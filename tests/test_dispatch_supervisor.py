@@ -16,7 +16,10 @@ from pathlib import Path
 
 import pytest
 
-from scripts.dispatch_supervisor import health, phase_z, procutil, scheduler, state, supervisor, worker
+from scripts.dispatch_supervisor import (
+    claim_release, health, phase_z, procutil, scheduler, state, supervisor, worker,
+    workspace,
+)
 
 
 def _tmp_state(tmp_path: Path) -> Path:
@@ -98,6 +101,22 @@ def _never_spawn_the_real_pregate(monkeypatch) -> None:
     just re-apply the same patch); a new test can no longer forget.
     """
     _stub_pregate(monkeypatch)
+
+
+@pytest.fixture(autouse=True)
+def _never_touch_the_real_task_pool(monkeypatch, tmp_path: Path) -> Path:
+    """Redirect the canonical claim CLI's pool at an empty tmp file.
+
+    Since WS-A2b a force-kill re-pends the claim its dead fire was holding,
+    which means EVERY hang test now reaches a next_tasks.json writer. Against
+    the real path that raises CanonicalWriteBlocked (a BaseException the
+    production fail-open handler deliberately cannot swallow). Autouse for the
+    same reason as the pregate stub above: opt-in protection is not protection.
+    """
+    pool = tmp_path / "autouse_next_tasks.json"
+    pool.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(health._task_pool_claim(), "NEXT_TASKS", pool)
+    return pool
 
 
 def test_pregate_is_stubbed_for_every_test_in_this_module() -> None:
@@ -206,7 +225,9 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
         attempts.append(kwargs["attempt"])
         _reserve_like_production(kwargs)
         log_path.write_text("worker timed out", encoding="utf-8")
-        return 137, 12.0, "worker timed out"
+        # Our own watchdog kill surfaces as the sentinel (2026-07-21: a raw 137
+        # now means an OUTSIDE kill and takes the external_signal path instead).
+        return worker.TIMEOUT_KILLED_SENTINEL, 12.0, "worker timed out"
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
@@ -226,6 +247,7 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
     assert result.attempts == 1
     assert attempts == [1]
     assert len(hang_alerts) == 1
+    assert hang_alerts[0]["job"]["timeout_kind"] == "work_cap"
 
 
 def test_worker_refuses_when_auth_already_blocked(tmp_path: Path, monkeypatch) -> None:
@@ -447,6 +469,40 @@ def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     assert tracked == "experiments/k9999.py"
+
+
+def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    _git_init_repo(tmp_path)
+    (tmp_path / "experiments").mkdir()
+    (tmp_path / "experiments" / "repair.py").write_text("FIXED = True\n", encoding="utf-8")
+    calls: list[dict] = []
+
+    def fake_backfill(**kwargs):
+        calls.append(kwargs)
+        return ["ci-red-123"]
+
+    monkeypatch.setattr(phase_z, "backfill_ci_repair_commit", fake_backfill)
+    owner = "hourly-slot-1-job-ci"
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path,
+        now_hhmm="16:08",
+        pre_fire_dirty=set(),
+        claim_owners={owner},
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert out["committed"] is True
+    assert out["ci_repair_tasks_backfilled"] == ["ci-red-123"]
+    assert calls == [{
+        "path": tmp_path / "storage" / "next_tasks.json",
+        "claim_owners": {owner},
+        "commit_sha": subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=tmp_path,
+            capture_output=True, text=True, check=True,
+        ).stdout.strip(),
+    }]
 
 
 def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
@@ -1120,6 +1176,360 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     assert state.read_state(state_path)["current_job"] is None
 
 
+def _seed_claimed_task(
+    tmp_path: Path, monkeypatch, *, task_id: str, owner: str
+) -> Path:
+    """Point the canonical claim CLI at a throwaway pool holding one live claim.
+
+    The supervisor imports scripts/task_pool_claim.py by path and caches it in
+    sys.modules, so patching that module's NEXT_TASKS is what redirects the
+    production write path — no parallel fixture pool.
+    """
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": task_id,
+                    "status": "in_progress",
+                    "claimed_by": owner,
+                    "claimed_at": "2026-01-01T00:00:00+00:00",
+                    "claim_session_id": "sess-1",
+                },
+                {"id": "untouched_other_task", "status": "pending"},
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(health._task_pool_claim(), "NEXT_TASKS", next_tasks)
+    return next_tasks
+
+
+def _read_task(path: Path, task_id: str) -> dict:
+    return next(t for t in json.loads(path.read_text(encoding="utf-8")) if t["id"] == task_id)
+
+
+def test_health_kill_repends_the_claim_the_dead_fire_was_holding(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """WS-A2b: killing a worker used to free only the dispatch_state slot, so the
+    task it had claimed stayed in_progress until the stale sweep hours later."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    job_id = str(state.read_state(state_path)["current_jobs"][0]["job_id"])
+    owner = health.identity.task_claim_owner(
+        role="hourly", slot_id="slot-1", job_id=job_id,
+    )
+    next_tasks = _seed_claimed_task(
+        tmp_path, monkeypatch, task_id="assign_zombie", owner=owner,
+    )
+
+    alerts_called: list[dict] = []
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: True)
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
+    monkeypatch.setattr(
+        health.alerts, "send_hang_alert",
+        lambda **kwargs: alerts_called.append(kwargs) or True,
+    )
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda pid, started_wall: procutil.IDENTITY_MATCH,
+    )
+    monkeypatch.setattr(
+        state, "get_current_jobs",
+        lambda path=state_path: [state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", job_id=job_id, slot_id=1,
+            started_wall="Wed Jan  1 00:00:00 2026", age_seconds=4000,
+        )],
+    )
+
+    action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action == "killed"
+    task = _read_task(next_tasks, "assign_zombie")
+    assert task["status"] == "pending"
+    assert "claimed_by" not in task
+    assert "claimed_at" not in task
+    assert task["last_release_reason"] == f"supervisor_kill_{job_id[:8]}"
+    assert task["status_history"][-1]["by"] == owner
+    # Untouched sibling proves the release is owner-scoped, not a pool reset.
+    assert _read_task(next_tasks, "untouched_other_task")["status"] == "pending"
+    # The re-pend is on the receipt, so the hang mail says what was requeued.
+    assert alerts_called[0]["job"]["repended_tasks"] == ["assign_zombie"]
+
+
+def test_health_kill_repends_codex_failover_claim_for_the_same_slot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A fire can hand the SAME slot/job to Codex mid-flight; health.py never
+    sees which executor claimed, so both role tokens must be released."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    job_id = str(state.read_state(state_path)["current_jobs"][0]["job_id"])
+    owner = health.identity.task_claim_owner(
+        role="codex-failover", slot_id="slot-1", job_id=job_id,
+    )
+    next_tasks = _seed_claimed_task(
+        tmp_path, monkeypatch, task_id="assign_codex_zombie", owner=owner,
+    )
+
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: True)
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
+    monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **kwargs: True)
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda pid, started_wall: procutil.IDENTITY_MATCH,
+    )
+    monkeypatch.setattr(
+        state, "get_current_jobs",
+        lambda path=state_path: [state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", job_id=job_id, slot_id=1,
+            started_wall="Wed Jan  1 00:00:00 2026", age_seconds=4000,
+        )],
+    )
+
+    assert health.check_once(state_path=state_path, max_age_s=3000) == "killed"
+    assert _read_task(next_tasks, "assign_codex_zombie")["status"] == "pending"
+
+
+def test_health_kill_completes_even_when_the_task_pool_is_unreadable(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:
+    """The kill is the safety-critical act. A broken task pool must degrade to a
+    WARNING (stale sweep is the backstop), never abort the kill/close path."""
+    state_path = _tmp_state(tmp_path)
+    _begin_fire(
+        state_path, pid=123, pgid=456, schedule_id="hourly_dispatch",
+        attempt=1, model="opus", log_path="/tmp/x.log",
+    )
+    job_id = str(state.read_state(state_path)["current_jobs"][0]["job_id"])
+
+    kills: list[int] = []
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
+    monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **kwargs: True)
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda pid, started_wall: procutil.IDENTITY_MATCH,
+    )
+
+    def _boom(*_args, **_kwargs):
+        raise OSError("next_tasks.json is locked")
+
+    monkeypatch.setattr(health._task_pool_claim(), "release_owner_claims", _boom)
+    monkeypatch.setattr(
+        state, "get_current_jobs",
+        lambda path=state_path: [state.CurrentJob(
+            pid=123, pgid=456, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1, model="opus",
+            log_path="/tmp/x.log", job_id=job_id, slot_id=1,
+            started_wall="Wed Jan  1 00:00:00 2026", age_seconds=4000,
+        )],
+    )
+
+    with caplog.at_level(logging.WARNING):
+        action = health.check_once(state_path=state_path, max_age_s=3000)
+
+    assert action == "killed"
+    assert kills == [456]
+    assert state.read_state(state_path)["current_job"] is None
+    assert "re-pend of task claims" in caplog.text
+
+
+# --- WS-A2c: worker.py's OWN timeout must re-pend too -----------------------
+#
+# health.py is the belt-and-suspenders layer (~1s behind); the path that
+# actually wins the CAS in production is `worker._run_one_attempt`'s
+# `Popen.wait(timeout=)` firing → category "hang" → killed_timeout. WS-A2b only
+# closed the health half, so a real hang still stranded its claim.
+
+
+def _seed_worker_hang(
+    tmp_path: Path,
+    monkeypatch,
+    *,
+    task_id: str,
+    role: str = "hourly",
+    close_first: bool = False,
+) -> tuple[Path, Path, list[dict], dict]:
+    """Drive run_worker down the hang path with one live claim in the pool.
+
+    The claim owner embeds the job_id, which run_worker mints internally, so the
+    pool can only be seeded from inside the fake attempt.
+    """
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    hang_alerts: list[dict] = []
+    seen: dict = {}
+
+    def fake_run_one_attempt(**kwargs):
+        _reserve_like_production(kwargs)
+        seen["job_id"] = kwargs["job_id"]
+        seen["slot_id"] = kwargs["slot_id"]
+        owner = claim_release.identity.task_claim_owner(
+            role=role, slot_id=kwargs["slot_id"], job_id=kwargs["job_id"],
+        )
+        seen["owner"] = owner
+        seen["next_tasks"] = _seed_claimed_task(
+            tmp_path, monkeypatch, task_id=task_id, owner=owner,
+        )
+        if close_first:
+            # Simulate health.py's watchdog winning the atomic close ~1s ahead
+            # of us, so our own record_completion returns None below.
+            seen["health_closed"] = state.record_completion(
+                job_id=kwargs["job_id"], expected_attempt=kwargs["attempt"],
+                expected_phase="classifying", exit_code=-1,
+                outcome="silent_death", final_model="opus", path=state_path,
+            ) is not None
+        return worker.TIMEOUT_KILLED_SENTINEL, 12.0, "timed out — SIGKILL'd by watchdog"
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.alerts, "send_hang_alert",
+        lambda **kwargs: hang_alerts.append(kwargs) or True,
+    )
+    return state_path, log_path, hang_alerts, seen
+
+
+def test_worker_own_timeout_repends_the_claim_the_dead_fire_was_holding(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """WS-A2c (a): the worker's own watchdog kill must hand the claim back."""
+    state_path, log_path, hang_alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_zombie",
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert result.outcome == "killed_timeout"
+    assert result.attempts == 1, "hang must NOT trigger retry"
+    task = _read_task(seen["next_tasks"], "assign_worker_zombie")
+    assert task["status"] == "pending"
+    assert "claimed_by" not in task
+    assert task["last_release_reason"] == f"supervisor_kill_{seen['job_id'][:8]}"
+    assert task["status_history"][-1]["by"] == seen["owner"]
+    # Owner-scoped, not a pool reset.
+    assert _read_task(seen["next_tasks"], "untouched_other_task")["status"] == "pending"
+    # Receipt rides along on the hang mail, same as the health path.
+    assert hang_alerts[0]["job"]["repended_tasks"] == ["assign_worker_zombie"]
+
+
+def test_worker_own_timeout_repends_codex_failover_claim_for_the_same_slot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Both role tokens: the fire may have handed the slot to Codex mid-flight."""
+    state_path, log_path, _alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_codex_zombie",
+        role="codex-failover",
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert result.outcome == "killed_timeout"
+    assert _read_task(seen["next_tasks"], "assign_worker_codex_zombie")["status"] == "pending"
+
+
+def test_worker_hang_result_and_alert_survive_a_broken_task_pool(
+    tmp_path: Path, monkeypatch, caplog
+) -> None:
+    """WS-A2c (b): re-pend is best-effort. A locked/corrupt pool degrades to a
+    WARNING and must never block killed_timeout landing or the hang alert."""
+    state_path, log_path, hang_alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_stuck",
+    )
+
+    def _boom(*_args, **_kwargs):
+        raise OSError("next_tasks.json is locked")
+
+    monkeypatch.setattr(claim_release._task_pool_claim(), "release_owner_claims", _boom)
+
+    with caplog.at_level(logging.WARNING):
+        result = worker.run_worker(
+            prompt_text="prompt", log_path=log_path, state_path=state_path,
+            sleep_fn=lambda sec: None,
+        )
+
+    assert result.outcome == "killed_timeout"
+    assert result.exit_code == 137
+    assert len(hang_alerts) == 1, "a broken pool must not swallow the hang alert"
+    assert hang_alerts[0]["job"]["repended_tasks"] == []
+    assert "re-pend of task claims" in caplog.text
+    # Untouched: the stale-claim sweep remains the backstop for this row.
+    assert _read_task(seen["next_tasks"], "assign_worker_stuck")["status"] == "in_progress"
+
+
+def test_worker_repends_even_when_health_won_the_close(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """WS-A2c (c): losing the CAS (`entry is None`) must NOT skip the re-pend.
+
+    health.py closes some aged-out jobs as silent_death / timeout_unverified
+    WITHOUT releasing anything, so a win-only re-pend would leave the claim
+    stranded exactly when nobody else is going to hand it back. Releasing
+    unconditionally is safe because release_owner_claims is idempotent.
+    """
+    state_path, log_path, hang_alerts, seen = _seed_worker_hang(
+        tmp_path, monkeypatch, task_id="assign_worker_lost_race", close_first=True,
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda sec: None,
+    )
+
+    assert seen["health_closed"] is True
+    assert result.outcome == "killed_timeout"
+    # Loser of the CAS stays silent on mail (2026-07-12 contract) but still
+    # requeues the work.
+    assert hang_alerts == []
+    assert _read_task(seen["next_tasks"], "assign_worker_lost_race")["status"] == "pending"
+
+
+def test_release_owner_claims_is_idempotent_for_an_already_pending_task(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """The safety argument for calling the helper from both worker and health:
+    a second release matches nothing rather than double-reporting or resetting
+    a row a successor fire may already have claimed."""
+    owner = claim_release.identity.task_claim_owner(
+        role="hourly", slot_id="slot-1", job_id="deadbeefcafe",
+    )
+    next_tasks = _seed_claimed_task(
+        tmp_path, monkeypatch, task_id="assign_twice", owner=owner,
+    )
+
+    first = claim_release.repend_killed_job_claims(
+        job_id="deadbeefcafe", slot_id="slot-1", source="worker",
+    )
+    second = claim_release.repend_killed_job_claims(
+        job_id="deadbeefcafe", slot_id=1, source="health",
+    )
+
+    assert first == ["assign_twice"]
+    assert second == [], "a second release must be a no-op, not a re-report"
+    assert _read_task(next_tasks, "assign_twice")["status"] == "pending"
+
+
 def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -1319,9 +1729,11 @@ def test_classify_normalizes_negative_signal_codes() -> None:
     assert worker._normalize_signal_exit(0) == 0
     assert worker._normalize_signal_exit(1) == 1
     assert worker._normalize_signal_exit(None) == 1
-    assert worker._classify(worker._normalize_signal_exit(-15), "") == "hang"
-    assert worker._classify(worker._normalize_signal_exit(-9), "") == "hang"
-    assert worker._classify(worker._normalize_signal_exit(-14), "") == "hang"
+    # 2026-07-21: raw signal exits are by construction OUTSIDE kills (our own
+    # kills return sentinels), so they classify as external_signal, not hang.
+    assert worker._classify(worker._normalize_signal_exit(-15), "") == "external_signal"
+    assert worker._classify(worker._normalize_signal_exit(-9), "") == "external_signal"
+    assert worker._classify(worker._normalize_signal_exit(-14), "") == "external_signal"
 
 
 def test_classify_timeout_sentinel_is_hang() -> None:
@@ -1441,31 +1853,45 @@ def test_worker_timeout_path_short_circuits_retry(tmp_path: Path, monkeypatch) -
     # sanitisation.
 
 
-def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
+def test_worker_killed_by_external_signal_is_not_reported_as_a_hang(
     tmp_path: Path, monkeypatch
 ) -> None:
-    """If the child dies from SIGTERM/SIGKILL/SIGALRM by external means (not
-    our own watchdog), `_run_one_attempt` still receives a negative wait()
-    return. `_normalize_signal_exit` converts to 128+signum so HANG_EXIT_CODES
-    set membership triggers and `_classify` returns "hang" → no retry.
+    """External SIGTERM ≠ hang (2026-07-21 redesign, email-12150).
+
+    Every kill the supervisor initiates returns through a sentinel, so a raw
+    143 can ONLY be an outside kill. The old contract classified it "hang" and
+    mailed a「卡住 N 分鐘」CRITICAL about a fire that was working to its last
+    second — three times in one day. New contract: outcome=external_signal,
+    claims handed back, one WARN via the dedicated alert, NO hang alert, no
+    in-fire retry.
     """
     state_path = _tmp_state(tmp_path)
     log_path = tmp_path / "worker.log"
     attempts: list[int] = []
-    hang_alerts: list[dict] = []
+    external_alerts: list[dict] = []
+    released: list[dict] = []
 
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
         _reserve_like_production(kwargs)
-        log_path.write_text("external SIGTERM (e.g. launchd kill)", encoding="utf-8")
+        log_path.write_text("Execution error", encoding="utf-8")
         # Externally signal-killed → negative is normalized at the boundary
-        return worker._normalize_signal_exit(-15), 7.0, "external SIGTERM"  # → 143 SIGTERM
+        return worker._normalize_signal_exit(-15), 7.0, "Execution error"  # → 143
 
     monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
     monkeypatch.setattr(
-        worker.alerts,
-        "send_hang_alert",
-        lambda **kwargs: hang_alerts.append(kwargs) or True,
+        worker.alerts, "send_hang_alert",
+        lambda **kwargs: pytest.fail(
+            "hang alert sent for an external signal — the false CRITICAL is back"
+        ),
+    )
+    monkeypatch.setattr(
+        worker.alerts, "send_external_signal_alert",
+        lambda **kwargs: external_alerts.append(kwargs) or True,
+    )
+    monkeypatch.setattr(
+        worker.claim_release, "repend_killed_job_claims",
+        lambda **kw: released.append(kw) or ["task-under-test"],
     )
 
     result = worker.run_worker(
@@ -1475,11 +1901,22 @@ def test_worker_signal_killed_outside_timeout_also_classified_as_hang(
         sleep_fn=lambda sec: None,
     )
 
-    assert result.outcome == "killed_timeout"
-    assert result.attempts == 1
+    assert result.outcome == "external_signal"
+    assert result.attempts == 1, "no in-fire retry — the killer is still out there"
     assert attempts == [1]
-    assert len(hang_alerts) == 1
-    assert result.exit_code == 143  # not sentinel — normalized POSIX code
+    assert result.exit_code == 143
+    assert len(external_alerts) == 1
+    assert external_alerts[0]["signum"] == 15
+    assert released and released[0]["source"] == "worker-external-signal"
+
+
+def test_supervisor_initiated_kill_is_still_a_hang() -> None:
+    """The sentinel path keeps its no-retry hang contract — only RAW signal
+    exits reclassify. If this goes red the redesign leaked onto real hangs."""
+    assert worker._classify(worker.TIMEOUT_KILLED_SENTINEL, "") == "hang"
+    assert worker._classify(143, "") == "external_signal"
+    assert worker._classify(137, "") == "external_signal"
+    assert worker._classify(worker._normalize_signal_exit(-14), "") == "external_signal"
 
 
 def test_load_cron_expr_reads_schedule_field_first(tmp_path: Path) -> None:
@@ -2413,6 +2850,64 @@ def test_multislot_health_closes_dead_job_without_touching_live_sibling(
     assert len(sent) == 1
 
 
+def test_multislot_health_timeout_kills_only_the_overdue_slot_in_same_cohort(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A timeout is per slot, never a cohort-wide kill sweep.
+
+    Regression for the 2026-07-20 incident: three workers returned within
+    1.5 seconds despite ages of 131s/612s/672s.  If one sibling really crosses
+    the watchdog ceiling, health must signal only that sibling's PGID and
+    leave younger jobs in the same cohort running.
+    """
+    state_path = _tmp_state(tmp_path)
+    cohort_id = "same-cohort"
+    handles = []
+    for slot, pid in enumerate((101, 202, 303), start=1):
+        handle = state.reserve_fire(
+            schedule_id="hourly_dispatch", attempt=1, model="opus",
+            log_path=f"/tmp/{pid}.log", max_slots=3, cohort_id=cohort_id,
+            path=state_path,
+        )
+        assert handle.slot_id == slot
+        state.attach_process(
+            job_id=handle.job_id, expected_attempt=1,
+            pid=pid, pgid=pid, started_wall=f"wall-{pid}", path=state_path,
+        )
+        handles.append(handle)
+
+    jobs = [
+        state.CurrentJob(
+            pid=pid, pgid=pid, schedule_id="hourly_dispatch",
+            started_at="2026-01-01T00:00:00+00:00", attempt=1,
+            model="opus", log_path=f"/tmp/{pid}.log",
+            job_id=handle.job_id, cohort_id=cohort_id, slot_id=handle.slot_id,
+            started_wall=f"wall-{pid}", age_seconds=age,
+        )
+        for handle, pid, age in zip(handles, (101, 202, 303), (3001, 672, 131))
+    ]
+    monkeypatch.setattr(state, "get_current_jobs", lambda _path=state_path: jobs)
+    monkeypatch.setattr(
+        health.procutil, "check_identity",
+        lambda _pid, _wall: procutil.IDENTITY_MATCH,
+    )
+    kills: list[int] = []
+    monkeypatch.setattr(
+        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True),
+    )
+    monkeypatch.setattr(health.procutil, "pgid_members", lambda _pgid: [])
+    monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **_kwargs: True)
+
+    assert health.check_once(state_path=state_path, max_age_s=3000) == "killed"
+    assert kills == [101]
+    survivors = state.read_state(state_path)["current_jobs"]
+    assert [job["job_id"] for job in survivors] == [
+        handles[1].job_id,
+        handles[2].job_id,
+    ]
+    assert [job["cohort_id"] for job in survivors] == [cohort_id, cohort_id]
+
+
 def test_health_keeps_quarantine_when_leader_dead_but_pgid_descendant_survives(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -2658,3 +3153,622 @@ def test_supervisor_restart_unexpected_still_emails(tmp_path: Path, monkeypatch)
     )
     assert second is False
     assert len(sends) == 1
+
+
+# -- WS-B producer-scoped workspaces (execution isolation pilot) --------------
+# Ownership must be produced by execution isolation, not inferred by a cleanup
+# layer afterwards (external adjudication; refactor_plan_ops_master §WS-B).
+# These tests pin: machine-built registered worktree, receipt-bound identity,
+# gate-green-only integration, and the no-deadlock exit (red output ALWAYS
+# ends up as a claimable P2 remediation task, never rots in a worktree).
+
+
+def _iso_cfg(**overrides) -> dict:
+    cfg = {"mode": "pilot", "lanes": ["platform_ops"], "max_total": 3,
+           "disk_floor_gib": 0.0}
+    cfg.update(overrides)
+    return cfg
+
+
+def _ws_allocate(repo: Path, *, job_id: str = "a" * 32, slot: str = "slot-1",
+                 config: dict | None = None, active_isolated: int = 0):
+    return workspace.allocate_workspace(
+        repo_root=repo, slot_id=slot, job_id=job_id,
+        config=config or _iso_cfg(), active_isolated=active_isolated,
+    )
+
+
+def _ws_receipt_events(repo: Path) -> list[dict]:
+    dest = repo / workspace.RECEIPTS_RELPATH
+    if not dest.exists():
+        return []
+    return [json.loads(line) for line in dest.read_text(encoding="utf-8").splitlines()]
+
+
+def _tmp_queue(tmp_path: Path) -> Path:
+    queue = tmp_path / "queue" / "next_tasks.json"
+    queue.parent.mkdir(parents=True, exist_ok=True)
+    queue.write_text("[]", encoding="utf-8")
+    return queue
+
+
+def test_workspace_allocate_creates_registered_worktree(tmp_path: Path) -> None:
+    from volpred.ops.git_writer_lock import is_registered_linked_worktree
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    assert ws is not None
+    path = Path(ws["path"])
+    assert path == repo / ".claude" / "worktrees" / "dispatch-slot-1-aaaaaaaa"
+    assert path.is_dir()
+    assert ws["branch"] == "worktree-dispatch-slot-1-aaaaaaaa"
+    # identity is machine-derived and mechanically verifiable -- the same door
+    # run_agent_job/compute_queue already use for the experiment lane.
+    assert is_registered_linked_worktree(repo, path)
+    head = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"],
+                          capture_output=True, text=True, check=True).stdout.strip()
+    assert ws["base_sha"] == head
+    events = _ws_receipt_events(repo)
+    assert [e["event"] for e in events] == ["allocated"]
+    assert events[0]["branch"] == ws["branch"]
+    assert isinstance(ws["setup_s"], float)
+
+
+def test_workspace_allocate_disk_floor_fails_closed(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo, config=_iso_cfg(disk_floor_gib=10**9))
+    assert ws is None
+    events = _ws_receipt_events(repo)
+    assert events and events[0]["event"] == "allocation_skipped"
+    assert events[0]["reason"] == "disk_floor"
+    assert not (repo / ".claude" / "worktrees").exists()
+
+
+def test_workspace_allocate_respects_caps(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    # active cap: never a second concurrent isolated fire
+    assert _ws_allocate(repo, active_isolated=1) is None
+    # total cap counts kept worktrees too
+    first = _ws_allocate(repo, job_id="b" * 32)
+    assert first is not None
+    second = _ws_allocate(repo, job_id="c" * 32, config=_iso_cfg(max_total=1))
+    assert second is None
+    reasons = [e.get("reason") for e in _ws_receipt_events(repo)
+               if e["event"] == "allocation_skipped"]
+    assert reasons == ["active_cap", "total_cap"]
+
+
+def test_workspace_finalize_empty_removed(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+    assert out["disposition"] == "empty_removed"
+    assert not Path(ws["path"]).exists()
+    branch_probe = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "--verify", ws["branch"]],
+        capture_output=True, text=True, check=False,
+    )
+    assert branch_probe.returncode != 0  # branch cleaned up with the worktree
+    assert [e["event"] for e in _ws_receipt_events(repo)] == ["allocated", "finalized"]
+
+
+def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "scripts").mkdir(exist_ok=True)
+    (wt / "scripts" / "wsb_pilot_change.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "-A"], check=True, capture_output=True)
+    subprocess.run(["git", "-C", str(wt), "commit", "-qm", "pilot change"],
+                   check=True, capture_output=True)
+    merges: list[str] = []
+
+    def fake_gate(**kwargs):
+        return {"verdict": "green", "rc": 0, "targets": ["tests/test_x.py"],
+                "duration_s": 0.1, "output_tail": ""}
+
+    def fake_merge(**kwargs):
+        merges.append(kwargs["workspace"]["name"])
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path), gate_fn=fake_gate, merge_fn=fake_merge,
+    )
+    assert out["disposition"] == "merged"
+    assert merges == ["dispatch-slot-1-aaaaaaaa"]
+    assert out["gate"]["verdict"] == "green"
+
+
+def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
+    tmp_path: Path,
+) -> None:
+    """The no-deadlock invariant: a red gate NEVER strands the output. It must
+    become a pending P2 task the normal dispatch loop is guaranteed to pick up,
+    with the worktree preserved -- and re-running the finalizer must not
+    duplicate the task."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "broken.py").write_text("x = 1\n", encoding="utf-8")
+
+    def red_gate(**kwargs):
+        return {"verdict": "red", "rc": 1, "targets": ["tests/test_y.py"],
+                "duration_s": 0.1, "output_tail": "FAILED tests/test_y.py::t"}
+
+    def never_merge(**kwargs):  # pragma: no cover - gate red must block merging
+        raise AssertionError("merge must not run on a red gate")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=queue, gate_fn=red_gate, merge_fn=never_merge,
+    )
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "gate_red"
+    assert wt.exists()  # output preserved, never force-removed
+    tasks = json.loads(queue.read_text(encoding="utf-8"))
+    assert len(tasks) == 1
+    task = tasks[0]
+    # incident-lifecycle P3: per-workspace wsb_remed_<name> ids are GONE — the
+    # workspace registers as an instance of the worker_orphaned incident and the
+    # queue carries ONE aggregate adjudication task (plan §2.3/G3).
+    assert task["priority"] == 2
+    assert task["status"] == "pending"
+    assert task["task_type"] == "platform_ops"
+    assert task["dispatch_lane"] == "main_thread"
+    assert task["source"] == "incident_router"
+    assert "merge_worktree.sh" in task["description"]
+    assert "incidents.json" in task["description"]
+    from volpred.ops import incident as incident_store
+
+    rows = incident_store.list_incidents(repo / "storage" / "ops" / "incidents.json")
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "worker_orphaned"
+    assert {i["key"] for i in rows[0]["instances"]} == {"dispatch-slot-1-aaaaaaaa"}
+    assert rows[0]["current_task_id"] == task["id"]
+    # idempotent: a second finalize pass (orphan sweep rerun) files nothing new
+    out2 = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success",
+        queue_path=queue, gate_fn=red_gate, merge_fn=never_merge,
+    )
+    assert out2["disposition"] == "remediation_opened"
+    tasks2 = json.loads(queue.read_text(encoding="utf-8"))
+    assert len(tasks2) == 1
+
+
+def test_workspace_finalize_unclean_worker_never_merges(tmp_path: Path) -> None:
+    """A hang/failure fire's bytes are unverified -- they go to remediation,
+    never through the gate to main."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    (Path(ws["path"]) / "partial.py").write_text("x = 1\n", encoding="utf-8")
+    called = {"gate": 0, "merge": 0}
+
+    def spy_gate(**kwargs):  # pragma: no cover - must not run
+        called["gate"] += 1
+        return {"verdict": "green", "rc": 0, "targets": [], "duration_s": 0}
+
+    def spy_merge(**kwargs):  # pragma: no cover - must not run
+        called["merge"] += 1
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="killed_timeout",
+        queue_path=queue, gate_fn=spy_gate, merge_fn=spy_merge,
+    )
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "worker_killed_timeout"
+    assert called == {"gate": 0, "merge": 0}
+    assert Path(ws["path"]).exists()
+    tasks = json.loads(queue.read_text(encoding="utf-8"))
+    assert len(tasks) == 1 and tasks[0]["status"] == "pending"
+
+
+def test_workspace_finalize_merge_failure_opens_remediation(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    (Path(ws["path"]) / "change.py").write_text("x = 1\n", encoding="utf-8")
+    out = workspace.finalize_workspace(
+        repo_root=repo, workspace=ws, worker_outcome="success", queue_path=queue,
+        gate_fn=lambda **kw: {"verdict": "green", "rc": 0, "targets": [],
+                              "duration_s": 0.0, "output_tail": ""},
+        merge_fn=lambda **kw: {"ok": False, "rc": 1, "reason": "merge_failed",
+                               "output_tail": "[ABORT] conflict"},
+    )
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "merge_failed"
+    assert Path(ws["path"]).exists()
+    assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
+
+
+def test_workspace_finalize_unregistered_dir_untouched(tmp_path: Path) -> None:
+    """A directory squatting on the namespace is not ours -- never removed,
+    never merged (independent-repo impersonation defence, error_log §C)."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    fake = repo / ".claude" / "worktrees" / "dispatch-slot-1-deadbeef"
+    fake.mkdir(parents=True)
+    (fake / "loot.txt").write_text("x", encoding="utf-8")
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace={"name": fake.name, "path": str(fake),
+                   "branch": "worktree-dispatch-slot-1-deadbeef", "base_sha": ""},
+        worker_outcome="success", queue_path=_tmp_queue(tmp_path),
+    )
+    assert out["disposition"] == "unregistered"
+    assert (fake / "loot.txt").exists()
+
+
+def test_workspace_sweep_closes_true_orphans_only(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    protected_ws = _ws_allocate(repo, job_id="b" * 32)
+    orphan_ws = _ws_allocate(repo, job_id="c" * 32, slot="slot-2")
+    assert protected_ws is not None and orphan_ws is not None
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo, protected_job_ids=["b" * 32], queue_path=queue,
+    )
+    # orphan (empty) removed; protected workspace untouched
+    assert [r["disposition"] for r in results] == ["empty_removed"]
+    assert not Path(orphan_ws["path"]).exists()
+    assert Path(protected_ws["path"]).exists()
+
+
+def test_workspace_isolation_config_defaults_off(tmp_path: Path) -> None:
+    missing = workspace.load_isolation_config(schedules_path=tmp_path / "nope.json")
+    assert missing["mode"] == "off"
+    no_daemon = tmp_path / "sched.json"
+    no_daemon.write_text(json.dumps({"cron_jobs": []}), encoding="utf-8")
+    assert workspace.load_isolation_config(schedules_path=no_daemon)["mode"] == "off"
+    pilot = tmp_path / "sched2.json"
+    pilot.write_text(json.dumps({"daemons": [{
+        "id": "volpred-dispatch-supervisor",
+        "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"],
+                             "max_total": 2, "disk_floor_gib": 5},
+    }]}), encoding="utf-8")
+    cfg = workspace.load_isolation_config(schedules_path=pilot)
+    assert cfg == {"mode": "pilot", "lanes": ["platform_ops"], "max_total": 2,
+                   "disk_floor_gib": 5.0}
+
+
+def test_workspace_allocation_refused_on_canonical_checkout_under_test_gate() -> None:
+    """Class gate (project_canonical_write_test_leak_gate): a pytest process --
+    conftest arms VOLPRED_NO_CANONICAL_WRITE=1 -- must never grow worktrees on
+    the real checkout through this module."""
+    assert os.environ.get("VOLPRED_NO_CANONICAL_WRITE") == "1"
+    assert workspace.allocate_workspace(
+        repo_root=workspace.ROOT, slot_id="slot-1", job_id="f" * 32,
+        config=_iso_cfg(),
+    ) is None
+    assert workspace.sweep_orphan_workspaces(
+        repo_root=workspace.ROOT, protected_job_ids=[],
+    ) == []
+
+
+def test_scheduler_fire_attaches_workspace_and_finalizes(tmp_path: Path, monkeypatch) -> None:
+    """Fire-path integration: pilot config -> allocate -> receipt on the state
+    job + prompt section -> finalize after the worker -> workspace receipt rides
+    the completions ring (ownership audit trail)."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]}}],
+    }), encoding="utf-8")
+    fake_ws = {"name": "dispatch-slot-1-fixed", "path": str(tmp_path / "ws"),
+               "branch": "worktree-dispatch-slot-1-fixed", "base_sha": "abc",
+               "lanes": ["platform_ops"], "created_at": "2026-07-20T00:00:00+00:00",
+               "setup_s": 1.0}
+    allocated: list[dict] = []
+    finalized: list[dict] = []
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(
+        scheduler.workspace_mod, "allocate_workspace",
+        lambda **kw: allocated.append(kw) or dict(fake_ws),
+    )
+    monkeypatch.setattr(
+        scheduler.workspace_mod, "finalize_workspace",
+        lambda **kw: finalized.append(kw) or {"disposition": "empty_removed"},
+    )
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        # the worker owns the normal completion close, like production
+        state.record_completion(
+            job_id=kwargs["job_id"], exit_code=0, outcome="success",
+            final_model=worker.OPUS_MODEL, path=kwargs["state_path"],
+        )
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+
+    assert result["action"] == "fired"
+    assert result["workspace"] == {"disposition": "empty_removed"}
+    # allocation happened once, machine-side, before the worker
+    assert len(allocated) == 1
+    # prompt carries the binding instructions
+    prompt_text = received[0]["prompt_text"]
+    assert "Producer-scoped workspace" in prompt_text
+    assert fake_ws["path"] in prompt_text
+    assert fake_ws["branch"] in prompt_text
+    assert "不得自行 merge" in prompt_text
+    # finalize ran with the worker's outcome
+    assert len(finalized) == 1
+    assert finalized[0]["worker_outcome"] == "success"
+    assert finalized[0]["workspace"]["name"] == "dispatch-slot-1-fixed"
+    # ownership audit trail: the completion entry carries the workspace receipt
+    snap = state.read_state(state_path)
+    assert snap["completions"][-1]["workspace"]["name"] == "dispatch-slot-1-fixed"
+    assert snap["completions"][-1]["workspace"]["branch"] == fake_ws["branch"]
+
+
+def test_scheduler_fire_unisolated_when_allocation_declined(tmp_path: Path, monkeypatch) -> None:
+    """Allocation refusal (caps/disk/lock) must never veto the fire."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot"}}],
+    }), encoding="utf-8")
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(scheduler.workspace_mod, "allocate_workspace",
+                        lambda **kw: None)
+    finalized: list[dict] = []
+    monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace",
+                        lambda **kw: finalized.append(kw))
+    received: list[dict] = []
+
+    def fake_run_worker(**kwargs):
+        received.append(kwargs)
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+    assert result["action"] == "fired"
+    assert result["workspace"] is None
+    assert "Producer-scoped workspace" not in received[0]["prompt_text"]
+    assert finalized == []  # nothing allocated -> nothing finalized
+
+
+# -- WS-B commit 2: PHASE-Z baseline guessing demoted for isolated cohorts ----
+# The recognizer stays (retirement is a separate decision after a stable
+# month); what changes is AUTHORSHIP CLAIMING: an isolated cohort's repo-byte
+# output lands through its workspace merge gate, so PHASE-Z may no longer
+# commit non-machine-state paths by timing arithmetic. Machine-state churn
+# (scheduled jobs) keeps its adoption -- that is the fallback's residue lane.
+
+
+def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("residue\n", encoding="utf-8")
+    (tmp_path / "storage" / "ops").mkdir(parents=True)
+    (tmp_path / "storage" / "ops" / "some_state.json").write_text("{}\n", encoding="utf-8")
+    alerts_seen: list[dict] = []
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        isolated_cohort=True,
+        alert_fn=lambda **kwargs: alerts_seen.append(kwargs) or {},
+    )
+    # machine state still adopted; the doc path is demoted, not committed
+    assert out["committed"] is True
+    assert out["owned"] == []
+    assert out["churn"] == ["storage/ops/some_state.json"]
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert _git_head_count(tmp_path) == before + 1
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == ""  # never entered history
+    assert (tmp_path / "docs" / "note.md").exists()  # and never deleted
+    assert not any("canonical checkout 殘留" in a.get("title", "") for a in alerts_seen), (
+        "canonical residue is tracked, not warned before it is actionable"
+    )
+    assert out["foreign_ownership"]["risk"] == ["docs/note.md"]
+
+
+def test_phase_z_isolated_cohort_all_residue_is_terminal(tmp_path: Path) -> None:
+    """All-residue outcome must land on a TERMINAL reason (nothing_owned) so
+    the scheduler releases the drain token -- no livelock behind the demotion."""
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("residue\n", encoding="utf-8")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        isolated_cohort=True, alert_fn=lambda **_kwargs: {},
+    )
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert scheduler._phase_z_terminal(out) is True
+    assert _git_head_count(tmp_path) == before
+    assert (tmp_path / "docs" / "note.md").exists()
+
+
+def test_phase_z_unisolated_cohort_keeps_legacy_adoption(tmp_path: Path) -> None:
+    """Contrast pin: without the isolation flag the legacy baseline fallback
+    still adopts fire-produced paths (unisolated lanes keep their safety net)."""
+    _git_init_repo(tmp_path)
+    before = _git_head_count(tmp_path)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "note.md").write_text("agent output\n", encoding="utf-8")
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
+        alert_fn=lambda **_kwargs: {},
+    )
+    assert out["committed"] is True
+    assert "isolation_residue" not in out
+    assert _git_head_count(tmp_path) == before + 1
+    tracked = subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert tracked == "docs/note.md"
+
+
+def test_record_completion_stamps_isolated_on_pending(tmp_path: Path) -> None:
+    state_path = _tmp_state(tmp_path)
+    # isolated fire
+    lease = state.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                               log_path="/tmp/a.log", path=state_path)
+    state.attach_process(job_id=lease.job_id, expected_attempt=1, pid=1, pgid=1,
+                         started_wall=None, path=state_path)
+    state.attach_workspace(job_id=lease.job_id, workspace={
+        "name": "dispatch-slot-1-aaaaaaaa", "path": "/tmp/wt", "branch": "b",
+        "base_sha": "s", "lanes": ["platform_ops"],
+        "created_at": "2026-07-20T00:00:00+00:00", "setup_s": 1.0,
+    }, path=state_path)
+    state.record_completion(job_id=lease.job_id, exit_code=0, outcome="success",
+                            final_model="opus", path=state_path)
+    pending = state.read_state(state_path)["phase_z_pending"]
+    assert [item["isolated"] for item in pending] == [True]
+    state.finish_phase_z(cohort_id=lease.cohort_id, path=state_path)
+    # unisolated fire
+    lease2 = state.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
+                                log_path="/tmp/b.log", path=state_path)
+    state.attach_process(job_id=lease2.job_id, expected_attempt=1, pid=2, pgid=2,
+                         started_wall=None, path=state_path)
+    state.record_completion(job_id=lease2.job_id, exit_code=0, outcome="success",
+                            final_model="opus", path=state_path)
+    pending2 = state.read_state(state_path)["phase_z_pending"]
+    assert [item["isolated"] for item in pending2] == [False]
+
+
+def _seed_pending_drain(state_path: Path, isolated_flags: list[bool]) -> None:
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [
+            {"job_id": f"job{i}", "cohort_id": f"cohort{i}", "slot_id": i + 1,
+             "created_at": "2026-07-20T00:00:00+00:00", "isolated": flag}
+            for i, flag in enumerate(isolated_flags)
+        ]
+
+
+def test_scheduler_recovery_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("p", encoding="utf-8")
+    captured: list[dict] = []
+
+    def spy_run_phase_z(**kwargs):
+        captured.append(kwargs)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", spy_run_phase_z)
+    for flags, expected in (([True, True], True), ([True, False], False)):
+        state_path = _tmp_state(tmp_path / f"case_{expected}")
+        state_path.parent.mkdir(parents=True, exist_ok=True)
+        _seed_pending_drain(state_path, flags)
+        scheduler._PHASE_Z_LOCK = None  # fresh loop per asyncio.run
+        result = asyncio.run(scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log", dry_run=False, repo_root=tmp_path,
+        ))
+        assert result["action"] == "phase_z_recovered"
+        assert captured[-1]["isolated_cohort"] is expected
+
+
+def test_scheduler_fire_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
+    """End-to-end wiring: an isolated fire's completion stamps the pending
+    item, and the fire task's own cohort drain hands isolated_cohort=True to
+    run_phase_z."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    schedules = tmp_path / "sched.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{"id": "volpred-dispatch-supervisor", "max_slots": 2,
+                     "writer_isolation": {"mode": "pilot", "lanes": ["platform_ops"]}}],
+    }), encoding="utf-8")
+    fake_ws = {"name": "dispatch-slot-1-fixed", "path": str(tmp_path / "ws"),
+               "branch": "worktree-dispatch-slot-1-fixed", "base_sha": "abc",
+               "lanes": ["platform_ops"], "created_at": "2026-07-20T00:00:00+00:00",
+               "setup_s": 1.0}
+    monkeypatch.setattr(scheduler.workspace_mod, "sweep_orphan_workspaces",
+                        lambda **kw: [])
+    monkeypatch.setattr(scheduler.workspace_mod, "allocate_workspace",
+                        lambda **kw: dict(fake_ws))
+    monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace",
+                        lambda **kw: {"disposition": "empty_removed"})
+    captured: list[dict] = []
+
+    def spy_run_phase_z(**kwargs):
+        captured.append(kwargs)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", spy_run_phase_z)
+
+    def fake_run_worker(**kwargs):
+        state.record_completion(
+            job_id=kwargs["job_id"], exit_code=0, outcome="success",
+            final_model=worker.OPUS_MODEL, path=kwargs["state_path"],
+        )
+        return worker.WorkerResult(
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            attempts=1, duration_s=1.0, log_tail="ok",
+        )
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
+    scheduler._PHASE_Z_LOCK = None  # fresh loop per asyncio.run
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *", prompt_path=prompt_path,
+        log_path=tmp_path / "worker.log", dry_run=False,
+        repo_root=tmp_path, schedules_path=schedules,
+    ))
+    assert result["action"] == "fired"
+    assert captured and captured[-1]["isolated_cohort"] is True

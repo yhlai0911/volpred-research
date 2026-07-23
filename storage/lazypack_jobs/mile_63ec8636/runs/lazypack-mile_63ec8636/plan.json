@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "title": "地緣衝突來時，黃金、原油與恐慌指數說不同故事",
+  "evidence": {
+    "analysis": {
+      "path": "storage/lazypack_jobs/mile_63ec8636/evidence.json",
+      "sha256": "c1c03b5a9e55105f4a3a9317eae035aef12c1e1f1e09abc32112c21c72df1d09",
+      "label": "gold, oil, and volatility event-study evidence snapshot"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_event_window",
+      "info": "method",
+      "style": "scientific",
+      "title": "把衝突日對齊，追蹤各資產後續路徑",
+      "alt": "地緣衝突事件窗的樣本數與黃金上漲次數",
+      "sources": [
+        "analysis"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "納入的衝突事件",
+          "value": {
+            "source": "analysis",
+            "path": "/event_study/event_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金事件日上漲",
+          "value": {
+            "source": "analysis",
+            "path": "/event_study/gold_positive_event_day_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 次"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "同一把尺",
+          "body": [
+            "每次事件都以前一個收盤為基準，再比較黃金、原油與恐慌指數的路徑。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_paths",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "黃金把漲幅留下，原油的衝高很快消退",
+      "alt": "事件窗尾端黃金與原油中位報酬對照",
+      "sources": [
+        "analysis"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "黃金窗尾中位報酬",
+          "value": {
+            "source": "analysis",
+            "path": "/event_study/gold_day9_median_return",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "原油窗尾中位報酬",
+          "value": {
+            "source": "analysis",
+            "path": "/event_study/oil_day9_median_return",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "差別在路徑",
+          "body": [
+            "原油先反映供應衝擊，之後常把漲幅吐回；黃金的中位路徑比較能延續。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_false_signal",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "恐慌指數主要在照鏡子，映出的是當天股價",
+      "alt": "恐慌指數與標普日變動相關性及控制後檢定",
+      "sources": [
+        "analysis"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "恐慌指數與標普日變動相關",
+          "value": {
+            "source": "analysis",
+            "path": "/cross_asset/vix_sp500_daily_corr",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "分歧訊號控制後檢定值",
+          "value": {
+            "source": "analysis",
+            "path": "/divergence_test/controlled_p_value",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走一句",
+          "body": [
+            "判斷地緣風險，別把恐慌指數當成戰事溫度計；先分清楚它量的是股市還是事件本身。"
+          ]
+        }
+      ]
+    }
+  ]
+}

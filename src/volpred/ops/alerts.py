@@ -1,3 +1,23 @@
+"""Ops alert registry + email/Telegram transport with a 24h dedup ledger.
+
+Alert dedup has exactly TWO stores with an explicit division of labor
+(2026-07-20 ops-master D4 — do not merge them, do not add a third):
+
+- THIS module — `storage/ops/alert_dedup.json`, 24h window per (level, title)
+  key = anti-BOMBARDMENT: the same standing condition (draft pool low, cron
+  fail, ...) re-detected across hourly check_alerts runs must not re-email the
+  boss for a day. Entries idle > `ALERT_DEDUP_RETENTION` (30d) are pruned on
+  every save (`_save_alert_dedup`).
+- `scripts/dispatch_supervisor/alerts.py` — per-class second-scale windows
+  (60s-3600s) kept inside dispatch_state = anti-FLOOD: a crash-looping daemon
+  may hit the same failure several times a minute; its dedup throttles the
+  burst *before* it even reaches `send-alert`. Alerts that pass the daemon's
+  flood gate still land here (it calls `send-alert --force` because burst
+  semantics differ from standing-condition semantics).
+
+Enforcement Layer Map (loop-health-and-dreaming.md) carries the same split.
+"""
+
 from __future__ import annotations
 
 import fcntl
@@ -40,11 +60,13 @@ from .health import (
     check_paper_trading_gaps,
     check_strategy_metrics_freshness,
 )
-from .scheduler import get_scheduler_state
-
 ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
+# D4 retention: dedup ledger entries with no activity for this long are pruned
+# at every save — the ledger is a rolling throttle window, not an archive
+# (incident history lives in incident_candidates.jsonl / notifications/).
+ALERT_DEDUP_RETENTION = timedelta(days=30)
 TELEGRAM_ALERT_MAX_CHARS = 4096
 
 # These alerts describe repair work the platform can perform itself.  They must
@@ -190,7 +212,36 @@ def _release_pool_preview_for_alert(storage_dir: str) -> dict[str, Any]:
         # Dropping these was why starvation could only ever be seen in arrears.
         "due_now": bool(preview.get("due_now")) if isinstance(preview, dict) else False,
         "narrative_cluster_pressure": cluster_pressure if isinstance(cluster_pressure, dict) else {},
+        # 2026-07-19: drafts the content-quality gates (audit / 懶人包圖組 / anti-ai)
+        # would refuse. Without this the alert printed a releasable count that the
+        # release path could not honour, and the boss saw "可釋出=3" next to 9h of
+        # zero releases.
+        "content_gate_blocked": (
+            preview.get("content_gate_blocked")
+            if isinstance(preview, dict) and isinstance(preview.get("content_gate_blocked"), list)
+            else []
+        ),
     }
+
+
+def _render_content_gate_blocked(entries: list[Any]) -> list[str]:
+    """Name the drafts the content gates refused, and why (2026-07-19).
+
+    A bare count reproduces the original failure in miniature: the boss could see
+    that nothing released but not which article was stuck or on what. Each line is
+    actionable on its own — id, how many release runs it has already burned, and
+    the literal gate message.
+    """
+    lines: list[str] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        issues = "; ".join(str(i) for i in (entry.get("issues") or []))
+        lines.append(
+            f"  - `{entry.get('id')}` ({entry.get('audience')}, 已連續被擋 "
+            f"{entry.get('skip_count')} 次): {issues[:220]}"
+        )
+    return lines
 
 
 RELEASE_DEADLOCK_RECEIPT = ("ops", "release_deadlock_remediation.json")
@@ -276,11 +327,106 @@ def _load_alert_dedup(storage_dir: str = "storage") -> dict[str, Any]:
     }
 
 
+def _prune_alert_dedup(payload: dict[str, Any], *, now: datetime) -> int:
+    """Drop dedup entries idle longer than ALERT_DEDUP_RETENTION. Returns count."""
+    alerts = payload.get("alerts")
+    if not isinstance(alerts, dict):
+        return 0
+    cutoff = now - ALERT_DEDUP_RETENTION
+    stale_keys: list[str] = []
+    for key, entry in alerts.items():
+        if not isinstance(entry, dict):
+            stale_keys.append(key)
+            continue
+        last_activity = max(
+            (
+                ts
+                for ts in (
+                    _parse_iso_datetime(entry.get("last_sent_at")),
+                    _parse_iso_datetime(entry.get("last_skipped_at")),
+                    _parse_iso_datetime(entry.get("first_sent_at")),
+                )
+                if ts is not None
+            ),
+            default=None,
+        )
+        if last_activity is None or last_activity < cutoff:
+            stale_keys.append(key)
+    for key in stale_keys:
+        del alerts[key]
+    if stale_keys:
+        warn(
+            "alert_dedup_retention",
+            "pruned stale dedup entries",
+            pruned=len(stale_keys),
+            retention_days=ALERT_DEDUP_RETENTION.days,
+        )
+    return len(stale_keys)
+
+
 def _save_alert_dedup(storage_dir: str, payload: dict[str, Any]) -> None:
     path = _alert_dedup_path(storage_dir)
     guard_canonical_write(path)
-    payload["updated_at"] = _utc_now().isoformat()
+    now = _utc_now()
+    _prune_alert_dedup(payload, now=now)
+    payload["updated_at"] = now.isoformat()
     dump_json(path, payload)
+
+
+def _incident_candidates_path(storage_dir: str = "storage") -> Path:
+    return _ops_path(storage_dir, "incident_candidates.jsonl")
+
+
+def _record_incident_candidate(
+    storage_dir: str,
+    *,
+    dedupe_key: str,
+    level: str,
+    title: str,
+    first_seen: str,
+    occurrence: int,
+    event: str,
+    now: datetime,
+) -> None:
+    """Append an error_log FILING CANDIDATE for this alert occurrence (WS-F3).
+
+    Draft stream only — this never touches docs/error_log.md (governance files
+    are propose-only; the main thread adjudicates candidates into real entries).
+    ``scripts/dreaming_review.py::detect_unfiled_incident_class`` reads this
+    stream: a dedupe key seen >=2 times with no corresponding error_log entry
+    means the class was never filed, so its second occurrence was exactly as
+    blind as its first (refactor_plan_ops_master_2026_07 P-class).
+
+    Fail-open on I/O: candidate recording must never break the alert transport.
+    (CanonicalWriteBlocked derives from BaseException, so the test-leak gate
+    still fires through the OSError handler below.)
+    """
+    path = _incident_candidates_path(storage_dir)
+    guard_canonical_write(path)
+    record = {
+        "at": now.isoformat(),
+        "dedupe_key": dedupe_key,
+        "level": level,
+        "title": title,
+        "first_seen": first_seen,
+        "occurrence": occurrence,
+        "event": event,  # sent | dedup_skip | send_failed
+    }
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            try:
+                fh.write(json.dumps(record, ensure_ascii=False) + "\n")
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except OSError as exc:
+        warn(
+            "incident_candidates",
+            "append failed; alert transport unaffected",
+            err=str(exc)[:200],
+            key=dedupe_key[:16],
+        )
 
 
 _TELEGRAM_LEVEL_EMOJI = {
@@ -508,6 +654,15 @@ def send_alert(
     dedup_state = _load_alert_dedup(storage_dir)
     existing = dedup_state["alerts"].get(dedup_key) or {}
     last_sent_at = _parse_iso_datetime(existing.get("last_sent_at"))
+    # WS-F3: every occurrence of the alert condition counts toward the filing
+    # radar, dedup-skipped ones included — dedup throttles the TRANSPORT, not
+    # the incident. Computed before either branch mutates the dedup entry.
+    incident_occurrence = (
+        int(existing.get("send_count", 0) or 0)
+        + int(existing.get("skip_count", 0) or 0)
+        + 1
+    )
+    incident_first_seen = str(existing.get("first_sent_at") or now.isoformat())
 
     if (
         not force_send
@@ -518,6 +673,16 @@ def send_alert(
         existing["skip_count"] = int(existing.get("skip_count", 0) or 0) + 1
         dedup_state["alerts"][dedup_key] = existing
         _save_alert_dedup(storage_dir, dedup_state)
+        _record_incident_candidate(
+            storage_dir,
+            dedupe_key=dedup_key,
+            level=normalized_level,
+            title=normalized_title,
+            first_seen=incident_first_seen,
+            occurrence=incident_occurrence,
+            event="dedup_skip",
+            now=now,
+        )
         return {
             "level": normalized_level,
             "title": normalized_title,
@@ -586,6 +751,18 @@ def send_alert(
             "skip_count": int(existing.get("skip_count", 0) or 0),
         }
         _save_alert_dedup(storage_dir, dedup_state)
+    # WS-F3: a failed transport (SMTP down / unconfigured) still means the
+    # incident OCCURRED — the filing radar must not go blind with the mail.
+    _record_incident_candidate(
+        storage_dir,
+        dedupe_key=dedup_key,
+        level=normalized_level,
+        title=normalized_title,
+        first_seen=incident_first_seen,
+        occurrence=incident_occurrence,
+        event="sent" if delivery["sent"] else "send_failed",
+        now=now,
+    )
     return result
 
 
@@ -676,6 +853,55 @@ def route_internal_remediable_alert(
             "routing_failure": True,
             "remediation": remediation,
         }
+    if remediation.get("notify_due"):
+        # machine_self record+notify (incident-lifecycle §6): the FIRST episode
+        # of a machine-self incident is announced once; repeats stay silent
+        # (counted in the store), and episode >= 2 escalates instead.
+        from volpred.ops import incident
+
+        incident_id = str(remediation.get("incident_id") or "")
+        notify_body = "\n".join(
+            [
+                "## Incident 已記錄",
+                f"incident `{incident_id}`（kind `{normalized_key}`，"
+                f"第 {remediation.get('occurrence_count')} 次觸發，"
+                f"episode {remediation.get('episode_count')}）。",
+                "此類（machine_self）不自動開修復單 —— 修復動作要靠壞掉的機器本身"
+                "執行，實測從不收斂；復發（episode>=2）將升級為單一[根因重構]任務。",
+                "",
+                "## 原始警報",
+                str(body),
+            ]
+        )
+        delivery = send_alert(
+            normalized_level,
+            str(title),
+            notify_body,
+            recipient=recipient,
+            storage_dir=storage_dir,
+        )
+        owner_reached = bool(
+            delivery.get("sent")
+            or (delivery.get("skipped") and delivery.get("skip_reason") == "dedup_24h")
+        )
+        if owner_reached and incident_id:
+            incident.record_notified(
+                incident.store_path_for(storage_dir),
+                incident_id,
+                now=now,
+                notification_id=(
+                    str(delivery.get("notification_id"))
+                    if delivery.get("notification_id")
+                    else None
+                ),
+            )
+        return {
+            **delivery,
+            "internal_alert_key": normalized_key,
+            "escalated": False,
+            "remediation": remediation,
+        }
+
     if not remediation.get("escalate"):
         return {
             "level": normalized_level,
@@ -689,74 +915,38 @@ def route_internal_remediable_alert(
             "escalated": False,
             "remediation": remediation,
         }
-    if suppress_owner_transport:
-        # A parent incident watcher may own the only terminal notification.
-        # Keep escalation_due unacknowledged so the next standalone detector
-        # can deliver it; suppression never skips task creation or failure count.
-        return {
-            "level": normalized_level,
-            "title": str(title),
-            "recipient": recipient,
-            "internal_alert_key": normalized_key,
-            "sent": False,
-            "skipped": True,
-            "skip_reason": "internal_owner_transport_suppressed",
-            "notification_id": None,
-            "escalated": False,
-            "remediation": remediation,
-        }
 
-    attempts = int(remediation.get("consecutive_remediation_failures") or 0)
-    failure_reason = str(remediation.get("last_failure_reason") or "未留下失敗原因")
-    episode_id = str(remediation.get("episode_id") or "unknown")
-    # Stable within one episode (so a delivery crash dedups), distinct after an
-    # explicit recovery (so a genuinely new incident within 24h still emails).
-    escalation_title = f"內部自動修復連續失敗（{normalized_key}；episode {episode_id}）"
-    escalation_body = "\n".join(
-        [
-            "## 自動修復失敗",
-            f"同一 alert_key `{normalized_key}` 已自動嘗試 {attempts} 次，仍未解除。",
-            f"失敗原因：{failure_reason}",
-            f"P1 任務：`{remediation.get('task_id')}`（已再次排入任務池）",
-            "",
-            "## 原始警報",
-            str(body),
-        ]
-    )
-    delivery = send_alert(
-        normalized_level,
-        escalation_title,
-        escalation_body,
-        recipient=recipient,
-        storage_dir=storage_dir,
-    )
-    owner_reached = bool(
-        delivery.get("sent")
-        or (
-            delivery.get("skipped")
-            and delivery.get("skip_reason") == "dedup_24h"
-        )
-    )
-    escalation_ack: dict[str, Any] | None = None
-    if owner_reached:
-        from .alert_remediation import mark_internal_alert_escalated
+    # Escalation due: run the §5 actuator exactly once — ONE [根因重構] task via
+    # the append gateway + ONE mail; the incident is suppressed afterwards.
+    # ``suppress_owner_transport`` lets a parent incident watcher own the only
+    # notification: the task is still opened, the mail is left due, and the next
+    # standalone detector pass delivers it (actuator receipts are idempotent).
+    from volpred.ops import incident
 
-        escalation_ack = mark_internal_alert_escalated(
-            alert_key=normalized_key,
-            task_id=str(remediation.get("task_id") or ""),
-            storage_dir=storage_dir,
-            notification_id=(
-                str(delivery.get("notification_id"))
-                if delivery.get("notification_id")
-                else None
-            ),
-            now=now,
-        )
+    incident_id = str(remediation.get("incident_id") or "")
+    receipt = incident.actuate_escalation(
+        incident.store_path_for(storage_dir),
+        incident_id,
+        queue_path=incident.store_path_for(storage_dir).parents[1] / "next_tasks.json",
+        now=now,
+        notify=lambda level_, title_, body_: send_alert(
+            level_, title_, body_, recipient=recipient, storage_dir=storage_dir
+        ),
+        send_mail=not suppress_owner_transport,
+    )
     return {
-        **delivery,
+        "level": normalized_level,
+        "title": str(title),
+        "recipient": recipient,
         "internal_alert_key": normalized_key,
+        "sent": bool(receipt.get("notified")),
+        "skipped": not bool(receipt.get("notified")),
+        "skip_reason": (
+            "internal_owner_transport_suppressed" if suppress_owner_transport else None
+        ),
+        "notification_id": (receipt.get("delivery") or {}).get("notification_id"),
         "escalated": True,
-        "escalation_ack": escalation_ack,
+        "escalation": receipt,
         "remediation": remediation,
     }
 
@@ -950,8 +1140,11 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
                 f"- draft: {draft_count}",
                 f"- eligible_before_dedup: {pool_counts.get('eligible_before_dedup', 'unknown')}",
                 f"- dedup_flagged: {pool_counts.get('dedup_flagged', 'unknown')}",
-                f"- eligible_after_dedup: {eligible_count}",
+                f"- narrative_cluster_filtered: {pool_counts.get('narrative_cluster_filtered', 'unknown')}",
+                f"- content_gate_blocked: {pool_counts.get('content_gate_blocked', 'unknown')}",
+                f"- eligible_after_all_gates: {eligible_count}",
                 f"- 被 narrative_cluster gate 擋住的 cluster: {', '.join(str(c) for c in blocked_clusters) or '(none)'}",
+                *_render_content_gate_blocked(preview_summary.get("content_gate_blocked") or []),
                 "",
                 "## 系統已自動執行",
                 *_render_release_deadlock_remediation(remediation),
@@ -993,7 +1186,10 @@ def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]
                 f"- scheduled: {pool_counts.get('scheduled', 'unknown')}",
                 f"- eligible_before_dedup: {pool_counts.get('eligible_before_dedup', 'unknown')}",
                 f"- dedup_flagged: {pool_counts.get('dedup_flagged', 'unknown')}",
-                f"- eligible_after_dedup: {pool_counts.get('eligible', 'unknown')}",
+                f"- narrative_cluster_filtered: {pool_counts.get('narrative_cluster_filtered', 'unknown')}",
+                f"- content_gate_blocked: {pool_counts.get('content_gate_blocked', 'unknown')}",
+                f"- eligible_after_all_gates: {pool_counts.get('eligible', 'unknown')}",
+                *_render_content_gate_blocked(preview_summary.get("content_gate_blocked") or []),
             ]
         elif preview_error:
             preview_lines = [f"- preview_error: {preview_error}"]
@@ -1759,19 +1955,10 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
                 latest["trailing_exit_codes"] = codes
                 latest["consecutive_failures"] = consec
 
-    # v12 (2026-04-19): shared_scheduler_tick cron removed; scheduler-tick now advisory-only.
-    # scheduler_state staleness 不再視為 host_cron_fail — checker 改只看實際 cron log exit codes。
-    # 保留 scheduler_state readout 供 body info，但不貢獻 breach judgement。
-    scheduler_state = get_scheduler_state(storage_dir=storage_dir)
-    scheduler_last_tick_at = _parse_iso_datetime(scheduler_state.get("last_tick_at"))
-    scheduler_last_status = str(scheduler_state.get("last_status") or "never")
-    scheduler_age_minutes = None
-    scheduler_issue = None  # v12: 永遠 None，scheduler-tick 不再作為 alert 條件
-    if scheduler_last_tick_at is not None:
-        scheduler_age = now - scheduler_last_tick_at
-        scheduler_age_minutes = round(scheduler_age.total_seconds() / 60.0, 1)
-
-    breached = bool(failing_logs)  # v12: 只看 cron log exit codes，不看 scheduler staleness
+    # v12 (2026-04-19): scheduler_state staleness 不再視為 host_cron_fail — checker
+    # 改只看實際 cron log exit codes。2026-07-20 ops-master D2: advisory scheduler lane
+    # 全面退役，body 內的 scheduler_state readout 一併移除。
+    breached = bool(failing_logs)  # 只看 cron log exit codes
     # Severity calibration (2026-07-04, boss Telegram msg 114/121/141 — repeated
     # CRITICAL noise on self-recovering hangs): a self-recovering exit code (142
     # SIGALRM hang / 75 Claude Max quota window) NEVER escalates to CRITICAL, even
@@ -1801,12 +1988,7 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         f"若非零 exit 已超過下一個預定 fire + {HOST_CRON_RECENCY_GRACE}，視為 stale marker，"
         "不再每小時重判。"
         "反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。",
-        f"- scheduler_last_tick_at: {scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else 'missing'}（僅供參考，v12 後不作為 breach 判準）",
-        f"- scheduler_last_status: {scheduler_last_status}",
-        f"- scheduler_age_minutes: {scheduler_age_minutes if scheduler_age_minutes is not None else 'missing'}",
     ]
-    if scheduler_issue:
-        body_lines.append(f"- scheduler_issue: {scheduler_issue}")
     if failing_logs:
         body_lines.append("- failing_logs:")
         for row in failing_logs:
@@ -1840,10 +2022,6 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
         "title": "Host cron failure detected",
         "body": "\n".join(body_lines) if breached else "",
         "details": {
-            "scheduler_last_tick_at": scheduler_last_tick_at.isoformat() if scheduler_last_tick_at else None,
-            "scheduler_last_status": scheduler_last_status,
-            "scheduler_age_minutes": scheduler_age_minutes,
-            "scheduler_issue": scheduler_issue,
             "failing_logs": failing_logs,
             "stale_logs": stale_logs,
             "host_cron_recency_grace_minutes": int(HOST_CRON_RECENCY_GRACE.total_seconds() // 60),
@@ -3956,6 +4134,8 @@ def _parse_content_quality_state(
     rhythm = snapshot["publish_rhythm"]
     title = snapshot["title_format"]
     arc = snapshot.get("arc_diversity", {})
+    arc_overmatch = snapshot.get("arc_dedup_overmatches", {})
+    audience = snapshot.get("audience_classification", {})
     release = snapshot.get("release_deadlock", {})
     frontend = snapshot.get("frontend_render", {})
     completeness = snapshot.get("content_completeness", {})
@@ -3981,6 +4161,10 @@ def _parse_content_quality_state(
         critical_subchecks.append("frontend_render")
     if arc.get("status") == "concentrated":
         breached_subchecks.append("arc_diversity")
+    if arc_overmatch.get("status") == "overmatch":
+        breached_subchecks.append("arc_dedup_overmatch")
+    if audience.get("status") == "misclassified":
+        breached_subchecks.append("audience_classification")
     if lazypack_gap:
         breached_subchecks.append("content_completeness:lazypack_gap")
     # Missing-chart/source content_completeness is a heuristic (frontend-rendered
@@ -4038,6 +4222,25 @@ def _parse_content_quality_state(
             f"- arc_diversity: 近 {arc.get('sample')} 篇最高 arc `{arc.get('top_axis')}` "
             f"佔 {arc.get('top_share')} > {arc.get('threshold')} 門檻（主題過度集中）"
         )
+    if arc_overmatch.get("status") == "overmatch":
+        examples = ", ".join(
+            str(x.get("candidate_id") or "?")
+            for x in arc_overmatch.get("candidates", [])[:5]
+        )
+        lines.append(
+            f"- arc_dedup_overmatch: {arc_overmatch.get('count')} 筆不同 narrative axis "
+            f"仍被擋；examples: {examples or 'n/a'}"
+        )
+    if audience.get("status") == "misclassified":
+        summary = audience.get("summary", {})
+        examples = ", ".join(
+            str(x.get("id") or "?")
+            for x in audience.get("tiers", {}).get("HIGH", [])[:5]
+        )
+        lines.append(
+            f"- audience_classification: {summary.get('high_confidence')} 篇 HIGH-confidence "
+            f"general→research 候選；examples: {examples or 'n/a'}"
+        )
     if completeness.get("status") == "incomplete":
         miss = completeness.get("findings", [])
         lines.append(
@@ -4082,6 +4285,10 @@ def _parse_content_quality_state(
             "時用 `codex exec`（boss 2026-06-30/07-15 directive），NotebookLM 僅為 "
             "fallback，不得當首選。append `## 懶人包圖組` 後用正式 publish/update "
             "流程同步；新 general 文會被 publish gate 阻擋。",
+            "6. `arc_dedup_overmatch` → 跑 `scripts/audit_arc_dedup_overmatches.py`，"
+            "逐筆裁決 dup waiver 或 fresh-arc rewrite。",
+            "7. `audience_classification` → 跑 `scripts/audit_audience_classification.py`，"
+            "複核 HIGH 候選並以正式更新流程改 audience；不得直接改 feed JSON。",
         ]
     )
 
@@ -4818,6 +5025,110 @@ def _parse_series_registry_state(storage_dir: str) -> dict[str, Any]:
     }
 
 
+def _parse_dedup_gate_health_state(storage_dir: str, now: datetime) -> dict[str, Any]:
+    """Does anyone read the dedup gate's own audit trail? (WS-F2, rule §4)
+
+    2026-06-23: the dedup gate silently blocked every article for 8 days and
+    the owner found out by looking at the feed. The gates now log every
+    decision to storage/logs/dedup_decisions.jsonl — this condition is the
+    reader that was promised in `.claude/rules/dedup-gate-audit.md` §4.
+
+    Adjudication is owned by ``volpred.ops.dedup_gate_audit`` (same brain as
+    `scripts/audit_dedup_gate_decisions.py`); this condition only maps its
+    verdict onto the alert contract. critical = black-hole recurrence (gate
+    firing, zero passes for 24h); warn = block rate > 30% weekly, or one arc
+    blocked ≥3 times. Fail-open: an audit crash is reported as its own warn
+    (a broken watchdog must not look green), but never raises.
+    """
+    from .dedup_gate_audit import audit_dedup_decisions
+
+    try:
+        verdict = audit_dedup_decisions(storage_dir=storage_dir, now=now)
+    except Exception as exc:  # noqa: BLE001 — watchdog itself must fail loud-but-soft
+        warn("dedup_gate_health", "audit crashed", err=str(exc))
+        return {
+            "id": "dedup_gate_health",
+            "breached": True,
+            "level": "warn",
+            "title": "dedup gate audit 本身掛了（黑洞偵測失明）",
+            "body": "\n".join([
+                "## 觸發條件",
+                f"`audit_dedup_decisions` 拋例外：{exc}",
+                "",
+                "## 影響",
+                "這是 2026-06-23 內容黑洞的復發偵測器；它掛掉期間 dedup gate 若再度全 block，"
+                "沒有任何機制會發現。",
+                "",
+                "## 修復",
+                "跑 `uv run python scripts/audit_dedup_gate_decisions.py` 重現 traceback，"
+                "修 `src/volpred/ops/dedup_gate_audit.py`。",
+            ]),
+            "details": {"error": str(exc)},
+        }
+
+    findings = verdict.get("findings") or []
+    if not findings:
+        return {
+            "id": "dedup_gate_health",
+            "breached": False,
+            "level": "info",
+            "title": "dedup_gate_health ok",
+            "body": "",
+            "details": {
+                "totals": verdict.get("totals"),
+                "block_rate": verdict.get("conditions", {}).get("block_rate", {}).get("rate"),
+            },
+        }
+
+    level = "critical" if any(f.get("level") == "critical" for f in findings) else "warn"
+    conditions = verdict.get("conditions", {})
+    body = "\n".join([
+        "## 觸發條件",
+        *(f"- [{f['level']}] {f['summary']}" for f in findings),
+        "",
+        "## 影響",
+        "dedup/publish gate 是 feed 的總閘門（Mission #1/#4/#5 上游）。2026-06-23 同款故障"
+        "曾讓平台 8 天零新文，靠老闆肉眼才發現；這則警報就是那次事故承諾的機械偵測器。",
+        "",
+        "## 觀察",
+        f"- 近 {verdict.get('window', {}).get('lookback_days')} 天決策："
+        f"{verdict.get('totals', {}).get('allow')} 放行 / {verdict.get('totals', {}).get('block')} block / "
+        f"{verdict.get('totals', {}).get('other')} 其他（hold/skip）",
+        f"- 最近一次放行：{conditions.get('no_pass_blackhole', {}).get('last_allow_ts') or '（窗內無）'}",
+        f"- block 最多的 gate：{conditions.get('block_rate', {}).get('top_blocking_gates')}",
+        "",
+        "## 修復入口",
+        "完整裁決：`uv run python scripts/audit_dedup_gate_decisions.py`；"
+        "black hole → 檢查 `src/volpred/publisher/publisher.py` 與 `volpred.ops.content` 的 gate "
+        "是否違反 fail-open（rule §3）；同 arc 重複 block → review 是否人工 unlock 該 arc。",
+    ])
+    return {
+        "id": "dedup_gate_health",
+        "breached": True,
+        "level": level,
+        "title": f"dedup gate 健康異常：{findings[0]['summary'][:60]}",
+        "body": body,
+        "details": {
+            "findings": findings,
+            "totals": verdict.get("totals"),
+            "conditions": {
+                "block_rate": {
+                    k: conditions.get("block_rate", {}).get(k)
+                    for k in ("breached", "rate", "blocks", "decisions")
+                },
+                "no_pass_blackhole": {
+                    k: conditions.get("no_pass_blackhole", {}).get(k)
+                    for k in ("breached", "streak_hours", "recent_blocks", "recent_allows")
+                },
+                "arc_repeat_block": {
+                    "breached": conditions.get("arc_repeat_block", {}).get("breached"),
+                    "repeat_arcs": conditions.get("arc_repeat_block", {}).get("repeat_arcs"),
+                },
+            },
+        },
+    }
+
+
 def build_alert_condition_report(
     *,
     storage_dir: str = "storage",
@@ -4854,6 +5165,7 @@ def build_alert_condition_report(
         _parse_paper_trading_gaps_state(storage_dir),             # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_disk_usage_state(storage_dir),                     # 2026-06-24 migrated from cloud platform-ops-patrol
         _parse_content_quality_state(storage_dir, current),       # 2026-06-24 meta-fix: content patrol layer
+        _parse_dedup_gate_health_state(storage_dir, current),     # 2026-07-20 WS-F2: dedup-gate-audit rule §4 兌現（2026-06-23 8-day 黑洞復發偵測）
         _parse_cluster_cap_drift_state(storage_dir),              # 2026-06-29 K1333 publish discovered vix 6.1x / spy 8.3x overshoot
         _parse_loop_health_state(storage_dir, current),           # 2026-06-29 loop-engineering: is the loop improving?
         _parse_series_registry_state(storage_dir),                # 2026-07-06 迷思實驗室 4-mistake incident: series-brand drift detector (SoT = config/article_series.json)

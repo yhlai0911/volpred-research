@@ -1,0 +1,408 @@
+{
+  "schema_version": 1,
+  "title": "K698 懶人包：大跌隔天會反彈嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k698/k698_results.json",
+      "sha256": "1facfd3767f531d9f107849841fc08356c5b265584a198c62b55cdbe7b5435ce",
+      "label": "experiment K698 results (contrarian tilt backtest)"
+    },
+    "robustness": {
+      "path": "experiments/k699/k699_results.json",
+      "sha256": "8bce2d433bb38d57f9976c9bdeb125f2f304afb61c3bc9528123a3a4acb12b58",
+      "label": "experiment K699 results (cross-period robustness and DM test)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_signal",
+      "info": "concept",
+      "style": "professional",
+      "title": "訊號本身確實存在",
+      "alt": "美股前一日大跌後隔天平均報酬明顯偏正，大漲後偏負，短線反轉現象在資料上看得到",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "現象",
+          "body": [
+            "美股前一天與隔天的走勢帶著負向關聯：跌深的隔天偏強，漲多的隔天偏弱。",
+            {
+              "template": "這裡的「大漲大跌」指前一日漲跌幅超過 {trigger}。",
+              "bindings": {
+                "trigger": {
+                  "source": "results",
+                  "path": "sensitivity_daily_threshold.12.threshold",
+                  "format": {
+                    "kind": "percent",
+                    "digits": 0
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "前一日大跌，隔日平均報酬（年化）",
+          "value": {
+            "source": "results",
+            "path": "autocorrelation_diagnostic.mean_ret_after_big_down_ann",
+            "format": {
+              "kind": "percent",
+              "digits": 1,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "前一日大漲，隔日平均報酬（年化）",
+          "value": {
+            "source": "results",
+            "path": "autocorrelation_diagnostic.mean_ret_after_big_up_ann",
+            "format": {
+              "kind": "percent",
+              "digits": 1,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "隔日報酬自我相關係數",
+          "value": {
+            "source": "results",
+            "path": "autocorrelation_diagnostic.acf_lag1",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "負值代表隔天傾向反向走"
+        },
+        {
+          "kind": "metric",
+          "label": "回測交易日數",
+          "value": {
+            "source": "results",
+            "path": "n_observations",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "最好的做法反而是最保守的",
+      "alt": "日頻逆勢傾斜的風險調整後分數與最大回撤皆優於每日拉回的固定配比",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩種做法",
+          "body": [
+            "固定配比：每天把股票與黃金拉回一半一半。",
+            {
+              "template": "日頻逆勢傾斜：前一日漲跌超過 {trigger} 時，把股票比重往反方向調 {tilt}。",
+              "bindings": {
+                "trigger": {
+                  "source": "results",
+                  "path": "sensitivity_daily_threshold.12.threshold",
+                  "format": {
+                    "kind": "percent",
+                    "digits": 0
+                  }
+                },
+                "tilt": {
+                  "source": "results",
+                  "path": "sensitivity_daily_threshold.12.tilt",
+                  "format": {
+                    "kind": "percent",
+                    "digits": 0
+                  }
+                }
+              }
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "逆勢傾斜 風險調整後分數",
+          "value": {
+            "source": "results",
+            "path": "strategies.1.sharpe_net",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "固定配比 風險調整後分數",
+          "value": {
+            "source": "results",
+            "path": "strategies.0.sharpe_net",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "逆勢傾斜 最大回撤",
+          "value": {
+            "source": "results",
+            "path": "strategies.1.max_dd_net",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "固定配比 最大回撤",
+          "value": {
+            "source": "results",
+            "path": "strategies.0.max_dd_net",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "逆勢傾斜 年化換手",
+          "value": {
+            "source": "results",
+            "path": "strategies.1.turnover_ann",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          },
+          "note": "固定配比幾乎不需換手"
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "分數只高一點點，回撤縮小比較有感。",
+            "疊上更多零件的版本反而更差，多裝機關沒有讓它變好。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_turnover",
+      "info": "method",
+      "style": "scientific",
+      "title": "越勤勞，賺得越少",
+      "alt": "把觸發門檻拉低會讓年化換手暴增而分數下滑，門檻拉高反而是掃描網格中的最佳點",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "掃描方式",
+          "body": [
+            "固定成本假設下，把觸發門檻與傾斜幅度做成網格逐格回測。",
+            "多抓到的反轉次數，最後多半付給了交易成本。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "網格最佳點 觸發門檻",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_best.threshold",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最佳點 年化換手",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_best.turnover_ann",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最佳點 真的動手的日子",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_best.pct_active",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最佳點 風險調整後分數",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_best.sharpe_net",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "低門檻情境 觸發門檻",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_threshold.0.threshold",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "幾乎每兩天就要動一次"
+        },
+        {
+          "kind": "metric",
+          "label": "低門檻情境 年化換手（最低）",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_threshold.0.turnover_ann",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "低門檻情境 年化換手（最高）",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_threshold.4.turnover_ann",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "低門檻情境 分數掉回",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_threshold.4.sharpe_net",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_honesty",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "誠實收尾：我們自己的檢定沒撐住",
+      "alt": "比較檢定未達顯著水準、最高分是樣本內掃描的最大值未做多重比較校正、交易成本只算一腿，因此不推薦此策略",
+      "sources": [
+        "results",
+        "robustness"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "與固定配比比較檢定的顯著性",
+          "value": {
+            "source": "robustness",
+            "path": "/full_period_confirmation/Default (1%, ±20%)/dm_pvalue",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "未達一般認定的顯著水準"
+        },
+        {
+          "kind": "text",
+          "heading": "差距可能只是運氣",
+          "body": [
+            "分數贏一點點，但兩模型比較檢定沒有通過，統計上分不出高下。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "掃描網格中的最高分",
+          "value": {
+            "source": "results",
+            "path": "sensitivity_daily_best.sharpe_net",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "樣本內掃描的最大值，未做多重比較校正"
+        },
+        {
+          "kind": "text",
+          "heading": "挑最大值會偏樂觀",
+          "body": [
+            "最漂亮的分數是在整組門檻與傾斜幅度網格裡挑出來的極值。",
+            "沒有對「挑了很多次」做任何統計修正，只能當上限看，不是預期值。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "假設的單邊交易成本",
+          "value": {
+            "source": "results",
+            "path": "tx_cost_bps",
+            "format": {
+              "kind": "integer",
+              "suffix": " bps"
+            }
+          },
+          "note": "僅計美股一腿，實際成本約低估一倍"
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "短線反轉的現象看得到，能不能變成錢沒有證據說得準。",
+            "訊號小到只要多動幾次手，就會被自己的交易成本吃掉。",
+            "本文為歷史回測結果，不構成任何投資建議。"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 # Refactor Plan — cron_hourly_dispatch (pre-staged for three-strike trigger)
 
-**Status**: PRE-STAGED. Not executed yet.
+**Status**: SUPERSEDED（2026-07-20 標註）— 本檔功能已由 `docs/refactor_plan_hourly_dispatch.md`
+（2026-07-04 supervisor daemon cutover，其檔頭明寫 "Supersedes: refactor_plan_cron_dispatch.md"）
+完整取代並落地。保留僅供歷史查考；殘留退役項由 `docs/refactor_plan_ops_master_2026_07.md` WS-D3 列管。
+（原狀態：PRE-STAGED. Not executed yet.）
 **Trigger**: Next hang of `cron_hourly_dispatch.sh` (strike 3 — currently at strike 2 after 2026-05-13 10:07 + 15:07 incidents).
 **Authority**: CLAUDE.md `Three-Strike Rule` (committed `a55620b4`).
 

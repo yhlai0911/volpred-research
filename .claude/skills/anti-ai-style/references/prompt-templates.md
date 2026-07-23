@@ -162,7 +162,7 @@ LLM 對「fluent-sounding citation」hallucinate 率最高 — 編造名人語�
 「給我這個數字的 primary source link」
 「這個歷史事件的具體日期 / 地點 / 涉事人」
 
-得到答覆後跑跨模型驗證（首選 agy 訂閱免費路徑；scripts/gemini_ask.py 會打 PAID API 僅 fallback）：
+得到答覆後跑跨模型驗證（一律走 agy 訂閱免費路徑；scripts/gemini_ask.py 付費 API 已停用 per boss msg936）：
 $ agy -p "驗證：AI 聲稱 X 在 Y 年說過 Z。請查證真實性，附 URL。"
 
 不通過驗證 → 整段刪 / 重寫，禁止保留含「假 citation」的句子。

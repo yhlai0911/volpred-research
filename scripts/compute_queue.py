@@ -33,16 +33,23 @@ Schema (queue file `storage/ops/compute_queue/<id>.json`):
     not_before (ISO UTC|null, optional) — worker must not start it before this
     quota_requeues (int, optional)      — times the quota wall bounced this job
     requeue_history (list, optional)    — one record per bounced attempt
+    claimed_by_pid (int|null)           — worker pid that claimed the job
+    claimed_by_pid_start_wall (str|null) — `ps lstart` fingerprint of that pid
+                                           (pid-reuse-safe liveness, see D6b reaper)
+    reap (dict, optional)               — D6b receipt: how a stranded running job
+                                           was judged dead and finalized
 
 Usage:
     enqueue:   uv run python scripts/compute_queue.py enqueue --script X --title Y ...
     list:      uv run python scripts/compute_queue.py list
-    list --pending-followup: completed collection + failed-agent triage
+    list --pending-followup: completed collection + failed-job triage
     list --completed-pending-followup: legacy completed-only view
     run-next:  uv run python scripts/compute_queue.py run-next
+    run-loop:  uv run python scripts/compute_queue.py run-loop  (drain until empty)
     show:      uv run python scripts/compute_queue.py show <id>
     cancel:    uv run python scripts/compute_queue.py cancel --id ID --reason WHY
-    requeue:   uv run python scripts/compute_queue.py requeue --id ID  (auth/quota only)
+    requeue:   uv run python scripts/compute_queue.py requeue --id ID
+               (auth/quota/worker_killed failures only)
     mark-followup-dispatched: ... --id <id>
 """
 from __future__ import annotations
@@ -58,6 +65,7 @@ import subprocess
 import sys
 import time
 import uuid
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -65,16 +73,45 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from scripts.dispatch_supervisor import procutil  # noqa: E402
+from scripts.dispatch_supervisor.failure_class import classify_output  # noqa: E402
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
+def _canonical_root() -> Path:
+    """Repo root that owns the queue, even when this copy of the script is in a worktree.
+
+    ``ROOT`` follows ``__file__``, so running ``scripts/compute_queue.py`` from inside a
+    linked worktree anchors it to that worktree — and every job enqueued there lands in a
+    queue directory **no worker ever reads** (the compute worker always runs from the
+    canonical checkout). That failure is silent: enqueue prints success, the job never runs.
+    It cost K1698 its round-5 Codex review on 2026-07-20 (job queued 06:46, still unstarted
+    at 17:10 with the reviewing fire long gone).
+
+    The queue is a global singleton with a single reader, so a worktree-local queue path has
+    no correct use — re-anchor rather than fail. A linked worktree's ``.git`` is a file, so
+    the git call below is only paid when we are actually in one.
+    """
+    if not (ROOT / ".git").is_file():
+        return ROOT
+    try:
+        from volpred.ops.git_writer_lock import git_common_dir
+
+        return git_common_dir(ROOT).parent.resolve()
+    except Exception:  # silent-ok: unprovable canonical root falls back to script-anchored ROOT.
+        return ROOT
+
+
+QUEUE_ROOT = _canonical_root()
+QUEUE_DIR = QUEUE_ROOT / "storage" / "ops" / "compute_queue"
 LOCK_FILE = QUEUE_DIR / ".worker.lock"
-LOG_DIR = ROOT / "storage" / "logs" / "compute"
-AGENT_JOB_DIR = ROOT / "storage" / "ops" / "agent_jobs"
-AGENT_BRIEF_DIR = ROOT / "storage" / "ops" / "agent_briefs"
+LOG_DIR = QUEUE_ROOT / "storage" / "logs" / "compute"
+AGENT_JOB_DIR = QUEUE_ROOT / "storage" / "ops" / "agent_jobs"
+AGENT_BRIEF_DIR = QUEUE_ROOT / "storage" / "ops" / "agent_briefs"
 
 # Agent jobs. A research agent needs 20-60min of wall clock (that is the whole
 # reason it cannot live inside a ~50min dispatch fire), so the default budget has
@@ -82,6 +119,73 @@ AGENT_BRIEF_DIR = ROOT / "storage" / "ops" / "agent_briefs"
 # fires, leaving it time to write a diagnosis before the worker kills the script.
 AGENT_DEFAULT_TIMEOUT = 5400  # 90 min
 AGENT_TIMEOUT_GRACE = 120
+
+# Scheduling priority (lower runs first). The queue used to be pure FIFO, which
+# is the right default only when every job costs the same. It does not: a
+# lazypack render is a few minutes and it is the last thing standing between a
+# finished draft and a reader, while a GARCH multistart or a research agent is
+# 60-90 minutes and nobody is waiting on the minute. FIFO put the reader behind
+# the compute (observed 2026-07-19: two general drafts skipped 20 release cycles
+# each). Priority restores the ordering that matters — release-blocking work
+# first, everything else in arrival order behind it.
+DEFAULT_QUEUE_PRIORITY = 5
+RELEASE_BLOCKING_PRIORITY = 1
+# Job-id prefixes whose completion unblocks a reader-facing release gate.
+RELEASE_BLOCKING_JOB_PREFIXES = ("lazypack-",)
+
+
+def _default_queue_priority(job_id: str) -> int:
+    """Priority for a job that did not declare one.
+
+    Derived from the id rather than stored per-caller so that jobs queued
+    before this field existed are scheduled correctly too — the alternative
+    (backfilling every queue file) would have to be re-run for every job that
+    a stale code path enqueues without the field.
+    """
+    if any(str(job_id).startswith(p) for p in RELEASE_BLOCKING_JOB_PREFIXES):
+        return RELEASE_BLOCKING_PRIORITY
+    return DEFAULT_QUEUE_PRIORITY
+
+
+def _scheduling_priority(job: dict) -> int:
+    """Effective run order key for a queued job; lower runs first.
+
+    An explicit `queue_priority` always wins. Otherwise the job inherits the
+    urgency of the work waiting on it: `claude_followup.priority` is the pool
+    priority of the task this job was dispatched for, and a P1 task's job has no
+    business queueing behind P2 work that merely arrived earlier. Without this,
+    every job that did not pass --queue-priority landed on DEFAULT_QUEUE_PRIORITY
+    and the sort degenerated to the FIFO it was meant to replace — which is the
+    inversion originally reported (assign_98a32740, a P1 agent job, waited ~3h
+    behind two P2 jobs queued 90 minutes earlier).
+
+    Taken as a min so the id-derived floor still holds: a release-blocking
+    lazypack render stays at RELEASE_BLOCKING_PRIORITY even if the task it
+    reports to is P3. Reading the followup rather than backfilling queue files
+    also keeps jobs enqueued by older code paths scheduled correctly.
+    """
+    declared = job.get("queue_priority")
+    if isinstance(declared, int) and not isinstance(declared, bool):
+        return declared
+    floor = _default_queue_priority(str(job.get("id") or ""))
+    followup = job.get("claude_followup")
+    if isinstance(followup, dict):
+        inherited = followup.get("priority")
+        if isinstance(inherited, int) and not isinstance(inherited, bool):
+            return min(floor, inherited)
+    return floor
+
+# Drain-loop parallelism (D6, owner directive 2026-07-20). The worker costs no
+# Claude tokens, so serializing it to one job per 15-minute tick was pure queue
+# latency; but compute jobs are multi-core-hungry (GARCH MLE multistarts,
+# bootstrap), and the same M1 Max also carries dispatch agents and the
+# interactive session. cpu//3 budgets ~3 cores per job with headroom left over
+# (10 cores -> 3 jobs); the cap of 3 keeps a bigger future machine from turning
+# the queue into a thundering herd. Override without touching code via the
+# `max_parallel` field on the volpred-compute-worker entry in
+# config/runtime_schedules.json (the canonical schedule spec) — see
+# _resolve_max_parallel for the precedence.
+DRAIN_MAX_PARALLEL_DEFAULT = min(3, max(1, (os.cpu_count() or 1) // 3))
 
 # Quota re-queue. A quota-class death is not a failure of the work: the CLI
 # answers "You've hit your session limit · resets 10:20pm" in about five seconds
@@ -251,6 +355,35 @@ _REVIEW_ARTIFACT_NAME = "review_verdict.json"
 def _is_review_job(artifact_path: Path | None) -> bool:
     """Did this job judge someone else's experiment rather than author one?"""
     return artifact_path is not None and artifact_path.name == _REVIEW_ARTIFACT_NAME
+
+
+def _review_verdict_unfilled(artifact_path: Path) -> list[str]:
+    """A review job's deliverable is a FILLED verdict, not a scaffold.
+
+    2026-07-19 k528: the verdict template was pre-generated, Codex never wrote
+    the adjudication, and the job still went `completed` because the artifact
+    existence check passed on eight `FILL:` placeholders. Existence is not the
+    postcondition — content is. Returns a list of problems (empty = filled).
+    """
+    try:
+        data = json.loads(artifact_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return [f"unreadable: {exc}"]
+    if not isinstance(data, dict):
+        return ["not a JSON object"]
+    problems: list[str] = []
+    verdict = str(data.get("verdict", ""))
+    if verdict not in {"PASS", "CONDITIONAL PASS", "CONDITIONAL_PASS", "FAIL"}:
+        problems.append(f"verdict={verdict!r} is not an adjudication")
+    for key, value in data.items():
+        if isinstance(value, str) and value.startswith("FILL:"):
+            problems.append(f"{key} unfilled")
+        elif isinstance(value, list):
+            problems.extend(
+                f"{key}[] unfilled" for item in value
+                if isinstance(item, str) and item.startswith("FILL:")
+            )
+    return problems
 
 
 def _experiment_scope(job: dict[str, Any], artifact_path: Path | None) -> Path | None:
@@ -448,6 +581,35 @@ def _runner_timed_out(job: dict[str, Any]) -> bool:
     return metadata.get("timed_out") is True
 
 
+def _artifact_contract_mismatch(job: dict[str, Any]) -> dict[str, Any] | None:
+    """Return evidence that the agent succeeded but its exact output is absent."""
+    meta_path = job.get("job_metadata")
+    if not meta_path:
+        return None
+    path = Path(str(meta_path))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        metadata = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        warn(
+            "compute_queue",
+            "job_metadata unreadable while checking artifact contract",
+            job=job.get("id"),
+            path=str(path),
+            err=str(exc),
+        )
+        return None
+    if (
+        metadata.get("exit_code") == 0
+        and metadata.get("timed_out") is False
+        and metadata.get("runner_exit_code") not in (None, 0)
+        and metadata.get("result_artifact_exists") is False
+    ):
+        return metadata
+    return None
+
+
 def _job_timed_out(job: dict[str, Any]) -> bool:
     return (
         job.get("failure_reason") == "timeout"
@@ -530,6 +692,11 @@ def enqueue(args) -> int:
         "args": args.script_args or [],
         "env": dict(kv.split("=", 1) for kv in (args.env or [])),
         "status": "queued",
+        "queue_priority": (
+            args.queue_priority
+            if isinstance(getattr(args, "queue_priority", None), int)
+            else _default_queue_priority(job_id)
+        ),
         "queued_at": utc_now(),
         "started_at": None,
         "completed_at": None,
@@ -546,6 +713,7 @@ def enqueue(args) -> int:
         "cwd": getattr(args, "job_cwd", None),
         "claude_followup": followup,
         "followup_dispatched": False,
+        "source_task_id": getattr(args, "source_task_id", None),
         "timeout_seconds": args.timeout or 3600,
         # Where the brief came from vs the frozen copy the runner will actually read.
         # Keeping both makes "the agent read something else than I wrote" auditable.
@@ -558,7 +726,138 @@ def enqueue(args) -> int:
         return 2
     _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
+    _link_source_task(job_id, entry.get("source_task_id"))
     return 0
+
+
+def _link_source_task(job_id: str, task_id: str | None) -> None:
+    """Mark the pool task that spawned this job as in_progress.
+
+    Without this the task stays `pending` while its job sits in the queue, so
+    every later fire's urgency lane re-surfaces it as undispatched work and the
+    honest response — enqueue it — produces a duplicate job (observed
+    2026-07-19: assign_98a32740 / assign_1238781f both queued yet still
+    pending, three fires apart).  The link is written at the one moment both
+    ids are known; a reconciler after the fact would be a second owner for the
+    same invariant.
+
+    Never fails the enqueue: the job file is already durable, and a job with an
+    unlinked task is strictly better than a fire that aborts mid-dispatch.
+    """
+    if not task_id:
+        return
+    try:
+        # Import under the canonical `scripts.` name. Path-inserting scripts/ and
+        # importing bare `task_pool_claim` would create a second module object
+        # with its own NEXT_TASKS constant, so a caller holding
+        # `scripts.task_pool_claim` (tests, other scripts) would be editing a
+        # different file than this one writes.
+        repo_root = str(Path(__file__).resolve().parent.parent)
+        if repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+        from scripts import task_pool_claim as tpc
+
+        # _locked_load writes the mutated list back on context exit; mutating in
+        # place is the whole contract, there is no separate write call.
+        with tpc._locked_load() as (_fh, tasks):
+            task = tpc._find(tasks, task_id)
+            task["compute_job_id"] = job_id
+            if task.get("status") in ("pending", "claimed"):
+                task["status"] = "in_progress"
+            task["result"] = tpc._append_note(
+                task.get("result"),
+                f"dispatched to compute job {job_id}; awaiting PHASE A collection",
+            )
+        print(f"linked source task: {task_id} -> in_progress")
+    except Exception as exc:  # noqa: BLE001 — advisory link, never blocks enqueue
+        print(f"warning: could not link source task {task_id}: {exc}", file=sys.stderr)
+
+
+def _find_task_dispatch_collision(
+    *,
+    repo_root: Path,
+    task_id: str,
+    target_workdir: Path,
+    runner=subprocess.run,
+) -> dict[str, str] | None:
+    """Return an unmerged worktree branch already carrying ``task_id``.
+
+    ``enqueue-agent`` is the one dispatch boundary that knows both the canonical
+    pool task id and the worktree that is about to receive an expensive agent.
+    Keep the collision invariant here rather than duplicating best-effort prompt
+    checks in every hourly lane.
+
+    A matching commit already reachable from canonical HEAD is historical and
+    therefore harmless. A matching commit reachable from another registered
+    worktree branch but not HEAD is live, unmerged work for the same task and
+    must stop the second dispatch.
+    """
+
+    def git(*args: str) -> subprocess.CompletedProcess:
+        try:
+            return runner(
+                ["git", "-C", str(repo_root), *args],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise RuntimeError(f"git {' '.join(args[:2])} failed: {exc}") from exc
+
+    matches = git(
+        "log", "--all", "--fixed-strings", f"--grep={task_id}", "--format=%H"
+    )
+    if matches.returncode != 0:
+        raise RuntimeError(
+            f"git log collision scan failed rc={matches.returncode}: "
+            f"{(matches.stderr or '').strip()[-240:]}"
+        )
+    matching_shas = [line.strip() for line in matches.stdout.splitlines() if line.strip()]
+    if not matching_shas:
+        return None
+
+    worktrees = git("worktree", "list", "--porcelain")
+    if worktrees.returncode != 0:
+        raise RuntimeError(
+            f"git worktree collision scan failed rc={worktrees.returncode}: "
+            f"{(worktrees.stderr or '').strip()[-240:]}"
+        )
+
+    records: list[dict[str, str]] = []
+    current: dict[str, str] = {}
+    for line in [*(worktrees.stdout or "").splitlines(), ""]:
+        if not line:
+            if current:
+                records.append(current)
+                current = {}
+            continue
+        key, _, value = line.partition(" ")
+        if key in {"worktree", "branch"} and value:
+            current[key] = value.removeprefix("refs/heads/") if key == "branch" else value
+
+    target = target_workdir.resolve()
+    for record in records:
+        raw_path = record.get("worktree")
+        branch = record.get("branch")
+        if not raw_path or not branch or Path(raw_path).resolve() == target:
+            continue
+        for sha in matching_shas:
+            merged = git("merge-base", "--is-ancestor", sha, "HEAD")
+            if merged.returncode == 0:
+                continue
+            if merged.returncode != 1:
+                raise RuntimeError(
+                    f"cannot determine whether task commit {sha[:12]} is merged into HEAD"
+                )
+            on_branch = git("merge-base", "--is-ancestor", sha, branch)
+            if on_branch.returncode == 0:
+                return {"worktree": raw_path, "branch": branch, "commit": sha}
+            if on_branch.returncode != 1:
+                raise RuntimeError(
+                    f"cannot inspect task commit {sha[:12]} on branch {branch}"
+                )
+    return None
 
 
 def enqueue_agent(args) -> int:
@@ -602,7 +901,49 @@ def enqueue_agent(args) -> int:
         return 2
     workdir = cwd_path.resolve()
 
+    source_task_id = str(getattr(args, "source_task_id", "") or "").strip()
+    if not source_task_id:
+        print(
+            "error: enqueue-agent requires --source-task-id so duplicate worktree "
+            "dispatches can be rejected mechanically",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        collision = _find_task_dispatch_collision(
+            repo_root=QUEUE_ROOT,
+            task_id=source_task_id,
+            target_workdir=workdir,
+        )
+    except RuntimeError as exc:
+        print(f"error: task-id collision scan failed closed: {exc}", file=sys.stderr)
+        return 2
+    if collision:
+        print(
+            "error: task-id collision; refusing duplicate agent dispatch: "
+            f"task={source_task_id} existing_worktree={collision['worktree']} "
+            f"branch={collision['branch']} commit={collision['commit'][:12]}",
+            file=sys.stderr,
+        )
+        return 2
+
     job_id = args.id or f"agent-{brief_path.stem}-{uuid.uuid4().hex[:6]}"
+
+    # The declared artifact and the instructions must describe the same output.
+    # Otherwise a typo is discovered only after an expensive agent has exited
+    # successfully, when the runner cannot find the exact path it must verify.
+    brief_text = brief_path.read_text(encoding="utf-8")
+    if args.result_artifact:
+        artifact_basename = Path(args.result_artifact).name
+        basename_pattern = rf"(?<![A-Za-z0-9_.-]){re.escape(artifact_basename)}(?![A-Za-z0-9_.-])"
+        if re.search(basename_pattern, brief_text) is None:
+            print(
+                "error: --result-artifact basename is absent from the agent brief; "
+                "refusing a job whose output contract cannot be satisfied: "
+                f"basename={artifact_basename!r} brief={brief_path}",
+                file=sys.stderr,
+            )
+            return 2
 
     # Freeze the brief HERE, at enqueue. The runner opens its brief when the worker
     # picks the job up (*/15) — not now — so "enqueue, then fix the brief" is not an
@@ -617,7 +958,7 @@ def enqueue_agent(args) -> int:
     # sent this write into the real repo. Guard at the writer so the leak fails loudly.
     guard_canonical_write(frozen_brief)
     AGENT_BRIEF_DIR.mkdir(parents=True, exist_ok=True)
-    frozen_brief.write_text(brief_path.read_text(encoding="utf-8"), encoding="utf-8")
+    frozen_brief.write_text(brief_text, encoding="utf-8")
 
     # `result_artifact` is the AGENT'S output, never the runner's summary. Resolve
     # it on the same side of the worktree boundary as the agent itself. The runner
@@ -663,11 +1004,13 @@ def enqueue_agent(args) -> int:
         followup_brief=args.followup_brief,
         followup_task_type=args.followup_task_type,
         followup_priority=args.followup_priority,
+        queue_priority=getattr(args, "queue_priority", None),
         timeout=outer_timeout,
         brief_source=str(brief_path),
         brief_snapshot=str(frozen_brief),
         timeout_parent_job_id=getattr(args, "timeout_parent_job_id", None),
         split_stage=getattr(args, "split_stage", None),
+        source_task_id=getattr(args, "source_task_id", None),
     )
     return enqueue(inner)
 
@@ -681,15 +1024,62 @@ def _arg_value(args: Any, flag: str) -> str | None:
     return args[index + 1] if index + 1 < len(args) else None
 
 
-def _runner_failure_class(job: dict[str, Any]) -> str | None:
-    """What the runner said killed the agent — `auth`, `quota`, `transient`, or None.
+# Producers may stamp an explicit terminal classification into their own stderr
+# (the lazypack render chain writes `[FAILURE_CLASS] none` after its three-layer
+# fallback, because stale codex quota lines earlier in the same log would
+# otherwise read as a quota death). The LAST marker wins; `none` means "a real
+# failure of the work — do not backoff-requeue".
+_FAILURE_CLASS_MARKER_RE = re.compile(
+    r"^\[FAILURE_CLASS\]\s+(auth|quota|transient|none)\s*$", re.MULTILINE
+)
+_STDERR_CLASS_TAIL_BYTES = 16_384
+_CODEX_QUOTA_RESET_RE = re.compile(r"^\[CODEX_QUOTA_RESET_AT\]\s+(\S+)\s*$", re.MULTILINE)
 
-    Written by scripts/run_agent_job.py into the job_metadata receipt. Absent on
-    jobs that predate the field, which read as None: the old triage brief.
+
+def _stderr_failure_class(job: dict[str, Any]) -> str | None:
+    """Classify a compute-kind job's death from its stderr tail.
+
+    Compute-kind jobs have no runner receipt (`job_metadata` is an agent-runner
+    artifact), so before assign_5195e5ae D3 the quota backoff-requeue was
+    structurally dead for them: a lazypack job killed by a codex quota wall
+    failed terminally while the same wall would have re-queued an agent job.
+    Reuses the supervisor's single-owner classifier over the stderr tail; an
+    explicit `[FAILURE_CLASS]` producer marker overrides the regexes.
+    """
+    stderr_file = job.get("stderr_file")
+    if not stderr_file:
+        return None
+    path = Path(str(stderr_file))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        with path.open("rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            size = fh.tell()
+            fh.seek(max(0, size - _STDERR_CLASS_TAIL_BYTES))
+            tail = fh.read().decode("utf-8", errors="replace")
+    except OSError as e:
+        warn("compute_queue", "stderr unreadable; failure class unavailable",
+             job=job.get("id"), path=str(path), err=str(e))
+        return None
+    markers = _FAILURE_CLASS_MARKER_RE.findall(tail)
+    if markers:
+        return None if markers[-1] == "none" else markers[-1]
+    return classify_output(tail)
+
+
+def _runner_failure_class(job: dict[str, Any]) -> str | None:
+    """What killed the job — `auth`, `quota`, `transient`, or None.
+
+    Agent-kind jobs: written by scripts/run_agent_job.py into the job_metadata
+    receipt (absent on jobs that predate the field, which read as None: the old
+    triage brief).  Compute-kind jobs carry no runner receipt, so their class
+    comes from the stderr tail via `_stderr_failure_class` — that is what lets
+    `_requeue_quota_blocked` cover both kinds with one mechanism.
     """
     meta_path = job.get("job_metadata")
     if not meta_path:
-        return None
+        return _stderr_failure_class(job)
     path = Path(meta_path)
     if not path.is_absolute():
         path = ROOT / path
@@ -701,6 +1091,29 @@ def _runner_failure_class(job: dict[str, Any]) -> str | None:
         return None
     value = meta.get("failure_class")
     return value if isinstance(value, str) else None
+
+
+def _codex_quota_reset_at(job: dict[str, Any]) -> datetime | None:
+    """Return a runner-published Codex reset clock, if present and valid."""
+    stderr_file = job.get("stderr_file")
+    if not stderr_file:
+        return None
+    path = Path(str(stderr_file))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        tail = path.read_text(encoding="utf-8", errors="replace")[-_STDERR_CLASS_TAIL_BYTES:]
+    except OSError as exc:
+        warn("compute_queue", "Codex quota reset marker unreadable",
+             job=job.get("id"), path=str(path), err=str(exc))
+        return None
+    matches = _CODEX_QUOTA_RESET_RE.findall(tail)
+    if not matches:
+        return None
+    return parse_iso_warn(
+        matches[-1], tag="compute_queue", field_name="codex_quota_reset_at",
+        fallback=None, job_id=job.get("id"),
+    )
 
 
 def _sleeping_until(job: dict[str, Any]) -> datetime | None:
@@ -729,6 +1142,12 @@ def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
     if it should fail normally — either because the wall was not quota, or because
     the job has already spent its patience.
     """
+    # Once a followup owns the disposition, the queue must not create a second
+    # writer.  This is normally impossible for the automatic path (the worker
+    # has not published a terminal receipt yet), but pin the invariant here as
+    # well as in the manual CLI so legacy/corrupt receipts fail closed.
+    if job.get("followup_dispatched"):
+        return False
     if _runner_failure_class(job) != "quota":
         return False
     bounces = job.get("quota_requeues") or 0
@@ -736,15 +1155,25 @@ def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
         return False
 
     job["quota_requeues"] = bounces + 1
+    reset_at = _codex_quota_reset_at(job)
     job.setdefault("requeue_history", []).append({
         "at": utc_now(),
         "reason": "quota",
         "exit_code": job.get("exit_code"),
         "started_at": job.get("started_at"),
+        "reset_at": reset_at.isoformat() if reset_at else None,
     })
-    job["not_before"] = (
-        datetime.now(timezone.utc) + timedelta(seconds=QUOTA_REQUEUE_BACKOFF_S)
-    ).isoformat()
+    now = datetime.now(timezone.utc)
+    wait_until = reset_at if reset_at and reset_at > now else (
+        now + timedelta(seconds=QUOTA_REQUEUE_BACKOFF_S)
+    )
+    job["not_before"] = wait_until.isoformat()
+    # Canonical queue status remains `queued` so the scheduler can resume it,
+    # while attempt_status is the dedicated operator-facing classification.
+    job["attempt_status"] = (
+        "codex_quota_exhausted" if reset_at else "quota_exhausted"
+    )
+    job["quota_reset_at"] = reset_at.isoformat() if reset_at else None
     # Back to a clean work order: the attempt that just bounced computed nothing,
     # so leaving its exit code or timestamps on the job would describe a run that
     # never happened. `queued_at` stays put — the job keeps its place in line.
@@ -753,6 +1182,79 @@ def _requeue_quota_blocked(job: dict[str, Any]) -> bool:
     job["completed_at"] = None
     job["exit_code"] = None
     return True
+
+
+# Canonical pending queue for escalation tasks (module constant so tests can
+# point it at a fixture; production never overrides it).
+NEXT_TASKS_PATH = ROOT / "storage" / "next_tasks.json"
+
+
+def _job_arg(job: dict[str, Any], flag: str) -> str | None:
+    args = job.get("args") or []
+    for i, value in enumerate(args):
+        if value == flag and i + 1 < len(args):
+            return str(args[i + 1])
+    return None
+
+
+def _maybe_open_lazypack_repair_task(job: dict[str, Any]) -> None:
+    """Terminal lazypack render failure → a real P1 repair task, never a black hole.
+
+    assign_5195e5ae D3: before this, a lazypack job whose whole renderer chain
+    failed simply sat as a failed receipt — no task, no owner, while the alert
+    body claimed a retry mechanism that did not exist.  A non-quota terminal
+    failure now files idempotent P1 work into the canonical pool (stable id per
+    article, `if_exists='skip'`), so the article stranded in draft has an owner
+    the dispatcher is guaranteed to feed.  Quota deaths never reach here — they
+    take the `_requeue_quota_blocked` backoff instead.
+    """
+    job_id = str(job.get("id") or "")
+    if not job_id.startswith("lazypack-"):
+        return
+    article_id = _job_arg(job, "--article-id") or job_id.removeprefix("lazypack-")
+    task_id = f"lazypack_render_repair_{article_id}"
+    record = {
+        "id": task_id,
+        "title": f"[lazypack] {article_id} 懶人包 render 三層全敗，文章卡在草稿",
+        "description": (
+            f"compute job `{job_id}` 的懶人包 render 鏈（codex → agy → deterministic "
+            f"self-repair）全數失敗，文章 `{article_id}` 因缺 `## 懶人包圖組` 被 release "
+            "gate 擋住。\n\n"
+            "先重新驗證：文章若已補上圖組（後續 job 救回），只記錄 no-op 後完成。\n"
+            "仍缺圖時依序排查：\n"
+            f"1. 讀 stderr 找出 deterministic 層的具體 violation：{job.get('stderr_file')}\n"
+            f"2. plan 檔：{_job_arg(job, '--plan')} — 三層都救不回通常代表 plan 的文案量"
+            "超過版面（縮短 blocks 文字或拆面板），修 plan 後重新 enqueue。\n"
+            "3. 若是 renderer bug，修 scripts/lazypack_render.py 並補 regression test。\n"
+            f"重新排隊：uv run python scripts/lazypack_async_render.py enqueue "
+            f"--article-id {article_id} --plan <fixed-plan>"
+        ),
+        "task_type": "platform_ops",
+        "priority": 1,
+        "status": "pending",
+        "source": "compute_queue_lazypack_failure",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "tags": ["lazypack", "render_failure"],
+        "payload": {
+            "job_id": job_id,
+            "article_id": article_id,
+            "exit_code": job.get("exit_code"),
+            "stderr_file": job.get("stderr_file"),
+        },
+    }
+    try:
+        from volpred.ops.next_tasks import append_task_record
+
+        # Admission may clamp machine-source P1 → P2 (dispatch-lanes R2); report
+        # the priority the pool actually admitted, not the one we asked for.
+        rec, created = append_task_record(record, path=NEXT_TASKS_PATH, if_exists="skip")
+        admitted = f"created (P{rec.get('priority')})" if created else (
+            "already pending — not duplicated"
+        )
+        print(f"repair-task: {task_id} {admitted}")
+    except Exception as exc:  # noqa: BLE001 — escalation must not mask the receipt
+        warn("compute_queue", "lazypack repair task creation failed",
+             job=job_id, task_id=task_id, err=f"{type(exc).__name__}: {exc}")
 
 
 def _agent_workdir(job: dict[str, Any]) -> str | None:
@@ -871,8 +1373,17 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
     if job.get("status") != "failed":
         return None
     timed_out = _job_timed_out(job)
+    contract_mismatch = None if timed_out else _artifact_contract_mismatch(job)
     workdir = _agent_workdir(job)
-    if not workdir and not timed_out:
+    # "No worktree" is not the same as "nothing to act on". Only kind=agent jobs
+    # ever carry a cwd, so this guard used to drop EVERY failed compute job on the
+    # floor — including ones whose enqueuer attached a claude_followup and a
+    # source_task_id and is sitting in the task pool waiting for that collection.
+    # k1730_armA_production_run_20260721 failed its experiment gate and starved its
+    # parent task k1731_F3_armA_production_recheck for 62.9h that way; 20 receipts
+    # were in that hole at once. A job with nothing to follow up on says so
+    # explicitly via followup_dispatched (see cancel()), which is checked above.
+    if not workdir and not timed_out and not job.get("claude_followup"):
         return None
 
     original = job.get("claude_followup") or {}
@@ -898,6 +1409,21 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
             "shard, validation/review, merge), each with one explicit artifact and success criterion.",
             f"Every compute child must use a timeout shorter than {timeout_seconds}s and record "
             f"--timeout-parent-job-id {job.get('id')} plus a distinct --split-stage value.",
+        ]
+        if original_brief:
+            triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
+    elif contract_mismatch:
+        near_misses = contract_mismatch.get("result_artifact_near_misses") or []
+        triage_lines = [
+            "ARTIFACT CONTRACT MISMATCH — the agent exited successfully, but the exact declared output path is missing.",
+            f"Job: {job.get('id')} (agent_exit_code=0, runner_exit_code={contract_mismatch.get('runner_exit_code')})",
+            f"Declared result artifact: {contract_mismatch.get('result_artifact') or job.get('result_artifact')}",
+            f"Near-miss candidates: {near_misses or '(none found)'}",
+            f"Runner metadata: {job.get('job_metadata')}",
+            f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
+            f"Worktree/cwd: {workdir}",
+            "Inspect the declared path and candidates, validate the existing output, and repair the path contract or collect the valid artifact.",
+            "Do NOT re-enqueue the agent: the work itself succeeded, and a fresh run would only duplicate it.",
         ]
         if original_brief:
             triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
@@ -935,21 +1461,37 @@ def _pending_followup_view(job: dict[str, Any]) -> dict[str, Any] | None:
             triage_lines.append(f"Followup to run once it completes (context only): {original_brief}")
     else:
         triage_lines = [
-            "TRIAGE FAILED AGENT JOB — this job did not complete successfully.",
-            f"Job: {job.get('id')} (exit_code={job.get('exit_code')})",
-            f"Worktree/cwd: {workdir}",
+            "TRIAGE FAILED JOB — this job did not complete successfully.",
+            f"Job: {job.get('id')} (exit_code={job.get('exit_code')}, "
+            f"failure_reason={job.get('failure_reason')})",
+            f"Worktree/cwd: {workdir or '(none — this is a compute job, it ran against the repo)'}",
+            f"Script: {job.get('script_path')}",
             f"Result artifact (may be missing, partial, or stale): {job.get('result_artifact')}",
             f"Runner metadata: {job.get('job_metadata')}",
             f"stdout/stderr: {job.get('stdout_file')} | {job.get('stderr_file')}",
-            "Inspect what actually exists in the worktree. Decide whether to preserve/commit and continue, "
+            "Inspect what actually exists on disk. Decide whether to preserve/commit and continue, "
             "re-enqueue from a fresh worktree, or document that nothing is salvageable. Do not treat any "
             "artifact as a successful result without validation, and never force-remove the worktree.",
         ]
+        if job.get("failure_reason") == "experiment_gate_failed":
+            gate = job.get("experiment_gate") or {}
+            triage_lines += [
+                "",
+                "The SCRIPT ran to completion (process_exit_code=0) — the repo experiment gate is what "
+                "failed, so any artifact it wrote is UNCERTIFIED, not absent. Fix the violation below "
+                "and re-run; do not adopt the numbers as-is and do not weaken the gate.",
+                str(gate.get("report") or "").strip(),
+            ]
         if original_brief:
             triage_lines.append(f"Original completed-job followup (context only): {original_brief}")
 
     row = dict(job)
-    row["followup_mode"] = "split_required" if timed_out else "triage_failed"
+    if timed_out:
+        row["followup_mode"] = "split_required"
+    elif contract_mismatch:
+        row["followup_mode"] = "artifact_contract_mismatch"
+    else:
+        row["followup_mode"] = "triage_failed"
     if timed_out:
         row["split_contract"] = {
             "parent_timeout_job_id": job.get("id"),
@@ -1012,144 +1554,557 @@ def show(args) -> int:
     return 0
 
 
+# The open handle whose flock IS the worker mutex. Held for the worker's whole
+# lifetime (one run-next slot or an entire drain loop) and dropped by the kernel
+# the instant the process dies.
+_WORKER_LOCK_HANDLE = None
+
+
 def _acquire_lock() -> bool:
-    """Return True if lock acquired. Stale locks > 6h auto-released."""
-    if LOCK_FILE.exists():
-        try:
-            mtime = LOCK_FILE.stat().st_mtime
-            if time.time() - mtime > 6 * 3600:
-                LOCK_FILE.unlink()  # stale
-            else:
-                return False
-        except FileNotFoundError:
-            pass  # silent-ok: another worker removed the lock; retry write below.
+    """Take the exclusive worker mutex; True means this process now owns it.
+
+    flock, not mtime (D6 refactor): the old scheme wrote a lock file and treated
+    >6h-old ones as stale, which was both too patient (a crashed worker blocked
+    the queue for up to 6h) and too impatient (a legitimate drain loop can run
+    longer than any fixed threshold). A kernel flock has neither hole — it dies
+    with its owner. This is also what makes the launchd */15 tick safe restart
+    insurance: a tick that lands while a drain loop is alive loses this flock
+    and exits immediately. The lock file itself is never unlinked; releasing the
+    fd is the release (unlink+recreate would let two processes flock different
+    inodes of the "same" path).
+    """
+    global _WORKER_LOCK_HANDLE
+    if _WORKER_LOCK_HANDLE is not None:
+        return False  # this process already runs a worker; a second is a bug
     try:
-        LOCK_FILE.write_text(f"{os.getpid()} {utc_now()}\n")
-        return True
+        handle = LOCK_FILE.open("a+", encoding="utf-8")
     except OSError as exc:
         _warn_compute_queue("worker lock write failed; skipping run", LOCK_FILE, exc)
         return False
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        handle.close()
+        return False  # silent-ok: lock held by a live worker; caller prints the skip line
+    except OSError as exc:
+        handle.close()
+        _warn_compute_queue("worker lock flock failed; skipping run", LOCK_FILE, exc)
+        return False
+    try:
+        # Owner stamp is observability only — the flock above is the mutex.
+        handle.truncate(0)
+        handle.write(f"{os.getpid()} {utc_now()}\n")
+        handle.flush()
+    except OSError as exc:
+        _warn_compute_queue("worker lock owner stamp failed (lock still held)", LOCK_FILE, exc)
+    _WORKER_LOCK_HANDLE = handle
+    return True
 
 
 def _release_lock():
+    global _WORKER_LOCK_HANDLE
+    handle = _WORKER_LOCK_HANDLE
+    _WORKER_LOCK_HANDLE = None
+    if handle is None:
+        return
     try:
-        LOCK_FILE.unlink()
-    except FileNotFoundError:
-        pass  # silent-ok: lock was already removed by another cleanup path.
+        fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    finally:
+        handle.close()
+
+
+# This process's own `ps lstart` fingerprint, probed once and cached — our own
+# start time never changes for the life of the process.
+_OWN_START_WALL: str | None = None
+
+
+def _own_start_wall() -> str | None:
+    """Fingerprint of THIS worker process for claim receipts, or None.
+
+    Fail-open by design: a claim without a fingerprint is still safe (the
+    reaper's worker-flock invariant covers it), so a broken/patched `ps` must
+    not block claiming work — but it must say so out loud.
+    """
+    global _OWN_START_WALL
+    if _OWN_START_WALL is not None:
+        return _OWN_START_WALL
+    try:
+        wall = procutil.get_process_start_wall(os.getpid())
+    except Exception as exc:  # noqa: BLE001 — e.g. monkeypatched subprocess in tests
+        warn(
+            "compute_queue",
+            "own start-wall probe raised; claims will carry no fingerprint",
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return None
+    if not wall:
+        # PROBE_FAILED (already logged by procutil) or an empty ps row for our
+        # own live pid — either way there is nothing usable to pin.
+        warn("compute_queue", "own start-wall probe returned no usable fingerprint")
+        return None
+    _OWN_START_WALL = wall
+    return wall
+
+
+# Terminal exit code the reaper stamps on a job whose worker died under it.
+# Distinct from -1 (timeout), -2 (runner exception), -3 (execution-guard crash):
+# those describe the JOB failing; -4 describes the WORKER dying (SIGTERM /
+# crash / power loss) with the job still claimed.
+WORKER_KILLED_EXIT_CODE = -4
+
+
+def _stale_running_verdict(job: dict[str, Any]) -> tuple[bool, str]:
+    """(claimer_is_dead, evidence) for one `running` receipt.
+
+    MUST be judged while THIS process holds the worker flock. That flock is the
+    load-bearing fact: jobs are only ever claimed and run inside a worker
+    process that holds the flock for its entire lifetime (_acquire_lock ->
+    finally _release_lock), and the kernel drops it at process death. So while
+    we own the flock, no live legitimate claimer can exist anywhere. The pid
+    probes below are pid-reuse-safe evidence collection (same `ps lstart`
+    fingerprint scheme as scripts/dispatch_supervisor/procutil.py), not the
+    safety argument itself:
+
+    - no recorded pid                  -> flock verdict alone: claimer dead.
+    - pid confirmed gone               -> claimer dead.
+    - pid alive, fingerprint differs   -> pid recycled by an unrelated process;
+                                          claimer dead.
+    - pid alive, fingerprint matches   -> contradicts the flock invariant;
+                                          refuse to reap (never finalize work we
+                                          cannot explain) and say so loudly.
+    - liveness probe failed            -> unverified; skip, next worker start
+                                          retries.
+
+    Even a dead claimer can leave live orphaned CHILDREN (the worker was
+    SIGTERM'd alone and its subprocess got reparented). If the dead worker's
+    process group still holds live members, the job's actual computation may
+    still be executing — finalizing it now could race a later manual requeue
+    against that survivor. Skip until the group drains; the launchd */15 tick
+    guarantees another look.
+    """
+    pid = job.get("claimed_by_pid")
+    if not isinstance(pid, int) or isinstance(pid, bool) or pid <= 0:
+        return True, (
+            "no claimed_by_pid on receipt; reaper holds the worker flock, so no "
+            "live worker can own this claim"
+        )
+    if pid == os.getpid():
+        return False, "claimed by this very process — reaper never self-reaps"
+    current = procutil.get_process_start_wall(pid)
+    if current is procutil.PROBE_FAILED:
+        return False, f"pid={pid} liveness probe failed; leaving for the next worker start"
+    expected = job.get("claimed_by_pid_start_wall")
+    if current is not None:
+        if expected and current == expected:
+            return False, (
+                f"pid={pid} alive with matching start-wall fingerprint {current!r} "
+                "— refusing to reap a live claimer (flock invariant violated?)"
+            )
+        if not expected:
+            # Legacy receipt (claimed before D6b recorded fingerprints) whose pid
+            # number is now held by SOME process. The flock invariant proves the
+            # claimer is dead (a live claimer would still hold the flock we own),
+            # so this live pid must be an unrelated recycle — but say exactly
+            # that in the evidence, because it is inference, not observation.
+            evidence = (
+                f"pid={pid} number is alive but receipt has no fingerprint; "
+                "worker flock held by reaper proves the claimer died — treating "
+                "the live pid as an unrelated recycle"
+            )
+        else:
+            evidence = (
+                f"pid={pid} alive but start-wall fingerprint differs "
+                f"(claimed {expected!r}, found {current!r}) — pid recycled, claimer dead"
+            )
+    else:
+        evidence = f"pid={pid} confirmed gone (ps reports no such process)"
+    # Claimer dead — but check for surviving orphaned children before finalizing.
+    members = procutil.pgid_members_checked(pid)
+    if members is None:
+        return False, (
+            f"pid={pid} claimer dead but pgid probe failed; cannot rule out live "
+            "orphaned children — leaving for the next worker start"
+        )
+    if members:
+        return False, (
+            f"pid={pid} claimer dead but its process group still holds live "
+            f"members {members} — job may still be executing; skip until they drain"
+        )
+    return True, evidence
+
+
+def _reap_stale_running(context: str) -> int:
+    """Finalize orphan `running` receipts left behind by a dead worker (D6b).
+
+    2026-07-20 incident: the D6 drain loop was SIGTERM'd mid-job and its two
+    claimed receipts sat at status=running forever. The crash guard
+    (_run_claimed) only covers exceptions — a signal kills the process before
+    any `except` runs — and `cancel` correctly refuses running jobs, so nothing
+    could ever retire them. This runs at worker start, right after the worker
+    flock is acquired (the one moment we KNOW no other worker is alive): every
+    running receipt whose claimer is provably dead is finalized to
+    failed/worker_killed, which routes agent jobs into the normal
+    `list --pending-followup` triage and makes both kinds eligible for
+    `requeue`. Returns the number of receipts reaped.
+    """
+    reaped = 0
+    for path in sorted(QUEUE_DIR.glob("*.json")):
+        job = _read_job_file(path, context=context)
+        if job is None or job.get("status") != "running":
+            continue
+        dead, evidence = _stale_running_verdict(job)
+        if not dead:
+            warn(
+                "compute_queue",
+                "running receipt left alone by stale-running reaper",
+                job=job.get("id"),
+                evidence=evidence,
+            )
+            continue
+        with _receipt_lock():
+            current = _read_job_file(path, context=context)
+            if current is None or current.get("status") != "running":
+                # Finalized by someone else between our scan and this lock —
+                # nothing left to reap. Loud enough via their own write.
+                continue
+            now = utc_now()
+            current["status"] = "failed"
+            current["exit_code"] = WORKER_KILLED_EXIT_CODE
+            current["failure_reason"] = "worker_killed"
+            current["completed_at"] = now
+            current["reap"] = {
+                "at": now,
+                "by_pid": os.getpid(),
+                "context": context,
+                "evidence": evidence,
+                "orphaned_started_at": current.get("started_at"),
+            }
+            _write_job_file(path, current)
+        stderr_file = current.get("stderr_file")
+        if stderr_file:
+            try:
+                with Path(stderr_file).open("a", encoding="utf-8") as se:
+                    se.write(f"\n[WORKER_KILLED] reaped at {now}: {evidence}\n")
+            except OSError as exc:
+                warn(
+                    "compute_queue",
+                    "reap stderr marker write failed (receipt already finalized)",
+                    job=current.get("id"),
+                    err=str(exc),
+                )
+        print(f"reaped: {current['id']} worker_killed ({evidence})")
+        reaped += 1
+    return reaped
+
+
+def _ready_queued_jobs(context: str) -> tuple[list[tuple[int, str, Path]], int]:
+    """Queued jobs allowed to start now, priority-then-arrival ordered.
+
+    Returns (ready, sleeping): `ready` as (priority, queued_at, path) tuples —
+    priority first, arrival order within a priority, so a release-blocking
+    render never waits out a 90-minute agent that arrived first — and
+    `sleeping` counting jobs waiting out a `not_before` quota window (starting
+    one of those now would just burn the same five seconds against the same
+    wall).
+    """
+    ready: list[tuple[int, str, Path]] = []
+    sleeping = 0
+    for p in sorted(QUEUE_DIR.glob("*.json")):
+        j = _read_job_file(p, context=context)
+        if j is None:
+            continue
+        if j.get("status") != "queued":
+            continue
+        if _sleeping_until(j) is not None:
+            sleeping += 1
+            continue
+        ready.append((_scheduling_priority(j), j.get("queued_at", ""), p))
+    ready.sort(key=lambda item: (item[0], item[1], str(item[2])))
+    return ready, sleeping
+
+
+def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
+    """Atomically flip one queued job to running; None if someone else got it.
+
+    Compare-and-set under the receipt flock: re-read, verify the job is still
+    queued and still allowed to start, then publish `running` in the same
+    critical section. Two claimers (parallel drain slots, a stray run-next tick,
+    an operator's cancel/amend) can therefore never both own the same job —
+    whichever writes first wins and the loser re-reads a non-queued status here
+    and walks away. Before this, the scan-then-mark in run_next was a TOCTOU
+    that only stayed safe because the worker mutex forbade a second worker.
+    """
+    with _receipt_lock():
+        job = _read_job_file(job_path, context=context)
+        if job is None or job.get("status") != "queued":
+            return None
+        if _sleeping_until(job) is not None:
+            return None
+        job["status"] = "running"
+        job["started_at"] = utc_now()
+        job["claimed_by_pid"] = os.getpid()
+        # D6b: pid-reuse-safe fingerprint (same lstart scheme as the dispatch
+        # supervisor's procutil). None when the probe could not produce one —
+        # the reaper then falls back to the worker-flock invariant.
+        job["claimed_by_pid_start_wall"] = _own_start_wall()
+        _write_job_file(job_path, job)
+    return job
+
+
+def _run_claimed(job_path: Path, job: dict[str, Any]) -> None:
+    """Execute one claimed job and always leave a terminal (or re-queued) receipt.
+
+    _execute_job already converts subprocess failures into receipt state; this
+    guard covers everything OUTSIDE that inner try (log-dir creation, receipt
+    merge, a bug in the postconditions themselves). A drain loop runs for hours,
+    so one crashing job must neither kill the loop nor strand a `running`
+    receipt that no process is actually running.
+    """
+    try:
+        _execute_job(job_path, job)
+    except Exception as exc:  # noqa: BLE001 — fail-loud catch-all; receipt is the trace
+        warn(
+            "compute_queue",
+            "job execution crashed outside the runner guard",
+            job=job.get("id"),
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        job["status"] = "failed"
+        job["exit_code"] = -3
+        job["execution_error"] = f"{type(exc).__name__}: {exc}"
+        with _receipt_lock():
+            _merge_runtime_output_paths(job_path, job)
+            job["completed_at"] = utc_now()
+            _write_job_file(job_path, job)
+        print(f"done: {job['id']} status=failed exit=-3 (execution error)")
 
 
 def run_next(args) -> int:
+    """Consume at most one queued job — the legacy single-shot entrypoint."""
     ensure_dirs()
     if not _acquire_lock():
         print("worker already running (lock held); skip")
         return 0
 
     try:
-        # Find oldest queued job that is allowed to start now
-        queued = []
-        sleeping = 0
-        for p in sorted(QUEUE_DIR.glob("*.json")):
-            j = _read_job_file(p, context="run-next")
-            if j is None:
-                continue
-            if j.get("status") != "queued":
-                continue
-            until = _sleeping_until(j)
-            if until is not None:
-                # Waiting out a quota window. Starting it now would just burn the
-                # same five seconds against the same wall.
-                sleeping += 1
-                continue
-            queued.append((j.get("queued_at", ""), p, j))
-        if not queued:
-            print(f"no queued jobs ready ({sleeping} waiting on not_before)"
-                  if sleeping else "no queued jobs")
+        _reap_stale_running("run-next")
+        ready, sleeping = _ready_queued_jobs("run-next")
+        for _prio, _queued_at, job_path in ready:
+            job = _claim_job(job_path, context="run-next")
+            if job is None:
+                continue  # lost the claim race; take the next candidate
+            print(f"running: {job['id']} ({job['script_path']})")
+            _run_claimed(job_path, job)
             return 0
-        queued.sort()
-        _, job_path, job = queued[0]
+        print(f"no queued jobs ready ({sleeping} waiting on not_before)"
+              if sleeping else "no queued jobs")
+        return 0
+    finally:
+        _release_lock()
 
-        # Mark running
-        job["status"] = "running"
-        job["started_at"] = utc_now()
-        with _receipt_lock():
-            _write_job_file(job_path, job)
-        print(f"running: {job['id']} ({job['script_path']})")
 
-        # Build command
-        cmd_parts = shlex.split(job["interpreter"]) + [job["script_path"]] + (job.get("args") or [])
-        env = os.environ.copy()
-        env.update(job.get("env") or {})
-        env["VOLPRED_COMPUTE_JOB_ID"] = str(job["id"])
-        stdout_p = Path(job["stdout_file"])
-        stderr_p = Path(job["stderr_file"])
-        stdout_p.parent.mkdir(parents=True, exist_ok=True)
+def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
+    """Run one already-claimed job through to its terminal receipt.
 
-        try:
-            with stdout_p.open("w") as so, stderr_p.open("w") as se:
-                proc = subprocess.run(
-                    cmd_parts,
-                    cwd=str(ROOT),
-                    env=env,
-                    stdout=so,
-                    stderr=se,
-                    timeout=job.get("timeout_seconds", 3600),
-                )
-            job["exit_code"] = proc.returncode
-            if proc.returncode != 0:
-                job["status"] = "failed"
-                if _runner_timed_out(job):
-                    _mark_timeout(job)
-                elif _requeue_quota_blocked(job):
-                    print(f"quota-blocked: {job['id']} never started — re-queued "
-                          f"(bounce {job['quota_requeues']}/{QUOTA_REQUEUE_MAX}, "
-                          f"not_before={job['not_before']})")
+    Thread-safe by construction: every path it touches (stdout/stderr logs, the
+    per-job receipt) is owned by this job, and receipt writes go through the
+    receipt flock, so bounded-parallel drain slots cannot trample each other.
+    """
+    # Build command
+    cmd_parts = shlex.split(job["interpreter"]) + [job["script_path"]] + (job.get("args") or [])
+    env = os.environ.copy()
+    env.update(job.get("env") or {})
+    env["VOLPRED_COMPUTE_JOB_ID"] = str(job["id"])
+    stdout_p = Path(job["stdout_file"])
+    stderr_p = Path(job["stderr_file"])
+    stdout_p.parent.mkdir(parents=True, exist_ok=True)
+
+    try:
+        with stdout_p.open("w") as so, stderr_p.open("w") as se:
+            proc = subprocess.run(
+                cmd_parts,
+                cwd=str(ROOT),
+                env=env,
+                stdout=so,
+                stderr=se,
+                timeout=job.get("timeout_seconds", 3600),
+            )
+        job["exit_code"] = proc.returncode
+        if proc.returncode != 0:
+            job["status"] = "failed"
+            if _runner_timed_out(job):
+                _mark_timeout(job)
+            elif _requeue_quota_blocked(job):
+                print(f"quota-blocked: {job['id']} never started — re-queued "
+                      f"(bounce {job['quota_requeues']}/{QUOTA_REQUEUE_MAX}, "
+                      f"not_before={job['not_before']})")
             else:
-                artifact_path = _declared_result_artifact(job)
-                if artifact_path is not None and not artifact_path.exists():
-                    # A successful process without its declared output is not a
-                    # successful job. Keep both codes: process_exit_code preserves
-                    # what actually ran; exit_code=3 is the queue postcondition.
+                # Non-quota terminal failure: lazypack jobs escalate to a real
+                # P1 repair task instead of a receipt nobody owns (D3).
+                _maybe_open_lazypack_repair_task(job)
+        else:
+            artifact_path = _declared_result_artifact(job)
+            if artifact_path is not None and not artifact_path.exists():
+                # A successful process without its declared output is not a
+                # successful job. Keep both codes: process_exit_code preserves
+                # what actually ran; exit_code=3 is the queue postcondition.
+                job["process_exit_code"] = proc.returncode
+                job["exit_code"] = 3
+                job["status"] = "failed"
+                job["failure_reason"] = "result_artifact_missing"
+                job["missing_result_artifact"] = str(artifact_path)
+                with stderr_p.open("a") as se:
+                    se.write(f"\n[RESULT_ARTIFACT_MISSING] {artifact_path}\n")
+            elif _is_review_job(artifact_path) and (
+                unfilled := _review_verdict_unfilled(artifact_path)
+            ):
+                # The verdict file exists but was never adjudicated (or is
+                # not a verdict at all). k528 2026-07-19: existence-only
+                # check let a FILL: scaffold pass as a completed review.
+                job["process_exit_code"] = proc.returncode
+                job["exit_code"] = 5
+                job["status"] = "failed"
+                job["failure_reason"] = "review_verdict_unfilled"
+                job["review_verdict_unfilled"] = unfilled
+                with stderr_p.open("a") as se:
+                    se.write(f"\n[REVIEW_VERDICT_UNFILLED] {unfilled}\n")
+            else:
+                gate = _experiment_gate_failure(job, artifact_path)
+                if gate is not None:
+                    # The artifact exists and the process was happy. That only
+                    # means the experiment ran the way its author meant it to.
+                    # It broke a rule the repo already paid to learn, so it is
+                    # not a completed job -- it routes to triage_failed.
                     job["process_exit_code"] = proc.returncode
-                    job["exit_code"] = 3
+                    job["exit_code"] = 4
                     job["status"] = "failed"
-                    job["failure_reason"] = "result_artifact_missing"
-                    job["missing_result_artifact"] = str(artifact_path)
+                    job["failure_reason"] = "experiment_gate_failed"
+                    job["experiment_gate"] = gate
                     with stderr_p.open("a") as se:
-                        se.write(f"\n[RESULT_ARTIFACT_MISSING] {artifact_path}\n")
+                        se.write(f"\n[EXPERIMENT_GATE_FAILED]\n{gate['report']}\n")
                 else:
-                    gate = _experiment_gate_failure(job, artifact_path)
-                    if gate is not None:
-                        # The artifact exists and the process was happy. That only
-                        # means the experiment ran the way its author meant it to.
-                        # It broke a rule the repo already paid to learn, so it is
-                        # not a completed job -- it routes to triage_failed.
-                        job["process_exit_code"] = proc.returncode
-                        job["exit_code"] = 4
-                        job["status"] = "failed"
-                        job["failure_reason"] = "experiment_gate_failed"
-                        job["experiment_gate"] = gate
-                        with stderr_p.open("a") as se:
-                            se.write(f"\n[EXPERIMENT_GATE_FAILED]\n{gate['report']}\n")
-                    else:
-                        job["status"] = "completed"
-        except subprocess.TimeoutExpired:
-            job["status"] = "failed"
-            job["exit_code"] = -1
-            _mark_timeout(job)
-            stderr_p.write_text(stderr_p.read_text() + "\n[TIMEOUT]\n")
-        except Exception as e:
-            job["status"] = "failed"
-            job["exit_code"] = -2
-            stderr_p.write_text(stderr_p.read_text() + f"\n[EXCEPTION] {e}\n")
+                    job["status"] = "completed"
+    except subprocess.TimeoutExpired:
+        job["status"] = "failed"
+        job["exit_code"] = -1
+        _mark_timeout(job)
+        stderr_p.write_text(stderr_p.read_text() + "\n[TIMEOUT]\n")
+    except Exception as e:
+        job["status"] = "failed"
+        job["exit_code"] = -2
+        stderr_p.write_text(stderr_p.read_text() + f"\n[EXCEPTION] {e}\n")
 
-        with _receipt_lock():
-            _merge_runtime_output_paths(job_path, job)
-            # A re-queued job did not finish; stamping completed_at would make an
-            # attempt that never ran look like a run.
-            if job["status"] != "queued":
-                job["completed_at"] = utc_now()
-            _write_job_file(job_path, job)
-        print(f"done: {job['id']} status={job['status']} exit={job['exit_code']}")
+    with _receipt_lock():
+        _merge_runtime_output_paths(job_path, job)
+        # A re-queued job did not finish; stamping completed_at would make an
+        # attempt that never ran look like a run.
+        if job["status"] != "queued":
+            job["completed_at"] = utc_now()
+        _write_job_file(job_path, job)
+    print(f"done: {job['id']} status={job['status']} exit={job['exit_code']}")
+
+
+def _resolve_max_parallel(cli_value: int | None) -> int:
+    """Effective drain-loop parallelism bound.
+
+    Precedence: explicit CLI flag > `max_parallel` on the volpred-compute-worker
+    entry in config/runtime_schedules.json > DRAIN_MAX_PARALLEL_DEFAULT. The
+    config file wins over a code constant because it is the repo's canonical
+    schedule spec (CLAUDE.md: 排程 → config/runtime_schedules.json): ops can
+    retune the bound in the same place the job's cadence lives, without a code
+    change. Every fallback is loud, and run-loop prints the effective bound at
+    startup, so the value in force is always observable in the worker log.
+    """
+    if cli_value is not None:
+        if cli_value < 1:
+            raise SystemExit(f"error: --max-parallel must be >= 1, got {cli_value}")
+        return cli_value
+    config_path = ROOT / "config" / "runtime_schedules.json"
+    entries: list[Any] = []
+    try:
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+        raw_entries = data.get("cron_jobs") if isinstance(data, dict) else None
+        entries = raw_entries if isinstance(raw_entries, list) else []
+    except (OSError, json.JSONDecodeError) as exc:
+        warn(
+            "compute_queue",
+            "runtime_schedules.json unreadable; using default max_parallel",
+            path=str(config_path),
+            err=str(exc),
+        )
+    for entry in entries:
+        if isinstance(entry, dict) and entry.get("id") == "volpred-compute-worker":
+            raw = entry.get("max_parallel")
+            if raw is None:
+                break
+            if isinstance(raw, int) and not isinstance(raw, bool) and raw >= 1:
+                return raw
+            warn(
+                "compute_queue",
+                "invalid max_parallel override in runtime_schedules.json; using default",
+                value=repr(raw),
+            )
+            break
+    return DRAIN_MAX_PARALLEL_DEFAULT
+
+
+def run_loop(args) -> int:
+    """Work-conserving drain: consume queued jobs continuously until none remain.
+
+    D6 (owner directive 2026-07-20): the worker costs no Claude tokens, so
+    "one job per 15-minute tick" was pure queue latency. This loop claims and
+    runs jobs continuously, at most `max_parallel` at a time, rescanning after
+    every completion so work enqueued mid-drain is picked up too. It exits when
+    nothing is claimable and nothing is in flight. Jobs sleeping on `not_before`
+    deliberately do NOT keep the loop alive — the launchd */15 tick is the
+    restart insurance that will come back for them (and for a crashed loop);
+    when a loop is already draining, that tick's invocation loses the worker
+    flock in _acquire_lock and exits immediately.
+    """
+    ensure_dirs()
+    if not _acquire_lock():
+        print("worker already running (lock held); skip")
+        return 0
+
+    try:
+        # Holding the flock proves no other worker is alive — the one safe
+        # moment to finalize running receipts stranded by a killed worker.
+        _reap_stale_running("run-loop")
+        limit = _resolve_max_parallel(getattr(args, "max_parallel", None))
+        print(f"drain-loop: start pid={os.getpid()} max_parallel={limit}")
+        jobs_run = 0
+        with ThreadPoolExecutor(max_workers=limit, thread_name_prefix="compute-job") as pool:
+            in_flight: dict[Future, str] = {}
+            while True:
+                ready, _sleeping = _ready_queued_jobs("run-loop")
+                for _prio, _queued_at, job_path in ready:
+                    if len(in_flight) >= limit:
+                        break
+                    job = _claim_job(job_path, context="run-loop")
+                    if job is None:
+                        continue  # lost the claim race; take the next candidate
+                    print(f"running: {job['id']} ({job['script_path']})")
+                    in_flight[pool.submit(_run_claimed, job_path, job)] = str(job["id"])
+                if not in_flight:
+                    break
+                done, _pending = wait(in_flight, return_when=FIRST_COMPLETED)
+                for future in done:
+                    job_id = in_flight.pop(future)
+                    jobs_run += 1
+                    exc = future.exception()
+                    if exc is not None:
+                        # _run_claimed already writes a failed receipt for
+                        # job-level crashes; reaching here means the guard
+                        # itself failed. Keep draining, but say so.
+                        warn(
+                            "compute_queue",
+                            "drain worker raised past the receipt guard",
+                            job=job_id,
+                            err=f"{type(exc).__name__}: {exc}",
+                        )
+        _ready, sleeping = _ready_queued_jobs("run-loop")
+        suffix = f" ({sleeping} left waiting on not_before)" if sleeping else ""
+        print(f"drain-loop: exit pid={os.getpid()} jobs_run={jobs_run}{suffix}")
         return 0
     finally:
         _release_lock()
@@ -1161,7 +2116,21 @@ def mark_followup_dispatched(args) -> int:
         print(f"error: not found {args.id}", file=sys.stderr)
         return 2
     with _receipt_lock():
-        j = json.loads(p.read_text())
+        j = _read_job_file(p, context="mark-followup-dispatched")
+        if j is None:
+            return 2
+        # This check and requeue()'s followup check use the same receipt lock.
+        # Whichever transition wins makes the other refuse: a queued/running
+        # worker and a triage followup can therefore never own the same job at
+        # once.  Before this gate, requeue-first followed by mark-followup could
+        # leave a queued job carrying an active triage task.
+        if j.get("status") not in {"completed", "failed"}:
+            print(
+                f"error: cannot dispatch followup for {args.id} — "
+                f"status={j.get('status')}, not terminal.",
+                file=sys.stderr,
+            )
+            return 2
         j["followup_dispatched"] = True
         j["followup_dispatched_at"] = utc_now()
         if args.next_task_id:
@@ -1306,6 +2275,13 @@ def requeue(args) -> int:
     mean the CLI turned the agent away at the door: no compute, no tokens, an
     untouched worktree. Every other class has a worktree whose state is the whole
     question — re-running it would race the salvage, so this refuses.
+
+    D6b adds one more admissible class: `failure_reason=worker_killed`, stamped
+    by the stale-running reaper when the WORKER died (SIGTERM/crash) with the
+    job still claimed. Unlike auth/quota this does NOT guarantee the job never
+    ran — the reaper already refused to finalize while the dead worker's process
+    group had live members, but for kind=agent jobs the operator should still
+    confirm the worktree holds nothing worth salvaging before re-running.
     """
     path = QUEUE_DIR / f"{args.id}.json"
     with _receipt_lock():
@@ -1319,21 +2295,33 @@ def requeue(args) -> int:
             print(f"error: cannot requeue {args.id} — status={job.get('status')}, not failed.",
                   file=sys.stderr)
             return 2
-        failure = _runner_failure_class(job)
-        if failure not in ("auth", "quota"):
+        if job.get("followup_dispatched"):
+            followup_id = job.get("followup_next_task_id") or "(unknown followup task)"
             print(
-                f"error: cannot requeue {args.id} — failure_class={failure}. Only auth/quota "
-                f"deaths are safe to re-run blind, because only they guarantee the agent never "
-                f"started. Triage this one's worktree instead.",
+                f"error: cannot requeue {args.id} — disposition is owned by "
+                f"followup {followup_id}. Do not retry the delegated original receipt.",
                 file=sys.stderr,
             )
             return 2
+        failure = _runner_failure_class(job)
+        worker_killed = job.get("failure_reason") == "worker_killed"
+        if failure not in ("auth", "quota") and not worker_killed:
+            print(
+                f"error: cannot requeue {args.id} — failure_class={failure}. Only auth/quota "
+                f"deaths and reaper-stamped worker_killed jobs are safe to re-run: auth/quota "
+                f"guarantee the agent never started, worker_killed means the worker (not the "
+                f"job) died. Triage this one's worktree instead.",
+                file=sys.stderr,
+            )
+            return 2
+        blocked_kind = failure if failure in ("auth", "quota") else "worker_killed"
 
         job.setdefault("requeue_history", []).append({
             "at": utc_now(),
-            "reason": f"manual:{failure}",
+            "reason": f"manual:{blocked_kind}",
             "exit_code": job.get("exit_code"),
             "started_at": job.get("started_at"),
+            "failure_reason": job.get("failure_reason"),
             "by": os.environ.get("VOLPRED_ACTOR") or os.environ.get("VOLPRED_TASK_CLAIM_OWNER"),
         })
         job["status"] = "queued"
@@ -1341,8 +2329,18 @@ def requeue(args) -> int:
         job["completed_at"] = None
         job["exit_code"] = None
         job["not_before"] = None
+        # The retired attempt's verdict and claim identity now live in
+        # requeue_history / reap; leaving them on a queued job would let a
+        # LATER unrelated failure inherit `worker_killed` and slip past this
+        # very gate on a second requeue.
+        job["failure_reason"] = None
+        job["claimed_by_pid"] = None
+        job["claimed_by_pid_start_wall"] = None
         _write_job_file(path, job)
-    print(f"requeued: {args.id} (was {failure}-blocked; the agent never ran)")
+    if blocked_kind == "worker_killed":
+        print(f"requeued: {args.id} (worker died mid-claim; job re-runs from scratch)")
+    else:
+        print(f"requeued: {args.id} (was {blocked_kind}-blocked; the agent never ran)")
     return 0
 
 
@@ -1374,9 +2372,14 @@ def main():
     e.add_argument("--followup-brief")
     e.add_argument("--followup-task-type")
     e.add_argument("--followup-priority", type=int)
+    e.add_argument("--queue-priority", type=int, help="Scheduling priority; lower runs first. Default 1 for release-blocking (lazypack-*) jobs, 5 otherwise.")
     e.add_argument("--timeout", type=int)
     e.add_argument("--timeout-parent-job-id")
     e.add_argument("--split-stage")
+    e.add_argument(
+        "--source-task-id",
+        help="Pool task this job was dispatched for; marked in_progress so A0 stops re-surfacing it.",
+    )
     e.set_defaults(func=enqueue)
 
     ea = sub.add_parser(
@@ -1397,9 +2400,18 @@ def main():
     ea.add_argument("--followup-brief")
     ea.add_argument("--followup-task-type")
     ea.add_argument("--followup-priority", type=int)
+    ea.add_argument("--queue-priority", type=int, help="Scheduling priority; lower runs first. Default 1 for release-blocking (lazypack-*) jobs, 5 otherwise.")
     ea.add_argument("--timeout", type=int)
     ea.add_argument("--timeout-parent-job-id")
     ea.add_argument("--split-stage")
+    ea.add_argument(
+        "--source-task-id",
+        required=True,
+        help=(
+            "Pool task this job was dispatched for; marks it in_progress and blocks "
+            "dispatch when another unmerged worktree branch already carries that task id."
+        ),
+    )
     ea.set_defaults(func=enqueue_agent)
 
     am = sub.add_parser(
@@ -1421,7 +2433,8 @@ def main():
 
     rq = sub.add_parser(
         "requeue",
-        help="Re-queue an auth/quota-blocked FAILED agent job (one that never ran). Refuses any other failure.",
+        help="Re-queue a FAILED job that never really ran: auth/quota-blocked agent jobs, "
+             "or reaper-stamped worker_killed jobs. Refuses any other failure.",
     )
     rq.add_argument("--id", required=True)
     rq.set_defaults(func=requeue)
@@ -1441,8 +2454,22 @@ def main():
     s.add_argument("id")
     s.set_defaults(func=show)
 
-    r = sub.add_parser("run-next")
+    r = sub.add_parser("run-next", help="Consume at most ONE queued job (legacy single-shot).")
     r.set_defaults(func=run_next)
+
+    rl = sub.add_parser(
+        "run-loop",
+        help="Drain the queue: run queued jobs continuously with bounded parallelism until empty.",
+    )
+    rl.add_argument(
+        "--max-parallel",
+        dest="max_parallel",
+        type=int,
+        default=None,
+        help="Parallelism bound override (default: `max_parallel` on the volpred-compute-worker "
+             "entry in config/runtime_schedules.json, else min(3, cpu//3)).",
+    )
+    rl.set_defaults(func=run_loop)
 
     m = sub.add_parser("mark-followup-dispatched")
     m.add_argument("--id", required=True)

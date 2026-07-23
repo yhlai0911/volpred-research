@@ -12,10 +12,36 @@ Signals (all local reads, fail-open):
   C. high-prio pending  — P1/P2 pending, agentable (not blocked, not main-thread)
   D. backlog cadence     — hours since last hourly substantive dispatch >= N
                            (so the P3 research backlog never starves — Mission #2)
+  E. capacity           — are there free dispatch slots (dispatch_slot_budget)?
+  F. novelty            — has the actionable state CHANGED since the last fire
+                          that proceeded?
 
-Decision: PROCEED if (A or B or C or cadence-due); else SKIP.
-  - email / critical are NEVER skipped (responsiveness preserved).
-  - fail-open: ANY read error -> PROCEED (never skip on uncertainty).
+Decision:
+    proceed = hard_demand or cadence_due or (high_prio and capacity and novelty)
+
+Why E/F exist (2026-07-20, owner directive telegram-1198). A/B/C/D are all
+DEMAND signals: "is there work?". At a 60-minute cadence that is the right
+question, because an hour reliably changes the answer. At 15 minutes it is the
+wrong one — the pool always holds P1/P2, so `high_prio` is true on 100% of
+fires (164/164 over the 7 days to 2026-07-20, would_skip=0) and the gate is
+structurally incapable of skipping. Firing 4x/hour against an unchanged pool
+with no free slot buys nothing and costs ~95K cold-load each time.
+
+E and F ask the sub-hourly questions instead:
+  E capacity — CAN another fire add throughput right now, or are all agent
+    slots already held? Demand without capacity is not work, it is a queue.
+  F novelty  — has anything actionable changed since the last fire proceeded?
+    A signature over the agentable P1/P2 ids + compute-followup ids + drought
+    flag. Identical signature = the previous fire already saw exactly this
+    world; a second look at it is a duplicate cold-load.
+
+Both are VETOES on the `high_prio` path only, never on hard demand:
+  - email / critical / compute-followup / publish-drought are main-thread work
+    that needs no agent slot, so they proceed regardless (responsiveness
+    preserved — the original invariant).
+  - `cadence_due` (substantive research starved >= window_hours) also bypasses
+    both vetoes, so a static pool can never starve research indefinitely.
+  - fail-open throughout: ANY read error -> treat as demand / capacity / novel.
   - every decision logged to storage/logs/hourly_pregate.jsonl (observable).
 
 Exit code: 0 = SKIP (real mode only), 1 = PROCEED (run claude -p).
@@ -29,6 +55,7 @@ Usage:
 """
 from __future__ import annotations
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -42,6 +69,7 @@ DASHBOARD = ROOT / "storage" / "ops" / "dashboard_latest.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
 COMPUTE_QUEUE = ROOT / "storage" / "ops" / "compute_queue"
 LOG = ROOT / "storage" / "logs" / "hourly_pregate.jsonl"
+STATE = ROOT / "storage" / "ops" / "pregate_state.json"
 
 # Host wall clock (Asia/Taipei) — the zone of naive timestamps in work_log.
 _HOST_TZ = timezone(timedelta(hours=8))
@@ -263,6 +291,106 @@ def has_publish_drought() -> bool:
     return bool(state.get("breached"))
 
 
+def free_slots() -> int:
+    """Free agent dispatch slots right now (cap - occupied).
+
+    Delegates to scripts/dispatch_slot_budget.py, which is the SINGLE owner of
+    both cap and occupancy — do not re-derive either here (re-deriving them in
+    a second place is the exact bug its module docstring is about).
+    """
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from dispatch_slot_budget import budget  # type: ignore
+    return int(budget().get("free", 0))
+
+
+def _actionable_signature(tasks: list) -> str:
+    """Stable digest of everything a fire could act on.
+
+    Keyed on IDENTITY, not counts: a pool that swapped one P1 for another has
+    genuinely changed even though `pending P1 = 39` did not move. Includes the
+    drought flag because repairing a drought is itself dispatchable work whose
+    arrival must break a novelty stall.
+
+    Deliberately does NOT include P3+ backlog: those are picked up by the
+    cadence signal, which bypasses novelty anyway, so folding them in here
+    would just make every fire look novel and re-break the gate.
+    """
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from continue_task_dispatch import detect_block_reason, is_main_thread_only  # type: ignore
+
+    ids = []
+    for t in tasks:
+        if not isinstance(t, dict) or str(t.get("status", "")).lower() != "pending":
+            continue
+        try:
+            prio = int(t.get("priority", 9))
+        except (TypeError, ValueError):
+            prio = 9
+        if prio > 2 or detect_block_reason(t) or is_main_thread_only(t):
+            continue
+        ids.append(str(t.get("id", "")))
+
+    if COMPUTE_QUEUE.is_dir():
+        for p in sorted(COMPUTE_QUEUE.glob("*.json")):
+            try:
+                j = json.loads(p.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError) as e:
+                _warn("pregate_sig_compute", "compute job unreadable, excluded from signature",
+                      job=p.name, err=str(e))
+                continue
+            if (j.get("status") == "completed" and j.get("claude_followup")
+                    and not j.get("followup_dispatched")):
+                ids.append(f"compute:{p.stem}")
+
+    # Critical dashboard sections by IDENTITY. `critical` is an incident STATE
+    # that persists across fires (unlike email/compute/drought, which are
+    # queues a fire actually drains), so "is there a critical?" pins the gate
+    # open exactly the way `high_prio` does — on 2026-07-20 the two live
+    # criticals were an escalated CI incident owned by the CI watcher and a
+    # standing unhandled-alerts count, neither of which a re-fire changes.
+    # Naming them here means a NEW critical still breaks novelty and fires
+    # immediately, while the same one stops buying a cold-load every 15 min.
+    try:
+        d = json.loads(DASHBOARD.read_text(encoding="utf-8"))
+        crit = sorted(str(s.get("section", "?")) for s in (d.get("sections") or [])
+                      if isinstance(s, dict) and s.get("status") == "critical")
+        ids.append("crit:" + ",".join(crit))
+    except Exception as e:
+        _warn("pregate_sig_critical", "dashboard read failed in signature", err=str(e))
+        ids.append("crit:unknown")
+
+    try:
+        ids.append(f"drought:{int(has_publish_drought())}")
+    except Exception as e:
+        # unknown -> a value that differs from both 0 and 1, so an unreadable
+        # drought state reads as novel (fail-open) rather than as "unchanged".
+        _warn("pregate_sig_drought", "drought read failed in signature", err=str(e))
+        ids.append("drought:unknown")
+
+    return hashlib.sha256("\n".join(sorted(ids)).encode("utf-8")).hexdigest()[:16]
+
+
+def _read_last_signature() -> str | None:
+    if not STATE.exists():
+        return None  # first run — nothing to compare against, and nothing to warn about
+    try:
+        return json.loads(STATE.read_text(encoding="utf-8")).get("last_proceed_signature")
+    except (OSError, json.JSONDecodeError, AttributeError) as e:
+        _warn("pregate_sig_state", "state unreadable, treating signature as novel (fail-open)",
+              err=str(e))
+        return None
+
+
+def _write_signature(sig: str) -> None:
+    try:
+        STATE.parent.mkdir(parents=True, exist_ok=True)
+        STATE.write_text(json.dumps(
+            {"last_proceed_signature": sig, "ts": _now().isoformat()},
+            ensure_ascii=False) + "\n", encoding="utf-8")
+    except OSError as e:
+        _warn("pregate_state", "cannot persist signature", err=str(e))
+
+
 def _log_decision(entry: dict) -> None:
     try:
         # forensic attribution（2026-07-10）：invoker 是自報值可被誤標（13:44/13:50 兩筆
@@ -313,11 +441,39 @@ def decide(window_hours: float) -> dict:
         else:
             reasons["cadence_due"] = hrs >= window_hours
 
-    # None (unknown) counts as demand present -> proceed
-    _DEMAND_SIGNALS = ("email", "critical", "high_prio", "compute_followup", "publish_drought")
-    demand = any(reasons.get(k) in (True, None) for k in _DEMAND_SIGNALS)
-    proceed = bool(demand or reasons.get("cadence_due"))
-    return {"proceed": proceed, "reasons": reasons}
+    # E/F — the sub-hourly signals. Only consulted on the high_prio path.
+    _safe("free_slots", free_slots)
+    _safe("signature", lambda: _actionable_signature(tasks))
+    sig = reasons.get("signature")
+    last_sig = _read_last_signature()
+    reasons["last_signature"] = last_sig
+    # unknown signature (read failed) or no prior state -> novel (fail-open)
+    reasons["novel"] = True if (sig is None or last_sig is None) else sig != last_sig
+    # unknown free_slots -> capacity available (fail-open)
+    reasons["capacity"] = True if reasons.get("free_slots") is None else reasons["free_slots"] > 0
+
+    # Three tiers, by what the signal actually IS:
+    #   absolute — a queue this fire drains (email reply, compute followup,
+    #     publish drought). Bounded, and if one is still there the fire must
+    #     come back. Never vetoed by anything.
+    #   critical — an incident STATE that persists whether or not we fire.
+    #     Main-thread triage, so capacity is irrelevant, but a REPEAT of the
+    #     identical incident set buys nothing -> novelty applies.
+    #   high_prio — agent-dispatchable backlog. Needs a free slot AND a changed
+    #     world -> both vetoes apply.
+    # None (unknown) counts as demand present -> proceed (fail-open).
+    _ABSOLUTE_DEMAND = ("email", "compute_followup", "publish_drought")
+    absolute = any(reasons.get(k) in (True, None) for k in _ABSOLUTE_DEMAND)
+    critical = reasons.get("critical") in (True, None)
+    soft_demand = reasons.get("high_prio") in (True, None)
+
+    proceed = bool(
+        absolute
+        or reasons.get("cadence_due")
+        or (critical and reasons["novel"])
+        or (soft_demand and reasons["capacity"] and reasons["novel"])
+    )
+    return {"proceed": proceed, "reasons": reasons, "signature": sig}
 
 
 def main(argv: list) -> int:
@@ -335,6 +491,7 @@ def main(argv: list) -> int:
         d = decide(args.window_hours)
         proceed = d["proceed"]
         reasons = d["reasons"]
+        signature = d.get("signature")
     except Exception as e:
         # top-level fail-open: never skip on an unexpected error
         _warn("pregate_fatal", "decide() crashed, fail-open PROCEED", err=str(e))
@@ -344,6 +501,17 @@ def main(argv: list) -> int:
         return 1
 
     would_skip = not proceed
+    # Advance the novelty baseline exactly when the DECISION was proceed — a
+    # skip must not advance it, or the next fire would compare against a world
+    # nobody looked at, and a static pool would alternate skip/proceed forever.
+    # Note this keys on the decision, not on whether the process exits 1: in
+    # shadow mode a would-skip fire still runs (and still consumes a task), so
+    # the baseline stays where real mode would have left it. Shadow therefore
+    # slightly OVER-estimates novelty — the proceed-leaning direction, which is
+    # the safe way for an observation window to be wrong.
+    if proceed and signature:
+        _write_signature(signature)
+
     if args.shadow:
         _log_decision({"ts": _now().isoformat(), "mode": "shadow", "invoker": args.invoker,
                        "would_skip": would_skip,

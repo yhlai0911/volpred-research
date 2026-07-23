@@ -1,0 +1,52 @@
+{
+  "id": "compute-k1258-artifact-schema-align-20260720",
+  "title": "K1258 rerun: parseable H4 token + flat conclusions/hypothesis_verdicts + provenance note",
+  "script_path": "experiments/k1258/k1258_forgetting_factor_bma.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-19T18:17:26Z",
+  "started_at": "2026-07-19T18:45:04Z",
+  "completed_at": "2026-07-19T18:45:12Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1258-artifact-schema-align-20260720.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1258-artifact-schema-align-20260720.stderr",
+  "result_artifact": "experiments/k1258/k1258_results.json",
+  "output_paths": [
+    "experiments/k1258/k1258_results.json",
+    "experiments/k1258/k1258_qlike_by_lambda.png",
+    "experiments/k1258/k1258_weight_switch_freq.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Parent assign_9f0a31a8, stage 2 of 3（與 compute-k1257-headline-realign-20260720 並行）。收 K1258 schema-align 重跑：(1) 確認頂層新增 conclusions / hypothesis_verdicts，且 hypotheses.H4.verdict==\"RECOMMENDATION\" 並有 recommendation / recommended_lambda 欄位；(2) 確認數值結果與 2026-07-19 版逐位元一致（H1 FAIL / H2 PASS / H3 PASS、λ=1 QLIKE SPY -8.227436 / GLD -8.181168 / 0050.TW -7.679046）—— 本次只改報告層，數字若變動代表 cache 或 seed 出事，必須查明；(3) 確認 provenance 帶 k1257_forecast_cache_reuse_note，且本次應為 true（v2 cache 已存在可重用），若仍 false 要說明；(4) 更新 README.md:112「BMA-family ensemble is structurally limited」改為受 3 資產×5 λ×單一 OOS 窗限制的措辭。主線程寫 knowledge.json（禁 agent 自寫，K1259）。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 5400,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1258"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "0d06e2bedddba2bf8af5aed8d71ac29d611faf73",
+  "delivered_paths": [
+    "experiments/k1258/k1258_qlike_by_lambda.png",
+    "experiments/k1258/k1258_results.json",
+    "experiments/k1258/k1258_weight_switch_freq.png"
+  ],
+  "delivered_at": "2026-07-19T19:00:54.399565+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-19T21:12:43Z",
+  "followup_next_task_id": "collect_k1258_schema_20260720"
+}

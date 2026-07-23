@@ -17,7 +17,7 @@ import json
 import os
 from pathlib import Path
 
-from scripts.dispatch_supervisor import identity, supervisor, worker
+from scripts.dispatch_supervisor import identity, scheduler, supervisor, worker
 from volpred.ops import writer_log
 
 
@@ -124,6 +124,16 @@ def test_codex_failover_owner_retains_codex_eligibility_prefix() -> None:
         role="codex-failover", slot_id="slot-2", job_id="abcdef123456",
     )
     assert owner == "codex-failover-slot-2-abcdef123456"
+
+
+def test_phase_z_cohort_maps_to_both_possible_executor_owners() -> None:
+    owners = scheduler._phase_z_claim_owners([
+        {"slot_id": 2, "job_id": "abcdef123456"},
+    ])
+    assert owners == {
+        "hourly-slot-2-abcdef123456",
+        "codex-failover-slot-2-abcdef123456",
+    }
 
 
 def test_dispatch_prompts_use_only_supervisor_issued_claim_owner() -> None:

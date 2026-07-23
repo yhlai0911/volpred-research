@@ -46,7 +46,7 @@ def pub(tmp_path, monkeypatch):
                 monkeypatch.setattr(mod, "sync_article", lambda *a, **kw: True, raising=False)
             if hasattr(mod, "_post"):
                 monkeypatch.setattr(mod, "_post", lambda *a, **kw: False, raising=False)
-        except (ImportError, ModuleNotFoundError):
+        except (ImportError, ModuleNotFoundError):  # silent-ok: either optional import path may be absent in CI
             pass
     # Redirect cluster gate to tmp feed. 2026-06-29: the FEED_PATH monkeypatch
     # alone was ineffective because cluster_gate_status / recent_cluster_counts
@@ -168,6 +168,10 @@ class TestTypeLockedExemption:
             audience="member_qa",
             tags=["會員提問", "SPY"],
             status="published",
+            # member_qa publishes must name the question they answer (the gate
+            # in ops.content fails closed without it). Irrelevant to cluster
+            # gating, but required to reach the code path under test.
+            details={"question_id": "spy-cluster-fixture-0000-0000-000000000000"},
             audit_strict=False,  # depth gate covered by test_content_depth_gate.py; this file tests cluster gating
         )
         assert pub_id.startswith("mile_")

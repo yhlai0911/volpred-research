@@ -129,11 +129,12 @@ def test_audit_flags_missing_draft(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_fb, "DRAFTS_DIR", drafts)
     data = [
         {"mile_id": "mile_missing", "fb_post_status": "awaiting_interactive_session", "date": "2026-07-08T00:00:00"},
+        {"mile_id": "mile_pending", "fb_post_status": "pending", "date": "2026-07-08T00:00:00"},
         {"mile_id": "mile_present", "fb_post_status": "awaiting_interactive_session", "date": "2026-07-08T00:00:00"},
         {"mile_id": "mile_done", "fb_post_status": "success", "date": "2026-07-08T00:00:00"},
     ]
     (drafts / "fb_mile_present.md").write_text("有稿\n", encoding="utf-8")
     missing = audit_fb._scan_missing_drafts(data)
     ids = {m["mile_id"] for m in missing}
-    assert ids == {"mile_missing"}  # present has draft, done is terminal (not handoff)
+    assert ids == {"mile_missing", "mile_pending"}  # all non-terminal missing copies surface
     assert missing[0]["expected_draft"].endswith("fb_mile_missing.md")

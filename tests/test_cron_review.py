@@ -72,7 +72,9 @@ def test_piggy_back_end_warns_when_state_read_fails(tmp_path, monkeypatch, capsy
 
     err = capsys.readouterr().err
     assert end is None
-    assert "[cron_review] WARN piggy-back state read failed" in err
+    # WS-D1: marker loading delegates to the canonical reader in
+    # volpred.ops.schedules — the warn is emitted by that single owner now.
+    assert "[schedules] WARN cron_last_run read failed" in err
     assert str(state_path) in err
 
 

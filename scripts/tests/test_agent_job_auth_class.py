@@ -49,6 +49,11 @@ def _run(monkeypatch, tmp_path, attempts, extra_argv=()):
     # These tests exercise auth-retry classification, not the cwd guard; accept
     # the tmp workdir as if it were a registered linked worktree.
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_a, **_k: True)
+    # `_run_attempt` is faked above, so the binary is never actually spawned — but
+    # main() still resolves it before writing metadata, and a CI runner has no
+    # `claude` on PATH. Without this the guard returns 2 and these tests fail on
+    # the host difference rather than on the behaviour they pin.
+    monkeypatch.setattr(run_agent_job, "_resolve_claude_bin", lambda: "/usr/bin/true")
 
     brief = tmp_path / "brief.md"
     brief.write_text("do the thing")
@@ -157,7 +162,9 @@ def test_a_genuinely_failed_job_still_gets_the_triage_brief(tmp_path):
     }
 
     row = compute_queue_followup(job)
-    assert "TRIAGE FAILED AGENT JOB" in row["claude_followup"]["brief"]
+    # Header dropped the word AGENT: failed compute jobs reach this branch too,
+    # now that a missing worktree no longer drops them from the collector.
+    assert "TRIAGE FAILED JOB" in row["claude_followup"]["brief"]
 
 
 def compute_queue_followup(job):

@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "title": "K740 懶人包：排第一名的策略，設定是最單純的那一級",
+  "evidence": {
+    "results": {
+      "path": "experiments/k740/k740_strategy_meta_analysis_results.json",
+      "sha256": "3fa005527e91427be8b0b294e3fb45249df057aad048bfd5b5255409614f1a0e",
+      "label": "14 檔紙上交易策略的實際追蹤結果（2023-01 ~ 2026-03）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_winner",
+      "info": "results",
+      "style": "professional",
+      "title": "冠軍是設定最單純的那一檔",
+      "alt": "綜合分數第一名的策略屬於最單純的複雜度等級，風險調整後表現與回撤控制皆居前",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "怎麼比的",
+          "body": [
+            {
+              "template": "把 {n} 檔實際往前追蹤的策略，用同一組指標排名：風險調整後報酬、回撤、勝率、周轉率。",
+              "bindings": {
+                "n": {
+                  "source": "results",
+                  "path": "n_strategies",
+                  "format": {
+                    "kind": "integer",
+                    "suffix": " 檔"
+                  }
+                }
+              }
+            },
+            "複雜度是事前標好的等級，不是事後看績效倒推的。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "綜合分數第一名",
+          "value": {
+            "source": "results",
+            "path": "composite_ranking.0.display",
+            "format": {
+              "kind": "text"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "它的複雜度等級（等級越小越單純）",
+          "value": {
+            "source": "results",
+            "path": "strategy_metrics.piecewise_conservative.complexity",
+            "format": {
+              "kind": "integer",
+              "suffix": " 級"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最大回撤",
+          "value": {
+            "source": "results",
+            "path": "strategy_metrics.piecewise_conservative.mdd",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "全體策略中最淺"
+        },
+        {
+          "kind": "metric",
+          "label": "月勝率",
+          "value": {
+            "source": "results",
+            "path": "strategy_metrics.piecewise_conservative.win_rate_monthly",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_complexity",
+      "info": "method",
+      "style": "bento-grid",
+      "title": "把設定弄複雜，換不到更好的成績",
+      "alt": "複雜度與風險調整後報酬的等級相關不顯著，跨資產分散帶來的提升則明確得多",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "複雜度與風險調整後報酬的相關係數",
+          "value": {
+            "source": "results",
+            "path": "characteristics_analysis.complexity_sharpe_correlation.rho",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "上述相關的 p 值",
+          "value": {
+            "source": "results",
+            "path": "characteristics_analysis.complexity_sharpe_correlation.p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "遠高於常用顯著水準，測不到關係"
+        },
+        {
+          "kind": "metric",
+          "label": "跨資產分散帶來的提升",
+          "value": {
+            "source": "results",
+            "path": "characteristics_analysis.diversification_premium_sharpe",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "多資產相對單一資產的平均差距"
+        },
+        {
+          "kind": "text",
+          "heading": "讀法",
+          "body": [
+            "複雜度那一欄怎麼看都看不出方向，統計上測不到。",
+            "真正拉開差距的是「有沒有分散到別的資產」，不是「模型有多精巧」。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_honesty",
+      "info": "concept",
+      "style": "professional",
+      "title": "這份排名不能當投資建議",
+      "alt": "樣本為自建策略池、期間有限，排名為事後比較且未做多重比較校正",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "追蹤期間",
+          "value": {
+            "source": "results",
+            "path": "period",
+            "format": {
+              "kind": "text"
+            }
+          },
+          "note": "只涵蓋有限的市場環境"
+        },
+        {
+          "kind": "text",
+          "heading": "三個要記得的限制",
+          "body": [
+            "這個策略池是我們自己養的，不是市場上所有做法的隨機抽樣。",
+            "排名是在同一段期間、同一批策略裡比出來的，換一段期間名次就可能翻盤。",
+            "沒有對「比了很多次」做統計修正，排名相鄰者的差距不該當成真實差距。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "帶走一句話",
+          "body": [
+            "在這份資料裡，把設定弄複雜沒有換到更好的成績。",
+            "本文為歷史追蹤結果，不構成任何投資建議。"
+          ]
+        }
+      ]
+    }
+  ]
+}

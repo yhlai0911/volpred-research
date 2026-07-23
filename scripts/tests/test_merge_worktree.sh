@@ -63,6 +63,14 @@ certify_all_experiments() {
 import hashlib, json, sys
 from pathlib import Path
 exp = Path(sys.argv[1])
+result_files = sorted(exp.glob("*_results.json"))
+entrypoints = sorted(exp.glob("*.py"))
+if result_files and entrypoints:
+    (exp / "reproduce_spec.json").write_text(json.dumps({
+        "schema_version": "volpred.reproduce_spec.v1",
+        "entrypoint": {"path": entrypoints[0].name},
+        "canonical_result": result_files[0].name,
+    }, indent=2), encoding="utf-8")
 surface = [
     p for p in sorted(exp.rglob("*"))
     if p.is_file() and "__pycache__" not in p.parts and p.name != "review_verdict.json"
@@ -107,6 +115,7 @@ setup_test_env() {
     cp "$real_scripts/audit_dm_hac_lag.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_mdd_scale_artifact.py" "$test_dir/scripts/"
     cp "$real_scripts/audit_fevd_ordering.py" "$test_dir/scripts/"
+    cp "$real_scripts/check_experiment_artifacts.py" "$test_dir/scripts/"
     cp "$PROJECT_ROOT/storage/ops/mdd_scale_artifact_baseline.json" \
         "$test_dir/storage/ops/"
 
@@ -116,8 +125,13 @@ setup_test_env() {
     git init -b main -q
     git config user.email "test@test"
     git config user.name "test"
-    mkdir -p experiments .claude/worktrees
+    mkdir -p experiments .claude/worktrees storage/memory
     echo "seed" > experiments/.gitkeep
+    # Result-bearing fixtures must satisfy the live artifact gate before their
+    # actual merge behavior can be exercised.  These are fixture identities,
+    # not research findings.
+    printf '%s\n' '[{"item_id":"K1262 K1617 K1618 K1619 test fixtures"}]' \
+        > storage/memory/knowledge.json
     git add -A && git commit -qm "seed"
 
     # 建立 worktree
@@ -154,6 +168,22 @@ run_merge_from_cwd() {
     shift 2
     (cd "$run_cwd" && bash "$test_dir/scripts/merge_worktree.sh" "$@" 2>&1) || true
 }
+
+# 2026-07-19: 跑腳本並保留 exit code（既有 helper 都用 `|| true` 吞掉 rc，
+# 但 case 20 的成功判準就是「必須非 0 退出」）。
+# 注意：呼叫端是 `output=$(run_merge_capture_rc ...)`，函式跑在 command-substitution
+# 的 subshell 裡 → 任何 shell 變數賦值都回不到 parent。所以 rc 走檔案傳遞，
+# 用 last_merge_rc 讀取。
+run_merge_capture_rc() {
+    local test_dir="$1"
+    shift
+    local rc=0
+    (cd "$test_dir" && bash "$test_dir/scripts/merge_worktree.sh" "$@") \
+        > "$TMP_BASE/last_run.out" 2>&1 || rc=$?
+    printf '%s' "$rc" > "$TMP_BASE/last_run.rc"
+    cat "$TMP_BASE/last_run.out"
+}
+last_merge_rc() { cat "$TMP_BASE/last_run.rc" 2>/dev/null || echo "NORC"; }
 
 # ============================================================
 # Test Case A: untracked experiments/ 無 commit → auto-commit + merge
@@ -593,12 +623,13 @@ test_case_8_cwd_inside_worktree() {
 }
 
 # ============================================================
-# Test Case 9 (K1618 review Finding 2): -X ours drop 了 agent 對既有檔的修改
-#   → 舊版只警告仍移除 worktree+branch -D → agent 修改遺失。
-#   修後必 AUTO-RESTORE agent 版本並 commit，main HEAD 保留 agent 修改。
+# Test Case 9 (K1618 review Finding 2; 2026-07-23 contract upgrade):
+#   main 與 agent 都改同一既有檔時，-X ours 或事後 AUTO-RESTORE 都是在
+#   未經語意裁決下偏向其中一方。正確行為是 merge 前 fail-closed，
+#   保留 main bytes、worktree bytes 與 branch，要求 rebase/人工整合。
 # ============================================================
 test_case_9_ours_dropped_auto_restore() {
-    echo "=== Case 9 (Finding 2): -X ours drop modified 檔 → 自動還原不遺失 ==="
+    echo "=== Case 9 (Finding 2): 同路徑雙邊修改 → merge 前 fail-closed ==="
     local test_dir
     test_dir=$(setup_test_env "case9")
     cd "$test_dir"
@@ -625,21 +656,23 @@ test_case_9_ours_dropped_auto_restore() {
     certify_all_experiments "${wt:-}"
     output=$(run_merge_in_test_dir "$test_dir")
 
-    # 9-1: main HEAD 的 km9.py 必是 agent 版本（auto-restore 生效）
+    # 9-1: main HEAD 保留 main 的有效版本；不得先 merge 再覆成 agent。
     local final_content
     final_content=$(git -C "$test_dir" show "main:experiments/km9/km9.py" 2>/dev/null || echo "MISSING")
-    if [[ "$final_content" == "agent v1" ]]; then
-        pass "9-1: main HEAD km9.py = agent 版本（-X ours drop 已自動還原，無資料遺失）"
+    if [[ "$final_content" == "main v1" ]] && \
+       echo "$output" | grep -q "STALE-BASE.*ABORT"; then
+        pass "9-1: stale overlap 在 merge 前被擋，main bytes 保留"
     else
-        fail "9-1: km9.py = '$final_content'（agent 修改遺失！Finding 2 重現）"
-        echo "$output" | grep -E "DROPPED|RESTORE|還原" | head -10
+        fail "9-1: km9.py = '$final_content'（未在 merge 前 fail-closed）"
+        echo "$output" | grep -E "STALE-BASE|ABORT|DROPPED|RESTORE" | head -10
     fi
 
-    # 9-2: script 必印 AUTO-RESTORE 訊息
-    if echo "$output" | grep -q "AUTO-RESTORE"; then
-        pass "9-2: script 執行 auto-restore（非只警告）"
+    # 9-2: agent 版本仍由 durable worktree + branch 保存。
+    if [[ -d "$wt" ]] && [[ "$(cat "$wt/experiments/km9/km9.py")" == "agent v1" ]] && \
+       git -C "$test_dir" show-ref --verify --quiet "refs/heads/$branch"; then
+        pass "9-2: worktree/branch 保留 agent bytes，等待明確整合"
     else
-        fail "9-2: script 沒 auto-restore"
+        fail "9-2: agent bytes 或 durable branch 遺失"
     fi
 }
 
@@ -703,9 +736,11 @@ test_case_11_stale_base_no_false_abort() {
     local wt=".claude/worktrees/agent-testcase11"
 
     # agent 只碰自己的 experiments/（完全合規）
-    mkdir -p "$wt/experiments/k9911"
-    echo "print('k9911')" > "$wt/experiments/k9911/k9911.py"
-    (cd "$wt" && git add -A && git commit -qm "k9911: agent 只動 experiments/")
+    # 使用 registry enforcement 門檻前的 fixture K-id；此 case 驗的是
+    # stale-base path 集合，不應被 K-id allocation gate 混淆。
+    mkdir -p "$wt/experiments/k1611"
+    echo "print('k1611')" > "$wt/experiments/k1611/k1611.py"
+    (cd "$wt" && git add -A && git commit -qm "k1611: agent 只動 experiments/")
 
     # main 在 branch 分出去「之後」改共享 JSON —— 這是 cron 的日常，不是違規
     mkdir -p storage/reports
@@ -725,10 +760,11 @@ test_case_11_stale_base_no_false_abort() {
     fi
 
     # 11-2: 合併真的發生 —— agent 的檔案要進 main 的 git tree（不只 working tree）
-    if git -C "$test_dir" cat-file -e "main:experiments/k9911/k9911.py" 2>/dev/null; then
-        pass "11-2: k9911.py 已在 main HEAD 的 git tree"
+    if git -C "$test_dir" cat-file -e "main:experiments/k1611/k1611.py" 2>/dev/null; then
+        pass "11-2: k1611.py 已在 main HEAD 的 git tree"
     else
-        fail "11-2: k9911.py 不在 main HEAD（合併被誤 abort 擋掉）"
+        fail "11-2: k1611.py 不在 main HEAD（合併被誤 abort 擋掉）"
+        echo "$output" | tail -40
     fi
 
     # 11-3: main 自己的 feed.json 不可被 agent 版本蓋掉
@@ -991,20 +1027,20 @@ test_case_17_overlapping_dirty_main_aborts_without_stash() {
     local wt=".claude/worktrees/agent-testcase17"
     local branch="worktree-agent-testcase17"
 
-    mkdir -p experiments/k17overlap
-    echo "print('base')" > experiments/k17overlap/k17overlap.py
-    echo "# K17 overlap" > experiments/k17overlap/README.md
-    echo "{}" > experiments/k17overlap/k17overlap_results.json
-    git add experiments/k17overlap
+    mkdir -p experiments/k1617overlap
+    echo "print('base')" > experiments/k1617overlap/k1617overlap.py
+    echo "# K1617 overlap" > experiments/k1617overlap/README.md
+    echo "{}" > experiments/k1617overlap/k1617overlap_results.json
+    git add experiments/k1617overlap
     git commit -qm "seed shared experiment file"
     (cd "$wt" && git merge main --no-edit -q)
 
-    echo "print('agent version')" > "$wt/experiments/k17overlap/k17overlap.py"
-    (cd "$wt" && git add experiments/k17overlap && git commit -qm "agent edits shared file")
+    echo "print('agent version')" > "$wt/experiments/k1617overlap/k1617overlap.py"
+    (cd "$wt" && git add experiments/k1617overlap && git commit -qm "agent edits shared file")
     certify_all_experiments "$wt"
 
     # 另一個 slot 在 main 同一路徑有未提交內容。
-    echo "print('interactive WIP')" > experiments/k17overlap/k17overlap.py
+    echo "print('interactive WIP')" > experiments/k1617overlap/k1617overlap.py
 
     local output
     output=$(run_merge_in_test_dir "$test_dir")
@@ -1014,7 +1050,7 @@ test_case_17_overlapping_dirty_main_aborts_without_stash() {
     else
         fail "17-1: 沒有明確偵測同一路徑 overlap"
     fi
-    if [[ "$(cat experiments/k17overlap/k17overlap.py)" == "print('interactive WIP')" ]]; then
+    if [[ "$(cat experiments/k1617overlap/k1617overlap.py)" == "print('interactive WIP')" ]]; then
         pass "17-2: main 上其他 slot 的 bytes 原封不動"
     else
         fail "17-2: main WIP 被 merge/stash 流程改寫"
@@ -1044,10 +1080,10 @@ test_case_18_unrelated_dirty_main_merges_in_place() {
     git commit -qm "seed unrelated tracked file"
     (cd "$wt" && git merge main --no-edit -q)
 
-    mkdir -p "$wt/experiments/k18clean"
-    echo "print('agent experiment')" > "$wt/experiments/k18clean/k18clean.py"
-    echo "# K18 clean" > "$wt/experiments/k18clean/README.md"
-    echo "{}" > "$wt/experiments/k18clean/k18clean_results.json"
+    mkdir -p "$wt/experiments/k1618clean"
+    echo "print('agent experiment')" > "$wt/experiments/k1618clean/k1618clean.py"
+    echo "# K1618 clean" > "$wt/experiments/k1618clean/README.md"
+    echo "{}" > "$wt/experiments/k1618clean/k1618clean_results.json"
     certify_all_experiments "$wt"
 
     echo "operator WIP" > operator_notes.txt
@@ -1055,7 +1091,7 @@ test_case_18_unrelated_dirty_main_merges_in_place() {
     local output
     output=$(run_merge_in_test_dir "$test_dir")
 
-    if git -C "$test_dir" cat-file -e "main:experiments/k18clean/k18clean.py" 2>/dev/null; then
+    if git -C "$test_dir" cat-file -e "main:experiments/k1618clean/k1618clean.py" 2>/dev/null; then
         pass "18-1: 不相交 dirty main 仍完成 agent integration"
     else
         fail "18-1: 不相交 WIP 不必要地阻塞 merge"
@@ -1085,10 +1121,10 @@ test_case_19_foreign_staged_index_aborts_unchanged() {
     cd "$test_dir"
 
     local wt=".claude/worktrees/agent-testcase19"
-    mkdir -p "$wt/experiments/k19staged"
-    echo "print('agent experiment')" > "$wt/experiments/k19staged/k19staged.py"
-    echo "# K19 staged" > "$wt/experiments/k19staged/README.md"
-    echo "{}" > "$wt/experiments/k19staged/k19staged_results.json"
+    mkdir -p "$wt/experiments/k1619staged"
+    echo "print('agent experiment')" > "$wt/experiments/k1619staged/k1619staged.py"
+    echo "# K1619 staged" > "$wt/experiments/k1619staged/README.md"
+    echo "{}" > "$wt/experiments/k1619staged/k1619staged_results.json"
     certify_all_experiments "$wt"
 
     echo "foreign staged bytes" > foreign_owner.txt
@@ -1108,7 +1144,7 @@ test_case_19_foreign_staged_index_aborts_unchanged() {
     else
         fail "19-2: merge 流程改寫/unstage 了 foreign owner 內容"
     fi
-    if ! git -C "$test_dir" cat-file -e "main:experiments/k19staged/k19staged.py" 2>/dev/null && \
+    if ! git -C "$test_dir" cat-file -e "main:experiments/k1619staged/k1619staged.py" 2>/dev/null && \
        [[ -d "$wt" ]]; then
         pass "19-3: agent branch 未假裝 merged，worktree 保留"
     else
@@ -1120,6 +1156,309 @@ test_case_19_foreign_staged_index_aborts_unchanged() {
         pass "19-4: staged abort 路徑零 stash"
     fi
 }
+
+
+# ============================================================
+# Test Case 20 (2026-07-19 SCOPE FIX): 成果只在 storage/、auto-commit 沒抓到
+# → 必須 ABORT（非 0 exit），不得印「可安全移除」、不得移除 worktree
+#
+# 這是 2026-07-17 hourly-slot-2 合併 dispatch-slot-1 時發現的失效路徑：K1262-v4 PRIMARY
+# 與 K1143-v2 兩層防線都只掃 worktree 的 experiments/，但 agent 成果早就不只放那裡。
+# 成果全在 storage/event_articles/ + auto-commit 沒捕捉到 → rev-list=0 且 experiments/
+# 是空的 → 舊版直接走「[OK] …experiments/ 也空，可安全移除」→ 未合併就砍 worktree。
+# 那次沒出事只是因為 auto-commit 剛好正常且 branch 還在。
+# ============================================================
+test_case_20_storage_only_work_autocommit_failed() {
+    echo "=== Case 20: 成果只在 storage/ + auto-commit 失效 → 必須 ABORT ==="
+    local test_dir
+    test_dir=$(setup_test_env "case20")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase20"
+
+    # Agent 成果全部在 storage/ —— 完全不碰 experiments/（= 舊防線的盲區）
+    mkdir -p "$wt/storage/event_articles"
+    echo "# 事件文章：CPI 跳升" > "$wt/storage/event_articles/cpi_20260717.md"
+    echo '{"kid": "evt1"}' > "$wt/storage/event_articles/cpi_20260717.json"
+
+    # Mock「auto-commit 沒有捕捉到 agent 成果」：
+    # 用 .git/info/exclude（位於 git-common-dir，linked worktree 共用）把成果路徑藏起來，
+    # 於是 worktree 內 `git status --porcelain` 是乾淨的 → 腳本判定 has_uncommitted=false
+    # → 根本不會觸發 auto-commit → rev-list=0。這正是 line 189 auto-commit 靜默沒生效
+    # 時的實際狀態，也是 K1143-v2 註解自己列出的成因之一（「gitignore 吃掉檔案」）。
+    echo "storage/event_articles/" >> "$test_dir/.git/info/exclude"
+
+    # sanity：確認 mock 真的生效，否則這個測試測不到目標路徑
+    if [[ -n "$(cd "$test_dir/$wt" && git status --porcelain)" ]]; then
+        fail "20-0: mock 失效 — git status 仍看得到成果，測不到 rev-list=0 路徑"
+        return
+    fi
+
+    local output rc
+    output=$(run_merge_capture_rc "$test_dir")
+    rc=$(last_merge_rc)
+
+    if [[ "$rc" != "0" ]] && [[ "$rc" != "NORC" ]]; then
+        pass "20-1: script 非 0 退出 (rc=$rc)"
+    else
+        fail "20-1: script exit 0 —— 未合併的成果被當成一次成功的整合"
+    fi
+
+    if echo "$output" | grep -q "ABORT"; then
+        pass "20-2: 印出 ABORT"
+    else
+        fail "20-2: 沒有 ABORT"
+        echo "$output" | tail -25
+    fi
+
+    if echo "$output" | grep -q "可安全移除"; then
+        fail "20-3: 竟宣告「可安全移除」（storage-only 盲區重現）"
+    else
+        pass "20-3: 未宣告「可安全移除」"
+    fi
+
+    # 最關鍵：成果檔與 worktree 必須都還在
+    if [[ -f "$test_dir/$wt/storage/event_articles/cpi_20260717.md" ]]; then
+        pass "20-4: worktree 成果檔仍在（無 silent data loss）"
+    else
+        fail "20-4: 成果檔遺失 — worktree 未合併就被移除 (silent data loss!)"
+    fi
+
+    if git worktree list --porcelain | grep -q "agent-testcase20"; then
+        pass "20-5: worktree 仍註冊（未被移除）"
+    else
+        fail "20-5: worktree 已被移除"
+    fi
+
+    # ABORT 訊息要指得出是哪個檔，否則人工復原無從下手
+    if echo "$output" | grep -q "storage/event_articles/cpi_20260717.md"; then
+        pass "20-6: ABORT 訊息列出具體檔案路徑"
+    else
+        fail "20-6: ABORT 訊息沒列出檔案路徑"
+    fi
+}
+
+# ============================================================
+# Test Case 21 (2026-07-19): --dry-run 不得自相矛盾
+# 舊版 dry-run 不真的 commit → rev-list 必然 0 → 同時印「會自動提交」與
+# 「可安全移除」，讓人誤判 worktree 是空的。
+# ============================================================
+test_case_21_dryrun_no_contradiction() {
+    echo "=== Case 21: --dry-run 訊息不自相矛盾 ==="
+    local test_dir
+    test_dir=$(setup_test_env "case21")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase21"
+    mkdir -p "$wt/storage/drafts"
+    echo "draft body" > "$wt/storage/drafts/d1.md"
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir" --dry-run)
+
+    if echo "$output" | grep -q "會自動提交" && echo "$output" | grep -q "可安全移除"; then
+        fail "21-1: dry-run 自相矛盾（同時宣稱會自動提交 + 可安全移除）"
+        echo "$output" | tail -25
+    else
+        pass "21-1: dry-run 無自相矛盾訊息"
+    fi
+
+    if echo "$output" | grep -q "會自動提交"; then
+        pass "21-2: dry-run 有回報「會自動提交」"
+    else
+        fail "21-2: dry-run 沒回報未提交變更"
+    fi
+
+    if [[ -f "$test_dir/$wt/storage/drafts/d1.md" ]]; then
+        pass "21-3: dry-run 未動 worktree 檔案"
+    else
+        fail "21-3: dry-run 竟動到 worktree 檔案"
+    fi
+}
+
+# ============================================================
+# Test Case 22 (K1262-v6): worktree tip 落後 main（0 自有 commit），main 期間刪掉/搬走檔案
+# → 舊版 file-presence diff 把「main 自己刪掉的舊檔」當成 worktree 成果 → 觸發 fallback
+#   → 用 `git log --all` 重建 commit list = **全 repo 其他分支**（其他 worktree 進行中的
+#   工作 + 測試 fixture commit）→ 非 dry-run 會把別人未完成的工作 cherry-pick 進 main。
+# → 修後：ancestor 判定使該訊號失效、fallback 永不用 --all，結論必須是「0 commits」，
+#   且輸出**不得**出現任何其他分支的 commit。
+# ============================================================
+test_case_22_stale_worktree_no_foreign_commits() {
+    echo "=== Case 22 (K1262-v6): 落後的 worktree 不得撈進其他分支的 commit ==="
+    local test_dir
+    test_dir=$(setup_test_env "case22")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase22"
+
+    # main 前進：搬走一個檔 + 刪掉一個 runtime 檔（= 本次誤判的兩類噪音）
+    mkdir -p scripts/_legacy storage/ops/event_ledger
+    echo "x" > scripts/weekly_quota_estimate.py
+    echo "{}" > storage/ops/event_ledger/abc123.json
+    git add scripts storage && git commit -qm "add files that main will later move/drop"
+    (cd "$wt" && git reset --hard main -q)   # worktree tip 與 main 同步後才落後
+    git mv scripts/weekly_quota_estimate.py scripts/_legacy/weekly_quota_estimate.py
+    git rm -q storage/ops/event_ledger/abc123.json
+    git commit -qm "main: move to _legacy, drop runtime file"
+
+    # 其他分支：模擬其他 worktree 進行中的工作 + 測試 fixture commit
+    local i
+    for i in 1 2; do
+        git checkout -q -b "other/k$i" main
+        echo "wip$i" > "experiments/other$i.txt"
+        git add experiments && git commit -qm "other-branch wip $i (K17$i rev7)"
+    done
+    git checkout -q -b bad/fixture main
+    echo f > f.txt && git add f.txt && git commit -qm "bad: new silent fallback"
+    git checkout -q main
+
+    local own
+    own=$(git rev-list --count "main..worktree-agent-testcase22" 2>/dev/null || echo ERR)
+    if [[ "$own" == "0" ]]; then
+        echo "  [SETUP-OK] worktree branch 自有 commit = 0（tip 落後 main）"
+    else
+        echo "  [SETUP-WARN] 預期 0 自有 commit，實得 $own"
+    fi
+
+    local output
+    output=$(run_merge_in_test_dir "$test_dir" --dry-run)
+
+    # 1. 絕不可出現其他分支的 commit
+    if echo "$output" | grep -qE "other-branch wip|bad: new silent fallback"; then
+        fail "22-1: 撈進其他分支的 commit（K1262-v6 誤合風險重現）"
+        echo "$output" | head -30
+    else
+        pass "22-1: 未撈進任何其他分支的 commit"
+    fi
+
+    # 2. 不可再宣稱從 --all 重建 commit list
+    if echo "$output" | grep -q "從 git log --all 重建"; then
+        fail "22-2: fallback 仍使用 git log --all（scope 未限縮）"
+    else
+        pass "22-2: fallback 未使用 git log --all"
+    fi
+
+    # 3. 不可宣告「會合併 N 個 commits」
+    if echo "$output" | grep -qE "會合併 [1-9][0-9]* 個 commits"; then
+        fail "22-3: 對 0 自有 commit 的 worktree 宣告要合併 commits"
+    else
+        pass "22-3: 未對 0 自有 commit 的 worktree 宣告合併"
+    fi
+
+    # 4. K1262 防線本體必須仍在：worktree 放真成果（untracked）時仍要被看見
+    mkdir -p "$wt/experiments/k9999"
+    echo "print('real result')" > "$wt/experiments/k9999/result.py"
+    local output2
+    output2=$(run_merge_in_test_dir "$test_dir" --dry-run)
+    if echo "$output2" | grep -q "k9999/result.py"; then
+        pass "22-4: 真成果仍被偵測到（K1262 防線未被弱化）"
+    else
+        fail "22-4: 真成果沒被偵測到 — K1262 silent-drop 的洞被打開了"
+        echo "$output2" | head -30
+    fi
+}
+
+# ============================================================
+# Test Case 23 (2026-07-23): stale-base 同路徑雙邊修改不得交給 -X ours
+#
+# 真實事故 86e142305：merge result 相對 main parent 看似 +38/-7，但相對
+# worktree parent 是 +0/-192；`git merge -X ours` 把 worktree 上已驗證的
+# D6b reaper 靜默丟掉。既有 post-merge detector 只看 experiments/，因此
+# scripts/compute_queue.py 完全不在保護範圍。
+#
+# 最小重現：branch 與 main 從同一 base 修改同一支程式的同一行。
+# 正確行為是在 merge 前 fail-closed，保留 main bytes + worktree + branch，
+# 要求先 rebase/人工整合；不能讓 -X ours 代替語意裁決。
+# ============================================================
+test_case_23_stale_overlap_aborts_before_merge() {
+    echo "=== Case 23: stale-base 同路徑雙邊修改 → merge 前 ABORT ==="
+    local test_dir
+    test_dir=$(setup_test_env "case23")
+    cd "$test_dir"
+
+    local wt=".claude/worktrees/agent-testcase23"
+    local branch="worktree-agent-testcase23"
+
+    mkdir -p src
+    printf '%s\n' "def verdict():" "    return 'base'" > src/live_worker.py
+    printf '%s\n' "line one" "line two" "line three" > src/legacy_worker.py
+    git add src/live_worker.py src/legacy_worker.py && git commit -qm "seed shared live worker"
+    (cd "$wt" && git merge main --no-edit -q)
+
+    # Worktree 的有效實作。
+    printf '%s\n' "def verdict():" "    return 'agent-live-reaper'" \
+        > "$wt/src/live_worker.py"
+    : > "$wt/src/legacy_worker.py"
+    (cd "$wt" && git add src/live_worker.py src/legacy_worker.py && git commit -qm "agent: add live reaper")
+
+    # Worktree 分出後 main 也改同一路徑；-X ours 會偏向這份 bytes。
+    printf '%s\n' "def verdict():" "    return 'main-concurrent-change'" \
+        > src/live_worker.py
+    git add src/live_worker.py && git commit -qm "main: concurrent live worker change"
+
+    local output rc
+    output=$(run_merge_capture_rc "$test_dir")
+    rc=$(last_merge_rc)
+
+    if [[ "$rc" != "0" ]] && [[ "$rc" != "NORC" ]] && \
+       echo "$output" | grep -q "STALE-BASE.*ABORT"; then
+        pass "23-1: stale overlap 在 merge 前 fail-closed"
+    else
+        fail "23-1: stale overlap 未被擋下（rc=${rc}；-X ours 可靜默丟 worktree 活碼）"
+        echo "$output" | tail -40
+    fi
+
+    if [[ "$(cat src/live_worker.py)" == *"main-concurrent-change"* ]] && \
+       git -C "$test_dir" show-ref --verify --quiet "refs/heads/$branch" && \
+       ! git -C "$test_dir" merge-base --is-ancestor "$branch" main 2>/dev/null; then
+        pass "23-2: main bytes 未被改寫，branch 未假裝 merged"
+    else
+        fail "23-2: main 或 branch ancestry 已被 merge 污染"
+    fi
+
+    if [[ -d "$wt" ]] && \
+       [[ "$(cat "$wt/src/live_worker.py")" == *"agent-live-reaper"* ]]; then
+        pass "23-3: worktree 與 agent 活碼完整保留"
+    else
+        fail "23-3: worktree/agent 活碼被移除或改寫"
+    fi
+
+    if echo "$output" | grep -q "src/live_worker.py"; then
+        pass "23-4: ABORT 證據列出重疊路徑"
+    else
+        fail "23-4: 訊息沒有列出需人工整合的路徑"
+    fi
+
+    if echo "$output" | grep -q "PURE-DELETION WARN" && \
+       echo "$output" | grep -q "src/legacy_worker.py"; then
+        pass "23-5: pure-deletion shape 會顯式告警並指出路徑"
+    else
+        fail "23-5: pure-deletion shape 未被告警"
+    fi
+}
+
+# Targeted feedback loop for the stale-base regression.  The full historical
+# suite remains the default; this selector gives Cases 9/11/23 a tight red/green
+# loop while changing the overlap contract.
+if [[ -n "${MERGE_TEST_ONLY:-}" ]]; then
+    case "$MERGE_TEST_ONLY" in
+        9) test_case_9_ours_dropped_auto_restore ;;
+        11) test_case_11_stale_base_no_false_abort ;;
+        23) test_case_23_stale_overlap_aborts_before_merge ;;
+        *)
+            echo "Unknown MERGE_TEST_ONLY=$MERGE_TEST_ONLY (supported: 9, 11, 23)"
+            exit 2
+            ;;
+    esac
+    echo "================================"
+    echo "Assertions PASS: $PASS"
+    echo "Assertions FAIL: $FAIL"
+    echo "Test cases: $([[ $FAIL -eq 0 ]] && echo 'PASS 1/1' || echo 'FAIL — see assertion failures above')"
+    echo "================================"
+    [[ $FAIL -eq 0 ]]
+    exit $?
+fi
 
 
 test_case_a
@@ -1161,12 +1500,23 @@ test_case_18_unrelated_dirty_main_merges_in_place
 echo ""
 test_case_19_foreign_staged_index_aborts_unchanged
 echo ""
+test_case_20_storage_only_work_autocommit_failed
+echo ""
+test_case_21_dryrun_no_contradiction
+echo ""
+test_case_22_stale_worktree_no_foreign_commits
+echo ""
+test_case_23_stale_overlap_aborts_before_merge
+echo ""
 
 echo "================================"
 echo "Assertions PASS: $PASS"
 echo "Assertions FAIL: $FAIL"
-# Test case-level summary（19 cases；17/18/19 pin multi-slot dirty-main/index contract）
-TOTAL_CASES=19
+# Test case-level summary（23 cases；17/18/19 pin multi-slot dirty-main/index contract；
+# 20/21 pin the 2026-07-19 scope fix: 安全網掃全樹、dry-run 不自相矛盾；
+# 22 pins K1262-v6: 落後的 worktree 不得靠 --all fallback 撈進其他分支的 commit；
+# 23 pins stale-base 同路徑雙邊修改不得交給 -X ours 語意裁決）
+TOTAL_CASES=23
 if [[ $FAIL -eq 0 ]]; then
     echo "Test cases: PASS $TOTAL_CASES/$TOTAL_CASES"
 else

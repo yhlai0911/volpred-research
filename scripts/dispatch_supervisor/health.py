@@ -32,7 +32,12 @@ import logging
 import traceback
 from pathlib import Path
 
-from . import alerts, procutil, selfreload, state
+from . import alerts, claim_release, procutil, selfreload, state
+from . import identity  # noqa: F401 — re-exported for callers/tests of health.identity
+# Re-exported: the by-path task_pool_claim loader moved to claim_release when
+# worker.py became a second caller (WS-A2c). Kept importable from here so the
+# module object stays a single cached instance across both call sites.
+from .claim_release import _task_pool_claim  # noqa: F401
 
 LOG = logging.getLogger(__name__)
 
@@ -51,6 +56,18 @@ def _force_kill_pgid(pgid: int) -> bool:
     Returns whether the group is CONFIRMED gone (2026-07-11) — a denied killpg
     used to be indistinguishable from a successful one here."""
     return procutil.kill_pgid(pgid)
+
+
+def _repend_killed_job_claims(*, job_id: str, slot_id: int | str) -> list[str]:
+    """health.py's view of the shared re-pend helper (see `claim_release`).
+
+    Kept as a named local so existing monkeypatch-based tests and the call site
+    below read the same as before; the implementation is now shared with
+    worker.py's own timeout path, which is the one that usually wins the CAS.
+    """
+    return claim_release.repend_killed_job_claims(
+        job_id=job_id, slot_id=slot_id, source="health",
+    )
 
 
 def _check_job(
@@ -84,12 +101,19 @@ def _check_job(
             outcome=f"{job.phase}_drained", final_model=job.model, path=state_path,
         )
         return "quarantine_drained" if closed is not None else None
-    identity = procutil.check_identity(job.pid, job.started_wall)
+    identity_verdict = procutil.check_identity(job.pid, job.started_wall)
+    repended_tasks: list[str] = []
     if job.age_seconds > max_age_s:
-        if identity == procutil.IDENTITY_MATCH:
+        if identity_verdict == procutil.IDENTITY_MATCH:
             LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
             if _force_kill_pgid(job.pgid):
                 exit_code, outcome = -9, "killed_timeout"
+                # The process is confirmed gone, so nothing can still be acting
+                # on its claim — release it now rather than stranding the task
+                # until the stale sweep (WS-A2b).
+                repended_tasks = _repend_killed_job_claims(
+                    job_id=job_id, slot_id=job.slot_id,
+                )
                 log_tail = ("(killed by health monitor)\n\n"
                             + alerts.read_log_tail(job.log_path))
             else:
@@ -103,7 +127,7 @@ def _check_job(
                     f"pgid={job.pgid} may still be running. Check `ps -g {job.pgid}` "
                     f"and kill by hand; this slot remains quarantined.)"
                 )
-        elif identity == procutil.IDENTITY_UNVERIFIED:
+        elif identity_verdict == procutil.IDENTITY_UNVERIFIED:
             # Codex review fix #4: no fingerprint was ever recorded for this
             # job — we cannot confirm this pid is still our worker and not a
             # PID-reuse collision, so we must NOT signal it. Quarantine the
@@ -123,7 +147,7 @@ def _check_job(
             # (already gone, or the OS recycled the pid to something else).
             LOG.warning(
                 "health: worker pid=%d aged out but identity=%s (pgid=%d) — skipping kill",
-                job.pid, identity, job.pgid,
+                job.pid, identity_verdict, job.pgid,
             )
             exit_code, outcome = -1, "silent_death"
             log_tail = "(identity mismatch/dead at max-age check — not killed, recorded as silent_death)"
@@ -170,17 +194,23 @@ def _check_job(
                      "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                      "attempt": job.attempt, "model": job.model,
                      "log_path": job.log_path,
-                     "survivors": procutil.pgid_members(job.pgid)},
+                     # max_age_s is the configured execution deadline.  The
+                     # deadline firing proves over-budget work, not a wedged
+                     # process; keep its alert identity out of hang_killed.
+                     "timeout_kind": "work_cap" if outcome == "killed_timeout" else None,
+                     "survivors": procutil.pgid_members(job.pgid),
+                     # WS-A2b receipt: which task claims this kill handed back.
+                     "repended_tasks": repended_tasks},
                 log_tail=log_tail,
                 state_path=state_path,
             )
-        if identity != procutil.IDENTITY_MATCH:
+        if identity_verdict != procutil.IDENTITY_MATCH:
             return outcome
         return "killed" if outcome == "killed_timeout" else outcome
-    if identity in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
+    if identity_verdict in (procutil.IDENTITY_MISMATCH, procutil.IDENTITY_DEAD):
         LOG.warning(
             "health: worker pid=%d dead/reused (identity=%s) but state has current_job — recording silent failure",
-            job.pid, identity,
+            job.pid, identity_verdict,
         )
         # Same ownership rule as the hang path: only the caller that actually
         # closed the slot reports it.

@@ -1,0 +1,47 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1258_forgetting_factor_bma.py",
+    "args": []
+  },
+  "canonical_result": "k1258_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1258/forecasts_SPY.parquet",
+      "sha256": "d1d064fed2d8e9f4fa6d000344de548076d3d6943c4f7fd8facf048ae5a52c41"
+    },
+    {
+      "path": "experiments/k1258/forecasts_GLD.parquet",
+      "sha256": "0490512df1a93fbdb933fc018f54529509cbcf7c1829ff4b15e420a30fed0036"
+    },
+    {
+      "path": "experiments/k1258/forecasts_0050_TW.parquet",
+      "sha256": "fd3c666fd40d5596567aa1cc1c63456a335dca4afb7038c74951810e6828feb3"
+    },
+    {
+      "path": "src/volpred/ops/diagnostics.py",
+      "sha256": "b8cc3188687c79dd364a3836de859a97e7da6b381b717d42c1e0479923d618d4"
+    }
+  ],
+  "timeout_seconds": 1800,
+  "network": "allow",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/provenance/runtime_min"
+    ],
+    "ignore_reasons": {
+      "/provenance/runtime_min": "Wall-clock timing of the run; machine-dependent and not part of the empirical claim surface."
+    }
+  }
+}

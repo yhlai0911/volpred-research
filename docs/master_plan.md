@@ -1,5 +1,12 @@
 # VolPred 重新擘劃 Master Plan（2026-05-29）
 
+> **2026-07-23 決策更新**：跨 ops、零付費續跑、換機、Admin、frontend、analytics 與
+> growth 的 accepted umbrella program 已移至
+> `docs/platform_optimization_program_2026_07.md`，架構決策見 `docs/adr/` 下四份 accepted ADR。
+> 本檔保留 2026-05-29 的診斷與歷史執行脈絡。凡本檔涉及「選一套前端／廢棄另一套」的
+> 內容，已由 ADR-0003 取代：原版與 v3 必須並行保留，deploy、default、retire 分開核可，
+> 未經 owner 明確批准不得刪除。
+>
 > 依 `VISION.md`（全自動不間斷自我運營 → 盈利）重新擘劃前後端 + 控制面 + 研究/內容/曝光/變現 pipeline + 治理文件。
 > 來源：主線程 session audit + 3 份平行架構盤點（後端 / 前端 / 指引文件，2026-05-29）。
 > 執行隔離：結構性重構在 `../volpred-refactor` worktree（branch `refactor/autonomy-overhaul`，錨點 tag `stable-pre-refactor-20260529`）；純清理與文件更新可在 main。

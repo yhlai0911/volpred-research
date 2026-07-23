@@ -334,7 +334,7 @@ def test_run_default_is_codex_bespoke_renderer_and_replaces_stale_pngs(
     stale.write_bytes(b"S" * 2048)
     captured = []
 
-    def fake_run(cmd, cwd):
+    def fake_run(cmd, cwd, **kwargs):
         captured.append(cmd)
         assert Path(cmd[1]).name == "gen_lazypack_codex.py"
         assert "lazypack_render.py" not in " ".join(cmd)
@@ -346,7 +346,7 @@ def test_run_default_is_codex_bespoke_renderer_and_replaces_stale_pngs(
         target.mkdir(parents=True, exist_ok=True)
         for panel in plan["panels"]:
             (target / f"{panel['name']}.png").write_bytes(b"N" * 2048)
-        return SimpleNamespace(returncode=0)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
 
     monkeypatch.setattr(lar.subprocess, "run", fake_run)
     monkeypatch.setattr(
@@ -383,14 +383,22 @@ def test_run_codex_failure_uses_logged_deterministic_fallback(
     out_dir = storage / "lazypack_jobs" / "mile_lz1" / "panels"
     captured = []
 
-    def fake_run(cmd, cwd):
+    def fake_run(cmd, cwd, **kwargs):
         captured.append(cmd)
         renderer = Path(cmd[1]).name
         if renderer == "gen_lazypack_codex.py":
             # A partial primary output must not leak into the fallback receipt.
             out_dir.mkdir(parents=True, exist_ok=True)
             (out_dir / "1_framework.png").write_bytes(b"P" * 2048)
-            return SimpleNamespace(returncode=17)
+            return SimpleNamespace(
+                returncode=17,
+                stdout="",
+                stderr="ERROR: You've hit your usage limit. Try again at Jul 25th.",
+            )
+        if renderer == "gen_lazypack_agy.py":
+            # A partial middle-layer output must not leak either.
+            (out_dir / "1_framework.png").write_bytes(b"A" * 2048)
+            return SimpleNamespace(returncode=11, stdout="", stderr="agy wrote nothing")
         assert renderer == "lazypack_render.py"
         plan_path = Path(cmd[cmd.index("--plan") + 1])
         plan = json.loads(plan_path.read_text(encoding="utf-8"))
@@ -441,16 +449,30 @@ def test_run_codex_failure_uses_logged_deterministic_fallback(
 
     assert lar.cmd_run(ns) == 0
     assert [Path(cmd[1]).name for cmd in captured] == [
-        "gen_lazypack_codex.py", "lazypack_render.py",
+        "gen_lazypack_codex.py", "gen_lazypack_agy.py", "lazypack_render.py",
     ]
+    # The agy layer receives an explicit remaining wall budget so a slow codex
+    # cannot starve the deterministic layer's window.
+    assert "--budget-s" in captured[1]
     assert (out_dir / "1_framework.png").read_bytes() == b"F" * 2048
     work_log = json.loads((storage / "work_log.json").read_text(encoding="utf-8"))
-    assert len(work_log) == 1
-    event = work_log[0]
-    assert event["outcome"] == "fallback_succeeded"
-    assert event["fallback_event_id"] == "lazypack_fallback:lazypack-mile_lz1"
-    assert event["primary_renderer"] == "scripts/gen_lazypack_codex.py"
-    assert event["fallback_renderer"] == "scripts/lazypack_render.py"
+    assert len(work_log) == 2  # both layer hand-offs are persisted, never silent
+    codex_to_agy, agy_to_det = work_log
+    assert codex_to_agy["outcome"] == "fallback_failed"  # agy rc=11
+    assert codex_to_agy["fallback_event_id"] == (
+        "lazypack_fallback:lazypack-mile_lz1:codex->agy"
+    )
+    assert codex_to_agy["primary_renderer"] == "scripts/gen_lazypack_codex.py"
+    assert codex_to_agy["fallback_renderer"] == "scripts/gen_lazypack_agy.py"
+    # The quota wall in codex's stderr must be classified for the fast-skip.
+    assert codex_to_agy["failure_class"] == "quota"
+    assert agy_to_det["outcome"] == "fallback_succeeded"
+    assert agy_to_det["fallback_event_id"] == (
+        "lazypack_fallback:lazypack-mile_lz1:agy->deterministic"
+    )
+    assert agy_to_det["primary_renderer"] == "scripts/gen_lazypack_agy.py"
+    assert agy_to_det["fallback_renderer"] == "scripts/lazypack_render.py"
+    assert agy_to_det["failure_class"] is None  # agy failure was not quota-class
 
 
 def test_failed_render_writes_back_partial_panel_ownership(
@@ -680,3 +702,87 @@ def test_release_gate_reads_content_not_seo_description(tmp_path, monkeypatch):
         storage_dir=str(storage_dir),
     )
     assert res["released_count"] == 1
+
+
+# ------------------------------------------------- requeue-stranded (D4a) ----
+
+def _failed_job(qdir: Path, job_id: str, article_id: str, *,
+                completed_at: str = "2026-07-20T02:00:00+00:00") -> Path:
+    qdir.mkdir(parents=True, exist_ok=True)
+    path = qdir / f"{job_id}.json"
+    path.write_text(json.dumps({
+        "id": job_id,
+        "title": f"lazypack render {article_id}",
+        "status": "failed",
+        "exit_code": 2,
+        "queued_at": "2026-07-20T01:00:00+00:00",
+        "completed_at": completed_at,
+        "script_path": "scripts/lazypack_async_render.py",
+        "interpreter": "uv run python",
+        "args": ["run", "--job-id", job_id, "--article-id", article_id,
+                 "--plan", "storage/lazypack_jobs/x/plan.json",
+                 "--out-dir", "storage/lazypack_jobs/x/panels"],
+        "result_artifact": "storage/lazypack_jobs/x/panels",
+        "output_paths": ["storage/lazypack_jobs/x/plan.json"],
+        "timeout_seconds": 1800,
+    }, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def test_requeue_stranded_is_idempotent_and_attempt_capped(
+    storage, tmp_path, monkeypatch
+):
+    """D4a: the alert path's promised retry — once per failed job, capped."""
+    qdir = _patch_queue(monkeypatch, tmp_path)
+    original = _failed_job(qdir, "lazypack-mile_lz1", "mile_lz1")
+
+    summary = lar.requeue_stranded(storage_dir=str(storage))
+    assert [r["new_job_id"] for r in summary["requeued"]] == ["lazypack-mile_lz1-r2"]
+    retry = json.loads((qdir / "lazypack-mile_lz1-r2.json").read_text(encoding="utf-8"))
+    assert retry["status"] == "queued"
+    job_id_flag = retry["args"].index("--job-id")
+    assert retry["args"][job_id_flag + 1] == "lazypack-mile_lz1-r2"
+    assert json.loads(original.read_text(encoding="utf-8"))["alert_requeued_as"] == (
+        "lazypack-mile_lz1-r2"
+    )
+
+    # Re-run while the retry is queued: the article is owned, nothing new.
+    summary = lar.requeue_stranded(storage_dir=str(storage))
+    assert summary["requeued"] == []
+
+    # The retry fails too → a second (final) retry is allowed...
+    retry["status"] = "failed"
+    retry["completed_at"] = "2026-07-20T03:00:00+00:00"
+    (qdir / "lazypack-mile_lz1-r2.json").write_text(
+        json.dumps(retry, ensure_ascii=False), encoding="utf-8")
+    summary = lar.requeue_stranded(storage_dir=str(storage))
+    assert [r["new_job_id"] for r in summary["requeued"]] == ["lazypack-mile_lz1-r3"]
+
+    # ...but the third failure hits the attempt ceiling: escalation belongs to
+    # the P1 repair task, not an unbounded retry ladder.
+    third = json.loads((qdir / "lazypack-mile_lz1-r3.json").read_text(encoding="utf-8"))
+    third["status"] = "failed"
+    third["completed_at"] = "2026-07-20T04:00:00+00:00"
+    (qdir / "lazypack-mile_lz1-r3.json").write_text(
+        json.dumps(third, ensure_ascii=False), encoding="utf-8")
+    summary = lar.requeue_stranded(storage_dir=str(storage))
+    assert summary["requeued"] == []
+    assert any(s["reason"] == "attempt_ceiling" for s in summary["skipped"])
+
+
+def test_requeue_stranded_skips_article_that_got_its_section(
+    tmp_path, monkeypatch
+):
+    qdir = _patch_queue(monkeypatch, tmp_path)
+    storage_dir = tmp_path / "storage"
+    _write_feed(storage_dir, [{
+        "id": "mile_ok",
+        "status": "draft",
+        "audience": "general",
+        "title": "已補圖的文章",
+        "content": "# 標題\n\n正文。\n\n## 懶人包圖組\n\n![圖](https://x.test/a.png)\n",
+    }])
+    _failed_job(qdir, "lazypack-mile_ok", "mile_ok")
+    summary = lar.requeue_stranded(storage_dir=str(storage_dir))
+    assert summary["requeued"] == []
+    assert not (qdir / "lazypack-mile_ok-r2.json").exists()

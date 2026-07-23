@@ -40,6 +40,7 @@ from zoneinfo import ZoneInfo
 
 from .common import load_json, project_path
 from .diagnostics import warn
+from .content_actuator_audits import build_audience_report, find_overmatches
 from .release_cadence import (
     RHYTHM_BURST_GAP_MIN,
     is_rhythm_controlled,
@@ -632,6 +633,14 @@ def content_quality_snapshot(
     injectable for tests.
     """
     current = now or datetime.now(timezone.utc)
+    feed = _load_feed(storage_dir)
+    overmatches = find_overmatches(feed, now=current)
+    repo_root = project_path(storage_dir).resolve().parent
+    audience = build_audience_report(
+        feed,
+        repo_root=repo_root,
+        source_feed=str(_feed_path(storage_dir)),
+    )
     return {
         "generated_at": current.astimezone(timezone.utc).isoformat(),
         "publish_rhythm": check_publish_rhythm(storage_dir, now=current),
@@ -641,6 +650,15 @@ def content_quality_snapshot(
         "title_format": check_title_format(storage_dir),
         # 2026-06-29 patrol completion (4 designed checks now built).
         "arc_diversity": check_arc_diversity(storage_dir),
+        "arc_dedup_overmatches": {
+            "status": "overmatch" if overmatches else "ok",
+            "count": len(overmatches),
+            "candidates": overmatches[:50],
+        },
+        "audience_classification": {
+            "status": "misclassified" if audience["summary"]["high_confidence"] else "ok",
+            **audience,
+        },
         "content_completeness": check_content_completeness(storage_dir),
         "release_deadlock": check_release_deadlock(storage_dir),
         "frontend_render": check_frontend_render(

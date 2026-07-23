@@ -45,6 +45,12 @@ Do **not** use this skill for：
 3. **資訊性**：真實圖表 ≥2 張（matplotlib PNG，禁 ASCII）；具體數字（不寫「顯著改善」空話）；標明資料來源 + 統計方法（Harvey/Kupiec/DM 等）+ 樣本數與期間
 4. **參考性**：cross-link ≥3 個相關 K/paper/experiment；延伸閱讀段落；reproduce method 簡述（script + results.json 路徑）；文末標 K 編號 + 資料來源
 
+**適用範圍補充（2026-07-22）**：上面第 3–4 點的 reader-visible 統計方法、reproduce
+path 與 K 編號是 `audience=research` 契約。`audience=general` 仍要引用完全相同的 canonical
+數字與統計強度，但以白話呈現；K-id 與實驗路徑只放 frontmatter /
+`details.experiment_refs` 等 provenance metadata，不得出現在讀者可見標題或正文。這個界線
+與下方 general 禁 K 編號及 publisher `_infer_audience` gate 一致。
+
 同一 K 已有文章但不符 4 維度 → 可視為「不符合標準」重派（不算 3-layer dedup 的 duplicate）。既有文章定期回審（top-viewed 優先）不達標考慮重寫。反面教材：K908 mile_3eb8657c（達標範例，可作 reference template）；只給數字翻譯 + 兩張圖但無 mechanism 解釋、academic 標題、無 cross-link 的文章（缺深度/可讀性/參考性）。
 
 ## thinking ≠ content
@@ -60,6 +66,7 @@ Do **not** use this skill for：
 ## 選題來源（寫之前先查）
 
 **主題不是憑記憶挑——用 `publication-candidates` skill 系統化選。**
+**讀者偏好迴圈**：選題與圖文表配置先查 `storage/analytics/reader_preferences.json`（週一 06:45 更新）的合格結論；樣本不足 bucket 不得當依據。
 
 1. **研究驅動**：`uv run volpred ops publication-candidates-summary`
 2. **事件驅動**：WebSearch 近期 CPI/NFP/FOMC/TSMC/earnings season；`grep '財報公告日.txt'`；讀 `next_tasks.json` 事件任務
@@ -258,7 +265,7 @@ pub.publish_milestone(
 **⚠️ lazypack gate（boss 2026-06-30 硬性；2026-07-02 改 async 管線，error_log 15:15 #4）**：`audience='general'` 文章的 `## 懶人包圖組` 區塊（heading + ≥1 張圖）在 **reader-visible 邊界** enforce（單一來源 `publisher.lazypack_required_at()`）：
 
 - **plan 必須先寫成 strict data-bound v1**：root=`schema_version:1,title,evidence,panels`；每個 evidence alias=`{path,sha256,label}`；panel 必填 `{name,info,style,title,alt,sources,blocks}`；數字只能用 evidence binding。缺欄位或舊版 root list 直接 fail，禁止 silent LLM fallback。最小範例與完整規則見 `lazypack-infographic` skill；CLI 見 `scripts/lazypack_render.py --help` 與 renderer tests。
-- **status=draft（本 skill 預設）→ 不需先生圖，正文寫完 publish 後一行 enqueue**（`*/15` compute worker 走 deterministic renderer；release_pool flip published 前 enforce，缺 section 不釋出）：
+- **status=draft（本 skill 預設）→ 不需先生圖，正文寫完 publish 後一行 enqueue**（`*/15` compute worker 走 codex-primary 渲染鏈，失敗自動 logged fallback 到 deterministic renderer；release_pool flip published 前 enforce，缺 section 不釋出）：
 ```bash
 uv run python scripts/lazypack_async_render.py enqueue \
   --article-id <mile_id> --plan <plan.json>
@@ -267,11 +274,14 @@ uv run python scripts/lazypack_async_render.py enqueue \
 ```
 - **status=published（event/trending 立即發佈）→ 發佈當下就要有 section**，同步先生完再 publish：
 ```bash
-# PRIMARY：strict plan + repo-owned deterministic renderer（不呼叫 LLM / 影像模型）
-uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>
+# PRIMARY：codex bespoke poster（boss 2026-07-15；codex 寫 data-bound 腳本、本地執行）
+uv run python scripts/gen_lazypack_codex.py \
+  --article-id <mile_id> --plan <plan.json> --out-dir <dir>
+# FALLBACK（codex 不可用 / 額度耗盡時順位自動生效，必留紀錄，禁 silent）：
+#   uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>
 # 每張 PNG → upload_chart() 上傳 Supabase → append 文末「## 懶人包圖組」
 ```
-`scripts/gen_lazypack_codex.py` 只保留 legacy/manual 歷史修復，不得當 primary，也不得在 plan/layout failure 時自動 fallback。完整 SOP 走 `lazypack-infographic` skill（2-4 張 poster：概念/方法/結果，禁卡通風）。逃生門：CLI `--no-lazypack-gate` / API `audit_strict=False`，**僅限**真正非讀者向 / 批次遷移（會被 content_quality coverage 監看）。
+渲染鏈三層順位（codex PRIMARY → deterministic FALLBACK → NotebookLM 最後備援，僅人工授權）與完整 SOP 走 `lazypack-infographic` skill（2-4 張 poster：概念/方法/結果，禁卡通風）。逃生門：CLI `--no-lazypack-gate` / API `audit_strict=False`，**僅限**真正非讀者向 / 批次遷移（會被 content_quality coverage 監看）。
 
 ## 7. 紀律
 - 繁中、status=draft、不派 sub-agent、不修改 storage/memory/* 或 storage/reports/* 以外共享檔

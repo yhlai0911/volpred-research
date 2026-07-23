@@ -67,7 +67,9 @@ def test_claim_complete_and_execution_receipt(tmp_path: Path):
     assert snapshot["brief_status_counts"]["pending"] == 1
     assert snapshot["agents"][0]["status"] == "idle"
     assert snapshot["agents"][0]["claimed_task_id"] is None
-    assert snapshot["scheduler"]["last_status"] == "never"
+    # No "scheduler" key: the advisory scheduler lane was retired in 4387fe5dc
+    # (dead since 2026-04-19). The snapshot must not resurrect it.
+    assert "scheduler" not in snapshot
 
 
 def test_fallback_and_approval_flow(tmp_path: Path):

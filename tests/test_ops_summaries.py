@@ -26,31 +26,6 @@ def test_build_queue_summary_compacts_snapshot(monkeypatch):
                 {"session_key": "claude-supervisor", "status": "online"},
                 {"session_key": "codex-worker", "status": "offline"},
             ],
-            "scheduler": {"last_tick_at": "2026-04-23T03:00:00+00:00", "last_status": "ok"},
-        },
-    )
-    monkeypatch.setattr(
-        summaries,
-        "scheduler_preview",
-        lambda storage_dir="storage": {
-            "decision": {
-                "task_id": "task_123",
-                "title": "Review queue",
-                "agent": "claude",
-                "mode": "coordinator",
-                "brief_status": "ready",
-                "advisory_only": False,
-            },
-            "queue_snapshot": [
-                {
-                    "task_id": "task_123",
-                    "title": "Review queue",
-                    "target_agent": "claude",
-                    "brief_status": "ready",
-                    "runnable": True,
-                    "blocked_reason": None,
-                }
-            ],
         },
     )
 
@@ -58,8 +33,10 @@ def test_build_queue_summary_compacts_snapshot(monkeypatch):
 
     assert summary["queued"] == 4
     assert summary["active_agents"] == ["claude-supervisor"]
-    assert summary["next_decision"]["task_id"] == "task_123"
-    assert summary["queue_head"][0]["runnable"] is True
+    # 2026-07-20 ops-master D2: advisory scheduler fields must stay retired.
+    assert "next_decision" not in summary
+    assert "queue_head" not in summary
+    assert "scheduler_last_tick_at" not in summary
 
 
 def test_build_continue_task_maintenance_skips_when_no_work(monkeypatch):
@@ -68,17 +45,9 @@ def test_build_continue_task_maintenance_skips_when_no_work(monkeypatch):
         "build_control_plane_snapshot",
         lambda storage_dir="storage": {
             "agents": [{"session_key": "claude-worker", "status": "idle"}],
+            "task_counts": {"queued": 0},
             "pending_user_tasks": 0,
             "discovery_allowed": True,
-        },
-    )
-    monkeypatch.setattr(
-        summaries,
-        "scheduler_preview",
-        lambda storage_dir="storage": {
-            "queued_count": 0,
-            "queue_snapshot": [],
-            "decision": None,
         },
     )
     monkeypatch.setattr(
@@ -102,26 +71,18 @@ def test_build_continue_task_maintenance_skips_when_no_work(monkeypatch):
 
 
 def test_build_continue_task_maintenance_auto_remediates_publish_drought(monkeypatch):
-    monkeypatch.setattr(
-        summaries,
-        "build_control_plane_snapshot",
-        lambda storage_dir="storage": {
+    snapshot_calls: list[str] = []
+
+    def _fake_snapshot(storage_dir="storage"):
+        snapshot_calls.append(storage_dir)
+        return {
             "agents": [{"session_key": "claude-worker", "status": "idle"}],
+            "task_counts": {"queued": 0},
             "pending_user_tasks": 0,
             "discovery_allowed": True,
-        },
-    )
-    preview_calls: list[str] = []
-
-    def _fake_preview(storage_dir="storage"):
-        preview_calls.append(storage_dir)
-        return {
-            "queued_count": 0,
-            "queue_snapshot": [],
-            "decision": None,
         }
 
-    monkeypatch.setattr(summaries, "scheduler_preview", _fake_preview)
+    monkeypatch.setattr(summaries, "build_control_plane_snapshot", _fake_snapshot)
     monkeypatch.setattr(
         summaries,
         "_runtime_idle_policy",
@@ -164,7 +125,8 @@ def test_build_continue_task_maintenance_auto_remediates_publish_drought(monkeyp
     result = summaries.build_continue_task_maintenance()
 
     assert remediation_calls == ["storage"]
-    assert preview_calls == ["storage", "storage"]
+    # snapshot re-read after remediation so the heartbeat reflects post-action state
+    assert snapshot_calls == ["storage", "storage"]
     assert result["auto_remediation"]["publish_drought"]["attempted"] is True
     assert result["alerts"]["breach_count"] == 0
     assert result["skip"] is True
@@ -180,26 +142,9 @@ def test_build_continue_task_maintenance_skips_when_slot_full(monkeypatch):
                 {"session_key": "claude-supervisor", "status": "busy"},
                 {"session_key": "claude-worker", "status": "busy"},
             ],
+            "task_counts": {"queued": 2},
             "pending_user_tasks": 0,
             "discovery_allowed": True,
-        },
-    )
-    monkeypatch.setattr(
-        summaries,
-        "scheduler_preview",
-        lambda storage_dir="storage": {
-            "queued_count": 2,
-            "queue_snapshot": [
-                {
-                    "task_id": "task_1",
-                    "title": "Blocked",
-                    "target_agent": "codex",
-                    "runnable": False,
-                    "blocked_reason": "agent_unavailable",
-                    "brief_status": "pending",
-                }
-            ],
-            "decision": None,
         },
     )
     monkeypatch.setattr(
@@ -221,38 +166,18 @@ def test_build_continue_task_maintenance_skips_when_slot_full(monkeypatch):
     assert result["max_concurrent_agents"] == 2
 
 
-def test_build_continue_task_maintenance_returns_next_decision(monkeypatch):
+def test_build_continue_task_maintenance_inspects_queue_when_receipts_show_queued(monkeypatch):
+    """2026-07-20 ops-master D2: with the advisory preview retired, queued
+    receipts (non-terminal rows in ops/tasks — a receipts-purity violation)
+    surface as inspect_queue instead of a fabricated next_decision."""
     monkeypatch.setattr(
         summaries,
         "build_control_plane_snapshot",
         lambda storage_dir="storage": {
             "agents": [{"session_key": "claude-worker", "status": "idle"}],
+            "task_counts": {"queued": 3},
             "pending_user_tasks": 1,
             "discovery_allowed": False,
-        },
-    )
-    monkeypatch.setattr(
-        summaries,
-        "scheduler_preview",
-        lambda storage_dir="storage": {
-            "queued_count": 3,
-            "queue_snapshot": [
-                {
-                    "task_id": "task_123",
-                    "title": "Review queue",
-                    "target_agent": "claude",
-                    "runnable": True,
-                    "blocked_reason": None,
-                    "brief_status": "ready",
-                }
-            ],
-            "decision": {
-                "task_id": "task_123",
-                "title": "Review queue",
-                "agent": "claude",
-                "mode": "coordinator",
-                "brief_status": "ready",
-            },
         },
     )
     monkeypatch.setattr(
@@ -269,10 +194,11 @@ def test_build_continue_task_maintenance_returns_next_decision(monkeypatch):
     result = summaries.build_continue_task_maintenance()
 
     assert result["skip"] is False
-    assert result["action"] == "review_next_task"
-    assert result["reason"] == "dispatch_candidate"
-    assert result["next_decision"]["task_id"] == "task_123"
+    assert result["action"] == "inspect_queue"
+    assert result["reason"] == "blocked_queue"
+    assert result["queued_count"] == 3
     assert result["pending_user_tasks"] == 1
+    assert "next_decision" not in result
     assert result["detail_hints"]["maintain"].endswith("continue-task-maintain --stub-if-no-work")
 
 
@@ -285,8 +211,6 @@ def test_build_daily_planning_maintenance_skips_when_no_gaps(monkeypatch):
             "running": 0,
             "pending_user_tasks": 0,
             "discovery_allowed": True,
-            "next_decision": None,
-            "queue_head": [],
         },
     )
     monkeypatch.setattr(
@@ -295,9 +219,6 @@ def test_build_daily_planning_maintenance_skips_when_no_gaps(monkeypatch):
         lambda storage_dir="storage": {
             "missing_system_task_count": 0,
             "missing_system_tasks": [],
-            "queued_count": 0,
-            "scheduler_last_tick_at": "2026-04-23T03:00:00+00:00",
-            "scheduler_last_status": "ok",
         },
     )
     monkeypatch.setattr(
@@ -329,8 +250,6 @@ def test_build_daily_planning_maintenance_collects_queue_scheduler_platform_sign
             "running": 1,
             "pending_user_tasks": 1,
             "discovery_allowed": False,
-            "next_decision": {"task_id": "task_123", "agent": "claude"},
-            "queue_head": [{"task_id": "task_123"}],
         },
     )
     monkeypatch.setattr(
@@ -338,10 +257,7 @@ def test_build_daily_planning_maintenance_collects_queue_scheduler_platform_sign
         "build_scheduler_summary",
         lambda storage_dir="storage": {
             "missing_system_task_count": 1,
-            "missing_system_tasks": ["shared scheduler tick"],
-            "queued_count": 2,
-            "scheduler_last_tick_at": "2026-04-23T03:00:00+00:00",
-            "scheduler_last_status": "warn",
+            "missing_system_tasks": ["daily_update"],
         },
     )
     monkeypatch.setattr(
@@ -367,8 +283,8 @@ def test_build_daily_planning_maintenance_collects_queue_scheduler_platform_sign
         "scheduler_gap",
         "platform:pending_questions",
     ]
-    assert result["queue"]["next_decision"]["task_id"] == "task_123"
-    assert result["scheduler"]["missing_system_tasks"] == ["shared scheduler tick"]
+    assert result["queue"]["queued"] == 2
+    assert result["scheduler"]["missing_system_tasks"] == ["daily_update"]
     assert result["platform_gate"]["pending_questions"] == 2
     assert result["detail_hints"]["maintain"].endswith("daily-planning-maintain --stub-if-no-work")
 
@@ -387,36 +303,15 @@ def test_build_scheduler_summary_uses_compact_counts(monkeypatch):
             "live_system_crontab_count": 4,
         },
     )
-    monkeypatch.setattr(
-        summaries,
-        "get_scheduler_state",
-        lambda storage_dir="storage": {
-            "last_tick_at": "2026-04-23T03:00:00+00:00",
-            "last_status": "ok",
-            "last_reason": None,
-        },
-    )
-    monkeypatch.setattr(
-        summaries,
-        "scheduler_preview",
-        lambda storage_dir="storage": {
-            "queued_count": 6,
-            "decision": {
-                "task_id": "task_456",
-                "title": "Publish update",
-                "agent": "codex",
-                "mode": "executor",
-                "brief_status": "ready",
-            },
-        },
-    )
 
     summary = summaries.build_scheduler_summary()
 
     assert summary["matched_system_task_count"] == 2
     assert summary["missing_system_task_count"] == 1
-    assert summary["queued_count"] == 6
-    assert summary["next_decision"]["agent"] == "codex"
+    # 2026-07-20 ops-master D2: advisory scheduler fields must stay retired.
+    assert "queued_count" not in summary
+    assert "next_decision" not in summary
+    assert "scheduler_last_tick_at" not in summary
 
 
 def test_build_token_summary_rolls_latest_available_reports(tmp_path: Path):
@@ -990,11 +885,7 @@ def test_build_platform_patrol_summary_combines_existing_checks(monkeypatch):
         summaries,
         "build_scheduler_summary",
         lambda storage_dir="storage": {
-            "scheduler_last_tick_at": "2026-04-23T07:00:00+00:00",
-            "scheduler_last_status": "ok",
-            "scheduler_last_reason": None,
             "missing_system_task_count": 0,
-            "queued_count": 2,
         },
     )
     monkeypatch.setattr(
@@ -1005,7 +896,6 @@ def test_build_platform_patrol_summary_combines_existing_checks(monkeypatch):
             "open_questions": 5,
             "event_ledger_entries": 12,
             "rollback_points": 8,
-            "agent_cli_health": {"status": "ready"},
         },
     )
 
@@ -1014,8 +904,9 @@ def test_build_platform_patrol_summary_combines_existing_checks(monkeypatch):
     assert summary["release_due"] is True
     assert summary["alert_breach_count"] == 1
     assert summary["breached_alerts"][0]["id"] == "release_pool_gap"
-    assert summary["scheduler"]["queued_count"] == 2
-    assert summary["health"]["agent_cli_health"] == "ready"
+    assert summary["scheduler"] == {"missing_system_task_count": 0}
+    # 2026-07-20 ops-master D2: retired advisory-scheduler / live-smoke fields
+    assert "agent_cli_health" not in summary["health"]
     assert summary["pending_questions"] == 3
     assert summary["next_release_candidates"][0]["id"] == "mile_1"
     assert summary["detail_hints"]["maintain"].endswith("platform-patrol-maintain --stub-if-no-work")

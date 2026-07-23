@@ -1,0 +1,39 @@
+{
+  "provenance": {
+    "asset": "SPY",
+    "period": "2016-2025",
+    "data_source": "yfinance",
+    "source_article": "mile_2cfa32a4",
+    "experiment_refs": ["K942", "K943"],
+    "note": "All values transcribed verbatim from the published source article; no re-estimation was performed in this task."
+  },
+  "regime_improvement_pct": {
+    "calm_below_15": 8.7,
+    "normal_15_to_25": 0.5,
+    "panic_above_25": 17.3
+  },
+  "horizon_improvement_pct": {
+    "one_day": 6.4,
+    "one_week": 18.4,
+    "one_month": -5.7
+  },
+  "derived_arithmetic": {
+    "panic_over_normal_ratio": 34.6,
+    "week_minus_month_pp": 24.1,
+    "week_minus_day_pp": 12.0
+  },
+  "direction_predictability": {
+    "best_hit_rate_pct": 53.7,
+    "market_up_time_pct": 62.0,
+    "shortfall_pp": 8.3
+  },
+  "caveats": {
+    "sample": "僅 SPY 一檔美股大盤，僅 2016-2025 十年，其他資產未測。",
+    "significance": "所有差距皆為樣本內觀察幅度，原始分析未附統計顯著性檢定，不得當作已驗證結論。",
+    "direction": "震盪幅度可預測不等於漲跌方向可預測。"
+  },
+  "thresholds": {
+    "calm_level": 15,
+    "panic_level": 25
+  }
+}

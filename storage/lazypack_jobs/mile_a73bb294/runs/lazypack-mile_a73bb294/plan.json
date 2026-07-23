@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "title": "季末 ETF 調倉 懶人包",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1348/k1348_results.json",
+      "sha256": "519967b0c16e42f1994b43c73452c1dff80fd8489aedd77349280e99d4045d01",
+      "label": "季末 ETF 調倉對成分股量能與波動的檢定結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "季末調倉在做什麼",
+      "alt": "概念說明：指數成分調整期間 ETF 需要同步調倉，交易集中在季末幾天",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "為什麼會集中在那幾天",
+          "body": [
+            "追蹤指數的 ETF 必須在成分調整生效時同步跟上，買賣因此擠在季末的窗口裡。",
+            "常見的直覺是：交易量一擠，價格就會跟著晃。這篇檢定的就是這句直覺。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "納入檢定的股票日觀測數",
+          "value": {
+            "source": "results",
+            "path": "tier2.panel_regression.log_volume.n_obs",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "量能確實跳起來了",
+      "alt": "全樣本迴歸顯示季末成交量顯著擴張，統計強度明確",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "量能擴張最明確的一檔，季末比平常多出的交易量（對數）",
+          "value": {
+            "source": "results",
+            "path": "verdict_summary_per_etf.IVV.log_volume_diff",
+            "format": {
+              "kind": "number",
+              "digits": 3,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "量能擴張的統計強度",
+          "value": {
+            "source": "results",
+            "path": "tier2.panel_regression.log_volume.quarter_end_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "量能擴張最明確的一檔的統計強度",
+          "value": {
+            "source": "results",
+            "path": "verdict_summary_per_etf.IVV.log_volume_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "但波動沒有跟著上來",
+      "alt": "振幅波動在統計上看不出季末效應，收盤波動甚至方向相反",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "振幅波動看不出季末效應的顯著性水準",
+          "value": {
+            "source": "results",
+            "path": "tier2.panel_regression.range_vol.quarter_end_p",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "振幅波動的統計強度",
+          "value": {
+            "source": "results",
+            "path": "tier2.panel_regression.range_vol.quarter_end_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "收盤波動的統計強度（方向相反）",
+          "value": {
+            "source": "results",
+            "path": "tier2.panel_regression.c2c_rv.quarter_end_t",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "研究邊界",
+          "body": [
+            "資料是日頻，抓不到日內的委託流與微結構，看不見不等於不存在。",
+            "本次結論屬有條件通過：量能通道成立，波動通道在這個解析度上是空結果。"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,10 @@
 # 系統架構
 
+> **已核可的目標架構（2026-07-23）**
+> 見 `docs/platform_optimization_program_2026_07.md` 與 `docs/adr/` 下四份 accepted ADR。
+> 本檔以下仍描述 live/current architecture；只有某項能力完成 shadow、cutover、read-back
+> 與 rollback gate 後，才能把現況段落改寫成新架構。不得從目標文件推定 live owner 已切換。
+
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：

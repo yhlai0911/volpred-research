@@ -1,0 +1,10 @@
+version: 2
+
+# 2026-07-20 incident triage: GitGuardian "Generic High Entropy Secret" fired on
+# SHA-256 file checksums inside the cron wrapper manifest (commits 04e03a477 /
+# a0dfd2d). Those are integrity hashes regenerated on every wrapper change, not
+# credentials. Real secrets live only in untracked .env files (verified: never
+# in git history; example files carry placeholders only).
+secret:
+  ignored-paths:
+    - config/cron_wrapper_manifest.json

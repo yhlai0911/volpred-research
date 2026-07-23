@@ -8,8 +8,10 @@
 靜默落後的資料（daily_update 卡 6/26、collect_us、twse_orderflow 死 12 天）、卡 1 年的
 頁面 cache，全部漏網，最後靠老闆當 QA 發現。本檢查補上 result-level 維度。
 
-十大維度（每個失敗都產生具體 finding，可被 alert 消費）：
+十一大維度（每個失敗都產生具體 finding，可被 alert 消費）：
 1. data_freshness   — 所有資料收集 job 是否照排程跑 + 關鍵資料檔是否新鮮（時效性資料優先）
+                      + DB 入庫驗證（canonical 最新 trade_date vs Supabase 端收據；
+                      老闆 2026-07-20「抓完數據要確認資料庫已正確存入」）
 2. cron_completion  — 所有排程 job 最近一輪是否真的 fire + exit0
 3. content_pipeline — 草稿池 ≥ 門檻、今日有產出、published 文章皆含真圖表+數據表（非純散文）
 4. live_freshness   — 線上 API 回傳的 data_date 是否 ≈ 最新交易日（抓「頁面卡舊資料」）
@@ -19,6 +21,7 @@
 8. reader_metrics   — 讀者互動 metrics 是否已落地且足夠新鮮
 9. dedup_calibration — 真實 90d feed 上的 arc/theme 固定 probes 與 threshold margin
 10. reproducibility — 論文/feed 引用實驗的 report coverage、staleness 與 mismatch（唯讀）
+11. worktree_reconcile — open 任務指向的 worktree 是否還在磁碟上（抓 k1709 型殭屍任務）
 
 用法：
   uv run python scripts/daily_checkup.py            # 印報告
@@ -46,6 +49,7 @@ SITE = "https://volpred.zeabur.app"
 # 週末/假日不交易的 job 用較寬窗口；真正時效性（盤中/tick）窗口較緊。
 DATA_JOBS_EXPECTED_H = {
     "daily_update": 26,            # 每日 08:03
+    "daily_update_intraday": 26,   # 每日 14:00（台股盤後；2026-07-20 補監控，見下方 exit-code 檢查）
     "collect_tw": 30,              # 工作日 15:00
     "collect_us": 30,             # 週二-六 07:03（跳週一，故放寬）
     "fred_backfill_guard": 30,
@@ -77,6 +81,22 @@ DATA_FILE_JOBS = [
         "uv run python scripts/collect_taifex_tick.py",
     ),
 ]
+
+# ── data_freshness sub-check: DB 入庫驗證（db_landing）───────────────────────
+# 老闆 2026-07-20 指令：「抓完數據要確認資料庫已正確存入」。sync 端印 "synced N"
+# 只是送出方的 exit-code 級證據；這裡直接查 Supabase 收到什麼（result-level 收據）：
+# canonical 本地（storage/paper_trading.json）最新 trade_date + 當日 row 數
+# vs DB 端最新 trade_date + 當日 row 數。不一致 = finding + 自動開 P1 修復單
+# （actuator 原則：gate 無死局，finding 必附可執行 recovery CLI）。
+# (table, date_col, local-state fn 名, recovery CLI)
+DB_LANDING_TABLES = (
+    ("market_daily", "trade_date", "_local_market_daily_state",
+     "uv run python scripts/supabase_sync.py market-daily  # canonical 全量重推（idempotent upsert）"),
+    ("paper_trades", "trade_date", "_local_paper_trades_state",
+     "uv run python scripts/daily_update.py  # idempotent：publish 有 monotone gate，重跑只補 sync"),
+)
+
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 _now = datetime.datetime.now()
 
@@ -141,6 +161,30 @@ def _missed_fires(cron: str, log_mtime: datetime.datetime) -> int:
     return missed
 
 
+_EXIT_RE = re.compile(r"exit (\d+) at .*?(?:\(duration=([\d.]+)s\))?\s*===")
+
+
+def _last_exit(log: Path) -> tuple[int, float | None] | None:
+    """log 尾端最後一筆 `exit N at ... (duration=Xs)` → (rc, duration_s)。
+
+    2026-07-20：mtime 只證明 job「有寫 log」，不證明它「有成功」。
+    daily_update_intraday 連續撞 600s watchdog（rc=142）卻天天更新 mtime，
+    schedule-aware 檢查因此永遠判它新鮮 —— 靠老闆手動發現。見 error_log 2026-07-20。
+    """
+    try:
+        with open(log, "rb") as fh:                # log 可達數百 KB，只讀尾端
+            fh.seek(0, os.SEEK_END)
+            fh.seek(max(0, fh.tell() - 16384))
+            tail = fh.read().decode("utf-8", "ignore")
+    except OSError:
+        return None  # silent-ok: missing/unreadable log surfaces as its own freshness finding upstream
+    hits = _EXIT_RE.findall(tail)
+    if not hits:
+        return None
+    rc, dur = hits[-1]
+    return int(rc), float(dur) if dur else None
+
+
 # ── 1. data_freshness ───────────────────────────────────────────────────────
 def check_data_freshness() -> list[dict]:
     out = []
@@ -151,6 +195,16 @@ def check_data_freshness() -> list[dict]:
         if a is None:
             out.append(_finding("data_freshness", "warn", f"{job}: 無 cron log（從未跑？）"))
             continue
+        # 「有跑但失敗」與「根本沒跑」是兩種故障，各自獨立報。
+        last = _last_exit(log)
+        if last and last[0] != 0:
+            rc, dur = last
+            why = f"撞 watchdog timeout（duration={dur:.0f}s）" if rc == 142 else f"rc={rc}"
+            out.append(_finding(
+                "data_freshness", "critical",
+                f"{job}: 最後一次執行失敗 —— {why}（{a:.0f}h 前）；log mtime 仍新，漏班檢查看不到",
+                recovery=f"tail -40 storage/logs/cron/{job}.log  # 查失敗點，再跑對應 wrapper",
+            ))
         cron = crons.get(job)
         missed = _missed_fires(cron, datetime.datetime.fromtimestamp(os.path.getmtime(log))) if cron else -1
         if missed >= 0:  # schedule-aware（primary）
@@ -186,6 +240,168 @@ def check_data_freshness() -> list[dict]:
                 f"{job}: 最新資料檔已 {a:.0f}h（預期 ≤{expected}h，由 {parent} 子步驟收）—— 資料落後",
                 recovery=recovery,
             ))
+    # result-level：DB 入庫驗證（canonical vs Supabase 收據）
+    out.extend(_db_landing_findings())
+    return out
+
+
+def _supabase_mod():
+    """Resolve scripts/supabase_sync at call time（同 reproduce_check 的 import 慣例）。"""
+    try:
+        from scripts import supabase_sync
+    except ModuleNotFoundError:  # direct ``python scripts/daily_checkup.py``
+        import supabase_sync  # type: ignore[no-redef]
+    return supabase_sync
+
+
+def _local_market_daily_state() -> tuple[str | None, int, list[str]]:
+    """canonical `_market_daily` 的（最新 trade_date, 該日 row 數, 全部日期）。"""
+    pt = json.loads((STORAGE / "paper_trading.json").read_text())
+    md = pt.get("_market_daily") or {}
+    dates = sorted(d for d in md if isinstance(d, str) and _ISO_DATE_RE.match(d))
+    if not dates:
+        return None, 0, []
+    return dates[-1], 1, dates  # 一天一 row（trade_date 是 conflict key）
+
+
+def _local_paper_trades_state() -> tuple[str | None, int, list[str]]:
+    """canonical 各策略 entries 的（全局最新 trade_date, 該日策略 row 數, 全部日期）。
+
+    只有「latest 停在全局最新日」的策略計入當日 row 數 —— 已停更/下架策略的
+    latest 停在舊日期，不會把 DB 端正常的部分入庫誤判成缺 row。
+    """
+    pt = json.loads((STORAGE / "paper_trading.json").read_text())
+    latest_per_strategy: list[str] = []
+    all_dates: set[str] = set()
+    for key, val in pt.items():
+        if key.startswith("_") or not isinstance(val, dict):
+            continue
+        dates = []
+        for e in val.get("entries") or []:
+            if not isinstance(e, dict):
+                continue
+            d = e.get("trade_date") or e.get("data_date") or e.get("date")
+            if isinstance(d, str) and _ISO_DATE_RE.match(d):
+                dates.append(d)
+        if dates:
+            latest_per_strategy.append(max(dates))
+            all_dates.update(dates)
+    if not latest_per_strategy:
+        return None, 0, []
+    latest = max(latest_per_strategy)
+    return latest, sum(1 for d in latest_per_strategy if d == latest), sorted(all_dates)
+
+
+def _db_landing_probe(ss, table: str, date_col: str) -> tuple[str | None, int]:
+    """DB 端（最新 date, 該日 row 數）。失敗 raise —— 呼叫端轉 finding，不 silent。"""
+    base = f"{ss.SUPABASE_URL}/rest/v1/{table}"
+    req = urllib.request.Request(
+        f"{base}?select={date_col}&order={date_col}.desc&limit=1", headers=ss.HEADERS)
+    rows = json.loads(ss._urlopen(req, timeout=20).read().decode("utf-8"))
+    if not rows:
+        return None, 0
+    latest = str(rows[0][date_col])
+    req2 = urllib.request.Request(
+        f"{base}?select={date_col}&{date_col}=eq.{latest}",
+        headers={**ss.HEADERS, "Prefer": "count=exact", "Range-Unit": "items", "Range": "0-0"})
+    resp = ss._urlopen(req2, timeout=20)
+    content_range = (resp.headers.get("Content-Range") or "").rsplit("/", 1)[-1]
+    if not content_range.isdigit():
+        raise ValueError(f"unexpected Content-Range for {table}: {content_range!r}")
+    return latest, int(content_range)
+
+
+def _open_db_landing_repair_task(table: str, msg: str, recovery: str, local_latest: str) -> str:
+    """開/確認修復單（actuator：finding 不留死局）。失敗 raise，呼叫端 fail-loud。
+
+    dedup：id 以 (table, canonical 最新日) 為 key —— 缺口未解時每天重跑 checkup
+    不會重複開單；缺口日推進（= 新 episode）才開新單。
+
+    priority：這裡送 1，但 admission 會把機器來源的 P1 夾到 P2（dispatch-lanes R2，
+    見 `next_tasks.clamp_machine_priority_inflation`）。回傳訊息報**實際入池**的
+    priority，不報我們要的那個 —— 同 compute_queue lazypack repair producer。
+    """
+    from volpred.ops.next_tasks import append_task_record
+
+    task_id = f"db_landing_repair_{table}_{local_latest}"
+    record = {
+        "id": task_id,
+        "title": f"【自動補救】DB 入庫落後：{table}",
+        "description": (
+            f"daily_checkup db_landing 偵測：{msg}\n\n"
+            f"修復（正式 CLI，不手改 DB）：\n  {recovery}\n\n"
+            "修完重跑 `uv run python scripts/daily_checkup.py` 驗證 finding 消失後才關單。"
+        ),
+        "task_type": "platform_ops",
+        "priority": 1,
+        "status": "pending",
+        "source": "daily_checkup_db_landing",
+        "created_at": _now.isoformat(),
+        "trigger": "db_landing_mismatch",
+    }
+    rec, created = append_task_record(
+        record, path=STORAGE / "next_tasks.json", if_exists="skip")
+    if created:
+        return f"已開修復單 {task_id}（P{rec.get('priority')}）"
+    return f"修復單已存在 {task_id}"
+
+
+def _db_landing_findings() -> list[dict]:
+    """result-level 入庫驗證：canonical vs Supabase。對齊 → 安靜；不一致 → finding+修復單。"""
+    ss = _supabase_mod()
+    if ss._remote_reads_blocked():
+        # 測試/CI 明確封鎖遠端讀 —— 留 stderr trace（no-silent-fallback），不產 finding
+        print("[daily_checkup] db_landing: remote reads blocked (VOLPRED_NO_REMOTE_READ=1) — skip",
+              file=sys.stderr)
+        return []
+    if not ss.SUPABASE_URL or not ss.SUPABASE_KEY:
+        return [_finding(
+            "data_freshness", "warn",
+            "db_landing: 缺 Supabase 憑證（.env.local）—— DB 入庫驗證無法執行",
+            recovery="確認 .env.local 的 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY")]
+    out: list[dict] = []
+    for table, date_col, local_fn, recovery in DB_LANDING_TABLES:
+        try:
+            local_latest, local_count, local_dates = globals()[local_fn]()
+        except Exception as exc:  # silent-ok: not silent — warn finding below IS the trace
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: canonical 讀取失敗: {exc}"))
+            continue
+        if local_latest is None:
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: canonical（paper_trading.json）無可比對資料"))
+            continue
+        try:
+            db_latest, db_count = _db_landing_probe(ss, table, date_col)
+        except Exception as exc:  # silent-ok: not silent — warn finding below IS the trace
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: DB 查詢失敗（無法驗證入庫）: {exc}"))
+            continue
+        msg, sev = None, "warn"
+        if db_latest is None:
+            sev = "critical"
+            msg = f"DB 表全空，canonical 最新 {local_latest}（{len(local_dates)} 個資料日）完全沒入庫"
+        elif db_latest < local_latest:
+            behind = sum(1 for d in local_dates if d > db_latest)
+            sev = "critical" if behind >= 3 else "warn"
+            msg = (f"DB 落後 canonical：DB 最新 {db_latest} < 本地最新 {local_latest}"
+                   f"（落後 {behind} 個資料日）")
+        elif db_latest == local_latest and db_count < local_count:
+            msg = (f"最新日 {local_latest} 入庫不完整：DB {db_count} row < "
+                   f"canonical {local_count} row")
+        elif db_latest > local_latest:
+            msg = (f"DB 端最新 {db_latest} 比 canonical {local_latest} 新 —— "
+                   "canonical 是 SoT，不應發生（查誰在直寫 DB）")
+        if msg is None:
+            continue  # 對齊 → 安靜
+        try:
+            receipt = _open_db_landing_repair_task(table, msg, recovery, local_latest)
+        except Exception as exc:
+            receipt = None
+            out.append(_finding("data_freshness", "warn",
+                                f"db_landing/{table}: 修復單建立失敗（actuator 故障，須人工開單）: {exc}"))
+        full_msg = f"db_landing/{table}: {msg}" + (f" —— {receipt}" if receipt else "")
+        out.append(_finding("data_freshness", sev, full_msg, recovery=recovery))
     return out
 
 
@@ -598,23 +814,190 @@ def check_reproducibility() -> list[dict]:
     return findings
 
 
+_WORKTREE_REF = re.compile(r"\.claude/worktrees/([A-Za-z0-9._-]+)")
+
+
+def check_worktree_reconcile() -> list[dict]:
+    """Open tasks whose worktree no longer exists on disk.
+
+    k1709 sat status=blocked from 2026-07-14 to 2026-07-19 pointing at
+    .claude/worktrees/dispatch-slot-2-c873d04d-k1709. The directory was gone, so
+    the task could never run; nothing looked for that, so it never closed either
+    — a pure zombie. This dimension is the missing feedback loop: it reconciles
+    task references against what is actually on disk.
+
+    The branch is what decides severity. Checkout gone but branch alive => the
+    commits are still reachable, so it is a bookkeeping problem (warn). Branch
+    gone too => the work is reachable only via reflog and is on the clock before
+    gc, which is the artifact-loss case (critical, per
+    feedback_no_research_artifact_loss).
+
+    in_progress is excluded on purpose: a task actively repairing a vanished
+    worktree necessarily names it, and flagging the repair as the disease is how
+    a checkup trains its reader to ignore it.
+    """
+    out = []
+    nt = STORAGE / "next_tasks.json"
+    try:
+        tasks = json.loads(nt.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        return [_finding("worktree_reconcile", "warn", f"讀不到 next_tasks.json: {exc}")]
+
+    wt_dir = ROOT / ".claude" / "worktrees"
+    try:
+        refs = subprocess.run(
+            ["git", "-C", str(ROOT), "for-each-ref", "--format=%(refname:short)"],
+            capture_output=True, text=True, timeout=20, check=True,
+        ).stdout.split()
+    except (subprocess.SubprocessError, OSError) as exc:
+        refs = []
+        out.append(_finding("worktree_reconcile", "warn", f"讀不到 git refs（branch 存活無法判定）: {exc}"))
+
+    for t in tasks:
+        if t.get("status") not in ("pending", "blocked", "queued"):
+            continue
+        names = set(_WORKTREE_REF.findall(json.dumps(t, ensure_ascii=False)))
+        missing = sorted(n for n in names if not (wt_dir / n).exists())
+        if not missing:
+            continue
+        # A worktree named wt/<name> or exp/<slug> may still have its branch.
+        orphaned = [n for n in missing if not any(n in r for r in refs)]
+        sev = "critical" if orphaned else "warn"
+        detail = f"branch 也不存在（成果僅存 reflog）: {orphaned}" if orphaned else "branch 尚存，commits 可救回"
+        out.append(_finding(
+            "worktree_reconcile", sev,
+            f"殭屍任務 {t.get('id')} [{t.get('status')}] 指向已消失的 worktree {missing} —— {detail}",
+            recovery=("查 git reflog / merge-base 裁定 commits 是否已進 main；"
+                      "已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"),
+        ))
+
+    try:
+        wt_list = subprocess.run(
+            ["git", "-C", str(ROOT), "worktree", "list", "--porcelain"],
+            capture_output=True, text=True, timeout=20, check=True,
+        ).stdout
+        prunable = wt_list.count("prunable")
+        if prunable:
+            out.append(_finding(
+                "worktree_reconcile", "warn",
+                f"git worktree 有 {prunable} 條 stale 註冊（目錄已不存在但註冊還在）",
+                recovery="uv run python scripts/git_writer_lock.py run -- worktree prune",
+            ))
+    except (subprocess.SubprocessError, OSError) as exc:
+        out.append(_finding("worktree_reconcile", "warn", f"worktree list 失敗: {exc}"))
+
+    return out
+
+
+#: The checkup's dimensions, in report order. Every entry must have a matching
+#: module-level ``check_<name>``. This is a public constant rather than a dict
+#: built inside ``run_all`` so that tests can enumerate the real list instead of
+#: hand-copying it: 2026-07-20 the ``worktree_reconcile`` dimension was added to
+#: ``run_all`` but not to the stub tuple in
+#: ``test_run_all_turns_reproducibility_checker_exception_into_warning``, so the
+#: real checker kept running inside a unit test. It is environment-dependent —
+#: on a dev box the worktrees exist and it stays quiet, on CI the clone has
+#: neither the checkouts nor the branches and it returns *critical* — so the test
+#: passed locally and failed only on CI, which is the worst place to find out.
+def check_task_pool_pressure() -> list[dict]:
+    """任務池水位 + 吞吐淨增（boss Telegram msg 1237, 2026-07-21）。
+
+    老闆是自己數了 10 天的 created/succeeded 才發現池子在單調膨脹的 —— 那是儀器
+    該做的事。淨增連續為正就 alert，下次不必等人親自察覺。
+    """
+    from volpred.ops.pool_pressure import evaluate_drain_first, load_policy, pool_snapshot
+
+    out: list[dict] = []
+    try:
+        snap = pool_snapshot()
+        policy = load_policy()
+        # persist=False：體檢是觀測者，不該順手改 latch 狀態（那是 generator 閘門的事）。
+        state = evaluate_drain_first(snapshot=snap, persist=False)
+    except Exception as exc:  # noqa: BLE001
+        return [_finding("task_pool_pressure", "warn", f"水位計算失敗: {type(exc).__name__}: {exc}")]
+
+    cap = int(policy["pending_cap"])
+    if snap.pending > cap:
+        out.append(_finding(
+            "task_pool_pressure", "warn",
+            f"pending={snap.pending} 超過 drain-first 閾值 {cap}"
+            f"（{snap.pending_by_priority}）—— 自動 refill/discovery 應已停止",
+            recovery="清既有 pending；超齡任務走 superseded / closed_no_action 正式裁決",
+        ))
+
+    streak = snap.net_positive_streak
+    if streak >= 3:
+        recent = "、".join(f"{r['date'][5:]} +{r['net']}" for r in snap.daily[:streak][:5])
+        out.append(_finding(
+            "task_pool_pressure", "critical",
+            f"連續 {streak} 個完整日 created > succeeded（{recent}）—— 池子單調膨脹，"
+            "生成端跑贏消化端",
+            recovery="檢查 drain-first 閘是否生效（storage/ops/drain_first_state.json）；"
+                     "若 active=true 仍淨增，代表有 generator 繞過閘門（看 stderr 的 "
+                     "[pool_pressure] WARN 找出是誰）",
+        ))
+
+    if state.get("active"):
+        out.append(_finding(
+            "task_pool_pressure", "info",
+            f"drain-first 生效中（entered_at={state.get('entered_at')}）；"
+            f"退出條件 pending<{cap} 且連續 {state['exit_streak_days']} 日 succeeded>=created "
+            f"（目前 {'已' if state['drain_streak_met'] else '未'}滿足吞吐條件）",
+        ))
+    return out
+
+
+def check_fire_manifest_hook() -> list[dict]:
+    """The write-time ownership declaration is mechanical only while wired."""
+    settings_path = ROOT / ".claude" / "settings.json"
+    hook_path = ROOT / "scripts" / "hooks" / "record_fire_manifest.py"
+    try:
+        settings = json.loads(settings_path.read_text(encoding="utf-8"))
+        groups = settings.get("hooks", {}).get("PostToolUse", [])
+        installed = any(
+            "record_fire_manifest.py" in str(hook.get("command", ""))
+            for group in groups
+            if group.get("matcher") == "Edit|Write|MultiEdit|NotebookEdit"
+            for hook in group.get("hooks", [])
+        )
+    except (OSError, ValueError, AttributeError):
+        installed = False
+    if hook_path.is_file() and installed:
+        return []
+    return [_finding(
+        "fire_manifest_hook", "warn",
+        "commit ownership 的 PostToolUse 宣告 hook 未安裝；shadow 覆蓋率會退化為 0",
+        recovery="確認 scripts/hooks/record_fire_manifest.py 存在且註冊於 .claude/settings.json PostToolUse",
+    )]
+
+
+CHECKUP_DIMENSIONS = (
+    "data_freshness",
+    "cron_completion",
+    "content_pipeline",
+    "live_freshness",
+    "live_cache",
+    "mission_progress",
+    "alert_conditions",
+    "reader_metrics",
+    "dedup_calibration",
+    "reproducibility",
+    "worktree_reconcile",
+    "task_pool_pressure",
+    "fire_manifest_hook",
+)
+
+
+def _checker(name: str):
+    """Resolve ``check_<name>`` at call time so monkeypatching still takes effect."""
+    return globals()[f"check_{name}"]
+
+
 def run_all() -> dict:
-    dims = {
-        "data_freshness": check_data_freshness,
-        "cron_completion": check_cron_completion,
-        "content_pipeline": check_content_pipeline,
-        "live_freshness": check_live_freshness,
-        "live_cache": check_live_cache,
-        "mission_progress": check_mission_progress,
-        "alert_conditions": check_alert_conditions,
-        "reader_metrics": check_reader_metrics,
-        "dedup_calibration": check_dedup_calibration,
-        "reproducibility": check_reproducibility,
-    }
     findings = []
-    for name, fn in dims.items():
+    for name in CHECKUP_DIMENSIONS:
         try:
-            findings.extend(fn())
+            findings.extend(_checker(name)())
         except Exception as exc:  # noqa: BLE001 — fail-open per no-silent-fallback：印出
             findings.append(_finding(name, "warn", f"檢查本身失敗: {exc}"))
     crit = [f for f in findings if f["severity"] == "critical"]

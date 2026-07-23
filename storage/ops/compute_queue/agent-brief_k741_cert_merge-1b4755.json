@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k741_cert_merge-1b4755",
+  "title": "K741/K904 multiplicity disclosure + Codex certification (unblock merge, assign_1238781f followup)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k741_cert_merge-1b4755.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5741c175-k741",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5741c175-k741/experiments/k741/k741_cert_merge_summary.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k741_cert_merge-1b4755.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T04:08:48Z",
+  "started_at": "2026-07-20T05:00:04Z",
+  "completed_at": "2026-07-20T06:26:42Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k741_cert_merge-1b4755.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k741_cert_merge-1b4755.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5741c175-k741/experiments/k741/k741_cert_merge_summary.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k741_cert_merge-1b4755.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5741c175-k741",
+  "claude_followup": {
+    "brief": "收件：(1) 驗 k741_cert_merge_summary.json 的 Student/Welch 選擇與 Holm 數字對得上 canonical JSON；(2) 確認 review_verdict.json x2 存在且 reviewed_sha256 與當前檔案 hash 相符（uv run python scripts/experiment_gates.py 檢查）；(3) codex verdict 若 FAIL 則建 remediation task、不要 merge；(4) PASS 則走正式 bash scripts/merge_worktree.sh dispatch-slot-1-5741c175-k741 合併；(5) 合併後解除 feed 更正 blocked task（assign 見 next_tasks 內 k741_nfp_feed_corrections），依 P1/P2/P3 順序更正 8 篇文章；(6) 寫 knowledge.json。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k741_cert_merge.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k741_cert_merge-1b4755.md",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-5741c175-k741/experiments/k741"
+  },
+  "followup_dispatched_at": "2026-07-20T06:40:43Z",
+  "followup_next_task_id": "assign_759a28f3"
+}

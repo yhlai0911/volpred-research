@@ -28169,7 +28169,7 @@
  {
   "item_id": "727e23ee",
   "category": "K1258",
-  "content": "K1258 Forgetting-Factor BMA volatility forecast (extending K1257 with exponentially-discounted log-posterior, Raftery-Karny-Ettler 2010) — closure RETRACTED-AND-DOWNGRADED 2026-04-29 after Codex primary-path re-review (task task-mojhf3d0-1gfgyn, session 019dd73b, 2m 21s) verdict CONDITIONAL PASS (vs subagent v1 PASS-with-caveats 0.88; contradicts at level not severity — primary conclusions accepted but caveats expanded). 5th and last fallback-gate closure reviewed in E078 systematic plan. Setup: 3 assets (SPY/GLD/0050.TW) × 5 lambdas (1.0/0.99/0.975/0.95/0.9) × OOS 2020-2026, in 5.83 min wall (worktree agent a09ba983). Primary conclusions ACCEPTED as descriptive findings: H1 FAIL (no Harvey pass anywhere; max |t|=2.659 for GLD λ=0.975 / 0050.TW best λ=0.9 only 1.59), H2 PASS (regime switching restored — weight_switch_freq SPY 0.0108→0.1987 ~18.5x / GLD ~9.7x / 0050.TW ~82x), H3 PASS (optimal λ asset-specific BUT identified by ex-post OOS argmin QLIKE not CV/AIC), H4 λ=1.0 default. Codex NEW MAJOR caveats (acknowledged): (1) MAJOR-1 K1257 invalid-model posterior contamination REPLICATED at k1258_forgetting_factor_bma.py:593-598 — when ll_row invalid for a model on day t, code only adds likelihood for valid models but invalid models RETAIN decayed prior + all normalize together. Forgetting factor only decays stale weight slowly, doesn't fix bug. (2) MAJOR-2 unconverged fits accepted — fit functions store res.success as 'converged' but no downstream exclusion (build_forecasts:489 only checks state is not None). results.json has NO convergence count, NaN count, dropped-model-day count → cannot verify whether MAJOR-1 actually fired in this run. MED caveats: (1) MED-1 H3 ex-post argmin not CV/AIC; (2) MED-2 'BMA family structurally insufficient' wording overreaches given evidence base of 3 assets × 5 λ × 1 OOS window — should be 'in K1257/K1258 setup, forgetting factor doesn't deliver Harvey-gated predictive gain'. MINOR: λ=1.0 reduce-to-K1257 not code-asserted. Implementation correctness: forgetting factor order correct (decay log_w first, then add log-likelihood); logsumexp + log_floor=-700 numerically stable for λ grid; H1/H2/H3/H4 all computable from results.json. Pending fixes (single coordinated K1257+K1258 family slot): (a) invalid-model day → log_w=-inf before normalize, (b) treat converged=False as unavailable + log convergence counts, (c) align README + knowledge wording to in-scope finding, (d) add λ=1.0 vs K1257 smoke test assert. After fixes + re-run identical numbers → confidence raise to 0.85+. E078 systematic plan COMPLETE (5/5 fallback closures reviewed). Pattern: 100% hit rate of primary-path Codex finding unsignaled issues; severity bimodal by family — P5-ABM (K1261/K1262/K1262b) all FAIL with structural bugs, BMA (K1257/K1258) both CONDITIONAL PASS with narrower shared bug, meta-analysis (K1259) FAIL with audit-method blind spot. Cross-model review NOT optional confirmed across 3 distinct code bases. Reviewer source: Codex CLI 0.121.0 primary path (post-restoration).",
+  "content": "K1258 Forgetting-Factor BMA volatility forecast (extending K1257 with exponentially-discounted log-posterior, Raftery-Karny-Ettler 2010) — closure RETRACTED-AND-DOWNGRADED 2026-04-29 after Codex primary-path re-review (task task-mojhf3d0-1gfgyn, session 019dd73b, 2m 21s) verdict CONDITIONAL PASS (vs subagent v1 PASS-with-caveats 0.88; contradicts at level not severity — primary conclusions accepted but caveats expanded). 5th and last fallback-gate closure reviewed in E078 systematic plan. Setup: 3 assets (SPY/GLD/0050.TW) × 5 lambdas (1.0/0.99/0.975/0.95/0.9) × OOS 2020-2026, in 5.83 min wall (worktree agent a09ba983). Primary conclusions ACCEPTED as descriptive findings: H1 FAIL (no Harvey pass anywhere; max |t|=2.659 for GLD λ=0.975 / 0050.TW best λ=0.9 only 1.59), H2 PASS (regime switching restored — weight_switch_freq SPY 0.0108→0.1987 ~18.5x / GLD ~9.7x / 0050.TW ~82x), H3 PASS (optimal λ asset-specific BUT identified by ex-post OOS argmin QLIKE not CV/AIC), H4 λ=1.0 default. Codex NEW MAJOR caveats (acknowledged): (1) MAJOR-1 K1257 invalid-model posterior contamination REPLICATED at k1258_forgetting_factor_bma.py:593-598 — when ll_row invalid for a model on day t, code only adds likelihood for valid models but invalid models RETAIN decayed prior + all normalize together. Forgetting factor only decays stale weight slowly, doesn't fix bug. (2) MAJOR-2 unconverged fits accepted — fit functions store res.success as 'converged' but no downstream exclusion (build_forecasts:489 only checks state is not None). results.json has NO convergence count, NaN count, dropped-model-day count → cannot verify whether MAJOR-1 actually fired in this run. MED caveats: (1) MED-1 H3 ex-post argmin not CV/AIC; (2) MED-2 'BMA family structurally insufficient' wording overreaches given evidence base of 3 assets × 5 λ × 1 OOS window — should be 'in K1257/K1258 setup, forgetting factor doesn't deliver Harvey-gated predictive gain'. MINOR: λ=1.0 reduce-to-K1257 not code-asserted. Implementation correctness: forgetting factor order correct (decay log_w first, then add log-likelihood); logsumexp + log_floor=-700 numerically stable for λ grid; H1/H2/H3/H4 all computable from results.json. Pending fixes (single coordinated K1257+K1258 family slot): (a) invalid-model day → log_w=-inf before normalize, (b) treat converged=False as unavailable + log convergence counts, (c) align README + knowledge wording to in-scope finding, (d) add λ=1.0 vs K1257 smoke test assert. After fixes + re-run identical numbers → confidence raise to 0.85+. E078 systematic plan COMPLETE (5/5 fallback closures reviewed). Pattern: 100% hit rate of primary-path Codex finding unsignaled issues; severity bimodal by family — P5-ABM (K1261/K1262/K1262b) all FAIL with structural bugs, BMA (K1257/K1258) both CONDITIONAL PASS with narrower shared bug, meta-analysis (K1259) FAIL with audit-method blind spot. Cross-model review NOT optional confirmed across 3 distinct code bases. Reviewer source: Codex CLI 0.121.0 primary path (post-restoration).\n\n--- REVISION 2026-07-20 (headline-realign remediation + Codex round-1 re-review) ---\nCodex primary-path review of the K1257/K1258 realign remediation: verdict CONDITIONAL PASS, 0 SEVERE (artifact storage/ops/codex_reviews/k1257_k1258_realign_verdict.md). No empirical reversal; H1 FAIL / H2 PASS / H3 FAIL stand. Corrections and newly-scoped claims:\n(1) SPY lambda=0.90 weight_switch_freq is 0.1981012658227848, not the 0.1987 quoted earlier in this entry — the earlier value is pre-remediation.\n(2) H2 RE-SCOPED. The code at k1258_forgetting_factor_bma.py:885 tests switch frequency >= 2x the lambda=1 baseline. It does NOT test whether switches align with VIX regimes. H2 PASS is retained but the claim is now \"switching / deconcentration restored\", not \"regime tracking restored\". The earlier wording in this entry overstates what was tested.\n(3) FAMILY-LEVEL OVER-EXTRAPOLATION RETRACTED. H1 FAIL is descriptive of this design only: 3 assets x 5 fixed lambda x one 2020-2026 OOS window. It is not evidence about the BMA family and does not support telling anyone to stop investing in BMA. Untested: adaptive/estimated lambda, other model pools, other assets, other windows, switching models / mixture-of-experts / regime-conditional priors.\n(4) Harvey range corrected to +0.20712577653542827 (SPY lambda=0.99) .. +2.659073649322139 (GLD lambda=0.975). The previously documented \"+1.3 to +2.66\" understated the spread at the low end.\n(5) \"lambda=1 QLIKE byte-identical to K1257\" now QUALIFIED: it holds against K1257's qlike_own_sample (SPY -8.227435956662777 both sides), NOT against K1257's current common-sample headline (-8.186392692633385 @ n=1518). K1258's lambda sweep runs entirely on own-sample and was never realigned — internally apples-to-apples across lambda, but K1257 headline and K1258 tables must never be placed side by side.\n(6) MAJOR-1 posterior contamination: K1257 now uses -inf absorbing weights; K1258 does NOT match it — log_floor=-700 (:613) lets a dropped model revive as a tiny finite weight (SPY lambda=1 GJR-t = 8.467e-305). K1258 still lacks posterior_semantics / drop-cause fields. Open under task k1257_k1258_semantics_and_certification.\n(7) H4 correctly recorded as RECOMMENDATION rather than a pseudo PASS/FAIL (k1258_results.json:773).\n(8) Multiplicity: 12 cells, Bonferroni 0.05/12 = 0.00417 vs |t|>3 ~= p 0.0027 — the gate is de-facto FWER-protective; now documented in the README.\n(9) reproduce_spec.json added (check_experiment_artifacts PASS, strict; three forecasts_*.parquet caches pinned by sha256). review_verdict.json still absent, so experiment_gates.py review-certification reports UNCERTIFIED pending Codex round 2.",
   "evidence": [
    "experiments/k1258/k1258_results.json",
    "experiments/k1258/codex_review.md",
@@ -28180,7 +28180,20 @@
   "created_at": "2026-04-25T16:45:46.904969+00:00",
   "main_thread_reviewed": true,
   "codex_reviewed": false,
-  "review_note": "Codex blocked by ~/.codex/config.toml gpt-5.5 unavailable; main-thread 10-check used as alternative integrity gate (codex_review.md commit 9e924653)."
+  "review_note": "Codex blocked by ~/.codex/config.toml gpt-5.5 unavailable; main-thread 10-check used as alternative integrity gate (codex_review.md commit 9e924653).",
+  "revisions": [
+   {
+    "revised_at": "2026-07-20T07:16:57.554960+08:00",
+    "actor": "hourly-slot-2-12a82fe8df354405949f674c05561895",
+    "reason": "K1258 headline-realign remediation + Codex round-1 CONDITIONAL PASS (storage/ops/codex_reviews/k1257_k1258_realign_verdict.md): supersede pre-realign headline/DM numbers, retract over-scoped claims, record what remains uncertified",
+    "fields": [
+     "content"
+    ],
+    "before": {
+     "content": "K1258 Forgetting-Factor BMA volatility forecast (extending K1257 with exponentially-discounted log-posterior, Raftery-Karny-Ettler 2010) — closure RETRACTED-AND-DOWNGRADED 2026-04-29 after Codex primary-path re-review (task task-mojhf3d0-1gfgyn, session 019dd73b, 2m 21s) verdict CONDITIONAL PASS (vs subagent v1 PASS-with-caveats 0.88; contradicts at level not severity — primary conclusions accepted but caveats expanded). 5th and last fallback-gate closure reviewed in E078 systematic plan. Setup: 3 assets (SPY/GLD/0050.TW) × 5 lambdas (1.0/0.99/0.975/0.95/0.9) × OOS 2020-2026, in 5.83 min wall (worktree agent a09ba983). Primary conclusions ACCEPTED as descriptive findings: H1 FAIL (no Harvey pass anywhere; max |t|=2.659 for GLD λ=0.975 / 0050.TW best λ=0.9 only 1.59), H2 PASS (regime switching restored — weight_switch_freq SPY 0.0108→0.1987 ~18.5x / GLD ~9.7x / 0050.TW ~82x), H3 PASS (optimal λ asset-specific BUT identified by ex-post OOS argmin QLIKE not CV/AIC), H4 λ=1.0 default. Codex NEW MAJOR caveats (acknowledged): (1) MAJOR-1 K1257 invalid-model posterior contamination REPLICATED at k1258_forgetting_factor_bma.py:593-598 — when ll_row invalid for a model on day t, code only adds likelihood for valid models but invalid models RETAIN decayed prior + all normalize together. Forgetting factor only decays stale weight slowly, doesn't fix bug. (2) MAJOR-2 unconverged fits accepted — fit functions store res.success as 'converged' but no downstream exclusion (build_forecasts:489 only checks state is not None). results.json has NO convergence count, NaN count, dropped-model-day count → cannot verify whether MAJOR-1 actually fired in this run. MED caveats: (1) MED-1 H3 ex-post argmin not CV/AIC; (2) MED-2 'BMA family structurally insufficient' wording overreaches given evidence base of 3 assets × 5 λ × 1 OOS window — should be 'in K1257/K1258 setup, forgetting factor doesn't deliver Harvey-gated predictive gain'. MINOR: λ=1.0 reduce-to-K1257 not code-asserted. Implementation correctness: forgetting factor order correct (decay log_w first, then add log-likelihood); logsumexp + log_floor=-700 numerically stable for λ grid; H1/H2/H3/H4 all computable from results.json. Pending fixes (single coordinated K1257+K1258 family slot): (a) invalid-model day → log_w=-inf before normalize, (b) treat converged=False as unavailable + log convergence counts, (c) align README + knowledge wording to in-scope finding, (d) add λ=1.0 vs K1257 smoke test assert. After fixes + re-run identical numbers → confidence raise to 0.85+. E078 systematic plan COMPLETE (5/5 fallback closures reviewed). Pattern: 100% hit rate of primary-path Codex finding unsignaled issues; severity bimodal by family — P5-ABM (K1261/K1262/K1262b) all FAIL with structural bugs, BMA (K1257/K1258) both CONDITIONAL PASS with narrower shared bug, meta-analysis (K1259) FAIL with audit-method blind spot. Cross-model review NOT optional confirmed across 3 distinct code bases. Reviewer source: Codex CLI 0.121.0 primary path (post-restoration)."
+    }
+   }
+  ]
  },
  {
   "item_id": "f16c1ade",
@@ -28291,7 +28304,7 @@
  {
   "item_id": "f63a3a42",
   "category": "K1257/methodology-BMA",
-  "content": "K1257 Bayesian Model Averaging (BMA) volatility forecast — gate-closing review completed 2026-04-29 via Codex CLI primary path (task task-moje58sy-9qtdx6, session 019dd6e7, 2m 37s) — verdict CONDITIONAL PASS (0 CRIT/0 SEV/1 MAJOR/2 MED/2 MINOR). Closure pending since 2026-04-20 because Codex CLI 4-day blocker started 2026-04-26; this is FIRST review (not re-verification). Setup: 6 candidate models (GARCH/GJR-N/GJR-t/EGARCH/HAR_ABS/A4f_IV2) × 3 assets (SPY/GLD/0050.TW) × OOS 2020-2026, with GLD using ^GVZ not VIX (README claims 7 models incl. HAR-RV/A4f-VIX2/Realized-GARCH but implementation actually 6 — see Codex MED-2). Primary conclusions ACCEPTED: H1 PARTIAL (SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior collapse to GJR-t), H2 FAIL (no asset passes Harvey vs equal-weight ensemble — confirms K482 equal-weight-puzzle extends to Bayesian), H3 FAIL (posterior degenerates within ~500 days; ~500 from visual inspection, not computed metric). Codex MAJOR caveat: invalid-model posterior contamination risk — when a model's h_pred is invalid on day t, the code skips likelihood update but preserves prior log_weight and re-normalizes alongside valid models (k1257_bma_volatility.py:551). Pre-update support != post-normalize support → silent posterior bias if any model had convergence failure or NaN forecast. results.json does NOT log convergence counts so unknown how often this fired. K1258 inherits same structure. MED-1 non-convergence handling: scipy.optimize.minimize res.success=False not treated as unavailable. MED-2 README drift: 6 vs 7 models / HAR_ABS vs HAR-RV / A4f_IV2 vs A4f-VIX2 / GLD GVZ-not-VIX. MINOR README time-index ambiguity + '~500 days' not byte-computed metric. Lookahead PASS: returns[s:t] uses t-1; forecast formed before y_t observed. Likelihood normalization PASS: logsumexp correct. Refit cadence symmetric: 6 models all 63-day. Cross-family pattern check (vs K1259/K1261/K1262/K1262b all FAIL): K1257 is BMA family with different code base; bug class is family-specific (stale-posterior vs P5-ABM negative-baseline threshold). Subagent never reviewed K1257 (was blocked by Codex CLI from 2026-04-20); Codex caught MAJOR on first pass — consistent with E078 'cross-model review NOT optional' principle. Pending fixes (subsequent slot, K1257+K1258 family fix): (a) invalid-model day -> log_weight=-inf before normalize OR strict valid mask for both forecast and posterior, (b) treat res.success=False as unavailable, (c) log convergence counts to results.json, (d) align README with implementation, (e) compute explicit concentration-hitting-time metric. After fixes + re-run identical numbers → confidence can raise to 0.85+. Reviewer source: Codex CLI 0.121.0 primary path (gate-closing review).",
+  "content": "K1257 Bayesian Model Averaging (BMA) volatility forecast — gate-closing review completed 2026-04-29 via Codex CLI primary path (task task-moje58sy-9qtdx6, session 019dd6e7, 2m 37s) — verdict CONDITIONAL PASS (0 CRIT/0 SEV/1 MAJOR/2 MED/2 MINOR). Closure pending since 2026-04-20 because Codex CLI 4-day blocker started 2026-04-26; this is FIRST review (not re-verification). Setup: 6 candidate models (GARCH/GJR-N/GJR-t/EGARCH/HAR_ABS/A4f_IV2) × 3 assets (SPY/GLD/0050.TW) × OOS 2020-2026, with GLD using ^GVZ not VIX (README claims 7 models incl. HAR-RV/A4f-VIX2/Realized-GARCH but implementation actually 6 — see Codex MED-2). Primary conclusions ACCEPTED: H1 PARTIAL (SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior collapse to GJR-t), H2 FAIL (no asset passes Harvey vs equal-weight ensemble — confirms K482 equal-weight-puzzle extends to Bayesian), H3 FAIL (posterior degenerates within ~500 days; ~500 from visual inspection, not computed metric). Codex MAJOR caveat: invalid-model posterior contamination risk — when a model's h_pred is invalid on day t, the code skips likelihood update but preserves prior log_weight and re-normalizes alongside valid models (k1257_bma_volatility.py:551). Pre-update support != post-normalize support → silent posterior bias if any model had convergence failure or NaN forecast. results.json does NOT log convergence counts so unknown how often this fired. K1258 inherits same structure. MED-1 non-convergence handling: scipy.optimize.minimize res.success=False not treated as unavailable. MED-2 README drift: 6 vs 7 models / HAR_ABS vs HAR-RV / A4f_IV2 vs A4f-VIX2 / GLD GVZ-not-VIX. MINOR README time-index ambiguity + '~500 days' not byte-computed metric. Lookahead PASS: returns[s:t] uses t-1; forecast formed before y_t observed. Likelihood normalization PASS: logsumexp correct. Refit cadence symmetric: 6 models all 63-day. Cross-family pattern check (vs K1259/K1261/K1262/K1262b all FAIL): K1257 is BMA family with different code base; bug class is family-specific (stale-posterior vs P5-ABM negative-baseline threshold). Subagent never reviewed K1257 (was blocked by Codex CLI from 2026-04-20); Codex caught MAJOR on first pass — consistent with E078 'cross-model review NOT optional' principle. Pending fixes (subsequent slot, K1257+K1258 family fix): (a) invalid-model day -> log_weight=-inf before normalize OR strict valid mask for both forecast and posterior, (b) treat res.success=False as unavailable, (c) log convergence counts to results.json, (d) align README with implementation, (e) compute explicit concentration-hitting-time metric. After fixes + re-run identical numbers → confidence can raise to 0.85+. Reviewer source: Codex CLI 0.121.0 primary path (gate-closing review).\n\n--- REVISION 2026-07-20 (headline-realign remediation + Codex round-1 re-review) ---\nCodex primary-path review of the realign remediation: verdict CONDITIONAL PASS, 0 SEVERE (artifact storage/ops/codex_reviews/k1257_k1258_realign_verdict.md). The (a)-(e) remediation list above is now CLOSED except (e). What changed and what did not:\n(1) Sample realignment DONE. headline BMA/Equal/GJR-t now share a common_mask = BMA n Equal n GJR-t (k1257_bma_volatility.py:675; regime QLIKE uses mask & common_mask at :706). SPY n_oos=1581 but n_common_sample=1518 — the 63-day gap is GJR-t invalid days traced to 1 non-converged refit out of 26 fits.\n(2) HEADLINE NUMBERS SUPERSEDED. SPY common-sample QLIKE: BMA=-8.186392692633385, Equal=-8.166751026857440, GJR-t=-8.135790746830748. The pre-realign SPY figures quoted earlier in this entry are own-sample, now stored separately as qlike_own_sample (SPY bma=-8.227435956662777 @ n=1581). Do not mix the two.\n(3) SPY DM-Harvey t vs GJR-t MOVED: -3.39750 -> -3.17394. Still clears |t|>3. Codex confirmed dm_harvey was never contaminated by the report-layer mismatch (it forms daily d=loss1-loss2 then takes np.isfinite(d), :641) — only the old headline table was.\n(4) VERDICTS UNCHANGED: H1 PARTIAL / H2 FAIL / H3 FAIL. No empirical reversal. Codex independently rebuilt the absorbing standard-BMA from experiments/k1258/forecasts_SPY.parquet and reproduced every headline and regime figure to the digit.\n(5) -inf absorbing state kept, not converted to revivable posterior. Codex sensitivity test (pause posterior update while a model is missing, resume from last common posterior) moved common BMA by 7.1e-7 and DM t by 5e-6 — immaterial, so no rerun was warranted for semantics alone.\n(6) Doc-only fixes applied this round: runtime 343.8s -> 369.6s (matches runtime_seconds), residual \"7 model x 2520\" / awaiting-execution text removed (implementation is and was 6 models), multiplicity disclosure added (m=3, Bonferroni 0.0167 vs |t|>3 ~= p 0.0027 = de-facto FWER protection), and the \"~500 days\" concentration claim explicitly labelled as eyeballed from k1257_weight_evolution.png. Remediation item (e) — a real concentration hitting-time / effective-number metric — remains NOT DONE.\n(7) STILL OPEN (task k1257_k1258_semantics_and_certification): machine-readable posterior/drop status fields (absorbing_dropped_models / ever_invalid_models / per-model final_weight_status); merge of the duplicated invalid_forecast_days and dropped_model_days counters (k1257_bma_volatility.py:576 increments both on the same branch); and a hash-bound review_verdict.json — experiment_gates.py review-certification still reports UNCERTIFIED for this directory.\n(8) reproduce_spec.json added (check_experiment_artifacts PASS, strict). Caveat recorded honestly: network=allow because the script calls yf.download directly and there is no source snapshot, so the spec pins entrypoint + seed + dependency module but NOT the input data. K1258 is better off here (parquet cache is pinnable).",
   "evidence": [
    "experiments/k1257/k1257_bma_volatility.py",
    "experiments/k1257/k1257_results.json",
@@ -28301,7 +28314,20 @@
    "experiments/k1257/codex_review.md (Codex primary-path CONDITIONAL PASS verdict 2026-04-29)"
   ],
   "confidence": 0.75,
-  "created_at": "2026-04-29T02:35:17.815224+00:00"
+  "created_at": "2026-04-29T02:35:17.815224+00:00",
+  "revisions": [
+   {
+    "revised_at": "2026-07-20T07:16:57.300674+08:00",
+    "actor": "hourly-slot-2-12a82fe8df354405949f674c05561895",
+    "reason": "K1257 headline-realign remediation + Codex round-1 CONDITIONAL PASS (storage/ops/codex_reviews/k1257_k1258_realign_verdict.md): supersede pre-realign headline/DM numbers, retract over-scoped claims, record what remains uncertified",
+    "fields": [
+     "content"
+    ],
+    "before": {
+     "content": "K1257 Bayesian Model Averaging (BMA) volatility forecast — gate-closing review completed 2026-04-29 via Codex CLI primary path (task task-moje58sy-9qtdx6, session 019dd6e7, 2m 37s) — verdict CONDITIONAL PASS (0 CRIT/0 SEV/1 MAJOR/2 MED/2 MINOR). Closure pending since 2026-04-20 because Codex CLI 4-day blocker started 2026-04-26; this is FIRST review (not re-verification). Setup: 6 candidate models (GARCH/GJR-N/GJR-t/EGARCH/HAR_ABS/A4f_IV2) × 3 assets (SPY/GLD/0050.TW) × OOS 2020-2026, with GLD using ^GVZ not VIX (README claims 7 models incl. HAR-RV/A4f-VIX2/Realized-GARCH but implementation actually 6 — see Codex MED-2). Primary conclusions ACCEPTED: H1 PARTIAL (SPY/GLD Harvey PASS t=-3.40/-3.38, 0050.TW FAIL posterior collapse to GJR-t), H2 FAIL (no asset passes Harvey vs equal-weight ensemble — confirms K482 equal-weight-puzzle extends to Bayesian), H3 FAIL (posterior degenerates within ~500 days; ~500 from visual inspection, not computed metric). Codex MAJOR caveat: invalid-model posterior contamination risk — when a model's h_pred is invalid on day t, the code skips likelihood update but preserves prior log_weight and re-normalizes alongside valid models (k1257_bma_volatility.py:551). Pre-update support != post-normalize support → silent posterior bias if any model had convergence failure or NaN forecast. results.json does NOT log convergence counts so unknown how often this fired. K1258 inherits same structure. MED-1 non-convergence handling: scipy.optimize.minimize res.success=False not treated as unavailable. MED-2 README drift: 6 vs 7 models / HAR_ABS vs HAR-RV / A4f_IV2 vs A4f-VIX2 / GLD GVZ-not-VIX. MINOR README time-index ambiguity + '~500 days' not byte-computed metric. Lookahead PASS: returns[s:t] uses t-1; forecast formed before y_t observed. Likelihood normalization PASS: logsumexp correct. Refit cadence symmetric: 6 models all 63-day. Cross-family pattern check (vs K1259/K1261/K1262/K1262b all FAIL): K1257 is BMA family with different code base; bug class is family-specific (stale-posterior vs P5-ABM negative-baseline threshold). Subagent never reviewed K1257 (was blocked by Codex CLI from 2026-04-20); Codex caught MAJOR on first pass — consistent with E078 'cross-model review NOT optional' principle. Pending fixes (subsequent slot, K1257+K1258 family fix): (a) invalid-model day -> log_weight=-inf before normalize OR strict valid mask for both forecast and posterior, (b) treat res.success=False as unavailable, (c) log convergence counts to results.json, (d) align README with implementation, (e) compute explicit concentration-hitting-time metric. After fixes + re-run identical numbers → confidence can raise to 0.85+. Reviewer source: Codex CLI 0.121.0 primary path (gate-closing review)."
+    }
+   }
+  ]
  },
  {
   "item_id": "k_fomc_2026_04_29_ex_post",
@@ -31301,8 +31327,8 @@
  },
  {
   "id": "k1396_har_rv_vs_a4f_paper9_c4",
-  "title": "K1396: HAR-RV vs A4f — Paper 9 C4 Non-inferiority (PASS)",
-  "body": "K1396 (PASS, Codex 0.132.0 review, 2026-05-22): HAR-RV benchmarks vs A4f under Patton QLIKE (OOS 2019-2026, n=1866, W=2000, refit q63, seed=42).\n\nMean QLIKE: HAR=1.5612, HAR_VIX=1.5229, A4f=1.5390.\nDM(A4f vs HAR): t=+0.87, p=0.39 — NOT Harvey-sig (|t|<3.0).\nDM(A4f vs HAR_VIX): t=-0.88, p=0.38 — NOT Harvey-sig.\nDM(HAR_VIX vs HAR): t=-2.60, p=0.009 — conventional sig only, NOT Harvey-sig.\n\nConclusion: A4f statistically non-inferior to HAR-type benchmarks under both r2-proxy (t=+0.29, p=0.77) and Patton QLIKE. A4f has 1.4% lower QLIKE than HAR (1.539 vs 1.561) but cannot claim Harvey-sig superiority.\n\nPaper 9 action: C4 honest limitation paragraph added to Section 7.4 (HAR-RV Benchmark Comparison). C4 status: ACKNOWLEDGED. HAR_VIX adding VIX² predictor to HAR achieves lowest QLIKE (1.523) but still not Harvey-sig vs A4f — all three are statistically indistinguishable at the Harvey threshold.",
+  "title": "K1396 更正: HAR-style daily-r² vs A4f 近似 — 非劣性宣稱撤回（superseded by K1379）",
+  "body": "K1396 更正版（2026-07-19 revise；原 2026-05-22 條目的公開宣稱經 2026-07-16 scope audit 判 FAIL_PUBLIC_CLAIM，本條目同步撤回）：\n\n原宣稱撤回：(1)「HAR-RV benchmark」— K1396 實際用 close-to-close daily r² 建 HAR-style 特徵，非 Corsi HAR-RV（需 intraday RV）；正確標籤 = HAR-style daily-r² NNLS。(2)「A4f non-inferiority PASS」— 未設 margin/reversed null/TOST，failure-to-reject 不能證明非劣性；撤回。(3) A4f 路徑為 blockwise steady-state-g 近似（每個 OOS 日 g 重設為無條件穩態，未遞迴 carry），與 K988 協定不符。(4) HAR-style daily-r²-VIX 巢套 daily-r²，raw QLIKE DM 不能支持 VIX 增量結論。\n\n保留為歷史診斷的數字（proxy=daily r²，僅描述性）：mean QLIKE HAR=1.5612 / HAR_VIX=1.5229 / A4f=1.5390；DM(A4f vs HAR) t=+0.87 p=0.39；DM(HAR_VIX vs HAR) t=-2.60 p=0.009（conventional only）。\n\nSuperseded by K1379（corrected Paper 9 daily-r² protocol）。文章更正：mile_7825c8a2、mile_7fbc61c8（已發佈）。憑證：experiments/k1396/{README.md, k1396_scope_audit.json, review_certification_20260716.md}。",
   "verdict": "PASS",
   "experiment_id": "K1396",
   "experiment_path": "experiments/k1396/",
@@ -31322,7 +31348,22 @@
   "related_experiments": [
    "K988"
   ],
-  "item_id": "9741caaf"
+  "item_id": "9741caaf",
+  "revisions": [
+   {
+    "revised_at": "2026-07-19T13:45:41.255445+08:00",
+    "actor": "main-interactive",
+    "reason": "k1396_scope_repair_daily_r2: withdraw HAR-RV/non-inferiority public claims per 2026-07-16 scope audit (FAIL_PUBLIC_CLAIM); relabel daily-r2 + steady-state A4f approximations",
+    "fields": [
+     "body",
+     "title"
+    ],
+    "before": {
+     "title": "K1396: HAR-RV vs A4f — Paper 9 C4 Non-inferiority (PASS)",
+     "body": "K1396 (PASS, Codex 0.132.0 review, 2026-05-22): HAR-RV benchmarks vs A4f under Patton QLIKE (OOS 2019-2026, n=1866, W=2000, refit q63, seed=42).\n\nMean QLIKE: HAR=1.5612, HAR_VIX=1.5229, A4f=1.5390.\nDM(A4f vs HAR): t=+0.87, p=0.39 — NOT Harvey-sig (|t|<3.0).\nDM(A4f vs HAR_VIX): t=-0.88, p=0.38 — NOT Harvey-sig.\nDM(HAR_VIX vs HAR): t=-2.60, p=0.009 — conventional sig only, NOT Harvey-sig.\n\nConclusion: A4f statistically non-inferior to HAR-type benchmarks under both r2-proxy (t=+0.29, p=0.77) and Patton QLIKE. A4f has 1.4% lower QLIKE than HAR (1.539 vs 1.561) but cannot claim Harvey-sig superiority.\n\nPaper 9 action: C4 honest limitation paragraph added to Section 7.4 (HAR-RV Benchmark Comparison). C4 status: ACKNOWLEDGED. HAR_VIX adding VIX² predictor to HAR achieves lowest QLIKE (1.523) but still not Harvey-sig vs A4f — all three are statistically indistinguishable at the Harvey threshold."
+    }
+   }
+  ]
  },
  {
   "item_id": "7c681d91",
@@ -40257,9 +40298,22 @@
   "experiment_id": "k1523_realized_kurtosis_vol",
   "experiment_path": "experiments/k1523_realized_kurtosis_vol/",
   "verdict": "NULL",
-  "needs_human": true,
+  "needs_human": false,
   "gap": "README 文字宣稱 TWII H1/H2 PASS（t=-3.14/-3.15），與 results.json 實際 DM t-stat（H1 t=-2.87, H2 t=-2.71）不符，且 JSON 頂層 verdict 與 per_asset_findings 的 supported 欄位皆為 false/NULL。需人工核對是否 README 沿用了 K1520 worktree salvage 前的舊跑法輸出、或 results.json 重跑後未同步更新 README，才能決定最終要記錄的 verdict。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:35:44.808805+08:00",
+    "actor": "hourly-slot-1-e5e7631ed316458ead427147cf60ee3d",
+    "reason": "K1523 needs_human 解除：README/results.json 矛盾已於 2026-07-14 由 README 自行更正並記載，非未決事項。本班獨立驗證 results.json 頂層 verdict=NULL、六假設 t_stat 逐一比對相符（SPY -2.27/-2.44/-1.06、TWII -2.87/-2.71/-1.29），條目記載的數字與裁決已正確；原矛盾版本宣稱的 TWII H1 t=-3.14 / H2 t=-3.15（兩數皆恰好越過 Harvey |t|>=3 門檻）在結果檔中不存在，README 已記為 K1520->K1523 worktree salvage 誤植並更正。條目 verdict 無需改動，僅解除 needs_human 旗標。",
+    "fields": [
+     "needs_human"
+    ],
+    "before": {
+     "needs_human": true
+    }
+   }
+  ]
  },
  {
   "item_id": "fba4c2d6",
@@ -41314,21 +41368,45 @@
  {
   "item_id": "11947489",
   "category": "vol_prediction",
-  "content": "[NEEDS_HUMAN 待人工裁決] K759：台股金融壓力指數 FSI（用 0050/2330 TSMC/2881 Fubon/2882 Cathay/^VIX 組成）是否對 TSMC 波動有領先預警力。yfinance 2010-01-04 至 2026-03-27。json 顯示 FSI p75=0.2461，987 個壓力日、395 嚴重壓力日；lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x，隨 horizon 拉長遞減至 lead_20d 僅 1.86x）。迴歸部分：VIX-only 模型 R²=0.1404，VIX+FSI 模型 R²=0.2493（ΔR²=0.1089，FSI 係數 t=15.14）；DM test：mean loss diff=0.000777, HAC t=2.237, p=0.0253。ROC：AUC(VIX-only)=0.8019 vs AUC(combo)=0.8608（ΔAUC=0.059），但 5000 次 bootstrap 的 AUC 差異 95% CI 為 [-0.0404, 0.0444]，跨零。策略部分：VT+FSI Override 策略 Sharpe=0.402，低於單純 VIX-based VT 策略 Sharpe=0.464（json summary 自己標註 override_improves_sharpe=false），5 個 OOS 期間 override 勝率僅 3/5。**研究誠實缺口**：README 全為「待補充」stub，無正式敘事、無 verdict 欄位、目錄下無 codex_review.md，未經 Codex 審查即留在 repo。DM t=2.237 雖傳統 p<0.05，但未達本專案 Harvey |t|>=3 discovery 門檻，而 summary 卻自行標記 `dm_test_significant: true`，與專案現行標準不一致，屬於潛在 overclaim。 〔gap：無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。〕",
+  "content": "K759 [NULL — 2026-07-22 人工重裁決，推翻 artifact 內建的 dm_test_significant=true]：台股金融壓力指數 FSI 對 TSMC 波動「無」通過本專案門檻的預警力。\n\n**FSI 實際構成（原 backfill 條目描述錯誤）**：`k759_financial_early_warning.py:142-146` 明確定義 `FSI = mean(Fubon_RV20, Cathay_RV20)`，只用 2881/2882 兩檔金融股的 20 日 RV。原條目寫成「用 0050/2330 TSMC/2881/2882/^VIX 組成」是錯的（0050/2330/VIX 只用於其他區塊）。好消息是 FSI 不含 TSMC 自身，無循環論證；壞消息是原條目的自述不可信。\n\n**裁決 NULL 的三個獨立理由**：\n\n1. **所謂 DM test 根本不是 DM test**。`k759_financial_early_warning.py:344-357` 取兩個「巢狀 OLS 在全樣本上的 in-sample 殘差」（e1=model_vix.resid、e2=model_both.resid）做 loss differential。Diebold-Mariano 檢定定義在 out-of-sample 預測誤差上；對 in-sample 巢狀模型，加一個解釋變數在代數上必然使 SSR 不增，d 的均值必然 >=0，該統計量無法拒絕任何東西。即使改成 OOS，巢狀模型也需 Clark-West/Giannini 修正而非裸 DM。所以 t=2.237 不只是「未達門檻」，是**測錯了東西**。\n\n2. **即使照原數字看也過不了門檻**：DM t=2.237（p=0.0253）< 本專案 Harvey (2016) |t|>=3 discovery gate。artifact summary 自行標記 `dm_test_significant: true` 屬 overclaim。\n\n3. **有做對照的檢定全部不顯著或反向**：\n   - ROC：ΔAUC = 0.8608−0.8019 = 0.0589，但 5000 次 bootstrap 的 95% CI = [−0.0404, +0.0444] **跨零**，AUC 增益不顯著。\n   - 策略層：VT+FSI Override Sharpe=0.402 < 純 VIX-based VT Sharpe=0.464，artifact 自己標 `override_improves_sharpe: false`，5 個 OOS 期間僅 3/5 勝。\n\n**看起來很強的數字為何不可採信**：迴歸 `fsi_t=15.14`（`:335` 用 cov_type='HC1'）與 `partial_corr_t=23.902`（`:318` 用 iid 公式 t = r*sqrt((n-3)/(1-r^2))）都建立在被解釋變數 `TSMC_RV_fwd5 = tsmc_rv.rolling(5).mean().shift(-5)`（`:275`，5 日重疊窗）與解釋變數 FSI（20 日 rolling RV）之上。重疊窗 + rolling 造成強烈序列相關，HC1 與 iid 標準誤在此設定下嚴重低估，t 值不可解讀。全篇唯一用了 HAC 的是那個無效的 DM（maxlags=10）。\n\n**唯一站得住的是描述性事實**：lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x），隨 horizon 遞減至 lead_20d 僅 1.86x。這是無檢定的條件機率，且兩邊都是波動度量，主要反映的是波動叢聚與跨資產同步，不構成「金融股領先預警 TSMC」的因果或預測發現。\n\n資料：yfinance 2010-01-04 至 2026-03-27，n_obs_returns=3965。README.md 全為「待補充」stub，無 codex_review.md。",
   "evidence": [
    "experiments/k759/README.md",
    "experiments/k759/k759_financial_early_warning_results.json"
   ],
-  "confidence": 0.35,
+  "confidence": 0.8,
   "created_at": "2026-03-31T00:00:00",
   "created_at_source": "artifact:k759_financial_early_warning_results.json",
   "k_id": "K759",
   "experiment_id": "k759",
   "experiment_path": "experiments/k759/",
-  "verdict": "UNVERIFIED",
-  "needs_human": true,
-  "gap": "無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "verdict": "NULL",
+  "needs_human": false,
+  "gap": "README.md 仍為「待補充」stub，建議補寫或標記為 NULL 結案；本裁決基於原始碼審查，未重跑實驗。",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "kb-adjudication-agent 2026-07-22 (原始碼重稽核 + artifact 逐項對照；未經 Codex 覆核)",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:22:54.169629+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "人工重裁決：DM 用 in-sample 巢狀殘差(k759_financial_early_warning.py:344-357)非有效 DM 檢定；t=2.237 亦未達 Harvey |t|>=3；AUC bootstrap CI [-0.0404,0.0444] 跨零；策略 Sharpe 0.402<0.464 反向。推翻 artifact 的 dm_test_significant=true。並修正原條目對 FSI 構成的錯誤描述(實際為 mean(Fubon_RV20,Cathay_RV20), k759:142-146)",
+    "fields": [
+     "confidence",
+     "content",
+     "gap",
+     "needs_human",
+     "reviewer",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "UNVERIFIED",
+     "needs_human": true,
+     "confidence": 0.35,
+     "reviewer": null,
+     "gap": "無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。",
+     "content": "[NEEDS_HUMAN 待人工裁決] K759：台股金融壓力指數 FSI（用 0050/2330 TSMC/2881 Fubon/2882 Cathay/^VIX 組成）是否對 TSMC 波動有領先預警力。yfinance 2010-01-04 至 2026-03-27。json 顯示 FSI p75=0.2461，987 個壓力日、395 嚴重壓力日；lead_1d 時 P(spike|stress)=15.82% vs P(spike|no stress)=1.15%（lift 13.77x，隨 horizon 拉長遞減至 lead_20d 僅 1.86x）。迴歸部分：VIX-only 模型 R²=0.1404，VIX+FSI 模型 R²=0.2493（ΔR²=0.1089，FSI 係數 t=15.14）；DM test：mean loss diff=0.000777, HAC t=2.237, p=0.0253。ROC：AUC(VIX-only)=0.8019 vs AUC(combo)=0.8608（ΔAUC=0.059），但 5000 次 bootstrap 的 AUC 差異 95% CI 為 [-0.0404, 0.0444]，跨零。策略部分：VT+FSI Override 策略 Sharpe=0.402，低於單純 VIX-based VT 策略 Sharpe=0.464（json summary 自己標註 override_improves_sharpe=false），5 個 OOS 期間 override 勝率僅 3/5。**研究誠實缺口**：README 全為「待補充」stub，無正式敘事、無 verdict 欄位、目錄下無 codex_review.md，未經 Codex 審查即留在 repo。DM t=2.237 雖傳統 p<0.05，但未達本專案 Harvey |t|>=3 discovery 門檻，而 summary 卻自行標記 `dm_test_significant: true`，與專案現行標準不一致，屬於潛在 overclaim。 〔gap：無正式 verdict 欄位、無 Codex review、README 未寫（stub）；json 內部宣稱的統計顯著性（DM t=2.237, p=0.0253）未達本專案現行 Harvey |t|>=3 discovery gate，需要人工依現行標準重新判定此實驗真實結論是 NULL 還是弱支持，並決定是否需要補做 Codex review 才能寫入 knowledge.json。〕"
+    }
+   }
+  ]
  },
  {
   "item_id": "63dab443",
@@ -41428,21 +41506,60 @@
  {
   "item_id": "212f0026",
   "category": "vt_strategy",
-  "content": "[NEEDS_HUMAN 待人工裁決] K833 [UNVERIFIED]: CBOE IV weekly short-straddle驗證(VRP proxy: straddle_pnl=IV_weekly-|weekly_return|)，SPY/QQQ/GLD三資產，yfinance 2010-01-15至2025-01-03(n_weekly=782)。三策略(S1 always-short/S2 VRP-timing/S3 GARCH-enhanced)均報極高Sharpe(SPY S1 Sharpe=3.686,AnnRet=36.47%,t=15.12；QQQ/GLD類似)，且無對照baseline的顯著性檢定(僅單樣本t-stat)、無gamma/delta避險。README為空白模板('待補充')，未見Codex review紀錄。CLAUDE.md研究誠實原則明訂'Sharpe遠高於baseline時先懷疑bug'，此結果未經該流程檢視即留在repo，數字本身雖逐字取自results.json，但可信度需人工複核。 〔gap：無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。〕",
+  "content": "K833 [FAIL — 2026-07-22 人工重裁決 + 數值重現 + Codex 對抗性覆核，Sharpe 3.4–3.7 確認為 premium 設定錯誤造成的假象]\n\n**主 bug：`k833_iv_straddle.py:156` 把權利金誤設為 IV 全額。**\n```\ndf['straddle_pnl'] = df['iv_weekly'] - df['abs_weekly_return']\n```\nATM straddle 理論價（Brenner–Subrahmanyam 1988）約 `0.7979 * S * sigma * sqrt(T)`（ATM call ≈ 0.3989，straddle 為兩倍），程式收取 1.0 倍，**系統性高估權利金 25.3%**。SPY 實測：平均週 IV 2.52%、平均 |週報酬| 1.61%，被高估的權利金約 0.51%/週，而真實 edge 僅約 0.20%/週。\n\n**次 bug：`:119-124` 與 `:156` 的時序錯置（真 lookahead，但非主因）。**\n`weekly_return[t]`（`:120`）是 close[t-1]→close[t] 的已實現報酬；`weekly_iv[t]`（`:124`）是週 t **收盤**的 VIX。等於用到期時才知道的 IV 計算期初權利金。`:176-177`/`:207-208` 對 S2/S3 signal 做的 shift(1) 並未修正 payoff 內的這個 lookahead。因 VIX 高度持續，單修此項 SPY Sharpe 僅 3.93→3.74。\n\n**重現結果（2026-07-22，yfinance 2010-01-01至2025-01-05，n_weekly=782，TX=0.2%/週，auto_adjust=False）**\n\n分解（raw Sharpe，未扣 rf）：SPY 原版 3.934 / 只 lag IV 3.744 / 只乘 0.7979 **1.096** / 雙修 1.051 —— **premium scaling 是主因，lookahead 是較小但真實的第二因**。\n\n雙修後，依檔案自身 Sharpe 定義（`:237` 扣 rf=2%/年）與 `:255` 的 t（檢定 mean=0、不扣 rf）：\n\n| 資產 | 原版 Sharpe（檔案定義，results.json） | 雙修後 Sharpe（檔案定義） | 雙修後 raw Sharpe | t |\n|---|---|---|---|---|\n| SPY | 3.686 | **0.847** | 1.051 | 4.07（HAC(4) ≈ 3.87） |\n| QQQ | 3.185 | **0.394** | 0.574 | 2.23 |\n| GLD | 3.421 | **0.377** | 0.585 | 2.27 |\n\n雙修後 MDD −12.7%→−28.8%、skew −0.93→−1.68。原版尾部好看正是因為 lookahead 讓大跌那週的權利金被同週飆高的 VIX 灌水抵消虧損。S2_VRPTiming 雙修後 SPY 1.046 / QQQ 0.541 / GLD 0.267（raw），擇時版未優於 always-short。\n\n**裁決 FAIL**：原宣稱「三資產一致 Sharpe 3.4–3.7」不成立。修正後僅 SPY 跨過 |t|>=3（iid 4.07、HAC(4) 3.87），QQQ/GLD 皆不顯著。\n\n**SPY 那個 t 也不足以稱為發現，理由限定如下（經 Codex 覆核修正，不採用未經證實的理由）**：\n- **estimand 不對**：VIX/VXN/GVZ 是 30 日 variance-strip 指數，`:145` 直接乘 sqrt(1/52) 隱含「30日→7日期限結構平坦、strip variance = ATM IV、風險中性分佈近似 BS、index option IV 可直接套用於 ETF」四個未檢驗假設。**0.7979 只是最小 proxy 修補，不等於可交易 straddle premium**；正解須用 entry 日 7D ATM 的實際 call+put 報價。\n- **口徑不一致**：`:237` 的 Sharpe 扣 rf、`:255` 的 t 檢定 mean=0 不扣 rf，檔案自身兩個指標口徑不同。\n- **檢定太弱**：`:255` 為普通 iid one-sample t，無 HAC、無 block bootstrap、無跨策略/跨資產多重檢定調整。Harvey–Liu–Zhu 的 t>3 是針對大量挖掘下的新 factor discovery 門檻，非策略認證。\n- **notional ≠ margin**：報酬分母是名目 notional，36%/年不是資本報酬率；−28.8% 的 proxy MDD 未模擬保證金、盤中 mark-to-market 或強制平倉。\n- （明確**不**主張：20bps/週「太樂觀」無證據，對高流動性 SPY ATM straddle 甚至可能偏保守——檔案 `:474` 稱 conservative、`:513` 稱 real bid-ask wider，自相矛盾，需 quote-level 敏感度分析才能裁決。未做避險亦非 bug，本設計本就是 unhedged hold-to-expiry proxy；若目標是 delta-hedged VRP 才屬 estimand 錯置，且正確用語是 delta hedge 而非 gamma hedge。）\n\n**Codex 另外指出、本次未量化的問題**：`:185`/`:215` 對 0.5 倉與 1.0 倉都扣完整 20bps（不公平地壓低 timing 策略，不會製造高 Sharpe）；`:74` 未固定 `auto_adjust`（改變 payoff）；`W-FRI.last()` 會把週四/週一資料標成週五，且不完整週仍按完整 sqrt(1/52) 收權利金。\n\n**保留的正確結論僅為描述性**：`vrp_positive_frac` SPY 0.8031 / QQQ 0.7749、`mean_iv_rv_ratio` SPY 1.7654 —— VRP 為正是既有事實（Bollerslev-Tauchen-Zhou 2009），非本實驗新發現。\n\n**修復建議**：`:156` 至少改為 `0.79788456 * df['iv_weekly'].shift(1) - df['abs_weekly_return']`；根本解是改用真實 7D ATM 報價；並統一 Sharpe/t 的 rf 口徑、`:185`/`:215` 成本按倉位縮放、`:74` 固定 auto_adjust。",
   "evidence": [
    "experiments/k833/k833_iv_straddle_results.json",
    "experiments/k833/README.md"
   ],
-  "confidence": 0.25,
+  "confidence": 0.9,
   "created_at": "2026-04-03T00:00:00",
   "created_at_source": "artifact:k833_iv_straddle_results.json",
   "k_id": "K833",
   "experiment_id": "k833",
   "experiment_path": "experiments/k833/",
-  "verdict": "UNVERIFIED",
-  "needs_human": true,
-  "gap": "無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "verdict": "FAIL",
+  "needs_human": false,
+  "gap": "修正版數字為本次獨立重現，尚未回寫 experiments/k833/ 的程式與 results.json；根本解(改用真實 7D ATM 報價)需付費期權資料，目前無此資料源。",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "kb-adjudication-agent 2026-07-22 (原始碼稽核 + 獨立數值重現三資產) + codex 對抗性覆核 (bug finding PASS，並修正本 agent 的口徑混用與三個未證實理由)",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:23:31.065909+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "數值重現確認 bug：k833_iv_straddle.py:156 以 IV 全額當 ATM straddle 權利金(應乘 0.7979)，高估 25.3%；另 :119-124 IV 與同週已實現報酬同期對齊構成 lookahead。修正後 SPY Sharpe 3.93->1.05(t=4.07)、QQQ 3.40->0.58(t=2.23)、GLD 3.42->0.59(t=2.27)，MDD 由 -12.7% 惡化至 -28.8%。原宣稱三資產 Sharpe 3.4-3.7 為假象",
+    "fields": [
+     "confidence",
+     "content",
+     "gap",
+     "needs_human",
+     "reviewer",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "UNVERIFIED",
+     "needs_human": true,
+     "confidence": 0.25,
+     "reviewer": null,
+     "gap": "無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。",
+     "content": "[NEEDS_HUMAN 待人工裁決] K833 [UNVERIFIED]: CBOE IV weekly short-straddle驗證(VRP proxy: straddle_pnl=IV_weekly-|weekly_return|)，SPY/QQQ/GLD三資產，yfinance 2010-01-15至2025-01-03(n_weekly=782)。三策略(S1 always-short/S2 VRP-timing/S3 GARCH-enhanced)均報極高Sharpe(SPY S1 Sharpe=3.686,AnnRet=36.47%,t=15.12；QQQ/GLD類似)，且無對照baseline的顯著性檢定(僅單樣本t-stat)、無gamma/delta避險。README為空白模板('待補充')，未見Codex review紀錄。CLAUDE.md研究誠實原則明訂'Sharpe遠高於baseline時先懷疑bug'，此結果未經該流程檢視即留在repo，數字本身雖逐字取自results.json，但可信度需人工複核。 〔gap：無對照baseline顯著性檢定、無Codex review紀錄、README為空白模板，且Sharpe數值(3.68等)遠高於平台常態基準——依CLAUDE.md規則『Sharpe遠高於baseline時先懷疑bug』，需要人工重新審視代碼是否有lookahead或成本低估等問題，才能決定是否可信。〕"
+    }
+   },
+   {
+    "revised_at": "2026-07-22T08:33:29.605422+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "Codex 對抗性覆核修正本 agent 自己的裁決：(1) 前版混用 raw Sharpe 與檔案定義 Sharpe(:237 扣 rf)，補正雙修後檔案定義值 SPY 0.847/QQQ 0.394/GLD 0.377；(2) 撤回三個未經證實的不可交易理由(20bps太樂觀無證據、未避險非 bug 且應稱 delta 非 gamma、左偏不必然使 Sharpe 高估)；(3) 補記 0.7979 僅為最小 proxy 修補，真正 estimand 問題是 VIX 30日 variance-strip 對 7日 ATM straddle 的 horizon/instrument mismatch；(4) 補記 Codex 指出的 :185/:215 半倉全額成本、:74 auto_adjust 未固定、W-FRI 標籤問題。bug finding 本身經 Codex 判定 PASS",
+    "fields": [
+     "content",
+     "gap",
+     "reviewer"
+    ],
+    "before": {
+     "reviewer": "kb-adjudication-agent 2026-07-22 (原始碼稽核 + 獨立數值重現三資產；未經 Codex 覆核)",
+     "gap": "修正版數字為本次獨立重現，尚未回寫 experiments/k833/ 的程式與 results.json；建議後續修 :156 並重跑後更新 artifact。",
+     "content": "K833 [FAIL — 2026-07-22 人工重裁決 + 數值重現，Sharpe 3.4–3.7 確認為 premium 設定錯誤造成的假象]：CBOE IV weekly short-straddle 的高 Sharpe 不成立。\n\n**主 bug：`k833_iv_straddle.py:156` 把權利金誤設為 IV 本身。**\n```\ndf['straddle_pnl'] = df['iv_weekly'] - df['abs_weekly_return']\n```\nATM straddle 的理論價（Brenner–Subrahmanyam）約為 `0.7979 * S * sigma * sqrt(T)`，不是 `S * sigma * sqrt(T)`。程式收取的是 1.0 倍，**系統性高估權利金 25.3%**。以 SPY 實測：平均週 IV = 2.52%，平均 |週報酬| = 1.61%，被高估的權利金約 0.51%/週 —— 而真實 edge 只有約 0.20%/週。也就是說**帳面收益中約 71% 是憑空生出來的**。\n\n**次 bug（真 lookahead，但非主因）：`:119-124` 與 `:156` 的時序錯置。**\n`weekly_return`（`:120` `weekly_close.pct_change()`）在索引 t 代表「週 t 內已實現」的報酬，而 `weekly_iv`（`:124` `iv_df['Close'].resample('W-FRI').last()`）在索引 t 是**週 t 收盤**的 VIX。也就是說：權利金用的是這個波動走完之後才觀測到的 IV。正確對齊應為 `iv_weekly.shift(1)`。因 VIX 高度持續（corr(ivw_t,|ret_t|)=0.578 vs 落後版 0.522），修正後 Sharpe 只從 3.93 掉到 3.74 —— lookahead 存在但不是高 Sharpe 的來源。\n\n**重現結果（2026-07-22，yfinance 2010-01-01至2025-01-05，n_weekly=782，TX=0.2%/週）**：\n\n| 資產 | S1 原版（已發表） | 僅修 lookahead | 修 lookahead + 0.7979 ATM 係數 |\n|---|---|---|---|\n| SPY | Sharpe 3.934, t=15.25, MDD −12.7%, skew −0.93 | 3.744, t=14.51, MDD −16.6% | **1.051, t=4.07, MDD −28.8%, skew −1.68** |\n| QQQ | 3.396, t=13.17 | 3.318, t=12.86 | **0.575, t=2.23, MDD −19.1%** |\n| GLD | 3.421, t=13.27 | 3.110, t=12.05 | **0.585, t=2.27, MDD −18.1%** |\n\n（S1 原版重現值 3.934 vs results.json 記載的 3.686，差異來自 auto_adjust 與 rv 索引對齊，機制完全一致。）\n\nS2_VRPTiming 修正後：SPY Sharpe 1.046 (t=4.05)、QQQ 0.541 (t=2.10)、GLD 0.267 (t=1.03) —— 擇時版並未優於 always-short。\n\n**裁決**：\n- 原宣稱「三資產一致 Sharpe 3.4–3.7」**FAIL**。修正後只有 SPY 通過 Harvey |t|>=3（t=4.07），QQQ/GLD 皆不顯著。\n- 修正後 MDD 從 −12.7% 惡化到 −28.8%，skewness 從 −0.93 惡化到 −1.68。原版之所以尾部好看，正是因為 lookahead 讓「大跌那週的權利金」被同週飆高的 VIX 灌水，剛好抵消虧損。\n- 即使 SPY 的 t=4.07，仍**不可解讀為可交易發現**：(a) 分母是名目 notional 而非保證金，36%/10% 的「報酬率」不是資本報酬率；(b) TX 0.2%/週對每週 roll 的 ATM straddle 過於樂觀；(c) 無 gamma/delta 避險；(d) 對強左偏序列用 Gaussian Sharpe × sqrt(52) 年化本身就會高估。\n- 保留的正確結論僅為描述性：`vrp_positive_frac` SPY 0.8031 / QQQ 0.7749、`mean_iv_rv_ratio` SPY 1.7654 —— 即 VRP 為正的既有事實（Bollerslev-Tauchen-Zhou 2009 已知），非本實驗新發現。\n\n**修復建議**：`:156` 改為 `0.7979 * df['iv_weekly'].shift(1) - df['abs_weekly_return']`，並在 README 標明 notional-based 而非 margin-based。"
+    }
+   }
+  ]
  },
  {
   "item_id": "6669201b",
@@ -41579,21 +41696,48 @@
  {
   "item_id": "a0f5af26",
   "category": "vt_strategy",
-  "content": "[NEEDS_HUMAN 待人工裁決] K841 [DOCUMENTED_NEGATIVE]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，資料期 2017-05-16至2026-04-02，n_trading_days=2157）。比較 6 個策略：S0=Buy&Hold 0050.TW、S1=8.63/VIX 次日調整、S2=S1+TX夜盤避險(always)、S3=VIX spike guard、S4=條件式夜盤避險(VIX>20)、S5=Full VT(日+夜)。結果（Sharpe/MDD）：S0 Sharpe=1.001/MDD=-33.83%；S1 Sharpe=1.359/MDD=-12.32%（表現最佳）；S2 Sharpe=0.768/MDD=-35.80%；S3 Sharpe=0.913/MDD=-33.41%；S4 Sharpe=0.788/MDD=-35.91%；S5 Sharpe=0.744/MDD=-17.76%。DM檢定：S2 vs S1 t=10.82(p<0.0001，S1顯著較佳)；S5 vs S1 t=-0.76(p=0.448，不顯著)。main_finding：夜盤避險並未改善 S1，S1（純日盤 VIX 調整）仍是台股最佳 VT 策略；夜盤避險在平常時期產生正 drift 成本(~+0.046%/夜)侵蝕報酬。根本限制是時機延遲：夜盤 15:00 開盤時最新 VIX 已是 T-2（2個交易日前），使『即時』避險在日頻VIX下不可行。COVID子期間 S5 MDD最佳(-4.83% vs S1 -5.08%)但正常時期犧牲過多報酬，S5 vs S1 全期無顯著差異。結論：TAIFEX 夜盤非 VIX-based 策略的可行即時避險管道，根因是資訊延遲一天。 〔gap：README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。〕",
+  "content": "K841 [SUPERSEDED — 本條目的所有數字已於 2026-07-15 的方法學修正中被推翻，請改讀 item_id=k841_dm_hac_correction_20260715]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，2017-05-16至2026-04-02，n_trading_days=2157）。\n\n本條目由 kb_backfill（2026-07-14）從 `k841_futures_realtime_vt_results.json` 反推而成，當時未察覺該 JSON 本身已於隔日被判定為方法學錯誤。**backfill 收錄的是一份已知有 bug 的 artifact。**\n\n**已被推翻的原宣稱**：\n- 「S1（純日盤 VIX 調整）是台股最佳 VT 策略，Sharpe=1.359/MDD=−12.32%」→ **錯**。修正後 S1 Sharpe=0.9628/MDD=−15.01%，**低於** S0 Buy&Hold 的 1.0006。原 h=1 helper 誤寫 `range(h)` 導致所有 DM 檢定用 gamma0-only iid 變異數；且原版把台股開盤後才知道的權重套用到前一夜的 overnight gap、未計夜盤避險與 S5 換股成本。\n- 「S5 在 COVID 子期間 MDD 最佳（−4.83% vs S1 −5.08%）」→ 該宣稱建立在同一份有 bug 的計算上，修正後 S5 全期 Sharpe 僅 0.0205、MDD −26.84%，原 S5 績效敘事整體失效。\n- 原條目 gap 欄位擔心的 exposure-matched MDD 問題（S1 ann_vol 8.61% vs S0 19.74%）在修正版中以更嚴格的方式處理：修正後明確限定結論為「always-on 與 high-VIX overlay 在此 proxy 下降低了相對 S0 的平方報酬風險」，並明說**未**建立更高的總報酬、Sharpe、效用或因果避險效力。\n\n**修正後仍成立的部分**：夜盤避險未改善風險調整後績效；根本限制是資訊延遲 —— 夜盤 15:00 開盤時可用的 VIX 訊號是嚴格早於夜盤開始的前一個美股收盤，至少落後一個美股交易日。日頻 VIX 下的「即時」夜盤避險不可行。此定性結論在修正前後一致。\n\n**處置**：本條目保留作為 provenance 紀錄（顯示 backfill 收了一份過期 artifact），但**不得被引用為實證證據**。所有數字以 k841_dm_hac_correction_20260715 為準。",
   "evidence": [
    "experiments/k841/k841_futures_realtime_vt_results.json",
    "experiments/k841/README.md"
   ],
-  "confidence": 0.6,
+  "confidence": 0.9,
   "created_at": "2026-04-03T00:00:00",
   "created_at_source": "artifact:k841_futures_realtime_vt_results.json",
   "k_id": "K841",
   "experiment_id": "k841",
   "experiment_path": "experiments/k841/",
-  "verdict": "DOCUMENTED_NEGATIVE",
-  "needs_human": true,
-  "gap": "README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。",
-  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)"
+  "verdict": "SUPERSEDED",
+  "needs_human": false,
+  "gap": "無 — 已由 k841_dm_hac_correction_20260715 取代；本條目僅存 provenance 價值。",
+  "provenance": "kb_backfill_unrecorded_experiments (2026-07-14)",
+  "reviewer": "kb-adjudication-agent 2026-07-22 (對照 k841_dm_hac_correction_20260715 與 review_certification_20260715.md)",
+  "superseded_by": "k841_dm_hac_correction_20260715",
+  "revisions": [
+   {
+    "revised_at": "2026-07-22T08:24:02.205826+08:00",
+    "actor": "kb-adjudication-agent-20260722",
+    "reason": "本條目由 kb_backfill(2026-07-14) 從已知有 bug 的 artifact 反推，隔日(2026-07-15)的 k841_dm_hac_correction_20260715 已推翻其全部數字(S1 Sharpe 1.359->0.9628 且低於 S0 1.0006；S5 Sharpe 0.0205)。原 gap 提出的 exposure-matched MDD 疑慮已由修正版以限縮結論範圍處理。標記 SUPERSEDED，禁止引用為實證證據",
+    "fields": [
+     "confidence",
+     "content",
+     "gap",
+     "needs_human",
+     "reviewer",
+     "superseded_by",
+     "verdict"
+    ],
+    "before": {
+     "verdict": "DOCUMENTED_NEGATIVE",
+     "needs_human": true,
+     "confidence": 0.6,
+     "reviewer": null,
+     "gap": "README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。",
+     "superseded_by": null,
+     "content": "[NEEDS_HUMAN 待人工裁決] K841 [DOCUMENTED_NEGATIVE]：TAIFEX 夜盤即時 VT 避險可行性檢驗（TAIFEX TX tick + yfinance VIX/0050.TW，資料期 2017-05-16至2026-04-02，n_trading_days=2157）。比較 6 個策略：S0=Buy&Hold 0050.TW、S1=8.63/VIX 次日調整、S2=S1+TX夜盤避險(always)、S3=VIX spike guard、S4=條件式夜盤避險(VIX>20)、S5=Full VT(日+夜)。結果（Sharpe/MDD）：S0 Sharpe=1.001/MDD=-33.83%；S1 Sharpe=1.359/MDD=-12.32%（表現最佳）；S2 Sharpe=0.768/MDD=-35.80%；S3 Sharpe=0.913/MDD=-33.41%；S4 Sharpe=0.788/MDD=-35.91%；S5 Sharpe=0.744/MDD=-17.76%。DM檢定：S2 vs S1 t=10.82(p<0.0001，S1顯著較佳)；S5 vs S1 t=-0.76(p=0.448，不顯著)。main_finding：夜盤避險並未改善 S1，S1（純日盤 VIX 調整）仍是台股最佳 VT 策略；夜盤避險在平常時期產生正 drift 成本(~+0.046%/夜)侵蝕報酬。根本限制是時機延遲：夜盤 15:00 開盤時最新 VIX 已是 T-2（2個交易日前），使『即時』避險在日頻VIX下不可行。COVID子期間 S5 MDD最佳(-4.83% vs S1 -5.08%)但正常時期犧牲過多報酬，S5 vs S1 全期無顯著差異。結論：TAIFEX 夜盤非 VIX-based 策略的可行即時避險管道，根因是資訊延遲一天。 〔gap：README.md 亦為未填寫 stub（全『待補充』），內容完全依賴 JSON 的 conclusions/main_finding 欄位重建；未見 codex_review 或 seed 欄位記錄。此外多個策略間 ann_vol 差異達 2倍以上（例如 S1 8.61% vs S0 19.74%），MDD 直接比較未見 exposure-matched gap 分析（依 repo 現行 mdd_scale_artifact 規則），建議人工複核 MDD 相關結論（尤其 S5 COVID MDD 優於 S1 的宣稱）是否需要 exposure-matched 重新驗證才能正式寫入 knowledge.json。〕"
+    }
+   }
+  ]
  },
  {
   "item_id": "720c3717",
@@ -42234,7 +42378,7 @@
  {
   "item_id": "f932cb04",
   "category": "experiment_finding",
-  "content": "K1730 arm A（GEVReg-MIDAS-SSVS，全量 production，quick_mode=false）— 裁決 NULL：point-in-time 月頻總經資料對 SPY 週最大 Parkinson RV 的區間預測沒有可偵測的增量價值。OOS 967 週（2008-01-07→2026-07-13）、19 次 refit、1,640 個非重疊週區塊。三個關鍵數字：(1) DM vs GEV-HAR t=+1.998、p=0.046 且 favours=benchmark（Harvey 校正後不顯著），vs HAR-QR t=+1.778、p=0.076 也偏 benchmark — 本模型只贏 Empirical（p<1e-8）；(2) permutation test 決定性：把 macro MIDAS 張量跨週打亂後 mean pinball 從 0.11407 **降到** 0.11208，與完全不用 macro 的 GEV-HAR（0.11224）幾乎相同，shuffled_worse_than_real=false → 真實 macro 排序不帶任何優勢；(3) SSVS 在樣本內確實選了 macro（real PIP：VIX 0.865 / CPI 0.653 / UNRATE 0.427，打亂後全數掉到 0.05–0.09），所以選擇機制有運作，但樣本內選擇完全沒轉換成 OOS 增益。校準面：全部五個模型的 Kupiec UC 都被拒絕（GEVReg 90% 實際覆蓋 0.8501、p=1.2e-06；GEV-HAR 0.8625；HAR-QR 0.8542；Gaussian-MIDAS 0.8480；Empirical 0.8366）→ 區間偏窄是這個 target 的共同性質、不是本模型特有缺陷；本模型 Christoffersen independence 不拒絕（p=0.73），問題在無條件寬度而非違反叢聚。全量 vs quick-mode 結論未翻轉（pinball 0.114193→0.114066，DM p 0.033→0.046，同號同結論）。Lookahead 三項 0 violations（macro_released_before_origin 0/118,080、origin_before_block_start 0/1,640、blocks_non_overlapping 0/1,639），GEV 數值驗證 max|logpdf err|=4.5e-13。限制（如實記錄，不可略）：SSVS MCMC 未收斂（worst R-hat=1.61、min ESS=6.25、worst |Geweke z|=49.3）→ PIP 只能當粗略指標；GEV MLE multistart 收斂率僅 0.47–0.51，但 Hessian 全正定、條件數≤1.8e4、Nelder-Mead 追加改善 ~3e-9 → 最佳解本身穩定，低收斂率反映似然面多峰。xi∈[-0.140,-0.095]（Weibull 域、上尾有界）。合併狀態：worktree dispatch-slot-1-558d7893-k1730 尚未合併 — merge gate 要求 experiments/k1730/review_verdict.json（Codex 審凍結後 claim surface 的 sha256 pin），已另立 followup。",
+  "content": "K1730 arm A（GEVReg-MIDAS-SSVS）— 結論：point-in-time 月頻總經資料對 SPY 週最大 Parkinson RV 的區間預測「偵測不到」增量價值（NULL）。OOS 967 週（2008-01-07→2026-07-13）、19 次 refit、1,640 個非重疊週區塊。\n\n**本條目 2026-07-21 修訂（hourly-slot-1-ad6c5e1c）**：原文寫於 2026-07-18T20:11（v1 期），其後被 K1730 自己的 remediation v2（2026-07-19，回應 Codex v1 FAIL）與 K1730 nested-DM 裁決書（2026-07-21）推翻了三項支撐證據。結論方向未變，被撤的是「憑什麼這樣說」。\n\n**已撤回，不得再引用**：\n1. **DM 不是檢定**。GEVReg-MIDAS-SSVS vs GEV-HAR 是 nested（GEV-HAR 就是本模型把 macro 係數塊限制為 0，見 k1730_gevreg_midas_ssvs.py:141-144）+ pinball（非可微）+ expanding window。K1731 F1 已證此三條件聯集無任何已發表的推論方法（Clark-West 只適用平方誤差、Giacomini-White 要求有限記憶視窗、McCracken 要求估計損失=評估損失）。**該 DM 的 p 值沒有對應的極限分佈，不是任何事件的機率**。原文的「t=+1.998、p=0.046」與 quick-mode 的「t=2.130、p=0.033」一律降級為描述性 loss gap，與 K1731 arm B 同status（role=\"nested-dm: diagnostic-only\"）。\n2. **「permutation test 決定性」整句撤回**。v2 查出 v1 的全樣本 shuffle 破壞 macro 張量時序、且把較晚的 release 放到較早的 origin 前，本身就漏未來資訊，不能當 falsifier。v2 改用 non-circular lag-shift placebo（lags [52,104,156,208,260] 週、共同丟棄前 260 blocks、1,380 blocks matched）：real=0.11415、placebo 區間 [0.11245, 0.11471]、4/5 個 placebo arm 不輸給 real、one-sided p=0.833。**這是粗解析度佐證（5 shifts 的 p 值下限 0.167），只能佐證 NULL，不足以支撐任何正面結論**。\n3. **SSVS PIP 不是「選擇機制有運作」的證據**，v2 已降級為 diagnostic-only（MCMC 未收斂：worst R-hat=1.61、min ESS=6.25、worst |Geweke z|=49.3）。\n4. **「GEV 似然面多峰」撤回** — v2 查出低 multistart 收斂率（0.47-0.51）是 start-feasibility artefact，不是似然面性質。\n\n**存活的證據層**（描述性，非檢定）：full production（quick_mode=false，salvage ref edcb5b0d0）DM t=+2.159、mean_loss_differential=+0.002106、favours=benchmark、harvey_significant=false（repo Harvey 門檻 abs(t)>3.0，k1730_scoring.py:307）→ 帶 macro 的模型 pinball 反而較差。注意 nested 設定下 H0 本來就預測 E[loss_large − loss_small] > 0（大模型多估係數帶來預測噪音），所以觀察到正值與「macro 無貢獻」相容，**但不能反過來當成 H0 成立的證據** — 此設計對「零訊號」與「被估計噪音淹沒的弱訊號」沒有辨別力。因此可支持的最強說法是「偵測不到」，不是「確定沒有」。校準面（未受撤回影響）：五個模型的 Kupiec UC 全被拒（GEVReg 90% 實際覆蓋 0.8501、p=1.2e-06；GEV-HAR 0.8625；HAR-QR 0.8542；Gaussian-MIDAS 0.8480；Empirical 0.8366）→ 區間偏窄是此 target 的共同性質、非本模型特有；本模型 Christoffersen independence 不拒絕（p=0.73）。Lookahead 三項 0 violations（macro_released_before_origin 0/118,080、origin_before_block_start 0/1,640、blocks_non_overlapping 0/1,639）；GEV 數值驗證 max|logpdf err|=4.5e-13；xi∈[-0.140,-0.095]（Weibull 域）。\n\n**唯一可用的修復路線**：full randomization test（B≥199 次置換 macro 塊 + 重新評分），因為它是隨機化檢定、不呼叫漸近極限、不假設損失可微、expanding window 在置換間固定而抵消。成本 ~21 min/pipeline × B → 必須走 compute_queue 且重用 no-macro 快取。**在它跑完之前，K1730 的 NULL 是描述性的、不是被檢定過的**。\n\n**成果保存狀態（重要）**：K1730 的 closeout 產物（README.md、REMEDIATION_v2.md、codex_review_v1.md、K1730_ARM_A_FULL_RUN_COLLECTION.md、full-production results.json）**只存在於 salvage checkpoint commit edcb5b0d0**，未進 canonical main；原 worktree dispatch-slot-1-558d7893-k1730 已消失。2026-07-21 的裁決書因為在 K1731 worktree 裡作業、看不到這些檔，才誤判「K1730 從未 closeout、無 README、無 brief、無 memory 條目、零對外曝光」。整合 salvage ref 另立 followup task。",
   "evidence": [
    ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
    ".claude/worktrees/dispatch-slot-1-558d7893-k1730/experiments/k1730/k1730_quickmode_results.json",
@@ -42242,7 +42386,20 @@
    "compute job compute-k1730-arm-a-production-quick-mode-1784358686 (exit 0, 2026-07-18T09:15:05Z→10:02:46Z)"
   ],
   "confidence": 0.8,
-  "created_at": "2026-07-18T20:11:49.668432"
+  "created_at": "2026-07-18T20:11:49.668432",
+  "revisions": [
+   {
+    "revised_at": "2026-07-21T18:16:08.315018+08:00",
+    "actor": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014",
+    "reason": "K1730 nested-DM 裁決收件核實：原文為 v1 期寫入，其後被 K1730 remediation v2（2026-07-19）與 nested-DM 裁決書（2026-07-21）撤回三項支撐（permutation 決定性、SSVS PIP 為證、GEV 多峰），且 nested DM 的 p 值無有效極限分佈。結論方向不變、證據層重寫；並記錄 closeout 產物僅存於 salvage ref edcb5b0d0。",
+    "fields": [
+     "content"
+    ],
+    "before": {
+     "content": "K1730 arm A（GEVReg-MIDAS-SSVS，全量 production，quick_mode=false）— 裁決 NULL：point-in-time 月頻總經資料對 SPY 週最大 Parkinson RV 的區間預測沒有可偵測的增量價值。OOS 967 週（2008-01-07→2026-07-13）、19 次 refit、1,640 個非重疊週區塊。三個關鍵數字：(1) DM vs GEV-HAR t=+1.998、p=0.046 且 favours=benchmark（Harvey 校正後不顯著），vs HAR-QR t=+1.778、p=0.076 也偏 benchmark — 本模型只贏 Empirical（p<1e-8）；(2) permutation test 決定性：把 macro MIDAS 張量跨週打亂後 mean pinball 從 0.11407 **降到** 0.11208，與完全不用 macro 的 GEV-HAR（0.11224）幾乎相同，shuffled_worse_than_real=false → 真實 macro 排序不帶任何優勢；(3) SSVS 在樣本內確實選了 macro（real PIP：VIX 0.865 / CPI 0.653 / UNRATE 0.427，打亂後全數掉到 0.05–0.09），所以選擇機制有運作，但樣本內選擇完全沒轉換成 OOS 增益。校準面：全部五個模型的 Kupiec UC 都被拒絕（GEVReg 90% 實際覆蓋 0.8501、p=1.2e-06；GEV-HAR 0.8625；HAR-QR 0.8542；Gaussian-MIDAS 0.8480；Empirical 0.8366）→ 區間偏窄是這個 target 的共同性質、不是本模型特有缺陷；本模型 Christoffersen independence 不拒絕（p=0.73），問題在無條件寬度而非違反叢聚。全量 vs quick-mode 結論未翻轉（pinball 0.114193→0.114066，DM p 0.033→0.046，同號同結論）。Lookahead 三項 0 violations（macro_released_before_origin 0/118,080、origin_before_block_start 0/1,640、blocks_non_overlapping 0/1,639），GEV 數值驗證 max|logpdf err|=4.5e-13。限制（如實記錄，不可略）：SSVS MCMC 未收斂（worst R-hat=1.61、min ESS=6.25、worst |Geweke z|=49.3）→ PIP 只能當粗略指標；GEV MLE multistart 收斂率僅 0.47–0.51，但 Hessian 全正定、條件數≤1.8e4、Nelder-Mead 追加改善 ~3e-9 → 最佳解本身穩定，低收斂率反映似然面多峰。xi∈[-0.140,-0.095]（Weibull 域、上尾有界）。合併狀態：worktree dispatch-slot-1-558d7893-k1730 尚未合併 — merge gate 要求 experiments/k1730/review_verdict.json（Codex 審凍結後 claim surface 的 sha256 pin），已另立 followup。"
+    }
+   }
+  ]
  },
  {
   "item_id": "390d9784",
@@ -42289,5 +42446,189 @@
    "review_verdict_file": "experiments/k1732/review_verdict.json",
    "commit": "45230fbc4"
   }
+ },
+ {
+  "item_id": "39255940",
+  "category": "research_correction",
+  "content": "[K1442-adjacent verdict=CORRECTION reviewer=Codex(read-only)+main-thread-recompute artifact=storage/event_articles/us_cpi_2026_06_11_t0 task=assign_a31a311d] The us_cpi_2026_06_11_t0 T+0 event article rebuilt its historical CPI comparison on the official FRED/ALFRED release-id-10 calendar (volpred.data.event_dates.cpi_release_dates, fail-closed, no first-Wednesday-style proxy). The hard-coded calendar held 14 dates, of which 7 were wrong: 2025-10-15 -> 2025-10-24, 2025-12-10 -> 2025-12-18, 2026-01-14 -> 2026-01-13, 2026-02-12 -> 2026-02-13, 2026-03-12 -> 2026-03-11, 2026-05-13 -> 2026-05-12, and 2025-11-13 which was a PHANTOM: BLS published no CPI at all in November 2025 (the October reference month was cancelled in the government shutdown and September was issued off-cycle on 2025-10-24), so the sample is 13 not 14. Effect on the claim: the draft had ranked 2026-06-10 4th; on the official calendar it ranks 1st of 13 at VIX +11.827 percent, more than 2x the runner-up 2026-01-13 (+5.688 percent). All three days the draft ranked above it were non-event days -- the phantom 2025-11-13 (+14.22 percent) plus two off-by-one dates whose VIX signs flip across adjacent sessions (2026-02-12 +17.96 percent vs official 2026-02-13 -1.057 percent; 2026-03-12 +12.629 percent vs official 2026-03-11 -2.808 percent). Corrected sample mean -0.847 percent, median -1.334 percent, 4 of 13 positive. Independently re-derived by the main thread, not taken from the agent's report: the 13 canonical dates were refetched from the module and every per-date VIX reaction recomputed from yfinance closes -- all headline figures reproduce exactly. The article was NOT published before the correction, so no reader-facing erratum was owed. Regression cover: tests/test_cpi_t0_official_release_dates.py, 39 tests, verified non-vacuous (reverting to the legacy list fails 8 of the 9 calendar tests; the survivor is test_target_release_is_resolved_from_the_calendar, because the legacy list happened to carry the correct 2026-06-10 and so resolved the right target for the wrong reason). Codex read-only review cleared lookahead, date-source leakage, row arithmetic and cwd independence, and produced 3 accepted fixes including a non-finite-quote guard in reaction_pct. Lesson: this is the same defect class as the K1442 event-date correction and the k528 NFP first-Friday proxy sweep -- a hand-maintained release calendar cannot represent a cancelled release, so it invents one. Any event study must resolve release dates from the canonical fail-closed module.",
+  "evidence": [
+   "storage/event_articles/us_cpi_2026_06_11_t0/k1442_cpi_date_fix_results.json",
+   "storage/event_articles/us_cpi_2026_06_11_t0/README.md",
+   "storage/event_articles/us_cpi_2026_06_11_t0/evidence.json",
+   "tests/test_cpi_t0_official_release_dates.py",
+   "experiments/k1442/related_event_date_audit.md"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-19T12:39:33.190192"
+ },
+ {
+  "item_id": "651fe11c",
+  "category": "experiment_result",
+  "content": "[K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target market's next-day variance forecast beyond its own history? Ladder rungs are SPY/VIX -> JAPAN, SPY/VIX/JAPAN -> TAIWAN, and SPY/VIX/JAPAN + TAIWAN -> INDONESIA/MALAYSIA/SINGAPORE/THAILAND. Target is the daily squared close-to-close log return, forecast on log variance with a 756-day rolling window (min 504 training obs, seed 42); the formal nested test is Clark-West (2007) with HAC lag 16, DM is diagnostic-only under nesting, Harvey strength threshold |t|>3. Data: Yahoo Finance via yfinance 1.2.0, 2005-01-01 to 2025-12-31, snapshot sha256 e2b64d8fad02aa29c96b243abb74fab6f707fa24f3f5ddf95b1eb3622ddb8160. RESULT — only the first rung carries: INDONESIA CW t=0.324 (one-sided p=0.3729), QLIKE 3.1259 -> 3.1228 (0.099%), n_oos=3900; JAPAN CW t=11.588 (one-sided p=0.0000), QLIKE 3.8236 -> 3.5304 (7.669%), n_oos=4438; MALAYSIA CW t=-0.278 (one-sided p=0.6096), QLIKE 3.4734 -> 3.4813 (-0.227%), n_oos=3959; SINGAPORE CW t=0.138 (one-sided p=0.4451), QLIKE 2.9192 -> 2.9324 (-0.453%), n_oos=4059; TAIWAN CW t=0.273 (one-sided p=0.3923), QLIKE 3.5925 -> 3.6160 (-0.656%), n_oos=4154; THAILAND CW t=-0.176 (one-sided p=0.5699), QLIKE 3.3975 -> 3.4062 (-0.257%), n_oos=3894. JAPAN is the single strong target (CW t=11.588, QLIKE improves 7.669%); the other five are all |t|<0.33 and four of five see QLIKE DETERIORATE (MALAYSIA -0.227%, SINGAPORE -0.453%, TAIWAN -0.656%, THAILAND -0.257%), with INDONESIA the only other nominal gain at +0.099%. The Southeast-Asia panel (4 assets, n_obs=3567, Clark-West adjusted loss averaged across assets by common date before HAC) is flat: t=0.184, one-sided p=0.4269, mean adjusted loss diff=5.182e-04. Pre-registered success criteria were NOT met (met=false): 1/2 targets reached |CW t|>3 and 2/4 improved QLIKE, and the required panel-level |CW t|>3 did not hold. INTERPRETATION — this is a NULL for the Taiwan -> Southeast-Asia leg and for the SPY/VIX/JAPAN -> Taiwan leg, not a null for international transmission as such: the US/VIX -> Japan rung is overwhelming. Read as: once a Southeast-Asian market already conditions on SPY, VIX and Japan, adding lagged Taiwan buys nothing at daily frequency. LIMITATIONS (from the artifact, not added here): daily bars cannot isolate overlapping intraday Tokyo/Taipei/Southeast-Asia transmission; squared daily return is a noisy variance proxy, not realized variance; inner-joining common dates selects globally open trading days and omits holiday-specific transmission; results establish predictive association only, not a structural causal channel. Taiwan closes before Tokyo and the Southeast-Asian sessions overlap Taiwan, so no intraday mechanism is claimed. PROVENANCE — recorded by the main thread (never an agent, K1259) while clearing the unrecorded-ratchet CI red (scripts/tests/test_knowledge_unrecorded_ratchet.py): the results landed in main between 13:14 and 13:38 on 2026-07-19 from another session's worktree without a knowledge entry. Every figure above was read programmatically out of k1719_results.json, not transcribed from the README. Note k1719 still lacks reproduce_spec.json (classification=unverified_missing_spec), so the run is not byte-reproducible on demand; a follow-up task carries that.",
+  "evidence": "experiments/k1719/k1719_results.json",
+  "confidence": "high",
+  "created_at": "2026-07-19T13:50:00",
+  "created_at_source": "task ci-red-k1719-unrecorded-knowledge (hourly fire 13:43 CST)",
+  "k_id": "k1719",
+  "experiment_id": "k1719",
+  "experiment_path": "experiments/k1719",
+  "verdict": "MIXED",
+  "review_verdict": "PASS",
+  "reviewer": "experiments/k1719/codex_review.md",
+  "reviewer_source": "Codex GPT-5 primary-path",
+  "needs_human": false,
+  "gap": "reproduce_spec.json missing (unverified_missing_spec)",
+  "provenance": "main-thread write from artifact JSON; CI ratchet remediation",
+  "snapshot_sha256": "e2b64d8fad02aa29c96b243abb74fab6f707fa24f3f5ddf95b1eb3622ddb8160",
+  "results_sha256": "9744ef08b1ea74bf4360e5aa149110337f8e4b32877fb7cf1a389c5121d376ae",
+  "qlike_oos": {
+   "INDONESIA": 0.09857441117261993,
+   "JAPAN": 7.669289612778455,
+   "MALAYSIA": -0.22724330477872468,
+   "SINGAPORE": -0.4534015336681252,
+   "TAIWAN": -0.6562841644118487,
+   "THAILAND": -0.25651978800189146
+  },
+  "sample": {
+   "start": "2005-01-01",
+   "end_exclusive": "2025-12-31",
+   "observations_by_ticker": {
+    "INDONESIA": 5092,
+    "JAPAN": 5138,
+    "MALAYSIA": 5150,
+    "SINGAPORE": 5250,
+    "SPY": 5282,
+    "TAIWAN": 5140,
+    "THAILAND": 5108,
+    "VIX": 5282
+   }
+  }
+ },
+ {
+  "item_id": "b68047d0",
+  "category": "experiment_result",
+  "content": "[K1436 verdict=NULL reviewer=feature-dev:code-reviewer subagent (PASS, no blocking defects; Codex CLI unavailable until 2026-07-25) artifact=experiments/k1436 task=compute-queue-followup-agent-brief_k1436_v2-70286f] Does BTC perpetual funding rate carry incremental information for next-day realized volatility beyond a HAR-RV baseline? Target is daily RV built as the sum of squared 5-min log returns within a UTC calendar day (689225 bars, 2393 days kept of 2394, min 250 bars/day). Predictors are the three HAR lags plus yesterday's mean 8h funding rate; both models are estimated on log RV with a 1000-day rolling window refit daily, seed 42. Data: Binance USDS-M BTCUSDT perpetual, funding from https://fapi.binance.com/fapi/v1/fundingRate (7180 settlements, 8h cadence) and 5-min klines from https://fapi.binance.com/fapi/v1/klines (689225 bars), fetched 2026-07-21T03:17:51.868877+00:00. Sample 2020-01-01..2026-07-20 (n=2393 days); OOS 2024-01-01..2026-07-20 (n_oos=932). INFERENCE — the models are nested (baseline = alternative with beta_funding=0), so Clark-West (2007) MSPE-adjusted is the ONLY test wired into the verdict; the DM blocks are retained as diagnostics and are not valid inference under nesting. RESULT — signed funding (pre-specified PRIMARY): QLIKE 0.285709 -> 0.283634 (-0.726%), MSE 6.395651e-07 -> 6.369095e-07 (-0.415%), Clark-West t=1.4019, one-sided p=0.0805, HAC lag 10 — NOT significant at 5%. DM diagnostic t=-0.8292 (HLN-corrected -0.8288, p=0.4072), far below the Harvey (2016) strength threshold |t|>3.0. |funding| (SECONDARY): QLIKE 0.285709 -> 0.283144 (-0.898%), Clark-West t=1.7394, one-sided p=0.0410; DM diagnostic t=-0.9169. MULTIPLE TESTING — 2 covariates were tested, so the Bonferroni one-sided bar is 0.025. |funding| clears the NOMINAL 5% bar (p=0.0410) but NOT the adjusted one; signed funding clears neither. The headline verdict follows the pre-specified primary covariate, and the secondary is reported regardless. IN-SAMPLE CONTEXT — incremental R^2 on log RV is tiny: baseline 0.5305 -> 0.5342 (delta 0.0037) for signed funding and 0.5351 (delta 0.0046) for |funding|, n=2371. A 1-sd rise in yesterday's mean funding moves expected log RV by 0.0670, i.e. 6.93% in RV / 3.41% in volatility — economically small and in-sample only. STABILITY — the (already insignificant) signal is concentrated in the first OOS half: 2024-01-01..2025-04-10 n=466 CW t=1.6049 (p=0.0543), QLIKE 0.298009 -> 0.293759; 2025-04-11..2026-07-20 n=466 CW t=0.3627 (p=0.3584), QLIKE 0.273409 -> 0.273509 — i.e. the second half is flat and QLIKE actually deteriorates slightly. INTERPRETATION — this is a NULL: at daily frequency, once a HAR-RV baseline already conditions on BTC's own realized-volatility history, yesterday's Binance funding rate adds nothing that survives a nested-model test. It is NOT evidence that leverage/funding is irrelevant to BTC volatility — the K139 liquidation-cascade mechanism is explicitly non-linear, and this specification enters funding linearly. LOOKAHEAD — assert_no_lookahead checked 250 rows with 0 violations on all three HAR lags and on funding_lag1; the code carries explicit .shift(1) at k1436.py build_har_features/build_funding_features, and the guard is an independent rebuild rather than a reuse of the same shift logic. LIMITATIONS (from the artifact, not added here): (1) Single exchange: Binance only. It is the largest BTC perp venue, but funding on OKX/Bybit/dYdX can diverge; a cross-venue funding dispersion measure is untested here. (2) Single contract: BTCUSDT perpetual only - no quarterly-futures basis, no options skew, no open interest, no liquidation data. A composite leverage measure may still work where funding alone does not. (3) Short sample by volatility-research standards: 2,393 days (2020-2026), OOS n=932. Regime-diverse (2021 bull, 2022 LUNA/FTX deleveraging, 2024-25 ETF era) but one asset over six years, and DM/CW power at n=932 is limited for small effects. (4) Funding regime shift: Binance changed funding-interval and cap rules over the sample; the series is treated as homogeneous, which it strictly is not. (5) Linear specification: funding enters linearly, but the K139 liquidation mechanism is explicitly non-linear (cascades trigger at thresholds). A threshold/quantile spec is a live untested alternative; |funding| is only a crude first step toward it. (6) Two covariates tested, and the SECONDARY is the one that scored better. |funding| clearing nominal 5% while the pre-specified primary does not is exactly the configuration where selective reporting does damage - hence the Bonferroni bar (0.025) and a headline that follows the primary. A clean test of |funding| needs fresh pre-registration and an OOS window this experiment has not already looked at. (7) Clark-West is one-sided and asymptotic; its normal reference is somewhat conservative in finite samples. At n=932 with effects this small, this design lacks the power to resolve an effect of this magnitude - which is not the same as showing the effect is zero. (8) Row-position vs calendar-date lagging: one RV day and one funding day are dropped, so at those boundaries shift(1) means 'last available prior row' rather than literally 'yesterday'. Not a lookahead violation (assert_no_lookahead verifies this), and it affects at most 2 of 2,393 days. (9) RV target: 5-min sampling with no sub-sampling/averaging and no microstructure-noise correction (no realized kernel, no bipower variation). Standard for a liquid perp, but not the most robust estimator available. PROVENANCE — recorded by the main thread (never an agent, K1259) during the PHASE-A collection of compute-queue job agent-brief_k1436_v2-70286f; every figure above was read programmatically out of k1436_results.json. This v2 supersedes the v1 scoping/feasibility document that previously sat in experiments/k1436 with no computed results.",
+  "evidence": [
+   "experiments/k1436/k1436_results.json"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-21T12:33:18.904550",
+  "k_id": "k1436",
+  "experiment_id": "k1436",
+  "experiment_path": "experiments/k1436",
+  "verdict": "NULL",
+  "review_verdict": "PASS",
+  "reviewer": "experiments/k1436/review_report.md",
+  "reviewer_source": "feature-dev:code-reviewer subagent (fallback; Codex CLI usage-limited until 2026-07-25)",
+  "needs_human": false,
+  "provenance": "main-thread write from artifact JSON; compute-queue followup collection",
+  "results_sha256": "bdcdc5a7e7ca920bf62ba65f13a4ff4fd0367c266db8d98db042b953af9a4c70",
+  "revisions": [
+   {
+    "revised_at": "2026-07-21T12:33:33.257231+08:00",
+    "actor": "hourly-slot-3-c090951b621142b6960534a8c9593ad5",
+    "reason": "PHASE-A collection of compute job agent-brief_k1436_v2-70286f: attach structured K-record fields (k_id/verdict/review provenance/sha) that add_knowledge cannot set",
+    "fields": [
+     "experiment_id",
+     "experiment_path",
+     "k_id",
+     "needs_human",
+     "provenance",
+     "results_sha256",
+     "review_verdict",
+     "reviewer",
+     "reviewer_source",
+     "verdict"
+    ],
+    "before": {
+     "k_id": null,
+     "experiment_id": null,
+     "experiment_path": null,
+     "verdict": null,
+     "review_verdict": null,
+     "reviewer": null,
+     "reviewer_source": null,
+     "needs_human": null,
+     "provenance": null,
+     "results_sha256": null
+    }
+   }
+  ]
+ },
+ {
+  "item_id": "6e49bdf8",
+  "category": "experiment_result",
+  "content": "[k1729 verdict=HAR_RV5_WINS_ROBUST_ACROSS_PROXIES reviewer=FALLBACK-DUAL-INDEPENDENT (Codex primary path unavailable: usage limit until 2026-07-25; Codex re-verification of these bytes still REQUIRED before closure) artifact=experiments/k1729 task=agent-brief_k1729_repair-986ef4] TAIFEX 5-minute realized volatility vs daily squared returns as HAR inputs: does intraday information improve a same-day-ahead RV forecast made at 08:45 before the day session opens? Two structurally identical HAR specifications (d/w/m lags) differing only in input -- HAR_RV5 on 5-minute RV, HAR_DAILY on daily open-to-close squared returns -- evaluated on QLIKE with Diebold-Mariano (Newey-West, HAC bandwidth 14), across two target proxies. Data: data/intraday/taifex_5min_rv.csv as-of 2026-07-16, reproducibility pinned by analysis_slice_sha256=2acdc69aa2103f4a... (whole-file sha is provenance only -- the collector appends a row daily, so it changes run to run). RESULT -- HAR_RV5 wins on both proxies and survives all three sensitivity ledgers. Primary: target rv_5min n=2548, improv=14.70%, DM t=-3.681, HAR_RV5_WINS; target daily_r2 n=2536, improv=3.37%, DM t=-3.367, HAR_RV5_WINS. Ex-ante contract ledger (the clean one, ex-post contract choice removed): rv_5min n=2543, improv=14.70%, DM t=-3.671, HAR_RV5_WINS; daily_r2 n=2531, improv=3.39%, DM t=-3.370, HAR_RV5_WINS. All 127 roll days dropped: rv_5min n=2421, improv=14.66%, DM t=-3.584, HAR_RV5_WINS; daily_r2 n=2410, improv=3.48%, DM t=-3.665, HAR_RV5_WINS. Insanity filter off: rv_5min n=2541, improv=15.19%, DM t=-3.867, HAR_RV5_WINS; daily_r2 n=2524, improv=3.48%, DM t=-3.456, HAR_RV5_WINS. The top-level verdict is machine-derived and REQUIRES the ex-ante ledger to concur on both targets, so _ROBUST_ACROSS_PROXIES is not carried by the primary ledger alone. Ex-ante contract determinacy: 2545/2550 OOS rows (99.80%) under a pre-specified convention (hold the front monthly contract through its published third-Wednesday settlement, holiday-adjusted, then roll); the 5 exceptions (2016-03-16, 2016-05-18, 2016-08-17, 2017-01-18, 2017-02-15) are all settlement days where volume migrated one day early. SCOPE -- what this supports: under this specific setup (08:45 pre-open forecast of same-day day-session RV), the 5-minute-RV HAR beats the structurally identical daily-squared-return HAR, across both proxies and three sensitivity ledgers. What it does NOT support: that this data line is worth maintaining. That is a cost-benefit judgement requiring maintenance cost, alternative cost, and the economic value of the gain -- this experiment measured none of the three. The rev1 draft made that claim, Codex rev1 failed it, and it was retracted; do not reinstate it. CAVEAT -- the 2017-onward subsample weakens on the daily_r2 proxy: n=2222, improv=3.37%, DM t=-2.921, NULL (rv_5min holds: n=2231, improv=13.81%, DM t=-3.067, HAR_RV5_WINS). CAVEAT -- the ex-ante ledger is a conditional estimand (membership is not knowable at 08:45), but the selection is model-agnostic and common to both models, so it favours neither. GOVERNANCE -- the nested-DM-misuse gate flagged k1729.py as primary_raw_dm; adjudicated a pattern-match false positive because the two regressor sets are disjoint (neither model is a parameter-restricted special case of the other), corroborated by non-degeneracy diagnostics (forecast correlation 0.778/0.791, exact-zero loss-diff fraction 0.0%). Recorded via the pre-existing reviewed_nonnested exit path (precedents K1049, k1100b); no new bypass mechanism was created. REVIEWER SOURCE -- fallback, not primary. Codex CLI returned a hard usage limit ('try again at Jul 25th, 2026') on 2026-07-21 14:33 Taipei. Per .claude/rules/experiments.md two independent reviewers ran instead and both PASSed: a fresh-context adversarial code-reviewer subagent (hand-computed the settlement calendar against the raw CSV, incl. two control non-ambiguous settlement dates) and agy/Antigravity Gemini (independently reimplemented both ex-ante roll conventions plus a third non-expiry-tied control). A fallback PASS is NOT equivalent to a primary-path Codex PASS: this K is NOT closed until Codex re-verifies these exact bytes on or after 2026-07-25.",
+  "evidence": [
+   "experiments/k1729/k1729_results.json",
+   "experiments/k1729/README.md",
+   "experiments/k1729/reproduce_spec.json",
+   "experiments/k1729/review_verdict.json",
+   "experiments/k1729/independent_review_rev2.md",
+   "experiments/k1729/agy_review_rev2.md",
+   "reviewed_commit=ba3642da3fa4d5d56ae481dfcf1e71173beff51d",
+   "results_sha256=2f30de1989439d6c6e4b94b989bfa9b3960c47f3804ef4c3f2ac9d0f191886e8",
+   "docs/governance/2026-07/nested_dm_fp_narrowing_audit.md (appendix A.1)"
+  ],
+  "confidence": 0.75,
+  "created_at": "2026-07-21T16:11:47.134945"
+ },
+ {
+  "item_id": "bfbcd654",
+  "category": "experiment_result",
+  "content": "K1730 arm A (GEVReg-MIDAS-SSVS 波動率區間預測) production run 定案，取代先前的 quick-mode artifact。production artifact md5 d0d25fe2b49eeca9ac7d8ab5dc7d0419（quick_mode=false, n_starts=30, n_draws=40000, n_burnin=10000, thin=10, n_chains=2, n_pred_draws=500），估計設定與 K1731 arm B rev5 在所有共用欄位上完全一致，跨臂比較首次 like-for-like。\n\n數值結論（OOS n=967, 2008-01-07 → 2026-07-13）：macro 模型 GEVReg-MIDAS-SSVS 的 mean pinball 0.11406583 高於自身 nested benchmark GEV-HAR 的 0.11223856，loss differential +0.00182727 favours benchmark。permutation 診斷 shuffled 0.11208304 < real 0.11406583，shuffled_worse_than_real=false，即打亂 macro 排序並不會變差。harvey_significant=false。\n\n推論層裁決：該 DM 比較同時滿足 nested + pinball + expanding window 三條件，依 K1731 F1 的結論此組合沒有已發表的推論方法，DM 統計量在 H0 下沒有 asymptotic-normal 極限。因此 arm A 的 t 值（quick-mode 2.13 / production 1.998）與 p 值皆已**撤回為 inference**，改標 diagnostic-only；README 中殘留的 t=+2.13 僅存在於歷史 review round 的 superseded 註記內。方向性結論改以 loss ordering + permutation 診斷 + harvey_significant=false 支撐。另需注意 nesting bias 與觀察到的方向同向（大模型多餘係數在 H0 下增加預測噪音），故此觀察與「macro 貢獻為零」一致，但**不足以**支持更強的「macro 主動惡化預測」主張。\n\n兩個 in-sample 選擇數字因 production 而更正：2008 refit 的 VIX PIP 0.85 → 0.87275；IP PIP peak 0.354 → 0.224125。VIX 在 19/19 refits PIP>0.5（mean 0.86467），CPI 11/19（0.65279），UNRATE 7/19（0.42716），IP 與 TERM 皆 0/19。xi range [-0.13965, -0.09465] 與 quick mode 相同至 7 位有效數字（multistart MLE，不依賴 draw 數）。\n\nPRIMARY artifact 的 cross_arm_comparison 是改 generator k1731_finalize_report.py 後重新產生，非手改 JSON；leaf diff 對 HEAD 顯示 3,486 個數值 leaf 全數未動（0 changed / 0 added / 0 removed），只有 15 個敘述字串與 finalized_utc 變動、6 個 claim-layer key 新增。\n\n尚未關閉：(a) K1730_NESTED_DM_ADJUDICATION.md 的 §1.1/§3.2/§7 仍引 quick-mode 數值，待其 owner 更新；(b) 該文件 §4.1 要求的 5 處 source annotation 尚未套進 k1730_gevreg_midas_ssvs.py；(c) auditor bucket exposed → diagnostic_only 需 baseline re-freeze；(d) randomization test（adjudication §4.2）未跑，在它跑完之前兩臂的 null 都只是 descriptive 非 tested；(e) Codex round 8 尚欠（額度至 2026-07-25 13:30），worktree 因 experiment certification gate 未合併，已排 task k1731_k1730_merge_after_codex_round8_20260725。",
+  "evidence": [
+   ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/F3_armA_production_recheck.md",
+   "experiments/k1730/k1730_gevreg_midas_ssvs_results.json (md5 d0d25fe2b49eeca9ac7d8ab5dc7d0419)",
+   "experiments/k1730/K1730_NESTED_DM_ADJUDICATION.md",
+   "experiments/k1731/README.md",
+   "hourly slot-1 457427c2 獨立抽驗 10 項數字（mean_pinball / dm_tests / permutation_test / ssvs_summary / refits[0].ssvs.pip.VIX / max IP PIP / xi_range / n_common_oos / harvey_significant / md5）全數逐位吻合"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-22T00:12:03.903356"
+ },
+ {
+  "item_id": "f20b88e3",
+  "category": "methodology",
+  "content": "2026-05-18 快照重複列污染事件的裁決定案。9 個 canonical 資料 CSV 各含 10 個重複交易日；該事件被三個獨立 agent 各審一次（分母 44 / 64 / 51），結論互相矛盾，本次對帳裁決如下。\n\n**權威裁決集 = audit C**（branch wt/dispatch-slot-1-20b291d5-snapdup, experiments/audit_snapshot_dup_20260721/）：篩 70 個 Python 檔、裁決 51 個 consumer，確認污染 9 個（k1319 k1391 k1396 k1398 k1399 k1591 k1592 k1705 paper2_table1_summary_stats_provenance），另 4 個 AT_RISK_UNVERIFIED。\n\n**audit A 作廢**（branch wt/dispatch-slot-1-858545f9-snapaudit）：其頭條 conclusions_changed_by_the_contamination=0 是分母錯誤造成的偽陰性。A 的 44 個 consumer path 中不含 k1319，而 k1319 正是判定翻轉案例。Codex primary-path review 早已判 A FAIL(MAJOR-1)，理由與此一致。\n\n**兩個顯著性判定翻轉**（audit B 與 audit C 各自獨立重跑，數字吻合到小數第四位）：\n1. k1319：DM har_vs_ewma t 從 -2.9319 移到 -3.1085，跨過 Harvey |t|>3.0 門檻；p 0.0034 → 0.0019。\n2. k1592：dm_GammaRule_minus_GJR_p 從 0.038 移到 0.137，跨過 5%；panel mean_losses 因 10 筆偽造零報酬膨脹約 25-30%。**k1592 的列數是乾淨的**，所以純以列數為準的稽核看不見它 —— 這是本事件最重要的方法學教訓：count-only 稽核對「重複列被後續處理吸收成零報酬」的污染型態失效。\n\n**投稿風險**：paper/leverage-direction/body_v_ijf.tex 的 L332（K1592 表註與頭條結論「no asset and no panel meets this criterion」、SPY Holm p=0.104）與 L358（K1591 gamma_diff=-0.087、HAC t=-0.66、bootstrap CI [-0.71,+0.39]、69.8% negative draws）皆源自受污染面板。該論文是目前唯一接近 ready-for-submission 者，在更正任務關閉前不得推進 arXiv 或投稿。\n\n**vintage caveat（所有下游更正都適用）**：audit B 的成對重跑取自同一 git vintage (00b07f07f^ vs 00b07f07f) 並先驗證 dedup(A)==B byte-identical，故 delta 只能歸因於那 10 列；但該 A/B 落在 2026-07-19 vintage，與原始執行 vintage 不同。方向與量級可信，**寫進產物或論文的精確更正值必須在原 vintage 重跑取得**，不可直接抄 B 的 after 值。\n\n**已觸及讀者的產出**：已發佈文章 mile_02c71e74（k1308）、mile_34157161（k1399）、k1396 系列 4 篇 feed；feed.json 的 K1319 條目；paper/garch-x-vix/errata_pending.md §SF1-K1391；paper/taiwan-vt tab:summary_stats 的 provenance。\n\n**流程教訓**：同一 incident 被派了三次、三次都從零篩 consumer，成本是三份 agent 工時，風險是先完成的錯誤結論（A）差點定案。派工端在建 audit 類任務前應查同 incident 是否已有進行中的 audit —— 與 K-article 的 dedup gate 是同類問題，只是發生在 ops 側而非內容側。",
+  "evidence": [
+   "storage/ops/snapaudit_reconciliation_20260722.md（本次裁決對帳）",
+   "audit C: wt/dispatch-slot-1-20b291d5-snapdup :: experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
+   "audit B: snapaudit-dcc222db :: experiments/snapshot_dup_audit_20260720/audit_results.json（64 consumers, 10 paired reruns with before/after + diff.json artifact）",
+   "audit A (作廢): wt/dispatch-slot-1-858545f9-snapaudit :: experiments/audit_dup_snapshot_20260719/audit_results.json",
+   "storage/ops/codex_reviews/audit_dup_snapshot_20260719_verdict.md（Codex 判 A FAIL, MAJOR-1）",
+   "paper/leverage-direction/body_v_ijf.tex:332,358"
+  ],
+  "confidence": 0.9,
+  "created_at": "2026-07-22T00:19:39.079590"
+ },
+ {
+  "item_id": "ffdc6a33",
+  "category": "methodology",
+  "content": "K1708 rev2 收件裁決（2026-07-22 主線程獨立驗證，非採信 agent 自述）。方法論教訓：**schema 遷移會讓 regression test 靜默失去鑑別力**。\n\n背景：K1708 的 verdict gate 在 2026-07-17 被查出假陽性，修正時 comparator 從 `cw_vs_benchmark_primary` 換成 `cw_vs_own_restriction_primary`。隨修正加的 4 個 regression test 全部用**新 schema** 寫 fixture 並斷言 NULL —— 但舊 gate 讀不到新欄位，一律 default 回 NULL，所以那 4 個測試在**修正前後都通過**，等於沒測到東西。Codex round-2 抓到這點並判 FAIL。\n\n修法（已獨立驗證）：fixture 改成**雙 schema**（同時帶新舊兩個欄位，也就是真正 rerun 後的形狀），並把「舊 gate 必須 SUPPORTED、新 gate 必須 NULL」兩件事**同時**寫成斷言，另加 guard-on-the-guard 確保 fixture 未加 mutation 時真的能過新 gate。\n\n本次獨立驗證（主線程實跑，未採信 agent 表格）：\n1. production checkout 複跑 `pytest experiments/k1708/test_k1708.py` → **54 passed**（修改前 35）。\n2. legacy probe（/tmp 獨立複本，只把生產 gate 換成重建的 pre-fix `legacy_derive_verdict`，其餘一字不改）→ **24 failed / 30 passed**；`-k discriminate` 下 4 個 case 全 FAIL（`assert 'SUPPORTED' == 'NULL'`）+ guard 亦 FAIL。**新測試確實咬得住新舊差異**。\n3. provenance 六個數字**獨立從 `K1708_results.json` 重算**（不呼叫 agent 自己寫的 `provenance_check_recorded_numbers()`）：QLIKE 改善 HAR_KF_DISC +0.776% / HAR_KF_MLE +1.460% / HAR_S_BM −1.677%；CW t = 1.202 / 1.545 / −1.209，六項全中，且 p 與 1−Φ(t) 精確吻合（|Δ|<1e-9）。\n4. 確認 stored payload **沒有** `cw_vs_own_restriction_primary` 欄位 → agent 宣稱「新 gate 從未在真實資料上被評估過、BLOCKER 1 的經驗缺口不重跑補不上」屬實，非推託。\n\n**研究結論本身仍是 NULL 且未定案**：K1708 full-sample verdict = NULL（舊 gate 因三個 CW t 都沒過 1.645；新 gate 因這份 artifact 沒有精確 nested 的比較欄位 —— 兩個 NULL 都成立）。本條記的是 gate/test 層的修復與方法論教訓，**不是** state-space 模型優於 HAR 的任何主張。Codex primary-path 二審尚未執行（額度 2026-07-25 13:30 台北恢復），worktree `dispatch-slot-1-457427c2-k1708` **未合併**，依 brief 留 blocked 而不以 fallback reviewer 代替。\n\n可遷移規則：**任何改動 comparator / schema 的修正，其 regression test 必須在「修正前的邏輯」上實跑一次並確認 FAIL**；只斷言修正後的期望值無法區分「修好了」與「測試根本沒接到線」。",
+  "evidence": [
+   ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/REMEDIATION_rev2.md",
+   ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/K1708_results.json",
+   ".claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/test_k1708.py",
+   "storage/ops/k1708_codex_review_round2_20260719.md",
+   "storage/logs/hooks/test_20260722T010916_25125.log",
+   "storage/logs/hooks/test_20260722T011145_31764.log",
+   "storage/logs/hooks/test_20260722T011355_40077.log"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-22T01:15:11.303738"
+ },
+ {
+  "item_id": "9b1dd6d8",
+  "category": "operations",
+  "content": "PHASE-Z ownership rule: a fire-start baseline only proves a path is not this fire output; it does not prove abandonment. Live write-time declarations must be excluded from risk, streak, quarantine, incident, and owner notifications. Only stale, unowned, or contested residue is actionable, and routine skipped-path WARNs are noise.",
+  "evidence": [
+   "Telegram msg 1312 / 2026-07-22 13:16 receipt (29 concurrent paths)",
+   "scripts/dispatch_supervisor/phase_z.py::_partition_foreign_ownership",
+   "tests/test_phase_z_ownership.py::test_1316_receipt_active_sessions_are_skipped_without_warn_or_risk",
+   "217 related tests passed"
+  ],
+  "confidence": 0.95,
+  "created_at": "2026-07-22T16:13:43.093967"
  }
 ]

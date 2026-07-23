@@ -19,10 +19,14 @@ from volpred.ops import next_tasks as nt
 ROOT = Path(__file__).resolve().parents[1]
 REAL_NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 VALIDATOR = ROOT / "scripts" / "validate_next_tasks_status.py"
-BASELINE = 27
+BASELINE = 0
 # Frozen 2026-07-18: blocked rows carrying no blocked_until. See
 # next_tasks.LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE for provenance.
 BLOCKED_NO_UNTIL_BASELINE = 0
+# Frozen 2026-07-20 (WS-A3): out-of-vocab blocked_reason rows. See
+# next_tasks.LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE for provenance;
+# scripts/migrate_status_vocab.py --update-baselines flips this to the residue.
+BLOCKED_REASON_BASELINE = 0
 
 
 # ---------------------------------------------------------------- vocabulary --
@@ -136,7 +140,9 @@ def test_audit_is_non_fatal_on_legacy_pollution(tmp_path, capsys):
     # returned to callers and CI's baseline gate is the hard stop. stderr fires
     # only ABOVE the frozen baseline — see test_status_audit_warns_above_baseline.
     assert nt._audit_task_statuses([{"id": "legacy", "status": "completed"}]) == 1
-    assert "out-of-vocab" not in capsys.readouterr().err
+    # Post-A3 migration the frozen baseline is 0: ANY pollution is above
+    # baseline and must be loud (the quiet-below-baseline era ended 2026-07-20).
+    assert "out-of-vocab" in capsys.readouterr().err
 
 
 # ------------------------------------------------------- content materializer --
@@ -190,6 +196,9 @@ def test_questions_materializer_routes_through_hardened_writer(tmp_path, monkeyp
         return path
 
     monkeypatch.setattr(questions, "project_path", fake_project_path)
+    # The duplicate corpus is owned by member_qa_duplicate_verdict, not by the
+    # ranking summary — stub the single fetch so this test stays offline.
+    monkeypatch.setattr(questions, "_fetch_question_history", lambda source: [])
     monkeypatch.setattr(
         questions,
         "get_member_question_ranking_summary",
@@ -206,6 +215,7 @@ def test_questions_materializer_routes_through_hardened_writer(tmp_path, monkeyp
                 }
             ],
             "pending_questions": [],
+            "answered_history": [],
         },
     )
 
@@ -336,7 +346,9 @@ def test_whole_file_write_tolerates_malformed_legacy_priority(tmp_path, capsys):
 
 def test_status_audit_is_quiet_at_or_below_baseline(tmp_path, capsys):
     """A frozen, known fact must not be re-warned on every dispatch write."""
-    tasks = [{"id": "legacy", "status": "completed", "priority": 3}]
+    # Baseline is 0 post-A3: "at or below baseline" now means a fully clean
+    # payload. Clean writes stay quiet on the hot dispatch path.
+    tasks = [{"id": "clean", "status": "pending", "priority": 3}]
     p = tmp_path / "next_tasks.json"
     p.write_text("[]", encoding="utf-8")
     with p.open("r+", encoding="utf-8") as fh:
@@ -469,3 +481,119 @@ def test_status_audit_warns_above_baseline(tmp_path, capsys):
         nt.write_tasks_to_handle(fh, tasks)
     err = capsys.readouterr().err
     assert "ABOVE frozen baseline" in err
+
+
+# ------------------------------------------- blocked_reason vocab gate (WS-A3) --
+# Same enforcement shape as the status vocab: canonical vocab in
+# src/volpred/ops/blocked_reasons.py, strict raise for writers setting a NEW
+# reason, non-fatal warn-above-baseline audit on the whole-file path, CI
+# baseline gate in scripts/validate_next_tasks_status.py.
+
+
+def test_every_vocab_blocked_reason_validates():
+    from volpred.ops.blocked_reasons import BLOCKED_REASONS
+
+    for reason in BLOCKED_REASONS:
+        assert nt.is_valid_blocked_reason(reason)
+        assert nt.validate_blocked_reason(reason) == reason
+
+
+@pytest.mark.parametrize(
+    "bad",
+    ["decomposed_into_subtasks", "waiting_graphify_14d_observation_window",
+     "free text prose reason", ""],
+)
+def test_out_of_vocab_blocked_reason_raises(bad):
+    assert not nt.is_valid_blocked_reason(bad)
+    with pytest.raises(nt.InvalidBlockedReason):
+        nt.validate_blocked_reason(bad)
+
+
+def test_blocked_reason_baseline_constant_mirrors_validator_default():
+    """Module constant, deps-free CI validator default, and this test must not drift."""
+    src = VALIDATOR.read_text(encoding="utf-8")
+    for line in src.splitlines():
+        if line.startswith("DEFAULT_BLOCKED_REASON_BASELINE"):
+            validator_baseline = int(line.split("=", 1)[1].strip())
+            break
+    else:
+        pytest.fail("validate_next_tasks_status.py has no DEFAULT_BLOCKED_REASON_BASELINE")
+    assert (
+        nt.LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE
+        == validator_baseline
+        == BLOCKED_REASON_BASELINE
+    )
+
+
+def test_real_queue_blocked_reason_out_of_vocab_matches_frozen_baseline():
+    from scripts import validate_next_tasks_status as vns
+
+    tasks = json.loads(REAL_NEXT_TASKS.read_text(encoding="utf-8"))
+    assert vns.count_out_of_vocab_blocked_reasons(tasks) == BLOCKED_REASON_BASELINE
+
+
+def test_validator_flags_injected_out_of_vocab_blocked_reason(tmp_path):
+    from scripts import validate_next_tasks_status as vns
+
+    tasks = json.loads(REAL_NEXT_TASKS.read_text(encoding="utf-8"))
+    current = vns.count_out_of_vocab_blocked_reasons(tasks)
+    tasks.append(
+        {"id": "injected", "status": "blocked", "priority": 3,
+         "blocked_reason": "hand_written_bogus_reason",
+         "blocked_until": "2099-01-01T00:00:00+00:00"}
+    )
+    fixture = tmp_path / "next_tasks.json"
+    fixture.write_text(json.dumps(tasks), encoding="utf-8")
+
+    over = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--path", str(fixture),
+         "--baseline", "9999", "--blocked-reason-baseline", str(current)],
+        capture_output=True,
+        text=True,
+    )
+    assert over.returncode == 1, over.stdout + over.stderr
+    assert "blocked_reason" in over.stderr
+
+    at = subprocess.run(
+        [sys.executable, str(VALIDATOR), "--path", str(fixture),
+         "--baseline", "9999", "--blocked-reason-baseline", str(current + 1)],
+        capture_output=True,
+        text=True,
+    )
+    assert at.returncode == 0, at.stdout + at.stderr
+
+
+def test_blocked_reason_audit_is_quiet_at_or_below_baseline_and_never_rewrites(tmp_path, capsys):
+    tasks = [
+        {"id": "legacy-r", "status": "blocked", "priority": 3,
+         "blocked_reason": "some_legacy_free_text",
+         "blocked_until": "2099-01-01T00:00:00+00:00"},
+    ]
+    p = tmp_path / "next_tasks.json"
+    p.write_text("[]", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        nt.write_tasks_to_handle(fh, tasks)  # must not raise
+    written = json.loads(p.read_text(encoding="utf-8"))
+    assert written[0]["blocked_reason"] == "some_legacy_free_text", "audit must report, not rewrite"
+    # Baseline 0 post-A3: one polluted row is above baseline, so the audit is
+    # loud; it still only reports and never rewrites the value.
+    assert "blocked_reason" in capsys.readouterr().err
+    assert nt._audit_blocked_reasons(tasks) == 1
+
+
+def test_blocked_reason_audit_warns_above_baseline(tmp_path, capsys):
+    tasks = [
+        {"id": f"bad-r-{i}", "status": "blocked", "priority": 3,
+         "blocked_reason": "hand_written_bogus_reason",
+         "blocked_until": "2099-01-01T00:00:00+00:00"}
+        for i in range(nt.LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE + 1)
+    ]
+    p = tmp_path / "next_tasks.json"
+    p.write_text("[]", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        nt.write_tasks_to_handle(fh, tasks)
+    err = capsys.readouterr().err
+    assert "ABOVE frozen baseline" in err
+    assert "blocked_reason" in err

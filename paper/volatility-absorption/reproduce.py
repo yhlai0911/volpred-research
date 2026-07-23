@@ -41,7 +41,10 @@ def approx(actual: float, paper: float, tol_pct: float) -> bool:
 
 
 def main() -> int:
-    k741 = load_json(PAPER_DIR / "experiments" / "k741_nfp_event_study_results.json")
+    # Canonical BLS-calendar re-run (2026-07-19). The archived proxy JSON at
+    # PAPER_DIR/experiments/k741_nfp_event_study_results.json is retained for history but is
+    # NO LONGER the gate source: it identifies NFP days by a first-Friday proxy.
+    k741 = load_json(PROJECT / "experiments" / "k741" / "k741_nfp_event_study_canonical_results.json")
     k903 = load_json(PROJECT / "experiments" / "k903" / "k903_paper8_robustness_results.json")
     k1418 = load_json(PROJECT / "experiments" / "k1418" / "k1418_results.json")
     k1686 = load_json(PROJECT / "experiments" / "k1686" / "k1686_contemporaneous_null_results.json")
@@ -56,6 +59,11 @@ def main() -> int:
     mech = k1686["mechanism_diagnostic_within_regime_shock_rate"]
     calib = k1686["calibration_diagnostics"]
     nfp = k741["part_a_historical"]
+    nfp_reg = k741["part_b_vix_regimes"]
+    nfp_dec = k741["factor_decomposition"]
+    nfp_rdt = k741["regime_difference_test"]
+    nfp_cells = k741["factorial_cells"]
+    nfp_mult = k741["test_variant_disclosure"]["multiplicity"]["min_adjusted_p_by_family"]
 
     claims = [
         # ---- Table 2: regime distribution (pinned; days = n_shock + n_normal) ----
@@ -136,15 +144,88 @@ def main() -> int:
         ("AppB TLT adjR2", 0.0290, cross_asset["TLT"]["r2_adj"], 3.0, "k1418.results[TLT].r2_adj"),
         ("AppB 0050 adjR2", -0.0013, cross_asset["0050.TW"]["r2_adj"], 5.0, "k1418.results[0050.TW].r2_adj"),
         # ---- Table 5 / NFP (C5) ----
-        ("T5 NFP ratio vs all", 1.14, nfp["ratio_vs_all"], 1.0, "k741.part_a_historical.ratio_vs_all"),
-        ("T5 NFP p vs all", 0.081, nfp["p_vs_all"], 1.0, "k741.part_a_historical.p_vs_all"),
-        ("T5 NFP ratio vs Friday", 1.16, nfp["ratio_vs_friday"], 1.0, "k741.part_a_historical.ratio_vs_friday"),
-        ("T5 NFP p vs Friday", 0.061, nfp["p_vs_friday"], 1.0, "k741.part_a_historical.p_vs_friday"),
-        ("T5 NFP total days 4104", 4104.0, float(nfp["n_nfp"] + nfp["n_non_nfp"]), 0.0, "k741.part_a_historical n_nfp+n_non_nfp"),
-        ("T5 Low NFP n", 62.0, float(k741["part_b_vix_regimes"]["Low (VIX<15)"]["n"]), 0.0, "k741.part_b_vix_regimes.Low.n"),
-        ("T5 Low NFP mean abs", 0.498, k741["part_b_vix_regimes"]["Low (VIX<15)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.Low.mean_abs_return_pct"),
-        ("T5 Medium NFP mean abs", 0.757, k741["part_b_vix_regimes"]["Medium (15-20)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.Medium.mean_abs_return_pct"),
-        ("T5 High NFP mean abs", 1.488, k741["part_b_vix_regimes"]["High (VIX>=25)"]["mean_abs_return_pct"], 1.0, "k741.part_b_vix_regimes.High.mean_abs_return_pct"),
+        # Rebound 2026-07-19 onto the canonical BLS-calendar re-run (task assign_1238781f).
+        # The old bindings pointed at the archived first-Friday-proxy JSON, which misdates 33 of
+        # 194 releases and invents an Oct-2025 event; they also never covered the regime
+        # ratio/t/p columns, which is why those three columns drifted unnoticed. All six
+        # regime columns are bound now.
+        ("T5 NFP ratio vs all", 1.16, nfp["ratio_vs_all"], 1.0, "k741c.part_a_historical.ratio_vs_all"),
+        ("T5 NFP p vs all", 0.039, nfp["p_vs_all"], 2.0, "k741c.part_a_historical.p_vs_all"),
+        ("T5 NFP ratio vs Friday", 1.19, nfp["ratio_vs_friday"], 1.0, "k741c.part_a_historical.ratio_vs_friday"),
+        ("T5 NFP p vs Friday", 0.036, nfp["p_vs_friday"], 2.0, "k741c.part_a_historical.p_vs_friday"),
+        # The paper discloses the variant it does NOT report, precisely because the two
+        # straddle 5%. Bind it so that disclosure cannot go stale independently of the
+        # headline — an unbound "under Student's, p = 0.051" is exactly the sentence that
+        # rots first.
+        ("T5 NFP p vs all (Student, disclosed)", 0.051,
+         nfp["test_variants_vs_all"]["p_student"], 2.0,
+         "k741c.part_a_historical.test_variants_vs_all.p_student"),
+        ("T5 NFP Brown-Forsythe p (disclosed)", 0.48,
+         nfp["test_variants_vs_all"]["levene_bf_p"], 3.0,
+         "k741c.part_a_historical.test_variants_vs_all.levene_bf_p"),
+        ("T5 NFP n", 194.0, float(nfp["n_nfp"]), 0.0, "k741c.part_a_historical.n_nfp"),
+        ("T5 NFP total days 4084", 4084.0, float(nfp["n_nfp"] + nfp["n_non_nfp"]), 0.0, "k741c.part_a_historical n_nfp+n_non_nfp"),
+        ("T5 Low NFP n", 63.0, float(nfp_reg["Low (VIX<15)"]["n"]), 0.0, "k741c.part_b_vix_regimes.Low.n"),
+        ("T5 Low NFP mean abs", 0.527, nfp_reg["Low (VIX<15)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Low.mean_abs_return_pct"),
+        ("T5 Low NFP ratio", 1.31, nfp_reg["Low (VIX<15)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Low.ratio"),
+        ("T5 Low NFP t", 2.28, nfp_reg["Low (VIX<15)"]["t_stat"], 2.0, "k741c.part_b_vix_regimes.Low.t_stat"),
+        ("T5 Low NFP p", 0.026, nfp_reg["Low (VIX<15)"]["p_value"], 3.0, "k741c.part_b_vix_regimes.Low.p_value"),
+        ("T5 Low NFP p Holm", 0.104, nfp_reg["Low (VIX<15)"]["p_value_holm"], 3.0, "k741c.part_b_vix_regimes.Low.p_value_holm"),
+        ("T5 Medium NFP n", 76.0, float(nfp_reg["Medium (15-20)"]["n"]), 0.0, "k741c.part_b_vix_regimes.Medium.n"),
+        ("T5 Medium NFP mean abs", 0.788, nfp_reg["Medium (15-20)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Medium.mean_abs_return_pct"),
+        ("T5 Medium NFP ratio", 1.23, nfp_reg["Medium (15-20)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Medium.ratio"),
+        ("T5 Medium NFP t", 2.23, nfp_reg["Medium (15-20)"]["t_stat"], 2.0, "k741c.part_b_vix_regimes.Medium.t_stat"),
+        ("T5 Medium NFP p", 0.029, nfp_reg["Medium (15-20)"]["p_value"], 3.0, "k741c.part_b_vix_regimes.Medium.p_value"),
+        ("T5 Medium NFP p Holm", 0.104, nfp_reg["Medium (15-20)"]["p_value_holm"], 3.0, "k741c.part_b_vix_regimes.Medium.p_value_holm"),
+        ("T5 Elevated NFP n", 27.0, float(nfp_reg["Elevated (20-25)"]["n"]), 0.0, "k741c.part_b_vix_regimes.Elevated.n"),
+        ("T5 Elevated NFP mean abs", 1.046, nfp_reg["Elevated (20-25)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.Elevated.mean_abs_return_pct"),
+        ("T5 Elevated NFP ratio", 1.19, nfp_reg["Elevated (20-25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.Elevated.ratio"),
+        ("T5 Elevated NFP t", 1.13, nfp_reg["Elevated (20-25)"]["t_stat"], 3.0, "k741c.part_b_vix_regimes.Elevated.t_stat"),
+        ("T5 Elevated NFP p", 0.266, nfp_reg["Elevated (20-25)"]["p_value"], 1.0, "k741c.part_b_vix_regimes.Elevated.p_value"),
+        ("T5 Elevated NFP p Holm", 0.533, nfp_reg["Elevated (20-25)"]["p_value_holm"], 1.0, "k741c.part_b_vix_regimes.Elevated.p_value_holm"),
+        ("T5 High NFP n", 28.0, float(nfp_reg["High (VIX>=25)"]["n"]), 0.0, "k741c.part_b_vix_regimes.High.n"),
+        ("T5 High NFP mean abs", 1.417, nfp_reg["High (VIX>=25)"]["mean_abs_return_pct"], 1.0, "k741c.part_b_vix_regimes.High.mean_abs_return_pct"),
+        ("T5 High NFP ratio", 0.94, nfp_reg["High (VIX>=25)"]["ratio"], 1.0, "k741c.part_b_vix_regimes.High.ratio"),
+        ("T5 High NFP t", -0.38, nfp_reg["High (VIX>=25)"]["t_stat"], 3.0, "k741c.part_b_vix_regimes.High.t_stat"),
+        ("T5 High NFP p", 0.707, nfp_reg["High (VIX>=25)"]["p_value"], 1.0, "k741c.part_b_vix_regimes.High.p_value"),
+        ("T5 High NFP p Holm", 0.707, nfp_reg["High (VIX>=25)"]["p_value_holm"], 1.0, "k741c.part_b_vix_regimes.High.p_value_holm"),
+        # The claims this section now rests on are NEGATIVE ones — "nothing survives Holm under
+        # any family". Bind the smallest adjusted p of every reported family so those claims
+        # break the gate if they ever stop holding, rather than silently becoming false while
+        # every other row stays green. The family boundary is itself a researcher degree of
+        # freedom, so all four groupings the paper quotes are bound, not just the flattering one.
+        ("T5 Holm min: overall pair", 0.072, nfp_mult["overall_pair"], 2.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.overall_pair"),
+        ("T5 Holm min: regimes only", 0.104, nfp_mult["regimes_only"], 3.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.regimes_only"),
+        ("T5 Holm min: primary + regimes", 0.130, nfp_mult["primary_overall_plus_regimes"], 2.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.primary_overall_plus_regimes"),
+        ("T5 Holm min: all six", 0.155, nfp_mult["all_six"], 2.0,
+         "k741c.test_variant_disclosure.multiplicity.min_adjusted_p_by_family.all_six"),
+        # "nothing clears 5% under any family" — the single sentence the section turns on.
+        ("T5 nothing clears 5pct under any family", 0.0,
+         float(k741["test_variant_disclosure"]["multiplicity"]["anything_clears_5pct"]), 0.0,
+         "k741c.test_variant_disclosure.multiplicity.anything_clears_5pct"),
+        # The variant choice is disclosed as NOT pre-specified; bind that too, so the honest
+        # framing cannot quietly revert to an 'a priori' claim.
+        ("T5 variant not pre-specified", 0.0,
+         float(k741["test_variant_disclosure"]["chosen_a_priori"]), 0.0,
+         "k741c.test_variant_disclosure.chosen_a_priori"),
+        # sec:nfp footnote quotes the date-effect decomposition, which is NOT the headline cell.
+        # Bound explicitly so the footnote cannot go stale while the gate stays green.
+        ("T5 fn date-effect from 1.149", 1.149, nfp_dec["date_effect_at_archived_mapper"]["ratio"][0], 1.0, "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[0]"),
+        ("T5 fn date-effect to 1.151", 1.151, nfp_dec["date_effect_at_archived_mapper"]["ratio"][1], 1.0, "k741c.factor_decomposition.date_effect_at_archived_mapper.ratio[1]"),
+        # sec:nfp regime-contrast test (difference-in-significance correction)
+        ("T5 regime diff point est", 0.37, nfp_rdt["observed_difference"], 3.0, "k741c.regime_difference_test.observed_difference"),
+        ("T5 regime diff CI lo", -0.10, nfp_rdt["ci95"][0], 5.0, "k741c.regime_difference_test.ci95[0]"),
+        ("T5 regime diff CI hi", 0.79, nfp_rdt["ci95"][1], 2.0, "k741c.regime_difference_test.ci95[1]"),
+        ("T5 regime diff p", 0.115, nfp_rdt["p_two_sided"], 2.0, "k741c.regime_difference_test.p_two_sided"),
+        ("T5 regime trend rho observed", -1.00, nfp_rdt["observed_spearman_trend"], 1.0, "k741c.regime_difference_test.observed_spearman_trend"),
+        ("T5 regime trend rho boot mean", -0.63, nfp_rdt["spearman_trend_mean"], 3.0, "k741c.regime_difference_test.spearman_trend_mean"),
+        # Mapping completeness: headline cell must consume every official release.
+        ("T5 headline releases mapped", 194.0, float(nfp_cells["official__forward_mapper"]["n_mapped"]), 0.0, "k741c.factorial_cells.official__forward_mapper.n_mapped"),
+        ("T5 headline zero exclusions", 0.0, float(len(nfp_cells["official__forward_mapper"]["excluded_releases"])), 0.0, "k741c.factorial_cells.official__forward_mapper.excluded_releases"),
+        ("T5 headline zero lookahead", 0.0, float(len(nfp_cells["official__forward_mapper"]["backward_mapped_lookahead_events"])), 0.0, "k741c.factorial_cells.official__forward_mapper.backward_mapped_lookahead_events"),
         # ---- NSI baseline / thresholds / subperiods / RV / controlled (k903, unchanged) ----
         ("Baseline beta", -0.000267, k903["baseline_regression"]["beta_hat"], 1.0, "k903.baseline_regression.beta_hat"),
         ("Baseline t", -1.77, k903["baseline_regression"]["t_stat_NW"], 2.0, "k903.baseline_regression.t_stat_NW"),
@@ -201,7 +282,13 @@ def main() -> int:
     matched = sum(1 for c in checks if c["status"] == "match")
     match_rate = matched / total * 100 if total else 0.0
     alert_level = "green" if match_rate >= 95 else ("amber" if match_rate >= 80 else "red")
-    gate_status = "pass" if match_rate >= 95 else "fail"
+
+    # A 95% rate is a health metric, not a reproducibility certification: with 112 checks it
+    # tolerates 5 wrong numbers, so a broken headline can be diluted by unrelated passing rows.
+    # Demonstrated adversarially (Codex round-2): forcing the headline p from 0.0506 to 0.20
+    # still returned 111/112, gate=pass, exit 0. Any mismatch now fails the gate.
+    mismatched = [c["metric"] for c in checks if c["status"] != "match"]
+    gate_status = "pass" if not mismatched else "fail"
 
     print(f"{'Metric':<38} {'Paper':>12} {'Actual':>12} {'diff %':>8} {'status':>10}")
     print("-" * 88)
@@ -213,6 +300,8 @@ def main() -> int:
         print(f"{c['metric'][:36]:<38} {pv_s} {av_s} {c['rel_diff_pct']:>7.2f}% {c['status']:>10}")
     print("-" * 88)
     print(f"Matched: {matched}/{total}  rate: {match_rate:.1f}%  alert: {alert_level}  gate: {gate_status}")
+    if mismatched:
+        print(f"[gate] FAIL — every bound number must match. Mismatched: {', '.join(mismatched)}")
 
     report = {
         "paper": "volatility-absorption",

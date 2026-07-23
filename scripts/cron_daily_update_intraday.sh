@@ -34,10 +34,14 @@ fi
 
 _start=$(date +%s)
 echo "=== [daily_update_intraday] start at $(date '+%Y-%m-%dT%H:%M:%S%z') ==="
-# 2026-06-30: hard watchdog timeout (600s) — 結尾 sync 在 transient SSL EOF 下曾卡 poll
-# 無限 hang 持有共用 lock。perl alarm 600s（正常 ~2min 的 5x）SIGALRM 殺掉 → trap EXIT
-# 釋放 lock，杜絕 lock cascade（intraday hang 擋下一班 morning）。見 error_log 2026-06-30。
-/usr/bin/perl -e 'alarm shift; exec @ARGV' 600 /opt/homebrew/bin/uv run python scripts/daily_update.py
+# 2026-06-30: hard watchdog timeout — 結尾 sync 在 transient SSL EOF 下曾卡 poll
+# 無限 hang 持有共用 lock。perl alarm SIGALRM 殺掉 → trap EXIT 釋放 lock，
+# 杜絕 lock cascade（intraday hang 擋下一班 morning）。見 error_log 2026-06-30。
+# 2026-07-20: 600s → 1200s。原註解寫「正常 ~2min 的 5x」，但 7/02-7/18 實測 duration
+# 是 250-340s（sync 步驟長大），600s 只剩 ~2x margin —— 偶發 Supabase URLError retry
+# 就衝破上限，7/16 與 7/20 各被 SIGALRM 誤殺一次（rc=142）。1200s 對實測 p95 仍有 ~3x
+# margin，且 14:00+20min 遠早於下一班，lock cascade 防護不變。見 error_log 2026-07-20。
+/usr/bin/perl -e 'alarm shift; exec @ARGV' 1200 /opt/homebrew/bin/uv run python scripts/daily_update.py
 _ec=$?
 echo "=== [daily_update_intraday] exit ${_ec} at $(date '+%Y-%m-%dT%H:%M:%S%z') (duration=$(($(date +%s) - _start))s) ==="
 exit ${_ec}

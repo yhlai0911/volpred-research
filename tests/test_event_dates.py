@@ -36,9 +36,12 @@ def test_cpi_release_dates_lock_shutdown_and_rescheduled_dates(monkeypatch):
     assert pd.Timestamp("2025-11-13") not in actual
 
 
-def test_release_dates_uses_last_entry_when_release_has_same_month_revisions(
+def test_release_dates_uses_earliest_entry_when_release_has_same_month_revisions(
     monkeypatch,
 ):
+    # 2026-07-19 semantics flip (k528 Codex blocker): off-cycle revision entries
+    # are filed LATER in the month than the regular report, so max() picked six
+    # wrong NFP dates. The regular release is the month's EARLIEST entry.
     monkeypatch.setattr(
         event_dates,
         "_fetch",
@@ -53,7 +56,7 @@ def test_release_dates_uses_last_entry_when_release_has_same_month_revisions(
     )
 
     assert actual.equals(
-        pd.DatetimeIndex(pd.to_datetime(["2024-02-15", "2024-03-12"]))
+        pd.DatetimeIndex(pd.to_datetime(["2024-02-13", "2024-03-12"]))
     )
 
 

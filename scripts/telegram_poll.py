@@ -39,7 +39,7 @@ from volpred.ops.telegram import (  # noqa: E402
     save_state,
     send_telegram,
 )
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.next_tasks import append_task_record  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 
@@ -93,16 +93,21 @@ def _archive(update: dict) -> None:
 
 
 def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -> str:
-    """Append a P1 telegram_reply task to the pending queue (gmail-poll contract)."""
-    tasks = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+    """Append a P1 telegram_reply task to the pending queue (gmail-poll contract).
+
+    WS-A1b: routed through the canonical append helper. The old tmp+replace
+    wrote WITHOUT LOCK_EX (a concurrent claim/dispatch write could be clobbered
+    wholesale) and with indent=1 (canonical is 2 → every append rewrote the
+    whole file as a diff, polluting PHASE-Z authorship). append_task_record
+    keeps the ``telegram-<msg_id>`` id contract (reply-right guard) and the
+    idempotent daemon-restart replay, now checked under the same lock.
+    """
     task_id = f"telegram-{msg_id}"
-    if any(t.get("id") == task_id for t in tasks):
-        return task_id  # idempotent on daemon restart replay
     ctx_block = (
         f"\n老闆是在**回覆這則訊息**（指代「這個/那個」時以此為準）：\n---\n{reply_context}\n---\n"
         if reply_context else ""
     )
-    tasks.append({
+    record = {
         "id": task_id,
         "task_type": "telegram_reply",
         "priority": 1,
@@ -119,12 +124,13 @@ def _append_task(text: str, msg_id: int, sender: str, reply_context: str = "") -
             "（guard 會在任務已被別的 session 完成時拒發，防雙回覆。）回覆要短、直接、口語 — "
             "這是即時聊天不是報告；長內容給結論 + 一行說明細節在哪。回覆送出後才 complete 本任務。"
         ),
-    })
-    normalize_task_priorities(tasks)
-    guard_canonical_write(NEXT_TASKS)
-    tmp = NEXT_TASKS.with_suffix(".tmp")
-    tmp.write_text(json.dumps(tasks, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    tmp.replace(NEXT_TASKS)
+    }
+    # append_task_record 內建的 _request_urgent_fire 對 telegram_reply 是 no-op：
+    # 它有專屬 owner（下面 _spawn_responder / _maybe_retry_stuck），is_urgent()
+    # 對 DEDICATED_OWNER_TASK_TYPES 一律回 False。理由完整寫在
+    # next_tasks._request_urgent_fire 的 docstring，由 test_urgent_task_lane.py
+    # 的 dedicated-owner 測試釘住。
+    append_task_record(record, path=NEXT_TASKS, if_exists="skip")
     return task_id
 
 
@@ -161,7 +167,7 @@ def _handle_update(update: dict) -> None:
     # 一次「已排入、稍後處理」，讓 boss 知道訊息沒掉。
     if not _spawn_responder(model=_pick_model(text)):
         send_telegram(
-            f"收到（已排 P1：{task_id}）。即時處理器暫時忙碌，稍後由排程接手回你。",
+            f"收到（已排 P1：{task_id}）。即時處理器暫時忙碌，兩分鐘內自動重派，不用等排程。",
             disable_notification=True,
         )
 

@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1739,
+  "last_k_id": 1750,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -1012,12 +1012,15 @@
       "topic_hash": "4346c2ef0c936853"
     },
     {
+      "amend_note": "experiments/k1732 = TAIEX CF-VaR deathcross backtest (boss-assigned 2026-07-19, published mile_29018fa1, certified). Hand-picked kid collided with this reservation (K1719 incident class #2). Displaced ETF macro-efficiency/fragility topic re-reserved under new number (see next reservation).",
+      "amended_at": "2026-07-19T05:50:22.291734+00:00",
+      "amended_by": "main-interactive",
       "claimed_at": "2026-07-18T00:00:01.917841+00:00",
       "claimed_by": "research_backlog_auto",
       "k_id": "K1732",
       "number": 1732,
       "source_max": 1731,
-      "status": "reserved",
+      "status": "consumed",
       "topic": "ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（EFA/EEM/EWJ/EWG/EWZ/INDA/XLK/XLF）事件窗，檢定 ETF-heavy 標的是否在宏觀 shock 日更快反映資訊但後續 co-volatility / reversal 更強（來源：JPM 2025 ETF macroefficiency + JFM 2025 ETF-based fragility）",
       "topic_hash": "020c9ea3475f9aef"
     },
@@ -1090,8 +1093,121 @@
       "status": "reserved",
       "topic": "商品期貨短期（1-4 週）動能與反轉「共存」驗證及 vol 條件 — yfinance 商品 ETF 代理（GLD/SLV/USO/UNG/CPER/PDBC），月/週 return series，檢定同 horizon 下動能與反轉是否因 vol 高低 regime 分離（JFEM 2026 commodity markets 發現短期動能-反轉並存，顛覆傳統 horizon 區分）；美股商品 ETF 代理版，免 tick（來源：JFEM/SSRN 2026 commodity short-term momentum-reversal coexistence）",
       "topic_hash": "bad154498f1504eb"
+    },
+    {
+      "amend_note": "displaced ETF topic turned out already completed (experiments/k_etf_vs_etf_fragility_2026_06_14, 2026-06-14 Codex PASS); no new experiment needed",
+      "amended_at": "2026-07-19T05:51:31.535277+00:00",
+      "amended_by": "main-interactive",
+      "claimed_at": "2026-07-19T05:50:22.994765+00:00",
+      "claimed_by": "main-interactive",
+      "k_id": "K1740",
+      "number": 1740,
+      "source_max": 1739,
+      "status": "released",
+      "topic": "ETF 宏觀效率 vs ETF fragility 的雙面檢定 — yfinance country/sector ETF（displaced from K1732 by collision repair 2026-07-19）",
+      "topic_hash": "183dd0ec7c96841a"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:02.242727+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1741",
+      "number": 1741,
+      "source_max": 1740,
+      "status": "reserved",
+      "topic": "放空企業債作股票尾部對沖的效率 vs put/VIX overlay — yfinance HYG/JNK（放空 proxy，用 inverse 或 short return series）疊 SPY，跨 2018Q4/2020/2022/2025 四類 drawdown 比較「short-credit hedge」vs put-proxy / long-VXX 的 beta-adjusted crisis-alpha 與平時 drag；明確標示放空成本/借券費 blocked 用保守 proxy；與既有 tail-hedge 成本軸（06-14b line 505）正交——這裡換對沖工具為 credit-short（來源：arXiv 2504.06289「On the Efficacy of Shorting Corporate Bonds as a Tail Risk Hedging Solution」2025）",
+      "topic_hash": "03257c7c99043809"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:02.764447+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1742",
+      "number": 1742,
+      "source_max": 1741,
+      "status": "reserved",
+      "topic": "⚠️ **中信心（dispatch 前須再查證轉譯）— 州最低工資調升生效日的邊界不連續設計 → 勞力密集零售/餐飲股波動反應** — 複用 AEJ:Applied 州界不連續識別設計，用公開州最低工資調升生效日曆，對勞力密集零售/餐飲類股（CMG/MCD/SBUX/TGT/M 等曝險不同州比例個股籃）做事件窗 RV/left-tail 比較 + 與非曝險對照股 DID；與既有 labor-shortage 軸（需求面稀缺）不同機制——這裡是明確法規生效日的成本面衝擊 + clean identification（來源：AEJ:Applied 州界最低工資不連續設計是勞動經濟學×asset pricing 交叉持續範式，但 2025-26 特定新文章未證實，屬推測）。",
+      "topic_hash": "b752952d2a1be7b3"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:02.997679+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1743",
+      "number": 1743,
+      "source_max": 1742,
+      "status": "reserved",
+      "topic": "TSM ADR vs 2330.TW 波動傳導與創紀錄 ADR 溢價：AI 時代價格發現往哪邊移** — yfinance TSM/2330.TW/TWD=X 日資料（可加本機日內），拆隔夜/日內段檢定 lead-lag 與溢價變動對雙邊 vol 預測力；2024-26 ADR 溢價歷史級高位是現成敘事鉤（JF/JFM cross-listing price-discovery 經典線）。與 #157（TAIEX 隔夜 VRP）不同——雙上市資訊份額弧，台灣讀者高共鳴。",
+      "topic_hash": "c4ed84890e8e8e4f"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:03.257971+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1744",
+      "number": 1744,
+      "source_max": 1743,
+      "status": "reserved",
+      "topic": "拉美 private-credit funding-gap 擴張與 EM 波動傳導** — 用 CFA 2026 Latin America private-credit funding-gap 論述作制度背景，建立 EM local-bank / credit / FX ETF proxy（ILF/EWW/ECH/EPU/EWZ/CEW/EMLC/EMB/UUP），檢定 private-credit supply-expansion proxy 或 fundraising/news intensity 是否伴隨 EM RV 壓縮、尾部風險重估或美元敏感度改變；與一般 BDC/private-credit spillover 題正交——這裡是區域 funding-gap / LatAm transmission（來源：CFA Institute 2026 Latin America private credit + CFA 2026 private markets growth report）。",
+      "topic_hash": "5e969296385696c3"
+    },
+    {
+      "claimed_at": "2026-07-20T00:00:03.850579+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1745",
+      "number": 1745,
+      "source_max": 1744,
+      "status": "reserved",
+      "topic": "TVP-HAR：時變參數 HAR（狀態空間 / Kalman filter）取代靜態 OLS-HAR** — 對 SPY/0050.TW/TX 日 RV，用 Kalman/random-walk 讓 HAR 的日/週/月係數隨時間演化，DM-HLN + Giacomini-Rossi fluctuation test 檢定時變係數 OOS 是否勝固定係數 HAR，並看係數路徑是否在 leverage/regime 轉換時漂移；yfinance/TAIFEX 免費（來源：Journal of Forecasting 2025 TVP-HAR for VIX 趨勢層級）。與 line 1452 factor-loading TVP（第一主成分 vol factor 的負荷時變）正交——這裡是 **HAR 自身日/週/月係數的連續時變**，非因子負荷；與 line 1478 level-shift（離散斷點）正交（連續演化 ≠ 結構斷點）。",
+      "topic_hash": "9cfda9753d4505d6"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:02.119576+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1746",
+      "number": 1746,
+      "source_max": 1745,
+      "status": "reserved",
+      "topic": "VaR/ES 預測的 bottom-up（成分加總）vs top-down（組合層直估）誰贏**（中高信心）— yfinance 多資產 basket（SPY/TLT/GLD/HYG/QQQ），比較「先預測各成分 VaR/ES 再加總」與「直接對組合報酬估 VaR/ES」的 Kupiec/Christoffersen/DQ/ES backtest 與 MCS；測 cross-sectional aggregation 是否改善尾部覆蓋。aggregation grep=0，與 line 1335（coherent estimator guardrail）、conformal 弧正交——這裡是 aggregation direction 本身（來源：Journal of Forecasting 2025 cross-sectional aggregation ES/VaR）。",
+      "topic_hash": "5e272f0ad5c5ef44"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:02.409665+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1747",
+      "number": 1747,
+      "source_max": 1746,
+      "status": "reserved",
+      "topic": "ML forecast comparison 的 estimation-risk inference audit** — 在相同 SPY/QQQ RV 任務重跑 Lasso/樹模型 vs HAR，比較傳統 DM 與納入 learner 收斂速度、loss-score 條件、sample split 的 predictive-ability inference；用 Monte Carlo 檢查 size，外層 holdout 防 selector/learner 自身 overfit。與 C+ ML-ceiling 賽馬正交：本題問「既有顯著性檢定是否有效」，不再疊新架構（來源：[JBES 2026, Extending Predictive-Ability Inference to Machine Learning](https://www.tandfonline.com/doi/abs/10.1080/07350015.2025.2562964)）。",
+      "topic_hash": "3116df5384aecc34"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:02.796030+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1748",
+      "number": 1748,
+      "source_max": 1747,
+      "status": "reserved",
+      "topic": "Primary-dealer settlement fails 作 Treasury market-plumbing 預警** — 用 FR2004 Treasury/MBS/agency fails-to-deliver/receive 週資料，嚴格從週四發布後才讓 fails z-score 進模型，預測下一週 TLT/IEF/MBB RV、range 與股債相關；threshold local projection + HAR/HAR+fails expanding OOS，依 target H 設 HAC/embargo。與 equity T+1 settlement 制度斷點正交：這是 collateral daisy-chain 的實際壓力量（來源：[NY Fed fails primer](https://www.newyorkfed.org/markets/pridealers_failsprimer.html)；[NY Fed data hub](https://www.newyorkfed.org/markets/data-hub)）。",
+      "topic_hash": "22e34779b1c30e94"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:03.035156+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1749",
+      "number": 1749,
+      "source_max": 1748,
+      "status": "reserved",
+      "topic": "「盤整越久噴越兇」** 低波動盤整 regime 後是否真接大波動（契合波動率專長 low-vol→high-vol transition）",
+      "topic_hash": "97db442e78e3f460"
+    },
+    {
+      "claimed_at": "2026-07-21T00:00:03.264934+00:00",
+      "claimed_by": "research_backlog_auto",
+      "k_id": "K1750",
+      "number": 1750,
+      "source_max": 1749,
+      "status": "reserved",
+      "topic": "IPO 市場熱度（Renaissance IPO ETF 相對 SPY）對 SPY 波動率的 OOS 預測增量** — 見上 §3；主檢定 = 控制 VIX 後的 delta-QLIKE 與 DM-HLN，raw 相關不算數。",
+      "topic_hash": "b457fa523bf8363b"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-19T00:00:02.460015+00:00"
+  "updated_at": "2026-07-21T00:00:03.264934+00:00"
 }

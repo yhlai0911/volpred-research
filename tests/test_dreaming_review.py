@@ -324,6 +324,39 @@ def test_detect_persistent_alerts_skips_host_cron_umbrella_owned_by_error_recurr
     assert signature not in baseline
 
 
+def test_detect_persistent_alerts_skips_owned_quota_notifications(tmp_path):
+    """Supervisor-owned outage/recovery notices are not generic incidents."""
+    storage = _storage(tmp_path)
+    _write_alert_dedup(
+        storage,
+        {
+            "e46b1923cd3787a9" + "0" * 48: {
+                "title": "supervisor quota_blocked（額度恢復後自動復工）",
+                "send_count": 13,
+                "first_sent_at": _iso(16),
+                "last_sent_at": _iso(0.1),
+            },
+            "31bfa7e7f9289f4c" + "0" * 48: {
+                "title": "Claude→Codex failover 已接手（Claude 端：quota）",
+                "send_count": 10,
+                "first_sent_at": _iso(7),
+                "last_sent_at": _iso(0.1),
+            },
+            "b74691d14763e77c" + "0" * 48: {
+                "title": "Claude→Codex failover 接手失敗（Claude 端：quota）",
+                "send_count": 10,
+                "first_sent_at": _iso(7),
+                "last_sent_at": _iso(0.1),
+            },
+        },
+    )
+
+    findings = dr.detect_persistent_alerts(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == [
+        "persistent_alert:b74691d14763e77c"
+    ]
+
+
 def test_host_cron_recurrence_remains_job_scoped(tmp_path):
     """The delegated owner keeps distinct cron jobs in distinct signatures."""
     snapshot = {
@@ -581,7 +614,13 @@ def test_main_dry_run_writes_report_not_baseline(tmp_path, monkeypatch):
     assert sent == []  # no email on dry-run
 
 
-def test_main_non_dry_writes_baseline_and_emails(tmp_path, monkeypatch):
+def test_main_non_dry_writes_baseline_and_queues_instead_of_emailing(tmp_path, monkeypatch):
+    """A cron job exiting non-zero six times is a ticket, not the owner's morning.
+
+    This is the 2026-07-19 shape exactly (`repeated_tool_failure:...:exit1`), and it
+    used to assert one boss email. Post boss-telegram 「為什麼要我看？你自己處理」the
+    same run must produce a queued task and silence.
+    """
     storage = _storage(tmp_path)
     _cron_log(storage, "myjob", 1, 6)
     sent = []
@@ -590,7 +629,8 @@ def test_main_non_dry_writes_baseline_and_emails(tmp_path, monkeypatch):
     assert rc == 0
     assert (storage / "ops" / "dreaming" / "baseline.json").exists()
     assert (storage / "ops" / "autonomous_decisions.jsonl").exists()
-    assert len(sent) == 1  # new findings → one boss email
+    assert sent == [], "propose_only 已自動接手 → 不打擾老闆"
+    assert any("repeated_tool_failure" in i for i in _queued_ids(storage)), "但必須真的有人接"
 
 
 def test_dispatch_does_not_go_to_the_receipts_trail(tmp_path, monkeypatch):
@@ -764,9 +804,12 @@ def test_findings_land_in_the_queue_the_dispatcher_actually_reads(tmp_path):
     assert queued[0]["task_type"] == "platform_ops"
 
 
-def test_a_proposal_nobody_read_for_three_nights_becomes_work(tmp_path):
-    """`memory_skill_gap` sat at occurrences=15. Persistence is the signal, the same
-    rule PHASE-Z uses for a foreign path nobody comes back for."""
+def test_a_proposal_becomes_work_on_sight_not_after_three_nights(tmp_path):
+    """2026-07-20 (boss telegram 「為什麼要我看？你自己處理」): propose_only used to
+    wait three nights before becoming work — and the queue it waited in was the
+    owner's inbox, reported as 「需要你看」. Waiting to see whether a cron job keeps
+    exiting non-zero is a ticket, not a person's judgement. The wait is gone, not
+    moved."""
     storage = _storage(tmp_path)
     dr.apply_auto_dispatch(
         [
@@ -778,7 +821,7 @@ def test_a_proposal_nobody_read_for_three_nights_becomes_work(tmp_path):
 
     ids = _queued_ids(storage)
     assert any("memory_skill_gap" in i for i in ids), "15 nights unread is a backlog item"
-    assert not any("seen_once" in i for i in ids), "one sighting is still just a proposal"
+    assert any("seen_once" in i for i in ids), "首見也開單 —— 等三晚的那三晚是老闆在等"
 
 
 def test_queueing_the_same_signature_every_night_does_not_pile_up(tmp_path):
@@ -1010,9 +1053,10 @@ def test_email_quiet_run_is_info_and_still_declines_refactor(monkeypatch):
 
 def test_action_numbering_is_positional_not_hardcoded():
     """加一條 tier 行動時編號自動遞延 —— 這是「加資料不改邏輯」的實證。"""
-    tier = dr.select_dreaming_tier({"escalations": 1, "new": 1})
-    lines = dr.render_dreaming_actions(tier, {"escalations": 1, "new": 1, "date_str": "2026-07-18"})
-    assert [line.split(".")[0] for line in lines] == ["1", "2", "3", "4"]
+    ctx = {"escalations": 1, "new": 1, "human_only": 0, "date_str": "2026-07-18"}
+    tier = dr.select_dreaming_tier(ctx)
+    lines = dr.render_dreaming_actions(tier, ctx)
+    assert [line.split(".")[0] for line in lines] == ["1", "2", "3", "4", "5"]
 
 
 # ---------------------------------------------------------------------------
@@ -1057,11 +1101,40 @@ def test_escalation_always_needs_a_human_even_if_machine_owned():
     assert dr.needs_human_attention(f) is True
 
 
-def test_live_governance_proposal_needs_a_human():
-    """治理檔 propose-only 且仍在發生 → 只有主線程能判，必須寄。"""
+def test_live_governance_proposal_does_not_need_a_human():
+    """治理檔 propose-only 且仍在發生 → 開工單給 agent，不是寄信給老闆。
+
+    2026-07-20 boss telegram：「為什麼要我看？你自己處理」。7/19 那輪的 10 筆
+    propose_only（repeated_tool_failure / persistent_alert）全被算進「需要你看」，
+    但沒有一筆需要老闆的判斷 —— 治理檔不自動改寫 ≠ 沒人接手。
+    """
     f = _quiescent_alert_finding()
     f.quiescent = False
+    assert dr.needs_human_attention(f) is False
+
+
+def test_destructive_or_policy_finding_is_the_one_thing_left_for_a_human():
+    """human_only 是唯一保留的人工出口 —— 它必須真的還會浮出來。"""
+    f = _quiescent_alert_finding()
+    f.quiescent = False
+    f.remediation = dr.REMEDIATION_HUMAN_ONLY
     assert dr.needs_human_attention(f) is True
+
+
+def test_human_only_is_never_auto_queued(tmp_path):
+    """destructive / policy 的那條例外不得被 actuator 悄悄接手。"""
+    f = _quiescent_alert_finding(sig="persistent_alert:destructive")
+    f.quiescent = False
+    f.remediation = dr.REMEDIATION_HUMAN_ONLY
+    assert dr.apply_auto_dispatch([f], str(_storage(tmp_path)), NOW) == []
+
+
+def test_needs_human_attention_reads_dicts_and_findings_the_same_way():
+    """報告寫出去後只剩 dict；規則若有第二份實作，兩邊遲早漂移。"""
+    f = _quiescent_alert_finding()
+    f.quiescent = False
+    f.remediation = dr.REMEDIATION_HUMAN_ONLY
+    assert dr.needs_human_attention(f.to_dict()) is dr.needs_human_attention(f) is True
 
 
 def test_reconcile_marks_the_decaying_finding_quiescent():
@@ -1123,8 +1196,11 @@ def test_main_stays_silent_when_nothing_needs_a_human(tmp_path, monkeypatch):
     assert (storage / "ops" / "autonomous_decisions.jsonl").exists()
 
 
-def test_main_still_emails_when_a_governance_proposal_is_live(tmp_path, monkeypatch):
-    """反向鎖：真的需要人判斷時不得被新閘門吞掉。"""
+def test_main_still_emails_when_a_human_only_finding_is_live(tmp_path, monkeypatch):
+    """反向鎖：真的需要人判斷時（destructive / policy）不得被新閘門吞掉。
+
+    2026-07-20 前這條測的是 live propose_only —— 但那類現在自動開工單，寄信才是錯的。
+    """
     storage = _storage(tmp_path)
     sent = []
     monkeypatch.setattr(
@@ -1132,6 +1208,7 @@ def test_main_still_emails_when_a_governance_proposal_is_live(tmp_path, monkeypa
     )
     live = _quiescent_alert_finding()
     live.quiescent = False
+    live.remediation = dr.REMEDIATION_HUMAN_ONLY
     monkeypatch.setattr(dr, "DETECTORS", [lambda s, snap, now: [live]])
     rc = dr.main(storage_dir=str(storage), dry_run=False, apply_auto=False, now=NOW)
     assert rc == 0
@@ -1143,14 +1220,47 @@ def test_email_body_explains_why_a_finding_needs_no_action(monkeypatch):
     findings = [_auto_dispatch_finding(), _quiescent_alert_finding()]
     live = _quiescent_alert_finding("persistent_alert:live")
     live.quiescent = False
+    decide = _quiescent_alert_finding("persistent_alert:decide")
+    decide.quiescent = False
+    decide.remediation = dr.REMEDIATION_HUMAN_ONLY
     report = dr.build_report(
-        {"overall": "ok"}, [live, *findings], [live], [], [], NOW, dry_run=False, auto_actions=[],
+        {"overall": "ok"}, [live, *findings, decide], [live], [], [], NOW,
+        dry_run=False, auto_actions=[],
     )
     sent = _capture_email(monkeypatch, report)
-    assert "機器已派修復 task" in sent["body"]
+    # 2026-07-21：這兩行原本是「機器已派修復 task」/「已自動開工單，hourly dispatch 接手」。
+    # 兩句都在描述「單開好了」，卻讀起來像「已經在修/已修好」。逐行措辭與表頭同一標準。
+    assert "已開工單，尚未執行" in sent["body"]
+    assert "機器已派修復" not in sent["body"]
     assert "已停火、自清中" in sent["body"]
     body_lines = [ln for ln in sent["body"].splitlines() if ln.startswith("  - [")]
-    assert "persistent_alert:live" in body_lines[0], "需要人的排最前面"
+    assert "persistent_alert:decide" in body_lines[0], "需要人的排最前面"
+
+
+def test_email_never_tells_the_owner_to_go_look_at_something(monkeypatch):
+    """2026-07-20 boss telegram：「為什麼要我看？你自己處理」。
+
+    這封信的表頭曾寫「**需要你看 10**」，而那 10 筆全是 propose_only、全都該開工單。
+    措辭是契約的一部分：只要有出口，就寫機器擁有它；剩下的欄位只認 human_only，
+    否則一個應為 0 的健康指標會長期不是 0，指標一旦說謊就沒人再看它。
+
+    2026-07-21 修正：當時的措辭是「已自動接手 N」，矯枉過正到另一邊 —— 把「開了單」
+    講成「處理好了」。正確的表頭同時擋掉兩種謊：不叫人去看，也不宣稱已修好。
+    """
+    report = dr.build_report(
+        {"overall": "ok"},
+        [_quiescent_alert_finding(f"persistent_alert:{i:016x}") for i in range(10)],
+        [], [], [], NOW, dry_run=False, auto_actions=[],
+    )
+    for f in report["findings"]:
+        f["quiescent"] = False  # 全部仍在發生 → 舊版會全算進「需要你看」
+    report["counts"]["actionable"] = 10  # 舊讀數即使還在，也不得出現在表頭
+    sent = _capture_email(monkeypatch, report)
+
+    assert "需要你看" not in sent["body"]
+    assert "已自動開單" in sent["body"]
+    assert "已自動接手" not in sent["body"]
+    assert "需要你決策 0" in sent["body"], "human_only=0 → 沒有一項落到老闆身上"
 
 
 def test_email_does_not_describe_the_actuator_as_off(monkeypatch):
@@ -1158,3 +1268,510 @@ def test_email_does_not_describe_the_actuator_as_off(monkeypatch):
     sent = _capture_email(monkeypatch, _email_report(new=1, escalations=0))
     assert "預設關" not in sent["body"]
     assert "預設開啟" in sent["body"]
+
+
+# ---------------------------------------------------------------------------
+# 首見即已停火（boss email-12144 2026-07-19）
+#
+# 舊版 quiescent 只有「跟上一輪 marker 比」這一種形式，於是首見的 finding 一律算活躍
+# —— 一個「初見即已停火」的 alert 必吵老闆一次，隔晚才靜音。當時把它記成「已知邊界」
+# 留給老闆判斷；老闆的回覆是「不是叫我做，你判定後就去優化執行啊，立刻重構底層」。
+# 底層修法：quiescence 的定義是「一個 run interval 內沒推進」，相對式只是它在有前值
+# 時的特例；首見改問同一個問題的絕對形式，仍是同一個 owner（_is_quiescent）。
+# ---------------------------------------------------------------------------
+def _first_sight(marker, sig="persistent_alert:first"):
+    return dr.DreamFinding(
+        pattern_type="persistent_alert",
+        signature=sig,
+        severity="warn",
+        remediation="propose_only",
+        activity_marker=marker,
+    )
+
+
+def test_first_sight_stale_marker_is_quiescent():
+    """首見但 marker 已超過一個 run interval → 停火中，沒有行動可做，不該吵人。"""
+    stale = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS + 1)).isoformat()
+    f = _first_sight(stale)
+    baseline: dict = {}
+    new, _, esc = dr.reconcile([f], baseline, NOW)
+    assert f.quiescent is True
+    assert new == [f], "仍算 new（報告要寫），只是不 actionable"
+    assert esc == []
+    assert dr.needs_human_attention(f) is False
+
+
+def test_first_sight_fresh_marker_still_gets_picked_up(tmp_path):
+    """反向鎖：首見且 marker 在一個 run interval 內推進過 → 真的還在燒，不得靜音。
+
+    2026-07-20 起「不靜音」的意思從「寄信給老闆」變成「開工單給 agent」——
+    propose_only 已有機器出口，所以這裡鎖的是 quiescent=False + 真的進了佇列。
+    """
+    fresh = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS - 1)).isoformat()
+    f = _first_sight(fresh)
+    dr.reconcile([f], {}, NOW)
+    assert f.quiescent is False
+    assert [a["action"] for a in dr.apply_auto_dispatch([f], str(_storage(tmp_path)), NOW)] == [
+        "queued"
+    ]
+
+
+def test_first_sight_unparseable_marker_fails_toward_acting(tmp_path):
+    """marker 壞掉時不敢判 quiescent —— 靜音的代價比多開一張工單高。"""
+    f = _first_sight("not-a-timestamp")
+    dr.reconcile([f], {}, NOW)
+    assert f.quiescent is False
+    assert [a["action"] for a in dr.apply_auto_dispatch([f], str(_storage(tmp_path)), NOW)] == [
+        "queued"
+    ]
+
+
+def test_first_sight_without_marker_is_never_quiescent():
+    """沒有 activity_marker 的 detector（多數）行為完全不變。"""
+    f = _first_sight(None, sig="persistent_alert:nomarker")
+    dr.reconcile([f], {}, NOW)
+    assert f.quiescent is False
+
+
+def test_first_sight_quiescent_finding_does_not_trip_the_email_gate(monkeypatch, tmp_path):
+    """端到端：整份報告只有一個首見即停火的 finding → 那封信不會寄。"""
+    storage = _storage(tmp_path)
+    sent: list = []
+    monkeypatch.setattr(
+        "volpred.ops.alerts.send_alert", lambda *a, **k: sent.append(1) or {"sent": True}
+    )
+    stale = (NOW - timedelta(hours=dr.DREAMING_RUN_INTERVAL_HOURS + 1)).isoformat()
+    monkeypatch.setattr(dr, "DETECTORS", [lambda s, snap, now: [_first_sight(stale)]])
+    rc = dr.main(storage_dir=str(storage), dry_run=False, apply_auto=False, now=NOW)
+    assert rc == 0
+    assert sent == [], "首見即停火 → actionable_new=0 → 不寄"
+
+
+def test_quiescence_has_a_single_owner():
+    """三種證據來源都走同一個判準函式；reconcile 不得自己再算一套。"""
+    src = (Path(__file__).resolve().parents[1] / "scripts" / "dreaming_review.py").read_text(
+        encoding="utf-8"
+    )
+    body = src.split("def reconcile(", 1)[1].split("\ndef ", 1)[0]
+    assert body.count("_is_quiescent(") == 2, "兩條分支都要委派給 owner"
+    assert "prev_marker ==" not in body, "quiescent 判定不得散回 reconcile（anti-stacking）"
+
+
+# ---------------------------------------------------------------------------
+# WS-F3: unfiled incident classes (incident_candidates.jsonl → error_log gap)
+# ---------------------------------------------------------------------------
+def _incident_stream(storage: Path, key: str, title: str, n: int, *, level: str = "warn") -> None:
+    lines = []
+    for i in range(n):
+        lines.append(json.dumps({
+            "at": _iso(float(n - i)),  # oldest first
+            "dedupe_key": key,
+            "level": level,
+            "title": title,
+            "first_seen": _iso(float(n)),
+            "occurrence": i + 1,
+            "event": "sent" if i == 0 else "dedup_skip",
+        }))
+    (storage / "ops" / "incident_candidates.jsonl").write_text(
+        "\n".join(lines) + "\n", encoding="utf-8"
+    )
+
+
+def test_unfiled_incident_class_flagged_after_two_occurrences(tmp_path):
+    """同 dedupe key ×2 + error_log 無對應條目 → detector 可見（F3 驗收）。"""
+    storage = _storage(tmp_path)
+    key = "a" * 64
+    _incident_stream(storage, key, "release pool starved", 2)
+    # error_log exists but says nothing about this class
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text("# error log\n(unrelated)\n", encoding="utf-8")
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, NOW)
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.signature == f"unfiled_incident_class:{key[:16]}"
+    assert f.severity == "warn"
+    assert f.remediation == "propose_only"  # governance file — agent adjudicates, never auto-write
+    assert f.governance_target == "docs/error_log.md"
+    assert "release pool starved" in (f.proposal or "")
+    assert f.activity_marker is not None
+
+
+def test_unfiled_incident_skips_successful_quota_failover_telemetry(tmp_path):
+    """The provider-outage owner prevents a second task for recovery telemetry."""
+    storage = _storage(tmp_path)
+    _incident_stream(
+        storage,
+        "31bfa7e7f9289f4c" + "0" * 48,
+        "Claude→Codex failover 已接手（Claude 端：quota）",
+        10,
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# empty\n", encoding="utf-8"
+    )
+
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_skips_supervisor_owned_quota_outage(tmp_path):
+    """Quota outage already has a supervisor owner; do not open a filing task."""
+    storage = _storage(tmp_path)
+    _incident_stream(
+        storage,
+        "e46b1923cd3787a9" + "0" * 48,
+        "supervisor quota_blocked（額度恢復後自動復工）",
+        13,
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# empty\n", encoding="utf-8"
+    )
+
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_keeps_quota_failover_failure(tmp_path):
+    """Only successful/owned telemetry is skipped; real slot loss stays visible."""
+    storage = _storage(tmp_path)
+    key = "b74691d14763e77c" + "0" * 48
+    _incident_stream(
+        storage,
+        key,
+        "Claude→Codex failover 接手失敗（Claude 端：quota）",
+        3,
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# empty\n", encoding="utf-8"
+    )
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == [
+        f"unfiled_incident_class:{key[:16]}"
+    ]
+
+
+def test_filed_incident_class_is_not_reproposed(tmp_path):
+    """已立案（title 出現在 error_log）→ 不重複提（F3 驗收下半）。"""
+    storage = _storage(tmp_path)
+    key = "b" * 64
+    _incident_stream(storage, key, "release pool starved", 3)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "## 2026-07-01 Release Pool Starved incident\nroot cause ...\n", encoding="utf-8"
+    )
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_incident_class_filed_by_dedupe_key_prefix_counts_as_filed(tmp_path):
+    storage = _storage(tmp_path)
+    key = "c" * 64
+    _incident_stream(storage, key, "obscure alert title", 2)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        f"## filed via key: {key[:16]}\n", encoding="utf-8"
+    )
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_incident_class_filed_in_archive_counts_as_filed(tmp_path):
+    storage = _storage(tmp_path)
+    key = "d" * 64
+    _incident_stream(storage, key, "archived class", 2)
+    (tmp_path / "docs" / "error_log_archive").mkdir(parents=True)
+    (tmp_path / "docs" / "error_log.md").write_text("# index only\n", encoding="utf-8")
+    (tmp_path / "docs" / "error_log_archive" / "2026-Q2.md").write_text(
+        "## archived class incident\n", encoding="utf-8"
+    )
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_detector_skips_non_utf8_archive(tmp_path):
+    """One damaged historical archive must not disable the live detector."""
+    storage = _storage(tmp_path)
+    _incident_stream(storage, "e" * 64, "current unfiled alert", 2)
+    archive = tmp_path / "docs" / "error_log_archive"
+    archive.mkdir(parents=True)
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# current log\n", encoding="utf-8"
+    )
+    (archive / "damaged.md").write_bytes(b"valid prefix\n\x80broken utf-8")
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == [
+        "unfiled_incident_class:" + "e" * 16
+    ]
+
+
+def test_single_occurrence_is_not_an_unfiled_class(tmp_path):
+    """一次性 alert 不構成 class — 第二次才升格（F3 門檻）。"""
+    storage = _storage(tmp_path)
+    _incident_stream(storage, "e" * 64, "one-off blip", 1)
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text("# empty\n", encoding="utf-8")
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_detector_missing_stream_is_no_signal(tmp_path):
+    storage = _storage(tmp_path)
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_end_to_end_via_send_alert(tmp_path, monkeypatch):
+    """整合驗收：注入同 key alert ×2（第二次 dedup-skip）→ detector 可見。"""
+    import volpred.ops.alerts as alerts_module  # noqa: F401
+
+    storage = _storage(tmp_path)
+    monkeypatch.setattr(
+        "volpred.ops.alerts._dispatch_alert_email",
+        lambda **kw: {"notification_id": "n1", "subject": "s", "sent": True,
+                      "configured": True, "send_error": None},
+    )
+    from volpred.ops.alerts import send_alert
+
+    first = send_alert("warn", "phantom cron regression", "body", storage_dir=str(storage))
+    second = send_alert("warn", "phantom cron regression", "body", storage_dir=str(storage))
+    assert first["sent"] and second["skipped"]
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text("# nothing filed\n", encoding="utf-8")
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, dr.datetime.now(dr.timezone.utc))
+    assert [f.pattern_type for f in findings] == ["unfiled_incident_class"]
+    assert "phantom cron regression" in findings[0].evidence[0]
+
+
+# ---------------------------------------------------------------------------
+# WS-F5: observation ledger deadline breaches
+# ---------------------------------------------------------------------------
+def _obs(storage: Path):
+    from volpred.ops import observation_ledger as obs
+    return obs
+
+
+def test_observation_ledger_overdue_item_breaches(tmp_path):
+    """注入逾期項 → detector 可見（F5 驗收）。"""
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="legacy_retirement", what="disabled-but-alive legacy wrapper",
+        deadline=_iso(3.0), action_on_expiry="retire it", now=NOW - timedelta(days=10),
+    )
+    findings = dr.detect_observation_ledger_breach(str(storage), {}, NOW)
+    assert len(findings) == 1
+    f = findings[0]
+    assert f.signature == "observation_ledger_breach:legacy_retirement"
+    assert f.severity == "warn"
+    assert f.remediation == "auto_dispatch"  # expiry action is concrete agent work
+    assert "retire it" in (f.proposal or "")
+    assert "observation resolve" in (f.proposal or "")
+
+
+def test_observation_ledger_permanent_item_is_exempt(tmp_path):
+    """permanent-observational（免 deadline 的裁定）不誤報（F5 驗收下半）。"""
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="pregate_shadow", what="deliberate shadow",
+        status=obs.STATUS_PERMANENT, note="gate ruling: do not flip enforce",
+    )
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+def test_observation_ledger_future_deadline_not_flagged(tmp_path):
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="still_observing", what="active window",
+        deadline=(NOW + timedelta(days=5)).isoformat(), action_on_expiry="decide",
+    )
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+def test_observation_ledger_decided_item_is_closed(tmp_path):
+    storage = _storage(tmp_path)
+    obs = _obs(storage)
+    obs.add_item(
+        str(storage), item_id="done_item", what="was observed",
+        deadline=_iso(3.0), action_on_expiry="decide", now=NOW - timedelta(days=10),
+    )
+    obs.resolve_item(str(storage), "done_item", resolution="executed the expiry action")
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+def test_observation_ledger_malformed_observing_item_without_deadline_breaches(tmp_path):
+    """observing 卻沒 deadline（繞過 CLI 手改 JSON 才可能）＝ deadline-less limbo，
+    正是帳本要防的狀態 → 必須浮上來，不能靜默跳過。"""
+    storage = _storage(tmp_path)
+    _write(
+        storage / "ops" / "observation_ledger.json",
+        {"schema": "observation_ledger.v1", "items": [
+            {"id": "limbo_item", "what": "no deadline", "status": "observing",
+             "started_at": _iso(20.0), "deadline": None, "action_on_expiry": "decide"},
+        ]},
+    )
+    findings = dr.detect_observation_ledger_breach(str(storage), {}, NOW)
+    assert len(findings) == 1
+    assert "missing/unparseable" in findings[0].evidence[0]
+
+
+def test_observation_ledger_missing_file_is_no_signal(tmp_path):
+    storage = _storage(tmp_path)
+    assert dr.detect_observation_ledger_breach(str(storage), {}, NOW) == []
+
+
+# ---------------------------------------------------------------------------
+# 誠實計數（2026-07-21 boss telegram-1224）：「已自動接手 N」把「開了 N 張單」講成
+# 「解決了 N 個問題」。那 7 張當時已 pending 四天。開單 ≠ 修好，措辭必須分開。
+# ---------------------------------------------------------------------------
+def _machine_finding(sig="missing_retry_strategy:k42"):
+    return dr.DreamFinding(
+        pattern_type="missing_retry_strategy",
+        signature=sig,
+        severity="warn",
+        remediation="auto_dispatch",
+    )
+
+
+def _report_with(findings):
+    return dr.build_report(
+        {"overall": "ok"}, findings, [], [], [], NOW, dry_run=True, auto_actions=[]
+    )
+
+
+def test_queued_but_unexecuted_is_never_reported_as_fixed(monkeypatch):
+    """核心迴歸鎖：task 還在 pending 時，信裡不得出現任何「已修好」的說法。"""
+    f = _machine_finding()
+    f.task_status = "pending"
+    sent = _capture_email(monkeypatch, _report_with([f]))
+    body = sent["body"]
+    assert "已自動開單 1（尚未執行）" in body
+    assert "已修復 0" in body
+    # 舊措辭與任何「機器已經處理完」的暗示都不得復活。
+    assert "已自動接手" not in body
+    assert "機器已派修復" not in body
+    assert "尚未執行" in body
+
+
+def test_succeeded_task_is_the_only_thing_counted_as_fixed(monkeypatch):
+    f = _machine_finding()
+    f.task_status = "succeeded"
+    report = _report_with([f])
+    assert report["counts"]["machine_fixed"] == 1
+    assert report["counts"]["machine_queued"] == 0
+    body = _capture_email(monkeypatch, report)["body"]
+    assert "已自動開單 0（尚未執行）" in body
+    assert "已修復 1" in body
+
+
+def test_failed_remediation_is_not_hidden_inside_the_queued_count(monkeypatch):
+    """failed 的工單既不是「修好」也不是「排隊中」—— 混進排隊會看起來只是慢。"""
+    f = _machine_finding()
+    f.task_status = "failed"
+    report = _report_with([f])
+    assert report["counts"] == {**report["counts"], "machine_stalled": 1, "machine_queued": 0}
+    body = _capture_email(monkeypatch, report)["body"]
+    assert "工單未成 1" in body
+
+
+def test_unknown_task_status_counts_as_not_done(monkeypatch):
+    """查不到 task（queue 壞了 / 還沒開）時只能猜「還沒好」，不能猜「已修好」。"""
+    report = _report_with([_machine_finding()])
+    assert report["counts"]["machine_queued"] == 1
+    assert report["counts"]["machine_fixed"] == 0
+
+
+def test_machine_handled_still_equals_the_sum_of_the_split(monkeypatch):
+    a, b, c = (_machine_finding(f"missing_retry_strategy:k{i}") for i in (1, 2, 3))
+    a.task_status, b.task_status, c.task_status = "pending", "succeeded", "failed"
+    counts = _report_with([a, b, c])["counts"]
+    assert counts["machine_handled"] == 3
+    assert (
+        counts["machine_queued"] + counts["machine_fixed"] + counts["machine_stalled"]
+        == counts["machine_handled"]
+    )
+
+
+def test_old_report_without_the_new_counts_still_renders(monkeypatch):
+    """舊報告重寄不可 KeyError，且沒有新欄位時一律當作「尚未執行」。"""
+    report = _email_report(new=1, escalations=0)
+    report["counts"]["machine_handled"] = 4  # 舊 schema：只有這一個數
+    body = _capture_email(monkeypatch, report)["body"]
+    assert "已自動開單 4（尚未執行）" in body
+    assert "已修復 0" in body
+
+
+# ---------------------------------------------------------------------------
+# finding → task 的邊。之前只有「第一次開單那晚」才寫 remediation_ref，之後每一晚都
+# 報 None，所以報告答不出「修好了嗎」。task id 是 signature 的純函數，重建即可。
+# ---------------------------------------------------------------------------
+def test_task_state_is_recovered_on_later_runs_not_just_the_night_it_queued(tmp_path):
+    storage = _storage(tmp_path)
+    f = _machine_finding()
+    dr.apply_auto_dispatch([f], str(storage), NOW)
+    fresh = _machine_finding()  # 新的一晚重新偵測出同一個 signature
+    assert fresh.remediation_ref is None
+    dr.annotate_task_states([fresh], str(storage))
+    assert fresh.remediation_ref == f"next_task:{dr._dreaming_task_id(fresh.signature)}"
+    assert fresh.task_status == "pending"
+
+
+def test_annotate_is_fail_open_when_the_queue_is_unreadable(tmp_path):
+    storage = _storage(tmp_path)
+    (storage / "next_tasks.json").write_text("{not json", encoding="utf-8")
+    f = _machine_finding()
+    dr.annotate_task_states([f], str(storage))  # 不得爆掉
+    assert f.task_status is None
+
+
+# ---------------------------------------------------------------------------
+# 優先權隨 severity 升級（2026-07-21）：reconcile() 第三次會把 signature 升成
+# critical，但 task 的 priority 停留在「第一次開單那晚」的 severity。實況：三張
+# critical-derived 的單卡在 P3（72h starvation），alert 一直紅。
+# ---------------------------------------------------------------------------
+def _queued(storage, task_id):
+    tasks = json.loads((storage / "next_tasks.json").read_text())
+    return next(t for t in tasks if t["id"] == task_id)
+
+
+def test_escalated_severity_tightens_the_priority_of_the_existing_task(tmp_path):
+    storage = _storage(tmp_path)
+    warn_f = _machine_finding()
+    dr.apply_auto_dispatch([warn_f], str(storage), NOW)
+    tid = dr._dreaming_task_id(warn_f.signature)
+    assert _queued(storage, tid)["priority"] == 3
+
+    crit = _machine_finding()
+    crit.severity = "critical"  # 三振後 reconcile() 升級
+    actions = dr.apply_auto_dispatch([crit], str(storage), NOW)
+    assert _queued(storage, tid)["priority"] == 2
+    assert [a["action"] for a in actions] == ["reprioritized"]
+    # 沒有開出第二張單 —— 升級是改既有的列，不是繞過去重。
+    assert len(json.loads((storage / "next_tasks.json").read_text())) == 1
+
+
+def test_priority_is_only_ever_tightened_never_relaxed(tmp_path):
+    storage = _storage(tmp_path)
+    crit = _machine_finding()
+    crit.severity = "critical"
+    dr.apply_auto_dispatch([crit], str(storage), NOW)
+    tid = dr._dreaming_task_id(crit.signature)
+    assert _queued(storage, tid)["priority"] == 2
+    dr.apply_auto_dispatch([_machine_finding()], str(storage), NOW)  # 降回 warn
+    assert _queued(storage, tid)["priority"] == 2
+
+
+def test_a_finished_task_is_not_reprioritized_back_to_life(tmp_path):
+    storage = _storage(tmp_path)
+    f = _machine_finding()
+    dr.apply_auto_dispatch([f], str(storage), NOW)
+    tid = dr._dreaming_task_id(f.signature)
+    tasks = json.loads((storage / "next_tasks.json").read_text())
+    tasks[0]["status"] = "succeeded"
+    (storage / "next_tasks.json").write_text(json.dumps(tasks), encoding="utf-8")
+
+    crit = _machine_finding()
+    crit.severity = "critical"
+    assert dr.apply_auto_dispatch([crit], str(storage), NOW) == []
+    assert _queued(storage, tid)["priority"] == 3
+    assert _queued(storage, tid)["status"] == "succeeded"

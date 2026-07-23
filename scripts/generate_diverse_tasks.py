@@ -61,8 +61,9 @@ CORRECTIVE_ERRATA_TOKENS = (
 EXPERIMENTS_DIR = ROOT / "experiments"
 RESEARCH_PROGRAM = ROOT / "research_program.md"
 
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities  # noqa: E402
+from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
+from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
 
 
 def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list, list]:
@@ -88,14 +89,18 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
-    guard_canonical_write(NEXT_TASKS)
-    normalize_task_priorities(tasks)
-    if isinstance(payload, dict) and "tasks" in payload:
-        payload["tasks"] = tasks
-        out = payload
-    else:
-        out = tasks
-    NEXT_TASKS.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    """WS-A1b: canonical one-shot writer (flock + serialize-first) replaces the
+    unlocked full-file write_text. This path is LIVE — continue_task_dispatch.
+    _maybe_refill calls generate(dry_run=False) every refill cycle (the A1a
+    audit's delete classification missed that caller). Legacy dict-root wrapper
+    is read tolerance only; writing it back is refused loudly."""
+    if isinstance(payload, dict):
+        _diag_warn(
+            "generate_diverse_tasks",
+            "next_tasks dict-root shape is no longer writable; canonical root is a list",
+        )
+        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
+    write_tasks_locked(NEXT_TASKS, tasks)
 
 
 def _existing_ids(tasks: list) -> set[str]:
@@ -356,82 +361,23 @@ def _effective_expected_gap_seconds(item: dict) -> int | None:
     return _parse_cron_gap_seconds(str(item.get("cron") or ""))
 
 
-def _warn_banner_ts_parse_failed(raw: str, exc: Exception, source: str | None) -> None:
-    source_text = f" source={source}" if source else ""
-    _warn_diverse(
-        "cron log timestamp parse failed; skipping matched banner timestamp "
-        f"raw={raw!r}{source_text} error={type(exc).__name__}: {exc}"
-    )
-
-
-def _parse_banner_ts(text: str, *, source: str | None = None) -> datetime | None:
-    m = re.search(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:\+00:00|\+\d{4})", text)
-    if m:
-        raw = m.group(0)
-        if re.search(r"[+-]\d{4}$", raw):
-            raw = raw[:-5] + raw[-5:-2] + ":" + raw[-2:]
-        try:
-            return datetime.fromisoformat(raw).astimezone(timezone.utc)
-        except ValueError as exc:
-            _warn_banner_ts_parse_failed(raw, exc, source)
-    m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}", text)
-    if m:
-        raw = m.group(0)
-        try:
-            return datetime.strptime(
-                raw.replace("T", " "),
-                "%Y-%m-%d %H:%M:%S",
-            ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
-        except ValueError as exc:
-            _warn_banner_ts_parse_failed(raw, exc, source)
-    m = re.search(r"\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?!:)", text)
-    if m:
-        raw = m.group(0)
-        try:
-            return datetime.strptime(
-                raw.replace("T", " "),
-                "%Y-%m-%d %H:%M",
-            ).replace(tzinfo=timezone(timedelta(hours=8))).astimezone(timezone.utc)
-        except ValueError as exc:
-            _warn_banner_ts_parse_failed(raw, exc, source)
-            return None
-    return None
-
-
-def _latest_cron_log_ts(job_id: str, log_rel: str | None = None) -> datetime | None:
-    if log_rel:
-        candidate = ROOT / log_rel if not log_rel.startswith("/") else Path(log_rel)
-        log_path = candidate if candidate.exists() else CRON_LOGS / f"{job_id}.log"
-    else:
-        log_path = CRON_LOGS / f"{job_id}.log"
-    if not log_path.exists():
-        return None
-    try:
-        lines = log_path.read_text(encoding="utf-8", errors="ignore").splitlines()
-    except OSError as exc:
-        _warn_diverse(
-            "cron log read failed; skipping log timestamp "
-            f"path={log_path} error={type(exc).__name__}: {exc}"
-        )
-        return None
-    for line in reversed(lines):
-        if "===" not in line:
-            continue
-        ts = _parse_banner_ts(line, source=str(log_path))
-        if ts is not None:
-            return ts
-    try:
-        return datetime.fromtimestamp(log_path.stat().st_mtime, tz=timezone.utc)
-    except OSError as exc:
-        _warn_diverse(
-            "cron log stat failed; skipping log timestamp "
-            f"path={log_path} error={type(exc).__name__}: {exc}"
-        )
-        return None
-
-
 def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
-    """Detect stale cron jobs — prefer recent log banner over stale cron_last_run."""
+    """Detect stale cron jobs.
+
+    Evidence source (WS-D1, 2026-07-20): `volpred.ops.schedules.job_liveness`
+    merges the piggyback marker with execution-log banner/mtime — the single
+    liveness source shared by every monitor. This module's former local banner
+    parser (`_parse_banner_ts` / `_latest_cron_log_ts`) was one of four parallel
+    partial implementations of the same fallback and is retired (anti-stacking).
+
+    `host_crontab_managed: false` jobs stay excluded from TASK GENERATION only
+    (policy, not source selection): the set still contains deliberately-dormant
+    advisory entries (e.g. `shared_scheduler_tick`, WS-D2 retirement) that would
+    spawn bogus repair tasks. Their real liveness is surfaced by check_alerts'
+    staleness records and the dashboards via the same helper.
+    """
+    from volpred.ops.schedules import job_liveness  # noqa: WPS433 (src on sys.path above)
+
     if not CRON_LAST_RUN.exists() or not RUNTIME_SCHEDULES.exists():
         return []
     last_run = _load_json_dict(CRON_LAST_RUN, source="cron_last_run")
@@ -452,30 +398,21 @@ def gen_platform_ops_tasks(existing: set[str]) -> list[dict]:
         expected = _effective_expected_gap_seconds(item)
         if expected is None:
             continue
-        last_iso = last_run.get(cid)
         log_rel = item.get("log_path")
-        log_dt = _latest_cron_log_ts(cid, log_rel)
-        if not last_iso:
-            if log_dt is None:
-                continue
-            last_dt = log_dt
-            last_iso = log_dt.isoformat()
-        else:
-            try:
-                last_dt = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
-            except Exception as exc:
-                _warn_diverse(
-                    "cron_last_run timestamp parse failed; using log fallback when available "
-                    f"id={cid!r} value={last_iso!r} "
-                    f"error={type(exc).__name__}: {exc}"
-                )
-                if log_dt is None:
-                    continue
-                last_dt = log_dt
-                last_iso = log_dt.isoformat()
-        if log_dt and log_dt > last_dt:
-            last_dt = log_dt
-            last_iso = last_dt.isoformat()
+        probe = dict(item)
+        if not probe.get("log_path"):
+            # historic default: every cron job logs to storage/logs/cron/<id>.log
+            probe["log_path"] = str(CRON_LOGS / f"{cid}.log")
+        live = job_liveness(probe, marker_state=last_run, repo_root=ROOT)
+        if live.marker_raw and live.marker_at is None:
+            _warn_diverse(
+                "cron_last_run timestamp parse failed; using log fallback when available "
+                f"id={cid!r} value={live.marker_raw!r}"
+            )
+        last_dt = live.last_activity
+        if last_dt is None:
+            continue
+        last_iso = last_dt.isoformat()
         gap = int((now - last_dt).total_seconds())
         if gap > 2 * expected and gap > 3600:  # absolute floor 1h to skip recently-fired
             stale.append((cid, last_iso, gap, expected, log_rel))
@@ -728,6 +665,16 @@ def gen_experiment_tasks(existing: set[str], rng: random.Random) -> list[dict]:
 
 def generate(*, dry_run: bool = False, seed: int = 42) -> dict:
     """Programmatic entry — used by continue_task_dispatch._maybe_refill."""
+    # drain-first 水位閘（boss msg 1237）。
+    if not dry_run:
+        admission = pool_admits_new_work(
+            "diverse_tasks",
+            path=NEXT_TASKS,
+            state_path=NEXT_TASKS.parent / "ops" / "drain_first_state.json",
+        )
+        if not admission.admitted:
+            print(f"[diverse-gen] skip: {admission.reason}")
+            return admission.as_result({"by_type": {}, "added_ids": []})
     payload, tasks = _load_tasks()
     existing = _existing_ids(tasks)
     rng = random.Random(seed)

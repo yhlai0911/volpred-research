@@ -19,4 +19,6 @@ metadata:
 3. 只有真正需老闆 policy 判斷的 alert（投稿與否 / paid data 採購 / 研究 pivot）保留 boss-facing 決策段，且標「## 需老闆決策」不是「建議行動」。
 4. 與 [[feedback_plain_language_boss_facing]]（白話化）、[[feedback_proactively_complete_red_alerts]]（看到紅色主動完成）、[[feedback_dont_deflect_act_on_repeated_complaints]] 同族 —— 都是「直接行動 result-level」而非「報告 / 建議 / deflect」。
 
+2026-07-20 Telegram msg-1140 同一條原則的第二次糾正（對 dreaming review CRITICAL alert「findings=19（**需要你看 10**、機器已接手 8…）」），原話：**「為什麼要我看？你自己處理」**。根因是 dreaming finding 的 `remediation=="propose_only"` 只進「人工待辦」不進 auto_remediation 佇列，於是 alert 把 10 筆丟回老闆。**propose_only 的正確語意是「不自動改 code，但自動開工單去調查」，不是「等老闆看」** —— 任何把 finding 計入 boss-facing「需要你看 N」的欄位都是這條 feedback 的違反。後續工單 `assign_0a1d74ae`。
+
 發文脫班 wire 落地：`scripts/remediate_publish_drought.py`（單一 owner）+ `check_alerts._auto_remediate_publish_drought()` + `alerts._parse_publishing_freshness_state` body 重寫 + `tests/test_remediate_publish_drought.py`。對應 pending P1 `platform_ops_drought_auto_refresh_wiring`。

@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
 """Slot-aware continuation dispatcher (replaces stub-only continue_task host cron).
 
-讀 storage/next_tasks.json 的 pending queue，按 priority asc 排序，
+讀 storage/next_tasks.json 的 pending queue，候選排序最外層先按 lane rank
+（task_urgency：urgent boss 急件 → time_critical 時效任務 → 其餘；lane 內 FIFO），
+lane 之後才是既有 priority asc + 餓死保護 + 同 priority 多樣性輪替，
 count 當前 slot 占用（.claude/worktrees/ + storage/ops/agents/ active），
 若 slot < cap (4) 且有可派 agent 的 task → 列出 / 派出（依 mode）。
 
 執行模式：
-  --dry-run    僅列 candidates 不派任何工作（default 安全）
-  --report     寫 report 到 storage/ops/dispatch_report_latest.json
+  --dry-run    read-only 巡檢：retire/sweep/refill/promote 一律不執行寫入，
+               report 只進 stdout、不落地（2026-07-20 WS-H4 修真：此旗標過去
+               宣告後從未被 main() 讀取，掛著 --dry-run 也跑含寫入的完整流程，
+               見 docs/dispatch-decision-pipeline-design.md §1.2）
+  --report     寫 report 到 storage/ops/dispatch_report_latest.json（--dry-run 時改印 stdout）
   --execute    真的 spawn agent（需 cron-runtime；目前主線程 fallback = print 指令給人類）
 
 main-thread-only 任務優先看 schema-level `dispatch_lane="main_thread"`；
@@ -105,9 +110,11 @@ MAIN_THREAD_MARKERS = re.compile(
     r"main\s*thread|NOT\s*agent|main-thread|主線程",
     re.IGNORECASE,
 )
-AGENT_DISPATCH_LANES = {"agent", "agentable", "auto", "auto_dispatch", "headless", "worker"}
-MAIN_THREAD_DISPATCH_LANES = {"main", "main_thread", "manual", "interactive"}
-BLOCKED_DISPATCH_LANES = {"blocked", "blocked_on_user", "hold"}
+from volpred.ops.next_tasks import (  # noqa: E402
+    AGENT_DISPATCH_LANES,
+    BLOCKED_DISPATCH_LANES,
+    MAIN_THREAD_DISPATCH_LANES,
+)
 
 # 2026-05-04 finding: dispatcher previously had no concept of "blocked".
 # Tasks that can never be dispatched (awaiting external auth, prior compute
@@ -123,6 +130,7 @@ import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.ops import task_urgency as _task_urgency  # noqa: E402  (2026-07-21 R1: lane rank 的唯一判定 owner)
 from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
@@ -367,6 +375,60 @@ def find_starved(tasks: list[dict], now: datetime | None = None) -> list[dict]:
     ]
 
 
+def apply_starved_tail_floor(
+    starved: list[dict],
+    candidates: list[dict],
+    free_slots: int,
+    preempt_ids: set,
+) -> list[dict]:
+    """Reserve one candidate slot for the lowest starved priority band.
+
+    `find_starved` orders the starved set priority-first, and that ordering is
+    right on its own terms (see its docstring). But the candidate list is then
+    truncated to `free_slots`, and when the starved set is *dominated* by higher
+    priorities the tail never appears in it — starved in the report, unreachable
+    in practice. 2026-07-21 (boss telegram-1224): 20 dreaming-derived rows, the
+    oldest 84h past its own 72h P3 line, sat behind 37 pending P1 and 53 P2. The
+    lockout said "先清光餓死的任務"; the P3 band had no arrival rate at which it
+    could ever be cleared, so the critical findings those rows owned stayed red
+    indefinitely and the review alert kept re-reporting them.
+
+    The floor is one slot, taken from the *last* non-preempt candidate: it drains
+    the tail at ≥1 task per fire while costing the top band at most one seat per
+    fire, and it never displaces an incident preempt (already-materialised P1
+    response work — displacing it is what the preempt lane exists to prevent).
+    Below 2 free slots there is no floor: a single slot must go to the top band,
+    otherwise the P1 starvation this whole mechanism exists to end comes back.
+    """
+    if free_slots < 2 or not starved or not candidates:
+        return candidates
+    tail_priority = max(_coerce_priority(s["task"].get("priority", 999)) for s in starved)
+    present = {_coerce_priority(t.get("priority", 999)) for t in candidates}
+    if tail_priority in present:
+        return candidates
+    chosen_ids = {t.get("id") for t in candidates}
+    tail_rows = [
+        s
+        for s in starved
+        if _coerce_priority(s["task"].get("priority", 999)) == tail_priority
+        and s["task"].get("id") not in chosen_ids
+        and s["task"].get("id") not in preempt_ids
+    ]
+    if not tail_rows:
+        return candidates
+    tail_task = max(tail_rows, key=lambda s: s["over_by_hours"])["task"]
+    kept = list(candidates)
+    if len(kept) < free_slots:
+        kept.append(tail_task)
+        return kept
+    # At capacity: evict the last candidate that is not an incident preempt.
+    for idx in range(len(kept) - 1, -1, -1):
+        if kept[idx].get("id") not in preempt_ids:
+            kept[idx] = tail_task
+            return kept
+    return candidates
+
+
 def categorize(tasks: list[dict], recent_type_counts: Counter | None = None) -> dict:
     recent_type_counts = recent_type_counts or Counter()
     agentable = []
@@ -504,12 +566,26 @@ def _materialize_pool_dry_diagnostic_task(now: datetime | None = None) -> dict:
                     "added_ids": [],
                 }
 
+            if isinstance(payload, dict):
+                # WS-A1b：dict 包裝殼只剩讀取容忍；canonical root 自 2026-07-16
+                # single-gateway 起固定為 list（兩份 live queue 皆已實測
+                # list-root）。原本這裡保留一份 write_tasks_to_handle 的手抄
+                # serialize-first 複本 —— 正是 helper 演進時最會漂移的形狀 ——
+                # 現改為 loud reject，與其他 writer 的 dict-root 處置一致。
+                _diag_warn(
+                    "next_tasks_write",
+                    "dict-root next_tasks shape is no longer writable; canonical root is a list",
+                )
+                return {
+                    "ok": False,
+                    "added": 0,
+                    "error": "next_tasks.json root must be a list (single-gateway 2026-07-16)",
+                }
             tasks.insert(0, task)
             normalize_task_priorities(tasks)
-            fh.seek(0)
-            fh.truncate()
-            json.dump(payload if isinstance(payload, dict) else tasks, fh, indent=2, ensure_ascii=False)
-            fh.write("\n")
+            from volpred.ops.next_tasks import write_tasks_to_handle
+
+            write_tasks_to_handle(fh, tasks)
             return {
                 "ok": True,
                 "added": 1,
@@ -664,6 +740,16 @@ def _promote_starved_article_tasks(limit: int) -> int:
     修法：釋出池真乾涸（releasable==0）時，晉升既有 pending 文章任務到 P1（最多
     `limit` 個、一次到位），而不是加開新任務 —— 保留 in-flight 自我節制（防
     pile-up），只修 dispatch 搆不到的問題。Fail-open：任何錯誤回 0 並留 trace。
+
+    **本函式是 R2 admission clamp（``clamp_machine_priority_inflation``）的
+    deliberate exception，不得收編進 gateway**（2026-07-21 dispatch-lanes）：
+    clamp 擋的是生成端在**建單時**自封 P1（機器來源無權宣告自己緊急）；這裡是
+    dispatch 端在**現場量測到 releasable==0** 後的事後晉升 —— 緊急性來自當下實測
+    的乾涸訊號，不是生成器的自我宣告，語意上正是 clamp 要保護的那種「真時效」
+    授權點。若把這條 in-place 提升改走 append_task_record，clamp 會把晉升立刻
+    夾回 P2，drought escalation 整條失效（pin test：
+    scripts/tests/test_promote_starved_article_tasks.py
+    ::test_promotion_is_deliberate_exception_to_machine_p1_clamp）。
     """
     if not NEXT_TASKS.exists():
         return 0
@@ -713,7 +799,7 @@ def _promote_starved_article_tasks(limit: int) -> int:
         return 0
 
 
-def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
+def _maybe_refill_draft_pool(*, auto_refill: bool, dry_run: bool = False) -> dict | None:
     """Force a daily_article-specific top-up when feed.json draft count is low.
 
     2026-07-01 3-STRIKE fix: `_maybe_refill` below only reacts to the
@@ -738,6 +824,17 @@ def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
         _releasable_now = _releasable_draft_count()
     except Exception:  # noqa: BLE001 — 訊號取不到就不晉升，refill 路徑照舊
         _releasable_now = None
+    if dry_run:
+        # WS-H4 dry-run 修真：只預覽訊號，不晉升、不補池。這條路徑上任何寫入都是
+        # 「以為在 dry-run 卻改了 state」的事故面（design doc §1.2）。
+        return {
+            "ok": True,
+            "added": 0,
+            "dry_run": True,
+            "reason": "dry_run_refill_suppressed",
+            "deficit_at_check": _draft_pool_deficit(),
+            "would_promote_starved": _releasable_now == 0,
+        }
     if _releasable_now == 0:
         _promote_starved_article_tasks(DRAFT_POOL_FLOOR)
     deficit = _draft_pool_deficit()
@@ -801,7 +898,7 @@ def _maybe_refill_draft_pool(*, auto_refill: bool) -> dict | None:
         return {"ok": False, "added": 0, "reason": f"error: {exc}", "deficit_at_check": deficit}
 
 
-def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
+def _maybe_refill(agentable_count: int, *, auto_refill: bool, dry_run: bool = False) -> dict | None:
     """Auto-trigger pool refill when agentable < REFILL_FLOOR.
 
     Two-stage refill (2026-05-06 diversity fix):
@@ -817,6 +914,16 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
         return None
     if agentable_count >= REFILL_FLOOR:
         return None
+    if dry_run:
+        # WS-H4 dry-run 修真：refill 各 stage（diverse/event/article/research/
+        # pool-dry breaker）全是 next_tasks.json writer，dry-run 一律不觸發。
+        return {
+            "ok": True,
+            "added": 0,
+            "dry_run": True,
+            "reason": "dry_run_refill_suppressed",
+            "would_refill_gap": max(0, REFILL_FLOOR - agentable_count),
+        }
     sys.path.insert(0, str(ROOT / "scripts"))
     combined: dict = {"ok": True, "added": 0, "added_ids": [], "by_type": {}}
     try:
@@ -901,7 +1008,7 @@ def _maybe_refill(agentable_count: int, *, auto_refill: bool) -> dict | None:
     return combined
 
 
-def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
+def _maybe_retire_covered_article_tasks(*, auto_refill: bool, dry_run: bool = False) -> dict | None:
     """Retire pending `*_article_<audience>` tasks already covered in feed.json.
 
     2026-07-01 root cause: an article task can be queued when the K is genuinely
@@ -922,13 +1029,81 @@ def _maybe_retire_covered_article_tasks(*, auto_refill: bool) -> dict | None:
         _warn_dispatch(f"covered_article_dedup import failed: {exc}")
         return None
     try:
-        return _retire_covered(apply=True)
+        # dry-run: same detection pass, apply=False so nothing is retired on disk.
+        return _retire_covered(apply=not dry_run)
     except Exception as exc:  # noqa: BLE001
         _warn_dispatch(f"covered_article_dedup sweep failed: {exc}")
         return None
 
 
-def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> dict:
+def _sweep_cleared_dreaming_tasks(*, dry_run: bool = False) -> list[dict]:
+    """Close dreaming tasks whose condition dissolved, before they can be candidates.
+
+    A dreaming finding is a snapshot of one night. Without this sweep a task whose
+    condition cleared on its own just sits pending until the 24h starvation lockout
+    force-feeds it to a fire, which burns a whole slot discovering it is a no-op —
+    or worse, executes the stale imperative (2026-07-17: four `orphaned_experiment`
+    tasks still demanding knowledge entries that backfill had already written).
+
+    Same shape as `_sweep_cleared_ordinary_tasks` on the alert side. Best-effort:
+    a failure here must never stop the dispatch report from being produced.
+    """
+    if dry_run:
+        # WS-H4 dry-run 修真：同一套 revalidation 判定、零寫入。不取 flock、不過
+        # canonical-write guard（沒有寫入就沒有要 guard 的東西）——讓 --dry-run
+        # 從任何 checkout 都能當純診斷跑。
+        try:
+            from volpred.ops import dreaming_revalidate
+
+            if not NEXT_TASKS.exists():
+                return []
+            tasks = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+            if not isinstance(tasks, list):
+                return []
+            return dreaming_revalidate.sweep_cleared(
+                tasks,
+                by="dispatcher-dry-run",
+                now=datetime.now(timezone.utc).isoformat(),
+            )
+        except Exception as exc:  # noqa: BLE001
+            _warn_dispatch(f"dreaming revalidation dry-run preview failed: {exc}")
+            return []
+    # Outside the best-effort try, same as the alert-side sweep: writing the
+    # canonical queue from a foreign tree is not a transient hiccup to warn
+    # about and continue past, and a guard swallowed by `except Exception`
+    # reads like protection while only downgrading the violation to a log line.
+    guard_canonical_write(NEXT_TASKS)
+    try:
+        import fcntl
+
+        from volpred.ops import dreaming_revalidate
+        from volpred.ops.next_tasks import write_tasks_to_handle
+
+        if not NEXT_TASKS.exists():
+            return []
+        with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)  # same lock every queue writer takes
+            try:
+                tasks = json.load(fh)
+                if not isinstance(tasks, list):
+                    return []
+                closed = dreaming_revalidate.sweep_cleared(
+                    tasks,
+                    by="dispatcher",
+                    now=datetime.now(timezone.utc).isoformat(),
+                )
+                if closed:
+                    write_tasks_to_handle(fh, tasks)
+                return closed
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except Exception as exc:  # noqa: BLE001
+        _warn_dispatch(f"dreaming revalidation sweep failed: {exc}")
+        return []
+
+
+def build_report(*, auto_refill: bool = True, now: datetime | None = None,
+                 dry_run: bool = False) -> dict:
     """Build the dispatch report.
 
     `now` exists so starvation verdicts can be pinned to a fixed instant. Without
@@ -937,16 +1112,25 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     "fresh" P2 written on 2026-07-13 crossed its own 24h starvation line the next
     day and joined the starved set, so the lockout assertion started failing on a
     calendar boundary rather than on a code change (CI red, 2026-07-14).
+
+    `dry_run=True` (WS-H4, 2026-07-20) makes this a read-only pass: the
+    retire/sweep/refill/promote maintenance stages are suppressed or run in
+    preview mode, so `storage/next_tasks.json` is byte-identical before and
+    after. The report is still produced, flagged `dry_run: true`.
     """
     slots = count_active_slots()
     # Retire covered article tasks BEFORE categorizing so duplicates never reach
     # the agentable candidate list this run.
-    _maybe_retire_covered_article_tasks(auto_refill=auto_refill)
+    _maybe_retire_covered_article_tasks(auto_refill=auto_refill, dry_run=dry_run)
+    # Same reason, dreaming's snapshots: a dissolved condition must not reach the
+    # candidate list, nor age into the starvation lockout that force-feeds it.
+    cleared_dreaming = _sweep_cleared_dreaming_tasks(dry_run=dry_run)
     pending = load_pending_tasks()
     recent_type_counts = load_recent_task_type_counts()
     cats = categorize(pending, recent_type_counts=recent_type_counts)
 
-    refill_result = _maybe_refill(len(cats["agentable"]), auto_refill=auto_refill)
+    refill_result = _maybe_refill(len(cats["agentable"]), auto_refill=auto_refill,
+                                  dry_run=dry_run)
     if refill_result and refill_result.get("added"):
         # Reload after refill so the report shows the fresh tasks
         pending = load_pending_tasks()
@@ -955,7 +1139,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     # 2026-07-01 3-STRIKE fix: draft-pool-specific top-up runs independently of
     # the agentable-count-based `_maybe_refill` above — see `_maybe_refill_draft_pool`
     # docstring for why the two signals can diverge (task-type mix vs feed content).
-    draft_refill_result = _maybe_refill_draft_pool(auto_refill=auto_refill)
+    draft_refill_result = _maybe_refill_draft_pool(auto_refill=auto_refill, dry_run=dry_run)
     if draft_refill_result and draft_refill_result.get("added"):
         pending = load_pending_tasks()
         cats = categorize(pending, recent_type_counts=recent_type_counts)
@@ -964,28 +1148,70 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
     slot_cap = slot_budget["cap"]
     free_slots = max(0, slot_cap - slots["occupied"])
 
-    # Starvation lockout. When agentable work has aged past its threshold, the
-    # candidate menu collapses to starved tasks plus explicit incident preemption.
+    # 2026-07-21 dispatch-lanes R1: lane rank is the OUTERMOST ordering key.
+    # `task_urgency.classify()` has been the single urgency owner since
+    # 2026-07-18, but this dispatcher never consulted it — ordering was
+    # priority + starvation + rotation only, so the fire a boss P1 woke via
+    # `request_fire` still picked the longest-starved *machine* P1 (2026-07-21:
+    # 33 pending P1, only 8 boss-sourced; the boss item queued behind 25
+    # generator-self-assigned P1s). Urgent (boss-source P1) rides first,
+    # oldest-first; time-critical types second, same FIFO; everything else
+    # keeps the existing priority / starvation-lockout / rotation logic
+    # UNCHANGED, operating only on the slots that remain after the lane head
+    # is seated — so the starved tail-floor reserve can never evict urgent or
+    # time-critical work.
+    lane_by_id: dict = {}
+    urgent_lane: list[dict] = []
+    time_critical_lane: list[dict] = []
+    scheduled_pool: list[dict] = []
+    for task in cats["agentable"]:
+        lane = _task_urgency.classify(task)
+        lane_by_id[task.get("id")] = lane
+        if lane == _task_urgency.LANE_URGENT:
+            urgent_lane.append(task)
+        elif lane == _task_urgency.LANE_TIME_CRITICAL:
+            time_critical_lane.append(task)
+        else:
+            scheduled_pool.append(task)
+    urgent_lane.sort(key=lambda t: str(t.get("created_at") or ""))
+    time_critical_lane.sort(key=lambda t: str(t.get("created_at") or ""))
+    lane_head = (urgent_lane + time_critical_lane)[:free_slots]
+    scheduled_slots = max(0, free_slots - len(lane_head))
+
+    # Starvation lockout — over the scheduled lane only. A starved urgent /
+    # time-critical task does not need the lockout: its lane already puts it at
+    # the head of the queue. When agentable scheduled work has aged past its
+    # threshold, the scheduled portion of the menu collapses to starved tasks
+    # plus explicit incident preemption.
     # ``dispatch_preempt`` is reserved for already-materialized P1 response work
     # (currently CI red repair): request_fire only wakes this generic dispatcher,
     # so omitting a fresh incident under lockout would consume the wake-up on an
     # unrelated old task and leave CI red. Ordinary fresh work remains excluded.
-    starved = find_starved(cats["agentable"], now=now)
+    starved = find_starved(scheduled_pool, now=now)
     starved_ids = {s["task"].get("id") for s in starved}
     # Main-thread tasks starve too (a boss-assigned P1 sat 27h — see `_coerce_priority`),
     # but the fix there cannot be a lockout: nothing in the agent lane can claim them.
     # Surface them so the fire has to look at them, and let the alert bridge nag.
     starved_main_thread = find_starved(cats["main_thread"], now=now)
-    preemptive = [task for task in cats["agentable"] if task.get("dispatch_preempt") is True]
+    preemptive = [task for task in scheduled_pool if task.get("dispatch_preempt") is True]
     preempt_ids = {task.get("id") for task in preemptive}
     if starved:
-        candidates_to_dispatch = (
+        scheduled_candidates = (
             preemptive + [s["task"] for s in starved if s["task"].get("id") not in preempt_ids]
-        )[:free_slots]
+        )[:scheduled_slots]
+        _before_ids = [t.get("id") for t in scheduled_candidates]
+        scheduled_candidates = apply_starved_tail_floor(
+            starved, scheduled_candidates, scheduled_slots, preempt_ids
+        )
+        tail_floor_ids = [
+            t.get("id") for t in scheduled_candidates if t.get("id") not in _before_ids
+        ]
     else:
-        candidates_to_dispatch = (
-            preemptive + [task for task in cats["agentable"] if task.get("id") not in preempt_ids]
-        )[:free_slots]
+        scheduled_candidates = (
+            preemptive + [task for task in scheduled_pool if task.get("id") not in preempt_ids]
+        )[:scheduled_slots]
+        tail_floor_ids = []
+    candidates_to_dispatch = lane_head + scheduled_candidates
 
     pending_summary = {
         "agentable": len(cats["agentable"]),
@@ -1000,6 +1226,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
 
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "dry_run": dry_run,
         "slot_cap": slot_cap,
         "slot_budget": slot_budget,
         "slot_state": slots,
@@ -1009,14 +1236,25 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
         "pending_main_thread": len(cats["main_thread"]),
         "pending_blocked": len(cats["blocked"]),
         "pending_summary": pending_summary,
+        # R1 lane visibility: how much of the agentable queue outranks the
+        # scheduled lane this fire, and which ids took lane-head seats.
+        "lanes": {
+            "urgent_pending": len(urgent_lane),
+            "time_critical_pending": len(time_critical_lane),
+            "lane_head_task_ids": [t.get("id") for t in lane_head],
+        },
         "starvation": {
             "locked": bool(starved),
             "incident_preempt_count": len(preemptive),
             "starved_count": len(starved),
+            # Which candidate (if any) is sitting in the reserved tail seat, so the
+            # trade this fire made is auditable rather than inferred from ordering.
+            "tail_floor_task_ids": tail_floor_ids,
             "thresholds_hours": {f"P{k}": v for k, v in STARVATION_HOURS.items()},
             "directive": (
                 "⛔ STARVATION LOCKOUT — 以下任務已超過其優先序的容忍時數。"
-                "本班 dispatch_candidates 只列 incident preempt 與這些餓死任務，"
+                "本班 dispatch_candidates 先列 urgent / time-critical lane（如有），"
+                "scheduled 部分只列 incident preempt 與這些餓死任務，"
                 "diversity rotation 暫停："
                 "先清光餓死的任務，才能回到一般輪替。"
                 if starved
@@ -1055,6 +1293,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
                 for s in starved_main_thread[:10]
             ],
         },
+        # Auto-closing a task is a real decision; it must not be silent. Whoever
+        # reads this report should see which snapshots dissolved and why.
+        "dreaming_cleared": cleared_dreaming,
         "dispatch_candidates": [
             {
                 "id": t.get("id"),
@@ -1063,6 +1304,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
                 # 拓撲建議（task.topology 欄位優先，否則 task_type 預設）— orchestrator
                 # 依此選載具，僅明顯不合時 override 並在 work_log 記原因
                 "topology": pick_topology(t.get("task_type"), t)["topology"],
+                "lane": lane_by_id.get(t.get("id"), _task_urgency.LANE_SCHEDULED),
                 "starved": t.get("id") in starved_ids,
                 "dispatch_preempt": t.get("dispatch_preempt") is True,
                 "age_hours": (lambda a: round(a, 1) if a is not None else None)(task_age_hours(t)),
@@ -1095,6 +1337,9 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None) -> di
 
 def print_report(report: dict) -> None:
     print(f"[dispatch] generated_at={report['generated_at']}")
+    if report.get("dry_run"):
+        print("[dispatch] DRY-RUN — read-only pass: retire/sweep/refill/promote "
+              "suppressed, report not persisted")
     s = report["slot_state"]
     pending_summary = report.get("pending_summary", {})
     pending_label = pending_summary.get(
@@ -1119,6 +1364,10 @@ def print_report(report: dict) -> None:
             f"（>{_slot_budget.STALE_HOURS}h）；不再占 slot，清理走 "
             f"scripts/reclaim_stale_worktrees.py"
         )
+    for c in report.get("dreaming_cleared") or []:
+        print(
+            f"  ✅ dreaming no-op closed: {c['id']} [{c['pattern_type']}] — {c['detail']}"
+        )
     print(
         f"[dispatch] pending: total={report['pending_total']} "
         f"{pending_label} "
@@ -1137,8 +1386,10 @@ def print_report(report: dict) -> None:
     if report["dispatch_candidates"]:
         label = "STARVED — 本班只能從這裡挑" if starvation.get("locked") else "candidates to dispatch"
         print(f"[dispatch] {label} ({len(report['dispatch_candidates'])}):")
+        tail_floor = set(starvation.get("tail_floor_task_ids") or [])
         for c in report["dispatch_candidates"]:
-            print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}")
+            seat = " ⟵ 保底席（最低 starved 優先序，本班必挑）" if c["id"] in tail_floor else ""
+            print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}{seat}")
     else:
         print("[dispatch] NO agent dispatch candidates "
               "(slot full or all pending are main-thread-only)")
@@ -1183,21 +1434,28 @@ def print_report(report: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dry-run", action="store_true", help="只列 candidates，不派工")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="read-only 巡檢：不 retire/sweep/refill/promote、不寫任何檔案")
     parser.add_argument("--report", action="store_true", help="寫 report 到 dispatch_report_latest.json")
     parser.add_argument("--execute", action="store_true", help="reserved (尚未實作 actual spawn)")
     parser.add_argument("--no-refill", action="store_true",
                         help="skip auto-refill even if agentable < floor (debug only)")
     args = parser.parse_args()
 
-    report = build_report(auto_refill=not args.no_refill)
+    report = build_report(auto_refill=not args.no_refill, dry_run=args.dry_run)
     print_report(report)
 
     if args.report:
-        guard_canonical_write(REPORT_PATH)
-        REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
-        REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
-        print(f"[dispatch] report written: {REPORT_PATH}")
+        if args.dry_run:
+            # dry-run must not persist anything — emit the payload to stdout instead.
+            print(json.dumps(report, indent=2, ensure_ascii=False))
+            print("[dispatch] DRY-RUN: report NOT written "
+                  f"(would have gone to {REPORT_PATH})")
+        else:
+            guard_canonical_write(REPORT_PATH)
+            REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+            REPORT_PATH.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
+            print(f"[dispatch] report written: {REPORT_PATH}")
 
     if args.execute:
         print("[dispatch] --execute not yet implemented; main-thread should pick up candidates and dispatch agents (Task tool / claude general-purpose / codex-rescue) per .claude/rules/agent-delegation.md")

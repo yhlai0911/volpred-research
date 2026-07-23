@@ -20,11 +20,11 @@
     "5280"
   ],
   "env": {},
-  "status": "queued",
+  "status": "failed",
   "queued_at": "2026-07-19T03:48:49Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-19T04:45:03Z",
+  "completed_at": "2026-07-19T05:58:57Z",
+  "exit_code": 4,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapaudit-3cae76.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapaudit-3cae76.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-858545f9-snapaudit/experiments/audit_dup_snapshot_20260719/audit_results.json",
@@ -38,8 +38,18 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "timeout_seconds": 5400,
   "brief_source": "/tmp/brief_snapaudit.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapaudit-3cae76.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapaudit-3cae76.md",
+  "process_exit_code": 0,
+  "failure_reason": "experiment_gate_failed",
+  "experiment_gate": {
+    "status": "failed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-858545f9-snapaudit/experiments/audit_dup_snapshot_20260719",
+    "exit_code": 1,
+    "report": "[gate] FAIL — 1 violation(s) under experiments/audit_dup_snapshot_20260719:\n\n  [fevd-ordering]\n    - experiments/audit_dup_snapshot_20260719/partition_cfc_va/dy_diag_param.py  (VIOLATION)\n    → Directional claims (NET / transmitter / receiver) cannot rest on a Cholesky FEVD: the NET value cannot separate a true transmitter from whatever was ordered first (K865 died on this). Hand-roll a KPPS generalized FEVD, or report an order-invariant total spillover index. A comment saying 'generalized' does not count. Owner: scripts/tests/test_fevd_ordering_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
+  },
+  "followup_dispatched_at": "2026-07-19T06:20:54Z",
+  "followup_next_task_id": "snapaudit_fevd_gate_remediation_20260719"
 }

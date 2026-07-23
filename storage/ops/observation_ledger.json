@@ -1,0 +1,51 @@
+{
+  "schema": "observation_ledger.v1",
+  "updated_at": "2026-07-20T10:09:01.212645+00:00",
+  "items": [
+    {
+      "id": "pregate_shadow",
+      "what": "hourly_dispatch pregate 刻意 shadow（PREGATE_SHADOW=1：只把 would-be decision 記到 storage/logs/hourly_pregate.jsonl，永不真 skip）；cron_hourly_dispatch.sh 註解仍寫 'validating ~1 week'，與裁定脫節（ops_master D3 對齊）",
+      "started_at": "2026-07-01T00:00:00+08:00",
+      "deadline": null,
+      "action_on_expiry": null,
+      "status": "permanent",
+      "note": "token_ops_waste gate 裁定（WS1a，commit 5ff007b98）：刻意不翻 enforce — strict_mismatch 50%、12 班 would-skip 有 6 班有實質產出；且 07-12 起池常有 P1/P2、would_skip=0%，skip 節省前提不成立。enforce 前提 = pregate demand heuristic 重設計，暫不立案 → permanent-observational，免 deadline"
+    },
+    {
+      "id": "hourly_dispatch_deliverable8_legacy_retirement",
+      "what": "legacy cron_hourly_dispatch.sh 已 launchctl-disabled（2026-07-04 supervisor cutover）但實體未退役；refactor_plan_hourly_dispatch Deliverable-8（bootout + mv scripts/_legacy/ + retro）一直停在「數班 clean fire 後」無日期",
+      "started_at": "2026-07-04T00:00:00+08:00",
+      "deadline": "2026-07-27T23:59:00+08:00",
+      "action_on_expiry": "執行 Deliverable-8：launchctl bootout legacy + mv scripts/cron_hourly_dispatch.sh scripts/_legacy/ + retro；同步 refactor_plan_cron_dispatch.md 標 SUPERSEDED 歸檔、更新 test_cutover_orphans.py _RETIRED_BY_DESIGN；或 observation extend 明文展期附理由",
+      "status": "observing",
+      "note": "ops_master P3/D3；supervisor 已穩定跑 16 天，disable 已 disarm，留實體只剩一鍵回滾價值"
+    },
+    {
+      "id": "single_gateway_claim_next_removal",
+      "what": "volpred ops claim-next 消費 lane 已標 deprecated（stderr 警告指向 task_pool_claim.py；2026-07-16 single-gateway refactor），設計文件寫「觀察一輪後移除」但無日期",
+      "started_at": "2026-07-16T00:00:00+08:00",
+      "deadline": "2026-07-30T23:59:00+08:00",
+      "action_on_expiry": "移除 claim-next 消費 lane（deprecation → 刪除），更新 docs/refactor_plan_single_gateway_task_system.md 殘留項清單與相關測試；或 observation extend 明文展期附理由",
+      "status": "observing",
+      "note": "ops_master P3/D3；refactor_plan_single_gateway_task_system.md 殘留項"
+    },
+    {
+      "id": "multi_slot_throughput_acceptance",
+      "what": "max_slots 2→4（assign_794c4bc2，2026-07-19）後的 24h 吞吐驗收；驗收任務 assign_f59976b6（blocked_until 2026-07-20T11:00+08:00）；改動前基線近 5 日 57/98/53/46/57 ≈ 62 任務/日",
+      "started_at": "2026-07-19T00:00:00+08:00",
+      "deadline": "2026-07-21T18:00:00+08:00",
+      "action_on_expiry": "完成 assign_f59976b6 驗收：對照基線判定吞吐變化，決定維持 max_slots=4 或回退 2；回退判準 = PHASE-Z cohort 競態 / worktree 磁碟壓力 / quota 連發（de-rate guard 觸發史）",
+      "status": "observing",
+      "note": "ops_master 驗收留原 blocked task assign_f59976b6；此帳本項只保證『逾期未驗收』會浮上 dreaming"
+    },
+    {
+      "id": "wsb_isolation_pilot",
+      "what": "WS-B producer-scoped isolation pilot (platform_ops lane): PHASE-Z unknown-author/ownership incidents must be zero for 2 weeks; receipts in storage/ops/dispatch_workspace_receipts.jsonl + dispatch_state completions[].workspace",
+      "started_at": "2026-07-20T10:09:01.212285+00:00",
+      "deadline": "2026-08-03",
+      "action_on_expiry": "zero unknown-author incidents -> add governance to writer_isolation.lanes and open recognizer retirement case; any incident -> set writer_isolation.mode=off and file root-cause task",
+      "status": "observing",
+      "note": "refactor_plan_ops_master_2026_07 WS-B; commits 5d0cc4fb0 + 4f95639c5"
+    }
+  ]
+}

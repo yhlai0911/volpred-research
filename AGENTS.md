@@ -74,7 +74,7 @@
   - **`storage/next_tasks.json`** = **canonical pending queue**（priority sorted；dispatcher 從這挑下個任務派工）
   - **`storage/ops/`** TaskRecord / AgentSession / ExecutionReceipt = **execution receipts / audit trail**（已完成 history，不是 pending queue）
   - `config/runtime_schedules.json` + `event_jobs` + `storage/ops/event_ledger/` = canonical schedule spec
-- **`storage/ops/handoff_latest.md`** = 每小時 :50 自動產生的**統一任務池快照**（Codex / Claude / 互動 session 共用入口）— 開工前必讀
+- **`storage/ops/handoff_latest.md`** = 每小時 :50 自動產生的**統一任務池快照**（Codex / Claude / 互動 session 共用入口）— 開工先讀 §1–§9（第一條 `---` 以前）；候補區只按當前任務關鍵字搜尋，歷史見 `storage/ops/handoff_archive/`
 
 ### 永遠修流程，不修資料
 
@@ -82,6 +82,18 @@
 - 不要用 session workaround 掩蓋 schema 或流程缺陷。
 - 不要繞過正式 CLI / sync / publish 流程。
 - 任何資料錯誤都要追到產生它的程式與流程。
+
+### 問題結案五步 Gate（2026-07-22 owner 指令，不可妥協）
+
+任何問題宣稱「解決」前必須依序走完五步，缺任一步只能標 **`contained`（止血）**，不得稱完成：
+
+1. **證據化症狀**：讀 live source / log / receipt / 時間戳 / 上下游交接 — 不憑印象、不憑上一輪的記憶。
+2. **判定根因層級**：定位到邏輯、流程契約、排程、狀態機、API、權限、checker 或架構之一；**根因不明 = 只能標 blocked**，不准用貌似合理的故事收尾。
+3. **重構底層**：修可重複執行的程式／流程／防呆。重跑、補檔、改文字、手動清 blocker 全部只算止血（contained）。
+4. **回歸驗證**：重跑案例 + 測試，並用 API／資料庫／雜湊／下游 acknowledgement **回讀**確認 — 「跑完沒報錯」不等於「下游真的收到對的東西」。
+5. **制度化寫回**：落入 script / contract / automation / skill / dashboard / 操作紀錄，使同類錯誤**無法再靜默發生**。
+
+回報時兩種狀態必分：**`contained`**（暫時止血，不可宣稱完成）vs **`root_cause_fixed_and_verified`**（五步全過，唯一真結案）。機械實作面：incident 生命週期的 sustained-clean resolution（`src/volpred/ops/incident.py`，一次乾淨不算 resolved）與 3-Strike Rule 是本 gate 的既有 enforcement；本段是其上位口徑，回報與 error_log 條目一律採用此二態詞彙。
 
 ### CLI / Workflow 優先順序
 
@@ -102,6 +114,9 @@
 
 - **禁止整檔讀取** `storage/reports/feed.json`；用 `grep`、`jq`、單篇 `storage/reports/<id>.json`。
 - `storage/memory/knowledge.json` 同理，禁止整檔讀取。
+- 〔L1 機械 deny：`cat/less/more` 這兩個檔已由 `.claude/hooks/pretooluse-bash-optimizer.sh` 攔截；
+  內建 Read 側由 `scripts/hooks/read_context_budget.py` 自動 bound（非 deny）。細則唯一 owner =
+  `.claude/rules/context-hygiene.md`，本節只留 pointer。〕
 - 重複性流程靠 skill，不要每次把長 SOP 貼進主對話。
 - **若新任務與當前上下文、已載入 skills、或目前正在處理的專案文件無直接關聯，必須另開一個乾淨的 sub-agent 處理。**
 - 用 sub-agent 的目的是隔離大搜尋、大量 logs、文件探索與無關 side task，減少 context 汙染與 token 損耗。
@@ -148,7 +163,63 @@
   - Supabase / Mirror sync 流程
 - Worktree agent 完成後要 commit。
 - 主線程再用 `bash scripts/merge_worktree.sh` 合併。
-- **絕對禁止** `git worktree remove --force`。
+- **絕對禁止** `git worktree remove --force`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh:141` 已攔截，含 `git -C <dir>` 與 `-ff` 等價寫法〕。
+
+### 實驗 artifact gate（2026-07-19 起，merge 與 CI 兩處都擋）
+
+帶 archived `*_results.json` 的 `experiments/<id>/` 若少了 knowledge 條目或 `reproduce_spec.json`，
+`scripts/check_experiment_artifacts.py` 會擋下 merge（`merge_worktree.sh`）與 push
+（`.github/workflows/experiment-artifacts.yml`），並印出可直接貼上執行的補救指令。
+
+- 開工前自查：`python3 scripts/check_experiment_artifacts.py check --path experiments/<id>`
+- knowledge 條目**只能主線程寫**（K1259），數字一律從 `*_results.json` 程式化取得，不得從 README
+  或 agent 摘要轉抄。
+- 只審本次新增/修改的實驗；無 results 的目錄、無 K-id 的目錄（後者仍要交 spec）不在 knowledge
+  半邊的 scope 內。理由見 `docs/error_log.md` 2026-07-19 條。
+- 真的無法產生 artifact 才寫 `config/experiment_artifact_exclusions.json`，且必須說明**為什麼做不到**
+  ——「之後再補」是 bug，不是理由。
+
+#### spec 要在 run-time 產生，不是事後補（2026-07-22 起，K1708 教訓）
+
+K1708 的 `K1708_results.json` 記 `code_trace` sha `43bffdd…` / 91,752 bytes，而 `K1708.py`
+在 disk 上是 126,998 bytes —— **spec 描述的不是跑出結果的那份程式**。根因是 spec 由人事後補寫，
+補的時候程式早已漂移。
+
+實驗腳本收尾**呼叫 canonical helper**，results 與 spec 由同一次 `trace_file()` 一起寫出：
+
+```python
+from volpred.research.reproduce_spec import finalize_experiment
+
+finalize_experiment(
+    results=payload, entrypoint=__file__,
+    canonical_result="K1750_results.json",
+    inputs=[...], seeds=[("numpy", 1750)], started_at=T0,
+)
+```
+
+`results["code_trace"]` 與 `spec["entrypoint"]` 的 sha／byte size 取自同一次 trace snapshot，
+兩者不可能出現 K1708 那種 identity 不一致；path 則分別使用 repo-relative 與 experiment-relative schema。
+
+#### 改 verdict gate 前先存原件（同上，K1708 三審 FAIL 的另一半）
+
+K1708 修 gate 假陽性時，**修正前的 gate 位元組從沒進 git**，事後只能用 `legacy_derive_verdict()`
+重建 —— 用重建物證明重建物正確是循環論證，review 直接判 FAIL。
+
+**動 gate 之前**先存原件（不是暫存、不是重建）：
+
+```bash
+uv run python scripts/preserve_gate_blob.py preserve \
+    --path experiments/<id>/<K>.py --reason "說明這次 gate 改什麼"
+```
+
+Claude 的 Edit/Write hook 會攔截「runtime spec 已 pin、原始 bytes 又尚未進 git」的唯一副本；
+已進 git 的 pre-image 可由 `git show` 回收，所以交由下游 artifact gate 在落地前強制補進
+`gate_history/`。shell／外部 editor 不經 hook，仍會在 merge/CI 被 drift gate 擋住。
+
+機械攔截：spec 若帶 `entrypoint.sha256`（= 由 helper 在 run-time 產生），而 entrypoint 現在
+hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artifacts.py` 直接擋。
+**只對 run-time 產生的 spec 生效**，1,256 個舊實驗完全不受影響（forward ratchet）。
+已知缺口與後續步驟寫在 `scripts/preserve_gate_blob.py` 的 module docstring。
 
 ## 發佈、論文、策略
 
@@ -215,6 +286,34 @@
   - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
   - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
 
+## Agent skills
+
+### Matt Pocock flow
+
+全域 Matt Pocock skills 已安裝。使用者明確要求依 Matt skills 選流程時，先讀
+`ask-matt` router，依其 main flow／on-ramp 選擇 user-invoked skill，不可自行拼湊替代順序。
+標示 `disable-model-invocation: true` 的 skill 只在使用者明確呼叫時啟動；其餘
+model-invoked skills 可按任務描述自動採用。建立或修改 skill 時以
+`writing-great-skills` 的 predictability、information hierarchy、completion criterion
+與 single source of truth 為準。
+
+### Issue tracker
+
+本專案使用 GitHub Issues 追蹤工程工作。見 `docs/agents/issue-tracker.md`。
+
+GitHub CLI 已安裝於 `/opt/homebrew/bin/gh`。Codex 的非互動 shell 可能沒有
+`/opt/homebrew/bin`，因此 `gh: command not found` **不代表未安裝**：先跑
+`zsh -lic 'command -v gh'` 或直接使用 `/opt/homebrew/bin/gh`。只有固定路徑與 login
+shell 都確認不存在後才可討論安裝；禁止因 PATH 漏載而重裝或回報 CLI 不存在。
+
+### Triage labels
+
+使用五個預設 triage roles 與同名 GitHub labels。見 `docs/agents/triage-labels.md`。
+
+### Domain docs
+
+本專案採 single-context domain documentation layout。見 `docs/agents/domain.md`。
+
 ## 活文件原則
 
 以下內容變了，就應該更新對應母本：
@@ -235,9 +334,9 @@
 
 ### Step 0 — 開工必讀 handoff
 ```bash
-cat storage/ops/handoff_latest.md
+sed -n '1,/^---$/p' storage/ops/handoff_latest.md
 ```
-看 section 1 任務池快照 / section 3 email_reply 待處理 / section 4 pending top 8。
+看 section 1 任務池快照 / section 3 email_reply 待處理 / section 4 pending top 8；候補區不要全文載入，僅按任務 id / K-id / 關鍵字搜尋。
 
 ### Step 1 — claim 一個你能勝任的 pending task
 
@@ -302,7 +401,7 @@ complete/release 自動退回 pending**。所以 VSCode 關掉或 crash 不會�
 ### Commit 慣例
 
 - 改動 commit 訊息開頭加 `[codex]` 與 Claude 區分
-- 共用 main checkout 禁止裸跑 `git add` / `git commit`；完整交易一律走：
+- 共用 main checkout 禁止裸跑 `git add` / `git commit`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh:148-150`，涵蓋 stage/merge/checkout/ref 全 mutation；registered linked worktree 不受攔截〕；完整交易一律走：
   `uv run python scripts/git_writer_lock.py commit --actor <owner> --message '<ASCII message>' -- <exact paths>`
   （worktree 整合走 `bash scripts/merge_worktree.sh`，它會持有同一把 common-dir lock）
 - **不要 `git push`** — 由用戶或 Claude 主線程統一推

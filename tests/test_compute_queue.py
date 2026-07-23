@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+import fcntl
 import json
+import subprocess
+import sys
+import threading
+import time
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -79,6 +84,173 @@ def test_acquire_lock_warns_when_lock_cannot_be_written(
     assert "FileNotFoundError" in captured.err
 
 
+def _queued_stub_job(
+    queue_dir: Path,
+    log_dir: Path,
+    job_id: str,
+    *,
+    interpreter: str = "python",
+    script_path: str = "sleep.py",
+    args: list[str] | None = None,
+    queued_at: str = "2026-07-20T00:00:00Z",
+) -> Path:
+    path = queue_dir / f"{job_id}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "id": job_id,
+                "status": "queued",
+                "title": job_id,
+                "queued_at": queued_at,
+                "script_path": script_path,
+                "interpreter": interpreter,
+                "args": args or [],
+                "env": {},
+                "stdout_file": str(log_dir / f"{job_id}.stdout"),
+                "stderr_file": str(log_dir / f"{job_id}.stderr"),
+                "result_artifact": None,
+                "timeout_seconds": 30,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_run_loop_drains_queue_and_bounds_parallelism(tmp_path: Path, monkeypatch) -> None:
+    """D6: one run-loop invocation consumes EVERY queued job, at most N at once.
+
+    Three sleep-type jobs, bound 2: the gauge must reach 2 (it actually ran in
+    parallel — work-conserving) and never exceed 2 (the bound held).
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    paths = [
+        _queued_stub_job(queue_dir, module.LOG_DIR, f"sleepy-{i}",
+                         queued_at=f"2026-07-20T00:00:0{i}Z")
+        for i in range(3)
+    ]
+
+    gauge = {"current": 0, "max": 0}
+    gauge_lock = threading.Lock()
+
+    def fake_sleep_job(*args, **kwargs):
+        with gauge_lock:
+            gauge["current"] += 1
+            gauge["max"] = max(gauge["max"], gauge["current"])
+        time.sleep(0.5)
+        with gauge_lock:
+            gauge["current"] -= 1
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(module.subprocess, "run", fake_sleep_job)
+
+    assert module.run_loop(SimpleNamespace(max_parallel=2)) == 0
+
+    for path in paths:
+        assert json.loads(path.read_text())["status"] == "completed"
+    assert gauge["max"] == 2
+
+
+def test_run_loop_drains_three_real_sleep_jobs_in_one_invocation(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """End-to-end with real subprocesses: 3 x 1.0s sleeps, bound 3.
+
+    Serial consumption would need >= 3.0s; the drain loop must finish them all
+    in a single invocation and visibly in parallel (< 2.5s wall clock).
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    paths = [
+        _queued_stub_job(
+            queue_dir,
+            module.LOG_DIR,
+            f"real-sleep-{i}",
+            interpreter=sys.executable,
+            script_path="-c",
+            args=["import time; time.sleep(1.0)"],
+            queued_at=f"2026-07-20T00:00:0{i}Z",
+        )
+        for i in range(3)
+    ]
+
+    started = time.monotonic()
+    assert module.run_loop(SimpleNamespace(max_parallel=3)) == 0
+    elapsed = time.monotonic() - started
+
+    for path in paths:
+        job = json.loads(path.read_text())
+        assert job["status"] == "completed", job
+        assert job["exit_code"] == 0
+    assert elapsed < 2.5, f"drain was not parallel: took {elapsed:.2f}s for 3x1.0s sleeps"
+
+
+def test_run_loop_second_instance_exits_immediately_while_lock_held(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    """The launchd */15 tick is restart insurance: it must lose the flock and
+    exit at once while a drain loop is alive, leaving the queue untouched.
+
+    flock conflicts between two open file descriptions behave identically in
+    one process and across processes, so holding the lock on a separate fd is a
+    faithful stand-in for the live drain loop.
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    job_path = _queued_stub_job(queue_dir, module.LOG_DIR, "untouched")
+
+    holder = module.LOCK_FILE.open("a+", encoding="utf-8")
+    try:
+        fcntl.flock(holder.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        rc = module.run_loop(SimpleNamespace(max_parallel=1))
+    finally:
+        fcntl.flock(holder.fileno(), fcntl.LOCK_UN)
+        holder.close()
+
+    assert rc == 0
+    out = capsys.readouterr().out
+    assert "worker already running (lock held); skip" in out
+    assert "drain-loop: start" not in out
+    assert json.loads(job_path.read_text())["status"] == "queued"
+
+
+def test_claim_job_is_atomic_second_claimer_refused(tmp_path: Path, monkeypatch) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _queued_stub_job(queue_dir, module.LOG_DIR, "claim-me")
+
+    first = module._claim_job(path, context="test-claim")
+    assert first is not None
+    assert first["status"] == "running"
+    assert json.loads(path.read_text())["status"] == "running"
+
+    assert module._claim_job(path, context="test-claim") is None
+
+
+def test_resolve_max_parallel_prefers_cli_then_config_then_default(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    cfg_dir = tmp_path / "config"
+    cfg_dir.mkdir()
+    cfg = cfg_dir / "runtime_schedules.json"
+    cfg.write_text(json.dumps(
+        {"cron_jobs": [{"id": "volpred-compute-worker", "max_parallel": 2}]}
+    ), encoding="utf-8")
+
+    assert module._resolve_max_parallel(5) == 5  # CLI beats config
+    assert module._resolve_max_parallel(None) == 2  # config beats default
+
+    cfg.write_text(json.dumps({"cron_jobs": []}), encoding="utf-8")
+    assert module._resolve_max_parallel(None) == module.DRAIN_MAX_PARALLEL_DEFAULT
+
+
 def test_compute_queue_has_no_silent_fallback_audit_findings() -> None:
     findings = audit_silent_fallbacks.audit_file(Path(module.__file__))
 
@@ -132,6 +304,140 @@ def test_enqueue_normalizes_and_deduplicates_explicit_output_paths(
     job = json.loads((queue_dir / "owned-output-job.json").read_text())
 
     assert job["output_paths"] == ["results/a.json", "results/b.png"]
+
+
+def test_enqueue_links_source_task_to_in_progress(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A queued job must not leave its pool task looking undispatched.
+
+    2026-07-19: assign_98a32740 / assign_1238781f each had a queued job yet
+    stayed `pending`, so the urgency lane re-surfaced them every fire and the
+    next dispatch nearly enqueued duplicate agents.
+    """
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(json.dumps([{"id": "assign_x", "status": "pending", "result": None}]))
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+
+    assert module.enqueue(_enqueue_args(source_task_id="assign_x")) == 0
+
+    job = json.loads((queue_dir / "owned-output-job.json").read_text())
+    assert job["source_task_id"] == "assign_x"
+
+    task = json.loads(pool.read_text())[0]
+    assert task["status"] == "in_progress"
+    assert task["compute_job_id"] == "owned-output-job"
+    assert "owned-output-job" in task["result"]
+
+
+def test_enqueue_agent_forwards_source_task_id(tmp_path: Path, monkeypatch) -> None:
+    """enqueue_agent rebuilds args into a fresh Namespace, dropping anything
+    it does not name explicitly.
+
+    A missing forward fails silently — the job still gets created, only the
+    link is lost, which is precisely the bug this field exists to prevent.
+    """
+    _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    monkeypatch.setattr(module, "AGENT_BRIEF_DIR", tmp_path / "briefs")
+    monkeypatch.setattr(module, "is_registered_linked_worktree", lambda *_a, **_k: True)
+    monkeypatch.setattr(module, "_find_task_dispatch_collision", lambda **_k: None)
+
+    brief = tmp_path / "brief.md"
+    brief.write_text("do the thing")
+    workdir = tmp_path / "wt"
+    workdir.mkdir()
+
+    captured: dict = {}
+    monkeypatch.setattr(module, "enqueue", lambda inner: captured.update(vars(inner)) or 0)
+
+    args = SimpleNamespace(
+        id="agent-job",
+        title=None,
+        brief_file=str(brief),
+        model="claude-opus-4-8",
+        effort="xhigh",
+        cwd=str(workdir),
+        result_artifact=None,
+        followup_brief=None,
+        followup_task_type=None,
+        followup_priority=None,
+        timeout=None,
+        timeout_parent_job_id=None,
+        split_stage=None,
+        source_task_id="assign_y",
+    )
+    assert module.enqueue_agent(args) == 0
+    assert captured["source_task_id"] == "assign_y"
+
+
+def test_enqueue_agent_blocks_task_id_on_another_unmerged_worktree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """The K741 incident: a second worktree must not receive the same pool task."""
+    canonical = tmp_path / "canonical"
+    canonical.mkdir()
+    _git(canonical, "init", "-b", "main")
+    _git(canonical, "config", "user.email", "t@t")
+    _git(canonical, "config", "user.name", "t")
+    (canonical / "seed.txt").write_text("seed", encoding="utf-8")
+    _git(canonical, "add", "seed.txt")
+    _git(canonical, "commit", "-m", "seed")
+
+    existing = tmp_path / "existing-worktree"
+    target = tmp_path / "second-worktree"
+    _git(canonical, "worktree", "add", "-b", "first-task-branch", str(existing))
+    (existing / "result.txt").write_text("first implementation", encoding="utf-8")
+    _git(existing, "add", "result.txt")
+    _git(existing, "commit", "-m", "[agent] implement assign_1238781f")
+    _git(canonical, "worktree", "add", "-b", "duplicate-task-branch", str(target), "main")
+
+    queue_dir = _patch_queue_paths(canonical, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", canonical)
+    monkeypatch.setattr(module, "QUEUE_ROOT", canonical)
+    monkeypatch.setattr(module, "AGENT_BRIEF_DIR", canonical / "briefs")
+    monkeypatch.setattr(module, "AGENT_JOB_DIR", canonical / "agent_jobs")
+    brief = canonical / "brief.md"
+    brief.write_text("duplicate dispatch", encoding="utf-8")
+    args = SimpleNamespace(
+        id="duplicate-agent-job",
+        title=None,
+        brief_file=str(brief),
+        model="claude-opus-4-8",
+        effort="xhigh",
+        cwd=str(target),
+        result_artifact=None,
+        followup_brief=None,
+        followup_task_type=None,
+        followup_priority=None,
+        timeout=None,
+        timeout_parent_job_id=None,
+        split_stage=None,
+        source_task_id="assign_1238781f",
+    )
+
+    assert module.enqueue_agent(args) == 2
+    err = capsys.readouterr().err
+    assert "task-id collision" in err
+    assert str(existing) in err
+    assert "first-task-branch" in err
+    assert not (queue_dir / "duplicate-agent-job.json").exists()
+    assert not (canonical / "briefs/duplicate-agent-job.md").exists()
+
+    # Historical task commits on canonical HEAD are not live collisions.
+    _git(canonical, "merge", "--no-ff", "first-task-branch", "-m", "merge first task")
+    assert module._find_task_dispatch_collision(
+        repo_root=canonical,
+        task_id="assign_1238781f",
+        target_workdir=target,
+    ) is None
 
 
 def _queued_job(queue_dir: Path, log_dir: Path, *, artifact: Path | None) -> Path:
@@ -314,10 +620,17 @@ def test_pending_followup_distinguishes_completed_collection_and_failed_agent_tr
     payload = json.loads(capsys.readouterr().out)
     assert [(row["id"], row["followup_mode"]) for row in payload] == [
         ("completed-agent", "collect_completed"),
+        # No worktree is not the same as nothing to act on: a failed compute job
+        # has no cwd by construction, and an agent job that ran in the main repo
+        # resolves to none. Both still carry the enqueuer's followup brief and a
+        # source task waiting on it, so both get triaged rather than dropped.
+        # (Ordering is by queue filename, where '-' sorts before '.'.)
+        ("failed-agent-main", "triage_failed"),
         ("failed-agent", "split_required"),
+        ("failed-compute", "triage_failed"),
         ("timeout-compute", "split_required"),
     ]
-    failed = payload[1]
+    failed = payload[2]
     assert failed["claude_followup"]["task_type"] == "platform_ops"
     assert failed["claude_followup"]["priority"] == 1
     assert "SPLIT REQUIRED" in failed["claude_followup"]["brief"]
@@ -396,6 +709,74 @@ def test_pending_followup_triages_legacy_failed_agent_with_cwd_arg(
     assert payload[0]["claude_followup"]["priority"] == 2
 
 
+def test_pending_followup_surfaces_gate_failed_compute_job_with_source_task(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A compute job that fails its experiment gate must reach a human.
+
+    k1730_armA_production_run_20260721 ran to completion (process_exit_code=0),
+    failed the nested-dm-misuse gate, and was then dropped by the collector
+    because it had no worktree. Its source task k1731_F3_armA_production_recheck
+    sat pending for 62.9h with `result: awaiting PHASE A collection` — a wait
+    that could never end. Nineteen other receipts were in the same hole.
+    """
+    _patch_queue_paths(tmp_path, monkeypatch)
+    job = {
+        "id": "k1730-armA-production",
+        "status": "failed",
+        "kind": "compute",
+        "cwd": None,
+        "script_path": "experiments/k1730/k1730_gevreg_midas_ssvs.py",
+        "exit_code": 4,
+        "process_exit_code": 0,
+        "failure_reason": "experiment_gate_failed",
+        "experiment_gate": {"status": "failed", "report": "[gate] FAIL — nested-dm-misuse"},
+        "source_task_id": "k1731_F3_armA_production_recheck",
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "recheck arm A numbers", "task_type": "experiment", "priority": 2},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None, "gate-failed compute job was dropped instead of triaged"
+    assert view["followup_mode"] == "triage_failed"
+    brief = view["claude_followup"]["brief"]
+    assert "nested-dm-misuse" in brief, "the gate violation must travel with the triage"
+    assert "UNCERTIFIED" in brief, "must not read as 'the run produced nothing'"
+    assert "recheck arm A numbers" in brief, "the enqueuer's original followup must survive"
+
+
+def test_pending_followup_surfaces_legacy_script_job_without_kind_or_cwd() -> None:
+    """Pre-kind script receipts must not disappear because they lack a worktree."""
+    job = {
+        "id": "compute_k1602",
+        "status": "failed",
+        "script_path": "experiments/k1602/k1602.py",
+        "exit_code": 1,
+        "stdout_file": "storage/logs/compute/compute_k1602.stdout",
+        "stderr_file": "storage/logs/compute/compute_k1602.stderr",
+        "result_artifact": "experiments/k1602/k1602_results.json",
+        "followup_dispatched": False,
+        "claude_followup": {
+            "brief": "Interpret K1602 after validating the result artifact.",
+            "task_type": "experiment",
+            "priority": 3,
+        },
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert view["followup_mode"] == "triage_failed"
+    assert view["claude_followup"]["task_type"] == "platform_ops"
+    brief = view["claude_followup"]["brief"]
+    assert job["stdout_file"] in brief
+    assert job["stderr_file"] in brief
+    assert job["result_artifact"] in brief
+    assert "Interpret K1602" in brief
+
+
 def test_pending_followup_detects_agent_inner_timeout_from_runner_metadata(
     tmp_path: Path,
     monkeypatch,
@@ -420,6 +801,44 @@ def test_pending_followup_detects_agent_inner_timeout_from_runner_metadata(
     assert view is not None
     assert view["followup_mode"] == "split_required"
     assert view["split_contract"]["child_timeout_lt_seconds"] == 5400
+
+
+def test_pending_followup_routes_successful_agent_artifact_contract_mismatch(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    expected = tmp_path / "wt/experiments/k1729/results.json"
+    near_miss = tmp_path / "wt/experiments/k1729/k1729_results.json"
+    metadata = tmp_path / "agent-metadata.json"
+    metadata.write_text(json.dumps({
+        "exit_code": 0,
+        "timed_out": False,
+        "runner_exit_code": 1,
+        "result_artifact": str(expected),
+        "result_artifact_exists": False,
+        "result_artifact_near_misses": [str(near_miss)],
+    }), encoding="utf-8")
+    job = {
+        "id": "agent-k1729",
+        "status": "failed",
+        "kind": "agent",
+        "cwd": str(tmp_path / "wt"),
+        "job_metadata": str(metadata),
+        "result_artifact": str(expected),
+        "exit_code": 1,
+        "followup_dispatched": False,
+        "claude_followup": {"brief": "collect K1729", "priority": 1},
+    }
+
+    view = module._pending_followup_view(job)
+
+    assert view is not None
+    assert view["followup_mode"] == "artifact_contract_mismatch"
+    brief = view["claude_followup"]["brief"]
+    assert str(near_miss) in brief
+    assert "Do NOT re-enqueue" in brief
+    assert "collect K1729" in brief
 
 
 def test_legacy_completed_only_filter_does_not_return_failed_agent(
@@ -456,6 +875,7 @@ def test_hourly_prompt_routes_both_followup_modes() -> None:
     assert "list --pending-followup --json" in prompt
     assert "collect_completed" in prompt
     assert "split_required" in prompt
+    assert "artifact_contract_mismatch" in prompt
     assert "triage_failed" in prompt
     assert "不得把 failed job 或殘留 artifact 當成功結果" in prompt
 
@@ -583,3 +1003,289 @@ def test_unreadable_verdict_warns_instead_of_silently_skipping(tmp_path: Path, m
     assert view is not None
     assert "possibly_superseded" not in view
     assert "review_verdict unreadable" in capsys.readouterr().err
+
+
+def test_review_verdict_unfilled_rejects_scaffold(tmp_path: Path) -> None:
+    """k528 2026-07-19: a pre-generated verdict template with FILL: placeholders
+    passed the existence-only postcondition and the review job went completed.
+    Content validation must reject scaffolds and non-adjudications."""
+    p = tmp_path / "review_verdict.json"
+    p.write_text(json.dumps({
+        "kid": "k528",
+        "verdict": "FILL: PASS or FAIL",
+        "reviewer": "FILL: model / effort",
+        "blocking_defects": ["FILL: one entry per defect"],
+        "reviewed_sha256": {"a.py": "deadbeef"},
+    }))
+    problems = module._review_verdict_unfilled(p)
+    assert any("verdict=" in x for x in problems)
+    assert any(x.startswith("reviewer") for x in problems)
+    assert any(x.startswith("blocking_defects") for x in problems)
+
+    p.write_text(json.dumps({
+        "kid": "k528", "verdict": "FAIL", "reviewer": "codex",
+        "blocking_defects": ["real defect"],
+    }))
+    assert module._review_verdict_unfilled(p) == []
+
+    p.write_text("not json {")
+    assert module._review_verdict_unfilled(p)
+
+
+# ---------------------------------------------------------------------------
+# D6b: stale-running reaper + worker_killed requeue
+# ---------------------------------------------------------------------------
+
+def _running_stub_job(
+    queue_dir: Path,
+    log_dir: Path,
+    job_id: str,
+    *,
+    pid: int | None,
+    start_wall: str | None = None,
+    kind: str = "compute",
+) -> Path:
+    """A receipt exactly as a killed worker would leave it: status=running."""
+    path = queue_dir / f"{job_id}.json"
+    path.write_text(
+        json.dumps(
+            {
+                "id": job_id,
+                "status": "running",
+                "title": job_id,
+                "kind": kind,
+                "queued_at": "2026-07-20T00:00:00Z",
+                "started_at": "2026-07-20T00:05:00Z",
+                "script_path": "sleep.py",
+                "interpreter": "python",
+                "args": [],
+                "env": {},
+                "stdout_file": str(log_dir / f"{job_id}.stdout"),
+                "stderr_file": str(log_dir / f"{job_id}.stderr"),
+                "result_artifact": None,
+                "timeout_seconds": 30,
+                "claimed_by_pid": pid,
+                "claimed_by_pid_start_wall": start_wall,
+            }
+        ),
+        encoding="utf-8",
+    )
+    return path
+
+
+def _dead_pid() -> int:
+    """A pid that is confirmed gone: spawn, exit, wait (reaped by us)."""
+    proc = subprocess.Popen([sys.executable, "-c", "pass"])
+    proc.wait()
+    return proc.pid
+
+
+def test_reaper_finalizes_running_receipt_with_dead_pid(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """2026-07-20 incident shape: drain loop SIGTERM'd, claimed receipt stuck at
+    running with a dead claimer pid. Worker start must finalize it to
+    failed/worker_killed so triage and requeue can own the retry."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _running_stub_job(
+        queue_dir, module.LOG_DIR, "orphan-dead-pid",
+        pid=_dead_pid(), start_wall="Mon Jan  1 00:00:00 2001",
+    )
+
+    assert module.run_next(SimpleNamespace()) == 0
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "failed"
+    assert job["failure_reason"] == "worker_killed"
+    assert job["exit_code"] == module.WORKER_KILLED_EXIT_CODE
+    assert job["completed_at"]
+    assert "confirmed gone" in job["reap"]["evidence"]
+    assert job["reap"]["orphaned_started_at"] == "2026-07-20T00:05:00Z"
+    assert "reaped: orphan-dead-pid" in capsys.readouterr().out
+    stderr_text = Path(job["stderr_file"]).read_text(encoding="utf-8")
+    assert "[WORKER_KILLED]" in stderr_text
+
+
+def test_reaper_flock_verdict_reaps_receipt_without_pid(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Receipt with no claimed_by_pid (pre-D6 claim path): holding the worker
+    flock is itself proof no live worker owns the claim -> reap."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _running_stub_job(queue_dir, module.LOG_DIR, "orphan-no-pid", pid=None)
+
+    assert module.run_loop(SimpleNamespace(max_parallel=1)) == 0
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "failed"
+    assert job["failure_reason"] == "worker_killed"
+    assert "no claimed_by_pid" in job["reap"]["evidence"]
+
+
+def test_reaper_spares_live_claimer_with_matching_fingerprint(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A live pid whose lstart fingerprint matches the receipt must NEVER be
+    reaped, whatever the flock says — never finalize work we cannot explain."""
+    from scripts.dispatch_supervisor import procutil
+
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    proc = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        fingerprint = procutil.get_process_start_wall(proc.pid)
+        assert fingerprint and fingerprint is not procutil.PROBE_FAILED
+        path = _running_stub_job(
+            queue_dir, module.LOG_DIR, "live-claimer",
+            pid=proc.pid, start_wall=fingerprint,
+        )
+
+        assert module.run_next(SimpleNamespace()) == 0
+
+        assert json.loads(path.read_text())["status"] == "running"
+    finally:
+        proc.kill()
+        proc.wait()
+
+
+def test_reaper_reaps_recycled_pid_on_fingerprint_mismatch(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Alive pid + differing fingerprint = the number was recycled by an
+    unrelated process; the claimer itself is dead -> reap."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    proc = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(30)"])
+    try:
+        path = _running_stub_job(
+            queue_dir, module.LOG_DIR, "recycled-pid",
+            pid=proc.pid, start_wall="Wed Jan  1 00:00:00 1997",
+        )
+
+        assert module.run_next(SimpleNamespace()) == 0
+
+        job = json.loads(path.read_text())
+        assert job["status"] == "failed"
+        assert job["failure_reason"] == "worker_killed"
+        assert "pid recycled" in job["reap"]["evidence"]
+    finally:
+        proc.kill()
+        proc.wait()
+
+
+def test_reaper_skips_dead_claimer_with_live_orphaned_children(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    """Dead worker whose process group still holds live members: the job's
+    computation may still be executing, so the reaper must wait it out."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    dead = _dead_pid()
+    path = _running_stub_job(queue_dir, module.LOG_DIR, "dead-with-children", pid=dead)
+    monkeypatch.setattr(
+        module.procutil, "pgid_members_checked", lambda pgid: [4242] if pgid == dead else []
+    )
+
+    assert module.run_next(SimpleNamespace()) == 0
+
+    assert json.loads(path.read_text())["status"] == "running"
+    assert "reaped:" not in capsys.readouterr().out
+
+
+def test_requeue_accepts_worker_killed_and_clears_verdict(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = queue_dir / "reaped-job.json"
+    path.write_text(json.dumps({
+        "id": "reaped-job",
+        "status": "failed",
+        "kind": "agent",
+        "queued_at": "2026-07-20T00:00:00Z",
+        "started_at": "2026-07-20T00:05:00Z",
+        "completed_at": "2026-07-20T01:00:00Z",
+        "exit_code": module.WORKER_KILLED_EXIT_CODE,
+        "failure_reason": "worker_killed",
+        "followup_dispatched": False,
+        "claimed_by_pid": 4242,
+        "claimed_by_pid_start_wall": "Mon Jan  1 00:00:00 2001",
+        "reap": {"at": "2026-07-20T01:00:00Z", "evidence": "test"},
+    }))
+
+    assert module.requeue(SimpleNamespace(id="reaped-job")) == 0
+    assert "requeued: reaped-job" in capsys.readouterr().out
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "queued"
+    assert job["failure_reason"] is None
+    assert job["claimed_by_pid"] is None
+    assert job["claimed_by_pid_start_wall"] is None
+    assert job["started_at"] is None
+    assert job["exit_code"] is None
+    history = job["requeue_history"]
+    assert history[-1]["reason"] == "manual:worker_killed"
+    assert history[-1]["failure_reason"] == "worker_killed"
+
+    # The cleared verdict must not let a LATER unrelated failure ride the same
+    # gate: fail the job again with no admissible class and requeue must refuse.
+    job["status"] = "failed"
+    job["exit_code"] = 1
+    path.write_text(json.dumps(job))
+    assert module.requeue(SimpleNamespace(id="reaped-job")) == 2
+    assert "cannot requeue" in capsys.readouterr().err
+
+
+def test_requeue_still_refuses_non_admissible_failures(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = queue_dir / "hard-fail.json"
+    path.write_text(json.dumps({
+        "id": "hard-fail",
+        "status": "failed",
+        "kind": "agent",
+        "exit_code": 1,
+        "failure_reason": "result_artifact_missing",
+        "followup_dispatched": False,
+    }))
+
+    assert module.requeue(SimpleNamespace(id="hard-fail")) == 2
+    err = capsys.readouterr().err
+    assert "cannot requeue" in err
+    assert json.loads(path.read_text())["status"] == "failed"
+
+
+def _git(cwd: Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=cwd, check=True, capture_output=True)
+
+
+def test_canonical_root_reanchors_queue_when_script_lives_in_a_worktree(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """A worktree-anchored queue is read by no worker, so enqueue there is silent loss.
+
+    K1698's round-5 Codex review was enqueued from inside a worktree on 2026-07-20 and
+    never ran: the job file landed in the worktree's own storage/ops/compute_queue.
+    """
+    canonical = tmp_path / "canonical"
+    canonical.mkdir()
+    _git(canonical, "init", "-b", "main")
+    _git(canonical, "config", "user.email", "t@t")
+    _git(canonical, "config", "user.name", "t")
+    (canonical / "seed.txt").write_text("seed", encoding="utf-8")
+    _git(canonical, "add", "seed.txt")
+    _git(canonical, "commit", "-m", "seed")
+
+    worktree = tmp_path / "wt"
+    _git(canonical, "worktree", "add", str(worktree), "-b", "side")
+    assert (worktree / ".git").is_file()  # linked worktrees carry a .git *file*
+
+    monkeypatch.setattr(module, "ROOT", worktree)
+    assert module._canonical_root() == canonical.resolve()
+
+    monkeypatch.setattr(module, "ROOT", canonical)
+    assert module._canonical_root() == canonical

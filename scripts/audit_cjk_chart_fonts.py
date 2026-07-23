@@ -54,7 +54,17 @@ CJK_FACES = (
 )
 
 MPL_MARKERS = ("matplotlib", "pyplot")
-STYLE_HELPERS = ("apply_cjk_style", "apply_article_style", "setup_cjk")
+# Helpers that set a CJK font chain themselves; calling one clears the gate.
+# `_setup_style` is volpred.charts.article_charts' style entry point — it was
+# missing here until 2026-07-20, so every chart script written against the
+# canonical charts module was flagged as tofu-prone even though it was fine
+# (digest29 turned CI red on exactly this). Dropped the same day:
+# `apply_article_style` / `setup_cjk`, which had no definition and no caller
+# anywhere — since the check is static, naming a nonexistent helper cleared the
+# gate just as well as a real one. test_every_style_helper_actually_sets_a_cjk_
+# font_chain keeps this tuple honest: a name may only be listed if its
+# definition really establishes the chain.
+STYLE_HELPERS = ("apply_cjk_style", "_setup_style")
 
 # Calls whose text argument is rendered into the figure (→ tofu without a font).
 TEXT_CALLS = {

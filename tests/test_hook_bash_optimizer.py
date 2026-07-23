@@ -28,6 +28,19 @@ def _run_pretooluse(command: str, *, hook_root: str | None = None) -> dict:
     return json.loads(result.stdout)
 
 
+def _run_compact_test(command: str, tmp_path: Path) -> subprocess.CompletedProcess[str]:
+    env = os.environ.copy()
+    env["VOLPRED_HOOK_ROOT"] = str(tmp_path)
+    return subprocess.run(
+        ["/bin/bash", str(COMPACT_SCRIPT), "test", command],
+        capture_output=True,
+        text=True,
+        check=False,
+        env=env,
+        cwd=REPO_ROOT,
+    )
+
+
 def test_pretooluse_rewrites_git_status_to_compact_runner(tmp_path: Path):
     result = _run_pretooluse("git status --short --branch", hook_root=str(tmp_path))
 
@@ -111,3 +124,36 @@ def test_run_compact_bash_tail_log_keeps_only_last_lines(tmp_path: Path):
     assert "\n120\n" in result.stdout
     assert "\n80\n" not in result.stdout
     assert "Full log:" in result.stdout
+
+
+def test_run_compact_bash_missing_pytest_path_is_not_false_green(tmp_path: Path):
+    result = _run_compact_test(
+        "uv run python -m pytest tests/definitely_does_not_exist.py -q | tail -20",
+        tmp_path,
+    )
+
+    assert result.returncode != 0
+    assert "Tests FAILED — pytest collected no tests." in result.stdout
+    assert "ERROR: file or directory not found" in result.stdout
+    assert "Tests passed" not in result.stdout
+
+
+def test_run_compact_bash_zero_selected_tests_is_not_success(tmp_path: Path):
+    result = _run_compact_test(
+        "uv run python -m pytest -q -k definitely_no_such_test "
+        "tests/test_hook_bash_optimizer.py | tail -20",
+        tmp_path,
+    )
+
+    assert result.returncode != 0
+    assert "Tests FAILED — pytest collected no tests." in result.stdout
+    assert "deselected" in result.stdout
+    assert "Tests passed" not in result.stdout
+
+
+def test_run_compact_bash_still_accepts_positive_pytest_summary(tmp_path: Path):
+    result = _run_compact_test("printf '2 passed in 0.01s\\n' | tail -1", tmp_path)
+
+    assert result.returncode == 0
+    assert "Tests passed." in result.stdout
+    assert "2 passed in 0.01s" in result.stdout

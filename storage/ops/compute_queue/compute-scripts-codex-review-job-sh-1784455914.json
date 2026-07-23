@@ -1,0 +1,50 @@
+{
+  "id": "compute-scripts-codex-review-job-sh-1784455914",
+  "title": "scripts/codex_review_job.sh",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1623_rev2_prompt.md",
+    "storage/ops/codex_reviews/k1623_rev2_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-19T10:11:54Z",
+  "started_at": "2026-07-19T15:00:05Z",
+  "completed_at": "2026-07-19T15:07:17Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-scripts-codex-review-job-sh-1784455914.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-scripts-codex-review-job-sh-1784455914.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1623_rev2_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1623_rev2_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 K1623 rev2 Codex round-2 裁決（verdict 檔第一行是 VERDICT: PASS/CONDITIONAL PASS/FAIL）。(1) PASS 或 CONDITIONAL PASS 且改完最小集合 → 填 .claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/review_verdict.json 的 verdict/reviewer/reviewed_at/review_artifact 欄位（sha256 由 experiment_gates.py verdict-template 機器產生，禁手改；若期間改過任何 claim-surface 檔案必須重跑 template 並重審）→ bash scripts/merge_worktree.sh dispatch-slot-2-c5cafe39-k1623 → 主線程（非 agent，K1259）寫 knowledge.json → 把 loss-reversal（同一組預測 QLIKE 選 HAR、MSE 選 ARFIMA，3/5 資產排序反轉，但兩者統計上無法區分）排進 daily_article。(2) FAIL → 依 blocking issues 開 bounded remediation，禁原樣重派，禁合併 worktree。(3) 任一情況都要 complete task k1623_rev2_codex_round2 與 assign_5aa9d5f5。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "da6a5b6ab62dca85646d86947dff1bc480d8d7f4",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1623_rev2_verdict.md"
+  ],
+  "delivered_at": "2026-07-19T16:01:05.249467+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-19T20:11:21Z",
+  "followup_next_task_id": "agent-brief_k1623_rev3_remediation-053de5"
+}

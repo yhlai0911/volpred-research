@@ -1,0 +1,26 @@
+{
+  "fetched_at_utc": "2026-07-21T03:17:51.868877+00:00",
+  "exchange": "Binance USDS-M Futures (perpetual)",
+  "symbol": "BTCUSDT",
+  "requested_start": "2020-01-01",
+  "funding_rate": {
+    "endpoint": "https://fapi.binance.com/fapi/v1/fundingRate",
+    "file": "experiments/k1436/data/btc_funding_rate_8h.csv",
+    "n_rows": 7180,
+    "period": [
+      "2020-01-01 00:00:00+00:00",
+      "2026-07-21 00:00:00.001000+00:00"
+    ],
+    "settlement_frequency": "8h (00:00 / 08:00 / 16:00 UTC)"
+  },
+  "klines_5m": {
+    "endpoint": "https://fapi.binance.com/fapi/v1/klines",
+    "file": "experiments/k1436/data/btcusdt_5m.csv",
+    "interval": "5m",
+    "n_rows": 689225,
+    "period": [
+      "2020-01-01 00:00:00+00:00",
+      "2026-07-21 03:20:00+00:00"
+    ]
+  }
+}

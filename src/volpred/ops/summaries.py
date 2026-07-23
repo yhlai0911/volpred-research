@@ -17,7 +17,6 @@ from .content import build_platform_cycle_summary
 from .health import health_snapshot
 from .local_control_plane import build_control_plane_snapshot
 from .questions import get_member_question_ranking_summary
-from .scheduler import get_scheduler_state, scheduler_preview
 from .schedules import build_schedule_report
 
 
@@ -39,18 +38,6 @@ def _warn_ops_summaries(message: str, path: Path, exc: Exception) -> None:
         f"path={_display_path(path)} error={type(exc).__name__}: {exc}",
         file=sys.stderr,
     )
-
-
-def _compact_decision(decision: dict[str, Any] | None) -> dict[str, Any] | None:
-    if not isinstance(decision, dict) or not decision:
-        return None
-    return {
-        "task_id": decision.get("task_id"),
-        "title": decision.get("title"),
-        "agent": decision.get("agent"),
-        "mode": decision.get("mode"),
-        "brief_status": decision.get("brief_status"),
-    }
 
 
 def _extract_breached_alerts(alert_report: dict[str, Any]) -> list[dict[str, Any]]:
@@ -172,35 +159,24 @@ def _runtime_idle_policy() -> dict[str, Any]:
 
 
 def build_queue_summary(storage_dir: str = "storage") -> dict[str, Any]:
+    # 2026-07-20 ops-master D2: the advisory shared-scheduler lane (preview /
+    # tick / scheduler_state.json) is retired; this summary now reads only the
+    # control-plane receipts snapshot. `storage/ops/tasks/` is receipts-only
+    # (single-gateway refactor), so `queued` here counts receipt anomalies, not
+    # the live pending pool (`storage/next_tasks.json`).
     snapshot = build_control_plane_snapshot(storage_dir=storage_dir)
-    preview = scheduler_preview(storage_dir=storage_dir)
     task_counts = snapshot.get("task_counts") if isinstance(snapshot.get("task_counts"), dict) else {}
     brief_counts = (
         snapshot.get("brief_status_counts")
         if isinstance(snapshot.get("brief_status_counts"), dict)
         else {}
     )
-    scheduler = snapshot.get("scheduler") if isinstance(snapshot.get("scheduler"), dict) else {}
     agents = snapshot.get("agents") if isinstance(snapshot.get("agents"), list) else []
     active_agents = [
         str(agent.get("session_key") or agent.get("agent") or "unknown")
         for agent in agents
         if str(agent.get("status") or "offline") != "offline"
     ]
-    queue_head: list[dict[str, Any]] = []
-    for row in (preview.get("queue_snapshot") or [])[:3]:
-        if not isinstance(row, dict):
-            continue
-        queue_head.append(
-            {
-                "task_id": row.get("task_id"),
-                "title": row.get("title"),
-                "target_agent": row.get("target_agent"),
-                "brief_status": row.get("brief_status"),
-                "runnable": row.get("runnable"),
-                "blocked_reason": row.get("blocked_reason"),
-            }
-        )
     return {
         "generated_at": _generated_at(),
         "queued": int(task_counts.get("queued", 0) or 0),
@@ -213,16 +189,13 @@ def build_queue_summary(storage_dir: str = "storage") -> dict[str, Any]:
         "pending_user_tasks": int(snapshot.get("pending_user_tasks", 0) or 0),
         "discovery_allowed": bool(snapshot.get("discovery_allowed")),
         "active_agents": active_agents,
-        "scheduler_last_tick_at": scheduler.get("last_tick_at"),
-        "scheduler_last_status": scheduler.get("last_status"),
-        "next_decision": _compact_decision(preview.get("decision")),
-        "queue_head": queue_head,
     }
 
 
 def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, Any]:
+    # 2026-07-20 ops-master D2: advisory scheduler_preview retired; the queue
+    # signal now comes straight from the control-plane receipts snapshot.
     snapshot = build_control_plane_snapshot(storage_dir=storage_dir)
-    preview = scheduler_preview(storage_dir=storage_dir)
     idle_policy = _runtime_idle_policy()
     agents = snapshot.get("agents") if isinstance(snapshot.get("agents"), list) else []
     busy_agents = [
@@ -231,22 +204,8 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         if str(agent.get("status") or "offline") == "busy"
     ]
     max_concurrent_agents = int(idle_policy.get("max_concurrent_agents", 4) or 4)
-    queued_count = int(preview.get("queued_count", 0) or 0)
-    next_decision = _compact_decision(preview.get("decision"))
-    queue_head = []
-    for row in (preview.get("queue_snapshot") or [])[:3]:
-        if not isinstance(row, dict):
-            continue
-        queue_head.append(
-            {
-                "task_id": row.get("task_id"),
-                "title": row.get("title"),
-                "target_agent": row.get("target_agent"),
-                "runnable": row.get("runnable"),
-                "blocked_reason": row.get("blocked_reason"),
-                "brief_status": row.get("brief_status"),
-            }
-        )
+    task_counts = snapshot.get("task_counts") if isinstance(snapshot.get("task_counts"), dict) else {}
+    queued_count = int(task_counts.get("queued", 0) or 0)
 
     # 2026-04-29 architectural fix: integrate alert breach state into
     # heartbeat output. Previously `queued_count==0` returned skip=no_work
@@ -271,33 +230,21 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         breached_alerts = _extract_breached_alerts(alert_report)
         critical_alert_count, warn_alert_count = _alert_breach_counts(breached_alerts)
         if remediation.get("attempted"):
-            preview = scheduler_preview(storage_dir=storage_dir)
-            queued_count = int(preview.get("queued_count", 0) or 0)
-            next_decision = _compact_decision(preview.get("decision"))
-            queue_head = []
-            for row in (preview.get("queue_snapshot") or [])[:3]:
-                if not isinstance(row, dict):
-                    continue
-                queue_head.append(
-                    {
-                        "task_id": row.get("task_id"),
-                        "title": row.get("title"),
-                        "target_agent": row.get("target_agent"),
-                        "runnable": row.get("runnable"),
-                        "blocked_reason": row.get("blocked_reason"),
-                        "brief_status": row.get("brief_status"),
-                    }
-                )
+            snapshot = build_control_plane_snapshot(storage_dir=storage_dir)
+            task_counts = (
+                snapshot.get("task_counts") if isinstance(snapshot.get("task_counts"), dict) else {}
+            )
+            queued_count = int(task_counts.get("queued", 0) or 0)
     has_actionable_alert = bool(breached_alerts)
 
     skip = False
     action = "review_next_task"
     reason = "dispatch_candidate"
-    if len(busy_agents) >= max_concurrent_agents and next_decision is None:
+    if len(busy_agents) >= max_concurrent_agents:
         skip = True
         action = "skip"
         reason = "slot_full"
-    elif has_actionable_alert and next_decision is None and queued_count == 0:
+    elif has_actionable_alert and queued_count == 0:
         # ALERT path: even with no formal queue work, breached alerts are
         # actionable (e.g. draft pool empty, release pool stalled). Do not
         # skip; LLM must inspect alerts and act.
@@ -306,11 +253,11 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         reason = (
             f"alert_breach_critical={critical_alert_count}_warn={warn_alert_count}"
         )
-    elif queued_count == 0 and next_decision is None:
+    elif queued_count == 0:
         skip = True
         action = "skip"
         reason = "no_work"
-    elif next_decision is None:
+    else:
         action = "inspect_queue"
         reason = "blocked_queue"
 
@@ -335,8 +282,6 @@ def build_continue_task_maintenance(storage_dir: str = "storage") -> dict[str, A
         "queued_count": queued_count,
         "pending_user_tasks": int(snapshot.get("pending_user_tasks", 0) or 0),
         "discovery_allowed": bool(snapshot.get("discovery_allowed")),
-        "next_decision": next_decision,
-        "queue_head": queue_head,
         "alerts": {
             "breach_count": len(breached_alerts),
             "critical_count": critical_alert_count,
@@ -397,15 +342,10 @@ def build_daily_planning_maintenance(
             "running": int(queue.get("running", 0) or 0),
             "pending_user_tasks": int(queue.get("pending_user_tasks", 0) or 0),
             "discovery_allowed": bool(queue.get("discovery_allowed")),
-            "next_decision": queue.get("next_decision"),
-            "queue_head": list(queue.get("queue_head") or [])[:3],
         },
         "scheduler": {
             "missing_system_task_count": int(scheduler.get("missing_system_task_count", 0) or 0),
             "missing_system_tasks": list(scheduler.get("missing_system_tasks") or [])[:5],
-            "queued_count": int(scheduler.get("queued_count", 0) or 0),
-            "last_tick_at": scheduler.get("scheduler_last_tick_at"),
-            "last_status": scheduler.get("scheduler_last_status"),
         },
         "platform_gate": {
             "skip": bool(platform.get("skip")),
@@ -426,16 +366,17 @@ def build_daily_planning_maintenance(
 
 
 def build_scheduler_summary(storage_dir: str = "storage") -> dict[str, Any]:
+    """Compact canonical-schedule snapshot (spec vs materialized system tasks).
+
+    2026-07-20 ops-master D2: the advisory shared-scheduler lane is retired;
+    this summary is now purely the schedule report (name kept for CLI compat).
+    """
+    _ = storage_dir  # schedule report reads canonical config, not storage
     report = build_schedule_report()
-    state = get_scheduler_state(storage_dir=storage_dir)
-    preview = scheduler_preview(storage_dir=storage_dir)
     matched = report.get("matched_system_tasks") if isinstance(report.get("matched_system_tasks"), list) else []
     missing = report.get("missing_system_tasks") if isinstance(report.get("missing_system_tasks"), list) else []
     return {
         "generated_at": _generated_at(),
-        "scheduler_last_tick_at": state.get("last_tick_at"),
-        "scheduler_last_status": state.get("last_status"),
-        "scheduler_last_reason": state.get("last_reason"),
         "expected_system_task_count": int(report.get("expected_system_task_count", 0) or 0),
         "matched_system_task_count": len(matched),
         "missing_system_task_count": len(missing),
@@ -444,8 +385,6 @@ def build_scheduler_summary(storage_dir: str = "storage") -> dict[str, Any]:
         "remote_trigger_count": int(report.get("remote_trigger_count", 0) or 0),
         "live_system_crontab_available": bool(report.get("live_system_crontab_available")),
         "live_system_crontab_count": int(report.get("live_system_crontab_count", 0) or 0),
-        "queued_count": int(preview.get("queued_count", 0) or 0),
-        "next_decision": _compact_decision(preview.get("decision")),
     }
 
 
@@ -1724,22 +1663,13 @@ def build_platform_patrol_summary(
         "alert_breach_count": int(alerts.get("breach_count", 0) or 0),
         "breached_alerts": breached_conditions,
         "scheduler": {
-            "last_tick_at": scheduler.get("scheduler_last_tick_at"),
-            "last_status": scheduler.get("scheduler_last_status"),
-            "last_reason": scheduler.get("scheduler_last_reason"),
             "missing_system_task_count": scheduler.get("missing_system_task_count"),
-            "queued_count": scheduler.get("queued_count"),
         },
         "health": {
             "failed_supabase_syncs": health.get("failed_supabase_syncs"),
             "open_questions": health.get("open_questions"),
             "event_ledger_entries": health.get("event_ledger_entries"),
             "rollback_points": health.get("rollback_points"),
-            "agent_cli_health": (
-                health.get("agent_cli_health", {}).get("status")
-                if isinstance(health.get("agent_cli_health"), dict)
-                else None
-            ),
         },
         "suggestions": list(cycle.get("suggestions") or [])[:3],
         "detail_hints": {

@@ -1,7 +1,7 @@
 {
-  "date": "2026-07-19",
+  "date": "2026-07-23",
   "scanned": true,
-  "scanned_at": "2026-07-18T22:00:22+00:00",
+  "scanned_at": "2026-07-22T22:00:05+00:00",
   "trending_added": 1,
   "event_added": 0,
   "member_qa_added": 0,
@@ -73,7 +73,9 @@
     },
     {
       "id": "fomc-2026-07-29-t7",
-      "reason": "pending"
+      "reason": "already_materialized",
+      "next_task_id": "event_article_fomc_2026-07-29_tminus7",
+      "queue_updated": false
     },
     {
       "id": "fomc-2026-07-29-t2",
@@ -94,7 +96,7 @@
   ],
   "member_qa_result": {
     "created": false,
-    "reason": "task_already_exists",
-    "task_id": "member_qa_3e258ba2_evaluate"
+    "reason": "no_pending_member_qa_work",
+    "gated_min_age": 0
   }
 }

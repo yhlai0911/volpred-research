@@ -20,6 +20,7 @@ paths:
   - Forward-label target（例如 `fwd_*`, 未來 H 日 RV/variance/return）不可只檢查 feature lag；OOS/expanding/rolling refit 的訓練列必須滿足 `target_end < forecast_origin`，等價於 row `j` 的 label window `j + H < i`，否則訓練尾端會看見預測日或之後的 realized return。
   - 多 horizon forward-label 實驗不可共用同一個 DM/HAC/HLN horizon；每個 target 的 inference horizon 必須等於該 target 的 H。
 - 所有隨機程序都要固定 seed。
+- **K 編號一律先 `uv run python scripts/kid_reserve.py reserve --owner <who> --topic '<topic>'` 取號，禁止掃 experiments/ 取 max+1**（K1719 與 k1732 兩次撞號教訓）。Enforcement owner = `experiment_gates.py` certify 的 `kid-registry` gate（K1719 起的數字 kid 無 registry 預留 → 擋 merge）；撞號修復用 `kid_reserve.py reassign`。
 - 策略與風險管理比較遵守 `research_program.md` 的公平比較、VaR+ES、Harvey / Patton 規則。
 - Worktree agent 的產出/共享狀態禁忌與合併流程 → 唯一 owner `.claude/rules/worktree.md`（規則本體）+ error_log §C；本檔不重述。
 - 完成實驗後先做 Codex code review，再寫 knowledge / experience / article。

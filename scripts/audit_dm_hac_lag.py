@@ -486,6 +486,7 @@ def _scan_function(
     path: Path,
     exercises_h1: bool,
     canonical_aliases: set[str],
+    root: Path = REPO_ROOT,
 ) -> Finding | None:
     """Find the bandwidth binding inside one DM-ish function."""
     body_src = _function_body_src(fn)
@@ -493,7 +494,7 @@ def _scan_function(
 
     if _function_is_explicitly_non_forecast(fn):
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=NOT_A_TEST,
@@ -504,7 +505,7 @@ def _scan_function(
 
     if _function_uses_dependence_robust_resampling(fn):
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=DEPENDENCE_ROBUST,
@@ -515,7 +516,7 @@ def _scan_function(
 
     if delegates and _function_has_iid_fallback(fn):
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=NO_HAC,
@@ -526,7 +527,7 @@ def _scan_function(
 
     if delegates:
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=DELEGATES,
@@ -537,7 +538,7 @@ def _scan_function(
 
     if not _function_computes_test_statistic(fn):
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=NOT_A_TEST,
@@ -608,7 +609,7 @@ def _scan_function(
                             "does not degenerate at h == 1, but it never scales with the sample"
                         ]
                     return Finding(
-                        file=str(path.relative_to(REPO_ROOT)),
+                        file=str(path.relative_to(root)),
                         function=fn.name,
                         lineno=fn.lineno,
                         verdict=verdict,
@@ -619,7 +620,7 @@ def _scan_function(
 
     if lag_expr is None and _function_has_h1_iid_branch(fn):
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=DEGENERATE,
@@ -632,7 +633,7 @@ def _scan_function(
     if lag_expr is None and (iid_ttest or _plain_variance_only(fn, body_src)):
         lag_label = "iid one-sample t-test" if iid_ttest else "iid sample variance"
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=NO_HAC,
@@ -646,7 +647,7 @@ def _scan_function(
 
     if lag_expr is None:
         return Finding(
-            file=str(path.relative_to(REPO_ROOT)),
+            file=str(path.relative_to(root)),
             function=fn.name,
             lineno=fn.lineno,
             verdict=UNKNOWN,
@@ -657,7 +658,7 @@ def _scan_function(
 
     verdict, notes = _classify_lag_expr(lag_expr)
     return Finding(
-        file=str(path.relative_to(REPO_ROOT)),
+        file=str(path.relative_to(root)),
         function=fn.name,
         lineno=fn.lineno,
         verdict=verdict,
@@ -667,7 +668,12 @@ def _scan_function(
     )
 
 
-def scan_file(path: Path) -> list[Finding]:
+def scan_file(path: Path, root: Path = REPO_ROOT) -> list[Finding]:
+    # ``root`` is what site keys are made relative to. It defaults to the main
+    # checkout, but a linked worktree must pass its OWN root: the ratchet
+    # baseline is keyed on repo-relative paths, and a worktree-prefixed key
+    # matches nothing, so an already-frozen site would read as a NEW violation
+    # and fail an experiment that changed none of the offending code.
     # A skipped file is a false negative for a bug-class audit: it silently
     # shrinks the population being certified. Never drop one without a trace.
     try:
@@ -693,7 +699,7 @@ def scan_file(path: Path) -> list[Finding]:
         if not _is_candidate_function(node):
             continue
         candidate_function_ids.add(id(node))
-        finding = _scan_function(node, path, exercises_h1, canonical_aliases)
+        finding = _scan_function(node, path, exercises_h1, canonical_aliases, root)
         if finding is None:
             continue
         findings.append(finding)
@@ -739,7 +745,7 @@ def scan_file(path: Path) -> list[Finding]:
         owner_name = enclosing_function.name if enclosing_function is not None else "module"
         findings.append(
             Finding(
-                file=str(path.relative_to(REPO_ROOT)),
+                file=str(path.relative_to(root)),
                 function=f"<{owner_name}>:ttest_1samp@{node.lineno}",
                 lineno=node.lineno,
                 verdict=NO_HAC,
@@ -758,7 +764,7 @@ def scan_population(root: Path = REPO_ROOT) -> list[Finding]:
     for pattern in SCAN_PATTERNS:
         paths.update(root.glob(pattern))
     for path in sorted(paths):
-        findings.extend(scan_file(path))
+        findings.extend(scan_file(path, root))
     findings.sort(key=lambda f: (SEVERITY[f.verdict], not f.exercises_h1, f.file))
     return findings
 

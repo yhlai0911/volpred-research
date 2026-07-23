@@ -1472,8 +1472,6 @@ def curate_task(
 
 
 def build_control_plane_snapshot(storage_dir: str = "storage") -> dict[str, Any]:
-    from .scheduler import get_scheduler_state
-
     tasks = list_tasks(storage_dir=storage_dir)
     agents = list_agent_sessions(storage_dir=storage_dir)
     counts: dict[str, int] = {}
@@ -1499,5 +1497,4 @@ def build_control_plane_snapshot(storage_dir: str = "storage") -> dict[str, Any]
         ),
         "latest_rollback_point": latest_rollback,
         "event_ledger_entries": len(list(event_ledger_dir.glob("*.json"))) if event_ledger_dir.exists() else 0,
-        "scheduler": get_scheduler_state(storage_dir=storage_dir),
     }

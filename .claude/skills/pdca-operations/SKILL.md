@@ -37,6 +37,7 @@ PDCA 是**整個平台運營的持續改善邏輯**（用戶 2026-06-30 定調�
 
 ### P — Plan（找問題 + 找機會，定計畫）
 兩條輸入並行掃，產出本輪 to-do：
+- **讀者偏好迴圈**（常態輸入）：`storage/analytics/reader_preferences.json`（週一 06:45 更新）的合格結論納入選題/圖文表決策；樣本不足 bucket 不得當依據。
 1. **每日大體檢（result-level）**：`uv run python scripts/daily_checkup.py`
    —— 8 維度查「結果好不好」非「程式有沒有報錯」：
    - `data_freshness`：資料收集 job 照排程跑？關鍵檔新鮮？（時效性 tick/order flow 優先，錯過窗口=永久損失）

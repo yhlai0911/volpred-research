@@ -3,8 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import fcntl
 import json
+import os
+import re
+import shutil
+import subprocess
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from scripts.supabase_sync import (
     _patch_where,
@@ -58,7 +62,60 @@ def _link_question_article(question_id: str, article_slug: str) -> bool:
         return False
 
 
-def claim_question_for_research(question_id: str) -> dict:
+class MemberQaOverrideReasonRequired(ValueError):
+    """Raised when the duplicate gate is overridden without a written reason.
+
+    2026-07-19 residual 3: a gate that hands out its own bypass key is not a
+    gate. `allow_duplicate=True` costs a sentence explaining what the re-asked
+    question wants that the existing article does not already answer, and that
+    sentence lands in the work log — so an override is an auditable decision
+    rather than a flag someone pasted from the task description.
+    """
+
+
+def _record_duplicate_override(question_id: str, new_angle: str) -> bool:
+    """Write an exercised duplicate-gate override into the work log.
+
+    Goes through `scripts/append_work_log.append_entry` (the single locked
+    writer — `scripts/tests/test_work_log_writer_gate.py`), never a hand-rolled
+    JSON append. Returns whether the entry landed; a failure is reported to the
+    operator rather than swallowed, because an unrecorded override is exactly
+    the invisible second study this gate exists to prevent.
+    """
+    try:
+        from scripts.append_work_log import append_entry
+
+        append_entry(
+            {
+                "timestamp": _utc_now(),
+                "task_type": "member_qa",
+                "task_id": f"member_qa_duplicate_override_{question_id.split('-')[0]}",
+                "outcome": "completed",
+                "actor": "question_ops",
+                "owner": "question_ops",
+                "commit": None,
+                "summary": (
+                    f"member_qa duplicate gate overridden for question_id={question_id}. "
+                    f"新角度：{new_angle}"
+                ),
+            }
+        )
+        return True
+    except Exception as exc:  # noqa: BLE001
+        _warn_question_ops(
+            f"duplicate-gate override for question_id={question_id} was NOT recorded "
+            f"in work_log ({exc}); reason text: {new_angle}"
+        )
+        return False
+
+
+def claim_question_for_research(
+    question_id: str,
+    *,
+    allow_duplicate: bool = False,
+    new_angle: str | None = None,
+    source: str = "user",
+) -> dict:
     """Atomically claim a question for research using status transition as lock.
 
     Transition: status='ranked' → status='researching' (conditional).
@@ -68,18 +125,76 @@ def claim_question_for_research(question_id: str) -> dict:
 
     Uses Supabase conditional PATCH with return=representation, so we know
     whether any row was actually updated (not just HTTP success).
+
+    2026-07-19: this is also the duplicate gate. Every member_qa research run
+    must pass through here (`.claude/skills/member-questions/SKILL.md` step 5),
+    so refusing the claim mechanically prevents a re-asked question from being
+    researched and published a second time. `allow_duplicate=True` is the
+    explicit, logged override for a genuinely new angle, and it is only
+    accepted together with a written `new_angle` reason (see
+    `MemberQaOverrideReasonRequired`).
+
+    Adjudication is delegated to `member_qa_duplicate_verdict` — this function
+    neither fetches history nor computes similarity itself.
     """
     now = _utc_now()
+
+    reason_text = (new_angle or "").strip()
+    if allow_duplicate and not reason_text:
+        raise MemberQaOverrideReasonRequired(
+            "overriding the member_qa duplicate gate requires a written reason "
+            "(--new-angle): what does this question ask that the existing article "
+            "does not already answer?"
+        )
+
+    verdict: dict[str, Any] | None = None
+    if not allow_duplicate:
+        current_rows = _select_rows(
+            "questions", select="id,question,status,source", id=question_id
+        )
+        if not current_rows:
+            return {"claimed": False, "question_id": question_id, "reason": "not_found"}
+        row_source = str(current_rows[0].get("source") or source)
+        verdict = member_qa_duplicate_verdict(
+            question_id,
+            str(current_rows[0].get("question") or ""),
+            source=row_source,
+        )
+        if verdict["verdict"] == "block":
+            duplicate = verdict["matched"]
+            return {
+                "claimed": False,
+                "question_id": question_id,
+                "reason": (
+                    f"duplicate_of={duplicate['question_id']} "
+                    f"similarity={duplicate['similarity']} "
+                    f"status={duplicate['status']}"
+                ),
+                "duplicate_of": duplicate,
+                "duplicate_verdict": verdict,
+            }
     affected = _patch_where_returning(
         "questions",
         {"id": question_id, "status": "ranked"},
         {"status": "researching", "updated_at": now},
     )
     if affected:
+        override_meta: dict[str, Any] = {}
+        if allow_duplicate:
+            # The override only becomes auditable once it is written down, and
+            # it is written only after the claim actually lands — a refused
+            # claim is not an override anyone exercised.
+            override_meta = {
+                "duplicate_override_reason": reason_text,
+                "duplicate_override_logged": _record_duplicate_override(
+                    question_id, reason_text
+                ),
+            }
         return {
             "claimed": True,
             "question_id": question_id,
             "question": affected[0],
+            **override_meta,
         }
     # Check current status to explain why claim failed
     current = _select_rows(
@@ -122,12 +237,94 @@ def archive_question(question_id: str, reason: str = "manual") -> dict:
     }
 
 
+def _question_answered_at(question_id: str) -> str | None:
+    """Existing answered_at stamp, or None (also None when the lookup fails —
+    the caller then keeps the legacy stamping behaviour and warns)."""
+    try:
+        rows = _select_rows("questions", select="id,answered_at", id=question_id)
+        if rows:
+            value = rows[0].get("answered_at")
+            return str(value) if value else None
+    except Exception as exc:  # noqa: BLE001
+        _warn_question_ops(
+            f"answered_at lookup failed for question_id={question_id}: {exc}"
+        )
+    return None
+
+
+def _existing_published_answer_articles(
+    question_id: str,
+    *,
+    exclude_article_id: str | None = None,
+    storage_dir: str = "storage",
+) -> list[str]:
+    """Article ids already bound to `question_id` by a PUBLISHED answer.
+
+    Local feed first (authoritative for anything this repo published, and
+    available without network), Supabase question_articles as enrichment. A
+    Supabase failure is reported by `_warn_question_ops` inside the helper and
+    degrades coverage — it never manufactures a false "no prior answer".
+    """
+    seen: list[str] = []
+    try:
+        from .content import find_published_member_qa_articles
+
+        found = find_published_member_qa_articles(
+            question_id,
+            exclude_article_id=exclude_article_id,
+            storage_dir=storage_dir,
+        )
+        for item in found.get("articles") or []:
+            aid = str(item.get("id") or "")
+            if aid and aid not in seen:
+                seen.append(aid)
+        if not found.get("local_ok", True):
+            _warn_question_ops(
+                f"answer idempotency check blind (local feed unreadable) for "
+                f"question_id={question_id}"
+            )
+    except Exception as exc:  # noqa: BLE001
+        _warn_question_ops(
+            f"prior-answer lookup failed for question_id={question_id}: {exc}"
+        )
+    return seen
+
+
 def answer_internal_question(
     question_id: str,
     answer: str,
     storage_dir: str = "storage",
     article_id: str | None = None,
+    *,
+    allow_reanswer: bool = False,
 ) -> dict:
+    # --- G2 idempotency guard (2026-07-19 STRIKE 2) --------------------------
+    # Binding a SECOND published article to a question is the database-level
+    # shape of "the same member question was answered twice": it overwrites
+    # answered_at, adds another question_articles row, and makes the Q&A page
+    # show two answers. Publishing is gated separately (G1 in ops.content); this
+    # keeps the question<->article binding itself idempotent so a re-run of the
+    # answer step cannot silently re-stamp an already-answered question.
+    prior_articles = _existing_published_answer_articles(
+        question_id, exclude_article_id=article_id, storage_dir=storage_dir
+    )
+    if prior_articles and not allow_reanswer:
+        return {
+            "id": question_id,
+            "found": True,
+            "status": "answered",
+            "article_published": True,
+            "linked_article": None,
+            "skipped": True,
+            "reason": "already_answered",
+            "existing_articles": prior_articles,
+            "note": (
+                f"問題 {question_id} 已有已發佈的答覆文章 {prior_articles}；"
+                "不重複綁定、不覆蓋 answered_at。若確為刻意續作，"
+                "請用 allow_reanswer=True 明確覆寫。"
+            ),
+        }
+
     # Determine if the linked article is already published
     article_is_published = False
     if article_id:
@@ -153,12 +350,21 @@ def answer_internal_question(
         dump_json(filepath, questions)
         question_status = "researching"
 
-    # Update Supabase question status
+    # Update Supabase question status.
+    # G2: answered_at is a FIRST-answer timestamp, not a last-touch one. Re-running
+    # the answer step for the same article (retry, resync) must not move it — an
+    # advancing answered_at is what made the two STRIKE 2 answers look like two
+    # legitimately distinct events in the audit trail.
+    existing_answered_at = _question_answered_at(question_id) if article_is_published else None
     _patch_where("questions", {"id": question_id}, {
         "status": question_status,
         "answer": answer[:500] if answer else None,
         "updated_at": _utc_now(),
-        **({"answered_at": _utc_now()} if article_is_published else {}),
+        **(
+            {"answered_at": _utc_now()}
+            if article_is_published and not existing_answered_at
+            else {}
+        ),
     })
 
     linked_article = False
@@ -244,6 +450,550 @@ MEMBER_QA_ACTIVE_TASK_STATUSES = {
 # question posted at 17:31 was processed at the 18:00 fire (酒店文 mile_9b76989e).
 # Boss wants a real cooldown so questions are not answered the moment they land.
 MEMBER_QA_MIN_AGE_SECONDS = 6 * 3600
+
+# ---------------------------------------------------------------------------
+# 2026-07-19 (boss: "為什麼會員提問又重複一次"): member-question duplicate gate.
+#
+# Incident: yaoxk1431 asked e79a7097 ("30 年資金穩定每年成長 15%，我該問什麼問題，
+# 我必須掌握投資的 15 個問題", 2026-07-11) and then 3e258ba2 (byte-identical except
+# 15% → 7%, 2026-07-18). Both were scored, ranked #1, claimed and published as
+# near-identical member_qa articles (mile_d84aa7d0 / mile_0205a444) a week apart.
+#
+# Why nothing stopped it: member_qa was the ONE content lane whose dedupe key was
+# the question UUID. A re-asked question is a new row → new UUID → every existing
+# check (task dedupe by question_id, min-age gate, atomic claim) passed. The
+# generation-time topic gate built on 2026-07-14 (volpred.ops.topic_dedup.
+# screen_topic) was only wired into the event + trending lanes.
+#
+# The gate below is deliberately mechanical (no LLM judgement in the loop):
+# digits are stripped before tokenizing, so "每年成長 15%" and "每年成長 7%" collapse
+# onto the same token set. Calibrated on the live 19-row user-question corpus
+# (171 pairs): the incident pair scores 1.000; the highest legitimate pair scores
+# 0.386 (7f6c50d9 vs 20dcd7d5 — congressional trades, follow vs fade, genuinely
+# two different studies); p95 = 0.167. BLOCK at 0.70 leaves a wide margin on both
+# sides. WARN at 0.35 annotates the task without blocking.
+MEMBER_QA_DUP_BLOCK_THRESHOLD = 0.70
+MEMBER_QA_DUP_WARN_THRESHOLD = 0.35
+
+# Statuses that mean "this question already consumed research capacity".
+MEMBER_QA_DUP_COMPARE_STATUSES = {
+    "answered",
+    "partially_answered",
+    "researching",
+    "completed",
+}
+
+
+def _question_tokens(text: str) -> set[str]:
+    """Tokenize a member question for duplicate detection.
+
+    Digits are stripped first — the 2026-07-19 incident differed only by the
+    target return number (15% vs 7%), so any tokenizer that keeps digits scores
+    the pair as "different". ASCII runs of >=2 letters and individual CJK
+    characters become tokens; everything else is punctuation noise.
+    """
+    if not text:
+        return set()
+    stripped = re.sub(r"[0-9０-９]+", "", text.lower())
+    tokens: set[str] = set(re.findall(r"[a-z]{2,}", stripped))
+    tokens |= set(re.findall(r"[一-鿿]", stripped))
+    return tokens
+
+
+def question_similarity(a: str, b: str) -> float:
+    """Jaccard overlap of digit-stripped question tokens (0.0 when either empty)."""
+    ta, tb = _question_tokens(a), _question_tokens(b)
+    if not ta or not tb:
+        return 0.0
+    union = len(ta | tb)
+    return len(ta & tb) / union if union else 0.0
+
+
+def find_duplicate_question(
+    question_text: str,
+    history: list[dict[str, Any]],
+    *,
+    exclude_question_id: str | None = None,
+    threshold: float = MEMBER_QA_DUP_BLOCK_THRESHOLD,
+) -> dict[str, Any] | None:
+    """Return the closest prior question at/above `threshold`, else None.
+
+    `history` rows need `question_id` (or `id`) and `question`. Only rows whose
+    status already consumed research capacity are considered — an unanswered
+    sibling in the ranking pool is not a reason to refuse work.
+    """
+    best: dict[str, Any] | None = None
+    for row in history or []:
+        if not isinstance(row, dict):
+            continue
+        prior_id = str(row.get("question_id") or row.get("id") or "").strip()
+        if not prior_id or prior_id == (exclude_question_id or ""):
+            continue
+        if str(row.get("status") or "") not in MEMBER_QA_DUP_COMPARE_STATUSES:
+            continue
+        similarity = question_similarity(question_text, str(row.get("question") or ""))
+        if similarity < threshold:
+            continue
+        if best is None or similarity > best["similarity"]:
+            best = {
+                "question_id": prior_id,
+                "question": row.get("question") or "",
+                "status": row.get("status") or "",
+                "similarity": round(similarity, 4),
+                "answered_at": row.get("answered_at"),
+                "linked_articles_count": row.get("linked_articles_count"),
+            }
+    return best
+
+
+def _fetch_question_history(source: str) -> list[dict[str, Any]]:
+    """Load prior questions for the duplicate gate.
+
+    No try/except: a guard rail inside a fail-open `try` is not a guard rail
+    (docs/error_log.md 2026-07-14 05:45). If Supabase is unreachable the caller
+    must fail, not proceed unchecked — the claim itself is a Supabase write, so
+    proceeding would fail anyway.
+    """
+    rows = _select_rows(
+        "questions",
+        select="id,question,status,answered_at,created_at",
+        order_by="id",  # stable key: _select_rows pages by offset past 1000 rows
+        source=source,
+    )
+    return [
+        {
+            "question_id": str(row.get("id") or ""),
+            "question": row.get("question") or "",
+            "status": row.get("status") or "",
+            "answered_at": row.get("answered_at"),
+        }
+        for row in rows
+    ]
+
+
+# --- residual 4: warn-band semantic adjudication, adjudicated ONCE ----------
+# WHY THIS EXISTS. The mechanical thresholds are calibrated on a 19-row corpus
+# (171 pairs). The whole margin between the highest legitimate pair (0.386 —
+# congressional trades, follow vs fade) and the block threshold (0.70) is 0.31,
+# and the lower edge of it is pinned by a SINGLE sample. Anything landing in
+# [0.35, 0.70) is therefore a coin the tokenizer cannot call: it is either a
+# genuine follow-up (proceed) or the same study re-asked (refuse). One LLM
+# semantic adjudication resolves it.
+#
+# WHY THE RESULT IS PERSISTED, AND WHY IT IS NEVER RE-COMPUTED. `question_id`
+# is the system-wide identity key for a member question (2026-07-19 residual 2).
+# If the same pair were re-adjudicated on every shift, the same two questions
+# could be "the same study" on Monday and "different studies" on Tuesday —
+# exactly the unstable-identity failure this whole task exists to kill. So: a
+# pair is adjudicated at most once, ever; every later look-up reads the store.
+# The store key is the pair sorted, so (a,b) and (b,a) are one entry.
+MEMBER_QA_ADJUDICATION_STORE = ("ops", "member_qa_duplicate_adjudications.json")
+MEMBER_QA_ADJUDICATION_STORE_VERSION = 1
+MEMBER_QA_ADJUDICATOR_TIMEOUT_SECONDS = 120
+MEMBER_QA_ADJUDICATOR_ENV = "VOLPRED_MEMBER_QA_WARN_ADJUDICATOR"
+
+# Only these two are real adjudications. "unavailable" is the fallback and is
+# deliberately NOT a member of this set — see `adjudicate_member_qa_warn_pair`.
+MEMBER_QA_ADJUDICATION_VERDICTS = {"duplicate", "distinct"}
+
+
+class WarnBandAdjudicatorUnavailable(RuntimeError):
+    """No LLM adjudicator could be reached for this warn-band pair."""
+
+
+def member_qa_pair_key(question_id_a: str, question_id_b: str) -> str:
+    """Order-independent identity for a question pair.
+
+    Sorted before joining so `(a, b)` and `(b, a)` cannot each get their own
+    cache entry — two entries for one pair would let the same two questions
+    hold two different verdicts, which is the drift this store prevents.
+    """
+    left, right = sorted(
+        [str(question_id_a or "").strip(), str(question_id_b or "").strip()]
+    )
+    return f"{left}|{right}"
+
+
+def _adjudication_store_path(storage_dir: str = "storage") -> Path:
+    return project_path(storage_dir, *MEMBER_QA_ADJUDICATION_STORE)
+
+
+def load_member_qa_adjudications(storage_dir: str = "storage") -> dict[str, Any]:
+    """Return the full adjudication store (empty skeleton when absent)."""
+    raw = load_json(_adjudication_store_path(storage_dir), {})
+    if not isinstance(raw, dict) or not isinstance(raw.get("pairs"), dict):
+        return {"version": MEMBER_QA_ADJUDICATION_STORE_VERSION, "pairs": {}}
+    return raw
+
+
+def get_member_qa_adjudication(
+    question_id_a: str,
+    question_id_b: str,
+    *,
+    storage_dir: str = "storage",
+) -> dict[str, Any] | None:
+    """Return the stored adjudication for this pair, or None.
+
+    No try/except: an unreadable store must surface, not silently degrade into
+    "never adjudicated" (which would re-run the LLM and could produce a second,
+    different verdict for a pair that already has one).
+    """
+    entry = load_member_qa_adjudications(storage_dir)["pairs"].get(
+        member_qa_pair_key(question_id_a, question_id_b)
+    )
+    return entry if isinstance(entry, dict) else None
+
+
+def _record_member_qa_adjudication(
+    entry: dict[str, Any],
+    *,
+    storage_dir: str = "storage",
+) -> dict[str, Any]:
+    """Persist one adjudication under an exclusive lock; first writer wins.
+
+    Re-read inside the lock so a concurrent shift that adjudicated the same
+    pair first keeps its verdict — "adjudicated once" must survive races too.
+    """
+    path = _adjudication_store_path(storage_dir)
+    guard_canonical_write(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists():
+        path.write_text(
+            json.dumps(
+                {"version": MEMBER_QA_ADJUDICATION_STORE_VERSION, "pairs": {}},
+                indent=2,
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+    with path.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            store = json.load(fh)
+            if not isinstance(store, dict) or not isinstance(store.get("pairs"), dict):
+                store = {"version": MEMBER_QA_ADJUDICATION_STORE_VERSION, "pairs": {}}
+            existing = store["pairs"].get(entry["pair_key"])
+            if isinstance(existing, dict):
+                return existing
+            store["pairs"][entry["pair_key"]] = entry
+            fh.seek(0)
+            fh.truncate()
+            json.dump(store, fh, indent=2, ensure_ascii=False)
+            fh.write("\n")
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    return entry
+
+
+_ADJUDICATOR_PROMPT = """你是研究排程的重複題判官。以下是兩則會員提問。
+
+A: {question_a}
+
+B: {question_b}
+
+它們的機械相似度為 {similarity}（落在需要人為判斷的灰色地帶）。
+請判斷：若已經為 A 做過一份完整研究並發表文章，B 是否會得到實質相同的研究與結論？
+
+只輸出一個 JSON 物件，不要任何其他文字：
+{{"verdict": "duplicate" 或 "distinct", "reason": "一句話理由（繁中，<=60 字）"}}
+
+duplicate = 同一份研究可以回答兩者，重做等於重複勞動。
+distinct = B 需要新的資料、新的檢定或新的結論，不是重問。"""
+
+
+def _agy_warn_band_adjudicator(
+    question_a: str,
+    question_b: str,
+    similarity: float,
+) -> tuple[str, str]:
+    """Adjudicate via the headless `agy -p` CLI. Raise when unusable.
+
+    `agy` is an agentic CLI that spawns its own workers, so it runs in its own
+    session and the whole process group is killed on timeout (same concern and
+    same owner as scripts/scan_trending_agy.py).
+    """
+    binary = shutil.which("agy")
+    if not binary:
+        raise WarnBandAdjudicatorUnavailable("agy not on PATH")
+    prompt = _ADJUDICATOR_PROMPT.format(
+        question_a=question_a, question_b=question_b, similarity=round(similarity, 4)
+    )
+    try:
+        proc = subprocess.Popen(
+            [binary, "-p", prompt],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            start_new_session=True,
+        )
+    except OSError as exc:
+        raise WarnBandAdjudicatorUnavailable(f"agy spawn failed: {exc}") from exc
+    try:
+        stdout, stderr = proc.communicate(
+            timeout=MEMBER_QA_ADJUDICATOR_TIMEOUT_SECONDS
+        )
+    except subprocess.TimeoutExpired as exc:
+        from scripts.dispatch_supervisor import procutil
+
+        try:
+            procutil.kill_pgid(os.getpgid(proc.pid))
+        except (ProcessLookupError, PermissionError):  # silent-ok: cleanup race-safe; the timeout still raises below
+            pass
+        proc.wait()
+        raise WarnBandAdjudicatorUnavailable("agy timed out") from exc
+    if proc.returncode != 0:
+        raise WarnBandAdjudicatorUnavailable(
+            f"agy exited {proc.returncode}: {(stderr or '')[-200:]}"
+        )
+    text = stdout or ""
+    fenced = re.search(r"```(?:json)?\s*(.+?)```", text, re.DOTALL)
+    if fenced:
+        text = fenced.group(1)
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end <= start:
+        raise WarnBandAdjudicatorUnavailable("agy returned no JSON object")
+    try:
+        parsed = json.loads(text[start : end + 1])
+    except json.JSONDecodeError as exc:
+        raise WarnBandAdjudicatorUnavailable(f"agy JSON unparseable: {exc}") from exc
+    verdict = str((parsed or {}).get("verdict") or "").strip().lower()
+    if verdict not in MEMBER_QA_ADJUDICATION_VERDICTS:
+        raise WarnBandAdjudicatorUnavailable(
+            f"agy returned an unusable verdict {verdict!r}"
+        )
+    return verdict, str((parsed or {}).get("reason") or "").strip()[:300]
+
+
+def _default_warn_band_adjudicator() -> Callable[[str, str, float], tuple[str, str]] | None:
+    """Resolve the adjudicator for this process, or None when there is none.
+
+    None here is not an error — it is the documented "no LLM available" state
+    that drives the conservative fallback.
+    """
+    setting = os.environ.get(MEMBER_QA_ADJUDICATOR_ENV, "").strip().lower()
+    if setting in {"off", "none", "0", "disabled"}:
+        return None
+    if os.environ.get("PYTEST_CURRENT_TEST"):
+        # Never shell out to a live model from the test suite: a regression pin
+        # whose expected value depends on a model's mood is not a pin, and a
+        # test run must not write real adjudications into the store. Tests that
+        # exercise adjudication inject their own callable instead.
+        return None
+    if not shutil.which("agy"):
+        return None
+    return _agy_warn_band_adjudicator
+
+
+def adjudicate_member_qa_warn_pair(
+    question_id: str,
+    question_text: str,
+    *,
+    matched_question_id: str,
+    matched_question: str,
+    similarity: float,
+    storage_dir: str = "storage",
+    adjudicator: Callable[[str, str, float], tuple[str, str]] | None = None,
+) -> dict[str, Any]:
+    """Return the (cached-or-fresh) semantic adjudication for one warn-band pair.
+
+    Contract:
+      * a pair already in the store is NEVER re-adjudicated — `adjudicator` is
+        not called at all on a cache hit;
+      * a fresh `duplicate`/`distinct` verdict is written to the store;
+      * `unavailable` (no adjudicator, or the adjudicator failed) is returned
+        but NOT written.
+
+    WHY THE FALLBACK IS NOT CACHED (this is the point of the whole store):
+    "we could not reach an LLM at 03:00 on a Tuesday" is a fact about the
+    infrastructure, not about the two questions. Because the store is read
+    first and unconditionally, writing it would freeze one transient outage
+    into a permanent verdict for that pair, and the LLM would never be asked
+    again. Not caching costs one retry next shift; caching costs correctness
+    forever.
+
+    WHY THE FALLBACK IS "STAY AT WARN" RATHER THAN BLOCK-OR-CLEAR:
+    clearing would make the gate trivially defeatable (unset an env var and
+    every warn-band pair passes). Blocking would convert an LLM outage into a
+    member_qa work stoppage — and with the legitimate congressional pair
+    sitting at 0.386, inside the band, a blocking fallback refuses real work by
+    design, which is how this very task ended up starved for 54h. Falling back
+    to the mechanical verdict is the identity operation: with no LLM the gate
+    is exactly as strong as it was before adjudication existed, never weaker.
+    """
+    pair_key = member_qa_pair_key(question_id, matched_question_id)
+    cached = get_member_qa_adjudication(
+        question_id, matched_question_id, storage_dir=storage_dir
+    )
+    if cached is not None:
+        return {**cached, "cached": True, "persisted": True}
+
+    resolver = adjudicator if adjudicator is not None else _default_warn_band_adjudicator()
+    if resolver is None:
+        return {
+            "pair_key": pair_key,
+            "adjudication": "unavailable",
+            "cached": False,
+            "persisted": False,
+            "similarity": round(float(similarity), 4),
+            "reason": "no LLM adjudicator available in this process",
+        }
+
+    try:
+        verdict, reason = resolver(question_text, matched_question, float(similarity))
+    except WarnBandAdjudicatorUnavailable as exc:
+        return {
+            "pair_key": pair_key,
+            "adjudication": "unavailable",
+            "cached": False,
+            "persisted": False,
+            "similarity": round(float(similarity), 4),
+            "reason": f"adjudicator unavailable: {exc}",
+        }
+    if verdict not in MEMBER_QA_ADJUDICATION_VERDICTS:
+        # A malformed answer is an unavailable adjudicator, not a verdict.
+        return {
+            "pair_key": pair_key,
+            "adjudication": "unavailable",
+            "cached": False,
+            "persisted": False,
+            "similarity": round(float(similarity), 4),
+            "reason": f"adjudicator returned unusable verdict {verdict!r}",
+        }
+
+    entry = {
+        "pair_key": pair_key,
+        "pair": sorted([str(question_id), str(matched_question_id)]),
+        "adjudication": verdict,
+        "similarity": round(float(similarity), 4),
+        "adjudicated_at": _utc_now(),
+        "adjudicator": getattr(resolver, "__name__", str(resolver)),
+        "reason": reason,
+        "warn_threshold": MEMBER_QA_DUP_WARN_THRESHOLD,
+        "block_threshold": MEMBER_QA_DUP_BLOCK_THRESHOLD,
+        "question_texts": {
+            str(question_id): str(question_text)[:500],
+            str(matched_question_id): str(matched_question)[:500],
+        },
+    }
+    stored = _record_member_qa_adjudication(entry, storage_dir=storage_dir)
+    return {**stored, "cached": False, "persisted": True}
+
+
+def member_qa_duplicate_verdict(
+    question_id: str,
+    question_text: str,
+    *,
+    source: str = "user",
+    history_cache: dict[str, list[dict[str, Any]]] | None = None,
+    storage_dir: str = "storage",
+    adjudicator: Callable[[str, str, float], tuple[str, str]] | None = None,
+) -> dict[str, Any]:
+    """THE member_qa duplicate adjudicator. Single owner, single history source.
+
+    2026-07-19 (anti-stacking): `question_id` is the system-wide identity key, and
+    before this function there were TWO adjudication paths — `claim_question_for_
+    research` (history via `_fetch_question_history`) and `ensure_member_qa_task`
+    (history via `summary["answered_history"]`). Same key, two owners, two corpora:
+    a guaranteed drift. Both consumers now delegate here and NEITHER fetches
+    history itself — this function is the only place history is loaded, so there is
+    exactly one corpus and exactly one verdict for a given question.
+
+    Verdicts (thresholds unchanged; calibration is a separate task):
+      block  similarity >= MEMBER_QA_DUP_BLOCK_THRESHOLD  → refuse the work
+      warn   similarity >= MEMBER_QA_DUP_WARN_THRESHOLD   → proceed, but annotated
+      clear  no prior question reaches the warn threshold
+
+    A warn-band hit additionally gets ONE persisted semantic adjudication
+    (residual 4): `duplicate` escalates the verdict to block, `distinct`
+    downgrades it to clear, and an unavailable adjudicator leaves the
+    mechanical `warn` untouched. The adjudication is computed at most once per
+    (question_id_a, question_id_b) pair — see `adjudicate_member_qa_warn_pair`.
+
+    `history_cache` lets a caller that adjudicates many candidates in one pass
+    (`ensure_member_qa_task` walks the whole ranked table) reuse one fetch. It is
+    a cache, not a data source: the caller passes an empty dict and this function
+    is still the only thing that ever populates it.
+
+    No try/except around the history load, on purpose: a guard rail inside a
+    fail-open `try` is not a guard rail (docs/error_log.md 2026-07-14 05:45).
+    """
+    cache = history_cache if history_cache is not None else {}
+    if source not in cache:
+        cache[source] = _fetch_question_history(source)
+    history = cache[source]
+
+    match = find_duplicate_question(
+        question_text,
+        history,
+        exclude_question_id=question_id,
+        threshold=MEMBER_QA_DUP_WARN_THRESHOLD,
+    )
+
+    similarity = float(match["similarity"]) if match else 0.0
+    adjudication: dict[str, Any] | None = None
+    if match and similarity >= MEMBER_QA_DUP_BLOCK_THRESHOLD:
+        verdict = "block"
+    elif match:
+        verdict = "warn"
+        # Warn band → one semantic adjudication per pair, forever (residual 4).
+        adjudication = adjudicate_member_qa_warn_pair(
+            question_id,
+            question_text,
+            matched_question_id=str(match["question_id"]),
+            matched_question=str(match["question"]),
+            similarity=similarity,
+            storage_dir=storage_dir,
+            adjudicator=adjudicator,
+        )
+        if adjudication["adjudication"] == "duplicate":
+            verdict = "block"
+        elif adjudication["adjudication"] == "distinct":
+            verdict = "clear"
+        # "unavailable" → stay at the mechanical `warn`; see the docstring of
+        # adjudicate_member_qa_warn_pair for why the fallback is the identity.
+    else:
+        verdict = "clear"
+        match = None
+
+    origin = f"supabase.questions(source={source}) rows={len(history)}"
+    if match:
+        adjudication_note = (
+            f"; adjudication={adjudication['adjudication']}"
+            f" (cached={adjudication['cached']})"
+            if adjudication
+            else ""
+        )
+        basis = (
+            f"{verdict}: {origin}; matched question_id={match['question_id']} "
+            f"status={match['status']}; jaccard(digit-stripped)={similarity} "
+            f"warn>={MEMBER_QA_DUP_WARN_THRESHOLD} block>={MEMBER_QA_DUP_BLOCK_THRESHOLD}"
+            f"{adjudication_note}"
+        )
+    else:
+        basis = (
+            f"clear: {origin}; no prior question in statuses "
+            f"{sorted(MEMBER_QA_DUP_COMPARE_STATUSES)} reached "
+            f"warn>={MEMBER_QA_DUP_WARN_THRESHOLD}"
+        )
+
+    return {
+        "verdict": verdict,
+        "question_id": question_id,
+        "matched_question_id": match["question_id"] if match else None,
+        "matched_title": str(match["question"]) if match else None,
+        "matched_status": match["status"] if match else None,
+        "similarity": similarity,
+        "basis": basis,
+        "source": source,
+        "history_size": len(history),
+        "warn_threshold": MEMBER_QA_DUP_WARN_THRESHOLD,
+        "block_threshold": MEMBER_QA_DUP_BLOCK_THRESHOLD,
+        # None unless the pair landed in the warn band and was adjudicated.
+        "adjudication": adjudication,
+        # Full matched row, for payloads that embed the prior question verbatim.
+        "matched": match,
+    }
 
 
 def _parse_time(value: Any) -> float:
@@ -468,6 +1218,20 @@ def get_member_question_ranking_summary(
         },
         "ranked_table": ranked_table,
         "pending_questions": pending_questions,
+        # Full history for the duplicate gate. NOT truncated by `limit`: a
+        # question re-asked 6 months later must still be recognised, and the
+        # 2026-07-19 incident's twin sat outside any top-N window.
+        "answered_history": [
+            {
+                "question_id": str(row.get("id") or ""),
+                "question": row.get("question") or "",
+                "status": row.get("status") or "",
+                "answered_at": row.get("answered_at"),
+                "linked_articles_count": linked_counts.get(str(row.get("id") or ""), 0),
+            }
+            for row in question_rows
+            if str(row.get("status") or "") in MEMBER_QA_DUP_COMPARE_STATUSES
+        ],
         "candidate_pool": candidate_rows[: max(limit, 1)],
         "suggestions": suggestions,
     }
@@ -485,11 +1249,23 @@ def ensure_member_qa_task(
     2. Latest pending-evaluation question as an evaluate→rerank→research task.
 
     Dedupe key is `question_id` against active next_tasks member_qa entries.
+
+    2026-07-19: a second dedupe key was added — question *meaning*. A question
+    that near-duplicates an already-answered one no longer materializes as a
+    research task; it becomes a `duplicate_review` task instead (the member
+    still gets served, but by linking the existing article rather than by
+    silently commissioning the same study twice).
     """
     summary = get_member_question_ranking_summary(source=source, limit=10)
     ranked_table = summary.get("ranked_table") if isinstance(summary.get("ranked_table"), list) else []
     pending_questions = summary.get("pending_questions") if isinstance(summary.get("pending_questions"), list) else []
     health = summary.get("health") if isinstance(summary.get("health"), dict) else {}
+
+    # No local history read here on purpose (2026-07-19 residual 2): adjudication
+    # and its corpus both belong to `member_qa_duplicate_verdict`. Fail-closed is
+    # preserved by that function — it loads history without a fail-open `try`, so
+    # an unreachable corpus raises instead of silently clearing every candidate.
+    verdict_cache: dict[str, list[dict[str, Any]]] = {}
 
     if int(health.get("researching", 0) or 0) > 0:
         return {"created": False, "reason": "already_researching"}
@@ -506,13 +1282,38 @@ def ensure_member_qa_task(
         return (now_ts - created) < MEMBER_QA_MIN_AGE_SECONDS
 
     gated_min_age = 0
+    # Duplicates are deferred, not dropped: a fresh question must not be starved
+    # behind a re-ask, but the member still deserves a reply, so the first
+    # deferred duplicate becomes the fallback candidate in `duplicate_review` mode.
+    deferred_duplicate: tuple[dict[str, Any], dict[str, Any]] | None = None
+
+    def _duplicate_of(item: dict[str, Any]) -> dict[str, Any] | None:
+        """Blocking prior for `item`, per the single adjudicator.
+
+        Only a `block` verdict defers a candidate — `warn` is a note, not a
+        refusal, and matching the pre-existing behaviour here keeps this change
+        a re-ownership rather than a silent threshold change.
+        """
+        result = member_qa_duplicate_verdict(
+            str(item.get("question_id") or ""),
+            str(item.get("question") or ""),
+            source=source,
+            history_cache=verdict_cache,
+        )
+        return result["matched"] if result["verdict"] == "block" else None
 
     candidate: dict[str, Any] | None = None
+    duplicate: dict[str, Any] | None = None
     mode = "research"
     for item in ranked_table:
         if isinstance(item, dict) and str(item.get("status") or "") == "ranked":
             if _too_young(item):
                 gated_min_age += 1
+                continue
+            hit = _duplicate_of(item)
+            if hit is not None:
+                if deferred_duplicate is None:
+                    deferred_duplicate = (item, hit)
                 continue
             candidate = item
             break
@@ -523,9 +1324,18 @@ def ensure_member_qa_task(
                 if _too_young(item):
                     gated_min_age += 1
                     continue
+                hit = _duplicate_of(item)
+                if hit is not None:
+                    if deferred_duplicate is None:
+                        deferred_duplicate = (item, hit)
+                    continue
                 candidate = item
                 mode = "evaluate"
                 break
+
+    if candidate is None and deferred_duplicate is not None:
+        candidate, duplicate = deferred_duplicate
+        mode = "duplicate_review"
 
     if candidate is None:
         reason = (
@@ -566,12 +1376,14 @@ def ensure_member_qa_task(
                         "task_id": task.get("id"),
                     }
 
-            title = _build_member_qa_task_title(candidate)
+            title = _build_member_qa_task_title(candidate, duplicate=duplicate)
             task_id = _build_member_qa_task_id(question_id=question_id, mode=mode)
             task = {
                 "id": task_id,
                 "title": title,
-                "description": _build_member_qa_task_description(candidate, mode=mode),
+                "description": _build_member_qa_task_description(
+                    candidate, mode=mode, duplicate=duplicate
+                ),
                 "task_type": "member_qa",
                 "dispatch_lane": "agent",
                 # 會員在等答案 = user-facing 且有時效感，與 user-assigned 同級（老闆 Telegram msg 590）
@@ -585,6 +1397,7 @@ def ensure_member_qa_task(
                 "proposer": candidate.get("proposer"),
                 "question_score": candidate.get("score"),
                 "task_mode": mode,
+                **({"duplicate_of": duplicate} if duplicate else {}),
             }
             validate_task_status(task["status"])
             normalize_task_priority(task)
@@ -598,15 +1411,24 @@ def ensure_member_qa_task(
         "task_id": task_id,
         "question_id": question_id,
         "mode": mode,
+        **({"duplicate_of": duplicate} if duplicate else {}),
     }
 
 
 def _build_member_qa_task_id(*, question_id: str, mode: str) -> str:
-    suffix = "research" if mode == "research" else "evaluate"
+    suffix = {"research": "research", "duplicate_review": "duplicate_review"}.get(
+        mode, "evaluate"
+    )
     return f"member_qa_{question_id.split('-')[0]}_{suffix}"
 
 
-def _build_member_qa_task_title(candidate: dict[str, Any]) -> str:
+def _build_member_qa_task_title(
+    candidate: dict[str, Any], *, duplicate: dict[str, Any] | None = None
+) -> str:
+    if duplicate:
+        proposer = str(candidate.get("proposer") or "會員").strip()
+        question = " ".join(str(candidate.get("question") or "").split())
+        return f"[member_qa/dup] {proposer} 重複提問（似 {duplicate['question_id'][:8]}）：{question[:60]}"
     proposer = str(candidate.get("proposer") or "會員").strip()
     question = " ".join(str(candidate.get("question") or "").split())
     if not question:
@@ -614,13 +1436,43 @@ def _build_member_qa_task_title(candidate: dict[str, Any]) -> str:
     return f"[member_qa] {proposer} 提問：{question[:80]}"
 
 
-def _build_member_qa_task_description(candidate: dict[str, Any], *, mode: str) -> str:
+def _build_member_qa_task_description(
+    candidate: dict[str, Any],
+    *,
+    mode: str,
+    duplicate: dict[str, Any] | None = None,
+) -> str:
     question_id = str(candidate.get("question_id") or "").strip()
     proposer = str(candidate.get("proposer") or "會員").strip()
     question = str(candidate.get("question") or "").strip()
     created_at = str(candidate.get("created_at") or "").strip()
     score = candidate.get("score")
     score_line = f"Current score: {score}\n" if isinstance(score, (int, float)) else ""
+    if mode == "duplicate_review" and duplicate:
+        workflow = (
+            "⚠️ 重複提問 —— 這題與已回答過的問題近乎同題（去除數字後 Jaccard "
+            f"{duplicate['similarity']}，門檻 {MEMBER_QA_DUP_BLOCK_THRESHOLD}）。\n"
+            f"既有問題：{duplicate['question_id']}（status={duplicate['status']}）\n"
+            f"既有題目：{duplicate['question']}\n\n"
+            "執行流程（預設不做新研究）：\n"
+            f"1. 找出既有問題已綁定的文章：uv run volpred ops question-ranking-summary --limit 20\n"
+            f"2. 用既有文章回覆本題：uv run volpred ops question-answer {question_id} "
+            "--answer \"（說明與既有文章的對應關係）\" --article-id <既有 article slug>\n"
+            "3. 只有在確認本題有既有文章沒回答到的新角度時，才考慮做新研究。\n"
+            "   繞過查重 gate 需要「寫得出理由」才成立：claim 時必須同時提供\n"
+            "   新角度說明（缺理由 → exit 2），該理由會自動寫入 work_log 供事後稽核。\n"
+            "   指令請查 `uv run volpred ops question-claim --help`；本描述刻意不附\n"
+            "   可直接複製的繞過指令 —— gate 不該自己發鑰匙（2026-07-19 殘留 3）。\n"
+        )
+        return (
+            f"Member question id: {question_id}\n"
+            f"Proposer: {proposer}\n"
+            f"Created: {created_at}\n"
+            f"{score_line}"
+            f"\n原題：\n{question}\n\n"
+            f"{workflow}\n"
+            "注意：重複提問也要回覆會員，但預設是「連既有文章」，不是「再寫一篇」。"
+        )
     if mode == "research":
         workflow = (
             "執行流程：\n"

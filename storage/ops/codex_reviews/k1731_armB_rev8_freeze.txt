@@ -1,0 +1,48 @@
+# K1731 arm B rev8 — sha256 freeze manifest
+# frozen 2026-07-21 01:00 台灣時間 by dispatch-slot-1-bd00f90a-k1731 (round-8, second pass)
+# scope: .claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/
+# Any verdict produced against these bytes is invalidated if a hash below changes.
+#
+# Changes to the rev7 file list:
+#   - k1731_armB_rev7_remediation.json -> k1731_armB_rev8_remediation.json
+#   + k1731_rev8_drift_check.py / _results.json  ADDED: the gate that measures numeric
+#     movement across the regeneration and proves the refactored estimation path still
+#     reproduces every stored interval exactly.
+#   + k1731_regression_check.py  ADDED: edited this round (rename-following pass). The
+#     rev7 manifest pinned its OUTPUT but not the gate itself.
+#   + the two SUPERSEDED result artifacts ADDED: round 8 regenerated all three, so all
+#     three are claim surface and all three are pinned. Round 7 pinned only rev5.
+#
+# This is the SECOND round-8 freeze. The first was reviewed by an independent fallback
+# reviewer (Codex quota exhausted, resets 2026-07-25), which returned FAIL on five
+# blocking issues — three surviving README claims, plus a verification script that
+# always exited 0 and a drift check that could silently verify zero leaves. All five are
+# fixed here, so these bytes differ from the ones that review saw and are NOT certified
+# by it. Codex round 8 is still owed.
+#
+# Round 8 also changed one repo-level file OUTSIDE this directory (the nested-DM
+# baseline). Its hash is recorded at the end under the same freeze contract.
+
+
+4e025926cfb389379357f8d0721260d3cca33c42af15baf49cbbf0582ffceeaf  README.md
+4bfe16f58eb1246cbb96574f8eb90e114ad5a69c7ab8c26fce44113e206237de  k1731_armB_rev8_remediation.json
+5a492e47ef6a76a37a84d695d33303afcf29c9fdd48588ed9982149235a746b0  k1731_es_mixture_check.py
+302e805e40625ed3fc30de242b7eaca04f95f7a66bb95edd62415ba487738144  k1731_es_mixture_check_results.json
+722e13495a20369b1b458df83e41f7aad99a8e4b8dab6271d5c4e0450c8f3098  k1731_armB_verification.py
+5f53b70b3744cfc7d50eb40332ac638715a43997e4e63ac0287b6ba988a2a7ef  k1731_armB_traceability_rows.json
+eb9ea201f04d789d59c367bce489eaad3605a63bbf4dce287e84b5471bb95f9e  k1731_regression_check.py
+994cfc5143ef8ebd30b7fac95dcb3f174595f0cececeb35344524371ecec9334  k1731_regression_check_results.json
+9a72557ecfdd9317f2ced9c7fe440b3fa93c1048002c7513b181575410b73e83  k1731_rev8_drift_check.py
+385b63fa0f2e6c51499d8bf28e3a9538bd81622b82342a802b97eac41bbe0bb2  k1731_rev8_drift_check_results.json
+ca4752cea8cc70aad5cbaec5868ff535ac15f0fa6c5e5101fdc231354253c60c  k1731_gevreg_midas_ssvs_returns_results.json
+c63590159fab43ae5845d6a49ea2037057c86771edd07f491710ee1e5e117b88  k1731_gevreg_midas_ssvs_returns_results_corrected.json
+b66b3a69574793903206339b35c2cb6eb1a08457ef2883f5e751d347733f8d94  k1731_gevreg_midas_ssvs_returns_results_corrected_rev5.json
+514ced63c9bcd3f4ca77d652a96334b4e1d7368b7e4d79483125a2091cbb23e1  k1731_gevreg_midas_ssvs_returns.py
+7faf083a80f18ef1823f742b211d685928c189c36f219a4822aa55bb11271d3e  k1731_finalize_report.py
+ea77adf6520773696d47837cc1c61879060671374add2962c478db2fb7697161  k1731_models.py
+e67c8b35ce057e9a2a4e4834c1e99578ff7aec4367c26467fe0e45d265a9792b  k1731_scoring.py
+
+# --- out-of-directory, repo-level ---
+2903eb65c01999c29b95bff0a3b7b8f7849cf9aeaefde97f5f39c5e21f5cdbab  scripts/audit_nested_dm_misuse.py
+25a863ad2a2f331fea0b94559e3a39e16297f532b311dba06751d7ed171efff2  scripts/tests/test_nested_dm_misuse_ratchet.py
+af5fff73156d22b9a22b1236055b75d6d54928348bb48acab0cb6a4e89f93821  storage/ops/nested_dm_misuse_baseline.json

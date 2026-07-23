@@ -123,7 +123,7 @@
   - `score`
   - `score_breakdown`
 - 研究候選池 lifecycle
-- 讀者/文章 analytics summary
+- 讀者/文章 analytics summary（讀者偏好迴圈輸出：`storage/analytics/reader_preferences.json` + report.md，週一 06:45 更新；樣本不足 bucket 不得當依據）
 - 站務健康面板（`/admin/health`）：local + jobs + workflows + content_release + analytics + questions
 - 排程管理面板（`/admin/schedules`）：shared scheduler / `event_jobs` / system crontab 即時讀取 + 核心任務覆蓋檢查
 - 6 小時會員問題重排 workflow 已可由 canonical schedule / shared scheduler 驅動；若本機尚有 session cron，只算過渡期便利

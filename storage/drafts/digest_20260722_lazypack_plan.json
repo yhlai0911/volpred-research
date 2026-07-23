@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "title": "換件測試：拆掉績效表的七顆螺絲",
+  "evidence": {
+    "k492": {
+      "path": "experiments/k492/k492_research_efficiency_results.json",
+      "sha256": "05b84187c0fcd792b882c2d37721a5f1b35ca35f3637ff07c8a527bb01e53b50",
+      "label": "K492 研究效率回顧（68 個實驗分類與跨樣本期存活統計）"
+    },
+    "k812v2": {
+      "path": "experiments/k812v2/k812v2_us_taiwan_leadlag_otc_results.json",
+      "sha256": "5b754cf8e35b8b2e34cbd39026b45d13e537a6f1ea9a7e733e7b762c6970efee",
+      "label": "K812v2 美股對台股領先落後策略（昨收到今收 vs 今開到今收）"
+    },
+    "k1109": {
+      "path": "experiments/k1109/k1109_results.json",
+      "sha256": "ce5b257484802b749b12560d6be025939f33dcdcb4c5e7352d0fd70ead3a15d1",
+      "label": "K1109 預先登錄隨機產業樣本（對照 K1106b 事後挑樣）"
+    },
+    "k1056": {
+      "path": "experiments/k1056/k1056_results.json",
+      "sha256": "7a7f8eb0cb42733657d01cd2301c7694b8a309358ae29029828ec56aa2474c11",
+      "label": "K1056 A4f 波動率模型跨五個市場時代穩健性驗證"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "換件測試：一次只換一個零件",
+      "alt": "懶人包：換件測試框架，逐一替換資料來源、樣本期、下單時點、報酬口徑、量尺、估計窗口與樣本名單",
+      "sources": [
+        "k492"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "怎麼用",
+          "body": [
+            "修車廠診斷引擎抖動，一次只換一個零件，換完發動看看還抖不抖。回測報告可以照做。",
+            "任何績效表背後都掛著一串看不見的設定。一次換掉其中一件、其餘不動，看那張表還活不活。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "換資料來源與樣本期",
+          "body": [
+            "把行情拿去跟交易所原始紀錄交叉核對，確認那天市場真的有交易。",
+            "參數鎖死，換一段完全不同的歷史重跑一次。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "換下單時點與報酬口徑",
+          "body": [
+            "訊號改成隔一天才能下單，看優勢還在不在。",
+            "報酬只認你進場後那一段，進場前的跳空不算你的。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "換量尺、窗口與名單",
+          "body": [
+            "換一把更精準的波動量尺，換兩個指標重排名次。",
+            "參數估計期間乘以零點五倍與兩倍各跑一次；標的名單要事前鎖死，不能事後挑。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "我們自己換件時，數字掉了多少",
+      "alt": "懶人包：跨樣本期存活率、報酬口徑差異、事後挑樣與預先登錄的統計強度落差",
+      "sources": [
+        "k492",
+        "k812v2",
+        "k1109"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "換樣本期後陣亡率",
+          "value": {
+            "source": "k492",
+            "path": "cross_oos_analysis.failure_rate_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          },
+          "note": "單期看起來有效的候選，換一段歷史重測"
+        },
+        {
+          "kind": "metric",
+          "label": "換期後存活數",
+          "value": {
+            "source": "k492",
+            "path": "cross_oos_analysis.n_survived",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "對照陣亡數，擲硬幣的存活率是五成"
+        },
+        {
+          "kind": "metric",
+          "label": "換期後陣亡數",
+          "value": {
+            "source": "k492",
+            "path": "cross_oos_analysis.n_failed",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "每一個在第一段樣本期都很漂亮"
+        },
+        {
+          "kind": "metric",
+          "label": "昨收到今收的評分",
+          "value": {
+            "source": "k812v2",
+            "path": "otc_vs_c2c_sharpe.s4.c2c_sharpe",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "含進場前的隔夜跳空，你吃不到"
+        },
+        {
+          "kind": "metric",
+          "label": "今開到今收的評分",
+          "value": {
+            "source": "k812v2",
+            "path": "otc_vs_c2c_sharpe.s4.otc_sharpe",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "只算可交易的那一段，優勢消失"
+        },
+        {
+          "kind": "metric",
+          "label": "可交易口徑的方向準確度",
+          "value": {
+            "source": "k812v2",
+            "path": "direction_accuracy.otc.overall",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          },
+          "note": "等同擲硬幣"
+        },
+        {
+          "kind": "metric",
+          "label": "事後挑樣的統計強度",
+          "value": {
+            "source": "k1109",
+            "path": "/k1106b_comparison/k1106b_fabless_beta/t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "六家裡先挑兩家答案符合假說的"
+        },
+        {
+          "kind": "metric",
+          "label": "預先登錄後的統計強度",
+          "value": {
+            "source": "k1109",
+            "path": "/k1106b_comparison/k1109_fabless_beta/t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "樣本清單事前鎖死並打時間戳記後重估"
+        }
+      ]
+    },
+    {
+      "name": "3_pass",
+      "info": "results",
+      "style": "scientific",
+      "title": "全部換過還活著的長這樣",
+      "alt": "懶人包：通過換件測試的模型在五個市場時代全勝，並附上樣本邊界",
+      "sources": [
+        "k1056"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "判準",
+          "body": [
+            "換時代、換波動環境、換滾動視窗都沒翻，而且每個沒把握的地方都標出來。",
+            "把恐慌指數加進波動率模型的版本，是目前唯一走完全部換件的發現。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "勝出的市場時代數",
+          "value": {
+            "source": "k1056",
+            "path": "sub_period_summary.n_a4f_wins",
+            "format": {
+              "kind": "integer",
+              "suffix": " 段"
+            }
+          },
+          "note": "低波動牛市、崩盤、暴力修正、升息後期與近期各切一段"
+        },
+        {
+          "kind": "metric",
+          "label": "純靠運氣連贏的機率",
+          "value": {
+            "source": "k1056",
+            "path": "sub_period_summary.binomial_p",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "兩個模型預測力相同時，連贏這麼多段的機率"
+        },
+        {
+          "kind": "metric",
+          "label": "整段樣本外預測誤差改善",
+          "value": {
+            "source": "k1056",
+            "path": "full_oos.improvement_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          },
+          "note": "邊界：中等恐慌區間幾乎打平，市場多數時間待在那裡"
+        },
+        {
+          "kind": "metric",
+          "label": "有效樣本外筆數",
+          "value": {
+            "source": "k1056",
+            "path": "full_oos.n_valid",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          },
+          "note": "資料來源 yfinance，標的 SPY"
+        }
+      ]
+    }
+  ]
+}

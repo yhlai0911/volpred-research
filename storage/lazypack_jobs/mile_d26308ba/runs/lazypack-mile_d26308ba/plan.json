@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "title": "K1495 懶人包：集中度警報亮起時，換等權重躲得掉嗎",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1495/k1495_results.json",
+      "sha256": "43b0383802a5477b6f358db9ba63e92e6e13df18b14500c1c5c8b2eebe332974",
+      "label": "experiment K1495 results (SPY-RSP concentration pulse and forward volatility)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "把直覺拆成兩句可以驗的話",
+      "alt": "把「集中度讓大盤更脆弱、換等權重比較穩」的直覺拆成兩個可檢定主張",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "起點",
+          "body": [
+            "美股漲勢集中在少數權值股，是市場最愛談的題目。順著推：市值加權指數是不是越集中越脆弱？"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "第一句",
+          "body": [
+            "高集中期之後，大盤的未來波動確實變大。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "第二句",
+          "body": [
+            "把部位換成等權重指數，可以少挨這段震盪。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "被標為高集中期的日子佔比",
+          "value": {
+            "source": "results",
+            "path": "descriptive.high_regime_share",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼量集中度，又怎麼不偷看未來",
+      "alt": "用市值加權減等權重的累積報酬差當集中度替身，門檻只用當天以前的歷史",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "替身指標",
+          "body": [
+            "用 SPY（市值加權）減 RSP（等權重）過去一段時間的累積報酬差當替身；差距拉大，代表漲勢往少數大型股集中。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "防偷看",
+          "body": [
+            "門檻只准用當天以前的歷史算（擴張視窗），擋掉拿未來分佈標記過去的作弊。",
+            "被預測的是隔天起算、往後一個月的年化實現波動，當天不計入。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "檢定用交易日",
+          "value": {
+            "source": "results",
+            "path": "data.n_obs",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "第一句成立，第二句被資料打回票",
+      "alt": "高集中期後 SPY 波動升高，但等權重 RSP 同期更高，兩者缺口沒有拉開",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "高集中期後 SPY 未來波動",
+          "value": {
+            "source": "results",
+            "path": "group_means.high_regime.fwd_rv21_spy",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "非高集中期 SPY 未來波動",
+          "value": {
+            "source": "results",
+            "path": "group_means.non_high_regime.fwd_rv21_spy",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "高集中期後 RSP 未來波動",
+          "value": {
+            "source": "results",
+            "path": "group_means.high_regime.fwd_rv21_rsp",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "SPY 減 RSP 缺口的變化",
+          "value": {
+            "source": "results",
+            "path": "tests.fwd_rv_gap.diff_high_minus_non_high",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "第一句成立：高集中期後大盤波動確實升高，重抽樣區間不跨零。",
+            "第二句不成立：等權重的 RSP 同期波動更高，兩者缺口的重抽樣區間跨過零，分不出差別。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "控制掉當期波動後，訊號還剩多少",
+      "alt": "控制當期波動後高集中期標記仍為正，但量到的是全市場亂流而非市值加權獨有脆弱",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "高集中期標記的增量（HAC 迴歸）",
+          "value": {
+            "source": "results",
+            "path": "regressions.primary_hac_forward_spy_vol.params.high_regime.coef",
+            "format": {
+              "kind": "percent",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": " 個百分點"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "該係數的 p 值",
+          "value": {
+            "source": "results",
+            "path": "regressions.primary_hac_forward_spy_vol.params.high_regime.p",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "整條迴歸的解釋力",
+          "value": {
+            "source": "results",
+            "path": "regressions.primary_hac_forward_spy_vol.r_squared",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "訊號量到的是整個股市要進亂流，不是市值加權指數獨有的脆弱。",
+            "想閃這段波動，靠指數加權方式換手在這份資料裡看不到效果。",
+            "要降低這段曝險，得從整體股票部位的大小下手。"
+          ]
+        }
+      ]
+    }
+  ]
+}

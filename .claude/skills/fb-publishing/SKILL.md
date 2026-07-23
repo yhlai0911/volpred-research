@@ -65,6 +65,17 @@ uv run python scripts/mark_fb_post_status.py --mile-id mile_<id> \
 
 `audit_fb_pipeline.py` 加了 backstop invariant：awaiting 但缺 canonical 稿 → warn。
 
+## 雙發佈完成契約（2026-07-23）
+
+`trending_repost` / `event_article` 發佈到 feed 的同一班，必須先把 FB-native
+完稿寫到 `storage/drafts/fb_mile_<id>.md`，才可把來源 task 標 `succeeded`。
+Chrome 當下不可用只影響是否送上 FB，不影響「稿必須已存在」；不得用
+`fb_repost_*` follow-up 取代完稿。`task_pool_claim.py complete` 會從發佈結果中的
+`mile_<id>` 回讀 canonical 稿，缺檔就 fail-closed 保留原 task 為 `in_progress`。
+
+`audit_fb_pipeline.py` 是第二道 backstop：所有非 terminal FB 狀態（不只
+`awaiting_interactive_session`）缺稿都會立即告警，不等 48h TTL。
+
 ## 執行流程（風控 gate，逐步不可跳）
 
 ```bash

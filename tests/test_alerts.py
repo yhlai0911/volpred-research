@@ -454,6 +454,135 @@ def test_send_alert_persists_dedup_and_skips_within_24h(tmp_path: Path, monkeypa
     assert dedup["alerts"][first["alert_key"]]["last_notification_id"] == "notif-1"
 
 
+def test_send_alert_save_prunes_dedup_entries_idle_beyond_retention(tmp_path: Path, monkeypatch):
+    """2026-07-20 ops-master D4: alert_dedup.json is a rolling throttle window,
+    not an archive — entries idle > ALERT_DEDUP_RETENTION (30d) are pruned on
+    every save so the ledger cannot grow without bound (was 769KB)."""
+    storage_dir = tmp_path / "storage"
+    dedup_path = storage_dir / "ops" / "alert_dedup.json"
+    dedup_path.parent.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    stale_ts = (now - timedelta(days=45)).isoformat()
+    fresh_ts = (now - timedelta(days=2)).isoformat()
+    dedup_path.write_text(
+        json.dumps(
+            {
+                "updated_at": stale_ts,
+                "alerts": {
+                    "stale-key": {
+                        "level": "warn",
+                        "title": "long gone",
+                        "first_sent_at": stale_ts,
+                        "last_sent_at": stale_ts,
+                        "last_skipped_at": None,
+                        "send_count": 3,
+                        "skip_count": 9,
+                    },
+                    "fresh-key": {
+                        "level": "warn",
+                        "title": "still relevant",
+                        "first_sent_at": fresh_ts,
+                        "last_sent_at": fresh_ts,
+                        "last_skipped_at": None,
+                        "send_count": 1,
+                        "skip_count": 0,
+                    },
+                    "corrupt-key": "not-a-dict",
+                },
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        return {
+            "notification_id": "notif-1",
+            "subject": f"[VolPred Alert][{level.upper()}] {title}",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+
+    result = send_alert(
+        "info",
+        "new alert",
+        "body",
+        recipient="yihao.lai@gmail.com",
+        storage_dir=str(storage_dir),
+    )
+    assert result["sent"] is True
+
+    dedup = json.loads(dedup_path.read_text(encoding="utf-8"))
+    assert "stale-key" not in dedup["alerts"]
+    assert "corrupt-key" not in dedup["alerts"]
+    assert "fresh-key" in dedup["alerts"]
+    assert result["alert_key"] in dedup["alerts"]
+
+
+def test_send_alert_appends_incident_candidates_for_sent_and_dedup_skipped(
+    tmp_path: Path, monkeypatch
+):
+    """WS-F3: every alert occurrence lands in the incident-candidates stream —
+    the sent one AND the dedup-skipped one. Dedup throttles the transport, not
+    the incident; the filing radar must count both."""
+    storage_dir = tmp_path / "storage"
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        return {
+            "notification_id": "notif-1",
+            "subject": f"[VolPred Alert][{level.upper()}] {title}",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+
+    first = send_alert("warn", "gate failure", "body", storage_dir=str(storage_dir))
+    second = send_alert("warn", "gate failure", "body", storage_dir=str(storage_dir))
+    assert first["sent"] is True
+    assert second["skipped"] is True
+
+    stream = storage_dir / "ops" / "incident_candidates.jsonl"
+    records = [json.loads(ln) for ln in stream.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 2
+    assert records[0]["event"] == "sent"
+    assert records[1]["event"] == "dedup_skip"
+    assert records[0]["dedupe_key"] == records[1]["dedupe_key"] == first["alert_key"]
+    assert [r["occurrence"] for r in records] == [1, 2]
+    assert records[1]["first_seen"] == records[0]["first_seen"]
+    assert records[0]["title"] == "gate failure"
+
+
+def test_send_alert_records_incident_candidate_even_when_transport_fails(
+    tmp_path: Path, monkeypatch
+):
+    """SMTP down/unconfigured still means the incident OCCURRED — the filing
+    radar must not go blind together with the mail."""
+    storage_dir = tmp_path / "storage"
+
+    def fake_dispatch(*, level: str, title: str, body: str, recipient: str, storage_dir: str):
+        return {
+            "notification_id": "notif-x",
+            "subject": "s",
+            "sent": False,
+            "configured": False,
+            "send_error": "smtp unconfigured",
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+    send_alert("critical", "transport down incident", "body", storage_dir=str(storage_dir))
+
+    stream = storage_dir / "ops" / "incident_candidates.jsonl"
+    records = [json.loads(ln) for ln in stream.read_text(encoding="utf-8").splitlines()]
+    assert len(records) == 1
+    assert records[0]["event"] == "send_failed"
+    assert records[0]["occurrence"] == 1
+
+
 def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body(
     tmp_path: Path, monkeypatch
 ):
@@ -730,8 +859,8 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
         ),
     )
     # Simulate a failing host cron so host_cron_fail breach triggers.
-    # Per control-plane rule (v12): host_cron_fail 只看 storage/logs/cron/*.log 最新
-    # "=== exit N ===" 非 0。scheduler_state staleness 不再 count (advisory only).
+    # host_cron_fail 只看 storage/logs/cron/*.log 最新 "=== exit N ===" 非 0
+    # （advisory scheduler lane 已於 2026-07-20 ops-master D2 退役）。
     _write_text(
         storage_dir / "logs" / "cron" / "daily_update.log",
         "\n".join(
@@ -741,15 +870,6 @@ def test_build_alert_condition_report_flags_required_breaches(tmp_path: Path):
                 "=== [daily_update] exit 1 at Sun Apr 19 13:00:10 CST 2026 ===",
             ]
         ),
-    )
-    _write_json(
-        storage_dir / "ops" / "scheduler_state.json",
-        {
-            "last_tick_at": (now - timedelta(hours=1)).isoformat(),
-            "last_status": "ok",
-            "last_reason": None,
-            "last_result": None,
-        },
     )
 
     # Inject a fixture paper_root: with paper_root=None, _parse_paper_stale_state
@@ -836,7 +956,9 @@ def test_release_pool_starved_alert_includes_preview_counts(tmp_path: Path, monk
     assert condition["breached"] is True
     assert condition["level"] == "warn"
     assert "dedup_flagged: 46" in condition["body"]
-    assert "eligible_after_dedup: 0" in condition["body"]
+    # 2026-07-19: renamed from eligible_after_dedup — the count now reflects the
+    # content-quality gates too, so the old label under-described what it filtered.
+    assert "eligible_after_all_gates: 0" in condition["body"]
     assert condition["details"]["release_preview"]["pool_counts"]["eligible"] == 0
 
 
@@ -964,10 +1086,6 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     _write_text(
         storage_dir / "logs" / "cron" / "daily_update.log",
         f"=== [daily_update] exit 1 at {(now - timedelta(minutes=5)).isoformat()} ===\n",
-    )
-    _write_json(
-        storage_dir / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-04-19T00:00:00+00:00", "last_status": "invalid_state"},
     )
     # Isolate M2/M3 staleness conditions so this test asserts only the cron/pool set.
     # Fresh knowledge entry (< 2d before `now`) keeps knowledge_stale quiet.
@@ -1119,10 +1237,6 @@ def test_host_cron_fail_severity_calibration(tmp_path: Path):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-06-15T00:00:00+00:00", "last_status": "ok"},
-    )
     now = datetime.now(timezone.utc)
 
     def write_exits(codes):
@@ -1183,10 +1297,6 @@ def test_host_cron_fail_quota_window_is_self_recovering(tmp_path: Path):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-02T00:00:00+00:00", "last_status": "ok"},
-    )
     now = datetime.now(timezone.utc)
 
     def write_exits(codes):
@@ -1247,10 +1357,6 @@ def test_host_cron_fail_git_push_held_is_benign(tmp_path: Path):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-03T00:00:00+00:00", "last_status": "ok"},
-    )
     now = datetime.now(timezone.utc)
 
     def write_push_exits(codes):
@@ -1293,10 +1399,6 @@ def test_host_cron_fail_ignores_stale_nonzero_exit(tmp_path: Path, monkeypatch):
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
-    )
     monkeypatch.setattr(
         "volpred.ops.alerts.load_runtime_schedules",
         lambda: {
@@ -1335,10 +1437,6 @@ def test_host_cron_fail_fresh_nonzero_exit_still_critical(tmp_path: Path, monkey
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
-    )
     monkeypatch.setattr(
         "volpred.ops.alerts.load_runtime_schedules",
         lambda: {
@@ -1377,10 +1475,6 @@ def test_host_cron_fail_unknown_exit_timestamp_caps_at_warn(tmp_path: Path, monk
     from volpred.ops.alerts import _parse_host_cron_state
 
     storage = tmp_path / "storage"
-    _write_json(
-        storage / "ops" / "scheduler_state.json",
-        {"last_tick_at": "2026-07-06T00:00:00+00:00", "last_status": "ok"},
-    )
     monkeypatch.setattr(
         "volpred.ops.alerts.load_runtime_schedules",
         lambda: {
@@ -1648,10 +1742,18 @@ def test_push_backlog_routes_only_when_latest_cause_is_silent_fallback_hold(
     assert outage["details"]["internal_alert_key"] is None
 
 
-def test_held_push_backlog_creates_p1_without_email_or_telegram(
+def test_held_push_backlog_records_incident_notifies_once_and_mints_no_task(
     tmp_path: Path,
     monkeypatch,
 ):
+    """incident-lifecycle P3 flip of the old contract (plan §6).
+
+    OLD: first internal signal = silent + P1 repair task per episode — 19 a1
+    tasks for one alert_key, none converged (machine_self repairs run on the
+    broken machinery itself).  NEW: machine_self kinds record the incident,
+    notify ONCE per episode, and never mint auto-repair tasks; repeats stay off
+    the transport entirely.
+    """
     storage = tmp_path / "storage"
     _write_json(storage / "next_tasks.json", [])
     condition = {
@@ -1662,22 +1764,22 @@ def test_held_push_backlog_creates_p1_without_email_or_telegram(
         "body": "held by NEW silent fallback",
         "details": {"internal_alert_key": "git_push_backup_hold"},
     }
-    monkeypatch.setattr(
-        alerts_module,
-        "build_alert_condition_report",
-        lambda **kwargs: {
+
+    def _report(**kwargs):
+        return {
             "generated_at": "2026-07-14T12:00:00+00:00",
             "recipient": "yihao.lai@gmail.com",
-            "conditions": [condition],
+            "conditions": [dict(condition)],
             "breach_count": 1,
-        },
-    )
+        }
+
+    monkeypatch.setattr(alerts_module, "build_alert_condition_report", _report)
+    deliveries: list[str] = []
     monkeypatch.setattr(
         alerts_module,
         "send_alert",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            AssertionError("suppressed internal route reached email/Telegram transport")
-        ),
+        lambda level, title, body, **kwargs: deliveries.append(title)
+        or {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"},
     )
 
     report = check_alert_conditions(
@@ -1685,11 +1787,28 @@ def test_held_push_backlog_creates_p1_without_email_or_telegram(
         now=datetime(2026, 7, 14, 12, 0, tzinfo=timezone.utc),
     )
 
-    assert report["alerts"][0]["skip_reason"] == "internal_auto_remediation"
+    # First episode: exactly one notification (§6 記錄+通知), zero repair tasks.
+    assert len(deliveries) == 1
+    assert report["alerts"][0]["sent"] is True
     tasks = json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
-    assert len(tasks) == 1
-    assert tasks[0]["priority"] == 1
-    assert tasks[0]["alert_key"] == "git_push_backup_hold"
+    assert tasks == []
+    from volpred.ops import incident
+
+    rows = incident.list_incidents(storage / "ops" / "incidents.json")
+    assert len(rows) == 1
+    assert rows[0]["kind"] == "git_push_backup_hold"
+    assert rows[0]["class"] == incident.CLASS_MACHINE_SELF
+
+    # Repeat signal: counted on the incident, nothing new on the transport.
+    report2 = check_alert_conditions(
+        storage_dir=str(storage),
+        now=datetime(2026, 7, 14, 13, 0, tzinfo=timezone.utc),
+    )
+    assert len(deliveries) == 1
+    assert report2["alerts"][0]["skip_reason"] == "internal_auto_remediation"
+    assert json.loads((storage / "next_tasks.json").read_text(encoding="utf-8")) == []
+    rows = incident.list_incidents(storage / "ops" / "incidents.json")
+    assert rows[0]["occurrence_count"] == 2
 
 
 def test_healthy_push_backlog_resolves_only_the_backup_hold_key(

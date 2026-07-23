@@ -51,6 +51,7 @@ Differences from legacy (deliberate, same behaviour):
 """
 from __future__ import annotations
 
+import ast
 import fcntl
 import hashlib
 import json
@@ -66,7 +67,13 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 
+from volpred.ops.foreign_incident import (
+    QUARANTINE_REF_PREFIX,
+    reconcile_incidents,
+    upsert_incident,
+)
 from volpred.ops.machine_churn import classify_machine_churn
+from volpred.ops.next_tasks import backfill_ci_repair_commit
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
@@ -215,6 +222,7 @@ _MACHINE_STATE_PREFIXES = (
 )
 _MACHINE_STATE_FILES = (
     "storage/.failed_supabase_syncs.json",  # shared publisher/drain retry queue
+    "storage/.failed_mirror_syncs.json",    # same, Mirror side (WS-C4)
     "storage/.knowledge_index_state.json",  # scheduled index freshness ledger
     "storage/next_tasks.json",       # the pending queue
     # Append-only ledger written through scripts/append_work_log.py — by fires, and
@@ -477,6 +485,18 @@ def _ensure_failed_closeout(
     """Persist first-failure ownership once; never re-pin later edited bytes."""
     if not owned:
         return False
+    machine = [rel for rel in owned if _is_machine_state(rel)]
+    if machine:
+        # Hot daemon-written state is never pinned (assign_33e4c59f): a dozen
+        # writers touch these files every hour, so the fingerprint is guaranteed
+        # to drift and the claim can only ever end in a "released" warn. Deferral
+        # has no meaning for bytes that are stale a minute later — the churn lane
+        # re-adopts these paths under the next fire's own baseline.
+        LOG.info("phase_z: not pinning %d machine-state path(s) into failed closeout: %s",
+                 len(machine), machine[:10])
+        owned = [rel for rel in owned if not _is_machine_state(rel)]
+        if not owned:
+            return False
     dest = _failed_closeout_path(repo_root, runner)
     if dest is None:
         return False
@@ -706,6 +726,21 @@ def recover_failed_closeout(
     payload = _read_failed_closeout(repo_root, runner)
     if payload is None:
         return {"committed": False, "reason": "no_failed_closeout"}
+    stale_machine = sorted(
+        e["path"] for e in payload["paths"] if _is_machine_state(e["path"]))
+    if stale_machine:
+        # Receipts written before assign_33e4c59f may still pin hot machine
+        # state. Release those claims silently: under the current invariant they
+        # would never have been pinned, and warning about their inevitable drift
+        # was the recurring "放棄認領" orphan alert (2026-07-20). Working bytes
+        # are untouched; the churn lane owns them.
+        LOG.info("phase_z: releasing %d pre-invariant machine-state claim(s) silently: %s",
+                 len(stale_machine), stale_machine[:10])
+        _release_closeout_claims(
+            repo_root, stale_machine, runner, reason="machine_state_unpinned")
+        payload = _read_failed_closeout(repo_root, runner)
+        if payload is None:
+            return {"committed": False, "reason": "no_failed_closeout"}
     dirty = _dirty_paths(repo_root, runner)
     if dirty is None:
         return {"committed": False, "reason": "status_error"}
@@ -1060,6 +1095,298 @@ def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[lis
     itself shut. One implementation, two callers; see that module for the reasoning.
     """
     return classify_machine_churn(repo_root, candidates, label="phase_z")
+
+
+# ── quarantine checkpoint (decision doc §4 D2) ───────────────────────────────
+# "不掃進 main" and "不遺失" are two different guarantees, and this module only
+# ever implemented the first. A dirty working tree is NOT preservation: those
+# bytes can be overwritten by the next writer, reset by a human, or swept by a
+# cleanup pass. 40+ paths sat foreign for up to 78 fires — visible, not safe.
+#
+# So: a path that is stuck (streak >= _FOREIGN_STREAK_CRITICAL) gets its current
+# bytes copied into an immutable ref under _FOREIGN_QUARANTINE_REF_PREFIX. The
+# rule the external review gave, verbatim:
+#
+#     不確定的內容一律自動保存，但絕不自動進 main。
+#
+# This is deliberately NOT an ownership decision and NOT an adoption heuristic
+# (D1 forbids a fourth guess): it does not claim the bytes are anyone's, does
+# not claim they are complete, and does not put them anywhere main can see. It
+# only makes them *retrievable* — `git show <ref>:<path>` — after the working
+# copy is gone. Whether they belong in main is still a human/D5 judgement.
+#
+# Everything below runs through git plumbing on a throwaway GIT_INDEX_FILE:
+# no `git add`, no `git commit`, no `git stash`, no HEAD move, no index write,
+# no working-tree write. The only shared mutations are object writes and one
+# `update-ref` on a namespace nothing else reads, and both are serialised by
+# volpred.ops.git_writer_lock like every other Git mutation in this module.
+# Single owner is volpred.ops.foreign_incident: the D3 close-condition check has
+# to look in exactly the namespace this writes to, and two string literals drift
+# silently — a drift here reads as "preserved but not retrievable".
+_FOREIGN_QUARANTINE_REF_PREFIX = QUARANTINE_REF_PREFIX
+# Bound on one checkpoint. 40 stuck paths is today's reality; a runaway producer
+# must not turn one fire into an unbounded plumbing loop inside the writer lease.
+_QUARANTINE_MAX_PATHS = 200
+_QUARANTINE_IDENTITY = {
+    "GIT_AUTHOR_NAME": "volpred-phase-z",
+    "GIT_AUTHOR_EMAIL": "phase-z@volpred.local",
+    "GIT_COMMITTER_NAME": "volpred-phase-z",
+    "GIT_COMMITTER_EMAIL": "phase-z@volpred.local",
+}
+
+
+def _quarantine_candidates(
+    repo_root: Path, stuck: list[str],
+) -> tuple[list[tuple[str, str]], dict[str, str]]:
+    """Split stuck paths into (checkpointable ``(mode, rel)``, skipped ``rel -> why``).
+
+    The live-editing gate is ``_classify_machine_churn``'s ``deferred`` bucket —
+    the same ``fcntl`` shared-lock probe every other writer in this repo uses. A
+    producer holding the lock is mid-write, so its bytes are a torn snapshot and
+    it is coming back for them anyway; checkpointing there would preserve a half
+    file and claim it was the state. There is deliberately no second liveness
+    notion here (see the decision doc §6: flock is the one signal this repo got
+    right, and inventing a rival to it is exactly the class of bug D1 stops).
+    """
+    _, deferred, _ = _classify_machine_churn(repo_root, stuck)
+    live = set(deferred)
+    payload: list[tuple[str, str]] = []
+    skipped: dict[str, str] = {}
+    for rel in stuck:
+        if rel in live:
+            skipped[rel] = "live_writer"
+            continue
+        src = repo_root / rel
+        try:
+            if src.is_symlink() or not src.is_file():
+                # A dirty *deletion* or a directory/symlink entry. Nothing to
+                # preserve: the pre-deletion bytes already live in HEAD.
+                skipped[rel] = "not_a_regular_file"
+                continue
+            mode = "100755" if os.access(src, os.X_OK) else "100644"
+        except OSError as exc:  # silent-ok: 不是靜默 —— 失敗連同 errno 記進 skipped，
+            skipped[rel] = f"stat_error: {exc}"  # 隨 checkpoint receipt 一起回報給呼叫端
+            continue
+        payload.append((mode, rel))
+    return payload, skipped
+
+
+def _quarantine_stuck_foreign(
+    repo_root: Path,
+    stuck: list[str],
+    *,
+    streaks: dict[str, int],
+    hhmm: str,
+    runner=subprocess.run,
+) -> dict:
+    """Checkpoint stuck foreign bytes into an immutable ref. Never fails a fire.
+
+    Returns a receipt dict that is folded into ``run_phase_z``'s result (and the
+    log line) so D3's incident/admission-control work has something mechanical to
+    read. No second state file: the ref namespace itself is the durable record.
+    """
+    result: dict = {
+        "ref": None, "created": False, "checkpointed": [], "skipped": {}, "reason": "",
+    }
+    if not stuck:
+        result["reason"] = "no_stuck_paths"
+        return result
+    considered = stuck[:_QUARANTINE_MAX_PATHS]
+    if len(stuck) > _QUARANTINE_MAX_PATHS:
+        LOG.warning("phase_z: %d stuck paths exceed the quarantine cap — checkpointing the "
+                    "%d longest-stuck this fire", len(stuck), _QUARANTINE_MAX_PATHS)
+    payload, skipped = _quarantine_candidates(repo_root, considered)
+    result["skipped"] = skipped
+    if not payload:
+        result["reason"] = "nothing_checkpointable"
+        return result
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="volpred-phase-z-quarantine-") as tx:
+            env = os.environ.copy()
+            env["GIT_INDEX_FILE"] = str(Path(tx) / "index")  # never the real index
+            env.update(_QUARANTINE_IDENTITY)
+            with git_writer_lock(
+                repo_root,
+                actor=f"dispatch-phase-z-quarantine:{hhmm}",
+                timeout_s=_COMMIT_TIMEOUT_S,
+            ):
+                stored: list[str] = []
+                for mode, rel in payload:
+                    blob = _git(
+                        repo_root, "hash-object", "-w", "--no-filters", "--",
+                        str(repo_root / rel),
+                        timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                    )
+                    if blob.returncode != 0:
+                        skipped[rel] = f"hash_object_rc{blob.returncode}"
+                        continue
+                    sha = (blob.stdout or "").strip()
+                    staged = _git(
+                        repo_root, "update-index", "--add", "--cacheinfo",
+                        f"{mode},{sha},{rel}",
+                        timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                    )
+                    if staged.returncode != 0:
+                        skipped[rel] = f"update_index_rc{staged.returncode}"
+                        continue
+                    stored.append(rel)
+                if not stored:
+                    result["reason"] = "nothing_checkpointable"
+                    return result
+
+                write_tree = _git(
+                    repo_root, "write-tree", timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if write_tree.returncode != 0:
+                    LOG.warning("phase_z: quarantine write-tree rc=%d: %s",
+                                write_tree.returncode, (write_tree.stderr or "")[-300:])
+                    result["reason"] = "write_tree_error"
+                    return result
+                tree_sha = (write_tree.stdout or "").strip()
+
+                # Same bytes as last fire → reuse that ref. Without this the same
+                # 40 paths would mint a new ref every hour forever, and a refs
+                # namespace nobody can read is a second kind of losing it.
+                previous = _git(
+                    repo_root, "for-each-ref", "--count=1", "--sort=-refname",
+                    "--format=%(refname) %(objectname)", _FOREIGN_QUARANTINE_REF_PREFIX,
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if previous.returncode == 0 and (previous.stdout or "").strip():
+                    prior_ref, _, prior_sha = (previous.stdout or "").strip().partition(" ")
+                    prior_tree = _git(
+                        repo_root, "rev-parse", "--verify", f"{prior_sha.strip()}^{{tree}}",
+                        timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                    )
+                    if prior_tree.returncode == 0 and (prior_tree.stdout or "").strip() == tree_sha:
+                        result.update({"ref": prior_ref, "created": False,
+                                       "checkpointed": stored, "reason": "unchanged"})
+                        return result
+
+                ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+                ref = f"{_FOREIGN_QUARANTINE_REF_PREFIX}/{ts}"
+                body = "\n".join([
+                    "Foreign paths stuck for >= "
+                    f"{_FOREIGN_STREAK_CRITICAL} fires, checkpointed so the bytes survive "
+                    "the working tree. NOT a claim of ownership, completeness or "
+                    "readiness, and NOT reachable from main.",
+                    "",
+                    "Retrieve with: git show <ref>:<path>",
+                    "",
+                    *[f"- {rel} — {streaks.get(rel, 0)} fires" for rel in stored],
+                ])
+                # No parent: a quarantine checkpoint must never be an ancestor of
+                # anything, so it can never be fast-forwarded into main by mistake.
+                commit = _git(
+                    repo_root, "commit-tree", tree_sha,
+                    "-m", f"quarantine({hhmm}): {len(stored)} stuck foreign path(s)",
+                    "-m", body,
+                    timeout_s=_COMMIT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if commit.returncode != 0:
+                    LOG.warning("phase_z: quarantine commit-tree rc=%d: %s",
+                                commit.returncode, (commit.stderr or "")[-300:])
+                    result["reason"] = "commit_tree_error"
+                    return result
+                commit_sha = (commit.stdout or "").strip()
+                # Empty old-value = "must not already exist"; a collision is a bug,
+                # never a silent overwrite of somebody's only copy.
+                landed = _git(
+                    repo_root, "update-ref", ref, commit_sha, "",
+                    timeout_s=_SHORT_TIMEOUT_S, runner=runner, env=env,
+                )
+                if landed.returncode != 0:
+                    LOG.warning("phase_z: quarantine update-ref rc=%d: %s",
+                                landed.returncode, (landed.stderr or "")[-300:])
+                    result["reason"] = "update_ref_error"
+                    return result
+                result.update({"ref": ref, "created": True, "checkpointed": stored,
+                               "commit": commit_sha, "reason": "checkpointed"})
+    except GitWriterLockError as exc:
+        LOG.warning("phase_z: quarantine skipped — git writer lock unavailable (%s)", exc)
+        result["reason"] = "lock_unavailable"
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        LOG.warning("phase_z: quarantine checkpoint failed (%s) — working tree untouched", exc)
+        result["reason"] = "error"
+    return result
+
+
+# ── persistent incident (decision doc §4 D3) ─────────────────────────────────
+
+def _reconcile_open_incidents(repo_root: Path, tasks_path: Path) -> dict:
+    """重跑每張未關 incident 的判準：收乾淨的關掉，其餘更新降載旗標。Never fails a fire.
+
+    降載必須能自己解除。靠人來關，等於把 forcing function 的解除端交給正是「沒有人
+    會回來收」的那個人 —— 而這個 class 的全部教訓就是別再依賴那個人。
+    """
+    empty = {"closed": [], "deferred": []}
+    if not tasks_path.exists():
+        return empty
+    try:
+        outcome = reconcile_incidents(repo_root, tasks_path=tasks_path)
+    except Exception as exc:  # noqa: BLE001 — 收單失敗不值得讓一班 fire 掛掉
+        LOG.warning("phase_z: incident reconcile failed (%s) — 降載維持，下一班再試", exc)
+        return empty
+    for entry in outcome["closed"]:
+        LOG.info("phase_z: incident %s closed — 關閉條件全綠（%d 個路徑），降載解除",
+                 entry["task_id"], len(entry["verdict"]["checked"]))
+    for entry in outcome["deferred"]:
+        LOG.info("phase_z: incident %s 降載暫緩 — 剩餘 %d 個路徑都是活躍碼（作者仍在編輯）",
+                 entry["task_id"], len(entry["verdict"]["deferred"]))
+    return outcome
+
+
+def _open_stuck_incident(
+    repo_root: Path,
+    stuck: list[str],
+    *,
+    streaks: dict[str, int],
+    quarantine: dict,
+) -> dict:
+    """Create-or-update the single incident for this stuck set. Never fails a fire.
+
+    The queue write is the mechanism that turns "78 fires of red logs" into a
+    thing with an owner, a close condition and a cost (see
+    ``volpred.ops.foreign_incident``). It is still not worth taking a dispatch
+    fire down for: on failure this returns ``reason="error"``, which is exactly
+    the case where the caller falls back to the legacy backed-off CRITICAL rather
+    than going quiet.
+    """
+    tasks_path = repo_root / "storage" / "next_tasks.json"
+    # 解除端跟建立端在同一個地方跑，而且**先跑**：一張關閉條件已滿足的 incident
+    # 若沒人關，降載就會活得比它要治的問題更久（2026-07-21：close condition 全綠、
+    # slot cap 仍是 DERATE_CAP，因為 incident_closeable 根本沒有 caller）。
+    # 放在 `if not stuck` 之前，是因為「這班沒有卡住的檔案」正是最該收單的一班。
+    _reconcile_open_incidents(repo_root, tasks_path)
+    if not stuck:
+        return {"fingerprint": None, "task_id": None, "created": False,
+                "updated": False, "reason": "no_stuck_paths"}
+    if not tasks_path.exists():
+        # A checkout with no task pool has no scheduler to de-rate, so there is
+        # nothing for an incident to control. PHASE-Z does not conjure the
+        # canonical queue into existence — that would be a new writer creating
+        # canonical state as a side effect. Say so, and let the caller page.
+        LOG.warning("phase_z: no task pool at %s — cannot open a stuck-path incident; "
+                    "falling back to the backed-off CRITICAL", tasks_path)
+        return {"fingerprint": None, "task_id": None, "created": False,
+                "updated": False, "reason": "no_queue"}
+    try:
+        receipt = upsert_incident(
+            paths=stuck,
+            streaks=streaks,
+            quarantine_ref=quarantine.get("ref"),
+            tasks_path=tasks_path,
+        )
+    except Exception as exc:  # noqa: BLE001 — a queue write must not fail a fire
+        LOG.warning("phase_z: stuck-path incident upsert failed (%s) — falling back "
+                    "to the backed-off CRITICAL so the condition is not silent", exc)
+        return {"fingerprint": None, "task_id": None, "created": False,
+                "updated": False, "reason": "error", "error": str(exc)}
+    LOG.info("phase_z: stuck-path incident %s (%s) — task=%s, fingerprint=%s",
+             receipt["reason"], "created" if receipt["created"] else "updated",
+             receipt["task_id"], receipt["fingerprint"])
+    return receipt
 
 
 # ── pre-fire guard ───────────────────────────────────────────────────────────
@@ -1724,6 +2051,105 @@ def _is_test_path(rel: str) -> bool:
     )
 
 
+# ---------------------------------------------------------------------------
+# Split-pair guard (task assign_b802db4f, 2026-07-22)
+#
+# A refactor lands as two halves: a new source module and the test that imports
+# it. PHASE-Z classifies paths by *when they went dirty*, never by what they mean
+# to each other, so the halves routinely land on opposite sides of the ownership
+# line -- the test went dirty during this fire (owned), the source was already
+# dirty at fire start (foreign, excluded). The candidate index then holds a test
+# whose import target is absent from it, audit-test-imports rejects it by design,
+# the commit rolls back, every path stays dirty, and the next fire rebuilds the
+# identical doomed candidate. Observed 2026-07-21/22: 21 foreign paths stuck for
+# >=3 fires and ~13 hours of fire output rolled back, because the receipt written
+# on failure pins only `owned` -- so recovery replays the same half-set forever.
+#
+# The exit is to spot the split before staging and defer the *test* half. We
+# never pull the foreign source in: that is stealing another session's in-flight
+# bytes, which is exactly what ownership classification exists to prevent.
+# Deferring is cheap and strictly bounded -- only an *untracked* test whose
+# missing half is itself untracked and present on disk qualifies, and a
+# brand-new test carries no regression signal that HEAD did not already lack. A
+# tracked test that breaks is a real break and still blocks the commit.
+# ---------------------------------------------------------------------------
+
+_AUDITED_IMPORT_ROOTS = {"volpred": "src", "scripts": "."}
+
+
+def _referenced_source_paths(repo_root: Path, rel: str) -> set[str]:
+    """Repo-relative source paths a test needs, by import and by path literal.
+
+    Mirrors what ``scripts/audit_test_imports.py`` resolves: dotted modules under
+    ``volpred``/``scripts`` (including ``from pkg import submodule``, where the
+    submodule is the half that goes missing) plus bare ``scripts/x.py`` literals.
+    A miss here costs nothing -- the guard only ever *drops* a path, so an
+    unresolved dependency just degrades to today's behaviour of letting the gate
+    reject the commit.
+    """
+    try:
+        source = (repo_root / rel).read_text(encoding="utf-8")
+        tree = ast.parse(source)
+    except (OSError, ValueError, SyntaxError):
+        return set()
+
+    dotted: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            dotted.update(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            dotted.add(node.module)
+            dotted.update(f"{node.module}.{alias.name}" for alias in node.names)
+
+    out: set[str] = set()
+    for name in dotted:
+        base = _AUDITED_IMPORT_ROOTS.get(name.split(".", 1)[0])
+        if base is None:
+            continue
+        stem = Path(base, *name.split("."))
+        for cand in (stem.with_suffix(".py"), stem / "__init__.py"):
+            if (repo_root / cand).is_file():
+                out.add(cand.as_posix())
+                break
+
+    for literal in re.findall(r"['\"](scripts/[\w./-]+\.py)['\"]", source):
+        if (repo_root / literal).is_file():
+            out.add(literal)
+    return out
+
+
+def _split_pair_deferrals(
+    repo_root: Path, to_stage: list[str], base_sha: str, *, runner
+) -> dict[str, list[str]]:
+    """Untracked tests in ``to_stage`` whose source half is absent from the candidate.
+
+    Returns ``{test_rel: [missing source rel, ...]}``; empty when nothing is split.
+    """
+    staged = set(to_stage)
+    tracked_cache: dict[str, bool] = {}
+
+    def _tracked(rel: str) -> bool:
+        if rel not in tracked_cache:
+            probe = _git(
+                repo_root, "cat-file", "-e", f"{base_sha}:{rel}",
+                timeout_s=_SHORT_TIMEOUT_S, runner=runner,
+            )
+            tracked_cache[rel] = probe.returncode == 0
+        return tracked_cache[rel]
+
+    deferrals: dict[str, list[str]] = {}
+    for rel in to_stage:
+        if not _is_test_path(rel) or _tracked(rel):
+            continue
+        missing = sorted(
+            dep for dep in _referenced_source_paths(repo_root, rel)
+            if dep not in staged and not _tracked(dep)
+        )
+        if missing:
+            deferrals[rel] = missing
+    return deferrals
+
+
 def _orphan_half_candidates(repo_root: Path, foreign: list[str]) -> list[str]:
     """Foreign dirty paths eligible to be *proved* a missing half.
 
@@ -2093,6 +2519,168 @@ def _post_commit_test_gate(
             "alert": alert_result, **comparison, **base}
 
 
+def _gate_review_fingerprint(repo_root: Path, gate_paths: list[str]) -> str:
+    """Stable id for one *content* state of the deferred gate paths.
+
+    Same bytes still sitting dirty next fire → same id → ``if_exists='skip'``
+    turns the second queue attempt into a no-op. Edit the gate again → new id →
+    a fresh review task. This is what keeps the review lane from re-filing the
+    identical task every hour (the "連續 N 班同一 reason" failure mode).
+    """
+    digest = hashlib.sha256()
+    for rel in sorted(gate_paths):
+        blob = repo_root / rel
+        try:
+            body = blob.read_bytes()
+        except OSError:
+            body = b"<unreadable>"
+        digest.update(rel.encode("utf-8"))
+        digest.update(b"\0")
+        digest.update(hashlib.sha256(body).hexdigest().encode("ascii"))
+        digest.update(b"\0")
+    return digest.hexdigest()[:12]
+
+
+def _default_gate_review(*, repo_root: Path, gate_paths: list[str], hhmm: str) -> dict:
+    """File (idempotently) the review task that owns a deferred gate change.
+
+    PHASE-Z deliberately does not commit changes to the very files that gate it
+    (a commit N that weakens the gate would be judged by that weakened gate at
+    commit N+1). Before 2026-07-20 that check rolled back the *whole* batch and
+    left no exit: every fire retried, failed, alerted, and the workspace stayed
+    stuck forever (assign_010d1a2d). Now the gate paths are simply held back —
+    everything else commits — and this task is the forward path for them.
+    """
+    from volpred.ops.next_tasks import append_task_record
+
+    fp = _gate_review_fingerprint(repo_root, gate_paths)
+    task_id = f"phase_z_gate_review_{fp}"
+    listing = "\n".join(f"- `{p}`" for p in gate_paths)
+    record = {
+        "id": task_id,
+        "title": f"[gate review] PHASE-Z 保留了 {len(gate_paths)} 個 trusted-gate 檔案變更，待審查後提交",
+        "description": "\n".join([
+            f"PHASE-Z（fire {hhmm}）已把這班其餘變更正常提交，但**保留**下列 trusted-gate 路徑不提交：",
+            "",
+            listing,
+            "",
+            "## 為什麼保留",
+            "這些檔案就是 PHASE-Z 用來審判 commit 的 gate 本身。若讓它們自動落地，"
+            "下一班就會被『這班剛改過的 gate』審判 —— commit N 弱化 gate、commit N+1 被弱化的 gate 放行。"
+            "candidate worktree 用 pinned base_sha 執行 hook，擋得住同一批的自我審判，擋不住這條跨 commit 的時序威脅。",
+            "",
+            "## 下一步（擇一，做完這張單就結案）",
+            "1. 看 diff，確認變更沒有弱化檢查強度：",
+            "",
+            "```",
+            "git diff -- " + " ".join(gate_paths),
+            "```",
+            "",
+            "2. 認可 → 由審查者自行提交（PHASE-Z 不會代勞）：",
+            "",
+            "```",
+            "git add " + " ".join(gate_paths),
+            "git commit -m 'chore(gate): <說明這次 gate 變更做了什麼>'",
+            "```",
+            "",
+            "3. 不認可 → 還原：",
+            "",
+            "```",
+            "git checkout -- " + " ".join(gate_paths),
+            "```",
+            "",
+            "檔案留在工作區、沒有遺失；在本單結案前，每班 PHASE-Z 都會照常提交其餘變更。",
+        ]),
+        "task_type": "platform_ops",
+        "priority": 2,
+        "status": "pending",
+        "source": "phase_z_gate_review",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "gate_paths": list(gate_paths),
+    }
+    try:
+        _, created = append_task_record(record, path=str(repo_root / "storage" / "next_tasks.json"))
+    except Exception as exc:  # queue unwritable must not wedge the commit itself
+        LOG.warning("phase_z: cannot file gate-review task (%s)", exc)
+        return {"task_id": task_id, "created": False, "error": str(exc)}
+    return {"task_id": task_id, "created": created}
+
+
+def _observe_ownership_shadow(
+    repo_root: Path,
+    *,
+    dirty_now: set[str],
+    baseline: set[str] | None,
+    fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
+) -> None:
+    """Log what a DECLARED-ownership ledger would have said. Decides nothing.
+
+    Stage 1 of docs/refactor_commit_ownership_state_machine.md. `owned = dirty_now
+    - baseline` is an inference about a shared checkout, and every incident in
+    error_log §B is that inference being wrong in one of three ways. The
+    replacement is a write-time declaration (`volpred.ops.fire_manifest`), and
+    this call measures the gap between the two answers on live fires *before*
+    anything commits on the new one — a shadow, not a switch.
+
+    Totally guarded on purpose: the commit path below must be bit-identical
+    whether this succeeds, fails, or the module is missing entirely.
+    """
+    try:
+        from volpred.ops import fire_manifest
+
+        fire_manifest.observe_shadow(
+            repo_root, dirty_now=dirty_now, baseline=baseline, fire_ids=fire_ids,
+        )
+    except Exception as exc:  # noqa: BLE001 — a shadow may never touch a decision
+        LOG.debug("phase_z: ownership shadow skipped (%s)", exc)
+
+
+def _partition_foreign_ownership(repo_root: Path, paths: list[str]) -> dict:
+    """Separate somebody's live, declared work from residue that needs an exit.
+
+    A fire-start baseline proves only that a path is not this fire's output.  It
+    does *not* prove that the path is abandoned or risky.  The 2026-07-22 13:16
+    receipt demonstrated the distinction: 29 paths owned by concurrent sessions
+    were correctly skipped, then incorrectly presented to the owner as one WARN.
+
+    Declared live ownership is write-time evidence, not another cleanup-layer
+    recognizer.  Those paths remain visible in the PHASE-Z receipt, but they do
+    not enter the foreign streak, orphan-half probe, quarantine, incident, or
+    owner notification lanes.  Only unowned, stale, or contested residue does.
+
+    Fail closed: an unreadable/missing ledger leaves every path in ``unowned``.
+    That preserves the existing no-commit safety boundary and merely delays any
+    notification until the persistent-incident threshold is reached.
+    """
+    ordered = sorted(set(paths))
+    empty = {
+        "active": {}, "stale": {}, "contested": {}, "unowned": ordered,
+        "risk": ordered,
+    }
+    if not ordered:
+        return empty
+    try:
+        from volpred.ops import fire_manifest
+
+        ownership = fire_manifest.resolve_ownership(repo_root, ordered)
+    except Exception as exc:  # noqa: BLE001 — attribution failure must not claim bytes
+        LOG.warning("phase_z: declared foreign ownership unavailable (%s)", exc)
+        return empty
+
+    active = dict(ownership.get("foreign") or {})
+    stale = dict(ownership.get("stale") or {})
+    contested = dict(ownership.get("contested") or {})
+    unowned = sorted(ownership.get("orphan") or [])
+    risk = sorted(set(unowned) | set(stale) | set(contested))
+    return {
+        "active": {p: active[p] for p in sorted(active)},
+        "stale": {p: stale[p] for p in sorted(stale)},
+        "contested": {p: contested[p] for p in sorted(contested)},
+        "unowned": unowned,
+        "risk": risk,
+    }
+
+
 def run_phase_z(
     *,
     repo_root: Path,
@@ -2105,8 +2693,27 @@ def run_phase_z(
     pre_fire_dirty: set[str] | list[str] | None = None,
     commit_receipt_override: dict | None = None,
     recovery_mode: bool = False,
+    isolated_cohort: bool = False,
+    gate_review_fn=None,
+    claim_owners: set[str] | list[str] | tuple[str, ...] | None = None,
+    fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
+
+    ``isolated_cohort`` (WS-B demotion, 2026-07-20): True when EVERY fire in
+    the drained cohort ran with a producer-scoped workspace (see workspace.py).
+    Isolated fires land their repo-byte output through their own worktree merge
+    gate, so the baseline arithmetic below may no longer CLAIM authorship of
+    non-machine-state paths by timing alone — a new dirty code/docs path on the
+    canonical checkout during an isolated fire is either another writer or an
+    isolation breach, and committing it under the fire's name is exactly the
+    guessing this pilot retires. Such paths are demoted to
+    ``isolation_residue``: left in the tree, surfaced once, and picked up by
+    the existing foreign-streak machinery if they stick around. Machine-state
+    adoption (scheduled-job churn — the residue lane isolation cannot cover)
+    is unchanged, and ``isolated_cohort=False`` keeps the full legacy fallback
+    for unisolated fires. The recognizer itself is retained (retirement is a
+    separate decision after a stable month — plan §WS-B).
 
     Returns keys: ``committed`` (bool), ``reason`` (str), and — when it acted —
     ``untracked`` (list of leaked-ignored paths removed from the index),
@@ -2130,6 +2737,7 @@ def run_phase_z(
     hhmm = now_hhmm or datetime.now().strftime("%H:%M")
     supplied_alert_fn = alert_fn
     alert_fn = alert_fn or _default_alert
+    gate_review_fn = gate_review_fn or _default_gate_review
     if internal_alert_fn is None:
         if supplied_alert_fn is None:
             internal_alert_fn = _default_internal_alert
@@ -2181,6 +2789,9 @@ def run_phase_z(
 
     baseline_observed_at = datetime.now(timezone.utc)
     baseline = set(pre_fire_dirty) if pre_fire_dirty is not None else _read_pre_fire_snapshot(repo_root, runner)
+    _observe_ownership_shadow(
+        repo_root, dirty_now=dirty_now, baseline=baseline, fire_ids=fire_ids,
+    )
     if baseline is None:
         # Ownership unknown. The old code committed anyway (`git add -A`), which
         # is how it swept an interactive session's half-finished edits into an
@@ -2216,8 +2827,35 @@ def run_phase_z(
         storage_dir=str(repo_root / "storage"),
         observed_at=datetime.now(timezone.utc),
     )
-    owned = sorted(dirty_now - baseline)
+    # A path becoming dirty during the fire proves only WHEN PHASE-Z first saw
+    # it, not WHO wrote it.  For agent-authored paths the unisolated fallback
+    # still uses that timing signal, but machine-state namespaces already have
+    # an explicit owner: the supervisor.  Keep those paths out of ``owned`` so
+    # they cannot generate an "agent omitted receipt" subject/alert merely
+    # because a worker updated queue state after the agent's Stop hook ran.
+    newly_dirty = sorted(dirty_now - baseline)
+    owned = [p for p in newly_dirty if not _is_machine_state(p)]
+    newly_dirty_machine = [p for p in newly_dirty if _is_machine_state(p)]
     dirty_before = sorted(dirty_now & baseline)
+    # ── WS-B demotion: isolated cohorts get NO baseline authorship guessing ──
+    # for repo bytes. Every fire in this cohort had its own workspace, so its
+    # repo-byte output landed (or went to remediation) through the worktree
+    # merge gate — a non-machine-state path that turned dirty on the canonical
+    # checkout during the fire is another writer or an isolation breach, and
+    # timing arithmetic can no longer prove which. Leave it, say so once, and
+    # let the foreign-streak machinery own it if it sticks around. Machine
+    # state (scheduled-job churn) keeps its adoption — that residue lane is
+    # exactly what the fallback still exists for.
+    isolation_residue: list[str] = []
+    if isolated_cohort:
+        isolation_residue = [p for p in owned if not _is_machine_state(p)]
+        owned = [p for p in owned if _is_machine_state(p)]
+        if isolation_residue:
+            LOG.info(
+                "phase_z: isolated cohort — leaving %d canonical non-machine "
+                "path(s) for declared-ownership classification: %s",
+                len(isolation_residue), isolation_residue[:10],
+            )
     # The snapshot is consumed only on a SETTLED outcome (committed / clean /
     # nothing_owned / nothing_to_commit — the scheduler's terminal set). A failed
     # commit attempt (pre-commit gate block, add/reset error) keeps the baseline,
@@ -2225,11 +2863,30 @@ def run_phase_z(
     # degrading to ownership_unknown. "One snapshot, one fire" still holds: the
     # next fire's pre-fire guard overwrites it unconditionally.
 
-    # Dirty-at-fire-start splits two ways, not one. A daemon-written churn path has
-    # an owner (this module); only the rest is "another session is still typing it".
+    # Machine state has the same owner whether it became dirty before or during
+    # this fire.  Classify both sets through the lock+parse gate.  Previously the
+    # during-fire half bypassed this classifier as ``owned``; besides inventing
+    # an agent attribution, that also skipped the corruption/live-writer checks.
     churn, churn_deferred, churn_corrupt = _classify_machine_churn(
-        repo_root, [p for p in dirty_before if _is_machine_state(p)])
-    foreign = [p for p in dirty_before if not _is_machine_state(p)]
+        repo_root,
+        sorted(
+            set(newly_dirty_machine)
+            | {p for p in dirty_before if _is_machine_state(p)}
+        ),
+    )
+    foreign = sorted(
+        set(p for p in dirty_before if not _is_machine_state(p))
+        | set(isolation_residue)
+    )
+    foreign_ownership = _partition_foreign_ownership(repo_root, foreign)
+    active_foreign = foreign_ownership["active"]
+    risk_foreign = foreign_ownership["risk"]
+    if active_foreign:
+        LOG.info(
+            "phase_z: %d skipped path(s) have live declared owner(s); "
+            "excluded from risk/notification lanes: %s",
+            len(active_foreign), list(active_foreign.items())[:10],
+        )
 
     if churn_corrupt:
         alert_fn(
@@ -2263,7 +2920,7 @@ def run_phase_z(
         {"adopted": [], "reason": "recovery_mode", "considered": [], "evidence": {}}
         if recovery_mode
         else _adopt_orphan_halves(
-            repo_root, foreign, runner=runner, test_runner=test_runner or subprocess.run,
+            repo_root, risk_foreign, runner=runner, test_runner=test_runner or subprocess.run,
         )
     )
     adopted_halves = list(orphan_halves["adopted"])
@@ -2276,34 +2933,83 @@ def run_phase_z(
                 rel, ", ".join(orphan_halves["evidence"][rel]["turned_green"]),
             )
         foreign = [p for p in foreign if p not in set(adopted_halves)]
+        risk_foreign = [p for p in risk_foreign if p not in set(adopted_halves)]
+        foreign_ownership["risk"] = list(risk_foreign)
+        foreign_ownership["unowned"] = [
+            p for p in foreign_ownership["unowned"] if p not in set(adopted_halves)
+        ]
     elif orphan_halves["reason"] not in {"no_candidates", "no_proof"}:
         LOG.info("phase_z: orphan-half probe adopted nothing (%s)", orphan_halves["reason"])
 
     # A recovery pass runs immediately before the real pre-fire snapshot. It
     # must not count the same unrelated dirty paths as another hourly shift.
-    streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, foreign)
+    streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, risk_foreign)
     stuck = sorted((p for p, n in streaks.items() if n >= _FOREIGN_STREAK_CRITICAL),
                    key=lambda p: (-streaks[p], p))
     worst_streak = max(streaks.values(), default=0)
 
+    quarantine: dict = {"ref": None, "created": False, "checkpointed": [],
+                        "skipped": {}, "reason": "no_stuck_paths"}
     if stuck:
         LOG.warning("phase_z: %d foreign path(s) stuck for >=%d fires: %s",
                     len(stuck), _FOREIGN_STREAK_CRITICAL, stuck[:10])
-    # Observability is the log line above (every fire). Paging is backed off — see
-    # _streak_is_notifiable.
-    if stuck and any(_streak_is_notifiable(streaks[p]) for p in stuck):
+        # Preservation is unconditional and needs nobody's approval; only the
+        # question "does this belong in main" needs a human. Decision doc §4 D2.
+        quarantine = _quarantine_stuck_foreign(
+            repo_root, stuck, streaks=streaks, hhmm=hhmm, runner=runner,
+        )
+        LOG.info("phase_z: quarantine %s — ref=%s, %d path(s) checkpointed, %d skipped",
+                 quarantine["reason"], quarantine["ref"],
+                 len(quarantine["checkpointed"]), len(quarantine["skipped"]))
+
+    # D3: the stuck set becomes ONE persistent incident in the canonical queue,
+    # and that incident — not this alert — is what the scheduler reads. See
+    # volpred.ops.foreign_incident for why a CRITICAL alone changed nothing.
+    incident = _open_stuck_incident(repo_root, stuck, streaks=streaks,
+                                    quarantine=quarantine)
+
+    # Paging is now bounded by the incident, not by a retry curve: ONE page when
+    # the incident opens, then silence while it stays open. `_streak_is_notifiable`
+    # kept re-paging (3/6/12/24…) because a notification was the only mechanism
+    # available; re-paging on top of a live incident would be a second reminder
+    # channel for one condition, which is how both end up ignored. The escalation
+    # that used to live in the retry curve now lives in the de-rated slot cap.
+    # No incident means no de-rate and no owner, so silence would be strictly
+    # worse than the old noise: fall back to the legacy backed-off CRITICAL.
+    incident_failed = incident.get("reason") in {"error", "no_queue"}
+    if incident.get("created") or (
+        incident_failed and any(_streak_is_notifiable(streaks[p]) for p in stuck)
+    ):
         alert_fn(
             level="critical",
             # streak 每班 +1、count 會浮動 — 進 title 就等於每班一個新 dedup key，
             # 同一批卡住檔案會變成連環 critical。細節全放 body。
-            title="PHASE-Z 有檔案連續多班沒人收 — 遺留變成堆積",
+            title="PHASE-Z 無主或過期檔案達處置門檻",
             body="\n".join([
                 f"（fire 時間: {hhmm}；{len(stuck)} 個檔案，最長已連續 {worst_streak} 班）",
                 "",
                 "## 發生什麼",
-                f"這些未提交的檔案不是任何一班 fire 產出的，而且已經連續 {worst_streak} 班都還在工作區。"
-                "單次遺留代表某個 session 正在寫；連續多班還在，代表沒有人會回來收 —— "
-                "它們會一直卡在工作區，讓每一班的「誰擁有這個檔案」判斷越來越不可靠。",
+                f"這些未提交檔案沒有 live producer declaration，且已連續 {worst_streak} 班仍在工作區。"
+                f"其中 unowned={len(foreign_ownership['unowned'])}、"
+                f"stale={len(foreign_ownership['stale'])}、"
+                f"contested={len(foreign_ownership['contested'])}；"
+                "仍有 live owner 的路徑已在分類前排除，不在這張 incident 裡。",
+                "",
+                *([
+                    "",
+                    "## 這封信的 owner",
+                    f"已開一張持久 incident：`{incident.get('task_id')}`"
+                    f"（fingerprint `{incident.get('fingerprint')}`）。這封信不會再重發 —— "
+                    "同一批檔案的後續班次只更新那張單。",
+                    "**未關的代價是 scheduler 降載**：`scripts/dispatch_slot_budget.py` "
+                    "看到未關 incident 就把每班 slot cap 壓下去，所以拖著不處理是有成本的。",
+                    "關閉條件（機械可驗）：`uv run python -m volpred.ops.foreign_incident --check`。",
+                ] if incident.get("task_id") else [
+                    "",
+                    "## 注意：incident 沒建起來",
+                    "任務池寫入失敗，所以這次退回舊的退避通知行為（3/6/12/24… 班）。"
+                    "scheduler 降載訊號這班不會生效 —— 先修任務池寫入。",
+                ]),
                 "",
                 "## 現在該做什麼",
                 "**沒有任何檔案會被丟棄。** 成品（草稿 / 實驗產出）由 "
@@ -2316,6 +3022,21 @@ def run_phase_z(
                 "## 卡住的檔案（連續班數）",
                 *[f"- {p} — {streaks[p]} 班" for p in stuck[:30]],
                 *(["- …"] if len(stuck) > 30 else []),
+                *([
+                    "",
+                    "## 已保存（可取回）",
+                    f"這些 bytes 已 checkpoint 進不可變 ref `{quarantine['ref']}`"
+                    f"（{len(quarantine['checkpointed'])} 個檔案）。工作區、index、main 都沒有被動到；"
+                    "這只是保存，不是收養、不宣稱完成、也進不了 main。",
+                    "取回：`git show " + str(quarantine["ref"]) + ":<路徑>`",
+                ] if quarantine.get("ref") else []),
+                *([
+                    "",
+                    "## 未保存（producer 正在寫）",
+                    "以下路徑此刻被 writer 持有 flock，checkpoint 會存到寫到一半的內容，故略過：",
+                    *[f"- {p}" for p, why in sorted(quarantine["skipped"].items())
+                      if why == "live_writer"],
+                ] if any(w == "live_writer" for w in quarantine["skipped"].values()) else []),
             ]),
         )
 
@@ -2329,38 +3050,89 @@ def run_phase_z(
         LOG.info("phase_z: %d machine-churn path(s) busy/unreadable — next fire takes them: %s",
                  len(churn_deferred), churn_deferred)
 
+    # ── trusted-gate split (assign_010d1a2d) ───────────────────────────────
+    # A dirty gate file used to roll back the ENTIRE batch with no forward
+    # path: every fire retried, failed, alerted, and the workspace stayed stuck
+    # (24 innocent files held hostage by one). Two things were conflated —
+    # "this batch must not be judged by its own gate" (real, and already
+    # structurally impossible: the hook runs from a pinned base_sha) and "a
+    # weakened gate must not judge the NEXT commit" (real, and what actually
+    # needs handling). Split the batch: non-gate paths commit normally, gate
+    # paths stay dirty and get a review task that says exactly which file and
+    # exactly what to run. Deadlock gone, collateral gone, threat still held.
+    gate_deferred = sorted(set(owned + churn + adopted_halves) & _TRUSTED_GATE_PATHS)
+    gate_review: dict | None = None
+    if gate_deferred:
+        owned = [p for p in owned if p not in _TRUSTED_GATE_PATHS]
+        churn = [p for p in churn if p not in _TRUSTED_GATE_PATHS]
+        adopted_halves = [p for p in adopted_halves if p not in _TRUSTED_GATE_PATHS]
+        try:
+            gate_review = gate_review_fn(repo_root=repo_root, gate_paths=gate_deferred, hhmm=hhmm)
+        except Exception as exc:
+            LOG.warning("phase_z: gate-review hook raised (%s)", exc)
+            gate_review = {"task_id": None, "created": False, "error": str(exc)}
+        LOG.warning("phase_z: holding back %d trusted-gate path(s) for review (task=%s): %s",
+                    len(gate_deferred), (gate_review or {}).get("task_id"), gate_deferred)
+        # warn, not critical: the rest of the batch is landing normally and the
+        # review task is the forward path. Only alert when the task is newly
+        # filed — re-alerting every fire for an already-queued review is the
+        # hourly-noise failure mode this redesign exists to kill.
+        if (gate_review or {}).get("created"):
+            alert_fn(
+                level="warn",
+                title=f"PHASE-Z 保留 {len(gate_deferred)} 個 gate 檔待審查（其餘已正常提交）",
+                body="\n".join([
+                    f"（fire 時間: {hhmm}）",
+                    "",
+                    "## 發生什麼",
+                    "這班改到了 PHASE-Z 自己的 gate 檔。其餘變更**已照常提交**；下列 gate 檔保留在工作區，"
+                    "等審查後由審查者提交 —— 避免這班改過的 gate 反過來審判下一班的 commit。",
+                    "",
+                    "## 檔案",
+                    *[f"- {p}" for p in gate_deferred],
+                    "",
+                    "## 下一步",
+                    "1. 看 diff：`git diff -- " + " ".join(gate_deferred) + "`",
+                    "2. 認可就提交：`git add " + " ".join(gate_deferred) + " && git commit`",
+                    "3. 不認可就還原：`git checkout -- " + " ".join(gate_deferred) + "`",
+                    "",
+                    f"追蹤任務: {(gate_review or {}).get('task_id')}",
+                ]),
+            )
+
+    gate_extra = {"gate_deferred": gate_deferred, "gate_review": gate_review} if gate_deferred else {}
+
+    if not owned and not churn and not adopted_halves and gate_deferred:
+        # Everything this fire produced was a gate change: nothing left to
+        # commit, but this is NOT "nothing_owned" — say so, so a run of these
+        # is legible as one pending review rather than an idle fire.
+        _consume_pre_fire_snapshot(repo_root, runner)
+        return {"committed": False, "reason": "gate_deferred_only", "foreign": foreign,
+                "orphan_halves": orphan_halves, "quarantine": quarantine,
+                "incident": incident, "foreign_ownership": foreign_ownership, **gate_extra}
+
     if not owned and not churn and not adopted_halves:
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: nothing of ours to commit
         LOG.info("phase_z: nothing this fire produced — %d foreign path(s) left alone", len(foreign))
         if not foreign:
             return {"committed": False, "reason": "nothing_owned", "foreign": [],
-                    "orphan_halves": orphan_halves}
+                    "orphan_halves": orphan_halves, "quarantine": quarantine,
+                    "incident": incident,
+                    "foreign_ownership": foreign_ownership,
+                    **({"isolation_residue": isolation_residue} if isolation_residue else {})}
         if stuck:
             # the critical alert above already said everything this one would, louder.
             return {"committed": False, "reason": "nothing_owned",
-                    "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves}
-        alert_fn(
-            level="warn",
-            title="PHASE-Z 有檔案未提交，但不是這班產出的",
-            body="\n".join([
-                f"（fire 時間: {hhmm}；{len(foreign)} 個檔案）",
-                "",
-                "## 發生什麼",
-                "這班 fire 沒有留下任何自己的未提交變更，但工作區裡有別人的未提交檔案"
-                "（fire 開始前就髒了）。PHASE-Z 不碰它們。",
-                "",
-                "## 現在該做什麼",
-                "多半不用做什麼：成品（草稿 / 實驗產出）由 `reap_orphan_deliverables` 每小時自動收編入池；"
-                "其餘檔案留在工作區等作者 commit。PHASE-Z 不自動收養（那是三次事故的成因），"
-                "但**不收養不等於丟棄** —— 沒有任何流程會刪掉它們。",
-                "",
-                "## 檔案",
-                *[f"- {p}" for p in foreign[:30]],
-                *(["- …"] if len(foreign) > 30 else []),
-            ]),
-        )
+                    "foreign": foreign, "stuck": stuck, "orphan_halves": orphan_halves,
+                    "quarantine": quarantine,
+                    "incident": incident,
+                    "foreign_ownership": foreign_ownership,
+                    **({"isolation_residue": isolation_residue} if isolation_residue else {})}
         return {"committed": False, "reason": "nothing_owned", "foreign": foreign,
-                "orphan_halves": orphan_halves}
+                "orphan_halves": orphan_halves, "quarantine": quarantine,
+                "incident": incident,
+                "foreign_ownership": foreign_ownership,
+                **({"isolation_residue": isolation_residue} if isolation_residue else {})}
 
     LOG.info("phase_z: auto-committing %d path(s) from this fire + %d machine-churn path(s)"
              " + %d proved orphan half/halves",
@@ -2415,6 +3187,20 @@ def run_phase_z(
                 untracked.append(path)
 
             to_stage = [p for p in (owned + churn + adopted_halves) if p not in set(untracked)]
+
+            # Defer test halves whose source half is not in this candidate; staging
+            # them guarantees an audit-test-imports rejection and a rollback that
+            # takes the rest of the fire's output down with it. See the split-pair
+            # guard block above.
+            split_deferred = _split_pair_deferrals(repo_root, to_stage, base_sha, runner=runner)
+            if split_deferred:
+                for test_rel, missing in sorted(split_deferred.items()):
+                    LOG.warning(
+                        "phase_z: deferring %s — source half not in candidate: %s",
+                        test_rel, ", ".join(missing),
+                    )
+                to_stage = [p for p in to_stage if p not in split_deferred]
+
             pathspec_file = tx_root / "paths.nul"
             try:
                 pathspec_file.write_bytes(b"\0".join(os.fsencode(path) for path in to_stage))
@@ -2717,6 +3503,16 @@ def run_phase_z(
             )
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: the fire's work landed
         LOG.info("phase_z: committed — %s", out.splitlines()[-1] if out else "(no output)")
+        ci_repair_tasks_backfilled: list[str] = []
+        if claim_owners:
+            try:
+                ci_repair_tasks_backfilled = backfill_ci_repair_commit(
+                    path=repo_root / "storage" / "next_tasks.json",
+                    claim_owners=claim_owners,
+                    commit_sha=committed_sha,
+                )
+            except Exception as exc:  # noqa: BLE001 — commit already landed; receipt repair is retryable
+                LOG.warning("phase_z: CI repair commit receipt backfill failed: %s", exc)
         tests = _post_commit_test_gate(
             repo_root, commit_sha=committed_sha, hhmm=hhmm, runner=runner,
             test_runner=test_runner or subprocess.run,
@@ -2758,29 +3554,15 @@ def run_phase_z(
                     "`uv run python scripts/fire_receipt.py --task-id <id> --subject '<一句話 what | why>'`",
                 ]),
             )
-        if foreign and not recovery_mode:
-            alert_fn(
-                level="warn",
-                title="PHASE-Z 有檔案不是這班產出的，已略過",
-                body="\n".join([
-                    f"（fire 時間: {hhmm}；{len(foreign)} 個檔案）",
-                    "",
-                    "## 發生什麼",
-                    f"這班 fire 的 {len(owned)} 個檔案已自動 commit。另外 {len(foreign)} 個檔案"
-                    "在 fire 開始前就已經是未提交狀態 —— 那是別的 session 正在做的事，PHASE-Z 沒有動它們。",
-                    "",
-                    "## 現在該做什麼",
-                    "通常不需要處理（該 session 會自己 commit）。若它已經結束，請人工確認後再 commit。",
-                    "",
-                    "## 略過的檔案",
-                    *[f"- {p}" for p in foreign[:30]],
-                    *(["- …"] if len(foreign) > 30 else []),
-                ]),
-            )
         return {"committed": True, "reason": "committed", "untracked": untracked,
                 "owned": owned, "foreign": foreign, "churn": churn,
                 "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
-                "orphan_halves": orphan_halves}
+                "orphan_halves": orphan_halves, "quarantine": quarantine,
+                "incident": incident,
+                "foreign_ownership": foreign_ownership,
+                "ci_repair_tasks_backfilled": ci_repair_tasks_backfilled,
+                **({"isolation_residue": isolation_residue} if isolation_residue else {}),
+                **gate_extra}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything
     # dirty was a leaked-ignored file already rm --cached'd, or a race cleaned
     # it) from a genuine commit failure.
@@ -2802,4 +3584,6 @@ def run_phase_z(
         runner=runner,
     )
     return {"committed": False, "reason": "commit_nonzero", "untracked": untracked,
-            "owned": owned, "commit_tail": out[-600:], "rolled_back": True}
+            "owned": owned, "commit_tail": out[-600:], "rolled_back": True,
+            "quarantine": quarantine,
+            "incident": incident}

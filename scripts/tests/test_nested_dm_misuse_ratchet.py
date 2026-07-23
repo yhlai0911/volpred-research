@@ -387,6 +387,60 @@ def test_generic_hac_mean_test_of_paired_error_difference_is_detected(
     assert finding.test_role in {"review_required", "primary_raw_dm"}
 
 
+_MASK_ESTIMATION = (
+    "import numpy as np\n"
+    "def refit(y, X, sc, n_beta, n_macro):\n"
+    "    active = np.ones(n_beta)\n"
+    "    active[n_beta - n_macro:] = 0.0\n"
+    "    return fit_gev_reg(y, X, sc, active=active)\n"
+)
+_MASK_INFERENCE = (
+    "def evaluate(loss_macro, loss_gev_har):\n"
+    "    dm_t, dm_p = dm_test(loss_macro, loss_gev_har, h=1)\n"
+    "    verdict = 'PASS' if dm_p < 0.05 else 'HOLD'\n"
+    "    return {'verdict': verdict, 'dm_t': dm_t}\n"
+)
+
+
+def test_coefficient_mask_restriction_is_nesting_evidence(tmp_path: Path) -> None:
+    path = _write_fixture(tmp_path, _MASK_ESTIMATION + _MASK_INFERENCE)
+    finding = scan_file(path, tmp_path)
+    assert finding is not None
+    assert finding.test_role == "primary_raw_dm"
+    assert any("active[" in evidence.text for evidence in finding.nested_evidence)
+
+
+def test_coefficient_mask_is_the_only_nesting_channel(tmp_path: Path) -> None:
+    path = _write_fixture(tmp_path, _MASK_INFERENCE)
+    assert scan_file(path, tmp_path) is None
+
+
+def test_zeroed_sample_weight_is_not_nesting(tmp_path: Path) -> None:
+    path = _write_fixture(
+        tmp_path,
+        "import numpy as np\n"
+        "def refit(y, X, burn_in):\n"
+        "    weights = np.ones(len(y))\n"
+        "    weights[:burn_in] = 0.0\n"
+        "    return fit_model(y, X, sample_weight=weights)\n" + _MASK_INFERENCE,
+    )
+    assert scan_file(path, tmp_path) is None
+
+
+def test_zeroed_restriction_not_passed_to_estimator_is_not_nesting(
+    tmp_path: Path,
+) -> None:
+    path = _write_fixture(
+        tmp_path,
+        "import numpy as np\n"
+        "def summarise(n_beta, n_macro):\n"
+        "    active = np.ones(n_beta)\n"
+        "    active[n_beta - n_macro:] = 0.0\n"
+        "    return {'n_active': int(active.sum())}\n" + _MASK_INFERENCE,
+    )
+    assert scan_file(path, tmp_path) is None
+
+
 def test_parse_failure_is_reported_not_silently_dropped(tmp_path: Path) -> None:
     _write_fixture(tmp_path, "def broken(:\n")
     result = scan_population(tmp_path)

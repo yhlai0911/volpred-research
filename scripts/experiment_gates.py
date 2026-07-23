@@ -43,6 +43,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import logging
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -150,7 +152,7 @@ def _scan_nested_dm(path: Path) -> Iterable[tuple[str, str]]:
 def _scan_dm_hac(path: Path) -> Iterable[tuple[str, str]]:
     import audit_dm_hac_lag as dm_hac
 
-    for finding in dm_hac.scan_file(path):
+    for finding in dm_hac.scan_file(path, _candidate_root(path)):
         if finding.verdict in dm_hac.RATCHET_VERDICTS:
             yield f"{finding.file}::{finding.function}", finding.verdict
 
@@ -166,7 +168,7 @@ def _scan_mdd(path: Path) -> Iterable[tuple[str, str]]:
 def _scan_fevd(path: Path) -> Iterable[tuple[str, str]]:
     import audit_fevd_ordering as fevd
 
-    site = fevd.classify(path)
+    site = fevd.classify(path, _candidate_root(path))
     if site is not None and site.classification in ("VIOLATION", "MISLABELED"):
         yield site.path, site.classification
 
@@ -415,6 +417,61 @@ def _review_certification_violations(exp_dir: Path) -> list[Violation]:
     return violations
 
 
+# K-ids below this predate the registry becoming the only legal allocator for
+# ad-hoc dispatch (K1719 collision 2026-07-17; second collision k1732 2026-07-19,
+# hand-picked by scanning worktrees while the registry had reserved it for a
+# different topic). From here on, a numeric kid entering main must exist in the
+# registry — kid_reserve.py is the write-side guard, this gate is the read-side
+# enforcement that finally wires it to every dispatch path (assign_762984a5).
+KID_REGISTRY_ENFORCE_FROM = 1719
+_KID_REGISTRY_REMEDY = (
+    "Reserve the K-id BEFORE the experiment: uv run python scripts/kid_reserve.py "
+    "reserve --owner <who> --topic '<topic>'. If this kid was picked by hand and "
+    "collided, repair with `kid_reserve.py reassign` (see its --help)."
+)
+
+
+def _canonical_registry_path() -> Path:
+    """The LIVE registry in the main checkout, not a worktree's stale branch copy."""
+    try:
+        proc = subprocess.run(
+            ["git", "rev-parse", "--git-common-dir"],
+            cwd=str(Path(__file__).resolve().parent),
+            capture_output=True, text=True, timeout=10, check=True,
+        )
+        common = Path(proc.stdout.strip())
+        if not common.is_absolute():
+            common = (Path(__file__).resolve().parent / common).resolve()
+        return common.parent / "storage" / "ops" / "k_id_registry.json"
+    except (OSError, subprocess.SubprocessError) as exc:
+        logging.warning("kid-registry: git common-dir resolution failed (%s); using local path", exc)
+        return REPO_ROOT / "storage" / "ops" / "k_id_registry.json"
+
+
+def _kid_registry_violations(exp_dir: Path) -> list[Violation]:
+    m = re.fullmatch(r"k(\d+)[a-z]?(?:_.*)?", exp_dir.name)
+    if not m:
+        return []  # named experiments (member_qa_*, vt_*) are outside the numeric allocator
+    number = int(m.group(1))
+    if number < KID_REGISTRY_ENFORCE_FROM:
+        return []
+    registry_path = _canonical_registry_path()
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+        numbers = {int(r.get("number") or 0) for r in registry.get("reservations", [])}
+    except (OSError, ValueError) as exc:
+        return [Violation(gate="kid-registry", site=_rel(exp_dir),
+                          verdict=f"registry unreadable ({exc}) — cannot verify K-id allocation",
+                          remedy=_KID_REGISTRY_REMEDY)]
+    if number not in numbers:
+        return [Violation(
+            gate="kid-registry", site=_rel(exp_dir),
+            verdict=(f"K{number} has no reservation in {registry_path.name} — "
+                     "hand-picked K-ids collide with queued reservations (K1719, k1732)"),
+            remedy=_KID_REGISTRY_REMEDY)]
+    return []
+
+
 def certification_violations(exp_dir: Path) -> list[Violation]:
     """Merge admission = methodology hard gates plus byte-bound review.
 
@@ -428,6 +485,7 @@ def certification_violations(exp_dir: Path) -> list[Violation]:
     return [
         *run_gates(exp_dir, CERTIFY_GATES),
         *_review_certification_violations(exp_dir),
+        *_kid_registry_violations(exp_dir),
     ]
 
 

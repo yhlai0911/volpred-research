@@ -61,8 +61,9 @@ Last updated: 2026-04-18
 - worker 應該在已登入 OAuth、已開啟的 VS Code 終端機內完成任務
 - `storage/ops/` 要留下 claim / finish / receipt 紀錄
 
-目前 repo 內仍保留一部分 `scheduler-tick -> subprocess.run(...)` 的舊路徑。
-它應視為**過渡期 / 診斷用**能力，而不是校正後的目標 runtime contract。
+（歷史註記）repo 曾保留 `scheduler-tick -> subprocess.run(...)` 的過渡期舊路徑；
+該 advisory lane 已於 2026-07-20 全面退役（refactor_plan_ops_master_2026_07 D2），
+正式派工由 dispatch-supervisor daemon + run_due_jobs piggy-back 負責。
 
 ## 系統邊界
 
@@ -406,8 +407,6 @@ Admin surface 的定位不是單純 CMS，而是 human operator 對 agent-first 
 - approvals：`storage/ops/approvals/`
 - executions：`storage/ops/executions/`
 - rollback points：`storage/ops/rollback_points/`
-- scheduler state：`storage/ops/scheduler_state.json`
-- live CLI readiness：`storage/ops/agent_cli_health.json`
 
 ### Task 排序與 claim
 
@@ -478,25 +477,16 @@ session 會建立 rollback point，並把 `session_id` / `session_rollback_point
 - `daily_update`
 - `release_pool`
 - `market_calendar_sync`
-- `shared_scheduler_tick`
 
-這些不是先進 shared scheduler queue，而是直接由 host cron 執行。
+這些不是先進 queue，而是直接由 host cron / LaunchAgent 執行。
 
-#### 2. `shared_scheduler_tick`
+#### 2. `shared_scheduler_tick`（已退役）
 
-過渡期自動化與診斷用派工器。
-host 每 10 分鐘執行一次 `scripts/run_scheduler_tick.sh`，再進入 `uv run volpred ops scheduler-tick`。
-
-這條路徑目前仍存在，但不應再被理解成校正後的正式 worker runtime。
-它不是「每 10 分鐘一定派一個 Claude 與一個 Codex」，而是每 10 分鐘做一次決策：
-
-- 沒任務就 skip
-- 任務 preconditions 不成立就 skip
-- target agent 被真人 session 佔用就 skip
-- 需要 coordinator 的任務，先產 brief
-- brief ready 的任務，才交 executor
-
-目前一次 tick 只挑一個最合適的 runnable task。
+過渡期 advisory 派工器（每 10 分鐘 `scheduler-tick` 做一次 skip/brief/executor 決策）。
+實際上從未在 host 端 fire（log 自 2026-04-19 起 size=0），整條 lane（`scheduler.py`、
+CLI、wrapper、`scheduler_state.json`、schedule spec）已於 2026-07-20 退役
+（refactor_plan_ops_master_2026_07 D2）。正式派工 = dispatch-supervisor daemon；
+event_jobs 展開 = `run_due_jobs` piggy-back。
 
 #### 3. `session_crons`
 
@@ -527,27 +517,13 @@ host 每 10 分鐘執行一次 `scripts/run_scheduler_tick.sh`，再進入 `uv r
 
 目前實際模型是：
 
-- `system_crontab.shared_scheduler_tick` 每 10 分鐘觸發正式派工
+- dispatch-supervisor daemon（`7 * * * *` 語意 + request_fire）觸發正式派工
 - `idle_policy` 決定有空閒 capacity 時，user / scheduled / discovery 哪一類優先被挑
-- 所以系統是 `cron-driven scheduler + idle-aware selection policy`
+- 所以系統是 `daemon-driven dispatch + idle-aware selection policy`
 - 不是 agent 一 idle 就一定立刻自動續跑的純 `idle-driven` runtime
 
-### Scheduler 決策流程
-
-```text
-crontab
-→ scripts/run_scheduler_tick.sh
-→ uv run volpred ops scheduler-tick
-→ 取得 self-lock
-→ expand_due_event_jobs()
-→ 掃 queued tasks
-→ 過濾 needs_manual_review / unmet preconditions / busy manual session
-→ 判斷 coordinator or executor
-→ 執行一個 round
-→ 回寫 scheduler_state / executions / task status
-```
-
-換句話說，目前正式自動化節奏仍以 host cron 為主；`idle_policy` 提供的是挑任務與續跑原則，不會自己取代 `shared_scheduler_tick` 成為主時鐘。
+（原「Scheduler 決策流程」advisory tick 流程圖已隨 2026-07-20 D2 退役移除；
+派工決策流程見 `scripts/dispatch_supervisor/` 與 `.claude/rules/control-plane.md`。）
 
 ### Event Layer
 
@@ -633,16 +609,10 @@ session bootstrap 時先建立 rollback point。
 - `uv run volpred ops next-task --agent claude|codex --emit-brief`
 - `uv run volpred ops finish-task <task_id> --agent claude|codex --summary ...`
 - `uv run volpred ops schedule-report`
-- `uv run volpred ops scheduler-preview`
 - `uv run volpred ops event-preview`
-- `uv run volpred ops scheduler-smoke`
-- `uv run volpred ops scheduler-live-smoke`
 
 ### 狀態檔
 
-- `storage/ops/scheduler_state.json`
-- `storage/ops/agent_cli_health.json`
-- `storage/ops/scheduler.log`
 - `storage/ops/executions/<task_id>/`
 
 ### Admin
@@ -676,9 +646,9 @@ session bootstrap 時先建立 rollback point。
 這些不一定代表 phase 未完成，但目前仍是 rollout gap：
 
 - `event_jobs.items` 仍為空，表示事件框架可用，但 canonical event 任務尚未系統化填入
-- 最新 `agent_cli_health` snapshot 可能不是 `ready`
 - Claude live path 目前仍可能回自由文字，不一定輸出 schema-valid JSON
 - Codex live path 可能受 timeout 影響，需要視當次環境狀態調整
+-（`agent_cli_health` snapshot 已隨 2026-07-20 D2 退役，不再是觀察面）
 
 ## 建議的閱讀順序
 
@@ -694,11 +664,9 @@ session bootstrap 時先建立 rollback point。
 ### 要追任務排程
 
 1. `config/runtime_schedules.json`
-2. `src/volpred/ops/scheduler.py`
+2. `scripts/dispatch_supervisor/`
 3. `src/volpred/ops/local_control_plane.py`
 4. `src/volpred/ops/execution_brief.py`
-5. `storage/ops/scheduler_state.json`
-6. `storage/ops/agent_cli_health.json`
 
 ### 要追平台資料流
 

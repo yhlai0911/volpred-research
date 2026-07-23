@@ -2,13 +2,15 @@ Hourly dispatch trigger (LaunchAgent HH:07 CST, 24 slots/day). 規則 (token-con
 
 **完整完成原則（HARD RULE）**：本次 fire 派的 task 必須**徹底完成 task goal 才能停止** — 派 agent 後 wait 完成、驗證結果、寫 knowledge.json/work_log、commit。**禁止做一半丟給下一輪**。若任務太大 50min cap 內完不成，**必須 scope 切小**到能在 50min 內收尾的單位（不要 partial 提交）。Heavy compute（GARCH MLE / Bootstrap / 全期 backtest）強制走 `scripts/compute_queue.py enqueue` 給 async worker，不要塞進 hourly fire。Cap 50min（3000s）；hang detect 由 cron script 處理，不該變成「做一半算了」的藉口。
 
+**Batch-drain 原則（HARD RULE，2026-07-21 老闆硬性指令「一班要跑多個任務、跑久一點」）**：完成一張任務（含第 10 點完整完成 gate 四項全過、status 已標）後**不收班** — 看已耗時：距 50min cap 還有 **≥12 分鐘**就回到選擇流程（A0 → PHASE A → PHASE B，同一優先序重新判斷）claim 下一張繼續做。收班條件只有兩個：(a) 無可派任務、(b) 剩餘預算不足以完整收尾一張（寧可留給下一班）。「每班做一張、跑 8 分鐘就停」= 白丟 42 分鐘 slot；但批次的單位仍是**完整任務** — 每張獨立過 gate、獨立標 status，「做一半丟下一班」照樣禁止。
+
 **Routing canonical**：`.claude/rules/task-routing.md`（capability / concurrency / workflow exceptions）+ `scripts/model_router.py`（model / effort / topology）。派工前依 `task_type` 查兩個 owner，不在本 prompt 維護固定型別數。
 
 **統一任務池 + claim 流程（HARD RULE，2026-05-25 用戶要求）**：
-1. **第一動作 = 一次定位，禁止翻抽屜**：`uv run python scripts/ops_snapshot.py`（0.4s 回傳 backbone/queue/pool/alerts/git 全狀態 JSON）+ 讀 `storage/ops/handoff_latest.md`（敘事脈絡）。**之後不得再用零散 ls / git status / jq 重複定位**（2026-07-14 WS1b：repo-navigation bash 一週 1,945 則 / 10.1M tokens 的根治）。
+1. **第一動作 = 一次定位，禁止翻抽屜**：`uv run python scripts/ops_snapshot.py`（0.4s 回傳 backbone/queue/pool/alerts/git 全狀態 JSON）+ 讀 `storage/ops/handoff_latest.md`（敘事脈絡）。**之後不得再用零散 ls / git status / jq 重複定位**（2026-07-14 WS1b：repo-navigation bash 一週 1,945 則 / 10.1M tokens 的根治）。**點狀查詢也走同一儀器**（G2 子命令，取代手寫 jq）：查單一 task `--task <id_or_title>`、查 feed 文章 `--article <id_or_slug>`、查排程 job 活性 `--job <schedule_id>`、盤 worktrees `--worktrees`、看派工 receipts `--receipts N`、篩佇列 `--queue --status S --type T --limit N`。輸出是決策極簡欄位（<2KB），不會把整檔拉進 context。
 2. **派工前先 claim**：先確認 `$VOLPRED_TASK_CLAIM_OWNER` 非空，再跑 `uv run python scripts/task_pool_claim.py claim --id <id> --owner "$VOLPRED_TASK_CLAIM_OWNER"`。這是 supervisor 依 slot_id + job_id 產生的唯一且 retry-stable ownership token；缺值必須停止並回報 dispatcher identity error，禁止退回日期/小時或自訂名稱。拒絕 `wrong_status` / `already_claimed` 時換另一 task，禁強推。
 3. 開工標 in_progress：`uv run python scripts/task_pool_claim.py start --id <id>`
-4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`
+4. 完工標 succeeded/failed：`uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --result "<摘要>"`。`trending_repost` / `event_article` 若摘要宣告 feed 已發佈 `mile_<id>`，同班必先產出 `storage/drafts/fb_mile_<id>.md`；缺稿時 complete 會 fail-closed，禁止用 `fb_repost_*` follow-up 代替完稿。
 5. 雙 session 撞題保護：claim 機制已 cross-session atomic（fcntl LOCK_EX on next_tasks.json）— 互動 session 與 hourly session claim 同 id 時後者得 `already_claimed`，自動換工。
 
 PRE-PHASE-0 — Auto-unblock expired blocked tasks（2026-06-05 加，治本 NFP T+0 卡死案例）:
@@ -40,19 +42,17 @@ PHASE 0 — Email reply 任務（**最高優先**，超越 compute queue followu
 
 ### Phase 0.A — 先處理已 in_progress 但未 close 的 email_reply
 ```bash
-uv run python scripts/task_pool_claim.py list --status in_progress --limit 50 2>/dev/null \
-  | jq '[.tasks[] | select(.task_type=="email_reply")]'
+uv run python scripts/ops_snapshot.py --queue --status in_progress --type email_reply
 ```
-對每一條（讀 `result` field 看上輪 plan + linked task ids）：
-- jq query linked_task_ids 的當前 status
+對每一條（用 `ops_snapshot --task <id>` 看上輪 plan + linked task ids —— result 前 200 字就夠判斷）：
+- 逐一 `ops_snapshot --task <linked_id>` 查 linked_task_ids 的當前 status
 - 若**全部 succeeded** → 寄 **CLOSE email**（`Re: <原 subj>` body=「完成項目摘要 + commit hash + 對應 task id」）→ complete --status succeeded
 - 若有 failed → 寄 **close-with-failure email** 說明哪步失敗+原因 → complete --status failed
 - 若仍 in_progress → 跳過本輪不動，下次 tick 再 check（避免 nagging）
 
 ### Phase 0.B — 新 pending email_reply 入單
 ```bash
-uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev/null \
-  | jq '[.tasks[] | select(.task_type=="email_reply")][0]'
+uv run python scripts/ops_snapshot.py --queue --type email_reply --limit 1
 ```
 若有最舊一條 → 走 5 步：
 
@@ -60,11 +60,12 @@ uv run python scripts/task_pool_claim.py list --status pending --limit 50 2>/dev
 2. **ANALYZE**: 讀 description 內「用戶回信內容」+「原始助理寄出內容」→ 分類 (question / command / dispatch / observation / urgent)
 3. **PLAN**: 寫 1-5 個 bullet 計畫 — 每 bullet 含「動作 / 預期產出 / ETA」。對需要 sub-task 的動作，下 `task_pool_claim.py claim` 建 linked sub-task（task_type 對應；description 含 parent_email_task_id 反向追蹤）
 4. **(SKIP — ack 已由 gmail-poll 寄)** ❌ 不要再寄 plan email。用戶在收信當下已收到 ack（含 task_id / type / priority / ETA / 完成 email 承諾）— 你只負責執行 + close。
-5. **記 plan 到 task.result** (jq edit next_tasks.json 補欄位)：
+5. **記 plan 到 task**（一律走 `task_pool_claim.py annotate` — **禁止**用 jq 產生新檔再蓋回佇列檔，那會繞過 flock 與 status vocab gate）：
    ```bash
-   jq --arg id <task_id> --arg plan '<plan text>' --argjson subs '["sub_id_1","sub_id_2"]' \
-     '(.[] | select(.id==$id)) |= (.plan = $plan | .linked_task_ids = $subs | .needs_close_reply = true)' \
-     storage/next_tasks.json > /tmp/nt && mv /tmp/nt storage/next_tasks.json
+   uv run python scripts/task_pool_claim.py annotate --id <task_id> \
+     --set plan='<plan text>' \
+     --set-json linked_task_ids='["sub_id_1","sub_id_2"]' \
+     --set-json needs_close_reply=true
    ```
 6. **EXECUTE**：當下 tick 能完成的立即做（小型 question 直接答完；指令直接 commit）；大型任務派 agent / 進 compute queue / 留 sub-task 給未來 tick 接。
 7. **本 tick close 判定**：若所有 linked sub-tasks 都已 succeeded（或本就無 sub-task 因為 question 直接回答完）→ 寄 close email + complete --status succeeded。否則**留 in_progress**，下次 tick Phase 0.A 接手。
@@ -109,8 +110,9 @@ PHASE A — 檢查 compute queue 有無 completed collection / failed-agent tria
 2. 若有 entries → 優先處理最舊一條，依 `followup_mode` 分流：
    - `collect_completed`：讀 `result_artifact`（若非 null，這是 agent 真正產出的檔）+ `job_metadata`（若非 null，這是 runner lifecycle receipt）+ `claude_followup.brief`，派 interpretation/collection agent 解讀（~25K tokens, light），不再做 compute。**禁止把 `job_metadata` 當研究結果**。
    - `split_required`：job 已 timeout；先盤點 partial outputs，禁止原樣重派。依 `split_contract` materialize 至少 2 個 bounded child stages；每段都要有 parent id、不同 stage、單一 artifact、success criterion，且 timeout 短於 parent。compute child 用 `--timeout-parent-job-id <parent>` + `--split-stage <name>` 留 receipt。
+   - `artifact_contract_mismatch`：agent 本身已成功，只有宣告的 exact artifact path 不存在；依 `job_metadata.result_artifact_near_misses` 驗證並收取既有產物，修正 path contract，**禁止 fresh-worktree re-enqueue**。
    - `triage_failed`：job **沒有成功**；派 platform_ops triage，照衍生的 `claude_followup.brief` 檢查 worktree/cwd 裡究竟有無可保留的腳本、partial result 或完整但未驗證的結果，再決定續跑 / fresh-worktree re-enqueue / 記錄無可救援。**不得把 failed job 或殘留 artifact 當成功結果，亦不得 force-remove worktree**。
-   三種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。本小時派工結束。
+   四種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。處理完本條 followup 後依 **Batch-drain 原則**：預算 ≥12 分鐘就回 A0 重新判斷、繼續下一張 — **不是本小時收工**。
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:
@@ -171,11 +173,14 @@ PHASE B — 派新工:
      uv run python scripts/compute_queue.py enqueue-agent \
        --brief-file /tmp/brief_kXXXX.md \
        --model claude-opus-4-8 --effort xhigh \
+       --source-task-id <task_id> \
        --cwd .claude/worktrees/<worktree> \
        --result-artifact experiments/kXXXX/kXXXX_results.json \
        --followup-brief '<收件時要做什麼：驗數字 / Codex 審 / 合併 worktree / 寫 knowledge>' \
        --followup-task-type experiment
      ```
+     `--source-task-id` 是唯一 task/worktree collision gate 的必要輸入；若另一個未合併
+     worktree branch 已帶同一 task id，enqueue 會直接回報既有路徑並拒派。
      `--result-artifact` 相對 `--cwd` 解析，runner 只驗存在、絕不寫入；runner 自己的摘要另存 `storage/ops/agent_jobs/<job_id>.json`。agent 由 ***/15 的 detached compute worker** 執行（不受 fire cap 限制、有 lock、有自己的 timeout），成果由**後續某一班 fire 在 PHASE A 收**。這正是 heavy compute 一直在走的路 —— agentic 長工作只是同一條路上的另一種 job。
    - **本班 fire 的職責到 enqueue 為止**：enqueue 完就往下走 / 收尾，**不要坐在那裡等 agent**。這不違反「完整完成原則」—— 完成的單位是 **task**，不是 fire。一個 60 分鐘的 agent 在 50 分鐘的 fire 裡「等到底」只有一種結局：被 SIGKILL、成果全毀，那才是真正的沒完成。
    - **短任務**（≤10min、`low`/`medium` effort：lookup / verify / classification / 短 review）→ 用 **Agent tool**（`run_in_background: false`，同步跑完）。這類本來就塞得進 fire，不必進 queue。
@@ -231,7 +236,7 @@ PHASE B — 派新工:
 7. 派完 end summary 格式（per memory feedback_task_end_summary_format）: 結束時間 / 總時間 / 本次 token / 完成項目 / 本週 Max 20x quota % (`uv run python scripts/weekly_quota_estimate.py`) / 下次任務時間。
 8. 若 last-3 涵蓋所有 candidates 的 type → 派沒做過的 type，必要時主動生 brief / 文章 / compute job。沒事做永不可接受。
 9. 嚴禁: force push, --no-verify, 寫 knowledge.json from agent (K1259), 假數字。研究誠實 > 一切。
-10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 的 `actor` 或 `owner` 必須逐字等於 `$VOLPRED_TASK_CLAIM_OWNER`；這個 supervisor-issued token 可精確歸因到 slot_id + job_id，缺少或自行改寫視同 (b) 未完成**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。下一輪 4h 後才開始下個新任務。
+10. **完整完成 gate**：本 fire 結束前驗證 — (a) agent 跑完 + 結果 verify、(b) knowledge.json 或 work_log 已寫，**且本 fire 寫入的每筆 work_log entry 的 `actor` 或 `owner` 必須逐字等於 `$VOLPRED_TASK_CLAIM_OWNER`；這個 supervisor-issued token 可精確歸因到 slot_id + job_id，缺少或自行改寫視同 (b) 未完成**、(c) commit 已 push 主線 OR worktree merged、(d) 派出的 task next_tasks status 已標 succeeded/failed（不留 in_progress 殘留）。任一未完成 = 本 fire 未真正結束，繼續做完。全部過 gate 後依 **Batch-drain 原則**決定接下一張或收班。
 
 PHASE Z — **本班收尾：交代「為什麼」**（2026-07-13 3-strike 重構；取代舊的「自己 git add + commit」）:
 

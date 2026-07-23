@@ -47,7 +47,7 @@ LOG_PATH = ROOT / "storage" / "logs" / "cron" / "gmail_poll.log"
 TAIPEI = ZoneInfo("Asia/Taipei")
 
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.next_tasks import append_task_record, normalize_task_priority  # noqa: E402
 
 # Quoted-reply markers (Gmail / Apple Mail / Outlook common forms)
 QUOTE_MARKERS = [
@@ -382,30 +382,18 @@ def _send_fast_path_answer(task: dict[str, Any], answer_md: str, pattern_id: str
 
 
 def _append_task(task: dict[str, Any], dry_run: bool) -> str:
-    """Atomically append task to next_tasks.json (file lock + read-modify-write)."""
+    """Append task to next_tasks.json via the canonical append helper.
+
+    WS-A1b: the previous hand-rolled truncate-then-json.dump here was the exact
+    2026-07-05 truncation-incident pattern. append_task_record owns bootstrap +
+    LOCK_EX + duplicate-id skip + serialize-first; the immediate email dispatch
+    stays with _trigger_immediate_dispatch (email_reply is a dedicated-owner
+    type,永遠不會被 _request_urgent_fire 判 urgent — 見 task_urgency docstring).
+    """
     normalize_task_priority(task)
     if dry_run:
         return task["id"]
-    import fcntl
-
-    guard_canonical_write(NEXT_TASKS)
-    NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
-    if not NEXT_TASKS.exists():
-        NEXT_TASKS.write_text("[]", encoding="utf-8")
-
-    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            data = json.load(fh)
-            if not isinstance(data, list):
-                raise ValueError("next_tasks.json is not a list")
-            data.append(task)
-            normalize_task_priorities(data)
-            fh.seek(0)
-            fh.truncate()
-            json.dump(data, fh, indent=2, ensure_ascii=False)
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    append_task_record(task, path=NEXT_TASKS, if_exists="skip")
     return task["id"]
 
 

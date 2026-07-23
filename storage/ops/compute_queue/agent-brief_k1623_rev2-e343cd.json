@@ -1,0 +1,68 @@
+{
+  "id": "agent-brief_k1623_rev2-e343cd",
+  "title": "K1623 rev2: 撤回 long-memory 識別宣稱 + MSE DM + 多重比較",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1623_rev2-e343cd.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev2_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1623_rev2-e343cd.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-19T04:44:48Z",
+  "started_at": "2026-07-19T09:30:05Z",
+  "completed_at": "2026-07-19T09:47:54Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1623_rev2-e343cd.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1623_rev2-e343cd.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623/k1623_rev2_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1623_rev2-e343cd.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623",
+  "claude_followup": {
+    "brief": "收 K1623 rev2：(1) 驗 k1623_rev2_results.json 的 MSE DM 表與 BH/Bonferroni 調整 p 是否與 README 宣稱逐項對上；(2) 確認三條宣稱（真 long-memory 識別 / 不可交易 / 多處顯著更差）已撤回；(3) 派 codex 二審，CONDITIONAL PASS 以上才可寫 knowledge.json；(4) merge_worktree.sh 合併 dispatch-slot-2-c5cafe39-k1623；(5) PASS 後把 loss-reversal angle 排進 daily_article。",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1623_rev2.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1623_rev2-e343cd.md",
+  "quota_requeues": 2,
+  "requeue_history": [
+    {
+      "at": "2026-07-19T06:53:16Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-19T06:30:01Z"
+    },
+    {
+      "at": "2026-07-19T07:30:10Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-19T07:30:04Z"
+    }
+  ],
+  "not_before": "2026-07-19T08:00:10.576543+00:00",
+  "source_task_id": "assign_5aa9d5f5",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1623/experiments/k1623"
+  },
+  "followup_dispatched_at": "2026-07-19T10:12:12Z",
+  "followup_next_task_id": "k1623_rev2_codex_round2"
+}

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -175,6 +177,221 @@ def test_refill_trending_skips_arc_duplicate(tmp_path, monkeypatch):
     data = json.loads(next_tasks.read_text(encoding="utf-8"))
     dup_ids = [t["id"] for t in data if "duplicate" in t.get("title", "")]
     assert dup_ids == []
+
+
+def test_refill_prefers_clean_candidate_over_named_near_miss(tmp_path, monkeypatch):
+    """A non-blocking verdict that NAMES matched articles must not outrank a clean one.
+
+    2026-07-16 regression: ai變現 / 債市波動度 / ai支出 all passed the generation
+    screen as warn_arc_near_miss / unjudged_thin_signature, and each screen record
+    named the exact article the writer agent later cited when it refused to write.
+    The screen had the evidence; the caller dropped it and queued P1 anyway.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+
+    # near-miss candidate comes FIRST, exactly as on 2026-07-16
+    candidates = [
+        {"id": "ai_capex", "title": "科技巨頭AI變現期延遲", "description": "..."},
+        {"id": "clean_one", "title": "novel arc on green hydrogen vol", "description": "..."},
+    ]
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps(candidates)
+        stderr = ""
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: [{"id": "mile_f5f4cb43"}])
+
+    from volpred.ops.topic_dedup import CLEAN, TopicScreen
+
+    def _fake_screen(title, desc, feed):
+        if "AI變現" in title:
+            return TopicScreen(
+                verdict="unjudged_thin_signature",
+                blocked=False,
+                reason="arc gate had no anchor; theme saturation 4 < 5",
+                matches=[{"id": "mile_f5f4cb43", "title": "AI 變現期的隱含波動率拐點"}],
+                saturation=4,
+            )
+        return TopicScreen(verdict=CLEAN, blocked=False, reason="clean")
+
+    monkeypatch.setattr(MODULE, "_screen_trending_topic", _fake_screen)
+
+    result = MODULE.refill_trending_candidates()
+
+    assert result["ok"] is True
+    added_titles = [t["title"] for t in json.loads(next_tasks.read_text(encoding="utf-8"))]
+    assert len(added_titles) == 1
+    assert "hydrogen" in added_titles[0], "clean candidate must win over a named near-miss"
+
+
+def test_refill_falls_back_to_near_miss_when_nothing_is_clean(tmp_path, monkeypatch):
+    """Preference, not a new block: no clean candidate must still yield work.
+
+    Hard-blocking named near-misses would risk the content blackhole that got the
+    publish-time arc gate downgraded to warn-only on 2026-06-23.
+    """
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps([{"id": "only_one", "title": "科技巨頭AI變現期延遲", "description": "..."}])
+        stderr = ""
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(MODULE, "_load_feed_for_dedup", lambda: [{"id": "mile_f5f4cb43"}])
+
+    from volpred.ops.topic_dedup import TopicScreen
+
+    monkeypatch.setattr(
+        MODULE,
+        "_screen_trending_topic",
+        lambda title, desc, feed: TopicScreen(
+            verdict="warn_arc_near_miss",
+            blocked=False,
+            reason="fuzzy descriptive arc near-miss of mile_f5f4cb43",
+            matches=[{"id": "mile_f5f4cb43"}],
+            saturation=4,
+        ),
+    )
+
+    result = MODULE.refill_trending_candidates()
+
+    tasks = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert len(tasks) == 1, "no clean candidate must not mean no work at all"
+    assert tasks[0]["priority"] >= 2, "a task needing arc adjudication must not sit at P1"
+    assert "mile_f5f4cb43" in tasks[0]["dedup_followup_required"]
+    assert any(s.get("reason") == "used_near_miss_fallback" for s in result["skipped"]), (
+        "falling back to a named near-miss must be visible in the receipt, not silent"
+    )
+
+
+def test_trending_quantitative_claim_without_source_spec_is_rejected(tmp_path, monkeypatch):
+    """Regression: fabricated index moves must never become P1 prose tasks."""
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps([{
+            "id": "fabricated_tw_move",
+            "title": "台股歷史性崩跌 2953 點（-6.5%）",
+            "description": "波動率市場重新定價。",
+        }])
+        stderr = ""
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(
+        MODULE,
+        "_screen_trending_topic",
+        lambda *_a, **_k: (_ for _ in ()).throw(AssertionError("dedup ran before source gate")),
+    )
+
+    result = MODULE.refill_trending_candidates()
+
+    assert result["added"] == []
+    assert result["skipped"] == [{
+        "id": "fabricated_tw_move",
+        "reason": "primary_source_verification_failed",
+        "detail": "missing_quant_claim_specs",
+    }]
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == []
+    audit = tmp_path / "storage" / "logs" / "trending_primary_source_verification.jsonl"
+    receipt = json.loads(audit.read_text(encoding="utf-8").splitlines()[-1])
+    assert receipt["decision"] == "reject"
+    assert receipt["reason"] == "missing_quant_claim_specs"
+
+
+def test_yfinance_nan_target_bar_is_not_zero_or_verified(monkeypatch):
+    """The incident shape: a target-date row exists but its close is NaN."""
+    pd = pytest.importorskip("pandas")
+    frame = pd.DataFrame(
+        {"Close": [45625.0, float("nan")], "Volume": [10.0, float("nan")]},
+        index=pd.to_datetime(["2026-07-16", "2026-07-17"]),
+    )
+    monkeypatch.setitem(sys.modules, "yfinance", types.SimpleNamespace(download=lambda *_a, **_k: frame))
+
+    actual, reason = MODULE._fetch_yfinance_claim({
+        "provider": "yfinance",
+        "ticker": "^TWII",
+        "date": "2026-07-17",
+        "metric": "close_change_pct",
+    })
+
+    assert actual is None
+    assert reason == "target_value_nan"
+
+
+def test_trending_claim_must_use_the_named_market_series(monkeypatch):
+    candidate = {
+        "title": "台股單日下跌 1.25%",
+        "description": "",
+        "quant_claims": [{
+            "kind": "percent", "value": -1.25, "provider": "yfinance",
+            "ticker": "SPY", "date": "2026-07-17", "metric": "close_change_pct",
+        }],
+    }
+    monkeypatch.setattr(
+        MODULE,
+        "_fetch_primary_claim",
+        lambda _spec: (_ for _ in ()).throw(AssertionError("wrong series was fetched")),
+    )
+
+    verified, receipt = MODULE._verify_trending_candidate(candidate, "wrong_market")
+
+    assert verified is False
+    assert receipt["reason"] == "series_identity_mismatch"
+    assert receipt["named_tickers"] == ["^TWII"]
+
+
+def test_verified_trending_claim_is_persisted_with_receipt(tmp_path, monkeypatch):
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True, exist_ok=True)
+    next_tasks.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(MODULE, "NEXT_TASKS", next_tasks)
+    monkeypatch.setenv("VOLPRED_TRENDING_SCAN_CMD", "echo dummy")
+    candidate = {
+        "id": "verified_tw_move",
+        "title": "台股單日下跌 1.25% 後，波動率如何反應？",
+        "description": "從收盤到收盤報酬切入。",
+        "quant_claims": [{
+            "kind": "percent", "value": -1.25, "provider": "yfinance",
+            "ticker": "^TWII", "date": "2026-07-17", "metric": "close_change_pct",
+        }],
+    }
+
+    class _FakeProc:
+        returncode = 0
+        stdout = json.dumps([candidate])
+        stderr = ""
+
+    from volpred.ops.topic_dedup import CLEAN, TopicScreen
+
+    monkeypatch.setattr(MODULE.subprocess, "run", lambda *a, **kw: _FakeProc())
+    monkeypatch.setattr(MODULE, "_fetch_primary_claim", lambda spec: (-1.25, "verified"))
+    monkeypatch.setattr(
+        MODULE, "_screen_trending_topic",
+        lambda *_a, **_k: TopicScreen(verdict=CLEAN, blocked=False, reason="clean"),
+    )
+
+    result = MODULE.refill_trending_candidates()
+
+    assert result["added"] == ["verified_tw_move"]
+    task = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert task["primary_source_verification"]["decision"] == "pass"
+    assert task["primary_source_verification"]["checks"][0]["actual"] == -1.25
 
 
 # --- Slot-aware event coverage (2026-07-03 NFP T+0 stale-duplicate fix) --------

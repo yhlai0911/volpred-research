@@ -21,6 +21,8 @@ from scripts import compute_queue, run_agent_job
 def _registered_worktree_fixture(monkeypatch):
     """These ownership tests use lightweight dirs; worktree validity is separate."""
     monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
+    monkeypatch.setattr(compute_queue, "_find_task_dispatch_collision", lambda **_k: None)
+    monkeypatch.setattr(compute_queue, "_link_source_task", lambda *_a, **_k: None)
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: True)
 
 
@@ -69,7 +71,7 @@ def test_runner_verifies_worktree_result_without_writing_main(monkeypatch, tmp_p
     metadata = main / "storage/ops/agent_jobs/job-test.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -90,6 +92,7 @@ def test_runner_verifies_worktree_result_without_writing_main(monkeypatch, tmp_p
 def test_runner_fails_when_successful_agent_omits_declared_result(
     monkeypatch,
     tmp_path: Path,
+    capsys,
 ) -> None:
     main = tmp_path / "main"
     worktree = tmp_path / "worktree"
@@ -97,12 +100,17 @@ def test_runner_fails_when_successful_agent_omits_declared_result(
     worktree.mkdir()
     brief = main / "brief.md"
     brief.write_text("forget the result")
-    fake = _fake_agent(tmp_path / "fake-claude", "exit 0\n")
+    near_miss = worktree / "experiments/k-missing/k-missing_results.json"
+    fake = _fake_agent(
+        tmp_path / "fake-claude",
+        f'mkdir -p "{near_miss.parent}"\n'
+        f'printf \'{{"source":"agent"}}\' > "{near_miss}"\n',
+    )
     metadata = main / "storage/ops/agent_jobs/job-missing.json"
-    rel_artifact = "experiments/k-missing/k-missing_results.json"
+    rel_artifact = "experiments/k-missing/results.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -118,6 +126,8 @@ def test_runner_fails_when_successful_agent_omits_declared_result(
     assert receipt["result_artifact_exists"] is False
     assert receipt["validation_ok"] is False
     assert receipt["runner_exit_code"] == 1
+    assert receipt["result_artifact_near_misses"] == [str(near_miss)]
+    assert str(near_miss) in capsys.readouterr().err
 
 
 def test_runner_never_overwrites_absolute_worktree_result(monkeypatch, tmp_path: Path) -> None:
@@ -134,7 +144,7 @@ def test_runner_never_overwrites_absolute_worktree_result(monkeypatch, tmp_path:
     metadata = main / "storage/ops/agent_jobs/job-absolute.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -165,6 +175,7 @@ def _enqueue_args(
         followup_task_type="experiment",
         followup_priority=1,
         timeout=5400,
+        source_task_id="assign_agent_artifact_boundary",
     )
 
 
@@ -187,7 +198,7 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
     worktree = root / ".claude/worktrees/k-test"
     worktree.mkdir(parents=True)
     brief = root / "brief.md"
-    brief.write_text("produce a canonical experiment result")
+    brief.write_text("produce experiments/k-test/k-test_results.json")
     _patch_queue_paths(monkeypatch, root)
 
     rel_artifact = "experiments/k-test/k-test_results.json"
@@ -215,6 +226,39 @@ def test_enqueue_agent_resolves_result_from_worktree_and_separates_metadata(
     assert job["args"][result_index + 1] == str(expected_result)
     assert job["args"][metadata_index + 1] == str(expected_metadata)
     assert not (root / rel_artifact).exists()
+
+    # The frozen brief must land under the tmp root like every other write. It did
+    # not until 2026-07-15: AGENT_BRIEF_DIR was bound at import from the real ROOT,
+    # so this test wrote a brief into the live checkout on every run and only CI's
+    # repo-state assert noticed. Assert the destination, not just the queue record.
+    assert (root / "storage/ops/agent_briefs/agent-artifact-test.md").exists()
+
+
+def test_enqueue_agent_rejects_result_basename_absent_from_brief(
+    monkeypatch,
+    tmp_path: Path,
+    capsys,
+) -> None:
+    root = tmp_path / "main"
+    worktree = root / ".claude/worktrees/k-test"
+    worktree.mkdir(parents=True)
+    brief = root / "brief.md"
+    # A substring is not an exact basename mention: this is the k1729 shape
+    # that used to pass unnoticed until the successful agent was collected.
+    brief.write_text("produce experiments/k-test/k-test_results.json")
+    _patch_queue_paths(monkeypatch, root)
+
+    args = _enqueue_args(
+        brief=brief,
+        cwd=".claude/worktrees/k-test",
+        result_artifact="experiments/k-test/results.json",
+        job_id="agent-contract-mismatch",
+    )
+
+    assert compute_queue.enqueue_agent(args) == 2
+    assert "basename is absent" in capsys.readouterr().err
+    assert not (root / "storage/ops/agent_briefs/agent-contract-mismatch.md").exists()
+    assert not (root / "storage/ops/compute_queue/agent-contract-mismatch.json").exists()
 
 
 def test_enqueue_agent_without_result_does_not_invent_a_fake_artifact(
@@ -277,7 +321,7 @@ def test_runner_defense_in_depth_rejects_non_worktree_cwd(
     brief.write_text("do not start")
     fake = _fake_agent(tmp_path / "fake-claude", "exit 99\n")
     monkeypatch.setattr(run_agent_job, "ROOT", main)
-    monkeypatch.setattr(run_agent_job, "CLAUDE_BIN", str(fake))
+    monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: False)
     monkeypatch.setattr(
         sys,

@@ -1,0 +1,21 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "digest29_epicenter.py",
+    "args": []
+  },
+  "canonical_result": "digest29_results.json",
+  "inputs": [],
+  "timeout_seconds": 900,
+  "network": "allow",
+  "randomness": {
+    "status": "not_applicable",
+    "seeds": []
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [],
+    "ignore_reasons": {}
+  }
+}

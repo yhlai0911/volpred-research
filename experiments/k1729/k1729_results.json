@@ -1,0 +1,471 @@
+{
+  "experiment_id": "K1729",
+  "title": "Self-owned TAIFEX tick (5-min RV) vs daily-only information for next-day TX day-session RV",
+  "timestamp_utc": "2026-07-21T06:50:13.841586+00:00",
+  "random_seed": 42,
+  "verdict": "HAR_RV5_WINS_ROBUST_ACROSS_PROXIES",
+  "hypothesis": {
+    "H0": "E[QLIKE(HAR-DAILY)] - E[QLIKE(HAR-RV5)] = 0 (intraday RV adds nothing over daily-only info)",
+    "H1": "HAR-RV5 attains strictly lower QLIKE on a common ledger",
+    "decision_rule": "Harvey (2016) |DM t| > 3.0 on BOTH proxy targets, AND the ex-ante-contract ledger must reach the same call on each, for a robust claim. The primary ledger alone is not sufficient: it still contains the days whose contract choice was not fixable ex ante."
+  },
+  "data": {
+    "source_csv": "data/intraday/taifex_5min_rv.csv",
+    "source_sha256": "11d177c2faaa4e215955247dcf96e38acd147a1bbe26ef459423c15c5cb5e17d",
+    "source_sha256_note": "Whole-file hash of the live canonical CSV at run time. The collector appends a row every trading day, so this value is provenance only and WILL differ from run to run. The reproducibility guarantee is analysis_slice_sha256 below.",
+    "as_of": "2026-07-16",
+    "analysis_slice_sha256": "2acdc69aa2103f4adcda0710cd530941f6cfed22bccdfca8ef777fba88f6c1e5",
+    "analysis_slice_sha256_note": "sha256 of the date <= as_of slice re-serialised as CSV. Stable across future collector appends; this is what a replication must match.",
+    "n_rows_available_at_runtime": 3551,
+    "contract": "TX active monthly (same_day_max_total_volume rule, per collector)",
+    "session": "day session 08:45-13:45 only (rv_5min == rv_day verified)",
+    "n_rows_total": 3550,
+    "date_min": "2012-01-02",
+    "date_max": "2026-07-16",
+    "night_session_note": "Night session exists only from 2017-05-16, but this design uses the day session exclusively, so the regime change does not enter the sample."
+  },
+  "models": {
+    "HAR_RV5": "HAR(d/w/m) on 5-min intraday RV regressors",
+    "HAR_DAILY": "HAR(d/w/m) on daily open-to-close squared-return regressors",
+    "symmetry": "Identical spec, rolling window, refit cadence, insanity filter and ledger. No hyperparameter was tuned for either model.",
+    "estimation": "level-space OLS, rolling window, refit every origin",
+    "window": 1000,
+    "insanity_filter": "forecast outside in-sample [min,max] or <=0 -> in-sample mean (BPQ 2016)",
+    "lag": "all regressors .shift(1); training pairs for origin t end at t-1"
+  },
+  "results": {
+    "rv_5min": {
+      "diagnostics": {
+        "HAR_RV5": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 7,
+          "insanity_filter_rate_pct": 0.27450980392156865,
+          "train_obs_min": 978,
+          "train_obs_max": 1000
+        },
+        "HAR_DAILY": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 0,
+          "insanity_filter_rate_pct": 0.0,
+          "train_obs_min": 978,
+          "train_obs_max": 1000
+        }
+      },
+      "full": {
+        "target": "rv_5min",
+        "n_test": 2548,
+        "ledger_start": "2016-01-20",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 0.19086090240721354,
+        "qlike_har_daily": 0.2237478084493344,
+        "qlike_diff_rv5_minus_daily": -0.032886906042120856,
+        "qlike_pct_improvement_rv5_vs_daily": 14.698202529911164,
+        "dm_t": -3.6805195082126385,
+        "dm_p": 0.00023758940764562198,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": 0.07154235008332327,
+        "nondegeneracy": {
+          "loss_diff_std": 0.3638288568822868,
+          "loss_diff_frac_exact_zero": 0.0,
+          "forecast_corr_rv5_vs_daily": 0.7783278627378828,
+          "forecast_mean_abs_rel_gap": 0.2057039435568557,
+          "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+        },
+        "harvey_significant": true,
+        "verdict": "HAR_RV5_WINS"
+      },
+      "sub_2017on": {
+        "target": "rv_5min@2017on",
+        "n_test": 2231,
+        "ledger_start": "2017-05-16",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 0.18590291913149048,
+        "qlike_har_daily": 0.21570168849838203,
+        "qlike_diff_rv5_minus_daily": -0.029798769366891548,
+        "qlike_pct_improvement_rv5_vs_daily": 13.814805796995449,
+        "dm_t": -3.066900482041347,
+        "dm_p": 0.0021888811466170832,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": 0.07955087842399229,
+        "nondegeneracy": {
+          "loss_diff_std": 0.36443001570894934,
+          "loss_diff_frac_exact_zero": 0.0,
+          "forecast_corr_rv5_vs_daily": 0.7791832592596949,
+          "forecast_mean_abs_rel_gap": 0.2083146020412483,
+          "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+        },
+        "harvey_significant": true,
+        "verdict": "HAR_RV5_WINS"
+      },
+      "sensitivity": {
+        "exante_contract_ledger": {
+          "target": "rv_5min@exante_contract",
+          "n_test": 2543,
+          "ledger_start": "2016-01-20",
+          "ledger_end": "2026-07-16",
+          "qlike_har_rv5": 0.19069880735474246,
+          "qlike_har_daily": 0.2235664225331122,
+          "qlike_diff_rv5_minus_daily": -0.03286761517836975,
+          "qlike_pct_improvement_rv5_vs_daily": 14.70149891292453,
+          "dm_t": -3.6707226318117487,
+          "dm_p": 0.0002468443247227725,
+          "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+          "dm_hac_bandwidth": 14,
+          "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+          "loss_diff_acf1": 0.07124294884471337,
+          "nondegeneracy": {
+            "loss_diff_std": 0.3641310335728591,
+            "loss_diff_frac_exact_zero": 0.0,
+            "forecast_corr_rv5_vs_daily": 0.7783087391177367,
+            "forecast_mean_abs_rel_gap": 0.2057174827890483,
+            "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+          },
+          "harvey_significant": true,
+          "verdict": "HAR_RV5_WINS"
+        },
+        "roll_days_excluded_ledger": {
+          "target": "rv_5min@no_roll_days",
+          "n_test": 2421,
+          "ledger_start": "2016-01-20",
+          "ledger_end": "2026-07-15",
+          "qlike_har_rv5": 0.19324593401989185,
+          "qlike_har_daily": 0.2264485174721168,
+          "qlike_diff_rv5_minus_daily": -0.03320258345222496,
+          "qlike_pct_improvement_rv5_vs_daily": 14.662309924953817,
+          "dm_t": -3.5842206450181457,
+          "dm_p": 0.0003447690535534065,
+          "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+          "dm_hac_bandwidth": 14,
+          "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+          "loss_diff_acf1": 0.07323811677516744,
+          "nondegeneracy": {
+            "loss_diff_std": 0.3684823619065208,
+            "loss_diff_frac_exact_zero": 0.0,
+            "forecast_corr_rv5_vs_daily": 0.7810904123170013,
+            "forecast_mean_abs_rel_gap": 0.20580909721811488,
+            "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+          },
+          "harvey_significant": true,
+          "verdict": "HAR_RV5_WINS"
+        },
+        "no_insanity_filter": {
+          "target": "rv_5min@no_filter",
+          "n_test": 2541,
+          "ledger_start": "2016-01-20",
+          "ledger_end": "2026-07-16",
+          "qlike_har_rv5": 0.1899798950879888,
+          "qlike_har_daily": 0.22400750708502695,
+          "qlike_diff_rv5_minus_daily": -0.03402761199703816,
+          "qlike_pct_improvement_rv5_vs_daily": 15.190389125719003,
+          "dm_t": -3.8673880664343248,
+          "dm_p": 0.00011277006749788043,
+          "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+          "dm_hac_bandwidth": 14,
+          "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+          "loss_diff_acf1": 0.07007144774133023,
+          "nondegeneracy": {
+            "loss_diff_std": 0.3620287295043325,
+            "loss_diff_frac_exact_zero": 0.0,
+            "forecast_corr_rv5_vs_daily": 0.7803059274074049,
+            "forecast_mean_abs_rel_gap": 0.2045197436451151,
+            "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+          },
+          "harvey_significant": true,
+          "verdict": "HAR_RV5_WINS"
+        },
+        "no_insanity_filter_diagnostics": {
+          "HAR_RV5": {
+            "n_forecasts": 2550,
+            "n_insanity_filtered": 7,
+            "insanity_filter_rate_pct": 0.27450980392156865,
+            "train_obs_min": 978,
+            "train_obs_max": 1000
+          },
+          "HAR_DAILY": {
+            "n_forecasts": 2550,
+            "n_insanity_filtered": 0,
+            "insanity_filter_rate_pct": 0.0,
+            "train_obs_min": 978,
+            "train_obs_max": 1000
+          },
+          "note": "n_insanity_filtered counts forecasts that WOULD have been replaced; with insanity=False they are kept, and any that are non-positive leave the ledger."
+        }
+      }
+    },
+    "daily_r2": {
+      "diagnostics": {
+        "HAR_RV5": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 12,
+          "insanity_filter_rate_pct": 0.47058823529411764,
+          "train_obs_min": 972,
+          "train_obs_max": 997
+        },
+        "HAR_DAILY": {
+          "n_forecasts": 2550,
+          "n_insanity_filtered": 0,
+          "insanity_filter_rate_pct": 0.0,
+          "train_obs_min": 972,
+          "train_obs_max": 997
+        }
+      },
+      "full": {
+        "target": "daily_r2",
+        "n_test": 2536,
+        "ledger_start": "2016-01-20",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 1.3949910321663586,
+        "qlike_har_daily": 1.443710291925937,
+        "qlike_diff_rv5_minus_daily": -0.04871925975957847,
+        "qlike_pct_improvement_rv5_vs_daily": 3.374586995191816,
+        "dm_t": -3.367082778615115,
+        "dm_p": 0.000771015697894839,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": -0.05407902380629839,
+        "nondegeneracy": {
+          "loss_diff_std": 0.7130053027130931,
+          "loss_diff_frac_exact_zero": 0.0,
+          "forecast_corr_rv5_vs_daily": 0.7907820766675596,
+          "forecast_mean_abs_rel_gap": 0.17664889083497365,
+          "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+        },
+        "harvey_significant": true,
+        "verdict": "HAR_RV5_WINS"
+      },
+      "sub_2017on": {
+        "target": "daily_r2@2017on",
+        "n_test": 2222,
+        "ledger_start": "2017-05-16",
+        "ledger_end": "2026-07-16",
+        "qlike_har_rv5": 1.371681836111511,
+        "qlike_har_daily": 1.4195775631620873,
+        "qlike_diff_rv5_minus_daily": -0.04789572705057621,
+        "qlike_pct_improvement_rv5_vs_daily": 3.3739422412319064,
+        "dm_t": -2.920740591191706,
+        "dm_p": 0.003527212661807333,
+        "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+        "dm_hac_bandwidth": 14,
+        "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+        "loss_diff_acf1": -0.0549370934492154,
+        "nondegeneracy": {
+          "loss_diff_std": 0.7522062084182143,
+          "loss_diff_frac_exact_zero": 0.0,
+          "forecast_corr_rv5_vs_daily": 0.7908206912018855,
+          "forecast_mean_abs_rel_gap": 0.18339979625624042,
+          "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+        },
+        "harvey_significant": false,
+        "verdict": "NULL"
+      },
+      "sensitivity": {
+        "exante_contract_ledger": {
+          "target": "daily_r2@exante_contract",
+          "n_test": 2531,
+          "ledger_start": "2016-01-20",
+          "ledger_end": "2026-07-16",
+          "qlike_har_rv5": 1.3939674992194544,
+          "qlike_har_daily": 1.4428169387046783,
+          "qlike_diff_rv5_minus_daily": -0.04884943948522391,
+          "qlike_pct_improvement_rv5_vs_daily": 3.3856990568103256,
+          "dm_t": -3.369645514648847,
+          "dm_p": 0.000763935682408512,
+          "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+          "dm_hac_bandwidth": 14,
+          "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+          "loss_diff_acf1": -0.05402814071892339,
+          "nondegeneracy": {
+            "loss_diff_std": 0.713669829495132,
+            "loss_diff_frac_exact_zero": 0.0,
+            "forecast_corr_rv5_vs_daily": 0.7907628348755718,
+            "forecast_mean_abs_rel_gap": 0.17670463524000382,
+            "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+          },
+          "harvey_significant": true,
+          "verdict": "HAR_RV5_WINS"
+        },
+        "roll_days_excluded_ledger": {
+          "target": "daily_r2@no_roll_days",
+          "n_test": 2410,
+          "ledger_start": "2016-01-20",
+          "ledger_end": "2026-07-15",
+          "qlike_har_rv5": 1.392492621086073,
+          "qlike_har_daily": 1.4427672026580505,
+          "qlike_diff_rv5_minus_daily": -0.050274581571977395,
+          "qlike_pct_improvement_rv5_vs_daily": 3.4845941520818555,
+          "dm_t": -3.6648052297696068,
+          "dm_p": 0.0002528726309618534,
+          "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+          "dm_hac_bandwidth": 14,
+          "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+          "loss_diff_acf1": -0.06656741272033483,
+          "nondegeneracy": {
+            "loss_diff_std": 0.6952046925963495,
+            "loss_diff_frac_exact_zero": 0.0,
+            "forecast_corr_rv5_vs_daily": 0.7920410880009731,
+            "forecast_mean_abs_rel_gap": 0.17672867608224366,
+            "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+          },
+          "harvey_significant": true,
+          "verdict": "HAR_RV5_WINS"
+        },
+        "no_insanity_filter": {
+          "target": "daily_r2@no_filter",
+          "n_test": 2524,
+          "ledger_start": "2016-01-20",
+          "ledger_end": "2026-07-16",
+          "qlike_har_rv5": 1.393255458664457,
+          "qlike_har_daily": 1.4434528144536152,
+          "qlike_diff_rv5_minus_daily": -0.05019735578915818,
+          "qlike_pct_improvement_rv5_vs_daily": 3.477588964912525,
+          "dm_t": -3.455590394925976,
+          "dm_p": 0.0005581613554332954,
+          "dm_sign_convention": "negative t => HAR-RV5 lower QLIKE => intraday helps",
+          "dm_hac_bandwidth": 14,
+          "dm_impl": "volpred.stats.model_evaluation.dm_test (Newey-West, bandwidth floored at 1)",
+          "loss_diff_acf1": -0.048561381893174764,
+          "nondegeneracy": {
+            "loss_diff_std": 0.7091009392904628,
+            "loss_diff_frac_exact_zero": 0.0,
+            "forecast_corr_rv5_vs_daily": 0.7946541375817475,
+            "forecast_mean_abs_rel_gap": 0.17490006234216435,
+            "note": "Non-nested: the HAR-RV5 and HAR-DAILY regressor sets are disjoint, so neither model is recoverable from the other by a zero/equality restriction and the DM variance does not degenerate under the null."
+          },
+          "harvey_significant": true,
+          "verdict": "HAR_RV5_WINS"
+        },
+        "no_insanity_filter_diagnostics": {
+          "HAR_RV5": {
+            "n_forecasts": 2550,
+            "n_insanity_filtered": 12,
+            "insanity_filter_rate_pct": 0.47058823529411764,
+            "train_obs_min": 972,
+            "train_obs_max": 997
+          },
+          "HAR_DAILY": {
+            "n_forecasts": 2550,
+            "n_insanity_filtered": 0,
+            "insanity_filter_rate_pct": 0.0,
+            "train_obs_min": 972,
+            "train_obs_max": 997
+          },
+          "note": "n_insanity_filtered counts forecasts that WOULD have been replaced; with insanity=False they are kept, and any that are non-positive leave the ledger."
+        }
+      }
+    }
+  },
+  "exclusions": {
+    "accounting_note": "n counts rows in the WHOLE FILE (2012-2026). n_in_oos_window counts the subset at or after the first OOS origin (row 1000) -- only those actually removed a scored day. Earlier rows are rolling-window warmup and were never in a ledger.",
+    "zero_rv_days": {
+      "n": 2,
+      "n_in_oos_window": 2,
+      "dates": [
+        "2025-04-07",
+        "2025-04-10"
+      ],
+      "dates_in_oos_window": [
+        "2025-04-07",
+        "2025-04-10"
+      ],
+      "detail": [
+        {
+          "date": "2025-04-07",
+          "day_n_ticks": 481,
+          "day_open": 19167,
+          "day_close": 19167
+        },
+        {
+          "date": "2025-04-10",
+          "day_n_ticks": 292,
+          "day_open": 18902,
+          "day_close": 18902
+        }
+      ],
+      "reason": "Price frozen for the entire session (open == close, a few hundred ticks vs ~30k typical), i.e. limit-lock. RV=0 is a true market outcome, not a data hole, but QLIKE is undefined at actual=0, so these days are dropped from the ledger rather than clipped to a small positive value."
+    },
+    "zero_r2_days": {
+      "n": 21,
+      "n_in_oos_window": 14,
+      "dates": [
+        "2012-01-12",
+        "2012-08-03",
+        "2012-08-29",
+        "2012-09-06",
+        "2012-10-16",
+        "2013-02-01",
+        "2013-04-22",
+        "2016-03-07",
+        "2016-06-06",
+        "2016-08-02",
+        "2017-08-01",
+        "2017-08-15",
+        "2018-01-08",
+        "2018-04-27",
+        "2019-01-04",
+        "2019-09-20",
+        "2021-02-25",
+        "2022-08-10",
+        "2023-04-20",
+        "2025-04-07",
+        "2025-04-10"
+      ],
+      "dates_in_oos_window": [
+        "2016-03-07",
+        "2016-06-06",
+        "2016-08-02",
+        "2017-08-01",
+        "2017-08-15",
+        "2018-01-08",
+        "2018-04-27",
+        "2019-01-04",
+        "2019-09-20",
+        "2021-02-25",
+        "2022-08-10",
+        "2023-04-20",
+        "2025-04-07",
+        "2025-04-10"
+      ],
+      "reason": "day_return == 0 exactly -> r2 = 0 -> QLIKE undefined on the daily_r2 target."
+    },
+    "warmup": "first 22 rows lack HAR monthly features; first OOS origin at row 1000."
+  },
+  "target_contract_selection_audit": {
+    "defect_repaired": "pick_active_contract() chooses day t's contract from day t's TOTAL volume, which includes the 08:45-13:45 day session being forecast. The identity of the contract y_t is measured on is therefore not fixable at the 08:45-on-t origin in general. Codex judged this blocking on 2026-07-17 (review_verdict.json); it was undisclosed, not scoped.",
+    "exante_rule": "RULE E -- hold the front monthly contract through its published final settlement date (3rd Wednesday of the contract month, advanced to the next trading day if that Wednesday is a holiday), then roll. Inputs are the contract held at t-1 and the published settlement calendar, both in the 08:45-on-t information set.",
+    "rule_is_a_convention_not_a_fit": "The alternative natural formalisation (take the nearest contract whose settlement date has not yet passed) agrees with RULE E ITSELF -- not merely with the realized selection -- on every row of the OOS window. The two differ on exactly one row of the whole file, row 0 (2012-01-02), and only because the file has no history before it, so the December-2011 settlement cannot be located; that row is warmup and is never scored. No choice between conventions was made against the data. Independently reimplemented and confirmed by an external reviewer (agy_review_rev2.md), which also showed a third convention not tied to expiry (roll on the 1st of the calendar month) agrees with only 59.22% of OOS rows -- expiry-tied conventions are the natural family, and within that family the choice is immaterial.",
+    "n_rows_total": 3550,
+    "n_exante_determined_total": 3512,
+    "n_ambiguous_total": 38,
+    "n_rows_oos_window": 2550,
+    "n_exante_determined_oos": 2545,
+    "n_ambiguous_oos": 5,
+    "pct_exante_determined_oos": 99.80392156862744,
+    "ambiguous_dates_oos": [
+      "2016-03-16",
+      "2016-05-18",
+      "2016-08-17",
+      "2017-01-18",
+      "2017-02-15"
+    ],
+    "ambiguous_day_character": "Every ambiguous row is a final-settlement day on which volume had already migrated to the next month, so the ex-post argmax rolled one day earlier than the calendar convention.",
+    "n_roll_days_total": 175,
+    "n_roll_days_oos": 127,
+    "residual_limitation": "Restricting the ledger to ex-ante-determined days conditions the sample on something not knowable at 08:45 on t, so the sensitivity estimand is 'expected loss differential on days whose contract follows the calendar' rather than an unconditional one. The selection is model-agnostic -- it touches neither forecast nor loss and both models are scored on the same days -- so it cannot favour either side, but it is a conditional claim and is reported as one."
+  },
+  "forecast_origin": "08:45 on day t, immediately before the day session opens; predicts day t's 08:45-13:45 realized variance. All t-1 information (including the t-1 evening night session, which ends 05:00 on day t) is realized and observable by then.",
+  "caveats": [
+    "Neither target is the latent integrated variance; both are noisy proxies.",
+    "No neutral third proxy (e.g. Parkinson range) was used: the canonical 5-min RV layer stores no session high/low, and TWII spot OHLC is a different asset (basis).",
+    "Result speaks to the day session only; it does not test the night session or any options-tick signal.",
+    "SCOPE LIMIT ON THE COST CLAIM (Codex review): the HAR-DAILY baseline's day_return is itself computed from tick by the collector. The baseline's INFORMATION SET is daily-only (day-session open and close are published in TAIFEX's free daily settlement data), but this experiment did not source it end-to-end from an external daily feed. It therefore establishes whether 5-min RV beats daily-compressed information -- not that an external cheap daily feed could replace the tick pipeline byte-for-byte.",
+    "Active-contract selection uses each day's TOTAL (day+night) volume, so the choice for day t-1 is only in the information set under the stated 08:45-on-t origin. A 13:45-on-t-1 origin would make it an economic-clock lookahead.",
+    "TARGET-SIDE EX-POST SELECTION (disclosed, quantified, and bounded -- see target_contract_selection_audit): the same TOTAL-volume rule also picks the contract y_t is measured on, and that total includes day t's own day session. The contract identity is therefore not fixable ex ante in general. A pre-specified ex-ante calendar rule reproduces the realized selection on 99.80% of OOS rows; the headline is re-run with the remaining rows dropped and the verdict is unchanged. What is NOT claimed is that the primary full-ledger numbers are themselves free of the ex-post choice -- they are not; the ex-ante-restricted ledger is the lookahead-free one.",
+    "The ex-ante-restricted ledger is a CONDITIONAL estimand: membership depends on whether day t's contract followed the calendar, which is not knowable at 08:45. The selection is model-agnostic and common to both models, so it cannot favour either, but it is not an unconditional statement."
+  ],
+  "code_sha256": "74ddae0e123be5eee0784568d98617ee64c2e2fb1034776ddf0eda934d0631b7"
+}

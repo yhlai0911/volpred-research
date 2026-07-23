@@ -1,0 +1,46 @@
+{
+  "id": "k1730_armA_production_run_20260721",
+  "title": "K1730 arm A production run (non-quick) — 現行 results.json 與 quickmode 檔 md5 完全相同",
+  "script_path": ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1730/k1730_gevreg_midas_ssvs.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 2,
+  "queued_at": "2026-07-21T09:09:58Z",
+  "started_at": "2026-07-21T09:15:05Z",
+  "completed_at": "2026-07-21T10:11:26Z",
+  "exit_code": 4,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1730_armA_production_run_20260721.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1730_armA_production_run_20260721.stderr",
+  "result_artifact": ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+  "output_paths": [
+    ".claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1730/k1730_gevreg_midas_ssvs_results.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1730 arm A production run 落地後的收件工作（parent task=k1731_F3_armA_production_recheck）。(1) 先驗 k1730_gevreg_midas_ssvs_results.json 的 quick_mode 必須為 false、config 必須是 n_starts=30/n_draws=40000/n_burnin=10000/n_pred_draws=500，且 md5 不再等於 k1730_quickmode_results.json（2026-07-21 查出兩檔 md5 皆 af6167c936d435c5c9ce13cddefea3db，即舊 production 檔是 quickmode 複本、run_production.log 只跑到 2019 就中斷）。(2) 用 production 數字逐項重核 experiments/k1731/README.md 的 §3.3b / §5.3 / §6 每一個 arm A 數字，改不掉的就標出處。(3) 跨臂 DM t=+2.13 的 nested-DM 缺陷比照 arm B 處理：能校正就校正，不能就撤回並標為診斷性，禁止硬撐。(4) 成功判準：README 內不再有未標註出處的 quick-mode 數字，跨臂宣稱要嘛有 production 支撐、要嘛已撤回。工作目錄 = .claude/worktrees/dispatch-slot-1-bd00f90a-k1731。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "source_task_id": "k1731_F3_armA_production_recheck",
+  "timeout_seconds": 21600,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 79519,
+  "claimed_by_pid_start_wall": "Tue Jul 21 17:15:04 2026",
+  "process_exit_code": 0,
+  "failure_reason": "experiment_gate_failed",
+  "experiment_gate": {
+    "status": "failed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1730",
+    "exit_code": 1,
+    "report": "[gate] FAIL — 1 violation(s) under .claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1730:\n\n  [nested-dm-misuse]\n    - experiments/k1730/k1730_gevreg_midas_ssvs.py  (review_required)\n    → Raw DM/HLN is not valid inference under a nested-model null. Use Clark-West (2007) for squared-error, or a general-loss / recursive-bootstrap design for QLIKE/pinball, and wire THAT into the verdict. If the DM is descriptive only, say so with `nested-dm: diagnostic-only` and keep it out of the claim sink. A primary unconditional GW/DM statistic under nesting is accepted only with the versioned fixed-memory cell manifest, matching runtime provenance, locally narrow claims, and a trusted external PASS receipt. Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
+  },
+  "followup_dispatched_at": "2026-07-21T15:15:22Z",
+  "followup_next_task_id": "k1731_F3_armA_production_recheck"
+}

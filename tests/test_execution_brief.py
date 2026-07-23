@@ -262,11 +262,11 @@ success_criteria:
 required_files:
   - "config/runtime_schedules.json"
 recommended_files:
-  - "scripts/install_scheduler_cron.sh"
+  - "scripts/install_host_crontab.sh"
 forbidden_large_files:
   - "storage/reports/feed.json"
 relevant_commands:
-  - "uv run volpred ops scheduler-preview"
+  - "uv run volpred ops scheduler-summary"
 why_this_agent: "claude governs schedule"
 """.strip(),
     )

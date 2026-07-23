@@ -31,6 +31,14 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+# WS-D1 (2026-07-20): liveness evidence merge is owned by volpred.ops.schedules.
+# cron_last_run.json alone lies for launchd-direct jobs (daily_update marker froze
+# at 2026-04-25 while the job ran healthy every morning) — the dashboard showed
+# the boss a dead job for ~3 months.
+from volpred.ops.schedules import job_liveness  # noqa: E402
 TZ = ZoneInfo("Asia/Taipei")
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
@@ -65,12 +73,12 @@ JOB_DESC = {
     "handoff_regen": "重生 handoff 文件 + 清理逾時 claim",
     "question_research": "巡會員提問、materialize 問答任務",
     "reader_facing_refill": "補事件/trending/會員問答候選池",
-    "work_summary_6h": "每 6h 寄工作摘要 email 給老闆",
+    "work_summary_6h": "（已退役 2026-07-20，併入 boss_report 20:10 日結）工作摘要 email",
     "log_rotate": "截斷過大的 log 檔（防 codex_loop.log 暴脹）",
     "codex_update": "週度更新 codex-cli 輔助 agent 到最新版",
-    "shared_scheduler_tick": "shared scheduler（v12 已降級 advisory）",
+    "shared_scheduler_tick": "（已退役 2026-07-20 ops-master D2）advisory shared scheduler",
     "continue_task_stub": "slot-aware 續跑心跳",
-    "token_usage_daily": "每日 token 使用量摘要",
+    "token_usage_daily": "（已退役 2026-07-20，落檔併入 token_report_daily 08:00）token 摘要",
     "ndc_indicator_refresh": "每月更新 NDC 景氣指標",
 }
 
@@ -272,13 +280,17 @@ def build_work() -> dict:
         ntw, nrel, nsort, nday = _fmt_tw(_next_fire_dt(item.get("cron", ""), warnings, str(jid or "?")))
         cat = JOB_CAT.get(jid, "other")
         cname, ccolor = CAT_META.get(cat, CAT_META["other"])
+        # Single liveness source (WS-D1): marker + execution-log banner/mtime
+        # merged by job_liveness — never the raw cron_last_run marker alone.
+        live = job_liveness(item, marker_state=last_run, repo_root=ROOT)
+        last_iso = live.last_activity.isoformat() if live.last_activity else ""
         schedule.append({
             "id": jid, "cron": item.get("cron", "?"),
             "label": item.get("label") or (item.get("description") or "")[:36],
             "desc": JOB_DESC.get(jid) or (item.get("description") or "")[:34],
             "cat": cname, "color": ccolor,
             "next_tw": ntw, "next_rel": nrel, "_sort": nsort, "_day": nday,
-            "last": _rel_time(last_run.get(jid, "")),
+            "last": _rel_time(last_iso),
             "skip": bool(item.get("piggy_back_skip") or item.get("host_crontab_managed") is False),
         })
     schedule.sort(key=lambda s: s["_sort"])  # 預設依接下來發生順序

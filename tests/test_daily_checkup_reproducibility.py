@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from scripts import daily_checkup, reproduce_check
 
 
@@ -57,19 +59,16 @@ def test_reproducibility_projects_aggregated_issues_to_fixed_finding_schema(monk
 
 
 def test_run_all_turns_reproducibility_checker_exception_into_warning(monkeypatch) -> None:
-    checker_names = (
-        "check_data_freshness",
-        "check_cron_completion",
-        "check_content_pipeline",
-        "check_live_freshness",
-        "check_live_cache",
-        "check_mission_progress",
-        "check_alert_conditions",
-        "check_reader_metrics",
-        "check_dedup_calibration",
-    )
-    for name in checker_names:
-        monkeypatch.setattr(daily_checkup, name, lambda: [])
+    # Enumerate the real dimension list, never a hand-copied one. The previous
+    # hard-coded tuple went stale the moment `worktree_reconcile` was added, and
+    # the un-stubbed checker ran for real inside this unit test: quiet on a dev
+    # box that has the worktrees, `critical` on a CI clone that has neither the
+    # checkouts nor the branches. Deriving the list makes a future dimension
+    # impossible to forget.
+    for name in daily_checkup.CHECKUP_DIMENSIONS:
+        if name == "reproducibility":
+            continue
+        monkeypatch.setattr(daily_checkup, f"check_{name}", lambda: [])
 
     def fail() -> list[dict]:
         raise RuntimeError("inventory unavailable")
@@ -82,3 +81,30 @@ def test_run_all_turns_reproducibility_checker_exception_into_warning(monkeypatc
     assert report["warn_count"] == 1
     assert report["findings"][0]["dimension"] == "reproducibility"
     assert "inventory unavailable" in report["findings"][0]["message"]
+
+
+def test_every_declared_dimension_has_a_checker() -> None:
+    """CHECKUP_DIMENSIONS is resolved by name at call time, so a typo would only
+    surface as a runtime KeyError swallowed into a warn finding during a real
+    checkup. Fail here instead."""
+    missing = [
+        name for name in daily_checkup.CHECKUP_DIMENSIONS
+        if not callable(getattr(daily_checkup, f"check_{name}", None))
+    ]
+    assert missing == []
+
+
+def test_fire_manifest_hook_check_warns_when_registration_is_missing(
+    tmp_path, monkeypatch,
+) -> None:
+    (tmp_path / ".claude").mkdir()
+    (tmp_path / ".claude" / "settings.json").write_text(
+        json.dumps({"hooks": {"PostToolUse": []}}), encoding="utf-8"
+    )
+    monkeypatch.setattr(daily_checkup, "ROOT", tmp_path)
+
+    findings = daily_checkup.check_fire_manifest_hook()
+
+    assert len(findings) == 1
+    assert findings[0]["dimension"] == "fire_manifest_hook"
+    assert findings[0]["severity"] == "warn"

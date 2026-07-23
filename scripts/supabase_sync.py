@@ -6,7 +6,6 @@ Used by record_and_publish.py and daily_update.py.
 Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars
 (or uses defaults from .env.local)
 """
-import hashlib
 import json
 import os
 import re
@@ -249,6 +248,23 @@ _MARKET_DAILY_COLUMNS = {
     "vix_level",
     "sigma_spy_ann", "sigma_gld_ann",
 }
+
+# 2026-07-20 adjudication (ops-master D5, boss "database landing verification"):
+# `overnight_gap` / `gap_alert_level` are CANONICAL-LOCAL-ONLY by decision, not
+# by accident — deliberately NOT synced to the market_daily table:
+#   - the live table has no such columns (15 cols verified 2026-07-20; adding a
+#     key here without ALTER first 400s every row, see warning above);
+#   - frontend-v2-fix has zero consumers of either key (grep 2026-07-20);
+#   - only 9/883 canonical rows are non-null (daily_update clears them on
+#     no-alert days) and both are derivable from spy_open / prior spy_close
+#     which already sync;
+#   - the alert content still reaches readers via the daily bulletin article
+#     (`details.overnight_gap` / `details.gap_alert_level`) and rides along in
+#     paper_trades.entry JSONB.
+# Listing a key here silences the daily schema-mismatch warning WITHOUT widening
+# the column whitelist. A genuinely unknown key still warns loudly (fail-open +
+# warn design stays intact). Regression: tests/test_daily_update_market_freshness.py.
+_MARKET_DAILY_LOCAL_ONLY = {"overnight_gap", "gap_alert_level"}
 
 
 def _post(table: str, data: list | dict) -> bool:
@@ -568,6 +584,251 @@ def extract_proposer(item: dict) -> str | None:
     return None
 
 
+# --- Frontend cache purge (2026-07-19, assign_sync_cache_purge) -------------
+#
+# Defect: this module writes articles straight to Supabase REST, bypassing the
+# frontend's /api/sync/[...path] route -- the only place that calls
+# revalidateTag('article') / revalidateTag(`article-<slug>`). A retraction done
+# via feed.json + sync_full() therefore updated the DB but never purged the
+# frontend cache, and getArticleInternal *throws* for a retracted row, so
+# unstable_cache's background revalidation had no new value to write and kept
+# re-serving the stale published body forever (mile_ebb5d6f5: HTTP 200 with full
+# content for >15min, far past `revalidate: 60` / page `revalidate = 300`).
+# Only a redeploy cleared it -- the other 12 retracted articles 404 by accident
+# of deploy history, not by mechanism.
+#
+# This module is the single enforcement owner for that purge (anti-stacking:
+# the frontend's getArticleInternal deliberately still throws; the report pages
+# already catch -> notFound()).
+_REVALIDATE_FAILURES: list[str] = []
+
+
+def _mirror_base_url() -> str:
+    from volpred.config.runtime import get_default_remote_url
+
+    return os.environ.get("VOLPRED_REMOTE_URL") or get_default_remote_url()
+
+
+def revalidate_article_cache(slug: str) -> bool:
+    """Purge the frontend unstable_cache tags for one article slug.
+
+    Returns True on success. Failures are recorded in _REVALIDATE_FAILURES and
+    printed LOUDLY -- an auth failure here silently disabling every purge is
+    exactly the 2026-06-11 incident (mirror writes 401'd unnoticed for a month),
+    so 401/403 gets its own explicit banner and sync_full()/the CLI surface it.
+    """
+    if not slug:
+        return True
+    # Same test-mode kill switch as every other outbound write in this module.
+    if _remote_writes_blocked():
+        return True
+
+    from volpred.mirror_auth import ops_admin_headers, ops_admin_token
+
+    url = f"{_mirror_base_url()}/api/sync/revalidate/article/{quote(str(slug), safe='')}"
+    if not ops_admin_token():
+        print(
+            f"  [supabase_sync] CACHE PURGE FAILED for {slug}: OPS_ADMIN_TOKEN is "
+            "unset, so /api/sync would 401. Retracted/unpublished articles will "
+            "keep being served from the frontend cache until a redeploy."
+        )
+        _REVALIDATE_FAILURES.append(slug)
+        return False
+
+    req = Request(
+        url,
+        data=b"",
+        headers={"Content-Type": "application/json", **ops_admin_headers()},
+        method="POST",
+    )
+    try:
+        # Routed through _urlopen like every other egress: neither of its two
+        # behaviours touches this call (the read gate only blocks GET, and a
+        # bare POST is not replay-safe so it is never retried), so the mirror
+        # host keeps its exact semantics while the chokepoint stays the single
+        # place a future outbound call can be gated from.
+        with _urlopen(req, timeout=10) as resp:
+            if 200 <= resp.status < 300:
+                return True
+            reason = f"HTTP {resp.status}"
+    except HTTPError as exc:
+        reason = f"HTTP {exc.code}"
+        if exc.code in (401, 403):
+            reason += " UNAUTHORIZED (OPS_ADMIN_TOKEN rejected by the mirror)"
+    except Exception as exc:  # URLError, timeout, DNS...
+        reason = f"{type(exc).__name__}: {exc}"
+
+    print(
+        f"  [supabase_sync] CACHE PURGE FAILED for {slug}: {reason} ({url}). "
+        "Supabase row is correct but readers may still see the cached old "
+        "version -- rerun the sync once the mirror is reachable."
+    )
+    _REVALIDATE_FAILURES.append(slug)
+    return False
+
+
+def projected_content(item: dict, *, verbose: bool = True) -> str:
+    """Return the exact `content` string sync_article() writes to Supabase.
+
+    Split out 2026-07-20 (WS-C2). The write path sanitizes content before
+    POSTing (markdown-table pipe escaping + CJK-appositive em-dash → comma),
+    so the stored projection is deliberately NOT byte-identical to the
+    canonical feed.json text. `feed_sync.compute_diff` used to hash the raw
+    feed content against the stored content, which meant every article whose
+    feed text still contained a CJK appositive em-dash was reported "changed"
+    on every single run — 137 of 1852 articles, forever, converging never.
+    That is fatal for the hourly reconcile job (WS-C2): a safety net that
+    always reports drift is a safety net nobody reads.
+
+    Both the writer and the differ now call this one function, so "what the
+    projection should contain" has a single definition (anti-stacking) and
+    the reconcile loop is idempotent by construction.
+
+    `verbose=False` for the diff path: it is asking a question, not
+    performing a repair, so it must not narrate.
+    """
+    content = item.get("content") or item.get("description") or ""
+    if not content:
+        return ""
+
+    def _say(msg: str) -> None:
+        if verbose:
+            print(msg)
+
+    try:
+        from volpred.publisher.markdown_table_sanitizer import (
+            sanitize_markdown_tables,
+        )
+        sanitized, report = sanitize_markdown_tables(content)
+        if report.changed:
+            content = sanitized
+            _say(
+                f"  [supabase_sync] markdown_table_sanitizer auto-fixed "
+                f"{len(report.fixed_lines)} row(s) for "
+                f"{item.get('id', 'unknown')}: {report.summary()}"
+            )
+        if report.has_unfixed:
+            _say(
+                f"  [supabase_sync] WARN unfixable table rows for "
+                f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
+            )
+    except Exception as exc:
+        _say(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
+
+    # Secondary anti-AI-style em-dash normalizer (2026-05-29): same
+    # belt-and-suspenders rationale — catches manual edits / legacy
+    # entries / hot-fix scripts that bypassed publisher._append_to_feed.
+    # Conservative CJK-appositive-only rewrite (landmine 9 fix (b)).
+    try:
+        from volpred.publisher.emdash_normalizer import normalize_emdash
+
+        normalized, emrep = normalize_emdash(content)
+        if emrep.changed:
+            content = normalized
+            _say(
+                f"  [supabase_sync] emdash_normalizer auto-fixed "
+                f"{emrep.replaced} em-dash(es) for "
+                f"{item.get('id', 'unknown')}: {emrep.summary()}"
+            )
+    except Exception as exc:
+        _say(f"  [supabase_sync] emdash_normalizer error: {exc}")
+
+    return content
+
+
+def projected_details(item: dict) -> dict:
+    """Return the exact `details` payload sync_article() writes to Supabase.
+
+    Split out 2026-07-20 (WS-C3): `feed_sync.compute_diff` is the single
+    canonical change detector, so it must compare the details blob the writer
+    would actually store — raw feed `details` plus the injected
+    `last_updated_at` (frontend reads details.last_updated_at to show
+    "更新於 <date hh:mm>") and the `_legacy` wrap for non-dict payloads.
+    One definition shared by writer and differ (anti-stacking) keeps the
+    hourly reconcile idempotent: if they projected differently, every row
+    with a top-level last_updated_at would report drift forever.
+    """
+    details = item.get("details")
+    if not isinstance(details, dict):
+        details = {} if details is None else {"_legacy": details}
+    if item.get("last_updated_at"):
+        details = {**details, "last_updated_at": item.get("last_updated_at")}
+    if item.get("status") == "retracted":
+        retraction = {
+            key: item.get(key)
+            for key in RETRACTION_DETAIL_FIELDS
+            if key in item
+        }
+        if retraction:
+            details = {**details, **retraction}
+    return details
+
+
+# details keys that live ONLY in Supabase, never in canonical feed.json.
+# Single definition shared by the writer (sync_article merges them back so a
+# re-sync cannot destroy them) and the differ (feed_sync.compute_diff ignores
+# them so their presence is not "drift"). Currently:
+#   - view_display: reader-facing view-count seed (boss email-12160/12163,
+#     scripts/seed_article_view_counts.py PATCHes it straight into the DB row;
+#     the seed exists nowhere else, so overwriting it is unrecoverable data
+#     loss and re-seeding would re-randomise the displayed numbers).
+# Discovered 2026-07-20 (WS-C3): the first full-details dry-run flagged
+# 1576/1854 rows "changed" — every seeded article — because the old wholesale
+# details overwrite had no concept of server-resident keys (and had in fact
+# been silently clobbering seeds on every article re-sync since 2026-07-18).
+SERVER_RESIDENT_DETAILS_KEYS = ("view_display",)
+
+# Retraction metadata is canonical at the feed-item top level, while Supabase
+# has no dedicated columns for it.  Project it into ``details`` so remote audit
+# and frontend surfaces do not lose the successor/errata chain.  Keeping the
+# mapping beside projected_details() also makes compute_diff see the same row
+# that sync_article() writes.
+RETRACTION_DETAIL_FIELDS = (
+    "retracted_reason",
+    "retracted_superseded_by",
+    "retracted_errata_ref",
+    "retracted_no_successor_reason",
+    "retraction_schema_version",
+)
+
+
+def _fetch_server_resident_details(slug: str) -> dict | None:
+    """Return the server-resident details keys currently stored for `slug`.
+
+    {} when the row does not exist or holds none of the keys. None on read
+    failure — the caller must treat that as "do not write": proceeding would
+    overwrite resident keys we could not read, which is unrecoverable.
+    """
+    try:
+        rows = _select_rows("articles", select="details", slug=slug)
+    except Exception as exc:
+        print(
+            f"  [supabase_sync] WARN resident-details read failed for {slug}: "
+            f"{type(exc).__name__}: {exc} -- refusing to write (a blind write "
+            "would clobber server-resident keys like view_display)"
+        )
+        return None
+    if not rows:
+        return {}
+    existing = rows[0].get("details")
+    if not isinstance(existing, dict):
+        return {}
+    return {k: existing[k] for k in SERVER_RESIDENT_DETAILS_KEYS if k in existing}
+
+
+def projected_category(item: dict) -> str:
+    """Return the exact `category` value sync_article() writes to Supabase.
+
+    Same WS-C3 single-definition rationale as projected_details: the differ
+    must apply the member_qa/milestone fallback the writer applies, or every
+    feed item without an explicit category would compare unequal to its own
+    stored projection on every run.
+    """
+    return item.get("category") or (
+        "member_qa" if classify_audience(item) == "member_qa" else "milestone"
+    )
+
+
 def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     """Sync a single article (feed item) to Supabase.
 
@@ -584,61 +845,41 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     runs the anti-AI-style em-dash normalizer (CJK appositive `——`/`—` →
     comma) so manual/legacy/hot-fix content gets the landmine-9 fix too.
     """
-    content = item.get("content") or item.get("description") or ""
-    if content:
-        try:
-            from volpred.publisher.markdown_table_sanitizer import (
-                sanitize_markdown_tables,
-            )
-            sanitized, report = sanitize_markdown_tables(content)
-            if report.changed:
-                content = sanitized
-                print(
-                    f"  [supabase_sync] markdown_table_sanitizer auto-fixed "
-                    f"{len(report.fixed_lines)} row(s) for "
-                    f"{item.get('id', 'unknown')}: {report.summary()}"
-                )
-            if report.has_unfixed:
-                print(
-                    f"  [supabase_sync] WARN unfixable table rows for "
-                    f"{item.get('id', 'unknown')}: lines={report.unfixed_lines}"
-                )
-        except Exception as exc:
-            print(f"  [supabase_sync] markdown_table_sanitizer error: {exc}")
-        # Secondary anti-AI-style em-dash normalizer (2026-05-29): same
-        # belt-and-suspenders rationale — catches manual edits / legacy
-        # entries / hot-fix scripts that bypassed publisher._append_to_feed.
-        # Conservative CJK-appositive-only rewrite (landmine 9 fix (b)).
-        try:
-            from volpred.publisher.emdash_normalizer import normalize_emdash
-
-            normalized, emrep = normalize_emdash(content)
-            if emrep.changed:
-                content = normalized
-                print(
-                    f"  [supabase_sync] emdash_normalizer auto-fixed "
-                    f"{emrep.replaced} em-dash(es) for "
-                    f"{item.get('id', 'unknown')}: {emrep.summary()}"
-                )
-        except Exception as exc:
-            print(f"  [supabase_sync] emdash_normalizer error: {exc}")
+    # 2026-07-20 (WS-C2): the sanitize pipeline that used to be inlined here
+    # now lives in projected_content(), which feed_sync.compute_diff also
+    # calls. One definition of "what the projection should contain" keeps the
+    # hourly reconcile idempotent — when the writer and the differ normalize
+    # differently, every affected row reports drift forever.
+    content = projected_content(item, verbose=True)
     # last_updated_at is not a column on the articles table, so carry it inside the
     # synced `details` JSON blob (the frontend reads details.last_updated_at to show
     # "更新於 <date hh:mm>" when content was edited after publish — boss 2026-07-01).
-    details = item.get("details")
-    if not isinstance(details, dict):
-        details = {} if details is None else {"_legacy": details}
-    if item.get("last_updated_at"):
-        details = {**details, "last_updated_at": item.get("last_updated_at")}
+    # The injection lives in projected_details() so the differ shares it (WS-C3).
+    details = projected_details(item)
+    slug = item.get("id", "")
+    # Server-resident keys (view_display, ...) exist ONLY in the DB row; a
+    # wholesale details overwrite destroys them (2026-07-18..20: every
+    # re-synced article lost its view-count seed). Merge them back before
+    # writing. On read failure fail CLOSED — a blind write is unrecoverable
+    # data loss, while a skipped sync is retried by the next diff pass.
+    # Skipped under the test kill switch: no write will happen (_post returns
+    # False), so there is nothing to clobber and no reason to touch the
+    # blocked read gate.
+    if slug and not _remote_writes_blocked():
+        resident = _fetch_server_resident_details(slug)
+        if resident is None:
+            return False
+        if resident:
+            details = {**details, **resident}
     row = {
-        "slug": item.get("id", ""),
+        "slug": slug,
         "title": item.get("title", ""),
         "content": content,
         "excerpt": content[:200] + "..." if len(content) > 200 else content,
         "audience": classify_audience(item),
         "phase": item.get("phase"),
         "status": item.get("status", "published"),
-        "category": item.get("category") or ("member_qa" if classify_audience(item) == "member_qa" else "milestone"),
+        "category": projected_category(item),
         "proposer": extract_proposer(item),
         "author_id": "claude",
         "details": details,
@@ -705,6 +946,14 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
             tag_ok = _sync_article_tags(row["slug"], tags)
             if not tag_ok:
                 print(f"  Warning: article synced but tags missing for {row['slug']}")
+        # Purge the frontend cache for this slug. Required for EVERY sync, not
+        # just retractions: content edits were equally invisible for up to 60s,
+        # and status downgrades (published -> retracted/unpublished) were
+        # invisible indefinitely. Does not flip `ok` -- the DB write is this
+        # function's contract -- but sync_full() records the slug in
+        # state["purge_retry_slugs"] when the purge failed, so the next run
+        # re-syncs it and retries the purge.
+        revalidate_article_cache(row["slug"])
     return ok
 
 
@@ -886,6 +1135,8 @@ def sync_article_status(slug: str, status: str) -> bool:
                     q_rows = _select_rows("questions", select="id,status", id=qid)
                     if q_rows and q_rows[0].get("status") == "researching":
                         _patch_where("questions", {"id": qid}, {"status": "answered", "answered_at": now_utc})
+    if ok:
+        revalidate_article_cache(slug)
     return ok
 
 
@@ -912,6 +1163,10 @@ def delete_article(slug: str) -> bool:
         # 409 / other error — don't silently succeed. Caller (cleanup_test_post)
         # must surface this to user.
         print(f"  [BUG-001 guard] articles DELETE for slug={slug} FAILED; row may still exist with FK blocker.")
+    else:
+        # A hard delete is the strongest possible visibility change; without the
+        # purge the frontend keeps serving the deleted body from unstable_cache.
+        revalidate_article_cache(slug)
     return ok
 
 
@@ -1149,7 +1404,12 @@ def sync_market_daily(trade_date: str, market: dict) -> bool:
     # 2026-05-04 finding #4 修整：whitelist 早已 enforce (上面 row=)，但 stripped 欄位
     # 不可見導致 audit agent 誤判「未 enforce」+ caller 不知 schema mismatch。
     # 補 print warning 提升可觀察性 — caller 可看到 daily_update 在塞 unknown keys。
-    stripped = {k for k in market.keys() if k not in _MARKET_DAILY_COLUMNS and k != "trade_date"}
+    stripped = {
+        k for k in market.keys()
+        if k not in _MARKET_DAILY_COLUMNS
+        and k != "trade_date"
+        and k not in _MARKET_DAILY_LOCAL_ONLY  # adjudicated local-only, no daily noise
+    }
     if stripped:
         print(
             f"  [sync_market_daily] schema-mismatch warning: trade_date={trade_date} "
@@ -1191,29 +1451,6 @@ def sync_memory_entry(entry_id: str, entry_type: str, content: dict) -> bool:
     return _post("memory_entries", row)
 
 
-# Syncable article fields whose change must trigger a re-sync, regardless of
-# whether any timestamp was bumped. 2026-06-03 3-strike (refactor plan
-# docs/refactor_plan_prepublish_content_gate.md, 根因 B): the prior incremental
-# filter was timestamp-gated only — editing content without bumping updated_at
-# silently skipped the row (the K1413 correction was silent-dropped until
-# updated_at was force-bumped). Content-hash-based detection catches any
-# syncable-field change and is decoupled from timestamps.
-_ARTICLE_HASH_FIELDS = (
-    "content", "title", "excerpt", "status", "audience", "category", "details",
-)
-
-
-def _article_hash(item: dict) -> str:
-    """Stable sha256 over the syncable fields of an article.
-
-    Uses sort_keys + ensure_ascii=False so equal content always produces an
-    equal digest (idempotent) and any field change flips it.
-    """
-    payload = {k: item.get(k) for k in _ARTICLE_HASH_FIELDS}
-    blob = json.dumps(payload, sort_keys=True, ensure_ascii=False, default=str)
-    return hashlib.sha256(blob.encode("utf-8")).hexdigest()
-
-
 def _load_sync_state(storage: Path) -> dict:
     """Load last sync timestamp per category."""
     state_path = storage / ".supabase_sync_state.json"
@@ -1229,8 +1466,13 @@ def _save_sync_state(storage: Path, state: dict):
 
 
 def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = True) -> dict:
-    """Incremental sync: only upsert items changed since last sync.
-    Falls back to full sync on first run or if state file is missing.
+    """Sync feed/memory/risk state to Supabase; articles via the canonical diff.
+
+    Article change detection (WS-C3, 2026-07-20) is owned by
+    volpred.ops.feed_sync.compute_diff — feed.json projection vs the actual
+    Supabase rows. This function only decides WHEN to diff (feed mtime gate +
+    pending purge retries) and then pushes exactly the diffed set; it holds no
+    per-article change criterion of its own anymore.
 
     reconcile_deletes: after pushing, run reconcile_article_deletes() to remove
     Supabase `articles` rows whose slug is absent from the canonical feed.json.
@@ -1262,47 +1504,56 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
                 if isinstance(item, dict) and item.get("id") not in seen_ids:
                     feed.append(item)
     if feed:
+        # Engine-A state retired 2026-07-20 (WS-C3): the local hash/timestamp
+        # ledger was a second definition of "changed" that never saw remote
+        # drift. Drop stale keys so the state file cannot masquerade as a
+        # live detection input again.
+        state.pop("article_hashes", None)
+        state.pop("articles_last_ts", None)
+        purge_retry_raw = state.get("purge_retry_slugs")
+        purge_retry = [
+            s
+            for s in (purge_retry_raw if isinstance(purge_retry_raw, list) else [])
+            if isinstance(s, str) and s
+        ]
         last_feed_sync = state.get("feed_mtime", 0)
-        if feed_mtime > last_feed_sync:
-            last_sync_ts = state.get("articles_last_ts", "")
-            article_hashes = state.get("article_hashes")
-            if not isinstance(article_hashes, dict):
-                article_hashes = {}
-            # 2026-06-03 3-strike (根因 B): content-hash-based change detection.
-            # 2026-06-29 correction: feed.json is the article source of truth.
-            # Legacy reports/<id>.json files are intentionally ignored here; a
-            # stale single file must never overwrite a corrected feed entry.
-            # Selection condition (OR'd, defence-in-depth):
-            #   (a) article content hash differs from last-synced hash, OR
-            #   (b) legacy timestamp condition (back-compat; updated_at/published_at/
-            #       created_at after last_sync_ts — kept as fallback, not removed), OR
-            #   (c) no last_sync_ts (first run -> full).
-            to_sync = []
-            for item in feed:
-                slug = item.get("id")
-                cur_hash = _article_hash(item)
-                hash_changed = article_hashes.get(slug) != cur_hash
-                ts_changed = (
-                    (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
-                    or (item.get("updated_at") or "") > last_sync_ts
-                )
-                if hash_changed or ts_changed or not last_sync_ts:
-                    to_sync.append(item)
+        if feed_mtime > last_feed_sync or purge_retry:
+            # WS-C3 (refactor_plan_ops_master_2026_07 §1.3 A1): per-article
+            # change detection is delegated to the single canonical differ,
+            # volpred.ops.feed_sync.compute_diff, which compares the projection
+            # sync_article() would WRITE (title/status/audience/published_at/
+            # content/category/phase/details/tags) against the ACTUAL Supabase
+            # rows. The old engine here — a local _article_hash ledger plus a
+            # timestamp fallback — was a second, different "changed" criterion:
+            # it never saw remote drift, re-pushed rows whose stored projection
+            # was already identical, and preserved the K1413 class of skew
+            # whenever its state file went stale.
+            # Retry semantics survive the cutover for free: a failed push
+            # leaves the DB differing from feed, so the next diff re-flags it
+            # (the old code encoded the same thing by withholding the hash).
+            # Lazy import: feed_sync imports helpers from this module at
+            # import time, so a module-level import would be circular.
+            from volpred.ops.feed_sync import compute_diff
+
+            diff = compute_diff(storage_dir=storage)
+            changed = set(diff.get("insert", [])) | set(diff.get("update", []))
+            # Slugs whose frontend cache purge failed last run are re-synced
+            # even when the DB projection already matches: the DB is right but
+            # readers may still see the cached old body, so sync_article must
+            # run again to retry the purge.
+            changed |= set(purge_retry)
+            to_sync = [item for item in feed if item.get("id") in changed]
             ok = 0
+            purge_mark = len(_REVALIDATE_FAILURES)
             for item in to_sync:
                 if sync_article(item, storage_dir=storage):
                     ok += 1
-                    # Only record the hash after a successful sync so a failed
-                    # push retries next run.
-                    article_hashes[item.get("id")] = _article_hash(item)
             counts["articles"] = ok
+            failed_purges = _REVALIDATE_FAILURES[purge_mark:]
+            if failed_purges:
+                counts["cache_purge_failed"] = failed_purges
             state["feed_mtime"] = feed_mtime
-            state["article_hashes"] = article_hashes
-            if feed:
-                state["articles_last_ts"] = max(
-                    (item.get("updated_at") or item.get("published_at") or item.get("created_at") or "")
-                    for item in feed
-                )
+            state["purge_retry_slugs"] = sorted(set(failed_purges))
         else:
             counts["articles"] = 0  # skipped, unchanged
 
@@ -1352,24 +1603,60 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
     return counts
 
 
+def _report_counts(counts: dict) -> int:
+    """Print sync counts; return the process exit code.
+
+    A failed frontend cache purge exits non-zero so a broken/expired
+    OPS_ADMIN_TOKEN cannot hide behind a green 'Done.' the way the mirror 401s
+    did for a month in 2026-06.
+    """
+    for k, v in counts.items():
+        print(f"  {k}: {v}")
+    failed = counts.get("cache_purge_failed") or []
+    if failed:
+        print(
+            f"ERROR: frontend cache purge FAILED for {len(failed)} article(s): "
+            f"{failed}. Supabase is correct but readers may still be served the "
+            "cached old version. Check OPS_ADMIN_TOKEN and mirror reachability."
+        )
+        return 1
+    print("Done.")
+    return 0
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "full":
         print("Running incremental sync to Supabase...")
-        counts = sync_full()
-        for k, v in counts.items():
-            print(f"  {k}: {v}")
-        print("Done.")
+        sys.exit(_report_counts(sync_full()))
     elif len(sys.argv) > 1 and sys.argv[1] == "force-full":
         # Delete state file to force full resync
         state_path = Path("storage") / ".supabase_sync_state.json"
         if state_path.exists():
             state_path.unlink()
         print("Running FULL resync (state cleared)...")
-        counts = sync_full()
-        for k, v in counts.items():
-            print(f"  {k}: {v}")
-        print("Done.")
+        sys.exit(_report_counts(sync_full()))
+    elif len(sys.argv) > 1 and sys.argv[1] == "market-daily":
+        # Formal recovery CLI for the daily_checkup db_landing sub-check:
+        # repush canonical _market_daily (storage/paper_trading.json) into the
+        # market_daily table via idempotent upserts — never hand-edit the DB.
+        # daily_update only pushes the last 30 dates; this covers the full
+        # window by default, or a narrower one via --since YYYY-MM-DD.
+        require_creds()  # fail loud, not a silent (0, 0) no-op
+        since = None
+        if "--since" in sys.argv:
+            try:
+                since = sys.argv[sys.argv.index("--since") + 1]
+            except IndexError:
+                print("ERROR: --since requires a YYYY-MM-DD argument")
+                sys.exit(2)
+        pt_path = Path("storage") / "paper_trading.json"
+        md = json.loads(pt_path.read_text()).get("_market_daily") or {}
+        ok, fail = sync_market_daily_backfill(md, since=since)
+        window = f"since {since}" if since else f"all {len(md)} dates"
+        print(f"market_daily repush ({window}): ok={ok} fail={fail}")
+        sys.exit(1 if fail else 0)
     else:
         print("Usage: python scripts/supabase_sync.py full          # incremental")
         print("       python scripts/supabase_sync.py force-full    # full resync")
+        print("       python scripts/supabase_sync.py market-daily [--since YYYY-MM-DD]  # repush canonical market_daily")

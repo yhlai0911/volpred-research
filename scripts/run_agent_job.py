@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import threading
@@ -44,7 +45,51 @@ from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-CLAUDE_BIN = os.environ.get("VOLPRED_CLAUDE_BIN", "claude")
+
+# Where the CLI actually lives when PATH can't be trusted. launchd hands its jobs
+# a minimal PATH that omits ~/.local/bin — `cron_compute_worker.sh` already works
+# around that for `uv` by spelling out /opt/homebrew/bin/uv, but nobody did the
+# same for `claude`, so every kind=agent job drained by the launchd worker died
+# on FileNotFoundError one second after start (2026-07-20: k528_round5_collection,
+# exit 1 at 05:16:21). kind=compute jobs never exec the CLI, which is why the
+# breakage stayed invisible until an agent job happened to land on that worker.
+# Fixing it here rather than in the wrapper keeps one owner for "can we exec the
+# CLI": launchd, cron and interactive runs all resolve through this function.
+_CLAUDE_FALLBACK_PATHS = (
+    Path.home() / ".local" / "bin" / "claude",
+    Path("/opt/homebrew/bin/claude"),
+    Path("/usr/local/bin/claude"),
+)
+
+
+def _resolve_claude_bin() -> str:
+    """Return an executable path for the Claude CLI, or raise saying why not.
+
+    Never falls back to the bare name `claude` on failure: that just defers the
+    same FileNotFoundError to Popen, where it surfaces as a traceback and gets
+    classified as a research failure instead of a host misconfiguration.
+    """
+    override = os.environ.get("VOLPRED_CLAUDE_BIN")
+    if override:
+        # An explicit override that doesn't resolve is a config error, not a
+        # licence to silently search elsewhere.
+        found = shutil.which(override)
+        if found:
+            return found
+        raise FileNotFoundError(
+            f"VOLPRED_CLAUDE_BIN={override!r} is not an executable on this host"
+        )
+    found = shutil.which("claude")
+    if found:
+        return found
+    for candidate in _CLAUDE_FALLBACK_PATHS:
+        if os.access(candidate, os.X_OK):
+            return str(candidate)
+    raise FileNotFoundError(
+        "claude CLI not found on PATH nor at "
+        + ", ".join(str(p) for p in _CLAUDE_FALLBACK_PATHS)
+        + " — set VOLPRED_CLAUDE_BIN to its absolute path"
+    )
 
 
 # An auth wall costs five seconds and zero tokens: the CLI answers "Not logged in"
@@ -61,6 +106,38 @@ AUTH_BACKOFF_S = 120
 AUTH_RETRY_MIN_BUDGET_S = 600
 # Enough to carry the CLI's auth/quota banner; not enough to hold a research log.
 _TAIL_LINES = 200
+
+
+# Prepended to every brief. The agent runs headless: when its turn ends the
+# process tree goes with it, so anything it parked in the background dies
+# unfinished and unreported. On 2026-07-20 the K1698 rev3 job did exactly that —
+# edited the generator correctly, launched the full rerun in the background,
+# ended the turn saying "背景重跑完成時我會被叫醒", and was collected as a failed
+# job with the rerun dead at 800/2192 files. The agent's reasoning was sound for
+# an interactive session; nobody had told it that it wasn't in one. Telling it
+# is the runner's job, not each dispatcher's memory.
+BRIEF_PREAMBLE = """\
+<runtime-contract>
+You are running headless under the compute worker (`claude -p`), not in an
+interactive session. Two consequences you must plan around:
+
+1. **Nothing wakes you up.** When this turn ends, your process tree is torn
+   down. Work you left running in the background dies unfinished, and its
+   output is lost. Never park a computation in the background and end the
+   turn intending to return to it — run it in the foreground and wait.
+2. **Your result artifact is the only thing that is collected.** Prose in your
+   final message is not read as a result. If you run out of time or hit a
+   blocker, still write the artifact, with the `unresolved` field naming
+   exactly what remains and why — a partial artifact that is honest about its
+   gaps is collectable; a missing one is a failed job.
+</runtime-contract>
+
+"""
+
+
+def _compose_brief(brief_text: str) -> str:
+    """The brief the agent actually receives: runtime contract, then the task."""
+    return BRIEF_PREAMBLE + brief_text
 
 
 def _utc_now() -> str:
@@ -202,7 +279,7 @@ def main() -> int:
     if not brief_path.exists():
         print(f"[run_agent_job] brief not found: {brief_path}", file=sys.stderr)
         return 2
-    brief = brief_path.read_text()
+    brief = _compose_brief(brief_path.read_text())
 
     workdir = Path(args.cwd)
     if not workdir.is_absolute():
@@ -240,8 +317,17 @@ def main() -> int:
         )
         return 2
 
+    try:
+        claude_bin = _resolve_claude_bin()
+    except FileNotFoundError as exc:
+        # Exit 2 (config error), not 1: a job that never started is a host
+        # problem for the owner to fix, not a failed piece of research for a
+        # triage agent to go read a worktree about.
+        print(f"[run_agent_job] {exc}", file=sys.stderr)
+        return 2
+
     argv = [
-        CLAUDE_BIN, "-p", "--dangerously-skip-permissions",
+        claude_bin, "-p", "--dangerously-skip-permissions",
         "--effort", args.effort, "--model", args.model, brief,
     ]
 
@@ -276,6 +362,15 @@ def main() -> int:
 
     finished = _utc_now()
     artifact_exists = result_artifact.exists() if result_artifact is not None else None
+    artifact_near_misses: list[str] = []
+    if result_artifact is not None and artifact_exists is False:
+        candidates = {
+            candidate.resolve(strict=False)
+            for pattern in ("*_results.json", "*results*.json")
+            for candidate in result_artifact.parent.glob(pattern)
+            if candidate.is_file()
+        }
+        artifact_near_misses = [str(candidate) for candidate in sorted(candidates)][:20]
     validation_ok = exit_code == 0 and artifact_exists is not False
     runner_exit_code = 0 if validation_ok else 1
     summary = {
@@ -295,6 +390,7 @@ def main() -> int:
         "attempts": attempts,
         "result_artifact": str(result_artifact) if result_artifact is not None else None,
         "result_artifact_exists": artifact_exists,
+        "result_artifact_near_misses": artifact_near_misses,
         "validation_ok": validation_ok,
         "runner_exit_code": runner_exit_code,
     }
@@ -311,6 +407,13 @@ def main() -> int:
             file=sys.stderr,
             flush=True,
         )
+        if artifact_near_misses:
+            print(
+                "[run_agent_job] near-miss result artifact candidates: "
+                + ", ".join(artifact_near_misses),
+                file=sys.stderr,
+                flush=True,
+            )
 
     print(
         f"[run_agent_job] done exit={exit_code} timed_out={timed_out} "

@@ -1,0 +1,50 @@
+{
+  "id": "k1698_rev4_codex_round5",
+  "title": "Codex primary-path review — K1698 rev4 (round 5)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1698_rev4_prompt.md",
+    "storage/ops/codex_reviews/k1698_rev4_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T09:10:32Z",
+  "started_at": "2026-07-20T09:15:05Z",
+  "completed_at": "2026-07-20T09:15:15Z",
+  "exit_code": 1,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1698_rev4_codex_round5.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1698_rev4_codex_round5.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1698_rev4_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 round 5 verdict：PASS 才可合併 worktree dispatch-slot-2-c5cafe39-k1698；FAIL 則列 blocker 續 rev5。verdict 在 storage/ops/codex_reviews/k1698_rev4_verdict.md；凍結清單 k1698_rev4_freeze.txt（10 檔，2026-07-20 17:12 已驗 10/10 與 worktree 位元組吻合）。rev4 只改兩處文件證據陳述（README 移除無 receipt 的 286.6s 與『較空載』歸因；remediation.json 修正 grep 證據與 receipt 宣稱），無任何數字變動。PASS 時由審查者填 experiments/k1698/review_verdict.json（現全為 FILL），未填則 experiment_gates.py certify 會擋下合併。禁止自簽。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 39136,
+  "claimed_by_pid_start_wall": "Mon Jul 20 17:15:05 2026",
+  "delivery_status": "partial_delivered",
+  "partial_delivered": true,
+  "delivery_commit": "cab0e8754ac1222ed52cd8dce54f0ee7b8749158",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+  ],
+  "delivered_at": "2026-07-20T10:01:53.160880+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-21T15:13:32Z",
+  "followup_next_task_id": "compute_followup_backlog_adjudication_20260721"
+}

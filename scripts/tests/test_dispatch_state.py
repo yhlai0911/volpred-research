@@ -1378,6 +1378,15 @@ def _drive_every_writer(path: Path) -> None:
                            log_path="/tmp/done.log", path=path)
     st.attach_process(job_id=done.job_id, expected_attempt=1,
                       pid=100, pgid=100, started_wall="wd", path=path)
+    # WS-B: an isolated fire carries its workspace receipt through to the
+    # completions ring (ownership audit trail) and marks its pending item.
+    st.attach_workspace(job_id=done.job_id, workspace={
+        "name": "dispatch-slot-1-abcd1234",
+        "path": "/tmp/wt/dispatch-slot-1-abcd1234",
+        "branch": "worktree-dispatch-slot-1-abcd1234",
+        "base_sha": "0" * 40, "lanes": ["platform_ops"],
+        "created_at": "2026-07-20T00:00:00+00:00", "setup_s": 1.0,
+    }, path=path)
     token = st.record_completion(job_id=done.job_id, expected_attempt=1, expected_pid=100,
                                  exit_code=0, outcome="success", final_model="opus", path=path)
     assert token is not None
@@ -1393,6 +1402,15 @@ def _drive_every_writer(path: Path) -> None:
         schedule_id="hourly_dispatch", attempt=2, model="opus",
         log_path="/tmp/z.log", cohort_id=pending.cohort_id, path=path,
     )
+    # WS-B: leave one LIVE job carrying a workspace so the nested-container gate
+    # sees $.current_jobs[].workspace / $.current_job.workspace in the final tree.
+    st.attach_workspace(job_id=sibling.job_id, workspace={
+        "name": "dispatch-slot-2-beefcafe",
+        "path": "/tmp/wt/dispatch-slot-2-beefcafe",
+        "branch": "worktree-dispatch-slot-2-beefcafe",
+        "base_sha": "1" * 40, "lanes": ["platform_ops"],
+        "created_at": "2026-07-20T00:00:00+00:00", "setup_s": 2.0,
+    }, path=path)
     st.record_completion(job_id=pending.job_id, expected_attempt=1, expected_pid=101,
                          exit_code=0, outcome="success", final_model="opus", path=path)
     assert sibling.job_id == st.read_state(path)["current_job"]["job_id"]
@@ -1463,7 +1481,41 @@ def _container_shapes(node, path="$"):
 KNOWN_CONTAINERS = {
     "$", "$.current_job", "$.current_jobs[]", "$.phase_z_pending[]",
     "$.completions[]", "$.alerts_dedup",
+    # WS-B workspace receipt (attach_workspace → record_completion 帶進 ring)。
+    # shape gate = test_workspace_receipt_shape_is_flat_and_documented。
+    "$.current_job.workspace", "$.current_jobs[].workspace",
+    "$.completions[].workspace",
 }
+
+# WS-B workspace receipt 的欄位契約（state.py docstring schema 同步列出）。
+WORKSPACE_RECEIPT_KEYS = {
+    "name", "path", "branch", "base_sha", "lanes", "created_at", "setup_s",
+}
+
+
+def test_workspace_receipt_shape_is_flat_and_documented(tmp_state):
+    """WS-B workspace 容器的 shape gate：欄位 ⊆ 契約集合，值必須是純量
+    （lanes 是字串 list）—— 不准再長出下一層無人 gate 的巢狀 dict。"""
+    _drive_every_writer(tmp_state)
+    state = st.read_state(tmp_state)
+    receipts = [
+        job["workspace"] for job in state["current_jobs"] if "workspace" in job
+    ] + [
+        entry["workspace"] for entry in state["completions"] if "workspace" in entry
+    ]
+    assert receipts, "驅動沒長出任何 workspace receipt（假綠燈風險）"
+    for receipt in receipts:
+        unknown = set(receipt) - WORKSPACE_RECEIPT_KEYS
+        assert not unknown, f"workspace receipt 出現契約外欄位: {sorted(unknown)}"
+        for key, value in receipt.items():
+            if key == "lanes":
+                assert isinstance(value, list) and all(
+                    isinstance(item, str) for item in value
+                ), "lanes 必須是字串 list"
+            else:
+                assert not isinstance(value, (dict, list)), (
+                    f"workspace[{key!r}] 是 {type(value).__name__} —— receipt 必須扁平"
+                )
 
 
 def test_no_undocumented_nested_container(tmp_state):

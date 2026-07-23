@@ -131,6 +131,18 @@
 - 不要繞過正式 CLI / sync / publish 流程。
 - 任何資料錯誤都要追到產生它的程式與流程。
 
+### 問題結案五步 Gate（2026-07-22 owner 指令，不可妥協）
+
+固定結案順序：**證據化症狀 → 判定根因層級 → 重構底層邏輯/流程/架構 → 重跑與回讀驗證 → 制度化寫回**。
+
+1. 症狀與證據：讀 live source / log / receipt / 時間戳 / 上下游交接，不憑印象
+2. 根因判定：定位到邏輯、流程契約、排程、狀態機、API、權限、checker 或架構；**根因不明只能標 blocked**
+3. 底層修正：重構可重複執行的程式/流程/防呆；重跑、補檔、改文字、手動清 blocker 都只算止血
+4. 回歸驗證：重跑案例 + 測試 + 用 API/DB/雜湊/下游 acknowledgement **回讀**
+5. 制度化寫回：落入 script / contract / automation / skill / dashboard / 操作紀錄，同類錯誤不得再靜默發生
+
+回報二態必分：**`contained`**（止血，不可宣稱完成）vs **`root_cause_fixed_and_verified`**（五步全過才是結案）。機械 owner = incident sustained-clean resolution（`src/volpred/ops/incident.py`）+ 3-Strike Rule；本段為上位口徑，progress_report 與 error_log 一律採此二態。
+
 ### Three-Strike Rule — 同類錯誤 / 同處 hang 三次就整體重構
 
 **Trigger**：同一類錯誤（同根因、同症狀、同類 bug 模式）連續發生 **3 次** OR 同一處（同一 script / function / pipeline 節點）連續 hang 住 **3 次**。
@@ -251,9 +263,11 @@ Codex 審代碼 → 通過才寫 `knowledge.json` → 每 5-10 實驗彙整一�
 
 ## 自動化與控制面
 
-**核心 dispatch 規則（inline 保留）**：
-- 任務優先序：`user-assigned ≈ 時效性(event-driven) > scheduled > agent-discovered`；slot running < 4 可繼續 discovery（不必等 queue 清空）
-- **時效性 / 即時性的研究與發文一律 P1**（老闆 2026-07-12）：event_article / trending_repost / 事件驅動實驗與 user-assigned 同級，插隊所有 scheduled — 時效過了價值歸零。已機械化（event_jobs + trending refill 以 priority=1 建任務）；**手動建時效任務也必寫 `priority: 1`**。
+**核心 dispatch 規則（inline 保留；2026-07-21 lane 重構後）**：
+- **選擇順序機械化**（唯一 owner = `task_urgency` + `continue_task_dispatch` lane 排序）：老闆急件（boss 來源）FIFO 永遠第一 → 時效性任務（看 task_type 不看數字）→ 其餘 P2/P3 + 餓死保護 + 輪替。餓死保護只在剩餘 slots 運作，不可能逐出 lane head。
+- **系統來源禁自封 P1**：入池 gateway 機械夾到 P2（`clamp_machine_priority_inflation`）。P1 只屬於老闆急件與時效任務；手動建時效任務仍寫 `priority: 1`（時效性 / 即時性研究與發文一律 P1，老闆 2026-07-12）。
+- **一班 batch-drain 多任務**（老闆 2026-07-21 硬性指令）：完成一張後預算 ≥12 分鐘就接下一張，收班條件僅「無任務」或「不足以完整收尾一張」；批次單位是完整任務，做一半丟下一班照樣禁止。
+- **生成端水位閘**：池深超標自動停產（`pool_pressure`，老闆四類白名單免閘）；同根因補救單由 incident 生命週期管理，不重複開單（`docs/refactor_plan_incident_lifecycle.md`）。
 - 同一 K 編號禁止雙 agent — 派前 `ls experiments/` + `ls .claude/worktrees/` 檢查
 - **Cron skip 用 stub**（slot 滿 / agent 仍跑 → 回覆 ≤15 字）
 - 每次 idle / discovery pass 必須產生可驗證輸出，不可空轉
@@ -327,6 +341,25 @@ Context compaction 時，**優先保留**：
 - Agent 派出 prompt 全文（保留 agent ID + task type + completion verdict）
 
 **格式要求**：compact 輸出用條列、不用段落敘述；每則 ≤ 30 字；分「當前狀態」/「未竟任務」/「最近規則」三區。
+
+## Agent skills
+
+### Issue tracker
+
+本專案使用 GitHub Issues 追蹤工程工作。See `docs/agents/issue-tracker.md`.
+
+GitHub CLI 已安裝於 `/opt/homebrew/bin/gh`。非互動 shell 可能沒有
+`/opt/homebrew/bin`，因此 `gh: command not found` **不代表未安裝**：先跑
+`zsh -lic 'command -v gh'` 或直接使用 `/opt/homebrew/bin/gh`。只有固定路徑與 login
+shell 都確認不存在後才可討論安裝；禁止因 PATH 漏載而重裝或回報 CLI 不存在。
+
+### Triage labels
+
+使用五個預設 triage roles 與同名 GitHub labels。See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+本專案採 single-context domain documentation layout。See `docs/agents/domain.md`.
 
 ## 一句話版本
 

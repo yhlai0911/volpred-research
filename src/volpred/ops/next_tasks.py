@@ -12,10 +12,16 @@ Single enforcement owner for two invariants on the canonical queue:
    ``fail_no_data_data_source_blocker`` /
    ``partially_resolved_K1180_done_awaiting_K1179`` /
    ``phase1_failed_codex_review_superseded_by_v2`` /
-   ``setup_done_superseded_by_v2``, one each). Those 27 legacy rows are frozen as
-   the baseline (永遠修流程，不修資料); the regression stop lives in
+   ``setup_done_superseded_by_v2``, one each). Those 27 legacy rows were frozen
+   as the baseline (永遠修流程，不修資料); the regression stop lives in
    ``scripts/validate_next_tasks_status.py``. New writes route through
    ``write_tasks_to_handle`` / ``write_tasks_locked`` here.
+   2026-07-20 WS-A3 (refactor_plan_ops_master): with every writer on the
+   canonical helper, the frozen rows are mapped back to the controlled vocab by
+   the one-time ``scripts/migrate_status_vocab.py`` (original value preserved
+   per-row in ``status_original``); after apply the baseline drops to 0.
+   The same migration + ``_audit_blocked_reasons`` extend the vocab gate to the
+   ``blocked_reason`` field (canonical vocab: ``blocked_reasons.py``).
 
 2. **Corruption-safe writes** (serialize-first-then-truncate). ``content.py`` and
    ``questions.py`` previously did ``fh.seek(0); fh.truncate(); json.dump(...)`` --
@@ -46,6 +52,8 @@ from typing import IO, Any
 
 from volpred.canonical_write import guard_canonical_write
 
+from .blocked_reasons import BLOCKED_REASONS
+from .blocked_reasons import is_valid as is_valid_blocked_reason
 from .diagnostics import warn
 
 
@@ -182,7 +190,70 @@ TASK_STATUSES: frozenset[str] = frozenset(
 # MIRRORED in scripts/validate_next_tasks_status.py::DEFAULT_BASELINE, which
 # cannot import this module (it runs on a deps-free CI runner).
 # tests/test_task_status_vocab.py asserts the two stay equal.
-LEGACY_OUT_OF_VOCAB_BASELINE = 27
+LEGACY_OUT_OF_VOCAB_BASELINE = 0
+
+
+# Canonical dispatch-lane vocabulary — who is allowed to claim a task.
+# Same shape as TASK_STATUSES above: this is the ONLY sanctioned place to add a
+# lane. Before 2026-07-20 the vocabulary was copy-pasted across three owners
+# (continue_task_dispatch.py listed 4 main-thread spellings, task_pool_claim.py's
+# claim gate hard-coded only "main_thread", task_urgency.py knew nothing about
+# lanes at all). That divergence is what let `dispatch_lane="manual"` be filtered
+# out of PHASE B candidates yet still be claimable by a burst fire.
+AGENT_DISPATCH_LANES: frozenset[str] = frozenset(
+    {"agent", "agentable", "auto", "auto_dispatch", "headless", "worker"}
+)
+MAIN_THREAD_DISPATCH_LANES: frozenset[str] = frozenset(
+    {"main", "main_thread", "manual", "interactive"}
+)
+BLOCKED_DISPATCH_LANES: frozenset[str] = frozenset({"blocked", "blocked_on_user", "hold"})
+
+
+def normalize_dispatch_lane(task: dict) -> str:
+    """Return the task's normalized schema-level dispatch lane ("" if unset).
+
+    Accepts both ``dispatch_lane`` and the legacy camelCase ``dispatchLane``,
+    and folds ``main-thread`` → ``main_thread`` so hyphen/underscore spellings
+    are the same lane.
+    """
+    if not isinstance(task, dict):
+        return ""
+    raw = task.get("dispatch_lane") or task.get("dispatchLane") or ""
+    return str(raw).strip().lower().replace("-", "_")
+
+
+def is_main_thread_reserved(task: dict) -> bool:
+    """One owner for "this task belongs to the interactive main thread".
+
+    The signal legitimately lives in TWO fields — ``dispatch_lane`` and the
+    ``pending_main_thread`` status — and before 2026-07-21 the readers each
+    picked one: the claim gate read both, the urgency classifier read only the
+    lane.  That split is the dispatch contradiction in
+    docs/refactor_plan_incident_lifecycle.md (附註): ``assign_10927b4e`` sat at
+    ``status=pending_main_thread`` with no lane field, ``is_urgent()`` saw a
+    claimable P1, ``request_fire`` woke an hourly supervisor whose claim was
+    then refused with ``main_thread_lane`` — a task with no legal executor
+    firing forever.  Every reader must derive from THIS predicate.
+    """
+    if not isinstance(task, dict):
+        return False
+    if str(task.get("status") or "").strip().lower() == "pending_main_thread":
+        return True
+    return normalize_dispatch_lane(task) in MAIN_THREAD_DISPATCH_LANES
+
+
+def is_agent_claimable_lane(task: dict) -> bool:
+    """Return True iff a headless/hourly session may claim this task.
+
+    An unset lane stays claimable — the vast majority of the queue predates the
+    field, and defaulting those to "reserved" would freeze the whole pool.
+    """
+    if is_main_thread_reserved(task):
+        return False
+    lane = normalize_dispatch_lane(task)
+    if not lane:
+        return True
+    return lane not in BLOCKED_DISPATCH_LANES
 
 
 def is_valid_status(status: str | None) -> bool:
@@ -206,6 +277,74 @@ def validate_task_status(status: str | None) -> str:
             "src/volpred/ops/next_tasks.py if it is a real new state"
         )
     return str(status).strip().lower()
+
+
+class InvalidBlockedReason(ValueError):
+    """Raised when a task blocked_reason is not in the controlled vocabulary."""
+
+
+# Frozen count of rows whose ``blocked_reason`` predates the vocab gate
+# (2026-07-20 WS-A3): 3 rows — one free-text K400 range note, one long
+# owner-sign-off prose paragraph, one hand-written ``decomposed_into_subtasks``.
+# scripts/migrate_status_vocab.py maps them back (original preserved in
+# ``blocked_reason_original``); after apply this drops to 0.
+# MIRRORED in scripts/validate_next_tasks_status.py::DEFAULT_BLOCKED_REASON_BASELINE
+# (deps-free CI runner cannot import this module); tests/test_task_status_vocab.py
+# asserts the two stay equal.
+LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE = 0
+
+
+def validate_blocked_reason(reason: str | None) -> str:
+    """Return the normalized blocked_reason, or raise ``InvalidBlockedReason``.
+
+    Strict raise for callers that set a NEW blocked_reason (mark_task_blocked
+    already enforces via argparse choices; sync_next_tasks_status's review gate
+    and any future writer call this). The whole-file write path deliberately
+    does NOT raise on frozen legacy rows -- see ``_audit_blocked_reasons``.
+    """
+    if not is_valid_blocked_reason(reason):
+        raise InvalidBlockedReason(
+            f"blocked_reason {reason!r} not in BLOCKED_REASONS; add it to "
+            "src/volpred/ops/blocked_reasons.py if it is a real new reason"
+        )
+    return str(reason).strip().lower()
+
+
+def _audit_blocked_reasons(tasks: list[Any]) -> int:
+    """Surface out-of-vocab ``blocked_reason`` values (observable, non-fatal).
+
+    Same non-fatal contract as ``_audit_task_statuses`` and for the same reason:
+    raising on a whole-file rewrite would brick every materializer while the
+    frozen legacy rows are still in the queue. Warns only ABOVE the baseline;
+    the mechanical stop is scripts/validate_next_tasks_status.py's gate.
+
+    Counts the field wherever it is set (including terminal rows -- the
+    sync review-gate deliberately keeps blocked_reason as audit trail after
+    release), so a polluted value cannot hide behind a status flip.
+    """
+    bad: list[str] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        reason = task.get("blocked_reason")
+        if reason is None:
+            continue
+        if not isinstance(reason, str):
+            bad.append(repr(reason)[:60])
+            continue
+        if not reason.strip():
+            continue  # empty string == absent
+        if not is_valid_blocked_reason(reason):
+            bad.append(reason[:60])
+    if len(bad) > LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE:
+        warn(
+            "next_tasks_blocked_reason",
+            "out-of-vocab blocked_reason(s) ABOVE frozen baseline -- new pollution",
+            count=len(bad),
+            baseline=LEGACY_OUT_OF_VOCAB_BLOCKED_REASON_BASELINE,
+            examples=bad[:5],
+        )
+    return len(bad)
 
 
 class InvalidBlockedUntil(ValueError):
@@ -496,6 +635,7 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     _normalize_priorities_tolerant(tasks)
     _audit_task_statuses(tasks)
     _audit_blocked_until(tasks)
+    _audit_blocked_reasons(tasks)
     payload = json.dumps(tasks, indent=2, ensure_ascii=False)
     try:
         payload.encode("utf-8")
@@ -530,6 +670,89 @@ def write_tasks_locked(path: str | Path, tasks: list[Any]) -> None:
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
 
+_CI_REPAIR_PENDING_COMMIT_RE = re.compile(
+    r"\brepair_commit\s*[:=]\s*pending_post_commit\b",
+    re.IGNORECASE,
+)
+_GIT_COMMIT_RE = re.compile(r"^[0-9a-f]{7,40}$", re.IGNORECASE)
+
+
+def backfill_ci_repair_commit(
+    *,
+    path: str | Path,
+    claim_owners: list[str] | tuple[str, ...] | set[str],
+    commit_sha: str,
+) -> list[str]:
+    """Replace an explicit CI-repair post-commit marker with the real SHA.
+
+    A dispatcher task completes before its enclosing Git owner (PHASE-Z or the
+    Codex exact-path commit helper) creates a commit.  The task therefore writes
+    ``repair_commit=pending_post_commit`` as an intent receipt.  Once Git has a
+    real object id, this function binds only terminal ``ci-red-*`` tasks whose
+    successful transition was recorded under one of the supplied fire owners.
+
+    The marker and owner checks are both mandatory: time proximity is not
+    authorship, and a fire that merely happens to follow somebody else's CI
+    repair must never claim that repair.  The update shares the canonical queue
+    lock and hardened serializer used by every other task-pool writer.
+    """
+    owners = {str(owner).strip() for owner in claim_owners if str(owner).strip()}
+    sha = str(commit_sha or "").strip().lower()
+    if not owners or not _GIT_COMMIT_RE.fullmatch(sha):
+        return []
+
+    p = Path(path)
+    guard_canonical_write(p)
+    if not p.exists():
+        return []
+
+    updated: list[str] = []
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = fh.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            for task in tasks:
+                if not isinstance(task, dict):
+                    continue
+                task_id = str(task.get("id") or "")
+                if not task_id.startswith("ci-red-"):
+                    continue
+                if str(task.get("status") or "").lower() not in {
+                    "succeeded", "succeeded_null_result",
+                }:
+                    continue
+                history = task.get("status_history")
+                terminal = next(
+                    (
+                        entry for entry in reversed(history)
+                        if isinstance(entry, dict)
+                        and str(entry.get("to") or "").lower() in {
+                            "succeeded", "succeeded_null_result",
+                        }
+                    ),
+                    None,
+                ) if isinstance(history, list) else None
+                if not terminal or str(terminal.get("by") or "") not in owners:
+                    continue
+                result = str(task.get("result") or "")
+                replaced, count = _CI_REPAIR_PENDING_COMMIT_RE.subn(
+                    f"repair_commit={sha}", result, count=1,
+                )
+                if count != 1:
+                    continue
+                task["result"] = replaced
+                task["repair_commit_source"] = "post_commit_receipt"
+                updated.append(task_id)
+            if updated:
+                write_tasks_to_handle(fh, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    return updated
+
+
 # --- Single-gateway append (2026-07-16 refactor) -----------------------------
 # docs/refactor_plan_single_gateway_task_system.md: `volpred ops assign` used to
 # write storage/ops/tasks/*.json — a queue no dispatcher consumes. This is the
@@ -560,6 +783,21 @@ def _legacy_priority_to_p(legacy: int) -> int:
 CANONICAL_NEXT_TASKS = Path(__file__).resolve().parents[3] / "storage" / "next_tasks.json"
 
 
+def _warn_if_over_pending_cap(record: dict[str, Any], tasks: list[Any]) -> None:
+    """Route-around detector for the drain-first gate. Never raises.
+
+    Observability only — enforcement lives at the generator entry points
+    (see ``volpred.ops.pool_pressure`` module docstring for why not here).
+    An append must never fail because the watchdog did.
+    """
+    try:
+        from volpred.ops.pool_pressure import warn_if_over_cap
+
+        warn_if_over_cap(record, tasks)
+    except Exception:  # noqa: BLE001 — silent-ok: observability must not break ingress
+        pass
+
+
 def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
     """急件入池 → 立刻要求 supervisor out-of-band 派工，不等下一班 hourly cron。
 
@@ -569,6 +807,13 @@ def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
     hourly（實例：assign_998ad2be / assign_33a9151f 建單 16:49/17:42，18:06 仍
     pending）。這裡是 **single gateway**（`volpred ops assign` 唯一的 append 路
     徑），所以接在這裡就同時涵蓋 telegram / user / owner / boss 所有人為 ingress。
+
+    範圍界線（2026-07-19 查證，別再「補接線」）：`scripts/telegram_poll.py` 自己組
+    record 直寫佇列、不經本函式，看起來像漏網，其實不是 —— 它建的是
+    `telegram_reply`，屬 `DEDICATED_OWNER_TASK_TYPES`，`is_urgent()` 一律回 False，
+    因為那類有專屬 owner（`_spawn_responder()` 即時處理，失敗則由 poll 迴圈在
+    `RETRY_AGE_THRESHOLD_SEC`=120s 內重派），本來就不該叫醒 hourly dispatcher —— 叫
+    醒了它也只會 skip 掉 telegram_reply。硬接一行 `request_urgent_fire` 是 no-op。
 
     `request_fire()` 只是在 supervisor state 寫一個 flag（同一把 fcntl 鎖），由
     scheduler 下一個 ≤60s tick 消費並走正常 `reserve_fire()` slot —— 不 spawn 任何
@@ -609,6 +854,182 @@ def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
         return False
 
 
+def clamp_machine_priority_inflation(record: dict[str, Any]) -> bool:
+    """機器來源的 P1 在 admission 夾到 P2（2026-07-21 dispatch-lanes R2）。
+
+    2026-07-21 實測：pending 181、P1 33 個，boss 來源（telegram/user）只有 8 個，
+    其餘 25 個是系統產生器自封的 P1（auto_discovered / agent / orphan_closeout /
+    auto_publish_drought_emergency / internal_alert_remediation_router …）。P1 的
+    語意是「boss 當下要的 + 時效性」；產生器人人自封 P1 等於取消 priority —— boss
+    的新急件在 33 張 P1 裡排隊，這正是 telegram/email 任務被池阻塞的另一半根因
+    （選擇端那一半見 continue_task_dispatch.py 的 lane rank）。
+
+    夾制條件（判定全部重用 `task_urgency`，禁止第二套 source 清單）：
+
+    * source **不是** 人為 ingress（`is_urgent_source` False），且
+    * task_type **不是** 時效類（TIME_CRITICAL_TASK_TYPES —— 時效任務依 2026-07-12
+      boss 指令必須 P1），且
+    * task_type **不是** dedicated-owner ingress（email_reply / telegram_reply ——
+      各有專屬即時 owner，priority 對它們是 pass-through），且
+    * priority 解析後 == 1
+
+    → priority 夾到 2、蓋 ``priority_capped_from: 1``、留一行 warn。
+
+    **只 clamp 不 block**：writer 層不能 block 的邊界同 `pool_pressure` 模組
+    docstring —— 走到 gateway 的任務語意上已被上游接受，在這裡拒絕會把失敗散進
+    每個 caller 的錯誤路徑；水位煞車屬生成端（pool_pressure 已 own），這裡只矯正
+    priority 語意。回傳是否有夾。
+    """
+    from volpred.ops import task_urgency  # lazy: task_urgency imports this module
+
+    if task_urgency.is_urgent_source(record.get("source")):
+        return False
+    task_type = record.get("task_type")
+    if task_type in task_urgency.TIME_CRITICAL_TASK_TYPES:
+        return False
+    if task_type in task_urgency.DEDICATED_OWNER_TASK_TYPES:
+        return False
+    if priority_sort_key(record.get("priority"), default=999) != 1:
+        return False
+    record["priority"] = 2
+    record["priority_capped_from"] = 1
+    warn(
+        "task_admission",
+        "machine-source P1 clamped to P2 (priority_capped_from=1)",
+        task_id=str(record.get("id")),
+        source=str(record.get("source")),
+        task_type=str(task_type),
+    )
+    return True
+
+
+def append_task_record(
+    record: dict[str, Any],
+    *,
+    path: str | Path = "storage/next_tasks.json",
+    if_exists: str = "skip",
+    semantic_dedupe: bool = True,
+) -> tuple[dict[str, Any], bool]:
+    """Append one caller-built task record to the queue under LOCK_EX.
+
+    Record-preserving sibling of :func:`append_next_task` (WS-A1b writer
+    convergence): ingress writers whose record shape is an external contract
+    (``telegram-<msg_id>`` reply-right guard ids, gmail ``email_reply`` payload
+    fields, ``daily_digest_YYYYMMDD`` dedupe ids) must not have the gateway
+    rebuild their record — but they must share the same bootstrap + flock +
+    duplicate-id + serialize-first discipline. This is the one implementation;
+    ``append_next_task`` routes through it.
+
+    ``if_exists='skip'`` returns ``(existing_record, False)`` when the id is
+    already queued (idempotent ingress replay); ``'raise'`` raises ValueError.
+
+    ``semantic_dedupe=True`` (default) additionally refuses records that are a
+    **semantic** duplicate of an already-open task — same file + symbol +
+    failure class, per ``volpred.ops.task_signature``. id-equality alone let the
+    same bug be filed twice 15 minutes apart (assign_614e70ee / assign_1d936f52),
+    and a post-hoc sweep only finds it after the queue is already polluted; the
+    boss requirement is to stop it **at the creation entry point**. Refused
+    records come back as ``(record, False)`` with ``duplicate_of`` /
+    ``duplicate_reason`` set so the caller can report instead of silently
+    growing the pool.
+
+    After the lock is released an urgent record (``task_urgency.is_urgent``)
+    requests an out-of-band supervisor fire; ``record['fire_requested']`` is a
+    **return-only receipt** (CLI print / test assertion), deliberately not
+    persisted — it is the outcome of this append, not task state. Dedicated
+    owner types (email_reply / telegram_reply) are never urgent here by design;
+    their ingest daemons own their own immediate paths (see
+    ``_request_urgent_fire`` docstring).
+    """
+    if if_exists not in {"skip", "raise"}:
+        raise ValueError(f"if_exists must be 'skip' or 'raise', got {if_exists!r}")
+    task_id = record.get("id")
+    if not isinstance(task_id, str) or not task_id.strip():
+        raise ValueError("task record must carry a non-empty string 'id'")
+
+    # R2 admission clamp（單一 gateway = 單一 enforcement 點）：機器來源不得自封
+    # P1。boss 來源 / 時效類 / dedicated-owner ingress 原樣通過。
+    clamp_machine_priority_inflation(record)
+
+    # G6 24h 全域上限（incident-lifecycle P2）：決策 owner =
+    # volpred.ops.remediation_throttle；這裡只是 gateway 的 choke point。
+    from volpred.ops import remediation_throttle
+
+    throttle_denied = False
+    dup_verdict: dict[str, Any] | None = None
+
+    p = Path(path)
+    guard_canonical_write(p)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    if not p.exists():
+        p.write_text("[]\n", encoding="utf-8")
+    with p.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            raw = fh.read()
+            tasks = json.loads(raw) if raw.strip() else []
+            if not isinstance(tasks, list):
+                raise ValueError("next_tasks.json root is not a list")
+            for existing in tasks:
+                if isinstance(existing, dict) and existing.get("id") == task_id:
+                    if if_exists == "raise":
+                        raise ValueError(f"duplicate task id {task_id}")
+                    return existing, False
+            # 語意重複閘門（老闆 2026-07-21：「在建單入口擋，不是事後掃」）。
+            # 放在 id 檢查之後、append 之前 —— 同一個 LOCK_EX 之內，所以不會有
+            # 「兩個 caller 同時通過檢查再雙雙寫入」的 TOCTOU 窗口。
+            if semantic_dedupe:
+                from volpred.ops.task_signature import find_semantic_duplicate
+
+                dup_verdict = find_semantic_duplicate(record, tasks)
+
+            if dup_verdict is not None:
+                pass  # refused below, outside the lock
+            elif remediation_throttle.is_auto_remediation(record) and remediation_throttle.over_cap(
+                tasks
+            ):
+                throttle_denied = True
+            else:
+                tasks.append(record)
+                write_tasks_to_handle(fh, tasks)
+            # 不擋，只記錄：閘門在 generator entry point（pool_pressure 模組 docstring
+            # 說明為何不在此層 enforce），所以任何新的自動 caller 天然繞得過去。這行
+            # 讓「繞過」在 log 現形，而不是靜默灌水。
+            if not throttle_denied and dup_verdict is None:
+                _warn_if_over_pending_cap(record, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    if dup_verdict is not None:
+        record["duplicate_of"] = dup_verdict["existing_id"]
+        record["duplicate_reason"] = "; ".join(dup_verdict["reasons"])
+        record["duplicate_signature"] = dup_verdict["b_key"]
+        record["duplicate_score"] = dup_verdict["score"]
+        warn(
+            "task_admission",
+            "semantic duplicate refused at creation entry point",
+            task_id=task_id,
+            duplicate_of=dup_verdict["existing_id"],
+            score=str(dup_verdict["score"]),
+            anchor=",".join(dup_verdict["anchor"][:4]),
+        )
+        # 刻意不 raise（即使 if_exists='raise'）：`raise` 的語意是「id 撞了，
+        # uuid4 下實質不可達」，而語意重複是**常態**。把常態走例外路徑會把失敗
+        # 散進每個 caller 的錯誤處理。回傳 created=False + duplicate_of 標記，
+        # 讓 caller 回報而不是靜默多一張。
+        return record, False
+    if throttle_denied:
+        # 鎖已釋放才寫 ledger（ledger 快，但原則上 side effect 不佔 queue flock）。
+        # 摘要信由 check_alerts 的 flush_denial_summary 每日彙整一封（G6）。
+        remediation_throttle.record_denial(
+            record, ledger_path=remediation_throttle.ledger_path_for(p)
+        )
+        record["throttled_by_remediation_cap"] = True
+        return record, False
+    # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
+    record["fire_requested"] = _request_urgent_fire(record, p)
+    return record, True
+
+
 def append_next_task(
     *,
     title: str,
@@ -647,26 +1068,5 @@ def append_next_task(
     if created_by:
         record["created_by"] = created_by
 
-    p = Path(path)
-    guard_canonical_write(p)
-    if not p.exists():
-        p.write_text("[]\n", encoding="utf-8")
-    with p.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            raw = fh.read()
-            tasks = json.loads(raw) if raw.strip() else []
-            if not isinstance(tasks, list):
-                raise ValueError("next_tasks.json root is not a list")
-            existing = {t.get("id") for t in tasks if isinstance(t, dict)}
-            if record["id"] in existing:
-                raise ValueError(f"duplicate task id {record['id']}")
-            tasks.append(record)
-            write_tasks_to_handle(fh, tasks)
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
-    # 急件不進排班：入池成功後（鎖已釋放）立刻請 supervisor 派工。
-    # `fire_requested` 是 **return-only receipt**（給 CLI 印 / 給測試斷言），
-    # 刻意不寫回佇列 —— 它是這次 append 的動作結果，不是 task 的狀態欄位。
-    record["fire_requested"] = _request_urgent_fire(record, p)
+    record, _created = append_task_record(record, path=path, if_exists="raise")
     return record

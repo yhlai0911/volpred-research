@@ -191,6 +191,68 @@ def test_failed_closeout_accumulates_distinct_later_batches(repo: Path):
     assert len(payload["receipts"]) == 2
 
 
+def test_machine_state_is_never_pinned_into_failed_closeout(repo: Path):
+    """Hot daemon-written state must not enter the receipt (assign_33e4c59f).
+
+    A dozen writers churn these files hourly, so a pinned fingerprint is
+    guaranteed to drift and the claim could only ever end in a "released" warn —
+    the recurring 放棄認領 orphan alert. The churn lane re-adopts them under the
+    next fire's own baseline; only real work is worth deferring.
+    """
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+    wl = repo / "storage" / "work_log.json"
+    wl.parent.mkdir(parents=True)
+    wl.write_text("[]\n")
+    _install_blocking_hook(repo)
+
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+
+    payload = json.loads(_failed_closeout_file(repo).read_text())
+    pinned = [entry["path"] for entry in payload["paths"]]
+    assert "out.txt" in pinned
+    assert "storage/work_log.json" not in pinned
+
+
+def test_pre_invariant_machine_state_claims_release_silently(repo: Path):
+    """Receipts written before the no-pin invariant still hold hot-state claims.
+
+    Recovery must drain them without the 放棄認領 warn — their drift is by
+    design, not an incident — while leaving the working bytes untouched and the
+    real work fully recoverable.
+    """
+    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    (repo / "out.txt").write_text("agent output\n")
+    _install_blocking_hook(repo)
+    assert _run(repo, [])["reason"] == "commit_nonzero"
+
+    wl = repo / "storage" / "work_log.json"
+    wl.parent.mkdir(parents=True)
+    wl.write_text("[]\n")
+    dest = _failed_closeout_file(repo)
+    payload = json.loads(dest.read_text())
+    payload["paths"].append(
+        # valid fingerprint shape, guaranteed to mismatch the live file — the
+        # exact state a pre-invariant receipt is in after an hour of churn
+        {"path": "storage/work_log.json", "fingerprint": {"kind": "missing"}})
+    dest.write_text(json.dumps(payload))
+
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 0\n")
+    hook.chmod(0o755)
+    alerts: list[dict] = []
+    recovered = phase_z.recover_failed_closeout(
+        repo_root=repo,
+        test_runner=lambda *a, **k: subprocess.CompletedProcess([], 0, "", ""),
+        alert_fn=lambda **k: alerts.append(k) or {},
+    )
+
+    assert recovered["committed"] is True
+    assert not any("放棄" in a.get("title", "") for a in alerts), alerts
+    assert wl.read_text() == "[]\n", "release must not touch working bytes"
+    assert not _failed_closeout_file(repo).exists()
+
+
 def test_blocked_candidate_preserves_head_index_and_working_bytes(repo: Path):
     """Alternate-index transaction: a hook veto cannot leave half the fire staged."""
     (repo / "foreign.txt").write_text("another writer\n")

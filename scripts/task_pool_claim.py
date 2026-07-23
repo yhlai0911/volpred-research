@@ -8,6 +8,8 @@ Schema additions to storage/next_tasks.json task entries:
   - completed_at      : ISO timestamp  (already exists)
   - result            : str  (already exists)
   - dispatch_lane     : agent | main_thread | blocked  (dispatcher ownership)
+  - compute_job_id    : str  (掛在 compute queue 上的 job id；job 仍活著時
+                              cleanup 的 stale reaper 不回收此 task)
 
 Status machine:
   pending  --claim-->  claimed  --start-->  in_progress  --complete-->  succeeded / failed / blocked
@@ -54,27 +56,33 @@ from volpred.ops.next_tasks import (  # noqa: E402
     normalize_priority,
     normalize_task_priority,
     normalize_task_priorities,
-    priority_sort_key,
     write_tasks_to_handle,
 )
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
+from volpred.ops import dreaming_revalidate  # noqa: E402
+from volpred.ops.task_pool_selection import (  # noqa: E402
+    CODEX_ELIGIBLE_TASK_TYPES,
+    evaluate_task_claim,
+    is_codex_eligible_task as _is_codex_eligible_task,
+    is_pending_list_candidate,
+    normalized_task_type as _normalized_task_type,
+    resolve_task_identity,
+    task_identity,
+    task_rank_key,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
+FB_DRAFTS_DIR = ROOT / "storage" / "drafts"
 
 DEFAULT_STALE_HOURS = 6  # Claim older than this with no completion -> auto-release
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
-CODEX_ELIGIBLE_TASK_TYPES = {
-    "platform_ops",
-    "experiment",
-    "governance",
-    "code_review",
-    "paper_review",
-    "daily_article",
-    "daily_digest",
-}
-
-
+FB_DUAL_PUBLISH_TASK_TYPES = {"trending_repost", "event_article"}
+_MILE_ID_RE = re.compile(r"\bmile_[A-Za-z0-9_-]+\b")
+_PUBLISH_EVIDENCE_RE = re.compile(
+    r"(?:發佈|發布|已發|publish(?:ed)?|feed\s+live|volpred\s+feed)",
+    re.IGNORECASE,
+)
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -120,7 +128,7 @@ def _locked_readonly() -> Iterator[list[dict[str, Any]]]:
 
 
 def _task_key(task: dict[str, Any]) -> str:
-    return str(task.get("id") or task.get("task_id") or "")
+    return task_identity(task)
 
 
 def _record_status_history(
@@ -147,80 +155,131 @@ def _record_status_history(
     task["status_history"].append(entry)
 
 
-def _matches(tasks: list[dict[str, Any]], task_id: str) -> list[dict[str, Any]]:
-    return [t for t in tasks if _task_key(t) == task_id]
-
-
 def _find(tasks: list[dict[str, Any]], task_id: str) -> dict[str, Any]:
-    matches = _matches(tasks, task_id)
-    if not matches:
+    resolution = resolve_task_identity(tasks, task_id)
+    if resolution.reason_code == "missing_task_id":
+        raise SystemExit("task id is missing")
+    if resolution.reason_code == "task_not_found":
         raise SystemExit(f"task id not found: {task_id}")
-    if len(matches) > 1:
-        statuses = [str(t.get("status") or "") for t in matches]
+    if resolution.reason_code == "duplicate_task_id":
+        statuses = [
+            str(tasks[index].get("status") or "")
+            for index in resolution.matching_indexes
+        ]
         raise SystemExit(
-            f"duplicate task id detected: {task_id} count={len(matches)} statuses={statuses}. "
+            f"duplicate task id detected: {task_id} "
+            f"count={len(resolution.matching_indexes)} statuses={statuses}. "
             "Run scripts/dedupe_next_tasks.py first."
         )
-    return matches[0]
+    return tasks[resolution.matching_indexes[0]]
 
 
-def _normalized_task_type(task: dict[str, Any]) -> str:
-    return (
-        str(task.get("task_type") or "")
-        .strip()
-        .lower()
-        .replace("-", "_")
-        .replace(" ", "_")
+def _published_mile_ids(task: dict[str, Any], result: str) -> set[str]:
+    """Extract dual-publish article ids only when completion claims publication.
+
+    A result can mention older ``mile_*`` articles during dedup/research, so an
+    id alone is not publication evidence. Limit inference to a local window
+    carrying an explicit publish/feed-live marker. Callers may also set
+    ``published_mile_id`` on the task as a machine-readable receipt.
+    """
+    published: set[str] = set()
+    explicit = task.get("published_mile_id")
+    if isinstance(explicit, str) and _MILE_ID_RE.fullmatch(explicit.strip()):
+        published.add(explicit.strip())
+    elif isinstance(explicit, list):
+        published.update(
+            value.strip()
+            for value in explicit
+            if isinstance(value, str) and _MILE_ID_RE.fullmatch(value.strip())
+        )
+
+    for match in _MILE_ID_RE.finditer(result or ""):
+        start = max(0, match.start() - 80)
+        end = min(len(result), match.end() + 80)
+        if _PUBLISH_EVIDENCE_RE.search(result[start:end]):
+            published.add(match.group(0))
+    return published
+
+
+def _require_fb_drafts_for_dual_publish(task: dict[str, Any], result: str) -> None:
+    """Refuse fake completion when a feed-published article has no FB copy.
+
+    Root cause (2026-07-20): a trending/event article could publish its feed
+    entry, file an ``fb_repost_*`` follow-up, and still be marked succeeded
+    without writing the copy the FB worker needs. Feed publication remains
+    independent of FB delivery, but preparing the canonical draft is part of
+    the same task's completion contract.
+    """
+    if _normalized_task_type(task) not in FB_DUAL_PUBLISH_TASK_TYPES:
+        return
+    published = _published_mile_ids(task, result)
+    if not published:
+        return
+    missing = sorted(
+        mile_id
+        for mile_id in published
+        if not (FB_DRAFTS_DIR / f"fb_{mile_id}.md").is_file()
     )
+    if missing:
+        expected = ", ".join(
+            f"storage/drafts/fb_{mile_id}.md" for mile_id in missing
+        )
+        raise SystemExit(
+            "dual-publish completion refused: feed publication was reported "
+            f"for {', '.join(missing)}, but canonical FB draft(s) are missing: "
+            f"{expected}. Write the FB-native copy now; an fb_repost follow-up "
+            "is not a substitute for the publish task's completion contract."
+        )
 
 
-def _is_codex_eligible_task(task: dict[str, Any]) -> bool:
-    status = str(task.get("status") or "").strip().lower()
-    if status == "pending_main_thread":
-        return False
-    lane = str(task.get("dispatch_lane") or "").strip().lower()
-    if lane in {"main_thread", "blocked"}:
-        return False
-    task_type = _normalized_task_type(task)
-    if task_type in CODEX_ELIGIBLE_TASK_TYPES:
-        return True
-    preferred_agent = (
-        str(task.get("preferred_agent") or task.get("target_agent") or "")
-        .strip()
-        .lower()
-    )
-    return preferred_agent == "codex"
+def _revalidate_dreaming_before_claim(
+    task: dict[str, Any], *, owner: str
+) -> dict[str, Any] | None:
+    """Refuse a dreaming claim whose condition dissolved since the night it was seen.
+
+    A dreaming task is a snapshot. On 2026-07-17 four `orphaned_experiment` tasks
+    were dispatched three days after `kb_backfill_unrecorded_experiments` had already
+    written the knowledge entries they existed to demand — an agent following the
+    description literally writes DUPLICATES. Re-running the finding's own detector
+    here closes it as a fresh no-op instead, the same guard alerts already have.
+
+    Returns None for every task with no verdict (non-dreaming, unregistered pattern,
+    check failed, condition still true) — silence means dispatch as before.
+    """
+    verdict = dreaming_revalidate.revalidate(task)
+    if verdict is None or not verdict.cleared:
+        return None
+    dreaming_revalidate.close_as_cleared(task, verdict, by=owner, now=_now())
+    return {
+        "ok": False,
+        "reason": dreaming_revalidate.CLEARED_REASON,
+        "task_id": _task_key(task),
+        "pattern_type": verdict.pattern_type,
+        "detail": verdict.detail,
+        "status": "succeeded",
+    }
 
 
 def _expire_managed_event_before_claim(
-    task: dict[str, Any], *, owner: str
+    task: dict[str, Any],
+    *,
+    owner: str,
+    decision: Any,
+    observed_at: datetime,
 ) -> dict[str, Any] | None:
-    """Reject a canonical event claim that lost the race with its deadline."""
+    """Apply the terminal mutation selected by the pure claim policy."""
 
-    managed = _normalized_task_type(task) == "event_article" and (
-        str(task.get("source") or "").strip().lower() == "event_expander"
-        or bool(task.get("ref_event_job_id"))
-    )
-    if not managed:
+    if decision.primary_reason not in {
+        "missing_deadline",
+        "invalid_deadline",
+        "deadline_expired",
+    }:
         return None
 
     task_id = _task_key(task)
-    raw_deadline = task.get("deadline")
-    if not raw_deadline:
-        schema_error = "missing_deadline"
-        deadline = None
-    else:
-        deadline = parse_iso_warn(
-            raw_deadline,
-            tag="claim",
-            field_name="deadline",
-            fallback=None,
-            site="event_deadline_guard",
-            task_id=task_id,
-        )
-        schema_error = "invalid_deadline" if deadline is None else None
-    if schema_error:
-        now_text = _now()
+    now_text = observed_at.astimezone(timezone.utc).isoformat()
+    if decision.primary_reason in {"missing_deadline", "invalid_deadline"}:
+        schema_error = decision.primary_reason
         previous = str(task.get("status") or "").strip().lower() or "pending"
         task["status"] = "failed"
         task["completed_at"] = now_text
@@ -241,18 +300,6 @@ def _expire_managed_event_before_claim(
             "status": "failed",
         }
 
-    now_text = _now()
-    now = parse_iso_warn(
-        now_text,
-        tag="claim",
-        field_name="claim_now",
-        fallback=None,
-        site="event_deadline_guard",
-        task_id=task_id,
-    )
-    if now is None or now <= deadline:
-        return None
-
     previous = str(task.get("status") or "").strip().lower() or "pending"
     task["status"] = "expired"
     task["expired_at"] = now_text
@@ -271,13 +318,8 @@ def _expire_managed_event_before_claim(
         "reason": "deadline_expired",
         "task_id": task_id,
         "status": "expired",
-        "deadline": deadline.isoformat(),
+        "deadline": decision.deadline_at,
     }
-
-
-def _is_codex_owner(owner: str) -> bool:
-    normalized = str(owner or "").strip().lower()
-    return normalized == "codex" or normalized.startswith("codex-") or normalized.startswith("codex_")
 
 
 _K_ID_RE = re.compile(r"^K\d{2,5}[A-Z]?$", re.IGNORECASE)
@@ -445,23 +487,64 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
     session = args.session or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4().hex[:12]
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
-        existing_owner = task.get("claimed_by")
         existing_status = (task.get("status") or "").lower()
-        # Idempotent: same owner re-claiming is OK
-        if existing_owner and existing_owner != args.owner and existing_status in {"claimed", "in_progress"}:
+        observed_at = datetime.now(timezone.utc)
+        decision = evaluate_task_claim(
+            task,
+            owner=args.owner,
+            main_thread=bool(getattr(args, "main_thread", False)),
+            observed_at=observed_at,
+        )
+        if decision.primary_reason == "already_claimed":
             return {
                 "ok": False,
                 "reason": "already_claimed",
-                "claimed_by": existing_owner,
+                "claimed_by": decision.claimed_by,
                 "claimed_at": task.get("claimed_at"),
             }
-        if existing_status not in {"pending", "pending_main_thread", "claimed", "blocked", ""}:
+        if decision.primary_reason == "wrong_status":
             return {"ok": False, "reason": "wrong_status", "status": existing_status}
         if existing_status != "claimed":
-            deadline_result = _expire_managed_event_before_claim(task, owner=args.owner)
+            deadline_result = _expire_managed_event_before_claim(
+                task,
+                owner=args.owner,
+                decision=decision,
+                observed_at=observed_at,
+            )
             if deadline_result is not None:
                 return deadline_result
-        if _is_codex_owner(args.owner) and not _is_codex_eligible_task(task):
+            dreaming_result = _revalidate_dreaming_before_claim(task, owner=args.owner)
+            if dreaming_result is not None:
+                return dreaming_result
+            if decision.primary_reason == "live_revalidation_required":
+                decision = evaluate_task_claim(
+                    task,
+                    owner=args.owner,
+                    main_thread=bool(
+                        getattr(args, "main_thread", False)
+                    ),
+                    observed_at=observed_at,
+                    revalidation_checked=True,
+                )
+        # 2026-07-20：原本只比對字面 "main_thread"，但 ctd 的候選過濾認得 4 種拼法
+        # （main / main_thread / manual / interactive）。詞彙不一致 ⇒ lane="manual"
+        # 的任務進不了 PHASE B 候選、卻擋不住 burst 點名 claim。
+        # 2026-07-21 incident-lifecycle P4：判定收編進唯一 owner
+        # is_main_thread_reserved（status=pending_main_thread 亦算），與
+        # task_urgency 的 fire 判定共用同一套詞彙 —— 這裡與 request_fire 讀不同
+        # 欄位正是「無合法執行者卻被 hourly fire」矛盾的根因（plan 附註）。
+        if decision.primary_reason == "main_thread_lane":
+            # 2026-07-20 owner 糾正（refactor_plan_ops_master_2026_07 §5 獨立軌）：
+            # lane 只擋候選排序不夠 —— burst/urgent fire 會點名 claim，隔離必須
+            # enforce 在 claim 這個唯一入口。互動主線程用 --main-thread 明示越過。
+            return {
+                "ok": False,
+                "reason": "main_thread_lane",
+                "dispatch_lane": decision.dispatch_lane or None,
+                "status": existing_status,
+                "hint": "reserved for main thread; pass --main-thread from an interactive session",
+            }
+        if decision.primary_reason == "not_codex_eligible":
             return {
                 "ok": False,
                 "reason": "not_codex_eligible",
@@ -493,23 +576,70 @@ def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "task_id": args.id, "status": "in_progress"}
 
 
+def _repend_task(
+    task: dict[str, Any], *, note: str, reason: str | None = None
+) -> str | None:
+    """Return one claimed/in_progress task to `pending` (single mutation site).
+
+    Every re-pend in this module goes through here so the claim fields, the
+    release timestamp and the status_history trace can never drift apart
+    between the manual, kill-triggered and stale-sweep paths.
+    """
+    prev_owner = task.get("claimed_by")
+    prev_status = (task.get("status") or "").lower() or "claimed"
+    task["status"] = "pending"
+    task.pop("claimed_by", None)
+    task.pop("claimed_at", None)
+    task.pop("claim_session_id", None)
+    task["last_released_at"] = _now()
+    if reason:
+        task["last_release_reason"] = reason
+    _record_status_history(
+        task,
+        frm=prev_status,
+        to="pending",
+        by=prev_owner or "release",
+        note=note,
+    )
+    return prev_owner
+
+
+def release_owner_claims(
+    owners: Any, *, reason: str, note: str | None = None
+) -> dict[str, Any]:
+    """Re-pend every live claim held by any of `owners`.
+
+    The dispatch supervisor's kill path uses this: when `health.py` force-kills
+    a hung worker it frees the dispatch_state slot, and the task that dead fire
+    was holding must go back to the pool in the same breath.  Before this
+    existed the claim stayed `claimed`/`in_progress` until the stale sweep
+    noticed hours later, so a P1 task could sit dead with nothing running behind
+    it (refactor_plan_ops_master_2026_07 §1.2 P1 / WS-A2b).
+
+    Owner-scoped rather than id-scoped because the supervisor knows which fire
+    it killed (slot+job → ownership token), not which task that fire claimed.
+    """
+    wanted = {str(owner) for owner in owners if str(owner or "").strip()}
+    if not wanted:
+        return {"ok": True, "released": [], "count": 0}
+    released: list[dict[str, Any]] = []
+    with _locked_load() as (_fh, tasks):
+        for task in tasks:
+            if not isinstance(task, dict):
+                continue
+            if (task.get("status") or "").lower() not in {"claimed", "in_progress"}:
+                continue
+            if str(task.get("claimed_by") or "") not in wanted:
+                continue
+            prev_owner = _repend_task(task, note=note or reason, reason=reason)
+            released.append({"id": _task_key(task), "owner": prev_owner})
+    return {"ok": True, "released": released, "count": len(released)}
+
+
 def cmd_release(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
-        prev_owner = task.get("claimed_by")
-        prev_status = (task.get("status") or "").lower() or "claimed"
-        task["status"] = "pending"
-        task.pop("claimed_by", None)
-        task.pop("claimed_at", None)
-        task.pop("claim_session_id", None)
-        task["last_released_at"] = _now()
-        _record_status_history(
-            task,
-            frm=prev_status,
-            to="pending",
-            by=prev_owner or "release",
-            note="manual_release",
-        )
+        prev_owner = _repend_task(task, note="manual_release")
         return {"ok": True, "task_id": args.id, "released_from": prev_owner}
 
 
@@ -627,6 +757,14 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
                 "status": prev_status,
                 "already_completed": True,
             }, None
+        existing_result = str(task.get("result") or "")
+        result_text = (
+            (existing_result + "\n\n" + args.result).strip()
+            if existing_result and args.result
+            else (args.result or existing_result)
+        )
+        if args.status == "succeeded":
+            _require_fb_drafts_for_dual_publish(task, result_text)
         task["status"] = args.status
         task["completed_at"] = _now()
         _record_status_history(
@@ -638,10 +776,8 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
         task.pop("claim_session_id", None)
-        result_text = args.result or ""
         if args.result:
-            existing = task.get("result") or ""
-            task["result"] = (existing + "\n\n" + args.result).strip() if existing else args.result
+            task["result"] = result_text
             result_text = task["result"]
         effect = None
         if args.status == "succeeded":
@@ -655,6 +791,53 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
         if burst and burst.get("text"):
             task["burst_reported_at"] = _now()
         return out, burst
+
+
+#: annotate 只准動 free-form metadata；生命週期/身分欄位各有專屬入口
+#: （claim/start/complete/release/mark_task_blocked），繞過那些入口 = 繞過
+#: 它們的 guard 與 status vocab 檢查。
+ANNOTATE_PROTECTED_FIELDS = frozenset({
+    "id", "status", "priority", "task_type", "created_at", "completed_at",
+    "claimed_by", "claimed_at", "claim_session_id",
+    "blocked_reason", "blocked_at", "blocked_until",
+})
+
+
+def cmd_annotate(args: argparse.Namespace) -> dict[str, Any]:
+    """Set free-form metadata fields (plan / linked_task_ids / ...) on one task.
+
+    WS-A1b: replaces the cron-dispatch-prompt era ``jq ... > /tmp/nt && mv``
+    instruction — that pipeline rewrote the whole queue OUTSIDE the flock and
+    the status-vocab audit, and it was teaching agents (N-times amplification).
+    This lands through _locked_load → write_tasks_to_handle like every other
+    queue mutation.
+    """
+    updates: dict[str, Any] = {}
+    for raw in args.set or []:
+        key, sep, value = raw.partition("=")
+        if not sep or not key:
+            raise SystemExit(f"annotate: --set expects FIELD=VALUE, got {raw!r}")
+        updates[key] = value
+    for raw in args.set_json or []:
+        key, sep, value = raw.partition("=")
+        if not sep or not key:
+            raise SystemExit(f"annotate: --set-json expects FIELD=JSON, got {raw!r}")
+        try:
+            updates[key] = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise SystemExit(f"annotate: --set-json {key}: invalid JSON ({exc}): {value!r}")
+    if not updates:
+        raise SystemExit("annotate: nothing to set (use --set FIELD=VALUE / --set-json FIELD=JSON)")
+    protected = sorted(set(updates) & ANNOTATE_PROTECTED_FIELDS)
+    if protected:
+        raise SystemExit(
+            f"annotate: refusing lifecycle/identity fields {protected}; "
+            "use claim/start/complete/release or scripts/mark_task_blocked.py"
+        )
+    with _locked_load() as (_fh, tasks):
+        task = _find(tasks, args.id)
+        task.update(updates)
+    return {"ok": True, "task_id": args.id, "fields": sorted(updates)}
 
 
 def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
@@ -681,11 +864,21 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 age_h = (datetime.now(timezone.utc) - claimed_dt).total_seconds() / 3600
                 if age_h < args.stale_hours:
                     continue
+            elif args.status == "pending":
+                if not is_pending_list_candidate(
+                    t,
+                    codex_eligible=bool(args.codex_eligible),
+                ):
+                    continue
             elif args.status and status != args.status:
                 continue
             if args.owner and t.get("claimed_by") != args.owner:
                 continue
-            if args.codex_eligible and not _is_codex_eligible_task(t):
+            if (
+                args.codex_eligible
+                and args.status != "pending"
+                and not _is_codex_eligible_task(t)
+            ):
                 continue
             out.append({
                 "id": _task_key(t),
@@ -697,7 +890,7 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
                 "claimed_at": t.get("claimed_at"),
                 "dispatch_lane": t.get("dispatch_lane"),
             })
-        out.sort(key=lambda x: (priority_sort_key(x.get("priority"), default=999), x.get("id") or ""))
+        out.sort(key=task_rank_key)
         if args.limit:
             out = out[: args.limit]
         return {"ok": True, "count": len(out), "tasks": out}
@@ -713,31 +906,92 @@ def cmd_normalize_priorities(args: argparse.Namespace) -> dict[str, Any]:
         return {"ok": True, "changed": changed}
 
 
+_COMPUTE_QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
+_COMPUTE_JOB_LIVE = {"pending", "queued", "running", "claimed"}
+
+
+def _compute_job_alive(job_id: str | None) -> bool:
+    """True 若 task 掛著的 compute-queue job 仍在飛。
+
+    stale reaper 只看 claimed_at 的年齡，看不見「工作其實在 compute worker 上跑」。
+    長研究 job timeout 動輒 5400s，遠超 --stale-hours 2 —— 於是 dispatch 到 compute
+    queue 的 task 會在 2h 後被放回 pending，重新進 starvation lockout 被第二次派工，
+    產生重複 agent job 與重複 worktree（實例：assign_5aa9d5f5 於 2026-07-19/07-20
+    連兩次 auto_release_stale_2h，工作全程在 queue 上正常執行）。
+
+    job 已進終態（completed / failed / timeout）則不擋 —— task 本來就該回池等收件。
+    """
+    if not job_id:
+        return False
+    path = _COMPUTE_QUEUE_DIR / f"{job_id}.json"
+    try:
+        with path.open(encoding="utf-8") as fh:
+            status = (json.load(fh).get("status") or "").lower()
+    except (OSError, ValueError):  # silent-ok: 缺檔/壞檔 = 無法證明 job 活著，回退到原回收邏輯
+        # 讀不到 job 檔 = 無法證明它活著，照原邏輯回收（不要因為 IO 錯誤把 task 永久釘住）
+        return False
+    return status in _COMPUTE_JOB_LIVE
+
+
 def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
     released = []
+    skipped_compute = []
     with _locked_load() as (_fh, tasks):
         now = datetime.now(timezone.utc)
         for t in tasks:
             status = (t.get("status") or "").lower()
             if status not in {"claimed", "in_progress"}:
                 continue
+            job_id = t.get("compute_job_id")
+            if _compute_job_alive(job_id):
+                skipped_compute.append({"id": _task_key(t), "compute_job_id": job_id})
+                continue
             claimed_at = t.get("claimed_at")
-            if not claimed_at:
-                continue
-            claimed_dt = parse_iso_warn(
-                claimed_at,
-                tag="claim",
-                field_name="claimed_at",
-                fallback=None,
-                site="cleanup_stale",
-                task_id=_task_key(t),
-            )
+            claimed_dt = None
+            age_source = "claimed_at"
+            if claimed_at:
+                claimed_dt = parse_iso_warn(
+                    claimed_at,
+                    tag="claim",
+                    field_name="claimed_at",
+                    fallback=None,
+                    site="cleanup_stale",
+                    task_id=_task_key(t),
+                )
             if claimed_dt is None:
-                continue
-            age_h = (now - claimed_dt).total_seconds() / 3600
+                # claim 沒留（或留了壞的）claimed_at：退而用其他生命週期欄位推
+                # 年齡；全缺 = 無法證明活著，視為無限 stale 立即回收
+                # （P4 claimed_at 盲點，refactor_plan_ops_master_2026_07 WS-A2）
+                for fallback_field in ("started_at", "updated_at", "created_at"):
+                    raw = t.get(fallback_field)
+                    if not raw:
+                        continue
+                    claimed_dt = parse_iso_warn(
+                        raw,
+                        tag="claim",
+                        field_name=fallback_field,
+                        fallback=None,
+                        site="cleanup_stale_fallback",
+                        task_id=_task_key(t),
+                    )
+                    if claimed_dt is not None:
+                        age_source = fallback_field
+                        break
+            if claimed_dt is None:
+                age_h = float("inf")
+                age_source = None
+            else:
+                age_h = (now - claimed_dt).total_seconds() / 3600
             if age_h >= args.stale_hours:
                 prev_owner = t.get("claimed_by")
-                released.append({"id": _task_key(t), "owner": prev_owner, "age_h": round(age_h, 1)})
+                released.append(
+                    {
+                        "id": _task_key(t),
+                        "owner": prev_owner,
+                        "age_h": round(age_h, 1) if claimed_dt is not None else None,
+                        "age_source": age_source,
+                    }
+                )
                 t["status"] = "pending"
                 t.pop("claimed_by", None)
                 t.pop("claimed_at", None)
@@ -751,18 +1005,28 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                     by=prev_owner or "cleanup",
                     note=f"auto_release_stale_{args.stale_hours}h",
                 )
-    return {"ok": True, "released": released, "count": len(released)}
+    return {
+        "ok": True,
+        "released": released,
+        "count": len(released),
+        "skipped_compute_in_flight": skipped_compute,
+    }
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    p = sub.add_parser("claim"); p.add_argument("--id", required=True); p.add_argument("--owner", required=True); p.add_argument("--session"); p.set_defaults(fn=cmd_claim)
+    p = sub.add_parser("claim"); p.add_argument("--id", required=True); p.add_argument("--owner", required=True); p.add_argument("--session"); p.add_argument("--main-thread", action="store_true", dest="main_thread", help="claim a main_thread-lane task (interactive session only)"); p.set_defaults(fn=cmd_claim)
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
     p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed", "blocked"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
+    p.add_argument("--id", required=True)
+    p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")
+    p.add_argument("--set-json", action="append", dest="set_json", metavar="FIELD=JSON", help="set FIELD to a parsed JSON value (repeatable)")
+    p.set_defaults(fn=cmd_annotate)
     p = sub.add_parser("list")
     p.add_argument("--status")
     p.add_argument("--owner")

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-19T09:40:04.945585",
+  "generated_at": "2026-07-19T23:09:05.493716",
   "overall": "warn",
   "critical_count": 0,
   "warn_count": 6,
@@ -19,7 +19,7 @@
     {
       "dimension": "dedup_calibration",
       "severity": "warn",
-      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=829, AI saturation=11 (threshold=5, margin=6), NFP control=3, FOMC theme=0 / hard=0",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=831, AI saturation=11 (threshold=5, margin=6), NFP control=3, FOMC theme=0 / hard=0",
       "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
     },
     {
@@ -31,7 +31,7 @@
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "PRIORITY_UNVERIFIED: 231 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
+      "message": "PRIORITY_UNVERIFIED: 230 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {
@@ -43,7 +43,7 @@
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "CODE_WITHOUT_RESULTS: 168 K-family directories have code but no archived *_results.json（例：k1212, k1267, k1380, k144, k150）",
+      "message": "CODE_WITHOUT_RESULTS: 169 K-family directories have code but no archived *_results.json（例：K1694, k1212, k1267, k1380, k144）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     }
   ]

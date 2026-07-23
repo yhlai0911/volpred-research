@@ -25,10 +25,12 @@ done
 unset _nvm_bin
 
 CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
+CODEX_BOUNDED="${CODEX_BOUNDED:-$REPO_ROOT/scripts/codex_exec_bounded.sh}"
 LOCK_DIR="/Users/yhlai0911/.volpred/run/telegram_responder.lock"
 RESPONDER_WORKDIR="/Users/yhlai0911/.volpred/run/telegram_responder_workdir"
 AUTO_MEMORY_DIR="/Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory"
 CAP_SEC=900  # 15 min hard cap — TG 是即時聊天，答不完的部分留 hourly 接手
+CODEX_FAILOVER_ENABLED="${TELEGRAM_RESPONDER_CODEX_FAILOVER:-1}"
 # Model 政策（config/models.json single source of truth）：這是 boss-facing 通道，
 # 回答品質優先於 token — 與 hourly-dispatch 同款 opus primary；owner 若要降速換快，
 # 改 TELEGRAM_RESPONDER_MODEL env 或此 default。
@@ -82,6 +84,12 @@ echo $$ > "$LOCK_DIR/pid"
 cleanup() { rm -rf "$LOCK_DIR"; }
 trap cleanup EXIT INT TERM
 
+# Every responder process gets one ownership token shared by its Claude primary
+# and Codex fallback.  A failover must be able to continue the same drain without
+# inventing a fixed global owner (which would make unrelated launches look like
+# one live claimant).
+export VOLPRED_TASK_CLAIM_OWNER="telegram-responder-$$"
+
 echo "=== telegram responder start $(date '+%F %T') ==="
 
 PROMPT='你是 VolPred 平台的 Telegram 即時回應者。唯一任務：處理老闆經 Telegram 傳來的待辦訊息，然後結束。
@@ -89,7 +97,7 @@ PROMPT='你是 VolPred 平台的 Telegram 即時回應者。唯一任務：處�
 流程（嚴格照做）：
 0. launcher cwd 是 repo 外的隔離目錄，但 CLI 的 `autoMemoryDirectory` 已綁到 canonical `/Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory/`；先讀 repo 的 AGENTS.md，再使用內建 auto-memory（`MEMORY.md` 索引、按需讀單筆）。若本次是「記住：…」類長期指示，用內建 memory 工作法寫入（一檔一事實 + `MEMORY.md` pointer）。禁止呼叫已廢棄的 `telegram_memory.py`，也禁止建立 scratch/channel 專屬平行記憶。
 1. 從 canonical root 讀 storage/next_tasks.json，找出全部 status=="pending" 且 task_type=="telegram_reply" 的任務（可能多筆，全部處理）。沒有 → 直接結束，不做別的事。
-2. 逐筆用 canonical 絕對入口執行 task_pool_claim.py claim/complete（`uv --project /Users/yhlai0911/volpred-research run python /Users/yhlai0911/volpred-research/scripts/task_pool_claim.py ...`）→ 查詢/診斷可直接完成；任何 repo 程式、文件、Git/index/ref 修改一律不在 responder 做，改用正式 task-pool writer建立後續任務交 hourly dispatch（禁止直接 append JSON），並回覆老闆「已排入任務池」→ 用 `uv --project /Users/yhlai0911/volpred-research run volpred ops telegram-send --reply-to-task <task_id> --text "..."` 回覆老闆（reply-right guard：任務已被別的 session 完成會拒發，防雙回覆；claim 失敗 = 別人在處理，不回覆直接跳過）。
+2. 逐筆用 canonical 絕對入口執行 task_pool_claim.py claim/complete，claim 必須帶 `--owner "$VOLPRED_TASK_CLAIM_OWNER"`（`uv --project /Users/yhlai0911/volpred-research run python /Users/yhlai0911/volpred-research/scripts/task_pool_claim.py ...`）→ 查詢/診斷可直接完成；任何 repo 程式、文件、Git/index/ref 修改一律不在 responder 做，改用正式 task-pool writer建立後續任務交 hourly dispatch（禁止直接 append JSON），並回覆老闆「已排入任務池」→ 用 `uv --project /Users/yhlai0911/volpred-research run volpred ops telegram-send --reply-to-task <task_id> --text "..."` 回覆老闆（reply-right guard：任務已被別的 session 完成會拒發，防雙回覆；claim 失敗 = 別人在處理，不回覆直接跳過）。
 3. 回覆風格：短、直接、口語 — 這是即時聊天。結論先講；細節一行帶過或說在哪。禁止長報告。
 4. 研究誠實原則適用：數字必須真查真算，不確定就說不確定。時間戳用 `TZ=Asia/Taipei date`。
 5. 全部 drain 完就結束。不進 ops loop、不派 agent、不碰 feed/paper、不執行任何 git mutation。15 分鐘內收尾。'
@@ -125,14 +133,38 @@ run_claude_pass() {
     )
 }
 
+run_codex_pass() {
+    # Claude weekly/session quota is independent of the ChatGPT-backed Codex
+    # login.  Use the repo's process-group watchdog: a bare `codex exec` can
+    # otherwise outlive this responder and keep the single-flight lock stale.
+    (
+        cd "$RESPONDER_WORKDIR" || exit 1
+        bash "$CODEX_BOUNDED" --timeout "$CAP_SEC" \
+            --skip-git-repo-check -s danger-full-access \
+            -C "$RESPONDER_WORKDIR" --add-dir "$REPO_ROOT" \
+            "$PROMPT"
+    )
+}
+
 # Drain loop（2026-07-02 race fix：responder 跑的期間進來的新訊息會被單飛鎖 skip，
 # 原版收尾就走人 → 新任務卡到下則訊息才被撿。改為收尾前回頭看佇列，有 pending
 # 就再跑一輪；上限 3 輪防無限迴圈，剩的留 hourly 兜底）。
 RC=0
+CLAUDE_UNAVAILABLE=0
 for ROUND in 1 2 3; do
-    run_claude_pass; RC=$?
+    if [ "$CLAUDE_UNAVAILABLE" -eq 0 ]; then
+        run_claude_pass; RC=$?
+    else
+        RC=1
+    fi
     LEFT=$(pending_count)
-    echo "[round $ROUND] exit=$RC, pending 剩 $LEFT"
+    if [ "$LEFT" != "0" ] && [ "$RC" -ne 0 ] && [ "$CODEX_FAILOVER_ENABLED" = "1" ]; then
+        CLAUDE_UNAVAILABLE=1
+        echo "[round $ROUND] Claude exit=$RC with $LEFT pending — Codex failover"
+        run_codex_pass; RC=$?
+        LEFT=$(pending_count)
+    fi
+    echo "[round $ROUND] final exit=$RC, pending 剩 $LEFT"
     [ "$LEFT" = "0" ] && break
 done
 echo "=== telegram responder end $(date '+%F %T') (exit=$RC) ==="

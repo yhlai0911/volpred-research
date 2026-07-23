@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-07-20T14:00:28+00:00",
+  "mode": "apply",
+  "grace_minutes": 20,
+  "detached": [
+    {
+      "owner": "hourly-slot-1-005f17cf9788448f9ead88a3a085203f",
+      "slot": "slot-1",
+      "job_id": "005f17cf9788448f9ead88a3a085203f",
+      "task_ids": [
+        "K740_article_general_audience_rewrite_2fb1dfb3",
+        "K942_article_general_audience_rewrite_2cfa32a4",
+        "alert_release_pool_deadlock_20260720"
+      ],
+      "youngest_claim_age_min": 47.6,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-07-20T13:14:24.384401+00:00",
+        "outcome": "quota_blocked",
+        "exit_code": 1
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-1-005f17cf*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 47.6min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "K740_article_general_audience_rewrite_2fb1dfb3",
+        "K942_article_general_audience_rewrite_2cfa32a4",
+        "alert_release_pool_deadlock_20260720"
+      ],
+      "released_at": "2026-07-20T14:00:28+00:00"
+    }
+  ]
+}

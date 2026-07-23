@@ -1,0 +1,79 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "paper2_taiwan_indiv_rolling_gamma.py",
+    "args": []
+  },
+  "canonical_result": "paper2_taiwan_indiv_rolling_gamma_results.json",
+  "inputs": [
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/0050_tw.csv",
+      "sha256": "a16a272ba2b75007321f0bf404a815869ddeac254f49a87fdae6788725b4483c"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/0056_tw.csv",
+      "sha256": "320abe05d7af8bd3f8ca6cfec4c1af84041c38d7a73f524f5f83bafc18875003"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2317_tw.csv",
+      "sha256": "19b15bf883961c093e5f1d2e0d411021422b2d5d06b14d53fbd5fd6f17584a8b"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2383_tw.csv",
+      "sha256": "49554a3ca6f4d2bdaafc540e8e79d61d7a0db91006d2ff2f46adac484f19f715"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2412_tw.csv",
+      "sha256": "b49c07260c39317c55444df45bbd0768fbb61b59df1b77ff6a10202736b28492"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2454_tw.csv",
+      "sha256": "90a11073a942b2a9797a6b67ad218d5552eff663425a582e38c45387f7801d76"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2881_tw.csv",
+      "sha256": "7e0513cec62484b457a48ac42ac714f570e1bf31f6a566dd5454073e04cf237c"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2882_tw.csv",
+      "sha256": "205c1a5a0c01ddc3656bfa54b27ccb017a790a83aa0f06cd37489ea1aca6824a"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2885_tw.csv",
+      "sha256": "7e5fe51f7b304793cdd2e86f6c1c388a52ad34cc9b628884dc7928d56d2d0b33"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2886_tw.csv",
+      "sha256": "532243dc28aad072be1db972641d80c3b5cc90ba110b0428f490d8d19f356a55"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/2891_tw.csv",
+      "sha256": "4f030e735281dcf7aa4d89e88b40df25af007af1708b75158a4e08400812b819"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/MANIFEST.json",
+      "sha256": "6faf04d74fad1f86d8daffbf64707c99b798968a1c0c306474342f53f580c81e"
+    },
+    {
+      "path": "experiments/paper2_taiwan_indiv_rolling_gamma/data/twii.csv",
+      "sha256": "de7009a78a8ccd56b57619425ac945a083e2fcea55c094bbab6d56573899beeb"
+    }
+  ],
+  "timeout_seconds": 3600,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 20260713
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [],
+    "ignore_reasons": {}
+  }
+}

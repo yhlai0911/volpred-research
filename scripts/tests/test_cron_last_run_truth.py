@@ -123,8 +123,10 @@ def test_merge_last_run_preserves_keys_written_by_another_process(tmp_path: Path
     merge_last_run({"b": "2026-02-02T00:00:00+00:00"}, path=path)
     merge_last_run({"c": "2026-03-03T00:00:00+00:00"}, path=path)
     data = json.loads(path.read_text(encoding="utf-8"))
-    assert set(data) == {"a", "b", "c"}, "a merge dropped another writer's key"
+    # "_meta" is the WS-D1 scope stamp (piggyback-only), not a job marker.
+    assert set(data) == {"a", "b", "c", "_meta"}, "a merge dropped another writer's key"
     assert data["a"] == "2026-01-01T00:00:00+00:00"
+    assert data["_meta"]["scope"] == "piggyback-and-cron_lib-self-report-only"
 
 
 def test_merge_last_run_refuses_to_flatten_a_corrupt_file(tmp_path: Path) -> None:
@@ -138,7 +140,9 @@ def test_merge_last_run_refuses_to_flatten_a_corrupt_file(tmp_path: Path) -> Non
 def test_mark_last_run_is_atomic_leaving_no_partial_file(tmp_path: Path) -> None:
     path = tmp_path / "cron_last_run.json"
     mark_last_run("j", iso="2026-07-10T00:00:00+00:00", path=path)
-    assert json.loads(path.read_text(encoding="utf-8")) == {"j": "2026-07-10T00:00:00+00:00"}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    assert data["j"] == "2026-07-10T00:00:00+00:00"
+    assert set(data) == {"j", "_meta"}  # scope stamp rides along on every write
     leftovers = [p.name for p in tmp_path.iterdir() if p.name.startswith(".cron_last_run")]
     assert not [n for n in leftovers if "tmp" in n], f"temp file left behind: {leftovers}"
 

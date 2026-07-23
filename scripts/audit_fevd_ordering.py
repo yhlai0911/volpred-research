@@ -76,7 +76,9 @@ class Site:
     note: str
 
 
-def classify(path: Path) -> Site | None:
+def classify(path: Path, root: Path = REPO) -> Site | None:
+    # ``root`` is what the site key is made relative to; a linked worktree must
+    # pass its own root or an already-baselined site reads as a new violation.
     src = path.read_text(encoding="utf-8", errors="ignore")
 
     calls_sm = bool(RE_SM_FEVD.search(src))
@@ -123,7 +125,7 @@ def classify(path: Path) -> Site | None:
         )
 
     return Site(
-        path=str(path.relative_to(REPO)),
+        path=str(path.relative_to(root)),
         classification=cls,
         calls_statsmodels_fevd=calls_sm,
         has_kpps_implementation=has_kpps,

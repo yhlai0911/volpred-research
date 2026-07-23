@@ -1,0 +1,192 @@
+{
+  "events": [
+    {
+      "election": "2002-11-05",
+      "vix_t_minus_60": 37.05,
+      "vix_t_minus_20": 41.02,
+      "vix_t_minus_1": 30.82,
+      "vix_t_plus_1": 30.73,
+      "vix_t_plus_5": 30.58,
+      "vix_t_plus_20": 28.92,
+      "runup_pct": -16.8,
+      "crush_pct": -0.3,
+      "crush_5d_pct": -0.8,
+      "rv20_pre": 31.7,
+      "rv20_post": 23.7,
+      "iv_rv_spread_post": 7.1
+    },
+    {
+      "election": "2006-11-07",
+      "vix_t_minus_60": 14.26,
+      "vix_t_minus_20": 11.52,
+      "vix_t_minus_1": 11.16,
+      "vix_t_plus_1": 10.75,
+      "vix_t_plus_5": 10.5,
+      "vix_t_plus_20": 11.33,
+      "runup_pct": -21.7,
+      "crush_pct": -3.7,
+      "crush_5d_pct": -5.9,
+      "rv20_pre": 7.6,
+      "rv20_post": 8.0,
+      "iv_rv_spread_post": 3.2
+    },
+    {
+      "election": "2010-11-02",
+      "vix_t_minus_60": 22.14,
+      "vix_t_minus_20": 21.76,
+      "vix_t_minus_1": 21.83,
+      "vix_t_plus_1": 19.56,
+      "vix_t_plus_5": 19.08,
+      "vix_t_plus_20": 21.36,
+      "runup_pct": -1.4,
+      "crush_pct": -10.4,
+      "crush_5d_pct": -12.6,
+      "rv20_pre": 11.0,
+      "rv20_post": 16.8,
+      "iv_rv_spread_post": 5.0
+    },
+    {
+      "election": "2014-11-04",
+      "vix_t_minus_60": 14.23,
+      "vix_t_minus_20": 17.2,
+      "vix_t_minus_1": 14.73,
+      "vix_t_plus_1": 14.17,
+      "vix_t_plus_5": 12.92,
+      "vix_t_plus_20": 12.5,
+      "runup_pct": 3.5,
+      "crush_pct": -3.8,
+      "crush_5d_pct": -12.3,
+      "rv20_pre": 18.6,
+      "rv20_post": 5.1,
+      "iv_rv_spread_post": 9.6
+    },
+    {
+      "election": "2018-11-06",
+      "vix_t_minus_60": 14.78,
+      "vix_t_minus_20": 15.95,
+      "vix_t_minus_1": 19.96,
+      "vix_t_plus_1": 16.36,
+      "vix_t_plus_5": 20.02,
+      "vix_t_plus_20": 21.19,
+      "runup_pct": 35.0,
+      "crush_pct": -18.0,
+      "crush_5d_pct": 0.3,
+      "rv20_pre": 24.6,
+      "rv20_post": 22.4,
+      "iv_rv_spread_post": -2.4
+    },
+    {
+      "election": "2022-11-08",
+      "vix_t_minus_60": 19.95,
+      "vix_t_minus_20": 33.63,
+      "vix_t_minus_1": 24.35,
+      "vix_t_plus_1": 26.09,
+      "vix_t_plus_5": 24.54,
+      "vix_t_plus_20": 22.68,
+      "runup_pct": 22.1,
+      "crush_pct": 7.1,
+      "crush_5d_pct": 0.8,
+      "rv20_pre": 25.2,
+      "rv20_post": 27.3,
+      "iv_rv_spread_post": -2.9
+    }
+  ],
+  "stats": {
+    "n_events": 6,
+    "mean_crush_pct": -4.9,
+    "median_crush_pct": -3.8,
+    "n_negative": 5,
+    "uncond_mean_1d_pct": -0.005,
+    "uncond_n": 6824,
+    "event_pctiles": [
+      51.9,
+      26.7,
+      4.0,
+      25.6,
+      0.5,
+      87.6
+    ],
+    "bootstrap_p_one_sided": 0.0267,
+    "mean_runup_pct": 3.5,
+    "mean_iv_rv_spread_post": 3.3,
+    "n_iv_rv_spread_positive": 4
+  },
+  "path_normalized": {
+    "-40": {
+      "mean": 99.9,
+      "median": 107.9,
+      "n_above_100": 4
+    },
+    "-30": {
+      "mean": 105.8,
+      "median": 102.8,
+      "n_above_100": 5
+    },
+    "-20": {
+      "mean": 111.8,
+      "median": 110.0,
+      "n_above_100": 4
+    },
+    "-18": {
+      "mean": 117.3,
+      "median": 123.5,
+      "n_above_100": 4
+    },
+    "-10": {
+      "mean": 105.3,
+      "median": 106.5,
+      "n_above_100": 4
+    },
+    "-5": {
+      "mean": 102.9,
+      "median": 102.1,
+      "n_above_100": 3
+    },
+    "-1": {
+      "mean": 100.0,
+      "median": 100.0,
+      "n_above_100": 0
+    },
+    "1": {
+      "mean": 95.2,
+      "median": 96.3,
+      "n_above_100": 1
+    },
+    "5": {
+      "mean": 94.9,
+      "median": 96.7,
+      "n_above_100": 2
+    },
+    "10": {
+      "mean": 95.9,
+      "median": 91.5,
+      "n_above_100": 2
+    },
+    "20": {
+      "mean": 96.2,
+      "median": 95.8,
+      "n_above_100": 2
+    }
+  },
+  "current": {
+    "as_of": "2026-07-20",
+    "vix_now": 18.65,
+    "calendar_days_to_election": 106,
+    "approx_trading_days_to_election": 73,
+    "hist_vix_at_same_horizon": {
+      "2002": 39.86,
+      "2006": 14.62,
+      "2010": 25.64,
+      "2014": 11.52,
+      "2018": 12.29,
+      "2022": 23.24
+    },
+    "hist_vix_at_same_horizon_mean": 21.2,
+    "hist_vix_at_same_horizon_range": [
+      11.52,
+      39.86
+    ]
+  },
+  "data_source": "yfinance ^VIX/^GSPC",
+  "last_bar": "2026-07-20"
+}

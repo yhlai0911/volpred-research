@@ -1,0 +1,35 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1719.py",
+    "args": []
+  },
+  "canonical_result": "k1719_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1719/k1719_source_snapshot.csv",
+      "sha256": "e2b64d8fad02aa29c96b243abb74fab6f707fa24f3f5ddf95b1eb3622ddb8160"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [],
+    "ignore_reasons": {}
+  }
+}

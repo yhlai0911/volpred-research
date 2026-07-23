@@ -35,10 +35,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops import next_tasks as nt  # noqa: E402
 from volpred.ops.task_urgency import (  # noqa: E402
+    LANE_DEFERRED,
     LANE_SCHEDULED,
     LANE_TIME_CRITICAL,
     LANE_URGENT,
     classify,
+    deferred_lane,
     dispatch_lane,
     is_urgent,
     is_urgent_source,
@@ -112,6 +114,18 @@ def test_time_critical_types_still_recognised_no_regression() -> None:
     """2026-07-16 daily_digest 脫班案的修補不得被這次改動洗掉。"""
     for tt in ("event_article", "trending_repost", "daily_digest"):
         task = _task("x", task_type=tt, source="reader_facing_refill")
+        assert classify(task) == LANE_TIME_CRITICAL
+
+
+def test_time_critical_is_type_only_not_priority_gated() -> None:
+    """2026-07-21 R1：時效性來自 type 本身，priority 打錯不得讓它退回 scheduled。
+
+    手建 P2 event_article 若因不是 P1 而排進 scheduled lane，等排到時時效已歸零
+    —— dispatcher 的 lane rank 與 A0 lane 都必須把它當 time_critical。
+    """
+    for prio in (2, 3, "P2"):
+        task = _task("x", task_type="event_article", source="reader_facing_refill",
+                     priority=prio)
         assert classify(task) == LANE_TIME_CRITICAL
 
 
@@ -271,3 +285,133 @@ def test_telegram_poll_does_not_wire_an_urgent_fire() -> None:
         "telegram_reply 有專屬 owner，不該請 hourly out-of-band fire"
     )
     assert "_spawn_responder" in src, "專屬 owner 消失的話，上面的豁免就不再成立"
+
+
+# --- 6. main_thread lane：漏掉時是餓死，不只是 double-claim（2026-07-20）------
+#
+# `dispatch_lane="main_thread"` 保留給互動 session，claim gate（commit f23d870c4,
+# 11:48）會拒絕 headless owner。本模組當時不認得 lane，照樣把這些任務排進 A0 最
+# 前面。A0 的規則是「lane 還有殘留 → 本班不進 PHASE A」，而 hourly fire 永遠
+# claim 不到這些任務 ⇒ 11:48 起每一班 fire 都卡死，一般排班全面餓死。
+#
+# 實例：7 張 [refactor-master] P1（source=user，03:12 建單）在 12:17 那班仍讓
+# `claim` 回 reason=main_thread_lane。
+
+def _main_thread_task(task_id: str = "assign_caf5b087", **extra) -> dict:
+    extra.setdefault("dispatch_lane", "main_thread")
+    return _task(task_id, source="user", **extra)
+
+
+def test_main_thread_lane_task_is_not_in_a0_lane() -> None:
+    """事故的精確形狀：source+priority 全中，但 headless fire claim 不到。"""
+    task = _main_thread_task()
+    assert is_urgent_source(task["source"]) is True, "前提：urgency 判定本身會命中"
+    assert classify(task) == LANE_DEFERRED
+    assert is_urgent(task) is False, "claim 不到的任務不該叫醒一班誰都做不了的 fire"
+    assert dispatch_lane([task]) == [], "進了 A0 lane = 每班 fire 都清不掉 ⇒ 餓死"
+
+
+@pytest.mark.parametrize("lane", ["main", "main_thread", "main-thread", "manual", "interactive"])
+def test_all_main_thread_spellings_excluded(lane: str) -> None:
+    """詞彙不一致正是根因 —— 4 種拼法（含連字號）都得認得。"""
+    assert dispatch_lane([_main_thread_task(dispatch_lane=lane)]) == []
+
+
+def test_agent_lane_and_unset_lane_still_dispatchable() -> None:
+    """誤擋防線：擋錯邊會把整個佇列凍住（絕大多數任務沒有 lane 欄位）。"""
+    assert classify(_task("t", source="user")) == LANE_URGENT, "未設 lane 必須照舊可派"
+    for lane in ("agent", "auto", "headless", "worker", ""):
+        task = _task("t", source="user", dispatch_lane=lane)
+        assert classify(task) == LANE_URGENT, f"lane={lane!r} 是可派的，不得被擋"
+
+
+def test_deferred_tasks_stay_observable() -> None:
+    """不進 A0 ≠ 消失 —— 主線程 backlog 若從報告消失就沒人會發現它在積。"""
+    tasks = [_main_thread_task("a"), _task("b", source="user")]
+    assert [t["id"] for t in deferred_lane(tasks)] == ["a"]
+    assert [t["id"] for t in dispatch_lane(tasks)] == ["b"]
+
+
+def test_claim_gate_and_urgency_share_one_vocabulary() -> None:
+    """兩邊各留一套字面值就是這次的根因，釘住「同一個 owner」。
+
+    2026-07-21 incident-lifecycle P4 收編升級：owner 從「共用 canonical set」
+    進一步收成單一 predicate ``is_main_thread_reserved``（status
+    pending_main_thread 與 dispatch_lane 兩個欄位一起判）。claim gate 與
+    request_fire 讀不同欄位，正是 assign_10927b4e「永遠沒有合法執行者卻被
+    hourly fire」的根因（refactor_plan_incident_lifecycle.md 附註）。
+    """
+    src = (ROOT / "scripts" / "task_pool_claim.py").read_text(encoding="utf-8")
+    assert "is_main_thread_reserved" in src, "claim gate 必須用唯一 owner predicate"
+    assert 'lane == "main_thread"' not in src, "不得回退成單一字面值比對"
+    assert 'existing_status == "pending_main_thread"' not in src, (
+        "status 判定不得在 claim gate 留第二份 —— owner 是 is_main_thread_reserved"
+    )
+
+
+# --- 7. admission 端：機器來源 P1 夾制（2026-07-21 dispatch-lanes R2） ---------
+#
+# 2026-07-21 實測：pending 181、P1 33 個，boss 來源只有 8 個 —— 25 個是產生器
+# 自封的 P1。P1 語意是「boss 當下要的 + 時效性」；機器自封 P1 等於取消 priority，
+# boss 新急件在 33 張 P1 裡排隊。gateway（append_task_record）夾制：機器來源、
+# 非時效類、非 dedicated-owner ingress 的 P1 → P2 + `priority_capped_from: 1`。
+# 只 clamp 不 block（writer 層不能 block —— 邊界同 pool_pressure docstring）。
+
+def _append(tmp_path, **extra) -> dict:
+    queue = tmp_path / "next_tasks.json"
+    record = _task(extra.pop("id", "adm_t1"), **extra)
+    rec, created = nt.append_task_record(record, path=queue)
+    assert created is True
+    return rec
+
+
+def test_machine_p1_is_clamped_to_p2_with_stamp(tmp_path, capsys) -> None:
+    rec = _append(tmp_path, source="auto_discovered")
+    assert rec["priority"] == 2
+    assert rec["priority_capped_from"] == 1
+    # 落地的也要是夾過的（不是只改記憶體 copy）
+    persisted = nt_load(tmp_path / "next_tasks.json")
+    assert persisted[0]["priority"] == 2
+    assert persisted[0]["priority_capped_from"] == 1
+    assert "task_admission" in capsys.readouterr().err, "夾制必須可觀測（no-silent-fallback）"
+
+
+@pytest.mark.parametrize("source", [
+    "agent", "orphan_closeout", "auto_publish_drought_emergency",
+    "internal_alert_remediation_router",
+])
+def test_known_machine_p1_inflators_all_clamped(tmp_path, source: str) -> None:
+    """2026-07-21 盤點到的自封 P1 產生器 source，一個都不能漏。"""
+    rec = _append(tmp_path, source=source)
+    assert rec["priority"] == 2
+    assert rec["priority_capped_from"] == 1
+
+
+def test_boss_p1_is_not_clamped(tmp_path) -> None:
+    rec = _append(tmp_path, source="boss-telegram-msg110")
+    assert rec["priority"] == 1
+    assert "priority_capped_from" not in rec
+    assert is_urgent(rec) is True, "夾制不得誤傷急件 lane"
+
+
+def test_machine_time_critical_p1_is_not_clamped(tmp_path) -> None:
+    """時效任務依 2026-07-12 boss 指令必須 P1 —— 機器源也一樣。"""
+    for i, tt in enumerate(("event_article", "trending_repost", "daily_digest")):
+        rec = _append(tmp_path, id=f"tc_{i}", task_type=tt, source="reader_facing_refill")
+        assert rec["priority"] == 1, tt
+        assert "priority_capped_from" not in rec
+
+
+def test_dedicated_owner_ingress_p1_is_not_clamped(tmp_path) -> None:
+    """email_reply / telegram_reply 有專屬 owner，priority 對它們是 pass-through。"""
+    for i, tt in enumerate(("email_reply", "telegram_reply")):
+        rec = _append(tmp_path, id=f"own_{i}", task_type=tt, source="gmail_inbox_poll")
+        assert rec["priority"] == 1, tt
+        assert "priority_capped_from" not in rec
+
+
+def test_machine_p2_passes_untouched(tmp_path) -> None:
+    """夾制只針對 P1；P2 以下不動（否則整個 priority 階梯都被壓扁）。"""
+    rec = _append(tmp_path, source="auto_discovered", priority=2)
+    assert rec["priority"] == 2
+    assert "priority_capped_from" not in rec

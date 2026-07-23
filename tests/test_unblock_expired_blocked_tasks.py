@@ -89,3 +89,99 @@ def test_apply_unblocks_expired_iso_timestamp(tmp_path, monkeypatch, capsys) -> 
     assert "blocked_note" not in saved[0]
     assert saved[0]["status_history"][-1]["from"] == "blocked"
     assert saved[0]["status_history"][-1]["to"] == "pending"
+
+
+def test_successful_codex_probe_unblocks_before_reset_date(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "quota_future_a",
+                    "task_type": "paper_review",
+                    "status": "blocked",
+                    "blocked_reason": "codex_quota_reset_pending",
+                    "blocked_until": "2999-01-01T00:00:00+00:00",
+                },
+                {
+                    "id": "ordinary_future",
+                    "task_type": "platform_ops",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_event_window",
+                    "blocked_until": "2999-01-01T00:00:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
+    monkeypatch.setattr(
+        unblock_expired_blocked_tasks,
+        "_probe_codex_available",
+        lambda: (True, "ChatGPT answered"),
+    )
+
+    assert unblock_expired_blocked_tasks.main(apply=True) == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "pending"
+    assert "blocked_until" not in saved[0]
+    assert saved[0]["status_history"][-1]["reason"] == "codex_reachability_probe_succeeded"
+    assert saved[1]["status"] == "blocked"
+    assert "codex quota probe: available; blocked=1" in capsys.readouterr().out
+
+
+def test_failed_codex_probe_keeps_expired_quota_blocked(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "quota_expired_but_still_down",
+                    "task_type": "paper_review",
+                    "status": "blocked",
+                    "blocked_reason": "codex_quota_reset_pending",
+                    "blocked_until": "2000-01-01T00:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
+    monkeypatch.setattr(
+        unblock_expired_blocked_tasks,
+        "_probe_codex_available",
+        lambda: (False, "usage limit still active"),
+    )
+
+    assert unblock_expired_blocked_tasks.main(apply=True) == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "blocked"
+    assert saved[0]["blocked_until"] == "2000-01-01T00:00:00+00:00"
+    assert "codex quota probe: unavailable; blocked=1" in capsys.readouterr().out
+
+
+def test_dry_run_reports_quota_probe_without_calling_it(tmp_path, monkeypatch, capsys) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = [
+        {
+            "id": "quota_dry_run",
+            "task_type": "paper_review",
+            "status": "blocked",
+            "blocked_reason": "codex_quota_reset_pending",
+            "blocked_until": "2000-01-01T00:00:00+00:00",
+        }
+    ]
+    next_tasks.write_text(json.dumps(original), encoding="utf-8")
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
+
+    def unexpected_probe() -> tuple[bool, str]:
+        raise AssertionError("dry-run must not spend a Codex probe")
+
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "_probe_codex_available", unexpected_probe)
+
+    assert unblock_expired_blocked_tasks.main(apply=False) == 0
+
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+    assert "would actively probe Codex for 1 quota-blocked task(s); no probe sent" in capsys.readouterr().out

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -469,13 +470,11 @@ def _select_current_main_artifact(paper_dir: Path, suffix: str) -> Path | None:
     `main.*` files. Suffix priority can therefore upload an old PDF while
     metrics come from the current TeX source.
     """
-    candidates = [
-        paper_dir / f"main_v4{suffix}",
-        paper_dir / f"main_v3{suffix}",
-        paper_dir / f"main_v2{suffix}",
-        paper_dir / f"main{suffix}",
-    ]
-    existing = [candidate for candidate in candidates if candidate.exists()]
+    # Version-agnostic: a hardcoded main_v4/v3/v2 list silently uploaded stale
+    # PDFs the day main_v5 appeared (2026-07-19 vt-trend-following incident).
+    # Match main{suffix} and main_v<N>{suffix} for ANY N, then pick by mtime.
+    pattern = re.compile(rf"main(_v\d+)?{re.escape(suffix)}$")
+    existing = [p for p in paper_dir.glob(f"main*{suffix}") if pattern.fullmatch(p.name)]
     if not existing:
         return None
     return max(existing, key=lambda candidate: candidate.stat().st_mtime)

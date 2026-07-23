@@ -1,0 +1,44 @@
+{
+  "id": "k1731-f1-boot-c0-parametric",
+  "title": "K1731 F1: nested null bootstrap, c=0 parametric, B=200 (prod MCMC)",
+  "script_path": "experiments/k1731/run_nested_bootstrap_shard.py",
+  "interpreter": "uv run python",
+  "args": [
+    "0.0",
+    "200",
+    "20260721",
+    "6",
+    "parametric"
+  ],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-21T07:15:02Z",
+  "started_at": "2026-07-21T07:43:07Z",
+  "completed_at": "2026-07-21T07:43:07Z",
+  "exit_code": 2,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1731-f1-boot-c0-parametric.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1731-f1-boot-c0-parametric.stderr",
+  "result_artifact": "experiments/k1731/f1/bootstrap_c0p0_parametric_s20260721.json",
+  "output_paths": [
+    "experiments/k1731/f1/bootstrap_c0p0_parametric_s20260721.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1731 F1 Route 2 shard A landed (c=0, parametric, B=200). Do NOT write knowledge.json from a worktree agent. Steps: (1) run 'uv run python experiments/k1731/k1731_nested_bootstrap.py --mode assemble --shards experiments/k1731/f1/bootstrap_c0p0_*.json --observed experiments/k1731/f1/reproduce_prod.json --out experiments/k1731/f1/assembled.json'. It hard-errors on duplicate data seeds across shards - deliberate, do not suppress. (2) Key numbers: 'mechanical_penalty_estimate' (= E[dbar | macro worthless by construction], the quantity README 3.2 currently only asserts the SIGN of on Clark-West's authority) and 'p_upper' (null-calibrated bootstrap p-value for observed dbar=0.002496089). (3) Compare 'simulated_loss_diff_acf1_mean' against observed 0.1776: if the parametric DGP understates it, the block shard is the one to trust and the README must say so. (4) Update README 11.3/11.4 with the MEASURED penalty, replacing the citation-based assertion. (5) Only then choose the test-inversion c-grid, sized from the c=0 spread - 11.6 deliberately left it unqueued because choosing earlier would be guessing. (6) If the confidence set runs to the grid edge, report 'the grid ended it, not the data' and bound nothing. Route 2 is an ADAPTED HEURISTIC (Clark-McCracken 2012's design is quadratic-loss; Corradi-Swanson 2007's loss-generality unverified) and must not be written up as inheriting anyone's validity proof.",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 79200,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 58570,
+  "claimed_by_pid_start_wall": "Tue Jul 21 14:15:04 2026",
+  "followup_dispatched_at": "2026-07-21T15:13:34Z",
+  "followup_next_task_id": "compute_followup_backlog_adjudication_20260721"
+}

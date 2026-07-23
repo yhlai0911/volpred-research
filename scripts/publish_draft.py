@@ -98,8 +98,6 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from volpred.canonical_write import guard_canonical_write
-
 
 def _refresh_publication_candidates_after_feed_change(reason: str) -> None:
     """Best-effort refresh after feed mutations so K coverage is immediately current.
@@ -1107,8 +1105,10 @@ def apply_update(args) -> int:
       4. Replace .content; optionally .title (--update-title)
       5. Append errata audit-trail fields (update_action / update_at / update_summary)
       6. Optionally update details.cluster_waiver / details.dup_waiver
-      7. Atomically rewrite feed.json (the only Contentlayer source)
-      8. Optionally invoke feed-sync (--sync-supabase) — default is decoupled
+      7. Hand the patched entry to the publish/update gateway
+         (`Publisher.rewrite_and_sync_article`): locked feed.json rewrite +
+         Mirror PUT + Supabase sync, failures dead-lettered (WS-C1)
+      8. Optionally ALSO run a whole-feed reconcile (--sync-supabase)
     """
     draft_path = Path(args.draft_path)
     if not draft_path.is_absolute():
@@ -1420,20 +1420,33 @@ def apply_update(args) -> int:
     if details_changed:
         art["details"] = new_details
 
-    # Write feed.json — serialize with same lock + atomic-swap used by publisher.py
-    # to avoid silent data loss on concurrent publisher appends (Codex review P2).
-    from volpred.ops.shared_lock import shared_state_lock
+    # Single publish/update gateway (WS-C1). The update path used to write
+    # feed.json here directly and push neither projection, so a corrected
+    # article diverged across feed / Supabase / Mirror until a human ran
+    # feed-sync. `Publisher.rewrite_and_sync_article` is now the one exit for
+    # both new-publish and update: locked canonical rewrite + Mirror PUT +
+    # Supabase sync, with any projection failure dead-lettered for the drain.
+    sys.path.insert(0, str(ROOT / "src"))
+    from volpred.publisher.publisher import Publisher
+
     storage_dir = str(feed_path.parent.parent)
-    guard_canonical_write(feed_path)
-    with shared_state_lock("publisher_feed", storage_dir=storage_dir):
-        tmp_path = feed_path.with_name(f".{feed_path.name}.tmp")
-        tmp_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp_path.replace(feed_path)
-    print(f"[publish_draft] wrote {feed_path.relative_to(ROOT)}")
+    publisher = Publisher(storage_dir=storage_dir)
+    sync_report = publisher.rewrite_and_sync_article(mile_id, art)
+    if not sync_report["feed_written"]:
+        print(f"error: feed rewrite failed: mile_id={mile_id} vanished from "
+              f"{feed_path} before the locked write", file=sys.stderr)
+        return 2
+    print(f"[publish_draft] wrote {feed_path.relative_to(ROOT) if feed_path.is_relative_to(ROOT) else feed_path}")
+    print(f"[publish_draft] mirror={sync_report['mirror']} "
+          f"supabase={sync_report['supabase']}")
+    for queue in sync_report["dead_letters"]:
+        print(f"[publish_draft] projection failure recorded to {queue} "
+              f"(drained by the retry cron)", file=sys.stderr)
 
     _refresh_publication_candidates_after_feed_change("update")
 
-    # Optional Supabase sync (decoupled by default)
+    # --sync-supabase keeps its original meaning: ALSO run a whole-feed
+    # reconcile. The per-article projection above is unconditional now.
     if getattr(args, "sync_supabase", False):
         cmd = ["uv", "run", "volpred", "ops", "feed-sync", "--apply"]
         print(f"[publish_draft] running feed-sync: {' '.join(cmd)}")
@@ -1445,9 +1458,6 @@ def apply_update(args) -> int:
             print(f"[publish_draft] feed-sync stderr: {result.stderr[-400:]}",
                   file=sys.stderr)
             return result.returncode
-    else:
-        print("[publish_draft] note: Supabase NOT auto-synced. Run "
-              "`uv run volpred ops feed-sync --apply` to push.")
 
     return 0
 
@@ -1515,6 +1525,11 @@ def main() -> int:
                         help="bypass the 懶人包圖組 (lazypack) requirement for "
                              "audience=general (use only for genuinely non-reader "
                              "pieces; default enforces .claude/rules/publishing.md §4)")
+    parser.add_argument("--lazypack-plan",
+                        help="evidence-bound plan.json for the 懶人包圖組. For a "
+                             "general draft/scheduled publish the async render is "
+                             "enqueued immediately after publish; an enqueue "
+                             "failure is a hard error, not a printed reminder.")
     parser.add_argument("--dry-run", action="store_true",
                         help="print metadata + sanitize report; do not invoke CLI")
 
@@ -1844,7 +1859,98 @@ def main() -> int:
         print(f"[publish_draft] stderr: {result.stderr[-700:]}", file=sys.stderr)
     if result.returncode == 0:
         _refresh_publication_candidates_after_feed_change("new_publish")
+        rc_lz = _settle_deferred_lazypack(
+            stdout=result.stdout or "",
+            body=body,
+            audience=audience,
+            status=status,
+            plan=getattr(args, "lazypack_plan", None),
+            bypass=getattr(args, "no_lazypack_gate", False),
+        )
+        if rc_lz != 0:
+            return rc_lz
     return result.returncode
+
+
+def _settle_deferred_lazypack(
+    *, stdout: str, body: str, audience: str, status: str,
+    plan: str | None, bypass: bool,
+) -> int:
+    """Close the obligation a deferred lazypack creates, at the moment it is created.
+
+    2026-07-19 (boss 20:14「為什麼文章沒有照排程釋出」): a draft published
+    without a 懶人包圖組 only got a *printed reminder* to enqueue the render
+    later. Two drafts — mile_21e45133, mile_47c4bc3e — were published against
+    that reminder and no render was ever queued; each then skipped 20 release
+    cycles while the release gate told humans to inspect a job id that did not
+    exist. A reminder addressed to whoever reads stdout is not an owner.
+
+    So: if a plan was supplied, the enqueue happens HERE and a failure is loud
+    and non-zero rather than a line of scrollback. With no plan there is
+    nothing to queue — that is a writer omission, and it is recorded on the
+    diagnostics channel so it shows up in an audit instead of only in a log
+    nobody re-reads. The release gate (content._lazypack_gate_issue) reports the
+    same gap truthfully and auto-enqueues the moment a plan lands.
+    """
+    if bypass or audience != "general":
+        return 0
+    try:
+        src_dir = ROOT / "src"
+        if str(src_dir) not in sys.path:
+            sys.path.insert(0, str(src_dir))
+        from volpred.publisher.publisher import (  # noqa: WPS433
+            has_lazypack_section,
+            lazypack_required_at,
+        )
+
+        if has_lazypack_section(body) or lazypack_required_at(status):
+            return 0  # already has one, or the publish-time gate already ruled
+        match = re.search(r"mile_[0-9a-f]{6,}", stdout)
+        if not match:
+            print("[publish_draft] LAZYPACK FOLLOW-UP: published but could not "
+                  "read the article id back from publish-milestone output; "
+                  "enqueue the render manually.", file=sys.stderr)
+            return 0
+        article_id = match.group(0)
+
+        if not plan:
+            from volpred.ops.diagnostics import warn  # noqa: WPS433
+
+            warn(
+                "lazypack_never_enqueued",
+                "general draft published with no lazypack plan; render was "
+                "never queued and the draft cannot be released until it is",
+                article_id=article_id,
+            )
+            print(f"[publish_draft] LAZYPACK NOT QUEUED for {article_id}: no "
+                  f"--lazypack-plan was given. The draft will NOT release until "
+                  f"a plan exists. Author one (lazypack-infographic skill), then: "
+                  f"uv run python scripts/lazypack_async_render.py enqueue "
+                  f"--article-id {article_id} --plan <plan.json>", file=sys.stderr)
+            return 0
+
+        proc = subprocess.run(
+            ["uv", "run", "python", "scripts/lazypack_async_render.py", "enqueue",
+             "--article-id", article_id, "--plan", plan],
+            capture_output=True, text=True, timeout=180,
+        )
+        if proc.returncode == 0:
+            print(f"[publish_draft] lazypack render queued for {article_id} "
+                  f"from {plan}")
+            return 0
+        print(f"\n[publish_draft] LAZYPACK ENQUEUE FAILED for {article_id} "
+              f"(plan={plan}, rc={proc.returncode}):\n"
+              f"{(proc.stderr or proc.stdout or '').strip()[-700:]}\n"
+              f"  The article IS published as a draft but has no render queued, "
+              f"so it will never pass the release gate. Fix the plan and run: "
+              f"uv run python scripts/lazypack_async_render.py enqueue "
+              f"--article-id {article_id} --plan {plan}", file=sys.stderr)
+        return 8
+    except Exception as exc:  # noqa: BLE001
+        print(f"[publish_draft] LAZYPACK FOLLOW-UP errored "
+              f"({type(exc).__name__}: {exc}) — enqueue the render manually.",
+              file=sys.stderr)
+        return 0
 
 
 if __name__ == "__main__":

@@ -84,11 +84,47 @@ def worker_calls(monkeypatch: pytest.MonkeyPatch) -> list:
 
 
 def _tick(tmp_state: Path, prompt_file: Path, schedules_path: Path):
+    # 2026-07-19: `repo_root` defaulted to the live checkout, so every tick that
+    # got past `due` ran the two phase_z pre-fire hooks
+    # (`recover_failed_closeout`, `run_pre_fire_guard`) against the developer's
+    # REAL repo — 14 such calls per run. Two consequences, one loud and one much
+    # worse:
+    #
+    #   * `run_pre_fire_guard` rewrote `.git/volpred_phase_z_pre_fire_dirty.json`
+    #     on the live repo on every run, and `recover_failed_closeout` will
+    #     `git add`/`git commit` the working tree whenever a failed-closeout
+    #     receipt happens to exist — a unit test with commit rights on the
+    #     machine it runs on.
+    #   * When that receipt exists, the release branch calls `send_alert`, which
+    #     writes canonical `storage/ops/alert_dedup.json`. Under the suite's
+    #     `VOLPRED_NO_CANONICAL_WRITE=1` that raises `CanonicalWriteBlocked` —
+    #     and because that is a BaseException, not an Exception, it walks
+    #     straight through `_default_alert`'s and the scheduler's `except
+    #     Exception` fail-open handlers and fails the test. CI never saw it: a
+    #     fresh checkout has no receipt in `.git/`, so the branch is dead there.
+    #     Locally it made 7 tests fail whenever a real closeout had failed —
+    #     permanent red that trained everyone to ignore this file's FAILED lines.
+    #
+    # Pinning `repo_root` at `tmp_path` uses the seam production already exposes.
+    # The hooks still run for real; they just find no git repo and fail open, so
+    # the scheduler decisions under test are unchanged while host state is not.
+    repo_root = prompt_file.parent
     return asyncio.run(
         scheduler._tick_once(
             state_path=tmp_state, cron_expr=CRON,
             prompt_path=prompt_file, log_path=prompt_file.parent / "worker.log",
-            dry_run=False, schedules_path=schedules_path,
+            dry_run=False, repo_root=repo_root, schedules_path=schedules_path,
+        )
+    )
+
+
+def _dry_tick(tmp_state: Path, prompt_file: Path, schedules_path: Path):
+    repo_root = prompt_file.parent
+    return asyncio.run(
+        scheduler._tick_once(
+            state_path=tmp_state, cron_expr=CRON,
+            prompt_path=prompt_file, log_path=prompt_file.parent / "worker.log",
+            dry_run=True, repo_root=repo_root, schedules_path=schedules_path,
         )
     )
 
@@ -190,6 +226,53 @@ def test_mode_off_never_invokes_pregate(
     result = _tick(tmp_state, prompt_file, schedules)
     assert result["action"] == "fired"
     assert len(worker_calls) == 1
+
+
+# ─── WS-H4 (2026-07-20) dry-run pregate parity ──────────────────────────────
+# scheduler.py:774 used to read `if fire_reason == "cron" and not dry_run:` —
+# the dry-run path never executed the pregate at all, so with mode != off the
+# H4 acceptance criterion ("--dry-run output == real fire decision") was
+# structurally impossible (design doc §1.1). Dry-run now walks the same pregate
+# judgment; only the write boundary (reserve/spawn) differs.
+
+
+def test_dry_run_walks_pregate_shadow_and_dry_fires(
+    tmp_path, tmp_state, prompt_file, worker_calls, monkeypatch
+) -> None:
+    schedules = _schedules_file(tmp_path, {"mode": "shadow", "window_hours": 3.0})
+    seen: list = []
+
+    def fake_pregate(**kw):
+        seen.append(kw)
+        return False  # shadow never skips
+
+    monkeypatch.setattr(scheduler, "_run_pregate", fake_pregate)
+    result = _dry_tick(tmp_state, prompt_file, schedules)
+    assert result["action"] == "dry_run_fire"
+    assert seen and seen[0]["mode"] == "shadow"  # pregate ran on the dry path too
+    assert worker_calls == []
+
+
+def test_dry_run_enforce_pregate_skip_matches_fire_decision(
+    tmp_path, tmp_state, prompt_file, worker_calls, monkeypatch
+) -> None:
+    """Same injected state → dry-run and real fire land on the same decision."""
+    schedules = _schedules_file(tmp_path, {"mode": "enforce", "window_hours": 3.0})
+    monkeypatch.setattr(scheduler, "_run_pregate", lambda **kw: True)
+    stale = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
+
+    dry = _dry_tick(tmp_state, prompt_file, schedules)
+    assert dry["action"] == "pregate_skip"
+    assert dry["dry_run"] is True
+    assert worker_calls == []
+
+    # reset to the identical injected state, then run the real path
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["last_fire_at"] = stale
+    fire = _tick(tmp_state, prompt_file, schedules)
+    assert fire["action"] == "pregate_skip"
+    assert worker_calls == []
+    assert dry["action"] == fire["action"]
 
 
 # ---------------------------------------------------------- load_pregate_config

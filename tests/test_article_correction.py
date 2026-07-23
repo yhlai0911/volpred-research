@@ -18,12 +18,14 @@ from volpred.publisher.article_correction import (
 
 
 @pytest.fixture
-def storage(tmp_path, monkeypatch):
+def storage(tmp_path):
     reports = tmp_path / "reports"
     reports.mkdir(parents=True)
     feed = [
         {
             "id": "mile_test",
+            "title": "old title",
+            "description": "old description",
             "status": "published",
             "published_at": "2026-07-01T17:24:08+00:00",
             "content": "近 20 日波動 18.1%，近 5 日 14.0%。事件在 7/2。",
@@ -33,14 +35,6 @@ def storage(tmp_path, monkeypatch):
     ]
     (reports / "feed.json").write_text(
         json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-    # Patch the name the module actually calls. `article_correction` did
-    # `from volpred.canonical_write import guard_canonical_write` at import
-    # time, so it holds its own alias -- patching the source module would be a
-    # silent no-op that looks like it is protecting the test.
-    monkeypatch.setattr(
-        "volpred.publisher.article_correction.guard_canonical_write",
-        lambda *_a, **_kw: None,
     )
     return tmp_path
 
@@ -60,7 +54,6 @@ def test_corrects_body_and_details_and_stamps_errata(storage):
         details_patch={"event": "NFP_US_2026_07_02", "as_of": "2026-07-02 close"},
         summary="official calendar correction",
         storage_dir=storage,
-        sync=False,
     )
 
     art = _article(storage)
@@ -72,6 +65,60 @@ def test_corrects_body_and_details_and_stamps_errata(storage):
     assert report["details_changes"]["event"]["from"] == "NFP_US_2026_07_03"
 
 
+def test_corrects_exact_title_and_records_change(storage):
+    report = apply_article_correction(
+        "mile_test",
+        title_replacement=("old title", "new title"),
+        summary="headline number correction",
+        storage_dir=storage,
+    )
+
+    art = _article(storage)
+    assert art["title"] == "new title"
+    expected = {"from": "old title", "to": "new title"}
+    assert art["errata"]["update_history"][-1]["title_change"] == expected
+    assert report["title_change"] == expected
+
+
+def test_title_mismatch_fails_before_writing(storage):
+    original = _feed(storage)
+    with pytest.raises(CorrectionNotApplied, match="title did not exactly match"):
+        apply_article_correction(
+            "mile_test",
+            title_replacement=("stale title", "new title"),
+            summary="headline number correction",
+            storage_dir=storage,
+        )
+    assert _feed(storage) == original
+
+
+def test_corrects_exact_description_and_records_change(storage):
+    report = apply_article_correction(
+        "mile_test",
+        description_replacement=("old description", "new description"),
+        summary="card excerpt correction",
+        storage_dir=storage,
+    )
+
+    art = _article(storage)
+    assert art["description"] == "new description"
+    expected = {"from": "old description", "to": "new description"}
+    assert art["errata"]["update_history"][-1]["description_change"] == expected
+    assert report["description_change"] == expected
+
+
+def test_description_mismatch_fails_before_writing(storage):
+    original = _feed(storage)
+    with pytest.raises(CorrectionNotApplied, match="description did not exactly match"):
+        apply_article_correction(
+            "mile_test",
+            description_replacement=("stale description", "new description"),
+            summary="card excerpt correction",
+            storage_dir=storage,
+        )
+    assert _feed(storage) == original
+
+
 def test_published_at_is_not_touched(storage):
     """A correction must not reorder the feed."""
     before = _article(storage)["published_at"]
@@ -80,7 +127,6 @@ def test_published_at_is_not_touched(storage):
         content_replacements=[("18.1%", "18.28%")],
         summary="s",
         storage_dir=storage,
-        sync=False,
     )
     art = _article(storage)
     assert art["published_at"] == before
@@ -95,7 +141,6 @@ def test_missing_substring_raises_and_writes_nothing(storage):
             content_replacements=[("nonexistent number", "x")],
             summary="s",
             storage_dir=storage,
-            sync=False,
         )
     assert _feed(storage) == original
 
@@ -108,7 +153,6 @@ def test_ambiguous_substring_raises_and_writes_nothing(storage):
             content_replacements=[("日", "x")],  # occurs twice
             summary="s",
             storage_dir=storage,
-            sync=False,
         )
     assert _feed(storage) == original
 
@@ -121,7 +165,6 @@ def test_partially_valid_batch_is_all_or_nothing(storage):
             content_replacements=[("18.1%", "18.28%"), ("missing", "x")],
             summary="s",
             storage_dir=storage,
-            sync=False,
         )
     assert "18.1%" in _article(storage)["content"]
     assert "errata" not in _article(storage)
@@ -134,7 +177,6 @@ def test_noop_correction_refuses_to_stamp_errata(storage):
             details_patch={"event": "NFP_US_2026_07_03"},  # already this value
             summary="s",
             storage_dir=storage,
-            sync=False,
         )
     assert "errata" not in _article(storage)
 
@@ -143,14 +185,14 @@ def test_unknown_article_raises(storage):
     with pytest.raises(KeyError, match="mile_ghost"):
         apply_article_correction(
             "mile_ghost", details_patch={"a": 1}, summary="s",
-            storage_dir=storage, sync=False,
+            storage_dir=storage,
         )
 
 
 def test_other_articles_are_untouched(storage):
     apply_article_correction(
         "mile_test", details_patch={"event": "X"}, summary="s",
-        storage_dir=storage, sync=False,
+        storage_dir=storage,
     )
     assert _article(storage, "mile_other") == {
         "id": "mile_other", "status": "published", "content": "unrelated"
@@ -161,19 +203,18 @@ def test_repeated_corrections_append_to_history(storage):
     for val in ("A", "B"):
         apply_article_correction(
             "mile_test", details_patch={"event": val}, summary=f"fix {val}",
-            storage_dir=storage, sync=False,
+            storage_dir=storage,
         )
     hist = _article(storage)["errata"]["update_history"]
     assert [h["summary"] for h in hist] == ["fix A", "fix B"]
 
 
 def _fake_sync(monkeypatch, impl):
-    import sys
-    import types
+    import supabase_sync
 
-    fake = types.ModuleType("scripts.supabase_sync")
-    fake.sync_article = impl
-    monkeypatch.setitem(sys.modules, "scripts.supabase_sync", fake)
+    monkeypatch.delenv("VOLPRED_NO_REMOTE_WRITE", raising=False)
+    monkeypatch.setattr("volpred.publisher.publisher.Publisher.REMOTE_URL", "")
+    monkeypatch.setattr(supabase_sync, "sync_article", impl)
 
 
 def test_sync_exception_propagates(storage, monkeypatch):
@@ -184,13 +225,12 @@ def test_sync_exception_propagates(storage, monkeypatch):
 
     _fake_sync(monkeypatch, boom)
 
-    with pytest.raises(RuntimeError, match="supabase unreachable"):
+    with pytest.raises(CorrectionNotSynced, match="projection sync failed"):
         apply_article_correction(
             "mile_test",
             details_patch={"event": "NFP_US_2026_07_02"},
             summary="s",
             storage_dir=storage,
-            sync=True,
         )
 
     # The feed edit itself is already committed; only the projection failed.
@@ -207,23 +247,93 @@ def test_sync_returning_false_is_an_error_not_a_quiet_flag(storage, monkeypatch)
     """
     _fake_sync(monkeypatch, lambda *_a, **_kw: False)
 
-    with pytest.raises(CorrectionNotSynced, match="still serves the old"):
+    with pytest.raises(CorrectionNotSynced, match="queued a retry"):
         apply_article_correction(
             "mile_test",
             details_patch={"event": "NFP_US_2026_07_02"},
             summary="s",
             storage_dir=storage,
-            sync=True,
         )
+    dead_letters = json.loads(
+        (storage / ".failed_supabase_syncs.json").read_text(encoding="utf-8")
+    )
+    assert dead_letters == ["mile_test"]
 
 
 def test_sync_success_is_reported(storage, monkeypatch):
     _fake_sync(monkeypatch, lambda *_a, **_kw: True)
     report = apply_article_correction(
         "mile_test", details_patch={"event": "X"}, summary="s",
-        storage_dir=storage, sync=True,
+        storage_dir=storage,
     )
     assert report["synced"] is True
+    assert report["gateway"]["feed_written"] is True
+
+
+def test_gateway_pushes_mirror_and_supabase(storage, monkeypatch):
+    calls = {"mirror": [], "supabase": []}
+
+    def fake_mirror(_self, pub_id, item):
+        calls["mirror"].append((pub_id, item["details"]["event"]))
+        return True
+
+    def fake_supabase(item, **_kwargs):
+        calls["supabase"].append((item["id"], item["details"]["event"]))
+        return True
+
+    _fake_sync(monkeypatch, fake_supabase)
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.Publisher.REMOTE_URL",
+        "https://mirror.example",
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.publisher.Publisher._sync_report_to_remote",
+        fake_mirror,
+    )
+
+    report = apply_article_correction(
+        "mile_test",
+        details_patch={"event": "corrected"},
+        summary="s",
+        storage_dir=storage,
+    )
+
+    assert report["gateway"]["mirror"] == "ok"
+    assert calls == {
+        "mirror": [("mile_test", "corrected")],
+        "supabase": [("mile_test", "corrected")],
+    }
+
+
+def test_concurrent_edit_is_not_overwritten(storage, monkeypatch):
+    from volpred.publisher.publisher import Publisher
+
+    real_gateway = Publisher.rewrite_and_sync_article
+
+    def inject_concurrent_edit(self, pub_id, updated_item, *, expected_item=None):
+        feed = _feed(storage)
+        feed[0]["content"] = "newer concurrent content"
+        (storage / "reports" / "feed.json").write_text(
+            json.dumps(feed, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+        return real_gateway(
+            self,
+            pub_id,
+            updated_item,
+            expected_item=expected_item,
+        )
+
+    monkeypatch.setattr(Publisher, "rewrite_and_sync_article", inject_concurrent_edit)
+
+    with pytest.raises(CorrectionNotApplied, match="changed concurrently"):
+        apply_article_correction(
+            "mile_test",
+            details_patch={"event": "corrected"},
+            summary="s",
+            storage_dir=storage,
+        )
+    assert _article(storage)["content"] == "newer concurrent content"
+    assert _article(storage)["details"]["event"] == "NFP_US_2026_07_03"
 
 
 def test_replacements_cannot_chain_into_each_other(storage):
@@ -245,7 +355,6 @@ def test_replacements_cannot_chain_into_each_other(storage):
         content_replacements=[("A", "B"), ("B", "C")],
         summary="s",
         storage_dir=storage,
-        sync=False,
     )
     assert _article(storage)["content"] == "B C"
 
@@ -257,7 +366,6 @@ def test_overlapping_replacements_are_rejected(storage):
             content_replacements=[("18.1%", "x"), ("18.1", "y")],
             summary="s",
             storage_dir=storage,
-            sync=False,
         )
     assert "18.1%" in _article(storage)["content"]
 
@@ -265,9 +373,9 @@ def test_overlapping_replacements_are_rejected(storage):
 def test_write_is_atomic_and_leaves_no_temp_files(storage):
     apply_article_correction(
         "mile_test", details_patch={"event": "X"}, summary="s",
-        storage_dir=storage, sync=False,
+        storage_dir=storage,
     )
-    leftovers = list((storage / "reports").glob(".feed_correction_*"))
+    leftovers = list((storage / "reports").glob(".feed.json.tmp"))
     assert leftovers == []
     # File is complete and parseable, not truncated.
     assert len(_feed(storage)) == 2
@@ -285,8 +393,8 @@ def test_failed_write_does_not_leave_a_partial_feed(storage, monkeypatch):
     with pytest.raises(OSError, match="disk full"):
         apply_article_correction(
             "mile_test", details_patch={"event": "X"}, summary="s",
-            storage_dir=storage, sync=False,
+            storage_dir=storage,
         )
 
     assert _feed(storage) == original
-    assert list((storage / "reports").glob(".feed_correction_*")) == []
+    assert list((storage / "reports").glob(".feed.json.tmp")) == []

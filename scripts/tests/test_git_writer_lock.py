@@ -1,6 +1,8 @@
 """Cross-process regression for the one canonical Git-writer lease."""
 from __future__ import annotations
 
+import ast
+import json
 import os
 import signal
 import stat
@@ -9,18 +11,26 @@ import sys
 import time
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
 from volpred.ops.git_writer_lock import (  # noqa: E402
     LOCK_BASENAME,
+    GitWriterLockError,
     GitWriterLockTimeout,
+    _terminate_process_group,
     git_writer_lock,
     git_writer_lock_path,
     is_registered_linked_worktree,
+    run_locked,
 )
 
 CLI = ROOT / "scripts" / "git_writer_lock.py"
+PROCESS_SIGNAL_SEARCH_ROOTS = (ROOT / "src", ROOT / "scripts")
+REAPING_METHODS = {"wait", "communicate", "poll"}
+SIGNAL_NAME_MARKERS = ("kill", "terminate")
 
 
 def _run(repo: Path, *args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
@@ -41,6 +51,45 @@ def _repo(tmp_path: Path) -> Path:
     return repo
 
 
+def _call_name(call: ast.Call) -> str:
+    fn = call.func
+    if isinstance(fn, ast.Name):
+        return fn.id
+    if isinstance(fn, ast.Attribute):
+        return fn.attr
+    return ""
+
+
+def _pid_object_names(call: ast.Call) -> set[str]:
+    names: set[str] = set()
+    for arg in call.args:
+        for node in ast.walk(arg):
+            if (
+                isinstance(node, ast.Attribute)
+                and node.attr == "pid"
+                and isinstance(node.value, ast.Name)
+            ):
+                names.add(node.value.id)
+    return names
+
+
+def _inside_timeout_handler(node: ast.AST, parents: dict[ast.AST, ast.AST]) -> bool:
+    """A wait raising TimeoutExpired has not reaped, so kill-then-wait is safe."""
+    current = node
+    while current in parents:
+        current = parents[current]
+        if isinstance(current, ast.ExceptHandler):
+            candidates = current.type.elts if isinstance(current.type, ast.Tuple) else [current.type]
+            return any(
+                (isinstance(item, ast.Name) and item.id == "TimeoutExpired")
+                or (isinstance(item, ast.Attribute) and item.attr == "TimeoutExpired")
+                for item in candidates
+            )
+        if isinstance(current, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            return False
+    return False
+
+
 def _cli(repo: Path, *args: str, check: bool = False) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         [sys.executable, str(CLI), *args],
@@ -49,6 +98,35 @@ def _cli(repo: Path, *args: str, check: bool = False) -> subprocess.CompletedPro
         text=True,
         check=check,
     )
+
+
+def test_exact_path_commit_backfills_owned_ci_repair_receipt(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    owner = "codex-failover-slot-2-job-ci"
+    queue = repo / "storage" / "next_tasks.json"
+    queue.parent.mkdir()
+    queue.write_text(json.dumps([{
+        "id": "ci-red-123",
+        "task_type": "platform_ops",
+        "priority": 2,
+        "status": "succeeded",
+        "result": "root_cause=fixture; repair_commit=pending_post_commit",
+        "status_history": [{"from": "in_progress", "to": "succeeded", "by": owner}],
+    }]), encoding="utf-8")
+    _run(repo, "git", "add", "storage/next_tasks.json")
+    _run(repo, "git", "commit", "-qm", "seed task receipt")
+    (repo / "repair.py").write_text("FIXED = True\n", encoding="utf-8")
+
+    completed = _cli(
+        repo, "commit", "--repo", str(repo), "--actor", owner,
+        "--message", "repair fixture", "--", "repair.py",
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    task = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert f"repair_commit={head}" in task["result"]
+    assert task["repair_commit_source"] == "post_commit_receipt"
 
 
 def test_main_and_linked_worktree_share_one_stable_lock_inode(tmp_path: Path) -> None:
@@ -418,6 +496,52 @@ def test_run_kills_background_descendants_before_releasing_metadata(tmp_path: Pa
     assert '"state": "released"' in git_writer_lock_path(repo).read_text()
 
 
+def test_run_cleanup_happens_while_exited_group_leader_is_unreaped(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Regression for the 2026-07-22 stale-PGID SIGTERM incident.
+
+    The old ordering was ``proc.wait(); killpg(proc.pid)``.  ``wait`` releases
+    the pid for reuse, so the kill could target an unrelated new process group.
+    The cleanup hook must instead observe an exited-but-unreaped leader.
+    """
+    repo = _repo(tmp_path)
+    observed: list[int] = []
+    original = _terminate_process_group
+
+    def assert_identity_is_still_pinned(proc: subprocess.Popen[str]) -> None:
+        assert proc.returncode is None
+        state = subprocess.run(
+            ["ps", "-o", "stat=", "-p", str(proc.pid)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert state.returncode == 0 and state.stdout.strip().startswith("Z"), (
+            "cleanup did not retain the exited leader as an unreaped zombie"
+        )
+        observed.append(proc.pid)
+        original(proc)
+
+    monkeypatch.setattr(
+        "volpred.ops.git_writer_lock._terminate_process_group",
+        assert_identity_is_still_pinned,
+    )
+    result = run_locked(
+        repo, ["/usr/bin/true"], actor="unreaped-identity-test", command_timeout_s=2,
+    )
+    assert result.returncode == 0
+    assert observed
+
+
+def test_group_cleanup_refuses_an_already_reaped_leader() -> None:
+    """A bare stale pid must never be accepted as process identity."""
+    proc = subprocess.Popen(["/usr/bin/true"], start_new_session=True, text=True)
+    proc.wait(timeout=2)
+    with pytest.raises(GitWriterLockError, match="after its leader was reaped"):
+        _terminate_process_group(proc)
+
+
 def test_run_timeout_kills_foreground_tree_and_returns_124(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     started = time.monotonic()
@@ -589,3 +713,82 @@ def test_repo_owned_writers_route_through_canonical_lease() -> None:
     telegram_text = (ROOT / "scripts/telegram_responder.sh").read_text()
     assert "RESPONDER_WORKDIR" in telegram_text
     assert 'cd "$RESPONDER_WORKDIR"' in telegram_text
+
+
+def test_repo_never_signals_a_pid_after_that_popen_was_reaped() -> None:
+    """Class gate for ``wait(); kill*(proc.pid)`` use-after-reap.
+
+    Once wait/communicate/poll reaps a child, its numeric pid/pgid can be reused
+    by an unrelated process.  A TimeoutExpired handler is the deliberate inverse:
+    timeout means the child was not reaped, so signal-then-wait remains valid.
+    """
+    tracked = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "src/**/*.py", "scripts/**/*.py"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.splitlines()
+    violations: list[str] = []
+    for rel in tracked:
+        if "/tests/" in rel or rel.startswith("scripts/_legacy/"):
+            continue
+        path = ROOT / rel
+        if not path.is_file() or not any(
+            path.is_relative_to(base) for base in PROCESS_SIGNAL_SEARCH_ROOTS
+        ):
+            continue
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        parents = {
+            child: parent
+            for parent in ast.walk(tree)
+            for child in ast.iter_child_nodes(parent)
+        }
+        functions = (
+            n for n in ast.walk(tree)
+            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+        )
+        for fn in functions:
+            calls = sorted(
+                (n for n in ast.walk(fn) if isinstance(n, ast.Call)),
+                key=lambda n: (n.lineno, n.col_offset),
+            )
+            reaped_at: dict[str, int] = {}
+            for call in calls:
+                called = _call_name(call)
+                receiver = call.func.value if isinstance(call.func, ast.Attribute) else None
+                if called in REAPING_METHODS and isinstance(receiver, ast.Name):
+                    reaped_at.setdefault(receiver.id, call.lineno)
+                    continue
+                if not any(marker in called.lower() for marker in SIGNAL_NAME_MARKERS):
+                    continue
+                if _inside_timeout_handler(call, parents):
+                    continue
+                for name in sorted(_pid_object_names(call)):
+                    if name in reaped_at and call.lineno > reaped_at[name]:
+                        violations.append(
+                            f"{rel}:{call.lineno} {fn.name} passes {name}.pid to "
+                            f"{called} after reaping it at line {reaped_at[name]}"
+                        )
+
+    assert not violations, (
+        "stale subprocess identity could signal a PID/PGID reused by an unrelated process:\n  "
+        + "\n  ".join(violations)
+    )
+
+
+def test_commit_blocks_explicitly_named_gitignored_path(tmp_path: Path) -> None:
+    """2026-07-19: naming a gitignored path (paper *.pdf case) let `git add -A`
+    skip it with only an advice hint while the caller believed it was committed.
+    The transaction must refuse loudly (exit 2) instead of silently narrowing."""
+    repo = _repo(tmp_path)
+    (repo / ".gitignore").write_text("*.bin\n")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "add gitignore")
+    (repo / "a.txt").write_text("hello")
+    (repo / "b.bin").write_text("blob")
+    proc = _cli(
+        repo, "commit", "--repo", str(repo), "--actor", "t",
+        "--message", "x", "--", "a.txt", "b.bin",
+    )
+    assert proc.returncode == 2, proc.stderr
+    assert "gitignored" in proc.stderr

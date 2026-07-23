@@ -93,12 +93,18 @@ def _fetch(release_id: int, start: str, end: str) -> list[str]:
 def release_dates(event: str, start: str, end: str, *, use_cache: bool = True) -> pd.DatetimeIndex:
     """Official news-release dates for `event` within [start, end].
 
-    Monthly releases can carry off-cycle entries (annual seasonal-factor revisions
-    are filed against the same release id). The news release is one per calendar
-    month, so we keep the last entry in each month.
+    Monthly releases can carry off-cycle entries (annual seasonal-factor and
+    benchmark revisions are filed against the same release id, LATER in the
+    month than the regular report). We therefore keep the EARLIEST entry in
+    each month — 2026-07-19 k528 Codex review proved the previous `max()` rule
+    picked 6 off-cycle dates as NFP events and flipped a significance result.
 
-    Raises rather than falling back — a silently-wrong event date is worse than a
-    failed run, because it produces plausible numbers.
+    Fail-closed on ambiguity: the selected sequence must look like a monthly
+    release calendar (consecutive gaps 13–110 days; shutdown catch-ups compress for real,
+    e.g. 2013-10-22 -> 2013-11-08 = 17d, and cancelled months stretch,
+    e.g. 2025-09-05 -> 2025-11-20 = 76d). Any gap outside that band
+    raises instead of returning a plausible-but-wrong calendar —
+    silently-wrong event dates are worse than a failed run.
     """
     if event not in RELEASE_IDS:
         raise KeyError(f"unknown event {event!r}; known: {sorted(RELEASE_IDS)}")
@@ -115,15 +121,39 @@ def release_dates(event: str, start: str, end: str, *, use_cache: bool = True) -
 
     if raw is None:
         raw = _fetch(RELEASE_IDS[event], start, end)
-        cache.parent.mkdir(parents=True, exist_ok=True)
-        cache.write_text(json.dumps(raw) + "\n")
+        if use_cache:
+            # use_cache=False must bypass the cache ENTIRELY — the old code
+            # skipped only the read and still wrote, which leaked canonical
+            # writes out of hermetic tests (CI repo-state guard, 2026-07-19).
+            from volpred.canonical_write import guard_canonical_write
+
+            guard_canonical_write(cache)
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(raw) + "\n")
 
     dates = pd.to_datetime(raw)
     if len(dates) == 0:
         raise RuntimeError(f"no {event} release dates returned for {start}..{end}")
     s = pd.Series(dates, index=dates)
-    monthly = s.groupby([dates.year, dates.month]).max()
-    return pd.DatetimeIndex(sorted(monthly.values))
+    monthly = s.groupby([dates.year, dates.month]).min()
+    selected = pd.DatetimeIndex(sorted(monthly.values))
+    # Lower bound 13d catches mispicked entries (collapse patterns run <=12d)
+    # while passing real shutdown catch-ups (2013-10-22 -> 2013-11-08 = 17d).
+    # Upper bound 110d allows cancelled months (76d real) but trips on 3+ gaps.
+    gaps = pd.Series(selected).diff().dropna().dt.days
+    bad = gaps[(gaps < 13) | (gaps > 110)]
+    if len(bad) > 0:
+        offenders = [
+            f"{selected[i - 1].date()} -> {selected[i].date()} ({int(g)}d)"
+            for i, g in zip(bad.index, bad.values)
+        ]
+        raise RuntimeError(
+            f"{event} release calendar failed monthly-cadence validation "
+            f"(gaps outside 13-110 days): {offenders}. Off-cycle entries or "
+            f"missing months need manual disambiguation — refusing to return "
+            f"a plausible-but-wrong calendar."
+        )
+    return selected
 
 
 def cpi_release_dates(start: str, end: str, **kw) -> pd.DatetimeIndex:

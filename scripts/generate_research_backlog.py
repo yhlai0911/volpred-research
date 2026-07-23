@@ -40,9 +40,9 @@ SCRIPTS_DIR = ROOT / "scripts"
 sys.path.insert(0, str(ROOT / "src"))
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priority, write_tasks_locked  # noqa: E402
+from volpred.ops.pool_pressure import pool_admits_new_work  # noqa: E402
 from kid_reserve import reserve_k_id  # noqa: E402
 JOURNAL_DISCOVERY_LIVE_STATUSES = {"pending", "claimed", "in_progress", "blocked", "pending_main_thread"}
 JOURNAL_DISCOVERY_COOLDOWN_HOURS = 6
@@ -96,25 +96,15 @@ def _load_tasks(max_retries: int = 5, sleep_s: float = 0.1) -> tuple[dict | list
 
 
 def _save_tasks(payload: dict | list, tasks: list) -> None:
-    guard_canonical_write(NEXT_TASKS)
-    normalize_task_priorities(tasks)
-    if isinstance(payload, dict) and "tasks" in payload:
-        payload["tasks"] = tasks
-        out = payload
-    else:
-        out = tasks
-    NEXT_TASKS.parent.mkdir(parents=True, exist_ok=True)
-    if not NEXT_TASKS.exists():
-        NEXT_TASKS.write_text("[]\n", encoding="utf-8")
-    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            fh.seek(0)
-            fh.truncate()
-            json.dump(out, fh, ensure_ascii=False, indent=2)
-            fh.write("\n")
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    """WS-A1b: canonical one-shot writer (flock + serialize-first + priority
+    normalization) replaces the hand-rolled truncate-then-json.dump. Legacy
+    dict-root wrapper is read tolerance only — the canonical queue root has
+    been a list since the 2026-07-16 single-gateway refactor — so writing it
+    back is refused loudly."""
+    if isinstance(payload, dict):
+        _warn_backlog("next_tasks dict-root shape is no longer writable; canonical root is a list")
+        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
+    write_tasks_locked(NEXT_TASKS, tasks)
 
 
 def _existing_ids(tasks: list) -> set[str]:
@@ -356,6 +346,17 @@ def _journal_fallback_result(
 
 
 def generate(*, dry_run: bool = False, max_new: int = 5) -> dict:
+    # drain-first 水位閘（boss msg 1237）—— cron_research_backlog.sh 每日直呼此函式，
+    # 不經 continue_task_dispatch._maybe_refill 的 REFILL_FLOOR，是池子照長的主因之一。
+    if not dry_run:
+        admission = pool_admits_new_work(
+            "research_backlog",
+            path=NEXT_TASKS,
+            state_path=NEXT_TASKS.parent / "ops" / "drain_first_state.json",
+        )
+        if not admission.admitted:
+            print(f"[research-backlog] skip: {admission.reason}")
+            return admission.as_result()
     if not RESEARCH_PROGRAM.exists():
         return {"ok": False, "reason": "research_program_missing", "added": 0}
     text = RESEARCH_PROGRAM.read_text(encoding="utf-8")

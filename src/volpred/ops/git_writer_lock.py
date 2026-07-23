@@ -20,6 +20,7 @@ import fcntl
 import json
 import math
 import os
+import select
 import signal
 import subprocess
 import threading
@@ -433,7 +434,6 @@ def run_locked(
             text=True,
             start_new_session=True,
         )
-        timed_out = False
         forwarded_signal = 0
         previous_handlers: dict[int, object] = {}
 
@@ -450,20 +450,77 @@ def run_locked(
                 previous_handlers[signum] = signal.getsignal(signum)
                 signal.signal(signum, _forward)
         try:
-            returncode = proc.wait(timeout=command_timeout_s)
+            # Do not call Popen.wait() first.  wait() reaps the process, after
+            # which its pid/pgid can be recycled before descendant cleanup uses
+            # that integer.  waitid(WNOWAIT) observes exit while deliberately
+            # retaining the zombie group leader as a kernel-owned identity pin.
+            _wait_for_exit_without_reaping(proc, timeout_s=command_timeout_s)
         except subprocess.TimeoutExpired:
-            timed_out = True
-            _terminate_process_group(proc.pid)
+            # Timeout leaves the leader live and therefore also identity-pinned.
+            _terminate_process_group(proc)
             proc.wait(timeout=5)
             returncode = 124
+        else:
+            try:
+                _terminate_process_group(proc)
+            finally:
+                # Reap only after every signal decision is finished.  This is
+                # the line that releases the pid/pgid for possible reuse.
+                returncode = proc.wait(timeout=5)
         finally:
-            if not timed_out:
-                _terminate_process_group(proc.pid)
             for signum, previous in previous_handlers.items():
                 signal.signal(signum, previous)
         if forwarded_signal:
             returncode = 128 + forwarded_signal
-        return subprocess.CompletedProcess(list(command), returncode)
+    return subprocess.CompletedProcess(list(command), returncode)
+
+
+def _wait_for_exit_without_reaping(
+    proc: subprocess.Popen[str], *, timeout_s: float
+) -> None:
+    """Observe ``proc`` exit but retain its zombie as a pid/pgid identity pin.
+
+    ``Popen.wait(timeout=...)`` cannot be used before group cleanup: it reaps the
+    leader, making a subsequent ``killpg(proc.pid, ...)`` a stale-identifier kill.
+    POSIX ``waitid(..., WNOWAIT)`` gives us the missing state transition: exited,
+    observable, but not yet reusable by an unrelated process.
+    """
+    if hasattr(os, "waitid"):
+        deadline = time.monotonic() + timeout_s
+        flags = os.WEXITED | os.WNOHANG | os.WNOWAIT
+        while True:
+            try:
+                exited = os.waitid(os.P_PID, proc.pid, flags)
+            except InterruptedError:  # silent-ok: an interrupted wait is retried without changing process state.
+                continue
+            if exited is not None:
+                return
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(proc.args, timeout_s)
+            time.sleep(min(0.02, remaining))
+
+    # CPython on macOS does not expose waitid(), even though Darwin supports
+    # WNOWAIT.  EVFILT_PROC/NOTE_EXIT is the native non-reaping equivalent.
+    if hasattr(select, "kqueue"):
+        queue = select.kqueue()
+        try:
+            change = select.kevent(
+                proc.pid,
+                filter=select.KQ_FILTER_PROC,
+                flags=select.KQ_EV_ADD | select.KQ_EV_ENABLE | select.KQ_EV_ONESHOT,
+                fflags=select.KQ_NOTE_EXIT,
+            )
+            events = queue.control([change], 1, timeout_s)
+        finally:
+            queue.close()
+        if events:
+            return
+        raise subprocess.TimeoutExpired(proc.args, timeout_s)
+
+    raise GitWriterLockError(
+        "platform has no non-reaping child-exit observer (waitid or kqueue)"
+    )
 
 
 def _process_group_exists(pgid: int) -> bool:
@@ -476,18 +533,69 @@ def _process_group_exists(pgid: int) -> bool:
     return True
 
 
-def _terminate_process_group(pgid: int) -> None:
-    """Bound cleanup for descendants accidentally left by ``run_locked``."""
-    if not _process_group_exists(pgid):
+def _live_process_group_members(pgid: int) -> list[int] | None:
+    """Return non-zombie group members, or ``None`` if ``ps`` is untrusted.
+
+    During normal completion the unreaped leader is intentionally a zombie.  It
+    pins the numeric group identity but is not a survivor and must not force a
+    one-second TERM/KILL grace on every successful Git command.
+    """
+    try:
+        result = subprocess.run(
+            ["ps", "-eo", "pid=,pgid=,stat="],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired):  # silent-ok: None forces conservative killpg liveness fallback; it never claims the group drained.
+        return None
+    if result.returncode != 0:
+        return None
+    members: list[int] = []
+    for line in result.stdout.splitlines():
+        parts = line.split()
+        if len(parts) < 3:
+            if line.strip():
+                return None
+            continue
+        try:
+            pid, candidate_pgid = int(parts[0]), int(parts[1])
+        except ValueError:  # silent-ok: malformed ps output returns untrusted None and therefore fails closed to the killpg probe.
+            return None
+        if candidate_pgid == pgid and not parts[2].startswith("Z"):
+            members.append(pid)
+    return members
+
+
+def _terminate_process_group(proc: subprocess.Popen[str]) -> None:
+    """Bound cleanup while ``proc`` still pins its own pid/pgid.
+
+    Accepting the Popen object, rather than a bare integer, makes the safety
+    precondition mechanically checkable.  A caller that already reaped the
+    leader is refused instead of signalling whichever future process happens to
+    inherit the same numeric process-group id.
+    """
+    if proc.returncode is not None:
+        raise GitWriterLockError(
+            "refusing process-group cleanup after its leader was reaped"
+        )
+    pgid = proc.pid
+    members = _live_process_group_members(pgid)
+    if members == [] or (members is None and not _process_group_exists(pgid)):
         return
     try:
         os.killpg(pgid, signal.SIGTERM)
     except ProcessLookupError:  # silent-ok: the process group exited between the liveness probe and TERM.
         return
     deadline = time.monotonic() + 1.0
-    while _process_group_exists(pgid) and time.monotonic() < deadline:
+    while time.monotonic() < deadline:
+        members = _live_process_group_members(pgid)
+        if members == [] or (members is None and not _process_group_exists(pgid)):
+            return
         time.sleep(0.02)
-    if _process_group_exists(pgid):
+    members = _live_process_group_members(pgid)
+    if members != [] and (members is not None or _process_group_exists(pgid)):
         try:
             os.killpg(pgid, signal.SIGKILL)
         except (ProcessLookupError, PermissionError):  # silent-ok: final KILL may race with exit; inherited descriptors keep any survivor serialized.

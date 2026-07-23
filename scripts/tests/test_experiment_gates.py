@@ -170,6 +170,43 @@ def test_frozen_legacy_debt_does_not_block_a_new_agent(tmp_path: Path) -> None:
     )
 
 
+def test_baselined_site_inside_a_linked_worktree_is_still_recognised(
+    tmp_path: Path,
+) -> None:
+    """A worktree path prefix must not turn frozen debt into a new violation.
+
+    K1623 arm C, 2026-07-21: the MC ran clean (reproduction gate 5/5, results
+    on disk) and the compute job was still marked failed. The gate had scanned
+    the worktree copy of an already-baselined file and keyed the site as
+    ``.claude/worktrees/<wt>/experiments/k1623/k1623.py::dm_hln`` -- a key no
+    baseline can contain. Two adapters (dm-hac-lag, fevd-ordering) built their
+    key against the auditor module's own repo root instead of the scanned
+    file's root, so every worktree experiment inherited the whole frozen
+    population as new debt. The other two adapters already passed a root; these
+    two were the ones that did not.
+    """
+    root = _portable_checkout(tmp_path)
+    site = json.loads(
+        (root / "storage" / "ops" / "dm_hac_lag_baseline.json").read_text()
+    )["degenerate_sites"][0]
+    baselined = site.split("::")[0]
+
+    # A linked worktree is its own git toplevel nested inside the checkout,
+    # which is exactly what makes the two roots diverge.
+    worktree = root / ".claude" / "worktrees" / "wt-x"
+    dst = worktree / baselined
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(REPO_ROOT / baselined, dst)
+    subprocess.run(["git", "init", "-q"], cwd=str(worktree), check=True)
+
+    proc = _run_gate(root, str(dst.parent))
+
+    assert proc.returncode == 0, (
+        f"{baselined} is frozen in the dm-hac-lag baseline; scanning it through "
+        "a worktree prefix must not re-litigate it.\n" + proc.stdout + proc.stderr
+    )
+
+
 def test_invalid_fixed_memory_role_can_never_hide_behind_legacy_baseline(
     tmp_path: Path,
 ) -> None:
@@ -242,32 +279,41 @@ def test_the_runner_actually_calls_the_gate() -> None:
 
     This is the load-bearing assertion. Every other test here checks that the
     gate *works*; the bug we are fixing was a gate that worked and was never
-    reached. `run_next` marking a job `completed` without consulting the gate is
+    reached. The runner marking a job `completed` without consulting the gate is
     how K1709 shipped, so assert the call is there, on that path, by AST -- not
     by grep, and not by trusting that nobody will refactor it out.
+
+    D6 (2026-07-20): execution moved from run_next's body into _execute_job so
+    that run-next and run-loop share ONE completion path. The invariants become:
+    the single `completed` assignment in the whole module lives in _execute_job,
+    _execute_job consults the gate, and every worker entrypoint (run_next AND
+    run_loop) routes execution through _run_claimed -> _execute_job.
     """
     source = (REPO_ROOT / "scripts" / "compute_queue.py").read_text(encoding="utf-8")
     tree = ast.parse(source)
-
-    run_next = next(
-        node
+    functions = {
+        node.name: node
         for node in tree.body
-        if isinstance(node, ast.FunctionDef) and node.name == "run_next"
-    )
-    calls = {
-        node.func.id
-        for node in ast.walk(run_next)
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        if isinstance(node, ast.FunctionDef)
     }
-    assert "_experiment_gate_failure" in calls, (
-        "run_next() no longer consults the experiment gates before marking a job "
-        "completed. That is the K1709 hole reopening: the detectors are fine, "
+
+    def _called_names(scope: ast.AST) -> set[str]:
+        return {
+            node.func.id
+            for node in ast.walk(scope)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        }
+
+    execute_job = functions["_execute_job"]
+    assert "_experiment_gate_failure" in _called_names(execute_job), (
+        "_execute_job() no longer consults the experiment gates before marking a "
+        "job completed. That is the K1709 hole reopening: the detectors are fine, "
         "they just never run on the agent's work."
     )
 
     completes = [
         node
-        for node in ast.walk(run_next)
+        for node in ast.walk(tree)
         if isinstance(node, ast.Assign)
         and any(
             isinstance(t, ast.Subscript)
@@ -281,9 +327,27 @@ def test_the_runner_actually_calls_the_gate() -> None:
         and node.value.value == "completed"
     ]
     assert len(completes) == 1, (
-        "There must be exactly one place run_next() calls a job completed, so "
-        "the gate cannot be bypassed by a second path."
+        "There must be exactly one place in compute_queue.py that calls a job "
+        "completed, so the gate cannot be bypassed by a second path."
     )
+    execute_span = range(execute_job.lineno, execute_job.end_lineno + 1)
+    assert completes[0].lineno in execute_span, (
+        "The single completion site must live inside _execute_job — the one "
+        "function that consults the gate."
+    )
+
+    for entrypoint in ("run_next", "run_loop"):
+        # run_loop hands _run_claimed to pool.submit rather than calling it
+        # directly, so check referenced names, not just direct call targets.
+        referenced = {
+            node.id
+            for node in ast.walk(functions[entrypoint])
+            if isinstance(node, ast.Name)
+        }
+        assert "_run_claimed" in referenced, (
+            f"{entrypoint}() no longer routes execution through _run_claimed, so "
+            "its jobs would bypass the gated completion path in _execute_job."
+        )
 
 
 def _agent_job(root: Path, artifact: Path, job_id: str = "job-1") -> dict:
@@ -308,9 +372,15 @@ def test_a_reviewer_is_not_charged_for_the_experiment_it_reviewed(tmp_path: Path
     review to be "completed" would have been to find nothing.
     """
     root = _portable_checkout(tmp_path)
-    _plant(root, "k1729", K1709_V1)
-    artifact = root / "experiments" / "k1729" / eg.CERT_FILENAME
-    artifact.write_text(json.dumps({"kid": "k1729", "verdict": "FAIL"}), encoding="utf-8")
+    # Do not reuse the real k1729 path: its non-nested comparison was later
+    # adjudicated and frozen in the baseline, which would legitimately suppress
+    # this planted violation and turn the regression fixture into a false green.
+    fixture_kid = "fixture_review_job"
+    _plant(root, fixture_kid, K1709_V1)
+    artifact = root / "experiments" / fixture_kid / eg.CERT_FILENAME
+    artifact.write_text(
+        json.dumps({"kid": fixture_kid, "verdict": "FAIL"}), encoding="utf-8"
+    )
     job = _agent_job(root, artifact)
 
     assert cq._experiment_gate_failure(job, artifact) is None, (

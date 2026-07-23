@@ -1,0 +1,266 @@
+{
+  "schema_version": 1,
+  "title": "對房子四問：買保護前的四格檢查",
+  "evidence": {
+    "d": {
+      "path": "storage/drafts/assets/digest30/evidence.json",
+      "sha256": "187213ee2e1b47cfbab912f0c78f732aa8ab7287fba3d0f9821246ceba899824",
+      "label": "每日精選導讀第 30 期證據彙整（引自 8 篇已發佈研究）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "對房子四問：保單要保對那棟房子",
+      "alt": "對房子四問的框架：火在哪一棟、火燒多久、保單掛誰名字、保費標多少",
+      "sources": [
+        "d"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "為什麼要分四問",
+          "body": [
+            "街尾失火就跑去買保險，多數人只做一個決定。實際上藏了四個各自獨立的問題，混在一起做，保費付了、賠付對不上。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "四問",
+          "body": [
+            "第一問 火在哪一棟：局部火還是全街火",
+            "第二問 火會燒多久：事件型還是體制型",
+            "第三問 保單掛誰的名字：工具對不對得上你的曝險",
+            "第四問 保費標多少：報價含多少恐慌溢價"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "今日恐慌指數收盤",
+          "value": {
+            "source": "d",
+            "path": "market_today.vix_close",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "GJR-GARCH 年化波動預估",
+          "value": {
+            "source": "d",
+            "path": "market_today.garch_annualized_vol_pct",
+            "format": {
+              "kind": "number",
+              "suffix": "%",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "bento-grid",
+      "title": "每一問查什麼數字",
+      "alt": "四問各自對應的查法與判準",
+      "sources": [
+        "d"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "第一問 火在哪一棟",
+          "body": [
+            "把自己那一籃的回撤和大盤回撤並排。差一個量級就是局部火，大盤保單救不了。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "費半自高點回撤（同期大盤僅個位數之一）",
+          "value": {
+            "source": "d",
+            "path": "q1_which_house.smh_drawdown_pct",
+            "format": {
+              "kind": "number",
+              "suffix": "%",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "第二問 火燒多久",
+          "body": [
+            "事件型的火風險集中在一天半，按整週付錢是浪費。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "財報日波動放大",
+          "value": {
+            "source": "d",
+            "path": "q2_how_long.day0_amplification_x",
+            "format": {
+              "kind": "number",
+              "suffix": " 倍",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "第三問 保單掛誰名字",
+          "body": [
+            "查你的標的對避險工具的敏感度。敏感度不夠，方向對也賠不回來。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "SMH 對 VIX 的敏感度",
+          "value": {
+            "source": "d",
+            "path": "q3_whose_name.smh_vix_sensitivity",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "第四問 保費標多少",
+          "body": [
+            "先接受報價長期偏貴，再決定買不買，並買在最可能發生的那一層。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "模型只吃 VIX 理論基準的",
+          "value": {
+            "source": "d",
+            "path": "q4_what_price.vix_slope_share_of_theory_pct",
+            "format": {
+              "kind": "number",
+              "suffix": "%",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "四格填進今天的盤面",
+      "alt": "四問各自填入最新讀數後的結果",
+      "sources": [
+        "d"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "財報後第二天放大倍數（已測不到差異）",
+          "value": {
+            "source": "d",
+            "path": "q2_how_long.day2_amplification_x",
+            "format": {
+              "kind": "number",
+              "suffix": " 倍",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "指數層級財報季波動比值（二十年樣本）",
+          "value": {
+            "source": "d",
+            "path": "q2_how_long.index_earnings_season_ratio_abs_ret",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "輝達財報隱含波動是同日恐慌指數的",
+          "value": {
+            "source": "d",
+            "path": "q3_whose_name.iv_to_vix_ratio",
+            "format": {
+              "kind": "number",
+              "suffix": " 倍",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "裸買價外賣權年化成本",
+          "value": {
+            "source": "d",
+            "path": "q4_what_price.naked_put_annual_cost_pct",
+            "format": {
+              "kind": "number",
+              "suffix": "%",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "買賣權價差年化成本",
+          "value": {
+            "source": "d",
+            "path": "q4_what_price.spread_put_annual_cost_pct",
+            "format": {
+              "kind": "number",
+              "suffix": "%",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "價差比裸買節省",
+          "value": {
+            "source": "d",
+            "path": "q4_what_price.spread_saving_pct",
+            "format": {
+              "kind": "integer",
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "前五大公司佔大盤權重",
+          "value": {
+            "source": "d",
+            "path": "q4_what_price.top5_weight_pct",
+            "format": {
+              "kind": "number",
+              "suffix": "%",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "一句話帶走",
+          "body": [
+            "最容易虧錢的做法：拿一張寫著整條街地址的便宜保單，去保一場只燒在街尾、一個下午就撲滅的火，還按整週付保費。"
+          ]
+        }
+      ]
+    }
+  ]
+}

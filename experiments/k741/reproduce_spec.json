@@ -1,0 +1,39 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k741_nfp_event_study_canonical.py",
+    "args": []
+  },
+  "canonical_result": "k741_nfp_event_study_canonical_results.json",
+  "inputs": [
+    {
+      "path": "paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv",
+      "sha256": "c5ac00087e6b44655da861dc974b816343a548768b077e52c4cdc36b2beea8bd"
+    },
+    {
+      "path": "src/volpred/data/event_dates.py",
+      "sha256": "98091d6b99f83e48cb93da023a1a7052f4b2995579fea8e479ce03fb8f1c0cf5"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "allow",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy.default_rng",
+        "value": 20260719
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/date"
+    ],
+    "ignore_reasons": {
+      "/date": "datetime.now() execution stamp written after every scientific quantity is computed; no estimate or verdict reads it."
+    }
+  }
+}

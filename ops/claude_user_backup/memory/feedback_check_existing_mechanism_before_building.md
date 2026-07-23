@@ -21,3 +21,9 @@ grep 同 concern 的 script/config/CLI flag（`--apply`、`mode`、`shadow`、`b
 `enforce` 是常見開關詞），並讀該機制自己的 verdict/log 判斷它為什麼還沒生效。
 修「為什麼沒生效」永遠優先於再蓋一層。關聯 [[project-loop-engineering-layer]]、
 anti-stacking（CLAUDE.md）。
+
+**2026-07-20 同一錯誤的鏡像版**：對老闆宣稱「我沒有正式 CLI 可以開 burst window，
+不想背著你動控制檔」——實際上 `scripts/dispatch_burst_cli.py`（open/status/close）
+一直存在。老闆因此多等了一輪派工才回「開到今天下午四點」。**推論**：「宣稱某能力不存在」
+和「動手建新機制」是同一個查證義務，前者甚至更貴，因為它把工作推回給老闆。
+說「做不到 / 沒有工具 / 需要你授權」之前，先 `grep -rli <concern> scripts src config`。

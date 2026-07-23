@@ -1,0 +1,53 @@
+{
+  "id": "compute-k741-k904-canonical-nfp-round-2-codex-primary-path-review-sp-1784481092",
+  "title": "K741/K904 canonical NFP round-2 Codex primary-path review (split child of agent-brief_k741_nfp_canonical-837c1f)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k741_canonical_round2_prompt.md",
+    "storage/ops/codex_reviews/k741_canonical_round2_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-19T17:11:32Z",
+  "started_at": "2026-07-19T17:15:01Z",
+  "completed_at": "2026-07-19T17:24:44Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k741-k904-canonical-nfp-round-2-codex-primary-path-review-sp-1784481092.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k741-k904-canonical-nfp-round-2-codex-primary-path-review-sp-1784481092.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k741_canonical_round2_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k741_canonical_round2_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K741 canonical NFP split child 2/2 收件。(1) 讀 storage/ops/codex_reviews/k741_canonical_round2_verdict.md 第一行 VERDICT。(2) PASS → 用 scripts/experiment_gates.py verdict-template 產 experiments/k741/review_verdict.json 與 experiments/k904/review_verdict.json（在 worktree .claude/worktrees/dispatch-slot-1-5741c175-k741 內），由裁決檔綁 reviewed bytes，再跑 bash scripts/merge_worktree.sh dispatch-slot-1-5741c175-k741 合併（cert gate 目前正是卡在缺 review_verdict.json）。(3) FAIL → 依 bounded fix list 派 remediation，不得手改裁決檔。(4) 合併後主線程寫 knowledge.json（K741 canonical：first-Friday proxy 34/195 錯，headline ratio 1.14→1.16、p 0.081→0.051，regime contrast bootstrap CI 含 0 故論文改為 descriptive）。(5) 依 comparison.md 的 feed 回溯建議裁定 k528×7 / k661×2 是否發更正。注意：split child 1/2 已在 2026-07-20 01:xx 完成驗證 — reproduce.py 123/123 green、tex 數字與 JSON 逐項相符，不要重跑。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "parent_timeout_job_id": "agent-brief_k741_nfp_canonical-837c1f",
+  "split_stage": "codex_review",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "376165c219f9b4b988c57530e19ace9cdc866e21",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k741_canonical_round2_verdict.md"
+  ],
+  "delivered_at": "2026-07-19T18:00:52.237525+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-19T21:12:43Z",
+  "followup_next_task_id": "k741_canonical_round2_remediation"
+}

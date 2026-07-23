@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_snapaudit_7f508612-f41a08",
+  "title": "稽核 2026-05-20~07-17 讀到重複 snapshot 的實驗結果 (assign_7f508612)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapaudit_7f508612-f41a08.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit/experiments/snapshot_dup_audit_20260720/audit_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_snapaudit_7f508612-f41a08.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T01:28:38Z",
+  "started_at": "2026-07-20T01:30:06Z",
+  "completed_at": "2026-07-20T02:09:53Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapaudit_7f508612-f41a08.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapaudit_7f508612-f41a08.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit/experiments/snapshot_dup_audit_20260720/audit_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_snapaudit_7f508612-f41a08.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit",
+  "claude_followup": {
+    "brief": "收 audit_results.json：(1) 驗每個 affected 判定都有 evidence 指回具體檔案/日期範圍，不接受『應該有處理』式推定；(2) 驗 numbers_changed=true 者的 before/after 能指回產出檔；(3) 未受影響者是否也寫了判定依據（誠實記錄要求）；(4) 有變動且已發表/在審者 → 開對應 paper_review 修正 task；(5) 用 merge_worktree.sh 正式整合 dispatch-slot-2-dcc222db-snapaudit（branch snapaudit-dcc222db）；(6) 寫 knowledge.json（agent 不得自寫，K1259 gate）。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_snapaudit_7f508612.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapaudit_7f508612-f41a08.md",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dcc222db-snapaudit/experiments/snapshot_dup_audit_20260720"
+  },
+  "followup_dispatched_at": "2026-07-20T02:16:44Z",
+  "followup_next_task_id": "collect_snapaudit_7f508612_20260720"
+}

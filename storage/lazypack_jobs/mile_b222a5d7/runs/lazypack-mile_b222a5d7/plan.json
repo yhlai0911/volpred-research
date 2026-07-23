@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "title": "選舉的波動率溢價，在你進場前就走完了",
+  "subtitle": "六次美國期中選舉，VIX 事件窗口的實際紀錄",
+  "evidence": {
+    "mid": {
+      "path": "storage/experiments/midterm_vix_event_study.json",
+      "sha256": "725ab788590c1c906d86ed01a3af881bf5b4c02b1285bc8b38d071eaf5ed06ac",
+      "label": "六次期中選舉 VIX 事件研究（yfinance ^VIX/^GSPC）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "editorial",
+      "title": "市場流傳的劇本，跟資料對不上",
+      "alt": "說明選舉季波動率套路的假設與實際資料的落差",
+      "sources": [
+        "mid"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "劇本怎麼講",
+          "body": [
+            "選舉結果不確定，大家搶著買保護，恐慌指數被推高；開票後答案揭曉，保護不再需要，指數一夜塌下來。所以選前買、選後賣。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "資料怎麼講",
+          "body": [
+            "恐慌指數的高點落在投票日前約三到四週，之後一路往下滑到投票日。最大的一段下滑，發生在開票之前。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "選前十八個交易日的 VIX（選前一日標準化為百，中位數）",
+          "value": {
+            "source": "mid",
+            "path": "/path_normalized/-18/median",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "已對齊事件日標準化"
+        },
+        {
+          "kind": "metric",
+          "label": "同一時點高於選前一日水準的次數",
+          "value": {
+            "source": "mid",
+            "path": "/path_normalized/-18/n_above_100",
+            "format": {
+              "kind": "number",
+              "digits": 0,
+              "suffix": " 次"
+            }
+          },
+          "note": "樣本共六次選舉"
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "editorial",
+      "title": "開票隔天確實會掉，但只掉這麼多",
+      "alt": "選後隔日 VIX 變化的平均、中位數與統計檢定結果",
+      "sources": [
+        "mid"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "開票隔天 VIX 平均變化",
+          "value": {
+            "source": "mid",
+            "path": "/stats/mean_crush_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": true
+            }
+          },
+          "note": "中位數見下"
+        },
+        {
+          "kind": "metric",
+          "label": "開票隔天 VIX 變化中位數",
+          "value": {
+            "source": "mid",
+            "path": "/stats/median_crush_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "show_plus": true
+            }
+          },
+          "note": "平均被單一極端年份拉低"
+        },
+        {
+          "kind": "metric",
+          "label": "六次裡下跌的次數",
+          "value": {
+            "source": "mid",
+            "path": "/stats/n_negative",
+            "format": {
+              "kind": "number",
+              "digits": 0,
+              "suffix": " 次"
+            }
+          },
+          "note": "唯一例外的那次反而上漲"
+        },
+        {
+          "kind": "metric",
+          "label": "隨機抽到同樣結果的機率",
+          "value": {
+            "source": "mid",
+            "path": "/stats/bootstrap_p_one_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "對照全樣本交易日重抽兩萬次，達統計顯著門檻"
+        },
+        {
+          "kind": "text",
+          "heading": "顯著不等於好賺",
+          "body": [
+            "把幅度最大的那次極端值拿掉，剩下幾次的平均只剩個位數的零頭。扣掉選擇權買賣價差與每天付出去的時間價值，這點空間大概就沒了。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "賣方的利潤，在最想賣的時候消失",
+      "alt": "隱含與已實現波動價差的分佈，以及目前市場位置",
+      "sources": [
+        "mid"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "選前 VIX 減選後二十日實現波動（六次平均）",
+          "value": {
+            "source": "mid",
+            "path": "/stats/mean_iv_rv_spread_post",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "show_plus": true
+            }
+          },
+          "note": "波動度口徑價差，非學術定義的變異數風險溢酬"
+        },
+        {
+          "kind": "metric",
+          "label": "最近一次期中選舉的同一價差",
+          "value": {
+            "source": "mid",
+            "path": "/events/5/iv_rv_spread_post",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "show_plus": true
+            }
+          },
+          "note": "選前 VIX 最貴的那幾次，賣方反而倒賠"
+        },
+        {
+          "kind": "text",
+          "heading": "虧的是哪幾次",
+          "body": [
+            "正好是選前恐慌指數被墊得最高、劇本喊快賣喊得最大聲的那幾次。賣方以為在收保費，結果選後走出來的波動比報價還兇。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "目前 VIX",
+          "value": {
+            "source": "mid",
+            "path": "/current/vix_now",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "距投票日尚有一段時間"
+        },
+        {
+          "kind": "metric",
+          "label": "六次選舉在同一時點的 VIX 平均",
+          "value": {
+            "source": "mid",
+            "path": "/current/hist_vix_at_same_horizon_mean",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          },
+          "note": "目前讀數落在歷史區間中段"
+        },
+        {
+          "kind": "text",
+          "heading": "所以要盯什麼",
+          "body": [
+            "盯投票前一個月的股市走勢，不是選舉日曆。近兩次選舉的波動率是被市場自己的下跌推上去的，選舉只是剛好排在後面。"
+          ]
+        }
+      ]
+    }
+  ]
+}

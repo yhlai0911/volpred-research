@@ -296,6 +296,44 @@ def reserve_k_id(
         return record
 
 
+def reassign_reservation(
+    *,
+    number: int,
+    actor: str,
+    status: str,
+    note: str,
+    registry_path: Path = REGISTRY_PATH,
+    lock_path: Path | None = None,
+) -> dict[str, Any]:
+    """Amend an existing reservation under the same exclusive lock.
+
+    2026-07-19: experiments/k1732 was hand-picked by scanning worktrees and
+    collided with a live registry reservation for a different backlog topic
+    (the K1719 incident class, second occurrence). The registry had no amend
+    path, so collisions could only be papered over by editing JSON by hand.
+    This is the canonical repair: mark the reservation consumed/released with
+    an audit note; the displaced topic re-reserves a fresh number via
+    `reserve`.
+    """
+    if status not in {"consumed", "released", "renumbered"}:
+        raise ValueError(f"status must be consumed/released/renumbered, got {status!r}")
+    if not note.strip():
+        raise ValueError("note is required — an amendment without a why is untraceable")
+    lock_path = Path(lock_path) if lock_path is not None else _default_lock_path(registry_path)
+    with _exclusive_lock(lock_path):
+        registry = _load_registry(registry_path)
+        for rec in registry.get("reservations", []):
+            if int(rec.get("number") or 0) == number:
+                rec["status"] = status
+                rec["amended_at"] = _now_iso()
+                rec["amended_by"] = actor
+                rec["amend_note"] = note
+                registry["updated_at"] = rec["amended_at"]
+                _atomic_write_json(registry_path, registry)
+                return rec
+        raise ValueError(f"no reservation with number {number} in {registry_path}")
+
+
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -309,6 +347,16 @@ def _build_parser() -> argparse.ArgumentParser:
     reserve.add_argument("--lock", type=Path, default=None)
     reserve.add_argument("--git-log-limit", type=int, default=30)
     reserve.add_argument("--minimum", type=int, default=1)
+
+    reassign = sub.add_parser(
+        "reassign", help="amend an existing reservation (consumed/released/renumbered) with an audit note"
+    )
+    reassign.add_argument("--number", type=int, required=True)
+    reassign.add_argument("--actor", required=True)
+    reassign.add_argument("--status", required=True, choices=["consumed", "released", "renumbered"])
+    reassign.add_argument("--note", required=True)
+    reassign.add_argument("--registry", type=Path, default=REGISTRY_PATH)
+    reassign.add_argument("--lock", type=Path, default=None)
     return parser
 
 
@@ -325,6 +373,17 @@ def main(argv: list[str] | None = None) -> int:
                 lock_path=args.lock,
                 git_log_limit=args.git_log_limit,
                 minimum=args.minimum,
+            )
+            print(json.dumps({"ok": True, **record}, ensure_ascii=False, sort_keys=True))
+            return 0
+        if args.cmd == "reassign":
+            record = reassign_reservation(
+                number=args.number,
+                actor=args.actor,
+                status=args.status,
+                note=args.note,
+                registry_path=args.registry,
+                lock_path=args.lock,
             )
             print(json.dumps({"ok": True, **record}, ensure_ascii=False, sort_keys=True))
             return 0

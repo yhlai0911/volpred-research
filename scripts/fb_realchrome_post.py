@@ -249,6 +249,7 @@ def parse_draft(path: Path) -> tuple[str, str, list[str]]:
       ## 主貼文（純文字，不含連結）
       <正文...>
       ## 第一則留言（貼連結）
+      <可有引言句>
       <url>
     """
     text = path.read_text(encoding="utf-8")
@@ -258,7 +259,12 @@ def parse_draft(path: Path) -> tuple[str, str, list[str]]:
         text,
         re.S,
     )
-    m_link = re.search(r"##\s*第一則留言[^\n]*\n\s*(https?://\S+)", text)
+    # 留言連結：取「## 第一則留言」區塊內的第一個 URL，而不是只認緊接標題的裸 URL。
+    # 2026-07-22：mile_903fd2cf 的稿在 URL 前寫了一句引言（人寫稿的自然寫法），舊 regex
+    # 因此靜默回空字串 → 主文照發、連結沒進留言。留言送出走 keyboard.type(link) 只打
+    # URL，引言本來就不會被貼上，所以正解是放寬抽取而非要求寫稿人把 URL 頂在標題下。
+    m_link_block = re.search(r"##\s*第一則留言[^\n]*\n(.*?)(?=\n##\s|\Z)", text, re.S)
+    m_link = re.search(r"https?://\S+", m_link_block.group(1)) if m_link_block else None
     if not m_body:
         raise ValueError(f"{path.name}: 找不到「## 主貼文」區塊")
     body = m_body.group(1).strip()
@@ -267,7 +273,7 @@ def parse_draft(path: Path) -> tuple[str, str, list[str]]:
         ln for ln in body.splitlines()
         if ln.strip() != "---" and not ln.lstrip().startswith("#")
     ).strip()
-    link = m_link.group(1).strip() if m_link else ""
+    link = m_link.group(0).strip() if m_link else ""
     # 附圖：## 圖片 區塊下的所有圖 URL（結果圖 + 懶人包）。主貼文必附圖（老闆規則）。
     images: list[str] = []
     m_img = re.search(r"##\s*圖片[^\n]*\n(.*)$", text, re.S)
@@ -324,6 +330,27 @@ def _composer_photo_count(page) -> int:
     return page.evaluate(_COMPOSER_PHOTO_COUNT_JS)
 
 
+def _composer_dialog(page):
+    """回「建立貼文」composer dialog 的 Locator。
+
+    2026-07-20 3-strike fix — 頁面上常同時開著**多個** `div[role='dialog']`：
+    上一輪 --check 停在某篇貼文的 permalink，那個「Ivan Lai 的貼文」dialog 也含
+    contenteditable 留言框，且在 DOM 排序中先於 composer → 舊的
+    `div[role='dialog'] div[role=textbox]`.first 會抓到**舊貼文的留言框**。
+    dry-run 實測：整篇 464 字主文被貼進 6/3 那篇 CPI 貼文的留言框，圖卻附在真正的
+    composer 上；真發會產出「舊文一則長留言 + 一篇無字純圖新貼文」。
+
+    判準與 _COMPOSER_PHOTO_COUNT_JS 一致：composer 是唯一同時具備 file input
+    與 contenteditable textbox 的 dialog。填字與附圖共用這一個定義，不再各自 `.first`。
+    """
+    return (
+        page.locator("div[role='dialog']")
+        .filter(has=page.locator("input[type='file']"))
+        .filter(has=page.locator("div[role='textbox'][contenteditable='true']"))
+        .first
+    )
+
+
 def _get_or_open_fb_page(browser):
     """在既有 context 找 facebook.com 分頁；沒有就開新分頁導到個人頁。
 
@@ -366,58 +393,78 @@ def _post_anchor(body: str) -> str:
 
 
 def _capture_permalink(page, anchor: str) -> str | None:
-    """在 profile timeline 抓「含 anchor 文字之貼文」的永久連結。策略：掃所有
-    permalink-shaped <a>，往上找 ≤8 層祖先其 innerText 含 anchor（= 確定是該貼文）
-    才回該連結；**anchor 完全沒匹配任何連結祖先 → 回 None**（誠實：不猜、不用 DOM
-    第一個連結頂替，避免把別篇貼文的 permalink 誤寫進 canonical，2026-07-09 review
-    finding 1）。回傳去掉 query string 的乾淨 URL。抓不到只回 None（非阻塞，主文已發）。"""
+    """從含 ``anchor`` 的貼文正文，幾何綁定其 header 時間戳並抓永久連結。
+
+    Facebook timeline 的時間戳 ``<a>`` 在 hover 前，``href`` 只是個人頁；hover 後才
+    materialize 成 ``/posts/...``。因此不能先用 permalink URL pattern 掃 DOM。先找
+    anchor 正文，再取它正上方、同欄且最近的短 link（時間戳），hover 後只讀**同一個
+    元素**的 href。這保留 2026-07-09 的誠實邊界：找不到精確綁定就回 None，絕不拿
+    timeline 第一個 permalink 猜測。回傳值會移除 volatile query string。
+    """
     if not anchor:
         return None
-    js = r"""
+    tag_timestamp_js = r"""
     (anchor) => {
-      const links = Array.from(document.querySelectorAll('a[href]')).filter(a => {
-        const h = a.href || '';
-        return h.includes('/posts/') || h.includes('story_fbid') ||
-               h.includes('/permalink/') || h.includes('/pfbid');
-      });
-      for (const a of links) {
-        let node = a;
-        for (let i = 0; i < 8 && node; i++) {
-          if ((node.innerText || '').includes(anchor)) return a.href.split('?')[0];
-          node = node.parentElement;
+      document.querySelectorAll('[data-vp-permalink-trigger]').forEach(
+        e => e.removeAttribute('data-vp-permalink-trigger')
+      );
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      let node, body = null;
+      while (node = walk.nextNode()) {
+        if ((node.nodeValue || '').includes(anchor)) {
+          body = node.parentElement;
+          break;
         }
       }
-      return null;  // anchor 沒匹配任何 permalink 連結的祖先 → 不猜（誠實 fail）
+      if (!body) return null;
+      body.scrollIntoView({block: 'center'});
+      const br = body.getBoundingClientRect();
+      const links = Array.from(document.querySelectorAll('a[href]')).filter(a => {
+        const r = a.getBoundingClientRect();
+        return r.width > 0 && r.height > 0 && r.height <= 32 &&
+               r.x >= br.x - 20 && r.x < br.x + 250 &&
+               r.bottom <= br.top && br.top - r.bottom < 100;
+      });
+      links.sort((a, b) =>
+        (br.top - a.getBoundingClientRect().bottom) -
+        (br.top - b.getBoundingClientRect().bottom)
+      );
+      if (!links.length) return null;
+      links[0].setAttribute('data-vp-permalink-trigger', '1');
+      return links[0].href;
     }
     """
     try:
-        url = page.evaluate(js, anchor)
-        if url:
-            print(f"[OK] 抓到貼文永久連結（anchor 比對命中）：{url}")
-        else:
-            print(f"[WARN] 抓 permalink：timeline 找不到含「{anchor}」的貼文永久連結"
+        initial_href = page.evaluate(tag_timestamp_js, anchor)
+        if not initial_href:
+            print(f"[WARN] 抓 permalink：timeline 找不到含「{anchor}」的貼文時間戳"
                   "（可能已捲太下 / 已刪 / anchor 不符）→ 不寫 URL（非阻塞）", file=sys.stderr)
-        return url or None
+            return None
+        timestamp = page.locator("[data-vp-permalink-trigger='1']")
+        timestamp.hover(timeout=5_000)
+        page.wait_for_timeout(1_200)
+        url = timestamp.evaluate("a => a.href")
+        if not url or not any(
+            marker in url for marker in ("/posts/", "story_fbid", "/permalink/", "/pfbid")
+        ):
+            print(f"[WARN] 抓 permalink：目標時間戳 hover 後仍未產生永久連結"
+                  f"（href={url or initial_href}）→ 不寫 URL（非阻塞）", file=sys.stderr)
+            return None
+        clean_url = url.split("?", 1)[0]
+        print(f"[OK] 抓到貼文永久連結（anchor 綁定時間戳 + hover）：{clean_url}")
+        return clean_url
     except Exception as e:  # noqa: BLE001
         print(f"[WARN] 抓 permalink 失敗（非阻塞）: {e}", file=sys.stderr)
         return None
 
 
-def _add_first_comment(page, body: str, link: str) -> None:
-    """在剛發的貼文底下補第一則留言（連結）。用主文第一行前段當 anchor，在 timeline
-    以 JS innerText 比對定位「該貼文」的留言 textbox（profile 頁 div[role='article']
-    不穩，2026-07-07 改此法驗證可行），type URL（ASCII 不亂碼）+ Enter 送出。"""
-    anchor = body.strip().splitlines()[0][:12]
-    # 2026-07-19：原本 domcontentloaded + 3.5s 就掃 DOM，profile feed 常還沒 render
-    # （實測 body innerText 僅 2170 字、滿頁佔位）→ 定位不到貼文。改等 load + 15s，
-    # 並把「其他貼文」捲進視窗讓最新貼文真正掛上 DOM。
-    page.goto(FB_PROFILE_URL, wait_until="load", timeout=90_000)
-    page.wait_for_timeout(15_000)
-    try:
-        page.get_by_text("其他貼文", exact=True).first.scroll_into_view_if_needed(timeout=15_000)
-    except Exception:
-        page.mouse.wheel(0, 1250)  # fallback: 捲過置頂貼文，露出最新貼文
-    page.wait_for_timeout(5_000)
+def _locate_comment_box(page, anchor: str = ""):
+    """以 JS innerText 比對定位「含 anchor 的那篇貼文」的留言 textbox。
+
+    profile 頁 div[role='article'] 不穩（2026-07-07 改此法驗證可行）：改掃所有 div，
+    找同時含 anchor 與「的身分留言」且夠小（<1400 字）的容器，取其 role=textbox。
+    anchor="" 用於**單篇 permalink 頁**（頁上只有一篇貼文，不需 anchor 消歧）。
+    """
     js = """
     (anchor) => {
       const boxes = Array.from(document.querySelectorAll('div'));
@@ -431,10 +478,42 @@ def _add_first_comment(page, body: str, link: str) -> None:
       return null;
     }
     """
-    handle = page.evaluate_handle(js, anchor)
-    el = handle.as_element()
+    el = page.evaluate_handle(js, anchor).as_element()
     if not el:
         raise RuntimeError(f"找不到含「{anchor}」貼文的留言框")
+    return el
+
+
+def _verify_comment_sent(page, el, needle: str) -> bool:
+    """送出後回讀確認：留言框清空 + 頁面出現 needle。
+
+    2026-07-19：原本無條件印 [OK]。實測 mile_29018fa1 這樣誤報成功，貼文實際 0 留言，
+    引流連結整篇掉了。送出後一律回讀，不回讀不算成功。
+    """
+    for _ in range(6):
+        cleared = (el.inner_text() or "").strip() == ""
+        shown = needle in page.evaluate("() => document.body.innerText")
+        if cleared and shown:
+            return True
+        page.wait_for_timeout(2_500)
+    return False
+
+
+def _add_first_comment(page, body: str, link: str) -> None:
+    """在剛發的貼文底下補第一則留言（連結）。用主文第一行前段當 anchor，在 timeline
+    定位「該貼文」的留言 textbox，type URL（ASCII 不亂碼）+ Enter 送出。"""
+    anchor = body.strip().splitlines()[0][:12]
+    # 2026-07-19：原本 domcontentloaded + 3.5s 就掃 DOM，profile feed 常還沒 render
+    # （實測 body innerText 僅 2170 字、滿頁佔位）→ 定位不到貼文。改等 load + 15s，
+    # 並把「其他貼文」捲進視窗讓最新貼文真正掛上 DOM。
+    page.goto(FB_PROFILE_URL, wait_until="load", timeout=90_000)
+    page.wait_for_timeout(15_000)
+    try:
+        page.get_by_text("其他貼文", exact=True).first.scroll_into_view_if_needed(timeout=15_000)
+    except Exception:
+        page.mouse.wheel(0, 1250)  # fallback: 捲過置頂貼文，露出最新貼文
+    page.wait_for_timeout(5_000)
+    el = _locate_comment_box(page, anchor)
     el.scroll_into_view_if_needed()
     el.click()
     page.wait_for_timeout(800)
@@ -442,15 +521,9 @@ def _add_first_comment(page, body: str, link: str) -> None:
     page.wait_for_timeout(3_500)  # 等連結預覽
     page.keyboard.press("Enter")
     page.wait_for_timeout(4_500)
-    # 2026-07-19：原本無條件印 [OK]。實測 mile_29018fa1 這樣誤報成功，貼文實際 0 留言，
-    # 引流連結整篇掉了。送出後必須回讀確認：留言框清空 + 頁面出現該連結。
-    for _ in range(6):
-        cleared = (el.inner_text() or "").strip() == ""
-        shown = link.rsplit("/", 1)[-1] in page.evaluate("() => document.body.innerText")
-        if cleared and shown:
-            print(f"[OK] 第一則留言已送出並驗證：{link}")
-            return
-        page.wait_for_timeout(2_500)
+    if _verify_comment_sent(page, el, link.rsplit("/", 1)[-1]):
+        print(f"[OK] 第一則留言已送出並驗證：{link}")
+        return
     raise RuntimeError(f"留言送出後驗證失敗（留言框未清空或頁面查無連結）：{link}")
 
 
@@ -555,6 +628,96 @@ def cmd_delete_matching(anchor: str, confirm: bool) -> int:
         page.screenshot(path=str(after))
         print(f"[OK] 已送出刪除，事後截圖：{after}")
         return 0
+
+
+def cmd_comment_on(post_url: str, comment_file: Path, dry_run: bool) -> int:
+    """對**既有**貼文補一則留言（更正說明 / 補連結用）。
+
+    與 `_add_first_comment` 的差別只在定位方式：這裡直接 goto 單篇 permalink（頁上只有
+    一篇貼文 → anchor="" 即可），留言框互動邏輯共用 `_locate_comment_box`。
+    中文一律走剪貼簿整段貼上（keyboard.type 對中文 IME 會亂碼，SKILL §硬規則 4），
+    並沿用發文路徑的「貼上前一刻 pbcopy + pbpaste 驗證 + composer 回讀」三重防剪貼簿被搶。
+
+    --dry-run：貼完 + 截圖後停在送出前，不按 Enter。
+    """
+    from playwright.sync_api import sync_playwright
+
+    text = comment_file.read_text(encoding="utf-8").strip()
+    if not text:
+        print(f"[FAIL] 留言檔為空：{comment_file}")
+        return 2
+
+    # 送出後回讀用的 needle：優先取留言內 URL 的末段（ASCII，最不易被 FB 改寫），
+    # 沒有 URL 才退回中文前段。
+    m = re.search(r"https?://\S+", text)
+    needle = m.group(0).rstrip("/").rsplit("/", 1)[-1] if m else text[:12]
+
+    ver = ensure_fb_chrome()
+    if not ver:
+        print(f"[FAIL] CDP port {CDP_PORT} 沒開且自動啟動失敗 — 見 docs/fb_realchrome_setup.md")
+        return 2
+    SHOT_DIR.mkdir(parents=True, exist_ok=True)
+    with sync_playwright() as pw:
+        browser = _connect(pw)
+        page = _get_or_open_fb_page(browser)
+        if _login_state(page) == "login_wall":
+            print("[FAIL] FB 未登入 — 只有老闆能在 dedicated Chrome 手動登入")
+            browser.close()
+            return 3
+
+        page.goto(post_url, wait_until="load", timeout=90_000)
+        page.wait_for_timeout(8_000)
+        try:
+            el = _locate_comment_box(page, "")
+        except RuntimeError as e:
+            shot = SHOT_DIR / f"comment_on_nobox_{int(time.time())}.png"
+            page.screenshot(path=str(shot))
+            print(f"[FAIL] {e}；截圖 {shot}")
+            browser.close()
+            return 4
+        el.scroll_into_view_if_needed()
+        el.click()
+        page.wait_for_timeout(800)
+
+        subprocess.run(["pbcopy"], input=text.encode("utf-8"), check=True)
+        clip = subprocess.run(["pbpaste"], capture_output=True, text=True).stdout
+        if clip.strip() != text:
+            shot = SHOT_DIR / f"comment_on_clip_mismatch_{int(time.time())}.png"
+            page.screenshot(path=str(shot))
+            print(f"[ABORT] 剪貼簿驗證失敗（pbcopy 後 pbpaste != 留言）→ 不貼；截圖 {shot}")
+            browser.close()
+            return 5
+        page.keyboard.press("Meta+V")
+        page.wait_for_timeout(2_500)
+
+        composed = el.inner_text() or ""
+        shot = SHOT_DIR / f"comment_on_composed_{int(time.time())}.png"
+        page.screenshot(path=str(shot))
+        head = text[:16]
+        if head not in composed:
+            print(f"[ABORT] 留言框內容與留言檔不符（剪貼簿可能被搶）→ 不送出；截圖 {shot}")
+            print(f"        期望開頭: {head!r}")
+            print(f"        實際讀到: {composed[:60]!r}")
+            browser.close()
+            return 5
+        print(f"[OK] 留言已貼入留言框（{len(text)} 字），截圖 {shot}")
+
+        if dry_run:
+            print("[DRY-RUN] 停在送出前，未按 Enter。人工看上面截圖確認後再跑不帶 --dry-run 的版本。")
+            browser.close()
+            return 0
+
+        page.keyboard.press("Enter")
+        page.wait_for_timeout(5_000)
+        ok = _verify_comment_sent(page, el, needle)
+        shot = SHOT_DIR / f"comment_on_{'done' if ok else 'fail'}_{int(time.time())}.png"
+        page.screenshot(path=str(shot))
+        browser.close()
+        if ok:
+            print(f"[OK] 留言已送出並驗證（needle={needle!r}）；截圖 {shot}")
+            return 0
+        print(f"[FAIL] 留言送出後驗證失敗（留言框未清空或頁面查無 {needle!r}）；截圖 {shot}")
+        return 6
 
 
 def cmd_check() -> int:
@@ -690,6 +853,14 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
             browser.close()
             return 3
 
+        # 2026-07-20 fix：--check 等前一輪操作會把分頁留在某篇貼文的 permalink，
+        # 那頁的「Ivan Lai 的貼文」dialog 帶著留言框，是上面 _composer_dialog 要閃避的
+        # 污染源本身。發文前先回個人頁根，讓 composer 是頁面上唯一的 dialog。
+        if "/posts/" in (page.url or "") or "permalink" in (page.url or ""):
+            print(f"[INFO] 分頁停在貼文 permalink → 導回個人頁再發（原 URL: {page.url}）")
+            page.goto(FB_PROFILE_URL, wait_until="domcontentloaded", timeout=60_000)
+            page.wait_for_timeout(3_000)
+
         # 1) 開 composer：點「在想些什麼」觸發鈕
         opened = False
         for sel in [
@@ -711,8 +882,8 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
             # 以「dialog 是否真的出現」為準，而非 click 的回傳。
             page.wait_for_timeout(3_000)
             try:
-                page.locator(
-                    "div[role='dialog'] div[role='textbox'][contenteditable='true']"
+                _composer_dialog(page).locator(
+                    "div[role='textbox'][contenteditable='true']"
                 ).first.wait_for(state="visible", timeout=8_000)
                 opened = True
                 print("[INFO] click 回報失敗但 composer 已開 → 續行")
@@ -730,8 +901,11 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
         # 2026-07-07 fix：`.first` 原本會抓到背景 profile 頁的留言框
         # （aria-label='以 Ivan Lai 的身分留言'），被 composer modal overlay 攔截 →
         # click timeout。scope 到 div[role='dialog'] 只剩 composer 那一個 textbox。
-        editor = page.locator(
-            "div[role='dialog'] div[role='textbox'][contenteditable='true']"
+        # 2026-07-20 fix：頁面可同時有多個 dialog（舊貼文 permalink 也含留言框）→
+        # 改用 _composer_dialog() 的 file-input+textbox 判準精確鎖定，見該函式 docstring。
+        composer = _composer_dialog(page)
+        editor = composer.locator(
+            "div[role='textbox'][contenteditable='true']"
         ).first
         editor.wait_for(state="visible", timeout=8_000)
         editor.click(timeout=8_000)
@@ -747,7 +921,7 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
         # 只清文字，附著的 link preview 卡要另外按「移除貼文的連結預覽」/「全部移除」。
         for rm_label in ["移除貼文的連結預覽", "全部移除"]:
             try:
-                rm = page.locator(f"div[role='dialog'] [aria-label='{rm_label}']").first
+                rm = composer.locator(f"[aria-label='{rm_label}']").first
                 if rm.count() > 0:
                     rm.click(timeout=4_000)
                     page.wait_for_timeout(800)
@@ -803,9 +977,8 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                 #   - cleanup 點單一「移除貼文附件」鈕（一次清空全部附件）
                 #   - 計 composer 內 blob: img 且渲染尺寸≥60px（排除 0×0 svg/data 圖示）= 真實張數
                 for _ in range(6):
-                    rm = page.locator(
-                        "div[role='dialog'] [aria-label='移除貼文附件'], "
-                        "div[role='dialog'] [aria-label='Remove attachment']"
+                    rm = composer.locator(
+                        "[aria-label='移除貼文附件'], [aria-label='Remove attachment']"
                     ).first
                     if rm.count() == 0 or not rm.is_visible():
                         break
@@ -818,10 +991,22 @@ def cmd_post(draft_path: Path, dry_run: bool, force: bool = False) -> int:
                     print("[ABORT] 找不到 composer dialog（無 file input + editor）→ 不發")
                     browser.close()
                     return 8
-                finp = page.locator("div[role='dialog'] input[type='file']").first
+                # 2026-07-20 fix — composer dialog 內不只一個 file input，且 `.first` 命中的
+                # 那個沒有 `multiple` 屬性（accept 清單以 video/* 開頭），多檔 set 會炸
+                # "Non-multiple file input can only accept single file" → 附圖 ABORT。
+                # 正解：優先挑帶 `multiple` 的 input；真的只有單檔 input 時逐張附上
+                # （FB 單檔 input 每次 set 是「再加一張」，不是替換），最後仍由下方
+                # _composer_photo_count 校驗總數，附不齊照樣 ABORT。
+                finp = composer.locator("input[type='file'][multiple]").first
                 if finp.count() == 0:
-                    finp = page.locator("input[type='file']").first
-                finp.set_input_files(local)
+                    finp = composer.locator("input[type='file']").first
+                if finp.evaluate("el => el.multiple"):
+                    finp.set_input_files(local)
+                else:
+                    print(f"[INFO] file input 不支援多檔 → 逐張附上 {len(local)} 張")
+                    for one in local:
+                        finp.set_input_files(one)
+                        page.wait_for_timeout(1_500)
                 page.wait_for_timeout(3_000 + 1_500 * len(local))  # 等縮圖上傳
                 # 照片 tile 可能稍晚 render；poll 至達 N 或穩定（≤6s 額外等待）
                 thumbs = _composer_photo_count(page)
@@ -931,13 +1116,17 @@ def main() -> int:
     g.add_argument("--post", metavar="DRAFT", help="發文：FB draft .md 路徑")
     g.add_argument("--delete-matching", metavar="ANCHOR",
                    help="撤掉重發用：定位 timeline 含此文字的最新貼文並刪除（預設只截圖，需 --confirm-delete 才真刪）")
+    g.add_argument("--comment-on", metavar="POST_URL",
+                   help="對既有貼文補一則留言（更正說明/補連結）：需搭配 --comment-file")
     g.add_argument("--recapture-permalink", metavar="MILE_ID",
                    help="回補既有已發貼文的 fb_post_url（導 timeline 抓永久連結，走正式 writer 回寫 canonical）")
     ap.add_argument("--posted-at", metavar="ISO",
                     help="搭配 --recapture-permalink：一併回補 fb_posted_at（ISO8601）")
     ap.add_argument("--confirm-delete", action="store_true",
                     help="搭配 --delete-matching：截圖驗證後真的移至垃圾桶（對外破壞性動作）")
-    ap.add_argument("--dry-run", action="store_true", help="搭配 --post：停在送出前")
+    ap.add_argument("--comment-file", metavar="PATH",
+                    help="搭配 --comment-on：留言正文 .md 路徑（中文走剪貼簿整段貼上）")
+    ap.add_argument("--dry-run", action="store_true", help="搭配 --post / --comment-on：停在送出前")
     ap.add_argument("--force", action="store_true",
                     help="繞過 idempotency guard 強制重發（已發過的 mile 也重貼；慎用）")
     args = ap.parse_args()
@@ -946,6 +1135,13 @@ def main() -> int:
         return cmd_check()
     if args.delete_matching:
         return cmd_delete_matching(args.delete_matching, confirm=args.confirm_delete)
+    if args.comment_on:
+        if not args.comment_file:
+            ap.error("--comment-on 需要搭配 --comment-file")
+        cf = Path(args.comment_file)
+        if not cf.exists():
+            ap.error(f"--comment-file 不存在：{cf}")
+        return cmd_comment_on(args.comment_on, cf, args.dry_run)
     if args.recapture_permalink:
         return cmd_recapture_permalink(args.recapture_permalink, posted_at=args.posted_at)
     return cmd_post(Path(args.post), args.dry_run, force=args.force)

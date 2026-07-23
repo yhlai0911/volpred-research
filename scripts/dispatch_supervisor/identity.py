@@ -24,3 +24,17 @@ def task_claim_owner(*, role: str, slot_id: str, job_id: str) -> str:
     if not normalized_slot or not normalized_job:
         raise ValueError("task-claim owner requires non-empty slot_id and job_id")
     return f"{normalized_role}-{normalized_slot}-{normalized_job}"
+
+
+def task_claim_owners_for_job(*, slot_id: str, job_id: str) -> tuple[str, ...]:
+    """Every owner token one supervisor fire could have issued for this slot.
+
+    A fire starts on Claude (``hourly``) and may hand the SAME slot/job to the
+    Codex failover mid-flight, so a reclaim path that only knows slot+job (the
+    health monitor's kill path — it never sees which executor actually claimed)
+    must consider both roles.  Deterministically ordered so logs are stable.
+    """
+    return tuple(
+        task_claim_owner(role=role, slot_id=slot_id, job_id=job_id)
+        for role in sorted(_CLAIM_OWNER_ROLES)
+    )

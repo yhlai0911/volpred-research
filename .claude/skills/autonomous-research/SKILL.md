@@ -461,11 +461,8 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 - 單一 session 累積成本超過 **$200** 或跨日超過 **24h**，主動建議使用者 `/clear`
 - 排程 cron tick 用 stub 回覆（≤15 字）省 token — 已在 CLAUDE.md「Cron skip 用 stub」段
-- `next_tasks.json` 只放 next-action 任務；completed/cancelled/superseded/resolved_* 一律移到 `storage/next_tasks_archive.jsonl`（2026-04-17 教訓：曾累積到 128KB / 205 條，每次 Edit 都重寫整檔）
-- 但在 v11 之後，`next_tasks.json` 只算 **legacy planning / working list**：
-  - scheduler / control plane 的正式 task source of truth 是 `storage/ops/`
-  - `next_tasks.json` 只能當補充線索，不可當成 canonical queue
-  - 若是正式排程、approval、rollback、event 任務，一律以 control plane / `event_jobs` 為準
+- `next_tasks.json` 只放 next-action 任務；終態（succeeded/failed/superseded/…）**由既有壓縮 helper 自動歸檔** — `volpred.ops.next_tasks.compact_terminal_tasks()`（終態 >3 天壓 tombstone + 歸檔 `storage/next_tasks_archive/`；測試 `scripts/tests/test_queue_maintenance_compact.py`）。**禁止用 Edit 工具或 jq+mv 直改這個佇列** — 寫入一律走 canonical helper（`task_pool_claim.py` / `append_next_task` / `write_tasks_locked`），繞過 = 繞過 flock 與 status vocab gate（WS-A1b）
+- `next_tasks.json` 是 **canonical pending queue**（2026-07-16 single-gateway refactor；`.claude/rules/control-plane.md` 為唯一 owner）：`storage/ops/tasks/` 是 execution receipts / audit trail，不是 pending queue；排程 spec 以 `config/runtime_schedules.json` + event_jobs 為準
 
 ## Related Skills
 

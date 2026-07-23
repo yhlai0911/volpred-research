@@ -137,7 +137,9 @@ def test_piggy_back_drift_warns_on_bad_job_timestamp(tmp_path: Path, monkeypatch
     assert result["drifts"] == ["unparsable_marker: paper_sync_all 'not-a-timestamp'"]
     assert "[check_alerts] WARN cron_last_run timestamp parse failed" in captured.err
     assert "job_id=paper_sync_all" in captured.err
-    assert "Invalid isoformat string" in captured.err
+    # WS-D1: parsing moved into volpred.ops.schedules.job_liveness; the WARN now
+    # carries the raw marker instead of datetime's "Invalid isoformat string".
+    assert "not-a-timestamp" in captured.err
     assert "piggy-back-drift:" in captured.out
 
 
@@ -184,3 +186,112 @@ def test_wrapper_drift_entries_quiet_on_a_non_checkout_root(tmp_path: Path, monk
     check_alerts = _load_check_alerts_module()
     monkeypatch.setattr(check_alerts, "PROJECT_ROOT", tmp_path)
     assert check_alerts._wrapper_drift_entries() == []
+
+
+def test_append_next_task_locked_routes_machine_p1_through_gateway_clamp(tmp_path: Path):
+    """2026-07-21 dispatch-lanes absorb: the CI-red P1 writer must pass the
+    append_task_record admission clamp — machine-source P1 is admitted as P2
+    (priority_capped_from=1). Timeliness rides on dispatch_preempt + the CI
+    watcher's request_fire loop, not on the priority digit."""
+    check_alerts = _load_check_alerts_module()
+    queue = tmp_path / "next_tasks.json"
+    task = check_alerts._build_ci_repair_task(
+        {"databaseId": 999001, "attempt": 1, "headSha": "abc123def", "url": "https://x/runs/999001"},
+        now_iso="2026-07-21T00:00:00+00:00",
+    )
+    assert task["priority"] == 1  # builder still declares P1 intent
+    assert "repair_commit=pending_post_commit" in task["description"]
+    assert "不自行 commit/push" in task["description"]
+
+    created = check_alerts._append_next_task_locked(task, queue)
+
+    assert created is True
+    persisted = json.loads(queue.read_text(encoding="utf-8"))
+    assert [t["id"] for t in persisted] == ["ci-red-999001"]
+    assert persisted[0]["priority"] == 2
+    assert persisted[0]["priority_capped_from"] == 1
+    assert persisted[0]["dispatch_preempt"] is True  # the actual timeliness carrier survives
+
+    # id-dedup contract preserved: replay returns False, queue unchanged.
+    replay = check_alerts._build_ci_repair_task(
+        {"databaseId": 999001, "attempt": 1, "headSha": "abc123def", "url": "https://x/runs/999001"},
+        now_iso="2026-07-21T01:00:00+00:00",
+    )
+    assert check_alerts._append_next_task_locked(replay, queue) is False
+    assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
+
+
+def test_append_next_task_locked_keeps_time_critical_machine_p1(tmp_path: Path):
+    """Clamp pass-through: a machine-built time-critical type keeps P1 (the
+    2026-07-12 boss directive lives in task_urgency, not in this caller)."""
+    check_alerts = _load_check_alerts_module()
+    queue = tmp_path / "next_tasks.json"
+    task = {
+        "id": "evt_x",
+        "title": "event",
+        "task_type": "event_article",
+        "priority": 1,
+        "status": "pending",
+        "source": "auto_remediation",
+        "created_at": "2026-07-21T00:00:00+00:00",
+    }
+    assert check_alerts._append_next_task_locked(task, queue) is True
+    persisted = json.loads(queue.read_text(encoding="utf-8"))
+    assert persisted[0]["priority"] == 1
+    assert "priority_capped_from" not in persisted[0]
+
+
+def test_every_module_level_call_target_actually_exists():
+    """Guard the merge-loss class: a call site outliving its definition.
+
+    2026-07-22: merge 883903a96 took the agent branch's rewritten
+    ``_append_next_task_locked`` and deleted the immediately-adjacent
+    ``_ci_incident_store_sync`` along with it, while all three call sites
+    survived.  Nothing failed at import time — the NameError only fired when
+    ``_reduce_ci_run`` reached line 1788 at runtime, which is inside the hourly
+    cron.  check_alerts.py then died on every run for 16 hours (alerting AND
+    auto-remediation both down, since the orphan reaper sits past the crash
+    point) and no test noticed.
+
+    Importing the module is not enough to catch this, so walk the AST and
+    assert every private ``_foo(...)`` call resolves to something defined in
+    the module.  This generalises: it catches the next deletion too, not just
+    this one.
+    """
+    import ast
+
+    check_alerts = _load_check_alerts_module()
+    root = Path(__file__).resolve().parents[1]
+    source = (root / "scripts" / "check_alerts.py").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    defined = {
+        node.name
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+    }
+    # Locally-bound names (imports, assignments, params) are legitimate targets too.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            defined.add(node.id)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                defined.add((alias.asname or alias.name).split(".")[0])
+        elif isinstance(node, ast.arg):
+            defined.add(node.arg)
+
+    missing = sorted(
+        {
+            node.func.id
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id.startswith("_")
+            and node.func.id not in defined
+            and not hasattr(check_alerts, node.func.id)
+        }
+    )
+    assert not missing, f"call sites with no definition in check_alerts.py: {missing}"
+
+    # The specific casualty, pinned by name so a re-deletion names itself.
+    assert callable(getattr(check_alerts, "_ci_incident_store_sync", None))

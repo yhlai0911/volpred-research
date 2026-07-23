@@ -37,7 +37,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Sequence
 
-from . import alerts, codex_failover, failure_class, identity, procutil, state
+from volpred.ops import fire_manifest
+
+from . import (
+    alerts, claim_release, codex_failover, failure_class, identity, procutil, state,
+)
 
 LOG = logging.getLogger(__name__)
 
@@ -85,6 +89,57 @@ HANG_EXIT_CODES = {137, 142, 143}  # SIGKILL / SIGALRM / SIGTERM
 TIMEOUT_KILLED_SENTINEL = -1000
 OWNERSHIP_LOST_SENTINEL = -1001
 TIMEOUT_SURVIVED_SENTINEL = -1002
+# The child printed a terse CLI fatal (see failure_class.is_terse_fatal_only)
+# and then stopped writing without exiting. We killed it early rather than
+# letting the hang cap reap it 16 minutes later. Distinct from the timeout
+# sentinels because this is NOT a hang: nothing was running to hang.
+FATAL_FASTFAIL_SENTINEL = -1003
+
+# How long a terse-fatal-only log must sit unchanged before we call it dead.
+# 60s per the owner's spec: long enough that a CLI which prints the marker and
+# then recovers (never observed, but cheap to allow for) survives, short enough
+# that the slot loses one minute instead of sixteen.
+FATAL_STALL_S = float(os.environ.get("VOLPRED_DISPATCH_FATAL_STALL_S", "60"))
+FATAL_POLL_S = float(os.environ.get("VOLPRED_DISPATCH_FATAL_POLL_S", "5"))
+# Sidecar-liveness DOA detection (2026-07-21, third Execution-error strike).
+# The terse fatal usually never reaches the main log until the process dies —
+# the CLI holds it in-process and flushes at kill time (every incident log has
+# mtime == kill time), so the marker probe above it is structurally blind to
+# the live case; and a HEALTHY agentic run legitimately writes nothing to the
+# main log for tens of minutes, so main-log silence alone discriminates
+# nothing. The debug sidecar is the one channel with a positive liveness
+# signal: a healthy CLI streams debug events from startup on; a dead-on-arrival
+# one freezes within its first seconds. Detection therefore keys on "the
+# sidecar froze INSIDE the startup window" — a run whose sidecar was still
+# growing after that window can never be fast-failed by this path, however
+# quiet it goes later (long tool runs are exactly that shape).
+SIDECAR_DEAD_S = float(os.environ.get("VOLPRED_DISPATCH_SIDECAR_DEAD_S", "180"))
+SIDECAR_STARTUP_WINDOW_S = float(
+    os.environ.get("VOLPRED_DISPATCH_SIDECAR_STARTUP_WINDOW_S", "120"))
+SIDECAR_STALL_S = float(os.environ.get("VOLPRED_DISPATCH_SIDECAR_STALL_S", "240"))
+
+# Route the CLI's own debug stream to a per-attempt sidecar file (`--debug-file`).
+#
+# Why this is needed: the 15-byte incident logs carried no diagnostic detail at
+# all. stderr is NOT missing — `_spawn` already folds it into the worker log, so
+# `Execution error` genuinely WAS everything the CLI emitted — which is exactly
+# the problem: the terse fatal names no cause (API? session limit? something
+# else?), so the failures are unattributable.
+#
+# Why only from attempt 2: `--debug-file` implicitly enables debug mode, and we
+# have not verified on this host whether debug ALSO reaches stdout. If it does,
+# the extra lines land in the worker log, `is_terse_fatal_only` stops matching,
+# and the sidecar would silently disable the fast-fail above — the fix breaking
+# the more valuable fix. Attempt 1 therefore keeps a pristine log and always
+# gets the fast path; by attempt 2 this fire is already known-bad, and knowing
+# WHY beats one more clean classification. The first sidecar a real incident
+# leaves behind settles whether this can widen to attempt 1.
+# 2026-07-21: default 2 → 1. The sidecar is no longer only a post-mortem aid —
+# it is the liveness channel the DOA detector reads (see SIDECAR_DEAD_S block),
+# and every observed dead-on-arrival happened on attempt 1, exactly the attempt
+# that used to run without one. Success still unlinks the sidecar, so the disk
+# cost of always-on is one file per FAILED attempt.
+DEBUG_SIDECAR_FROM_ATTEMPT = int(os.environ.get("VOLPRED_DISPATCH_DEBUG_FROM_ATTEMPT", "1"))
 
 # stderr/stdout regex classifiers — shared with scripts/run_agent_job.py, the
 # other place that spawns `claude -p` and must tell auth/quota/transient apart.
@@ -124,12 +179,20 @@ def _classify(exit_code: int, output: str) -> str:
         return "ownership_lost"
     if exit_code == TIMEOUT_SURVIVED_SENTINEL:
         return "hang_survived"
+    if exit_code == FATAL_FASTFAIL_SENTINEL:
+        return "fatal_fastfail"
     if exit_code == TIMEOUT_KILLED_SENTINEL:
         return "hang"
     if exit_code == 0:
         return "success"
     if exit_code in HANG_EXIT_CODES:
-        return "hang"
+        # A raw signal exit can ONLY be an outside kill: every kill WE initiate
+        # returns through a sentinel above (timeout / fatal probes), never as
+        # the child's own wait() status. Until 2026-07-21 this fell into "hang"
+        # — three healthy fires killed mid-work at ~600s by an unidentified
+        # external SIGTERM were mailed to the owner as「卡住」CRITICALs
+        # (email-12150, assign_7f15f261).
+        return "external_signal"
     return failure_class.classify_output(output) or "hard_failure"
 
 
@@ -186,6 +249,94 @@ def _read_since(path: Path, offset: int, max_bytes: int = 2048) -> str:
     except OSError as exc:
         LOG.warning("read_since %s failed: %s", path, exc)
         return ""
+
+
+def _wait_with_fatal_probe(
+    proc: subprocess.Popen,
+    *,
+    log_path: Path,
+    log_offset: int,
+    timeout_s: float,
+    debug_path: Path | None = None,
+    stall_s: float | None = None,
+    poll_s: float | None = None,
+    now_fn=time.monotonic,
+) -> tuple[str, int | None]:
+    """Wait for the child, watching for the "dead but not exited" shape.
+
+    Returns one of:
+      ("exited", raw_wait_status)  child exited on its own — the normal path
+      ("timeout", None)            the hang cap expired, caller kills as before
+      ("fatal_stall", None)        the child is provably dead-on-arrival —
+                                   caller kills now
+
+    Why a poll loop instead of one `proc.wait(timeout=timeout_s)`: the hang cap
+    is a last resort, not a detector. On 2026-07-20 five fires printed
+    `Execution error` within seconds and then sat there; each burned ~16 minutes
+    of its slot before something reaped it, and each mailed a CRITICAL hang
+    alert for a process that had never started working.
+
+    TWO detectors feed the fatal_stall verdict, because the main log alone is
+    structurally blind (2026-07-21, third strike of the same shape):
+
+    1. Marker probe — the log holds ONLY a terse CLI fatal and has not grown
+       for `stall_s`. Stall-gated so a CLI that prints the marker and then
+       keeps writing takes itself back out of the verdict. In practice the CLI
+       usually flushes the marker only when killed, so this branch catches the
+       early-flush minority.
+    2. Sidecar liveness — requires `debug_path`. A healthy CLI streams debug
+       events from startup on; a DOA one freezes within its first seconds. The
+       verdict fires only when the main log is quiet AND the sidecar either
+       never wrote a byte (SIDECAR_DEAD_S) or froze at a size it reached inside
+       SIDECAR_STARTUP_WINDOW_S and has not grown for SIDECAR_STALL_S. A run
+       whose sidecar was still growing after the startup window can never be
+       fast-failed here, however quiet it goes later.
+    """
+    # Resolved at CALL time, not bound as a default: the module globals are the
+    # ops knob (env-overridable) and tests tune them by monkeypatching the
+    # module, which a default argument captured at import would silently ignore.
+    stall_s = FATAL_STALL_S if stall_s is None else stall_s
+    poll_s = FATAL_POLL_S if poll_s is None else poll_s
+    start = now_fn()
+    deadline = start + timeout_s
+    marker_since: float | None = None
+    marker_size: int | None = None
+    sidecar_size = 0
+    sidecar_last_growth = start
+    while True:
+        remaining = deadline - now_fn()
+        if remaining <= 0:
+            return "timeout", None
+        try:
+            return "exited", proc.wait(timeout=min(poll_s, remaining))
+        except subprocess.TimeoutExpired:
+            pass  # silent-ok: poll tick — the timeout IS the loop's clock, not an error
+        attempt_output = _read_since(log_path, log_offset)
+        # ── detector 2: sidecar liveness (positive proof-of-life channel) ──
+        if debug_path is not None:
+            now = now_fn()
+            size = _log_size(debug_path)
+            if size != sidecar_size:
+                sidecar_size, sidecar_last_growth = size, now
+            main_quiet = (not attempt_output.strip()
+                          or failure_class.is_terse_fatal_only(attempt_output))
+            if main_quiet:
+                if sidecar_size == 0 and now - start >= SIDECAR_DEAD_S:
+                    return "fatal_stall", None
+                if (sidecar_size > 0
+                        and sidecar_last_growth - start <= SIDECAR_STARTUP_WINDOW_S
+                        and now - sidecar_last_growth >= SIDECAR_STALL_S):
+                    return "fatal_stall", None
+        # ── detector 1: terse-fatal marker on the main log ──
+        size = _log_size(log_path)
+        if not failure_class.is_terse_fatal_only(attempt_output):
+            marker_since, marker_size = None, None  # working, or wrote something else
+            continue
+        if marker_since is None or size != marker_size:
+            marker_since, marker_size = now_fn(), size  # (re)start the grace window
+            continue
+        if now_fn() - marker_since >= stall_s:
+            return "fatal_stall", None
 
 
 def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> bool:
@@ -307,14 +458,18 @@ def _run_one_attempt(
     On timeout: SIGKILL whole PGID, return exit_code=-9 (mapped to killed_timeout
     upstream via HANG_EXIT_CODES + outcome classification).
     """
+    debug_path = log_path.parent / f"{log_path.stem}.attempt{attempt}.debug.log"
     argv = [
         claude_bin, "-p", "--dangerously-skip-permissions",
         "--effort", effort, "--model", model,
         "--add-dir", str(PROJECT_ROOT),
         "--settings", str(PROJECT_ROOT / ".claude" / "settings.json"),
+        *(["--debug-file", str(debug_path)]
+          if attempt >= DEBUG_SIDECAR_FROM_ATTEMPT else []),
         prompt_text,
     ]
     managed_state = True
+    declare_manifest = job_id is not None
     if job_id is None:
         # Compatibility for direct one-attempt smoke/tests. Production reserves
         # the logical fire in scheduler/run_worker and always supplies job_id.
@@ -357,10 +512,26 @@ def _run_one_attempt(
         ),
         "VOLPRED_DISPATCH_SLOT": slot_id,
         "VOLPRED_DISPATCH_JOB_ID": job_id,
+        "VOLPRED_FIRE_ID": job_id,
+        "VOLPRED_FIRE_REPO_ROOT": str(PROJECT_ROOT),
         "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
             role="hourly", slot_id=slot_id, job_id=job_id,
         ),
     }
+    # Stage 2 of declared commit ownership: create the change-set before the
+    # producer can write.  This remains observability-only; PHASE-Z still uses
+    # its fire-start baseline until the seven-day shadow gate passes.
+    if declare_manifest:
+        try:
+            fire_manifest.open_manifest(
+                PROJECT_ROOT,
+                fire_id=job_id,
+                actor=child_env["VOLPRED_ACTOR"],
+                job_id=job_id,
+                slot_id=slot_id,
+            )
+        except Exception as exc:  # noqa: BLE001 — attribution must never veto a fire
+            LOG.warning("fire manifest open failed for job_id=%s: %s", job_id, exc)
     try:
         proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)
     except OSError:
@@ -388,9 +559,43 @@ def _run_one_attempt(
             job_id=job_id, expected_attempt=attempt, pid=proc.pid,
             started_wall=started_wall, path=state_path,
         )
-    try:
-        exit_code = proc.wait(timeout=timeout_s)
-    except subprocess.TimeoutExpired:
+    verdict, raw_exit = _wait_with_fatal_probe(
+        proc, log_path=log_path, log_offset=log_offset, timeout_s=timeout_s,
+        debug_path=(debug_path
+                    if attempt >= DEBUG_SIDECAR_FROM_ATTEMPT else None),
+    )
+    if verdict == "fatal_stall":
+        # Dead-on-arrival CLI: the log holds a terse fatal and nothing else, and
+        # has not moved for FATAL_STALL_S. Reap it now — waiting for the hang
+        # cap costs the rest of the slot and mails a CRITICAL for a fire that
+        # never started (2026-07-20, five occurrences).
+        LOG.warning(
+            "worker attempt=%d terse CLI fatal + %.0fs stall — killing pgid=%d "
+            "instead of waiting out the %ds hang cap",
+            attempt, FATAL_STALL_S, pgid, timeout_s,
+        )
+        killed = bool(_kill_pgid(pgid))
+        try:
+            proc.wait(timeout=GRACE_PERIOD_S + 5)
+        except subprocess.TimeoutExpired:
+            LOG.warning(
+                "worker attempt=%d fatal-fastfail child survived SIGKILL grace pgid=%d",
+                attempt, pgid,
+            )
+        duration = time.time() - started
+        attempt_output = _read_since(log_path, log_offset)
+        if not killed:
+            # A group we could not kill is an orphan no matter WHY we killed it;
+            # quarantine it exactly like a surviving hang rather than declaring
+            # the slot free while something may still be writing.
+            return TIMEOUT_SURVIVED_SENTINEL, duration, attempt_output
+        if managed_state and not state.mark_job_phase(
+            job_id=job_id, phase="classifying", expected_phase="running",
+            expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
+        ):
+            return OWNERSHIP_LOST_SENTINEL, duration, attempt_output
+        return FATAL_FASTFAIL_SENTINEL, duration, attempt_output
+    if verdict == "timeout":
         # Codex-review §10 #1 fix: our own watchdog timeout fired. Whatever
         # POSIX signal status we observe next (raw negative wait() return,
         # 137 fallback if SIGKILL also raced), this MUST be classified as
@@ -416,8 +621,18 @@ def _run_one_attempt(
         ):
             return OWNERSHIP_LOST_SENTINEL, duration, attempt_output
         return TIMEOUT_KILLED_SENTINEL, duration, attempt_output
+    exit_code = raw_exit
     duration = time.time() - started
     attempt_output = _read_since(log_path, log_offset)
+    if exit_code == 0:
+        # Debug sidecars only exist to explain failures; a clean attempt's copy
+        # is pure disk cost (a 50-minute opus fire's debug stream is large).
+        try:
+            debug_path.unlink()
+        except FileNotFoundError:
+            pass  # silent-ok: sidecar disabled or never written
+        except OSError as exc:
+            LOG.warning("debug sidecar cleanup %s failed: %s", debug_path, exc)
     if managed_state and not state.mark_job_phase(
         job_id=job_id, phase="classifying", expected_phase="running",
         expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
@@ -591,6 +806,7 @@ def run_worker(
         # stale 'Not logged in' match would freeze the loop (2026-07-05 fix).
         log_tail = attempt_output
         category = _classify(exit_code, attempt_output)
+        attempt_outcome = "failure"  # overridden by branches with a named shape
         LOG.info("worker attempt=%d exit=%d category=%s duration=%.1fs", attempt, exit_code, category, duration)
 
         if category == "ownership_lost":
@@ -645,10 +861,118 @@ def run_worker(
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
             )
 
+        if category == "fatal_fastfail":
+            # The CLI died at second one and never exited; we reaped it in ~60s
+            # instead of ~960s. Two things follow from "it never ran":
+            #   - This is NOT a hang. Sending the hang alert would keep mailing
+            #     the owner a CRITICAL about a frozen 50-minute agent that does
+            #     not exist, which is what made the 2026-07-20 incidents read as
+            #     a systemic failure. The completion receipt below is the record.
+            #   - The task it claimed was never worked on. Release the claim NOW
+            #     so a retry below — or the next fire — can pick it up, rather
+            #     than stranding a P1 until the stale sweep.
+            # Same idempotence argument as the hang path: the kill is confirmed
+            # (an unkillable group returns hang_survived instead), and
+            # release_owner_claims skips rows that are no longer claimed.
+            repended_tasks = claim_release.repend_killed_job_claims(
+                job_id=job_id, slot_id=slot_id, source="worker-fatal-fastfail",
+            )
+            LOG.warning(
+                "worker attempt=%d terse CLI fatal fast-fail after %.1fs "
+                "(hang cap avoided); released claims=%s; output=%r",
+                attempt, duration, repended_tasks or "none", log_tail.strip(),
+            )
+            # Treated as transient from here on: a terse CLI fatal is the shape
+            # an API/session-side problem takes, and the existing transient
+            # contract (backoff, then retry within this same fire) is exactly
+            # the right response. Falls through to the retry ladder below, whose
+            # per-attempt receipt keeps the distinct outcome name so completion
+            # history can tell this shape apart from an ordinary failed run.
+            category = "transient"
+            attempt_outcome = "fatal_fastfail"
+
+        if category == "external_signal":
+            # Dead child WE never killed: something outside the supervisor
+            # signalled the group (sender unknown — this receipt is the
+            # attribution groundwork, assign_7f15f261). Same claim-release as a
+            # hang (the process is confirmed gone; the claim must not strand),
+            # but the notification is an honest WARN naming the signal, never a
+            #「卡住 N 分鐘」CRITICAL about a fire that was working to its last
+            # second (2026-07-21: three healthy fires died this way at ~600s).
+            # No in-fire retry: the killer is still out there and a fresh fire
+            # from the next tick re-dispatches the released claims anyway.
+            repended_tasks = claim_release.repend_killed_job_claims(
+                job_id=job_id, slot_id=slot_id, source="worker-external-signal",
+            )
+            signum = exit_code - 128 if exit_code > 128 else exit_code
+            LOG.warning(
+                "worker attempt=%d killed by EXTERNAL signal %d after %.1fs "
+                "(not our watchdog); released claims=%s",
+                attempt, signum, total_duration, repended_tasks or "none",
+            )
+            # Killer tracer (2026-07-21, 4th unattributed kill): POSIX cannot
+            # name the sender, but a janitor/cron that kills is ALIVE this very
+            # second — snapshot the process table so the next occurrence names
+            # every candidate. Pure evidence capture; never blocks the path.
+            try:
+                snap = subprocess.run(
+                    ["ps", "-axo", "pid,ppid,etime,command"],
+                    capture_output=True, text=True, timeout=10,
+                ).stdout
+                snap_path = log_path.parent / (
+                    f"{log_path.stem}.attempt{attempt}.killsnap.txt")
+                snap_path.write_text(snap, encoding="utf-8")
+                LOG.warning("external-signal process snapshot: %s", snap_path)
+            except Exception as exc:  # noqa: BLE001
+                LOG.warning("external-signal snapshot failed: %s", exc)
+            entry = state.record_completion(
+                job_id=job_id, expected_attempt=attempt,
+                expected_phase="classifying",
+                exit_code=exit_code, outcome="external_signal", final_model=model,
+                path=state_path,
+            )
+            if entry is not None:
+                dead = entry["job"]
+                alerts.send_external_signal_alert(
+                    job={"pid": dead.get("pid", -1),
+                         "pgid": int(dead.get("pgid") or -1),
+                         "started_at": entry.get("fire_at"), "attempt": attempt,
+                         "model": model, "log_path": dead.get("log_path", ""),
+                         "repended_tasks": repended_tasks},
+                    signum=signum, duration_s=total_duration,
+                    state_path=state_path,
+                )
+            return WorkerResult(
+                exit_code=exit_code, outcome="external_signal", final_model=model,
+                attempts=attempt, duration_s=total_duration, log_tail=log_tail,
+            )
+
         if category == "hang":
             # Sanitize sentinel to canonical SIGKILL hang code before persisting:
             # state file readers + alerts expect a real POSIX exit code, not -1000.
             persisted_exit = 137 if exit_code == TIMEOUT_KILLED_SENTINEL else exit_code
+            # WS-A2c: hand the dead fire's task-pool claim back BEFORE the CAS,
+            # so this runs on both return points below (the one that closed the
+            # job and the one that lost to health.py). Deliberately
+            # unconditional:
+            #   - The kill already happened and is CONFIRMED — reaching category
+            #     "hang" requires _kill_pgid() to have returned True (a surviving
+            #     group is classified "hang_survived" instead), so nothing can
+            #     still be acting on this claim.
+            #   - Double-release is a no-op. release_owner_claims
+            #     (scripts/task_pool_claim.py:579-582) skips any row that is no
+            #     longer claimed/in_progress, so if health.py already re-pended
+            #     this job we simply release nothing.
+            #   - Doing it only when we WIN the CAS would leave a real hole:
+            #     health.py closes some aged-out jobs as silent_death /
+            #     timeout_unverified WITHOUT re-pending, and in those cases
+            #     `entry is None` here would mean nobody hands the claim back.
+            # Best-effort: the helper swallows its own failures (WARNING only),
+            # so neither killed_timeout nor the hang alert can be blocked by a
+            # locked or corrupt task pool. The stale sweep is still the backstop.
+            repended_tasks = claim_release.repend_killed_job_claims(
+                job_id=job_id, slot_id=slot_id, source="worker",
+            )
             # record_completion is the atomic hand-off; a non-None return means
             # WE closed this job and therefore own the incident report. It hands
             # back the job as it was at that instant, so we never re-read
@@ -675,10 +999,18 @@ def run_worker(
                          "started_at": entry.get("fire_at"),
                          "attempt": attempt, "model": model,
                          "log_path": hung.get("log_path", ""),
+                         # The sentinel is minted only by our configured
+                         # deadline.  A raw signal is classified separately as
+                         # external_signal, so do not call this proof of hang.
+                         "timeout_kind": (
+                             "work_cap" if exit_code == TIMEOUT_KILLED_SENTINEL else None
+                         ),
                          # observed at alert time: macOS can and does refuse
                          # killpg, so report whether the SIGKILL actually landed
                          # rather than asserting it did (see procutil.kill_pgid).
-                         "survivors": procutil.pgid_members(pgid) if pgid > 0 else []},
+                         "survivors": procutil.pgid_members(pgid) if pgid > 0 else [],
+                         # WS-A2c receipt: which task claims this kill handed back.
+                         "repended_tasks": repended_tasks},
                     log_tail=log_tail, state_path=state_path,
                 )
             return WorkerResult(
@@ -783,7 +1115,7 @@ def run_worker(
             wait_s = RETRY_BACKOFF_S if category == "transient" else max(5, RETRY_BACKOFF_S // 3)
             state.record_completion(
                 job_id=job_id, expected_attempt=attempt, exit_code=exit_code,
-                outcome="failure", final_model=model, release_slot=False,
+                outcome=attempt_outcome, final_model=model, release_slot=False,
                 path=state_path,
             )
             LOG.info("worker attempt=%d %s; sleeping %ds before retry", attempt, category, wait_s)

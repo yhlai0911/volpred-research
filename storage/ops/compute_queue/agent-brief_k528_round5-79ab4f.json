@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k528_round5-79ab4f",
+  "title": "K528 round-5 remediation (Codex FAIL: B1 Friday estimand / B2-B3 fail-open completeness / B4 multiplicity)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k528_round5-79ab4f.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/k528_round5_remediation.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k528_round5-79ab4f.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-20T04:05:49Z",
+  "started_at": "2026-07-20T04:30:04Z",
+  "completed_at": "2026-07-20T04:56:43Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k528_round5-79ab4f.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k528_round5-79ab4f.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528/k528_round5_remediation.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k528_round5-79ab4f.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp",
+  "claude_followup": {
+    "brief": "收件：B1 看 estimand 措辭是否全文一致（禁兩種說法並存）；B2 的對抗測試必須示範在未修版本會 fail，否則視同未修；B3 覆蓋/freshness gate 要有實測；B4 確認 confirmatory family 是 rerun 前指定且 Holm 值有列表。通過後 enqueue Codex round 6 primary-path review → PASS 才用 verdict-template 重生 review_verdict.json（須在所有 claim-surface 檔 landed 之後，否則 sha pin 漂移）→ experiment_gates.py certify → 正式 merge_worktree.sh。knowledge.json 由主線程寫。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k528_round5.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k528_round5-79ab4f.md",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-30adeed7-k528nfp/experiments/k528"
+  },
+  "followup_dispatched_at": "2026-07-20T05:14:17Z",
+  "followup_next_task_id": "assign_05939c1e"
+}

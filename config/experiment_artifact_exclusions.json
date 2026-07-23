@@ -1,0 +1,22 @@
+{
+  "_readme": [
+    "Experiments exempt from scripts/check_experiment_artifacts.py.",
+    "",
+    "The gate requires every experiments/<id>/ that carries archived *_results.json to have",
+    "(a) an entry in storage/memory/knowledge.json and (b) a valid reproduce_spec.json.",
+    "",
+    "An exclusion is an admission that a finding will stay unrecorded or unreproducible.",
+    "It is NEVER the cheap way out of writing an artifact. Every entry must state WHY the",
+    "artifact cannot exist -- not that writing it was inconvenient. An entry whose reason is",
+    "'will do later' is a bug; write the artifact instead.",
+    "",
+    "Directories with NO archived *_results.json are already outside the gate's scope and do",
+    "not belong here -- see the module docstring in scripts/check_experiment_artifacts.py.",
+    "The 2026-07-19 sweep found 108 such directories (paper-writing sessions, .gitkeep",
+    "placeholders, abandoned stubs); listing them here would be noise, not exemption.",
+    "",
+    "Match is on the leading K-id (e.g. 'k1538' also covers 'k1538_bond_fund_flows') or on",
+    "the full directory name, case-insensitive."
+  ],
+  "exclusions": []
+}

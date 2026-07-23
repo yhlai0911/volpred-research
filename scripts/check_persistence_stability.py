@@ -8,6 +8,12 @@ Current recommendations (Phase H, 2026-03-15):
   TLT: w=252 (unstable, std=0.064-0.214)
   GLD: w=252→504 transition (stabilizing, std dropped to 0.019)
   BTC: w=252 (was unstable, 2025 std=0.026 suggests stabilizing)
+
+Research diagnostic only. A recommendation is not authorized to rewrite the
+production estimation window: this command performs heavy rolling GARCH fits,
+and changing the window requires a reviewed experiment/backtest. Heavy reruns
+must go through the compute queue; ``daily_update.py`` deliberately does not
+consume this return value as an automatic actuator.
 """
 import sys
 import os

@@ -374,7 +374,7 @@ For cross-asset validation (Section~\ref{sec:cross_asset}), we additionally use:
 \item \textbf{0050.TW} (Yuanta/P-shares Taiwan Top 50 ETF): Taiwan equity market with VIX lag of one additional day due to time-zone differences.
 \end{itemize}
 
-All data are obtained from Yahoo Finance for the same sample period. The 0050.TW data are cleaned using the split-adjustment procedure of \citet{lai2026vt} to correct for the unadjusted 1:4 stock split prior to 2014.
+All data are obtained from Yahoo Finance for the same sample period. The 0050.TW series requires an explicit repair for the 4:1 split of 2014-01-02, which some Yahoo Finance vintages back-adjust only from the split date forward, leaving the pre-2014 history quoted in pre-split units. Switching to the adjusted-close column does not remove the break, because the adjusted series jumps by the same factor as the raw close; the discontinuity is a level misalignment, not an adjustment error. We therefore rescale the entire pre-2014-01-02 segment by the split factor so that the full history is expressed in post-split units, and verify that no close-to-close ratio near a common split factor remains anywhere in the series. This is a level repair applied before any estimation window is formed, and is therefore stricter than the return-series exclusion used by \citet{lai2026vt}, whose sample-window quantities do not depend on pre-2014 price levels. All 0050.TW results reported below, including the Diebold--Mariano statistics in Table~\ref{tab:cross_asset}, are computed on the repaired series.
 
 
 %=================================================================

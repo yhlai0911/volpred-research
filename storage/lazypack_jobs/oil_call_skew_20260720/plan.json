@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "title": "股市買跌的保險，油市買漲的保險",
+  "subtitle": "同一天到期的選擇權，兩個市場替相反方向的尾巴付錢",
+  "evidence": {
+    "skew": {
+      "path": "storage/article_assets/oil-call-skew-20260720/evidence.json",
+      "sha256": "f5c3d1e57396156d17a621ea94b29fce383c5e7014672aeba6e3474b6fb153c4",
+      "label": "四資產選擇權偏斜與 IV/RV 比率（2026-07-17 收盤鏈）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "editorial",
+      "title": "偏斜在問的問題，跟 OVX 不一樣",
+      "alt": "說明隱含波動率偏斜與波動率指數回答的問題不同",
+      "sources": [
+        "skew"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "OVX 回答的",
+          "body": [
+            "油價接下來可能抖多大。它是一個溫度，不指方向。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "偏斜回答的",
+          "body": [
+            "同樣距離的價外買權和賣權，哪一邊開價比較貴。也就是市場替哪一側的尾巴收比較多保費。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼算",
+          "body": [
+            "取同一個到期日、有未平倉且有買價的合約，用相鄰履約價線性內插出等距價外的買權與賣權隱含波動率，相減。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "油市恐慌指數 OVX",
+          "value": {
+            "source": "skew",
+            "path": "/ts/ovx",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股市恐慌指數 VIX",
+          "value": {
+            "source": "skew",
+            "path": "/ts/vix",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "兩者比值在五年裡的百分位",
+          "value": {
+            "source": "skew",
+            "path": "/ts/ratio_pct_5y",
+            "format": {
+              "kind": "number",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "等距價外：買權減賣權的隱含波動率",
+      "alt": "四個市場在等距價外的買賣權隱含波動率價差",
+      "sources": [
+        "skew"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "原油 USO（正值＝買權比較貴）",
+          "value": {
+            "source": "skew",
+            "path": "/USO/skew_10",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "能源股 XLE",
+          "value": {
+            "source": "skew",
+            "path": "/XLE/skew_10",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金 GLD",
+          "value": {
+            "source": "skew",
+            "path": "/GLD/skew_10",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股市 SPY（負值＝賣權比較貴）",
+          "value": {
+            "source": "skew",
+            "path": "/SPY/skew_10",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "換成各自的一個標準差再算一次",
+          "body": [
+            "原油的一個標準差比股市大得多，用同一個固定百分比比對兩者並不對等。改用各自的標準差重算後，兩邊的數值都變了，符號沒有翻轉：原油仍在買權側加價，股市仍在賣權側加價。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3_pricing",
+      "info": "results",
+      "style": "professional",
+      "title": "那個報價，相對眼前的實況算高嗎",
+      "alt": "四個市場平價隱含波動率除以近月已實現波動率的比率",
+      "sources": [
+        "skew"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "原油 USO：隱含 ÷ 近月已實現",
+          "value": {
+            "source": "skew",
+            "path": "/vrp/USO/vrp_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "能源股 XLE",
+          "value": {
+            "source": "skew",
+            "path": "/vrp/XLE/vrp_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股市 SPY",
+          "value": {
+            "source": "skew",
+            "path": "/vrp/SPY/vrp_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "黃金 GLD",
+          "value": {
+            "source": "skew",
+            "path": "/vrp/GLD/vrp_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "分子是未來一個多月的隱含波動，分母是過去一個月已經發生的波動。期間不同，所以它不是學術定義的變異數風險溢酬，也不等於賣方實際賺到多少，只是一個描述性的比率。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "原油的絕對值最高，比率卻第二低",
+          "body": [
+            "原油的平價報價是四個市場裡最高的，但它自己近月實際跑出來的波動也很高。過去一季西德州先崩後彈，區間拉得極大，這個波動是真的。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "帶走的三件事，和一個不知道",
+      "alt": "本文的三個可用結論與一項明確的限制",
+      "sources": [
+        "skew"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一",
+          "body": [
+            "看油市風險別停在 OVX。它講有多抖，不講保費加在哪一邊。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "二",
+          "body": [
+            "要替原油部位買保護，先想清楚保哪一側。此刻上行保險明顯比下行貴。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "三",
+          "body": [
+            "拿能源股當原油上漲的替代品，注意 XLE 替上行尾部加的價比原油小很多。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "一個不知道",
+          "body": [
+            "這是一天的快照，手上沒有偏斜的歷史序列，所以無法判斷眼前的數字是常態還是異常。偏斜講的是保險相對貴不貴，不是價格方向預測。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "原油等距價外偏斜：買權比賣權貴多少",
+          "value": {
+            "source": "skew",
+            "path": "/USO/skew_10",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

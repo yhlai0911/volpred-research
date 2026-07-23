@@ -224,6 +224,30 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
     p.append("</table>")
     p.append(f"<div class='sub'>共 {len(cat_rows)} 類；上表為前 12 大。</div>")
 
+    # bash command buckets (week) — 最大單項 Bash 的指令大類拆解
+    bash_cmd = (week.get("drilldown") or {}).get("bash_commands") or {}
+    bc_rows = bash_cmd.get("buckets") or []
+    if bc_rows:
+        bc_max = max((int(r.get("input_output_tokens", 0) or 0) for r in bc_rows), default=1) or 1
+        p.append("<h2>當週 × Bash 指令大類</h2><table>")
+        for i, r in enumerate(bc_rows):
+            color = BARS[i % len(BARS)]
+            io = int(r.get("input_output_tokens", 0) or 0)
+            p.append(f"<tr><td class='tag' style='width:150px'>{esc(r.get('name'))}</td>"
+                     f"<td>{_bar(io / bc_max * 100, color)}</td>"
+                     f"<td class='num' style='width:70px'>{m(io)}</td>"
+                     f"<td class='num sub' style='width:44px'>{float(r.get('share_pct', 0) or 0):.0f}%</td>"
+                     f"<td class='num sub' style='width:66px'>{int(r.get('commands', 0) or 0):,} 次</td></tr>")
+        p.append("</table>")
+        py_top = bash_cmd.get("python_scripts_top") or []
+        if py_top:
+            p.append("<div class='sub'>uv run python 細分（top scripts）：" + "、".join(
+                f"{esc(t.get('name'))} {int(t.get('commands', 0) or 0):,} 次"
+                for t in py_top[:5]) + "</div>")
+        p.append(f"<div class='sub'>共 {int(bash_cmd.get('commands', 0) or 0):,} 條指令 / "
+                 f"{int(bash_cmd.get('turns', 0) or 0):,} turns；token 為含 Bash 呼叫之 turn 的 "
+                 f"input+output 全額（一 turn 多指令均分）。</div>")
+
     # by model
     p.append("<h2>當週 × 模型</h2><table>")
     for b, k, msgs in mod_rows:
@@ -269,6 +293,9 @@ def build_html(today: dict, week: dict, now_tw: datetime) -> tuple[str, str]:
                  f"本週 {week_bill:,} / {WEEKLY_CAP:,} billable ({cap_pct:.0f}% cap)\n"
                  f"今日 {day_bill:,} billable, ${float(tot_t.get('estimated_cost_usd',0)):,.0f}\n"
                  f"前 3 使用類型: " + ", ".join(f"{k}={m(b)}" for b, k, _ in cat_rows[:3]))
+    if bc_rows:
+        text_body += "\nBash 指令大類前 3: " + ", ".join(
+            f"{r.get('name')}={m(r.get('input_output_tokens', 0))}" for r in bc_rows[:3])
     return html_body, text_body
 
 

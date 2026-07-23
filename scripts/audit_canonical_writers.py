@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import ast
 import json
+import re
 import subprocess
 import sys
 from collections import Counter
@@ -72,67 +73,53 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
         "os.replace": 1, "unlink": 1, "write_text": 1,
     },
     "scripts/backfill_null_task_ids.py:main": {"open-write": 1},
-    "scripts/backfill_task_types.py:main": {"open-write": 1},
     "scripts/backfill_verified_live.py:main": {"replace": 1, "write_text": 1},
     "scripts/build_publication_candidates.py:_write_output_atomically": {
         "os.replace": 1, "write_text": 1,
     },
-    "scripts/check_alerts.py:_append_next_task_locked": {
-        "mkdir": 1, "open-write": 1, "write_text": 1,
-    },
+    # scripts/check_alerts.py:_append_next_task_locked was a direct flock writer
+    # until 2026-07-21 (dispatch-lanes absorb): it now delegates to the
+    # append_task_record gateway and owns no direct mutation.
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": {"open-write": 1},
     "scripts/continue_task_dispatch.py:_materialize_pool_dry_diagnostic_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
     "scripts/continue_task_dispatch.py:_promote_starved_article_tasks": {"open-write": 1},
+    "scripts/continue_task_dispatch.py:_sweep_cleared_dreaming_tasks": {"open-write": 1},
     "scripts/daily_update.py:main": {"write_text": 1},
-    "scripts/decompose_drone_series.py:main": {"open-write": 1},
     "scripts/dedupe_next_tasks.py:main": {"open-write": 1},
     "scripts/dispatch_supervisor/state.py:_atomic_write_json": {"os.replace": 1, "unlink": 1},
     "scripts/dispatch_supervisor/state.py:_locked_state": {"mkdir": 1},
     "scripts/dreaming_review.py:apply_auto_dispatch": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
-    "scripts/enqueue_daily_digest.py:_reconcile_stale_digest_task": {
-        "replace": 1, "write_text": 1,
-    },
-    "scripts/enqueue_daily_digest.py:main": {"replace": 1, "write_text": 1},
     "scripts/extract_base64_images.py:main": {"write_text": 1},
     "scripts/fb_page_post.py:_mark_success": {"write_text": 1},
-    "scripts/generate_diverse_tasks.py:_save_tasks": {"write_text": 1},
-    "scripts/generate_research_backlog.py:_save_tasks": {
-        "mkdir": 1, "open-write": 1, "write_text": 1,
-    },
-    "scripts/gmail_inbox_poll.py:_append_task": {
-        "mkdir": 1, "open-write": 1, "write_text": 1,
-    },
-    "scripts/graphify_codeonly_pilot.py:_ensure_followup_task": {
-        "mkdir": 1, "open-write": 1, "write_text": 1,
-    },
-    "scripts/mark_task_blocked.py:_save": {"replace": 1, "write_text": 1},
     "scripts/mark_fb_post_status.py:_write_json": {"write_text": 1},
     "scripts/merge_feed_files.py:<module>": {"open-write": 2},
     "scripts/migrate_fb_post_status_single_source.py:main": {"write_text": 1},
-    "scripts/publish_draft.py:apply_update": {"replace": 1, "write_text": 1},
-    "scripts/record_and_publish.py:record_and_publish": {"write_text": 1},
-    "scripts/refill_reader_facing_pool.py:_append_task": {
-        "mkdir": 1, "open-write": 1, "write_text": 1,
+    "scripts/reap_orphan_deliverables.py:_close_resolved_escalations": {
+        "open-write": 1,
     },
-    "scripts/refill_task_pool.py:_save_tasks": {"write_text": 1},
+    # scripts/publish_draft.py:apply_update was a canonical feed writer until
+    # WS-C1 (2026-07-20): --update now routes through
+    # Publisher.rewrite_and_sync_article, so the script owns no feed mutation.
+    "scripts/record_and_publish.py:record_and_publish": {"write_text": 1},
     "scripts/series_registry.py:apply": {"write_text": 1},
     "scripts/slim_feed_description.py:main": {"write_text": 1},
     "scripts/sync_next_tasks_status.py:main": {"open-write": 1},
-    "scripts/task_generator_v2.py:main": {"open-write": 1},
     "scripts/task_pool_claim.py:_locked_load": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
-    "scripts/telegram_poll.py:_append_task": {"replace": 1, "write_text": 1},
     "scripts/unblock_expired_blocked_tasks.py:main": {"open-write": 1},
     "src/volpred/memory/system.py:MemorySystem._append_to_index": {
         "open-write": 1, "replace": 1,
     },
     "src/volpred/ops/alert_remediation.py:_enqueue": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
+    },
+    "src/volpred/ops/alert_remediation.py:_close_cleared_task": {
+        "open-write": 1,
     },
     "src/volpred/ops/alert_remediation.py:_sweep_cleared_ordinary_tasks": {
         "open-write": 1,
@@ -161,6 +148,7 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     },
     "src/volpred/ops/event_jobs.py:gc_event_ledger": {"unlink": 1},
     "src/volpred/ops/feed_sync.py:reconcile_content_from_singles": {"write_text": 1},
+    "src/volpred/ops/foreign_incident.py:reconcile_incidents": {"open-write": 1},
     "src/volpred/ops/local_control_plane.py:_atomic_write_json": {
         "mkdir": 1, "replace": 1, "write_text": 1,
     },
@@ -178,21 +166,15 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "src/volpred/ops/questions.py:ensure_member_qa_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
-    # Errata/correction path: rewrites one already-published feed entry in place
-    # under the shared publisher_feed lock, then stamps an errata trail. It is a
-    # distinct owner rather than a caller of Publisher._rewrite_feed_entry
-    # because it must hold the lock across the Supabase sync (see the module's
-    # CorrectionNotSynced contract). mkstemp/fdopen/unlink in this scope target
-    # the tmp file, not storage, so os.replace is the only canonical mutation.
-    "src/volpred/publisher/article_correction.py:apply_article_correction": {
-        "os.replace": 1,
+    "src/volpred/ops/retraction.py:_write_feed_atomic": {
+        "os.replace": 1, "unlink": 1, "write_text": 1,
     },
     "src/volpred/publisher/lazypack_install.py:install_lazypack_section": {"write_text": 1},
     "src/volpred/publisher/publisher.py:Publisher._append_to_feed": {
         "open-write": 1, "replace": 1,
     },
     "src/volpred/publisher/publisher.py:Publisher._rewrite_feed_entry": {
-        "open-write": 1, "replace": 1,
+        "open-write": 1, "replace": 1, "unlink": 1,
     },
     "src/volpred/publisher/publisher.py:Publisher.unpublish": {"open-write": 1},
 }
@@ -208,7 +190,6 @@ GENERIC_OWNER_TARGETS: Mapping[str, frozenset[str]] = {
         {"tasks_path"}
     ),
     "scripts/backfill_arc_dedup_metadata.py:_write_json_atomic": frozenset({"path"}),
-    "scripts/check_alerts.py:_append_next_task_locked": frozenset({"next_tasks_path"}),
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": frozenset(
         {"next_tasks_path"}
     ),
@@ -235,9 +216,40 @@ GENERIC_OWNER_TARGETS: Mapping[str, frozenset[str]] = {
     "src/volpred/ops/next_tasks.py:write_tasks_to_handle": frozenset(
         {"fh", "handle_name"}
     ),
+    "src/volpred/ops/retraction.py:_write_feed_atomic": frozenset({"path", "tmp"}),
 }
 
 HANDLE_ONLY_OWNERS = {"src/volpred/ops/next_tasks.py:write_tasks_to_handle"}
+
+# --- WS-A1 next_tasks helper-routing gate (2026-07-20) -----------------------
+# The owner ratchet above answers "is this mutation registered?"; it does NOT
+# answer "does the registered writer actually serialize through the canonical
+# helper?" (docs/audit_next_tasks_writers.md gap note). This gate closes that:
+# outside NEXT_TASKS_MODULE, a scope touching storage/next_tasks.json may only
+# (a) mkdir its parent, (b) bootstrap-write a literal "[]", (c) open it "r+" —
+# and it MUST call one of the canonical helpers to land bytes. Full-payload
+# write_text / json.dump / handle truncate+write / tmp+replace are rejected.
+NEXT_TASKS_TARGET: tuple[str, ...] = ("storage", "next_tasks.json")
+NEXT_TASKS_MODULE = "src/volpred/ops/next_tasks.py"
+NEXT_TASKS_HELPERS = frozenset(
+    {
+        "write_tasks_to_handle", "write_tasks_locked", "append_next_task",
+        "append_task_record", "backfill_ci_repair_commit",
+    }
+)
+NEXT_TASKS_BOOTSTRAP_LITERALS = frozenset({"[]", "[]\n"})
+# Frozen ratchet (may only SHRINK) mirroring test_work_log_writer_gate.py's
+# BASELINE: archived one-shot experiment scripts are evidence of what was
+# actually executed (research-honesty) and are not on any scheduled path, so
+# they are not rewritten — but the class must not grow.
+NEXT_TASKS_EXPERIMENT_BASELINE = frozenset({"experiments/K1387/write_knowledge.py"})
+# Doc lines that WRITE into next_tasks.json via shell (the jq-then-mv shape the
+# retired cron_hourly_dispatch_prompt.md instruction taught to agents).
+NEXT_TASKS_DOC_MUTATION_PATTERNS = (
+    r"\bmv\s+\S+\s+\S*next_tasks\.json",
+    r"\b(?:tee|sponge)\s+(?:-a\s+)?\S*next_tasks\.json",
+    r">\s*\S*next_tasks\.json",
+)
 
 PATH_MUTATORS = {
     "mkdir",
@@ -285,10 +297,16 @@ class AuditResult:
     violations: tuple[Mutation, ...]
     owner_count_mismatches: tuple[str, ...]
     parse_errors: tuple[str, ...]
+    helper_routing_violations: tuple[str, ...] = ()
 
     @property
     def ok(self) -> bool:
-        return not (self.violations or self.owner_count_mismatches or self.parse_errors)
+        return not (
+            self.violations
+            or self.owner_count_mismatches
+            or self.parse_errors
+            or self.helper_routing_violations
+        )
 
 
 def _iter_python_files(root: Path) -> Iterator[Path]:
@@ -1244,15 +1262,280 @@ def _scan_file(path: Path, root: Path) -> tuple[list[Mutation], str | None]:
     return inventory, None
 
 
+def _is_next_tasks_path(
+    node: ast.AST | None,
+    assignments: Mapping[str, list[ast.AST]],
+    module_assignments: Mapping[str, list[ast.AST]],
+    function_returns: Mapping[str, list[ast.AST]],
+) -> bool:
+    hints = _path_hints(
+        node, assignments, module_assignments, function_returns=function_returns
+    )
+    return all(component in hints for component in NEXT_TASKS_TARGET)
+
+
+#: Locked read-modify-write handle modes. "r"/"r+" is the dry-run/apply ternary
+#: used by queue-maintenance CLIs; "a+" is event_jobs' create-if-missing handle
+#: (bytes still land via write_tasks_to_handle's seek(0)+truncate discipline).
+NEXT_TASKS_RMW_MODES = frozenset({"r", "r+", "a+"})
+
+
+def _mode_constants(
+    node: ast.AST | None,
+    assignments: Mapping[str, list[ast.AST]],
+    seen: frozenset[str] = frozenset(),
+) -> set[str]:
+    """All string constants an open-mode expression can evaluate to; empty set
+    when any branch is unresolvable (callers fail closed)."""
+    if isinstance(node, ast.Constant):
+        return {node.value} if isinstance(node.value, str) else set()
+    if isinstance(node, ast.IfExp):
+        body = _mode_constants(node.body, assignments, seen)
+        orelse = _mode_constants(node.orelse, assignments, seen)
+        return body | orelse if body and orelse else set()
+    if isinstance(node, ast.Name) and node.id not in seen:
+        values = assignments.get(node.id, ())
+        if not values:
+            return set()
+        out: set[str] = set()
+        for value in values:
+            resolved = _mode_constants(value, assignments, seen | {node.id})
+            if not resolved:
+                return set()
+            out |= resolved
+        return out
+    return set()
+
+
+def _next_tasks_handle_names(
+    scope: ast.AST,
+    assignments: Mapping[str, list[ast.AST]],
+    module_assignments: Mapping[str, list[ast.AST]],
+    function_returns: Mapping[str, list[ast.AST]],
+) -> set[str]:
+    """Names bound to an open handle on the next_tasks file inside ``scope``."""
+
+    def _binds(call: ast.AST | None) -> bool:
+        return (
+            isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and call.func.attr == "open"
+            and _is_next_tasks_path(
+                call.func.value, assignments, module_assignments, function_returns
+            )
+        )
+
+    names: set[str] = set()
+    for node in _nodes_in_scope(scope):
+        if isinstance(node, ast.withitem) and _binds(node.context_expr):
+            if isinstance(node.optional_vars, ast.Name):
+                names.add(node.optional_vars.id)
+        elif isinstance(node, ast.Assign) and _binds(node.value):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    names.add(target.id)
+    return names
+
+
+def _scan_next_tasks_routing(path: Path, root: Path) -> list[str]:
+    """WS-A1 gate: every next_tasks.json mutation must route through a helper."""
+    relative = path.relative_to(root).as_posix()
+    if relative == NEXT_TASKS_MODULE:
+        return []
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=relative)
+    except (OSError, SyntaxError, UnicodeError):
+        return []  # silent-ok: _scan_file already reports the parse error for scan roots
+    module_assignments = _assignments(tree)
+    function_returns = _function_returns(tree)
+    parameter_bindings = _parameter_bindings(tree)
+    findings: list[str] = []
+    for scope_node, scope_name in _scope_nodes(tree):
+        local_assignments = (
+            dict(module_assignments) if scope_node is tree else _assignments(scope_node)
+        )
+        if isinstance(scope_node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            for parameter, values in parameter_bindings.get(scope_node.name, {}).items():
+                local_assignments.setdefault(parameter, []).extend(values)
+
+        def _on_next_tasks(node: ast.AST | None) -> bool:
+            return _is_next_tasks_path(
+                node, local_assignments, module_assignments, function_returns
+            )
+
+        handle_names = _next_tasks_handle_names(
+            scope_node, local_assignments, module_assignments, function_returns
+        )
+        helper_called = False
+        scope_findings: list[str] = []
+        mutates = False
+        for node in _nodes_in_scope(scope_node):
+            if not isinstance(node, ast.Call):
+                continue
+            qualified = _qualified_name(node.func)
+            if qualified.rsplit(".", 1)[-1] in NEXT_TASKS_HELPERS:
+                helper_called = True
+                continue
+            where = f"{relative}:{node.lineno}: {scope_name}"
+            # Serialization straight onto a next_tasks handle bypasses
+            # write_tasks_to_handle's serialize-first + audits.
+            if qualified == "json.dump" and len(node.args) >= 2:
+                fp = node.args[1]
+                if isinstance(fp, ast.Name) and fp.id in handle_names:
+                    mutates = True
+                    scope_findings.append(
+                        f"{where} -> json.dump on next_tasks handle "
+                        "(serialize via write_tasks_to_handle)"
+                    )
+                continue
+            if (
+                isinstance(node.func, ast.Attribute)
+                and node.func.attr in {"truncate", "write"}
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in handle_names
+            ):
+                mutates = True
+                scope_findings.append(
+                    f"{where} -> handle .{node.func.attr}() on next_tasks "
+                    "(serialize via write_tasks_to_handle)"
+                )
+                continue
+            mutation = _mutation_target(node)
+            if mutation is None:
+                continue
+            operation, target = mutation
+            if operation in OWNER_HANDLE_MUTATORS:
+                continue  # handled via handle_names above
+            if not _on_next_tasks(target):
+                continue
+            mutates = True
+            if operation == "mkdir":
+                continue  # parent-dir bootstrap is harmless
+            if operation == "write_text":
+                arg = node.args[0] if node.args else None
+                if (
+                    isinstance(arg, ast.Constant)
+                    and isinstance(arg.value, str)
+                    and arg.value in NEXT_TASKS_BOOTSTRAP_LITERALS
+                ):
+                    continue
+                scope_findings.append(
+                    f"{where} -> full-payload write_text on next_tasks.json "
+                    "(use write_tasks_locked)"
+                )
+                continue
+            if operation == "open-write":
+                mode = _open_mode(
+                    node, path_method=isinstance(node.func, ast.Attribute)
+                )
+                resolved = _mode_constants(mode, local_assignments)
+                if resolved and resolved <= NEXT_TASKS_RMW_MODES:
+                    continue
+                scope_findings.append(
+                    f"{where} -> open(next_tasks.json) with mode outside "
+                    f"{sorted(NEXT_TASKS_RMW_MODES)} (truncating/overwrite modes "
+                    "bypass the locked read-modify-write contract)"
+                )
+                continue
+            scope_findings.append(
+                f"{where} -> {operation} targeting next_tasks.json "
+                "(replace/rename/unlink bypass the flock; use the canonical helpers)"
+            )
+        if mutates and not helper_called:
+            scope_findings.append(
+                f"{relative}: {scope_name} mutates next_tasks.json without calling a "
+                f"canonical helper ({'/'.join(sorted(NEXT_TASKS_HELPERS))})"
+            )
+        findings.extend(scope_findings)
+    return findings
+
+
+def _scan_experiment_next_tasks(root: Path) -> tuple[list[str], list[str]]:
+    """Extend the routing gate into experiments/ (frozen-baseline ratchet).
+
+    ``SKIP_PARTS`` exempts experiments/ from the owner ratchet, which is how
+    K1387's bare ``open('w')`` writer stayed invisible (A1a audit). Text
+    prefilter keeps the pass cheap; baseline entries are frozen evidence.
+    """
+    base = root / "experiments"
+    violations: list[str] = []
+    read_errors: list[str] = []
+    if not base.is_dir():
+        return violations, read_errors
+    for path in sorted(base.rglob("*.py")):
+        rel_parts = path.relative_to(base).parts[:-1]
+        if any(part in SKIP_PARTS for part in rel_parts):
+            continue
+        relative = path.relative_to(root).as_posix()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            read_errors.append(f"{relative}: {type(exc).__name__}: {exc}")
+            continue  # silent-ok: recorded in read_errors -> surfaces as PARSE_ERROR (fail closed)
+        if "next_tasks" not in text:
+            continue
+        if relative in NEXT_TASKS_EXPERIMENT_BASELINE:
+            continue
+        try:
+            ast.parse(text, filename=relative)
+        except SyntaxError as exc:
+            # Fail closed: an unparseable experiment file that mentions the
+            # queue cannot be audited, and _scan_file never sees experiments/.
+            read_errors.append(f"{relative}: SyntaxError: {exc}")
+            continue  # silent-ok: recorded in read_errors -> surfaces as PARSE_ERROR (fail closed)
+        violations.extend(_scan_next_tasks_routing(path, root))
+    return violations, read_errors
+
+
+def _scan_next_tasks_doc_instructions(root: Path) -> list[str]:
+    """Reject doc/prompt lines that teach shell rewrites of next_tasks.json."""
+    patterns = [re.compile(p) for p in NEXT_TASKS_DOC_MUTATION_PATTERNS]
+    doc_paths: list[Path] = []
+    claude_dir = root / ".claude"
+    if claude_dir.is_dir():
+        for path in sorted(claude_dir.rglob("*")):
+            rel = path.relative_to(claude_dir).parts
+            if rel and rel[0] == "worktrees":
+                continue
+            if path.is_file() and path.suffix.lower() in {".md", ".sh"}:
+                doc_paths.append(path)
+    scripts_dir = root / "scripts"
+    if scripts_dir.is_dir():
+        doc_paths.extend(sorted(scripts_dir.glob("*.md")))
+    violations: list[str] = []
+    for path in doc_paths:
+        relative = path.relative_to(root).as_posix()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            continue  # silent-ok: docs are prose; unreadable prose cannot teach a writer
+        for lineno, line in enumerate(text.splitlines(), 1):
+            if "next_tasks.json" not in line:
+                continue
+            if any(p.search(line) for p in patterns):
+                violations.append(
+                    f"{relative}:{lineno}: doc teaches a shell rewrite of "
+                    "next_tasks.json (route via scripts/task_pool_claim.py, "
+                    "e.g. the annotate subcommand)"
+                )
+    return violations
+
+
 def audit(root: Path = ROOT) -> AuditResult:
     root = root.resolve()
     inventory: list[Mutation] = []
     parse_errors: list[str] = []
+    routing: list[str] = []
     for path in _iter_python_files(root):
         findings, error = _scan_file(path, root)
         inventory.extend(findings)
         if error:
             parse_errors.append(error)
+        routing.extend(_scan_next_tasks_routing(path, root))
+    experiment_violations, experiment_read_errors = _scan_experiment_next_tasks(root)
+    routing.extend(experiment_violations)
+    parse_errors.extend(experiment_read_errors)
+    routing.extend(_scan_next_tasks_doc_instructions(root))
 
     inventory.sort(key=lambda item: (item.path, item.line, item.operation))
     violations = tuple(
@@ -1268,7 +1551,13 @@ def audit(root: Path = ROOT) -> AuditResult:
         if (root / owner.split(":", 1)[0]).exists()
         and Counter(expected) != observed_by_owner.get(owner, Counter())
     )
-    return AuditResult(tuple(inventory), violations, mismatches, tuple(parse_errors))
+    return AuditResult(
+        tuple(inventory),
+        violations,
+        mismatches,
+        tuple(parse_errors),
+        tuple(sorted(routing)),
+    )
 
 
 def _render_text(result: AuditResult) -> str:
@@ -1284,11 +1573,14 @@ def _render_text(result: AuditResult) -> str:
         lines.append(f"RATCHET: {mismatch}")
     for error in result.parse_errors:
         lines.append(f"PARSE_ERROR: {error}")
+    for finding in result.helper_routing_violations:
+        lines.append(f"NEXT-TASKS-ROUTING: {finding}")
     lines.append(
         f"[canonical-writers] {'PASS' if result.ok else 'FAIL'}: "
         f"{len(result.violations)} unguarded, "
         f"{len(result.owner_count_mismatches)} owner-count mismatch(es), "
-        f"{len(result.parse_errors)} parse error(s)"
+        f"{len(result.parse_errors)} parse error(s), "
+        f"{len(result.helper_routing_violations)} next-tasks routing violation(s)"
     )
     return "\n".join(lines)
 
@@ -1312,6 +1604,7 @@ def main(argv: Iterable[str] | None = None) -> int:
                     "violations": [asdict(item) for item in result.violations],
                     "owner_count_mismatches": list(result.owner_count_mismatches),
                     "parse_errors": list(result.parse_errors),
+                    "helper_routing_violations": list(result.helper_routing_violations),
                 },
                 ensure_ascii=False,
                 indent=2,

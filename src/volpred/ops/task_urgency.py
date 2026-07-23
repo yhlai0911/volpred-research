@@ -31,7 +31,10 @@ A0 抓不到）與 `assign_33a9151f`（source=user，抓得到但排在別人後
                       trending_repost / daily_digest）。它們 source 是
                       `reader_facing_refill` 之類的機器來源，靠 task_type 認得
                       出來，這裡保留 type 判定（2026-07-16 daily_digest 脫班案
-                      的修補，移掉會回歸）。
+                      的修補，移掉會回歸）。**只看 type、不看 priority**
+                      （2026-07-21 dispatch-lanes R1）：時效性來自任務類型本身，
+                      priority 數字打錯（手建 P2 event_article）不該讓它退回
+                      scheduled lane 排隊等時效歸零。
 * ``scheduled``     —— 其餘全部，走一般排班。
 
 排序：urgent 全部（依 created_at）→ time_critical 全部（依 created_at）。一班
@@ -50,6 +53,23 @@ source 依非英數字元切成 token，再和 token 白名單做**完整 token*
 （task-routing.md：「不進一般 hourly/Codex claim」）處理。A0 若也把它們列進來就
 是雙 owner ＝ double-claim race。它們被明確排除，且各自的 ingest 已經有自己的
 即時路徑。
+
+## 主線程 lane 同理 —— 但漏掉時是**餓死**，不只是 race（2026-07-20）
+
+`dispatch_lane="main_thread"` 的任務保留給互動 session，`task_pool_claim` 的 claim
+gate（`:495-509`，commit `f23d870c4` 11:48 落地）會直接拒絕 headless owner。本模組
+當時完全不認得 lane，於是同一批任務**照樣被排進 A0 lane 最前面**。
+
+後果比 double-claim 嚴重：PHASE A0 的規則是「lane 還有殘留 → 本班不進 PHASE A」。
+這 7 張 `[refactor-master]` P1（03:12 建單，`source=user`）hourly fire 永遠 claim
+不到、也就永遠清不掉 ⇒ **11:48 之後每一班 fire 都卡在 A0，一般排班工作全面餓死**。
+實測：本班 12:17 fire 跑 `claim assign_caf5b087` 得 `reason=main_thread_lane`。
+
+所以 lane 判定必須和 claim gate 用**同一套詞彙** —— 現在共用
+`volpred.ops.next_tasks.is_agent_claimable_lane()`（該檔是 controlled-vocabulary
+owner，同 `TASK_STATUSES` 的形狀）。這類任務歸入 `LANE_DEFERRED`：不進 A0 可動
+lane、`is_urgent()` 回 False（不會叫醒一班誰都做不了的 fire），但 CLI 仍在
+`deferred` 欄位獨立列出 —— 主線程的 backlog 要**可見**，不是消失。
 """
 from __future__ import annotations
 
@@ -58,6 +78,8 @@ import json
 import re
 from pathlib import Path
 from typing import Any, Iterable
+
+from volpred.ops.next_tasks import is_agent_claimable_lane
 
 LANE_URGENT = "urgent"
 LANE_TIME_CRITICAL = "time_critical"
@@ -74,6 +96,9 @@ TIME_CRITICAL_TASK_TYPES = frozenset({"event_article", "trending_repost", "daily
 
 #: 有專屬派工 owner，A0 不得碰（否則 double-claim）。
 DEDICATED_OWNER_TASK_TYPES = frozenset({"email_reply", "telegram_reply"})
+
+#: 保留給互動主線程 / 已封鎖的 lane，headless fire claim 不到（見下方 LANE_DEFERRED）。
+LANE_DEFERRED = "deferred"
 
 #: 急件的 priority 門檻（P1 only —— boss 的「急件」定義就是 user-assigned P1）。
 URGENT_PRIORITY = 1
@@ -105,12 +130,16 @@ def classify(task: dict) -> str:
     """回傳 ``urgent`` / ``time_critical`` / ``scheduled``。不看 status。"""
     if not isinstance(task, dict):
         return LANE_SCHEDULED
+    if not is_agent_claimable_lane(task):
+        return LANE_DEFERRED  # 專屬 owner = 互動主線程，見 module docstring
     if task.get("task_type") in DEDICATED_OWNER_TASK_TYPES:
         return LANE_SCHEDULED  # 有專屬 owner，見 module docstring
     prio = _priority(task)
     if prio == URGENT_PRIORITY and is_urgent_source(task.get("source")):
         return LANE_URGENT
-    if prio == URGENT_PRIORITY and task.get("task_type") in TIME_CRITICAL_TASK_TYPES:
+    # Type-only, no priority gate: perishability is a property of the task
+    # type, not of the priority digit someone typed (module docstring §判定模型).
+    if task.get("task_type") in TIME_CRITICAL_TASK_TYPES:
         return LANE_TIME_CRITICAL
     return LANE_SCHEDULED
 
@@ -141,6 +170,27 @@ def dispatch_lane(tasks: Iterable[dict], *, pending_only: bool = True) -> list[d
     return [row[2] for row in out]
 
 
+def deferred_lane(tasks: Iterable[dict], *, pending_only: bool = True) -> list[dict]:
+    """保留給互動主線程的 pending 任務（舊→新）。
+
+    這些**不是** A0 可動的活，但要在報告裡看得見 —— headless fire 清不掉的
+    backlog 若從報告消失，就沒有任何地方會提醒主線程它積了幾張。
+    """
+    out: list[tuple[str, dict]] = []
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        if pending_only and task.get("status") != "pending":
+            continue
+        if classify(task) != LANE_DEFERRED:
+            continue
+        record = dict(task)
+        record["lane"] = LANE_DEFERRED
+        out.append((str(task.get("created_at") or ""), record))
+    out.sort(key=lambda row: row[0])
+    return [row[1] for row in out]
+
+
 def load_tasks(path: str | Path) -> list[dict]:
     data = json.loads(Path(path).read_text(encoding="utf-8"))
     if isinstance(data, dict):
@@ -156,13 +206,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--tasks", default="storage/next_tasks.json")
     ap.add_argument("--all-statuses", action="store_true", help="不過濾 status=pending")
     args = ap.parse_args(argv)
-    lane = dispatch_lane(load_tasks(args.tasks), pending_only=not args.all_statuses)
+    tasks = load_tasks(args.tasks)
+    pending_only = not args.all_statuses
+    lane = dispatch_lane(tasks, pending_only=pending_only)
+    deferred = deferred_lane(tasks, pending_only=pending_only)
     print(json.dumps(
         {
             "count": len(lane),
             "urgent": sum(1 for t in lane if t["lane"] == LANE_URGENT),
             "time_critical": sum(1 for t in lane if t["lane"] == LANE_TIME_CRITICAL),
             "tasks": [{k: t.get(k) for k in _REPORT_FIELDS} for t in lane],
+            # 主線程保留任務：headless fire claim 不到，不計入 count（否則 A0 的
+            # 「清完整條 lane」永遠不成立 ⇒ 排班餓死），但必須看得見。
+            "deferred_main_thread": len(deferred),
+            "deferred": [{k: t.get(k) for k in _REPORT_FIELDS} for t in deferred],
         },
         ensure_ascii=False,
     ))

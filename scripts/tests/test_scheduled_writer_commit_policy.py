@@ -255,8 +255,13 @@ def test_launchagent_population_is_registered_when_available() -> None:
         if "job_id" in row:
             assert row["job_id"] in jobs, (label, row["job_id"])
         else:
-            assert row["status"] == "host_only_exception"
-            assert str(row.get("reason") or "").strip()
+            # A fully retired agent may drop job_id: keeping a zombie runtime
+            # spec + policy row just to satisfy this reference would be the
+            # two-systems anti-pattern (WS-H2 2026-07-20, work-summary
+            # retirement). The row must still document why it lingers —
+            # typically "host plist not yet booted out".
+            assert row["status"] in {"host_only_exception", "retired"}, label
+            assert str(row.get("reason") or "").strip(), label
 
 
 def test_this_file_is_the_only_policy_enforcement_owner() -> None:

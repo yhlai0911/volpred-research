@@ -1,0 +1,71 @@
+{
+  "generated_at": "2026-07-20T03:35:00+00:00",
+  "mode": "apply",
+  "grace_minutes": 20,
+  "detached": [
+    {
+      "owner": "hourly-slot-1-51a8c53b67f34a6bb5d5e2b687e75f96",
+      "slot": "slot-1",
+      "job_id": "51a8c53b67f34a6bb5d5e2b687e75f96",
+      "task_ids": [
+        "K1718_article_general",
+        "K1495_article_general"
+      ],
+      "youngest_claim_age_min": 25.2,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-07-20T03:26:34.406568+00:00",
+        "outcome": "success",
+        "exit_code": 0
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-1-51a8c53b*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 25.2min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "K1718_article_general",
+        "K1495_article_general"
+      ],
+      "released_at": "2026-07-20T03:35:00+00:00"
+    },
+    {
+      "owner": "hourly-slot-1-8ac4cbc80b334ee2b3c4d13e4398344a",
+      "slot": "slot-1",
+      "job_id": "8ac4cbc80b334ee2b3c4d13e4398344a",
+      "task_ids": [
+        "ci-red-29711772660"
+      ],
+      "youngest_claim_age_min": 57.8,
+      "age_source": "claimed_at",
+      "process": "dead",
+      "process_evidence": {
+        "source": "dispatch_state.completions",
+        "completed_at": "2026-07-20T02:45:37.886973+00:00",
+        "outcome": "success",
+        "exit_code": 0
+      },
+      "worktree_present": false,
+      "disk_evidence": {
+        "pattern": "dispatch-slot-1-8ac4cbc8*",
+        "pattern_matches": [],
+        "referenced": [],
+        "referenced_present": []
+      },
+      "verdict": "detached",
+      "rationale": "process dead (dispatch_state.completions) AND no worktree on disk AND claim age 57.8min >= grace 20min",
+      "released": true,
+      "released_ids": [
+        "ci-red-29711772660"
+      ],
+      "released_at": "2026-07-20T03:35:00+00:00"
+    }
+  ]
+}

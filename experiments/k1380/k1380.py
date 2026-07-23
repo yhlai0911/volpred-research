@@ -134,8 +134,8 @@ def fit_gjr(returns):
                                     options={'maxiter': 500})
             if res.fun < best_ll:
                 best_ll, best_p = res.fun, res.x
-        except Exception:
-            pass
+        except Exception:  # silent-ok: multistart/grid 單點發散是預期行為，非被吞掉的錯誤 —
+            pass           # 全數失敗會讓 best_p 保持 None，由 caller 判定並向上表達
     return best_p
 
 
@@ -216,8 +216,8 @@ def fit_garch_x(returns, tau_vals, omega_mode='constrained', denom='tau_t'):
                                     options={'maxiter': 500})
             if res.fun < best_ll:
                 best_ll, best_p = res.fun, res.x
-        except Exception:
-            pass
+        except Exception:  # silent-ok: multistart/grid 單點發散是預期行為，非被吞掉的錯誤 —
+            pass           # 全數失敗會讓 best_p 保持 None，由 caller 判定並向上表達
     return best_p, -best_ll if best_p is not None else (None, -np.inf)
 
 
@@ -289,8 +289,8 @@ def fit_tau_params(returns, tau_form, log_vix_vals, vix_vals,
                 best_ll = ll
                 best_tau = (th0, th1)
                 best_gjr = gjr_p
-        except Exception:
-            pass
+        except Exception:  # silent-ok: multistart/grid 單點發散是預期行為，非被吞掉的錯誤 —
+            pass           # 全數失敗會讓 best_p 保持 None，由 caller 判定並向上表達
     return best_tau, best_gjr
 
 
@@ -359,8 +359,8 @@ def fit_midas(returns, vix_lags_matrix, Km_mode=False):
                                     options={'maxiter': 500})
             if res.fun < best_ll:
                 best_ll, best_p = res.fun, res.x
-        except Exception:
-            pass
+        except Exception:  # silent-ok: multistart/grid 單點發散是預期行為，非被吞掉的錯誤 —
+            pass           # 全數失敗會讓 best_p 保持 None，由 caller 判定並向上表達
     return best_p
 
 
@@ -645,8 +645,15 @@ print("\n[3] Computing QLIKE losses...")
 r2_oos = r2[oos_indices]
 
 def qlike(sigma2_hat, rv_proxy):
-    """Patton (2011) proxy-robust QLIKE: σ̂²/r² - log(σ̂²/r²) - 1."""
-    ratio = np.maximum(sigma2_hat, 1e-16) / np.maximum(rv_proxy, 1e-16)
+    """Patton (2011) proxy-robust QLIKE: r²/σ̂² - log(r²/σ̂²) - 1.
+
+    The ratio is proxy-over-forecast. Reversing it (σ̂²/r²) is NOT a robust
+    loss: its expected value is minimized by shrinking σ̂² toward zero
+    (E[1/r²] diverges under r² = σ²χ²₁), so it mechanically rewards
+    under-forecasting. That reversed form produced the discarded 2026-07-16
+    run — see README.md.
+    """
+    ratio = np.maximum(rv_proxy, 1e-16) / np.maximum(sigma2_hat, 1e-16)
     return ratio - np.log(ratio) - 1.0
 
 qlike_matrix = np.full((17, n_oos), np.nan)

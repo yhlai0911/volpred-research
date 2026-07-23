@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -203,3 +205,60 @@ def test_extract_keep_block_warns_when_existing_handoff_cannot_be_read(
     assert "[generate_handoff] WARN handoff read failed" in captured.err
     assert "KEEP block not preserved" in captured.err
     assert "permission denied" in captured.err
+
+
+def test_rotate_keep_block_archives_stale_resolved_and_undated_entries(tmp_path) -> None:
+    module = _load_generate_handoff()
+    keep = """<!-- KEEP -->
+intro without a date
+
+### Active 2026-07-15
+still needed
+
+### RESOLVED 2026-07-20
+done
+
+### Old 2026-06-30
+historical
+
+### Undated owner note
+must not be guessed stale
+<!-- /KEEP -->"""
+
+    compact = module._rotate_keep_block(
+        keep,
+        tmp_path,
+        datetime(2026, 7, 22, tzinfo=ZoneInfo("Asia/Taipei")),
+    )
+
+    assert "intro without a date" in compact
+    assert "### Active 2026-07-15" in compact
+    assert "### Undated owner note" not in compact
+    assert "### RESOLVED 2026-07-20" not in compact
+    assert "### Old 2026-06-30" not in compact
+    assert "### Old 2026-06-30" in (tmp_path / "2026-06.md").read_text(encoding="utf-8")
+    assert "### RESOLVED 2026-07-20" in (tmp_path / "2026-07.md").read_text(encoding="utf-8")
+    assert "### Undated owner note" in (tmp_path / "2026-07.md").read_text(encoding="utf-8")
+
+
+def test_rotate_keep_block_archive_append_is_idempotent(tmp_path) -> None:
+    module = _load_generate_handoff()
+    keep = "<!-- KEEP -->\n### Old 2026-06-30\nonce\n<!-- /KEEP -->"
+    now = datetime(2026, 7, 22, tzinfo=ZoneInfo("Asia/Taipei"))
+
+    module._rotate_keep_block(keep, tmp_path, now)
+    module._rotate_keep_block(keep, tmp_path, now)
+
+    archived = (tmp_path / "2026-06.md").read_text(encoding="utf-8")
+    assert archived.count("### Old 2026-06-30") == 1
+
+
+def test_handoff_header_explains_bounded_read_and_archive(tmp_path, monkeypatch) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "§1–§9" in handoff
+    assert "storage/ops/handoff_archive/" in handoff

@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "title": "震央定位法懶人包",
+  "evidence": {
+    "epi": {
+      "path": "experiments/digest29/digest29_results.json",
+      "sha256": "e9a1317c11b9a46962629781010adbd68ba6f243506165e62f0a26257f6a51df",
+      "label": "震央定位證據包（yfinance, as-of 2026-07-17 收盤）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "震央定位法：跌幅是體感，震央才是判準",
+      "alt": "震央定位法的三個座標：震源深度、波及範圍、餘震長度",
+      "sources": [
+        "epi"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "為什麼不看跌幅",
+          "body": [
+            "同樣搖得站不穩，可能是遠方大地震，也可能是腳底下的小淺震。",
+            "跌幅只告訴你痛，不告訴你接下來會怎樣。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "三個座標",
+          "body": [
+            "一、震源深度：波動率體制真的換檔了嗎。",
+            "二、波及範圍：震動擴散到別的板塊了嗎。",
+            "三、餘震長度：這個狀態會待多久。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "判讀規則",
+          "body": [
+            "三格都指向換檔，才做全組合層級的動作；只中一格，處理那個板塊就好。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "費半與大盤回撤差距",
+          "value": {
+            "source": "epi",
+            "path": "/breadth/sox_minus_spx_drawdown_gap_pp",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": " 個百分點",
+              "absolute": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "editorial",
+      "title": "三格怎麼查：當天就能填的判準",
+      "alt": "震央定位法三個座標各自的查法與判準",
+      "sources": [
+        "epi"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "震源深度",
+          "body": [
+            "查 VIX 落在哪個狀態，以及有沒有越過凸性折點。",
+            "換檔：站上偏高到高的區間，實際波動同步加速。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "波及範圍",
+          "body": [
+            "查大盤回撤、板塊離散度，以及有沒有板塊真的翻紅。",
+            "換檔：全板塊同步下殺，相關性往上爬。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "餘震長度",
+          "body": [
+            "查該 VIX 狀態的歷史平均壽命，以及預測工具有沒有失準。",
+            "換檔：高波動狀態延續數週，原本的工具開始不管用。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "當前 VIX 讀數",
+          "value": {
+            "source": "epi",
+            "path": "/series/^VIX/last",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "收盤定位：三格都沒中",
+      "alt": "以最新收盤數據填入震央定位法三個座標的讀數",
+      "sources": [
+        "epi"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "費半距高點回撤",
+          "value": {
+            "source": "epi",
+            "path": "/series/^SOX/drawdown_from_peak_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "標普五百距高點回撤",
+          "value": {
+            "source": "epi",
+            "path": "/series/^GSPC/drawdown_from_peak_pct",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "VIX（正常區間）",
+          "value": {
+            "source": "epi",
+            "path": "/series/^VIX/last",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "費半波動較六十日前",
+          "value": {
+            "source": "epi",
+            "path": "/aftershock/sox_rv20_ratio_vs_60d_ago",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "prefix": "×"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "大盤波動較六十日前",
+          "value": {
+            "source": "epi",
+            "path": "/aftershock/spy_rv20_ratio_vs_60d_ago",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "prefix": "×"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "費半與大盤相關性（近四十日）",
+          "value": {
+            "source": "epi",
+            "path": "/correlation/sox_spy_corr_last40d",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "定位結果",
+          "body": [
+            "震源淺、範圍窄、餘震短。",
+            "這是產業層級的部位問題，不是全組合的風險事件。"
+          ]
+        }
+      ]
+    }
+  ]
+}

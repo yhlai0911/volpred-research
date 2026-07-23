@@ -1,0 +1,52 @@
+{
+  "id": "agent-brief_tsfm_har_mcs-6345e3",
+  "title": "TSFM×Log-HAR 預測組合 MCS 誠實檢定 (SPY/0050.TW/TX)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_tsfm_har_mcs-6345e3.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8157aca3-tsfmhar",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_tsfm_har_mcs-6345e3.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-21T21:18:39Z",
+  "started_at": "2026-07-21T21:30:04Z",
+  "completed_at": "2026-07-21T21:36:22Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_tsfm_har_mcs-6345e3.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_tsfm_har_mcs-6345e3.stderr",
+  "result_artifact": null,
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_tsfm_har_mcs-6345e3.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8157aca3-tsfmhar",
+  "claude_followup": {
+    "brief": "收 TSFM×Log-HAR 組合實驗：先驗 results.json 數字與 README 一致（走 agent-result-verification skill），再確認無 look-ahead（bias-correction 係數只用訓練窗）→ Codex review 產 review_verdict.json → experiment_gates.py certify → merge_worktree.sh 合併 → 寫 knowledge.json。若 agent 回 status=already_covered 或 blocked_no_weights，不要硬推，直接記錄並結案。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": "research_har_mcs_spy_0050_tw_tx_tsfm_timesfm_ttm_log_har",
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_tsfm_har_mcs.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_tsfm_har_mcs-6345e3.md",
+  "claimed_by_pid": 89313,
+  "claimed_by_pid_start_wall": "Wed Jul 22 05:30:04 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "followup_dispatched_at": "2026-07-21T23:12:21Z",
+  "followup_next_task_id": "k1711_general_article_from_tsfm_dedup"
+}

@@ -240,5 +240,11 @@
         "docs/error_log.md"
       ]
     }
+  },
+  "pending_caps": {
+    "_description": "drain-first 水位閘（boss Telegram msg 1237, 2026-07-21）。pending > pending_cap 時，自動 refill / discovery 生成器停止產出新任務，只派工既有 pending。解除需 pending < pending_cap 且連續 exit_streak_days 個完整日 succeeded >= created。Owner: src/volpred/ops/pool_pressure.py。白名單（telegram_reply / email_reply / 時效性 P1 / 老闆指派 / reader_facing time_critical）不受此閘。",
+    "enabled": true,
+    "pending_cap": 80,
+    "exit_streak_days": 3
   }
 }

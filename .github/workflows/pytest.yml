@@ -70,6 +70,19 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: volpred_ops_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       VOLPRED_NO_REMOTE_WRITE: "1"
       VOLPRED_NO_EMAIL: "1"
@@ -79,6 +92,9 @@ jobs:
       # could issue live Supabase reads. conftest.py is tracked again; this line
       # completes the belt that was always meant to survive a broken conftest.
       VOLPRED_NO_REMOTE_READ: "1"
+      VOLPRED_POSTGRES_TEST_DSN: >-
+        postgresql://postgres:postgres@127.0.0.1:5432/volpred_ops_test
+      VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST: "1"
     steps:
       - uses: actions/checkout@v4
         with:

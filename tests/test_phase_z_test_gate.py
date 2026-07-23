@@ -527,12 +527,24 @@ def test_phase_z_test_gate_red_is_a_registered_bridge_key() -> None:
     assert "phase_z_test_gate_red" in ops_alerts.INTERNAL_REMEDIABLE_ALERT_KEYS
 
 
-def test_phase_z_test_gate_red_mints_a_real_task(tmp_path: Path) -> None:
+def test_phase_z_test_gate_red_records_machine_self_without_a_task(
+    tmp_path: Path, monkeypatch,
+) -> None:
     from volpred.ops import alerts as ops_alerts
 
     storage = tmp_path / "storage"
     storage.mkdir()
     (storage / "next_tasks.json").write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(
+        ops_alerts,
+        "send_alert",
+        lambda *args, **kwargs: {
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "test_transport_disabled",
+            "notification_id": None,
+        },
+    )
 
     result = ops_alerts.route_internal_remediable_alert(
         alert_key="phase_z_test_gate_red",
@@ -546,7 +558,7 @@ def test_phase_z_test_gate_red_mints_a_real_task(tmp_path: Path) -> None:
 
     tasks = _json.loads((storage / "next_tasks.json").read_text(encoding="utf-8"))
     minted = [t for t in tasks if "phase_z_test_gate_red" in (t.get("tags") or [])]
-    assert minted, f"expected a bridge task, got result={result}"
-    assert minted[0]["priority"] == 1
-    assert minted[0]["task_type"] == "platform_ops"
-    assert "建議行動" not in minted[0]["description"]
+    assert minted == [], "machine_self incidents must not ask broken machinery to self-repair"
+    assert result["remediation"]["action"] == "notify"
+    assert result["remediation"]["reason"] == "incident_notification_due"
+    assert result["remediation"]["incident_id"]

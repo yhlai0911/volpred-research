@@ -1,15 +1,51 @@
 {
-  "generated_at": "2026-07-19T04:01:02.549157+00:00",
-  "adoptable": [],
+  "generated_at": "2026-07-23T11:00:58.062278+00:00",
+  "adoptable": [
+    {
+      "path": "storage/drafts/K1597_general_draft.md",
+      "title": "台指期的波動又粗糙又厚尾，為什麼專治厚尾的模型還是贏不了 HAR？",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 3794,
+      "age_hours": 45.7
+    },
+    {
+      "path": "storage/drafts/k1253_general_draft.md",
+      "title": "波動率模型擋得住黑天鵝嗎？我們拿一場關稅風暴實測給你看",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 2463,
+      "age_hours": 24.0
+    },
+    {
+      "path": "storage/drafts/k1711_general_draft.md",
+      "title": "AI 圈的「時序基礎模型」搬進波動率擂台：老公式 HAR 沒被打下來",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 4040,
+      "age_hours": 24.0
+    }
+  ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 28,
-    "grace": 1,
+    "registered": 49,
+    "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 0,
-  "adopted": [],
+  "orphan_count": 3,
+  "adopted": [
+    {
+      "path": "storage/drafts/K1597_general_draft.md",
+      "adopted": false,
+      "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
+    },
+    {
+      "path": "storage/drafts/k1253_general_draft.md",
+      "adopted": false,
+      "reason": "gate_rejected (rc=7):   Refusing to publish. Rewrite the draft in general-reader language (remove K-id / statistical jargon from title and body) or intentionally publish it as research."
+    }
+  ],
   "applied": true,
   "job_deliverable_candidates": [],
   "job_deliverable_held": [],
@@ -47,29 +83,5 @@
     }
   },
   "held_escalations": [],
-  "held_escalated_paths": [
-    "experiments/k1380/README.md",
-    "experiments/k1380/k1380.py",
-    "experiments/k1380/k1380_losses_all.npy",
-    "experiments/k1380/k1380_losses_all_INVALID_20260716.npy",
-    "experiments/k1380/k1380_results.json",
-    "experiments/k1380/k1380_results_INVALID_20260716.json",
-    "experiments/k1380/k1380_spa_from_cache.py",
-    "experiments/k1380/k1380_spa_from_cache_INVALID_20260716.py",
-    "job:K1694-script-rerun-1211",
-    "job:compute-k1730-arm-a-production-quick-mode-1784358686",
-    "job:k1704-formal-cache-rerun-20260716",
-    "job:k1704-formal-rerun-20260716",
-    "job:k1704-input-ledger-delta-review-20260716",
-    "job:k1704-origin-ledger-delta-review-20260716",
-    "job:k1704-post-run-review-20260716",
-    "job:k1731-armB-corrected-rev5",
-    "job:lazypack-mile_a8d79d6a-r2",
-    "storage/drafts/digest_20260714.md",
-    "storage/drafts/fb_mile_5a20a332.md",
-    "storage/drafts/fb_mile_f78be848.md",
-    "storage/drafts/k1410_source_provenance_update.md",
-    "storage/drafts/k841_mile_179df5f5_correction.md",
-    "storage/drafts/k841_mile_b4304948_correction.md"
-  ]
+  "held_escalated_paths": []
 }

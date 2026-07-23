@@ -467,6 +467,413 @@ def _release_axis_waives_dup(item: dict, blockers: list[dict]) -> bool:
     return True
 
 
+# --- G1: member_qa publish-time duplicate gate (2026-07-19, STRIKE 2) --------
+# Incident history for this class:
+#   2026-03-31 (STRIKE 1) mile_530a28bc / mile_42ee876c — same member, same
+#     Taiwan-economy question answered twice within 7 hours.
+#   2026-07-19 (STRIKE 2) mile_d84aa7d0 (2026-07-12) / mile_0205a444
+#     (2026-07-19) — member yaoxk1431's "30 年每年成長 15% / 7%" question
+#     researched and published twice, one week apart.
+#
+# WHY THIS GATE LIVES AT PUBLISH TIME, not upstream:
+# every previous fix guarded an INTENT step (ensure_member_qa_task creating a
+# task, claim_question_for_research claiming a question). Those are all
+# skippable — a main thread that hand-writes an article and calls
+# publish-milestone directly never touches them, and that is exactly how
+# STRIKE 2 happened. The published article is the only artifact the reader
+# actually sees, and until now it was the ONE step with no owner. This gate is
+# the last line of defence: it holds even when every upstream gate is bypassed,
+# because nothing reaches a reader without passing through here.
+#
+# Deliberate follow-ups (先發初步、後補深入) are legitimate and must stay
+# possible, so the gate has ONE legal channel: details['supersedes'] (CLI:
+# --supersedes) must NAME the prior article id(s) it continues. Naming is the
+# point — an unconditional bypass flag would decay into "always set it", while
+# naming forces the author to look at what already exists.
+_MEMBER_QA_PUBLISHED_STATUSES = {"published", "scheduled"}
+
+
+class MemberQaDuplicatePublishError(ValueError):
+    """Raised when a member_qa article would be the 2nd published answer to a
+    question that already has one."""
+
+
+class MemberQaPublishGateIndeterminate(ValueError):
+    """Raised when the gate cannot establish whether a prior published answer
+    exists — either because the local feed is unreadable, or because the
+    article carries no `details['question_id']` to check against.
+
+    Fail-closed, but LOUD and distinguishable: 'we could not check' must never
+    be silently rendered as 'clear'. Callers/operators see a different error
+    class than a real duplicate so they can retry rather than assume a dup.
+
+    A missing question_id deliberately shares this class rather than getting
+    its own: the *semantics* are identical ("the gate cannot judge"), and a
+    missing binding key is emphatically NOT a duplicate. Splitting it into a
+    third type would give callers two error classes to catch for one meaning,
+    which is exactly the stacking this gate was consolidated to remove.
+    """
+
+
+def _member_qa_local_prior_answers(
+    question_id: str,
+    feed: list[dict],
+    *,
+    exclude_article_id: str | None = None,
+) -> list[dict]:
+    """Published/scheduled member_qa articles already bound to `question_id`."""
+    hits: list[dict] = []
+    for item in feed or []:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("status") or "") not in _MEMBER_QA_PUBLISHED_STATUSES:
+            continue
+        details = item.get("details")
+        qid = None
+        if isinstance(details, dict):
+            qid = details.get("question_id")
+        qid = qid or item.get("question_id")
+        if not qid or str(qid) != str(question_id):
+            continue
+        if exclude_article_id and str(item.get("id")) == str(exclude_article_id):
+            continue
+        hits.append(
+            {
+                "id": item.get("id"),
+                "title": item.get("title"),
+                "status": item.get("status"),
+                "published_at": item.get("published_at") or item.get("created_at"),
+                "source": "local_feed",
+            }
+        )
+    return hits
+
+
+def _member_qa_remote_prior_answers(question_id: str) -> tuple[list[dict], str | None]:
+    """Supabase-side prior answers via question_articles → articles.
+
+    Returns (hits, error). `error` non-None means the remote side is UNKNOWN,
+    not clear. Supabase is an ENRICHMENT source here (it can see articles this
+    checkout never wrote); the local feed is the authoritative mirror of
+    everything this repo publishes, so a remote outage degrades coverage but
+    does not stall the member_qa line — see `assert_member_qa_publish_allowed`.
+    """
+    try:
+        links = _select_rows(
+            "question_articles", select="question_id,article_id", question_id=question_id
+        )
+    except Exception as exc:  # noqa: BLE001
+        return [], f"{type(exc).__name__}: {exc}"
+    hits: list[dict] = []
+    for link in links or []:
+        article_id = link.get("article_id") if isinstance(link, dict) else None
+        if not article_id:
+            continue
+        try:
+            rows = _select_rows("articles", select="id,slug,status,title", id=article_id)
+        except Exception as exc:  # noqa: BLE001
+            return hits, f"{type(exc).__name__}: {exc}"
+        for row in rows or []:
+            if str(row.get("status") or "") not in _MEMBER_QA_PUBLISHED_STATUSES:
+                continue
+            hits.append(
+                {
+                    "id": row.get("slug") or row.get("id"),
+                    "title": row.get("title"),
+                    "status": row.get("status"),
+                    "published_at": None,
+                    "source": "supabase",
+                }
+            )
+    return hits, None
+
+
+def find_published_member_qa_articles(
+    question_id: str,
+    *,
+    feed: list[dict] | None = None,
+    storage_dir: str = "storage",
+    exclude_article_id: str | None = None,
+) -> dict:
+    """Every already-published answer to `question_id`, plus source health.
+
+    Result keys:
+      articles          — de-duplicated prior published/scheduled answers
+      local_ok          — the authoritative local feed was readable
+      remote_ok         — the Supabase enrichment query succeeded
+      remote_error      — why it did not (None when remote_ok)
+    """
+    local_ok = True
+    if feed is None:
+        try:
+            feed = load_feed(storage_dir)
+        except Exception as exc:  # noqa: BLE001
+            from .diagnostics import warn
+
+            warn("member_qa_publish_gate", "local feed unreadable", err=str(exc))
+            feed, local_ok = [], False
+    hits = _member_qa_local_prior_answers(
+        question_id, feed or [], exclude_article_id=exclude_article_id
+    )
+    remote_hits, remote_error = _member_qa_remote_prior_answers(question_id)
+    for hit in remote_hits:
+        if exclude_article_id and str(hit.get("id")) == str(exclude_article_id):
+            continue
+        if any(str(h.get("id")) == str(hit.get("id")) for h in hits):
+            continue
+        hits.append(hit)
+    return {
+        "question_id": question_id,
+        "articles": hits,
+        "local_ok": local_ok,
+        "remote_ok": remote_error is None,
+        "remote_error": remote_error,
+    }
+
+
+def _normalize_supersedes(value) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        parts = [p.strip() for p in value.replace(",", " ").split()]
+    elif isinstance(value, (list, tuple, set)):
+        parts = [str(p).strip() for p in value]
+    else:
+        parts = [str(value).strip()]
+    return [p for p in parts if p]
+
+
+# --- the "cannot be bound" escape hatch ------------------------------------
+# A handful of historical articles are tagged member_qa but answer no member
+# question at all (mile_e4002f4f: commissioned as task K1466_article_general,
+# byline "[提出：Claude，執行：Claude]", no matching row in `questions`).
+# Fabricating a question_id for those would forge a member binding, so they get
+# a waiver instead — but a waiver that is EXPENSIVE to produce.
+#
+# Deliberately NOT a CLI flag and NOT a magic string: it is a three-field JSON
+# object that must be hand-written into --details-json, and the reason must be
+# a real written adjudication. Residual 3 was opened precisely because this gate
+# used to hand out its own bypass key; a `--skip-question-id` flag would be that
+# mistake again in a new costume. Naming what you concluded, and signing it, is
+# the whole mechanism.
+_WAIVER_MIN_REASON_CHARS = 40
+_WAIVER_REQUIRED_FIELDS = ("reason", "adjudicated_by", "adjudicated_at")
+
+
+def _validate_question_id_waiver(waiver: object) -> tuple[dict | None, str | None]:
+    """Return (normalized_waiver, error). Exactly one is non-None."""
+    if not isinstance(waiver, dict):
+        return None, (
+            f"details['question_id_waiver'] must be a JSON object with "
+            f"{list(_WAIVER_REQUIRED_FIELDS)}, got {type(waiver).__name__}"
+        )
+    out: dict[str, str] = {}
+    for field in _WAIVER_REQUIRED_FIELDS:
+        value = waiver.get(field)
+        if not isinstance(value, str) or not value.strip():
+            return None, (
+                f"details['question_id_waiver']['{field}'] is missing or empty — "
+                "a waiver without all three fields does not clear the gate"
+            )
+        out[field] = value.strip()
+    if len(out["reason"]) < _WAIVER_MIN_REASON_CHARS:
+        return None, (
+            f"details['question_id_waiver']['reason'] is {len(out['reason'])} chars; "
+            f"at least {_WAIVER_MIN_REASON_CHARS} are required. State WHY this article "
+            "provably answers no member question (what you searched, what you found) — "
+            "a placeholder is not an adjudication"
+        )
+    try:
+        datetime.fromisoformat(out["adjudicated_at"].replace("Z", "+00:00"))
+    except ValueError:
+        return None, (
+            "details['question_id_waiver']['adjudicated_at'] must be an ISO-8601 "
+            f"timestamp, got {out['adjudicated_at']!r}"
+        )
+    return out, None
+
+
+def assert_member_qa_publish_allowed(
+    question_id: str | None,
+    *,
+    feed: list[dict] | None = None,
+    supersedes=None,
+    title: str = "",
+    storage_dir: str = "storage",
+    exclude_article_id: str | None = None,
+    waiver: object = None,
+) -> dict:
+    """Raise unless this member_qa article may become a reader-visible answer.
+
+    Blocks when the question already has ≥1 published/scheduled answer, unless
+    `supersedes` explicitly names ALL of them (the deliberate-sequel channel).
+    """
+    # Normalize BEFORE the emptiness test: a whitespace-only question_id is
+    # truthy, and would otherwise be accepted as a binding and then matched
+    # against nothing — i.e. a blank string would read as "clear".
+    question_id = str(question_id).strip() if question_id is not None else ""
+    if not question_id:
+        # No binding key → the gate CANNOT judge, so it must not clear.
+        # This branch used to warn and let the publish through ("unjudged"),
+        # which meant the one gate standing on the reader-visible artifact was
+        # a no-op for any article that simply omitted the key — the cheapest
+        # possible bypass. Now fail-closed. The pre-condition for flipping it
+        # was backfilling the two historical unbound articles (mile_530a28bc
+        # bound to df669347…, mile_e4002f4f waived as not-a-member-question);
+        # both are done, so no existing article is stalled by this.
+        checked, waiver_error = _validate_question_id_waiver(waiver) if waiver is not None else (None, None)
+        if checked is not None:
+            print(
+                "  ↪️ member_qa publish allowed WITHOUT a question_id under an explicit "
+                f"waiver by {checked['adjudicated_by']} ({checked['adjudicated_at']}): "
+                f"{checked['reason'][:120]}"
+            )
+            return {
+                "blocked": False,
+                "verdict": "unbound_waived",
+                "articles": [],
+                "waiver": checked,
+            }
+
+        from .diagnostics import warn
+
+        warn(
+            "member_qa_publish_gate",
+            "member_qa publish blocked: no details.question_id and no valid waiver",
+            title=str(title)[:80],
+            waiver_error=waiver_error,
+        )
+        detail = f"\nThe waiver you supplied was rejected: {waiver_error}" if waiver_error else ""
+        raise MemberQaPublishGateIndeterminate(
+            "member_qa_publish_gate_indeterminate: this member_qa article carries no "
+            "details['question_id'], so the gate cannot check whether the member's "
+            "question already has a published answer. 'Cannot check' is not a clearance.\n"
+            "Fix it one of two ways:\n"
+            "  (1) BIND IT (do this unless it is provably impossible) — pass the question's "
+            "uuid from the Supabase `questions` table:\n"
+            "        volpred ops publish-milestone --question-id <uuid> ...\n"
+            "      or equivalently --details-json '{\"question_id\": \"<uuid>\"}'.\n"
+            "  (2) WAIVE IT (only when the article provably answers no member question, "
+            "e.g. a general/research piece mislabelled member_qa) — hand-write an "
+            "adjudication into --details-json; there is no CLI flag for this on purpose:\n"
+            "        --details-json '{\"question_id_waiver\": {\"reason\": \"<why no member "
+            "question exists: what you searched and what you found>\", \"adjudicated_by\": "
+            "\"<who>\", \"adjudicated_at\": \"<ISO-8601>\"}}'\n"
+            f"      All three fields are required and reason must be >= {_WAIVER_MIN_REASON_CHARS} chars."
+            f"{detail}"
+        )
+
+    found = find_published_member_qa_articles(
+        question_id,
+        feed=feed,
+        storage_dir=storage_dir,
+        exclude_article_id=exclude_article_id,
+    )
+    if not found["local_ok"]:
+        # We are blind on the authoritative source: "unknown" must not be
+        # rendered as "no duplicate". Fail closed with a DISTINCT error type.
+        raise MemberQaPublishGateIndeterminate(
+            "member_qa_publish_gate_indeterminate: local feed unreadable, cannot "
+            f"verify whether question_id={question_id} already has a published answer. "
+            "Fix the feed read and retry — this is NOT a clearance."
+        )
+
+    priors = found["articles"]
+    if not priors:
+        if not found["remote_ok"]:
+            # Local (authoritative for anything this repo published) says clear;
+            # only the Supabase enrichment is down. Degrade explicitly instead of
+            # stalling the whole member_qa line on an external outage.
+            print(
+                "  ⚠️ member_qa publish gate DEGRADED: Supabase cross-check unavailable "
+                f"({found['remote_error']}); cleared on local feed only."
+            )
+            return {"blocked": False, "verdict": "clear_degraded", **found}
+        return {"blocked": False, "verdict": "clear", **found}
+
+    prior_ids = [str(a.get("id")) for a in priors]
+    declared = set(_normalize_supersedes(supersedes))
+    if declared and set(prior_ids).issubset(declared):
+        print(
+            f"  ↪️ member_qa sequel allowed: supersedes={sorted(declared)} "
+            f"(question_id={question_id})"
+        )
+        return {"blocked": False, "verdict": "supersedes", **found}
+
+    listed = "; ".join(
+        f"{a.get('id')} ({a.get('status')}, {a.get('source')}) '{str(a.get('title') or '')[:40]}'"
+        for a in priors
+    )
+    raise MemberQaDuplicatePublishError(
+        "member_qa_duplicate_publish_blocked: question_id="
+        f"{question_id} already has {len(priors)} published answer(s): {listed}. "
+        "This is the 2026-07-19 STRIKE 2 class (a member's question answered twice). "
+        "If this is a deliberate follow-up, re-run with "
+        f"details['supersedes']={prior_ids!r} (CLI: --supersedes "
+        f"{','.join(prior_ids)}); otherwise do not publish."
+    )
+
+
+_MEMBER_QA_GATE_EXEMPT_STATUSES = {"unpublished", "retracted"}
+
+
+def member_qa_publish_gate_applies(item: dict) -> bool:
+    """Does the G1 member_qa publish gate apply to this article?
+
+    2026-07-22 (residual 5, anti-stacking): this predicate used to live INLINE
+    inside `Publisher.publish_milestone`, so the release-pool status-rewrite
+    path (`_atomic_promote_release_item`) — the other way an article becomes
+    reader-visible — had no G1 at all. member_qa does not currently route
+    through release_pool, so it was not a live hole, but "the gate only exists
+    on one of the two publish paths" is precisely how STRIKE 2 happened. One
+    predicate + one adjudicator (`assert_member_qa_publish_allowed`), both
+    publish paths.
+
+    `unpublished` / `retracted` are exempt: those transitions REMOVE an article
+    from readers, and a gate that blocks retraction would be a gate that keeps
+    duplicates live.
+    """
+    if not isinstance(item, dict):
+        return False
+    if str(item.get("status") or "") in _MEMBER_QA_GATE_EXEMPT_STATUSES:
+        return False
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    return (
+        str(item.get("audience") or "").strip() == "member_qa"
+        or str(item.get("category") or "").strip() == "member_qa"
+        or str(details.get("content_type") or "").strip() == "member_qa"
+        or str(item.get("phase") or "").startswith("member_qa")
+    )
+
+
+def assert_member_qa_publish_allowed_for_item(
+    item: dict,
+    *,
+    feed: list[dict] | None = None,
+    storage_dir: str = "storage",
+) -> dict | None:
+    """Run G1 on a whole feed item; None when the gate does not apply.
+
+    A thin field extractor over `assert_member_qa_publish_allowed` — the
+    judgement itself is NOT reimplemented here. `exclude_article_id` is
+    mandatory on this path: a `scheduled` member_qa article being promoted is
+    already in the feed with a gate-visible status, so without the exclusion it
+    would be blocked as its own duplicate.
+    """
+    if not member_qa_publish_gate_applies(item):
+        return None
+    details = item.get("details") if isinstance(item.get("details"), dict) else {}
+    return assert_member_qa_publish_allowed(
+        details.get("question_id") or item.get("question_id"),
+        feed=feed,
+        supersedes=details.get("supersedes"),
+        title=str(item.get("title") or ""),
+        storage_dir=storage_dir,
+        exclude_article_id=str(item.get("id") or "") or None,
+        waiver=details.get("question_id_waiver"),
+    )
+
+
 def _extract_k_ids_from_item(item: dict) -> set[str]:
     refs: set[str] = set()
     details = item.get("details")
@@ -1034,19 +1441,54 @@ def _materialize_release_audit_fix_task(
             if not isinstance(tasks, list):
                 raise ValueError("next_tasks.json is not a list")
 
-            for task in tasks:
-                if not isinstance(task, dict):
-                    continue
-                if task.get("id") == task_id or (
-                    task.get("source") == "release_pool_audit_skip_materializer"
-                    and str(task.get("article_id") or "") == item_id
-                    and item_id
-                ):
-                    return {
-                        "created": False,
-                        "reason": "task_already_exists",
-                        "task_id": task.get("id") or task_id,
-                    }
+            prior = [
+                task
+                for task in tasks
+                if isinstance(task, dict)
+                and (
+                    task.get("id") == task_id
+                    or (
+                        task.get("source") == "release_pool_audit_skip_materializer"
+                        and str(task.get("article_id") or "") == item_id
+                        and item_id
+                    )
+                )
+            ]
+            open_task = next(
+                (
+                    task
+                    for task in prior
+                    if str(task.get("status") or "") in _RELEASE_AUDIT_OPEN_STATUSES
+                ),
+                None,
+            )
+
+            if open_task is not None:
+                # Write-once was the bug: the task was filed at its opening
+                # priority and never learned it had gone on blocking. A
+                # finished article sat behind the P1 queue for 20-30h while
+                # its skip count climbed to 24 and nothing in the pool said
+                # so. Refresh the evidence and escalate while it is open.
+                refreshed = _refresh_release_audit_task(
+                    open_task, item, audit_issues, skip_count
+                )
+                if refreshed:
+                    write_tasks_to_handle(fh, tasks)
+                return {
+                    "created": False,
+                    "reason": "task_already_exists",
+                    "task_id": open_task.get("id") or task_id,
+                    "refreshed": refreshed,
+                    "priority": open_task.get("priority"),
+                }
+
+            if prior:
+                # Every prior attempt is closed, yet the audit is still skipping
+                # this article: the fix did not hold. Matching on article_id
+                # alone regardless of status meant one closed task suppressed
+                # re-materialization forever, leaving a still-blocked article
+                # with no owner at all. File the next round under its own id.
+                task_id = f"{task_id}_r{len(prior) + 1}"
 
             title_text = " ".join(str(item.get("title") or item_id or "untitled draft").split())
             task = {
@@ -1055,7 +1497,7 @@ def _materialize_release_audit_fix_task(
                 "description": _build_release_audit_task_description(item, audit_issues, skip_count),
                 "task_type": "platform_ops",
                 "dispatch_lane": "agent",
-                "priority": 3,
+                "priority": _release_audit_task_priority(skip_count),
                 "status": "pending",
                 "source": "release_pool_audit_skip_materializer",
                 "tags": ["release_pool", "audit_skip", "platform_ops"],
@@ -1072,6 +1514,75 @@ def _materialize_release_audit_fix_task(
             fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
     return {"created": True, "task_id": task_id}
+
+
+# A blocked draft is a finished article the readers never see, so it opens at P2
+# rather than the old hardcoded P3 — but not at P1, which would let routine gate
+# misses dilute the lane reserved for genuinely urgent work. It earns P1 by
+# persisting: at the 240-minute release cadence, 6 skips is a full day during
+# which the cadence had a slot to fill and could not fill it.
+RELEASE_AUDIT_TASK_OPEN_PRIORITY = 2
+RELEASE_AUDIT_TASK_URGENT_PRIORITY = 1
+RELEASE_AUDIT_TASK_URGENT_SKIPS = 6
+
+# Escalation applies only to tasks still awaiting work. A closed task must not be
+# resurrected by a late audit tick; the audit would be reopening someone else's
+# completed decision.
+_RELEASE_AUDIT_OPEN_STATUSES = frozenset({"pending", "in_progress", "blocked"})
+
+
+def _release_audit_task_priority(skip_count: int) -> int:
+    """Priority for a release-blocked draft, as a function of how long it stuck."""
+    try:
+        skips = int(skip_count or 0)
+    except (TypeError, ValueError):
+        skips = 0
+    if skips >= RELEASE_AUDIT_TASK_URGENT_SKIPS:
+        return RELEASE_AUDIT_TASK_URGENT_PRIORITY
+    return RELEASE_AUDIT_TASK_OPEN_PRIORITY
+
+
+def _refresh_release_audit_task(
+    task: dict,
+    item: dict,
+    audit_issues: list,
+    skip_count: int,
+) -> bool:
+    """Re-state an existing blocker task's evidence and escalate if it persists.
+
+    Returns True when the task changed, so the caller only rewrites the file
+    when there is something to write. Priority moves one way only: a task the
+    owner deliberately raised must not be pushed back down by a routine tick.
+    """
+    if str(task.get("status") or "") not in _RELEASE_AUDIT_OPEN_STATUSES:
+        return False
+
+    changed = False
+    if task.get("release_audit_skipped_count") != skip_count:
+        task["release_audit_skipped_count"] = skip_count
+        changed = True
+    if task.get("release_audit_issues") != audit_issues:
+        # The blocker itself can change (a lazypack lands, anti-AI style trips
+        # instead); a stale issue list sends the next fire at the wrong problem.
+        task["release_audit_issues"] = audit_issues
+        changed = True
+
+    description = _build_release_audit_task_description(item, audit_issues, skip_count)
+    if task.get("description") != description:
+        task["description"] = description
+        changed = True
+
+    escalated = _release_audit_task_priority(skip_count)
+    try:
+        current = int(task.get("priority"))
+    except (TypeError, ValueError):
+        current = None
+    if current is None or escalated < current:
+        task["priority"] = escalated
+        normalize_task_priority(task)
+        changed = True
+
+    return changed
 
 
 def _next_release_audit_skip_count(details: dict) -> int:
@@ -1273,6 +1784,29 @@ def _atomic_promote_release_item(
         prospective = {**current, **item}
         prospective["status"] = "published"
         prospective["published_at"] = released_at
+
+        # G1 on the release path (2026-07-22, residual 5). This function is the
+        # ONLY place release_pool rewrites status to 'published', so hooking the
+        # gate here covers every release route (pool, explicit pub_id, drought
+        # override) with one call. Same judgement function as
+        # Publisher.publish_milestone — no second copy of the rule.
+        # A block is NOT raised: aborting here would kill the whole release run
+        # over one bad article. It is returned as a conflict outcome, which the
+        # caller already logs and skips, leaving the article as a draft.
+        try:
+            assert_member_qa_publish_allowed_for_item(
+                prospective, feed=fresh_feed, storage_dir=storage_dir
+            )
+        except (
+            MemberQaDuplicatePublishError,
+            MemberQaPublishGateIndeterminate,
+        ) as exc:
+            return {
+                "outcome": "member_qa_publish_blocked",
+                "id": item_id,
+                "reason": f"{type(exc).__name__}: {str(exc).splitlines()[0]}",
+            }
+
         throttle_block = _release_publish_throttle(
             prospective,
             fresh_feed,
@@ -1588,6 +2122,209 @@ def _maybe_drought_release(
     }
 
 
+def _lazypack_job_state(article_id: str, storage_dir: str = "storage") -> tuple[str, str | None]:
+    """What the lazypack lane actually knows about ``article_id``.
+
+    Returns ``(state, job_id)`` where state is one of ``missing`` (no job was
+    ever queued), ``queued``/``running``/``failed``/``completed``.
+
+    2026-07-19 deadlock (boss 20:14): the gate used to *assume* a job existed
+    and print `lazypack-<id>` as the thing to go inspect. For mile_21e45133 and
+    mile_47c4bc3e no such job was ever enqueued, so the message pointed at a
+    file that does not exist and the draft skipped 20 release cycles with no
+    one able to act on the instruction. A gate that reports a state it did not
+    check is worse than one that blocks: it spends a human's attention on a
+    dead end. Look before speaking.
+    """
+    queue_dir = Path(storage_dir) / "ops" / "compute_queue"
+    if not queue_dir.exists():
+        return "missing", None
+    jobs: list[tuple[str, str, str]] = []
+    for path in sorted(queue_dir.glob(f"lazypack-{article_id}*.json")):
+        try:
+            job = json.loads(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            # 讀不動的 job 檔會讓這個 gate 少看到一個 job，而它的回答會被當成
+            # 「已檢查過全部」——正是本函式 docstring 要避免的那種假回報。
+            from .diagnostics import warn
+
+            warn(f"lazypack job 檔讀取失敗，已略過：{path.name}: {exc}")
+            continue
+        # glob is a prefix match: lazypack-mile_ab must not answer for
+        # lazypack-mile_abcdef. Retries are the only legal suffix.
+        job_id = str(job.get("id") or path.stem)
+        if job_id != f"lazypack-{article_id}" and not job_id.startswith(
+            f"lazypack-{article_id}-r"
+        ):
+            continue
+        jobs.append((str(job.get("queued_at") or ""), job_id, str(job.get("status") or "")))
+    if not jobs:
+        return "missing", None
+    jobs.sort()
+    _, job_id, status = jobs[-1]
+    return (status or "unknown"), job_id
+
+
+def _lazypack_plan_path(article_id: str, storage_dir: str = "storage") -> Path | None:
+    """The authored, evidence-bound plan for ``article_id``, if one exists."""
+    root = Path(storage_dir) / "lazypack_jobs"
+    for candidate in (
+        root / article_id / "plan.json",
+        root / f"{article_id}_plan.json",
+    ):
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _lazypack_gate_issue(
+    article_id: str, storage_dir: str = "storage", *, may_enqueue: bool = True
+) -> str:
+    """One honest sentence about why this article has no 懶人包圖組 yet.
+
+    When the render was simply never queued and a plan is on disk, queue it
+    here rather than reporting the gap: the gate is the one code path that
+    reliably notices, and a draft that needs one command is not a finding, it
+    is an omission to close. Without a plan there is nothing to queue — say so
+    explicitly instead of inventing a job id.
+
+    ``may_enqueue=False`` keeps the read-only preview caller side-effect free;
+    it still reports the true state, it just does not act on it.
+    """
+    state, job_id = _lazypack_job_state(article_id, storage_dir)
+
+    if state == "missing":
+        plan = _lazypack_plan_path(article_id, storage_dir)
+        if plan is not None and not may_enqueue:
+            return (
+                "missing 懶人包圖組 section; the render job was never queued "
+                f"(an evidence-bound plan is ready at {plan})"
+            )
+        if plan is None:
+            return (
+                "missing 懶人包圖組 section and NO render job was ever queued "
+                f"(checked {Path(storage_dir) / 'ops' / 'compute_queue'}/"
+                f"lazypack-{article_id}*.json) "
+                "— no evidence-bound plan on disk either; author one via the "
+                "lazypack-infographic skill, then: uv run python "
+                f"scripts/lazypack_async_render.py enqueue --article-id {article_id} "
+                "--plan <plan.json>"
+            )
+        try:
+            import subprocess
+
+            proc = subprocess.run(
+                [
+                    "uv", "run", "python", "scripts/lazypack_async_render.py",
+                    "enqueue", "--article-id", article_id, "--plan", str(plan),
+                ],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            if proc.returncode == 0:
+                return (
+                    "missing 懶人包圖組 section; the render job was never queued "
+                    f"— auto-enqueued just now from {plan}. The */15 compute "
+                    "worker will render it; this draft releases on the next cycle."
+                )
+            return (
+                "missing 懶人包圖組 section; the render job was never queued and "
+                f"auto-enqueue from {plan} FAILED: "
+                f"{(proc.stderr or proc.stdout or '').strip()[:300]}"
+            )
+        except Exception as exc:  # noqa: BLE001 — reported, never raised at a gate
+            return (
+                "missing 懶人包圖組 section; the render job was never queued and "
+                f"auto-enqueue from {plan} raised {type(exc).__name__}: {exc}"
+            )
+
+    if state in ("queued", "running"):
+        return (
+            f"missing 懶人包圖組 section (render {state}, job {job_id}) — "
+            "waiting on the */15 compute worker, no action needed"
+        )
+    if state == "completed":
+        return (
+            f"missing 懶人包圖組 section although job {job_id} COMPLETED — the "
+            "render finished but the section was not installed; inspect: uv run "
+            f"python scripts/compute_queue.py show {job_id}"
+        )
+    return (
+        f"missing 懶人包圖組 section (render {state}, job {job_id}) — inspect: "
+        f"uv run python scripts/compute_queue.py show {job_id} ; re-enqueue via "
+        "scripts/lazypack_async_render.py enqueue"
+    )
+
+
+def release_content_gate_issues(
+    item: dict,
+    storage_dir: str = "storage",
+    *,
+    record: bool = True,
+) -> list[str]:
+    """Return the content-quality blockers that would stop ``item`` releasing.
+
+    2026-07-19 root-cause extraction (boss 20:14 「為什麼文章沒有照排程釋出」):
+    `release_pool_articles` evaluated these three gates INLINE, while
+    `preview_release_pool_by_settings` — the instrument that feeds the hourly
+    alert AND `_auto_remediate_release_deadlock` — stopped at the dedup/cluster
+    filters. The pool therefore reported `eligible=3` for 9 hours while the real
+    release path released 0 and the deadlock detector concluded `not_deadlocked`.
+    One evaluator, two callers: preview eligibility now means the same thing as
+    release eligibility.
+
+    No skip counters, no fix tasks, no feed mutation. Callers that need those side
+    effects (the release loop) own them. `record=False` additionally suppresses the
+    anti-AI gate's decision-ledger append and evaluates against a copy, so the
+    preview path is fully read-only.
+    """
+    if not record:
+        item = deepcopy(item)
+    audience = str(item.get("audience") or "").lower()
+    body_text = (
+        item.get("description")
+        or item.get("content")
+        or item.get("summary")
+        or ""
+    )
+    issues = list(
+        _audit_general_content(
+            audience,
+            list(item.get("tags") or []),
+            str(body_text),
+        )
+    )
+
+    if audience == "general":
+        try:
+            # Read content-first (NOT the audit gate's description-first
+            # body_text): the installed section lives in item["content"];
+            # "description" is the <=200-char SEO snippet.
+            _lz_text = item.get("content") or item.get("description") or ""
+            if not has_lazypack_section(str(_lz_text)):
+                issues.append(
+                    _lazypack_gate_issue(
+                        str(item.get("id") or ""), storage_dir,
+                        may_enqueue=record
+                    )
+                )
+        except Exception as exc:  # fail-open: never block release on a broken check
+            _warn_release_pool("lazypack release gate check failed; fail-open", exc)
+
+    issues.extend(
+        _run_publish_anti_ai_gate(
+            storage_dir,
+            item,
+            target_status="published",
+            raise_on_block=False,
+            log_decision=record,
+        )
+        or []
+    )
+    return issues
+
+
 def release_pool_articles(
     *,
     pub_id: str | None = None,
@@ -1857,51 +2594,11 @@ def release_pool_articles(
         # terminology + tag count cap. audit_strict effectively False here
         # so we don't crash the cron loop, but we DO refuse to flip status.
         audience = str(item.get("audience") or "").lower()
-        body_text = (
-            item.get("description")
-            or item.get("content")
-            or item.get("summary")
-            or ""
-        )
-        audit_issues = _audit_general_content(
-            audience,
-            list(item.get("tags") or []),
-            str(body_text),
-        )
-        # 2026-07-02 lazypack async pipeline (error_log 15:15 #4): drafts are
-        # created WITHOUT the 懶人包圖組 section (the deterministic render runs on the
-        # compute_queue lane, not inside the writing agent's 50-min cap), but a
-        # general article must not flip to published until the section landed.
-        # Reuses the release-audit skip counter + fix-task escalation below
-        # (single enforcement owner — anti-stacking) and fails open on checker
-        # malfunction per dedup-gate-audit.md.
-        if audience == "general":
-            try:
-                # Read content-first (NOT the audit gate's description-first
-                # body_text): the installed section lives in item["content"];
-                # "description" is the ≤200-char SEO snippet and would never
-                # contain it. Mirrors content_quality's coverage scan.
-                _lz_text = item.get("content") or item.get("description") or ""
-                if not has_lazypack_section(str(_lz_text)):
-                    audit_issues = list(audit_issues) + [
-                        "missing 懶人包圖組 section (async lazypack render "
-                        "pending/failed — inspect: uv run python "
-                        "scripts/compute_queue.py show "
-                        f"lazypack-{item.get('id')} ; re-enqueue via "
-                        "scripts/lazypack_async_render.py enqueue)"
-                    ]
-            except Exception as exc:  # fail-open: never block release on a broken check
-                _warn_release_pool(
-                    "lazypack release gate check failed; fail-open", exc
-                )
-        anti_ai_issues = _run_publish_anti_ai_gate(
-            storage_dir,
-            item,
-            target_status="published",
-            raise_on_block=False,
-        )
-        if anti_ai_issues:
-            audit_issues = list(audit_issues) + anti_ai_issues
+        # Gate evaluation lives in release_content_gate_issues() so the preview /
+        # deadlock detector judge the pool by the SAME rules (2026-07-19). The
+        # skip-counter + fix-task escalation below stays here — it is a release-run
+        # side effect, not part of the verdict.
+        audit_issues = release_content_gate_issues(item, storage_dir)
         if audit_issues:
             details = item.get("details")
             if not isinstance(details, dict):
@@ -2575,6 +3272,38 @@ def preview_release_pool_by_settings(
             filtered_candidates.append(item)
         candidates = filtered_candidates
 
+    # Content-quality gates (audit / lazypack / anti-ai), evaluated with the same
+    # helper the release loop uses. Before 2026-07-19 the preview stopped above and
+    # reported every dedup-clean draft as `eligible`, so the hourly alert printed
+    # "去重後可釋出=3" and `_auto_remediate_release_deadlock` saw eligible>0 →
+    # not_deadlocked, while the real release path released 0 for 9 hours straight.
+    content_gate_blocked: list[dict] = []
+    releasable: list[dict] = []
+    for item in candidates:
+        try:
+            issues = release_content_gate_issues(item, storage_dir, record=False)
+        except Exception as exc:  # fail-open: a broken checker must not fake a deadlock
+            _warn_release_pool("preview content gate check failed; fail-open", exc)
+            issues = []
+        if issues:
+            details = item.get("details")
+            content_gate_blocked.append(
+                {
+                    "id": item.get("id"),
+                    "title": item.get("title"),
+                    "audience": _article_audience(item),
+                    "issues": issues,
+                    "skip_count": (
+                        details.get("release_audit_skipped_count")
+                        if isinstance(details, dict)
+                        else None
+                    ),
+                }
+            )
+            continue
+        releasable.append(item)
+    candidates = releasable
+
     due_now = settings["mode"] in ("scheduled", "auto") and (
         next_release_at is None or next_release_at <= now
     )
@@ -2601,10 +3330,13 @@ def preview_release_pool_by_settings(
             "scheduled": sum(1 for item in pool_items if item.get("status") == "scheduled"),
             "eligible_before_dedup": len(candidates_before_dedup),
             "dedup_flagged": len(dedup_flagged),
+            "narrative_cluster_filtered": len(narrative_cluster_filtered),
+            "content_gate_blocked": len(content_gate_blocked),
             "eligible": len(candidates),
         },
         "narrative_cluster_pressure": narrative_pressure,
         "narrative_cluster_filtered": narrative_cluster_filtered,
+        "content_gate_blocked": content_gate_blocked,
         "next_candidates": next_candidates,
     }
 

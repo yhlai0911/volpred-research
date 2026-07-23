@@ -1,0 +1,39 @@
+{
+  "id": "k1257-k1258-semantics-rerun-20260723",
+  "title": "K1257 K1258 posterior semantics rerun",
+  "script_path": "scripts/run_k1257_k1258_semantics_rerun.sh",
+  "interpreter": "bash",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 2,
+  "queued_at": "2026-07-23T11:15:39Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-semantics-rerun-20260723.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1257-k1258-semantics-rerun-20260723.stderr",
+  "result_artifact": "experiments/k1258/k1258_results.json",
+  "output_paths": [
+    "experiments/k1257/k1257_results.json",
+    "experiments/k1257/k1257_qlike_comparison.png",
+    "experiments/k1257/k1257_weight_evolution.png",
+    "experiments/k1258/k1258_results.json",
+    "experiments/k1258/k1258_qlike_by_lambda.png",
+    "experiments/k1258/k1258_weight_switch_freq.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Collect K1257/K1258 semantic-schema rerun. Verify exit 0 and wrapper headline-equality gate, inspect absorbing_dropped_models, ever_invalid_models, per-model final_weight_status, drop_events, and posterior_excluded_days. Then generate each review_verdict.json only via experiment_gates.py verdict-template, run bounded Codex round 2 against the final claim-surface bytes, fill the generated templates with the independent hash-bound verdict, run certification/artifact gates, commit exact artifacts, and complete source task k1257_k1258_semantics_and_certification only if both experiments certify.",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "k1257_k1258_semantics_and_certification",
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null
+}

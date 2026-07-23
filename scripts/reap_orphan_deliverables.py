@@ -73,6 +73,7 @@ from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import (  # noqa: E402
     GitWriterLockError,
@@ -163,6 +164,7 @@ def load_baseline() -> set[str]:
 # ── queue-owned deliverables ─────────────────────────────────────────────────
 
 _TERMINAL_JOB_STATES = {"completed", "failed"}
+_INFLIGHT_JOB_STATES = {"queued", "running"}
 _GIT_ENV_KEYS = {
     "GIT_DIR",
     "GIT_WORK_TREE",
@@ -240,6 +242,14 @@ def _write_job_receipt(path: Path, payload: dict) -> None:
     tmp.replace(path)
 
 
+# Rejection reasons that mean "the producer never wrote this file", as opposed
+# to "the file is there but this reaper is not allowed to deliver it".
+_NOTHING_WAS_PRODUCED = frozenset({
+    "missing_or_not_regular_file",
+    "not_a_nonempty_string",
+})
+
+
 def _exact_repo_file(raw: object) -> tuple[str | None, str | None]:
     """Validate one ownership declaration as an exact regular file in ROOT."""
     if not isinstance(raw, str) or not raw.strip():
@@ -274,6 +284,200 @@ def _path_is_dirty(rel: str) -> bool:
     return status.returncode != 0 or bool(status.stdout.strip())
 
 
+_WORKTREE_PREFIX_RE = re.compile(r"^\.claude/worktrees/[^/]+/")
+_MANAGED_WORKTREE_OUTPUT_RE = re.compile(
+    r"^\.claude/worktrees/"
+    r"(?P<worktree>[A-Za-z0-9][A-Za-z0-9._-]*)/"
+    r"(?P<path>[^\x00]+)$"
+)
+
+
+def _tracked_clean_in_worktree(raw: object) -> bool:
+    """Return whether a declared output already has a worktree merge exit.
+
+    The canonical checkout intentionally ignores ``.claude/worktrees``.  A
+    compute job can nevertheless run there and commit its output on the
+    worktree branch.  Treating that file as merely ``git_ignored`` manufactures
+    an orphan alert and, worse, invites the main-checkout reaper to bypass the
+    review/merge gate.  Only a regular file that Git tracks *and* reports clean
+    in that exact worktree qualifies; untracked or modified outputs stay held.
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return False
+    candidate = Path(raw.strip())
+    candidate = candidate if candidate.is_absolute() else ROOT / candidate
+    if candidate.is_symlink() or not candidate.is_file():
+        return False
+    resolved = candidate.resolve(strict=False)
+    worktrees_root = (ROOT / ".claude" / "worktrees").resolve(strict=False)
+    try:
+        within = resolved.relative_to(worktrees_root)
+    except ValueError:  # silent-ok: declaration is outside managed worktrees
+        return False
+    if len(within.parts) < 2:
+        return False
+    worktree = worktrees_root / within.parts[0]
+    rel = PurePosixPath(*within.parts[1:]).as_posix()
+
+    env = os.environ.copy()
+    for key in _GIT_ENV_KEYS:
+        env.pop(key, None)
+    kwargs = {
+        "cwd": str(worktree),
+        "env": env,
+        "capture_output": True,
+        "text": True,
+    }
+    tracked = subprocess.run(
+        ["git", "--literal-pathspecs", "ls-files", "--error-unmatch", "--", rel],
+        **kwargs,
+    )
+    if tracked.returncode != 0:
+        return False
+    status = subprocess.run(
+        ["git", "--literal-pathspecs", "status", "--porcelain=v1",
+         "--untracked-files=all", "--", rel],
+        **kwargs,
+    )
+    return status.returncode == 0 and not status.stdout.strip()
+
+
+def _checkpointed_on_retained_worktree_branch(raw: object) -> bool:
+    """Whether cleanup preserved a removed worktree output on its branch.
+
+    The no-residue worktree cleanup checkpoints bytes, removes the linked
+    worktree, and deliberately retains its branch when an experiment gate
+    blocks merge.  At that point the compute receipt's original path no longer
+    exists, but adopting the result into main would bypass the pending review.
+    Recognize only the two canonical branch names and only an exact Git blob.
+
+    An existing worktree never qualifies here: its clean/dirty state belongs
+    to :func:`_tracked_clean_in_worktree`, so an old branch commit cannot hide
+    a newer uncommitted edit.
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return False
+    candidate = Path(raw.strip())
+    if candidate.is_absolute():
+        try:
+            original = candidate.resolve(strict=False).relative_to(
+                ROOT.resolve(strict=False)
+            ).as_posix()
+        except ValueError:  # silent-ok: paths outside ROOT cannot name its branch blobs
+            return False
+    else:
+        original = raw.strip().removeprefix("./")
+    match = _MANAGED_WORKTREE_OUTPUT_RE.fullmatch(original)
+    if match is None:
+        return False
+    rel = PurePosixPath(match.group("path"))
+    if not rel.parts or any(part in {"", ".", ".."} for part in rel.parts):
+        return False
+    worktree_name = match.group("worktree")
+    if (ROOT / ".claude" / "worktrees" / worktree_name).exists():
+        return False
+
+    refs = (
+        f"refs/heads/worktree-{worktree_name}",
+        f"refs/heads/wt/{worktree_name}",
+    )
+    for ref in refs:
+        verified = _git("rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}")
+        if verified.returncode != 0:
+            continue
+        blob_type = _git("cat-file", "-t", f"{ref}:{rel.as_posix()}")
+        if blob_type.returncode == 0 and blob_type.stdout.strip() == "blob":
+            return True
+    return False
+
+
+def _managed_worktree_output_root(raw: object) -> Path | None:
+    """Return the registered-worktree-shaped root for an existing output."""
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    candidate = Path(raw.strip())
+    candidate = candidate if candidate.is_absolute() else ROOT / candidate
+    if candidate.is_symlink() or not candidate.is_file():
+        return None
+    resolved = candidate.resolve(strict=False)
+    worktrees_root = (ROOT / ".claude" / "worktrees").resolve(strict=False)
+    try:
+        within = resolved.relative_to(worktrees_root)
+    except ValueError:  # silent-ok: declaration is outside managed worktrees
+        return None
+    if len(within.parts) < 2:
+        return None
+    worktree = worktrees_root / within.parts[0]
+    # A linked worktree has a `.git` file pointing at the common repository.
+    # Requiring it keeps an arbitrary ignored directory from impersonating a
+    # review/merge owner.
+    if not (worktree / ".git").is_file():
+        return None
+    return worktree
+
+
+def _active_followup_owns_worktree(job: dict, declared: list[object]) -> bool:
+    """Whether a live agent follow-up owns every declared worktree output.
+
+    Compute results are intentionally left modified/untracked until their
+    review stage commits the worktree.  The main-checkout reaper must not call
+    those files ownerless while that exact downstream job remains queued or
+    running; conversely, a missing/terminal/unrelated follow-up must not silence
+    the hold.
+    """
+    if job.get("followup_dispatched") is not True:
+        return False
+    followup_id = job.get("followup_next_task_id")
+    if not isinstance(followup_id, str) or not re.fullmatch(
+            r"[A-Za-z0-9][A-Za-z0-9._-]*", followup_id):
+        return False
+
+    roots = [_managed_worktree_output_root(raw) for raw in declared]
+    if not roots or any(root is None for root in roots):
+        return False
+    worktree = roots[0]
+    if any(root != worktree for root in roots[1:]):
+        return False
+
+    followup_path = QUEUE_DIR / f"{followup_id}.json"
+    # Some follow-up ids name task-pool rows rather than compute receipts.
+    # Absence here is therefore a normal non-match, not an unreadable-input
+    # warning for every reaper sweep.
+    if not followup_path.is_file():
+        return False
+    followup = _load_json(followup_path, {})
+    if not isinstance(followup, dict):
+        return False
+    if (
+        followup.get("kind") != "agent"
+        or followup.get("status") not in _INFLIGHT_JOB_STATES
+    ):
+        return False
+    cwd = followup.get("cwd")
+    if not isinstance(cwd, str) or not cwd.strip():
+        return False
+    return Path(cwd).resolve(strict=False) == worktree.resolve(strict=False)
+
+
+def _landed_in_main(raw: object) -> str | None:
+    """Worktree-declared output that has since been merged into the checkout.
+
+    A job that ran in a worktree declares `.claude/worktrees/<wt>/experiments/…`.
+    Once the worktree merges, `merge_worktree.sh` removes it, so the declared
+    path stops existing while the deliverable itself is safe in the main tree —
+    the exact shape that produced seven bogus `no_existing_declared_files` holds
+    on 2026-07-19. Resolve the same repo-relative path in the checkout instead.
+    """
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    original = raw.strip().removeprefix("./")
+    stripped = _WORKTREE_PREFIX_RE.sub("", original)
+    if stripped == original:
+        return None  # never was a worktree path — nothing to re-resolve
+    rel, _reason = _exact_repo_file(stripped)
+    return rel
+
+
 def scan_job_deliverables() -> dict:
     """Find terminal compute jobs whose exact declared files need delivery."""
     candidates: list[dict] = []
@@ -302,17 +506,54 @@ def scan_job_deliverables() -> dict:
         declared = job.get("output_paths")
         if not isinstance(declared, list) or not declared:
             continue
+        if _active_followup_owns_worktree(job, declared):
+            # The exact worktree and files have a live review/merge owner.  Its
+            # queue receipt owns escalation if that job stalls; opening an
+            # orphan-delivery task here duplicates ownership and pressures the
+            # main reaper to bypass the experiment gate.
+            continue
 
         exact: list[str] = []
         rejected: list[dict] = []
+        worktree_owned = 0
+        checkpoint_owned = 0
         for raw in declared:
             rel, reason = _exact_repo_file(raw)
             if rel is not None:
                 exact.append(rel)
+            elif _tracked_clean_in_worktree(raw):
+                worktree_owned += 1
+            elif _checkpointed_on_retained_worktree_branch(raw):
+                checkpoint_owned += 1
             else:
                 rejected.append({"path": raw, "reason": reason})
         exact = list(dict.fromkeys(exact))
         if not exact:
+            if worktree_owned == len(declared):
+                # Already committed on the job's worktree branch. Its only
+                # legitimate exit is the normal review + merge workflow.
+                continue
+            if checkpoint_owned == len(declared):
+                # Worktree cleanup preserved the exact bytes while a review or
+                # experiment gate kept them out of main.  The retained branch,
+                # not orphan adoption, is their canonical exit.
+                continue
+            landed = [rel for rel in (_landed_in_main(raw) for raw in declared)
+                      if rel is not None]
+            if landed:
+                # Already in the checkout under its post-merge path. Nothing is
+                # at risk, so holding it only manufactures a triage task.
+                continue
+            if job.get("status") == "failed" and all(
+                    r.get("reason") in _NOTHING_WAS_PRODUCED for r in rejected):
+                # A failed job produced no deliverable to preserve. Holding it
+                # asks a human to find an exit for something that never existed.
+                # The skip stops there on purpose: if a declared path *does*
+                # exist and was refused on policy grounds (outside the repo, a
+                # symlink, git-ignored), the artifact is real and this file's
+                # invariant applies — held + a readable reason, never silently
+                # dropped because the producer happened to exit non-zero.
+                continue
             # Do not finalize the job: a timed-out producer may still land a
             # declared file before the next sweep, and preserving it is the goal.
             held.append({"job_id": str(job.get("id") or job_path.stem),
@@ -325,7 +566,11 @@ def scan_job_deliverables() -> dict:
         previous = {str(path) for path in previously_delivered}
         pending = [path for path in exact if path not in previous or _path_is_dirty(path)]
         if not pending:
-            if rejected:
+            # A declared output that `.gitignore` excludes (`__pycache__`,
+            # scratch `*_article.md`) is not a deliverable this reaper can ever
+            # deliver — every real output already landed. Holding on those alone
+            # is bookkeeping noise, not a preserved artifact.
+            if rejected and any(r.get("reason") != "git_ignored" for r in rejected):
                 held.append({
                     "job_id": str(job.get("id") or job_path.stem),
                     "reason": "declared_outputs_not_yet_deliverable",
@@ -490,7 +735,28 @@ def is_registered(rel: str, fm: dict, body: str, feed: list[dict]) -> tuple[bool
             refs = ((art.get("details") or {}).get("experiment_refs")) or []
             if isinstance(refs, list) and kids & {str(r).upper() for r in refs}:
                 return True, f"K-coverage → {art.get('id')}"
+
+    # Derivatives of an already-published article name it in the filename:
+    # `fb_mile_5a20a332.md` (FB copy), `k841_mile_179df5f5_correction.md`
+    # (errata). They carry no frontmatter title — they were never meant to enter
+    # the draft pool — so every probe above misses and they land in `no_title`
+    # held forever. The article id in the name is an exact back-link; use it.
+    named = _mile_ids(rel)
+    if named:
+        for art in feed:
+            if str(art.get("id") or "") in named:
+                return True, f"derivative of published {art.get('id')}"
     return False, ""
+
+
+# No leading \b: the id is usually prefixed (`fb_mile_…`), and `_` is a word
+# character, so \b would never fire on exactly the names this probe exists for.
+_MILE_ID_RE = re.compile(r"mile_[0-9a-f]{6,}(?![0-9a-f])")
+
+
+def _mile_ids(rel: str) -> set[str]:
+    """Feed article ids named by a draft's filename (not its body)."""
+    return set(_MILE_ID_RE.findall(PurePosixPath(rel).name))
 
 
 def _inflight_stems(tasks: list[dict]) -> set[str]:
@@ -738,6 +1004,7 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
     records: list[tuple[str, str]] = []
     dirty_set: set[str] = set()
     deletion_dirs: set[str] = set()
+    pending_rename: dict[str, list[str]] = {}
 
     for line in status.stdout.splitlines():
         code, rel = line[:2], line[3:].strip()
@@ -747,8 +1014,8 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
             # A disappearing file is not a deliverable. Committing the deletion
             # would be this script's first destructive act; report it instead.
             if all_files:
-                held.append({"path": rel, "kind": "deletion",
-                             "reason": "deletion_not_owned"})
+                pending_rename.setdefault(
+                    str(PurePosixPath(rel).parent), []).append(rel)
                 deletion_dirs.add(str(PurePosixPath(rel).parent))
             continue
         dirty_set.add(rel)
@@ -802,12 +1069,25 @@ def scan_namespace(ns_id: str, *, now_ts: float | None = None) -> dict:
             # additive half untracked). The reaper never commits deletions, so
             # adopting only the other half would land a half-applied rename and
             # silently duplicate invalidated data. Held → escalated by name.
-            held.append({"path": rel, "kind": "paired_deletion",
-                         "reason": f"paired_deletion_pending:{parent}"})
+            pending_rename.setdefault(parent, []).append(rel)
             continue
 
         collectable.append({"path": rel, "kind": PurePosixPath(rel).suffix.lstrip("."),
                             "reason": "untracked" if code == "??" else "modified"})
+
+    # One in-flight rename is one thing to do, not N orphans. k1380's deliberate
+    # `*_INVALID_20260716.*` invalidation produced eight held rows with two
+    # different "not owned" reasons, and the escalation task read as eight
+    # ownerless artifacts when the actual state was "a directory is mid-rename,
+    # waiting to be committed". Report the directory once, name its members.
+    for parent in sorted(pending_rename):
+        members = sorted(set(pending_rename[parent]))
+        held.append({"path": parent, "kind": "pending_rename",
+                     "reason": "pending_rename",
+                     "detail": f"{len(members)} 個檔案處於未 commit 的改名/修改中"
+                               f"（非無主）：{', '.join(members)}。"
+                               f"出口是 commit 這個目錄，不是找人認領。",
+                     "members": members})
 
     return {"namespace": ns_id, "collectable": collectable, "held": held,
             "skipped": skipped}
@@ -899,6 +1179,71 @@ def _write_json_atomic(path: Path, payload) -> None:
     tmp.replace(path)
 
 
+def _escalation_title(paths: list[str]) -> str:
+    """點名的標題：一份就寫出它是誰，多份才退回計數（並仍點名第一個）。"""
+    if len(paths) == 1:
+        return f"解決長期無主的產物 `{paths[0]}`（reaper held 超過 TTL）"
+    return (f"解決 {len(paths)} 份長期無主的產物："
+            f"`{paths[0]}` 等（reaper held 超過 TTL）")
+
+
+def _close_resolved_escalations(previous: dict, current: dict) -> list[str]:
+    """關掉「當初升級的 held key 已經不再 held」的那些任務。
+
+    這是缺掉的反向對帳。``state`` 每一輪都從當前 scan 重建，所以一個 key 不再 held
+    時，它的記錄就消失了 —— 連同那個 ``task_id``。任務本身沒有任何人去關，於是
+    **任務活得比它的成因更久**：``experiments/k1380`` 和其中一個 job key 早已不在
+    state 裡，兩張單卻還躺在 pending。任務描述裡寫的「判定完成後這張任務關閉，held
+    記錄會自然消失」把因果講反了 —— 記錄消失是自動的，關單不是。
+
+    只關「所有 held_paths 都不再 held」的單：還有任一路徑卡著，事情就沒完。
+    """
+    stale_tasks: dict[str, set[str]] = {}
+    for key, rec in previous.items():
+        task_id = isinstance(rec, dict) and rec.get("task_id")
+        if task_id and key not in current:
+            stale_tasks.setdefault(str(task_id), set()).add(key)
+    if not stale_tasks:
+        return []
+
+    from volpred.ops.next_tasks import write_tasks_to_handle
+
+    guard_canonical_write(TASKS_PATH)
+    closed: list[str] = []
+    with TASKS_PATH.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            handle.seek(0)
+            raw = handle.read().strip()
+            tasks = json.loads(raw) if raw else []
+            if not isinstance(tasks, list):
+                return []
+            for task in tasks:
+                if not isinstance(task, dict):
+                    continue
+                tid = str(task.get("id") or "")
+                if tid not in stale_tasks:
+                    continue
+                if str(task.get("status") or "").lower() not in ("pending", "blocked"):
+                    continue
+                held = set((task.get("payload") or {}).get("held_paths") or [])
+                # 還有路徑卡著就留著 —— 部分解決不是解決。
+                if held - stale_tasks[tid]:
+                    continue
+                task["status"] = "succeeded"
+                task["completed_at"] = _now().isoformat()
+                task["result"] = (
+                    "held 條件已自行消失：當初升級的路徑都不再被 reaper held"
+                    f"（{', '.join(sorted(stale_tasks[tid]))}）。"
+                )
+                closed.append(tid)
+            if closed:
+                write_tasks_to_handle(handle, tasks)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    return closed
+
+
 def _escalate_held(records: dict[str, dict]) -> dict:
     """Queue one task that names every path held past the TTL.
 
@@ -916,7 +1261,11 @@ def _escalate_held(records: dict[str, dict]) -> dict:
              f"shifts={records[key].get('shifts')})"
              for key in paths]
     return append_next_task(
-        title=f"解決 {len(paths)} 份長期無主的產物（reaper held 超過 TTL）",
+        # 標題必須點名**是哪一份**。只編碼份數的話，每個單路徑逃逸都渲染成同一串字，
+        # 於是 7/19、7/20、7/20 三張不同 held key（experiments/k1380、兩個 job:…）
+        # 在任務池裡長得一模一樣 —— 老闆看到的是「同一張單開了三次」，而實際上是三件
+        # 不同的事，沒有任何 dedup 失效。分不出來的標題，讓真重複與假重複都看不見。
+        title=_escalation_title(paths),
         description=(
             "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是"
             "永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須"
@@ -925,7 +1274,8 @@ def _escalate_held(records: dict[str, dict]) -> dict:
             + "\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定"
               "（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何"
               "這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與"
-              "其下游丟棄產物。判定完成後這張任務關閉，held 記錄會自然消失。"
+              "其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪"
+              "sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。"
         ),
         source="reap_orphan_deliverables_held_ttl",
         task_family="ops",
@@ -968,6 +1318,10 @@ def track_held(held_entries: list[dict], *, shifts_to_escalate: int | None = Non
         record["namespace"] = entry.get("namespace")
         state[key] = record
 
+    # 反向對帳先於升級：一張成因已消失的單還開著，會讓下一次判斷「這件事有人管了嗎」
+    # 讀到錯的答案。
+    resolved = _close_resolved_escalations(previous, state) if persist else []
+
     pending = {key: rec for key, rec in state.items()
                if rec["shifts"] >= shifts_to_escalate and not rec.get("task_id")}
     escalations: list[dict] = []
@@ -987,7 +1341,8 @@ def track_held(held_entries: list[dict], *, shifts_to_escalate: int | None = Non
             "shifts_to_escalate": shifts_to_escalate,
             "entries": state,
         })
-    return {"state": state, "escalations": escalations, "suppressed": suppressed}
+    return {"state": state, "escalations": escalations, "suppressed": suppressed,
+            "resolved_tasks": resolved}
 
 
 def scan(*, now_ts: float | None = None) -> dict:

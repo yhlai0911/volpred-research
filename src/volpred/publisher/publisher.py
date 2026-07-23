@@ -363,7 +363,7 @@ def _run_anti_ai_checks(text: str, *, fb_mode: bool) -> tuple[bool, list[str]]:
     return run_checks(text, fb_mode=fb_mode)
 
 
-def _log_anti_ai_gate_decision(
+def _log_anti_ai_gate_decision_impl(
     storage_dir: str,
     item: dict,
     *,
@@ -429,14 +429,26 @@ def _run_publish_anti_ai_gate(
     *,
     target_status: str | None = None,
     raise_on_block: bool = True,
+    log_decision: bool = True,
 ) -> list[str]:
     """Run anti-AI-style publish gate.
 
     Returns release-audit issues when `raise_on_block=False`; otherwise raises
     ValueError on hard-block. Gate malfunction is explicitly fail-open.
+
+    `log_decision=False` runs the identical verdict without appending to the
+    canonical dedup-decision ledger — for read-only callers such as
+    `preview_release_pool_by_settings`, which must be able to ask "would this
+    release?" without leaving a decision trail that implies a release was
+    attempted (2026-07-19).
     """
     if not _anti_ai_gate_applies(item, target_status=target_status):
         return []
+
+    def _log_anti_ai_gate_decision(*args, **kwargs):  # noqa: WPS430
+        if log_decision:
+            return _log_anti_ai_gate_decision_impl(*args, **kwargs)
+        return None
 
     warn_only, mode_reason = _anti_ai_gate_warn_only()
     try:
@@ -461,7 +473,8 @@ def _run_publish_anti_ai_gate(
             reason=f"gate_error_fail_open_degraded:{type(exc).__name__}:{exc}",
             mode=mode_reason,
         )
-        _send_anti_ai_gate_degraded_alert(storage_dir, item, exc)
+        if log_decision:
+            _send_anti_ai_gate_degraded_alert(storage_dir, item, exc)
         print(
             f"  [feed_publisher] WARN anti-AI gate fail-open for "
             f"{item.get('id', 'unknown')}: {exc}"
@@ -1301,17 +1314,57 @@ class Publisher:
             )
             return None
 
-    def _record_failed_supabase_sync(self, pub_id: str) -> None:
-        failed_path = self.reports_dir.parent / ".failed_supabase_syncs.json"
+    def _record_dead_letter(self, queue_name: str, pub_id: str) -> None:
+        """Append ``pub_id`` to a projection dead-letter queue (idempotent)."""
+        failed_path = self.reports_dir.parent / queue_name
         try:
             failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
         except Exception as exc:
-            print(f"  Failed to read .failed_supabase_syncs.json; starting fresh: {exc}")
+            print(f"  Failed to read {queue_name}; starting fresh: {exc}")
             failed = []
         if pub_id not in failed:
             failed.append(pub_id)
             guard_canonical_write(failed_path)
             failed_path.write_text(json.dumps(failed))
+
+    def _record_failed_supabase_sync(self, pub_id: str) -> None:
+        self._record_dead_letter(".failed_supabase_syncs.json", pub_id)
+
+    def _record_failed_mirror_sync(self, pub_id: str) -> None:
+        """Mirror-side dead letter (WS-C1).
+
+        Mirror PUT failures used to be a bare ``print`` (the "401 for a month"
+        class). They now land in a queue with the same semantics as the
+        Supabase one; WS-C4 wires the shared drain over both queues.
+        """
+        self._record_dead_letter(".failed_mirror_syncs.json", pub_id)
+
+    def _mirror_article(self, pub_id: str, item: dict) -> bool:
+        """PUT one article to the Mirror, dead-lettering a real failure (WS-C4).
+
+        Single exit for "push this article to the Mirror" on the publish and
+        unpublish paths, which used to drop :meth:`_sync_report_to_remote`'s
+        return value on the floor — a rejected PUT was a bare print, which is
+        how a 401 stayed unnoticed for a month.
+
+        A disabled Mirror returns True: nothing was attempted, so nothing
+        failed. Dead-lettering it would queue every article on every
+        no-remote run and drown the real failures.
+        """
+        if not self._mirror_enabled():
+            return True
+        if self._sync_report_to_remote(pub_id, item):
+            return True
+        self._record_failed_mirror_sync(pub_id)
+        print(f"  Mirror sync FAILED for {pub_id} -- recorded to .failed_mirror_syncs.json")
+        return False
+
+    def _remote_writes_allowed(self) -> bool:
+        """False under the conftest/production kill switch (no network writes)."""
+        return os.environ.get("VOLPRED_NO_REMOTE_WRITE") != "1"
+
+    def _mirror_enabled(self) -> bool:
+        return bool(self.REMOTE_URL) and self._remote_writes_allowed()
 
     # Domain-specific compound terms for topic extraction (longest match first)
     _DOMAIN_TERMS = [
@@ -1512,6 +1565,41 @@ class Publisher:
         import re
         # --- Dedupe check: reject exact title + warn similar topics ---
         feed = self._load_feed()
+
+        # --- G1: member_qa publish-time duplicate gate (2026-07-19 STRIKE 2) ---
+        # The ONLY gate standing on the reader-visible artifact. Every other
+        # member_qa dedup check guards an INTENT step (task creation, question
+        # claim) and is therefore skippable by any caller that writes an article
+        # by hand — which is exactly how the same member's question got answered
+        # twice (mile_d84aa7d0 / mile_0205a444). This one holds even when the
+        # entire upstream is bypassed, because nothing becomes reader-visible
+        # without passing through publish_milestone. Deliberate sequels pass by
+        # naming the prior article(s) in details['supersedes'].
+        # Implementation: volpred.ops.content.assert_member_qa_publish_allowed
+        # (lazy import — ops.content imports this module at load time).
+        # 2026-07-22: the "does the gate apply here?" test is shared with the
+        # release-pool status-rewrite path via member_qa_publish_gate_applies,
+        # so the two publish paths cannot drift on WHICH articles are gated.
+        from volpred.ops.content import (
+            assert_member_qa_publish_allowed,
+            member_qa_publish_gate_applies,
+        )
+
+        if member_qa_publish_gate_applies({
+            'status': status,
+            'audience': audience,
+            'category': category,
+            'phase': phase,
+            'details': details or {},
+        }):
+            assert_member_qa_publish_allowed(
+                (details or {}).get('question_id'),
+                feed=feed,
+                supersedes=(details or {}).get('supersedes'),
+                title=title,
+                storage_dir=str(self.reports_dir.parent),
+                waiver=(details or {}).get('question_id_waiver'),
+            )
         from datetime import timedelta
         cutoff_exact = datetime.now(timezone.utc) - timedelta(hours=24)
         for existing in feed:
@@ -2427,7 +2515,7 @@ class Publisher:
         guard_canonical_write(self._feed_file)
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-        self._sync_report_to_remote(pub_id, target_item)
+        self._mirror_article(pub_id, target_item)
         sync_ok = False
         try:
             import sys
@@ -2627,7 +2715,11 @@ class Publisher:
                             f"not present in persisted feed (entries={len(verify_feed)})"
                         )
                 if _record_id:
-                    self._sync_report_to_remote(str(_record_id), item)
+                    # WS-C4: the MAIN publish path used to drop this return
+                    # value (a rejected PUT was a bare print — the "401 for a
+                    # month" class). _mirror_article dead-letters the failure
+                    # into .failed_mirror_syncs.json for the drain cron.
+                    self._mirror_article(str(_record_id), item)
                 return str(item.get('id'))
         except Exception as exc:
             result_label = f"error: {type(exc).__name__}: {exc}"[:200]
@@ -2641,20 +2733,33 @@ class Publisher:
                 storage_dir=storage_dir,
             )
 
-    def _rewrite_feed_entry(self, pub_id: str, updated_item: dict) -> bool:
+    def _rewrite_feed_entry(
+        self,
+        pub_id: str,
+        updated_item: dict,
+        *,
+        expected_item: dict | None = None,
+    ) -> bool:
         """Replace a single feed entry by id, preserving lock + read-back.
 
         Used by post-publish gates (live_verify) that mutate an already-appended
-        item AFTER _append_to_feed has run. Returns True on success.
+        item AFTER _append_to_feed has run. ``expected_item`` provides an
+        optimistic compare-and-swap guard for callers that prepared a rewrite
+        from an earlier snapshot: a concurrent edit fails loudly instead of
+        being overwritten. Returns True on success.
         """
         from volpred.ops.shared_lock import shared_state_lock
 
         storage_dir = str(self.reports_dir.parent)
+        self._last_rewrite_conflict = False
         with shared_state_lock("publisher_feed", storage_dir=storage_dir):
             feed = self._load_feed()
             found = False
             for idx, entry in enumerate(feed):
                 if entry.get("id") == pub_id:
+                    if expected_item is not None and entry != expected_item:
+                        self._last_rewrite_conflict = True
+                        return False
                     feed[idx] = updated_item
                     found = True
                     break
@@ -2662,13 +2767,100 @@ class Publisher:
                 return False
             guard_canonical_write(self._feed_file)
             tmp_file = self._feed_file.with_name(f".{self._feed_file.name}.tmp")
-            with open(tmp_file, 'w') as f:
-                json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
-            with open(tmp_file) as f:
-                json.load(f)
-            tmp_file.replace(self._feed_file)
-            self._sync_report_to_remote(pub_id, updated_item)
+            try:
+                with open(tmp_file, 'w') as f:
+                    json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
+                with open(tmp_file) as f:
+                    json.load(f)
+                tmp_file.replace(self._feed_file)
+            except BaseException:
+                tmp_file.unlink(missing_ok=True)
+                raise
+            # Keep the mirror outcome observable to callers (rewrite_and_sync_article
+            # dead-letters a failed PUT); the boolean return of this method stays
+            # "was the entry found and rewritten", unchanged for existing callers.
+            self._last_mirror_ok = (
+                bool(self._sync_report_to_remote(pub_id, updated_item))
+                if self._mirror_enabled()
+                else False
+            )
             return True
+
+    def rewrite_and_sync_article(
+        self,
+        pub_id: str,
+        updated_item: dict,
+        *,
+        expected_item: dict | None = None,
+    ) -> dict:
+        """Single exit for in-place rewrites of an already-published article.
+
+        WS-C1 (refactor_plan_ops_master_2026_07 §3): before this existed, the
+        ``publish_draft.py --update`` path wrote feed.json directly and pushed
+        neither projection, so a corrected article diverged across feed /
+        Supabase / Mirror until somebody remembered to run feed-sync by hand.
+        Update and publish now share one gateway:
+
+          1. feed.json rewrite under the ``publisher_feed`` lock (canonical)
+          2. Mirror PUT (inside :meth:`_rewrite_feed_entry`)
+          3. Supabase ``sync_article`` projection
+          4. any projection failure → dead-letter queue (drained by cron)
+
+        When ``expected_item`` is supplied, the canonical rewrite is a
+        compare-and-swap. This lets read/transform/write callers keep their
+        validation outside the low-level writer without clobbering a newer
+        concurrent version of the same article.
+
+        Returns a report dict; ``ok`` is False when the canonical write missed
+        or a projection failed, so callers can propagate a non-zero exit code.
+        """
+        report: dict = {
+            "id": pub_id,
+            "feed_written": False,
+            "conflict": False,
+            "mirror": "skipped",
+            "supabase": "skipped",
+            "dead_letters": [],
+            "ok": False,
+        }
+        self._last_mirror_ok = False
+        report["feed_written"] = bool(
+            self._rewrite_feed_entry(
+                pub_id,
+                updated_item,
+                expected_item=expected_item,
+            )
+        )
+        report["conflict"] = bool(getattr(self, "_last_rewrite_conflict", False))
+        if not report["feed_written"]:
+            return report
+
+        if self._mirror_enabled():
+            if self._last_mirror_ok:
+                report["mirror"] = "ok"
+            else:
+                report["mirror"] = "failed"
+                self._record_failed_mirror_sync(pub_id)
+                report["dead_letters"].append(".failed_mirror_syncs.json")
+
+        if self._remote_writes_allowed():
+            sync_ok = False
+            try:
+                import sys
+                sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
+                from supabase_sync import sync_article
+                sync_ok = bool(sync_article(updated_item, storage_dir=self.reports_dir.parent))
+            except Exception as exc:
+                print(f"  Supabase update sync exception for {pub_id}: {exc}")
+            if sync_ok:
+                report["supabase"] = "ok"
+            else:
+                report["supabase"] = "failed"
+                self._record_failed_supabase_sync(pub_id)
+                report["dead_letters"].append(".failed_supabase_syncs.json")
+
+        report["ok"] = not report["dead_letters"]
+        return report
 
     def get_report(self, pub_id: str) -> dict | None:
         # Contentlayer pattern: feed.json is canonical. Read from it only.
@@ -2736,9 +2928,7 @@ class Publisher:
         route already accepts ``reports/<slug>.json`` and revalidates article
         cache tags, so publisher mutations should use this small payload path.
         """
-        if not self.REMOTE_URL:
-            return False
-        if os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1":
+        if not self._mirror_enabled():
             return False
         import time
         import urllib.error

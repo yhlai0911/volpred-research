@@ -237,8 +237,8 @@
    "journal_target": "JPM/FAJ",
    "stage": "revision",
    "stage_entered_at": "2026-07-01T03:18:00+08:00",
-   "last_advance_at": "2026-07-16T18:20:00+08:00",
-   "blocker": "K1695 withdrawal EXECUTED in body_v4 (2026-07-16 interactive main thread): narrative decision (B) — the international drawdown-PROTECTION claim is withdrawn everywhere (abstract, contribution 3, Section international, Table 5, Figure 2 caption, discussion, limitations, conclusion), replaced by an honest exposure-matched decomposition: raw MDD reduction = genuine risk reduction via de-levering (vol ratio 0.52-0.66, phase rank 1/231), NOT timing (matched gap common -0.9pp p=0.559, inception +5.0pp p=0.212, 0/13 Holm; no-timing constant-weight reproduces +10.7 of +12.6pp). Decision B supersedes the 2026-07-15 hourly-07 remove-entirely wording: the protection CLAIM is withdrawn as required, but the decomposition + null are retained per research-honesty rule 6 (null results reported, not hidden). reproduce.py extended (+33 K1695 byte-match checks incl claim_status=retracted), gate 100% green; main_v4.pdf 42pp compiles clean. REMAINING BLOCKER (still gates arXiv): codex contribution-gate BORDERLINE reframing agenda (stale Figure 2 regeneration, pending Calmar cells in Table 3, BAB source/sample conflict, abstract overload (partly relieved by this rewrite), forensic notes to appendix, cover letter). Next fresh contribution gate should re-audit the v4 abstract/contribution focus.",
+   "last_advance_at": "2026-07-19T13:20:00+08:00",
+   "blocker": null,
    "awaiting_correction": {
     "declared_at": "2026-07-15T05:17:00+08:00",
     "declared_by": "hourly-05",
@@ -293,7 +293,8 @@
     "commit_date": "2026-07-01",
     "confidence": "exact_stage_transition",
     "basis": "paper-pipeline contribution gate set vt-trend-following to revision / NOT arXiv-ready; tracker already carried 03:18 timestamp"
-   }
+   },
+   "note_20260719": "K1695 third-contribution withdrawal COMPLETED in body_v5/main_v5 (abstract sentence, contribution #3, Table 5 + Section 4 international panel + figure, discussion/limitations/conclusion derivatives all removed; dangling refs 0; xelatex clean; paper-update uploaded main_v5.pdf). Next: continue revision toward submission."
   },
   {
    "paper": "prg-periodic-garch",

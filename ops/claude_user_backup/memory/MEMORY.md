@@ -6,10 +6,12 @@
 - [reference_lai_prs_paper.md](reference_lai_prs_paper.md) — PRS 論文 metadata + 延伸方向
 - 模型與 CLI 環境：[cache TTL 依 tier](reference_anthropic_cache_ttl.md)｜[advisor=fable 撞 CC #76199](reference_advisor_fable_bug.md)｜[Codex/Gemini 認證可用性](reference_dual_cli_availability.md)｜[agy CLI 取代 gemini-cli](reference_antigravity_cli.md)
 - [reference_notebooklm_rag_workflow.md](reference_notebooklm_rag_workflow.md) — 外部文獻 RAG 走 NotebookLM 的觸發時機
+- [reference_shell_utf8_locale_required.md](reference_shell_utf8_locale_required.md) — 非互動 shell 要 export LANG/LC_ALL，否則中文 argv 壞掉
 - [reference_publisher_strict_audit_tag_rules.md](reference_publisher_strict_audit_tag_rules.md) — K-id 自動移到 metadata；tag ≤8 禁統計術語
-- 派工與算力：[SUPERSEDED — 派工改 dispatch-supervisor daemon](reference_hourly_dispatch_via_os_cron.md)｜[heavy compute 進 queue，~75% token 節省](reference_compute_queue_token_split.md)
+- 派工與算力：[SUPERSEDED — 派工改 dispatch-supervisor daemon](reference_hourly_dispatch_via_os_cron.md)｜[heavy compute 進 queue，~75% token 節省](reference_compute_queue_token_split.md)｜[worktree 內 enqueue worker 看不到](reference_enqueue_from_worktree_is_invisible.md)
 - [reference_knowledge_wiki_and_context_economy.md](reference_knowledge_wiki_and_context_economy.md) — 編譯式知識庫 + context 經濟
 - [reference_strategy_card_metrics_window.md](reference_strategy_card_metrics_window.md) — 策略卡 metrics 窗口；低 MDD 是設計非 bug
+- [reference_nested_forecast_inference_gap.md](reference_nested_forecast_inference_gap.md) — nested + pinball + expanding 無可用推論法；CW 不可用於 pinball
 - [reference_zeabur_deploy_target.md](reference_zeabur_deploy_target.md) — 部署走 deploy-zeabur-safe.sh 到 volpred-v3
 - [reference_trending_blog_sources.md](reference_trending_blog_sources.md) — trending 掃描來源清單 + high-viral 類型
 - [reference_unified_memory_one_brain.md](reference_unified_memory_one_brain.md) — Telegram 與本機共用同一記憶，勿建 channel 專屬
@@ -66,15 +68,16 @@
 
 ## Feedback — 自主運營與派工
 - [feedback_proactive_result_level_operation.md](feedback_proactive_result_level_operation.md) — 運營要「主動 + result-level」非「反應式 + exit-code」
+- [feedback_main_thread_executes_complex_work.md](feedback_main_thread_executes_complex_work.md) — 主線直接做複雜任務，「很大」不是派工理由
 - [feedback_handoff_routine_maintenance.md](feedback_handoff_routine_maintenance.md) — handoff 平常持續維護，非 compact 才寫
-- alert 處理：[預設自動變 task + starvation lockout](feedback_alert_is_a_task_not_a_chore.md)｜[body 寫「已自動修復」非「建議行動」](feedback_alerts_auto_act_not_suggest.md)｜[看到 critical 主動完成](feedback_proactively_complete_red_alerts.md)
+- alert 處理：[預設自動變 task + starvation lockout](feedback_alert_is_a_task_not_a_chore.md)｜[body 寫「已自動修復」非「建議行動」](feedback_alerts_auto_act_not_suggest.md)｜[看到 critical 主動完成](feedback_proactively_complete_red_alerts.md)｜[重複開單根因=alert→task 無狀態，反覆修不好要重架](feedback_incident_not_alert_task_mapping.md)
 - [feedback_dont_deflect_act_on_repeated_complaints.md](feedback_dont_deflect_act_on_repeated_complaints.md) — 反覆被點名的問題要實做，不 deflect
 - [feedback_repeated_done_question_means_finish_now.md](feedback_repeated_done_question_means_finish_now.md) — 連問「都完成了嗎」=當回合做完
 - [feedback_finish_task_before_standby.md](feedback_finish_task_before_standby.md) — 任務不得做一半待機；完成含部署+線上驗證
 - [feedback_fix_verify_then_report.md](feedback_fix_verify_then_report.md) — 先修好+測過+驗證，才回報；不丟待辦給老闆（硬規則）
 - [feedback_resume_ops_loop_after_user.md](feedback_resume_ops_loop_after_user.md) — 回完用戶要流回 ops loop
 - [feedback_continuous_work_and_read_mail.md](feedback_continuous_work_and_read_mail.md) — tick 要做實事不空轉；直接讀 Gmail
-- 派工節奏：[hourly 派 1 agent、scope ≤50min](feedback_one_dispatch_per_hour.md)｜[多樣性不能造成空轉](feedback_dispatch_over_diversity.md)｜[pool <4 一次補滿](feedback_pool_fill_to_threshold.md)｜[補池前查 current_job、寫入走 flock](feedback_refill_check_saturation_and_running_hourly.md)
+- 派工節奏：[一班 batch-drain 多任務到預算用盡](feedback_batch_tasks_per_fire.md)｜[hourly 派 1 agent、scope ≤50min](feedback_one_dispatch_per_hour.md)｜[多樣性不能造成空轉](feedback_dispatch_over_diversity.md)｜[pool <4 一次補滿](feedback_pool_fill_to_threshold.md)｜[補池前查 current_job、寫入走 flock](feedback_refill_check_saturation_and_running_hourly.md)
 - 自主界線：[policy task 一律自主](feedback_no_user_policy_block.md)｜[該做就直接做不問選擇題](feedback_dont_ask_do.md)｜[自主決策不歸因用戶、不等 ack](feedback_own_judgment_dont_credit_user.md)
 - [feedback_urgent_work_bypass_queue.md](feedback_urgent_work_bypass_queue.md) — 急件不進排程，當場開工
 - [feedback_urgent_bypasses_scheduler_by_design.md](feedback_urgent_bypasses_scheduler_by_design.md) — 架構硬指令：急件直達派工；request_fire 已存在但 Telegram 沒接線
@@ -82,8 +85,11 @@
 - [feedback_time_sensitive_work_is_p1.md](feedback_time_sensitive_work_is_p1.md) — 時效性研究/發文 = P1，與 user-assigned 同級
 - [feedback_tasks_survive_session_close.md](feedback_tasks_survive_session_close.md) — backbone 須 session-independent
 - [feedback_task_end_summary_format.md](feedback_task_end_summary_format.md) — 任務結束 4 項摘要格式
+- [feedback_refactor_independent_execution.md](feedback_refactor_independent_execution.md) — 重構走獨立軌（main_thread lane），不進一般派工
+- [feedback_gates_smooth_no_deadlock.md](feedback_gates_smooth_no_deadlock.md) — gate 要流暢有出口，block 必附修復/寬限/裁決三選一，禁死局
 
 ## Feedback — 工程紀律
+- [feedback_five_step_closure_gate.md](feedback_five_step_closure_gate.md) — 結案五步鐵律；contained vs root_cause_fixed_and_verified 二態
 - [feedback_declare_complete_requires_class_sweep.md](feedback_declare_complete_requires_class_sweep.md) — 宣告完成前對 bug class 全量掃描 + 留機械 gate
 - 壞掉就當場修：[關卡壞了立刻徹底修，同關卡 2 次換模型](feedback_gates_fix_immediately_two_strikes_switch_model.md)｜[silent fallback 不丟下一班](feedback_fix_silent_fallback_immediately.md)
 - [feedback_refactor_over_patch_no_legacy.md](feedback_refactor_over_patch_no_legacy.md) — 重構優先於修補，不留遺留死碼；別把補丁說成治本

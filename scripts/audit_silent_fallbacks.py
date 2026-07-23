@@ -657,6 +657,58 @@ def load_baseline(path: Path) -> list[Finding]:
     )
 
 
+def _match_relocated_files(
+    findings: list[Finding],
+    baseline: list[Finding],
+    current_unmatched: set[int],
+    baseline_unmatched: set[int],
+) -> None:
+    """Pair leftover findings that moved wholesale from one file to another.
+
+    Runs last, over what the path-sensitive passes could not match, so a file that
+    merely moved contributes nothing to `new`. A file whose contents also changed
+    keeps a differing signature multiset and stays unmatched — the gate still fires
+    for it. Findings without a signature never participate.
+    """
+
+    def group(indexes: set[int], source: list[Finding]) -> dict[str, list[int]]:
+        by_path: dict[str, list[int]] = defaultdict(list)
+        for idx in sorted(indexes):
+            if source[idx].signature:
+                by_path[source[idx].path].append(idx)
+        return by_path
+
+    current_by_path = group(current_unmatched, findings)
+    baseline_by_path = group(baseline_unmatched, baseline)
+
+    def fingerprint(indexes: list[int], source: list[Finding]) -> tuple:
+        return tuple(sorted(
+            (source[idx].exception, source[idx].action, source[idx].signature)
+            for idx in indexes
+        ))
+
+    # Several old paths can share one fingerprint (`except Exception: continue` in
+    # a like-named scope is not rare). Which old file became which new file is then
+    # ambiguous — but the findings are byte-identical, so the question this gate
+    # actually asks ("did a new silent fallback appear?") has the same answer under
+    # every pairing. Consume the group in order rather than bailing out: the earlier
+    # bail-out left 2 of 14 relocations reported as new, which still held the push.
+    baseline_by_fp: dict[tuple, deque[str]] = defaultdict(deque)
+    for path, indexes in sorted(baseline_by_path.items()):
+        baseline_by_fp[fingerprint(indexes, baseline)].append(path)
+
+    for new_path, new_indexes in sorted(current_by_path.items()):
+        old_paths = baseline_by_fp.get(fingerprint(new_indexes, findings))
+        if not old_paths:
+            continue
+        old_indexes = baseline_by_path.get(old_paths.popleft())
+        if not old_indexes:
+            continue
+        for new_idx, old_idx in zip(new_indexes, old_indexes):
+            current_unmatched.discard(new_idx)
+            baseline_unmatched.discard(old_idx)
+
+
 def diff_against_baseline(
     findings: list[Finding],
     baseline: list[Finding],
@@ -688,6 +740,17 @@ def diff_against_baseline(
         item.signature is None for item in baseline
     ):
         match_by_key(lambda item: ("legacy", *item.key()))
+
+    # Whole-file relocations are not new silent fallbacks (2026-07-20). Every key
+    # above is path-sensitive, so `git mv scripts/x.py scripts/_legacy/x.py` reads
+    # as "N new + N resolved" and the pre-push gate holds every commit behind it —
+    # 34 commits / 5.2h on the day the E1E2 dead-code archive landed, for zero new
+    # code. Matching by signature alone would fix that but could silently absorb a
+    # genuinely new handler that happens to share a scope name and body, so pair at
+    # FILE level instead: only when one unmatched path's findings are a permutation
+    # of another's does this claim a rename, which is far stronger evidence than any
+    # single line carries.
+    _match_relocated_files(findings, baseline, current_unmatched, baseline_unmatched)
 
     new_findings = sorted((findings[idx] for idx in current_unmatched), key=lambda item: item.key())
     resolved_findings = sorted(
@@ -746,6 +809,7 @@ def _baseline_report(
     new_findings: list[Finding],
     resolved_findings: list[Finding],
     limit: int | None,
+    scope_is_full: bool,
 ) -> None:
     print(
         "[silent-fallback-audit] "
@@ -757,11 +821,23 @@ def _baseline_report(
         print(f"NEW {item.path}:{item.line} except {item.exception}: {item.action}")
     if limit is not None and len(new_findings) > limit:
         print(f"... {len(new_findings) - limit} more new findings (rerun with --limit 0 for all)")
-    if resolved_findings:
+    # Only a full sweep can tell "resolved" from "not audited this run". The
+    # pre-commit hook passes just the staged files, so every baseline entry
+    # outside that subset looks resolved — advertising a baseline cleanup there
+    # is false advice, and on 2026-07-21 it sent a P1 incident chasing a
+    # non-existent "baseline reduction deadlock" while the real block (6 new
+    # findings) sat one line above it. Scope-aware silence beats a wrong note.
+    if resolved_findings and scope_is_full:
         print(
             "[silent-fallback-audit] "
             f"note: {len(resolved_findings)} baseline finding(s) no longer present; "
             "reduce the baseline in a separate cleanup commit."
+        )
+    elif resolved_findings:
+        print(
+            "[silent-fallback-audit] "
+            f"note: {len(resolved_findings)} baseline finding(s) outside this run's scope "
+            "(partial audit — not evidence they were resolved)."
         )
 
 
@@ -816,9 +892,11 @@ def main() -> int:
             root = Path(tmp)
             extract_rev(repo, args.rev, root)
             findings = audit_paths(list(default_targets(root)), root=root)
+        scope_is_full = True  # --rev always audits the whole extracted tree
     else:
         root = repo
         findings = audit_paths(args.paths or list(default_targets(root)), root=root)
+        scope_is_full = not args.paths
 
     if args.write_baseline:
         write_baseline(args.write_baseline, findings)
@@ -863,6 +941,7 @@ def main() -> int:
                 new_findings=new_findings,
                 resolved_findings=resolved_findings,
                 limit=None if args.limit == 0 else args.limit,
+                scope_is_full=scope_is_full,
             )
 
     if args.strict and baseline is not None:

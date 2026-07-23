@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "title": "研究效率回顧 懶人包",
+  "evidence": {
+    "results": {
+      "path": "experiments/k492/k492_research_efficiency_results.json",
+      "sha256": "05b84187c0fcd792b882c2d37721a5f1b35ca35f3637ff07c8a527bb01e53b50",
+      "label": "68 個實驗的研究效率回顧統計"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "單一樣本期有效，不等於真的有效",
+      "alt": "概念說明：單期回測有效與跨樣本期仍有效是兩件事",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩道不同的關卡",
+          "body": [
+            "第一關是在一段歷史資料上看起來有效，這關很容易過。",
+            "第二關是換一段沒用來調整過的歷史再測一次，多數想法死在這裡。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "本次回顧涵蓋的實驗數",
+          "value": {
+            "source": "results",
+            "path": "n_experiments_classified",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "我們自己的實驗成績分佈",
+      "alt": "實驗結果分佈：完全沒效果、明確有效的比例，以及平均幾個實驗換一個驗證發現",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "完全沒效果的比例",
+          "value": {
+            "source": "results",
+            "path": "null_rate_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "scale": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "明確有效的比例",
+          "value": {
+            "source": "results",
+            "path": "positive_rate_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "scale": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平均幾個實驗換一個驗證發現",
+          "value": {
+            "source": "results",
+            "path": "experiments_per_validated_finding",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " 個"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "換一個樣本期，一半當場死掉",
+      "alt": "走到跨樣本期驗證的實驗中，超過一半在換樣本期後失效",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "走到跨樣本期驗證的實驗數",
+          "value": {
+            "source": "results",
+            "path": "cross_oos_analysis.n_experiments_with_cross_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "換樣本期後失效的比例",
+          "value": {
+            "source": "results",
+            "path": "cross_oos_analysis.failure_rate_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%",
+              "scale": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "換樣本期後仍有效的實驗數",
+          "value": {
+            "source": "results",
+            "path": "cross_oos_analysis.n_survived",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼用這個數字",
+          "body": [
+            "看到只用一段歷史驗證的漂亮回測，先假設它有相當機率撐不過第二段。",
+            "要求對方出示換樣本期後的結果，是成本最低的一個問題。"
+          ]
+        }
+      ]
+    }
+  ]
+}

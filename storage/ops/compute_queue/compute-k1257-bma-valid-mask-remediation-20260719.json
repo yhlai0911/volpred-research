@@ -1,0 +1,50 @@
+{
+  "id": "compute-k1257-bma-valid-mask-remediation-20260719",
+  "title": "K1257 BMA valid-mask and convergence remediation full rerun",
+  "script_path": "experiments/k1257/k1257_bma_volatility.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-19T07:20:27Z",
+  "started_at": "2026-07-19T14:15:05Z",
+  "completed_at": "2026-07-19T14:25:58Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-bma-valid-mask-remediation-20260719.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1257-bma-valid-mask-remediation-20260719.stderr",
+  "result_artifact": "experiments/k1257/k1257_results.json",
+  "output_paths": [
+    "experiments/k1257/k1257_results.json",
+    "experiments/k1257/k1257_weight_evolution.png",
+    "experiments/k1257/k1257_qlike_comparison.png"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Parent assign_9f0a31a8. Verify K1257 full rerun diagnostics contain fit_attempts, fit_exceptions, nonconverged_fits, invalid_forecast_days and dropped_model_days for every asset/model; compare QLIKE and H1-H3 to prior artifact and K1258 lambda=1; run Codex primary-path review; update K1257/K1258 knowledge entries if conclusions changed; close parent only after both queue jobs are collected.",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 10800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1257"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "f62ea5b99e91b976d55d4efcf4419b45efad4739",
+  "delivered_paths": [
+    "experiments/k1257/k1257_qlike_comparison.png",
+    "experiments/k1257/k1257_results.json",
+    "experiments/k1257/k1257_weight_evolution.png"
+  ],
+  "delivered_at": "2026-07-19T19:00:53.766661+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-19T18:18:25Z",
+  "followup_next_task_id": "assign_9f0a31a8"
+}

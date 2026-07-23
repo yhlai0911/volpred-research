@@ -552,6 +552,175 @@ def ops() -> None:
     pass
 
 
+@ops.command("work-import-legacy")
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    required=True,
+    help="Required safety flag; this command never writes imported data.",
+)
+@click.option(
+    "--next-tasks-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--task-records-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--ops-jobs-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+def ops_work_import_legacy(
+    dry_run: bool,
+    next_tasks_snapshot: Path,
+    task_records_snapshot: Path,
+    ops_jobs_snapshot: Path,
+) -> None:
+    """Preview legacy work mappings from three supplied JSON snapshots."""
+    from volpred.ops.work_migration import (
+        LegacySnapshotLoadError,
+        load_legacy_snapshots,
+        preview_legacy_snapshots,
+    )
+
+    if not dry_run:  # Defensive even though Click requires the flag.
+        raise click.UsageError("--dry-run is the only supported mode")
+    try:
+        snapshots = load_legacy_snapshots(
+            next_tasks_path=next_tasks_snapshot,
+            task_records_path=task_records_snapshot,
+            ops_jobs_path=ops_jobs_snapshot,
+        )
+    except LegacySnapshotLoadError as exc:
+        click.echo(
+            json.dumps(
+                {
+                    "mode": "dry_run",
+                    "ready": False,
+                    "candidate_count": 0,
+                    "issue_count": 1,
+                    "source_counts": {
+                        source: {"seen": 0, "mapped": 0}
+                        for source in (
+                            "next_tasks",
+                            "task_records",
+                            "ops_jobs",
+                        )
+                    },
+                    "candidates": [],
+                    "issues": [exc.as_issue()],
+                },
+                ensure_ascii=False,
+                separators=(",", ":"),
+            )
+        )
+        raise click.exceptions.Exit(2)
+    report = preview_legacy_snapshots(snapshots)
+    payload = {"mode": "dry_run", **report.as_dict()}
+    click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    if not report.ready:
+        raise click.exceptions.Exit(2)
+
+
+@ops.command("work-shadow-replay")
+@click.option(
+    "--next-tasks-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--task-records-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--ops-jobs-snapshot",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option(
+    "--observation-dir",
+    type=click.Path(file_okay=False, path_type=Path),
+    required=True,
+    help="Append-only destination for shadow observation receipts.",
+)
+@click.option(
+    "--observation-id",
+    default=None,
+    help="Unique receipt id; generated when omitted.",
+)
+@click.option(
+    "--observed-at",
+    default=None,
+    help="ISO-8601 replay time; defaults to the current UTC time.",
+)
+@click.option("--worker-id", required=True)
+@click.option("--capability", "capabilities", multiple=True)
+@click.option("--attestation", "attestations", multiple=True)
+def ops_work_shadow_replay(
+    next_tasks_snapshot: Path,
+    task_records_snapshot: Path,
+    ops_jobs_snapshot: Path,
+    observation_dir: Path,
+    observation_id: str | None,
+    observed_at: str | None,
+    worker_id: str,
+    capabilities: tuple[str, ...],
+    attestations: tuple[str, ...],
+) -> None:
+    """Replay legacy and Work Coordinator selection without live state access."""
+    from uuid import uuid4
+
+    from volpred.ops.work import WorkerOffer
+    from volpred.ops.work_migration import (
+        LegacySnapshotLoadError,
+        load_legacy_snapshots,
+    )
+    from volpred.ops.work_shadow_replay import (
+        append_shadow_observation,
+        replay_legacy_selection,
+    )
+
+    try:
+        snapshots = load_legacy_snapshots(
+            next_tasks_path=next_tasks_snapshot,
+            task_records_path=task_records_snapshot,
+            ops_jobs_path=ops_jobs_snapshot,
+        )
+    except LegacySnapshotLoadError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    replay_time = _parse_observed_at(observed_at) or datetime.now(timezone.utc)
+    receipt_id = observation_id or (
+        f"shadow_{replay_time.strftime('%Y%m%dT%H%M%S%fZ')}_"
+        f"{uuid4().hex[:12]}"
+    )
+    try:
+        ledger = replay_legacy_selection(
+            snapshots,
+            offer=WorkerOffer(
+                worker_id=worker_id,
+                capabilities=frozenset(capabilities),
+                attestations=frozenset(attestations),
+                lease_seconds=300,
+            ),
+            observed_at=replay_time,
+            observation_id=receipt_id,
+        )
+        receipt_path = append_shadow_observation(
+            ledger,
+            directory=observation_dir,
+        )
+    except (FileExistsError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    payload = {**ledger.as_dict(), "receipt_path": str(receipt_path)}
+    click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+
+
 @ops.group("rollback")
 def ops_rollback() -> None:
     """Rollback points for local repo + storage + config recovery."""
@@ -734,6 +903,110 @@ def ops_dreaming_run(storage_dir: str, dry_run: bool) -> None:
 
     rc = dreaming_review.main(storage_dir=storage_dir, dry_run=dry_run)
     raise SystemExit(rc)
+
+
+@ops.group("observation")
+def ops_observation() -> None:
+    """Observation-period deadline ledger (design principle 5, WS-F5).
+
+    Every shadow / disabled-but-alive / deprecated state must be registered
+    here WITH a deadline and an action-on-expiry. Items past deadline with no
+    decision surface as a dreaming_review breach finding (nightly), which
+    queues a task to either execute the expiry action or extend explicitly.
+    Ledger: storage/ops/observation_ledger.json (owner:
+    volpred.ops.observation_ledger — the only schema/validation authority).
+    """
+
+
+@ops_observation.command("add")
+@click.option("--id", "item_id", required=True, help="Stable slug, e.g. pregate_shadow")
+@click.option("--what", required=True, help="What is being observed (state + where it lives)")
+@click.option("--deadline", default=None, help="ISO deadline (required unless --permanent)")
+@click.option("--action-on-expiry", default=None, help="What happens at the deadline (required unless --permanent)")
+@click.option("--permanent", is_flag=True, help="Deliberately observational forever — requires --note citing the ruling")
+@click.option("--started-at", default=None, help="ISO start of the observation (default: now)")
+@click.option("--note", default=None, help="Context / ruling reference")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_observation_add(
+    item_id: str,
+    what: str,
+    deadline: str | None,
+    action_on_expiry: str | None,
+    permanent: bool,
+    started_at: str | None,
+    note: str | None,
+    storage_dir: str,
+) -> None:
+    """Register an observation item (validates principle 5 at creation)."""
+    from volpred.ops import observation_ledger as obs
+
+    item = obs.add_item(
+        storage_dir,
+        item_id=item_id,
+        what=what,
+        deadline=deadline,
+        action_on_expiry=action_on_expiry,
+        status=obs.STATUS_PERMANENT if permanent else obs.STATUS_OBSERVING,
+        started_at=started_at,
+        note=note,
+    )
+    console.print(f"[green]Observation registered[/green] {item['id']} ({item['status']})")
+    _print_json(item)
+
+
+@ops_observation.command("list")
+@click.option("--storage-dir", default="storage", show_default=True)
+@click.option("--all", "show_all", is_flag=True, help="Include decided (closed) items")
+def ops_observation_list(storage_dir: str, show_all: bool) -> None:
+    """List observation items; overdue ones are marked."""
+    from datetime import datetime, timezone
+
+    from volpred.ops import observation_ledger as obs
+
+    ledger = obs.load_ledger(storage_dir)
+    now = datetime.now(timezone.utc)
+    overdue_ids = {i.get("id") for i in obs.overdue_items(storage_dir, now=now)}
+    shown = []
+    for item in ledger["items"]:
+        if not show_all and item.get("status") == obs.STATUS_DECIDED:
+            continue
+        shown.append(item)
+        mark = "OVERDUE" if item.get("id") in overdue_ids else item.get("status", "?")
+        # No square brackets: rich console.print would eat them as markup tags.
+        console.print(
+            f"  {mark:<10} {item.get('id')} deadline={item.get('deadline') or '-'} "
+            f"— {str(item.get('what') or '')[:90]}"
+        )
+    if not shown:
+        console.print("  (no open observation items)")
+    _print_json({"count": len(shown), "overdue": sorted(x for x in overdue_ids if x), "items": shown})
+
+
+@ops_observation.command("resolve")
+@click.option("--id", "item_id", required=True)
+@click.option("--resolution", required=True, help="What was decided/done")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_observation_resolve(item_id: str, resolution: str, storage_dir: str) -> None:
+    """Close an item: the expiry action (or an explicit decision) happened."""
+    from volpred.ops import observation_ledger as obs
+
+    item = obs.resolve_item(storage_dir, item_id, resolution=resolution)
+    console.print(f"[green]Observation decided[/green] {item['id']}")
+    _print_json(item)
+
+
+@ops_observation.command("extend")
+@click.option("--id", "item_id", required=True)
+@click.option("--deadline", required=True, help="New ISO deadline")
+@click.option("--reason", required=True, help="Why the window is being extended")
+@click.option("--storage-dir", default="storage", show_default=True)
+def ops_observation_extend(item_id: str, deadline: str, reason: str, storage_dir: str) -> None:
+    """Extend an observing item's deadline — the extension trail stays on the item."""
+    from volpred.ops import observation_ledger as obs
+
+    item = obs.extend_deadline(storage_dir, item_id, deadline=deadline, reason=reason)
+    console.print(f"[yellow]Observation extended[/yellow] {item['id']} → {deadline}")
+    _print_json(item)
 
 
 @ops.group("experiments")
@@ -1662,7 +1935,11 @@ def ops_daily_planning_maintain(storage_dir: str, source: str, limit: int, stub_
 @ops.command("scheduler-summary")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_scheduler_summary(storage_dir: str) -> None:
-    """Show a compact scheduler + canonical schedule snapshot."""
+    """Show a compact canonical-schedule snapshot (spec vs materialized system tasks).
+
+    Command name kept for compatibility; the advisory shared-scheduler lane it
+    once summarized was retired 2026-07-20 (refactor_plan_ops_master_2026_07 D2).
+    """
     from volpred.ops import build_scheduler_summary
 
     summary = build_scheduler_summary(storage_dir=storage_dir)
@@ -1691,8 +1968,9 @@ def ops_token_summary(storage_dir: str, days: int) -> None:
 def ops_token_usage_maintain(storage_dir: str, days: int, tail_lines: int, check_only: bool, stub_if_no_work: bool) -> None:
     """Run the canonical token-usage daily/weekly report maintenance loop with optional no-work stub output."""
     from volpred.ops import run_token_usage_maintenance
-    from volpred.ops.pending_replay import mark_self_replayed
-    mark_self_replayed("token_usage_daily")
+    # WS-H2 2026-07-20: no mark_self_replayed here — the token_usage_daily
+    # session cron is retired; this CLI now runs from cron_token_report.sh
+    # (host cron), so there is no session-replay ledger entry to reconcile.
 
     result = run_token_usage_maintenance(
         storage_dir=storage_dir,
@@ -2187,85 +2465,6 @@ def ops_event_preview(storage_dir: str) -> None:
     _print_json(result)
 
 
-@ops.command("scheduler-preview")
-@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_scheduler_preview(storage_dir: str) -> None:
-    """Preview what the shared scheduler would do on the next tick."""
-    from volpred.ops import scheduler_preview
-
-    result = scheduler_preview(storage_dir=storage_dir)
-    console.print("[green]Scheduler preview[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-tick")
-@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_scheduler_tick(storage_dir: str) -> None:
-    """Run one shared-scheduler orchestration tick."""
-    from volpred.ops import scheduler_tick
-
-    result = scheduler_tick(storage_dir=storage_dir)
-    if result.get("status") == "skipped":
-        console.print(f"[yellow]Scheduler skipped[/yellow] {result.get('reason')}")
-    else:
-        console.print("[green]Scheduler tick complete[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-smoke")
-@click.option(
-    "--mode",
-    type=click.Choice(["coordinator", "executor", "both"], case_sensitive=False),
-    default="both",
-    show_default=True,
-    help="Which isolated smoke path to exercise",
-)
-@click.option("--base-dir", default=None, help="Optional artifact root for isolated smoke outputs")
-@click.option("--keep-artifacts/--cleanup", default=True, show_default=True, help="Keep or delete smoke artifacts")
-def ops_scheduler_smoke(mode: str, base_dir: str | None, keep_artifacts: bool) -> None:
-    """Run an isolated scheduler smoke without touching live storage or real agent CLIs."""
-    from volpred.ops import run_scheduler_smoke
-
-    result = run_scheduler_smoke(mode=mode, base_dir=base_dir, keep_artifacts=keep_artifacts)
-    console.print("[green]Scheduler smoke complete[/green]")
-    _print_json(result)
-
-
-@ops.command("scheduler-live-smoke")
-@click.option(
-    "--mode",
-    type=click.Choice(["coordinator", "claude-executor", "codex-executor", "all"], case_sensitive=False),
-    default="all",
-    show_default=True,
-    help="Which live path to exercise with the installed Claude/Codex CLIs",
-)
-@click.option("--base-dir", default=None, help="Optional artifact root for isolated smoke outputs")
-@click.option("--keep-artifacts/--cleanup", default=True, show_default=True, help="Keep or delete smoke artifacts")
-@click.option(
-    "--snapshot-storage-dir",
-    default="storage",
-    show_default=True,
-    help="Optional storage dir for writing the latest agent_cli_health snapshot",
-)
-def ops_scheduler_live_smoke(
-    mode: str,
-    base_dir: str | None,
-    keep_artifacts: bool,
-    snapshot_storage_dir: str | None,
-) -> None:
-    """Run a live scheduler smoke against installed agent CLIs using isolated storage."""
-    from volpred.ops import run_scheduler_live_smoke
-
-    result = run_scheduler_live_smoke(
-        mode=mode,
-        base_dir=base_dir,
-        keep_artifacts=keep_artifacts,
-        snapshot_storage_dir=snapshot_storage_dir,
-    )
-    console.print("[green]Scheduler live smoke complete[/green]")
-    _print_json(result)
-
-
 @ops.command("sync-all")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_sync_all(storage_dir: str) -> None:
@@ -2295,7 +2494,11 @@ def ops_indicator_arena_sync(storage_dir: str, dry_run: bool) -> None:
               help="Dry-run shows diff only; --apply writes to Supabase")
 @click.option("--allow-delete/--no-delete", default=False, show_default=True,
               help="Allow DELETE of Supabase rows missing from feed.json")
-def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool) -> None:
+@click.option("--quiet-when-clean", is_flag=True, default=False,
+              help="Print nothing when there is no drift (for the hourly "
+                   "reconcile job — only drift is worth a log line)")
+def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool,
+                  quiet_when_clean: bool) -> None:
     """One-way reconcile feed.json (canonical) -> Supabase articles projection.
 
     Contentlayer pattern: feed.json is the single source of truth; this
@@ -2308,7 +2511,10 @@ def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool) -> None:
         dry_run=dry_run,
         allow_delete=allow_delete,
         verbose=True,
+        quiet_when_clean=quiet_when_clean,
     )
+    if quiet_when_clean and result.get("clean"):
+        return
     _print_json({"action": "feed_sync", "result": result})
 
 
@@ -2338,6 +2544,26 @@ def ops_recalc_metrics() -> None:
 @click.option("--publish-at", default=None, help="Scheduled publish time (ISO datetime) when status=scheduled")
 @click.option("--audience", default=None, help="Target audience: general, research, daily, member_qa")
 @click.option("--proposer", default=None, help="Who proposed/asked this (member name for Q&A)")
+@click.option(
+    "--supersedes",
+    default=None,
+    help=(
+        "Comma-separated prior article id(s) this piece deliberately continues. "
+        "Required to publish a 2nd member_qa answer to the same question "
+        "(must name every already-published answer)."
+    ),
+)
+@click.option(
+    "--question-id",
+    default=None,
+    help=(
+        "Supabase `questions` uuid this member_qa article answers. REQUIRED for "
+        "member_qa publishes: without it the duplicate gate cannot tell whether the "
+        "member's question was already answered, and fails closed. (The rare article "
+        "that provably answers no member question is waived via "
+        "--details-json question_id_waiver, not via a flag.)"
+    ),
+)
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_publish_milestone(
     title: str,
@@ -2349,6 +2575,8 @@ def ops_publish_milestone(
     publish_at: str | None,
     audience: str | None,
     proposer: str | None,
+    supersedes: str | None,
+    question_id: str | None,
     storage_dir: str,
 ) -> None:
     """Publish a milestone article through the unified publisher path."""
@@ -2357,6 +2585,20 @@ def ops_publish_milestone(
     details = _parse_json_input(details_json, default={})
     if not isinstance(details, dict):
         raise click.ClickException("--details-json must decode to an object")
+    if question_id:
+        existing = details.get("question_id")
+        if existing and str(existing).strip() != question_id.strip():
+            # Two different bindings for one article is not a preference to
+            # resolve silently — the caller does not know what they are publishing.
+            raise click.ClickException(
+                f"--question-id={question_id!r} conflicts with "
+                f"details['question_id']={existing!r}; pass only one."
+            )
+        details["question_id"] = question_id.strip()
+    if supersedes:
+        details["supersedes"] = [
+            part.strip() for part in supersedes.replace(",", " ").split() if part.strip()
+        ]
 
     pub_id = publish_milestone_article(
         title=title,
@@ -2400,6 +2642,17 @@ def ops_release_pool_by_settings(force: bool, storage_dir: str) -> None:
         console.print("[yellow]Skipped[/yellow] release run")
     else:
         console.print(f"[green]Released[/green] {result['released_count']} article(s) by cadence settings")
+    # Machine-readable outcome line (2026-07-19). Plain print, not rich: rich wraps
+    # at the captured-subprocess width and would corrupt the marker. Callers that
+    # piggy-back this command (scripts/check_alerts.py) must be able to tell a real
+    # release from a due-but-released-nothing run — exit code 0 means "the machinery
+    # ran", never "an article went out".
+    print(
+        "RELEASE_OUTCOME"
+        f" released={int(result.get('released_count') or 0)}"
+        f" skipped={1 if result.get('skipped') else 0}"
+        f" reason={result.get('reason') or ''}"
+    )
     _print_json({"action": "release_article_pool_by_settings", **result})
 
 
@@ -2961,20 +3214,65 @@ def ops_strategy_set_active(identifier: str, active: bool) -> None:
 
 @ops.command("question-claim")
 @click.argument("question_id")
-def ops_question_claim(question_id: str) -> None:
+@click.option(
+    "--allow-duplicate",
+    is_flag=True,
+    help="Override the duplicate gate for a genuinely new angle on a re-asked question. "
+    "Requires --new-angle.",
+)
+@click.option(
+    "--new-angle",
+    default=None,
+    help="REQUIRED with --allow-duplicate: what does this question ask that the "
+    "existing article does not already answer? Written to work_log.",
+)
+def ops_question_claim(
+    question_id: str, allow_duplicate: bool, new_angle: str | None
+) -> None:
     """Atomically claim a ranked question for research (cross-session race protection).
 
     Uses status='ranked' → 'researching' transition as the lock. If another
     session already claimed this question, the command reports claimed=False
     with the current status. Exit code 0 on success, 2 on claim lost.
-    """
-    from volpred.ops import claim_question_for_research
 
-    result = claim_question_for_research(question_id)
+    Also the member_qa duplicate gate (2026-07-19): a question that near-
+    duplicates an already-answered one cannot be claimed without
+    --allow-duplicate, so a re-ask cannot silently become a second article.
+    The override is not free — it requires --new-angle "<理由>", which is
+    written to work_log; without it the command exits 2.
+    """
+    from volpred.ops import (
+        MemberQaOverrideReasonRequired,
+        claim_question_for_research,
+    )
+
+    try:
+        result = claim_question_for_research(
+            question_id, allow_duplicate=allow_duplicate, new_angle=new_angle
+        )
+    except MemberQaOverrideReasonRequired as exc:
+        console.print(f"[red]Override refused:[/red] {exc}")
+        console.print(
+            '[yellow]用法:[/yellow] --allow-duplicate --new-angle "本題問的是 X，'
+            '既有文章 mile_xxxx 只回答了 Y"'
+        )
+        raise SystemExit(2) from exc
     _print_json({"action": "question_claim", **result})
+    if result.get("duplicate_override_logged") is False:
+        console.print(
+            "[yellow]警告:[/yellow] 繞過理由未能寫入 work_log — 請手動補 "
+            "scripts/append_work_log.py 記錄，否則本次繞過無稽核軌跡。"
+        )
     if not result.get("claimed"):
         reason = result.get("reason", "unknown")
         console.print(f"[yellow]Claim lost:[/yellow] {question_id} — {reason}")
+        if result.get("duplicate_of"):
+            dup = result["duplicate_of"]
+            console.print(
+                f"[yellow]Duplicate gate:[/yellow] 這題與 {dup['question_id']} "
+                f"（status={dup['status']}）近乎同題 — 請先用既有文章回覆；"
+                f"確有新角度才以 --allow-duplicate --new-angle \"<理由>\" 重試。"
+            )
         raise SystemExit(2)
     console.print(f"[green]Claimed[/green] {question_id}")
 

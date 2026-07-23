@@ -1,0 +1,159 @@
+{
+  "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+  "dry_run": false,
+  "tasks_path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
+  "migrated_count": 25,
+  "kept_p1_count": 8,
+  "migrated": [
+    {
+      "id": "K492_article_general_v2",
+      "title": "K492: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+      "source": "auto_discovered",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "K709_article_general_v2",
+      "title": "K709: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+      "source": "auto_discovered",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "K1348_article_general",
+      "title": "K1348: write general-audience article (auto-discovered uncovered K)",
+      "source": "auto_discovered",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "article_k1697_rolling_gamma_moving_target",
+      "title": "[發文] K1697：沿用多時的台股 Table 2 數字重跑後復現不出來，rolling last-window γ 是移動標靶",
+      "source": "orphan_closeout",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "article_k1699_forecast_timing_convention",
+      "title": "[發文] K1699：同一模型同一資料，只因改變『你幾點做預測』，DM 從 +5.06 崩到 0/6 顯著",
+      "source": "orphan_closeout",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "article_k1608_boxoffice_null",
+      "title": "[發文] K1608：大片週末後股市會動嗎？1,098 個週末的誠實檢定說：測不到",
+      "source": "orphan_closeout",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "paper_0050_snapshot_repoint_20260719",
+      "title": "P0 論文層：taiwan-vt / garch-x-vix 的 0050 pinned snapshot 仍含 4x 斷點，且方法描述與事實不符",
+      "source": "agent",
+      "task_type": "paper_review"
+    },
+    {
+      "id": "assign_580c1b3e",
+      "title": "K1730 v2 收件 stage 2：等 in-flight production run 落地 → README + 四項核實 + Codex round 2",
+      "source": "compute_queue_followup",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "fb_repost_mile_903fd2cf",
+      "title": "FB 雙發佈補件：mile_903fd2cf（原油 vs 股市選擇權偏斜）",
+      "source": "hourly_dispatch",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "fb_draft_missing_structural_fix",
+      "title": "FB 雙發佈結構缺陷：23/31 篇 expired_skip 的根因是「FB 稿從未產出」",
+      "source": "hourly-dispatch",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "collect_snapaudit_7f508612_20260720",
+      "title": "收件：snapshot 重複 audit（assign_7f508612）— 驗證 16 affected / 10 numbers_changed 的證據鏈 + 合併 worktree",
+      "source": "hourly-dispatch",
+      "task_type": "paper_review"
+    },
+    {
+      "id": "assign_3684bd32",
+      "title": "[refactor-master A4-residual] worktree-veto 殘留 in_flight 裁決出口",
+      "source": "agent",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "assign_bc2ab360",
+      "title": "C1 殘留：article_correction 第三條 in-place 重寫路徑收編或退役",
+      "source": "agent",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "assign_759a28f3",
+      "title": "K741 NFP 數字更正後的 8 篇 feed 文章更正（blocked on 論文數字定案）",
+      "source": "agent",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "assign_94fde28e",
+      "title": "[NFP canonical] feed 8 篇 NFP 文章數字更正（blocked on paper 數字定稿）",
+      "source": "system",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "guard_stale_base_worktree_merge_revert",
+      "title": "merge-time guard：stale-base worktree merge 靜默 revert 活碼（第二起，K1032 為第一起）",
+      "source": "agent",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "K1409_article_general",
+      "title": "K1409: write general-audience article (auto-discovered uncovered K)",
+      "source": "auto_publish_drought_emergency",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "K1597_article_general",
+      "title": "K1597: write general-audience article (auto-discovered uncovered K)",
+      "source": "auto_publish_drought_emergency",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "K1253_article_general",
+      "title": "K1253: write general-audience article (auto-discovered uncovered K)",
+      "source": "auto_publish_drought_emergency",
+      "task_type": "daily_article"
+    },
+    {
+      "id": "assign_commit_atomicity_gate",
+      "title": "PHASE-Z commit 原子性：同一 fire 的變更集要嘛全進要嘛全不進",
+      "source": "auto_discovered",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "snapdupfix_k1319",
+      "title": "[snapshot-dup 修正/HIGH] k1319 — 在去重後資料重跑並更正產物",
+      "source": "auto_discovered",
+      "task_type": "experiment"
+    },
+    {
+      "id": "snapdupfix_k1592",
+      "title": "[snapshot-dup 修正/HIGH] k1592 — 在去重後資料重跑並更正產物",
+      "source": "auto_discovered",
+      "task_type": "experiment"
+    },
+    {
+      "id": "alert_internal_phase_z_test_gate_red_7af47e56b9_20260721T050338185591Z_a1",
+      "title": "[internal alert] PHASE-Z auto-commit 測試紅燈（60ee5f819e9b）",
+      "source": "internal_alert_remediation_router",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "compute_queue_failed_script_job_followup_blind_spot",
+      "title": "compute_queue: failed script job 的 followup 靜默丟失（26 筆從未 triage）",
+      "source": "auto_discovered",
+      "task_type": "platform_ops"
+    },
+    {
+      "id": "assign_cc32a7b4",
+      "title": "PHASE-Z 卡住檔案 incident（8d4ff3f5793ccd98）— 未關則 scheduler 降載",
+      "source": "phase_z",
+      "task_type": "platform_ops"
+    }
+  ]
+}

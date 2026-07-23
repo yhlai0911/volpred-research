@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "title": "K1718 懶人包：拿紐約恐慌指數預測日股波動，六格全掛",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1718/k1718_results.json",
+      "sha256": "f119533d474fe23743abebdcb206b20b457efb67142b2898bf220aa164974d97",
+      "label": "experiment K1718 results (lagged US VIX overlay on Japan volatility, pre-registered gate)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "一個很順口的跨市場直覺",
+      "alt": "紐約收盤在日本開盤前就已知，拿美股恐慌指數預測隔天日股波動的直覺",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "時差",
+          "body": [
+            "紐約收盤時東京還在睡。等日本開盤，美股恐慌指數早就是攤在桌上的已知數字。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "順口的猜測",
+          "body": [
+            "既然免費拿到一個領先資訊，拿它預測隔天日股波動，應該多少有點用。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "跑資料前寫死的格數",
+          "value": {
+            "source": "results",
+            "path": "pre_registered_gate.total_cells",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最後通過的格數",
+          "value": {
+            "source": "results",
+            "path": "pre_registered_gate.passed_cells",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "先把規則寫死，再去看資料",
+      "alt": "兩檔日本資產各配三種波動模型，加落後恐慌指數，門檻在跑資料前訂好",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "六個格子",
+          "body": [
+            "兩檔日本資產各配三種波動模型，二乘三共六格；每格都是原模型，對上原模型再塞一項落後的美股恐慌指數。",
+            "恐慌指數只准用來源日期嚴格早於日本目標日的那筆收盤。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "通關門檻",
+          "body": [
+            "兩條都要達到：加了之後波動預測誤差要變低，且多重比較校正後的檢定 p 值要夠小。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "日經進模型的天數",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.diagnostics.n_model",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "日經樣本的年化波動",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.diagnostics.return_summary.annualized_vol",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "第一關就全數出局：誤差不降反升",
+      "alt": "加進恐慌指數後六格的誤差分數全部變差，沒有一格變好",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "日經基本款原誤差",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.metrics.garch.qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "日經基本款加恐慌指數後",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.metrics.garch_x_vix.qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "共同評分樣本（日經）",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.metrics.garch.n_obs_shared_positive_mask",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "誤差分數越低越準。六格全部往上跑，沒有一格變好——加了反而更差。",
+            "第一個通關條件就全數出局。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "兩格原本擠進門檻，被多重校正推回去",
+      "alt": "基本款兩格的校正前 p 值進了門檻，但 Holm 多重比較校正後全數退回",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "日經基本款校正前 p 值",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.comparisons.garch.clark_west_primary.p_value_one_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同一格校正後 p 值",
+          "value": {
+            "source": "results",
+            "path": "assets.n225.comparisons.garch.clark_west_primary.holm_p_value_6_tests",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "最後達標的格數",
+          "value": {
+            "source": "results",
+            "path": "pre_registered_gate.passed_cells",
+            "format": {
+              "kind": "integer",
+              "suffix": " 格"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "六格一起跑，就算恐慌指數沒用，光靠運氣也容易有一兩格看起來顯著；Holm 校正就是在收這筆帳。",
+            "這不是證明恐慌指數對日本波動沒價值，而是這個設定、這種加法，通不過事先簽下的門檻。",
+            "沒找到也是一種找到——把走不通的路標出來，下次做日本波動可以從別處開始。"
+          ]
+        }
+      ]
+    }
+  ]
+}

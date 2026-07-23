@@ -1,6 +1,87 @@
 # Project Improvement Status
 
-Last updated: **2026-07-14 (token/ops 浪費結構性優化)**
+Last updated: **2026-07-23（平台運營優化總計畫已核可）**
+
+## 2026-07-23 平台運營優化總計畫（accepted charter）
+
+跨基礎架構、程式、零付費 AI 續跑、換機／暖備、Admin、原版／v3／vNext、analytics、
+自然成長與受控自我優化的總體決策，見
+`docs/platform_optimization_program_2026_07.md` 與 `docs/adr/` 下四份 accepted ADR。
+GitHub planning parent 為
+`https://github.com/yhlai0911/volpred-research/issues/3`，33 張驗收票為 #4–#36；
+GitHub 只負責規劃／驗收，`storage/next_tasks.json` 仍是唯一 runtime pending queue，
+materialized runtime task 必須引用對應 planning issue。
+Phase 0／ADR-0001 的 module seam、interface、adapter 與第一個 TDD 切片，見
+`docs/operations_core_module_design.md`。
+2026-07-23 已完成 in-memory tracer（24 cases）及 private PostgreSQL 17 shadow adapter
+（34 cases）；含 database-clock lease fencing、approval／risk fail-closed、parent／deadline
+readiness、atomic acquire、idempotent checkpoint/resume、concurrent terminal replay、
+event/receipt、
+FORCE RLS、專用低權限 function definer、具名 mutation functions、worker／approver
+分權、token-redacted read projection 與 transaction failure rollback，連同相鄰回歸共
+71 passed。canonical row 已包含
+parent／deadline、requester、created／updated 與 blocked reason。外部測試 DSN 有
+localhost／hostaddr／專用 DB／opt-in 防線；CI 固定使用 PostgreSQL 17 且缺少
+integration backend 時 fail closed。
+Submit C legacy snapshot importer 已達
+**`root_cause_fixed_and_verified`**（implementation commit `5ddb5b0d1`；47 scoped
+tests；Spec／Standards 雙軸複審無 P1／P2）：
+三套來源只讀映射、公開 migration façade、
+內容雜湊綁定的 payload reference、structured reconciliation、duplicate ID／idempotency、
+missing parent／simultaneous claim／invalid lifecycle／unknown schema／policy／public effect
+fail-closed、逐值核可 provenance registry，以及強制三份 snapshot、只允許
+`--dry-run`、malformed encoding／shape machine-readable、輸入逐 byte 不變的 CLI。
+2026-07-23 16:14:48 CST 的 next_tasks-only smoke（snapshot SHA-256
+`18281269d61832d97dc38177f8d26ec8b53b91e525e5198a99e9414a1f47c703`）為
+3,337 seen／2,569 mapped／900 issues，因未分類 provenance 與歷史 schema debt 正確
+回報 `ready=false`。
+Submit D shadow replay 的原始 `232ffc994`／`5b9f78adf` checkpoint 只達
+**`contained`**：immutable snapshot 與 append-only receipt 安全性成立，但 Matt 雙軸複審
+確認 selector 是 replay 專用副本，未涵蓋真實 routing／lease semantics，故當時不得稱完成。
+2026-07-23 Issue #7 reimplementation 已達
+**`root_cause_fixed_and_verified`**：
+legacy direct-claim gate 與 production pending-list filter／priority-id ranking 抽成
+`volpred.ops.task_pool_selection`，Work Coordinator acquisition 抽成
+`volpred.ops.work.selection`，production claim／in-memory acquire 與 replay 共用相同 pure
+policy seam；PostgreSQL `acquire_work` 則由 34-case integration contract 回讀 parity。
+legacy winner 先套用 production `list --status pending` 的 exact status／worker filter，
+再對原始 immutable `next_tasks` 執行含 identity uniqueness 的 direct-claim admission；
+migration importer 不可表示的 record 仍保留 reconciliation comparison。duplicate／missing
+identity 以 ordinal + content hash 分開綁定並 fail closed；三來源 raw identity inventory
+在 mapping 前掃描完整母體，故跨來源 duplicate 不會因一份 record 無法映射而消失，也不會
+因 task-id dict 覆蓋而錯接 selector evidence；未送進 Coordinator 的 record 明示 migration `not_evaluated`，
+不虛構 Coordinator reason。blocked 與 claimed records 只保留比較證據，不會被虛構成
+hourly winner。需 live detector 的 registered dreaming candidate 若 snapshot 沒有
+revalidation evidence，會以 `live_revalidation_required` fail closed，不查 live source，
+production claim 則在同一 transaction 完成 detector check 後才重新進 admission。
+replay 的 selection scope 明定為 `next_tasks`，另外兩份 snapshot 仍參與同一 hash identity
+與 reconciliation evidence；若 next-task 的 parent 位於其他 snapshot，則透過 production
+selector 的 non-selectable `dependency_items` 提供 readiness context，但 parent 永不進入
+winner pool，因此不虛構跨三套 legacy store 的全域 winner。
+逐 candidate 比較 priority、status readiness、capability、attestation、claim ownership、
+lease expiry、dispatch lane、preferred agent、parent readiness、deadline 與 terminal
+disposition；差異由 selector／reconciliation reason codes 經顯式 policy oracle 分類並附
+evidence reference。兩支 CLI 共用同一 snapshot loader；152 個 selector／replay 核心
+cases、另行重跑的 10 個 model-router topology regressions、144 個相鄰
+dreaming／stale-reclaim／refill regressions 與 34 個隔離 PostgreSQL contracts 通過。
+CLI 仍只讀 caller 提供的三份 snapshot，僅在指定目錄追加不可覆寫的 observation receipt。
+尚未建立 canonical schedule 或累積七天 observation window，migration 也未部署，
+因此仍不構成接管或上線。
+
+這是 umbrella program，不另建 ops 進度帳；下方
+`docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
+Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在
+各自 gate 與 owner 獨立核可前不得刪除。
+
+## 2026-07-20 Ops Master Consolidation（active — 最高優先）
+
+Owner 指令「重構所有運營程式碼：底層邏輯/流程/架構三層徹底改、去重複、滿足 PDCA/loop
+engineering、含 email/Telegram 互動與派工邏輯」。五路平行稽核（控制面/scripts/enforcement/
+發佈管線/事故根因）後產出**收編型 master plan** = `docs/refactor_plan_ops_master_2026_07.md`
+（§7 狀態表為 canonical，吸收既有 11 份 refactor plan 全部殘留項，此後 ops 重構單一入口）。
+當日 Phase 0 完成：truncate-before-serialize corruption 路徑修復（continue_task_dispatch）、
+cleanup claimed_at 盲點修復 + 5 筆殭屍任務自然回收（task_pool_claim）、cron_dispatch plan
+標 SUPERSEDED、12 筆 Phase 1 任務入池（refactor-master 系列，P1/P2）。
 
 ## 2026-07-14 Token/Ops 浪費重構（active）
 
@@ -90,7 +171,7 @@ attribution、error_log 壓縮、治理疊層收斂、K1709 合併）已進 next
 
 - [ ] B4.1: 寫 launchd plist `~/Library/LaunchAgents/com.volpred.continue-task.plist` cron `*/30 * * * *`
 - [ ] B4.2: 跑 `bash scripts/install_host_crontab.sh` rebuild canonical crontab + 補 continue_task entry（解 #1, #6）
-- [ ] B4.3: 移除 `runtime_schedules.json system_crontab.shared_scheduler_tick`（已死，piggy-back 接管）（解 #7）
+- [x] B4.3: 移除 `runtime_schedules.json system_crontab.shared_scheduler_tick`（已死，piggy-back 接管）（解 #7）— 2026-07-20 ops-master D2 完成：整條 advisory scheduler lane（scheduler.py / scheduler-tick·preview·smoke CLI / run_scheduler_tick.sh / schedule spec / writer-ownership entry）退役，readers（summaries/health/alerts/control-plane snapshot/docs）同 commit 拔除
 - [ ] B4.4: `session_startup.md §2.0` replay 改為 enforced script `scripts/replay_pending_sessions.py`（解 #1, #2）
 
 ### Effort × Risk × Mission Impact

@@ -23,10 +23,14 @@ have stopped. This avoids committing a sibling's half-written files.
 In `dry_run=True` mode (shadow phase per refactor_plan §4 phase 2) the
 scheduler logs "WOULD enqueue at <fire_at>" + updates last_fire_at but
 does NOT spawn a worker. Used to diff against legacy shell decisions.
+WS-H4 (2026-07-20): a dry-run tick walks the SAME pregate judgment as a
+cron fire (it used to bypass it) — dry-run and fire may only diverge at
+the write boundary (reserve_fire / worker spawn), never in the decision.
 """
 from __future__ import annotations
 
 import asyncio
+import dataclasses
 import json
 import logging
 import os
@@ -45,7 +49,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import alerts, phase_z, state, worker
+from . import alerts, decision, identity, phase_z, state, worker, workspace as workspace_mod
 
 LOG = logging.getLogger(__name__)
 
@@ -61,7 +65,10 @@ FALLBACK_CRON = "7 * * * *"
 # scheduling lived in LaunchAgent plist. Supervisor falls back to "7 * * * *".
 SCHEDULE_ID = "volpred-hourly-dispatch"
 DAEMON_ID = "volpred-dispatch-supervisor"
+# Also the floor the pool de-rates to during a quota outage: the capacity that
+# ran for months without exhausting the window is the safe thing to fall back to.
 DEFAULT_MAX_SLOTS = 2
+QUOTA_DERATE_STREAK = 2
 
 # Strong references keep launched fire tasks alive until their done callback
 # observes the result. Keys are immutable state job_ids, never reusable slots.
@@ -79,6 +86,19 @@ _PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_
 # every ~64s tick forever. Three attempts ≈ 3 min of transient tolerance, then
 # one give-up alert and the token is released.
 _PHASE_Z_MAX_DRAIN_ATTEMPTS = 3
+
+
+def _phase_z_claim_owners(pending: list[dict[str, Any]]) -> set[str]:
+    """Return every executor identity that could have owned a drained fire."""
+    owners: set[str] = set()
+    for item in pending:
+        job_id = str(item.get("job_id") or "").strip()
+        raw_slot = str(item.get("slot_id") or "").strip()
+        if not job_id or not raw_slot:
+            continue
+        slot_id = raw_slot if raw_slot.startswith("slot-") else f"slot-{raw_slot}"
+        owners.update(identity.task_claim_owners_for_job(slot_id=slot_id, job_id=job_id))
+    return owners
 
 
 def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
@@ -167,8 +187,41 @@ def load_cron_expr(*, schedules_path: Path = SCHEDULES_PATH, schedule_id: str = 
     return FALLBACK_CRON
 
 
+def quota_derate_active(state_path: Path) -> bool:
+    """True while the newest completions are an unbroken quota_blocked streak.
+
+    A quota block is not a failure of one fire — it says the WINDOW is spent,
+    so every additional slot burns its ~95K cold-load on a run that cannot do
+    any work. Above the baseline capacity that turns a surge into an amplifier
+    of the outage, which is why the de-rate exists at all.
+
+    Unlike ``auth_blocked`` (a latched flag needing `cli unblock-auth`), quota
+    resolves on a clock. So the signal must self-clear: one successful
+    completion breaks the streak and the configured capacity comes straight
+    back, with no human in the loop. Requiring two in a row keeps a single
+    unlucky fire from de-rating the pool.
+    """
+    try:
+        data = json.loads(state_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logging.warning("quota_streak_state_unreadable: %s (%s) — treating as no streak", state_path, exc)
+        return False
+    completions = data.get("completions")
+    if not isinstance(completions, list):
+        return False
+    streak = 0
+    for item in reversed(completions):
+        if not isinstance(item, dict) or item.get("outcome") != "quota_blocked":
+            break
+        streak += 1
+        if streak >= QUOTA_DERATE_STREAK:
+            return True
+    return False
+
+
 def load_max_slots(
     *, schedules_path: Path = SCHEDULES_PATH, daemon_id: str = DAEMON_ID,
+    state_path: Path = state.STATE_PATH,
 ) -> int:
     """Hot-load the daemon pool capacity from runtime_schedules.json.
 
@@ -176,6 +229,11 @@ def load_max_slots(
     or invalid values fall back to two; bool is rejected even though it is an
     ``int`` subclass.  A config reduction never kills existing workers — it
     only blocks new admission until occupancy falls below the new limit.
+
+    The configured value is a ceiling, not a promise: while a quota streak is
+    active the pool is clamped back to ``DEFAULT_MAX_SLOTS``. Keeping that here
+    rather than in the caller preserves the single-owner rule — everyone who
+    asks "how many slots exist" gets the same answer, de-rate included.
     """
     try:
         data = json.loads(schedules_path.read_text(encoding="utf-8"))
@@ -188,6 +246,13 @@ def load_max_slots(
         value = item.get("max_slots", DEFAULT_MAX_SLOTS)
         if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
             LOG.warning("max_slots %r invalid — using %d", value, DEFAULT_MAX_SLOTS)
+            return DEFAULT_MAX_SLOTS
+        if value > DEFAULT_MAX_SLOTS and quota_derate_active(state_path):
+            LOG.warning(
+                "max_slots %d de-rated to %d: last %d completions were quota_blocked "
+                "(self-clears on the next successful fire)",
+                value, DEFAULT_MAX_SLOTS, QUOTA_DERATE_STREAK,
+            )
             return DEFAULT_MAX_SLOTS
         return value
     LOG.warning("daemon %s missing max_slots — using %d", daemon_id, DEFAULT_MAX_SLOTS)
@@ -235,9 +300,13 @@ def _slot_prompt(
     job_id: str,
     workdir: Path,
     repo_root: Path,
+    workspace: dict[str, Any] | None = None,
 ) -> str:
     """Inject the stable namespace and non-main launch boundary."""
     prefix = f"dispatch-{slot_id}-{job_id[:8]}"
+    workspace_section = (
+        workspace_mod.prompt_fragment(workspace) + "\n" if workspace else ""
+    )
     return (
         "[Supervisor multi-slot context]\n"
         f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
@@ -253,6 +322,7 @@ def _slot_prompt(
         "merge_worktree.sh 完整整合；不得留下未合併 branch/worktree。"
         "task-pool claim/complete 必須用 canonical_root 的絕對 script path，讓 fcntl control"
         "plane 寫 canonical queue。最後依原 PHASE Z 只留 fire receipt，不自行 git add/commit。\n\n"
+        + workspace_section
         + prompt
     )
 
@@ -295,9 +365,11 @@ async def _run_reserved_fire(
     state_path: Path,
     repo_root: Path,
     workdir: Path | None = None,
+    fire_workspace: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one already-admitted logical fire and close its cohort safely."""
     phase_z_outcome: dict | None = None
+    workspace_outcome: dict | None = None
     result = None
     worker_exc: BaseException | None = None
     try:
@@ -345,6 +417,43 @@ async def _run_reserved_fire(
                 path=state_path,
             )
     finally:
+        # Close the producer-side state machine before any workspace/PHASE-Z
+        # consumer reads it. fire_receipt normally seals successful output;
+        # this also seals a genuinely no-output success and gives failed/dead
+        # producers the named ABANDONED exit instead of a six-hour anonymous
+        # open claim. The ledger remains shadow-only here.
+        try:
+            from volpred.ops import fire_manifest
+
+            manifest = fire_manifest.read(repo_root, job_id)
+            if manifest and manifest.get("state") == fire_manifest.STATE_OPEN:
+                worker_outcome = result.outcome if result is not None else "failure"
+                if worker_outcome in {"success", "codex_failover_recovered"}:
+                    fire_manifest.seal(repo_root, job_id)
+                else:
+                    fire_manifest.close(
+                        repo_root, job_id, state=fire_manifest.STATE_ABANDONED,
+                        reason=f"worker_outcome={worker_outcome}",
+                    )
+        except Exception as exc:  # noqa: BLE001 — attribution must never skip closeout
+            LOG.warning("fire manifest closeout failed job_id=%s: %s", job_id, exc)
+        # ── WS-B workspace finalize (before the PHASE-Z drain) ──────────────
+        # The isolated lane's output lands (or goes to remediation) through its
+        # OWN gate here, so PHASE-Z only ever sees canonical-root residue.
+        # finalize_workspace never raises; belt-and-suspenders anyway because a
+        # crash here must not skip the cohort drain below.
+        if fire_workspace is not None:
+            try:
+                worker_outcome = result.outcome if result is not None else "failure"
+                workspace_outcome = await asyncio.to_thread(
+                    workspace_mod.finalize_workspace,
+                    repo_root=repo_root, workspace=fire_workspace,
+                    worker_outcome=worker_outcome, job_id=job_id,
+                )
+                LOG.info("workspace finalize job_id=%s disposition=%s",
+                         job_id, (workspace_outcome or {}).get("disposition"))
+            except Exception as exc:  # noqa: BLE001
+                LOG.exception("workspace finalize crashed job_id=%s: %s", job_id, exc)
         global _PHASE_Z_LOCK
         if _PHASE_Z_LOCK is None:
             _PHASE_Z_LOCK = asyncio.Lock()
@@ -371,8 +480,22 @@ async def _run_reserved_fire(
                 }
             else:
                 try:
+                    # WS-B: baseline authorship guessing is demoted to fallback
+                    # only when EVERY fire in the drained cohort was isolated
+                    # (state.record_completion stamps `isolated` per fire). One
+                    # unisolated sibling keeps the full legacy behaviour.
+                    isolated_cohort = all(
+                        bool(item.get("isolated")) for item in cohort_pending
+                    )
                     phase_z_outcome = await asyncio.to_thread(
                         phase_z.run_phase_z, repo_root=repo_root,
+                        isolated_cohort=isolated_cohort,
+                        claim_owners=_phase_z_claim_owners(cohort_pending),
+                        fire_ids={
+                            str(item["job_id"])
+                            for item in cohort_pending
+                            if item.get("job_id")
+                        },
                     )
                     LOG.info("phase_z cohort drain job_id=%s outcome=%s", job_id, phase_z_outcome)
                 except Exception as exc:  # noqa: BLE001
@@ -398,6 +521,7 @@ async def _run_reserved_fire(
         "attempts": result.attempts, "exit_code": result.exit_code,
         "phase_z": phase_z_outcome, "fire_reason": fire_reason,
         "job_id": job_id, "slot_id": slot_id,
+        "workspace": workspace_outcome,
     }
 
 
@@ -614,7 +738,22 @@ async def _tick_once(
                 return {"action": "skip", "reason": "cohort_still_running"}
             if not pending_phase_z:
                 return {"action": "phase_z_already_drained", "phase_z": None}
-            outcome = await asyncio.to_thread(phase_z.run_phase_z, repo_root=repo_root)
+            # WS-B: same demotion rule as the fire-task drain — every pending
+            # fire must have been isolated for the recovery drain to skip
+            # baseline authorship guessing on repo bytes.
+            recovery_isolated = all(
+                bool(item.get("isolated")) for item in pending_phase_z
+            )
+            outcome = await asyncio.to_thread(
+                phase_z.run_phase_z, repo_root=repo_root,
+                isolated_cohort=recovery_isolated,
+                claim_owners=_phase_z_claim_owners(pending_phase_z),
+                fire_ids={
+                    str(item["job_id"])
+                    for item in pending_phase_z
+                    if item.get("job_id")
+                },
+            )
             if _phase_z_terminal(outcome):
                 for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
                     state.finish_phase_z(cohort_id=cohort, path=state_path)
@@ -643,53 +782,69 @@ async def _tick_once(
             "action": "phase_z_recovered", "phase_z": outcome,
             "pending_jobs": len(pending_phase_z),
         }
-    if snap.get("auth_blocked"):
-        return {"action": "skip", "reason": "auth_blocked"}
+    # ── WS-H4 step 2: collect inputs, let decision.decide() own the verdict ──
+    # All reads happen here; decide() is pure. Dry-run and fire consume the
+    # SAME Decision — they may only diverge at the write boundary below.
     current_jobs = snap.get("current_jobs") or []
     capacity = max_slots if max_slots is not None else load_max_slots(schedules_path=schedules_path)
-    if len(current_jobs) >= capacity:
-        # A pending request deliberately survives a full-pool skip and is
-        # consumed only after a later tick sees capacity.
-        return {
-            "action": "skip", "reason": "slots_full",
-            "active_slots": len(current_jobs), "max_slots": capacity,
-        }
-    if _parse_last_fire(snap.get("last_fire_at")) is None:
-        # Cold start, or `dispatch_state.json` was lost / clobbered by an
-        # external writer (the daemon logs its own resets; a silent loss is
-        # someone else's write). `_due_to_fire` now refuses to treat "unknown"
-        # as "due" — so stamp the field and let the NEXT real slot fire.
-        # Without this bootstrap the daemon would never fire again.
-        with state._locked_state(state_path) as (_fh, data):
-            if _parse_last_fire(data.get("last_fire_at")) is None:
-                data["last_fire_at"] = state._now()
-        LOG.warning(
-            "last_fire_at missing/unparseable (cold start or external state loss) — "
-            "bootstrapped to now; the next scheduled slot fires normally. "
-            "NOT firing an off-slot catch-up (2026-07-10: that cost 9 stray ~95K cold-loads)."
-        )
-        return {"action": "skip", "reason": "bootstrap_last_fire_at"}
     due, prev_fire = _due_to_fire(cron_expr=cron_expr, last_fire_at=snap.get("last_fire_at"))
-    fire_reason = "cron"
-    if not due:
-        # External ASAP trigger (e.g. boss replied to an email — see
-        # state.request_fire): fire now instead of waiting for the next cron
-        # slot. Consumed atomically so one request produces exactly one fire.
-        requested = state.consume_fire_request(state_path)
-        if requested is not None:
-            LOG.info("fire request consumed (reason=%s) — firing off-cadence", requested)
-            due = True
-            fire_reason = f"requested:{requested}"
-    else:
-        # Cron is due anyway — clear any pending request so it doesn't cause
-        # a SECOND fire right after this one (the request is satisfied). Keep
-        # the request visible in fire_reason: a requested fire must never be
-        # pregate-skipped (boss asked for it), so it can't stay plain "cron".
-        requested = state.consume_fire_request(state_path)
-        if requested is not None:
-            fire_reason = f"cron+requested:{requested}"
-    if not due:
+    pregate_cfg = load_pregate_config(schedules_path=schedules_path)
+    # Peek (not consume) the out-of-band request: a request deliberately
+    # survives auth / full-pool / bootstrap skips, so consumption may only
+    # happen after the admission gates pass (below).
+    peeked_request = (
+        str(snap.get("fire_request_reason") or "unspecified")
+        if snap.get("fire_requested_at") else None
+    )
+    dec_input = decision.DecisionInput(
+        auth_blocked=bool(snap.get("auth_blocked")),
+        active_slots=len(current_jobs),
+        capacity=capacity,
+        quota_derated=quota_derate_active(state_path),
+        last_fire_known=_parse_last_fire(snap.get("last_fire_at")) is not None,
+        due=due,
+        prev_fire=prev_fire.isoformat(),
+        fire_request=peeked_request,
+        pregate_mode=pregate_cfg["mode"],
+    )
+    dec = decision.decide(dec_input)
+    if dec.action == decision.ACTION_SKIP:
+        if dec.reason == "auth_blocked":
+            return {"action": "skip", "reason": "auth_blocked"}
+        if dec.reason == "slots_full":
+            return {
+                "action": "skip", "reason": "slots_full",
+                "active_slots": len(current_jobs), "max_slots": capacity,
+            }
+        if dec.reason == "bootstrap_last_fire_at":
+            # Cold start, or `dispatch_state.json` was lost / clobbered by an
+            # external writer (the daemon logs its own resets; a silent loss is
+            # someone else's write). `_due_to_fire` refuses to treat "unknown"
+            # as "due" — so stamp the field and let the NEXT real slot fire.
+            # Without this bootstrap the daemon would never fire again.
+            with state._locked_state(state_path) as (_fh, data):
+                if _parse_last_fire(data.get("last_fire_at")) is None:
+                    data["last_fire_at"] = state._now()
+            LOG.warning(
+                "last_fire_at missing/unparseable (cold start or external state loss) — "
+                "bootstrapped to now; the next scheduled slot fires normally. "
+                "NOT firing an off-slot catch-up (2026-07-10: that cost 9 stray ~95K cold-loads)."
+            )
+            return {"action": "skip", "reason": "bootstrap_last_fire_at"}
         return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
+    # Admission gates passed — consume any pending request atomically NOW
+    # (one request produces exactly one fire; consumed even when cron was due
+    # anyway so it cannot cause a SECOND fire right after this one).
+    consumed = state.consume_fire_request(state_path)
+    if consumed != dec_input.fire_request:
+        # Lost the atomic-consume race, or a request landed after the snapshot:
+        # re-decide with the value this tick actually owns.
+        dec_input = dataclasses.replace(dec_input, fire_request=consumed)
+        dec = decision.decide(dec_input)
+        if dec.action == decision.ACTION_SKIP:
+            return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
+    if consumed is not None and not due:
+        LOG.info("fire request consumed (reason=%s) — firing off-cadence", consumed)
     # Git conflict guard (2026-07-10 rewire; see phase_z.run_pre_fire_guard).
     # Orphaned by the 7/4 cutover — its only caller was the now-unloaded
     # cron_hourly_dispatch.sh, while the concurrent-writer risk it backstops
@@ -723,21 +878,35 @@ async def _tick_once(
     # Gates ONLY plain cron fires — requested fires always run. Shadow mode
     # never skips (pregate exits 1) but logs the would-be decision for the
     # observation window before the config flip to enforce.
-    if fire_reason == "cron" and not dry_run:
-        pregate_cfg = load_pregate_config(schedules_path=schedules_path)
-        if pregate_cfg["mode"] in ("shadow", "enforce"):
-            pregate_skip = await asyncio.to_thread(
-                _run_pregate,
-                mode=pregate_cfg["mode"], window_hours=pregate_cfg["window_hours"],
-            )
-            if pregate_skip:  # only reachable in enforce mode
-                LOG.info("pregate SKIP — no work worth the cold-load; slot consumed (prev_scheduled=%s)",
-                         prev_fire.isoformat())
-                # consume the slot like dry_run does, so we don't re-evaluate
-                # every tick for the rest of the hour
-                with state._locked_state(state_path) as (_fh, data):
-                    data["last_fire_at"] = state._now()
-                return {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
+    #
+    # WS-H4 (2026-07-20): dry-run used to bypass the pregate entirely, which made
+    # "--dry-run output == real fire decision" structurally impossible whenever
+    # mode != off (docs/dispatch-decision-pipeline-design.md §1.1). Both paths
+    # now collect the demand signal here and hand it to the SAME decide(); only
+    # the write boundary (reserve_fire / worker spawn) differs.
+    if dec.action == decision.ACTION_COLLECT_DEMAND:
+        pregate_skip = await asyncio.to_thread(
+            _run_pregate,
+            mode=pregate_cfg["mode"], window_hours=pregate_cfg["window_hours"],
+        )
+        dec_input = dataclasses.replace(dec_input, demand={"pregate_skip": bool(pregate_skip)})
+        dec = decision.decide(dec_input)
+        if dec.action == decision.ACTION_SKIP:  # reason=pregate_skip, enforce mode only
+            LOG.info("pregate SKIP — no work worth the cold-load; slot consumed (prev_scheduled=%s)",
+                     prev_fire.isoformat())
+            # consume the slot like dry_run does, so we don't re-evaluate
+            # every tick for the rest of the hour
+            with state._locked_state(state_path) as (_fh, data):
+                data["last_fire_at"] = state._now()
+            result = {"action": "pregate_skip", "prev_fire": prev_fire.isoformat()}
+            if dry_run:
+                result["dry_run"] = True
+            return result
+    if dec.action != decision.ACTION_FIRE:  # decide() contract: fire is all that remains
+        LOG.error("decision pipeline returned unexpected action=%r reason=%r — skipping tick",
+                  dec.action, dec.reason)
+        return {"action": "skip", "reason": f"decision_error:{dec.action}"}
+    fire_reason = dec.fire_reason or "cron"
     if dry_run:
         LOG.info("DRY-RUN would fire (prev_scheduled=%s)", prev_fire.isoformat())
         # update last_fire_at so we don't re-log every tick — shadow run still tracks
@@ -767,12 +936,55 @@ async def _tick_once(
         state.release_reservation(job_id=job_id, path=state_path)
         LOG.error("cannot create repo-external dispatch cwd job_id=%s: %s", job_id, exc)
         return {"action": "skip", "reason": "scratch_workdir_error", "error": str(exc)}
+    # ── WS-B producer-scoped workspace (pilot) ──────────────────────────────
+    # Allocation is strictly fail-open: any refusal (mode off, caps, disk floor,
+    # writer-lock busy, git error) fires the slot UNISOLATED and PHASE-Z's
+    # baseline fallback keeps covering it. Runs in a thread: `git worktree add`
+    # checks out the full tree and must not stall the event loop (health_loop
+    # heartbeats share it).
+    fire_workspace: dict[str, Any] | None = None
+    iso_cfg = workspace_mod.load_isolation_config(schedules_path=schedules_path)
+    if iso_cfg["mode"] == "pilot":
+        try:
+            # Protect every job the state file still remembers (live, draining,
+            # or completed) — the sweep may only close TRUE orphans whose fire
+            # left no state behind. See sweep_orphan_workspaces docstring.
+            fresh = state.read_state(state_path)
+            protected = (
+                [str(j.get("job_id")) for j in (fresh.get("current_jobs") or [])]
+                + [str(i.get("job_id")) for i in (fresh.get("phase_z_pending") or [])]
+                + [str(c.get("job_id")) for c in (fresh.get("completions") or [])]
+                + [job_id]
+            )
+            swept = await asyncio.to_thread(
+                workspace_mod.sweep_orphan_workspaces,
+                repo_root=repo_root, protected_job_ids=protected,
+            )
+            if swept:
+                LOG.info("workspace orphan sweep closed %d workspace(s): %s",
+                         len(swept), [s.get("disposition") for s in swept])
+            active_isolated = sum(
+                1 for j in current_jobs if j.get("workspace") is not None
+            )
+            fire_workspace = await asyncio.to_thread(
+                workspace_mod.allocate_workspace,
+                repo_root=repo_root, slot_id=slot_id, job_id=job_id,
+                config=iso_cfg, active_isolated=active_isolated,
+            )
+        except Exception as exc:  # noqa: BLE001 — isolation must never veto dispatch
+            LOG.warning("workspace allocation crashed (non-fatal, firing unisolated): %s", exc)
+            fire_workspace = None
+        if fire_workspace is not None:
+            state.attach_workspace(
+                job_id=job_id, workspace=fire_workspace, path=state_path,
+            )
     prompt = _slot_prompt(
         prompt,
         slot_id=slot_id,
         job_id=job_id,
         workdir=workdir,
         repo_root=repo_root,
+        workspace=fire_workspace,
     )
     LOG.info(
         "firing worker job_id=%s slot=%s prev_scheduled=%s log=%s",
@@ -793,7 +1005,7 @@ async def _tick_once(
         job_id=job_id, cohort_id=lease.cohort_id, slot_id=slot_id, prompt=prompt,
         scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
         log_path=job_log_path, state_path=state_path, repo_root=repo_root,
-        workdir=workdir,
+        workdir=workdir, fire_workspace=fire_workspace,
     )
     if not background:
         return await coro

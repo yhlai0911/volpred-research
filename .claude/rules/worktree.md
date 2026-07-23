@@ -34,6 +34,10 @@ paths:
 4. Merge 後**主線程手動 check**：`git log --oneline -5` 驗證 commits 真的進了 main。
 5. **K1143-v2 (2026-04-19) hardening**：script 若偵測到 `rev-list=0` 但 worktree `experiments/` 仍有主目錄沒有的檔，會主動 ABORT 並顯示手動 copy 指令。**看到 ABORT 不是 bug，是防禦**；按 hint 執行即可。
 6. Regression test：`bash scripts/tests/test_merge_worktree.sh`（修 script 後必跑；case / assertion 數以 script 當次 summary 為準，不在規則重複硬編）。
+7. **stale-base overlap gate（2026-07-23）**：worktree 落後 main 本身不是錯；但若 main 與
+   worktree 從 merge-base 起修改了**相同路徑**，`merge_worktree.sh` 必須在 merge 前 ABORT，
+   保留兩側 branch / bytes，待 worktree 明確 rebase 或人工整合並重跑驗證。禁止讓 `-X ours`
+   代替語意裁決。兩側路徑不相交才可繼續；worktree 相對 base 呈現純刪除的路徑會另行告警。
 
 ## Agent brief 規範
 
@@ -70,6 +74,13 @@ paths:
 - **K1618** (2026-07-04) **STRIKE 2**（K1032 same root class 第 2 次）：主線程 shell cwd 停在待合併 worktree 內（Bash cwd 跨呼叫持久）+ 相對路徑 `bash scripts/merge_worktree.sh` 呼叫 → 舊版 `BASH_SOURCE`-相對解析把 `MAIN_DIR` 指到 **worktree root** → `main_branch` = worktree 自己的分支 → `main_branch..branch` 自比自 = 0-commit false-negative → 5 層防禦全繞過 → 未 merge 就砍 worktree（靠 branch 存活救回）。**systemic fix**（詳 `docs/error_log.md` 2026-07-04 04:25 RESOLVED）：
   1. `resolve_main_dir()` 用 `git -C "$script_dir" rev-parse --git-common-dir` anchor 到**腳本實體目錄**（非裸 cwd），從任何 cwd 都回主 repo；`-d "$root/.git"` 拒絕誤指 worktree。
   2. HEAD=worktree-agent 分支 / `main_branch==branch` self-compare / git log rc≠0 三道 fail-loud guard；`ensure_cwd_outside_worktree()` 在兩個 remove 前擋。
-  3. `-X ours` drop 了 modified 檔改**自動還原 agent 版本**（`git checkout branch -- <df>`+commit），add/commit 真失敗 fail-closed 保留 worktree+branch。
+  3. 當時對 `-X ours` drop 的 modified 檔採**自動還原 agent 版本**；此契約已由
+     2026-07-23 stale-base overlap gate 取代：現在必須在 merge 前保留兩側並要求明確整合，
+     不再於 merge 後武斷覆成任一側。
   4. Test 加 case 8/9/10，現為 **10 cases / 25 assertions PASS 10/10**。**merge 前主線程必先 `cd $REPO_ROOT`、永不從 worktree 內部觸發 merge**（memory `feedback_no_cd_into_worktree_before_merge`）。
+- **86e142305 / D6b reaper** (2026-07-23)：main 與 stale worktree 同改
+  `scripts/compute_queue.py`，`-X ours` 產出的 merge 相對 main parent 看似正常，
+  相對 worktree parent 卻是 `+0/-192`，已驗證活碼被靜默丟棄；舊 detector 又只掃
+  `experiments/`。修復為 merge 前比較兩側自 merge-base 起的 path set：有交集即
+  fail-closed，無交集才放行；另對 pure-deletion shape 顯式告警。
 - Session 停止時 `git worktree remove --force` 清掉未 merge worktree → 重要 session recovery 永遠走 reflog 不走 remove force。

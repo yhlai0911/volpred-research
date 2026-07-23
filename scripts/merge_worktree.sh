@@ -88,6 +88,67 @@ ensure_cwd_outside_worktree() {
     fi
     return 0
 }
+
+# ── 2026-07-19 SCOPE FIX：安全網從「只看 experiments/」擴到全樹 ─────────────
+# 舊版 K1262-v4 PRIMARY（file-presence diff）與 K1143-v2（pre-remove 掃描）兩層防線
+# 都硬編 `experiments/`。但 agent 成果早就不只放那裡（storage/event_articles/、
+# storage/drafts/、docs/ 都有）。於是這條失效路徑一直開著：成果全在 storage/ →
+# auto-commit 沒抓到（被 ignore 規則蓋掉、或根本沒觸發）→ rev-list=0 且 experiments/
+# 是空的 → 直接走「可安全移除」→ 未合併就砍 worktree。
+# 防線宣稱擋 silent data loss，實際覆蓋卻比宣稱窄；這裡把兩層都改成掃全樹。
+#
+# 取捨：為什麼**不**拿 `.gitignore` 當邊界
+#   K1143-v2 自己的註解就把「gitignore 吃掉檔案」列為必須 ABORT 的成因之一——被 ignore
+#   規則蓋到的 agent 產出，正是最容易靜默消失、最需要這條防線的那一種。若把邊界委派給
+#   git 的 ignore 判斷（--exclude-standard / check-ignore），防線就會對它最該擋的情況失明。
+#   代價是全樹掃描會看到機器產生的噪音。因此改用下面這份**結構性噪音 denylist**：只列
+#   「機器產生、不帶 agent 語意」的路徑（快取 / venv / build 產物 / log），其餘一律視為
+#   可能的成果。寧可偶爾多一次 fail-closed 的 ABORT，也不要少一次 silent 砍檔。
+#
+# ── K1262-v6 (2026-07-21)：辨識「main 自己刪掉／搬走的舊檔」，避免落後的 worktree 誤報 ──
+# 判準刻意開得極窄：**同一路徑**在 main 的歷史裡曾存在**位元組完全相同**的版本。
+# 滿足這條的檔案不可能是 agent 的新成果（新成果不會與 main 舊版本 byte-identical），
+# 但足以吃掉 stale worktree（tip 落後 main）必然產生的那類噪音：被搬進 scripts/_legacy/ 的
+# 腳本、被輪替刪掉的 runtime JSON、被移除的 local 設定 —— 這些正是本次誤判的三個檔。
+# 為什麼不用路徑 denylist：denylist 只能擋「這次剛好誤報的這幾個檔」，且一旦寫寬
+# （例如整個 storage/ 或所有 gitignored 檔）就會重新打開 K1262 silent-drop 的洞。
+# 內容比對是內容層判準，不需要預測未來的成果路徑。
+# 擋：把 main 自己刪掉的舊檔當成 worktree 未合併成果 → 假 ABORT／假 merge 觸發。
+is_stale_main_deleted_file() {
+    local wf="$1" rel="$2" blob c
+    blob=$(git -C "$MAIN_DIR" hash-object -- "$wf" 2>/dev/null) || return 1
+    [[ -z "$blob" ]] && return 1
+    while IFS= read -r c; do
+        [[ -z "$c" ]] && continue
+        if [[ "$(git -C "$MAIN_DIR" rev-parse -q --verify "$c:$rel" 2>/dev/null)" == "$blob" ]]; then
+            return 0
+        fi
+    done < <(git -C "$MAIN_DIR" log --format=%H -n 200 -- "$rel" 2>/dev/null)
+    return 1
+}
+
+# 輸出：worktree 內存在、但 MAIN_DIR 對應路徑不存在的檔案（相對路徑，一行一個）。
+worktree_only_paths() {
+    local wt_path="$1"
+    find "$wt_path" \
+        \( -name '.git' -o -name '__pycache__' -o -name '.venv' -o -name 'venv' \
+           -o -name 'node_modules' -o -name '.next' -o -name '.pytest_cache' \
+           -o -name '.mypy_cache' -o -name '.ruff_cache' -o -name '.eggs' \
+           -o -name 'dist' -o -name 'build' -o -name '*.egg-info' \
+           -o -name '.claude' -o -path "$wt_path/storage/logs" \) -prune -o \
+        -type f -not -name '*.pyc' -not -name '*.pyo' -not -name '.DS_Store' -print0 2>/dev/null \
+    | while IFS= read -r -d '' wf; do
+        local rel="${wf#$wt_path/}"
+        [[ -z "$rel" ]] && continue
+        if [[ ! -e "$MAIN_DIR/$rel" ]]; then
+            # K1262-v6：main 歷史裡有同路徑、同內容的版本 → 是 main 刪掉/搬走的舊檔，非成果
+            if is_stale_main_deleted_file "$wf" "$rel"; then
+                continue
+            fi
+            printf '%s\n' "$rel"
+        fi
+    done
+}
 # ──────────────────────────────────────────────────────────────────────────
 
 DRY_RUN=false
@@ -241,19 +302,122 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         return 1
     fi
 
+    # 2026-07-23 stale-base overlap guard (86e142305 / D6b reaper incident).
+    #
+    # `git merge -X ours` only chooses our side for conflicting hunks; it does
+    # not prove that the agent's semantic change survived.  In 86e142305 both
+    # main and the worktree changed scripts/compute_queue.py after their common
+    # base.  The merge looked small relative to main (+38/-7), but relative to
+    # the worktree parent it was +0/-192: the verified D6b reaper disappeared.
+    # The old post-merge detector only inspected experiments/, so code under
+    # scripts/ had no protection.
+    #
+    # A worktree being behind main is normal in a busy repo.  The dangerous
+    # state is narrower and deterministic: main advanced *and* both sides
+    # touched the same path.  Disjoint stale worktrees remain mergeable (Case
+    # 11: cron updates feed.json while an agent only adds its experiment).
+    # Overlap requires an explicit rebase/manual integration before this
+    # script may merge; `-X ours` must never make that semantic decision.
+    local stale_merge_base=""
+    local main_ahead_count=0
+    local main_since_base_paths=""
+    local branch_since_base_paths=""
+    local stale_overlap_paths=""
+    local branch_pure_deletion_paths=""
+
+    if ! stale_merge_base=$(git -C "$MAIN_DIR" merge-base "$main_branch" "$branch" 2>/dev/null) \
+        || [[ -z "$stale_merge_base" ]]; then
+        echo "  [STALE-BASE ABORT] 無法解析 $main_branch 與 $branch 的 merge-base；拒絕盲目合併"
+        return 1
+    fi
+    if ! main_ahead_count=$(git -C "$MAIN_DIR" rev-list --count "$stale_merge_base..$main_branch" 2>/dev/null); then
+        echo "  [STALE-BASE ABORT] 無法計算 main 相對 worktree base 的前進量"
+        return 1
+    fi
+
+    if [[ "$commit_count_verify" -gt 0 ]]; then
+        branch_pure_deletion_paths=$(
+            git -C "$MAIN_DIR" diff --numstat "$stale_merge_base" "$branch" 2>/dev/null \
+                | awk -F '\t' '$1 == "0" && $2 ~ /^[0-9]+$/ && $2 > 0 {print $3}' \
+                | sort -u || true
+        )
+        if [[ -n "$branch_pure_deletion_paths" ]]; then
+            echo "  [PURE-DELETION WARN] worktree 相對 merge-base 有只刪不增的路徑："
+            printf '%s\n' "$branch_pure_deletion_paths" | sed -n '1,20{s/^/      /;p;}'
+            echo "  [PURE-DELETION WARN] 若非明確刪除任務，rebase 前先核對是否把活碼覆成舊版。"
+        fi
+    fi
+
+    if [[ "$main_ahead_count" -gt 0 ]] && [[ "$commit_count_verify" -gt 0 ]]; then
+        if ! main_since_base_paths=$(git -C "$MAIN_DIR" diff --name-only \
+            "$stale_merge_base" "$main_branch"); then
+            echo "  [STALE-BASE ABORT] 無法列出 main 自 merge-base 後的變更路徑"
+            return 1
+        fi
+        if ! branch_since_base_paths=$(git -C "$MAIN_DIR" diff --name-only \
+            "$stale_merge_base" "$branch"); then
+            echo "  [STALE-BASE ABORT] 無法列出 worktree 自 merge-base 後的變更路徑"
+            return 1
+        fi
+        stale_overlap_paths=$(comm -12 \
+            <(printf '%s\n' "$main_since_base_paths" | sed '/^$/d' | sort -u) \
+            <(printf '%s\n' "$branch_since_base_paths" | sed '/^$/d' | sort -u))
+
+        if [[ -n "$stale_overlap_paths" ]]; then
+            echo "  [STALE-BASE ABORT] worktree base 落後 main $main_ahead_count commits，且雙方修改同一路徑："
+            printf '%s\n' "$stale_overlap_paths" | sed -n '1,20{s/^/      /;p;}'
+            echo "  [WHY] 禁止交給 -X ours 靜默裁決；86e142305 曾因此相對 worktree parent 產生 +0/-192。"
+            echo "  [HINT] 在 worktree 明確整合 main、解衝突並重跑驗證後再合併："
+            echo "         git -C \"$wt_path\" rebase \"$main_branch\""
+            echo "         # 解衝突、重跑該任務測試並 commit，再執行："
+            echo "         bash scripts/merge_worktree.sh $wt_name"
+            return 1
+        fi
+        echo "  [STALE-BASE SAFE] worktree base 落後 main $main_ahead_count commits，但變更路徑不相交，允許繼續。"
+    fi
+
     # K1262-v4 (2026-04-27): **PRIMARY 防線** — file-presence diff 不依賴 rev-list count。
     # 即使 rev-list 報 0（false negative，K1032/K1114/K1262 same root cause），
-    # 只要 worktree branch tip 含 main 沒有的 experiments/<kXXX>/ 檔，就強制走 merge path。
+    # 只要 worktree branch tip 含 main 沒有的檔，就強制走 merge path。
     # 這條 layer 在 K1262 silent drop bug 第三次重現後新增。
+    # 2026-07-19 scope fix：拿掉 `-- experiments/` pathspec，改比對**全樹**。
+    # 這是 commit-to-commit 的 tree diff，只看已提交的 tracked 檔，沒有 untracked 噪音問題，
+    # 所以全樹是純粹的擴大覆蓋——不必再追著每個新的成果路徑（storage/、docs/…）補 pathspec。
+    #
+    # K1262-v6 (2026-07-21): diff-tree 訊號在 branch 是 main 祖先時**方向相反**，先擋掉。
+    # `diff-tree A "$main_branch" "$branch"` 問的是「從 main 走到 branch 會新增哪些檔」。
+    # 當 branch 完全落後（tip 已被 main 包含、0 自有 commit）時，這個集合等於
+    # **main 後來刪掉／搬走的舊檔**（例：搬進 scripts/_legacy/、輪替掉的 runtime JSON、
+    # 被移除的 .claude/settings.local.json），不是 branch 的成果。舊版拿它當
+    # 「rev-list false negative」的證據 → 觸發 commit 來源 fallback → 誤判。
+    # 擋：把 0 自有 commit 的 worktree 誤判成有未合併成果、進而誤合他人工作。
+    # 為什麼安全（不弱化 K1262）：ancestor 成立 = branch tip 的整棵 tree 都已在 main 的
+    # 歷史裡，定義上不存在「只在 branch 有的已提交成果」。真正的 K1262 silent-drop 情境
+    # （有 commit 但 rev-list 誤報 0、或成果是 untracked/gitignored）都**不**滿足 ancestor：
+    # 前者 branch tip 不是 main 祖先，後者走下面 K1262-v5 的 filesystem 防線，兩條都不受影響。
+    local branch_is_ancestor=false
+    if git -C "$MAIN_DIR" merge-base --is-ancestor "$branch" "$main_branch" 2>/dev/null; then
+        branch_is_ancestor=true
+    fi
+
+    # K1262-v6: fallback 觸發但無法在 branch 範圍內解釋時的 fail-closed 旗標（見下方 gate）
+    local fallback_unresolved=false
+
     local file_presence_unique=""
-    file_presence_unique=$(git -C "$MAIN_DIR" diff-tree --diff-filter=A --name-only -r "$main_branch" "$branch" -- experiments/ 2>/dev/null | grep -v '^$' || true)
+    if $branch_is_ancestor; then
+        echo "  [K1262-v6] $branch 是 $main_branch 的祖先（tree 已完全含於 main 歷史）→"
+        echo "             略過 commit-to-commit file-presence 訊號（該方向只會列出 main 自己刪掉的舊檔）。"
+        echo "             下面的 K1262-v5 filesystem 防線與 pre-remove 全樹掃描**照常**執行。"
+    else
+        file_presence_unique=$(git -C "$MAIN_DIR" diff-tree --diff-filter=A --name-only -r "$main_branch" "$branch" 2>/dev/null | grep -v '^$' || true)
+    fi
     # 過濾出真正只在 worktree branch 有的（main HEAD 不存在）
-    local worktree_only_exp_files=""
+    local worktree_only_files=""
     if [[ -n "$file_presence_unique" ]]; then
         while IFS= read -r f; do
             [[ -z "$f" ]] && continue
             if ! git -C "$MAIN_DIR" cat-file -e "$main_branch:$f" 2>/dev/null; then
-                worktree_only_exp_files="$worktree_only_exp_files$f"$'\n'
+                worktree_only_files="$worktree_only_files$f"$'\n'
             fi
         done <<< "$file_presence_unique"
     fi
@@ -261,33 +425,56 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     # K1262-v5 (2026-04-27) EXTRA-DEFENSE: 若 git diff-tree 回空但 worktree 有實際檔案 not in
     # MAIN_DIR，純文件系統 fallback。處理 git plumbing 全 silent fail 的 K1262-actual case
     # (rev-list=0, log=empty, diff-tree=empty, 但檔案實在 worktree 裡)。
-    if [[ -z "$worktree_only_exp_files" ]] && [[ -d "$wt_path/experiments" ]]; then
+    # 2026-07-19 scope fix：從 `find "$wt_path/experiments"` 改成 worktree_only_paths()
+    # 全樹掃描（見檔案上方該函式的取捨註解）。舊版只要成果不在 experiments/ 就完全看不到。
+    if [[ -z "$worktree_only_files" ]] && [[ -d "$wt_path" ]]; then
         local fs_only_files=""
-        while IFS= read -r -d '' wf; do
-            local rel="${wf#$wt_path/}"
-            if [[ ! -e "$MAIN_DIR/$rel" ]]; then
-                fs_only_files="${fs_only_files}${rel}"$'\n'
-            fi
-        done < <(find "$wt_path/experiments" -type f -not -path '*/__pycache__/*' -print0 2>/dev/null)
+        fs_only_files=$(worktree_only_paths "$wt_path")
         if [[ -n "$fs_only_files" ]]; then
-            echo "  [🚨 K1262-v5 FS-DEFENSE] git plumbing 全空但 filesystem 顯示 worktree experiments/ 有 main 沒有的檔案"
-            worktree_only_exp_files="$fs_only_files"
+            echo "  [🚨 K1262-v5 FS-DEFENSE] git plumbing 全空但 filesystem 顯示 worktree 有 main 沒有的檔案"
+            worktree_only_files="$fs_only_files"
         fi
     fi
 
-    if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]] && [[ -n "$worktree_only_exp_files" ]]; then
-        echo "  [🚨 K1262-v4 PRIMARY] rev-list 報 0 commits 但 file-presence diff 顯示 worktree branch 含 main 沒有的 experiments/ 檔："
-        echo "$worktree_only_exp_files" | head -10 | sed 's/^/      /'
+    if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]] && [[ -n "$worktree_only_files" ]]; then
+        echo "  [🚨 K1262-v4 PRIMARY] rev-list 報 0 commits 但 file-presence diff 顯示 worktree 含 main 沒有的檔案："
+        echo "$worktree_only_files" | head -10 | sed 's/^/      /'
         echo "  [🚨 K1262-v4] 強制走 merge path（不信 rev-list false negative）"
-        # 重建 new_commits 與 commit_count_verify 從另一條路徑（git log --all 跨 worktree）
-        new_commits=$(git -C "$MAIN_DIR" log --oneline --all "^$main_branch" "$branch" 2>/dev/null | head -50 || true)
-        if [[ -z "$new_commits" ]]; then
-            # 仍找不到 — 可能 branch ref 對不上但檔案在 working tree（gitignored）
-            # 沿用既有 K1143-v2 abort path：file-presence layer fall through 到下面 if
-            :
+        # K1262-v6 (2026-07-21): 重建 commit list 的來源**限縮在這一個 branch**，永不用 `--all`。
+        # 舊版 `git log --all "^$main_branch" "$branch"` 把「全 repo 所有分支」當成
+        # 「這個 branch」的替身：其他 worktree 進行中的分支、測試 fixture commit 全會被撈進來
+        # cherry-pick 進 main。偵測層的方向沒錯，錯的是 fallback 的 **scope**。
+        # 擋：把別人未完成的工作與測試 fixture commit 誤合進 main（難回溯，比漏合更貴）。
+        # 兩個 branch-scoped 來源：
+        #   1) merge-base..branch —— 不受 main 前進影響，仍只看這條 branch 自己的 commit
+        #   2) branch 自己的 reflog —— 救「ref 被覆寫/rev-list 誤報 0 但 commit 還在」的
+        #      K1032/K1114 式 false negative（只取 main 尚未包含者），天然限定在本 branch
+        local merge_base="" rebuilt=""
+        merge_base=$(git -C "$MAIN_DIR" merge-base "$main_branch" "$branch" 2>/dev/null || true)
+        if [[ -n "$merge_base" ]]; then
+            rebuilt=$(git -C "$MAIN_DIR" log --oneline "$merge_base..$branch" 2>/dev/null | head -50 || true)
+        fi
+        if [[ -z "$rebuilt" ]]; then
+            rebuilt=$(git -C "$MAIN_DIR" reflog show "$branch" --format='%H' 2>/dev/null \
+                | while IFS= read -r sha; do
+                    [[ -z "$sha" ]] && continue
+                    if ! git -C "$MAIN_DIR" merge-base --is-ancestor "$sha" "$main_branch" 2>/dev/null; then
+                        git -C "$MAIN_DIR" log --oneline -1 "$sha" 2>/dev/null || true
+                    fi
+                  done | awk '!seen[$0]++' | head -50 || true)
+            [[ -n "$rebuilt" ]] && echo "  [K1262-v6] merge-base..$branch 為空，改用 $branch 自己的 reflog（仍限本 branch）"
+        fi
+        if [[ -z "$rebuilt" ]]; then
+            # K1262-v6 fail-closed：branch 歷史裡找不到對應 commit 時**不再自動擴大範圍**。
+            # 兩種錯誤方向不對稱：漏合 branch 還在、可救回；誤合污染 main、難回溯。
+            # 所以這裡標記待人工確認，讓流程走到下面的 pre-remove 掃描 / v6 fail-closed gate，
+            # 絕不因為「找不到就換更大的來源」而自動放行。
+            fallback_unresolved=true
+            echo "  [K1262-v6] branch-scoped 來源（merge-base / reflog）皆無 commit → 不擴大範圍，改要求人工確認"
         else
-            commit_count_verify=$(echo "$new_commits" | grep -c '^' || echo 0)
-            echo "  [K1262-v4] 從 git log --all 重建 commit list: $commit_count_verify commits"
+            new_commits="$rebuilt"
+            commit_count_verify=$(printf '%s\n' "$new_commits" | grep -c '^' || echo 0)
+            echo "  [K1262-v6] 從 branch-scoped 來源重建 commit list: $commit_count_verify commits"
         fi
     fi
 
@@ -298,53 +485,61 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
         # `git worktree remove --force` 直接刪除整個目錄，是 K903/K904/K1032/K1114/K1100g_d9
         # silent loss 的真正 smoking gun。
         #
-        # 防禦：pre-remove 掃 worktree 下 experiments/<kXXX>/，凡是主目錄沒有的就 abort。
-        # 有相同 kXXX 的 common dir 也需要用 diff 檢查是否 worktree 版更新（不比 __pycache__）。
-        local orphan_exp_dirs=""
-        local updated_exp_dirs=""
-        if [[ -d "$wt_path/experiments" ]]; then
-            for exp_dir in "$wt_path/experiments/"*/; do
-                [[ -d "$exp_dir" ]] || continue
-                local exp_name
-                exp_name=$(basename "$exp_dir")
-                # K1262-v5 (2026-04-27): glob 給的 $exp_dir 帶 trailing slash，但 diff -rq 輸出
-                # `Only in /path:` 不帶 trailing slash → grep `^Only in $exp_dir` (with /) NEVER matches
-                # → wt_only 永遠空 → updated_exp_dirs 永遠空 → silent drop. 修：strip trailing /.
-                local exp_dir_no_slash="${exp_dir%/}"
-                if [[ ! -d "$MAIN_DIR/experiments/$exp_name" ]]; then
-                    orphan_exp_dirs="$orphan_exp_dirs  $exp_name\n"
-                else
-                    # 共存資料夾：比對有無 worktree-only 的關鍵檔
-                    local wt_only
-                    wt_only=$(diff -rq "$MAIN_DIR/experiments/$exp_name" "$exp_dir_no_slash" 2>/dev/null \
-                        | grep "^Only in $exp_dir_no_slash" \
-                        | grep -v '__pycache__' \
-                        | head -5 || true)
-                    if [[ -n "$wt_only" ]]; then
-                        updated_exp_dirs="$updated_exp_dirs  $exp_name (worktree-only files):\n$wt_only\n"
-                    fi
-                fi
-            done
+        # 2026-07-19 DRY-RUN 自相矛盾修正：
+        # dry-run 不真的 auto-commit，所以 rev-list 必然還是 0。舊版於是同時印出
+        # 「[DRY-RUN] 會自動提交」與「[OK] …可安全移除」兩句互相打臉的結論，讓人以為
+        # worktree 是空的、可以放心砍。正解是**先模擬 auto-commit 之後的狀態再下結論**：
+        # 既然實跑時那些未提交變更會先變成 commit，dry-run 就不該宣告「無變更可移除」。
+        if $DRY_RUN && $has_uncommitted; then
+            echo "  [DRY-RUN] rev-list=0 只是因為 dry-run 沒有真的 auto-commit。"
+            echo "  [DRY-RUN] 實跑時上面列出的未提交變更會先被 commit → $main_branch..$branch 會有新 commits 要合併。"
+            # 措辭刻意避開「可安全移除」這串字：那是 no-op 路徑的結論標記，
+            # 出現在 dry-run 輸出裡就是誤導（也會讓守這條的測試失去意義）。
+            echo "  [DRY-RUN] 結論：這個 worktree **有**待合併的成果，不是空的；實跑會走合併流程而非移除。"
+            echo ""
+            return 0
         fi
-        if [[ -n "$orphan_exp_dirs" ]] || [[ -n "$updated_exp_dirs" ]]; then
-            echo "  [🛑 ABORT] rev-list=0 但 worktree experiments/ 有主目錄沒有的內容（auto-commit 漏掉或 gitignored）："
-            if [[ -n "$orphan_exp_dirs" ]]; then
-                echo "    主目錄不存在的實驗資料夾："
-                printf "%b" "$orphan_exp_dirs"
-            fi
-            if [[ -n "$updated_exp_dirs" ]]; then
-                echo "    主目錄有但 worktree 多出檔案的資料夾："
-                printf "%b" "$updated_exp_dirs"
+
+        # 防禦：pre-remove 掃 worktree 全樹，凡是主目錄沒有的檔就 abort。
+        # 2026-07-19 scope fix：舊版只 for-loop `$wt_path/experiments/*/`，成果放在
+        # storage/event_articles/、storage/drafts/、docs/ 時完全掃不到 → 直接走「可安全移除」。
+        # 改用 worktree_only_paths()（全樹，結構性噪音 denylist；取捨見該函式註解）。
+        # 附帶效果：舊版對「主目錄已有同名資料夾」還要另跑 diff -rq 比 worktree-only 檔，
+        # 現在逐檔比對天然涵蓋這件事，那段特例邏輯（含它自己的 trailing-slash bug）可以退場。
+        local orphan_paths=""
+        orphan_paths=$(worktree_only_paths "$wt_path")
+        if [[ -n "$orphan_paths" ]]; then
+            local orphan_n
+            orphan_n=$(printf '%s\n' "$orphan_paths" | grep -c '^' || echo 0)
+            echo "  [🛑 ABORT] rev-list=0 但 worktree 有主目錄沒有的檔案（auto-commit 漏掉或被 ignore 規則蓋掉）：共 $orphan_n 個"
+            printf '%s\n' "$orphan_paths" | head -20 | sed 's/^/      /'
+            if [[ "$orphan_n" -gt 20 ]]; then
+                echo "      ... 還有 $((orphan_n - 20)) 個"
             fi
             echo "  [🛑 ABORT] 拒絕 remove 以防 silent data loss"
             echo "  [HINT] 手動處理建議："
-            echo "         1. cd $wt_path && git status && ls -la experiments/"
-            echo "         2. 把漏掉的檔手動 copy 到主目錄：cp -r $wt_path/experiments/<kXXX> $MAIN_DIR/experiments/"
+            echo "         1. cd $wt_path && git status --ignored && ls -la"
+            echo "         2. 確認上列檔案是否為成果；是的話手動 copy 到主目錄對應路徑"
             echo "         3. 主目錄 git add + commit 後再跑 bash scripts/merge_worktree.sh $wt_name"
+            echo "         4. 若確認全是可丟棄的產物，先在 worktree 內刪掉再重跑本腳本"
             return 1
         fi
 
-        echo "  [OK] 沒有新的 commits（雙重確認 rev-list=0）+ experiments/ 也空，可安全移除"
+        # K1262-v6 (2026-07-21) FAIL-CLOSED GATE：file-presence/FS 防線曾示警，但 branch 自己的
+        # 歷史裡找不到對應 commit，且上面的全樹掃描也沒留下 orphan 檔 —— 狀態自相矛盾。
+        # 舊版此時會自動把來源換成 `--all` 放行；新版停下來要人看一眼，絕不自動擴大範圍。
+        # 擋：在證據不一致時仍走「可安全移除」或誤合他人 commit。
+        if $fallback_unresolved; then
+            echo "  [🛑 K1262-v6 ABORT] 偵測層示警（worktree 有 main 沒有的檔）但 $branch 的歷史"
+            echo "         （merge-base..$branch 與其 reflog）找不到任何對應 commit —— 證據不一致。"
+            echo "  [🛑 K1262-v6] 拒絕自動判定（既不移除、也不擴大 commit 來源），請人工確認："
+            echo "         1. cd $wt_path && git status --ignored && git log --oneline -10"
+            echo "         2. 確認成果後手動 copy 到主目錄對應路徑並 commit，再重跑本腳本"
+            echo "         3. 若確認全是可丟棄的產物，先在 worktree 內刪掉再重跑本腳本"
+            return 1
+        fi
+
+        echo "  [OK] 沒有新的 commits（雙重確認 rev-list=0）+ 全樹無 worktree-only 檔案，可安全移除"
         if ! $DRY_RUN; then
             # K1618 (2026-07-04): 移除前確認 cwd 不在待移除 worktree 內
             if ! ensure_cwd_outside_worktree "$wt_path"; then
@@ -423,6 +618,33 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
             echo "         3. 若審完又改了 code → 重審，不要手改裁決檔"
             echo "         4. 再跑 bash scripts/merge_worktree.sh $wt_name"
             return 1
+        fi
+
+        # --- Artifact-completeness gate (2026-07-19) ----------------------------
+        # 認證 gate 問「這份實驗被審過了嗎」，這道問「它把該留的東西留下了嗎」：
+        # knowledge.json 條目 + reproduce_spec.json。2026-07-19 CI 連三班紅
+        # （k1732 → k1719）就是實驗進了 main、artifact 沒進，然後一筆一筆事後補。
+        # 同一支腳本也跑在 .github/workflows/experiment-artifacts.yml；規則只有一份。
+        local artifacts_gate="$MAIN_DIR/scripts/check_experiment_artifacts.py"
+        if [[ ! -f "$artifacts_gate" ]]; then
+            echo "  [🛑 ABORT] 找不到 $artifacts_gate — 不在沒有 gate 的情況下盲目合併實驗"
+            return 1
+        fi
+        local artifact_args=()
+        while IFS= read -r kid; do
+            [[ -n "$kid" ]] || continue
+            [[ -d "$wt_path/experiments/$kid" ]] || continue
+            artifact_args+=(--path "$wt_path/experiments/$kid")
+        done <<< "$touched_experiments"
+        if [[ ${#artifact_args[@]} -gt 0 ]]; then
+            echo "  [ARTIFACT] 檢查實驗 artifact 完整性..."
+            # 同 certify gate：stdlib-only 的 python3，不用 uv —— 起不來的 gate 等於棄權。
+            if ! python3 "$artifacts_gate" check "${artifact_args[@]}"; then
+                echo "  [🛑 ABORT] 實驗缺 artifact，拒絕合併（上方已列出可直接執行的補救指令）"
+                echo "  [WHY] 實驗進 main、knowledge/reproduce_spec 沒進 → 下一班 CI 紅，"
+                echo "        而且要靠考古才知道當初跑了什麼。趁作者還在現場補最便宜。"
+                return 1
+            fi
         fi
     fi
 
@@ -789,6 +1011,10 @@ detect_unregistered_worktree_dirs() {
 }
 
 UNREGISTERED_FOUND=0
+# 2026-07-19: 單一 worktree ABORT 不終止其他 worktree 的處理（K1143-v2 的設計），
+# 但**必須**讓 caller（hourly fire / supervisor）看得見 —— 否則「未合併就保留待人工」
+# 會被 exit 0 + 「=== 完成 ===」掩蓋成一次成功的整合。同 K1684 的理由。
+ABORT_FOUND=0
 
 # 主流程
 # 用 compatible 方式讀 array（macOS bash 3.x 無 mapfile）
@@ -813,7 +1039,10 @@ else
     # 加 `|| true` 讓 main loop 繼續處理其他 worktree + orphan cleanup。
     for wt in "${wt_array[@]}"; do
         if [[ -n "$wt" ]]; then
-            merge_one_worktree "$wt" || echo "  [SKIP] 這個 worktree abort，繼續處理其他"
+            merge_one_worktree "$wt" || {
+                ABORT_FOUND=1
+                echo "  [SKIP] 這個 worktree abort，繼續處理其他"
+            }
         fi
     done
 fi
@@ -871,5 +1100,11 @@ fi
 if [[ "$UNREGISTERED_FOUND" -eq 1 ]]; then
     echo ""
     echo "=== 有未註冊的 worktree 目錄未處理（見上方 [ABORT]）— exit 1 ==="
+    exit 1
+fi
+
+if [[ "$ABORT_FOUND" -eq 1 ]]; then
+    echo ""
+    echo "=== 有 worktree 因安全檢查 ABORT 而未合併（見上方 [ABORT]）— exit 1 ==="
     exit 1
 fi

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """Headless Gemini caller — FALLBACK path for one-shot Q&A / fact-check.
 
+⛔ DISABLED 2026-07-17 (boss msg936): the PAID Gemini API is turned off. All
+headless Gemini work goes through the free agy CLI (`agy -p`). This script now
+hard-exits 2 unless VOLPRED_ALLOW_PAID_GEMINI=1 is set (manual break-glass for a
+genuine agy outage). See _guard_paid_gemini_disabled().
+
 Why this exists (2026-05-20 — fallback role):
 - Primary headless Gemini = Antigravity CLI `agy -p`. This script is the
   FALLBACK: a dependency-free, API-key-authenticated path used when agy is
@@ -36,6 +41,24 @@ REPO = Path(__file__).resolve().parent.parent
 DEFAULT_MODEL = "gemini-3.1-pro-preview"
 API_BASE = "https://generativelanguage.googleapis.com/v1beta/models"
 _USAGE_LOG = REPO / "storage" / "logs" / "gemini_ask_usage.jsonl"
+
+
+def _guard_paid_gemini_disabled() -> None:
+    """Hard guard: the PAID Gemini API is disabled per boss directive (msg936,
+    2026-07-17). Primary headless Gemini = the free agy CLI (`agy -p`). This
+    fallback stays code-reachable only behind an explicit env override so a
+    genuine agy outage can still be manually unblocked. Placed at both the CLI
+    entry (main) and the API boundary (ask) so import-based callers are blocked
+    too; kept out of module scope so the module stays importable for tests.
+    """
+    if os.environ.get("VOLPRED_ALLOW_PAID_GEMINI") == "1":
+        return
+    print(
+        "paid Gemini API disabled per boss msg936; use agy. "
+        "Set VOLPRED_ALLOW_PAID_GEMINI=1 to override.",
+        file=sys.stderr,
+    )
+    raise SystemExit(2)
 
 
 def _warn_usage_notification(message: str, exc: Exception) -> None:
@@ -124,6 +147,7 @@ def load_api_key() -> str:
 
 
 def ask(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120) -> str:
+    _guard_paid_gemini_disabled()
     key = load_api_key()
     url = f"{API_BASE}/{model}:generateContent?key={key}"
     body = json.dumps({"contents": [{"parts": [{"text": prompt}]}]}).encode("utf-8")
@@ -147,6 +171,7 @@ def ask(prompt: str, model: str = DEFAULT_MODEL, timeout: int = 120) -> str:
 
 
 def main() -> int:
+    _guard_paid_gemini_disabled()
     args = sys.argv[1:]
     model = DEFAULT_MODEL
     if "--model" in args:

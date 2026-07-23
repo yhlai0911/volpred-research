@@ -373,6 +373,161 @@ def _classify_bash_family(cmd):
     return "other bash"
 
 
+# ---------------------------------------------------------------------------
+# Bash 指令大類（owner 2026-07-20：日報最大項 Bash 再拆成指令大類）
+#
+# 單一分類表：段首指令詞 -> 大類。要調整分類只改這個 dict。
+# 取詞規則（_bash_effective_command）：
+#   - 只看第一行（heredoc body 不參與判斷）
+#   - 以 && / || / ; / | 切段，取第一個有效段；純 cd 段視為導航 glue，改取下一段
+#   - 跳過 env 前綴（TZ=... 等）與 wrapper（time / nohup / timeout N / sudo / env ...）
+#   - python / python3 / uv run python / uv run <entrypoint> 歸 "uv run python"，
+#     另記 scripts/ 檔名（或 entrypoint 名）供 top-N 細分
+BASH_BUCKET_PYTHON = "uv run python"
+BASH_BUCKET_OTHER = "其他"
+BASH_COMMAND_BUCKETS = {
+    # git / GitHub
+    "git": "git", "gh": "git",
+    # 測試
+    "pytest": "pytest/測試",
+    # 查詢 / 文字處理
+    "jq": "jq/grep/查詢", "grep": "jq/grep/查詢", "rg": "jq/grep/查詢",
+    "awk": "jq/grep/查詢", "sed": "jq/grep/查詢", "sort": "jq/grep/查詢",
+    "uniq": "jq/grep/查詢", "cut": "jq/grep/查詢", "diff": "jq/grep/查詢",
+    "xargs": "jq/grep/查詢",
+    # Python 執行（uv run python / python3 直呼都歸此類；再細分 scripts/ 名）
+    "python": BASH_BUCKET_PYTHON, "python3": BASH_BUCKET_PYTHON,
+    # 網路
+    "curl": "curl/網路", "wget": "curl/網路", "ping": "curl/網路",
+    "dig": "curl/網路", "ssh": "curl/網路", "scp": "curl/網路",
+    "rsync": "curl/網路",
+    # 檔案系統
+    "ls": "ls/檔案系統", "find": "ls/檔案系統", "cat": "ls/檔案系統",
+    "head": "ls/檔案系統", "tail": "ls/檔案系統", "wc": "ls/檔案系統",
+    "stat": "ls/檔案系統", "du": "ls/檔案系統", "df": "ls/檔案系統",
+    "mkdir": "ls/檔案系統", "rm": "ls/檔案系統", "cp": "ls/檔案系統",
+    "mv": "ls/檔案系統", "touch": "ls/檔案系統", "chmod": "ls/檔案系統",
+    "ln": "ls/檔案系統", "tree": "ls/檔案系統", "cd": "ls/檔案系統",
+    "pwd": "ls/檔案系統", "open": "ls/檔案系統",
+    # shell glue / 輸出（真實資料中「其他」的最大宗，2026-07-20 dry-run）
+    "echo": "echo/shell glue", "printf": "echo/shell glue",
+    "date": "echo/shell glue", "sleep": "echo/shell glue",
+    "export": "echo/shell glue", "true": "echo/shell glue",
+    # 子 shell / .sh 腳本執行
+    "bash": "bash/.sh 腳本", "sh": "bash/.sh 腳本", "zsh": "bash/.sh 腳本",
+}
+_BASH_SEGMENT_SPLIT_RE = re.compile(r"\s*(?:&&|\|\||;|\|)\s*")
+_BASH_ENV_ASSIGN_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
+_BASH_WRAPPER_WORDS = {"time", "nohup", "command", "builtin", "exec", "sudo", "caffeinate", "env"}
+_UV_VALUE_FLAGS = {"--extra", "--with", "--python", "-p", "--project", "--directory", "--group", "--index"}
+
+
+def _bash_effective_command(cmd):
+    """取第一個有效段的 (指令詞, 該段 tokens)。空 command 回 ("", [])。"""
+    stripped = cmd.strip()
+    first_line = stripped.splitlines()[0].strip() if stripped else ""
+    if not first_line:
+        return "", []
+    fallback = ("", [])
+    for seg in _BASH_SEGMENT_SPLIT_RE.split(first_line):
+        tokens = seg.split()
+        while tokens:
+            head = tokens[0]
+            if _BASH_ENV_ASSIGN_RE.match(head) or head in _BASH_WRAPPER_WORDS:
+                tokens = tokens[1:]
+                continue
+            if head == "timeout":
+                # timeout DURATION cmd... — 丟掉 timeout 與 duration
+                tokens = tokens[1:]
+                if tokens and re.match(r"^\d", tokens[0]):
+                    tokens = tokens[1:]
+                continue
+            break
+        if not tokens:
+            continue
+        word = tokens[0].rsplit("/", 1)[-1]  # ./scripts/foo.sh -> foo.sh
+        if fallback == ("", []):
+            fallback = (word, tokens)
+        if word == "cd":
+            continue  # 導航 glue：優先用下一段的主指令
+        return word, tokens
+    return fallback
+
+
+def _python_script_detail(tokens):
+    """從 python 執行的 args 找 script 識別名（供 uv run python 大類的 top-N 細分）。"""
+    seen_module_flag = False
+    for tok in tokens:
+        if tok == "-c":
+            return "(inline -c)"
+        if tok == "-m":
+            seen_module_flag = True
+            continue
+        if tok.startswith("<<") or tok == "-":
+            return "(heredoc/stdin)"
+        if tok.startswith("-"):
+            continue
+        if seen_module_flag:
+            return f"(-m {tok})"
+        if tok.endswith(".py"):
+            idx = tok.find("scripts/")
+            return tok[idx:] if idx >= 0 else tok.rsplit("/", 1)[-1]
+        # 第一個非 flag arg 不是 .py（如直接跑 console entrypoint）
+        return tok.rsplit("/", 1)[-1]
+    return "(no script arg)"
+
+
+def _bash_command_bucket(cmd):
+    """一條 Bash command -> (大類, python 細分名或 None)。"""
+    word, tokens = _bash_effective_command(cmd)
+    if not word:
+        return BASH_BUCKET_OTHER, None
+    if word == "uv":
+        rest = tokens[1:]
+        if rest and rest[0] == "run":
+            i = 1
+            while i < len(rest):
+                tok = rest[i]
+                if tok in _UV_VALUE_FLAGS:
+                    i += 2
+                    continue
+                if tok.startswith("-"):
+                    i += 1
+                    continue
+                break
+            sub = rest[i] if i < len(rest) else ""
+            sub_base = sub.rsplit("/", 1)[-1]
+            if sub_base in ("python", "python3"):
+                return BASH_BUCKET_PYTHON, _python_script_detail(rest[i + 1:])
+            mapped = BASH_COMMAND_BUCKETS.get(sub_base)
+            if mapped and mapped != BASH_BUCKET_PYTHON:
+                return mapped, None
+            # uv run volpred / 其他 entrypoint -> 歸 python 類，以 entrypoint 名細分
+            return BASH_BUCKET_PYTHON, (sub_base or "(uv run)")
+        return BASH_BUCKET_PYTHON, "(uv non-run)"
+    bucket = BASH_COMMAND_BUCKETS.get(word)
+    if bucket == BASH_BUCKET_PYTHON:
+        return bucket, _python_script_detail(tokens[1:])
+    if bucket:
+        return bucket, None
+    return BASH_BUCKET_OTHER, None
+
+
+def _extract_bash_commands(content):
+    """從 assistant content blocks 取出所有 Bash tool_use 的 command 字串。"""
+    commands = []
+    if not isinstance(content, list):
+        return commands
+    for item in content:
+        if not isinstance(item, dict) or item.get("type") != "tool_use" or item.get("name") != "Bash":
+            continue
+        inp = item.get("input", {}) if isinstance(item.get("input"), dict) else {}
+        cmd = str(inp.get("command", "")).strip()
+        if cmd:
+            commands.append(cmd)
+    return commands
+
+
 def _warn_token_usage(message: str, path: Path, exc: Exception | None = None, *, line_no: int | None = None) -> None:
     loc = f"{path}"
     if line_no is not None:
@@ -559,10 +714,19 @@ def generate_drilldown(date_start, date_end):
         "top_first_lines": defaultdict(lambda: {"messages": 0, "billable_total": 0}),
     }
     sessions = {}
+    # 全 Bash 呼叫（不限 bash_other 類別）的指令大類拆解；以 msg_id 去重，
+    # 因為同一 turn 的每個 content-block record 都帶相同的 turn-total usage。
+    bash_turns = {}
 
     for record in iter_session_records(date_start, date_end):
         usage = _usage_breakdown(record["usage"])
         billable = _billable_total(usage)
+
+        bash_cmds = _extract_bash_commands(record["content"])
+        if bash_cmds:
+            mid = record.get("msg_id") or f"_noid::{record['session_id']}::{record['timestamp'].isoformat()}"
+            bash_turn = bash_turns.setdefault(mid, {"usage": record["usage"], "commands": []})
+            bash_turn["commands"].extend(bash_cmds)
         session_bucket = sessions.setdefault(
             record["session_id"],
             {
@@ -603,15 +767,7 @@ def generate_drilldown(date_start, date_end):
             text_only["top_signatures"][signature]["billable_total"] += billable
 
         elif record["category"] == "bash_other":
-            commands = []
-            if isinstance(record["content"], list):
-                for item in record["content"]:
-                    if not isinstance(item, dict) or item.get("type") != "tool_use" or item.get("name") != "Bash":
-                        continue
-                    inp = item.get("input", {}) if isinstance(item.get("input"), dict) else {}
-                    cmd = str(inp.get("command", "")).strip()
-                    if cmd:
-                        commands.append(cmd)
+            commands = bash_cmds
 
             if not commands:
                 continue
@@ -640,6 +796,66 @@ def generate_drilldown(date_start, date_end):
                     bash_other["top_first_lines"][first_line]["messages"] += 1
                     seen_first_lines.add(first_line)
                 bash_other["top_first_lines"][first_line]["billable_total"] += billable
+
+    # --- Bash 指令大類彙總（token 為該 turn input+output 全額；一 turn 多指令均分） ---
+    bucket_stats = defaultdict(lambda: {"commands": 0, "turns": 0, "io": 0.0, "billable": 0.0})
+    python_scripts = defaultdict(lambda: {"commands": 0, "io": 0.0})
+    bash_total_io = 0
+    bash_total_billable = 0
+    bash_total_commands = 0
+    for bash_turn in bash_turns.values():
+        u = _usage_breakdown(bash_turn["usage"])
+        io = u["input_tokens"] + u["output_tokens"]
+        turn_billable = _billable_total(u)
+        cmds = bash_turn["commands"]
+        n = len(cmds) or 1
+        bash_total_io += io
+        bash_total_billable += turn_billable
+        bash_total_commands += len(cmds)
+        seen_buckets = set()
+        for cmd in cmds:
+            bucket, script = _bash_command_bucket(cmd)
+            st = bucket_stats[bucket]
+            st["commands"] += 1
+            if bucket not in seen_buckets:
+                st["turns"] += 1
+                seen_buckets.add(bucket)
+            st["io"] += io / n
+            st["billable"] += turn_billable / n
+            if script:
+                ps = python_scripts[script]
+                ps["commands"] += 1
+                ps["io"] += io / n
+
+    def _bucket_row(name, st):
+        return {
+            "name": name,
+            "commands": st["commands"],
+            "turns": st["turns"],
+            "input_output_tokens": int(round(st["io"])),
+            "billable_total": int(round(st["billable"])),
+            "share_pct": round(100 * st["io"] / bash_total_io, 1) if bash_total_io else 0.0,
+        }
+
+    sorted_buckets = sorted(
+        bucket_stats.items(), key=lambda kv: (-kv[1]["io"], -kv[1]["commands"], kv[0])
+    )
+    bucket_rows = [_bucket_row(name, st) for name, st in sorted_buckets[:8]]
+    rest_buckets = sorted_buckets[8:]
+    if rest_buckets:
+        rest_agg = {
+            "commands": sum(st["commands"] for _, st in rest_buckets),
+            "turns": sum(st["turns"] for _, st in rest_buckets),
+            "io": sum(st["io"] for _, st in rest_buckets),
+            "billable": sum(st["billable"] for _, st in rest_buckets),
+        }
+        bucket_rows.append(_bucket_row("其餘合計", rest_agg))
+    python_scripts_top = [
+        {"name": name, "commands": st["commands"], "input_output_tokens": int(round(st["io"]))}
+        for name, st in sorted(
+            python_scripts.items(), key=lambda kv: (-kv[1]["io"], -kv[1]["commands"], kv[0])
+        )[:6]
+    ]
 
     def _sorted_items(mapping, limit=10):
         return [
@@ -688,6 +904,14 @@ def generate_drilldown(date_start, date_end):
             "family_breakdown": _sorted_items(bash_other["family_breakdown"], limit=10),
             "prefix_breakdown": _sorted_items(bash_other["prefix_breakdown"], limit=12),
             "top_first_lines": _sorted_items(bash_other["top_first_lines"], limit=12),
+        },
+        "bash_commands": {
+            "turns": len(bash_turns),
+            "commands": bash_total_commands,
+            "input_output_tokens": bash_total_io,
+            "billable_total": bash_total_billable,
+            "buckets": bucket_rows,
+            "python_scripts_top": python_scripts_top,
         },
         "cache_diagnostics": {
             "sessions_in_window": len(sessions),
@@ -990,6 +1214,32 @@ def format_report_text(report):
         lines.append("")
 
     drilldown = report.get("drilldown") or {}
+
+    bash_cmd = drilldown.get("bash_commands") or {}
+    if bash_cmd.get("buckets"):
+        lines.append("## Bash 指令大類（全部 Bash 呼叫）")
+        lines.append(
+            f"- Turns: {bash_cmd.get('turns', 0):,} | Commands: {bash_cmd.get('commands', 0):,}"
+            f" | Input+Output: {format_number(bash_cmd.get('input_output_tokens', 0))}"
+            f" | Billable: {format_number(bash_cmd.get('billable_total', 0))}"
+        )
+        lines.append("| 大類 | 次數 | Input+Output | 佔 Bash 比例 |")
+        lines.append("|------|------|--------------|--------------|")
+        for row in bash_cmd["buckets"]:
+            lines.append(
+                f"| {row['name']} | {row['commands']:,} | "
+                f"{format_number(row['input_output_tokens'])} | {row['share_pct']:.1f}% |"
+            )
+        if bash_cmd.get("python_scripts_top"):
+            lines.append("- uv run python 細分（top scripts）:")
+            for item in bash_cmd["python_scripts_top"]:
+                lines.append(
+                    f"  - {item['name']}: {item['commands']:,} 次 / "
+                    f"{format_number(item['input_output_tokens'])} tokens"
+                )
+        lines.append("- 註：token 為含該指令之 turn 的 input+output 全額；一 turn 多指令時均分。")
+        lines.append("")
+
     text_only = drilldown.get("text_only") or {}
     if text_only:
         lines.append("## Drilldown: 純文字回覆")

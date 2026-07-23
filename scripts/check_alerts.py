@@ -153,16 +153,49 @@ def _auto_trigger_release_pool_if_due() -> dict:
             timeout=180,
         )
         end = datetime.now(timezone.utc)
-        ok = result.returncode == 0
-        if ok:
+        ran = result.returncode == 0
+        if ran:
             _record_release_pool_fallback_fire(
                 start_iso=start.isoformat(timespec="seconds"),
                 end_iso=end.isoformat(timespec="seconds"),
                 returncode=result.returncode,
             )
+        # 2026-07-19 (boss 20:14 「為什麼文章沒有照排程釋出」): returncode 0 only
+        # proves the CLI ran. For 9 hours this function reported
+        # `release-pool-auto: ok ... reason=done` while every release run released
+        # zero articles — `done` was a hard-coded placeholder in the print below,
+        # never an outcome. Parse the CLI's RELEASE_OUTCOME marker so a due run that
+        # released nothing is reported as `starved`, not `ok`.
+        released_count = None
+        cli_reason = ""
+        for line in (result.stdout or "").splitlines():
+            if line.startswith("RELEASE_OUTCOME"):
+                for token in line.split()[1:]:
+                    key, _, value = token.partition("=")
+                    if key == "released":
+                        try:
+                            released_count = int(value)
+                        except ValueError:
+                            released_count = None
+                    elif key == "reason":
+                        cli_reason = value
+        if released_count is None:
+            outcome = "unknown_outcome"
+            ok = ran
+        elif released_count > 0:
+            outcome = f"released={released_count}"
+            ok = ran
+        else:
+            # Due, machinery healthy, zero articles out: this is the failure the
+            # boss saw. It must never render as ok.
+            outcome = f"starved released=0{(':' + cli_reason) if cli_reason else ''}"
+            ok = False
         return {
             "triggered": True,
             "ok": ok,
+            "ran": ran,
+            "released_count": released_count,
+            "outcome": outcome,
             "returncode": result.returncode,
             "age_min": round(age_min),
             "start_at": start.isoformat(),
@@ -199,6 +232,51 @@ def _auto_remediate_publish_drought() -> dict:
         )
         # The ladder prints a single clean JSON line on stdout (--json). Parse
         # the last JSON object; ignore any stray warn lines on stderr.
+        summary: dict = {}
+        for line in reversed((proc.stdout or "").splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                try:
+                    summary = json.loads(line)
+                    break
+                except json.JSONDecodeError:
+                    continue  # silent-ok: scanning stdout in reverse for last valid JSON line; non-JSON candidates expected
+        summary["returncode"] = proc.returncode
+        summary["ran_at"] = start.isoformat()
+        if not summary.get("attempted"):
+            return summary or {"attempted": False, "reason": "no_json_output",
+                               "stderr_tail": (proc.stderr or "")[-200:]}
+        return summary
+    except Exception as exc:  # noqa: BLE001
+        return {"attempted": False, "error": str(exc)}
+
+
+def _auto_remediate_lazypack_stuck() -> dict:
+    """Hourly actuator behind SELF_REMEDIATING['lazypack_render_stuck'].
+
+    assign_5195e5ae D4a: the remediation registry claimed "render retry is
+    wired into the alert path" while nothing implemented it — stranded render
+    failures fell into a black hole and the alert body described a fiction.
+    Delegates to the single owner of the lazypack job lifecycle
+    (`scripts/lazypack_async_render.py requeue-stranded`): idempotent per
+    failed job id, capped attempts per article, safe to re-run (every renderer
+    layer recomputes the panel set from the hash-pinned plan). Runs BEFORE the
+    alert email so the alert truthfully reports what was already re-queued.
+    Bounded subprocess, non-fatal: failures are captured, never raised.
+    """
+    from datetime import datetime, timezone
+    import subprocess
+
+    script = PROJECT_ROOT / "scripts" / "lazypack_async_render.py"
+    try:
+        start = datetime.now(timezone.utc)
+        proc = subprocess.run(
+            ["/opt/homebrew/bin/uv", "run", "python", str(script), "requeue-stranded"],
+            cwd=str(PROJECT_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
         summary: dict = {}
         for line in reversed((proc.stdout or "").splitlines()):
             line = line.strip()
@@ -278,6 +356,70 @@ def _auto_remediate_release_deadlock() -> dict:
         # cannot name a safe one — say so rather than guessing, and let the writer
         # pick any cluster outside the blocked set.
         required = [c for c in known if c not in blocked]
+
+        # 2026-07-19: a deadlock has two very different shapes and they need
+        # opposite medicine. Cluster-pressure deadlock => the pool needs NEW drafts
+        # in a passable cluster. Content-gate deadlock (anti-ai / missing 懶人包圖組 /
+        # audit) => the pool already holds near-ready articles and writing more is
+        # exactly the wrong move; those drafts must be REPAIRED. Before the preview
+        # ran the content gates it could not see this case at all, so every
+        # content-gate deadlock was invisible (eligible looked > 0 → not_deadlocked).
+        gate_blocked = preview.get("content_gate_blocked") or []
+        if gate_blocked:
+            def _blocker_kind(issues: list) -> str:
+                text = " ".join(str(i) for i in issues)
+                if "懶人包圖組" in text:
+                    return "lazypack_missing"
+                if "anti_ai_style" in text:
+                    return "anti_ai_style"
+                return "audit"
+
+            lines = []
+            for entry in gate_blocked:
+                lines.append(
+                    f"- `{entry.get('id')}` ({entry.get('audience')}, 已被擋 "
+                    f"{entry.get('skip_count')} 次) [{_blocker_kind(entry.get('issues') or [])}] "
+                    f"{entry.get('title')}\n    {'; '.join(str(i) for i in (entry.get('issues') or []))}"
+                )
+            task_id = f"release_deadlock_repair_{now.strftime('%Y%m%d_%H')}"
+            task = {
+                "id": task_id,
+                "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+                "description": (
+                    f"release_pool 死鎖：草稿池有 {draft} 篇、eligible=0（due_now=true），"
+                    f"其中 {len(gate_blocked)} 篇是被**內容品質閘門**擋住，不是缺稿。\n\n"
+                    + "\n".join(lines)
+                    + "\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n"
+                    "- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。"
+                    "備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> "
+                    "--experiment <K> --plan <plan.json>`。\n"
+                    "- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，"
+                    "**不得**放寬閘門。\n"
+                    "改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。"
+                ),
+                "task_type": "platform_ops",
+                "priority": 1,
+                "status": "pending",
+                "source": "auto_remediation",
+                "created_at": now.isoformat(),
+                "blocked_article_ids": [e.get("id") for e in gate_blocked],
+                "trigger": "release_pool_content_gate_deadlock",
+            }
+            created = _append_next_task_locked(task, PROJECT_ROOT / "storage" / "next_tasks.json")
+            receipt.update(
+                {
+                    "attempted": True,
+                    "kind": "content_gate_deadlock",
+                    "draft": draft,
+                    "eligible": eligible,
+                    "content_gate_blocked": gate_blocked,
+                    "blocked_clusters": blocked,
+                    "required_clusters": required,
+                    ("task_id" if created else "existing_task_id"): task_id,
+                }
+            )
+            _write_json_atomic(receipt_path, receipt)
+            return receipt
 
         task_id = f"release_deadlock_refill_{now.strftime('%Y%m%d_%H')}"
         task = {
@@ -381,6 +523,7 @@ def _auto_reap_orphan_deliverables() -> dict:
 # ---------------------------------------------------------------------------
 CI_WATCH_STATE = PROJECT_ROOT / "storage" / "ops" / "ci_watch_state.json"
 CI_NEXT_TASKS = PROJECT_ROOT / "storage" / "next_tasks.json"
+CI_INCIDENT_STORE = PROJECT_ROOT / "storage" / "ops" / "incidents.json"
 CI_WORKFLOW = "Test Suite"
 CI_RUN_HISTORY_LIMIT = 20
 CI_ATTEMPT_FETCH_LIMIT = 40
@@ -574,29 +717,90 @@ def _ci_latest_completed_run() -> dict | None:
 
 
 def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
-    """flock-append one task to the pending queue (same discipline as refill scripts)."""
-    import fcntl
+    """Append one caller-built task via the single ingress gateway.
 
-    from volpred.ops.next_tasks import normalize_task_priority, write_tasks_to_handle
+    2026-07-21 dispatch-lanes 收編：這裡原本是一個私有 flock writer（自己 open +
+    dedup + write_tasks_to_handle），繞過 ``append_task_record`` —— 本檔的機器產
+    P1（CI 紅燈修復、release 死鎖補救）因此躲掉 R2 admission clamp。改為委派
+    gateway（結構允許：本函式自身就是完整的 read-modify-write，沒有外部持鎖），
+    caller 契約不變（caller-built record；重複 id 回 False），flock / guard /
+    dedup / clamp / pending-cap 觀測全由 gateway 單點供給。
 
-    guard_canonical_write(next_tasks_path)
-    normalize_task_priority(task)
-    next_tasks_path.parent.mkdir(parents=True, exist_ok=True)
-    if not next_tasks_path.exists():
-        next_tasks_path.write_text("[]\n", encoding="utf-8")
-    with next_tasks_path.open("r+", encoding="utf-8") as fh:
-        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
-        try:
-            data = json.load(fh)
-            if not isinstance(data, list):
-                raise ValueError("next_tasks.json is not a list")
-            if any(isinstance(t, dict) and t.get("id") == task["id"] for t in data):
-                return False
-            data.append(task)
-            write_tasks_to_handle(fh, data)
-            return True
-        finally:
-            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    CI 紅燈修復的時效**不靠 P1 數字**，clamp 到 P2 不削弱它：
+    (a) record 上的 ``dispatch_preempt`` 讓它領跑 scheduled menu 並穿透
+        starvation lockout（continue_task_dispatch.py:1176）；
+    (b) CI watcher 每輪 still-red poll 都重新 request_fire 直到任務離開 pending
+        （``_ci_dispatch_pending_task``）。
+    release 死鎖補救同理：死鎖 detector 每小時重評，且文章類任務在真乾涸時由
+    dispatch 端 ``_promote_starved_article_tasks`` 現場量測後晉升。
+    """
+    from volpred.ops.next_tasks import append_task_record
+
+    _, created = append_task_record(task, path=next_tasks_path, if_exists="skip")
+    return created
+
+
+def _ci_incident_store_sync(
+    event: str,
+    incident: dict,
+    *,
+    run_key: str | None = None,
+    task_id: str | None = None,
+) -> None:
+    """Mirror CI incidents into the shared incident store (identity + counters).
+
+    CI watch is the ONE pre-existing path that already had a real incident
+    object (plan §2.2 — "做對的那條路已經在 repo 裡了"), so its repair/verify
+    flow stays untouched (task_mode=external).  The store contributes the
+    shared identity, never-resetting counters, and the G6 cap visibility.
+
+    Fingerprint deviation from plan §3.3 (documented design ruling): the plan
+    suggests ``kind + root_cause 分類``, but root cause is discovered
+    asynchronously and legitimately CHANGES across runs within one incident
+    (see the root_cause-rebinding comment in ``_reduce_ci_run``) — an identity
+    that mutates mid-incident is no identity.  CI's run-anchored
+    ``incident_id`` is stable from open to close, so it is the fingerprint
+    part; failing runs are the instances.
+
+    2026-07-22 restored: merge 883903a96 took the agent branch's rewritten
+    ``_append_next_task_locked`` above and deleted this immediately-adjacent
+    definition with it, while all three call sites survived.  check_alerts.py
+    then died with ``NameError`` at :2756 on every hourly run from
+    2026-07-21 17:00 CST — 16 consecutive failures — taking the whole alerting
+    + auto-remediation job down with it (the orphan reaper at :2802 is past the
+    crash point and never ran).  Restored verbatim from 3f35e4511; HEAD's newer
+    gateway ``_append_next_task_locked`` is deliberately kept.  K1032 class.
+    """
+    try:
+        from volpred.ops import incident as incident_store
+
+        store = CI_INCIDENT_STORE
+        ci_id = str(incident.get("incident_id") or "")
+        if not ci_id:
+            return
+        parts = (ci_id,)
+        if event == "breach":
+            incident_store.route_breach(
+                store,
+                kind="ci_red",
+                fingerprint_parts=parts,
+                instance_key=run_key,
+                details=str(incident.get("root_cause") or "")[:200],
+            )
+        elif event == "bind" and task_id:
+            incident_store.bind_task(
+                store, incident_store.incident_id_for("ci_red", parts), task_id
+            )
+        elif event == "resolved":
+            incident_store.observe_clean(
+                store,
+                kind="ci_red",
+                fingerprint_parts=parts,
+                criterion="ci_verified_green",
+                by=ci_id,
+            )
+    except Exception as exc:  # noqa: BLE001 — the CI flow must never die on store bookkeeping
+        warn("ci_watch", "incident store sync failed", event=event, err=str(exc))
 
 
 def _ci_run_key(run: dict) -> str:
@@ -647,10 +851,12 @@ def _build_ci_repair_task(
             "（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n"
             "3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，"
             "不等下一班（老闆指示：強模型直接嘗試）\n"
-            "4. commit + push；result 必須帶機器可讀的 `root_cause=<一行>; "
-            "repair_commit=<sha>`\n"
+            "4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; "
+            "repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）"
+            "在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n"
             "5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n"
-            "成功標準：修復已 push；最終 GitHub success 由 CI watcher 獨立驗證。"
+            "成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，"
+            "最終 GitHub success 由 CI watcher 獨立驗證。"
         ),
     }
 
@@ -1219,6 +1425,55 @@ def _ci_commit_covered(repair_commit: str, green_head: str) -> bool:
     return proc.returncode == 0
 
 
+def _parse_iso(value) -> datetime | None:
+    """Aware UTC datetime, or None for anything unparseable/naive."""
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:  # silent-ok: fail-open — unparseable ts means "cannot prove stale", caller keeps task + escalation
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _ci_failure_predates_repair(run: dict, records: dict[str, dict]) -> dict | None:
+    """Was this red run queued against a tree that predates the repair?
+
+    A repair task that reached ``succeeded`` at time T means a fix was declared
+    done at T. A run *created* before T never contained that fix — it would have
+    failed no matter how good the repair was. Opening a second repair task on it
+    sends the next fixer after a bug that is already gone.
+
+    2026-07-20: incident ``ci-red-29703582195``'s repair completed 22:38:29Z, but
+    run 29705358452 had been queued at 22:01:20Z, three commits behind. The
+    watcher saw "repair succeeded yet still red" and opened ``ci-red-29705358452``;
+    the fixer that claimed it found all four failing tests already green on HEAD.
+
+    Timestamps, not commit ancestry, because the repair commit is only known when
+    the fixer emits the structured ``repair_commit=`` line — and the fire that
+    missed it is exactly the one that produced this incident.
+
+    Fail-open: no parseable ``completed_at``/``createdAt`` means no suppression.
+    Suppression also only defers by one CI cycle — if the repair really did not
+    work, the next run is created after T, is not stale, and opens its own task.
+    """
+    run_created = _parse_iso(run.get("createdAt"))
+    if run_created is None:
+        return None
+    for task_id, record in records.items():
+        if str(record.get("status") or "").lower() not in {"succeeded", "succeeded_null_result"}:
+            continue
+        completed = _parse_iso(record.get("completed_at"))
+        if completed is None or run_created >= completed:
+            continue
+        return {
+            "repair_task_id": str(task_id),
+            "repair_completed_at": str(record.get("completed_at")),
+            "run_created_at": str(run.get("createdAt")),
+        }
+    return None
+
+
 def _request_ci_repair_dispatch(task_id: str) -> dict:
     """Use the existing supervisor fire request; never start a second dispatcher."""
     try:
@@ -1595,6 +1850,8 @@ def _reduce_ci_run(
             checkpoint()
 
         is_new_failure = _ci_record_failure(incident, run)
+        if is_new_failure:
+            _ci_incident_store_sync("breach", incident, run_key=run_key)
         failure_keys = incident.setdefault("failure_run_keys", [])
         incident.pop("recovery_candidate", None)
         incident.pop("unverified_green_candidate", None)
@@ -1610,6 +1867,17 @@ def _reduce_ci_run(
         has_active_task = any(value in CI_ACTIVE_TASK_STATUSES for value in statuses.values())
         failed_tasks = _ci_failed_task_ids(records)
         should_ensure = not task_ids or (is_new_failure and not has_active_task and not failed_tasks)
+        if should_ensure and task_ids:
+            # Never suppress an incident's *first* task — only retries, where a
+            # completed repair gives us something to be stale relative to.
+            stale = _ci_failure_predates_repair(run, records)
+            if stale:
+                should_ensure = False
+                summary["stale_failure"] = stale
+                incident["last_stale_failure"] = {**stale, "run_key": run_key, "at": now_iso}
+                stale_keys = incident.setdefault("stale_failure_run_keys", [])
+                if run_key not in stale_keys:
+                    stale_keys.append(run_key)
         hard_failure: str | None = None
         if should_ensure:
             task = _build_ci_repair_task(
@@ -1624,6 +1892,8 @@ def _reduce_ci_run(
                     task_ids.append(task["id"])
                 state["last_task_id"] = task["id"]
                 summary["task_id"] = task["id"]
+                if summary["task_added"]:
+                    _ci_incident_store_sync("bind", incident, task_id=task["id"])
             except Exception as exc:  # noqa: BLE001
                 warn("ci_watch", "P1 repair task append failed", err=str(exc), task_id=task["id"])
                 hard_failure = f"append_failed: {type(exc).__name__}: {exc}"
@@ -1650,8 +1920,15 @@ def _reduce_ci_run(
         failed_tasks = _ci_failed_task_ids(records)
         if failed_tasks:
             hard_failure = f"repair_task_terminal_failure: {', '.join(failed_tasks)}"
-        elif len(failure_keys) > CI_MAX_SILENT_FAILURE_CYCLES:
-            hard_failure = f"ci_failed_more_than_two_cycles: {len(failure_keys)}"
+        else:
+            # Runs queued before the repair landed are stale evidence, not proof the
+            # fixer keeps failing. Counting them escalates to the boss for a bug that
+            # was already fixed -- the same defect as the duplicate-task path above,
+            # just surfacing in the escalation counter instead of the task pool.
+            stale_keys = set(incident.get("stale_failure_run_keys") or [])
+            live_cycles = len([key for key in failure_keys if key not in stale_keys])
+            if live_cycles > CI_MAX_SILENT_FAILURE_CYCLES:
+                hard_failure = f"ci_failed_more_than_two_cycles: {live_cycles}"
         if hard_failure:
             _ci_set_escalation(incident, hard_failure)
 
@@ -2105,6 +2382,7 @@ def _notify_ci_incident(
     incident["phase"] = "recovered"
     incident["recovered_at"] = now_iso
     incident["verified_green_run"] = candidate
+    _ci_incident_store_sync("resolved", incident)
     state["last_closed_incident"] = copy.deepcopy(incident)
     state.pop("active_incident", None)
     summary["reason"] = "recovery_notified"
@@ -2340,8 +2618,10 @@ def _auto_remediate_ci_red() -> dict:
     return _handle_ci_runs(runs, now_iso=datetime.now(timezone.utc).isoformat())
 
 
-# The monitor cannot meaningfully monitor itself; `host_crontab_managed: false`
-# means the entry documents something this host does not schedule.
+# The monitor cannot meaningfully monitor itself. (Note: `host_crontab_managed:
+# false` no longer means "skip" — WS-D1 2026-07-20: launchd-direct jobs are
+# judged from execution-log exit-0 banners via volpred.ops.schedules.job_liveness,
+# because their cron_last_run markers can freeze while the job runs healthy.)
 STALENESS_EXCLUDED_JOB_IDS = frozenset({"check_alerts"})
 STALENESS_TOLERANCE = 2.0  # a job is stale past 2× its longest legitimate gap
 
@@ -2371,8 +2651,9 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
     """One record per configured job — nothing is silently skipped.
 
     Every entry in `system_crontab.items` gets a verdict:
-      excluded / unmanaged   — deliberately not checked, with a reason
-      never_ran              — configured but has NEVER recorded a run
+      excluded               — deliberately not checked, with a reason
+      unscheduled            — no cron expression (KeepAlive daemon etc.)
+      never_ran              — configured but has NO run evidence anywhere
       bad_cron               — cron expression croniter cannot parse
       unparsable_marker      — marker exists but is not a timestamp
       stale / ok             — compared against 2× the cron's longest legit gap
@@ -2380,18 +2661,29 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
     Returning `never_ran` and `bad_cron` as verdicts rather than `continue`
     statements is the point: the old loop dropped both on the floor, which is how
     `indicator_arena_daily` (never once recorded) stayed invisible.
+
+    Evidence source (WS-D1, 2026-07-20): `volpred.ops.schedules.job_liveness` is
+    the single liveness merge. `cron_last_run.json` only covers piggyback fires
+    and cron_lib self-reports; launchd-direct jobs (`host_crontab_managed:
+    false`) are judged from their execution-log exit-0 banner instead. The old
+    blanket `unmanaged` skip made a dead launchd job invisible here while its
+    frozen marker (daily_update @2026-04-25) misled every other reader.
     """
+    from volpred.ops.schedules import job_liveness  # noqa: WPS433 (deferred; SRC_DIR wired above)
+
     records: list[dict] = []
     for item in items:
         job_id = item.get("id")
         cron = item.get("cron")
         if not job_id:
             continue
-        if item.get("host_crontab_managed") is False:
-            records.append({"job_id": job_id, "status": "unmanaged", "detail": "host_crontab_managed=false"})
-            continue
         if job_id in STALENESS_EXCLUDED_JOB_IDS:
             records.append({"job_id": job_id, "status": "excluded", "detail": "the monitor itself"})
+            continue
+        if not cron:
+            records.append({"job_id": job_id, "status": "unscheduled",
+                            "detail": "no cron expression (daemon/KeepAlive job — "
+                                      "its own alert conditions own liveness)"})
             continue
 
         try:
@@ -2406,28 +2698,31 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
             records.append({"job_id": job_id, "status": "bad_cron", "detail": f"cron={cron!r} ({exc})"})
             continue
 
-        last_iso = state.get(job_id)
-        if not last_iso:
+        live = job_liveness(item, marker_state=state, repo_root=PROJECT_ROOT)
+        if live.last_success is None:
+            if live.marker_raw:
+                _warn_check_alerts(
+                    f"cron_last_run timestamp parse failed for job_id={job_id}",
+                    state_path,
+                    ValueError(f"unparsable marker: {live.marker_raw!r}"),
+                )
+                records.append({"job_id": job_id, "status": "unparsable_marker",
+                                "detail": repr(live.marker_raw)})
+                continue
+            detail = f"no cron_last_run entry (cron={cron})"
+            if not live.marker_eligible:
+                detail += " and no exit-0 banner in execution log"
             records.append({"job_id": job_id, "status": "never_ran",
-                            "detail": f"no cron_last_run entry (cron={cron})",
-                            "period_min": period_min})
-            continue
-        try:
-            last_dt = datetime.fromisoformat(str(last_iso).replace("Z", "+00:00"))
-        except Exception as exc:  # noqa: BLE001
-            _warn_check_alerts(
-                f"cron_last_run timestamp parse failed for job_id={job_id}",
-                state_path, exc,
-            )
-            records.append({"job_id": job_id, "status": "unparsable_marker", "detail": repr(last_iso)})
+                            "detail": detail, "period_min": period_min})
             continue
 
-        age_min = (now - last_dt).total_seconds() / 60
+        age_min = (now - live.last_success).total_seconds() / 60
         records.append({
             "job_id": job_id,
             "status": "stale" if age_min > STALENESS_TOLERANCE * period_min else "ok",
             "age_min": age_min,
             "period_min": period_min,
+            "evidence": live.success_source,
         })
     return records
 
@@ -2560,10 +2855,35 @@ def main() -> int:
     # email (if it still fires) truthfully reports what the system already did.
     drought_remediation = _auto_remediate_publish_drought()
 
+    # assign_5195e5ae D4a: stranded lazypack render failures get their promised
+    # hourly re-enqueue BEFORE the alert email, so lazypack_render_stuck's
+    # self-remediation claim is mechanically true (idempotent per failed job,
+    # attempt-capped per article; escalation past the cap is owned by the P1
+    # repair task compute_queue files on terminal failure).
+    lazypack_requeue = _auto_remediate_lazypack_stuck()
+
     # 2026-07-13 (boss msg 624): adopt finished-but-unregistered deliverables into
     # the pool before the alert fires, so a completed article is delivered rather
     # than surfaced as a discard/keep decision for the boss.
     orphan_reap = _auto_reap_orphan_deliverables()
+
+    # G6 (incident-lifecycle P2): flush today's 24h-cap refusals into ONE daily
+    # summary mail. Owner = remediation_throttle.flush_denial_summary; the alert
+    # transport's 24h title dedup collapses the hourly calls to one delivery.
+    try:
+        from volpred.ops import remediation_throttle as _throttle
+
+        throttle_summary = _throttle.flush_denial_summary(
+            ledger_path=_throttle.ledger_path_for(CI_NEXT_TASKS)
+        )
+    except Exception as exc:  # noqa: BLE001 — summary flush must not break the alert pass
+        warn("remediation_throttle", "flush failed in check_alerts", err=str(exc))
+        throttle_summary = {"sent": False, "reason": f"flush_error: {exc}"}
+    if throttle_summary.get("denials"):
+        print(
+            f"  remediation-throttle: denials_today={throttle_summary.get('denials')} "
+            f"summary_sent={throttle_summary.get('sent')}"
+        )
 
     report = check_alert_conditions(storage_dir="storage")
     print("=== ops check-alerts ===")
@@ -2579,11 +2899,15 @@ def main() -> int:
     _check_piggy_back_drift(due_summary)
     if release_trigger.get("triggered"):
         status = "ok" if release_trigger.get("ok") else "fail"
-        print(
-            f"  release-pool-auto: {status} "
-            f"age={release_trigger.get('age_min')}min "
-            f"reason={release_trigger.get('reason') or release_trigger.get('error') or 'done'}"
+        # `reason` was a placeholder that fell back to the literal 'done' — it said
+        # 'done' on every zero-output run. Report the parsed outcome (2026-07-19).
+        _reason = (
+            release_trigger.get("outcome")
+            or release_trigger.get("reason")
+            or release_trigger.get("error")
+            or "unknown_outcome"
         )
+        print(f"  release-pool-auto: {status} age={release_trigger.get('age_min')}min reason={_reason}")
     else:
         # 2026-04-19: Log skip state for debugging (piggy-back health check).
         print(
@@ -2593,11 +2917,20 @@ def main() -> int:
     # 2026-07-13: release gate-deadlock auto-remediation (boss msg 660)
     if deadlock_remediation.get("attempted"):
         _task = deadlock_remediation.get("task_id") or deadlock_remediation.get("existing_task_id")
+        _kind = deadlock_remediation.get("kind") or "cluster_pressure"
+        _gate_blocked = deadlock_remediation.get("content_gate_blocked") or []
         print(
-            f"  release-deadlock-remediation: draft={deadlock_remediation.get('draft')} "
-            f"eligible=0 blocked={deadlock_remediation.get('blocked_clusters')} "
+            f"  release-deadlock-remediation: kind={_kind} "
+            f"draft={deadlock_remediation.get('draft')} eligible=0 "
+            f"content_gate_blocked={len(_gate_blocked)} "
+            f"blocked={deadlock_remediation.get('blocked_clusters')} "
             f"required={deadlock_remediation.get('required_clusters')} task={_task}"
         )
+        for _e in _gate_blocked:
+            print(
+                f"    - {_e.get('id')} skips={_e.get('skip_count')} "
+                f"{'; '.join(str(i) for i in (_e.get('issues') or []))[:160]}"
+            )
     elif deadlock_remediation.get("error"):
         print(f"  release-deadlock-remediation: ERROR {deadlock_remediation['error']}")
 
@@ -2617,6 +2950,18 @@ def main() -> int:
         print(
             f"  publish-drought-remediation: skip "
             f"reason={drought_remediation.get('reason', drought_remediation.get('error', 'unknown'))}"
+        )
+    # assign_5195e5ae D4a: stranded lazypack render re-enqueue receipt
+    if lazypack_requeue.get("attempted"):
+        print(
+            f"  lazypack-requeue: requeued={len(lazypack_requeue.get('requeued') or [])} "
+            f"skipped={len(lazypack_requeue.get('skipped') or [])} "
+            f"ids={[r.get('new_job_id') for r in (lazypack_requeue.get('requeued') or [])]}"
+        )
+    else:
+        print(
+            f"  lazypack-requeue: skip "
+            f"reason={lazypack_requeue.get('reason', lazypack_requeue.get('error', 'unknown'))}"
         )
     # 2026-07-13: orphan deliverable adoption (boss msg 624 — 產出即交付)
     adopted = [a for a in (orphan_reap.get("adopted") or []) if a.get("adopted")]

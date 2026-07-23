@@ -109,3 +109,26 @@ def publication_block_reason(entry: dict) -> str | None:
 
 def is_publication_blocked(entry: dict) -> bool:
     return publication_block_reason(entry) is not None
+
+
+def article_ineligibility_reason(entry: dict) -> str | None:
+    """Return a hard reason why a knowledge entry cannot seed an article.
+
+    This is deliberately stricter than :func:`publication_block_reason`.
+    Auto-discovery has no human in the loop to repair missing provenance, so a
+    failed review, an empty evidence field, or an unresolved human-review flag
+    must stop the task before it enters the reader-facing queue.
+    """
+    verdict = str(entry.get("verdict") or "").strip().upper()
+    if verdict.startswith("FAIL_"):
+        return f"knowledge verdict={verdict}"
+    if not entry.get("evidence"):
+        return "knowledge evidence is empty"
+    if entry.get("needs_human") is True:
+        return "knowledge needs_human=true"
+    return publication_block_reason(entry)
+
+
+def is_article_eligible(entry: dict) -> bool:
+    """Whether an entry may automatically seed a reader-facing article."""
+    return article_ineligibility_reason(entry) is None

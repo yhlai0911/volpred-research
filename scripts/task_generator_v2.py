@@ -38,6 +38,7 @@ FEED_JSON = ROOT / "storage" / "reports" / "feed.json"
 EXPERIMENTS_DIR = ROOT / "experiments"
 PAPER_DIR = ROOT / "paper"
 RUNTIME_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
+KNOWLEDGE_PATH = ROOT / "storage" / "memory" / "knowledge.json"
 GENERATOR_SOURCE_TAG = "task_generator_v2"
 DEFAULT_DISPATCH_LANES = {
     "experiment": "agent",
@@ -47,8 +48,9 @@ DEFAULT_DISPATCH_LANES = {
     "event_article": "main_thread",
 }
 
-from volpred.canonical_write import guard_canonical_write  # noqa: E402
-from volpred.ops.next_tasks import normalize_task_priorities, normalize_task_priority  # noqa: E402
+from volpred.ops.article_brief import audience_brief_contract  # noqa: E402
+from volpred.ops.next_tasks import normalize_task_priority  # noqa: E402
+from volpred.publication_gate import article_ineligibility_reason  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -696,6 +698,27 @@ def generate_daily_article_tasks(
     ex_ids = existing_ids(existing)
     results: list[dict] = []
 
+    try:
+        knowledge = json.loads(KNOWLEDGE_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        _warn_task_generator("knowledge eligibility index read failed", KNOWLEDGE_PATH, exc)
+        return []
+    if not isinstance(knowledge, list):
+        _warn_task_generator(
+            "knowledge eligibility index is not a list",
+            KNOWLEDGE_PATH,
+            TypeError(type(knowledge).__name__),
+        )
+        return []
+    latest_knowledge: dict[str, dict] = {}
+    for entry in knowledge:
+        if not isinstance(entry, dict):
+            continue
+        raw_kid = entry.get("experiment_id") or entry.get("k_id")
+        match = re.match(r"^K(\d+)", str(raw_kid or ""), re.IGNORECASE)
+        if match:
+            latest_knowledge[f"K{match.group(1)}"] = entry
+
     # Glob all k*_results.json
     results_paths = sorted(EXPERIMENTS_DIR.glob("k*/k*_results.json"))
 
@@ -709,6 +732,10 @@ def generate_daily_article_tasks(
             continue
         # Only generate if verdict is non-null
         if verdict is None:
+            continue
+        reason = article_ineligibility_reason(latest_knowledge.get(kid, {}))
+        if reason:
+            print(f"[task_generator_v2] skip {kid}: {reason}")
             continue
 
         # Check: already in feed?
@@ -730,7 +757,8 @@ def generate_daily_article_tasks(
             f"{kid} has a non-null verdict in experiments/{rpath.parent.name}/ "
             f"but no published feed article and no existing task. "
             f"Verdict: {verdict_str}. "
-            f"Write a general-audience article summarising key findings."
+            f"Write a general-audience article summarising key findings. "
+            f"{audience_brief_contract('general')}"
         )
 
         task = make_task(
@@ -775,7 +803,10 @@ def run_source(
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Multi-source task generator v2 — appends tasks to storage/next_tasks.json"
+        description=(
+            "Multi-source task generator v2 — computes/report candidate tasks only "
+            "(WS-A1b: queue write path removed; enqueue via refill_task_pool.py or volpred ops assign)"
+        )
     )
     parser.add_argument(
         "--source",
@@ -796,12 +827,6 @@ def main() -> None:
         help="Print generated tasks without writing to disk",
     )
     parser.add_argument(
-        "--commit",
-        action="store_true",
-        default=False,
-        help="Write generated tasks to storage/next_tasks.json (incompatible with --dry-run)",
-    )
-    parser.add_argument(
         "--json-output",
         type=str,
         default=None,
@@ -809,9 +834,6 @@ def main() -> None:
     )
 
     args = parser.parse_args()
-
-    if args.dry_run and args.commit:
-        parser.error("--dry-run and --commit are mutually exclusive")
 
     existing = load_next_tasks()
     print(f"[task_generator_v2] Loaded {len(existing)} existing tasks from next_tasks.json")
@@ -839,25 +861,18 @@ def main() -> None:
     counts = {src: len(tasks) for src, tasks in all_generated.items()}
     print("[task_generator_v2] Counts by source:", json.dumps(counts, ensure_ascii=False))
 
-    # Write to file if --commit
-    if args.commit and total > 0:
-        new_tasks = [t for tasks in all_generated.values() for t in tasks]
-        original = load_next_tasks()
-        combined = original + new_tasks
-        normalize_task_priorities(combined)
-        guard_canonical_write(NEXT_TASKS)
-        with open(NEXT_TASKS, "w", encoding="utf-8") as f:
-            json.dump(combined, f, ensure_ascii=False, indent=2)
-        print(f"[task_generator_v2] Wrote {total} new tasks to {NEXT_TASKS}")
-    elif args.commit and total == 0:
-        print("[task_generator_v2] No new tasks to write.")
+    # WS-A1b: the --commit write path (bare open("w") + json.dump, no flock —
+    # the most dangerous writer in the A1a inventory) was REMOVED. This module
+    # keeps its candidate-computation logic (a WS-H4 decision-pipeline
+    # candidate) and dry-run/JSON reporting only; queue writes go through
+    # scripts/refill_task_pool.py or `volpred ops assign`.
 
     # Write JSON output log if requested
     if args.json_output:
         out = {
             "generated_at": now_iso(),
             "dry_run": args.dry_run,
-            "commit": args.commit,
+            "commit": False,  # WS-A1b: write path removed; field kept for log-schema stability
             "source": args.source,
             "counts": counts,
             "total": total,

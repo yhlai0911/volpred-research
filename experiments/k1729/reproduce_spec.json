@@ -1,0 +1,48 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1729.py",
+    "args": []
+  },
+  "canonical_result": "k1729_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1729/k1729_source_snapshot.csv",
+      "sha256": "2acdc69aa2103f4adcda0710cd530941f6cfed22bccdfca8ef777fba88f6c1e5"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca"
+    },
+    {
+      "path": "src/volpred/evaluation/metrics.py",
+      "sha256": "53087878fa879d99fc6013947394e1b21396dd2945d3ddd844f30ab0b25a8d61"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/timestamp_utc",
+      "/data/source_sha256",
+      "/data/n_rows_available_at_runtime"
+    ],
+    "ignore_reasons": {
+      "/timestamp_utc": "wall-clock stamp of the run",
+      "/data/source_sha256": "whole-file hash of the LIVE canonical CSV, which the collector appends to every trading day. It is recorded as provenance only. The reproducibility guarantee is /data/analysis_slice_sha256, which is NOT ignored and which equals the sha256 of k1729_source_snapshot.csv listed in inputs.",
+      "/data/n_rows_available_at_runtime": "row count of the live CSV at run time; grows daily for the same reason."
+    }
+  },
+  "notes": "k1729.py reads the live canonical data/intraday/taifex_5min_rv.csv and truncates it at DATA_AS_OF='2026-07-16'. k1729_source_snapshot.csv is that truncated slice, frozen; its sha256 is byte-identical to /data/analysis_slice_sha256 in the result. So a re-run reproduces exactly even as the collector keeps appending rows, and a replicator without the live file can verify the analysed data from the snapshot."
+}

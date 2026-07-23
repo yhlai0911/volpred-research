@@ -1,0 +1,68 @@
+{
+  "id": "agent-brief_k1698_rev2-713b65",
+  "title": "K1698 rev2: 修 contract-selection lookahead + 夜盤邊界 audit + equivalence",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1698_rev2-713b65.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698/experiments/k1698/k1698_rev2_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1698_rev2-713b65.json",
+    "--timeout",
+    "7080"
+  ],
+  "env": {},
+  "status": "completed",
+  "queued_at": "2026-07-19T04:44:48Z",
+  "started_at": "2026-07-19T10:00:06Z",
+  "completed_at": "2026-07-19T11:11:02Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1698_rev2-713b65.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1698_rev2-713b65.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698/experiments/k1698/k1698_rev2_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1698_rev2-713b65.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698",
+  "claude_followup": {
+    "brief": "收 K1698 rev2：(1) 首要驗 contract selection 是否真的不再用 13:30 後資訊（讀 code，不要只信 README）；(2) 驗 rv_window_boundary_audit 是否涵蓋夜盤期+OOS 且 None 令 ok=False；(3) 確認 H2 用的是 equivalence/noninferiority 而非 p=0.142；(4) 派 codex 二審，CONDITIONAL PASS 以上才可寫 knowledge.json；(5) merge_worktree.sh 合併 dispatch-slot-2-c5cafe39-k1698。",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "timeout_seconds": 7200,
+  "brief_source": "/tmp/brief_k1698_rev2.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1698_rev2-713b65.md",
+  "quota_requeues": 2,
+  "requeue_history": [
+    {
+      "at": "2026-07-19T07:00:11Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-19T07:00:05Z"
+    },
+    {
+      "at": "2026-07-19T07:45:11Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-19T07:45:05Z"
+    }
+  ],
+  "not_before": "2026-07-19T08:15:11.283102+00:00",
+  "source_task_id": "assign_42306eaa",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-c5cafe39-k1698/experiments/k1698"
+  },
+  "followup_dispatched_at": "2026-07-19T12:12:22Z",
+  "followup_next_task_id": "compute-k1698-rev2b-codex-round-3-primary-path-review-1784463137"
+}

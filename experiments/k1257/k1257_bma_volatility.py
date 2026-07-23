@@ -47,6 +47,8 @@ from scipy import stats
 from scipy.optimize import minimize
 from scipy.stats import norm, t as t_dist
 from scipy.special import logsumexp
+from volpred.ops.diagnostics import warn
+from volpred.research.posterior_semantics import summarize_posterior_support
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -272,7 +274,8 @@ def fit_gjr_t(returns):
             if res.fun < best_nll:
                 best_nll = res.fun
                 best = res
-        except Exception:
+        except Exception as exc:
+            warn("k1257", "GJR-t multistart failed", start_df=df0, err=exc)
             continue
     if best is None:
         return {"params": np.array([var0 * 0.05, 0.05, 0.05, 0.90, 8.0]),
@@ -309,7 +312,8 @@ def fit_egarch_n(returns):
             if res.fun < best_nll:
                 best_nll = res.fun
                 best = res
-        except Exception:
+        except Exception as exc:
+            warn("k1257", "EGARCH multistart failed", start_omega=omega0, err=exc)
             continue
     if best is None:
         return {"params": np.array([-0.1, 0.1, -0.08, 0.95]),
@@ -364,7 +368,8 @@ def fit_a4f(returns, iv2):
             if res.fun < best_nll:
                 best_nll = res.fun
                 best = res
-        except Exception:
+        except Exception as exc:
+            warn("k1257", "A4f multistart failed", start_theta1=th1, err=exc)
             continue
     if best is None:
         return {"params": np.array([1e-5, 0.5, 0.05, 0.04, 0.06, 0.90]),
@@ -391,6 +396,18 @@ def log_pred_density(y, h, dist, df=None):
 # -----------------------------------------------------------------
 # OOS forecasting engine per asset
 # -----------------------------------------------------------------
+def _drop_unusable_fits(state, diagnostics, state_to_model):
+    """Count every refit result and remove failed optimizers from state."""
+    for state_key, model in state_to_model.items():
+        diagnostics[model]["fit_attempts"] += 1
+        fitted = state.get(state_key)
+        if fitted is None:
+            diagnostics[model]["fit_exceptions"] += 1
+        elif not bool(fitted.get("converged", False)):
+            diagnostics[model]["nonconverged_fits"] += 1
+            state[state_key] = None
+
+
 def run_asset(asset, df):
     print(f"\n[Asset: {asset}] N={len(df)}, span={df.index[0].date()} -> "
           f"{df.index[-1].date()}", flush=True)
@@ -414,8 +431,21 @@ def run_asset(asset, df):
     bma_forecasts = np.full(T, np.nan)
     eq_forecasts = np.full(T, np.nan)
     weight_history = np.full((T, len(MODEL_NAMES)), np.nan)
+    posterior_excluded = np.zeros((T, len(MODEL_NAMES)), dtype=bool)
 
     state = {"last_fit": -1}
+    state_to_model = {
+        "garch_n": "GARCH_N", "gjr_n": "GJR_N", "gjr_t": "GJR_t",
+        "egarch_n": "EGARCH_N", "har": "HAR_ABS", "a4f": "A4f_IV2",
+    }
+    diagnostics = {
+        model: {
+            "fit_attempts": 0,
+            "fit_exceptions": 0,
+            "nonconverged_fits": 0,
+        }
+        for model in MODEL_NAMES
+    }
 
     C_GAMMA_NORMAL = math.sqrt(2.0 / math.pi)
 
@@ -461,6 +491,12 @@ def run_asset(asset, df):
             except Exception as e:
                 print(f"    fit_a4f FAIL: {e}")
                 state["a4f"] = None
+
+            # A returned optimizer result is not usable merely because the
+            # fit function did not raise.  Keep failures out of both the
+            # forecast and posterior paths, and make every exclusion
+            # auditable in the result artifact.
+            _drop_unusable_fits(state, diagnostics, state_to_model)
 
             state["last_fit"] = t
             # init recursive h_prev from last in-sample value
@@ -535,21 +571,24 @@ def run_asset(asset, df):
             forecasts["A4f_IV2"][t] = h_t
             state["g_a4f"] = g_t
 
-        # --- record weights BEFORE computing BMA forecast (posterior pre-t) ---
-        weight_history[t, :] = np.exp(log_weights)
-
         # --- BMA forecast = sum_i w_i * h_i (weight-sum variance) ---
         h_vec = np.array([forecasts[m][t] for m in MODEL_NAMES])
         valid = np.isfinite(h_vec) & (h_vec > 0)
+        posterior_excluded[t] = ~valid | ~np.isfinite(log_weights)
         if valid.any():
-            # normalize weights over valid models
-            w_valid = np.exp(log_weights[valid] - logsumexp(log_weights[valid]))
+            valid_log_weights = log_weights[valid]
+            if not np.any(np.isfinite(valid_log_weights)):
+                valid_log_weights = np.full(valid.sum(), -np.log(valid.sum()))
+            w_valid = np.exp(valid_log_weights - logsumexp(valid_log_weights))
+            weight_history[t, valid] = w_valid
+            weight_history[t, ~valid] = 0.0
             bma_forecasts[t] = float(np.sum(w_valid * h_vec[valid]))
             eq_forecasts[t] = float(np.mean(h_vec[valid]))
         # else NaN
 
         # --- update log posterior using predictive density of y_t given F_{t-1} ---
         y_t = returns[t]
+        next_log_weights = np.full(len(MODEL_NAMES), -np.inf)
         for mi, m in enumerate(MODEL_NAMES):
             h_pred = forecasts[m][t]
             if not np.isfinite(h_pred) or h_pred <= 0:
@@ -561,11 +600,12 @@ def run_asset(asset, df):
             else:
                 lp = log_pred_density(y_t, h_pred, "normal")
             log_preds[m][t] = lp
-            # posterior update: log w_new = log w_old + log p(y_t | M_i)
-            log_weights[mi] = log_weights[mi] + lp
+            next_log_weights[mi] = log_weights[mi] + lp
 
-        # normalize via log-sum-exp
-        log_weights = log_weights - logsumexp(log_weights)
+        finite_next = np.isfinite(next_log_weights)
+        if finite_next.any():
+            next_log_weights[finite_next] -= logsumexp(next_log_weights[finite_next])
+            log_weights = next_log_weights
 
     # final state
     print(f"  final weights: " + ", ".join(
@@ -629,6 +669,20 @@ def run_asset(asset, df):
     dm_bma_vs_gjr = dm_harvey(qlike_bma_pw, qlike_gjr_t_pw)
     dm_bma_vs_eq = dm_harvey(qlike_bma_pw, qlike_eq_pw)
 
+    # --- common-sample mask for headline QLIKE -----------------------
+    # DM already restricts to days where the loss difference is finite, but
+    # the headline means used np.nanmean per series, so a model that drops
+    # days (e.g. SPY GJR_t loses the 63-day block after a non-converged
+    # refit) was compared against BMA/Equal on a *different* denominator.
+    # On SPY that inflated BMA-GJR_t by 81% and made the reported gap
+    # inconsistent with the Harvey t built from the aligned difference.
+    common_mask = (np.isfinite(qlike_bma_pw) & np.isfinite(qlike_eq_pw)
+                   & np.isfinite(qlike_gjr_t_pw))
+    n_common = int(common_mask.sum())
+
+    def _mean_common(pw):
+        return float(np.mean(pw[common_mask])) if n_common else float("nan")
+
     # --- regime-dependent weights (4 VIX buckets) ---
     regimes = {"VIX<15": (0, 15), "15-20": (15, 20),
                "20-25": (20, 25), ">25": (25, 999)}
@@ -653,19 +707,71 @@ def run_asset(asset, df):
         if mask.sum() < 10:
             regime_qlike[rname] = {"n_days": int(mask.sum())}
             continue
+        rmask = mask & common_mask
         regime_qlike[rname] = {
             "n_days": int(mask.sum()),
-            "bma_qlike": float(np.nanmean(qlike_bma_pw[mask])),
-            "gjr_t_qlike": float(np.nanmean(qlike_gjr_t_pw[mask])),
-            "equal_qlike": float(np.nanmean(qlike_eq_pw[mask])),
+            "n_common_sample": int(rmask.sum()),
+            "bma_qlike": float(np.mean(qlike_bma_pw[rmask])) if rmask.any() else float("nan"),
+            "gjr_t_qlike": float(np.mean(qlike_gjr_t_pw[rmask])) if rmask.any() else float("nan"),
+            "equal_qlike": float(np.mean(qlike_eq_pw[rmask])) if rmask.any() else float("nan"),
         }
+
+    final_weight_values = np.exp(log_weights)
+    support_summary = summarize_posterior_support(
+        model_names=MODEL_NAMES,
+        invalid_forecasts=np.column_stack(
+            [
+                ~np.isfinite(forecasts[model][oos_idx])
+                | (forecasts[model][oos_idx] <= 0)
+                for model in MODEL_NAMES
+            ]
+        ),
+        posterior_excluded=posterior_excluded[oos_idx],
+        final_weights=final_weight_values,
+        revival_policy="absorbing",
+    )
+    for model in MODEL_NAMES:
+        diagnostics[model].update(
+            support_summary["support_diagnostics"][model]
+        )
 
     result = {
         "n_oos": int(n_oos),
-        "bma_qlike": float(np.nanmean(qlike_bma_pw)),
-        "equal_weight_qlike": float(np.nanmean(qlike_eq_pw)),
-        "gjr_t_qlike": float(np.nanmean(qlike_gjr_t_pw)),
+        "n_common_sample": n_common,
+        # Headline QLIKE = common valid days across BMA / Equal / GJR-t, so
+        # the reported gap is the same quantity the Harvey t is built from.
+        "bma_qlike": _mean_common(qlike_bma_pw),
+        "equal_weight_qlike": _mean_common(qlike_eq_pw),
+        "gjr_t_qlike": _mean_common(qlike_gjr_t_pw),
+        # Per-series own-sample means kept for transparency (NOT comparable
+        # across series when denominators differ).
+        "qlike_own_sample": {
+            "bma": float(np.nanmean(qlike_bma_pw)),
+            "equal_weight": float(np.nanmean(qlike_eq_pw)),
+            "gjr_t": float(np.nanmean(qlike_gjr_t_pw)),
+            "n_bma": int(np.isfinite(qlike_bma_pw).sum()),
+            "n_equal_weight": int(np.isfinite(qlike_eq_pw).sum()),
+            "n_gjr_t": int(np.isfinite(qlike_gjr_t_pw).sum()),
+        },
         "per_model_qlike": per_model_qlike,
+        # Documented semantics of the MAJOR-1 fix: a model whose forecast is
+        # invalid on day t is excluded from that day's posterior via -inf,
+        # which is ABSORBING — it cannot regain weight even if a later refit
+        # converges. On SPY GJR_t this is why final_weights is exactly 0.0
+        # (vs ~1e-30 for models that merely lost on likelihood).
+        "posterior_semantics": {
+            "invalid_day_handling": "excluded_from_posterior_absorbing",
+            "revival_policy": "absorbing",
+            "drop_event_definition": (
+                "first day of each consecutive invalid-forecast spell"
+            ),
+            "posterior_excluded_day_definition": (
+                "day the model is absent from the posterior used to forecast"
+            ),
+            "note": ("-inf log-weight after an invalid day is never "
+                     "recovered; final_weights==0.0 means 'dropped', "
+                     "tiny-but-nonzero means 'lost on likelihood'."),
+        },
         "dm_bma_vs_gjr": {
             "t_stat": dm_bma_vs_gjr[0], "p_value": dm_bma_vs_gjr[1],
             "harvey_pass": dm_bma_vs_gjr[2]
@@ -676,8 +782,14 @@ def run_asset(asset, df):
         },
         "regime_weights": regime_weights,
         "regime_qlike": regime_qlike,
-        "final_weights": {m: float(np.exp(log_weights[i]))
+        "final_weights": {m: float(final_weight_values[i])
                           for i, m in enumerate(MODEL_NAMES)},
+        "absorbing_dropped_models": support_summary[
+            "absorbing_dropped_models"
+        ],
+        "ever_invalid_models": support_summary["ever_invalid_models"],
+        "final_weight_status": support_summary["final_weight_status"],
+        "forecast_diagnostics": diagnostics,
     }
 
     # Keep arrays for charting
@@ -797,7 +909,8 @@ def main():
         diff_vs_gjr = r["bma_qlike"] - r["gjr_t_qlike"]
         diff_vs_eq = r["bma_qlike"] - r["equal_weight_qlike"]
         lines.append(
-            f"{a}: BMA={r['bma_qlike']:.5f}, GJR-t={r['gjr_t_qlike']:.5f} "
+            f"{a}: n_common={r.get('n_common_sample', r['n_oos'])}, "
+            f"BMA={r['bma_qlike']:.5f}, GJR-t={r['gjr_t_qlike']:.5f} "
             f"(BMA-GJR={diff_vs_gjr:+.5f}, Harvey t="
             f"{r['dm_bma_vs_gjr']['t_stat']:+.2f}); "
             f"Equal={r['equal_weight_qlike']:.5f} "
@@ -811,11 +924,19 @@ def main():
         f"H1 verdict: {verdicts['H1_bma_beats_gjr']}; "
         f"H2: {verdicts['H2_bma_beats_equal']}; "
         f"H3 (regime weight shift): {verdicts['H3_regime_weight_shift']}. "
+        "All headline QLIKE figures are computed on the common valid days "
+        "shared by BMA / Equal / GJR-t (n_common per asset above), the same "
+        "sample the Harvey t is built from; per-series own-sample means are "
+        "kept separately under qlike_own_sample. "
         "Research-honesty: null results reported as-is; the purpose of BMA "
-        "is principled posterior weighting, not guaranteed QLIKE win. If "
-        "posterior concentrates quickly on a single model, BMA effectively "
-        "reduces to that model's forecast and differences vs single-best "
-        "shrink."
+        "is principled posterior weighting, not guaranteed QLIKE win. "
+        "Posterior concentration is not hypothetical here — on every asset "
+        "the terminal posterior puts ~1.0 on a single model, so BMA is in "
+        "practice that model's forecast and the gap vs single-best is a "
+        "statement about which model the posterior picked, not about "
+        "combination gains. Invalid-day exclusion is absorbing (see "
+        "posterior_semantics): a model dropped after a non-converged refit "
+        "cannot regain weight."
     )
 
     # -----------------------------------------------------------------

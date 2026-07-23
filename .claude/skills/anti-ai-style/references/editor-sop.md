@@ -106,7 +106,7 @@ grep -nE "結構性|本質上是|深層次|多維度|生態化|賦能|閉環" $D
 # 提取所有 claim
 grep -nE "[0-9]+%|根據|研究|論文|報告|引用|曾說" $DRAFT > /tmp/claims.txt
 
-# 跨模型驗證（首選 agy 訂閱免費路徑；scripts/gemini_ask.py 會打 PAID API 觸發 email alert，僅 agy 不可用時才 fallback）
+# 跨模型驗證（一律走 agy 訂閱免費路徑；scripts/gemini_ask.py 付費 API 已停用 exit 2 per boss msg936，除非 break-glass VOLPRED_ALLOW_PAID_GEMINI=1）
 CLAIMS=$(cat /tmp/claims.txt)
 PROMPT=$(cat <<EOF
 請逐項驗證下列 claims：
