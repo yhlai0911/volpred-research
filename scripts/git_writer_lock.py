@@ -6,12 +6,15 @@ Examples:
       bash scripts/merge_worktree.sh agent-name
   uv run python scripts/git_writer_lock.py commit --actor codex-vscode \
       --message '[codex] describe change' -- path/to/a.py path/to/test.py
+  uv run python scripts/git_writer_lock.py commit --actor change-delivery \
+      --expected-head <full-object-id> --message 'land proposal' -- owned.py
 """
 from __future__ import annotations
 
 import argparse
 import importlib.util
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -98,6 +101,17 @@ def _git(*args: str) -> list[str]:
     return ["git", "--literal-pathspecs", *args]
 
 
+def _expected_head(raw: str | None) -> str | None:
+    if raw is None:
+        return None
+    if re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", raw) is None:
+        raise ValueError(
+            "expected-head must be a full lowercase Git object ID "
+            "(40 or 64 hexadecimal characters)"
+        )
+    return raw
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     command = _strip_separator(args.command)
     if not command:
@@ -115,6 +129,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
 def cmd_commit(args: argparse.Namespace) -> int:
     repo = _repo(args.repo)
+    expected_head = _expected_head(args.expected_head)
     paths = _normalize_paths(repo, _strip_separator(args.paths))
     if not paths:
         print("[git-writer-lock] commit needs explicit file paths", file=sys.stderr)
@@ -126,6 +141,28 @@ def cmd_commit(args: argparse.Namespace) -> int:
         env = lease.child_env()
         popen = {"env": env, "text": True, "check": False,
                  "pass_fds": lease.child_pass_fds()}
+        if expected_head is not None:
+            head = subprocess.run(
+                _git("rev-parse", "--verify", "HEAD^{commit}"),
+                cwd=repo,
+                capture_output=True,
+                **popen,
+            )
+            if head.returncode != 0:
+                print(
+                    "[git-writer-lock] BLOCKED: cannot resolve current HEAD for "
+                    "expected HEAD fence",
+                    file=sys.stderr,
+                )
+                return 2
+            observed_head = head.stdout.strip()
+            if observed_head != expected_head:
+                print(
+                    "[git-writer-lock] BLOCKED: expected HEAD fence failed: "
+                    f"expected {expected_head}, observed {observed_head}",
+                    file=sys.stderr,
+                )
+                return 2
         # 2026-07-19: an explicitly named but gitignored path (main_v5 era:
         # paper .pdf) made `git add -A` skip it with only an advice hint while
         # the transaction still reported success — the caller believed the file
@@ -255,6 +292,13 @@ def build_parser() -> argparse.ArgumentParser:
     commit.add_argument("--repo", default=str(ROOT))
     commit.add_argument("--actor", required=True)
     commit.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_S)
+    commit.add_argument(
+        "--expected-head",
+        help=(
+            "full object ID observed by the caller; fail inside the writer "
+            "lease before staging if canonical HEAD has advanced"
+        ),
+    )
     message = commit.add_mutually_exclusive_group(required=True)
     message.add_argument("--message")
     message.add_argument("--message-file")

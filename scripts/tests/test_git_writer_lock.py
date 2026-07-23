@@ -419,6 +419,103 @@ def test_exact_path_commit_preserves_foreign_index_and_worktree(tmp_path: Path) 
     assert foreign.read_text() == "foreign working\n"
 
 
+def test_exact_path_commit_expected_head_fails_before_touching_index(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    (repo / "concurrent.txt").write_text("concurrent\n")
+    _run(repo, "git", "add", "concurrent.txt")
+    _run(repo, "git", "commit", "-qm", "concurrent writer")
+    observed_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    (repo / "owned.txt").write_text("owned\n")
+    before_status = _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "stale-proposal",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must not land",
+        "--",
+        "owned.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "expected HEAD fence failed" in blocked.stderr
+    assert expected_head in blocked.stderr
+    assert observed_head in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == observed_head
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == before_status
+    assert not _run(repo, "git", "diff", "--cached", "--name-only").stdout
+
+
+def test_exact_path_commit_expected_head_lands_direct_child(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    (repo / "owned.txt").write_text("owned\n")
+
+    committed = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "fresh-proposal",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "land fenced proposal",
+        "--",
+        "owned.txt",
+    )
+
+    assert committed.returncode == 0, committed.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD^").stdout.strip() == expected_head
+    assert (
+        _run(repo, "git", "show", "--format=", "--name-only", "HEAD").stdout.strip()
+        == "owned.txt"
+    )
+
+
+@pytest.mark.parametrize("expected_head", ["HEAD", "abc123", "A" * 40, "0" * 41])
+def test_exact_path_commit_rejects_non_object_id_fence(
+    tmp_path: Path,
+    expected_head: str,
+) -> None:
+    repo = _repo(tmp_path)
+    (repo / "owned.txt").write_text("owned\n")
+    before_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    before_status = _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "invalid-proposal",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must not land",
+        "--",
+        "owned.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "expected-head must be a full lowercase Git object ID" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == before_head
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == before_status
+
+
 def test_same_process_nested_lease_borrows_without_unlocking_outer(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     with git_writer_lock(repo, actor="outer", timeout_s=0) as outer:
