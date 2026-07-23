@@ -44,9 +44,9 @@
   "timeout_seconds": 4200,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/k1731_armB_rev9_claim_surface.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-k1731-armb-rev9-remediation.md",
-  "claimed_by_pid": 57527,
-  "claimed_by_pid_start_wall": "Thu Jul 23 20:15:01 2026",
-  "quota_requeues": 13,
+  "claimed_by_pid": 93002,
+  "claimed_by_pid_start_wall": "Thu Jul 23 21:00:01 2026",
+  "quota_requeues": 14,
   "requeue_history": [
     {
       "at": "2026-07-23T03:15:05Z",
@@ -138,9 +138,16 @@
       "exit_code": 1,
       "started_at": "2026-07-23T12:15:01Z",
       "reset_at": null
+    },
+    {
+      "at": "2026-07-23T13:00:08Z",
+      "reason": "quota",
+      "exit_code": 1,
+      "started_at": "2026-07-23T13:00:01Z",
+      "reset_at": null
     }
   ],
-  "not_before": "2026-07-23T12:45:06.673971+00:00",
+  "not_before": "2026-07-23T13:30:08.354204+00:00",
   "attempt_status": "quota_exhausted",
   "quota_reset_at": null
 }
