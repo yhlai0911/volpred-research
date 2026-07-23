@@ -1097,13 +1097,19 @@ regression 證明 staged projection 只漂移 `created_at`／`updated_at` 也會
 cross-wired raw snapshot、ledger/cutover mismatch、detached owner spoof、
 forged projection metadata、dispatch/timestamp drift 與 running
 `started_at` drift；preflight／assessment／projection／replay／direct-mode／claim／
-handoff／claim 相鄰 suite 228 passed。
+handoff／claim 相鄰 suite 230 passed。
 
 Standards 第三輪另抓到 `LegacySnapshots` shallow-frozen 的 mutable-row TOCTOU：
 同一 caller object 若在 queue equality、import 與 snapshot hash 三次讀取間改動，
 仍可能交叉綁定不同 generation。最終 seam 入口先 canonicalize 三來源一次並 decode
 成 private copy，後續所有 evidence derivation 只讀該 copy；adversarial importer
 mutation regression 證明原 caller row 雖被改動，manifest 仍只反映入口 generation。
+Spec final smoke 再把同一根因追到 canonical replay producer：舊
+`replay_legacy_selection()` 先後三次 canonicalize caller，A→B→A 可讓中間 B 的
+snapshot hash 配到第一次 A 的 selector/comparison，結尾 equality 又因回到 A 而通過。
+現在 replay 入口也只做一次 `freeze_legacy_snapshots()`；hash、import、兩側 selector
+與 comparisons 全部只讀 private copy。ABA public regression 固定原 caller 只被讀一次，
+且三個 ledger SHA 均等於入口 generation。
 
 **狀態**：此 preflight 缺口已制度化止血，但尚無正式 DB/filesystem CAS ownership
 transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。

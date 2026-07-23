@@ -87,6 +87,8 @@ immutable manifest 綁定
 raw legacy snapshot、assessment、import report、projection 與 owner state SHA-256。
 Assessment 另帶 receipt-set digest 與最後 snapshot identity，必須與本次完整 cutover
 snapshot 一致；Coordinator 無法表示的 dispatch policy 會 fail closed。
+上游 shadow replay producer 同步改為入口單次 freeze；ledger hash、兩側 selector 與
+comparisons 不再分次讀 caller mappings，A→B→A mutation 無法生成自洽外觀的錯綁 ledger。
 此能力無 apply／writer seam，live 仍是 `direct_execution`、observation count 仍為 0，
 所以只是正式 transaction 前的 fail-closed evidence capsule，不構成 ownership cutover。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：

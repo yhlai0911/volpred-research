@@ -312,9 +312,8 @@ def replay_legacy_selection(
 ) -> ShadowReplayLedger:
     """Compare both policies over one hash-bound, caller-supplied snapshot."""
     observed_at = _aware_utc(observed_at)
-    snapshot_bytes = _canonical_snapshot_bytes(snapshots)
-    snapshot = identify_legacy_snapshots(snapshots)
-    immutable_snapshots = _snapshots_from_canonical_bytes(snapshot_bytes)
+    immutable_snapshots = freeze_legacy_snapshots(snapshots)
+    snapshot = identify_legacy_snapshots(immutable_snapshots)
     report = preview_legacy_snapshots(immutable_snapshots)
     raw_next_tasks = tuple(
         dict(task) for task in immutable_snapshots.next_tasks
@@ -414,8 +413,6 @@ def replay_legacy_selection(
             key=lambda comparison: comparison.candidate_ref,
         )
     )
-    if _canonical_snapshot_bytes(snapshots) != snapshot_bytes:
-        raise RuntimeError("shadow replay mutated its supplied snapshots")
     legacy_selection = ShadowSelectionView(
         policy="legacy",
         snapshot_sha256=snapshot.sha256,

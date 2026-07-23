@@ -1,4 +1,5 @@
 import builtins
+import hashlib
 import json
 import socket
 from datetime import datetime, timezone
@@ -6,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from volpred.ops import work_shadow_replay
 from volpred.ops.work import WorkCoordinator, WorkerOffer
 from volpred.ops.work_migration import LegacySnapshots
 from volpred.ops.work_shadow_replay import (
@@ -145,6 +147,42 @@ def test_replay_uses_one_immutable_snapshot_for_both_selection_policies() -> Non
         },
         sort_keys=True,
     ) == before
+
+
+def test_replay_freezes_caller_snapshot_before_aba_mutation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mutable_task = _pending_task("aba_task")
+    snapshots = LegacySnapshots(next_tasks=(mutable_task,))
+    canonicalize = work_shadow_replay._canonical_snapshot_bytes
+    expected_sha256 = hashlib.sha256(canonicalize(snapshots)).hexdigest()
+    original_reads = 0
+
+    def mutate_between_reads(candidate: LegacySnapshots) -> bytes:
+        nonlocal original_reads
+        payload = canonicalize(candidate)
+        if candidate is snapshots:
+            original_reads += 1
+            mutable_task["priority"] = 9 if original_reads == 1 else 1
+        return payload
+
+    monkeypatch.setattr(
+        work_shadow_replay,
+        "_canonical_snapshot_bytes",
+        mutate_between_reads,
+    )
+
+    ledger = replay_legacy_selection(
+        snapshots,
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_aba",
+    )
+
+    assert original_reads == 1
+    assert ledger.snapshot.sha256 == expected_sha256
+    assert ledger.legacy_selection.snapshot_sha256 == expected_sha256
+    assert ledger.coordinator_selection.snapshot_sha256 == expected_sha256
 
 
 def test_replay_runs_legacy_selection_before_importer_filtering() -> None:

@@ -555,6 +555,9 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   canonicalize 成單一 byte generation，再 decode 成 private copy；queue equality、
   importer 與 latest-snapshot identity 不再跨三次讀 caller object，避免 mutable-input
   TOCTOU 交叉綁定。
+- 同一規則也由 canonical `replay_legacy_selection()` producer 持有：ledger snapshot
+  hash、import、legacy selector、Coordinator selector 與 comparisons 全部只從入口
+  private copy導出；不再以 A→B→A 三次 caller read 讓 ledger hash 與比較內容脫鉤。
 - Raw legacy bytes 由 seam 自行 decode、計算 SHA 並產生 importer report；staged
   Work Coordinator projection 會再走既有
   importer，逐 work identity 比對 row count、status、priority、source／policy、
