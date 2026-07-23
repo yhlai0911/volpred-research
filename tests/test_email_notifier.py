@@ -6,6 +6,7 @@ disabled globally via root conftest.py VOLPRED_NO_EMAIL=1; these tests verify
 the guards are honored AND that bookkeeping (notification_log + per-id JSON)
 is updated correctly even when send is suppressed.
 """
+
 from __future__ import annotations
 
 import json
@@ -15,6 +16,13 @@ import pytest
 
 from volpred.publisher import email_notifier
 from volpred.publisher.email_notifier import EmailNotifier
+
+
+@pytest.fixture(autouse=True)
+def isolate_project_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep unit fixtures independent of untracked project credentials."""
+
+    monkeypatch.setattr(email_notifier, "_prime_project_env", lambda: None)
 
 
 @pytest.fixture
@@ -44,7 +52,9 @@ def test_load_env_file_warns_when_existing_path_cannot_be_read(tmp_path: Path, c
     assert str(tmp_path) in captured.err
 
 
-def test_notify_writes_log_and_file_when_send_suppressed(notifier: EmailNotifier, tmp_path: Path):
+def test_notify_writes_log_and_file_when_send_suppressed(
+    notifier: EmailNotifier, tmp_path: Path
+):
     """VOLPRED_NO_EMAIL=1 suppresses SMTP but bookkeeping still records."""
     notif_id = notifier.notify(
         "Test subject",
@@ -67,7 +77,9 @@ def test_notify_writes_log_and_file_when_send_suppressed(notifier: EmailNotifier
     assert any(entry["id"] == notif_id for entry in log)
 
 
-def test_load_log_warns_on_corrupt_json(notifier: EmailNotifier, tmp_path: Path, capsys):
+def test_load_log_warns_on_corrupt_json(
+    notifier: EmailNotifier, tmp_path: Path, capsys
+):
     log_file = tmp_path / "notifications" / "notification_log.json"
     log_file.write_text("{bad json", encoding="utf-8")
 
@@ -78,7 +90,9 @@ def test_load_log_warns_on_corrupt_json(notifier: EmailNotifier, tmp_path: Path,
     assert str(log_file) in captured.err
 
 
-def test_load_log_warns_on_schema_drift(notifier: EmailNotifier, tmp_path: Path, capsys):
+def test_load_log_warns_on_schema_drift(
+    notifier: EmailNotifier, tmp_path: Path, capsys
+):
     log_file = tmp_path / "notifications" / "notification_log.json"
     log_file.write_text(json.dumps({"items": []}), encoding="utf-8")
 
@@ -88,7 +102,9 @@ def test_load_log_warns_on_schema_drift(notifier: EmailNotifier, tmp_path: Path,
     assert "expected list, got dict" in captured.err
 
 
-def test_load_log_filters_non_object_entries(notifier: EmailNotifier, tmp_path: Path, capsys):
+def test_load_log_filters_non_object_entries(
+    notifier: EmailNotifier, tmp_path: Path, capsys
+):
     log_file = tmp_path / "notifications" / "notification_log.json"
     log_file.write_text(
         json.dumps(
@@ -97,7 +113,10 @@ def test_load_log_filters_non_object_entries(notifier: EmailNotifier, tmp_path: 
                     "id": "ok",
                     "timestamp": "2026-06-22T00:00:00+00:00",
                     "level": "warn",
-                    "metadata": {"notification_type": "alert", "notification_key": "key"},
+                    "metadata": {
+                        "notification_type": "alert",
+                        "notification_key": "key",
+                    },
                     "sent": True,
                 },
                 "bad",
@@ -108,7 +127,10 @@ def test_load_log_filters_non_object_entries(notifier: EmailNotifier, tmp_path: 
 
     assert notifier.already_sent("alert", "key") is True
     captured = capsys.readouterr()
-    assert "[email_notifier] WARN notification log contains non-object entries" in captured.err
+    assert (
+        "[email_notifier] WARN notification log contains non-object entries"
+        in captured.err
+    )
     assert "1 invalid entries" in captured.err
 
 
@@ -126,7 +148,9 @@ def test_notify_dedup_skips_duplicate(notifier: EmailNotifier, tmp_path: Path):
         dedupe_key="key_x",
     )
     assert first != second
-    second_payload = json.loads((tmp_path / "notifications" / f"{second}.json").read_text())
+    second_payload = json.loads(
+        (tmp_path / "notifications" / f"{second}.json").read_text()
+    )
     assert second_payload["skipped"] is True
     assert second_payload["skip_reason"] == "duplicate"
     assert second_payload["sent"] is False
@@ -136,7 +160,9 @@ def test_notify_dedup_skips_duplicate(notifier: EmailNotifier, tmp_path: Path):
 
 def test_notify_dedup_force_send_bypasses(notifier: EmailNotifier, tmp_path: Path):
     notifier.notify("S", "B1", dedupe_type="t", dedupe_key="k")
-    forced_id = notifier.notify("S", "B2", dedupe_type="t", dedupe_key="k", force_send=True)
+    forced_id = notifier.notify(
+        "S", "B2", dedupe_type="t", dedupe_key="k", force_send=True
+    )
     assert not forced_id.startswith("skip_")
     payload = json.loads((tmp_path / "notifications" / f"{forced_id}.json").read_text())
     assert payload.get("skipped") is None or payload["skipped"] is False
@@ -165,7 +191,7 @@ def test_get_notifications_filter_and_limit(notifier: EmailNotifier):
 
 
 def test_send_email_skipped_under_tmp_storage(tmp_path: Path, monkeypatch):
-    """Defense-in-depth: tmp_path triggers the second guard even without VOLPRED_NO_EMAIL."""
+    """tmp_path triggers the second guard without VOLPRED_NO_EMAIL."""
     monkeypatch.setenv("ADMIN_NOTIFICATION_EMAILS", "user@example.com")
     monkeypatch.setenv("EMAIL_FROM", "ops@volpred.test")
     monkeypatch.setenv("SMTP_HOST", "smtp.test")
