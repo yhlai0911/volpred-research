@@ -1,4 +1,4 @@
-"""PostgreSQL adapter for durable EffectRequest and outbox claiming."""
+"""PostgreSQL adapter for durable EffectRequest and outbox settlement."""
 
 from __future__ import annotations
 
@@ -12,10 +12,14 @@ from psycopg import Connection
 from psycopg.rows import dict_row
 
 from ._effect import (
+    AcknowledgedEffect,
     AcknowledgementExpectation,
+    EffectAttemptOutcome,
     EffectRequest,
     EffectRequestConflict,
     EffectView,
+    FailedEffect,
+    _normalize_attempt_outcome,
     _normalize_request,
     _request_sha256,
 )
@@ -56,8 +60,8 @@ class EffectOutboxLease:
     """A fenced claim on one pending effect intent.
 
     The token is deliberately absent from the read projection and only returned
-    to the worker that generated it. Delivery acknowledgement arrives in a
-    later slice; an abandoned claim becomes eligible after ``expires_at``.
+    to the worker that generated it. An abandoned claim becomes eligible after
+    ``expires_at``; late settlement is fenced by the attempt count and token.
     """
 
     sequence: int
@@ -68,8 +72,55 @@ class EffectOutboxLease:
     expires_at: str
 
 
+@dataclass(frozen=True)
+class EffectAttemptReceipt:
+    """Immutable result of settling one fenced outbox attempt."""
+
+    schema_version: str
+    effect_id: str
+    outbox_sequence: int
+    attempt_count: int
+    worker_id: str
+    reported_outcome: str
+    disposition: str
+    acknowledgement: AcknowledgementExpectation | None
+    reason_code: str | None
+    evidence_ref: str
+    evidence_sha256: str
+    retry_at: str | None
+    recorded_at: str
+
+
+def _attempt_receipt_from_row(row: dict[str, Any]) -> EffectAttemptReceipt:
+    acknowledgement = None
+    if row["acknowledgement_kind"] is not None:
+        acknowledgement = AcknowledgementExpectation(
+            kind=row["acknowledgement_kind"],
+            target_ref=row["acknowledgement_target_ref"],
+        )
+    retry_at = _isoformat(row["retry_at"])
+    recorded_at = _isoformat(row["recorded_at"])
+    if recorded_at is None:
+        raise RuntimeError("effect attempt receipt omitted recorded_at")
+    return EffectAttemptReceipt(
+        schema_version="effect-attempt-receipt.v1",
+        effect_id=row["effect_id"],
+        outbox_sequence=row["outbox_sequence"],
+        attempt_count=row["attempt_count"],
+        worker_id=row["worker_id"],
+        reported_outcome=row["reported_outcome"],
+        disposition=row["disposition"],
+        acknowledgement=acknowledgement,
+        reason_code=row["reason_code"],
+        evidence_ref=row["evidence_ref"],
+        evidence_sha256=row["evidence_sha256"],
+        retry_at=retry_at,
+        recorded_at=recorded_at,
+    )
+
+
 class PostgresEffectDelivery:
-    """Persist effect intent and its outbox row in one database transaction."""
+    """Persist effect intent and own its fenced outbox lifecycle."""
 
     def __init__(
         self,
@@ -101,6 +152,21 @@ class PostgresEffectDelivery:
                 "unsupported effect risk:",
                 "effect outbox worker and token are required",
                 "effect outbox lease_seconds must be positive",
+                "effect outbox settlement fields are required",
+                "effect outbox attempt_count must be positive",
+                "effect outbox sequence must be positive",
+                "effect outbox settlement hash must be lowercase SHA-256",
+                "unsupported effect outbox outcome:",
+                "effect outbox acknowledgement fields are required",
+                "effect outbox failure reason_code is required",
+                "unknown effect outbox attempt:",
+                "effect outbox attempt is not actively claimed:",
+                "effect outbox attempt worker mismatch:",
+                "effect outbox attempt token mismatch:",
+                "effect outbox attempt count mismatch:",
+                "effect outbox attempt lease expired:",
+                "effect outbox acknowledgement mismatch:",
+                "effect outbox settlement conflicts with its original outcome",
             )
         ):
             raise ValueError(message) from None
@@ -209,5 +275,76 @@ class PostgresEffectDelivery:
             expires_at=expires_at,
         )
 
+    def settle_outbox(
+        self,
+        *,
+        lease: EffectOutboxLease,
+        outcome: EffectAttemptOutcome,
+    ) -> EffectAttemptReceipt:
+        """Atomically record one attempt and transition retry/terminal state.
 
-__all__ = ["EffectOutboxLease", "PostgresEffectDelivery"]
+        Equivalent replay returns the original immutable receipt. A stale
+        lease, mismatched acknowledgement, or changed outcome fails closed.
+        Backoff and attempt exhaustion are database-owned policy.
+        """
+
+        if not isinstance(lease, EffectOutboxLease):
+            raise ValueError("effect outbox lease is required")
+        normalized = _normalize_attempt_outcome(outcome)
+        if isinstance(normalized, AcknowledgedEffect):
+            outcome_kind = "acknowledged"
+            acknowledgement_kind = normalized.acknowledgement.kind
+            acknowledgement_target_ref = normalized.acknowledgement.target_ref
+            reason_code = None
+        elif isinstance(normalized, FailedEffect):
+            outcome_kind = (
+                "retryable_failure"
+                if normalized.retryable
+                else "terminal_failure"
+            )
+            acknowledgement_kind = None
+            acknowledgement_target_ref = None
+            reason_code = normalized.reason_code
+        else:  # pragma: no cover - normalization is exhaustive
+            raise AssertionError("unreachable effect outcome")
+
+        with self._connection_factory() as connection:
+            connection.row_factory = dict_row
+            try:
+                row = connection.execute(
+                    """
+                    SELECT *
+                    FROM volpred_ops.settle_effect_outbox(
+                      %s, %s, %s, %s, %s, %s,
+                      %s, %s, %s, %s, %s
+                    )
+                    """,
+                    (
+                        lease.sequence,
+                        lease.effect_id,
+                        lease.attempt_count,
+                        lease.claimed_by,
+                        lease.token,
+                        outcome_kind,
+                        acknowledgement_kind,
+                        acknowledgement_target_ref,
+                        reason_code,
+                        normalized.evidence_ref,
+                        normalized.evidence_sha256,
+                    ),
+                ).fetchone()
+            except Exception as error:
+                self._translate(error)
+                raise AssertionError("unreachable")
+        if row is None:
+            raise RuntimeError(
+                "settle_effect_outbox returned no EffectAttemptReceipt"
+            )
+        return _attempt_receipt_from_row(row)
+
+
+__all__ = [
+    "EffectAttemptReceipt",
+    "EffectOutboxLease",
+    "PostgresEffectDelivery",
+]

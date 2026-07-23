@@ -1,8 +1,9 @@
-"""Immutable EffectRequest and payload-bound replay contract.
+"""Immutable EffectRequest and delivery-attempt outcome contracts.
 
-This module owns request identity only. It deliberately has no provider,
-outbox, retry, or delivery code; those capabilities arrive in later slices
-without changing the public request contract.
+This module owns payload-bound request identity plus the typed evidence a
+worker may return after an external attempt. Provider execution, durable
+outbox state, retry policy, and acknowledgement verification remain hidden
+behind delivery adapters.
 """
 
 from __future__ import annotations
@@ -44,6 +45,32 @@ class EffectRequest:
 
 
 @dataclass(frozen=True)
+class AcknowledgedEffect:
+    """Evidence that the request's typed downstream read-back succeeded."""
+
+    acknowledgement: AcknowledgementExpectation
+    evidence_ref: str
+    evidence_sha256: str
+
+
+@dataclass(frozen=True)
+class FailedEffect:
+    """Evidence that one provider attempt failed.
+
+    ``retryable`` is provider classification, not retry policy. The delivery
+    implementation owns backoff, attempt limits, and dead-letter disposition.
+    """
+
+    reason_code: str
+    evidence_ref: str
+    evidence_sha256: str
+    retryable: bool
+
+
+EffectAttemptOutcome = AcknowledgedEffect | FailedEffect
+
+
+@dataclass(frozen=True)
 class EffectView:
     schema_version: str
     id: str
@@ -71,8 +98,8 @@ class EffectDelivery:
 
     ``request`` is concurrency-safe within this shadow process. A replay with
     the same normalized payload returns the original EffectView; a reused key
-    with any semantic drift fails closed. The later transactional-store slice
-    will preserve this contract while adding durable outbox ownership.
+    with any semantic drift fails closed. Durable adapters preserve this
+    contract while adding outbox ownership and attempt settlement.
     """
 
     def __init__(
@@ -207,6 +234,65 @@ def _normalize_request(request: EffectRequest) -> EffectRequest:
     )
 
 
+def _normalize_attempt_outcome(
+    outcome: EffectAttemptOutcome,
+) -> EffectAttemptOutcome:
+    if isinstance(outcome, AcknowledgedEffect):
+        if not isinstance(
+            outcome.acknowledgement,
+            AcknowledgementExpectation,
+        ):
+            raise ValueError("acknowledgement expectation is required")
+        acknowledgement = AcknowledgementExpectation(
+            kind=_required_text(
+                outcome.acknowledgement.kind,
+                field="acknowledgement kind",
+            ),
+            target_ref=_required_text(
+                outcome.acknowledgement.target_ref,
+                field="acknowledgement target_ref",
+            ),
+        )
+        return AcknowledgedEffect(
+            acknowledgement=acknowledgement,
+            evidence_ref=_required_text(
+                outcome.evidence_ref,
+                field="effect attempt evidence_ref",
+            ),
+            evidence_sha256=_normalize_sha256(
+                outcome.evidence_sha256,
+                field="effect attempt evidence_sha256",
+            ),
+        )
+    if isinstance(outcome, FailedEffect):
+        if not isinstance(outcome.retryable, bool):
+            raise ValueError("effect failure retryable must be boolean")
+        return FailedEffect(
+            reason_code=_required_text(
+                outcome.reason_code,
+                field="effect failure reason_code",
+            ),
+            evidence_ref=_required_text(
+                outcome.evidence_ref,
+                field="effect attempt evidence_ref",
+            ),
+            evidence_sha256=_normalize_sha256(
+                outcome.evidence_sha256,
+                field="effect attempt evidence_sha256",
+            ),
+            retryable=outcome.retryable,
+        )
+    raise ValueError("unsupported effect attempt outcome")
+
+
+def _normalize_sha256(value: str, *, field: str) -> str:
+    if not isinstance(value, str) or _SHA256.fullmatch(value) is None:
+        raise ValueError(
+            f"{field} must be 64 lowercase hexadecimal characters"
+        )
+    return value
+
+
 def _request_sha256(request: EffectRequest) -> str:
     encoded = json.dumps(
         {
@@ -233,9 +319,12 @@ def _request_sha256(request: EffectRequest) -> str:
 
 
 __all__ = [
+    "AcknowledgedEffect",
     "AcknowledgementExpectation",
+    "EffectAttemptOutcome",
     "EffectDelivery",
     "EffectRequest",
     "EffectRequestConflict",
     "EffectView",
+    "FailedEffect",
 ]

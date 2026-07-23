@@ -70,16 +70,21 @@
 > interface；尚無 live Postgres authority adapter、`ChangeDelivery.land`、durable
 > receipt 或正式 caller，因此不改變目前 Git writer ownership。
 
-> **Effect Delivery request-identity contract（2026-07-24，shadow）**
+> **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
 > 每個 intent 必須綁定 WorkItem id／version、effect kind、target、payload reference
 > 與 SHA-256、risk、requester，以及 typed downstream acknowledgement expectation；
 > normalized payload 另綁成 canonical SHA-256。同一 idempotency key 的等價／並發
-> replay 只 materialize 一個 EffectRequest，任何欄位漂移皆 fail closed。這只是
-> program commit 11 的 in-process contract；尚未連接 PostgreSQL transaction、
-> WorkItem + outbox atomic write、effect-worker fencing、provider adapter、retry 或
-> downstream read-back，因此不會產生外部效果，也不改變現行 publisher／notification
-> ownership。
+> replay 只 materialize 一個 EffectRequest，任何欄位漂移皆 fail closed。
+> private PostgreSQL adapter 會在同一 transaction 建立 EffectRequest 與唯一 outbox；
+> claim 使用 database clock、`SKIP LOCKED`、有限 lease 與 token fencing。attempt
+> settlement 只接受 typed acknowledgement 或具 evidence hash 的 failure，並原子寫入
+> immutable receipt、bounded exponential retry 或 dead-letter 終態；等價 settlement
+> replay 回傳同一 receipt，late／mismatched token、錯誤 acknowledgement 或 changed
+> outcome 全部 fail closed。worker 只能呼叫 named functions 與讀 token-redacted views。
+> 這仍是 shadow contract：尚未接 provider adapter、Primary Authority、正式 caller 或
+> live migration/downstream read-back，因此不會產生外部效果，也不改變現行
+> publisher／notification ownership。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

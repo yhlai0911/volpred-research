@@ -20,11 +20,14 @@ from threading import RLock
 from typing import Callable
 
 from ._effect import (
+    AcknowledgedEffect,
     AcknowledgementExpectation,
+    EffectAttemptOutcome,
     EffectDelivery,
     EffectRequest,
     EffectRequestConflict,
     EffectView,
+    FailedEffect,
 )
 
 
@@ -413,6 +416,7 @@ def _validate_workspace(proposal: ChangeSetProposal) -> None:
 
 
 __all__ = [
+    "AcknowledgedEffect",
     "AcknowledgementExpectation",
     "ChangeDelivery",
     "ChangeSetConflict",
@@ -420,8 +424,10 @@ __all__ = [
     "ChangeSetView",
     "CheckEvidence",
     "ContentHash",
+    "EffectAttemptOutcome",
     "EffectDelivery",
     "EffectRequest",
     "EffectRequestConflict",
     "EffectView",
+    "FailedEffect",
 ]

@@ -247,6 +247,29 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   transactional outbox identity／claim 基礎，不是完整的 program commit 12，更不是
   notification／publisher ownership cutover。
 
+### 2026-07-24 fenced settlement／retry checkpoint
+
+- program commit 12 的第二個 durable slice 新增 typed
+  `AcknowledgedEffect | FailedEffect` outcome 與單一 `settle_outbox` interface。
+  acknowledgement 必須精確匹配原 EffectRequest 的 kind／target，所有 outcome 都要有
+  evidence reference + SHA-256；provider 只分類 failure 是否 retryable，backoff、
+  attempt limit 與 dead-letter disposition 留在 Effect Delivery implementation。
+- PostgreSQL settlement 以 outbox sequence、effect id、attempt number、worker 與 raw
+  claim token 做 fencing；過期、已被重領或錯綁 claim 在 mutation 前拒絕。transaction
+  會一起寫入 token-digest-only immutable attempt receipt，並更新 outbox／EffectRequest
+  終態；任何後半段 failure 會 rollback receipt 與狀態。等價 client retry 以
+  transaction advisory lock 序列化並回傳原 receipt，不同 outcome fail closed。
+- retry 採 database clock、30 秒起始的 bounded exponential backoff、一小時 cap、
+  五次 attempt limit；第五次 retryable failure 或任何 terminal failure 進
+  dead letter。worker role 只能執行 named function 並讀 token-redacted receipt view，
+  不能 mutation table 或讀 claim token digest。
+- Effect Delivery scoped suite 109 passed，包含雙 worker claim、crash-after-claim
+  recovery、expired-token rejection、並發 settlement replay、retry exhaustion、
+  acknowledgement mismatch 與 transaction rollback。此 checkpoint 沒有 provider
+  adapter、Primary Authority grant、正式 Work Coordinator caller 或 live migration，
+  也尚未實際執行 typed downstream read-back；因此不是 notification／publisher
+  ownership cutover。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

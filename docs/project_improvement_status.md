@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（EffectRequest durable outbox checkpoint）**
+Last updated: **2026-07-24（Effect Delivery fenced settlement checkpoint）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -105,6 +105,16 @@ exact version 綁定阻止 unknown／stale identity。outbox claim 使用 databa
 合併進 Work Coordinator mutation transaction，也沒有 delivery acknowledgement、
 retry／dead letter、Primary Authority fencing 或 provider adapter；program commit 12
 與 Effect Delivery ownership cutover 均未完成。
+同日完成 program commit 12 的第二個 durable checkpoint：`settle_outbox` 將
+outbox sequence／effect id／attempt／worker／claim token 綁成 fenced settlement，
+typed acknowledgement 必須精確匹配原 request；failure 只由 provider 分類是否
+retryable，30 秒起始 exponential backoff、一小時 cap、五次上限與 dead-letter
+disposition 由 PostgreSQL implementation 統一持有。每次 settlement 在同一 transaction
+寫 token-digest-only immutable receipt 並更新 outbox／EffectRequest；等價並發 replay
+回傳同一 receipt，late token、changed outcome、acknowledgement drift 與後半段注入失敗
+均 fail closed／rollback。109 個 Effect Delivery scoped tests 通過。尚未接 provider
+adapter、Primary Authority、正式 Work Coordinator caller、live migration 或真實
+downstream read-back，因此仍不構成外部效果 ownership cutover。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

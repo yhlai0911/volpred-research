@@ -14,11 +14,16 @@ import pytest
 from psycopg.conninfo import conninfo_to_dict
 
 from volpred.ops.delivery import (
+    AcknowledgedEffect,
     AcknowledgementExpectation,
     EffectRequest,
     EffectRequestConflict,
+    FailedEffect,
 )
-from volpred.ops.delivery.postgres import PostgresEffectDelivery
+from volpred.ops.delivery.postgres import (
+    EffectOutboxLease,
+    PostgresEffectDelivery,
+)
 from volpred.ops.work import WorkCoordinator, WorkRequest
 from volpred.ops.work.postgres import PostgresCoordinationStore
 
@@ -33,6 +38,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724020500_operations_core_effect_outbox.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724030000_operations_core_effect_outbox_settlement.sql",
 )
 
 
@@ -160,6 +169,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.effect_attempt_receipts,
               volpred_ops.effect_outbox,
               volpred_ops.effect_requests,
               volpred_ops.work_receipts,
@@ -477,3 +487,393 @@ def test_worker_uses_named_functions_but_cannot_mutate_or_read_claim_token(
             ).description
         }
     assert "claim_token" not in columns
+
+
+def _acknowledged(**overrides: object) -> AcknowledgedEffect:
+    outcome = AcknowledgedEffect(
+        acknowledgement=AcknowledgementExpectation(
+            kind="telegram.message.readback",
+            target_ref="telegram:owner-chat",
+        ),
+        evidence_ref="telegram:message:4321",
+        evidence_sha256="b" * 64,
+    )
+    return replace(outcome, **overrides)
+
+
+def _failed(**overrides: object) -> FailedEffect:
+    outcome = FailedEffect(
+        reason_code="provider_timeout",
+        evidence_ref="attempt-log:effect-postgres-1:1",
+        evidence_sha256="c" * 64,
+        retryable=True,
+    )
+    return replace(outcome, **overrides)
+
+
+def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    effect = delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+
+    receipt = delivery.settle_outbox(
+        lease=lease,
+        outcome=_acknowledged(),
+    )
+    replay = _delivery(
+        postgres_effect_dsn,
+        token="unused-replay-token",
+    ).settle_outbox(
+        lease=lease,
+        outcome=_acknowledged(),
+    )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        outbox = connection.execute(
+            """
+            SELECT status, claimed_by, claim_token, claim_expires_at
+            FROM volpred_ops.effect_outbox
+            WHERE effect_id = %s
+            """,
+            (effect.id,),
+        ).fetchone()
+        receipt_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.effect_attempt_receipts"
+        ).fetchone()[0]
+
+    assert replay == receipt
+    assert receipt.disposition == "delivered"
+    assert receipt.acknowledgement == _acknowledged().acknowledgement
+    assert receipt.retry_at is None
+    assert delivery.inspect(effect.id).status == "delivered"
+    assert delivery.claim_outbox(
+        worker_id="other-worker",
+        lease_seconds=300,
+    ) is None
+    assert outbox == ("delivered", None, None, None)
+    assert receipt_count == 1
+
+
+def test_concurrent_equivalent_settlement_returns_one_immutable_receipt(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+
+    deliveries = (
+        _delivery(postgres_effect_dsn, token="unused-a"),
+        _delivery(postgres_effect_dsn, token="unused-b"),
+    )
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        receipts = tuple(
+            executor.map(
+                lambda item: item.settle_outbox(
+                    lease=lease,
+                    outcome=_acknowledged(),
+                ),
+                deliveries,
+            )
+        )
+
+    assert receipts[0] == receipts[1]
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        receipt_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.effect_attempt_receipts"
+        ).fetchone()[0]
+    assert receipt_count == 1
+
+
+def test_acknowledgement_mismatch_rolls_back_before_terminal_state(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    effect = delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+
+    with pytest.raises(ValueError, match="acknowledgement mismatch"):
+        delivery.settle_outbox(
+            lease=lease,
+            outcome=_acknowledged(
+                acknowledgement=AcknowledgementExpectation(
+                    kind="telegram.message.readback",
+                    target_ref="telegram:another-chat",
+                )
+            ),
+        )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        state = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.effect_requests WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_outbox WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.effect_attempt_receipts)
+            """,
+            (effect.id, effect.id),
+        ).fetchone()
+    assert state == ("requested", "claimed", 0)
+
+
+def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn, token="attempt-token-1")
+    delivery.request(_request())
+    first_lease = delivery.claim_outbox(
+        worker_id="effect-worker-a",
+        lease_seconds=300,
+    )
+    assert first_lease is not None
+
+    first_receipt = delivery.settle_outbox(
+        lease=first_lease,
+        outcome=_failed(),
+    )
+    assert first_receipt.disposition == "retry_scheduled"
+    assert first_receipt.retry_at is not None
+    assert delivery.claim_outbox(
+        worker_id="too-early",
+        lease_seconds=300,
+    ) is None
+
+    with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET available_at = clock_timestamp() - interval '1 second'
+            """
+        )
+
+    second_delivery = _delivery(
+        postgres_effect_dsn,
+        token="attempt-token-2",
+    )
+    second_lease = second_delivery.claim_outbox(
+        worker_id="effect-worker-b",
+        lease_seconds=300,
+    )
+    assert second_lease is not None
+    assert second_lease.attempt_count == 2
+
+    replay = delivery.settle_outbox(
+        lease=first_lease,
+        outcome=_failed(),
+    )
+    assert replay == first_receipt
+    with pytest.raises(ValueError, match="original outcome"):
+        delivery.settle_outbox(
+            lease=first_lease,
+            outcome=_failed(evidence_sha256="d" * 64),
+        )
+
+    stale_second = replace(second_lease, token=first_lease.token)
+    with pytest.raises(ValueError, match="token mismatch"):
+        second_delivery.settle_outbox(
+            lease=stale_second,
+            outcome=_failed(),
+        )
+
+
+def test_expired_claim_cannot_settle_before_recovery(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn, token="expired-token")
+    delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+    with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET claim_expires_at = clock_timestamp() - interval '1 second'
+            """
+        )
+
+    with pytest.raises(ValueError, match="lease expired"):
+        delivery.settle_outbox(lease=lease, outcome=_acknowledged())
+
+    recovered = _delivery(
+        postgres_effect_dsn,
+        token="recovered-token",
+    ).claim_outbox(worker_id="recovery-worker", lease_seconds=300)
+    assert recovered is not None
+    assert recovered.attempt_count == 2
+
+
+def test_terminal_failure_dead_letters_without_another_claim(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    effect = delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+
+    receipt = delivery.settle_outbox(
+        lease=lease,
+        outcome=_failed(
+            retryable=False,
+            reason_code="provider_rejected_target",
+        ),
+    )
+
+    assert receipt.disposition == "dead_lettered"
+    assert receipt.reported_outcome == "terminal_failure"
+    assert delivery.inspect(effect.id).status == "dead_lettered"
+    assert delivery.claim_outbox(
+        worker_id="other-worker",
+        lease_seconds=300,
+    ) is None
+
+
+def test_retry_exhaustion_dead_letters_on_fifth_attempt(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    _delivery(postgres_effect_dsn).request(_request())
+    final_receipt = None
+    for attempt in range(1, 6):
+        delivery = _delivery(
+            postgres_effect_dsn,
+            token=f"attempt-token-{attempt}",
+        )
+        lease = delivery.claim_outbox(
+            worker_id=f"effect-worker-{attempt}",
+            lease_seconds=300,
+        )
+        assert lease is not None
+        assert lease.attempt_count == attempt
+        final_receipt = delivery.settle_outbox(
+            lease=lease,
+            outcome=_failed(
+                evidence_ref=f"attempt-log:effect-postgres-1:{attempt}",
+            ),
+        )
+        if attempt < 5:
+            assert final_receipt.disposition == "retry_scheduled"
+            with psycopg.connect(
+                postgres_effect_dsn,
+                autocommit=True,
+            ) as connection:
+                connection.execute(
+                    """
+                    UPDATE volpred_ops.effect_outbox
+                    SET available_at = clock_timestamp() - interval '1 second'
+                    """
+                )
+
+    assert final_receipt is not None
+    assert final_receipt.disposition == "dead_lettered"
+    assert final_receipt.reported_outcome == "retryable_failure"
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        states = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.effect_requests),
+              (SELECT status FROM volpred_ops.effect_outbox),
+              (SELECT count(*) FROM volpred_ops.effect_attempt_receipts)
+            """
+        ).fetchone()
+    assert states == ("dead_lettered", "dead_lettered", 5)
+
+
+def test_settlement_failure_rolls_back_attempt_receipt_and_state(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    effect = delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+    with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
+        connection.execute(
+            """
+            CREATE FUNCTION volpred_ops.fail_effect_terminal_update()
+            RETURNS trigger LANGUAGE plpgsql AS $$
+            BEGIN
+              IF NEW.status = 'delivered' THEN
+                RAISE EXCEPTION 'injected terminal update failure';
+              END IF;
+              RETURN NEW;
+            END;
+            $$
+            """
+        )
+        connection.execute(
+            """
+            CREATE TRIGGER fail_effect_terminal_update
+            BEFORE UPDATE ON volpred_ops.effect_outbox
+            FOR EACH ROW
+            EXECUTE FUNCTION volpred_ops.fail_effect_terminal_update()
+            """
+        )
+    try:
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="terminal update failure",
+        ):
+            delivery.settle_outbox(
+                lease=lease,
+                outcome=_acknowledged(),
+            )
+        with psycopg.connect(postgres_effect_dsn) as connection:
+            state = connection.execute(
+                """
+                SELECT
+                  (SELECT status FROM volpred_ops.effect_requests WHERE id = %s),
+                  (SELECT status FROM volpred_ops.effect_outbox WHERE effect_id = %s),
+                  (SELECT count(*) FROM volpred_ops.effect_attempt_receipts)
+                """,
+                (effect.id, effect.id),
+            ).fetchone()
+        assert state == ("requested", "claimed", 0)
+    finally:
+        with psycopg.connect(
+            postgres_effect_dsn,
+            autocommit=True,
+        ) as connection:
+            connection.execute(
+                "DROP TRIGGER fail_effect_terminal_update "
+                "ON volpred_ops.effect_outbox"
+            )
+            connection.execute(
+                "DROP FUNCTION volpred_ops.fail_effect_terminal_update()"
+            )
+
+
+def test_worker_cannot_mutate_attempt_receipts_or_read_token_digest(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    delivery = _delivery(postgres_effect_dsn)
+    delivery.request(_request())
+    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    assert lease is not None
+    delivery.settle_outbox(lease=lease, outcome=_acknowledged())
+
+    with _worker_connection(postgres_effect_dsn) as connection:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "DELETE FROM volpred_ops.effect_attempt_receipts"
+            )
+        connection.rollback()
+        connection.execute("SET ROLE volpred_ops_worker")
+        columns = {
+            description.name
+            for description in connection.execute(
+                "SELECT * FROM "
+                "volpred_ops.effect_attempt_receipt_reads LIMIT 0"
+            ).description
+        }
+    assert "claim_token_sha256" not in columns
