@@ -78,7 +78,8 @@ approval 與 terminal disposition。duplicate identity、缺失／模糊 lifecyc
 同日新增 Issue #9 cutover preflight manifest：seam 直接從 immutable receipts 用
 trusted wall clock 重跑 canonical 七日 assessment，並從同一 owner-state bytes 取得
 unique-owner mode 與 CAS SHA；queue path 固定為 repo canonical，paired state 由 queue
-唯一衍生並在 shared lock 內取樣。Raw legacy bytes 由 seam 自行 hash、decode 與 import，
+唯一衍生並在 shared lock 內取樣。Caller 三來源 mappings 先 canonicalize 一次並重建
+private snapshot，後續對帳不再重讀 mutable caller rows。Raw legacy bytes 由 seam 自行 hash、decode 與 import，
 projection metadata 則從 payload 重算。Legacy import 與 staged Coordinator projection
 逐 identity 比對 row count、priority、claim ownership／started timestamp、parent、
 deadline、policy、row created／updated timestamp 與 terminal disposition。通過後的

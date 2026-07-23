@@ -66,7 +66,9 @@
 > receipts 用 trusted wall clock 重跑七日 assessment，並從同一次 owner-state byte
 > snapshot 取得 mode 與 CAS SHA。Queue path 固定為 repo canonical
 > `storage/next_tasks.json`，paired state 由 queue path 唯一衍生；兩者在 shared queue
-> lock 內取樣。Raw legacy bytes 由 seam 自行 decode、計算 SHA
+> lock 內取樣。Caller 的三來源 mappings 在 seam 入口先 canonicalize 一次並解碼成
+> private snapshot，後續 queue equality／import／identity 只讀該 frozen generation。
+> Raw legacy bytes 由 seam 自行 decode、計算 SHA
 > 並重建 importer report。只有 import 無 reconciliation issue，且 staged projection 的 row
 > identity／priority／claim ownership／parent／deadline／terminal disposition 與
 > import 完全一致時才產生 immutable、hash-addressed cutover manifest。Projection

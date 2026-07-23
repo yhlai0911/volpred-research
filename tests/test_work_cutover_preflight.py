@@ -10,7 +10,7 @@ import pytest
 
 from volpred.ops import work_cutover
 from volpred.ops.work import WorkEventView, WorkItemView, WorkSnapshot
-from volpred.ops.work.legacy import LegacySnapshots
+from volpred.ops.work.legacy import LegacySnapshotImporter, LegacySnapshots
 from volpred.ops.work_cutover import prepare_work_ownership_cutover
 from volpred.ops.work_projection import project_legacy_next_tasks
 from volpred.ops.work_shadow_replay import identify_legacy_snapshots
@@ -377,6 +377,41 @@ def test_preflight_rejects_unrepresentable_dispatch_policy(
         match="coordinator projection does not match legacy import",
     ):
         _prepare(tmp_path, legacy_rows=(legacy,))
+
+
+def test_preflight_freezes_mutable_caller_rows_before_import(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    mutable_row = _legacy_row()
+    snapshots = LegacySnapshots(next_tasks=(mutable_row,))
+    _write_canonical_queue(tmp_path, _legacy_bytes(mutable_row))
+    observations = tmp_path / "observations"
+    _write_observations(observations, snapshots=snapshots)
+    projection = project_legacy_next_tasks(_staged_snapshot())
+    real_import = LegacySnapshotImporter.import_snapshot
+
+    def mutate_caller_then_import(
+        importer: LegacySnapshotImporter,
+        supplied: LegacySnapshots,
+    ):
+        mutable_row["priority"] = 2
+        return real_import(importer, supplied)
+
+    monkeypatch.setattr(
+        LegacySnapshotImporter,
+        "import_snapshot",
+        mutate_caller_then_import,
+    )
+
+    manifest = prepare_work_ownership_cutover(
+        observation_directory=observations,
+        legacy_snapshots=snapshots,
+        projection=projection,
+    )
+
+    assert mutable_row["priority"] == 2
+    assert manifest.legacy_row_count == 1
 
 
 @pytest.mark.parametrize(

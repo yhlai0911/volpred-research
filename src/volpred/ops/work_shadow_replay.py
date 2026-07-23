@@ -293,6 +293,16 @@ def identify_legacy_snapshots(
     )
 
 
+def freeze_legacy_snapshots(
+    snapshots: LegacySnapshots,
+) -> LegacySnapshots:
+    """Detach mutable caller mappings behind one canonical byte snapshot."""
+
+    return _snapshots_from_canonical_bytes(
+        _canonical_snapshot_bytes(snapshots)
+    )
+
+
 def replay_legacy_selection(
     snapshots: LegacySnapshots,
     *,
@@ -1731,6 +1741,7 @@ __all__ = [
     "ShadowSelectionDifference",
     "ShadowSelectionView",
     "ShadowSnapshotIdentity",
+    "freeze_legacy_snapshots",
     "identify_legacy_snapshots",
     "replay_legacy_selection",
 ]

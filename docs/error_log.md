@@ -1099,6 +1099,12 @@ forged projection metadata、dispatch/timestamp drift 與 running
 `started_at` drift；preflight／assessment／projection／replay／direct-mode／claim／
 handoff／claim 相鄰 suite 228 passed。
 
+Standards 第三輪另抓到 `LegacySnapshots` shallow-frozen 的 mutable-row TOCTOU：
+同一 caller object 若在 queue equality、import 與 snapshot hash 三次讀取間改動，
+仍可能交叉綁定不同 generation。最終 seam 入口先 canonicalize 三來源一次並 decode
+成 private copy，後續所有 evidence derivation 只讀該 copy；adversarial importer
+mutation regression 證明原 caller row 雖被改動，manifest 仍只反映入口 generation。
+
 **狀態**：此 preflight 缺口已制度化止血，但尚無正式 DB/filesystem CAS ownership
 transaction、七日 live receipts、unique-owner 下游回讀或 live rollback rehearsal。
 因此本切片與 Issue #9 整體都仍是 **contained**，不得宣稱

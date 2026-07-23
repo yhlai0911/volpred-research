@@ -22,7 +22,10 @@ from .work_shadow_assessment import (
     REQUIRED_OBSERVATION_WINDOW,
     assess_shadow_observation_directory,
 )
-from .work_shadow_replay import identify_legacy_snapshots
+from .work_shadow_replay import (
+    freeze_legacy_snapshots,
+    identify_legacy_snapshots,
+)
 from .task_pool_mode import (
     load_task_pool_mode_evidence,
     task_pool_mode_path,
@@ -158,6 +161,7 @@ def prepare_work_ownership_cutover(
 ) -> WorkOwnershipCutoverManifest:
     """Derive a cutover identity from raw evidence without mutating state."""
 
+    immutable_snapshots = freeze_legacy_snapshots(legacy_snapshots)
     queue_path = _canonical_queue_path().resolve()
     state_path = task_pool_mode_path(queue_path)
     with queue_path.open("rb") as queue_handle:
@@ -180,16 +184,16 @@ def prepare_work_ownership_cutover(
     if not assessment.ready_for_cutover:
         raise ValueError("shadow assessment is not ready for cutover")
     raw_next_tasks = _decode_next_tasks(legacy_next_tasks_bytes)
-    if raw_next_tasks != legacy_snapshots.next_tasks:
+    if raw_next_tasks != immutable_snapshots.next_tasks:
         raise ValueError(
             "raw legacy snapshot does not match supplied snapshots"
         )
     import_report = LegacySnapshotImporter().import_snapshot(
-        legacy_snapshots
+        immutable_snapshots
     )
     if not import_report.ready:
         raise ValueError("legacy import is not ready for cutover")
-    current_snapshot = identify_legacy_snapshots(legacy_snapshots)
+    current_snapshot = identify_legacy_snapshots(immutable_snapshots)
     if (
         assessment.latest_snapshot_sha256 != current_snapshot.sha256
         or assessment.latest_snapshot_source_counts

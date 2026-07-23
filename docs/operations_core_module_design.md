@@ -551,6 +551,10 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   path；paired owner state 由 queue path 唯一衍生，queue bytes／owner state 在同一
   shared lock 內取樣並取得 mode 與 CAS SHA；
   caller 不再能傳入或重建 `ready_for_cutover=True` summary 來放行。
+- Caller 三來源 snapshot 的 row mappings 雖可能 mutable，進 seam 第一個動作會先
+  canonicalize 成單一 byte generation，再 decode 成 private copy；queue equality、
+  importer 與 latest-snapshot identity 不再跨三次讀 caller object，避免 mutable-input
+  TOCTOU 交叉綁定。
 - Raw legacy bytes 由 seam 自行 decode、計算 SHA 並產生 importer report；staged
   Work Coordinator projection 會再走既有
   importer，逐 work identity 比對 row count、status、priority、source／policy、
