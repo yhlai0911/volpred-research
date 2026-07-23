@@ -247,6 +247,7 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
     assert result.attempts == 1
     assert attempts == [1]
     assert len(hang_alerts) == 1
+    assert hang_alerts[0]["job"]["timeout_kind"] == "work_cap"
 
 
 def test_worker_refuses_when_auth_already_blocked(tmp_path: Path, monkeypatch) -> None:

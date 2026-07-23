@@ -999,6 +999,12 @@ def run_worker(
                          "started_at": entry.get("fire_at"),
                          "attempt": attempt, "model": model,
                          "log_path": hung.get("log_path", ""),
+                         # The sentinel is minted only by our configured
+                         # deadline.  A raw signal is classified separately as
+                         # external_signal, so do not call this proof of hang.
+                         "timeout_kind": (
+                             "work_cap" if exit_code == TIMEOUT_KILLED_SENTINEL else None
+                         ),
                          # observed at alert time: macOS can and does refuse
                          # killpg, so report whether the SIGKILL actually landed
                          # rather than asserting it did (see procutil.kill_pgid).

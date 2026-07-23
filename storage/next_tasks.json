@@ -45613,10 +45613,28 @@
     "description": "已直接重現並讀到判定式。hook 用一行 grep 決定通過與否，把 `no tests ran` 和 `N passed` 並列為通過條件（alternation 的第二支就是 `(no tests ran)`）。\n\n重現：`uv run python -m pytest tests/definitely_does_not_exist.py -q` → 畫面顯示 「Tests passed.」，實際日誌是 `no tests ran in 0.30s` + `ERROR: file or directory not found`。\n\n本班（hourly-slot-1-bc31c978）就中過一次：跑 tests/test_run_agent_job.py（該檔根本不存在）拿到 Tests passed，差點把它當成驗證通過寫進回報。\n\n嚴重性：這是驗證儀器本身的 bug。任何 agent 打錯測試檔名、或測試檔被移走／改名，都會拿到綠燈並據以宣稱「已驗證」—— 正是 CLAUDE.md 最在意的假宣告，而且 hook 讓它看起來有機械背書，比沒有 hook 更危險。\n\n諷刺的是該檔 line 28 的註解寫明這段就是為了「避免把真正的 pytest 失敗誤報成 Tests passed」，但 `(no tests ran)` 這個 alternation 又把同一類錯誤放了回來。\n\n修法：把 `no tests ran` 從通過條件移除，改成獨立的 WARN/FAIL 分支（收集到 0 個測試本來就不是通過）；並考慮改認 pytest 自己的 exit code（5 = no tests collected、4 = usage error）而非只 grep 文字。\n\n未自行修改：該 hook 位於 ~/.claude（user-global，影響所有專案，不在本 repo），動老闆的全域驗證儀器前先請示。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-20T05:40:07.073428+00:00",
-    "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9"
+    "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9",
+    "claimed_by": "codex-failover-slot-2-061ef3538e234774a5c9af7049d14102",
+    "claimed_at": "2026-07-23T00:10:20.880891+00:00",
+    "claim_session_id": "5b4a740836d8",
+    "status_history": [
+      {
+        "ts": "2026-07-23T00:10:20.880907+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-2-061ef3538e234774a5c9af7049d14102"
+      },
+      {
+        "ts": "2026-07-23T00:10:21.826485+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-2-061ef3538e234774a5c9af7049d14102"
+      }
+    ],
+    "started_at": "2026-07-23T00:10:21.826471+00:00"
   },
   {
     "id": "assign_24ebe308",
@@ -48127,7 +48145,7 @@
     "description": "Alert `supervisor hang_killed` fired 9× over 9.4d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-20T21:25:01.081546+00:00）。\n證據：alert_key=800782d7aa16a35c title='supervisor hang_killed' send_count=9 span=9.4d (first 2026-07-11T06:57:41.105045+00:00 → last 2026-07-20T16:18:57.019986+00:00) — no fire in 5.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "dreaming",
     "created_at": "2026-07-20T21:25:01.081546+00:00",
     "dreaming": {
@@ -48136,7 +48154,30 @@
       "occurrences": 1,
       "governance_target": "docs/error_log.md"
     },
-    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)"
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-22 (was P3)",
+    "status_history": [
+      {
+        "ts": "2026-07-23T00:02:08.629374+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-52e53cf2e9264887a0cdb39bfae081e1"
+      },
+      {
+        "ts": "2026-07-23T00:02:08.885674+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-52e53cf2e9264887a0cdb39bfae081e1"
+      },
+      {
+        "ts": "2026-07-23T00:10:30.483212+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-52e53cf2e9264887a0cdb39bfae081e1"
+      }
+    ],
+    "started_at": "2026-07-23T00:02:08.885658+00:00",
+    "completed_at": "2026-07-23T00:10:30.483197+00:00",
+    "result": "contained: audited all 12 alert sends into three root-cause classes; split configured work-cap kills into supervisor work_timeout WARN while preserving killed_timeout receipt and claim re-pend; true survivor/orphan hangs remain CRITICAL; opened docs/refactor_plan_dispatch_work_admission.md for the remaining pre-claim admission redesign. Verified 30 focused tests, py_compile, diff check, and enforcement-map audit."
   },
   {
     "id": "trending_repost_2026_07_21_ai變現",

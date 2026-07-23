@@ -9,6 +9,7 @@ All alert functions:
 Dedup windows match `refactor_plan_hourly_dispatch.md §3.3 alerts dedup table`:
   auth_blocked         : 3600s
   hang_killed          : 600s
+  work_timeout         : 600s
   silent_death         : 600s
   completion_failure   : 0s     (no dedup — every final failure is visible)
   supervisor_restart   : 60s
@@ -250,13 +251,21 @@ def send_external_signal_alert(
 
 
 def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path = state.STATE_PATH) -> bool:
-    """Hang-killed alert. Dedup 10min."""
-    key = f"hang_killed:{job.get('job_id') or job.get('pid') or 'unknown'}"
+    """Report a killed worker without conflating a work cap with a hang.
+
+    ``timeout_kind=work_cap`` means our configured deadline fired.  That proves
+    only that the task did not fit its execution container; it does not prove
+    the process was wedged.  Kill failures and watchdog findings without that
+    provenance remain ``hang_killed`` CRITICAL alerts.
+    """
+    survivors = job.get("survivors") or []
+    work_timeout = job.get("timeout_kind") == "work_cap" and not survivors
+    alert_class = "work_timeout" if work_timeout else "hang_killed"
+    key = f"{alert_class}:{job.get('job_id') or job.get('pid') or 'unknown'}"
     if state.should_dedup_alert(key, window_s=600, path=state_path):
         return False
 
     # 2026-07-11: don't assert the kill landed — report what was observed.
-    survivors = job.get("survivors") or []
     if survivors:
         headline = "# ⚠️ Worker hang 了，但 SIGKILL 沒殺掉（孤兒還活著）"
         impact = (
@@ -267,6 +276,13 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
                 if job.get("slot_quarantined")
                 else "- 派工 slot 已清掉，下個整點照常 fire（但孤兒不會自己消失）\n"
             )
+        )
+    elif work_timeout:
+        headline = "# Supervisor 在設定的 work cap 回收一個 worker"
+        impact = (
+            "- 這證明工作超出本班時間預算，不證明 worker hang 住\n"
+            "- 本輪 hourly fire 未完成；應縮小 task 或改走 detached compute queue\n"
+            "- 該行程已確認消失；Supervisor 仍存活\n"
         )
     else:
         # Say how long it actually sat, computed from started_at — the old
@@ -312,7 +328,9 @@ def send_hang_alert(*, job: dict[str, Any], log_tail: str = "", state_path: Path
         "## Worker log tail\n\n"
         "```\n" + (tail[-2000:] if tail else "(empty)") + "\n```\n"
     )
-    _send("critical", "supervisor hang_killed", body)
+    level = "warn" if work_timeout else "critical"
+    title = "supervisor work_timeout" if work_timeout else "supervisor hang_killed"
+    _send(level, title, body)
     state.mark_alert_sent(key, path=state_path)
     return True
 

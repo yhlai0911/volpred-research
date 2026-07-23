@@ -262,3 +262,41 @@ def test_alert_body_carries_the_diagnostics(monkeypatch: pytest.MonkeyPatch) -> 
     assert "the agent wedged here" in body
     for blind in ("pid: -1", "started_at: None", "log: (unknown)", "(empty)"):
         assert blind not in body, f"blind-alert marker leaked back in: {blind!r}"
+
+
+def test_work_cap_timeout_is_not_reported_as_a_hang(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    sent: list[tuple[str, str, str]] = []
+    dedup_keys: list[str] = []
+    monkeypatch.setattr(
+        alerts, "_send", lambda level, title, body: sent.append((level, title, body))
+    )
+    monkeypatch.setattr(
+        alerts.state,
+        "should_dedup_alert",
+        lambda key, **_kwargs: dedup_keys.append(key) or False,
+    )
+    monkeypatch.setattr(alerts.state, "mark_alert_sent", lambda *_a, **_k: None)
+
+    alerts.send_hang_alert(
+        job={
+            "job_id": "deadline-job",
+            "pid": 45848,
+            "pgid": 45848,
+            "started_at": "2026-07-22T01:57:08+00:00",
+            "attempt": 1,
+            "model": "claude-opus-4-8",
+            "log_path": "/tmp/worker.log",
+            "survivors": [],
+            "timeout_kind": "work_cap",
+        },
+        log_tail="still making progress when the deadline fired",
+    )
+
+    assert dedup_keys == ["work_timeout:deadline-job"]
+    assert len(sent) == 1
+    level, title, body = sent[0]
+    assert (level, title) == ("warn", "supervisor work_timeout")
+    assert "不證明 worker hang" in body
+    assert "compute queue" in body

@@ -194,6 +194,10 @@ def _check_job(
                      "pid": job.pid, "pgid": job.pgid, "started_at": job.started_at,
                      "attempt": job.attempt, "model": job.model,
                      "log_path": job.log_path,
+                     # max_age_s is the configured execution deadline.  The
+                     # deadline firing proves over-budget work, not a wedged
+                     # process; keep its alert identity out of hang_killed.
+                     "timeout_kind": "work_cap" if outcome == "killed_timeout" else None,
                      "survivors": procutil.pgid_members(job.pgid),
                      # WS-A2b receipt: which task claims this kill handed back.
                      "repended_tasks": repended_tasks},
