@@ -231,6 +231,22 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   effect-worker fencing、provider adapter、retry／dead letter 或 acknowledgement
   read-back；因此它不產生外部效果，也不構成 Effect Delivery ownership cutover。
 
+### 2026-07-24 durable request／outbox checkpoint
+
+- program commit 12 的第一個 durable slice 將 `EffectRequest` 與唯一 outbox row
+  放進同一個 private PostgreSQL transaction。request 以 advisory transaction lock
+  綁定 idempotency key；等價 replay 回傳原始 row，不同 canonical request SHA-256
+  fail closed，outbox insert 失敗會連同 request 一起 rollback。
+- request 必須引用已存在且 version 完全相符的 WorkItem。outbox worker 只能透過
+  named `SECURITY DEFINER` function 取得單筆 claim；selection 使用 database clock、
+  `FOR UPDATE SKIP LOCKED` 與有限 lease，crash 後由過期 claim 重領。read projection
+  不暴露 claim token，runtime role 不能直接新增、修改或刪除底層 row。
+- 此 checkpoint 尚未把 EffectRequest 建立嵌入 Work Coordinator 的 mutation
+  transaction，也沒有 delivered／retry／dead-letter transition、effect-worker 的
+  Primary Authority fencing、provider adapter 或 acknowledgement read-back。因此這是
+  transactional outbox identity／claim 基礎，不是完整的 program commit 12，更不是
+  notification／publisher ownership cutover。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

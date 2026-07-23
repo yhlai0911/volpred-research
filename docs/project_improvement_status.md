@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（EffectRequest idempotency contract）**
+Last updated: **2026-07-24（EffectRequest durable outbox checkpoint）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -93,6 +93,18 @@ fail closed，並發 replay 只 materialize 一筆。117 個 delivery scoped tes
 尚未建立 program commit 12 的 PostgreSQL store／transactional outbox，也沒有
 effect-worker fencing、provider delivery、retry／dead letter 或 downstream read-back，
 因此不會產生外部效果，現行 publisher／notification ownership 不變。
+同日續做 platform program commit 12 的第一個 durable checkpoint：
+private PostgreSQL migration 以單一 transaction 原子建立 EffectRequest 與唯一 outbox
+row；request 先鎖 idempotency key，等價 replay 跨 adapter instance 仍只留一筆，
+payload drift fail closed，注入 outbox insert failure 時兩表均為零。WorkItem FK 與
+exact version 綁定阻止 unknown／stale identity。outbox claim 使用 database clock、
+`FOR UPDATE SKIP LOCKED`、有限 lease 與過期重領；worker role 只能執行 named
+`SECURITY DEFINER` functions／讀 token-redacted projection，不能直接 mutation。
+100 個 Effect Delivery scoped tests 通過，包含真實 PostgreSQL transaction rollback、
+雙 worker concurrent claim 與 crash-after-claim recovery。此 checkpoint 尚未把 request
+合併進 Work Coordinator mutation transaction，也沒有 delivery acknowledgement、
+retry／dead letter、Primary Authority fencing 或 provider adapter；program commit 12
+與 Effect Delivery ownership cutover 均未完成。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
