@@ -34770,7 +34770,7 @@
     "title": "K1723: 颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 202",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 578). Original: 颱風登陸與台股波動：颱風假的 vol 機制 — CWB 警報/登陸資料 + TAIEX/台指期，停市後復市日 gap vol 系統性檢定、與一般連假區分；台灣特有制度國際空白（來源：physical-risk event-study 2025 方法移植）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1723.py with signal.shift(1) + seed=42, (c) K1723_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34779,7 +34779,30 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-16T00:00:02Z"
+    "created_at": "2026-07-16T00:00:02Z",
+    "status_history": [
+      {
+        "ts": "2026-07-23T01:10:25.485999+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-00c477ec1ebe4a5e87d1c2a1de3a5110"
+      },
+      {
+        "ts": "2026-07-23T01:10:25.739881+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-00c477ec1ebe4a5e87d1c2a1de3a5110"
+      },
+      {
+        "ts": "2026-07-23T01:10:25.987802+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-00c477ec1ebe4a5e87d1c2a1de3a5110"
+      }
+    ],
+    "started_at": "2026-07-23T01:10:25.739864+00:00",
+    "completed_at": "2026-07-23T01:10:25.987784+00:00",
+    "result": "Resolved without rerun: K1723 duplicates completed K1675 typhoon-closure event study (2012-2025; 16 closure days/13 events; seed 42; integrity gates PASS; knowledge verdict CONDITIONAL_PASS). Feed coverage already exists in mile_e3cede77 and mile_3c3b4201. Legacy K1675 predates the current artifact gate and still lacks reproduce_spec.json, so no new-system certification is claimed."
   },
   {
     "id": "ci-red-29457218773",
@@ -53003,7 +53026,7 @@
     "title": "ASIA 廣度 backlog 第 2 班：K1723 颱風登陸 vol + 剩餘 ASIA 任務（remediation 順延）",
     "task_type": "experiment",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-22T02:59:50.849005+00:00",
     "description": "承 assign_d7f183e1（老闆 2026-07-22 Telegram 指令：亞太新主題實驗連續 2 班強制排前，remediation 順延）。\n\n**第 1 班（hourly-slot-1-cb097ccd, 2026-07-22 10:53 CST）已執行**：\n- ASIA-3 台股產業 DY spillover（asia3_tw_sector_spillover）→ agent job agent-brief_asia3-f72fed，worktree dispatch-slot-1-cb097ccd-asia3\n- K1724 台股當沖佔比 vs 次日 RV（K1724）→ agent job agent-brief_k1724-4ed6e2，worktree dispatch-slot-1-cb097ccd-k1724\n（K1719 ASIA-5 已於 7/21 完成，不重派）\n\n**本張＝第 2 班要做的**：\n1. experiment lane 優先撈 K1723（颱風登陸與台股波動：颱風假的 vol 機制），remediation 順延。\n2. 檢查上述兩個 agent job 的收件狀態（PHASE A），若已完成先收件驗數字。\n3. 完成後回報：實際跑了哪幾筆、產出 K 編號、verdict、feed 覆蓋狀況 —— 這是老闆指令明文要求的回報項目，不可省。",
@@ -53026,11 +53049,31 @@
         "to": "pending",
         "by": "hourly-slot-3-3e0d71218cbb4cf8b8683c045d8b046d",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 58.9min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-23T01:08:16.620320+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-failover-slot-1-00c477ec1ebe4a5e87d1c2a1de3a5110"
+      },
+      {
+        "ts": "2026-07-23T01:08:16.867031+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-failover-slot-1-00c477ec1ebe4a5e87d1c2a1de3a5110"
+      },
+      {
+        "ts": "2026-07-23T01:10:26.238820+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-failover-slot-1-00c477ec1ebe4a5e87d1c2a1de3a5110"
       }
     ],
-    "started_at": "2026-07-22T03:01:43.993711+00:00",
+    "started_at": "2026-07-23T01:08:16.867016+00:00",
     "last_released_at": "2026-07-22T04:00:29.282980+00:00",
-    "last_release_reason": "liveness_reconcile_detached_3e0d7121"
+    "last_release_reason": "liveness_reconcile_detached_3e0d7121",
+    "completed_at": "2026-07-23T01:10:26.238802+00:00",
+    "result": "PHASE A reconciled truthfully: agent-brief_asia3-f72fed and agent-brief_k1724-4ed6e2 both failed before execution at 2026-07-22T03:05:48Z (exit 2: cwd worktree missing), produced no artifacts, and source tasks remain pending. K1723 was not rerun because K1675 already covers the same typhoon-closure volatility question (13 events; CONDITIONAL_PASS; integrity gates PASS) with published feed coverage mile_e3cede77 plus mile_3c3b4201. No heavy compute was run inline and no duplicate worktree was created."
   },
   {
     "id": "telegram-1305",
