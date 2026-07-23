@@ -72,3 +72,25 @@ weakened in either direction; and every numeric field is unchanged apart from th
 `run_at_utc` stamp that `reproduce_spec.json` declares ignorable.
 
 Final frozen commit: `0b3ab65ee`.
+
+## Round 4 — PASS (Codex primary-path re-attestation before publication)
+
+Codex quota was available again on 2026-07-23, so the fallback review above was
+re-attested on the required primary path before any outward-facing K1436 claim.
+
+- All six claim-surface SHA-256 values still match the frozen round-3 bytes.
+- Codex re-read the causal feature construction, rolling training slice,
+  Clark-West implementation, multiplicity gate, and verdict expression.
+- An independent in-memory rerun rebuilt RV/funding, re-derived 250 sampled
+  lookahead checks, recomputed all three OOS forecast series, QLIKE/MSE, and both
+  Clark-West tests without writing artifacts.
+- The rerun matched the archived artifact: OOS `n=932`; QLIKE
+  `0.2857089950 / 0.2836340297 / 0.2831439808`; one-sided Clark-West
+  `p=0.0804749381 / 0.0409834511`; verdict `NULL`.
+- `scripts/check_experiment_artifacts.py check --path experiments/k1436` and
+  Python compilation both passed.
+
+No blocking defect was found. The publication-safe claim remains narrow:
+funding is a significant in-sample correlate, but neither pre-specified signed
+funding nor the secondary absolute-funding variant clears the adjusted OOS
+forecasting gate.
