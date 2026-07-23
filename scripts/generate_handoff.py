@@ -15,6 +15,7 @@ Cron: HH:50 every hour (10 min before hourly-dispatch fires at :07 next hour).
 """
 from __future__ import annotations
 
+import fcntl
 import json
 import re
 import sys
@@ -68,9 +69,84 @@ def _load_json(path: Path, default: Any) -> Any:
         return default
     try:
         return json.loads(path.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError) as exc:
+    except (json.JSONDecodeError, OSError, UnicodeError) as exc:
         _warn_json_read_failed(path, exc, action="using default")
         return default
+
+
+def _load_task_pool_mode_snapshot() -> tuple[dict[str, Any], bool]:
+    if not TASK_POOL_MODE.exists():
+        return {}, True
+    try:
+        payload = json.loads(TASK_POOL_MODE.read_bytes().decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("task-pool owner state must be an object")
+        enabled = payload.get("enabled", False)
+        mode = payload.get("mode", "queued_execution")
+        if not isinstance(enabled, bool):
+            raise ValueError("task-pool owner enabled must be boolean")
+        if not isinstance(mode, str) or not mode:
+            raise ValueError("task-pool owner mode must be a non-empty string")
+        if enabled and mode not in {
+            "direct_execution",
+            "restore_in_progress",
+        }:
+            raise ValueError(f"unsupported enabled task-pool mode {mode!r}")
+        return payload, True
+    except (
+        json.JSONDecodeError,
+        OSError,
+        UnicodeError,
+        ValueError,
+    ) as exc:
+        _warn_json_read_failed(
+            TASK_POOL_MODE,
+            exc,
+            action="using fail-closed owner snapshot",
+        )
+        return {}, False
+
+
+def _load_task_pool_snapshot() -> tuple[list[Any], Any, bool, bool]:
+    """Read owner state and queue bytes under one queue snapshot lock."""
+
+    if not NEXT_TASKS.exists():
+        task_pool_mode, state_valid = _load_task_pool_mode_snapshot()
+        return [], task_pool_mode, False, state_valid
+    try:
+        with NEXT_TASKS.open("rb") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+            try:
+                task_pool_mode, state_valid = (
+                    _load_task_pool_mode_snapshot()
+                )
+                try:
+                    payload = json.loads(handle.read().decode("utf-8"))
+                    if not isinstance(payload, list):
+                        raise ValueError("task queue root must be a list")
+                except (
+                    json.JSONDecodeError,
+                    OSError,
+                    UnicodeError,
+                    ValueError,
+                ) as exc:
+                    _warn_json_read_failed(
+                        NEXT_TASKS,
+                        exc,
+                        action="using fail-closed empty snapshot",
+                    )
+                    return [], task_pool_mode, False, state_valid
+                return payload, task_pool_mode, True, state_valid
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    except OSError as exc:
+        _warn_json_read_failed(
+            NEXT_TASKS,
+            exc,
+            action="using fail-closed empty snapshot",
+        )
+        task_pool_mode, state_valid = _load_task_pool_mode_snapshot()
+        return [], task_pool_mode, False, state_valid
 
 
 def _parse_completed_at(value: Any) -> datetime:
@@ -298,23 +374,32 @@ def _format_task_line(t: dict[str, Any]) -> str:
 
 
 def build() -> str:
-    tasks = _load_json(NEXT_TASKS, [])
-    task_pool_mode = _load_json(TASK_POOL_MODE, {})
-    direct_mode = bool(
+    (
+        tasks,
+        task_pool_mode,
+        queue_readable,
+        state_valid,
+    ) = _load_task_pool_snapshot()
+    active_direct_execution = bool(
         isinstance(task_pool_mode, dict)
         and task_pool_mode.get("enabled") is True
-        and task_pool_mode.get("mode")
-        in {"direct_execution", "restore_in_progress"}
+        and task_pool_mode.get("mode") == "direct_execution"
     )
     restore_in_progress = bool(
-        direct_mode and task_pool_mode.get("mode") == "restore_in_progress"
+        isinstance(task_pool_mode, dict)
+        and task_pool_mode.get("enabled") is True
+        and task_pool_mode.get("mode") == "restore_in_progress"
+    )
+    snapshot_unreadable = not queue_readable or not state_valid
+    direct_mode = (
+        active_direct_execution or restore_in_progress or snapshot_unreadable
     )
     direct_mode_drift = (
         _direct_mode_receipt_drift(
             tasks if isinstance(tasks, list) else [],
             task_pool_mode,
         )
-        if direct_mode and not restore_in_progress
+        if active_direct_execution and queue_readable
         else None
     )
     dashboard = _load_json(DASHBOARD, {})
@@ -348,10 +433,19 @@ def build() -> str:
                 "  - restore_started_at: "
                 f"{task_pool_mode.get('restore_started_at') or '(unknown)'}"
             )
-        else:
+        elif active_direct_execution:
             lines.append(
                 "- **DIRECT EXECUTION MODE：ACTIVE** — 新任務入池與 claim 已機械封鎖；"
                 "只允許既有控制任務收尾。"
+            )
+        else:
+            lines.append(
+                "- **TASK POOL SNAPSHOT：UNREADABLE** — owner/queue snapshot "
+                "不可安全對帳；禁止 claim、refill 或以空池 fallback。"
+            )
+        if snapshot_unreadable:
+            lines.append(
+                "  - queue_snapshot: unreadable or missing (fail closed)"
             )
         lines.append(
             f"  - activated_at: {task_pool_mode.get('activated_at') or '(unknown)'}"
@@ -394,7 +488,11 @@ def build() -> str:
         row_context = (
             "restore-transaction rows"
             if restore_in_progress
-            else "direct-mode pending rows"
+            else (
+                "unreadable-snapshot rows"
+                if snapshot_unreadable
+                else "direct-mode pending rows"
+            )
         )
         lines.append(f"  - {row_context} (claimable=0): {pending_rows}")
     else:
@@ -447,6 +545,10 @@ def build() -> str:
             lines.append(
                 f"- **Restore recovery rows**：{pending_rows}；**claimable**：0"
             )
+        elif snapshot_unreadable:
+            lines.append(
+                f"- **Unreadable snapshot rows**：{pending_rows}；**claimable**：0"
+            )
         else:
             lines.append(
                 f"- **Direct-mode pending drift rows**：{pending_rows}；"
@@ -493,6 +595,10 @@ def build() -> str:
         if restore_in_progress:
             lines.append(
                 "- (restore 尚未完成 — queue 可暫時為空，不得自行補池或 claim)"
+            )
+        elif snapshot_unreadable:
+            lines.append(
+                "- (queue snapshot 不可讀 — 不得視為空池、補池或 claim)"
             )
         else:
             lines.append("- (direct execution mode — 任務池保持清空，不得自行補池)")
@@ -549,6 +655,8 @@ def build() -> str:
     if direct_mode:
         if restore_in_progress:
             lines.append("RESTORE TRANSACTION 尚未完成：")
+        elif snapshot_unreadable:
+            lines.append("TASK POOL SNAPSHOT 不可安全讀取：")
         else:
             lines.append("DIRECT EXECUTION MODE 已啟用：")
         lines.append("  1. 禁止 claim、refill、建立或恢復 legacy task-pool 任務。")
@@ -556,6 +664,11 @@ def build() -> str:
             lines.append(
                 "  2. 先以 `task_pool_control.py status` 取得最新 state_sha256，"
                 "再用原 backup／actor／reason 重跑 `task_pool_control.py restore`。"
+            )
+        elif snapshot_unreadable:
+            lines.append(
+                "  2. 先用 `task_pool_control.py status` 回讀 owner state；"
+                "修復前不得把解析失敗當成空池。"
             )
         else:
             lines.append("  2. 只直接續做老闆已指定的 operations-core 重構與 live 驗證。")
@@ -574,6 +687,10 @@ def build() -> str:
             lines.append(
                 "  4. 重試會依 transaction receipt 覆寫空白／部分／已完整還原的 "
                 "queue，read-back 後才重開 admission；期間不得碰 queue。"
+            )
+        elif snapshot_unreadable:
+            lines.append(
+                "  4. 只走 receipt/state 綁定的 recovery；禁止手改 queue 或直接補池。"
             )
         else:
             lines.append(

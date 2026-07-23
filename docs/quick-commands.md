@@ -54,10 +54,11 @@ uv run volpred ops job-show <job_id>                 # 查看任務詳情及日�
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
 uv run volpred ops work-shadow-replay --next-tasks-snapshot <next_tasks.json> --task-records-snapshot <task_records.json> --ops-jobs-snapshot <ops_jobs.json> --observation-dir <receipts_dir> --worker-id <worker> --capability code  # 純 snapshot 新舊 selection 對帳；只追加 observation receipt
-uv run python scripts/task_pool_control.py status  # 回讀 mode 與 owner-state CAS identity（state_sha256）
+uv run python scripts/task_pool_control.py status  # 回讀 mode 與 owner-state CAS identity；restore_in_progress 即使 queue partial 也會回傳 SHA，並標 queue_readable=false
+# 自訂 --queue 時，resolved basename 仍須是 next_tasks.json，--state 必須是其 parent/ops/task_pool_mode.json；sibling typo、detached / symlink alias state 都 fail closed
 uv run python scripts/task_pool_control.py enter-direct --expected-state-sha256 <status的SHA或absent> --actor <actor> --reason '<reason>' [--preserve-task-id <id>]  # CAS 通過後才逐位元備份 → 關閉 admission → 清池
 uv run python scripts/task_pool_control.py reconcile-direct --expected-state-sha256 <status的SHA> --actor <actor> --reason '<reason>'  # 只依同一 owner receipt 收斂 stale-writer drift
-uv run python scripts/task_pool_control.py restore --expected-state-sha256 <status的SHA> --backup <receipt綁定路徑> --actor <actor> --reason '<reason>'  # 初次呼叫要求 live pool 為空；若 status.mode=restore_in_progress，沿用原 backup 參數與最新 SHA 重跑即可冪等續作
+uv run python scripts/task_pool_control.py restore --expected-state-sha256 <status的SHA> --backup <receipt綁定路徑> --actor <actor> --reason '<reason>'  # queue/backup 都須符合 owner receipt；初次要求 live pool 為空，restore_in_progress 則沿用原參數與最新 SHA 冪等續作
 
 # experiments/ 結構整理（新規先行 + touched-file migration）
 uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選

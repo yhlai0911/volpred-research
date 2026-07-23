@@ -36,6 +36,7 @@ class TaskPoolMode:
     activated_at: str | None = None
     activated_by: str | None = None
     reason: str | None = None
+    queue_path: str | None = None
     backup_path: str | None = None
     backup_sha256: str | None = None
     backup_bytes: int | None = None
@@ -94,8 +95,29 @@ class RestoreReceipt:
 def task_pool_mode_path(queue_path: str | Path) -> Path:
     """Return the mode state paired with a legacy queue path."""
 
-    queue = Path(queue_path)
+    queue = Path(queue_path).resolve()
+    if queue.name != "next_tasks.json":
+        raise ValueError(
+            "managed task-pool queue must resolve to next_tasks.json"
+        )
     return queue.parent / "ops" / "task_pool_mode.json"
+
+
+def validate_task_pool_state_path(
+    *,
+    queue_path: str | Path,
+    state_path: str | Path,
+) -> Path:
+    """Return the queue-paired owner state or reject a detached identity."""
+
+    expected = task_pool_mode_path(queue_path).resolve()
+    observed = Path(state_path).resolve()
+    if observed != expected:
+        raise ValueError(
+            "state path does not match the queue-paired owner state: "
+            f"expected {expected}, observed {observed}"
+        )
+    return observed
 
 
 def _mode_from_payload(payload: Any) -> TaskPoolMode:
@@ -118,6 +140,7 @@ def _mode_from_payload(payload: Any) -> TaskPoolMode:
         activated_at=_optional_string(payload, "activated_at"),
         activated_by=_optional_string(payload, "activated_by"),
         reason=_optional_string(payload, "reason"),
+        queue_path=_optional_string(payload, "queue_path"),
         backup_path=_optional_string(payload, "backup_path"),
         backup_sha256=_optional_string(payload, "backup_sha256"),
         backup_bytes=_optional_int(payload, "backup_bytes"),
@@ -213,6 +236,16 @@ def _validate_sha256(value: str, *, field: str) -> str:
     return value
 
 
+def _require_receipt_queue(mode: TaskPoolMode, queue: Path) -> str:
+    if mode.queue_path is None:
+        raise ValueError("active task-pool receipt has no queue path")
+    if queue.resolve() != Path(mode.queue_path).resolve():
+        raise ValueError(
+            "queue path does not match the active direct-mode receipt"
+        )
+    return mode.queue_path
+
+
 def _task_ids(rows: Iterable[Any]) -> tuple[set[str], int]:
     ids: set[str] = set()
     anonymous = 0
@@ -276,6 +309,7 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temp_path, path)
+        _fsync_directory(path.parent)
     finally:
         if temp_path.exists():
             temp_path.unlink()
@@ -283,6 +317,14 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
     return (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode()
+
+
+def _fsync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_DIRECTORY", 0))
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def _validate_identity(value: str, *, field: str) -> str:
@@ -317,9 +359,12 @@ def enter_direct_execution_mode(
     safely closed full queue but never an open empty queue without a backup.
     """
 
-    queue = Path(queue_path)
-    state = Path(state_path)
-    backups = Path(backup_dir)
+    queue = Path(queue_path).resolve()
+    state = validate_task_pool_state_path(
+        queue_path=queue,
+        state_path=state_path,
+    )
+    backups = Path(backup_dir).resolve()
     actor = _validate_identity(activated_by, field="activated_by")
     rationale = _validate_identity(reason, field="reason")
     preserve = tuple(
@@ -369,8 +414,18 @@ def enter_direct_execution_mode(
                     raise ValueError(
                         "enter-direct requires disabled queued-execution owner state"
                     )
-            original = queue.read_bytes()
+                if (
+                    source_mode.queue_path is not None
+                    and queue.resolve() != Path(source_mode.queue_path).resolve()
+                ):
+                    raise ValueError(
+                        "queue path does not match the queued-execution owner state"
+                    )
             try:
+                handle.flush()
+                handle.buffer.seek(0)
+                original = handle.buffer.read()
+                handle.seek(0)
                 tasks = json.loads(original.decode("utf-8"))
             except (UnicodeError, json.JSONDecodeError) as exc:
                 raise ValueError(f"next_tasks queue is unreadable: {exc}") from exc
@@ -427,7 +482,8 @@ def enter_direct_execution_mode(
             write_tasks_to_handle(handle, retained)
             handle.flush()
             os.fsync(handle.fileno())
-            if json.loads(queue.read_text(encoding="utf-8")) != retained:
+            handle.seek(0)
+            if json.load(handle) != retained:
                 raise RuntimeError("task-pool clear read-back verification failed")
         finally:
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
@@ -462,8 +518,11 @@ def reconcile_direct_execution_pool(
     or its verified backup pointer.
     """
 
-    queue = Path(queue_path)
-    state = Path(state_path)
+    queue = Path(queue_path).resolve()
+    state = validate_task_pool_state_path(
+        queue_path=queue,
+        state_path=state_path,
+    )
     actor = _validate_identity(reconciled_by, field="reconciled_by")
     rationale = _validate_identity(reason, field="reason")
 
@@ -483,6 +542,7 @@ def reconcile_direct_execution_pool(
             mode = evidence.mode
             if not mode.enabled or mode.mode != "direct_execution":
                 raise ValueError("task pool is not in direct-execution mode")
+            _require_receipt_queue(mode, queue)
             preserve = set(mode.preserve_task_ids)
             raw = handle.read()
             try:
@@ -537,9 +597,12 @@ def restore_task_pool_backup(
 ) -> RestoreReceipt:
     """Restore the verified cutover backup when the live pool is empty."""
 
-    queue = Path(queue_path)
-    state = Path(state_path)
-    backup = Path(backup_path)
+    queue = Path(queue_path).resolve()
+    state = validate_task_pool_state_path(
+        queue_path=queue,
+        state_path=state_path,
+    )
+    backup = Path(backup_path).resolve()
     actor = _validate_identity(restored_by, field="restored_by")
     rationale = _validate_identity(reason, field="reason")
 
@@ -550,7 +613,7 @@ def restore_task_pool_backup(
             expected_state_sha256=expected_state_sha256,
         )
         raise ValueError("next_tasks queue does not exist")
-    with queue.open("r+", encoding="utf-8") as handle:
+    with queue.open("r+b") as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
             evidence = _load_expected_mode_evidence(
@@ -565,6 +628,7 @@ def restore_task_pool_backup(
                 raise ValueError(
                     "task pool is not in direct-execution or restore-in-progress mode"
                 )
+            receipt_queue_path = _require_receipt_queue(mode, queue)
             if (
                 mode.backup_path is None
                 or backup.resolve() != Path(mode.backup_path).resolve()
@@ -584,9 +648,22 @@ def restore_task_pool_backup(
                 raise ValueError(f"backup is unreadable: {exc}") from exc
             if not isinstance(restored, list):
                 raise ValueError("backup root must be a list")
+            if (
+                mode.backup_bytes != len(payload)
+                or mode.backup_task_count != len(restored)
+            ):
+                raise ValueError(
+                    "backup metadata does not match the active direct-mode receipt"
+                )
 
             if mode.mode == "direct_execution":
-                current = json.load(handle)
+                handle.seek(0)
+                try:
+                    current = json.loads(handle.read().decode("utf-8"))
+                except (UnicodeError, json.JSONDecodeError) as exc:
+                    raise ValueError(
+                        f"next_tasks queue is unreadable: {exc}"
+                    ) from exc
                 if not isinstance(current, list):
                     raise ValueError("next_tasks queue root must be a list")
                 if current:
@@ -603,7 +680,7 @@ def restore_task_pool_backup(
                     "activated_at": mode.activated_at,
                     "activated_by": mode.activated_by,
                     "reason": mode.reason,
-                    "queue_path": str(queue.resolve()),
+                    "queue_path": receipt_queue_path,
                     "backup_path": str(backup.resolve()),
                     "backup_sha256": digest,
                     "backup_bytes": len(payload),
@@ -643,6 +720,23 @@ def restore_task_pool_backup(
                         "restore transaction receipt is incomplete: "
                         + ", ".join(missing)
                     )
+                assert mode.restore_started_at is not None
+                assert mode.restore_requested_by is not None
+                assert mode.restore_reason is not None
+                assert mode.restore_source_state_sha256 is not None
+                assert mode.restore_target_sha256 is not None
+                _validate_identity(
+                    mode.restore_started_at,
+                    field="restore_started_at",
+                )
+                restore_requested_by = _validate_identity(
+                    mode.restore_requested_by,
+                    field="restore_requested_by",
+                )
+                restore_reason = _validate_identity(
+                    mode.restore_reason,
+                    field="restore_reason",
+                )
                 _validate_sha256(
                     mode.restore_source_state_sha256,
                     field="restore_source_state_sha256",
@@ -662,23 +756,24 @@ def restore_task_pool_backup(
                 restore_source_state_sha256 = (
                     mode.restore_source_state_sha256
                 )
-                restore_requested_by = mode.restore_requested_by
-                restore_reason = mode.restore_reason
                 prepared_evidence = evidence
 
-            if queue.read_bytes() != payload:
+            handle.seek(0)
+            if handle.read() != payload:
                 handle.seek(0)
                 handle.truncate()
-                handle.write(payload.decode("utf-8"))
-                handle.flush()
-                os.fsync(handle.fileno())
-            if queue.read_bytes() != payload:
+                handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+            handle.seek(0)
+            if handle.read() != payload:
                 raise RuntimeError("task-pool restore read-back verification failed")
 
             disabled_payload = {
                 "schema": 2,
                 "enabled": False,
                 "mode": "queued_execution",
+                "queue_path": receipt_queue_path,
                 "restored_at": now,
                 "restored_by": restore_requested_by,
                 "reason": restore_reason,

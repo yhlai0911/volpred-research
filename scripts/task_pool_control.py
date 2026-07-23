@@ -21,6 +21,7 @@ from volpred.ops.task_pool_mode import (  # noqa: E402
     load_task_pool_mode_evidence,
     reconcile_direct_execution_pool,
     restore_task_pool_backup,
+    validate_task_pool_state_path,
 )
 
 
@@ -102,14 +103,29 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _queue_snapshot(path: Path) -> dict[str, object]:
-    if not path.exists():
-        rows: list[object] = []
-    else:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(payload, list):
-            raise ValueError("task queue root must be a list")
-        rows = payload
+def _queue_snapshot(
+    path: Path,
+    *,
+    allow_unreadable: bool = False,
+) -> dict[str, object]:
+    try:
+        if not path.exists():
+            rows: list[object] = []
+        else:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(payload, list):
+                raise ValueError("task queue root must be a list")
+            rows = payload
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+        if not allow_unreadable:
+            raise
+        return {
+            "pool_count": None,
+            "pending_count": None,
+            "claimed_pending_count": None,
+            "queue_readable": False,
+            "queue_error": f"{type(exc).__name__}: {exc}",
+        }
     pending = 0
     claimed_pending = 0
     for row in rows:
@@ -123,11 +139,18 @@ def _queue_snapshot(path: Path) -> dict[str, object]:
         "pool_count": len(rows),
         "pending_count": pending,
         "claimed_pending_count": claimed_pending,
+        "queue_readable": True,
+        "queue_error": None,
     }
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    args.queue = args.queue.resolve()
+    args.state = validate_task_pool_state_path(
+        queue_path=args.queue,
+        state_path=args.state,
+    )
     if args.command == "enter-direct":
         receipt = enter_direct_execution_mode(
             queue_path=args.queue,
@@ -174,7 +197,12 @@ def main(argv: list[str] | None = None) -> int:
         mode = load_task_pool_mode(args.state)
         state_sha256 = None
         state_bytes = 0
-    snapshot = _queue_snapshot(args.queue)
+    snapshot = _queue_snapshot(
+        args.queue,
+        allow_unreadable=(
+            mode.enabled and mode.mode == "restore_in_progress"
+        ),
+    )
     print(
         json.dumps(
             {

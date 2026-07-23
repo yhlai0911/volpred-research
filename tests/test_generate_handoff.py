@@ -6,6 +6,8 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -132,6 +134,128 @@ def test_handoff_keeps_admission_closed_during_restore_transaction(
     assert "Claim 流程（避免雙 session 撞題）" not in handoff
 
 
+def test_handoff_recovers_when_restore_queue_ends_mid_utf8_character(
+    tmp_path,
+    monkeypatch,
+    capsys,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "next_tasks.json").write_bytes(b'["\xe4\xb8')
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "restore_in_progress",
+                "restore_started_at": "2026-07-23T12:55:00+00:00",
+            }
+        ),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "RESTORE TRANSACTION：IN PROGRESS" in handoff
+    assert "禁止 claim、refill" in handoff
+    captured = capsys.readouterr()
+    assert "UnicodeDecodeError" in captured.err
+
+
+def test_handoff_fails_closed_when_queued_mode_queue_is_unreadable(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "next_tasks.json").write_bytes(b'["\xe4\xb8')
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps({"enabled": False, "mode": "queued_execution"}),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "TASK POOL SNAPSHOT：UNREADABLE" in handoff
+    assert "禁止 claim、refill" in handoff
+    assert "任務池空 — hourly dispatch 必須自主生新題" not in handoff
+    assert "Claim 流程（避免雙 session 撞題）" not in handoff
+
+
+@pytest.mark.parametrize(
+    "state_bytes",
+    [
+        b"{bad-json",
+        b"[]",
+        b'{"enabled": true, "mode": "unknown_owner"}',
+    ],
+)
+def test_handoff_fails_closed_when_owner_state_is_invalid(
+    tmp_path,
+    monkeypatch,
+    state_bytes,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "task_pool_mode.json").write_bytes(state_bytes)
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "TASK POOL SNAPSHOT：UNREADABLE" in handoff
+    assert "禁止 claim、refill" in handoff
+    assert "任務池空 — hourly dispatch 必須自主生新題" not in handoff
+    assert "Claim 流程（避免雙 session 撞題）" not in handoff
+
+
+def test_task_pool_snapshot_reads_owner_state_inside_queue_lock(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps({"enabled": False, "mode": "queued_execution"}),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+    original_flock = module.fcntl.flock
+    original_load_mode = module._load_task_pool_mode_snapshot
+    lock_held = False
+    events: list[str] = []
+
+    def tracked_flock(descriptor: int, operation: int) -> None:
+        nonlocal lock_held
+        original_flock(descriptor, operation)
+        if operation == module.fcntl.LOCK_SH:
+            lock_held = True
+            events.append("lock_shared")
+        elif operation == module.fcntl.LOCK_UN:
+            events.append("unlock")
+            lock_held = False
+
+    def tracked_load_mode() -> tuple[dict[str, object], bool]:
+        assert lock_held is True
+        events.append("read_mode")
+        return original_load_mode()
+
+    monkeypatch.setattr(module.fcntl, "flock", tracked_flock)
+    monkeypatch.setattr(
+        module,
+        "_load_task_pool_mode_snapshot",
+        tracked_load_mode,
+    )
+
+    tasks, mode, readable, state_valid = module._load_task_pool_snapshot()
+
+    assert tasks == []
+    assert mode["mode"] == "queued_execution"
+    assert readable is True
+    assert state_valid is True
+    assert events == ["lock_shared", "read_mode", "unlock"]
+
+
 def test_handoff_treats_direct_mode_receipt_drift_as_unclaimable(
     tmp_path,
     monkeypatch,
@@ -186,7 +310,10 @@ def test_handoff_warns_on_invalid_json_source(tmp_path, monkeypatch, capsys) -> 
 
     assert "總數**：0" in handoff
     captured = capsys.readouterr()
-    assert "[generate_handoff] WARN JSON read failed; using default" in captured.err
+    assert (
+        "[generate_handoff] WARN JSON read failed; "
+        "using fail-closed empty snapshot"
+    ) in captured.err
     assert "next_tasks.json" in captured.err
     assert "JSONDecodeError" in captured.err
 

@@ -23,11 +23,30 @@
 >
 > Restore 採 durable two-phase transaction：先在同一把 queue lock 內把 owner state
 > 寫成 `enabled=true, mode=restore_in_progress`，再把 receipt 綁定的 backup exact
-> bytes 寫回並 fsync/read-back，最後才切成 disabled `queued_execution`。因此 process
+> bytes 寫回並 fsync/read-back，最後才切成 disabled `queued_execution`。Active、
+> prepared 與 restored receipt 都保留同一個 resolved `queue_path`；restore／reconcile
+> caller 指向不同 queue 時，會在任何 queue/state mutation 前 fail closed。因此 process
 > 在 queue write 前、寫到一半或 write 後 crash，admission／claim 都仍保持關閉；
 > operator 由 `status` 取得新的 `state_sha256` 後，以原 backup 參數重跑 `restore`
-> 即可冪等續作。自動 handoff 會把此狀態標為 `RESTORE TRANSACTION：IN PROGRESS`，
-> 不會輸出 claim、refill 或 reconcile-direct 指示。
+> 即可冪等續作。State atomic replace 在 rename 後另 fsync parent directory，確保
+> prepared marker 先於 queue mutation durable；即使 queue 只留下 partial JSON，
+> `status` 仍回傳 state identity，並以 `queue_readable=false`／`queue_error` 明示降級。
+> 自動 handoff 在同一把 queue `LOCK_SH` 內讀 owner state 與 queue bytes，避免把
+> partial queue 配到較新的 final state；會把 restore 狀態標為
+> `RESTORE TRANSACTION：IN PROGRESS`。即使 state 顯示 queued execution，只要 queue
+> snapshot 不可讀，也改標 `TASK POOL SNAPSHOT：UNREADABLE`，不輸出 claim、refill
+> 或空池 fallback。Owner state 只有「檔案不存在」可視為預設 queued；現存但
+> JSON／UTF-8 損壞、root 非 object、欄位型別錯誤或 enabled mode 不受支援時，同樣
+> 視為 unreadable 並 fail closed。
+>
+> Queue 與 owner state 也是單一 identity：state 必須等於「resolved queue parent
+> `/ops/task_pool_mode.json`」。CLI 雖保留 `--queue`／`--state` 供測試與維運，但
+> enter/reconcile/restore/status 都先驗證 pair；detached state、路徑 typo 或 symlink
+> alias 自建的 `alias/ops` state 會在 backup、clear、queue write 前拒絕。Symlink queue
+> 一律在 seam 入口 resolve 一次到真實 queue，且真實 basename 必須是
+> `next_tasks.json`；state pairing、open、receipt 與 read-back 全沿用該固定 path。
+> Restore 的 mutation、fsync 與 exact-byte read-back 使用同一 locked binary fd，
+> alias 在 transaction 中途 retarget 也不能把驗證或寫入導向另一個 inode。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

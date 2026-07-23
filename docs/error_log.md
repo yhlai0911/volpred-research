@@ -977,13 +977,61 @@ receipt 寫回，但 process death／machine crash 不會執行補償；crash wi
 **根因層級與底層修復**：這是跨兩個 JSON owner surfaces 的 transaction ordering
 缺陷，不是資料內容錯誤。Restore 現在先在 queue `LOCK_EX` 內以 atomic replace 寫入
 schema v2 `enabled=true, mode=restore_in_progress` receipt，綁定原 direct-mode state
-SHA、backup SHA／bytes／row count、request actor／reason；接著才把 backup exact bytes
+SHA、resolved queue path、backup SHA／bytes／row count、request actor／reason；接著才把 backup exact bytes
 寫回 queue、fsync 並逐位元 read-back，最後才 commit disabled `queued_execution`。
 若 crash 發生在 queue write 前、途中或後，普通 writer、claim 與 handoff 全部仍 fail
 closed；使用 `status` 取得 prepared state 的最新 SHA，沿用同一 backup 重跑 public
 `restore` seam，會覆寫空白／部分／已完整 recovery bytes，驗證後冪等 finalise。缺欄、
 非 64 位 lowercase hex 的 source／target SHA、或與 active backup identity 不符的
-prepared receipt，都在碰 queue 前拒絕。
+prepared receipt，都在碰 queue 前拒絕。State atomic replace 在 rename 後 fsync
+parent directory，避免 reboot 遺失 prepared marker；`status` 遇
+`restore_in_progress` 的 partial／invalid queue 不再先崩潰，而是保留 state SHA 並輸出
+`queue_readable=false` 與解析錯誤，讓 operator 能完成 receipt-bound retry。原 backup
+bytes/count、target bytes/count 與非空 started_at／actor／reason 都在 queue mutation
+前驗證。
+
+Prepared retry 即使發現 queue path 上的 bytes 已等於 backup，也會在 final owner-state
+前無條件對 locked queue fd flush/fsync；不能把前一個 crash process 留在 page cache
+但尚未 durable 的完整 bytes 當成已提交。handoff JSON loader 同步捕捉
+`UnicodeDecodeError`，queue 若剛好截斷在 UTF-8 多位元字元中，仍會產生
+`RESTORE TRANSACTION：IN PROGRESS` recovery 指示。
+
+Matt Spec 首輪複審另實證：若只綁 backup、不綁 queue，caller 可拿 q1 的 active
+state／backup 改對另一個空 q2 執行 restore，造成 q1 仍空、q2 收到 rows，owner state
+卻已重開 admission。現在 mode schema 解析並保留 `queue_path`；direct、
+`restore_in_progress`、reconcile 與 restored receipt 都 exact-match 同一 resolved
+identity，prepared payload 不再採用 retry caller 的路徑。public wrong-queue regression
+證明 q1、q2、state 與 backup bytes 全部不變。
+
+Matt Spec 第二輪再實證 queue 與 state_path 仍可拆開：detached state 可顯示 gate
+enabled，但 canonical writer 會從 queue parent 讀另一個不存在的 state，等同清池時
+admission 仍開。現在 `task_pool_mode_path()` 先 resolve 真實 queue（含 symlink），再
+唯一衍生 `ops/task_pool_mode.json`；所有 control transition 與 status 都在副作用前
+驗證 exact pair。detached state 與 symlink alias-state regressions 證明 queue、兩個
+state candidates 與 backup inventory 均不變。
+
+後續複審再找到兩個 identity 邊界。第一，同一 parent 的 `next_task.json`（少 s）
+原本也能配到同一 state，造成「錯檔已切換、canonical queue 未動」卻回報成功；現在
+resolved queue basename 強制為 `next_tasks.json`。第二，symlink 雖先用來推導 state，
+後續 open/read-back 仍曾沿用 lexical alias，alias 若在驗證後 retarget 會形成 TOCTOU。
+現在 enter/reconcile/restore/status 在入口只 resolve 一次，後續全用固定真實 path；
+restore 的 compare/write/fsync/read-back 更只用同一 locked binary fd。Sibling filename
+typo與 validation 後 symlink retarget regressions 均證明 canonical queue/state identity
+不會被替換。
+
+Matt Standards 後續複審又指出 handoff 原本先讀 queue、後讀 state，沒有共用 lock：
+restore write 中途可把 partial queue fallback 成 `[]`，隨後卻讀到 final queued state，
+誤輸出「空池應補題」。現在 handoff 以 queue `LOCK_SH` 包住 owner state 與 queue bytes
+的同一 snapshot，與所有 control mutation 的 `LOCK_EX` 互斥；queue JSON／UTF-8
+不可讀或檔案缺失時，即使 owner state 看似 queued，也一律輸出
+`TASK POOL SNAPSHOT：UNREADABLE` 並封鎖 claim/refill。Lock-order regression 與
+queued-mode corrupt-queue regression 固定此 fail-closed contract。
+
+同一複審也延伸到 owner-state 半邊：先前 handoff 對 malformed state 使用 `{}` fallback，
+仍可能輸出正常 claim/refill。現在只有 state 檔案不存在可代表預設 queued execution；
+現存但 JSON／UTF-8 損壞、root 非 object、enabled/mode 型別錯誤或 enabled unknown mode
+都回報 invalid snapshot，與 canonical writer／claim 的 fail-closed 契約一致。三種
+invalid-state regressions（壞 JSON、list root、unknown enabled owner）均禁止空池 fallback。
 
 **回歸、回讀與制度化**：public regression 分別重建「prepared、queue 尚空」與
 「queue 已是 exact backup、final state 尚未寫」兩種 durable crash snapshot，兩者都
@@ -996,3 +1044,11 @@ recovery 契約。此「先開 admission 的 crash window」完成五步 gate，
 **root_cause_fixed_and_verified**；Issue #9 的七日 receipts、正式 Coordinator
 ownership cutover、legacy read-only projection 與 live rollback rehearsal 仍未完成，
 所以 Issue #9 整體仍為 **contained**。
+
+最終 Matt Standards／Spec 經四輪 adversarial review 均 PASS（0 個剩餘 P1／P2）；
+direct-mode、claim、handoff、shadow、queue pairing、roadmap 與 urgent-lane 相鄰套件
+223 passed。最終 full pytest assertions 為 4,656 passed／1 skipped／0 failed；
+process exit code 仍為 1，唯一原因是 CI-parity session auditor 偵測既有未追蹤 live
+`.claude/worktrees`／ops receipts 被部分 tests 讀取。這個 repo-wide fixture hygiene
+問題與本 slice 無因果關係，未把路徑加入永久 parity baseline、未 skip、未掩蓋；
+本 slice 的 exact-path diff check 與 compile check 均通過。
