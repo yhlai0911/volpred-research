@@ -103,6 +103,50 @@ def test_handoff_switches_to_direct_execution_contract(tmp_path, monkeypatch) ->
     assert "Claim 流程（避免雙 session 撞題）" not in handoff
 
 
+def test_handoff_treats_direct_mode_receipt_drift_as_unclaimable(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {
+                "id": "control-task",
+                "status": "in_progress",
+                "task_type": "platform_ops",
+                "priority": 1,
+            },
+            {
+                "id": "stale-writer-leak",
+                "status": "pending",
+                "task_type": "platform_ops",
+                "priority": 2,
+            },
+        ],
+    )
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "direct_execution",
+                "preserve_task_ids": ["control-task"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "DIRECT MODE RECEIPT：BREACHED" in handoff
+    assert "unexpected_task_ids: stale-writer-leak" in handoff
+    assert "**Direct-mode pending drift rows**：1；**claimable**：0" in handoff
+    assert "以下 row 只供 drift 對帳；禁止 claim" in handoff
+    assert "task_pool_control.py reconcile-direct" in handoff
+    assert "**Codex-eligible pending top 8**" not in handoff
+
+
 def test_handoff_warns_on_invalid_json_source(tmp_path, monkeypatch, capsys) -> None:
     module = _load_generate_handoff()
     _write_fixture_files(tmp_path, [])

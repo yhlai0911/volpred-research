@@ -167,6 +167,42 @@ def _task_pool_snapshot(tasks: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def _direct_mode_receipt_drift(
+    tasks: list[dict[str, Any]],
+    mode: dict[str, Any],
+) -> dict[str, Any]:
+    """Compare live task identities with the direct-mode activation receipt."""
+
+    preserve_raw = mode.get("preserve_task_ids", [])
+    receipt_valid = isinstance(preserve_raw, list) and all(
+        isinstance(task_id, str) and task_id
+        for task_id in preserve_raw
+    )
+    preserve = set(preserve_raw) if receipt_valid else set()
+    identity_counts: Counter[str] = Counter()
+    anonymous_rows = 0
+    for task in tasks:
+        task_id = task.get("id")
+        if isinstance(task_id, str) and task_id:
+            identity_counts[task_id] += 1
+        else:
+            anonymous_rows += 1
+    unexpected = sorted(set(identity_counts) - preserve)
+    duplicates = sorted(
+        task_id for task_id, count in identity_counts.items() if count > 1
+    )
+    return {
+        "breached": not receipt_valid
+        or bool(unexpected)
+        or bool(duplicates)
+        or anonymous_rows > 0,
+        "receipt_valid": receipt_valid,
+        "unexpected_task_ids": unexpected,
+        "duplicate_task_ids": duplicates,
+        "anonymous_rows": anonymous_rows,
+    }
+
+
 def _active_agents() -> dict[str, Any]:
     worktrees: list[str] = []
     if WORKTREES.exists():
@@ -269,6 +305,14 @@ def build() -> str:
         and task_pool_mode.get("enabled") is True
         and task_pool_mode.get("mode") == "direct_execution"
     )
+    direct_mode_drift = (
+        _direct_mode_receipt_drift(
+            tasks if isinstance(tasks, list) else [],
+            task_pool_mode,
+        )
+        if direct_mode
+        else None
+    )
     dashboard = _load_json(DASHBOARD, {})
     work_log = _load_json(WORK_LOG, [])
     gmail = _load_json(GMAIL_STATE, {})
@@ -301,13 +345,42 @@ def build() -> str:
         lines.append(
             f"  - backup_sha256: {task_pool_mode.get('backup_sha256') or '(unknown)'}"
         )
+        if direct_mode_drift and direct_mode_drift["breached"]:
+            lines.append(
+                "- **DIRECT MODE RECEIPT：BREACHED** — live queue 不只包含 activation "
+                "receipt 允許的控制任務；這些 row 是 drift，不是可 claim 工作。"
+            )
+            if not direct_mode_drift["receipt_valid"]:
+                lines.append("  - preserve_task_ids: INVALID")
+            if direct_mode_drift["unexpected_task_ids"]:
+                lines.append(
+                    "  - unexpected_task_ids: "
+                    + ", ".join(direct_mode_drift["unexpected_task_ids"][:8])
+                )
+            if direct_mode_drift["duplicate_task_ids"]:
+                lines.append(
+                    "  - duplicate_task_ids: "
+                    + ", ".join(direct_mode_drift["duplicate_task_ids"][:8])
+                )
+            if direct_mode_drift["anonymous_rows"]:
+                lines.append(
+                    f"  - anonymous_rows: {direct_mode_drift['anonymous_rows']}"
+                )
+        else:
+            lines.append("  - direct_mode_receipt: clean (preserved rows only)")
     sc = snap["status_counts"]
     lines.append(f"- **總數**：{sum(sc.values())}")
     for s in ("pending", "pending_main_thread", "claimed", "in_progress", "succeeded", "failed", "blocked", "blocked_on_user"):
         if sc.get(s):
             lines.append(f"  - {s}: {sc[s]}")
-    lines.append(f"  - Codex-eligible pending: {snap['codex_eligible_pending_count']}")
-    lines.append(f"  - Codex-skip pending: {snap['codex_skip_pending_count']}")
+    if direct_mode:
+        pending_rows = (
+            snap["codex_eligible_pending_count"] + snap["codex_skip_pending_count"]
+        )
+        lines.append(f"  - direct-mode pending rows (claimable=0): {pending_rows}")
+    else:
+        lines.append(f"  - Codex-eligible pending: {snap['codex_eligible_pending_count']}")
+        lines.append(f"  - Codex-skip pending: {snap['codex_skip_pending_count']}")
     lines.append("")
     lines.append("**type 分佈（top 6）**：")
     for ttype, cnt in Counter(snap["type_counts"]).most_common(6):
@@ -347,20 +420,39 @@ def build() -> str:
     # 4. Pending top
     lines.append("## 4. Pending 任務 top 8（依 priority asc）")
     lines.append("")
-    lines.append(
-        f"- **Codex-eligible pending**：{snap['codex_eligible_pending_count']}；"
-        f"**Codex-skip pending**：{snap['codex_skip_pending_count']}"
-    )
-    if snap["codex_eligible_pending_count"] == 0 and snap["codex_skip_pending_count"] > 0:
+    if direct_mode:
+        pending_rows = (
+            snap["codex_eligible_pending_count"] + snap["codex_skip_pending_count"]
+        )
+        lines.append(
+            f"- **Direct-mode pending drift rows**：{pending_rows}；**claimable**：0"
+        )
+    else:
+        lines.append(
+            f"- **Codex-eligible pending**：{snap['codex_eligible_pending_count']}；"
+            f"**Codex-skip pending**：{snap['codex_skip_pending_count']}"
+        )
+    if (
+        not direct_mode
+        and snap["codex_eligible_pending_count"] == 0
+        and snap["codex_skip_pending_count"] > 0
+    ):
         lines.append("> Codex worker：此 snapshot 沒有可 claim 的 pending；先跑 `task_pool_claim.py list --codex-eligible`，仍為 0 才走 error_log fallback。")
-    if snap["codex_eligible_pending"]:
+    if snap["codex_eligible_pending"] and not direct_mode:
         lines.append("")
         lines.append("**Codex-eligible pending top 8**：")
         for t in snap["codex_eligible_pending"]:
             lines.append(_format_task_line(t))
         lines.append("")
         lines.append("**All pending top 8**：")
-    if snap["pending_top"]:
+    if direct_mode and snap["pending_top"]:
+        lines.append(
+            "> 以下 row 只供 drift 對帳；禁止 claim。先執行 "
+            "`task_pool_control.py reconcile-direct`，再回讀 status。"
+        )
+        for t in snap["pending_top"]:
+            lines.append(_format_task_line(t))
+    elif snap["pending_top"]:
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))
     elif direct_mode:
@@ -423,6 +515,11 @@ def build() -> str:
             "  3. 先用 `uv run python scripts/task_pool_control.py status` 回讀 gate；"
             "不得因池空走 error_log fallback。"
         )
+        if direct_mode_drift and direct_mode_drift["breached"]:
+            lines.append(
+                "     §1 若標示 RECEIPT BREACHED：禁止 claim；以 "
+                "`task_pool_control.py reconcile-direct` 收斂後再次回讀 status。"
+            )
         lines.append(
             "  4. 回復舊池只准用 receipt 綁定的 `task_pool_control.py restore`，"
             "且 live pool 必須為空。"
