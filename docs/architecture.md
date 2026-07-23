@@ -104,8 +104,14 @@
 > immutable receipt、bounded exponential retry 或 dead-letter 終態；等價 settlement
 > replay 回傳同一 receipt，late／mismatched token、錯誤 acknowledgement 或 changed
 > outcome 全部 fail closed。worker 只能呼叫 named functions 與讀 token-redacted views。
-> 這仍是 shadow contract：尚未接 provider adapter、Primary Authority、正式 caller 或
-> live migration/downstream read-back，因此不會產生外部效果，也不改變現行
+> program commit 13 已加入一個窄的 safe email notification adapter：raw JSON payload
+> 必須與 EffectRequest SHA-256 相符，effect／recipient／acknowledgement 必須是同一個
+> typed contract；穩定 Message-ID 在 SMTP 前先查 Sent mailbox，重播若已存在且收件人、
+> subject、plain／HTML body 全相符就不重寄。SMTP 返回後仍須經獨立 IMAP read-back
+> 取得 exact message bytes 才能回傳 `AcknowledgedEffect`；查無訊息為 retryable
+> failure，內容漂移則 terminal fail closed。這仍是 shadow provider capability：
+> 尚未把 adapter 接到 durable claim／settlement worker、Primary Authority 或正式
+> caller，也未執行 live send/read-back 或 migration，因此不改變現行
 > publisher／notification ownership。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**

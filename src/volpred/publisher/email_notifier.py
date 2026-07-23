@@ -25,6 +25,13 @@ def _utc_now() -> str:
 
 
 TAIPEI_TZ = ZoneInfo("Asia/Taipei")
+_PROVIDER_MESSAGE_ID = re.compile(r"<[^<>\s@]+@[^<>\s@]+>")
+
+
+def _validate_provider_message_id(value: str) -> str:
+    if _PROVIDER_MESSAGE_ID.fullmatch(value) is None:
+        raise ValueError("provider_message_id must be one Message-ID")
+    return value
 
 
 def _warn_email_notifier(message: str, path: Path, exc: Exception) -> None:
@@ -408,6 +415,7 @@ class EmailNotifier:
         text_body: str,
         html_body: str | None,
         recipients: list[str],
+        provider_message_id: str | None = None,
     ) -> None:
         # 2026-04-20 fix: hard gate against tests + ephemeral runs leaking into
         # user inbox. User reported receiving "First run scheduled article" and
@@ -432,6 +440,10 @@ class EmailNotifier:
         message["Subject"] = subject
         message["From"] = formataddr((self.from_name, self.from_email))
         message["To"] = ", ".join(recipients)
+        if provider_message_id is not None:
+            message["Message-ID"] = _validate_provider_message_id(
+                provider_message_id
+            )
         message.set_content(text_body)
         if html_body:
             message.add_alternative(html_body, subtype="html")
@@ -462,10 +474,24 @@ class EmailNotifier:
         dedupe_type: str | None = None,
         dedupe_key: str | None = None,
         force_send: bool = False,
+        provider_message_id: str | None = None,
     ) -> str:
         import uuid
 
         metadata = dict(metadata or {})
+        if provider_message_id is not None:
+            provider_message_id = _validate_provider_message_id(
+                provider_message_id
+            )
+            recorded_message_id = metadata.get("provider_message_id")
+            if (
+                recorded_message_id is not None
+                and recorded_message_id != provider_message_id
+            ):
+                raise ValueError(
+                    "provider_message_id conflicts with notification metadata"
+                )
+            metadata["provider_message_id"] = provider_message_id
         if dedupe_type and dedupe_key:
             metadata.setdefault("notification_type", dedupe_type)
             metadata.setdefault("notification_key", dedupe_key)
@@ -513,6 +539,7 @@ class EmailNotifier:
                     text_body=body,
                     html_body=html_body,
                     recipients=target_recipients,
+                    provider_message_id=provider_message_id,
                 )
                 notification["sent"] = True
             except Exception as exc:

@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Effect Delivery fenced settlement checkpoint）**
+Last updated: **2026-07-24（safe email notification adapter checkpoint）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -135,6 +135,18 @@ disposition 由 PostgreSQL implementation 統一持有。每次 settlement 在�
 均 fail closed／rollback。109 個 Effect Delivery scoped tests 通過。尚未接 provider
 adapter、Primary Authority、正式 Work Coordinator caller、live migration 或真實
 downstream read-back，因此仍不構成外部效果 ownership cutover。
+同日完成 program commit 13 的第一個 safe email notification provider adapter：
+只接受 `email.notification.send`／`safe`／單一收件人與同 target 的
+`email.sent-mail.readback` typed contract；raw payload bytes 必須與 EffectRequest
+SHA-256 相符。Adapter 以 effect identity 導出穩定 Message-ID，SMTP 前先查 Sent
+mailbox 以避免可驗證重播重寄，provider write 後再由獨立 IMAP adapter 回讀 exact
+message bytes；Message-ID、recipient、subject、plain／HTML body 全相符才產生
+`AcknowledgedEffect`，查無訊息為 retryable failure，內容漂移 terminal fail closed。
+既有 `EmailNotifier` 只新增可選 Message-ID threading，現行 caller ownership 不變。
+133 個 Effect Delivery／EmailNotifier scoped tests 通過，全程未連網、未寄信；尚未接
+durable outbox claim／settlement worker、Primary Authority、正式 Work Coordinator
+caller、live migration 或真實 downstream smoke，因此仍不構成 notification ownership
+cutover。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

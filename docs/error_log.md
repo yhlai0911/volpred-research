@@ -1143,3 +1143,30 @@ status。
 **root_cause_fixed_and_verified**；Issue #9 仍缺七日 live receipts、正式
 DB/filesystem CAS ownership transaction、unique-owner 下游回讀與 rollback rehearsal，
 所以 Issue 整體仍為 **contained**。
+
+### 2026-07-24 — SMTP acceptance 仍可被誤當成通知已送達 — contained
+
+**症狀與根因層級**：Effect Delivery 已有 durable request／outbox／settlement，但沒有
+任何 production-shaped provider adapter；現行 EmailNotifier 的 transport seam 在 SMTP
+呼叫未拋例外後即標記 `sent=true`。這只能證明 local call／SMTP acceptance，不能證明
+下游 Sent mailbox 有 exact message，也無法讓 outbox replay 在重寄前辨認已送出的同一
+effect。根因是 provider acknowledgement 契約缺少獨立 read-back，不是補一個 success
+boolean 能解決。
+
+**底層 containment**：新增窄的 `EmailNotificationEffectAdapter`，只接受 safe、單一
+收件人的 typed email effect。Raw payload bytes 必須與 EffectRequest SHA-256 相符；
+effect／target／acknowledgement 綁定後導出穩定 Message-ID。Adapter 在 SMTP 前先查
+Sent mailbox；存在且 recipient／subject／plain／HTML body 精確相符便冪等 acknowledge，
+不再重寄。SMTP 後必須經獨立 IMAP adapter 回讀 exact RFC822 bytes 才回傳
+`AcknowledgedEffect`，evidence SHA-256 直接取自回讀 bytes；查無訊息為 retryable，
+已存在但內容漂移則 terminal fail closed。`EmailNotifier` 只新增可選 Message-ID
+threading，未複製第二套 SMTP implementation。
+
+**回歸、回讀與結案界線**：fake Sent mailbox 與 production IMAP adapter contract
+覆蓋成功 read-back、可驗證 replay 不重寄、SMTP 成功但 Sent 缺失、transport timeout、
+raw payload drift、header injection、recipient／subject／body drift 與 exact evidence
+hash；連同 Effect Delivery PostgreSQL settlement 及既有 EmailNotifier 共 133 tests
+通過，全程未連網、未寄信。此 slice 已把 adapter interface 與 failure semantics
+制度化，但尚未接 durable outbox worker／settlement、Primary Authority 或正式 caller，
+也沒有 live send/read-back receipt；因此 program commit 13 與 notification ownership
+仍是 **contained**，不得宣稱 live delivery 已完成。

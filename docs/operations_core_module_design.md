@@ -270,6 +270,27 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   也尚未實際執行 typed downstream read-back；因此不是 notification／publisher
   ownership cutover。
 
+### 2026-07-24 safe email notification adapter checkpoint
+
+- program commit 13 的第一個 provider adapter 只接受
+  `email.notification.send` + `safe` risk + 單一 `email:<recipient>` target，並要求
+  完全相同 target 的 `email.sent-mail.readback` acknowledgement；其他 effect／risk／
+  target 組合在 provider 前 terminal fail closed。
+- caller 提供的 raw `email-notification.v1` JSON bytes 必須 exact-match EffectRequest
+  的 payload SHA-256。Adapter 以 effect／request／payload identity 導出穩定
+  Message-ID；SMTP 前先查 Sent mailbox，已存在且 Message-ID、收件人、subject、
+  plain／HTML body 全相符時直接回傳相同 acknowledgement，不重寄。
+- 現行 `EmailNotifier` 只新增可選的 provider Message-ID threading，既有 caller
+  interface 與 bookkeeping 不變。SMTP process exit／server acceptance 不算成功；
+  provider write 後必須透過獨立 `ImapSentMailReader` 回讀 exact message bytes，
+  acknowledgement evidence hash 直接取該 bytes。缺 Sent copy 為 retryable failure，
+  已存在但內容漂移則 terminal fail closed。
+- fake Sent adapter 與 production IMAP adapter 共用同一個窄 read port；133 個 Effect
+  Delivery／EmailNotifier scoped regressions 通過，且測試未連網、未寄信。此 checkpoint
+  尚未接 durable outbox worker／settlement、Primary Authority、正式 Work Coordinator
+  caller 或 live migration，也未執行真實 downstream smoke；因此 program commit 13
+  只達 shadow provider capability，不構成 notification ownership cutover。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam
