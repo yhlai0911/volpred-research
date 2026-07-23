@@ -1045,10 +1045,15 @@ recovery 契約。此「先開 admission 的 crash window」完成五步 gate，
 ownership cutover、legacy read-only projection 與 live rollback rehearsal 仍未完成，
 所以 Issue #9 整體仍為 **contained**。
 
-最終 Matt Standards／Spec 經四輪 adversarial review 均 PASS（0 個剩餘 P1／P2）；
-direct-mode、claim、handoff、shadow、queue pairing、roadmap 與 urgent-lane 相鄰套件
-223 passed。最終 full pytest assertions 為 4,656 passed／1 skipped／0 failed；
+Matt Standards／Spec 經多輪 adversarial review 與 immutable commit 回讀後均 PASS
+（0 個剩餘 P1／P2）。Post-commit Standards 曾再抓出 handoff 對 list 內 malformed
+row 仍會 `.get()` 崩潰的 P2；follow-up locked loader 現要求 `id/status/task_type`
+為必要非空字串，`title` 可省略但若存在必須是字串。14 組 non-object、wrong-type、
+missing、null、empty 與 whitespace public regressions 都輸出 unreadable/fail-closed，
+不再產生 claim/refill 指示。最終 direct-mode、claim、handoff、shadow、queue pairing、
+roadmap 與 urgent-lane 相鄰套件 242 passed。主要程式修正後的 full pytest assertions
+為 4,656 passed／1 skipped／0 failed；
 process exit code 仍為 1，唯一原因是 CI-parity session auditor 偵測既有未追蹤 live
 `.claude/worktrees`／ops receipts 被部分 tests 讀取。這個 repo-wide fixture hygiene
 問題與本 slice 無因果關係，未把路徑加入永久 parity baseline、未 skip、未掩蓋；
-本 slice 的 exact-path diff check 與 compile check 均通過。
+follow-up focused suite 66 passed，exact-path diff check 與 compile check 均通過。

@@ -107,6 +107,28 @@ def _load_task_pool_mode_snapshot() -> tuple[dict[str, Any], bool]:
         return {}, False
 
 
+def _validate_task_pool_rows(payload: list[Any]) -> list[dict[str, Any]]:
+    required_identity_fields = ("id", "status", "task_type")
+    validated: list[dict[str, Any]] = []
+    for index, row in enumerate(payload):
+        if not isinstance(row, dict):
+            raise ValueError(f"task queue row {index} must be an object")
+        for field in required_identity_fields:
+            value = row.get(field)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(
+                    f"task queue row {index} field {field!r} "
+                    "must be a non-empty string"
+                )
+        title = row.get("title")
+        if title is not None and not isinstance(title, str):
+            raise ValueError(
+                f"task queue row {index} field 'title' must be a string"
+            )
+        validated.append(row)
+    return validated
+
+
 def _load_task_pool_snapshot() -> tuple[list[Any], Any, bool, bool]:
     """Read owner state and queue bytes under one queue snapshot lock."""
 
@@ -124,6 +146,7 @@ def _load_task_pool_snapshot() -> tuple[list[Any], Any, bool, bool]:
                     payload = json.loads(handle.read().decode("utf-8"))
                     if not isinstance(payload, list):
                         raise ValueError("task queue root must be a list")
+                    tasks = _validate_task_pool_rows(payload)
                 except (
                     json.JSONDecodeError,
                     OSError,
@@ -136,7 +159,7 @@ def _load_task_pool_snapshot() -> tuple[list[Any], Any, bool, bool]:
                         action="using fail-closed empty snapshot",
                     )
                     return [], task_pool_mode, False, state_valid
-                return payload, task_pool_mode, True, state_valid
+                return tasks, task_pool_mode, True, state_valid
             finally:
                 fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
     except OSError as exc:

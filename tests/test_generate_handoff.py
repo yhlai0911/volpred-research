@@ -184,6 +184,46 @@ def test_handoff_fails_closed_when_queued_mode_queue_is_unreadable(
 
 
 @pytest.mark.parametrize(
+    "rows",
+    [
+        [None],
+        [1],
+        [{"status": 1}],
+        [{"task_type": []}],
+        [{"id": {}}],
+        [{"title": 7}],
+        [{"status": "pending", "task_type": "platform_ops"}],
+        [{"id": None, "status": "pending", "task_type": "platform_ops"}],
+        [{"id": "", "status": "pending", "task_type": "platform_ops"}],
+        [{"id": " ", "status": "pending", "task_type": "platform_ops"}],
+        [{"id": "task", "task_type": "platform_ops"}],
+        [{"id": "task", "status": "pending"}],
+        [{"id": "task", "status": " ", "task_type": "platform_ops"}],
+        [{"id": "task", "status": "pending", "task_type": ""}],
+    ],
+)
+def test_handoff_fails_closed_when_queue_rows_violate_contract(
+    tmp_path,
+    monkeypatch,
+    rows,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, rows)
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps({"enabled": False, "mode": "queued_execution"}),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "TASK POOL SNAPSHOT：UNREADABLE" in handoff
+    assert "禁止 claim、refill" in handoff
+    assert "任務池空 — hourly dispatch 必須自主生新題" not in handoff
+    assert "Claim 流程（避免雙 session 撞題）" not in handoff
+
+
+@pytest.mark.parametrize(
     "state_bytes",
     [
         b"{bad-json",
