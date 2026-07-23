@@ -721,6 +721,67 @@ def ops_work_shadow_replay(
     click.echo(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
 
 
+@ops.command("work-shadow-assess")
+@click.option(
+    "--observation-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    required=True,
+    help="Directory containing append-only work shadow receipts.",
+)
+@click.option(
+    "--assessed-at",
+    default=None,
+    help="ISO-8601 assessment time; defaults to the current UTC time.",
+)
+@click.option("--queue-owner-mode", required=True)
+@click.option(
+    "--required-days",
+    type=click.FloatRange(min=0.0, min_open=True),
+    default=7.0,
+    show_default=True,
+)
+@click.option(
+    "--max-gap-hours",
+    type=click.FloatRange(min=0.0, min_open=True),
+    default=26.0,
+    show_default=True,
+)
+def ops_work_shadow_assess(
+    observation_dir: Path,
+    assessed_at: str | None,
+    queue_owner_mode: str,
+    required_days: float,
+    max_gap_hours: float,
+) -> None:
+    """Fail closed unless explicit shadow receipts satisfy the soak gate."""
+    from datetime import timedelta
+
+    from volpred.ops.work_shadow_assessment import (
+        assess_shadow_observation_directory,
+    )
+
+    assessment_time = (
+        _parse_observed_at(assessed_at)
+        or datetime.now(timezone.utc)
+    )
+    report = assess_shadow_observation_directory(
+        observation_dir,
+        assessed_at=assessment_time,
+        queue_owner_mode=queue_owner_mode,
+        required_window=timedelta(days=required_days),
+        max_gap=timedelta(hours=max_gap_hours),
+    )
+    click.echo(
+        json.dumps(
+            report.as_dict(),
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+    )
+    if not report.ready_for_cutover:
+        raise click.exceptions.Exit(2)
+
+
 @ops.group("rollback")
 def ops_rollback() -> None:
     """Rollback points for local repo + storage + config recovery."""
