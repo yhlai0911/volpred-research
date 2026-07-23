@@ -124,13 +124,18 @@ UNFILED_INCIDENT_MAX_FINDINGS = 8
 # owner for the condition behind the notification. `Host cron failure detected`
 # stores the actual job only in details.failing_logs; loop_health.error_recurrence
 # tracks it canonically as <log>.log:exit<code>. A successful quota failover is
-# recovery telemetry, while `supervisor quota_blocked` owns the provider outage.
-# Feeding either notification through the generic incident detectors creates a
-# duplicate/false Three-Strike instead of identifying a new failure class.
+# recovery telemetry, while `supervisor quota_blocked` owns the provider outage
+# and records whether Codex recovered the slot separately. Feeding any of those
+# already-owned notifications through the generic incident detectors creates a
+# duplicate/false Three-Strike instead of identifying a new failure class. The
+# failover-failed title is deliberately absent: it represents real outcome loss.
 PERSISTENT_ALERT_DELEGATED_OWNERS = {
     "Host cron failure detected": "loop_health.error_recurrence",
+    "supervisor quota_blocked（額度恢復後自動復工）": (
+        "dispatch_supervisor.quota_failover"
+    ),
     "Claude→Codex failover 已接手（Claude 端：quota）": (
-        "dispatch_supervisor.quota_blocked"
+        "dispatch_supervisor.quota_failover"
     ),
 }
 

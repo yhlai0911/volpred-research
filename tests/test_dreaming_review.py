@@ -324,12 +324,18 @@ def test_detect_persistent_alerts_skips_host_cron_umbrella_owned_by_error_recurr
     assert signature not in baseline
 
 
-def test_detect_persistent_alerts_skips_successful_quota_failover_telemetry(tmp_path):
-    """Quota is owned upstream; a successful fallback is not another incident."""
+def test_detect_persistent_alerts_skips_owned_quota_notifications(tmp_path):
+    """Supervisor-owned outage/recovery notices are not generic incidents."""
     storage = _storage(tmp_path)
     _write_alert_dedup(
         storage,
         {
+            "e46b1923cd3787a9" + "0" * 48: {
+                "title": "supervisor quota_blocked（額度恢復後自動復工）",
+                "send_count": 13,
+                "first_sent_at": _iso(16),
+                "last_sent_at": _iso(0.1),
+            },
             "31bfa7e7f9289f4c" + "0" * 48: {
                 "title": "Claude→Codex failover 已接手（Claude 端：quota）",
                 "send_count": 10,
@@ -1406,6 +1412,44 @@ def test_unfiled_incident_skips_successful_quota_failover_telemetry(tmp_path):
     )
 
     assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_skips_supervisor_owned_quota_outage(tmp_path):
+    """Quota outage already has a supervisor owner; do not open a filing task."""
+    storage = _storage(tmp_path)
+    _incident_stream(
+        storage,
+        "e46b1923cd3787a9" + "0" * 48,
+        "supervisor quota_blocked（額度恢復後自動復工）",
+        13,
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# empty\n", encoding="utf-8"
+    )
+
+    assert dr.detect_unfiled_incident_class(str(storage), {}, NOW) == []
+
+
+def test_unfiled_incident_keeps_quota_failover_failure(tmp_path):
+    """Only successful/owned telemetry is skipped; real slot loss stays visible."""
+    storage = _storage(tmp_path)
+    key = "b74691d14763e77c" + "0" * 48
+    _incident_stream(
+        storage,
+        key,
+        "Claude→Codex failover 接手失敗（Claude 端：quota）",
+        3,
+    )
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "error_log.md").write_text(
+        "# empty\n", encoding="utf-8"
+    )
+
+    findings = dr.detect_unfiled_incident_class(str(storage), {}, NOW)
+    assert [f.signature for f in findings] == [
+        f"unfiled_incident_class:{key[:16]}"
+    ]
 
 
 def test_filed_incident_class_is_not_reproposed(tmp_path):
