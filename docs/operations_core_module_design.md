@@ -539,9 +539,34 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   failure、release failure 與 local expiry cases 亦都維持 fail closed。Primary
   Authority session、Supabase adapter 與 PG17 RPC scoped suite 共 12 passed。
 - 這完成 host workflow 的 in-process state／demotion contract，但尚未把週期性 renew
-  接到 canonical keepalive、把 active state 綁到所有 effect classes，也沒有執行兩台
-  真實 Mac 的 network-partition／五分鐘 failover rehearsal。因此本切片的局部根因為
-  `root_cause_fixed_and_verified`，program commit 34 整體仍是 `contained`。
+  接到 canonical keepalive。這個缺口的後續狀態見下方 checkpoint；所有 effect
+  classes 的 enable gate與兩台真實 Mac network-partition／五分鐘 failover rehearsal
+  仍未完成。因此本切片的局部根因為 `root_cause_fixed_and_verified`，program
+  commit 34 整體仍是 `contained`。
+
+### 2026-07-24 canonical Primary Authority keepalive checkpoint
+
+- `HostAuthorityKeepalive` 是一個 host process 內唯一的週期性 renew owner。它先透過
+  `HostAuthoritySession.activate()` 取得 lease，之後 caller 只能經 keepalive 的
+  `current_lease()` 取用；wrapped session 不再是 effect／commit caller 的 enable
+  interface。Renew interval 必須短於 lease，production composition 預設
+  300 秒 lease／60 秒 renew。
+- Worker renew failure、非 `Exception` 的 thread termination、dead worker、session
+  read-back drift、release failure與 join timeout都先把 keepalive state 設為
+  `demoted` 並關閉 current-lease gate。Stop 也先進 `stopping` 再等待 remote release；
+  即使 RPC 卡住，正式 caller 已無法取得 lease。Status 不含 raw fencing token，只暴露
+  authority identity、renewal count、last renewed expiry、worker liveness與 exception
+  type。
+- 新 unit／concurrency cases覆蓋 renew、clean stop、renew failure、`BaseException`、
+  release response lost、blocked-renew stop timeout、invalid renewal margin、
+  environment composition與 token redaction；連同 session／Supabase adapter共
+  22 passed。Production no-effect rehearsal 讓 A host renew 一次並 release，B host
+  以同一 key 接管；epoch 精確 `1 → 2`，兩個 release refs 都由 DB transaction回傳，
+  final state 都是 `stopped`。
+- 這個週期性 keepalive owner 缺口為
+  `root_cause_fixed_and_verified`。尚未完成的是全 effect-family enable gate、真實
+  雙 Mac network partition、Supabase outage與五分鐘 RTO rehearsal，因此 program
+  commit 34 整體仍是 `contained`。
 
 ## 6. Effect Delivery
 

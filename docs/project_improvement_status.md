@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Primary Authority host session／shadow）**
+Last updated: **2026-07-24（Primary Authority canonical keepalive／live no-effect rehearsal）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -375,9 +375,15 @@ program commit 34 與 Change Delivery umbrella 仍為 `contained`。
 失敗都先清除本機 lease並轉為 demoted。共享 store 的雙 host injection、renew
 unavailable、release response lost 與 expiry regressions，加上既有 Supabase／PG17
 authority contracts，共 12 passed。這使 session lifecycle 的局部缺口達
-`root_cause_fixed_and_verified`；但 canonical keepalive、全 effect-family enable gate
-與真實雙 Mac network-partition／RTO rehearsal尚未完成，所以 program commit 34 整體
-仍是 `contained`。
+`root_cause_fixed_and_verified`。
+同日 `HostAuthorityKeepalive` 再成為週期性 renew 的單一 process owner：正式 caller
+只能從 keepalive 取 lease，stop／renew failure／dead worker／join timeout 都先封鎖
+本機 enable gate，status 不洩漏 raw token。Concurrency／composition與相鄰 authority
+suite 共 22 passed；production service-role no-effect rehearsal 完成 A renew/release、
+B 同 key acquire/release，epoch `1 → 2` 且 final state 都是 `stopped`。這個 canonical
+keepalive 缺口達 `root_cause_fixed_and_verified`；但全 effect-family enable gate與
+真實雙 Mac network-partition／Supabase outage／五分鐘 RTO rehearsal尚未完成，所以
+program commit 34 整體仍是 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

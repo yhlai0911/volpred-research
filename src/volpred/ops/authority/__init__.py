@@ -208,11 +208,31 @@ def _normalize_intent(intent: WriteIntent) -> WriteIntent:
     )
 
 
+from .keepalive import (  # noqa: E402
+    HostAuthorityKeepalive,
+    HostAuthorityKeepaliveStatus,
+    KeepaliveState,
+    build_supabase_host_authority_keepalive,
+)
+from .session import (  # noqa: E402
+    AuthorityInactive,
+    HostAuthoritySession,
+    HostAuthorityStatus,
+)
+
+
 __all__ = [
+    "AuthorityInactive",
     "AuthorityReceipt",
     "AuthorityRequest",
     "FencingGrant",
+    "HostAuthorityKeepalive",
+    "HostAuthorityKeepaliveStatus",
+    "HostAuthoritySession",
+    "HostAuthorityStatus",
+    "KeepaliveState",
     "PrimaryAuthority",
     "PrimaryLease",
     "WriteIntent",
+    "build_supabase_host_authority_keepalive",
 ]

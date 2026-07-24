@@ -282,8 +282,18 @@
 > status 永不暴露 raw token；renew 或 release control plane failure會先清除本機 lease
 > 並 demote，local expiry 亦不可再取得 lease。雙 host failure injection證明 active
 > holder 排他、release 後 standby 只以新 epoch 接管；12 個 session／HTTP／PG17
-> scoped cases 通過。此 checkpoint 尚未接 canonical keepalive／全 effect enable gate，
-> 亦未做真實雙機 network-partition rehearsal，所以 program commit 34 維持
+> scoped cases 通過。
+>
+> `HostAuthorityKeepalive` 現在是週期性 renew 的單一 process owner；caller 必須從
+> keepalive 取得 current lease，不能繞回 wrapped session。Stop、renew failure、
+> unexpected worker exit 與 join timeout 都先關閉本機 enable gate，remote lease 最晚
+> 由 database clock expiry fence；status 只回 renewal count、expiry、worker liveness
+> 與 exception type。Production service-role composition 的 no-effect rehearsal 以
+> authority key `operations-core-keepalive-smoke-2a249b5a100e4352a76c848f5ca394c1`
+> 完成 A renew/release 後 B acquire/release，epoch `1 → 2`、兩端 final state 都是
+> `stopped`。22 個 keepalive／session／HTTP scoped cases 通過。此 checkpoint 尚未把
+> keepalive active state 接到所有 effect-family owner，也未做真實雙 Mac
+> network-partition／五分鐘 RTO rehearsal，所以 program commit 34 仍維持
 > `contained`。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**

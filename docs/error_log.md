@@ -1848,3 +1848,34 @@ Architecture、operations-core design 與 improvement status 已同步。這個 
 局部根因為 **`root_cause_fixed_and_verified`**；canonical keepalive、全 effect-family
 enable gate、真實雙 Mac network partition 與五分鐘 RTO rehearsal仍缺，所以 program
 commit 34 整體維持 **`contained`**。
+
+### 2026-07-24 — Host session 可手動 renew，但沒有 canonical keepalive owner
+
+**證據化症狀與根因層級**：`HostAuthoritySession` 已能 fail closed，但週期性 renew
+仍由未定義的 runtime caller負責。Caller 忘記排 renew、renew thread 無聲退出，或 stop
+卡在 remote call 時，session 在 local expiry 前仍可能被其他 host component誤當 active；
+正式 PostgreSQL write雖會逐次 fencing，host enable state卻沒有單一 liveness owner。
+這是 host keepalive／enable-gate workflow 缺口，不是 lease row 或 fencing policy錯誤。
+
+**底層重構**：新增 `HostAuthorityKeepalive`，以單一 daemon thread擁有 activate、
+periodic renew、stop與demote；production builder直接組合 service-role
+`SupabaseAuthorityStore`。Effect／commit caller只能經 keepalive `current_lease()`；
+renew failure、unexpected `BaseException`、dead worker、session drift、release failure
+或 join timeout一律先把 state 設為 `demoted`／`stopping`，再做可能阻塞的 cleanup。
+因此 control plane 卡住時本機 gate 已關閉，remote raw lease最晚由 database clock
+expiry fence。Status只回 token-redacted authority、renew count、expiry、worker
+liveness與 failure type；renew interval若不短於 lease，在剛 acquire 後立即 demote
+並 release，不能帶著無 renewal margin 的 authority啟動。
+
+**回歸、live 回讀與制度化**：unit／concurrency cases覆蓋 successful renew、clean
+release、renew failure、thread `BaseException`、release response lost、blocked-renew
+stop timeout、invalid margin、environment composition與 token redaction；連同既有
+session／Supabase authority adapters為 22 passed，compileall通過。Production
+no-effect rehearsal使用唯一 authority key
+`operations-core-keepalive-smoke-2a249b5a100e4352a76c848f5ca394c1`：A host
+acquire後由 keepalive實際 renew 1 次並 release，B host隨即以同 key acquire；
+epoch精確 `1 → 2`，兩個 durable release refs均回讀且 final state都是 `stopped`。
+Architecture、module design、improvement status與 public package exports已同步。這個
+canonical keepalive owner 根因為 **`root_cause_fixed_and_verified`**；全
+effect-family enable gate、真實雙 Mac network partition、Supabase outage與五分鐘
+RTO rehearsal仍缺，因此 program commit 34 整體維持 **`contained`**。
