@@ -338,8 +338,15 @@ delivery adapters 與 live smoke／rollback rehearsal仍缺，umbrella 仍為 `c
 PG17 clean／idempotent migration、ACL 與實際 service-role create/read 回歸通過。
 Production receipt `20260724081714 operations_core_change_set_rpc` 已回讀；live HTTP
 missing lookup 為 null、owner=`legacy/1`、ChangeSet count=0，沒有 transfer 或寫入。
-Commit authority／settlement／Work read model 仍無 HTTP adapters；因此只核可
-ChangeSet HTTP persistence seam，umbrella 狀態不變。
+同日 `SupabaseCommitAuthority` 與一個 service-role-only RPC 補上 production
+authority adapter；它保留既有 `CommitAuthority.authorize()` interface，process 先
+重算 request digest，RPC 只委派 private owner／WorkLease／Primary Authority
+transaction。PG17 clean／idempotent replay、actual service-role grant/replay、ACL
+及 135 個相鄰 tests 通過。Production receipt
+`20260724085535 operations_core_commit_authority_rpc` 已回讀；live HTTP adapter 在
+`legacy/1` 下 typed fail closed，grant／receipt／ChangeSet 再次回讀皆為 0。
+Settlement／Work read model 仍無 HTTP adapters，未執行 CAS 或 live commit；
+因此只核可 commit-authority remote seam，umbrella 狀態不變。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

@@ -1681,3 +1681,43 @@ owner 仍為 `legacy/1`、ChangeSet count 仍為 0，沒有執行 transfer 或�
 **`root_cause_fixed_and_verified`**；commit authority／settlement／Work read model
 的 HTTP adapters、live ownership CAS、commit smoke 與 rollback rehearsal仍缺，
 所以 Change Delivery umbrella 維持 **`contained`**。
+
+### 2026-07-24 — Commit authority 只有直連 PostgreSQL adapter，production caller 無法跨 HTTP fence Git write
+
+**證據化症狀**：ChangeSet 與 commit owner 已有 service-role adapters，但 formal
+caller 的 `CommitAuthority.authorize()` 仍只接受 `PostgresCommitAuthority`。Production
+runtime 若沒有 direct database connection，就無法在 Git writer 前同時回讀 WorkLease、
+Primary Authority 與 owner generation；若在 caller 自行拼 PostgREST table reads 或
+重寫判斷，會讓 database-clock transaction 不再是唯一授權 owner。
+
+**根因層級**：這是 remote-but-owned authority adapter 與 PostgREST interface 缺口，
+不是 live owner row、grant 資料或 Git writer 錯誤。ChangeSet store 可遠端持久化並不
+代表 commit 已獲授權；缺這一層仍不得切換 owner。
+
+**底層重構**：新增 `SupabaseCommitAuthority`，維持既有
+`CommitAuthority.authorize()` seam。Adapter 在送網路前重算包含 proposal、WorkItem、
+owner generation、兩個 fencing token、repo／HEAD、paths／hashes、message 與 actor
+的 canonical SHA-256；public RPC 只委派既有 private owner-fenced
+`authorize_commit_write` transaction，不複製 policy。回傳僅含 token-redacted grant，
+不保存 raw token。Environment builder 只接受 service-role key，不會退回
+publishable／anon key。
+
+**回歸與 live 回讀**：unit transport cases涵蓋 exact payload、pre-network digest
+rejection、typed ownership failure、untrusted JSON boolean generation 與 credential
+fail-closed。PG17 non-superuser 從 clean schema replay全部 migrations並二次 replay
+本 migration，實際以 service role authorize／等價 replay，同時確認 private grant
+table denial。PostgreSQL delivery 39 tests與 Change Delivery／Git writer／Supabase
+adapter 相鄰 96 tests 均通過。Production migration receipt 是
+`20260724085535 operations_core_commit_authority_rpc`；catalog 回讀 function owner、
+security-definer、空 search path、service-role-only execute、private table／view
+deny與 definer 無 public CREATE 共八項全 true，security／performance advisors 無
+指向新 RPC 的 finding。正式 HTTP adapter 在 live `legacy/1` 下精確回傳 typed
+`CommitActuatorBlocked`；smoke 前後 grant／delivery receipt／ChangeSet 皆為 0，
+沒有執行 owner transfer 或 Git write。
+
+**制度化與狀態界線**：migration、PG17 ACL/read-back contract、HTTP interface tests、
+architecture、operations-core module design 與 improvement status 已同步，使這個
+adapter 不可在沒有 digest／ACL／live zero-write 證據時靜默上線。此 production
+commit-authority adapter seam 為 **`root_cause_fixed_and_verified`**；但 settlement
+與 Work read model 的 HTTP adapters、live ownership CAS、commit smoke 及 rollback
+rehearsal仍缺，Change Delivery umbrella 維持 **`contained`**。

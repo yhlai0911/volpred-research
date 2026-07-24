@@ -207,8 +207,22 @@
 > ACL 與 service-role create/read 已通過；production receipt 是
 > `20260724081714 operations_core_change_set_rpc`。Live catalog 的五項 ACL／hardening
 > predicates 全 true，HTTP missing lookup 精確回傳 null，owner 仍為 `legacy/1` 且
-> ChangeSet count 為 0。Authority／settlement／Work read model 的 HTTP adapters 亦
-> 尚缺，因此不能執行 live commit smoke。
+> ChangeSet count 為 0。Settlement／Work read model 的 HTTP adapters 仍缺，因此
+> 不能執行 live commit smoke。
+>
+> **Commit authority service-role seam（2026-07-24，live fail-closed／legacy owner）**
+> `SupabaseCommitAuthority` 實作既有 `CommitAuthority.authorize()` interface，先在
+> process 內重算完整 request digest，再由單一 service-role RPC 委派 private
+> `authorize_commit_write` transaction；WorkLease／Primary Authority／owner generation
+> 仍以 database clock 與 durable state 驗證，HTTP adapter 不重寫 lifecycle。RPC 只
+> 回傳 token-redacted grant，function 由 `volpred_ops_definer` 持有、
+> `SECURITY DEFINER`、`search_path=''`，且只有 service role 可執行；service role
+> 無 private grant table／view SELECT。PG17 clean／idempotent replay、actual
+> service-role grant/replay 與 135 個相鄰 tests 通過；production receipt 是
+> `20260724085535 operations_core_commit_authority_rpc`。正式 HTTP adapter 在 live
+> `legacy/1` owner 下回傳 typed `CommitActuatorBlocked`，其後 grant／receipt／
+> ChangeSet count 仍全為 0。這是 production authority adapter 的 fail-closed smoke，
+> 不是 live commit smoke或 ownership cutover。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

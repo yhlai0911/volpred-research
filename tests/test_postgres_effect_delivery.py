@@ -159,6 +159,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724130000_operations_core_change_set_rpc.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724140000_operations_core_commit_authority_rpc.sql",
 )
 
 
@@ -977,6 +981,68 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                 """
             ).fetchone()
         assert service_rpc_security == (True,) * 13
+        with psycopg.connect(dsn, autocommit=True) as connection:
+            commit_authority_rpc_security = connection.execute(
+                """
+                SELECT
+                  (
+                    SELECT procedure.proowner = (
+                      SELECT oid FROM pg_roles
+                      WHERE rolname = 'volpred_ops_definer'
+                    )
+                      AND procedure.prosecdef
+                      AND procedure.proconfig = ARRAY['search_path=""']
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname =
+                        'volpred_authorize_commit_write'
+                  ),
+                  has_function_privilege(
+                    'service_role',
+                    'public.volpred_authorize_commit_write('
+                      'text,text,bigint,text,text,text,text,integer,'
+                      'bigint,text,text,text,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'anon',
+                    'public.volpred_authorize_commit_write('
+                      'text,text,bigint,text,text,text,text,integer,'
+                      'bigint,text,text,text,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'authenticated',
+                    'public.volpred_authorize_commit_write('
+                      'text,text,bigint,text,text,text,text,integer,'
+                      'bigint,text,text,text,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'public',
+                    'public.volpred_authorize_commit_write('
+                      'text,text,bigint,text,text,text,text,integer,'
+                      'bigint,text,text,text,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.commit_authority_grants',
+                    'SELECT'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.commit_authority_grant_reads',
+                    'SELECT'
+                  ),
+                  NOT has_schema_privilege(
+                    'volpred_ops_definer', 'public', 'CREATE'
+                  )
+                """
+            ).fetchone()
+        assert commit_authority_rpc_security == (True,) * 8
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -997,6 +1063,10 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   ),
                   public.volpred_mark_change_set_landed(
                     text, text, text, text
+                  ),
+                  public.volpred_authorize_commit_write(
+                    text, text, bigint, text, text, text, text, integer,
+                    bigint, text, text, text, text
                   ),
                   public.volpred_read_notification_owner(),
                   public.volpred_transfer_notification_owner(
@@ -2056,6 +2126,99 @@ def test_commit_authority_atomically_verifies_both_leases(
     )
     assert work_lease.token not in repr(durable)
     assert primary_lease.fencing_token not in repr(durable)
+
+
+def test_commit_authority_service_rpc_returns_token_redacted_grant(
+    postgres_effect_dsn: str,
+) -> None:
+    _ensure_commit_owner(postgres_effect_dsn)
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-rpc-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-rpc-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        grant = connection.execute(
+            """
+            SELECT public.volpred_authorize_commit_write(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                primary_lease.authority_key,
+                primary_lease.holder_ref,
+                primary_lease.epoch,
+                primary_lease.fencing_token,
+                request.request_sha256,
+                request.proposal_sha256,
+                request.work_item_id,
+                request.work_item_version,
+                request.commit_owner_generation,
+                request.work_lease_token,
+                request.repository,
+                request.expected_head,
+                request.actor,
+            ),
+        ).fetchone()[0]
+        replay = connection.execute(
+            """
+            SELECT public.volpred_authorize_commit_write(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                primary_lease.authority_key,
+                primary_lease.holder_ref,
+                primary_lease.epoch,
+                primary_lease.fencing_token,
+                request.request_sha256,
+                request.proposal_sha256,
+                request.work_item_id,
+                request.work_item_version,
+                request.commit_owner_generation,
+                request.work_lease_token,
+                request.repository,
+                request.expected_head,
+                request.actor,
+            ),
+        ).fetchone()[0]
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.commit_authority_grants"
+            )
+
+    assert replay == grant
+    assert grant["request_sha256"] == request.request_sha256
+    assert grant["commit_owner_generation"] == 2
+    assert grant["commit_owner_ref"] == (
+        "commit-owner:git.commit:generation-2"
+    )
+    assert work_lease.token not in repr(grant)
+    assert primary_lease.fencing_token not in repr(grant)
 
 
 @pytest.mark.parametrize(

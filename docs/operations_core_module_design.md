@@ -434,6 +434,26 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   read model 仍只有 direct PostgreSQL adapters；故 bounded seam 為
   `root_cause_fixed_and_verified`，Change Delivery umbrella 仍是 `contained`。
 
+### 2026-07-24 service-role commit authority checkpoint
+
+- `SupabaseCommitAuthority` 是既有 private `CommitAuthority.authorize()` seam 的第二個
+  production adapter。它先重算完整 write-intent SHA-256，再把 current PrimaryLease
+  identity、兩個 raw fencing token 與 owner generation 交給 narrow PostgREST RPC；
+  caller 不需要知道 SQL、grant table 或 lock ordering。
+- Public wrapper 只委派既有 owner-fenced `authorize_commit_write` transaction，沒有
+  第二套 grant policy；輸出只有 token-redacted durable grant。Function 由
+  `volpred_ops_definer` 持有、`SECURITY DEFINER`、`search_path=''`，只給 service role
+  EXECUTE，service role 對 private grant table／view 仍無 SELECT。
+- PG17 non-superuser clean migration、migration replay、actual service-role
+  authorize/replay、transport／typed-error regressions與相鄰 135 tests 通過。
+  Production receipt `20260724085535 operations_core_commit_authority_rpc` 已回讀；
+  live catalog 八項 hardening／ACL predicates 全 true，advisor 沒有指向新 RPC 的
+  finding。正式 HTTP adapter 在 `git.commit=legacy/1` 下精確 fail closed 為 typed
+  `CommitActuatorBlocked`，再次回讀 grant／receipt／ChangeSet 全為 0。
+- 這個 remote authority adapter seam 為 `root_cause_fixed_and_verified`；settlement
+  與 Work read model 的 HTTP adapters、live ownership CAS、commit smoke 與 rollback
+  rehearsal仍缺，因此 Change Delivery umbrella 維持 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
