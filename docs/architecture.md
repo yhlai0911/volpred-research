@@ -342,9 +342,23 @@
 > settlement 都留在深模組內。private store seam 具有 fake 與 service-role-only
 > Supabase adapters，並在 request／begin／provider 前重驗同一 host lease；owner、
 > Work／Effect 或 authority identity 漂移均不呼叫 projection。相鄰 suite 為
-> 171 passed。對應 PostgreSQL RPC migration、production owner row、現有
-> single-article writer routing、live CAS／acknowledgement／rollback rehearsal 尚未
-> 執行，所以這是 pre-cutover contract，不改變目前 publisher ownership。
+> 171 passed。後續 production migrations
+> `20260724151111 operations_core_publisher_article_ownership` 與
+> `20260724152359 operations_core_publisher_article_terminal_replay` 已建立五個
+> service-role-only RPC，request replay 在既有 attempt 已 terminal 時直接回傳 durable
+> receipt，不會重新 begin 或跨越 provider seam。`scripts/supabase_sync.sync_article`
+> 現在依 database owner 選 legacy projection 或 formal caller；provider 只使用
+> `sync_article_projection`，避免路由遞迴。Active frontend route 也已加入相同 owner
+> fence：部署後 full-feed writer 在 operations-core generation 會 409，單篇 route
+> 只回 delegated、不 upsert。
+>
+> Production 回讀仍為 `publisher.article.supabase.sync=legacy/1`，publisher scope
+> request／active attempt／Primary Authority lease 都是 0；沒有執行文章 write 或 owner
+> transfer。Frontend fence commit `ae14890` 尚未 push／deploy，因此 live route 仍不能
+> 視為已受 fence 保護；在部署與 live 回讀之前禁止 CAS cutover。PG17 45 cases、
+> caller／adapter 22 cases與 frontend typecheck通過。這個 publisher program 仍為
+> `contained`，下一個 gate 是部署 frontend、回讀 live route version，再做唯一 owner
+> article acknowledgement 與 rollback rehearsal。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

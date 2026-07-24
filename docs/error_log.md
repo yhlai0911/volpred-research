@@ -1967,3 +1967,36 @@ design與 improvement status同步保存這個真正的 provider boundary。此�
 **`root_cause_fixed_and_verified`**；本切片沒有 live effect或 owner mutation，
 其餘 family cutover與真實 outage／RTO rehearsal仍缺，因此 program commit 34 umbrella
 維持 **`contained`**。
+
+### 2026-07-24 — Publisher settlement response 遺失後重播會重新 begin terminal WorkItem
+
+**證據化症狀與根因層級**：formal caller 的 request idempotency雖會回到同一
+WorkItem／EffectRequest，但成功 settlement後若 caller遺失 HTTP response，再送同一
+request只得到 work/effect identity，接著呼叫 begin；既有 WorkItem已是
+`succeeded`，因此 begin拒絕。這不會重複寫 provider，卻使「外部寫已成功」無法從
+durable state收斂回 receipt。根因是 request／settlement transaction boundary缺少
+terminal receipt recovery，不是再加 client retry或手補資料可解。
+
+**底層重構**：新增 forward-only migration，在相同 idempotency request已存在時讀取
+最新 `delivered`／`dead_lettered` attempt並組回
+`owned-publisher-article-receipt.v1`；新 request明確回 `receipt=null`。
+`SupabaseOwnedPublisherArticleStore`解析 typed terminal receipt，
+`OwnedPublisherArticleSync.sync()`在驗證 owner generation、Work／Effect identity與
+terminal disposition後直接返回，begin／provider／settlement全部不再執行。現有
+17:00 ownership migration原件未改寫，production只套用新的 forward migration。
+
+**回歸、production回讀與狀態界線**：PG17完整
+cutover→delivery→lost-response replay→rollback案例通過，重播 receipt逐欄等於原
+settlement且 attempt count維持 1；caller／adapter 22 cases與完整 PostgreSQL 45 cases
+通過。Production migration receipt為
+`20260724152359 operations_core_publisher_article_terminal_replay`；catalog回讀
+SECURITY DEFINER、空 search path、service-role-only EXECUTE、private table FORCE
+RLS／direct SELECT denial與 function rewrite markers全正確，publisher scope仍是
+`legacy/1`、0 request、0 active attempt、0 lease。此 terminal-replay seam為
+**`root_cause_fixed_and_verified`**。
+
+Python owner router與 active frontend owner fence已實作，後者在獨立 repo commit
+`ae14890`；但 frontend尚未 push／deploy。若現在切 production owner，舊 live
+`/api/sync`仍可能保留競爭 writer，因此 publisher整體只能標 **`contained`**。下一個
+不可跳過的 gate是部署 frontend、回讀 live version／owner-fence，再做唯一 owner
+article acknowledgement與rollback rehearsal；本輪未執行 owner transfer或文章寫入。

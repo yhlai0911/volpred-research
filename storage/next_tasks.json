@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Publisher formal caller contract is implemented behind one sync interface: owner/request/begin/provider/settle orchestration, service-role-only adapter, CAS rollback shape, and three lease/identity no-write gates; 171 scoped tests. RPC migration and live ownership gates remain, so umbrella is contained.",
-    "next_direct_step": "Implement the four publisher ownership RPCs and private owner/request/attempt rows; prove PG17 non-superuser replay, FORCE RLS and service-role-only ACL, then run read-only production catalog/owner checks before any CAS cutover",
+    "containment_evidence": "Publisher ownership and terminal-replay migrations are live; five service-role-only RPCs, FORCE RLS/ACL, owner routing, PG17 lost-response replay and frontend owner fence are implemented. Production remains legacy/1 with publisher requests/active attempts/lease all zero; no article write or owner transfer.",
+    "next_direct_step": "Push and deploy active frontend commit ae14890 through the authorized release path, read back the live route owner fence/version, then CAS publisher owner to operations_core for one article acknowledgement and exact rollback rehearsal; do not cut over before deployment.",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "OwnedPublisherArticleSync is the one-call formal interface; fake and service-role adapters share the private seam, owner/request/begin/provider/settle and host-lease drift fail closed before projection"
+    "latest_checkpoint": "Commits 9324f9b8c and 4f22b7d04 plus frontend ae14890; production migration receipts 20260724151111 and 20260724152359; PG17 45 passed, caller/adapter 22 passed, frontend typecheck passed."
   }
 ]

@@ -916,6 +916,36 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
 - 本 checkpoint 仍未套用 production migration、轉移 live owner、路由現有 writer 或
   執行 live acknowledgement／rollback rehearsal；因此只標 **`contained`**。
 
+### 2026-07-24 publisher production schema、owner routing 與 terminal replay checkpoint
+
+- Production 已套用
+  `20260724151111 operations_core_publisher_article_ownership` 與
+  `20260724152359 operations_core_publisher_article_terminal_replay`。五個 public RPC
+  由 no-login definer 持有、固定空 search path，只有 service role可執行；四張
+  ownership／request／attempt private tables均 FORCE RLS，service role沒有 direct
+  SELECT，definer也沒有殘留 public schema CREATE。
+- Request RPC現在隱藏 terminal-replay recovery：若相同 idempotency key對應的 attempt
+  已是 `delivered` 或 `dead_lettered`，同一 transaction組回
+  `owned-publisher-article-receipt.v1`。`OwnedPublisherArticleSync.sync()`驗證 receipt
+  的 owner generation／Work／Effect identity後直接返回，不重新 begin，也不呼叫
+  provider。PG17完整 cutover案例實際 settlement後重播，receipt完全相同且 attempt
+  count仍為 1；caller unit case確認 projection calls為 0。
+- `scripts/supabase_sync.sync_article()`是現行 writer的 database-owner router：
+  `legacy`只進既有 `sync_article_projection()`，`operations_core`才啟動
+  `publisher:article.supabase.sync` keepalive並呼叫 formal interface；錯誤 family或
+  未知 owner fail closed。Production provider adapter只呼叫 projection implementation，
+  不會遞迴回 owner router。
+- Active frontend repo commit `ae14890`也讀同一 owner RPC。部署後 full `feed.json`
+  route在 operations-core generation回 409，single-report route只回 delegated；
+  兩條路徑都不再 upsert article。該 repo目前仍比 `origin/main` ahead 9 commits，
+  本輪未被授權 push，所以此 fence尚未部署。
+- Production owner回讀保持 `legacy/1`，publisher request／active attempt／Primary
+  Authority lease均為 0，沒有文章 write或 owner mutation。PG17 `45 passed`、
+  caller／adapter `22 passed`、frontend typecheck通過；security advisor對本 scope為
+  0 finding。正式 CAS、unique-owner article acknowledgement與rollback rehearsal
+  必須等 frontend部署與live version回讀，故 program commit 14仍是
+  **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

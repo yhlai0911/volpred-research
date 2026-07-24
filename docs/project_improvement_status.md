@@ -248,6 +248,27 @@ owned publisher／email 相鄰 suite 為 `10 passed`。production migration、li
 transfer、writer routing 與 live acknowledgement／rollback 尚未執行，所以此
 checkpoint 仍為 **`contained`**。
 
+同日兩個 forward-only production migrations 已落地：
+`20260724151111 operations_core_publisher_article_ownership` 與
+`20260724152359 operations_core_publisher_article_terminal_replay`。第二個 migration
+修正「settlement 已成功但 HTTP response 遺失」的終端重播：相同 idempotency request
+會從 durable terminal attempt 組回 receipt，formal caller 在 begin／provider 前直接
+返回；PG17 regression 實際確認 attempt count維持 1。Production catalog回讀 function
+owner、SECURITY DEFINER、空 search path、service-role-only EXECUTE、四張 private
+table FORCE RLS／service-role SELECT denial與 definer public CREATE denial全數通過；
+publisher owner仍為 `legacy/1`，request／active attempt／lease皆為 0，沒有文章寫入。
+Security advisor無本 scope finding；performance advisor僅列出三個早於本 migration
+存在、尚未累積使用統計的 shared ownership indexes。
+
+現有 Python single-article writer已改成 database-owner router，active frontend repo
+也在 commit `ae14890` 加入 full-feed 409與single-report delegated fence；完整
+PostgreSQL suite `45 passed`、caller／adapter `22 passed`、frontend typecheck通過。
+但 frontend repo仍比 `origin/main` ahead 9 commits，依治理規則本輪未 push，因此 fence
+尚未部署到 live route。Production owner不得在此時切換；program commit 14維持
+**`contained`**。下一步是由有 push／deploy authority 的流程發布 active frontend，
+回讀 live version與 owner-fence行為後，才執行 CAS article smoke、exact Supabase
+read-back、rollback與 stale-generation refusal。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem
