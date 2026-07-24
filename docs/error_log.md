@@ -1760,3 +1760,34 @@ production commit-settlement adapter seam 為
 **`root_cause_fixed_and_verified`**；但 Work read model HTTP adapter、完整 remote
 caller composition、live ownership CAS、commit smoke 與 rollback rehearsal仍缺，
 Change Delivery umbrella 維持 **`contained`**。
+
+### 2026-07-24 — Formal remote Change Delivery 無法回讀 terminal WorkItem
+
+**證據化症狀與根因層級**：commit owner、ChangeSet、commit authority 與 settlement
+都有 service-role adapters 後，`OwnedChangeDelivery.deliver()` 的最後一步仍只能靠
+direct PostgreSQL `WorkCoordinator.inspect()` 回讀 settlement transaction 產生的
+terminal WorkItem。Production runtime 無 direct database connection 時，無法用同一
+formal caller 證明 WorkItem 已成 `succeeded`、version 已遞增、result ref 等於
+settlement ref 且 claim 已清除。這是 Work read-model／remote composition interface
+缺口，不是補一筆 receipt JSON 或讓 service role 直接 SELECT private tables可解。
+
+**底層重構**：新增 exact-id `volpred_read_work_snapshot`，一次從 private FORCE-RLS
+sources 讀回 item、events、verified checkpoints 與 receipts；public wrapper 由
+`volpred_ops_definer` 持有、固定空 search path，只有 service role 可執行，且不授予
+四個 private sources 的 SELECT。`SupabaseWorkReadModel` 驗證 schema、lifecycle、
+positive versions、timezone-aware timestamps、checkpoint SHA-256 與 nested WorkItem
+identity。`build_supabase_owned_change_delivery()` 將 owner、ChangeSet、authority、
+Git actuator、settlement 與 read model 接成完整 formal caller，owner check 仍在任何
+proposal 或 Git write 之前。
+
+**回歸、live 回讀與制度化**：public-interface TDD、PG17 non-superuser clean migration、
+二次 replay、實際 service-role bounded read、anon／authenticated／PUBLIC denial、
+private table denial與相鄰 114 tests 通過。Production migration receipt 是
+`20260724101005 operations_core_work_read_model_rpc`；catalog hardening predicates
+全 true，security／performance advisors 對新 RPC 都是 0 findings。Live HTTP adapter
+對一筆 `succeeded/v4` WorkItem 回傳 items=1、events=4、receipts=1，missing id 回傳
+空 snapshot；probe 前後 WorkItem count=19、ChangeSet／commit grant／commit receipt
+均為 0，owner 保持 `legacy/1`。此 remote read/composition seam 為
+**`root_cause_fixed_and_verified`**；尚未執行 production owner CAS、真實 commit、
+exact Git read-back與 rollback rehearsal，因此 Change Delivery umbrella 仍是
+**`contained`**。

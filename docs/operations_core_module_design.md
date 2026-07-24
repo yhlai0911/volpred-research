@@ -474,8 +474,32 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   finding。正式 HTTP adapter 在 `git.commit=legacy/1` 下 typed fail closed，前後
   grant／receipt／ChangeSet 全為 0。
 - 這個 remote settlement adapter seam 為 `root_cause_fixed_and_verified`；Work read
-  model HTTP adapter、完整 remote caller composition、live ownership CAS、commit
+  model 與 formal caller 的後續狀態見下方 checkpoint；live ownership CAS、commit
   smoke 與 rollback rehearsal仍缺，因此 Change Delivery umbrella 維持 `contained`。
+
+### 2026-07-24 service-role Work read model 與 remote caller checkpoint
+
+- `SupabaseWorkReadModel` 實作既有 `_WorkReadModel.inspect(WorkQuery)` seam，但 production
+  adapter 只接受 exact WorkItem id，不提供未界定的全表 scan。單一 RPC 回傳 WorkItem、
+  events、verified checkpoints 與 terminal receipts；Python 端驗證 schema、
+  lifecycle、versions、timestamps、checkpoint hash 與所有 nested WorkItem identity。
+- `volpred_read_work_snapshot` 只讀 private FORCE-RLS sources；function 是
+  `volpred_ops_definer` owner、`SECURITY DEFINER`、`search_path=''`，只有 service role
+  EXECUTE。anon／authenticated／PUBLIC 無權，service role 對
+  `work_item_reads`／`work_events`／`work_checkpoints`／`work_receipts` 仍無 SELECT。
+  `build_supabase_owned_change_delivery()` 現在將 owner store、ChangeSet store、
+  commit authority、Git actuator、settlement 與 Work read model 組成 formal caller，
+  並保留 owner check 在 proposal／Git write 之前。
+- PG17 non-superuser clean migration、二次 replay、實際 service-role bounded read、
+  ACL、HTTP transport 與相鄰 114 tests 通過。Production receipt
+  `20260724101005 operations_core_work_read_model_rpc` 已回讀；live adapter 對一筆
+  succeeded WorkItem 回傳 items=1／events=4／receipts=1，missing id 回傳空 snapshot。
+  Probe 前後 WorkItem=19、ChangeSet=0、commit grant=0、commit receipt=0，
+  owner=`legacy/1`；兩類 advisor 無新 RPC finding。
+- 這個 read model 與 remote composition seam 為
+  `root_cause_fixed_and_verified`。尚未執行 production ownership CAS、真實 commit、
+  exact Git read-back 或 rollback rehearsal，所以 Change Delivery umbrella 仍為
+  `contained`。
 
 ## 6. Effect Delivery
 

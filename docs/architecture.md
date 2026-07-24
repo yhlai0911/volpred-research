@@ -207,8 +207,8 @@
 > ACL 與 service-role create/read 已通過；production receipt 是
 > `20260724081714 operations_core_change_set_rpc`。Live catalog 的五項 ACL／hardening
 > predicates 全 true，HTTP missing lookup 精確回傳 null，owner 仍為 `legacy/1` 且
-> ChangeSet count 為 0。Work read model 的 HTTP adapter 仍缺，因此
-> 不能執行 live commit smoke。
+> ChangeSet count 為 0。這個 persistence seam 本身已完成；完整 production caller
+> 與 Work read model 的後續狀態見下方 checkpoints。
 >
 > **Commit authority service-role seam（2026-07-24，live fail-closed／legacy owner）**
 > `SupabaseCommitAuthority` 實作既有 `CommitAuthority.authorize()` interface，先在
@@ -237,8 +237,29 @@
 > production receipt 是
 > `20260724092237 operations_core_commit_settlement_rpc`。正式 HTTP adapter 在 live
 > `legacy/1` 下回傳 typed `CommitSettlementBlocked`；前後 grant／receipt／ChangeSet
-> 仍全為 0。這不是 owner transfer、Git write 或 live commit smoke；Work read model
-> adapter 與完整 remote caller composition 仍是 cutover blocker。
+> 仍全為 0。這不是 owner transfer、Git write 或 live commit smoke。
+>
+> **Work read model 與 remote formal caller seam（2026-07-24，live read／legacy owner）**
+> `SupabaseWorkReadModel.inspect(WorkQuery(work_id=...))` 只接受 exact WorkItem id，
+> 透過 `volpred_read_work_snapshot` 一次回傳 item、event、verified checkpoint 與
+> terminal receipt；adapter 會驗證 schema、lifecycle、positive versions、
+> timezone-aware timestamps、checkpoint SHA-256 及所有 nested WorkItem identity，
+> untrusted JSON drift 一律 fail closed。Public function 由 `volpred_ops_definer`
+> 持有、`SECURITY DEFINER`、`search_path=''`，只給 service role EXECUTE；
+> anon／authenticated／PUBLIC 拒絕，service role 對四個 private read sources 均無
+> SELECT。`build_supabase_owned_change_delivery()` 已將 owner、ChangeSet、authority、
+> Git actuator、settlement 與此 read model 組成同一 formal caller，且不自行改變
+> ownership。
+>
+> PG17 clean／idempotent migration、實際 service-role bounded snapshot、ACL 與
+> 114 個相鄰 tests 通過；production receipt 是
+> `20260724101005 operations_core_work_read_model_rpc`。Live HTTP read-back 對一筆
+> `succeeded/v4` WorkItem 回傳 items=1、events=4、receipts=1；missing id 回傳四個
+> empty arrays。Probe 前後 WorkItem count=19、ChangeSet／commit grant／commit
+> receipt 都是 0，owner 保持 `legacy/1`，security／performance advisors 對新 RPC
+> 都是 0 findings。這完成 remote adapter 與 composition seam，但尚未執行 production
+> owner CAS、真實 commit smoke、exact Git read-back 或 rollback rehearsal；Change
+> Delivery umbrella 仍為 `contained`。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

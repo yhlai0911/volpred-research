@@ -168,6 +168,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724150000_operations_core_commit_settlement_rpc.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724100512_operations_core_work_read_model_rpc.sql",
 )
 
 
@@ -1114,6 +1118,70 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                 """
             ).fetchone()
         assert commit_settlement_rpc_security == (True,) * 8
+        with psycopg.connect(dsn, autocommit=True) as connection:
+            work_read_rpc_security = connection.execute(
+                """
+                SELECT
+                  (
+                    SELECT procedure.proowner = (
+                      SELECT oid FROM pg_roles
+                      WHERE rolname = 'volpred_ops_definer'
+                    )
+                      AND procedure.prosecdef
+                      AND procedure.proconfig = ARRAY['search_path=""']
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname =
+                        'volpred_read_work_snapshot'
+                  ),
+                  has_function_privilege(
+                    'service_role',
+                    'public.volpred_read_work_snapshot(text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'anon',
+                    'public.volpred_read_work_snapshot(text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'authenticated',
+                    'public.volpred_read_work_snapshot(text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'public',
+                    'public.volpred_read_work_snapshot(text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.work_item_reads',
+                    'SELECT'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.work_events',
+                    'SELECT'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.work_checkpoints',
+                    'SELECT'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.work_receipts',
+                    'SELECT'
+                  ),
+                  NOT has_schema_privilege(
+                    'volpred_ops_definer', 'public', 'CREATE'
+                  )
+                """
+            ).fetchone()
+        assert work_read_rpc_security == (True,) * 10
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -1144,6 +1212,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     text, text, text, text, text, text, text, jsonb,
                     text, timestamptz, text
                   ),
+                  public.volpred_read_work_snapshot(text),
                   public.volpred_read_notification_owner(),
                   public.volpred_transfer_notification_owner(
                     text, bigint, text, text, text, bigint
@@ -2379,6 +2448,47 @@ def test_commit_settlement_service_rpc_returns_token_redacted_receipt(
     )
     assert work_lease.token not in repr(receipt)
     assert primary_lease.fencing_token not in repr(receipt)
+
+
+def test_work_read_model_service_rpc_returns_one_bounded_snapshot(
+    postgres_effect_dsn: str,
+) -> None:
+    work_id = "work-service-read-model-1"
+    _seed_work(postgres_effect_dsn, work_id=work_id)
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        snapshot = connection.execute(
+            "SELECT public.volpred_read_work_snapshot(%s)",
+            (work_id,),
+        ).fetchone()[0]
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.work_item_reads"
+            )
+
+    assert snapshot["schema_version"] == "work-snapshot.v1"
+    assert [item["id"] for item in snapshot["items"]] == [work_id]
+    assert [event["kind"] for event in snapshot["events"]] == [
+        "submitted"
+    ]
+    assert snapshot["checkpoints"] == []
+    assert snapshot["receipts"] == []
+
+    for role in ("anon", "authenticated"):
+        with psycopg.connect(
+            postgres_effect_dsn,
+            autocommit=True,
+        ) as connection:
+            connection.execute(f"SET ROLE {role}")
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                connection.execute(
+                    "SELECT public.volpred_read_work_snapshot(%s)",
+                    (work_id,),
+                )
 
 
 @pytest.mark.parametrize(

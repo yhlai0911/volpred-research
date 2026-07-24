@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import json
 
 import pytest
 
+from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery import (
     ChangeSetProposal,
     ChangeSetView,
@@ -17,6 +19,7 @@ from volpred.ops.delivery.owned_change import (
     CommitOwnershipLost,
     OwnedChangeCommand,
     OwnedChangeDelivery,
+    build_supabase_owned_change_delivery,
 )
 from volpred.ops.work import WorkItemView, WorkQuery, WorkSnapshot
 
@@ -175,6 +178,20 @@ class _Coordinator:
         return WorkSnapshot(items=(self.item,))
 
 
+class _Response:
+    def __init__(self, payload: object) -> None:
+        self._raw = json.dumps(payload).encode("utf-8")
+
+    def __enter__(self) -> _Response:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+    def read(self) -> bytes:
+        return self._raw
+
+
 def _command() -> OwnedChangeCommand:
     return OwnedChangeCommand(
         proposal=_proposal(),
@@ -257,3 +274,58 @@ def test_deliver_rejects_owner_generation_drift_in_receipt() -> None:
             delivery=delivery,
             coordinator=_Coordinator(_work()),
         ).deliver(_command())
+
+
+def test_supabase_builder_is_a_fail_closed_formal_caller(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: list[str] = []
+
+    def fake_urlopen(call, *, timeout: float):
+        observed.append(call.full_url)
+        return _Response(
+            {
+                "schema_version": "commit-owner.v1",
+                "capability": "git.commit",
+                "owner": "legacy",
+                "generation": 1,
+                "changed_at": "2026-07-24T05:00:00+00:00",
+                "changed_by": "migration",
+                "change_reason": "legacy owner until cutover",
+            }
+        )
+
+    monkeypatch.setenv("SUPABASE_URL", "https://project.supabase.co")
+    monkeypatch.setenv(
+        "SUPABASE_SERVICE_ROLE_KEY", "secret-service-role"
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        fake_urlopen,
+    )
+    primary_lease = PrimaryLease(
+        schema_version="primary-lease.v1",
+        authority_key="operations-core-commits",
+        holder_ref="host:commit-primary",
+        epoch=1,
+        fencing_token="primary-secret",
+        lease_seconds=300,
+        acquired_at="2026-07-24T05:00:00+00:00",
+        expires_at="2026-07-24T05:05:00+00:00",
+    )
+    caller = build_supabase_owned_change_delivery(
+        primary_lease=primary_lease,
+        clock=lambda: pytest.fail("Git must not run under legacy owner"),
+        change_set_id_factory=lambda: "unused-change-set",
+    )
+
+    with pytest.raises(
+        CommitOwnershipLost,
+        match="does not own git.commit",
+    ):
+        caller.deliver(_command())
+
+    assert observed == [
+        "https://project.supabase.co/rest/v1/rpc/"
+        "volpred_read_commit_owner"
+    ]

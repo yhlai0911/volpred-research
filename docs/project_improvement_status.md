@@ -352,8 +352,14 @@ token-redacted evidence。PG17 clean／idempotent replay、actual service-role s
 ACL 與相鄰 140 tests 通過。Production receipt
 `20260724092237 operations_core_commit_settlement_rpc` 已回讀；live HTTP adapter 在
 `legacy/1` 下 typed fail closed，前後 grant／receipt／ChangeSet 均為 0。Work read
-model HTTP adapter與完整 remote caller composition仍缺，未執行 CAS 或 live commit；
-因此只核可 settlement remote seam，umbrella 狀態不變。
+model 後續新增 service-role-only bounded snapshot RPC 與 `SupabaseWorkReadModel`，
+並由 `build_supabase_owned_change_delivery()` 將全部 production adapters 接成 formal
+caller。PG17 clean／idempotent replay、ACL、實際 service-role read 與相鄰 114 tests
+通過；production receipt `20260724101005 operations_core_work_read_model_rpc` 已回讀。
+Live 成功 WorkItem snapshot 為 items=1／events=4／receipts=1，probe 前後
+WorkItem=19、ChangeSet／grant／commit receipt=0、owner=`legacy/1`，新 RPC 無 advisor
+finding。這只核可 remote read/composition seam；尚未執行 CAS、真實 commit、exact
+Git read-back或 rollback rehearsal，umbrella 狀態不變。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

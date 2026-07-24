@@ -225,6 +225,76 @@ def build_postgres_owned_change_delivery(
     )
 
 
+def build_supabase_owned_change_delivery(
+    *,
+    primary_lease: PrimaryLease,
+    clock: Callable[[], datetime],
+    change_set_id_factory: Callable[[], str],
+    writer_cli: Path | None = None,
+) -> OwnedChangeDelivery:
+    """Wire the production service-role adapters without changing ownership."""
+
+    from volpred.ops.work.supabase import SupabaseWorkReadModel
+
+    from ._git_actuator import GitCommitActuator
+    from .supabase_change_store import SupabaseChangeSetStore
+    from .supabase_commit_authority import SupabaseCommitAuthority
+    from .supabase_commit_ownership import SupabaseCommitOwnerStore
+    from .supabase_commit_settlement import SupabaseCommitSettlement
+    from .supabase_rpc import runtime_environment
+
+    values = runtime_environment()
+    supabase_url = values.get("SUPABASE_URL", "")
+    service_role_key = values.get("SUPABASE_SERVICE_ROLE_KEY", "")
+    timeout_seconds = float(
+        values.get("VOLPRED_OPERATIONS_RPC_TIMEOUT_SEC", "45")
+    )
+    authority = SupabaseCommitAuthority(
+        supabase_url=supabase_url,
+        service_role_key=service_role_key,
+        primary_lease=primary_lease,
+        timeout_seconds=timeout_seconds,
+    )
+    actuator = (
+        GitCommitActuator(clock=clock, authority=authority)
+        if writer_cli is None
+        else GitCommitActuator(
+            clock=clock,
+            authority=authority,
+            writer_cli=writer_cli,
+        )
+    )
+    delivery = ChangeDelivery(
+        clock=clock,
+        id_factory=change_set_id_factory,
+        actuator=actuator,
+        settlement=SupabaseCommitSettlement(
+            supabase_url=supabase_url,
+            service_role_key=service_role_key,
+            primary_lease=primary_lease,
+            timeout_seconds=timeout_seconds,
+        ),
+        store=SupabaseChangeSetStore(
+            supabase_url=supabase_url,
+            service_role_key=service_role_key,
+            timeout_seconds=timeout_seconds,
+        ),
+    )
+    return OwnedChangeDelivery(
+        owner_store=SupabaseCommitOwnerStore(
+            supabase_url=supabase_url,
+            service_role_key=service_role_key,
+            timeout_seconds=timeout_seconds,
+        ),
+        delivery=delivery,
+        coordinator=SupabaseWorkReadModel(
+            supabase_url=supabase_url,
+            service_role_key=service_role_key,
+            timeout_seconds=timeout_seconds,
+        ),
+    )
+
+
 __all__ = [
     "CommitOwner",
     "CommitOwnershipLost",
@@ -232,4 +302,5 @@ __all__ = [
     "OwnedChangeDelivery",
     "OwnedChangeReceipt",
     "build_postgres_owned_change_delivery",
+    "build_supabase_owned_change_delivery",
 ]
