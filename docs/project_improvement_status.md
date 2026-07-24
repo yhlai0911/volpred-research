@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Change Delivery remote settlement seam／legacy owner）**
+Last updated: **2026-07-24（Primary Authority host session／shadow）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -370,6 +370,14 @@ transport contracts 通過；production receipt
 token digest 均已清空，grant／receipt 各 1，兩類 advisor 無新 RPC finding。這只核可
 remote authority seam；未執行 Git owner CAS、commit、effect 或 host failover，
 program commit 34 與 Change Delivery umbrella 仍為 `contained`。
+同日再以 `HostAuthoritySession` 收斂 host-side acquire／renew／demote state：active
+重入不重發 token；status 只回 token-redacted identity；renew、release 或 local expiry
+失敗都先清除本機 lease並轉為 demoted。共享 store 的雙 host injection、renew
+unavailable、release response lost 與 expiry regressions，加上既有 Supabase／PG17
+authority contracts，共 12 passed。這使 session lifecycle 的局部缺口達
+`root_cause_fixed_and_verified`；但 canonical keepalive、全 effect-family enable gate
+與真實雙 Mac network-partition／RTO rehearsal尚未完成，所以 program commit 34 整體
+仍是 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

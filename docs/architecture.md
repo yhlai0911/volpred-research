@@ -276,6 +276,16 @@
 > 無新 RPC finding。這不代表 Git owner transfer、commit smoke 或 program commit 34
 > host failover 已核可。
 
+> **Primary Authority host session seam（2026-07-24，shadow）**
+> `HostAuthoritySession` 是 acquire／renew／demote 的 host-side workflow；正式
+> commit／effect adapter 仍須在 PostgreSQL 逐次重驗 fencing token。Session 的
+> status 永不暴露 raw token；renew 或 release control plane failure會先清除本機 lease
+> 並 demote，local expiry 亦不可再取得 lease。雙 host failure injection證明 active
+> holder 排他、release 後 standby 只以新 epoch 接管；12 個 session／HTTP／PG17
+> scoped cases 通過。此 checkpoint 尚未接 canonical keepalive／全 effect enable gate，
+> 亦未做真實雙機 network-partition rehearsal，所以 program commit 34 維持
+> `contained`。
+
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
 > 每個 intent 必須綁定 WorkItem id／version、effect kind、target、payload reference

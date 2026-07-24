@@ -1821,3 +1821,30 @@ grant／receipt；兩類 advisor 無新 RPC finding。Migration、adapter、PG17
 此 remote Primary Authority seam 為 **`root_cause_fixed_and_verified`**；但 Git owner
 CAS、live commit、rollback rehearsal與 program commit 34 host
 acquire／renew／demote workflow都尚未執行，umbrella 仍為 **`contained`**。
+
+### 2026-07-24 — Remote lease primitive 存在，但 host 沒有 fail-closed session lifecycle
+
+**證據化症狀與根因層級**：`PrimaryAuthority` 與 Supabase RPC 已能個別
+acquire／renew／release，但 runtime caller 仍須自行保存 raw lease、判斷本機是否
+active，以及處理 renew／release 的 network failure。若 caller 在 renew 失敗後仍沿用
+記憶體中的舊 lease，本機會繼續自認 primary；雖然正式 PostgreSQL write 最終仍會被
+database fencing 擋下，host scheduling／enable state 卻沒有單一 fail-closed owner。
+這是 host workflow／local authority state seam 缺口，不是 lease table 或 RPC policy
+錯誤。
+
+**底層重構**：新增 `HostAuthoritySession`，在 process lock 內持有唯一 active lease。
+等價 activate 重入只回同一 lease；token-redacted status 不洩漏 fencing token。
+Renew 會核對 authority／holder／epoch／token、acquired timestamp 與 lease window；
+control plane unavailable、stale identity、malformed read-back 或 local expiry都會先
+清掉 raw lease並 demote，再回 typed `AuthorityInactive`。Explicit demote 也在 remote
+release 前先停用本機 authority；即使 response 遺失，本機不能再取出 stale token，
+remote holder 只會保留到 database-clock expiry。
+
+**回歸與狀態界線**：共享 authority store 的雙 host injection 證明 primary active 時
+standby acquire 被拒，release 後 standby 只取得下一個 epoch，舊 session 不可再取 lease。
+Renew unavailable、release unavailable與 local expiry 三個 failure cases全部 fail
+closed；連同 Supabase HTTP 與 PG17 RPC contracts 共 12 passed，compileall 通過。
+Architecture、operations-core design 與 improvement status 已同步。這個 host session
+局部根因為 **`root_cause_fixed_and_verified`**；canonical keepalive、全 effect-family
+enable gate、真實雙 Mac network partition 與五分鐘 RTO rehearsal仍缺，所以 program
+commit 34 整體維持 **`contained`**。

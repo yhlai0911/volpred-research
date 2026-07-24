@@ -523,6 +523,26 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   Git owner CAS、commit、effect 或 host failover。Change Delivery umbrella 與
   program commit 34 的 acquire／renew／demote workflow 仍為 `contained`。
 
+### 2026-07-24 host authority session checkpoint
+
+- `HostAuthoritySession` 把 host-side acquire／renew／demote 收進一個 typed workflow，
+  不讓 scheduler、commit worker 與 effect worker各自保存一份「本機是否 primary」
+  判斷。`activate()` 成功後的等價重入回傳同一份 lease，不再次產生 fencing token；
+  token-redacted `status()` 只暴露 holder、epoch、expiry 與最後 release reference。
+- `renew()` 在同一把 process lock 內重驗 lease identity 與 timezone-aware window；
+  control plane unavailable、stale lease、malformed read-back 或已過期 lease都會先清除
+  本機 raw lease 並轉為 `demoted`，再以 typed `AuthorityInactive` 失敗。`demote()`
+  同樣先停用本機 authority 才呼叫 remote release；release response 遺失時，本機仍
+  不可繼續產生正式 write，remote lease 至多留到 database-clock expiry。
+- 共享 store 的雙 host failure injection 證明同時只有一個 session 可 active；
+  primary release 後 standby 取得下一個 epoch，舊 session 無法再取出 token。Renew
+  failure、release failure 與 local expiry cases 亦都維持 fail closed。Primary
+  Authority session、Supabase adapter 與 PG17 RPC scoped suite 共 12 passed。
+- 這完成 host workflow 的 in-process state／demotion contract，但尚未把週期性 renew
+  接到 canonical keepalive、把 active state 綁到所有 effect classes，也沒有執行兩台
+  真實 Mac 的 network-partition／五分鐘 failover rehearsal。因此本切片的局部根因為
+  `root_cause_fixed_and_verified`，program commit 34 整體仍是 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
