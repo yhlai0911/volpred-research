@@ -151,6 +151,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724114500_operations_core_change_set_receipt_index.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724120000_operations_core_commit_ownership_rpc.sql",
 )
 
 
@@ -832,11 +836,78 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert ownership_tables_force_rls is True
         assert ownership_public_table_select_revoked is True
         assert ownership_functions_hardened is True
+        with psycopg.connect(dsn, autocommit=True) as connection:
+            service_rpc_security = connection.execute(
+                """
+                SELECT
+                  (
+                    SELECT count(*) = 2
+                      AND bool_and(
+                        procedure.proowner = (
+                          SELECT oid FROM pg_roles
+                          WHERE rolname = 'volpred_ops_definer'
+                        )
+                        AND procedure.prosecdef
+                        AND procedure.proconfig = ARRAY['search_path=""']
+                      )
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname IN (
+                        'volpred_read_commit_owner',
+                        'volpred_transfer_commit_owner'
+                      )
+                  ),
+                  has_function_privilege(
+                    'service_role',
+                    'public.volpred_read_commit_owner()',
+                    'EXECUTE'
+                  ),
+                  has_function_privilege(
+                    'service_role',
+                    'public.volpred_transfer_commit_owner('
+                      'text,bigint,text,text,text,bigint)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'anon',
+                    'public.volpred_read_commit_owner()',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'authenticated',
+                    'public.volpred_transfer_commit_owner('
+                      'text,bigint,text,text,text,bigint)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'public',
+                    'public.volpred_read_commit_owner()',
+                    'EXECUTE'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.commit_owners',
+                    'SELECT'
+                  ),
+                  NOT has_schema_privilege(
+                    'volpred_ops_definer',
+                    'public',
+                    'CREATE'
+                  )
+                """
+            ).fetchone()
+        assert service_rpc_security == (True,) * 8
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
                 """
                 DROP FUNCTION IF EXISTS
+                  public.volpred_read_commit_owner(),
+                  public.volpred_transfer_commit_owner(
+                    text, bigint, text, text, text, bigint
+                  ),
                   public.volpred_read_notification_owner(),
                   public.volpred_transfer_notification_owner(
                     text, bigint, text, text, text, bigint
@@ -1042,6 +1113,73 @@ def _approver_connection(dsn: str) -> psycopg.Connection:
     connection = psycopg.connect(dsn)
     connection.execute("SET ROLE volpred_ops_approver")
     return connection
+
+
+def test_commit_owner_service_rpc_cutover_rollback_and_acl(
+    postgres_effect_dsn: str,
+) -> None:
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        initial = connection.execute(
+            "SELECT public.volpred_read_commit_owner()"
+        ).fetchone()[0]
+        assert (initial["owner"], initial["generation"]) == ("legacy", 1)
+
+        cutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_commit_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "test:service-rpc",
+                "exercise service-role operator seam",
+                None,
+            ),
+        ).fetchone()[0]
+        assert (cutover["owner"], cutover["generation"]) == (
+            "operations_core",
+            2,
+        )
+
+        rollback = connection.execute(
+            """
+            SELECT public.volpred_transfer_commit_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "operations_core",
+                2,
+                "legacy",
+                "test:service-rpc",
+                "exercise exact rollback",
+                2,
+            ),
+        ).fetchone()[0]
+        assert (rollback["owner"], rollback["generation"]) == ("legacy", 3)
+
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.commit_owners"
+            )
+
+    for role in ("anon", "authenticated"):
+        with psycopg.connect(
+            postgres_effect_dsn,
+            autocommit=True,
+        ) as connection:
+            connection.execute(f"SET ROLE {role}")
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                connection.execute(
+                    "SELECT public.volpred_read_commit_owner()"
+                )
 
 
 def _ensure_commit_owner(dsn: str) -> None:

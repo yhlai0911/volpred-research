@@ -1618,3 +1618,35 @@ checkout 內既有未追蹤 worktree/runtime files 將 exit 改為 1，因此不
 green。此 FK advisor 根因為 **`root_cause_fixed_and_verified`**；schema deployment
 已完成，但 production owner 仍是 legacy，正式 CAS、live commit smoke 與 rollback
 rehearsal尚未執行，所以 Change Delivery 整體維持 **`contained`**。
+
+### 2026-07-24 — Production commit owner 只有 private PG adapter，管理面無正式 read/CAS seam
+
+**證據化症狀與根因層級**：Change Delivery private migrations 已部署，但 Supabase
+Management SQL 直接呼叫 `volpred_ops.read_commit_owner()` 收到
+`permission denied for function read_commit_owner`；catalog 雖顯示 session user
+`postgres` 對 worker／approver 有 membership，卻沒有直接 function privilege，也
+不能 `SET ROLE`。拒絕本身符合 least privilege，但 production 只有
+`PostgresCommitOwnerStore`，沒有 service-role／PostgREST adapter；若用 privileged
+SQL 或暫時 grant 繞過，就會把正式 ownership transaction 退化成 session workaround。
+這是 remote-owned adapter 與 operator interface 缺口，不是 owner row 資料錯誤。
+
+**底層重構**：forward migration 新增
+`public.volpred_read_commit_owner()`／`volpred_transfer_commit_owner()`，只委派既有
+private read／CAS functions，因此未複製 ownership state machine；unsettled grant、
+`commit_unsettled` ChangeSet、generation 與 rollback-of-generation fences 全保留。
+Functions 由 no-login `volpred_ops_definer` 持有、`SECURITY DEFINER` 且
+`search_path=''`，只授權 service role；anon／authenticated／PUBLIC 無 EXECUTE，
+service role 仍無 private table SELECT。`SupabaseCommitOwnerStore` 將 production
+HTTP transport 藏在同一 owner-store seam 後，嚴格驗證 schema、capability、owner、
+positive generation 與 timezone-aware timestamp，CAS 衝突轉成 typed
+`CommitOwnershipLost`，也禁止 publishable／anon key fallback。
+
+**回歸、live 回讀與制度化**：unit interface、PG17 non-superuser clean replay、
+service-role `legacy/1 → operations_core/2 → legacy/3` transaction、ACL 與 direct-table
+denial regressions均通過。Production migration receipt 是
+`20260724074117 operations_core_commit_ownership_rpc`；live service-role HTTP 回讀
+仍為 `git.commit=legacy/1`，catalog 八項 hardening／ACL predicates 全 true，兩類
+advisor 對新 RPC 均為 0 findings。本次沒有執行 owner transfer。這個 operator seam
+根因為 **`root_cause_fixed_and_verified`**；但完整 production Change Delivery
+adapters、正式 live commit smoke 與 rollback rehearsal仍未完成，umbrella 保持
+**`contained`**。

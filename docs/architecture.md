@@ -182,6 +182,20 @@
 > 對舊無 owner overload 已失權，全部新表 FORCE RLS 且 PUBLIC 無 read／execute。
 > Schema deployment 不等於 ownership cutover；production Git writer 仍由 legacy
 > path 持有，只有另一次 approver CAS 才能切換。
+>
+> **Change Delivery service-role operator seam（2026-07-24，live read／legacy owner）**
+> Production 不能靠 Management SQL 的 session role 暗中繞過 private RLS。新增
+> `volpred_read_commit_owner`／`volpred_transfer_commit_owner` 兩個 public
+> PostgREST RPC；它們只委派既有 private read／CAS transaction，owner 是
+> `volpred_ops_definer`、`SECURITY DEFINER` 且 `search_path=''`，只有
+> `service_role` 可執行，anon／authenticated／PUBLIC 全拒，service role 仍不能直接
+> SELECT owner tables。`SupabaseCommitOwnerStore` 是 production HTTP adapter，會嚴格
+> 驗證 schema、capability、owner generation 與 timezone-aware timestamp，CAS 衝突
+> 轉成 typed `CommitOwnershipLost`。Live migration receipt 是
+> `20260724074117 operations_core_commit_ownership_rpc`；RPC 回讀仍為
+> `git.commit=legacy/1`，本 checkpoint 沒有執行 ownership transfer。完整 production
+> Change Delivery caller 尚未有 service-role adapters，故不得只因 owner RPC 可用便
+> 切換 Git ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

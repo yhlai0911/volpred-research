@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Change Delivery live schema／legacy owner）**
+Last updated: **2026-07-24（Change Delivery service-role owner seam／legacy owner）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -325,6 +325,14 @@ worker 只可用 owner-fenced overload。首次 advisor 回讀抓到 ChangeSet d
 FK 缺 covering index；forward migration 與 PG17 contract 補齊後該 finding 消失，
 `volpred_ops` security advisor 為 0 findings。Production Git owner 尚未切換，正式
 CAS／live smoke／rollback rehearsal未執行，因此 umbrella 狀態仍是 `contained`。
+同日 live Management SQL 對 private owner function 的 permission denial 證實缺少
+production operator seam。新增兩個 service-role-only public RPC 與
+`SupabaseCommitOwnerStore`，只委派原 private read／CAS transaction；definer owner、
+空 search path、anon／authenticated／PUBLIC deny、service role 無 table SELECT 均由
+PG17 與 live catalog 回讀。Production migration receipt
+`20260724074117 operations_core_commit_ownership_rpc` 已存在，HTTP adapter 回讀仍為
+`legacy/1`，兩類 advisor 對新 RPC 零 findings。Owner 沒有 transfer；完整 production
+delivery adapters 與 live smoke／rollback rehearsal仍缺，umbrella 仍為 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

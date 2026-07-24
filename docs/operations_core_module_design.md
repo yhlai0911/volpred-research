@@ -396,6 +396,24 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   cutover；正式 CAS、production smoke 與 live rollback rehearsal 尚未執行，因此
   Change Delivery 整體仍為 `contained`。
 
+### 2026-07-24 service-role owner RPC checkpoint
+
+- Live 管理面實測無法執行 private `read_commit_owner()`；這是正確的 privilege
+  拒絕，但也證明 production 沒有可供 operator／PostgREST 使用的正式 read／CAS
+  adapter，不能靠臨時 SQL 或 RLS bypass 收尾。
+- 新 public RPC 只委派 private owner functions，保留原本的 CAS、unsettled grant／
+  ChangeSet rollback fence 與 immutable receipt。兩個 functions 都由
+  `volpred_ops_definer` 持有、`SECURITY DEFINER`、空 `search_path`，只授權
+  service role；anon／authenticated／PUBLIC 均拒，service role 無 table SELECT。
+  Python `SupabaseCommitOwnerStore` 對 RPC payload 與錯誤做 typed fail-closed。
+- PG17 non-superuser clean replay、service-role cutover→rollback、ACL 與 HTTP adapter
+  regressions通過；production receipt
+  `20260724074117 operations_core_commit_ownership_rpc` 已回讀，security／performance
+  advisors 對兩個新 RPC 均為 0 findings。Live RPC 回讀 owner 仍是 `legacy/1`，沒有
+  執行 transfer。這個 operator seam 根因為 `root_cause_fixed_and_verified`，但完整
+  production delivery adapters、live commit smoke 與 rollback rehearsal仍缺，
+  Change Delivery umbrella 維持 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam

@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Candidate workspace materialization now runs source revalidation, exact-path copy, stage/hash fence, commit and object read-back under one canonical writer lease; source drift, foreign target bytes and hook rollback are covered; 72 scoped tests passed and canonical-writer audit reports 0 violations",
-    "next_direct_step": "Wire the formal Work Coordinator caller to durable ChangeSetStore, Postgres commit authority and settlement in a non-live end-to-end shadow path; then rehearse migration deployment and ownership rollback before any Git cutover",
+    "containment_evidence": "Service-role-only owner RPC and strict HTTP adapter landed; PG17 clean replay plus ACL/cutover-rollback regression passed; production receipt 20260724074117 read back; catalog hardening predicates all true; new-RPC security/performance advisor findings 0; owner remains legacy/1",
+    "next_direct_step": "Build the remaining service-role formal Change Delivery adapters and controlled smoke harness; only then execute production owner CAS, exact commit read-back, rollback rehearsal and recutover",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Change Delivery candidate workspace materializer: registered linked worktree to canonical checkout is content-bound, fail-closed on foreign bytes, rollback-safe on ordinary failure and restartable from exact candidate residue; live ownership unchanged"
+    "latest_checkpoint": "Production service-role commit-owner operator seam deployed and live-read verified; git.commit remains legacy/1"
   }
 ]

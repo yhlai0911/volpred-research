@@ -1,0 +1,7 @@
+-- Remote receipt counterpart for the commit-ownership RPC migration applied
+-- through the Supabase migration API as version 20260724074117.
+--
+-- Its remote timestamp precedes the local Change Delivery dependencies.
+-- The idempotent canonical migration therefore remains at
+-- 20260724120000_operations_core_commit_ownership_rpc.sql so clean replay
+-- creates the service-role RPCs only after their private owner functions.
