@@ -2212,3 +2212,51 @@ transfer或 canonical research data mutation。此 scheduler false-green根因�
 **`root_cause_fixed_and_verified`**；program commit 15仍缺 full-sync formal outbox
 ownership與rollback rehearsal，故 program commit 15及 operations-core umbrella維持
 **`contained`**。
+
+### 2026-07-25 — Full-feed reconcile 沒有 immutable batch EffectRequest
+
+**證據化缺口與根因層級**：single-article projection已有payload-bound formal caller，
+但 hourly reconcile的batch intent仍由caller讀live feed、算diff後逐篇呼叫；若直接把
+這層包進outbox，worker retry會在EffectRequest建立後重新讀可能已變動的feed，原請求
+identity與真正執行的article集合便可分離。根因是batch transaction seam缺少immutable
+intent，不是diff演算法或Supabase row錯誤。
+
+**底層contained切片**：新增
+`prepare_publisher_article_reconcile(...) -> PreparedPublisherArticleReconcile`單一
+interface，將canonical feed SHA-256及本次完整articles綁入deterministic payload，
+effect kind／target／safe risk／typed acknowledgement與payload hash全由module擁有。
+`PublisherArticleReconcileEffectAdapter`只接受唯一slug canonical排序；先read-back、
+只upsert mismatch、再要求全batch exact read-back。Payload／contract漂移為terminal，
+provider與read-back failure為retryable，generic durable worker可據此dead-letter或
+重試。Delete因具destructive語意刻意不混入safe family。
+
+**回歸、回讀與狀態界線**：八個新cases覆蓋EffectRequest replay、部分已收斂batch、
+provider failure、非法evidence、schema/order/risk拒絕與durable dead-letter；與
+single-article及worker相鄰套件共 **36 passed**，compileall及`git diff --check`通過。
+Production adapter read-only回讀`mile_30b22ca5`為exact match，evidence SHA-256
+`b8b20a3bddd6c5035f821ac0572f38b1c6785b83e2b51d6658f6837289e6dff6`；沒有remote
+write或owner mutation。因hourly producer尚未接production payload store／outbox owner，
+且family owner CAS、delete effect與rollback rehearsal未完成，本項與program commit 15
+均維持 **`contained`**，不可宣稱cutover完成。
+
+### 2026-07-25 — Mixed audit exit contract 讓 Test Suite 連續紅燈
+
+**證據化症狀與根因層級**：GitHub Test Suite runs `30122387928`與`30126175832`
+連續只紅
+`test_runtime_schedule_marks_known_findings_exit_jobs`：`audit_publish_sync.log`
+不再被辨識為findings job。該job的真實contract是exit 0=converged、1=findings、
+2=observation unavailable；舊helper只接受整欄精確等於`"findings"`，資料模型只能
+「全豁免」或「全當infra failure」。因此保留精確0/1/2描述會讓exit 1假critical，
+改回整欄findings又會吞掉真正的exit 2。根因是alert metadata缺少per-code分類。
+
+**底層修復**：runtime schedule新增typed `findings_exit_codes`，目前
+`audit_publish_sync=[1]`。新helper回傳log→code set；legacy
+`exit_semantics=findings`仍代表所有nonzero皆為finding。Host-cron parser先讀latest
+exit code，只豁免typed set命中的code；已登記mixed contract的audit不再套用
+`audit_*`整支豁免fallback，且consecutive-failure計算也忽略同一typed findings code。
+
+**回歸與制度化**：新增同一audit exit 1不breach、exit 2仍breach的對稱測試；canonical
+schedule inventory再次包含`audit_publish_sync.log`。Alerts、feed-sync CLI、
+projection audit、publisher effect相鄰套件共 **121 passed**，JSON parse、
+compileall與`git diff --check`通過。這個CI／alert contract根因為
+**`root_cause_fixed_and_verified`**。

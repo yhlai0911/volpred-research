@@ -1440,20 +1440,26 @@ def _trailing_consecutive_failures(
     return consec
 
 
-def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = None) -> set[str]:
-    """Return cron log names whose non-zero exit is a findings signal.
+def _findings_exit_codes_from_schedule_config(
+    config: dict[str, Any] | None = None,
+) -> dict[str, frozenset[int] | None]:
+    """Return typed findings exit codes by cron log name.
 
-    Runtime schedule metadata is the canonical source. The parser still keeps the
-    historical `audit_*.log` fallback below for old logs/configs, but every current
-    findings-as-exit cron should declare `exit_semantics: "findings"` in
-    config/runtime_schedules.json so the alert layer does not grow another
-    hardcoded registry.
+    ``None`` means every non-zero code is a findings signal, preserving the
+    established ``exit_semantics: "findings"`` shorthand. Mixed contracts must
+    declare ``findings_exit_codes`` so observation/transport failures remain
+    visible to host-cron health.
     """
     if config is None:
         try:
             config = load_runtime_schedules()
-        except Exception:
-            return set()
+        except Exception as exc:
+            warn(
+                "alerts",
+                "runtime schedule read failed for typed findings exits",
+                err=str(exc),
+            )
+            return {}
 
     def iter_items() -> list[dict[str, Any]]:
         items: list[dict[str, Any]] = []
@@ -1464,15 +1470,39 @@ def _findings_exit_logs_from_schedule_config(config: dict[str, Any] | None = Non
             items.extend(item for item in config["cron_jobs"] if isinstance(item, dict))
         return items
 
-    logs: set[str] = set()
+    logs: dict[str, frozenset[int] | None] = {}
     for item in iter_items():
-        if str(item.get("exit_semantics") or "").strip().lower() != "findings":
+        semantics = str(item.get("exit_semantics") or "").strip().lower()
+        raw_codes = item.get("findings_exit_codes")
+        codes: frozenset[int] | None
+        if semantics == "findings":
+            codes = None
+        elif (
+            isinstance(raw_codes, list)
+            and raw_codes
+            and all(
+                isinstance(code, int)
+                and not isinstance(code, bool)
+                and code > 0
+                for code in raw_codes
+            )
+        ):
+            codes = frozenset(raw_codes)
+        else:
             continue
         for key in ("log_path", "log"):
             raw = item.get(key)
             if isinstance(raw, str) and raw.strip():
-                logs.add(Path(raw).name)
+                logs[Path(raw).name] = codes
     return logs
+
+
+def _findings_exit_logs_from_schedule_config(
+    config: dict[str, Any] | None = None,
+) -> set[str]:
+    """Compatibility view of logs with at least one findings exit code."""
+
+    return set(_findings_exit_codes_from_schedule_config(config))
 
 
 def _iter_runtime_schedule_items(config: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1977,18 +2007,31 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
     # Those are findings, surfaced via the job's own WARN + report JSON; firing
     # host_cron_fail CRITICAL on them is a false-critical (email-noise → erodes trust
     # in alerting). Non-audit jobs now self-declare this via runtime_schedules.json.
-    findings_exit_logs = _findings_exit_logs_from_schedule_config()
+    findings_exit_codes = _findings_exit_codes_from_schedule_config()
     schedule_by_log = _schedule_items_by_log_name()
-
-    def _is_audit_signal_log(name: str) -> bool:
-        return name.startswith("audit_") or name in findings_exit_logs
 
     if logs_dir.exists():
         for log_path in sorted(logs_dir.glob("*.log")):
-            if _is_audit_signal_log(log_path.name):
-                continue
             latest = _latest_cron_exit(log_path)
             if latest and int(latest.get("exit_code", 0)) != 0:
+                latest_code = int(latest.get("exit_code", 0))
+                typed_findings = findings_exit_codes.get(log_path.name)
+                if (
+                    log_path.name in findings_exit_codes
+                    and (
+                        typed_findings is None
+                        or latest_code in typed_findings
+                    )
+                ):
+                    continue
+                if (
+                    log_path.name.startswith("audit_")
+                    and log_path.name not in findings_exit_codes
+                ):
+                    # Backward-compatible fallback for unregistered legacy
+                    # audit logs. Registered mixed-semantics jobs are governed
+                    # by their exact typed code set above.
+                    continue
                 latest_exit_time = _parse_latest_exit_time(latest)
                 if latest_exit_time is None:
                     latest["recency_status"] = "unknown_exited_at"
@@ -2020,10 +2063,13 @@ def _parse_host_cron_state(storage_dir: str, now: datetime) -> dict[str, Any]:
                 # a sustained outage. A 142 hang chain is still counted (stuck != gap).
                 consec = _trailing_consecutive_failures(
                     codes,
-                    ignore_codes=(_QUOTA_EXHAUSTED_EXIT_CODE, *_BENIGN_FINDINGS_EXIT_CODES),
+                    ignore_codes=(
+                        _QUOTA_EXHAUSTED_EXIT_CODE,
+                        *_BENIGN_FINDINGS_EXIT_CODES,
+                        *(typed_findings or ()),
+                    ),
                 )
                 max_consec_fail = max(max_consec_fail, consec)
-                latest_code = int(latest.get("exit_code", 0))
                 # Self-recovering codes: exit=142 = SIGALRM hang-kill (self-recovers
                 # next hourly fire); exit=75 = Claude Max quota window (self-resets on
                 # schedule, Codex covers the gap). A hard failure (126 perm / 1 error /

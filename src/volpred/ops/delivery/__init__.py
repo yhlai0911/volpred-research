@@ -9,14 +9,14 @@ families whose production cutover gate is recorded in
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
 import hashlib
 import json
-from pathlib import Path, PurePosixPath
 import re
 import stat
 import subprocess
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path, PurePosixPath
 from threading import RLock
 from typing import Callable
 
@@ -29,6 +29,13 @@ from ._effect import (
     EffectRequestConflict,
     EffectView,
     FailedEffect,
+)
+from ._publisher_article_reconcile import (
+    PreparedPublisherArticleReconcile,
+    PublisherArticleReconcileEffectAdapter,
+    PublisherArticleReconcilePlan,
+    encode_publisher_article_reconcile_payload,
+    prepare_publisher_article_reconcile,
 )
 from ._publisher_article_sync import (
     PublisherArticleProjection,
@@ -47,7 +54,6 @@ from .owned_publisher_article import (
     PublisherArticleSyncOwnershipLost,
     SupabaseOwnedPublisherArticleStore,
 )
-
 
 _GIT_OBJECT_ID = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -759,17 +765,22 @@ __all__ = [
     "EffectView",
     "FailedEffect",
     "LandChangeSet",
-    "PublisherArticleProjection",
-    "PublisherArticleProjectionReadback",
-    "PublisherArticleSyncEffectAdapter",
     "OwnedPublisherArticleAttempt",
     "OwnedPublisherArticleCommand",
     "OwnedPublisherArticleReceipt",
     "OwnedPublisherArticleRequest",
     "OwnedPublisherArticleSync",
+    "PreparedPublisherArticleReconcile",
+    "PublisherArticleProjection",
+    "PublisherArticleProjectionReadback",
+    "PublisherArticleReconcileEffectAdapter",
+    "PublisherArticleReconcilePlan",
+    "PublisherArticleSyncEffectAdapter",
     "PublisherArticleSyncOwner",
     "PublisherArticleSyncOwnershipLost",
     "SupabaseArticleProjectionAdapter",
     "SupabaseOwnedPublisherArticleStore",
+    "encode_publisher_article_reconcile_payload",
     "encode_publisher_article_sync_payload",
+    "prepare_publisher_article_reconcile",
 ]

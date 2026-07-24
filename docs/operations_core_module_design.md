@@ -1078,6 +1078,29 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   為 **`root_cause_fixed_and_verified`**；full-sync formal outbox ownership與rollback
   rehearsal仍缺，故 program commit 15保持 **`contained`**。
 
+### 2026-07-25 immutable reconcile EffectRequest checkpoint
+
+- Safe full-feed reconcile現在有一個小型 external interface：
+  `prepare_publisher_article_reconcile(...) -> PreparedPublisherArticleReconcile`。
+  Interface隱藏 effect kind、target、risk、acknowledgement與payload hash；implementation
+  將 canonical feed SHA-256及本次需upsert的完整 article objects綁入immutable payload，
+  slug必須唯一且canonical排序。Worker retry不再有機會從後來已變動的`feed.json`
+  重建另一個 batch intent。
+- `PublisherArticleReconcileEffectAdapter`沿用已有 production／fake article
+  projection adapters這個真 seam：先逐篇read-back、只upsert mismatch、再逐篇exact
+  read-back。等價 replay為零寫入；payload hash、schema、target或safe-risk漂移為
+  non-retryable，經generic durable worker落dead letter；provider與read-back錯誤為
+  retryable。Destructive delete不混入此effect family，保留獨立權限與rollback設計。
+- 八個新 public-interface cases連同single-article provider及effect worker相鄰套件為
+  **36 passed**。Production adapter只讀回
+  `supabase:articles/mile_30b22ca5`，projection完全相符，evidence SHA-256為
+  `b8b20a3bddd6c5035f821ac0572f38b1c6785b83e2b51d6658f6837289e6dff6`；未執行
+  remote write、owner transfer或live effect。
+- 這完成 formal EffectRequest／provider contract的shadow切片，不等於production
+  ownership cutover。Hourly producer尚未寫入production payload store／outbox，
+  family owner CAS、destructive delete effect與exact rollback rehearsal仍缺；因此
+  program commit 15與operations-core umbrella維持 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

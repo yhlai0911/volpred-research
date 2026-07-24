@@ -433,6 +433,29 @@
 > false-green根因為 **`root_cause_fixed_and_verified`**，不代表 formal full-sync
 > outbox ownership或rollback rehearsal已完成；program commit 15仍為
 > **`contained`**。
+>
+> **Immutable reconcile EffectRequest contract（2026-07-25，shadow）**：
+> `prepare_publisher_article_reconcile(...)` 是 safe batch 的單一 external
+> interface；caller只提供 Work identity、payload ref、canonical feed SHA-256與本次
+> 要收斂的完整 article objects，不再自行拼 effect kind、target、risk或
+> acknowledgement。Payload將 articles正規化為唯一 slug排序並內嵌完整 bytes，
+> worker retry不會回頭從可漂移的 `feed.json`重建 intent。
+> `PublisherArticleReconcileEffectAdapter`先逐篇 read-back，只寫 mismatch，再要求全
+> batch exact read-back；等價 replay不重寫，hash／schema／target／risk漂移由 durable
+> worker terminal dead-letter，provider或read-back failure保持 retryable。Destructive
+> delete刻意不在此 safe family，避免安全與破壞性 effect共用一個淺介面。
+> 新契約與相鄰 article／worker套件 **36 passed**；production read-only adapter回讀
+> `mile_30b22ca5`完全相符，evidence SHA-256
+> `b8b20a3bddd6c5035f821ac0572f38b1c6785b83e2b51d6658f6837289e6dff6`。
+> 本 checkpoint尚未把 hourly producer接到 production payload store／outbox owner，
+> 也沒有 owner CAS、delete effect或rollback rehearsal，因此 program commit 15仍為
+> **`contained`**。
+>
+> **Typed cron findings exits（2026-07-25）**：schedule的
+> `exit_semantics`可保存完整0/1/2 contract，另以`findings_exit_codes`列出只代表業務
+> finding的code。Host-cron health只豁免列出的code；同一audit的transport／observation
+> failure仍是infra failure。這取代把整支log全豁免的布林模型，也修復
+> `audit_publish_sync`改成精確0/1/2契約後的clean-CI regression。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

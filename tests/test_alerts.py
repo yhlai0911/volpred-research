@@ -1784,6 +1784,12 @@ def test_findings_exit_logs_from_schedule_config():
                     "id": "daily_update",
                     "log_path": "storage/logs/cron/daily_update.log",
                 },
+                {
+                    "id": "mixed_audit",
+                    "log_path": "storage/logs/cron/mixed_audit.log",
+                    "exit_semantics": "0=clean,1=findings,2=unavailable",
+                    "findings_exit_codes": [1],
+                },
             ]
         },
         "cron_jobs": [
@@ -1798,7 +1804,55 @@ def test_findings_exit_logs_from_schedule_config():
     assert _findings_exit_logs_from_schedule_config(config) == {
         "indicator_arena_daily.log",
         "legacy_findings.log",
+        "mixed_audit.log",
     }
+
+
+@pytest.mark.parametrize(
+    ("exit_code", "breached"),
+    [(1, False), (2, True)],
+)
+def test_host_cron_applies_typed_findings_exit_codes(
+    tmp_path: Path,
+    monkeypatch,
+    exit_code: int,
+    breached: bool,
+):
+    from datetime import datetime, timezone
+
+    from volpred.ops.alerts import _parse_host_cron_state
+
+    storage = tmp_path / "storage"
+    config = {
+        "metadata": {},
+        "system_crontab": {
+            "items": [
+                {
+                    "id": "audit_projection",
+                    "cron": "15 * * * *",
+                    "log_path": "storage/logs/cron/audit_projection.log",
+                    "exit_semantics": "0=clean,1=findings,2=unavailable",
+                    "findings_exit_codes": [1],
+                }
+            ]
+        },
+        "remote_triggers": {"items": []},
+        "session_crons": {"items": []},
+    }
+    monkeypatch.setattr(
+        "volpred.ops.alerts.load_runtime_schedules",
+        lambda: config,
+    )
+    now = datetime(2026, 7, 25, 5, 15, tzinfo=timezone.utc)
+    _write_text(
+        storage / "logs" / "cron" / "audit_projection.log",
+        f"=== [audit_projection] exit {exit_code} at {now.isoformat()} ===\n",
+    )
+
+    result = _parse_host_cron_state(str(storage), now)
+
+    assert result["breached"] is breached
+    assert bool(result["details"]["failing_logs"]) is breached
 
 
 def test_runtime_schedule_marks_known_findings_exit_jobs():

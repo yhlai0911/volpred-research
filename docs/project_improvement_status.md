@@ -328,6 +328,22 @@ Failure injection由0轉1；相關與相鄰套件 **69 passed**，production rea
 **`root_cause_fixed_and_verified`**；formal full-sync outbox ownership與rollback
 rehearsal仍缺，program commit 15維持 **`contained`**。
 
+同日建立 program commit 15 的 immutable reconcile EffectRequest shadow contract。
+`prepare_publisher_article_reconcile()`把 Work identity、canonical feed SHA與本次完整
+article objects收進單一safe interface，effect constants與payload hash不再散給caller；
+payload內嵌且canonical排序，retry不會從已漂移feed重建intent。Batch provider先讀、
+只寫mismatch、再逐篇exact read-back；等價 replay零寫入，非法contract由durable
+worker dead-letter。八個新cases與相鄰套件 **36 passed**；production read-only
+`mile_30b22ca5`完全相符。Hourly production caller／payload store／outbox owner、
+destructive delete family與rollback rehearsal尚未接通，所以本checkpoint及program
+commit 15仍為 **`contained`**。
+
+同班另修正current Test Suite連續紅燈：cron alert metadata原本只能把整支log標為
+`findings`，無法表達`audit_publish_sync`的exit 1=findings、exit 2=unavailable。
+Schedule新增typed `findings_exit_codes=[1]`；host health只豁免code 1，code 2仍會進
+infra failure。精確重現與相鄰publisher／audit suites共 **121 passed**，此CI契約根因
+為 **`root_cause_fixed_and_verified`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem
