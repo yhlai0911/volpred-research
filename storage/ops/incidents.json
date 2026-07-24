@@ -253,6 +253,9 @@
     },
     {
      "at": "2026-07-24T19:14:42.544019+00:00"
+    },
+    {
+     "at": "2026-07-24T20:17:14.951334+00:00"
     }
    ],
    "current_task_id": null,
@@ -570,7 +573,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-24T19:07:52.615874+00:00"
+     "last_seen_at": "2026-07-24T20:07:45.077751+00:00"
     },
     {
      "cleared_at": null,
@@ -583,7 +586,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-24T19:07:52.874540+00:00"
+     "last_seen_at": "2026-07-24T20:07:45.330909+00:00"
     },
     {
      "cleared_at": null,
@@ -596,7 +599,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-24T19:07:53.387232+00:00"
+     "last_seen_at": "2026-07-24T20:07:45.814261+00:00"
     },
     {
      "cleared_at": null,
@@ -609,7 +612,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-24T19:07:53.124436+00:00"
+     "last_seen_at": "2026-07-24T20:07:45.564854+00:00"
     },
     {
      "cleared_at": null,
@@ -622,7 +625,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-24T19:07:53.685800+00:00"
+     "last_seen_at": "2026-07-24T20:07:46.085367+00:00"
     },
     {
      "cleared_at": null,
@@ -648,7 +651,7 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-24T19:07:53.965807+00:00"
+     "last_seen_at": "2026-07-24T20:07:46.325063+00:00"
     },
     {
      "cleared_at": null,
@@ -666,9 +669,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-24T19:07:53.965807+00:00",
+   "last_seen_at": "2026-07-24T20:07:46.325063+00:00",
    "notified_at": null,
-   "occurrence_count": 654,
+   "occurrence_count": 660,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -927,9 +930,19 @@
    "last_seen_at": "2026-07-24T19:00:07.353935+00:00",
    "notified_at": null,
    "occurrence_count": 3,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-24T20:00:14.688293+00:00",
+    "by": "ci-red-30107632406",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-24T20:00:14.688293+00:00",
+     "by": "ci-red-30107632406",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [],
    "task_mode": "external",
@@ -939,6 +952,6 @@
    }
   }
  },
- "updated_at": "2026-07-24T19:14:42.544510+00:00",
+ "updated_at": "2026-07-24T20:17:14.951723+00:00",
  "version": 1
 }
