@@ -75,6 +75,8 @@ def encode_publisher_article_sync_payload(article: Mapping[str, object]) -> byte
 class PublisherArticleSyncEffectAdapter:
     """Deliver one safe article projection and require exact read-back."""
 
+    effect_kinds = frozenset({_EFFECT_KIND})
+
     def __init__(self, *, projection: PublisherArticleProjection) -> None:
         self._projection = projection
 

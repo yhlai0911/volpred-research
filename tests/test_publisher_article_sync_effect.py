@@ -230,7 +230,16 @@ class _TerminalStore:
         self.effect = effect
         self.outcome: FailedEffect | None = None
 
-    def claim_outbox(self, *, worker_id: str, lease_seconds: int):
+    def claim_outbox(
+        self,
+        *,
+        worker_id: str,
+        lease_seconds: int,
+        effect_kinds: frozenset[str],
+    ):
+        assert effect_kinds == frozenset(
+            {"publisher.article.supabase.sync"}
+        )
         return EffectOutboxLease(
             sequence=44,
             effect_id=self.effect.id,
@@ -305,6 +314,41 @@ def test_invalid_article_effect_is_durably_dead_lettered_by_worker() -> None:
         store.outcome.reason_code
         == "unsupported_publisher_article_sync_contract"
     )
+
+
+def test_worker_fails_closed_if_store_returns_another_effect_family() -> None:
+    payload = _payload()
+    wrong_family = replace(
+        _effect(payload),
+        effect_kind="email.notification.send",
+    )
+    store = _TerminalStore(wrong_family)
+    projection = _Projection()
+    worker = EffectOutboxWorker(
+        delivery=store,
+        authority=_Authority(),
+        primary_authority=_PrimaryAuthority(),
+        payload_reader=type(
+            "PayloadReader",
+            (),
+            {"read": lambda _self, _ref: payload},
+        )(),
+        provider=PublisherArticleSyncEffectAdapter(projection=projection),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="outside the provider capability",
+    ):
+        worker.run_once(
+            EffectWorkerCommand(
+                worker_id="effect-worker:publisher-sync",
+                lease_seconds=300,
+            )
+        )
+
+    assert projection.upserts == 0
+    assert store.outcome is None
 
 
 def test_supabase_projection_adapter_compares_full_row_and_tags(

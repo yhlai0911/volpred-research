@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（owned email production keepalive gate）**
+Last updated: **2026-07-24（effect-family transactional routing gate）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -412,6 +412,19 @@ lease holder=null、live attempt=0。此 family gate局部根因為
 `root_cause_fixed_and_verified`；其他 effect family、真實雙 Mac network partition、
 Supabase outage與五分鐘 RTO rehearsal仍未完成，因此 program commit 34 umbrella
 保持 `contained`。
+同日多 family盤點抓到 generic outbox claim沒有 provider capability filter：任一 narrow
+provider worker都會拿全域最舊 row，publisher上線後可能先拿 email effect並把合法 intent
+錯判為 unsupported後 dead-letter。底層改為 provider宣告 immutable `effect_kinds`，
+claim transaction join EffectRequest後只鎖相符 family，worker對回傳 row再做 provider前
+family fence；舊三參數 unfiltered RPC直接移除，無相容 escape hatch。PG17 clean／
+idempotent migration與「email先入列、publisher後入列」交錯案例證明各 worker只拿自己
+family；unit／PG17相鄰套件共 67 passed。Production migration
+`20260724134742 operations_core_effect_family_routing`已套用，live catalog回讀
+filtered signature、`volpred_ops_definer` owner、fixed search path、worker-only ACL、
+filter definition與 index全對；當下 active claim=0，本次沒有 claim或 provider call。
+此 cross-family routing根因為 `root_cause_fixed_and_verified`。Publisher durable
+formal caller／HTTP adapters／owner cutover與 program commit 34的真實 outage／RTO
+rehearsal仍缺，umbrella維持 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

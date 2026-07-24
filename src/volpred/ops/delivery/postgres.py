@@ -167,6 +167,7 @@ class PostgresEffectDelivery:
                 "effect payload hash does not match its durable bytes",
                 "unsupported effect risk:",
                 "effect outbox worker and token are required",
+                "effect outbox effect kinds are required",
                 "effect outbox lease_seconds must be positive",
                 "effect outbox settlement fields are required",
                 "effect outbox settlement authority is required",
@@ -253,6 +254,7 @@ class PostgresEffectDelivery:
         *,
         worker_id: str,
         lease_seconds: int,
+        effect_kinds: frozenset[str],
     ) -> EffectOutboxLease | None:
         if not isinstance(worker_id, str) or not worker_id.strip():
             raise ValueError("effect outbox worker is required")
@@ -262,6 +264,7 @@ class PostgresEffectDelivery:
             or lease_seconds <= 0
         ):
             raise ValueError("effect outbox lease_seconds must be positive")
+        normalized_effect_kinds = _normalize_effect_kinds(effect_kinds)
         token = self._token_factory().strip()
         if not token:
             raise ValueError("effect outbox token is required")
@@ -272,9 +275,14 @@ class PostgresEffectDelivery:
                 row = connection.execute(
                     """
                     SELECT *
-                    FROM volpred_ops.claim_effect_outbox(%s, %s, %s)
+                    FROM volpred_ops.claim_effect_outbox(%s, %s, %s, %s)
                     """,
-                    (worker_id.strip(), lease_seconds, token),
+                    (
+                        worker_id.strip(),
+                        lease_seconds,
+                        token,
+                        list(normalized_effect_kinds),
+                    ),
                 ).fetchone()
             except Exception as error:
                 self._translate(error)
@@ -383,6 +391,31 @@ class PostgresEffectDelivery:
                 "settle_effect_outbox returned no EffectAttemptReceipt"
             )
         return _attempt_receipt_from_row(row)
+
+
+def _normalize_effect_kinds(
+    effect_kinds: frozenset[str],
+) -> tuple[str, ...]:
+    if not isinstance(effect_kinds, frozenset) or not effect_kinds:
+        raise ValueError(
+            "effect outbox effect kinds must be a non-empty frozenset"
+        )
+    normalized = tuple(
+        sorted(
+            kind.strip()
+            for kind in effect_kinds
+            if isinstance(kind, str) and kind.strip()
+        )
+    )
+    if len(normalized) != len(effect_kinds):
+        raise ValueError(
+            "effect outbox effect kinds must be normalized text"
+        )
+    if frozenset(normalized) != effect_kinds:
+        raise ValueError(
+            "effect outbox effect kinds must be normalized text"
+        )
+    return normalized
 
 
 __all__ = [

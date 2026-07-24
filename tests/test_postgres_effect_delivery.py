@@ -87,6 +87,7 @@ from volpred.ops.work import (
 from volpred.ops.work.postgres import PostgresCoordinationStore
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+TELEGRAM_EFFECT_KINDS = frozenset({"telegram.message.send"})
 MIGRATIONS = (
     REPO_ROOT
     / "supabase"
@@ -180,6 +181,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724131707_operations_core_owned_email_keepalive_gate.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724134742_operations_core_effect_family_routing.sql",
 )
 
 
@@ -1884,6 +1889,7 @@ def test_concurrent_workers_claim_one_outbox_row(
                 lambda pair: pair[0].claim_outbox(
                     worker_id=pair[1],
                     lease_seconds=300,
+                    effect_kinds=TELEGRAM_EFFECT_KINDS,
                 ),
                 zip(deliveries, ("worker-a", "worker-b"), strict=True),
             )
@@ -1895,6 +1901,100 @@ def test_concurrent_workers_claim_one_outbox_row(
     assert {claim.token for claim in acquired} <= {"claim-a", "claim-b"}
 
 
+def test_outbox_claim_routes_only_effects_supported_by_the_provider(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    _seed_work(postgres_effect_dsn, work_id="work-effect-2")
+    telegram = _delivery(
+        postgres_effect_dsn,
+        effect_id="effect-telegram-first",
+    ).request(_request())
+    publisher = _delivery(
+        postgres_effect_dsn,
+        effect_id="effect-publisher-second",
+    ).request(
+        _request(
+            idempotency_key="effect:work-effect-2:publisher:sync",
+            work_item_id="work-effect-2",
+            effect_kind="publisher.article.supabase.sync",
+            target_ref="supabase:articles/mile_routed",
+            acknowledgement=AcknowledgementExpectation(
+                kind="publisher.article.supabase.readback",
+                target_ref="supabase:articles/mile_routed",
+            ),
+        )
+    )
+
+    publisher_claim = _delivery(
+        postgres_effect_dsn,
+        token="publisher-claim",
+    ).claim_outbox(
+        worker_id="effect-worker:publisher",
+        lease_seconds=300,
+        effect_kinds=frozenset({"publisher.article.supabase.sync"}),
+    )
+    telegram_claim = _delivery(
+        postgres_effect_dsn,
+        token="telegram-claim",
+    ).claim_outbox(
+        worker_id="effect-worker:telegram",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
+
+    assert publisher_claim is not None
+    assert publisher_claim.effect_id == publisher.id
+    assert telegram_claim is not None
+    assert telegram_claim.effect_id == telegram.id
+    with pytest.raises(ValueError, match="effect kind"):
+        _delivery(postgres_effect_dsn).claim_outbox(
+            worker_id="effect-worker:invalid",
+            lease_seconds=300,
+            effect_kinds=frozenset(),
+        )
+
+
+def test_effect_family_claim_rpc_removes_unfiltered_escape_hatch(
+    postgres_effect_dsn: str,
+) -> None:
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        security = connection.execute(
+            """
+            SELECT
+              to_regprocedure(
+                'volpred_ops.claim_effect_outbox(text,integer,text)'
+              ) IS NULL,
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.claim_effect_outbox('
+                  'text,integer,text,text[])',
+                'EXECUTE'
+              ),
+              NOT has_function_privilege(
+                'public',
+                'volpred_ops.claim_effect_outbox('
+                  'text,integer,text,text[])',
+                'EXECUTE'
+              ),
+              procedure.proowner = (
+                SELECT oid FROM pg_roles
+                WHERE rolname = 'volpred_ops_definer'
+              ),
+              procedure.prosecdef,
+              procedure.proconfig @>
+                ARRAY['search_path=pg_catalog, volpred_ops']
+            FROM pg_proc AS procedure
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = procedure.pronamespace
+            WHERE namespace.nspname = 'volpred_ops'
+              AND procedure.proname = 'claim_effect_outbox'
+            """
+        ).fetchone()
+
+    assert security == (True,) * 6
+
+
 def test_expired_outbox_claim_is_recovered_with_database_clock(
     postgres_effect_dsn: str,
 ) -> None:
@@ -1903,7 +2003,11 @@ def test_expired_outbox_claim_is_recovered_with_database_clock(
     first = _delivery(
         postgres_effect_dsn,
         token="stale-token",
-    ).claim_outbox(worker_id="worker-a", lease_seconds=300)
+    ).claim_outbox(
+        worker_id="worker-a",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert first is not None
 
     with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
@@ -1919,7 +2023,11 @@ def test_expired_outbox_claim_is_recovered_with_database_clock(
     recovered = _delivery(
         postgres_effect_dsn,
         token="fresh-token",
-    ).claim_outbox(worker_id="worker-b", lease_seconds=300)
+    ).claim_outbox(
+        worker_id="worker-b",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert recovered is not None
     assert recovered.effect_id == first.effect_id
     assert recovered.attempt_count == 2
@@ -1949,7 +2057,11 @@ def test_worker_uses_named_functions_but_cannot_mutate_or_read_claim_token(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     effect = delivery.request(_request())
-    claim = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    claim = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert claim is not None
 
     with _worker_connection(postgres_effect_dsn) as connection:
@@ -3390,7 +3502,11 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     effect = delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
 
     receipt = _settle(
@@ -3438,6 +3554,7 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
     assert delivery.claim_outbox(
         worker_id="other-worker",
         lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
     ) is None
     assert outbox == ("delivered", None, None, None)
     assert receipt_count == 1
@@ -3452,6 +3569,7 @@ def test_settlement_without_durable_authority_grant_is_rejected(
     lease = delivery.claim_outbox(
         worker_id="effect-worker",
         lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
     )
     assert lease is not None
 
@@ -3475,7 +3593,11 @@ def test_concurrent_equivalent_settlement_returns_one_immutable_receipt(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
 
     deliveries = (
@@ -3509,7 +3631,11 @@ def test_acknowledgement_mismatch_rolls_back_before_terminal_state(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     effect = delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
 
     with pytest.raises(ValueError, match="acknowledgement mismatch"):
@@ -3547,6 +3673,7 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     first_lease = delivery.claim_outbox(
         worker_id="effect-worker-a",
         lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
     )
     assert first_lease is not None
 
@@ -3561,6 +3688,7 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     assert delivery.claim_outbox(
         worker_id="too-early",
         lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
     ) is None
 
     with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
@@ -3578,6 +3706,7 @@ def test_retryable_failure_uses_database_backoff_and_fences_stale_claim(
     second_lease = second_delivery.claim_outbox(
         worker_id="effect-worker-b",
         lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
     )
     assert second_lease is not None
     assert second_lease.attempt_count == 2
@@ -3628,7 +3757,11 @@ def test_expired_claim_cannot_settle_before_recovery(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn, token="expired-token")
     delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
     with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
         connection.execute(
@@ -3649,7 +3782,11 @@ def test_expired_claim_cannot_settle_before_recovery(
     recovered = _delivery(
         postgres_effect_dsn,
         token="recovered-token",
-    ).claim_outbox(worker_id="recovery-worker", lease_seconds=300)
+    ).claim_outbox(
+        worker_id="recovery-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert recovered is not None
     assert recovered.attempt_count == 2
 
@@ -3660,7 +3797,11 @@ def test_terminal_failure_dead_letters_without_another_claim(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     effect = delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
 
     receipt = _settle(
@@ -3679,6 +3820,7 @@ def test_terminal_failure_dead_letters_without_another_claim(
     assert delivery.claim_outbox(
         worker_id="other-worker",
         lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
     ) is None
 
 
@@ -3696,6 +3838,7 @@ def test_retry_exhaustion_dead_letters_on_fifth_attempt(
         lease = delivery.claim_outbox(
             worker_id=f"effect-worker-{attempt}",
             lease_seconds=300,
+            effect_kinds=TELEGRAM_EFFECT_KINDS,
         )
         assert lease is not None
         assert lease.attempt_count == attempt
@@ -3741,7 +3884,11 @@ def test_settlement_failure_rolls_back_attempt_receipt_and_state(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     effect = delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
     with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
         connection.execute(
@@ -3807,7 +3954,11 @@ def test_worker_cannot_mutate_attempt_receipts_or_read_token_digest(
     _seed_work(postgres_effect_dsn)
     delivery = _delivery(postgres_effect_dsn)
     delivery.request(_request())
-    lease = delivery.claim_outbox(worker_id="effect-worker", lease_seconds=300)
+    lease = delivery.claim_outbox(
+        worker_id="effect-worker",
+        lease_seconds=300,
+        effect_kinds=TELEGRAM_EFFECT_KINDS,
+    )
     assert lease is not None
     _settle(
         postgres_effect_dsn,

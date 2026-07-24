@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Generic worker gate is root_cause_fixed_and_verified: pre-claim, pre-authorize and pre-provider lease read-back; demote/wrong family/replacement lease yield zero provider calls; 88 scoped tests passed. Umbrella remains contained.",
-    "next_direct_step": "Refactor production email.ops_alert ownership begin RPC to revalidate a host-held notification:email.ops_alert keepalive lease instead of acquiring its own lease; run PG17, live no-send read-back, outage and rollback gates",
+    "containment_evidence": "Cross-family outbox misrouting is root_cause_fixed_and_verified: provider capability is carried into the claim transaction, wrong-family store drift fails before provider, PG17 interleaving plus production owner/ACL/definition/read-back passed; 67 scoped tests. Umbrella remains contained.",
+    "next_direct_step": "Build the publisher single-article sync formal caller: durable payload + WorkItem + EffectRequest orchestration, service-role production adapters, owner-fenced cutover and no-write/live rollback gates",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Generic EffectOutboxWorker now requires the host keepalive lease gate; raw authority identity/token removed from commands; email and publisher providers plus adjacent authority/PG17 contracts: 88 passed"
+    "latest_checkpoint": "Effect providers now declare immutable effect_kinds; transactional SKIP LOCKED claims filter by family and worker rechecks before provider; PG17/live catalog gates passed, legacy unfiltered RPC removed"
   }
 ]

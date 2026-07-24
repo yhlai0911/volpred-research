@@ -316,6 +316,16 @@
 > `email.ops_alert` family gate；其他 effect family與真實雙 Mac network partition、
 > Supabase outage、五分鐘 RTO rehearsal仍未完成，所以 program commit 34 整體保持
 > `contained`。
+>
+> 多 family 上線前另修正 generic outbox routing：provider現在必須宣告支援的
+> `effect_kinds`，transactional claim只在該 capability set內做 `SKIP LOCKED`；
+> worker回讀 EffectRequest後再驗一次 family，DB／adapter漂移都在 provider前
+> fail closed。Migration
+> `20260724134742 operations_core_effect_family_routing` 已移除舊三參數 unfiltered
+> RPC；production回讀 owner／search path／worker-only ACL／function body／routing
+> index全對，live active claim=0且沒有執行 effect。PG17與相鄰 worker共 67 passed。
+> 這關閉 cross-family誤認領後把合法 effect錯誤 dead-letter的根因；publisher正式
+> caller與 ownership cutover仍未完成。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

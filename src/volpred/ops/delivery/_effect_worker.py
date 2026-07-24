@@ -35,6 +35,7 @@ class _EffectOutboxStore(Protocol):
         *,
         worker_id: str,
         lease_seconds: int,
+        effect_kinds: frozenset[str],
     ) -> EffectOutboxLease | None: ...
 
     def inspect(self, effect_id: str) -> EffectView: ...
@@ -56,6 +57,8 @@ class EffectPayloadReader(Protocol):
 
 class EffectProvider(Protocol):
     """Execute one typed effect and return provider/read-back evidence."""
+
+    effect_kinds: frozenset[str]
 
     def deliver(
         self,
@@ -153,6 +156,7 @@ class EffectOutboxWorker:
         self._primary_authority = primary_authority
         self._payload_reader = payload_reader
         self._provider = provider
+        self._effect_kinds = _normalize_provider_effect_kinds(provider)
 
     def run_once(
         self,
@@ -163,6 +167,7 @@ class EffectOutboxWorker:
         lease = self._delivery.claim_outbox(
             worker_id=normalized.worker_id,
             lease_seconds=normalized.lease_seconds,
+            effect_kinds=self._effect_kinds,
         )
         if lease is None:
             return None
@@ -171,6 +176,10 @@ class EffectOutboxWorker:
         if effect.id != lease.effect_id:
             raise EffectWorkerBlocked(
                 "effect store returned a request for a different outbox claim"
+            )
+        if effect.effect_kind not in self._effect_kinds:
+            raise EffectWorkerBlocked(
+                "effect store returned an effect outside the provider capability"
             )
         primary_lease = self._current_primary_lease(
             expected=primary_lease,
@@ -311,6 +320,30 @@ def _normalize_command(command: EffectWorkerCommand) -> EffectWorkerCommand:
         worker_id=worker_id,
         lease_seconds=command.lease_seconds,
     )
+
+
+def _normalize_provider_effect_kinds(
+    provider: EffectProvider,
+) -> frozenset[str]:
+    try:
+        effect_kinds = provider.effect_kinds
+    except AttributeError as exc:
+        raise TypeError(
+            "effect provider must declare its supported effect kinds"
+        ) from exc
+    if not isinstance(effect_kinds, frozenset) or not effect_kinds:
+        raise ValueError(
+            "effect provider effect_kinds must be a non-empty frozenset"
+        )
+    normalized = frozenset(
+        _required_text(kind, field="effect provider effect kind")
+        for kind in effect_kinds
+    )
+    if normalized != effect_kinds:
+        raise ValueError(
+            "effect provider effect kinds must be normalized text"
+        )
+    return normalized
 
 
 def _authority_request(

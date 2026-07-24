@@ -618,6 +618,34 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   network partition、Supabase outage與五分鐘 RTO rehearsal仍缺，因此 program
   commit 34 umbrella保持 `contained`。
 
+### 2026-07-24 effect-family transactional routing checkpoint
+
+- Generic outbox 原本只有 `(worker_id, lease_seconds, token)` 三參數 claim；它按時間
+  認領全域最舊 effect，完全不知道注入 worker 的 narrow provider 支援哪些
+  `effect_kind`。第二個 provider family 上線後，publisher worker可能先拿到 email
+  effect，再由 provider把合法他族 intent當 unsupported contract dead-letter。這是
+  routing transaction 的能力資訊缺失，不是 provider validation 問題。
+- `EffectProvider` 現在必須宣告 non-empty normalized `effect_kinds`；worker只把該
+  capability set傳入 durable claim，並在 store回傳 EffectRequest後再做一次
+  defense-in-depth family check。錯 family在 payload read／authority grant／external
+  provider之前 fail closed，不能被錯誤結案。
+- Forward migration
+  `20260724134742_operations_core_effect_family_routing.sql` 移除舊三參數 RPC，
+  新 claim在同一 `SKIP LOCKED` transaction join EffectRequest並以
+  `effect_kind = ANY(...)` 篩選。PG17 clean／idempotent replay實際用「email先入列、
+  publisher後入列」證明兩個 worker各自拿到正確 row；owner、fixed search path、
+  worker-only execute、PUBLIC deny與 routing index也由 contract鎖住。
+- Production migration receipt為
+  `20260724134742 operations_core_effect_family_routing`。Live catalog回讀確認舊
+  unfiltered signature不存在、新 function由 `volpred_ops_definer`持有且 family filter
+  在 definition內；當下 email outbox有 2 pending、2 expired claimed、0 active claim，
+  本次只讀、沒有 claim或 provider call。三個相鄰套件共 67 passed，Supabase advisor
+  沒有此 function的新 scope finding。
+- 這個 cross-family誤認領根因為 `root_cause_fixed_and_verified`。Publisher仍缺
+  durable payload／WorkItem／EffectRequest正式 caller、production HTTP adapters與
+  owner cutover；真實雙 Mac network partition、Supabase outage及五分鐘 RTO rehearsal
+  也未完成，所以 program commit 14／34 umbrella皆維持 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam

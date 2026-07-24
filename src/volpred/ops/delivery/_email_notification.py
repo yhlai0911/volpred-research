@@ -215,6 +215,8 @@ def _discover_sent_mailbox(connection: imaplib.IMAP4_SSL) -> str:
 class EmailNotificationEffectAdapter:
     """Deliver one safe email effect and require independent Sent read-back."""
 
+    effect_kinds = frozenset({_EFFECT_KIND})
+
     def __init__(
         self,
         *,

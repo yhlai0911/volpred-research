@@ -248,6 +248,13 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
 **規則**：文章系列身分 / 成員 / 格式一律讀 machine-readable registry（`config/article_series.json`），禁從標題 / 代號重新推導（無 SoT → 同系列反覆搞錯）。config 是唯一源頭；registry 存第二份 status = dual SoT。Supabase 1000-row cap 要 explicit 處理。
 **機械 owner**：`scripts/series_registry.py --audit`（drift 每小時 check_alerts 告警）+ config single-source 規則。
 **代表 incident**：
+- 2026-07-24 **root_cause_fixed_and_verified** generic effect outbox claim不帶
+  provider capability，所有 narrow worker都會拿全域最舊 row；第二個 family上線後
+  可能把他族合法 effect當 unsupported而 dead-letter。Provider現強制宣告
+  `effect_kinds`，PG claim在同一 `SKIP LOCKED` transaction按 family篩選，worker回讀
+  後再做 provider前 fence；舊 unfiltered RPC已移除。PG17交錯 family、production
+  function／ACL／owner／definition與 active-claim=0回讀通過（publisher cutover及
+  operations-core umbrella仍 contained）— Q3
 - 2026-07-24 **root_cause_fixed_and_verified** `email.ops_alert` ownership RPC在
   host keepalive之外自行 acquire／release Primary Authority，讓 keepalive只是可選
   helper；caller改為三階段重驗同一 lease，SQL begin只接受預持 lease、settle不再

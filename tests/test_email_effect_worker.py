@@ -115,6 +115,8 @@ class _Notifier:
 
 
 class _ProviderError:
+    effect_kinds = frozenset({"email.notification.send"})
+
     def deliver(self, effect: EffectView, payload: bytes):
         raise TimeoutError("provider timed out")
 
@@ -213,6 +215,7 @@ class _Store:
     def __init__(self, effect: EffectView) -> None:
         self.effect = effect
         self.available = True
+        self.claimed_effect_kinds: list[frozenset[str]] = []
         self.outcomes: list[object] = []
         self.authorities: list[EffectSettlementAuthority] = []
         self.receipt_drift = False
@@ -222,7 +225,9 @@ class _Store:
         *,
         worker_id: str,
         lease_seconds: int,
+        effect_kinds: frozenset[str],
     ) -> EffectOutboxLease | None:
+        self.claimed_effect_kinds.append(effect_kinds)
         if not self.available:
             return None
         self.available = False
@@ -355,6 +360,9 @@ def test_worker_claims_authorizes_reads_back_and_durably_settles() -> None:
     )
     assert len(notifier.calls) == 1
     assert reader.refs == ["file:effects/shadow-email.json"]
+    assert store.claimed_effect_kinds == [
+        frozenset({"email.notification.send"})
+    ]
     assert isinstance(store.outcomes[0], AcknowledgedEffect)
     assert store.authorities[0].request_sha256 == (
         receipt.authority_request_sha256
