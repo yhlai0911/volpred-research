@@ -573,6 +573,27 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   雙 Mac network partition、Supabase outage與五分鐘 RTO rehearsal，因此 program
   commit 34 整體仍是 `contained`。
 
+### 2026-07-24 generic effect-worker keepalive gate checkpoint
+
+- 原本的 `EffectWorkerCommand` 讓 caller 直接提供 authority key、holder、epoch 與 raw
+  fencing token；即使 host keepalive 已 demote，caller 仍可用記憶體中的舊欄位先 claim
+  outbox，再走到 database authority check。這使 `HostAuthorityKeepalive` 只是可選
+  helper，不是 Effect Delivery 的實際 enable gate。
+- `EffectOutboxWorker` 現在依賴一個內部 lease-gate seam，public command 只剩 worker
+  identity 與 outbox lease duration。Worker 會在 claim 前、authority grant 前與
+  provider 前呼叫 `current_lease()`；錯誤 authority family、closed gate、epoch／token
+  replacement都在外部 provider 前 fail closed。Renew 造成的 expiry 延長仍視為同一
+  identity，不會阻擋正常長駐 worker。
+- Email notification 與 publisher article sync 兩個 provider adapters 都經相同 worker
+  interface 驗證；failure injection 證明 gate 在三個 checkpoint 任一處關閉時 provider
+  呼叫為 0，command／receipt 不含 raw token。Authority、Effect Delivery 與 PG17
+  相鄰套件共 88 passed。
+- 這個 generic outbox worker interface 根因為
+  `root_cause_fixed_and_verified`。Production `email.ops_alert` 的深層 ownership RPC
+  仍自行 acquire `notification:email.ops_alert` lease，尚未 revalidate host keepalive
+  lease；其他 effect family 也未逐一接管。因此「全 effect-family enable gate」與
+  program commit 34 umbrella 仍為 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam

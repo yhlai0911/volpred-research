@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
@@ -116,6 +117,54 @@ class _Notifier:
 class _ProviderError:
     def deliver(self, effect: EffectView, payload: bytes):
         raise TimeoutError("provider timed out")
+
+
+class _LeaseGate:
+    def __init__(
+        self,
+        *,
+        fencing_token: str = "primary-fence-current",
+        fail_on_call: int | None = None,
+    ) -> None:
+        self.lease = PrimaryLease(
+            schema_version="primary-lease.v1",
+            authority_key="operations-core-effects",
+            holder_ref="host:shadow-primary",
+            epoch=42,
+            fencing_token=fencing_token,
+            lease_seconds=300,
+            acquired_at="2026-07-24T03:00:00+00:00",
+            expires_at="2026-07-24T03:05:00+00:00",
+        )
+        self.fail_on_call = fail_on_call
+        self.calls = 0
+
+    def current_lease(self) -> PrimaryLease:
+        self.calls += 1
+        if self.calls == self.fail_on_call:
+            raise RuntimeError("host authority keepalive is demoted")
+        return self.lease
+
+
+class _RenewingLeaseGate(_LeaseGate):
+    def current_lease(self) -> PrimaryLease:
+        lease = super().current_lease()
+        return replace(
+            lease,
+            expires_at=f"2026-07-24T03:0{5 + self.calls}:00+00:00",
+        )
+
+
+class _DriftingLeaseGate(_LeaseGate):
+    def current_lease(self) -> PrimaryLease:
+        lease = super().current_lease()
+        if self.calls == 1:
+            return lease
+        return replace(
+            lease,
+            epoch=lease.epoch + 1,
+            fencing_token="primary-fence-replaced",
+        )
 
 
 class _Authority:
@@ -249,14 +298,22 @@ class _Store:
 def _worker(
     *,
     authority: _Authority | None = None,
+    primary_authority: _LeaseGate | None = None,
     provider: object | None = None,
     payload_reader: _PayloadReader | None = None,
-) -> tuple[EffectOutboxWorker, _Store, _Notifier, _PayloadReader]:
+) -> tuple[
+    EffectOutboxWorker,
+    _Store,
+    _Notifier,
+    _PayloadReader,
+    _LeaseGate,
+]:
     payload = _payload()
     store = _Store(_effect(payload))
     mailbox = _Mailbox()
     notifier = _Notifier(mailbox)
     reader = payload_reader or _PayloadReader(payload)
+    selected_primary_authority = primary_authority or _LeaseGate()
     selected_provider = provider or EmailNotificationEffectAdapter(
         notifier=notifier,
         sent_mail_reader=mailbox,
@@ -264,19 +321,16 @@ def _worker(
     worker = EffectOutboxWorker(
         delivery=store,
         authority=authority or _Authority(),
+        primary_authority=selected_primary_authority,
         payload_reader=reader,
         provider=selected_provider,
     )
-    return worker, store, notifier, reader
+    return worker, store, notifier, reader, selected_primary_authority
 
 
 def _command(**overrides: object) -> EffectWorkerCommand:
     command = EffectWorkerCommand(
         worker_id="effect-worker:shadow-email",
-        primary_authority_key="operations-core-effects",
-        primary_authority_holder_ref="host:shadow-primary",
-        primary_authority_epoch=42,
-        primary_fencing_token="primary-fence-current",
         lease_seconds=300,
     )
     return replace(command, **overrides)
@@ -284,7 +338,9 @@ def _command(**overrides: object) -> EffectWorkerCommand:
 
 def test_worker_claims_authorizes_reads_back_and_durably_settles() -> None:
     authority = _Authority()
-    worker, store, notifier, reader = _worker(authority=authority)
+    worker, store, notifier, reader, primary_authority = _worker(
+        authority=authority
+    )
 
     receipt = worker.run_once(_command())
 
@@ -305,11 +361,15 @@ def test_worker_claims_authorizes_reads_back_and_durably_settles() -> None:
     )
     assert "outbox-claim-secret" not in repr(receipt)
     assert "primary-fence-current" not in repr(receipt)
+    assert "primary-fence-current" not in repr(_command())
+    assert primary_authority.calls == 3
 
 
 def test_worker_returns_none_without_claiming_or_authorizing() -> None:
     authority = _Authority()
-    worker, store, notifier, reader = _worker(authority=authority)
+    worker, store, notifier, reader, _primary_authority = _worker(
+        authority=authority
+    )
     store.available = False
 
     assert worker.run_once(_command()) is None
@@ -319,39 +379,126 @@ def test_worker_returns_none_without_claiming_or_authorizing() -> None:
 
 
 @pytest.mark.parametrize(
-    ("authority", "command", "message"),
+    ("authority", "primary_authority", "message"),
     [
         (
             _Authority(),
-            _command(primary_fencing_token="primary-fence-stale"),
+            _LeaseGate(fencing_token="primary-fence-stale"),
             "stale Primary Authority",
         ),
         (
             _MismatchedAuthority(),
-            _command(),
+            _LeaseGate(),
             "does not match",
         ),
     ],
 )
 def test_worker_refuses_provider_before_valid_authority(
     authority: _Authority,
-    command: EffectWorkerCommand,
+    primary_authority: _LeaseGate,
     message: str,
 ) -> None:
-    worker, store, notifier, reader = _worker(authority=authority)
+    worker, store, notifier, reader, _gate = _worker(
+        authority=authority,
+        primary_authority=primary_authority,
+    )
 
     with pytest.raises(EffectWorkerBlocked, match=message):
-        worker.run_once(command)
+        worker.run_once(_command())
 
     assert notifier.calls == []
     assert reader.refs == []
     assert store.outcomes == []
 
 
+def test_worker_refuses_to_claim_when_keepalive_gate_is_closed() -> None:
+    authority = _Authority()
+    primary_authority = _LeaseGate(fail_on_call=1)
+    worker, store, notifier, reader, _gate = _worker(
+        authority=authority,
+        primary_authority=primary_authority,
+    )
+
+    with pytest.raises(EffectWorkerBlocked, match="keepalive gate"):
+        worker.run_once(_command())
+
+    assert store.available is True
+    assert authority.requests == []
+    assert notifier.calls == []
+    assert reader.refs == []
+
+
+def test_worker_refuses_wrong_effect_authority_before_claim() -> None:
+    authority = _Authority()
+    primary_authority = _LeaseGate()
+    primary_authority.lease = replace(
+        primary_authority.lease,
+        authority_key="operations-core-commits",
+    )
+    worker, store, notifier, reader, _gate = _worker(
+        authority=authority,
+        primary_authority=primary_authority,
+    )
+
+    with pytest.raises(EffectWorkerBlocked, match="wrong effect authority"):
+        worker.run_once(_command())
+
+    assert store.available is True
+    assert authority.requests == []
+    assert notifier.calls == []
+    assert reader.refs == []
+
+
+@pytest.mark.parametrize("fail_on_call", [2, 3])
+def test_worker_rechecks_keepalive_before_any_provider_call(
+    fail_on_call: int,
+) -> None:
+    authority = _Authority()
+    primary_authority = _LeaseGate(fail_on_call=fail_on_call)
+    worker, store, notifier, reader, _gate = _worker(
+        authority=authority,
+        primary_authority=primary_authority,
+    )
+
+    with pytest.raises(EffectWorkerBlocked, match="keepalive gate"):
+        worker.run_once(_command())
+
+    assert store.available is False
+    assert notifier.calls == []
+    assert reader.refs == []
+    assert store.outcomes == []
+    assert len(authority.requests) == (1 if fail_on_call == 3 else 0)
+
+
+def test_worker_allows_keepalive_renewal_but_rejects_lease_replacement() -> None:
+    renewed_worker, _store, notifier, _reader, renewed_gate = _worker(
+        primary_authority=_RenewingLeaseGate(),
+    )
+
+    receipt = renewed_worker.run_once(_command())
+
+    assert receipt is not None
+    assert receipt.disposition == "delivered"
+    assert len(notifier.calls) == 1
+    assert renewed_gate.calls == 3
+
+    drifted_worker, drifted_store, drifted_notifier, drifted_reader, _gate = (
+        _worker(primary_authority=_DriftingLeaseGate())
+    )
+    with pytest.raises(EffectWorkerBlocked, match="changed during"):
+        drifted_worker.run_once(_command())
+
+    assert drifted_store.available is False
+    assert drifted_notifier.calls == []
+    assert drifted_reader.refs == []
+
+
 def test_payload_failure_is_authorized_and_settled_as_retryable() -> None:
     reader = _PayloadReader(_payload())
     reader.error = OSError("artifact store unavailable")
-    worker, store, notifier, _reader = _worker(payload_reader=reader)
+    worker, store, notifier, _reader, _gate = _worker(
+        payload_reader=reader
+    )
 
     receipt = worker.run_once(_command())
 
@@ -365,7 +512,9 @@ def test_payload_failure_is_authorized_and_settled_as_retryable() -> None:
 
 def test_payload_hash_drift_is_terminal_and_never_reaches_provider() -> None:
     reader = _PayloadReader(b'{"drifted":true}')
-    worker, store, notifier, _reader = _worker(payload_reader=reader)
+    worker, store, notifier, _reader, _gate = _worker(
+        payload_reader=reader
+    )
 
     receipt = worker.run_once(_command())
 
@@ -378,7 +527,9 @@ def test_payload_hash_drift_is_terminal_and_never_reaches_provider() -> None:
 
 
 def test_unexpected_provider_error_is_settled_as_retryable() -> None:
-    worker, store, _notifier, _reader = _worker(provider=_ProviderError())
+    worker, store, _notifier, _reader, _gate = _worker(
+        provider=_ProviderError()
+    )
 
     receipt = worker.run_once(_command())
 
@@ -389,7 +540,7 @@ def test_unexpected_provider_error_is_settled_as_retryable() -> None:
 
 
 def test_worker_fails_closed_when_settlement_readback_drifts() -> None:
-    worker, store, notifier, _reader = _worker()
+    worker, store, notifier, _reader, _gate = _worker()
     store.receipt_drift = True
 
     with pytest.raises(EffectWorkerBlocked, match="settlement read-back"):

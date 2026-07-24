@@ -1904,3 +1904,31 @@ status 已同步，這個 startup 原子性缺口為
 **`root_cause_fixed_and_verified`**。全 effect-family enable gate、真實雙 Mac
 network partition、Supabase outage與五分鐘 RTO rehearsal仍未執行，所以 program
 commit 34 umbrella 保持 **`contained`**。
+
+### 2026-07-24 — Effect worker command 可繞過 host keepalive 傳入 stale raw lease
+
+**證據化症狀與根因層級**：`HostAuthorityKeepalive` 雖已是 canonical renew owner，
+但 `EffectWorkerCommand` 仍公開 authority key、holder、epoch 與 raw fencing token。
+任意 caller 可保存舊 command，在 keepalive demote 後仍先 claim outbox；只有較後面的
+database authorization 可能攔住。這使本機 enable gate 不是必經 seam，且每個
+provider caller 都要自行知道完整 lease identity。根因是 Effect Delivery worker
+interface 暴露了應由 keepalive implementation 擁有的 authority state，不是 outbox
+或 provider 資料錯誤。
+
+**底層重構**：`EffectOutboxWorker` 改依賴內部 lease-gate seam，command 只保留
+worker id 與 outbox lease duration。Worker 在 claim 前、authorize 前與 provider 前
+各回讀 `current_lease()`；authority key 必須是 `operations-core-effects`，同一 attempt
+的 holder／epoch／token／acquired identity不可漂移。Renew 可更新 expiry，不會被誤判
+成換主。Closed gate、wrong family 或 replacement lease 都轉成 typed
+`EffectWorkerBlocked`，provider 呼叫為 0；raw fencing token不再出現在 caller command。
+
+**回歸、回讀與制度化**：Email notification 與 publisher article sync 兩個現有
+provider family 都經相同 worker interface 驗證；failure injection 覆蓋 claim 前
+demote、claim 後 demote、grant 後 demote、wrong family、lease replacement與正常
+renew。Authority／Effect Delivery／PG17 相鄰套件共 **88 passed**，compileall與
+`git diff --check` 通過；acknowledgement與 durable settlement receipt仍由原 external
+interface逐欄回讀。Architecture、operations-core module design與 improvement status
+已同步。這個 generic worker seam 為 **`root_cause_fixed_and_verified`**；production
+`email.ops_alert` 的 ownership RPC仍自行 acquire family-specific lease，尚未改成
+revalidate host keepalive lease，所以全 effect-family enable gate與 program commit 34
+umbrella 維持 **`contained`**。

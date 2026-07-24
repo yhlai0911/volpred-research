@@ -6,6 +6,7 @@ from dataclasses import replace
 
 import pytest
 
+from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
@@ -210,6 +211,20 @@ class _Authority:
         )
 
 
+class _PrimaryAuthority:
+    def current_lease(self) -> PrimaryLease:
+        return PrimaryLease(
+            schema_version="primary-lease.v1",
+            authority_key="operations-core-effects",
+            holder_ref="host:primary",
+            epoch=7,
+            fencing_token="primary-token",
+            lease_seconds=300,
+            acquired_at="2026-07-24T00:00:00+00:00",
+            expires_at="2026-07-24T00:05:00+00:00",
+        )
+
+
 class _TerminalStore:
     def __init__(self, effect: EffectView) -> None:
         self.effect = effect
@@ -267,6 +282,7 @@ def test_invalid_article_effect_is_durably_dead_lettered_by_worker() -> None:
     worker = EffectOutboxWorker(
         delivery=store,
         authority=_Authority(),
+        primary_authority=_PrimaryAuthority(),
         payload_reader=type(
             "PayloadReader",
             (),
@@ -278,10 +294,6 @@ def test_invalid_article_effect_is_durably_dead_lettered_by_worker() -> None:
     receipt = worker.run_once(
         EffectWorkerCommand(
             worker_id="effect-worker:publisher-sync",
-            primary_authority_key="operations-core-effects",
-            primary_authority_holder_ref="host:primary",
-            primary_authority_epoch=7,
-            primary_fencing_token="primary-token",
             lease_seconds=300,
         )
     )

@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Primary Authority canonical keepalive／live no-effect rehearsal）**
+Last updated: **2026-07-24（generic effect-worker keepalive gate）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -387,6 +387,15 @@ final state 都是 `stopped`。這個 canonical
 keepalive 缺口達 `root_cause_fixed_and_verified`；但全 effect-family enable gate與
 真實雙 Mac network-partition／Supabase outage／五分鐘 RTO rehearsal尚未完成，所以
 program commit 34 整體仍是 `contained`。
+同日 generic durable outbox worker 也移除 caller 自填 raw authority identity／token
+的介面，改從 keepalive lease gate 取得，並在 claim、authorize、provider 三個階段前
+重驗同一 lease identity。Email notification 與 publisher article sync 都走這個深模組
+seam；closed gate、錯誤 authority family與 epoch／token replacement 的 failure
+injection 均在 provider 前拒絕，正常 renew 的 expiry 延長仍可通過。Authority／Effect
+Delivery／PG17 相鄰套件共 88 passed，這個 generic worker 局部根因為
+`root_cause_fixed_and_verified`。但 production `email.ops_alert` ownership RPC 仍會
+自行 acquire family-specific lease，尚未 revalidate host keepalive lease；因此全
+effect-family enable gate與 program commit 34 umbrella 繼續是 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

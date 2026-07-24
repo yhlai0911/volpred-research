@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Service-role-only owner RPC and strict HTTP adapter landed; PG17 clean replay plus ACL/cutover-rollback regression passed; production receipt 20260724074117 read back; catalog hardening predicates all true; new-RPC security/performance advisor findings 0; owner remains legacy/1",
-    "next_direct_step": "Build the remaining service-role formal Change Delivery adapters and controlled smoke harness; only then execute production owner CAS, exact commit read-back, rollback rehearsal and recutover",
+    "containment_evidence": "Generic worker gate is root_cause_fixed_and_verified: pre-claim, pre-authorize and pre-provider lease read-back; demote/wrong family/replacement lease yield zero provider calls; 88 scoped tests passed. Umbrella remains contained.",
+    "next_direct_step": "Refactor production email.ops_alert ownership begin RPC to revalidate a host-held notification:email.ops_alert keepalive lease instead of acquiring its own lease; run PG17, live no-send read-back, outage and rollback gates",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Production service-role commit-owner operator seam deployed and live-read verified; git.commit remains legacy/1"
+    "latest_checkpoint": "Generic EffectOutboxWorker now requires the host keepalive lease gate; raw authority identity/token removed from commands; email and publisher providers plus adjacent authority/PG17 contracts: 88 passed"
   }
 ]

@@ -2030,12 +2030,9 @@ def _grant_authority(
     request = _authority_request(
         command=EffectWorkerCommand(
             worker_id=lease.claimed_by,
-            primary_authority_key=primary_lease.authority_key,
-            primary_authority_holder_ref=primary_lease.holder_ref,
-            primary_authority_epoch=primary_lease.epoch,
-            primary_fencing_token=primary_lease.fencing_token,
             lease_seconds=300,
         ),
+        primary_lease=primary_lease,
         lease=lease,
         effect=delivery.inspect(lease.effect_id),
     )

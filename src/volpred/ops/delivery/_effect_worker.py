@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Protocol
 
+from volpred.ops.authority import PrimaryLease
+
 from ._effect import EffectAttemptOutcome, EffectView, FailedEffect
 from .postgres import (
     EffectAttemptReceipt,
@@ -23,6 +25,7 @@ from .postgres import (
 
 _RECEIPT_SCHEMA = "effect-worker-receipt.v1"
 _AUTHORITY_SCHEMA = "effect-authority-request.v1"
+_EFFECT_AUTHORITY_KEY = "operations-core-effects"
 _SHA256 = frozenset("0123456789abcdef")
 
 
@@ -61,13 +64,15 @@ class EffectProvider(Protocol):
     ) -> EffectAttemptOutcome: ...
 
 
+class _PrimaryLeaseGate(Protocol):
+    """Expose the live host lease only while its keepalive gate is open."""
+
+    def current_lease(self) -> PrimaryLease: ...
+
+
 @dataclass(frozen=True)
 class EffectWorkerCommand:
     worker_id: str
-    primary_authority_key: str
-    primary_authority_holder_ref: str
-    primary_authority_epoch: int
-    primary_fencing_token: str
     lease_seconds: int
 
 
@@ -139,11 +144,13 @@ class EffectOutboxWorker:
         *,
         delivery: _EffectOutboxStore,
         authority: EffectAuthority,
+        primary_authority: _PrimaryLeaseGate,
         payload_reader: EffectPayloadReader,
         provider: EffectProvider,
     ) -> None:
         self._delivery = delivery
         self._authority = authority
+        self._primary_authority = primary_authority
         self._payload_reader = payload_reader
         self._provider = provider
 
@@ -152,6 +159,7 @@ class EffectOutboxWorker:
         command: EffectWorkerCommand,
     ) -> EffectWorkerReceipt | None:
         normalized = _normalize_command(command)
+        primary_lease = self._current_primary_lease()
         lease = self._delivery.claim_outbox(
             worker_id=normalized.worker_id,
             lease_seconds=normalized.lease_seconds,
@@ -164,8 +172,12 @@ class EffectOutboxWorker:
             raise EffectWorkerBlocked(
                 "effect store returned a request for a different outbox claim"
             )
+        primary_lease = self._current_primary_lease(
+            expected=primary_lease,
+        )
         authority_request = _authority_request(
             command=normalized,
+            primary_lease=primary_lease,
             lease=lease,
             effect=effect,
         )
@@ -181,6 +193,7 @@ class EffectOutboxWorker:
             authority_grant,
             request=authority_request,
         )
+        self._current_primary_lease(expected=primary_lease)
 
         try:
             payload = self._payload_reader.read(effect.payload_ref)
@@ -225,6 +238,37 @@ class EffectOutboxWorker:
             grant=authority_grant,
         )
 
+    def _current_primary_lease(
+        self,
+        *,
+        expected: PrimaryLease | None = None,
+    ) -> PrimaryLease:
+        try:
+            observed = _normalize_primary_lease(
+                self._primary_authority.current_lease()
+            )
+        except EffectWorkerBlocked:
+            raise
+        except Exception as exc:
+            raise EffectWorkerBlocked(
+                "Primary Authority keepalive gate is not active"
+            ) from exc
+        if observed.authority_key != _EFFECT_AUTHORITY_KEY:
+            raise EffectWorkerBlocked(
+                "Primary Authority keepalive gate returned the wrong "
+                "effect authority"
+            )
+        if (
+            expected is not None
+            and _primary_lease_identity(observed)
+            != _primary_lease_identity(expected)
+        ):
+            raise EffectWorkerBlocked(
+                "Primary Authority keepalive gate changed during the "
+                "effect attempt"
+            )
+        return observed
+
 
 class FileEffectPayloadReader:
     """Read ``file:<repo-relative-path>`` refs without path traversal."""
@@ -257,24 +301,6 @@ def _normalize_command(command: EffectWorkerCommand) -> EffectWorkerCommand:
     if not isinstance(command, EffectWorkerCommand):
         raise TypeError("effect worker command is required")
     worker_id = _required_text(command.worker_id, field="effect worker_id")
-    primary_authority_key = _required_text(
-        command.primary_authority_key,
-        field="Primary Authority key",
-    )
-    primary_authority_holder_ref = _required_text(
-        command.primary_authority_holder_ref,
-        field="Primary Authority holder_ref",
-    )
-    if (
-        isinstance(command.primary_authority_epoch, bool)
-        or not isinstance(command.primary_authority_epoch, int)
-        or command.primary_authority_epoch <= 0
-    ):
-        raise ValueError("Primary Authority epoch must be positive")
-    primary_fencing_token = _required_text(
-        command.primary_fencing_token,
-        field="Primary Authority fencing token",
-    )
     if (
         isinstance(command.lease_seconds, bool)
         or not isinstance(command.lease_seconds, int)
@@ -283,10 +309,6 @@ def _normalize_command(command: EffectWorkerCommand) -> EffectWorkerCommand:
         raise ValueError("effect worker lease_seconds must be positive")
     return EffectWorkerCommand(
         worker_id=worker_id,
-        primary_authority_key=primary_authority_key,
-        primary_authority_holder_ref=primary_authority_holder_ref,
-        primary_authority_epoch=command.primary_authority_epoch,
-        primary_fencing_token=primary_fencing_token,
         lease_seconds=command.lease_seconds,
     )
 
@@ -294,6 +316,7 @@ def _normalize_command(command: EffectWorkerCommand) -> EffectWorkerCommand:
 def _authority_request(
     *,
     command: EffectWorkerCommand,
+    primary_lease: PrimaryLease,
     lease: EffectOutboxLease,
     effect: EffectView,
 ) -> EffectAuthorityRequest:
@@ -308,10 +331,10 @@ def _authority_request(
         "outbox_claim_token": lease.token,
         "outbox_claim_expires_at": lease.expires_at,
         "worker_id": command.worker_id,
-        "primary_authority_key": command.primary_authority_key,
-        "primary_authority_holder_ref": command.primary_authority_holder_ref,
-        "primary_authority_epoch": command.primary_authority_epoch,
-        "primary_fencing_token": command.primary_fencing_token,
+        "primary_authority_key": primary_lease.authority_key,
+        "primary_authority_holder_ref": primary_lease.holder_ref,
+        "primary_authority_epoch": primary_lease.epoch,
+        "primary_fencing_token": primary_lease.fencing_token,
         "effect_kind": effect.effect_kind,
         "target_ref": effect.target_ref,
         "payload_ref": effect.payload_ref,
@@ -336,16 +359,84 @@ def _authority_request(
         outbox_claim_token=lease.token,
         outbox_claim_expires_at=lease.expires_at,
         worker_id=command.worker_id,
-        primary_authority_key=command.primary_authority_key,
-        primary_authority_holder_ref=command.primary_authority_holder_ref,
-        primary_authority_epoch=command.primary_authority_epoch,
-        primary_fencing_token=command.primary_fencing_token,
+        primary_authority_key=primary_lease.authority_key,
+        primary_authority_holder_ref=primary_lease.holder_ref,
+        primary_authority_epoch=primary_lease.epoch,
+        primary_fencing_token=primary_lease.fencing_token,
         effect_kind=effect.effect_kind,
         target_ref=effect.target_ref,
         payload_ref=effect.payload_ref,
         payload_sha256=effect.payload_sha256,
         acknowledgement_kind=effect.acknowledgement.kind,
         acknowledgement_target_ref=effect.acknowledgement.target_ref,
+    )
+
+
+def _normalize_primary_lease(lease: PrimaryLease) -> PrimaryLease:
+    if not isinstance(lease, PrimaryLease):
+        raise EffectWorkerBlocked(
+            "Primary Authority keepalive gate returned an invalid lease"
+        )
+    if (
+        isinstance(lease.epoch, bool)
+        or not isinstance(lease.epoch, int)
+        or lease.epoch <= 0
+    ):
+        raise EffectWorkerBlocked(
+            "Primary Authority keepalive gate returned an invalid epoch"
+        )
+    if (
+        isinstance(lease.lease_seconds, bool)
+        or not isinstance(lease.lease_seconds, int)
+        or lease.lease_seconds <= 0
+    ):
+        raise EffectWorkerBlocked(
+            "Primary Authority keepalive gate returned an invalid duration"
+        )
+    try:
+        return PrimaryLease(
+            schema_version=_required_text(
+                lease.schema_version,
+                field="PrimaryLease schema_version",
+            ),
+            authority_key=_required_text(
+                lease.authority_key,
+                field="Primary Authority key",
+            ),
+            holder_ref=_required_text(
+                lease.holder_ref,
+                field="Primary Authority holder_ref",
+            ),
+            epoch=lease.epoch,
+            fencing_token=_required_text(
+                lease.fencing_token,
+                field="Primary Authority fencing token",
+            ),
+            lease_seconds=lease.lease_seconds,
+            acquired_at=_required_text(
+                lease.acquired_at,
+                field="Primary Authority acquired_at",
+            ),
+            expires_at=_required_text(
+                lease.expires_at,
+                field="Primary Authority expires_at",
+            ),
+        )
+    except (TypeError, ValueError) as exc:
+        raise EffectWorkerBlocked(
+            "Primary Authority keepalive gate returned an invalid lease"
+        ) from exc
+
+
+def _primary_lease_identity(lease: PrimaryLease) -> tuple[object, ...]:
+    return (
+        lease.schema_version,
+        lease.authority_key,
+        lease.holder_ref,
+        lease.epoch,
+        lease.fencing_token,
+        lease.lease_seconds,
+        lease.acquired_at,
     )
 
 

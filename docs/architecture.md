@@ -298,6 +298,17 @@
 > keepalive active state 接到所有 effect-family owner，也未做真實雙 Mac
 > network-partition／五分鐘 RTO rehearsal，所以 program commit 34 仍維持
 > `contained`。
+>
+> Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
+> epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate
+> 取得 authority，並在 claim 前、authorize 前與 provider 前重新回讀同一 lease
+> identity。正常 renew 只延長 expiry，不會被誤判成換主；demote、錯誤 authority key
+> 或 epoch／token replacement 都在 provider 前 fail closed。Email notification 與
+> publisher article sync 兩個現有 provider family 共用此深模組 seam；相鄰 authority／
+> Effect Delivery／PG17 契約共 88 passed。Production `email.ops_alert` 的
+> `OwnedEmailNotification` 仍由 ownership RPC 自行 acquire family-specific lease，
+> 尚未改成 revalidate host-held keepalive lease，因此不得把這個 generic worker
+> checkpoint 宣稱為全 effect-family enable gate 完成。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
