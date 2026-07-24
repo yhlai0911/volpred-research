@@ -430,8 +430,8 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   ACL 及 service-role create/by-id/by-idempotency read 已通過。Production receipt
   `20260724081714 operations_core_change_set_rpc` 已回讀；live catalog hardening／ACL
   全 true，HTTP missing lookup 為 null、owner=`legacy/1`、ChangeSet count=0。這封閉
-  ChangeSet production HTTP persistence seam，但 commit authority、settlement 與 Work
-  read model 仍只有 direct PostgreSQL adapters；故 bounded seam 為
+  ChangeSet production HTTP persistence seam，但 Work read model 仍只有 direct
+  PostgreSQL adapter；故 bounded seam 為
   `root_cause_fixed_and_verified`，Change Delivery umbrella 仍是 `contained`。
 
 ### 2026-07-24 service-role commit authority checkpoint
@@ -450,9 +450,32 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   live catalog 八項 hardening／ACL predicates 全 true，advisor 沒有指向新 RPC 的
   finding。正式 HTTP adapter 在 `git.commit=legacy/1` 下精確 fail closed 為 typed
   `CommitActuatorBlocked`，再次回讀 grant／receipt／ChangeSet 全為 0。
-- 這個 remote authority adapter seam 為 `root_cause_fixed_and_verified`；settlement
-  與 Work read model 的 HTTP adapters、live ownership CAS、commit smoke 與 rollback
+- 這個 remote authority adapter seam 為 `root_cause_fixed_and_verified`；Work read
+  model HTTP adapter、live ownership CAS、commit smoke 與 rollback
   rehearsal仍缺，因此 Change Delivery umbrella 維持 `contained`。
+
+### 2026-07-24 service-role commit settlement checkpoint
+
+- `SupabaseCommitSettlement` 是既有 private `CommitSettlementStore.settle()` seam 的
+  第二個 production adapter。它在送網路前由 exact actuation 重算 settlement
+  SHA-256；caller 不需要知道 RPC payload、receipt table、lock ordering 或 Work
+  completion transaction。
+- Public wrapper 只委派 owner-fenced `settle_commit_write`，不複製 settlement state
+  machine。Raw WorkLease／Primary Authority tokens 只作 database-clock revalidation，
+  回傳仍是 token-redacted `change-delivery-receipt.v1`。Adapter 逐欄核對 proposal、
+  WorkItem/version、owner generation/ref、authority refs、repo、commit/parent、paths、
+  actor、timestamp、status、settlement ref 與 digest，untrusted JSON 一律 fail closed。
+- Function 由 `volpred_ops_definer` 持有、`SECURITY DEFINER`、`search_path=''`，只給
+  service role EXECUTE；anon／authenticated／PUBLIC 拒絕，service role 無 private
+  receipt table／view SELECT。PG17 non-superuser clean／idempotent migration、
+  actual service-role settlement、ACL 與相鄰 140 tests 通過。
+  Production receipt `20260724092237 operations_core_commit_settlement_rpc` 已回讀；
+  live catalog hardening／ACL predicates 全 true，兩類 advisor 沒有指向新 RPC 的
+  finding。正式 HTTP adapter 在 `git.commit=legacy/1` 下 typed fail closed，前後
+  grant／receipt／ChangeSet 全為 0。
+- 這個 remote settlement adapter seam 為 `root_cause_fixed_and_verified`；Work read
+  model HTTP adapter、完整 remote caller composition、live ownership CAS、commit
+  smoke 與 rollback rehearsal仍缺，因此 Change Delivery umbrella 維持 `contained`。
 
 ## 6. Effect Delivery
 

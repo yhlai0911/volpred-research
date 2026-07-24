@@ -207,7 +207,7 @@
 > ACL 與 service-role create/read 已通過；production receipt 是
 > `20260724081714 operations_core_change_set_rpc`。Live catalog 的五項 ACL／hardening
 > predicates 全 true，HTTP missing lookup 精確回傳 null，owner 仍為 `legacy/1` 且
-> ChangeSet count 為 0。Settlement／Work read model 的 HTTP adapters 仍缺，因此
+> ChangeSet count 為 0。Work read model 的 HTTP adapter 仍缺，因此
 > 不能執行 live commit smoke。
 >
 > **Commit authority service-role seam（2026-07-24，live fail-closed／legacy owner）**
@@ -223,6 +223,22 @@
 > `legacy/1` owner 下回傳 typed `CommitActuatorBlocked`，其後 grant／receipt／
 > ChangeSet count 仍全為 0。這是 production authority adapter 的 fail-closed smoke，
 > 不是 live commit smoke或 ownership cutover。
+>
+> **Commit settlement service-role seam（2026-07-24，live fail-closed／legacy owner）**
+> `SupabaseCommitSettlement` 實作既有 `CommitSettlementStore.settle()` interface；
+> process 先從 verified actuation 重算 settlement digest，RPC 再委派 private
+> owner-fenced `settle_commit_write` transaction，保留 WorkLease、Primary Authority、
+> owner generation、durable receipt 與 Work completion 的單一 database owner。
+> Adapter 逐欄核對 token-redacted receipt、exact paths、timestamps、settlement ref
+> 與 digest，任何 JSON shape 或 read-back drift 都 typed fail closed。Public function
+> 由 `volpred_ops_definer` 持有、`SECURITY DEFINER`、`search_path=''`，只有 service
+> role 可執行，service role 對 private receipt table／view 仍無 SELECT。PG17
+> clean／idempotent replay、actual service-role settlement 與 140 個相鄰 tests 通過；
+> production receipt 是
+> `20260724092237 operations_core_commit_settlement_rpc`。正式 HTTP adapter 在 live
+> `legacy/1` 下回傳 typed `CommitSettlementBlocked`；前後 grant／receipt／ChangeSet
+> 仍全為 0。這不是 owner transfer、Git write 或 live commit smoke；Work read model
+> adapter 與完整 remote caller composition 仍是 cutover blocker。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

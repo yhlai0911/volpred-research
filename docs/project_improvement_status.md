@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Change Delivery service-role owner seam／legacy owner）**
+Last updated: **2026-07-24（Change Delivery remote settlement seam／legacy owner）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -345,8 +345,15 @@ transaction。PG17 clean／idempotent replay、actual service-role grant/replay�
 及 135 個相鄰 tests 通過。Production receipt
 `20260724085535 operations_core_commit_authority_rpc` 已回讀；live HTTP adapter 在
 `legacy/1` 下 typed fail closed，grant／receipt／ChangeSet 再次回讀皆為 0。
-Settlement／Work read model 仍無 HTTP adapters，未執行 CAS 或 live commit；
-因此只核可 commit-authority remote seam，umbrella 狀態不變。
+同日 `SupabaseCommitSettlement` 與 service-role-only RPC 補上 production settlement
+adapter；process 重算 settlement digest，RPC 只委派 private owner／WorkLease／
+Primary Authority／receipt／Work completion transaction，回傳後逐欄核對
+token-redacted evidence。PG17 clean／idempotent replay、actual service-role settlement、
+ACL 與相鄰 140 tests 通過。Production receipt
+`20260724092237 operations_core_commit_settlement_rpc` 已回讀；live HTTP adapter 在
+`legacy/1` 下 typed fail closed，前後 grant／receipt／ChangeSet 均為 0。Work read
+model HTTP adapter與完整 remote caller composition仍缺，未執行 CAS 或 live commit；
+因此只核可 settlement remote seam，umbrella 狀態不變。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

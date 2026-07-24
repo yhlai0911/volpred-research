@@ -49,6 +49,7 @@ from volpred.ops.delivery._git_actuator import (
 from volpred.ops.delivery._change_settlement import (
     CommitSettlement,
     CommitSettlementBlocked,
+    commit_settlement_sha256,
 )
 from volpred.ops.delivery.postgres import (
     EffectOutboxLease,
@@ -163,6 +164,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724140000_operations_core_commit_authority_rpc.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724150000_operations_core_commit_settlement_rpc.sql",
 )
 
 
@@ -1043,6 +1048,72 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                 """
             ).fetchone()
         assert commit_authority_rpc_security == (True,) * 8
+        with psycopg.connect(dsn, autocommit=True) as connection:
+            commit_settlement_rpc_security = connection.execute(
+                """
+                SELECT
+                  (
+                    SELECT procedure.proowner = (
+                      SELECT oid FROM pg_roles
+                      WHERE rolname = 'volpred_ops_definer'
+                    )
+                      AND procedure.prosecdef
+                      AND procedure.proconfig = ARRAY['search_path=""']
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname =
+                        'volpred_settle_commit_write'
+                  ),
+                  has_function_privilege(
+                    'service_role',
+                    'public.volpred_settle_commit_write('
+                      'text,text,bigint,text,text,bigint,text,text,text,'
+                      'text,text,text,text,text,text,jsonb,text,'
+                      'timestamp with time zone,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'anon',
+                    'public.volpred_settle_commit_write('
+                      'text,text,bigint,text,text,bigint,text,text,text,'
+                      'text,text,text,text,text,text,jsonb,text,'
+                      'timestamp with time zone,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'authenticated',
+                    'public.volpred_settle_commit_write('
+                      'text,text,bigint,text,text,bigint,text,text,text,'
+                      'text,text,text,text,text,text,jsonb,text,'
+                      'timestamp with time zone,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_function_privilege(
+                    'public',
+                    'public.volpred_settle_commit_write('
+                      'text,text,bigint,text,text,bigint,text,text,text,'
+                      'text,text,text,text,text,text,jsonb,text,'
+                      'timestamp with time zone,text)',
+                    'EXECUTE'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.commit_delivery_receipts',
+                    'SELECT'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.commit_delivery_receipt_reads',
+                    'SELECT'
+                  ),
+                  NOT has_schema_privilege(
+                    'volpred_ops_definer', 'public', 'CREATE'
+                  )
+                """
+            ).fetchone()
+        assert commit_settlement_rpc_security == (True,) * 8
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -1067,6 +1138,11 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   public.volpred_authorize_commit_write(
                     text, text, bigint, text, text, text, text, integer,
                     bigint, text, text, text, text
+                  ),
+                  public.volpred_settle_commit_write(
+                    text, text, bigint, text, text, bigint, text, text,
+                    text, text, text, text, text, text, text, jsonb,
+                    text, timestamptz, text
                   ),
                   public.volpred_read_notification_owner(),
                   public.volpred_transfer_notification_owner(
@@ -2219,6 +2295,90 @@ def test_commit_authority_service_rpc_returns_token_redacted_grant(
     )
     assert work_lease.token not in repr(grant)
     assert primary_lease.fencing_token not in repr(grant)
+
+
+def test_commit_settlement_service_rpc_returns_token_redacted_receipt(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-settlement-rpc-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-settlement-rpc-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    grant = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    ).authorize(request)
+    command = _commit_settlement(request, grant)
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        receipt = connection.execute(
+            """
+            SELECT public.volpred_settle_commit_write(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                primary_lease.authority_key,
+                primary_lease.holder_ref,
+                primary_lease.epoch,
+                command.primary_fencing_token,
+                command.actuation.authority_request_sha256,
+                command.actuation.commit_owner_generation,
+                command.actuation.commit_owner_ref,
+                commit_settlement_sha256(command),
+                command.change_set_id,
+                command.work_lease_token,
+                command.actuation.work_lease_ref,
+                command.actuation.primary_authority_ref,
+                command.repository,
+                command.actuation.commit_sha,
+                command.actuation.parent_sha,
+                Jsonb(list(command.actuation.exact_paths)),
+                command.actuation.actor,
+                command.actuation.observed_at,
+                command.actuation.status,
+            ),
+        ).fetchone()[0]
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.commit_delivery_receipts"
+            )
+
+    assert receipt["schema_version"] == "change-delivery-receipt.v1"
+    assert receipt["status"] == "landed"
+    assert receipt["change_set_id"] == command.change_set_id
+    assert receipt["settlement_sha256"] == commit_settlement_sha256(
+        command
+    )
+    assert receipt["commit_owner_generation"] == 2
+    assert receipt["commit_owner_ref"] == (
+        "commit-owner:git.commit:generation-2"
+    )
+    assert work_lease.token not in repr(receipt)
+    assert primary_lease.fencing_token not in repr(receipt)
 
 
 @pytest.mark.parametrize(

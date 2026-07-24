@@ -1721,3 +1721,42 @@ adapter 不可在沒有 digest／ACL／live zero-write 證據時靜默上線。�
 commit-authority adapter seam 為 **`root_cause_fixed_and_verified`**；但 settlement
 與 Work read model 的 HTTP adapters、live ownership CAS、commit smoke 及 rollback
 rehearsal仍缺，Change Delivery umbrella 維持 **`contained`**。
+
+### 2026-07-24 — Commit settlement 只有直連 PostgreSQL adapter，remote caller 無法 durable acknowledge Git write
+
+**證據化症狀與根因層級**：commit owner、ChangeSet 與 commit authority 已有
+service-role adapters，但 `CommitSettlementStore.settle()` 仍只接受
+`PostgresCommitSettlement`。沒有 direct database connection 的 production runtime
+即使取得 Git read-back，也無法重驗 WorkLease／Primary Authority／owner generation
+並原子保存 receipt、完成 WorkItem。若 caller 自行串 table reads／writes，就會讓
+private transaction 不再是唯一 settlement owner。這是 remote-but-owned adapter 與
+PostgREST interface 缺口，不是 live receipt 資料錯誤。
+
+**底層重構**：新增 `SupabaseCommitSettlement`，維持既有單一 `settle()` interface。
+Adapter 先重算 exact actuation 的 settlement SHA-256，再把兩個 raw fencing token
+交給 narrow service-role RPC；public wrapper 只委派既有 owner-fenced
+`settle_commit_write` transaction，不複製任何 lifecycle policy。回傳只含
+token-redacted durable receipt；adapter 逐欄核對 proposal、WorkItem/version、owner
+generation/ref、authority refs、repo、commit/parent、paths、actor、timestamps、
+status、settlement ref 與 digest。Malformed JSON、boolean version、timestamp 或
+read-back drift 都轉成 typed `CommitSettlementBlocked`。Environment builder 只接受
+service-role key。
+
+**回歸與 live 回讀**：HTTP interface cases涵蓋 exact payload、untrusted receipt、
+typed fencing failure、credential 與 command-type fail-closed。PG17 non-superuser
+從 clean schema replay全部 migrations並二次 replay本 migration，實際以 service role
+settle並確認 private receipt table denial。Change Delivery／Git writer／Supabase
+adapter 相鄰 100 tests及 PostgreSQL delivery 40 tests 通過。Production migration
+receipt 是 `20260724092237 operations_core_commit_settlement_rpc`；catalog 回讀
+function owner、security-definer、空 search path、service-role-only execute、private
+table／view deny與 definer 無 public CREATE 全 true，security／performance advisors
+無指向新 RPC 的 finding。正式 HTTP adapter 在 live `legacy/1` 下精確回傳 typed
+`CommitSettlementBlocked`；probe 前後 grant／delivery receipt／ChangeSet 皆為 0，
+沒有 owner transfer、Git write或 Work completion。
+
+**制度化與狀態界線**：migration、PG17 ACL/read-back contract、HTTP interface tests、
+architecture、operations-core module design 與 improvement status 已同步。此
+production commit-settlement adapter seam 為
+**`root_cause_fixed_and_verified`**；但 Work read model HTTP adapter、完整 remote
+caller composition、live ownership CAS、commit smoke 與 rollback rehearsal仍缺，
+Change Delivery umbrella 維持 **`contained`**。
