@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Change Delivery Git file-mode identity fence）**
+Last updated: **2026-07-24（Change Delivery owner-fenced formal caller）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -296,6 +296,30 @@ commit-object／recovery read-back 三層都核對 mode。四個 RED cases 轉 G
 scoped suite 76 passed；具體 identity 根因為 `root_cause_fixed_and_verified`，
 Change Delivery 整體仍因 formal caller、live migrations、ownership cutover 與
 rollback rehearsal未完成而維持 `contained`。
+
+同日 lost-return provenance follow-up 證實，原 recovery 即使核對
+parent／message／paths／blob／mode，仍會接受另一個 writer 先落下的 bitwise
+lookalike first child，並錯誤產生本次 authority receipt。Actuator 現在於 authorize
+後把完整 authority-request SHA-256 寫成
+`Volpred-Commit-Authority-Request` commit trailer；正常 post-write read-back 與
+historical recovery 都要求 trailer 精確匹配，raw fencing token 不進 Git object。
+Unbound lookalike regression 已先 RED 後 GREEN，正常 commit trailer 與 receipt
+digest 亦精確對帳；此 provenance identity 缺口為
+`root_cause_fixed_and_verified`。Formal caller、live migrations、Git ownership
+cutover 與 rollback rehearsal仍未完成，因此 Change Delivery 整體維持
+`contained`。
+
+同日 formal caller follow-up 已新增 `OwnedChangeDelivery` 與 durable
+`git.commit` owner generation。Operations Core 只有在 owner row 為
+`operations_core` 時可 propose／land；generation 由 landing digest 一路綁到
+authority、actuation、settlement 與 final receipt，DB transaction 會再次核對 owner，
+舊的無 owner RPC 對 worker 已失權。Settlement 與 `complete_work()` 原子化，caller
+並回讀 terminal WorkItem。PG17 non-superuser clean migration replay、RLS／權限回讀、
+unsettled rollback refusal，以及臨時 canonical repo + linked worktree 的完整
+generation 2 commit → generation 3 rollback → generation 4 re-cutover 均已通過。
+此 formal caller／ownership seam 在 shadow 為 `root_cause_fixed_and_verified`；
+migrations 尚未部署 live、production Git owner 未切換，因此 umbrella 狀態仍是
+`contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

@@ -39,6 +39,8 @@ def commit_settlement_sha256(command: CommitSettlement) -> str:
             "proposal_sha256": receipt.proposal_sha256,
             "work_item_id": receipt.work_item_id,
             "work_item_version": receipt.work_item_version,
+            "commit_owner_generation": receipt.commit_owner_generation,
+            "commit_owner_ref": receipt.commit_owner_ref,
             "authority_request_sha256": receipt.authority_request_sha256,
             "work_lease_ref": receipt.work_lease_ref,
             "primary_authority_ref": receipt.primary_authority_ref,

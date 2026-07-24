@@ -98,7 +98,10 @@ SELECT
   receipt.actuation_observed_at AS delivery_actuation_observed_at,
   receipt.settled_at AS delivery_settled_at,
   receipt.settlement_ref AS delivery_settlement_ref,
-  receipt.settlement_sha256 AS delivery_settlement_sha256
+  receipt.settlement_sha256 AS delivery_settlement_sha256,
+  receipt.commit_owner_generation
+    AS delivery_commit_owner_generation,
+  receipt.commit_owner_ref AS delivery_commit_owner_ref
 FROM volpred_ops.change_sets AS change_set
 LEFT JOIN volpred_ops.commit_delivery_receipt_reads AS receipt
   ON receipt.authority_request_sha256 =
@@ -230,6 +233,8 @@ BEGIN
         'proposal_sha256',
         'work_item_id',
         'work_item_version',
+        'commit_owner_generation',
+        'commit_owner_ref',
         'authority_request_sha256',
         'work_lease_ref',
         'primary_authority_ref',
@@ -247,6 +252,14 @@ BEGIN
       OR p_actuation_receipt->>'authority_request_sha256' IS NULL
       OR p_actuation_receipt->>'authority_request_sha256'
         !~ '^[0-9a-f]{64}$'
+      OR p_actuation_receipt->>'commit_owner_generation' IS NULL
+      OR p_actuation_receipt->>'commit_owner_generation'
+        !~ '^[1-9][0-9]*$'
+      OR p_actuation_receipt->>'commit_owner_ref'
+        IS DISTINCT FROM (
+          'commit-owner:git.commit:generation-'
+          || (p_actuation_receipt->>'commit_owner_generation')
+        )
       OR p_actuation_receipt->>'commit_sha' IS NULL
       OR p_actuation_receipt->>'commit_sha'
         !~ '^([0-9a-f]{40}|[0-9a-f]{64})$'
@@ -373,6 +386,14 @@ BEGIN
       OR receipt.proposal_sha256 <> current_change.proposal_sha256
       OR receipt.work_item_id <> current_change.work_item_id
       OR receipt.work_item_version <> current_change.work_item_version
+      OR receipt.commit_owner_generation
+        IS DISTINCT FROM (
+          current_change.actuation_receipt
+            ->>'commit_owner_generation'
+        )::bigint
+      OR receipt.commit_owner_ref
+        IS DISTINCT FROM
+          current_change.actuation_receipt->>'commit_owner_ref'
       OR receipt.commit_sha
         IS DISTINCT FROM current_change.actuation_receipt->>'commit_sha'
       OR receipt.parent_sha

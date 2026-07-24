@@ -59,7 +59,8 @@ class PostgresCommitSettlement:
                     SELECT *
                     FROM volpred_ops.settle_commit_write(
                       %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                      %s, %s, %s, %s, %s, %s, %s, %s
+                      %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                      %s
                     )
                     """,
                     (
@@ -68,6 +69,8 @@ class PostgresCommitSettlement:
                         self._primary_lease.epoch,
                         command.primary_fencing_token,
                         actuation.authority_request_sha256,
+                        actuation.commit_owner_generation,
+                        actuation.commit_owner_ref,
                         settlement_sha256,
                         command.change_set_id,
                         command.work_lease_token,
@@ -91,6 +94,7 @@ class PostgresCommitSettlement:
                 if message.startswith(
                     (
                         "commit settlement",
+                        "commit ownership",
                         "Primary Authority",
                     )
                 ):
@@ -107,6 +111,8 @@ class PostgresCommitSettlement:
             proposal_sha256=row["proposal_sha256"],
             work_item_id=row["work_item_id"],
             work_item_version=row["work_item_version"],
+            commit_owner_generation=row["commit_owner_generation"],
+            commit_owner_ref=row["commit_owner_ref"],
             authority_request_sha256=row["authority_request_sha256"],
             work_lease_ref=row["work_lease_ref"],
             primary_authority_ref=row["primary_authority_ref"],
@@ -125,6 +131,9 @@ class PostgresCommitSettlement:
             receipt.settlement_sha256 != settlement_sha256
             or receipt.authority_request_sha256
             != actuation.authority_request_sha256
+            or receipt.commit_owner_generation
+            != actuation.commit_owner_generation
+            or receipt.commit_owner_ref != actuation.commit_owner_ref
             or receipt.change_set_id != command.change_set_id
             or receipt.repository != command.repository
             or receipt.commit_sha != actuation.commit_sha

@@ -28,6 +28,7 @@ from . import (
 
 
 _RECEIPT_SCHEMA = "commit-actuation.v1"
+_AUTHORITY_TRAILER = "Volpred-Commit-Authority-Request"
 _DEFAULT_WRITER_CLI = (
     Path(__file__).resolve().parents[4] / "scripts" / "git_writer_lock.py"
 )
@@ -38,6 +39,7 @@ class CommitActuation:
     proposal_sha256: str
     work_item_id: str
     work_item_version: int
+    commit_owner_generation: int
     work_lease_token: str
     primary_fencing_token: str
     repository: str
@@ -55,6 +57,8 @@ class CommitActuationReceipt:
     proposal_sha256: str
     work_item_id: str
     work_item_version: int
+    commit_owner_generation: int
+    commit_owner_ref: str
     authority_request_sha256: str
     work_lease_ref: str
     primary_authority_ref: str
@@ -84,6 +88,7 @@ class CommitAuthorityRequest:
     proposal_sha256: str
     work_item_id: str
     work_item_version: int
+    commit_owner_generation: int
     work_lease_token: str
     primary_fencing_token: str
     repository: str
@@ -97,6 +102,8 @@ class CommitAuthorityRequest:
 @dataclass(frozen=True)
 class CommitAuthorityGrant:
     request_sha256: str
+    commit_owner_generation: int
+    commit_owner_ref: str
     work_lease_ref: str
     primary_authority_ref: str
 
@@ -179,7 +186,10 @@ class GitCommitActuator:
             "--expected-head",
             normalized.expected_head,
             "--message",
-            normalized.message,
+            _authority_bound_message(
+                normalized.message,
+                authority_request.request_sha256,
+            ),
         ]
         for item in normalized.content_hashes:
             argv.extend(
@@ -219,6 +229,7 @@ class GitCommitActuator:
             repository,
             command=normalized,
             commit_sha=commit_sha,
+            authority_request_sha256=authority_request.request_sha256,
         )
 
         observed_at = self._clock()
@@ -231,6 +242,8 @@ class GitCommitActuator:
             proposal_sha256=normalized.proposal_sha256,
             work_item_id=normalized.work_item_id,
             work_item_version=normalized.work_item_version,
+            commit_owner_generation=normalized.commit_owner_generation,
+            commit_owner_ref=authority_grant.commit_owner_ref,
             authority_request_sha256=authority_request.request_sha256,
             work_lease_ref=authority_grant.work_lease_ref,
             primary_authority_ref=authority_grant.primary_authority_ref,
@@ -274,6 +287,7 @@ def _recover_prior_commit(
             repository,
             command=command,
             commit_sha=commit_sha,
+            authority_request_sha256=authority_request.request_sha256,
         )
         observed_at = datetime.fromisoformat(
             _git_text(
@@ -298,6 +312,8 @@ def _recover_prior_commit(
         proposal_sha256=command.proposal_sha256,
         work_item_id=command.work_item_id,
         work_item_version=command.work_item_version,
+        commit_owner_generation=command.commit_owner_generation,
+        commit_owner_ref=authority_grant.commit_owner_ref,
         authority_request_sha256=authority_request.request_sha256,
         work_lease_ref=authority_grant.work_lease_ref,
         primary_authority_ref=authority_grant.primary_authority_ref,
@@ -315,6 +331,7 @@ def _verify_commit(
     *,
     command: CommitActuation,
     commit_sha: str,
+    authority_request_sha256: str,
 ) -> str:
     parent_sha = _git_text(
         repository,
@@ -333,9 +350,13 @@ def _verify_commit(
         "--format=%B",
         commit_sha,
     )
-    if message != command.message:
+    if message != _authority_bound_message(
+        command.message,
+        authority_request_sha256,
+    ):
         raise CommitActuatorBlocked(
-            "canonical Git writer commit message differs from the ChangeSet"
+            "canonical Git writer commit message is not bound to the "
+            "authorized ChangeSet"
         )
     changed_paths = tuple(
         sorted(
@@ -375,6 +396,16 @@ def _verify_commit(
                 f"committed Git file mode differs from the ChangeSet: {item.path}"
             )
     return parent_sha
+
+
+def _authority_bound_message(message: str, request_sha256: str) -> str:
+    """Bind the durable Git object to the authority grant used to create it."""
+
+    if _SHA256.fullmatch(request_sha256) is None:
+        raise CommitActuatorBlocked(
+            "commit authority request digest is not a lowercase SHA-256"
+        )
+    return f"{message}\n\n{_AUTHORITY_TRAILER}: {request_sha256}"
 
 
 def _tree_git_mode(repository: Path, revision: str, path: str) -> str | None:
@@ -419,6 +450,11 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
     work_item_id = _required_text(command.work_item_id, field="work_item_id")
     if command.work_item_version <= 0:
         raise ValueError("work_item_version must be positive")
+    if (
+        isinstance(command.commit_owner_generation, bool)
+        or command.commit_owner_generation <= 0
+    ):
+        raise ValueError("commit_owner_generation must be positive")
     work_lease_token = _required_text(
         command.work_lease_token,
         field="work_lease_token",
@@ -460,6 +496,7 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
         proposal_sha256=command.proposal_sha256,
         work_item_id=work_item_id,
         work_item_version=command.work_item_version,
+        commit_owner_generation=command.commit_owner_generation,
         work_lease_token=work_lease_token,
         primary_fencing_token=primary_fencing_token,
         repository=str(repository),
@@ -478,6 +515,7 @@ def _authority_request(command: CommitActuation) -> CommitAuthorityRequest:
         proposal_sha256=command.proposal_sha256,
         work_item_id=command.work_item_id,
         work_item_version=command.work_item_version,
+        commit_owner_generation=command.commit_owner_generation,
         work_lease_token=command.work_lease_token,
         primary_fencing_token=command.primary_fencing_token,
         repository=command.repository,
@@ -501,6 +539,7 @@ def _authority_request_sha256(request: CommitAuthorityRequest) -> str:
         "proposal_sha256": request.proposal_sha256,
         "work_item_id": request.work_item_id,
         "work_item_version": request.work_item_version,
+        "commit_owner_generation": request.commit_owner_generation,
         "work_lease_token": request.work_lease_token,
         "primary_fencing_token": request.primary_fencing_token,
         "repository": request.repository,
@@ -532,8 +571,26 @@ def _validate_authority_grant(
             raise CommitActuatorBlocked(
                 "commit authority grant does not match the requested write intent"
             )
+        if grant.commit_owner_generation != request.commit_owner_generation:
+            raise CommitActuatorBlocked(
+                "commit authority grant does not match the owner generation"
+            )
+        owner_ref = _required_text(
+            grant.commit_owner_ref,
+            field="commit owner reference",
+        )
+        expected_owner_ref = (
+            "commit-owner:git.commit:"
+            f"generation-{request.commit_owner_generation}"
+        )
+        if owner_ref != expected_owner_ref:
+            raise CommitActuatorBlocked(
+                "commit authority grant has an invalid owner reference"
+            )
         return CommitAuthorityGrant(
             request_sha256=grant.request_sha256,
+            commit_owner_generation=grant.commit_owner_generation,
+            commit_owner_ref=owner_ref,
             work_lease_ref=_required_text(
                 grant.work_lease_ref,
                 field="authority WorkLease reference",

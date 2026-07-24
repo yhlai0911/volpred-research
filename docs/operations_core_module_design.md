@@ -285,6 +285,13 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   Git committer 的 timezone-aware timestamp 重建 token-redacted receipt；任何 mismatch
   維持 stale-HEAD fail closed，writer 零呼叫。已在 candidate 上方新增後續 commit
   也不影響精確回讀。
+- 「完整 commit message」不是 caller 的人類可見文字本身。Actuator 在 authorize 後
+  固定附加 `Volpred-Commit-Authority-Request: <sha256>` trailer；SHA-256 綁同一次
+  proposal、WorkItem/version、兩個 fencing token、repository/parent、paths/hashes、
+  原 message 與 commit-worker actor。Writer argv 與 durable receipt 仍不包含 raw
+  token。正常 post-write verification 與 stale-HEAD recovery 共用這個 exact bound
+  message gate，因此沒有 authority trailer 的 bitwise lookalike first child 會
+  fail closed。
 - 跨 process regression 直接讓第一個 actuator 在 writer 已 commit 後、store
   checkpoint 前遺失 return；第二個 `ChangeDelivery` instance 由同一 proposed record
   恢復 exact commit，接著完成 checkpoint／settlement，並證明 expected parent 到 HEAD
@@ -333,6 +340,46 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   suite 76 passed。此 mode identity 根因為 `root_cause_fixed_and_verified`；formal
   caller、live migrations、ownership cutover 與 rollback rehearsal仍缺，整體維持
   `contained`。
+
+### 2026-07-24 authority-bound Git object checkpoint
+
+- Lost-return recovery 原先把 caller message、parent、paths、blob hashes 與 bounded
+  file modes 當成完整 commit identity；另一個 writer 若先建立位元完全相同的 first
+  child，actuator 會誤建自己的 authority receipt。該 commit 實際上沒有證明由本次
+  WorkLease／Primary Authority grant 產生。
+- `GitCommitActuator` 現在只把原 message 留在 authority request identity，authorize
+  成功後才交給 canonical writer 一份附加 authority-request SHA-256 trailer 的 bound
+  message。正常 writer read-back 與 historical recovery 都重建並 exact-match 同一
+  trailer；不同 grant、沒有 trailer或只有相同內容的 lookalike 均 fail closed。
+- Regression 先證明 unbound bitwise lookalike 會被舊實作接受，再驗證修正後拒絕，
+  同時正常 commit object 的 trailer 與 receipt digest 精確一致、真 lost-return
+  recovery 仍可完成。這個 commit-provenance identity 缺口為
+  `root_cause_fixed_and_verified`；formal caller、live migrations、Git ownership
+  cutover 與 rollback rehearsal仍缺，Change Delivery 整體維持 `contained`。
+
+### 2026-07-24 owner-fenced formal caller checkpoint
+
+- `OwnedChangeDelivery` 將 formal Work Coordinator caller 收斂為一個 deep operation：
+  讀 current `git.commit` owner、建立 immutable proposal、owner-fenced land，再回讀
+  terminal WorkItem。它要求 owner 為 `operations_core`，並將同一 generation 綁入
+  landing command、authority request／grant、actuation、settlement 與 delivery
+  receipt；PostgreSQL authorize／settle 會在 transaction 內再次鎖定 owner，caller
+  的前置 read 不會成為授權依據。
+- Private `commit_owners`／`commit_owner_receipts` 提供 approver-only CAS transfer。
+  舊的無 owner 參數 authorize／settle overload 已對 worker 失權；rollback 必須指出
+  current generation，且任何未 settlement grant 或 `commit_unsettled` ChangeSet
+  都會阻擋 ownership transfer。新 settlement 在 immutable receipt 落表後，同一
+  transaction 以穩定 report id 完成 WorkItem；formal caller 回讀 status、version、
+  settlement ref、summary、finished time 與 cleared claim。
+- PostgreSQL 17 已用 non-superuser migration executor 從乾淨 schema replay；
+  RLS／function owner／fixed search path／least-privilege read-back 全部通過。臨時
+  canonical repo + registered linked worktree 的 non-live E2E 實際建立 owner
+  generation 2 commit、回讀 ChangeSet／grant／receipt／WorkItem，再演練 legacy
+  generation 3 rollback、冪等 replay、stale CAS refusal 與 generation 4 re-cutover。
+- Formal caller、durable store、commit authority、settlement 與 rollback mechanism
+  的 shadow 根因達 `root_cause_fixed_and_verified`。Migrations 尚未部署 live，
+  production Git ownership 未切換；整體 Change Delivery 仍為 `contained`，下一步
+  是 live migration rehearsal/read-back 與 owner 核可後的受控 cutover。
 
 ## 6. Effect Delivery
 

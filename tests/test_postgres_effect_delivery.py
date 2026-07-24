@@ -1,3 +1,4 @@
+import hashlib
 import os
 import shutil
 import socket
@@ -23,6 +24,7 @@ from volpred.ops.authority.postgres import PostgresAuthorityStore
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
+    ChangeSetProposal,
     ChangeSetConflict,
     ChangeSetView,
     CheckEvidence,
@@ -57,10 +59,18 @@ from volpred.ops.delivery.postgres_authority import PostgresEffectAuthority
 from volpred.ops.delivery.postgres_commit_authority import (
     PostgresCommitAuthority,
 )
+from volpred.ops.delivery.postgres_commit_ownership import (
+    PostgresCommitOwnerStore,
+)
 from volpred.ops.delivery.postgres_commit_settlement import (
     PostgresCommitSettlement,
 )
 from volpred.ops.delivery.postgres_change_store import PostgresChangeSetStore
+from volpred.ops.delivery.owned_change import (
+    CommitOwnershipLost,
+    OwnedChangeCommand,
+    build_postgres_owned_change_delivery,
+)
 from volpred.ops.delivery.postgres_payload import (
     EffectPayloadConflict,
     PostgresEffectPayloadStore,
@@ -132,6 +142,10 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
+    / "20260724110000_operations_core_commit_ownership.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
     / "20260724113000_operations_core_change_set_store.sql",
 )
 
@@ -176,24 +190,28 @@ def _validate_external_test_dsn(dsn: str) -> None:
 
 def _commit_authority_security_readback(
     dsn: str,
-) -> tuple[bool, bool, bool, bool, bool, bool]:
+) -> tuple[bool, bool, bool, bool, bool, bool, bool]:
+    owner_fenced = (
+        "volpred_ops.authorize_commit_write("
+        "text,text,bigint,text,text,text,text,integer,bigint,"
+        "text,text,text,text)"
+    )
+    legacy = (
+        "volpred_ops.authorize_commit_write("
+        "text,text,bigint,text,text,text,text,integer,text,text,text,text)"
+    )
     with psycopg.connect(dsn, autocommit=True) as connection:
         return connection.execute(
             """
             SELECT
               has_function_privilege(
-                'volpred_ops_worker',
-                'volpred_ops.authorize_commit_write('
-                  'text,text,bigint,text,text,text,text,integer,'
-                  'text,text,text,text)',
-                'EXECUTE'
+                'volpred_ops_worker', %s, 'EXECUTE'
               ),
               has_function_privilege(
-                'public',
-                'volpred_ops.authorize_commit_write('
-                  'text,text,bigint,text,text,text,text,integer,'
-                  'text,text,text,text)',
-                'EXECUTE'
+                'volpred_ops_worker', %s, 'EXECUTE'
+              ),
+              has_function_privilege(
+                'public', %s, 'EXECUTE'
               ),
               (
                 SELECT relrowsecurity AND relforcerowsecurity
@@ -214,37 +232,40 @@ def _commit_authority_security_readback(
                   WHERE rolname = 'volpred_ops_definer'
                 )
                 FROM pg_proc AS procedure
-                JOIN pg_namespace AS namespace
-                  ON namespace.oid = procedure.pronamespace
-                WHERE namespace.nspname = 'volpred_ops'
-                  AND procedure.proname = 'authorize_commit_write'
+                WHERE procedure.oid = %s::regprocedure
               ),
               (
                 SELECT procedure.prosecdef
                   AND procedure.proconfig @>
                     ARRAY['search_path=pg_catalog, volpred_ops']
                 FROM pg_proc AS procedure
-                JOIN pg_namespace AS namespace
-                  ON namespace.oid = procedure.pronamespace
-                WHERE namespace.nspname = 'volpred_ops'
-                  AND procedure.proname = 'authorize_commit_write'
+                WHERE procedure.oid = %s::regprocedure
               )
-            """
+            """,
+            (owner_fenced, legacy, owner_fenced, owner_fenced, owner_fenced),
         ).fetchone()
 
 
 def _commit_settlement_security_readback(
     dsn: str,
-) -> tuple[bool, bool, bool, bool, bool, bool]:
-    signature = (
+) -> tuple[bool, bool, bool, bool, bool, bool, bool]:
+    owner_fenced = (
         "volpred_ops.settle_commit_write("
-        "text,text,bigint,text,text,text,text,text,text,text,text,"
-        "text,text,jsonb,text,timestamp with time zone,text)"
+        "text,text,bigint,text,text,bigint,text,text,text,text,text,"
+        "text,text,text,text,jsonb,text,timestamp with time zone,text)"
+    )
+    legacy = (
+        "volpred_ops.settle_commit_write("
+        "text,text,bigint,text,text,text,text,text,text,text,text,text,"
+        "text,jsonb,text,timestamp with time zone,text)"
     )
     with psycopg.connect(dsn, autocommit=True) as connection:
         return connection.execute(
             """
             SELECT
+              has_function_privilege(
+                'volpred_ops_worker', %s, 'EXECUTE'
+              ),
               has_function_privilege(
                 'volpred_ops_worker', %s, 'EXECUTE'
               ),
@@ -270,23 +291,96 @@ def _commit_settlement_security_readback(
                   WHERE rolname = 'volpred_ops_definer'
                 )
                 FROM pg_proc AS procedure
-                JOIN pg_namespace AS namespace
-                  ON namespace.oid = procedure.pronamespace
-                WHERE namespace.nspname = 'volpred_ops'
-                  AND procedure.proname = 'settle_commit_write'
+                WHERE procedure.oid = %s::regprocedure
               ),
               (
                 SELECT procedure.prosecdef
                   AND procedure.proconfig @>
                     ARRAY['search_path=pg_catalog, volpred_ops']
                 FROM pg_proc AS procedure
-                JOIN pg_namespace AS namespace
-                  ON namespace.oid = procedure.pronamespace
-                WHERE namespace.nspname = 'volpred_ops'
-                  AND procedure.proname = 'settle_commit_write'
+                WHERE procedure.oid = %s::regprocedure
               )
             """,
-            (signature, signature),
+            (
+                owner_fenced,
+                legacy,
+                owner_fenced,
+                owner_fenced,
+                owner_fenced,
+            ),
+        ).fetchone()
+
+
+def _commit_ownership_security_readback(
+    dsn: str,
+) -> tuple[bool, bool, bool, bool, bool, bool, bool]:
+    read_owner = "volpred_ops.read_commit_owner()"
+    transfer_owner = (
+        "volpred_ops.transfer_commit_owner("
+        "text,bigint,text,text,text,bigint)"
+    )
+    with psycopg.connect(dsn, autocommit=True) as connection:
+        return connection.execute(
+            """
+            SELECT
+              has_function_privilege(
+                'volpred_ops_worker', %s, 'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_approver', %s, 'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker', %s, 'EXECUTE'
+              ),
+              has_function_privilege(
+                'public', %s, 'EXECUTE'
+              ),
+              (
+                SELECT bool_and(relrowsecurity AND relforcerowsecurity)
+                FROM pg_class AS relation
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = relation.relnamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND relation.relname IN (
+                    'commit_owners',
+                    'commit_owner_receipts'
+                  )
+              ),
+              (
+                NOT has_table_privilege(
+                  'public', 'volpred_ops.commit_owners', 'SELECT'
+                )
+                AND NOT has_table_privilege(
+                  'public',
+                  'volpred_ops.commit_owner_receipts',
+                  'SELECT'
+                )
+              ),
+              (
+                SELECT bool_and(
+                  procedure.proowner = (
+                    SELECT oid FROM pg_roles
+                    WHERE rolname = 'volpred_ops_definer'
+                  )
+                  AND procedure.prosecdef
+                  AND procedure.proconfig @>
+                    ARRAY['search_path=pg_catalog, volpred_ops']
+                )
+                FROM pg_proc AS procedure
+                WHERE procedure.oid IN (
+                  %s::regprocedure,
+                  %s::regprocedure
+                )
+              )
+            """,
+            (
+                read_owner,
+                transfer_owner,
+                transfer_owner,
+                transfer_owner,
+                read_owner,
+                transfer_owner,
+            ),
         ).fetchone()
 
 
@@ -688,6 +782,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert owned_indexes is True
         (
             commit_worker_execute,
+            legacy_commit_worker_execute,
             commit_public_execute,
             commit_grants_force_rls,
             commit_grants_public_select,
@@ -695,6 +790,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
             commit_function_search_path,
         ) = _commit_authority_security_readback(dsn)
         assert commit_worker_execute is True
+        assert legacy_commit_worker_execute is False
         assert commit_public_execute is False
         assert commit_grants_force_rls is True
         assert commit_grants_public_select is False
@@ -702,6 +798,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert commit_function_search_path is True
         (
             settlement_worker_execute,
+            legacy_settlement_worker_execute,
             settlement_public_execute,
             settlement_receipts_force_rls,
             settlement_receipts_public_select,
@@ -709,11 +806,28 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
             settlement_function_search_path,
         ) = _commit_settlement_security_readback(dsn)
         assert settlement_worker_execute is True
+        assert legacy_settlement_worker_execute is False
         assert settlement_public_execute is False
         assert settlement_receipts_force_rls is True
         assert settlement_receipts_public_select is False
         assert settlement_function_owner is True
         assert settlement_function_search_path is True
+        (
+            ownership_worker_read,
+            ownership_approver_transfer,
+            ownership_worker_transfer,
+            ownership_public_transfer,
+            ownership_tables_force_rls,
+            ownership_public_table_select_revoked,
+            ownership_functions_hardened,
+        ) = _commit_ownership_security_readback(dsn)
+        assert ownership_worker_read is True
+        assert ownership_approver_transfer is True
+        assert ownership_worker_transfer is False
+        assert ownership_public_transfer is False
+        assert ownership_tables_force_rls is True
+        assert ownership_public_table_select_revoked is True
+        assert ownership_functions_hardened is True
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -851,6 +965,8 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.change_sets,
               volpred_ops.commit_delivery_receipts,
               volpred_ops.commit_authority_grants,
+              volpred_ops.commit_owner_receipts,
+              volpred_ops.commit_owners,
               volpred_ops.primary_authority_grants,
               volpred_ops.primary_authority_receipts,
               volpred_ops.primary_authority_leases,
@@ -887,6 +1003,27 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               change_reason, NULL, changed_at
             FROM volpred_ops.notification_owners
             WHERE effect_family = 'email.ops_alert';
+            INSERT INTO volpred_ops.commit_owners (
+              capability, owner, generation, changed_at, changed_by,
+              change_reason
+            )
+            VALUES (
+              'git.commit',
+              'legacy',
+              1,
+              clock_timestamp(),
+              'test-reset',
+              'restore canonical legacy fixture owner'
+            );
+            INSERT INTO volpred_ops.commit_owner_receipts (
+              capability, generation, previous_owner, owner, actor_ref,
+              reason, rollback_of_generation, changed_at
+            )
+            SELECT
+              capability, generation, NULL, owner, changed_by,
+              change_reason, NULL, changed_at
+            FROM volpred_ops.commit_owners
+            WHERE capability = 'git.commit';
             """
         )
 
@@ -895,6 +1032,36 @@ def _worker_connection(dsn: str) -> psycopg.Connection:
     connection = psycopg.connect(dsn)
     connection.execute("SET ROLE volpred_ops_worker")
     return connection
+
+
+def _approver_connection(dsn: str) -> psycopg.Connection:
+    connection = psycopg.connect(dsn)
+    connection.execute("SET ROLE volpred_ops_approver")
+    return connection
+
+
+def _ensure_commit_owner(dsn: str) -> None:
+    store = PostgresCommitOwnerStore(
+        connection_factory=lambda: _approver_connection(dsn)
+    )
+    owner = store.read_owner()
+    if owner.owner == "legacy":
+        store.transfer_owner(
+            expected_owner="legacy",
+            expected_generation=owner.generation,
+            target_owner="operations_core",
+            actor_ref="test:commit-owner-cutover",
+            reason="isolated PostgreSQL commit contract",
+        )
+
+
+def _git_text(repository: Path, *arguments: str) -> str:
+    return subprocess.run(
+        ("git", "-C", str(repository), *arguments),
+        capture_output=True,
+        check=True,
+        text=True,
+    ).stdout.strip()
 
 
 def _seed_work(dsn: str, *, work_id: str = "work-effect-1") -> None:
@@ -927,6 +1094,7 @@ def _seed_running_work(
     work_id: str = "work-commit-1",
     lease_token: str = "work-lease-commit-1",
 ) -> tuple[WorkLease, WorkItemView]:
+    _ensure_commit_owner(dsn)
     coordinator = WorkCoordinator(
         PostgresCoordinationStore(
             connection_factory=lambda: _worker_connection(dsn)
@@ -979,6 +1147,7 @@ def _commit_authority_request(
         proposal_sha256="a" * 64,
         work_item_id=work_id,
         work_item_version=work_version,
+        commit_owner_generation=2,
         work_lease_token=work_lease_token,
         primary_fencing_token=primary_fencing_token,
         repository="/tmp/volpred-commit-authority-test",
@@ -1005,6 +1174,8 @@ def _commit_actuation_receipt(
         proposal_sha256=request.proposal_sha256,
         work_item_id=request.work_item_id,
         work_item_version=request.work_item_version,
+        commit_owner_generation=request.commit_owner_generation,
+        commit_owner_ref=grant.commit_owner_ref,
         authority_request_sha256=request.request_sha256,
         work_lease_ref=grant.work_lease_ref,
         primary_authority_ref=grant.primary_authority_ref,
@@ -1754,6 +1925,58 @@ def test_commit_authority_rejects_forged_request_hash_before_database(
     assert grant_count == 0
 
 
+def test_commit_owner_rollback_blocks_unsettled_generation(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    ).authorize(request)
+    owner_store = PostgresCommitOwnerStore(
+        connection_factory=lambda: _approver_connection(
+            postgres_effect_dsn
+        )
+    )
+
+    with pytest.raises(
+        CommitOwnershipLost,
+        match="zero unsettled grants",
+    ):
+        owner_store.transfer_owner(
+            expected_owner="operations_core",
+            expected_generation=2,
+            target_owner="legacy",
+            actor_ref="approver:blocked-rollback",
+            reason="must not strand an unsettled commit",
+            rollback_of_generation=2,
+        )
+
+    owner = owner_store.read_owner()
+    assert (owner.owner, owner.generation) == ("operations_core", 2)
+
+
 def test_commit_settlement_revalidates_both_leases_and_replays_receipt(
     postgres_effect_dsn: str,
 ) -> None:
@@ -1976,6 +2199,196 @@ def test_commit_settlement_conflicting_replay_fails_closed(
     assert durable == [(command.change_set_id,)]
 
 
+def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
+    postgres_effect_dsn: str,
+    tmp_path: Path,
+) -> None:
+    repository = tmp_path / "canonical"
+    workspace = tmp_path / "candidate"
+    repository.mkdir()
+    _git_text(repository, "init", "-b", "main")
+    _git_text(repository, "config", "user.name", "Owned Change Test")
+    _git_text(
+        repository,
+        "config",
+        "user.email",
+        "owned-change@example.invalid",
+    )
+    candidate_path = repository / "owned.txt"
+    candidate_path.write_text("legacy\n", encoding="utf-8")
+    _git_text(repository, "add", "owned.txt")
+    _git_text(repository, "commit", "-m", "base")
+    base_commit = _git_text(repository, "rev-parse", "HEAD")
+    _git_text(
+        repository,
+        "worktree",
+        "add",
+        "-b",
+        "shadow-owned-change",
+        str(workspace),
+        base_commit,
+    )
+    workspace_candidate = workspace / "owned.txt"
+    workspace_candidate.write_text(
+        "operations core\n",
+        encoding="utf-8",
+    )
+
+    work_lease, running = _seed_running_work(
+        postgres_effect_dsn,
+        work_id="work-owned-change-shadow",
+        lease_token="work-lease-owned-change-shadow",
+    )
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            )
+        ),
+        token_factory=lambda: "primary-owned-change-shadow",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:owned-change-shadow",
+            lease_seconds=300,
+        )
+    )
+    delivery = build_postgres_owned_change_delivery(
+        lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+        clock=lambda: datetime.now(timezone.utc),
+        change_set_id_factory=lambda: "changeset-owned-change-shadow",
+        writer_cli=REPO_ROOT / "scripts" / "git_writer_lock.py",
+    )
+    proposal = ChangeSetProposal(
+        idempotency_key="changeset:owned-change-shadow:attempt-1",
+        work_item_id=running.id,
+        work_item_version=running.version,
+        base_commit=base_commit,
+        workspace_ref=str(workspace),
+        exact_paths=("owned.txt",),
+        content_hashes=(
+            ContentHash(
+                path="owned.txt",
+                sha256=hashlib.sha256(
+                    workspace_candidate.read_bytes()
+                ).hexdigest(),
+            ),
+        ),
+        required_checks=(
+            CheckEvidence(
+                name="shadow-contract",
+                status="passed",
+                evidence_ref="pytest:owned-change-shadow",
+            ),
+        ),
+        author_ref="agent:change-author",
+        author_evidence_ref="execution:owned-change-shadow",
+    )
+
+    receipt = delivery.deliver(
+        OwnedChangeCommand(
+            proposal=proposal,
+            work_lease_token=work_lease.token,
+            primary_fencing_token=primary_lease.fencing_token,
+            repository=str(repository),
+            message="[codex] shadow owner-fenced ChangeSet",
+            actor="commit-worker:owned-change-shadow",
+        )
+    )
+    primary.release(primary_lease)
+
+    assert receipt.owner.owner == "operations_core"
+    assert receipt.owner.generation == 2
+    assert receipt.delivery.commit_owner_generation == 2
+    assert receipt.delivery.commit_owner_ref == (
+        "commit-owner:git.commit:generation-2"
+    )
+    assert receipt.work_item.status == "succeeded"
+    assert _git_text(repository, "show", "HEAD:owned.txt") == (
+        "operations core"
+    )
+    assert _git_text(repository, "rev-parse", "HEAD") == (
+        receipt.delivery.commit_sha
+    )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT
+              change_set.status,
+              authority.commit_owner_generation,
+              authority.commit_owner_ref,
+              work.status,
+              work.result_ref
+            FROM volpred_ops.change_sets AS change_set
+            JOIN volpred_ops.commit_authority_grants AS authority
+              ON authority.request_sha256 =
+                change_set.delivery_authority_request_sha256
+            JOIN volpred_ops.work_items AS work
+              ON work.id = change_set.work_item_id
+            WHERE change_set.id = %s
+            """,
+            (receipt.delivery.change_set_id,),
+        ).fetchone()
+    assert durable == (
+        "landed",
+        2,
+        "commit-owner:git.commit:generation-2",
+        "succeeded",
+        receipt.delivery.settlement_ref,
+    )
+    assert work_lease.token not in repr(durable)
+    assert primary_lease.fencing_token not in repr(durable)
+
+    owner_store = PostgresCommitOwnerStore(
+        connection_factory=lambda: _approver_connection(
+            postgres_effect_dsn
+        )
+    )
+    rolled_back = owner_store.transfer_owner(
+        expected_owner="operations_core",
+        expected_generation=2,
+        target_owner="legacy",
+        actor_ref="approver:shadow-rollback",
+        reason="verify deployment rollback before live cutover",
+        rollback_of_generation=2,
+    )
+    replay = owner_store.transfer_owner(
+        expected_owner="operations_core",
+        expected_generation=2,
+        target_owner="legacy",
+        actor_ref="approver:shadow-rollback",
+        reason="verify deployment rollback before live cutover",
+        rollback_of_generation=2,
+    )
+    assert replay == rolled_back
+    assert (rolled_back.owner, rolled_back.generation) == ("legacy", 3)
+
+    with pytest.raises(CommitOwnershipLost, match="compare-and-set"):
+        owner_store.transfer_owner(
+            expected_owner="operations_core",
+            expected_generation=2,
+            target_owner="legacy",
+            actor_ref="approver:stale-rollback",
+            reason="stale rollback must fail closed",
+            rollback_of_generation=2,
+        )
+
+    recutover = owner_store.transfer_owner(
+        expected_owner="legacy",
+        expected_generation=3,
+        target_owner="operations_core",
+        actor_ref="approver:shadow-recutover",
+        reason="restore shadow owner after rollback rehearsal",
+    )
+    assert (recutover.owner, recutover.generation) == (
+        "operations_core",
+        4,
+    )
+
+
 def test_change_set_store_survives_restart_and_resumes_settlement(
     postgres_effect_dsn: str,
 ) -> None:
@@ -2041,6 +2454,23 @@ def test_change_set_store_survives_restart_and_resumes_settlement(
             actuation=actuation,
         )
     )
+    owner_store = PostgresCommitOwnerStore(
+        connection_factory=lambda: _approver_connection(
+            postgres_effect_dsn
+        )
+    )
+    with pytest.raises(
+        CommitOwnershipLost,
+        match="zero unsettled ChangeSets",
+    ):
+        owner_store.transfer_owner(
+            expected_owner="operations_core",
+            expected_generation=2,
+            target_owner="legacy",
+            actor_ref="approver:checkpoint-rollback",
+            reason="must not strand a checkpoint before landed linkage",
+            rollback_of_generation=2,
+        )
     landed = restarted_process.mark_landed(
         change_set_id=proposed.view.id,
         proposal_sha256=proposed.view.proposal_sha256,

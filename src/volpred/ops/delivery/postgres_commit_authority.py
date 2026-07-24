@@ -63,7 +63,7 @@ class PostgresCommitAuthority:
                     SELECT *
                     FROM volpred_ops.authorize_commit_write(
                       %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                      %s, %s, %s
+                      %s, %s, %s, %s
                     )
                     """,
                     (
@@ -75,6 +75,7 @@ class PostgresCommitAuthority:
                         request.proposal_sha256,
                         request.work_item_id,
                         request.work_item_version,
+                        request.commit_owner_generation,
                         request.work_lease_token,
                         request.repository,
                         request.expected_head,
@@ -90,6 +91,7 @@ class PostgresCommitAuthority:
                 if message.startswith(
                     (
                         "commit authority",
+                        "commit ownership",
                         "Primary Authority",
                     )
                 ):
@@ -101,6 +103,8 @@ class PostgresCommitAuthority:
             )
         return CommitAuthorityGrant(
             request_sha256=row["request_sha256"],
+            commit_owner_generation=row["commit_owner_generation"],
+            commit_owner_ref=row["commit_owner_ref"],
             work_lease_ref=row["work_lease_ref"],
             primary_authority_ref=row["primary_authority_ref"],
         )

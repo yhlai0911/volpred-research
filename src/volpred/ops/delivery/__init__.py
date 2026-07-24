@@ -93,6 +93,7 @@ class ChangeSetView:
 @dataclass(frozen=True)
 class LandChangeSet:
     change_set_id: str
+    commit_owner_generation: int
     work_lease_token: str
     primary_fencing_token: str
     repository: str
@@ -107,6 +108,8 @@ class DeliveryReceipt:
     proposal_sha256: str
     work_item_id: str
     work_item_version: int
+    commit_owner_generation: int
+    commit_owner_ref: str
     authority_request_sha256: str
     work_lease_ref: str
     primary_authority_ref: str
@@ -238,6 +241,9 @@ class ChangeDelivery:
                         proposal_sha256=change_set.proposal_sha256,
                         work_item_id=change_set.work_item_id,
                         work_item_version=change_set.work_item_version,
+                        commit_owner_generation=(
+                            normalized.commit_owner_generation
+                        ),
                         work_lease_token=normalized.work_lease_token,
                         primary_fencing_token=normalized.primary_fencing_token,
                         repository=normalized.repository,
@@ -306,11 +312,17 @@ def _normalize_land_command(command: LandChangeSet) -> LandChangeSet:
     actor = _required_text(command.actor, field="commit actor")
     if not actor.startswith("commit-worker:"):
         raise ValueError("commit actor must use the commit-worker identity")
+    if (
+        isinstance(command.commit_owner_generation, bool)
+        or command.commit_owner_generation <= 0
+    ):
+        raise ValueError("commit_owner_generation must be positive")
     return LandChangeSet(
         change_set_id=_required_text(
             command.change_set_id,
             field="change_set_id",
         ),
+        commit_owner_generation=command.commit_owner_generation,
         work_lease_token=_required_text(
             command.work_lease_token,
             field="work_lease_token",
@@ -330,6 +342,7 @@ def _land_command_sha256(command: LandChangeSet) -> str:
         {
             "schema_version": "land-change-set.v1",
             "change_set_id": command.change_set_id,
+            "commit_owner_generation": command.commit_owner_generation,
             "work_lease_token": command.work_lease_token,
             "primary_fencing_token": command.primary_fencing_token,
             "repository": command.repository,
@@ -372,6 +385,9 @@ def _validate_actuation_receipt(
         or receipt.proposal_sha256 != change_set.proposal_sha256
         or receipt.work_item_id != change_set.work_item_id
         or receipt.work_item_version != change_set.work_item_version
+        or receipt.commit_owner_generation
+        != command.commit_owner_generation
+        or not receipt.commit_owner_ref.strip()
         or receipt.parent_sha != change_set.base_commit
         or receipt.exact_paths != change_set.exact_paths
         or receipt.actor != command.actor
@@ -402,6 +418,9 @@ def _validate_delivery_receipt(
         or receipt.proposal_sha256 != change_set.proposal_sha256
         or receipt.work_item_id != change_set.work_item_id
         or receipt.work_item_version != change_set.work_item_version
+        or receipt.commit_owner_generation
+        != command.commit_owner_generation
+        or receipt.commit_owner_ref != actuation.commit_owner_ref
         or receipt.authority_request_sha256
         != actuation.authority_request_sha256
         or receipt.work_lease_ref != actuation.work_lease_ref

@@ -99,6 +99,11 @@ class _Actuator:
             proposal_sha256=command.proposal_sha256,
             work_item_id=command.work_item_id,
             work_item_version=command.work_item_version,
+            commit_owner_generation=command.commit_owner_generation,
+            commit_owner_ref=(
+                "commit-owner:git.commit:"
+                f"generation-{command.commit_owner_generation}"
+            ),
             authority_request_sha256="a" * 64,
             work_lease_ref="work-lease:work-1:v7",
             primary_authority_ref="primary-authority:operations-core-commits:epoch-1",
@@ -127,6 +132,11 @@ class _Authority:
     def authorize(self, request):
         return CommitAuthorityGrant(
             request_sha256=request.request_sha256,
+            commit_owner_generation=request.commit_owner_generation,
+            commit_owner_ref=(
+                "commit-owner:git.commit:"
+                f"generation-{request.commit_owner_generation}"
+            ),
             work_lease_ref="work-lease:work-1:v7",
             primary_authority_ref="primary-authority:epoch-42",
         )
@@ -160,6 +170,8 @@ class _Settlement:
             proposal_sha256=receipt.proposal_sha256,
             work_item_id=receipt.work_item_id,
             work_item_version=receipt.work_item_version,
+            commit_owner_generation=receipt.commit_owner_generation,
+            commit_owner_ref=receipt.commit_owner_ref,
             authority_request_sha256=receipt.authority_request_sha256,
             work_lease_ref=receipt.work_lease_ref,
             primary_authority_ref=receipt.primary_authority_ref,
@@ -179,6 +191,7 @@ class _Settlement:
 def _land(change_set_id: str = "changeset-1") -> LandChangeSet:
     return LandChangeSet(
         change_set_id=change_set_id,
+        commit_owner_generation=2,
         work_lease_token="work-lease-token",
         primary_fencing_token="primary-fencing-token",
         repository="/repo",
@@ -464,6 +477,7 @@ def test_land_orchestrates_actuation_and_durable_settlement(
         proposal_sha256=proposed.proposal_sha256,
         work_item_id=proposed.work_item_id,
         work_item_version=proposed.work_item_version,
+        commit_owner_generation=2,
         work_lease_token="work-lease-token",
         primary_fencing_token="primary-fencing-token",
         repository="/repo",

@@ -34,6 +34,8 @@ def _actuation_json(receipt: CommitActuationReceipt) -> dict[str, Any]:
         "proposal_sha256": receipt.proposal_sha256,
         "work_item_id": receipt.work_item_id,
         "work_item_version": receipt.work_item_version,
+        "commit_owner_generation": receipt.commit_owner_generation,
+        "commit_owner_ref": receipt.commit_owner_ref,
         "authority_request_sha256": receipt.authority_request_sha256,
         "work_lease_ref": receipt.work_lease_ref,
         "primary_authority_ref": receipt.primary_authority_ref,
@@ -56,6 +58,8 @@ def _actuation_from_json(
         proposal_sha256=payload["proposal_sha256"],
         work_item_id=payload["work_item_id"],
         work_item_version=int(payload["work_item_version"]),
+        commit_owner_generation=int(payload["commit_owner_generation"]),
+        commit_owner_ref=payload["commit_owner_ref"],
         authority_request_sha256=payload["authority_request_sha256"],
         work_lease_ref=payload["work_lease_ref"],
         primary_authority_ref=payload["primary_authority_ref"],
@@ -104,6 +108,8 @@ def _record_from_row(row: dict[str, Any]) -> ChangeSetRecord:
             proposal_sha256=row["proposal_sha256"],
             work_item_id=row["work_item_id"],
             work_item_version=row["work_item_version"],
+            commit_owner_generation=row["delivery_commit_owner_generation"],
+            commit_owner_ref=row["delivery_commit_owner_ref"],
             authority_request_sha256=row[
                 "delivery_authority_request_sha256"
             ],

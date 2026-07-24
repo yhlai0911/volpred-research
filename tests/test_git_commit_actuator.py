@@ -15,6 +15,8 @@ from volpred.ops.delivery._git_actuator import (
     CommitAuthorityRequest,
     CommitActuatorBlocked,
     GitCommitActuator,
+    _authority_bound_message,
+    _authority_request,
 )
 
 
@@ -40,6 +42,8 @@ class _Authority:
             raise CommitActuatorBlocked("stale Primary Authority fencing token")
         return CommitAuthorityGrant(
             request_sha256=request.request_sha256,
+            commit_owner_generation=request.commit_owner_generation,
+            commit_owner_ref="commit-owner:git.commit:generation-3",
             work_lease_ref="work-lease:work-1:v7",
             primary_authority_ref="primary-authority:epoch-42",
         )
@@ -49,6 +53,8 @@ class _MalformedGrantAuthority(_Authority):
     def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant:
         return CommitAuthorityGrant(
             request_sha256=request.request_sha256,
+            commit_owner_generation=request.commit_owner_generation,
+            commit_owner_ref="commit-owner:git.commit:generation-3",
             work_lease_ref="",
             primary_authority_ref="primary-authority:epoch-42",
         )
@@ -58,8 +64,21 @@ class _MismatchedGrantAuthority(_Authority):
     def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant:
         return CommitAuthorityGrant(
             request_sha256="0" * 64,
+            commit_owner_generation=request.commit_owner_generation,
+            commit_owner_ref="commit-owner:git.commit:generation-3",
             work_lease_ref="work-lease:work-1:v7",
             primary_authority_ref="primary-authority:epoch-42",
+        )
+
+
+class _MismatchedOwnerAuthority(_Authority):
+    def authorize(
+        self,
+        request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant:
+        return replace(
+            super().authorize(request),
+            commit_owner_ref="commit-owner:git.commit:generation-99",
         )
 
 
@@ -95,6 +114,7 @@ def _command(repo: Path, expected_head: str) -> CommitActuation:
         proposal_sha256="a" * 64,
         work_item_id="work-1",
         work_item_version=7,
+        commit_owner_generation=3,
         work_lease_token="work-lease-current",
         primary_fencing_token="primary-fence-current",
         repository=str(repo),
@@ -129,6 +149,8 @@ def test_actuator_lands_and_reads_back_exact_changeset(
     assert receipt.proposal_sha256 == "a" * 64
     assert receipt.work_item_id == "work-1"
     assert receipt.work_item_version == 7
+    assert receipt.commit_owner_generation == 3
+    assert receipt.commit_owner_ref == "commit-owner:git.commit:generation-3"
     assert len(receipt.authority_request_sha256) == 64
     assert receipt.work_lease_ref == "work-lease:work-1:v7"
     assert receipt.primary_authority_ref == "primary-authority:epoch-42"
@@ -138,6 +160,11 @@ def test_actuator_lands_and_reads_back_exact_changeset(
     assert receipt.actor == "commit-worker:test"
     assert receipt.status == "committed"
     assert receipt.observed_at == NOW.isoformat()
+    assert _git(repo, "show", "--no-patch", "--format=%B", "HEAD") == (
+        f"{_command(repo, base_commit).message}\n\n"
+        "Volpred-Commit-Authority-Request: "
+        f"{receipt.authority_request_sha256}"
+    )
     assert _git(repo, "show", "--format=", "--name-only", "HEAD").splitlines() == [
         "new.txt",
         "tracked.txt",
@@ -185,7 +212,35 @@ def test_actuator_does_not_recover_lookalike_commit_with_different_message(
     (repo / "new.txt").write_text("new\n", encoding="utf-8")
     command = _command(repo, base_commit)
     _git(repo, "add", "new.txt", "tracked.txt")
-    _git(repo, "commit", "-m", "different intent")
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message(
+            "different intent",
+            _authority_request(command).request_sha256,
+        ),
+    )
+    lookalike_commit = _git(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="expected HEAD fence failed",
+    ):
+        _actuator().commit(command)
+
+    assert _git(repo, "rev-parse", "HEAD") == lookalike_commit
+
+
+def test_actuator_does_not_recover_unbound_bitwise_lookalike_commit(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(repo, "commit", "-m", command.message)
     lookalike_commit = _git(repo, "rev-parse", "HEAD")
 
     with pytest.raises(
@@ -207,7 +262,15 @@ def test_actuator_does_not_recover_lookalike_commit_with_different_file_mode(
     command = _command(repo, base_commit)
     new_path.chmod(0o755)
     _git(repo, "add", "new.txt", "tracked.txt")
-    _git(repo, "commit", "-m", command.message)
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message(
+            command.message,
+            _authority_request(command).request_sha256,
+        ),
+    )
     lookalike_commit = _git(repo, "rev-parse", "HEAD")
 
     with pytest.raises(
@@ -328,6 +391,22 @@ def test_actuator_rejects_grant_for_a_different_write_intent(
     assert _git(repo, "diff", "--cached", "--name-only") == ""
 
 
+def test_actuator_rejects_grant_for_a_different_owner_generation_ref(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+
+    with pytest.raises(CommitActuatorBlocked, match="owner reference"):
+        _actuator(_MismatchedOwnerAuthority()).commit(
+            _command(repo, base_commit)
+        )
+
+    assert _git(repo, "rev-parse", "HEAD") == base_commit
+    assert _git(repo, "diff", "--cached", "--name-only") == ""
+
+
 def test_actuator_rejects_content_drift_and_restores_index(
     repository: tuple[Path, str],
 ) -> None:
@@ -360,6 +439,7 @@ def test_actuator_rejects_writer_success_without_new_commit(
         proposal_sha256="a" * 64,
         work_item_id="work-1",
         work_item_version=7,
+        commit_owner_generation=3,
         work_lease_token="work-lease-current",
         primary_fencing_token="primary-fence-current",
         repository=str(repo),

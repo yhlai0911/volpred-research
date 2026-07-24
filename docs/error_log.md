@@ -1539,3 +1539,56 @@ recovery mode-lookalike 四個 RED cases 已轉 GREEN；完整 Change Delivery�
 Git writer scoped suite 76 passed。此具體 mode identity 根因為
 **`root_cause_fixed_and_verified`**；formal caller、live migrations、Git ownership
 cutover 與 rollback rehearsal仍未完成，Change Delivery 整體維持 **`contained`**。
+
+### 2026-07-24 — Lost-return recovery 未證明 commit 來自本次 authority grant
+
+**症狀與根因層級**：公開 Git actuator regression 先由另一個 writer 在 expected
+parent 上建立一筆與 command 相同 message、paths、blob bytes 與 file modes 的 commit，
+再呼叫 actuator retry。修正前 `_recover_prior_commit()` 直接接受該 first child 並
+產生帶本次 WorkLease／Primary Authority refs 的 receipt。也就是內容 identity 雖相同，
+Git object 卻沒有任何證據證明由本次 authorize call 產生；這是 external transaction
+的 provenance identity 缺口。
+
+**底層修復**：Actuator 仍先重算並 authorize 完整 `commit-authority-request.v1`，
+但交給 canonical writer 的實際 commit message 固定附加
+`Volpred-Commit-Authority-Request: <request_sha256>` trailer。Digest 已綁 proposal、
+WorkItem/version、兩個 fencing token、repository/parent、paths/hashes、原 message 與
+commit-worker actor；raw token 不進 argv message、Git object或 receipt。正常 writer
+return 後的 object verification 與 historical lost-return recovery 共用同一個 bound
+message constructor，trailer 缺失或不同都 fail closed。
+
+**回歸、回讀與制度化**：unbound bitwise lookalike case 已先 RED（舊實作未拋錯）
+後 GREEN；正常 commit 回讀的 trailer 與 `commit-actuation.v1` receipt 中
+`authority_request_sha256` 精確一致，既有真 lost-return recovery 仍通過。提交前另跑
+完整 Git actuator／Change Delivery／canonical writer scoped suites、compile 與
+direct-mode owner-state read-back。此具體 provenance identity 根因為
+**`root_cause_fixed_and_verified`**；formal caller、live migrations、Git ownership
+cutover 與 rollback rehearsal仍未完成，因此 Change Delivery 整體維持
+**`contained`**。
+
+### 2026-07-24 — Formal caller 沒有 durable Git owner generation
+
+**症狀與根因層級**：ChangeSet store、commit authority、Git actuator 與 settlement
+各自存在，但沒有一個 formal Work Coordinator caller 串接全部 durable adapters；
+Git commit 權限也沒有可 CAS、可回讀、可 rollback 的 owner generation。若只在 Python
+先讀「目前 owner」，owner 可能在 authorize 前改變；既有無 owner 參數 RPC 仍可繞過
+新檢查。這是 ownership／transaction boundary 根因，不是補一個 caller wrapper 可解。
+
+**底層修復**：新增 private `commit_owners`／append-only owner receipts 與
+approver-only CAS transfer。`OwnedChangeDelivery` 只接受 current
+`operations_core` generation，並把 generation 綁入 landing command SHA、authority
+request／grant、Git actuation、ChangeSet checkpoint、settlement SHA 與 final receipt。
+Authorize／settle functions 在 transaction 內鎖定並重驗 owner；舊無 owner overload
+對 worker失權。Settlement 落 immutable receipt 後在同一 transaction 呼叫
+`complete_work()`，formal caller 再回讀唯一 terminal WorkItem。Rollback 在有未
+settlement grant 或 `commit_unsettled` ChangeSet 時 fail closed。
+
+**回歸、回讀與狀態界線**：PostgreSQL 17 以 non-superuser migration executor 從乾淨
+schema replay，回讀 FORCE RLS、PUBLIC deny、worker／approver 分權、function owner
+與 fixed search path。臨時 canonical repo + registered linked worktree 的 non-live
+E2E 實際完成 owner generation 2 commit，核對 durable ChangeSet／grant／receipt／
+WorkItem 後，演練 generation 3 rollback、同 request 冪等 replay、stale CAS refusal
+及 generation 4 re-cutover；另有未 settlement grant 專例證明 rollback 被阻擋。
+這個 formal caller／ownership 根因在 shadow 為
+**`root_cause_fixed_and_verified`**。Migrations 尚未部署 live、production Git owner
+未切換，Change Delivery umbrella 仍是 **`contained`**，不可宣稱正式 cutover 完成。

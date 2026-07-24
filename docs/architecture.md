@@ -135,6 +135,13 @@
 > commit 成功、receipt return／ChangeSet checkpoint 前中斷後，可於 restart 續進
 > checkpoint 與 settlement，不會再建立第二個 commit；之後已有其他 mainline commit
 > 也可從歷史第一個 child 精確回讀。
+> 實際 Git commit message 另由 actuator 加上
+> `Volpred-Commit-Authority-Request: <sha256>` trailer；digest 是同一次
+> WorkLease／Primary Authority authorize request 的完整 identity，並包含原 message、
+> actor、parent、paths 與 content hashes。Post-write read-back 與 lost-return recovery
+> 都要求這個 trailer 精確匹配；只有 bytes／paths／mode／人類可見 message 相同、但未
+> 經本次 authority request 的 first-child commit 不再能冒充 actuator 成果。Raw fencing
+> token 不寫入 Git object。
 >
 > 以上 migrations 均未部署 live；2026-07-24 唯讀 catalog 回讀 proposal／grant／
 > settlement tables/functions 皆不存在。Lost-return crash window 已由 exact Git
@@ -153,6 +160,23 @@
 > base 的 `100644`／`100755`，new file 固定為 `100644`。Proposal validation、
 > lease 內 materialization 與 post-commit／lost-return read-back 都套用同一規則，
 > 不讓相同 proposal digest 落成不同 tree。
+>
+> **Formal Work Coordinator caller 與 Git owner generation（2026-07-24，shadow）**
+> `OwnedChangeDelivery.deliver()` 是 formal caller 的窄入口：先讀 private PostgreSQL
+> `git.commit` owner row，只有 `operations_core` 的 current generation 才可 propose；
+> 同一 generation 會進入 landing-command digest、authority request／grant、
+> actuation checkpoint、settlement digest 與 final receipt。授權及 settlement
+> transactions 都再次鎖定並核對 owner generation，消除 caller read 與 Git write
+> 之間的 TOCTOU。舊的無 owner 參數 RPC 已對 worker 失權。
+>
+> Settlement 寫入 immutable delivery receipt 後，會在同一 PostgreSQL transaction
+> 呼叫 `complete_work()`；formal caller 最後回讀唯一 `succeeded` WorkItem，並核對
+> version、settlement ref、summary、finished time 與 claim clearing。Owner transfer
+> 是 approver-only CAS；有未 settlement grant 或 `commit_unsettled` ChangeSet 時不得
+> rollback。PG17 clean migration replay 與臨時 canonical repo／linked worktree 的
+> end-to-end shadow 已完成 operations_core generation 2 commit → durable receipt／
+> Work completion → legacy generation 3 rollback → operations_core generation 4
+> re-cutover。這不是 live deployment；production Git owner 仍未切換。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
