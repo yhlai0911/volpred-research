@@ -37,6 +37,16 @@ from ._publisher_article_sync import (
     SupabaseArticleProjectionAdapter,
     encode_publisher_article_sync_payload,
 )
+from .owned_publisher_article import (
+    OwnedPublisherArticleAttempt,
+    OwnedPublisherArticleCommand,
+    OwnedPublisherArticleReceipt,
+    OwnedPublisherArticleRequest,
+    OwnedPublisherArticleSync,
+    PublisherArticleSyncOwner,
+    PublisherArticleSyncOwnershipLost,
+    SupabaseOwnedPublisherArticleStore,
+)
 
 
 _GIT_OBJECT_ID = re.compile(r"(?:[0-9a-f]{40}|[0-9a-f]{64})")
@@ -752,6 +762,14 @@ __all__ = [
     "PublisherArticleProjection",
     "PublisherArticleProjectionReadback",
     "PublisherArticleSyncEffectAdapter",
+    "OwnedPublisherArticleAttempt",
+    "OwnedPublisherArticleCommand",
+    "OwnedPublisherArticleReceipt",
+    "OwnedPublisherArticleRequest",
+    "OwnedPublisherArticleSync",
+    "PublisherArticleSyncOwner",
+    "PublisherArticleSyncOwnershipLost",
     "SupabaseArticleProjectionAdapter",
+    "SupabaseOwnedPublisherArticleStore",
     "encode_publisher_article_sync_payload",
 ]

@@ -879,8 +879,25 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
 - 本切片尚未建立 publisher WorkItem／EffectRequest 的正式 caller、payload durable
   writer、Primary Authority family、single-owner transaction 或 live cutover receipt；
   現行 `/api/sync/reports/<slug>.json` 與 direct `sync_article()` caller 都未移除。
-  因此 program commit 14 目前是 **`contained`**，不是 publisher sync ownership
-  完成。
+
+### 2026-07-24 publisher formal caller contract checkpoint
+
+- `OwnedPublisherArticleSync.sync()` 現在是 program commit 14 的單一 external
+  interface。caller 只提供 immutable article、idempotency key 與 actor；owner
+  generation 回讀、durable request、Work／outbox claim token、family Primary
+  Authority keepalive、provider read-back 與 settlement 全藏在 implementation。
+- private store seam 有 fake 與 `SupabaseOwnedPublisherArticleStore` 兩個 adapters；
+  production adapter 只接受 `SUPABASE_SERVICE_ROLE_KEY`，不會 fallback 到 publishable
+  key。owner transfer interface 是 generation CAS，rollback 必須攜帶
+  `rollback_of_generation`；對應 RPC 名稱與 payload shape 已鎖成 caller contract。
+- formal caller 在 request 前、begin 前與 provider 前重驗同一
+  `publisher:article.supabase.sync` lease；begin 若漂移 Work／Effect identity、owner
+  generation 或 authority identity，外部 projection write 為零。new caller／provider／
+  generic Effect Delivery／owned email 相鄰 suite 共 `171 passed`。
+- 本 checkpoint 尚未提供四個 service-role RPC 的 PostgreSQL implementation，也沒有
+  將任何現有 publisher write path 路由到新 interface；production owner row、CAS
+  cutover、live acknowledgement 與 rollback rehearsal 都未執行。因此 live 行為不變，
+  program commit 14 仍為 **`contained`**，不是 publisher sync ownership 完成。
 
 ## 7. Provider Execution
 

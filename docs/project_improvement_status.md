@@ -225,6 +225,18 @@ read-only live smoke，完整 row／tags 回讀 `matches=true`（evidence SHA-25
 唯一 owner cutover 與 live rollback rehearsal 尚未完成，現行兩條 single-article
 write path 也未移除，因此此 checkpoint 僅為 **`contained`**。
 
+同日下一個 checkpoint 將 formal caller 收斂成
+`OwnedPublisherArticleSync.sync(command) -> receipt` 的單一 external interface。
+caller 不再組裝 WorkItem、immutable payload、EffectRequest／outbox、owner
+generation、兩種 claim token、Primary Authority 或 settlement。private store seam
+同時有 fake 與 service-role-only Supabase adapter；publishable key 不會被當成權限
+fallback，owner transfer 必須用 generation CAS，rollback identity 也在 interface
+固定。request／begin／provider 三道 lease read-back 與 begin identity drift cases
+皆證明 projection write 為零，相鄰 suite 為 `171 passed`。四個 production RPC、
+owner row／migration、現行 writer routing、live cutover 與 rollback rehearsal 尚未
+落地，故這是 formal caller contract checkpoint，program commit 14 仍為
+**`contained`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem

@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Cross-family outbox misrouting is root_cause_fixed_and_verified: provider capability is carried into the claim transaction, wrong-family store drift fails before provider, PG17 interleaving plus production owner/ACL/definition/read-back passed; 67 scoped tests. Umbrella remains contained.",
-    "next_direct_step": "Build the publisher single-article sync formal caller: durable payload + WorkItem + EffectRequest orchestration, service-role production adapters, owner-fenced cutover and no-write/live rollback gates",
+    "containment_evidence": "Publisher formal caller contract is implemented behind one sync interface: owner/request/begin/provider/settle orchestration, service-role-only adapter, CAS rollback shape, and three lease/identity no-write gates; 171 scoped tests. RPC migration and live ownership gates remain, so umbrella is contained.",
+    "next_direct_step": "Implement the four publisher ownership RPCs and private owner/request/attempt rows; prove PG17 non-superuser replay, FORCE RLS and service-role-only ACL, then run read-only production catalog/owner checks before any CAS cutover",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Effect providers now declare immutable effect_kinds; transactional SKIP LOCKED claims filter by family and worker rechecks before provider; PG17/live catalog gates passed, legacy unfiltered RPC removed"
+    "latest_checkpoint": "OwnedPublisherArticleSync is the one-call formal interface; fake and service-role adapters share the private seam, owner/request/begin/provider/settle and host-lease drift fail closed before projection"
   }
 ]

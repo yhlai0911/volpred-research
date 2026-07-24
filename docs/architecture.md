@@ -334,6 +334,17 @@
 > provider seam。RED case 曾實際觀察 provider 被呼叫，修正後 provider／settlement
 > 都為 0；email、publisher 與 PostgreSQL 相鄰套件共 68 passed。這個局部 lease
 > revalidation 根因已修復，未改變 publisher owner 或 live effect state。
+>
+> publisher single-article formal caller interface 已收斂為
+> `OwnedPublisherArticleSync.sync(command) -> receipt`：caller 只知道 article、
+> idempotency key 與 actor；WorkItem、durable payload、EffectRequest／outbox、
+> owner generation、claim tokens、family Primary Authority、provider read-back 與
+> settlement 都留在深模組內。private store seam 具有 fake 與 service-role-only
+> Supabase adapters，並在 request／begin／provider 前重驗同一 host lease；owner、
+> Work／Effect 或 authority identity 漂移均不呼叫 projection。相鄰 suite 為
+> 171 passed。對應 PostgreSQL RPC migration、production owner row、現有
+> single-article writer routing、live CAS／acknowledgement／rollback rehearsal 尚未
+> 執行，所以這是 pre-cutover contract，不改變目前 publisher ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
