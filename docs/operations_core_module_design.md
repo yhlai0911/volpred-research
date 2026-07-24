@@ -501,6 +501,28 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   exact Git read-back 或 rollback rehearsal，所以 Change Delivery umbrella 仍為
   `contained`。
 
+### 2026-07-24 service-role Primary Authority lifecycle checkpoint
+
+- `SupabaseAuthorityStore` 是既有 `PrimaryAuthority` external interface 的 production
+  HTTP adapter；acquire／renew／authorize／release 仍由原本的 private PostgreSQL
+  database-clock transactions擁有，caller 不需要知道 lease table、token digest、
+  lock ordering 或 PostgREST payload。
+- 四個 public wrappers 只接受 lifecycle 所需的 raw fencing token，回傳 lease／grant／
+  receipt 均不含 token。Python adapter 會核對 authority key、holder、epoch、
+  resource、timezone-aware timestamps 與 lease window；任何 JSON drift 都 fail
+  closed。Functions 是 `volpred_ops_definer` owner、`SECURITY DEFINER`、
+  `search_path=''`，只給 service role EXECUTE；anon／authenticated／PUBLIC 無權，
+  service role 也不能直接 SELECT private authority tables。
+- PG17 non-superuser clean／idempotent migration、service-role
+  acquire→authorize→renew→release、ACL 與 HTTP transport contracts 通過。Production
+  receipt `20260724101355 operations_core_primary_authority_rpc` 已回讀；live HTTP
+  smoke 只使用 `smoke:no-external-effect` resource，release 後下游 read-back 證實
+  holder 與 token digest 都已清空，並各留下 1 筆 immutable grant／receipt；兩類
+  advisor 都沒有指向新 RPC 的 finding。
+- 這個 remote Primary Authority seam 為 `root_cause_fixed_and_verified`；它沒有執行
+  Git owner CAS、commit、effect 或 host failover。Change Delivery umbrella 與
+  program commit 34 的 acquire／renew／demote workflow 仍為 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam

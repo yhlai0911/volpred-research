@@ -1791,3 +1791,33 @@ private table denial與相鄰 114 tests 通過。Production migration receipt �
 **`root_cause_fixed_and_verified`**；尚未執行 production owner CAS、真實 commit、
 exact Git read-back與 rollback rehearsal，因此 Change Delivery umbrella 仍是
 **`contained`**。
+
+### 2026-07-24 — Primary Authority 只有直連 PostgreSQL adapter，remote caller 無法持有同一 DB-clock lease
+
+**證據化症狀與根因層級**：production Change Delivery 已能用 service-role HTTP
+組合 owner、ChangeSet、commit authority、settlement 與 Work read model，但
+`PrimaryAuthority` 本身仍只有 `PostgresAuthorityStore`。沒有 direct database
+connection 的 runtime 只能由 caller 手造 `PrimaryLease` 或旁路 private tables，
+使 acquire／renew／authorize／release 不再由同一 database-clock transaction owner
+控制。這是 remote-owned adapter 與 operator interface 缺口，不是 live lease 資料錯誤。
+
+**底層重構**：新增 `SupabaseAuthorityStore` 與四個 service-role-only public RPC，
+全部只委派既有 private Primary Authority functions，不複製 lease state machine。
+Raw fencing token 只作 database revalidation，public response、grant 與 receipt 都
+不含 token。Adapter 逐欄驗證 authority key、holder、positive epoch、resource、
+timezone-aware timestamp 與 lease window，untrusted JSON drift fail closed；
+environment builder 只接受 service-role key。Functions 由 no-login
+`volpred_ops_definer` 持有、固定空 search path，anon／authenticated／PUBLIC 無
+EXECUTE，service role 對 private authority tables 仍無 SELECT。
+
+**回歸、live 回讀與制度化**：HTTP interface、PG17 non-superuser clean migration、
+二次 replay、實際 service-role acquire→authorize→renew→release、ACL 與 private-table
+denial contracts 通過。Production migration receipt 是
+`20260724101355 operations_core_primary_authority_rpc`；live smoke 的 resource 固定為
+`smoke:no-external-effect`，沒有 Git／effect side effect。下游 canonical read-back
+確認 release 後 holder 與 token digest 都為 null，且 exact epoch 各保存 1 筆 immutable
+grant／receipt；兩類 advisor 無新 RPC finding。Migration、adapter、PG17／HTTP tests
+與四份 canonical architecture status 已同步，使 remote runtime 不必再手造 lease。
+此 remote Primary Authority seam 為 **`root_cause_fixed_and_verified`**；但 Git owner
+CAS、live commit、rollback rehearsal與 program commit 34 host
+acquire／renew／demote workflow都尚未執行，umbrella 仍為 **`contained`**。

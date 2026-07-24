@@ -360,6 +360,16 @@ Live 成功 WorkItem snapshot 為 items=1／events=4／receipts=1，probe 前後
 WorkItem=19、ChangeSet／grant／commit receipt=0、owner=`legacy/1`，新 RPC 無 advisor
 finding。這只核可 remote read/composition seam；尚未執行 CAS、真實 commit、exact
 Git read-back或 rollback rehearsal，umbrella 狀態不變。
+同日 `SupabaseAuthorityStore` 與四個 service-role-only RPC 補上 production
+Primary Authority lifecycle adapter；既有 private PostgreSQL transactions仍唯一擁有
+database-clock acquire／renew／authorize／release policy，HTTP seam 不回傳 raw
+fencing token。PG17 clean／idempotent replay、實際 service-role lifecycle、ACL 與
+transport contracts 通過；production receipt
+`20260724101355 operations_core_primary_authority_rpc` 已回讀。Live
+`smoke:no-external-effect` acquire→authorize→renew→release 後，canonical holder／
+token digest 均已清空，grant／receipt 各 1，兩類 advisor 無新 RPC finding。這只核可
+remote authority seam；未執行 Git owner CAS、commit、effect 或 host failover，
+program commit 34 與 Change Delivery umbrella 仍為 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

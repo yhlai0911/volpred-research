@@ -261,6 +261,21 @@
 > owner CAS、真實 commit smoke、exact Git read-back 或 rollback rehearsal；Change
 > Delivery umbrella 仍為 `contained`。
 
+> **Primary Authority service-role lifecycle seam（2026-07-24，live released smoke）**
+> `SupabaseAuthorityStore` 讓 production runtime 經同一 `PrimaryAuthority`
+> acquire／renew／authorize／release interface 使用既有 private database-clock
+> transactions；public wrappers 不重寫 lease policy，也不回傳 raw fencing token。
+> Adapter 對 authority identity、epoch、resource、timestamp 與 lease window做 exact
+> read-back validation。四個 functions 由 `volpred_ops_definer` 持有、
+> `SECURITY DEFINER`、`search_path=''`，只有 service role 可執行，且 service role
+> 仍不能 SELECT private authority tables。PG17 clean／idempotent replay與 production
+> ACL catalog read-back 通過；migration receipt 是
+> `20260724101355 operations_core_primary_authority_rpc`。Live
+> acquire→authorize→renew→release smoke 沒有產生外部效果；release 後 canonical
+> lease holder／token digest 均為 null，immutable grant／receipt 各 1，兩類 advisor
+> 無新 RPC finding。這不代表 Git owner transfer、commit smoke 或 program commit 34
+> host failover 已核可。
+
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
 > 每個 intent 必須綁定 WorkItem id／version、effect kind、target、payload reference

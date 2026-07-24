@@ -172,6 +172,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724100512_operations_core_work_read_model_rpc.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724160000_operations_core_primary_authority_rpc.sql",
 )
 
 
@@ -1213,6 +1217,18 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     text, timestamptz, text
                   ),
                   public.volpred_read_work_snapshot(text),
+                  public.volpred_acquire_primary_authority(
+                    text, text, integer, text
+                  ),
+                  public.volpred_renew_primary_authority(
+                    text, text, bigint, integer, text
+                  ),
+                  public.volpred_authorize_primary_write(
+                    text, text, bigint, text, text, text
+                  ),
+                  public.volpred_release_primary_authority(
+                    text, text, bigint, text
+                  ),
                   public.volpred_read_notification_owner(),
                   public.volpred_transfer_notification_owner(
                     text, bigint, text, text, text, bigint
