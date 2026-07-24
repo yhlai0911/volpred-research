@@ -9,7 +9,7 @@ families whose production cutover gate is recorded in
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 import hashlib
 import json
@@ -89,6 +89,38 @@ class ChangeSetView:
     created_at: str
 
 
+@dataclass(frozen=True)
+class LandChangeSet:
+    change_set_id: str
+    work_lease_token: str
+    primary_fencing_token: str
+    repository: str
+    message: str
+    actor: str
+
+
+@dataclass(frozen=True)
+class DeliveryReceipt:
+    schema_version: str
+    change_set_id: str
+    proposal_sha256: str
+    work_item_id: str
+    work_item_version: int
+    authority_request_sha256: str
+    work_lease_ref: str
+    primary_authority_ref: str
+    repository: str
+    commit_sha: str
+    parent_sha: str
+    exact_paths: tuple[str, ...]
+    actor: str
+    status: str
+    actuation_observed_at: str
+    settled_at: str
+    settlement_ref: str
+    settlement_sha256: str
+
+
 class ChangeSetConflict(ValueError):
     """An idempotency key was replayed with a different proposal payload."""
 
@@ -96,9 +128,9 @@ class ChangeSetConflict(ValueError):
 class ChangeDelivery:
     """Validate and retain immutable candidate ChangeSets.
 
-    The interface intentionally exposes only ``propose`` and ``inspect`` in
-    this shadow slice. No method in this module stages, commits, or changes a
-    Git ref.
+    ``land`` coordinates the authority-fenced Git actuator with a durable
+    post-commit settlement adapter. The adapters remain injected so proposing
+    and inspecting ChangeSets stays side-effect free.
     """
 
     def __init__(
@@ -106,12 +138,19 @@ class ChangeDelivery:
         *,
         clock: Callable[[], datetime],
         id_factory: Callable[[], str],
+        actuator=None,
+        settlement=None,
     ) -> None:
         self._clock = clock
         self._id_factory = id_factory
+        self._actuator = actuator
+        self._settlement = settlement
         self._lock = RLock()
         self._by_id: dict[str, ChangeSetView] = {}
         self._id_by_idempotency_key: dict[str, str] = {}
+        self._land_command_sha_by_id: dict[str, str] = {}
+        self._actuation_by_id: dict[str, object] = {}
+        self._delivery_by_id: dict[str, DeliveryReceipt] = {}
 
     def propose(self, proposal: ChangeSetProposal) -> ChangeSetView:
         normalized = _normalize_proposal(proposal)
@@ -167,12 +206,211 @@ class ChangeDelivery:
             except KeyError as exc:
                 raise ValueError(f"unknown ChangeSet: {change_set_id}") from exc
 
+    def land(self, command: LandChangeSet) -> DeliveryReceipt:
+        """Land one immutable proposal and durably settle its verified commit.
+
+        Once the actuator reports a commit, retries never invoke the Git writer
+        again. They resume only the settlement phase, preventing a transient
+        database failure from creating a second commit.
+        """
+
+        if self._actuator is None or self._settlement is None:
+            raise RuntimeError("Change Delivery landing is not configured")
+        normalized = _normalize_land_command(command)
+        land_command_sha256 = _land_command_sha256(normalized)
+
+        from ._change_settlement import CommitSettlement
+        from ._git_actuator import CommitActuation
+
+        with self._lock:
+            try:
+                change_set = self._by_id[normalized.change_set_id]
+            except KeyError as exc:
+                raise ValueError(
+                    f"unknown ChangeSet: {normalized.change_set_id}"
+                ) from exc
+
+            existing_command_sha = self._land_command_sha_by_id.get(change_set.id)
+            if (
+                existing_command_sha is not None
+                and existing_command_sha != land_command_sha256
+            ):
+                raise ChangeSetConflict(
+                    "ChangeSet landing command conflicts with its original payload"
+                )
+            existing_delivery = self._delivery_by_id.get(change_set.id)
+            if existing_delivery is not None:
+                return existing_delivery
+
+            actuation = self._actuation_by_id.get(change_set.id)
+            if actuation is None:
+                actuation = self._actuator.commit(
+                    CommitActuation(
+                        proposal_sha256=change_set.proposal_sha256,
+                        work_item_id=change_set.work_item_id,
+                        work_item_version=change_set.work_item_version,
+                        work_lease_token=normalized.work_lease_token,
+                        primary_fencing_token=normalized.primary_fencing_token,
+                        repository=normalized.repository,
+                        expected_head=change_set.base_commit,
+                        exact_paths=change_set.exact_paths,
+                        content_hashes=change_set.content_hashes,
+                        message=normalized.message,
+                        actor=normalized.actor,
+                    )
+                )
+                actuation = _validate_actuation_receipt(
+                    actuation,
+                    change_set=change_set,
+                    command=normalized,
+                )
+                self._land_command_sha_by_id[change_set.id] = land_command_sha256
+                self._actuation_by_id[change_set.id] = actuation
+                self._by_id[change_set.id] = replace(
+                    change_set,
+                    status="commit_unsettled",
+                )
+
+            delivery = self._settlement.settle(
+                CommitSettlement(
+                    change_set_id=change_set.id,
+                    repository=normalized.repository,
+                    work_lease_token=normalized.work_lease_token,
+                    primary_fencing_token=normalized.primary_fencing_token,
+                    actuation=actuation,
+                )
+            )
+            delivery = _validate_delivery_receipt(
+                delivery,
+                change_set=change_set,
+                command=normalized,
+                actuation=actuation,
+            )
+            self._delivery_by_id[change_set.id] = delivery
+            self._by_id[change_set.id] = replace(change_set, status="landed")
+            return delivery
+
 
 def _required_text(value: str, *, field: str) -> str:
     normalized = value.strip()
     if not normalized:
         raise ValueError(f"{field} is required")
     return normalized
+
+
+def _normalize_land_command(command: LandChangeSet) -> LandChangeSet:
+    if not isinstance(command, LandChangeSet):
+        raise TypeError("LandChangeSet is required")
+    repository = Path(command.repository).expanduser()
+    if not repository.is_absolute():
+        raise ValueError("Change Delivery repository must be an absolute path")
+    actor = _required_text(command.actor, field="commit actor")
+    if not actor.startswith("commit-worker:"):
+        raise ValueError("commit actor must use the commit-worker identity")
+    return LandChangeSet(
+        change_set_id=_required_text(
+            command.change_set_id,
+            field="change_set_id",
+        ),
+        work_lease_token=_required_text(
+            command.work_lease_token,
+            field="work_lease_token",
+        ),
+        primary_fencing_token=_required_text(
+            command.primary_fencing_token,
+            field="primary_fencing_token",
+        ),
+        repository=str(repository.resolve()),
+        message=_required_text(command.message, field="commit message"),
+        actor=actor,
+    )
+
+
+def _land_command_sha256(command: LandChangeSet) -> str:
+    encoded = json.dumps(
+        {
+            "schema_version": "land-change-set.v1",
+            "change_set_id": command.change_set_id,
+            "work_lease_token": command.work_lease_token,
+            "primary_fencing_token": command.primary_fencing_token,
+            "repository": command.repository,
+            "message": command.message,
+            "actor": command.actor,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _validate_actuation_receipt(
+    receipt,
+    *,
+    change_set: ChangeSetView,
+    command: LandChangeSet,
+):
+    from ._git_actuator import CommitActuationReceipt, CommitActuatorBlocked
+
+    if not isinstance(receipt, CommitActuationReceipt):
+        raise CommitActuatorBlocked(
+            "commit actuator returned an invalid actuation receipt"
+        )
+    if (
+        receipt.schema_version != "commit-actuation.v1"
+        or receipt.proposal_sha256 != change_set.proposal_sha256
+        or receipt.work_item_id != change_set.work_item_id
+        or receipt.work_item_version != change_set.work_item_version
+        or receipt.parent_sha != change_set.base_commit
+        or receipt.exact_paths != change_set.exact_paths
+        or receipt.actor != command.actor
+        or receipt.status != "committed"
+        or _SHA256.fullmatch(receipt.authority_request_sha256) is None
+        or _GIT_OBJECT_ID.fullmatch(receipt.commit_sha) is None
+        or not receipt.work_lease_ref.strip()
+        or not receipt.primary_authority_ref.strip()
+        or not receipt.observed_at.strip()
+    ):
+        raise CommitActuatorBlocked(
+            "commit actuator receipt does not match the immutable ChangeSet"
+        )
+    return receipt
+
+
+def _validate_delivery_receipt(
+    receipt,
+    *,
+    change_set: ChangeSetView,
+    command: LandChangeSet,
+    actuation,
+) -> DeliveryReceipt:
+    if not isinstance(receipt, DeliveryReceipt):
+        raise RuntimeError("commit settlement returned an invalid delivery receipt")
+    if (
+        receipt.schema_version != "change-delivery-receipt.v1"
+        or receipt.change_set_id != change_set.id
+        or receipt.proposal_sha256 != change_set.proposal_sha256
+        or receipt.work_item_id != change_set.work_item_id
+        or receipt.work_item_version != change_set.work_item_version
+        or receipt.authority_request_sha256
+        != actuation.authority_request_sha256
+        or receipt.work_lease_ref != actuation.work_lease_ref
+        or receipt.primary_authority_ref != actuation.primary_authority_ref
+        or receipt.repository != command.repository
+        or receipt.commit_sha != actuation.commit_sha
+        or receipt.parent_sha != actuation.parent_sha
+        or receipt.exact_paths != actuation.exact_paths
+        or receipt.actor != command.actor
+        or receipt.status != "landed"
+        or receipt.actuation_observed_at != actuation.observed_at
+        or not receipt.settled_at.strip()
+        or not receipt.settlement_ref.strip()
+        or _SHA256.fullmatch(receipt.settlement_sha256) is None
+    ):
+        raise RuntimeError(
+            "durable commit settlement read-back does not match its actuation"
+        )
+    return receipt
 
 
 def _normalize_exact_path(raw: str) -> str:
@@ -431,12 +669,14 @@ __all__ = [
     "ChangeSetView",
     "CheckEvidence",
     "ContentHash",
+    "DeliveryReceipt",
     "EffectAttemptOutcome",
     "EffectDelivery",
     "EffectRequest",
     "EffectRequestConflict",
     "EffectView",
     "FailedEffect",
+    "LandChangeSet",
     "PublisherArticleProjection",
     "PublisherArticleProjectionReadback",
     "PublisherArticleSyncEffectAdapter",

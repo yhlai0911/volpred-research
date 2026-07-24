@@ -91,8 +91,8 @@
 > unavailable、grant 與 intent 不符皆 fail closed。Git argv 與 receipt 都不保存 raw
 > token，receipt 只保留 request hash 與兩個 authority reference，之後仍回讀 commit
 > parent、exact paths 與 blob hashes。這只是 program commit 10 的 actuator-side
-> interface；尚無 live Postgres authority adapter、`ChangeDelivery.land`、durable
-> receipt 或正式 caller，因此不改變目前 Git writer ownership。
+> interface；後續 PostgreSQL authority 與 settlement 狀態見下方，正式 caller 與
+> Git ownership 仍未切換。
 >
 > **Change Delivery durable commit-grant follow-up（2026-07-24，shadow）**
 > private `PostgresCommitAuthority` 會在跨入 database seam 前重算完整 write-intent
@@ -103,10 +103,19 @@
 > 前 fail closed。Grant table FORCE RLS，worker 只能呼叫 named function，PUBLIC 無
 > table read 或 function execute 權限。
 >
-> 此 migration 目前只有 clean-replay evidence，未套用 live。Git write 仍發生在 grant
-> transaction 結束之後；`ChangeDelivery.land`、durable post-commit settlement／
-> receipt、external-write interval 的 lease revalidation、正式 caller 與 rollback
-> rehearsal 仍未完成，因此不改變目前 Git ownership。
+> 此 migration 目前只有 clean-replay evidence，未套用 live。
+>
+> **Change Delivery post-commit settlement follow-up（2026-07-24，shadow）**
+> `ChangeDelivery.land()` 現在把 immutable ChangeSet、authority-fenced
+> `GitCommitActuator` 與 durable `PostgresCommitSettlement` 收進同一 deep-module
+> workflow。Git commit read-back 後，`settle_commit_write` 再次核對 exact running
+> WorkItem／WorkLease 與 database-clock Primary Authority，才保存 token-redacted
+> `change-delivery-receipt.v1`；DB 暫時失敗的 retry 只續做 settlement，不會重複
+> commit。Receipt FORCE RLS，PUBLIC 無存取，worker 只有 named-function execute。
+>
+> 此 follow-up 未部署 live，也尚缺 formal caller、proposal durable store、
+> workspace materialization、ownership cutover 與 rollback rehearsal，因此不改變
+> 目前 Git ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

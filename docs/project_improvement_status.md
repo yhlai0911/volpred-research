@@ -236,6 +236,18 @@ read；PG17 non-superuser migration replay 與相關 Change／Effect Delivery su
 receipt、external Git interval 的 lease revalidation、正式 caller 與 rollback
 rehearsal 仍缺，因此 Change Delivery ownership 保持 `contained`。
 
+同日下一個 bounded slice 補上 `ChangeDelivery.land()` 與 durable post-commit
+settlement。Landing 在 actuator 已回讀 commit 後保存 `commit_unsettled` checkpoint；
+DB 暫時失敗的 replay 只續 settlement，不會再寫一次 Git。PostgreSQL
+`settle_commit_write` 在 external write 後重新驗證 exact running WorkItem、
+WorkLease 與 Primary Authority，才保存 immutable、token-redacted
+`change-delivery-receipt.v1`；等價 receipt 在 lease 日後過期仍可回讀，漂移 replay
+fail closed。PG17/FORCE RLS 測試另抓到 immutable grant 不可用 `FOR UPDATE`，final
+contract 只 SELECT grant、只鎖可變 WorkItem；174 個 scoped 相鄰 tests 通過。Live
+catalog 回讀新 tables/functions 皆不存在，確認 migration 仍未套 live；formal
+caller、durable proposal store、workspace materializer、Git ownership cutover 與
+rollback rehearsal 仍缺，所以 Change Delivery 整體維持 `contained`。
+
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
 Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在

@@ -14,6 +14,12 @@ from volpred.ops.delivery import (
     ChangeSetProposal,
     CheckEvidence,
     ContentHash,
+    DeliveryReceipt,
+    LandChangeSet,
+)
+from volpred.ops.delivery._git_actuator import (
+    CommitActuation,
+    CommitActuationReceipt,
 )
 
 
@@ -76,6 +82,73 @@ def _proposal(linked: Path, base_commit: str) -> ChangeSetProposal:
 
 def _delivery() -> ChangeDelivery:
     return ChangeDelivery(clock=lambda: NOW, id_factory=lambda: "changeset-1")
+
+
+class _Actuator:
+    def __init__(self) -> None:
+        self.commands: list[CommitActuation] = []
+
+    def commit(self, command: CommitActuation) -> CommitActuationReceipt:
+        self.commands.append(command)
+        return CommitActuationReceipt(
+            schema_version="commit-actuation.v1",
+            proposal_sha256=command.proposal_sha256,
+            work_item_id=command.work_item_id,
+            work_item_version=command.work_item_version,
+            authority_request_sha256="a" * 64,
+            work_lease_ref="work-lease:work-1:v7",
+            primary_authority_ref="primary-authority:operations-core-commits:epoch-1",
+            commit_sha="2" * 40,
+            parent_sha=command.expected_head,
+            exact_paths=command.exact_paths,
+            actor=command.actor,
+            status="committed",
+            observed_at=NOW.isoformat(),
+        )
+
+
+class _Settlement:
+    def __init__(self, *, fail_once: bool = False) -> None:
+        self.commands = []
+        self._fail_once = fail_once
+
+    def settle(self, command):
+        self.commands.append(command)
+        if self._fail_once:
+            self._fail_once = False
+            raise RuntimeError("database unavailable")
+        receipt = command.actuation
+        return DeliveryReceipt(
+            schema_version="change-delivery-receipt.v1",
+            change_set_id=command.change_set_id,
+            proposal_sha256=receipt.proposal_sha256,
+            work_item_id=receipt.work_item_id,
+            work_item_version=receipt.work_item_version,
+            authority_request_sha256=receipt.authority_request_sha256,
+            work_lease_ref=receipt.work_lease_ref,
+            primary_authority_ref=receipt.primary_authority_ref,
+            repository=command.repository,
+            commit_sha=receipt.commit_sha,
+            parent_sha=receipt.parent_sha,
+            exact_paths=receipt.exact_paths,
+            actor=receipt.actor,
+            status="landed",
+            actuation_observed_at=receipt.observed_at,
+            settled_at=NOW.isoformat(),
+            settlement_ref=f"change-delivery:{command.change_set_id}:{receipt.commit_sha}",
+            settlement_sha256="b" * 64,
+        )
+
+
+def _land(change_set_id: str = "changeset-1") -> LandChangeSet:
+    return LandChangeSet(
+        change_set_id=change_set_id,
+        work_lease_token="work-lease-token",
+        primary_fencing_token="primary-fencing-token",
+        repository="/repo",
+        message="[change-delivery] land changeset-1",
+        actor="commit-worker:test",
+    )
 
 
 def test_propose_validates_and_exposes_immutable_changeset(
@@ -302,3 +375,105 @@ def test_propose_rejects_ambiguous_clock_and_duplicate_generated_id(
                 idempotency_key="changeset:work-1:attempt-2",
             )
         )
+
+
+def test_land_orchestrates_actuation_and_durable_settlement(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _Actuator()
+    settlement = _Settlement()
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=settlement,
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    receipt = delivery.land(_land(proposed.id))
+
+    assert receipt.status == "landed"
+    assert receipt.change_set_id == proposed.id
+    assert receipt.proposal_sha256 == proposed.proposal_sha256
+    assert receipt.commit_sha == "2" * 40
+    assert delivery.inspect(proposed.id).status == "landed"
+    assert len(actuator.commands) == 1
+    assert actuator.commands[0] == CommitActuation(
+        proposal_sha256=proposed.proposal_sha256,
+        work_item_id=proposed.work_item_id,
+        work_item_version=proposed.work_item_version,
+        work_lease_token="work-lease-token",
+        primary_fencing_token="primary-fencing-token",
+        repository="/repo",
+        expected_head=proposed.base_commit,
+        exact_paths=proposed.exact_paths,
+        content_hashes=proposed.content_hashes,
+        message="[change-delivery] land changeset-1",
+        actor="commit-worker:test",
+    )
+    assert len(settlement.commands) == 1
+
+    assert delivery.land(_land(proposed.id)) == receipt
+    assert len(actuator.commands) == 1
+    assert len(settlement.commands) == 1
+
+
+def test_land_retries_only_post_commit_settlement_after_transient_failure(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _Actuator()
+    settlement = _Settlement(fail_once=True)
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=settlement,
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(RuntimeError, match="database unavailable"):
+        delivery.land(_land(proposed.id))
+
+    assert delivery.inspect(proposed.id).status == "commit_unsettled"
+    receipt = delivery.land(_land(proposed.id))
+    assert receipt.status == "landed"
+    assert len(actuator.commands) == 1
+    assert len(settlement.commands) == 2
+
+
+def test_land_rejects_command_drift_after_external_commit(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _Actuator()
+    settlement = _Settlement(fail_once=True)
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=settlement,
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+    command = _land(proposed.id)
+
+    with pytest.raises(RuntimeError, match="database unavailable"):
+        delivery.land(command)
+
+    with pytest.raises(ChangeSetConflict, match="landing command"):
+        delivery.land(replace(command, message="[change-delivery] changed"))
+    assert len(actuator.commands) == 1
+    assert len(settlement.commands) == 1
+
+
+def test_land_requires_configured_actuator_and_settlement(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    delivery = _delivery()
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(RuntimeError, match="not configured"):
+        delivery.land(_land(proposed.id))
+    assert delivery.inspect(proposed.id).status == "proposed"

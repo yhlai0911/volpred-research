@@ -1372,3 +1372,42 @@ orphan 計數，direct receipt 外 identity 另以 drift warning 顯示。owner 
 claimable: 0`，且不再要求 reconcile。此 reporting／control-plane 假告警完成五步
 gate，為 **root_cause_fixed_and_verified**；owner 指定的整體 operations-core
 重構仍是 **contained**，preserved control task 不在 legacy pool 內結案。
+
+### 2026-07-24 — Commit grant 後到 Git 落地間沒有第二道 fence／durable receipt — contained
+
+**症狀與根因層級**：`PostgresCommitAuthority` 只證明 external write 開始前
+WorkLease 與 Primary Authority 有效；grant transaction 結束後，Git writer 才執行。
+若任一 lease 在這段 interval 到期／被接管，舊流程仍可能產生 commit；process 若在
+commit 後 crash，亦沒有 durable receipt 可分辨「尚未寫」與「已寫但未 settle」。
+這是 Change Delivery transaction boundary／idempotency 契約缺口，不是補一筆 JSON
+或延長 lease 可解。
+
+**底層修復**：實作 `ChangeDelivery.land()` 兩階段 orchestration。Immutable
+ChangeSet 先交給既有 authority-fenced actuator；一旦 exact commit/parent/path/blob
+read-back 成立，狀態即成 `commit_unsettled`，DB failure retry 只續 settlement，不再
+重跑 Git。新 `PostgresCommitSettlement`／`settle_commit_write` 會在 external write
+後重新核對 exact running WorkItem version、holder、WorkLease token/expiry，並用同一
+authority request 再驗 database-clock Primary Authority，才保存 immutable
+`change-delivery-receipt.v1`。Receipt 不含 raw token；等價 replay 在 lease 日後過期
+仍回原 receipt，任何 identity drift 都 fail closed。
+
+**觀察先於修正的 PG17 物證**：第一輪 integration 回報
+`commit settlement authority grant is unknown`，但 grant table 確有同 SHA row。
+根因是 settlement 對 FORCE-RLS immutable grant 使用 `SELECT ... FOR UPDATE`；row lock
+要求 UPDATE policy，而最小權限設計只有 SELECT/INSERT，於是 row 對 definer 不可見。
+Final seam 對 immutable grant 使用 plain SELECT、只鎖可變 WorkItem；沒有為了讓測試
+變綠而擴張 UPDATE 權限。
+
+**回歸、read-back 與狀態界線**：unit cases 覆蓋 land success、等價 replay、
+post-commit DB failure resume、landing-command drift 與 adapter missing；PG17
+non-superuser cases覆蓋雙 fence 成功、WorkLease／Primary lease 在 external interval
+失效、conflicting replay、settled 後 lease 到期的 durable read-back，以及 table／
+function owner、FORCE RLS、PUBLIC revoke、worker-only execute。Supabase current
+security/performance advisors 已回讀；174 個 Change／Effect Delivery 相鄰 tests
+通過。Live read-only catalog 明確回傳 commit authority／delivery tables 與兩個
+named functions 全為 `null`，確認沒有把 shadow migration 誤報成 deployed；現存
+advisor findings 都是此 migration 尚未部署前的既有 public-schema 項目，本 slice
+沒新增 public exposure。此 post-commit
+authorization／receipt 根因已完成底層與隔離 DB 驗證，但 migration 尚未 live、
+formal caller／workspace materializer／ownership cutover／rollback rehearsal 也未完成，
+所以目前只能標 **contained**；不得把 Change Delivery 整體稱為完成。

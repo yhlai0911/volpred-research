@@ -35,10 +35,15 @@ from volpred.ops.delivery._effect_worker import (
 )
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
+    CommitActuationReceipt,
     CommitAuthorityRequest,
     CommitActuatorBlocked,
     _authority_request as commit_authority_request,
     _authority_request_sha256,
+)
+from volpred.ops.delivery._change_settlement import (
+    CommitSettlement,
+    CommitSettlementBlocked,
 )
 from volpred.ops.delivery.postgres import (
     EffectOutboxLease,
@@ -48,6 +53,9 @@ from volpred.ops.delivery.postgres import (
 from volpred.ops.delivery.postgres_authority import PostgresEffectAuthority
 from volpred.ops.delivery.postgres_commit_authority import (
     PostgresCommitAuthority,
+)
+from volpred.ops.delivery.postgres_commit_settlement import (
+    PostgresCommitSettlement,
 )
 from volpred.ops.delivery.postgres_payload import (
     EffectPayloadConflict,
@@ -113,6 +121,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724090000_operations_core_commit_authority.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724100000_operations_core_commit_settlement.sql",
 )
 
 
@@ -210,6 +222,63 @@ def _commit_authority_security_readback(
                   AND procedure.proname = 'authorize_commit_write'
               )
             """
+        ).fetchone()
+
+
+def _commit_settlement_security_readback(
+    dsn: str,
+) -> tuple[bool, bool, bool, bool, bool, bool]:
+    signature = (
+        "volpred_ops.settle_commit_write("
+        "text,text,bigint,text,text,text,text,text,text,text,text,"
+        "text,text,jsonb,text,timestamp with time zone,text)"
+    )
+    with psycopg.connect(dsn, autocommit=True) as connection:
+        return connection.execute(
+            """
+            SELECT
+              has_function_privilege(
+                'volpred_ops_worker', %s, 'EXECUTE'
+              ),
+              has_function_privilege(
+                'public', %s, 'EXECUTE'
+              ),
+              (
+                SELECT relrowsecurity AND relforcerowsecurity
+                FROM pg_class AS relation
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = relation.relnamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND relation.relname = 'commit_delivery_receipts'
+              ),
+              has_table_privilege(
+                'public',
+                'volpred_ops.commit_delivery_receipts',
+                'SELECT'
+              ),
+              (
+                SELECT procedure.proowner = (
+                  SELECT oid FROM pg_roles
+                  WHERE rolname = 'volpred_ops_definer'
+                )
+                FROM pg_proc AS procedure
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = procedure.pronamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND procedure.proname = 'settle_commit_write'
+              ),
+              (
+                SELECT procedure.prosecdef
+                  AND procedure.proconfig @>
+                    ARRAY['search_path=pg_catalog, volpred_ops']
+                FROM pg_proc AS procedure
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = procedure.pronamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND procedure.proname = 'settle_commit_write'
+              )
+            """,
+            (signature, signature),
         ).fetchone()
 
 
@@ -623,6 +692,20 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert commit_grants_public_select is False
         assert commit_function_owner is True
         assert commit_function_search_path is True
+        (
+            settlement_worker_execute,
+            settlement_public_execute,
+            settlement_receipts_force_rls,
+            settlement_receipts_public_select,
+            settlement_function_owner,
+            settlement_function_search_path,
+        ) = _commit_settlement_security_readback(dsn)
+        assert settlement_worker_execute is True
+        assert settlement_public_execute is False
+        assert settlement_receipts_force_rls is True
+        assert settlement_receipts_public_select is False
+        assert settlement_function_owner is True
+        assert settlement_function_search_path is True
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -757,6 +840,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.notification_owners,
               volpred_ops.effect_attempt_receipts,
               volpred_ops.effect_authority_grants,
+              volpred_ops.commit_delivery_receipts,
               volpred_ops.commit_authority_grants,
               volpred_ops.primary_authority_grants,
               volpred_ops.primary_authority_receipts,
@@ -901,6 +985,40 @@ def _commit_authority_request(
         actor="commit-worker:postgres-test",
     )
     return commit_authority_request(command)
+
+
+def _commit_actuation_receipt(
+    request: CommitAuthorityRequest,
+    grant,
+) -> CommitActuationReceipt:
+    return CommitActuationReceipt(
+        schema_version="commit-actuation.v1",
+        proposal_sha256=request.proposal_sha256,
+        work_item_id=request.work_item_id,
+        work_item_version=request.work_item_version,
+        authority_request_sha256=request.request_sha256,
+        work_lease_ref=grant.work_lease_ref,
+        primary_authority_ref=grant.primary_authority_ref,
+        commit_sha="d" * 40,
+        parent_sha=request.expected_head,
+        exact_paths=request.exact_paths,
+        actor=request.actor,
+        status="committed",
+        observed_at=datetime.now(timezone.utc).isoformat(),
+    )
+
+
+def _commit_settlement(
+    request: CommitAuthorityRequest,
+    grant,
+) -> CommitSettlement:
+    return CommitSettlement(
+        change_set_id="changeset-postgres-1",
+        repository=request.repository,
+        work_lease_token=request.work_lease_token,
+        primary_fencing_token=request.primary_fencing_token,
+        actuation=_commit_actuation_receipt(request, grant),
+    )
 
 
 def _request(**overrides: object) -> EffectRequest:
@@ -1596,6 +1714,228 @@ def test_commit_authority_rejects_forged_request_hash_before_database(
             "SELECT count(*) FROM volpred_ops.commit_authority_grants"
         ).fetchone()[0]
     assert grant_count == 0
+
+
+def test_commit_settlement_revalidates_both_leases_and_replays_receipt(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    authority = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    grant = authority.authorize(request)
+    command = _commit_settlement(request, grant)
+    settlement = PostgresCommitSettlement(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+
+    receipt = settlement.settle(command)
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute(
+            """
+            UPDATE volpred_ops.work_items
+            SET claim_expires_at = clock_timestamp() - interval '1 second'
+            WHERE id = %s
+            """,
+            (running.id,),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.primary_authority_leases
+            SET acquired_at = clock_timestamp() - interval '2 seconds',
+                lease_expires_at = clock_timestamp() - interval '1 second'
+            WHERE authority_key = %s
+            """,
+            (primary_lease.authority_key,),
+        )
+    replay = settlement.settle(command)
+
+    assert replay == receipt
+    assert receipt.schema_version == "change-delivery-receipt.v1"
+    assert receipt.status == "landed"
+    assert receipt.change_set_id == command.change_set_id
+    assert receipt.proposal_sha256 == request.proposal_sha256
+    assert receipt.authority_request_sha256 == request.request_sha256
+    assert receipt.commit_sha == command.actuation.commit_sha
+    assert receipt.parent_sha == request.expected_head
+    assert receipt.exact_paths == request.exact_paths
+    assert receipt.settlement_ref == (
+        f"change-delivery:{command.change_set_id}:"
+        f"{command.actuation.commit_sha}"
+    )
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT settlement_sha256, change_set_id, commit_sha, parent_sha,
+                   exact_paths, commit_worker_ref
+            FROM volpred_ops.commit_delivery_receipts
+            WHERE authority_request_sha256 = %s
+            """,
+            (request.request_sha256,),
+        ).fetchone()
+        receipt_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.commit_delivery_receipts"
+        ).fetchone()[0]
+    assert durable == (
+        receipt.settlement_sha256,
+        command.change_set_id,
+        command.actuation.commit_sha,
+        command.actuation.parent_sha,
+        list(command.actuation.exact_paths),
+        request.actor,
+    )
+    assert receipt_count == 1
+    assert work_lease.token not in repr(durable)
+    assert primary_lease.fencing_token not in repr(durable)
+
+
+@pytest.mark.parametrize("expired_lease", ["work", "primary"])
+def test_commit_settlement_rejects_lease_loss_during_external_write(
+    postgres_effect_dsn: str,
+    expired_lease: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    grant = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    ).authorize(request)
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        if expired_lease == "work":
+            connection.execute(
+                """
+                UPDATE volpred_ops.work_items
+                SET claim_expires_at = clock_timestamp() - interval '1 second'
+                WHERE id = %s
+                """,
+                (running.id,),
+            )
+        else:
+            connection.execute(
+                """
+                UPDATE volpred_ops.primary_authority_leases
+                SET acquired_at = clock_timestamp() - interval '2 seconds',
+                    lease_expires_at =
+                      clock_timestamp() - interval '1 second'
+                WHERE authority_key = %s
+                """,
+                (primary_lease.authority_key,),
+            )
+
+    settlement = PostgresCommitSettlement(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    expected = "WorkLease was lost|Primary Authority lease expired"
+    with pytest.raises(CommitSettlementBlocked, match=expected):
+        settlement.settle(_commit_settlement(request, grant))
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.commit_delivery_receipts"
+        ).fetchone()[0]
+    assert count == 0
+
+
+def test_commit_settlement_conflicting_replay_fails_closed(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    grant = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    ).authorize(request)
+    settlement = PostgresCommitSettlement(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    command = _commit_settlement(request, grant)
+    settlement.settle(command)
+
+    with pytest.raises(CommitSettlementBlocked, match="conflicts"):
+        settlement.settle(
+            replace(command, change_set_id="changeset-conflicting-replay")
+        )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT change_set_id
+            FROM volpred_ops.commit_delivery_receipts
+            """
+        ).fetchall()
+    assert durable == [(command.change_set_id,)]
 
 
 def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(

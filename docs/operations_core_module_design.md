@@ -219,6 +219,33 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   post-commit receipt 尚缺，external Git write 也尚未與 lease
   revalidation／settlement transaction 耦合。現行 Git ownership 不變。
 
+### 2026-07-24 ChangeDelivery land／post-commit settlement checkpoint
+
+- `ChangeDelivery.land()` 已成為 proposal 到 landing 的唯一 orchestration seam。它從
+  immutable ChangeSet 建立 actuator command；Git commit 一旦取得精確
+  `commit-actuation.v1` read-back，即把狀態標成 `commit_unsettled`。後續 DB 暫時失敗的
+  retry 只重跑 settlement，不再啟動第二次 Git write；landing command 漂移會以
+  `ChangeSetConflict` fail closed。
+- 新增 private `PostgresCommitSettlement` 與 `settle_commit_write` transaction。它在
+  external Git interval **之後**重新鎖定 exact running WorkItem，核對 version、holder、
+  未過期 WorkLease，再用同一 authority request 重新驗證 database-clock Primary
+  Authority；只有兩道 fence 仍有效時才保存 `change-delivery-receipt.v1`。
+- Durable receipt 綁 change-set/proposal、authority request、token-redacted lease refs、
+  repository、commit/parent、exact paths、commit worker 與 actuation timestamp。同一
+  receipt 等價 replay 即使 lease 日後已到期仍可回讀；任何欄位漂移都拒絕。Receipt
+  table FORCE RLS，PUBLIC 無 table/function access，worker 只有 named-function
+  execute。
+- PG17 non-superuser replay 首輪實際抓到：對 immutable authority grant 使用
+  `SELECT ... FOR UPDATE` 會在 FORCE RLS 下需要不存在的 UPDATE policy，因而把現存
+  grant 誤判成 unknown。Final transaction 對 immutable grant 使用 SELECT-only，
+  只鎖可變 WorkItem；這同時維持 least privilege 與短 transaction。174 個
+  Change／Effect Delivery 相鄰 tests 通過。
+- 此 checkpoint 尚未部署 live，也沒有 formal Work Coordinator caller、candidate
+  workspace→canonical checkout 的 production materializer、durable ChangeSet proposal
+  store、Git ownership cutover 或 rollback rehearsal。因此 post-commit
+  authorization/receipt seam 的具體缺口已修，但 Change Delivery 整體仍是
+  `contained`，現行 Git owner 不變。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
