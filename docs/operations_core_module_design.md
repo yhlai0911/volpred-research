@@ -250,6 +250,32 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   authorization/receipt seam 的具體缺口已修，但 Change Delivery 整體仍是
   `contained`，現行 Git owner 不變。
 
+### 2026-07-24 durable ChangeSet lifecycle checkpoint
+
+- external `propose／inspect／land` interface 不增加 persistence 細節；private
+  `ChangeSetStore` seam 一次封裝 immutable proposal、landing-command identity、
+  token-redacted `commit-actuation.v1` checkpoint 與 final `DeliveryReceipt` linkage。
+  in-memory 與 PostgreSQL 兩個 adapter 讓 seam 成為真實變異點，而非只有一層 pass-through。
+- `ChangeDelivery.land()` 不再以 instance dict 判斷是否已 commit。actuator read-back
+  通過後，必須先由 store 原子轉成 `commit_unsettled`，才跨入 settlement；新 process
+  讀到該 checkpoint 時直接重建 settlement command，不會再次呼叫 actuator。settlement
+  已 durable、但 store 尚未標 landed 的 retry 也只 replay receipt linkage。
+- PostgreSQL migration 以 idempotency-key advisory lock 建 proposal，並核對 exact
+  WorkItem version；checkpoint transaction 鎖定 ChangeSet、驗證 proposal／command
+  digest、WorkItem、parent、paths、commit actor 與 timezone-aware actuation identity；
+  landed transition 必須 join 已存在且完全匹配的 immutable commit receipt。
+- `change_sets` FORCE RLS，PUBLIC 無 table/function access；worker 只能讀
+  token-redacted view 與呼叫三個 named functions。Raw WorkLease／Primary fencing
+  token 不進 schema，只保存 canonical landing-command SHA-256。PG17 non-superuser
+  migration replay、process restart、conflicting replay、RLS 與相鄰 Git/Effect suite
+  共 68 tests 通過。
+- production Supabase 唯讀 catalog 仍回傳 change-set／commit grant／settlement
+  tables/functions 全為 `null`，證明本切片沒有越權部署。checkpoint 已 durable 後的
+  restart ambiguity 已消除；但 Git commit 成功到 checkpoint transaction 提交之間仍有
+  窄 crash window，必須由 exact Git read-back recovery 與 production workspace
+  materializer 一起封閉。formal caller、live migration、ownership cutover 與 rollback
+  rehearsal 也未完成，所以整體仍為 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam

@@ -256,6 +256,19 @@ actuation receipt gate 現在先 parse 並要求 timezone-aware，失敗時保�
 Change Delivery unit suite 22 passed；這個 timestamp identity 缺口為
 `root_cause_fixed_and_verified`，但未改變整體 ownership 的 `contained` 狀態。
 
+同日下一個 Change Delivery slice 把原本只存在 Python instance dict 的 proposal、
+landing-command digest、`commit_unsettled` actuation 與 final receipt linkage 收進
+private `ChangeSetStore` seam。in-memory／PostgreSQL 兩個 adapter 共用同一 contract；
+新 process 在 checkpoint 已提交後能讀回 actuation，只 replay settlement，Git actuator
+零次重呼。PostgreSQL transaction 另核對 WorkItem version、proposal／command hash、
+parent／paths／actor／timezone-aware timestamp 與 immutable settlement receipt；
+FORCE RLS、PUBLIC revoke、named-function-only worker access、raw-token absence 及
+non-superuser migration replay 均通過。Change／Effect／Git 相鄰 suite 共 68 tests
+通過。Production catalog 唯讀回讀所有新舊 Change Delivery tables/functions 仍為
+`null`，確認沒有部署；Git commit 到 checkpoint 提交間的窄 crash window、workspace
+materializer、formal caller、live migration、ownership cutover 與 rollback rehearsal
+仍缺，所以此 slice 與 Change Delivery 整體都維持 `contained`。
+
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
 Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在

@@ -9,7 +9,7 @@ families whose production cutover gate is recorded in
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from datetime import datetime
 import hashlib
 import json
@@ -140,40 +140,38 @@ class ChangeDelivery:
         id_factory: Callable[[], str],
         actuator=None,
         settlement=None,
+        store=None,
     ) -> None:
+        from ._change_store import InMemoryChangeSetStore
+
         self._clock = clock
         self._id_factory = id_factory
         self._actuator = actuator
         self._settlement = settlement
+        self._store = (
+            store if store is not None else InMemoryChangeSetStore()
+        )
         self._lock = RLock()
-        self._by_id: dict[str, ChangeSetView] = {}
-        self._id_by_idempotency_key: dict[str, str] = {}
-        self._land_command_sha_by_id: dict[str, str] = {}
-        self._actuation_by_id: dict[str, object] = {}
-        self._delivery_by_id: dict[str, DeliveryReceipt] = {}
 
     def propose(self, proposal: ChangeSetProposal) -> ChangeSetView:
         normalized = _normalize_proposal(proposal)
         proposal_sha256 = _proposal_sha256(normalized)
 
         with self._lock:
-            existing_id = self._id_by_idempotency_key.get(
+            existing = self._store.load_by_idempotency_key(
                 normalized.idempotency_key
             )
-            if existing_id is not None:
-                existing = self._by_id[existing_id]
-                if existing.proposal_sha256 != proposal_sha256:
+            if existing is not None:
+                if existing.view.proposal_sha256 != proposal_sha256:
                     raise ChangeSetConflict(
                         "ChangeSet idempotency key conflicts with its original payload"
                     )
-                return existing
+                return existing.view
 
             _validate_workspace(normalized)
             change_set_id = self._id_factory()
             if not change_set_id:
                 raise ValueError("ChangeSet id is required")
-            if change_set_id in self._by_id:
-                raise ValueError(f"duplicate ChangeSet id: {change_set_id}")
             observed_at = self._clock()
             if observed_at.tzinfo is None:
                 raise ValueError("ChangeSet clock must return a timezone-aware value")
@@ -195,16 +193,11 @@ class ChangeDelivery:
                 status="proposed",
                 created_at=created_at,
             )
-            self._by_id[view.id] = view
-            self._id_by_idempotency_key[view.idempotency_key] = view.id
-            return view
+            return self._store.create(view).view
 
     def inspect(self, change_set_id: str) -> ChangeSetView:
         with self._lock:
-            try:
-                return self._by_id[change_set_id]
-            except KeyError as exc:
-                raise ValueError(f"unknown ChangeSet: {change_set_id}") from exc
+            return self._store.load(change_set_id).view
 
     def land(self, command: LandChangeSet) -> DeliveryReceipt:
         """Land one immutable proposal and durably settle its verified commit.
@@ -223,14 +216,9 @@ class ChangeDelivery:
         from ._git_actuator import CommitActuation
 
         with self._lock:
-            try:
-                change_set = self._by_id[normalized.change_set_id]
-            except KeyError as exc:
-                raise ValueError(
-                    f"unknown ChangeSet: {normalized.change_set_id}"
-                ) from exc
-
-            existing_command_sha = self._land_command_sha_by_id.get(change_set.id)
+            record = self._store.load(normalized.change_set_id)
+            change_set = record.view
+            existing_command_sha = record.land_command_sha256
             if (
                 existing_command_sha is not None
                 and existing_command_sha != land_command_sha256
@@ -238,11 +226,11 @@ class ChangeDelivery:
                 raise ChangeSetConflict(
                     "ChangeSet landing command conflicts with its original payload"
                 )
-            existing_delivery = self._delivery_by_id.get(change_set.id)
+            existing_delivery = record.delivery
             if existing_delivery is not None:
                 return existing_delivery
 
-            actuation = self._actuation_by_id.get(change_set.id)
+            actuation = record.actuation
             if actuation is None:
                 actuation = self._actuator.commit(
                     CommitActuation(
@@ -264,12 +252,13 @@ class ChangeDelivery:
                     change_set=change_set,
                     command=normalized,
                 )
-                self._land_command_sha_by_id[change_set.id] = land_command_sha256
-                self._actuation_by_id[change_set.id] = actuation
-                self._by_id[change_set.id] = replace(
-                    change_set,
-                    status="commit_unsettled",
+                record = self._store.checkpoint_actuation(
+                    change_set_id=change_set.id,
+                    proposal_sha256=change_set.proposal_sha256,
+                    land_command_sha256=land_command_sha256,
+                    actuation=actuation,
                 )
+                change_set = record.view
 
             delivery = self._settlement.settle(
                 CommitSettlement(
@@ -286,9 +275,17 @@ class ChangeDelivery:
                 command=normalized,
                 actuation=actuation,
             )
-            self._delivery_by_id[change_set.id] = delivery
-            self._by_id[change_set.id] = replace(change_set, status="landed")
-            return delivery
+            landed = self._store.mark_landed(
+                change_set_id=change_set.id,
+                proposal_sha256=change_set.proposal_sha256,
+                land_command_sha256=land_command_sha256,
+                delivery=delivery,
+            )
+            if landed.delivery is None:
+                raise RuntimeError(
+                    "ChangeSet store omitted the durable delivery receipt"
+                )
+            return landed.delivery
 
 
 def _required_text(value: str, *, field: str) -> str:

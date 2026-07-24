@@ -1433,3 +1433,32 @@ direct-execution control gate 與相鄰 actuator tests。此具體缺口為
 **root_cause_fixed_and_verified**；shadow migration、formal caller、durable proposal
 store、Git ownership cutover 與 rollback rehearsal 仍未完成，所以 Change Delivery
 整體仍為 **contained**。
+
+### 2026-07-24 — `commit_unsettled` 只存在 process memory，restart 會再進 Git actuator — contained
+
+**症狀與根因層級**：第一個 `ChangeDelivery` instance 在 actuator 已回傳 verified
+commit、settlement 暫時失敗後，能靠 instance dict 記住 `commit_unsettled`；換成新
+instance 即無法 `inspect` 原 ChangeSet，也沒有 actuation receipt 可續 settlement。
+這是 proposal／actuation lifecycle 的 durable-state seam 缺口，不是多 retry 一次或
+延長 lease 能修。公開 restart regression 在修正前會得到 unknown ChangeSet，且設計上
+會重新進 Git actuator。
+
+**底層修復**：新增 private `ChangeSetStore`，external
+`propose／inspect／land` interface 不變。in-memory adapter 支援 interface tests；
+`PostgresChangeSetStore` 以 immutable create、actuation checkpoint、landed linkage
+三個 transaction 保存完整 lifecycle。checkpoint 只落 token-redacted receipt 與
+canonical landing-command SHA-256，不保存 raw WorkLease／Primary token；landed
+transition 必須 join 已存在且 exact-match 的 commit settlement receipt。Store
+FORCE RLS，PUBLIC 無 table/function access，worker 只有 named functions 與
+token-redacted read view。
+
+**回歸、live 回讀與狀態**：跨兩個 `ChangeDelivery` instance 的測試證明 checkpoint
+後 restart 時第二個 actuator 零呼叫；PG17 non-superuser migration replay、durable
+reload、conflicting replay、RLS／PUBLIC 權限與相鄰 Change／Effect／Git 共 68 tests
+通過。Production Supabase `qxhfgdfzazwpkdgesavm` 唯讀 catalog 回讀
+`change_sets`、三個 lifecycle functions、commit authority／settlement tables 全為
+`null`，確認 shadow migration 未部署。checkpoint **已提交後**的 restart 重複寫風險
+已被底層封閉；但 Git commit 成功到 checkpoint transaction 提交之間仍有窄 crash
+window，且 live migration／workspace materializer／formal caller／ownership cutover／
+rollback rehearsal未完成，因此本項與 Change Delivery 整體都只能標
+**`contained`**，不得宣稱 `root_cause_fixed_and_verified`。

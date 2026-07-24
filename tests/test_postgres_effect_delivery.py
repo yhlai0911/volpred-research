@@ -23,6 +23,9 @@ from volpred.ops.authority.postgres import PostgresAuthorityStore
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
+    ChangeSetConflict,
+    ChangeSetView,
+    CheckEvidence,
     ContentHash,
     EffectRequest,
     EffectRequestConflict,
@@ -57,6 +60,7 @@ from volpred.ops.delivery.postgres_commit_authority import (
 from volpred.ops.delivery.postgres_commit_settlement import (
     PostgresCommitSettlement,
 )
+from volpred.ops.delivery.postgres_change_store import PostgresChangeSetStore
 from volpred.ops.delivery.postgres_payload import (
     EffectPayloadConflict,
     PostgresEffectPayloadStore,
@@ -125,6 +129,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724100000_operations_core_commit_settlement.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724113000_operations_core_change_set_store.sql",
 )
 
 
@@ -840,6 +848,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.notification_owners,
               volpred_ops.effect_attempt_receipts,
               volpred_ops.effect_authority_grants,
+              volpred_ops.change_sets,
               volpred_ops.commit_delivery_receipts,
               volpred_ops.commit_authority_grants,
               volpred_ops.primary_authority_grants,
@@ -1018,6 +1027,35 @@ def _commit_settlement(
         work_lease_token=request.work_lease_token,
         primary_fencing_token=request.primary_fencing_token,
         actuation=_commit_actuation_receipt(request, grant),
+    )
+
+
+def _change_set_view(
+    running: WorkItemView,
+    request: CommitAuthorityRequest,
+) -> ChangeSetView:
+    return ChangeSetView(
+        schema_version="changeset.v1",
+        id="changeset-postgres-1",
+        idempotency_key="changeset:work-commit-1:attempt-1",
+        work_item_id=running.id,
+        work_item_version=running.version,
+        base_commit=request.expected_head,
+        workspace_ref="/tmp/shadow-change-worktree",
+        exact_paths=request.exact_paths,
+        content_hashes=request.content_hashes,
+        required_checks=(
+            CheckEvidence(
+                name="pytest",
+                status="passed",
+                evidence_ref="test:postgres-change-store",
+            ),
+        ),
+        author_ref="agent:change-author",
+        author_evidence_ref="execution:work-commit-1:attempt-1",
+        proposal_sha256=request.proposal_sha256,
+        status="proposed",
+        created_at=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -1936,6 +1974,215 @@ def test_commit_settlement_conflicting_replay_fails_closed(
             """
         ).fetchall()
     assert durable == [(command.change_set_id,)]
+
+
+def test_change_set_store_survives_restart_and_resumes_settlement(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    grant = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    ).authorize(request)
+    actuation = _commit_actuation_receipt(request, grant)
+    command_sha256 = "e" * 64
+    first_process = PostgresChangeSetStore(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn)
+    )
+    proposed = first_process.create(_change_set_view(running, request))
+
+    checkpoint = first_process.checkpoint_actuation(
+        change_set_id=proposed.view.id,
+        proposal_sha256=proposed.view.proposal_sha256,
+        land_command_sha256=command_sha256,
+        actuation=actuation,
+    )
+    assert checkpoint.view.status == "commit_unsettled"
+
+    restarted_process = PostgresChangeSetStore(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn)
+    )
+    recovered = restarted_process.load(proposed.view.id)
+    assert recovered == checkpoint
+    assert recovered.actuation == actuation
+    assert recovered.delivery is None
+
+    settlement = PostgresCommitSettlement(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    receipt = settlement.settle(
+        CommitSettlement(
+            change_set_id=proposed.view.id,
+            repository=request.repository,
+            work_lease_token=work_lease.token,
+            primary_fencing_token=primary_lease.fencing_token,
+            actuation=actuation,
+        )
+    )
+    landed = restarted_process.mark_landed(
+        change_set_id=proposed.view.id,
+        proposal_sha256=proposed.view.proposal_sha256,
+        land_command_sha256=command_sha256,
+        delivery=receipt,
+    )
+
+    final_process = PostgresChangeSetStore(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn)
+    )
+    assert final_process.load(proposed.view.id) == landed
+    assert landed.view.status == "landed"
+    assert landed.delivery == receipt
+    assert final_process.create(
+        replace(
+            _change_set_view(running, request),
+            id="unused-replay-id",
+        )
+    ) == landed
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT status, land_command_sha256, actuation_receipt,
+                   delivery_authority_request_sha256
+            FROM volpred_ops.change_sets
+            WHERE id = %s
+            """,
+            (proposed.view.id,),
+        ).fetchone()
+    assert durable[0] == "landed"
+    assert durable[1] == command_sha256
+    assert durable[2]["commit_sha"] == actuation.commit_sha
+    assert durable[3] == actuation.authority_request_sha256
+    assert work_lease.token not in repr(durable)
+    assert primary_lease.fencing_token not in repr(durable)
+
+
+def test_change_set_store_conflicts_and_privileges_fail_closed(
+    postgres_effect_dsn: str,
+) -> None:
+    _, running = _seed_running_work(postgres_effect_dsn)
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token="unused-for-proposal",
+        primary_fencing_token="unused-for-proposal",
+    )
+    store = PostgresChangeSetStore(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn)
+    )
+    view = _change_set_view(running, request)
+    store.create(view)
+
+    with pytest.raises(ValueError, match="unknown ChangeSet"):
+        store.load("missing-change-set")
+    with pytest.raises(ChangeSetConflict, match="original payload"):
+        store.create(
+            replace(
+                view,
+                id="conflicting-id",
+                proposal_sha256="f" * 64,
+            )
+        )
+
+    with _worker_connection(postgres_effect_dsn) as connection:
+        assert connection.execute(
+            "SELECT status FROM volpred_ops.change_set_reads WHERE id = %s",
+            (view.id,),
+        ).fetchone() == ("proposed",)
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="actuation receipt is invalid",
+        ):
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.checkpoint_change_set_actuation(
+                  %s, %s, %s, %s
+                )
+                """,
+                (
+                    view.id,
+                    view.proposal_sha256,
+                    "e" * 64,
+                    Jsonb(
+                        {
+                            "schema_version": "commit-actuation.v1",
+                            "proposal_sha256": view.proposal_sha256,
+                            "work_item_id": view.work_item_id,
+                            "work_item_version": view.work_item_version,
+                            "commit_sha": "d" * 40,
+                            "parent_sha": view.base_commit,
+                            "exact_paths": list(view.exact_paths),
+                            "actor": "commit-worker:postgres-test",
+                            "status": "committed",
+                            "observed_at": datetime.now(
+                                timezone.utc
+                            ).isoformat(),
+                            "work_lease_token": "must-never-be-durable",
+                        }
+                    ),
+                ),
+            ).fetchall()
+        connection.rollback()
+        connection.execute("SET ROLE volpred_ops_worker")
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.change_sets"
+            ).fetchall()
+        connection.rollback()
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        security = connection.execute(
+            """
+            SELECT
+              (
+                SELECT relrowsecurity AND relforcerowsecurity
+                FROM pg_class AS relation
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = relation.relnamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND relation.relname = 'change_sets'
+              ),
+              has_table_privilege(
+                'public', 'volpred_ops.change_sets', 'SELECT'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.checkpoint_change_set_actuation('
+                  'text,text,text,jsonb)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'public',
+                'volpred_ops.checkpoint_change_set_actuation('
+                  'text,text,text,jsonb)',
+                'EXECUTE'
+              )
+            """
+        ).fetchone()
+    assert security == (True, False, True, False)
 
 
 def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(

@@ -22,6 +22,7 @@ from volpred.ops.delivery._git_actuator import (
     CommitActuationReceipt,
     CommitActuatorBlocked,
 )
+from volpred.ops.delivery._change_store import InMemoryChangeSetStore
 
 
 NOW = datetime(2026, 7, 23, 14, 30, tzinfo=timezone.utc)
@@ -220,6 +221,19 @@ def test_idempotent_replay_is_payload_bound(
     conflicting = replace(proposal, author_evidence_ref="execution:different")
     with pytest.raises(ChangeSetConflict, match="original payload"):
         delivery.propose(conflicting)
+
+
+def test_idempotent_replay_does_not_require_ephemeral_workspace(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    delivery = _delivery()
+    proposal = _proposal(linked, base_commit)
+    first = delivery.propose(proposal)
+    (linked / "tracked.txt").write_text("workspace drifted\n", encoding="utf-8")
+    (linked / "new.txt").unlink()
+
+    assert delivery.propose(proposal) is first
 
 
 @pytest.mark.parametrize(
@@ -454,6 +468,44 @@ def test_land_retries_only_post_commit_settlement_after_transient_failure(
     assert receipt.status == "landed"
     assert len(actuator.commands) == 1
     assert len(settlement.commands) == 2
+
+
+def test_restart_resumes_durable_checkpoint_without_second_git_write(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    store = InMemoryChangeSetStore()
+    first_actuator = _Actuator()
+    settlement = _Settlement(fail_once=True)
+    first_process = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=first_actuator,
+        settlement=settlement,
+        store=store,
+    )
+    proposed = first_process.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(RuntimeError, match="database unavailable"):
+        first_process.land(_land(proposed.id))
+
+    second_actuator = _Actuator()
+    restarted_process = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "unused-after-restart",
+        actuator=second_actuator,
+        settlement=settlement,
+        store=store,
+    )
+    assert restarted_process.inspect(proposed.id).status == "commit_unsettled"
+
+    receipt = restarted_process.land(_land(proposed.id))
+
+    assert receipt.status == "landed"
+    assert len(first_actuator.commands) == 1
+    assert second_actuator.commands == []
+    assert len(settlement.commands) == 2
+    assert restarted_process.inspect(proposed.id).status == "landed"
 
 
 def test_land_rejects_command_drift_after_external_commit(

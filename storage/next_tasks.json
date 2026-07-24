@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "ChangeDelivery.land plus PG17 durable post-commit settlement implemented; external-write WorkLease and Primary Authority revalidation; 174 scoped tests; live catalog confirms shadow migrations not deployed",
-    "next_direct_step": "Persist ChangeSet proposals and commit_unsettled actuation state so process restart can reconcile an already-landed Git commit without a second write; then add production workspace materialization before any Git ownership cutover",
+    "containment_evidence": "Durable ChangeSet proposal/actuation/receipt store implemented; cross-process restart resumes settlement without a second actuator call; 68 scoped tests including PG17 non-superuser/RLS; production catalog confirms migrations are not deployed",
+    "next_direct_step": "Close the Git-commit-to-actuation-checkpoint crash window with exact repository read-back recovery, then add production candidate-workspace materialization before any Git ownership cutover",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Change Delivery post-commit checkpoint: land retries settlement only after verified Git actuation; immutable receipt replay survives lease expiry; FORCE-RLS immutable grant read fixed; 174 scoped tests; live remains unchanged"
+    "latest_checkpoint": "Change Delivery durable lifecycle checkpoint: immutable proposal plus token-redacted commit_unsettled state and final receipt linkage survive process restart; raw lease tokens absent; live remains unchanged"
   }
 ]

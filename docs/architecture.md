@@ -116,9 +116,19 @@
 > durable adapter 前要求它可解析且帶 UTC offset；非法或 naive wall-clock 不得交由
 > PostgreSQL session timezone 猜測，也不得先把 ChangeSet 標成 `commit_unsettled`。
 >
-> 此 follow-up 未部署 live，也尚缺 formal caller、proposal durable store、
-> workspace materialization、ownership cutover 與 rollback rehearsal，因此不改變
-> 目前 Git ownership。
+> **Change Delivery durable lifecycle follow-up（2026-07-24，shadow）**
+> `ChangeDelivery` 的 external interface 不變，proposal、token-redacted actuation
+> checkpoint 與 final receipt 改由 private `ChangeSetStore` seam 保存。
+> `PostgresChangeSetStore` 以三個 named transaction 實作 immutable create、
+> `commit_unsettled` checkpoint 與 landed receipt linkage；另一個 in-memory adapter
+> 保留 interface tests。程序若在 checkpoint 已提交後、settlement 前中斷，新 instance
+> 會讀回 actuation，只續做冪等 settlement，不再呼叫 Git writer。Raw WorkLease／
+> Primary Authority token 不落表，只保存 payload-bound landing-command SHA-256。
+>
+> 以上 migrations 均未部署 live；2026-07-24 唯讀 catalog 回讀 proposal／grant／
+> settlement tables/functions 皆不存在。Git commit 已完成但 actuation checkpoint
+> 尚未提交的窄 crash window、production workspace materialization、formal caller、
+> ownership cutover 與 rollback rehearsal 仍未完成，因此不改變目前 Git ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
