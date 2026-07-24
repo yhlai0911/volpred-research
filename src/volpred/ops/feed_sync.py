@@ -492,13 +492,25 @@ def sync_feed_to_supabase(
     if dry_run:
         if verbose:
             print("[feed-sync] dry-run: no writes performed")
-        return {"mode": "dry_run", "clean": clean, "diff": diff}
+        return {
+            "mode": "dry_run",
+            "clean": clean,
+            "acknowledged": None,
+            "diff": diff,
+        }
 
     result = apply_diff(diff, storage_dir=storage_dir, allow_delete=allow_delete)
+    acknowledged = result.get("failed") == 0
     if verbose:
         print(
             f"[feed-sync] applied: inserted={result['inserted']} "
             f"updated={result['updated']} deleted={result['deleted']} "
             f"skipped_deletes={result['skipped_deletes']} failed={result['failed']}"
         )
-    return {"mode": "apply", "clean": clean, "diff": diff, "result": result}
+    return {
+        "mode": "apply",
+        "clean": clean,
+        "acknowledged": acknowledged,
+        "diff": diff,
+        "result": result,
+    }

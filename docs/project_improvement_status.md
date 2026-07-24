@@ -318,6 +318,16 @@ orphan=0、live 404=0。此 false-convergence根因為
 **`root_cause_fixed_and_verified`**；formal outbox ownership與 rollback rehearsal
 仍缺，因此 program commit 15維持 **`contained`**。
 
+同日關閉 hourly feed-sync 的 scheduler false-green。舊 CLI即使
+`apply_diff()`已回 `failed=1`仍 exit 0，導致每小時 wrapper留下成功 receipt。現在
+feed-sync external interface提供 aggregate `acknowledged`，apply未明確全數確認即在
+輸出 JSON evidence後 exit 1；quiet clean維持靜默成功。Canonical schedule已登記
+0／1語意，wrapper propagation regression也鎖住 `cron_emit_exit`及最終 exit。
+Failure injection由0轉1；相關與相鄰套件 **69 passed**，production read-only dry-run
+為 feed/db 1877/1877、drift 0，wrapper三份 lockstep。此局部根因為
+**`root_cause_fixed_and_verified`**；formal full-sync outbox ownership與rollback
+rehearsal仍缺，program commit 15維持 **`contained`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem

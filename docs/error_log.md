@@ -2185,3 +2185,30 @@ mutation、owner transfer或canonical receipt寫入。此false-convergence根因
 **`root_cause_fixed_and_verified`**；program commit 15的週期convergence receipt
 gate完成，formal outbox ownership與rollback rehearsal仍缺，故commit 15與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-25 — Hourly feed-sync 已記 effect failure，cron receipt 仍 exit 0
+
+**證據化症狀與根因層級**：failure injection讓
+`sync_feed_to_supabase(..., dry_run=False)`回傳
+`result.failed=1`與具體 slug／operation，但 `volpred ops feed-sync --apply`仍得到
+`exit_code=0`。每小時 wrapper忠實傳遞 CLI code，因此 `cron_emit_exit`會把未確認的
+Operations Core article projection記成成功。根因在 CLI／scheduler
+acknowledgement seam：effect adapter、durable outbox與 per-article caller已回報失敗，
+最外層卻只列印 nested counters，沒有 aggregate acknowledgement contract。
+
+**底層重構**：feed-sync模組的 external interface現在明確回傳
+`acknowledged=True|False`；只有 apply模式且所有嘗試的 projection effect均確認才為
+true，dry-run則為 `None`。CLI仍先輸出完整 JSON evidence，但 apply結果不是明確
+`True`時 fail closed為 exit 1；`--quiet-when-clean`的 clean路徑仍安靜 exit 0。
+`config/runtime_schedules.json`同步登記 0／1語意，wrapper contract regression固定
+`cron_emit_exit`與最終 `exit "$_ec"`，避免日後吞掉 CLI code。
+
+**回歸、下游回讀與狀態界線**：原始 RED由 `exit_code=0`轉為1；成功、quiet-clean、
+aggregate acknowledgement與wrapper propagation共5案通過，與 feed diff、
+full-sync cursor、publisher owner／effect相鄰套件合計 **69 passed**。
+Production read-only dry-run回讀 `feed=1877`、`db=1877`、insert/update/delete均0，
+cron wrapper canonical／manifest／host副本 lockstep。沒有 remote write、owner
+transfer或 canonical research data mutation。此 scheduler false-green根因為
+**`root_cause_fixed_and_verified`**；program commit 15仍缺 full-sync formal outbox
+ownership與rollback rehearsal，故 program commit 15及 operations-core umbrella維持
+**`contained`**。

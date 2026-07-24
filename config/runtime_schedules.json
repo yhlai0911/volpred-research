@@ -350,6 +350,7 @@
         "description": "WS-C2（refactor_plan_ops_master_2026_07 §3）：每小時 `volpred ops feed-sync --apply --no-delete --quiet-when-clean`，把 canonical feed.json 的變更收斂到 Supabase articles 投影。L3 診斷指出全系統原本沒有任何排程做全量對帳 —— 即時推送失敗、繞過 gateway 的手改、批次內容改寫，都會讓投影靜默落後直到有人發現。此 job 是那條收斂網（C1 收斂寫入端、C2 兜底端，互補不重疊）。無 drift 時 --quiet-when-clean 完全不輸出（只留 cron_lib start/exit receipt），有 drift 才記錄，避免每小時刷 log 讓人習慣性忽略。刻意不帶 --allow-delete：破壞性刪除屬於單一守門者 supabase_sync.reconcile_article_deletes（有 floor/cap/dump 不變式），不交給無人值守的每小時 job。排在 audit_publish_sync 之前，讓同一個 piggy-back tick 先收斂再稽核。由 run_due_jobs piggy-back 執行；piggy-back 由每小時 check_alerts 觸發，因此有效 cadence 為 60 分鐘。",
         "host_crontab_managed": true,
         "piggy_back_enabled": true,
+        "exit_semantics": "0=clean or every attempted projection acknowledged,1=one or more projection effects unacknowledged",
         "matchers": [
           "ops feed-sync",
           "feed_sync.log",

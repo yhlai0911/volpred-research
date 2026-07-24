@@ -2573,9 +2573,13 @@ def ops_feed_sync(storage_dir: str, dry_run: bool, allow_delete: bool,
         verbose=True,
         quiet_when_clean=quiet_when_clean,
     )
-    if quiet_when_clean and result.get("clean"):
-        return
-    _print_json({"action": "feed_sync", "result": result})
+    if not (quiet_when_clean and result.get("clean")):
+        _print_json({"action": "feed_sync", "result": result})
+    if (
+        result.get("mode") == "apply"
+        and result.get("acknowledged") is not True
+    ):
+        raise click.exceptions.Exit(1)
 
 
 @ops.command("daily-update")

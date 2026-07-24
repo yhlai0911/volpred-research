@@ -1062,6 +1062,22 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   gate已完成，formal outbox ownership與 rollback rehearsal仍缺，故整體維持
   **`contained`**。
 
+### 2026-07-25 hourly feed-sync acknowledgement checkpoint
+
+- Scheduled `feed-sync --apply` 原本雖從 per-article Operations Core caller收到
+  `failed=1`，CLI仍一律 exit 0；wrapper正確傳遞這個錯誤的 code，造成 cron
+  receipt false-green。這是最外層 acknowledgement seam缺失，不是 provider或
+  outbox沒有回報。
+- `sync_feed_to_supabase()`現在以單一 top-level `acknowledged`隱藏 nested counters：
+  apply只有全部 effect確認時為true，dry-run為 `None`。CLI在輸出 evidence後要求
+  apply acknowledgement明確為true，否則 exit 1；quiet clean仍安靜 exit 0。
+  Canonical schedule登記同一 0／1語意，wrapper regression固定 exit code不被吞掉。
+- Failure injection由 exit 0轉1；本切片與 feed diff、full-sync cursor、publisher
+  ownership／effect相鄰套件共 **69 passed**。Production read-only dry-run回讀
+  feed/db均1877、三種 drift均0，host wrapper lockstep。此 scheduler false-green根因
+  為 **`root_cause_fixed_and_verified`**；full-sync formal outbox ownership與rollback
+  rehearsal仍缺，故 program commit 15保持 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

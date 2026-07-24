@@ -422,6 +422,17 @@
 > smoke回讀 local=14、Supabase=14、雙向 drift=0、live 404=0。這完成 commit 15 的
 > 週期 convergence receipt gate；formal outbox ownership與 rollback rehearsal仍未
 > 完成，所以 commit 15仍為 **`contained`**。
+>
+> **Hourly feed-sync acknowledgement（2026-07-25）**：scheduled
+> `volpred ops feed-sync --apply`不再只列印 nested failure後仍 exit 0。
+> `sync_feed_to_supabase()`以 top-level `acknowledged`作 caller interface；apply只有
+> 所有嘗試的 projection effect都確認時為true，CLI否則在輸出 evidence後 exit 1。
+> Canonical schedule登記相同 0／1語意，host wrapper繼續原樣傳遞 code。
+> Failure injection、quiet-clean與wrapper contract連同相鄰套件共69案通過；
+> production read-only dry-run為 feed/db 1877/1877、drift 0。此 scheduler
+> false-green根因為 **`root_cause_fixed_and_verified`**，不代表 formal full-sync
+> outbox ownership或rollback rehearsal已完成；program commit 15仍為
+> **`contained`**。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
