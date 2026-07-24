@@ -1297,6 +1297,115 @@ def _reconcile_dump_path(storage_dir: str | Path, stamp: str | None = None) -> P
     return Path(storage_dir) / "ops" / f"supabase_reconcile_removed_{stamp}.jsonl"
 
 
+ARTICLE_DELETE_CASCADE_CONTRACT = (
+    ("article_impressions", "article_id", "cascade"),
+    ("article_reactions", "article_id", "cascade"),
+    ("article_relations", "source_id", "cascade"),
+    ("article_relations", "target_id", "cascade"),
+    ("article_tags", "article_id", "cascade"),
+    ("comments", "article_id", "cascade"),
+    ("question_articles", "article_id", "cascade"),
+)
+
+
+def _read_article_delete_dependency_contract() -> tuple[tuple[str, str, str], ...]:
+    """Read the live FK contract through the service-role-only catalog RPC."""
+    require_creds()
+    url = (
+        f"{SUPABASE_URL}/rest/v1/rpc/"
+        "volpred_read_article_delete_dependency_contract"
+    )
+    payload = _request_json(url, method="POST", data={})
+    if not isinstance(payload, list):
+        raise RuntimeError("article delete dependency contract must be a list")
+    normalized: list[tuple[str, str, str]] = []
+    for row in payload:
+        if not isinstance(row, Mapping) or set(row) != {
+            "table",
+            "column",
+            "on_delete",
+        }:
+            raise RuntimeError(
+                "article delete dependency contract returned an invalid row"
+            )
+        table = row.get("table")
+        column = row.get("column")
+        on_delete = row.get("on_delete")
+        if not all(
+            isinstance(value, str) and value
+            for value in (table, column, on_delete)
+        ):
+            raise RuntimeError(
+                "article delete dependency contract returned an invalid value"
+            )
+        normalized.append((table, column, on_delete))
+    return tuple(sorted(normalized))
+
+
+def _capture_article_delete_cascades(
+    ghost_uuids: list[str],
+) -> tuple[dict[str, dict[str, list[dict]]], dict[str, int]]:
+    """Capture every live ON DELETE CASCADE row before destructive mutation."""
+    ghost_ids = frozenset(ghost_uuids)
+    tables = tuple(
+        dict.fromkeys(table for table, _column, _action in ARTICLE_DELETE_CASCADE_CONTRACT)
+    )
+    rows_by_article = {
+        article_id: {table: [] for table in tables}
+        for article_id in ghost_uuids
+    }
+    seen_by_article = {
+        article_id: {table: set() for table in tables}
+        for article_id in ghost_uuids
+    }
+    unique_by_table: dict[str, set[str]] = {table: set() for table in tables}
+
+    for table, column, _action in ARTICLE_DELETE_CASCADE_CONTRACT:
+        for offset in range(0, len(ghost_uuids), 100):
+            chunk = ghost_uuids[offset : offset + 100]
+            rows = _select_rows_in(table, column, chunk, select="*")
+            for raw in rows:
+                if not isinstance(raw, Mapping):
+                    raise RuntimeError(
+                        f"{table}.{column} recovery row must be an object"
+                    )
+                row = dict(raw)
+                row_key = json.dumps(
+                    row,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    ensure_ascii=False,
+                    allow_nan=False,
+                )
+                related_id = str(row.get(column) or "")
+                if related_id not in ghost_ids:
+                    continue
+                unique_by_table[table].add(row_key)
+                if row_key in seen_by_article[related_id][table]:
+                    continue
+                seen_by_article[related_id][table].add(row_key)
+                rows_by_article[related_id][table].append(row)
+
+    for article_tables in rows_by_article.values():
+        for table_rows in article_tables.values():
+            table_rows.sort(
+                key=lambda row: json.dumps(
+                    row,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    ensure_ascii=False,
+                    allow_nan=False,
+                )
+            )
+    return (
+        rows_by_article,
+        {
+            table: len(row_keys)
+            for table, row_keys in sorted(unique_by_table.items())
+        },
+    )
+
+
 def reconcile_article_deletes(
     storage_dir: str | Path = "storage",
     *,
@@ -1326,15 +1435,18 @@ def reconcile_article_deletes(
       max_deletes: abort if the drift exceeds `max_deletes`. Guards canonical
                    corruption (e.g. a bad edit dropping most articles) from
                    triggering a mass delete instead of a targeted reconcile.
-      dump:        every row to be removed — plus its article_impressions, which
-                   ON DELETE CASCADE (migration 021) would otherwise destroy — is
-                   appended to storage/ops/supabase_reconcile_removed_YYYYMMDD.jsonl
-                   BEFORE any DELETE, so a mistaken removal is fully recoverable.
+      dependency:  the live FK catalog must exactly match the checked-in cascade
+                   allowlist. A new cascade cannot silently escape recovery.
+      dump:        the complete article row and every row in every live
+                   ON DELETE CASCADE relation are written and read back before
+                   any DELETE. Any dependency read or dump failure aborts.
+      snapshot:    feed.json must retain the exact same SHA-256 throughout
+                   planning and recovery capture; concurrent edits abort.
 
     apply=False performs a read-only preview (computes ghosts, writes nothing).
 
     Returns counters: {local_count, remote_count, ghost_count, deleted, failed,
-    impressions_dumped, dump_path, aborted, reason, sample}.
+    cascade_rows_dumped, dump_path, dump_sha256, aborted, reason, sample}.
     """
     storage = Path(storage_dir)
     result = {
@@ -1344,7 +1456,10 @@ def reconcile_article_deletes(
         "deleted": 0,
         "failed": 0,
         "impressions_dumped": 0,
+        "cascade_rows_dumped": {},
+        "canonical_feed_sha256": None,
         "dump_path": None,
+        "dump_sha256": None,
         "aborted": False,
         "reason": "",
         "sample": [],
@@ -1353,7 +1468,8 @@ def reconcile_article_deletes(
     # --- local canonical id set (source of truth) ---
     feed_path = storage / "reports" / "feed.json"
     try:
-        feed = json.loads(feed_path.read_text())
+        feed_bytes = feed_path.read_bytes()
+        feed = json.loads(feed_bytes)
     except Exception as e:
         result["aborted"] = True
         result["reason"] = "canonical_load_failed"
@@ -1362,6 +1478,8 @@ def reconcile_article_deletes(
             f"{type(e).__name__}: {e}"
         )
         return result
+    canonical_feed_sha256 = hashlib.sha256(feed_bytes).hexdigest()
+    result["canonical_feed_sha256"] = canonical_feed_sha256
     if isinstance(feed, dict):
         feed = feed.get("items", [])
     local_ids = {
@@ -1382,7 +1500,7 @@ def reconcile_article_deletes(
     # --- remote projection (paginates past the 1000-row cap) ---
     remote_rows = _select_rows(
         "articles",
-        select="id,slug,status,title,published_at,updated_at",
+        select="*",
         order_by="id",
     )
     result["remote_count"] = len(remote_rows)
@@ -1413,48 +1531,121 @@ def reconcile_article_deletes(
         result["reason"] = "preview"
         return result
 
-    # --- dump-before-delete (recoverable), incl. cascade-impacted impressions ---
-    from datetime import datetime, timezone
-    now_iso = datetime.now(timezone.utc).isoformat()
-    ghost_uuids = [str(g["id"]) for g in ghosts if g.get("id")]
-    impressions_by_article: dict[str, list] = {}
-    for i in range(0, len(ghost_uuids), 100):
-        chunk = ghost_uuids[i:i + 100]
-        try:
-            imp_rows = _select_rows_in(
-                "article_impressions", "article_id", chunk, select="*"
-            )
-        except Exception as e:
-            imp_rows = []
-            print(
-                f"[reconcile] WARN impressions fetch failed for a chunk "
-                f"(dump proceeds without them): {type(e).__name__}: {e}"
-            )
-        for row in imp_rows:
-            aid = str(row.get("article_id") or "")
-            impressions_by_article.setdefault(aid, []).append(row)
+    # --- fail closed if a live cascade can escape the recovery snapshot ---
+    try:
+        observed_contract = _read_article_delete_dependency_contract()
+    except Exception as exc:
+        result["aborted"] = True
+        result["reason"] = (
+            "dependency_contract_unavailable:"
+            f"{type(exc).__name__}"
+        )
+        print(
+            "[reconcile] WARN abort: cannot verify article delete dependency "
+            f"contract: {type(exc).__name__}: {exc}"
+        )
+        return result
+    expected_contract = tuple(sorted(ARTICLE_DELETE_CASCADE_CONTRACT))
+    if observed_contract != expected_contract:
+        result["aborted"] = True
+        result["reason"] = "dependency_contract_drift"
+        print(
+            "[reconcile] WARN abort: live article delete dependency contract "
+            "does not match the checked-in recovery allowlist."
+        )
+        return result
 
-    dump_path = _reconcile_dump_path(storage)
-    dump_path.parent.mkdir(parents=True, exist_ok=True)
-    imp_total = 0
-    with dump_path.open("a", encoding="utf-8") as fh:
-        for g in ghosts:
-            imps = impressions_by_article.get(str(g.get("id")), [])
-            imp_total += len(imps)
-            fh.write(
-                json.dumps(
-                    {
-                        "deleted_at": now_iso,
-                        "reason": "supabase_reconcile_ghost_not_in_feed",
-                        "article": g,
-                        "impressions": imps,
-                    },
-                    ensure_ascii=False,
-                )
-                + "\n"
+    # --- dump-before-delete: full article plus every cascade-impacted row ---
+    from datetime import datetime, timezone
+    captured_at = datetime.now(timezone.utc)
+    now_iso = captured_at.isoformat()
+    ghost_uuids = [str(g["id"]) for g in ghosts if g.get("id")]
+    try:
+        cascades_by_article, cascade_counts = (
+            _capture_article_delete_cascades(ghost_uuids)
+        )
+    except Exception as exc:
+        result["aborted"] = True
+        result["reason"] = (
+            "recovery_snapshot_failed:"
+            f"{type(exc).__name__}"
+        )
+        print(
+            "[reconcile] WARN abort: a cascade recovery read failed; "
+            f"deleting nothing: {type(exc).__name__}: {exc}"
+        )
+        return result
+
+    try:
+        if hashlib.sha256(feed_path.read_bytes()).hexdigest() != canonical_feed_sha256:
+            result["aborted"] = True
+            result["reason"] = "canonical_snapshot_changed"
+            print(
+                "[reconcile] WARN abort: feed.json changed during recovery "
+                "capture; deleting nothing."
             )
-    result["impressions_dumped"] = imp_total
+            return result
+    except Exception as exc:
+        result["aborted"] = True
+        result["reason"] = f"canonical_recheck_failed:{type(exc).__name__}"
+        print(
+            "[reconcile] WARN abort: cannot re-read canonical feed snapshot; "
+            f"deleting nothing: {type(exc).__name__}: {exc}"
+        )
+        return result
+
+    recovery_lines = []
+    for ghost in sorted(ghosts, key=lambda row: str(row.get("slug") or "")):
+        article_id = str(ghost.get("id") or "")
+        recovery_lines.append(
+            json.dumps(
+                {
+                    "schema_version": "supabase-article-delete-recovery.v2",
+                    "captured_at": now_iso,
+                    "reason": "supabase_reconcile_ghost_not_in_feed",
+                    "canonical_feed_sha256": canonical_feed_sha256,
+                    "article": ghost,
+                    "cascade_rows": cascades_by_article.get(article_id, {}),
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+                ensure_ascii=False,
+                allow_nan=False,
+            )
+        )
+    recovery_bytes = ("\n".join(recovery_lines) + "\n").encode("utf-8")
+    dump_stamp = captured_at.strftime("%Y%m%dT%H%M%S%fZ")
+    dump_path = _reconcile_dump_path(storage, stamp=dump_stamp)
+    try:
+        dump_path.parent.mkdir(parents=True, exist_ok=True)
+        with dump_path.open("xb") as fh:
+            fh.write(recovery_bytes)
+            fh.flush()
+            os.fsync(fh.fileno())
+        observed_dump = dump_path.read_bytes()
+    except Exception as exc:
+        result["aborted"] = True
+        result["reason"] = f"recovery_dump_failed:{type(exc).__name__}"
+        print(
+            "[reconcile] WARN abort: recovery dump was not durably written; "
+            f"deleting nothing: {type(exc).__name__}: {exc}"
+        )
+        return result
+    if observed_dump != recovery_bytes:
+        result["aborted"] = True
+        result["reason"] = "recovery_dump_readback_mismatch"
+        print(
+            "[reconcile] WARN abort: recovery dump read-back mismatched; "
+            "deleting nothing."
+        )
+        return result
+
+    result["impressions_dumped"] = cascade_counts.get(
+        "article_impressions", 0
+    )
+    result["cascade_rows_dumped"] = cascade_counts
     result["dump_path"] = str(dump_path)
+    result["dump_sha256"] = hashlib.sha256(observed_dump).hexdigest()
 
     # --- delete (FK-safe via delete_article: impressions pre-delete + loud fail) ---
     for g in ghosts:
@@ -1470,7 +1661,8 @@ def reconcile_article_deletes(
         f"[reconcile] local={result['local_count']} "
         f"remote={result['remote_count']} ghosts={result['ghost_count']} "
         f"deleted={result['deleted']} failed={result['failed']} "
-        f"impressions_dumped={imp_total} dump={dump_path}"
+        f"cascade_rows_dumped={sum(cascade_counts.values())} "
+        f"dump_sha256={result['dump_sha256']} dump={dump_path}"
     )
     return result
 
