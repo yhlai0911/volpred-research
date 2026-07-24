@@ -1146,6 +1146,30 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   EffectRequest／owner／rollback，因此program commit 15與operations-core umbrella
   仍為 **`contained`**。
 
+### 2026-07-25 publisher destructive delete intent checkpoint
+
+- Delete維持與safe reconcile不同的interface與權限。新的兩段式deep module先以
+  `plan_publisher_article_delete(...)`凍結exact canonical feed bytes、floor／cap、
+  完整remote article rows與所有cascade-affected rows，再由
+  `prepare_publisher_article_delete(...)`要求scope-bound explicit approval，才產生
+  risk=`destructive`的EffectRequest。Caller不再自行拼effect kind、target、
+  acknowledgement或recovery digest。
+- Plan要求每個candidate不在canonical feed，slug／article id皆唯一，且
+  article_impressions、article_reactions、article_tags、comments、
+  question_articles五個family必須完整出現；每一個dependent row的article_id都須綁回
+  candidate。Module自行產生deterministic JSONL recovery artifact，scope同時綁定
+  canonical feed SHA、guard values、candidate bytes及recovery ref／SHA。
+- Authorization保存opaque approval ref、approver、timezone-aware timestamp與scope
+  SHA；任何scope漂移都在EffectRequest前fail closed，approval內容漂移也不能重用原
+  idempotency key。Module沒有provider adapter或hourly caller，故此checkpoint沒有
+  remote mutation，也不把destructive authority交給無人值守safe job。
+- Contract、Effect Delivery、safe reconcile、legacy delete與feed-sync相鄰套件共
+  **156 passed**；
+  compileall及`git diff --check`通過。本切片仍為 **`contained`**：獨立owner CAS、
+  durable approval verifier、provider delete/read-back、mutation-boundary authority、
+  exact restore executor與live rollback/convergence rehearsal尚未完成，program commit
+  15及operations-core umbrella狀態不變。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

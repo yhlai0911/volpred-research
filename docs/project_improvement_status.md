@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-25（publisher reconcile mutation-boundary authority gate）**
+Last updated: **2026-07-25（publisher destructive delete intent checkpoint）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -358,6 +358,18 @@ identity傳入provider，每筆真正write前重新核對key／holder／epoch／
 套件 **82 passed**。
 此根因為 **`root_cause_fixed_and_verified`**，但destructive delete family仍未formal
 cutover，故program commit 15與umbrella狀態不變。
+
+Destructive delete後續先完成零I/O的獨立intent checkpoint。兩段式deep module以exact
+canonical feed bytes建立scope並在任何EffectRequest前執行floor／cap、candidate
+不在feed、identity唯一性與五個cascade family完整性；module自行產生包含article及
+article_impressions／reactions／tags／comments／question links的deterministic recovery
+JSONL。只有approval artifact的scope SHA精確相符才會materialize
+risk=`destructive`的EffectRequest；approval drift也不能沿用idempotency key。
+Effect Delivery與相鄰 **156 passed**，且本module沒有provider或hourly接線，所以零
+remote mutation。
+Owner CAS、durable approval verifier、delete/read-back adapter、restore executor與live
+rollback/convergence仍缺；此checkpoint誠實維持 **`contained`**，program commit 15與
+umbrella狀態不變。
 
 同班另修正current Test Suite連續紅燈：cron alert metadata原本只能把整支log標為
 `findings`，無法表達`audit_publish_sync`的exit 1=findings、exit 2=unavailable。

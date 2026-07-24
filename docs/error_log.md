@@ -2315,3 +2315,30 @@ owned callers、single／batch effects、兩套operator rehearsals、feed sync�
 為 **`root_cause_fixed_and_verified`**；destructive delete的獨立EffectRequest／
 owner／rollback仍缺，所以program commit 15與operations-core umbrella維持
 **`contained`**。
+
+### 2026-07-25 — Publisher destructive delete缺少不可變scope與完整rollback bytes
+
+**證據化症狀與根因層級**：legacy `reconcile_article_deletes()`雖集中floor、cap與
+dump-before-delete，但dump只保存article與impressions；其他會cascade消失的
+article_reactions／article_tags／comments／question_articles沒有進rollback artifact。
+既有函式也以當下mutable feed與remote read直接跨越delete，沒有先形成scope-bound
+destructive EffectRequest或顯式approval identity。這代表safe reconcile已正式接管時，
+delete仍不能借用同一無人值守權限。
+
+**底層checkpoint**：新增零I/O的publisher delete deep module。第一段從exact canonical
+feed bytes與完整remote candidate rows建立唯一scope，機械執行feed floor、delete cap、
+候選不仍存在於canonical feed、slug／article identity唯一性，以及五個cascade table
+逐row article-id綁定；同時產生canonical JSONL recovery bytes與SHA-256。第二段只有在
+durable approval的scope SHA-256精確相符時，才materialize
+`publisher.article.supabase.delete`、risk=`destructive`的EffectRequest；approval ref、
+approver、timestamp、scope、recovery ref/hash與全部候選均受payload digest保護。
+本module沒有provider adapter，也沒有接入hourly producer，因此本切片零remote mutation。
+
+**回歸與誠實狀態**：新增contract cases涵蓋canonical ordering、floor／cap、canonical
+overlap、cascade completeness／錯綁、approval drift、idempotency conflict及plan
+tamper；連同Effect Delivery、safe reconcile、legacy delete與feed-sync相鄰套件共
+**156 passed**，
+compileall與`git diff --check`通過。Destructive intent contract checkpoint為
+**`contained`**：尚需獨立owner transaction、provider mutation-boundary fencing、
+durable approval verifier、exact restore executor及live rollback/convergence rehearsal，
+因此program commit 15與operations-core umbrella狀態不變。

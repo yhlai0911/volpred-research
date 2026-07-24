@@ -37,6 +37,13 @@ from ._publisher_article_reconcile import (
     encode_publisher_article_reconcile_payload,
     prepare_publisher_article_reconcile,
 )
+from ._publisher_article_delete import (
+    PreparedPublisherArticleDelete,
+    PublisherArticleDeleteAuthorization,
+    PublisherArticleDeletePlan,
+    plan_publisher_article_delete,
+    prepare_publisher_article_delete,
+)
 from ._publisher_article_sync import (
     PublisherArticleProjection,
     PublisherArticleProjectionReadback,
