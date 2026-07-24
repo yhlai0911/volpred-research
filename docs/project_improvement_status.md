@@ -237,6 +237,17 @@ owner row／migration、現行 writer routing、live cutover 與 rollback rehear
 落地，故這是 formal caller contract checkpoint，program commit 14 仍為
 **`contained`**。
 
+同日 publisher ownership transaction 的 local PostgreSQL migration 已補齊 owner
+read／generation-CAS transfer、durable request、begin 與 settlement 五個
+service-role-only RPC，並完成 cutover → acknowledged delivery → rollback → stale
+generation rejection → recutover transaction rehearsal。獨立複驗抓到 settlement
+一度誤從 token-redacted authority read model 讀取 fencing-token hash；修正後
+SECURITY DEFINER 直接鎖 private lease table，security-shape regression 也明確鎖住
+begin/read-model 與 settle/private-table 的不同契約。PostgreSQL suite 為 `45 passed`，
+owned publisher／email 相鄰 suite 為 `10 passed`。production migration、live owner
+transfer、writer routing 與 live acknowledgement／rollback 尚未執行，所以此
+checkpoint 仍為 **`contained`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem

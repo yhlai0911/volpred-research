@@ -4849,6 +4849,18 @@ def test_owned_publisher_rpc_security_and_definition_shape(
         "FROM volpred_ops.primary_authority_lease_reads"
         in definitions["volpred_begin_owned_publisher_article_sync"]
     )
+    settlement_definition = definitions[
+        "volpred_settle_owned_publisher_article_sync"
+    ]
+    assert (
+        "FROM volpred_ops.primary_authority_leases"
+        in settlement_definition
+    )
+    assert (
+        "FROM volpred_ops.primary_authority_lease_reads"
+        not in settlement_definition
+    )
+    assert "fencing_token_sha256" in settlement_definition
     assert (
         "acquire_primary_authority"
         not in definitions["volpred_begin_owned_publisher_article_sync"]

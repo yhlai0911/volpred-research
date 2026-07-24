@@ -899,6 +899,23 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   cutover、live acknowledgement 與 rollback rehearsal 都未執行。因此 live 行為不變，
   program commit 14 仍為 **`contained`**，不是 publisher sync ownership 完成。
 
+### 2026-07-24 publisher ownership transaction checkpoint
+
+- PostgreSQL migration 現在提供 service-role-only owner read／generation-CAS transfer、
+  durable request、begin 與 settlement 五個 RPC，並預置唯一
+  `publisher.article.supabase.sync=legacy/1` owner row。local PostgreSQL 17 fixture
+  會重播完整 migration chain，驗證 cutover、delivery acknowledgement、active-attempt
+  transfer rejection、rollback、stale-generation rejection 與 recutover。
+- 獨立複驗曾抓到 settlement 從 token-redacted
+  `primary_authority_lease_reads` 讀取不存在的 `fencing_token_sha256`；migration 已改為
+  由 SECURITY DEFINER 直接鎖 private `primary_authority_leases`，保留 raw fencing token
+  hash 驗證。security-shape regression 現在同時要求 begin 只能讀 redacted view、settle
+  必須讀 private table 且核對 `fencing_token_sha256`，防止兩種 authority surface 再次
+  靜默互換。PostgreSQL suite 為 `45 passed`，owned publisher／email 相鄰 suite 為
+  `10 passed`。
+- 本 checkpoint 仍未套用 production migration、轉移 live owner、路由現有 writer 或
+  執行 live acknowledgement／rollback rehearsal；因此只標 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam
