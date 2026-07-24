@@ -82,6 +82,17 @@ class _PayloadReader:
         return self.payload
 
 
+class _DemotingPayloadReader(_PayloadReader):
+    def __init__(self, payload: bytes, lease_gate: _LeaseGate) -> None:
+        super().__init__(payload)
+        self._lease_gate = lease_gate
+
+    def read(self, payload_ref: str) -> bytes:
+        payload = super().read(payload_ref)
+        self._lease_gate.fail_on_call = self._lease_gate.calls + 1
+        return payload
+
+
 class _Mailbox:
     def __init__(self) -> None:
         self.messages: dict[str, bytes] = {}
@@ -370,7 +381,7 @@ def test_worker_claims_authorizes_reads_back_and_durably_settles() -> None:
     assert "outbox-claim-secret" not in repr(receipt)
     assert "primary-fence-current" not in repr(receipt)
     assert "primary-fence-current" not in repr(_command())
-    assert primary_authority.calls == 3
+    assert primary_authority.calls == 4
 
 
 def test_worker_returns_none_without_claiming_or_authorizing() -> None:
@@ -478,6 +489,22 @@ def test_worker_rechecks_keepalive_before_any_provider_call(
     assert len(authority.requests) == (1 if fail_on_call == 3 else 0)
 
 
+def test_worker_rechecks_keepalive_after_payload_read_before_provider() -> None:
+    primary_authority = _LeaseGate()
+    reader = _DemotingPayloadReader(_payload(), primary_authority)
+    worker, store, notifier, _reader, _gate = _worker(
+        primary_authority=primary_authority,
+        payload_reader=reader,
+    )
+
+    with pytest.raises(EffectWorkerBlocked, match="keepalive gate"):
+        worker.run_once(_command())
+
+    assert reader.refs == ["file:effects/shadow-email.json"]
+    assert notifier.calls == []
+    assert store.outcomes == []
+
+
 def test_worker_allows_keepalive_renewal_but_rejects_lease_replacement() -> None:
     renewed_worker, _store, notifier, _reader, renewed_gate = _worker(
         primary_authority=_RenewingLeaseGate(),
@@ -488,7 +515,7 @@ def test_worker_allows_keepalive_renewal_but_rejects_lease_replacement() -> None
     assert receipt is not None
     assert receipt.disposition == "delivered"
     assert len(notifier.calls) == 1
-    assert renewed_gate.calls == 3
+    assert renewed_gate.calls == 4
 
     drifted_worker, drifted_store, drifted_notifier, drifted_reader, _gate = (
         _worker(primary_authority=_DriftingLeaseGate())

@@ -593,6 +593,14 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   仍自行 acquire `notification:email.ops_alert` lease，尚未 revalidate host keepalive
   lease；其他 effect family 也未逐一接管。因此「全 effect-family enable gate」與
   program commit 34 umbrella 仍為 `contained`。
+- 後續 public-interface regression 證實上述「provider 前」回讀仍早了一個真正的
+  external boundary：durable payload reader 可在回傳 bytes 前阻塞，期間 keepalive
+  demote，但 worker 原先不會再回讀就呼叫 provider。現在 valid payload 通過
+  EffectRequest SHA-256 後會立即重驗同一 lease identity；payload-read demotion 轉為
+  typed `EffectWorkerBlocked`，provider 與 settlement 均不執行。Email、publisher 與
+  PostgreSQL 相鄰套件 68 passed；此 race 為
+  `root_cause_fixed_and_verified`，program commit 34 umbrella 仍因真實 outage／RTO
+  rehearsal 與其餘 family cutover 未完成而保持 `contained`。
 
 ### 2026-07-24 owned email production keepalive gate checkpoint
 

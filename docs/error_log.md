@@ -1944,3 +1944,26 @@ interface逐欄回讀。Architecture、operations-core module design與 improvem
 `email.ops_alert` 的 ownership RPC仍自行 acquire family-specific lease，尚未改成
 revalidate host keepalive lease，所以全 effect-family enable gate與 program commit 34
 umbrella 維持 **`contained`**。
+
+### 2026-07-24 — Effect worker 的 provider keepalive gate 早於 durable payload read
+
+**證據化症狀與根因層級**：既有文件宣稱 worker 在 provider 前重驗 keepalive，但
+`EffectOutboxWorker.run_once()` 的第三次回讀實際位於
+`EffectPayloadReader.read()` 之前。Public-interface RED injection 讓 reader 在回傳
+正確 payload bytes 後關閉 gate；舊實作沒有拋出 `EffectWorkerBlocked`，而是完成 email
+provider call。根因是 lease revalidation 放在可能阻塞的 payload boundary 前，不是
+payload hash、provider adapter或 PostgreSQL fencing資料錯誤。
+
+**底層重構**：Worker 保留 claim前、authorize前與 grant後的既有 gate，並在 payload
+bytes 通過 EffectRequest SHA-256 後、呼叫 `EffectProvider.deliver()` 的前一刻再次
+回讀同一 holder／epoch／token／acquired identity。Payload read期間發生 demotion或
+lease replacement現在會 fail closed；provider與 settlement都不執行，避免失去主控
+租約的 host產生正式外部寫入。
+
+**回歸、回讀與制度化**：新 regression 修正前實際得到「DID NOT RAISE」，修正後轉
+GREEN，並回讀 payload ref已讀、provider calls=0、settlement outcomes=0。Email、
+publisher與PostgreSQL相鄰套件共 **68 passed**；architecture、operations-core module
+design與 improvement status同步保存這個真正的 provider boundary。此局部 race為
+**`root_cause_fixed_and_verified`**；本切片沒有 live effect或 owner mutation，
+其餘 family cutover與真實 outage／RTO rehearsal仍缺，因此 program commit 34 umbrella
+維持 **`contained`**。

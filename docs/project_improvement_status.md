@@ -425,6 +425,13 @@ filter definition與 index全對；當下 active claim=0，本次沒有 claim或
 此 cross-family routing根因為 `root_cause_fixed_and_verified`。Publisher durable
 formal caller／HTTP adapters／owner cutover與 program commit 34的真實 outage／RTO
 rehearsal仍缺，umbrella維持 `contained`。
+同日再以 payload-store blocking injection 驗證 generic worker 的 provider boundary：
+既有第三次 keepalive 回讀發生在 durable payload read 之前，reader 若在回傳 bytes
+前讓 host demote，舊 worker仍會呼叫 provider。現在 payload SHA-256 通過後會立即
+重驗同一 lease identity；RED case轉 GREEN，provider／settlement皆為 0，email、
+publisher與PostgreSQL相鄰套件共 68 passed。這個 provider-boundary race為
+`root_cause_fixed_and_verified`；沒有 live effect或 owner mutation，program commit 34
+umbrella仍因其餘 family cutover與真實 outage／RTO rehearsal未完成而保持 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

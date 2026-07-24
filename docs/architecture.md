@@ -326,6 +326,14 @@
 > index全對，live active claim=0且沒有執行 effect。PG17與相鄰 worker共 67 passed。
 > 這關閉 cross-family誤認領後把合法 effect錯誤 dead-letter的根因；publisher正式
 > caller與 ownership cutover仍未完成。
+>
+> 同日 provider-boundary failure injection 發現原稱「provider 前」的 keepalive
+> 回讀實際位於 durable payload read 之前；payload store 若阻塞並讓 host demote，
+> worker 仍會帶著先前 lease 呼叫外部 provider。`EffectOutboxWorker` 現在只在 payload
+> bytes 通過 EffectRequest SHA-256 後，再立即重驗同一 keepalive identity，才跨越
+> provider seam。RED case 曾實際觀察 provider 被呼叫，修正後 provider／settlement
+> 都為 0；email、publisher 與 PostgreSQL 相鄰套件共 68 passed。這個局部 lease
+> revalidation 根因已修復，未改變 publisher owner 或 live effect state。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

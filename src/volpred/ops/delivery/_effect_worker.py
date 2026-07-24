@@ -222,6 +222,7 @@ class EffectOutboxWorker:
                     retryable=False,
                 )
             else:
+                self._current_primary_lease(expected=primary_lease)
                 try:
                     outcome = self._provider.deliver(effect, payload)
                 except Exception:  # noqa: BLE001 - adapter errors become evidence.
