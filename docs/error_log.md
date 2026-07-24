@@ -1650,3 +1650,34 @@ advisor 對新 RPC 均為 0 findings。本次沒有執行 owner transfer。這�
 根因為 **`root_cause_fixed_and_verified`**；但完整 production Change Delivery
 adapters、正式 live commit smoke 與 rollback rehearsal仍未完成，umbrella 保持
 **`contained`**。
+
+### 2026-07-24 — ChangeSet durable lifecycle 只有直連 PostgreSQL adapter
+
+**證據化症狀與根因層級**：commit owner 已有 service-role PostgREST seam，但 formal
+caller 的 ChangeSet proposal／checkpoint／landed state 仍只能透過
+`PostgresChangeSetStore`。Production runtime 若沒有 direct database connection，
+無法使用已部署的 durable lifecycle；若讓 service role 直接讀 private view 或在
+caller 重組 SQL state machine，會破壞 RLS 與單一 transaction owner。這是 remote
+persistence adapter 缺口，不是 owner row 或 ChangeSet 資料錯誤。
+
+**底層重構**：新增五個 service-role-only public RPC，逐一委派 private create、
+by-id／by-idempotency read、actuation checkpoint 與 landed linkage；回傳只來自既有
+token-redacted `change_set_reads`。`SupabaseChangeSetStore` 實作同一 store protocol，
+共用 owner adapter 的 narrow HTTP transport，將 JSON 轉回 canonical
+`ChangeSetRecord`，並保留 typed conflict／validation errors、timezone-aware timestamp
+gate 與 delivery exact-match read-back。Environment builder 只接受 service-role key，
+不會退回 publishable／anon key。
+
+**回歸、回讀與狀態界線**：HTTP interface cases 通過 create、missing lookup、typed
+conflict 與 credential fail-closed；PG17 non-superuser 從 clean schema replay全部
+migrations，再重播本 migration 驗證 idempotence，並以 service role 實際 create、
+by-id／by-idempotency read。Catalog 回讀五個 functions 都是 no-login definer owner、
+`SECURITY DEFINER`、空 search path；anon／authenticated／PUBLIC 無 EXECUTE，
+service role 無 private table／view SELECT。Production migration receipt 是
+`20260724081714 operations_core_change_set_rpc`；live catalog 七項 hardening／ACL
+predicates 全 true，正式 HTTP adapter 的 missing idempotency lookup 精確回傳 null，
+owner 仍為 `legacy/1`、ChangeSet count 仍為 0，沒有執行 transfer 或建立 proposal。
+此 ChangeSet remote persistence seam 達
+**`root_cause_fixed_and_verified`**；commit authority／settlement／Work read model
+的 HTTP adapters、live ownership CAS、commit smoke 與 rollback rehearsal仍缺，
+所以 Change Delivery umbrella 維持 **`contained`**。

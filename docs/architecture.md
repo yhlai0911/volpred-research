@@ -194,8 +194,21 @@
 > 轉成 typed `CommitOwnershipLost`。Live migration receipt 是
 > `20260724074117 operations_core_commit_ownership_rpc`；RPC 回讀仍為
 > `git.commit=legacy/1`，本 checkpoint 沒有執行 ownership transfer。完整 production
-> Change Delivery caller 尚未有 service-role adapters，故不得只因 owner RPC 可用便
-> 切換 Git ownership。
+> Change Delivery caller 尚未完整接上 service-role adapters，故不得只因 owner RPC
+> 可用便切換 Git ownership。
+>
+> **ChangeSet service-role lifecycle seam（2026-07-24，live read／legacy owner）**
+> `SupabaseChangeSetStore` 將 immutable create、by-id／by-idempotency read、
+> actuation checkpoint 與 landed linkage 對應到五個 narrow public RPC。RPC 只委派
+> private `volpred_ops` transaction／token-redacted read view；functions 由
+> `volpred_ops_definer` 持有、空 `search_path` 且只授權 service role，caller 仍無
+> ChangeSet table／view SELECT。Owner 與 ChangeSet adapter 共用一個 service-role
+> transport，禁止 publishable-key fallback。PG17 clean replay、migration idempotence、
+> ACL 與 service-role create/read 已通過；production receipt 是
+> `20260724081714 operations_core_change_set_rpc`。Live catalog 的五項 ACL／hardening
+> predicates 全 true，HTTP missing lookup 精確回傳 null，owner 仍為 `legacy/1` 且
+> ChangeSet count 為 0。Authority／settlement／Work read model 的 HTTP adapters 亦
+> 尚缺，因此不能執行 live commit smoke。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

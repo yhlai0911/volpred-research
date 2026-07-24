@@ -52,7 +52,7 @@ def test_read_owner_uses_service_role_rpc_and_validates_payload(
         return _Response(_owner_payload())
 
     monkeypatch.setattr(
-        "volpred.ops.delivery.supabase_commit_ownership.request.urlopen",
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
         fake_urlopen,
     )
     store = SupabaseCommitOwnerStore(
@@ -98,7 +98,7 @@ def test_transfer_owner_sends_exact_compare_and_set_identity(
         )
 
     monkeypatch.setattr(
-        "volpred.ops.delivery.supabase_commit_ownership.request.urlopen",
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
         fake_urlopen,
     )
     store = SupabaseCommitOwnerStore(
@@ -152,7 +152,7 @@ def test_compare_and_set_failure_is_typed(
         ),
     )
     monkeypatch.setattr(
-        "volpred.ops.delivery.supabase_commit_ownership.request.urlopen",
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
         lambda *args, **kwargs: (_ for _ in ()).throw(failure),
     )
     store = SupabaseCommitOwnerStore(
@@ -177,7 +177,7 @@ def test_invalid_or_untrusted_owner_payload_fails_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        "volpred.ops.delivery.supabase_commit_ownership.request.urlopen",
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
         lambda *args, **kwargs: _Response(
             _owner_payload(changed_at="2026-07-24T07:00:00")
         ),
@@ -196,7 +196,7 @@ def test_environment_adapter_never_falls_back_to_publishable_key(
 ) -> None:
     monkeypatch.setattr(
         "volpred.ops.delivery.supabase_commit_ownership."
-        "_runtime_environment",
+        "runtime_environment",
         lambda: {
             "SUPABASE_URL": "https://project.supabase.co",
             "SUPABASE_KEY": "publishable-or-anon-key",

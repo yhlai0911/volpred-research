@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from datetime import datetime, timezone
 from typing import Any
 
@@ -24,8 +24,15 @@ from ._git_actuator import CommitActuationReceipt
 ConnectionFactory = Callable[[], Connection[Any]]
 
 
-def _isoformat(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat()
+def _isoformat(value: datetime | str) -> str:
+    observed = (
+        datetime.fromisoformat(value)
+        if isinstance(value, str)
+        else value
+    )
+    if observed.tzinfo is None:
+        raise ValueError("ChangeSet timestamp must include UTC offset")
+    return observed.astimezone(timezone.utc).isoformat()
 
 
 def _actuation_json(receipt: CommitActuationReceipt) -> dict[str, Any]:
@@ -72,7 +79,7 @@ def _actuation_from_json(
     )
 
 
-def _record_from_row(row: dict[str, Any]) -> ChangeSetRecord:
+def _record_from_row(row: Mapping[str, Any]) -> ChangeSetRecord:
     view = ChangeSetView(
         schema_version=row["schema_version"],
         id=row["id"],

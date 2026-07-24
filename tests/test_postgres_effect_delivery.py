@@ -155,6 +155,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724120000_operations_core_commit_ownership_rpc.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724130000_operations_core_change_set_rpc.sql",
 )
 
 
@@ -895,10 +899,84 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     'volpred_ops_definer',
                     'public',
                     'CREATE'
+                  ),
+                  (
+                    SELECT count(*) = 5
+                      AND bool_and(
+                        procedure.proowner = (
+                          SELECT oid FROM pg_roles
+                          WHERE rolname = 'volpred_ops_definer'
+                        )
+                        AND procedure.prosecdef
+                        AND procedure.proconfig = ARRAY['search_path=""']
+                      )
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname IN (
+                        'volpred_create_change_set',
+                        'volpred_read_change_set',
+                        'volpred_read_change_set_by_idempotency_key',
+                        'volpred_checkpoint_change_set_actuation',
+                        'volpred_mark_change_set_landed'
+                      )
+                  ),
+                  (
+                    SELECT bool_and(
+                      has_function_privilege(
+                        'service_role', procedure.oid, 'EXECUTE'
+                      )
+                    )
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname IN (
+                        'volpred_create_change_set',
+                        'volpred_read_change_set',
+                        'volpred_read_change_set_by_idempotency_key',
+                        'volpred_checkpoint_change_set_actuation',
+                        'volpred_mark_change_set_landed'
+                      )
+                  ),
+                  (
+                    SELECT NOT bool_or(
+                      has_function_privilege(
+                        'anon', procedure.oid, 'EXECUTE'
+                      )
+                      OR has_function_privilege(
+                        'authenticated', procedure.oid, 'EXECUTE'
+                      )
+                      OR has_function_privilege(
+                        'public', procedure.oid, 'EXECUTE'
+                      )
+                    )
+                    FROM pg_proc AS procedure
+                    JOIN pg_namespace AS namespace
+                      ON namespace.oid = procedure.pronamespace
+                    WHERE namespace.nspname = 'public'
+                      AND procedure.proname IN (
+                        'volpred_create_change_set',
+                        'volpred_read_change_set',
+                        'volpred_read_change_set_by_idempotency_key',
+                        'volpred_checkpoint_change_set_actuation',
+                        'volpred_mark_change_set_landed'
+                      )
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.change_sets',
+                    'SELECT'
+                  ),
+                  NOT has_table_privilege(
+                    'service_role',
+                    'volpred_ops.change_set_reads',
+                    'SELECT'
                   )
                 """
             ).fetchone()
-        assert service_rpc_security == (True,) * 8
+        assert service_rpc_security == (True,) * 13
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -907,6 +985,18 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   public.volpred_read_commit_owner(),
                   public.volpred_transfer_commit_owner(
                     text, bigint, text, text, text, bigint
+                  ),
+                  public.volpred_create_change_set(
+                    text, text, text, integer, text, text, jsonb, jsonb,
+                    jsonb, text, text, text, text, timestamptz
+                  ),
+                  public.volpred_read_change_set(text),
+                  public.volpred_read_change_set_by_idempotency_key(text),
+                  public.volpred_checkpoint_change_set_actuation(
+                    text, text, text, jsonb
+                  ),
+                  public.volpred_mark_change_set_landed(
+                    text, text, text, text
                   ),
                   public.volpred_read_notification_owner(),
                   public.volpred_transfer_notification_owner(
@@ -2529,6 +2619,84 @@ def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
         "operations_core",
         4,
     )
+
+
+def test_change_set_service_rpc_creates_and_reads_token_redacted_view(
+    postgres_effect_dsn: str,
+) -> None:
+    _, running = _seed_running_work(postgres_effect_dsn)
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token="never-send-through-change-set-rpc",
+        primary_fencing_token="never-send-through-change-set-rpc",
+    )
+    view = _change_set_view(running, request)
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        created = connection.execute(
+            """
+            SELECT public.volpred_create_change_set(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                view.id,
+                view.idempotency_key,
+                view.work_item_id,
+                view.work_item_version,
+                view.base_commit,
+                view.workspace_ref,
+                Jsonb(list(view.exact_paths)),
+                Jsonb(
+                    [
+                        {"path": item.path, "sha256": item.sha256}
+                        for item in view.content_hashes
+                    ]
+                ),
+                Jsonb(
+                    [
+                        {
+                            "name": item.name,
+                            "status": item.status,
+                            "evidence_ref": item.evidence_ref,
+                        }
+                        for item in view.required_checks
+                    ]
+                ),
+                view.author_ref,
+                view.author_evidence_ref,
+                view.proposal_sha256,
+                view.schema_version,
+                view.created_at,
+            ),
+        ).fetchone()[0]
+        by_id = connection.execute(
+            "SELECT public.volpred_read_change_set(%s)",
+            (view.id,),
+        ).fetchone()[0]
+        by_key = connection.execute(
+            """
+            SELECT public.volpred_read_change_set_by_idempotency_key(%s)
+            """,
+            (view.idempotency_key,),
+        ).fetchone()[0]
+        missing = connection.execute(
+            "SELECT public.volpred_read_change_set(%s)",
+            ("missing-change-set",),
+        ).fetchone()[0]
+
+    assert created == by_id == by_key
+    assert created["status"] == "proposed"
+    assert created["proposal_sha256"] == view.proposal_sha256
+    assert missing is None
+    assert "work_lease_token" not in created
+    assert "primary_fencing_token" not in created
 
 
 def test_change_set_store_survives_restart_and_resumes_settlement(

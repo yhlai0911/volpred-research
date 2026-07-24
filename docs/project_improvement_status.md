@@ -333,6 +333,13 @@ PG17 與 live catalog 回讀。Production migration receipt
 `20260724074117 operations_core_commit_ownership_rpc` 已存在，HTTP adapter 回讀仍為
 `legacy/1`，兩類 advisor 對新 RPC 零 findings。Owner 沒有 transfer；完整 production
 delivery adapters 與 live smoke／rollback rehearsal仍缺，umbrella 仍為 `contained`。
+同日 ChangeSet lifecycle 再新增五個 service-role-only RPC 與
+`SupabaseChangeSetStore`，共用 narrow HTTP transport，禁止 publishable key fallback；
+PG17 clean／idempotent migration、ACL 與實際 service-role create/read 回歸通過。
+Production receipt `20260724081714 operations_core_change_set_rpc` 已回讀；live HTTP
+missing lookup 為 null、owner=`legacy/1`、ChangeSet count=0，沒有 transfer 或寫入。
+Commit authority／settlement／Work read model 仍無 HTTP adapters；因此只核可
+ChangeSet HTTP persistence seam，umbrella 狀態不變。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

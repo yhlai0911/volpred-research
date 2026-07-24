@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime
-import json
-import os
-from pathlib import Path
 from typing import Any
-from urllib import error, request
 
 from .owned_change import CommitOwner, CommitOwnershipLost
+from .supabase_rpc import (
+    ServiceRoleRpcClient,
+    SupabaseRpcError,
+    runtime_environment,
+)
 
 
 def _required_text(value: object, *, field: str) -> str:
@@ -74,31 +75,6 @@ def _owner_from_payload(payload: Mapping[str, Any]) -> CommitOwner:
     )
 
 
-def _runtime_environment() -> dict[str, str]:
-    values = dict(os.environ)
-    env_path = Path(__file__).resolve().parents[4] / ".env.local"
-    if not env_path.exists():
-        return values
-    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
-        line = raw_line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        values.setdefault(key.strip(), value.strip().strip("\"'"))
-    return values
-
-
-def _rpc_error_message(payload: bytes) -> str | None:
-    try:
-        decoded = json.loads(payload)
-    except (UnicodeError, json.JSONDecodeError):
-        return "response body was not valid JSON"
-    if not isinstance(decoded, Mapping):
-        return None
-    message = decoded.get("message")
-    return message if isinstance(message, str) else None
-
-
 class SupabaseCommitOwnerStore:
     """Read and CAS-transfer Git ownership through service-role-only RPCs."""
 
@@ -109,20 +85,15 @@ class SupabaseCommitOwnerStore:
         service_role_key: str,
         timeout_seconds: float = 45.0,
     ) -> None:
-        self._url = supabase_url.strip().rstrip("/")
-        self._key = service_role_key.strip()
-        if not self._url or not self._key:
-            raise ValueError(
-                "Supabase URL and service-role key are required for "
-                "commit ownership"
-            )
-        if timeout_seconds <= 0:
-            raise ValueError("Supabase RPC timeout must be positive")
-        self._timeout_seconds = timeout_seconds
+        self._client = ServiceRoleRpcClient(
+            supabase_url=supabase_url,
+            service_role_key=service_role_key,
+            timeout_seconds=timeout_seconds,
+        )
 
     @classmethod
     def from_environment(cls) -> SupabaseCommitOwnerStore:
-        values = _runtime_environment()
+        values = runtime_environment()
         return cls(
             supabase_url=values.get("SUPABASE_URL", ""),
             service_role_key=values.get("SUPABASE_SERVICE_ROLE_KEY", ""),
@@ -165,31 +136,10 @@ class SupabaseCommitOwnerStore:
         function: str,
         payload: Mapping[str, object],
     ) -> Mapping[str, Any]:
-        encoded = json.dumps(
-            payload,
-            ensure_ascii=False,
-            separators=(",", ":"),
-        ).encode("utf-8")
-        call = request.Request(
-            f"{self._url}/rest/v1/rpc/{function}",
-            data=encoded,
-            method="POST",
-            headers={
-                "apikey": self._key,
-                "Authorization": f"Bearer {self._key}",
-                "Content-Type": "application/json",
-                "Accept": "application/json",
-            },
-        )
         try:
-            with request.urlopen(
-                call,
-                timeout=self._timeout_seconds,
-            ) as response:
-                raw = response.read()
-        except error.HTTPError as exc:
-            raw = exc.read()
-            message = _rpc_error_message(raw) or f"HTTP {exc.code}"
+            decoded = self._client.call(function, payload)
+        except SupabaseRpcError as exc:
+            message = str(exc)
             if message.startswith(
                 (
                     "commit ownership",
@@ -198,16 +148,6 @@ class SupabaseCommitOwnerStore:
             ):
                 raise CommitOwnershipLost(message) from None
             raise RuntimeError(f"commit ownership RPC failed: {message}")
-        except (OSError, error.URLError) as exc:
-            raise RuntimeError(
-                f"commit ownership RPC unavailable: {exc}"
-            ) from exc
-        try:
-            decoded = json.loads(raw)
-        except (UnicodeError, json.JSONDecodeError) as exc:
-            raise RuntimeError(
-                "commit ownership RPC returned invalid JSON"
-            ) from exc
         if not isinstance(decoded, Mapping):
             raise RuntimeError(
                 "commit ownership RPC returned a non-object response"

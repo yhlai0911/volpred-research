@@ -414,6 +414,26 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   production delivery adapters、live commit smoke 與 rollback rehearsal仍缺，
   Change Delivery umbrella 維持 `contained`。
 
+### 2026-07-24 service-role ChangeSet store checkpoint
+
+- `SupabaseChangeSetStore` 實作既有 private `ChangeSetStore` protocol，不另造 lifecycle
+  state machine；immutable create、兩種 identity read、actuation checkpoint 與 landed
+  linkage 分別委派 private transaction functions。PostgREST payload 會轉回同一
+  `ChangeSetRecord`，timestamp 必須含 offset，conflict／validation error 保留 typed
+  fail-closed semantics。
+- 五個 public wrappers 全是 `volpred_ops_definer` owner、`SECURITY DEFINER`、
+  `search_path=''`，只給 service role EXECUTE；anon／authenticated／PUBLIC 拒絕，
+  service role 仍不能 SELECT private table 或 token-redacted view。Owner store 與
+  ChangeSet store 共用窄 service-role transport，且 environment builder 只讀
+  `SUPABASE_SERVICE_ROLE_KEY`。
+- Unit transport contracts、PG17 non-superuser clean migration replay／二次 replay、
+  ACL 及 service-role create/by-id/by-idempotency read 已通過。Production receipt
+  `20260724081714 operations_core_change_set_rpc` 已回讀；live catalog hardening／ACL
+  全 true，HTTP missing lookup 為 null、owner=`legacy/1`、ChangeSet count=0。這封閉
+  ChangeSet production HTTP persistence seam，但 commit authority、settlement 與 Work
+  read model 仍只有 direct PostgreSQL adapters；故 bounded seam 為
+  `root_cause_fixed_and_verified`，Change Delivery umbrella 仍是 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
