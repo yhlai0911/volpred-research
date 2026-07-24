@@ -2103,3 +2103,31 @@ rehearsal回讀 full-feed 409、single-report delegated；article
 被拒，generation 8兩條 frontend fence再次通過。故 operator seam與 program commit 14
 為 **`root_cause_fixed_and_verified`**；整體 operations-core umbrella仍為
 **`contained`**。
+
+### 2026-07-25 — Publisher cutover 後舊 projection tests 在 clean CI 誤走 formal caller
+
+**證據化症狀與根因層級**：GitHub Actions runs `30107632406`、`30111281248`
+連續以同四案失敗：兩個 cache purge regression與兩個 server-resident details
+regression都在 `ServiceRoleRpcClient` 建構時拋出
+`ValueError: Supabase URL and service-role key are required`。從 tracked `HEAD`
+建立不含 `.env.local` 的 clean archive後，0.17秒最小重現可連續兩次得到同一錯誤。
+根因不是 CI 缺 production credential，也不是 production owner router應回退；
+commit `35242068a5` 已把 `sync_article()` 切到 owner-fenced Operations Core formal
+caller，但四個只驗 direct projection provider 的舊 tests仍 mock `_post`／
+`_select_rows`後呼叫 router。Developer checkout的 gitignored `.env.local`把 stale
+test seam 推進到 live RPC，掩蓋了 clean-checkout credential failure。
+
+**修正與安全邊界**：四案改為直接呼叫正式 provider seam
+`sync_article_projection()`，與同一 cutover已遷移的 effect-adapter regression一致。
+Production `sync_article()`、owner lookup、service-role composition、keepalive與
+fail-closed路由完全未改；測試也不注入假 production credentials或放寬 remote-access
+guard。
+
+**回歸與制度化**：原始 clean-archive兩檔命令由4 failed轉為
+**22 passed, 1 skipped**；publisher ownership／effect／rehearsal相鄰套件的
+**47個 assertions通過**。完整CI命令
+`uv run --extra dev python -m pytest -q -p no:cacheprovider`為
+**5005 passed, 1 skipped**，`git diff --check`通過，且沒有 remote write、email、
+canonical write、owner transfer或live effect。本CI test-contract根因為
+**`root_cause_fixed_and_verified`**；跨兩台實體Mac的Primary Authority receipt pair
+仍缺，故整體operations-core umbrella維持 **`contained`**。

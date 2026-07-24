@@ -387,7 +387,7 @@ def test_sync_article_preserves_server_resident_view_display(monkeypatch):
     monkeypatch.setattr(supabase_sync, "_patch_where", lambda *a, **k: True)
     monkeypatch.setattr(supabase_sync, "revalidate_article_cache", lambda s: True)
 
-    ok = supabase_sync.sync_article(
+    ok = supabase_sync.sync_article_projection(
         _item("mile_seeded", published_at="2026-07-20T00:00:00+00:00")
     )
 
@@ -412,7 +412,7 @@ def test_sync_article_fails_closed_when_resident_read_fails(monkeypatch, capsys)
 
     monkeypatch.setattr(supabase_sync, "_select_rows", boom)
 
-    ok = supabase_sync.sync_article(_item("mile_readfail"))
+    ok = supabase_sync.sync_article_projection(_item("mile_readfail"))
 
     assert ok is False
     assert posted == []

@@ -17,9 +17,10 @@ Two conditions had to stack:
      stale-while-revalidate has no new value to write when the loader throws,
      so it keeps re-serving the last good value. Expiry is not eviction.
 
-Owner of the fix is the sync side (condition 1): supabase_sync now POSTs
+Owner of the fix is the projection provider (condition 1):
+``sync_article_projection`` now POSTs
 /api/sync/revalidate/article/<slug> after every successful write. These tests
-pin that behaviour so the purge cannot be dropped again.
+pin that provider behaviour so the purge cannot be dropped again.
 
 The live end-to-end check (retract -> sync -> curl -> 404) needs the real
 deployment and is env-gated; CI never touches the network.
@@ -128,7 +129,7 @@ def test_retraction_sync_purges_frontend_cache(monkeypatch, sync):
     _stub_db(monkeypatch, sync)
     calls = _capture(monkeypatch, sync)
 
-    assert sync.sync_article(_retracted_item()) is True
+    assert sync.sync_article_projection(_retracted_item()) is True
 
     assert len(calls) == 1, "retraction sync must issue exactly one purge"
     req = calls[0]
@@ -203,11 +204,11 @@ def test_401_fails_loudly_and_is_recorded(monkeypatch, sync, capsys):
 
 
 def test_purge_failure_does_not_mask_successful_db_write(monkeypatch, sync):
-    """sync_article's contract is the DB write; the purge reports separately."""
+    """The projection contract is the DB write; the purge reports separately."""
     _stub_db(monkeypatch, sync)
     _capture(monkeypatch, sync, raises=urllib.error.URLError("dns"))
 
-    assert sync.sync_article(_retracted_item()) is True
+    assert sync.sync_article_projection(_retracted_item()) is True
     assert sync._REVALIDATE_FAILURES == ["mile_ebb5d6f5"]
 
 
