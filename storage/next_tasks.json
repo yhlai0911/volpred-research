@@ -44,6 +44,6 @@
     "next_direct_step": "Run the bounded program commit 34 production outage/RTO rehearsal with provider effects disabled: interrupt Supabase lease renewal, prove HostAuthorityKeepalive closes the local enable gate, restore service and prove standby reacquires within five minutes, then read back zero duplicate claims/effects. Keep publisher owner operations_core/8 and verify the fence before/after the outage.",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Frontend deployment 6a6393ea4727f1da77de7137 is RUNNING; publisher generation 6 acknowledgement and exact rollback passed; final production owner is operations_core/8 with live route fences and stale-generation refusal verified. Four new rehearsal regressions pass locally; full tracked CI-parity rerun follows commit."
+    "latest_checkpoint": "Frontend deployment 6a6393ea4727f1da77de7137 is RUNNING; publisher generation 6 acknowledgement and exact rollback passed; final production owner is operations_core/8 with live route fences and stale-generation refusal verified. Canonical rehearsal CLI is committed at d692369d7; tracked CI-parity, 28 adjacent tests, compileall, CLI help, diff check, direct-mode gate, and final owner read-back all passed."
   }
 ]
