@@ -2320,15 +2320,17 @@ owner／rollback仍缺，所以program commit 15與operations-core umbrella維�
 
 **證據化症狀與根因層級**：legacy `reconcile_article_deletes()`雖集中floor、cap與
 dump-before-delete，但dump只保存article與impressions；其他會cascade消失的
-article_reactions／article_tags／comments／question_articles沒有進rollback artifact。
+article_reactions／雙向article_relations／article_tags／comments／question_articles
+沒有進rollback artifact。
 既有函式也以當下mutable feed與remote read直接跨越delete，沒有先形成scope-bound
 destructive EffectRequest或顯式approval identity。這代表safe reconcile已正式接管時，
 delete仍不能借用同一無人值守權限。
 
 **底層checkpoint**：新增零I/O的publisher delete deep module。第一段從exact canonical
 feed bytes與完整remote candidate rows建立唯一scope，機械執行feed floor、delete cap、
-候選不仍存在於canonical feed、slug／article identity唯一性，以及五個cascade table
-逐row article-id綁定；同時產生canonical JSONL recovery bytes與SHA-256。第二段只有在
+候選不仍存在於canonical feed、slug／article identity唯一性，以及六個cascade table
+／七條FK edge逐row article identity綁定；同時產生canonical JSONL recovery bytes與
+SHA-256。第二段只有在
 durable approval的scope SHA-256精確相符時，才materialize
 `publisher.article.supabase.delete`、risk=`destructive`的EffectRequest；approval ref、
 approver、timestamp、scope、recovery ref/hash與全部候選均受payload digest保護。
@@ -2342,3 +2344,30 @@ compileall與`git diff --check`通過。Destructive intent contract checkpoint�
 **`contained`**：尚需獨立owner transaction、provider mutation-boundary fencing、
 durable approval verifier、exact restore executor及live rollback/convergence rehearsal，
 因此program commit 15與operations-core umbrella狀態不變。
+
+### 2026-07-25 — Delete rollback聲稱完整但漏掉雙向article_relations
+
+**證據化症狀與根因層級**：intent checkpoint初版把cascade contract手寫成五張表，
+並假設所有dependent row都以`article_id`連回article；production `pg_constraint`
+回讀實際是六張表、七條`ON DELETE CASCADE` edge，其中`article_relations`分別以
+`source_id`與`target_id`連回。Legacy dump又只保存article的部分欄位與impressions，
+且impressions讀失敗時仍繼續delete。根因是destructive recovery以靜態、不完整的
+應用層清單描述live FK graph，沒有database contract gate。
+
+**底層修復**：cascade table/column contract現在由delete intent deep module單一持有；
+shadow plan與legacy runtime共用它。Plan可接受relations任一端綁回candidate，兩端都
+不符則fail closed。Legacy runtime先透過service-role-only catalog RPC精確比對live
+七條edge，再讀完整article row與六張cascade table；任一RPC／child read失敗、
+feed SHA在capture期間漂移、或recovery artifact的fsync後read-back不一致，都在任何
+DELETE前中止。Recovery v2使用每次唯一檔案、保存canonical feed SHA與dump SHA。
+
+**回歸與制度化**：migration function由`volpred_ops_definer`持有、空search path，
+anon/authenticated/PUBLIC皆無EXECUTE，僅service_role可呼叫；production RPC回讀七條
+edge與code contract完全一致。Read-only live reconcile為local=1877、remote=1877、
+ghost=0、deleted=0。Contract drift、child-read failure、feed generation drift、
+relations endpoint錯綁與完整cascade dump均有failure injection；generic Effect
+Delivery、delete/safe/owned reconcile、feed sync及Supabase相鄰套件共
+**200 passed, 1 skipped**，compileall與`git diff --check`通過。本不完整rollback根因為
+**`root_cause_fixed_and_verified`**；destructive provider／owner CAS／restore executor
+與live rollback rehearsal仍未完成，所以program commit 15與umbrella仍為
+**`contained`**。

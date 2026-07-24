@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-25（publisher destructive delete intent checkpoint）**
+Last updated: **2026-07-25（publisher destructive recovery graph gate）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -361,15 +361,24 @@ cutover，故program commit 15與umbrella狀態不變。
 
 Destructive delete後續先完成零I/O的獨立intent checkpoint。兩段式deep module以exact
 canonical feed bytes建立scope並在任何EffectRequest前執行floor／cap、candidate
-不在feed、identity唯一性與五個cascade family完整性；module自行產生包含article及
-article_impressions／reactions／tags／comments／question links的deterministic recovery
-JSONL。只有approval artifact的scope SHA精確相符才會materialize
+不在feed、identity唯一性與六張cascade table／七條FK edge完整性；module自行產生包含
+article及impressions／reactions／雙向relations／tags／comments／question links的
+deterministic recovery JSONL。只有approval artifact的scope SHA精確相符才會materialize
 risk=`destructive`的EffectRequest；approval drift也不能沿用idempotency key。
 Effect Delivery與相鄰 **156 passed**，且本module沒有provider或hourly接線，所以零
 remote mutation。
 Owner CAS、durable approval verifier、delete/read-back adapter、restore executor與live
 rollback/convergence仍缺；此checkpoint誠實維持 **`contained`**，program commit 15與
 umbrella狀態不變。
+
+同一班隨後用production catalog推翻intent初版的五表假設：`article_relations`另有
+`source_id`與`target_id`兩條cascade edge。Delete contract改為單一六表／七edge來源；
+legacy apply新增service-role-only live catalog equality gate，並把完整article row、
+所有child rows、feed SHA與fsync/read-back後dump SHA一起保存。任何schema drift、
+child read失敗或capture期間feed換代都零刪除。Production ACL與七edge RPC回讀通過；
+read-only reconcile為1877/1877、ghost=0、deleted=0，相鄰
+**200 passed, 1 skipped**。此recovery完整性根因為
+**`root_cause_fixed_and_verified`**，但owner/provider/restore/live rollback缺口不變。
 
 同班另修正current Test Suite連續紅燈：cron alert metadata原本只能把整支log標為
 `findings`，無法表達`audit_publish_sync`的exit 1=findings、exit 2=unavailable。

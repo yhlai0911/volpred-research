@@ -37,6 +37,13 @@ def _candidate(slug: str, article_id: str) -> dict:
                 {"article_id": article_id, "viewed_at": "2026-07-25T00:00:00Z"}
             ],
             "article_reactions": [],
+            "article_relations": [
+                {
+                    "id": f"relation-{article_id}",
+                    "source_id": article_id,
+                    "target_id": "article-canonical",
+                }
+            ],
             "article_tags": [{"article_id": article_id, "tag_id": "tag-spy"}],
             "comments": [],
             "question_articles": [],
@@ -106,6 +113,7 @@ def test_plan_freezes_guards_scope_and_complete_recovery_rows() -> None:
     assert set(recovery[0]["dependents"]) == {
         "article_impressions",
         "article_reactions",
+        "article_relations",
         "article_tags",
         "comments",
         "question_articles",
@@ -200,6 +208,25 @@ def test_plan_requires_every_cascade_family_for_exact_rollback() -> None:
 def test_plan_rejects_cascade_rows_for_a_different_article() -> None:
     candidate = _candidate("mile_ghost", "article-ghost")
     candidate["dependents"]["article_tags"][0]["article_id"] = "article-other"
+
+    with pytest.raises(ValueError, match="bound to a different article"):
+        plan_publisher_article_delete(
+            canonical_feed=_feed(),
+            candidates=[candidate],
+            recovery_artifact_ref="artifact:publisher/delete/recovery.jsonl",
+            minimum_canonical_articles=3,
+            maximum_deletes=1,
+        )
+
+
+def test_plan_rejects_relation_when_neither_endpoint_is_the_article() -> None:
+    candidate = _candidate("mile_ghost", "article-ghost")
+    candidate["dependents"]["article_relations"][0].update(
+        {
+            "source_id": "article-other-a",
+            "target_id": "article-other-b",
+        }
+    )
 
     with pytest.raises(ValueError, match="bound to a different article"):
         plan_publisher_article_delete(

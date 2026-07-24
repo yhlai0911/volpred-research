@@ -81,7 +81,9 @@ def _stub_supabase(
     monkeypatch.setattr(
         supabase_sync,
         "_read_article_delete_dependency_contract",
-        lambda: tuple(sorted(supabase_sync.ARTICLE_DELETE_CASCADE_CONTRACT)),
+        lambda: tuple(
+            sorted(supabase_sync._article_delete_cascade_contract())
+        ),
     )
 
     def _fake_delete(slug: str) -> bool:
@@ -314,7 +316,9 @@ def test_live_dependency_contract_drift_aborts_before_child_reads(
         supabase_sync,
         "_read_article_delete_dependency_contract",
         lambda: (
-            *tuple(sorted(supabase_sync.ARTICLE_DELETE_CASCADE_CONTRACT)),
+            *tuple(
+                sorted(supabase_sync._article_delete_cascade_contract())
+            ),
             ("new_cascade_table", "article_id", "cascade"),
         ),
     )

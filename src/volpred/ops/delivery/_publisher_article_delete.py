@@ -28,15 +28,16 @@ _EFFECT_KIND = "publisher.article.supabase.delete"
 _ACKNOWLEDGEMENT_KIND = "publisher.article.supabase.delete.readback"
 _TARGET_REF = "supabase:articles"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-_CASCADE_TABLES = frozenset(
-    {
-        "article_impressions",
-        "article_reactions",
-        "article_tags",
-        "comments",
-        "question_articles",
-    }
+PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS = (
+    ("article_impressions", ("article_id",)),
+    ("article_reactions", ("article_id",)),
+    ("article_relations", ("source_id", "target_id")),
+    ("article_tags", ("article_id",)),
+    ("comments", ("article_id",)),
+    ("question_articles", ("article_id",)),
 )
+_CASCADE_COLUMNS = dict(PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS)
+_CASCADE_TABLES = frozenset(_CASCADE_COLUMNS)
 
 
 @dataclass(frozen=True)
@@ -283,7 +284,14 @@ def _normalize_candidates(
                 ),
                 key=_canonical_json,
             )
-            if any(row.get("article_id") != article_id for row in normalized_rows):
+            relation_columns = _CASCADE_COLUMNS[table]
+            if any(
+                not any(
+                    row.get(column) == article_id
+                    for column in relation_columns
+                )
+                for row in normalized_rows
+            ):
                 raise ValueError(
                     f"publisher delete {table} recovery row is bound to "
                     "a different article"
@@ -406,6 +414,7 @@ def _canonical_json(value: object) -> bytes:
 
 
 __all__ = [
+    "PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS",
     "PreparedPublisherArticleDelete",
     "PublisherArticleDeleteAuthorization",
     "PublisherArticleDeletePlan",

@@ -1297,15 +1297,17 @@ def _reconcile_dump_path(storage_dir: str | Path, stamp: str | None = None) -> P
     return Path(storage_dir) / "ops" / f"supabase_reconcile_removed_{stamp}.jsonl"
 
 
-ARTICLE_DELETE_CASCADE_CONTRACT = (
-    ("article_impressions", "article_id", "cascade"),
-    ("article_reactions", "article_id", "cascade"),
-    ("article_relations", "source_id", "cascade"),
-    ("article_relations", "target_id", "cascade"),
-    ("article_tags", "article_id", "cascade"),
-    ("comments", "article_id", "cascade"),
-    ("question_articles", "article_id", "cascade"),
-)
+def _article_delete_cascade_contract() -> tuple[tuple[str, str, str], ...]:
+    """Return the destructive intent module's canonical cascade edges."""
+    from volpred.ops.delivery import (
+        PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS,
+    )
+
+    return tuple(
+        (table, column, "cascade")
+        for table, columns in PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS
+        for column in columns
+    )
 
 
 def _read_article_delete_dependency_contract() -> tuple[tuple[str, str, str], ...]:
@@ -1346,9 +1348,10 @@ def _capture_article_delete_cascades(
     ghost_uuids: list[str],
 ) -> tuple[dict[str, dict[str, list[dict]]], dict[str, int]]:
     """Capture every live ON DELETE CASCADE row before destructive mutation."""
+    cascade_contract = _article_delete_cascade_contract()
     ghost_ids = frozenset(ghost_uuids)
     tables = tuple(
-        dict.fromkeys(table for table, _column, _action in ARTICLE_DELETE_CASCADE_CONTRACT)
+        dict.fromkeys(table for table, _column, _action in cascade_contract)
     )
     rows_by_article = {
         article_id: {table: [] for table in tables}
@@ -1360,7 +1363,7 @@ def _capture_article_delete_cascades(
     }
     unique_by_table: dict[str, set[str]] = {table: set() for table in tables}
 
-    for table, column, _action in ARTICLE_DELETE_CASCADE_CONTRACT:
+    for table, column, _action in cascade_contract:
         for offset in range(0, len(ghost_uuids), 100):
             chunk = ghost_uuids[offset : offset + 100]
             rows = _select_rows_in(table, column, chunk, select="*")
@@ -1545,7 +1548,7 @@ def reconcile_article_deletes(
             f"contract: {type(exc).__name__}: {exc}"
         )
         return result
-    expected_contract = tuple(sorted(ARTICLE_DELETE_CASCADE_CONTRACT))
+    expected_contract = tuple(sorted(_article_delete_cascade_contract()))
     if observed_contract != expected_contract:
         result["aborted"] = True
         result["reason"] = "dependency_contract_drift"

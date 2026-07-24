@@ -1155,9 +1155,10 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   risk=`destructive`的EffectRequest。Caller不再自行拼effect kind、target、
   acknowledgement或recovery digest。
 - Plan要求每個candidate不在canonical feed，slug／article id皆唯一，且
-  article_impressions、article_reactions、article_tags、comments、
-  question_articles五個family必須完整出現；每一個dependent row的article_id都須綁回
-  candidate。Module自行產生deterministic JSONL recovery artifact，scope同時綁定
+  article_impressions、article_reactions、article_relations、article_tags、comments、
+  question_articles六個table／七條FK edge必須完整出現；一般dependent row的
+  `article_id`、relations的`source_id`或`target_id`須綁回candidate。Module自行產生
+  deterministic JSONL recovery artifact，scope同時綁定
   canonical feed SHA、guard values、candidate bytes及recovery ref／SHA。
 - Authorization保存opaque approval ref、approver、timezone-aware timestamp與scope
   SHA；任何scope漂移都在EffectRequest前fail closed，approval內容漂移也不能重用原
@@ -1169,6 +1170,25 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   durable approval verifier、provider delete/read-back、mutation-boundary authority、
   exact restore executor與live rollback/convergence rehearsal尚未完成，program commit
   15及operations-core umbrella狀態不變。
+
+### 2026-07-25 publisher destructive recovery graph checkpoint
+
+- Production catalog證實`articles`目前有六張child table、七條
+  `ON DELETE CASCADE` edge；intent初版漏掉
+  `article_relations.source_id/target_id`，legacy recovery則只保存部分article欄位與
+  impressions。兩者原本都不能支持「完整rollback」宣稱。
+- Cascade column contract現在由delete intent module單一持有，shadow plan與legacy
+  runtime共用。Legacy apply在任何DELETE前以service-role-only RPC比對live catalog，
+  完整讀回article與六張child table，並把exact feed SHA、recovery v2 bytes及dump
+  SHA綁在同一capture。RPC／child read／fsync read-back失敗或feed generation漂移一律
+  零刪除；新增FK若未先擴充recovery，也會被catalog drift gate擋住。
+- Migration已套production；function owner、SECURITY DEFINER、空search path及
+  service-role-only ACL逐欄回讀。RPC得到七條edge，與code exact match；read-only
+  reconcile回讀local=1877、remote=1877、ghost=0、deleted=0；相鄰套件
+  **200 passed, 1 skipped**。此不完整recovery根因為
+  **`root_cause_fixed_and_verified`**；owner CAS、provider delete/read-back、restore
+  executor與live rollback rehearsal仍缺，program commit 15與umbrella維持
+  **`contained`**。
 
 ## 7. Provider Execution
 

@@ -38,6 +38,7 @@ from ._publisher_article_reconcile import (
     prepare_publisher_article_reconcile,
 )
 from ._publisher_article_delete import (
+    PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS,
     PreparedPublisherArticleDelete,
     PublisherArticleDeleteAuthorization,
     PublisherArticleDeletePlan,
@@ -792,6 +793,7 @@ __all__ = [
     "OwnedPublisherReconcileCommand",
     "OwnedPublisherReconcileReceipt",
     "OwnedPublisherReconcileRequest",
+    "PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS",
     "PreparedPublisherArticleReconcile",
     "PublisherArticleProjection",
     "PublisherArticleProjectionReadback",
