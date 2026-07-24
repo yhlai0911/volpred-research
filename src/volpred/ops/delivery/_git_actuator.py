@@ -127,6 +127,41 @@ class GitCommitActuator:
     def commit(self, command: CommitActuation) -> CommitActuationReceipt:
         normalized = _normalize_command(command)
         repository = Path(normalized.repository)
+        authority_request = _authority_request(normalized)
+        try:
+            authority_grant = self._authority.authorize(authority_request)
+        except CommitActuatorError:
+            raise
+        except Exception as exc:
+            raise CommitActuatorBlocked(
+                "commit authority could not authorize the request"
+            ) from exc
+        authority_grant = _validate_authority_grant(
+            authority_grant,
+            request=authority_request,
+        )
+
+        observed_head = _git_text(
+            repository,
+            "rev-parse",
+            "--verify",
+            "HEAD^{commit}",
+        )
+        if observed_head != normalized.expected_head:
+            recovered = _recover_prior_commit(
+                repository,
+                command=normalized,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                observed_head=observed_head,
+            )
+            if recovered is not None:
+                return recovered
+            raise CommitActuatorBlocked(
+                "expected HEAD fence failed and no exact prior ChangeSet "
+                "commit was found"
+            )
+
         if not self._writer_cli.is_file():
             raise CommitActuatorBlocked(
                 f"canonical Git writer CLI is unavailable: {self._writer_cli}"
@@ -150,20 +185,6 @@ class GitCommitActuator:
                 ["--expected-content-hash", f"{item.path}={item.sha256}"]
             )
         argv.extend(["--", *normalized.exact_paths])
-
-        authority_request = _authority_request(normalized)
-        try:
-            authority_grant = self._authority.authorize(authority_request)
-        except CommitActuatorError:
-            raise
-        except Exception as exc:
-            raise CommitActuatorBlocked(
-                "commit authority could not authorize the request"
-            ) from exc
-        authority_grant = _validate_authority_grant(
-            authority_grant,
-            request=authority_request,
-        )
 
         try:
             proc = subprocess.run(
@@ -191,42 +212,11 @@ class GitCommitActuator:
             raise CommitActuatorBlocked(
                 "canonical Git writer returned success without creating a commit"
             )
-        parent_sha = _git_text(
+        parent_sha = _verify_commit(
             repository,
-            "rev-parse",
-            "--verify",
-            f"{commit_sha}^{{commit}}^",
+            command=normalized,
+            commit_sha=commit_sha,
         )
-        if parent_sha != normalized.expected_head:
-            raise CommitActuatorBlocked(
-                "canonical Git writer produced a commit with an unexpected parent"
-            )
-
-        changed_paths = tuple(
-            sorted(
-                _git_text(
-                    repository,
-                    "-c",
-                    "core.quotepath=false",
-                    "diff-tree",
-                    "--no-commit-id",
-                    "--name-only",
-                    "-r",
-                    commit_sha,
-                ).splitlines()
-            )
-        )
-        if changed_paths != normalized.exact_paths:
-            raise CommitActuatorBlocked(
-                "canonical Git writer commit paths differ from the ChangeSet"
-            )
-        for item in normalized.content_hashes:
-            blob = _git_bytes(repository, "show", f"{commit_sha}:{item.path}")
-            observed = hashlib.sha256(blob).hexdigest()
-            if observed != item.sha256:
-                raise CommitActuatorBlocked(
-                    f"committed content hash differs from the ChangeSet: {item.path}"
-                )
 
         observed_at = self._clock()
         if observed_at.tzinfo is None:
@@ -248,6 +238,128 @@ class GitCommitActuator:
             status="committed",
             observed_at=observed_at.isoformat(),
         )
+
+
+def _recover_prior_commit(
+    repository: Path,
+    *,
+    command: CommitActuation,
+    authority_request: CommitAuthorityRequest,
+    authority_grant: CommitAuthorityGrant,
+    observed_head: str,
+) -> CommitActuationReceipt | None:
+    """Recover an exact writer commit whose process return was lost.
+
+    The canonical writer can only have created the first mainline child of the
+    fenced expected HEAD. Later commits may already be on top when a restarted
+    worker retries, so inspect that historical child rather than accepting an
+    arbitrary matching commit from repository history.
+    """
+
+    candidates = _git_text(
+        repository,
+        "rev-list",
+        "--first-parent",
+        "--reverse",
+        f"{command.expected_head}..{observed_head}",
+    ).splitlines()
+    if not candidates:
+        return None
+    commit_sha = candidates[0]
+    try:
+        parent_sha = _verify_commit(
+            repository,
+            command=command,
+            commit_sha=commit_sha,
+        )
+        observed_at = datetime.fromisoformat(
+            _git_text(
+                repository,
+                "show",
+                "--no-patch",
+                "--format=%cI",
+                commit_sha,
+            )
+        )
+        if observed_at.tzinfo is None or observed_at.utcoffset() is None:
+            return None
+    except (  # silent-ok: caller raises an explicit stale-HEAD recovery miss
+        CommitActuatorBlocked,
+        TypeError,
+        ValueError,
+    ):
+        return None
+
+    return CommitActuationReceipt(
+        schema_version=_RECEIPT_SCHEMA,
+        proposal_sha256=command.proposal_sha256,
+        work_item_id=command.work_item_id,
+        work_item_version=command.work_item_version,
+        authority_request_sha256=authority_request.request_sha256,
+        work_lease_ref=authority_grant.work_lease_ref,
+        primary_authority_ref=authority_grant.primary_authority_ref,
+        commit_sha=commit_sha,
+        parent_sha=parent_sha,
+        exact_paths=command.exact_paths,
+        actor=command.actor,
+        status="committed",
+        observed_at=observed_at.isoformat(),
+    )
+
+
+def _verify_commit(
+    repository: Path,
+    *,
+    command: CommitActuation,
+    commit_sha: str,
+) -> str:
+    parent_sha = _git_text(
+        repository,
+        "rev-parse",
+        "--verify",
+        f"{commit_sha}^{{commit}}^",
+    )
+    if parent_sha != command.expected_head:
+        raise CommitActuatorBlocked(
+            "canonical Git writer produced a commit with an unexpected parent"
+        )
+    message = _git_text(
+        repository,
+        "show",
+        "--no-patch",
+        "--format=%B",
+        commit_sha,
+    )
+    if message != command.message:
+        raise CommitActuatorBlocked(
+            "canonical Git writer commit message differs from the ChangeSet"
+        )
+    changed_paths = tuple(
+        sorted(
+            _git_text(
+                repository,
+                "-c",
+                "core.quotepath=false",
+                "diff-tree",
+                "--no-commit-id",
+                "--name-only",
+                "-r",
+                commit_sha,
+            ).splitlines()
+        )
+    )
+    if changed_paths != command.exact_paths:
+        raise CommitActuatorBlocked(
+            "canonical Git writer commit paths differ from the ChangeSet"
+        )
+    for item in command.content_hashes:
+        blob = _git_bytes(repository, "show", f"{commit_sha}:{item.path}")
+        observed = hashlib.sha256(blob).hexdigest()
+        if observed != item.sha256:
+            raise CommitActuatorBlocked(
+                f"committed content hash differs from the ChangeSet: {item.path}"
+            )
+    return parent_sha
 
 
 def _normalize_command(command: CommitActuation) -> CommitActuation:

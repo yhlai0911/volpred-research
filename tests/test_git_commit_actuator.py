@@ -144,6 +144,59 @@ def test_actuator_lands_and_reads_back_exact_changeset(
     ]
 
 
+def test_actuator_recovers_exact_commit_after_process_return_is_lost(
+    repository: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    committed = _actuator().commit(command)
+
+    (repo / "later.txt").write_text("later\n", encoding="utf-8")
+    _git(repo, "add", "later.txt")
+    _git(repo, "commit", "-m", "later commit")
+    head_after_later_commit = _git(repo, "rev-parse", "HEAD")
+    authority = _Authority()
+    restarted = GitCommitActuator(
+        clock=lambda: NOW,
+        authority=authority,
+        writer_cli=tmp_path / "writer-must-not-run",
+    )
+
+    recovered = restarted.commit(command)
+
+    assert recovered.commit_sha == committed.commit_sha
+    assert recovered.parent_sha == base_commit
+    assert recovered.exact_paths == command.exact_paths
+    assert recovered.actor == command.actor
+    assert recovered.status == "committed"
+    assert datetime.fromisoformat(recovered.observed_at).utcoffset() is not None
+    assert len(authority.requests) == 1
+    assert _git(repo, "rev-parse", "HEAD") == head_after_later_commit
+
+
+def test_actuator_does_not_recover_lookalike_commit_with_different_message(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(repo, "commit", "-m", "different intent")
+    lookalike_commit = _git(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="expected HEAD fence failed",
+    ):
+        _actuator().commit(command)
+
+    assert _git(repo, "rev-parse", "HEAD") == lookalike_commit
+
+
 def test_actuator_preserves_unrelated_index_and_worktree_state(
     repository: tuple[Path, str],
 ) -> None:

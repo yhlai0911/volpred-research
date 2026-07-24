@@ -271,10 +271,28 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   共 68 tests 通過。
 - production Supabase 唯讀 catalog 仍回傳 change-set／commit grant／settlement
   tables/functions 全為 `null`，證明本切片沒有越權部署。checkpoint 已 durable 後的
-  restart ambiguity 已消除；但 Git commit 成功到 checkpoint transaction 提交之間仍有
-  窄 crash window，必須由 exact Git read-back recovery 與 production workspace
-  materializer 一起封閉。formal caller、live migration、ownership cutover 與 rollback
-  rehearsal 也未完成，所以整體仍為 `contained`。
+  restart ambiguity 已消除；Git commit 成功到 checkpoint transaction 提交之間的
+  lost-return recovery 見下一節。formal caller、live migration、ownership cutover
+  與 rollback rehearsal 仍未完成，所以整體仍為 `contained`。
+
+### 2026-07-24 exact Git lost-return recovery checkpoint
+
+- `GitCommitActuator.commit()` 每次都先重新取得完整 authority grant。HEAD 若仍等於
+  expected parent 才可呼叫 canonical writer；HEAD 已前進時，actuator 只檢查該 parent
+  後第一個 first-parent commit，不會在任意 history 搜尋相似內容。
+- Recovery 要求 candidate 的 parent、完整 commit message、sorted exact path set 與
+  每個 committed blob SHA-256 都精確符合 normalized `CommitActuation`。成功時使用
+  Git committer 的 timezone-aware timestamp 重建 token-redacted receipt；任何 mismatch
+  維持 stale-HEAD fail closed，writer 零呼叫。已在 candidate 上方新增後續 commit
+  也不影響精確回讀。
+- 跨 process regression 直接讓第一個 actuator 在 writer 已 commit 後、store
+  checkpoint 前遺失 return；第二個 `ChangeDelivery` instance 由同一 proposed record
+  恢復 exact commit，接著完成 checkpoint／settlement，並證明 expected parent 到 HEAD
+  只有一筆 ChangeSet commit。Change Delivery／Git actuator scoped suite 37 passed。
+- 此切片封閉 shadow interface 的 lost-return crash window，但沒有 materialize
+  candidate workspace、部署 PostgreSQL migrations、接上 formal Work Coordinator caller
+  或完成 ownership cutover／rollback rehearsal；Change Delivery 整體仍為
+  `contained`。
 
 ## 6. Effect Delivery
 

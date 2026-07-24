@@ -265,9 +265,18 @@ parent／paths／actor／timezone-aware timestamp 與 immutable settlement recei
 FORCE RLS、PUBLIC revoke、named-function-only worker access、raw-token absence 及
 non-superuser migration replay 均通過。Change／Effect／Git 相鄰 suite 共 68 tests
 通過。Production catalog 唯讀回讀所有新舊 Change Delivery tables/functions 仍為
-`null`，確認沒有部署；Git commit 到 checkpoint 提交間的窄 crash window、workspace
-materializer、formal caller、live migration、ownership cutover 與 rollback rehearsal
-仍缺，所以此 slice 與 Change Delivery 整體都維持 `contained`。
+`null`，確認沒有部署；checkpoint 已提交後的 restart ambiguity 已消除。
+
+同日 lost-return follow-up 封閉 Git commit 已成功、但 receipt return／ChangeSet
+checkpoint 尚未完成的窄 crash window。`GitCommitActuator` retry 仍先重驗 WorkLease
+與 Primary Authority；HEAD 已前進時，只接受 expected parent 後第一個 first-parent
+commit，且 parent、完整 message、exact paths、全部 blob SHA-256 必須精確符合原
+authority-bound command，才以 Git committer 的 timezone-aware timestamp 重建 receipt。
+任何 lookalike／stale commit 均 fail closed 且不再呼叫 writer。跨 process regression
+證明 commit 後立即遺失 return 時，restart 能 recovery → checkpoint → settlement，
+且不產生第二筆 Git commit；scoped suite 37 passed。Workspace materializer、formal
+caller、live migration、ownership cutover 與 rollback rehearsal仍缺，所以 Change
+Delivery 整體維持 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

@@ -20,7 +20,9 @@ from volpred.ops.delivery import (
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
     CommitActuationReceipt,
+    CommitAuthorityGrant,
     CommitActuatorBlocked,
+    GitCommitActuator,
 )
 from volpred.ops.delivery._change_store import InMemoryChangeSetStore
 
@@ -119,6 +121,26 @@ class _TimestampActuator(_Actuator):
             super().commit(command),
             observed_at=self._observed_at,
         )
+
+
+class _Authority:
+    def authorize(self, request):
+        return CommitAuthorityGrant(
+            request_sha256=request.request_sha256,
+            work_lease_ref="work-lease:work-1:v7",
+            primary_authority_ref="primary-authority:epoch-42",
+        )
+
+
+class _LoseFirstReturn:
+    def __init__(self, actuator: GitCommitActuator) -> None:
+        self._actuator = actuator
+        self.calls = 0
+
+    def commit(self, command: CommitActuation) -> CommitActuationReceipt:
+        self.calls += 1
+        self._actuator.commit(command)
+        raise RuntimeError("process exited before actuation checkpoint")
 
 
 class _Settlement:
@@ -506,6 +528,56 @@ def test_restart_resumes_durable_checkpoint_without_second_git_write(
     assert second_actuator.commands == []
     assert len(settlement.commands) == 2
     assert restarted_process.inspect(proposed.id).status == "landed"
+
+
+def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    repo, linked, base_commit = workspace
+    (repo / "tracked.txt").write_bytes((linked / "tracked.txt").read_bytes())
+    (repo / "new.txt").write_bytes((linked / "new.txt").read_bytes())
+    store = InMemoryChangeSetStore()
+    settlement = _Settlement()
+    first_git_actuator = GitCommitActuator(
+        clock=lambda: NOW,
+        authority=_Authority(),
+    )
+    lost_return = _LoseFirstReturn(first_git_actuator)
+    first_process = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=lost_return,
+        settlement=settlement,
+        store=store,
+    )
+    proposed = first_process.propose(_proposal(linked, base_commit))
+    command = replace(_land(proposed.id), repository=str(repo))
+
+    with pytest.raises(RuntimeError, match="before actuation checkpoint"):
+        first_process.land(command)
+
+    committed_sha = _git(repo, "rev-parse", "HEAD")
+    assert committed_sha != base_commit
+    assert first_process.inspect(proposed.id).status == "proposed"
+    restarted_process = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "unused-after-restart",
+        actuator=GitCommitActuator(
+            clock=lambda: NOW,
+            authority=_Authority(),
+        ),
+        settlement=settlement,
+        store=store,
+    )
+
+    receipt = restarted_process.land(command)
+
+    assert receipt.status == "landed"
+    assert receipt.commit_sha == committed_sha
+    assert receipt.parent_sha == base_commit
+    assert restarted_process.inspect(proposed.id).status == "landed"
+    assert lost_return.calls == 1
+    assert _git(repo, "rev-list", "--count", f"{base_commit}..HEAD") == "1"
 
 
 def test_land_rejects_command_drift_after_external_commit(

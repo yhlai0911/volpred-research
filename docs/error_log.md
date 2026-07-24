@@ -1462,3 +1462,28 @@ reload、conflicting replay、RLS／PUBLIC 權限與相鄰 Change／Effect／Git
 window，且 live migration／workspace materializer／formal caller／ownership cutover／
 rollback rehearsal未完成，因此本項與 Change Delivery 整體都只能標
 **`contained`**，不得宣稱 `root_cause_fixed_and_verified`。
+
+### 2026-07-24 — Git commit 成功但 checkpoint 前遺失 return 會重入 writer
+
+**症狀與根因層級**：durable `ChangeSetStore` 只能處理 actuation checkpoint 已提交後
+的 restart。若 canonical writer 已建立 commit，但程序在 receipt return 或
+`checkpoint_actuation` 前中斷，store 仍顯示 `proposed`；新 process 會以舊
+expected HEAD 重入 actuator。先前 actuator 只看到 stale HEAD 並拒絕，既無法續
+settlement，也無 durable evidence 說明現有 child 是否就是原 write intent。這是
+external Git transaction lost-return seam，不是延長 DB lease 或重試 checkpoint 可解。
+
+**底層修復**：`GitCommitActuator` retry 仍先重驗完整 WorkLease／Primary Authority
+grant。HEAD 已前進時，只檢查 expected parent 後第一個 first-parent commit；candidate
+必須同時符合 exact parent、完整 commit message、sorted exact path set 與每個
+committed blob SHA-256，才以 Git committer 的 timezone-aware timestamp 重建
+`commit-actuation.v1`。Mismatch 維持 stale-HEAD fail closed，canonical writer 不會被
+呼叫；candidate 上方已有後續 mainline commits 仍可精確回讀。
+
+**回歸、狀態界線與制度化**：Git actuator cases 覆蓋 exact historical recovery 與
+不同 message 的 lookalike refusal；跨 `ChangeDelivery` process case 直接讓第一個
+actuator 在 commit 後遺失 return，確認第二個 process 從仍為 `proposed` 的 store
+recovery、checkpoint、settlement，且 expected parent 到 HEAD 只有一筆 ChangeSet
+commit。Change Delivery／Git actuator scoped suite 37 passed。此 lost-return 根因在
+shadow interface 為 **root_cause_fixed_and_verified**；production workspace
+materializer、formal caller、live migrations、ownership cutover 與 rollback rehearsal
+尚未完成，所以 Change Delivery 整體仍為 **`contained`**。

@@ -125,10 +125,22 @@
 > 會讀回 actuation，只續做冪等 settlement，不再呼叫 Git writer。Raw WorkLease／
 > Primary Authority token 不落表，只保存 payload-bound landing-command SHA-256。
 >
+> **Change Delivery lost-return recovery follow-up（2026-07-24，shadow）**
+> `GitCommitActuator` 在每次 retry 仍先重新取得 WorkLease／Primary Authority grant；
+> 若 canonical HEAD 已離開 expected parent，actuator 不再立刻把所有情況都視為未知
+> stale write。它只檢查 expected parent 後的第一個 first-parent commit，並要求
+> parent、完整 message、exact path set 與每個 committed blob SHA-256 全部等於原
+> authority-bound command，才由 Git committer 的 timezone-aware timestamp 重建
+> `commit-actuation.v1`。任何差異仍 fail closed，且不呼叫 writer。這讓程序在 Git
+> commit 成功、receipt return／ChangeSet checkpoint 前中斷後，可於 restart 續進
+> checkpoint 與 settlement，不會再建立第二個 commit；之後已有其他 mainline commit
+> 也可從歷史第一個 child 精確回讀。
+>
 > 以上 migrations 均未部署 live；2026-07-24 唯讀 catalog 回讀 proposal／grant／
-> settlement tables/functions 皆不存在。Git commit 已完成但 actuation checkpoint
-> 尚未提交的窄 crash window、production workspace materialization、formal caller、
-> ownership cutover 與 rollback rehearsal 仍未完成，因此不改變目前 Git ownership。
+> settlement tables/functions 皆不存在。Lost-return crash window 已由 exact Git
+> read-back recovery 在 shadow interface 封閉；production workspace materialization、
+> formal caller、ownership cutover 與 rollback rehearsal仍未完成，因此不改變目前
+> Git ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
