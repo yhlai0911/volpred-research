@@ -9,7 +9,7 @@ resulting commit object.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 import hashlib
 import json
@@ -307,31 +307,8 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
 
 
 def _authority_request(command: CommitActuation) -> CommitAuthorityRequest:
-    payload = {
-        "schema_version": "commit-authority-request.v1",
-        "proposal_sha256": command.proposal_sha256,
-        "work_item_id": command.work_item_id,
-        "work_item_version": command.work_item_version,
-        "work_lease_token": command.work_lease_token,
-        "primary_fencing_token": command.primary_fencing_token,
-        "repository": command.repository,
-        "expected_head": command.expected_head,
-        "exact_paths": list(command.exact_paths),
-        "content_hashes": [
-            {"path": item.path, "sha256": item.sha256}
-            for item in command.content_hashes
-        ],
-        "message": command.message,
-        "actor": command.actor,
-    }
-    encoded = json.dumps(
-        payload,
-        sort_keys=True,
-        separators=(",", ":"),
-        ensure_ascii=False,
-    ).encode("utf-8")
-    return CommitAuthorityRequest(
-        request_sha256=hashlib.sha256(encoded).hexdigest(),
+    request = CommitAuthorityRequest(
+        request_sha256="",
         proposal_sha256=command.proposal_sha256,
         work_item_id=command.work_item_id,
         work_item_version=command.work_item_version,
@@ -344,6 +321,39 @@ def _authority_request(command: CommitActuation) -> CommitAuthorityRequest:
         message=command.message,
         actor=command.actor,
     )
+    return replace(
+        request,
+        request_sha256=_authority_request_sha256(request),
+    )
+
+
+def _authority_request_sha256(request: CommitAuthorityRequest) -> str:
+    """Recompute the complete write-intent identity for authority adapters."""
+
+    payload = {
+        "schema_version": "commit-authority-request.v1",
+        "proposal_sha256": request.proposal_sha256,
+        "work_item_id": request.work_item_id,
+        "work_item_version": request.work_item_version,
+        "work_lease_token": request.work_lease_token,
+        "primary_fencing_token": request.primary_fencing_token,
+        "repository": request.repository,
+        "expected_head": request.expected_head,
+        "exact_paths": list(request.exact_paths),
+        "content_hashes": [
+            {"path": item.path, "sha256": item.sha256}
+            for item in request.content_hashes
+        ],
+        "message": request.message,
+        "actor": request.actor,
+    }
+    encoded = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def _validate_authority_grant(

@@ -225,6 +225,17 @@ read-only live smoke，完整 row／tags 回讀 `matches=true`（evidence SHA-25
 唯一 owner cutover 與 live rollback rehearsal 尚未完成，現行兩條 single-article
 write path 也未移除，因此此 checkpoint 僅為 **`contained`**。
 
+同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
+private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
+SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem
+version、未過期 WorkLease token 與 database-clock Primary Authority lease；成功只落
+token-redacted WorkLease／Primary Authority refs，等價 replay 回同一 immutable grant。
+Grant table FORCE RLS，worker 只有 named function execute，PUBLIC 無 execute／table
+read；PG17 non-superuser migration replay 與相關 Change／Effect Delivery suite 共
+138 tests 通過。此 migration 未套 live；`ChangeDelivery.land`、durable post-commit
+receipt、external Git interval 的 lease revalidation、正式 caller 與 rollback
+rehearsal 仍缺，因此 Change Delivery ownership 保持 `contained`。
+
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
 Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在

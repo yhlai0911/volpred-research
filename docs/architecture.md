@@ -93,6 +93,20 @@
 > parent、exact paths 與 blob hashes。這只是 program commit 10 的 actuator-side
 > interface；尚無 live Postgres authority adapter、`ChangeDelivery.land`、durable
 > receipt 或正式 caller，因此不改變目前 Git writer ownership。
+>
+> **Change Delivery durable commit-grant follow-up（2026-07-24，shadow）**
+> private `PostgresCommitAuthority` 會在跨入 database seam 前重算完整 write-intent
+> identity。單一 PostgreSQL transaction 鎖定並核對 exact running WorkItem version、
+> 未過期 WorkLease token 與 database-clock Primary Authority lease，再保存一筆只含
+> token-redacted WorkLease／Primary Authority refs 的 immutable grant。等價 replay
+> 回同一 grant；stale work／primary fence 或 forged request digest 都在 Git mutation
+> 前 fail closed。Grant table FORCE RLS，worker 只能呼叫 named function，PUBLIC 無
+> table read 或 function execute 權限。
+>
+> 此 migration 目前只有 clean-replay evidence，未套用 live。Git write 仍發生在 grant
+> transaction 結束之後；`ChangeDelivery.land`、durable post-commit settlement／
+> receipt、external-write interval 的 lease revalidation、正式 caller 與 rollback
+> rehearsal 仍未完成，因此不改變目前 Git ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

@@ -1313,3 +1313,35 @@ performance advisor 發現的 owner-generation FK covering index 缺口已修，
 新 index 尚未累積使用統計的 INFO。`email.ops_alert` 的正式 caller、ownership
 transaction、unique-owner acknowledgement 與 rollback rehearsal 五步全過，狀態為
 **root_cause_fixed_and_verified**；其他 effect family 不在本結案範圍。
+
+### 2026-07-24 — Commit actuator 的雙 fence 仍只有 fake authority — contained
+
+**症狀與根因層級**：`GitCommitActuator` 已把完整 commit intent、WorkLease token 與
+Primary Authority fencing token 交給 `CommitAuthority`，但唯一 adapter 是測試 fake。
+既有 PostgreSQL Primary Authority 只能驗證 primary lease，不能在同一 transaction
+證明 WorkItem 仍為 exact running version、claim token 尚有效；若薄包兩次查詢，兩個
+lease generation 可在中間漂移。這是 Change Delivery durable authorization seam 缺口，
+不是 Git writer 本身的 path／HEAD fence 錯誤。
+
+**底層修復**：新增 private `PostgresCommitAuthority` 與
+`authorize_commit_write` transaction。Adapter 在入 DB 前依 production canonical
+encoder 重算整份 write-intent SHA-256，拒絕 caller 把合法 hash 配到修改後的 repo、
+HEAD、path、content、message 或 token。Database function 先鎖 WorkItem，要求 exact
+`running` version、非空 holder、matching/unexpired WorkLease，再沿用 durable
+`authorize_primary_write` 驗證 database-clock Primary Authority。成功 grant 保存
+proposal、Work holder、commit worker、repository／HEAD 及兩個 token-redacted refs；
+raw tokens 不進 grant table。相同 request 冪等 replay，任何 durable identity drift
+fail closed 且整個 transaction rollback。
+
+**回歸、回讀與制度化**：public integration cases 覆蓋成功／等價 replay、stale
+WorkLease、stale Primary Authority 與 forged request digest；新 migration 在
+PostgreSQL 17 non-superuser／CREATEROLE executor 下重播全部 migrations，並把自身再跑
+一次驗證冪等。Privilege read-back 確認 grant table FORCE RLS、PUBLIC 無 SELECT／
+function EXECUTE、worker 只有 named-function EXECUTE、function 為 no-login definer
+owner 且固定 `search_path`。Change／Effect Delivery 相鄰 suite 138 passed。
+
+**狀態界線**：此 commit-grant adapter 未部署 live；grant transaction 結束後才進入
+external Git writer，尚缺 `ChangeDelivery.land`、durable post-commit settlement／
+receipt、external-write interval 的 lease revalidation、正式 caller 與 rollback
+rehearsal。因此 fake-only authorization 缺口已被 durable contract containment，但
+Change Delivery ownership 整體仍是 **contained**，現行 Git owner 不變。

@@ -14,11 +14,16 @@ import pytest
 from psycopg.conninfo import conninfo_to_dict
 from psycopg.types.json import Jsonb
 
-from volpred.ops.authority import AuthorityRequest, PrimaryAuthority, WriteIntent
+from volpred.ops.authority import (
+    AuthorityRequest,
+    PrimaryAuthority,
+    WriteIntent,
+)
 from volpred.ops.authority.postgres import PostgresAuthorityStore
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
+    ContentHash,
     EffectRequest,
     EffectRequestConflict,
     FailedEffect,
@@ -28,17 +33,34 @@ from volpred.ops.delivery._effect_worker import (
     EffectWorkerBlocked,
     _authority_request,
 )
+from volpred.ops.delivery._git_actuator import (
+    CommitActuation,
+    CommitAuthorityRequest,
+    CommitActuatorBlocked,
+    _authority_request as commit_authority_request,
+    _authority_request_sha256,
+)
 from volpred.ops.delivery.postgres import (
     EffectOutboxLease,
     EffectSettlementAuthority,
     PostgresEffectDelivery,
 )
 from volpred.ops.delivery.postgres_authority import PostgresEffectAuthority
+from volpred.ops.delivery.postgres_commit_authority import (
+    PostgresCommitAuthority,
+)
 from volpred.ops.delivery.postgres_payload import (
     EffectPayloadConflict,
     PostgresEffectPayloadStore,
 )
-from volpred.ops.work import WorkCoordinator, WorkRequest
+from volpred.ops.work import (
+    Started,
+    WorkCoordinator,
+    WorkItemView,
+    WorkLease,
+    WorkerOffer,
+    WorkRequest,
+)
 from volpred.ops.work.postgres import PostgresCoordinationStore
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -87,6 +109,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724071000_operations_core_notification_ownership_index.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724090000_operations_core_commit_authority.sql",
 )
 
 
@@ -126,6 +152,65 @@ def _validate_external_test_dsn(dsn: str) -> None:
             "'volpred_ops_effect_test', and "
             "VOLPRED_ALLOW_DESTRUCTIVE_POSTGRES_TEST=1"
         )
+
+
+def _commit_authority_security_readback(
+    dsn: str,
+) -> tuple[bool, bool, bool, bool, bool, bool]:
+    with psycopg.connect(dsn, autocommit=True) as connection:
+        return connection.execute(
+            """
+            SELECT
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.authorize_commit_write('
+                  'text,text,bigint,text,text,text,text,integer,'
+                  'text,text,text,text)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'public',
+                'volpred_ops.authorize_commit_write('
+                  'text,text,bigint,text,text,text,text,integer,'
+                  'text,text,text,text)',
+                'EXECUTE'
+              ),
+              (
+                SELECT relrowsecurity AND relforcerowsecurity
+                FROM pg_class AS relation
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = relation.relnamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND relation.relname = 'commit_authority_grants'
+              ),
+              has_table_privilege(
+                'public',
+                'volpred_ops.commit_authority_grants',
+                'SELECT'
+              ),
+              (
+                SELECT procedure.proowner = (
+                  SELECT oid FROM pg_roles
+                  WHERE rolname = 'volpred_ops_definer'
+                )
+                FROM pg_proc AS procedure
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = procedure.pronamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND procedure.proname = 'authorize_commit_write'
+              ),
+              (
+                SELECT procedure.prosecdef
+                  AND procedure.proconfig @>
+                    ARRAY['search_path=pg_catalog, volpred_ops']
+                FROM pg_proc AS procedure
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = procedure.pronamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND procedure.proname = 'authorize_commit_write'
+              )
+            """
+        ).fetchone()
 
 
 def _verify_non_superuser_migration_executor(dsn: str) -> None:
@@ -524,6 +609,20 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         assert public_rpc_fixed_search_paths is True
         assert definer_public_create is False
         assert owned_indexes is True
+        (
+            commit_worker_execute,
+            commit_public_execute,
+            commit_grants_force_rls,
+            commit_grants_public_select,
+            commit_function_owner,
+            commit_function_search_path,
+        ) = _commit_authority_security_readback(dsn)
+        assert commit_worker_execute is True
+        assert commit_public_execute is False
+        assert commit_grants_force_rls is True
+        assert commit_grants_public_select is False
+        assert commit_function_owner is True
+        assert commit_function_search_path is True
     finally:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(
@@ -658,6 +757,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.notification_owners,
               volpred_ops.effect_attempt_receipts,
               volpred_ops.effect_authority_grants,
+              volpred_ops.commit_authority_grants,
               volpred_ops.primary_authority_grants,
               volpred_ops.primary_authority_receipts,
               volpred_ops.primary_authority_leases,
@@ -726,6 +826,81 @@ def _seed_work(dsn: str, *, work_id: str = "work-effect-1") -> None:
             payload_ref=f"owner:effect:{work_id}",
         )
     )
+
+
+def _seed_running_work(
+    dsn: str,
+    *,
+    work_id: str = "work-commit-1",
+    lease_token: str = "work-lease-commit-1",
+) -> tuple[WorkLease, WorkItemView]:
+    coordinator = WorkCoordinator(
+        PostgresCoordinationStore(
+            connection_factory=lambda: _worker_connection(dsn)
+        ),
+        id_factory=lambda: work_id,
+        token_factory=lambda: lease_token,
+        clock=lambda: datetime.now(timezone.utc),
+    )
+    coordinator.submit(
+        WorkRequest(
+            idempotency_key=f"owner:commit:{work_id}",
+            source="user",
+            kind="platform_ops",
+            title="Land a durable ChangeSet",
+            priority=1,
+            required_capabilities=frozenset({"commit"}),
+            required_attestations=frozenset(),
+            risk="safe",
+            approval="auto",
+            payload_ref=f"changeset:{work_id}",
+        )
+    )
+    lease = coordinator.acquire(
+        WorkerOffer(
+            worker_id="agent:change-author",
+            capabilities=frozenset({"commit"}),
+            attestations=frozenset(),
+            lease_seconds=300,
+        )
+    )
+    assert lease is not None
+    running = coordinator.record(
+        Started(
+            work_id=lease.work_item.id,
+            lease_token=lease.token,
+            expected_version=lease.work_item.version,
+        )
+    )
+    return lease, running
+
+
+def _commit_authority_request(
+    *,
+    work_id: str,
+    work_version: int,
+    work_lease_token: str,
+    primary_fencing_token: str,
+) -> CommitAuthorityRequest:
+    command = CommitActuation(
+        proposal_sha256="a" * 64,
+        work_item_id=work_id,
+        work_item_version=work_version,
+        work_lease_token=work_lease_token,
+        primary_fencing_token=primary_fencing_token,
+        repository="/tmp/volpred-commit-authority-test",
+        expected_head="b" * 40,
+        exact_paths=("src/volpred/example.py",),
+        content_hashes=(
+            ContentHash(
+                path="src/volpred/example.py",
+                sha256="c" * 64,
+            ),
+        ),
+        message="[change-delivery] land durable grant",
+        actor="commit-worker:postgres-test",
+    )
+    return commit_authority_request(command)
 
 
 def _request(**overrides: object) -> EffectRequest:
@@ -1255,6 +1430,172 @@ def test_primary_authority_fences_concurrent_and_stale_holders(
     receipt = second.release(replacement)
     assert receipt.epoch == 2
     assert second.release(replacement) == receipt
+
+
+def test_commit_authority_atomically_verifies_both_leases(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    authority = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+
+    grant = authority.authorize(request)
+    assert authority.authorize(request) == grant
+    assert grant.request_sha256 == request.request_sha256
+    assert grant.work_lease_ref == (
+        f"work-lease:{running.id}:v{running.version}"
+    )
+    assert grant.primary_authority_ref == (
+        "primary-authority:operations-core-commits:epoch-1"
+    )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT
+              proposal_sha256, work_item_id, work_item_version,
+              work_holder_ref, commit_worker_ref, repository,
+              expected_head, work_lease_ref, primary_authority_ref
+            FROM volpred_ops.commit_authority_grants
+            WHERE request_sha256 = %s
+            """,
+            (request.request_sha256,),
+        ).fetchone()
+    assert durable == (
+        request.proposal_sha256,
+        running.id,
+        running.version,
+        "agent:change-author",
+        request.actor,
+        request.repository,
+        request.expected_head,
+        grant.work_lease_ref,
+        grant.primary_authority_ref,
+    )
+    assert work_lease.token not in repr(durable)
+    assert primary_lease.fencing_token not in repr(durable)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("work_lease_token", "stale-work-token", "WorkLease is stale"),
+        (
+            "primary_fencing_token",
+            "stale-primary-token",
+            "Primary Authority lease lost",
+        ),
+    ],
+)
+def test_commit_authority_rejects_stale_fences(
+    postgres_effect_dsn: str,
+    field: str,
+    value: str,
+    message: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    authority = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    request = replace(request, **{field: value})
+    request = replace(
+        request,
+        request_sha256=_authority_request_sha256(request),
+    )
+
+    with pytest.raises(CommitActuatorBlocked, match=message):
+        authority.authorize(request)
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        grant_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.commit_authority_grants"
+        ).fetchone()[0]
+    assert grant_count == 0
+
+
+def test_commit_authority_rejects_forged_request_hash_before_database(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(postgres_effect_dsn)
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: "primary-commit-token",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:commit-primary",
+            lease_seconds=300,
+        )
+    )
+    authority = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+
+    with pytest.raises(CommitActuatorBlocked, match="request hash"):
+        authority.authorize(replace(request, repository="/tmp/forged"))
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        grant_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.commit_authority_grants"
+        ).fetchone()[0]
+    assert grant_count == 0
 
 
 def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(

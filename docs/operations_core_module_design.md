@@ -194,9 +194,30 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   authority-request hash、WorkLease reference 與 Primary Authority reference，並仍須
   通過 commit object／parent／exact paths／blob hashes read-back 才成立。
 - 這完成的是 program commit 10 的 stale-token rejection seam，不是 live authority
-  service。Postgres Primary Authority adapter、durable DeliveryReceipt、
+  service；在這個 checkpoint 當時仍缺 Postgres Primary Authority adapter、durable
+  DeliveryReceipt、
   `ChangeDelivery.land`、network-partition failure injection 與正式 caller 仍未完成；
   step 34 的 acquire／renew／demote workflow 前不得宣稱取得 commit ownership。
+
+### 2026-07-24 PostgreSQL commit authority checkpoint
+
+- 新增 private `PostgresCommitAuthority`，作為既有 `CommitAuthority` seam 的第二個
+  adapter。它接收 current typed `PrimaryLease`；caller 不需要知道 SQL、grant table
+  或 lock ordering。
+- Adapter 在 database access 前重算 proposal、WorkItem/version、兩個 raw fencing
+  token、repository/HEAD、exact paths/content hashes、message 與 commit-worker identity
+  的 canonical SHA-256，不能把合法 digest 配給修改後的 intent。
+- `authorize_commit_write` 在同一 transaction 要求 exact `running` version、非空
+  Work holder、matching/unexpired WorkLease 與 database-clock Primary Authority。
+  Durable grant 綁 proposal、Work holder、commit worker、repository/HEAD，只暴露
+  token-redacted WorkLease／Primary Authority refs。
+- Grant table FORCE RLS；只有 no-login definer policies 可 select/insert，
+  `volpred_ops_worker` 只得到 named-function execute，PUBLIC 無 execute／table-read。
+  PostgreSQL 17 non-superuser migration replay、stale-fence、forged-hash 與 equivalent
+  replay contracts 通過。
+- 此切片仍為 `contained`：migration 未套 live，`ChangeDelivery.land` 與 durable
+  post-commit receipt 尚缺，external Git write 也尚未與 lease
+  revalidation／settlement transaction 耦合。現行 Git ownership 不變。
 
 ## 6. Effect Delivery
 
