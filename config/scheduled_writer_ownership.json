@@ -250,9 +250,10 @@
     },
     "audit_publish_sync": {
       "entrypoint": "scripts/audit_publish_sync.py",
-      "policy": "no_repo_tracked_output",
-      "tracked_outputs": [],
-      "reason": "Audit is read-only apart from logs/notifications."
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/ops/publisher_projection_convergence_latest.json"],
+      "phase_z_probe_paths": ["storage/ops/publisher_projection_convergence_latest.json"],
+      "reason": "Hourly read-only remote audit atomically publishes one typed projection-convergence receipt; it does not mutate canonical content."
     },
     "audit_fb_pipeline": {
       "entrypoint": "scripts/audit_fb_pipeline.py",
