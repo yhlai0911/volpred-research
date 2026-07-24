@@ -67,6 +67,7 @@ class OwnedPublisherArticleRequest:
     work_id: str
     effect_id: str
     request_sha256: str
+    terminal_receipt: OwnedPublisherArticleReceipt | None = None
 
 
 @dataclass(frozen=True)
@@ -198,6 +199,9 @@ class OwnedPublisherArticleSync:
             normalized,
             owner_generation=owner.generation,
         )
+        if request_view.terminal_receipt is not None:
+            self._validate_terminal_receipt(request_view)
+            return request_view.terminal_receipt
         primary_lease = self._current_primary_lease(
             expected=primary_lease,
         )
@@ -255,6 +259,25 @@ class OwnedPublisherArticleSync:
                 "owned publisher keepalive lease was replaced"
             )
         return lease
+
+    @staticmethod
+    def _validate_terminal_receipt(
+        request_view: OwnedPublisherArticleRequest,
+    ) -> None:
+        receipt = request_view.terminal_receipt
+        if receipt is None:
+            raise AssertionError("terminal receipt is required")
+        if (
+            receipt.owner_generation != request_view.owner_generation
+            or receipt.work_id != request_view.work_id
+            or receipt.effect_id != request_view.effect_id
+            or receipt.disposition
+            not in {"delivered", "dead_lettered"}
+        ):
+            raise PublisherArticleSyncOwnershipLost(
+                "owned publisher terminal receipt drifted "
+                "from its durable request"
+            )
 
     @staticmethod
     def _validate_attempt(
@@ -369,6 +392,17 @@ class SupabaseOwnedPublisherArticleStore:
                 "p_actor_ref": command.actor_ref,
             },
         )
+        receipt_payload = response.get("receipt")
+        terminal_receipt = (
+            _receipt_from_payload(
+                _mapping(
+                    receipt_payload,
+                    field="owned request terminal receipt",
+                )
+            )
+            if receipt_payload is not None
+            else None
+        )
         return OwnedPublisherArticleRequest(
             owner_generation=_positive_integer(
                 response.get("owner_generation"),
@@ -386,6 +420,7 @@ class SupabaseOwnedPublisherArticleStore:
                 response.get("request_sha256"),
                 field="owned request hash",
             ),
+            terminal_receipt=terminal_receipt,
         )
 
     def begin(

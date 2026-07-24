@@ -189,6 +189,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724170000_operations_core_publisher_article_ownership.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724180000_operations_core_publisher_article_terminal_replay.sql",
 )
 
 
@@ -4628,8 +4632,32 @@ def test_owned_publisher_transaction_cutover_delivery_and_rollback(
             receipt["effect_status"],
             receipt["disposition"],
         ) == ("succeeded", "delivered", "delivered")
-
+        terminal_replay = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_sync(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "publisher:pg17:owned-transaction",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        assert terminal_replay["work_id"] == owned_request["work_id"]
+        assert terminal_replay["effect_id"] == owned_request["effect_id"]
+        assert terminal_replay["receipt"] == receipt
         connection.execute("RESET ROLE")
+        assert connection.execute(
+            """
+            SELECT count(*)
+            FROM volpred_ops.owned_notification_attempts
+            WHERE effect_id = %s
+            """,
+            (owned_request["effect_id"],),
+        ).fetchone()[0] == 1
+
         held_after_settlement = connection.execute(
             """
             SELECT holder_ref, epoch

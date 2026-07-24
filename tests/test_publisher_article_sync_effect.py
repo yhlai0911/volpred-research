@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import replace
+from types import SimpleNamespace
 
 import pytest
 
@@ -448,3 +449,159 @@ def test_direct_sync_converges_an_empty_tag_projection(monkeypatch) -> None:
     assert deleted == [
         ("article_tags", {"article_id": "article-uuid"}),
     ]
+
+
+def test_public_sync_routes_legacy_owner_to_projection(
+    monkeypatch,
+) -> None:
+    from scripts import supabase_sync
+    from volpred.ops.delivery import owned_publisher_article
+
+    projection_calls: list[tuple[dict, object]] = []
+    monkeypatch.setattr(
+        supabase_sync,
+        "_remote_writes_blocked",
+        lambda: False,
+    )
+    monkeypatch.setattr(
+        owned_publisher_article.SupabaseOwnedPublisherArticleStore,
+        "from_environment",
+        classmethod(
+            lambda cls: SimpleNamespace(
+                read_owner=lambda: SimpleNamespace(
+                    effect_family="publisher.article.supabase.sync",
+                    owner="legacy",
+                    generation=1,
+                )
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        supabase_sync,
+        "sync_article_projection",
+        lambda item, storage_dir="storage": (
+            projection_calls.append((item, storage_dir)) or True
+        ),
+    )
+
+    assert supabase_sync.sync_article(
+        _article(),
+        storage_dir="fixture-storage",
+    )
+    assert projection_calls == [(_article(), "fixture-storage")]
+
+
+def test_public_sync_routes_operations_core_through_formal_caller(
+    monkeypatch,
+) -> None:
+    from scripts import supabase_sync
+    from volpred.ops import authority
+    from volpred.ops.delivery import owned_publisher_article
+
+    store = SimpleNamespace(
+        read_owner=lambda: SimpleNamespace(
+            effect_family="publisher.article.supabase.sync",
+            owner="operations_core",
+            generation=4,
+        )
+    )
+    keepalive_calls: list[str] = []
+    keepalive = SimpleNamespace(
+        start=lambda: keepalive_calls.append("start"),
+        stop=lambda: keepalive_calls.append("stop"),
+    )
+    commands = []
+
+    class FakeOwnedSync:
+        def __init__(self, **kwargs):
+            assert kwargs["store"] is store
+            assert kwargs["primary_authority"] is keepalive
+
+        def sync(self, command):
+            commands.append(command)
+            return SimpleNamespace(delivered=True)
+
+    monkeypatch.setattr(
+        supabase_sync,
+        "_remote_writes_blocked",
+        lambda: False,
+    )
+    monkeypatch.setattr(
+        owned_publisher_article.SupabaseOwnedPublisherArticleStore,
+        "from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        owned_publisher_article,
+        "OwnedPublisherArticleSync",
+        FakeOwnedSync,
+    )
+    monkeypatch.setattr(
+        authority,
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: (
+            keepalive
+            if kwargs
+            == {
+                "authority_key": "publisher:article.supabase.sync",
+                "holder_ref": "effect-worker:publisher-article-sync",
+            }
+            else None
+        ),
+    )
+    monkeypatch.setattr(
+        supabase_sync,
+        "sync_article_projection",
+        lambda *args, **kwargs: pytest.fail(
+            "operations_core must not call the legacy projection"
+        ),
+    )
+
+    assert supabase_sync.sync_article(
+        _article(),
+        actor_ref="publisher:test",
+    )
+    assert keepalive_calls == ["start", "stop"]
+    assert len(commands) == 1
+    assert commands[0].article == _article()
+    assert commands[0].actor_ref == "publisher:test"
+    assert commands[0].idempotency_key == (
+        "publisher:article:mile_effect_sync:"
+        + hashlib.sha256(_payload()).hexdigest()
+    )
+
+
+def test_public_sync_fails_closed_on_owner_family_drift(
+    monkeypatch,
+) -> None:
+    from scripts import supabase_sync
+    from volpred.ops.delivery import owned_publisher_article
+
+    monkeypatch.setattr(
+        supabase_sync,
+        "_remote_writes_blocked",
+        lambda: False,
+    )
+    monkeypatch.setattr(
+        owned_publisher_article.SupabaseOwnedPublisherArticleStore,
+        "from_environment",
+        classmethod(
+            lambda cls: SimpleNamespace(
+                read_owner=lambda: SimpleNamespace(
+                    effect_family="email.ops_alert",
+                    owner="legacy",
+                    generation=4,
+                )
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        supabase_sync,
+        "sync_article_projection",
+        lambda *args, **kwargs: pytest.fail(
+            "owner drift must not call a writer"
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="wrong effect family"):
+        supabase_sync.sync_article(_article())

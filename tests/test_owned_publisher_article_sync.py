@@ -271,6 +271,49 @@ def test_sync_hides_request_begin_provider_and_settlement() -> None:
     assert lease_gate.calls == 3
 
 
+def test_sync_returns_terminal_replay_without_calling_provider() -> None:
+    store = _Store(_owner())
+    terminal = OwnedPublisherArticleReceipt(
+        schema_version="owned-publisher-article-receipt.v1",
+        owner_generation=store.owner.generation,
+        work_id=store.request_view.work_id,
+        work_status="succeeded",
+        effect_id=store.request_view.effect_id,
+        effect_status="delivered",
+        attempt_count=1,
+        disposition="delivered",
+        evidence_ref="supabase:articles/mile_owned_sync",
+        evidence_sha256="d" * 64,
+        primary_authority_ref=(
+            "primary-authority:"
+            "publisher:article.supabase.sync:epoch-7"
+        ),
+        recorded_at="2026-07-24T12:00:01+00:00",
+    )
+    store.request_view = replace(
+        store.request_view,
+        terminal_receipt=terminal,
+    )
+    projection = _Projection()
+    lease_gate = _LeaseGate()
+
+    receipt = OwnedPublisherArticleSync(
+        store=store,
+        provider=PublisherArticleSyncEffectAdapter(
+            projection=projection
+        ),
+        primary_authority=lease_gate,
+    ).sync(_command())
+
+    assert receipt == terminal
+    assert [name for name, _ in store.calls] == [
+        "read_owner",
+        "request",
+    ]
+    assert projection.upserts == 0
+    assert lease_gate.calls == 1
+
+
 def test_sync_fails_closed_before_request_when_owner_is_legacy() -> None:
     store = _Store(_owner(owner="legacy"))
     projection = _Projection()
@@ -401,6 +444,49 @@ def test_service_role_adapter_sends_canonical_request_payload(
         "article": _article(),
     }
     assert "service-role-secret" not in repr(rpc_payload)
+
+
+def test_service_role_adapter_parses_terminal_request_receipt(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = SupabaseOwnedPublisherArticleStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="service-role-secret",
+    )
+    terminal_payload = {
+        "schema_version": "owned-publisher-article-receipt.v1",
+        "owner_generation": 4,
+        "work_id": "work-owned-publisher-1",
+        "work_status": "succeeded",
+        "effect_id": "effect-owned-publisher-1",
+        "effect_status": "delivered",
+        "attempt_count": 1,
+        "disposition": "delivered",
+        "evidence_ref": "supabase:articles/mile_owned_sync",
+        "evidence_sha256": "d" * 64,
+        "primary_authority_ref": (
+            "primary-authority:"
+            "publisher:article.supabase.sync:epoch-7"
+        ),
+        "recorded_at": "2026-07-24T12:00:01+00:00",
+    }
+    monkeypatch.setattr(
+        store._client,
+        "call",
+        lambda function, payload: {
+            "owner_generation": 4,
+            "work_id": "work-owned-publisher-1",
+            "effect_id": "effect-owned-publisher-1",
+            "request_sha256": "b" * 64,
+            "receipt": terminal_payload,
+        },
+    )
+
+    response = store.request(_command(), owner_generation=4)
+
+    assert response.terminal_receipt == OwnedPublisherArticleReceipt(
+        **terminal_payload
+    )
 
 
 def test_service_role_adapter_exposes_owner_cas_with_rollback_identity(
