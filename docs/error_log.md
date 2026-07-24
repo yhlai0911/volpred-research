@@ -2293,3 +2293,25 @@ command exit 0。Canonical schedule、wrapper、架構、module design與operato
 **`root_cause_fixed_and_verified`**；獨立destructive delete effect／owner／rollback
 及physical two-Mac evidence仍未完成，所以program commit 15與operations-core
 umbrella維持 **`contained`**。
+
+### 2026-07-25 — Publisher read-back期間換代後舊attempt仍可upsert
+
+**證據化症狀與根因層級**：single-article與safe reconcile formal callers已在request、
+begin及provider入口核對Primary Authority，但兩個provider的第一個動作都是真實
+Supabase read-back。Failure injections在該read-back返回前把keepalive換成新epoch／
+fencing token，舊attempt仍進入upsert；database settlement fence即使之後拒絕，也
+無法撤回已發生的外部write。根因是authority revalidation放在external boundary之前，
+而不是緊貼mutation，不是owner RPC、Supabase row或keepalive renew錯誤。
+
+**底層修復**：兩個owned callers都將進入attempt時的完整lease identity綁成mutation
+authorizer；single與batch adapters對每一筆確實需要upsert的article，在provider write
+前重新核對authority key、holder、epoch、fencing token及acquired-at。任何漂移直接
+拋ownership loss，不降級成retryable provider failure，也不settle舊attempt。已收斂
+的read-only replay維持零write，不虛耗mutation authorization。
+
+**回歸與制度化**：兩條failure injections修後都回讀projection write=0、settlement=0；
+owned callers、single／batch effects、兩套operator rehearsals、feed sync及CLI相鄰
+套件共 **82 passed**，compileall與`git diff --check`通過。此mutation-boundary fencing根因
+為 **`root_cause_fixed_and_verified`**；destructive delete的獨立EffectRequest／
+owner／rollback仍缺，所以program commit 15與operations-core umbrella維持
+**`contained`**。

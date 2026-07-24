@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（effect-family transactional routing gate）**
+Last updated: **2026-07-25（publisher reconcile mutation-boundary authority gate）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -349,6 +349,15 @@ schedule-equivalent hourly command exit 0；最終tracked-snapshot selected suit
 **`root_cause_fixed_and_verified`**。破壞性delete
 仍保留既有floor/cap/dump guard，尚未收進獨立formal effect／owner／rollback，因此
 program commit 15與operations-core umbrella仍為 **`contained`**。
+
+同一production slice隨後補上single-article與batch true-external mutation boundary的
+authority fence。兩條failure injections都讓provider第一次Supabase read-back後換成
+新epoch／fencing token；修正前舊attempt仍會upsert，修正後formal callers把原始lease
+identity傳入provider，每筆真正write前重新核對key／holder／epoch／token／acquired-at，
+漂移即以ownership loss中止且不settle。回讀projection write=0、settlement=0；相鄰
+套件 **82 passed**。
+此根因為 **`root_cause_fixed_and_verified`**，但destructive delete family仍未formal
+cutover，故program commit 15與umbrella狀態不變。
 
 同班另修正current Test Suite連續紅燈：cron alert metadata原本只能把整支log標為
 `findings`，無法表達`audit_publish_sync`的exit 1=findings、exit 2=unavailable。

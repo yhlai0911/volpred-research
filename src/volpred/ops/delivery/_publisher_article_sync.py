@@ -17,7 +17,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 from ._effect import (
     AcknowledgedEffect,
@@ -84,6 +84,8 @@ class PublisherArticleSyncEffectAdapter:
         self,
         effect: EffectView,
         payload: bytes,
+        *,
+        authorize_mutation: Callable[[], None] | None = None,
     ) -> EffectAttemptOutcome:
         if not isinstance(payload, bytes):
             return _failure(
@@ -134,6 +136,11 @@ class PublisherArticleSyncEffectAdapter:
         if acknowledged is not None:
             return acknowledged
 
+        if authorize_mutation is not None:
+            # The initial projection read is a true external boundary.  An
+            # owned caller revalidates its exact Primary Authority epoch here
+            # so a stale attempt cannot write after a blocked read-back.
+            authorize_mutation()
         try:
             written = self._projection.upsert(article)
         except Exception:

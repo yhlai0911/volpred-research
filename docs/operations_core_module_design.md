@@ -1126,6 +1126,26 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   EffectRequest／owner／rollback；program commit 34的physical two-Mac receipt也不在
   本切片，故兩個較大範圍仍標 **`contained`**。
 
+### 2026-07-25 publisher mutation-boundary authority checkpoint
+
+- Post-cutover failure injection發現single-article與batch formal callers雖在
+  `begin`後、進provider前回讀同一
+  Primary Authority epoch，provider卻先做一次true-external Supabase read-back再
+  upsert。若read-back阻塞期間keepalive被demote或另一host接管，舊attempt原本仍會在
+  已失效的epoch下執行upsert，直到settlement才可能被database fence拒絕；這時外部
+  mutation已經發生。
+- 兩個owned callers現在都把原始lease identity綁成mutation authorizer；single與batch
+  adapters在每一筆真正需要upsert的article、且緊貼provider write前重讀authority。
+  Authority key、holder、epoch、fencing token或acquired-at任一漂移都直接拋出
+  ownership loss；不轉成provider retry、不settle舊attempt。已完全收斂的零寫入
+  replay不要求額外write authority。
+- 兩條failure injections都在第一次read-back後替換epoch與token，回讀projection
+  write=0、settlement=0；owned callers、effect adapters、兩套operator rehearsals、
+  feed sync與CLI相鄰套件共 **82 passed**，compileall與`git diff --check`通過。此external-boundary
+  fencing根因為 **`root_cause_fixed_and_verified`**。Destructive delete仍缺獨立
+  EffectRequest／owner／rollback，因此program commit 15與operations-core umbrella
+  仍為 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

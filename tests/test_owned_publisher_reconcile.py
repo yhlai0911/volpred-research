@@ -278,7 +278,7 @@ def test_reconcile_hides_request_begin_provider_and_settlement() -> None:
         "outbox-token",
         "primary-token",
     )
-    assert lease_gate.calls == 3
+    assert lease_gate.calls == 4
 
 
 def test_reconcile_fails_closed_when_settlement_receipt_drifts() -> None:
@@ -423,6 +423,44 @@ def test_reconcile_fails_closed_before_provider_when_lease_is_replaced() -> None
         return attempt
 
     store.begin = begin_and_replace  # type: ignore[method-assign]
+
+    with pytest.raises(
+        PublisherArticleReconcileOwnershipLost,
+        match="lease was replaced",
+    ):
+        OwnedPublisherArticleReconcile(
+            store=store,
+            provider=PublisherArticleReconcileEffectAdapter(
+                projection=projection
+            ),
+            primary_authority=lease_gate,
+        ).reconcile(_command())
+
+    assert projection.upserts == 0
+    assert [name for name, _ in store.calls] == [
+        "read_owner",
+        "request",
+        "begin",
+    ]
+
+
+def test_reconcile_revalidates_lease_after_readback_before_write() -> None:
+    store = _Store(_owner())
+    projection = _Projection()
+    lease_gate = _LeaseGate()
+    original = lease_gate.lease
+    original_readback = projection.readback
+
+    def readback_and_replace_lease(article: dict):
+        observed = original_readback(article)
+        lease_gate.lease = replace(
+            original,
+            epoch=original.epoch + 1,
+            fencing_token="replacement-token",
+        )
+        return observed
+
+    projection.readback = readback_and_replace_lease  # type: ignore[method-assign]
 
     with pytest.raises(
         PublisherArticleReconcileOwnershipLost,

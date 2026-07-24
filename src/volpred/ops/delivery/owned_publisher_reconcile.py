@@ -222,6 +222,9 @@ class OwnedPublisherArticleReconcile:
         outcome = self._provider.deliver(
             attempt.effect,
             attempt.payload,
+            authorize_mutation=lambda: self._current_primary_lease(
+                expected=primary_lease,
+            ),
         )
         receipt = self._store.settle(attempt, outcome)
         self._validate_settlement_receipt(

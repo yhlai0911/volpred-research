@@ -13,6 +13,7 @@ import json
 import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from typing import Callable
 
 from ._effect import (
     AcknowledgedEffect,
@@ -120,6 +121,8 @@ class PublisherArticleReconcileEffectAdapter:
         self,
         effect: EffectView,
         payload: bytes,
+        *,
+        authorize_mutation: Callable[[], None] | None = None,
     ) -> EffectAttemptOutcome:
         if not isinstance(payload, bytes):
             return _failure(
@@ -163,6 +166,15 @@ class PublisherArticleReconcileEffectAdapter:
         for article, observed in zip(plan.articles, before, strict=True):
             if _readback_matches(observed):
                 continue
+            if authorize_mutation is not None:
+                # Read-back is a true external boundary and may block long
+                # enough for the host authority lease to be replaced.  The
+                # owner-fenced caller supplies an exact-epoch revalidation
+                # here so a stale attempt cannot write after that boundary.
+                # Authority failures deliberately escape instead of becoming
+                # provider retries: the durable attempt must expire without a
+                # settlement from the stale host.
+                authorize_mutation()
             try:
                 written = self._projection.upsert(article)
             except Exception:  # noqa: BLE001 - provider errors become evidence.
