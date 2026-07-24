@@ -955,6 +955,40 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   RED injections原先兩次均未 raise，修正後連同 publisher／PostgreSQL相鄰套件共
   **69 passed**，且未執行 remote write或 owner mutation。
 
+### 2026-07-25 publisher production ownership closure
+
+- Active frontend `ae14890` 從 clean detached worktree 經
+  `frontend-v2-fix/scripts/deploy-zeabur-safe.sh` 上傳到 canonical `volpred-v3`；
+  Zeabur deployment `6a6393ea4727f1da77de7137` 為 `RUNNING`，部署腳本對
+  production feed／strategy API 的下游回讀都通過。Active checkout 內既有的
+  package／PDF／test 變更沒有進 deployment。
+- Generation 6 的 live fence read-back 得到 full-feed
+  `409 operations_core_owns_publisher_article_sync` 與 single-report
+  `delegated/operations_core/6`。Canonical published single-report
+  `crisis_protection_20260316_002220` 經 database-owner router與 formal caller
+  產生 `work_owned_publisher_110068f9062bfe12d5a501935f1a631c`／
+  `effect_owned_publisher_110068f9062bfe12d5a501935f1a631c`；durable terminal
+  receipt為 attempt 1、`succeeded/delivered`，provider evidence ref
+  `supabase:articles/crisis_protection_20260316_002220`，SHA-256
+  `9ecceb0468f16bec17b2e0a418db4a4ae4c512850c1e39723122996ef33bcbe1`。
+- Exact generation-CAS rollback回到 `legacy/7`，再正式 recutover到
+  `operations_core/8`。Generation 7 stale transfer 被 production RPC拒絕；final
+  owner與 generation 8 的兩條 live route fence均已回讀。前兩次 operator-script
+  preflight／receipt呈現錯誤也都在 exception path自動回到 legacy，沒有留下雙 owner；
+  第一案在 article input前、第二案在 terminal receipt後，後者的 projection write為
+  同一 canonical article的冪等 upsert。
+- 新增 `scripts/rehearse_publisher_cutover.py` 作唯一 operator rehearsal seam：
+  article存在性、path-safe slug、published status都在 CAS前驗證；空 full-feed 先證明
+  409，才以完整 canonical article驗 single-report delegated；delivery receipt直接
+  由 typed dataclass序列化。任何 cutover後例外都在 `finally` 以目前 generation做
+  exact rollback。四個 regression cases覆蓋 mutation前 preflight、成功 rollback、
+  live-probe failure與 receipt generation drift。
+- 以上完成 program commit 14 的 production deployment、唯一 owner fence、
+  acknowledged single-article effect、exact rollback、stale-generation refusal與
+  final recutover，狀態為 **`root_cause_fixed_and_verified`**。Program commit 34
+  的真實 network-partition／Supabase outage／五分鐘 RTO，以及其他 operations-core
+  umbrella slices不由此結案。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

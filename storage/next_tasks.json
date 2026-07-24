@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Publisher formal caller now rejects settlement or terminal-replay receipts whose schema, generation, Work/Effect/attempt, authority ref, provider evidence, or lifecycle tuple drifts; 69 adjacent publisher/PostgreSQL cases pass with no remote write or owner mutation.",
-    "next_direct_step": "Push and deploy active frontend commit ae14890 through the authorized release path, read back the live route owner fence/version, then CAS publisher owner to operations_core for one article acknowledgement and exact rollback rehearsal; do not cut over before deployment.",
+    "containment_evidence": "Publisher program commit 14 is root_cause_fixed_and_verified: frontend ae14890 deployed as Zeabur 6a6393ea4727f1da77de7137; live full-feed 409 and single-report delegated fences passed; generation 6 formal caller returned attempt-1 succeeded/delivered receipt for crisis_protection_20260316_002220; exact rollback reached legacy/7, final recutover is operations_core/8, and stale generation 7 CAS was refused. Canonical rehearsal CLI now preflights inputs and automatically rolls back failures. Overall operations-core umbrella remains contained.",
+    "next_direct_step": "Run the bounded program commit 34 production outage/RTO rehearsal with provider effects disabled: interrupt Supabase lease renewal, prove HostAuthorityKeepalive closes the local enable gate, restore service and prove standby reacquires within five minutes, then read back zero duplicate claims/effects. Keep publisher owner operations_core/8 and verify the fence before/after the outage.",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Settlement-response and terminal-replay lifecycle validation added in canonical caller; two RED DID-NOT-RAISE injections now pass, adjacent suites 69 passed, compileall and diff check passed."
+    "latest_checkpoint": "Frontend deployment 6a6393ea4727f1da77de7137 is RUNNING; publisher generation 6 acknowledgement and exact rollback passed; final production owner is operations_core/8 with live route fences and stale-generation refusal verified. Four new rehearsal regressions pass locally; full tracked CI-parity rerun follows commit."
   }
 ]

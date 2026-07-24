@@ -2027,3 +2027,37 @@ Architecture、operations-core design與 improvement status已同步；本切片
 write、owner transfer或 frontend deploy。這個 response-boundary根因為
 **`root_cause_fixed_and_verified`**；program commit 14仍因 frontend live fence、
 唯一 owner acknowledgement與rollback rehearsal未完成而維持 **`contained`**。
+
+### 2026-07-25 — Publisher owner fence 已部署，但人工 rehearsal 在 CAS 後才驗 input／猜 receipt 欄位
+
+**證據化症狀**：active frontend `ae14890` 從 clean detached worktree部署成功，
+Zeabur deployment `6a6393ea4727f1da77de7137` 為 `RUNNING`，live API通過。第一次
+generation 2 cutover後，兩條 live fence已分別回 409／delegated，但 operator script
+才發現從 feed選到的 `mile_30b22ca5` 沒有 single-report檔。第二次 generation 4 已完成
+canonical article delivery並取回 typed terminal receipt，呈現證據時卻讀取不存在的
+`work_item_id`欄位。兩案都由 `finally` 自動 CAS rollback，owner依序回到
+`legacy/3`與`legacy/5`；第一案未建立 request／attempt，第二案只對同一 canonical
+article做已確認的冪等 projection。
+
+**根因層級與底層重構**：缺口在 operator transaction seam：本地 immutable input
+preflight與 typed receipt呈現沒有收進 cutover interface，而不是 frontend、RPC或
+Supabase article資料錯誤。新增 `scripts/rehearse_publisher_cutover.py`，在任何 remote
+mutation前驗 article檔存在、slug path-safe、id一致且 status為 published；idempotency
+key綁 deployment、cutover generation與 slug。Live probe先以空 full-feed證明 409，
+再以完整 canonical article驗 single-report delegated，避免 branch drift時寫入殘缺
+dummy row。Receipt只接受 typed `OwnedPublisherArticleReceipt`、同 generation、
+attempt 1與合法 delivered lifecycle，輸出直接 `dataclasses.asdict()`，不再手抄欄位。
+任何 cutover後例外均從 live owner read-back取得目前 generation做 exact rollback。
+
+**回歸、production回讀與制度化**：四個新 cases覆蓋 mutation前缺檔、成功 ack／rollback、
+live fence failure automatic rollback與 receipt generation drift。正式 generation 6
+rehearsal回讀 full-feed 409、single-report delegated；article
+`crisis_protection_20260316_002220` receipt為
+`work_owned_publisher_110068f9062bfe12d5a501935f1a631c`／
+`effect_owned_publisher_110068f9062bfe12d5a501935f1a631c`、attempt 1、
+`succeeded/delivered`，evidence SHA-256
+`9ecceb0468f16bec17b2e0a418db4a4ae4c512850c1e39723122996ef33bcbe1`。Exact rollback
+回到 `legacy/7`後，final recutover為 `operations_core/8`；stale generation 7 transfer
+被拒，generation 8兩條 frontend fence再次通過。故 operator seam與 program commit 14
+為 **`root_cause_fixed_and_verified`**；整體 operations-core umbrella仍為
+**`contained`**。

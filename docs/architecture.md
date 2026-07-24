@@ -363,6 +363,23 @@
 > 69 cases通過。這個 publisher program 仍為
 > `contained`，下一個 gate 是部署 frontend、回讀 live route version，再做唯一 owner
 > article acknowledgement 與 rollback rehearsal。
+>
+> **2026-07-25 production closure（取代上方 pre-deploy 狀態）**：active frontend
+> commit `ae14890` 已由 clean detached worktree 經 canonical Zeabur CLI upload 部署，
+> deployment `6a6393ea4727f1da77de7137` 為 `RUNNING`，feed 與 strategy API 均通過。
+> Owner generation 6 下，live full-feed route 回
+> `409 operations_core_owns_publisher_article_sync`，single-report route 回
+> `delegated/operations_core/6`；canonical article
+> `crisis_protection_20260316_002220` 經 formal caller 得到
+> `owned-publisher-article-receipt.v1`、attempt 1、
+> `succeeded/delivered`，evidence SHA-256
+> `9ecceb0468f16bec17b2e0a418db4a4ae4c512850c1e39723122996ef33bcbe1`。
+> Exact rollback 回讀 `legacy/7`，最後 recutover 回讀
+> `operations_core/8`；舊 generation 7 的 transfer 被 CAS 拒絕，兩條 live frontend
+> fence 也在 generation 8 再次回讀。`scripts/rehearse_publisher_cutover.py` 將
+> preflight、live fence、typed receipt 與 failure rollback 收成單一 operator seam。
+> 因而 program commit 14 為 **`root_cause_fixed_and_verified`**；這不擴張為整個
+> operations-core 或 program commit 34 已完成。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

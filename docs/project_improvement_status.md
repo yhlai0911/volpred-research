@@ -280,6 +280,22 @@ diff check通過；沒有 remote write或 owner mutation。這個 response-bound
 **`root_cause_fixed_and_verified`**，但 frontend deploy、live owner cutover與rollback
 仍缺，program commit 14整體狀態不變。
 
+2026-07-25 完成 program commit 14 production closure。Active frontend commit
+`ae14890` 由 clean detached worktree 經 canonical Zeabur upload部署為
+`6a6393ea4727f1da77de7137`（`RUNNING`），live feed／strategy API通過。Generation 6
+下 full-feed route回 409、single-report route回 delegated；published article
+`crisis_protection_20260316_002220` 的 formal caller receipt為 attempt 1、
+`succeeded/delivered`，evidence SHA-256
+`9ecceb0468f16bec17b2e0a418db4a4ae4c512850c1e39723122996ef33bcbe1`。Exact rollback
+回讀 `legacy/7`，final recutover回讀 `operations_core/8`，舊 generation 7 CAS被拒，
+generation 8兩條 frontend fence再次通過。Canonical
+`scripts/rehearse_publisher_cutover.py` 把 mutation前 single-report preflight、live
+fence、typed receipt與任何失敗的 automatic rollback制度化；四個 regression cases
+覆蓋成功與 failure paths。因此 program commit 14為
+**`root_cause_fixed_and_verified`**。整體 operations-core與 program commit 34仍因
+真實 network partition／Supabase outage／五分鐘 RTO等未完成而維持
+**`contained`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem

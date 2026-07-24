@@ -88,6 +88,8 @@ npx zeabur@latest service redeploy --id <service_id> -i=false -y             # �
 # 安全部署前端代碼到 live service（volpred.zeabur.app -> volpred-v3 service）:
 cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh
 # 文件：docs/zeabur-safe-deploy.md
+# Publisher owner fence 部署後的正式 CAS → 單篇 acknowledgement → exact rollback：
+uv run python scripts/rehearse_publisher_cutover.py --deployment-id <zeabur_deployment_id> --slug <published_single_report_slug>
 # 注意：所有 CLI 命令加 -i=false 避免互動式 prompt
 
 # 發佈
