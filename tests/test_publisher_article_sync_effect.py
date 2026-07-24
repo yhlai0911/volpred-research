@@ -389,7 +389,7 @@ def test_supabase_projection_adapter_compares_full_row_and_tags(
     calls: list[dict] = []
     monkeypatch.setattr(
         supabase_sync,
-        "sync_article",
+        "sync_article_projection",
         lambda item, storage_dir="storage": calls.append(item) or True,
     )
     adapter = SupabaseArticleProjectionAdapter(storage_dir="storage")

@@ -6,6 +6,7 @@ Used by record_and_publish.py and daily_update.py.
 Requires: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars
 (or uses defaults from .env.local)
 """
+import hashlib
 import json
 import os
 import re
@@ -855,8 +856,92 @@ def projected_article_row(item: dict, *, verbose: bool = True) -> dict:
     }
 
 
-def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
-    """Sync a single article (feed item) to Supabase.
+def sync_article(
+    item: dict,
+    storage_dir: str | Path = "storage",
+    *,
+    actor_ref: str = "publisher:sync_article",
+    idempotency_key: str | None = None,
+) -> bool:
+    """Route one article through the database-selected production owner.
+
+    ``legacy`` keeps the established projection writer. ``operations_core``
+    enters the owner-fenced formal caller, which owns durable WorkItem,
+    payload, EffectRequest/outbox, provider read-back, and settlement. Owner
+    lookup failure is fail-closed; silently falling back would create two
+    production writers after cutover.
+    """
+    if _remote_writes_blocked():
+        return sync_article_projection(item, storage_dir=storage_dir)
+
+    from volpred.ops.delivery.owned_publisher_article import (
+        OwnedPublisherArticleCommand,
+        OwnedPublisherArticleSync,
+        PublisherArticleSyncOwnershipLost,
+        SupabaseOwnedPublisherArticleStore,
+    )
+
+    ownership_store = SupabaseOwnedPublisherArticleStore.from_environment()
+    owner = ownership_store.read_owner()
+    if owner.effect_family != "publisher.article.supabase.sync":
+        raise PublisherArticleSyncOwnershipLost(
+            "publisher owner read returned the wrong effect family"
+        )
+    if owner.owner == "legacy":
+        return sync_article_projection(item, storage_dir=storage_dir)
+    if owner.owner != "operations_core":
+        raise PublisherArticleSyncOwnershipLost(
+            f"unsupported publisher article owner: {owner.owner}"
+        )
+
+    from volpred.ops.authority import (
+        build_supabase_host_authority_keepalive,
+    )
+    from volpred.ops.delivery._publisher_article_sync import (
+        PublisherArticleSyncEffectAdapter,
+        SupabaseArticleProjectionAdapter,
+        encode_publisher_article_sync_payload,
+    )
+
+    payload = encode_publisher_article_sync_payload(item)
+    slug = str(item.get("id") or "")
+    delivery_key = idempotency_key or (
+        f"publisher:article:{slug}:"
+        f"{hashlib.sha256(payload).hexdigest()}"
+    )
+    worker_id = "effect-worker:publisher-article-sync"
+    keepalive = build_supabase_host_authority_keepalive(
+        authority_key="publisher:article.supabase.sync",
+        holder_ref=worker_id,
+    )
+    keepalive.start()
+    try:
+        receipt = OwnedPublisherArticleSync(
+            store=ownership_store,
+            provider=PublisherArticleSyncEffectAdapter(
+                projection=SupabaseArticleProjectionAdapter(
+                    storage_dir=storage_dir
+                )
+            ),
+            primary_authority=keepalive,
+            worker_id=worker_id,
+        ).sync(
+            OwnedPublisherArticleCommand(
+                idempotency_key=delivery_key,
+                article=item,
+                actor_ref=actor_ref,
+            )
+        )
+    finally:
+        keepalive.stop()
+    return receipt.delivered
+
+
+def sync_article_projection(
+    item: dict,
+    storage_dir: str | Path = "storage",
+) -> bool:
+    """Write the provider-owned article projection directly to Supabase.
 
     Contentlayer pattern (2026-04-18): feed.json is canonical and now
     holds the complete content directly (post reconcile_content_from_singles).

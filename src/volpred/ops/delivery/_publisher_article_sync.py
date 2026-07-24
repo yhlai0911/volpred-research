@@ -175,7 +175,12 @@ class SupabaseArticleProjectionAdapter:
 
     def upsert(self, article: dict) -> bool:
         sync = _supabase_sync_module()
-        return bool(sync.sync_article(article, storage_dir=self._storage_dir))
+        return bool(
+            sync.sync_article_projection(
+                article,
+                storage_dir=self._storage_dir,
+            )
+        )
 
     def readback(
         self,
