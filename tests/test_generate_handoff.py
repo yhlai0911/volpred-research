@@ -105,6 +105,44 @@ def test_handoff_switches_to_direct_execution_contract(tmp_path, monkeypatch) ->
     assert "Claim 流程（避免雙 session 撞題）" not in handoff
 
 
+def test_handoff_labels_preserved_pending_control_row_without_false_drift(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(
+        tmp_path,
+        [
+            {
+                "id": "control-task",
+                "status": "pending",
+                "task_type": "platform_ops",
+                "priority": 1,
+            }
+        ],
+    )
+    (tmp_path / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "direct_execution",
+                "preserve_task_ids": ["control-task"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    _patch_paths(monkeypatch, module, tmp_path)
+
+    handoff = module.build()
+
+    assert "direct_mode_receipt: clean" in handoff
+    assert "**Direct-mode preserved control rows**：1；**claimable**：0" in handoff
+    assert "owner 控制任務；禁止 claim" in handoff
+    assert "不需 reconcile" in handoff
+    assert "Direct-mode pending drift rows" not in handoff
+    assert "以下 row 只供 drift 對帳" not in handoff
+
+
 def test_handoff_keeps_admission_closed_during_restore_transaction(
     tmp_path,
     monkeypatch,

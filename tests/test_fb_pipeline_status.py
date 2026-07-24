@@ -316,6 +316,151 @@ def test_ops_dashboard_production_pending_counts_pending_main_thread(tmp_path, m
     assert section["pending_main_thread_count"] == 2
 
 
+def test_ops_dashboard_excludes_clean_direct_control_row_from_backlog(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    tasks = [
+        {
+            "id": "control-task",
+            "status": "pending",
+            "task_type": "platform_ops",
+        }
+    ]
+    (repo / "storage" / "next_tasks.json").write_text(
+        json.dumps(tasks),
+        encoding="utf-8",
+    )
+    (repo / "storage" / "ops" / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "direct_execution",
+                "preserve_task_ids": ["control-task"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text(
+        '{"system_crontab":{"items":[]}}\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import contextlib
+    import io
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    pending_section = next(
+        section
+        for section in payload["sections"]
+        if section["section"] == "production_pending"
+    )
+
+    assert rc == 0
+    assert pending_section["status"] == "ok"
+    assert pending_section["pending_count"] == 0
+    assert pending_section["direct_control_row_count"] == 1
+    assert pending_section["direct_receipt_drift_count"] == 0
+    assert pending_section["next"] is None
+    assert "claimable=0" in pending_section["tldr"]
+
+
+def test_ops_dashboard_surfaces_direct_receipt_drift_without_refill(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    repo = tmp_path
+    (repo / "storage" / "reports").mkdir(parents=True)
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "notifications").mkdir(parents=True)
+    (repo / "config").mkdir(parents=True)
+
+    tasks = [
+        {
+            "id": "control-task",
+            "status": "in_progress",
+            "task_type": "platform_ops",
+        },
+        {
+            "id": "stale-writer-leak",
+            "status": "pending",
+            "task_type": "platform_ops",
+        },
+    ]
+    (repo / "storage" / "next_tasks.json").write_text(
+        json.dumps(tasks),
+        encoding="utf-8",
+    )
+    (repo / "storage" / "ops" / "task_pool_mode.json").write_text(
+        json.dumps(
+            {
+                "enabled": True,
+                "mode": "direct_execution",
+                "preserve_task_ids": ["control-task"],
+            }
+        ),
+        encoding="utf-8",
+    )
+    (repo / "storage" / "reports" / "feed.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "ops" / "cron_last_run.json").write_text("{}\n", encoding="utf-8")
+    (repo / "storage" / "reports" / "trending_repost_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "storage" / "notifications" / "notification_log.json").write_text("[]\n", encoding="utf-8")
+    (repo / "config" / "runtime_schedules.json").write_text(
+        '{"system_crontab":{"items":[]}}\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(ops_dashboard, "REPO", repo)
+    monkeypatch.setattr(ops_dashboard, "http_ok", lambda url, timeout=8: True)
+    monkeypatch.setattr(
+        ops_dashboard,
+        "build_alert_condition_report",
+        lambda storage_dir="storage": {"conditions": [], "breach_count": 0},
+    )
+
+    import contextlib
+    import io
+
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc = ops_dashboard.main()
+    payload = json.loads(buf.getvalue())
+    pending_section = next(
+        section
+        for section in payload["sections"]
+        if section["section"] == "production_pending"
+    )
+
+    assert rc == 0
+    assert pending_section["status"] == "warn"
+    assert pending_section["pending_count"] == 0
+    assert pending_section["direct_control_row_count"] == 1
+    assert pending_section["direct_receipt_drift_count"] == 1
+    assert "reconcile-direct" in pending_section["next"]
+    assert "refill" not in pending_section["next"]
+
+
 def test_ops_dashboard_warns_on_invalid_inflight_timestamp(tmp_path, monkeypatch, capsys) -> None:
     repo = tmp_path
     (repo / "storage" / "reports").mkdir(parents=True)

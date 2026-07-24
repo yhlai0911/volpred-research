@@ -425,6 +425,27 @@ def build() -> str:
         if active_direct_execution and queue_readable
         else None
     )
+    preserve_ids = (
+        set(task_pool_mode.get("preserve_task_ids", []))
+        if (
+            active_direct_execution
+            and direct_mode_drift
+            and direct_mode_drift["receipt_valid"]
+        )
+        else set()
+    )
+    direct_control_pending = [
+        task
+        for task in tasks
+        if task.get("status") in {"pending", "pending_main_thread"}
+        and task.get("id") in preserve_ids
+    ]
+    direct_drift_pending = [
+        task
+        for task in tasks
+        if task.get("status") in {"pending", "pending_main_thread"}
+        and task.get("id") not in preserve_ids
+    ]
     dashboard = _load_json(DASHBOARD, {})
     work_log = _load_json(WORK_LOG, [])
     gmail = _load_json(GMAIL_STATE, {})
@@ -508,16 +529,19 @@ def build() -> str:
         pending_rows = (
             snap["codex_eligible_pending_count"] + snap["codex_skip_pending_count"]
         )
-        row_context = (
-            "restore-transaction rows"
-            if restore_in_progress
-            else (
-                "unreadable-snapshot rows"
-                if snapshot_unreadable
-                else "direct-mode pending rows"
-            )
-        )
-        lines.append(f"  - {row_context} (claimable=0): {pending_rows}")
+        if restore_in_progress:
+            row_context = "restore-transaction rows"
+            row_count = pending_rows
+        elif snapshot_unreadable:
+            row_context = "unreadable-snapshot rows"
+            row_count = pending_rows
+        elif direct_mode_drift and direct_mode_drift["breached"]:
+            row_context = "direct-mode drift pending rows"
+            row_count = len(direct_drift_pending)
+        else:
+            row_context = "direct-mode control pending rows"
+            row_count = len(direct_control_pending)
+        lines.append(f"  - {row_context} (claimable=0): {row_count}")
     else:
         lines.append(f"  - Codex-eligible pending: {snap['codex_eligible_pending_count']}")
         lines.append(f"  - Codex-skip pending: {snap['codex_skip_pending_count']}")
@@ -572,9 +596,15 @@ def build() -> str:
             lines.append(
                 f"- **Unreadable snapshot rows**：{pending_rows}；**claimable**：0"
             )
+        elif direct_mode_drift and direct_mode_drift["breached"]:
+            lines.append(
+                f"- **Direct-mode pending drift rows**："
+                f"{len(direct_drift_pending)}；**claimable**：0"
+            )
         else:
             lines.append(
-                f"- **Direct-mode pending drift rows**：{pending_rows}；"
+                f"- **Direct-mode preserved control rows**："
+                f"{len(direct_control_pending)}；"
                 "**claimable**：0"
             )
     else:
@@ -595,7 +625,32 @@ def build() -> str:
             lines.append(_format_task_line(t))
         lines.append("")
         lines.append("**All pending top 8**：")
-    if direct_mode and snap["pending_top"]:
+    if (
+        active_direct_execution
+        and direct_mode_drift
+        and direct_mode_drift["breached"]
+    ):
+        lines.append(
+            "> 以下 row 只供 drift 對帳；禁止 claim。先執行 "
+            "`task_pool_control.py status` 取得 state_sha256，再以 "
+            "`task_pool_control.py reconcile-direct --expected-state-sha256 <SHA>` "
+            "收斂並回讀 status。"
+        )
+        if direct_drift_pending:
+            for t in direct_drift_pending[:8]:
+                lines.append(_format_task_line(t))
+        else:
+            lines.append(
+                "- (receipt breach 不在 pending rows；依 §1 identity 明細收斂)"
+            )
+    elif active_direct_execution and direct_control_pending:
+        lines.append(
+            "> 以下 row 是 activation receipt 保留的 owner 控制任務；禁止 claim，"
+            "依 §9 直接續做，不需 reconcile。"
+        )
+        for t in direct_control_pending[:8]:
+            lines.append(_format_task_line(t))
+    elif direct_mode and snap["pending_top"]:
         if restore_in_progress:
             lines.append(
                 "> 以下 row 是尚未 finalise 的 restore recovery data；禁止 claim。"
@@ -604,10 +659,7 @@ def build() -> str:
             )
         else:
             lines.append(
-                "> 以下 row 只供 drift 對帳；禁止 claim。先執行 "
-                "`task_pool_control.py status` 取得 state_sha256，再以 "
-                "`task_pool_control.py reconcile-direct --expected-state-sha256 <SHA>` "
-                "收斂並回讀 status。"
+                "> owner/queue snapshot 尚不可安全分類；禁止 claim 或 refill。"
             )
         for t in snap["pending_top"]:
             lines.append(_format_task_line(t))

@@ -24,6 +24,7 @@ if str(SRC) not in sys.path:
 
 from volpred.ops.alerts import build_alert_condition_report
 from volpred.ops.boss_facing import plainify_boss_text
+from volpred.ops.task_pool_mode import load_task_pool_mode
 
 FB_POST_TERMINAL_STATUSES = {"success", "wont_fix", "fb_silent_reject", "expired_skip"}
 FB_POST_HANDOFF_STATUSES = {"awaiting_interactive_session"}
@@ -166,7 +167,45 @@ def main():
     now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
     # L1 Production
-    nt = jl(REPO / "storage" / "next_tasks.json", [])
+    raw_tasks = jl(REPO / "storage" / "next_tasks.json", [])
+    if not isinstance(raw_tasks, list):
+        raw_tasks = []
+    mode_path = REPO / "storage" / "ops" / "task_pool_mode.json"
+    owner_mode = None
+    owner_mode_error = None
+    try:
+        owner_mode = load_task_pool_mode(mode_path)
+        if owner_mode.enabled and owner_mode.mode not in {
+            "direct_execution",
+            "restore_in_progress",
+        }:
+            raise ValueError(
+                f"unsupported enabled task-pool mode {owner_mode.mode!r}"
+            )
+    except (OSError, UnicodeError, ValueError) as exc:
+        warn_json_read_failed(mode_path, exc)
+        owner_mode_error = f"{type(exc).__name__}: {exc}"
+
+    owner_closed = bool(owner_mode and owner_mode.enabled)
+    preserve_ids = (
+        set(owner_mode.preserve_task_ids)
+        if owner_mode and owner_mode.mode == "direct_execution"
+        else set()
+    )
+    direct_control_rows = [
+        task
+        for task in raw_tasks
+        if isinstance(task, dict) and task.get("id") in preserve_ids
+    ]
+    direct_drift_rows = [
+        task
+        for task in raw_tasks
+        if not isinstance(task, dict) or task.get("id") not in preserve_ids
+    ]
+    # Closed-owner rows are control/recovery state, never production backlog.
+    # In particular, a preserved row released back to ``pending`` cannot be
+    # claimed while direct execution is active and must not trigger refill.
+    nt = [] if owner_closed or owner_mode_error else raw_tasks
     pending = [t for t in nt if t.get("status") == "pending"]
     pending_main = [t for t in nt if t.get("status") == "pending_main_thread"]
     actionable = pending + pending_main
@@ -217,7 +256,40 @@ def main():
     # flowing — it is NOT under-supplied. (boss mandate 2026-06-08：persistent warn
     # at "2 pending" while research was compute-queued was a false signal.)
     total_active = len(actionable) + len(in_flight)
-    if pending:
+    if owner_mode_error:
+        pending_tldr = (
+            "task-pool owner state unreadable; production backlog classification "
+            "failed closed"
+        )
+        pending_status = "critical"
+        pending_next = (
+            "repair/read back task_pool_mode.json before claim, refill, or restore"
+        )
+    elif owner_closed:
+        if owner_mode and owner_mode.mode == "direct_execution":
+            pending_tldr = (
+                f"direct execution active: {len(direct_control_rows)} preserved "
+                f"control row(s), {len(direct_drift_rows)} receipt drift row(s); "
+                "claimable=0"
+            )
+            pending_status = "warn" if direct_drift_rows else "ok"
+            pending_next = (
+                "receipt drift: run task_pool_control.py status, then "
+                "receipt-bound reconcile-direct"
+                if direct_drift_rows
+                else None
+            )
+        else:
+            pending_tldr = (
+                f"restore transaction active: {len(raw_tasks)} recovery row(s); "
+                "claimable=0"
+            )
+            pending_status = "warn"
+            pending_next = (
+                "read back task_pool_control.py status, then resume the "
+                "receipt-bound restore transaction"
+            )
+    elif pending:
         pending_tldr = (
             f"{len(pending)} pending tasks"
             + (f" + {len(pending_main)} pending_main_thread" if pending_main else "")
@@ -265,6 +337,15 @@ def main():
         pending_claude_only_count=len(pending_claude_only),
         in_flight_count=len(in_flight),
         stale_inflight_count=len(stale_inflight),
+        task_pool_owner_mode=(
+            owner_mode.mode if owner_mode is not None else "unreadable"
+        ),
+        direct_control_row_count=len(direct_control_rows),
+        direct_receipt_drift_count=(
+            len(direct_drift_rows)
+            if owner_mode and owner_mode.mode == "direct_execution"
+            else 0
+        ),
     ))
 
     # Stale in-flight orphans (compute_queued/claimed/in_progress > 48h) — these

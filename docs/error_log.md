@@ -1345,3 +1345,30 @@ external Git writer，尚缺 `ChangeDelivery.land`、durable post-commit settlem
 receipt、external-write interval 的 lease revalidation、正式 caller 與 rollback
 rehearsal。因此 fake-only authorization 缺口已被 durable contract containment，但
 Change Delivery ownership 整體仍是 **contained**，現行 Git owner 不變。
+
+### 2026-07-24 — Direct-mode preserved control row 被誤報為 pending drift／production backlog
+
+**症狀與物證**：owner receipt 為 `direct_execution`，live queue 只有 receipt 明列的
+`assign_f3f36d75`，`task_pool_control.py reconcile-direct` 回讀
+`removed_task_ids=[]`、`retained_task_ids=[assign_f3f36d75]`，證明沒有 stale-writer
+drift。然而 handoff 仍把該 row 標成「pending drift」並要求 reconcile；dashboard 也把
+它算成 production pending，持續產生 `1 pending tasks` warning。該 row 已被 direct-mode
+claim gate 機械封鎖，兩個建議都不可執行。
+
+**根因與底層修復**：兩個 reporting consumer 只看 legacy lifecycle status，沒有把
+owner receipt 的 `preserve_task_ids` 納入 backlog classification。handoff 現在先把
+preserved control pending 與 receipt 外 drift pending 分開：clean receipt 只提示直接
+續做控制任務，只有真正 breach 才提供 receipt-bound reconcile。dashboard 同樣回讀
+owner mode；direct／restore mode 的 row 不再流入 production backlog、in-flight 或 stale
+orphan 計數，direct receipt 外 identity 另以 drift warning 顯示。owner state 不可讀或
+出現未知 enabled mode 時 fail closed，不會建議 claim／refill。
+
+**回歸、live 回讀與狀態**：clean preserved row、receipt breach、direct-mode claim gate
+與 pool control 共 86 個 targeted cases 通過；Python compile 與 `git diff --check`
+通過（環境未安裝 Ruff executable）。live dashboard 回讀
+`production_pending.status=ok`、`pending_count=0`、
+`direct_control_row_count=1`、`direct_receipt_drift_count=0`；重生 handoff 顯示
+`direct_mode_receipt: clean` 與 `Direct-mode preserved control rows: 1,
+claimable: 0`，且不再要求 reconcile。此 reporting／control-plane 假告警完成五步
+gate，為 **root_cause_fixed_and_verified**；owner 指定的整體 operations-core
+重構仍是 **contained**，preserved control task 不在 legacy pool 內結案。
