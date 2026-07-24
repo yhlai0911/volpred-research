@@ -379,9 +379,22 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   generation 2 commit、回讀 ChangeSet／grant／receipt／WorkItem，再演練 legacy
   generation 3 rollback、冪等 replay、stale CAS refusal 與 generation 4 re-cutover。
 - Formal caller、durable store、commit authority、settlement 與 rollback mechanism
-  的 shadow 根因達 `root_cause_fixed_and_verified`。Migrations 尚未部署 live，
-  production Git ownership 未切換；整體 Change Delivery 仍為 `contained`，下一步
-  是 live migration rehearsal/read-back 與 owner 核可後的受控 cutover。
+  的 shadow 根因達 `root_cause_fixed_and_verified`。
+
+### 2026-07-24 live schema deployment checkpoint
+
+- 五筆 Change Delivery private migrations 已依序套到 production Supabase：
+  commit authority、post-commit settlement、Git owner generation、durable
+  ChangeSet store，以及 advisor 回讀後追加的 delivery-receipt FK covering index。
+- Live catalog 回讀所有 named functions 都由 no-login `volpred_ops_definer` 持有、
+  `SECURITY DEFINER` 且固定 `search_path`；五張新表全部 FORCE RLS，PUBLIC 無
+  SELECT／EXECUTE，worker 可用 owner-fenced overload、不可用舊 overload。Security
+  advisor 對 `volpred_ops` 為 0 findings；新 FK 的 unindexed finding 在 forward
+  migration 後消失。
+- Owner row 刻意保持 `git.commit=legacy/1`，grant／delivery receipt／ChangeSet
+  count 均為 0。這只完成 schema deployment 與 live read-back，不是 Git ownership
+  cutover；正式 CAS、production smoke 與 live rollback rehearsal 尚未執行，因此
+  Change Delivery 整體仍為 `contained`。
 
 ## 6. Effect Delivery
 

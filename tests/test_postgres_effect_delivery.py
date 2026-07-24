@@ -147,6 +147,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724113000_operations_core_change_set_store.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724114500_operations_core_change_set_receipt_index.sql",
 )
 
 
@@ -2609,10 +2613,19 @@ def test_change_set_store_conflicts_and_privileges_fail_closed(
                 'volpred_ops.checkpoint_change_set_actuation('
                   'text,text,text,jsonb)',
                 'EXECUTE'
+              ),
+              (
+                SELECT indexdef LIKE
+                  '%(delivery_authority_request_sha256)%'
+                  AND indexdef LIKE '%WHERE %'
+                FROM pg_indexes
+                WHERE schemaname = 'volpred_ops'
+                  AND indexname =
+                    'change_sets_delivery_authority_request_idx'
               )
             """
         ).fetchone()
-    assert security == (True, False, True, False)
+    assert security == (True, False, True, False, True)
 
 
 def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(

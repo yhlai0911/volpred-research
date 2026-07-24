@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Change Delivery owner-fenced formal caller）**
+Last updated: **2026-07-24（Change Delivery live schema／legacy owner）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -319,8 +319,12 @@ authority、actuation、settlement 與 final receipt，DB transaction 會再次�
 unsettled rollback refusal，以及臨時 canonical repo + linked worktree 的完整
 generation 2 commit → generation 3 rollback → generation 4 re-cutover 均已通過。
 此 formal caller／ownership seam 在 shadow 為 `root_cause_fixed_and_verified`；
-migrations 尚未部署 live、production Git owner 未切換，因此 umbrella 狀態仍是
-`contained`。
+其後五筆 private migrations 已套到 production，live read-back 證實 owner 仍是
+`legacy/1`、grant／receipt／ChangeSet 皆為 0、五張新表 FORCE RLS、PUBLIC deny、
+worker 只可用 owner-fenced overload。首次 advisor 回讀抓到 ChangeSet delivery-receipt
+FK 缺 covering index；forward migration 與 PG17 contract 補齊後該 finding 消失，
+`volpred_ops` security advisor 為 0 findings。Production Git owner 尚未切換，正式
+CAS／live smoke／rollback rehearsal未執行，因此 umbrella 狀態仍是 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

@@ -1592,5 +1592,29 @@ E2E 實際完成 owner generation 2 commit，核對 durable ChangeSet／grant／
 WorkItem 後，演練 generation 3 rollback、同 request 冪等 replay、stale CAS refusal
 及 generation 4 re-cutover；另有未 settlement grant 專例證明 rollback 被阻擋。
 這個 formal caller／ownership 根因在 shadow 為
-**`root_cause_fixed_and_verified`**。Migrations 尚未部署 live、production Git owner
-未切換，Change Delivery umbrella 仍是 **`contained`**，不可宣稱正式 cutover 完成。
+**`root_cause_fixed_and_verified`**。Production Git owner 未切換，Change Delivery
+umbrella 仍是 **`contained`**，不可宣稱正式 cutover 完成。
+
+### 2026-07-24 — Change Delivery live schema deployment 暴露 receipt FK 無 covering index
+
+**部署與觀察**：在 PG17 non-superuser replay、119 個 Change／Git／PostgreSQL scoped
+tests 與 canonical writer audit 通過後，依序以 migration API 套用 commit authority、
+settlement、owner generation 與 ChangeSet store。Owner 初始化後 live 回讀仍為
+`git.commit=legacy/1`，grant／delivery receipt／ChangeSet 都是 0，沒有執行 owner
+transfer。五張新表全部 FORCE RLS、PUBLIC 無 SELECT；新 functions 都由
+`volpred_ops_definer` 持有、固定 `search_path`，worker 對舊無 owner overload 失權。
+
+**Advisor 缺口與底層修復**：第一次 live performance advisor 指出
+`change_sets_delivery_authority_request_sha256_fkey` 沒有 referencing-side index。
+新增 forward-only `change_sets_delivery_authority_request_idx`，只索引非空 immutable
+delivery authority request；PG17 migration contract 直接回讀 index shape，避免只在
+文件宣稱。Production migration receipt 為
+`20260724072403 operations_core_change_set_receipt_index`，部署後同一 advisor finding
+消失；`volpred_ops` security advisor 為 0 findings。
+
+**驗證與狀態界線**：兩個 owner／ChangeSet PostgreSQL cases通過；完整 pytest 的
+4,911 tests 本體全通過、1 skipped，但 session-level CI-parity plugin 因 canonical
+checkout 內既有未追蹤 worktree/runtime files 將 exit 改為 1，因此不可記成 full-suite
+green。此 FK advisor 根因為 **`root_cause_fixed_and_verified`**；schema deployment
+已完成，但 production owner 仍是 legacy，正式 CAS、live commit smoke 與 rollback
+rehearsal尚未執行，所以 Change Delivery 整體維持 **`contained`**。

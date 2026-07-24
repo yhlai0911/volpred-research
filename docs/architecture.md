@@ -161,7 +161,7 @@
 > lease 內 materialization 與 post-commit／lost-return read-back 都套用同一規則，
 > 不讓相同 proposal digest 落成不同 tree。
 >
-> **Formal Work Coordinator caller 與 Git owner generation（2026-07-24，shadow）**
+> **Formal Work Coordinator caller 與 Git owner generation（2026-07-24，live schema／legacy owner）**
 > `OwnedChangeDelivery.deliver()` 是 formal caller 的窄入口：先讀 private PostgreSQL
 > `git.commit` owner row，只有 `operations_core` 的 current generation 才可 propose；
 > 同一 generation 會進入 landing-command digest、authority request／grant、
@@ -176,7 +176,12 @@
 > rollback。PG17 clean migration replay 與臨時 canonical repo／linked worktree 的
 > end-to-end shadow 已完成 operations_core generation 2 commit → durable receipt／
 > Work completion → legacy generation 3 rollback → operations_core generation 4
-> re-cutover。這不是 live deployment；production Git owner 仍未切換。
+> re-cutover。2026-07-24 已把 commit authority、settlement、owner generation、
+> ChangeSet store 與 receipt-FK covering index 五筆 private migrations 套到 production；
+> live read-back 為 `git.commit=legacy/1`、grant／receipt／ChangeSet 全為 0，worker
+> 對舊無 owner overload 已失權，全部新表 FORCE RLS 且 PUBLIC 無 read／execute。
+> Schema deployment 不等於 ownership cutover；production Git writer 仍由 legacy
+> path 持有，只有另一次 approver CAS 才能切換。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。
