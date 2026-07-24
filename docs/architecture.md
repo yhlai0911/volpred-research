@@ -413,6 +413,15 @@
 > `counts.failures`。CLI只要有任何 projection failure便非零退出。這關閉 program
 > commit 15 的 silent skip根因，但 full-sync的 formal EffectRequest／outbox
 > ownership與 convergence rehearsal尚未完成，故不宣稱 commit 15 cutover。
+>
+> **Projection convergence receipt v2（2026-07-25）**：hourly audit不再只向
+> Supabase查 local已知 slug，改以與 canonical feed相同的72小時
+> `published_at`視窗以exact-count Range分頁讀取完整 published projection，雙向回讀
+> `missing_supabase`與`orphan_supabase`；local視窗為空也不能跳過 remote observation。
+> Credential、transport或response shape失敗仍標 unavailable。Production read-only
+> smoke回讀 local=14、Supabase=14、雙向 drift=0、live 404=0。這完成 commit 15 的
+> 週期 convergence receipt gate；formal outbox ownership與 rollback rehearsal仍未
+> 完成，所以 commit 15仍為 **`contained`**。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

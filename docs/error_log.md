@@ -2158,3 +2158,30 @@ clean tracked snapshot **31 passed, 1 skipped**，`git diff --check`通過；沒
 **`root_cause_fixed_and_verified`**；program commit 15的 formal EffectRequest／
 outbox ownership、週期 convergence receipt與rollback rehearsal尚未完成，因此
 program commit 15與 operations-core umbrella仍為 **`contained`**。
+
+### 2026-07-25 — Projection audit 只查 local slug，Supabase orphan 永遠不可見
+
+**證據化症狀與根因層級**：`audit_publish_sync.py`的契約列出 remote-only orphan，
+實作卻把 local published slug組成 `in (...)`交給Supabase；remote集合因此必為local
+集合子集，`remote - local`在資料取得前就被機械消除。Local視窗為空時函式還直接回
+空集合，不需要credential或remote observation，receipt仍可標converged。這是
+convergence observation domain錯誤，不是Supabase資料或單篇writer漂移。
+
+**底層重構**：Receipt schema升為
+`publisher-projection-convergence.v2`；remote read改查與local完全相同的72小時
+`published_at` window及published status，不再接受local slug白名單；exact count與
+Range分頁保證完整讀完視窗。Audit雙向保存`missing_supabase`與
+`orphan_supabase`，兩者都計入mismatch與alert；即使local為空也照常查remote。
+Credential、transport與response-shape failure維持typed
+`unavailable`，禁止用空remote集合冒充證據。
+
+**回歸、production回讀與狀態界線**：新增remote-only與empty-local兩個failure
+injections，另鎖定PostgREST URL必含published/window filter且不得含slug `in`，
+並覆蓋多頁remote projection；audit與schedule scoped suite共 **11 passed**，
+compileall與`git diff --check`通過。
+Production read-only smoke只寫臨時receipt，回讀v2 `converged`：local=14、
+Supabase=14、missing=0、orphan=0、live 404=0、observation error=0；沒有remote
+mutation、owner transfer或canonical receipt寫入。此false-convergence根因為
+**`root_cause_fixed_and_verified`**；program commit 15的週期convergence receipt
+gate完成，formal outbox ownership與rollback rehearsal仍缺，故commit 15與
+operations-core umbrella維持 **`contained`**。

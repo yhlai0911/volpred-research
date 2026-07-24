@@ -1042,6 +1042,26 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   outbox ownership、週期 projection-convergence receipt與 rollback rehearsal尚未
   完成，因此 commit 15與 operations-core umbrella仍為 **`contained`**。
 
+### 2026-07-25 projection convergence orphan checkpoint
+
+- Hourly `audit_publish_sync.py` 雖宣稱比較 local、Supabase與live route，Supabase query
+  卻只要求 local feed已知的 slug；因此 remote-only published row不可能進入結果，
+  「orphan」surface實際永遠是假陰性。Local視窗為空時更直接跳過 remote query，
+  receipt仍可標 converged。
+- Convergence receipt v2改以相同72小時 `published_at`視窗讀取完整 published
+  projection；PostgREST read以exact count與Range分頁到完整視窗，再雙向計算
+  `missing_supabase`與`orphan_supabase`。即使 local set為空也必須觀測 remote。
+  任何 credential、transport或response-shape failure維持 unavailable，不能被空集合
+  冒充。Mismatch total與alert亦納入 orphan。
+- 兩個新 failure injections覆蓋 remote-only row與空 local視窗，URL contract另驗
+  published status／window filter且不再出現 local slug `in`限制；audit與schedule
+  scoped suite共 **11 passed**。Production read-only smoke用臨時 receipt回讀
+  v2 `converged`，local=14、Supabase=14、missing=0、orphan=0、live 404=0、
+  observation error=0。此 false-convergence根因為
+  **`root_cause_fixed_and_verified`**；program commit 15的週期 convergence receipt
+  gate已完成，formal outbox ownership與 rollback rehearsal仍缺，故整體維持
+  **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

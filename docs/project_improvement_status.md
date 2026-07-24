@@ -307,6 +307,17 @@ purge retry不會在 prerequisite write失敗時被清掉；memory cursor只覆�
 **`root_cause_fixed_and_verified`**；program commit 15仍缺 formal outbox ownership、
 週期 convergence receipt與 rollback rehearsal，所以維持 **`contained`**。
 
+同日補完 program commit 15 的週期 convergence receipt。舊 audit只查 local feed
+已知 slug，因而永遠無法觀測 Supabase-only orphan；local視窗為空時還會跳過 remote
+query並假綠。Receipt v2改以相同72小時 published window分頁讀完整 remote projection，
+雙向計算 missing／orphan，且 local為空仍必須查 remote；unavailable failure contract
+維持 fail closed。兩個 orphan regressions、pagination／URL contract與既有
+audit/schedule suite共 **11 passed**；production read-only smoke為 local=14、
+Supabase=14、missing=0、
+orphan=0、live 404=0。此 false-convergence根因為
+**`root_cause_fixed_and_verified`**；formal outbox ownership與 rollback rehearsal
+仍缺，因此 program commit 15維持 **`contained`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem

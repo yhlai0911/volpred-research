@@ -22,16 +22,16 @@ import time
 from pathlib import Path
 from typing import Callable
 from urllib import request, error
-from urllib.parse import quote
+from urllib.parse import urlencode
 from uuid import uuid4
 
 REPO = Path(__file__).parent.parent
 FEED = REPO / "storage" / "reports" / "feed.json"
 RECEIPT = REPO / "storage" / "ops" / "publisher_projection_convergence_latest.json"
 LIVE_URL_TEMPLATE = "https://volpred.zeabur.app/v3/reports/{mile_id}"
-SUPA_REST_TEMPLATE = "{base}/rest/v1/articles?select=slug,status&slug=in.({ids})"
 WINDOW_HOURS = 72  # only audit articles published in last N hours
-RECEIPT_SCHEMA = "publisher-projection-convergence.v1"
+SUPABASE_PAGE_SIZE = 1000
+RECEIPT_SCHEMA = "publisher-projection-convergence.v2"
 
 
 class RemoteObservationUnavailable(RuntimeError):
@@ -75,26 +75,70 @@ def http_status(url, timeout=10):
         ) from e
 
 
-def fetch_supabase_slugs(env, mile_ids):
+def fetch_supabase_slugs(env, cutoff_iso):
     base = env.get("SUPABASE_URL") or env.get("NEXT_PUBLIC_SUPABASE_URL")
     key = env.get("SUPABASE_SERVICE_ROLE_KEY") or env.get("SUPABASE_KEY")
-    if not mile_ids:
-        return set()
     if not (base and key):
         raise RemoteObservationUnavailable(
             "supabase_credentials_unavailable"
         )
-    ids_csv = ",".join(mile_ids)
-    url = SUPA_REST_TEMPLATE.format(base=base.rstrip("/"), ids=quote(ids_csv, safe=","))
-    req = request.Request(url, headers={"apikey": key, "Authorization": f"Bearer {key}"})
+    query = urlencode(
+        {
+            "select": "slug,status,published_at",
+            "status": "eq.published",
+            "published_at": f"gte.{cutoff_iso}",
+            "order": "slug.asc",
+        },
+        safe=",:.-TZ",
+    )
+    url = f"{base.rstrip('/')}/rest/v1/articles?{query}"
     try:
-        with request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode())
-            return {r["slug"] for r in data if r.get("status") == "published"}
+        slugs = set()
+        offset = 0
+        while True:
+            req = request.Request(
+                url,
+                headers={
+                    "apikey": key,
+                    "Authorization": f"Bearer {key}",
+                    "Prefer": "count=exact",
+                    "Range-Unit": "items",
+                    "Range": (
+                        f"{offset}-{offset + SUPABASE_PAGE_SIZE - 1}"
+                    ),
+                },
+            )
+            with request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode())
+                if not isinstance(data, list):
+                    raise ValueError(
+                        "Supabase articles response must be a list"
+                    )
+                slugs.update(
+                    r["slug"]
+                    for r in data
+                    if r.get("status") == "published"
+                )
+                content_range = getattr(
+                    getattr(resp, "headers", None),
+                    "get",
+                    lambda key: None,
+                )("Content-Range")
+
+            offset += len(data)
+            if not data:
+                break
+            if content_range:
+                total_text = content_range.rsplit("/", 1)[-1]
+                if total_text != "*" and offset >= int(total_text):
+                    break
+            elif len(data) < SUPABASE_PAGE_SIZE:
+                break
+        return slugs
     except Exception as e:
         _warn_publish_sync(
             "supabase slug fetch failed",
-            article_count=len(mile_ids),
+            window_start=cutoff_iso,
             exc=e,
         )
         raise RemoteObservationUnavailable(
@@ -141,7 +185,10 @@ def run_audit(
         raise ValueError("canonical feed must be a list or contain an items list")
 
     now = time.time() if now is None else now
-    cutoff_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(now - WINDOW_HOURS * 3600))
+    cutoff_iso = time.strftime(
+        "%Y-%m-%dT%H:%M:%SZ",
+        time.gmtime(now - WINDOW_HOURS * 3600),
+    )
 
     # Local published in window
     local_pub = []
@@ -165,7 +212,7 @@ def run_audit(
     try:
         supa_set = supabase_fetch(
             load_env() if env is None else env,
-            sorted(local_set),
+            cutoff_iso,
         )
     except RemoteObservationUnavailable as exc:
         supabase_available = False
@@ -176,14 +223,19 @@ def run_audit(
             }
         )
 
-    # A: local pub not in supabase
+    # A: local pub not in Supabase
     missing_supa = (
         sorted(local_set - supa_set)
         if supabase_available
         else []
     )
+    orphan_supa = (
+        sorted(supa_set - local_set)
+        if supabase_available
+        else []
+    )
 
-    # B: in supabase but live URL not 200
+    # B: in Supabase but live URL not 200
     live_check = (
         sorted(local_set & supa_set)
         if supabase_available
@@ -205,7 +257,8 @@ def run_audit(
         if s != 200:
             live_404.append({"mile_id": mid, "status_code": s})
 
-    mismatches = len(missing_supa) + len(live_404)
+    # C: published in Supabase's same window but absent from canonical feed
+    mismatches = len(missing_supa) + len(orphan_supa) + len(live_404)
     if observation_errors:
         convergence_status = "unavailable"
         exit_code = 2
@@ -220,10 +273,12 @@ def run_audit(
         "audit": "publish_sync",
         "convergence_status": convergence_status,
         "window_hours": WINDOW_HOURS,
+        "window_start": cutoff_iso,
         "feed_sha256": hashlib.sha256(feed_bytes).hexdigest(),
         "local_published_count": len(local_set),
-        "supabase_synced_count": len(supa_set),
+        "supabase_published_count": len(supa_set),
         "missing_supabase": missing_supa,
+        "orphan_supabase": orphan_supa,
         "live_404": live_404,
         "observation_errors": observation_errors,
         "mismatch_total": mismatches,
@@ -240,12 +295,16 @@ def main():
     # Alert if >=3 mismatches (avoid noise on 1-off transient)
     mismatches = report["mismatch_total"]
     missing_supa = report["missing_supabase"]
+    orphan_supa = report["orphan_supabase"]
     live_404 = report["live_404"]
     if mismatches >= 3:
         body = (
             "## 觸發條件\n"
-            f"publish-sync audit 過去 {WINDOW_HOURS}h 發現 {mismatches} 篇 mismatch (missing_supabase={len(missing_supa)} live_404={len(live_404)})\n"
+            f"publish-sync audit 過去 {WINDOW_HOURS}h 發現 {mismatches} 篇 mismatch "
+            f"(missing_supabase={len(missing_supa)} "
+            f"orphan_supabase={len(orphan_supa)} live_404={len(live_404)})\n"
             f"- missing_supabase: {', '.join(missing_supa) or '無'}\n"
+            f"- orphan_supabase: {', '.join(orphan_supa) or '無'}\n"
             f"- live_404: {', '.join(x['mile_id'] for x in live_404) or '無'}\n\n"
             "## 影響\n"
             "讀者點擊 FB / 外部分享連結會 404；Mission 1 (文章) + 5 (曝光) 漏接\n\n"
