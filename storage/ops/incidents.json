@@ -256,6 +256,9 @@
     },
     {
      "at": "2026-07-24T20:17:14.951334+00:00"
+    },
+    {
+     "at": "2026-07-24T21:22:20.981651+00:00"
     }
    ],
    "current_task_id": null,
@@ -279,6 +282,44 @@
    "suppressed_until": null,
    "task_history": [],
    "task_mode": "none",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
+  "inc_5cc1ae3a8ef5": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-24T21:00:10.385885+00:00",
+   "escalation": null,
+   "fingerprint": "5cc1ae3a8ef57cd9d58fc6c3658ad8efd4db5dfa41bd25cbc478d9f7d83695a5",
+   "fingerprint_parts": [
+    "ci-red-30122387928"
+   ],
+   "first_seen_at": "2026-07-24T21:00:10.385885+00:00",
+   "incident_id": "inc_5cc1ae3a8ef5",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-24T21:00:10.385885+00:00",
+     "key": "30122387928:1",
+     "last_seen_at": "2026-07-24T21:00:10.385885+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-24T20:13:06.6548182Z E AssertionError: assert {'audit_fb_pi...na_daily.log'} <= {'audit_fb_pi...na_daily.log'}",
+   "last_seen_at": "2026-07-24T21:00:10.385885+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [],
+   "task_mode": "external",
    "throttled": {
     "count": 0,
     "last_at": null
@@ -573,7 +614,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-24T20:07:45.077751+00:00"
+     "last_seen_at": "2026-07-24T21:07:08.027165+00:00"
     },
     {
      "cleared_at": null,
@@ -586,7 +627,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-24T20:07:45.330909+00:00"
+     "last_seen_at": "2026-07-24T21:07:08.271799+00:00"
     },
     {
      "cleared_at": null,
@@ -599,7 +640,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-24T20:07:45.814261+00:00"
+     "last_seen_at": "2026-07-24T21:07:08.748988+00:00"
     },
     {
      "cleared_at": null,
@@ -612,7 +653,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-24T20:07:45.564854+00:00"
+     "last_seen_at": "2026-07-24T21:07:08.513182+00:00"
     },
     {
      "cleared_at": null,
@@ -625,7 +666,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-24T20:07:46.085367+00:00"
+     "last_seen_at": "2026-07-24T21:07:09.053126+00:00"
     },
     {
      "cleared_at": null,
@@ -651,7 +692,7 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-24T20:07:46.325063+00:00"
+     "last_seen_at": "2026-07-24T21:07:09.296730+00:00"
     },
     {
      "cleared_at": null,
@@ -669,9 +710,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-24T20:07:46.325063+00:00",
+   "last_seen_at": "2026-07-24T21:07:09.296730+00:00",
    "notified_at": null,
-   "occurrence_count": 660,
+   "occurrence_count": 666,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -743,9 +784,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-24T07:30:08.769396+00:00"
-    },
-    {
      "at": "2026-07-24T08:21:08.238436+00:00"
     },
     {
@@ -777,6 +815,9 @@
     },
     {
      "at": "2026-07-24T18:30:45.579492+00:00"
+    },
+    {
+     "at": "2026-07-24T20:17:21.469062+00:00"
     }
    ],
    "current_task_id": null,
@@ -952,6 +993,6 @@
    }
   }
  },
- "updated_at": "2026-07-24T20:17:14.951723+00:00",
+ "updated_at": "2026-07-24T21:22:20.982455+00:00",
  "version": 1
 }
