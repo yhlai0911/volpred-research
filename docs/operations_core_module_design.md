@@ -394,6 +394,38 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   `2026-07-23T23:48:57.414826+00:00`；同班 caller／owned delivery／Sent read-back
   scoped suite 為 `85 passed`。複驗沒有寄信或改 owner，且不擴張上述完成範圍。
 
+### 2026-07-24 publisher 單篇 Supabase sync shadow checkpoint
+
+- program commit 14 的第一個垂直切片建立
+  `PublisherArticleSyncEffectAdapter` external interface，只接受
+  `publisher.article.supabase.sync`／`safe`／單一 slug 與完全相同的
+  `publisher.article.supabase.readback` target。payload 以 canonical JSON 綁定完整
+  feed article；hash、schema、slug 或 acknowledgement 漂移都在 projection write 前
+  terminal fail closed。
+- provider 在 upsert 前先做完整 projection read-back。已收斂的等價 replay 直接回傳
+  acknowledgement，不再重複寫；需要寫入時，只有文章 row（含 content／details／
+  audience／category／phase 等）與 tags 都回讀一致才算成功。時區等價的
+  `published_at` 先正規化，`view_display` 等 server-resident details key 不被誤判成
+  canonical drift。
+- `SupabaseArticleProjectionAdapter` 是 production adapter；測試使用 in-memory
+  fake adapter，兩者跨越同一 internal seam。既有 `sync_article()` 的 row 組裝抽成
+  `projected_article_row()`，direct writer、hourly differ 與 effect read-back 不再各自
+  推理 projection shape。
+- duplicate replay、provider failure、invalid intent、post-write mismatch、worker
+  terminal dead-letter、production-shaped row／tag read-back與 explicit empty-tag
+  convergence 共 9 個新 cases 通過；publisher／Supabase sync／feed-sync／
+  Effect Delivery worker 的 scoped 相鄰回歸為 `193 passed, 1 skipped`。
+- 2026-07-24 09:13 CST 的 read-only live smoke 從 canonical feed 只取最新 published
+  article `mile_f00be77f`，再由 production Supabase adapter 回讀完整 row／tags；
+  `matches=true`，evidence SHA-256 =
+  `faf3920540be40ad90ab7d8e2392be39d52cd9e38eda5f896dca31a2699ee3de`。
+  本 smoke 沒有 upsert、cache purge、owner transfer 或其他外部寫入。
+- 本切片尚未建立 publisher WorkItem／EffectRequest 的正式 caller、payload durable
+  writer、Primary Authority family、single-owner transaction 或 live cutover receipt；
+  現行 `/api/sync/reports/<slug>.json` 與 direct `sync_article()` caller 都未移除。
+  因此 program commit 14 目前是 **`contained`**，不是 publisher sync ownership
+  完成。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

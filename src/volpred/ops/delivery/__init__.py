@@ -1,9 +1,9 @@
-"""Shadow Change and Effect Delivery interfaces.
+"""Change and Effect Delivery interfaces.
 
-The current slices own immutable ChangeSet proposal validation and
-payload-bound EffectRequest identity. They remain disconnected from live Git
-and external providers: landing, outbox delivery, and downstream effects stay
-behind later worker and Primary Authority gates described in
+The package owns immutable ChangeSet proposal validation, payload-bound
+EffectRequest identity, and narrow authority-fenced provider adapters.
+Ownership remains capability-specific: callers may use only the effect
+families whose production cutover gate is recorded in
 ``operations_core_module_design.md``.
 """
 
@@ -28,6 +28,13 @@ from ._effect import (
     EffectRequestConflict,
     EffectView,
     FailedEffect,
+)
+from ._publisher_article_sync import (
+    PublisherArticleProjection,
+    PublisherArticleProjectionReadback,
+    PublisherArticleSyncEffectAdapter,
+    SupabaseArticleProjectionAdapter,
+    encode_publisher_article_sync_payload,
 )
 
 
@@ -430,4 +437,9 @@ __all__ = [
     "EffectRequestConflict",
     "EffectView",
     "FailedEffect",
+    "PublisherArticleProjection",
+    "PublisherArticleProjectionReadback",
+    "PublisherArticleSyncEffectAdapter",
+    "SupabaseArticleProjectionAdapter",
+    "encode_publisher_article_sync_payload",
 ]

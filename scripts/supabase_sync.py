@@ -829,6 +829,32 @@ def projected_category(item: dict) -> str:
     )
 
 
+def projected_article_row(item: dict, *, verbose: bool = True) -> dict:
+    """Return the canonical Supabase ``articles`` row for one feed item.
+
+    This is the single definition shared by the direct writer, the hourly
+    differ, and the operations-core single-article effect read-back.  It
+    deliberately excludes server-resident ``details`` keys; ``sync_article``
+    merges those keys only after reading the current remote row.
+    """
+
+    content = projected_content(item, verbose=verbose)
+    return {
+        "slug": item.get("id", ""),
+        "title": item.get("title", ""),
+        "content": content,
+        "excerpt": content[:200] + "..." if len(content) > 200 else content,
+        "audience": classify_audience(item),
+        "phase": item.get("phase"),
+        "status": item.get("status", "published"),
+        "category": projected_category(item),
+        "proposer": extract_proposer(item),
+        "author_id": "claude",
+        "details": projected_details(item),
+        "published_at": item.get("published_at"),
+    }
+
+
 def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     """Sync a single article (feed item) to Supabase.
 
@@ -850,13 +876,8 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
     # calls. One definition of "what the projection should contain" keeps the
     # hourly reconcile idempotent — when the writer and the differ normalize
     # differently, every affected row reports drift forever.
-    content = projected_content(item, verbose=True)
-    # last_updated_at is not a column on the articles table, so carry it inside the
-    # synced `details` JSON blob (the frontend reads details.last_updated_at to show
-    # "更新於 <date hh:mm>" when content was edited after publish — boss 2026-07-01).
-    # The injection lives in projected_details() so the differ shares it (WS-C3).
-    details = projected_details(item)
-    slug = item.get("id", "")
+    row = projected_article_row(item, verbose=True)
+    slug = row["slug"]
     # Server-resident keys (view_display, ...) exist ONLY in the DB row; a
     # wholesale details overwrite destroys them (2026-07-18..20: every
     # re-synced article lost its view-count seed). Merge them back before
@@ -870,21 +891,7 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         if resident is None:
             return False
         if resident:
-            details = {**details, **resident}
-    row = {
-        "slug": slug,
-        "title": item.get("title", ""),
-        "content": content,
-        "excerpt": content[:200] + "..." if len(content) > 200 else content,
-        "audience": classify_audience(item),
-        "phase": item.get("phase"),
-        "status": item.get("status", "published"),
-        "category": projected_category(item),
-        "proposer": extract_proposer(item),
-        "author_id": "claude",
-        "details": details,
-        "published_at": item.get("published_at"),
-    }
+            row["details"] = {**row["details"], **resident}
     ok = _post("articles", row)
     # Single retry on _post failure (transient HTTP error / network blip)
     # before falling through to read-back verification. release_pool used to
@@ -940,12 +947,18 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         except Exception as exc:
             print(f"  [supabase_sync] read-back verification error for {row['slug']}: {exc}")
     if ok:
-        # Sync tags
-        tags = item.get("tags") or []
-        if tags:
+        # Sync tags when the canonical item carries that field, including the
+        # explicit empty set. Missing means "not supplied" for legacy callers;
+        # an explicit [] means "remove stale article_tags".
+        if "tags" in item:
+            tags = item.get("tags") or []
             tag_ok = _sync_article_tags(row["slug"], tags)
             if not tag_ok:
-                print(f"  Warning: article synced but tags missing for {row['slug']}")
+                print(
+                    f"  Warning: article synced but tags diverged for "
+                    f"{row['slug']}"
+                )
+                ok = False
         # Purge the frontend cache for this slug. Required for EVERY sync, not
         # just retractions: content edits were equally invisible for up to 60s,
         # and status downgrades (published -> retracted/unpublished) were
@@ -959,30 +972,40 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
 
 def _sync_article_tags(slug: str, tags: list[str]) -> bool:
     """Sync tags for an article."""
-    tag_names = list(dict.fromkeys(tag.strip() for tag in tags if isinstance(tag, str) and tag.strip()))
-    if not tag_names:
-        return True
-
-    # Upsert tags
-    tag_rows = [{"name": tag_name} for tag_name in tag_names]
-    if not _post("tags", tag_rows):
-        print(f"  Supabase tag upsert failed for {slug}: {tag_names}")
-        return False
-
+    tag_names = list(
+        dict.fromkeys(
+            tag.strip()
+            for tag in tags
+            if isinstance(tag, str) and tag.strip()
+        )
+    )
     try:
         article_id = _get_article_id(slug)
         if not article_id:
             print(f"  Supabase article tag sync skipped for {slug}: article_id not found")
             return False
+        if not tag_names:
+            return _delete_where("article_tags", {"article_id": article_id})
+
+        # Upsert tags before replacing the join rows.
+        tag_rows = [{"name": tag_name} for tag_name in tag_names]
+        if not _post("tags", tag_rows):
+            print(f"  Supabase tag upsert failed for {slug}: {tag_names}")
+            return False
         tag_map = _get_tag_ids(tag_names)
         if len(tag_map) != len(tag_names):
             missing = [name for name in tag_names if name not in tag_map]
-            print(f"  Supabase article tag sync incomplete for {slug}: missing tag ids for {missing}")
+            print(
+                f"  Supabase article tag sync incomplete for {slug}: "
+                f"missing tag ids for {missing}"
+            )
             return False
 
         # Delete existing article_tags then insert current set
         # (prevents stale tags from persisting after tag changes)
-        _delete_where("article_tags", {"article_id": article_id})
+        if not _delete_where("article_tags", {"article_id": article_id}):
+            print(f"  Supabase article tag delete failed for {slug}")
+            return False
         at_rows = []
         for tag_name in tag_names:
             tag_id = tag_map.get(tag_name)

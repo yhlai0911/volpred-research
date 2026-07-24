@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（production ops-alert ownership live read-back）**
+Last updated: **2026-07-24（publisher single-article sync shadow checkpoint）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -208,6 +208,22 @@ owner=`operations_core`、generation=`4`、changed_at=
 `2026-07-23T23:48:57.414826+00:00`；caller／owned delivery／Sent read-back scoped
 suite 同班為 `85 passed`。本次未寄信、未轉移 owner，也不把單一 effect family 的
 接管擴張為整個 Effect Delivery 已完成。
+
+同日開始 program commit 14 的 publisher 單篇 sync 切片：
+`PublisherArticleSyncEffectAdapter` 只接受 payload-bound、safe、單一 Supabase article
+target 與 typed read-back expectation。provider 先讀後寫，projection 已收斂的等價
+replay 不再 upsert；需要寫入時，文章完整 row 與 tags 必須全部回讀一致，否則回傳
+typed retryable failure，由既有 PostgreSQL outbox 統一 backoff／dead-letter。
+production `SupabaseArticleProjectionAdapter` 與 fake adapter 共用同一 seam；原本散在
+`sync_article()` 的 row shape 已抽為 `projected_article_row()`，供 direct writer 與
+effect read-back 共用；explicit empty tags 會刪除 stale join rows，不再無限 mismatch。
+9 個新 cases 與 193 個 scoped 相鄰 regressions 通過，另有 1 個既有 skip。
+09:13 CST 再以 production adapter 對最新 published article `mile_f00be77f` 做
+read-only live smoke，完整 row／tags 回讀 `matches=true`（evidence SHA-256
+`faf3920540be40ad90ab7d8e2392be39d52cd9e38eda5f896dca31a2699ee3de`）；未產生外部寫入。
+正式 publisher caller、durable payload transaction、effect-family Primary Authority、
+唯一 owner cutover 與 live rollback rehearsal 尚未完成，現行兩條 single-article
+write path 也未移除，因此此 checkpoint 僅為 **`contained`**。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
