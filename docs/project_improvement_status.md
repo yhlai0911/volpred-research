@@ -304,7 +304,8 @@ lookalike first child，並錯誤產生本次 authority receipt。Actuator 現�
 `Volpred-Commit-Authority-Request` commit trailer；正常 post-write read-back 與
 historical recovery 都要求 trailer 精確匹配，raw fencing token 不進 Git object。
 Unbound lookalike regression 已先 RED 後 GREEN，正常 commit trailer 與 receipt
-digest 亦精確對帳；此 provenance identity 缺口為
+digest 亦精確對帳；owner-generation follow-up 另釘住舊 generation 的合法 trailer
+不可被新 generation recovery 接受。此 provenance identity 缺口為
 `root_cause_fixed_and_verified`。Formal caller、live migrations、Git ownership
 cutover 與 rollback rehearsal仍未完成，因此 Change Delivery 整體維持
 `contained`。

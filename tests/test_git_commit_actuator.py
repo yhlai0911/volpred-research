@@ -252,6 +252,35 @@ def test_actuator_does_not_recover_unbound_bitwise_lookalike_commit(
     assert _git(repo, "rev-parse", "HEAD") == lookalike_commit
 
 
+def test_actuator_does_not_recover_commit_from_prior_owner_generation(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    prior_owner_command = replace(command, commit_owner_generation=2)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message(
+            command.message,
+            _authority_request(prior_owner_command).request_sha256,
+        ),
+    )
+    prior_owner_commit = _git(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="expected HEAD fence failed",
+    ):
+        _actuator().commit(command)
+
+    assert _git(repo, "rev-parse", "HEAD") == prior_owner_commit
+
+
 def test_actuator_does_not_recover_lookalike_commit_with_different_file_mode(
     repository: tuple[Path, str],
 ) -> None:

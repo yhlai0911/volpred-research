@@ -138,10 +138,10 @@
 > 實際 Git commit message 另由 actuator 加上
 > `Volpred-Commit-Authority-Request: <sha256>` trailer；digest 是同一次
 > WorkLease／Primary Authority authorize request 的完整 identity，並包含原 message、
-> actor、parent、paths 與 content hashes。Post-write read-back 與 lost-return recovery
-> 都要求這個 trailer 精確匹配；只有 bytes／paths／mode／人類可見 message 相同、但未
-> 經本次 authority request 的 first-child commit 不再能冒充 actuator 成果。Raw fencing
-> token 不寫入 Git object。
+> actor、owner generation、parent、paths 與 content hashes。Post-write read-back
+> 與 lost-return recovery 都要求這個 trailer 精確匹配；只有
+> bytes／paths／mode／人類可見 message 相同、但未經本次 authority request 的
+> first-child commit 不再能冒充 actuator 成果。Raw fencing token 不寫入 Git object。
 >
 > 以上 migrations 均未部署 live；2026-07-24 唯讀 catalog 回讀 proposal／grant／
 > settlement tables/functions 皆不存在。Lost-return crash window 已由 exact Git

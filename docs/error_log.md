@@ -1552,16 +1552,18 @@ Git object 卻沒有任何證據證明由本次 authorize call 產生；這是 e
 **底層修復**：Actuator 仍先重算並 authorize 完整 `commit-authority-request.v1`，
 但交給 canonical writer 的實際 commit message 固定附加
 `Volpred-Commit-Authority-Request: <request_sha256>` trailer。Digest 已綁 proposal、
-WorkItem/version、兩個 fencing token、repository/parent、paths/hashes、原 message 與
-commit-worker actor；raw token 不進 argv message、Git object或 receipt。正常 writer
+WorkItem/version、Git owner generation、兩個 fencing token、repository/parent、
+paths/hashes、原 message 與 commit-worker actor；raw token 不進 argv message、Git
+object或 receipt。正常 writer
 return 後的 object verification 與 historical lost-return recovery 共用同一個 bound
 message constructor，trailer 缺失或不同都 fail closed。
 
 **回歸、回讀與制度化**：unbound bitwise lookalike case 已先 RED（舊實作未拋錯）
 後 GREEN；正常 commit 回讀的 trailer 與 `commit-actuation.v1` receipt 中
 `authority_request_sha256` 精確一致，既有真 lost-return recovery 仍通過。提交前另跑
-完整 Git actuator／Change Delivery／canonical writer scoped suites、compile 與
-direct-mode owner-state read-back。此具體 provenance identity 根因為
+owner-generation regression，證明舊 generation 的合法 trailer 不可被新 generation
+recovery 接受；並跑完整 Git actuator／Change Delivery／canonical writer scoped
+suites、compile 與 direct-mode owner-state read-back。此具體 provenance identity 根因為
 **`root_cause_fixed_and_verified`**；formal caller、live migrations、Git ownership
 cutover 與 rollback rehearsal仍未完成，因此 Change Delivery 整體維持
 **`contained`**。

@@ -287,8 +287,9 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   也不影響精確回讀。
 - 「完整 commit message」不是 caller 的人類可見文字本身。Actuator 在 authorize 後
   固定附加 `Volpred-Commit-Authority-Request: <sha256>` trailer；SHA-256 綁同一次
-  proposal、WorkItem/version、兩個 fencing token、repository/parent、paths/hashes、
-  原 message 與 commit-worker actor。Writer argv 與 durable receipt 仍不包含 raw
+  proposal、WorkItem/version、Git owner generation、兩個 fencing token、
+  repository/parent、paths/hashes、原 message 與 commit-worker actor。Writer argv
+  與 durable receipt 仍不包含 raw
   token。正常 post-write verification 與 stale-HEAD recovery 共用這個 exact bound
   message gate，因此沒有 authority trailer 的 bitwise lookalike first child 會
   fail closed。
@@ -353,7 +354,8 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   trailer；不同 grant、沒有 trailer或只有相同內容的 lookalike 均 fail closed。
 - Regression 先證明 unbound bitwise lookalike 會被舊實作接受，再驗證修正後拒絕，
   同時正常 commit object 的 trailer 與 receipt digest 精確一致、真 lost-return
-  recovery 仍可完成。這個 commit-provenance identity 缺口為
+  recovery 仍可完成；舊 owner generation 產生的合法 trailer 也不可被新 generation
+  recovery 接受。這個 commit-provenance identity 缺口為
   `root_cause_fixed_and_verified`；formal caller、live migrations、Git ownership
   cutover 與 rollback rehearsal仍缺，Change Delivery 整體維持 `contained`。
 
