@@ -571,6 +571,54 @@ def test_exact_path_commit_materializes_registered_workspace_under_same_lease(
     assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
 
 
+def test_workspace_materialization_rejects_unbound_executable_mode(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    linked = tmp_path / "candidate"
+    _run(
+        repo,
+        "git",
+        "worktree",
+        "add",
+        "-qb",
+        "candidate-executable-mode",
+        str(linked),
+        expected_head,
+    )
+    candidate = b"#!/bin/sh\nexit 0\n"
+    source = linked / "new.sh"
+    source.write_bytes(candidate)
+    source.chmod(0o755)
+    before_status = _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "change-delivery-materializer",
+        "--expected-head",
+        expected_head,
+        "--source-workspace",
+        str(linked),
+        "--expected-content-hash",
+        f"new.sh={hashlib.sha256(candidate).hexdigest()}",
+        "--message",
+        "must not materialize unbound mode",
+        "--",
+        "new.sh",
+    )
+
+    assert blocked.returncode == 2
+    assert "Git file mode" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == before_status
+    assert not (repo / "new.sh").exists()
+
+
 def test_workspace_materialization_rejects_source_drift_without_touching_main(
     tmp_path: Path,
 ) -> None:

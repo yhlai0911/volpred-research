@@ -197,6 +197,28 @@ def test_actuator_does_not_recover_lookalike_commit_with_different_message(
     assert _git(repo, "rev-parse", "HEAD") == lookalike_commit
 
 
+def test_actuator_does_not_recover_lookalike_commit_with_different_file_mode(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    new_path = repo / "new.txt"
+    new_path.write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    new_path.chmod(0o755)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(repo, "commit", "-m", command.message)
+    lookalike_commit = _git(repo, "rev-parse", "HEAD")
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="expected HEAD fence failed",
+    ):
+        _actuator().commit(command)
+
+    assert _git(repo, "rev-parse", "HEAD") == lookalike_commit
+
+
 def test_actuator_preserves_unrelated_index_and_worktree_state(
     repository: tuple[Path, str],
 ) -> None:

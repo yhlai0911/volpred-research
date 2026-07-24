@@ -219,6 +219,36 @@ def _git_blob(repo: Path, revision: str, path: str) -> bytes | None:
     raise ValueError(f"cannot read canonical base blob: {path}")
 
 
+def _git_blob_mode(repo: Path, revision: str, path: str) -> str | None:
+    tree = subprocess.run(
+        _git("ls-tree", "-z", revision, "--", path),
+        cwd=repo,
+        capture_output=True,
+        check=False,
+    )
+    if tree.returncode != 0:
+        raise ValueError(f"cannot inspect canonical base Git mode: {path}")
+    entries = [entry for entry in tree.stdout.split(b"\0") if entry]
+    if not entries:
+        return None
+    if len(entries) != 1:
+        raise ValueError(f"cannot resolve exact canonical base Git mode: {path}")
+    metadata, separator, observed_path = entries[0].partition(b"\t")
+    fields = metadata.split()
+    if (
+        separator != b"\t"
+        or observed_path.decode("utf-8", errors="surrogateescape") != path
+        or len(fields) != 3
+        or fields[1] != b"blob"
+    ):
+        raise ValueError(f"unsupported canonical base Git entry: {path}")
+    return fields[0].decode("ascii")
+
+
+def _regular_file_git_mode(mode: int) -> str:
+    return "100755" if stat.S_IMODE(mode) & 0o111 else "100644"
+
+
 def _replace_file(path: Path, payload: bytes, mode: int) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, raw_temp = tempfile.mkstemp(
@@ -305,6 +335,16 @@ def _materialize_candidate_workspace(
             raise ValueError(f"cannot inspect source-workspace path {path}: {exc}") from exc
         if not stat.S_ISREG(candidate_stat.st_mode):
             raise ValueError(f"source-workspace path is not a regular file: {path}")
+        base_mode = _git_blob_mode(repo, expected_head, path)
+        expected_mode = base_mode or "100644"
+        if expected_mode not in {"100644", "100755"}:
+            raise ValueError(f"unsupported base Git file mode for {path}")
+        candidate_mode = _regular_file_git_mode(candidate_stat.st_mode)
+        if candidate_mode != expected_mode:
+            raise ValueError(
+                "Git file mode changes are outside ChangeSet content identity: "
+                f"{path}"
+            )
         try:
             payload = candidate.read_bytes()
         except OSError as exc:
@@ -328,6 +368,10 @@ def _materialize_candidate_workspace(
                 raise ValueError(f"cannot inspect canonical target {path}: {exc}") from exc
             if not stat.S_ISREG(target_stat.st_mode):
                 raise ValueError(f"canonical target is not a regular file: {path}")
+            if _regular_file_git_mode(target_stat.st_mode) != expected_mode:
+                raise ValueError(
+                    f"canonical target has foreign Git file mode: {path}"
+                )
             base = _git_blob(repo, expected_head, path)
             if current not in {payload, base}:
                 raise ValueError(

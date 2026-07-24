@@ -365,6 +365,18 @@ def test_propose_rejects_symlinks_and_renames(
         _delivery().propose(proposal)
 
 
+@pytest.mark.parametrize("path", ["tracked.txt", "new.txt"])
+def test_propose_rejects_file_mode_changes_outside_content_identity(
+    workspace: tuple[Path, Path, str],
+    path: str,
+) -> None:
+    _, linked, base_commit = workspace
+    (linked / path).chmod(0o755)
+
+    with pytest.raises(ValueError, match="Git file mode"):
+        _delivery().propose(_proposal(linked, base_commit))
+
+
 def test_propose_rejects_base_drift_and_canonical_checkout(
     workspace: tuple[Path, Path, str],
 ) -> None:

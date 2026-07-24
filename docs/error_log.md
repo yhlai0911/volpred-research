@@ -1516,3 +1516,26 @@ materializer overwrite／rollback 根因已達
 **`root_cause_fixed_and_verified`**；formal Work Coordinator caller、live migrations、
 Git ownership cutover 與 rollback rehearsal 尚未完成，因此整體 task 仍只能標
 **`contained`**。
+
+### 2026-07-24 — ChangeSet content identity 未綁 Git executable bit
+
+**症狀與根因層級**：`changeset.v1`、commit authority 與 writer fence 都只綁定
+exact path／blob SHA-256。公開 regression 證明同一 proposal 的 tracked 或 new file
+可在 source 端切成 executable 而仍通過 `propose()`；materializer 會真的建立
+`100755` commit。若程序遺失 writer return，stale-HEAD recovery 也會把 parent、
+message、paths、bytes 全相同但 tree mode 不同的 lookalike 當作原 commit。這是
+immutable write-intent 的 identity 缺口，不是 chmod cosmetic difference。
+
+**底層修復**：目前 durable schema 尚未 live cutover，因此不以半套 migration 新增
+欄位；bounded ChangeSet v1 明確禁止 mode transition。Tracked regular file 必須保留
+base tree 的 `100644`／`100755`，new file 固定 `100644`。`propose()` 核對 workspace
+與 base tree；canonical writer 在同一 common-dir lease 內再核對 source 及 target
+mode，避免覆蓋 foreign chmod；post-commit verification／lost-return recovery 最後
+比較 expected 與 observed tree mode。未來若需 executable new file，必須先把 mode
+正式納入 proposal、authority request 與 durable receipts。
+
+**回歸與狀態界線**：tracked／new proposal mode drift、writer executable new file、
+recovery mode-lookalike 四個 RED cases 已轉 GREEN；完整 Change Delivery、Git actuator、
+Git writer scoped suite 76 passed。此具體 mode identity 根因為
+**`root_cause_fixed_and_verified`**；formal caller、live migrations、Git ownership
+cutover 與 rollback rehearsal仍未完成，Change Delivery 整體維持 **`contained`**。

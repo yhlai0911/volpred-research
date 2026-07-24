@@ -148,6 +148,11 @@
 > 失敗會還原原 bytes，kill 後 exact residue可冪等續作。這封閉 production
 > materializer 的 overwrite／rollback seam，但 formal caller、live migration、
 > ownership cutover 與正式 rollback rehearsal仍未完成，因此不改變目前 Git ownership。
+> ChangeSet v1 的 immutable identity 只包含 path 與 blob SHA-256，不包含 Git tree
+> mode；因此此 bounded slice 明確禁止 mode transition：tracked regular file 必須保留
+> base 的 `100644`／`100755`，new file 固定為 `100644`。Proposal validation、
+> lease 內 materialization 與 post-commit／lost-return read-back 都套用同一規則，
+> 不讓相同 proposal digest 落成不同 tree。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

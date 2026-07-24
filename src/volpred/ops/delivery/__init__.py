@@ -15,6 +15,7 @@ import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import re
+import stat
 import subprocess
 from threading import RLock
 from typing import Callable
@@ -605,6 +606,37 @@ def _dirty_paths(workspace: Path) -> tuple[str, ...]:
     return tuple(sorted(dirty))
 
 
+def _tree_git_mode(workspace: Path, revision: str, path: str) -> str | None:
+    raw = _run_git(
+        workspace,
+        "--literal-pathspecs",
+        "ls-tree",
+        "-z",
+        revision,
+        "--",
+        path,
+    )
+    entries = [entry for entry in raw.split("\0") if entry]
+    if not entries:
+        return None
+    if len(entries) != 1:
+        raise ValueError(f"cannot resolve exact Git tree mode for ChangeSet path: {path}")
+    metadata, separator, observed_path = entries[0].partition("\t")
+    fields = metadata.split()
+    if (
+        separator != "\t"
+        or observed_path != path
+        or len(fields) != 3
+        or fields[1] != "blob"
+    ):
+        raise ValueError(f"unsupported Git tree entry for ChangeSet path: {path}")
+    return fields[0]
+
+
+def _regular_file_git_mode(mode: int) -> str:
+    return "100755" if stat.S_IMODE(mode) & 0o111 else "100644"
+
+
 def _validate_workspace(proposal: ChangeSetProposal) -> None:
     workspace = Path(proposal.workspace_ref)
     if not workspace.is_dir():
@@ -658,6 +690,18 @@ def _validate_workspace(proposal: ChangeSetProposal) -> None:
             ) from exc
         if not resolved.is_file():
             raise ValueError(f"ChangeSet path is not a regular file: {relative}")
+        base_mode = _tree_git_mode(workspace, proposal.base_commit, relative)
+        expected_mode = base_mode or "100644"
+        if expected_mode not in {"100644", "100755"}:
+            raise ValueError(
+                f"unsupported base Git file mode for ChangeSet path: {relative}"
+            )
+        observed_mode = _regular_file_git_mode(resolved.stat().st_mode)
+        if observed_mode != expected_mode:
+            raise ValueError(
+                "Git file mode changes are outside ChangeSet content identity: "
+                f"{relative}"
+            )
         try:
             payload = resolved.read_bytes()
         except OSError as exc:

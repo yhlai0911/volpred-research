@@ -362,7 +362,47 @@ def _verify_commit(
             raise CommitActuatorBlocked(
                 f"committed content hash differs from the ChangeSet: {item.path}"
             )
+        expected_mode = (
+            _tree_git_mode(repository, command.expected_head, item.path)
+            or "100644"
+        )
+        observed_mode = _tree_git_mode(repository, commit_sha, item.path)
+        if (
+            expected_mode not in {"100644", "100755"}
+            or observed_mode != expected_mode
+        ):
+            raise CommitActuatorBlocked(
+                f"committed Git file mode differs from the ChangeSet: {item.path}"
+            )
     return parent_sha
+
+
+def _tree_git_mode(repository: Path, revision: str, path: str) -> str | None:
+    raw = _git_bytes(
+        repository,
+        "ls-tree",
+        "-z",
+        revision,
+        "--",
+        path,
+    )
+    entries = [entry for entry in raw.split(b"\0") if entry]
+    if not entries:
+        return None
+    if len(entries) != 1:
+        raise CommitActuatorBlocked(
+            f"cannot resolve exact committed Git file mode: {path}"
+        )
+    metadata, separator, observed_path = entries[0].partition(b"\t")
+    fields = metadata.split()
+    if (
+        separator != b"\t"
+        or observed_path.decode("utf-8", errors="surrogateescape") != path
+        or len(fields) != 3
+        or fields[1] != b"blob"
+    ):
+        raise CommitActuatorBlocked(f"unsupported committed Git tree entry: {path}")
+    return fields[0].decode("ascii")
 
 
 def _normalize_command(command: CommitActuation) -> CommitActuation:

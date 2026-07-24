@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（Change Delivery candidate workspace materializer）**
+Last updated: **2026-07-24（Change Delivery Git file-mode identity fence）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -286,6 +286,16 @@ Git writer／Change Delivery／actuator scoped suite 72 passed，canonical write
 0 violations。Materializer overwrite／rollback seam 為
 `root_cause_fixed_and_verified`；formal caller、live migrations、Git ownership
 cutover 與正式 rollback rehearsal仍缺，所以 Change Delivery 整體維持 `contained`。
+
+同日 materializer follow-up 發現 `changeset.v1` 只綁 path／blob SHA-256，沒有綁定
+Git tree mode；相同 proposal 可落成 `100644` 或 `100755`，lost-return recovery 也會
+接受 mode 不同的 lookalike。現階段不擴張尚未 cutover 的 durable schema，而是把
+bounded policy 機械化：tracked regular file 保留 base mode，new file 固定
+`100644`。Proposal、lease 內 source／canonical target materialization，以及
+commit-object／recovery read-back 三層都核對 mode。四個 RED cases 轉 GREEN，完整
+scoped suite 76 passed；具體 identity 根因為 `root_cause_fixed_and_verified`，
+Change Delivery 整體仍因 formal caller、live migrations、ownership cutover 與
+rollback rehearsal未完成而維持 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

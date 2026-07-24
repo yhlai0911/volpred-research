@@ -316,6 +316,24 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   Coordinator caller、live migrations、Git ownership cutover 與 rollback rehearsal
   仍未完成，所以 Change Delivery 整體維持 `contained`。
 
+### 2026-07-24 Git file-mode identity checkpoint
+
+- `changeset.v1` 綁定 exact paths 與 content SHA-256，但沒有 file-mode 欄位；修正前
+  同一 proposal 可在 source validation 後由 `100644` 漂成 `100755`，writer 仍會落地，
+  lost-return recovery 也會把 bytes／message／paths 相同但 mode 不同的 commit 誤認為
+  原 write intent。
+- 為避免在 shadow schema 尚未 cutover 前擴張 durable identity，本 slice 採明確的
+  bounded policy：tracked regular file 必須保留 base tree 的 `100644`／`100755`；
+  new file 只允許 `100644`。Executable-bit transition 與 executable new file 都 fail
+  closed，未來若要支援必須先把 mode 正式加入 proposal、authority request 與 receipts。
+- `propose()` 先核對 workspace stat 與 base tree；canonical writer 在 common-dir
+  lease 內再次核對 source 與 target mode，避免 materialize 覆蓋 foreign chmod；
+  commit-object read-back與 stale-HEAD recovery 再比較 expected／observed tree mode。
+  四個 RED cases 已轉 GREEN，完整 Change Delivery／Git actuator／Git writer scoped
+  suite 76 passed。此 mode identity 根因為 `root_cause_fixed_and_verified`；formal
+  caller、live migrations、ownership cutover 與 rollback rehearsal仍缺，整體維持
+  `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
