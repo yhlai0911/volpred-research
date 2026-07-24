@@ -557,10 +557,15 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   即使 RPC 卡住，正式 caller 已無法取得 lease。Status 不含 raw fencing token，只暴露
   authority identity、renewal count、last renewed expiry、worker liveness與 exception
   type。
+- Start 的 remote acquire、renew worker publication 與 `running` gate 現在位於同一個
+  process-lock transition。並行 starter 只能取得同一 lease／同一 worker；並行 stop
+  必須等這個 transition 落定後再關 gate，不能在 acquire 尚未返回時先報完成，隨後又被
+  starter 重開。
 - 新 unit／concurrency cases覆蓋 renew、clean stop、renew failure、`BaseException`、
   release response lost、blocked-renew stop timeout、invalid renewal margin、
-  environment composition與 token redaction；連同 session／Supabase adapter共
-  22 passed。Production no-effect rehearsal 讓 A host renew 一次並 release，B host
+  concurrent start／stop、environment composition與 token redaction；連同
+  session／Supabase adapter共 24 passed。Production no-effect rehearsal讓 A host
+  renew 一次並 release，B host
   以同一 key 接管；epoch 精確 `1 → 2`，兩個 release refs 都由 DB transaction回傳，
   final state 都是 `stopped`。
 - 這個週期性 keepalive owner 缺口為

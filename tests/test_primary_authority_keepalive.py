@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
-from threading import Event
+from threading import Event, Lock, Thread
 import time
 
 import pytest
@@ -155,6 +155,122 @@ def test_keepalive_renews_and_clean_stop_releases_authority() -> None:
     with pytest.raises(AuthorityInactive, match="not running"):
         keepalive.current_lease()
     keepalive.stop()
+
+
+def test_concurrent_start_creates_only_one_renewal_owner(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _AuthorityStore()
+    keepalive = _keepalive(store, interval=60.0)
+    first_activate_entered = Event()
+    allow_first_activate = Event()
+    second_activate_entered = Event()
+    activate_lock = Lock()
+    activate_calls = 0
+    original_activate = HostAuthoritySession.activate
+
+    def delayed_activate(
+        session: HostAuthoritySession,
+    ) -> PrimaryLease:
+        nonlocal activate_calls
+        with activate_lock:
+            activate_calls += 1
+            call_number = activate_calls
+        if call_number == 1:
+            first_activate_entered.set()
+            assert allow_first_activate.wait(1.0)
+        else:
+            second_activate_entered.set()
+        return original_activate(session)
+
+    monkeypatch.setattr(
+        HostAuthoritySession,
+        "activate",
+        delayed_activate,
+    )
+    results: list[PrimaryLease] = []
+    errors: list[BaseException] = []
+
+    def start() -> None:
+        try:
+            results.append(keepalive.start())
+        except BaseException as error:
+            errors.append(error)
+
+    first = Thread(target=start)
+    second = Thread(target=start)
+    first.start()
+    assert first_activate_entered.wait(1.0)
+    second.start()
+    second_reached_activate = second_activate_entered.wait(0.1)
+    allow_first_activate.set()
+    first.join(1.0)
+    second.join(1.0)
+
+    assert second_reached_activate is False
+    assert first.is_alive() is False
+    assert second.is_alive() is False
+    assert errors == []
+    assert len(results) == 2
+    assert results[0] == results[1]
+    assert activate_calls == 1
+    keepalive.stop()
+
+
+def test_stop_cannot_finish_while_start_is_acquiring_authority(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _AuthorityStore()
+    keepalive = _keepalive(store, interval=60.0)
+    activate_entered = Event()
+    allow_activate = Event()
+    stop_finished = Event()
+    original_activate = HostAuthoritySession.activate
+
+    def delayed_activate(
+        session: HostAuthoritySession,
+    ) -> PrimaryLease:
+        activate_entered.set()
+        assert allow_activate.wait(1.0)
+        return original_activate(session)
+
+    monkeypatch.setattr(
+        HostAuthoritySession,
+        "activate",
+        delayed_activate,
+    )
+    errors: list[BaseException] = []
+
+    def start() -> None:
+        try:
+            keepalive.start()
+        except BaseException as error:
+            errors.append(error)
+
+    def stop() -> None:
+        try:
+            keepalive.stop()
+        except BaseException as error:
+            errors.append(error)
+        finally:
+            stop_finished.set()
+
+    starter = Thread(target=start)
+    stopper = Thread(target=stop)
+    starter.start()
+    assert activate_entered.wait(1.0)
+    stopper.start()
+    stop_finished_during_activate = stop_finished.wait(0.1)
+    allow_activate.set()
+    starter.join(1.0)
+    stopper.join(1.0)
+
+    assert stop_finished_during_activate is False
+    assert starter.is_alive() is False
+    assert stopper.is_alive() is False
+    assert errors == []
+    assert keepalive.status().state == "stopped"
+    assert store.current is None
 
 
 def test_renew_failure_demotes_and_closes_local_enable_gate() -> None:

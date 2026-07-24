@@ -88,29 +88,31 @@ class HostAuthorityKeepalive:
                 raise AuthorityInactive(
                     "Primary Authority keepalive cannot be restarted"
                 )
-
-        lease = self._session.activate()
-        try:
-            self._validate_renew_margin(lease)
-            worker = Thread(
-                target=self._run,
-                name=(
-                    "volpred-primary-authority-"
-                    f"{lease.authority_key}"
-                ),
-                daemon=True,
-            )
-            with self._lock:
+            # Activation and publication of the renewal worker are one local
+            # transition.  Releasing this lock around the remote acquire lets
+            # concurrent starters create multiple workers, or lets stop()
+            # return while this call can still publish a running gate.
+            lease = self._session.activate()
+            try:
+                self._validate_renew_margin(lease)
+                worker = Thread(
+                    target=self._run,
+                    name=(
+                        "volpred-primary-authority-"
+                        f"{lease.authority_key}"
+                    ),
+                    daemon=True,
+                )
                 self._worker = worker
                 self._state = "running"
                 worker.start()
-        except BaseException as error:
-            self._fail_closed(error)
-            raise AuthorityInactive(
-                "Primary Authority keepalive failed to start; "
-                "local host demoted"
-            ) from error
-        return lease
+            except BaseException as error:
+                self._fail_closed(error)
+                raise AuthorityInactive(
+                    "Primary Authority keepalive failed to start; "
+                    "local host demoted"
+                ) from error
+            return lease
 
     def current_lease(self) -> PrimaryLease:
         """Return a lease only while the canonical renew owner is live."""

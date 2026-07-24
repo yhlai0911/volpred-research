@@ -378,9 +378,12 @@ authority contracts，共 12 passed。這使 session lifecycle 的局部缺口�
 `root_cause_fixed_and_verified`。
 同日 `HostAuthorityKeepalive` 再成為週期性 renew 的單一 process owner：正式 caller
 只能從 keepalive 取 lease，stop／renew failure／dead worker／join timeout 都先封鎖
-本機 enable gate，status 不洩漏 raw token。Concurrency／composition與相鄰 authority
-suite 共 22 passed；production service-role no-effect rehearsal 完成 A renew/release、
-B 同 key acquire/release，epoch `1 → 2` 且 final state 都是 `stopped`。這個 canonical
+本機 enable gate，status 不洩漏 raw token。後續 startup race 回歸抓到 remote acquire
+原先不在 keepalive lock 內：並行 start 可建立兩個 renew owner，並行 stop 可先返回再被
+starter 重開 gate。Acquire、worker publication與 running gate 現已原子化；
+concurrency／composition與相鄰 authority suite 共 24 passed；production service-role
+no-effect rehearsal 完成 A renew/release、B 同 key acquire/release，epoch `1 → 2` 且
+final state 都是 `stopped`。這個 canonical
 keepalive 缺口達 `root_cause_fixed_and_verified`；但全 effect-family enable gate與
 真實雙 Mac network-partition／Supabase outage／五分鐘 RTO rehearsal尚未完成，所以
 program commit 34 整體仍是 `contained`。

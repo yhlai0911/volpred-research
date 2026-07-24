@@ -288,10 +288,13 @@
 > keepalive 取得 current lease，不能繞回 wrapped session。Stop、renew failure、
 > unexpected worker exit 與 join timeout 都先關閉本機 enable gate，remote lease 最晚
 > 由 database clock expiry fence；status 只回 renewal count、expiry、worker liveness
-> 與 exception type。Production service-role composition 的 no-effect rehearsal 以
+> 與 exception type。Start 的 remote acquire、renew worker publication 與 running
+> gate 是同一個 process-lock transition；並行 start 只能共用一個 worker，stop 也不能
+> 在 acquire 尚未完成時先返回、再被 starter 重開 gate。Production service-role
+> composition 的 no-effect rehearsal 以
 > authority key `operations-core-keepalive-smoke-2a249b5a100e4352a76c848f5ca394c1`
 > 完成 A renew/release 後 B acquire/release，epoch `1 → 2`、兩端 final state 都是
-> `stopped`。22 個 keepalive／session／HTTP scoped cases 通過。此 checkpoint 尚未把
+> `stopped`。24 個 keepalive／session／HTTP scoped cases 通過。此 checkpoint 尚未把
 > keepalive active state 接到所有 effect-family owner，也未做真實雙 Mac
 > network-partition／五分鐘 RTO rehearsal，所以 program commit 34 仍維持
 > `contained`。

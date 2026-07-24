@@ -1879,3 +1879,28 @@ Architecture、module design、improvement status與 public package exports已�
 canonical keepalive owner 根因為 **`root_cause_fixed_and_verified`**；全
 effect-family enable gate、真實雙 Mac network partition、Supabase outage與五分鐘
 RTO rehearsal仍缺，因此 program commit 34 整體維持 **`contained`**。
+
+### 2026-07-24 — Keepalive acquire 未納入本機 transition，並行 start／stop 可破壞單一 owner gate
+
+**證據化症狀與根因層級**：`HostAuthorityKeepalive.start()` 原先只在進入時用
+`self._lock` 檢查 `standby`，隨即放鎖執行 `HostAuthoritySession.activate()`，最後才
+重新取鎖 publish worker 與 `running`。可重現的 barrier injection 證明兩個 starter
+會同時跨入 activate 並各建 renew thread；stop 也可在第一個 acquire 尚未返回時把
+`standby` 標成 `stopped` 並先返回，之後 starter 仍會 publish `running`。資料庫 fencing
+仍會保護正式 write，但本機「單一 renew owner／stop 後 gate 不可重開」契約已被破壞。
+根因是 start transition 的 process-lock 範圍不完整，不是 Supabase lease row 或 DB-clock
+政策錯誤。
+
+**底層重構**：Remote acquire、renew worker 建立與 `running` publication 現在共用同一個
+keepalive `RLock` critical section。第二個 starter 會在 transition 完成後直接回讀同一
+lease，不會呼叫第二次 activate或建立第二個 worker；並行 stop 必須等 start 落定，再從
+`running → stopping → stopped` 關 gate。Acquire 阻塞期間 gate仍是 `standby`，
+`current_lease()` 無法取出 raw token，所以等待 lock 不會擴大 effect／commit 權限。
+
+**回歸、回讀與狀態界線**：新增兩個 deterministic barrier cases，修正前分別實際觀察到
+第二次 activate 與 stop 提前完成，修正後均通過；keepalive／session／Supabase authority
+相鄰套件共 **24 passed**。Architecture、operations-core module design與 improvement
+status 已同步，這個 startup 原子性缺口為
+**`root_cause_fixed_and_verified`**。全 effect-family enable gate、真實雙 Mac
+network partition、Supabase outage與五分鐘 RTO rehearsal仍未執行，所以 program
+commit 34 umbrella 保持 **`contained`**。
