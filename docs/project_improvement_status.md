@@ -469,6 +469,13 @@ duplicate claims=0、effect requests/provider calls=0，publisher fence前後完
 authority相鄰suite共28 passed。這使live Supabase outage與五分鐘RTO的單host operator
 seam達`root_cause_fixed_and_verified`；真正跨兩台實體Mac的network partition與其餘
 effect-family cutover仍缺，因此program commit 34 umbrella保持`contained`。
+同日 operator seam又新增`primary`／`standby`／`verify-pair`三個process角色：
+shared rehearsal ID決定性導出隔離key，兩端receipt含machine fingerprint與code hash，
+配對receipt綁定兩個payload SHA-256並機械驗distinct hosts、相同implementation、
+exact next epoch、DB-clock expiry後300秒內handoff、publisher fence不變與零
+duplicate/effect/provider。local interface
+suite 6 passed；兩台實體Mac尚未產出production paired receipts，所以umbrella仍為
+`contained`。
 同日 generic durable outbox worker 也移除 caller 自填 raw authority identity／token
 的介面，改從 keepalive lease gate 取得，並在 claim、authorize、provider 三個階段前
 重驗同一 lease identity。Email notification 與 publisher article sync 都走這個深模組

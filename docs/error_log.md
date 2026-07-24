@@ -1560,6 +1560,17 @@ duplicate claims=0、effect requests=0、provider calls=0；publisher fence前�
 實體Mac的network partition與其餘effect-family cutover尚未完成，program commit 34與
 operations-core umbrella維持**`contained`**。
 
+後續回歸也證實單process runner的demotion觀測有 thread exit競態：keepalive先把狀態
+設成`demoted`，worker才真正退出，原本只等待state便立即assert liveness，會偶發失敗。
+接受條件已改為`state=demoted AND worker_alive=false`。同一operator seam新增明確
+`primary`／`standby`角色，以shared rehearsal ID跨主機共用隔離authority key；第三個
+`verify-pair`角色會驗兩份machine fingerprint、implementation/receipt hash、
+exact next epoch、primary DB-clock expiry後最多300秒handoff、固定publisher fence及零
+duplicate/effect/provider。6個failure-injection/interface tests、compileall與
+diff check通過。這個跨process演練介面缺口為
+**`root_cause_fixed_and_verified`**；但尚無兩台實體Mac的live paired receipts，
+operations-core umbrella仍為**`contained`**。
+
 ### 2026-07-24 — ChangeSet content identity 未綁 Git executable bit
 
 **症狀與根因層級**：`changeset.v1`、commit authority 與 writer fence 都只綁定

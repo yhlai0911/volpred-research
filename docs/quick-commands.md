@@ -90,8 +90,13 @@ cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh
 # 文件：docs/zeabur-safe-deploy.md
 # Publisher owner fence 部署後的正式 CAS → 單篇 acknowledgement → exact rollback：
 uv run python scripts/rehearse_publisher_cutover.py --deployment-id <zeabur_deployment_id> --slug <published_single_report_slug>
-# Primary Authority live renewal outage；隔離 key、零 provider effect、原子保存 RTO receipt：
-uv run python scripts/rehearse_primary_authority_outage.py --receipt-path storage/ops/primary_authority_outage_rehearsal_latest.json
+# Primary Authority 單機 live renewal outage（舊流程仍相容）：
+uv run python scripts/rehearse_primary_authority_outage.py single-host --receipt-path storage/ops/primary_authority_outage_rehearsal_latest.json
+# 雙實體 Mac：先在 primary 跑完並讀 receipt epoch，再到 standby 用同一 rehearsal-id：
+uv run python scripts/rehearse_primary_authority_outage.py primary --rehearsal-id <shared_id> --receipt-path primary.json
+uv run python scripts/rehearse_primary_authority_outage.py standby --rehearsal-id <shared_id> --expected-primary-epoch <epoch> --receipt-path standby.json
+# 把兩份 receipt 放到同一台機器後，驗 host fingerprint、next epoch、DB-clock RTO 與零 effect：
+uv run python scripts/rehearse_primary_authority_outage.py verify-pair --primary-receipt primary.json --standby-receipt standby.json --receipt-path storage/ops/primary_authority_outage_cross_host_latest.json
 # 注意：所有 CLI 命令加 -i=false 避免互動式 prompt
 
 # 發佈

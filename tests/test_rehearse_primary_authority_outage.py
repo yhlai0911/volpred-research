@@ -8,8 +8,13 @@ import pytest
 
 from scripts.rehearse_primary_authority_outage import (
     PartitionableAuthorityStore,
+    PrimaryProcessReceipt,
+    StandbyProcessReceipt,
     _write_receipt,
     rehearse_primary_authority_outage,
+    rehearse_primary_process_role,
+    rehearse_standby_process_role,
+    verify_cross_host_receipts,
 )
 from volpred.ops.authority import (
     AuthorityReceipt,
@@ -243,3 +248,112 @@ def test_receipt_writer_round_trips_exact_payload(
     assert target.is_file()
     assert json.loads(target.read_text())["standby"]["epoch"] == 2
     assert list(target.parent.glob("*.tmp")) == []
+
+
+def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
+    live = _LiveAuthorityStore()
+    primary_store = PartitionableAuthorityStore(
+        healthy=live,
+        unavailable=_UnavailableAuthorityStore(),
+    )
+    publisher = _PublisherStore()
+
+    primary = rehearse_primary_process_role(
+        rehearsal_id="cross-host-test",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        holder_ref="host:primary:outage",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=primary_store,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = rehearse_standby_process_role(
+        rehearsal_id="cross-host-test",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        holder_ref="host:standby:outage",
+        expected_primary_epoch=primary.primary.epoch,
+        lease_seconds=10,
+        rto_seconds=1.0,
+        poll_interval_seconds=0.005,
+        store=live,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    paired = verify_cross_host_receipts(primary, standby)
+    paired_path = tmp_path / "cross-host.json"
+    _write_receipt(paired_path, paired)
+
+    assert isinstance(primary, PrimaryProcessReceipt)
+    assert primary.final_primary_state == "demoted"
+    assert primary.local_gate_closed is True
+    assert isinstance(standby, StandbyProcessReceipt)
+    assert standby.standby.epoch == primary.primary.epoch + 1
+    assert standby.final_standby_state == "stopped"
+    assert paired.schema_version == (
+        "primary-authority-outage-cross-host.v1"
+    )
+    assert paired.database_clock_handoff_seconds >= 0
+    assert paired.successful_authority_claims == 2
+    assert paired.duplicate_authority_claims == 0
+    assert paired.effect_requests == paired.provider_calls == 0
+    assert paired.cross_host_verified is True
+    saved_pair = json.loads(paired_path.read_text())
+    assert saved_pair["schema_version"] == (
+        "primary-authority-outage-cross-host.v1"
+    )
+    assert saved_pair["primary_receipt_sha256"] == (
+        paired.primary_receipt_sha256
+    )
+    assert saved_pair["cross_host_verified"] is True
+    assert live.authorize_calls == 0
+    assert live.current is None
+
+
+def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    primary = rehearse_primary_process_role(
+        rehearsal_id="same-machine-test",
+        host_id="mac-a",
+        host_fingerprint="shared-fingerprint",
+        holder_ref="host:a:outage",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=PartitionableAuthorityStore(
+            healthy=live,
+            unavailable=_UnavailableAuthorityStore(),
+        ),
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = rehearse_standby_process_role(
+        rehearsal_id="same-machine-test",
+        host_id="mac-b",
+        host_fingerprint="shared-fingerprint",
+        holder_ref="host:b:outage",
+        expected_primary_epoch=primary.primary.epoch,
+        lease_seconds=10,
+        rto_seconds=1.0,
+        poll_interval_seconds=0.005,
+        store=live,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+
+    with pytest.raises(ValueError, match="two distinct machines"):
+        verify_cross_host_receipts(primary, standby)
+
+    with pytest.raises(ValueError, match="different rehearsal code"):
+        verify_cross_host_receipts(
+            primary,
+            replace(
+                standby,
+                host_fingerprint="standby-fingerprint",
+                implementation_sha256="0" * 64,
+            ),
+        )

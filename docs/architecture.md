@@ -314,6 +314,15 @@
 > process rehearsal，尚未取代兩台實體 Mac 的 network-partition演練；其餘 effect
 > family也未全部cutover，因此 program commit 34 umbrella仍為 `contained`。
 >
+> 同一 operator seam 另提供 `primary`、`standby`、`verify-pair` 三個跨 process
+> 角色。兩台主機用 shared rehearsal ID 決定性導出同一隔離 authority key，各自原子
+> 保存 token-redacted receipt；pair verifier 綁定兩份 receipt SHA-256，並拒絕相同
+> machine fingerprint、兩端 code SHA-256 不一致、非 exact-next epoch、standby 早於
+> primary DB-clock expiry、超過 300 秒、publisher fence 漂移或任何
+> duplicate/effect/provider 計數。local
+> failure injection 已通過；尚未取得兩台實體 Mac 的 production receipt pair，所以
+> 這只是制度化演練路徑，不能把 umbrella 升為 `root_cause_fixed_and_verified`。
+>
 > Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
 > epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate
 > 取得 authority，並在 claim 前、authorize 前與 provider 前重新回讀同一 lease

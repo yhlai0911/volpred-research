@@ -597,6 +597,14 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   `root_cause_fixed_and_verified`。兩個session仍在同一台Mac process內；真正跨兩台
   實體Mac的network partition與其餘effect-family cutover尚未完成，因此program
   commit 34與operations-core umbrella保持`contained`。
+- 後續將同一 seam 深化為明確的`primary`／`standby` process roles與
+  `verify-pair`：shared rehearsal ID決定性導出隔離key，receipt記錄hash過的machine
+  fingerprint與implementation SHA-256，配對時綁定兩份receipt SHA-256並驗distinct
+  machine、相同code、exact next epoch、DB-clock expiry後300秒內handoff、固定
+  publisher fence及零effect/provider。
+  failure-injection regression也把原先「state先demoted、worker稍後退出」的觀測競態
+  改成兩個條件同時成立才接受。6個interface cases、compileall與diff check通過；
+  真正雙Mac receipt pair仍待operator執行，umbrella狀態不變。
 
 ### 2026-07-24 generic effect-worker keepalive gate checkpoint
 
