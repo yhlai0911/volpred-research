@@ -356,7 +356,11 @@
 > request／active attempt／Primary Authority lease 都是 0；沒有執行文章 write 或 owner
 > transfer。Frontend fence commit `ae14890` 尚未 push／deploy，因此 live route 仍不能
 > 視為已受 fence 保護；在部署與 live 回讀之前禁止 CAS cutover。PG17 45 cases、
-> caller／adapter 22 cases與 frontend typecheck通過。這個 publisher program 仍為
+> caller／adapter 22 cases與 frontend typecheck通過。Formal caller 另在 provider
+> read-back後逐欄核對 settlement receipt 的 generation、Work／Effect／attempt、
+> Primary Authority ref、evidence與 lifecycle tuple；terminal replay也套用同一
+> lifecycle contract，漂移 response一律 fail closed。Publisher／PostgreSQL相鄰
+> 69 cases通過。這個 publisher program 仍為
 > `contained`，下一個 gate 是部署 frontend、回讀 live route version，再做唯一 owner
 > article acknowledgement 與 rollback rehearsal。
 

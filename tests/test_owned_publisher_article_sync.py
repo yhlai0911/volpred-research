@@ -271,6 +271,31 @@ def test_sync_hides_request_begin_provider_and_settlement() -> None:
     assert lease_gate.calls == 3
 
 
+def test_sync_fails_closed_when_settlement_receipt_drifts() -> None:
+    store = _Store(_owner())
+    original_settle = store.settle
+
+    def settle_with_drift(*args, **kwargs):
+        return replace(
+            original_settle(*args, **kwargs),
+            effect_id="effect-from-another-attempt",
+        )
+
+    store.settle = settle_with_drift  # type: ignore[method-assign]
+
+    with pytest.raises(
+        PublisherArticleSyncOwnershipLost,
+        match="settlement receipt drifted",
+    ):
+        OwnedPublisherArticleSync(
+            store=store,
+            provider=PublisherArticleSyncEffectAdapter(
+                projection=_Projection()
+            ),
+            primary_authority=_LeaseGate(),
+        ).sync(_command())
+
+
 def test_sync_returns_terminal_replay_without_calling_provider() -> None:
     store = _Store(_owner())
     terminal = OwnedPublisherArticleReceipt(
@@ -312,6 +337,42 @@ def test_sync_returns_terminal_replay_without_calling_provider() -> None:
     ]
     assert projection.upserts == 0
     assert lease_gate.calls == 1
+
+
+def test_sync_fails_closed_on_inconsistent_terminal_replay() -> None:
+    store = _Store(_owner())
+    store.request_view = replace(
+        store.request_view,
+        terminal_receipt=OwnedPublisherArticleReceipt(
+            schema_version="owned-publisher-article-receipt.v1",
+            owner_generation=store.owner.generation,
+            work_id=store.request_view.work_id,
+            work_status="failed",
+            effect_id=store.request_view.effect_id,
+            effect_status="dead_lettered",
+            attempt_count=1,
+            disposition="delivered",
+            evidence_ref="supabase:articles/mile_owned_sync",
+            evidence_sha256="d" * 64,
+            primary_authority_ref=(
+                "primary-authority:"
+                "publisher:article.supabase.sync:epoch-7"
+            ),
+            recorded_at="2026-07-24T12:00:01+00:00",
+        ),
+    )
+
+    with pytest.raises(
+        PublisherArticleSyncOwnershipLost,
+        match="terminal receipt drifted",
+    ):
+        OwnedPublisherArticleSync(
+            store=store,
+            provider=PublisherArticleSyncEffectAdapter(
+                projection=_Projection()
+            ),
+            primary_authority=_LeaseGate(),
+        ).sync(_command())
 
 
 def test_sync_fails_closed_before_request_when_owner_is_legacy() -> None:

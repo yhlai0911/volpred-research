@@ -37,6 +37,7 @@ _PRIMARY_AUTHORITY_KEY = "publisher:article.supabase.sync"
 _OPERATIONS_CORE_OWNER = "operations_core"
 _LEGACY_OWNER = "legacy"
 _WORKER_ID = "effect-worker:publisher-article-sync"
+_RECEIPT_SCHEMA = "owned-publisher-article-receipt.v1"
 
 
 class PublisherArticleSyncOwnershipLost(RuntimeError):
@@ -223,7 +224,13 @@ class OwnedPublisherArticleSync:
             attempt.effect,
             attempt.payload,
         )
-        return self._store.settle(attempt, outcome)
+        receipt = self._store.settle(attempt, outcome)
+        self._validate_settlement_receipt(
+            receipt,
+            attempt=attempt,
+            outcome=outcome,
+        )
+        return receipt
 
     def _token(self, kind: str) -> str:
         token = self._token_factory()
@@ -268,15 +275,60 @@ class OwnedPublisherArticleSync:
         if receipt is None:
             raise AssertionError("terminal receipt is required")
         if (
-            receipt.owner_generation != request_view.owner_generation
+            receipt.schema_version != _RECEIPT_SCHEMA
+            or receipt.owner_generation != request_view.owner_generation
             or receipt.work_id != request_view.work_id
             or receipt.effect_id != request_view.effect_id
             or receipt.disposition
             not in {"delivered", "dead_lettered"}
+            or not _receipt_lifecycle_is_consistent(receipt)
         ):
             raise PublisherArticleSyncOwnershipLost(
                 "owned publisher terminal receipt drifted "
                 "from its durable request"
+            )
+
+    @staticmethod
+    def _validate_settlement_receipt(
+        receipt: OwnedPublisherArticleReceipt,
+        *,
+        attempt: OwnedPublisherArticleAttempt,
+        outcome: EffectAttemptOutcome,
+    ) -> None:
+        if not isinstance(receipt, OwnedPublisherArticleReceipt):
+            raise TypeError(
+                "owned publisher settlement returned no typed receipt"
+            )
+        if (
+            receipt.schema_version != _RECEIPT_SCHEMA
+            or receipt.owner_generation != attempt.owner_generation
+            or receipt.work_id != attempt.work_id
+            or receipt.effect_id != attempt.effect.id
+            or receipt.attempt_count != attempt.attempt_count
+            or receipt.primary_authority_ref
+            != attempt.primary_authority_ref
+            or receipt.evidence_ref != outcome.evidence_ref
+            or receipt.evidence_sha256 != outcome.evidence_sha256
+            or not _receipt_lifecycle_is_consistent(receipt)
+            or (
+                isinstance(outcome, AcknowledgedEffect)
+                and receipt.disposition != "delivered"
+            )
+            or (
+                isinstance(outcome, FailedEffect)
+                and not outcome.retryable
+                and receipt.disposition != "dead_lettered"
+            )
+            or (
+                isinstance(outcome, FailedEffect)
+                and outcome.retryable
+                and receipt.disposition
+                not in {"retry_scheduled", "dead_lettered"}
+            )
+        ):
+            raise PublisherArticleSyncOwnershipLost(
+                "owned publisher settlement receipt drifted "
+                "from its durable attempt"
             )
 
     @staticmethod
@@ -784,6 +836,20 @@ def _receipt_from_payload(
             field="recorded_at",
         ),
     )
+
+
+def _receipt_lifecycle_is_consistent(
+    receipt: OwnedPublisherArticleReceipt,
+) -> bool:
+    expected_states = {
+        "delivered": ("succeeded", "delivered"),
+        "retry_scheduled": ("pending", "requested"),
+        "dead_lettered": ("failed", "dead_lettered"),
+    }
+    return (
+        receipt.work_status,
+        receipt.effect_status,
+    ) == expected_states.get(receipt.disposition)
 
 
 def _mapping(value: object, *, field: str) -> Mapping[str, Any]:

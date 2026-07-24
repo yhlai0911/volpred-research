@@ -2000,3 +2000,30 @@ Python owner router與 active frontend owner fence已實作，後者在獨立 re
 `/api/sync`仍可能保留競爭 writer，因此 publisher整體只能標 **`contained`**。下一個
 不可跳過的 gate是部署 frontend、回讀 live version／owner-fence，再做唯一 owner
 article acknowledgement與rollback rehearsal；本輪未執行 owner transfer或文章寫入。
+
+### 2026-07-25 — Publisher formal caller 未驗 settlement 與 terminal replay lifecycle
+
+**證據化症狀與根因層級**：兩個 public-interface injection分別讓 settlement receipt
+指向另一個 Effect，以及讓 `disposition=delivered` 搭配
+`work_status=failed/effect_status=dead_lettered`。修正前兩案都得到
+`DID NOT RAISE`：provider完成 downstream read-back後，formal caller直接信任
+service-role response；terminal replay也只核對 identity與 disposition集合，沒有核對
+lifecycle tuple。根因是 transaction response boundary缺少 caller-side read-back
+contract，不是 PostgreSQL durable row或 provider projection錯誤。
+
+**底層重構**：`OwnedPublisherArticleSync`現在逐欄核對 receipt schema、owner
+generation、Work／Effect／attempt、Primary Authority ref、provider evidence與三組合法
+lifecycle tuple。Acknowledged outcome只接受 delivered；non-retryable failure只接受
+dead-lettered；retryable failure只接受 retry-scheduled或已耗盡重試的dead-lettered。
+Terminal replay共用 lifecycle驗證。任何漂移在回到 publisher上游前轉成
+`PublisherArticleSyncOwnershipLost`，不會把另一個 transaction或矛盾 terminal state
+誤報成功。
+
+**回歸、下游回讀與制度化**：兩個 RED injections均轉 GREEN；publisher formal caller、
+effect adapter與 PG17 delivery contracts共 **69 passed**，compileall與
+`git diff --check`通過。擴大到含 Supabase hash suite時，83個 test assertions全過，但
+既有 CI-parity ratchet另擋兩個測試讀未追蹤 `.env.local`，未把該聚合命令誤報為成功。
+Architecture、operations-core design與 improvement status已同步；本切片無 remote
+write、owner transfer或 frontend deploy。這個 response-boundary根因為
+**`root_cause_fixed_and_verified`**；program commit 14仍因 frontend live fence、
+唯一 owner acknowledgement與rollback rehearsal未完成而維持 **`contained`**。

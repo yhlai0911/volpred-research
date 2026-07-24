@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Publisher ownership and terminal-replay migrations are live; five service-role-only RPCs, FORCE RLS/ACL, owner routing, PG17 lost-response replay and frontend owner fence are implemented. Production remains legacy/1 with publisher requests/active attempts/lease all zero; no article write or owner transfer.",
+    "containment_evidence": "Publisher formal caller now rejects settlement or terminal-replay receipts whose schema, generation, Work/Effect/attempt, authority ref, provider evidence, or lifecycle tuple drifts; 69 adjacent publisher/PostgreSQL cases pass with no remote write or owner mutation.",
     "next_direct_step": "Push and deploy active frontend commit ae14890 through the authorized release path, read back the live route owner fence/version, then CAS publisher owner to operations_core for one article acknowledgement and exact rollback rehearsal; do not cut over before deployment.",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Commits 9324f9b8c and 4f22b7d04 plus frontend ae14890; production migration receipts 20260724151111 and 20260724152359; PG17 45 passed, caller/adapter 22 passed, frontend typecheck passed."
+    "latest_checkpoint": "Settlement-response and terminal-replay lifecycle validation added in canonical caller; two RED DID-NOT-RAISE injections now pass, adjacent suites 69 passed, compileall and diff check passed."
   }
 ]

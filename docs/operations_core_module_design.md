@@ -945,6 +945,15 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   0 finding。正式 CAS、unique-owner article acknowledgement與rollback rehearsal
   必須等 frontend部署與live version回讀，故 program commit 14仍是
   **`contained`**。
+- Formal caller不把 service-role response視為 acknowledgement：
+  settlement後逐欄核對 receipt schema、owner generation、Work／Effect／attempt、
+  Primary Authority ref與 provider evidence，並要求
+  `delivered → succeeded/delivered`、
+  `retry_scheduled → pending/requested`、
+  `dead_lettered → failed/dead_lettered`。Terminal replay同樣驗證 terminal lifecycle
+  tuple；任何漂移都回 `PublisherArticleSyncOwnershipLost`，不能被上游誤認成成功。
+  RED injections原先兩次均未 raise，修正後連同 publisher／PostgreSQL相鄰套件共
+  **69 passed**，且未執行 remote write或 owner mutation。
 
 ## 7. Provider Execution
 

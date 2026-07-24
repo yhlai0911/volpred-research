@@ -269,6 +269,17 @@ PostgreSQL suite `45 passed`、caller／adapter `22 passed`、frontend typecheck
 回讀 live version與 owner-fence行為後，才執行 CAS article smoke、exact Supabase
 read-back、rollback與 stale-generation refusal。
 
+同日 formal caller補上 settlement／terminal replay response 的 fail-closed契約。
+先前 provider雖完成 exact read-back，caller卻直接返回 service-role receipt；若 response
+的 generation、Work／Effect／attempt、Primary Authority ref、evidence或 lifecycle
+tuple漂移，上游仍可能把不屬於本 transaction的 terminal response當成結果。現在
+`OwnedPublisherArticleSync`逐欄核對 durable attempt與 provider outcome，並固定三組
+合法 lifecycle tuple。兩個 public-interface RED injections修正前均為
+`DID NOT RAISE`，修正後與 publisher／PostgreSQL相鄰套件共 `69 passed`，compileall與
+diff check通過；沒有 remote write或 owner mutation。這個 response-boundary根因為
+**`root_cause_fixed_and_verified`**，但 frontend deploy、live owner cutover與rollback
+仍缺，program commit 14整體狀態不變。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem
