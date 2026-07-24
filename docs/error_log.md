@@ -1411,3 +1411,25 @@ advisor findings 都是此 migration 尚未部署前的既有 public-schema 項�
 authorization／receipt 根因已完成底層與隔離 DB 驗證，但 migration 尚未 live、
 formal caller／workspace materializer／ownership cutover／rollback rehearsal 也未完成，
 所以目前只能標 **contained**；不得把 Change Delivery 整體稱為完成。
+
+### 2026-07-24 — Actuation wall-clock 未驗證便進入 durable settlement
+
+**症狀與物證**：公開 `ChangeDelivery.land()` regression 讓 actuator 分別回傳
+`not-a-timestamp` 與沒有 UTC offset 的 `2026-07-23T14:30:00`。修正前兩例都未拋錯，
+直接呼叫 settlement 並把 ChangeSet 標成 landed。可是 `observed_at` 同時進入
+settlement SHA-256 與 PostgreSQL `timestamptz`；非法字串會在 external Git write
+之後才失敗，naive wall-clock 則可能被 database session timezone 隱式解讀。
+
+**根因層級與底層修復**：這是 Change Delivery evidence-identity interface 的驗證缺口，
+不是資料庫格式問題。既有 actuation receipt gate 只有 `strip()` 非空檢查；現在它在跨入
+settlement seam 前以 ISO datetime parser 驗證，並要求 `tzinfo`／UTC offset 都存在。
+失敗一律回報 `CommitActuatorBlocked`，ChangeSet 保持 `proposed`，settlement adapter
+零次呼叫。
+
+**回歸、回讀與制度化**：兩個 public-interface cases 已先 RED 後 GREEN；
+`tests/test_change_delivery.py` 22 passed。Canonical architecture、operations-core
+module design 與 improvement status 已同步這項 identity 契約；提交前會再回讀
+direct-execution control gate 與相鄰 actuator tests。此具體缺口為
+**root_cause_fixed_and_verified**；shadow migration、formal caller、durable proposal
+store、Git ownership cutover 與 rollback rehearsal 仍未完成，所以 Change Delivery
+整體仍為 **contained**。

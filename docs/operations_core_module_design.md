@@ -235,6 +235,10 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   receipt 等價 replay 即使 lease 日後已到期仍可回讀；任何欄位漂移都拒絕。Receipt
   table FORCE RLS，PUBLIC 無 table/function access，worker 只有 named-function
   execute。
+- Actuation timestamp 不只是 display metadata。`ChangeDelivery.land()` 在 settlement
+  seam 前要求 `observed_at` 為可解析且 timezone-aware 的 timestamp；非法或 naive
+  wall-clock fail closed，不能讓 PostgreSQL session timezone 隱式決定 durable identity，
+  也不能把未驗證 receipt 留成 `commit_unsettled` checkpoint。
 - PG17 non-superuser replay 首輪實際抓到：對 immutable authority grant 使用
   `SELECT ... FOR UPDATE` 會在 FORCE RLS 下需要不存在的 UPDATE policy，因而把現存
   grant 誤判成 unknown。Final transaction 對 immutable grant 使用 SELECT-only，

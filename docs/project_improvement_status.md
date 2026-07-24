@@ -248,6 +248,14 @@ catalog 回讀新 tables/functions 皆不存在，確認 migration 仍未套 liv
 caller、durable proposal store、workspace materializer、Git ownership cutover 與
 rollback rehearsal 仍缺，所以 Change Delivery 整體維持 `contained`。
 
+同日 Change Delivery interface regression 證實 `commit-actuation.v1.observed_at`
+原本只驗非空，非法字串與 naive wall-clock 都能穿過 `land()` 進入 settlement；
+PostgreSQL 可能依 session timezone 解讀後者，或在 Git 已落地後才拒絕前者。既有
+actuation receipt gate 現在先 parse 並要求 timezone-aware，失敗時保持 ChangeSet
+`proposed` 且不呼叫 settlement。公開 `land()` seam 的兩個 RED cases 已轉 GREEN，
+Change Delivery unit suite 22 passed；這個 timestamp identity 缺口為
+`root_cause_fixed_and_verified`，但未改變整體 ownership 的 `contained` 狀態。
+
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
 Phase 1 現行修復的 canonical implementation ledger。原版、v3 與全部既有 skills 在

@@ -356,6 +356,18 @@ def _validate_actuation_receipt(
         raise CommitActuatorBlocked(
             "commit actuator returned an invalid actuation receipt"
         )
+    try:
+        observed_at = datetime.fromisoformat(receipt.observed_at)
+    except (TypeError, ValueError):
+        observed_at = None
+    if (
+        observed_at is None
+        or observed_at.tzinfo is None
+        or observed_at.utcoffset() is None
+    ):
+        raise CommitActuatorBlocked(
+            "commit actuator observed_at must be a timezone-aware timestamp"
+        )
     if (
         receipt.schema_version != "commit-actuation.v1"
         or receipt.proposal_sha256 != change_set.proposal_sha256
@@ -369,7 +381,6 @@ def _validate_actuation_receipt(
         or _GIT_OBJECT_ID.fullmatch(receipt.commit_sha) is None
         or not receipt.work_lease_ref.strip()
         or not receipt.primary_authority_ref.strip()
-        or not receipt.observed_at.strip()
     ):
         raise CommitActuatorBlocked(
             "commit actuator receipt does not match the immutable ChangeSet"

@@ -20,6 +20,7 @@ from volpred.ops.delivery import (
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
     CommitActuationReceipt,
+    CommitActuatorBlocked,
 )
 
 
@@ -104,6 +105,18 @@ class _Actuator:
             actor=command.actor,
             status="committed",
             observed_at=NOW.isoformat(),
+        )
+
+
+class _TimestampActuator(_Actuator):
+    def __init__(self, observed_at: str) -> None:
+        super().__init__()
+        self._observed_at = observed_at
+
+    def commit(self, command: CommitActuation) -> CommitActuationReceipt:
+        return replace(
+            super().commit(command),
+            observed_at=self._observed_at,
         )
 
 
@@ -465,6 +478,36 @@ def test_land_rejects_command_drift_after_external_commit(
         delivery.land(replace(command, message="[change-delivery] changed"))
     assert len(actuator.commands) == 1
     assert len(settlement.commands) == 1
+
+
+@pytest.mark.parametrize(
+    "observed_at",
+    [
+        "not-a-timestamp",
+        "2026-07-23T14:30:00",
+    ],
+)
+def test_land_rejects_unverifiable_actuation_time_before_settlement(
+    workspace: tuple[Path, Path, str],
+    observed_at: str,
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _TimestampActuator(observed_at)
+    settlement = _Settlement()
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=settlement,
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(CommitActuatorBlocked, match="timezone-aware"):
+        delivery.land(_land(proposed.id))
+
+    assert delivery.inspect(proposed.id).status == "proposed"
+    assert len(actuator.commands) == 1
+    assert settlement.commands == []
 
 
 def test_land_requires_configured_actuator_and_settlement(

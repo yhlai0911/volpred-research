@@ -112,6 +112,9 @@
 > WorkItem／WorkLease 與 database-clock Primary Authority，才保存 token-redacted
 > `change-delivery-receipt.v1`；DB 暫時失敗的 retry 只續做 settlement，不會重複
 > commit。Receipt FORCE RLS，PUBLIC 無存取，worker 只有 named-function execute。
+> `commit-actuation.v1.observed_at` 也是 settlement identity：`land()` 會在進入
+> durable adapter 前要求它可解析且帶 UTC offset；非法或 naive wall-clock 不得交由
+> PostgreSQL session timezone 猜測，也不得先把 ChangeSet 標成 `commit_unsettled`。
 >
 > 此 follow-up 未部署 live，也尚缺 formal caller、proposal durable store、
 > workspace materialization、ownership cutover 與 rollback rehearsal，因此不改變
