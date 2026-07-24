@@ -193,6 +193,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724180000_operations_core_publisher_article_terminal_replay.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724213739_operations_core_publisher_reconcile_ownership.sql",
 )
 
 
@@ -1275,6 +1279,21 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     bigint, text, integer, text, text, bigint, integer,
                     text, text, text, text, bigint, text, text, text,
                     text, text, text, text, text, text, text
+                  ),
+                  public.volpred_read_publisher_article_reconcile_owner(),
+                  public.volpred_transfer_publisher_article_reconcile_owner(
+                    text, bigint, text, text, text, bigint
+                  ),
+                  public.volpred_request_owned_publisher_article_reconcile(
+                    bigint, text, jsonb, text
+                  ),
+                  public.volpred_begin_owned_publisher_article_reconcile(
+                    bigint, text, text, integer, text, text, text
+                  ),
+                  public.volpred_settle_owned_publisher_article_reconcile(
+                    bigint, text, integer, text, text, bigint, integer,
+                    text, text, text, text, bigint, text, text, text,
+                    text, text, text, text, text, text, text
                   )
                 """
             )
@@ -1452,6 +1471,27 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               change_reason, NULL, changed_at
             FROM volpred_ops.notification_owners
             WHERE effect_family = 'publisher.article.supabase.sync';
+            INSERT INTO volpred_ops.notification_owners (
+              effect_family, owner, generation, changed_at, changed_by,
+              change_reason
+            )
+            VALUES (
+              'publisher.article.supabase.reconcile',
+              'legacy',
+              1,
+              clock_timestamp(),
+              'test-reset',
+              'restore canonical legacy reconcile fixture owner'
+            );
+            INSERT INTO volpred_ops.notification_owner_receipts (
+              effect_family, generation, previous_owner, owner, actor_ref,
+              reason, rollback_of_generation, changed_at
+            )
+            SELECT
+              effect_family, generation, NULL, owner, changed_by,
+              change_reason, NULL, changed_at
+            FROM volpred_ops.notification_owners
+            WHERE effect_family = 'publisher.article.supabase.reconcile';
             INSERT INTO volpred_ops.commit_owners (
               capability, owner, generation, changed_at, changed_by,
               change_reason
@@ -4795,6 +4835,374 @@ def test_owned_publisher_transaction_cutover_delivery_and_rollback(
         1,
         ["legacy", "operations_core", "legacy", "operations_core"],
     )
+
+
+def test_owned_publisher_reconcile_cutover_delivery_and_rollback(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "publisher-article-reconcile.v1",
+        "canonical_feed_sha256": "f" * 64,
+        "articles": [
+            {
+                "id": "mile_pg17_reconcile",
+                "title": "PG17 reconcile transaction",
+                "content": "Canonical reconcile fixture.",
+                "status": "published",
+                "tags": ["K1708"],
+            }
+        ],
+    }
+    worker_id = "effect-worker:publisher-article-reconcile"
+    authority_key = "publisher:article.supabase.reconcile"
+    work_token = "work-owned-reconcile-token"
+    outbox_token = "outbox-owned-reconcile-token"
+    primary_token = "primary-owned-reconcile-token"
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        initial = connection.execute(
+            "SELECT public.volpred_read_publisher_article_reconcile_owner()"
+        ).fetchone()[0]
+        assert (initial["owner"], initial["generation"]) == ("legacy", 1)
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="does not own publisher reconcile batch generation 1",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_request_owned_publisher_article_reconcile(
+                  %s, %s, %s, %s
+                )
+                """,
+                (1, "reconcile:pre-cutover", Jsonb(payload), "test:pg17"),
+            )
+
+        cutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_reconcile_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "test:pg17",
+                "exercise safe reconcile ownership",
+                None,
+            ),
+        ).fetchone()[0]
+        assert (cutover["owner"], cutover["generation"]) == (
+            "operations_core",
+            2,
+        )
+
+        owned_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_reconcile(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "reconcile:owned-transaction",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        replay = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_reconcile(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "reconcile:owned-transaction",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        assert replay == owned_request
+        assert owned_request["receipt"] is None
+
+        connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (authority_key, worker_id, 300, primary_token),
+        )
+        attempt = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_publisher_article_reconcile(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                owned_request["effect_id"],
+                worker_id,
+                300,
+                work_token,
+                outbox_token,
+                primary_token,
+            ),
+        ).fetchone()[0]
+        assert attempt["effect"]["effect_kind"] == (
+            "publisher.article.supabase.reconcile"
+        )
+        assert attempt["effect"]["target_ref"] == "supabase:articles"
+        assert attempt["effect"]["risk"] == "safe"
+        assert attempt["effect"]["acknowledgement"] == {
+            "kind": "publisher.article.supabase.reconcile.readback",
+            "target_ref": "supabase:articles",
+        }
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="requires zero active attempts",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_transfer_publisher_article_reconcile_owner(
+                  %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    "operations_core",
+                    2,
+                    "legacy",
+                    "test:pg17",
+                    "reject active rollback",
+                    2,
+                ),
+            )
+
+        receipt = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_publisher_article_reconcile(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                attempt["work_id"],
+                attempt["work_version"],
+                work_token,
+                attempt["effect"]["id"],
+                attempt["outbox_sequence"],
+                attempt["attempt_count"],
+                attempt["worker_id"],
+                outbox_token,
+                attempt["primary_authority_key"],
+                attempt["primary_authority_holder_ref"],
+                attempt["primary_authority_epoch"],
+                primary_token,
+                attempt["authority_request_sha256"],
+                attempt["outbox_claim_ref"],
+                attempt["primary_authority_ref"],
+                "acknowledged",
+                attempt["effect"]["acknowledgement"]["kind"],
+                attempt["effect"]["acknowledgement"]["target_ref"],
+                None,
+                "supabase:articles:reconcile:" + "f" * 64,
+                "e" * 64,
+            ),
+        ).fetchone()[0]
+        assert (
+            receipt["work_status"],
+            receipt["effect_status"],
+            receipt["disposition"],
+        ) == ("succeeded", "delivered", "delivered")
+
+        terminal = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_reconcile(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "reconcile:owned-transaction",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        assert terminal["receipt"] == receipt
+
+        connection.execute(
+            """
+            SELECT public.volpred_release_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                authority_key,
+                worker_id,
+                attempt["primary_authority_epoch"],
+                primary_token,
+            ),
+        )
+        rollback = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_reconcile_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "operations_core",
+                2,
+                "legacy",
+                "test:pg17",
+                "exact reconcile rollback",
+                2,
+            ),
+        ).fetchone()[0]
+        assert (rollback["owner"], rollback["generation"]) == ("legacy", 3)
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="does not own publisher reconcile batch generation 2",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_request_owned_publisher_article_reconcile(
+                  %s, %s, %s, %s
+                )
+                """,
+                (2, "reconcile:stale", Jsonb(payload), "test:pg17"),
+            )
+
+        recutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_reconcile_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                3,
+                "operations_core",
+                "test:pg17",
+                "restore reconcile owner",
+                None,
+            ),
+        ).fetchone()[0]
+        assert (recutover["owner"], recutover["generation"]) == (
+            "operations_core",
+            4,
+        )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_requests WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.effect_attempt_receipts
+               WHERE effect_id = %s),
+              (SELECT array_agg(owner ORDER BY generation)
+               FROM volpred_ops.notification_owner_receipts
+               WHERE effect_family =
+                 'publisher.article.supabase.reconcile')
+            """,
+            (
+                owned_request["work_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+            ),
+        ).fetchone()
+    assert durable == (
+        "succeeded",
+        "delivered",
+        "delivered",
+        1,
+        ["legacy", "operations_core", "legacy", "operations_core"],
+    )
+
+
+def test_owned_publisher_reconcile_rpc_security_shape(
+    postgres_effect_dsn: str,
+) -> None:
+    functions = (
+        "volpred_read_publisher_article_reconcile_owner",
+        "volpred_transfer_publisher_article_reconcile_owner",
+        "volpred_request_owned_publisher_article_reconcile",
+        "volpred_begin_owned_publisher_article_reconcile",
+        "volpred_settle_owned_publisher_article_reconcile",
+    )
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        rows = connection.execute(
+            """
+            SELECT
+              procedure.proname,
+              procedure.proowner = (
+                SELECT oid FROM pg_roles
+                WHERE rolname = 'volpred_ops_definer'
+              ),
+              procedure.prosecdef,
+              procedure.proconfig = ARRAY['search_path=""'],
+              has_function_privilege(
+                'service_role', procedure.oid, 'EXECUTE'
+              ),
+              has_function_privilege('anon', procedure.oid, 'EXECUTE'),
+              has_function_privilege(
+                'authenticated', procedure.oid, 'EXECUTE'
+              ),
+              has_function_privilege('public', procedure.oid, 'EXECUTE'),
+              pg_get_functiondef(procedure.oid)
+            FROM pg_proc AS procedure
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = procedure.pronamespace
+            WHERE namespace.nspname = 'public'
+              AND procedure.proname = ANY(%s)
+            ORDER BY procedure.proname
+            """,
+            (list(functions),),
+        ).fetchall()
+        service_table_access = connection.execute(
+            """
+            SELECT bool_or(
+              has_table_privilege('service_role', relation.oid, 'SELECT')
+              OR has_table_privilege(
+                'service_role', relation.oid, 'INSERT,UPDATE,DELETE'
+              )
+            )
+            FROM pg_class AS relation
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = relation.relnamespace
+            WHERE namespace.nspname = 'volpred_ops'
+              AND relation.relname IN (
+                'notification_owners',
+                'owned_notification_requests',
+                'owned_notification_attempts',
+                'effect_payloads',
+                'effect_requests',
+                'effect_outbox'
+              )
+            """
+        ).fetchone()[0]
+
+    assert len(rows) == 5
+    expected_privileges = (True, True, True, True, False, False, False)
+    assert all(row[1:8] == expected_privileges for row in rows)
+    assert service_table_access is False
+    definitions = "\n".join(row[8] for row in rows)
+    assert "publisher.article.supabase.reconcile" in definitions
+    assert "publisher:article.supabase.reconcile" in definitions
+    assert "publisher.article.supabase.reconcile.readback" in definitions
+    assert "supabase:articles" in definitions
 
 
 def test_owned_publisher_rpc_security_and_definition_shape(

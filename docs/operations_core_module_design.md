@@ -1101,6 +1101,31 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   family owner CAS、destructive delete effect與exact rollback rehearsal仍缺；因此
   program commit 15與operations-core umbrella維持 **`contained`**。
 
+### 2026-07-25 publisher safe reconcile production ownership closure
+
+- External interface維持單一
+  `OwnedPublisherArticleReconcile.reconcile(command)`；caller只提供idempotency、
+  Work identity、canonical feed SHA與完整article objects。Supabase adapter隱藏private
+  payload store、WorkItem、EffectRequest/outbox、owner fence、primary-authority lease、
+  attempt與receipt transaction，避免hourly caller自行拼湊effect contract。
+- `feed_sync.apply_diff()`只在有safe upsert時讀family owner。Legacy generation走既有
+  per-article formal caller；Operations Core generation把整批immutable intent只提交
+  一次；article objects與canonical feed SHA取自同一份byte snapshot，並行改稿不能
+  拼出舊objects／新hash。Begin要求owner generation與active primary lease完全相符；settle要求同一
+  owner、work、outbox與authority receipt，terminal replay只接受exact identity。
+  Destructive delete刻意維持獨立guarded seam，不借用safe權限。
+- Production migration將五個RPC設為service-role-only、`SECURITY DEFINER`且空
+  `search_path`；private tables不開direct service-role access。Live operator rehearsal
+  完成`legacy/1 → operations_core/2 → legacy/3 rollback → operations_core/4`，
+  回讀WorkItem succeeded、Effect/outbox delivered、attempt acknowledged，
+  local/Supabase均14且drift=0；schedule-equivalent hourly command再以exit 0收尾。
+  Caller、routing、operator與PostgreSQL套件合計 **98 passed**（51 Python + 47
+  PostgreSQL）。
+- 因此safe reconcile production ownership切片是
+  **`root_cause_fixed_and_verified`**。Program commit 15仍缺獨立destructive delete
+  EffectRequest／owner／rollback；program commit 34的physical two-Mac receipt也不在
+  本切片，故兩個較大範圍仍標 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

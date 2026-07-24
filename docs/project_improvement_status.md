@@ -338,6 +338,17 @@ worker dead-letter。八個新cases與相鄰套件 **36 passed**；production re
 destructive delete family與rollback rehearsal尚未接通，所以本checkpoint及program
 commit 15仍為 **`contained`**。
 
+同日safe reconcile ownership已從shadow接到production。`feed_sync`依
+`publisher.article.supabase.reconcile` owner generation在legacy逐篇caller與
+Operations Core immutable batch之間路由；batch由private payload store、WorkItem、
+EffectRequest/outbox、primary lease及typed read-back receipt完整擁有。Live rehearsal
+走完`legacy/1 → operations_core/2 → legacy/3 rollback → operations_core/4`，
+回讀work succeeded、effect/outbox delivered、local/Supabase 14/14、drift 0，且
+schedule-equivalent hourly command exit 0；51個Python cases與47個PostgreSQL cases
+通過。這個safe ownership切片為 **`root_cause_fixed_and_verified`**。破壞性delete
+仍保留既有floor/cap/dump guard，尚未收進獨立formal effect／owner／rollback，因此
+program commit 15與operations-core umbrella仍為 **`contained`**。
+
 同班另修正current Test Suite連續紅燈：cron alert metadata原本只能把整支log標為
 `findings`，無法表達`audit_publish_sync`的exit 1=findings、exit 2=unavailable。
 Schedule新增typed `findings_exit_codes=[1]`；host health只豁免code 1，code 2仍會進

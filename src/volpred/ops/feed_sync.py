@@ -113,10 +113,21 @@ def _feed_path(storage_dir: str | Path = "storage") -> Path:
 
 
 def _load_feed(storage_dir: str | Path = "storage") -> list[dict]:
+    feed, _feed_sha256 = _load_feed_snapshot(storage_dir)
+    return feed
+
+
+def _load_feed_snapshot(
+    storage_dir: str | Path = "storage",
+) -> tuple[list[dict], str]:
+    """Parse feed objects and hash the exact same canonical byte snapshot."""
+
     p = _feed_path(storage_dir)
-    if not p.exists():
-        return []
-    return json.loads(p.read_text())
+    payload = p.read_bytes() if p.exists() else b"[]"
+    return (
+        json.loads(payload),
+        hashlib.sha256(payload).hexdigest(),
+    )
 
 
 def _warn_feed_sync(message: str, path: Path, exc: Exception) -> None:
@@ -179,7 +190,7 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
       - delete: slugs in DB but not feed
       - feed_count, db_count
     """
-    feed = _load_feed(storage_dir)
+    feed, canonical_feed_sha256 = _load_feed_snapshot(storage_dir)
     feed_by_slug: dict[str, dict] = {
         a["id"]: a for a in feed if isinstance(a, dict) and a.get("id")
     }
@@ -322,31 +333,17 @@ def apply_diff(
         a["id"]: a for a in feed if isinstance(a, dict) and a.get("id")
     }
 
-    inserted = updated = deleted = failed = 0
-    failures: list[dict] = []
-
-    for slug in diff.get("insert", []):
-        item = feed_by_slug.get(slug)
-        if not item:
-            continue
-        ok = sync_article(item, storage_dir=storage_dir)
-        if ok:
-            inserted += 1
-        else:
-            failed += 1
-            failures.append({"slug": slug, "op": "insert"})
-
-    for slug in diff.get("update", []):
-        item = feed_by_slug.get(slug)
-        if not item:
-            continue
-        # sync_article uses on_conflict=slug, so POST doubles as UPSERT.
-        ok = sync_article(item, storage_dir=storage_dir)
-        if ok:
-            updated += 1
-        else:
-            failed += 1
-            failures.append({"slug": slug, "op": "update"})
+    upserts = _apply_safe_projection_upserts(
+        diff,
+        feed_by_slug=feed_by_slug,
+        canonical_feed_sha256=canonical_feed_sha256,
+        storage_dir=storage_dir,
+    )
+    inserted = upserts["inserted"]
+    updated = upserts["updated"]
+    deleted = 0
+    failed = upserts["failed"]
+    failures: list[dict] = list(upserts["failures"])
 
     # Destructive deletes are delegated to the single guarded owner
     # (supabase_sync.reconcile_article_deletes) rather than looping raw
@@ -375,6 +372,173 @@ def apply_diff(
         "failed": failed,
         "failures": failures,
         "reconcile": reconcile,
+        "safe_effect": upserts["safe_effect"],
+    }
+
+
+def _apply_safe_projection_upserts(
+    diff: dict,
+    *,
+    feed_by_slug: dict[str, dict],
+    canonical_feed_sha256: str,
+    storage_dir: str | Path,
+) -> dict:
+    """Route safe upserts through the database-selected family owner.
+
+    The legacy owner retains the established per-article path. The
+    Operations Core owner receives one immutable, payload-bound batch; owner
+    generation, WorkItem, EffectRequest/outbox, Primary Authority, provider
+    read-back and settlement remain behind one formal interface. Deletes are
+    intentionally absent from this module and continue through the guarded
+    destructive owner in ``reconcile_article_deletes``.
+    """
+
+    insert_items = tuple(
+        feed_by_slug[slug]
+        for slug in diff.get("insert", ())
+        if slug in feed_by_slug
+    )
+    update_items = tuple(
+        feed_by_slug[slug]
+        for slug in diff.get("update", ())
+        if slug in feed_by_slug
+    )
+    if not insert_items and not update_items:
+        return {
+            "inserted": 0,
+            "updated": 0,
+            "failed": 0,
+            "failures": [],
+            "safe_effect": None,
+        }
+
+    from volpred.ops.delivery import (
+        OwnedPublisherArticleReconcile,
+        OwnedPublisherReconcileCommand,
+        PublisherArticleReconcileEffectAdapter,
+        PublisherArticleReconcileOwnershipLost,
+        SupabaseArticleProjectionAdapter,
+        SupabaseOwnedPublisherReconcileStore,
+        encode_publisher_article_reconcile_payload,
+    )
+
+    store = SupabaseOwnedPublisherReconcileStore.from_environment()
+    owner = store.read_owner()
+    if owner.effect_family != "publisher.article.supabase.reconcile":
+        raise PublisherArticleReconcileOwnershipLost(
+            "publisher reconcile owner read returned the wrong effect family"
+        )
+    if owner.owner == "legacy":
+        inserted = updated = failed = 0
+        failures: list[dict] = []
+        for operation, items in (
+            ("insert", insert_items),
+            ("update", update_items),
+        ):
+            for item in items:
+                ok = sync_article(item, storage_dir=storage_dir)
+                if ok:
+                    if operation == "insert":
+                        inserted += 1
+                    else:
+                        updated += 1
+                else:
+                    failed += 1
+                    failures.append({"slug": item["id"], "op": operation})
+        return {
+            "inserted": inserted,
+            "updated": updated,
+            "failed": failed,
+            "failures": failures,
+            "safe_effect": {
+                "owner": owner.owner,
+                "owner_generation": owner.generation,
+                "mode": "legacy_per_article",
+            },
+        }
+    if owner.owner != "operations_core":
+        raise PublisherArticleReconcileOwnershipLost(
+            f"unsupported publisher reconcile owner: {owner.owner}"
+        )
+
+    articles = tuple(
+        sorted(
+            (*insert_items, *update_items),
+            key=lambda article: str(article["id"]),
+        )
+    )
+    payload = encode_publisher_article_reconcile_payload(
+        canonical_feed_sha256=canonical_feed_sha256,
+        articles=articles,
+    )
+    effect_sha256 = hashlib.sha256(payload).hexdigest()
+    worker_id = "effect-worker:publisher-article-reconcile"
+
+    from volpred.ops.authority import build_supabase_host_authority_keepalive
+
+    keepalive = build_supabase_host_authority_keepalive(
+        authority_key="publisher:article.supabase.reconcile",
+        holder_ref=worker_id,
+    )
+    keepalive.start()
+    try:
+        receipt = OwnedPublisherArticleReconcile(
+            store=store,
+            provider=PublisherArticleReconcileEffectAdapter(
+                projection=SupabaseArticleProjectionAdapter(
+                    storage_dir=storage_dir
+                )
+            ),
+            primary_authority=keepalive,
+            worker_id=worker_id,
+        ).reconcile(
+            OwnedPublisherReconcileCommand(
+                idempotency_key=(
+                    f"publisher:article-reconcile:{effect_sha256}"
+                ),
+                canonical_feed_sha256=canonical_feed_sha256,
+                articles=articles,
+                actor_ref="feed-sync:hourly-safe-reconcile",
+            )
+        )
+    finally:
+        keepalive.stop()
+
+    if receipt.delivered:
+        return {
+            "inserted": len(insert_items),
+            "updated": len(update_items),
+            "failed": 0,
+            "failures": [],
+            "safe_effect": {
+                "owner": owner.owner,
+                "owner_generation": receipt.owner_generation,
+                "effect_id": receipt.effect_id,
+                "attempt_count": receipt.attempt_count,
+                "disposition": receipt.disposition,
+                "evidence_ref": receipt.evidence_ref,
+                "evidence_sha256": receipt.evidence_sha256,
+            },
+        }
+
+    failures = [
+        {"slug": item["id"], "op": "reconcile"}
+        for item in articles
+    ]
+    return {
+        "inserted": 0,
+        "updated": 0,
+        "failed": len(failures),
+        "failures": failures,
+        "safe_effect": {
+            "owner": owner.owner,
+            "owner_generation": receipt.owner_generation,
+            "effect_id": receipt.effect_id,
+            "attempt_count": receipt.attempt_count,
+            "disposition": receipt.disposition,
+            "evidence_ref": receipt.evidence_ref,
+            "evidence_sha256": receipt.evidence_sha256,
+        },
     }
 
 

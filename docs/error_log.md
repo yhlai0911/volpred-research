@@ -2260,3 +2260,32 @@ schedule inventory再次包含`audit_publish_sync.log`。Alerts、feed-sync CLI�
 projection audit、publisher effect相鄰套件共 **121 passed**，JSON parse、
 compileall與`git diff --check`通過。這個CI／alert contract根因為
 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-25 — Immutable reconcile存在，但hourly safe intent仍由caller擁有
+
+**證據化症狀**：shadow batch contract已能固定canonical feed SHA與完整articles，
+但production `feed_sync`仍由caller讀live feed、算diff後逐篇送出；production沒有
+batch family owner、private payload、outbox transaction或exact rollback。因而即使
+worker contract正確，hourly producer重試仍可能在不同時間重新建立另一個intent，
+也無法從durable receipt證明「哪一批」由哪一代owner執行。
+
+**根因層級與底層修復**：根因是production ownership／transaction seam，不是Supabase
+row或diff資料。新增`publisher.article.supabase.reconcile` family及generation-CAS
+owner；五個service-role-only PostgreSQL RPC把request、begin、settle、owner read與
+transfer收進formal transaction。Request保存完整canonical payload並建立WorkItem、
+EffectRequest/outbox；begin要求同代owner與active primary lease；settle要求同一
+work、outbox、authority receipt與typed read-back。`feed_sync`只依owner選legacy逐篇
+或Operations Core單批路徑，article objects與feed SHA由同一份byte snapshot產生，
+避免並行改稿造成舊objects綁新hash；destructive delete不共用safe authority。
+
+**回歸、回讀與制度化**：51個Python cases與47個PostgreSQL cases通過，涵蓋routing、
+exact replay、generation fence、active-attempt transfer拒絕、security ACL、success、
+rollback與再cutover。Production operator rehearsal完成
+`legacy/1 → operations_core/2 → legacy/3 (rollback_of=2) →
+operations_core/4`；回讀WorkItem `succeeded`、Effect/outbox `delivered`、attempt與
+authority receipt一致，local/Supabase均14且drift=0；schedule-equivalent hourly
+command exit 0。Canonical schedule、wrapper、架構、module design與operator script均
+寫回，讓同類ownership缺口無法再靜默退回caller。Safe reconcile ownership切片為
+**`root_cause_fixed_and_verified`**；獨立destructive delete effect／owner／rollback
+及physical two-Mac evidence仍未完成，所以program commit 15與operations-core
+umbrella維持 **`contained`**。

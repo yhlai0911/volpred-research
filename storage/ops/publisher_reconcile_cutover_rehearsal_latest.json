@@ -1,0 +1,40 @@
+{
+  "schema_version": "publisher-reconcile-cutover-rehearsal.v1",
+  "slug": "crisis_protection_20260316_002220",
+  "canonical_feed_sha256": "c1a68c7e6a22c9b9a12c36dbb55af3227e66debfaa2af2138f560d0f5dad1224",
+  "cutover_generation": 2,
+  "delivery": {
+    "schema_version": "owned-publisher-reconcile-receipt.v1",
+    "owner_generation": 2,
+    "work_id": "work_owned_reconcile_f87e0687826c42873e2f958ca4eceb2a",
+    "work_status": "succeeded",
+    "effect_id": "effect_owned_reconcile_f87e0687826c42873e2f958ca4eceb2a",
+    "effect_status": "delivered",
+    "attempt_count": 1,
+    "disposition": "delivered",
+    "evidence_ref": "supabase:articles:reconcile:c1a68c7e6a22c9b9a12c36dbb55af3227e66debfaa2af2138f560d0f5dad1224",
+    "evidence_sha256": "139c8aaea50fc5fe50e73442036255d22111c934ce00bbe6df96ab23f023ad2f",
+    "primary_authority_ref": "primary-authority:publisher:article.supabase.reconcile:epoch-1",
+    "recorded_at": "2026-07-24T21:49:34.953179+00:00"
+  },
+  "convergence": {
+    "schema_version": "publisher-projection-convergence.v2",
+    "audit": "publish_sync",
+    "convergence_status": "converged",
+    "window_hours": 72,
+    "window_start": "2026-07-21T21:49:35Z",
+    "feed_sha256": "c1a68c7e6a22c9b9a12c36dbb55af3227e66debfaa2af2138f560d0f5dad1224",
+    "local_published_count": 14,
+    "supabase_published_count": 14,
+    "missing_supabase": [],
+    "orphan_supabase": [],
+    "live_404": [],
+    "observation_errors": [],
+    "mismatch_total": 0,
+    "generated_at": "2026-07-24T21:49:35Z"
+  },
+  "rollback_generation": 3,
+  "rollback_of_generation": 2,
+  "final_owner": "operations_core",
+  "final_generation": 4
+}

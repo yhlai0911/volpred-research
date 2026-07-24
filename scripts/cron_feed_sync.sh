@@ -15,6 +15,13 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/feed_sync.log 2>&1
 # pushing — a manual edit, a batch content rewrite, a crashed publisher —
 # leaves the projection stale until this job converges it.
 #
+# Safe upserts follow the publisher.article.supabase.reconcile family owner.
+# The operations_core owner binds the canonical feed SHA and complete sorted
+# article objects into one immutable batch, then executes it through the
+# durable payload store, WorkItem, EffectRequest/outbox, primary lease, and
+# typed read-back acknowledgement. Legacy ownership remains an exact rollback
+# path and uses the existing per-article caller.
+#
 # Deliberately NOT --allow-delete: a slug missing from feed is a destructive
 # signal that belongs to the single guarded delete owner
 # (supabase_sync.reconcile_article_deletes with its floor/cap/dump

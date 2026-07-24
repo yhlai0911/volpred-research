@@ -451,6 +451,22 @@
 > 也沒有 owner CAS、delete effect或rollback rehearsal，因此 program commit 15仍為
 > **`contained`**。
 >
+> **Safe reconcile production ownership（2026-07-25）**：hourly
+> `feed-sync`的safe upsert已由
+> `publisher.article.supabase.reconcile` family owner控制。Legacy owner仍走逐篇
+> publisher caller；Operations Core owner則把canonical feed SHA與本次完整、
+> 唯一slug排序的article objects寫進private immutable payload，於同一正式路徑建立
+> WorkItem、EffectRequest、outbox與owned request，再以active primary-authority lease
+> begin並用typed batch read-back settlement確認。Owner transfer採generation CAS，
+> active attempt會阻擋轉移；operator seam已在線上走完
+> `legacy/1 → operations_core/2 → legacy/3 (rollback_of=2) →
+> operations_core/4`。最終回讀WorkItem=`succeeded`、Effect/outbox=`delivered`、
+> local/Supabase 14/14且drift=0，隨後schedule-equivalent
+> `feed-sync --apply --no-delete --quiet-when-clean` exit 0。Safe reconcile ownership
+> 切片為 **`root_cause_fixed_and_verified`**；destructive delete仍由既有
+> floor/cap/dump guard單獨擁有，尚未具備formal destructive EffectRequest與rollback，
+> 故program commit 15及operations-core umbrella仍為 **`contained`**。
+>
 > **Typed cron findings exits（2026-07-25）**：schedule的
 > `exit_semantics`可保存完整0/1/2 contract，另以`findings_exit_codes`列出只代表業務
 > finding的code。Host-cron health只豁免列出的code；同一audit的transport／observation
