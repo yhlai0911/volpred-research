@@ -1022,6 +1022,26 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   的真實 network-partition／Supabase outage／五分鐘 RTO，以及其他 operations-core
   umbrella slices不由此結案。
 
+### 2026-07-25 full-sync acknowledgement cursor checkpoint
+
+- Program commit 15 前置盤點發現 legacy `sync_full()` 把 provider 回傳的 `False`
+  當成已完成：article write失敗仍推進 `feed_mtime`，memory write失敗仍把 count cursor
+  推到檔尾，risk write失敗仍回報 1；CLI 只針對 cache purge失敗回非零。因此單次
+  transport/provider失敗會被本地 cursor覆蓋，下一輪 unchanged run不再碰到那筆
+  未落地 projection。
+- Article path現在保存 `article_retry_slugs`，失敗時不推進 feed gate；即使本輪是由
+  另一個 purge retry打開 gate，provider失敗的 slug仍是下一輪顯式輸入。既有
+  `purge_retry_slugs`只有在 prerequisite projection write成功後才能清除。Memory count
+  定義改為「下游已確認的連續前綴」，遇到第一個洞便停止；risk與delete reconcile也
+  進入同一 typed failure list。`_report_counts()`只要有任何 projection failure就
+  非零退出，不再印假 `Done.`。
+- 四個 failure injections在修正前得到 4 failed；修正後 article retry、purge
+  dependency、memory contiguous cursor、risk exit contract與相鄰 reconcile/cache
+  套件在 clean tracked snapshot共 **31 passed, 1 skipped**。這個 silent cursor advancement根因為
+  **`root_cause_fixed_and_verified`**。Program commit 15 的 formal EffectRequest／
+  outbox ownership、週期 projection-convergence receipt與 rollback rehearsal尚未
+  完成，因此 commit 15與 operations-core umbrella仍為 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

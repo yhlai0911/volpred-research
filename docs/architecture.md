@@ -404,6 +404,15 @@
 > preflight、live fence、typed receipt 與 failure rollback 收成單一 operator seam。
 > 因而 program commit 14 為 **`root_cause_fixed_and_verified`**；這不擴張為整個
 > operations-core 或 program commit 34 已完成。
+>
+> **Full-sync failure cursor（2026-07-25）**：`scripts/supabase_sync.sync_full`
+> 不再用「嘗試過」冒充「下游已確認」。Article provider失敗會保存
+> `article_retry_slugs`且不推進 `feed_mtime`；cache purge retry只有在 projection
+> prerequisite成功後才可清除。Memory count cursor只代表 Supabase已確認的連續
+> prefix，遇到第一筆失敗即停止，不會越過洞；risk與delete reconcile失敗也進入
+> `counts.failures`。CLI只要有任何 projection failure便非零退出。這關閉 program
+> commit 15 的 silent skip根因，但 full-sync的 formal EffectRequest／outbox
+> ownership與 convergence rehearsal尚未完成，故不宣稱 commit 15 cutover。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

@@ -296,6 +296,17 @@ fence、typed receipt與任何失敗的 automatic rollback制度化；四個 reg
 真實 network partition／Supabase outage／五分鐘 RTO等未完成而維持
 **`contained`**。
 
+同日開始 program commit 15 的 full-sync convergence checkpoint。Failure injection
+證實 `sync_full()` 在 article／memory／risk provider回 `False`後仍推進
+`feed_mtime`／count cursor並由 CLI回綠，讓未落地 projection被 unchanged gate永久
+跳過。底層現以 `article_retry_slugs`保存明確重試輸入，article失敗不推進 mtime，
+purge retry不會在 prerequisite write失敗時被清掉；memory cursor只覆蓋下游已確認的
+連續前綴，risk與delete reconcile也進統一 failure contract，CLI遇任何 failure均
+非零。四個 RED injections轉 GREEN，相鄰 sync/reconcile suite
+在 clean tracked snapshot為 **31 passed, 1 skipped**。此 silent cursor advancement根因為
+**`root_cause_fixed_and_verified`**；program commit 15仍缺 formal outbox ownership、
+週期 convergence receipt與 rollback rehearsal，所以維持 **`contained`**。
+
 同日 Change Delivery follow-up 把 program commit 10 的 fake-only authority 推進為
 private PostgreSQL adapter。`PostgresCommitAuthority` 先重算完整 commit intent
 SHA-256，再由單一 `authorize_commit_write` transaction 鎖定並核對 running WorkItem

@@ -1590,6 +1590,7 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
     path; pass False to skip (e.g. a push-only smoke test)."""
     storage = Path(storage_dir)
     counts = {}
+    failures: list[str] = []
     backup_audit = ensure_local_article_backups(storage, repair=True)
     counts["article_backup_repairs"] = backup_audit.get("created_count", 0)
     counts["article_backup_bodyless"] = len(backup_audit.get("bodyless_ids", []))
@@ -1624,8 +1625,16 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
             for s in (purge_retry_raw if isinstance(purge_retry_raw, list) else [])
             if isinstance(s, str) and s
         ]
+        article_retry_raw = state.get("article_retry_slugs")
+        article_retry = [
+            s
+            for s in (
+                article_retry_raw if isinstance(article_retry_raw, list) else []
+            )
+            if isinstance(s, str) and s
+        ]
         last_feed_sync = state.get("feed_mtime", 0)
-        if feed_mtime > last_feed_sync or purge_retry:
+        if feed_mtime > last_feed_sync or purge_retry or article_retry:
             # WS-C3 (refactor_plan_ops_master_2026_07 §1.3 A1): per-article
             # change detection is delegated to the single canonical differ,
             # volpred.ops.feed_sync.compute_diff, which compares the projection
@@ -1650,18 +1659,33 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
             # readers may still see the cached old body, so sync_article must
             # run again to retry the purge.
             changed |= set(purge_retry)
+            # A failed provider write is also an explicit retry input. This is
+            # required even when another reason opened the mtime gate and the
+            # feed itself has not changed.
+            changed |= set(article_retry)
             to_sync = [item for item in feed if item.get("id") in changed]
             ok = 0
+            failed_syncs: list[str] = []
             purge_mark = len(_REVALIDATE_FAILURES)
             for item in to_sync:
                 if sync_article(item, storage_dir=storage):
                     ok += 1
+                else:
+                    failed_syncs.append(str(item.get("id") or "<missing-id>"))
             counts["articles"] = ok
             failed_purges = _REVALIDATE_FAILURES[purge_mark:]
             if failed_purges:
                 counts["cache_purge_failed"] = failed_purges
-            state["feed_mtime"] = feed_mtime
-            state["purge_retry_slugs"] = sorted(set(failed_purges))
+            if failed_syncs:
+                failures.extend(f"article:{slug}" for slug in failed_syncs)
+            else:
+                state["feed_mtime"] = feed_mtime
+            state["article_retry_slugs"] = sorted(set(failed_syncs))
+            # A cache purge can run only after the projection write. Preserve
+            # an existing purge retry when that prerequisite write failed.
+            state["purge_retry_slugs"] = sorted(
+                set(failed_purges) | (set(purge_retry) & set(failed_syncs))
+            )
         else:
             counts["articles"] = 0  # skipped, unchanged
 
@@ -1669,8 +1693,10 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
     rf_path = storage / "risk_forecast.json"
     if rf_path.exists():
         rf = json.loads(rf_path.read_text())
-        sync_risk_forecast(rf)
-        counts["risk_forecast"] = 1
+        risk_synced = sync_risk_forecast(rf)
+        counts["risk_forecast"] = int(risk_synced)
+        if not risk_synced:
+            failures.append("risk_forecast")
 
     # Memory — only sync entries added since last sync count
     memory_dir = storage / "memory"
@@ -1693,8 +1719,14 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
                 eid = str(entry.get("id") or entry.get("item_id") or f"{mem_type}_{idx:04d}")
                 if sync_memory_entry(eid, mem_type, entry):
                     ok += 1
+                else:
+                    failures.append(f"memory:{mem_type}:{eid}")
+                    # The state schema is a single contiguous-prefix cursor.
+                    # Continuing after a hole would make that failed entry
+                    # unreachable on every later run.
+                    break
             counts[mem_type] = ok
-            state[f"{mem_type}_count"] = len(entries)
+            state[f"{mem_type}_count"] = last_count + ok
 
     # Delete reconcile — the push above is upsert-only, so remote rows for
     # articles absent from canonical feed.json accumulate as ghosts. Close the
@@ -1703,10 +1735,17 @@ def sync_full(storage_dir: str | Path = "storage", *, reconcile_deletes: bool = 
     if reconcile_deletes and not _remote_reads_blocked():
         try:
             counts["reconcile"] = reconcile_article_deletes(storage)
+            if counts["reconcile"].get("aborted"):
+                failures.append(
+                    "article_reconcile:"
+                    f"{counts['reconcile'].get('reason') or 'aborted'}"
+                )
         except Exception as e:
             counts["reconcile"] = {"aborted": True, "reason": f"error:{type(e).__name__}"}
+            failures.append(f"article_reconcile:error:{type(e).__name__}")
             print(f"[reconcile] WARN sync_full reconcile step failed: {type(e).__name__}: {e}")
 
+    counts["failures"] = failures
     _save_sync_state(storage, state)
     return counts
 
@@ -1727,6 +1766,13 @@ def _report_counts(counts: dict) -> int:
             f"{failed}. Supabase is correct but readers may still be served the "
             "cached old version. Check OPS_ADMIN_TOKEN and mirror reachability."
         )
+    sync_failures = counts.get("failures") or []
+    if sync_failures:
+        print(
+            f"ERROR: {len(sync_failures)} projection operation(s) FAILED: "
+            f"{sync_failures}. Retry is preserved in the sync cursor/state."
+        )
+    if failed or sync_failures:
         return 1
     print("Done.")
     return 0

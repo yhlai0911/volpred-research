@@ -300,6 +300,125 @@ def test_mtime_gate_skips_without_diffing(tmp_path, monkeypatch):
     assert synced == []
 
 
+def test_failed_article_write_keeps_feed_gate_open_for_retry(tmp_path, monkeypatch):
+    """A failed projection must not be hidden by advancing feed_mtime."""
+    storage = tmp_path / "storage"
+    feed_path = _write_feed(storage, [_item("mile_retry_write")])
+    attempts: list[str] = []
+
+    monkeypatch.setattr(
+        "volpred.ops.feed_sync.compute_diff",
+        lambda storage_dir="storage": {
+            "insert": ["mile_retry_write"],
+            "update": [],
+            "delete": [],
+        },
+    )
+
+    def fail_once(item: dict, storage_dir="storage") -> bool:
+        attempts.append(item["id"])
+        return len(attempts) > 1
+
+    monkeypatch.setattr(supabase_sync, "sync_article", fail_once)
+
+    first = supabase_sync.sync_full(storage, reconcile_deletes=False)
+
+    assert first["articles"] == 0
+    assert first["failures"] == ["article:mile_retry_write"]
+    assert _state_path(storage).exists()
+    first_state = json.loads(_state_path(storage).read_text())
+    assert first_state.get("feed_mtime", 0) < feed_path.stat().st_mtime
+    assert supabase_sync._report_counts(first) == 1
+
+    second = supabase_sync.sync_full(storage, reconcile_deletes=False)
+
+    assert second["articles"] == 1
+    assert second["failures"] == []
+    assert attempts == ["mile_retry_write", "mile_retry_write"]
+    second_state = json.loads(_state_path(storage).read_text())
+    assert second_state["feed_mtime"] == feed_path.stat().st_mtime
+
+
+def test_failed_write_does_not_clear_pending_cache_purge_retry(
+    tmp_path,
+    monkeypatch,
+):
+    """A purge retry still needs retrying when its prerequisite DB write fails."""
+    storage = tmp_path / "storage"
+    feed_path = _write_feed(storage, [_item("mile_retry_purge")])
+    _state_path(storage).write_text(
+        json.dumps(
+            {
+                "feed_mtime": feed_path.stat().st_mtime,
+                "purge_retry_slugs": ["mile_retry_purge"],
+            }
+        )
+    )
+    monkeypatch.setattr(
+        "volpred.ops.feed_sync.compute_diff",
+        lambda storage_dir="storage": {"insert": [], "update": [], "delete": []},
+    )
+    monkeypatch.setattr(supabase_sync, "sync_article", lambda *args, **kwargs: False)
+
+    counts = supabase_sync.sync_full(storage, reconcile_deletes=False)
+
+    assert counts["failures"] == ["article:mile_retry_purge"]
+    state = json.loads(_state_path(storage).read_text())
+    assert state["purge_retry_slugs"] == ["mile_retry_purge"]
+
+
+def test_memory_cursor_stops_at_first_failed_projection(tmp_path, monkeypatch):
+    """The count cursor may cover only a contiguous prefix acknowledged downstream."""
+    storage = tmp_path / "storage"
+    memory = storage / "memory"
+    memory.mkdir(parents=True)
+    (memory / "knowledge.json").write_text(
+        json.dumps(
+            [
+                {"id": "K1", "finding": "first"},
+                {"id": "K2", "finding": "retry me"},
+                {"id": "K3", "finding": "must wait"},
+            ]
+        )
+    )
+    attempts: list[str] = []
+
+    def fail_k2_once(entry_id: str, entry_type: str, content: dict) -> bool:
+        attempts.append(entry_id)
+        return entry_id != "K2" or attempts.count("K2") > 1
+
+    monkeypatch.setattr(supabase_sync, "sync_memory_entry", fail_k2_once)
+
+    first = supabase_sync.sync_full(storage, reconcile_deletes=False)
+
+    assert first["knowledge"] == 1
+    assert first["failures"] == ["memory:knowledge:K2"]
+    assert attempts == ["K1", "K2"]
+    first_state = json.loads(_state_path(storage).read_text())
+    assert first_state["knowledge_count"] == 1
+
+    second = supabase_sync.sync_full(storage, reconcile_deletes=False)
+
+    assert second["knowledge"] == 2
+    assert second["failures"] == []
+    assert attempts == ["K1", "K2", "K2", "K3"]
+    second_state = json.loads(_state_path(storage).read_text())
+    assert second_state["knowledge_count"] == 3
+
+
+def test_risk_projection_failure_is_reported_as_failed_run(tmp_path, monkeypatch):
+    storage = tmp_path / "storage"
+    storage.mkdir()
+    (storage / "risk_forecast.json").write_text(json.dumps({"level": "high"}))
+    monkeypatch.setattr(supabase_sync, "sync_risk_forecast", lambda data: False)
+
+    counts = supabase_sync.sync_full(storage, reconcile_deletes=False)
+
+    assert counts["risk_forecast"] == 0
+    assert counts["failures"] == ["risk_forecast"]
+    assert supabase_sync._report_counts(counts) == 1
+
+
 # --- _select_rows pagination (unrelated to the engine merge; kept as-is) -----
 
 

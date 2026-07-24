@@ -2131,3 +2131,30 @@ guard。
 canonical write、owner transfer或live effect。本CI test-contract根因為
 **`root_cause_fixed_and_verified`**；跨兩台實體Mac的Primary Authority receipt pair
 仍缺，故整體operations-core umbrella維持 **`contained`**。
+
+### 2026-07-25 — Full sync 在 provider 失敗後仍推進 cursor 並回報成功
+
+**證據化症狀與根因層級**：四個 hermetic failure injections在修正前得到
+`4 failed, 14 passed`。Article provider回 `False`後，`sync_full()`仍把
+`feed_mtime`寫成當前檔案時間；memory第二筆失敗後仍繼續第三筆並把 count設為檔案
+總長；risk provider失敗仍回報 `risk_forecast=1`；CLI沒有任何通用 failure contract。
+另有相依漏洞：cache purge retry即使 prerequisite article write失敗，也會被清空。
+根因在 acknowledgement/cursor transaction契約：本地進度代表「迭代過」，不是
+「下游已確認」，因此 unchanged gate會讓未落地 projection永久不可達。這不是資料內容
+錯誤，也不能靠手改 sync state收尾。
+
+**底層重構**：Article path新增 persistent `article_retry_slugs`，provider失敗不推進
+`feed_mtime`；retry slug本身也是下一輪 gate輸入，避免由其他原因開 gate時發現的 drift
+在失敗後再次消失。`purge_retry_slugs`只在 projection prerequisite成功後清除。Memory
+count改為下游 acknowledgement的連續前綴，第一個失敗即停止，不跨洞；risk與delete
+reconcile失敗也進 `counts["failures"]`。`_report_counts()`遇任何 projection failure
+一律非零，不再印假 `Done.`。
+
+**回歸、回讀與制度化**：同四個 RED injections轉 GREEN；article retry第二輪確實再
+呼叫同 slug並在成功後才推進 mtime，memory第二輪從失敗 id接續後才到尾端，state與
+exit code均逐欄回讀。Supabase hash、cache purge與delete reconcile相鄰 suite為
+clean tracked snapshot **31 passed, 1 skipped**，`git diff --check`通過；沒有 remote write、canonical
+研究資料修改、owner transfer或live effect。此 silent cursor advancement根因為
+**`root_cause_fixed_and_verified`**；program commit 15的 formal EffectRequest／
+outbox ownership、週期 convergence receipt與rollback rehearsal尚未完成，因此
+program commit 15與 operations-core umbrella仍為 **`contained`**。
