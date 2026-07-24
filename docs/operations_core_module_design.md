@@ -1,6 +1,7 @@
 # Operations Core Module Design
 
-- **Status**：ACCEPTED DESIGN — 尚未切換任何 live owner
+- **Status**：ACTIVE MIGRATION — `email.ops_alert` 已切換 live owner；其餘 capability
+  仍須逐一通過接管 gate
 - **Date**：2026-07-23
 - **Parent decisions**：ADR-0001、ADR-0002、`docs/platform_optimization_program_2026_07.md`
 - **Design vocabulary**：module、interface、implementation、depth、seam、adapter、leverage、locality
@@ -387,6 +388,11 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
 - 因而 `email.ops_alert` 的正式 caller、production ownership transaction、
   unique-owner live acknowledgement 與 rollback rehearsal 四項 gate 均為
   `root_cause_fixed_and_verified`。其他 notification family 不在這次 cutover scope。
+- 2026-07-24 08:07 CST 的 Codex failover read-only 複驗再次從 production owner
+  interface 回讀 `notification-owner.v1`：effect family=`email.ops_alert`、
+  owner=`operations_core`、generation=`4`、changed_at=
+  `2026-07-23T23:48:57.414826+00:00`；同班 caller／owned delivery／Sent read-back
+  scoped suite 為 `85 passed`。複驗沒有寄信或改 owner，且不擴張上述完成範圍。
 
 ## 7. Provider Execution
 

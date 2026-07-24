@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（authority-fenced effect worker live shadow checkpoint）**
+Last updated: **2026-07-24（production ops-alert ownership live read-back）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -201,6 +201,13 @@ generation request 零落地，final live read-back 為唯一 owner `operations_
 均有同名 local stub，ownership FK advisor gap 已補；本 scope security lint 為零。
 因此 program commit 13 的 `email.ops_alert` production ownership 為
 `root_cause_fixed_and_verified`；其他 effect family 不在本次完成宣告內。
+
+2026-07-24 08:07 CST 的 Codex failover read-only 複驗再次從 production owner
+interface 回讀 `notification-owner.v1`：effect family=`email.ops_alert`、
+owner=`operations_core`、generation=`4`、changed_at=
+`2026-07-23T23:48:57.414826+00:00`；caller／owned delivery／Sent read-back scoped
+suite 同班為 `85 passed`。本次未寄信、未轉移 owner，也不把單一 effect family 的
+接管擴張為整個 Effect Delivery 已完成。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是
