@@ -295,9 +295,13 @@ def test_supabase_builder_is_a_fail_closed_formal_caller(
             }
         )
 
-    monkeypatch.setenv("SUPABASE_URL", "https://project.supabase.co")
-    monkeypatch.setenv(
-        "SUPABASE_SERVICE_ROLE_KEY", "secret-service-role"
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.runtime_environment",
+        lambda: {
+            "SUPABASE_URL": "https://project.supabase.co",
+            "SUPABASE_SERVICE_ROLE_KEY": "secret-service-role",
+            "VOLPRED_OPERATIONS_RPC_TIMEOUT_SEC": "45",
+        },
     )
     monkeypatch.setattr(
         "volpred.ops.delivery.supabase_rpc.request.urlopen",
