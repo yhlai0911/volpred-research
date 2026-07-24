@@ -299,6 +299,21 @@
 > network-partition／五分鐘 RTO rehearsal，所以 program commit 34 仍維持
 > `contained`。
 >
+> **Primary Authority live outage／RTO rehearsal（2026-07-25）**
+> `scripts/rehearse_primary_authority_outage.py` 現在是唯一的 no-effect outage
+> operator seam：只允許自動產生的隔離 authority key，先回讀
+> publisher=`operations_core/8`，完成一次 live healthy renew 後把整個 authority
+> adapter切到實際不可達的 PostgREST endpoint。模組沒有 authorize、outbox、
+> provider或settlement caller；恢復後只等待 DB-clock lease 到期並讓獨立 standby
+> session取得下一個 epoch，最後以 release receipt關閉 lease。正式 300 秒 lease／
+> 60 秒 renew rehearsal 的 durable receipt 位於
+> `storage/ops/primary_authority_outage_rehearsal_latest.json`：local gate在
+> 60.526秒內 demote，standby在239.962秒內取得 epoch `1 → 2`，successful claims=2、
+> duplicate claims=0、effect/provider calls=0；publisher fence前後均為同一
+> `operations_core/8`。這完成 live Supabase outage與五分鐘 RTO的單 host
+> process rehearsal，尚未取代兩台實體 Mac 的 network-partition演練；其餘 effect
+> family也未全部cutover，因此 program commit 34 umbrella仍為 `contained`。
+>
 > Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
 > epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate
 > 取得 authority，並在 claim 前、authorize 前與 provider 前重新回讀同一 lease
@@ -313,9 +328,9 @@
 > fixed search path、service-role-only ACL、owner=`operations_core/4`、零 live lease
 > 與零 live attempt均已回讀。PG17 contract另證明無 host lease時 begin transaction
 > 整體 rollback，settlement 後 lease仍存續到 host release。這完成
-> `email.ops_alert` family gate；其他 effect family與真實雙 Mac network partition、
-> Supabase outage、五分鐘 RTO rehearsal仍未完成，所以 program commit 34 整體保持
-> `contained`。
+> `email.ops_alert` family gate；其他 effect family與真實雙 Mac network partition
+> 仍未完成。單 host live Supabase outage／五分鐘 RTO 已由上方2026-07-25 checkpoint
+> 證實，但不取代跨實體host演練，所以 program commit 34 整體保持`contained`。
 >
 > 多 family 上線前另修正 generic outbox routing：provider現在必須宣告支援的
 > `effect_kinds`，transactional claim只在該 capability set內做 `SKIP LOCKED`；

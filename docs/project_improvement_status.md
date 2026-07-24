@@ -458,6 +458,17 @@ final state 都是 `stopped`。這個 canonical
 keepalive 缺口達 `root_cause_fixed_and_verified`；但全 effect-family enable gate與
 真實雙 Mac network-partition／Supabase outage／五分鐘 RTO rehearsal尚未完成，所以
 program commit 34 整體仍是 `contained`。
+同日下一個production slice新增
+`scripts/rehearse_primary_authority_outage.py`，只用隔離generated authority key，
+先後回讀publisher=`operations_core/8`，並在一次healthy renew後把authority adapter
+切到真實不可達PostgREST transport。正式300秒lease／60秒renew live run讓local gate
+於60.526秒內demote，transport恢復後standby仍等DB-clock expiry，於239.962秒內取得
+exact next epoch `1 → 2`，最後release為`stopped`。Durable receipt
+`storage/ops/primary_authority_outage_rehearsal_latest.json`回讀successful claims=2、
+duplicate claims=0、effect requests/provider calls=0，publisher fence前後完全一致；
+authority相鄰suite共28 passed。這使live Supabase outage與五分鐘RTO的單host operator
+seam達`root_cause_fixed_and_verified`；真正跨兩台實體Mac的network partition與其餘
+effect-family cutover仍缺，因此program commit 34 umbrella保持`contained`。
 同日 generic durable outbox worker 也移除 caller 自填 raw authority identity／token
 的介面，改從 keepalive lease gate 取得，並在 claim、authorize、provider 三個階段前
 重驗同一 lease identity。Email notification 與 publisher article sync 都走這個深模組
@@ -480,9 +491,9 @@ release成功。Production migration
 兩個 RPC仍為 `volpred_ops_definer`／fixed empty search path／service-role-only，
 begin self-acquire=false、settle release=false、owner=`operations_core/4`、current
 lease holder=null、live attempt=0。此 family gate局部根因為
-`root_cause_fixed_and_verified`；其他 effect family、真實雙 Mac network partition、
-Supabase outage與五分鐘 RTO rehearsal仍未完成，因此 program commit 34 umbrella
-保持 `contained`。
+`root_cause_fixed_and_verified`；其他 effect family與真實雙 Mac network partition
+仍未完成。單host live Supabase outage／五分鐘RTO已由上方receipt證實，但不取代跨
+實體host演練，因此program commit 34 umbrella保持`contained`。
 同日多 family盤點抓到 generic outbox claim沒有 provider capability filter：任一 narrow
 provider worker都會拿全域最舊 row，publisher上線後可能先拿 email effect並把合法 intent
 錯判為 unsupported後 dead-letter。底層改為 provider宣告 immutable `effect_kinds`，
@@ -494,15 +505,16 @@ family；unit／PG17相鄰套件共 67 passed。Production migration
 filtered signature、`volpred_ops_definer` owner、fixed search path、worker-only ACL、
 filter definition與 index全對；當下 active claim=0，本次沒有 claim或 provider call。
 此 cross-family routing根因為 `root_cause_fixed_and_verified`。Publisher durable
-formal caller／HTTP adapters／owner cutover與 program commit 34的真實 outage／RTO
-rehearsal仍缺，umbrella維持 `contained`。
+formal caller／HTTP adapters／owner cutover已由後續publisher checkpoint處理；
+program commit 34仍缺跨兩台實體Mac的partition演練，umbrella維持`contained`。
 同日再以 payload-store blocking injection 驗證 generic worker 的 provider boundary：
 既有第三次 keepalive 回讀發生在 durable payload read 之前，reader 若在回傳 bytes
 前讓 host demote，舊 worker仍會呼叫 provider。現在 payload SHA-256 通過後會立即
 重驗同一 lease identity；RED case轉 GREEN，provider／settlement皆為 0，email、
 publisher與PostgreSQL相鄰套件共 68 passed。這個 provider-boundary race為
 `root_cause_fixed_and_verified`；沒有 live effect或 owner mutation，program commit 34
-umbrella仍因其餘 family cutover與真實 outage／RTO rehearsal未完成而保持 `contained`。
+umbrella仍因其餘 family cutover與跨兩台實體Mac的partition演練未完成而保持
+`contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

@@ -90,6 +90,8 @@ cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh
 # 文件：docs/zeabur-safe-deploy.md
 # Publisher owner fence 部署後的正式 CAS → 單篇 acknowledgement → exact rollback：
 uv run python scripts/rehearse_publisher_cutover.py --deployment-id <zeabur_deployment_id> --slug <published_single_report_slug>
+# Primary Authority live renewal outage；隔離 key、零 provider effect、原子保存 RTO receipt：
+uv run python scripts/rehearse_primary_authority_outage.py --receipt-path storage/ops/primary_authority_outage_rehearsal_latest.json
 # 注意：所有 CLI 命令加 -i=false 避免互動式 prompt
 
 # 發佈

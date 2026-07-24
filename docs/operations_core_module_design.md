@@ -573,6 +573,31 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   雙 Mac network partition、Supabase outage與五分鐘 RTO rehearsal，因此 program
   commit 34 整體仍是 `contained`。
 
+### 2026-07-25 live Supabase outage／RTO rehearsal checkpoint
+
+- `scripts/rehearse_primary_authority_outage.py` 將 production outage演練收進
+  fail-closed operator seam。CLI只接受自動產生的
+  `operations-core-outage-smoke-*` authority key，先驗 publisher owner為預期的
+  `operations_core/8`，且整個模組不組裝 authorize、outbox、provider或settlement
+  interface。Authority store在一次 healthy renew後切到實際不可達的
+  `127.0.0.1:1` PostgREST transport；standby在transport恢復後仍須等待DB-clock
+  lease到期，不能靠local state繞過remote fence。
+- 正式live run採production composition的300秒lease／60秒renew。Primary健康renew
+  後的 expiry為`2026-07-24T17:27:27.770913+00:00`；renew transport中斷後
+  `HostAuthorityKeepalive`在60.526秒內demote且`current_lease()` fail closed。
+  Standby在239.962秒內取得exact next epoch `1 → 2`，其後release receipt使final
+  state=`stopped`。Receipt回讀successful claims=2、duplicate claims=0、
+  effect requests=0、provider calls=0。
+- Durable evidence由CLI原子寫入
+  `storage/ops/primary_authority_outage_rehearsal_latest.json`並exact JSON
+  read-back；publisher fence在演練前後都是同一
+  `publisher.article.supabase.sync=operations_core/8`。相鄰authority suite共
+  28 passed，compileall與diff check通過。
+- 這個live Supabase renewal-outage／五分鐘RTO operator seam為
+  `root_cause_fixed_and_verified`。兩個session仍在同一台Mac process內；真正跨兩台
+  實體Mac的network partition與其餘effect-family cutover尚未完成，因此program
+  commit 34與operations-core umbrella保持`contained`。
+
 ### 2026-07-24 generic effect-worker keepalive gate checkpoint
 
 - 原本的 `EffectWorkerCommand` 讓 caller 直接提供 authority key、holder、epoch 與 raw

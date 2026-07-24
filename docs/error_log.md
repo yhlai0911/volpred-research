@@ -1529,6 +1529,37 @@ materializer overwrite／rollback 根因已達
 Git ownership cutover 與 rollback rehearsal 尚未完成，因此整體 task 仍只能標
 **`contained`**。
 
+### 2026-07-25 — Primary Authority outage演練缺少安全operator seam，第一次receipt又保存stale expiry
+
+**證據化症狀與根因層級**：Program commit 34雖已有`HostAuthorityKeepalive`與fake
+renew-failure測試，但production outage仍只能靠臨時片段切transport，沒有機械限制
+authority family、effect path、publisher owner或RTO證據。第一次正式300／60 live
+演練成功demote與接管後，receipt的`primary.expires_at`卻取自initial acquire object，
+不是healthy renew後的lease；控制流程正確，但保存證據少一代。根因是operator
+transaction／evidence boundary未制度化，且renew read-back未成為rehearsal的canonical
+lease identity，不是Supabase lease transaction本身失效。
+
+**底層重構**：新增`scripts/rehearse_primary_authority_outage.py`。CLI只生成隔離的
+`operations-core-outage-smoke-*` key，在第一個remote mutation前驗
+publisher=`operations_core/8`；模組沒有authorize、outbox、provider或settlement
+caller。一次healthy renew後，先以`current_lease()`固定最新lease evidence，再把整個
+authority store切到實際不可達的`127.0.0.1:1` PostgREST transport。Keepalive demote
+後立即證明local gate關閉；transport恢復時standby仍須等DB-clock expiry，成功只能是
+exact next epoch。Receipt以temporary file + fsync + replace原子保存並逐欄JSON
+read-back。
+
+**回歸、production回讀與狀態界線**：28個outage／keepalive／session／Supabase adapter
+tests通過，compileall與`git diff --check`通過。修正後production 300秒lease／60秒renew
+replay的primary renewed expiry為`2026-07-24T17:27:27.770913+00:00`；transport outage
+使local gate在60.526秒內demote，standby在239.962秒內取得epoch `1 → 2`並以release
+receipt停在`stopped`。Durable receipt
+`storage/ops/primary_authority_outage_rehearsal_latest.json`回讀successful claims=2、
+duplicate claims=0、effect requests=0、provider calls=0；publisher fence前後都是
+同一`operations_core/8`。因此live Supabase renewal-outage／五分鐘RTO operator seam為
+**`root_cause_fixed_and_verified`**。兩個session仍位於同一台Mac process；真正跨兩台
+實體Mac的network partition與其餘effect-family cutover尚未完成，program commit 34與
+operations-core umbrella維持**`contained`**。
+
 ### 2026-07-24 — ChangeSet content identity 未綁 Git executable bit
 
 **症狀與根因層級**：`changeset.v1`、commit authority 與 writer fence 都只綁定
