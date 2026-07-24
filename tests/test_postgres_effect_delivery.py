@@ -185,6 +185,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724134742_operations_core_effect_family_routing.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724170000_operations_core_publisher_article_ownership.sql",
 )
 
 
@@ -1252,6 +1256,21 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     bigint, text, integer, text, text, bigint, integer,
                     text, text, text, text, bigint, text, text, text,
                     text, text, text, text, text, text, text
+                  ),
+                  public.volpred_read_publisher_article_sync_owner(),
+                  public.volpred_transfer_publisher_article_sync_owner(
+                    text, bigint, text, text, text, bigint
+                  ),
+                  public.volpred_request_owned_publisher_article_sync(
+                    bigint, text, jsonb, text
+                  ),
+                  public.volpred_begin_owned_publisher_article_sync(
+                    bigint, text, text, integer, text, text, text
+                  ),
+                  public.volpred_settle_owned_publisher_article_sync(
+                    bigint, text, integer, text, text, bigint, integer,
+                    text, text, text, text, bigint, text, text, text,
+                    text, text, text, text, text, text, text
                   )
                 """
             )
@@ -1408,6 +1427,27 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               change_reason, NULL, changed_at
             FROM volpred_ops.notification_owners
             WHERE effect_family = 'email.ops_alert';
+            INSERT INTO volpred_ops.notification_owners (
+              effect_family, owner, generation, changed_at, changed_by,
+              change_reason
+            )
+            VALUES (
+              'publisher.article.supabase.sync',
+              'legacy',
+              1,
+              clock_timestamp(),
+              'test-reset',
+              'restore canonical legacy publisher fixture owner'
+            );
+            INSERT INTO volpred_ops.notification_owner_receipts (
+              effect_family, generation, previous_owner, owner, actor_ref,
+              reason, rollback_of_generation, changed_at
+            )
+            SELECT
+              effect_family, generation, NULL, owner, changed_by,
+              change_reason, NULL, changed_at
+            FROM volpred_ops.notification_owners
+            WHERE effect_family = 'publisher.article.supabase.sync';
             INSERT INTO volpred_ops.commit_owners (
               capability, owner, generation, changed_at, changed_by,
               change_reason
@@ -4356,3 +4396,466 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
         1,
         ["legacy", "operations_core", "legacy", "operations_core"],
     )
+
+
+def test_owned_publisher_transaction_cutover_delivery_and_rollback(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "publisher-article-sync.v1",
+        "article": {
+            "id": "mile_pg17_owned_publisher",
+            "title": "PG17 owned publisher transaction",
+            "content": "Canonical PG17 publisher fixture.",
+            "description": "Publisher ownership fixture.",
+            "status": "published",
+            "audience": "research",
+            "category": "milestone",
+            "phase": "robustness",
+            "published_at": "2026-07-24T12:00:00+00:00",
+            "details": {"experiment_refs": ["K1708"]},
+            "tags": ["K1708", "SPY"],
+        },
+    }
+    work_token = "work-owned-publisher-token"
+    outbox_token = "outbox-owned-publisher-token"
+    primary_token = "primary-owned-publisher-token"
+    worker_id = "effect-worker:publisher-article-sync"
+    authority_key = "publisher:article.supabase.sync"
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        initial = connection.execute(
+            "SELECT public.volpred_read_publisher_article_sync_owner()"
+        ).fetchone()[0]
+        assert (initial["owner"], initial["generation"]) == ("legacy", 1)
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="does not own publisher article generation 1",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_request_owned_publisher_article_sync(
+                  %s, %s, %s, %s
+                )
+                """,
+                (
+                    1,
+                    "publisher:pg17:pre-cutover",
+                    Jsonb(payload),
+                    "test:pg17",
+                ),
+            )
+
+        cutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "test:pg17",
+                "exercise publisher ownership transaction",
+                None,
+            ),
+        ).fetchone()[0]
+        assert (cutover["owner"], cutover["generation"]) == (
+            "operations_core",
+            2,
+        )
+
+        owned_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_sync(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "publisher:pg17:owned-transaction",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        replayed_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_sync(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "publisher:pg17:owned-transaction",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        assert replayed_request == owned_request
+
+        with pytest.raises(
+            psycopg.errors.NoDataFound,
+            match="query returned no rows",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_begin_owned_publisher_article_sync(
+                  %s, %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    2,
+                    owned_request["effect_id"],
+                    worker_id,
+                    300,
+                    work_token,
+                    outbox_token,
+                    primary_token,
+                ),
+            )
+        connection.execute("RESET ROLE")
+        no_lease_state = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT version FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s)
+            """,
+            (
+                owned_request["work_id"],
+                owned_request["work_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+            ),
+        ).fetchone()
+        assert no_lease_state == ("pending", 1, "pending", 0)
+        connection.execute("SET ROLE service_role")
+
+        primary_lease = connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (authority_key, worker_id, 300, primary_token),
+        ).fetchone()[0]
+        attempt = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_publisher_article_sync(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                owned_request["effect_id"],
+                worker_id,
+                300,
+                work_token,
+                outbox_token,
+                primary_token,
+            ),
+        ).fetchone()[0]
+        assert attempt["effect"]["effect_kind"] == (
+            "publisher.article.supabase.sync"
+        )
+        assert attempt["effect"]["target_ref"] == (
+            "supabase:articles/mile_pg17_owned_publisher"
+        )
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="requires zero active attempts",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_transfer_publisher_article_sync_owner(
+                  %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    "operations_core",
+                    2,
+                    "legacy",
+                    "test:pg17",
+                    "must reject transfer during active delivery",
+                    2,
+                ),
+            )
+
+        receipt = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_publisher_article_sync(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                attempt["work_id"],
+                attempt["work_version"],
+                work_token,
+                attempt["effect"]["id"],
+                attempt["outbox_sequence"],
+                attempt["attempt_count"],
+                attempt["worker_id"],
+                outbox_token,
+                attempt["primary_authority_key"],
+                attempt["primary_authority_holder_ref"],
+                attempt["primary_authority_epoch"],
+                primary_token,
+                attempt["authority_request_sha256"],
+                attempt["outbox_claim_ref"],
+                attempt["primary_authority_ref"],
+                "acknowledged",
+                attempt["effect"]["acknowledgement"]["kind"],
+                attempt["effect"]["acknowledgement"]["target_ref"],
+                None,
+                "supabase:articles/mile_pg17_owned_publisher",
+                "e" * 64,
+            ),
+        ).fetchone()[0]
+        assert (
+            receipt["work_status"],
+            receipt["effect_status"],
+            receipt["disposition"],
+        ) == ("succeeded", "delivered", "delivered")
+
+        connection.execute("RESET ROLE")
+        held_after_settlement = connection.execute(
+            """
+            SELECT holder_ref, epoch
+            FROM volpred_ops.primary_authority_lease_reads
+            WHERE authority_key = %s
+            """,
+            (authority_key,),
+        ).fetchone()
+        assert held_after_settlement == (
+            worker_id,
+            primary_lease["epoch"],
+        )
+        connection.execute("SET ROLE service_role")
+        connection.execute(
+            """
+            SELECT public.volpred_release_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                authority_key,
+                worker_id,
+                primary_lease["epoch"],
+                primary_token,
+            ),
+        )
+
+        rollback = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "operations_core",
+                2,
+                "legacy",
+                "test:pg17",
+                "rehearse exact publisher rollback",
+                2,
+            ),
+        ).fetchone()[0]
+        assert (rollback["owner"], rollback["generation"]) == (
+            "legacy",
+            3,
+        )
+        assert connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "operations_core",
+                2,
+                "legacy",
+                "test:pg17",
+                "rehearse exact publisher rollback",
+                2,
+            ),
+        ).fetchone()[0] == rollback
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="does not own publisher article generation 2",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_request_owned_publisher_article_sync(
+                  %s, %s, %s, %s
+                )
+                """,
+                (
+                    2,
+                    "publisher:pg17:stale-owner",
+                    Jsonb(payload),
+                    "test:pg17",
+                ),
+            )
+
+        recutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                3,
+                "operations_core",
+                "test:pg17",
+                "restore publisher owner after rollback rehearsal",
+                None,
+            ),
+        ).fetchone()[0]
+        assert (recutover["owner"], recutover["generation"]) == (
+            "operations_core",
+            4,
+        )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable_state = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_requests WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT status FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.effect_attempt_receipts
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.primary_authority_receipts
+               WHERE authority_key = %s),
+              (SELECT array_agg(owner ORDER BY generation)
+               FROM volpred_ops.notification_owner_receipts
+               WHERE effect_family =
+                 'publisher.article.supabase.sync')
+            """,
+            (
+                owned_request["work_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                authority_key,
+            ),
+        ).fetchone()
+    assert durable_state == (
+        "succeeded",
+        "delivered",
+        "delivered",
+        "delivered",
+        1,
+        1,
+        ["legacy", "operations_core", "legacy", "operations_core"],
+    )
+
+
+def test_owned_publisher_rpc_security_and_definition_shape(
+    postgres_effect_dsn: str,
+) -> None:
+    function_names = (
+        "volpred_read_publisher_article_sync_owner",
+        "volpred_transfer_publisher_article_sync_owner",
+        "volpred_request_owned_publisher_article_sync",
+        "volpred_begin_owned_publisher_article_sync",
+        "volpred_settle_owned_publisher_article_sync",
+    )
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        rows = connection.execute(
+            """
+            SELECT
+              procedure.proname,
+              procedure.proowner = (
+                SELECT oid FROM pg_roles
+                WHERE rolname = 'volpred_ops_definer'
+              ) AS owned_by_definer,
+              procedure.prosecdef,
+              procedure.proconfig = ARRAY['search_path=""'],
+              has_function_privilege(
+                'service_role', procedure.oid, 'EXECUTE'
+              ) AS service_execute,
+              has_function_privilege(
+                'anon', procedure.oid, 'EXECUTE'
+              ) AS anon_execute,
+              has_function_privilege(
+                'authenticated', procedure.oid, 'EXECUTE'
+              ) AS authenticated_execute,
+              has_function_privilege(
+                'public', procedure.oid, 'EXECUTE'
+              ) AS public_execute,
+              pg_get_functiondef(procedure.oid)
+            FROM pg_proc AS procedure
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = procedure.pronamespace
+            WHERE namespace.nspname = 'public'
+              AND procedure.proname = ANY(%s)
+            ORDER BY procedure.proname
+            """,
+            (list(function_names),),
+        ).fetchall()
+        service_table_access = connection.execute(
+            """
+            SELECT bool_or(
+              has_table_privilege(
+                'service_role', relation.oid, 'SELECT'
+              )
+            )
+            FROM pg_class AS relation
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = relation.relnamespace
+            WHERE namespace.nspname = 'volpred_ops'
+              AND relation.relname IN (
+                'notification_owners',
+                'notification_owner_receipts',
+                'owned_notification_requests',
+                'owned_notification_attempts'
+              )
+            """
+        ).fetchone()[0]
+        definer_public_create = connection.execute(
+            """
+            SELECT has_schema_privilege(
+              'volpred_ops_definer', 'public', 'CREATE'
+            )
+            """
+        ).fetchone()[0]
+
+    assert len(rows) == 5
+    assert all(
+        row[1:8] == (True, True, True, True, False, False, False)
+        for row in rows
+    )
+    definitions = {row[0]: row[8] for row in rows}
+    assert (
+        "FROM volpred_ops.primary_authority_lease_reads"
+        in definitions["volpred_begin_owned_publisher_article_sync"]
+    )
+    assert (
+        "acquire_primary_authority"
+        not in definitions["volpred_begin_owned_publisher_article_sync"]
+    )
+    assert (
+        "release_primary_authority"
+        not in definitions["volpred_settle_owned_publisher_article_sync"]
+    )
+    assert service_table_access is False
+    assert definer_public_create is False
