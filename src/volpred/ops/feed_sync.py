@@ -190,7 +190,7 @@ def compute_diff(storage_dir: str | Path = "storage") -> dict:
       - delete: slugs in DB but not feed
       - feed_count, db_count
     """
-    feed, canonical_feed_sha256 = _load_feed_snapshot(storage_dir)
+    feed = _load_feed(storage_dir)
     feed_by_slug: dict[str, dict] = {
         a["id"]: a for a in feed if isinstance(a, dict) and a.get("id")
     }
@@ -328,7 +328,7 @@ def apply_diff(
 
     Returns dict of counters: {inserted, updated, deleted, failed}.
     """
-    feed = _load_feed(storage_dir)
+    feed, canonical_feed_sha256 = _load_feed_snapshot(storage_dir)
     feed_by_slug: dict[str, dict] = {
         a["id"]: a for a in feed if isinstance(a, dict) and a.get("id")
     }

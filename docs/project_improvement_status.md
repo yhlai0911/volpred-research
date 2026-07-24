@@ -344,8 +344,9 @@ Operations Core immutable batch之間路由；batch由private payload store、Wo
 EffectRequest/outbox、primary lease及typed read-back receipt完整擁有。Live rehearsal
 走完`legacy/1 → operations_core/2 → legacy/3 rollback → operations_core/4`，
 回讀work succeeded、effect/outbox delivered、local/Supabase 14/14、drift 0，且
-schedule-equivalent hourly command exit 0；51個Python cases與47個PostgreSQL cases
-通過。這個safe ownership切片為 **`root_cause_fixed_and_verified`**。破壞性delete
+schedule-equivalent hourly command exit 0；最終tracked-snapshot selected suite
+91案通過（含完整47-case PostgreSQL contract檔）。這個safe ownership切片為
+**`root_cause_fixed_and_verified`**。破壞性delete
 仍保留既有floor/cap/dump guard，尚未收進獨立formal effect／owner／rollback，因此
 program commit 15與operations-core umbrella仍為 **`contained`**。
 

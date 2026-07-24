@@ -2278,9 +2278,13 @@ work、outbox、authority receipt與typed read-back。`feed_sync`只依owner選l
 或Operations Core單批路徑，article objects與feed SHA由同一份byte snapshot產生，
 避免並行改稿造成舊objects綁新hash；destructive delete不共用safe authority。
 
-**回歸、回讀與制度化**：51個Python cases與47個PostgreSQL cases通過，涵蓋routing、
-exact replay、generation fence、active-attempt transfer拒絕、security ACL、success、
-rollback與再cutover。Production operator rehearsal完成
+**回歸、回讀與制度化**：最終tracked-snapshot selected suite 91案通過（含完整
+47-case PostgreSQL contract檔），涵蓋routing、exact replay、generation fence、
+active-attempt transfer拒絕、security ACL、success、rollback與再cutover。第一次
+post-commit schedule-equivalent驗證另抓到caller仍走`_load_feed()`、未綁新SHA變數；
+根因是先前測試只直呼batch helper，未跨`apply_diff()`邊界。Caller現以單次
+`_load_feed_snapshot()`同時取得objects與SHA，新增回歸會讓任何第二次feed read直接
+失敗；修後同一CLI安靜exit 0。Production operator rehearsal完成
 `legacy/1 → operations_core/2 → legacy/3 (rollback_of=2) →
 operations_core/4`；回讀WorkItem `succeeded`、Effect/outbox `delivered`、attempt與
 authority receipt一致，local/Supabase均14且drift=0；schedule-equivalent hourly

@@ -1119,8 +1119,8 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   完成`legacy/1 → operations_core/2 → legacy/3 rollback → operations_core/4`，
   回讀WorkItem succeeded、Effect/outbox delivered、attempt acknowledged，
   local/Supabase均14且drift=0；schedule-equivalent hourly command再以exit 0收尾。
-  Caller、routing、operator與PostgreSQL套件合計 **98 passed**（51 Python + 47
-  PostgreSQL）。
+  最終tracked-snapshot selected suite **91 passed**，其中包含完整47-case
+  PostgreSQL contract檔。
 - 因此safe reconcile production ownership切片是
   **`root_cause_fixed_and_verified`**。Program commit 15仍缺獨立destructive delete
   EffectRequest／owner／rollback；program commit 34的physical two-Mac receipt也不在

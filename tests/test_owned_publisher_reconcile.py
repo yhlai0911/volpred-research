@@ -655,6 +655,70 @@ def test_hourly_safe_upserts_preserve_legacy_owner_path(
     assert outcome["safe_effect"]["mode"] == "legacy_per_article"
 
 
+def test_apply_diff_binds_articles_and_hash_from_one_feed_snapshot(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from volpred.ops import feed_sync
+
+    captured: dict[str, object] = {}
+
+    def apply_upserts(
+        _diff,
+        *,
+        feed_by_slug,
+        canonical_feed_sha256,
+        storage_dir,
+    ):
+        captured.update(
+            {
+                "feed_by_slug": feed_by_slug,
+                "canonical_feed_sha256": canonical_feed_sha256,
+                "storage_dir": storage_dir,
+            }
+        )
+        return {
+            "inserted": 1,
+            "updated": 0,
+            "failed": 0,
+            "failures": [],
+            "safe_effect": {"mode": "test"},
+        }
+
+    monkeypatch.setattr(
+        feed_sync,
+        "_load_feed_snapshot",
+        lambda _storage_dir: ([_article()], "a" * 64),
+    )
+    monkeypatch.setattr(
+        feed_sync,
+        "_load_feed",
+        lambda _storage_dir: pytest.fail(
+            "apply_diff must not perform a second feed read"
+        ),
+    )
+    monkeypatch.setattr(
+        feed_sync,
+        "_apply_safe_projection_upserts",
+        apply_upserts,
+    )
+
+    outcome = feed_sync.apply_diff(
+        {
+            "insert": ["mile_owned_sync"],
+            "update": [],
+            "delete": [],
+        },
+        storage_dir="snapshot-storage",
+    )
+
+    assert outcome["inserted"] == 1
+    assert captured == {
+        "feed_by_slug": {"mile_owned_sync": _article()},
+        "canonical_feed_sha256": "a" * 64,
+        "storage_dir": "snapshot-storage",
+    }
+
+
 def test_hourly_operations_core_owner_emits_one_immutable_batch(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
