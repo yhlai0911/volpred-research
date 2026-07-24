@@ -479,6 +479,13 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
     )
     captured: dict[str, object] = {}
 
+    class FakeKeepalive:
+        def start(self) -> None:
+            captured["keepalive_started"] = True
+
+        def stop(self) -> None:
+            captured["keepalive_stopped"] = True
+
     class FakeNotifier:
         def __init__(self, *, storage_dir: str) -> None:
             captured["notifier_storage_dir"] = storage_dir
@@ -487,9 +494,18 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
             raise AssertionError("operations_core route used legacy notifier")
 
     class FakeOwnedDelivery:
-        def __init__(self, *, store: object, provider: object) -> None:
+        def __init__(
+            self,
+            *,
+            store: object,
+            provider: object,
+            primary_authority: object,
+            worker_id: str,
+        ) -> None:
             captured["store"] = store
             captured["provider"] = provider
+            captured["primary_authority"] = primary_authority
+            captured["worker_id"] = worker_id
 
         def deliver(self, command: object) -> object:
             captured["command"] = command
@@ -522,6 +538,14 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
         "ImapSentMailReader.from_environment",
         classmethod(lambda cls: object()),
     )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: (
+            captured.update({"keepalive_kwargs": kwargs})
+            or FakeKeepalive()
+        ),
+    )
 
     result = alerts_module._dispatch_alert_email(
         level="warn",
@@ -538,6 +562,14 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
     )
     assert getattr(command, "recipient") == "owner@example.com"
     assert captured["store"] is fake_store
+    assert captured["primary_authority"].__class__ is FakeKeepalive
+    assert captured["worker_id"] == "effect-worker:ops-alert-email"
+    assert captured["keepalive_started"] is True
+    assert captured["keepalive_stopped"] is True
+    assert captured["keepalive_kwargs"] == {
+        "authority_key": "notification:email.ops_alert",
+        "holder_ref": "effect-worker:ops-alert-email",
+    }
     assert result == {
         "notification_id": "effect-owned-email-test",
         "subject": "[VolPred Alert][WARN] ownership smoke",

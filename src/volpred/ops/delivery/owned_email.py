@@ -19,6 +19,8 @@ from typing import Any, Protocol
 from urllib import error, request
 from uuid import uuid4
 
+from volpred.ops.authority import PrimaryLease
+
 from ._effect import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
@@ -29,6 +31,7 @@ from ._effect import (
 
 
 _OWNER_FAMILY = "email.ops_alert"
+_PRIMARY_AUTHORITY_KEY = "notification:email.ops_alert"
 _OPERATIONS_CORE_OWNER = "operations_core"
 _LEGACY_OWNER = "legacy"
 
@@ -149,6 +152,12 @@ class _OwnedEmailProvider(Protocol):
     ) -> EffectAttemptOutcome: ...
 
 
+class _PrimaryLeaseGate(Protocol):
+    """Expose the host lease only while its keepalive is healthy."""
+
+    def current_lease(self) -> PrimaryLease: ...
+
+
 class OwnedEmailNotification:
     """Deliver one ops-alert email through the current durable owner."""
 
@@ -157,6 +166,7 @@ class OwnedEmailNotification:
         *,
         store: _OwnedEmailStore,
         provider: _OwnedEmailProvider,
+        primary_authority: _PrimaryLeaseGate,
         worker_id: str = "effect-worker:ops-alert-email",
         lease_seconds: int = 300,
         token_factory: Callable[[], str] | None = None,
@@ -167,6 +177,7 @@ class OwnedEmailNotification:
             raise ValueError("owned email lease_seconds must be positive")
         self._store = store
         self._provider = provider
+        self._primary_authority = primary_authority
         self._worker_id = worker_id.strip()
         self._lease_seconds = lease_seconds
         self._token_factory = token_factory or (
@@ -175,6 +186,7 @@ class OwnedEmailNotification:
 
     def deliver(self, command: OwnedEmailCommand) -> OwnedEmailReceipt:
         normalized = _normalize_command(command)
+        primary_lease = self._current_primary_lease()
         owner = self._store.read_owner()
         if (
             owner.effect_family != _OWNER_FAMILY
@@ -187,14 +199,22 @@ class OwnedEmailNotification:
             normalized,
             owner_generation=owner.generation,
         )
+        primary_lease = self._current_primary_lease(
+            expected=primary_lease,
+        )
         attempt = self._store.begin(
             request_view,
             worker_id=self._worker_id,
             lease_seconds=self._lease_seconds,
             work_lease_token=self._token("work"),
             outbox_claim_token=self._token("outbox"),
-            primary_fencing_token=self._token("primary"),
+            primary_fencing_token=primary_lease.fencing_token,
         )
+        self._validate_attempt_authority(
+            attempt,
+            primary_lease=primary_lease,
+        )
+        self._current_primary_lease(expected=primary_lease)
         outcome = self._provider.deliver(attempt.effect, attempt.payload)
         return self._store.settle(attempt, outcome)
 
@@ -203,6 +223,54 @@ class OwnedEmailNotification:
         if not isinstance(token, str) or not token.strip():
             raise ValueError(f"owned email {kind} token is required")
         return token.strip()
+
+    def _current_primary_lease(
+        self,
+        *,
+        expected: PrimaryLease | None = None,
+    ) -> PrimaryLease:
+        lease = self._primary_authority.current_lease()
+        if not isinstance(lease, PrimaryLease):
+            raise TypeError(
+                "owned email keepalive returned no typed PrimaryLease"
+            )
+        if (
+            lease.authority_key != _PRIMARY_AUTHORITY_KEY
+            or lease.holder_ref != self._worker_id
+        ):
+            raise NotificationOwnershipLost(
+                "owned email keepalive lease identity mismatch"
+            )
+        if expected is not None and (
+            lease.authority_key != expected.authority_key
+            or lease.holder_ref != expected.holder_ref
+            or lease.epoch != expected.epoch
+            or lease.fencing_token != expected.fencing_token
+            or lease.acquired_at != expected.acquired_at
+        ):
+            raise NotificationOwnershipLost(
+                "owned email keepalive lease was replaced"
+            )
+        return lease
+
+    @staticmethod
+    def _validate_attempt_authority(
+        attempt: OwnedEmailAttempt,
+        *,
+        primary_lease: PrimaryLease,
+    ) -> None:
+        if (
+            attempt.primary_authority_key
+            != primary_lease.authority_key
+            or attempt.primary_authority_holder_ref
+            != primary_lease.holder_ref
+            or attempt.primary_authority_epoch != primary_lease.epoch
+            or attempt.primary_fencing_token
+            != primary_lease.fencing_token
+        ):
+            raise NotificationOwnershipLost(
+                "owned email begin used a different Primary Authority lease"
+            )
 
 
 class SupabaseOwnedEmailStore:

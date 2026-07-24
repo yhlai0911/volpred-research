@@ -594,6 +594,30 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   lease；其他 effect family 也未逐一接管。因此「全 effect-family enable gate」與
   program commit 34 umbrella 仍為 `contained`。
 
+### 2026-07-24 owned email production keepalive gate checkpoint
+
+- `OwnedEmailNotification` 現在依賴 live lease gate，不再由 token factory產生
+  Primary Authority token。它在 durable request前、begin前與 provider前回讀同一
+  `notification:email.ops_alert` holder／epoch／token identity；gate關閉、family
+  不符、lease replacement或 begin RPC回傳另一個 authority identity，都在 SMTP
+  provider前 fail closed。
+- Production caller啟動 `HostAuthorityKeepalive` 後才進 owned transaction，並以
+  `finally` stop。Migration
+  `20260724131707_operations_core_owned_email_keepalive_gate.sql` 保留 public RPC
+  signature，但 begin只讀既有未過期 lease，再由 `authorize_effect_write` 驗 raw
+  token；settlement不再 release，避免在 keepalive背後清掉 remote lease。
+- PG17 contract覆蓋無 host lease的 transaction rollback、預持 lease後完整 delivery、
+  settlement後 lease仍存續及 host explicit release；unit failure injection另覆蓋
+  closed gate與 epoch／token replacement，provider call均為 0。Production migration
+  receipt為 `20260724131707 operations_core_owned_email_keepalive_gate`；live
+  function-definition／owner／ACL／search-path、notification owner與 live lease均已回讀，
+  未寄信、未做 owner transfer。
+- 此 `email.ops_alert` family enable-gate缺口為
+  `root_cause_fixed_and_verified`。兩筆歷史 `started` attempt均早已 lease-expired，
+  live attempt=0；其 reconciliation不在本 slice內。其他 effect family、真實雙 Mac
+  network partition、Supabase outage與五分鐘 RTO rehearsal仍缺，因此 program
+  commit 34 umbrella保持 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam

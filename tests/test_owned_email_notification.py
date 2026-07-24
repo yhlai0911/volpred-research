@@ -9,6 +9,7 @@ from volpred.ops.delivery import (
     AcknowledgementExpectation,
     EffectView,
 )
+from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery.owned_email import (
     NotificationOwner,
     NotificationOwnershipLost,
@@ -184,13 +185,34 @@ class _Provider:
         )
 
 
+class _LeaseGate:
+    def __init__(self) -> None:
+        self.calls = 0
+        self.lease = PrimaryLease(
+            schema_version="primary-lease.v1",
+            authority_key="notification:email.ops_alert",
+            holder_ref="effect-worker:ops-alert-email",
+            epoch=1,
+            fencing_token="primary-token",
+            lease_seconds=300,
+            acquired_at="2026-07-24T07:00:00+00:00",
+            expires_at="2026-07-24T07:05:00+00:00",
+        )
+
+    def current_lease(self) -> PrimaryLease:
+        self.calls += 1
+        return self.lease
+
+
 def test_deliver_owns_request_begin_provider_and_settlement() -> None:
     store = _Store(_owner())
     provider = _Provider()
-    tokens = iter(("work-token", "outbox-token", "primary-token"))
+    primary_authority = _LeaseGate()
+    tokens = iter(("work-token", "outbox-token"))
     delivery = OwnedEmailNotification(
         store=store,
         provider=provider,
+        primary_authority=primary_authority,
         token_factory=lambda: next(tokens),
     )
 
@@ -211,6 +233,7 @@ def test_deliver_owns_request_begin_provider_and_settlement() -> None:
         "outbox-token",
         "primary-token",
     )
+    assert primary_authority.calls == 3
 
 
 def test_deliver_fails_closed_before_request_when_owner_is_legacy() -> None:
@@ -224,9 +247,61 @@ def test_deliver_fails_closed_before_request_when_owner_is_legacy() -> None:
         OwnedEmailNotification(
             store=store,
             provider=provider,
+            primary_authority=_LeaseGate(),
         ).deliver(_command())
 
     assert store.calls == [("read_owner", None)]
+    assert provider.calls == []
+
+
+def test_deliver_fails_closed_before_request_when_keepalive_is_closed() -> None:
+    store = _Store(_owner())
+    provider = _Provider()
+
+    class ClosedGate:
+        def current_lease(self) -> PrimaryLease:
+            raise RuntimeError("host keepalive is demoted")
+
+    with pytest.raises(RuntimeError, match="keepalive is demoted"):
+        OwnedEmailNotification(
+            store=store,
+            provider=provider,
+            primary_authority=ClosedGate(),
+        ).deliver(_command())
+
+    assert store.calls == []
+    assert provider.calls == []
+
+
+def test_deliver_fails_closed_before_provider_when_keepalive_is_replaced() -> None:
+    store = _Store(_owner())
+    provider = _Provider()
+    primary_authority = _LeaseGate()
+    original = primary_authority.lease
+
+    def begin_with_replaced_lease(*args, **kwargs):
+        attempt = _Store.begin(store, *args, **kwargs)
+        primary_authority.lease = PrimaryLease(
+            **{
+                **original.__dict__,
+                "epoch": original.epoch + 1,
+                "fencing_token": "replacement-token",
+            }
+        )
+        return attempt
+
+    store.begin = begin_with_replaced_lease  # type: ignore[method-assign]
+
+    with pytest.raises(
+        NotificationOwnershipLost,
+        match="lease was replaced",
+    ):
+        OwnedEmailNotification(
+            store=store,
+            provider=provider,
+            primary_authority=primary_authority,
+        ).deliver(_command())
+
     assert provider.calls == []
 
 

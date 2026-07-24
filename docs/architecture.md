@@ -305,10 +305,17 @@
 > identity。正常 renew 只延長 expiry，不會被誤判成換主；demote、錯誤 authority key
 > 或 epoch／token replacement 都在 provider 前 fail closed。Email notification 與
 > publisher article sync 兩個現有 provider family 共用此深模組 seam；相鄰 authority／
-> Effect Delivery／PG17 契約共 88 passed。Production `email.ops_alert` 的
-> `OwnedEmailNotification` 仍由 ownership RPC 自行 acquire family-specific lease，
-> 尚未改成 revalidate host-held keepalive lease，因此不得把這個 generic worker
-> checkpoint 宣稱為全 effect-family enable gate 完成。
+> Effect Delivery／PG17 契約共 88 passed。Production `email.ops_alert` 後續也接到
+> 同一 host keepalive contract：正式 caller 先啟動 family keepalive，request、begin
+> 與 provider 前重驗同一 epoch／token；begin RPC 不再自行 acquire，settlement 也不再
+> 越權 release，而由 keepalive stop 持有唯一 release lifecycle。Remote migration
+> `20260724131707 operations_core_owned_email_keepalive_gate` 已套用；function owner、
+> fixed search path、service-role-only ACL、owner=`operations_core/4`、零 live lease
+> 與零 live attempt均已回讀。PG17 contract另證明無 host lease時 begin transaction
+> 整體 rollback，settlement 後 lease仍存續到 host release。這完成
+> `email.ops_alert` family gate；其他 effect family與真實雙 Mac network partition、
+> Supabase outage、五分鐘 RTO rehearsal仍未完成，所以 program commit 34 整體保持
+> `contained`。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

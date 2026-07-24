@@ -176,6 +176,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724160000_operations_core_primary_authority_rpc.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724131707_operations_core_owned_email_keepalive_gate.sql",
 )
 
 
@@ -3924,6 +3928,41 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
         ).fetchone()[0]
         assert replayed_request == owned_request
 
+        with pytest.raises(
+            psycopg.errors.NoDataFound,
+            match="query returned no rows",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_begin_owned_email_notification(
+                  %s, %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    2,
+                    owned_request["effect_id"],
+                    "effect-worker:pg17",
+                    300,
+                    work_token,
+                    outbox_token,
+                    primary_token,
+                ),
+            )
+
+        primary_lease = connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                "notification:email.ops_alert",
+                "effect-worker:pg17",
+                300,
+                primary_token,
+            ),
+        ).fetchone()[0]
+
         attempt = connection.execute(
             """
             SELECT public.volpred_begin_owned_email_notification(
@@ -3998,6 +4037,35 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
         assert receipt["work_status"] == "succeeded"
         assert receipt["effect_status"] == "delivered"
         assert receipt["disposition"] == "delivered"
+
+        connection.execute("RESET ROLE")
+        held_after_settlement = connection.execute(
+            """
+            SELECT holder_ref, epoch
+            FROM volpred_ops.primary_authority_lease_reads
+            WHERE authority_key = 'notification:email.ops_alert'
+            """
+        ).fetchone()
+        assert held_after_settlement == (
+            "effect-worker:pg17",
+            primary_lease["epoch"],
+        )
+        connection.execute("SET ROLE service_role")
+
+        released = connection.execute(
+            """
+            SELECT public.volpred_release_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                "notification:email.ops_alert",
+                "effect-worker:pg17",
+                primary_lease["epoch"],
+                primary_token,
+            ),
+        ).fetchone()[0]
+        assert released["epoch"] == primary_lease["epoch"]
 
         rollback = connection.execute(
             """

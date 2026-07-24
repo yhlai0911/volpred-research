@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（generic effect-worker keepalive gate）**
+Last updated: **2026-07-24（owned email production keepalive gate）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -396,6 +396,22 @@ Delivery／PG17 相鄰套件共 88 passed，這個 generic worker 局部根因�
 `root_cause_fixed_and_verified`。但 production `email.ops_alert` ownership RPC 仍會
 自行 acquire family-specific lease，尚未 revalidate host keepalive lease；因此全
 effect-family enable gate與 program commit 34 umbrella 繼續是 `contained`。
+同日下一個 production slice 把 `OwnedEmailNotification` 接到 canonical host
+keepalive。Caller不再製造 Primary Authority token，而是在 request、begin 與 provider
+前重驗 `notification:email.ops_alert` 的同一 holder／epoch／token；錯誤 family、
+closed gate、lease replacement或 RPC 回傳不同 authority identity都在 SMTP 前
+fail closed。Forward migration把 begin RPC從「自行 acquire」改為只接受既有且未過期
+的 host lease，settlement也不再 release，release lifecycle唯一歸 keepalive stop。
+PG17 clean／idempotent／non-superuser migration與 transaction contract通過：無預持
+lease時 begin全 transaction rollback，settlement後 lease仍由 host持有，最後 explicit
+release成功。Production migration
+`20260724131707 operations_core_owned_email_keepalive_gate` 已套用；live回讀確認
+兩個 RPC仍為 `volpred_ops_definer`／fixed empty search path／service-role-only，
+begin self-acquire=false、settle release=false、owner=`operations_core/4`、current
+lease holder=null、live attempt=0。此 family gate局部根因為
+`root_cause_fixed_and_verified`；其他 effect family、真實雙 Mac network partition、
+Supabase outage與五分鐘 RTO rehearsal仍未完成，因此 program commit 34 umbrella
+保持 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

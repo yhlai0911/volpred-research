@@ -609,6 +609,9 @@ def _dispatch_alert_email(
         OwnedEmailNotification,
         SupabaseOwnedEmailStore,
     )
+    from volpred.ops.authority import (
+        build_supabase_host_authority_keepalive,
+    )
 
     ownership_store = SupabaseOwnedEmailStore.from_environment()
     owner = ownership_store.read_owner()
@@ -618,23 +621,34 @@ def _dispatch_alert_email(
         )
     notifier = EmailNotifier(storage_dir=storage_dir)
     if owner.owner == "operations_core":
-        receipt = OwnedEmailNotification(
-            store=ownership_store,
-            provider=EmailNotificationEffectAdapter(
-                notifier=notifier,
-                sent_mail_reader=ImapSentMailReader.from_environment(),
-            ),
-        ).deliver(
-            OwnedEmailCommand(
-                idempotency_key=delivery_key,
-                level=level,
-                title=subject,
-                recipient=recipient,
-                text_body=text_body,
-                html_body=html_body,
-                actor_ref=f"ops-alert:{_alert_key(level, title)}",
-            )
+        worker_id = "effect-worker:ops-alert-email"
+        keepalive = build_supabase_host_authority_keepalive(
+            authority_key="notification:email.ops_alert",
+            holder_ref=worker_id,
         )
+        keepalive.start()
+        try:
+            receipt = OwnedEmailNotification(
+                store=ownership_store,
+                provider=EmailNotificationEffectAdapter(
+                    notifier=notifier,
+                    sent_mail_reader=ImapSentMailReader.from_environment(),
+                ),
+                primary_authority=keepalive,
+                worker_id=worker_id,
+            ).deliver(
+                OwnedEmailCommand(
+                    idempotency_key=delivery_key,
+                    level=level,
+                    title=subject,
+                    recipient=recipient,
+                    text_body=text_body,
+                    html_body=html_body,
+                    actor_ref=f"ops-alert:{_alert_key(level, title)}",
+                )
+            )
+        finally:
+            keepalive.stop()
         return {
             "notification_id": receipt.effect_id,
             "subject": subject,
