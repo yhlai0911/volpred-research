@@ -46,6 +46,7 @@ class CommitActuation:
     content_hashes: tuple[ContentHash, ...]
     message: str
     actor: str
+    workspace_ref: str | None = None
 
 
 @dataclass(frozen=True)
@@ -184,6 +185,8 @@ class GitCommitActuator:
             argv.extend(
                 ["--expected-content-hash", f"{item.path}={item.sha256}"]
             )
+        if normalized.workspace_ref is not None:
+            argv.extend(["--source-workspace", normalized.workspace_ref])
         argv.extend(["--", *normalized.exact_paths])
 
         try:
@@ -402,6 +405,16 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
     actor = _required_text(command.actor, field="commit actor")
     if not actor.startswith("commit-worker:"):
         raise ValueError("commit actor must use the commit-worker identity")
+    workspace_ref: str | None = None
+    if command.workspace_ref is not None:
+        workspace = Path(command.workspace_ref).expanduser()
+        if not workspace.is_absolute():
+            raise ValueError("commit actuator workspace_ref must be an absolute path")
+        workspace_ref = str(workspace.resolve())
+        if workspace_ref == str(repository):
+            raise ValueError(
+                "commit actuator workspace_ref must not be the canonical repository"
+            )
 
     return CommitActuation(
         proposal_sha256=command.proposal_sha256,
@@ -415,6 +428,7 @@ def _normalize_command(command: CommitActuation) -> CommitActuation:
         content_hashes=tuple(hashes[path] for path in paths),
         message=_required_text(command.message, field="commit message"),
         actor=actor,
+        workspace_ref=workspace_ref,
     )
 
 

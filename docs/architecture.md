@@ -138,9 +138,16 @@
 >
 > 以上 migrations 均未部署 live；2026-07-24 唯讀 catalog 回讀 proposal／grant／
 > settlement tables/functions 皆不存在。Lost-return crash window 已由 exact Git
-> read-back recovery 在 shadow interface 封閉；production workspace materialization、
-> formal caller、ownership cutover 與 rollback rehearsal仍未完成，因此不改變目前
-> Git ownership。
+> read-back recovery 在 shadow interface 封閉。
+>
+> **Candidate workspace materialization follow-up（2026-07-24，shadow）**
+> `ChangeDelivery.land()` 將 proposal 的 linked `workspace_ref` 傳給 canonical Git
+> writer；writer 在同一把 common-dir lease 內重驗 source HEAD／clean index／完整
+> dirty set／content hashes，再 materialize、stage、commit 與回讀 commit object。
+> Canonical exact paths 若不是 base bytes 或可驗證的 candidate residue便拒絕；一般
+> 失敗會還原原 bytes，kill 後 exact residue可冪等續作。這封閉 production
+> materializer 的 overwrite／rollback seam，但 formal caller、live migration、
+> ownership cutover 與正式 rollback rehearsal仍未完成，因此不改變目前 Git ownership。
 
 > **Effect Delivery durable outbox contract（2026-07-24，shadow）**
 > `volpred.ops.delivery.EffectDelivery` 已提供 immutable `request`／`inspect` seam。

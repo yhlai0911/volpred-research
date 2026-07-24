@@ -16,8 +16,10 @@ import hashlib
 import importlib.util
 import os
 import re
+import stat
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -44,6 +46,7 @@ run_locked = _OWNER.run_locked
 git_writer_lock_path = _OWNER.git_writer_lock_path
 git_common_dir = _OWNER.git_common_dir
 require_canonical_main_checkout = _OWNER.require_canonical_main_checkout
+is_registered_linked_worktree = _OWNER.is_registered_linked_worktree
 _inherited_lease = _OWNER._inherited_lease
 
 EX_TEMPFAIL = 75
@@ -142,6 +145,220 @@ def _expected_content_hashes(
     return expected
 
 
+def _source_workspace(raw: str | None) -> Path | None:
+    if raw is None:
+        return None
+    source = Path(raw).expanduser()
+    if not source.is_absolute():
+        raise ValueError("source-workspace must be an absolute path")
+    return source.resolve()
+
+
+def _workspace_dirty_paths(workspace: Path) -> tuple[str, ...]:
+    status = subprocess.run(
+        _git(
+            "-c",
+            "core.quotepath=false",
+            "status",
+            "--porcelain=v1",
+            "-z",
+            "--untracked-files=all",
+        ),
+        cwd=workspace,
+        capture_output=True,
+        check=False,
+    )
+    if status.returncode != 0:
+        raise ValueError("cannot inspect source-workspace Git status")
+    entries = status.stdout.decode("utf-8", errors="surrogateescape").split("\0")
+    dirty: list[str] = []
+    index = 0
+    while index < len(entries):
+        entry = entries[index]
+        index += 1
+        if not entry:
+            continue
+        if len(entry) < 4 or entry[2] != " ":
+            raise ValueError("source-workspace returned an invalid Git status entry")
+        state = entry[:2]
+        path = entry[3:]
+        if "R" in state or "C" in state:
+            if index < len(entries):
+                index += 1
+            raise ValueError("source-workspace rename/copy materialization is unsupported")
+        if state[0] not in {" ", "?"}:
+            raise ValueError("source-workspace index must be clean")
+        if "D" in state:
+            raise ValueError("source-workspace deletion materialization is unsupported")
+        normalized = _normalize_paths(workspace, [path])
+        if len(normalized) != 1:
+            raise ValueError("source-workspace dirty path is not one exact file")
+        dirty.append(normalized[0])
+    if len(dirty) != len(set(dirty)):
+        raise ValueError("source-workspace reported duplicate dirty paths")
+    return tuple(sorted(dirty))
+
+
+def _git_blob(repo: Path, revision: str, path: str) -> bytes | None:
+    blob = subprocess.run(
+        _git("show", f"{revision}:{path}"),
+        cwd=repo,
+        capture_output=True,
+        check=False,
+    )
+    if blob.returncode == 0:
+        return blob.stdout
+    missing = subprocess.run(
+        _git("cat-file", "-e", f"{revision}:{path}"),
+        cwd=repo,
+        capture_output=True,
+        check=False,
+    )
+    if missing.returncode != 0:
+        return None
+    raise ValueError(f"cannot read canonical base blob: {path}")
+
+
+def _replace_file(path: Path, payload: bytes, mode: int) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, raw_temp = tempfile.mkstemp(
+        prefix=f".{path.name}.change-delivery-",
+        dir=path.parent,
+    )
+    temp = Path(raw_temp)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(temp, mode)
+        os.replace(temp, path)
+    finally:
+        try:
+            temp.unlink()
+        except FileNotFoundError:  # silent-ok: os.replace consumed the temp on success.
+            pass
+
+
+def _restore_materialized_paths(
+    repo: Path,
+    originals: dict[str, tuple[bool, bytes, int]],
+) -> None:
+    for path, (existed, payload, mode) in originals.items():
+        target = repo / path
+        if existed:
+            _replace_file(target, payload, mode)
+        else:
+            try:
+                target.unlink()
+            except FileNotFoundError:  # silent-ok: absent is the exact pre-materialization state being restored.
+                pass
+
+
+def _materialize_candidate_workspace(
+    *,
+    repo: Path,
+    source: Path,
+    expected_head: str | None,
+    paths: list[str],
+    expected_content_hashes: dict[str, str],
+) -> dict[str, tuple[bool, bytes, int]]:
+    """Copy one immutable candidate into main while the Git writer lease is held.
+
+    Validation happens before the first destination write. Exact candidate
+    residue left by a killed prior attempt is accepted, making the operation
+    safely restartable; unrelated destination bytes fail closed.
+    """
+    if expected_head is None:
+        raise ValueError("source-workspace materialization requires expected-head")
+    if set(expected_content_hashes) != set(paths):
+        raise ValueError(
+            "source-workspace materialization requires a content hash for every path"
+        )
+    if not is_registered_linked_worktree(repo, source):
+        raise ValueError(
+            "source-workspace must be a registered non-main linked worktree"
+        )
+    source_head = subprocess.run(
+        _git("rev-parse", "--verify", "HEAD^{commit}"),
+        cwd=source,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if source_head.returncode != 0 or source_head.stdout.strip() != expected_head:
+        raise ValueError("source-workspace HEAD differs from expected-head")
+    if _workspace_dirty_paths(source) != tuple(sorted(paths)):
+        raise ValueError(
+            "source-workspace dirty paths differ from the complete commit scope"
+        )
+
+    candidates: dict[str, tuple[bytes, int]] = {}
+    originals: dict[str, tuple[bool, bytes, int]] = {}
+    for path in paths:
+        candidate = source / path
+        if candidate.is_symlink():
+            raise ValueError(f"source-workspace path may not be a symlink: {path}")
+        try:
+            candidate_stat = candidate.stat()
+        except OSError as exc:
+            raise ValueError(f"cannot inspect source-workspace path {path}: {exc}") from exc
+        if not stat.S_ISREG(candidate_stat.st_mode):
+            raise ValueError(f"source-workspace path is not a regular file: {path}")
+        try:
+            payload = candidate.read_bytes()
+        except OSError as exc:
+            raise ValueError(f"cannot read source-workspace path {path}: {exc}") from exc
+        observed_hash = hashlib.sha256(payload).hexdigest()
+        if observed_hash != expected_content_hashes[path]:
+            raise ValueError(
+                f"source content hash drift for {path}: expected "
+                f"{expected_content_hashes[path]}, observed {observed_hash}"
+            )
+        candidates[path] = (payload, stat.S_IMODE(candidate_stat.st_mode))
+
+        target = repo / path
+        if target.is_symlink():
+            raise ValueError(f"canonical target may not be a symlink: {path}")
+        if target.exists():
+            try:
+                target_stat = target.stat()
+                current = target.read_bytes()
+            except OSError as exc:
+                raise ValueError(f"cannot inspect canonical target {path}: {exc}") from exc
+            if not stat.S_ISREG(target_stat.st_mode):
+                raise ValueError(f"canonical target is not a regular file: {path}")
+            base = _git_blob(repo, expected_head, path)
+            if current not in {payload, base}:
+                raise ValueError(
+                    f"canonical target has foreign working bytes: {path}"
+                )
+            originals[path] = (
+                True,
+                current,
+                stat.S_IMODE(target_stat.st_mode),
+            )
+        else:
+            if _git_blob(repo, expected_head, path) is not None:
+                raise ValueError(
+                    f"canonical target has an unowned deletion: {path}"
+                )
+            originals[path] = (False, b"", 0)
+
+    # Catch source residue added while candidate files were being read.
+    if _workspace_dirty_paths(source) != tuple(sorted(paths)):
+        raise ValueError("source-workspace changed during materialization preflight")
+
+    try:
+        for path in paths:
+            payload, mode = candidates[path]
+            _replace_file(repo / path, payload, mode)
+    except BaseException:
+        _restore_materialized_paths(repo, originals)
+        raise
+    return originals
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     command = _strip_separator(args.command)
     if not command:
@@ -160,6 +377,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 def cmd_commit(args: argparse.Namespace) -> int:
     repo = _repo(args.repo)
     expected_head = _expected_head(args.expected_head)
+    source_workspace = _source_workspace(args.source_workspace)
     paths = _normalize_paths(repo, _strip_separator(args.paths))
     expected_content_hashes = _expected_content_hashes(
         repo,
@@ -232,7 +450,16 @@ def cmd_commit(args: argparse.Namespace) -> int:
 
         index_touched = False
         committed = False
+        materialized_originals: dict[str, tuple[bool, bytes, int]] | None = None
         try:
+            if source_workspace is not None:
+                materialized_originals = _materialize_candidate_workspace(
+                    repo=repo,
+                    source=source_workspace,
+                    expected_head=expected_head,
+                    paths=paths,
+                    expected_content_hashes=expected_content_hashes,
+                )
             index_touched = True
             add = subprocess.run(
                 _git("add", "-A", "--", *paths), cwd=repo, **popen
@@ -323,6 +550,8 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     cwd=repo,
                     **popen,
                 )
+            if materialized_originals is not None and not committed:
+                _restore_materialized_paths(repo, materialized_originals)
 
 
 def cmd_validate_inherited(args: argparse.Namespace) -> int:
@@ -371,6 +600,13 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "optional staged-blob assertion; when present, one value is "
             "required for every exact commit path"
+        ),
+    )
+    commit.add_argument(
+        "--source-workspace",
+        help=(
+            "registered linked worktree whose exact candidate files are copied "
+            "and committed inside the same canonical Git-writer lease"
         ),
     )
     message = commit.add_mutually_exclusive_group(required=True)

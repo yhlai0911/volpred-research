@@ -40,10 +40,10 @@
     ],
     "started_at": "2026-07-23T12:40:40.901626+00:00",
     "resolution_state": "contained",
-    "containment_evidence": "Durable ChangeSet proposal/actuation/receipt store implemented; cross-process restart resumes settlement without a second actuator call; 68 scoped tests including PG17 non-superuser/RLS; production catalog confirms migrations are not deployed",
-    "next_direct_step": "Close the Git-commit-to-actuation-checkpoint crash window with exact repository read-back recovery, then add production candidate-workspace materialization before any Git ownership cutover",
+    "containment_evidence": "Candidate workspace materialization now runs source revalidation, exact-path copy, stage/hash fence, commit and object read-back under one canonical writer lease; source drift, foreign target bytes and hook rollback are covered; 72 scoped tests passed and canonical-writer audit reports 0 violations",
+    "next_direct_step": "Wire the formal Work Coordinator caller to durable ChangeSetStore, Postgres commit authority and settlement in a non-live end-to-end shadow path; then rehearse migration deployment and ownership rollback before any Git cutover",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Change Delivery durable lifecycle checkpoint: immutable proposal plus token-redacted commit_unsettled state and final receipt linkage survive process restart; raw lease tokens absent; live remains unchanged"
+    "latest_checkpoint": "Change Delivery candidate workspace materializer: registered linked worktree to canonical checkout is content-bound, fail-closed on foreign bytes, rollback-safe on ordinary failure and restartable from exact candidate residue; live ownership unchanged"
   }
 ]

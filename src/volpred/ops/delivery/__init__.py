@@ -245,6 +245,7 @@ class ChangeDelivery:
                         content_hashes=change_set.content_hashes,
                         message=normalized.message,
                         actor=normalized.actor,
+                        workspace_ref=change_set.workspace_ref,
                     )
                 )
                 actuation = _validate_actuation_receipt(

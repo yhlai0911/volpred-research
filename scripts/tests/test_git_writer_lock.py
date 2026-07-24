@@ -517,6 +517,202 @@ def test_exact_path_commit_expected_content_hash_lands_verified_blob(
     assert hashlib.sha256(committed_blob).hexdigest() == sha256
 
 
+def test_exact_path_commit_materializes_registered_workspace_under_same_lease(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    linked = tmp_path / "candidate"
+    _run(
+        repo,
+        "git",
+        "worktree",
+        "add",
+        "-qb",
+        "candidate-materialization",
+        str(linked),
+        expected_head,
+    )
+    tracked_payload = b"candidate seed\n"
+    new_payload = b"candidate new\n"
+    (linked / "seed.txt").write_bytes(tracked_payload)
+    (linked / "new.txt").write_bytes(new_payload)
+
+    committed = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "change-delivery-materializer",
+        "--expected-head",
+        expected_head,
+        "--source-workspace",
+        str(linked),
+        "--expected-content-hash",
+        f"seed.txt={hashlib.sha256(tracked_payload).hexdigest()}",
+        "--expected-content-hash",
+        f"new.txt={hashlib.sha256(new_payload).hexdigest()}",
+        "--message",
+        "materialize exact candidate",
+        "--",
+        "new.txt",
+        "seed.txt",
+    )
+
+    assert committed.returncode == 0, committed.stderr
+    assert (repo / "seed.txt").read_bytes() == tracked_payload
+    assert (repo / "new.txt").read_bytes() == new_payload
+    assert _run(repo, "git", "rev-parse", "HEAD^").stdout.strip() == expected_head
+    assert (
+        _run(repo, "git", "show", "--format=", "--name-only", "HEAD").stdout.splitlines()
+        == ["new.txt", "seed.txt"]
+    )
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+
+
+def test_workspace_materialization_rejects_source_drift_without_touching_main(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    linked = tmp_path / "candidate"
+    _run(
+        repo,
+        "git",
+        "worktree",
+        "add",
+        "-qb",
+        "candidate-source-drift",
+        str(linked),
+        expected_head,
+    )
+    (linked / "seed.txt").write_text("candidate\n")
+    expected_hash = hashlib.sha256(b"earlier candidate\n").hexdigest()
+    before_status = _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "change-delivery-materializer",
+        "--expected-head",
+        expected_head,
+        "--source-workspace",
+        str(linked),
+        "--expected-content-hash",
+        f"seed.txt={expected_hash}",
+        "--message",
+        "must not materialize drift",
+        "--",
+        "seed.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "source content hash drift" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == before_status
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+
+
+def test_workspace_materialization_preserves_foreign_target_bytes(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    linked = tmp_path / "candidate"
+    _run(
+        repo,
+        "git",
+        "worktree",
+        "add",
+        "-qb",
+        "candidate-target-conflict",
+        str(linked),
+        expected_head,
+    )
+    candidate = b"candidate\n"
+    (linked / "seed.txt").write_bytes(candidate)
+    (repo / "seed.txt").write_text("foreign in-flight edit\n")
+    before_status = _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "change-delivery-materializer",
+        "--expected-head",
+        expected_head,
+        "--source-workspace",
+        str(linked),
+        "--expected-content-hash",
+        f"seed.txt={hashlib.sha256(candidate).hexdigest()}",
+        "--message",
+        "must not overwrite foreign bytes",
+        "--",
+        "seed.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "canonical target has foreign working bytes" in blocked.stderr
+    assert (repo / "seed.txt").read_text() == "foreign in-flight edit\n"
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == before_status
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+
+
+def test_workspace_materialization_restores_main_when_commit_hook_fails(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    linked = tmp_path / "candidate"
+    _run(
+        repo,
+        "git",
+        "worktree",
+        "add",
+        "-qb",
+        "candidate-hook-failure",
+        str(linked),
+        expected_head,
+    )
+    candidate = b"candidate\n"
+    (linked / "seed.txt").write_bytes(candidate)
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
+    before = (repo / "seed.txt").read_bytes()
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "change-delivery-materializer",
+        "--expected-head",
+        expected_head,
+        "--source-workspace",
+        str(linked),
+        "--expected-content-hash",
+        f"seed.txt={hashlib.sha256(candidate).hexdigest()}",
+        "--message",
+        "hook must reject",
+        "--",
+        "seed.txt",
+    )
+
+    assert blocked.returncode == 1
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert (repo / "seed.txt").read_bytes() == before
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+    assert _run(repo, "git", "status", "--porcelain=v1", "-uall").stdout == ""
+
+
 def test_exact_path_commit_content_hash_drift_fails_and_restores_index(
     tmp_path: Path,
 ) -> None:

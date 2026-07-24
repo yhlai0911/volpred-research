@@ -1487,3 +1487,32 @@ commit。Change Delivery／Git actuator scoped suite 37 passed。此 lost-return
 shadow interface 為 **root_cause_fixed_and_verified**；production workspace
 materializer、formal caller、live migrations、ownership cutover 與 rollback rehearsal
 尚未完成，所以 Change Delivery 整體仍為 **`contained`**。
+
+### 2026-07-24 — ChangeSet 已驗證但 canonical checkout 沒有 production materializer
+
+**症狀與根因層級**：`propose()` 只驗證 linked worktree，`GitCommitActuator` 卻假設
+candidate bytes 已在 canonical checkout。公開 lost-return regression 修正前必須由
+test 手動 `read_bytes()/write_bytes()` 搬兩個檔案才可落地；正式 caller 若照 interface
+直接 `land()`，writer 讀到的是 base／其他作者 bytes。若另在 writer lease 外先 copy，
+則會留下 overwrite race、commit 失敗殘留與 source drift window。這是 Change
+Delivery workspace→writer transaction boundary 缺口，不是多一個 copy helper 可解。
+
+**底層修復**：`ChangeDelivery.land()` 將 immutable proposal 的 `workspace_ref` 傳入
+private actuator。Canonical `git_writer_lock.py commit --source-workspace` 在同一把
+common-dir lease 內要求 registered non-main linked worktree，重驗 exact HEAD、clean
+index、完整 dirty set 與每個 content hash，完成 atomic-file materialization、stage、
+staged-blob fence、commit 與 object read-back。Canonical target 只可為 base bytes 或
+前次 kill 留下的 exact candidate residue；foreign bytes、symlink 與 unowned deletion
+均在覆寫前拒絕。一般 hook／commit failure 會 reset index 並還原 preimage；kill residue
+則在重跑時以 proposal content hash 收斂，不需猜 producer。
+
+**回歸、回讀與狀態界線**：四個新 writer cases 分別證明完整 materialization、
+source drift 零 main mutation、foreign target bytes 保留，以及 pre-commit hook failure
+還原；原 lost-return process case 已移除手動 copy，直接走正式 seam並驗證 canonical
+bytes。Git writer／Change Delivery／actuator scoped suite 72 passed；canonical writer
+audit 回讀 107 個 owner mutations，結果為 0 unguarded、0 owner mismatch、0 routing
+violation。Direct-mode status 再回讀仍只含 owner-preserved control row。此
+materializer overwrite／rollback 根因已達
+**`root_cause_fixed_and_verified`**；formal Work Coordinator caller、live migrations、
+Git ownership cutover 與 rollback rehearsal 尚未完成，因此整體 task 仍只能標
+**`contained`**。

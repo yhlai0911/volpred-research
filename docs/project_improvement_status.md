@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-24（publisher single-article sync shadow checkpoint）**
+Last updated: **2026-07-24（Change Delivery candidate workspace materializer）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -274,9 +274,18 @@ commit，且 parent、完整 message、exact paths、全部 blob SHA-256 必須�
 authority-bound command，才以 Git committer 的 timezone-aware timestamp 重建 receipt。
 任何 lookalike／stale commit 均 fail closed 且不再呼叫 writer。跨 process regression
 證明 commit 後立即遺失 return 時，restart 能 recovery → checkpoint → settlement，
-且不產生第二筆 Git commit；scoped suite 37 passed。Workspace materializer、formal
-caller、live migration、ownership cutover 與 rollback rehearsal仍缺，所以 Change
-Delivery 整體維持 `contained`。
+且不產生第二筆 Git commit；scoped suite 37 passed。
+
+同日下一個 bounded slice 完成 candidate workspace→canonical checkout 的 production
+materializer seam。`ChangeDelivery.land()` 直接沿用 proposal 的 linked worktree；
+canonical writer 在單一 common-dir lease 內重驗 source HEAD、clean index、完整 dirty
+path set 與 content hashes，才 materialize、stage、commit 並回讀 object。Canonical
+target 有 foreign bytes／symlink／unowned deletion 時在覆寫前拒絕；hook／commit failure
+會還原原 exact-path bytes，process kill 留下的 exact candidate residue則可冪等續作。
+Git writer／Change Delivery／actuator scoped suite 72 passed，canonical writer audit
+0 violations。Materializer overwrite／rollback seam 為
+`root_cause_fixed_and_verified`；formal caller、live migrations、Git ownership
+cutover 與正式 rollback rehearsal仍缺，所以 Change Delivery 整體維持 `contained`。
 
 這是 umbrella program，不另建 ops 進度帳；下方
 `docs/refactor_plan_ops_master_2026_07.md` 在交易式 operations core 接管完成前，仍是

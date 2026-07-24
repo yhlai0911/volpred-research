@@ -460,6 +460,7 @@ def test_land_orchestrates_actuation_and_durable_settlement(
         content_hashes=proposed.content_hashes,
         message="[change-delivery] land changeset-1",
         actor="commit-worker:test",
+        workspace_ref=proposed.workspace_ref,
     )
     assert len(settlement.commands) == 1
 
@@ -534,8 +535,6 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
     workspace: tuple[Path, Path, str],
 ) -> None:
     repo, linked, base_commit = workspace
-    (repo / "tracked.txt").write_bytes((linked / "tracked.txt").read_bytes())
-    (repo / "new.txt").write_bytes((linked / "new.txt").read_bytes())
     store = InMemoryChangeSetStore()
     settlement = _Settlement()
     first_git_actuator = GitCommitActuator(
@@ -578,6 +577,8 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
     assert restarted_process.inspect(proposed.id).status == "landed"
     assert lost_return.calls == 1
     assert _git(repo, "rev-list", "--count", f"{base_commit}..HEAD") == "1"
+    assert (repo / "tracked.txt").read_bytes() == (linked / "tracked.txt").read_bytes()
+    assert (repo / "new.txt").read_bytes() == (linked / "new.txt").read_bytes()
 
 
 def test_land_rejects_command_drift_after_external_commit(

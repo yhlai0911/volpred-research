@@ -294,6 +294,28 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   或完成 ownership cutover／rollback rehearsal；Change Delivery 整體仍為
   `contained`。
 
+### 2026-07-24 candidate workspace materialization checkpoint
+
+- `ChangeDelivery.land()` 現在把 immutable proposal 的 `workspace_ref` 傳入 private
+  `GitCommitActuator`；actuator 仍先取得完整 WorkLease／Primary Authority grant，只有
+  真正需要寫 Git 時才把 linked worktree 交給 canonical writer。Lost-return recovery
+  找到既有 commit 時不要求 ephemeral workspace 仍存在。
+- `git_writer_lock.py commit --source-workspace` 將 source revalidation、exact-path
+  materialization、stage、staged-blob hash fence、commit 與 commit-object read-back
+  放在同一把 common-dir writer lease。Source 必須是同 repo 的 registered non-main
+  worktree，HEAD、clean index、完整 dirty-path set 與每個 content hash 都須匹配
+  proposal；source path 只負責搬運，write identity 仍由 proposal SHA、base、path 與
+  content hash 綁定。
+- Canonical target 只接受 base bytes 或前次遭 kill 留下的 exact candidate bytes；
+  symlink、缺失 tracked file 或任何外來 working bytes 都在覆寫前 fail closed。一般
+  commit／hook 失敗會 reset 本次 index 並原子還原 materialization 前的 exact-path
+  bytes；kill 後重跑則可從 exact candidate residue 冪等續作。
+- Git writer、Change Delivery 與 actuator scoped suite 共 72 tests 通過，canonical
+  writer audit 為 0 unguarded／0 owner mismatch／0 routing violation。此 materializer
+  seam 的 overwrite／rollback 缺口為 `root_cause_fixed_and_verified`；formal Work
+  Coordinator caller、live migrations、Git ownership cutover 與 rollback rehearsal
+  仍未完成，所以 Change Delivery 整體維持 `contained`。
+
 ## 6. Effect Delivery
 
 ### 6.1 Seam
