@@ -80,6 +80,7 @@ from .owned_publisher_delete import (
     SupabaseOwnedPublisherDeleteStore,
     SupabasePublisherArticleDeleteApprovalVerifier,
     SupabasePublisherArticleDeleteProjection,
+    SupabasePublisherArticleDeleteRestoreProjection,
     SupabasePublisherDeleteProviderFactory,
 )
 from .owned_publisher_article import (
@@ -847,6 +848,7 @@ __all__ = [
     "SupabaseOwnedPublisherReconcileStore",
     "SupabasePublisherArticleDeleteApprovalVerifier",
     "SupabasePublisherArticleDeleteProjection",
+    "SupabasePublisherArticleDeleteRestoreProjection",
     "SupabasePublisherDeleteProviderFactory",
     "encode_publisher_article_reconcile_payload",
     "encode_publisher_article_sync_payload",

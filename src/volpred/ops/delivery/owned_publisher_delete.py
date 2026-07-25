@@ -759,43 +759,9 @@ class SupabasePublisherArticleDeleteProjection:
         self,
         expected_candidate: Mapping[str, object],
     ) -> PublisherArticleDeleteCandidateReadback:
-        article = _mapping(
-            expected_candidate.get("article"),
-            field="publisher delete expected article",
-        )
-        article_id = _required_text(
-            article.get("id"),
-            field="publisher delete expected article id",
-        )
-        response = _mapping(
-            self._client.call(
-                "volpred_read_publisher_article_delete_candidate",
-                {"p_article_id": article_id},
-            ),
-            field="publisher delete candidate read-back",
-        )
-        candidate = response.get("candidate")
-        if candidate is not None:
-            candidate = dict(
-                _mapping(
-                    candidate,
-                    field="publisher delete candidate",
-                )
-            )
-        return PublisherArticleDeleteCandidateReadback(
-            article_id=_required_text(
-                response.get("article_id"),
-                field="publisher delete read-back article_id",
-            ),
-            candidate=candidate,
-            evidence_ref=_required_text(
-                response.get("evidence_ref"),
-                field="publisher delete candidate evidence_ref",
-            ),
-            evidence_sha256=_sha256(
-                response.get("evidence_sha256"),
-                field="publisher delete candidate evidence hash",
-            ),
+        return _read_publisher_article_delete_candidate(
+            self._client,
+            expected_candidate,
         )
 
     def delete(self, expected_candidate: Mapping[str, object]) -> bool:
@@ -832,6 +798,86 @@ class SupabasePublisherArticleDeleteProjection:
         if not isinstance(deleted, bool):
             raise RuntimeError("publisher compare-delete deleted must be boolean")
         return deleted
+
+
+class SupabasePublisherArticleDeleteRestoreProjection:
+    """Service-role-only atomic projection for one exact recovery batch."""
+
+    def __init__(
+        self,
+        *,
+        client: ServiceRoleRpcClient,
+    ) -> None:
+        self._client = client
+
+    @classmethod
+    def from_environment(
+        cls,
+    ) -> SupabasePublisherArticleDeleteRestoreProjection:
+        values = runtime_environment()
+        return cls(
+            client=ServiceRoleRpcClient(
+                supabase_url=values.get("SUPABASE_URL", ""),
+                service_role_key=values.get(
+                    "SUPABASE_SERVICE_ROLE_KEY",
+                    "",
+                ),
+                timeout_seconds=float(
+                    values.get(
+                        "VOLPRED_OPERATIONS_RPC_TIMEOUT_SEC",
+                        "45",
+                    )
+                ),
+            )
+        )
+
+    def readback(
+        self,
+        expected_candidate: Mapping[str, object],
+    ) -> PublisherArticleDeleteCandidateReadback:
+        return _read_publisher_article_delete_candidate(
+            self._client,
+            expected_candidate,
+        )
+
+    def restore_batch(
+        self,
+        expected_candidates: tuple[Mapping[str, object], ...],
+    ) -> bool:
+        if not expected_candidates:
+            raise ValueError("publisher delete restore batch must not be empty")
+        candidates = [dict(candidate) for candidate in expected_candidates]
+        response = _mapping(
+            self._client.call(
+                "volpred_restore_publisher_article_delete_batch",
+                {"p_expected_candidates": candidates},
+            ),
+            field="publisher delete restore response",
+        )
+        if (
+            response.get("schema_version")
+            != "publisher-article-delete-restore-batch.v1"
+        ):
+            raise RuntimeError(
+                "publisher delete restore response schema drifted"
+            )
+        candidate_count = response.get("candidate_count")
+        restored_count = response.get("restored_count")
+        restored = response.get("restored")
+        if (
+            isinstance(candidate_count, bool)
+            or not isinstance(candidate_count, int)
+            or candidate_count != len(candidates)
+            or isinstance(restored_count, bool)
+            or not isinstance(restored_count, int)
+            or restored_count < 0
+            or restored_count > candidate_count
+            or restored is not True
+        ):
+            raise RuntimeError(
+                "publisher delete restore response identity drifted"
+            )
+        return True
 
 
 class SupabasePublisherDeleteProviderFactory:
@@ -899,6 +945,50 @@ def _authorization_payload(
         "approved_at": authorization.approved_at,
         "scope_sha256": authorization.scope_sha256,
     }
+
+
+def _read_publisher_article_delete_candidate(
+    client: ServiceRoleRpcClient,
+    expected_candidate: Mapping[str, object],
+) -> PublisherArticleDeleteCandidateReadback:
+    article = _mapping(
+        expected_candidate.get("article"),
+        field="publisher delete expected article",
+    )
+    article_id = _required_text(
+        article.get("id"),
+        field="publisher delete expected article id",
+    )
+    response = _mapping(
+        client.call(
+            "volpred_read_publisher_article_delete_candidate",
+            {"p_article_id": article_id},
+        ),
+        field="publisher delete candidate read-back",
+    )
+    candidate = response.get("candidate")
+    if candidate is not None:
+        candidate = dict(
+            _mapping(
+                candidate,
+                field="publisher delete candidate",
+            )
+        )
+    return PublisherArticleDeleteCandidateReadback(
+        article_id=_required_text(
+            response.get("article_id"),
+            field="publisher delete read-back article_id",
+        ),
+        candidate=candidate,
+        evidence_ref=_required_text(
+            response.get("evidence_ref"),
+            field="publisher delete candidate evidence_ref",
+        ),
+        evidence_sha256=_sha256(
+            response.get("evidence_sha256"),
+            field="publisher delete candidate evidence hash",
+        ),
+    )
 
 
 def _authorization_from_payload(
@@ -1212,6 +1302,7 @@ __all__ = [
     "PublisherArticleDeleteOwnershipLost",
     "SupabasePublisherArticleDeleteApprovalVerifier",
     "SupabasePublisherArticleDeleteProjection",
+    "SupabasePublisherArticleDeleteRestoreProjection",
     "SupabasePublisherDeleteProviderFactory",
     "SupabaseOwnedPublisherDeleteStore",
 ]

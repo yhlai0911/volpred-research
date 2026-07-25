@@ -1581,3 +1581,21 @@ Failure injections與相鄰publisher suites共157 passed；本輪沒有remote mu
 execution-contract切片為`root_cause_fixed_and_verified`。整體仍是`contained`：
 production service-role atomic restore projection、manual-only live
 delete→restore→convergence rehearsal及physical two-Mac receipt pair仍待完成。
+
+## 2026-07-25 — Program commit 15 production atomic restore projection checkpoint
+
+Exact restore已接上production service-role adapter與單一PostgreSQL batch RPC。
+RPC先驗七條live cascade edges與完整table row shape，再鎖全批parent／child scope；
+只接受absent或exact，依articles→六張child tables順序恢復，雙向relation去重，最後
+逐candidate exact read-back。任一中途例外由同一transaction全批rollback；exact
+replay回`restored_count=0`且零write。
+
+隔離PG17 migration重套與failure injections **6 passed**，包含nullable child
+binding與mid-batch rollback。Production migrations `20260725020432`及forward-only
+NULL-safe wrapper `20260725020935`已套用；live回讀確認no-login definer、空search
+path、service-role-only wrapper EXECUTE、internal v1不對service role開放、14個RLS
+policies及七edge catalog一致，advisors無新增本function告警。本輪未執行production
+article delete／restore。此projection slice為
+`root_cause_fixed_and_verified`；整體仍是`contained`，下一步是manual-only live
+synthetic delete→restore→feed convergence rehearsal，另須physical two-Mac receipt
+pair。

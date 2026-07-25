@@ -1623,3 +1623,32 @@ Contract與相鄰publisher suites共157 passed；本切片沒有production RPC�
 injections，之後才可執行manual-only live delete→restore→convergence rehearsal。
 因此exact restore execution contract為`root_cause_fixed_and_verified`，program commit
 15與operations-core umbrella仍為`contained`。
+
+## 17. Publisher destructive delete production restore projection（2026-07-25）
+
+`SupabasePublisherArticleDeleteRestoreProjection`是restore executor唯一production
+adapter：read-back沿用完整candidate RPC；mutation只呼叫一次
+`volpred_restore_publisher_article_delete_batch(jsonb)`，並fail-close驗證schema、
+candidate count、restore count與boolean acknowledgement。Runtime只從
+`SUPABASE_SERVICE_ROLE_KEY`建立client，不存在publishable-key fallback。
+
+Database RPC在同一transaction內依序完成：
+
+1. 回讀live FK catalog，必須精確等於六張cascade tables／七條edges；
+2. 驗每個article與child JSON可完整round-trip至目前table row type，且child仍綁定
+   candidate article；
+3. 鎖住全批既存parent／child rows，再對每個candidate只接受absent或exact；
+4. 先插入全部missing articles，再插入六張child tables；跨兩個candidate重複出現的
+   relation以`(source_id,target_id)`去重；
+5. 逐candidate重新呼叫private complete read model，任何不等即raise並回滾全批。
+
+Public wrapper由no-login definer持有、`SECURITY DEFINER`、空search path，只有
+service role能EXECUTE；definer只有SELECT／INSERT／row-lock所需UPDATE privileges及
+對應RLS policies，migration結束後沒有public schema CREATE。隔離PG17以真constraint
+與trigger注入驗證scope drift零write、中途失敗全批rollback、nullable child binding、
+dual-edge relation與read-only replay，共6案通過。首版migration
+`20260725020432`後以forward-only `20260725020935`補上SQL NULL-safe wrapper；舊v1
+僅no-login owner可執行。Production owner、ACL、14個RLS policies與七edge catalog已
+回讀。此slice為
+`root_cause_fixed_and_verified`；umbrella仍為`contained`，下一步是manual-only live
+synthetic delete→restore→feed convergence rehearsal。

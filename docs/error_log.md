@@ -2454,3 +2454,37 @@ safe reconcile、Effect Delivery與Supabase相鄰套件共 **157 passed**，comp
 本execution contract checkpoint為 **`root_cause_fixed_and_verified`**；production
 service-role atomic restore projection與manual-only live delete→restore→convergence
 rehearsal仍缺，故program commit 15與operations-core umbrella維持 **`contained`**。
+
+### 2026-07-25 — Exact restore contract存在，但production仍沒有原子restore projection
+
+**證據化症狀與根因層級**：`PublisherArticleDeleteRestoreExecutor`已把recovery hash、
+canonical JSONL、全批absent／exact preflight與typed post-readback釘死，但production
+只有read-candidate與compare-delete RPC，`restore_batch`仍只存在Protocol與test fake。
+若operator直接逐表INSERT，article成功而任一child失敗會留下partial restore；
+`article_relations`同時連到兩個待恢復article時也可能重複INSERT或違反FK順序。根因是
+database transaction projection缺失，不是recovery bytes、executor或live FK catalog。
+
+**底層重構**：新增`SupabasePublisherArticleDeleteRestoreProjection`與唯一
+`volpred_restore_publisher_article_delete_batch(jsonb)` RPC。RPC由no-login
+`volpred_ops_definer`持有、`SECURITY DEFINER`且空search path，只授權service role
+EXECUTE；PUBLIC／anon／authenticated均撤權。Transaction先驗production七條cascade
+edge、逐row round-trip table shape與article binding，再鎖全批parent／child rows；
+所有candidate只准absent或exact，任何漂移都在首筆INSERT前拒絕。真正restore先一次
+插入全部articles，再依序插六張child tables；雙向relation用PK identity去重。任一
+constraint／trigger／readback例外由同一transaction全批rollback；全批已存在的replay
+回`restored_count=0`且不寫。
+
+**回歸、live回讀與狀態界線**：隔離PG17把兩份migration各重套兩次，failure injections
+**6 passed**，涵蓋六表exact restore、read-only replay、雙edge relation去重、scope
+drift全批零write、nullable child脫離candidate必拒，以及article／前三張child已INSERT
+後在article_tags觸發例外仍全批rollback。首版production migration
+`20260725020432`套用後，failure injection再抓到SQL三值邏輯
+`NULL <> expected = UNKNOWN`；依forward-only原則保留原migration，另以
+`20260725020935` wrapper使用`IS DISTINCT FROM`防守六表binding，舊v1撤掉service-role
+EXECUTE只留no-login owner內呼叫。Catalog回讀確認function owner、空search path、
+service-role-only ACL、14個INSERT／UPDATE RLS policies、七條cascade contract及
+no-login definer無public CREATE均正確；Supabase security／performance advisors沒有
+新增此function告警。沒有執行production article restore或delete。
+本production atomic projection slice為 **`root_cause_fixed_and_verified`**；manual-only
+live synthetic delete→restore→feed convergence rehearsal與physical two-Mac authority
+receipt pair仍缺，故operations-core umbrella維持 **`contained`**。

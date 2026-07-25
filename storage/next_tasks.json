@@ -44,6 +44,6 @@
     "next_direct_step": "Run the manual-only live synthetic delete -> restore -> feed convergence rehearsal while recording owner transfer and rollback generations; do not grant destructive authority to the unattended hourly safe job. Separately collect the two-physical-Mac authority receipt pair for program commit 34.",
     "last_released_at": "2026-07-23T14:50:05.946118+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "latest_checkpoint": "Production restore now uses one service-role-only SECURITY DEFINER RPC owned by the no-login definer with an empty search path, exact seven-edge cascade validation, all-batch absent/exact preflight, parent-plus-six-child atomic inserts, exact post-readback, and read-only replay. Isolated PG17 failure injections pass 5/5 including scope drift and mid-batch rollback; production migration 20260725020432 and ACL/RLS/catalog readback are clean. No production article mutation ran."
+    "latest_checkpoint": "Production restore now uses a service-role-only NULL-safe wrapper over the no-login definer atomic core: exact seven-edge cascade validation, six-table binding, all-batch absent/exact preflight, parent-plus-six-child atomic inserts, exact post-readback, and read-only replay. Isolated PG17 failure injections pass 6/6 including nullable-child drift, scope drift, and mid-batch rollback. Production migrations 20260725020432 and forward-only fix 20260725020935 are live; wrapper ACL/RLS/catalog readback is clean, internal v1 is not service-role executable, and no production article mutation ran."
   }
 ]

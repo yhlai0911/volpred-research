@@ -26,6 +26,7 @@ from volpred.ops.delivery import (
     SupabaseOwnedPublisherDeleteStore,
     SupabasePublisherArticleDeleteApprovalVerifier,
     SupabasePublisherArticleDeleteProjection,
+    SupabasePublisherArticleDeleteRestoreProjection,
     plan_publisher_article_delete,
     prepare_publisher_article_delete,
 )
@@ -397,6 +398,79 @@ def test_projection_compare_delete_sends_attempt_and_approval_identity():
     )
 
 
+def test_restore_projection_sends_one_exact_batch_and_reuses_readback():
+    candidate = _candidate()
+    client = _RpcClient(
+        {
+            "volpred_read_publisher_article_delete_candidate": {
+                "article_id": candidate["article"]["id"],
+                "candidate": candidate,
+                "evidence_ref": "supabase:publisher-delete-candidate:owned-1",
+                "evidence_sha256": "1" * 64,
+            },
+            "volpred_restore_publisher_article_delete_batch": {
+                "schema_version": (
+                    "publisher-article-delete-restore-batch.v1"
+                ),
+                "candidate_count": 1,
+                "restored_count": 1,
+                "restored": True,
+            },
+        }
+    )
+    projection = SupabasePublisherArticleDeleteRestoreProjection(
+        client=client,
+    )
+
+    assert projection.readback(candidate).candidate == candidate
+    assert projection.restore_batch((candidate,)) is True
+    assert client.calls[-1] == (
+        "volpred_restore_publisher_article_delete_batch",
+        {"p_expected_candidates": [candidate]},
+    )
+
+
+@pytest.mark.parametrize(
+    "response",
+    [
+        {
+            "schema_version": "publisher-article-delete-restore-batch.v0",
+            "candidate_count": 1,
+            "restored_count": 1,
+            "restored": True,
+        },
+        {
+            "schema_version": "publisher-article-delete-restore-batch.v1",
+            "candidate_count": 2,
+            "restored_count": 1,
+            "restored": True,
+        },
+        {
+            "schema_version": "publisher-article-delete-restore-batch.v1",
+            "candidate_count": 1,
+            "restored_count": 2,
+            "restored": True,
+        },
+        {
+            "schema_version": "publisher-article-delete-restore-batch.v1",
+            "candidate_count": 1,
+            "restored_count": 1,
+            "restored": False,
+        },
+    ],
+)
+def test_restore_projection_fails_closed_on_rpc_receipt_drift(response):
+    candidate = _candidate()
+    client = _RpcClient(
+        {"volpred_restore_publisher_article_delete_batch": response}
+    )
+
+    with pytest.raises(RuntimeError, match="restore response"):
+        SupabasePublisherArticleDeleteRestoreProjection(
+            client=client,
+        ).restore_batch((candidate,))
+
+
 def test_approval_verifier_requires_typed_durable_readback():
     prepared = _prepared()
     response = _approval_response()
@@ -462,6 +536,52 @@ def test_approval_record_fix_qualifies_column_and_preserves_definer_owner():
     assert "WHERE approval_ref = btrim(approval_ref)" not in sql
     assert "SET ROLE volpred_ops_definer" in sql
     assert "REVOKE CREATE ON SCHEMA public FROM volpred_ops_definer" in sql
+
+
+def test_restore_migration_is_atomic_exact_and_service_role_only():
+    sql = Path(
+        "supabase/migrations/"
+        "20260725015352_operations_core_publisher_delete_restore.sql"
+    ).read_text()
+
+    required = (
+        "volpred_restore_publisher_article_delete_batch",
+        "volpred_read_article_delete_dependency_contract",
+        "volpred_ops.read_publisher_article_delete_candidate",
+        "FOR UPDATE",
+        "jsonb_populate_record",
+        "jsonb_populate_recordset",
+        "INSERT INTO public.articles",
+        "INSERT INTO public.article_impressions",
+        "INSERT INTO public.article_reactions",
+        "INSERT INTO public.article_relations",
+        "INSERT INTO public.article_tags",
+        "INSERT INTO public.comments",
+        "INSERT INTO public.question_articles",
+        "REVOKE ALL ON FUNCTION",
+        "FROM PUBLIC, anon, authenticated, service_role",
+        "TO service_role",
+        "SET search_path = ''",
+    )
+    assert all(fragment in sql for fragment in required)
+    assert "GRANT SELECT, INSERT, UPDATE ON" in sql
+    assert "GRANT INSERT ON" not in sql.split("TO service_role")[-1]
+
+
+def test_restore_null_binding_fix_is_forward_only_and_hides_v1():
+    sql = Path(
+        "supabase/migrations/"
+        "20260725020832_fix_publisher_delete_restore_null_binding.sql"
+    ).read_text()
+
+    assert "IS DISTINCT FROM target_article_id" in sql
+    assert (
+        "volpred_restore_publisher_article_delete_batch_v1(jsonb)"
+        in sql
+    )
+    assert "FROM PUBLIC, anon, authenticated, service_role" in sql
+    assert "SET search_path = ''" in sql
+    assert "TO service_role" in sql
 
 
 def test_payload_hash_is_preserved_across_json_text_transport():
