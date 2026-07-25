@@ -1,11 +1,11 @@
 # Feed Index
 
-_Last built: 2026-07-24 06:01 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-25 00:05 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
 - Total articles: **1877**  (with thumbnail: 86)
-- Last 30 days: **237**
+- Last 30 days: **235**
 - Total chars (content): 5,816,527
 
 **Status**: published=1673, archived=124, unpublished=66, retracted=13, wont_fix=1
@@ -14,7 +14,7 @@ _Last built: 2026-07-24 06:01 UTC — source: `storage/reports/feed.json` (do NO
 
 **Category**: milestone=913, general=842, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (237)
+## 最近 30 天 (235)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
@@ -253,13 +253,13 @@ _Last built: 2026-07-24 06:01 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-06-25 | `mile_f314fcb3` | 週頻也救不了 Return 預測 — 514 週測試後，5 個模型全敗給歷史平均 | research | milestone | published | 3056 |  | 研究, SPY, return-predictability, weekly, OOS, null-result |
 | 2026-06-25 | `mile_b3ff7f9e` | K434: BMA 沒有贏過最佳單一模型 — BIC 加權退化為單模型選擇的機制分析 | research | milestone | published | 5510 |  | 研究, BMA, GARCH, EGARCH, SPY, 波動率預測 |
 | 2026-06-25 | `mile_bdd3b732` | 尾部風控不是預言明天：低波動、厚尾與風險模型的煞車距離 | general | general | published | 2977 |  | 一般讀者, 精選導讀, 風險管理, VaR, 尾部風險, 模型比較 |
-| 2026-06-25 | `mile_57a86c37` | 每日策略建議：VIX 18.63（正常）— 2026-06-25 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
-| 2026-06-25 | `mile_61f6e2b6` | 2026-06-25 本日持倉比率建議（依據 2026-06-24 收盤數據） | daily | milestone | published | 1047 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 
-<details><summary>## 2026-Q2 (968)</summary>
+<details><summary>## 2026-Q2 (970)</summary>
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-06-25 | `mile_57a86c37` | 每日策略建議：VIX 18.63（正常）— 2026-06-25 | daily | general | published | 1649 | Y | 每日建議, VIX, 策略配置 |
+| 2026-06-25 | `mile_61f6e2b6` | 2026-06-25 本日持倉比率建議（依據 2026-06-24 收盤數據） | daily | milestone | published | 1047 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-06-24 | `mile_1597b341` | 分散投資的幻覺：你以為無關的資產，其實偷偷牽動著你整個組合 | general | general | published | 5815 |  | 一般讀者, 精選導讀, 跨資產, 相關性, 分散投資, 風險管理 |
 | 2026-06-24 | `mile_f3e389cf` | 隔夜波動率：學術上很重要，實戰裡很尷尬 | general | general | unpublished | 3956 |  | 一般讀者, 精選導讀, 隔夜波動率, SPY, 台指期, PRG模型 |
 | 2026-06-24 | `mile_366ef29b` | 每日策略建議：VIX 19.49（正常）— 2026-06-24 | daily | general | published | 1708 | Y | 每日建議, VIX, 策略配置 |
