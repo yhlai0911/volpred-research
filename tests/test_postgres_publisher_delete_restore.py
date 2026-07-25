@@ -52,6 +52,7 @@ DELETE_REQUEST_DEPENDENCIES = tuple(
         "20260725002427_operations_core_publisher_delete_ownership.sql",
         "20260725004020_fix_publisher_delete_approval_record_ambiguity.sql",
         "20260725202655_promote_publisher_delete_scope_approval.sql",
+        "20260725205013_remove_owned_request_share_lock.sql",
     )
 )
 ARTICLE_ID = "11111111-1111-4111-8111-111111111111"
@@ -522,8 +523,29 @@ def test_owned_delete_request_promotes_scope_approval_into_work_approval(
             """,
             (request["work_id"],),
         ).fetchone()
+        connection.execute("SET ROLE volpred_ops_definer")
+        visible_request = connection.execute(
+            """
+            SELECT effect_id
+            FROM volpred_ops.owned_notification_requests
+            WHERE effect_id = %s
+            """,
+            (request["effect_id"],),
+        ).fetchone()
+        locked_request = connection.execute(
+            """
+            SELECT effect_id
+            FROM volpred_ops.owned_notification_requests
+            WHERE effect_id = %s
+            FOR SHARE
+            """,
+            (request["effect_id"],),
+        ).fetchone()
+        connection.execute("RESET ROLE")
 
     assert work == ("approved", "pending", 2)
+    assert visible_request == (request["effect_id"],)
+    assert locked_request is None
 
 
 def _article(article_id: str, slug: str) -> dict:

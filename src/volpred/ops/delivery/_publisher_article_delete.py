@@ -17,6 +17,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Callable, Protocol
 
+from volpred.ops.diagnostics import warn
+
 from ._effect import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
@@ -294,7 +296,12 @@ class PublisherArticleDeleteEffectAdapter:
                 authorize_mutation()
             try:
                 deleted = self._projection.delete(candidate)
-            except Exception:  # noqa: BLE001 - provider failures are evidence.
+            except Exception as error:  # noqa: BLE001 - provider boundary.
+                warn(
+                    "publisher-delete-provider",
+                    "compare-delete provider raised",
+                    error=error,
+                )
                 deleted = False
             if not deleted:
                 return _failure(

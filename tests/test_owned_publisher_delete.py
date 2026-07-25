@@ -312,7 +312,10 @@ class _RpcClient:
 
     def call(self, function: str, payload: dict):
         self.calls.append((function, payload))
-        return self.responses[function]
+        response = self.responses[function]
+        if isinstance(response, Exception):
+            raise response
+        return response
 
 
 def _approval_response(*, active: bool = True) -> dict:
@@ -373,8 +376,13 @@ def test_projection_compare_delete_sends_attempt_and_approval_identity():
                 "evidence_ref": "supabase:publisher-delete-candidate:owned-1",
                 "evidence_sha256": "1" * 64,
             },
-            "volpred_compare_delete_publisher_article": {
-                "deleted": True,
+            "volpred_execute_publisher_article_compare_delete": {
+                "schema_version": (
+                    "publisher-article-compare-delete-execution.v1"
+                ),
+                "ok": True,
+                "result": {"deleted": True},
+                "error": None,
             },
         }
     )
@@ -396,6 +404,62 @@ def test_projection_compare_delete_sends_attempt_and_approval_identity():
         payload["p_authorization"]["scope_sha256"]
         == prepared.scope_sha256
     )
+
+
+def test_projection_reports_read_only_preflight_when_compare_rpc_fails():
+    prepared = _prepared()
+    candidate = _candidate()
+    diagnostic = {
+        "schema_version": "publisher-article-compare-delete-diagnostic.v1",
+        "owner_match": True,
+        "request_match": True,
+        "attempt_match": False,
+        "effect_match": True,
+        "payload_match": True,
+        "approval_match": True,
+        "primary_lease_match": True,
+        "dependency_contract_match": True,
+        "candidate_exact": True,
+    }
+    client = _RpcClient(
+        {
+            "volpred_execute_publisher_article_compare_delete": {
+                "schema_version": (
+                    "publisher-article-compare-delete-execution.v1"
+                ),
+                "ok": False,
+                "result": None,
+                "error": {
+                    "sqlstate": "P0002",
+                    "message": "query returned no rows",
+                    "detail": None,
+                    "hint": None,
+                    "context": (
+                        "PL/pgSQL function "
+                        "volpred_compare_delete_publisher_article line 99"
+                    ),
+                },
+            },
+            "volpred_diagnose_publisher_article_compare_delete": diagnostic,
+        }
+    )
+    projection = SupabasePublisherArticleDeleteProjection(
+        client=client,
+        attempt=_attempt(prepared),
+        authorization=_authorization(prepared.scope_sha256),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match=r'preflight_failed_checks=\["attempt_match"\]',
+    ):
+        projection.delete(candidate)
+
+    assert [function for function, _ in client.calls] == [
+        "volpred_execute_publisher_article_compare_delete",
+        "volpred_diagnose_publisher_article_compare_delete",
+    ]
+    assert client.calls[0][1] == client.calls[1][1]
 
 
 def test_restore_projection_sends_one_exact_batch_and_reuses_readback():
@@ -520,6 +584,72 @@ def test_delete_migration_fences_every_destructive_boundary():
     assert all(fragment in sql for fragment in required)
     assert "publisher safe reconcile" not in sql
     assert "bigint, text, jsonb, text" not in sql
+
+
+def test_compare_delete_diagnostic_is_read_only_and_service_role_only():
+    sql = Path(
+        "supabase/migrations/"
+        "20260725204038_publisher_delete_compare_preflight_diagnostics.sql"
+    ).read_text()
+
+    required = (
+        "publisher-article-compare-delete-diagnostic.v1",
+        "'owner_match', EXISTS",
+        "'request_match', EXISTS",
+        "'attempt_match', EXISTS",
+        "'effect_match', EXISTS",
+        "'payload_match', EXISTS",
+        "'approval_match', EXISTS",
+        "'primary_lease_match', EXISTS",
+        "'dependency_contract_match'",
+        "'candidate_exact'",
+        "SECURITY DEFINER",
+        "SET search_path = ''",
+        "FROM PUBLIC, anon, authenticated",
+        "TO service_role",
+    )
+    assert all(fragment in sql for fragment in required)
+    assert "DELETE FROM" not in sql
+    assert "UPDATE " not in sql
+    assert "INSERT INTO" not in sql
+
+
+def test_compare_delete_execution_preserves_typed_exception_context():
+    sql = Path(
+        "supabase/migrations/"
+        "20260725204444_publisher_delete_compare_exception_context.sql"
+    ).read_text()
+
+    required = (
+        "publisher-article-compare-delete-execution.v1",
+        "volpred_compare_delete_publisher_article(",
+        "EXCEPTION WHEN OTHERS",
+        "GET STACKED DIAGNOSTICS",
+        "RETURNED_SQLSTATE",
+        "PG_EXCEPTION_CONTEXT",
+        "SECURITY DEFINER",
+        "SET search_path = ''",
+        "FROM PUBLIC, anon, authenticated",
+        "TO service_role",
+    )
+    assert all(fragment in sql for fragment in required)
+
+
+def test_compare_delete_does_not_lock_the_immutable_owned_request():
+    sql = Path(
+        "supabase/migrations/"
+        "20260725205013_remove_owned_request_share_lock.sql"
+    ).read_text()
+
+    request_read = (
+        "SELECT * INTO STRICT owned_request\n"
+        "  FROM volpred_ops.owned_notification_requests\n"
+        "  WHERE effect_id = btrim(p_effect_id)\n"
+        "    AND effect_family = ownership.effect_family\n"
+        "    AND owner_generation = ownership.generation;"
+    )
+    assert request_read in sql
+    assert request_read.replace(";", "\n  FOR SHARE;") not in sql
 
 
 def test_approval_record_fix_qualifies_column_and_preserves_definer_owner():

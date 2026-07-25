@@ -1676,8 +1676,14 @@ Interface把整個人工流程收斂成一個failure-closed transaction choreogr
    response遺失時，一律先重跑exact restore；即使restore失敗，owner rollback與
    approval revoke仍各自繼續嘗試，最後合併回報cleanup failure。
 
-Failure-injection與相鄰destructive publisher suites共56 passed；CLI help、compileall及
-diff check通過。本切片完成manual rehearsal的operator seam，但本輪沒有建立synthetic
-production row，也沒有執行live delete／restore。因此rehearsal capability為
-`root_cause_fixed_and_verified`，實際live receipt與physical two-Mac authority pair仍是
-umbrella升級前的evidence gate。
+Failure-injection完成後，production rehearsal `live-20260726-0503`也實際走完兩個
+獨立owned delete effects與中間atomic restore。首輪live evidence另外揭露兩個contract
+gap：destructive WorkItem必須由`required/awaiting_approval`經`approve_work`提升；
+append-only owned request不可使用同時要求UPDATE RLS visibility的`FOR SHARE`。目前
+projection以service-role-only preflight與typed exception context保留失敗位置，並在已
+鎖定owner generation後plain-read immutable request。
+
+Live receipt與DB readback一致：primary／cleanup effect皆`delivered`，restore為`1/1`，
+epoch 8／9 authority均release，synthetic row absent，final owner=`legacy/19`且approval
+inactive；standing convergence為零mismatch。Manual rehearsal evidence gate已
+`root_cause_fixed_and_verified`，umbrella升級前只剩physical two-Mac authority pair。

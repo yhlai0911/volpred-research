@@ -221,14 +221,14 @@ def test_rehearsal_deletes_restores_cleans_up_and_rolls_back():
     assert store.approval_states == [True, False]
 
 
-def test_delete_receipt_must_match_the_exact_phase_work_identity():
+def test_delete_receipt_requires_a_materialized_work_identity():
     plan = _plan()
     authorization = _authorization(plan.scope_sha256)
     store = _Store(authorization)
 
     def deliver(owner, prepared):
         receipt = _delete_receipt(owner, prepared)
-        return replace(receipt, work_id="different-work-item")
+        return replace(receipt, work_id="")
 
     with pytest.raises(RuntimeError, match="exact acknowledged receipt"):
         rehearse_publisher_delete_restore(

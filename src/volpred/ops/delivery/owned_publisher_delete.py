@@ -14,6 +14,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 import hashlib
 import json
+import re
 from typing import Any, Protocol
 from uuid import uuid4
 
@@ -766,32 +767,78 @@ class SupabasePublisherArticleDeleteProjection:
 
     def delete(self, expected_candidate: Mapping[str, object]) -> bool:
         attempt = self._attempt
-        response = _mapping(
-            self._client.call(
-                "volpred_compare_delete_publisher_article",
-                {
-                    "p_owner_generation": attempt.owner_generation,
-                    "p_effect_id": attempt.effect.id,
-                    "p_attempt_count": attempt.attempt_count,
-                    "p_worker_id": attempt.worker_id,
-                    "p_primary_authority_key": (
-                        attempt.primary_authority_key
-                    ),
-                    "p_primary_authority_holder_ref": (
-                        attempt.primary_authority_holder_ref
-                    ),
-                    "p_primary_authority_epoch": (
-                        attempt.primary_authority_epoch
-                    ),
-                    "p_primary_fencing_token": (
-                        attempt.primary_fencing_token
-                    ),
-                    "p_authorization": _authorization_payload(
-                        self._authorization
-                    ),
-                    "p_expected_candidate": dict(expected_candidate),
-                },
+        parameters = {
+            "p_owner_generation": attempt.owner_generation,
+            "p_effect_id": attempt.effect.id,
+            "p_attempt_count": attempt.attempt_count,
+            "p_worker_id": attempt.worker_id,
+            "p_primary_authority_key": attempt.primary_authority_key,
+            "p_primary_authority_holder_ref": (
+                attempt.primary_authority_holder_ref
             ),
+            "p_primary_authority_epoch": attempt.primary_authority_epoch,
+            "p_primary_fencing_token": attempt.primary_fencing_token,
+            "p_authorization": _authorization_payload(
+                self._authorization
+            ),
+            "p_expected_candidate": dict(expected_candidate),
+        }
+        try:
+            execution = _mapping(
+                self._client.call(
+                    "volpred_execute_publisher_article_compare_delete",
+                    parameters,
+                ),
+                field="publisher compare-delete execution",
+            )
+            if (
+                execution.get("schema_version")
+                != "publisher-article-compare-delete-execution.v1"
+                or not isinstance(execution.get("ok"), bool)
+            ):
+                raise RuntimeError(
+                    "publisher compare-delete execution envelope drifted"
+                )
+            if not execution["ok"]:
+                database_error = _mapping(
+                    execution.get("error"),
+                    field="publisher compare-delete database error",
+                )
+                context = str(database_error.get("context") or "")
+                location_match = re.search(
+                    r"line \d+(?: at [^\n]+)?",
+                    context,
+                )
+                location = (
+                    location_match.group(0)
+                    if location_match is not None
+                    else "no line context"
+                )
+                raise RuntimeError(
+                    "publisher compare-delete database error "
+                    f"{database_error.get('sqlstate')}: "
+                    f"{database_error.get('message')}; {location}"
+                )
+            raw_response = execution.get("result")
+        except Exception as error:
+            diagnostic = _mapping(
+                self._client.call(
+                    "volpred_diagnose_publisher_article_compare_delete",
+                    parameters,
+                ),
+                field="publisher compare-delete diagnostic",
+            )
+            failed_checks = sorted(
+                key
+                for key, value in diagnostic.items()
+                if key != "schema_version" and value is not True
+            )
+            raise RuntimeError(
+                f"{error}; preflight_failed_checks="
+                + json.dumps(failed_checks, separators=(",", ":"))
+            ) from error
+        response = _mapping(
+            raw_response,
             field="publisher compare-delete response",
         )
         deleted = response.get("deleted")

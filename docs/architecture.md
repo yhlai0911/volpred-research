@@ -766,6 +766,11 @@ artifact先落盤、scope-bound approval、generation-CAS owner、兩個獨立de
 退回`legacy`並撤銷approval。成功只能由standing
 `publisher-projection-convergence.v2`零mismatch receipt裁決。
 
-這個operator seam已由failure injection驗證，但尚未在本輪執行production synthetic
-delete→restore→cleanup，所以operations-core umbrella維持`contained`；仍需一張live
-rehearsal receipt與physical two-Mac Primary Authority receipt pair。
+Live rehearsal `live-20260726-0503`已在production完成
+delete→exact restore→cleanup delete。兩個獨立owned effects皆為`delivered`，
+restore receipt為`candidate_count=1/restored_count=1`，standing convergence
+為`converged`、`mismatch_total=0`、零observation error；最後synthetic row不存在、
+owner回到`legacy/19`且approval已撤銷。Canonical evidence為
+`storage/ops/publisher_delete_restore/live-20260726-0503_{recovery.jsonl,receipt.json}`。
+Operations-core umbrella仍維持`contained`，唯一剩餘evidence gate為physical
+two-Mac Primary Authority receipt pair。

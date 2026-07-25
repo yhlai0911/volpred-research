@@ -2513,3 +2513,39 @@ PostgreSQL restore suites共 **56 passed**，CLI help、compileall與`git diff -
 通過。本輪沒有pre-seed production synthetic row或執行live mutation，因此operator
 seam根因為 **`root_cause_fixed_and_verified`**，但actual live rehearsal evidence與
 physical two-Mac receipt pair仍缺，operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Live publisher delete rehearsal被WorkItem admission與RLS row lock連續擋下
+
+**證據化症狀**：首輪production synthetic rehearsal在建立destructive WorkItem時回報
+`invalid submitted work policy or initial state`；修正後，owned request／attempt／effect
+與Primary Authority都已落盤，但compare-delete連續回`P0002 query returned no rows`。
+每次失敗後都由rehearsal cleanup確認synthetic exact restore、owner回`legacy`及approval
+revoke，沒有以手補row或重寫receipt止血。
+
+**根因層級**：第一層是workflow contract——scope-bound delete approval沒有被提升成
+generic WorkItem的`required/awaiting_approval → approved/pending`狀態。第二層是database
+RLS／locking contract——append-only `owned_notification_requests`刻意只有SELECT／INSERT
+policy，但compare函式對它做`SELECT ... FOR SHARE`；PostgreSQL會把UPDATE policy也套到
+`SELECT FOR UPDATE/SHARE`，default-deny把已存在的request row過濾成零列。Live
+service-role-only preflight在同一lease內證明九項identity全為true，exception wrapper再
+把位置收斂到compare函式`line 47`的owned request locking read。
+
+**底層修復與制度化**：forward migrations
+`20260725202655_promote_publisher_delete_scope_approval.sql`先由正式
+`approve_work`完成WorkItem promotion；
+`20260725204038_publisher_delete_compare_preflight_diagnostics.sql`與
+`20260725204444_publisher_delete_compare_exception_context.sql`保留service-role-only、
+token不外洩的typed diagnostics；最後
+`20260725205013_remove_owned_request_share_lock.sql`在已鎖住owner generation後，對
+immutable request改用plain exact SELECT，不新增UPDATE policy、不放寬append-only
+invariant。Python projection會在database error時附上SQLSTATE／line及read-only
+failed-check集合，provider boundary不再靜默吞掉原始根因。
+
+**回歸與live回讀**：隔離PG17重現同一RLS差異（plain SELECT可見、`FOR SHARE`不可見）
+並驗證新函式；`live-20260726-0503`隨後完整完成primary delete、exact restore與不同
+effect的cleanup delete。DB回讀確認兩筆WorkItem皆`succeeded`、Effect與attempt皆
+`delivered`、Primary Authority epoch 8／9皆有release receipt、synthetic row absent、
+owner=`legacy/19`、approval inactive；standing convergence為`converged`且
+`mismatch_total=0`。本incident為 **`root_cause_fixed_and_verified`**；physical
+two-Mac authority receipt pair仍缺，所以operations-core umbrella維持
+**`contained`**。

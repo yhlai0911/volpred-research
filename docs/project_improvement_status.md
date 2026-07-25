@@ -1615,3 +1615,19 @@ cleanup response遺失、approval response遺失、restore unavailable及非synt
 拒絕；與相鄰destructive suites共 **56 passed**。本輪沒有remote mutation，所以
 operator seam為`root_cause_fixed_and_verified`，program commit 15仍等待實際live
 synthetic rehearsal receipt；operations-core umbrella另仍等待physical two-Mac pair。
+
+## 2026-07-26 — Program commit 15 live destructive rehearsal verified
+
+Production rehearsal `live-20260726-0503`已完整完成primary delete、atomic exact restore
+與獨立cleanup delete。過程先修正scope approval未提升為generic WorkItem approval，
+再以同一live lease的typed preflight與exception context定位
+`owned_notification_requests FOR SHARE`被RLS UPDATE default-deny過濾的根因；forward
+migration在owner generation已鎖定後改用plain immutable read，沒有替append-only table
+開UPDATE policy。
+
+Canonical receipt回讀：兩個WorkItem=`succeeded`、兩個Effect／attempt=`delivered`、
+restore=`1/1`、Primary Authority epoch 8／9皆已release、final owner=`legacy/19`、
+approval inactive、synthetic row absent，standing convergence=`converged`且
+`mismatch_total=0`。此live rehearsal incident為`root_cause_fixed_and_verified`；
+operations-core umbrella仍為`contained`，下一步只剩physical two-Mac authority
+receipt pair。

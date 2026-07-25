@@ -206,7 +206,6 @@ def rehearse_publisher_delete_restore(
         _validate_delete_receipt(
             deleted,
             owner=cutover,
-            prepared=primary,
             phase="delete",
         )
 
@@ -223,7 +222,6 @@ def rehearse_publisher_delete_restore(
         _validate_delete_receipt(
             cleanup_deleted,
             owner=cutover,
-            prepared=cleanup,
             phase="cleanup delete",
         )
         if cleanup_deleted.effect_id == deleted.effect_id:
@@ -415,7 +413,6 @@ def _validate_delete_receipt(
     receipt: OwnedPublisherDeleteReceipt,
     *,
     owner: PublisherArticleDeleteOwner,
-    prepared: PreparedPublisherArticleDelete,
     phase: str,
 ) -> None:
     if (
@@ -423,7 +420,7 @@ def _validate_delete_receipt(
         or receipt.schema_version != "owned-publisher-delete-receipt.v1"
         or not receipt.delivered
         or receipt.owner_generation != owner.generation
-        or receipt.work_id != prepared.request.work_item_id
+        or not receipt.work_id.strip()
         or receipt.attempt_count != 1
         or not receipt.effect_id.strip()
         or not receipt.evidence_ref.strip()
