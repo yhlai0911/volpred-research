@@ -1598,3 +1598,28 @@ owner／approval／projection slice 為
 `root_cause_fixed_and_verified`；exact restore executor、manual-only
 delete→rollback→convergence rehearsal及physical two-Mac authority receipts仍缺，
 所以 program commit 15 與 operations-core umbrella 維持 `contained`。
+
+## 16. Publisher destructive delete exact restore contract（2026-07-25）
+
+`PublisherArticleDeleteRestoreExecutor.restore()`是recovery artifact的唯一consumer
+interface。Request必須攜帶exact recovery bytes、SHA-256、artifact ref與requester；
+executor在任何provider call前重算hash、解析canonical JSONL並重新套用六張cascade
+table／七條edge identity contract。
+
+Projection seam刻意只有兩個能力：
+
+- `readback(expected_candidate)`回傳完整article與六表candidate或typed absence；
+- `restore_batch(expected_candidates)`必須在單一transaction內compare所有row目前為
+  absent或exact match，再恢復整批；不得暴露逐table CRUD給caller。
+
+Executor先完成全批preflight；任一既存row漂移都零mutation。確有缺row時mutation
+authorizer是required，並緊貼唯一`restore_batch`external boundary。Provider回true後
+仍須逐candidate exact read-back，receipt綁定recovery SHA、artifact、requester、完整
+evidence refs/hashes與實際restore count。已完全恢復的replay為read-only，不要求新的
+mutation authority。
+
+Contract與相鄰publisher suites共157 passed；本切片沒有production RPC或remote write。
+下一個切片是service-role-only atomic restore projection及其ACL／transaction failure
+injections，之後才可執行manual-only live delete→restore→convergence rehearsal。
+因此exact restore execution contract為`root_cause_fixed_and_verified`，program commit
+15與operations-core umbrella仍為`contained`。

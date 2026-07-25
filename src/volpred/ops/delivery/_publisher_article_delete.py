@@ -32,6 +32,7 @@ _RECOVERY_SCHEMA = "publisher-article-delete-recovery.v1"
 _EFFECT_KIND = "publisher.article.supabase.delete"
 _ACKNOWLEDGEMENT_KIND = "publisher.article.supabase.delete.readback"
 _TARGET_REF = "supabase:articles"
+_RESTORE_RECEIPT_SCHEMA = "publisher-article-delete-restore-receipt.v1"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS = (
     ("article_impressions", ("article_id",)),
@@ -102,6 +103,33 @@ class PublisherArticleDeleteCandidateReadback:
         return self.candidate is None
 
 
+@dataclass(frozen=True)
+class PublisherArticleDeleteRestoreRequest:
+    """One exact recovery artifact selected for manual rollback."""
+
+    recovery_dump: bytes
+    recovery_dump_sha256: str
+    recovery_artifact_ref: str
+    requester_ref: str
+
+
+@dataclass(frozen=True)
+class PublisherArticleDeleteRestoreReceipt:
+    """Typed proof that every recovery row was read back exactly."""
+
+    schema_version: str
+    recovery_dump_sha256: str
+    recovery_artifact_ref: str
+    candidate_count: int
+    restored_count: int
+    evidence_ref: str
+    evidence_sha256: str
+
+
+class PublisherArticleDeleteRestoreError(RuntimeError):
+    """Exact restore could not be proven without scope drift."""
+
+
 class _PublisherArticleDeleteApprovalVerifier(Protocol):
     def readback(
         self,
@@ -120,6 +148,20 @@ class _PublisherArticleDeleteProjection(Protocol):
         expected_candidate: Mapping[str, object],
     ) -> bool:
         """Atomically compare the complete expected candidate and delete it."""
+        ...
+
+
+class _PublisherArticleDeleteRestoreProjection(Protocol):
+    def readback(
+        self,
+        expected_candidate: Mapping[str, object],
+    ) -> PublisherArticleDeleteCandidateReadback: ...
+
+    def restore_batch(
+        self,
+        expected_candidates: tuple[Mapping[str, object], ...],
+    ) -> bool:
+        """Atomically compare absent/exact rows and restore the whole batch."""
         ...
 
 
@@ -326,6 +368,128 @@ class PublisherArticleDeleteEffectAdapter:
                 retryable=True,
             )
         return readback
+
+
+class PublisherArticleDeleteRestoreExecutor:
+    """Restore one canonical recovery dump through an atomic projection."""
+
+    def __init__(
+        self,
+        *,
+        projection: _PublisherArticleDeleteRestoreProjection,
+    ) -> None:
+        self._projection = projection
+
+    def restore(
+        self,
+        request: PublisherArticleDeleteRestoreRequest,
+        *,
+        authorize_mutation: Callable[[], None] | None = None,
+    ) -> PublisherArticleDeleteRestoreReceipt:
+        normalized = _normalize_restore_request(request)
+        candidates = _decode_recovery_dump(normalized.recovery_dump)
+        before = tuple(self._readback(candidate) for candidate in candidates)
+        missing_count = 0
+        for candidate, observed in zip(candidates, before, strict=True):
+            if observed.absent:
+                missing_count += 1
+                continue
+            if not self._matches(observed, candidate):
+                raise PublisherArticleDeleteRestoreError(
+                    "publisher delete restore scope drifted before mutation"
+                )
+
+        if missing_count:
+            if authorize_mutation is None:
+                raise PublisherArticleDeleteRestoreError(
+                    "publisher delete restore mutation authorization is required"
+                )
+            authorize_mutation()
+            try:
+                restored = self._projection.restore_batch(candidates)
+            except Exception as exc:  # noqa: BLE001 - provider evidence.
+                raise PublisherArticleDeleteRestoreError(
+                    "publisher delete restore provider failed"
+                ) from exc
+            if restored is not True:
+                raise PublisherArticleDeleteRestoreError(
+                    "publisher delete restore provider rejected exact batch"
+                )
+
+        after = tuple(self._readback(candidate) for candidate in candidates)
+        if any(
+            observed.absent or not self._matches(observed, candidate)
+            for candidate, observed in zip(candidates, after, strict=True)
+        ):
+            raise PublisherArticleDeleteRestoreError(
+                "publisher delete restore exact read-back failed"
+            )
+        evidence = _canonical_json(
+            {
+                "schema_version": _RESTORE_RECEIPT_SCHEMA,
+                "recovery_dump_sha256": normalized.recovery_dump_sha256,
+                "recovery_artifact_ref": normalized.recovery_artifact_ref,
+                "requester_ref": normalized.requester_ref,
+                "candidate_count": len(candidates),
+                "restored_count": missing_count,
+                "articles": [
+                    {
+                        "article_id": observed.article_id,
+                        "evidence_ref": observed.evidence_ref.strip(),
+                        "evidence_sha256": observed.evidence_sha256,
+                    }
+                    for observed in after
+                ],
+            }
+        )
+        return PublisherArticleDeleteRestoreReceipt(
+            schema_version=_RESTORE_RECEIPT_SCHEMA,
+            recovery_dump_sha256=normalized.recovery_dump_sha256,
+            recovery_artifact_ref=normalized.recovery_artifact_ref,
+            candidate_count=len(candidates),
+            restored_count=missing_count,
+            evidence_ref=(
+                "supabase:articles:restore:"
+                f"{normalized.recovery_dump_sha256}"
+            ),
+            evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        )
+
+    def _readback(
+        self,
+        expected_candidate: Mapping[str, object],
+    ) -> PublisherArticleDeleteCandidateReadback:
+        try:
+            observed = self._projection.readback(expected_candidate)
+        except Exception as exc:  # noqa: BLE001 - provider evidence.
+            raise PublisherArticleDeleteRestoreError(
+                "publisher delete restore read-back failed"
+            ) from exc
+        article_id = expected_candidate["article"]["id"]
+        if (
+            not isinstance(observed, PublisherArticleDeleteCandidateReadback)
+            or observed.article_id != article_id
+            or not _valid_evidence(
+                observed.evidence_ref,
+                observed.evidence_sha256,
+            )
+        ):
+            raise PublisherArticleDeleteRestoreError(
+                "publisher delete restore returned malformed read-back"
+            )
+        return observed
+
+    @staticmethod
+    def _matches(
+        observed: PublisherArticleDeleteCandidateReadback,
+        expected_candidate: Mapping[str, object],
+    ) -> bool:
+        try:
+            return _candidate_readback_matches(observed, expected_candidate)
+        except (TypeError, ValueError) as exc:
+            raise PublisherArticleDeleteRestoreError(
+                "publisher delete restore returned malformed candidate"
+            ) from exc
 
 
 def plan_publisher_article_delete(
@@ -593,6 +757,87 @@ def _validate_plan(plan: PublisherArticleDeletePlan) -> None:
         or recovery.get("sha256") != plan.recovery_dump_sha256
     ):
         raise ValueError("publisher delete plan metadata does not match its scope")
+
+
+def _normalize_restore_request(
+    request: PublisherArticleDeleteRestoreRequest,
+) -> PublisherArticleDeleteRestoreRequest:
+    if not isinstance(request, PublisherArticleDeleteRestoreRequest):
+        raise TypeError("publisher delete restore request is required")
+    if not isinstance(request.recovery_dump, bytes):
+        raise TypeError("publisher delete recovery dump must be bytes")
+    if (
+        not isinstance(request.recovery_dump_sha256, str)
+        or _SHA256.fullmatch(request.recovery_dump_sha256) is None
+    ):
+        raise ValueError(
+            "publisher delete recovery dump SHA-256 must be lowercase hex"
+        )
+    if (
+        hashlib.sha256(request.recovery_dump).hexdigest()
+        != request.recovery_dump_sha256
+    ):
+        raise ValueError(
+            "publisher delete recovery hash does not match its bytes"
+        )
+    return PublisherArticleDeleteRestoreRequest(
+        recovery_dump=request.recovery_dump,
+        recovery_dump_sha256=request.recovery_dump_sha256,
+        recovery_artifact_ref=_required_text(
+            request.recovery_artifact_ref,
+            field="publisher delete recovery_artifact_ref",
+        ),
+        requester_ref=_required_text(
+            request.requester_ref,
+            field="publisher delete restore requester_ref",
+        ),
+    )
+
+
+def _decode_recovery_dump(recovery_dump: bytes) -> tuple[dict, ...]:
+    if not recovery_dump or not recovery_dump.endswith(b"\n"):
+        raise ValueError(
+            "publisher delete recovery dump must be non-empty canonical JSONL"
+        )
+    decoded_candidates: list[dict] = []
+    for raw_line in recovery_dump.splitlines(keepends=True):
+        try:
+            row = json.loads(raw_line[:-1].decode("utf-8"))
+        except (UnicodeError, json.JSONDecodeError) as exc:
+            raise ValueError(
+                "publisher delete recovery dump contains invalid JSONL"
+            ) from exc
+        if (
+            not isinstance(row, Mapping)
+            or set(row) != {"schema_version", "article", "dependents"}
+            or row.get("schema_version") != _RECOVERY_SCHEMA
+        ):
+            raise ValueError(
+                "publisher delete recovery row fields do not match schema"
+            )
+        decoded_candidates.append(
+            {
+                "article": row["article"],
+                "dependents": row["dependents"],
+            }
+        )
+    normalized = _normalize_candidates(decoded_candidates)
+    canonical = b"".join(
+        _canonical_json(
+            {
+                "schema_version": _RECOVERY_SCHEMA,
+                "article": candidate["article"],
+                "dependents": candidate["dependents"],
+            }
+        )
+        + b"\n"
+        for candidate in normalized
+    )
+    if canonical != recovery_dump:
+        raise ValueError(
+            "publisher delete recovery dump is not canonical or ordered"
+        )
+    return normalized
 
 
 def _normalize_authorization(
@@ -880,6 +1125,10 @@ __all__ = [
     "PublisherArticleDeleteCandidateReadback",
     "PublisherArticleDeleteEffectAdapter",
     "PublisherArticleDeletePlan",
+    "PublisherArticleDeleteRestoreError",
+    "PublisherArticleDeleteRestoreExecutor",
+    "PublisherArticleDeleteRestoreReceipt",
+    "PublisherArticleDeleteRestoreRequest",
     "plan_publisher_article_delete",
     "prepare_publisher_article_delete",
 ]

@@ -2430,3 +2430,27 @@ reconcile、publisher sync與Supabase suites共
 **`root_cause_fixed_and_verified`**；exact restore executor、manual-only
 delete→rollback→convergence rehearsal及physical two-Mac receipts仍未完成，故program
 commit 15與operations-core umbrella維持 **`contained`**。
+
+### 2026-07-25 — Recovery JSONL存在但沒有可驗證的exact restore execution contract
+
+**證據化缺口與根因層級**：destructive delete已在任何mutation前保存完整article與
+六張cascade table，但consumer尚未定義如何拒絕hash漂移、如何處理部分已恢復的replay，
+以及如何證明整批restore後逐row bytes完全相同。若operator自行逐表INSERT，第二筆失敗
+會留下partial rollback，或已存在但漂移的row被靜默覆寫。根因是recovery artifact與
+provider之間缺少atomic transaction／typed read-back seam，不是dump capture或FK graph。
+
+**底層checkpoint**：新增`PublisherArticleDeleteRestoreExecutor`單一interface。Executor
+只接受SHA-256精確相符、canonical且slug排序的recovery JSONL；schema仍要求完整六表並
+沿用雙向`article_relations`identity gate。它先read-back全部candidate，只允許absent或
+exact match；任何scope drift全批零write。真正缺row時必須提供mutation authorizer，
+再委派一個「全批compare + restore」atomic projection；完成後逐candidate要求typed
+evidence與exact byte-equivalent read-back。全批已恢復的replay不取mutation authority，
+仍產生hash-bound receipt。
+
+**回歸與狀態界線**：failure injections覆蓋dump hash／canonical order、preflight drift、
+缺authority、authority loss、provider未落地及idempotent replay；delete、owned delete、
+safe reconcile、Effect Delivery與Supabase相鄰套件共 **157 passed**，compileall與
+`git diff --check`通過。沒有production RPC、remote write、owner transfer或live effect。
+本execution contract checkpoint為 **`root_cause_fixed_and_verified`**；production
+service-role atomic restore projection與manual-only live delete→restore→convergence
+rehearsal仍缺，故program commit 15與operations-core umbrella維持 **`contained`**。

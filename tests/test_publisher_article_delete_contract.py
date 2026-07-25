@@ -17,6 +17,9 @@ from volpred.ops.delivery import (
     PublisherArticleDeleteAuthorization,
     PublisherArticleDeleteCandidateReadback,
     PublisherArticleDeleteEffectAdapter,
+    PublisherArticleDeleteRestoreError,
+    PublisherArticleDeleteRestoreExecutor,
+    PublisherArticleDeleteRestoreRequest,
     plan_publisher_article_delete,
     prepare_publisher_article_delete,
 )
@@ -174,6 +177,72 @@ class _DeleteProjection:
         if self.delete_applies:
             self.rows[article_id] = None
         return True
+
+
+class _RestoreProjection:
+    def __init__(
+        self,
+        candidates: list[dict],
+        *,
+        present: bool = False,
+        restore_applies: bool = True,
+    ) -> None:
+        self.rows = {
+            candidate["article"]["id"]: (
+                json.loads(json.dumps(candidate)) if present else None
+            )
+            for candidate in candidates
+        }
+        self.restore_applies = restore_applies
+        self.events: list[str] = []
+        self.restore_calls = 0
+
+    def readback(
+        self,
+        expected_candidate: dict,
+    ) -> PublisherArticleDeleteCandidateReadback:
+        article_id = expected_candidate["article"]["id"]
+        self.events.append(f"read:{article_id}")
+        candidate = self.rows[article_id]
+        snapshot = (
+            None if candidate is None else json.loads(json.dumps(candidate))
+        )
+        evidence = json.dumps(
+            {"article_id": article_id, "candidate": snapshot},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+        return PublisherArticleDeleteCandidateReadback(
+            article_id=article_id,
+            candidate=snapshot,
+            evidence_ref=f"supabase:articles:{article_id}",
+            evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        )
+
+    def restore_batch(self, expected_candidates: tuple[dict, ...]) -> bool:
+        self.events.append("restore")
+        self.restore_calls += 1
+        if any(
+            self.rows[candidate["article"]["id"]] not in (None, candidate)
+            for candidate in expected_candidates
+        ):
+            return False
+        if self.restore_applies:
+            for candidate in expected_candidates:
+                self.rows[candidate["article"]["id"]] = json.loads(
+                    json.dumps(candidate)
+                )
+        return True
+
+
+def _restore_request(plan=None) -> PublisherArticleDeleteRestoreRequest:
+    actual_plan = plan or _plan()
+    return PublisherArticleDeleteRestoreRequest(
+        recovery_dump=actual_plan.recovery_dump,
+        recovery_dump_sha256=actual_plan.recovery_dump_sha256,
+        recovery_artifact_ref="artifact:publisher/delete/recovery.jsonl",
+        requester_ref="operator:publisher-delete-rollback",
+    )
 
 
 def test_plan_freezes_guards_scope_and_complete_recovery_rows() -> None:
@@ -529,3 +598,142 @@ def test_delete_adapter_fails_when_delete_lacks_absence_readback() -> None:
     assert isinstance(outcome, FailedEffect)
     assert outcome.reason_code == "publisher_article_delete_absence_mismatch"
     assert outcome.retryable is True
+
+
+def test_restore_executor_atomically_restores_and_reads_back_exact_dump() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates)
+    authority_calls: list[str] = []
+
+    receipt = PublisherArticleDeleteRestoreExecutor(
+        projection=projection,
+    ).restore(
+        _restore_request(plan),
+        authorize_mutation=lambda: authority_calls.append("authority"),
+    )
+
+    assert receipt.schema_version == (
+        "publisher-article-delete-restore-receipt.v1"
+    )
+    assert receipt.recovery_dump_sha256 == plan.recovery_dump_sha256
+    assert receipt.candidate_count == 2
+    assert receipt.restored_count == 2
+    assert len(receipt.evidence_sha256) == 64
+    assert projection.restore_calls == 1
+    assert authority_calls == ["authority"]
+    assert projection.events[:2] == ["read:article-a", "read:article-b"]
+    assert projection.events[2] == "restore"
+    assert all(projection.rows.values())
+
+
+def test_restore_executor_replay_requires_no_mutation_authority() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates, present=True)
+    authority_calls: list[None] = []
+
+    receipt = PublisherArticleDeleteRestoreExecutor(
+        projection=projection,
+    ).restore(
+        _restore_request(plan),
+        authorize_mutation=lambda: authority_calls.append(None),
+    )
+
+    assert receipt.restored_count == 0
+    assert projection.restore_calls == 0
+    assert authority_calls == []
+
+
+def test_restore_executor_rejects_hash_or_scope_drift_before_write() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates)
+    bad_hash = replace(_restore_request(plan), recovery_dump_sha256="0" * 64)
+
+    with pytest.raises(ValueError, match="hash does not match"):
+        PublisherArticleDeleteRestoreExecutor(
+            projection=projection,
+        ).restore(bad_hash)
+
+    projection.rows["article-b"] = json.loads(json.dumps(candidates[1]))
+    projection.rows["article-b"]["article"]["title"] = "remote drift"
+    with pytest.raises(
+        PublisherArticleDeleteRestoreError,
+        match="scope drifted",
+    ):
+        PublisherArticleDeleteRestoreExecutor(
+            projection=projection,
+        ).restore(_restore_request(plan))
+
+    assert projection.restore_calls == 0
+
+
+def test_restore_executor_rejects_noncanonical_jsonl_before_readback() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates)
+    noncanonical = plan.recovery_dump.replace(b'{"article":', b'{ "article":', 1)
+    request = replace(
+        _restore_request(plan),
+        recovery_dump=noncanonical,
+        recovery_dump_sha256=hashlib.sha256(noncanonical).hexdigest(),
+    )
+
+    with pytest.raises(ValueError, match="not canonical"):
+        PublisherArticleDeleteRestoreExecutor(
+            projection=projection,
+        ).restore(request)
+
+    assert projection.events == []
+
+
+def test_restore_executor_authority_loss_prevents_atomic_restore() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates)
+
+    def replaced_authority() -> None:
+        raise RuntimeError("primary authority replaced")
+
+    with pytest.raises(RuntimeError, match="authority replaced"):
+        PublisherArticleDeleteRestoreExecutor(
+            projection=projection,
+        ).restore(
+            _restore_request(plan),
+            authorize_mutation=replaced_authority,
+        )
+
+    assert projection.restore_calls == 0
+
+
+def test_restore_executor_requires_authority_for_a_real_mutation() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates)
+
+    with pytest.raises(
+        PublisherArticleDeleteRestoreError,
+        match="mutation authorization is required",
+    ):
+        PublisherArticleDeleteRestoreExecutor(
+            projection=projection,
+        ).restore(_restore_request(plan))
+
+    assert projection.restore_calls == 0
+
+
+def test_restore_executor_fails_without_exact_post_restore_readback() -> None:
+    plan = _plan()
+    candidates = json.loads(plan.scope)["candidates"]
+    projection = _RestoreProjection(candidates, restore_applies=False)
+
+    with pytest.raises(
+        PublisherArticleDeleteRestoreError,
+        match="exact read-back failed",
+    ):
+        PublisherArticleDeleteRestoreExecutor(
+            projection=projection,
+        ).restore(_restore_request(plan), authorize_mutation=lambda: None)
+
+    assert projection.restore_calls == 1

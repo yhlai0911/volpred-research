@@ -1568,3 +1568,16 @@ candidate與evidence hash不變。相鄰回歸
 222 passed。此切片為 `root_cause_fixed_and_verified`；整體仍為 `contained`，下一步是
 exact restore executor與manual-only delete→rollback→convergence rehearsal，另須完成
 program commit 34的physical two-Mac authority receipt pair。
+
+## 2026-07-25 — Program commit 15 exact restore contract checkpoint
+
+Recovery JSONL現在有單一`PublisherArticleDeleteRestoreExecutor`consumer：先驗exact
+SHA-256、canonical ordering與完整六表identity，再對全批candidate做absent／exact
+preflight；scope drift一律零write。真正restore必須取得mutation authorizer，provider
+contract要求單transaction compare-and-restore整批，之後逐candidate exact read-back並
+產生hash-bound receipt；已收斂replay維持read-only。
+
+Failure injections與相鄰publisher suites共157 passed；本輪沒有remote mutation。此
+execution-contract切片為`root_cause_fixed_and_verified`。整體仍是`contained`：
+production service-role atomic restore projection、manual-only live
+delete→restore→convergence rehearsal及physical two-Mac receipt pair仍待完成。
