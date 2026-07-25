@@ -2600,3 +2600,23 @@ suites **36 passed**，
 publisher=`operations_core/8`與安全隔離key，未acquire authority、未呼叫provider。
 此sequencing根因為 **`root_cause_fixed_and_verified`**；沒有第二台可操作remote
 session，故physical pair與operations-core umbrella仍為 **`contained`**。
+
+### 2026-07-26 — Final cross-host pair沒有綁定mutation前的readiness
+
+**證據化症狀與根因層級**：`primary`／`standby` CLI雖強制讀paired readiness，process
+receipt卻沒有該artifact identity；`verify-pair`只接兩份role receipt，也完全不讀
+readiness。事後因此無法證明實際roles使用的是mutation前驗過的那組主機、source與
+publisher fence，另一組相容role receipt可脫離原preflight重新配對。根因是evidence
+schema與function interface沒有端到端bind readiness，不是lease CAS或DB clock。
+
+**底層修復與驗證**：兩個role function改為直接要求typed readiness並在function boundary
+重驗，process receipt升v2且各自寫入同一readiness SHA-256；final verifier新增必填
+readiness，重驗structural invariants、兩端host／source／safe key／publisher fence及
+receipt hash binding，final receipt亦升v2保存該SHA。Failure injections涵蓋不同
+readiness receipt、edited same-machine artifact、role identity drift與validation後
+source race；相鄰authority suites **37 passed**，`py_compile`與diff gate通過。
+Production只讀preflight回讀`operations_core/8`與implementation
+`cc02ab8d5a073f2bd85aa08045abcd285b2a3151059192c7b99dea40563043cc`，沒有authority
+acquire或provider call。此evidence-chain根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac尚未執行roles，physical pair與
+operations-core umbrella仍為 **`contained`**。

@@ -99,8 +99,8 @@ uv run python scripts/rehearse_primary_authority_outage.py verify-readiness --pr
 # 把同一 readiness-pair.json 放到兩台機器；primary 跑完讀 epoch，再由 standby 接手：
 uv run python scripts/rehearse_primary_authority_outage.py primary --rehearsal-id <shared_id> --readiness-receipt readiness-pair.json --receipt-path primary.json
 uv run python scripts/rehearse_primary_authority_outage.py standby --rehearsal-id <shared_id> --readiness-receipt readiness-pair.json --expected-primary-epoch <epoch> --receipt-path standby.json
-# 把兩份 receipt 放到同一台機器後，驗 host fingerprint、next epoch、DB-clock RTO 與零 effect：
-uv run python scripts/rehearse_primary_authority_outage.py verify-pair --primary-receipt primary.json --standby-receipt standby.json --receipt-path storage/ops/primary_authority_outage_cross_host_latest.json
+# 把 readiness 與兩份 process receipt 放到同一台機器後，驗完整 preflight→role→pair 雜湊鏈：
+uv run python scripts/rehearse_primary_authority_outage.py verify-pair --readiness-receipt readiness-pair.json --primary-receipt primary.json --standby-receipt standby.json --receipt-path storage/ops/primary_authority_outage_cross_host_latest.json
 # 注意：所有 CLI 命令加 -i=false 避免互動式 prompt
 
 # 發佈

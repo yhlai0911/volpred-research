@@ -211,6 +211,7 @@ class PrimaryProcessReceipt:
     host_id: str
     host_fingerprint: str
     implementation_sha256: str
+    cross_host_readiness_sha256: str
     authority_key: str
     started_at: str
     completed_at: str
@@ -239,6 +240,7 @@ class StandbyProcessReceipt:
     host_id: str
     host_fingerprint: str
     implementation_sha256: str
+    cross_host_readiness_sha256: str
     authority_key: str
     started_at: str
     completed_at: str
@@ -267,6 +269,7 @@ class CrossHostOutageReceipt:
     standby_host_id: str
     standby_host_fingerprint: str
     implementation_sha256: str
+    cross_host_readiness_sha256: str
     primary_epoch: int
     standby_epoch: int
     primary_expires_at: str
@@ -380,7 +383,7 @@ def rehearse_primary_process_role(
     store: PartitionableAuthorityStore,
     publisher_store: PublisherOwnerReader,
     expected_publisher_generation: int,
-    expected_implementation_sha256: str | None = None,
+    readiness: CrossHostReadinessReceipt,
     monotonic: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> PrimaryProcessReceipt:
@@ -395,11 +398,17 @@ def rehearse_primary_process_role(
         renew_interval_seconds=renew_interval_seconds,
         poll_interval_seconds=poll_interval_seconds,
     )
+    _validate_role_readiness(
+        readiness,
+        rehearsal_id=rehearsal_id,
+        role="primary",
+        host_id=host_id,
+        host_fingerprint=host_fingerprint,
+        expected_publisher_generation=expected_publisher_generation,
+    )
+    readiness_sha256 = _receipt_sha256(readiness)
     implementation_sha256 = _implementation_sha256()
-    if (
-        expected_implementation_sha256 is not None
-        and implementation_sha256 != expected_implementation_sha256
-    ):
+    if implementation_sha256 != readiness.implementation_sha256:
         raise RuntimeError("source drifted after cross-host readiness")
     started_at = datetime.now(UTC).isoformat()
     publisher_before = _validate_publisher_fence(
@@ -487,12 +496,13 @@ def rehearse_primary_process_role(
         _verify_implementation_unchanged(implementation_sha256)
 
         return PrimaryProcessReceipt(
-            schema_version="primary-authority-outage-primary.v1",
+            schema_version="primary-authority-outage-primary.v2",
             rehearsal_id=rehearsal_id,
             role="primary",
             host_id=host_id,
             host_fingerprint=host_fingerprint,
             implementation_sha256=implementation_sha256,
+            cross_host_readiness_sha256=readiness_sha256,
             authority_key=authority_key,
             started_at=started_at,
             completed_at=datetime.now(UTC).isoformat(),
@@ -531,7 +541,7 @@ def rehearse_standby_process_role(
     store: AuthorityStore,
     publisher_store: PublisherOwnerReader,
     expected_publisher_generation: int,
-    expected_implementation_sha256: str | None = None,
+    readiness: CrossHostReadinessReceipt,
     monotonic: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> StandbyProcessReceipt:
@@ -555,11 +565,17 @@ def rehearse_standby_process_role(
     if rto_seconds <= 0 or rto_seconds > 300:
         raise ValueError("RTO must be positive and at most five minutes")
 
+    _validate_role_readiness(
+        readiness,
+        rehearsal_id=rehearsal_id,
+        role="standby",
+        host_id=host_id,
+        host_fingerprint=host_fingerprint,
+        expected_publisher_generation=expected_publisher_generation,
+    )
+    readiness_sha256 = _receipt_sha256(readiness)
     implementation_sha256 = _implementation_sha256()
-    if (
-        expected_implementation_sha256 is not None
-        and implementation_sha256 != expected_implementation_sha256
-    ):
+    if implementation_sha256 != readiness.implementation_sha256:
         raise RuntimeError("source drifted after cross-host readiness")
     started_at = datetime.now(UTC).isoformat()
     publisher_before = _validate_publisher_fence(
@@ -619,12 +635,13 @@ def rehearse_standby_process_role(
         _verify_implementation_unchanged(implementation_sha256)
 
         return StandbyProcessReceipt(
-            schema_version="primary-authority-outage-standby.v1",
+            schema_version="primary-authority-outage-standby.v2",
             rehearsal_id=rehearsal_id,
             role="standby",
             host_id=host_id,
             host_fingerprint=host_fingerprint,
             implementation_sha256=implementation_sha256,
+            cross_host_readiness_sha256=readiness_sha256,
             authority_key=authority_key,
             started_at=started_at,
             completed_at=datetime.now(UTC).isoformat(),
@@ -649,6 +666,7 @@ def verify_cross_host_receipts(
     primary: PrimaryProcessReceipt,
     standby: StandbyProcessReceipt,
     *,
+    readiness: CrossHostReadinessReceipt,
     max_handoff_seconds: float = 300.0,
 ) -> CrossHostOutageReceipt:
     """Verify a no-effect, exact-next-epoch handoff across distinct hosts."""
@@ -657,10 +675,11 @@ def verify_cross_host_receipts(
         raise ValueError(
             "max_handoff_seconds must be positive and at most five minutes"
         )
-    if primary.schema_version != "primary-authority-outage-primary.v1":
+    if primary.schema_version != "primary-authority-outage-primary.v2":
         raise ValueError("unsupported primary receipt schema")
-    if standby.schema_version != "primary-authority-outage-standby.v1":
+    if standby.schema_version != "primary-authority-outage-standby.v2":
         raise ValueError("unsupported standby receipt schema")
+    _validate_cross_host_readiness_receipt(readiness)
     if primary.role != "primary" or standby.role != "standby":
         raise ValueError("receipt role mismatch")
     if (
@@ -676,6 +695,32 @@ def verify_cross_host_receipts(
         )
     if primary.implementation_sha256 != standby.implementation_sha256:
         raise ValueError("host receipts used different rehearsal code")
+    readiness_sha256 = _receipt_sha256(readiness)
+    if (
+        primary.cross_host_readiness_sha256 != readiness_sha256
+        or standby.cross_host_readiness_sha256 != readiness_sha256
+    ):
+        raise ValueError(
+            "host receipts are not bound to this cross-host readiness"
+        )
+    if (
+        readiness.rehearsal_id != primary.rehearsal_id
+        or readiness.authority_key != primary.authority_key
+        or readiness.implementation_sha256 != primary.implementation_sha256
+        or (
+            readiness.primary_host_id,
+            readiness.primary_host_fingerprint,
+        )
+        != (primary.host_id, primary.host_fingerprint)
+        or (
+            readiness.standby_host_id,
+            readiness.standby_host_fingerprint,
+        )
+        != (standby.host_id, standby.host_fingerprint)
+    ):
+        raise ValueError(
+            "host receipts drifted from cross-host readiness identity"
+        )
     if (
         primary.host_id == standby.host_id
         or primary.host_fingerprint == standby.host_fingerprint
@@ -703,6 +748,10 @@ def verify_cross_host_receipts(
     )
     if any(fence != publisher_fences[0] for fence in publisher_fences[1:]):
         raise ValueError("publisher owner fence drifted across host receipts")
+    if publisher_fences[0] != readiness.publisher_fence:
+        raise ValueError(
+            "publisher owner fence drifted after cross-host readiness"
+        )
     successful_claims = (
         primary.successful_authority_claims
         + standby.successful_authority_claims
@@ -736,7 +785,7 @@ def verify_cross_host_receipts(
         raise ValueError("database-clock handoff exceeded five-minute RTO")
 
     return CrossHostOutageReceipt(
-        schema_version="primary-authority-outage-cross-host.v1",
+        schema_version="primary-authority-outage-cross-host.v2",
         rehearsal_id=primary.rehearsal_id,
         authority_key=primary.authority_key,
         verified_at=datetime.now(UTC).isoformat(),
@@ -745,6 +794,7 @@ def verify_cross_host_receipts(
         standby_host_id=standby.host_id,
         standby_host_fingerprint=standby.host_fingerprint,
         implementation_sha256=primary.implementation_sha256,
+        cross_host_readiness_sha256=readiness_sha256,
         primary_epoch=primary.primary.epoch,
         standby_epoch=standby.standby.epoch,
         primary_expires_at=primary.primary.expires_at,
@@ -1186,12 +1236,7 @@ def _validate_role_readiness(
     host_fingerprint: str,
     expected_publisher_generation: int,
 ) -> None:
-    if (
-        readiness.schema_version
-        != "primary-authority-outage-readiness-pair.v1"
-        or not readiness.cross_host_ready
-    ):
-        raise ValueError("cross-host readiness receipt is not verified")
+    _validate_cross_host_readiness_receipt(readiness)
     if (
         readiness.rehearsal_id != rehearsal_id
         or readiness.authority_key != _authority_key_for_rehearsal(rehearsal_id)
@@ -1217,6 +1262,40 @@ def _validate_role_readiness(
         or fence.generation != expected_publisher_generation
     ):
         raise ValueError("cross-host readiness publisher fence mismatch")
+
+
+def _validate_cross_host_readiness_receipt(
+    readiness: CrossHostReadinessReceipt,
+) -> None:
+    """Recheck structural invariants instead of trusting an edited ready flag."""
+
+    if (
+        readiness.schema_version
+        != "primary-authority-outage-readiness-pair.v1"
+        or not readiness.cross_host_ready
+    ):
+        raise ValueError("cross-host readiness receipt is not verified")
+    if readiness.authority_key != _authority_key_for_rehearsal(
+        readiness.rehearsal_id
+    ):
+        raise ValueError(
+            "cross-host readiness authority key is not derived from identity"
+        )
+    if (
+        readiness.primary_host_id == readiness.standby_host_id
+        or readiness.primary_host_fingerprint
+        == readiness.standby_host_fingerprint
+    ):
+        raise ValueError(
+            "cross-host readiness requires two distinct physical machines"
+        )
+    digests = (
+        readiness.implementation_sha256,
+        readiness.primary_readiness_sha256,
+        readiness.standby_readiness_sha256,
+    )
+    if any(re.fullmatch(r"[0-9a-f]{64}", digest) is None for digest in digests):
+        raise ValueError("cross-host readiness contains an invalid SHA-256")
 
 
 def _lease_evidence(lease: PrimaryLease) -> AuthorityLeaseEvidence:
@@ -1333,6 +1412,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     verify.add_argument("--primary-receipt", required=True)
     verify.add_argument("--standby-receipt", required=True)
+    verify.add_argument("--readiness-receipt", required=True)
     verify.add_argument("--receipt-path", required=True)
     verify.add_argument("--max-handoff-seconds", type=float, default=300.0)
 
@@ -1371,6 +1451,9 @@ def main() -> int:
         receipt = verify_cross_host_receipts(
             _load_primary_receipt(Path(args.primary_receipt)),
             _load_standby_receipt(Path(args.standby_receipt)),
+            readiness=_load_cross_host_readiness(
+                Path(args.readiness_receipt)
+            ),
             max_handoff_seconds=args.max_handoff_seconds,
         )
     elif args.role == "single-host":
@@ -1397,16 +1480,6 @@ def main() -> int:
         readiness = _load_cross_host_readiness(
             Path(args.readiness_receipt)
         )
-        _validate_role_readiness(
-            readiness,
-            rehearsal_id=args.rehearsal_id,
-            role=args.role,
-            host_id=host_id,
-            host_fingerprint=host_fingerprint,
-            expected_publisher_generation=(
-                args.expected_publisher_generation
-            ),
-        )
         holder_ref = (
             f"host:{host_fingerprint}:outage-{args.role}:"
             f"{args.rehearsal_id}"
@@ -1428,9 +1501,7 @@ def main() -> int:
                 expected_publisher_generation=(
                     args.expected_publisher_generation
                 ),
-                expected_implementation_sha256=(
-                    readiness.implementation_sha256
-                ),
+                readiness=readiness,
             )
         else:
             receipt = rehearse_standby_process_role(
@@ -1447,9 +1518,7 @@ def main() -> int:
                 expected_publisher_generation=(
                     args.expected_publisher_generation
                 ),
-                expected_implementation_sha256=(
-                    readiness.implementation_sha256
-                ),
+                readiness=readiness,
             )
     _write_receipt(Path(args.receipt_path), receipt)
     print(json.dumps(asdict(receipt), ensure_ascii=False, indent=2))

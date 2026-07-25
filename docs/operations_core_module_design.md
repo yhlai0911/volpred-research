@@ -1737,3 +1737,27 @@ publisher=`operations_core/8`、安全隔離key與implementation
 `d02ed42e3aa8e380ba07d862ca6c270054a67c1d6907b349ea502c14128e387d`，沒有authority
 acquire或provider call。本sequencing根因為`root_cause_fixed_and_verified`；第二台
 實體Mac仍無可操作remote session，所以physical pair與umbrella維持`contained`。
+
+## 22. Readiness-to-process receipt evidence binding（2026-07-26）
+
+Readiness gate先前只存在CLI啟動路徑：role function接受可選的implementation hash，
+process receipt本身不記paired readiness，final `verify-pair`也不接收readiness
+artifact。即使CLI確實先驗過兩端，事後只有兩份role receipt時仍無法證明它們使用的是
+mutation前通過的那組host／source／publisher fence；另一組相容receipt可以被重新配對而
+假綠。
+
+Primary與standby role現在直接要求typed `CrossHostReadinessReceipt`，在function內而非
+CLI外重驗role、machine、derived authority key與source，再把paired readiness的
+SHA-256寫入各自v2 receipt。Final verifier強制接收同一readiness，重驗其distinct-host、
+digest與derived-key invariants，並要求兩端readiness hash、host identity、
+implementation及publisher fence都exact match；v2 final receipt也保存同一hash。
+
+Failure injection涵蓋role啟動前source race、edited same-machine readiness、不同
+readiness的process receipt與identity drift；相鄰authority suites **37 passed**，
+`py_compile`與diff gate通過。本機production只讀receipt
+`storage/ops/primary_authority_outage_host_readiness_latest.json`回讀
+publisher=`operations_core/8`、安全隔離key與implementation
+`cc02ab8d5a073f2bd85aa08045abcd285b2a3151059192c7b99dea40563043cc`，沒有組裝
+authority store或provider。此evidence-chain根因為
+`root_cause_fixed_and_verified`；第二台實體Mac仍未執行role，所以physical pair與
+operations-core umbrella仍為`contained`。

@@ -327,7 +327,11 @@
 > `verify-readiness`只接受 distinct hosts、相同 rehearsal identity／code／publisher
 > fence，並產生同一份 paired readiness receipt。`primary`與`standby`都必須在任何
 > authority RPC前驗本機符合指定角色且source未漂移，避免先改live lease、最後配對時
-> 才發現第二台不可用或版本不合。
+> 才發現第二台不可用或版本不合。兩份process receipt v2另各自保存同一paired
+> readiness的SHA-256；`verify-pair`強制接收該readiness並重驗rehearsal、authority
+> key、兩端host identity、implementation與publisher fence完全一致，最後的v2 receipt
+> 也保存相同readiness SHA。這讓事後evidence能證明實際roles使用的就是mutation前
+> 通過的preflight，不能只拿任意兩份相容role receipt另行配對。
 >
 > Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
 > epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate

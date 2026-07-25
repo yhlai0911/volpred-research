@@ -1670,3 +1670,19 @@ Failure injections與相鄰authority suites **36 passed**；本機production只�
 此pre-mutation sequencing切片為`root_cause_fixed_and_verified`。第二台實體Mac仍沒有
 可操作remote session，故physical paired receipt與operations-core umbrella維持
 `contained`。
+
+## 2026-07-26 — Program commit 34 readiness evidence-chain checkpoint
+
+Cross-host role不再只由CLI外部檢查readiness。Primary／standby function直接要求同一
+typed paired readiness，在第一個remote read／mutation前重驗role、machine、safe key
+與source，兩份process receipt v2各自保存readiness SHA-256。Final `verify-pair`也強制
+接收該artifact，重驗distinct hosts與完整identity／publisher fence binding，並把相同
+SHA寫入final v2 receipt；任意兩份相容role receipt不能再脫離原preflight重組成假綠
+evidence。
+
+Failure injections與相鄰authority suites **37 passed**；production只讀preflight
+`readiness-binding-20260726-0710`已原子落檔並exact read-back
+`operations_core/8`、安全隔離key與新implementation aggregate，沒有authority acquire
+或provider call。此evidence-chain切片為`root_cause_fixed_and_verified`；實體第二台
+Mac仍無可操作session，故physical paired receipt與operations-core umbrella維持
+`contained`。

@@ -139,6 +139,34 @@ class _PublisherStore:
         return self.owner
 
 
+def _paired_readiness(
+    *,
+    rehearsal_id: str,
+    publisher: _PublisherStore,
+    primary_host_id: str = "primary-mac",
+    primary_host_fingerprint: str = "primary-fingerprint",
+    standby_host_id: str = "standby-mac",
+    standby_host_fingerprint: str = "standby-fingerprint",
+) -> CrossHostReadinessReceipt:
+    primary = prepare_cross_host_role_readiness(
+        rehearsal_id=rehearsal_id,
+        role="primary",
+        host_id=primary_host_id,
+        host_fingerprint=primary_host_fingerprint,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = prepare_cross_host_role_readiness(
+        rehearsal_id=rehearsal_id,
+        role="standby",
+        host_id=standby_host_id,
+        host_fingerprint=standby_host_fingerprint,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    return verify_cross_host_readiness(primary, standby)
+
+
 def test_live_outage_closes_gate_and_standby_reacquires_next_epoch() -> None:
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
@@ -360,10 +388,15 @@ def test_primary_rechecks_readiness_source_before_remote_read(
 ) -> None:
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="ready-race-test",
+        publisher=publisher,
+    )
+    digests = iter((readiness.implementation_sha256, "2" * 64))
     monkeypatch.setattr(
         outage_operator,
         "_implementation_sha256",
-        lambda: "2" * 64,
+        lambda: next(digests),
     )
 
     with pytest.raises(
@@ -384,10 +417,10 @@ def test_primary_rechecks_readiness_source_before_remote_read(
             ),
             publisher_store=publisher,
             expected_publisher_generation=8,
-            expected_implementation_sha256="1" * 64,
+            readiness=readiness,
         )
 
-    assert publisher.read_count == 0
+    assert publisher.read_count == 2
     assert live.acquire_successes == 0
 
 
@@ -398,6 +431,10 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         unavailable=_UnavailableAuthorityStore(),
     )
     publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="cross-host-test",
+        publisher=publisher,
+    )
 
     primary = rehearse_primary_process_role(
         rehearsal_id="cross-host-test",
@@ -410,6 +447,7 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         store=primary_store,
         publisher_store=publisher,
         expected_publisher_generation=8,
+        readiness=readiness,
     )
     standby = rehearse_standby_process_role(
         rehearsal_id="cross-host-test",
@@ -423,8 +461,13 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         store=live,
         publisher_store=publisher,
         expected_publisher_generation=8,
+        readiness=readiness,
     )
-    paired = verify_cross_host_receipts(primary, standby)
+    paired = verify_cross_host_receipts(
+        primary,
+        standby,
+        readiness=readiness,
+    )
     paired_path = tmp_path / "cross-host.json"
     _write_receipt(paired_path, paired)
 
@@ -435,7 +478,12 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert standby.standby.epoch == primary.primary.epoch + 1
     assert standby.final_standby_state == "stopped"
     assert paired.schema_version == (
-        "primary-authority-outage-cross-host.v1"
+        "primary-authority-outage-cross-host.v2"
+    )
+    assert (
+        primary.cross_host_readiness_sha256
+        == standby.cross_host_readiness_sha256
+        == paired.cross_host_readiness_sha256
     )
     assert paired.database_clock_handoff_seconds >= 0
     assert paired.successful_authority_claims == 2
@@ -444,7 +492,7 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert paired.cross_host_verified is True
     saved_pair = json.loads(paired_path.read_text())
     assert saved_pair["schema_version"] == (
-        "primary-authority-outage-cross-host.v1"
+        "primary-authority-outage-cross-host.v2"
     )
     assert saved_pair["primary_receipt_sha256"] == (
         paired.primary_receipt_sha256
@@ -454,13 +502,70 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert live.current is None
 
 
+def test_pair_verifier_rejects_process_receipt_from_other_readiness() -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="readiness-binding-test",
+        publisher=publisher,
+    )
+    primary = rehearse_primary_process_role(
+        rehearsal_id="readiness-binding-test",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        holder_ref="host:primary:outage",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=PartitionableAuthorityStore(
+            healthy=live,
+            unavailable=_UnavailableAuthorityStore(),
+        ),
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+        readiness=readiness,
+    )
+    standby = rehearse_standby_process_role(
+        rehearsal_id="readiness-binding-test",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        holder_ref="host:standby:outage",
+        expected_primary_epoch=primary.primary.epoch,
+        lease_seconds=10,
+        rto_seconds=1.0,
+        poll_interval_seconds=0.005,
+        store=live,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+        readiness=readiness,
+    )
+
+    with pytest.raises(ValueError, match="not bound to this"):
+        verify_cross_host_receipts(
+            primary,
+            replace(
+                standby,
+                cross_host_readiness_sha256="0" * 64,
+            ),
+            readiness=readiness,
+        )
+
+
 def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="same-machine-test",
+        publisher=publisher,
+        primary_host_id="mac-a",
+        primary_host_fingerprint="fingerprint-a",
+        standby_host_id="mac-b",
+        standby_host_fingerprint="fingerprint-b",
+    )
     primary = rehearse_primary_process_role(
         rehearsal_id="same-machine-test",
         host_id="mac-a",
-        host_fingerprint="shared-fingerprint",
+        host_fingerprint="fingerprint-a",
         holder_ref="host:a:outage",
         lease_seconds=10,
         renew_interval_seconds=0.01,
@@ -471,11 +576,12 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
         ),
         publisher_store=publisher,
         expected_publisher_generation=8,
+        readiness=readiness,
     )
     standby = rehearse_standby_process_role(
         rehearsal_id="same-machine-test",
         host_id="mac-b",
-        host_fingerprint="shared-fingerprint",
+        host_fingerprint="fingerprint-b",
         holder_ref="host:b:outage",
         expected_primary_epoch=primary.primary.epoch,
         lease_seconds=10,
@@ -484,10 +590,18 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
         store=live,
         publisher_store=publisher,
         expected_publisher_generation=8,
+        readiness=readiness,
     )
 
-    with pytest.raises(ValueError, match="two distinct machines"):
-        verify_cross_host_receipts(primary, standby)
+    with pytest.raises(ValueError, match="two distinct physical machines"):
+        verify_cross_host_receipts(
+            primary,
+            standby,
+            readiness=replace(
+                readiness,
+                standby_host_fingerprint=readiness.primary_host_fingerprint,
+            ),
+        )
 
     with pytest.raises(ValueError, match="different rehearsal code"):
         verify_cross_host_receipts(
@@ -497,6 +611,7 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
                 host_fingerprint="standby-fingerprint",
                 implementation_sha256="0" * 64,
             ),
+            readiness=readiness,
         )
 
 
@@ -517,6 +632,14 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
 
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="unsafe-key-test",
+        publisher=publisher,
+        primary_host_id="mac-a",
+        primary_host_fingerprint="fingerprint-a",
+        standby_host_id="mac-b",
+        standby_host_fingerprint="fingerprint-b",
+    )
     primary = rehearse_primary_process_role(
         rehearsal_id="unsafe-key-test",
         host_id="mac-a",
@@ -531,6 +654,7 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
         ),
         publisher_store=publisher,
         expected_publisher_generation=8,
+        readiness=readiness,
     )
     standby = rehearse_standby_process_role(
         rehearsal_id="unsafe-key-test",
@@ -544,6 +668,7 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
         store=live,
         publisher_store=publisher,
         expected_publisher_generation=8,
+        readiness=readiness,
     )
     unsafe_key = "operations-core-effects"
 
@@ -554,6 +679,7 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
         verify_cross_host_receipts(
             replace(primary, authority_key=unsafe_key),
             replace(standby, authority_key=unsafe_key),
+            readiness=readiness,
         )
 
     assert primary.authority_key == _authority_key_for_rehearsal(
@@ -570,7 +696,18 @@ def test_process_role_rejects_source_drift(
     publisher = _PublisherStore()
     if role == "standby":
         live.epoch = 1
-    digests = iter(("1" * 64, "2" * 64))
+    rehearsal_id = f"source-drift-{role}"
+    readiness = _paired_readiness(
+        rehearsal_id=rehearsal_id,
+        publisher=publisher,
+    )
+    digests = iter(
+        (
+            readiness.implementation_sha256,
+            readiness.implementation_sha256,
+            "2" * 64,
+        )
+    )
     monkeypatch.setattr(
         outage_operator,
         "_implementation_sha256",
@@ -583,7 +720,7 @@ def test_process_role_rejects_source_drift(
     ):
         if role == "primary":
             rehearse_primary_process_role(
-                rehearsal_id="source-drift-primary",
+                rehearsal_id=rehearsal_id,
                 host_id="primary-mac",
                 host_fingerprint="primary-fingerprint",
                 holder_ref="host:primary:outage",
@@ -596,10 +733,11 @@ def test_process_role_rejects_source_drift(
                 ),
                 publisher_store=publisher,
                 expected_publisher_generation=8,
+                readiness=readiness,
             )
         else:
             rehearse_standby_process_role(
-                rehearsal_id="source-drift-standby",
+                rehearsal_id=rehearsal_id,
                 host_id="standby-mac",
                 host_fingerprint="standby-fingerprint",
                 holder_ref="host:standby:outage",
@@ -610,6 +748,7 @@ def test_process_role_rejects_source_drift(
                 store=live,
                 publisher_store=publisher,
                 expected_publisher_generation=8,
+                readiness=readiness,
             )
 
     if role == "standby":
