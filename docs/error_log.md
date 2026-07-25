@@ -2566,3 +2566,18 @@ operator與`src/volpred/ops/**/*.py`全部Python source，逐檔SHA後再aggrega
 缺工具宣稱lint通過。本輪沒有remote acquire或effect。此false-positive根因為
 **`root_cause_fixed_and_verified`**；physical two-Mac receipt仍需真實兩機執行，
 operations-core umbrella維持**`contained`**。
+
+### 2026-07-26 — Cross-host receipt在結束時才雜湊，可能記到未執行的新code
+
+**證據化症狀與根因層級**：兩個process role原本在組receipt時才呼叫
+`_implementation_sha256()`。Shared checkout若在primary已import modules並開始live
+rehearsal後被其他writer更新，primary仍執行舊loaded code，receipt卻雜湊新disk bytes；
+稍後由新code啟動的standby會得到相同hash，pair verifier因而可能假綠。根因是run-time
+code identity沒有包住實際執行窗口，不是authority CAS或DB clock。
+
+**底層修復與驗證**：Primary／standby均在第一個remote read／mutation前快照canonical
+implementation aggregate，remote cleanup後、receipt construction前重驗；任何source
+drift都raise且不產receipt。兩個role新增failure injection，standby路徑另確認lease已
+release；相鄰authority suite、compile與diff gate通過。本false-positive根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac目前無可操作remote session，故沒有
+執行production role，physical pair與operations-core umbrella仍為**`contained`**。

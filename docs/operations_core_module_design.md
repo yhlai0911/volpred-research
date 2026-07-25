@@ -1702,3 +1702,16 @@ aggregate SHA-256。Verifier仍要求兩端aggregate exact-match，並新增
 Receipt identity false-positive根因為`root_cause_fixed_and_verified`，但兩台實體Mac
 尚未執行process roles並形成paired receipt，因此program commit 34與operations-core
 umbrella仍為`contained`。
+
+## 20. Cross-host receipt run-time identity stability（2026-07-26）
+
+只在role結束時雜湊disk source仍不足：shared checkout可能在primary已import舊code後
+更新，使receipt記錄從未執行過的新bytes，再與之後啟動的standby錯誤配對。Primary與
+standby現在都在第一個remote read／mutation前快照canonical implementation aggregate，
+並在remote cleanup後、receipt construction前重驗相同aggregate；任何中途source drift
+都fail closed且不留下可配對receipt。
+
+兩個role的failure injection與相鄰authority suites通過；standby drift路徑另回讀lease
+已release。本false-positive根因為`root_cause_fixed_and_verified`。因第二台實體Mac
+目前沒有可操作的remote session，本輪沒有執行production role，physical pair與umbrella
+仍維持`contained`。

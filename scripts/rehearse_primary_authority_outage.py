@@ -278,6 +278,7 @@ def rehearse_primary_process_role(
         renew_interval_seconds=renew_interval_seconds,
         poll_interval_seconds=poll_interval_seconds,
     )
+    implementation_sha256 = _implementation_sha256()
     started_at = datetime.now(UTC).isoformat()
     publisher_before = _validate_publisher_fence(
         publisher_store.read_owner(),
@@ -361,6 +362,7 @@ def rehearse_primary_process_role(
         final_primary = primary.status()
         if final_primary.state != "demoted":
             raise RuntimeError("partitioned primary did not remain demoted")
+        _verify_implementation_unchanged(implementation_sha256)
 
         return PrimaryProcessReceipt(
             schema_version="primary-authority-outage-primary.v1",
@@ -368,7 +370,7 @@ def rehearse_primary_process_role(
             role="primary",
             host_id=host_id,
             host_fingerprint=host_fingerprint,
-            implementation_sha256=_implementation_sha256(),
+            implementation_sha256=implementation_sha256,
             authority_key=authority_key,
             started_at=started_at,
             completed_at=datetime.now(UTC).isoformat(),
@@ -430,6 +432,7 @@ def rehearse_standby_process_role(
     if rto_seconds <= 0 or rto_seconds > 300:
         raise ValueError("RTO must be positive and at most five minutes")
 
+    implementation_sha256 = _implementation_sha256()
     started_at = datetime.now(UTC).isoformat()
     publisher_before = _validate_publisher_fence(
         publisher_store.read_owner(),
@@ -485,6 +488,7 @@ def rehearse_standby_process_role(
         )
         if publisher_after != publisher_before:
             raise RuntimeError("publisher owner fence drifted during handoff")
+        _verify_implementation_unchanged(implementation_sha256)
 
         return StandbyProcessReceipt(
             schema_version="primary-authority-outage-standby.v1",
@@ -492,7 +496,7 @@ def rehearse_standby_process_role(
             role="standby",
             host_id=host_id,
             host_fingerprint=host_fingerprint,
-            implementation_sha256=_implementation_sha256(),
+            implementation_sha256=implementation_sha256,
             authority_key=authority_key,
             started_at=started_at,
             completed_at=datetime.now(UTC).isoformat(),
@@ -987,6 +991,15 @@ def _implementation_manifest() -> dict[str, str]:
         ).hexdigest()
         for path in paths
     }
+
+
+def _verify_implementation_unchanged(expected_sha256: str) -> None:
+    """Refuse evidence if the checkout changed while a role was running."""
+
+    if _implementation_sha256() != expected_sha256:
+        raise RuntimeError(
+            "Operations Core source changed during outage rehearsal"
+        )
 
 
 def _machine_identity() -> tuple[str, str]:

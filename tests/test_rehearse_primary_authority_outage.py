@@ -6,6 +6,7 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
+import scripts.rehearse_primary_authority_outage as outage_operator
 from scripts.rehearse_primary_authority_outage import (
     PartitionableAuthorityStore,
     PrimaryProcessReceipt,
@@ -421,3 +422,58 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
     assert primary.authority_key == _authority_key_for_rehearsal(
         primary.rehearsal_id
     )
+
+
+@pytest.mark.parametrize("role", ["primary", "standby"])
+def test_process_role_rejects_source_drift(
+    monkeypatch: pytest.MonkeyPatch,
+    role: str,
+) -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    if role == "standby":
+        live.epoch = 1
+    digests = iter(("1" * 64, "2" * 64))
+    monkeypatch.setattr(
+        outage_operator,
+        "_implementation_sha256",
+        lambda: next(digests),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="source changed during outage rehearsal",
+    ):
+        if role == "primary":
+            rehearse_primary_process_role(
+                rehearsal_id="source-drift-primary",
+                host_id="primary-mac",
+                host_fingerprint="primary-fingerprint",
+                holder_ref="host:primary:outage",
+                lease_seconds=10,
+                renew_interval_seconds=0.01,
+                poll_interval_seconds=0.005,
+                store=PartitionableAuthorityStore(
+                    healthy=live,
+                    unavailable=_UnavailableAuthorityStore(),
+                ),
+                publisher_store=publisher,
+                expected_publisher_generation=8,
+            )
+        else:
+            rehearse_standby_process_role(
+                rehearsal_id="source-drift-standby",
+                host_id="standby-mac",
+                host_fingerprint="standby-fingerprint",
+                holder_ref="host:standby:outage",
+                expected_primary_epoch=1,
+                lease_seconds=10,
+                rto_seconds=1.0,
+                poll_interval_seconds=0.005,
+                store=live,
+                publisher_store=publisher,
+                expected_publisher_generation=8,
+            )
+
+    if role == "standby":
+        assert live.current is None

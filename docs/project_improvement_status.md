@@ -1644,3 +1644,15 @@ authority key精確等於shared rehearsal ID導出的隔離key，不能把正式
 Receipt false-positive缺口為`root_cause_fixed_and_verified`；實際physical two-Mac
 process roles與paired receipt仍未執行，所以program commit 34及operations-core
 umbrella維持`contained`。
+
+## 2026-07-26 — Program commit 34 run-time code stability checkpoint
+
+Cross-host role不再於結束時才決定implementation identity。Primary／standby均在第一個
+remote read或mutation前快照canonical Operations Core aggregate，完成remote cleanup後、
+建立receipt前重驗；shared checkout若在role執行途中變更，該次run會fail closed且不能
+留下receipt，避免舊loaded code被新disk hash冒名。
+
+Primary與standby source-drift failure injection及相鄰authority suites通過，standby
+失敗路徑亦確認lease已release。此evidence identity切片為
+`root_cause_fixed_and_verified`；本機沒有可操作的第二台Mac remote session，本輪未做
+production mutation，physical receipt pair與operations-core umbrella仍為`contained`。

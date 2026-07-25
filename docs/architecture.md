@@ -783,3 +783,8 @@ Physical Primary Authority pair的`implementation_sha256`不再只代表rehearsa
 verifier另要求receipt的authority key精確等於shared rehearsal ID所導出的隔離key。
 因此同script但authority／keepalive／transport版本不同，或把production authority key
 填入receipt，都不能形成`cross_host_verified` evidence。
+
+兩個process role現在都在第一個remote read／mutation前快照上述aggregate identity，
+並在remote cleanup完成、建立receipt前重新計算一次。Shared checkout若在演練途中被
+dispatcher、互動session或deploy更新，該role會fail closed且不產生receipt；不能讓
+「舊loaded code執行、新disk bytes入證」形成假綠pair。
