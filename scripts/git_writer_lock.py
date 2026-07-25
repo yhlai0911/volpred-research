@@ -403,6 +403,58 @@ def _materialize_candidate_workspace(
     return originals
 
 
+def _committed_scope(
+    repo: Path,
+    *,
+    base_head: str,
+    commit_head: str,
+    env: dict[str, str],
+    pass_fds: tuple[int, ...],
+) -> tuple[str, ...] | None:
+    """Return changed paths only when ``commit_head`` is one direct commit.
+
+    ``git commit --only`` builds a temporary index for hooks. A hook can stage a
+    foreign path into that temporary index even when the CLI named exact paths,
+    so argv alone is not evidence of the resulting commit scope.
+    """
+    parent = subprocess.run(
+        _git("rev-list", "--parents", "-n", "1", commit_head),
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    if parent.returncode != 0:
+        return None
+    if parent.stdout.split() != [commit_head, base_head]:
+        return None
+
+    changed = subprocess.run(
+        _git(
+            "diff",
+            "--name-only",
+            "--no-renames",
+            "-z",
+            base_head,
+            commit_head,
+        ),
+        cwd=repo,
+        capture_output=True,
+        env=env,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    if changed.returncode != 0:
+        return None
+    return tuple(
+        path.decode("utf-8", errors="surrogateescape")
+        for path in changed.stdout.split(b"\0")
+        if path
+    )
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     command = _strip_separator(args.command)
     if not command:
@@ -441,28 +493,42 @@ def cmd_commit(args: argparse.Namespace) -> int:
         env = lease.child_env()
         popen = {"env": env, "text": True, "check": False,
                  "pass_fds": lease.child_pass_fds()}
-        if expected_head is not None:
-            head = subprocess.run(
-                _git("rev-parse", "--verify", "HEAD^{commit}"),
-                cwd=repo,
-                capture_output=True,
-                **popen,
+        head = subprocess.run(
+            _git("rev-parse", "--verify", "HEAD^{commit}"),
+            cwd=repo,
+            capture_output=True,
+            **popen,
+        )
+        if head.returncode != 0:
+            print(
+                "[git-writer-lock] BLOCKED: cannot resolve current HEAD",
+                file=sys.stderr,
             )
-            if head.returncode != 0:
-                print(
-                    "[git-writer-lock] BLOCKED: cannot resolve current HEAD for "
-                    "expected HEAD fence",
-                    file=sys.stderr,
-                )
-                return 2
-            observed_head = head.stdout.strip()
-            if observed_head != expected_head:
-                print(
-                    "[git-writer-lock] BLOCKED: expected HEAD fence failed: "
-                    f"expected {expected_head}, observed {observed_head}",
-                    file=sys.stderr,
-                )
-                return 2
+            return 2
+        original_head = head.stdout.strip()
+        if expected_head is not None and original_head != expected_head:
+            print(
+                "[git-writer-lock] BLOCKED: expected HEAD fence failed: "
+                f"expected {expected_head}, observed {original_head}",
+                file=sys.stderr,
+            )
+            return 2
+        # Preserve the caller's complete index, including unrelated staged
+        # changes, so a hook-injected foreign path can be rolled back without
+        # taking another writer's staged ownership with it.
+        index_tree = subprocess.run(
+            _git("write-tree"),
+            cwd=repo,
+            capture_output=True,
+            **popen,
+        )
+        if index_tree.returncode != 0:
+            print(
+                "[git-writer-lock] BLOCKED: cannot snapshot current index",
+                file=sys.stderr,
+            )
+            return int(index_tree.returncode)
+        original_index_tree = index_tree.stdout.strip()
         # 2026-07-19: an explicitly named but gitignored path (main_v5 era:
         # paper .pdf) made `git add -A` skip it with only an advice hint while
         # the transaction still reported success — the caller believed the file
@@ -493,6 +559,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
             return int(preflight.returncode)
 
         index_touched = False
+        index_restored = False
         committed = False
         materialized_originals: dict[str, tuple[bool, bytes, int]] | None = None
         try:
@@ -557,6 +624,71 @@ def cmd_commit(args: argparse.Namespace) -> int:
             commit = subprocess.run(commit_cmd, cwd=repo, **popen)
             committed = commit.returncode == 0
             if committed:
+                committed_head = subprocess.run(
+                    _git("rev-parse", "--verify", "HEAD^{commit}"),
+                    cwd=repo,
+                    capture_output=True,
+                    **popen,
+                )
+                commit_scope = (
+                    _committed_scope(
+                        repo,
+                        base_head=original_head,
+                        commit_head=committed_head.stdout.strip(),
+                        env=env,
+                        pass_fds=lease.child_pass_fds(),
+                    )
+                    if committed_head.returncode == 0
+                    else None
+                )
+                unexpected = (
+                    sorted(set(commit_scope) - set(paths))
+                    if commit_scope is not None
+                    else []
+                )
+                if commit_scope is None or unexpected:
+                    new_head = (
+                        committed_head.stdout.strip()
+                        if committed_head.returncode == 0
+                        else ""
+                    )
+                    rollback = subprocess.run(
+                        _git("update-ref", "HEAD", original_head, new_head),
+                        cwd=repo,
+                        **popen,
+                    )
+                    if rollback.returncode != 0:
+                        print(
+                            "[git-writer-lock] ERROR: commit scope drift detected "
+                            "but HEAD CAS rollback failed",
+                            file=sys.stderr,
+                        )
+                        return 1
+                    committed = False
+                    restore_index = subprocess.run(
+                        _git("read-tree", original_index_tree),
+                        cwd=repo,
+                        **popen,
+                    )
+                    index_restored = restore_index.returncode == 0
+                    if not index_restored:
+                        print(
+                            "[git-writer-lock] ERROR: commit scope drift was "
+                            "rolled back but index restoration failed",
+                            file=sys.stderr,
+                        )
+                        return 1
+                    detail = (
+                        f"unexpected paths {unexpected}"
+                        if unexpected
+                        else "result was not one direct child commit"
+                    )
+                    print(
+                        "[git-writer-lock] BLOCKED: commit scope drift after "
+                        f"hooks: {detail}",
+                        file=sys.stderr,
+                    )
+                    return 2
                 try:
                     head = subprocess.run(
                         _git("rev-parse", "HEAD"),
@@ -585,7 +717,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     )
             return int(commit.returncode)
         finally:
-            if index_touched and not committed:
+            if index_touched and not committed and not index_restored:
                 # Preflight proved these entries matched HEAD before we touched
                 # them, so exact-path reset restores index ownership while
                 # deliberately preserving working-tree bytes.

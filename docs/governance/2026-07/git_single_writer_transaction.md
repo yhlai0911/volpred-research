@@ -51,6 +51,11 @@ nested `frontend-v2-fix` 是另一個 Git common-dir，天然取得不同 sentin
 - CLI 只接受 repo 內的 exact file path（拒絕 `--all`、目錄、repo root、Git magic pathspec），
   並全程 `--literal-pathspecs`。取鎖後若 target 已 staged 就拒絕；commit/hook 失敗只 reset
   preflight 證明原本乾淨的 target index，working bytes 與 foreign index 保持不變。
+- `git commit --only` 的 argv 不足以證明實際 scope：pre-commit hook 能在 Git 的暫存 index
+  `git add` foreign path。CLI 因此先 snapshot 原 HEAD 與完整 index tree，commit 後在同一
+  lease 內驗證結果是原 HEAD 的單一 direct child、且 changed paths 不超出 exact scope；
+  drift 會以 `update-ref HEAD <old> <new>` CAS 回退、`read-tree` 還原原 index，hook 產生的
+  working bytes保留供診斷，且不寫成功 receipt。
 - 外層 transaction 的 child 必須同時繼承 lock FD 與匿名 pipe capability FD；verifier 先用獨立
   probe 證明 flock 已被占用，再驗 declared FD 是原 open-file-description，並比對 metadata
   內不可由 stale token 重建的 capability inode。這避免 holder crash 後以 stale token 新開 FD
@@ -89,7 +94,9 @@ pre-staged collision 與 hook-failure index rollback。`test_git_reference_trans
 實際證明 raw commit（含 `--no-verify`）、raw `update-ref main`、canonical `HEAD` pseudo-ref、
 fake-PATH interpreter、unlocked FD 與 crash 後 stale-token/capability forgery 都被擋；locked commit
 可落地，registered linked worktree 的 side branch不受 main gate影響。hook installer另 pin
-canonical-source refusal與 atomic replacement順序。
+canonical-source refusal與 atomic replacement順序。另有 failure injection 讓 pre-commit hook
+刻意 stage foreign path，驗證 helper拒絕、HEAD CAS回退、既有 foreign staged entry逐 byte
+保留、working bytes不被覆寫。
 
 `scripts/tests/test_git_conflict_guard_nondestructive.py` pin 有 markers 時 bytes 與 foreign staged
 entry 不動；只有空 orphan 可刪。`test_pretooluse_deny.sh` 覆蓋 direct、`command`/`env` wrapper、

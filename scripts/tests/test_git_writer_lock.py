@@ -420,6 +420,52 @@ def test_exact_path_commit_preserves_foreign_index_and_worktree(tmp_path: Path) 
     assert foreign.read_text() == "foreign working\n"
 
 
+def test_exact_path_commit_rejects_hook_injected_foreign_path(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    foreign = repo / "foreign.txt"
+    preexisting = repo / "preexisting.txt"
+    foreign.write_text("base\n")
+    preexisting.write_text("base\n")
+    _run(repo, "git", "add", "foreign.txt", "preexisting.txt")
+    _run(repo, "git", "commit", "-qm", "add foreign fixtures")
+    before_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    preexisting.write_text("already staged\n")
+    _run(repo, "git", "add", "preexisting.txt")
+    staged_blob = _run(repo, "git", "show", ":preexisting.txt").stdout
+    (repo / "owned.txt").write_text("owned\n")
+
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "printf 'hook injected\\n' > foreign.txt\n"
+        "git add -- foreign.txt\n"
+    )
+    hook.chmod(0o755)
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "exact-owner",
+        "--message",
+        "owned only",
+        "--",
+        "owned.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "commit scope drift" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == before_head
+    assert _run(repo, "git", "show", ":preexisting.txt").stdout == staged_blob
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == (
+        "preexisting.txt\n"
+    )
+    assert (repo / "owned.txt").read_text() == "owned\n"
+    assert foreign.read_text() == "hook injected\n"
+
+
 def test_exact_path_commit_expected_head_fails_before_touching_index(
     tmp_path: Path,
 ) -> None:
