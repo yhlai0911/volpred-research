@@ -8,10 +8,15 @@ from datetime import UTC, datetime
 import pytest
 
 from volpred.ops.delivery import (
+    AcknowledgedEffect,
     AcknowledgementExpectation,
     EffectDelivery,
     EffectRequestConflict,
+    FailedEffect,
+    PublisherArticleDeleteApprovalReadback,
     PublisherArticleDeleteAuthorization,
+    PublisherArticleDeleteCandidateReadback,
+    PublisherArticleDeleteEffectAdapter,
     plan_publisher_article_delete,
     prepare_publisher_article_delete,
 )
@@ -84,6 +89,91 @@ def _prepare(plan=None, authorization=None):
         payload_ref="artifact:publisher/delete/intent.json",
         requester_ref="publisher:delete-operator",
     )
+
+
+def _effect(prepared=None):
+    actual = prepared or _prepare()
+    return EffectDelivery(
+        clock=lambda: datetime(2026, 7, 25, tzinfo=UTC),
+        id_factory=lambda: "effect-publisher-delete-1",
+    ).request(actual.request)
+
+
+class _ApprovalVerifier:
+    def __init__(
+        self,
+        *,
+        active: list[bool] | None = None,
+        events: list[str] | None = None,
+    ) -> None:
+        self._active = list(active or [True])
+        self.events = events if events is not None else []
+        self.calls = 0
+
+    def readback(
+        self,
+        authorization: PublisherArticleDeleteAuthorization,
+    ) -> PublisherArticleDeleteApprovalReadback:
+        self.events.append("approval")
+        active = self._active[min(self.calls, len(self._active) - 1)]
+        self.calls += 1
+        return PublisherArticleDeleteApprovalReadback(
+            authorization=authorization,
+            active=active,
+            evidence_ref=f"approval-readback:{authorization.approval_ref}",
+            evidence_sha256=hashlib.sha256(
+                f"{authorization.approval_ref}:{active}".encode()
+            ).hexdigest(),
+        )
+
+
+class _DeleteProjection:
+    def __init__(
+        self,
+        candidates: list[dict],
+        *,
+        events: list[str] | None = None,
+        delete_applies: bool = True,
+    ) -> None:
+        self.rows = {
+            candidate["article"]["id"]: json.loads(json.dumps(candidate))
+            for candidate in candidates
+        }
+        self.events = events if events is not None else []
+        self.delete_applies = delete_applies
+        self.delete_calls: list[str] = []
+
+    def readback(
+        self,
+        expected_candidate: dict,
+    ) -> PublisherArticleDeleteCandidateReadback:
+        article_id = expected_candidate["article"]["id"]
+        self.events.append(f"read:{article_id}")
+        candidate = self.rows[article_id]
+        snapshot = (
+            None if candidate is None else json.loads(json.dumps(candidate))
+        )
+        evidence = json.dumps(
+            {"article_id": article_id, "candidate": snapshot},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+        return PublisherArticleDeleteCandidateReadback(
+            article_id=article_id,
+            candidate=snapshot,
+            evidence_ref=f"supabase:articles:{article_id}",
+            evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        )
+
+    def delete(self, expected_candidate: dict) -> bool:
+        article_id = expected_candidate["article"]["id"]
+        self.events.append(f"delete:{article_id}")
+        self.delete_calls.append(article_id)
+        if self.rows[article_id] != expected_candidate:
+            return False
+        if self.delete_applies:
+            self.rows[article_id] = None
+        return True
 
 
 def test_plan_freezes_guards_scope_and_complete_recovery_rows() -> None:
@@ -299,3 +389,143 @@ def test_tampered_plan_is_rejected_before_effect_request() -> None:
 
     with pytest.raises(ValueError, match="recovery hash"):
         _prepare(tampered)
+
+
+def test_delete_adapter_requires_exact_scope_then_typed_absence() -> None:
+    prepared = _prepare()
+    payload = json.loads(prepared.payload)
+    candidates = payload["scope"]["candidates"]
+    events: list[str] = []
+    approval = _ApprovalVerifier(events=events)
+    projection = _DeleteProjection(candidates, events=events)
+    authority_calls = 0
+
+    def authorize() -> None:
+        nonlocal authority_calls
+        authority_calls += 1
+        events.append("authority")
+
+    outcome = PublisherArticleDeleteEffectAdapter(
+        approval=approval,
+        projection=projection,
+    ).deliver(
+        _effect(prepared),
+        prepared.payload,
+        authorize_mutation=authorize,
+    )
+
+    assert isinstance(outcome, AcknowledgedEffect)
+    assert outcome.acknowledgement == prepared.request.acknowledgement
+    assert projection.delete_calls == ["article-a", "article-b"]
+    assert approval.calls == 3
+    assert authority_calls == 2
+    assert events.index("authority") < events.index("delete:article-a")
+    assert events.index("delete:article-a") < events.index("delete:article-b")
+    assert all(row is None for row in projection.rows.values())
+
+
+def test_delete_adapter_preflights_all_candidates_before_first_write() -> None:
+    prepared = _prepare()
+    candidates = json.loads(prepared.payload)["scope"]["candidates"]
+    projection = _DeleteProjection(candidates)
+    projection.rows["article-b"]["article"]["title"] = "Changed remotely"
+
+    outcome = PublisherArticleDeleteEffectAdapter(
+        approval=_ApprovalVerifier(),
+        projection=projection,
+    ).deliver(_effect(prepared), prepared.payload)
+
+    assert isinstance(outcome, FailedEffect)
+    assert outcome.reason_code == "publisher_article_delete_scope_drift"
+    assert outcome.retryable is False
+    assert projection.delete_calls == []
+
+
+def test_delete_adapter_reports_malformed_provider_readback() -> None:
+    prepared = _prepare()
+    candidates = json.loads(prepared.payload)["scope"]["candidates"]
+    projection = _DeleteProjection(candidates)
+    projection.rows["article-b"] = {"article": {"id": "article-b"}}
+
+    outcome = PublisherArticleDeleteEffectAdapter(
+        approval=_ApprovalVerifier(),
+        projection=projection,
+    ).deliver(_effect(prepared), prepared.payload)
+
+    assert isinstance(outcome, FailedEffect)
+    assert outcome.reason_code == "publisher_article_delete_provider_error"
+    assert outcome.retryable is True
+    assert projection.delete_calls == []
+
+
+def test_delete_adapter_rechecks_durable_approval_at_mutation_boundary() -> None:
+    prepared = _prepare()
+    candidates = json.loads(prepared.payload)["scope"]["candidates"]
+    projection = _DeleteProjection(candidates)
+
+    outcome = PublisherArticleDeleteEffectAdapter(
+        approval=_ApprovalVerifier(active=[True, False]),
+        projection=projection,
+    ).deliver(_effect(prepared), prepared.payload)
+
+    assert isinstance(outcome, FailedEffect)
+    assert outcome.reason_code == "publisher_article_delete_approval_not_active"
+    assert outcome.retryable is False
+    assert projection.delete_calls == []
+
+
+def test_delete_adapter_authority_loss_escapes_without_mutation() -> None:
+    prepared = _prepare()
+    candidates = json.loads(prepared.payload)["scope"]["candidates"]
+    projection = _DeleteProjection(candidates)
+
+    def replaced_authority() -> None:
+        raise RuntimeError("primary authority lease replaced")
+
+    with pytest.raises(RuntimeError, match="lease replaced"):
+        PublisherArticleDeleteEffectAdapter(
+            approval=_ApprovalVerifier(),
+            projection=projection,
+        ).deliver(
+            _effect(prepared),
+            prepared.payload,
+            authorize_mutation=replaced_authority,
+        )
+
+    assert projection.delete_calls == []
+
+
+def test_delete_adapter_replay_accepts_only_typed_absence_evidence() -> None:
+    prepared = _prepare()
+    candidates = json.loads(prepared.payload)["scope"]["candidates"]
+    projection = _DeleteProjection(candidates)
+    projection.rows = {article_id: None for article_id in projection.rows}
+    authority_calls: list[None] = []
+
+    outcome = PublisherArticleDeleteEffectAdapter(
+        approval=_ApprovalVerifier(),
+        projection=projection,
+    ).deliver(
+        _effect(prepared),
+        prepared.payload,
+        authorize_mutation=lambda: authority_calls.append(None),
+    )
+
+    assert isinstance(outcome, AcknowledgedEffect)
+    assert projection.delete_calls == []
+    assert authority_calls == []
+
+
+def test_delete_adapter_fails_when_delete_lacks_absence_readback() -> None:
+    prepared = _prepare()
+    candidates = json.loads(prepared.payload)["scope"]["candidates"]
+    projection = _DeleteProjection(candidates, delete_applies=False)
+
+    outcome = PublisherArticleDeleteEffectAdapter(
+        approval=_ApprovalVerifier(),
+        projection=projection,
+    ).deliver(_effect(prepared), prepared.payload)
+
+    assert isinstance(outcome, FailedEffect)
+    assert outcome.reason_code == "publisher_article_delete_absence_mismatch"
+    assert outcome.retryable is True

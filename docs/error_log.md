@@ -2371,3 +2371,30 @@ Delivery、delete/safe/owned reconcile、feed sync及Supabase相鄰套件共
 **`root_cause_fixed_and_verified`**；destructive provider／owner CAS／restore executor
 與live rollback rehearsal仍未完成，所以program commit 15與umbrella仍為
 **`contained`**。
+
+### 2026-07-25 — Delete intent已有approval bytes，但worker沒有destructive execution contract
+
+**證據化症狀與根因層級**：delete intent已把canonical feed、完整candidate/cascade
+rows、recovery SHA與operator approval綁成immutable EffectRequest，但沒有worker
+adapter去回讀durable approval、比對remote scope或證明delete後真的absence。若直接
+沿用safe reconcile provider，approval可能已撤回、第二筆candidate已漂移，或authority
+在read-back阻塞期間換代；舊attempt仍可能部分刪除。根因是destructive effect
+execution seam缺失，不是intent hash、legacy floor/cap或Supabase資料內容。
+
+**底層重構**：新增`PublisherArticleDeleteEffectAdapter`與窄版approval/projection
+interfaces。Adapter先驗effect contract及canonical payload，再讀回active approval，
+把全部candidate的article及六表cascade bytes exact preflight；任一scope drift皆全批
+零mutation。每筆delete前再次exact read-back與approval read-back，再讓owned caller
+緊貼mutation重驗原Primary Authority epoch；projection的delete contract必須atomic
+compare完整candidate後才刪。Authority loss刻意向外拋，不轉retry或settle stale
+attempt。只有每筆typed absence read-back都帶合法evidence ref/hash才產生
+acknowledgement，provider回true但row仍存在會fail closed。
+
+**回歸、下游回讀與狀態界線**：failure injections覆蓋全scope preflight、approval在
+mutation boundary撤回、authority換代零write、already-absent冪等replay與delete缺少
+absence read-back及malformed provider readback；delete contract本檔 **19 passed**，
+與Effect Delivery、safe reconcile及Supabase相鄰套件合計 **127 passed**。本切片無production provider、
+remote mutation、owner transfer或live effect。Worker execution-contract根因為
+**`root_cause_fixed_and_verified`**；production Supabase projection、owner CAS、
+exact restore executor與live delete→rollback→convergence rehearsal仍缺，故program
+commit 15及operations-core umbrella維持 **`contained`**。

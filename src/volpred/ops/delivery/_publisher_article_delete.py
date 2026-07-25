@@ -15,10 +15,15 @@ import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Callable, Protocol
 
 from ._effect import (
+    AcknowledgedEffect,
     AcknowledgementExpectation,
+    EffectAttemptOutcome,
     EffectRequest,
+    EffectView,
+    FailedEffect,
 )
 
 _SCOPE_SCHEMA = "publisher-article-delete-scope.v1"
@@ -71,6 +76,256 @@ class PreparedPublisherArticleDelete:
     payload: bytes
     recovery_dump: bytes
     scope_sha256: str
+
+
+@dataclass(frozen=True)
+class PublisherArticleDeleteApprovalReadback:
+    """Typed evidence that the scope-bound durable approval remains active."""
+
+    authorization: PublisherArticleDeleteAuthorization
+    active: bool
+    evidence_ref: str
+    evidence_sha256: str
+
+
+@dataclass(frozen=True)
+class PublisherArticleDeleteCandidateReadback:
+    """Complete candidate/cascade state, or typed evidence of its absence."""
+
+    article_id: str
+    candidate: Mapping[str, object] | None
+    evidence_ref: str
+    evidence_sha256: str
+
+    @property
+    def absent(self) -> bool:
+        return self.candidate is None
+
+
+class _PublisherArticleDeleteApprovalVerifier(Protocol):
+    def readback(
+        self,
+        authorization: PublisherArticleDeleteAuthorization,
+    ) -> PublisherArticleDeleteApprovalReadback: ...
+
+
+class _PublisherArticleDeleteProjection(Protocol):
+    def readback(
+        self,
+        expected_candidate: Mapping[str, object],
+    ) -> PublisherArticleDeleteCandidateReadback: ...
+
+    def delete(
+        self,
+        expected_candidate: Mapping[str, object],
+    ) -> bool:
+        """Atomically compare the complete expected candidate and delete it."""
+        ...
+
+
+@dataclass(frozen=True)
+class _PublisherArticleDeleteExecution:
+    scope_sha256: str
+    canonical_feed_sha256: str
+    recovery_dump_sha256: str
+    authorization: PublisherArticleDeleteAuthorization
+    candidates: tuple[dict, ...]
+
+
+class PublisherArticleDeleteEffectAdapter:
+    """Delete one approved immutable scope and require typed absence read-back."""
+
+    effect_kinds = frozenset({_EFFECT_KIND})
+
+    def __init__(
+        self,
+        *,
+        approval: _PublisherArticleDeleteApprovalVerifier,
+        projection: _PublisherArticleDeleteProjection,
+    ) -> None:
+        self._approval = approval
+        self._projection = projection
+
+    def deliver(
+        self,
+        effect: EffectView,
+        payload: bytes,
+        *,
+        authorize_mutation: Callable[[], None] | None = None,
+    ) -> EffectAttemptOutcome:
+        if not isinstance(payload, bytes):
+            return _failure(
+                effect,
+                "invalid_publisher_article_delete_payload",
+                retryable=False,
+            )
+        if hashlib.sha256(payload).hexdigest() != effect.payload_sha256:
+            return _failure(
+                effect,
+                "publisher_article_delete_payload_hash_mismatch",
+                retryable=False,
+            )
+        if not _base_contract_matches(effect):
+            return _failure(
+                effect,
+                "unsupported_publisher_article_delete_contract",
+                retryable=False,
+            )
+        try:
+            execution = _decode_payload(payload)
+        except (TypeError, UnicodeError, ValueError, json.JSONDecodeError):
+            return _failure(
+                effect,
+                "invalid_publisher_article_delete_payload",
+                retryable=False,
+            )
+
+        approval_failure = self._verify_approval(effect, execution.authorization)
+        if approval_failure is not None:
+            return approval_failure
+
+        before: list[PublisherArticleDeleteCandidateReadback] = []
+        for candidate in execution.candidates:
+            observed = self._readback(effect, candidate)
+            if isinstance(observed, FailedEffect):
+                return observed
+            if not observed.absent:
+                try:
+                    matches = _candidate_readback_matches(observed, candidate)
+                except (TypeError, ValueError):
+                    return _failure(
+                        effect,
+                        "publisher_article_delete_provider_error",
+                        retryable=True,
+                    )
+                if matches:
+                    before.append(observed)
+                    continue
+                return _failure(
+                    effect,
+                    "publisher_article_delete_scope_drift",
+                    retryable=False,
+                )
+            before.append(observed)
+
+        acknowledged = _acknowledged(effect, execution, tuple(before))
+        if acknowledged is not None:
+            return acknowledged
+
+        for candidate, observed in zip(
+            execution.candidates,
+            before,
+            strict=True,
+        ):
+            if observed.absent:
+                continue
+            boundary_readback = self._readback(effect, candidate)
+            if isinstance(boundary_readback, FailedEffect):
+                return boundary_readback
+            try:
+                boundary_matches = _candidate_readback_matches(
+                    boundary_readback,
+                    candidate,
+                )
+            except (TypeError, ValueError):
+                return _failure(
+                    effect,
+                    "publisher_article_delete_provider_error",
+                    retryable=True,
+                )
+            if not boundary_matches:
+                return _failure(
+                    effect,
+                    "publisher_article_delete_scope_drift",
+                    retryable=False,
+                )
+            approval_failure = self._verify_approval(
+                effect,
+                execution.authorization,
+            )
+            if approval_failure is not None:
+                return approval_failure
+            if authorize_mutation is not None:
+                # Approval and remote read-back are external boundaries. The
+                # owner-fenced caller revalidates its exact authority epoch
+                # immediately before every destructive mutation.
+                authorize_mutation()
+            try:
+                deleted = self._projection.delete(candidate)
+            except Exception:  # noqa: BLE001 - provider failures are evidence.
+                deleted = False
+            if not deleted:
+                return _failure(
+                    effect,
+                    "publisher_article_delete_provider_error",
+                    retryable=True,
+                )
+
+        after: list[PublisherArticleDeleteCandidateReadback] = []
+        for candidate in execution.candidates:
+            observed = self._readback(effect, candidate)
+            if isinstance(observed, FailedEffect):
+                return observed
+            after.append(observed)
+        acknowledged = _acknowledged(effect, execution, tuple(after))
+        if acknowledged is not None:
+            return acknowledged
+        return _failure(
+            effect,
+            "publisher_article_delete_absence_mismatch",
+            retryable=True,
+        )
+
+    def _verify_approval(
+        self,
+        effect: EffectView,
+        authorization: PublisherArticleDeleteAuthorization,
+    ) -> FailedEffect | None:
+        try:
+            readback = self._approval.readback(authorization)
+        except Exception:  # noqa: BLE001 - provider failures are evidence.
+            return _failure(
+                effect,
+                "publisher_article_delete_approval_provider_error",
+                retryable=True,
+            )
+        if not _approval_readback_matches(readback, authorization):
+            return _failure(
+                effect,
+                "publisher_article_delete_approval_not_active",
+                retryable=False,
+            )
+        return None
+
+    def _readback(
+        self,
+        effect: EffectView,
+        candidate: Mapping[str, object],
+    ) -> PublisherArticleDeleteCandidateReadback | FailedEffect:
+        try:
+            readback = self._projection.readback(candidate)
+        except Exception:  # noqa: BLE001 - provider failures are evidence.
+            return _failure(
+                effect,
+                "publisher_article_delete_provider_error",
+                retryable=True,
+            )
+        article = candidate["article"]
+        article_id = article["id"]
+        if (
+            not isinstance(readback, PublisherArticleDeleteCandidateReadback)
+            or readback.article_id != article_id
+            or not _valid_evidence(
+                readback.evidence_ref,
+                readback.evidence_sha256,
+            )
+        ):
+            return _failure(
+                effect,
+                "publisher_article_delete_provider_error",
+                retryable=True,
+            )
+        return readback
 
 
 def plan_publisher_article_delete(
@@ -378,6 +633,210 @@ def _normalize_authorization(
     )
 
 
+def _decode_payload(payload: bytes) -> _PublisherArticleDeleteExecution:
+    decoded = json.loads(payload.decode("utf-8"))
+    if not isinstance(decoded, Mapping):
+        raise TypeError("publisher delete payload must be an object")
+    if set(decoded) != {
+        "schema_version",
+        "scope_sha256",
+        "scope",
+        "authorization",
+    }:
+        raise ValueError("publisher delete payload fields do not match schema")
+    if decoded.get("schema_version") != _PAYLOAD_SCHEMA:
+        raise ValueError("unsupported publisher delete payload schema")
+    if _canonical_json(decoded) != payload:
+        raise ValueError("publisher delete payload is not canonical")
+
+    scope = decoded["scope"]
+    if not isinstance(scope, Mapping):
+        raise TypeError("publisher delete scope must be an object")
+    if set(scope) != {
+        "schema_version",
+        "canonical_feed_sha256",
+        "canonical_article_count",
+        "guards",
+        "candidates",
+        "recovery",
+    }:
+        raise ValueError("publisher delete scope fields do not match schema")
+    if scope.get("schema_version") != _SCOPE_SCHEMA:
+        raise ValueError("unsupported publisher delete scope schema")
+    scope_sha256 = decoded["scope_sha256"]
+    if (
+        not isinstance(scope_sha256, str)
+        or _SHA256.fullmatch(scope_sha256) is None
+        or hashlib.sha256(_canonical_json(scope)).hexdigest() != scope_sha256
+    ):
+        raise ValueError("publisher delete scope hash does not match its bytes")
+
+    candidates = scope["candidates"]
+    normalized_candidates = _normalize_candidates(candidates)
+    if list(normalized_candidates) != candidates:
+        raise ValueError("publisher delete candidates are not canonical")
+    guards = scope["guards"]
+    recovery = scope["recovery"]
+    if (
+        not isinstance(guards, Mapping)
+        or set(guards) != {
+            "minimum_canonical_articles",
+            "maximum_deletes",
+        }
+        or not isinstance(recovery, Mapping)
+        or set(recovery) != {"artifact_ref", "sha256"}
+    ):
+        raise ValueError("publisher delete scope guards or recovery are invalid")
+    minimum = _positive_int(
+        guards["minimum_canonical_articles"],
+        field="minimum_canonical_articles",
+    )
+    maximum = _positive_int(
+        guards["maximum_deletes"],
+        field="maximum_deletes",
+    )
+    canonical_count = _positive_int(
+        scope["canonical_article_count"],
+        field="canonical_article_count",
+    )
+    if canonical_count < minimum or len(normalized_candidates) > maximum:
+        raise ValueError("publisher delete scope violates its guards")
+    canonical_feed_sha256 = scope["canonical_feed_sha256"]
+    recovery_dump_sha256 = recovery["sha256"]
+    if (
+        not isinstance(canonical_feed_sha256, str)
+        or _SHA256.fullmatch(canonical_feed_sha256) is None
+        or not isinstance(recovery_dump_sha256, str)
+        or _SHA256.fullmatch(recovery_dump_sha256) is None
+    ):
+        raise ValueError("publisher delete scope hashes are invalid")
+    _required_text(recovery["artifact_ref"], field="recovery artifact_ref")
+
+    authorization_payload = decoded["authorization"]
+    if not isinstance(authorization_payload, Mapping) or set(
+        authorization_payload
+    ) != {
+        "approval_ref",
+        "approver_ref",
+        "approved_at",
+        "scope_sha256",
+    }:
+        raise ValueError("publisher delete authorization fields do not match schema")
+    authorization = _normalize_authorization(
+        PublisherArticleDeleteAuthorization(**authorization_payload)
+    )
+    if authorization.scope_sha256 != scope_sha256:
+        raise ValueError("publisher delete authorization scope drifted")
+    return _PublisherArticleDeleteExecution(
+        scope_sha256=scope_sha256,
+        canonical_feed_sha256=canonical_feed_sha256,
+        recovery_dump_sha256=recovery_dump_sha256,
+        authorization=authorization,
+        candidates=normalized_candidates,
+    )
+
+
+def _base_contract_matches(effect: EffectView) -> bool:
+    acknowledgement = effect.acknowledgement
+    return (
+        effect.schema_version == "effect-request.v1"
+        and effect.effect_kind == _EFFECT_KIND
+        and effect.risk == "destructive"
+        and effect.target_ref == _TARGET_REF
+        and acknowledgement.kind == _ACKNOWLEDGEMENT_KIND
+        and acknowledgement.target_ref == _TARGET_REF
+    )
+
+
+def _approval_readback_matches(
+    readback: object,
+    authorization: PublisherArticleDeleteAuthorization,
+) -> bool:
+    return bool(
+        isinstance(readback, PublisherArticleDeleteApprovalReadback)
+        and readback.active is True
+        and readback.authorization == authorization
+        and _valid_evidence(readback.evidence_ref, readback.evidence_sha256)
+    )
+
+
+def _candidate_readback_matches(
+    readback: PublisherArticleDeleteCandidateReadback,
+    expected: Mapping[str, object],
+) -> bool:
+    if readback.absent:
+        return False
+    normalized = _normalize_candidates([readback.candidate])
+    return len(normalized) == 1 and normalized[0] == expected
+
+
+def _acknowledged(
+    effect: EffectView,
+    execution: _PublisherArticleDeleteExecution,
+    readbacks: tuple[PublisherArticleDeleteCandidateReadback, ...],
+) -> AcknowledgedEffect | None:
+    if len(readbacks) != len(execution.candidates) or not all(
+        readback.absent for readback in readbacks
+    ):
+        return None
+    evidence = _canonical_json(
+        {
+            "schema_version": "publisher-article-delete-readback.v1",
+            "scope_sha256": execution.scope_sha256,
+            "canonical_feed_sha256": execution.canonical_feed_sha256,
+            "recovery_dump_sha256": execution.recovery_dump_sha256,
+            "articles": [
+                {
+                    "article_id": readback.article_id,
+                    "evidence_ref": readback.evidence_ref.strip(),
+                    "evidence_sha256": readback.evidence_sha256,
+                    "absent": True,
+                }
+                for readback in readbacks
+            ],
+        }
+    )
+    return AcknowledgedEffect(
+        acknowledgement=AcknowledgementExpectation(
+            kind=_ACKNOWLEDGEMENT_KIND,
+            target_ref=_TARGET_REF,
+        ),
+        evidence_ref=f"supabase:articles:delete:{execution.scope_sha256}",
+        evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+    )
+
+
+def _valid_evidence(evidence_ref: object, evidence_sha256: object) -> bool:
+    return bool(
+        isinstance(evidence_ref, str)
+        and evidence_ref.strip()
+        and isinstance(evidence_sha256, str)
+        and _SHA256.fullmatch(evidence_sha256) is not None
+    )
+
+
+def _failure(
+    effect: EffectView,
+    reason_code: str,
+    *,
+    retryable: bool,
+) -> FailedEffect:
+    evidence = _canonical_json(
+        {
+            "effect_id": effect.id,
+            "request_sha256": effect.request_sha256,
+            "reason_code": reason_code,
+            "retryable": retryable,
+        }
+    )
+    return FailedEffect(
+        reason_code=reason_code,
+        evidence_ref=f"effect-attempt:{effect.id}:{reason_code}",
+        evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        retryable=retryable,
+    )
+
+
 def _json_mapping(value: object, *, field: str) -> dict:
     if not isinstance(value, Mapping):
         raise TypeError(f"{field} must be an object")
@@ -416,7 +875,10 @@ def _canonical_json(value: object) -> bytes:
 __all__ = [
     "PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS",
     "PreparedPublisherArticleDelete",
+    "PublisherArticleDeleteApprovalReadback",
     "PublisherArticleDeleteAuthorization",
+    "PublisherArticleDeleteCandidateReadback",
+    "PublisherArticleDeleteEffectAdapter",
     "PublisherArticleDeletePlan",
     "plan_publisher_article_delete",
     "prepare_publisher_article_delete",

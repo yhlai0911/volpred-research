@@ -1190,6 +1190,29 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   executor與live rollback rehearsal仍缺，program commit 15與umbrella維持
   **`contained`**。
 
+### 2026-07-25 publisher destructive execution adapter checkpoint
+
+- Immutable delete intent先前只證明scope與approval bytes已綁定，worker仍沒有可安全
+  執行destructive EffectRequest的interface。新增
+  `PublisherArticleDeleteEffectAdapter`，把durable approval read-back、完整candidate
+  與六表cascade read-back、delete compare-and-mutate及typed absence acknowledgement
+  收在同一個effect family adapter；payload hash、risk、target與acknowledgement任一
+  漂移均在provider I/O前terminal fail closed。
+- Adapter先重驗scope-bound approval，再把**全部**candidate做exact preflight，確保
+  第二筆scope drift時第一筆也不會先刪。每筆真正mutation前再讀一次完整candidate，
+  重驗durable approval，並由owned caller緊貼delete重驗原Primary Authority epoch。
+  Projection interface的delete語意是atomic compare完整article/cascade bytes後刪除；
+  authority replacement直接向外拋ownership loss，不會被包成provider retry或settle
+  stale attempt。
+- Replay只有在每筆都回傳typed absence且evidence ref/hash合法時才acknowledge；delete
+  回true但read-back仍存在會成為retryable absence mismatch。Failure injections覆蓋
+  全scope preflight、approval撤回、authority換代零mutation、已刪除replay與缺absence
+  acknowledgement；delete contract及Effect/reconcile/Supabase相鄰套件
+  **127 passed**。這個worker execution-contract根因為
+  **`root_cause_fixed_and_verified`**；production Supabase projection、owner CAS、
+  exact restore executor及live delete→rollback→convergence rehearsal仍缺，故program
+  commit 15與umbrella維持 **`contained`**。
+
 ## 7. Provider Execution
 
 ### 7.1 Seam

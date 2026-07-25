@@ -40,7 +40,10 @@ from ._publisher_article_reconcile import (
 from ._publisher_article_delete import (
     PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS,
     PreparedPublisherArticleDelete,
+    PublisherArticleDeleteApprovalReadback,
     PublisherArticleDeleteAuthorization,
+    PublisherArticleDeleteCandidateReadback,
+    PublisherArticleDeleteEffectAdapter,
     PublisherArticleDeletePlan,
     plan_publisher_article_delete,
     prepare_publisher_article_delete,

@@ -380,6 +380,17 @@ read-only reconcile為1877/1877、ghost=0、deleted=0，相鄰
 **200 passed, 1 skipped**。此recovery完整性根因為
 **`root_cause_fixed_and_verified`**，但owner/provider/restore/live rollback缺口不變。
 
+同班再補上destructive worker execution adapter。原scope-bound EffectRequest現在只有
+在durable approval仍active、全部candidate的article與六表cascade bytes都exact-match
+時才可進mutation；每筆delete前會重新read-back、重驗approval，並讓owned caller緊貼
+mutation重驗原Primary Authority epoch。第二筆scope drift時維持全批零刪除，
+authority換代直接向外拋ownership loss；effect只有在每筆typed absence read-back都帶
+合法evidence ref/hash時才acknowledge。Failure injections與相鄰套件
+**127 passed**。此execution-contract根因為
+**`root_cause_fixed_and_verified`**；production Supabase projection、delete owner CAS、
+exact restore executor與live delete→rollback→convergence尚未完成，所以program
+commit 15與operations-core umbrella仍為 **`contained`**。
+
 同班另修正current Test Suite連續紅燈：cron alert metadata原本只能把整支log標為
 `findings`，無法表達`audit_publish_sync`的exit 1=findings、exit 2=unavailable。
 Schedule新增typed `findings_exit_codes=[1]`；host health只豁免code 1，code 2仍會進
