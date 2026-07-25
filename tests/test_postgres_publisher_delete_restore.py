@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import json
 import os
 import shutil
 import socket
@@ -12,6 +13,11 @@ import psycopg
 import pytest
 from psycopg.types.json import Jsonb
 
+from volpred.ops.delivery import (
+    PublisherArticleDeleteAuthorization,
+    plan_publisher_article_delete,
+    prepare_publisher_article_delete,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEPENDENCY_MIGRATION = (
@@ -31,6 +37,22 @@ RESTORE_NULL_BINDING_FIX = (
     / "supabase"
     / "migrations"
     / "20260725020832_fix_publisher_delete_restore_null_binding.sql"
+)
+DELETE_REQUEST_DEPENDENCIES = tuple(
+    REPO_ROOT / "supabase" / "migrations" / name
+    for name in (
+        "20260723062144_operations_core_work_coordinator.sql",
+        "20260724020500_operations_core_effect_outbox.sql",
+        "20260724030000_operations_core_effect_outbox_settlement.sql",
+        "20260724040000_operations_core_effect_worker_authority.sql",
+        "20260724050000_operations_core_effect_receipt_index.sql",
+        "20260724060000_operations_core_effect_payload_primary_authority.sql",
+        "20260724070000_operations_core_notification_ownership.sql",
+        "20260724071000_operations_core_notification_ownership_index.sql",
+        "20260725002427_operations_core_publisher_delete_ownership.sql",
+        "20260725004020_fix_publisher_delete_approval_record_ambiguity.sql",
+        "20260725202655_promote_publisher_delete_scope_approval.sql",
+    )
 )
 ARTICLE_ID = "11111111-1111-4111-8111-111111111111"
 SECOND_ARTICLE_ID = "22222222-2222-4222-8222-222222222222"
@@ -360,6 +382,7 @@ def reset_restore_tables(restore_postgres_dsn: str) -> None:
             CASCADE
             """
         )
+
         connection.execute(
             "INSERT INTO public.profiles (id) VALUES (%s)",
             (USER_ID,),
@@ -391,6 +414,116 @@ def reset_restore_tables(restore_postgres_dsn: str) -> None:
                 "2026-07-25T00:00:00+00:00",
             ),
         )
+
+
+@pytest.fixture(scope="session")
+def delete_request_postgres_dsn(
+    restore_postgres_dsn: str,
+) -> str:
+    with psycopg.connect(
+        restore_postgres_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("ALTER ROLE volpred_ops_definer NOINHERIT")
+        for migration in DELETE_REQUEST_DEPENDENCIES:
+            connection.execute(migration.read_text(encoding="utf-8"))
+    return restore_postgres_dsn
+
+
+def test_owned_delete_request_promotes_scope_approval_into_work_approval(
+    delete_request_postgres_dsn: str,
+) -> None:
+    candidate = _candidate(article_id=ARTICLE_ID, slug="orphan-owned-delete")
+    plan = plan_publisher_article_delete(
+        canonical_feed=json.dumps(
+            [{"id": f"mile_{index}"} for index in range(500)]
+        ).encode(),
+        candidates=(candidate,),
+        recovery_artifact_ref="private://owned-delete-recovery",
+    )
+    authorization = PublisherArticleDeleteAuthorization(
+        approval_ref="approval:postgres-owned-delete",
+        approver_ref="owner:postgres-test",
+        approved_at="2026-07-25T20:30:00+00:00",
+        scope_sha256=plan.scope_sha256,
+    )
+    prepared = prepare_publisher_article_delete(
+        plan=plan,
+        authorization=authorization,
+        idempotency_key="postgres-owned-delete",
+        work_item_id="publisher-delete-restore-rehearsal:test:delete",
+        work_item_version=1,
+        payload_ref="private://owned-delete-payload",
+        requester_ref="operator:postgres-test",
+    )
+
+    with psycopg.connect(
+        delete_request_postgres_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        cutover = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_delete_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "operator:postgres-test",
+                "exercise destructive request admission",
+                None,
+            ),
+        ).fetchone()[0]
+        assert (cutover["owner"], cutover["generation"]) == (
+            "operations_core",
+            2,
+        )
+        connection.execute(
+            """
+            SELECT public.volpred_record_publisher_article_delete_approval(
+              %s, %s
+            )
+            """,
+            (
+                Jsonb(
+                    {
+                        "approval_ref": authorization.approval_ref,
+                        "approver_ref": authorization.approver_ref,
+                        "approved_at": authorization.approved_at,
+                        "scope_sha256": authorization.scope_sha256,
+                    }
+                ),
+                "operator:postgres-test",
+            ),
+        ).fetchone()
+
+        request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_delete(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                prepared.request.idempotency_key,
+                prepared.payload.decode(),
+                "operator:postgres-test",
+            ),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        work = connection.execute(
+            """
+            SELECT approval, status, version
+            FROM volpred_ops.work_items
+            WHERE id = %s
+            """,
+            (request["work_id"],),
+        ).fetchone()
+
+    assert work == ("approved", "pending", 2)
 
 
 def _article(article_id: str, slug: str) -> dict:
