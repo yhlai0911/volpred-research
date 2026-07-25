@@ -10,6 +10,9 @@ from scripts.rehearse_primary_authority_outage import (
     PartitionableAuthorityStore,
     PrimaryProcessReceipt,
     StandbyProcessReceipt,
+    _authority_key_for_rehearsal,
+    _implementation_manifest,
+    _implementation_sha256,
     _write_receipt,
     rehearse_primary_authority_outage,
     rehearse_primary_process_role,
@@ -357,3 +360,64 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
                 implementation_sha256="0" * 64,
             ),
         )
+
+
+def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
+    manifest = _implementation_manifest()
+
+    assert {
+        "scripts/rehearse_primary_authority_outage.py",
+        "src/volpred/ops/authority/__init__.py",
+        "src/volpred/ops/authority/keepalive.py",
+        "src/volpred/ops/authority/session.py",
+        "src/volpred/ops/authority/supabase.py",
+        "src/volpred/ops/delivery/owned_publisher_article.py",
+        "src/volpred/ops/delivery/supabase_rpc.py",
+    } <= manifest.keys()
+    assert all(len(digest) == 64 for digest in manifest.values())
+    assert len(_implementation_sha256()) == 64
+
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    primary = rehearse_primary_process_role(
+        rehearsal_id="unsafe-key-test",
+        host_id="mac-a",
+        host_fingerprint="fingerprint-a",
+        holder_ref="host:a:outage",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=PartitionableAuthorityStore(
+            healthy=live,
+            unavailable=_UnavailableAuthorityStore(),
+        ),
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = rehearse_standby_process_role(
+        rehearsal_id="unsafe-key-test",
+        host_id="mac-b",
+        host_fingerprint="fingerprint-b",
+        holder_ref="host:b:outage",
+        expected_primary_epoch=primary.primary.epoch,
+        lease_seconds=10,
+        rto_seconds=1.0,
+        poll_interval_seconds=0.005,
+        store=live,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    unsafe_key = "operations-core-effects"
+
+    with pytest.raises(
+        ValueError,
+        match="not derived from rehearsal identity",
+    ):
+        verify_cross_host_receipts(
+            replace(primary, authority_key=unsafe_key),
+            replace(standby, authority_key=unsafe_key),
+        )
+
+    assert primary.authority_key == _authority_key_for_rehearsal(
+        primary.rehearsal_id
+    )

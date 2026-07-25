@@ -1631,3 +1631,16 @@ approval inactive、synthetic row absent，standing convergence=`converged`且
 `mismatch_total=0`。此live rehearsal incident為`root_cause_fixed_and_verified`；
 operations-core umbrella仍為`contained`，下一步只剩physical two-Mac authority
 receipt pair。
+
+## 2026-07-26 — Program commit 34 cross-host receipt identity checkpoint
+
+Cross-host Primary Authority receipt的implementation identity已從單一operator檔提升為
+canonical source manifest：operator加上`src/volpred/ops/**/*.py`全部Python source
+逐檔SHA-256，再對repo-relative manifest做aggregate SHA-256。Pair verifier同時要求
+authority key精確等於shared rehearsal ID導出的隔離key，不能把正式effect-family key
+包成rehearsal evidence。
+
+相鄰authority suites **31 passed**，本輪沒有remote acquire、effect或provider call。
+Receipt false-positive缺口為`root_cause_fixed_and_verified`；實際physical two-Mac
+process roles與paired receipt仍未執行，所以program commit 34及operations-core
+umbrella維持`contained`。

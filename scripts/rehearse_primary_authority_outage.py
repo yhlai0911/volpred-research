@@ -536,6 +536,12 @@ def verify_cross_host_receipts(
         or primary.authority_key != standby.authority_key
     ):
         raise ValueError("receipts do not share one rehearsal identity")
+    if primary.authority_key != _authority_key_for_rehearsal(
+        primary.rehearsal_id
+    ):
+        raise ValueError(
+            "receipt authority key is not derived from rehearsal identity"
+        )
     if primary.implementation_sha256 != standby.implementation_sha256:
         raise ValueError("host receipts used different rehearsal code")
     if (
@@ -956,7 +962,31 @@ def _receipt_sha256(receipt: object) -> str:
 
 
 def _implementation_sha256() -> str:
-    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    payload = json.dumps(
+        _implementation_manifest(),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _implementation_manifest() -> dict[str, str]:
+    """Bind cross-host evidence to every Operations Core Python source."""
+
+    repo_root = Path(__file__).resolve().parents[1]
+    source_root = repo_root / "src" / "volpred" / "ops"
+    paths = [Path(__file__).resolve(), *sorted(source_root.rglob("*.py"))]
+    if not source_root.is_dir() or len(paths) == 1:
+        raise RuntimeError(
+            "Operations Core source tree is unavailable for receipt identity"
+        )
+    return {
+        path.relative_to(repo_root).as_posix(): hashlib.sha256(
+            path.read_bytes()
+        ).hexdigest()
+        for path in paths
+    }
 
 
 def _machine_identity() -> tuple[str, str]:

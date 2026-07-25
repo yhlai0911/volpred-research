@@ -2549,3 +2549,20 @@ owner=`legacy/19`、approval inactive；standing convergence為`converged`且
 `mismatch_total=0`。本incident為 **`root_cause_fixed_and_verified`**；physical
 two-Mac authority receipt pair仍缺，所以operations-core umbrella維持
 **`contained`**。
+
+### 2026-07-26 — Cross-host verifier只雜湊operator，兩端依賴漂移仍會假綠
+
+**證據化症狀與根因層級**：physical pair receipt原本的`implementation_sha256`只讀
+`scripts/rehearse_primary_authority_outage.py` bytes。若primary與standby checkout的
+authority session、keepalive、Supabase adapter或publisher fence reader不同版，只要
+operator檔相同，verifier仍會誤判「相同implementation」。Verifier也只比較兩端
+authority key相等，沒有重新從shared rehearsal ID導出隔離key。根因是evidence identity
+過淺，不是lease CAS或database clock。
+
+**底層修復與驗證**：implementation identity改為canonical source manifest，涵蓋
+operator與`src/volpred/ops/**/*.py`全部Python source，逐檔SHA後再aggregate；verifier
+另要求authority key精確等於rehearsal ID derivation。針對性與相鄰authority suites
+**31 passed**，`py_compile`與`git diff --check`通過；Ruff在本repo環境未安裝，沒有以
+缺工具宣稱lint通過。本輪沒有remote acquire或effect。此false-positive根因為
+**`root_cause_fixed_and_verified`**；physical two-Mac receipt仍需真實兩機執行，
+operations-core umbrella維持**`contained`**。

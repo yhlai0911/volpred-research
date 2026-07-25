@@ -1687,3 +1687,18 @@ Live receipt與DB readback一致：primary／cleanup effect皆`delivered`，rest
 epoch 8／9 authority均release，synthetic row absent，final owner=`legacy/19`且approval
 inactive；standing convergence為零mismatch。Manual rehearsal evidence gate已
 `root_cause_fixed_and_verified`，umbrella升級前只剩physical two-Mac authority pair。
+
+## 19. Physical cross-host receipt implementation identity（2026-07-26）
+
+Primary／standby process receipt的implementation identity必須涵蓋實際載入的
+Operations Core，不可只雜湊operator入口。Canonical manifest以repo-relative path排序，
+包含`scripts/rehearse_primary_authority_outage.py`與
+`src/volpred/ops/**/*.py`全部Python source；每檔先做SHA-256，再對canonical manifest做
+aggregate SHA-256。Verifier仍要求兩端aggregate exact-match，並新增
+`authority_key == derive(rehearsal_id)`，避免edited receipt把正式effect-family key包成
+隔離演練。
+
+相鄰authority suites共31 passed；本切片沒有remote acquire、effect或provider call。
+Receipt identity false-positive根因為`root_cause_fixed_and_verified`，但兩台實體Mac
+尚未執行process roles並形成paired receipt，因此program commit 34與operations-core
+umbrella仍為`contained`。

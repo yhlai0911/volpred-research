@@ -774,3 +774,12 @@ owner回到`legacy/19`且approval已撤銷。Canonical evidence為
 `storage/ops/publisher_delete_restore/live-20260726-0503_{recovery.jsonl,receipt.json}`。
 Operations-core umbrella仍維持`contained`，唯一剩餘evidence gate為physical
 two-Mac Primary Authority receipt pair。
+
+### Cross-host receipt code identity（2026-07-26）
+
+Physical Primary Authority pair的`implementation_sha256`不再只代表rehearsal script。
+兩台host各自從canonical relative paths建立manifest，涵蓋operator與
+`src/volpred/ops/**/*.py`全部Python source，再對manifest做canonical SHA-256。Pair
+verifier另要求receipt的authority key精確等於shared rehearsal ID所導出的隔離key。
+因此同script但authority／keepalive／transport版本不同，或把production authority key
+填入receipt，都不能形成`cross_host_verified` evidence。
