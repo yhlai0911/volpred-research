@@ -533,13 +533,14 @@ def test_delete_phases_have_distinct_immutable_request_identities():
     identities: list[tuple[str, str]] = []
 
     def deliver(owner, prepared):
+        phase = prepared.request.work_item_id.rsplit(":", 1)[-1]
         identities.append(
             (
                 prepared.request.idempotency_key,
                 hashlib.sha256(prepared.payload).hexdigest(),
             )
         )
-        return _delete_receipt(owner, prepared)
+        return _delete_receipt(owner, prepared, suffix=phase)
 
     rehearse_publisher_delete_restore(
         rehearsal_id="smoke-777",

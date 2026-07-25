@@ -449,7 +449,7 @@ def _validate_restore_receipt(
     recovery_artifact_ref: str,
     require_full_restore: bool = True,
 ) -> None:
-    restored_count = receipt.restored_count
+    restored_count = getattr(receipt, "restored_count", None)
     if (
         not isinstance(receipt, PublisherArticleDeleteRestoreReceipt)
         or receipt.schema_version
@@ -580,15 +580,12 @@ def _load_candidate(path: Path) -> Mapping[str, object]:
 def _atomic_write(
     path: Path,
     payload: bytes,
-    *,
-    replace_existing: bool = False,
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if path.exists():
         if path.read_bytes() == payload:
             return
-        if not replace_existing:
-            raise RuntimeError(f"existing artifact has different bytes: {path}")
+        raise RuntimeError(f"existing artifact has different bytes: {path}")
     temporary = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
     try:
         temporary.write_bytes(payload)
