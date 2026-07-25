@@ -1568,3 +1568,33 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - frontend 與 Admin 對舊 task shapes 的讀取依賴。
 
 Inventory 只讀並輸出 versioned report。任何未知 writer、無法重播的 migration 或無 owner side effect，都會阻擋接管，不以猜測補齊。
+
+## 15. Publisher destructive delete production ownership（2026-07-25）
+
+`publisher.article.supabase.delete` 現在是獨立於 hourly safe reconcile 的 destructive
+family。`OwnedPublisherArticleDelete.delete()` 是正式 caller：先回讀 generation-CAS
+owner，再以 private payload 建立 WorkItem、EffectRequest/outbox 與 attempt，provider
+則由 attempt-bound factory 建立，不能把另一個 attempt 的 authority identity 帶進
+projection。
+
+Production Supabase seam 由 service-role-only RPC 組成：
+
+- durable approval table 開啟並強制 RLS；approval 可 idempotent record、read-back、
+  revoke，scope SHA-256 與完整 authorization identity 不可漂移；
+- candidate read-back 固定回傳完整 article 與六張 dependent tables；live FK catalog
+  必須仍精確等於七條 cascade edges；
+- compare-delete 在同一 PostgreSQL transaction 內鎖住 family owner、started attempt、
+  active approval、Primary Authority epoch/token、article 與 child rows，並把 caller
+  candidate 與 durable effect payload scope、database projection逐 byte 比對後才 DELETE；
+- public／anon／authenticated 無 EXECUTE，十個 public wrapper 皆由 no-login
+  `volpred_ops_definer` 持有、空 search path，只有 service role 可呼叫。
+
+Live verification 完成`legacy/1 → operations_core/2 → legacy/3 rollback`的owner CAS，
+最終仍未授權任何 unattended delete。Approval smoke 已完成 record → read-back →
+revoke；candidate read-back回傳六張 dependent tables；故意呼叫 compare-delete 時由
+owner fence 拒絕，前後 candidate 與 evidence hash完全相同。相鄰 Effect/outbox、
+safe reconcile、publisher sync 與 Supabase suites 共222 passed。此 production
+owner／approval／projection slice 為
+`root_cause_fixed_and_verified`；exact restore executor、manual-only
+delete→rollback→convergence rehearsal及physical two-Mac authority receipts仍缺，
+所以 program commit 15 與 operations-core umbrella 維持 `contained`。

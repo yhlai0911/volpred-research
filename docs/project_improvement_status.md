@@ -1552,3 +1552,19 @@ attribution、error_log 壓縮、治理疊層收斂、K1709 合併）已進 next
 - **已派 worker 的部分**: `task_a683510edfc3` (codex-worker, code) — expose Table 2 behavioral sentiment (K732) + calendar anomaly OOS (K736) intermediate outputs, 讓 Table 2 也能 reproduce.
 
 _Created 2026-04-18 06:09 UTC by claude-supervisor from audit task_a2ad5cff36e9._
+
+## 2026-07-25 — Program commit 15 destructive production seam checkpoint
+
+`publisher.article.supabase.delete` 已有獨立 production owner CAS、durable approval、
+private WorkItem/EffectRequest/outbox transaction、attempt-bound provider factory，以及
+transaction-fenced Supabase compare-delete。Production ACL回讀確認十個 wrapper均為
+`volpred_ops_definer` SECURITY DEFINER、空 search path，PUBLIC／anon／authenticated
+不可執行，service role only；approval table為RLS + FORCE RLS。
+
+Live smoke 真實走過 approval record／read-back／revoke，並對既有article回讀完整六表
+candidate。Owner CAS完成`legacy/1 → operations_core/2 → legacy/3 rollback`；未建立任何
+delete attempt、未刪除article。帶假attempt呼叫compare-delete被owner fence拒絕，前後
+candidate與evidence hash不變。相鄰回歸
+222 passed。此切片為 `root_cause_fixed_and_verified`；整體仍為 `contained`，下一步是
+exact restore executor與manual-only delete→rollback→convergence rehearsal，另須完成
+program commit 34的physical two-Mac authority receipt pair。

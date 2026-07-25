@@ -2398,3 +2398,35 @@ remote mutation、owner transfer或live effect。Worker execution-contract根因
 **`root_cause_fixed_and_verified`**；production Supabase projection、owner CAS、
 exact restore executor與live delete→rollback→convergence rehearsal仍缺，故program
 commit 15及operations-core umbrella維持 **`contained`**。
+
+### 2026-07-25 — Destructive adapter完成但production沒有owner、approval store或atomic projection
+
+**證據化症狀與根因層級**：worker adapter雖能驗scope、approval與typed absence，但
+production沒有`publisher.article.supabase.delete` owner row、durable approval store、
+WorkItem/EffectRequest/outbox transaction或真正compare-delete RPC。把現有Python
+protocol直接接到legacy HTTP DELETE，仍會留下跨transaction的owner／approval／authority
+TOCTOU。根因是production ownership與database mutation seam缺失，不是adapter、
+canonical feed或Supabase article資料。
+
+**底層重構**：新增獨立destructive family與owner generation CAS；正式caller只接受
+immutable prepared intent，保存原始canonical payload bytes，再由attempt-bound factory
+建立approval verifier與projection。Approval使用private RLS/FORCE RLS table並提供
+service-role-only record/read/revoke。Compare-delete在同一PostgreSQL transaction內鎖定
+owner、started attempt、approval、Primary Authority lease、article與六表child rows；
+durable effect payload中的authorization/candidate、live七條cascade contract及database
+candidate任何一項不一致都禁止DELETE。十個public wrapper皆空search path、no-login
+definer owner，PUBLIC／anon／authenticated無EXECUTE。
+
+**回歸與下游回讀**：首次production smoke在任何INSERT前抓到approval function的
+PL/pgSQL `approval_ref`欄位／局部變數ambiguity；原migration保持immutable，另以
+forward-only migration把local重新命名並用table alias限定，重跑後approval
+record→read-back→revoke成功，最終evidence SHA-256為
+`d92fef088e81089f49c53556fcb521a25a63ef0c45c13fe0f73b6f122fe05df1`。
+Production candidate read-back確認六張dependent tables與64字元evidence hash；owner
+CAS完成`legacy/1 → operations_core/2 → legacy/3 rollback`，故意compare-delete被拒，
+前後candidate與evidence完全相同，零article mutation。相鄰Effect/outbox、safe
+reconcile、publisher sync與Supabase suites共
+**222 passed**。本production owner／approval／projection根因為
+**`root_cause_fixed_and_verified`**；exact restore executor、manual-only
+delete→rollback→convergence rehearsal及physical two-Mac receipts仍未完成，故program
+commit 15與operations-core umbrella維持 **`contained`**。
