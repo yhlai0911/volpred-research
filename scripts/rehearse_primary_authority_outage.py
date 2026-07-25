@@ -148,6 +148,36 @@ class PublisherFenceEvidence:
 
 
 @dataclass(frozen=True)
+class HostReadinessReceipt:
+    schema_version: str
+    rehearsal_id: str
+    role: str
+    host_id: str
+    host_fingerprint: str
+    implementation_sha256: str
+    authority_key: str
+    observed_at: str
+    publisher_fence: PublisherFenceEvidence
+
+
+@dataclass(frozen=True)
+class CrossHostReadinessReceipt:
+    schema_version: str
+    rehearsal_id: str
+    authority_key: str
+    verified_at: str
+    primary_host_id: str
+    primary_host_fingerprint: str
+    standby_host_id: str
+    standby_host_fingerprint: str
+    implementation_sha256: str
+    publisher_fence: PublisherFenceEvidence
+    primary_readiness_sha256: str
+    standby_readiness_sha256: str
+    cross_host_ready: bool
+
+
+@dataclass(frozen=True)
 class PrimaryAuthorityOutageReceipt:
     schema_version: str
     authority_key: str
@@ -252,6 +282,92 @@ class CrossHostOutageReceipt:
     cross_host_verified: bool
 
 
+def prepare_cross_host_role_readiness(
+    *,
+    rehearsal_id: str,
+    role: str,
+    host_id: str,
+    host_fingerprint: str,
+    publisher_store: PublisherOwnerReader,
+    expected_publisher_generation: int,
+) -> HostReadinessReceipt:
+    """Build one read-only host receipt before any authority lease is acquired."""
+
+    if role not in {"primary", "standby"}:
+        raise ValueError("readiness role must be primary or standby")
+    if not host_id.strip() or not host_fingerprint.strip():
+        raise ValueError("host identity and fingerprint are required")
+    authority_key = _authority_key_for_rehearsal(rehearsal_id)
+    implementation_sha256 = _implementation_sha256()
+    publisher_fence = _validate_publisher_fence(
+        publisher_store.read_owner(),
+        expected_generation=expected_publisher_generation,
+    )
+    _verify_implementation_unchanged(implementation_sha256)
+    return HostReadinessReceipt(
+        schema_version="primary-authority-outage-host-readiness.v1",
+        rehearsal_id=rehearsal_id,
+        role=role,
+        host_id=host_id,
+        host_fingerprint=host_fingerprint,
+        implementation_sha256=implementation_sha256,
+        authority_key=authority_key,
+        observed_at=datetime.now(UTC).isoformat(),
+        publisher_fence=publisher_fence,
+    )
+
+
+def verify_cross_host_readiness(
+    primary: HostReadinessReceipt,
+    standby: HostReadinessReceipt,
+) -> CrossHostReadinessReceipt:
+    """Bind two compatible physical hosts before the primary mutates a lease."""
+
+    expected_schema = "primary-authority-outage-host-readiness.v1"
+    if (
+        primary.schema_version != expected_schema
+        or standby.schema_version != expected_schema
+    ):
+        raise ValueError("unsupported host readiness receipt schema")
+    if primary.role != "primary" or standby.role != "standby":
+        raise ValueError("host readiness role mismatch")
+    if (
+        primary.rehearsal_id != standby.rehearsal_id
+        or primary.authority_key != standby.authority_key
+    ):
+        raise ValueError("host readiness receipts do not share one identity")
+    if primary.authority_key != _authority_key_for_rehearsal(
+        primary.rehearsal_id
+    ):
+        raise ValueError(
+            "readiness authority key is not derived from rehearsal identity"
+        )
+    if primary.implementation_sha256 != standby.implementation_sha256:
+        raise ValueError("physical hosts are not running the same source")
+    if (
+        primary.host_id == standby.host_id
+        or primary.host_fingerprint == standby.host_fingerprint
+    ):
+        raise ValueError("readiness requires two distinct physical machines")
+    if primary.publisher_fence != standby.publisher_fence:
+        raise ValueError("publisher fence differs across physical hosts")
+    return CrossHostReadinessReceipt(
+        schema_version="primary-authority-outage-readiness-pair.v1",
+        rehearsal_id=primary.rehearsal_id,
+        authority_key=primary.authority_key,
+        verified_at=datetime.now(UTC).isoformat(),
+        primary_host_id=primary.host_id,
+        primary_host_fingerprint=primary.host_fingerprint,
+        standby_host_id=standby.host_id,
+        standby_host_fingerprint=standby.host_fingerprint,
+        implementation_sha256=primary.implementation_sha256,
+        publisher_fence=primary.publisher_fence,
+        primary_readiness_sha256=_receipt_sha256(primary),
+        standby_readiness_sha256=_receipt_sha256(standby),
+        cross_host_ready=True,
+    )
+
+
 def rehearse_primary_process_role(
     *,
     rehearsal_id: str,
@@ -264,6 +380,7 @@ def rehearse_primary_process_role(
     store: PartitionableAuthorityStore,
     publisher_store: PublisherOwnerReader,
     expected_publisher_generation: int,
+    expected_implementation_sha256: str | None = None,
     monotonic: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> PrimaryProcessReceipt:
@@ -279,6 +396,11 @@ def rehearse_primary_process_role(
         poll_interval_seconds=poll_interval_seconds,
     )
     implementation_sha256 = _implementation_sha256()
+    if (
+        expected_implementation_sha256 is not None
+        and implementation_sha256 != expected_implementation_sha256
+    ):
+        raise RuntimeError("source drifted after cross-host readiness")
     started_at = datetime.now(UTC).isoformat()
     publisher_before = _validate_publisher_fence(
         publisher_store.read_owner(),
@@ -409,6 +531,7 @@ def rehearse_standby_process_role(
     store: AuthorityStore,
     publisher_store: PublisherOwnerReader,
     expected_publisher_generation: int,
+    expected_implementation_sha256: str | None = None,
     monotonic: Callable[[], float] = time.monotonic,
     sleep: Callable[[float], None] = time.sleep,
 ) -> StandbyProcessReceipt:
@@ -433,6 +556,11 @@ def rehearse_standby_process_role(
         raise ValueError("RTO must be positive and at most five minutes")
 
     implementation_sha256 = _implementation_sha256()
+    if (
+        expected_implementation_sha256 is not None
+        and implementation_sha256 != expected_implementation_sha256
+    ):
+        raise RuntimeError("source drifted after cross-host readiness")
     started_at = datetime.now(UTC).isoformat()
     publisher_before = _validate_publisher_fence(
         publisher_store.read_owner(),
@@ -1033,6 +1161,64 @@ def _load_standby_receipt(path: Path) -> StandbyProcessReceipt:
     return StandbyProcessReceipt(**payload)
 
 
+def _load_host_readiness(path: Path) -> HostReadinessReceipt:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["publisher_fence"] = PublisherFenceEvidence(
+        **payload["publisher_fence"]
+    )
+    return HostReadinessReceipt(**payload)
+
+
+def _load_cross_host_readiness(path: Path) -> CrossHostReadinessReceipt:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["publisher_fence"] = PublisherFenceEvidence(
+        **payload["publisher_fence"]
+    )
+    return CrossHostReadinessReceipt(**payload)
+
+
+def _validate_role_readiness(
+    readiness: CrossHostReadinessReceipt,
+    *,
+    rehearsal_id: str,
+    role: str,
+    host_id: str,
+    host_fingerprint: str,
+    expected_publisher_generation: int,
+) -> None:
+    if (
+        readiness.schema_version
+        != "primary-authority-outage-readiness-pair.v1"
+        or not readiness.cross_host_ready
+    ):
+        raise ValueError("cross-host readiness receipt is not verified")
+    if (
+        readiness.rehearsal_id != rehearsal_id
+        or readiness.authority_key != _authority_key_for_rehearsal(rehearsal_id)
+    ):
+        raise ValueError("cross-host readiness identity mismatch")
+    if readiness.implementation_sha256 != _implementation_sha256():
+        raise ValueError("local source drifted after cross-host readiness")
+    expected_host = (
+        readiness.primary_host_id,
+        readiness.primary_host_fingerprint,
+    )
+    if role == "standby":
+        expected_host = (
+            readiness.standby_host_id,
+            readiness.standby_host_fingerprint,
+        )
+    if (host_id, host_fingerprint) != expected_host:
+        raise ValueError("local machine does not match its readiness role")
+    fence = readiness.publisher_fence
+    if (
+        fence.effect_family != _PUBLISHER_FAMILY
+        or fence.owner != "operations_core"
+        or fence.generation != expected_publisher_generation
+    ):
+        raise ValueError("cross-host readiness publisher fence mismatch")
+
+
 def _lease_evidence(lease: PrimaryLease) -> AuthorityLeaseEvidence:
     return AuthorityLeaseEvidence(
         holder_ref=lease.holder_ref,
@@ -1108,6 +1294,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     primary.add_argument(
         "--renew-interval-seconds", type=float, default=60.0
     )
+    primary.add_argument("--readiness-receipt", required=True)
 
     standby = roles.add_parser(
         "standby",
@@ -1117,6 +1304,28 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     standby.add_argument("--rehearsal-id", required=True)
     standby.add_argument("--expected-primary-epoch", required=True, type=int)
     standby.add_argument("--rto-seconds", type=float, default=300.0)
+    standby.add_argument("--readiness-receipt", required=True)
+
+    prepare = roles.add_parser(
+        "prepare-host",
+        help="write one read-only physical-host readiness receipt",
+    )
+    prepare.add_argument("--rehearsal-id", required=True)
+    prepare.add_argument(
+        "--process-role",
+        required=True,
+        choices=("primary", "standby"),
+    )
+    prepare.add_argument("--expected-publisher-generation", type=int, default=8)
+    prepare.add_argument("--receipt-path", required=True)
+
+    verify_readiness = roles.add_parser(
+        "verify-readiness",
+        help="bind two compatible host receipts before lease mutation",
+    )
+    verify_readiness.add_argument("--primary-receipt", required=True)
+    verify_readiness.add_argument("--standby-receipt", required=True)
+    verify_readiness.add_argument("--receipt-path", required=True)
 
     verify = roles.add_parser(
         "verify-pair",
@@ -1139,7 +1348,26 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main() -> int:
     args = _parse_args()
-    if args.role == "verify-pair":
+    if args.role == "verify-readiness":
+        receipt = verify_cross_host_readiness(
+            _load_host_readiness(Path(args.primary_receipt)),
+            _load_host_readiness(Path(args.standby_receipt)),
+        )
+    elif args.role == "prepare-host":
+        host_id, host_fingerprint = _machine_identity()
+        receipt = prepare_cross_host_role_readiness(
+            rehearsal_id=args.rehearsal_id,
+            role=args.process_role,
+            host_id=host_id,
+            host_fingerprint=host_fingerprint,
+            publisher_store=(
+                SupabaseOwnedPublisherArticleStore.from_environment()
+            ),
+            expected_publisher_generation=(
+                args.expected_publisher_generation
+            ),
+        )
+    elif args.role == "verify-pair":
         receipt = verify_cross_host_receipts(
             _load_primary_receipt(Path(args.primary_receipt)),
             _load_standby_receipt(Path(args.standby_receipt)),
@@ -1166,6 +1394,19 @@ def main() -> int:
         )
     else:
         host_id, host_fingerprint = _machine_identity()
+        readiness = _load_cross_host_readiness(
+            Path(args.readiness_receipt)
+        )
+        _validate_role_readiness(
+            readiness,
+            rehearsal_id=args.rehearsal_id,
+            role=args.role,
+            host_id=host_id,
+            host_fingerprint=host_fingerprint,
+            expected_publisher_generation=(
+                args.expected_publisher_generation
+            ),
+        )
         holder_ref = (
             f"host:{host_fingerprint}:outage-{args.role}:"
             f"{args.rehearsal_id}"
@@ -1187,6 +1428,9 @@ def main() -> int:
                 expected_publisher_generation=(
                     args.expected_publisher_generation
                 ),
+                expected_implementation_sha256=(
+                    readiness.implementation_sha256
+                ),
             )
         else:
             receipt = rehearse_standby_process_role(
@@ -1202,6 +1446,9 @@ def main() -> int:
                 publisher_store=publisher_store,
                 expected_publisher_generation=(
                     args.expected_publisher_generation
+                ),
+                expected_implementation_sha256=(
+                    readiness.implementation_sha256
                 ),
             )
     _write_receipt(Path(args.receipt_path), receipt)

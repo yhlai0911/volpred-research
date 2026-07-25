@@ -2581,3 +2581,22 @@ drift都raise且不產receipt。兩個role新增failure injection，standby路�
 release；相鄰authority suite、compile與diff gate通過。本false-positive根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac目前無可操作remote session，故沒有
 執行production role，physical pair與operations-core umbrella仍為**`contained`**。
+
+### 2026-07-26 — Physical rehearsal到mutation後才驗第二台host readiness
+
+**證據化症狀與根因層級**：正式流程原本直接在第一台執行`primary`，完成live
+authority acquire／renew／demote後才把兩份role receipt交給`verify-pair`。第二台若
+credential不可用、source aggregate不同、publisher fence漂移或其實不是distinct
+machine，都只能在第一台已mutation控制面後發現。根因是operator sequencing缺少
+pre-mutation cross-host compatibility gate，不是Primary Authority CAS。
+
+**底層修復與驗證**：新增只讀`prepare-host`與`verify-readiness`，先綁定兩端machine
+fingerprint、canonical source aggregate、shared rehearsal-derived key與publisher
+owner；正式primary／standby CLI都強制帶同一paired readiness，並在任何authority RPC
+前重驗本機role與source。Code mismatch、same-machine、wrong-role與readiness後source
+drift（含CLI validation後窄race）failure injections均fail closed；相鄰authority
+suites **36 passed**，
+`py_compile`與`git diff --check`通過。Production只讀preflight回讀
+publisher=`operations_core/8`與安全隔離key，未acquire authority、未呼叫provider。
+此sequencing根因為 **`root_cause_fixed_and_verified`**；沒有第二台可操作remote
+session，故physical pair與operations-core umbrella仍為 **`contained`**。

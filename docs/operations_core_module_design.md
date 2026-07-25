@@ -1715,3 +1715,25 @@ standby現在都在第一個remote read／mutation前快照canonical implementat
 已release。本false-positive根因為`root_cause_fixed_and_verified`。因第二台實體Mac
 目前沒有可操作的remote session，本輪沒有執行production role，physical pair與umbrella
 仍維持`contained`。
+
+## 21. Cross-host pre-mutation readiness gate（2026-07-26）
+
+原本的physical流程在primary已acquire／renew／demote live authority lease之後，才把
+primary與standby receipt交給`verify-pair`檢查distinct machines、相同code與publisher
+fence。若第二台host沒有正確credential、checkout不是同一版，或其實是同一台machine，
+失敗會在live控制面已mutation後才被看見。這是operator sequencing缺口，不是lease CAS
+本身的錯誤。
+
+新增兩段式readiness handshake。`prepare-host`只做machine identity、canonical source
+aggregate與publisher owner read-back，不acquire authority；`verify-readiness`把兩端
+receipt SHA-256、shared rehearsal-derived key、distinct host、exact code與exact
+publisher fence綁成paired receipt。正式`primary`／`standby`CLI現在都強制接受同一份
+paired readiness，並在任何authority RPC前重驗本機role／fingerprint與source aggregate。
+
+Failure injections涵蓋code mismatch、same-machine、wrong-role host、preflight後
+source drift與CLI validation後的窄race；相鄰authority suites **36 passed**，compile
+與diff gate通過。Production只讀preflight `readiness-20260726-0635`回讀
+publisher=`operations_core/8`、安全隔離key與implementation
+`d02ed42e3aa8e380ba07d862ca6c270054a67c1d6907b349ea502c14128e387d`，沒有authority
+acquire或provider call。本sequencing根因為`root_cause_fixed_and_verified`；第二台
+實體Mac仍無可操作remote session，所以physical pair與umbrella維持`contained`。

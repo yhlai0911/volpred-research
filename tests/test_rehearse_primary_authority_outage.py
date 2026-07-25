@@ -8,16 +8,21 @@ import pytest
 
 import scripts.rehearse_primary_authority_outage as outage_operator
 from scripts.rehearse_primary_authority_outage import (
+    CrossHostReadinessReceipt,
+    HostReadinessReceipt,
     PartitionableAuthorityStore,
     PrimaryProcessReceipt,
     StandbyProcessReceipt,
     _authority_key_for_rehearsal,
     _implementation_manifest,
     _implementation_sha256,
+    _validate_role_readiness,
     _write_receipt,
+    prepare_cross_host_role_readiness,
     rehearse_primary_authority_outage,
     rehearse_primary_process_role,
     rehearse_standby_process_role,
+    verify_cross_host_readiness,
     verify_cross_host_receipts,
 )
 from volpred.ops.authority import (
@@ -31,7 +36,7 @@ from volpred.ops.delivery.owned_publisher_article import (
 
 
 class _LiveAuthorityStore:
-    def __init__(self, *, lease_window_seconds: float = 0.12) -> None:
+    def __init__(self, *, lease_window_seconds: float = 0.25) -> None:
         self.lease_window_seconds = lease_window_seconds
         self.current: PrimaryLease | None = None
         self.epoch = 0
@@ -252,6 +257,138 @@ def test_receipt_writer_round_trips_exact_payload(
     assert target.is_file()
     assert json.loads(target.read_text())["standby"]["epoch"] == 2
     assert list(target.parent.glob("*.tmp")) == []
+
+
+def test_cross_host_readiness_fails_before_authority_mutation() -> None:
+    publisher = _PublisherStore()
+    primary = prepare_cross_host_role_readiness(
+        rehearsal_id="physical-ready-test",
+        role="primary",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = prepare_cross_host_role_readiness(
+        rehearsal_id="physical-ready-test",
+        role="standby",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+
+    paired = verify_cross_host_readiness(primary, standby)
+
+    assert isinstance(primary, HostReadinessReceipt)
+    assert isinstance(paired, CrossHostReadinessReceipt)
+    assert paired.cross_host_ready is True
+    assert paired.primary_host_fingerprint == "primary-fingerprint"
+    assert paired.standby_host_fingerprint == "standby-fingerprint"
+    assert publisher.read_count == 2
+
+    with pytest.raises(ValueError, match="same source"):
+        verify_cross_host_readiness(
+            primary,
+            replace(standby, implementation_sha256="0" * 64),
+        )
+    with pytest.raises(ValueError, match="two distinct physical machines"):
+        verify_cross_host_readiness(
+            primary,
+            replace(standby, host_fingerprint=primary.host_fingerprint),
+        )
+
+
+def test_role_readiness_rejects_wrong_machine_or_stale_source(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    publisher = _PublisherStore()
+    primary = prepare_cross_host_role_readiness(
+        rehearsal_id="role-ready-test",
+        role="primary",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = prepare_cross_host_role_readiness(
+        rehearsal_id="role-ready-test",
+        role="standby",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    paired = verify_cross_host_readiness(primary, standby)
+
+    _validate_role_readiness(
+        paired,
+        rehearsal_id="role-ready-test",
+        role="primary",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        expected_publisher_generation=8,
+    )
+    with pytest.raises(ValueError, match="does not match its readiness role"):
+        _validate_role_readiness(
+            paired,
+            rehearsal_id="role-ready-test",
+            role="standby",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            expected_publisher_generation=8,
+        )
+
+    monkeypatch.setattr(
+        outage_operator,
+        "_implementation_sha256",
+        lambda: "0" * 64,
+    )
+    with pytest.raises(ValueError, match="source drifted"):
+        _validate_role_readiness(
+            paired,
+            rehearsal_id="role-ready-test",
+            role="primary",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            expected_publisher_generation=8,
+        )
+
+
+def test_primary_rechecks_readiness_source_before_remote_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    monkeypatch.setattr(
+        outage_operator,
+        "_implementation_sha256",
+        lambda: "2" * 64,
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="source drifted after cross-host readiness",
+    ):
+        rehearse_primary_process_role(
+            rehearsal_id="ready-race-test",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            holder_ref="host:primary:outage",
+            lease_seconds=10,
+            renew_interval_seconds=0.01,
+            poll_interval_seconds=0.005,
+            store=PartitionableAuthorityStore(
+                healthy=live,
+                unavailable=_UnavailableAuthorityStore(),
+            ),
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            expected_implementation_sha256="1" * 64,
+        )
+
+    assert publisher.read_count == 0
+    assert live.acquire_successes == 0
 
 
 def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:

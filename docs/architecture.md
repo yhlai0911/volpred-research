@@ -322,6 +322,12 @@
 > duplicate/effect/provider 計數。local
 > failure injection 已通過；尚未取得兩台實體 Mac 的 production receipt pair，所以
 > 這只是制度化演練路徑，不能把 umbrella 升為 `root_cause_fixed_and_verified`。
+> 正式角色啟動前另強制一個只讀 readiness handshake：兩端先各自回讀
+> publisher owner、machine fingerprint與完整 Operations Core source aggregate，
+> `verify-readiness`只接受 distinct hosts、相同 rehearsal identity／code／publisher
+> fence，並產生同一份 paired readiness receipt。`primary`與`standby`都必須在任何
+> authority RPC前驗本機符合指定角色且source未漂移，避免先改live lease、最後配對時
+> 才發現第二台不可用或版本不合。
 >
 > Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
 > epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate
@@ -788,3 +794,11 @@ verifier另要求receipt的authority key精確等於shared rehearsal ID所導出
 並在remote cleanup完成、建立receipt前重新計算一次。Shared checkout若在演練途中被
 dispatcher、互動session或deploy更新，該role會fail closed且不產生receipt；不能讓
 「舊loaded code執行、新disk bytes入證」形成假綠pair。
+
+兩台實體host在進入上述角色前還必須交換並配對
+`primary-authority-outage-host-readiness.v1` receipts。配對只做publisher owner
+read-back，不 acquire authority lease；若machine fingerprint重複、source aggregate
+不同、rehearsal key不一致或publisher fence不同，流程在live authority mutation前就
+停止。正式role CLI必須帶同一份
+`primary-authority-outage-readiness-pair.v1`，並在本機再次核對role、fingerprint與
+source aggregate。

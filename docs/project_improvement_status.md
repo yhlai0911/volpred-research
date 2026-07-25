@@ -1656,3 +1656,17 @@ Primary與standby source-drift failure injection及相鄰authority suites通過�
 失敗路徑亦確認lease已release。此evidence identity切片為
 `root_cause_fixed_and_verified`；本機沒有可操作的第二台Mac remote session，本輪未做
 production mutation，physical receipt pair與operations-core umbrella仍為`contained`。
+
+## 2026-07-26 — Program commit 34 cross-host readiness checkpoint
+
+Physical rehearsal現在必須先由兩端各跑只讀`prepare-host`，再以
+`verify-readiness`綁定distinct machine fingerprints、shared rehearsal-derived key、
+canonical Operations Core aggregate與publisher fence。Primary／standby正式CLI都要求
+同一份paired readiness，並在任何authority RPC前重驗本機role、fingerprint與source，
+不再先改live lease、最後才發現第二台不相容。
+
+Failure injections與相鄰authority suites **36 passed**；本機production只讀preflight
+回讀`operations_core/8`與安全隔離key，沒有authority acquire、effect或provider call。
+此pre-mutation sequencing切片為`root_cause_fixed_and_verified`。第二台實體Mac仍沒有
+可操作remote session，故physical paired receipt與operations-core umbrella維持
+`contained`。
