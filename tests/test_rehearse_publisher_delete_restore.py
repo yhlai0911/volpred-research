@@ -221,6 +221,86 @@ def test_rehearsal_deletes_restores_cleans_up_and_rolls_back():
     assert store.approval_states == [True, False]
 
 
+def test_delete_receipt_must_match_the_exact_phase_work_identity():
+    plan = _plan()
+    authorization = _authorization(plan.scope_sha256)
+    store = _Store(authorization)
+
+    def deliver(owner, prepared):
+        receipt = _delete_receipt(owner, prepared)
+        return replace(receipt, work_id="different-work-item")
+
+    with pytest.raises(RuntimeError, match="exact acknowledged receipt"):
+        rehearse_publisher_delete_restore(
+            rehearsal_id="smoke-777",
+            actor_ref="operator:test",
+            plan=plan,
+            authorization=authorization,
+            recovery_artifact_ref="storage/ops/recovery.jsonl",
+            store=store,
+            deliver_delete=deliver,
+            restore_exact=lambda request: _restore_receipt(plan),
+            read_convergence=_converged,
+        )
+
+    assert (store.owner.owner, store.owner.generation) == ("legacy", 3)
+    assert store.approval_states == [True, False]
+
+
+def test_delete_phases_must_not_reuse_one_effect_identity():
+    plan = _plan()
+    authorization = _authorization(plan.scope_sha256)
+    store = _Store(authorization)
+
+    with pytest.raises(RuntimeError, match="reused the primary delete effect"):
+        rehearse_publisher_delete_restore(
+            rehearsal_id="smoke-777",
+            actor_ref="operator:test",
+            plan=plan,
+            authorization=authorization,
+            recovery_artifact_ref="storage/ops/recovery.jsonl",
+            store=store,
+            deliver_delete=lambda owner, prepared: _delete_receipt(
+                owner,
+                prepared,
+                suffix="same-effect",
+            ),
+            restore_exact=lambda request: _restore_receipt(plan),
+            read_convergence=_converged,
+        )
+
+    assert (store.owner.owner, store.owner.generation) == ("legacy", 3)
+    assert store.approval_states == [True, False]
+
+
+def test_restore_receipt_must_match_the_exact_artifact_identity():
+    plan = _plan()
+    authorization = _authorization(plan.scope_sha256)
+    store = _Store(authorization)
+
+    with pytest.raises(RuntimeError, match="exact recovery receipt"):
+        rehearse_publisher_delete_restore(
+            rehearsal_id="smoke-777",
+            actor_ref="operator:test",
+            plan=plan,
+            authorization=authorization,
+            recovery_artifact_ref="storage/ops/recovery.jsonl",
+            store=store,
+            deliver_delete=lambda owner, prepared: _delete_receipt(
+                owner,
+                prepared,
+            ),
+            restore_exact=lambda request: replace(
+                _restore_receipt(plan),
+                recovery_artifact_ref="storage/ops/other.jsonl",
+            ),
+            read_convergence=_converged,
+        )
+
+    assert (store.owner.owner, store.owner.generation) == ("legacy", 3)
+    assert store.approval_states == [True, False]
+
+
 def test_uncertain_first_delete_restores_before_owner_rollback():
     plan = _plan()
     authorization = _authorization(plan.scope_sha256)

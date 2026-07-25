@@ -203,10 +203,19 @@ def rehearse_publisher_delete_restore(
 
         delete_invoked = True
         deleted = deliver_delete(cutover, primary)
-        _validate_delete_receipt(deleted, owner=cutover, phase="delete")
+        _validate_delete_receipt(
+            deleted,
+            owner=cutover,
+            prepared=primary,
+            phase="delete",
+        )
 
         restored = restore_exact(restore_request)
-        _validate_restore_receipt(restored, plan=plan)
+        _validate_restore_receipt(
+            restored,
+            plan=plan,
+            recovery_artifact_ref=recovery_artifact_ref,
+        )
         restore_complete = True
 
         cleanup_invoked = True
@@ -214,8 +223,13 @@ def rehearse_publisher_delete_restore(
         _validate_delete_receipt(
             cleanup_deleted,
             owner=cutover,
+            prepared=cleanup,
             phase="cleanup delete",
         )
+        if cleanup_deleted.effect_id == deleted.effect_id:
+            raise RuntimeError(
+                "publisher cleanup delete reused the primary delete effect"
+            )
         cleanup_complete = True
 
         convergence = dict(read_convergence())
@@ -270,6 +284,7 @@ def rehearse_publisher_delete_restore(
                     _validate_restore_receipt(
                         recovered,
                         plan=plan,
+                        recovery_artifact_ref=recovery_artifact_ref,
                         require_full_restore=False,
                     )
                 except Exception as exc:  # noqa: BLE001 - preserve all cleanup.
@@ -400,13 +415,27 @@ def _validate_delete_receipt(
     receipt: OwnedPublisherDeleteReceipt,
     *,
     owner: PublisherArticleDeleteOwner,
+    prepared: PreparedPublisherArticleDelete,
     phase: str,
 ) -> None:
     if (
         not isinstance(receipt, OwnedPublisherDeleteReceipt)
+        or receipt.schema_version != "owned-publisher-delete-receipt.v1"
         or not receipt.delivered
         or receipt.owner_generation != owner.generation
+        or receipt.work_id != prepared.request.work_item_id
         or receipt.attempt_count != 1
+        or not receipt.effect_id.strip()
+        or not receipt.evidence_ref.strip()
+        or len(receipt.evidence_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in receipt.evidence_sha256
+        )
+        or not receipt.primary_authority_ref.startswith(
+            f"primary-authority:{_AUTHORITY_KEY}:epoch-"
+        )
+        or not receipt.recorded_at.strip()
     ):
         raise RuntimeError(
             f"publisher {phase} did not return the exact acknowledged receipt"
@@ -417,21 +446,29 @@ def _validate_restore_receipt(
     receipt: PublisherArticleDeleteRestoreReceipt,
     *,
     plan: PublisherArticleDeletePlan,
+    recovery_artifact_ref: str,
     require_full_restore: bool = True,
 ) -> None:
+    restored_count = receipt.restored_count
     if (
         not isinstance(receipt, PublisherArticleDeleteRestoreReceipt)
+        or receipt.schema_version
+        != "publisher-article-delete-restore-receipt.v1"
         or receipt.recovery_dump_sha256 != plan.recovery_dump_sha256
+        or receipt.recovery_artifact_ref != recovery_artifact_ref
+        or isinstance(receipt.candidate_count, bool)
+        or not isinstance(receipt.candidate_count, int)
         or receipt.candidate_count != plan.delete_count
-        or (require_full_restore and receipt.restored_count != plan.delete_count)
-        or (
-            not require_full_restore
-            and (
-                isinstance(receipt.restored_count, bool)
-                or not isinstance(receipt.restored_count, int)
-                or receipt.restored_count < 0
-                or receipt.restored_count > plan.delete_count
-            )
+        or isinstance(restored_count, bool)
+        or not isinstance(restored_count, int)
+        or restored_count < 0
+        or restored_count > plan.delete_count
+        or (require_full_restore and restored_count != plan.delete_count)
+        or not receipt.evidence_ref.strip()
+        or len(receipt.evidence_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in receipt.evidence_sha256
         )
     ):
         raise RuntimeError(
@@ -581,11 +618,19 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--storage-dir", default="storage")
     parser.add_argument(
         "--recovery-artifact",
-        default="storage/ops/publisher_delete_restore_recovery.jsonl",
+        default=None,
+        help=(
+            "immutable recovery path; defaults to a rehearsal-id-specific "
+            "artifact under storage/ops/publisher_delete_restore/"
+        ),
     )
     parser.add_argument(
         "--receipt",
-        default="storage/ops/publisher_delete_restore_rehearsal_latest.json",
+        default=None,
+        help=(
+            "immutable receipt path; defaults to a rehearsal-id-specific "
+            "artifact under storage/ops/publisher_delete_restore/"
+        ),
     )
     parser.add_argument(
         "--confirm",
@@ -603,7 +648,22 @@ def main() -> int:
         )
     storage_dir = Path(args.storage_dir)
     candidate = _load_candidate(Path(args.candidate))
-    recovery_path = Path(args.recovery_artifact)
+    artifact_dir = storage_dir / "ops" / "publisher_delete_restore"
+    recovery_path = (
+        Path(args.recovery_artifact)
+        if args.recovery_artifact
+        else artifact_dir / f"{args.rehearsal_id}_recovery.jsonl"
+    )
+    receipt_path = (
+        Path(args.receipt)
+        if args.receipt
+        else artifact_dir / f"{args.rehearsal_id}_receipt.json"
+    )
+    if receipt_path.exists():
+        raise RuntimeError(
+            "refusing to reuse a completed rehearsal receipt path: "
+            f"{receipt_path}"
+        )
     plan = plan_publisher_article_delete(
         canonical_feed=(storage_dir / "reports" / "feed.json").read_bytes(),
         candidates=(candidate,),
@@ -649,9 +709,8 @@ def main() -> int:
         + b"\n"
     )
     _atomic_write(
-        Path(args.receipt),
+        receipt_path,
         payload,
-        replace_existing=True,
     )
     print(payload.decode(), end="")
     return 0
