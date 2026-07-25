@@ -755,3 +755,17 @@
 - `004_deep_efficiency.sql` — 索引 + feed RPC + strategy_metrics_cache
 - `005_ops_control_plane.sql` — ops_jobs + audit logs
 - `006_reload_postgrest_schema.sql` — schema refresh
+
+### Operations Core destructive publisher rehearsal（2026-07-26）
+
+Production destructive publisher family的人工演練只可經
+`scripts/rehearse_publisher_delete_restore.py`執行。入口機械限制單筆
+`ops-core-delete-restore-smoke-*` remote-only synthetic article，要求exact recovery
+artifact先落盤、scope-bound approval、generation-CAS owner、兩個獨立delete effects
+及中間atomic restore。任何不確定mutation先restore；所有終止路徑仍須嘗試把owner
+退回`legacy`並撤銷approval。成功只能由standing
+`publisher-projection-convergence.v2`零mismatch receipt裁決。
+
+這個operator seam已由failure injection驗證，但尚未在本輪執行production synthetic
+delete→restore→cleanup，所以operations-core umbrella維持`contained`；仍需一張live
+rehearsal receipt與physical two-Mac Primary Authority receipt pair。

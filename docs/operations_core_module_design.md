@@ -1652,3 +1652,32 @@ dual-edge relation與read-only replay，共6案通過。首版migration
 回讀。此slice為
 `root_cause_fixed_and_verified`；umbrella仍為`contained`，下一步是manual-only live
 synthetic delete→restore→feed convergence rehearsal。
+
+## 18. Publisher destructive delete manual rehearsal seam（2026-07-26）
+
+`scripts/rehearse_publisher_delete_restore.py`是destructive family唯一operator
+rehearsal入口，刻意不進任何runtime schedule。CLI必須明示
+`--confirm DELETE-RESTORE-SYNTHETIC`，且scope只准包含一筆slug以
+`ops-core-delete-restore-smoke-`開頭、已預先seed且live完整candidate與本地artifact
+exact-match的remote-only row。
+
+Interface把整個人工流程收斂成一個failure-closed transaction choreography：
+
+1. 先從exact feed bytes與candidate產生scope/recovery，fsync並read-back recovery
+   artifact，再記錄scope-bound durable approval；
+2. destructive owner只准從`legacy`以generation CAS切到`operations_core`；
+3. 第一個獨立EffectRequest完成delete與typed absence receipt；
+4. atomic restore executor恢復article與六表完整bytes，且receipt的candidate／restore
+   count必須精確等於scope；
+5. 第二個不同idempotency/work identity的EffectRequest做cleanup delete；
+6. standing publisher convergence receipt必須為v2、`converged`、零mismatch且零
+   observation error，才可正常結束；
+7. 最後以generation CAS回`legacy`並撤銷approval。任何delete RPC可能已mutation但
+   response遺失時，一律先重跑exact restore；即使restore失敗，owner rollback與
+   approval revoke仍各自繼續嘗試，最後合併回報cleanup failure。
+
+Failure-injection與相鄰destructive publisher suites共56 passed；CLI help、compileall及
+diff check通過。本切片完成manual rehearsal的operator seam，但本輪沒有建立synthetic
+production row，也沒有執行live delete／restore。因此rehearsal capability為
+`root_cause_fixed_and_verified`，實際live receipt與physical two-Mac authority pair仍是
+umbrella升級前的evidence gate。

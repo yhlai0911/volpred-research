@@ -1599,3 +1599,19 @@ article delete／restore。此projection slice為
 `root_cause_fixed_and_verified`；整體仍是`contained`，下一步是manual-only live
 synthetic delete→restore→feed convergence rehearsal，另須physical two-Mac receipt
 pair。
+
+## 2026-07-26 — Program commit 15 manual destructive rehearsal seam
+
+新增唯一manual-only operator入口
+`scripts/rehearse_publisher_delete_restore.py`。它只接受單筆固定synthetic slug prefix、
+已pre-seed且live exact的remote-only candidate，並要求explicit confirmation。流程依序
+freeze recovery artifact、record approval、CAS cutover、owned delete、atomic exact
+restore、第二個獨立cleanup delete、standing convergence read-back、CAS rollback與
+approval revoke。
+
+不確定delete response會先走exact restore；restore本身失敗也不會跳過owner rollback
+或approval revoke。Failure injections涵蓋正常完成、第一個delete response遺失、
+cleanup response遺失、approval response遺失、restore unavailable及非synthetic scope
+拒絕；與相鄰destructive suites共 **56 passed**。本輪沒有remote mutation，所以
+operator seam為`root_cause_fixed_and_verified`，program commit 15仍等待實際live
+synthetic rehearsal receipt；operations-core umbrella另仍等待physical two-Mac pair。

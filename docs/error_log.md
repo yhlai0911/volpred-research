@@ -2488,3 +2488,28 @@ no-login definer無public CREATE均正確；Supabase security／performance advi
 本production atomic projection slice為 **`root_cause_fixed_and_verified`**；manual-only
 live synthetic delete→restore→feed convergence rehearsal與physical two-Mac authority
 receipt pair仍缺，故operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Production delete／restore都存在，但人工演練仍靠operator手工串接
+
+**證據化症狀與根因層級**：destructive owner、approval、compare-delete、完整recovery
+與atomic restore projection都已上production，但沒有單一入口固定實際演練順序。
+Operator若手工串RPC，可能重用同一EffectRequest做restore後cleanup、delete response
+遺失時直接rollback owner，或restore失敗後跳過approval revoke。根因是operator
+transaction choreography缺失，不是database projection或Effect adapter。
+
+**底層修復**：新增manual-only
+`scripts/rehearse_publisher_delete_restore.py`，機械限制單筆固定prefix synthetic
+candidate與explicit confirmation。入口在任何remote mutation前freeze並read-back
+recovery bytes；再依序record scope-bound approval、generation-CAS cutover、第一個
+owned delete、atomic exact restore、第二個不同idempotency/work identity的cleanup
+delete、standing convergence read-back、CAS rollback與approval revoke。不確定delete
+一律先exact restore；cleanup code會分別嘗試restore、owner rollback與approval revoke，
+不因前一步exception跳過後兩步。
+
+**回歸與誠實狀態**：failure injections涵蓋happy path、第一個delete response遺失、
+cleanup response遺失、approval response遺失、restore failure仍rollback/revoke，以及
+非synthetic scope在任何remote mutation前拒絕；與owned delete、restore contract及
+PostgreSQL restore suites共 **56 passed**，CLI help、compileall與`git diff --check`
+通過。本輪沒有pre-seed production synthetic row或執行live mutation，因此operator
+seam根因為 **`root_cause_fixed_and_verified`**，但actual live rehearsal evidence與
+physical two-Mac receipt pair仍缺，operations-core umbrella維持 **`contained`**。
