@@ -59,9 +59,10 @@ def _gate_from_row(row: dict[str, Any]) -> WorkCutoverGate:
 class PostgresWorkOwnerStore:
     """Read and privileged-CAS the private Work Coordinator owner row.
 
-    Runtime worker and approver roles can only read ownership. The transfer
-    function remains ungranted until a durable cutover-gate transaction is
-    available, so this adapter is limited to migration-owner rehearsals.
+    Runtime worker and approver roles can only read ownership. The durable
+    gate exists locally, but transfer remains ungranted until its migration
+    is deployed and a dedicated operator identity is approved; this adapter
+    is therefore limited to migration-owner rehearsals.
     """
 
     def __init__(self, connection_factory: ConnectionFactory) -> None:

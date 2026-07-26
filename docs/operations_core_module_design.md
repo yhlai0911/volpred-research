@@ -1509,9 +1509,10 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   claim 的 `started_at`）。
   Projection schema 必須精確等於 production compatibility contract
   `next-tasks-read-projection.v1`；未知 schema 即使產生相同 payload 也拒絕。
-  Row count／SHA 由 payload 重算。Manifest v2 以 canonical JSON 綁定 raw
+  Row count／SHA 由 payload 重算。Manifest v3 以 canonical JSON 綁定 raw
   legacy snapshot、canonical assessment、derived import report、validated projection
-  schema 與 owner-state 五個 SHA-256 identity；assessment 額外綁定 canonical receipt-set
+  schema 與 owner-state 五個 SHA-256 identity，並由同一 trusted clock 加入
+  `prepared_at`／15 分鐘 `valid_until`；assessment 額外綁定 canonical receipt-set
   digest 與最後 snapshot identity，最後一筆必須 exact-match 本次三來源 cutover
   snapshot。Importer 已保存但 Coordinator projection 無法表示的 dispatch lane、
   preferred／target agent、fallback policy、dreaming 或 timestamp 會造成 parity fail，
@@ -1521,9 +1522,10 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   或迫使新 owner 接受無法驗證的 claim。Preflight 因此要求 next_tasks 為
   quiescent（零 active lease）；active work id 會在 manifest 產生前明確 fail closed。
 - 這是 **read-only preflight capability**，沒有 filesystem／database mutation、
-  materialize 或 apply interface。Live `direct_execution` mode 與零 observation
-  evidence 均未變；正式 CAS transaction、唯一 owner 下游回讀及 live rollback
-  rehearsal 仍未完成，因此 Issue #9 保持 `contained`。
+  materialize 或 apply interface；它只產生交給下一節 local durable gate stage 的
+  evidence capsule。Local gated CAS 已完成，但 migration 尚未部署 production，
+  `direct_execution` mode 與零 observation evidence 均未變，也未完成 live
+  unique-owner 下游回讀與 rollback rehearsal，因此 Issue #9 保持 `contained`。
 
 ### Issue #9 — Durable Work Coordinator owner fencing
 
