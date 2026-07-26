@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.volpred.operations-core-scheduler</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/uv</string>
+    <string>run</string>
+    <string>python</string>
+    <string>-m</string>
+    <string>scripts.operations_core_scheduler</string>
+    <string>daemon</string>
+    <string>--tick-seconds</string>
+    <string>30</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/yhlai0911/volpred-research</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin:/Users/yhlai0911/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>HOME</key>
+    <string>/Users/yhlai0911</string>
+    <key>VOLPRED_ACTOR</key>
+    <string>operations-core-scheduler</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/yhlai0911/.volpred/logs/operations_core_scheduler_launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/yhlai0911/.volpred/logs/operations_core_scheduler_launchd.err</string>
+</dict>
+</plist>
+

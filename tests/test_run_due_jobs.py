@@ -268,3 +268,58 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
     assert jobs["piggy_only_test"]["reason"] == "wrapper_missing"
     # Legacy managed=false entries remain excluded unless they opt in.
     assert "fully_disabled_test" not in jobs
+
+
+def test_run_due_jobs_never_executes_operations_core_owned_job(tmp_path, monkeypatch):
+    import json
+    import run_due_jobs as rdj
+
+    wrapper = tmp_path / "would_have_run.sh"
+    wrapper.write_text("#!/bin/bash\nexit 99\n", encoding="utf-8")
+    wrapper.chmod(0o755)
+    config_path = tmp_path / "schedules.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "metadata": {"timezone": "Asia/Taipei"},
+                "schedule_materialization": {
+                    "generation": "g1",
+                    "mode": "canary",
+                    "active_jobs": {
+                        "owned": {"activated_at": "2026-01-01T00:00:00Z"}
+                    },
+                },
+                "system_crontab": {
+                    "items": [
+                        {
+                            "id": "owned",
+                            "cron": "* * * * *",
+                            "wrapper_script": str(wrapper),
+                            "piggy_back_enabled": True,
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(rdj, "CONFIG_PATH", config_path)
+    monkeypatch.setattr(rdj, "LAST_RUN_PATH", tmp_path / "cron_last_run.json")
+    monkeypatch.setattr(rdj, "PROJECT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        rdj,
+        "PENDING_SESSIONS_PATH",
+        tmp_path / "storage" / "ops" / "pending_sessions.json",
+    )
+
+    result = rdj.run_due_jobs()
+
+    assert result["fired_count"] == 0
+    assert result["jobs"] == [
+        {
+            "job_id": "owned",
+            "action": "skip",
+            "reason": "operations_core_owner",
+            "generation": "g1",
+        }
+    ]
