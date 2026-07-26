@@ -3461,3 +3461,35 @@ live acceptance fire 產生單一 WorkItem／EffectRequest／outbox attempt 1，
 exact read-back 為 delivered；同一 fire 重播只回相同 effect／terminal receipt，
 attempt_count 仍為 1。因下一個自然 schedule receipt 與 sustained-clean 尚未回讀，
 故仍只能標 **`contained`**，不能提前宣稱 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-26 — owner-gate suppression 新增 exit-0 marker，綠測試仍寫髒 CI checkout
+
+**證據化症狀與根因層級**：GitHub Actions Test Suite run
+`30207277676` 在 commit `668ed9a87991e615d3574ea1766b8aa4ae5d0927` 的 pytest step
+全數通過，最後 tree-clean gate 才抓到 `storage/ops/cron_last_run.json` 與
+`.lock` 被建立。最小化後只有
+`test_cron_lib_suppresses_stale_legacy_trigger_before_business_action` 可在約 0.6 秒穩定
+重現：該 commit 讓 stale legacy trigger 被 Operations Core owner gate 抑制時也呼叫
+`cron_emit_exit(..., 0)`，但測試 subprocess 沒有設定 `VOLPRED_CRON_MARKER_PATH`；
+底層 `cron_mark_last_run.merge_last_run()` 又未遵守
+`VOLPRED_NO_CANONICAL_WRITE=1`。因此測試 assertions 全綠，正式 marker 卻被寫入。既有
+canonical-writer audit 未把 `cron_last_run.json` 列入 target，故也無法在更早階段攔截。
+
+**底層修復與制度化**：`cron_mark_last_run.py` 以 plain system Python 可載入的
+`src/volpred/canonical_write.py` 作唯一 guard，在 lock／mkdir／tempfile／replace 前的
+`merge_last_run()` 與 `_atomic_write()` 兩個最低寫入邊界 fail closed；production 未設定
+test-only flag，正常 exit-0 marker 語意不變。owner-gate end-to-end test 將 marker 明確
+導向 `tmp_path` 並回讀 `handoff_regen` key。canonical-writer audit 新增
+`cron_last_run.json` target，固定 `cron_mark_last_run` 兩個 low-level owners；擴大監管面
+同時發現既有 `check_alerts._record_release_pool_fallback_fire`，其 guard 已存在，現納入
+owner-count ratchet。
+
+**回歸與狀態**：獨立乾淨副本的 regression 先以
+`DID NOT RAISE CanonicalWriteBlocked` 轉 RED，修正後 GREEN；cron scoped suite
+**28 passed**、canonical-writer tests **20 passed**、audit CLI 回讀
+`ok=true / violations=[] / owner_count_mismatches=[]`，plain `/usr/bin/env python3`
+marker smoke 通過。完整無憑證 suite 為 **5352 passed, 2 skipped**；測試前後
+`git_status_delta=clean`、`canonical_mtime_delta=clean`。本機根因、回歸與制度化 gate
+已完成；但新 commit 尚待主線 push，GitHub hosted runner 尚未回讀 sustained green，
+故目前只能標 **`contained`**。新 run 全綠並確認下游通知收斂後才升級為
+**`root_cause_fixed_and_verified`**。

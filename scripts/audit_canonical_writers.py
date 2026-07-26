@@ -82,6 +82,9 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     # until 2026-07-21 (dispatch-lanes absorb): it now delegates to the
     # append_task_record gateway and owns no direct mutation.
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": {"open-write": 1},
+    "scripts/check_alerts.py:_record_release_pool_fallback_fire": {
+        "mkdir": 1, "write_text": 1,
+    },
     "scripts/continue_task_dispatch.py:_materialize_pool_dry_diagnostic_task": {
         "mkdir": 1, "open-write": 1, "write_text": 1,
     },
