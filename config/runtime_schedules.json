@@ -307,11 +307,12 @@
         "log_path": "storage/logs/cron/owned_publisher_article_recovery.log",
         "host_crontab_managed": false,
         "piggy_back_enabled": true,
-        "description": "每小時由 check_alerts → run_due_jobs 單一 piggy-back owner 回收 publisher sync 的 expired started 與 due retry；exact-family RPC 以 SKIP LOCKED 原子領取並由既有 Supabase read-back provider 收斂。",
+        "description": "每小時由 check_alerts → run_due_jobs 單一 piggy-back owner 回收 publisher sync 的 expired started 與 due retry，並終止 old-generation 且 approval 已撤銷的 publisher delete retry；兩個 exact-family RPC 均以 SKIP LOCKED 原子領取，delete 路徑不呼叫 provider。",
         "matchers": [
           "recover_owned_publisher_articles.py",
           "cron_owned_publisher_article_recovery.sh",
-          "volpred_recover_due_owned_publisher_article_sync"
+          "volpred_recover_due_owned_publisher_article_sync",
+          "volpred_reconcile_stale_owned_publisher_article_delete"
         ]
       },
       {

@@ -55,6 +55,7 @@ DELETE_REQUEST_DEPENDENCIES = tuple(
         "20260725202655_promote_publisher_delete_scope_approval.sql",
         "20260725205013_remove_owned_request_share_lock.sql",
         "20260726103201_reconcile_stale_owned_publisher_delete.sql",
+        "20260726104730_fence_publisher_delete_reconciliation_identity.sql",
     )
 )
 ARTICLE_ID = "11111111-1111-4111-8111-111111111111"
@@ -635,6 +636,19 @@ def test_stale_revoked_delete_retry_is_terminalized_without_provider(
                 "operator:postgres-test",
             ),
         ).fetchone()[0]
+        decoy_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_delete(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                "postgres-stale-owned-delete-decoy",
+                prepared.payload.decode(),
+                "operator:postgres-test",
+            ),
+        ).fetchone()[0]
         primary = connection.execute(
             """
             SELECT public.volpred_acquire_primary_authority(
@@ -725,6 +739,41 @@ def test_stale_revoked_delete_retry_is_terminalized_without_provider(
             ),
         ).fetchone()[0]
 
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            DELETE FROM volpred_ops.owned_notification_requests
+            WHERE effect_id = %s
+            """,
+            (decoy_request["effect_id"],),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.owned_notification_requests
+            SET work_id = %s
+            WHERE effect_id = %s
+            """,
+            (decoy_request["work_id"], request["effect_id"]),
+        )
+        connection.execute("SET ROLE service_role")
+        cross_linked = connection.execute(
+            """
+            SELECT public.volpred_reconcile_stale_owned_publisher_article_delete(
+              25, %s
+            )
+            """,
+            ("effect-worker:publisher-delete-reconciliation",),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.owned_notification_requests
+            SET work_id = %s
+            WHERE effect_id = %s
+            """,
+            (request["work_id"], request["effect_id"]),
+        )
+        connection.execute("SET ROLE service_role")
         reconciliation = connection.execute(
             """
             SELECT public.volpred_reconcile_stale_owned_publisher_article_delete(
@@ -772,6 +821,7 @@ def test_stale_revoked_delete_retry_is_terminalized_without_provider(
         ).fetchone()
 
     assert rolled_back["owner"] == "legacy"
+    assert cross_linked["reconciled_count"] == 0
     assert reconciliation["reconciled_count"] == 1
     assert reconciliation["receipts"][0]["effect_id"] == request["effect_id"]
     assert replay["reconciled_count"] == 0

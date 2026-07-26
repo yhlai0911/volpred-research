@@ -3212,6 +3212,17 @@ migration 上線後一次收斂六筆，回讀 `receipt_count=6`、
 零-provider reconciliation；production smoke 為 delete=0、sync=0。五步 gate
 全部完成，狀態 **`root_cause_fixed_and_verified`**。
 
+**Matt review remediation**：首次複審判定 selector 雖逐表檢查狀態，卻未證明
+`owned_request.work_id`、`effect.work_item_id`、`message.effect_id` 與
+`attempt_receipt.outbox_sequence` 都屬同一 request chain；各自 FK 不能取代 composite
+identity。另有 RPC decoder 未驗證 generation 單調性／固定 reason，以及 canonical
+schedule metadata 仍宣稱 sync-only。負向 PostgreSQL 測試把 request work_id
+cross-link 到另一個合法 WorkItem，修前確實錯誤收斂 1 筆；forward migration
+`20260726104730_fence_publisher_delete_reconciliation_identity` 補全 request SHA、
+work/effect/outbox/receipt/worker/evidence/lifecycle identity 後變成零 mutation。
+decoder 與 metadata ratchet 同步補齊。Production `pg_get_functiondef` 回讀
+request-work、outbox-effect、receipt-outbox fences 均存在，replay count 仍為 0。
+
 ## 2026-07-26 — Business schedule 有三套 owner，session cron 又把已退役 queue 當控制面
 
 **證據化症狀**：cutover 前同一份 `runtime_schedules.json` 同時由 host crontab、

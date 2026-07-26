@@ -418,32 +418,36 @@ def test_supabase_store_preserves_exact_canonical_payload_text():
     assert "p_payload" not in payload
 
 
-def test_supabase_store_reconciles_stale_retries_through_exact_rpc():
-    response = {
+def _reconciliation_response(**receipt_overrides) -> dict:
+    receipt = {
+        "schema_version": (
+            "owned-publisher-delete-reconciliation-receipt.v1"
+        ),
+        "effect_id": "effect-owned-publisher-delete-1",
+        "attempt_count": 1,
+        "stale_owner_generation": 4,
+        "current_owner_generation": 5,
+        "approval_ref": "approval:publisher-delete/owned-1",
+        "reason_code": "stale_generation_revoked_approval",
+        "evidence_ref": (
+            "owned-publisher-delete-reconciliation:"
+            "effect-owned-publisher-delete-1:attempt-1"
+        ),
+        "evidence_sha256": "e" * 64,
+        "recorded_at": "2026-07-26T10:00:00+00:00",
+    }
+    receipt.update(receipt_overrides)
+    return {
         "schema_version": (
             "owned-publisher-delete-reconciliation-summary.v1"
         ),
         "reconciled_count": 1,
-        "receipts": [
-            {
-                "schema_version": (
-                    "owned-publisher-delete-reconciliation-receipt.v1"
-                ),
-                "effect_id": "effect-owned-publisher-delete-1",
-                "attempt_count": 1,
-                "stale_owner_generation": 4,
-                "current_owner_generation": 5,
-                "approval_ref": "approval:publisher-delete/owned-1",
-                "reason_code": "stale_generation_revoked_approval",
-                "evidence_ref": (
-                    "owned-publisher-delete-reconciliation:"
-                    "effect-owned-publisher-delete-1:attempt-1"
-                ),
-                "evidence_sha256": "e" * 64,
-                "recorded_at": "2026-07-26T10:00:00+00:00",
-            }
-        ],
+        "receipts": [receipt],
     }
+
+
+def test_supabase_store_reconciles_stale_retries_through_exact_rpc():
+    response = _reconciliation_response()
     client = _RpcClient(
         {
             "volpred_reconcile_stale_owned_publisher_article_delete": (
@@ -472,6 +476,39 @@ def test_supabase_store_reconciles_stale_retries_through_exact_rpc():
             },
         )
     ]
+
+
+@pytest.mark.parametrize(
+    "receipt_overrides",
+    [
+        {
+            "stale_owner_generation": 5,
+            "current_owner_generation": 5,
+        },
+        {"reason_code": "unknown_reconciliation_reason"},
+    ],
+)
+def test_supabase_store_rejects_reconciliation_receipt_drift(
+    receipt_overrides,
+):
+    client = _RpcClient(
+        {
+            "volpred_reconcile_stale_owned_publisher_article_delete": (
+                _reconciliation_response(**receipt_overrides)
+            )
+        }
+    )
+    store = object.__new__(SupabaseOwnedPublisherDeleteStore)
+    store._client = client
+
+    with pytest.raises(
+        RuntimeError,
+        match="reconciliation receipt lifecycle drift",
+    ):
+        store.reconcile_stale_retries(
+            limit=25,
+            actor_ref="effect-worker:publisher-delete-reconciliation",
+        )
 
 
 def test_projection_compare_delete_sends_attempt_and_approval_identity():

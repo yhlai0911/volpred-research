@@ -1967,6 +1967,15 @@ v2，先走零-provider delete reconciliation，再走原 publisher-sync recover
 production wrapper smoke 兩邊均為零筆 no-op。此切片完成五步 gate，狀態為
 `root_cause_fixed_and_verified`。
 
+Matt 雙軸初審其後抓到 selector 尚未證明跨表 parent identity、decoder 未驗證
+generation 順序／固定 reason，以及 schedule metadata 仍描述成 sync-only。
+`20260726104730_fence_publisher_delete_reconciliation_identity` 已以 forward migration
+補 request→work→effect→outbox→attempt receipt 全鏈 identity fences；cross-linked
+request 的 PostgreSQL 負向案例先 RED 後 GREEN。Python decoder 現拒絕
+`current_generation <= stale_generation` 與未知 reason；runtime schedule／writer
+inventory 也已明列零-provider delete reconciliation。Production function definition
+回讀三組 identity fence 均存在，重跑仍為 0。
+
 ## 2026-07-26 — Operations Core scheduler 全量上線
 
 - ✅ `schedule_materialization.mode=active`；49/49 executable system jobs 已轉給

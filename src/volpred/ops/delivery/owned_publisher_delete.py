@@ -1425,6 +1425,26 @@ def _reconciliation_summary_from_payload(
             raise RuntimeError(
                 "owned publisher delete reconciliation receipt schema drift"
             )
+        stale_owner_generation = _positive_integer(
+            receipt.get("stale_owner_generation"),
+            field="reconciliation stale_owner_generation",
+        )
+        current_owner_generation = _positive_integer(
+            receipt.get("current_owner_generation"),
+            field="reconciliation current_owner_generation",
+        )
+        reason_code = _required_text(
+            receipt.get("reason_code"),
+            field="reconciliation reason_code",
+        )
+        if (
+            current_owner_generation <= stale_owner_generation
+            or reason_code != "stale_generation_revoked_approval"
+        ):
+            raise RuntimeError(
+                "owned publisher delete reconciliation receipt "
+                "lifecycle drift"
+            )
         receipts.append(
             OwnedPublisherDeleteReconciliationReceipt(
                 schema_version=str(receipt["schema_version"]),
@@ -1436,22 +1456,13 @@ def _reconciliation_summary_from_payload(
                     receipt.get("attempt_count"),
                     field="reconciliation attempt_count",
                 ),
-                stale_owner_generation=_positive_integer(
-                    receipt.get("stale_owner_generation"),
-                    field="reconciliation stale_owner_generation",
-                ),
-                current_owner_generation=_positive_integer(
-                    receipt.get("current_owner_generation"),
-                    field="reconciliation current_owner_generation",
-                ),
+                stale_owner_generation=stale_owner_generation,
+                current_owner_generation=current_owner_generation,
                 approval_ref=_required_text(
                     receipt.get("approval_ref"),
                     field="reconciliation approval_ref",
                 ),
-                reason_code=_required_text(
-                    receipt.get("reason_code"),
-                    field="reconciliation reason_code",
-                ),
+                reason_code=reason_code,
                 evidence_ref=_required_text(
                     receipt.get("evidence_ref"),
                     field="reconciliation evidence_ref",

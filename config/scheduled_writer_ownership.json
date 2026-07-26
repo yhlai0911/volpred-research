@@ -191,7 +191,7 @@
       "entrypoint": "scripts/recover_owned_publisher_articles.py",
       "policy": "no_repo_tracked_output",
       "tracked_outputs": [],
-      "reason": "Mutates only the fenced Supabase publisher-sync transaction and ignored log evidence; it never writes or commits Git-tracked repository state."
+      "reason": "Mutates the fenced Supabase publisher-sync recovery and the zero-provider stale publisher-delete reconciliation transactions plus ignored log evidence; it never writes or commits Git-tracked repository state."
     },
     "memory_health_daily": {
       "entrypoint": "scripts/cron_memory_health.sh",

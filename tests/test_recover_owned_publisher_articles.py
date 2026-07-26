@@ -188,13 +188,18 @@ def test_recovery_has_one_canonical_hourly_schedule() -> None:
             "description": (
                 "每小時由 check_alerts → run_due_jobs 單一 piggy-back "
                 "owner 回收 publisher sync 的 expired started 與 due "
-                "retry；exact-family RPC 以 SKIP LOCKED 原子領取並由"
-                "既有 Supabase read-back provider 收斂。"
+                "retry，並終止 old-generation 且 approval 已撤銷的 "
+                "publisher delete retry；兩個 exact-family RPC 均以 "
+                "SKIP LOCKED 原子領取，delete 路徑不呼叫 provider。"
             ),
             "matchers": [
                 "recover_owned_publisher_articles.py",
                 "cron_owned_publisher_article_recovery.sh",
                 "volpred_recover_due_owned_publisher_article_sync",
+                (
+                    "volpred_reconcile_stale_owned_"
+                    "publisher_article_delete"
+                ),
             ],
         }
     ]
@@ -206,9 +211,10 @@ def test_recovery_has_one_canonical_hourly_schedule() -> None:
         "policy": "no_repo_tracked_output",
         "tracked_outputs": [],
         "reason": (
-            "Mutates only the fenced Supabase publisher-sync transaction "
-            "and ignored log evidence; it never writes or commits "
-            "Git-tracked repository state."
+            "Mutates the fenced Supabase publisher-sync recovery and the "
+            "zero-provider stale publisher-delete reconciliation "
+            "transactions plus ignored log evidence; it never writes or "
+            "commits Git-tracked repository state."
         ),
     }
     assert (
