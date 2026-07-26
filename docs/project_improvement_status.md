@@ -664,6 +664,7 @@ program commit 34 與 Change Delivery umbrella 仍為 `contained`。
 unavailable、release response lost 與 expiry regressions，加上既有 Supabase／PG17
 authority contracts，共 12 passed。這使 session lifecycle 的局部缺口達
 `root_cause_fixed_and_verified`。
+
 同日 `HostAuthorityKeepalive` 再成為週期性 renew 的單一 process owner：正式 caller
 只能從 keepalive 取 lease，stop／renew failure／dead worker／join timeout 都先封鎖
 本機 enable gate，status 不洩漏 raw token。後續 startup race 回歸抓到 remote acquire
@@ -1965,3 +1966,21 @@ Production 首輪精確收斂 6/6，回讀 `receipt_count=6`、`fully_converged=
 v2，先走零-provider delete reconciliation，再走原 publisher-sync recovery；
 production wrapper smoke 兩邊均為零筆 no-op。此切片完成五步 gate，狀態為
 `root_cause_fixed_and_verified`。
+
+## 2026-07-26 — Operations Core scheduler 全量上線
+
+- ✅ `schedule_materialization.mode=active`；49/49 executable system jobs 已轉給
+  `com.volpred.operations-core-scheduler`。
+- ✅ Host crontab 的 VolPred entries=0；舊 per-job LaunchAgents=0；wrapper effect 前
+  另有 fail-closed owner gate。唯讀 reconcile 為
+  `owner_surfaces_verified`，0 conflict、0 dormant legacy surface。
+- ✅ active boundary 後自然 `event_jobs_materialize` fire attempt 1 exit 0；immutable
+  fire identity／duplicate suppression／no-early-fire 均有 live receipt。
+- ✅ 七條 session-local CronCreate 全數制度化退役，`session_crons.items=[]`；
+  knowledge index 改由新的 Operations Core 六小時 wrapper 執行，其餘功能有 explicit
+  replacement mapping，`run_due_jobs` 不再寫新的 pending-session marker。
+- ✅ NDC hand-off 遵守 direct execution：legacy queue 關閉時明確失敗並留 receipt，
+  本次 stale work 已登記 GitHub Issue #38；沒有手改 next_tasks 或 canonical CSV。
+- 🟡 Scheduler 已正式提供服務，但 Issue #28 的 sustained-clean 觀察窗仍為
+  `contained`。Issue #9 是獨立的 Work Coordinator queue cutover，七日 evidence 未滿，
+  不隨 scheduler ownership 自動結案。

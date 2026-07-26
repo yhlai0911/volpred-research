@@ -3211,3 +3211,41 @@ migration 上線後一次收斂六筆，回讀 `receipt_count=6`、
 `reconciled_count=0`。既有 hourly publisher recovery 入口升級為 v2，每輪先執行
 零-provider reconciliation；production smoke 為 delete=0、sync=0。五步 gate
 全部完成，狀態 **`root_cause_fixed_and_verified`**。
+
+## 2026-07-26 — Business schedule 有三套 owner，session cron 又把已退役 queue 當控制面
+
+**證據化症狀**：cutover 前同一份 `runtime_schedules.json` 同時由 host crontab、
+per-job LaunchAgent 與 `check_alerts → run_due_jobs` piggy-back 解讀；
+`feed_sync`／`audit_publish_sync` 曾被 owner audit 證實 simultaneous owner。
+另有七條 session-local `CronCreate` 在 session 關閉時只累積
+`pending_sessions.json`，NDC freshness 已落後至 expected `2026M05`，卻沒有可靠
+executor。新 NDC materializer 首輪又嘗試新增 legacy next_tasks id，被正式
+`TaskPoolAdmissionClosed` guard 擋下；queue bytes 未受污染。
+
+**根因層級**：canonical schedule spec 只有「何時跑」，沒有可機械執行的單一 owner
+generation；host installer、launchd installer、piggy-back 與互動 session 各自推論
+ownership。NDC follow-up 同時違反 `direct_execution` 期間 GitHub Issues 才是唯一新
+工作登記面的契約。這是 schedule/control-plane architecture 缺陷，不是補 cron marker
+或手改 pending JSON 能解。
+
+**底層修復**：Operations Core scheduler 現以 generation、immutable fire key、
+activation boundary、fenced lease、retry／timeout、catch-up policy 與 terminal
+receipt 擁有 business clock。`cron_owner_gate.py`／`cron_lib.sh` 在 wrapper effect
+前 fail closed；reconciler 原子安裝核心 daemon、移除 legacy host／launchd surfaces
+並回讀。2026-07-26 18:38 台灣時間正式改為 active：49/49 executable jobs 由
+Operations Core 擁有，VolPred host crontab entries=0，legacy per-job LaunchAgents=0。
+session crons 以 `items=[] / status=retired` 制度化退役；knowledge index 另建真正的
+六小時 executable wrapper。NDC 在 queue admission 關閉時改為 exit 1 並留下 scheduler
+failure evidence，實際資料工作登記為 GitHub Issue #38，禁止繞過 gate 或假綠。
+
+**回歸與 live 回讀**：scheduler／runtime／owner／wrapper／liveness focused suites
+持續通過；wrapper manifest 已同步 live copy。owner audit 回報
+`owner_surfaces_verified`、49 core／0 legacy、conflicts=[]、
+dormant_legacy_surfaces=[]。active boundary 後第一個自然 fire
+`event_jobs_materialize@2026-07-26T10:40:00Z` 於 10:40:18Z 啟動、attempt 1 exit 0，
+且重複 tick 未產生第二個 identity；18:30 的回歸 fire 亦證明修正後不再提前跨分鐘。
+
+「三套 schedule owner 與 session recorder 假控制面」根因已完成五步，狀態
+**`root_cause_fixed_and_verified`**。Issue #28 的長窗 sustained-clean 與 Issue #9
+Work Coordinator 七日 queue ownership evidence 是不同 gate，仍標
+**`contained`**，不得用本次 scheduler 成功冒充完成。

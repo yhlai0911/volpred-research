@@ -834,6 +834,31 @@
 
 **核心原則重申**：同一套 `ops` CLI，真人與主線程 agent 共用；v12 下真人 UI 是監看層，主線程才是正式執行者，不再有第二個平行 Claude / Codex session 持續消化 queue。
 
+### Operations Core scheduler（2026-07-26，取代上方 v12 時鐘描述）
+
+`config/runtime_schedules.json.schedule_materialization.mode=active` 是目前正式時鐘。
+單一 LaunchAgent `com.volpred.operations-core-scheduler` 讀取同一份 canonical spec，
+以 `generation + job_id + scheduled UTC` 建 immutable fire identity，並以 fenced lease、
+retry、timeout、terminal receipt 與 catch-up policy 執行 49 個 `system_crontab` jobs。
+
+- 主機 crontab 的 VolPred entries 已收斂為 0；它不再是 business schedule owner。
+- 舊 per-job LaunchAgents 已 bootout；wrapper 邊界另有 fail-closed owner gate，避免 stale
+  plist／手動 shell 誤觸造成雙跑。
+- `run_due_jobs.py` 只保留 rollback compatibility；Operations Core owner 下所有 job
+  均會被拒絕，不再是 universal piggy-back scheduler。
+- `session_crons.items=[]` 且 status=`retired`；不得再建立 Claude Code `CronCreate`。
+  原功能分別由 `ops_dashboard`、`check_alerts`／`daily_checkup`、`git_push_backup`、
+  `knowledge_index_maintain`、`ndc_indicator_refresh` 與 `research_backlog_daily` 接手。
+- scheduler receipts 在 `storage/ops/schedule_receipts.json`（ignored runtime state）；
+  liveness/readback 以成功 receipt 為最強證據，不以「process 沒報錯」代替下游確認。
+- rollback 是 owner transaction：先改 generation/mode 或 active set，再跑
+  `scripts/reconcile_schedule_owners.py --apply`；禁止手動只加回某一條 cron。
+
+Agent work queue 與 business clock 是不同責任。2026-07-23 起 legacy
+`storage/next_tasks.json` admission 處於 `direct_execution`，新工作唯一登記面暫為
+GitHub Issues；Work Coordinator 的 queue ownership 仍須依 Issue #9 完成七日
+owner-matched evidence，不能因 scheduler 已上線就冒充 queue cutover 完成。
+
 ## 程式碼架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）
 - **config/project_targets.json**：前端 / 部署 / Mirror target 的版本控制設定
