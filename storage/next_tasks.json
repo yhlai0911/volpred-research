@@ -32776,7 +32776,7 @@
     "title": "K1715: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Chri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 509). Original: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1715.py with signal.shift(1) + seed=42, (c) K1715_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -32789,7 +32789,18 @@
     "compute_job_id": "agent-brief_k1715_fix_attempt1-ba80b2",
     "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_fix_attempt1-ba80b2; awaiting PHASE A collection",
     "fail_reason": "Codex FAIL @87f2fec59: README/JSON number mismatches, optimizer_success_rate=0 (no convergence diagnostics retained), false arch 3-4sigfig agreement claim, unidentified causal attribution. Re-dispatched fix attempt1 (max effort) job agent-brief_k1715_fix_attempt1-ba80b2.",
-    "escalation_attempts": 1
+    "escalation_attempts": 1,
+    "last_released_at": "2026-07-26T21:50:20.882881+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "status_history": [
+      {
+        "ts": "2026-07-26T21:50:20.882888+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "release",
+        "note": "auto_release_stale_2h"
+      }
+    ]
   },
   {
     "id": "K1716",
@@ -43860,10 +43871,31 @@
         "to": "pending",
         "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
         "note": "supervisor_settle_empty"
+      },
+      {
+        "ts": "2026-07-26T21:51:23.574299+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-26T21:51:23.574302+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-26T21:52:55.866998+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
+        "note": "supervisor_settle_empty"
       }
     ],
-    "dispatch_settled_session_id": "dispatch-eff32f3b-c6922deb",
-    "last_released_at": "2026-07-26T21:44:44.573511+00:00",
+    "dispatch_settled_session_id": "dispatch-8a8912b5-f85bb988",
+    "last_released_at": "2026-07-26T21:52:55.866982+00:00",
     "last_release_reason": "workspace_empty"
   }
 ]
