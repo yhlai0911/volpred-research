@@ -887,6 +887,10 @@ receipt 只證明排程已交付，模型成功／quota_blocked／auth_blocked �
 - `/api/admin/questions/summary`
 - `/api/admin/content`
 
+Analytics privacy tracer 的事件字典、identity merge、retention 與
+opt-out／clear／delete 邊界見 `docs/analytics-privacy-contract.md`；Admin analytics
+只能讀 aggregate summary，不得繞過 tracer 讀 raw identity 或事件屬性。
+
 **核心原則重申**：同一套 `ops` CLI，真人與主線程 agent 共用；v12 下真人 UI 是監看層，主線程才是正式執行者，不再有第二個平行 Claude / Codex session 持續消化 queue。
 
 ### Operations Core scheduler（2026-07-26，取代上方 v12 時鐘描述）
