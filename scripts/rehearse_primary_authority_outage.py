@@ -709,6 +709,21 @@ def verify_cross_host_receipts(
         rehearsal_id=primary.rehearsal_id,
         lease_seconds=primary.lease_seconds,
     )
+    _validate_process_timeline(
+        started_at=standby.started_at,
+        completed_at=standby.completed_at,
+        role="standby",
+    )
+    standby_acquired = _timestamp(
+        standby.standby.acquired_at,
+        field="standby acquired_at",
+    )
+    standby_expires = _timestamp(
+        standby.standby.expires_at,
+        field="standby expires_at",
+    )
+    if standby_expires <= standby_acquired:
+        raise ValueError("standby lease window is invalid")
     if primary.role != "primary" or standby.role != "standby":
         raise ValueError("receipt role mismatch")
     if (
@@ -816,10 +831,6 @@ def verify_cross_host_receipts(
     primary_expiry = _timestamp(
         primary.primary.expires_at,
         field="primary expires_at",
-    )
-    standby_acquired = _timestamp(
-        standby.standby.acquired_at,
-        field="standby acquired_at",
     )
     handoff_seconds = (standby_acquired - primary_expiry).total_seconds()
     if handoff_seconds < 0:
@@ -1208,6 +1219,18 @@ def _timestamp(value: str, *, field: str) -> datetime:
     if observed.tzinfo is None:
         raise ValueError(f"{field} must include a timezone")
     return observed.astimezone(UTC)
+
+
+def _validate_process_timeline(
+    *,
+    started_at: str,
+    completed_at: str,
+    role: str,
+) -> None:
+    started = _timestamp(started_at, field=f"{role} started_at")
+    completed = _timestamp(completed_at, field=f"{role} completed_at")
+    if completed < started:
+        raise ValueError(f"{role} process timeline is inverted")
 
 
 def _receipt_sha256(receipt: object) -> str:
@@ -1610,6 +1633,11 @@ def _validate_primary_receipt_for_standby(
         or primary.role != "primary"
     ):
         raise ValueError("standby requires a completed primary v3 receipt")
+    _validate_process_timeline(
+        started_at=primary.started_at,
+        completed_at=primary.completed_at,
+        role="primary",
+    )
     if primary.authority_key != _authority_key_for_rehearsal(rehearsal_id):
         raise ValueError(
             "primary authority key is not derived from rehearsal identity"
