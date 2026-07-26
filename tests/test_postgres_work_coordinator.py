@@ -208,6 +208,9 @@ def reset_postgres_contract_state(postgres_dsn: str) -> None:
             WHERE capability = 'work.coordinate'
             """
         )
+        connection.execute(
+            "SELECT volpred_ops.set_legacy_work_mutation_access(true)"
+        )
 
 
 def _worker_connection(dsn: str) -> psycopg.Connection:
@@ -328,7 +331,9 @@ def test_work_owner_cutover_fences_legacy_mutations_atomically(
         requester_ref="owner:user",
     )
     legacy = WorkCoordinator(
-        PostgresCoordinationStore(connection_factory),
+        PostgresCoordinationStore(
+            lambda: _worker_connection(postgres_dsn)
+        ),
         clock=lambda: FIXED_NOW,
         id_factory=lambda: "legacy-must-not-write",
     )
@@ -479,6 +484,30 @@ def test_operations_core_generation_owns_full_lifecycle_and_rollback(
             )
         )
 
+    legacy = WorkCoordinator(
+        PostgresCoordinationStore(
+            lambda: _worker_connection(postgres_dsn)
+        ),
+        clock=lambda: FIXED_NOW,
+        id_factory=lambda: "work-legacy-after-rollback",
+    )
+    restored = legacy.submit(
+        WorkRequest(
+            idempotency_key="owner:postgres:legacy-after-rollback",
+            source="user",
+            kind="platform_ops",
+            title="rollback restores legacy runtime mutation access",
+            priority=1,
+            required_capabilities=frozenset(),
+            required_attestations=frozenset(),
+            risk="safe",
+            approval="auto",
+            payload_ref="owner:postgres:legacy-after-rollback",
+            requester_ref="owner:user",
+        )
+    )
+    assert restored.id == "work-legacy-after-rollback"
+
 
 def test_work_owner_transfer_rejects_active_lease_without_state_change(
     postgres_dsn: str,
@@ -537,6 +566,117 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
             "SELECT count(*) FROM volpred_ops.work_owner_receipts"
         ).fetchone()[0]
     assert receipt_count == 1
+
+
+@pytest.mark.parametrize("start_before_expiry", [False, True])
+def test_work_owner_rollback_reconciles_expired_lease_without_losing_identity(
+    postgres_dsn: str,
+    start_before_expiry: bool,
+) -> None:
+    connection_factory = lambda: psycopg.connect(postgres_dsn)
+    owner_store = PostgresWorkOwnerStore(connection_factory)
+    manifest_sha256 = "8" * 64
+    cutover = owner_store.transfer_owner(
+        expected_owner="legacy",
+        expected_generation=1,
+        target_owner="operations_core",
+        actor_ref="operator:pytest",
+        reason="exercise expired lease rollback",
+        cutover_manifest_sha256=manifest_sha256,
+    )
+    coordinator = WorkCoordinator(
+        PostgresCoordinationStore(
+            connection_factory,
+            owner_generation=cutover.generation,
+        ),
+        clock=lambda: FIXED_NOW,
+        id_factory=lambda: "work-expired-owner-rollback",
+        token_factory=lambda: "expired-owner-rollback-token",
+    )
+    submitted = coordinator.submit(
+        WorkRequest(
+            idempotency_key=(
+                "owner:postgres:expired-owner-rollback:"
+                f"{start_before_expiry}"
+            ),
+            source="user",
+            kind="platform_ops",
+            title="expired lease must not strand owner rollback",
+            priority=1,
+            required_capabilities=frozenset(),
+            required_attestations=frozenset(),
+            risk="safe",
+            approval="auto",
+            payload_ref="owner:postgres:expired-owner-rollback",
+            requester_ref="owner:user",
+        )
+    )
+    lease = coordinator.acquire(
+        WorkerOffer(
+            worker_id="expired-owner-worker",
+            capabilities=frozenset(),
+            attestations=frozenset(),
+            lease_seconds=300,
+        )
+    )
+    assert lease is not None
+    before_expiry = lease.work_item
+    if start_before_expiry:
+        before_expiry = coordinator.record(
+            Started(
+                work_id=submitted.id,
+                lease_token=lease.token,
+                expected_version=lease.work_item.version,
+            )
+        )
+    _expire_claim(postgres_dsn, submitted.id)
+
+    rollback = owner_store.transfer_owner(
+        expected_owner="operations_core",
+        expected_generation=cutover.generation,
+        target_owner="legacy",
+        actor_ref="operator:pytest",
+        reason="rollback after worker expiry",
+        cutover_manifest_sha256=manifest_sha256,
+        rollback_of_generation=cutover.generation,
+    )
+
+    assert (rollback.owner, rollback.generation) == ("legacy", 3)
+    with psycopg.connect(postgres_dsn) as connection:
+        row = connection.execute(
+            """
+            SELECT id, idempotency_key, status, version, claimed_by,
+                   claim_token, claim_expires_at, last_release_reason
+            FROM volpred_ops.work_items
+            WHERE id = %s
+            """,
+            (submitted.id,),
+        ).fetchone()
+        event = connection.execute(
+            """
+            SELECT kind, version, actor_ref
+            FROM volpred_ops.work_events
+            WHERE work_id = %s
+            ORDER BY sequence DESC
+            LIMIT 1
+            """,
+            (submitted.id,),
+        ).fetchone()
+    assert row == (
+        submitted.id,
+        submitted.idempotency_key,
+        "pending",
+        before_expiry.version + 1,
+        None,
+        None,
+        None,
+        "ownership transfer reconciled expired lease",
+    )
+    assert event == (
+        "released",
+        before_expiry.version + 1,
+        "system:work-owner-transfer",
+    )
 
 
 def test_work_owner_transfer_replay_is_exact_and_idempotent(
@@ -632,8 +772,21 @@ def test_work_owner_security_exposes_only_fenced_public_functions(
         ).fetchone()
 
     assert worker_privileges == (False, False, True)
-    assert approver_privileges == (True, True)
+    assert approver_privileges == (False, True)
     assert worker_table_access == (False, False)
+
+    with _approver_connection(postgres_dsn) as connection:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.transfer_work_owner(
+                  'legacy', 1, 'operations_core', 'operator:pytest',
+                  'must pass durable gate', %s, NULL
+                )
+                """,
+                ("9" * 64,),
+            ).fetchall()
 
 
 def test_postgres_worker_role_runs_adapter_but_cannot_delete(

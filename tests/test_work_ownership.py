@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+import pytest
+
 from volpred.ops.work.ownership import WorkOwner
+from volpred.ops.work.postgres import PostgresCoordinationStore
 from volpred.ops.work.postgres_ownership import PostgresWorkOwnerStore
 
 
@@ -19,6 +22,17 @@ def test_work_owner_exposes_generation_bound_identity() -> None:
     )
 
     assert owner.owner_ref == "work-owner:work.coordinate:generation-2"
+
+
+@pytest.mark.parametrize("invalid_generation", [True, 0, -1, "2"])
+def test_postgres_store_rejects_non_positive_integer_owner_generation(
+    invalid_generation: object,
+) -> None:
+    with pytest.raises(ValueError, match="positive integer"):
+        PostgresCoordinationStore(
+            lambda: None,  # type: ignore[arg-type,return-value]
+            owner_generation=invalid_generation,  # type: ignore[arg-type]
+        )
 
 
 class _Cursor:

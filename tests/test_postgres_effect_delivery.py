@@ -85,6 +85,7 @@ from volpred.ops.work import (
     WorkRequest,
 )
 from volpred.ops.work.postgres import PostgresCoordinationStore
+from volpred.ops.work.postgres_ownership import PostgresWorkOwnerStore
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TELEGRAM_EFFECT_KINDS = frozenset({"telegram.message.send"})
@@ -1415,6 +1416,8 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.work_owner_receipts,
+              volpred_ops.work_owners,
               volpred_ops.owned_notification_attempts,
               volpred_ops.owned_notification_requests,
               volpred_ops.notification_owner_receipts,
@@ -1441,6 +1444,29 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
         )
         connection.execute(
             """
+            INSERT INTO volpred_ops.work_owners (
+              capability, owner, generation, cutover_manifest_sha256,
+              changed_at, changed_by, change_reason
+            )
+            VALUES (
+              'work.coordinate',
+              'legacy',
+              1,
+              NULL,
+              clock_timestamp(),
+              'test-reset',
+              'restore canonical legacy Work Coordinator owner'
+            );
+            INSERT INTO volpred_ops.work_owner_receipts (
+              capability, generation, previous_owner, owner, actor_ref,
+              reason, cutover_manifest_sha256, rollback_of_generation,
+              changed_at
+            )
+            SELECT
+              capability, generation, NULL, owner, changed_by,
+              change_reason, cutover_manifest_sha256, NULL, changed_at
+            FROM volpred_ops.work_owners
+            WHERE capability = 'work.coordinate';
             INSERT INTO volpred_ops.notification_owners (
               effect_family, owner, generation, changed_at, changed_by,
               change_reason
@@ -1526,6 +1552,9 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
             FROM volpred_ops.commit_owners
             WHERE capability = 'git.commit';
             """
+        )
+        connection.execute(
+            "SELECT volpred_ops.set_legacy_work_mutation_access(true)"
         )
 
 
@@ -4111,6 +4140,20 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
     work_token = "work-owned-email-token"
     outbox_token = "outbox-owned-email-token"
     primary_token = "primary-owned-email-token"
+    work_owner = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_effect_dsn)
+    ).transfer_owner(
+        expected_owner="legacy",
+        expected_generation=1,
+        target_owner="operations_core",
+        actor_ref="test:pg17",
+        reason="exercise owned workflow after Work Coordinator cutover",
+        cutover_manifest_sha256="7" * 64,
+    )
+    assert (work_owner.owner, work_owner.generation) == (
+        "operations_core",
+        2,
+    )
 
     with psycopg.connect(
         postgres_effect_dsn,

@@ -173,7 +173,10 @@ BEGIN
   WHERE capability = 'work.coordinate'
   FOR SHARE;
 
-  IF ownership.owner <> p_expected_owner
+  IF (
+        p_expected_owner IS NOT NULL
+        AND ownership.owner <> p_expected_owner
+      )
       OR (
         p_expected_generation IS NOT NULL
         AND ownership.generation <> p_expected_generation
@@ -185,6 +188,36 @@ BEGIN
       ownership.owner,
       ownership.generation;
   END IF;
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.set_legacy_work_mutation_access(
+  p_enabled boolean
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+DECLARE
+  verb text;
+  preposition text;
+BEGIN
+  verb := CASE WHEN p_enabled THEN 'GRANT' ELSE 'REVOKE' END;
+  preposition := CASE WHEN p_enabled THEN 'TO' ELSE 'FROM' END;
+  EXECUTE verb || ' EXECUTE ON FUNCTION '
+    || 'volpred_ops.submit_work('
+    || 'text,text,text,text,text,integer,text[],text[],text,text,'
+    || 'text,text,timestamptz,text,text,integer,timestamptz,timestamptz),'
+    || 'volpred_ops.acquire_work(text,text[],text[],integer,text),'
+    || 'volpred_ops.start_work(text,text,integer),'
+    || 'volpred_ops.checkpoint_work(text,text,integer,text,text,text,text),'
+    || 'volpred_ops.release_work(text,text,integer,text),'
+    || 'volpred_ops.complete_work(text,text,text,integer,text,text) '
+    || preposition || ' volpred_ops_worker';
+  EXECUTE verb || ' EXECUTE ON FUNCTION '
+    || 'volpred_ops.approve_work(text,integer,text,text) '
+    || preposition || ' volpred_ops_approver';
 END;
 $$;
 
@@ -270,16 +303,42 @@ BEGIN
       'work ownership rollback manifest does not match current cutover';
   END IF;
 
+  event_at := clock_timestamp();
+  WITH expired AS (
+    UPDATE volpred_ops.work_items
+    SET status = 'pending',
+        version = version + 1,
+        claimed_by = NULL,
+        claim_token = NULL,
+        claim_expires_at = NULL,
+        last_release_reason =
+          'ownership transfer reconciled expired lease',
+        updated_at = event_at
+    WHERE status IN ('claimed', 'running')
+      AND claim_expires_at IS NOT NULL
+      AND claim_expires_at <= event_at
+    RETURNING id, version
+  )
+  INSERT INTO volpred_ops.work_events (
+    work_id, kind, version, created_at, actor_ref
+  )
+  SELECT
+    id, 'released', version, event_at, 'system:work-owner-transfer'
+  FROM expired;
+
   IF EXISTS (
     SELECT 1
     FROM volpred_ops.work_items
     WHERE status IN ('claimed', 'running')
+      AND (
+        claim_expires_at IS NULL
+        OR claim_expires_at > event_at
+      )
   ) THEN
     RAISE EXCEPTION
       'work ownership transfer requires zero active leases';
   END IF;
 
-  event_at := clock_timestamp();
   UPDATE volpred_ops.work_owners
   SET owner = p_target_owner,
       generation = generation + 1,
@@ -313,6 +372,10 @@ BEGIN
     ownership.changed_at
   );
 
+  PERFORM volpred_ops.set_legacy_work_mutation_access(
+    p_target_owner = 'legacy'
+  );
+
   RETURN QUERY SELECT * FROM volpred_ops.read_work_owner();
 END;
 $$;
@@ -341,8 +404,10 @@ ALTER FUNCTION volpred_ops.complete_work(
   text, text, text, integer, text, text
 ) RENAME TO complete_work_unfenced;
 
--- Legacy wrappers have no generation argument and are valid only while the
--- durable owner row still names legacy.
+-- Compatibility wrappers have no generation argument. Runtime roles can
+-- execute them only while legacy owns the capability; Operations Core
+-- stored procedures retain owner-only access so their transaction can call
+-- the same private mutation body after cutover.
 CREATE FUNCTION volpred_ops.submit_work(
   p_id text,
   p_idempotency_key text,
@@ -369,7 +434,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.submit_work_unfenced(
     p_id, p_idempotency_key, p_source, p_kind, p_title, p_priority,
     p_required_capabilities, p_required_attestations, p_risk, p_approval,
@@ -392,7 +457,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.acquire_work_unfenced(
     p_worker_id, p_capabilities, p_attestations, p_lease_seconds, p_token
   );
@@ -411,7 +476,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.approve_work_unfenced(
     p_work_id, p_expected_version, p_approved_by, p_evidence_ref
   );
@@ -429,7 +494,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.start_work_unfenced(
     p_work_id, p_lease_token, p_expected_version
   );
@@ -451,7 +516,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.checkpoint_work_unfenced(
     p_work_id, p_lease_token, p_expected_version, p_checkpoint_id,
     p_artifact_ref, p_artifact_sha256, p_verification_ref
@@ -471,7 +536,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.release_work_unfenced(
     p_work_id, p_lease_token, p_expected_version, p_reason
   );
@@ -492,7 +557,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, volpred_ops
 AS $$
 BEGIN
-  PERFORM volpred_ops.assert_work_owner('legacy');
+  PERFORM volpred_ops.assert_work_owner(NULL);
   RETURN QUERY SELECT * FROM volpred_ops.complete_work_unfenced(
     p_report_id, p_work_id, p_lease_token, p_expected_version,
     p_result_ref, p_summary
@@ -687,6 +752,8 @@ ALTER FUNCTION volpred_ops.read_work_owner()
   OWNER TO volpred_ops_definer;
 ALTER FUNCTION volpred_ops.assert_work_owner(text, bigint)
   OWNER TO volpred_ops_definer;
+ALTER FUNCTION volpred_ops.set_legacy_work_mutation_access(boolean)
+  OWNER TO volpred_ops_definer;
 ALTER FUNCTION volpred_ops.transfer_work_owner(
   text, bigint, text, text, text, text, bigint
 ) OWNER TO volpred_ops_definer;
@@ -747,6 +814,7 @@ REVOKE CREATE ON SCHEMA volpred_ops FROM volpred_ops_definer;
 REVOKE ALL ON FUNCTION
   volpred_ops.read_work_owner(),
   volpred_ops.assert_work_owner(text, bigint),
+  volpred_ops.set_legacy_work_mutation_access(boolean),
   volpred_ops.transfer_work_owner(
     text, bigint, text, text, text, text, bigint
   )
@@ -805,9 +873,6 @@ FROM PUBLIC;
 
 GRANT EXECUTE ON FUNCTION volpred_ops.read_work_owner()
   TO volpred_ops_worker, volpred_ops_approver;
-GRANT EXECUTE ON FUNCTION volpred_ops.transfer_work_owner(
-  text, bigint, text, text, text, text, bigint
-) TO volpred_ops_approver;
 
 GRANT EXECUTE ON FUNCTION
   volpred_ops.submit_work(

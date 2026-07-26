@@ -33,7 +33,12 @@ def _owner_from_row(row: dict[str, Any]) -> WorkOwner:
 
 
 class PostgresWorkOwnerStore:
-    """Read and CAS-transfer the private Work Coordinator owner row."""
+    """Read and privileged-CAS the private Work Coordinator owner row.
+
+    Runtime worker and approver roles can only read ownership. The transfer
+    function remains ungranted until a durable cutover-gate transaction is
+    available, so this adapter is limited to migration-owner rehearsals.
+    """
 
     def __init__(self, connection_factory: ConnectionFactory) -> None:
         self._connection_factory = connection_factory

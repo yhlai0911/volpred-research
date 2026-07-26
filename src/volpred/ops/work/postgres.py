@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from psycopg import Connection
+from psycopg.errors import InsufficientPrivilege
 from psycopg.rows import dict_row
 
 from . import (
@@ -74,9 +75,13 @@ class PostgresCoordinationStore:
         owner_generation: int | None = None,
     ) -> None:
         if owner_generation is not None and (
-            isinstance(owner_generation, bool) or owner_generation <= 0
+            isinstance(owner_generation, bool)
+            or not isinstance(owner_generation, int)
+            or owner_generation <= 0
         ):
-            raise ValueError("owner_generation must be positive")
+            raise ValueError(
+                "owner_generation must be a positive integer"
+            )
         self._connection_factory = connection_factory
         self._owner_generation = owner_generation
 
@@ -122,14 +127,25 @@ class PostgresCoordinationStore:
             else (*parameters, self._owner_generation)
         )
         placeholders = ", ".join("%s" for _ in owned_parameters)
-        return self._execute_mutation(
-            connection,
-            (
-                f"SELECT * FROM volpred_ops.{function}"
-                f"({placeholders})"
-            ),
-            owned_parameters,
-        )
+        try:
+            return self._execute_mutation(
+                connection,
+                (
+                    f"SELECT * FROM volpred_ops.{function}"
+                    f"({placeholders})"
+                ),
+                owned_parameters,
+            )
+        except InsufficientPrivilege:
+            if (
+                self._owner_generation is None
+                and function != "approve_work"
+            ):
+                raise WorkOwnershipLost(
+                    "work ownership legacy mutation lost: "
+                    "runtime access was revoked"
+                ) from None
+            raise
 
     def create_if_absent(
         self,
