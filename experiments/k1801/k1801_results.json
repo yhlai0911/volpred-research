@@ -7,12 +7,24 @@
     "panel_path": "experiments/k1587/data/k1587_panel.csv",
     "pm25_source": "EPA AirData 88101, NYC 5 counties (Bronx/Kings/New York/Queens/Richmond)",
     "market_source": "SPY / VIX daily close (paper/garch-x-vix dataset)",
-    "lagged_columns_used": [
-      "pm25_signal",
-      "vix_signal"
-    ],
     "target_column": "fwd_rv5",
-    "target_transform": "sqrt(fwd_rv5 / 5 * 252) * 100  → 年化波動率 %"
+    "target_transform": "sqrt(fwd_rv5 / 5 * 252) * 100  → 年化波動率 %",
+    "target_window": "列 t 起算五個交易日（t..t+4）；K1587 的 fwd_rv1 等於同列 rv1",
+    "alignment": {
+      "decile_figure": {
+        "kind": "predictive",
+        "grouping_columns": [
+          "pm25_signal",
+          "vix_signal"
+        ],
+        "note": "分組變數為 shift(1) 後的前一日值，嚴格落後於被觀察窗口"
+      },
+      "wildfire_figure": {
+        "kind": "contemporaneous",
+        "pollution_column": "pm25_mean",
+        "note": "同日實測值，因為『該日空氣有多髒』是當日事實陳述；與 fwd_rv5 在第 t 日重疊，屬描述性事件對照，不得據以推論預測力"
+      }
+    }
   },
   "sample": {
     "rows": 2006,
@@ -119,5 +131,20 @@
   "figures": [
     "experiments/k1801/k1801_fig1_decile_ladder.png",
     "experiments/k1801/k1801_fig2_wildfire_window.png"
-  ]
+  ],
+  "code_trace": {
+    "path": "experiments/k1801/k1801.py",
+    "sha256": "978be712813914db6d249a766b70614d00f6667c29b3ffd100a1f5c991aeb65e",
+    "size_bytes": 13223
+  },
+  "runtime_seconds": 0.311,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": []
+  }
 }

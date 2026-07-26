@@ -16,10 +16,22 @@ SPY 波動預測」並判定 NULL。K1801 的唯一目的是把該結論轉成�
       · PM2.5：EPA AirData 參數 88101，紐約五郡日均，2018-2025
       · 市場：SPY 收盤、VIX 收盤（paper/garch-x-vix 資料集）
 
-Lookahead 紀律
-  panel 內 `pm25_signal` / `vix_signal` 已是 `.shift(1)` 後的欄位（見 K1587 §Method），
-  本檔只讀這兩個落後欄位，不觸碰任何同日欄位；目標 `fwd_rv5` 為前瞻五日已實現變異數，
-  分組僅作描述統計，不做任何樣本內外預測，故無訓練/測試洩漏面。
+兩張圖用的是**兩種不同的時間對齊**，這裡寫清楚，因為它們回答的問題不同
+（2026-07-26 Codex 審查 finding 1：原 docstring 誤稱全檔只用落後欄位）：
+
+  Fig 1（十分位）— **預測式對齊**。分組變數用 `pm25_signal` / `vix_signal`，
+    即 K1587 建面板時已 `.shift(1)` 的前一日值；被觀察量 `fwd_rv5` 是列 t 起算的
+    五日已實現變異數（K1587 的 `fwd_rv1` 與同列 `rv1` 相等，故 `fwd_rv5` 覆蓋
+    t..t+4）。因此這張圖問的是「昨天的空污能不能預告今天起的波動」，訊號嚴格
+    落後於被預測窗口。
+
+  Fig 2（野火事件）— **同期對齊**。柱狀用同日實測 `pm25_mean`，因為「六月七日
+    紐約空氣有多髒」是關於當天空氣品質的事實陳述，用前一日值反而錯置；折線同樣
+    是列 t 起算的五日波動，與柱狀在第 t 日重疊。這張圖是描述性事件對照，**不是**
+    預測檢定，不可據以推論預測力。
+
+預測層面的結論一律歸屬 K1587 的正式 OOS 檢驗（verdict=NULL），本檔不新增預測宣稱，
+因此沒有訓練/測試切分，也沒有相應的洩漏面。
 
 Seed: 不適用（無隨機程序）。
 """
@@ -27,6 +39,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 import matplotlib
@@ -34,6 +47,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from volpred.research.reproduce_spec import finalize_experiment
 
 REPO = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
@@ -51,6 +65,7 @@ def annualise_5d(v):
 
 
 def main() -> int:
+    started_at = time.time()
     p = pd.read_csv(PANEL)
     p["date"] = pd.to_datetime(p["date"])
 
@@ -125,7 +140,8 @@ def main() -> int:
               labels=["紐約五郡 PM2.5 日均（µg/m³）",
                       "接下來五個交易日的標普 500 波動（年化 %）"],
               loc="upper right", fontsize=10, framealpha=0.92)
-    ax.set_title("2023 年加拿大野火煙霧籠罩紐約的那兩個月：空污爆表，市場波動沒跟著上去",
+    ax.set_title("2023 年加拿大野火煙霧籠罩紐約的那兩個月：空污爆表，市場波動沒跟著上去"
+                 "（同期對照，非預測檢定）",
                  fontsize=13, pad=12)
     ax.grid(alpha=0.2, axis="y")
 
@@ -158,9 +174,23 @@ def main() -> int:
             "pm25_source": ("EPA AirData 88101, NYC 5 counties "
                             "(Bronx/Kings/New York/Queens/Richmond)"),
             "market_source": "SPY / VIX daily close (paper/garch-x-vix dataset)",
-            "lagged_columns_used": ["pm25_signal", "vix_signal"],
             "target_column": "fwd_rv5",
             "target_transform": "sqrt(fwd_rv5 / 5 * 252) * 100  → 年化波動率 %",
+            "target_window": "列 t 起算五個交易日（t..t+4）；K1587 的 fwd_rv1 等於同列 rv1",
+            "alignment": {
+                "decile_figure": {
+                    "kind": "predictive",
+                    "grouping_columns": ["pm25_signal", "vix_signal"],
+                    "note": "分組變數為 shift(1) 後的前一日值，嚴格落後於被觀察窗口",
+                },
+                "wildfire_figure": {
+                    "kind": "contemporaneous",
+                    "pollution_column": "pm25_mean",
+                    "note": ("同日實測值，因為『該日空氣有多髒』是當日事實陳述；"
+                             "與 fwd_rv5 在第 t 日重疊，屬描述性事件對照，"
+                             "不得據以推論預測力"),
+                },
+            },
         },
         "sample": {
             "rows": int(len(d)),
@@ -222,8 +252,18 @@ def main() -> int:
         ],
     }
 
-    out = HERE / "k1801_results.json"
-    out.write_text(json.dumps(results, ensure_ascii=False, indent=2) + "\n")
+    out, _ = finalize_experiment(
+        results=results,
+        entrypoint=__file__,
+        canonical_result="k1801_results.json",
+        inputs=[PANEL],
+        outputs=[
+            "k1801_fig1_decile_ladder.png",
+            "k1801_fig2_wildfire_window.png",
+        ],
+        seeds=None,
+        started_at=started_at,
+    )
     print(json.dumps(results["headline"], ensure_ascii=False, indent=2))
     print(json.dumps(results["wildfire_event"], ensure_ascii=False, indent=2))
     print(f"wrote {out}")

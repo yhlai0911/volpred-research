@@ -1,0 +1,16 @@
+{
+  "kid": "k1801",
+  "verdict": "PASS",
+  "reviewer": "Codex (gpt-5.6-sol) primary path, 2 rounds",
+  "reviewed_at": "2026-07-26T08:58:00+00:00",
+  "reviewed_commit": "2f9559e2e",
+  "review_artifact": "round1 FAIL (lookahead docstring mismatch + README overclaim) -> remediated -> round2 PASS; Codex numerically verified fwd_rv5 == rv1.rolling(5).sum().shift(-4) (max_abs_diff 4e-16)",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "README.md": "cc2be5335dd2e7f8718cb620cf94de968247d30a311395097efa44345006fb37",
+    "k1801.py": "519ceb8320c3fd7c27a2395f144c1107245efac88bae392232e02754771b702b",
+    "k1801_fig1_decile_ladder.png": "1dbbd86e94467df32280bff5982b41e9f912ab9279d74ada06e891b519298401",
+    "k1801_fig2_wildfire_window.png": "38feee3aecd5e7fb9edcec73cd54d57460e8e5a466995b66065e7052fc71016f",
+    "k1801_results.json": "3fb05088ddbe36ccb157fe7f5b0a60aaf8c6db79d1436fa67c4d48876e73dbae"
+  }
+}

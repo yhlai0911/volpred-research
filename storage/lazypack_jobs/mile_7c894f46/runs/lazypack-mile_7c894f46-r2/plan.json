@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：空污爆表的那幾天，股市其實比較安靜",
+  "evidence": {
+    "k1801": {
+      "path": "experiments/k1801/k1801_results.json",
+      "sha256": "3fb05088ddbe36ccb157fe7f5b0a60aaf8c6db79d1436fa67c4d48876e73dbae",
+      "label": "紐約 PM2.5 十分位 vs 標普 500 後續已實現波動"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "method",
+      "style": "editorial",
+      "title": "問題：昨天空氣很髒，今天市場會更亂嗎？",
+      "alt": "說明檢驗設計：用前一日紐約空污濃度分組，看之後五個交易日的美股大盤波動",
+      "sources": [
+        "k1801"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "檢驗用的交易日數",
+          "value": {
+            "source": "k1801",
+            "path": "/sample/rows",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全期間平均空污濃度",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/pm25_signal_mean_ugm3",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": " µg/m³"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼測的",
+          "body": [
+            "取紐約五郡每日細懸浮微粒，一律用前一日數值，再看接下來五個交易日美股大盤的實際波動。",
+            "同一批交易日另外用前一日 VIX 分一次組，當作對照，確認方法本身測得出東西。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "結果：空污沒有階梯，VIX 有",
+      "alt": "空污最低組與最高組、VIX 最低組與最高組的後續波動比較",
+      "sources": [
+        "k1801"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "空污最乾淨組之後五日波動",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/pm25_decile1_fwd_vol5_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "空污最髒組之後五日波動",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/pm25_decile10_fwd_vol5_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 最平靜組之後五日波動",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/vix_decile1_fwd_vol5_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 最恐慌組之後五日波動",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/vix_decile10_fwd_vol5_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "方向相反",
+          "body": [
+            "空污最髒的那一組，之後的波動反而比最乾淨那一組低。",
+            "換成 VIX 分組，最恐慌組是最平靜組的數倍，階梯乾淨且幾乎單調。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "野火最濃那天，市場照樣沒被嚇到",
+      "alt": "野火煙霧事件的極端空污值與後續市場波動比較，以及給投資人的結論",
+      "sources": [
+        "k1801"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "煙霧最濃日空污是平常的",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/peak_over_sample_mean_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 0,
+              "suffix": " 倍"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "煙霧窗口之後五日波動",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/smoke_window_median_fwd_vol5_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全樣本之後五日波動",
+          "value": {
+            "source": "k1801",
+            "path": "/article_display_values/sample_median_fwd_vol5_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走這句",
+          "body": [
+            "空氣品質不是減碼訊號。要判斷未來一週的震盪，VIX 仍是免費工具裡最好用的那個。",
+            "看到「某某另類數據能預測市場」時，先問它測的目標和你要用的是不是同一個。"
+          ]
+        }
+      ]
+    }
+  ]
+}

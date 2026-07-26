@@ -21,11 +21,11 @@
     "K1801"
   ],
   "env": {},
-  "status": "queued",
+  "status": "cancelled",
   "queue_priority": 1,
   "queued_at": "2026-07-26T08:47:55Z",
   "started_at": null,
-  "completed_at": null,
+  "completed_at": "2026-07-26T08:56:39Z",
   "exit_code": null,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_7c894f46.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_7c894f46.stderr",
@@ -41,9 +41,11 @@
   "kind": "compute",
   "cwd": null,
   "claude_followup": null,
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": null,
   "timeout_seconds": 1800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "cancelled_at": "2026-07-26T08:56:39Z",
+  "cancel_reason": "plan evidence sha256 changed after Codex review remediation of K1801; re-enqueue with updated hash"
 }
