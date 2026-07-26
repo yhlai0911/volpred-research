@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-26T09:40:04.594405",
+  "generated_at": "2026-07-26T16:27:08.652746",
   "overall": "critical",
   "critical_count": 3,
-  "warn_count": 15,
+  "warn_count": 14,
   "findings": [
     {
       "dimension": "cron_completion",
@@ -15,12 +15,6 @@
       "severity": "warn",
       "message": "enqueue_daily_digest: 最近一輪 exit=1（非 0）",
       "recovery": "tail storage/logs/cron/enqueue_daily_digest.log"
-    },
-    {
-      "dimension": "cron_completion",
-      "severity": "warn",
-      "message": "reader_facing_refill: 最近一輪 exit=1（非 0）",
-      "recovery": "tail storage/logs/cron/reader_facing_refill.log"
     },
     {
       "dimension": "cron_completion",
@@ -73,7 +67,7 @@
     {
       "dimension": "alert_conditions",
       "severity": "warn",
-      "message": "knowledge_stale: M2 knowledge closure stale > 3.39d",
+      "message": "knowledge_stale: M2 knowledge closure stale > 3.68d",
       "recovery": "uv run volpred ops check-alerts --storage-dir storage"
     },
     {
