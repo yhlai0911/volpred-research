@@ -318,6 +318,13 @@ def test_clear_and_delete_are_replay_safe_and_read_back_every_projection() -> No
     assert after_delete.identity_link_count == 0
     assert event_replay_after_delete.accepted is False
     assert event_replay_after_delete.reason == "deleted"
+    with pytest.raises(ValueError, match="deleted analytics identity"):
+        tracer.set_opt_out(
+            "user:user-2",
+            idempotency_key="privacy:opt-out:user-2",
+            acted_at="2026-07-26T16:25:00+00:00",
+        )
+    assert tracer.inspect_privacy("user:user-2").opted_out is False
 
 
 def test_privacy_action_idempotency_key_is_bound_to_action_and_subject() -> None:
@@ -425,3 +432,32 @@ def test_future_event_timestamp_cannot_extend_raw_retention() -> None:
                 properties={"content_id": "article-1", "surface": "home"},
             )
         )
+
+
+def test_late_merge_tombstones_new_alias_of_deleted_user() -> None:
+    tracer = _tracer()
+    tracer.delete(
+        "user:user-deleted",
+        idempotency_key="delete:user-deleted",
+        acted_at="2026-07-26T15:40:00+00:00",
+    )
+
+    with pytest.raises(ValueError, match="deleted analytics identity"):
+        tracer.merge_identity(
+            idempotency_key="late-merge:anon-late:user-deleted",
+            anonymous_id="anon-late",
+            user_id="user-deleted",
+            merged_at="2026-07-26T15:45:00+00:00",
+        )
+    replay = tracer.record(
+        AnalyticsEvent(
+            idempotency_key="late-event:anon-late",
+            kind="content_impression",
+            occurred_at="2026-07-26T15:46:00+00:00",
+            anonymous_id="anon-late",
+            user_id=None,
+            properties={"content_id": "article-1", "surface": "home"},
+        )
+    )
+    assert replay.accepted is False
+    assert replay.reason == "deleted"

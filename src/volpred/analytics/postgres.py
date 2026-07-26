@@ -31,19 +31,24 @@ class PostgresAnalyticsStore:
         connection_factory: ConnectionFactory,
         *,
         tombstone_secret: bytes,
+        digest_key_id: str,
     ) -> None:
         if len(tombstone_secret) < 32:
             raise ValueError(
                 "analytics tombstone_secret must contain at least 32 bytes"
             )
+        if not digest_key_id.strip():
+            raise ValueError("analytics digest_key_id is required")
         self._connection_factory = connection_factory
         self._tombstone_secret = tombstone_secret
+        self._digest_key_id = digest_key_id
 
     def _lock_subjects(
         self,
         connection: psycopg.Connection[Any],
         subject_refs: set[str],
     ) -> None:
+        self._verify_digest_key(connection)
         connection.execute(
             """
             SELECT pg_advisory_xact_lock(
@@ -56,6 +61,38 @@ class PostgresAnalyticsStore:
                 "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
                 (f"volpred-analytics:{subject_ref}",),
             )
+
+    def _verify_digest_key(
+        self,
+        connection: psycopg.Connection[Any],
+    ) -> None:
+        verifier = self._keyed_digest(
+            f"digest-key-verifier:{self._digest_key_id}".encode("utf-8")
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_analytics.digest_key_identity (
+              singleton,
+              key_id,
+              verifier
+            ) VALUES (true, %s, %s)
+            ON CONFLICT (singleton) DO NOTHING
+            """,
+            (self._digest_key_id, verifier),
+        )
+        existing = connection.execute(
+            """
+            SELECT key_id, verifier
+            FROM volpred_analytics.digest_key_identity
+            WHERE singleton
+            """
+        ).fetchone()
+        if (
+            existing is None
+            or existing[0] != self._digest_key_id
+            or not hmac.compare_digest(bytes(existing[1]), verifier)
+        ):
+            raise ValueError("analytics digest key identity mismatch")
 
     def _subject_digest(self, subject_kind: str, subject_id: str) -> bytes:
         return self._keyed_digest(
@@ -135,6 +172,32 @@ class PostgresAnalyticsStore:
             ).fetchone()[0]
             is True
         )
+
+    def _store_subject_tombstones(
+        self,
+        connection: psycopg.Connection[Any],
+        identities: set[tuple[str, str]],
+        *,
+        deleted_at: str,
+    ) -> None:
+        with connection.cursor() as cursor:
+            cursor.executemany(
+                """
+                INSERT INTO volpred_analytics.privacy_tombstones (
+                  subject_digest,
+                  deleted_at
+                ) VALUES (%s, %s)
+                ON CONFLICT (subject_digest)
+                DO UPDATE SET deleted_at = EXCLUDED.deleted_at
+                """,
+                [
+                    (
+                        self._subject_digest(subject_kind, subject_id),
+                        deleted_at,
+                    )
+                    for subject_kind, subject_id in identities
+                ],
+            )
 
     def _is_opted_out(
         self,
@@ -366,6 +429,15 @@ class PostgresAnalyticsStore:
                     ("user", user_id),
                 },
             ):
+                self._store_subject_tombstones(
+                    connection,
+                    {
+                        ("anonymous", anonymous_id),
+                        ("user", user_id),
+                    },
+                    deleted_at=merged_at,
+                )
+                connection.commit()
                 raise ValueError("cannot merge a deleted analytics identity")
             existing_link = connection.execute(
                 """
@@ -438,6 +510,7 @@ class PostgresAnalyticsStore:
         end_at: str,
     ) -> tuple[dict[str, int | str], ...]:
         with self._connection_factory() as connection:
+            self._verify_digest_key(connection)
             rows = connection.execute(
                 """
                 SELECT events.kind, count(*)::integer
@@ -606,6 +679,10 @@ class PostgresAnalyticsStore:
             )
             if replay is not None:
                 return replay
+            if self._is_deleted(
+                connection, {(subject_kind, subject_id)}
+            ):
+                raise ValueError("cannot mutate a deleted analytics identity")
             connection.execute(
                 """
                 INSERT INTO volpred_analytics.privacy_preferences (
@@ -655,6 +732,10 @@ class PostgresAnalyticsStore:
             )
             if replay is not None:
                 return replay
+            if self._is_deleted(
+                connection, {(subject_kind, subject_id)}
+            ):
+                raise ValueError("cannot mutate a deleted analytics identity")
             anonymous_ids, user_ids = self._aliases(
                 connection, subject_kind, subject_id
             )
@@ -717,25 +798,14 @@ class PostgresAnalyticsStore:
             anonymous_ids, user_ids = self._aliases(
                 connection, subject_kind, subject_id
             )
-            for kind, values in (
-                ("anonymous", anonymous_ids),
-                ("user", user_ids),
-            ):
-                with connection.cursor() as cursor:
-                    cursor.executemany(
-                        """
-                        INSERT INTO volpred_analytics.privacy_tombstones (
-                          subject_digest,
-                          deleted_at
-                        ) VALUES (%s, %s)
-                        ON CONFLICT (subject_digest)
-                        DO UPDATE SET deleted_at = EXCLUDED.deleted_at
-                        """,
-                        [
-                            (self._subject_digest(kind, value), acted_at)
-                            for value in values
-                        ],
-                    )
+            self._store_subject_tombstones(
+                connection,
+                {
+                    *(("anonymous", value) for value in anonymous_ids),
+                    *(("user", value) for value in user_ids),
+                },
+                deleted_at=acted_at,
+            )
             removed_events = connection.execute(
                 """
                 DELETE FROM volpred_analytics.events
@@ -809,6 +879,7 @@ class PostgresAnalyticsStore:
         subject_id: str,
     ) -> AnalyticsPrivacyReadback:
         with self._connection_factory() as connection:
+            self._verify_digest_key(connection)
             anonymous_ids, user_ids = self._aliases(
                 connection, subject_kind, subject_id
             )

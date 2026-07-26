@@ -136,6 +136,13 @@ CREATE TABLE IF NOT EXISTS volpred_analytics.event_dedupe_tombstones (
   CHECK (octet_length(event_payload_digest) = 32)
 );
 
+CREATE TABLE IF NOT EXISTS volpred_analytics.digest_key_identity (
+  singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
+  key_id text NOT NULL CHECK (length(key_id) > 0),
+  verifier bytea NOT NULL CHECK (octet_length(verifier) = 32),
+  established_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
+
 INSERT INTO volpred_analytics.event_definitions (
   kind,
   purpose,
@@ -317,18 +324,35 @@ ALTER TABLE volpred_analytics.event_dedupe_tombstones
   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_analytics.event_dedupe_tombstones
   FORCE ROW LEVEL SECURITY;
+ALTER TABLE volpred_analytics.digest_key_identity
+  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE volpred_analytics.digest_key_identity
+  FORCE ROW LEVEL SECURITY;
 
 GRANT USAGE ON SCHEMA volpred_analytics TO volpred_analytics_worker;
+REVOKE ALL ON ALL TABLES IN SCHEMA volpred_analytics
+  FROM volpred_analytics_worker;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA volpred_analytics
+  FROM volpred_analytics_worker;
 GRANT SELECT ON volpred_analytics.event_definitions
   TO volpred_analytics_worker;
-GRANT SELECT, INSERT, UPDATE, DELETE
-  ON volpred_analytics.events,
-     volpred_analytics.identity_links,
+GRANT SELECT, INSERT, DELETE ON volpred_analytics.events
+  TO volpred_analytics_worker;
+GRANT UPDATE (user_id) ON volpred_analytics.events
+  TO volpred_analytics_worker;
+GRANT SELECT, INSERT, DELETE
+  ON volpred_analytics.identity_links,
      volpred_analytics.identity_merge_receipts,
-     volpred_analytics.privacy_preferences,
-     volpred_analytics.privacy_action_receipts,
-     volpred_analytics.privacy_tombstones,
+     volpred_analytics.privacy_action_receipts
+  TO volpred_analytics_worker;
+GRANT SELECT, INSERT, UPDATE, DELETE
+  ON volpred_analytics.privacy_preferences
+  TO volpred_analytics_worker;
+GRANT SELECT, INSERT, UPDATE
+  ON volpred_analytics.privacy_tombstones,
      volpred_analytics.event_dedupe_tombstones
+  TO volpred_analytics_worker;
+GRANT SELECT, INSERT ON volpred_analytics.digest_key_identity
   TO volpred_analytics_worker;
 GRANT USAGE, SELECT
   ON ALL SEQUENCES IN SCHEMA volpred_analytics
@@ -350,7 +374,8 @@ BEGIN
     'privacy_preferences',
     'privacy_action_receipts',
     'privacy_tombstones',
-    'event_dedupe_tombstones'
+    'event_dedupe_tombstones',
+    'digest_key_identity'
   ]
   LOOP
     EXECUTE format(
@@ -358,8 +383,68 @@ BEGIN
       table_name
     );
     EXECUTE format(
-      'CREATE POLICY analytics_worker_access ON volpred_analytics.%I '
-      'FOR ALL TO volpred_analytics_worker USING (true) WITH CHECK (true)',
+      'DROP POLICY IF EXISTS analytics_worker_select ON volpred_analytics.%I',
+      table_name
+    );
+    EXECUTE format(
+      'DROP POLICY IF EXISTS analytics_worker_insert ON volpred_analytics.%I',
+      table_name
+    );
+    EXECUTE format(
+      'DROP POLICY IF EXISTS analytics_worker_update ON volpred_analytics.%I',
+      table_name
+    );
+    EXECUTE format(
+      'DROP POLICY IF EXISTS analytics_worker_delete ON volpred_analytics.%I',
+      table_name
+    );
+    EXECUTE format(
+      'CREATE POLICY analytics_worker_select ON volpred_analytics.%I '
+      'FOR SELECT TO volpred_analytics_worker USING (true)',
+      table_name
+    );
+  END LOOP;
+  FOREACH table_name IN ARRAY ARRAY[
+    'events',
+    'identity_links',
+    'identity_merge_receipts',
+    'privacy_preferences',
+    'privacy_action_receipts',
+    'privacy_tombstones',
+    'event_dedupe_tombstones',
+    'digest_key_identity'
+  ]
+  LOOP
+    EXECUTE format(
+      'CREATE POLICY analytics_worker_insert ON volpred_analytics.%I '
+      'FOR INSERT TO volpred_analytics_worker WITH CHECK (true)',
+      table_name
+    );
+  END LOOP;
+  FOREACH table_name IN ARRAY ARRAY[
+    'events',
+    'privacy_preferences',
+    'privacy_tombstones',
+    'event_dedupe_tombstones'
+  ]
+  LOOP
+    EXECUTE format(
+      'CREATE POLICY analytics_worker_update ON volpred_analytics.%I '
+      'FOR UPDATE TO volpred_analytics_worker USING (true) WITH CHECK (true)',
+      table_name
+    );
+  END LOOP;
+  FOREACH table_name IN ARRAY ARRAY[
+    'events',
+    'identity_links',
+    'identity_merge_receipts',
+    'privacy_preferences',
+    'privacy_action_receipts'
+  ]
+  LOOP
+    EXECUTE format(
+      'CREATE POLICY analytics_worker_delete ON volpred_analytics.%I '
+      'FOR DELETE TO volpred_analytics_worker USING (true)',
       table_name
     );
   END LOOP;

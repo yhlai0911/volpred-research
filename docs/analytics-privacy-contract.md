@@ -50,9 +50,14 @@ references:
 Delete retains only HMAC-SHA-256 subject tombstones and one minimal,
 HMAC-bound deletion receipt. The required secret is supplied to the store,
 must contain at least 32 bytes, and must remain stable for the lifetime of
-existing tombstones. These artifacts prevent delayed upstream event or merge
-replays from recreating deleted data without storing the original identity.
-Earlier privacy-action receipts for the linked aliases are removed.
+existing tombstones. PostgreSQL also pins the configured key ID and a keyed
+verifier in a one-row, append-only identity table; a missing or drifted secret
+fails closed before any adapter operation. These artifacts prevent delayed
+upstream event or merge replays from recreating deleted data without storing
+the original identity. A late merge that reveals a new alias of a deleted
+identity tombstones that alias before rejecting the merge. Earlier
+privacy-action receipts for linked aliases are removed, and their delayed
+replay cannot recreate a preference.
 
 Event idempotency is bound to a canonical payload digest. Retention purge
 replaces an expired raw row with keyed event/payload digests, so a delayed
@@ -73,9 +78,11 @@ PostgreSQL state lives in the private `volpred_analytics` schema. `PUBLIC`,
 `anon`, and `authenticated` receive no schema, table, or sequence privileges.
 All tables use forced row-level security. A dedicated non-login,
 non-superuser, non-bypass `volpred_analytics_worker` role has only the grants
-and RLS policy needed by the backend adapter. A database trigger independently
-rejects undeclared/nested property values, retention drift, and timestamps
-more than five minutes in the future.
+and command-specific RLS policies needed by the backend adapter. Tombstone and
+digest-key tables have no worker `DELETE` privilege; event mutation is limited
+to the canonical `user_id` merge column. A database trigger independently
+rejects undeclared/nested property values, retention drift, and timestamps more
+than five minutes in the future.
 
 Admin reads go through `admin_summary()`, which returns only event kind and
 group count for a time interval. There is no Admin method for raw events,

@@ -468,6 +468,12 @@ class InMemoryAnalyticsStore:
                     ("user", user_id),
                 )
             ):
+                self._deleted_subject_digests.update(
+                    {
+                        self._subject_digest("anonymous", anonymous_id),
+                        self._subject_digest("user", user_id),
+                    }
+                )
                 raise ValueError("cannot merge a deleted analytics identity")
             previous_user = self._user_by_anonymous_id.get(anonymous_id)
             if previous_user is not None and previous_user != user_id:
@@ -560,6 +566,11 @@ class InMemoryAnalyticsStore:
             )
             if existing is not None:
                 return existing
+            if (
+                self._subject_digest(subject_kind, subject_id)
+                in self._deleted_subject_digests
+            ):
+                raise ValueError("cannot mutate a deleted analytics identity")
             self._opted_out_subjects.add((subject_kind, subject_id))
             receipt = AnalyticsPrivacyActionReceipt(
                 action="opt_out",
@@ -596,6 +607,11 @@ class InMemoryAnalyticsStore:
             )
             if existing is not None:
                 return existing
+            if (
+                self._subject_digest(subject_kind, subject_id)
+                in self._deleted_subject_digests
+            ):
+                raise ValueError("cannot mutate a deleted analytics identity")
             anonymous_ids, user_ids = self._subject_aliases(
                 subject_kind, subject_id
             )

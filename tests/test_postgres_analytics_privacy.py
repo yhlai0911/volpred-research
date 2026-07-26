@@ -21,6 +21,7 @@ MIGRATION = next(
     )
 )
 TEST_TOMBSTONE_SECRET = b"analytics-postgres-test-secret-32b"
+TEST_DIGEST_KEY_ID = "pytest-v1"
 
 
 def _postgres_bin_dir() -> Path | None:
@@ -186,6 +187,7 @@ def test_postgres_adapter_replays_merge_and_privacy_lifecycle(
         PostgresAnalyticsStore(
             lambda: _worker_connection(analytics_postgres_dsn),
             tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
         )
     )
     event = AnalyticsEvent(
@@ -273,6 +275,13 @@ def test_postgres_adapter_replays_merge_and_privacy_lifecycle(
     replay_after_delete = tracer.record(event)
     assert replay_after_delete.accepted is False
     assert replay_after_delete.reason == "deleted"
+    with pytest.raises(ValueError, match="deleted analytics identity"):
+        tracer.set_opt_out(
+            "user:user-pg",
+            idempotency_key="opt-out:user-pg",
+            acted_at="2026-07-26T16:05:00+00:00",
+        )
+    assert tracer.inspect_privacy("user:user-pg").opted_out is False
 
 
 def test_postgres_adapter_enforces_raw_retention(
@@ -282,6 +291,7 @@ def test_postgres_adapter_enforces_raw_retention(
         PostgresAnalyticsStore(
             lambda: _worker_connection(analytics_postgres_dsn),
             tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
         )
     )
     tracer.record(
@@ -326,6 +336,7 @@ def test_postgres_clear_prevents_delayed_event_replay(
         PostgresAnalyticsStore(
             lambda: _worker_connection(analytics_postgres_dsn),
             tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
         )
     )
     event = AnalyticsEvent(
@@ -359,6 +370,7 @@ def test_postgres_privacy_action_key_is_bound_to_action_and_subject(
         PostgresAnalyticsStore(
             lambda: _worker_connection(analytics_postgres_dsn),
             tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
         )
     )
     tracer.set_opt_out(
@@ -388,6 +400,7 @@ def test_postgres_event_key_and_identity_are_fail_closed(
         PostgresAnalyticsStore(
             lambda: _worker_connection(analytics_postgres_dsn),
             tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
         )
     )
     original = AnalyticsEvent(
@@ -431,6 +444,85 @@ def test_postgres_event_key_and_identity_are_fail_closed(
                 properties={"content_id": "article-pg", "surface": "home"},
             )
         )
+
+
+def test_postgres_late_merge_tombstones_alias_of_deleted_user(
+    analytics_postgres_dsn: str,
+) -> None:
+    tracer = AnalyticsPrivacyTracer(
+        PostgresAnalyticsStore(
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
+        )
+    )
+    tracer.delete(
+        "user:user-deleted-pg",
+        idempotency_key="delete:user-deleted-pg",
+        acted_at="2026-07-26T15:40:00+00:00",
+    )
+
+    with pytest.raises(ValueError, match="deleted analytics identity"):
+        tracer.merge_identity(
+            idempotency_key="late-merge:anon-late-pg:user-deleted-pg",
+            anonymous_id="anon-late-pg",
+            user_id="user-deleted-pg",
+            merged_at="2026-07-26T15:45:00+00:00",
+        )
+    replay = tracer.record(
+        AnalyticsEvent(
+            idempotency_key="late-event:anon-late-pg",
+            kind="content_impression",
+            occurred_at="2026-07-26T15:46:00+00:00",
+            anonymous_id="anon-late-pg",
+            user_id=None,
+            properties={"content_id": "article-pg", "surface": "home"},
+        )
+    )
+    assert replay.accepted is False
+    assert replay.reason == "deleted"
+
+
+def test_digest_key_drift_and_tombstone_deletion_fail_closed(
+    analytics_postgres_dsn: str,
+) -> None:
+    tracer = AnalyticsPrivacyTracer(
+        PostgresAnalyticsStore(
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
+            digest_key_id=TEST_DIGEST_KEY_ID,
+        )
+    )
+    event = AnalyticsEvent(
+        idempotency_key="delete:key-gate-pg",
+        kind="content_impression",
+        occurred_at="2026-07-26T15:40:00+00:00",
+        anonymous_id="anon-key-gate-pg",
+        user_id=None,
+        properties={"content_id": "article-pg", "surface": "home"},
+    )
+    tracer.record(event)
+    tracer.delete(
+        "anonymous:anon-key-gate-pg",
+        idempotency_key="delete-action:key-gate-pg",
+        acted_at="2026-07-26T15:45:00+00:00",
+    )
+
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "DELETE FROM volpred_analytics.privacy_tombstones"
+            )
+
+    wrong_key_tracer = AnalyticsPrivacyTracer(
+        PostgresAnalyticsStore(
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=b"different-valid-secret-for-test-32",
+            digest_key_id=TEST_DIGEST_KEY_ID,
+        )
+    )
+    with pytest.raises(ValueError, match="digest key identity mismatch"):
+        wrong_key_tracer.record(event)
 
 
 def test_database_trigger_rejects_future_or_nested_raw_event(
@@ -480,6 +572,25 @@ def test_database_trigger_rejects_future_or_nested_raw_event(
             ),
         )
     with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(
+            psycopg.errors.InsufficientPrivilege,
+        ):
+            connection.execute(
+                """
+                UPDATE volpred_analytics.events
+                SET properties = %s
+                WHERE idempotency_key = 'direct:valid-before-update'
+                """,
+                (
+                    Jsonb(
+                        {
+                            "content_id": {"portfolio_position": "long"},
+                            "surface": "home",
+                        }
+                    ),
+                ),
+            )
+    with psycopg.connect(analytics_postgres_dsn) as connection:
         with pytest.raises(
             psycopg.errors.RaiseException,
             match="properties must be strings",
