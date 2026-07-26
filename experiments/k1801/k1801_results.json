@@ -1,0 +1,123 @@
+{
+  "experiment_id": "K1801",
+  "title": "紐約 PM2.5 十分位 vs 標普 500 後續已實現波動（讀者向描述性分析）",
+  "scope": "描述統計與圖表產生；不做預測宣稱。預測結論以 K1587 的 OOS 檢驗（verdict=NULL）為準。",
+  "parent_experiment": "K1587",
+  "data": {
+    "panel_path": "experiments/k1587/data/k1587_panel.csv",
+    "pm25_source": "EPA AirData 88101, NYC 5 counties (Bronx/Kings/New York/Queens/Richmond)",
+    "market_source": "SPY / VIX daily close (paper/garch-x-vix dataset)",
+    "lagged_columns_used": [
+      "pm25_signal",
+      "vix_signal"
+    ],
+    "target_column": "fwd_rv5",
+    "target_transform": "sqrt(fwd_rv5 / 5 * 252) * 100  → 年化波動率 %"
+  },
+  "sample": {
+    "rows": 2006,
+    "start": "2018-01-03",
+    "end": "2025-12-24"
+  },
+  "decile_medians_fwd_vol5_pct": {
+    "by_pm25": [
+      13.6082,
+      13.3839,
+      12.9875,
+      13.135,
+      13.0818,
+      12.2249,
+      12.0472,
+      12.3731,
+      11.9635,
+      11.4422
+    ],
+    "by_vix": [
+      7.4285,
+      7.8224,
+      9.886,
+      9.7703,
+      11.7452,
+      14.1853,
+      15.0308,
+      15.9774,
+      19.2695,
+      26.8754
+    ]
+  },
+  "decile_median_levels": {
+    "pm25_ugm3": [
+      2.6667,
+      3.7176,
+      4.4893,
+      5.2143,
+      5.8056,
+      6.7563,
+      7.8013,
+      9.2307,
+      11.4177,
+      16.0708
+    ],
+    "vix": [
+      12.44,
+      13.53,
+      14.84,
+      16.105,
+      17.2,
+      18.705,
+      20.505,
+      22.61,
+      26.055,
+      32.19
+    ]
+  },
+  "headline": {
+    "pm25_decile1_fwd_vol5_pct": 13.6082,
+    "pm25_decile10_fwd_vol5_pct": 11.4422,
+    "pm25_decile1_level_ugm3": 2.6667,
+    "pm25_decile10_level_ugm3": 16.0708,
+    "vix_decile1_fwd_vol5_pct": 7.4285,
+    "vix_decile10_fwd_vol5_pct": 26.8754,
+    "vix_decile1_level": 12.44,
+    "vix_decile10_level": 32.19,
+    "vix_d10_over_d1_ratio": 3.6179,
+    "pm25_d10_minus_d1_pp": -2.166,
+    "sample_median_fwd_vol5_pct": 12.4772,
+    "pm25_signal_mean_ugm3": 7.5981
+  },
+  "wildfire_event": {
+    "window": [
+      "2023-05-15",
+      "2023-07-14"
+    ],
+    "peak_date": "2023-06-07",
+    "peak_pm25_ugm3": 189.1301,
+    "peak_over_sample_mean_ratio": 24.8917,
+    "smoke_window": [
+      "2023-06-05",
+      "2023-06-16"
+    ],
+    "smoke_window_median_fwd_vol5_pct": 9.9582,
+    "smoke_window_n": 10
+  },
+  "article_display_values": {
+    "pm25_decile1_fwd_vol5_pct": 13.6,
+    "pm25_decile10_fwd_vol5_pct": 11.4,
+    "pm25_decile1_level_ugm3": 2.7,
+    "pm25_decile10_level_ugm3": 16.1,
+    "vix_decile1_fwd_vol5_pct": 7.4,
+    "vix_decile10_fwd_vol5_pct": 26.9,
+    "vix_decile1_level": 12.4,
+    "vix_decile10_level": 32.2,
+    "vix_d10_over_d1_ratio": 3.6,
+    "sample_median_fwd_vol5_pct": 12.5,
+    "smoke_window_median_fwd_vol5_pct": 10.0,
+    "peak_pm25_ugm3": 189.0,
+    "peak_over_sample_mean_ratio": 25.0,
+    "pm25_signal_mean_ugm3": 7.6
+  },
+  "figures": [
+    "experiments/k1801/k1801_fig1_decile_ladder.png",
+    "experiments/k1801/k1801_fig2_wildfire_window.png"
+  ]
+}
