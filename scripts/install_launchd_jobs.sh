@@ -197,6 +197,8 @@ echo "[derive] reading $SCHEDULE_JSON ..."
 # Use jq to enumerate items, filter to host_crontab_managed != false
 LABELS=()
 DECOMMISSION_LABELS=()
+LABEL_COUNT=0
+DECOMMISSION_COUNT=0
 MATCHED=0
 while IFS= read -r item; do
     id=$(echo "$item" | jq -r '.id')
@@ -217,6 +219,7 @@ while IFS= read -r item; do
     if [[ "$operations_core_owned" == "true" ]]; then
         label="${configured_label:-com.volpred.${id//_/-}}"
         DECOMMISSION_LABELS+=("$label")
+        DECOMMISSION_COUNT=$((DECOMMISSION_COUNT + 1))
         MATCHED=$((MATCHED + 1))
         echo "[decommission] $id (operations-core owner; legacy label=$label)"
         continue
@@ -251,6 +254,7 @@ while IFS= read -r item; do
 
     write_plist "$label" "$wrapper" "$schedule_xml" "$logbase"
     LABELS+=("$label")
+    LABEL_COUNT=$((LABEL_COUNT + 1))
     MATCHED=$((MATCHED + 1))
     echo "  $id  cron='$cron'  wrapper=$(basename "$wrapper")"
 done < <(jq -c '
@@ -271,15 +275,16 @@ if [[ -n "$TARGET_ID" && "$MATCHED" -ne 1 ]]; then
 fi
 
 if [[ "$RENDER_ONLY" -eq 1 ]]; then
-    echo "[render-only] wrote ${#LABELS[@]} plist(s); would decommission ${#DECOMMISSION_LABELS[@]} label(s); launchctl unchanged"
+    echo "[render-only] wrote ${LABEL_COUNT} plist(s); would decommission ${DECOMMISSION_COUNT} label(s); launchctl unchanged"
     exit 0
 fi
 
 echo ""
-echo "[bootstrap] (re)loading ${#LABELS[@]} plists into launchd gui/$USER_UID domain..."
+echo "[bootstrap] (re)loading ${LABEL_COUNT} plists into launchd gui/$USER_UID domain..."
 echo ""
 
-for label in "${DECOMMISSION_LABELS[@]}"; do
+for label in "${DECOMMISSION_LABELS[@]-}"; do
+    [[ -z "$label" ]] && continue
     if launchctl bootout "gui/$USER_UID/$label" 2>/dev/null; then
         echo "[bootout] $label OK (operations-core owner)"
     else
@@ -287,7 +292,8 @@ for label in "${DECOMMISSION_LABELS[@]}"; do
     fi
 done
 
-for label in "${LABELS[@]}"; do
+for label in "${LABELS[@]-}"; do
+    [[ -z "$label" ]] && continue
     plist="$LAUNCH_AGENTS_DIR/${label}.plist"
     launchctl bootout "gui/$USER_UID/$label" 2>/dev/null || true
     if launchctl bootstrap "gui/$USER_UID" "$plist" 2>&1; then
