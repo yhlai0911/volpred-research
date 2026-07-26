@@ -2739,3 +2739,24 @@ publisher=`operations_core/8`、fingerprint=`6652d01267d664d621c957b8`及impleme
 acquire或provider call。本raw-artifact binding根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Paired readiness完整綁artifact但沒有有效期限
+
+**證據化症狀與根因層級**：pair v2會重算兩份raw host receipt，卻只檢查
+`observed_at`能解析。修正前failure injection顯示16分鐘前的host observation仍能形成
+pair；20分鐘前形成的完整pair交給primary後，流程真的開始publisher read與authority
+acquire。根因是readiness interface缺少temporal validity contract，讓「曾經online」
+被當成「mutation前仍ready」，不是Primary Authority CAS。
+
+**底層修復、回歸與live狀態**：pair schema升v3，從較早host observation導出15分鐘
+`valid_until`，pairing拒絕stale observation及領先verifier clock超過60秒的時間戳；
+primary／standby共用active-window validator並在任何remote read前執行。Final verifier
+重算歷史窗口，不以稽核當下時間誤判舊evidence。三條failure injections修後在零新增
+publisher read、零authority acquire下fail closed；相鄰authority suites
+**44 passed**，`py_compile`與diff gate通過，Ruff未安裝。Production只讀preflight
+`freshness-window-preflight-20260726-103436` exact read-back
+publisher=`operations_core/8`、fingerprint=`6652d01267d664d621c957b8`及implementation
+`4feea2fb05dc0db72eedc92afe13f665586e4e5148a64c120d12454cd707e809`，沒有authority
+acquire或provider call。本freshness-window根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
+operations-core umbrella維持 **`contained`**。

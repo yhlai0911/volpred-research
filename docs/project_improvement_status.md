@@ -1735,3 +1735,20 @@ implementation=`66030247729b74be53645bd0d9da87fbe3940f2ba4443034083340691b973c38
 沒有authority mutation。此raw-artifact binding切片為
 `root_cause_fixed_and_verified`；physical paired receipt與operations-core umbrella
 仍因第二台實體Mac離線而維持`contained`。
+
+## 2026-07-26 — Program commit 34 readiness freshness checkpoint
+
+Raw host artifacts雖已exact binding，pair v2沒有有效期限；修正前16分鐘舊host
+observation仍可配對，20分鐘舊pair甚至會讓primary進入remote read與authority acquire。
+Readiness pair現升v3，由兩端較早`observed_at`導出15分鐘`valid_until`，容忍60秒跨機
+clock skew；兩個role在任何remote read前共用同一active-window validator，final
+verifier則保留歷史稽核語義。
+
+Stale／future／expired failure injections修後在零新增remote read、零authority
+acquire下fail closed；相鄰authority suites **44 passed**。Production只讀preflight
+`freshness-window-preflight-20260726-103436`已exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`與
+implementation=`4feea2fb05dc0db72eedc92afe13f665586e4e5148a64c120d12454cd707e809`，
+沒有authority mutation。此freshness-window切片為
+`root_cause_fixed_and_verified`；physical paired receipt與operations-core umbrella
+仍因第二台實體Mac離線而維持`contained`。

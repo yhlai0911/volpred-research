@@ -311,7 +311,13 @@ def test_cross_host_readiness_fails_before_authority_mutation() -> None:
 
     assert isinstance(primary, HostReadinessReceipt)
     assert isinstance(paired, CrossHostReadinessReceipt)
+    assert paired.schema_version == (
+        "primary-authority-outage-readiness-pair.v3"
+    )
     assert paired.cross_host_ready is True
+    assert datetime.fromisoformat(paired.valid_until) > datetime.fromisoformat(
+        paired.verified_at
+    )
     assert paired.primary_host_fingerprint == "primary-fingerprint"
     assert paired.standby_host_fingerprint == "standby-fingerprint"
     assert publisher.read_count == 2
@@ -326,6 +332,87 @@ def test_cross_host_readiness_fails_before_authority_mutation() -> None:
             primary,
             replace(standby, host_fingerprint=primary.host_fingerprint),
         )
+
+
+def test_readiness_pair_rejects_stale_or_future_host_observations() -> None:
+    publisher = _PublisherStore()
+    primary = prepare_cross_host_role_readiness(
+        rehearsal_id="readiness-freshness-test",
+        role="primary",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    standby = prepare_cross_host_role_readiness(
+        rehearsal_id="readiness-freshness-test",
+        role="standby",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+    )
+    now = datetime.now(UTC)
+
+    with pytest.raises(ValueError, match="outside freshness window"):
+        verify_cross_host_readiness(
+            replace(
+                primary,
+                observed_at=(now - timedelta(minutes=16)).isoformat(),
+            ),
+            standby,
+        )
+    with pytest.raises(ValueError, match="ahead of verifier clock"):
+        verify_cross_host_readiness(
+            primary,
+            replace(
+                standby,
+                observed_at=(now + timedelta(minutes=2)).isoformat(),
+            ),
+        )
+
+
+def test_primary_rejects_expired_readiness_before_remote_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    publisher = _PublisherStore()
+    live = _LiveAuthorityStore()
+    prepared_at = datetime.now(UTC) - timedelta(minutes=20)
+
+    class _FrozenDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            if tz is None:
+                return prepared_at.replace(tzinfo=None)
+            return prepared_at.astimezone(tz)
+
+    with monkeypatch.context() as frozen:
+        frozen.setattr(outage_operator, "datetime", _FrozenDateTime)
+        readiness = _paired_readiness(
+            rehearsal_id="expired-readiness-test",
+            publisher=publisher,
+        )
+
+    remote_reads_before = publisher.read_count
+    with pytest.raises(ValueError, match="readiness receipt expired"):
+        rehearse_primary_process_role(
+            rehearsal_id="expired-readiness-test",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            lease_seconds=10,
+            renew_interval_seconds=0.01,
+            poll_interval_seconds=0.005,
+            store=PartitionableAuthorityStore(
+                healthy=live,
+                unavailable=_UnavailableAuthorityStore(),
+            ),
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            readiness=readiness,
+        )
+
+    assert publisher.read_count == remote_reads_before
+    assert live.acquire_successes == 0
 
 
 def test_role_readiness_rejects_wrong_machine_or_stale_source(

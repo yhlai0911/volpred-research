@@ -816,11 +816,17 @@ dispatcher、互動session或deploy更新，該role會fail closed且不產生rec
 read-back，不 acquire authority lease；若machine fingerprint重複、source aggregate
 不同、rehearsal key不一致或publisher fence不同，流程在live authority mutation前就
 停止。正式role CLI必須帶同一份
-`primary-authority-outage-readiness-pair.v2`，並在本機再次核對role、fingerprint與
-source aggregate。Pair v2內嵌兩端原始host readiness artifacts及各自canonical
+`primary-authority-outage-readiness-pair.v3`，並在本機再次核對role、fingerprint與
+source aggregate。Pair v3內嵌兩端原始host readiness artifacts及各自canonical
 SHA-256；primary、standby與final verifier都會重算digest並逐欄核對pair的denormalized
 identity。只有一份自行填寫host欄位、沒有exact preflight artifacts的paired receipt，
 會在第一個publisher read或authority RPC前fail closed。
+
+Pair v3另由兩端`observed_at`中較早者唯一導出15分鐘`valid_until`；配對時拒絕超過
+15分鐘的host observation及領先verifier clock超過60秒的時間戳。兩個正式role在第一個
+publisher read／authority RPC前重驗pair仍在有效期內，因此舊的「曾經online」receipt
+不能代替本次演練的contemporaneous readiness。Final verifier只重算這段歷史窗口與
+raw artifacts是否一致，不會因事後保存、稽核而讓有效evidence過期。
 
 Standby role另必須把mutation前驗過的完整primary receipt之canonical SHA-256寫入
 `primary-authority-outage-standby.v3`。Final verifier只接受該digest與當前primary

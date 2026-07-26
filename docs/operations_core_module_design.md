@@ -1837,3 +1837,27 @@ fingerprint=`6652d01267d664d621c957b8`與implementation
 acquire、effect或provider call。此pre-mutation evidence-chain根因為
 `root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair與
 operations-core umbrella維持`contained`。
+
+## 26. Paired readiness freshness window（2026-07-26）
+
+Readiness pair v2完整綁住兩份raw host artifacts，卻只驗`observed_at`可解析，沒有
+「現在仍可用」的時間契約。修正前failure injection證實16分鐘前的host observation仍
+可配對；用20分鐘前產生的完整pair啟動primary時，流程真的進入publisher read與
+authority acquire。這會把歷史上曾經online的第二台Mac誤當成本次mutation前的
+contemporaneous readiness。
+
+Pair schema升v3；validity implementation集中在readiness module seam，而非散落於CLI。
+Pairing拒絕超過15分鐘的任一host observation，並容忍至多60秒跨機clock skew；receipt
+保存由兩端較早`observed_at`唯一導出的`valid_until`。Primary與standby在第一個remote
+read前共用同一active-window validator，final verifier則重算歷史窗口及raw hashes，
+保留事後稽核能力。
+
+Stale／future timestamp及expired-pair failure injections修前紅、修後在零新增publisher
+read、零authority acquire下fail closed；相鄰authority suites **44 passed**，
+`py_compile`與diff gate通過，Ruff未安裝。Production只讀preflight
+`freshness-window-preflight-20260726-103436`已原子落檔並exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`與
+implementation=`4feea2fb05dc0db72eedc92afe13f665586e4e5148a64c120d12454cd707e809`；
+沒有authority acquire、effect或provider call。此freshness根因為
+`root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair與
+operations-core umbrella維持`contained`。

@@ -26,7 +26,7 @@ import sys
 import time
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from threading import RLock
 from typing import Protocol
@@ -53,6 +53,8 @@ _SAFE_AUTHORITY_PREFIX = "operations-core-outage-smoke-"
 _PUBLISHER_FAMILY = "publisher.article.supabase.sync"
 _OUTAGE_URL = "http://127.0.0.1:1"
 _REHEARSAL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{5,63}")
+_READINESS_TTL_SECONDS = 15 * 60
+_READINESS_CLOCK_SKEW_SECONDS = 60
 
 
 class AuthorityStore(Protocol):
@@ -169,6 +171,7 @@ class CrossHostReadinessReceipt:
     rehearsal_id: str
     authority_key: str
     verified_at: str
+    valid_until: str
     primary_host_id: str
     primary_host_fingerprint: str
     standby_host_id: str
@@ -333,11 +336,18 @@ def verify_cross_host_readiness(
     """Bind two compatible physical hosts before the primary mutates a lease."""
 
     _validate_host_readiness_pair(primary, standby)
+    verified_at = datetime.now(UTC)
+    valid_until = _readiness_valid_until(
+        primary,
+        standby,
+        verified_at=verified_at,
+    )
     return CrossHostReadinessReceipt(
-        schema_version="primary-authority-outage-readiness-pair.v2",
+        schema_version="primary-authority-outage-readiness-pair.v3",
         rehearsal_id=primary.rehearsal_id,
         authority_key=primary.authority_key,
-        verified_at=datetime.now(UTC).isoformat(),
+        verified_at=verified_at.isoformat(),
+        valid_until=valid_until.isoformat(),
         primary_host_id=primary.host_id,
         primary_host_fingerprint=primary.host_fingerprint,
         standby_host_id=standby.host_id,
@@ -1338,6 +1348,7 @@ def _validate_role_readiness(
     expected_publisher_generation: int,
 ) -> None:
     _validate_cross_host_readiness_receipt(readiness)
+    _require_active_readiness(readiness, observed_at=datetime.now(UTC))
     if (
         readiness.rehearsal_id != rehearsal_id
         or readiness.authority_key != _authority_key_for_rehearsal(rehearsal_id)
@@ -1372,7 +1383,7 @@ def _validate_cross_host_readiness_receipt(
 
     if (
         readiness.schema_version
-        != "primary-authority-outage-readiness-pair.v2"
+        != "primary-authority-outage-readiness-pair.v3"
         or not readiness.cross_host_ready
     ):
         raise ValueError("cross-host readiness receipt is not verified")
@@ -1399,7 +1410,23 @@ def _validate_cross_host_readiness_receipt(
         raise ValueError(
             "cross-host readiness drifted from its host receipts"
         )
-    _timestamp(readiness.verified_at, field="readiness verified_at")
+    verified_at = _timestamp(
+        readiness.verified_at,
+        field="readiness verified_at",
+    )
+    valid_until = _timestamp(
+        readiness.valid_until,
+        field="readiness valid_until",
+    )
+    expected_valid_until = _readiness_valid_until(
+        primary,
+        standby,
+        verified_at=verified_at,
+    )
+    if valid_until != expected_valid_until:
+        raise ValueError(
+            "cross-host readiness validity window drifted from host receipts"
+        )
     if readiness.authority_key != _authority_key_for_rehearsal(
         readiness.rehearsal_id
     ):
@@ -1457,6 +1484,66 @@ def _validate_host_readiness_pair(
         raise ValueError("publisher fence differs across physical hosts")
     _timestamp(primary.observed_at, field="primary readiness observed_at")
     _timestamp(standby.observed_at, field="standby readiness observed_at")
+
+
+def _readiness_valid_until(
+    primary: HostReadinessReceipt,
+    standby: HostReadinessReceipt,
+    *,
+    verified_at: datetime,
+) -> datetime:
+    """Derive one bounded validity window from both host observations."""
+
+    observations = (
+        (
+            "primary",
+            _timestamp(
+                primary.observed_at,
+                field="primary readiness observed_at",
+            ),
+        ),
+        (
+            "standby",
+            _timestamp(
+                standby.observed_at,
+                field="standby readiness observed_at",
+            ),
+        ),
+    )
+    clock_skew = timedelta(seconds=_READINESS_CLOCK_SKEW_SECONDS)
+    ttl = timedelta(seconds=_READINESS_TTL_SECONDS)
+    for role, observed_at in observations:
+        if observed_at > verified_at + clock_skew:
+            raise ValueError(
+                f"{role} readiness observation is ahead of verifier clock"
+            )
+        if verified_at > observed_at + ttl:
+            raise ValueError(
+                f"{role} readiness observation is outside freshness window"
+            )
+    return min(observed_at for _, observed_at in observations) + ttl
+
+
+def _require_active_readiness(
+    readiness: CrossHostReadinessReceipt,
+    *,
+    observed_at: datetime,
+) -> None:
+    """Fail closed when a role starts outside the paired validity window."""
+
+    verified_at = _timestamp(
+        readiness.verified_at,
+        field="readiness verified_at",
+    )
+    valid_until = _timestamp(
+        readiness.valid_until,
+        field="readiness valid_until",
+    )
+    clock_skew = timedelta(seconds=_READINESS_CLOCK_SKEW_SECONDS)
+    if verified_at > observed_at + clock_skew:
+        raise ValueError("readiness verification is ahead of local clock")
+    if observed_at > valid_until:
+        raise ValueError("cross-host readiness receipt expired")
 
 
 def _validate_primary_receipt_for_standby(
