@@ -129,7 +129,9 @@ CREATE TABLE IF NOT EXISTS volpred_analytics.privacy_tombstones (
 CREATE TABLE IF NOT EXISTS volpred_analytics.event_dedupe_tombstones (
   idempotency_digest bytea PRIMARY KEY,
   event_payload_digest bytea NOT NULL,
-  expired_at timestamptz NOT NULL,
+  suppression_reason text NOT NULL
+    CHECK (suppression_reason IN ('expired', 'cleared')),
+  suppressed_at timestamptz NOT NULL,
   CHECK (octet_length(idempotency_digest) = 32),
   CHECK (octet_length(event_payload_digest) = 32)
 );
@@ -282,7 +284,7 @@ $retention$;
 DROP TRIGGER IF EXISTS enforce_event_retention
   ON volpred_analytics.events;
 CREATE TRIGGER enforce_event_retention
-BEFORE INSERT OR UPDATE OF occurred_at, raw_expires_at
+BEFORE INSERT OR UPDATE
 ON volpred_analytics.events
 FOR EACH ROW
 EXECUTE FUNCTION volpred_analytics.enforce_event_retention();

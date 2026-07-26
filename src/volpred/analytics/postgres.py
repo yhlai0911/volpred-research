@@ -203,9 +203,28 @@ class PostgresAnalyticsStore:
                     duplicate=True,
                     raw_expires_at=existing[2].isoformat(),
                 )
+            direct_identities = {
+                identity
+                for identity in (
+                    ("anonymous", event.anonymous_id)
+                    if event.anonymous_id
+                    else None,
+                    ("user", event.user_id) if event.user_id else None,
+                )
+                if identity is not None
+            }
+            if self._is_deleted(connection, direct_identities):
+                return AnalyticsEventReceipt(
+                    event_id=None,
+                    idempotency_key=event.idempotency_key,
+                    accepted=False,
+                    duplicate=False,
+                    raw_expires_at=None,
+                    reason="deleted",
+                )
             expired_replay = connection.execute(
                 """
-                SELECT event_payload_digest
+                SELECT event_payload_digest, suppression_reason
                   FROM volpred_analytics.event_dedupe_tombstones
                   WHERE idempotency_digest = %s
                 """,
@@ -224,7 +243,7 @@ class PostgresAnalyticsStore:
                     accepted=False,
                     duplicate=False,
                     raw_expires_at=None,
-                    reason="expired",
+                    reason=expired_replay[1],
                 )
             anonymous_ids = (
                 {event.anonymous_id} if event.anonymous_id else set()
@@ -531,6 +550,40 @@ class PostgresAnalyticsStore:
             duplicate=False,
         )
 
+    def _suppress_event_rows(
+        self,
+        connection: psycopg.Connection[Any],
+        rows: list[tuple[Any, ...]],
+        *,
+        reason: str,
+        acted_at: str,
+    ) -> None:
+        with connection.cursor() as cursor:
+            cursor.executemany(
+                """
+                INSERT INTO volpred_analytics.event_dedupe_tombstones (
+                  idempotency_digest,
+                  event_payload_digest,
+                  suppression_reason,
+                  suppressed_at
+                ) VALUES (%s, %s, %s, %s)
+                ON CONFLICT (idempotency_digest)
+                DO UPDATE SET
+                  event_payload_digest = EXCLUDED.event_payload_digest,
+                  suppression_reason = EXCLUDED.suppression_reason,
+                  suppressed_at = EXCLUDED.suppressed_at
+                """,
+                [
+                    (
+                        self._event_key_digest(row[1]),
+                        bytes(row[2]),
+                        reason,
+                        acted_at,
+                    )
+                    for row in rows
+                ],
+            )
+
     def set_opt_out(
         self,
         *,
@@ -605,14 +658,29 @@ class PostgresAnalyticsStore:
             anonymous_ids, user_ids = self._aliases(
                 connection, subject_kind, subject_id
             )
-            removed = connection.execute(
+            cleared_rows = connection.execute(
                 """
-                DELETE FROM volpred_analytics.events
+                SELECT id, idempotency_key, payload_digest
+                FROM volpred_analytics.events
                 WHERE anonymous_id = ANY(%s)
                    OR user_id = ANY(%s)
+                FOR UPDATE
                 """,
                 (list(anonymous_ids), list(user_ids)),
-            ).rowcount
+            ).fetchall()
+            self._suppress_event_rows(
+                connection,
+                cleared_rows,
+                reason="cleared",
+                acted_at=acted_at,
+            )
+            connection.execute(
+                """
+                DELETE FROM volpred_analytics.events
+                WHERE id = ANY(%s)
+                """,
+                ([row[0] for row in cleared_rows],),
+            )
             return self._save_privacy_action(
                 connection,
                 action="clear",
@@ -621,7 +689,7 @@ class PostgresAnalyticsStore:
                 ),
                 idempotency_key=idempotency_key,
                 acted_at=acted_at,
-                removed_raw_events=removed,
+                removed_raw_events=len(cleared_rows),
             )
 
     def delete(
@@ -784,28 +852,12 @@ class PostgresAnalyticsStore:
                 """,
                 (before,),
             ).fetchall()
-            with connection.cursor() as cursor:
-                cursor.executemany(
-                    """
-                    INSERT INTO volpred_analytics.event_dedupe_tombstones (
-                      idempotency_digest,
-                      event_payload_digest,
-                      expired_at
-                    ) VALUES (%s, %s, %s)
-                    ON CONFLICT (idempotency_digest)
-                    DO UPDATE SET
-                      event_payload_digest = EXCLUDED.event_payload_digest,
-                      expired_at = EXCLUDED.expired_at
-                    """,
-                    [
-                        (
-                            self._event_key_digest(row[1]),
-                            bytes(row[2]),
-                            before,
-                        )
-                        for row in expired_rows
-                    ],
-                )
+            self._suppress_event_rows(
+                connection,
+                expired_rows,
+                reason="expired",
+                acted_at=before,
+            )
             connection.execute(
                 """
                 DELETE FROM volpred_analytics.events

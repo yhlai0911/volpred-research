@@ -174,6 +174,13 @@ def test_identity_merge_is_replay_safe_and_admin_summary_is_aggregate_only() -> 
         user_id="user-1",
         merged_at="2026-07-26T15:46:00+00:00",
     )
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.merge_identity(
+            idempotency_key="identity-merge:anon-1:user-1:second",
+            anonymous_id="anon-other",
+            user_id="user-other",
+            merged_at="2026-07-26T15:46:00+00:00",
+        )
 
     assert first.duplicate is False
     assert replay.duplicate is True
@@ -333,6 +340,29 @@ def test_privacy_action_idempotency_key_is_bound_to_action_and_subject() -> None
             idempotency_key="privacy-action:shared",
             acted_at="2026-07-26T16:01:00+00:00",
         )
+
+
+def test_clear_prevents_delayed_event_replay_without_opt_out() -> None:
+    tracer = _tracer()
+    event = AnalyticsEvent(
+        idempotency_key="impression:clear-replay",
+        kind="content_impression",
+        occurred_at="2026-07-26T15:40:00+00:00",
+        anonymous_id="anon-clear",
+        user_id=None,
+        properties={"content_id": "article-1", "surface": "home"},
+    )
+    tracer.record(event)
+    tracer.clear(
+        "anonymous:anon-clear",
+        idempotency_key="clear:anon-clear",
+        acted_at="2026-07-26T15:45:00+00:00",
+    )
+
+    replay = tracer.record(event)
+    assert replay.accepted is False
+    assert replay.reason == "cleared"
+    assert tracer.inspect_privacy("anonymous:anon-clear").raw_event_count == 0
 
 
 def test_event_key_is_bound_to_payload_and_dual_identity_cannot_conflict() -> None:

@@ -43,7 +43,8 @@ references:
 - `set_opt_out` immediately removes all linked aliases from aggregate
   projections and rejects later events;
 - `clear` removes existing raw events while retaining the opt-out preference
-  and identity link;
+  and identity link; it replaces event rows with keyed dedupe tombstones so
+  delayed delivery cannot recreate cleared history;
 - `delete` removes raw events, identity links, merge receipts, and preferences.
 
 Delete retains only HMAC-SHA-256 subject tombstones and one minimal,

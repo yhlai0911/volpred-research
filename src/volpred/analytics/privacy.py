@@ -255,7 +255,7 @@ class InMemoryAnalyticsStore:
             str, _StoredPrivacyAction
         ] = {}
         self._deleted_subject_digests: set[bytes] = set()
-        self._expired_event_key_digests: dict[bytes, bytes] = {}
+        self._suppressed_event_keys: dict[bytes, tuple[bytes, str]] = {}
         self._next_event_number = 1
 
     def record(
@@ -281,12 +281,22 @@ class InMemoryAnalyticsStore:
                     duplicate=True,
                     raw_expires_at=existing.raw_expires_at,
                 )
-            expired_payload_digest = self._expired_event_key_digests.get(
+            if self._event_is_deleted(event):
+                return AnalyticsEventReceipt(
+                    event_id=None,
+                    idempotency_key=event.idempotency_key,
+                    accepted=False,
+                    duplicate=False,
+                    raw_expires_at=None,
+                    reason="deleted",
+                )
+            suppression = self._suppressed_event_keys.get(
                 self._event_key_digest(event.idempotency_key)
             )
-            if expired_payload_digest is not None:
+            if suppression is not None:
+                suppressed_payload_digest, suppression_reason = suppression
                 if not hmac.compare_digest(
-                    expired_payload_digest, payload_digest
+                    suppressed_payload_digest, payload_digest
                 ):
                     raise ValueError(
                         "analytics event idempotency_key was reused"
@@ -297,16 +307,7 @@ class InMemoryAnalyticsStore:
                     accepted=False,
                     duplicate=False,
                     raw_expires_at=None,
-                    reason="expired",
-                )
-            if self._event_is_deleted(event):
-                return AnalyticsEventReceipt(
-                    event_id=None,
-                    idempotency_key=event.idempotency_key,
-                    accepted=False,
-                    duplicate=False,
-                    raw_expires_at=None,
-                    reason="deleted",
+                    reason=suppression_reason,
                 )
             if self._event_is_opted_out(event):
                 return AnalyticsEventReceipt(
@@ -451,6 +452,13 @@ class InMemoryAnalyticsStore:
         with self._lock:
             existing = self._merge_receipts.get(idempotency_key)
             if existing is not None:
+                if (
+                    existing.anonymous_id != anonymous_id
+                    or existing.user_id != user_id
+                ):
+                    raise ValueError(
+                        "identity merge idempotency_key was reused"
+                    )
                 return replace(existing, duplicate=True)
             if any(
                 self._subject_digest(kind, subject_id)
@@ -599,6 +607,11 @@ class InMemoryAnalyticsStore:
                 )
             )
             for key in matching_keys:
+                self._suppressed_event_keys[
+                    self._event_key_digest(
+                        self._events[key].event.idempotency_key
+                    )
+                ] = (self._events[key].payload_digest, "cleared")
                 del self._events[key]
             receipt = AnalyticsPrivacyActionReceipt(
                 action="clear",
@@ -749,11 +762,11 @@ class InMemoryAnalyticsStore:
                 if datetime.fromisoformat(stored.raw_expires_at) <= cutoff
             )
             for key in expired_keys:
-                self._expired_event_key_digests[
+                self._suppressed_event_keys[
                     self._event_key_digest(
                         self._events[key].event.idempotency_key
                     )
-                ] = self._events[key].payload_digest
+                ] = (self._events[key].payload_digest, "expired")
                 del self._events[key]
             return len(expired_keys)
 

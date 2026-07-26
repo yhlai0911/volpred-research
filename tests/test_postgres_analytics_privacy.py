@@ -319,6 +319,39 @@ def test_postgres_adapter_enforces_raw_retention(
     assert replay.reason == "expired"
 
 
+def test_postgres_clear_prevents_delayed_event_replay(
+    analytics_postgres_dsn: str,
+) -> None:
+    tracer = AnalyticsPrivacyTracer(
+        PostgresAnalyticsStore(
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
+        )
+    )
+    event = AnalyticsEvent(
+        idempotency_key="impression:clear-replay-pg",
+        kind="content_impression",
+        occurred_at="2026-07-26T15:40:00+00:00",
+        anonymous_id="anon-clear-pg",
+        user_id=None,
+        properties={"content_id": "article-pg", "surface": "home"},
+    )
+    tracer.record(event)
+    tracer.clear(
+        "anonymous:anon-clear-pg",
+        idempotency_key="clear:anon-clear-pg",
+        acted_at="2026-07-26T15:45:00+00:00",
+    )
+
+    replay = tracer.record(event)
+    assert replay.accepted is False
+    assert replay.reason == "cleared"
+    assert (
+        tracer.inspect_privacy("anonymous:anon-clear-pg").raw_event_count
+        == 0
+    )
+
+
 def test_postgres_privacy_action_key_is_bound_to_action_and_subject(
     analytics_postgres_dsn: str,
 ) -> None:
@@ -431,6 +464,39 @@ def test_database_trigger_rejects_future_or_nested_raw_event(
                     Jsonb({"content_id": "article-pg", "surface": "home"}),
                     b"x" * 32,
                     "2027-08-25T15:40:00+00:00",
+                ),
+            )
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        connection.execute(
+            insert_sql,
+            (
+                "direct:valid-before-update",
+                "content_impression",
+                "2026-07-26T15:40:00+00:00",
+                "anon-direct-update",
+                Jsonb({"content_id": "article-pg", "surface": "home"}),
+                b"x" * 32,
+                "2026-08-25T15:40:00+00:00",
+            ),
+        )
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="properties must be strings",
+        ):
+            connection.execute(
+                """
+                UPDATE volpred_analytics.events
+                SET properties = %s
+                WHERE idempotency_key = 'direct:valid-before-update'
+                """,
+                (
+                    Jsonb(
+                        {
+                            "content_id": {"portfolio_position": "long"},
+                            "surface": "home",
+                        }
+                    ),
                 ),
             )
     with _worker_connection(analytics_postgres_dsn) as connection:
