@@ -2237,3 +2237,28 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   固定base的Matt spec／standards雙軸複審皆PASS。最終scoped行為測試為
   152 passed、1 skipped、1個既有基線案例deselect，PostgreSQL交易測試另56 passed；
   狀態為 **`root_cause_fixed_and_verified`**。
+
+## 2026-07-27 — Mutating execution isolation production enforcement（Issue #43）
+
+- ✅ 依既有 Matt Issue #3 → master spec → T35 ticket 執行，未重做 plan/spec/tickets。
+  Mutating work 的 public interface 現只允許 isolated workspace 或 requeue；無法配發、
+  preflight 不完整、receipt 寫入失敗都不會 firing unisolated。
+- ✅ Admission 原子綁定 task id、claim session、workspace identity、base SHA 與 exact
+  declared paths；producer 的 macOS sandbox 拒絕 canonical state、common Git metadata、
+  credential files及外部 transport，machine finalizer 才能做 exact-path commit、gate、
+  main-base CAS、merge及 durable settlement。
+- ✅ 失敗注入及 E2E 覆蓋雙 slot 不同路徑、同路徑 conflict、pre-dirty target、
+  CAS lost、stale gate、worker crash、restart orphan、admission outbox與 settlement
+  recovery；最終相鄰組合測試 **326 passed**，spec／standards獨立複審均 PASS。
+- ✅ Production canary `issue43_live_canary_v2_20260727` 的 job
+  `80f1563b6a1f4dd89d5e100e2e0f4005` 在 enforce mode 完成；worker 唯一變更
+  `docs/ops/issue43_live_canary.md`，machine landing commit `296aabac0` 無 foreign
+  path。Gate、terminal intent、finalized、settlement receipts 分別為
+  `dd8e3614…`、`38b6fe70…`、`0b19918a…`、`c256addc…`，queue 回讀 succeeded。
+- ✅ Live canary 沒有掩蓋部署錯誤：前兩輪依序抓出 log FD 被 sandbox 拒絕、
+  dispatch identity env 被剝除及 synthetic HOME 無模型認證。根因修於
+  `6893fb285`／`5b1b8b979`；模型 token 僅由 supervisor 從 owner-only regular file
+  讀入單一 allowlisted env，worker 仍不能讀 secret tree或取得 SSH/Git/cloud/Telegram
+  authority。重載後 live replay 通過，狀態為 **`root_cause_fixed_and_verified`**。
+- ⏭️ 這只結案 T35；PHASE-Z legacy recognizer、舊 wrapper及其他 compatibility path
+  仍須按後續 ticket 各自完成五步 Gate 後才能宣稱「新架構完全取代舊架構」。
