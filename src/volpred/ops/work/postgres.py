@@ -23,6 +23,7 @@ from . import (
     WorkReceiptView,
     WorkerOffer,
 )
+from .ownership import WorkOwnershipLost
 
 
 ConnectionFactory = Callable[[], Connection[Any]]
@@ -66,8 +67,18 @@ def _item_from_row(row: dict[str, Any]) -> WorkItemView:
 class PostgresCoordinationStore:
     """Persist coordination state in one PostgreSQL transaction per mutation."""
 
-    def __init__(self, connection_factory: ConnectionFactory) -> None:
+    def __init__(
+        self,
+        connection_factory: ConnectionFactory,
+        *,
+        owner_generation: int | None = None,
+    ) -> None:
+        if owner_generation is not None and (
+            isinstance(owner_generation, bool) or owner_generation <= 0
+        ):
+            raise ValueError("owner_generation must be positive")
         self._connection_factory = connection_factory
+        self._owner_generation = owner_generation
 
     @staticmethod
     def _execute_mutation(
@@ -79,6 +90,8 @@ class PostgresCoordinationStore:
             return connection.execute(query, params).fetchone()
         except Exception as error:
             message = getattr(getattr(error, "diag", None), "message_primary", "")
+            if message.startswith("work ownership"):
+                raise WorkOwnershipLost(message) from None
             if message.startswith("claim lost: "):
                 raise ClaimLost(message.removeprefix("claim lost: ")) from None
             if message.startswith(
@@ -97,6 +110,27 @@ class PostgresCoordinationStore:
                 raise ValueError(message) from None
             raise
 
+    def _execute_owned_mutation(
+        self,
+        connection: Connection[Any],
+        function: str,
+        parameters: tuple[Any, ...],
+    ) -> dict[str, Any] | None:
+        owned_parameters = (
+            parameters
+            if self._owner_generation is None
+            else (*parameters, self._owner_generation)
+        )
+        placeholders = ", ".join("%s" for _ in owned_parameters)
+        return self._execute_mutation(
+            connection,
+            (
+                f"SELECT * FROM volpred_ops.{function}"
+                f"({placeholders})"
+            ),
+            owned_parameters,
+        )
+
     def create_if_absent(
         self,
         idempotency_key: str,
@@ -104,15 +138,9 @@ class PostgresCoordinationStore:
     ) -> WorkItemView:
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            item = self._execute_mutation(
+            item = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.submit_work(
-                  %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                  %s, %s, %s, %s, %s, %s, %s, %s, %s
-                )
-                """,
+                "submit_work",
                 (
                     candidate.id,
                     idempotency_key,
@@ -273,12 +301,9 @@ class PostgresCoordinationStore:
         del claimed_at, expires_at
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            claimed = self._execute_mutation(
+            claimed = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.acquire_work(%s, %s, %s, %s, %s)
-                """,
+                "acquire_work",
                 (
                     offer.worker_id,
                     list(offer.capabilities),
@@ -306,12 +331,9 @@ class PostgresCoordinationStore:
         del created_at
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            approved = self._execute_mutation(
+            approved = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.approve_work(%s, %s, %s, %s)
-                """,
+                "approve_work",
                 (
                     report.work_id,
                     report.expected_version,
@@ -334,12 +356,9 @@ class PostgresCoordinationStore:
         del observed_at
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            running = self._execute_mutation(
+            running = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.start_work(%s, %s, %s)
-                """,
+                "start_work",
                 (work_id, lease_token, expected_version),
             )
             if running is None:
@@ -356,14 +375,9 @@ class PostgresCoordinationStore:
         del created_at
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            checkpointed = self._execute_mutation(
+            checkpointed = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.checkpoint_work(
-                  %s, %s, %s, %s, %s, %s, %s
-                )
-                """,
+                "checkpoint_work",
                 (
                     report.work_id,
                     report.lease_token,
@@ -382,12 +396,9 @@ class PostgresCoordinationStore:
         del observed_at
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            released = self._execute_mutation(
+            released = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.release_work(%s, %s, %s, %s)
-                """,
+                "release_work",
                 (
                     report.work_id,
                     report.lease_token,
@@ -408,12 +419,9 @@ class PostgresCoordinationStore:
         del created_at
         with self._connection_factory() as connection:
             connection.row_factory = dict_row
-            completed = self._execute_mutation(
+            completed = self._execute_owned_mutation(
                 connection,
-                """
-                SELECT *
-                FROM volpred_ops.complete_work(%s, %s, %s, %s, %s, %s)
-                """,
+                "complete_work",
                 (
                     report.report_id,
                     report.work_id,

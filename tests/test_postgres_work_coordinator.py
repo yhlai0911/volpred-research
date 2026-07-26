@@ -26,6 +26,8 @@ from volpred.ops.work import (
     WorkerOffer,
 )
 from volpred.ops.work.postgres import PostgresCoordinationStore
+from volpred.ops.work.ownership import WorkOwnershipLost
+from volpred.ops.work.postgres_ownership import PostgresWorkOwnerStore
 
 
 FIXED_NOW = datetime(2026, 7, 23, 6, 30, tzinfo=timezone.utc)
@@ -33,6 +35,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = next(
     (REPO_ROOT / "supabase" / "migrations").glob(
         "*_operations_core_work_coordinator.sql"
+    )
+)
+OWNERSHIP_MIGRATION = next(
+    (REPO_ROOT / "supabase" / "migrations").glob(
+        "*_operations_core_work_ownership.sql"
     )
 )
 
@@ -88,6 +95,9 @@ def postgres_dsn(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
                 "DROP SCHEMA IF EXISTS volpred_ops CASCADE"
             )
             connection.execute(MIGRATION.read_text(encoding="utf-8"))
+            connection.execute(
+                OWNERSHIP_MIGRATION.read_text(encoding="utf-8")
+            )
         yield external_dsn
         return
     bin_dir = _postgres_bin_dir()
@@ -136,6 +146,9 @@ def postgres_dsn(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
     try:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(MIGRATION.read_text(encoding="utf-8"))
+            connection.execute(
+                OWNERSHIP_MIGRATION.read_text(encoding="utf-8")
+            )
         yield dsn
     finally:
         subprocess.run(
@@ -160,11 +173,39 @@ def reset_postgres_contract_state(postgres_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.work_owner_receipts,
               volpred_ops.work_receipts,
               volpred_ops.work_checkpoints,
               volpred_ops.work_events,
               volpred_ops.work_items
             RESTART IDENTITY
+            """
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.work_owners
+            SET owner = 'legacy',
+                generation = 1,
+                cutover_manifest_sha256 = NULL,
+                changed_at = clock_timestamp(),
+                changed_by = 'pytest:reset',
+                change_reason = 'reset owner fixture'
+            WHERE capability = 'work.coordinate'
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_owner_receipts (
+              capability, generation, previous_owner, owner,
+              actor_ref, reason, cutover_manifest_sha256,
+              rollback_of_generation, changed_at
+            )
+            SELECT
+              capability, generation, NULL, owner,
+              changed_by, change_reason, cutover_manifest_sha256,
+              NULL, changed_at
+            FROM volpred_ops.work_owners
+            WHERE capability = 'work.coordinate'
             """
         )
 
@@ -248,6 +289,351 @@ def test_external_postgres_dsn_requires_local_dedicated_database_and_opt_in(
     _validate_external_test_dsn(
         "postgresql://postgres@127.0.0.1/volpred_ops_test"
     )
+
+
+def test_work_owner_cutover_fences_legacy_mutations_atomically(
+    postgres_dsn: str,
+) -> None:
+    connection_factory = lambda: psycopg.connect(postgres_dsn)
+    owner_store = PostgresWorkOwnerStore(connection_factory)
+
+    initial = owner_store.read_owner()
+    cutover = owner_store.transfer_owner(
+        expected_owner="legacy",
+        expected_generation=1,
+        target_owner="operations_core",
+        actor_ref="operator:pytest",
+        reason="exercise owner fencing",
+        cutover_manifest_sha256="a" * 64,
+    )
+
+    assert (initial.owner, initial.generation) == ("legacy", 1)
+    assert (
+        cutover.owner,
+        cutover.generation,
+        cutover.cutover_manifest_sha256,
+    ) == ("operations_core", 2, "a" * 64)
+
+    request = WorkRequest(
+        idempotency_key="owner:postgres:cutover-fence",
+        source="user",
+        kind="platform_ops",
+        title="only current owner may submit",
+        priority=1,
+        required_capabilities=frozenset({"code"}),
+        required_attestations=frozenset(),
+        risk="safe",
+        approval="auto",
+        payload_ref="owner:postgres:cutover-fence",
+        requester_ref="owner:user",
+    )
+    legacy = WorkCoordinator(
+        PostgresCoordinationStore(connection_factory),
+        clock=lambda: FIXED_NOW,
+        id_factory=lambda: "legacy-must-not-write",
+    )
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="legacy mutation lost",
+    ):
+        legacy.submit(request)
+
+    operations_core = WorkCoordinator(
+        PostgresCoordinationStore(
+            connection_factory,
+            owner_generation=cutover.generation,
+        ),
+        clock=lambda: FIXED_NOW,
+        id_factory=lambda: "work-owned-generation-2",
+    )
+    submitted = operations_core.submit(request)
+
+    assert submitted.id == "work-owned-generation-2"
+    assert owner_store.read_owner() == cutover
+
+
+def test_operations_core_generation_owns_full_lifecycle_and_rollback(
+    postgres_dsn: str,
+) -> None:
+    connection_factory = lambda: psycopg.connect(postgres_dsn)
+    owner_store = PostgresWorkOwnerStore(connection_factory)
+    manifest_sha256 = "b" * 64
+    cutover = owner_store.transfer_owner(
+        expected_owner="legacy",
+        expected_generation=1,
+        target_owner="operations_core",
+        actor_ref="operator:pytest",
+        reason="exercise full owned lifecycle",
+        cutover_manifest_sha256=manifest_sha256,
+    )
+    tokens = iter(("owned-claim-1", "owned-claim-2"))
+    coordinator = WorkCoordinator(
+        PostgresCoordinationStore(
+            connection_factory,
+            owner_generation=cutover.generation,
+        ),
+        clock=lambda: FIXED_NOW,
+        id_factory=lambda: "work-owned-lifecycle",
+        token_factory=lambda: next(tokens),
+        checkpoint_id_factory=lambda: "owned-checkpoint",
+    )
+    work = coordinator.submit(
+        WorkRequest(
+            idempotency_key="owner:postgres:owned-lifecycle",
+            source="user",
+            kind="platform_ops",
+            title="generation owns every mutation",
+            priority=1,
+            required_capabilities=frozenset({"code"}),
+            required_attestations=frozenset(),
+            risk="safe",
+            approval="auto",
+            payload_ref="owner:postgres:owned-lifecycle",
+            requester_ref="owner:user",
+        )
+    )
+    offer = WorkerOffer(
+        worker_id="owned-worker",
+        capabilities=frozenset({"code"}),
+        attestations=frozenset(),
+        lease_seconds=300,
+    )
+    first_lease = coordinator.acquire(offer)
+    assert first_lease is not None
+    running = coordinator.record(
+        Started(
+            work_id=work.id,
+            lease_token=first_lease.token,
+            expected_version=first_lease.work_item.version,
+        )
+    )
+    checkpointed = coordinator.record(
+        Checkpointed(
+            report_id="owned-checkpoint-report",
+            work_id=work.id,
+            lease_token=first_lease.token,
+            expected_version=running.version,
+            artifact_ref="artifact:owned",
+            artifact_sha256="c" * 64,
+            verification_ref="pytest:owned",
+        )
+    )
+    released = coordinator.record(
+        Released(
+            work_id=work.id,
+            lease_token=first_lease.token,
+            expected_version=checkpointed.version,
+            reason="exercise owner-fenced resume",
+        )
+    )
+    assert released.status == "pending"
+    second_lease = coordinator.acquire(offer)
+    assert second_lease is not None
+    resumed = coordinator.record(
+        Started(
+            work_id=work.id,
+            lease_token=second_lease.token,
+            expected_version=second_lease.work_item.version,
+        )
+    )
+    completed = coordinator.record(
+        Completed(
+            report_id="owned-completion",
+            work_id=work.id,
+            lease_token=second_lease.token,
+            expected_version=resumed.version,
+            result_ref="receipt:owned",
+            summary="owner-fenced lifecycle complete",
+        )
+    )
+    assert completed.status == "succeeded"
+
+    rollback = owner_store.transfer_owner(
+        expected_owner="operations_core",
+        expected_generation=cutover.generation,
+        target_owner="legacy",
+        actor_ref="operator:pytest",
+        reason="exercise exact rollback",
+        cutover_manifest_sha256=manifest_sha256,
+        rollback_of_generation=cutover.generation,
+    )
+    assert (rollback.owner, rollback.generation) == ("legacy", 3)
+
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="operations_core mutation lost",
+    ):
+        coordinator.submit(
+            WorkRequest(
+                idempotency_key="owner:postgres:stale-generation",
+                source="user",
+                kind="platform_ops",
+                title="stale generation cannot write",
+                priority=1,
+                required_capabilities=frozenset(),
+                required_attestations=frozenset(),
+                risk="safe",
+                approval="auto",
+                payload_ref="owner:postgres:stale-generation",
+                requester_ref="owner:user",
+            )
+        )
+
+
+def test_work_owner_transfer_rejects_active_lease_without_state_change(
+    postgres_dsn: str,
+) -> None:
+    connection_factory = lambda: psycopg.connect(postgres_dsn)
+    coordinator = WorkCoordinator(
+        PostgresCoordinationStore(connection_factory),
+        clock=lambda: FIXED_NOW,
+        id_factory=lambda: "work-active-owner-fence",
+        token_factory=lambda: "active-owner-fence-claim",
+    )
+    coordinator.submit(
+        WorkRequest(
+            idempotency_key="owner:postgres:active-owner-fence",
+            source="user",
+            kind="platform_ops",
+            title="active lease blocks owner transfer",
+            priority=1,
+            required_capabilities=frozenset(),
+            required_attestations=frozenset(),
+            risk="safe",
+            approval="auto",
+            payload_ref="owner:postgres:active-owner-fence",
+            requester_ref="owner:user",
+        )
+    )
+    assert coordinator.acquire(
+        WorkerOffer(
+            worker_id="active-worker",
+            capabilities=frozenset(),
+            attestations=frozenset(),
+            lease_seconds=300,
+        )
+    ) is not None
+    owner_store = PostgresWorkOwnerStore(connection_factory)
+
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="requires zero active leases",
+    ):
+        owner_store.transfer_owner(
+            expected_owner="legacy",
+            expected_generation=1,
+            target_owner="operations_core",
+            actor_ref="operator:pytest",
+            reason="must not strand active lease",
+            cutover_manifest_sha256="d" * 64,
+        )
+
+    assert (owner_store.read_owner().owner, owner_store.read_owner().generation) == (
+        "legacy",
+        1,
+    )
+    with psycopg.connect(postgres_dsn) as connection:
+        receipt_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_owner_receipts"
+        ).fetchone()[0]
+    assert receipt_count == 1
+
+
+def test_work_owner_transfer_replay_is_exact_and_idempotent(
+    postgres_dsn: str,
+) -> None:
+    owner_store = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_dsn)
+    )
+    command = {
+        "expected_owner": "legacy",
+        "expected_generation": 1,
+        "target_owner": "operations_core",
+        "actor_ref": "operator:pytest",
+        "reason": "lost response replay",
+        "cutover_manifest_sha256": "e" * 64,
+    }
+
+    first = owner_store.transfer_owner(**command)
+    replay = owner_store.transfer_owner(**command)
+
+    assert replay == first
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="compare-and-set failed",
+    ):
+        owner_store.transfer_owner(
+            **{**command, "reason": "different command"}
+        )
+
+
+def test_work_owner_security_exposes_only_fenced_public_functions(
+    postgres_dsn: str,
+) -> None:
+    with psycopg.connect(postgres_dsn) as connection:
+        worker_privileges = connection.execute(
+            """
+            SELECT
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.submit_work_unfenced('
+                'text,text,text,text,text,integer,text[],text[],text,text,'
+                'text,text,timestamptz,text,text,integer,'
+                'timestamptz,timestamptz)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.transfer_work_owner('
+                'text,bigint,text,text,text,text,bigint)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.submit_work('
+                'text,text,text,text,text,integer,text[],text[],text,text,'
+                'text,text,timestamptz,text,text,integer,'
+                'timestamptz,timestamptz,bigint)',
+                'EXECUTE'
+              )
+            """
+        ).fetchone()
+        approver_privileges = connection.execute(
+            """
+            SELECT
+              has_function_privilege(
+                'volpred_ops_approver',
+                'volpred_ops.transfer_work_owner('
+                'text,bigint,text,text,text,text,bigint)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_approver',
+                'volpred_ops.approve_work('
+                'text,integer,text,text,bigint)',
+                'EXECUTE'
+              )
+            """
+        ).fetchone()
+        worker_table_access = connection.execute(
+            """
+            SELECT
+              has_table_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.work_owners',
+                'SELECT,INSERT,UPDATE,DELETE'
+              ),
+              has_table_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.work_owner_receipts',
+                'SELECT,INSERT,UPDATE,DELETE'
+              )
+            """
+        ).fetchone()
+
+    assert worker_privileges == (False, False, True)
+    assert approver_privileges == (True, True)
+    assert worker_table_access == (False, False)
 
 
 def test_postgres_worker_role_runs_adapter_but_cannot_delete(
@@ -1690,6 +2076,8 @@ def test_postgres_migration_enables_rls_and_denies_untrusted_schema_access(
         ("work_checkpoints", True),
         ("work_events", True),
         ("work_items", True),
+        ("work_owner_receipts", True),
+        ("work_owners", True),
         ("work_receipts", True),
     ]
     assert can_use_schema is False
@@ -1821,11 +2209,17 @@ def test_postgres_catalog_contains_canonical_audit_fields_and_fk_indexes(
     ]
     assert unsafe_memberships == []
     assert function_owners == [("volpred_ops_definer",)]
-    assert function_return_types == [("volpred_ops.work_item_reads",)]
+    assert {row[0] for row in function_return_types} == {
+        "void",
+        "volpred_ops.work_item_reads",
+        "volpred_ops.work_owner_reads",
+    }
     assert definer_write_privileges == [
         ("work_checkpoints", True, False, False),
         ("work_events", True, False, False),
         ("work_items", True, True, False),
+        ("work_owner_receipts", True, False, False),
+        ("work_owners", False, True, False),
         ("work_receipts", True, False, False),
     ]
 
@@ -1873,6 +2267,9 @@ def test_postgres_migration_can_be_rolled_back_and_reapplied(
         connection.execute("DROP ROLE volpred_ops_test_incoming")
         connection.execute("DROP SCHEMA IF EXISTS volpred_ops CASCADE")
         connection.execute(MIGRATION.read_text(encoding="utf-8"))
+        connection.execute(
+            OWNERSHIP_MIGRATION.read_text(encoding="utf-8")
+        )
 
         table_count = connection.execute(
             """
@@ -1884,7 +2281,7 @@ def test_postgres_migration_can_be_rolled_back_and_reapplied(
             """
         ).fetchone()[0]
 
-    assert table_count == 4
+    assert table_count == 6
 
 
 def test_postgres_schema_is_private_rls_enabled_and_transactionally_removable(
@@ -1910,7 +2307,9 @@ def test_postgres_schema_is_private_rls_enabled_and_transactionally_removable(
                     'work_items',
                     'work_events',
                     'work_checkpoints',
-                    'work_receipts'
+                    'work_receipts',
+                    'work_owners',
+                    'work_owner_receipts'
                   )
                 """
             ).fetchone()
@@ -1918,7 +2317,7 @@ def test_postgres_schema_is_private_rls_enabled_and_transactionally_removable(
             connection.execute("DROP ROLE volpred_untrusted")
 
     assert usage == (False,)
-    assert rls == (True, 4)
+    assert rls == (True, 6)
 
     with psycopg.connect(postgres_dsn) as connection:
         connection.execute("DROP SCHEMA volpred_ops CASCADE")

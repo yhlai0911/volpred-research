@@ -197,6 +197,16 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260724213739_operations_core_publisher_reconcile_ownership.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726034720_operations_core_work_ownership.sql",
+)
+IDEMPOTENT_REPLAY_MIGRATION = (
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260724213739_operations_core_publisher_reconcile_ownership.sql"
 )
 
 
@@ -483,7 +493,9 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
         ) as connection:
             for migration in MIGRATIONS:
                 connection.execute(migration.read_text(encoding="utf-8"))
-            connection.execute(MIGRATIONS[-1].read_text(encoding="utf-8"))
+            connection.execute(
+                IDEMPOTENT_REPLAY_MIGRATION.read_text(encoding="utf-8")
+            )
 
         with psycopg.connect(dsn, autocommit=True) as connection:
             (
