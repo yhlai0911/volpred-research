@@ -50,6 +50,7 @@ from pathlib import Path
 from typing import Callable
 
 from . import identity, procutil
+from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ PROMPT_PATH = ROOT / "scripts" / "cron_hourly_dispatch_codex_failover_prompt.md"
 
 # Used only if the prompt file is missing — keeps failover functional rather than
 # skipping the slot over a deleted file.
-FALLBACK_PROMPT = (
+FALLBACK_PROMPT = inject_external_report_contract(
     "新一輪 hourly tick（Claude dispatch 失敗 failover）。cat storage/ops/handoff_latest.md，"
     "依同樣流程 claim 下一個 Codex-eligible pending task → 完整完成 → complete → "
     "用 scripts/git_writer_lock.py commit 提交 [codex]。"
@@ -190,7 +191,7 @@ def _read_prompt(prompt_path: Path) -> str:
     if not text:
         LOG.warning("failover prompt empty path=%s — using inline fallback", prompt_path)
         return FALLBACK_PROMPT
-    return text
+    return inject_external_report_contract(text)
 
 
 def run_codex_failover(

@@ -2006,6 +2006,11 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   required dispatch daemon present、0 conflict；heartbeat checker `breached=false`。
 - dispatch-supervisor 寄出的所有管理通知標題統一加 `[新架構派發]`。19:06 收到的
   `supervisor restart` 是本次恢復新派發層產生，不是舊逐工作 LaunchAgent。
+- 19:13 的 Operations Core worker Telegram 班報同樣確認來自新架構，但它繞過 daemon
+  alert sink，標題未帶來源，且把已恢復的真 outage 說成「誤報」。worker prompt contract
+  已補兩個 gate：所有外部報告 title／第一行必帶 `[新架構派發]`；歷史 incident 必以
+  告警當下 evidence 裁決，current healthy 只能稱 recovered，不得倒推 false positive。
+  同一 contract 已由一般 Claude worker、Codex failover 與 failover inline fallback 共用。
 - 此 active-daemon 漏查 incident 為 `root_cause_fixed_and_verified`；T09 整體仍須
   sustained-clean 長窗，維持 `contained`。
 

@@ -50,6 +50,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 from . import alerts, decision, identity, phase_z, state, worker, workspace as workspace_mod
+from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
 
@@ -307,7 +308,7 @@ def _slot_prompt(
     workspace_section = (
         workspace_mod.prompt_fragment(workspace) + "\n" if workspace else ""
     )
-    return (
+    base_prompt = (
         "[Supervisor multi-slot context]\n"
         f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
         f"launcher_cwd={workdir}（刻意不是 Git repo）；canonical_root={repo_root}.\n"
@@ -325,6 +326,7 @@ def _slot_prompt(
         + workspace_section
         + prompt
     )
+    return inject_external_report_contract(base_prompt)
 
 
 def _phase_z_terminal(outcome: dict[str, Any] | None) -> bool:

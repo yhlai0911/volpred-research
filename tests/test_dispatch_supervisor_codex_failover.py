@@ -311,6 +311,19 @@ def test_shipped_prompt_file_exists() -> None:
     assert codex_failover.PROMPT_PATH.is_file()
 
 
+def test_shipped_and_fallback_prompts_share_external_report_contract(
+    tmp_path: Path,
+) -> None:
+    shipped = codex_failover._read_prompt(codex_failover.PROMPT_PATH)
+    fallback = codex_failover._read_prompt(tmp_path / "missing.md")
+
+    for prompt in (shipped, fallback):
+        assert "所有對外 Email、Telegram 與最終回報" in prompt
+        assert "[新架構派發]" in prompt
+        assert "現在健康只能證明已恢復" in prompt
+        assert "不能把先前告警改稱誤報" in prompt
+
+
 # ── worker wiring ──────────────────────────────────────────────────────────
 
 class _FailoverStub:

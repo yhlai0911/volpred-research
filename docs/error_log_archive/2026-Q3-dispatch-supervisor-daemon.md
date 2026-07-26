@@ -38,8 +38,15 @@ receipt 可證明，故不虛構；可證實且已修的是控制面允許它靜
    Python XML parser 拒絕。改由系統 plist parser 驗 Label，對應 regression 先 RED 後 GREEN；
    第二次 live apply 成功，host crontab unchanged、49 jobs、0 conflict。
 5. 相鄰 scheduler／launchd／dispatch alert suites 全綠。新架構 dispatch-supervisor 的
-   所有 email title 另在單一 `_send` seam 統一加 `[新架構派發]`，避免 owner 看到
-   `supervisor restart` 時誤判為退役舊架構。
+   所有 daemon alert email title 另在單一 `_send` seam 統一加 `[新架構派發]`，避免 owner
+   看到 `supervisor restart` 時誤判為退役舊架構。
+6. 19:13 的 Operations Core worker Telegram 回報又暴露第二個輸出面：一般班次回報不經
+   daemon alert sink，因此仍無來源註記，且用「現在 heartbeat 0.4 分」把 19:01 的真 outage
+   錯判為誤報。`_slot_prompt` 現要求所有外部 Email／Telegram／final report 的 title
+   （無 title 時第一行）加 `[新架構派發]`；incident 裁決必回讀告警當下 evidence timestamp，
+   現在健康只能稱已恢復，不能倒推先前告警是誤報。這份 contract 已抽成單一 helper，
+   同時注入一般 Claude worker、Codex failover shipped prompt，以及 prompt 遺失／空檔時的
+   inline fallback，避免 auth／quota 切換後標示規則消失。
 
 T09 的 sustained-clean 長窗仍是獨立 umbrella gate；本 incident 的「漏查 active daemon」
 根因與當下服務恢復已完成五步，不把 umbrella 觀察窗偷換成已結案。

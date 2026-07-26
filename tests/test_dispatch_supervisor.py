@@ -3154,6 +3154,23 @@ def test_dispatch_supervisor_email_title_identifies_new_architecture(
     assert command[title_index] == "[新架構派發] supervisor restart"
 
 
+def test_slot_prompt_labels_all_external_reports_and_preserves_incident_timeline(
+    tmp_path: Path,
+) -> None:
+    prompt = scheduler._slot_prompt(
+        "original task",
+        slot_id="slot-1",
+        job_id="job-123",
+        workdir=tmp_path / "scratch",
+        repo_root=tmp_path / "repo",
+    )
+
+    assert "所有對外 Email、Telegram 與最終回報" in prompt
+    assert "[新架構派發]" in prompt
+    assert "現在健康只能證明已恢復" in prompt
+    assert "不能把先前告警改稱誤報" in prompt
+
+
 def test_supervisor_restart_unexpected_still_emails(tmp_path: Path, monkeypatch) -> None:
     """No marker (planned_reason=None) --- genuine restart still alerts once."""
     state_path = _tmp_state(tmp_path)
