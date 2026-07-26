@@ -101,16 +101,20 @@ def test_claim_assigns_linked_github_issue_after_local_claim(
     )
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
     calls = []
-    monkeypatch.setattr(
-        task_pool_claim,
-        "assign_issue",
-        lambda issue_ref: calls.append(issue_ref)
-        or {
+
+    def fake_assign_issue(issue_ref, *, repo_root):
+        calls.append((issue_ref, repo_root))
+        return {
             "ok": True,
             "action": "assign",
             "issue_ref": "#37",
             "issue_number": 37,
-        },
+        }
+
+    monkeypatch.setattr(
+        task_pool_claim,
+        "assign_issue",
+        fake_assign_issue,
     )
 
     result = task_pool_claim.cmd_claim(
@@ -124,7 +128,7 @@ def test_claim_assigns_linked_github_issue_after_local_claim(
 
     assert result["ok"] is True
     assert result["issue_tracker_sync"]["ok"] is True
-    assert calls == ["#37"]
+    assert calls == [("#37", task_pool_claim.ROOT)]
     assert json.loads(next_tasks.read_text(encoding="utf-8"))[0]["status"] == "claimed"
 
 
@@ -170,7 +174,11 @@ def test_issue_sync_failure_never_rolls_back_local_claim(
         encoding="utf-8",
     )
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
-    monkeypatch.setattr(task_pool_claim, "assign_issue", lambda _ref: sync_result)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "assign_issue",
+        lambda _ref, **_kwargs: sync_result,
+    )
 
     result = task_pool_claim.cmd_claim(
         argparse.Namespace(
@@ -255,7 +263,8 @@ def test_complete_defers_linked_issue_close_until_real_commit(
             id="linked-ticket",
             status="succeeded",
             result="implemented acceptance criteria",
-        )
+        ),
+        completion_base_commit="1" * 40,
     )
 
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
@@ -270,8 +279,38 @@ def test_complete_defers_linked_issue_close_until_real_commit(
         "task_id": "linked-ticket",
         "completion_owner": "codex-vscode",
         "completed_at": saved["completed_at"],
+        "completion_base_commit": "1" * 40,
     }
     assert "issue_closed_commit" not in saved
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "issue_ref",
+        "issue_close_pending",
+        "issue_closed_commit",
+        "issue_closed_at",
+    ],
+)
+def test_annotate_refuses_issue_bridge_identity_and_receipt_fields(
+    tmp_path, monkeypatch, field
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([{"id": "linked-ticket", "status": "pending"}]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    with pytest.raises(SystemExit, match="refusing lifecycle/identity fields"):
+        task_pool_claim.cmd_annotate(
+            argparse.Namespace(
+                id="linked-ticket",
+                set=[f"{field}=forged"],
+                set_json=[],
+            )
+        )
 
 
 def test_complete_idempotently_clears_stale_terminal_claim(tmp_path, monkeypatch) -> None:

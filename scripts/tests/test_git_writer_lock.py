@@ -160,20 +160,38 @@ def test_exact_path_commit_closes_owned_linked_issue_with_real_sha(
     )
     _run(repo, "git", "add", "storage/next_tasks.json")
     _run(repo, "git", "commit", "-qm", "seed linked task")
+    completion_base = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    seeded = json.loads(queue.read_text(encoding="utf-8"))
+    seeded[0]["issue_close_pending"]["completion_base_commit"] = completion_base
+    queue.write_text(json.dumps(seeded), encoding="utf-8")
     (repo / "implementation.py").write_text("DONE = True\n", encoding="utf-8")
     gh_log = tmp_path / "gh.log"
+    gh_state = tmp_path / "gh-state.txt"
     fake_gh = tmp_path / "gh"
     fake_gh.write_text(
-        "#!/bin/sh\n"
-        "printf '%s\\n' \"$@\" >> \"$GH_LOG\"\n"
-        "if [ \"$1\" = issue ] && [ \"$2\" = view ]; then\n"
-        "  printf '%s\\n' '{\"state\":\"OPEN\",\"comments\":[]}'\n"
-        "fi\n",
+        "#!/usr/bin/env python3\n"
+        "import json\n"
+        "import os\n"
+        "from pathlib import Path\n"
+        "import sys\n"
+        "args = sys.argv[1:]\n"
+        "with open(os.environ['GH_LOG'], 'a', encoding='utf-8') as log:\n"
+        "    log.write('\\n'.join(args) + '\\n')\n"
+        "state = Path(os.environ['GH_STATE'])\n"
+        "if args[:2] == ['issue', 'view']:\n"
+        "    if state.exists():\n"
+        "        print(json.dumps({'state': 'CLOSED', 'comments': "
+        "[{'body': state.read_text(encoding='utf-8')}]}))\n"
+        "    else:\n"
+        "        print(json.dumps({'state': 'OPEN', 'comments': []}))\n"
+        "elif args[:2] == ['issue', 'close']:\n"
+        "    state.write_text(args[args.index('--comment') + 1], encoding='utf-8')\n",
         encoding="utf-8",
     )
     fake_gh.chmod(0o755)
     monkeypatch.setenv("GH_BIN", str(fake_gh))
     monkeypatch.setenv("GH_LOG", str(gh_log))
+    monkeypatch.setenv("GH_STATE", str(gh_state))
 
     completed = _cli(
         repo,

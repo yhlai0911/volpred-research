@@ -868,6 +868,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                             path=repo / "storage" / "next_tasks.json",
                             claim_owners={args.actor},
                             commit_sha=commit_sha,
+                            commit_parent_sha=original_head,
                             repo_root=repo,
                         )
                 except Exception as exc:  # noqa: BLE001 — commit is durable; later PHASE-Z can retry receipt state

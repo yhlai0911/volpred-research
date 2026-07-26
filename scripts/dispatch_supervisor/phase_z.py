@@ -3520,6 +3520,7 @@ def run_phase_z(
                     path=repo_root / "storage" / "next_tasks.json",
                     claim_owners=claim_owners,
                     commit_sha=committed_sha,
+                    commit_parent_sha=base_sha,
                     repo_root=repo_root,
                 )
             except Exception as exc:  # noqa: BLE001 — commit already landed; GitHub sync is retryable

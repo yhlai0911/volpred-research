@@ -38,6 +38,7 @@ import fcntl
 import json
 import os
 import re
+import subprocess
 import sys
 import uuid
 from contextlib import contextmanager
@@ -590,7 +591,7 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
         issue_ref = task.get("issue_ref")
     if issue_ref is not None:
         try:
-            result["issue_tracker_sync"] = assign_issue(issue_ref)
+            result["issue_tracker_sync"] = assign_issue(issue_ref, repo_root=ROOT)
         except Exception as exc:  # noqa: BLE001 — GitHub is not the claim authority
             result["issue_tracker_sync"] = {
                 "ok": False,
@@ -770,8 +771,36 @@ def _request_burst_fire(task_id: str, pending_left: int) -> dict[str, Any]:
         return {"requested": False, "reason": f"{type(exc).__name__}: {exc}"}
 
 
+def _current_repo_head(repo_root: Path = ROOT) -> str | None:
+    """Return the immutable completion fence used by post-commit settlement."""
+    try:
+        observed = subprocess.run(
+            ["git", "rev-parse", "--verify", "HEAD^{commit}"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        from volpred.ops.diagnostics import warn
+
+        warn(
+            "task-pool-issue-sync",
+            "cannot resolve completion base commit",
+            repo_root=str(repo_root),
+            err=str(exc),
+        )
+        return None
+    sha = str(observed.stdout or "").strip().lower()
+    return sha if observed.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", sha) else None
+
+
 def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
-    out, burst = _complete_locked(args)
+    out, burst = _complete_locked(
+        args,
+        completion_base_commit=_current_repo_head(),
+    )
     if burst:
         # Both run outside the queue lock: network IO and the supervisor's own
         # lock have no business being held under the queue's LOCK_EX.
@@ -782,7 +811,11 @@ def cmd_complete(args: argparse.Namespace) -> dict[str, Any]:
     return out
 
 
-def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str, Any] | None]:
+def _complete_locked(
+    args: argparse.Namespace,
+    *,
+    completion_base_commit: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower() or "in_progress"
@@ -835,6 +868,14 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
                     "action": "defer_close_until_commit",
                     "reason": "invalid_issue_ref",
                 }
+            elif not completion_base_commit:
+                out["issue_tracker_sync"] = {
+                    "ok": False,
+                    "action": "defer_close_until_commit",
+                    "issue_ref": normalize_issue_ref(issue_ref),
+                    "issue_number": number,
+                    "reason": "git_head_unavailable",
+                }
             else:
                 canonical_ref = normalize_issue_ref(issue_ref)
                 task["issue_ref"] = canonical_ref
@@ -843,6 +884,7 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
                     "task_id": args.id,
                     "completion_owner": completion_owner,
                     "completed_at": task["completed_at"],
+                    "completion_base_commit": completion_base_commit,
                 }
                 out["issue_tracker_sync"] = {
                     "ok": True,
@@ -867,6 +909,7 @@ ANNOTATE_PROTECTED_FIELDS = frozenset({
     "id", "status", "priority", "task_type", "created_at", "completed_at",
     "claimed_by", "claimed_at", "claim_session_id",
     "blocked_reason", "blocked_at", "blocked_until",
+    "issue_ref", "issue_close_pending", "issue_closed_commit", "issue_closed_at",
 })
 
 

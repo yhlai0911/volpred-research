@@ -278,6 +278,67 @@ def close_issue(
             "reason": "gh_command_failed",
             "detail": str(completed.stderr or "").strip()[-500:],
         }
+    try:
+        verified = runner(
+            [
+                binary,
+                "issue",
+                "view",
+                str(number),
+                "--json",
+                "state,comments",
+            ],
+            cwd=Path(repo_root).resolve() if repo_root is not None else None,
+            capture_output=True,
+            text=True,
+            check=False,
+            shell=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "close_readback_failed",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    try:
+        verified_payload = json.loads(verified.stdout)
+        verified_state = str(verified_payload["state"]).upper()
+        verified_comments = verified_payload.get("comments", [])
+        verified_marker = any(
+            marker in str(item.get("body") or "")
+            for item in verified_comments
+            if isinstance(item, dict)
+        )
+    except (KeyError, TypeError, json.JSONDecodeError) as exc:
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "close_readback_invalid",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    if (
+        verified.returncode != 0
+        or verified_state != "CLOSED"
+        or not verified_marker
+    ):
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "close_readback_mismatch",
+            "detail": {
+                "returncode": verified.returncode,
+                "state": verified_state,
+                "marker_seen": verified_marker,
+            },
+        }
     return {
         "ok": True,
         "action": "close",
@@ -292,18 +353,24 @@ def settle_completed_task_issues(
     path: str | Path,
     claim_owners: set[str] | list[str] | tuple[str, ...],
     commit_sha: str,
+    commit_parent_sha: str,
     repo_root: str | Path | None = None,
     closer: Callable[..., dict[str, Any]] = close_issue,
 ) -> list[dict[str, Any]]:
-    """Close commit-bound issues, then durably acknowledge successful closes.
+    """Bind eligible receipts, close their issues, then acknowledge readback.
 
-    GitHub IO happens outside the queue lock.  The second locked phase only
-    acknowledges a close if the terminal row and its pending-close receipt are
-    byte-for-byte the candidate observed before the external call.
+    A newly completed task may bind only to the direct child of the HEAD
+    observed by ``complete``.  Once bound, retries keep that original SHA even
+    if a later commit by the same owner triggers settlement.  GitHub IO stays
+    outside the queue lock; the final phase acknowledges only an unchanged
+    terminal receipt.
     """
     sha = str(commit_sha or "").strip().lower()
+    parent_sha = str(commit_parent_sha or "").strip().lower()
     if _GIT_OBJECT_ID.fullmatch(sha) is None:
         raise ValueError("commit_sha must be a full Git object id")
+    if _GIT_OBJECT_ID.fullmatch(parent_sha) is None:
+        raise ValueError("commit_parent_sha must be a full Git object id")
     owners = {str(owner).strip() for owner in claim_owners if str(owner).strip()}
     if not owners:
         return []
@@ -311,43 +378,61 @@ def settle_completed_task_issues(
     if not queue.exists():
         return []
 
-    with queue.open("r", encoding="utf-8") as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
-        try:
-            payload = json.load(handle)
-        finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
-    if not isinstance(payload, list):
-        raise ValueError("next_tasks.json root is not a list")
+    from volpred.ops.next_tasks import write_tasks_to_handle
 
     candidates: list[dict[str, Any]] = []
-    for task in payload:
-        if not isinstance(task, dict) or task.get("status") != "succeeded":
-            continue
-        pending = task.get("issue_close_pending")
-        if not isinstance(pending, dict):
-            continue
-        owner = str(pending.get("completion_owner") or "")
-        if owner not in owners:
-            continue
-        task_id = str(task.get("id") or "")
-        issue_ref = pending.get("issue_ref")
-        if not task_id or issue_number(issue_ref) is None:
-            continue
-        candidates.append(
-            {
-                "task_id": task_id,
-                "issue_ref": normalize_issue_ref(issue_ref),
-                "pending": pending,
-                "summary": str(task.get("result") or ""),
-            }
-        )
+    with queue.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            payload = json.load(handle)
+            if not isinstance(payload, list):
+                raise ValueError("next_tasks.json root is not a list")
+            changed = False
+            for task in payload:
+                if not isinstance(task, dict) or task.get("status") != "succeeded":
+                    continue
+                pending = task.get("issue_close_pending")
+                if not isinstance(pending, dict):
+                    continue
+                owner = str(pending.get("completion_owner") or "")
+                if owner not in owners:
+                    continue
+                task_id = str(task.get("id") or "")
+                issue_ref = pending.get("issue_ref")
+                if not task_id or issue_number(issue_ref) is None:
+                    continue
+
+                bound_sha = str(pending.get("commit_sha") or "").strip().lower()
+                if bound_sha:
+                    if _GIT_OBJECT_ID.fullmatch(bound_sha) is None:
+                        continue
+                elif pending.get("completion_base_commit") == parent_sha:
+                    bound_sha = sha
+                    pending = dict(pending)
+                    pending["commit_sha"] = bound_sha
+                    task["issue_close_pending"] = pending
+                    changed = True
+                else:
+                    continue
+                candidates.append(
+                    {
+                        "task_id": task_id,
+                        "issue_ref": normalize_issue_ref(issue_ref),
+                        "pending": pending,
+                        "summary": str(task.get("result") or ""),
+                        "commit_sha": bound_sha,
+                    }
+                )
+            if changed:
+                write_tasks_to_handle(handle, payload)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
     successful: list[dict[str, Any]] = []
     for candidate in candidates:
         result = closer(
             issue_ref=candidate["issue_ref"],
-            commit_sha=sha,
+            commit_sha=candidate["commit_sha"],
             task_id=candidate["task_id"],
             summary=candidate["summary"],
             repo_root=Path(repo_root) if repo_root is not None else None,
@@ -358,14 +443,12 @@ def settle_completed_task_issues(
                     "task_id": candidate["task_id"],
                     "issue_ref": candidate["issue_ref"],
                     "issue_number": issue_number(candidate["issue_ref"]),
-                    "commit_sha": sha,
+                    "commit_sha": candidate["commit_sha"],
                     "pending": candidate["pending"],
                 }
             )
     if not successful:
         return []
-
-    from volpred.ops.next_tasks import write_tasks_to_handle
 
     acknowledged: list[dict[str, Any]] = []
     with queue.open("r+", encoding="utf-8") as handle:
@@ -390,7 +473,7 @@ def settle_completed_task_issues(
                     continue
                 task.pop("issue_close_pending", None)
                 task["issue_closed_at"] = closed_at
-                task["issue_closed_commit"] = sha
+                task["issue_closed_commit"] = receipt["commit_sha"]
                 acknowledged.append(
                     {
                         key: receipt[key]

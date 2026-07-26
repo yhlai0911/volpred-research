@@ -527,6 +527,13 @@ def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
                 text=True,
                 check=True,
             ).stdout.strip(),
+            "commit_parent_sha": subprocess.run(
+                ["git", "rev-parse", "HEAD^"],
+                cwd=tmp_path,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip(),
             "repo_root": tmp_path,
         }
     ]
