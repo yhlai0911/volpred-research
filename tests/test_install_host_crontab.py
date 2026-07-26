@@ -200,3 +200,60 @@ def test_targeted_reconcile_preserves_empty_log_field_and_removes_legacy_line(
         "# volpred-missing-log-job"
     ]
     assert "15 1 * * * /usr/bin/true # personal" in lines
+
+
+def test_targeted_reconcile_removes_operations_core_owned_host_leg(
+    tmp_path: Path,
+) -> None:
+    wrapper = tmp_path / "fixture_wrapper.sh"
+    wrapper.write_text("#!/bin/bash\nexit 0\n", encoding="utf-8")
+    wrapper.chmod(wrapper.stat().st_mode | stat.S_IXUSR)
+    config = tmp_path / "runtime_schedules.json"
+    config.write_text(
+        json.dumps(
+            {
+                "schedule_materialization": {
+                    "mode": "canary",
+                    "active_jobs": {
+                        "owned": {"activated_at": "2026-07-26T10:00:00Z"}
+                    },
+                },
+                "system_crontab": {
+                    "items": [
+                        {
+                            "id": "owned",
+                            "cron": "0 * * * *",
+                            "wrapper_script": str(wrapper),
+                            "host_crontab_managed": True,
+                        }
+                    ]
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    state = tmp_path / "crontab.txt"
+    state.write_text(
+        f"0 * * * * {wrapper} >> /tmp/owned.log 2>&1 # volpred-owned\n"
+        "15 1 * * * /usr/bin/true # personal\n",
+        encoding="utf-8",
+    )
+    env = {
+        **_fake_crontab_env(tmp_path, state),
+        "VOLPRED_RUNTIME_SCHEDULES_PATH": str(config),
+        "VOLPRED_REPO_ROOT": str(tmp_path / "repo"),
+    }
+
+    result = subprocess.run(
+        ["bash", "scripts/install_host_crontab.sh", "--id", "owned"],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    installed = state.read_text(encoding="utf-8")
+    assert "# volpred-owned" not in installed
+    assert "15 1 * * * /usr/bin/true # personal" in installed

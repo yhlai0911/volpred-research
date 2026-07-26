@@ -2,8 +2,75 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-14",
+    "updated_at": "2026-07-26",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。"
+  },
+  "schedule_materialization": {
+    "schema": 1,
+    "generation": "operations-core-v1",
+    "mode": "shadow",
+    "timezone": "Asia/Taipei",
+    "receipt_path": "storage/ops/schedule_receipts.json",
+    "daemon_label": "com.volpred.operations-core-scheduler",
+    "daemon_plist": "ops/launchd/com.volpred.operations-core-scheduler.plist",
+    "tick_seconds": 30,
+    "max_parallel": 4,
+    "shadow_grace_seconds": 120,
+    "active_jobs": {},
+    "job_defaults": {
+      "catch_up": "latest_only",
+      "grace_seconds": 120,
+      "max_catchup_seconds": 86400,
+      "max_attempts": 3,
+      "retry_delay_seconds": 300,
+      "lease_seconds": 3600,
+      "timeout_seconds": 3000
+    },
+    "job_overrides": {
+      "boss_report_4h": {
+        "catch_up": "skip",
+        "max_attempts": 1
+      },
+      "codex_update": {
+        "catch_up": "skip",
+        "max_attempts": 1
+      },
+      "git_push_backup": {
+        "catch_up": "skip",
+        "max_attempts": 1
+      },
+      "check_alerts": {
+        "catch_up": "skip",
+        "timeout_seconds": 420
+      },
+      "gmail_poll": {
+        "catch_up": "skip",
+        "timeout_seconds": 600
+      },
+      "market_closure_detect": {
+        "catch_up": "skip",
+        "max_attempts": 1
+      },
+      "collect_tw_data": {
+        "max_catchup_seconds": 28800
+      },
+      "collect_us_data": {
+        "max_catchup_seconds": 28800
+      },
+      "daily_update": {
+        "max_catchup_seconds": 21600
+      },
+      "daily_update_intraday": {
+        "max_catchup_seconds": 21600
+      }
+    },
+    "ownership_contract": {
+      "shadow": "legacy owners execute; operations core records predictions only",
+      "canary": "only active_jobs execute in operations core; every other job remains legacy",
+      "active": "operations core owns every enabled system_crontab job",
+      "cutover_rule": "set active_jobs.<id>.activated_at before removing that exact legacy owner",
+      "rollback_rule": "remove active_jobs.<id>, reconcile legacy owner, then verify next legacy receipt"
+    }
   },
   "system_crontab": {
     "source_label": "Canonical system crontab spec",

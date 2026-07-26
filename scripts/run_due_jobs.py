@@ -46,6 +46,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from cron_mark_last_run import merge_last_run  # noqa: E402
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.ops.schedule_materialization import (  # noqa: E402
+    ScheduleConfigurationError,
+    load_schedule_policy,
+)
 
 # Host crontab expressions are in LOCAL time (macOS cron default). When we
 # evaluate "is this job due?" via croniter, we must use the same local tz
@@ -318,6 +322,19 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         return {"ok": False, "reason": "croniter_not_installed", "jobs": []}
 
     config = json.loads(CONFIG_PATH.read_text())
+    operations_core_policy = None
+    if "schedule_materialization" in config:
+        try:
+            operations_core_policy = load_schedule_policy(config)
+        except ScheduleConfigurationError as exc:
+            # Ownership ambiguity is fail-closed.  Running the legacy fan-out
+            # while the new ownership policy is invalid can double-fire jobs.
+            return {
+                "ok": False,
+                "reason": "schedule_materialization_invalid",
+                "detail": str(exc),
+                "jobs": [],
+            }
     items = (config.get("system_crontab") or {}).get("items") or []
     state = _load_last_run()
     now = _utc_now()
@@ -335,6 +352,19 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
         log_rel = item.get("log_path") or f"storage/logs/cron/{job_id}.log"
 
         if not job_id or not cron_expr or not wrapper:
+            continue
+        if (
+            operations_core_policy is not None
+            and operations_core_policy.owner_for(str(job_id)) == "operations_core"
+        ):
+            results.append(
+                {
+                    "job_id": job_id,
+                    "action": "skip",
+                    "reason": "operations_core_owner",
+                    "generation": operations_core_policy.generation,
+                }
+            )
             continue
         if job_id in SKIP_JOB_IDS:
             continue

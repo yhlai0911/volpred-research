@@ -74,7 +74,16 @@ fi
 build_volpred_block() {
   echo "$HEADER"
   jq -r '
+    def operations_core_owns($root; $id):
+      (($root.schedule_materialization.mode // "disabled") == "active")
+      or (
+        (($root.schedule_materialization.mode // "disabled") == "canary")
+        and (($root.schedule_materialization.active_jobs[$id] // null) != null)
+      );
+    . as $root
+    |
     .system_crontab.items[]
+    | select(operations_core_owns($root; .id) | not)
     | select(.host_crontab_managed != false)
     | select(.wrapper_script != null)
     | [.cron, .wrapper_script, (.log_path // ""), .id] | join("\u001f")
@@ -128,8 +137,17 @@ if [[ -n "$TARGET_ID" ]]; then
     }
   ')"
   TARGET_ENTRY="$(jq -r --arg id "$TARGET_ID" '
+      def operations_core_owns($root; $job_id):
+        (($root.schedule_materialization.mode // "disabled") == "active")
+        or (
+          (($root.schedule_materialization.mode // "disabled") == "canary")
+          and (($root.schedule_materialization.active_jobs[$job_id] // null) != null)
+        );
+      . as $root
+      |
       .system_crontab.items[]
       | select(.id == $id)
+      | select(operations_core_owns($root; .id) | not)
       | select(.host_crontab_managed != false)
       | select(.wrapper_script != null)
       | [.cron, .wrapper_script, (.log_path // ""), .id] | join("\u001f")

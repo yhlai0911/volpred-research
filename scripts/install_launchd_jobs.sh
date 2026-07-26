@@ -196,6 +196,7 @@ echo "[derive] reading $SCHEDULE_JSON ..."
 
 # Use jq to enumerate items, filter to host_crontab_managed != false
 LABELS=()
+DECOMMISSION_LABELS=()
 MATCHED=0
 while IFS= read -r item; do
     id=$(echo "$item" | jq -r '.id')
@@ -211,6 +212,15 @@ while IFS= read -r item; do
 
     configured_label=$(echo "$item" | jq -r '.launchagent_label // .launchd_label // empty')
     mechanism=$(echo "$item" | jq -r '.mechanism // empty')
+    operations_core_owned=$(echo "$item" | jq -r '._operations_core_owned')
+
+    if [[ "$operations_core_owned" == "true" ]]; then
+        label="${configured_label:-com.volpred.${id//_/-}}"
+        DECOMMISSION_LABELS+=("$label")
+        MATCHED=$((MATCHED + 1))
+        echo "[decommission] $id (operations-core owner; legacy label=$label)"
+        continue
+    fi
 
     # Default mode preserves the historical bulk migration behavior. Targeted
     # mode is the safe path for an explicit LaunchAgent owner: it may (and
@@ -243,7 +253,17 @@ while IFS= read -r item; do
     LABELS+=("$label")
     MATCHED=$((MATCHED + 1))
     echo "  $id  cron='$cron'  wrapper=$(basename "$wrapper")"
-done < <(jq -c '.system_crontab.items[]' "$SCHEDULE_JSON")
+done < <(jq -c '
+    def operations_core_owns($root; $id):
+      (($root.schedule_materialization.mode // "disabled") == "active")
+      or (
+        (($root.schedule_materialization.mode // "disabled") == "canary")
+        and (($root.schedule_materialization.active_jobs[$id] // null) != null)
+      );
+    . as $root
+    | .system_crontab.items[]
+    | . + {"_operations_core_owned": operations_core_owns($root; .id)}
+  ' "$SCHEDULE_JSON")
 
 if [[ -n "$TARGET_ID" && "$MATCHED" -ne 1 ]]; then
     echo "[ERROR] targeted job not found exactly once: $TARGET_ID (matched=$MATCHED)" >&2
@@ -251,13 +271,21 @@ if [[ -n "$TARGET_ID" && "$MATCHED" -ne 1 ]]; then
 fi
 
 if [[ "$RENDER_ONLY" -eq 1 ]]; then
-    echo "[render-only] wrote ${#LABELS[@]} plist(s); launchctl unchanged"
+    echo "[render-only] wrote ${#LABELS[@]} plist(s); would decommission ${#DECOMMISSION_LABELS[@]} label(s); launchctl unchanged"
     exit 0
 fi
 
 echo ""
 echo "[bootstrap] (re)loading ${#LABELS[@]} plists into launchd gui/$USER_UID domain..."
 echo ""
+
+for label in "${DECOMMISSION_LABELS[@]}"; do
+    if launchctl bootout "gui/$USER_UID/$label" 2>/dev/null; then
+        echo "[bootout] $label OK (operations-core owner)"
+    else
+        echo "[bootout] $label already absent (operations-core owner)"
+    fi
+done
 
 for label in "${LABELS[@]}"; do
     plist="$LAUNCH_AGENTS_DIR/${label}.plist"
