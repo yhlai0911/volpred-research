@@ -43403,7 +43403,7 @@
     "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:lazypack-mile_7c894f46-r2` — declared_outputs_not_yet_deliverable (namespace=compute_queue, first_seen=2026-07-26T11:00:57.105966+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "reap_orphan_deliverables_held_ttl",
     "created_at": "2026-07-26T16:01:21.154249+00:00",
     "payload": {
@@ -43420,7 +43420,34 @@
     },
     "created_by": "reap_orphan_deliverables",
     "diagnosis": "ROOT CAUSE 已定位（未 claim，留給有測試環境的一班做正解，不在 hourly 內急改 reaper 內部狀態）：job lazypack-mile_7c894f46-r2 status=failed、partial_delivered（只交付 plan.json，delivery_commit 7e18502e5），其 output_paths 仍宣告 panels/panel_*.png 但該 run 失敗、panels/ 為空且永不填滿。後續 run r4 已成功產圖、且文章 mile_7c894f46（野火煙霧壓境那天…）status=published(2026-07-26T11:00)。故 r2 的 phantom PNG 路徑本來就不該進版控。reaper 之所以持續 held：failed-job『nothing produced』skip(reap_orphan_deliverables.py:547) 只在 if not exact 分支觸發，而 plan.json 存在使 exact 非空 → 走到 pending/held 邏輯，把不存在的 PNG 以 declared_outputs_not_yet_deliverable held(:573-579)。",
-    "recommended_fix": "正解＝reaper edge-case 修補（WS platform_ops lane，需測試）：對 status=failed 的 job，其『已 partial-delivered 但剩餘 declared outputs 從未產出且 producer 已非零退出』的 phantom 路徑，比照 :547 的 nothing-produced 語意不再 held（維持檔頂不變量：真實存在卻被政策拒收的才 held）。或提供 compute_queue delivery-resolve/supersede CLI 讓 superseded 的 failed run 標記關閉。禁刪檔（此處無檔可刪，panels/ 為空）。"
+    "recommended_fix": "正解＝reaper edge-case 修補（WS platform_ops lane，需測試）：對 status=failed 的 job，其『已 partial-delivered 但剩餘 declared outputs 從未產出且 producer 已非零退出』的 phantom 路徑，比照 :547 的 nothing-produced 語意不再 held（維持檔頂不變量：真實存在卻被政策拒收的才 held）。或提供 compute_queue delivery-resolve/supersede CLI 讓 superseded 的 failed run 標記關閉。禁刪檔（此處無檔可刪，panels/ 為空）。",
+    "status_history": [
+      {
+        "ts": "2026-07-26T23:39:10.952820+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T23:39:11.173353+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T23:53:21.381445+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-26T23:39:11.173339+00:00",
+    "output_paths": [
+      "scripts/reap_orphan_deliverables.py",
+      "scripts/tests/test_orphan_reaper.py"
+    ],
+    "completed_at": "2026-07-26T23:53:21.381422+00:00",
+    "result": "root_cause=failed partial-delivery receipts with one delivered file bypassed the nothing-produced branch, so nonexistent declared tails stayed held forever; repair_commit=de951612509110a7bfcc7e976beb38e699e8c069; verification=27 focused tests passed on merged main, dual review PASS, live r2 dry-run candidates=[] held=[]; status=root_cause_fixed_and_verified"
   },
   {
     "id": "K1443_article_general",
