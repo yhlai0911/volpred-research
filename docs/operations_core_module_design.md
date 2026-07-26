@@ -1693,10 +1693,17 @@ inactive；standing convergence為零mismatch。Manual rehearsal evidence gate�
 Primary／standby process receipt的implementation identity必須涵蓋實際載入的
 Operations Core，不可只雜湊operator入口。Canonical manifest以repo-relative path排序，
 包含`scripts/rehearse_primary_authority_outage.py`與
-`src/volpred/ops/**/*.py`全部Python source；每檔先做SHA-256，再對canonical manifest做
-aggregate SHA-256。Verifier仍要求兩端aggregate exact-match，並新增
+`src/volpred/ops/**/*.py`全部Python source、`pyproject.toml`、`uv.lock`，另加入實際
+Python implementation／version與OpenSSL version的canonical runtime identity；各項先做
+SHA-256，再對canonical manifest做aggregate SHA-256。Verifier仍要求兩端aggregate
+exact-match，並新增
 `authority_key == derive(rehearsal_id)`，避免edited receipt把正式effect-family key包成
 隔離演練。
+
+Physical machine identity在macOS必須來自`IOPlatformUUID`後的one-way SHA-256，
+receipt不可保存raw hardware UUID。`uuid.getnode()`不是硬體identity contract：多網卡
+與介面列舉差異會讓同一台Mac跨process選到不同node，造成distinct-host假綠；穩定anchor
+不可讀時必須在任何publisher／authority remote read前fail closed。
 
 相鄰authority suites共31 passed；本切片沒有remote acquire、effect或provider call。
 Receipt identity false-positive根因為`root_cause_fixed_and_verified`，但兩台實體Mac

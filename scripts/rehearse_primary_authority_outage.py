@@ -17,8 +17,11 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import re
 import socket
+import ssl
+import subprocess
 import sys
 import time
 from collections.abc import Callable
@@ -27,7 +30,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from threading import RLock
 from typing import Protocol
-from uuid import getnode, uuid4
+from uuid import uuid4
 
 from volpred.ops.authority import (
     AuthorityInactive,
@@ -1197,21 +1200,42 @@ def _implementation_sha256() -> str:
 
 
 def _implementation_manifest() -> dict[str, str]:
-    """Bind cross-host evidence to every Operations Core Python source."""
+    """Bind cross-host evidence to source, dependency locks, and runtime."""
 
     repo_root = Path(__file__).resolve().parents[1]
     source_root = repo_root / "src" / "volpred" / "ops"
-    paths = [Path(__file__).resolve(), *sorted(source_root.rglob("*.py"))]
-    if not source_root.is_dir() or len(paths) == 1:
+    paths = [
+        repo_root / "pyproject.toml",
+        Path(__file__).resolve(),
+        *sorted(source_root.rglob("*.py")),
+        repo_root / "uv.lock",
+    ]
+    if (
+        not source_root.is_dir()
+        or len(paths) == 3
+        or any(not path.is_file() for path in paths)
+    ):
         raise RuntimeError(
-            "Operations Core source tree is unavailable for receipt identity"
+            "Operations Core source or dependency lock is unavailable "
+            "for receipt identity"
         )
-    return {
+    manifest = {
         path.relative_to(repo_root).as_posix(): hashlib.sha256(
             path.read_bytes()
         ).hexdigest()
         for path in paths
     }
+    runtime = json.dumps(
+        {
+            "openssl_version": ssl.OPENSSL_VERSION,
+            "python_implementation": platform.python_implementation(),
+            "python_version": platform.python_version(),
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    manifest["runtime/python-ssl.json"] = hashlib.sha256(runtime).hexdigest()
+    return manifest
 
 
 def _verify_implementation_unchanged(expected_sha256: str) -> None:
@@ -1225,9 +1249,48 @@ def _verify_implementation_unchanged(expected_sha256: str) -> None:
 
 def _machine_identity() -> tuple[str, str]:
     host_id = socket.gethostname().strip() or "unknown-host"
-    material = f"{host_id}\0{getnode():012x}".encode("utf-8")
-    fingerprint = hashlib.sha256(material).hexdigest()[:24]
+    anchor = _physical_machine_anchor()
+    fingerprint = hashlib.sha256(anchor.encode("utf-8")).hexdigest()[:24]
     return host_id, fingerprint
+
+
+def _physical_machine_anchor() -> str:
+    """Read a stable hardware identity without exposing it in receipts."""
+
+    if sys.platform == "darwin":
+        try:
+            observed = subprocess.run(
+                [
+                    "/usr/sbin/ioreg",
+                    "-rd1",
+                    "-c",
+                    "IOPlatformExpertDevice",
+                ],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            raise RuntimeError(
+                "physical Mac identity is unavailable"
+            ) from exc
+        match = re.search(
+            r'"IOPlatformUUID"\s*=\s*"([0-9A-Fa-f-]{36})"',
+            observed.stdout,
+        )
+        if observed.returncode == 0 and match is not None:
+            return f"macos-ioplatformuuid:{match.group(1).lower()}"
+        raise RuntimeError("physical Mac identity is unavailable")
+
+    for path in (Path("/etc/machine-id"), Path("/var/lib/dbus/machine-id")):
+        try:
+            value = path.read_text(encoding="utf-8").strip()
+        except OSError:
+            continue  # silent-ok: try the second canonical machine-id path.
+        if re.fullmatch(r"[0-9A-Fa-f]{32}", value):
+            return f"linux-machine-id:{value.lower()}"
+    raise RuntimeError("stable physical machine identity is unavailable")
 
 
 def _load_primary_receipt(path: Path) -> PrimaryProcessReceipt:

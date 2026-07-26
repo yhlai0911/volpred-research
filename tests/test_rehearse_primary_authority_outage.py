@@ -670,10 +670,13 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
         )
 
 
-def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
+def test_pair_identity_binds_safe_key_sources_and_runtime_dependencies(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     manifest = _implementation_manifest()
 
     assert {
+        "pyproject.toml",
         "scripts/rehearse_primary_authority_outage.py",
         "src/volpred/ops/authority/__init__.py",
         "src/volpred/ops/authority/keepalive.py",
@@ -681,9 +684,21 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
         "src/volpred/ops/authority/supabase.py",
         "src/volpred/ops/delivery/owned_publisher_article.py",
         "src/volpred/ops/delivery/supabase_rpc.py",
+        "runtime/python-ssl.json",
+        "uv.lock",
     } <= manifest.keys()
     assert all(len(digest) == 64 for digest in manifest.values())
     assert len(_implementation_sha256()) == 64
+    runtime_digest = manifest["runtime/python-ssl.json"]
+    monkeypatch.setattr(
+        outage_operator.platform,
+        "python_version",
+        lambda: "0.0-runtime-drift",
+    )
+    assert (
+        _implementation_manifest()["runtime/python-ssl.json"]
+        != runtime_digest
+    )
 
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
@@ -738,6 +753,49 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
     assert primary.authority_key == _authority_key_for_rehearsal(
         primary.rehearsal_id
     )
+
+
+def test_machine_identity_ignores_network_interface_drift(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        outage_operator,
+        "_physical_machine_anchor",
+        lambda: "platform-uuid-a",
+        raising=False,
+    )
+    monkeypatch.setattr(outage_operator.socket, "gethostname", lambda: "Mac")
+    monkeypatch.setattr(outage_operator, "getnode", lambda: 1, raising=False)
+    first = outage_operator._machine_identity()
+    monkeypatch.setattr(outage_operator, "getnode", lambda: 2, raising=False)
+
+    assert outage_operator._machine_identity() == first
+    assert first[0] == "Mac"
+    monkeypatch.setattr(
+        outage_operator.socket,
+        "gethostname",
+        lambda: "renamed-mac",
+    )
+    assert outage_operator._machine_identity()[1] == first[1]
+
+
+def test_machine_identity_fails_closed_without_stable_anchor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(outage_operator.sys, "platform", "darwin")
+    monkeypatch.setattr(
+        outage_operator.subprocess,
+        "run",
+        lambda *_args, **_kwargs: outage_operator.subprocess.CompletedProcess(
+            args=[],
+            returncode=0,
+            stdout="",
+            stderr="",
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="physical Mac identity"):
+        outage_operator._physical_machine_anchor()
 
 
 @pytest.mark.parametrize("role", ["primary", "standby"])

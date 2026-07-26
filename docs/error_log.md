@@ -2662,3 +2662,39 @@ publisher=`operations_core/8`、安全隔離key及implementation
 acquire或provider call。此standby sequencing／identity根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac仍無可操作session，physical pair與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Cross-host implementation identity漏掉dependency lock與實際runtime
+
+**證據化症狀與根因層級**：physical pair的`implementation_sha256`雖已涵蓋operator與
+`src/volpred/ops/**/*.py`，但兩台Mac若source完全相同、`uv.lock`／`pyproject.toml`
+不同，或實際Python／OpenSSL runtime漂移，readiness仍會判成相同implementation。
+原回歸只assert Python source paths，重現測試加入lock與runtime identity後先紅燈。
+根因是implementation boundary仍只等同source tree，不是Supabase lease CAS。
+
+**底層修復、回歸與狀態**：canonical manifest現同時雜湊全部Operations Core Python
+source、`pyproject.toml`、`uv.lock`，並把實際Python implementation／version與OpenSSL
+version序列化後納入aggregate；任一端dependency spec或stdlib HTTPS runtime不同，
+`verify-readiness`都會在authority RPC前拒絕。Failure injection改寫runtime version
+後digest必須漂移；相鄰authority suite **44 passed**，`py_compile`與diff gate通過；
+Ruff在本repo環境未安裝，未以缺工具宣稱lint通過。本false-green根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍無可操作session，physical pair與
+operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Physical host fingerprint誤用network node，同一Mac可被當成兩台
+
+**證據化症狀與根因層級**：同樣`host_id="Mac"`的既有readiness保存fingerprint
+`32a72d…`，本輪第一次readiness卻變成`8a336d…`；緊接著另一個process的
+`uuid.getnode()`又回不同node。原實作把hostname與`getnode()`雜湊，網路介面選擇漂移
+就足以讓同一台實體Mac通過`primary_fingerprint != standby_fingerprint`。根因是把
+network-interface identity誤當physical-machine identity，不是pair比較條件本身。
+
+**底層修復、回歸與live回讀**：macOS現只從`/usr/sbin/ioreg`讀`IOPlatformUUID`，
+receipt僅保存其SHA-256前綴、不暴露raw UUID；讀不到穩定hardware anchor就fail closed。
+Failure injection在同一platform anchor下切換兩個network node，fingerprint必須不變。
+相鄰authority suite **44 passed**，`py_compile`與diff gate通過。Production只讀preflight
+`physical-anchor-preflight-20260726-0925`已原子落檔並exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`及
+implementation=`ef95ccf23a39a3fa4b9c724214ff07afc4d1fc5d7b3f0cc5c1d5c37a4fa192b7`；
+沒有authority acquire或provider call。本physical-identity false-green根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍無可操作session，physical pair與
+operations-core umbrella維持 **`contained`**。

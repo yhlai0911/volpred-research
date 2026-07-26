@@ -323,7 +323,10 @@
 > failure injection 已通過；尚未取得兩台實體 Mac 的 production receipt pair，所以
 > 這只是制度化演練路徑，不能把 umbrella 升為 `root_cause_fixed_and_verified`。
 > 正式角色啟動前另強制一個只讀 readiness handshake：兩端先各自回讀
-> publisher owner、machine fingerprint與完整 Operations Core source aggregate，
+> publisher owner、machine fingerprint與完整 Operations Core implementation
+> aggregate；identity除全部Python source外，也綁定`pyproject.toml`、`uv.lock`與
+> 實際Python／OpenSSL runtime，避免兩端source相同但dependency或stdlib transport
+> 不同仍假綠，
 > `verify-readiness`只接受 distinct hosts、相同 rehearsal identity／code／publisher
 > fence，並產生同一份 paired readiness receipt。`primary`與`standby`都必須在任何
 > authority RPC前驗本機符合指定角色且source未漂移，避免先改live lease、最後配對時
@@ -337,6 +340,8 @@
 > fail-closed counters、publisher fence與lease window，再從receipt直接導出exact
 > expected epoch。兩端authority holder ref也由shared rehearsal、role與host
 > fingerprint內部導出，caller不能自行填入與physical identity脫鉤的holder。
+> macOS machine fingerprint只雜湊穩定的`IOPlatformUUID`，不再使用會隨網路介面
+> 選擇漂移的`uuid.getnode()`；硬體anchor取不到就fail closed，receipt不保存原始UUID。
 >
 > Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
 > epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate
