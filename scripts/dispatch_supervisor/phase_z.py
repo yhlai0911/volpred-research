@@ -73,6 +73,7 @@ from volpred.ops.foreign_incident import (
     upsert_incident,
 )
 from volpred.ops.machine_churn import classify_machine_churn
+from volpred.ops.issue_tracker_sync import settle_completed_task_issues
 from volpred.ops.next_tasks import backfill_ci_repair_commit
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
@@ -3504,6 +3505,7 @@ def run_phase_z(
         _consume_pre_fire_snapshot(repo_root, runner)  # settled: the fire's work landed
         LOG.info("phase_z: committed — %s", out.splitlines()[-1] if out else "(no output)")
         ci_repair_tasks_backfilled: list[str] = []
+        issue_tasks_closed: list[dict[str, Any]] = []
         if claim_owners:
             try:
                 ci_repair_tasks_backfilled = backfill_ci_repair_commit(
@@ -3513,6 +3515,18 @@ def run_phase_z(
                 )
             except Exception as exc:  # noqa: BLE001 — commit already landed; receipt repair is retryable
                 LOG.warning("phase_z: CI repair commit receipt backfill failed: %s", exc)
+            try:
+                issue_tasks_closed = settle_completed_task_issues(
+                    path=repo_root / "storage" / "next_tasks.json",
+                    claim_owners=claim_owners,
+                    commit_sha=committed_sha,
+                    repo_root=repo_root,
+                )
+            except Exception as exc:  # noqa: BLE001 — commit already landed; GitHub sync is retryable
+                LOG.warning(
+                    "phase_z: linked issue post-commit settlement failed: %s",
+                    exc,
+                )
         tests = _post_commit_test_gate(
             repo_root, commit_sha=committed_sha, hhmm=hhmm, runner=runner,
             test_runner=test_runner or subprocess.run,
@@ -3561,6 +3575,7 @@ def run_phase_z(
                 "incident": incident,
                 "foreign_ownership": foreign_ownership,
                 "ci_repair_tasks_backfilled": ci_repair_tasks_backfilled,
+                "issue_tasks_closed": issue_tasks_closed,
                 **({"isolation_residue": isolation_residue} if isolation_residue else {}),
                 **gate_extra}
     # Non-zero commit: distinguish the benign "nothing to commit" (everything

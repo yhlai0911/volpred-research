@@ -58,6 +58,11 @@ from volpred.ops.next_tasks import (  # noqa: E402
     normalize_task_priorities,
     write_tasks_to_handle,
 )
+from volpred.ops.issue_tracker_sync import (  # noqa: E402
+    assign_issue,
+    issue_number,
+    normalize_issue_ref,
+)
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops import dreaming_revalidate  # noqa: E402
 from volpred.ops.task_pool_selection import (  # noqa: E402
@@ -575,7 +580,25 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
         task["claimed_at"] = _now()
         task["claim_session_id"] = session
         _record_status_history(task, frm=prev, to="claimed", by=args.owner)
-        return {"ok": True, "task_id": args.id, "owner": args.owner, "session": session, "status": "claimed"}
+        result = {
+            "ok": True,
+            "task_id": args.id,
+            "owner": args.owner,
+            "session": session,
+            "status": "claimed",
+        }
+        issue_ref = task.get("issue_ref")
+    if issue_ref is not None:
+        try:
+            result["issue_tracker_sync"] = assign_issue(issue_ref)
+        except Exception as exc:  # noqa: BLE001 — GitHub is not the claim authority
+            result["issue_tracker_sync"] = {
+                "ok": False,
+                "action": "assign",
+                "reason": "unexpected_sync_error",
+                "detail": f"{type(exc).__name__}: {exc}",
+            }
+    return result
 
 
 def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
@@ -803,6 +826,30 @@ def _complete_locked(args: argparse.Namespace) -> tuple[dict[str, Any], dict[str
         if args.status == "succeeded":
             effect = _apply_codex_review_followup_fail(tasks, task, result_text)
         out = {"ok": True, "task_id": args.id, "status": args.status}
+        issue_ref = task.get("issue_ref")
+        if args.status == "succeeded" and issue_ref is not None:
+            number = issue_number(issue_ref)
+            if number is None:
+                out["issue_tracker_sync"] = {
+                    "ok": False,
+                    "action": "defer_close_until_commit",
+                    "reason": "invalid_issue_ref",
+                }
+            else:
+                canonical_ref = normalize_issue_ref(issue_ref)
+                task["issue_ref"] = canonical_ref
+                task["issue_close_pending"] = {
+                    "issue_ref": canonical_ref,
+                    "task_id": args.id,
+                    "completion_owner": completion_owner,
+                    "completed_at": task["completed_at"],
+                }
+                out["issue_tracker_sync"] = {
+                    "ok": True,
+                    "action": "defer_close_until_commit",
+                    "issue_ref": canonical_ref,
+                    "issue_number": number,
+                }
         if effect:
             out["review_followup_effect"] = effect
         # Stamped inside the same LOCK_EX that wrote the terminal status, so the

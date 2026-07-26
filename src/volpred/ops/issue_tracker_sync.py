@@ -7,8 +7,15 @@ local dispatch.
 """
 from __future__ import annotations
 
+import fcntl
+import json
+import os
 import re
-from typing import Any
+import shutil
+import subprocess
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Callable
 
 
 _SHORT_ISSUE_REF = re.compile(r"^#?([1-9]\d*)$")
@@ -37,4 +44,375 @@ def normalize_issue_ref(value: Any) -> str:
     return f"#{number}"
 
 
-__all__ = ["issue_number", "normalize_issue_ref"]
+def _resolve_gh_binary(explicit: str | None = None) -> str | None:
+    """Resolve ``gh`` in interactive and stripped cron/Codex environments."""
+    if explicit:
+        return explicit
+    configured = os.environ.get("GH_BIN")
+    if configured:
+        return configured
+    discovered = shutil.which("gh")
+    if discovered:
+        return discovered
+    homebrew = Path("/opt/homebrew/bin/gh")
+    return str(homebrew) if homebrew.is_file() else None
+
+
+def assign_issue(
+    issue_ref: Any,
+    *,
+    repo_root: str | Path | None = None,
+    gh_binary: str | None = None,
+    runner: Callable[..., Any] = subprocess.run,
+) -> dict[str, Any]:
+    """Best-effort assignee sync; never raises into the local claim path."""
+    number = issue_number(issue_ref)
+    if number is None:
+        return {
+            "ok": False,
+            "action": "assign",
+            "reason": "invalid_issue_ref",
+        }
+    canonical = f"#{number}"
+    binary = _resolve_gh_binary(gh_binary)
+    if binary is None:
+        return {
+            "ok": False,
+            "action": "assign",
+            "issue_ref": canonical,
+            "issue_number": number,
+            "reason": "gh_unavailable",
+        }
+    try:
+        completed = runner(
+            [
+                binary,
+                "issue",
+                "edit",
+                str(number),
+                "--add-assignee",
+                "@me",
+            ],
+            cwd=Path(repo_root).resolve() if repo_root is not None else None,
+            capture_output=True,
+            text=True,
+            check=False,
+            shell=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {
+            "ok": False,
+            "action": "assign",
+            "issue_ref": canonical,
+            "issue_number": number,
+            "reason": "gh_execution_failed",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    if completed.returncode != 0:
+        return {
+            "ok": False,
+            "action": "assign",
+            "issue_ref": canonical,
+            "issue_number": number,
+            "reason": "gh_command_failed",
+            "detail": str(completed.stderr or "").strip()[-500:],
+        }
+    return {
+        "ok": True,
+        "action": "assign",
+        "issue_ref": canonical,
+        "issue_number": number,
+    }
+
+
+_GIT_OBJECT_ID = re.compile(r"^(?:[0-9a-f]{40}|[0-9a-f]{64})$")
+
+
+def close_issue(
+    *,
+    issue_ref: Any,
+    commit_sha: str,
+    task_id: str,
+    summary: str,
+    repo_root: str | Path | None = None,
+    gh_binary: str | None = None,
+    runner: Callable[..., Any] = subprocess.run,
+) -> dict[str, Any]:
+    """Close one linked issue with a commit-bound, task-stable comment."""
+    number = issue_number(issue_ref)
+    if number is None:
+        return {"ok": False, "action": "close", "reason": "invalid_issue_ref"}
+    if _GIT_OBJECT_ID.fullmatch(str(commit_sha or "")) is None:
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "invalid_commit_sha",
+        }
+    binary = _resolve_gh_binary(gh_binary)
+    if binary is None:
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "gh_unavailable",
+        }
+    bounded_summary = " ".join(str(summary or "").split())[:500]
+    marker = f"volpred-task:{task_id}:commit:{commit_sha}"
+    comment = (
+        f"Runtime task `{task_id}` completed in commit `{commit_sha}`."
+        + (f"\n\n{bounded_summary}" if bounded_summary else "")
+        + f"\n\n<!-- {marker} -->"
+    )
+    try:
+        observed = runner(
+            [
+                binary,
+                "issue",
+                "view",
+                str(number),
+                "--json",
+                "state,comments",
+            ],
+            cwd=Path(repo_root).resolve() if repo_root is not None else None,
+            capture_output=True,
+            text=True,
+            check=False,
+            shell=False,
+            timeout=30,
+        )
+        if observed.returncode != 0:
+            return {
+                "ok": False,
+                "action": "close",
+                "issue_ref": f"#{number}",
+                "issue_number": number,
+                "reason": "gh_readback_failed",
+                "detail": str(observed.stderr or "").strip()[-500:],
+            }
+        try:
+            evidence = json.loads(observed.stdout)
+            state = str(evidence["state"]).upper()
+            comments = evidence.get("comments", [])
+            marker_seen = any(
+                marker in str(item.get("body") or "")
+                for item in comments
+                if isinstance(item, dict)
+            )
+        except (KeyError, TypeError, json.JSONDecodeError) as exc:
+            return {
+                "ok": False,
+                "action": "close",
+                "issue_ref": f"#{number}",
+                "issue_number": number,
+                "reason": "gh_readback_invalid",
+                "detail": f"{type(exc).__name__}: {exc}",
+            }
+        if state == "CLOSED":
+            if marker_seen:
+                return {
+                    "ok": True,
+                    "action": "close",
+                    "issue_ref": f"#{number}",
+                    "issue_number": number,
+                    "already_closed": True,
+                }
+            return {
+                "ok": False,
+                "action": "close",
+                "issue_ref": f"#{number}",
+                "issue_number": number,
+                "reason": "issue_closed_without_receipt",
+            }
+        if marker_seen:
+            return {
+                "ok": False,
+                "action": "close",
+                "issue_ref": f"#{number}",
+                "issue_number": number,
+                "reason": "issue_reopened_after_receipt",
+            }
+        if state != "OPEN":
+            return {
+                "ok": False,
+                "action": "close",
+                "issue_ref": f"#{number}",
+                "issue_number": number,
+                "reason": "unexpected_issue_state",
+                "detail": state,
+            }
+        completed = runner(
+            [
+                binary,
+                "issue",
+                "close",
+                str(number),
+                "--comment",
+                comment,
+            ],
+            cwd=Path(repo_root).resolve() if repo_root is not None else None,
+            capture_output=True,
+            text=True,
+            check=False,
+            shell=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "gh_execution_failed",
+            "detail": f"{type(exc).__name__}: {exc}",
+        }
+    if completed.returncode != 0:
+        return {
+            "ok": False,
+            "action": "close",
+            "issue_ref": f"#{number}",
+            "issue_number": number,
+            "reason": "gh_command_failed",
+            "detail": str(completed.stderr or "").strip()[-500:],
+        }
+    return {
+        "ok": True,
+        "action": "close",
+        "issue_ref": f"#{number}",
+        "issue_number": number,
+        "already_closed": False,
+    }
+
+
+def settle_completed_task_issues(
+    *,
+    path: str | Path,
+    claim_owners: set[str] | list[str] | tuple[str, ...],
+    commit_sha: str,
+    repo_root: str | Path | None = None,
+    closer: Callable[..., dict[str, Any]] = close_issue,
+) -> list[dict[str, Any]]:
+    """Close commit-bound issues, then durably acknowledge successful closes.
+
+    GitHub IO happens outside the queue lock.  The second locked phase only
+    acknowledges a close if the terminal row and its pending-close receipt are
+    byte-for-byte the candidate observed before the external call.
+    """
+    sha = str(commit_sha or "").strip().lower()
+    if _GIT_OBJECT_ID.fullmatch(sha) is None:
+        raise ValueError("commit_sha must be a full Git object id")
+    owners = {str(owner).strip() for owner in claim_owners if str(owner).strip()}
+    if not owners:
+        return []
+    queue = Path(path)
+    if not queue.exists():
+        return []
+
+    with queue.open("r", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+        try:
+            payload = json.load(handle)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    if not isinstance(payload, list):
+        raise ValueError("next_tasks.json root is not a list")
+
+    candidates: list[dict[str, Any]] = []
+    for task in payload:
+        if not isinstance(task, dict) or task.get("status") != "succeeded":
+            continue
+        pending = task.get("issue_close_pending")
+        if not isinstance(pending, dict):
+            continue
+        owner = str(pending.get("completion_owner") or "")
+        if owner not in owners:
+            continue
+        task_id = str(task.get("id") or "")
+        issue_ref = pending.get("issue_ref")
+        if not task_id or issue_number(issue_ref) is None:
+            continue
+        candidates.append(
+            {
+                "task_id": task_id,
+                "issue_ref": normalize_issue_ref(issue_ref),
+                "pending": pending,
+                "summary": str(task.get("result") or ""),
+            }
+        )
+
+    successful: list[dict[str, Any]] = []
+    for candidate in candidates:
+        result = closer(
+            issue_ref=candidate["issue_ref"],
+            commit_sha=sha,
+            task_id=candidate["task_id"],
+            summary=candidate["summary"],
+            repo_root=Path(repo_root) if repo_root is not None else None,
+        )
+        if result.get("ok"):
+            successful.append(
+                {
+                    "task_id": candidate["task_id"],
+                    "issue_ref": candidate["issue_ref"],
+                    "issue_number": issue_number(candidate["issue_ref"]),
+                    "commit_sha": sha,
+                    "pending": candidate["pending"],
+                }
+            )
+    if not successful:
+        return []
+
+    from volpred.ops.next_tasks import write_tasks_to_handle
+
+    acknowledged: list[dict[str, Any]] = []
+    with queue.open("r+", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            current = json.load(handle)
+            if not isinstance(current, list):
+                raise ValueError("next_tasks.json root is not a list")
+            by_id = {
+                str(task.get("id")): task
+                for task in current
+                if isinstance(task, dict) and task.get("id")
+            }
+            closed_at = datetime.now(timezone.utc).isoformat()
+            for receipt in successful:
+                task = by_id.get(receipt["task_id"])
+                if (
+                    task is None
+                    or task.get("status") != "succeeded"
+                    or task.get("issue_close_pending") != receipt["pending"]
+                ):
+                    continue
+                task.pop("issue_close_pending", None)
+                task["issue_closed_at"] = closed_at
+                task["issue_closed_commit"] = sha
+                acknowledged.append(
+                    {
+                        key: receipt[key]
+                        for key in (
+                            "task_id",
+                            "issue_ref",
+                            "issue_number",
+                            "commit_sha",
+                        )
+                    }
+                )
+            if acknowledged:
+                write_tasks_to_handle(handle, current)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    return acknowledged
+
+
+__all__ = [
+    "assign_issue",
+    "close_issue",
+    "issue_number",
+    "normalize_issue_ref",
+    "settle_completed_task_issues",
+]

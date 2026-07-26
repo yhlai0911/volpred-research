@@ -853,16 +853,26 @@ def cmd_commit(args: argparse.Namespace) -> int:
                         src = str(ROOT / "src")
                         if src not in sys.path:
                             sys.path.insert(0, src)
+                        from volpred.ops.issue_tracker_sync import (
+                            settle_completed_task_issues,
+                        )
                         from volpred.ops.next_tasks import backfill_ci_repair_commit
 
+                        commit_sha = head.stdout.strip()
                         backfill_ci_repair_commit(
                             path=repo / "storage" / "next_tasks.json",
                             claim_owners={args.actor},
-                            commit_sha=head.stdout.strip(),
+                            commit_sha=commit_sha,
+                        )
+                        settle_completed_task_issues(
+                            path=repo / "storage" / "next_tasks.json",
+                            claim_owners={args.actor},
+                            commit_sha=commit_sha,
+                            repo_root=repo,
                         )
                 except Exception as exc:  # noqa: BLE001 — commit is durable; later PHASE-Z can retry receipt state
                     print(
-                        f"[git-writer-lock] warning: CI repair receipt backfill failed: {exc}",
+                        f"[git-writer-lock] warning: post-commit task settlement failed: {exc}",
                         file=sys.stderr,
                     )
             return int(commit.returncode)

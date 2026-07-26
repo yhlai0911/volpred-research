@@ -130,6 +130,76 @@ def test_exact_path_commit_backfills_owned_ci_repair_receipt(tmp_path: Path) -> 
     assert task["repair_commit_source"] == "post_commit_receipt"
 
 
+def test_exact_path_commit_closes_owned_linked_issue_with_real_sha(
+    tmp_path: Path, monkeypatch
+) -> None:
+    repo = _repo(tmp_path)
+    owner = "codex-vscode"
+    queue = repo / "storage" / "next_tasks.json"
+    queue.parent.mkdir()
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "linked-ticket",
+                    "task_type": "platform_ops",
+                    "priority": 2,
+                    "status": "succeeded",
+                    "result": "implemented acceptance criteria",
+                    "issue_ref": "#37",
+                    "issue_close_pending": {
+                        "issue_ref": "#37",
+                        "task_id": "linked-ticket",
+                        "completion_owner": owner,
+                        "completed_at": "2026-07-26T12:00:00+00:00",
+                    },
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    _run(repo, "git", "add", "storage/next_tasks.json")
+    _run(repo, "git", "commit", "-qm", "seed linked task")
+    (repo / "implementation.py").write_text("DONE = True\n", encoding="utf-8")
+    gh_log = tmp_path / "gh.log"
+    fake_gh = tmp_path / "gh"
+    fake_gh.write_text(
+        "#!/bin/sh\n"
+        "printf '%s\\n' \"$@\" >> \"$GH_LOG\"\n"
+        "if [ \"$1\" = issue ] && [ \"$2\" = view ]; then\n"
+        "  printf '%s\\n' '{\"state\":\"OPEN\",\"comments\":[]}'\n"
+        "fi\n",
+        encoding="utf-8",
+    )
+    fake_gh.chmod(0o755)
+    monkeypatch.setenv("GH_BIN", str(fake_gh))
+    monkeypatch.setenv("GH_LOG", str(gh_log))
+
+    completed = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        owner,
+        "--message",
+        "implement linked ticket",
+        "--",
+        "implementation.py",
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    task = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert task["issue_closed_commit"] == head
+    assert task["issue_closed_at"]
+    assert "issue_close_pending" not in task
+    gh_args = gh_log.read_text(encoding="utf-8")
+    assert "issue\nclose\n37\n--comment\n" in gh_args
+    assert head in gh_args
+    assert "volpred-task:linked-ticket:commit:" in gh_args
+
+
 def test_main_and_linked_worktree_share_one_stable_lock_inode(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     worktree = tmp_path / "linked"

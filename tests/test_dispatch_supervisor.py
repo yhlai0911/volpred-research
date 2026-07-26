@@ -478,12 +478,22 @@ def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
     (tmp_path / "experiments").mkdir()
     (tmp_path / "experiments" / "repair.py").write_text("FIXED = True\n", encoding="utf-8")
     calls: list[dict] = []
+    issue_calls: list[dict] = []
 
     def fake_backfill(**kwargs):
         calls.append(kwargs)
         return ["ci-red-123"]
 
+    def fake_issue_settlement(**kwargs):
+        issue_calls.append(kwargs)
+        return [{"task_id": "linked-ticket", "issue_ref": "#37"}]
+
     monkeypatch.setattr(phase_z, "backfill_ci_repair_commit", fake_backfill)
+    monkeypatch.setattr(
+        phase_z,
+        "settle_completed_task_issues",
+        fake_issue_settlement,
+    )
     owner = "hourly-slot-1-job-ci"
     out = phase_z.run_phase_z(
         repo_root=tmp_path,
@@ -503,6 +513,23 @@ def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
             capture_output=True, text=True, check=True,
         ).stdout.strip(),
     }]
+    assert out["issue_tasks_closed"] == [
+        {"task_id": "linked-ticket", "issue_ref": "#37"}
+    ]
+    assert issue_calls == [
+        {
+            "path": tmp_path / "storage" / "next_tasks.json",
+            "claim_owners": {owner},
+            "commit_sha": subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=tmp_path,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip(),
+            "repo_root": tmp_path,
+        }
+    ]
 
 
 def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:

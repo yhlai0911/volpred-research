@@ -5,7 +5,10 @@ from __future__ import annotations
 import json
 
 import pytest
+from click.testing import CliRunner
 
+from volpred.cli import cli
+from volpred.ops import next_tasks
 from volpred.ops.next_tasks import _legacy_priority_to_p, append_next_task
 
 
@@ -64,6 +67,38 @@ def test_append_rejects_invalid_issue_reference(tmp_path, issue_ref):
         )
 
     assert not queue.exists()
+
+
+def test_ops_assign_forwards_issue_reference(monkeypatch):
+    captured = {}
+
+    def fake_append_next_task(**kwargs):
+        captured.update(kwargs)
+        return {
+            "id": "assign_fixture",
+            "priority": 3,
+            "task_type": "platform_ops",
+            "issue_ref": kwargs["issue_ref"],
+        }
+
+    monkeypatch.setattr(next_tasks, "append_next_task", fake_append_next_task)
+
+    result = CliRunner().invoke(
+        cli,
+        [
+            "ops",
+            "assign",
+            "--title",
+            "Implement #37",
+            "--description",
+            "Use the existing ticket",
+            "--issue-ref",
+            "#37",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert captured["issue_ref"] == "#37"
 
 
 def test_append_rejects_non_list_root(tmp_path):

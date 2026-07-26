@@ -1216,6 +1216,7 @@ def ops_experiments_adopt(
 @click.option("--schedule-proposal-json", default=None, help="JSON object or file path describing a proposed schedule change")
 @click.option("--payload-json", default=None, help="JSON object or file path for structured payload")
 @click.option("--parent-task-id", default=None, help="Optional parent task id")
+@click.option("--issue-ref", default=None, help="Optional planning issue reference, e.g. #37")
 @click.option("--created-by", default=None, help="Actor label")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_assign(
@@ -1233,6 +1234,7 @@ def ops_assign(
     schedule_proposal_json: str | None,
     payload_json: str | None,
     parent_task_id: str | None,
+    issue_ref: str | None,
     created_by: str | None,
     storage_dir: str,
 ) -> None:
@@ -1264,6 +1266,7 @@ def ops_assign(
         legacy_priority=priority,
         payload=payload,
         parent_task_id=parent_task_id,
+        issue_ref=issue_ref,
         created_by=created_by,
     )
     console.print(

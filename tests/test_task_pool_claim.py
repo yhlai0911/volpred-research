@@ -81,6 +81,111 @@ def test_claim_is_rejected_while_direct_execution_mode_is_active(
     assert json.loads(next_tasks.read_text())[0]["status"] == "pending"
 
 
+def test_claim_assigns_linked_github_issue_after_local_claim(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "linked-ticket",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "issue_ref": "#37",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    calls = []
+    monkeypatch.setattr(
+        task_pool_claim,
+        "assign_issue",
+        lambda issue_ref: calls.append(issue_ref)
+        or {
+            "ok": True,
+            "action": "assign",
+            "issue_ref": "#37",
+            "issue_number": 37,
+        },
+    )
+
+    result = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="linked-ticket",
+            owner="codex-vscode",
+            session="session-37",
+            main_thread=False,
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["issue_tracker_sync"]["ok"] is True
+    assert calls == ["#37"]
+    assert json.loads(next_tasks.read_text(encoding="utf-8"))[0]["status"] == "claimed"
+
+
+@pytest.mark.parametrize(
+    ("issue_ref", "sync_result"),
+    [
+        (
+            "issue-37",
+            {
+                "ok": False,
+                "action": "assign",
+                "reason": "invalid_issue_ref",
+            },
+        ),
+        (
+            "#37",
+            {
+                "ok": False,
+                "action": "assign",
+                "issue_ref": "#37",
+                "issue_number": 37,
+                "reason": "gh_unavailable",
+            },
+        ),
+    ],
+)
+def test_issue_sync_failure_never_rolls_back_local_claim(
+    tmp_path, monkeypatch, issue_ref, sync_result
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "linked-ticket",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "issue_ref": issue_ref,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "assign_issue", lambda _ref: sync_result)
+
+    result = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="linked-ticket",
+            owner="codex-vscode",
+            session="session-37",
+            main_thread=False,
+        )
+    )
+
+    assert result["ok"] is True
+    assert result["issue_tracker_sync"] == sync_result
+    assert json.loads(next_tasks.read_text(encoding="utf-8"))[0]["status"] == "claimed"
+
+
 def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
@@ -122,6 +227,51 @@ def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
     assert "claimed_by" not in saved[0]
     assert "claimed_at" not in saved[0]
     assert "claim_session_id" not in saved[0]
+
+
+def test_complete_defers_linked_issue_close_until_real_commit(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "linked-ticket",
+                    "status": "in_progress",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "claimed_by": "codex-vscode",
+                    "issue_ref": "#37",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="linked-ticket",
+            status="succeeded",
+            result="implemented acceptance criteria",
+        )
+    )
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert result["issue_tracker_sync"] == {
+        "ok": True,
+        "action": "defer_close_until_commit",
+        "issue_ref": "#37",
+        "issue_number": 37,
+    }
+    assert saved["issue_close_pending"] == {
+        "issue_ref": "#37",
+        "task_id": "linked-ticket",
+        "completion_owner": "codex-vscode",
+        "completed_at": saved["completed_at"],
+    }
+    assert "issue_closed_commit" not in saved
 
 
 def test_complete_idempotently_clears_stale_terminal_claim(tmp_path, monkeypatch) -> None:
