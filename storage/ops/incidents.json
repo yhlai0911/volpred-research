@@ -243,9 +243,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-26T05:16:45.617765+00:00"
-    },
-    {
      "at": "2026-07-26T06:17:47.604264+00:00"
     },
     {
@@ -277,6 +274,9 @@
     },
     {
      "at": "2026-07-26T13:39:01.441871+00:00"
+    },
+    {
+     "at": "2026-07-26T14:37:08.856776+00:00"
     }
    ],
    "current_task_id": null,
@@ -708,7 +708,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-26T13:07:28.713040+00:00"
+     "last_seen_at": "2026-07-26T14:07:12.547840+00:00"
     },
     {
      "cleared_at": null,
@@ -721,7 +721,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-26T13:07:28.980410+00:00"
+     "last_seen_at": "2026-07-26T14:07:12.827739+00:00"
     },
     {
      "cleared_at": null,
@@ -734,7 +734,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-26T13:07:29.517960+00:00"
+     "last_seen_at": "2026-07-26T14:07:13.375099+00:00"
     },
     {
      "cleared_at": null,
@@ -747,7 +747,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-26T13:07:29.235489+00:00"
+     "last_seen_at": "2026-07-26T14:07:13.092561+00:00"
     },
     {
      "cleared_at": null,
@@ -760,7 +760,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-26T13:07:29.818458+00:00"
+     "last_seen_at": "2026-07-26T14:07:13.674811+00:00"
     },
     {
      "cleared_at": null,
@@ -786,7 +786,7 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-26T13:07:30.095142+00:00"
+     "last_seen_at": "2026-07-26T14:07:13.927124+00:00"
     },
     {
      "cleared_at": null,
@@ -804,9 +804,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-26T13:07:30.095142+00:00",
+   "last_seen_at": "2026-07-26T14:07:13.927124+00:00",
    "notified_at": null,
-   "occurrence_count": 900,
+   "occurrence_count": 906,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -861,14 +861,20 @@
      "first_seen_at": "2026-07-25T20:20:44.766623+00:00",
      "key": "tests/test_rehearse_publisher_delete_restore.py::tests.test_rehearse_publisher_delete_restore::test_delete_phases_have_distinct_immutable_request_identities",
      "last_seen_at": "2026-07-25T20:20:44.766623+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T13:40:25.112003+00:00",
+     "key": "tests/test_alerts.py::tests.test_alerts::test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy",
+     "last_seen_at": "2026-07-26T13:40:25.112003+00:00"
     }
    ],
    "kind": "phase_z_test_gate_red",
-   "last_breach_detail": "PHASE-Z auto-commit 測試紅燈（fc427ddaede1）",
-   "last_seen_at": "2026-07-25T20:20:44.766623+00:00",
+   "last_breach_detail": "PHASE-Z auto-commit 測試紅燈（a327d09c8338）",
+   "last_seen_at": "2026-07-26T13:40:25.112003+00:00",
    "notification_id": "01ca7dcb",
    "notified_at": "2026-07-21T18:20:42.499421+00:00",
-   "occurrence_count": 2,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1092,6 +1098,6 @@
    }
   }
  },
- "updated_at": "2026-07-26T13:39:01.443217+00:00",
+ "updated_at": "2026-07-26T14:37:08.857219+00:00",
  "version": 1
 }

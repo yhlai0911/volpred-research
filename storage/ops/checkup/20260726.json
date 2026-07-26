@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-26T16:27:08.652746",
+  "generated_at": "2026-07-26T22:30:46.126709",
   "overall": "critical",
-  "critical_count": 3,
-  "warn_count": 14,
+  "critical_count": 4,
+  "warn_count": 9,
   "findings": [
     {
       "dimension": "cron_completion",
@@ -11,69 +11,15 @@
       "recovery": "tail storage/logs/cron/dreaming_review.log"
     },
     {
-      "dimension": "cron_completion",
-      "severity": "warn",
-      "message": "enqueue_daily_digest: 最近一輪 exit=1（非 0）",
-      "recovery": "tail storage/logs/cron/enqueue_daily_digest.log"
-    },
-    {
-      "dimension": "cron_completion",
-      "severity": "warn",
-      "message": "research_backlog: 最近一輪 exit=1（非 0）",
-      "recovery": "tail storage/logs/cron/research_backlog.log"
-    },
-    {
       "dimension": "content_pipeline",
       "severity": "warn",
       "message": "草稿池僅 0 篇（門檻 4）—— Mission 1 缺產出",
       "recovery": "主動派寫作 agent 補池（feed-publisher，新鮮非 spy 主題）"
     },
     {
-      "dimension": "mission_progress",
-      "severity": "warn",
-      "message": "pending 任務僅 1 件 —— backlog 偏薄，需主動生研究議題/派工",
-      "recovery": "派 journal-discovery / autonomous-research 生新方向"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "warn",
-      "message": "release_pool_gap: Release pool starved > 8.0h (cron healthy)",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
       "dimension": "alert_conditions",
       "severity": "critical",
       "message": "draft_pool_low: Draft pool below threshold (<4)",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "critical",
-      "message": "publishing_freshness: 發文脫班（無新文超過 release 節奏門檻）",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "critical",
-      "message": "host_cron_fail: Host cron failure detected",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "warn",
-      "message": "event_receipt_watchdog: Event receipt watchdog stale (next_task_bridge_missing)",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "warn",
-      "message": "knowledge_stale: M2 knowledge closure stale > 3.68d",
-      "recovery": "uv run volpred ops check-alerts --storage-dir storage"
-    },
-    {
-      "dimension": "alert_conditions",
-      "severity": "warn",
-      "message": "content_quality: 內容品質巡檢：發文間隔過久",
       "recovery": "uv run volpred ops check-alerts --storage-dir storage"
     },
     {
@@ -85,7 +31,7 @@
     {
       "dimension": "dedup_calibration",
       "severity": "warn",
-      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=843, AI saturation=12 (threshold=5, margin=7), NFP control=3, FOMC theme=0 / hard=0",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=844, AI saturation=12 (threshold=5, margin=7), NFP control=3, FOMC theme=0 / hard=0",
       "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
     },
     {
@@ -97,7 +43,7 @@
     {
       "dimension": "reproducibility",
       "severity": "warn",
-      "message": "PRIORITY_UNVERIFIED: 222 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
+      "message": "PRIORITY_UNVERIFIED: 226 referenced experiment(s) lack a current passing reproduction report（例：k1001, k1003, k1010, k1023, k1025）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
     },
     {
@@ -111,6 +57,42 @@
       "severity": "warn",
       "message": "CODE_WITHOUT_RESULTS: 169 K-family directories have code but no archived *_results.json（例：K1694, k1212, k1267, k1380, k144）",
       "recovery": "uv run python scripts/reproduce_check.py inventory --no-write"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "warn",
+      "message": "殭屍任務 assign_42306eaa [pending] 指向已消失的 worktree ['dispatch-slot-2-c5cafe39-k1698'] —— branch 尚存，commits 可救回",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "critical",
+      "message": "殭屍任務 assign_ae004ae2 [blocked] 指向已消失的 worktree ['dispatch-slot-3-30adeed7-k528nfp'] —— branch 也不存在（成果僅存 reflog）: ['dispatch-slot-3-30adeed7-k528nfp']",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "critical",
+      "message": "殭屍任務 assign_06d6352d [pending] 指向已消失的 worktree ['dispatch-slot-3-30adeed7-k528nfp'] —— branch 也不存在（成果僅存 reflog）: ['dispatch-slot-3-30adeed7-k528nfp']",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "worktree_reconcile",
+      "severity": "critical",
+      "message": "殭屍任務 k528_round7_gate_hardening [pending] 指向已消失的 worktree ['dispatch-slot-3-30adeed7-k528nfp'] —— branch 也不存在（成果僅存 reflog）: ['dispatch-slot-3-30adeed7-k528nfp']",
+      "recovery": "查 git reflog / merge-base 裁定 commits 是否已進 main；已合併→關單並註明，未合併→依 feedback_no_research_artifact_loss 復原。禁止直接關單了事"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "warn",
+      "message": "pending=106 超過 drain-first 閾值 80（{'p1': 3, 'p2': 35, 'p3': 66, 'p4': 1, 'p5': 1}）—— 自動 refill/discovery 應已停止",
+      "recovery": "清既有 pending；超齡任務走 superseded / closed_no_action 正式裁決"
+    },
+    {
+      "dimension": "task_pool_pressure",
+      "severity": "info",
+      "message": "drain-first 生效中（entered_at=2026-07-26T14:31:09.277721+00:00）；退出條件 pending<80 且連續 3 日 succeeded>=created （目前 已滿足吞吐條件）",
+      "recovery": null
     }
   ]
 }

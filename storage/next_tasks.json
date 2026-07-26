@@ -32696,7 +32696,10 @@
     "dispatch_job_id": "agent-brief_k1714-cd4315",
     "dispatch_worktree": ".claude/worktrees/dispatch-slot-3-3896dcaa-k1714",
     "dispatch_note": "DISPATCHED→compute-queue agent job agent-brief_k1714-cd4315 (opus/xhigh, timeout 5400s) @2026-07-22T10:3x by hourly-slot-3-3896dcaa; branch wt/dispatch-slot-3-3896dcaa-k1714。收件由 queue followup 負責，勿重複派工。",
-    "last_release_reason": "normalize_pending_claim_residue"
+    "last_release_reason": "normalize_pending_claim_residue",
+    "triage_2026_07_26": "SALVAGE-NOT-REENQUEUE. 完整未合併產出在 worktree .claude/worktrees/dispatch-slot-3-3896dcaa-k1714/experiments/K1714/（K1714.py + 67KB results.json + 24KB README + test_K1714.py + figures，07-22 11:05，git untracked）。compute job agent-brief_k1714-cd4315 被標 failed 是 quota_exhausted 假象（re-queue 16 次撞額度窗），實際 agent 已完成。",
+    "test_status": "32/33 pass。唯一 fail=test_logm_unvec_is_pd_for_any_real_vector：用 scale=5.0 的 10 維隨機向量餵 logm_unvec→矩陣指數在理論上 PD 但數值上 ill-conditioned，np.linalg.cholesky 的 float PD-check 失敗。headline Cholesky spec（PD-by-construction）不受影響；matrix-log 僅次要 spec 且 verdict 亦為 LOSE。",
+    "disposition": "bounded 收尾：(1) 原則性解 logm PD 不變量（實際 fit 係數不會產生此極端；修法二選一並經 Codex 審—A. 測試改用 realistic scale + 文件化 conditioning floor；B. logm_unvec 加 eigenvalue floor/jitter 並記錄 PD-fail-rate），禁單純弱化測試蒙混；(2) 33/33 綠 + agent-result-verification;(3) merge_worktree.sh 整合；(4) complete K1714。結論本身（HAR realized-cov 在 GMV 上輸所有標準估計量，4 spec 一致的乾淨負面結果）已可信。"
   },
   {
     "id": "K1715",
@@ -34427,7 +34430,8 @@
       }
     ],
     "last_released_at": "2026-07-26T12:18:47.348079+00:00",
-    "last_release_reason": "normalize_pending_claim_residue"
+    "last_release_reason": "normalize_pending_claim_residue",
+    "triage_2026_07_26": "compute job agent-brief_k1724 exit=2 instant launch-fail（job_metadata 缺、worktree dispatch-slot-1-cb097ccd-k1724 已消失、無任何產出）。無可救援→需 fresh re-run；此 pending 任務即載體，重派走 compute_queue/enqueue-agent。"
   },
   {
     "id": "K1725",
@@ -34967,17 +34971,20 @@
         "from": "blocked",
         "to": "pending",
         "reason": "codex_reachability_probe_succeeded"
+      },
+      {
+        "ts": "2026-07-26T13:50:03.685444+00:00",
+        "from": "pending",
+        "to": "pending",
+        "by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+        "note": "normalize_pending_claim_residue"
       }
     ],
-    "started_at": "2026-07-21T09:28:37.168709+00:00",
     "result": "rev2b 已完成並自審修掉 round-2 六項缺陷；主線程逐條驗過 contract-selection / boundary audit / TOST 三項；Codex round 3 已進 compute queue compute-k1698-rev2b-codex-round-3-primary-path-review-1784463137，裁決前不得 merge",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
-    "last_released_at": "2026-07-20T03:12:37.507759+00:00",
-    "last_release_reason": "auto_release_stale_2h",
+    "last_released_at": "2026-07-26T13:50:03.685434+00:00",
+    "last_release_reason": "normalize_pending_claim_residue",
     "compute_job_id": "agent-brief_k1698_rev2-713b65",
-    "claimed_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
-    "claimed_at": "2026-07-21T09:28:36.652523+00:00",
-    "claim_session_id": "4de53d4191b6",
     "recovery_branch": "worktree-dispatch-slot-2-c5cafe39-k1698",
     "reviewed_commit": "e13f83a5d",
     "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
@@ -38042,7 +38049,8 @@
     "compute_job_id": "k1257-k1258-semantics-rerun-20260723",
     "result": "dispatched to compute job k1257-k1258-semantics-rerun-20260723; awaiting PHASE A collection",
     "last_released_at": "2026-07-26T12:18:47.348310+00:00",
-    "last_release_reason": "normalize_pending_claim_residue"
+    "last_release_reason": "normalize_pending_claim_residue",
+    "triage_2026_07_26": "collect_completed followup（compute job k1257-k1258-semantics-rerun-20260723，exit 0，experiment_gate=passed）已 deliver 完整產物到 main：experiments/k1257 + experiments/k1258（code/results.json/README/figures/reproduce_spec/forecasts parquet；k1257 有 codex_review.md，k1258 有 codex_review.md + codex_review_v2.md）。剩餘 cert 步驟（heavy，非 fire-tail）：依 followup brief 驗 exit0+headline-equality gate、inspect absorbing_dropped_models/ever_invalid_models/per-model final_weight_status/drop_events/posterior_excluded_days、以 experiment_gates.py verdict-template 生 review_verdict.json、Codex round-2 對 final claim-surface bytes、填 template、cert/artifact gates、commit exact artifacts，兩 experiment 皆 certify 才 complete 本任務。此為 heavy compute+review，走 compute_queue/enqueue-agent。"
   },
   {
     "id": "assign_e7643d81",
@@ -41690,7 +41698,8 @@
     "compute_job_id": "agent-k1731-armb-rev9-remediation",
     "result": "dispatched to compute job agent-k1731-armb-rev9-remediation; awaiting PHASE A collection",
     "last_released_at": "2026-07-26T12:14:58.502833+00:00",
-    "last_release_reason": "auto_release_stale_2h"
+    "last_release_reason": "auto_release_stale_2h",
+    "triage_2026_07_26": "arm B rev9 remediation compute job quota_exhausted 未執行（無 k1731_armB_rev9_remediation.json）。registered worktree .claude/worktrees/dispatch-slot-1-bd00f90a-k1731 仍在、可續用。此 pending 任務即續辦載體；重派走 compute_queue/enqueue-agent（3-strike ladder 注意）。"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_2d1d356b",
@@ -41721,7 +41730,7 @@
     "title": "兩份 general drafts 的 audience gate 編輯裁決（K1253 / K1711）",
     "description": "來源：orphan escalation assign_0c7a209c。兩份檔案已補 canonical YAML frontmatter、K-id 與 repo-relative 圖片路徑，因此不再是 no_title / broken-image orphan；但正式 publisher dry-run 對兩份都拒絕：draft declares audience=general but publisher would infer research。\n\n這是讀者向編輯工作，留給 Claude 主線：\n1. storage/drafts/k1253_general_draft.md：先依 canonical knowledge eligibility 重新裁決是否可發表。既有 K1253 任務紀錄明示 needs_human=True、環境 smoke test、非研究發現，禁止只為過 gate 就淡化 provenance；若不可發表，建立明確 exclusion/archive 出口，不得讓 reaper 反覆 intake。\n2. storage/drafts/k1711_general_draft.md：依 general-reader 規則重寫或明確改分 research，忠實保留 retrospective pseudo-OOS 與「MCS 未拒絕不等於贏」限制。\n3. 各自重跑：uv run python scripts/publish_draft.py <draft> --dry-run --lazypack-plan storage/lazypack_plans/<kid>_general_plan.json。只有 gate 全過才可走正式 publish。\n\nCodex failover 已驗證：reaper 模擬（排除 parent in-flight）兩檔皆 adoptable、held=[]；tests/test_reap_draft_artifacts.py 16 passed。不要回退已修正的 repo-relative 圖片路徑。",
     "task_type": "daily_article",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "source": "codex_failover_followup",
     "created_at": "2026-07-22T11:05:08.719109+00:00",
@@ -41734,7 +41743,8 @@
       "codex_skip": true
     },
     "parent_task_id": "assign_0c7a209c",
-    "created_by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14"
+    "created_by": "codex-failover-slot-1-21efcecb5ac34fb3901fcf94892e3a14",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "release_deadlock_repair_20260722_15",
@@ -41798,7 +41808,8 @@
         "by": "handoff",
         "note": "【主線專屬交接｜Telegram msg 1327｜2026-07-22 23:38 Asia/Taipei】先用 task_pool_claim.py claim --id assign_f13a5d5f --owner <interactive-owner> --main-thread 接手。已核實：23:14 request_fire(reason=user:assign_f13a5d5f) 啟動 job c4191cb4，但 fire 沒綁指定 task；該班改做其他 P2，23:35 本 P1 仍未 claim。live feed 最新 published 仍是 mile_a73bb294（19:00 台北），不是已修。執行順序：1) contained：從 3 drafts 找一篇通過證據/品質 gate 的新稿，用正式 publisher 發佈並回讀 feed + live API；2) root cause：重現 request_fire 帶 task id 卻可 claim 無關任務的 selector/claim 契約缺口，納入 c4191cb4 supervisor/worker receipt；3) 底層重構：urgent targeted fire 必須原子保留/claim exact task，或明確失敗並持續重試，禁止用別張任務的 exit 0 當接手成功；4) 補 regression、API/下游回讀、機械 alert；5) 合併 alert_release_pool_deadlock_20260722 與 release_deadlock_repair_20260722_15，按 contained 或 root_cause_fixed_and_verified 回報。禁止只手動補圖、重跑或只更新文字。"
       }
-    ]
+    ],
+    "verify_2026_07_26_2207fire": "ROOT_CAUSE_FIXED_AND_VERIFIED（供 main-thread 結案回報用；hourly lane 無法 claim main_thread_lane 任務）。live 本地源驗證（非 Supabase，feed.json 已 deprecated）：(1) storage/ops/release_deadlock_remediation.json 今日 14:00Z 跑出 reason=not_deadlocked（draft=0/eligible=0 非死鎖）；(2) alert_release_pool_deadlock_20260722 status=succeeded（07-22 16:21 結案）；(3) root-cause repair commit 2985beb4a(07-23)+d0cf3e77a(replenish)+3256626fe(publisher cutover gate)；(4) 今日已發文 mile_beee535c(21:37 daily_digest)、published_today=2。當前 draft=0 是 drain-first backpressure（pending=106>80→auto-refill 主動暫停），非死鎖回歸。判定=已恢復且根因已修（非誤報，07-22 為真死鎖）。剩餘：main-thread 依五步結案 gate 正式 close + 回報老闆（Telegram msg1324）。"
   },
   {
     "id": "telegram-1327",
@@ -41956,7 +41967,7 @@
     "description": "從聯準會利率決議前夕的短端國債隱含波動率出發，構建利率波動率與標普 500 相關性模型。驗證當總經數據波動放大時，VIX 與 MOVE 指數的背離現象。",
     "task_type": "trending_repost",
     "priority": 2,
-    "status": "pending",
+    "status": "failed",
     "created_at": "2026-07-22T22:00:14+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -42006,7 +42017,30 @@
       ],
       "screened_at": "2026-07-22T22:00:17+00:00"
     },
-    "dedup_followup_required": "生成端查重點名了下列可能同 arc 的已發文章：mile_21e45133, mile_e13e5485, mile_d12825bb。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。"
+    "dedup_followup_required": "生成端查重點名了下列可能同 arc 的已發文章：mile_21e45133, mile_e13e5485, mile_d12825bb。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。",
+    "status_history": [
+      {
+        "ts": "2026-07-26T14:15:19.805887+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      },
+      {
+        "ts": "2026-07-26T14:15:20.030238+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      },
+      {
+        "ts": "2026-07-26T14:15:20.272418+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      }
+    ],
+    "started_at": "2026-07-26T14:15:20.030223+00:00",
+    "completed_at": "2026-07-26T14:15:20.272391+00:00",
+    "result": "不寫：arc-covered。此題（降息路徑分歧 × MOVE × VIX 避險背離）與近期已發佈文章同一 narrative arc — mile_53caca1a（點陣圖分歧+MOVE P34）、mile_671d4c75（股債都怕但怕的不同=VIX/MOVE背離）、mile_d12825bb（MOVE 方向感）。依 arc-dedup 規則『標題字面不像≠不重複』判為重複，拒寫 duplicate。任務為 07-22 建的 reader_facing_refill 時效題，已過期且被覆蓋。"
   },
   {
     "id": "trending_repost_2026_07_23_台股波動",
@@ -42014,7 +42048,7 @@
     "description": "量化台股加權指數高檔震盪時台選擇權隱含波動率的結構變化。分析外資期現貨避險部位與台指波動率指數的同動性及套利空間。",
     "task_type": "trending_repost",
     "priority": 2,
-    "status": "pending",
+    "status": "failed",
     "created_at": "2026-07-22T22:00:25+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -42060,7 +42094,30 @@
       ],
       "screened_at": "2026-07-22T22:00:27+00:00"
     },
-    "dedup_followup_required": "生成端查重點名了下列可能同 arc 的已發文章：mile_e13e5485, mile_3e11060d, mile_e7b6e075。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。"
+    "dedup_followup_required": "生成端查重點名了下列可能同 arc 的已發文章：mile_e13e5485, mile_3e11060d, mile_e7b6e075。開寫前必做 3-layer 查重：確認撞 arc 就換軸或回報 arc-covered，不要硬寫。",
+    "status_history": [
+      {
+        "ts": "2026-07-26T14:16:15.191743+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      },
+      {
+        "ts": "2026-07-26T14:16:15.415417+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      },
+      {
+        "ts": "2026-07-26T14:16:15.655096+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      }
+    ],
+    "started_at": "2026-07-26T14:16:15.415399+00:00",
+    "completed_at": "2026-07-26T14:16:15.655073+00:00",
+    "result": "不寫：arc-covered + 資料不足。台股 vol / 台版VIX 敘事近期已飽和發佈（mile_e13e5485 台股恐慌37、mile_3e11060d 台版VIX站上37、mile_71f9ad88 台股回檔去槓桿、k1557 台股創高急殺 bootstrap）。本題的區辨角度『外資期現貨避險部位 × 台指選擇權IV』所需 primary data 不存在（僅 tw_institutional_0050.csv，無三大法人期選避險部位；storage 無 VIXTWN 原始 csv）→ 無法組足證據包（≥3 可驗證數字+表+圖）。依 evidence-package 硬規『不滿足→換題，禁強推』close。任務為 07-22 reader_facing_refill 過期時效題。"
   },
   {
     "id": "commit_ownership_stage2_shadow_validation_20260730",
@@ -42168,7 +42225,7 @@
     "id": "K1686_article_general",
     "title": "K1686: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1686 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: [提出: dreaming orphan-closure, 執行: hourly-21 主線程收尾, 二審: Codex primary-path (codex-vscode) R2 PASS 2026-07-12] K1686 關閉 Paper 8（volatility-absorption）的核心識別缺陷 P0-1。前身 K897 的 GJR-GARCH null 用 h[t]（F_{t-1}-可測、不對當日 r_t 反應）當 vol proxy，於是模擬把 shock 標在大跌『隔天』；但實證的 ΔVIX_t=VIX_t-VIX_{t-1} 中 V Canonical evidence: experiments/k1686/k1686_contemporaneous_null_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
@@ -42187,13 +42244,14 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-23T07:01:51+00:00",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "K1719_article_general",
     "title": "K1719: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1719 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Emergency reader-facing publish-drought remediation; dispatch immediately.  Verdict preview: [K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 2,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_publish_drought_emergency",
@@ -42212,7 +42270,8 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-23T08:01:29+00:00",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "assign_d8bfe910",
@@ -42244,7 +42303,7 @@
     "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 69 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 69 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T121531212566Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T133915892572Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-26T12:15:31.321238+00:00",
     "payload": {
@@ -42270,7 +42329,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-26T13:39:18.319050+00:00"
+    "updated_at": "2026-07-26T13:39:18.319050+00:00",
+    "superseded_at": "2026-07-26T14:37:11.481543+00:00",
+    "superseded_by": "assign_76606948",
+    "completed_at": "2026-07-26T14:37:11.481543+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "assign_457c838c",
@@ -42315,12 +42378,97 @@
     "description": "由 alert `host_cron_fail` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=critical（max_consecutive_failures=6；non_hang_failure=True）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/enqueue_daily_digest.log exit=1 at 2026-07-26T09:00:44.916303+00:00 recency=fresh_or_unscheduled\n  - storage/logs/cron/research_backlog.log exit=1 at 2026-07-26T09:00:44.558809+00:00 recency=fresh_or_unscheduled\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-26T13:00:51.883721+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "host_cron_fail"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-26T14:08:38.833425+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      },
+      {
+        "ts": "2026-07-26T14:08:43.338397+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      },
+      {
+        "ts": "2026-07-26T14:13:04.311731+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4"
+      }
+    ],
+    "started_at": "2026-07-26T14:08:43.338384+00:00",
+    "completed_at": "2026-07-26T14:13:04.311706+00:00",
+    "result": "host_cron_fail 已恢復（非誤報）。根因：digest_daily_enqueue / research_backlog_daily 兩個 legacy cron 在 Operations Core 接管期間以 exit=1 失敗（TaskPoolAdmissionClosed，legacy direct write 被擋）。mode 已於 12:14Z restore 為 enabled:false，且 owner-gate 現以 rc=75 suppress 這兩個 legacy job；但 suppression 路徑只 exit 0 不寫 exit marker → detector _latest_cron_exit 讀到凍結的舊 exit=1，且 piggy-back job 無 cron expr、recency gate 無法 age-out → 每小時 re-breach。修法：scripts/cron_lib.sh owner-gate rc=75 分支改為 cron_emit_exit $job 0 寫 fresh 權威 exit-0 marker。重跑兩 wrapper 後 detector 讀 exit_code=0，breach 清除。"
+  },
+  {
+    "id": "K1708_gatecert_s14_rerun",
+    "task_type": "experiment",
+    "status": "pending",
+    "priority": 2,
+    "source": "hourly_dispatch_triage",
+    "created_at": "2026-07-26T14:24:53.684396+00:00",
+    "title": "K1708 gate-cert 收尾：§14 real-data rerun 評估新收緊 gate criterion + 重新裁決（3-strike active）",
+    "description": "來源：triage of failed compute job agent-brief_k1708_stage2-e9aa0b（quota_exhausted，stage2 remediation 從未執行，無 K1708_stage2_summary.json）。\n\n背景：K1708（time-varying state-space HAR vs fixed/rolling HAR）研究結論=NULL（state-space 未勝 HAR），此結論不在爭議。Codex round-1/2/3 全 FAIL，round-3 已觸發 3-STRIKE（commit e26236de3）。所有 blocker 是 GATE 機制可證性，非研究結論。round-3 誠實結論：rev2 的 gate 修正在門檻/併行條件收緊、comparator 上橫移，但『新口徑 gate 從未在真實資料上被評估』——要有新口徑數字必須重跑（§14，前幾輪明列不重跑）。\n\n3-STRIKE 已 active → 禁止同法 identical re-enqueue。bounded scope（唯一未做的具體步驟）：\n1) 在 worktree .claude/worktrees/dispatch-slot-1-457427c2-k1708 的既有 K1708.py 上，跑 §14 full-sample rerun，產生新口徑欄位 cw_vs_own_restriction_primary / cw_holm_family / regime qlike_vs_own_restriction，寫入 results.json。預期仍 NULL（t 無理由更大、門檻 1.645→3.0）；若非 NULL 視為異常訊號要追。\n2) 用新資料跑 experiment_gates + 完整 test（含 legacy_derive_verdict 對照），確認 4 blocker CLOSED。\n3) Codex round-4 primary-path 二審（禁 fallback reviewer）。\n4) PASS 才 merge_worktree.sh + 由主線程寫 knowledge.json；若再 FAIL → escalate email 老闆（3-strike ceiling）。\n此為 heavy compute+review，走 compute_queue / enqueue-agent，不塞 hourly fire。"
+  },
+  {
+    "id": "K1436_article_general",
+    "title": "K1436: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1436 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [K1436 verdict=NULL reviewer=feature-dev:code-reviewer subagent (PASS, no blocking defects; Codex CLI unavailable until 2026-07-25) artifact=experiments/k1436 task=compute-queue-followup-agent-brief_k1436_v2-70286f] Does BTC perpetual funding rate carry incremental information fo Canonical evidence: experiments/k1436/k1436_results.json, experiments/k1436/v1_feasibility_audit_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1436",
+    "evidence_source_paths": [
+      "experiments/k1436/k1436_results.json",
+      "experiments/k1436/v1_feasibility_audit_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1436/k1436_results.json, experiments/k1436/v1_feasibility_audit_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-26T14:29:03+00:00"
+  },
+  {
+    "id": "assign_76606948",
+    "title": "PHASE-Z 卡住檔案 incident（c173ab459b5f36c7）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 70 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 70 班\n- tests/test_check_matt_skills_installation.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T143709021853Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-26T14:37:11.491084+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "c173ab459b5f36c7",
+      "paths": [
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "tests/test_check_matt_skills_installation.py"
+      ],
+      "streaks": {
+        "storage/logs/trending_primary_source_verification.jsonl": 70,
+        "tests/test_check_matt_skills_installation.py": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260726T143709021853Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-26T14:37:11.481543+00:00",
+      "last_seen_at": "2026-07-26T14:37:11.481543+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

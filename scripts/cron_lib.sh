@@ -28,6 +28,14 @@ if [ -z "${VOLPRED_CRON_LIB_LOADED:-}" ]; then
       local owner_gate_rc=$?
       if [ "${owner_gate_rc}" = "75" ]; then
         echo "=== [${job_name}] legacy trigger suppressed by Operations Core ownership ==="
+        # Emit an authoritative exit-0 marker on suppression. host_cron_fail's
+        # _latest_cron_exit reads the last `=== [job] exit N ... ===` line; a
+        # legacy job that failed ONCE before the ownership transfer would otherwise
+        # leave that failure frozen as the newest marker. These piggy-back jobs have
+        # no cron expr, so the recency gate (_stale_cron_exit_reason) can't age it
+        # out and the alert re-breaches every hour. Suppression is a healthy no-op —
+        # the wrapper correctly deferred to Operations Core — so record it as exit 0.
+        cron_emit_exit "${job_name}" 0
         exit 0
       fi
       if [ "${owner_gate_rc}" != "0" ]; then

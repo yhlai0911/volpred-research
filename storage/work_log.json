@@ -26894,5 +26894,65 @@
     "owner": "hourly-slot-1-5605659d7f7242c2b4eef3e9b474a98b",
     "commit": null,
     "summary": "PHASE A0 time_critical lane：撰寫並立即發佈每日精選導讀 mile_beee535c（daily_digest/general/published）。框架「兩支溫度計＋事件日避險三查」，回應降息路徑分歧的事件日避險議題。curate archive 8 篇跨度33天（06-15→07-18，過14天 span gate）；content 7346字/10圖；anti_ai_gate PASS；懶人包 codex primary 卡關→logged fallback lazypack_render 產3張 poster 全200。獨立 jq 驗證 status=published、8篇來源皆published。剩餘2條 trending_repost 預算不足完整收尾，留下一班。"
+  },
+  {
+    "timestamp": "2026-07-26T22:13:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "alert_host_cron_fail_20260726",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "commit": null,
+    "summary": "P1 host_cron_fail 已恢復。根因：owner-gate rc=75 suppression 路徑不寫 exit marker，legacy job 轉移前的舊 exit=1 marker 被 detector 凍讀、piggy-back job 無 cron expr 使 recency gate 無法 age-out → 每小時 re-breach。修 scripts/cron_lib.sh：suppression 分支改 cron_emit_exit $job 0 寫 fresh exit-0 marker。重跑 digest/backlog wrapper 後 _latest_cron_exit 讀 exit_code=0，breach 清除。"
+  },
+  {
+    "timestamp": "2026-07-26T22:21:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "agent-brief_k1714-cd4315",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "commit": null,
+    "summary": "PHASE-A triage_failed(agent-brief_k1714-cd4315)：followup brief 稱『agent never ran/quota』有誤。實查 worktree dispatch-slot-3-3896dcaa-k1714 有完整未合併 K1714（realized-cov HAR→GMV，乾淨負面結果 verdict=LOSE，4 spec 一致，Holm+bootstrap+Harvey2016）。跑測試 32/33 pass，唯 test_logm_unvec_is_pd_for_any_real_vector fail（scale=5.0 隨機向量致 matrix-log 數值 ill-conditioned，headline Cholesky spec 不受影響）。處置=salvage-not-reenqueue：已 annotate K1714 帶精確修法（原則性解 PD 不變量+Codex審→33/33→merge_worktree.sh→complete），mark-followup-dispatched→K1714。避免 fresh re-enqueue 白跑 ~1h 已完成實驗。"
+  },
+  {
+    "timestamp": "2026-07-26T22:25:06+08:00",
+    "task_type": "platform_ops",
+    "task_id": "agent-brief_k1708_stage2-e9aa0b",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "commit": null,
+    "summary": "PHASE-A triage_failed(agent-brief_k1708_stage2)：stage2 remediation quota_exhausted 真未執行（無 K1708_stage2_summary.json）。查明 K1708 研究結論=NULL 不爭議，但 gate 機制 Codex round-1/2/3 全 FAIL、round-3 已觸發 3-STRIKE（commit e26236de3）；round-3 誠實結論=新收緊 gate criterion 從未在真實資料評估、需 §14 rerun。3-strike active 禁 identical re-enqueue。處置：建 bounded task K1708_gatecert_s14_rerun（唯一未做步驟=§14 real-data rerun→gates/tests→Codex round-4→PASS 才 merge+knowledge，再 FAIL 則 escalate 老闆；heavy 走 compute_queue），mark-followup-dispatched。注意 K1708 task 標 succeeded(07-22 00:17) 早於整個 round2/3 saga，屬 pre-existing 狀態不一致，已於本 followup task 描述留痕。"
+  },
+  {
+    "timestamp": "2026-07-26T22:26:37+08:00",
+    "task_type": "platform_ops",
+    "task_id": "triage_batch_compute_followup_20260726",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "commit": null,
+    "summary": "PHASE-A batch triage 收尾 3 個 failed compute followup：(1) agent-k1731-armb-rev9 quota 未執行、registered worktree dispatch-slot-1-bd00f90a-k1731 可續用→指向既有 pending assign_k1731_rev9；(2) agent-brief_k1724 exit=2 instant launch-fail、worktree 已消失無產出→fresh re-run，指向既有 pending K1724；(3) agent-brief_asia3 exit=2 instant launch-fail、無 source task/worktree/產出→abandon（no next task）。三者皆 mark-followup-dispatched。連同本班稍早 k1714(salvage) + k1708_stage2(3-strike bounded task) 共清空全部 6 條 pending-followup。"
+  },
+  {
+    "timestamp": "2026-07-26T22:28:03+08:00",
+    "task_type": "platform_ops",
+    "task_id": "k1257-k1258-semantics-rerun-20260723",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "commit": null,
+    "summary": "PHASE-A collect_completed(k1257-k1258-semantics-rerun)：job exit0+gate passed，產物已 deliver 到 main experiments/k1257+k1258（含既有 codex_review v1/v2）。此 followup 實為 heavy 雙實驗 certification（verdict-template+Codex round-2+cert gates+commit），非 light interpretation → 路由至既有 pending 任務 k1257_k1258_semantics_and_certification（已 annotate 收集脈絡+剩餘 cert 步驟，走 compute_queue），mark-followup-dispatched。至此 6/6 pending-followup 全部清空。"
+  },
+  {
+    "timestamp": "2026-07-26T22:34:59+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_f13a5d5f",
+    "outcome": "verified_not_closed",
+    "actor": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
+    "commit": null,
+    "summary": "Boss P1 assign_f13a5d5f（release 死鎖+沒出新文）：hourly lane 無法 claim（main_thread_lane）。已做 live 本地源驗證並 annotate：release_deadlock_remediation.json 今日 14:00Z=not_deadlocked、deadlock alert 07-22 succeeded、root-cause commit 2985beb4a、今日發文 mile_beee535c、published_today=2。判定 root_cause_fixed_and_verified（非誤報）。當前 draft=0 為 drain-first backpressure 非死鎖。正式 close+回報留 main-thread lane。"
   }
 ]
