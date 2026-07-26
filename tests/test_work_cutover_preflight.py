@@ -206,7 +206,7 @@ def test_preflight_derives_manifest_from_raw_evidence(
 
     manifest = _prepare(tmp_path, legacy_bytes=raw)
 
-    assert manifest.schema_version == "work-owner-cutover-manifest.v2"
+    assert manifest.schema_version == "work-owner-cutover-manifest.v3"
     assert manifest.legacy_row_count == 1
     assert manifest.coordinator_row_count == 1
     assert (
@@ -214,6 +214,14 @@ def test_preflight_derives_manifest_from_raw_evidence(
         == "next-tasks-read-projection.v1"
     )
     assert manifest.legacy_snapshot_sha256 == hashlib.sha256(raw).hexdigest()
+    assert manifest.prepared_at == FIXED_NOW.isoformat()
+    assert manifest.valid_until == (
+        FIXED_NOW + timedelta(minutes=15)
+    ).isoformat()
+    assert (
+        hashlib.sha256(manifest.canonical_bytes()).hexdigest()
+        == manifest.sha256
+    )
     assert len(manifest.sha256) == 64
 
 

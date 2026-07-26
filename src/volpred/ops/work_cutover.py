@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import fcntl
 import hashlib
 import json
@@ -35,7 +35,8 @@ from .task_pool_mode import (
 )
 
 
-_SCHEMA_VERSION = "work-owner-cutover-manifest.v2"
+_SCHEMA_VERSION = "work-owner-cutover-manifest.v3"
+_MANIFEST_TTL = timedelta(minutes=15)
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -154,9 +155,11 @@ class WorkOwnershipCutoverManifest:
     import_report_sha256: str
     projection_schema_version: str
     projection_sha256: str
+    prepared_at: str
+    valid_until: str
     sha256: str
 
-    def as_dict(self) -> dict[str, str | int]:
+    def identity_dict(self) -> dict[str, str | int]:
         return {
             "schema_version": self.schema_version,
             "legacy_row_count": self.legacy_row_count,
@@ -167,8 +170,15 @@ class WorkOwnershipCutoverManifest:
             "import_report_sha256": self.import_report_sha256,
             "projection_schema_version": self.projection_schema_version,
             "projection_sha256": self.projection_sha256,
-            "sha256": self.sha256,
+            "prepared_at": self.prepared_at,
+            "valid_until": self.valid_until,
         }
+
+    def canonical_bytes(self) -> bytes:
+        return _canonical_bytes(self.identity_dict())
+
+    def as_dict(self) -> dict[str, str | int]:
+        return {**self.identity_dict(), "sha256": self.sha256}
 
 
 def prepare_work_ownership_cutover(
@@ -180,6 +190,7 @@ def prepare_work_ownership_cutover(
     """Derive a cutover identity from raw evidence without mutating state."""
 
     immutable_snapshots = freeze_legacy_snapshots(legacy_snapshots)
+    cutover_at = _cutover_time()
     queue_path = _canonical_queue_path().resolve()
     state_path = task_pool_mode_path(queue_path)
     with queue_path.open("rb") as queue_handle:
@@ -189,7 +200,7 @@ def prepare_work_ownership_cutover(
             owner = load_task_pool_mode_evidence(state_path)
             assessment = assess_shadow_observation_directory(
                 observation_directory,
-                assessed_at=_cutover_time(),
+                assessed_at=cutover_at,
                 queue_owner_mode=owner.mode.mode,
                 queue_owner_gate_enabled=owner.mode.enabled,
                 queue_owner_state_path=owner.state_path,
@@ -270,6 +281,8 @@ def prepare_work_ownership_cutover(
         "import_report_sha256": import_report_sha256,
         "projection_schema_version": projection.schema_version,
         "projection_sha256": projection_sha256,
+        "prepared_at": cutover_at.isoformat(),
+        "valid_until": (cutover_at + _MANIFEST_TTL).isoformat(),
     }
     return WorkOwnershipCutoverManifest(
         **identity,

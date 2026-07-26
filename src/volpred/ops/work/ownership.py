@@ -25,4 +25,20 @@ class WorkOwner:
         return f"work-owner:{self.capability}:generation-{self.generation}"
 
 
-__all__ = ["WorkOwner", "WorkOwnershipLost"]
+@dataclass(frozen=True)
+class WorkCutoverGate:
+    schema_version: str
+    manifest_sha256: str
+    source_owner: str
+    source_generation: int
+    status: str
+    prepared_at: str
+    valid_until: str
+    staged_at: str
+    staged_by: str
+    consumed_at: str | None
+    consumed_generation: int | None
+    rolled_back_at: str | None
+
+
+__all__ = ["WorkCutoverGate", "WorkOwner", "WorkOwnershipLost"]
