@@ -3261,3 +3261,32 @@ dormant_legacy_surfaces=[]。active boundary 後第一個自然 fire
 **`root_cause_fixed_and_verified`**。Issue #28 的長窗 sustained-clean 與 Issue #9
 Work Coordinator 七日 queue ownership evidence 是不同 gate，仍標
 **`contained`**，不得用本次 scheduler 成功冒充完成。
+
+### 2026-07-26 — NDC 月資料排程只會派人工工作，模型額度耗盡時無法更新
+
+**證據化症狀**：`景氣領先指標不含趨勢指數(點)` 停在 `2026M01`，
+`景氣對策信號(分)` 停在 `2026M04`，而 freshness gate 已要求 `2026M05`。
+舊 `collect_ndc_bci.py` 明知 Angular 頁面不能用 plain GET，仍只印出「請用
+Claude / Chrome 手動更新」；Operations Core 的月排程也只嘗試把工作寫進已關閉的
+legacy queue，因此 direct-execution guard 正確 exit 1 後，沒有不依賴模型額度的
+資料 executor。舊註解另把真正端點誤記成需 reverse-engineer 的 POST body。
+
+**根因層級與底層修復**：這是 data-ingestion／schedule contract 缺陷，不是補 CSV
+一列能結案。正式 collector 現由 Playwright 啟動本機 Chrome，從官方頁實際使用的
+`/n/json/data/eco/indicators` 回應擷取固定代碼 `SR0051`／`SR0005`；逐次驗證
+origin、endpoint、series code/name/unit、期間單調性、數值有限性與 snapshot
+SHA-256。完整官方 current-vintage 先保存為
+`storage/macro/ndc_bci_source_latest.json`，再原子 upsert canonical CSV、逐列回讀、
+freshness 回讀，最後只對兩個宣告 output 做 path-scoped self-commit。月排程 wrapper
+已直接執行 collector，不再產生 agent task，也不消耗 Claude／Codex 額度。
+
+**回歸、live readback 與研究限制**：2026-07-26 官方回應
+`source_latest_date=2026-06-26`，領先指標 533 筆（1982M01–2026M05）、
+信號 509 筆（1984M01–2026M05）；最新值分別為 `103.81` 與 `39`。同步補回 17 個
+缺月並納入官方明載的全歷史回溯修正，CSV 回讀兩條 latest 均為 `2026M05`，
+freshness=`true`。snapshot 明確保存官方「每月發布均回溯修正歷史資料」說明；
+因此本檔代表 **current vintage**，不可冒充歷史各時點實際可得 vintage。Git 會從
+本次開始保存每月 snapshot 版本，但 2026-07-26 以前的 point-in-time vintages
+無法由本流程倒推。自動收集／schema drift／hash tamper／atomic upsert 測試與
+schedule/writer policy gate 均納入回歸。此「NDC 排程依賴互動模型」incident 五步
+完成，狀態 **`root_cause_fixed_and_verified`**。

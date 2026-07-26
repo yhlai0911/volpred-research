@@ -2008,3 +2008,20 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   `supervisor restart` 是本次恢復新派發層產生，不是舊逐工作 LaunchAgent。
 - 此 active-daemon 漏查 incident 為 `root_cause_fixed_and_verified`；T09 整體仍須
   sustained-clean 長窗，維持 `contained`。
+
+## 2026-07-26 — NDC ingestion 改為 quota-independent 自動流程
+
+- ✅ 移除 `collect_ndc_bci.py` 的人工 Chrome 指示與錯誤 endpoint 註解；正式流程由
+  Playwright + 本機 Chrome 取得官方 Angular app 的 JSON 回應。
+- ✅ 以官方固定代碼 `SR0051`／`SR0005`、schema、期間、有限數值與 SHA-256
+  fail closed；保存含 capture time、source latest date、官方 revision notice 的
+  source snapshot。
+- ✅ canonical CSV 採 atomic upsert、逐列 readback、freshness postcondition；
+  unattended writer 只 self-commit CSV 與 snapshot，既有工作樹其他修改不會被帶入。
+- ✅ `ndc_indicator_refresh` Operations Core wrapper 直接執行 collector；fresh 時
+  tiny skip，stale 時自動同步，不再寫 legacy queue 或等待 Claude／Codex 額度。
+- ✅ 首次 live 同步後兩條必要序列均到 `2026M05`：領先指標 `103.81`、信號 `39`；
+  補齊 17 個缺月並保存官方 current-vintage 全歷史修正。Issue #38 可依此證據結案。
+- ⚠️ NDC 官方每月回溯修正完整歷史；`tw_dgbas_bci_m.csv` 是 current-vintage
+  canonical，不是歷史 point-in-time database。Git 自本次起保存 snapshot 版本，
+  任何舊期回測若需要 real-time vintage，必須另設 availability/vintage gate。

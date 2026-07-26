@@ -261,11 +261,14 @@
       "reason": "Materializes due event windows through the canonical pending queue and records idempotent event-ledger receipts."
     },
     "ndc_indicator_refresh": {
-      "entrypoint": "scripts/materialize_ndc_indicator_task.py",
-      "policy": "phase_z_machine_state",
-      "tracked_outputs": ["storage/next_tasks.json"],
-      "phase_z_probe_paths": ["storage/next_tasks.json"],
-      "reason": "Freshness check is read-only. A stale monthly period materializes one deterministic platform_ops queue task only when admission is open; direct-execution mode fails visibly and leaves the scheduler receipt as evidence instead of bypassing the queue gate."
+      "entrypoint": "scripts/collect_ndc_bci.py",
+      "commit_owner": "scripts/collect_ndc_bci.py",
+      "policy": "self_commit",
+      "tracked_outputs": [
+        "storage/macro/tw_dgbas_bci_m.csv",
+        "storage/macro/ndc_bci_source_latest.json"
+      ],
+      "reason": "Operations Core launches a quota-independent Playwright/Chrome collector. It validates official NDC series codes SR0051/SR0005, atomically writes the canonical CSV and exact source snapshot, reads both series back, and path-scoped self-commits only its declared outputs."
     },
     "digest_daily_enqueue": {
       "entrypoint": "scripts/enqueue_daily_digest.py",
