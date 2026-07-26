@@ -994,6 +994,13 @@ def append_task_record(
     task_id = record.get("id")
     if not isinstance(task_id, str) or not task_id.strip():
         raise ValueError("task record must carry a non-empty string 'id'")
+    if "issue_ref" in record:
+        if record["issue_ref"] is None:
+            record.pop("issue_ref")
+        else:
+            from volpred.ops.issue_tracker_sync import normalize_issue_ref
+
+            record["issue_ref"] = normalize_issue_ref(record["issue_ref"])
 
     # R2 admission clamp（單一 gateway = 單一 enforcement 點）：機器來源不得自封
     # P1。boss 來源 / 時效類 / dedicated-owner ingress 原樣通過。
@@ -1088,6 +1095,7 @@ def append_next_task(
     payload: dict[str, Any] | None = None,
     parent_task_id: str | None = None,
     created_by: str | None = None,
+    issue_ref: str | None = None,
     path: str | Path = "storage/next_tasks.json",
 ) -> dict[str, Any]:
     """Append one pending task to the canonical queue under LOCK_EX.
@@ -1115,6 +1123,10 @@ def append_next_task(
         record["parent_task_id"] = parent_task_id
     if created_by:
         record["created_by"] = created_by
+    if issue_ref is not None:
+        from volpred.ops.issue_tracker_sync import normalize_issue_ref
+
+        record["issue_ref"] = normalize_issue_ref(issue_ref)
 
     record, _created = append_task_record(record, path=path, if_exists="raise")
     return record

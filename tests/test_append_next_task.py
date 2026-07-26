@@ -37,6 +37,35 @@ def test_append_preserves_existing_rows(tmp_path):
     assert len(on_disk) == 2
 
 
+def test_append_persists_canonical_issue_reference(tmp_path):
+    queue = tmp_path / "next_tasks.json"
+
+    rec = append_next_task(
+        title="implement ticket",
+        description="follow the existing spec",
+        issue_ref="https://github.com/yhlai0911/volpred-research/issues/37",
+        path=queue,
+    )
+
+    assert rec["issue_ref"] == "#37"
+    assert json.loads(queue.read_text(encoding="utf-8"))[0]["issue_ref"] == "#37"
+
+
+@pytest.mark.parametrize("issue_ref", ["", "#0", "#abc", "issue-37", object()])
+def test_append_rejects_invalid_issue_reference(tmp_path, issue_ref):
+    queue = tmp_path / "next_tasks.json"
+
+    with pytest.raises(ValueError, match="issue_ref"):
+        append_next_task(
+            title="invalid ticket",
+            description="must not enter the queue",
+            issue_ref=issue_ref,
+            path=queue,
+        )
+
+    assert not queue.exists()
+
+
 def test_append_rejects_non_list_root(tmp_path):
     queue = tmp_path / "next_tasks.json"
     queue.write_text("{}", encoding="utf-8")
