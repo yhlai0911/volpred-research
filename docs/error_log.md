@@ -3095,8 +3095,11 @@ Recovery RPC 現同時原子選取 expired `started` 或 due `retry_scheduled`�
 初版 selector 只綁 owner generation，但 generation 是 per-family counter，不是跨 family
 authority boundary；same-generation cross-family RED fixture 證實 email worker 可誤領
 別的 family。Forward migration
-`20260726083559_fence_owned_email_recovery_family` 將 request effect family 與
-effect kind 一併納入 SQL selector。Production catalog 回讀
+`20260726083559_fence_owned_email_recovery_family` 將 request effect family 納入
+SQL selector；production 實際另以
+`20260726083856_fence_owned_email_recovery_family` 加入 effect kind。兩筆 ledger
+stored statement bytes 已各自保存到同版號 repo migration，避免事後合併改寫
+已套用 migration。Production catalog 回讀
 `explicit_family_fence=true`，且原有 9 筆 publisher／delete due retry 數量不變。
 Follow-up 首跑將唯一 email due retry stale dead-letter；exact-family 回讀
 `expired_started=0`、`due_retry=0`、`nonterminal=0`、recovery receipts=23，第二次

@@ -654,10 +654,15 @@
 > 同一 actuator 亦會選取 `email.ops_alert` 最新一筆已到期的
 > `retry_scheduled + WorkItem pending + outbox pending`。初版 due-retry selector
 > 只比對 owner generation；因各 family generation 可碰巧相同，follow-up
-> `20260726083559_fence_owned_email_recovery_family` 再強制比對 effect family 與
-> effect kind。Production 回讀確認 exact-family fence 已存在、其餘 9 筆
+> `20260726083559_fence_owned_email_recovery_family` 先強制比對 effect family，
+> `20260726083856_fence_owned_email_recovery_family` 再補 effect kind。Production
+> ledger 與 stored statement bytes 已逐一回讀，確認兩層 fence 均存在、其餘 9 筆
 > publisher／delete due retry 未變；email follow-up 回收 1 筆後，
 > `expired_started=0`、`due_retry=0`、`nonterminal=0`，recovery receipts 共 23 筆。
+> 已部署的 v1 RPC／receipt schema 為相容性保留 `recover_expired`／`expired_*`
+> 名稱；due-retry receipt 中這些欄位代表被取代的 predecessor identity，語義以
+> `reason_code` 為準。現階段不新增第二個 privileged RPC alias，以免擴大 mutation
+> surface；若升級為 v2 schema，canonical vocabulary 應改為 `candidate_*`。
 > 這是 `email.ops_alert` effect-family 的 runtime 流程，不代表 Work Coordinator
 > queue owner 已切換。
 

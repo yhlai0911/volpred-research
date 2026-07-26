@@ -206,8 +206,10 @@ Exact-family follow-up 另發現 1 筆 email `retry_scheduled` 已超過 outbox
 保留原 provider settlement evidence並追加 `retry_due_without_actuator` receipt。
 初版 selector 只比對 per-family owner generation；same-generation cross-family
 RED fixture 證實此條件不是 authority boundary。Forward migration
-`20260726083559_fence_owned_email_recovery_family` 增加 request family 與 effect-kind
-fence；production catalog 回讀已確認，且其餘 9 筆 publisher/delete rows 未變。
+`20260726083559_fence_owned_email_recovery_family` 增加 request family fence；
+production 實際的 `20260726083856_fence_owned_email_recovery_family` 再增加
+effect-kind fence。兩筆 ledger stored statement bytes 已分開保存並納入 PG17 replay；
+production catalog 回讀已確認，且其餘 9 筆 publisher/delete rows 未變。
 Production 首跑將該 email retry stale dead-letter，回讀
 `email_expired_started=0`、`email_due_retry=0`、`email_nonterminal=0`、
 email recovery receipts=23，隨後 wrapper no-op。

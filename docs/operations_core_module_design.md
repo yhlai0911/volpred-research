@@ -909,11 +909,17 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   `available_at` 但沒有 consumer。Recovery selector 現同時接受 expired `started`
   與 due `retry_scheduled`，後者保留原 settlement evidence並另寫
   `retry_due_without_actuator` receipt。由於 owner generation 只在 family 內遞增，
-  初版 generation-only selector 不構成跨 family authority boundary；forward migration
-  `20260726083559_fence_owned_email_recovery_family` 增加 request family 與 effect-kind
-  fence。Same-generation cross-family 回歸與 production catalog 回讀均通過；
+  初版 generation-only selector 不構成跨 family authority boundary；forward migrations
+  `20260726083559_fence_owned_email_recovery_family` 與
+  `20260726083856_fence_owned_email_recovery_family` 依 production immutable ledger
+  分別增加 request family 與 effect-kind fence。Same-generation cross-family 回歸與
+  production catalog／stored statement bytes 回讀均通過；
   follow-up 首跑回收該筆 stale retry，而 9 筆 publisher／delete due retry 未變，
   email exact-family `expired_started/due_retry/nonterminal` 全為 0。
+- 已部署 v1 RPC／receipt schema 的 `recover_expired`／`expired_*` 是 compatibility
+  vocabulary；對 due retry 代表被取代的 predecessor，`reason_code` 才是 interpretation
+  discriminator。為維持單一 privileged mutation seam，本版不建立 generic alias；
+  未來若升級 v2 schema，欄位與 interface 應原子改為 `candidate_*`。
 
 ### 2026-07-24 publisher 單篇 Supabase sync shadow checkpoint
 

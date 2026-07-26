@@ -223,6 +223,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726083559_fence_owned_email_recovery_family.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726083856_fence_owned_email_recovery_family.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -230,6 +234,38 @@ IDEMPOTENT_REPLAY_MIGRATION = (
     / "migrations"
     / "20260724213739_operations_core_publisher_reconcile_ownership.sql"
 )
+OWNED_EMAIL_FENCE_MIGRATION_RECEIPTS = (
+    (
+        REPO_ROOT
+        / "supabase"
+        / "migrations"
+        / "20260726083559_fence_owned_email_recovery_family.sql",
+        1688,
+        "622db1864a3fa5da4d26fb91a2a516f83b306749c52ed34087ff238ca1704ea9",
+        False,
+    ),
+    (
+        REPO_ROOT
+        / "supabase"
+        / "migrations"
+        / "20260726083856_fence_owned_email_recovery_family.sql",
+        2519,
+        "d95ec5e4824e38b7067cc443b3c1983a04d3c34c1b60cf8298188ab4a2336781",
+        True,
+    ),
+)
+
+
+def test_owned_email_fence_migrations_match_production_receipts() -> None:
+    for migration, expected_bytes, expected_sha256, strip_terminal_newline in (
+        OWNED_EMAIL_FENCE_MIGRATION_RECEIPTS
+    ):
+        statement = migration.read_bytes()
+        if strip_terminal_newline:
+            assert statement.endswith(b"\n")
+            statement = statement.removesuffix(b"\n")
+        assert len(statement) == expected_bytes
+        assert hashlib.sha256(statement).hexdigest() == expected_sha256
 
 
 def _postgres_bin_dir() -> Path | None:

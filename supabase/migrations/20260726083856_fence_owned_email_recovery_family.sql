@@ -43,6 +43,37 @@ $new_scope$
   ELSE
     EXECUTE rewritten_definition;
   END IF;
+
+  SELECT pg_catalog.pg_get_functiondef(
+    pg_catalog.to_regprocedure(
+      'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)'
+    )
+  )
+  INTO STRICT function_definition;
+
+  rewritten_definition := pg_catalog.replace(
+    function_definition,
+    $old_kind$
+    AND effect.status = 'requested'
+    AND (
+$old_kind$,
+    $new_kind$
+    AND effect.status = 'requested'
+    AND effect.effect_kind = 'email.notification.send'
+    AND (
+$new_kind$
+  );
+  IF rewritten_definition = function_definition THEN
+    IF pg_catalog.strpos(
+      function_definition,
+      'effect.effect_kind = ''email.notification.send'''
+    ) = 0 THEN
+      RAISE EXCEPTION
+        'owned email recovery effect-kind fence pre-image did not match';
+    END IF;
+  ELSE
+    EXECUTE rewritten_definition;
+  END IF;
 END;
 $migration$;
 
