@@ -1,4 +1,4 @@
-# Path ownership：Claude 主線程 × Codex loop 的分工契約
+# Path ownership：Claude／Codex 互動工作與 Operations Core 的分工契約
 
 **建立 2026-07-26**，起因：owner 詢問「Codex 在優化平台，Claude 會不會改到他的程式碼」。實測近 7 天
 commit 足跡，**兩邊都寫過的檔案 40+ 個**，包含 `scripts/dispatch_supervisor/scheduler.py`、
@@ -10,11 +10,15 @@ commit 足跡，**兩邊都寫過的檔案 40+ 個**，包含 `scripts/dispatch_
 
 | Runtime | 進入點 | 指令檔 | 節奏 |
 |---|---|---|---|
-| Claude 主線程 | Claude Code session + `dispatch-supervisor` daemon | `CLAUDE.md` + `.claude/rules/` + `.claude/skills/` | 每小時 `:07` dispatch；互動 turn 隨時 |
-| Codex loop | `scripts/codex_loop.sh`（VSCode 終端常駐，單一 instance lock） | `AGENTS.md` | 每小時 tick，`codex exec resume --last` |
+| Operations Core | `com.volpred.operations-core-scheduler` | `config/runtime_schedules.json` | 唯一 business clock；30 秒 reconcile |
+| dispatch executor | `com.volpred.dispatch-supervisor` + local socket | `scripts/dispatch_supervisor/` | 無自有時鐘；只接 Operations Core tick |
+| Claude 主線程 | Claude Code interactive session | `CLAUDE.md` + `.claude/rules/` + `.claude/skills/` | 互動 turn；不是 schedule owner |
+| Codex interactive | Codex app／CLI | `AGENTS.md` | 互動 turn；不是 schedule owner |
+| legacy Codex loop | `scripts/codex_loop.sh` | rollback only | SessionStart 預設 no-op，不自動啟動 |
 
-兩邊從**同一個** `storage/next_tasks.json` claim 任務，claim 帶 owner token
-（`codex-vscode` / `codex-cli` / `hourly-slot-N-<hash>`）。
+模型派發仍以 stable owner token／fire receipt 防重；純程式 schedule receipt 與
+模型 completion receipt 分開。`storage/next_tasks.json` 的 admission 是否開放仍由
+`storage/ops/task_pool_mode.json` 決定，不能因互動 app 啟停而改變。
 
 ## 三區分工
 

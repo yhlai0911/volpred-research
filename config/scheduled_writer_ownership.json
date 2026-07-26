@@ -446,6 +446,12 @@
       "tracked_outputs": ["config/market_closures_adhoc.json"],
       "reason": "Emergency closure config is authored state outside PHASE-Z and is committed only when clean before detection."
     },
+    "agent_dispatch_tick": {
+      "entrypoint": "scripts/cron_agent_dispatch_tick.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Operations Core delivers a local socket trigger only. The executor owns ignored dispatch state and each admitted fire retains the delegated delivery contract."
+    },
     "volpred-hourly-dispatch": {
       "entrypoint": "scripts/cron_hourly_dispatch.sh",
       "policy": "deprecated",

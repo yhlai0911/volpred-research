@@ -2030,3 +2030,19 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ⚠️ NDC 官方每月回溯修正完整歷史；`tw_dgbas_bci_m.csv` 是 current-vintage
   canonical，不是歷史 point-in-time database。Git 自本次起保存 snapshot 版本，
   任何舊期回測若需要 real-time vintage，必須另設 availability/vintage gate。
+
+## 2026-07-26 — 模型派發收斂到 Operations Core 單時鐘
+
+- ✅ 新增 `agent_dispatch_tick`：Operations Core 每分鐘經權限 0600 的本機 Unix socket
+  觸發 dispatch executor；executor 的 internal scheduler loop 已從 production
+  `_run_async` 拔除。
+- ✅ executor 仍保留 4 slots、健康監控、Claude→Codex failover、quota derating、
+  worktree isolation 與 PHASE-Z；因此單一時鐘不以犧牲並行能力換取。
+- ✅ trigger receipt 與 model completion receipt 分離：額度用盡不會讓 scheduler
+  停止或假裝模型成功；下一個合法 hourly/requested tick 會在額度恢復後自然重試。
+- ✅ 舊 `codex_loop.sh` 已停止；SessionStart 呼叫的
+  `auto_start_codex_loop.sh` 預設改為 retired no-op，重新開 Claude／Codex 不會復活
+  第二個派工時鐘。
+- ✅ live socket round-trip 回傳 `not_due`、owner audit 為 50/50 Operations Core、
+  0 legacy／0 conflict；Mac launchd 的 Operations Core 與 dispatch executor 均為
+  RunAtLoad／KeepAlive。

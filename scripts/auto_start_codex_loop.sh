@@ -1,15 +1,22 @@
 #!/bin/bash
-# Auto-start codex_loop on Claude Code session start.
-# Idempotent: if already running, do nothing. Detached so Claude session
-# startup is not blocked and loop survives Claude session end.
+# Legacy codex_loop rollback entrypoint.
 #
-# Wired via SessionStart hook in .claude/settings.json.
-# Stop manually: pkill -f 'scripts/codex_loop.sh'
+# The SessionStart hook still calls this file, but the 2026-07-26 Operations
+# Core cutover made the old always-on loop a second independent dispatch clock.
+# Default is therefore a deliberate no-op. An operator may temporarily restore
+# the rollback path with VOLPRED_ENABLE_LEGACY_CODEX_LOOP=1 after first disabling
+# agent_dispatch_tick in config/runtime_schedules.json.
 
 set -e
-REPO=/Users/yhlai0911/volpred-research
-LOG=/Users/yhlai0911/.volpred/logs/codex_loop.log
+REPO="${VOLPRED_REPO_ROOT:-/Users/yhlai0911/volpred-research}"
+LOG="${VOLPRED_CODEX_LOOP_LOG:-/Users/yhlai0911/.volpred/logs/codex_loop.log}"
 LOOP=$REPO/scripts/codex_loop.sh
+
+mkdir -p "$(dirname "$LOG")"
+if [ "${VOLPRED_ENABLE_LEGACY_CODEX_LOOP:-0}" != "1" ]; then
+  echo "[auto_start_codex_loop] retired: Operations Core agent_dispatch_tick owns the clock" >> "$LOG"
+  exit 0
+fi
 
 # Already running → no-op
 if pgrep -f "scripts/codex_loop.sh" >/dev/null 2>&1; then
@@ -22,7 +29,6 @@ if [ ! -x /Users/yhlai0911/.nvm/versions/node/v22.20.0/bin/codex ]; then
   exit 0
 fi
 
-mkdir -p "$(dirname "$LOG")"
 echo "[auto_start_codex_loop] launching at $(date '+%Y-%m-%d %H:%M:%S')" >> "$LOG"
 
 # Detached background launch

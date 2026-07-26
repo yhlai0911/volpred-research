@@ -3290,3 +3290,34 @@ freshness=`true`。snapshot 明確保存官方「每月發布均回溯修正歷�
 無法由本流程倒推。自動收集／schema drift／hash tamper／atomic upsert 測試與
 schedule/writer policy gate 均納入回歸。此「NDC 排程依賴互動模型」incident 五步
 完成，狀態 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-26 — Operations Core 上線後，模型派發仍有兩個獨立時鐘
+
+**證據化症狀**：business schedule 已全量切到 Operations Core，但 live process 同時有
+`com.volpred.dispatch-supervisor` 自己的 60 秒 scheduler loop 與
+`scripts/codex_loop.sh` 的一小時 sleep loop；兩者都能從同一任務來源啟動模型工作。
+`git_writer_lock`／task claim 只能降低同時寫壞或同 task 重抓，不能防兩套架構各自挑不同
+task、各自改設計。更嚴重的是舊 Codex loop 由 Claude Code SessionStart hook 呼叫
+`auto_start_codex_loop.sh`，手動 kill 後重新開 session 仍會復活。
+
+**根因層級與底層修復**：Operations Core cutover 只收斂 `system_crontab` business jobs，
+把 dispatch supervisor 當 required daemon 稽核，卻沒有把 daemon 內部 scheduler 也視為
+clock surface；SessionStart 自動啟動的 Codex loop 又完全不在 schedule registry。
+production supervisor 現改為無時鐘 executor：本機 Unix socket（mode 0600）只接受
+Operations Core `agent_dispatch_tick`，每次 trigger 以
+`scheduler._tick_once(background=True)` 做 admission，保留 4 slots、health、
+Claude→Codex failover、quota derating、worktree isolation 與 PHASE-Z。
+`auto_start_codex_loop.sh` 預設改為 retired no-op；明確 rollback env 只有在先停用
+canonical tick 後才可使用。
+
+**回歸、live 回讀與制度化**：socket round-trip／非法 request／executor 不存在／production
+`_run_async` 無 `scheduler_loop`／SessionStart no-op 均有回歸測試；runtime schedule、
+wrapper manifest、writer ownership 與 architecture/ownership 文件同步。live executor
+經 planned reload 後 PID 更新、socket 建立，Operations Core 自 19:43 起連續產生
+`agent_dispatch_tick` immutable receipts（attempt 1、exit 0），wrapper decision 回讀
+`not_due`，dispatch heartbeat 由新 PID 持續更新。owner audit 為 50 core／0 legacy、
+0 conflict；process readback 只有 Operations Core 與無時鐘 dispatch executor，
+沒有 `codex_loop.sh`。排程 trigger receipt 與模型 completion receipt 分離，所以
+Claude／Codex quota 用盡只留下 `quota_blocked`，不會讓純程式排程停止或假綠；下個
+合法 hourly/requested tick 在 quota reset 後自然再試。此雙時鐘 incident 五步完成，
+狀態 **`root_cause_fixed_and_verified`**。

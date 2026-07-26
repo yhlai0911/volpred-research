@@ -768,29 +768,41 @@
 6. 新增策略用 `add_strategy.py`（只寫 DB，不需部署）
 7. 測試貼文清理優先走 `uv run volpred ops cleanup-post <pub_id>`，不要手改 feed/DB
 
-### Agent-first Ops Layer（v12 單主線程架構，2026-04-19）
+### Agent-first Ops Layer（Operations Core 單時鐘架構，2026-07-26）
 
-**核心模型**：整個本地 control plane 只有**一個持久的執行者** — 主線程 Claude Code single session。v11 的 3-terminal worker pool（supervisor + claude-worker + codex-worker）已於 git commit `e64a1907` 拆除；不再有常駐 T2/T3 worker terminal、也不再依賴 headless `claude -p` / `codex exec` subprocess。舊架構詳見 `docs/multi-agent-terminal-workflow-codex.md`（已 DEPRECATED）。
+**核心模型**：本機 business schedule 的唯一持久時鐘是
+`com.volpred.operations-core-scheduler`。Claude Code／Codex 互動 app 不是排程 owner；
+關閉、重新開啟或額度用盡都不會停止純程式工作。需要模型的工作由
+`agent_dispatch_tick` 經本機 Unix socket 送給 KeepAlive dispatch executor；trigger
+receipt 只證明排程已交付，模型成功／quota_blocked／auth_blocked 另以
+`storage/ops/dispatch_state.json` completion receipt 判定。
 
 **角色分工**：
 
-- **dispatch-supervisor orchestrator pool**：`config/runtime_schedules.json` 的 `volpred-dispatch-supervisor.max_slots` 控制並行 logical fires（2026-07-13 起預設 2）。每槽以 stable `job_id` / `slot_id` 隔離 state、log 與 worktree prefix；task-pool claim 仍由 canonical fcntl control plane 仲裁。
+- **Operations Core scheduler**：每 30 秒重讀 `config/runtime_schedules.json`，以
+  generation／immutable fire key／lease／retry／catch-up／receipt 執行全部
+  `system_crontab` jobs；不呼叫模型的 job 不依賴 Claude／Codex 額度。
+- **dispatch executor pool**：`volpred-dispatch-supervisor.max_slots` 控制並行 logical
+  fires。它沒有自己的 schedule loop，只接受 Operations Core 每分鐘 tick，並保留
+  health monitor、模型 failover、stable `job_id`／`slot_id` 與 PHASE-Z。
 - **Codex（ephemeral subagent）**：透過 `codex:codex-rescue` / `codex:review` 等 subagent 以 **ad-hoc** 方式被主線程派遣。共用 runtime、一次一個、任務結束即退出；**不是常駐 session，也不會主動 poll queue**。
 - **Worktree agents（ephemeral）**：僅產出 `experiments/kXXX/`，完成後由主線程 `scripts/merge_worktree.sh` 合併；不可寫共享狀態。
-- **Cloud triggers（遠端/host 層）**：Session cron 與 host crontab 只負責**把事件放進 queue**，不直接完成 task。
+- **legacy Codex loop**：`scripts/auto_start_codex_loop.sh` 預設為退役 no-op；SessionStart
+  不會再建立第二個每小時時鐘。只可在先停用 `agent_dispatch_tick` 後，以明確 rollback
+  env 暫時恢復。
 
 **Queue 語意**：control-plane queue (`storage/ops/`, `event_jobs`, `storage/next_tasks.json`) 在 v12 下是 **proposal / backlog**，不是 worker poll target。主線程在每輪 cron 或 idle pass 時**主動消化** queue。沒有 worker daemon loop 去認領 task。
 
 **排程 / 時鐘層級**（全部 source of truth 在 `config/runtime_schedules.json`）：
 
-- **Session cron（Claude Code `CronCreate` durable）**：`*/4` 分鐘觸發「繼續任務」prompt，驅動主線程自動推進 queue。這是 v12 的正式執行時鐘。
-- **Host crontab（5 entries + 1 hourly）**：
-  - 資料收集：`collect_tw` / `collect_us`
-  - 每日更新：`daily_update`（08:03 TPE）
-  - Pool 釋出：`release_pool`
-  - 日曆同步：`market_cal`
-  - 每小時：`check_alerts`（email alert subsystem）
-- **Event jobs**：由 cron / signal 觸發的 one-shot 事件（例如 FOMC、CPI release），materialize 成 control-plane task 由主線程消化。
+- **Operations Core**：唯一 business schedule owner；Mac 登入時由 launchd
+  `RunAtLoad + KeepAlive` 自動恢復，daemon 每 tick 熱重載 config。
+- **Agent dispatch policy**：退役 `cron_jobs[id=volpred-hourly-dispatch]` 的 `schedule`
+  只保留 canonical hourly due/pregate policy，不再是 OS clock。
+- **Event jobs**：先由 `event_jobs_materialize` 純程式 job 產生 durable fire，再依
+  task 性質由純程式 executor 或模型 dispatch 執行。
+- **Session cron／host VolPred crontab／per-job LaunchAgent**：正式路徑均已退役；
+  owner audit 會把重新出現的 clock surface 判為 conflict。
 
 **Alert subsystem**（`src/volpred/ops/alerts.py` + `.claude/rules/alert.md`）：
 

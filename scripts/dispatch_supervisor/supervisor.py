@@ -1,4 +1,4 @@
-"""Supervisor daemon entry point.
+"""Dispatch executor daemon entry point.
 
 Runs under launchd Aqua agent `com.volpred.dispatch-supervisor.plist`
 (RunAtLoad=true, KeepAlive=true, NOT StartCalendarInterval).
@@ -11,9 +11,9 @@ Boot sequence::
                                                  left `current_job` by a crashed
                                                  prior instance (Codex review §10 #3)
     4. alerts.send_supervisor_restart()       — info-level breadcrumb (dedup 60s)
-    5. asyncio.gather(scheduler_loop, health_loop) — wrapped so an uncaught crash
-                                                 here alerts before launchd restarts us
-                                                 (Codex review §10 #7)
+    5. asyncio.gather(trigger_server, health_loop) — Operations Core is the only
+                                                    schedule owner; this process
+                                                    receives ticks and executes them
 
 CLI::
     uv run python -m scripts.dispatch_supervisor.supervisor          # production
@@ -21,8 +21,10 @@ CLI::
     uv run python -m scripts.dispatch_supervisor.supervisor --version
     uv run python -m scripts.dispatch_supervisor.supervisor --once    # single tick for smoke
 
-`--once` runs a single scheduler tick (no async loop) for smoke testing under
-cron. Health-loop is skipped in --once mode.
+`--once` runs a single decision tick for smoke testing. Production never uses
+it: Operations Core calls ``scripts.dispatch_supervisor.trigger`` through a
+local Unix socket, preserving the worker pool while removing this daemon's
+independent schedule clock.
 
 Deliverable 5/8 — all 7 Codex review must-fix items landed (2026-07-04).
 Deliverables 6-8 cover shadow run, cutover, deprecate, retro.
@@ -38,7 +40,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import alerts, health, procutil, scheduler, state, worker, __version__
+from . import alerts, health, procutil, scheduler, state, trigger, worker, __version__
 
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = Path(os.environ.get("VOLPRED_HOME_DIR", str(Path.home() / ".volpred"))) / "logs"
@@ -252,7 +254,7 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
 
 async def _run_async(*, dry_run: bool) -> int:
     await asyncio.gather(
-        scheduler.scheduler_loop(dry_run=dry_run),
+        trigger.serve_forever(dry_run=dry_run),
         health.health_loop(),
     )
     return 0
