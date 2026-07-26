@@ -157,6 +157,13 @@ def test_recovery_script_binds_keepalive_store_and_projection(
             "holder_ref": "effect-worker:publisher-article-sync",
         },
     )
+    assert (
+        "projection",
+        {
+            "storage_dir": "storage",
+            "require_mirror_ack": True,
+        },
+    ) in calls
     assert calls[-1] == ("keepalive_stop", None)
 
 

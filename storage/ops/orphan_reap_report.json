@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-26T16:01:09.858039+00:00",
+  "generated_at": "2026-07-26T18:00:24.646439+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,14 +7,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 122.7
+      "age_hours": 124.6
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 49,
-    "grace": 2,
+    "registered": 51,
+    "grace": 0,
     "inflight": 0
   },
   "orphan_count": 1,
@@ -22,7 +22,7 @@
     {
       "path": "storage/drafts/K1597_general_draft.md",
       "adopted": false,
-      "reason": "gate_rejected (rc=1): requests.exceptions.ConnectionError: HTTPSConnectionPool(host='qxhfgdfzazwpkdgesavm.supabase.co', port=443): Max retries exceeded with url: /storage/v1/object/article-images/k1597_tail_vs_forecast_zh."
+      "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
     }
   ],
   "applied": true,
@@ -44,7 +44,7 @@
         }
       ],
       "skipped": {
-        "grace": 0,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -61,24 +61,80 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/K1714/K1714.py",
+          "kind": "py",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/K1714_results.json",
+          "kind": "json",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/README.md",
+          "kind": "md",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/data/prices_raw.csv",
+          "kind": "csv",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/figures/fig1_rolling_vol.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/figures/fig2_cumulative_variance_differential.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/figures/fig3_turnover_leverage.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/figures/fig4_rcov_conditioning.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1714/test_K1714.py",
+          "kind": "py",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
-    }
-  },
-  "held_escalations": [
-    {
-      "task_id": "assign_8bed8009",
-      "paths": [
-        "job:lazypack-mile_7c894f46-r2"
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/K1714/K1714.py",
+            "experiments/K1714/K1714_results.json",
+            "experiments/K1714/README.md",
+            "experiments/K1714/data/prices_raw.csv",
+            "experiments/K1714/figures/fig1_rolling_vol.png",
+            "experiments/K1714/figures/fig2_cumulative_variance_differential.png",
+            "experiments/K1714/figures/fig3_turnover_leverage.png",
+            "experiments/K1714/figures/fig4_rcov_conditioning.png",
+            "experiments/K1714/test_K1714.py"
+          ],
+          "committed": true,
+          "detail": "[main 671c59249] chore(experiment-reap): collect orphaned experiment artifacts (9 files)\n 9 files changed, 9501 insertions(+)\n create mode 100644 expe"
+        }
       ]
     }
-  ],
+  },
+  "held_escalations": [],
   "held_escalated_paths": [
     "job:lazypack-mile_7c894f46-r2"
   ]

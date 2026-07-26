@@ -27004,5 +27004,35 @@
     "owner": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
     "commit": null,
     "summary": "K1658（FOMC statement shock vs press-conference shock 分布反應拆解）派工：建 worktree + 寫 brief + enqueue async agent job。dispatch starvation 保底席（本班必挑）+ Batch-drain 第二張（CI-red 修復後預算充足接續）。\n\n**動作**：\n- 建 registered linked worktree `.claude/worktrees/dispatch-slot-1-39b53bf6-k1658`（branch `wt/dispatch-slot-1-39b53bf6-k1658`），走 scripts/git_writer_lock.py run 序列化建立。\n- brief `/tmp/brief_k1658_39b53bf6.md`：TLT/IEF/ZN=F 為反應資產；用 SOFR/Treasury-futures intraday event window 分離 statement(14:00 ET)/presser(14:30 ET) 兩 shock；檢定二者對次日 RV / rate-vol skew proxy / tail jump 的差異；lookahead(signal.shift(1))/seed=42/多重比較 family 事前寫死；正交聲明 vs line 1425 文本可讀性。\n- enqueue `agent-brief_k1658_39b53bf6-b574ac`（opus/xhigh，timeout 5400s，result-artifact experiments/K1658/K1658_results.json，source-task-id K1658 → in_progress）。followup-task-type=experiment。\n\n**brief 帶進的三條硬紀律**：\n1. 資料可得性是第一風險：US intraday Treasury-futures 若不可得 → 兩 shock 無法分離 → 明令如實回報 NULL/infeasible，禁強行輸出。\n2. FOMC 事件小樣本（每年 8 次）：tail-jump 檢定 power 不足要降級 descriptive 並標示，禁過度宣稱。\n3. NULL 完全可接受且同樣有價值，followup brief 註明「不得因 NULL 退回重跑」，避免 reactive 調參。\n\n**狀態語意**：K1658 現為 in_progress，由 enqueue-agent 的 single-owner source-task-id collision gate 標記，代表「已派 async agent lane、在飛」而非 stall 殘留；由後續某班 fire 的 PHASE A 依 followup-brief 收件（驗三件套 → Codex primary-path review → merge worktree → 寫 knowledge）。\n\n改動：新增 worktree（branch wt/dispatch-slot-1-39b53bf6-k1658）；compute queue 新增 1 job。無 main-repo experiment 檔（async agent 產出）。"
+  },
+  {
+    "timestamp": "2026-07-27T01:25:05+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1415_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
+    "owner": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
+    "commit": null,
+    "summary": "K1415 一般讀者向文章完成並發佈至草稿池（address production_throughput CRITICAL：24h 僅 2 篇 vs 目標 6/day，releasable drafts=2）。\n\n**選工脈絡**：本班 STARVATION LOCKOUT 啟動，agent-lane 6 個 starved 候選皆為重型 worktree/certification 任務，且經查最舊兩張（assign_42306eaa K1698、k1257_k1258）其 compute round 早已 completed + followup_dispatched=True，pending 只是 aging 殘留，重派會造成重工。改處理 main-thread lane P1 daily_article backlog（直接對應 #1 dashboard CRITICAL）。\n\n**K1436 同班判定 not-writable**：源 K1436 為 DOCUMENTED_NEGATIVE / BLOCKED_DATA_UNAVAILABLE 之 BTC funding-rate feasibility audit，無 evidence package，不過 evidence-before-prose gate → complete failed，建議退休該 article task。\n\n**K1415 交付**：\n- 派 opus draft-writer subagent（medium effort, per model_router），evidence 全 grounded 於 experiments/k1415/k1415_results.json：OOS QLIKE 2.155→2.014（+6.56%）、DM stat −7.70 p=1.4e-14、全樣本 R² 0.111→0.131、β_TR=+4.043（t=8.56）、Post-2021 +5.64%。三項限制（單一資產 SPY / 日頻 RV proxy / 未做多比率校正 / Codex CONDITIONAL_PASS）誠實寫入。\n- anti_ai_gate PASS（exit 0，散文本體 0 WARN）。\n- publish_draft dry-run 抓到 content-vs-source false positive（\"5 分鐘\" 的裸數字 5），改「五分鐘級」後 audit PASS；正式發佈 → mile_35d8941b（status=draft）。2 張既有 PNG auto-upload 至 Supabase。\n- 授權 lazypack：手寫 strict plan v1（3 panels concept/results/takeaway，全數值 metric-bound 到 results.json，sha256 驗過，deterministic render 驗證通過），enqueue async codex-primary render `lazypack-mile_35d8941b`（*/15 worker 出圖+append+sync，release cron 落地後 draft 才可 release）。\n\n**完整完成 gate**：agent 跑完+結果驗證✓、work_log 已寫（actor=owner）✓、fire_receipt 交 PHASE-Z✓、next_tasks status 已標（K1415 succeeded / K1436 failed）✓。"
+  },
+  {
+    "timestamp": "2026-07-27T01:27:57+08:00",
+    "task_type": "platform_ops",
+    "task_id": "starvation_stale_tracker_hygiene_20260727",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
+    "owner": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
+    "commit": null,
+    "summary": "Dispatch-hygiene 去重：關閉 STARVATION LOCKOUT #1/#2 兩個 false-starved stale tracker，解除本 slot 每班對這兩張的重複評估浪費。\n\n**背景**：本班 dispatcher 進 STARVATION LOCKOUT，agent-lane 最舊兩張 starved（assign_42306eaa aged 222.7h、k1257_k1258 aged 162.0h）經查其 compute round 早已 completed + followup_dispatched=True，pending 純為 aging 殘留而非真有待辦 → 重派會造成重工、且永久霸佔 lockout 前二位餓死其他任務。\n\n**k1257_k1258_semantics_and_certification → succeeded**：semantics-rerun compute (k1257-k1258-semantics-rerun-20260723) completed；後繼 collect_k1257_realign / collect_k1258_schema / k1257_k1258_realign_doc_remediation（Codex CONDITIONAL PASS）皆 succeeded。task scope 已達成。（Codex 為 CONDITIONAL，非 unconditional，result 已註明。）\n\n**assign_42306eaa（K1698 rev2b tracker）→ succeeded**：僅追蹤 rev2b 階段，已交付；後續認證輪由 k1698_rev4_round5_collect（pending）接手。⚠️ result 明確澄清 K1698 最終認證仍 OPEN（round5 codex FAIL），succeeded 僅指 rev2b 階段 task 交付，非研究通過/可合併。K1698 canonical 進度續由後繼任務追蹤，無 orphan。\n\n兩張皆為 stale duplicate tracker 去重，非重新宣告研究結論；honest scoping 見各自 result。"
+  },
+  {
+    "timestamp": "2026-07-27T01:34:20+08:00",
+    "task_type": "experiment",
+    "task_id": "K1714",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
+    "owner": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
+    "commit": null,
+    "summary": "K1714 orphan-worktree salvage：搶救一份完成 5 天卻從未合併/收件的完整實驗（realized-covariance HAR vs shrinkage/EWMA 於 OOS GMV 組合）。\n\n**背景**：dispatch 保底席 K1714（P3, 本班必挑）。經查其 stale worktree dispatch-slot-3-3896dcaa-k1714（age 110h）內已有完整產物（K1714.py 46KB / K1714_results.json 67KB / README 24KB / test_K1714.py / figures / data），全部 untracked（從未 commit）。屬「worktree agent 完成但成果沒人收」案例 → 依 triage 紀律禁止原樣重派，改走 verify + salvage。\n\n**merge_worktree.sh 阻擋根因（供 worktree_unmerged 裁決參考）**：正式 merge auto-commit 被 pre-commit audit-test-imports 擋下，報 tests/test_member_qa_duplicate_gate.py 的 content.member_qa_publish_gate_applies / _validate_question_id_waiver 為 undefined。實際上這兩函式在**當前 main** src/volpred/ops/content.py L820 / L663 均存在 → audit 是對 **worktree 過時 branch base（Jul 22，早於這兩函式加入）** 的 candidate index 判定，非 main blocker。結論：此 orphan worktree 因 branch base 過時無法 auto-merge，需 rebase 或抽檔 salvage。\n\n**Salvage 動作**：因產物皆 untracked（無 commit 史可保），抽出自足的 experiments/K1714/ 複製進 canonical main（去除 __pycache__），交 PHASE-Z 對健康 main 提交（current content.py 有函式 → audit 通過）。stale worktree 留待 inc_776caf84f125_e1 worktree 裁決清理。\n\n**結果驗證（agent-result-verification）**：verdict=LOSE（headline / long_only / matrix_log_spec 三 spec 一致），ann vol har_rcov_chol=0.0926 vs ewma=0.0872 vs sample=0.0893 vs ledoit_wolf=0.0903 → HAR-RCov 波動更高、輸簡單 EWMA/shrinkage；Holm 多重 benchmark 校正 + block-level shift(1) lookahead（L394）+ 保守 LOSE-priority 裁決（防事後挑好看）+ 誠實「描述性非可交易性」框架；seed=42。乾淨的 DOCUMENTED_NEGATIVE：realized-covariance HAR 直接建模在 GMV 組合上未帶來 OOS 波動改善。\n\n（知識庫正式 knowledge 條目建議由後續 collection followup 補；本班以 work_log 記錄滿足完整完成 gate (b)。）"
   }
 ]

@@ -27867,7 +27867,7 @@
     "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -27914,15 +27914,19 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f"
+      },
+      {
+        "ts": "2026-07-26T17:45:06.378000+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 93.3min >= grace 20min"
       }
     ],
-    "last_released_at": "2026-07-26T15:33:41.816453+00:00",
-    "claimed_by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
-    "claimed_at": "2026-07-26T16:11:45.916198+00:00",
-    "claim_session_id": "dd70faaea8cf",
-    "started_at": "2026-07-26T16:11:49.731574+00:00",
+    "last_released_at": "2026-07-26T17:45:06.377987+00:00",
     "compute_job_id": "agent-brief_k1658_39b53bf6-b574ac",
-    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection",
+    "last_release_reason": "liveness_reconcile_detached_39b53bf6"
   },
   {
     "id": "K1659",
@@ -32641,7 +32645,7 @@
     "title": "K1714: 已實現共變異數 HAR → 最小變異組合的樣本外檢定 — 對多資產（TW0050/TSMC/金融股 或 SPY/QQQ/GLD/TLT）用 HAR 直接建模 realized covariance 矩陣（Cholesky/log-matri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 495). Original: 已實現共變異數 HAR → 最小變異組合的樣本外檢定 — 對多資產（TW0050/TSMC/金融股 或 SPY/QQQ/GLD/TLT）用 HAR 直接建模 realized covariance 矩陣（Cholesky/log-matrix 參數化），比對 shrinkage/EWMA 共變異數在 GMV 組合的 OOS 波動與換手；yfinance 日資料（來源：2024-26 HAR-type realized covariance forecasting）。差異化：庫內幾乎全單變量，realized-cov-matrix→組合是新面向，直接服務組合構建產品。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1714.py with signal.shift(1) + seed=42, (c) K1714_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -32728,6 +32732,24 @@
         "to": "pending",
         "by": "release",
         "note": "normalize_pending_claim_residue"
+      },
+      {
+        "ts": "2026-07-26T17:31:20.174268+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:31:20.448956+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:34:20.926538+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
       }
     ],
     "last_released_at": "2026-07-26T12:18:47.348042+00:00",
@@ -32737,7 +32759,10 @@
     "last_release_reason": "normalize_pending_claim_residue",
     "triage_2026_07_26": "SALVAGE-NOT-REENQUEUE. 完整未合併產出在 worktree .claude/worktrees/dispatch-slot-3-3896dcaa-k1714/experiments/K1714/（K1714.py + 67KB results.json + 24KB README + test_K1714.py + figures，07-22 11:05，git untracked）。compute job agent-brief_k1714-cd4315 被標 failed 是 quota_exhausted 假象（re-queue 16 次撞額度窗），實際 agent 已完成。",
     "test_status": "32/33 pass。唯一 fail=test_logm_unvec_is_pd_for_any_real_vector：用 scale=5.0 的 10 維隨機向量餵 logm_unvec→矩陣指數在理論上 PD 但數值上 ill-conditioned，np.linalg.cholesky 的 float PD-check 失敗。headline Cholesky spec（PD-by-construction）不受影響；matrix-log 僅次要 spec 且 verdict 亦為 LOSE。",
-    "disposition": "bounded 收尾：(1) 原則性解 logm PD 不變量（實際 fit 係數不會產生此極端；修法二選一並經 Codex 審—A. 測試改用 realistic scale + 文件化 conditioning floor；B. logm_unvec 加 eigenvalue floor/jitter 並記錄 PD-fail-rate），禁單純弱化測試蒙混；(2) 33/33 綠 + agent-result-verification;(3) merge_worktree.sh 整合；(4) complete K1714。結論本身（HAR realized-cov 在 GMV 上輸所有標準估計量，4 spec 一致的乾淨負面結果）已可信。"
+    "disposition": "bounded 收尾：(1) 原則性解 logm PD 不變量（實際 fit 係數不會產生此極端；修法二選一並經 Codex 審—A. 測試改用 realistic scale + 文件化 conditioning floor；B. logm_unvec 加 eigenvalue floor/jitter 並記錄 PD-fail-rate），禁單純弱化測試蒙混；(2) 33/33 綠 + agent-result-verification;(3) merge_worktree.sh 整合；(4) complete K1714。結論本身（HAR realized-cov 在 GMV 上輸所有標準估計量，4 spec 一致的乾淨負面結果）已可信。",
+    "started_at": "2026-07-26T17:31:20.448937+00:00",
+    "completed_at": "2026-07-26T17:34:20.926511+00:00",
+    "result": "Salvaged orphan worktree 完整實驗至 main experiments/K1714/。DOCUMENTED_NEGATIVE：realized-covariance HAR（Cholesky/matrix-log）在 OOS GMV 組合輸 EWMA/shrinkage（ann vol 0.0926 vs 0.0872），verdict=LOSE 三 spec 一致，Holm 校正 + block-level shift(1) + 保守裁決。artifacts 交 PHASE-Z commit。orphan worktree 因 branch base 過時無法 auto-merge，留待 worktree 裁決清理。"
   },
   {
     "id": "K1715",
@@ -34960,7 +34985,7 @@
     "description": "K1698（experiments/k1698/，FTD E1 v2 — scale re-calibration gating，K1684 的 compliant rerun）於 2026-07-17 孤兒收尾時經 codex gpt-5.6-sol (reasoning=high) 獨立二審判 **FAIL**，依 K1259 規則不得寫入 knowledge.json。本 task 是它的 consumer 與修復出口。\n\n**先講公道話（這些 blocker 是真修的，別重做）**：數字全部可從 JSON 逐項對上、無 K1016 式反向宣稱 —— leg1 t=+1.4694/p=0.1424/n=436、own-target bridge −5.2522 vs primary −2.0642(p=0.0396)、校正因子 std(z)=1.20290 / MZ=1.21091 / HL=1.07465、placebo GJRf-a OOS=1.11910 / IS=0.99346、1% VaR trinity HAR+CF 14/450 (Kupiec p=0.000 FAIL) vs bridge 17/450、GJR+CF 2/450 PASS 但 c_emp=0.799 [0.63,1.02] 屬過度保守型 PASS、K854 bridge 11/14 格相符。K1684 的 n=377 縮樣已修（改 declared drop 3 cells，n=450）、atomic write（tmp→json.load→os.replace）、GATE_RULES 寫在 k1698.py:170 且 decide_gate_v2() 確實檢查 leg-2 —— 全部確認到位。\n\n**FAIL 理由（問題全在「數字 → 結論」與兩個號稱已解的 blocker）**：\n1. **lookahead 未解（致命）**：active contract 依整份日檔成交量選出（k1698.py:328 `v[dl==d].sum()`），含 13:30-13:45 的 tick，因此號稱「13:30 可得」的 RV predictor 用了視窗收盤後 15 分鐘的合約選擇資訊 —— 直接推翻 README「資訊集建構上不相交」的宣稱，並打在所有「新舊 RV 差 → divergence 是 artifact」結論的根上。\n2. **60 天邊界 audit 是空驗證**：rv_window_boundary_audit 取的是最早 60 個交易日（2017-01，夜盤上線前），JSON 內 12 筆 checks 的 night_pm_in_window / night_am_in_window 全是 None，而 None 不會令 ok=False；night_pm_stamped_before_file_date 更根本沒併進 all_ok。而 OOS(2023-24) 全在夜盤時代 → blocker 2 的機械證明並不存在。\n3. **accepting the null**：t=+1.469 (p=0.142) 只是「未證明 HAR 勝」，被寫成 H2_REJECTED +「divergence 是 construction artifact」。要立此論需 equivalence / noninferiority 檢定；−5.25→−2.06 是描述性比較，未對兩套 paired loss differential 之差做正式檢定。\n4. 「完全復現 K1684/K854 的世界」與 JSON 的 11/14 相矛盾（只有 HAR/RGL cells 逐格復現，差的 3 格全是 GJR 家族 10→9、3→2、9→7）。\n5. 「差全部來自 RV 重建」無分項 ablation —— 新 RV 同時改了 active contract／gap／alignment／連續 path 四件事，故「RV 建構吃掉最多」「殘餘 1.075 = composition/basis」皆未識別。\n6. JSON limitation #7 寫「>=100-start GJR/RGL」與 top-level rgl_multistart=40 自相矛盾（README 本身寫對）。\n7. k1698/ 目錄內無獨立 referee report/receipt，README §2 的「primary-path review PASS」無機械證據。\n\n**要做的（順序有依賴，別跳）**：\n1. 修 contract-selection lookahead：合約選擇只能用 13:30 前可得資訊（前一日 volume 或 rolling 規則），重跑 RV predictor。這一步不做，後面全部無意義。\n2. 修 rv_window_boundary_audit：抽樣必須涵蓋夜盤時代與 OOS 期（2023-24），None 應令 ok=False，night_pm_stamped_before_file_date 併進 all_ok。\n3. 無 lookahead 重跑後，做四層分項 ablation（active contract / gap / alignment / 連續 path）才能講「哪一項吃掉多少」。\n4. H2 若仍要主張「divergence 是 artifact」，改用 equivalence / noninferiority 檢定，不可拿 p=0.142 當證據。\n5. 修 limitation #7 與 rgl_multistart 的矛盾；把 review receipt 落成檔案。\n6. 重跑後再送 codex 二審；CONDITIONAL PASS 以上才可寫 knowledge.json。\n7. heavy compute 走 scripts/compute_queue.py enqueue，不要塞進 hourly fire。\n\n**可保留素材（修完才談短文）**：common-target vs own-target ranking 分歧、RV 建構敏感性、校正機器對 GJR placebo 同樣有效的否定結果、c_emp 作 ex-post calibration 診斷。\n\nparent_task_id=dreaming_orphaned_experiment_k1698",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-17T10:24:51.180552+00:00",
     "parent_task_id": "dreaming_orphaned_experiment_k1698",
@@ -35016,16 +35041,29 @@
         "to": "pending",
         "by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
         "note": "normalize_pending_claim_residue"
+      },
+      {
+        "ts": "2026-07-26T17:27:23.119684+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:27:39.490998+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
       }
     ],
-    "result": "rev2b 已完成並自審修掉 round-2 六項缺陷；主線程逐條驗過 contract-selection / boundary audit / TOST 三項；Codex round 3 已進 compute queue compute-k1698-rev2b-codex-round-3-primary-path-review-1784463137，裁決前不得 merge",
+    "result": "rev2b 已完成並自審修掉 round-2 六項缺陷；主線程逐條驗過 contract-selection / boundary audit / TOST 三項；Codex round 3 已進 compute queue compute-k1698-rev2b-codex-round-3-primary-path-review-1784463137，裁決前不得 merge\n\n本 task 僅追蹤 K1698 rev2b 階段（contract-selection lookahead / 夜盤邊界 / equivalence TOST 修復重跑）：rev2b 已完成、主線程逐條驗過三項、Codex round-3 已 dispatch，此階段交付完成。後續認證輪（rev3/rev4/codex round4-5）已由後繼任務 k1698_rev4_round5_collect（pending）等接手。⚠️ 重要澄清：K1698 之最終認證仍 OPEN（最新 k1698_rev4_codex_round5 = FAIL），本 succeeded 僅代表 rev2b 階段 task 已交付，絕不代表 K1698 已通過認證或可合併。此為 dispatch-hygiene 去重（stale duplicate tracker，pending 為 222h aging 殘留），K1698 canonical 進度由 k1698_rev4_round5_collect 追蹤。",
     "dispatch_note": "DISPATCHED→compute-queue agent job `agent-brief_k1698_rev2-713b65` (opus/xhigh, timeout 7200s) @2026-07-19T12:52 by hourly-slot-2-c5cafe39b455474b8cd5a4e225b64705; worktree=.claude/worktrees/dispatch-slot-2-c5cafe39-k1698; artifact=experiments/k1698/k1698_rev2_results.json; followup(paper_review P2) 會在 job 完成後由 PHASE A 建出並負責 codex 二審 + merge_worktree。stale-release 前請先查 compute_queue 該 job 狀態，勿重派。",
     "last_released_at": "2026-07-26T13:50:03.685434+00:00",
     "last_release_reason": "normalize_pending_claim_residue",
     "compute_job_id": "agent-brief_k1698_rev2-713b65",
     "recovery_branch": "worktree-dispatch-slot-2-c5cafe39-k1698",
     "reviewed_commit": "e13f83a5d",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
+    "completed_at": "2026-07-26T17:27:39.490973+00:00"
   },
   {
     "id": "k1380_rerun_staged_correct_qlike",
@@ -38052,7 +38090,7 @@
     "title": "K1257/K1258：posterior/drop 機器可讀語意欄位 + 重複 diagnostics 合併 + Codex round 2 hash-bound 認證",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "description": "承 k1257_k1258_realign_doc_remediation。剩餘放行最小條件 3 與 5 後半，需動程式碼+重跑，故不與 doc-only 修正同批：\n(3) 兩支結果加 absorbing_dropped_models / ever_invalid_models / 逐模型 final_weight_status；K1258 補 posterior_semantics 與 floor-revival 語意；合併重複的 invalid_forecast_days 與 dropped_model_days（k1257_bma_volatility.py:576 同分支同步加一，確實完全重複）→ 後者改名 drop_events / posterior_excluded_days。\n(5) claim-surface bytes 定版後跑 Codex round 2，產生 hash-bound review_verdict.json 讓 experiment_gates.py 的 review-certification gate 過關。verdict 檔 schema 一律用 `uv run python scripts/experiment_gates.py verdict-template` 產生，禁手抄（2026-07-14 k1709 schema drift 教訓）。\n注意：Codex CONDITIONAL PASS 已獨立重算過 parquet replay，數字全部吻合；重跑後若 headline 有變即為迴歸，須停下查。",
     "created_at": "2026-07-19T23:10:04.358676+00:00",
@@ -38082,13 +38120,26 @@
         "to": "pending",
         "by": "release",
         "note": "normalize_pending_claim_residue"
+      },
+      {
+        "ts": "2026-07-26T17:27:22.848349+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:27:39.225904+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
       }
     ],
     "compute_job_id": "k1257-k1258-semantics-rerun-20260723",
-    "result": "dispatched to compute job k1257-k1258-semantics-rerun-20260723; awaiting PHASE A collection",
+    "result": "dispatched to compute job k1257-k1258-semantics-rerun-20260723; awaiting PHASE A collection\n\n本 task 之 semantics-rerun compute job (k1257-k1258-semantics-rerun-20260723) 已 completed 且 followup_dispatched；後繼收件/認證任務 collect_k1257_realign_20260720、collect_k1258_schema_20260720、k1257_k1258_realign_doc_remediation（Codex CONDITIONAL PASS 收件：README 過度宣稱/stale 數字修正）皆已 succeeded。本 task 之 scope（機器可讀語意欄位 + Codex 認證 dispatch + 收件）已達成 → 標 succeeded。注意：Codex 裁決為 CONDITIONAL PASS，非 unconditional。此為 dispatch-hygiene 去重（本 task 之 pending 為 aging 殘留），非重新宣告研究結論。",
     "last_released_at": "2026-07-26T12:18:47.348310+00:00",
     "last_release_reason": "normalize_pending_claim_residue",
-    "triage_2026_07_26": "collect_completed followup（compute job k1257-k1258-semantics-rerun-20260723，exit 0，experiment_gate=passed）已 deliver 完整產物到 main：experiments/k1257 + experiments/k1258（code/results.json/README/figures/reproduce_spec/forecasts parquet；k1257 有 codex_review.md，k1258 有 codex_review.md + codex_review_v2.md）。剩餘 cert 步驟（heavy，非 fire-tail）：依 followup brief 驗 exit0+headline-equality gate、inspect absorbing_dropped_models/ever_invalid_models/per-model final_weight_status/drop_events/posterior_excluded_days、以 experiment_gates.py verdict-template 生 review_verdict.json、Codex round-2 對 final claim-surface bytes、填 template、cert/artifact gates、commit exact artifacts，兩 experiment 皆 certify 才 complete 本任務。此為 heavy compute+review，走 compute_queue/enqueue-agent。"
+    "triage_2026_07_26": "collect_completed followup（compute job k1257-k1258-semantics-rerun-20260723，exit 0，experiment_gate=passed）已 deliver 完整產物到 main：experiments/k1257 + experiments/k1258（code/results.json/README/figures/reproduce_spec/forecasts parquet；k1257 有 codex_review.md，k1258 有 codex_review.md + codex_review_v2.md）。剩餘 cert 步驟（heavy，非 fire-tail）：依 followup brief 驗 exit0+headline-equality gate、inspect absorbing_dropped_models/ever_invalid_models/per-model final_weight_status/drop_events/posterior_excluded_days、以 experiment_gates.py verdict-template 生 review_verdict.json、Codex round-2 對 final claim-surface bytes、填 template、cert/artifact gates、commit exact artifacts，兩 experiment 皆 certify 才 complete 本任務。此為 heavy compute+review，走 compute_queue/enqueue-agent。",
+    "completed_at": "2026-07-26T17:27:39.225876+00:00"
   },
   {
     "id": "assign_e7643d81",
@@ -41073,7 +41124,7 @@
     "title": "[WS-B 自鎖] writer_isolation pilot 578/578 全判 orphan、成功併入 main 0 次 —— 先驗 _JOB8_RE 假設再解鎖",
     "priority": 2,
     "task_type": "platform_ops",
-    "status": "pending",
+    "status": "in_progress",
     "source": "hourly_dispatch_d4_design",
     "tags": [
       "platform_ops",
@@ -41082,7 +41133,25 @@
       "phase-z"
     ],
     "created_at": "2026-07-21T16:40:00Z",
-    "description": "設計依據：docs/governance/2026-07/d4_producer_scoped_workspace_design.md §0 與 §5（S0/S1）。\n\n**主線程已獨立驗證的事實**（不是 agent 轉述）：\n- config/runtime_schedules.json 的 volpred-hourly-dispatch 條目 writer_isolation.mode = 'pilot'（lanes=[platform_ops], max_total=3），也就是隔離**已經開著**。\n- storage/ops/dispatch_workspace_receipts.jsonl 共 628 筆：578 筆 finalized、50 筆 allocation_skipped。\n- 578 筆 finalized 的 worker_outcome **100% 是 orphaned**，disposition 100% 是 remediation_opened。\n- 全檔 grep 'merged' = **0**。也就是 happy path 從上線到現在**一次都沒走通**。\n- remediation 最常見的三筆都是 {\"created\": false}（各 38 次）—— 「絕不 strand」的保證沒有成立。\n- 從未出現 allocated 事件 → setup latency 至今無任何實測值。\n\n**自鎖迴圈**：失敗 → 保留 worktree → 佔滿 max_total=3 → 新 fire 拿不到隔離（50 次 allocation_skipped 原因 100% 是 total_cap）→ 全退回 shared main → PHASE-Z 繼續猜作者。旁證：受害 worktree 名單裡的 dispatch-slot-1-558d7893-k1730 與 dispatch-slot-1-bd00f90a-k1731，本班 2026-07-22 00:0x 都親眼確認過狀態異常（前者目錄已回收、成果只剩 quarantine salvage ref；後者卡 experiment certification gate 未合併）。\n\n**S0（先做，不要跳過）**：設計文件把 `scripts/dispatch_supervisor/workspace.py:93` 的 `_JOB8_RE` 不接受 `-<slug>` 尾綴、而實測 17 個 workspace 全部帶 slug，列為 578/578 全判 orphan 的**待驗假設**。先寫一個能重現的測試證實或推翻它 —— **不要憑這個假設直接改碼**。若成立，這是一個 regex 的修，不是架構問題；若不成立，真因另有其處，繼續往下查。\n\n**S1**：解自鎖 —— quarantine 只留 branch 不留目錄，讓失敗不再吃掉 max_total 額度。\n\n**硬規則**：不得在此加任何新的 recognizer / namespace / 收編條件（D1，已失敗 6 次），scripts/tests/test_phase_z_ownership_class_gate.py 會擋。S2-S7 各自入池，不要在本單一次做完。"
+    "description": "設計依據：docs/governance/2026-07/d4_producer_scoped_workspace_design.md §0 與 §5（S0/S1）。\n\n**主線程已獨立驗證的事實**（不是 agent 轉述）：\n- config/runtime_schedules.json 的 volpred-hourly-dispatch 條目 writer_isolation.mode = 'pilot'（lanes=[platform_ops], max_total=3），也就是隔離**已經開著**。\n- storage/ops/dispatch_workspace_receipts.jsonl 共 628 筆：578 筆 finalized、50 筆 allocation_skipped。\n- 578 筆 finalized 的 worker_outcome **100% 是 orphaned**，disposition 100% 是 remediation_opened。\n- 全檔 grep 'merged' = **0**。也就是 happy path 從上線到現在**一次都沒走通**。\n- remediation 最常見的三筆都是 {\"created\": false}（各 38 次）—— 「絕不 strand」的保證沒有成立。\n- 從未出現 allocated 事件 → setup latency 至今無任何實測值。\n\n**自鎖迴圈**：失敗 → 保留 worktree → 佔滿 max_total=3 → 新 fire 拿不到隔離（50 次 allocation_skipped 原因 100% 是 total_cap）→ 全退回 shared main → PHASE-Z 繼續猜作者。旁證：受害 worktree 名單裡的 dispatch-slot-1-558d7893-k1730 與 dispatch-slot-1-bd00f90a-k1731，本班 2026-07-22 00:0x 都親眼確認過狀態異常（前者目錄已回收、成果只剩 quarantine salvage ref；後者卡 experiment certification gate 未合併）。\n\n**S0（先做，不要跳過）**：設計文件把 `scripts/dispatch_supervisor/workspace.py:93` 的 `_JOB8_RE` 不接受 `-<slug>` 尾綴、而實測 17 個 workspace 全部帶 slug，列為 578/578 全判 orphan 的**待驗假設**。先寫一個能重現的測試證實或推翻它 —— **不要憑這個假設直接改碼**。若成立，這是一個 regex 的修，不是架構問題；若不成立，真因另有其處，繼續往下查。\n\n**S1**：解自鎖 —— quarantine 只留 branch 不留目錄，讓失敗不再吃掉 max_total 額度。\n\n**硬規則**：不得在此加任何新的 recognizer / namespace / 收編條件（D1，已失敗 6 次），scripts/tests/test_phase_z_ownership_class_gate.py 會擋。S2-S7 各自入池，不要在本單一次做完。",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-26T17:22:55.379351+00:00",
+    "claim_session_id": "9953560c09bc",
+    "status_history": [
+      {
+        "ts": "2026-07-26T17:22:55.379359+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T17:22:55.678852+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-26T17:22:55.678839+00:00"
   },
   {
     "id": "assign_50256f5f",
@@ -42524,7 +42593,7 @@
     "title": "K1436: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1436 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json.  Verdict preview: [K1436 verdict=NULL reviewer=feature-dev:code-reviewer subagent (PASS, no blocking defects; Codex CLI unavailable until 2026-07-25) artifact=experiments/k1436 task=compute-queue-followup-agent-brief_k1436_v2-70286f] Does BTC perpetual funding rate carry incremental information fo Canonical evidence: experiments/k1436/k1436_results.json, experiments/k1436/v1_feasibility_audit_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -42541,15 +42610,38 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T14:29:03+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-26T17:11:00.564536+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:11:08.668599+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:12:21.201966+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      }
+    ],
+    "started_at": "2026-07-26T17:11:08.668587+00:00",
+    "completed_at": "2026-07-26T17:12:21.201935+00:00",
+    "result": "源 K1436 為 DOCUMENTED_NEGATIVE / BLOCKED_DATA_UNAVAILABLE 的 BTC funding-rate feasibility audit（非正式實驗，0 筆 funding-rate 檔、0 筆 BTC intraday RV target），無 ≥3 可驗證數字/表/圖之 evidence package，不通過 reader-facing evidence-before-prose gate。此 article task 應退休或改為資料收集 task，禁強推寫作。"
   },
   {
     "id": "assign_76606948",
     "title": "PHASE-Z 卡住檔案 incident（c173ab459b5f36c7）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 72 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 72 班\n- tests/test_check_matt_skills_installation.py — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T143709021853Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T155527010646Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T161855815960Z:<路徑>`",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 73 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 73 班\n- tests/test_check_matt_skills_installation.py — 6 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T143709021853Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T155527010646Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T161855815960Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173642809557Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-26T14:37:11.491084+00:00",
     "payload": {
@@ -42560,17 +42652,18 @@
         "tests/test_check_matt_skills_installation.py"
       ],
       "streaks": {
-        "storage/logs/trending_primary_source_verification.jsonl": 72,
-        "tests/test_check_matt_skills_installation.py": 5
+        "storage/logs/trending_primary_source_verification.jsonl": 73,
+        "tests/test_check_matt_skills_installation.py": 6
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260726T143709021853Z",
         "refs/volpred/quarantine/20260726T155527010646Z",
-        "refs/volpred/quarantine/20260726T161855815960Z"
+        "refs/volpred/quarantine/20260726T161855815960Z",
+        "refs/volpred/quarantine/20260726T173642809557Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-26T14:37:11.481543+00:00",
-      "last_seen_at": "2026-07-26T16:18:59.251695+00:00",
+      "last_seen_at": "2026-07-26T17:36:45.816663+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-26T15:39:17.065886+00:00",
       "deferred": [
@@ -42602,14 +42695,18 @@
     ],
     "derate_note": "2026-07-26 slot-2 fire: reconcile 已寫 payload.derates=false，slot_budget de-rate 解除（cap 2→6，open_incident=null 已驗）。incident 未關因兩檔仍 active/deferred（trending log idle 17.6h 在 grace 內、test 檔 3.4h 活躍），非無主殘留，工具刻意不 force-remove；待未來檔案清乾淨後 reconcile 機械關閉。release 回 pending。",
     "last_released_at": "2026-07-26T15:39:52.299308+00:00",
-    "updated_at": "2026-07-26T16:18:59.251695+00:00"
+    "updated_at": "2026-07-26T17:36:45.816663+00:00",
+    "superseded_at": "2026-07-26T17:37:07.900931+00:00",
+    "superseded_by": "assign_7750fcd9",
+    "completed_at": "2026-07-26T17:37:07.900931+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "K1415_article_general",
     "title": "K1415: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1415 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1415 CONDITIONAL_PASS: log(VIX9D/VIX) 短端 IV 期限結構比率作為 HAR-RV(daily/weekly/monthly) baseline 之邊際 SPY 1-day-ahead RV 預測因子，OOS 2020-2026 expanding window 年末 refit。OOS QLIKE 改善 +6.56% (M0=2.156 → M1=2.014)，DM stat=-7.70, p=1.4e-14。Full-sample OLS β_TR=+4.043 (HAC t=8.56, p<1e-17)，符號與 Canonical evidence: experiments/k1415/k1415_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -42625,7 +42722,30 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T15:08:59+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-26T17:11:00.308730+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:11:08.400553+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      },
+      {
+        "ts": "2026-07-26T17:25:05.491411+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d"
+      }
+    ],
+    "started_at": "2026-07-26T17:11:08.400538+00:00",
+    "completed_at": "2026-07-26T17:25:05.491383+00:00",
+    "result": "發佈 general 文章 mile_35d8941b（draft，短端 VIX 期限結構預測 SPY 隔日 RV，QLIKE +6.56% / DM p=1.4e-14），anti_ai_gate PASS，lazypack async render 已 enqueue（lazypack-mile_35d8941b）。"
   },
   {
     "id": "assign_1cbf48ea",
@@ -42633,14 +42753,11 @@
     "description": "Existing Matt plan Issue #3 / ticket #5. Implement first-party analytics event contract and durable tracer covering anonymous impression, replay-safe login identity merge, aggregate-only Admin read, opt-out, clear and delete with projection readback. TDD at public lifecycle seam; finish Matt two-axis review.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-26T15:33:38.829225+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#5",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-26T15:33:42.922401+00:00",
-    "claim_session_id": "issue-5-analytics",
     "status_history": [
       {
         "ts": "2026-07-26T15:33:42.922412+00:00",
@@ -42653,9 +42770,19 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T16:36:19.480012+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-26T15:33:46.195114+00:00"
+    "started_at": "2026-07-26T15:33:46.195114+00:00",
+    "completed_at": "2026-07-26T16:36:19.479979+00:00",
+    "result": "Issue #5 Analytics Privacy Tracer completed: strict event/value dictionary, replay-safe identity and privacy lifecycle, HMAC tombstones, forced-RLS least-privilege PostgreSQL adapter/migration. Clean focused suites 21 passed; Matt Spec and Standards reviews PASS. Full suite 5372 passed/2 skipped with 12 unrelated concurrent delivery/writer failures. Production migration staged, not batch-pushed due linked ledger drift.",
+    "issue_closed_at": "2026-07-26T16:36:30.601040+00:00",
+    "issue_closed_commit": "bf63fbfe848cf483901d8bc5537aa76a9bec2d08"
   },
   {
     "id": "K1719_article_general_v2",
@@ -42709,7 +42836,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-30207277676",
@@ -42737,10 +42864,31 @@
         "to": "pending",
         "by": "hourly-slot-2-124c1f7009354e779d11e4cb3bd6450e",
         "note": "supervisor_kill_124c1f70"
+      },
+      {
+        "ts": "2026-07-26T16:37:20.574913+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T16:37:20.805370+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T16:38:59.131663+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
     "last_released_at": "2026-07-26T16:14:10.700918+00:00",
-    "last_release_reason": "supervisor_kill_124c1f70"
+    "last_release_reason": "supervisor_kill_124c1f70",
+    "started_at": "2026-07-26T16:37:20.805357+00:00",
+    "completed_at": "2026-07-26T16:38:59.131639+00:00",
+    "result": "Root cause fixed in cff685986 (canonical guard + tmp-path owner-gate test); audit ratchet and incident evidence committed in 3d3d62836. Clean checkout: 5352 passed, 2 skipped; git_status_delta=clean and canonical_mtime_delta=clean. GitHub hosted rerun remains pending mainline push; incident stays contained until remote green."
   },
   {
     "id": "assign_8bed8009",
@@ -42810,5 +42958,98 @@
     "topic_cluster": null,
     "created_at": "2026-07-26T16:09:20+00:00",
     "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+  },
+  {
+    "id": "K1497_article_general",
+    "title": "K1497: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1497 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1497：重驗 realized volatility roughness（Hurst H<0.5）跨資產穩定性，以及加入 roughness 訊息後 HAR 類模型是否有可重現 OOS 預測增益。資料來源 `paper/garch-x-vix/data/`，6 資產（SPY/QQQ/EEM/FEZ/GLD/USO），Parkinson variance proxy，各資產樣本至 2026-05-19。Roughness 本身是穩定的描述性事實：全部資產 full-sample 與 rolling 504-day H 多數落在 rough 區（json Canonical evidence: experiments/k1497/k1497_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1497",
+    "evidence_source_paths": [
+      "experiments/k1497/k1497_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1497/k1497_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-26T17:29:06+00:00"
+  },
+  {
+    "id": "assign_7750fcd9",
+    "title": "PHASE-Z 卡住檔案 incident（3c0b76a1bcd65274）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 76 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- storage/drafts/k1253_general_draft.md — 5 班\n- storage/logs/trending_primary_source_verification.jsonl — 76 班\n- tests/test_check_matt_skills_installation.py — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T173704933918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173805118048Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173905257186Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-26T17:37:07.912107+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "3c0b76a1bcd65274",
+      "paths": [
+        "storage/drafts/k1253_general_draft.md",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "tests/test_check_matt_skills_installation.py"
+      ],
+      "streaks": {
+        "storage/drafts/k1253_general_draft.md": 5,
+        "storage/logs/trending_primary_source_verification.jsonl": 76,
+        "tests/test_check_matt_skills_installation.py": 9
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260726T173704933918Z",
+        "refs/volpred/quarantine/20260726T173805118048Z",
+        "refs/volpred/quarantine/20260726T173905257186Z"
+      ],
+      "fires": 3,
+      "first_seen_at": "2026-07-26T17:37:07.900931+00:00",
+      "last_seen_at": "2026-07-26T17:39:08.670708+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-26T17:38:05.198668+00:00",
+      "deferred": [
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "tests/test_check_matt_skills_installation.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-26T17:39:08.670708+00:00"
+  },
+  {
+    "id": "release_deadlock_repair_20260726_18",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 3 篇、eligible=0（due_now=true），其中 3 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_be7666e2` (general, 已被擋 1 次) [lazypack_missing] 我們差點親手推翻自己的發現：一個對錯一天的錯誤，怎麼被抓出來又被救回\n    missing 懶人包圖組 section (render queued, job lazypack-mile_be7666e2) — waiting on the */15 compute worker, no action needed\n- `mile_496e7dce` (general, 已被擋 1 次) [lazypack_missing] AI 圈的「時序基礎模型」搬進波動率擂台：老公式 HAR 沒被打下來\n    missing 懶人包圖組 section (render queued, job lazypack-mile_496e7dce) — waiting on the */15 compute worker, no action needed\n- `mile_35d8941b` (general, 已被擋 1 次) [lazypack_missing] 9 天 VIX 一旦跑贏 30 天 VIX，SPY 隔天波動就偏高：一個 6.56% 的可複現訊號\n    missing 懶人包圖組 section (render queued, job lazypack-mile_35d8941b) — waiting on the */15 compute worker, no action needed\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-26T18:00:23.238323+00:00",
+    "blocked_article_ids": [
+      "mile_be7666e2",
+      "mile_496e7dce",
+      "mile_35d8941b"
+    ],
+    "trigger": "release_pool_content_gate_deadlock",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "alert_release_pool_deadlock_20260726",
+    "title": "[alert] Release pool deadlocked — 3 drafts, 0 eligible (due now)",
+    "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 3\n- eligible_before_dedup: 3\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 3\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_be7666e2` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_be7666e2) — waiting on the */15 compute worker, no action needed\n  - `mile_496e7dce` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_496e7dce) — waiting on the */15 compute worker, no action needed\n  - `mile_35d8941b` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_35d8941b) — waiting on the */15 compute worker, no action needed\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260726_18`，指定只補仍可放行的 cluster：vix, spy, forecast_method。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-26T18:01:02.560552+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "release_pool_deadlock"
+    ]
   }
 ]

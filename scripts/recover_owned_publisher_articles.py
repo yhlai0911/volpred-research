@@ -53,7 +53,8 @@ def recover_owned_publisher_articles(
             store=SupabaseOwnedPublisherArticleStore.from_environment(),
             provider=PublisherArticleSyncEffectAdapter(
                 projection=SupabaseArticleProjectionAdapter(
-                    storage_dir="storage"
+                    storage_dir="storage",
+                    require_mirror_ack=True,
                 )
             ),
             primary_authority=keepalive,

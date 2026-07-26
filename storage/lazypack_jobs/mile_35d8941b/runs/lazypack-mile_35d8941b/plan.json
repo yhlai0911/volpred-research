@@ -1,0 +1,192 @@
+{
+  "schema_version": 1,
+  "title": "短端 VIX 期限結構預測 SPY 隔日波動（K1415）",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1415/k1415_results.json",
+      "sha256": "68ef84be776197f74dbd0fbe3d01da11366669f2d42a504eef886249b6eeb0fc",
+      "label": "K1415 SPY 短端期限結構實驗結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "訊號從哪來：短端 VIX 對上長端 VIX",
+      "alt": "概念框架：短天期 VIX 反映近期預期波動、長天期 VIX 反映月度預期，兩者比值代表短端相對長端的緊張度",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一句話直覺",
+          "body": [
+            "短天期 VIX 是市場對近期波動的預期，長天期 VIX 是對月度波動的預期。",
+            "當短端相對長端偏高，常是即將到來的震盪還沒被日、週、月的歷史波動吃進去。",
+            "把短端與長端 VIX 的比值取對數後加進 HAR-RV 基準，就是在補這一塊資訊。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本涵蓋",
+          "value": {
+            "source": "results",
+            "path": "sample.n_obs_total",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個交易日"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外起點",
+          "value": {
+            "source": "results",
+            "path": "sample.oos_start",
+            "format": {
+              "kind": "date"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "加了短端訊號，隔日波動預測誤差降多少",
+      "alt": "主要結果：加入短端期限結構後，樣本外預測誤差明顯下降，Diebold-Mariano 檢定拒絕兩模型表現相等",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "樣本外誤差改善",
+          "value": {
+            "source": "results",
+            "path": "test.qlike_improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1,
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "純 HAR 誤差（QLIKE）",
+          "value": {
+            "source": "results",
+            "path": "models.M0.oos_qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "加訊號後誤差（QLIKE）",
+          "value": {
+            "source": "results",
+            "path": "models.M1.oos_qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "DM 檢定統計量（絕對值）",
+          "value": {
+            "source": "results",
+            "path": "test.dm_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "absolute": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "scientific",
+      "title": "解釋力、係數方向與研究邊界",
+      "alt": "重點與限制：全樣本解釋力上升、期限結構係數為正、近期子樣本仍有改善，但仍受單一資產與日頻代理資料限制",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "全樣本 R²（純 HAR）",
+          "value": {
+            "source": "results",
+            "path": "models.M0.r2_full_sample",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全樣本 R²（加訊號）",
+          "value": {
+            "source": "results",
+            "path": "models.M1.r2_full_sample",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "期限結構係數 β",
+          "value": {
+            "source": "results",
+            "path": "coefficients.M1.TR.coef",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "近期子樣本誤差改善",
+          "value": {
+            "source": "results",
+            "path": "sensitivity.post_2021.improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1,
+              "digits": 2,
+              "show_plus": true
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "讀這個訊號的三個前提",
+          "body": [
+            "只驗過單一資產 SPY，跨資產是否成立仍待檢定。",
+            "已實現波動用日頻報酬平方年化估，非五分鐘級高頻資料。",
+            "尚未做多比率同時測試的多重檢定校正；Codex 審核為有條件通過。"
+          ]
+        }
+      ]
+    }
+  ]
+}
