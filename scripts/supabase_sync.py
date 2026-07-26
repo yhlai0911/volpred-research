@@ -14,9 +14,15 @@ import socket
 import time
 from collections.abc import Mapping
 from pathlib import Path
+from typing import NamedTuple
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
+
+from volpred.ops.diagnostics import warn
+from volpred.ops.public_article_projection_contract import (
+    load_public_article_projection_contract,
+)
 
 try:
     from scripts.article_backups import ensure_local_article_backups
@@ -602,6 +608,33 @@ def extract_proposer(item: dict) -> str | None:
 # the frontend's getArticleInternal deliberately still throws; the report pages
 # already catch -> notFound()).
 _REVALIDATE_FAILURES: list[str] = []
+_PUBLIC_PROJECTION_CONTRACT = (
+    load_public_article_projection_contract()
+)
+_PUBLIC_DETAIL_EXACT = frozenset(
+    _PUBLIC_PROJECTION_CONTRACT["forbidden_detail_exact"]
+)
+_PUBLIC_DETAIL_PREFIXES = tuple(
+    _PUBLIC_PROJECTION_CONTRACT["forbidden_detail_prefixes"]
+)
+
+
+class ArticleCacheAcknowledgement(NamedTuple):
+    """Typed acknowledgement for one reader-cache invalidation request."""
+
+    acknowledged: bool
+    target_ref: str
+    status_code: int | None
+    evidence_ref: str
+    evidence_sha256: str
+
+
+class ArticleProjectionSyncResult(NamedTuple):
+    """Projection write result with independently auditable cache evidence."""
+
+    succeeded: bool
+    projection_acknowledged: bool
+    cache_acknowledgement: ArticleCacheAcknowledgement | None
 
 
 def _mirror_base_url() -> str:
@@ -611,22 +644,43 @@ def _mirror_base_url() -> str:
 
 
 def revalidate_article_cache(slug: str) -> bool:
-    """Purge the frontend unstable_cache tags for one article slug.
+    """Compatibility wrapper returning the typed cache acknowledgement verdict."""
 
-    Returns True on success. Failures are recorded in _REVALIDATE_FAILURES and
-    printed LOUDLY -- an auth failure here silently disabling every purge is
-    exactly the 2026-06-11 incident (mirror writes 401'd unnoticed for a month),
-    so 401/403 gets its own explicit banner and sync_full()/the CLI surface it.
+    return revalidate_article_cache_with_evidence(slug).acknowledged
+
+
+def revalidate_article_cache_with_evidence(
+    slug: str,
+) -> ArticleCacheAcknowledgement:
+    """Purge frontend cache tags and retain target/status/hash evidence.
+
+    Failures are recorded in ``_REVALIDATE_FAILURES`` and printed loudly.  The
+    formal Effect path persists the returned reference and digest in its
+    settlement receipt instead of reducing this external acknowledgement to a
+    process-local boolean.
     """
     if not slug:
-        return True
+        return _article_cache_acknowledgement(
+            target_ref="mirror:article-cache/empty-slug",
+            status_code=None,
+            acknowledged=True,
+            reason="empty_slug_noop",
+        )
+    url = (
+        f"{_mirror_base_url()}/api/sync/revalidate/article/"
+        f"{quote(str(slug), safe='')}"
+    )
     # Same test-mode kill switch as every other outbound write in this module.
     if _remote_writes_blocked():
-        return True
+        return _article_cache_acknowledgement(
+            target_ref=url,
+            status_code=None,
+            acknowledged=True,
+            reason="remote_write_blocked_test_noop",
+        )
 
     from volpred.mirror_auth import ops_admin_headers, ops_admin_token
 
-    url = f"{_mirror_base_url()}/api/sync/revalidate/article/{quote(str(slug), safe='')}"
     if not ops_admin_token():
         print(
             f"  [supabase_sync] CACHE PURGE FAILED for {slug}: OPS_ADMIN_TOKEN is "
@@ -634,7 +688,12 @@ def revalidate_article_cache(slug: str) -> bool:
             "keep being served from the frontend cache until a redeploy."
         )
         _REVALIDATE_FAILURES.append(slug)
-        return False
+        return _article_cache_acknowledgement(
+            target_ref=url,
+            status_code=None,
+            acknowledged=False,
+            reason="ops_admin_token_unset",
+        )
 
     req = Request(
         url,
@@ -649,15 +708,49 @@ def revalidate_article_cache(slug: str) -> bool:
         # host keeps its exact semantics while the chokepoint stays the single
         # place a future outbound call can be gated from.
         with _urlopen(req, timeout=10) as resp:
+            status_code = int(resp.status)
+            body = resp.read()
             if 200 <= resp.status < 300:
-                return True
-            reason = f"HTTP {resp.status}"
+                expected_body = {
+                    "status": "revalidated",
+                    "slug": str(slug),
+                    "tags": ["article", f"article-{slug}"],
+                }
+                try:
+                    decoded = json.loads(body.decode("utf-8"))
+                except (UnicodeError, json.JSONDecodeError):
+                    response_observation: object = {
+                        "invalid_json_body_sha256": hashlib.sha256(
+                            body
+                        ).hexdigest()
+                    }
+                    reason = "invalid_acknowledgement_json"
+                else:
+                    response_observation = decoded
+                    if decoded == expected_body:
+                        return _article_cache_acknowledgement(
+                            target_ref=url,
+                            status_code=status_code,
+                            acknowledged=True,
+                            reason="http_body_acknowledged",
+                            response_observation=response_observation,
+                        )
+                    reason = "invalid_acknowledgement_body"
+            else:
+                reason = f"HTTP {resp.status}"
+                response_observation = {
+                    "body_sha256": hashlib.sha256(body).hexdigest()
+                }
     except HTTPError as exc:
         reason = f"HTTP {exc.code}"
+        status_code = int(exc.code)
+        response_observation = None
         if exc.code in (401, 403):
             reason += " UNAUTHORIZED (OPS_ADMIN_TOKEN rejected by the mirror)"
     except Exception as exc:  # URLError, timeout, DNS...
         reason = f"{type(exc).__name__}: {exc}"
+        status_code = None
+        response_observation = None
 
     print(
         f"  [supabase_sync] CACHE PURGE FAILED for {slug}: {reason} ({url}). "
@@ -665,7 +758,296 @@ def revalidate_article_cache(slug: str) -> bool:
         "version -- rerun the sync once the mirror is reachable."
     )
     _REVALIDATE_FAILURES.append(slug)
-    return False
+    return _article_cache_acknowledgement(
+        target_ref=url,
+        status_code=status_code,
+        acknowledged=False,
+        reason=reason,
+        response_observation=response_observation,
+    )
+
+
+def _article_cache_acknowledgement(
+    *,
+    target_ref: str,
+    status_code: int | None,
+    acknowledged: bool,
+    reason: str,
+    response_observation: object = None,
+) -> ArticleCacheAcknowledgement:
+    observed = {
+        "schema_version": "article-cache-ack.v1",
+        "method": "POST",
+        "target_ref": target_ref,
+        "status_code": status_code,
+        "acknowledged": acknowledged,
+        "reason": reason,
+        "response": response_observation,
+    }
+    encoded = json.dumps(
+        observed,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    suffix = (
+        f"status={status_code}"
+        if status_code is not None
+        else f"result={reason}"
+    )
+    return ArticleCacheAcknowledgement(
+        acknowledged=acknowledged,
+        target_ref=target_ref,
+        status_code=status_code,
+        evidence_ref=f"{target_ref}#{suffix}",
+        evidence_sha256=hashlib.sha256(encoded).hexdigest(),
+    )
+
+
+def readback_article_public_projection(item: Mapping[str, object]) -> dict:
+    """Read one reader-facing article projection and return typed evidence.
+
+    This is the independent Mirror/frontend acknowledgement used by the
+    Operations Core single-article effect.  A 2xx response is not enough: the
+    canonical reader-visible fields must match the expected Supabase
+    projection.  Hidden statuses are acknowledged only by an exact 404.
+    """
+
+    slug = str(item.get("id") or "").strip()
+    if not slug or quote(slug, safe="") != slug:
+        raise ValueError("public projection read-back requires a safe slug")
+    expected_row = projected_article_row(dict(item), verbose=False)
+    visible = expected_row.get("status") in {
+        "published",
+        "draft",
+        "scheduled",
+    }
+    url = (
+        f"{_mirror_base_url()}/api/publications/feed/"
+        f"{quote(slug, safe='')}"
+    )
+    request = Request(url, method="GET")
+    status_code: int
+    body = b""
+    try:
+        with _urlopen(request, timeout=10) as response:
+            status_code = int(response.status)
+            body = response.read()
+    except HTTPError as exc:
+        status_code = int(exc.code)
+        body = exc.read()
+
+    if status_code == 404:
+        feed_health = _readback_public_feed_health()
+        observed = {
+            "slug": slug,
+            "status_code": status_code,
+            "hidden": True,
+            "feed_health": feed_health["observed"],
+        }
+        matches = not visible and feed_health["healthy"]
+        evidence_ref = (
+            f"{url}#status={status_code}|{feed_health['evidence_ref']}"
+        )
+    elif 200 <= status_code < 300:
+        try:
+            decoded = json.loads(body.decode("utf-8"))
+        except (UnicodeError, json.JSONDecodeError) as exc:
+            raise RuntimeError(
+                "public article projection returned invalid JSON"
+            ) from exc
+        if not isinstance(decoded, Mapping):
+            raise RuntimeError(
+                "public article projection returned no article object"
+            )
+        expected = _public_article_projection(expected_row, item)
+        observed_projection = _public_article_projection(
+            decoded,
+            decoded,
+        )
+        forbidden_detail_keys = _public_forbidden_detail_keys(
+            decoded.get("details")
+        )
+        observed = {
+            **observed_projection,
+            "status_code": status_code,
+            "forbidden_detail_keys": forbidden_detail_keys,
+        }
+        matches = (
+            visible
+            and not forbidden_detail_keys
+            and observed_projection == expected
+        )
+        evidence_ref = f"{url}#status={status_code}"
+    else:
+        observed = {
+            "slug": slug,
+            "status_code": status_code,
+            "hidden": False,
+        }
+        matches = False
+        evidence_ref = f"{url}#status={status_code}"
+
+    evidence = json.dumps(
+        observed,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    return {
+        "matches": matches,
+        "evidence_ref": evidence_ref,
+        "evidence_sha256": hashlib.sha256(evidence).hexdigest(),
+    }
+
+
+def _readback_public_feed_health() -> dict:
+    """Prove a hidden-article 404 was observed on a healthy reader surface.
+
+    The frontend article route maps both a true missing row and backend
+    exceptions to 404.  Its feed route maps backend exceptions to an empty
+    200 fallback.  Requiring a concurrently non-empty feed response prevents
+    that generic failure pair from authorizing a hidden-article settlement.
+    """
+
+    url = f"{_mirror_base_url()}/api/publications/feed?limit=1&offset=0"
+    request = Request(url, method="GET")
+    try:
+        with _urlopen(request, timeout=10) as response:
+            status_code = int(response.status)
+            body = response.read()
+    except HTTPError as exc:
+        status_code = int(exc.code)
+        body = exc.read()
+
+    decoded: object = None
+    decode_error = False
+    if 200 <= status_code < 300:
+        try:
+            decoded = json.loads(body.decode("utf-8"))
+        except (UnicodeError, json.JSONDecodeError):
+            decode_error = True
+    items = decoded.get("items") if isinstance(decoded, Mapping) else None
+    total = decoded.get("total") if isinstance(decoded, Mapping) else None
+    healthy = (
+        not decode_error
+        and isinstance(items, list)
+        and bool(items)
+        and isinstance(total, int)
+        and not isinstance(total, bool)
+        and total > 0
+    )
+    observed = {
+        "status_code": status_code,
+        "valid_json": not decode_error and isinstance(decoded, Mapping),
+        "item_count": len(items) if isinstance(items, list) else None,
+        "total": total if isinstance(total, int) and not isinstance(total, bool) else None,
+        "healthy": healthy,
+    }
+    return {
+        "healthy": healthy,
+        "observed": observed,
+        "evidence_ref": f"{url}#status={status_code}",
+    }
+
+
+def _public_article_projection(
+    row: Mapping[str, object],
+    tag_source: Mapping[str, object],
+) -> dict:
+    """Mirror the owned fields exposed by frontend ``toFeedItem``.
+
+    Internal governance details are stripped with the same exact/prefix
+    contract as ``frontend-v2-fix/src/lib/data-server.ts``.  Keep the contract
+    test beside the publisher effect tests whenever either side changes.
+    """
+
+    published_at = row.get("published_at")
+    if isinstance(published_at, str) and published_at:
+        try:
+            from datetime import datetime, timezone
+
+            observed = datetime.fromisoformat(
+                published_at.replace("Z", "+00:00")
+            )
+            published_at = (
+                observed.astimezone(timezone.utc).isoformat()
+                if observed.tzinfo is not None
+                else observed.isoformat()
+            )
+        except ValueError as exc:
+            warn(
+                "supabase_sync.public_projection_timestamp",
+                "published_at parse failed; preserving raw value",
+                err=str(exc),
+                value=published_at,
+            )
+    return {
+        "id": row.get("slug") or row.get("id"),
+        "title": row.get("title"),
+        "content": row.get("content"),
+        "excerpt": row.get("excerpt"),
+        "audience": row.get("audience"),
+        "phase": row.get("phase"),
+        "status": row.get("status"),
+        "category": row.get("category"),
+        "proposer": row.get("proposer"),
+        "published_at": published_at,
+        "details": _public_details(row.get("details")),
+        "tags": _public_tags(tag_source.get("tags")),
+    }
+
+
+def _public_details(value: object) -> dict:
+    if not isinstance(value, Mapping):
+        return {}
+    return {
+        key: item
+        for key, item in value.items()
+        if (
+            isinstance(key, str)
+            and key not in _PUBLIC_DETAIL_EXACT
+            and not any(
+                key.startswith(prefix)
+                for prefix in _PUBLIC_DETAIL_PREFIXES
+            )
+        )
+    }
+
+
+def _public_forbidden_detail_keys(value: object) -> list[str]:
+    if not isinstance(value, Mapping):
+        return []
+    return sorted(
+        key
+        for key in value
+        if (
+            isinstance(key, str)
+            and (
+                key in _PUBLIC_DETAIL_EXACT
+                or any(
+                    key.startswith(prefix)
+                    for prefix in _PUBLIC_DETAIL_PREFIXES
+                )
+            )
+        )
+    )
+
+
+def _public_tags(value: object) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return sorted(
+        {
+            part.strip()
+            for tag in value
+            if isinstance(tag, str)
+            for part in tag.split(",")
+            if part.strip()
+        }
+    )
 
 
 def projected_content(item: dict, *, verbose: bool = True) -> str:
@@ -874,11 +1256,17 @@ def sync_article(
     if _remote_writes_blocked():
         return sync_article_projection(item, storage_dir=storage_dir)
 
-    from volpred.ops.delivery.owned_publisher_article import (
+    from volpred.ops.delivery import (
         OwnedPublisherArticleCommand,
         OwnedPublisherArticleSync,
         PublisherArticleSyncOwnershipLost,
+        PublisherArticleSyncEffectAdapter,
+        SupabaseArticleProjectionAdapter,
         SupabaseOwnedPublisherArticleStore,
+        encode_publisher_article_sync_payload,
+    )
+    from volpred.ops.authority import (
+        build_supabase_host_authority_keepalive,
     )
 
     ownership_store = SupabaseOwnedPublisherArticleStore.from_environment()
@@ -893,15 +1281,6 @@ def sync_article(
         raise PublisherArticleSyncOwnershipLost(
             f"unsupported publisher article owner: {owner.owner}"
         )
-
-    from volpred.ops.authority import (
-        build_supabase_host_authority_keepalive,
-    )
-    from volpred.ops.delivery._publisher_article_sync import (
-        PublisherArticleSyncEffectAdapter,
-        SupabaseArticleProjectionAdapter,
-        encode_publisher_article_sync_payload,
-    )
 
     payload = encode_publisher_article_sync_payload(item)
     slug = str(item.get("id") or "")
@@ -920,7 +1299,8 @@ def sync_article(
             store=ownership_store,
             provider=PublisherArticleSyncEffectAdapter(
                 projection=SupabaseArticleProjectionAdapter(
-                    storage_dir=storage_dir
+                    storage_dir=storage_dir,
+                    require_mirror_ack=True,
                 )
             ),
             primary_authority=keepalive,
@@ -940,7 +1320,24 @@ def sync_article(
 def sync_article_projection(
     item: dict,
     storage_dir: str | Path = "storage",
+    *,
+    require_cache_ack: bool = False,
 ) -> bool:
+    """Compatibility boolean for callers outside formal Effect Delivery."""
+
+    return sync_article_projection_result(
+        item,
+        storage_dir=storage_dir,
+        require_cache_ack=require_cache_ack,
+    ).succeeded
+
+
+def sync_article_projection_result(
+    item: dict,
+    storage_dir: str | Path = "storage",
+    *,
+    require_cache_ack: bool = False,
+) -> ArticleProjectionSyncResult:
     """Write the provider-owned article projection directly to Supabase.
 
     Contentlayer pattern (2026-04-18): feed.json is canonical and now
@@ -974,7 +1371,11 @@ def sync_article_projection(
     if slug and not _remote_writes_blocked():
         resident = _fetch_server_resident_details(slug)
         if resident is None:
-            return False
+            return ArticleProjectionSyncResult(
+                succeeded=False,
+                projection_acknowledged=False,
+                cache_acknowledgement=None,
+            )
         if resident:
             row["details"] = {**row["details"], **resident}
     ok = _post("articles", row)
@@ -1031,6 +1432,7 @@ def sync_article_projection(
                         ok = False
         except Exception as exc:
             print(f"  [supabase_sync] read-back verification error for {row['slug']}: {exc}")
+    cache_acknowledgement: ArticleCacheAcknowledgement | None = None
     if ok:
         # Sync tags when the canonical item carries that field, including the
         # explicit empty set. Missing means "not supplied" for legacy callers;
@@ -1047,12 +1449,24 @@ def sync_article_projection(
         # Purge the frontend cache for this slug. Required for EVERY sync, not
         # just retractions: content edits were equally invisible for up to 60s,
         # and status downgrades (published -> retracted/unpublished) were
-        # invisible indefinitely. Does not flip `ok` -- the DB write is this
-        # function's contract -- but sync_full() records the slug in
-        # state["purge_retry_slugs"] when the purge failed, so the next run
-        # re-syncs it and retries the purge.
-        revalidate_article_cache(row["slug"])
-    return ok
+        # invisible indefinitely. Legacy callers preserve the historical DB
+        # projection return contract and let sync_full() retain purge retries.
+        # The formal Effect caller sets require_cache_ack=True, so the same
+        # failure cannot be settled as delivered.
+        cache_acknowledgement = revalidate_article_cache_with_evidence(
+            row["slug"]
+        )
+    cache_acknowledged = (
+        cache_acknowledgement is not None
+        and cache_acknowledgement.acknowledged
+    )
+    return ArticleProjectionSyncResult(
+        succeeded=bool(
+            ok and (cache_acknowledged or not require_cache_ack)
+        ),
+        projection_acknowledged=bool(ok),
+        cache_acknowledgement=cache_acknowledgement,
+    )
 
 
 def _sync_article_tags(slug: str, tags: list[str]) -> bool:

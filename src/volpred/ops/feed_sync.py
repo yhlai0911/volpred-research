@@ -486,7 +486,8 @@ def _apply_safe_projection_upserts(
             store=store,
             provider=PublisherArticleReconcileEffectAdapter(
                 projection=SupabaseArticleProjectionAdapter(
-                    storage_dir=storage_dir
+                    storage_dir=storage_dir,
+                    require_mirror_ack=True,
                 )
             ),
             primary_authority=keepalive,

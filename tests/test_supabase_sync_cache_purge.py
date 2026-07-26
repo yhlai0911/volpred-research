@@ -28,6 +28,7 @@ deployment and is env-gated; CI never touches the network.
 from __future__ import annotations
 
 import importlib.util
+import json
 import os
 import urllib.error
 from pathlib import Path
@@ -58,14 +59,28 @@ def sync(monkeypatch):
 
 
 class _FakeResponse:
-    def __init__(self, status: int = 200):
+    def __init__(self, status: int = 200, body=None):
         self.status = status
+        self.body = (
+            {
+                "status": "revalidated",
+                "slug": "mile_ebb5d6f5",
+                "tags": ["article", "article-mile_ebb5d6f5"],
+            }
+            if body is None
+            else body
+        )
 
     def __enter__(self):
         return self
 
     def __exit__(self, *exc):
         return False
+
+    def read(self):
+        if isinstance(self.body, bytes):
+            return self.body
+        return json.dumps(self.body).encode("utf-8")
 
 
 def _capture(monkeypatch, sync, response=None, raises=None):
@@ -141,6 +156,70 @@ def test_retraction_sync_purges_frontend_cache(monkeypatch, sync):
     # 401'd silently for a month).
     assert req.headers.get("X-ops-key") == "test-ops-token"
     assert sync._REVALIDATE_FAILURES == []
+
+
+def test_formal_cache_ack_keeps_target_status_and_digest(monkeypatch, sync):
+    _stub_db(monkeypatch, sync)
+    _capture(monkeypatch, sync, response=_FakeResponse(204))
+
+    result = sync.sync_article_projection_result(
+        _retracted_item(),
+        require_cache_ack=True,
+    )
+
+    assert result.succeeded is True
+    acknowledgement = result.cache_acknowledgement
+    assert acknowledgement is not None
+    assert acknowledgement.acknowledged is True
+    assert acknowledgement.status_code == 204
+    assert acknowledgement.target_ref.endswith(
+        "/api/sync/revalidate/article/mile_ebb5d6f5"
+    )
+    assert acknowledgement.evidence_ref.endswith("#status=204")
+    assert len(acknowledgement.evidence_sha256) == 64
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        b"not-json",
+        {
+            "status": "noop",
+            "slug": "mile_ebb5d6f5",
+            "tags": ["article", "article-mile_ebb5d6f5"],
+        },
+        {
+            "status": "revalidated",
+            "slug": "mile_wrong",
+            "tags": ["article", "article-mile_wrong"],
+        },
+        {
+            "status": "revalidated",
+            "slug": "mile_ebb5d6f5",
+            "tags": ["article"],
+        },
+    ],
+)
+def test_http_2xx_without_exact_cache_ack_body_fails_closed(
+    monkeypatch,
+    sync,
+    body,
+):
+    _capture(
+        monkeypatch,
+        sync,
+        response=_FakeResponse(200, body=body),
+    )
+
+    acknowledgement = sync.revalidate_article_cache_with_evidence(
+        "mile_ebb5d6f5"
+    )
+
+    assert acknowledgement.acknowledged is False
+    assert acknowledgement.status_code == 200
+    assert acknowledgement.evidence_ref.endswith("#status=200")
+    assert len(acknowledgement.evidence_sha256) == 64
+    assert sync._REVALIDATE_FAILURES == ["mile_ebb5d6f5"]
 
 
 def test_status_downgrade_purges_frontend_cache(monkeypatch, sync):

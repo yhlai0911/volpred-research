@@ -2142,3 +2142,93 @@ contract修正後 delivered。最終 readback為 `due_retry=0`、`started=0`、
 `nonterminal=0`、4 recovery receipts，第二次 actuator與最小 cron環境 wrapper皆
 no-op。此 publisher-sync slice為`root_cause_fixed_and_verified`；6 筆
 publisher-delete old-generation retry不在本 seam authority內。
+
+## 31. Publisher Supabase／Mirror composite acknowledgement（2026-07-27）
+
+T06 closure audit發現 formal single-article effect雖已要求Supabase row／tag exact
+read-back，`sync_article_projection()`卻忽略frontend cache purge的失敗；只要DB已
+收斂，effect甚至會在provider write前直接acknowledge。結果是讀者仍可能取得舊cache，
+durable receipt卻寫成`delivered`。這是completion contract只涵蓋一個downstream
+surface的根因，不是Mirror retry次數不足。
+
+`SupabaseArticleProjectionAdapter(require_mirror_ack=True)`現在是正式
+single-article、hourly recovery及hourly batch reconcile的固定provider設定。它把
+完成條件收斂為：
+
+1. Supabase完整row／tag projection exact match；
+2. frontend `/api/publications/feed/<slug>` 的owned reader-visible欄位
+   （含excerpt與去除internal keys後的details）exact match；
+3. 需要write時，cache revalidation必須取得帶POST target／HTTP status／digest的
+   typed acknowledgement。
+
+Payload未提供`tags`時沿用Supabase read-back的server tags作public expected scope，
+並依frontend相同的comma-split規則正規化；不把「未擁有」誤解成空集合。隱藏狀態的
+article 404也不具自我授權能力：同一readback還必須證明reader-facing feed為健康且
+非空，以排除frontend把backend exception映射成article 404、feed 200 empty fallback
+的失敗組合；只有同一次provider attempt先取得cache revalidation ack後才可完成。
+cache ack在readback入口、任何Supabase／public I/O前即one-shot consume，所以失敗
+readback後的retry不能沿用舊ack跳過mutation boundary。
+
+Supabase、public article／feed health及cache POST的evidence refs與canonical
+aggregate SHA-256一併進既有
+`owned-publisher-article-receipt.v1`；任一read-back mismatch、transport failure或
+cache acknowledgement失敗都回到Effect Delivery的retry／durable dead-letter，
+不能settle為delivered。只有owner明確rollback為`legacy`時保留舊projection
+capability；正式batch reconcile已使用相同composite adapter，不再以standing audit
+取代Effect acknowledgement。
+
+TDD由紅測證明舊介面無法要求Mirror ack，再補hidden backend-fallback、failed
+post-write readback token leakage、typed cache evidence與formal batch wiring案例；
+formal effect、owned publisher、reconcile、recovery、cache purge與legacy gateway
+scoped回歸最終為152 passed、1 skipped、1個既有不穩定notification案例deselect；
+另有PostgreSQL Effect Delivery交易回歸56 passed。
+Production read-only先確認`mile_beee535c` public body exact match；另驗證：
+`mile_cc6ea154`移除command的`tags`後仍由server comma-packed tags收斂為
+composite match；`mile_f9c70bd0`的initial HTTP 404即使feed健康，在未取得cache
+ack前仍明確`matches=false`。
+
+最後以canonical hidden article `mile_f9c70bd0`做同值live write-boundary驗收，owner
+`operations_core/8`建立
+`effect_owned_publisher_db02df8f575ce1bbe317bafd7bd7e577`，attempt 1 delivered。
+Receipt ref同時保存Supabase、article HTTP 404、健康feed HTTP 200與cache POST
+HTTP 200，evidence SHA-256=`74a7720bffcf6d5b475cfd157f1eea16a3182fe9a33e0046a109d0e63622bdd2`；
+相同idempotency key重播仍回同一effect／digest且attempt維持1。此
+completion-contract與後述contract／batch-recovery已通過固定base的Matt
+spec／standards雙軸複審，狀態為`root_cause_fixed_and_verified`。
+
+### 31.1 Versioned public projection contract
+
+`config/public_article_projection_contract.json`固定reader-visible與internal detail
+欄位分界，schema v1的policy SHA-256為
+`6d125ff39bdb951026cdecf6e314d4cd56eb6877cc1cf478333375bc78306888`。
+`public_article_projection_contract.py`同時負責schema／digest驗證與frontend
+`INTERNAL_DETAIL_EXACT`、`INTERNAL_DETAIL_PREFIXES` source audit。這不是可關閉
+的額外檢查：default hourly `audit_publish_sync.run_audit()`必須產生exact contract
+evidence；缺檔、decode／JSON錯誤、digest tamper或frontend drift皆落
+`unavailable` receipt。兩個publisher rollback rehearsal也要求相同evidence，不能以
+`null`或舊receipt通過。
+
+Public observed details在任何filter前先檢查forbidden keys；真正下游洩漏會
+`matches=false`，不能因Python把key濾掉而假綠。同步writer與formal adapter均從
+同一versioned母本載入，移除第二份手寫policy。
+
+### 31.2 Failure evidence and immutable batch recovery
+
+Typed cache acknowledgement失敗不再被generic exception覆蓋：single effect的
+retry／dead-letter receipt保留cache POST target、HTTP status、ref與SHA。Batch
+reconcile改為每篇write後立刻readback，確保hidden article的one-shot cache ack由同一
+attempt消費；partial batch失敗時，先前成功與失敗項目的refs及aggregate digest都寫回
+原attempt。
+
+每小時canonical publisher recovery runner現依序處理publisher-delete reconciliation、
+immutable batch reconcile與single sync。新RPC
+`volpred_recover_due_owned_publisher_article_reconcile`只選current
+`operations_core` generation的expired started／due retry，寫private recovery receipt
+後以原effect id和原durable payload建立下一attempt；禁止用新的standing diff取代舊
+Effect。Local PostgreSQL transaction回歸涵蓋retry due→attempt 2→delivered與ACL；
+production migration receipt為
+`20260726182802 owned_publisher_reconcile_recovery`。Production回讀確認receipt table
+FORCE RLS、anon／authenticated／service_role無直讀、SECURITY DEFINER RPC只有
+service_role可execute；部署後candidate count與canonical runner均為0。
+固定base的Matt最終複審為spec PASS／standards PASS；scoped行為測試合計208 passed，
+另有1 skipped與1個既有基線案例deselect。

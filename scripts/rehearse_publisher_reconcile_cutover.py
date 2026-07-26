@@ -283,7 +283,8 @@ def _build_delivery(
                 store=store,
                 provider=PublisherArticleReconcileEffectAdapter(
                     projection=SupabaseArticleProjectionAdapter(
-                        storage_dir=storage_dir
+                        storage_dir=storage_dir,
+                        require_mirror_ack=True,
                     )
                 ),
                 primary_authority=keepalive,

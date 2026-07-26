@@ -23,6 +23,7 @@ from volpred.ops.delivery.owned_publisher_reconcile import (
     OwnedPublisherReconcileReceipt,
     OwnedPublisherReconcileRequest,
     OwnedPublisherArticleReconcile,
+    OwnedPublisherArticleReconcileRecovery,
     PublisherArticleReconcileOwner,
     PublisherArticleReconcileOwnershipLost,
     SupabaseOwnedPublisherReconcileStore,
@@ -245,6 +246,82 @@ class _LeaseGate:
     def current_lease(self) -> PrimaryLease:
         self.calls += 1
         return self.lease
+
+
+class _RecoveryStore(_Store):
+    def __init__(self, owner: PublisherArticleReconcileOwner) -> None:
+        super().__init__(owner)
+        self.pending = [
+            replace(
+                self.attempt,
+                attempt_count=2,
+                outbox_claim_ref="effect-outbox:41:attempt-2",
+            )
+        ]
+
+    def recover_due(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedPublisherReconcileAttempt | None:
+        self.calls.append(
+            (
+                "recover_due",
+                (
+                    owner_generation,
+                    worker_id,
+                    lease_seconds,
+                ),
+            )
+        )
+        if not self.pending:
+            return None
+        return replace(
+            self.pending.pop(0),
+            work_lease_token=work_lease_token,
+            outbox_claim_token=outbox_claim_token,
+            primary_fencing_token=primary_fencing_token,
+        )
+
+
+def test_due_reconcile_recovery_replays_original_immutable_batch() -> None:
+    store = _RecoveryStore(_owner())
+    projection = _Projection()
+    lease_gate = _LeaseGate()
+    tokens = iter(
+        (
+            "work-token-1",
+            "outbox-token-1",
+            "work-token-2",
+            "outbox-token-2",
+        )
+    )
+
+    summary = OwnedPublisherArticleReconcileRecovery(
+        store=store,
+        provider=PublisherArticleReconcileEffectAdapter(
+            projection=projection
+        ),
+        primary_authority=lease_gate,
+        token_factory=lambda: next(tokens),
+    ).recover(limit=2)
+
+    assert summary.recovered_count == 1
+    assert summary.delivered_count == 1
+    assert summary.retry_scheduled_count == 0
+    assert summary.receipts[0].attempt_count == 2
+    assert projection.upserts == 1
+    assert [name for name, _ in store.calls] == [
+        "read_owner",
+        "recover_due",
+        "settle",
+        "recover_due",
+    ]
 
 
 def test_reconcile_hides_request_begin_provider_and_settlement() -> None:
@@ -784,6 +861,8 @@ def test_hourly_operations_core_owner_emits_one_immutable_batch(
             return _owner()
 
     commands: list[OwnedPublisherReconcileCommand] = []
+    projection_options: list[dict[str, object]] = []
+    projection = object()
 
     class Reconcile:
         def __init__(self, **_kwargs):
@@ -819,6 +898,13 @@ def test_hourly_operations_core_owner_emits_one_immutable_batch(
         Reconcile,
     )
     monkeypatch.setattr(
+        delivery,
+        "SupabaseArticleProjectionAdapter",
+        lambda **kwargs: (
+            projection_options.append(kwargs) or projection
+        ),
+    )
+    monkeypatch.setattr(
         authority,
         "build_supabase_host_authority_keepalive",
         lambda **_kwargs: Keepalive(),
@@ -844,3 +930,9 @@ def test_hourly_operations_core_owner_emits_one_immutable_batch(
         "mile_owned_sync",
     ]
     assert commands[0].canonical_feed_sha256 == canonical_feed_sha256
+    assert projection_options == [
+        {
+            "storage_dir": tmp_path,
+            "require_mirror_ack": True,
+        }
+    ]

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts import rehearse_publisher_reconcile_cutover as rehearsal_module
 from scripts.rehearse_publisher_reconcile_cutover import (
     rehearse_publisher_reconcile_cutover,
 )
@@ -200,3 +201,58 @@ def test_rehearsal_preflight_fails_before_owner_mutation(
         )
 
     assert store.transfers == []
+
+
+def test_production_delivery_builder_requires_composite_ack(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    projection_options: list[dict[str, object]] = []
+
+    class _Keepalive:
+        def start(self) -> None:
+            pass
+
+        def stop(self) -> None:
+            pass
+
+    class _StopAfterProjection(RuntimeError):
+        pass
+
+    monkeypatch.setattr(
+        rehearsal_module,
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: _Keepalive(),
+    )
+    monkeypatch.setattr(
+        rehearsal_module,
+        "SupabaseArticleProjectionAdapter",
+        lambda **kwargs: (
+            projection_options.append(kwargs)
+            or (_ for _ in ()).throw(_StopAfterProjection())
+        ),
+    )
+    deliver = rehearsal_module._build_delivery(
+        _Store(),
+        storage_dir=tmp_path,
+        actor_ref="operator:test",
+    )
+
+    with pytest.raises(_StopAfterProjection):
+        deliver(
+            _owner(owner="operations_core", generation=2),
+            "f" * 64,
+            (
+                {
+                    "id": "mile_reconcile_rehearsal",
+                    "status": "published",
+                },
+            ),
+        )
+
+    assert projection_options == [
+        {
+            "storage_dir": tmp_path,
+            "require_mirror_ack": True,
+        }
+    ]

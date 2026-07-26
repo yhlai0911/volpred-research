@@ -163,7 +163,10 @@ class PublisherArticleReconcileEffectAdapter:
         if acknowledged is not None:
             return acknowledged
 
-        for article, observed in zip(plan.articles, before, strict=True):
+        current_readbacks = list(before)
+        for index, (article, observed) in enumerate(
+            zip(plan.articles, before, strict=True)
+        ):
             if _readback_matches(observed):
                 continue
             if authorize_mutation is not None:
@@ -180,20 +183,53 @@ class PublisherArticleReconcileEffectAdapter:
             except Exception:  # noqa: BLE001 - provider errors become evidence.
                 written = False
             if not written:
+                failure_observation = _projection_failure_evidence(
+                    self._projection,
+                    article,
+                )
                 return _failure(
                     effect,
                     "publisher_article_reconcile_provider_error",
                     retryable=True,
+                    evidence=_batch_failure_evidence(
+                        effect=effect,
+                        plan=plan,
+                        readbacks=current_readbacks,
+                        failed_slug=article["id"],
+                        failed_observation=failure_observation,
+                    ),
+                )
+            try:
+                post_write = self._projection.readback(article)
+            except Exception:  # noqa: BLE001 - provider errors are evidence.
+                return _failure(
+                    effect,
+                    "publisher_article_reconcile_provider_error",
+                    retryable=True,
+                    evidence=_batch_failure_evidence(
+                        effect=effect,
+                        plan=plan,
+                        readbacks=current_readbacks,
+                        failed_slug=article["id"],
+                        failed_observation=None,
+                    ),
+                )
+            current_readbacks[index] = post_write
+            if not _readback_matches(post_write):
+                return _failure(
+                    effect,
+                    "publisher_article_reconcile_readback_mismatch",
+                    retryable=True,
+                    evidence=_batch_failure_evidence(
+                        effect=effect,
+                        plan=plan,
+                        readbacks=current_readbacks,
+                        failed_slug=article["id"],
+                        failed_observation=post_write,
+                    ),
                 )
 
-        try:
-            after = self._readback(plan)
-        except Exception:  # noqa: BLE001 - provider errors become evidence.
-            return _failure(
-                effect,
-                "publisher_article_reconcile_provider_error",
-                retryable=True,
-            )
+        after = tuple(current_readbacks)
         acknowledged = _acknowledged(effect, plan, after)
         if acknowledged is not None:
             return acknowledged
@@ -303,7 +339,18 @@ def _acknowledged(
             kind=_ACKNOWLEDGEMENT_KIND,
             target_ref=_TARGET_REF,
         ),
-        evidence_ref=(f"supabase:articles:reconcile:{plan.canonical_feed_sha256}"),
+        evidence_ref="|".join(
+            [
+                (
+                    "supabase:articles:reconcile:"
+                    f"{plan.canonical_feed_sha256}"
+                ),
+                *[
+                    str(row["evidence_ref"])
+                    for row in evidence_rows
+                ],
+            ]
+        ),
         evidence_sha256=hashlib.sha256(evidence).hexdigest(),
     )
 
@@ -336,8 +383,9 @@ def _failure(
     reason_code: str,
     *,
     retryable: bool,
+    evidence: PublisherArticleProjectionReadback | None = None,
 ) -> FailedEffect:
-    evidence = _canonical_json(
+    evidence_payload = _canonical_json(
         {
             "effect_id": effect.id,
             "request_sha256": effect.request_sha256,
@@ -347,9 +395,109 @@ def _failure(
     )
     return FailedEffect(
         reason_code=reason_code,
-        evidence_ref=f"effect-attempt:{effect.id}:{reason_code}",
-        evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        evidence_ref=(
+            evidence.evidence_ref
+            if _readback_evidence_is_valid(evidence)
+            else f"effect-attempt:{effect.id}:{reason_code}"
+        ),
+        evidence_sha256=(
+            evidence.evidence_sha256
+            if _readback_evidence_is_valid(evidence)
+            else hashlib.sha256(evidence_payload).hexdigest()
+        ),
         retryable=retryable,
+    )
+
+
+def _projection_failure_evidence(
+    projection: PublisherArticleProjection,
+    article: dict,
+) -> PublisherArticleProjectionReadback | None:
+    reader = getattr(projection, "failure_evidence", None)
+    if not callable(reader):
+        return None
+    observed = reader(article)
+    return observed if _readback_evidence_is_valid(observed) else None
+
+
+def _batch_failure_evidence(
+    *,
+    effect: EffectView,
+    plan: PublisherArticleReconcilePlan,
+    readbacks: list[PublisherArticleProjectionReadback | None],
+    failed_slug: str,
+    failed_observation: PublisherArticleProjectionReadback | None,
+) -> PublisherArticleProjectionReadback:
+    rows = [
+        {
+            "slug": article["id"],
+            "matches": observed.matches,
+            "evidence_ref": observed.evidence_ref,
+            "evidence_sha256": observed.evidence_sha256,
+        }
+        for article, observed in zip(
+            plan.articles,
+            readbacks,
+            strict=True,
+        )
+        if _readback_evidence_is_valid(observed)
+    ]
+    if (
+        _readback_evidence_is_valid(failed_observation)
+        and not any(
+            row["slug"] == failed_slug
+            and row["evidence_sha256"]
+            == failed_observation.evidence_sha256
+            for row in rows
+        )
+    ):
+        rows.append(
+            {
+                "slug": failed_slug,
+                "matches": failed_observation.matches,
+                "evidence_ref": failed_observation.evidence_ref,
+                "evidence_sha256": (
+                    failed_observation.evidence_sha256
+                ),
+            }
+        )
+    payload = _canonical_json(
+        {
+            "schema_version": (
+                "publisher-article-reconcile-failure-evidence.v1"
+            ),
+            "effect_id": effect.id,
+            "canonical_feed_sha256": plan.canonical_feed_sha256,
+            "failed_slug": failed_slug,
+            "observations": rows,
+        }
+    )
+    refs = [
+        str(row["evidence_ref"])
+        for row in rows
+        if isinstance(row.get("evidence_ref"), str)
+    ]
+    return PublisherArticleProjectionReadback(
+        matches=False,
+        evidence_ref="|".join(
+            [
+                f"effect-attempt:{effect.id}:partial",
+                *refs,
+            ]
+        ),
+        evidence_sha256=hashlib.sha256(payload).hexdigest(),
+    )
+
+
+def _readback_evidence_is_valid(
+    readback: PublisherArticleProjectionReadback | None,
+) -> bool:
+    return bool(
+        readback is not None
+        and isinstance(readback.evidence_ref, str)
+        and readback.evidence_ref.strip()
+        and isinstance(readback.evidence_sha256, str)
+        and _SHA256.fullmatch(readback.evidence_sha256) is not None
     )
 
 

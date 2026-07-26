@@ -504,7 +504,17 @@ def test_sync_article_preserves_server_resident_view_display(monkeypatch):
     monkeypatch.setattr(supabase_sync, "_post", fake_post)
     monkeypatch.setattr(supabase_sync, "_select_rows", fake_select)
     monkeypatch.setattr(supabase_sync, "_patch_where", lambda *a, **k: True)
-    monkeypatch.setattr(supabase_sync, "revalidate_article_cache", lambda s: True)
+    monkeypatch.setattr(
+        supabase_sync,
+        "revalidate_article_cache_with_evidence",
+        lambda slug: supabase_sync.ArticleCacheAcknowledgement(
+            acknowledged=True,
+            target_ref=f"https://example.test/cache/{slug}",
+            status_code=204,
+            evidence_ref=f"https://example.test/cache/{slug}#status=204",
+            evidence_sha256="a" * 64,
+        ),
+    )
 
     ok = supabase_sync.sync_article_projection(
         _item("mile_seeded", published_at="2026-07-20T00:00:00+00:00")

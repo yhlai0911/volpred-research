@@ -169,7 +169,11 @@ def test_batch_plan_is_canonical_and_replay_skips_converged_rows() -> None:
     assert isinstance(first, AcknowledgedEffect)
     assert replay == first
     assert projection.upserts == ["mile_reconcile_b"]
-    assert first.evidence_ref == f"supabase:articles:reconcile:{FEED_SHA256}"
+    assert first.evidence_ref.startswith(
+        f"supabase:articles:reconcile:{FEED_SHA256}|"
+    )
+    assert "supabase:articles/mile_reconcile_a" in first.evidence_ref
+    assert "supabase:articles/mile_reconcile_b" in first.evidence_ref
 
 
 def test_provider_failure_is_retryable_without_writing_later_rows() -> None:
@@ -185,6 +189,38 @@ def test_provider_failure_is_retryable_without_writing_later_rows() -> None:
     assert outcome.reason_code == "publisher_article_reconcile_provider_error"
     assert outcome.retryable is True
     assert projection.upserts == ["mile_reconcile_a"]
+
+
+def test_partial_batch_failure_receipt_keeps_prior_and_failed_refs() -> None:
+    class Projection(_Projection):
+        def failure_evidence(self, article: dict):
+            if article["id"] != "mile_reconcile_b":
+                return None
+            return PublisherArticleProjectionReadback(
+                matches=False,
+                evidence_ref=(
+                    "https://volpred.example.test/api/sync/revalidate/"
+                    "article/mile_reconcile_b#status=503"
+                ),
+                evidence_sha256="9" * 64,
+            )
+
+    projection = Projection()
+    projection.fail_slug = "mile_reconcile_b"
+    payload = _payload()
+
+    outcome = PublisherArticleReconcileEffectAdapter(
+        projection=projection
+    ).deliver(_effect(payload), payload)
+
+    assert isinstance(outcome, FailedEffect)
+    assert outcome.retryable is True
+    assert "supabase:articles/mile_reconcile_a" in outcome.evidence_ref
+    assert "mile_reconcile_b#status=503" in outcome.evidence_ref
+    assert projection.upserts == [
+        "mile_reconcile_a",
+        "mile_reconcile_b",
+    ]
 
 
 def test_invalid_post_write_evidence_is_not_an_acknowledgement() -> None:

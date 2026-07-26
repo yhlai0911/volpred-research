@@ -146,23 +146,41 @@ class PublisherArticleSyncEffectAdapter:
         except Exception:
             written = False
         if not written:
+            failure_evidence = _projection_failure_evidence(
+                self._projection,
+                article,
+            )
             return _failure(
                 effect,
                 "publisher_article_sync_provider_error",
                 retryable=True,
+                evidence=failure_evidence,
             )
 
         try:
             observed = self._projection.readback(article)
         except Exception:
+            failure_evidence = _projection_failure_evidence(
+                self._projection,
+                article,
+            )
             return _failure(
                 effect,
                 "publisher_article_sync_provider_error",
                 retryable=True,
+                evidence=failure_evidence,
             )
         acknowledged = _acknowledged(effect, observed)
         if acknowledged is not None:
             return acknowledged
+        failure_evidence = (
+            observed
+            if _valid_failure_evidence(observed)
+            else _projection_failure_evidence(
+                self._projection,
+                article,
+            )
+        )
         return _failure(
             effect,
             (
@@ -171,21 +189,135 @@ class PublisherArticleSyncEffectAdapter:
                 else "publisher_article_sync_readback_mismatch"
             ),
             retryable=True,
+            evidence=failure_evidence,
         )
 
 
 class SupabaseArticleProjectionAdapter:
-    """Production adapter for direct Supabase upsert plus exact row/tag read-back."""
+    """Production article projection with optional public-surface acknowledgement.
 
-    def __init__(self, *, storage_dir: str | Path = "storage") -> None:
+    Formal single-article and batch-reconcile callers enable
+    ``require_mirror_ack``.  In that mode a matching Supabase row is necessary
+    but not sufficient: the adapter also requires the reader-facing frontend
+    projection to match, and a write is successful only when its typed
+    cache-revalidation acknowledgement can be bound into the receipt.
+    """
+
+    def __init__(
+        self,
+        *,
+        storage_dir: str | Path = "storage",
+        require_mirror_ack: bool = False,
+    ) -> None:
         self._storage_dir = Path(storage_dir)
+        self._require_mirror_ack = require_mirror_ack
+        self._cache_acknowledgements: dict[str, dict[str, object]] = {}
+        self._failure_evidence: dict[
+            str, PublisherArticleProjectionReadback
+        ] = {}
 
     def upsert(self, article: dict) -> bool:
         sync = _supabase_sync_module()
+        if self._require_mirror_ack:
+            result = sync.sync_article_projection_result(
+                article,
+                storage_dir=self._storage_dir,
+                require_cache_ack=True,
+            )
+            cache_ack = result.cache_acknowledgement
+            if not result.succeeded or cache_ack is None:
+                self._remember_write_failure(
+                    article,
+                    result=result,
+                )
+                return False
+            cache_evidence = {
+                "acknowledged": cache_ack.acknowledged,
+                "target_ref": cache_ack.target_ref,
+                "status_code": cache_ack.status_code,
+                "evidence_ref": cache_ack.evidence_ref,
+                "evidence_sha256": cache_ack.evidence_sha256,
+            }
+            if not _valid_cache_acknowledgement(cache_evidence):
+                self._remember_write_failure(
+                    article,
+                    result=result,
+                )
+                return False
+            payload_identity = hashlib.sha256(
+                encode_publisher_article_sync_payload(article)
+            ).hexdigest()
+            self._cache_acknowledgements[payload_identity] = cache_evidence
+            return True
         return bool(
             sync.sync_article_projection(
                 article,
                 storage_dir=self._storage_dir,
+            )
+        )
+
+    def failure_evidence(
+        self,
+        article: dict,
+    ) -> PublisherArticleProjectionReadback | None:
+        """Consume typed evidence retained by the preceding failed upsert."""
+
+        return self._failure_evidence.pop(
+            hashlib.sha256(
+                encode_publisher_article_sync_payload(article)
+            ).hexdigest(),
+            None,
+        )
+
+    def _remember_write_failure(
+        self,
+        article: dict,
+        *,
+        result: object,
+    ) -> None:
+        cache_ack = getattr(result, "cache_acknowledgement", None)
+        slug = str(article.get("id") or "")
+        if cache_ack is not None:
+            evidence_ref = str(
+                getattr(
+                    cache_ack,
+                    "evidence_ref",
+                    f"mirror:article-cache/{slug}",
+                )
+            )
+            evidence_sha256 = str(
+                getattr(cache_ack, "evidence_sha256", "")
+            )
+        else:
+            evidence_ref = f"supabase:articles/{slug}#write-failed"
+            evidence_sha256 = hashlib.sha256(
+                _canonical_json(
+                    {
+                        "schema_version": (
+                            "publisher-article-write-failure.v1"
+                        ),
+                        "slug": slug,
+                        "projection_acknowledged": bool(
+                            getattr(
+                                result,
+                                "projection_acknowledged",
+                                False,
+                            )
+                        ),
+                        "cache_acknowledgement": None,
+                    }
+                )
+            ).hexdigest()
+        if _SHA256.fullmatch(evidence_sha256) is None:
+            return
+        payload_identity = hashlib.sha256(
+            encode_publisher_article_sync_payload(article)
+        ).hexdigest()
+        self._failure_evidence[payload_identity] = (
+            PublisherArticleProjectionReadback(
+                matches=False,
+                evidence_ref=evidence_ref,
+                evidence_sha256=evidence_sha256,
             )
         )
 
@@ -195,6 +327,35 @@ class SupabaseArticleProjectionAdapter:
     ) -> PublisherArticleProjectionReadback | None:
         sync = _supabase_sync_module()
         slug = article["id"]
+        payload_identity = hashlib.sha256(
+            encode_publisher_article_sync_payload(article)
+        ).hexdigest()
+        # Consume at readback entry, before any external I/O.  A failed
+        # post-write read cannot leak this one-shot acknowledgement into the
+        # initial read of a later retry.
+        cache_acknowledgement = (
+            self._cache_acknowledgements.pop(payload_identity, None)
+            if self._require_mirror_ack
+            else None
+        )
+        if (
+            cache_acknowledgement is not None
+            and _valid_cache_acknowledgement(cache_acknowledgement)
+        ):
+            # Preserve the consumed write-boundary acknowledgement before any
+            # external read. If that read raises or returns no row, the effect
+            # receipt can still prove which cache side effect occurred.
+            self._failure_evidence[payload_identity] = (
+                PublisherArticleProjectionReadback(
+                    matches=False,
+                    evidence_ref=str(
+                        cache_acknowledgement["evidence_ref"]
+                    ),
+                    evidence_sha256=str(
+                        cache_acknowledgement["evidence_sha256"]
+                    ),
+                )
+            )
         expected_row = sync.projected_article_row(article, verbose=False)
         rows = sync._select_rows(
             "articles",
@@ -241,11 +402,103 @@ class SupabaseArticleProjectionAdapter:
                 server_resident_keys=sync.SERVER_RESIDENT_DETAILS_KEYS,
             )
         evidence = _canonical_json(actual)
-        return PublisherArticleProjectionReadback(
+        supabase_readback = PublisherArticleProjectionReadback(
             matches=actual == expected,
             evidence_ref=f"supabase:articles/{slug}",
             evidence_sha256=hashlib.sha256(evidence).hexdigest(),
         )
+        if not self._require_mirror_ack:
+            return supabase_readback
+
+        public_article = dict(article)
+        if requested_tags is None and len(rows) == 1:
+            public_article["tags"] = tag_names
+        mirror_payload = sync.readback_article_public_projection(
+            public_article
+        )
+        if not isinstance(mirror_payload, Mapping):
+            raise RuntimeError(
+                "publisher public projection read-back must be an object"
+            )
+        mirror_matches = mirror_payload.get("matches")
+        mirror_ref = mirror_payload.get("evidence_ref")
+        mirror_sha256 = mirror_payload.get("evidence_sha256")
+        if (
+            not isinstance(mirror_matches, bool)
+            or not isinstance(mirror_ref, str)
+            or not mirror_ref.strip()
+            or not isinstance(mirror_sha256, str)
+            or _SHA256.fullmatch(mirror_sha256) is None
+        ):
+            raise RuntimeError(
+                "publisher public projection read-back is invalid"
+            )
+        visible = article.get("status", "published") in {
+            "published",
+            "draft",
+            "scheduled",
+        }
+        effective_mirror_matches = mirror_matches and (
+            visible or cache_acknowledgement is not None
+        )
+        cache_ref = (
+            str(cache_acknowledgement["evidence_ref"])
+            if cache_acknowledgement is not None
+            else None
+        )
+        aggregate = {
+            "schema_version": "publisher-article-projection-readback.v1",
+            "slug": slug,
+            "supabase": {
+                "matches": supabase_readback.matches,
+                "evidence_ref": supabase_readback.evidence_ref,
+                "evidence_sha256": supabase_readback.evidence_sha256,
+            },
+            "mirror": {
+                "matches": effective_mirror_matches,
+                "evidence_ref": mirror_ref.strip(),
+                "evidence_sha256": mirror_sha256,
+                "cache_acknowledgement": cache_acknowledgement,
+            },
+        }
+        evidence_refs = [
+            supabase_readback.evidence_ref,
+            mirror_ref.strip(),
+        ]
+        if cache_ref is not None:
+            evidence_refs.append(cache_ref)
+        readback = PublisherArticleProjectionReadback(
+            matches=(
+                supabase_readback.matches
+                and effective_mirror_matches
+            ),
+            evidence_ref="|".join(evidence_refs),
+            evidence_sha256=hashlib.sha256(
+                _canonical_json(aggregate)
+            ).hexdigest(),
+        )
+        self._failure_evidence.pop(payload_identity, None)
+        return readback
+
+
+def _valid_cache_acknowledgement(value: Mapping[str, object]) -> bool:
+    return (
+        value.get("acknowledged") is True
+        and isinstance(value.get("target_ref"), str)
+        and bool(str(value["target_ref"]).strip())
+        and (
+            value.get("status_code") is None
+            or (
+                isinstance(value.get("status_code"), int)
+                and not isinstance(value.get("status_code"), bool)
+                and 200 <= int(value["status_code"]) < 300
+            )
+        )
+        and isinstance(value.get("evidence_ref"), str)
+        and bool(str(value["evidence_ref"]).strip())
+        and isinstance(value.get("evidence_sha256"), str)
+        and _SHA256.fullmatch(str(value["evidence_sha256"])) is not None
+    )
 
 
 def _supabase_sync_module():
@@ -420,8 +673,9 @@ def _failure(
     reason_code: str,
     *,
     retryable: bool,
+    evidence: PublisherArticleProjectionReadback | None = None,
 ) -> FailedEffect:
-    evidence = _canonical_json(
+    evidence_payload = _canonical_json(
         {
             "effect_id": effect.id,
             "request_sha256": effect.request_sha256,
@@ -431,9 +685,40 @@ def _failure(
     )
     return FailedEffect(
         reason_code=reason_code,
-        evidence_ref=f"effect-attempt:{effect.id}:{reason_code}",
-        evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        evidence_ref=(
+            evidence.evidence_ref
+            if _valid_failure_evidence(evidence)
+            else f"effect-attempt:{effect.id}:{reason_code}"
+        ),
+        evidence_sha256=(
+            evidence.evidence_sha256
+            if _valid_failure_evidence(evidence)
+            else hashlib.sha256(evidence_payload).hexdigest()
+        ),
         retryable=retryable,
+    )
+
+
+def _projection_failure_evidence(
+    projection: PublisherArticleProjection,
+    article: dict,
+) -> PublisherArticleProjectionReadback | None:
+    reader = getattr(projection, "failure_evidence", None)
+    if not callable(reader):
+        return None
+    observed = reader(article)
+    return observed if _valid_failure_evidence(observed) else None
+
+
+def _valid_failure_evidence(
+    evidence: PublisherArticleProjectionReadback | None,
+) -> bool:
+    return bool(
+        evidence is not None
+        and isinstance(evidence.evidence_ref, str)
+        and evidence.evidence_ref.strip()
+        and isinstance(evidence.evidence_sha256, str)
+        and _SHA256.fullmatch(evidence.evidence_sha256) is not None
     )
 
 

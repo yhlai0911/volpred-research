@@ -25,6 +25,12 @@ from urllib import request, error
 from urllib.parse import urlencode
 from uuid import uuid4
 
+from volpred.ops.public_article_projection_contract import (
+    PublicArticleProjectionContractError,
+    audit_frontend_public_article_projection_contract,
+    public_projection_contract_evidence_matches,
+)
+
 REPO = Path(__file__).parent.parent
 FEED = REPO / "storage" / "reports" / "feed.json"
 RECEIPT = REPO / "storage" / "ops" / "publisher_projection_convergence_latest.json"
@@ -36,6 +42,12 @@ RECEIPT_SCHEMA = "publisher-projection-convergence.v2"
 
 class RemoteObservationUnavailable(RuntimeError):
     """A remote surface could not be observed, so convergence is unknown."""
+
+
+def audit_projection_contract() -> dict:
+    return audit_frontend_public_article_projection_contract(
+        REPO / "frontend-v2-fix" / "src" / "lib" / "data-server.ts"
+    )
 
 
 def _warn_publish_sync(message, *, exc=None, **context):
@@ -174,6 +186,9 @@ def run_audit(
         fetch_supabase_slugs
     ),
     live_status: Callable[[str], int] = http_status,
+    projection_contract_audit: Callable[[], dict] = (
+        audit_projection_contract
+    ),
 ) -> tuple[dict, int]:
     """Observe the publisher projection and persist one typed receipt."""
 
@@ -207,6 +222,23 @@ def run_audit(
     local_set = set(local_pub)
 
     observation_errors: list[dict[str, str]] = []
+    projection_contract_evidence: dict | None = None
+    try:
+        projection_contract_evidence = projection_contract_audit()
+        if not public_projection_contract_evidence_matches(
+            projection_contract_evidence
+        ):
+            raise PublicArticleProjectionContractError(
+                "public projection contract evidence is invalid"
+            )
+    except PublicArticleProjectionContractError as exc:
+        projection_contract_evidence = None
+        observation_errors.append(
+            {
+                "surface": "public_projection_contract",
+                "reason": str(exc),
+            }
+        )
     supa_set: set[str] = set()
     supabase_available = True
     try:
@@ -281,6 +313,7 @@ def run_audit(
         "orphan_supabase": orphan_supa,
         "live_404": live_404,
         "observation_errors": observation_errors,
+        "public_projection_contract": projection_contract_evidence,
         "mismatch_total": mismatches,
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)),
     }

@@ -1040,3 +1040,36 @@ piggy-back owner 執行。Service-role-only
 links；只有明確 `tags`（含空陣列）才比較或替換。Production `operations_core/8`
 的 3 筆 due retry 已全部 delivered，回讀 `due_retry/started/nonterminal=0`；這不授權
 處理屬於舊 generation 的 destructive publisher-delete retry。
+
+正式single-article、recovery與hourly batch reconcile caller會以
+`SupabaseArticleProjectionAdapter(require_mirror_ack=True)`啟用composite
+acknowledgement。Effect只有在Supabase row／tags、reader-facing
+`/api/publications/feed/<slug>`內容與必要cache revalidation三者都確認後才可
+delivered；receipt的evidence ref保存Supabase read-back、public GET與cache purge
+POST target／HTTP status，aggregate SHA-256綁定三段typed evidence。Public
+mismatch或cache purge失敗屬retryable provider failure，由同一outbox／dead-letter
+lifecycle處理，不再由caller自行判定成功。
+Payload未帶`tags`時，public expected沿用Supabase已存在的server tags，並套用前端
+comma-split正規化；隱藏狀態的404還要同時證明reader-facing feed健康且非空，並緊接
+同一次attempt成功的cache revalidation。一次性cache ack在readback入口、任何I/O前
+consume，initial generic 404或失敗readback後的retry都不能借舊ack直接settle。
+
+Reader-visible／internal detail欄位的分界不再散落於Python與frontend：
+`config/public_article_projection_contract.json`是版本化唯一母本，policy SHA-256
+為`6d125ff39bdb951026cdecf6e314d4cd56eb6877cc1cf478333375bc78306888`。
+同步程式載入時自驗digest，hourly publish-sync audit會機械比對frontend
+`INTERNAL_DETAIL_EXACT`／`INTERNAL_DETAIL_PREFIXES`；缺檔、壞JSON、digest
+不符或frontend drift都寫`unavailable` receipt，delete／reconcile rollback rehearsal
+亦只接受同一contract evidence。Public API若真的洩漏internal key，adapter會在過濾前
+fail closed，不能用本機filter把下游洩漏洗成exact match。
+
+失敗receipt保留同一typed evidence邊界：single cache POST失敗會保存target、status、
+ref與digest；batch reconcile逐篇在write後立即readback，partial failure會把先前成功
+與失敗項目的evidence refs／aggregate SHA一併寫進原Effect attempt，不能只留下通用
+錯誤字串。`publisher.article.supabase.reconcile`另由既有每小時
+`owned_publisher_article_recovery` schedule呼叫service-role-only
+`volpred_recover_due_owned_publisher_article_reconcile`；它只重播原始durable batch
+payload／effect id，不能以當下較小的feed diff取代。Production migration
+`20260726182802 owned_publisher_reconcile_recovery`已回讀：private receipt table
+FORCE RLS、三個外部role皆無直讀，SECURITY DEFINER RPC僅service role可執行；
+部署後due started／retry均為0，canonical runner重跑為0 recovery／0 delivery。

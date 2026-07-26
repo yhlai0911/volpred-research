@@ -2193,3 +2193,47 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   相同 terminal receipt，effect 不變且 attempt_count 仍為 1。
 - 🟡 目前仍為 **`contained`**：下一個自然 schedule receipt 與 sustained-clean
   尚待回讀；五步 gate 未全過前不稱完成。
+
+## 2026-07-27 — Publisher／Sync Effect Delivery 完成 Mirror acknowledgement（Issue #14）
+
+- 🔎 T06 acceptance audit確認 formal publisher receipt過去只證明Supabase row／tags；
+  frontend cache purge回傳值被忽略，而且Supabase已相符時會直接settle。網站可能仍讀到
+  舊內容，effect卻顯示delivered。
+- ✅ 正式single-article、hourly recovery與hourly batch reconcile都啟用composite
+  acknowledgement：Supabase exact read-back、public article API reader-visible
+  exact read-back及typed cache revalidation acknowledgement缺一不可。只有明確
+  legacy rollback保留舊capability，不新增第二套retry或pending queue。
+- ✅ 失敗仍由既有WorkItem／EffectRequest／outbox的bounded retry與durable
+  dead-letter處理；receipt evidence ref保存Supabase、public article／feed health與
+  cache POST target／HTTP status，aggregate SHA-256綁定三段觀察。
+- ✅ Reader-visible/internal detail分界已收斂到versioned
+  `config/public_article_projection_contract.json`，policy SHA-256
+  `6d125ff3…806888`；hourly audit與兩個rollback rehearsal必須持有exact
+  contract evidence。缺檔、壞JSON、digest／frontend drift都fail closed並寫
+  `unavailable`，public payload在過濾前即拒絕internal key洩漏。
+- ✅ Single失敗receipt保存typed cache target/status/ref/hash；batch reconcile逐篇
+  write後立即readback，partial batch receipt保留先前成功與失敗項目的全部refs，
+  不再把evidence丟成generic failure。
+- ✅ Immutable batch due recovery已接進同一canonical hourly runner，只可重播原
+  Effect與durable payload。Production migration
+  `20260726182802 owned_publisher_reconcile_recovery`已部署；回讀為private table
+  FORCE RLS、外部roles無直讀、RPC僅service role execute。部署後due candidates與
+  canonical runner皆為0。
+- ✅ TDD紅測先證明舊介面無法要求Mirror ack；修後formal effect與publisher相鄰
+  scoped回歸通過，另有production read-only public body exact match。
+- ✅ Live acceptance在owner `operations_core/8`建立
+  `effect_owned_publisher_e35fe214c6acef66f14d87da4aec7f2e`：attempt 1、
+  Work succeeded、Effect delivered，evidence為
+  `supabase:articles/mile_beee535c|https://volpred.zeabur.app/api/publications/feed/mile_beee535c#status=200`；
+  同key重播回同一terminal receipt且attempt仍為1。
+- ✅ Production read-only另確認 omitted-tags/comma-packed案例
+  `mile_cc6ea154` composite match；隱藏文章`mile_f9c70bd0`的initial HTTP 404即使
+  reader feed健康，在無same-attempt cache ack時仍為`matches=false`。
+- ✅ Live write-boundary驗收以同一canonical hidden article建立
+  `effect_owned_publisher_db02df8f575ce1bbe317bafd7bd7e577`，attempt 1 delivered；
+  receipt含Supabase、article 404、健康feed 200、cache POST 200及aggregate digest
+  `74a7720…22bdd2`。同key重播仍是同一effect／digest且attempt維持1。
+- ✅ Issue #14五項acceptance的底層流程、回歸、production read-back與活文件已齊；
+  固定base的Matt spec／standards雙軸複審皆PASS。最終scoped行為測試為
+  152 passed、1 skipped、1個既有基線案例deselect，PostgreSQL交易測試另56 passed；
+  狀態為 **`root_cause_fixed_and_verified`**。

@@ -539,7 +539,7 @@
         "cron": "15 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_audit_publish_sync.sh",
         "log_path": "storage/logs/cron/audit_publish_sync.log",
-        "description": "Hourly: local published vs complete same-window Supabase projection vs live URL parity audit. 每輪原子寫 storage/ops/publisher_projection_convergence_latest.json 並 exact read-back；同時偵測 local-missing-remote 與 remote-orphan-local，remote credentials/transport 不可用時標 unavailable，禁止把空集合誤報成 projection drift。exit 0=converged、1=proven drift findings、2=observation unavailable。",
+        "description": "Hourly: local published vs complete same-window Supabase projection vs live URL parity audit. 每輪原子寫 storage/ops/publisher_projection_convergence_latest.json 並 exact read-back；同時以 versioned config/public_article_projection_contract.json 的 exact policy SHA 稽核 frontend INTERNAL_DETAIL policy。contract 缺檔、壞JSON、digest/frontend drift或注入evidence不符皆標 unavailable；remote credentials/transport 不可用同樣禁止把空集合誤報成 projection drift。exit 0=converged、1=proven drift findings、2=observation unavailable。",
         "host_crontab_managed": true,
         "piggy_back_enabled": true,
         "exit_semantics": "0=converged,1=findings,2=unavailable",
