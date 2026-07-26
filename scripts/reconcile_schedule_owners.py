@@ -25,8 +25,10 @@ import argparse
 import json
 import os
 import plistlib
+import signal
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from datetime import datetime, timezone
@@ -44,6 +46,7 @@ CONFIG_PATH = ROOT / "config" / "runtime_schedules.json"
 CORE_LABEL = "com.volpred.operations-core-scheduler"
 CORE_PLIST = ROOT / "ops" / "launchd" / f"{CORE_LABEL}.plist"
 UTC = timezone.utc
+HOST_RECONCILE_TIMEOUT_SECONDS = 10
 
 
 def _load_config(path: Path = CONFIG_PATH) -> dict[str, Any]:
@@ -116,6 +119,11 @@ def build_owner_plan(
         "operations_core_job_ids": core_owned,
         "legacy_job_ids": legacy_owned,
         "legacy_labels_to_bootout": core_legacy_labels,
+        "legacy_label_jobs": {
+            label: value
+            for value in core_owned
+            if (label := _possible_legacy_label(items[value])) is not None
+        },
         "legacy_launchagent_labels": legacy_launchagents,
         "core_daemon_required": policy.mode != "disabled",
         "core_daemon_label": str(
@@ -130,25 +138,40 @@ def audit_owner_plan(
     *,
     crontab_text: str,
     loaded_labels: set[str],
+    gated_job_ids: set[str] | None = None,
 ) -> dict[str, Any]:
     conflicts: list[dict[str, str]] = []
+    dormant: list[dict[str, str]] = []
+    gated = gated_job_ids or set()
     for job_id in plan["operations_core_job_ids"]:
         tag = f"# volpred-{job_id.replace('_', '-')}"
         if any(line.rstrip().endswith(tag) for line in crontab_text.splitlines()):
-            conflicts.append(
+            target = dormant if job_id in gated else conflicts
+            target.append(
                 {
                     "job_id": job_id,
                     "surface": "host_crontab",
-                    "reason": "legacy owner still installed",
+                    "reason": (
+                        "legacy clock present but business action suppressed by owner gate"
+                        if job_id in gated
+                        else "legacy owner still installed"
+                    ),
                 }
             )
+    label_jobs = plan.get("legacy_label_jobs") or {}
     for label in plan["legacy_labels_to_bootout"]:
         if label in loaded_labels:
-            conflicts.append(
+            job_id = str(label_jobs.get(label) or "")
+            target = dormant if job_id in gated else conflicts
+            target.append(
                 {
-                    "job_id": "",
+                    "job_id": job_id,
                     "surface": label,
-                    "reason": "legacy LaunchAgent still loaded",
+                    "reason": (
+                        "legacy clock present but business action suppressed by owner gate"
+                        if job_id in gated
+                        else "legacy LaunchAgent still loaded"
+                    ),
                 }
             )
     core_label = str(plan["core_daemon_label"])
@@ -165,7 +188,82 @@ def audit_owner_plan(
         "ok": not conflicts,
         "status": "owner_surfaces_verified" if not conflicts else "ownership_conflict",
         "conflicts": conflicts,
+        "dormant_legacy_surfaces": dormant,
     }
+
+
+def _legacy_gate_covered_job_ids(config: Mapping[str, Any]) -> set[str]:
+    """Jobs whose live wrapper calls the canonical pre-action owner gate."""
+    covered: set[str] = set()
+    for job_id, item in _items_by_id(config).items():
+        raw = item.get("wrapper_script")
+        if not isinstance(raw, str) or not raw:
+            continue
+        live = Path(raw).expanduser()
+        canonical = ROOT / "scripts" / live.name
+        candidates = [path for path in (live, canonical) if path.is_file()]
+        if not candidates:
+            continue
+        if all(
+            "cron_lib.sh" in path.read_text(encoding="utf-8", errors="ignore")
+            and "cron_emit_start" in path.read_text(encoding="utf-8", errors="ignore")
+            for path in candidates
+        ):
+            covered.add(job_id)
+    return covered
+
+
+def _run_host_reconcile(
+    command: list[str],
+    *,
+    env: Mapping[str, str],
+    gated_job_ids: set[str],
+    required_job_ids: set[str],
+) -> None:
+    """Bound macOS crontab writes; a verified pre-action gate is the fallback."""
+    process = subprocess.Popen(
+        command,
+        cwd=ROOT,
+        env=dict(env),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        start_new_session=True,
+    )
+    try:
+        stdout, stderr = process.communicate(timeout=HOST_RECONCILE_TIMEOUT_SECONDS)
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGTERM)
+        try:
+            stdout, stderr = process.communicate(timeout=2)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGKILL)
+            stdout, stderr = process.communicate()
+        uncovered = sorted(required_job_ids - gated_job_ids)
+        if uncovered:
+            raise RuntimeError(
+                "host crontab reconciliation timed out and owner gate is missing "
+                f"for {uncovered}"
+            )
+        print(
+            "[reconcile_schedule_owners] WARN host crontab rewrite timed out; "
+            "verified legacy owner gates remain fail-closed"
+        )
+        return
+    if stdout:
+        print(stdout, end="")
+    if stderr:
+        print(stderr, end="", file=sys.stderr)
+    if process.returncode != 0:
+        uncovered = sorted(required_job_ids - gated_job_ids)
+        if uncovered:
+            raise subprocess.CalledProcessError(
+                process.returncode, command, output=stdout, stderr=stderr
+            )
+        print(
+            "[reconcile_schedule_owners] WARN host crontab rewrite failed; "
+            "verified legacy owner gates remain fail-closed"
+        )
 
 
 def _read_crontab() -> str:
@@ -264,6 +362,7 @@ def apply_owner_plan(
     job_id: str | None,
     restart_core: bool = False,
 ) -> None:
+    gated_job_ids = _legacy_gate_covered_job_ids(config)
     if plan["core_daemon_required"]:
         _install_core_plist(restart=restart_core)
 
@@ -275,7 +374,12 @@ def apply_owner_plan(
         "VOLPRED_REPO_ROOT": str(ROOT),
         "VOLPRED_RUNTIME_SCHEDULES_PATH": str(config_path),
     }
-    subprocess.run(host_command, cwd=ROOT, env=env, check=True)
+    _run_host_reconcile(
+        host_command,
+        env=env,
+        gated_job_ids=gated_job_ids,
+        required_job_ids=set(plan["operations_core_job_ids"]),
+    )
 
     domain = f"gui/{os.getuid()}"
     for label in plan["legacy_labels_to_bootout"]:
@@ -331,6 +435,7 @@ def main(argv: list[str] | None = None) -> int:
         plan,
         crontab_text=_read_crontab(),
         loaded_labels=_loaded_launchd_labels(),
+        gated_job_ids=_legacy_gate_covered_job_ids(config),
     )
     audit["audited_at"] = datetime.now(UTC).isoformat().replace("+00:00", "Z")
     print(json.dumps(audit, ensure_ascii=False, indent=2, sort_keys=True))

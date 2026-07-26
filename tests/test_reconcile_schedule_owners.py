@@ -91,6 +91,32 @@ def test_audit_green_requires_core_clock() -> None:
     assert green["status"] == "owner_surfaces_verified"
 
 
+def test_audit_accepts_dormant_host_clock_only_with_verified_owner_gate() -> None:
+    plan = build_owner_plan(config())
+    live_host_line = (
+        "0 * * * * /bin/true >> /tmp/x 2>&1 # volpred-host-job\n"
+    )
+
+    audit = audit_owner_plan(
+        plan,
+        crontab_text=live_host_line,
+        loaded_labels={"com.volpred.operations-core-scheduler"},
+        gated_job_ids={"host_job"},
+    )
+
+    assert audit["ok"] is True
+    assert audit["conflicts"] == []
+    assert audit["dormant_legacy_surfaces"] == [
+        {
+            "job_id": "host_job",
+            "surface": "host_crontab",
+            "reason": (
+                "legacy clock present but business action suppressed by owner gate"
+            ),
+        }
+    ]
+
+
 def test_unchanged_loaded_core_plist_is_not_restarted(
     tmp_path, monkeypatch
 ) -> None:

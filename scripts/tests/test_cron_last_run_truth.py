@@ -76,7 +76,9 @@ def test_weekday_cron_is_not_stale_over_a_weekend() -> None:
     last = datetime(2026, 7, 10, 15, 0, tzinfo=timezone.utc)     # Friday's run
     items = [{"id": "collect_tw_data", "cron": "0 15 * * 1-5"}]
     state = {"collect_tw_data": last.isoformat()}
-    rec = check_alerts.evaluate_cron_staleness(items, state, now, base=base)[0]
+    rec = check_alerts.evaluate_cron_staleness(
+        items, state, now, base=base, receipt_state={}
+    )[0]
     assert rec["status"] == "ok", f"weekend gap {rec['age_min']:.0f}min vs period {gap:.0f}min"
 
 
@@ -85,7 +87,9 @@ def test_weekday_cron_is_not_stale_over_a_weekend() -> None:
 def test_never_ran_job_is_reported_not_skipped() -> None:
     # Old code: `if not last_iso: continue` → indicator_arena_daily was invisible.
     items = [{"id": "indicator_arena_daily", "cron": "0 8 * * *"}]
-    rec = check_alerts.evaluate_cron_staleness(items, {}, datetime.now(timezone.utc))[0]
+    rec = check_alerts.evaluate_cron_staleness(
+        items, {}, datetime.now(timezone.utc), receipt_state={}
+    )[0]
     assert rec["status"] == "never_ran"
     assert "no cron_last_run entry" in rec["detail"]
 
@@ -93,15 +97,20 @@ def test_never_ran_job_is_reported_not_skipped() -> None:
 def test_unknown_cron_expression_is_reported_not_skipped() -> None:
     # Old code: `period_min = period_map.get(cron); if None: continue` → 24 jobs skipped.
     items = [{"id": "bogus", "cron": "not a cron"}]
-    rec = check_alerts.evaluate_cron_staleness(items, {"bogus": "2026-01-01T00:00:00+00:00"},
-                                               datetime.now(timezone.utc))[0]
+    rec = check_alerts.evaluate_cron_staleness(
+        items,
+        {"bogus": "2026-01-01T00:00:00+00:00"},
+        datetime.now(timezone.utc),
+        receipt_state={},
+    )[0]
     assert rec["status"] == "bad_cron"
 
 
 def test_unparsable_marker_is_reported_not_skipped() -> None:
     items = [{"id": "j", "cron": "0 * * * *"}]
-    rec = check_alerts.evaluate_cron_staleness(items, {"j": "garbage"},
-                                               datetime.now(timezone.utc))[0]
+    rec = check_alerts.evaluate_cron_staleness(
+        items, {"j": "garbage"}, datetime.now(timezone.utc), receipt_state={}
+    )[0]
     assert rec["status"] == "unparsable_marker"
 
 
@@ -109,7 +118,9 @@ def test_genuinely_stale_job_is_flagged() -> None:
     now = datetime.now(timezone.utc)
     items = [{"id": "j", "cron": "0 * * * *"}]  # hourly → tolerance 2h
     state = {"j": (now - timedelta(hours=5)).isoformat()}
-    rec = check_alerts.evaluate_cron_staleness(items, state, now)[0]
+    rec = check_alerts.evaluate_cron_staleness(
+        items, state, now, receipt_state={}
+    )[0]
     assert rec["status"] == "stale"
 
 
@@ -170,7 +181,9 @@ def test_every_configured_job_gets_a_verdict() -> None:
     dropped jobs on the floor with no trace.
     """
     items = _items()
-    records = check_alerts.evaluate_cron_staleness(items, {}, datetime.now(timezone.utc))
+    records = check_alerts.evaluate_cron_staleness(
+        items, {}, datetime.now(timezone.utc), receipt_state={}
+    )
     verdicted = {r["job_id"] for r in records}
     configured = {i["id"] for i in items if i.get("id")}
     assert verdicted == configured, f"no verdict for: {sorted(configured - verdicted)}"
@@ -178,7 +191,9 @@ def test_every_configured_job_gets_a_verdict() -> None:
 
 def test_no_configured_cron_expression_is_unparsable() -> None:
     items = _items()
-    records = check_alerts.evaluate_cron_staleness(items, {}, datetime.now(timezone.utc))
+    records = check_alerts.evaluate_cron_staleness(
+        items, {}, datetime.now(timezone.utc), receipt_state={}
+    )
     bad = [r for r in records if r["status"] == "bad_cron"]
     assert not bad, f"unparsable cron(s): {[(r['job_id'], r['detail']) for r in bad]}"
 

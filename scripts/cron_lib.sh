@@ -17,6 +17,24 @@ if [ -z "${VOLPRED_CRON_LIB_LOADED:-}" ]; then
 
   cron_emit_start() {
     local job_name=$1
+    # The canonical config transfers business ownership before live OS schedule
+    # surfaces are removed. macOS can leave a stale cron/LaunchAgent trigger
+    # behind (or hang while rewriting crontab); that clock must become a no-op,
+    # never a second business owner. Operations Core sets its owner explicitly
+    # and bypasses this legacy-side gate.
+    if [ "${VOLPRED_SCHEDULE_OWNER:-legacy}" != "operations_core" ]; then
+      /usr/bin/env python3 "${VOLPRED_REPO_ROOT}/scripts/cron_owner_gate.py" \
+        --wrapper "$0"
+      local owner_gate_rc=$?
+      if [ "${owner_gate_rc}" = "75" ]; then
+        echo "=== [${job_name}] legacy trigger suppressed by Operations Core ownership ==="
+        exit 0
+      fi
+      if [ "${owner_gate_rc}" != "0" ]; then
+        echo "=== [${job_name}] ERROR ownership ambiguous; fail-closed rc=${owner_gate_rc} ==="
+        exit "${owner_gate_rc}"
+      fi
+    fi
     echo "=== [${job_name}] $(cron_now_iso) start ==="
   }
 
