@@ -1,0 +1,1144 @@
+{
+  "experiment_id": "asia3_tw_sector_spillover",
+  "generated_at_utc": "2026-07-26T20:16:52.187138+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance daily OHLC, auto_adjust=True",
+    "tickers": [
+      "2330.TW",
+      "2317.TW",
+      "2454.TW",
+      "2881.TW",
+      "2891.TW",
+      "2603.TW",
+      "2609.TW",
+      "1301.TW",
+      "3008.TW"
+    ],
+    "sector_map": {
+      "2330.TW": "Semiconductor",
+      "2317.TW": "Electronics_EMS",
+      "2454.TW": "IC_Design",
+      "2881.TW": "Financials",
+      "2891.TW": "Financials",
+      "2603.TW": "Shipping",
+      "2609.TW": "Shipping",
+      "1301.TW": "Petrochemical",
+      "3008.TW": "Optical"
+    },
+    "volatility_measure": "Garman-Klass (1980) range-based daily vol on log scale",
+    "gk_ex_div_invariance_note": "GK uses within-day log ratios only; invariant to per-day price adjustment (splits/ex-dividend), so overnight gaps do not contaminate it",
+    "alignment": "inner join on TWSE trading calendar (all tickers TWSE-listed)",
+    "per_ticker": {
+      "2330.TW": {
+        "sector": "Semiconductor",
+        "n_raw": 6603,
+        "n_gk": 6603,
+        "start": "2000-01-04",
+        "end": "2026-07-24"
+      },
+      "2317.TW": {
+        "sector": "Electronics_EMS",
+        "n_raw": 8428,
+        "n_gk": 8428,
+        "start": "1993-01-05",
+        "end": "2026-07-24"
+      },
+      "2454.TW": {
+        "sector": "IC_Design",
+        "n_raw": 6199,
+        "n_gk": 6199,
+        "start": "2001-07-23",
+        "end": "2026-07-24"
+      },
+      "2881.TW": {
+        "sector": "Financials",
+        "n_raw": 6091,
+        "n_gk": 6091,
+        "start": "2001-12-20",
+        "end": "2026-07-24"
+      },
+      "2891.TW": {
+        "sector": "Financials",
+        "n_raw": 5985,
+        "n_gk": 5985,
+        "start": "2002-05-17",
+        "end": "2026-07-24"
+      },
+      "2603.TW": {
+        "sector": "Shipping",
+        "n_raw": 6603,
+        "n_gk": 6603,
+        "start": "2000-01-04",
+        "end": "2026-07-24"
+      },
+      "2609.TW": {
+        "sector": "Shipping",
+        "n_raw": 6603,
+        "n_gk": 6603,
+        "start": "2000-01-04",
+        "end": "2026-07-24"
+      },
+      "1301.TW": {
+        "sector": "Petrochemical",
+        "n_raw": 6603,
+        "n_gk": 6603,
+        "start": "2000-01-04",
+        "end": "2026-07-24"
+      },
+      "3008.TW": {
+        "sector": "Optical",
+        "n_raw": 6034,
+        "n_gk": 6034,
+        "start": "2002-03-11",
+        "end": "2026-07-24"
+      }
+    },
+    "common_start": "2002-05-17",
+    "common_end": "2026-07-24",
+    "n_common": 5985
+  },
+  "descriptive_stats": {
+    "TSMC(Semi)": {
+      "sector": "Semiconductor",
+      "mean_daily_vol": 0.010912709653739082,
+      "median_daily_vol": 0.00939101937334629,
+      "annualized_vol_pct": 17.323389524188435,
+      "logvol_std": 1.0643388021813325
+    },
+    "HonHai(EMS)": {
+      "sector": "Electronics_EMS",
+      "mean_daily_vol": 0.012182513325565204,
+      "median_daily_vol": 0.010556769307528207,
+      "annualized_vol_pct": 19.339140361905592,
+      "logvol_std": 1.247126492890738
+    },
+    "MediaTek(IC)": {
+      "sector": "IC_Design",
+      "mean_daily_vol": 0.01671417628840565,
+      "median_daily_vol": 0.014557738126100141,
+      "annualized_vol_pct": 26.53293229704837,
+      "logvol_std": 1.1735093492165078
+    },
+    "Fubon(Fin)": {
+      "sector": "Financials",
+      "mean_daily_vol": 0.011855512601771104,
+      "median_daily_vol": 0.009777844107466035,
+      "annualized_vol_pct": 18.820042805687205,
+      "logvol_std": 1.1137321220964067
+    },
+    "CTBC(Fin)": {
+      "sector": "Financials",
+      "mean_daily_vol": 0.011338622285139665,
+      "median_daily_vol": 0.009499297016273087,
+      "annualized_vol_pct": 17.999504865944672,
+      "logvol_std": 1.148297855496143
+    },
+    "Evergreen(Ship)": {
+      "sector": "Shipping",
+      "mean_daily_vol": 0.017426958660355985,
+      "median_daily_vol": 0.014777783771571585,
+      "annualized_vol_pct": 27.66443923410316,
+      "logvol_std": 1.19595592367777
+    },
+    "YangMing(Ship)": {
+      "sector": "Shipping",
+      "mean_daily_vol": 0.017234437653105932,
+      "median_daily_vol": 0.014274730663141739,
+      "annualized_vol_pct": 27.35882160969958,
+      "logvol_std": 1.2303891759387
+    },
+    "FPC(Petchem)": {
+      "sector": "Petrochemical",
+      "mean_daily_vol": 0.01164363041431246,
+      "median_daily_vol": 0.00976328690988434,
+      "annualized_vol_pct": 18.48369026053124,
+      "logvol_std": 1.1015978861629387
+    },
+    "Largan(Optic)": {
+      "sector": "Optical",
+      "mean_daily_vol": 0.0180830807085535,
+      "median_daily_vol": 0.016053861042603007,
+      "annualized_vol_pct": 28.706000695645333,
+      "logvol_std": 1.1738342721861157
+    }
+  },
+  "logvol_correlation": {
+    "TSMC(Semi)": {
+      "TSMC(Semi)": 1.0,
+      "HonHai(EMS)": 0.6997856097175904,
+      "MediaTek(IC)": 0.7609756432541133,
+      "Fubon(Fin)": 0.7946830824432493,
+      "CTBC(Fin)": 0.7670633423066772,
+      "Evergreen(Ship)": 0.7457613162896652,
+      "YangMing(Ship)": 0.7182387340879147,
+      "FPC(Petchem)": 0.8028060160313688,
+      "Largan(Optic)": 0.7279700230597593
+    },
+    "HonHai(EMS)": {
+      "TSMC(Semi)": 0.6997856097175904,
+      "HonHai(EMS)": 1.0,
+      "MediaTek(IC)": 0.6403355558233847,
+      "Fubon(Fin)": 0.6980040500548196,
+      "CTBC(Fin)": 0.7062127489446071,
+      "Evergreen(Ship)": 0.6600987644740199,
+      "YangMing(Ship)": 0.6209834021775322,
+      "FPC(Petchem)": 0.6684004834055638,
+      "Largan(Optic)": 0.6339920209818488
+    },
+    "MediaTek(IC)": {
+      "TSMC(Semi)": 0.7609756432541133,
+      "HonHai(EMS)": 0.6403355558233847,
+      "MediaTek(IC)": 1.0,
+      "Fubon(Fin)": 0.6899970845426624,
+      "CTBC(Fin)": 0.675977072793208,
+      "Evergreen(Ship)": 0.6669454629048366,
+      "YangMing(Ship)": 0.6538991312631982,
+      "FPC(Petchem)": 0.6991676130205776,
+      "Largan(Optic)": 0.6888602120223166
+    },
+    "Fubon(Fin)": {
+      "TSMC(Semi)": 0.7946830824432493,
+      "HonHai(EMS)": 0.6980040500548196,
+      "MediaTek(IC)": 0.6899970845426624,
+      "Fubon(Fin)": 1.0,
+      "CTBC(Fin)": 0.8169584208783662,
+      "Evergreen(Ship)": 0.7200108316686388,
+      "YangMing(Ship)": 0.6941821264732245,
+      "FPC(Petchem)": 0.7505966494672421,
+      "Largan(Optic)": 0.6898399545832492
+    },
+    "CTBC(Fin)": {
+      "TSMC(Semi)": 0.7670633423066772,
+      "HonHai(EMS)": 0.7062127489446071,
+      "MediaTek(IC)": 0.675977072793208,
+      "Fubon(Fin)": 0.8169584208783662,
+      "CTBC(Fin)": 1.0,
+      "Evergreen(Ship)": 0.7100250303366774,
+      "YangMing(Ship)": 0.6882034386043393,
+      "FPC(Petchem)": 0.7319813253811411,
+      "Largan(Optic)": 0.6722323338188052
+    },
+    "Evergreen(Ship)": {
+      "TSMC(Semi)": 0.7457613162896652,
+      "HonHai(EMS)": 0.6600987644740199,
+      "MediaTek(IC)": 0.6669454629048366,
+      "Fubon(Fin)": 0.7200108316686388,
+      "CTBC(Fin)": 0.7100250303366774,
+      "Evergreen(Ship)": 1.0,
+      "YangMing(Ship)": 0.7952978518123726,
+      "FPC(Petchem)": 0.7389554377512975,
+      "Largan(Optic)": 0.65728780777777
+    },
+    "YangMing(Ship)": {
+      "TSMC(Semi)": 0.7182387340879147,
+      "HonHai(EMS)": 0.6209834021775322,
+      "MediaTek(IC)": 0.6538991312631982,
+      "Fubon(Fin)": 0.6941821264732245,
+      "CTBC(Fin)": 0.6882034386043393,
+      "Evergreen(Ship)": 0.7952978518123726,
+      "YangMing(Ship)": 1.0,
+      "FPC(Petchem)": 0.7188193560973075,
+      "Largan(Optic)": 0.6309909368678637
+    },
+    "FPC(Petchem)": {
+      "TSMC(Semi)": 0.8028060160313688,
+      "HonHai(EMS)": 0.6684004834055638,
+      "MediaTek(IC)": 0.6991676130205776,
+      "Fubon(Fin)": 0.7505966494672421,
+      "CTBC(Fin)": 0.7319813253811411,
+      "Evergreen(Ship)": 0.7389554377512975,
+      "YangMing(Ship)": 0.7188193560973075,
+      "FPC(Petchem)": 1.0,
+      "Largan(Optic)": 0.6834463536477137
+    },
+    "Largan(Optic)": {
+      "TSMC(Semi)": 0.7279700230597593,
+      "HonHai(EMS)": 0.6339920209818488,
+      "MediaTek(IC)": 0.6888602120223166,
+      "Fubon(Fin)": 0.6898399545832492,
+      "CTBC(Fin)": 0.6722323338188052,
+      "Evergreen(Ship)": 0.65728780777777,
+      "YangMing(Ship)": 0.6309909368678637,
+      "FPC(Petchem)": 0.6834463536477137,
+      "Largan(Optic)": 1.0
+    }
+  },
+  "connectedness_full_sample": {
+    "method": "Generalized FEVD (Pesaran-Shin 1998) on VAR(p) MA representation",
+    "why_generalized": "order-invariant; Cholesky-FEVD would depend on the arbitrary variable ordering (task-flagged pitfall)",
+    "var_lag": 6,
+    "fevd_horizon": 10,
+    "directional_convention": "DY(2012): to/from/net divided by N (system-average shares)",
+    "total_spillover_index_pct": 80.52975562916751,
+    "to_others_pct": {
+      "TSMC(Semi)": 10.05308966546113,
+      "HonHai(EMS)": 7.6435429741224095,
+      "MediaTek(IC)": 8.06965242604598,
+      "Fubon(Fin)": 9.607003332974791,
+      "CTBC(Fin)": 9.495800931790226,
+      "Evergreen(Ship)": 9.404863935590074,
+      "YangMing(Ship)": 8.958681785482343,
+      "FPC(Petchem)": 9.592753530078152,
+      "Largan(Optic)": 7.704367047622405
+    },
+    "from_others_pct": {
+      "TSMC(Semi)": 9.179728302103369,
+      "HonHai(EMS)": 8.74126862925213,
+      "MediaTek(IC)": 8.824936056661091,
+      "Fubon(Fin)": 9.025045042640038,
+      "CTBC(Fin)": 9.034885238694649,
+      "Evergreen(Ship)": 9.008713353785753,
+      "YangMing(Ship)": 8.874843621178954,
+      "FPC(Petchem)": 9.042335520317176,
+      "Largan(Optic)": 8.797999864534367
+    },
+    "net_pct": {
+      "TSMC(Semi)": 0.8733613633577608,
+      "HonHai(EMS)": -1.0977256551297199,
+      "MediaTek(IC)": -0.7552836306151107,
+      "Fubon(Fin)": 0.5819582903347538,
+      "CTBC(Fin)": 0.46091569309557734,
+      "Evergreen(Ship)": 0.3961505818043207,
+      "YangMing(Ship)": 0.08383816430338875,
+      "FPC(Petchem)": 0.5504180097609765,
+      "Largan(Optic)": -1.0936328169119616
+    },
+    "from_own_share_pct": {
+      "TSMC(Semi)": 82.61755471893034,
+      "HonHai(EMS)": 78.67141766326915,
+      "MediaTek(IC)": 79.42442450994982,
+      "Fubon(Fin)": 81.2254053837603,
+      "CTBC(Fin)": 81.31396714825183,
+      "Evergreen(Ship)": 81.07842018407176,
+      "YangMing(Ship)": 79.87359259061058,
+      "FPC(Petchem)": 81.38101968285456,
+      "Largan(Optic)": 79.18199878080931
+    },
+    "pairwise_pct_row_normalized": {
+      "TSMC(Semi)": {
+        "TSMC(Semi)": 17.38244528106967,
+        "HonHai(EMS)": 8.678626434211175,
+        "MediaTek(IC)": 10.048585932163851,
+        "Fubon(Fin)": 11.248986446634472,
+        "CTBC(Fin)": 10.88204705623015,
+        "Evergreen(Ship)": 10.618096140744859,
+        "YangMing(Ship)": 10.149938493690197,
+        "FPC(Petchem)": 11.832079805119108,
+        "Largan(Optic)": 9.159194410136514
+      },
+      "HonHai(EMS)": {
+        "TSMC(Semi)": 10.718706893984603,
+        "HonHai(EMS)": 21.328582336730843,
+        "MediaTek(IC)": 8.901071578679343,
+        "Fubon(Fin)": 10.749100035370292,
+        "CTBC(Fin)": 10.65744517798918,
+        "Evergreen(Ship)": 9.948609235929696,
+        "YangMing(Ship)": 9.075239785906508,
+        "FPC(Petchem)": 10.019918348452975,
+        "Largan(Optic)": 8.601326606956574
+      },
+      "MediaTek(IC)": {
+        "TSMC(Semi)": 11.775031433728405,
+        "HonHai(EMS)": 8.414947896552807,
+        "MediaTek(IC)": 20.575575490050173,
+        "Fubon(Fin)": 10.005304114410983,
+        "CTBC(Fin)": 9.875362061715768,
+        "Evergreen(Ship)": 9.723445484167472,
+        "YangMing(Ship)": 9.616293274892325,
+        "FPC(Petchem)": 10.440726574137987,
+        "Largan(Optic)": 9.573313670344085
+      },
+      "Fubon(Fin)": {
+        "TSMC(Semi)": 11.502852001578233,
+        "HonHai(EMS)": 8.940984270625783,
+        "MediaTek(IC)": 8.72502887406474,
+        "Fubon(Fin)": 18.774594616239696,
+        "CTBC(Fin)": 12.434072133294446,
+        "Evergreen(Ship)": 10.356086274535668,
+        "YangMing(Ship)": 9.740086796429265,
+        "FPC(Petchem)": 10.937480284116235,
+        "Largan(Optic)": 8.58881474911594
+      },
+      "CTBC(Fin)": {
+        "TSMC(Semi)": 11.267138975559888,
+        "HonHai(EMS)": 9.32352539084485,
+        "MediaTek(IC)": 8.5225252512073,
+        "Fubon(Fin)": 12.745311634274422,
+        "CTBC(Fin)": 18.68603285174817,
+        "Evergreen(Ship)": 10.484228048294652,
+        "YangMing(Ship)": 9.894905792930796,
+        "FPC(Petchem)": 10.754639364160822,
+        "Largan(Optic)": 8.321692690979098
+      },
+      "Evergreen(Ship)": {
+        "TSMC(Semi)": 11.103265286851705,
+        "HonHai(EMS)": 8.568865181356498,
+        "MediaTek(IC)": 8.597754939627558,
+        "Fubon(Fin)": 10.388386580307019,
+        "CTBC(Fin)": 10.486864238239356,
+        "Evergreen(Ship)": 18.92157981592824,
+        "YangMing(Ship)": 12.455622233722462,
+        "FPC(Petchem)": 11.186729359806531,
+        "Largan(Optic)": 8.290932364160627
+      },
+      "YangMing(Ship)": {
+        "TSMC(Semi)": 10.919058986392976,
+        "HonHai(EMS)": 7.973628372548013,
+        "MediaTek(IC)": 8.7881107583839,
+        "Fubon(Fin)": 10.087208497522774,
+        "CTBC(Fin)": 10.250923579194293,
+        "Evergreen(Ship)": 12.778030353794431,
+        "YangMing(Ship)": 20.12640740938941,
+        "FPC(Petchem)": 10.930673970063413,
+        "Largan(Optic)": 8.14595807271079
+      },
+      "FPC(Petchem)": {
+        "TSMC(Semi)": 12.171349900195935,
+        "HonHai(EMS)": 8.38958572376245,
+        "MediaTek(IC)": 9.147894252696378,
+        "Fubon(Fin)": 10.86678618725553,
+        "CTBC(Fin)": 10.833961247137063,
+        "Evergreen(Ship)": 10.898366999279974,
+        "YangMing(Ship)": 10.415004508329211,
+        "FPC(Petchem)": 18.618980317145443,
+        "Largan(Optic)": 8.658070864198022
+      },
+      "Largan(Optic)": {
+        "TSMC(Semi)": 11.020403510858442,
+        "HonHai(EMS)": 8.501723497200105,
+        "MediaTek(IC)": 9.895900247590768,
+        "Fubon(Fin)": 10.37194650099765,
+        "CTBC(Fin)": 10.041532892311778,
+        "Evergreen(Ship)": 9.836912883563931,
+        "YangMing(Ship)": 9.28104518344032,
+        "FPC(Petchem)": 10.23253406484631,
+        "Largan(Optic)": 20.818001219190695
+      }
+    },
+    "net_pairwise_pct": {
+      "TSMC(Semi)": {
+        "TSMC(Semi)": 0.0,
+        "HonHai(EMS)": 0.22667560664149192,
+        "MediaTek(IC)": 0.1918272779516171,
+        "Fubon(Fin)": 0.028207283882640082,
+        "CTBC(Fin)": 0.04278799103663778,
+        "Evergreen(Ship)": 0.05390768290076058,
+        "YangMing(Ship)": 0.08545783252253106,
+        "FPC(Petchem)": 0.03769667723075869,
+        "Largan(Optic)": 0.20680101119132516
+      },
+      "HonHai(EMS)": {
+        "TSMC(Semi)": -0.22667560664149192,
+        "HonHai(EMS)": 0.0,
+        "MediaTek(IC)": -0.05401374245850407,
+        "Fubon(Fin)": -0.20090175163827872,
+        "CTBC(Fin)": -0.14821330968270335,
+        "Evergreen(Ship)": -0.15330489495257757,
+        "YangMing(Ship)": -0.12240126815094396,
+        "FPC(Petchem)": -0.18114806941005837,
+        "Largan(Optic)": -0.011067012195163189
+      },
+      "MediaTek(IC)": {
+        "TSMC(Semi)": -0.1918272779516171,
+        "HonHai(EMS)": 0.05401374245850407,
+        "MediaTek(IC)": 0.0,
+        "Fubon(Fin)": -0.14225280448291575,
+        "CTBC(Fin)": -0.1503152011676075,
+        "Evergreen(Ship)": -0.1250767271711016,
+        "YangMing(Ship)": -0.09202027961204731,
+        "FPC(Petchem)": -0.14364803571573415,
+        "Largan(Optic)": 0.03584295302740927
+      },
+      "Fubon(Fin)": {
+        "TSMC(Semi)": -0.028207283882640082,
+        "HonHai(EMS)": 0.20090175163827872,
+        "MediaTek(IC)": 0.14225280448291575,
+        "Fubon(Fin)": 0.0,
+        "CTBC(Fin)": 0.03458216677555291,
+        "Evergreen(Ship)": 0.0035889228634833656,
+        "YangMing(Ship)": 0.03856907789927856,
+        "FPC(Petchem)": -0.007854899651189542,
+        "Largan(Optic)": 0.19812575020907888
+      },
+      "CTBC(Fin)": {
+        "TSMC(Semi)": -0.04278799103663778,
+        "HonHai(EMS)": 0.14821330968270335,
+        "MediaTek(IC)": 0.1503152011676075,
+        "Fubon(Fin)": -0.03458216677555291,
+        "CTBC(Fin)": 0.0,
+        "Evergreen(Ship)": 0.0002929099938560794,
+        "YangMing(Ship)": 0.039557531807055124,
+        "FPC(Petchem)": 0.008813542552915665,
+        "Largan(Optic)": 0.1910933557036311
+      },
+      "Evergreen(Ship)": {
+        "TSMC(Semi)": -0.05390768290076058,
+        "HonHai(EMS)": 0.15330489495257757,
+        "MediaTek(IC)": 0.1250767271711016,
+        "Fubon(Fin)": -0.0035889228634833656,
+        "CTBC(Fin)": -0.0002929099938560794,
+        "Evergreen(Ship)": 0.0,
+        "YangMing(Ship)": 0.035823124452441055,
+        "FPC(Petchem)": -0.032040262280728614,
+        "Largan(Optic)": 0.17177561326703383
+      },
+      "YangMing(Ship)": {
+        "TSMC(Semi)": -0.08545783252253106,
+        "HonHai(EMS)": 0.12240126815094396,
+        "MediaTek(IC)": 0.09202027961204731,
+        "Fubon(Fin)": -0.03856907789927856,
+        "CTBC(Fin)": -0.039557531807055124,
+        "Evergreen(Ship)": -0.035823124452441055,
+        "YangMing(Ship)": 0.0,
+        "FPC(Petchem)": -0.05729660685935571,
+        "Largan(Optic)": 0.12612079008105886
+      },
+      "FPC(Petchem)": {
+        "TSMC(Semi)": -0.03769667723075869,
+        "HonHai(EMS)": 0.18114806941005837,
+        "MediaTek(IC)": 0.14364803571573415,
+        "Fubon(Fin)": 0.007854899651189542,
+        "CTBC(Fin)": -0.008813542552915665,
+        "Evergreen(Ship)": 0.032040262280728614,
+        "YangMing(Ship)": 0.05729660685935571,
+        "FPC(Petchem)": 0.0,
+        "Largan(Optic)": 0.1749403556275877
+      },
+      "Largan(Optic)": {
+        "TSMC(Semi)": -0.20680101119132516,
+        "HonHai(EMS)": 0.011067012195163189,
+        "MediaTek(IC)": -0.03584295302740927,
+        "Fubon(Fin)": -0.19812575020907888,
+        "CTBC(Fin)": -0.1910933557036311,
+        "Evergreen(Ship)": -0.17177561326703383,
+        "YangMing(Ship)": -0.12612079008105886,
+        "FPC(Petchem)": -0.1749403556275877,
+        "Largan(Optic)": 0.0
+      }
+    },
+    "var_diagnostics": {
+      "ic_selected_orders": {
+        "aic": 6,
+        "bic": 2,
+        "hqic": 5,
+        "fpe": 6
+      },
+      "lag_used": 6,
+      "ljung_box_lag10": {
+        "TSMC(Semi)": {
+          "lb_stat": 5.12322768921433,
+          "lb_pvalue": 0.8827956283578203
+        },
+        "HonHai(EMS)": {
+          "lb_stat": 1.1356668957125948,
+          "lb_pvalue": 0.9996924953141995
+        },
+        "MediaTek(IC)": {
+          "lb_stat": 2.7760758222493793,
+          "lb_pvalue": 0.9862136419399266
+        },
+        "Fubon(Fin)": {
+          "lb_stat": 3.8586911705704914,
+          "lb_pvalue": 0.9534965671290756
+        },
+        "CTBC(Fin)": {
+          "lb_stat": 24.199076563370852,
+          "lb_pvalue": 0.00708915562361453
+        },
+        "Evergreen(Ship)": {
+          "lb_stat": 5.428073871420588,
+          "lb_pvalue": 0.8608119092573486
+        },
+        "YangMing(Ship)": {
+          "lb_stat": 1.3491145570794456,
+          "lb_pvalue": 0.9993334723155644
+        },
+        "FPC(Petchem)": {
+          "lb_stat": 15.111860517120533,
+          "lb_pvalue": 0.12803653359759018
+        },
+        "Largan(Optic)": {
+          "lb_stat": 0.9438260349282622,
+          "lb_pvalue": 0.9998680763657706
+        }
+      },
+      "stable": true
+    }
+  },
+  "net_transmitters_ranked": [
+    "TSMC(Semi)",
+    "Fubon(Fin)",
+    "FPC(Petchem)",
+    "CTBC(Fin)",
+    "Evergreen(Ship)",
+    "YangMing(Ship)"
+  ],
+  "net_receivers_ranked": [
+    "HonHai(EMS)",
+    "Largan(Optic)",
+    "MediaTek(IC)"
+  ],
+  "sector_group_net_mean": {
+    "Semiconductor": 0.8733613633577608,
+    "Electronics_EMS": -1.0977256551297199,
+    "IC_Design": -0.7552836306151107,
+    "Financials": 0.5214369917151656,
+    "Shipping": 0.23999437305385474,
+    "Petrochemical": 0.5504180097609765,
+    "Optical": -1.0936328169119616
+  },
+  "rolling_spillover": {
+    "window": 200,
+    "step": 5,
+    "n_points": 1158,
+    "mean": 62.77543052733357,
+    "min": 30.349418670202155,
+    "min_date": "2019-12-11",
+    "max": 88.34946287403149,
+    "max_date": "2005-05-05",
+    "last": 80.5014648511219,
+    "last_date": "2026-07-24"
+  },
+  "rolling_bear_vs_calm": {
+    "bear_spans": [
+      [
+        "2008-09-01",
+        "2009-03-31",
+        "GFC"
+      ],
+      [
+        "2011-08-01",
+        "2011-12-31",
+        "EU debt"
+      ],
+      [
+        "2020-02-20",
+        "2020-04-30",
+        "COVID"
+      ],
+      [
+        "2022-01-01",
+        "2022-12-31",
+        "2022 bear"
+      ]
+    ],
+    "bear_mean_total_spillover": 61.729973729925035,
+    "calm_mean_total_spillover": 62.885163588130276,
+    "bear_minus_calm": -1.1551898582052402,
+    "caveat": "pooled mean averages heterogeneous-duration crises; see per_crisis_spillover for the honest breakdown"
+  },
+  "per_crisis_spillover": {
+    "2008_GFC": {
+      "span": [
+        "2008-10-01",
+        "2009-03-31"
+      ],
+      "w200": {
+        "n": 25,
+        "mean": 76.58730758871134,
+        "max": 78.84296345518244,
+        "min": 72.92769127629546
+      },
+      "w100": {
+        "n": 25,
+        "mean": 78.33305566578326,
+        "max": 84.14789998876483,
+        "min": 66.41445296693944
+      }
+    },
+    "2011_EU_debt": {
+      "span": [
+        "2011-08-01",
+        "2011-12-31"
+      ],
+      "w200": {
+        "n": 22,
+        "mean": 58.32333195320161,
+        "max": 72.39648291151082,
+        "min": 38.069549872965865
+      },
+      "w100": {
+        "n": 22,
+        "mean": 72.74200201216355,
+        "max": 82.47813058850281,
+        "min": 58.99388456487426
+      }
+    },
+    "2015_China_crash": {
+      "span": [
+        "2015-06-01",
+        "2015-09-30"
+      ],
+      "w200": {
+        "n": 17,
+        "mean": 69.10488086806845,
+        "max": 85.87795282444132,
+        "min": 36.64285518631673
+      },
+      "w100": {
+        "n": 17,
+        "mean": 77.92380124473398,
+        "max": 88.89549576460095,
+        "min": 54.0846080693417
+      }
+    },
+    "2018_Q4_selloff": {
+      "span": [
+        "2018-10-01",
+        "2018-12-31"
+      ],
+      "w200": {
+        "n": 13,
+        "mean": 35.512560809593964,
+        "max": 42.369138248544566,
+        "min": 33.04381619139908
+      },
+      "w100": {
+        "n": 13,
+        "mean": 56.148400415301204,
+        "max": 67.26089156053762,
+        "min": 52.61551783746897
+      }
+    },
+    "2020_COVID": {
+      "span": [
+        "2020-02-20",
+        "2020-05-31"
+      ],
+      "w200": {
+        "n": 14,
+        "mean": 44.33207394597546,
+        "max": 48.785926578686414,
+        "min": 34.218071740708226
+      },
+      "w100": {
+        "n": 14,
+        "mean": 66.54148914569112,
+        "max": 70.59058692411605,
+        "min": 58.03940502385001
+      }
+    },
+    "2022_bear": {
+      "span": [
+        "2022-01-01",
+        "2022-12-31"
+      ],
+      "w200": {
+        "n": 49,
+        "mean": 58.24673885596754,
+        "max": 83.27158028256657,
+        "min": 37.22361811704851
+      },
+      "w100": {
+        "n": 49,
+        "mean": 61.357418420129335,
+        "max": 83.09267015256121,
+        "min": 55.01262175735058
+      }
+    },
+    "_full_sample_mean_w200": 62.77543052733357,
+    "_full_sample_mean_w100": 69.12438158509907,
+    "_interpretation": "Connectedness elevates in PROLONGED bears (2008 GFC, 2015 China crash) but the 200-day trailing window under-reads SHARP crashes (2018 Q4, 2020 COVID) because a multi-week shock is diluted across the window. The pooled bear-vs-calm mean is ~flat only because it averages these opposite-duration episodes -- it is NOT evidence that contagion is absent."
+  },
+  "sensitivity": {
+    "window_150": {
+      "mean": 63.38713063761257,
+      "n_points": 584
+    },
+    "window_250": {
+      "mean": 63.55009759344338,
+      "n_points": 574
+    },
+    "horizon_12": {
+      "total": 80.52441002554747
+    }
+  },
+  "lag_robustness": {
+    "lag_2": {
+      "total": 80.30149844938177,
+      "net": {
+        "TSMC(Semi)": 0.8877017570864165,
+        "HonHai(EMS)": -1.0494657573321877,
+        "MediaTek(IC)": -0.7348258759636401,
+        "Fubon(Fin)": 0.6010739820582227,
+        "CTBC(Fin)": 0.426555162182801,
+        "Evergreen(Ship)": 0.4211767435542022,
+        "YangMing(Ship)": 0.08319601076591887,
+        "FPC(Petchem)": 0.5062810365384127,
+        "Largan(Optic)": -1.1416930588901417
+      }
+    },
+    "lag_4": {
+      "total": 80.40658303361546,
+      "net": {
+        "TSMC(Semi)": 0.8636879362008063,
+        "HonHai(EMS)": -1.1020808934780248,
+        "MediaTek(IC)": -0.7481592828521659,
+        "Fubon(Fin)": 0.5757510140576549,
+        "CTBC(Fin)": 0.46265399107879546,
+        "Evergreen(Ship)": 0.42673410695180536,
+        "YangMing(Ship)": 0.09437616918508063,
+        "FPC(Petchem)": 0.544092161791145,
+        "Largan(Optic)": -1.1170552029350942
+      }
+    },
+    "lag_6": {
+      "total": 80.52975562916751,
+      "net": {
+        "TSMC(Semi)": 0.8733613633577608,
+        "HonHai(EMS)": -1.0977256551297199,
+        "MediaTek(IC)": -0.7552836306151107,
+        "Fubon(Fin)": 0.5819582903347538,
+        "CTBC(Fin)": 0.46091569309557734,
+        "Evergreen(Ship)": 0.3961505818043207,
+        "YangMing(Ship)": 0.08383816430338875,
+        "FPC(Petchem)": 0.5504180097609765,
+        "Largan(Optic)": -1.0936328169119616
+      }
+    },
+    "sign_agreement_vs_aic_lag": {
+      "lag_2_vs_6": {
+        "sign_agreement_count": 9,
+        "of": 9,
+        "spearman_net_rho": 0.9833333333333333
+      },
+      "lag_4_vs_6": {
+        "sign_agreement_count": 9,
+        "of": 9,
+        "spearman_net_rho": 0.9833333333333333
+      }
+    }
+  },
+  "rolling_short_window_100d": {
+    "window": 100,
+    "step": 5,
+    "n_points": 1178,
+    "mean": 69.12438158509907,
+    "max": 88.89549576460095,
+    "max_date": "2015-07-13",
+    "min": 49.992244887911,
+    "min_date": "2019-11-06",
+    "bear_mean": 68.74633860775707,
+    "calm_mean": 69.163318595874,
+    "bear_minus_calm": -0.4169799881169354
+  },
+  "granger_network": {
+    "alpha": 0.01,
+    "bonferroni_alpha": 0.0001388888888888889,
+    "n_tests": 72,
+    "maxlag": 6,
+    "edges": [
+      {
+        "source": "TSMC(Semi)",
+        "target": "CTBC(Fin)",
+        "min_p": 1.8509750283905837e-05
+      },
+      {
+        "source": "TSMC(Semi)",
+        "target": "Evergreen(Ship)",
+        "min_p": 7.081872261219003e-10
+      },
+      {
+        "source": "TSMC(Semi)",
+        "target": "YangMing(Ship)",
+        "min_p": 8.309153427380973e-13
+      },
+      {
+        "source": "TSMC(Semi)",
+        "target": "FPC(Petchem)",
+        "min_p": 2.548447034282439e-06
+      },
+      {
+        "source": "HonHai(EMS)",
+        "target": "CTBC(Fin)",
+        "min_p": 2.9414094977917043e-07
+      },
+      {
+        "source": "HonHai(EMS)",
+        "target": "YangMing(Ship)",
+        "min_p": 7.790497057854355e-08
+      },
+      {
+        "source": "MediaTek(IC)",
+        "target": "YangMing(Ship)",
+        "min_p": 5.60467635156228e-06
+      },
+      {
+        "source": "MediaTek(IC)",
+        "target": "Largan(Optic)",
+        "min_p": 1.6320513133250153e-06
+      },
+      {
+        "source": "Fubon(Fin)",
+        "target": "TSMC(Semi)",
+        "min_p": 2.3982825357500484e-07
+      },
+      {
+        "source": "Fubon(Fin)",
+        "target": "MediaTek(IC)",
+        "min_p": 0.00010182389560806439
+      },
+      {
+        "source": "Fubon(Fin)",
+        "target": "CTBC(Fin)",
+        "min_p": 2.7110822462473923e-05
+      },
+      {
+        "source": "Fubon(Fin)",
+        "target": "YangMing(Ship)",
+        "min_p": 0.00011682125598964018
+      },
+      {
+        "source": "Fubon(Fin)",
+        "target": "Largan(Optic)",
+        "min_p": 2.8157938027338024e-07
+      },
+      {
+        "source": "CTBC(Fin)",
+        "target": "Evergreen(Ship)",
+        "min_p": 4.442156594200355e-08
+      },
+      {
+        "source": "CTBC(Fin)",
+        "target": "YangMing(Ship)",
+        "min_p": 1.086701640789906e-08
+      },
+      {
+        "source": "CTBC(Fin)",
+        "target": "Largan(Optic)",
+        "min_p": 5.826567985381458e-06
+      },
+      {
+        "source": "Evergreen(Ship)",
+        "target": "YangMing(Ship)",
+        "min_p": 8.424928101474655e-05
+      },
+      {
+        "source": "FPC(Petchem)",
+        "target": "CTBC(Fin)",
+        "min_p": 2.3167713136759277e-05
+      },
+      {
+        "source": "FPC(Petchem)",
+        "target": "YangMing(Ship)",
+        "min_p": 2.3190669291473996e-06
+      },
+      {
+        "source": "FPC(Petchem)",
+        "target": "Largan(Optic)",
+        "min_p": 0.0001281538165527754
+      },
+      {
+        "source": "Largan(Optic)",
+        "target": "HonHai(EMS)",
+        "min_p": 7.878966004744876e-06
+      },
+      {
+        "source": "Largan(Optic)",
+        "target": "Fubon(Fin)",
+        "min_p": 2.4932116932822865e-06
+      },
+      {
+        "source": "Largan(Optic)",
+        "target": "CTBC(Fin)",
+        "min_p": 4.469083328662464e-05
+      },
+      {
+        "source": "Largan(Optic)",
+        "target": "Evergreen(Ship)",
+        "min_p": 1.0151676415380897e-08
+      },
+      {
+        "source": "Largan(Optic)",
+        "target": "YangMing(Ship)",
+        "min_p": 1.267601104589158e-08
+      },
+      {
+        "source": "Largan(Optic)",
+        "target": "FPC(Petchem)",
+        "min_p": 4.022051604779846e-06
+      }
+    ],
+    "out_degree": {
+      "TSMC(Semi)": 4,
+      "HonHai(EMS)": 2,
+      "MediaTek(IC)": 2,
+      "Fubon(Fin)": 5,
+      "CTBC(Fin)": 3,
+      "Evergreen(Ship)": 1,
+      "YangMing(Ship)": 0,
+      "FPC(Petchem)": 3,
+      "Largan(Optic)": 6
+    },
+    "in_degree": {
+      "TSMC(Semi)": 1,
+      "HonHai(EMS)": 1,
+      "MediaTek(IC)": 1,
+      "Fubon(Fin)": 1,
+      "CTBC(Fin)": 5,
+      "Evergreen(Ship)": 3,
+      "YangMing(Ship)": 8,
+      "FPC(Petchem)": 2,
+      "Largan(Optic)": 4
+    },
+    "pmatrix": {
+      "TSMC(Semi)->HonHai(EMS)": 0.09046437255278743,
+      "TSMC(Semi)->MediaTek(IC)": 0.0003476166153046327,
+      "TSMC(Semi)->Fubon(Fin)": 0.008196369031297347,
+      "TSMC(Semi)->CTBC(Fin)": 1.8509750283905837e-05,
+      "TSMC(Semi)->Evergreen(Ship)": 7.081872261219003e-10,
+      "TSMC(Semi)->YangMing(Ship)": 8.309153427380973e-13,
+      "TSMC(Semi)->FPC(Petchem)": 2.548447034282439e-06,
+      "TSMC(Semi)->Largan(Optic)": 0.00027503319424674005,
+      "HonHai(EMS)->TSMC(Semi)": 0.013392931187908734,
+      "HonHai(EMS)->MediaTek(IC)": 0.031140219421386468,
+      "HonHai(EMS)->Fubon(Fin)": 0.012572072650091559,
+      "HonHai(EMS)->CTBC(Fin)": 2.9414094977917043e-07,
+      "HonHai(EMS)->Evergreen(Ship)": 0.0003555535868109174,
+      "HonHai(EMS)->YangMing(Ship)": 7.790497057854355e-08,
+      "HonHai(EMS)->FPC(Petchem)": 0.0002876400203542149,
+      "HonHai(EMS)->Largan(Optic)": 0.04644373092838078,
+      "MediaTek(IC)->TSMC(Semi)": 0.0010348949749508312,
+      "MediaTek(IC)->HonHai(EMS)": 0.02923206408349984,
+      "MediaTek(IC)->Fubon(Fin)": 0.008425987700231773,
+      "MediaTek(IC)->CTBC(Fin)": 0.002306403860238831,
+      "MediaTek(IC)->Evergreen(Ship)": 0.001902968443893122,
+      "MediaTek(IC)->YangMing(Ship)": 5.60467635156228e-06,
+      "MediaTek(IC)->FPC(Petchem)": 0.0011978907992820195,
+      "MediaTek(IC)->Largan(Optic)": 1.6320513133250153e-06,
+      "Fubon(Fin)->TSMC(Semi)": 2.3982825357500484e-07,
+      "Fubon(Fin)->HonHai(EMS)": 0.0027910017521261543,
+      "Fubon(Fin)->MediaTek(IC)": 0.00010182389560806439,
+      "Fubon(Fin)->CTBC(Fin)": 2.7110822462473923e-05,
+      "Fubon(Fin)->Evergreen(Ship)": 0.0023334796591485563,
+      "Fubon(Fin)->YangMing(Ship)": 0.00011682125598964018,
+      "Fubon(Fin)->FPC(Petchem)": 0.008582395037460173,
+      "Fubon(Fin)->Largan(Optic)": 2.8157938027338024e-07,
+      "CTBC(Fin)->TSMC(Semi)": 0.10979549230947785,
+      "CTBC(Fin)->HonHai(EMS)": 0.008764854201173084,
+      "CTBC(Fin)->MediaTek(IC)": 0.000193594533494523,
+      "CTBC(Fin)->Fubon(Fin)": 0.05469120144149739,
+      "CTBC(Fin)->Evergreen(Ship)": 4.442156594200355e-08,
+      "CTBC(Fin)->YangMing(Ship)": 1.086701640789906e-08,
+      "CTBC(Fin)->FPC(Petchem)": 0.0011908540676223945,
+      "CTBC(Fin)->Largan(Optic)": 5.826567985381458e-06,
+      "Evergreen(Ship)->TSMC(Semi)": 0.10670141772780653,
+      "Evergreen(Ship)->HonHai(EMS)": 0.10067715006834914,
+      "Evergreen(Ship)->MediaTek(IC)": 0.018552688170481006,
+      "Evergreen(Ship)->Fubon(Fin)": 0.11977136913805128,
+      "Evergreen(Ship)->CTBC(Fin)": 0.0007910729658181677,
+      "Evergreen(Ship)->YangMing(Ship)": 8.424928101474655e-05,
+      "Evergreen(Ship)->FPC(Petchem)": 0.00032380136399724833,
+      "Evergreen(Ship)->Largan(Optic)": 0.00029691095565065236,
+      "YangMing(Ship)->TSMC(Semi)": 0.021503167862904578,
+      "YangMing(Ship)->HonHai(EMS)": 0.02677446792599361,
+      "YangMing(Ship)->MediaTek(IC)": 0.0028058359199906297,
+      "YangMing(Ship)->Fubon(Fin)": 0.04481523726911652,
+      "YangMing(Ship)->CTBC(Fin)": 0.004538051487996681,
+      "YangMing(Ship)->Evergreen(Ship)": 0.4849806336949342,
+      "YangMing(Ship)->FPC(Petchem)": 0.02784455421663031,
+      "YangMing(Ship)->Largan(Optic)": 0.0014734634953712787,
+      "FPC(Petchem)->TSMC(Semi)": 0.00381981777333844,
+      "FPC(Petchem)->HonHai(EMS)": 0.08188890276941693,
+      "FPC(Petchem)->MediaTek(IC)": 0.0025667925460336003,
+      "FPC(Petchem)->Fubon(Fin)": 0.011598010121767447,
+      "FPC(Petchem)->CTBC(Fin)": 2.3167713136759277e-05,
+      "FPC(Petchem)->Evergreen(Ship)": 0.00022446170116672705,
+      "FPC(Petchem)->YangMing(Ship)": 2.3190669291473996e-06,
+      "FPC(Petchem)->Largan(Optic)": 0.0001281538165527754,
+      "Largan(Optic)->TSMC(Semi)": 0.0004653058427312888,
+      "Largan(Optic)->HonHai(EMS)": 7.878966004744876e-06,
+      "Largan(Optic)->MediaTek(IC)": 0.0007773380275546818,
+      "Largan(Optic)->Fubon(Fin)": 2.4932116932822865e-06,
+      "Largan(Optic)->CTBC(Fin)": 4.469083328662464e-05,
+      "Largan(Optic)->Evergreen(Ship)": 1.0151676415380897e-08,
+      "Largan(Optic)->YangMing(Ship)": 1.267601104589158e-08,
+      "Largan(Optic)->FPC(Petchem)": 4.022051604779846e-06
+    }
+  },
+  "oos_forecast_dm": {
+    "oos_start": "2015-01-05",
+    "oos_end": "2026-07-24",
+    "n_forecasts": 2810,
+    "refit_every": 21,
+    "aggregation": "loss averaged across sectors by date, then HAC DM (K1355 discipline)",
+    "dm_t_var_vs_ar": 2.506432283026642,
+    "dm_p": 0.01225172916906403,
+    "harvey_significant_|t|>3": false,
+    "interpretation": "negative t => VAR (cross-sector spillover) has lower one-step loss than univariate AR",
+    "lag_caveat": "VAR/AR share the same lag (fair comparison), but the lag was chosen by AIC on the full sample; a fully PIT design would re-select lag from pre-origin data only (effect negligible given the shared-lag fairness and n=2810).",
+    "per_sector_diagnostic": {
+      "TSMC(Semi)": {
+        "dm_t": 3.287620229655303,
+        "dm_p": 0.0010228245160690541,
+        "mean_se_var": 0.4937261742517245,
+        "mean_se_ar": 0.47603027486668353
+      },
+      "HonHai(EMS)": {
+        "dm_t": 1.9579159222332112,
+        "dm_p": 0.05033873842240566,
+        "mean_se_var": 0.7450399507019906,
+        "mean_se_ar": 0.6896910578018015
+      },
+      "MediaTek(IC)": {
+        "dm_t": 3.44160297890043,
+        "dm_p": 0.0005867263457479677,
+        "mean_se_var": 0.778233681982149,
+        "mean_se_ar": 0.7611165793648482
+      },
+      "Fubon(Fin)": {
+        "dm_t": 2.443731799399928,
+        "dm_p": 0.014597363525736373,
+        "mean_se_var": 0.5031706629872972,
+        "mean_se_ar": 0.49053850811838884
+      },
+      "CTBC(Fin)": {
+        "dm_t": 2.6403026724959227,
+        "dm_p": 0.008329041367086898,
+        "mean_se_var": 0.5254578225222672,
+        "mean_se_ar": 0.5100122591786606
+      },
+      "Evergreen(Ship)": {
+        "dm_t": 1.0674682166651925,
+        "dm_p": 0.2858521895034394,
+        "mean_se_var": 0.7369336163381032,
+        "mean_se_ar": 0.6911185954925104
+      },
+      "YangMing(Ship)": {
+        "dm_t": 0.9332310332333753,
+        "dm_p": 0.3507809030692033,
+        "mean_se_var": 0.8032209210829673,
+        "mean_se_ar": 0.773916470868845
+      },
+      "FPC(Petchem)": {
+        "dm_t": 0.6827311521248867,
+        "dm_p": 0.49483304031902464,
+        "mean_se_var": 0.5066186950655028,
+        "mean_se_ar": 0.5040262885049702
+      },
+      "Largan(Optic)": {
+        "dm_t": 3.088399002772874,
+        "dm_p": 0.0020320507387070474,
+        "mean_se_var": 0.6109535664035198,
+        "mean_se_ar": 0.5955745469007417
+      }
+    }
+  },
+  "comparison_to_T5a": {
+    "T5a_structure": "VT gamma: TAIEX 0.153 > 0050 0.087 > TSMC 0.039 (aggregation amplifies gamma)",
+    "note": "T5a is a vol-targeting persistence (gamma) result at index/ETF/single-stock aggregation levels, not a spillover measure. The connection tested here: whether more index-like / cross-linked sectors (semis, financials) act as net volatility transmitters, consistent with aggregation concentrating systematic volatility. See README for the full discussion."
+  },
+  "limitations": [
+    "Daily Garman-Klass vol is a range-based proxy, not intraday realized variance.",
+    "Connectedness/GFEVD are network-centrality diagnostics, not structural causal spillovers.",
+    "Two sectors (Financials, Shipping) have 2 representative stocks; others have 1 -> sector coverage is representative, not exhaustive.",
+    "Granger causality is linear and in-sample; treat as robustness, not proof of mechanism."
+  ],
+  "references": [
+    "Diebold, F.X. & Yilmaz, K. (2012). Better to give than to receive: Predictive directional measurement of volatility spillovers. International Journal of Forecasting 28(1), 57-66.",
+    "Diebold, F.X. & Yilmaz, K. (2014). On the network topology of variance decompositions: Measuring the connectedness of financial firms. Journal of Econometrics 182(1), 119-134.",
+    "Pesaran, H.H. & Shin, Y. (1998). Generalized impulse response analysis in linear multivariate models. Economics Letters 58(1), 17-29.",
+    "Garman, M.B. & Klass, M.J. (1980). On the estimation of security price volatilities from historical data. Journal of Business 53(1), 67-78."
+  ]
+}
