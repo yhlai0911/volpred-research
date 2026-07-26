@@ -18,6 +18,7 @@ returned by FRED release id 50 (Employment Situation), fetched 2026-07-19.
 from __future__ import annotations
 
 import importlib.util
+import re
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -870,6 +871,190 @@ class TestCalendarFailClosedCannotBeBypassed:
         )
 
 
+# ---------------------------------------------------------------------------
+# Round-7 N1: a STRUCTURAL detector for the 237-as-a-release-count misbinding.
+#
+# 237 is the count of official NFP releases that TRADED in a Friday session; 243
+# is the count DATED a Friday. Round 6 shipped a guard advertised as a
+# "structural invariant" that was really a 5-phrase blocklist with two
+# unconditional line-level exemptions (any 243 on the line, or any denial token
+# on the line). The round-6 collection verdict proved four synonym rephrasings
+# and two exemption hijacks walked straight past it. This replaces the wordlist
+# with a compositional, proximity-aware check:
+#
+#   * "release-dated language" is NOT a fixed phrase. It is a Friday token whose
+#     nearest governing verb (within a small window) is a release/publication
+#     verb -- so 'released on a Friday', 'published on a Friday', '週五發布',
+#     '發布日在週五' all trip it, but '237 releases traded in a Friday session'
+#     (where 'releases' is the subject noun and Friday governs 'session') does
+#     not. That noun-vs-predicate distinction is the reason the check is
+#     proximity-based rather than clause-wide.
+#   * a Friday token bound to a SESSION verb marks the correct estimand, so a
+#     clause that binds Friday to a session (or draws the 243/237 distinction)
+#     is exempt -- but an unrelated '243 trading weeks' no longer buys a pass,
+#     because the session word has to sit NEXT TO the Friday, not merely on the
+#     same line.
+#   * the denial escape is CLAUSE-LOCAL: a correction marker only exempts the
+#     clause it lives in, so a denial in a neighbouring clause can no longer
+#     launder an offending one.
+# ---------------------------------------------------------------------------
+
+_FRIDAY_TOKENS = ("friday", "週五", "周五", "星期五", "禮拜五")
+_RELEASE_VERBS = (
+    "releas", "publish", "publicat", "announce",
+    "公布", "公佈", "發布", "發佈", "發表", "公告",
+)
+_SESSION_VERBS = ("session", "trade", "trading", "交易", "盤")
+# Markers that a clause is QUOTING the wrong wording in order to retire it.
+_DENIAL_MARKERS = (
+    "wrong", "typo", "erratum", "errata", "correction", "misbind",
+    "must not", "should read", "retire", "supersed",
+    "錯", "誤植", "更正", "勘誤", "此前", "既不是", "不是", "應為", "應改",
+)
+_CLAUSE_DELIM = re.compile(r"(?:;|；|。|--|——|—|\||\t|\r?\n)")
+_RE_237 = re.compile(r"(?<!\d)237(?!\d)")
+_FRIDAY_RE = re.compile("|".join(re.escape(t) for t in _FRIDAY_TOKENS))
+# A phrase inside quotation marks is a MENTION, not a use: an errata note quotes
+# the wrong wording ('Friday releases', 「Friday releases」) in order to retire
+# it. Verbs inside such spans do not bind their Friday.
+_QUOTED_SPAN = re.compile(
+    r"'[^'\n]*'|\"[^\"\n]*\"|「[^」\n]*」|『[^』\n]*』|“[^”\n]*”|‘[^’\n]*’"
+)
+# The farthest a verb may sit from a Friday token and still be taken to govern
+# it. Beyond this the Friday is treated as governed by neither.
+_MAX_BIND_GAP = 24
+
+
+def _contains_any(text, tokens):
+    low = text.lower()
+    return any(tok in low for tok in tokens)
+
+
+def _quoted_regions(low):
+    return [(m.start(), m.end()) for m in _QUOTED_SPAN.finditer(low)]
+
+
+def _verb_spans(low, verbs, quoted):
+    spans = []
+    for v in verbs:
+        start = low.find(v)
+        while start != -1:
+            s, e = start, start + len(v)
+            if not any(qs <= s and e <= qe for qs, qe in quoted):
+                spans.append((s, e))
+            start = low.find(v, start + 1)
+    return spans
+
+
+def _nearest_gap(friday_span, verb_spans):
+    """Smallest character gap between a Friday token and any of ``verb_spans``
+    (0 if they overlap), or None if the nearest is beyond ``_MAX_BIND_GAP``."""
+    fs, fe = friday_span
+    best = None
+    for vs, ve in verb_spans:
+        if ve <= fs:
+            gap = fs - ve
+        elif vs >= fe:
+            gap = vs - fe
+        else:
+            gap = 0
+        if gap <= _MAX_BIND_GAP and (best is None or gap < best):
+            best = gap
+    return best
+
+
+def _friday_bindings(text):
+    """For every Friday token, decide by NEAREST GOVERNOR whether it is bound to
+    a release/publication verb or to a session verb, then OR the verdicts over
+    the clause. Returns ``(release_bound, session_bound)``.
+
+    Nearest-governor rather than a fixed window because the two readings sit at
+    different distances: 'publication day was a Friday' puts the release verb 11
+    characters out, while 'a Friday session' puts the session word right against
+    it. A symmetric window wide enough for the former would also swallow an
+    unrelated '243 trading weeks'; comparing which governor is CLOSER does not.
+    Ties go to release (the misbinding), so appending a distant session word
+    cannot launder a tight 'Friday releases'."""
+    low = text.lower()
+    friday_spans = [(m.start(), m.end()) for m in _FRIDAY_RE.finditer(low)]
+    if not friday_spans:
+        return False, False
+    quoted = _quoted_regions(low)
+    release_spans = _verb_spans(low, _RELEASE_VERBS, quoted)
+    session_spans = _verb_spans(low, _SESSION_VERBS, quoted)
+    release_bound = session_bound = False
+    for span in friday_spans:
+        rd = _nearest_gap(span, release_spans)
+        sd = _nearest_gap(span, session_spans)
+        if rd is not None and (sd is None or rd <= sd):
+            release_bound = True
+        elif sd is not None:
+            session_bound = True
+    return release_bound, session_bound
+
+
+def _clause_misbinds_237(clause):
+    """Does this clause present 237 (a SESSION count) as a Friday-RELEASE count
+    without correcting or reconciling it? Returns ``(bool, reason)``."""
+    if not _RE_237.search(clause):
+        return False, ""
+    release_bound, session_bound = _friday_bindings(clause)
+    if not release_bound:
+        # 237 is here, but no Friday token governs a release act, e.g.
+        # '237 traded in a Friday session' -- the correct estimand.
+        return False, ""
+    if session_bound:
+        # A Friday also governs a session in this clause: either the session
+        # estimand itself or the 243/237 distinction being drawn. Both honest.
+        return False, "Friday bound to a session (correct estimand / distinction drawn)"
+    if _contains_any(clause, _DENIAL_MARKERS):
+        return False, "correction context (clause quotes the wrong wording to retire it)"
+    return True, "237 sits in Friday-release language with no Friday-session reading"
+
+
+def _release_misbinding_offenders(text):
+    """Split `text` into clauses and return ``(clause, reason)`` for any that
+    misbind 237. `text` is normally one logical unit (a Markdown/JSON physical
+    line, or a whole Python string literal); the splitter also breaks embedded
+    newlines so a multi-line docstring is judged line by line."""
+    hits = []
+    for clause in _CLAUSE_DELIM.split(text):
+        bad, reason = _clause_misbinds_237(clause)
+        if bad:
+            hits.append((clause.strip()[:120], reason))
+    return hits
+
+
+def _k528_text_units(path):
+    """Yield ``(lineno, text)`` logical units for the misbinding scan.
+
+    Python files are parsed with ``ast`` so an implicitly-concatenated string
+    ('a' 'b' across physical lines) is ONE unit -- that is the exact shape that
+    would otherwise wrap a 'Friday' away from its 'session' onto the next
+    physical line and manufacture a false positive. Comment lines, which ast
+    drops, are yielded verbatim. JSON and Markdown are scanned per physical
+    line."""
+    text = path.read_text(encoding="utf-8")
+    if path.suffix == ".py":
+        import ast
+
+        try:
+            tree = ast.parse(text)
+        except SyntaxError:  # silent-ok: fall back to the STRICTER physical-line scan (every line, not just string literals) so an unparseable .py is scanned more, never skipped; this is a test-side gate, not a production path that could hide data
+            for i, line in enumerate(text.splitlines(), 1):
+                yield i, line
+            return
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                yield node.lineno, node.value
+        for i, line in enumerate(text.splitlines(), 1):
+            if line.lstrip().startswith("#"):
+                yield i, line
+    else:
+        for i, line in enumerate(text.splitlines(), 1):
+            yield i, line
+
+
 class TestFridayEstimandIsScopedHonestly:
     """Codex v3 finding 4: restricting to Friday is a legitimate conditional
     estimand, but it stops supporting statements about NFP releases in general,
@@ -922,62 +1107,56 @@ class TestFridayEstimandIsScopedHonestly:
             assert session > release, "the absorbing session must come after the release"
 
     def test_no_live_artifact_describes_the_237_as_a_release_count(self):
-        """Round-5 B1 residual, widened after round 6 caught a file two earlier
-        sweeps missed.
+        """Round-5 B1 residual, rebuilt in round 7 (N1) from a 5-phrase blocklist
+        into a compositional, proximity-aware structural check.
 
         The defect is not a phrase, it is a MISBINDING: 237 is the count of
         releases ABSORBED BY a Friday session; 243 is the count of releases
         DATED a Friday. Saying '237 Friday releases' fuses them, and that is the
         sentence B1 exists to retire.
 
-        So this checks the binding rather than blocklisting wording -- a
-        synonym for 'Friday releases' would still have to bind it to 237 to be
-        wrong, and a line that names BOTH numbers is drawing the distinction
-        rather than collapsing it, which is exactly what we want people to write.
+        The round-6 guard keyed on five fixed phrases with two blanket
+        exemptions, and the round-6 collection verdict proved four synonym
+        rephrasings and two exemption hijacks walked past it. The detector this
+        now delegates to (``_release_misbinding_offenders``) reads release-dated
+        language as a Friday token GOVERNING a release verb, exempts a Friday
+        that governs a session (the correct estimand / the drawn distinction),
+        and keeps the denial escape clause-local. Its evasion suite -- the six
+        round-6 injections plus legitimate distinction/errata lines -- lives in
+        ``TestReleaseMisbindingGateIsStructural`` so the guard itself has a
+        guard.
 
         Scope is every LIVE artifact under experiments/k528, not a hand-listed
-        few. Round-6 found the retired estimand alive in
-        k528_rerun_v3_summary.json -- a file README lists as an output artifact
-        -- precisely because the earlier sweeps scoped by the '*_results.json'
-        filename pattern. Review RECORDS are exempt: a verdict that quotes the
+        few. Review RECORDS are exempt by filename: a verdict that quotes the
         defect verbatim as its evidence is doing its job.
         """
         review_records = (
             "codex_review_",
             "k528_round5_collection_verdict",
+            "k528_round6_collection_verdict",
             "k528_round5_remediation",
             "k528_completeness_gate_fix",
+            "round7_gate_hardening_summary",
             "review_verdict",
         )
-        release_language = (
-            "Friday releases",
-            "在週五公布",
-            "發布日在週五",
-            "released on a Friday",
-            "dated a Friday",
-        )
-        # A line may quote the wrong phrasing in order to rule it out.
-        denial_markers = ("wrong phrase", "既不是", "不是「發布日", "此前寫的是")
-
         offenders = []
         for path in sorted(K528_DIR.rglob("*")):
             if not path.is_file() or path.suffix not in (".py", ".md", ".json"):
                 continue
             if any(marker in path.name for marker in review_records):
                 continue
-            for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-                if "237" not in line or "243" in line:
+            for lineno, unit in _k528_text_units(path):
+                if "237" not in unit:
                     continue
-                if not any(phrase in line for phrase in release_language):
-                    continue
-                if any(marker in line for marker in denial_markers):
-                    continue
-                offenders.append(f"{path.relative_to(K528_DIR)}:{i} {line.strip()[:140]}")
+                for clause, reason in _release_misbinding_offenders(unit):
+                    offenders.append(
+                        f"{path.relative_to(K528_DIR)}:{lineno} [{reason}] {clause}"
+                    )
 
         assert not offenders, (
-            "237 is a SESSION count, not a release count. These lines bind it to "
-            "release-dated language without naming the 243 that would draw the "
-            "distinction:\n  " + "\n  ".join(offenders)
+            "237 is a SESSION count, not a release count. These clauses bind it "
+            "to Friday-release language with no Friday-session reading and no "
+            "correction context:\n  " + "\n  ".join(offenders)
         )
 
     def test_readme_does_not_sanction_a_pre_registration_claim(self):
@@ -1005,3 +1184,109 @@ class TestFridayEstimandIsScopedHonestly:
         non_friday = sum(1 for e in results["event_data"] if e["weekday"] != 4)
         assert b["excluded_non_friday_events"]["n"] == non_friday == 16
         assert str(non_friday) in b["estimand"]
+
+
+class TestReleaseMisbindingGateIsStructural:
+    """Round-7 N1. The round-6 guard was a 5-phrase blocklist and the round-6
+    collection verdict (k528_round6_collection_verdict.json, anti_vacuity_tests)
+    proved four synonym rephrasings and two exemption hijacks walked past it.
+
+    These are those exact six evasions -- now pinned as MUST-CATCH -- plus the
+    verbatim defect, and legitimate distinction/errata lines pinned as
+    MUST-PASS. The point of N1 is a stricter gate, not a blunter one, so the
+    false-positive side is tested as hard as the false-negative side. This
+    class is the guard on the guard: if someone re-softens
+    ``_clause_misbinds_237`` back into a wordlist, the synonym cases go red.
+    """
+
+    # The verbatim defect plus the six round-6 evasions. Every one must be seen.
+    MISBINDINGS = [
+        pytest.param(
+            "restricting the event group to Friday releases (237)",
+            id="verbatim_round6_defect",
+        ),
+        # -- four synonym rephrasings that the 5-phrase blocklist missed --
+        pytest.param("237 場 NFP 是週五發布的", id="synonym_zh_published"),
+        pytest.param(
+            "the 237 NFP announcements published on a Friday",
+            id="synonym_en_published",
+        ),
+        pytest.param(
+            "237 releases whose publication day was a Friday",
+            id="synonym_en_publication_day",
+        ),
+        pytest.param("限定週五發布的 237 場 NFP 事件", id="synonym_zh_restricted"),
+        # -- two exemption hijacks --
+        pytest.param(
+            "restricting the event group to Friday releases (237); "
+            "sample spans 243 trading weeks",
+            id="hijack_unrelated_243_on_line",
+        ),
+        pytest.param(
+            "既不是 proxy 的問題 -- 237 Friday releases were used",
+            id="hijack_denial_in_other_clause",
+        ),
+    ]
+
+    # Lines that DRAW the distinction correctly, or correct the wording. None
+    # may be flagged; two are synthetic and two are copied from live artifacts.
+    LEGITIMATE = [
+        pytest.param(
+            "243 releases were dated a Friday; "
+            "237 of them traded in a Friday session",
+            id="distinction_two_clauses",
+        ),
+        pytest.param(
+            "更正：此前寫的是「237 Friday releases」是錯的 — "
+            "237 是週五 session 交易數，243 才是週五發布的 release 數",
+            id="errata_quotes_then_reconciles",
+        ),
+        pytest.param(
+            "253 場有效發布中，243 場發布日在週五，但只有 237 場在週五開盤",
+            id="live_readme_distinction_line",
+        ),
+        pytest.param(
+            "event group to the 237 releases ABSORBED BY a Friday session.",
+            id="live_session_estimand_releases_is_a_noun",
+        ),
+    ]
+
+    @pytest.mark.parametrize("text", MISBINDINGS)
+    def test_misbindings_are_caught(self, text):
+        assert _release_misbinding_offenders(text), (
+            "the hardened gate let a 237-as-a-release-count misbinding through: "
+            f"{text!r}. A synonym or an exemption hijack must not evade it."
+        )
+
+    @pytest.mark.parametrize("text", LEGITIMATE)
+    def test_legitimate_lines_are_not_flagged(self, text):
+        hits = _release_misbinding_offenders(text)
+        assert not hits, (
+            f"the gate false-flagged a legitimate line: {text!r} -> {hits}. "
+            "The goal is a stricter gate, not a blunter one."
+        )
+
+    def test_the_243_exemption_is_conditional_not_blanket(self):
+        """Round-6 weakness: any 243 on the line bought a free pass. A 243 that
+        is not itself bound to Friday-release language must NOT launder 237."""
+        # 243 present, and a session word ('sessions') present, so the old
+        # blanket rule would have exempted -- but Friday governs 'released'.
+        assert _release_misbinding_offenders(
+            "237 released on a Friday across 243 sessions"
+        )
+
+    def test_the_denial_exemption_is_clause_local_not_line_wide(self):
+        """Round-6 weakness: any denial token on the line bought a free pass. A
+        denial that lives in a different clause must NOT launder the offender."""
+        assert _release_misbinding_offenders(
+            "更正了其他行；237 released on a Friday"
+        )
+
+    def test_the_gate_is_not_vacuous_on_the_live_tree(self):
+        """A guard nobody has ever seen fire is not a guard. Inject the verbatim
+        defect into a throwaway string and confirm the detector bites, then
+        confirm a corrected version of the same clause does not."""
+        assert _release_misbinding_offenders("event group of 237 Friday releases")
+        assert not _release_misbinding_offenders(
+            "237 releases traded in a Friday session; 243 were dated a Friday"
+        )

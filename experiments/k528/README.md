@@ -265,8 +265,9 @@ uv run python experiments/k528/build_article_correction.py --apply    # 寫入 +
 
 事件日期正確性的 owner 是 `tests/test_nfp_official_release_dates.py`（未另開新檔）：
 
-- `TestK528UsesOfficialCalendar` — 釘住 k528 用官方日曆、樣本 253 筆、237 筆在週五、
-  212 個日期共通、結果檔宣告 fail-closed
+- `TestK528UsesOfficialCalendar` — 釘住 k528 用官方日曆、樣本 253 筆、其中 237 筆在週五
+  session 交易（對照官方 BLS 日曆的 243 筆發布日在週五，兩者差額為六個順延到下週一
+  session 的 Good Friday 發布，見上文 §估計量）、212 個日期共通、結果檔宣告 fail-closed
 - `test_no_off_cycle_revision_date_is_treated_as_an_event` — **直接釘住 v2 BLOCKER**：
   對 artifact 斷言六個 off-cycle 日期不在事件集合、六個正式發布日在。對 artifact 而非
   只對 accessor 斷言，因為「accessor 是對的」不能證明「出貨的結果用了它」
@@ -278,6 +279,18 @@ uv run python experiments/k528/build_article_correction.py --apply    # 寫入 +
   非中性排除有揭露、排除筆數與 weekday 分解一致（結果檔曾經散文寫 11、資料寫 16）
 - `TestProxyMutationIsCaught` — mutation test：proxy 日曆餵給 guard 必須被拒；
   只塞回幻影的 2025-10-03 也必須被抓；同時驗證 guard 不會誤殺官方日曆
+- `test_no_live_artifact_describes_the_237_as_a_release_count` + `TestReleaseMisbindingGateIsStructural`
+  — 釘住「237 不是 Friday-release 數，而是 Friday-session 數」的措辭不變量。
+  **宣稱 vs 實際的落差（round-7 N1 修）**：round-6 裁決把這個 gate 描述成「結構性不變量」，
+  但它當時其實只是**5 詞字面 blocklist + 兩個無條件行豁免**（同行出現 `243` 就整行放行、
+  同行出現否定詞就整行放行）。round-6 收件審查用注入證明它**擋不住**：4 個同義改寫
+  （「237 場 NFP 是週五發布的」「published on a Friday」「publication day was a Friday」
+  「限定週五發布的 237 場」）全部溜過，行內無關 `243`（如「243 trading weeks」）與鄰句的
+  否定詞都能挾持豁免。round-7 把它換成**組合式、就近支配（nearest-governor）**的結構檢查：
+  release-dated 語意 = Friday token 的最近支配動詞是 release/發布 類（而非 session/交易 類），
+  引號內的片語視為「提及」不計入綁定，否定詞豁免收緊為 clause-local。6 個注入 + 2 個
+  legitimate 反例（正確對照 / 正確 errata）全部進 `TestReleaseMisbindingGateIsStructural`，
+  硬化後 6 擋 2 放，已用真實檔案注入探針端到端驗證。
 
 accessor 層的 owner 是 `tests/test_event_dates_release_selection.py` 與
 `tests/test_event_dates_real_raw_response.py`（未經編輯的 ALFRED 日期清單 + mutation 檢查）。

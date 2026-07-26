@@ -1,0 +1,120 @@
+{
+  "task_id": "k528_round7_gate_hardening",
+  "round": 7,
+  "worktree": ".claude/worktrees/k528-round7-204d556b",
+  "branch": "k528-nfp-official-dates",
+  "base_head_at_start": "5b1f154c1db804c77cc054ddbae17b9df1e6aa27",
+  "reviewer_note": "Self-produced. Every before/after cell below was run by this agent in the worktree, not inherited from the round-6 verdict. The round-6 collection verdict flagged N1/N2/N3 as non-blocking; this round hardens N1 with a regression suite and closes N2/N3.",
+
+  "N1_gate_hardening": {
+    "status": "DONE",
+    "gate_enforcement_owner": "tests/test_nfp_official_release_dates.py",
+    "claimed_vs_actual_gap_documented_in": [
+      "tests/test_nfp_official_release_dates.py (module comment above _FRIDAY_TOKENS, ~line 917)",
+      "experiments/k528/README.md (防迴歸 section, test_no_live_artifact... bullet)"
+    ],
+    "what_round6_claimed": "The round-6 verdict described the guard as a '結構性不變量' (structural invariant).",
+    "what_it_actually_was": "A 5-phrase literal blocklist (release_language = 5 fixed strings) with TWO unconditional line-level exemptions: any '243' anywhere on the line skipped it, and any denial token anywhere on the line skipped it.",
+    "evasions_confirmed_against_old_gate": "4 synonym rephrasings + line-level 243 hijack + line-level denial hijack all PASSED (were not blocked) by the reconstructed old gate; only the verbatim defect was blocked.",
+    "new_design": {
+      "approach": "Compositional, proximity-aware (nearest-governor) structural check, not a phrase list.",
+      "release_dated_language": "A Friday token whose NEAREST governing verb (within 24 chars) is a release/publication verb (releas/publish/publicat/announce/公布/公佈/發布/發佈/發表/公告).",
+      "session_reading_exempts": "A Friday token whose nearest governor is a session verb (session/trade/trading/交易/盤) marks the correct estimand or the drawn 243/237 distinction; the clause is exempt.",
+      "quoted_mention_exempts": "A verb inside quotation marks ('...' / \"...\" / 「...」 / 『...』) is a mention, not a use, so an errata that quotes 'Friday releases' to retire it does not trip the gate.",
+      "denial_exempt_is_clause_local": "A correction marker only exempts the clause it lives in, so a denial in a neighbouring clause cannot launder an offending one.",
+      "python_string_wrapping_handled": "Python files are scanned via ast so an implicitly-concatenated string literal ('a' 'b' across physical lines) is one unit; this prevents the false positive where 'Friday' and 'session' wrap onto separate physical lines (build_article_correction.py:326).",
+      "key_symbols": {
+        "_friday_bindings": "tests/test_nfp_official_release_dates.py:966",
+        "_clause_misbinds_237": "tests/test_nfp_official_release_dates.py:996",
+        "_release_misbinding_offenders": "tests/test_nfp_official_release_dates.py:1015",
+        "_k528_text_units": "tests/test_nfp_official_release_dates.py:1028",
+        "real_file_scan_test": "tests/test_nfp_official_release_dates.py:1109 (test_no_live_artifact_describes_the_237_as_a_release_count)",
+        "evasion_suite_class": "tests/test_nfp_official_release_dates.py:1189 (TestReleaseMisbindingGateIsStructural)"
+      }
+    },
+
+    "before_after_per_case": {
+      "note": "OLD = reconstructed round-6 5-phrase blocklist; NEW = round-7 structural check. BLOCK = flagged as offender; PASS = let through. Injections must go BLOCK under NEW; legitimate lines must stay PASS.",
+      "injections_must_block": [
+        {"id": "verbatim_round6_defect", "text": "restricting the event group to Friday releases (237)", "old": "BLOCK", "new": "BLOCK"},
+        {"id": "synonym_zh_published", "text": "237 場 NFP 是週五發布的", "old": "PASS", "new": "BLOCK"},
+        {"id": "synonym_en_published", "text": "the 237 NFP announcements published on a Friday", "old": "PASS", "new": "BLOCK"},
+        {"id": "synonym_en_publication_day", "text": "237 releases whose publication day was a Friday", "old": "PASS", "new": "BLOCK"},
+        {"id": "synonym_zh_restricted", "text": "限定週五發布的 237 場 NFP 事件", "old": "PASS", "new": "BLOCK"},
+        {"id": "hijack_unrelated_243", "text": "restricting the event group to Friday releases (237); sample spans 243 trading weeks", "old": "PASS", "new": "BLOCK"},
+        {"id": "hijack_denial_in_other_clause", "text": "既不是 proxy 的問題 -- 237 Friday releases were used", "old": "PASS", "new": "BLOCK"}
+      ],
+      "legitimate_must_pass": [
+        {"id": "distinction_two_clauses", "text": "243 releases were dated a Friday; 237 of them traded in a Friday session", "old": "PASS", "new": "PASS"},
+        {"id": "errata_quotes_then_reconciles", "text": "更正：此前寫的是「237 Friday releases」是錯的 — 237 是週五 session 交易數，243 才是週五發布的 release 數", "old": "PASS", "new": "PASS"},
+        {"id": "live_readme_distinction_line", "text": "253 場有效發布中，243 場發布日在週五，但只有 237 場在週五開盤", "old": "PASS", "new": "PASS"},
+        {"id": "live_session_estimand_releases_is_a_noun", "text": "event group to the 237 releases ABSORBED BY a Friday session.", "old": "PASS", "new": "PASS"}
+      ],
+      "summary": "OLD blocked 1/7 injections (only verbatim); NEW blocks 7/7 injections and keeps 4/4 legitimate lines passing."
+    },
+
+    "end_to_end_verification": {
+      "method": "Wrote experiments/k528/_tmp_gate_probe.md containing the 6 injections (lines 1-6) plus 2 legitimate lines (lines 7-8) and ran the real-file scan test (rglob -> _k528_text_units -> detector).",
+      "result": "test FAILED naming _tmp_gate_probe.md; the detector flagged exactly lines 1-6 (all six injections) and did NOT flag lines 7-8 (legitimate).",
+      "cleanup": "probe file removed; git status --porcelain clean for it; real-file scan test PASSES on the clean tree."
+    },
+
+    "regression_tests": {
+      "file": "tests/test_nfp_official_release_dates.py",
+      "new_class": "TestReleaseMisbindingGateIsStructural",
+      "new_class_test_count": 14,
+      "new_class_result": "14 passed",
+      "breakdown": "7 x test_misbindings_are_caught (verbatim + 6 evasions), 4 x test_legitimate_lines_are_not_flagged, 1 x test_the_243_exemption_is_conditional_not_blanket, 1 x test_the_denial_exemption_is_clause_local_not_line_wide, 1 x test_the_gate_is_not_vacuous_on_the_live_tree"
+    }
+  },
+
+  "N2_readme_contrast": {
+    "status": "DONE",
+    "where": "experiments/k528/README.md (防迴歸 section, TestK528UsesOfficialCalendar bullet)",
+    "before": "樣本 253 筆、237 筆在週五、",
+    "after": "樣本 253 筆、其中 237 筆在週五 session 交易（對照官方 BLS 日曆的 243 筆發布日在週五，兩者差額為六個順延到下週一 session 的 Good Friday 發布，見上文 §估計量）",
+    "provenance_added": "官方 BLS 日曆 243 vs 237 session estimand, six Good Friday shifts",
+    "gate_self_check": "The rewritten line names both 237 (session) and 243 (release) with correct roles; the hardened gate exempts it (session-bound Friday present)."
+  },
+
+  "N3_article_errata_draft": {
+    "status": "DRAFT_PRODUCED",
+    "draft_file": "experiments/k528/errata_mile_35eef830.md",
+    "article_id": "mile_35eef830",
+    "gap": "The live article's errata records only the 2026-07-18 event-date correction (K1442); it does not disclose that the proxy-era figures (254 次公布, NFP-vs-Friday 1.17x, VIX regime 2.17x, r~0.45/0.38) are superseded by the K528 official-calendar rerun.",
+    "supersession_numbers": {
+      "sample": {"proxy": "254 次公布", "official": "253 場有效發布 (254 official; 6 Good-Friday shifts to next Monday session; 1 window-buffer exclusion 2005-01-07)"},
+      "nfp_vs_friday": {"proxy": "1.17x significant", "official": "1.189x nominal p=0.0209 n=237; Holm-6 confirmatory-family 0.0417 significant; Holm-22 all-outputs 0.375 not significant"},
+      "nfp_vs_all": {"proxy": "1.10x not significant", "official": "1.108x p=0.1121 not significant"},
+      "vix_regime": {"proxy": "2.17x, 127/127, median 16.71, high 1.15%/low 0.53%", "official": "~2.0x, 128/125, median 16.69, high 1.13%/low 0.56%, p~0"},
+      "vix_predictive_corr": {"proxy": "Pearson ~0.45 / Spearman 0.38", "official": "Pearson 0.4404 / Spearman 0.3455"}
+    },
+    "qualitative_conclusion": "Unchanged in both versions: NFP is not a reason to systematically de-risk SPY; the driver is the entry-day VIX regime.",
+    "publish_note": "Draft only. Not published this round. Main thread did NOT touch storage/reports/feed.json. Publish belongs to the collector fire AFTER the k528-nfp-official-dates branch merges and certifies, via the formal errata mechanism (update_action=estimand_supersession), preserving the existing event_date_correction entry."
+  },
+
+  "constraint_compliance": {
+    "no_correctness_traded_for_pass": true,
+    "note": "The gate was made STRICTER, not looser: it now blocks 7/7 injections (vs 1/7) while still passing 4/4 legitimate distinction/errata lines. No legitimate context was sacrificed to get injections to trip.",
+    "worktree_scope": "Only experiments/k528/ files and tests/test_nfp_official_release_dates.py touched. No feed.json / knowledge.json / paper body / Supabase-Mirror sync writes. No merge performed by this agent.",
+    "files_changed": [
+      "tests/test_nfp_official_release_dates.py (gate rebuilt + evasion suite; import re added)",
+      "experiments/k528/README.md (N2 contrast + N1 claimed-vs-actual documentation)",
+      "experiments/k528/errata_mile_35eef830.md (N3 draft, new file)",
+      "experiments/k528/round7_gate_hardening_summary.json (this artifact, new file)"
+    ]
+  },
+
+  "test_status": {
+    "command": "uv run --extra dev python -m pytest tests/test_nfp_official_release_dates.py experiments/k528/test_k528_completeness_gate.py experiments/k528/test_k528_price_coverage_gate.py -q",
+    "result": "107 passed"
+  },
+
+  "followup_for_collector_fire": [
+    "Primary-path Codex review of this hardening (task k528_primary_codex_certify_merge). Merge is still governance-gated on a primary-path Codex PASS per .claude/rules/experiments.md; a fallback PASS is not a Codex PASS.",
+    "On Codex PASS: refresh review_verdict.json via experiment_gates.py verdict-template (sha will drift after this round's edits), then merge_worktree.sh -> certify K528; on FAIL: open round-8.",
+    "After merge+certify: publish the N3 errata (errata_mile_35eef830.md) to article mile_35eef830 via the formal errata mechanism."
+  ],
+
+  "unresolved": "None for the round-7 scope (N1 hardened + regression suite green, N2 done, N3 draft produced, summary artifact written). Out of scope by design and left to the collector fire: primary-path Codex certification, merge, and the actual publish of the N3 errata."
+}
