@@ -526,8 +526,13 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   在 grant 建立前就拒絕。Timeout 是 ambiguous outcome，只保留 active grant；
   authority-bound 但非 exact 的 HEAD mutation 同樣保留 grant並阻擋 rollback。
   只有 writer lease 內確認 HEAD 未變，或 timeout 後重試證明 first-parent 是另一個
-  request，才寫 immutable abandonment。Recovery 只能 read existing grant，不能在
-  看到 effect 後補授權。資料庫端 settlement trigger 與 abandonment 共用
+  **有效 authority request**，才可能寫 immutable abandonment；缺失／損壞 trailer
+  或同 request 的非精確 commit 都視為 ambiguous mutation。Writer 前另保存完整
+  index tree 與 exact-path kind／mode／hash baseline；abandon 前 HEAD、index 與
+  worktree 必須全部回到基線。重試若 target 已 staged，或 formal workspace 模式下
+  canonical exact paths 已偏離 base，會在 authorize／writer 前保留既有 grant並
+  fail closed。Recovery 只能 read existing grant，不能在看到 effect 後補授權。
+  資料庫端 settlement trigger 與 abandonment 共用
   `commit-authority:<request_sha256>` advisory transaction lock，並由 abandonment
   schema version／owner identity／terminal receipt trigger fail closed；雙連線競爭
   regression 證明同一 request 不會同時落成 abandonment 與 delivery receipt。
@@ -547,9 +552,10 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
 - 隔離 PostgreSQL + 暫存 Git system test 已實際產生唯一 exact-path commit，回讀
   commit object／HEAD／ChangeSet／authority／WorkItem 後完成 rollback rehearsal；
   另有 external-lock-before-authority、timeout→unrelated commit cleanup、
-  authority-bound non-exact mutation、lost workspace recovery，以及雙連線 terminal
-  arbitration regressions。2026-07-26 當前證據為核心 66 passed、完整 PostgreSQL
-  55 passed；最終 Matt Spec／Standards 複審尚在進行，所以 Issue #10 此刻仍標
+  missing-trailer／authority-bound non-exact mutation、timeout-after-git-add staged
+  residue、lost workspace recovery，以及雙連線 terminal arbitration regressions。
+  精準提交 `07accb1e1` 後完整 scoped suite 198 passed；最後兩個 review follow-up
+  另有 62 passed。最終 Matt Spec／Standards 複審尚在進行，所以 Issue #10 此刻仍標
   `contained`。production owner 也仍刻意保持 `legacy/1`，未執行 live ownership
   CAS，Change Delivery umbrella 同樣為 `contained`。
 

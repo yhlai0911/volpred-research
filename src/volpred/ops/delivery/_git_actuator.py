@@ -13,7 +13,9 @@ from dataclasses import dataclass, replace
 from datetime import datetime
 import hashlib
 import json
+import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 from typing import Callable, Protocol
@@ -130,6 +132,20 @@ class _RecoveredCommit:
     observed_at: str
 
 
+@dataclass(frozen=True)
+class _WorktreePathState:
+    path: str
+    kind: str
+    mode: int
+    sha256: str
+
+
+@dataclass(frozen=True)
+class _RepositoryBaseline:
+    index_tree: str
+    exact_paths: tuple[_WorktreePathState, ...]
+
+
 class CommitAuthority(Protocol):
     """Verify both delivery fences against canonical coordination state."""
 
@@ -215,18 +231,20 @@ class GitCommitActuator:
             if recovered is None:
                 existing_grant = self._lookup_request(authority_request)
                 if existing_grant is not None:
-                    if _first_parent_bears_authority_request(
+                    first_parent_request = _first_parent_authority_request(
                         repository,
                         command=normalized,
                         observed_head=observed_head,
-                        authority_request_sha256=(
-                            authority_request.request_sha256
-                        ),
+                    )
+                    if (
+                        first_parent_request is None
+                        or first_parent_request
+                        == authority_request.request_sha256
                     ):
                         raise CommitActuatorBlocked(
-                            "expected HEAD fence failed after an authority-"
-                            "bound non-exact mutation; authority remains "
-                            "active for incident recovery"
+                            "expected HEAD fence failed after an ambiguous or "
+                            "authority-bound non-exact mutation; authority "
+                            "remains active for incident recovery"
                         )
                     self._abandon_request(
                         authority_request,
@@ -248,6 +266,11 @@ class GitCommitActuator:
             raise CommitActuatorBlocked(
                 f"canonical Git writer CLI is unavailable: {self._writer_cli}"
             )
+        baseline = _repository_baseline(
+            repository,
+            paths=normalized.exact_paths,
+        )
+        _preflight_repository_state(normalized)
         authority_grant = self._authorize_request(authority_request)
 
         argv = [
@@ -303,6 +326,7 @@ class GitCommitActuator:
                 command=normalized,
                 authority_request=authority_request,
                 authority_grant=authority_grant,
+                baseline=baseline,
                 failure=failure,
             )
         detail = (proc.stderr or proc.stdout or "").strip()[-600:]
@@ -318,6 +342,7 @@ class GitCommitActuator:
                 command=normalized,
                 authority_request=authority_request,
                 authority_grant=authority_grant,
+                baseline=baseline,
                 failure=CommitActuatorBlocked(
                     detail
                     or f"canonical Git writer exited {proc.returncode}"
@@ -330,6 +355,7 @@ class GitCommitActuator:
                 command=normalized,
                 authority_request=authority_request,
                 authority_grant=authority_grant,
+                baseline=baseline,
                 failure=CommitActuatorBlocked(
                     "canonical Git writer returned success without creating "
                     "a commit"
@@ -476,6 +502,7 @@ class GitCommitActuator:
         command: CommitActuation,
         authority_request: CommitAuthorityRequest,
         authority_grant: CommitAuthorityGrant,
+        baseline: _RepositoryBaseline,
         failure: CommitActuatorError,
     ) -> CommitActuationReceipt:
         repository = Path(command.repository)
@@ -507,6 +534,15 @@ class GitCommitActuator:
             raise CommitActuatorBlocked(
                 "canonical Git writer failed after an unexpected HEAD "
                 "mutation; authority remains active for incident recovery"
+            ) from failure
+        if not _repository_matches_baseline(
+            repository,
+            baseline=baseline,
+        ):
+            raise CommitActuatorBlocked(
+                "canonical Git writer failed with residual index or "
+                "worktree mutation; authority remains active for incident "
+                "recovery"
             ) from failure
         self._abandon_request(authority_request, authority_grant)
         raise failure
@@ -569,13 +605,12 @@ def _find_prior_commit(
     )
 
 
-def _first_parent_bears_authority_request(
+def _first_parent_authority_request(
     repository: Path,
     *,
     command: CommitActuation,
     observed_head: str,
-    authority_request_sha256: str,
-) -> bool:
+) -> str | None:
     candidates = _git_text(
         repository,
         "rev-list",
@@ -584,7 +619,7 @@ def _first_parent_bears_authority_request(
         f"{command.expected_head}..{observed_head}",
     ).splitlines()
     if not candidates:
-        return False
+        return None
     message = _git_text(
         repository,
         "show",
@@ -592,10 +627,7 @@ def _first_parent_bears_authority_request(
         "--format=%B",
         candidates[0],
     )
-    return (
-        _authority_trailer_value(message)
-        == authority_request_sha256
-    )
+    return _authority_trailer_value(message)
 
 
 def _authority_trailer_value(message: str) -> str | None:
@@ -608,6 +640,127 @@ def _authority_trailer_value(message: str) -> str | None:
     if len(values) != 1 or _SHA256.fullmatch(values[0]) is None:
         return None
     return values[0]
+
+
+def _preflight_repository_state(command: CommitActuation) -> None:
+    repository = Path(command.repository)
+    staged = _git_returncode(
+        repository,
+        "diff",
+        "--cached",
+        "--quiet",
+        "--",
+        *command.exact_paths,
+    )
+    if staged == 1:
+        raise CommitActuatorBlocked(
+            "ChangeSet target paths are already staged; authority remains "
+            "unchanged for incident recovery"
+        )
+    if staged != 0:
+        raise CommitActuatorBlocked(
+            "cannot verify ChangeSet target index state"
+        )
+
+    if command.workspace_ref is not None:
+        worktree = _git_returncode(
+            repository,
+            "diff",
+            "--quiet",
+            command.expected_head,
+            "--",
+            *command.exact_paths,
+        )
+        if worktree == 1:
+            raise CommitActuatorBlocked(
+                "canonical ChangeSet paths differ from the expected base "
+                "before materialization; authority remains unchanged"
+            )
+        if worktree != 0:
+            raise CommitActuatorBlocked(
+                "cannot verify canonical ChangeSet path state"
+            )
+        return
+
+    expected_hashes = {
+        item.path: item.sha256 for item in command.content_hashes
+    }
+    for path in command.exact_paths:
+        candidate = repository / path
+        if (
+            not candidate.is_file()
+            or candidate.is_symlink()
+            or hashlib.sha256(candidate.read_bytes()).hexdigest()
+            != expected_hashes[path]
+        ):
+            raise CommitActuatorBlocked(
+                "canonical ChangeSet path content drifted before writer "
+                f"actuation: {path}"
+            )
+
+
+def _repository_baseline(
+    repository: Path,
+    *,
+    paths: tuple[str, ...],
+) -> _RepositoryBaseline:
+    return _RepositoryBaseline(
+        index_tree=_git_text(repository, "write-tree"),
+        exact_paths=tuple(
+            _worktree_path_state(repository, path=path)
+            for path in paths
+        ),
+    )
+
+
+def _repository_matches_baseline(
+    repository: Path,
+    *,
+    baseline: _RepositoryBaseline,
+) -> bool:
+    try:
+        observed = _repository_baseline(
+            repository,
+            paths=tuple(item.path for item in baseline.exact_paths),
+        )
+    except (CommitActuatorBlocked, OSError):  # silent-ok: fail closed by retaining authority.
+        return False
+    return observed == baseline
+
+
+def _worktree_path_state(
+    repository: Path,
+    *,
+    path: str,
+) -> _WorktreePathState:
+    candidate = repository / path
+    if not candidate.exists() and not candidate.is_symlink():
+        return _WorktreePathState(
+            path=path,
+            kind="missing",
+            mode=0,
+            sha256=hashlib.sha256(b"").hexdigest(),
+        )
+    metadata = candidate.lstat()
+    mode = stat.S_IMODE(metadata.st_mode)
+    if stat.S_ISLNK(metadata.st_mode):
+        kind = "symlink"
+        payload = os.readlink(candidate).encode(
+            "utf-8",
+            errors="surrogateescape",
+        )
+    elif stat.S_ISREG(metadata.st_mode):
+        kind = "file"
+        payload = candidate.read_bytes()
+    else:
+        kind = "other"
+        payload = b""
+    return _WorktreePathState(
+        path=path,
+        kind=kind,
+        mode=mode,
+        sha256=hashlib.sha256(payload).hexdigest(),
+    )
 
 
 def _recovery_receipt(
@@ -952,6 +1105,22 @@ def _git_text(repository: Path, *args: str) -> str:
         "utf-8",
         errors="surrogateescape",
     ).strip()
+
+
+def _git_returncode(repository: Path, *args: str) -> int:
+    try:
+        proc = subprocess.run(
+            ["git", "--literal-pathspecs", *args],
+            cwd=repository,
+            capture_output=True,
+            check=False,
+            timeout=20,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        raise CommitActuatorBlocked(
+            f"cannot verify Git repository state: {exc}"
+        ) from exc
+    return int(proc.returncode)
 
 
 def _git_bytes(repository: Path, *args: str) -> bytes:

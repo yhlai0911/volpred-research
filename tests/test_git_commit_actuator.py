@@ -444,7 +444,12 @@ def test_timeout_then_unrelated_commit_terminally_abandons_old_grant(
 
     (repo / "unrelated.txt").write_text("other request\n", encoding="utf-8")
     _git(repo, "add", "unrelated.txt")
-    _git(repo, "commit", "-m", "unrelated request")
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message("unrelated request", "d" * 64),
+    )
     with pytest.raises(CommitActuatorBlocked, match="expected HEAD"):
         _actuator(authority).commit(_command(repo, base_commit))
 
@@ -452,6 +457,72 @@ def test_timeout_then_unrelated_commit_terminally_abandons_old_grant(
     assert authority.abandonments[0].request_sha256 == (
         _authority_request(_command(repo, base_commit)).request_sha256
     )
+
+
+def test_timeout_with_staged_residue_keeps_grant_active_on_retry(
+    repository: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    residue_writer = tmp_path / "residue_writer.py"
+    residue_writer.write_text(
+        "import subprocess, time\n"
+        "subprocess.run(\n"
+        "    ['git', 'add', '--', 'new.txt', 'tracked.txt'],\n"
+        "    check=True,\n"
+        ")\n"
+        "time.sleep(5)\n",
+        encoding="utf-8",
+    )
+    authority = _Authority()
+    first = GitCommitActuator(
+        clock=lambda: NOW,
+        authority=authority,
+        writer_cli=residue_writer,
+        timeout_s=0.15,
+    )
+    command = _command(repo, base_commit)
+
+    with pytest.raises(CommitActuatorBusy, match="timed out"):
+        first.commit(command)
+    assert _git(repo, "diff", "--cached", "--name-only").splitlines() == [
+        "new.txt",
+        "tracked.txt",
+    ]
+    assert len(authority.requests) == 1
+    assert authority.abandonments == []
+
+    with pytest.raises(CommitActuatorBlocked, match="already staged"):
+        _actuator(authority).commit(command)
+
+    assert len(authority.requests) == 1
+    assert authority.abandonments == []
+    assert _authority_request(command).request_sha256 in authority.grants
+
+
+def test_missing_authority_trailer_keeps_existing_grant_active(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    request = _authority_request(command)
+    authority = _Authority()
+    authority.authorize(request)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(repo, "commit", "-m", command.message)
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="ambiguous or authority-bound",
+    ):
+        _actuator(authority).commit(command)
+
+    assert authority.abandonments == []
+    assert request.request_sha256 in authority.grants
 
 
 def test_actuator_does_not_recover_lookalike_commit_with_different_message(
@@ -702,7 +773,10 @@ def test_actuator_rejects_content_drift_and_restores_index(
     )
     before_status = _git(repo, "status", "--porcelain=v1", "--untracked-files=all")
 
-    with pytest.raises(CommitActuatorBlocked, match="expected content hash failed"):
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="content drifted before writer",
+    ):
         _actuator().commit(drifted)
 
     assert _git(repo, "rev-parse", "HEAD") == base_commit

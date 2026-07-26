@@ -40,13 +40,18 @@ abandonment 沒有共用 terminal arbitration。現已改為先取得 repo-wide 
 writer lease，才在同一 lease 內重讀 HEAD、authorize、把 capability 傳給 writer，
 並做終止判定；busy 不再建立 grant，timeout 保留 active grant等待 exact recovery，
 authority-bound non-exact mutation也持續阻擋 rollback。只有同一 lease 內證明未發生
-該 request mutation才可 immutable abandon。DB settlement trigger與abandon共用
+該 request mutation才可 immutable abandon；缺失／損壞 trailer 或同 request 的
+非精確 commit 一律視為 ambiguous。Writer 前會保存完整 index tree 與 exact-path
+kind／mode／hash，abandon 前必須全部回到基線。重試看到 target staged 或 formal
+workspace 的 canonical paths 已偏離 base，會在 authorize／writer 前保留舊 grant。
+DB settlement trigger與abandon共用
 同一 request advisory lock，並新增雙連線競爭回歸；recovery RPC 在
 `VOLPRED_NO_REMOTE_WRITE=1` 下仍可讀，abandonment decoder強制 schema version。
 
 隔離 PostgreSQL + 暫存 Git system test 已回讀唯一 exact-path commit、
 HEAD／diff、ChangeSet、authority receipt 與 succeeded WorkItem，並完成 owner rollback
-rehearsal；目前核心 **66 passed**、完整 PostgreSQL **55 passed**。本輪核心修正被另一 session 的 23:55
+rehearsal；精準提交 `07accb1e1` 後完整 scoped suite **198 passed**，最後兩個 review
+follow-up另有 **62 passed**。本輪核心修正被另一 session 的 23:55
 廣域 dispatcher transaction 一併收入 commit `d45c9a307`，未回退或改寫該 shared
 commit；後續證據以 exact-path commit 補齊。最終 Matt Spec／Standards 複審尚在
 進行，Issue #10 此刻與 Change Delivery umbrella 均維持 **`contained`**；
