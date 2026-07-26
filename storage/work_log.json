@@ -26346,5 +26346,192 @@
     "owner": "hourly-slot-1-b2fdc0e3f4b44f0faf3b10df74e07dfc",
     "commit": null,
     "summary": "Independent read-only live verification of the operations-core cutover under DIRECT EXECUTION MODE. The refactor lane is actively owned by a live codex_loop (PID 45011, `codex exec resume --last`), which committed 339955d0→439cb186 within minutes during this fire — so this fire did read-only verification only, no source edit, to avoid co-driving the same transactional core (per the 16:12 fire's established discipline).\n\nEvidence collected this fire:\n- Operations-core logic layer GREEN: 146 passed (owned-email notification guard, work coordinator, cutover preflight, supabase work read model, owned change delivery, primary-authority keepalive/session/outage-rehearsal, publisher owned-delete/delete-restore-rehearsal, publisher reconcile).\n- Postgres adapter-contract tests (test_postgres_work_coordinator.py + test_postgres_publisher_delete_restore.py): 57 errors — root cause is `pg_ctl start` of the per-test ephemeral homebrew postgresql@17 cluster failing fast in this dispatch sandbox while the codex_loop co-drives the same cluster-spawning suite. Environment/co-driving limitation, NOT a code regression; the tests' own guard is `pytest.skip(\"PostgreSQL server binaries are required\")`. Confirmed reproducible in isolation and attributed to ephemeral-cluster startup, not adapter logic. Not repaired (repair would mean co-driving codex_loop's owned transactional core).\n- Live publisher projection convergence (scripts/audit_publish_sync.py): convergence_status=converged, local_published=2 / supabase_published=2, missing/orphan/live_404 empty, mismatch_total=0, window 72h.\n- Drain-first gate (storage/ops/drain_first_state.json): active=false, pending=1 (direct-mode control row assign_f3f36d75), drain_streak_met=true.\n- Control gate (task_pool_control.py status): direct_execution mode enabled, pool_count=1, preserve_task_ids=[assign_f3f36d75], backup intact (89863b056e1d, 3338 tasks). Did NOT claim the control row, did NOT restore the legacy pool.\n- Host readiness receipt (primary_authority_outage_host_readiness_latest.json): rehearsal backend-binding-clean-20260726-1158, role=primary, single host_id=Mac, implementation_sha256 aacc19590821. Only the primary host is present.\n\nUmbrella assign_f3f36d75 remains contained (resolution_state=contained): the sole remaining gate is program-commit-34's paired two-physical-Mac receipt, blocked on the second physical Mac being offline — an operator/hardware dependency not resolvable this fire. No claim, no pool restore, no fabricated pair, no unattended destructive authority granted."
+  },
+  {
+    "timestamp": "2026-07-26T13:59:42+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-34989d96f",
+    "outcome": "succeeded",
+    "summary": "close work cutover gate review gaps",
+    "commit": "34989d96f11ec3b331245a1aee78c0f9fc611017",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871530+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T14:05:49+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-32e49e072",
+    "outcome": "succeeded",
+    "summary": "verify cutover expiry rollback readback",
+    "commit": "32e49e07257e2c28ba34f02ccc9e95f75cd5f94a",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871525+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T14:07:25+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-15407ec98",
+    "outcome": "succeeded",
+    "summary": "align work cutover canonical docs",
+    "commit": "15407ec9890b92e78a6491dbbdcf27af98377902",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871521+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T14:17:14+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-c2c17ea5d",
+    "outcome": "succeeded",
+    "summary": "deploy work cutover gate",
+    "commit": "c2c17ea5db90160f79d580a976546159a27d2d29",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871516+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T14:46:38+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-76f1c0152",
+    "outcome": "succeeded",
+    "summary": "start hourly work shadow evidence",
+    "commit": "76f1c0152751be5a0d0a029d11826439f030a52e",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871512+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T14:47:54+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d9b893672",
+    "outcome": "succeeded",
+    "summary": "record work shadow full verification",
+    "commit": "d9b8936723578dccf56f1f90bd93f7b2554ca36a",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871507+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T14:48:40+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d73410eec",
+    "outcome": "succeeded",
+    "summary": "correct work shadow verification count",
+    "commit": "d73410eec775bdf1e6277c318b256696c9613536",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871503+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T15:24:17+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-61eb5e89f",
+    "outcome": "succeeded",
+    "summary": "bind work shadow evidence to live owner",
+    "commit": "61eb5e89f1c155fbf7eefe0de28c25905cfd4fba",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871498+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T15:29:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-09b9eeeda",
+    "outcome": "succeeded",
+    "summary": "record owned email guard verification",
+    "commit": "09b9eeeda509103f24dccef502c4aed3cee5a0a2",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871492+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T15:42:02+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-c1be3b615",
+    "outcome": "succeeded",
+    "summary": "restart shadow soak on owner changes",
+    "commit": "c1be3b615ce99a4246e802053d4e8ff68d30d95d",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871487+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T15:50:53+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-e8195efca",
+    "outcome": "succeeded",
+    "summary": "recover interrupted owned email attempts",
+    "commit": "e8195efcada5eba00918ef27673c5353afd0dc2e",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871482+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T16:07:52+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-a3a82fcb6",
+    "outcome": "succeeded",
+    "summary": "fence owned email expired retries",
+    "commit": "a3a82fcb6adfba378d0722bcd6191255a03c6c5c",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871477+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T16:12:47+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-7fada4742",
+    "outcome": "succeeded",
+    "summary": "record owned email recovery verification",
+    "commit": "7fada474266bac062f761239395ae580d7e2d0ce",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871472+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T16:40:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-e64b700df",
+    "outcome": "succeeded",
+    "summary": "recover due owned email retries",
+    "commit": "e64b700df4902cb2ba7f137465994b8dc0fc3d5d",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871467+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T16:59:29+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-5da98c429",
+    "outcome": "succeeded",
+    "summary": "preserve owned email migration receipts",
+    "commit": "5da98c429f76c13eff6936802d3638ed876b0da3",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871462+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T17:01:28+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-339955d08",
+    "outcome": "succeeded",
+    "summary": "close k1801 artifact gate",
+    "commit": "339955d08b151571a4923e1fd88833052f6908ff",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871455+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T17:17:04+08:00",
+    "task_type": "platform_ops",
+    "task_id": "codex-commit-d2041a138",
+    "outcome": "succeeded",
+    "summary": "record owned email final verification",
+    "commit": "d2041a1385dcd3bd70cd036ad4109d6e80e90427",
+    "owner": "codex",
+    "backfilled_at": "2026-07-26T09:18:21.871173+00:00",
+    "backfill_source": "scripts/backfill_work_log_from_commits.py"
   }
 ]
