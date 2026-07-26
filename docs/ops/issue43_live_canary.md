@@ -18,4 +18,12 @@ declared output path and must modify no other repo path, run no
 
 ## Receipt identifiers (appended by owner post-integration)
 
-_(placeholder — populated by supervisor finalizer)_
+- Dispatch job: `80f1563b6a1f4dd89d5e100e2e0f4005`
+- Claim session: `dispatch-80f1563b-c0becdcf`
+- Allocation: `751cdf01fd644e979b72cd1d1d50899d`
+- Settlement pending: `e4c09b9db26c4c40b9c8c3e068204e9e`
+- Gate passed: `dd8e3614d6724021af24b6fa087ecbdf`
+- Terminal intent: `38b6fe70c29f47019635182c2496447a`
+- Finalized: `0b19918aaf9141d8949ad011393386d7`
+- Settlement completed: `c256addc427c4bf7b4131594fa8d3814`
+- Candidate and main SHA: `296aabac03c73f484c8e6c8dfed9e4e46d707824`
