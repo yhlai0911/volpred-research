@@ -201,10 +201,7 @@ def prepare_work_ownership_cutover(
             assessment = assess_shadow_observation_directory(
                 observation_directory,
                 assessed_at=cutover_at,
-                queue_owner_mode=owner.mode.mode,
-                queue_owner_gate_enabled=owner.mode.enabled,
-                queue_owner_state_path=owner.state_path,
-                queue_owner_state_sha256=owner.sha256,
+                queue_owner=owner,
                 required_window=REQUIRED_OBSERVATION_WINDOW,
                 max_gap=MAX_OBSERVATION_GAP,
             )

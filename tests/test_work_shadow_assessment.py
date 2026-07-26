@@ -6,8 +6,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from click.testing import CliRunner
+import pytest
 
 from volpred.cli import cli
+from volpred.ops.task_pool_mode import TaskPoolMode, TaskPoolModeEvidence
 from volpred.ops.work_shadow_assessment import (
     assess_shadow_observation_directory,
 )
@@ -33,6 +35,7 @@ def _write_receipt(
     queue_owner_gate_enabled: bool = False,
     queue_owner_state_path: str = "/repo/storage/ops/task_pool_mode.json",
     queue_owner_state_sha256: str = "a" * 64,
+    queue_owner_state_byte_count: int = 64,
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     snapshot_sha = f"{index + 1:064x}"
@@ -94,11 +97,27 @@ def _write_receipt(
             "gate_enabled": queue_owner_gate_enabled,
             "state_path": queue_owner_state_path,
             "state_sha256": queue_owner_state_sha256,
-            "state_byte_count": 64,
+            "state_byte_count": queue_owner_state_byte_count,
         }
     (directory / f"scheduled_{index:02d}.json").write_text(
         json.dumps(receipt),
         encoding="utf-8",
+    )
+
+
+def _owner_evidence(
+    *,
+    mode: str = "queued_execution",
+    gate_enabled: bool = False,
+    state_path: str = "/repo/storage/ops/task_pool_mode.json",
+    state_sha256: str = "a" * 64,
+    byte_count: int = 64,
+) -> TaskPoolModeEvidence:
+    return TaskPoolModeEvidence(
+        mode=TaskPoolMode(enabled=gate_enabled, mode=mode),
+        state_path=state_path,
+        sha256=state_sha256,
+        byte_count=byte_count,
     )
 
 
@@ -114,7 +133,7 @@ def test_seven_continuous_clean_days_are_ready_for_cutover(tmp_path: Path) -> No
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -148,10 +167,7 @@ def test_only_receipts_bound_to_current_owner_state_count_toward_window(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=8, hours=1),
-        queue_owner_mode="queued_execution",
-        queue_owner_gate_enabled=False,
-        queue_owner_state_path="/repo/storage/ops/task_pool_mode.json",
-        queue_owner_state_sha256="b" * 64,
+        queue_owner=_owner_evidence(state_sha256="b" * 64),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -160,6 +176,50 @@ def test_only_receipts_bound_to_current_owner_state_count_toward_window(
     assert report.observation_count == 1
     assert report.recorded_from == (START + timedelta(days=8)).isoformat()
     assert report.reason_codes == ("observation_window_too_short",)
+
+
+def test_owner_state_aba_restarts_the_continuous_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        mismatch = index == 3
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(hours=index),
+            queue_owner_mode=(
+                "direct_execution" if mismatch else "queued_execution"
+            ),
+            queue_owner_gate_enabled=mismatch,
+            queue_owner_state_sha256=("d" if mismatch else "a") * 64,
+        )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(hours=9),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(hours=7),
+        max_gap=timedelta(hours=3),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.observation_count == 5
+    assert report.recorded_from == (START + timedelta(hours=4)).isoformat()
+    assert report.reason_codes == ("observation_window_too_short",)
+
+
+def test_assessor_rejects_partial_owner_evidence_api(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(TypeError):
+        assess_shadow_observation_directory(
+            tmp_path,
+            assessed_at=START,
+            queue_owner_mode="queued_execution",  # type: ignore[call-arg]
+            required_window=timedelta(days=7),
+            max_gap=timedelta(hours=26),
+        )
 
 
 def test_pre_owner_evidence_receipts_do_not_poison_new_window(
@@ -183,10 +243,7 @@ def test_pre_owner_evidence_receipts_do_not_poison_new_window(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
-        queue_owner_gate_enabled=False,
-        queue_owner_state_path="/repo/storage/ops/task_pool_mode.json",
-        queue_owner_state_sha256="b" * 64,
+        queue_owner=_owner_evidence(state_sha256="b" * 64),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -203,7 +260,7 @@ def test_malformed_receipt_fails_closed_instead_of_crashing(tmp_path: Path) -> N
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START,
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -226,7 +283,7 @@ def test_v4_receipt_without_owner_evidence_fails_closed(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START,
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -257,7 +314,7 @@ def test_unexplained_selector_drift_blocks_cutover(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -296,7 +353,7 @@ def test_simultaneous_queue_owner_evidence_blocks_cutover(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -326,7 +383,7 @@ def test_blocking_dimension_difference_is_not_hidden_by_same_winner(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -357,7 +414,7 @@ def test_duplicate_observation_identity_blocks_cutover(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -385,6 +442,7 @@ def test_work_shadow_assess_cli_emits_machine_verdict(
             observed_at=START + timedelta(days=index),
             queue_owner_state_path=str(mode_state.resolve()),
             queue_owner_state_sha256=hashlib.sha256(mode_bytes).hexdigest(),
+            queue_owner_state_byte_count=len(mode_bytes),
         )
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr("volpred.ops.common.PROJECT_ROOT", tmp_path)
@@ -447,7 +505,7 @@ def test_duplicate_observation_timestamp_blocks_cutover(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -474,7 +532,7 @@ def test_snapshot_identity_mismatch_blocks_tampered_receipt(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -499,7 +557,7 @@ def test_missing_source_count_evidence_is_invalid(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -565,7 +623,7 @@ def test_short_or_gapped_window_is_not_continuous(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -587,7 +645,7 @@ def test_future_observations_fail_closed(tmp_path: Path) -> None:
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START - timedelta(seconds=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -614,7 +672,7 @@ def test_each_receipt_must_reconcile_its_own_queue_row_count(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -644,7 +702,7 @@ def test_each_candidate_must_carry_every_required_dimension(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -675,7 +733,7 @@ def test_unregistered_policy_change_cannot_whitelist_a_difference(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -721,7 +779,7 @@ def test_registered_policy_change_with_evidence_is_explained(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -756,7 +814,7 @@ def test_registered_label_without_oracle_prerequisites_is_not_explained(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -784,7 +842,7 @@ def test_duplicate_candidate_identity_blocks_row_reconciliation(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -815,7 +873,7 @@ def test_backdated_replay_clock_cannot_fake_seven_recorded_days(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=recorded_start + timedelta(minutes=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -860,7 +918,7 @@ def test_selection_difference_must_match_selector_views(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -888,7 +946,7 @@ def test_changed_selector_views_require_a_difference_receipt(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -964,7 +1022,7 @@ def test_winner_change_cannot_borrow_unrelated_candidate_policy(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )
@@ -998,7 +1056,7 @@ def test_selection_views_must_match_comparison_eligibility(
     report = assess_shadow_observation_directory(
         observations,
         assessed_at=START + timedelta(days=7, hours=1),
-        queue_owner_mode="queued_execution",
+        queue_owner=_owner_evidence(),
         required_window=timedelta(days=7),
         max_gap=timedelta(hours=26),
     )

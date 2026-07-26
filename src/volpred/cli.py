@@ -758,10 +758,7 @@ def ops_work_shadow_assess(
     report = assess_shadow_observation_directory(
         observation_dir,
         assessed_at=_work_shadow_assessment_time(),
-        queue_owner_mode=owner_evidence.mode.mode,
-        queue_owner_gate_enabled=owner_evidence.mode.enabled,
-        queue_owner_state_path=owner_evidence.state_path,
-        queue_owner_state_sha256=owner_evidence.sha256,
+        queue_owner=owner_evidence,
         required_window=REQUIRED_OBSERVATION_WINDOW,
         max_gap=MAX_OBSERVATION_GAP,
     )

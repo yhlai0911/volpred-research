@@ -14,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from .task_pool_mode import TaskPoolModeEvidence
 from .work_shadow_replay import is_registered_policy_change
 
 _LEGACY_RECEIPT_SCHEMA = "work-shadow-replay.v3"
@@ -91,10 +92,7 @@ class ShadowObservationAssessment:
 @dataclass(frozen=True)
 class _AssessmentContext:
     assessed_at: datetime
-    queue_owner_mode: str
-    queue_owner_gate_enabled: bool | None
-    queue_owner_state_path: str | None
-    queue_owner_state_sha256: str | None
+    queue_owner: TaskPoolModeEvidence
     required_window: timedelta
     max_gap: timedelta
 
@@ -111,10 +109,10 @@ def _failed_assessment(
         observation_count=observation_count,
         covered_dimensions=(),
         assessed_at=context.assessed_at.isoformat(),
-        queue_owner_mode=context.queue_owner_mode,
-        queue_owner_gate_enabled=context.queue_owner_gate_enabled,
-        queue_owner_state_path=context.queue_owner_state_path,
-        queue_owner_state_sha256=context.queue_owner_state_sha256,
+        queue_owner_mode=context.queue_owner.mode.mode,
+        queue_owner_gate_enabled=context.queue_owner.mode.enabled,
+        queue_owner_state_path=context.queue_owner.state_path,
+        queue_owner_state_sha256=context.queue_owner.sha256,
         required_window_seconds=int(
             context.required_window.total_seconds()
         ),
@@ -126,20 +124,14 @@ def assess_shadow_observation_directory(
     directory: Path,
     *,
     assessed_at: datetime,
-    queue_owner_mode: str,
-    queue_owner_gate_enabled: bool | None = None,
-    queue_owner_state_path: str | None = None,
-    queue_owner_state_sha256: str | None = None,
+    queue_owner: TaskPoolModeEvidence,
     required_window: timedelta,
     max_gap: timedelta,
 ) -> ShadowObservationAssessment:
     """Assess explicit replay receipts without consulting live state."""
     context = _AssessmentContext(
         assessed_at=_aware_utc(assessed_at),
-        queue_owner_mode=queue_owner_mode,
-        queue_owner_gate_enabled=queue_owner_gate_enabled,
-        queue_owner_state_path=queue_owner_state_path,
-        queue_owner_state_sha256=queue_owner_state_sha256,
+        queue_owner=queue_owner,
         required_window=required_window,
         max_gap=max_gap,
     )
@@ -161,13 +153,57 @@ def assess_shadow_observation_directory(
             reason_code="invalid_receipt",
             observation_count=len(receipt_paths),
         )
-    receipts = [
+    owner_bound_receipts = [
         receipt
         for receipt in all_receipts
-        if (
-            receipt.get("schema_version") == _OWNER_BOUND_RECEIPT_SCHEMA
-            and _owner_evidence_matches_context(receipt, context)
+        if receipt.get("schema_version") == _OWNER_BOUND_RECEIPT_SCHEMA
+    ]
+    owner_observation_ids = tuple(
+        receipt["observation_id"] for receipt in owner_bound_receipts
+    )
+    if len(set(owner_observation_ids)) != len(owner_observation_ids):
+        return _failed_assessment(
+            context,
+            reason_code="duplicate_observation_id",
+            observation_count=len(receipt_paths),
         )
+    try:
+        owner_timeline = tuple(
+            sorted(
+                (
+                    (
+                        _parse_observed_at(receipt["recorded_at"]),
+                        receipt,
+                    )
+                    for receipt in owner_bound_receipts
+                ),
+                key=lambda item: item[0],
+            )
+        )
+    except (KeyError, TypeError, ValueError):
+        return _failed_assessment(
+            context,
+            reason_code="invalid_receipt",
+            observation_count=len(receipt_paths),
+        )
+    owner_timestamps = tuple(item[0] for item in owner_timeline)
+    if len(set(owner_timestamps)) != len(owner_timestamps):
+        return _failed_assessment(
+            context,
+            reason_code="duplicate_recorded_at",
+            observation_count=len(receipt_paths),
+        )
+    last_owner_mismatch = max(
+        (
+            index
+            for index, (_, receipt) in enumerate(owner_timeline)
+            if not _owner_evidence_matches_context(receipt, context)
+        ),
+        default=-1,
+    )
+    receipts = [
+        receipt
+        for _, receipt in owner_timeline[last_owner_mismatch + 1 :]
     ]
     snapshot_identity_mismatch = any(
         receipt["legacy_selection"]["snapshot_sha256"]
@@ -247,9 +283,9 @@ def assess_shadow_observation_directory(
         for dimension in comparison["dimensions"]
     }
     reasons: list[str] = []
-    if queue_owner_mode != "queued_execution" or (
-        queue_owner_gate_enabled is not None
-        and queue_owner_gate_enabled is not False
+    if (
+        queue_owner.mode.mode != "queued_execution"
+        or queue_owner.mode.enabled is not False
     ):
         reasons.append("queue_owner_mode_not_queued_execution")
     if not receipts:
@@ -350,10 +386,10 @@ def assess_shadow_observation_directory(
             name for name in _REQUIRED_DIMENSIONS if name in covered
         ),
         assessed_at=context.assessed_at.isoformat(),
-        queue_owner_mode=queue_owner_mode,
-        queue_owner_gate_enabled=queue_owner_gate_enabled,
-        queue_owner_state_path=queue_owner_state_path,
-        queue_owner_state_sha256=queue_owner_state_sha256,
+        queue_owner_mode=queue_owner.mode.mode,
+        queue_owner_gate_enabled=queue_owner.mode.enabled,
+        queue_owner_state_path=queue_owner.state_path,
+        queue_owner_state_sha256=queue_owner.sha256,
         observed_from=(
             observed_at[0].isoformat() if observed_at else None
         ),
@@ -530,21 +566,12 @@ def _owner_evidence_matches_context(
     context: _AssessmentContext,
 ) -> bool:
     evidence = receipt["queue_owner_evidence"]
-    if evidence["mode"] != context.queue_owner_mode:
-        return False
-    if (
-        context.queue_owner_gate_enabled is not None
-        and evidence["gate_enabled"] != context.queue_owner_gate_enabled
-    ):
-        return False
-    if (
-        context.queue_owner_state_path is not None
-        and evidence["state_path"] != context.queue_owner_state_path
-    ):
-        return False
     return (
-        context.queue_owner_state_sha256 is None
-        or evidence["state_sha256"] == context.queue_owner_state_sha256
+        evidence["mode"] == context.queue_owner.mode.mode
+        and evidence["gate_enabled"] == context.queue_owner.mode.enabled
+        and evidence["state_path"] == context.queue_owner.state_path
+        and evidence["state_sha256"] == context.queue_owner.sha256
+        and evidence["state_byte_count"] == context.queue_owner.byte_count
     )
 
 
