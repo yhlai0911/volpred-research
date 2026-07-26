@@ -27034,5 +27034,35 @@
     "owner": "hourly-slot-1-5cfabe59b7774fcda3f413977617579d",
     "commit": null,
     "summary": "K1714 orphan-worktree salvage：搶救一份完成 5 天卻從未合併/收件的完整實驗（realized-covariance HAR vs shrinkage/EWMA 於 OOS GMV 組合）。\n\n**背景**：dispatch 保底席 K1714（P3, 本班必挑）。經查其 stale worktree dispatch-slot-3-3896dcaa-k1714（age 110h）內已有完整產物（K1714.py 46KB / K1714_results.json 67KB / README 24KB / test_K1714.py / figures / data），全部 untracked（從未 commit）。屬「worktree agent 完成但成果沒人收」案例 → 依 triage 紀律禁止原樣重派，改走 verify + salvage。\n\n**merge_worktree.sh 阻擋根因（供 worktree_unmerged 裁決參考）**：正式 merge auto-commit 被 pre-commit audit-test-imports 擋下，報 tests/test_member_qa_duplicate_gate.py 的 content.member_qa_publish_gate_applies / _validate_question_id_waiver 為 undefined。實際上這兩函式在**當前 main** src/volpred/ops/content.py L820 / L663 均存在 → audit 是對 **worktree 過時 branch base（Jul 22，早於這兩函式加入）** 的 candidate index 判定，非 main blocker。結論：此 orphan worktree 因 branch base 過時無法 auto-merge，需 rebase 或抽檔 salvage。\n\n**Salvage 動作**：因產物皆 untracked（無 commit 史可保），抽出自足的 experiments/K1714/ 複製進 canonical main（去除 __pycache__），交 PHASE-Z 對健康 main 提交（current content.py 有函式 → audit 通過）。stale worktree 留待 inc_776caf84f125_e1 worktree 裁決清理。\n\n**結果驗證（agent-result-verification）**：verdict=LOSE（headline / long_only / matrix_log_spec 三 spec 一致），ann vol har_rcov_chol=0.0926 vs ewma=0.0872 vs sample=0.0893 vs ledoit_wolf=0.0903 → HAR-RCov 波動更高、輸簡單 EWMA/shrinkage；Holm 多重 benchmark 校正 + block-level shift(1) lookahead（L394）+ 保守 LOSE-priority 裁決（防事後挑好看）+ 誠實「描述性非可交易性」框架；seed=42。乾淨的 DOCUMENTED_NEGATIVE：realized-covariance HAR 直接建模在 GMV 組合上未帶來 OOS 波動改善。\n\n（知識庫正式 knowledge 條目建議由後續 collection followup 補；本班以 work_log 記錄滿足完整完成 gate (b)。）"
+  },
+  {
+    "timestamp": "2026-07-27T02:34:19+08:00",
+    "task_type": "platform_ops",
+    "task_id": "issue40_production_workspace_acceptance_20260727",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "owner": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "commit": "07938d55d",
+    "summary": "Issue #40 production acceptance canary: created + committed docs/ops/issue40_production_workspace_acceptance.md inside producer-scoped workspace worktree-dispatch-slot-1-204d556b (ASCII msg w/ task id, clean tree, only declared path). Supervisor finalizer to gate+merge the exact branch."
+  },
+  {
+    "timestamp": "2026-07-27T02:38:06+08:00",
+    "task_type": "experiment",
+    "task_id": "K1658",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "owner": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "commit": null,
+    "summary": "PHASE A triage_failed recovery: agent-brief_k1658_39b53bf6-b574ac exited 2 (cwd not found — worktree dispatch-slot-1-39b53bf6-k1658 never existed; no canonical experiments/K1658, nothing salvageable). Created fresh registered worktree k1658-rerun-204d556b (branch worktree-k1658-rerun-204d556b, base main 91a24dc29) under git_writer_lock, re-wrote brief with corrected cwd, re-enqueued agent-agent-brief_k1658_rerun_204d556b-3104b0 (opus/xhigh, timeout 5280, cwd preflight passed, K1658->in_progress), marked old followup dispatched."
+  },
+  {
+    "timestamp": "2026-07-27T02:43:21+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_7750fcd9",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "owner": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "commit": null,
+    "summary": "Resolved PHASE-Z stuck-files incident (fingerprint 3c0b76a1bcd65274, 77-fire de-rate root cause). 3 foreign tracked-mods in canonical main: 2 M-files (trending_primary_source_verification.jsonl, test_check_matt_skills_installation.py) already in quarantine refs; k1253_general_draft.md was AD (staged-add, WT-deleted) un-quarantined -> preserved staged blob c0fdf255 to refs/volpred/preserve/k1253_general_draft_204d556b before clearing. Cleared all 3 under git_writer_lock (reset k1253, checkout HEAD for 2 M-files). foreign_incident --check green (closeable=true, derates=false), --reconcile closed. Slot cap de-rate lifted 2->6."
   }
 ]

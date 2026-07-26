@@ -27867,7 +27867,7 @@
     "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -27924,8 +27924,8 @@
       }
     ],
     "last_released_at": "2026-07-26T17:45:06.377987+00:00",
-    "compute_job_id": "agent-brief_k1658_39b53bf6-b574ac",
-    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection",
+    "compute_job_id": "agent-agent-brief_k1658_rerun_204d556b-3104b0",
+    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1658_rerun_204d556b-3104b0; awaiting PHASE A collection",
     "last_release_reason": "liveness_reconcile_detached_39b53bf6"
   },
   {
@@ -32769,7 +32769,7 @@
     "title": "K1715: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Chri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 509). Original: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1715.py with signal.shift(1) + seed=42, (c) K1715_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -32778,7 +32778,9 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-15T00:00:01Z"
+    "created_at": "2026-07-15T00:00:01Z",
+    "compute_job_id": "agent-agent-brief_k1715_204d556b-e2cc16",
+    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection"
   },
   {
     "id": "K1716",
@@ -39750,10 +39752,12 @@
     "description": "收件審查 (k528_round6_collection_verdict.json) 判 B1-B4 全 PASS，但點出 3 個 non-blocking: N1 (最重要) round-6 裁決自稱的「結構性不變量」gate 其實是 5 詞 blocklist + 兩個無條件豁免 —— 實測 6 個注入有 4 個同義改寫溜過 (如「237 場 NFP 是週五發布的」/「published on a Friday」)，且同行只要出現 243 (即使語意無關) 整行豁免、denial marker 可被挾持。今天樹是乾淨的所以 B1 判 PASS，但這個 gate 擋不住改寫後的迴歸。N2 README.md:268「237 筆在週五」無 243 對照 (內部章節，gate 掃不到)。N3 線上文章 mile_35eef830 errata 只記 2026-07-18 事件日更正，未說明 proxy 期數字已被取代。Worktree: .claude/worktrees/dispatch-slot-3-30adeed7-k528nfp (branch k528-nfp-official-dates, HEAD 5b1f154c1)。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "collection_review",
     "parent_task_id": "k528_round6_collection_verify",
-    "created_at": "2026-07-20T21:19:00.806181+00:00"
+    "created_at": "2026-07-20T21:19:00.806181+00:00",
+    "compute_job_id": "agent-agent-brief_k528_round7_204d556b-3d6f3b",
+    "result": "dispatched to compute job agent-agent-brief_k528_round7_204d556b-3d6f3b; awaiting PHASE A collection"
   },
   {
     "id": "k528_primary_codex_certify_merge",
@@ -42990,7 +42994,7 @@
     "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 77 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- storage/drafts/k1253_general_draft.md — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 77 班\n- tests/test_check_matt_skills_installation.py — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T173704933918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173805118048Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173905257186Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T182937793148Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-26T17:37:07.912107+00:00",
     "payload": {
@@ -43023,7 +43027,79 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-26T18:29:40.644386+00:00"
+    "updated_at": "2026-07-26T18:29:40.644386+00:00",
+    "claimed_by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+    "claimed_at": "2026-07-26T18:42:06.986615+00:00",
+    "claim_session_id": "1e803ee95600",
+    "status_history": [
+      {
+        "ts": "2026-07-26T18:42:06.986623+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
+      },
+      {
+        "ts": "2026-07-26T18:42:07.234989+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
+      }
+    ],
+    "started_at": "2026-07-26T18:42:07.234969+00:00",
+    "completed_at": "2026-07-26T18:42:53.518125+00:00",
+    "result": "關閉條件機械滿足：3 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "storage/drafts/k1253_general_draft.md": {
+          "quarantined": false,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.codex/worktrees/operations-core-scheduler-cutover",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-204d556b",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "tests/test_check_matt_skills_installation.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-204d556b",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "tests/test_check_matt_skills_installation.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "storage/drafts/k1253_general_draft.md",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "tests/test_check_matt_skills_installation.py"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "release_deadlock_repair_20260726_18",
@@ -43078,5 +43154,82 @@
     "started_at": "2026-07-26T18:15:48.823305+00:00",
     "completed_at": "2026-07-26T18:26:51.968565+00:00",
     "result": "ROOT CAUSE: com.volpred.compute-worker LaunchAgent 未 bootstrap 於 launchd → */15 drain 從不執行 → 3 lazypack render job 卡 queued → 3 drafts content_gate_blocked → deadlock。FIX: launchctl bootstrap+kickstart，worker 恢復，3 job queued→running→completed，eligible 0→3。VERIFIED: release-pool-by-settings released=1 mile_be7666e2 published+supabase_synced+verified_live；check_alerts breaches=0。durable 守護記入 assign_f13a5d5f (main-thread)。"
+  },
+  {
+    "id": "issue40_production_workspace_acceptance_20260727",
+    "title": "[Issue #40 acceptance] production workspace → gate → merge receipt canary",
+    "description": "Issue #40 production acceptance canary. This is a bounded platform_ops repo-patch task. Inside the supervisor-provided workspace, create docs/ops/issue40_production_workspace_acceptance.md with the task id, current UTC timestamp, and a short statement that the file is the tracked canary for task→workspace→gate→merge read-back. Do not modify storage JSON or external systems. Commit only that declared doc path with an ASCII message containing the task id. Complete normally so the supervisor finalizer can gate and integrate the exact branch.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user_issue40_acceptance",
+    "issue_ref": "#40",
+    "tags": [
+      "platform_ops",
+      "issue40",
+      "production-acceptance"
+    ],
+    "created_at": "2026-07-26T18:32:16.080979+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-26T18:33:08.069003+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
+      },
+      {
+        "ts": "2026-07-26T18:33:11.387229+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
+      },
+      {
+        "ts": "2026-07-26T18:33:40.957352+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
+      }
+    ],
+    "started_at": "2026-07-26T18:33:11.387212+00:00",
+    "completed_at": "2026-07-26T18:33:40.957325+00:00",
+    "result": "Issue #40 acceptance canary: created docs/ops/issue40_production_workspace_acceptance.md in workspace worktree-dispatch-slot-1-204d556b, committed 07938d55d (ASCII msg, task id). Clean tree, only declared path. Supervisor finalizer to gate+merge.",
+    "issue_close_pending": {
+      "issue_ref": "#40",
+      "task_id": "issue40_production_workspace_acceptance_20260727",
+      "completion_owner": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
+      "completed_at": "2026-07-26T18:33:40.957325+00:00",
+      "completion_base_commit": "91a24dc295e796220be271489f2ae83e578f08b5"
+    }
+  },
+  {
+    "id": "issue42_persistent_fire_lifecycle_20260727",
+    "title": "[Issue #42] 持久化 Supervisor Fire Lifecycle 與 self-reload handoff",
+    "description": "依 GitHub Issue #42 與既有 Matt spec 實作 durable fire generation、baseline receipt、restart closeout matching 與 failure-injection tests；完成 production planned reload read-back 與 sustained-clean gate。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "source": "user_issue42_implementation",
+    "issue_ref": "#42",
+    "created_at": "2026-07-26T18:41:54.568830+00:00",
+    "preferred_agent": "codex",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-26T18:42:18.000382+00:00",
+    "claim_session_id": "20bb66684587",
+    "status_history": [
+      {
+        "ts": "2026-07-26T18:42:18.000390+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T18:42:21.348172+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-26T18:42:21.348157+00:00"
   }
 ]
