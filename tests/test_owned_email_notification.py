@@ -4,6 +4,7 @@ import hashlib
 
 import pytest
 
+from volpred.ops.delivery import owned_email as owned_email_module
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
@@ -321,3 +322,90 @@ def test_environment_adapter_never_falls_back_to_publishable_key(
         match="service-role key",
     ):
         SupabaseOwnedEmailStore.from_environment()
+
+
+def test_supabase_store_blocks_remote_mutation_when_remote_writes_are_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    network_calls = 0
+
+    def fail_if_called(*args: object, **kwargs: object) -> object:
+        nonlocal network_calls
+        network_calls += 1
+        raise AssertionError("network attempted")
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setattr(owned_email_module.request, "urlopen", fail_if_called)
+    store = SupabaseOwnedEmailStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="fake-service-role-key",
+    )
+
+    with pytest.raises(RuntimeError, match="remote writes are disabled"):
+        store.request(_command(), owner_generation=2)
+
+    assert network_calls == 0
+
+
+def test_supabase_store_blocks_remote_mutation_under_pytest_when_guard_is_removed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    network_calls = 0
+
+    def fail_if_called(*args: object, **kwargs: object) -> object:
+        nonlocal network_calls
+        network_calls += 1
+        raise AssertionError("network attempted")
+
+    monkeypatch.delenv("VOLPRED_NO_REMOTE_WRITE", raising=False)
+    monkeypatch.setattr(owned_email_module.request, "urlopen", fail_if_called)
+    store = SupabaseOwnedEmailStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="fake-service-role-key",
+    )
+
+    with pytest.raises(RuntimeError, match="remote writes are disabled"):
+        store.request(_command(), owner_generation=2)
+
+    assert network_calls == 0
+
+
+def test_supabase_store_allows_owner_read_when_remote_writes_are_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Response:
+        def __enter__(self) -> Response:
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return (
+                b'{"schema_version":"notification-owner.v1",'
+                b'"effect_family":"email.ops_alert",'
+                b'"owner":"legacy","generation":1,'
+                b'"changed_at":"2026-07-24T07:00:00+00:00",'
+                b'"changed_by":"migration","change_reason":"initial"}'
+            )
+
+    requested_urls: list[str] = []
+
+    def respond(call: object, **kwargs: object) -> Response:
+        requested_urls.append(call.full_url)  # type: ignore[attr-defined]
+        return Response()
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setattr(owned_email_module.request, "urlopen", respond)
+    store = SupabaseOwnedEmailStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="fake-service-role-key",
+    )
+
+    owner = store.read_owner()
+
+    assert owner.owner == "legacy"
+    assert requested_urls == [
+        "https://project.supabase.co/rest/v1/rpc/"
+        "volpred_read_notification_owner"
+    ]

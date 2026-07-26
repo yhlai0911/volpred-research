@@ -9,6 +9,12 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .local_control_plane import NONTERMINAL_TASK_STATUSES
+from .task_pool_mode import (
+    load_task_pool_mode_evidence,
+    task_pool_mode_path,
+)
+from .task_pool_selection import task_identity
 from .work import WorkerOffer
 from .work.legacy import LegacySnapshots
 from .work_shadow_replay import (
@@ -19,24 +25,14 @@ from .work_shadow_replay import (
 
 
 SnapshotReader = Callable[[], Sequence[Mapping[str, Any]]]
-_ACTIVE_TASK_RECORD_STATUSES = frozenset(
-    {
-        "queued",
-        "claimed",
-        "running",
-        "awaiting_approval",
-        "awaiting_retry",
-        "pending",
-    }
-)
 _ACTIVE_OPS_JOB_STATUSES = frozenset({"queued", "running"})
 
 
 def _record_identity(record: Mapping[str, Any]) -> str | None:
-    raw = record.get("id")
-    if not isinstance(raw, str) or not raw.strip():
+    identity = task_identity(record).strip()
+    if not identity:
         return None
-    return raw.strip()
+    return identity
 
 
 def _parent_identity(record: Mapping[str, Any]) -> str | None:
@@ -77,7 +73,7 @@ def _scope_receipt_sources(
             if (
                 _record_identity(record) in relevant_ids
                 or str(record.get("status") or "").strip().lower()
-                in _ACTIVE_TASK_RECORD_STATUSES
+                in NONTERMINAL_TASK_STATUSES
             )
         )
         expanded_ids = set(relevant_ids)
@@ -111,6 +107,7 @@ def observe_work_shadow(
     observation_id: str,
     observed_at: datetime,
     offer: WorkerOffer,
+    queue_owner_evidence: Mapping[str, Any] | None = None,
 ) -> Path:
     """Freeze three legacy sources once, replay them, and append one receipt."""
 
@@ -130,6 +127,7 @@ def observe_work_shadow(
     return append_shadow_observation(
         ledger,
         directory=observation_directory,
+        queue_owner_evidence=queue_owner_evidence,
     )
 
 
@@ -144,11 +142,13 @@ def observe_canonical_work_shadow(
     """Observe the canonical pending queue plus its two legacy receipt stores."""
 
     queue_path = project_root / "storage" / "next_tasks.json"
+    state_path = task_pool_mode_path(queue_path)
 
     with queue_path.open("rb") as queue_handle:
         fcntl.flock(queue_handle.fileno(), fcntl.LOCK_SH)
         try:
             payload = json.loads(queue_handle.read())
+            owner = load_task_pool_mode_evidence(state_path)
         finally:
             fcntl.flock(queue_handle.fileno(), fcntl.LOCK_UN)
     if not isinstance(payload, list) or not all(
@@ -184,6 +184,14 @@ def observe_canonical_work_shadow(
             attestations=frozenset(),
             lease_seconds=300,
         ),
+        queue_owner_evidence={
+            "schema_version": "task-pool-owner-evidence.v1",
+            "mode": owner.mode.mode,
+            "gate_enabled": owner.mode.enabled,
+            "state_path": owner.state_path,
+            "state_sha256": owner.sha256,
+            "state_byte_count": owner.byte_count,
+        },
     )
 
 

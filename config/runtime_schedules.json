@@ -488,7 +488,7 @@
         "cron": "15 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_work_shadow_observe.sh",
         "log_path": "storage/logs/cron/work_shadow_observe.log",
-        "description": "Issue #9 pre-cutover evidence producer. Every hour it freezes canonical next_tasks, local TaskRecord receipts and Supabase ops_jobs once, runs the shared legacy/Work Coordinator selectors, and appends one ignored work-shadow-replay.v3 receipt. It never submits, claims, completes, stages a gate or changes queue ownership. Canonical owner is the hourly check_alerts run_due_jobs piggy-back.",
+        "description": "Issue #9 pre-cutover evidence producer. Every hour it freezes canonical next_tasks, its paired queue-owner state, local TaskRecord receipts and Supabase ops_jobs once, runs the shared legacy/Work Coordinator selectors, and appends one ignored owner-bound work-shadow-replay.v4 receipt. Only receipts whose owner mode, gate flag, state path and state SHA match assessment-time owner evidence count toward the seven-day window; historical v3 receipts remain audit-only. It never submits, claims, completes, stages a gate or changes queue ownership. Canonical owner is the hourly check_alerts run_due_jobs piggy-back.",
         "host_crontab_managed": false,
         "piggy_back_enabled": true,
         "staleness_expected_minutes": 90,

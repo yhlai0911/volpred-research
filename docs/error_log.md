@@ -2943,7 +2943,7 @@ receipts，不是 pending queue，terminal `ops_jobs` 也不是 owner cutover re
 Python entrypoint、120 秒 bounded wrapper、single-owner hourly :15 schedule、
 wrapper manifest 與 scheduled-writer ownership 分類。Producer 對 next_tasks 用 shared
 lock，只納入同 id／parent dependency、TaskRecord 非終態 anomaly及 queued/running
-ops_jobs，然後用 Issue #7 同一 immutable replay seam 追加 gitignored v3 receipt；
+ops_jobs，然後用 Issue #7 同一 immutable replay seam 追加 gitignored receipt；
 runtime log 只輸出 bounded summary。Wrapper live smoke exit 0，
 `cron_last_run.work_shadow_observe=2026-07-26T06:26:57+00:00`，修正後 receipt
 source counts `1/0/0`。Re-pend 現在一律走 `_repend_task()` 並清除 `started_at`，
@@ -2952,3 +2952,50 @@ direct-mode owner instruction 未被修改，因此 live assessment 仍有 missi
 invalid lifecycle，加上七日 window 與 queued-execution mode 未滿；Issue #9 保持
 **`contained`**。相鄰回歸 **161 passed**；全專案
 **5,171 passed、1 skipped、0 failed**。
+
+**Matt review 後續根因修正**：初版 scheduled receipt 是 v3，未記錄 observation-time
+owner state；assessment 只看評估當下 mode，日後切回 `queued_execution` 可能錯把
+direct-mode evidence 算入七日窗口。另 `_record_identity()` 只讀 `id`，與 production
+`task_identity(id | task_id)` 契約分叉，會漏掉 `task_id`-only row 的 terminal
+TaskRecord／ops-job 對帳。Scheduled producer 現改寫 owner-bound
+`work-shadow-replay.v4`，在同一 queue shared lock 內取得 paired owner-state bytes，
+receipt 綁定 mode／gate flag／resolved path／SHA-256／byte count。Assessment 只計入
+與當下 owner evidence 完全相符的 v4 receipts；舊 v3 為 append-only audit evidence，
+不污染也不計入新窗口。Identity scoping 改為直接共用 production `task_identity()`。
+因此 producer 已開始運作，但在 live `direct_execution` 下
+**cutover-eligible 七日時鐘尚未開始**；必須切至核可的 queued owner state 後重新
+連續累積七日。這個 remediation 不改 queue、gate 或 owner。
+
+### 2026-07-26 — 測試 guard 未包住 owned-email RPC，三筆 WorkItem 誤寫 production
+
+**證據化症狀**：full suite 執行後，production 在 06:34–06:35 UTC 新增三筆
+`source=ops.alerts.send_alert`、`kind=ops.alert.email` 的 WorkItem。三筆事件都只有
+`submitted → acquired → started`，沒有 Work receipt；lease 約五分鐘後過期。
+當時 live owner 仍為 `legacy/1`，cutover gate／gate receipt 仍為 0，因此這不是新版
+owner 正式流量。精確 regression 在 `VOLPRED_NO_REMOTE_WRITE=1` 下替換
+`urllib.request.urlopen`；修正前仍呼叫 network，得到 RED。
+
+**根因層級與底層修復**：這是 remote-write safety boundary 缺口。
+`SupabaseOwnedEmailStore` 直接使用 `urllib`，未經 repo 其他 publisher 的 guard。
+共同 `_rpc` boundary 現在把唯一 read-only function
+`volpred_read_notification_owner` 與 mutation functions 明確分離；任何 mutation 在
+`VOLPRED_NO_REMOTE_WRITE=1` 時都於建立／送出 HTTP request 前 fail closed。現有三筆
+production rows 不手改、不刪除，保留作 incident audit evidence。
+
+**相鄰 evidence 修正**：Matt Standards re-review 同時發現 Work shadow observer
+自建 active-status set 漏掉 canonical `blocked` TaskRecord。Observer 已改為直接共用
+`local_control_plane.NONTERMINAL_TASK_STATUSES`，並以五種 canonical nonterminal state
+的 public-seam regression 鎖定，避免七日 cutover ledger被靜默美化。
+
+**回歸與 production 回讀**：修後在 service-role key unset、
+`VOLPRED_NO_REMOTE_WRITE=1` 下重跑 full suite，**5,177 passed、1 skipped、0 failed**。
+以事故最後一筆 `2026-07-26T06:35:28.127882Z` 為 cutoff 回讀，測試形狀
+`Claude→Codex failover 接手失敗%` 新增數為 **0**。同窗口另有三筆 07:01 UTC
+正式巡檢告警，均可在 `storage/ops/incident_candidates.jsonl` 對到同 timestamp／
+dedupe key，且 production WorkItem 全為 `succeeded`、version 4、各有一筆 durable
+Work receipt；它們是新版 owned-email runtime 的真實健康流量，不是測試洩漏。
+
+**狀態**：remote-write guard 根因為 **`root_cause_fixed_and_verified`**。原三筆
+test-shaped running rows不手改、不刪除，保留 audit evidence；Issue #9 的 Work
+Coordinator queue owner 仍是 `legacy/1`、gate／gate receipt 都是 0，所以 Issue #9
+整體仍為 **`contained`**。

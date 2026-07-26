@@ -1580,11 +1580,14 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
 - 2026-07-26 已新增 `work_shadow_observe` canonical hourly producer，由
   `check_alerts → run_due_jobs` 單一 piggy-back owner 在每小時 :15 的 due window
   執行 `scripts/observe_work_shadow.py`。Producer 以 queue shared lock 凍結
-  `storage/next_tasks.json`，TaskRecord receipts 只納入 canonical pending id 的
-  duplicate／parent dependency 與任何非終態 anomaly，Supabase `ops_jobs` 只納入
+  `storage/next_tasks.json` 與 paired owner-state byte snapshot，TaskRecord receipts
+  只納入 canonical pending id 的
+  duplicate／parent dependency 與 canonical
+  `NONTERMINAL_TASK_STATUSES`（含 `blocked`）anomaly，Supabase `ops_jobs` 只納入
   queued／running residue；不把與 pending ownership 無關的歷史 terminal receipts
-  冒充待遷移 queue。三份 scope 仍由同一 replay snapshot identity 綁定，唯一寫入是
-  gitignored append-only `storage/ops/work_shadow_observations/`。
+  冒充待遷移 queue。三份 scope 仍由同一 replay snapshot identity 綁定；scheduled
+  v4 receipt 另綁定 observation-time owner mode／gate flag／state path／SHA，唯一
+  寫入是 gitignored append-only `storage/ops/work_shadow_observations/`。
 - Live wrapper smoke exit 0 並回寫 `cron_last_run.work_shadow_observe`；首輪修正後 receipt
   source counts 為 `next_tasks=1 / task_records=0 / ops_jobs=0`。它正確抓到 preserved
   control row `assign_f3f36d75` 的 `missing_parent` 與 `invalid_lifecycle`，所以 assessment
@@ -1595,6 +1598,23 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   trace；既有 preserved row 未直接改資料，仍待 owner-approved canonical reconciliation。
   相鄰 shadow／cutover／task lifecycle／scheduler suites **161 passed**，全專案
   **5,171 passed、1 skipped、0 failed**。
+
+- 2026-07-26 Matt Standards re-review 發現 observer 自建的 lifecycle set 漏掉
+  canonical `blocked`，可能靜默省略 live legacy residue。Observer 現在直接共用
+  `local_control_plane.NONTERMINAL_TASK_STATUSES`；queued／claimed／running／
+  awaiting_approval／blocked 全部有 public-seam regression。這項修正只影響後續
+  append-only observation，未改歷史 receipt、live queue、gate 或 owner。
+
+- Matt Spec re-review 另發現初版 v3 receipts 沒有 observation-time owner identity，
+  assessment 可能在日後 mode 切換時重用 direct-mode evidence；`_record_identity()`
+  也只讀 `id`，與 production `id | task_id` identity seam 分叉。Scheduled producer
+  現寫 v4 owner-bound receipt，assessment 僅計入 owner mode／gate／path／state SHA
+  與當下完整相符的 v4 timeline；舊 v3 永久保留但不計入。Canonical scoping 直接共用
+  `task_identity()`。因此 observer 已運作，但 live 仍為 `direct_execution`，
+  cutover-eligible 七日時鐘尚未開始。Live v4 smoke
+  `scheduled_20260726T071908848044Z_db0c9cd079a6` 回讀 owner evidence
+  `direct_execution`／gate enabled、source counts `1/0/0`、兩個 reconciliation
+  issues；assessment 只計入這張 owner-matched v4 receipt並維持五個 blocking reasons。
 
 取得七天 shadow 證據、production migration read-back 與 owner-approved window 後，
 才規劃第一個正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與

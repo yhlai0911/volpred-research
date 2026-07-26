@@ -99,11 +99,14 @@ def _write_observations(
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     identity = identify_legacy_snapshots(snapshots)
+    owner_path = directory.parent / "ops" / "task_pool_mode.json"
+    owner_bytes = owner_path.read_bytes()
+    owner_state = json.loads(owner_bytes)
     for index in range(count):
         observed_at = start + timedelta(days=index)
         snapshot_sha = identity.sha256
         receipt = {
-            "schema_version": "work-shadow-replay.v3",
+            "schema_version": "work-shadow-replay.v4",
             "observation_id": f"scheduled_{index:02d}",
             "observed_at": observed_at.isoformat(),
             "recorded_at": observed_at.isoformat(),
@@ -148,6 +151,14 @@ def _write_observations(
                 }
             ],
             "reconciliation_issues": [],
+            "queue_owner_evidence": {
+                "schema_version": "task-pool-owner-evidence.v1",
+                "mode": owner_state["mode"],
+                "gate_enabled": owner_state["enabled"],
+                "state_path": str(owner_path.resolve()),
+                "state_sha256": hashlib.sha256(owner_bytes).hexdigest(),
+                "state_byte_count": len(owner_bytes),
+            },
         }
         (directory / f"scheduled_{index:02d}.json").write_text(
             json.dumps(receipt),
@@ -289,11 +300,11 @@ def test_preflight_rejects_a_ledger_for_a_different_snapshot(
 ) -> None:
     observed = LegacySnapshots(next_tasks=(_legacy_row(),))
     observations = tmp_path / "observations"
-    _write_observations(observations, snapshots=observed)
     replacement = _legacy_row()
     replacement["id"] = "task-2"
     replacement_snapshot = LegacySnapshots(next_tasks=(replacement,))
     _write_canonical_queue(tmp_path, _legacy_bytes(replacement))
+    _write_observations(observations, snapshots=observed)
     staged = replace(
         _staged_snapshot().items[0],
         id="task-2",

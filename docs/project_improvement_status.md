@@ -130,13 +130,40 @@ evidence-bound transaction gate，不是 cutover，Issue #9 仍為 `contained`�
 同日補上缺失的七日 evidence producer：`work_shadow_observe` 由 canonical
 `runtime_schedules.json` 每小時 :15 經單一 piggy-back owner 執行，wrapper 已安裝且
 live smoke exit 0、marker 回讀成功。它只讀 canonical pending queue、相關 TaskRecord
-parent／active anomaly 與 queued/running `ops_jobs`，追加 gitignored v3 receipt；
+parent／active anomaly 與 queued/running `ops_jobs`，追加 gitignored receipt；
 不 stage gate、不 transfer owner。最新 receipt 已把歷史無關 terminal receipts排除，
 source counts 為 `1/0/0`，並正確留下 preserved control row 的 missing-parent 與
 pending+started_at lifecycle blocker。Release／stale cleanup 的產生流程已統一清除
-`started_at`；現存 row 未手改。七日時鐘已開始累積，但 mode 仍為
-`direct_execution` 且 blocking evidence 尚在，因此 Issue #9 仍是 `contained`。
+`started_at`；現存 row 未手改。Matt Spec review 後 scheduled receipt 升為
+owner-bound v4，在 queue shared lock 內綁定 observation-time mode／gate／state
+path／SHA；assessment 只計入與當下 owner evidence 完全相符的 v4 receipts，舊 v3
+只保留 audit。Identity scoping 同步共用 production `task_identity(id | task_id)`，
+不再漏掉 alias row 的 terminal 對帳。因 live mode 仍為 `direct_execution`，
+cutover-eligible 七日時鐘尚未開始，且 blocking evidence 尚在，因此 Issue #9 仍是
+`contained`。
 相鄰回歸 **161 passed**，全專案 **5,171 passed、1 skipped、0 failed**。
+Matt Standards re-review 另發現 observer 的 duplicated active-status set 漏掉合法
+非終態 `blocked`；現已改為共用 `local_control_plane.NONTERMINAL_TASK_STATUSES`，
+並以 queued／claimed／running／awaiting_approval／blocked 五態 regression 防止
+cutover evidence 靜默漏列。
+Live v4 wrapper smoke
+`scheduled_20260726T071908848044Z_db0c9cd079a6` 已 exit 0；receipt 回讀
+`direct_execution`／gate enabled、owner-state SHA 綁定、source counts `1/0/0`，
+assessment observation count 1 且五個既有 blockers 全保留，沒有誤判 ready。
+
+同次 full-suite production read-back 發現三筆 06:34–06:35 UTC 建立的
+`ops.alert.email` WorkItem 並非新版 runtime 健康流量，而是測試程序在
+`VOLPRED_NO_REMOTE_WRITE=1` 下仍繞過 guard 呼叫 Supabase mutation RPC；三筆都只到
+submitted／acquired／started、沒有 effect receipt，lease 隨後過期。根因修正把
+mutation guard 放進 `SupabaseOwnedEmailStore` 的共同 RPC boundary，在任何 HTTP 前
+fail closed；read-only owner query 不受影響。現存 production rows 依「修流程、不手改
+資料」保留作 audit evidence，不能拿來宣稱 Work Coordinator 已開始正式接管。
+修後 full suite **5,177 passed、1 skipped、0 failed**；production 以事故最後一筆
+時間為 cutoff 回讀，`Claude→Codex failover 接手失敗%` 測試形狀新增數為 0。
+同窗口 07:01 UTC 的另外三筆是 canonical hourly alert 真實流量，local incident
+candidate 有同 timestamp／dedupe key，production WorkItem 三筆皆 `succeeded` 且各有
+durable receipt。這證明 owned-email `operations_core/4` 已正式運作；它不代表
+Work Coordinator queue owner 已切換，後者仍是 `legacy/1`。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由

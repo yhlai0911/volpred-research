@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -27,11 +28,16 @@ def _write_receipt(
     *,
     index: int,
     observed_at: datetime,
+    schema_version: str = "work-shadow-replay.v4",
+    queue_owner_mode: str = "queued_execution",
+    queue_owner_gate_enabled: bool = False,
+    queue_owner_state_path: str = "/repo/storage/ops/task_pool_mode.json",
+    queue_owner_state_sha256: str = "a" * 64,
 ) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     snapshot_sha = f"{index + 1:064x}"
     receipt = {
-        "schema_version": "work-shadow-replay.v3",
+        "schema_version": schema_version,
         "observation_id": f"scheduled_{index:02d}",
         "observed_at": observed_at.isoformat(),
         "recorded_at": observed_at.isoformat(),
@@ -81,6 +87,15 @@ def _write_receipt(
         ],
         "reconciliation_issues": [],
     }
+    if schema_version == "work-shadow-replay.v4":
+        receipt["queue_owner_evidence"] = {
+            "schema_version": "task-pool-owner-evidence.v1",
+            "mode": queue_owner_mode,
+            "gate_enabled": queue_owner_gate_enabled,
+            "state_path": queue_owner_state_path,
+            "state_sha256": queue_owner_state_sha256,
+            "state_byte_count": 64,
+        }
     (directory / f"scheduled_{index:02d}.json").write_text(
         json.dumps(receipt),
         encoding="utf-8",
@@ -110,6 +125,76 @@ def test_seven_continuous_clean_days_are_ready_for_cutover(tmp_path: Path) -> No
     assert report.covered_dimensions == REQUIRED_DIMENSIONS
 
 
+def test_only_receipts_bound_to_current_owner_state_count_toward_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+            queue_owner_mode="direct_execution",
+            queue_owner_gate_enabled=True,
+            queue_owner_state_sha256="d" * 64,
+        )
+    _write_receipt(
+        observations,
+        index=8,
+        observed_at=START + timedelta(days=8),
+        queue_owner_state_sha256="b" * 64,
+    )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner_mode="queued_execution",
+        queue_owner_gate_enabled=False,
+        queue_owner_state_path="/repo/storage/ops/task_pool_mode.json",
+        queue_owner_state_sha256="b" * 64,
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.observation_count == 1
+    assert report.recorded_from == (START + timedelta(days=8)).isoformat()
+    assert report.reason_codes == ("observation_window_too_short",)
+
+
+def test_pre_owner_evidence_receipts_do_not_poison_new_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    _write_receipt(
+        observations,
+        index=0,
+        observed_at=START - timedelta(days=1),
+        schema_version="work-shadow-replay.v3",
+    )
+    for index in range(1, 9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index - 1),
+            queue_owner_state_sha256="b" * 64,
+        )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=7, hours=1),
+        queue_owner_mode="queued_execution",
+        queue_owner_gate_enabled=False,
+        queue_owner_state_path="/repo/storage/ops/task_pool_mode.json",
+        queue_owner_state_sha256="b" * 64,
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is True
+    assert report.observation_count == 8
+
+
 def test_malformed_receipt_fails_closed_instead_of_crashing(tmp_path: Path) -> None:
     observations = tmp_path / "observations"
     observations.mkdir()
@@ -126,6 +211,28 @@ def test_malformed_receipt_fails_closed_instead_of_crashing(tmp_path: Path) -> N
     assert report.ready_for_cutover is False
     assert report.reason_codes == ("invalid_receipt",)
     assert report.observation_count == 1
+
+
+def test_v4_receipt_without_owner_evidence_fails_closed(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    _write_receipt(observations, index=0, observed_at=START)
+    receipt_path = observations / "scheduled_00.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    del receipt["queue_owner_evidence"]
+    receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START,
+        queue_owner_mode="queued_execution",
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("invalid_receipt",)
 
 
 def test_unexplained_selector_drift_blocks_cutover(tmp_path: Path) -> None:
@@ -264,18 +371,21 @@ def test_work_shadow_assess_cli_emits_machine_verdict(
     monkeypatch,
 ) -> None:
     observations = tmp_path / "observations"
-    for index in range(8):
-        _write_receipt(
-            observations,
-            index=index,
-            observed_at=START + timedelta(days=index),
-        )
     mode_state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
     mode_state.parent.mkdir(parents=True)
     mode_state.write_text(
         json.dumps({"enabled": False, "mode": "queued_execution"}),
         encoding="utf-8",
     )
+    mode_bytes = mode_state.read_bytes()
+    for index in range(8):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+            queue_owner_state_path=str(mode_state.resolve()),
+            queue_owner_state_sha256=hashlib.sha256(mode_bytes).hexdigest(),
+        )
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr("volpred.ops.common.PROJECT_ROOT", tmp_path)
     monkeypatch.setattr(
@@ -437,7 +547,9 @@ def test_direct_execution_mode_cannot_reuse_queue_shadow_evidence(
     payload = json.loads(result.output)
     assert payload["ready_for_cutover"] is False
     assert payload["reason_codes"] == [
-        "queue_owner_mode_not_queued_execution"
+        "queue_owner_mode_not_queued_execution",
+        "no_observations",
+        "missing_reconciliation_dimension",
     ]
 
 
@@ -694,7 +806,7 @@ def test_backdated_replay_clock_cannot_fake_seven_recorded_days(
         )
         path = observations / f"scheduled_{index:02d}.json"
         receipt = json.loads(path.read_text(encoding="utf-8"))
-        receipt["schema_version"] = "work-shadow-replay.v3"
+        receipt["schema_version"] = "work-shadow-replay.v4"
         receipt["recorded_at"] = (
             recorded_start + timedelta(seconds=index)
         ).isoformat()

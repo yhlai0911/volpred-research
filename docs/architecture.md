@@ -83,8 +83,18 @@
 > token 不在 compatibility projection 中，ownership transaction 無法無損移交該寫入權，
 > 所以正式切換必須在零 active lease 的 quiescent queue 執行。任何 drift 或未排空 lease
 > 都在 mutation 前 fail closed。此 seam
-> 沒有 apply／writer 能力，live 仍為 `direct_execution` 且 observation count 為 0；
-> 它不等於 cutover 核可，也無法用手造 assessment／hash 繞過七日真實證據。
+> 沒有 apply／writer 能力，live 仍為 `direct_execution`。2026-07-26 起由 canonical
+> `work_shadow_observe` schedule 每小時 :15 經單一 piggy-back owner 讀取三份 legacy
+> source，並在同一 queue shared lock 內綁定 paired owner-state bytes；scheduled
+> receipt 為 `work-shadow-replay.v4`，內含 mode／gate flag／state path／state SHA。
+> Assessment 只計入與當下 owner evidence 完全相符的 v4 receipts；既有 v3 保留
+> audit 但不再計入 soak。首張正確 scoped live receipt 為
+> `scheduled_20260726T063140235891Z_097ee6ba7655`，source counts `1/0/0`。
+> Producer 共用 TaskRecord canonical nonterminal lifecycle vocabulary，保留
+> `queued`／`claimed`／`running`／`awaiting_approval`／`blocked` residue。
+> 目前 owner state 仍是 `direct_execution`，所以 cutover-eligible 七日 observation
+> clock 尚未開始；receipt 也仍有 blocking reconciliation evidence。
+> 因此它不等於 cutover 核可，也無法用手造 assessment／hash 繞過七日真實證據。
 
 > **Work Coordinator durable owner fencing（2026-07-26，local schema／legacy owner）**
 > PostgreSQL migration 已建立 private `work_owners` 與 append-only
@@ -116,10 +126,11 @@
 > 等 formal workflow 則明確 rebind 到 runtime 無 execute 權限的 definer-only
 > internal seam，不會在 work owner 切換後斷鏈。PG17 non-superuser clean replay、
 > manifest freshness／unknown-hash rejection、generation lifecycle、in-flight legacy race、expired-lease rollback
-> 與 owned-email nested workflow 已通過本地 integration；migration 未套 production，
-> live owner 與 direct-execution containment 均未改變。下一步仍是七日真實 receipts、
-> production migration read-back，以及在核可窗口執行 staged cutover／rollback
-> rehearsal；Issue #9 維持
+> 與 owned-email nested workflow 已通過本地 integration。Production 已於
+> 2026-07-26 套用 owner fencing 與 durable cutover-gate migrations；catalog／ACL
+> read-back 通過，live owner 仍為 `legacy/1`，gate／gate receipt 均為 0，沒有 stage
+> 或 transfer。下一步仍是七日真實 receipts，以及在 owner 核可窗口執行 staged
+> cutover／unique-owner downstream read-back／rollback rehearsal；Issue #9 維持
 > `contained`。
 
 > **Change Delivery commit-authority contract（2026-07-24，shadow）**
@@ -611,13 +622,18 @@
 > `operations_core/2 → legacy/3`，舊 generation request 被拒且零 row，再
 > `legacy/3 → operations_core/4`；final live state 只有一個 owner row、零 active
 > attempts。故 `email.ops_alert` production ownership 四個缺口現為
-> `root_cause_fixed_and_verified`；這不表示其他 effect family 已自動切換。
+> `root_cause_fixed_and_verified`。2026-07-26 07:01 UTC 後續 live read-back 又確認
+> 三筆 canonical hourly alert 全為 Work `succeeded`、version 4，且各有一筆 durable
+> receipt；owner 仍為 `operations_core/4`。同日另補上
+> `VOLPRED_NO_REMOTE_WRITE`／pytest mutation fail-closed boundary，full-suite 後
+> test-shaped failover WorkItem 新增數為 0。這不表示其他 effect family 或 Work
+> Coordinator queue owner 已自動切換。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：
 > 1. **LaunchAgent**（macOS 原生，最可靠）— hourly-dispatch / compute-worker / check-alerts / daily-update / gmail-poll / collect / release / work-summary / handoff-regen 等 12 個
-> 2. **piggy-back universal scheduler** — `check_alerts (0 * * * *)` → `scripts/run_due_jobs.py` 讀 `runtime_schedules.json` 評估 due 並執行（macOS host cron 只可靠 fire `0` 分 pattern，故非 0 分 job 走此路）。`piggy_back_skip:true` / `host_crontab_managed:false` 的 job 由 LaunchAgent 專責、piggy-back 跳過（防雙 fire）
+> 2. **piggy-back universal scheduler** — `check_alerts (0 * * * *)` → `scripts/run_due_jobs.py` 讀 `runtime_schedules.json` 評估 due 並執行（macOS host cron 只可靠 fire `0` 分 pattern，故非 0 分 job 走此路）。`piggy_back_skip:true` 明確禁止 piggy-back；`host_crontab_managed:false` 只禁止 host crontab leg，若同時有 `piggy_back_enabled:true` 仍由 piggy-back 執行（例如 `work_shadow_observe`、`git_push_backup`）。LaunchAgent 專責 job 必須以 skip／未 opt-in 防雙 fire。
 > 3. **codex_loop.sh daemon**（VSCode terminal，常駐）— Codex 每小時 tick，讀 `AGENTS.md`（Codex 版指令檔，**勿歸檔**）claim task
 > 4. **task pool** — `next_tasks.json`（pending queue，目前實際多靠 hourly-dispatch 自生）+ `storage/ops/tasks/`（audit receipts）
 > 5. **dispatch_supervisor 重構（進行中，D4/8）** — 目標 long-lived asyncio supervisor 收斂上述為「1 樞紐 + 3 消費端」（見 `docs/refactor_plan_hourly_dispatch.md`）

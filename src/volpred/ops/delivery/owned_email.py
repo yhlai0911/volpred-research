@@ -34,6 +34,15 @@ _OWNER_FAMILY = "email.ops_alert"
 _PRIMARY_AUTHORITY_KEY = "notification:email.ops_alert"
 _OPERATIONS_CORE_OWNER = "operations_core"
 _LEGACY_OWNER = "legacy"
+_READ_ONLY_RPCS = frozenset({"volpred_read_notification_owner"})
+
+
+def _remote_mutations_disabled() -> bool:
+    return (
+        os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
+        or "PYTEST_CURRENT_TEST" in os.environ
+        or "PYTEST_VERSION" in os.environ
+    )
 
 
 class NotificationOwnershipLost(RuntimeError):
@@ -644,6 +653,13 @@ class SupabaseOwnedEmailStore:
         )
 
     def _rpc(self, function: str, payload: Mapping[str, object]) -> Mapping[str, Any]:
+        if (
+            function not in _READ_ONLY_RPCS
+            and _remote_mutations_disabled()
+        ):
+            raise RuntimeError(
+                "notification ownership remote writes are disabled"
+            )
         encoded = json.dumps(
             payload,
             ensure_ascii=False,

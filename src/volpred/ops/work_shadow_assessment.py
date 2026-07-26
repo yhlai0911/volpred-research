@@ -16,7 +16,11 @@ from typing import Any
 
 from .work_shadow_replay import is_registered_policy_change
 
-_REQUIRED_SCHEMA = "work-shadow-replay.v3"
+_LEGACY_RECEIPT_SCHEMA = "work-shadow-replay.v3"
+_OWNER_BOUND_RECEIPT_SCHEMA = "work-shadow-replay.v4"
+_SUPPORTED_SCHEMAS = frozenset(
+    {_LEGACY_RECEIPT_SCHEMA, _OWNER_BOUND_RECEIPT_SCHEMA}
+)
 REQUIRED_OBSERVATION_WINDOW = timedelta(days=7)
 MAX_OBSERVATION_GAP = timedelta(hours=26)
 MAX_REPLAY_CLOCK_SKEW = timedelta(minutes=5)
@@ -140,23 +144,31 @@ def assess_shadow_observation_directory(
         max_gap=max_gap,
     )
     receipt_paths = tuple(sorted(directory.glob("*.json")))
-    receipts: list[dict[str, Any]] = []
+    all_receipts: list[dict[str, Any]] = []
     try:
         for path in receipt_paths:
             receipt = json.loads(path.read_text(encoding="utf-8"))
             if (
                 not isinstance(receipt, dict)
-                or receipt.get("schema_version") != _REQUIRED_SCHEMA
+                or receipt.get("schema_version") not in _SUPPORTED_SCHEMAS
                 or not _receipt_shape_is_valid(receipt)
             ):
                 raise ValueError("unsupported shadow receipt")
-            receipts.append(receipt)
+            all_receipts.append(receipt)
     except (OSError, ValueError, json.JSONDecodeError, TypeError):
         return _failed_assessment(
             context,
             reason_code="invalid_receipt",
             observation_count=len(receipt_paths),
         )
+    receipts = [
+        receipt
+        for receipt in all_receipts
+        if (
+            receipt.get("schema_version") == _OWNER_BOUND_RECEIPT_SCHEMA
+            and _owner_evidence_matches_context(receipt, context)
+        )
+    ]
     snapshot_identity_mismatch = any(
         receipt["legacy_selection"]["snapshot_sha256"]
         != receipt["snapshot"]["sha256"]
@@ -396,6 +408,13 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
         return False
     if receipt.get("selection_scope") != "next_tasks":
         return False
+    if (
+        receipt.get("schema_version") == _OWNER_BOUND_RECEIPT_SCHEMA
+        and not _owner_evidence_shape_is_valid(
+            receipt.get("queue_owner_evidence")
+        )
+    ):
+        return False
     snapshot = receipt.get("snapshot")
     if not isinstance(snapshot, dict):
         return False
@@ -481,6 +500,51 @@ def _receipt_shape_is_valid(receipt: dict[str, Any]) -> bool:
     return selection_difference is None or isinstance(
         selection_difference,
         dict,
+    )
+
+
+def _owner_evidence_shape_is_valid(evidence: Any) -> bool:
+    if not isinstance(evidence, dict):
+        return False
+    state_sha256 = evidence.get("state_sha256")
+    state_byte_count = evidence.get("state_byte_count")
+    return (
+        evidence.get("schema_version")
+        == "task-pool-owner-evidence.v1"
+        and isinstance(evidence.get("mode"), str)
+        and bool(evidence["mode"])
+        and isinstance(evidence.get("gate_enabled"), bool)
+        and isinstance(evidence.get("state_path"), str)
+        and bool(evidence["state_path"])
+        and isinstance(state_sha256, str)
+        and len(state_sha256) == 64
+        and all(character in "0123456789abcdef" for character in state_sha256)
+        and isinstance(state_byte_count, int)
+        and not isinstance(state_byte_count, bool)
+        and state_byte_count >= 0
+    )
+
+
+def _owner_evidence_matches_context(
+    receipt: dict[str, Any],
+    context: _AssessmentContext,
+) -> bool:
+    evidence = receipt["queue_owner_evidence"]
+    if evidence["mode"] != context.queue_owner_mode:
+        return False
+    if (
+        context.queue_owner_gate_enabled is not None
+        and evidence["gate_enabled"] != context.queue_owner_gate_enabled
+    ):
+        return False
+    if (
+        context.queue_owner_state_path is not None
+        and evidence["state_path"] != context.queue_owner_state_path
+    ):
+        return False
+    return (
+        context.queue_owner_state_sha256 is None
+        or evidence["state_sha256"] == context.queue_owner_state_sha256
     )
 
 

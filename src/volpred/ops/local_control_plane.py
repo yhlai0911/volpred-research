@@ -34,6 +34,7 @@ TASK_STATUSES = {
     "cancelled",
 }
 TERMINAL_TASK_STATUSES = {"succeeded", "failed", "cancelled"}
+NONTERMINAL_TASK_STATUSES = TASK_STATUSES - TERMINAL_TASK_STATUSES
 ACTIVE_EXPERIMENT_STATUSES = {"claimed", "running", "awaiting_approval", "blocked"}
 AGENT_STATUSES = {"online", "idle", "busy", "offline"}
 AGENT_NAMES = {"claude", "codex"}

@@ -484,6 +484,7 @@ def append_shadow_observation(
     ledger: ShadowReplayLedger,
     *,
     directory: Path,
+    queue_owner_evidence: Mapping[str, Any] | None = None,
 ) -> Path:
     """Atomically append one immutable observation receipt.
 
@@ -496,9 +497,15 @@ def append_shadow_observation(
         )
     receipt = {
         **ledger.as_dict(),
-        "schema_version": "work-shadow-replay.v3",
+        "schema_version": (
+            "work-shadow-replay.v4"
+            if queue_owner_evidence is not None
+            else "work-shadow-replay.v3"
+        ),
         "recorded_at": datetime.now(timezone.utc).isoformat(),
     }
+    if queue_owner_evidence is not None:
+        receipt["queue_owner_evidence"] = dict(queue_owner_evidence)
     payload = (
         json.dumps(
             receipt,
