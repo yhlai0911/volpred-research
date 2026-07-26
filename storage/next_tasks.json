@@ -43840,7 +43840,7 @@
     "id": "issue43_live_canary_v2_20260727",
     "title": "[Issue #43 live canary] Verify enforced mutating isolation",
     "description": "Production acceptance canary. Create docs/ops/issue43_live_canary.md containing the assigned task id and a concise note that supervisor receipt identifiers will be appended by the owner after machine integration. Modify no other repo path. Do not run git add/commit/merge; machine finalizer owns integration.",
-    "status": "pending",
+    "status": "succeeded",
     "priority": 1,
     "task_type": "platform_ops",
     "source": "user",
@@ -43892,10 +43892,75 @@
         "to": "pending",
         "by": "hourly-slot-1-8a8912b5ce354eb3be4eb47b7d8634e4",
         "note": "supervisor_settle_empty"
+      },
+      {
+        "ts": "2026-07-26T21:56:25.073422+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-80f1563b6a1f4dd89d5e100e2e0f4005",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-26T21:56:25.073426+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-80f1563b6a1f4dd89d5e100e2e0f4005",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-26T21:58:38.966510+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-80f1563b6a1f4dd89d5e100e2e0f4005",
+        "note": "supervisor_post_merge_settlement"
       }
     ],
-    "dispatch_settled_session_id": "dispatch-8a8912b5-f85bb988",
+    "dispatch_settled_session_id": "dispatch-80f1563b-c0becdcf",
     "last_released_at": "2026-07-26T21:52:55.866982+00:00",
-    "last_release_reason": "workspace_empty"
+    "last_release_reason": "workspace_empty",
+    "started_at": "2026-07-26T21:56:25.073411+00:00",
+    "completed_at": "2026-07-26T21:58:38.966494+00:00",
+    "result": "worker=success; workspace=merged; main_sha=296aabac03c73f484c8e6c8dfed9e4e46d707824"
+  },
+  {
+    "id": "assign_9da1028c",
+    "title": "PHASE-Z 卡住檔案 incident（0483fd073bd3e6a1）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/1_method.png — 3 班\n- storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/2_scorecard.png — 3 班\n- storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/3_takeaway.png — 3 班\n- storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/render_lazypack.py — 3 班\n- storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/1_method.png — 3 班\n- storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/2_scorecard.png — 3 班\n- storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/3_takeaway.png — 3 班\n- storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/render_lazypack.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T215839697495Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-26T21:58:39.784279+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "0483fd073bd3e6a1",
+      "paths": [
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/1_method.png",
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/2_scorecard.png",
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/3_takeaway.png",
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/render_lazypack.py",
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/1_method.png",
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/2_scorecard.png",
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/3_takeaway.png",
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/render_lazypack.py"
+      ],
+      "streaks": {
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/1_method.png": 3,
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/2_scorecard.png": 3,
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/3_takeaway.png": 3,
+        "storage/lazypack_jobs/mile_a8006dd2/runs/lazypack-mile_a8006dd2/panels/render_lazypack.py": 3,
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/1_method.png": 3,
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/2_scorecard.png": 3,
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/3_takeaway.png": 3,
+        "storage/lazypack_jobs/mile_ea920f7f/runs/lazypack-mile_ea920f7f/panels/render_lazypack.py": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260726T215839697495Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-26T21:58:39.773522+00:00",
+      "last_seen_at": "2026-07-26T21:58:39.773522+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
