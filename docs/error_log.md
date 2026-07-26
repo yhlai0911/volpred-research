@@ -2995,7 +2995,13 @@ production rows 不手改、不刪除，保留作 incident audit evidence。
 dedupe key，且 production WorkItem 全為 `succeeded`、version 4、各有一筆 durable
 Work receipt；它們是新版 owned-email runtime 的真實健康流量，不是測試洩漏。
 
-**狀態**：remote-write guard 根因為 **`root_cause_fixed_and_verified`**。原三筆
-test-shaped running rows不手改、不刪除，保留 audit evidence；Issue #9 的 Work
-Coordinator queue owner 仍是 `legacy/1`、gate／gate receipt 都是 0，所以 Issue #9
-整體仍為 **`contained`**。
+**Failover 最終重驗與狀態**：在包含 pytest guard-removal regression 與 read-only
+owner RPC regression 的 immutable HEAD 上，再以外部模型金鑰 unset、
+`VOLPRED_CI_PARITY=0` 跑完整 repository suite，結果為
+**5,182 passed、1 skipped、0 failed**。Production 在 suite 前
+`2026-07-26T07:15:03.344446Z` 的同一 `source/kind` 基準為 6 筆、最新
+`created_at=07:01:49.8944Z`；12 分鐘後 `07:27:46.537877Z` 回讀仍精確為 6 筆、
+相同最新時間，基準後新增列為 **0**。因此 remote-write guard 根因為
+**`root_cause_fixed_and_verified`**。原三筆 test-shaped running rows不手改、不刪除，
+保留 audit evidence；Issue #9 的 Work Coordinator queue owner 仍是 `legacy/1`、
+gate／gate receipt 都是 0，所以 Issue #9 整體仍為 **`contained`**。
