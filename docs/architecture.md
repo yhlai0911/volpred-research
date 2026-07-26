@@ -74,9 +74,10 @@
 > import 完全一致時才產生 immutable、hash-addressed cutover manifest。Projection
 > schema 必須精確等於 production `next-tasks-read-projection.v1`；未知 schema
 > 即使 payload bytes 相同也 fail closed。Row count／SHA 由 decoded payload 重算，
-> 不信任 caller metadata。Manifest v2
+> 不信任 caller metadata。Manifest v3
 > 同時綁定 raw legacy snapshot SHA、assessment SHA、import report SHA、projection
-> schema／SHA 與兩側 row count；assessment 的 receipt-set digest 與最後 snapshot identity
+> schema／SHA、兩側 row count，以及同一 trusted clock 產生的 `prepared_at` /
+> `valid_until` 15 分鐘有效窗；assessment 的 receipt-set digest 與最後 snapshot identity
 > 必須等於本次完整三來源 cutover snapshot。即使兩側 active claim 欄位完全一致，
 > `claimed`／`running` legacy row 仍不能產生 manifest：legacy worker 持有的 lease
 > token 不在 compatibility projection 中，ownership transaction 無法無損移交該寫入權，
@@ -93,18 +94,27 @@
 > 保留 work id、增加 version 並寫 `released` event；仍有效或缺 expiry 的 active lease
 > 會讓整筆 transfer rollback。
 >
-> 這個 schema 尚未把 preflight manifest 持久化成可消耗的 gate row，因此 private
-> transfer function **刻意不授權** worker、approver 或 PUBLIC；runtime 只能 read
-> owner，不能拿任意 64-hex hash 接管。Migration-owner rehearsal 執行 CAS 時，legacy
+> 後續 migration 已新增 private `work_cutover_gates` 與 append-only gate receipts。
+> Stage transaction 重新計算 canonical payload SHA-256，逐欄驗證 manifest v3、
+> projection schema、row-count parity、15 分鐘 freshness，並以 shared owner lock 綁定
+> 當下 `legacy` generation；等價 replay 回同一 gate，不同 actor／generation／bytes
+> fail closed。Transfer 只接受未過期 `ready` gate，並在 owner CAS 同一 transaction
+> 標成 `consumed`；rollback 只能消耗該 gate 實際記錄的 cutover generation，完成後標成
+> `rolled_back`。任意未 staged 的 64-hex hash已不能切換 owner。
+>
+> Stage、gate read 與 transfer function 仍**刻意不授權** worker、approver 或 PUBLIC；
+> runtime 只能 read owner，不能自行準備或消耗 gate。Migration-owner rehearsal 執行
+> CAS 時，legacy
 > runtime mutation grants 會在取得 owner lock 前撤銷，rollback 時同交易恢復；
 > legacy wrapper 仍在 shared owner lock 下明確 assert `legacy`，所以已通過舊 ACL
 > 但排隊中的 invocation 也不能越過 cutover。既有 notification／publisher／commit
 > 等 formal workflow 則明確 rebind 到 runtime 無 execute 權限的 definer-only
 > internal seam，不會在 work owner 切換後斷鏈。PG17 non-superuser clean replay、
-> generation lifecycle、in-flight legacy race、expired-lease rollback
+> manifest freshness／unknown-hash rejection、generation lifecycle、in-flight legacy race、expired-lease rollback
 > 與 owned-email nested workflow 已通過本地 integration；migration 未套 production，
-> live owner 與 direct-execution containment 均未改變。下一步仍是 durable manifest
-> gate row + 七日真實 receipts + live read-back／rollback rehearsal；Issue #9 維持
+> live owner 與 direct-execution containment 均未改變。下一步仍是七日真實 receipts、
+> production migration read-back，以及在核可窗口執行 staged cutover／rollback
+> rehearsal；Issue #9 維持
 > `contained`。
 
 > **Change Delivery commit-authority contract（2026-07-24，shadow）**

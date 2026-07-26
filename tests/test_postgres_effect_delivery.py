@@ -6,7 +6,7 @@ import subprocess
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from pathlib import Path
 
@@ -86,6 +86,7 @@ from volpred.ops.work import (
 )
 from volpred.ops.work.postgres import PostgresCoordinationStore
 from volpred.ops.work.postgres_ownership import PostgresWorkOwnerStore
+from volpred.ops.work_cutover import WorkOwnershipCutoverManifest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TELEGRAM_EFFECT_KINDS = frozenset({"telegram.message.send"})
@@ -202,6 +203,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726034720_operations_core_work_ownership.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726050256_operations_core_work_cutover_gate.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -222,6 +227,29 @@ def _postgres_bin_dir() -> Path | None:
         subprocess.check_output((pg_config, "--bindir"), text=True).strip()
     )
     return bin_dir if (bin_dir / "postgres").exists() else None
+
+
+def _work_cutover_manifest(seed: str) -> WorkOwnershipCutoverManifest:
+    prepared_at = datetime.now(timezone.utc)
+    evidence_sha256 = hashlib.sha256(seed.encode("utf-8")).hexdigest()
+    manifest = WorkOwnershipCutoverManifest(
+        schema_version="work-owner-cutover-manifest.v3",
+        legacy_row_count=1,
+        coordinator_row_count=1,
+        queue_owner_state_sha256=evidence_sha256,
+        legacy_snapshot_sha256=evidence_sha256,
+        assessment_sha256=evidence_sha256,
+        import_report_sha256=evidence_sha256,
+        projection_schema_version="next-tasks-read-projection.v1",
+        projection_sha256=evidence_sha256,
+        prepared_at=prepared_at.isoformat(),
+        valid_until=(prepared_at + timedelta(minutes=15)).isoformat(),
+        sha256="",
+    )
+    return replace(
+        manifest,
+        sha256=hashlib.sha256(manifest.canonical_bytes()).hexdigest(),
+    )
 
 
 def _validate_external_test_dsn(dsn: str) -> None:
@@ -1416,6 +1444,8 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.work_cutover_gate_receipts,
+              volpred_ops.work_cutover_gates,
               volpred_ops.work_owner_receipts,
               volpred_ops.work_owners,
               volpred_ops.owned_notification_attempts,
@@ -4195,15 +4225,23 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
     work_token = "work-owned-email-token"
     outbox_token = "outbox-owned-email-token"
     primary_token = "primary-owned-email-token"
-    work_owner = PostgresWorkOwnerStore(
+    work_owner_store = PostgresWorkOwnerStore(
         lambda: psycopg.connect(postgres_effect_dsn)
-    ).transfer_owner(
+    )
+    work_manifest = _work_cutover_manifest("owned email transaction")
+    work_owner_store.stage_cutover_manifest(
+        manifest=work_manifest,
+        expected_owner="legacy",
+        expected_generation=1,
+        actor_ref="test:pg17",
+    )
+    work_owner = work_owner_store.transfer_owner(
         expected_owner="legacy",
         expected_generation=1,
         target_owner="operations_core",
         actor_ref="test:pg17",
         reason="exercise owned workflow after Work Coordinator cutover",
-        cutover_manifest_sha256="7" * 64,
+        cutover_manifest_sha256=work_manifest.sha256,
     )
     assert (work_owner.owner, work_owner.generation) == (
         "operations_core",

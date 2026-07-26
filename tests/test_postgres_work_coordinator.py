@@ -1,7 +1,10 @@
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+import hashlib
 from ipaddress import ip_address
+import json
 import os
 from pathlib import Path
 import shutil
@@ -29,6 +32,7 @@ from volpred.ops.work import (
 from volpred.ops.work.postgres import PostgresCoordinationStore
 from volpred.ops.work.ownership import WorkOwnershipLost
 from volpred.ops.work.postgres_ownership import PostgresWorkOwnerStore
+from volpred.ops.work_cutover import WorkOwnershipCutoverManifest
 
 
 FIXED_NOW = datetime(2026, 7, 23, 6, 30, tzinfo=timezone.utc)
@@ -43,6 +47,61 @@ OWNERSHIP_MIGRATION = next(
         "*_operations_core_work_ownership.sql"
     )
 )
+CUTOVER_GATE_MIGRATION = next(
+    (REPO_ROOT / "supabase" / "migrations").glob(
+        "*_operations_core_work_cutover_gate.sql"
+    )
+)
+
+
+def _cutover_manifest(seed: str) -> WorkOwnershipCutoverManifest:
+    prepared_at = datetime.now(timezone.utc)
+    evidence_sha256 = hashlib.sha256(seed.encode("utf-8")).hexdigest()
+    manifest = WorkOwnershipCutoverManifest(
+        schema_version="work-owner-cutover-manifest.v3",
+        legacy_row_count=1,
+        coordinator_row_count=1,
+        queue_owner_state_sha256=evidence_sha256,
+        legacy_snapshot_sha256=evidence_sha256,
+        assessment_sha256=evidence_sha256,
+        import_report_sha256=evidence_sha256,
+        projection_schema_version="next-tasks-read-projection.v1",
+        projection_sha256=evidence_sha256,
+        prepared_at=prepared_at.isoformat(),
+        valid_until=(prepared_at + timedelta(minutes=15)).isoformat(),
+        sha256="",
+    )
+    return replace(
+        manifest,
+        sha256=hashlib.sha256(manifest.canonical_bytes()).hexdigest(),
+    )
+
+
+def _rehash_manifest(
+    manifest: WorkOwnershipCutoverManifest,
+) -> WorkOwnershipCutoverManifest:
+    return replace(
+        manifest,
+        sha256=hashlib.sha256(manifest.canonical_bytes()).hexdigest(),
+    )
+
+
+def _stage_cutover(
+    owner_store: PostgresWorkOwnerStore,
+    seed: str,
+    *,
+    actor_ref: str = "operator:pytest",
+) -> WorkOwnershipCutoverManifest:
+    manifest = _cutover_manifest(seed)
+    gate = owner_store.stage_cutover_manifest(
+        manifest=manifest,
+        expected_owner="legacy",
+        expected_generation=1,
+        actor_ref=actor_ref,
+    )
+    assert gate.status == "ready"
+    assert gate.manifest_sha256 == manifest.sha256
+    return manifest
 
 
 def _postgres_bin_dir() -> Path | None:
@@ -99,6 +158,9 @@ def postgres_dsn(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
             connection.execute(
                 OWNERSHIP_MIGRATION.read_text(encoding="utf-8")
             )
+            connection.execute(
+                CUTOVER_GATE_MIGRATION.read_text(encoding="utf-8")
+            )
         yield external_dsn
         return
     bin_dir = _postgres_bin_dir()
@@ -150,6 +212,9 @@ def postgres_dsn(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
             connection.execute(
                 OWNERSHIP_MIGRATION.read_text(encoding="utf-8")
             )
+            connection.execute(
+                CUTOVER_GATE_MIGRATION.read_text(encoding="utf-8")
+            )
         yield dsn
     finally:
         subprocess.run(
@@ -174,6 +239,8 @@ def reset_postgres_contract_state(postgres_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.work_cutover_gate_receipts,
+              volpred_ops.work_cutover_gates,
               volpred_ops.work_owner_receipts,
               volpred_ops.work_receipts,
               volpred_ops.work_checkpoints,
@@ -320,6 +387,7 @@ def test_work_owner_cutover_fences_legacy_mutations_atomically(
 ) -> None:
     connection_factory = lambda: psycopg.connect(postgres_dsn)
     owner_store = PostgresWorkOwnerStore(connection_factory)
+    manifest = _stage_cutover(owner_store, "atomic fence")
 
     initial = owner_store.read_owner()
     cutover = owner_store.transfer_owner(
@@ -328,7 +396,7 @@ def test_work_owner_cutover_fences_legacy_mutations_atomically(
         target_owner="operations_core",
         actor_ref="operator:pytest",
         reason="exercise owner fencing",
-        cutover_manifest_sha256="a" * 64,
+        cutover_manifest_sha256=manifest.sha256,
     )
 
     assert (initial.owner, initial.generation) == ("legacy", 1)
@@ -336,7 +404,7 @@ def test_work_owner_cutover_fences_legacy_mutations_atomically(
         cutover.owner,
         cutover.generation,
         cutover.cutover_manifest_sha256,
-    ) == ("operations_core", 2, "a" * 64)
+    ) == ("operations_core", 2, manifest.sha256)
 
     request = WorkRequest(
         idempotency_key="owner:postgres:cutover-fence",
@@ -376,6 +444,89 @@ def test_work_owner_cutover_fences_legacy_mutations_atomically(
 
     assert submitted.id == "work-owned-generation-2"
     assert owner_store.read_owner() == cutover
+    consumed_gate = owner_store.read_cutover_gate(manifest.sha256)
+    assert (
+        consumed_gate.status,
+        consumed_gate.consumed_generation,
+        consumed_gate.rolled_back_at,
+    ) == ("consumed", cutover.generation, None)
+
+
+def test_work_cutover_gate_rejects_unstaged_and_stale_manifests(
+    postgres_dsn: str,
+) -> None:
+    owner_store = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_dsn)
+    )
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="cutover gate is not staged",
+    ):
+        owner_store.transfer_owner(
+            expected_owner="legacy",
+            expected_generation=1,
+            target_owner="operations_core",
+            actor_ref="operator:pytest",
+            reason="an arbitrary digest is not evidence",
+            cutover_manifest_sha256="f" * 64,
+        )
+
+    stale = _cutover_manifest("stale evidence")
+    stale_prepared = datetime.now(timezone.utc) - timedelta(minutes=16)
+    stale = _rehash_manifest(
+        replace(
+            stale,
+            prepared_at=stale_prepared.isoformat(),
+            valid_until=(
+                stale_prepared + timedelta(minutes=15)
+            ).isoformat(),
+        )
+    )
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="stale or future-dated",
+    ):
+        owner_store.stage_cutover_manifest(
+            manifest=stale,
+            expected_owner="legacy",
+            expected_generation=1,
+            actor_ref="operator:pytest",
+        )
+
+    malformed_identity: dict[str, object] = dict(
+        _cutover_manifest("null evidence digest").identity_dict()
+    )
+    malformed_identity["projection_sha256"] = None
+    malformed_payload = json.dumps(
+        malformed_identity,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    malformed_sha256 = hashlib.sha256(malformed_payload).hexdigest()
+    with psycopg.connect(postgres_dsn) as connection:
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="manifest contract is invalid",
+        ):
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.stage_work_cutover_manifest(
+                  %s, %s, 'legacy', 1, 'operator:pytest'
+                )
+                """,
+                (malformed_sha256, malformed_payload),
+            ).fetchall()
+
+    assert (
+        owner_store.read_owner().owner,
+        owner_store.read_owner().generation,
+    ) == ("legacy", 1)
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_cutover_gates"
+        ).fetchone()[0] == 0
 
 
 def test_inflight_legacy_wrapper_rechecks_owner_after_transfer_wins_lock(
@@ -385,6 +536,10 @@ def test_inflight_legacy_wrapper_rechecks_owner_after_transfer_wins_lock(
     submit_started = Event()
     transfer_pid: list[int] = []
     submit_pid: list[int] = []
+    manifest = _stage_cutover(
+        PostgresWorkOwnerStore(lambda: psycopg.connect(postgres_dsn)),
+        "inflight legacy race",
+    )
 
     def transfer() -> None:
         with psycopg.connect(postgres_dsn) as connection:
@@ -398,7 +553,7 @@ def test_inflight_legacy_wrapper_rechecks_owner_after_transfer_wins_lock(
                   'transfer wins owner lock race', %s, NULL
                 )
                 """,
-                ("6" * 64,),
+                (manifest.sha256,),
             ).fetchone()
 
     def submit() -> Exception | None:
@@ -477,7 +632,10 @@ def test_operations_core_generation_owns_full_lifecycle_and_rollback(
 ) -> None:
     connection_factory = lambda: psycopg.connect(postgres_dsn)
     owner_store = PostgresWorkOwnerStore(connection_factory)
-    manifest_sha256 = "b" * 64
+    manifest_sha256 = _stage_cutover(
+        owner_store,
+        "full lifecycle",
+    ).sha256
     cutover = owner_store.transfer_owner(
         expected_owner="legacy",
         expected_generation=1,
@@ -578,6 +736,12 @@ def test_operations_core_generation_owns_full_lifecycle_and_rollback(
         rollback_of_generation=cutover.generation,
     )
     assert (rollback.owner, rollback.generation) == ("legacy", 3)
+    rolled_back_gate = owner_store.read_cutover_gate(manifest_sha256)
+    assert (
+        rolled_back_gate.status,
+        rolled_back_gate.consumed_generation,
+        rolled_back_gate.rolled_back_at is not None,
+    ) == ("rolled_back", cutover.generation, True)
 
     with pytest.raises(
         WorkOwnershipLost,
@@ -658,6 +822,7 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
         )
     ) is not None
     owner_store = PostgresWorkOwnerStore(connection_factory)
+    manifest = _stage_cutover(owner_store, "active lease rejection")
 
     with pytest.raises(
         WorkOwnershipLost,
@@ -669,7 +834,7 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
             target_owner="operations_core",
             actor_ref="operator:pytest",
             reason="must not strand active lease",
-            cutover_manifest_sha256="d" * 64,
+            cutover_manifest_sha256=manifest.sha256,
         )
 
     assert (owner_store.read_owner().owner, owner_store.read_owner().generation) == (
@@ -703,7 +868,10 @@ def test_work_owner_rollback_reconciles_expired_lease_without_losing_identity(
 ) -> None:
     connection_factory = lambda: psycopg.connect(postgres_dsn)
     owner_store = PostgresWorkOwnerStore(connection_factory)
-    manifest_sha256 = "8" * 64
+    manifest_sha256 = _stage_cutover(
+        owner_store,
+        f"expired lease rollback {start_before_expiry}",
+    ).sha256
     cutover = owner_store.transfer_owner(
         expected_owner="legacy",
         expected_generation=1,
@@ -813,13 +981,31 @@ def test_work_owner_transfer_replay_is_exact_and_idempotent(
     owner_store = PostgresWorkOwnerStore(
         lambda: psycopg.connect(postgres_dsn)
     )
+    manifest = _stage_cutover(owner_store, "exact replay")
+    staged_replay = owner_store.stage_cutover_manifest(
+        manifest=manifest,
+        expected_owner="legacy",
+        expected_generation=1,
+        actor_ref="operator:pytest",
+    )
+    assert staged_replay.status == "ready"
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="manifest replay conflicts",
+    ):
+        owner_store.stage_cutover_manifest(
+            manifest=manifest,
+            expected_owner="legacy",
+            expected_generation=1,
+            actor_ref="operator:different",
+        )
     command = {
         "expected_owner": "legacy",
         "expected_generation": 1,
         "target_owner": "operations_core",
         "actor_ref": "operator:pytest",
         "reason": "lost response replay",
-        "cutover_manifest_sha256": "e" * 64,
+        "cutover_manifest_sha256": manifest.sha256,
     }
 
     first = owner_store.transfer_owner(**command)
@@ -833,6 +1019,14 @@ def test_work_owner_transfer_replay_is_exact_and_idempotent(
         owner_store.transfer_owner(
             **{**command, "reason": "different command"}
         )
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            """
+            SELECT event
+            FROM volpred_ops.work_cutover_gate_receipts
+            ORDER BY sequence
+            """
+        ).fetchall() == [("staged",), ("consumed",)]
 
 
 def test_work_owner_security_exposes_only_fenced_public_functions(
@@ -854,6 +1048,18 @@ def test_work_owner_security_exposes_only_fenced_public_functions(
                 'volpred_ops_worker',
                 'volpred_ops.transfer_work_owner('
                 'text,bigint,text,text,text,text,bigint)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.transfer_work_owner_ungated('
+                'text,bigint,text,text,text,text,bigint)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.stage_work_cutover_manifest('
+                'text,bytea,text,bigint,text)',
                 'EXECUTE'
               ),
               has_function_privilege(
@@ -885,6 +1091,12 @@ def test_work_owner_security_exposes_only_fenced_public_functions(
               ),
               has_function_privilege(
                 'volpred_ops_approver',
+                'volpred_ops.stage_work_cutover_manifest('
+                'text,bytea,text,bigint,text)',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_approver',
                 'volpred_ops.approve_work('
                 'text,integer,text,text,bigint)',
                 'EXECUTE'
@@ -903,13 +1115,30 @@ def test_work_owner_security_exposes_only_fenced_public_functions(
                 'volpred_ops_worker',
                 'volpred_ops.work_owner_receipts',
                 'SELECT,INSERT,UPDATE,DELETE'
+              ),
+              has_table_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.work_cutover_gates',
+                'SELECT,INSERT,UPDATE,DELETE'
+              ),
+              has_table_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.work_cutover_gate_receipts',
+                'SELECT,INSERT,UPDATE,DELETE'
               )
             """
         ).fetchone()
 
-    assert worker_privileges == (False, False, True, False)
-    assert approver_privileges == (False, True)
-    assert worker_table_access == (False, False)
+    assert worker_privileges == (
+        False,
+        False,
+        False,
+        False,
+        True,
+        False,
+    )
+    assert approver_privileges == (False, False, True)
+    assert worker_table_access == (False, False, False, False)
 
     with _approver_connection(postgres_dsn) as connection:
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
@@ -2363,6 +2592,8 @@ def test_postgres_migration_enables_rls_and_denies_untrusted_schema_access(
 
     assert rows == [
         ("work_checkpoints", True),
+        ("work_cutover_gate_receipts", True),
+        ("work_cutover_gates", True),
         ("work_events", True),
         ("work_items", True),
         ("work_owner_receipts", True),
@@ -2500,11 +2731,14 @@ def test_postgres_catalog_contains_canonical_audit_fields_and_fk_indexes(
     assert function_owners == [("volpred_ops_definer",)]
     assert {row[0] for row in function_return_types} == {
         "void",
+        "volpred_ops.work_cutover_gate_reads",
         "volpred_ops.work_item_reads",
         "volpred_ops.work_owner_reads",
     }
     assert definer_write_privileges == [
         ("work_checkpoints", True, False, False),
+        ("work_cutover_gate_receipts", True, False, False),
+        ("work_cutover_gates", True, True, False),
         ("work_events", True, False, False),
         ("work_items", True, True, False),
         ("work_owner_receipts", True, False, False),
@@ -2559,6 +2793,9 @@ def test_postgres_migration_can_be_rolled_back_and_reapplied(
         connection.execute(
             OWNERSHIP_MIGRATION.read_text(encoding="utf-8")
         )
+        connection.execute(
+            CUTOVER_GATE_MIGRATION.read_text(encoding="utf-8")
+        )
 
         table_count = connection.execute(
             """
@@ -2570,7 +2807,7 @@ def test_postgres_migration_can_be_rolled_back_and_reapplied(
             """
         ).fetchone()[0]
 
-    assert table_count == 6
+    assert table_count == 8
 
 
 def test_postgres_schema_is_private_rls_enabled_and_transactionally_removable(

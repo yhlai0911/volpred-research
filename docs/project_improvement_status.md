@@ -85,8 +85,10 @@ schema 不可只靠相同 payload bytes 冒充相容；row count／SHA 則從 pa
 Legacy import 與 staged Coordinator projection
 逐 identity 比對 row count、priority、claim ownership／started timestamp、parent、
 deadline、policy、row created／updated timestamp 與 terminal disposition。通過後的
-immutable manifest v2 綁定
+immutable manifest v3 綁定
 raw legacy snapshot、assessment、import report、projection schema／SHA 與 owner state SHA-256。
+它另由同一次 trusted clock 固定 `prepared_at` 與 15 分鐘 `valid_until`，讓後續 durable
+gate 能拒絕過期 evidence capsule。
 Assessment 另帶 receipt-set digest 與最後 snapshot identity，必須與本次完整 cutover
 snapshot 一致；Coordinator 無法表示的 dispatch policy 會 fail closed。
 上游 shadow replay producer 同步改為入口單次 freeze；ledger hash、兩側 selector 與
@@ -104,11 +106,15 @@ claimed／running lease 會依 DB clock 在同一 transaction 回 pending、保�
 並追加 release event；有效 lease 仍阻擋 transfer。Legacy runtime grants 與 owner
 切換同交易撤銷／恢復；legacy wrapper 仍 assert `legacy`，已進入但排隊中的 caller
 也不能越過 owner CAS。既有 notification／publisher／commit formal workflow
-明確 rebind 到 runtime 不可執行的 definer-only internal seam。由於 durable preflight gate row
-尚未存在，private transfer 刻意不授權 worker、approver 或 PUBLIC，避免任意 SHA
-繞過七日 gate；目前僅有 local PG17／non-superuser migration replay 與 nested workflow
+明確 rebind 到 runtime 不可執行的 definer-only internal seam。後續 local migration
+已新增 durable `work_cutover_gates` 與 append-only gate receipts：stage 會重算 canonical
+manifest bytes 的 SHA-256、驗證 v3 exact contract／row parity／15 分鐘 freshness，
+並鎖定當下 legacy generation；owner transfer 只能在同一 transaction consume 該 gate，
+rollback 只能使用 gate 記錄的 consumed generation。Stage、read、transfer 仍不授權
+worker、approver 或 PUBLIC，避免任意 SHA 或 runtime caller 繞過七日 gate。
+目前僅有 local PG17／non-superuser migration replay 與 nested workflow
 integration evidence，未部署 production、未改 live owner、未做七日 read-back／rollback
-rehearsal。因此這是 transaction-fencing checkpoint，不是 cutover；Issue #9 仍為
+rehearsal。因此這是 evidence-bound transaction-gate checkpoint，不是 cutover；Issue #9 仍為
 `contained`。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority

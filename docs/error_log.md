@@ -2857,3 +2857,32 @@ checkpoint 仍未把七日 preflight manifest持久化成可消耗 gate row，�
 transfer operator刻意不可用；migration未部署production、沒有live unique-owner
 read-back或rollback rehearsal。Issue #9 整體維持 **`contained`**，不得把 local
 CAS schema稱為完成 cutover。
+
+### 2026-07-26 — Work owner transfer 只綁 hash、沒有 durable evidence freshness／一次性消耗
+
+**證據化症狀與根因層級**：前一切片先撤銷 runtime transfer 權限，已阻止 worker／
+approver 用任意 64-hex 接管，但 migration-owner 仍只能把裸 hash 傳進 CAS；資料庫
+沒有 manifest bytes、freshness、來源 generation 或 consumed state，因而無法證明
+一次 owner transfer 真正對應哪份七日 preflight evidence。這是 ownership transaction
+缺少 durable authorization object，不是 ACL 或文字說明問題。
+
+**底層修復**：preflight manifest 升為 v3，由同一 trusted clock 綁定
+`prepared_at` 與精確 15 分鐘 `valid_until`，並公開 deterministic canonical bytes。
+新 migration 以 private FORCE-RLS gate table 保存 exact bytes、來源 owner／generation
+與 `ready → consumed → rolled_back` 狀態，append-only receipts 保存三個轉移事件。
+Stage function 在 DB 端重算 SHA-256，驗證 exact top-level contract、production
+projection schema、row-count parity、所有 evidence digests 與 freshness，再以 owner
+shared lock做 source-generation CAS。正式 transfer wrapper 先鎖 gate，只有未過期
+`ready` 可 cutover；owner CAS 成功後同交易標 `consumed`。Rollback 僅接受該 gate
+保存的 consumed generation，同交易標 `rolled_back`。未 staged hash、stale manifest、
+衝突 replay 全部 fail closed；ungated primitive 與 stage／transfer 對 runtime roles
+維持不可執行。
+
+**回歸、回讀與狀態**：TDD 先以 manifest v3／freshness expectation 得到 RED，再完成
+GREEN；local PG17 contracts 回讀 unknown hash 與 stale manifest 不留 gate／owner
+mutation、exact stage／transfer replay 只各寫一筆 receipt、cutover 與 rollback durable
+state，以及 worker／approver 對 gate tables、stage、ungated transfer 都無權限。
+Owned-email nested workflow 也在新 gate 後完成 operations_core generation 流程。
+此 local evidence-bound gate 根因為 **`root_cause_fixed_and_verified`**；但 migration
+尚未部署 production、七日真實 receipts 尚未累積，也未做 live cutover／rollback
+rehearsal，所以 Issue #9 整體仍為 **`contained`**。
