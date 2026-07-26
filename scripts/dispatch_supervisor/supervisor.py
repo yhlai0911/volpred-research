@@ -36,6 +36,7 @@ import asyncio
 import logging
 import os
 import resource
+import stat
 import sys
 import traceback
 from pathlib import Path
@@ -55,6 +56,7 @@ from . import (
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = Path(os.environ.get("VOLPRED_HOME_DIR", str(Path.home() / ".volpred"))) / "logs"
 SUPERVISOR_LOG = LOG_DIR / "dispatch_supervisor.log"
+_MODEL_TOKEN_MAX_BYTES = 16 * 1024
 
 
 def _setup_logging(level: int = logging.INFO) -> None:
@@ -82,6 +84,7 @@ def _set_runtime_env() -> None:
         it per-fire (worker._dispatch_actor) so AGENT writes carry the fire.
     """
     os.environ.setdefault("VOLPRED_ACTOR", "dispatch-supervisor")
+    _load_model_auth_token()
     try:
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
         target = 65536
@@ -91,6 +94,57 @@ def _set_runtime_env() -> None:
             logging.info("RLIMIT_NOFILE %d -> %d (hard=%s)", soft, new_soft, hard)
     except (ValueError, OSError) as exc:
         logging.warning("setrlimit NOFILE failed: %s", exc)
+
+
+def _load_model_auth_token() -> None:
+    """Load the model-only OAuth token before entering a synthetic HOME.
+
+    The isolated worker must not read the operator's ``~/.volpred`` tree, but
+    the Claude CLI still needs model-provider authentication.  The supervisor
+    therefore reads one exact, owner-only file and exports one exact env key;
+    ``isolated_environment`` passes that key while continuing to strip
+    SSH/Git/cloud/Telegram authority.
+    """
+    if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
+        return
+    volpred_home = Path(
+        os.environ.get("VOLPRED_HOME_DIR", str(Path.home() / ".volpred"))
+    )
+    token_path = volpred_home / "secrets" / "claude_oauth_token"
+    try:
+        info = token_path.lstat()
+    except FileNotFoundError:
+        logging.warning(
+            "model OAuth token file absent; isolated workers cannot use keychain auth"
+        )
+        return
+    except OSError as exc:
+        logging.warning("model OAuth token metadata unavailable: %s", exc)
+        return
+    mode = stat.S_IMODE(info.st_mode)
+    if (
+        not stat.S_ISREG(info.st_mode)
+        or token_path.is_symlink()
+        or info.st_uid != os.getuid()
+        or mode & 0o077
+        or info.st_size <= 0
+        or info.st_size > _MODEL_TOKEN_MAX_BYTES
+    ):
+        logging.error(
+            "refusing insecure model OAuth token file path=%s mode=%04o owner=%s size=%s",
+            token_path, mode, info.st_uid, info.st_size,
+        )
+        return
+    try:
+        token = token_path.read_text(encoding="utf-8").strip()
+    except (OSError, UnicodeError) as exc:
+        logging.warning("model OAuth token read failed: %s", exc)
+        return
+    if not token or any(ch.isspace() for ch in token):
+        logging.error("refusing malformed model OAuth token file path=%s", token_path)
+        return
+    os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = token
+    logging.info("loaded model-only OAuth token for isolated workers")
 
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:

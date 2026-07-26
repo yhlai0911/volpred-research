@@ -1810,15 +1810,53 @@ def test_force_kill_pgid_reports_false_when_orphan_survives(monkeypatch) -> None
     assert health._force_kill_pgid(456) is False
 
 
-def test_supervisor_set_runtime_env_raises_soft_limit(monkeypatch) -> None:
+def test_supervisor_set_runtime_env_raises_soft_limit(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
     calls: list[tuple[int, tuple[int, int]]] = []
 
+    monkeypatch.setenv("VOLPRED_HOME_DIR", str(tmp_path / "volpred-home"))
+    monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
     monkeypatch.setattr(resource, "getrlimit", lambda which: (256, 65536))
     monkeypatch.setattr(resource, "setrlimit", lambda which, value: calls.append((which, value)))
 
     supervisor._set_runtime_env()
 
     assert calls == [(resource.RLIMIT_NOFILE, (65536, 65536))]
+
+
+def test_supervisor_loads_secure_model_token_for_isolated_workers(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    home = tmp_path / "volpred-home"
+    token_path = home / "secrets" / "claude_oauth_token"
+    token_path.parent.mkdir(parents=True)
+    token_path.write_text("model-token\n", encoding="utf-8")
+    token_path.chmod(0o600)
+    monkeypatch.setenv("VOLPRED_HOME_DIR", str(home))
+    monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
+    monkeypatch.setattr(resource, "getrlimit", lambda which: (65536, 65536))
+
+    supervisor._set_runtime_env()
+
+    assert os.environ["CLAUDE_CODE_OAUTH_TOKEN"] == "model-token"
+
+
+def test_supervisor_rejects_insecure_model_token_file(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    home = tmp_path / "volpred-home"
+    token_path = home / "secrets" / "claude_oauth_token"
+    token_path.parent.mkdir(parents=True)
+    token_path.write_text("must-not-load\n", encoding="utf-8")
+    token_path.chmod(0o644)
+    monkeypatch.setenv("VOLPRED_HOME_DIR", str(home))
+    monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
+    monkeypatch.setattr(resource, "getrlimit", lambda which: (65536, 65536))
+
+    supervisor._set_runtime_env()
+
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in os.environ
 
 
 def test_classify_normalizes_negative_signal_codes() -> None:
