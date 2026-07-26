@@ -680,7 +680,20 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
         receipt_count = connection.execute(
             "SELECT count(*) FROM volpred_ops.work_owner_receipts"
         ).fetchone()[0]
+        legacy_submit_access = connection.execute(
+            """
+            SELECT has_function_privilege(
+              'volpred_ops_worker',
+              'volpred_ops.submit_work('
+              'text,text,text,text,text,integer,text[],text[],text,text,'
+              'text,text,timestamptz,text,text,integer,'
+              'timestamptz,timestamptz)',
+              'EXECUTE'
+            )
+            """
+        ).fetchone()[0]
     assert receipt_count == 1
+    assert legacy_submit_access is True
 
 
 @pytest.mark.parametrize("start_before_expiry", [False, True])
