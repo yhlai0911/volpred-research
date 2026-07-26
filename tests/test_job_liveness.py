@@ -29,6 +29,7 @@ import check_alerts  # noqa: E402
 from volpred.ops.schedules import (  # noqa: E402
     job_liveness,
     load_cron_marker_state,
+    load_schedule_receipt_success,
     marker_eligible,
 )
 
@@ -165,8 +166,12 @@ def test_piggyback_job_marker_only_verdict_unchanged() -> None:
     ok_state = {"feed_sync": (now - timedelta(minutes=20)).isoformat()}
     stale_state = {"feed_sync": (now - timedelta(hours=5)).isoformat()}
 
-    ok_rec = check_alerts.evaluate_cron_staleness(items, ok_state, now)[0]
-    stale_rec = check_alerts.evaluate_cron_staleness(items, stale_state, now)[0]
+    ok_rec = check_alerts.evaluate_cron_staleness(
+        items, ok_state, now, receipt_state={}
+    )[0]
+    stale_rec = check_alerts.evaluate_cron_staleness(
+        items, stale_state, now, receipt_state={}
+    )[0]
     assert ok_rec["status"] == "ok" and ok_rec["evidence"] == "piggyback_marker"
     assert stale_rec["status"] == "stale"
 
@@ -220,6 +225,61 @@ def test_load_cron_marker_state_skips_meta_keys(tmp_path) -> None:
     assert state == {"feed_sync": "2026-07-20T08:00:00+00:00"}
 
 
+def test_operations_core_receipt_is_strongest_success_evidence(tmp_path) -> None:
+    receipt_at = datetime(2026, 7, 26, 9, 50, 21, tzinfo=UTC)
+    marker_at = datetime(2026, 7, 26, 8, 50, tzinfo=UTC)
+    receipt_state = {
+        "handoff_regen": (
+            receipt_at,
+            "operations-core-v1:handoff_regen:abc",
+        )
+    }
+
+    live = job_liveness(
+        {"id": "handoff_regen", "cron": "50 * * * *"},
+        marker_state={"handoff_regen": marker_at.isoformat()},
+        receipt_state=receipt_state,
+        repo_root=tmp_path,
+    )
+
+    assert live.last_success == receipt_at
+    assert live.success_source == "operations_core_receipt"
+    assert live.schedule_receipt_fire_key.endswith(":abc")
+
+
+def test_receipt_loader_ignores_non_success_attempts(tmp_path) -> None:
+    path = tmp_path / "schedule_receipts.json"
+    path.write_text(
+        json.dumps(
+            {
+                "schema": 1,
+                "fires": {
+                    "old": {
+                        "job_id": "job",
+                        "state": "succeeded",
+                        "finished_at": "2026-07-26T08:00:00Z",
+                    },
+                    "failed": {
+                        "job_id": "job",
+                        "state": "failed",
+                        "finished_at": "2026-07-26T09:00:00Z",
+                    },
+                    "new": {
+                        "job_id": "job",
+                        "state": "succeeded",
+                        "finished_at": "2026-07-26T10:00:00Z",
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert load_schedule_receipt_success(path) == {
+        "job": (datetime(2026, 7, 26, 10, 0, tzinfo=UTC), "new")
+    }
+
+
 def test_unparsable_marker_survives_into_helper_and_evaluator() -> None:
     now = datetime.now(UTC)
     live = job_liveness({"id": "j", "cron": "0 * * * *"},
@@ -227,7 +287,11 @@ def test_unparsable_marker_survives_into_helper_and_evaluator() -> None:
     assert live.marker_raw == "garbage" and live.marker_at is None
 
     rec = check_alerts.evaluate_cron_staleness(
-        [{"id": "j", "cron": "0 * * * *"}], {"j": "garbage"}, now)[0]
+        [{"id": "j", "cron": "0 * * * *"}],
+        {"j": "garbage"},
+        now,
+        receipt_state={},
+    )[0]
     assert rec["status"] == "unparsable_marker"
 
 
@@ -236,7 +300,10 @@ def test_unscheduled_daemon_job_gets_explicit_verdict() -> None:
     # meaning; it must be labelled, not silently dropped or "unmanaged".
     rec = check_alerts.evaluate_cron_staleness(
         [{"id": "telegram_poll", "cron": None, "host_crontab_managed": False}],
-        {}, datetime.now(UTC))[0]
+        {},
+        datetime.now(UTC),
+        receipt_state={},
+    )[0]
     assert rec["status"] == "unscheduled"
 
 

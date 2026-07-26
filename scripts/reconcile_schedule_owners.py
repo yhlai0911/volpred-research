@@ -62,12 +62,21 @@ def _items_by_id(config: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
     return result
 
 
-def _legacy_label(item: Mapping[str, Any]) -> str | None:
+def _possible_legacy_label(item: Mapping[str, Any]) -> str | None:
     configured = item.get("launchagent_label") or item.get("launchd_label")
     if configured:
         return str(configured)
-    if item.get("mechanism") == "launchd":
-        return f"com.volpred.{str(item.get('id') or '').replace('_', '-')}"
+    job_id = str(item.get("id") or "")
+    return f"com.volpred.{job_id.replace('_', '-')}" if job_id else None
+
+
+def _direct_legacy_label(item: Mapping[str, Any]) -> str | None:
+    if (
+        item.get("launchagent_label")
+        or item.get("launchd_label")
+        or item.get("mechanism") == "launchd"
+    ):
+        return _possible_legacy_label(item)
     return None
 
 
@@ -89,14 +98,14 @@ def build_owner_plan(
         {
             label
             for value in core_owned
-            if (label := _legacy_label(items[value])) is not None
+            if (label := _possible_legacy_label(items[value])) is not None
         }
     )
     legacy_launchagents = sorted(
         {
             label
             for value in legacy_owned
-            if (label := _legacy_label(items[value])) is not None
+            if (label := _direct_legacy_label(items[value])) is not None
         }
     )
     return {
@@ -280,7 +289,7 @@ def apply_owner_plan(
     # install_host_crontab above.
     if job_id and job_id in plan["legacy_job_ids"]:
         item = _items_by_id(config)[job_id]
-        if _legacy_label(item) is not None:
+        if _direct_legacy_label(item) is not None:
             subprocess.run(
                 ["bash", str(ROOT / "scripts" / "install_launchd_jobs.sh"), "--id", job_id],
                 cwd=ROOT,

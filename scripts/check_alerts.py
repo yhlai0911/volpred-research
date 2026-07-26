@@ -2647,7 +2647,15 @@ def cron_max_gap_min(cron_expr: str, *, base=None, samples: int = 12) -> float:
     return max((b - a).total_seconds() / 60 for a, b in zip(times, times[1:]))
 
 
-def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) -> list[dict]:
+def evaluate_cron_staleness(
+    items,
+    state,
+    now,
+    *,
+    state_path=None,
+    base=None,
+    receipt_state=None,
+) -> list[dict]:
     """One record per configured job — nothing is silently skipped.
 
     Every entry in `system_crontab.items` gets a verdict:
@@ -2669,8 +2677,15 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
     blanket `unmanaged` skip made a dead launchd job invisible here while its
     frozen marker (daily_update @2026-04-25) misled every other reader.
     """
-    from volpred.ops.schedules import job_liveness  # noqa: WPS433 (deferred; SRC_DIR wired above)
+    from volpred.ops.schedules import (  # noqa: WPS433 (deferred; SRC_DIR wired above)
+        job_liveness,
+        load_schedule_receipt_success,
+    )
 
+    if receipt_state is None:
+        receipt_state = load_schedule_receipt_success(
+            PROJECT_ROOT / "storage" / "ops" / "schedule_receipts.json"
+        )
     records: list[dict] = []
     for item in items:
         job_id = item.get("id")
@@ -2698,7 +2713,12 @@ def evaluate_cron_staleness(items, state, now, *, state_path=None, base=None) ->
             records.append({"job_id": job_id, "status": "bad_cron", "detail": f"cron={cron!r} ({exc})"})
             continue
 
-        live = job_liveness(item, marker_state=state, repo_root=PROJECT_ROOT)
+        live = job_liveness(
+            item,
+            marker_state=state,
+            receipt_state=receipt_state,
+            repo_root=PROJECT_ROOT,
+        )
         if live.last_success is None:
             if live.marker_raw:
                 _warn_check_alerts(

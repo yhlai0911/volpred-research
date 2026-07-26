@@ -43,7 +43,7 @@ def test_canary_plan_has_one_owner_per_job() -> None:
 
     assert plan["operations_core_job_ids"] == ["host_job"]
     assert plan["legacy_job_ids"] == ["launch_job"]
-    assert plan["legacy_labels_to_bootout"] == []
+    assert plan["legacy_labels_to_bootout"] == ["com.volpred.host-job"]
 
 
 def test_active_plan_decommissions_legacy_launchagent() -> None:
@@ -51,7 +51,10 @@ def test_active_plan_decommissions_legacy_launchagent() -> None:
 
     assert plan["operations_core_job_ids"] == ["host_job", "launch_job"]
     assert plan["legacy_job_ids"] == []
-    assert plan["legacy_labels_to_bootout"] == ["com.volpred.launch-job"]
+    assert plan["legacy_labels_to_bootout"] == [
+        "com.volpred.host-job",
+        "com.volpred.launch-job",
+    ]
 
 
 def test_audit_reports_host_and_launchagent_conflicts() -> None:

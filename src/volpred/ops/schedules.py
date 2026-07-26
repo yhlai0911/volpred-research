@@ -325,6 +325,9 @@ def build_schedule_report() -> dict[str, Any]:
 # (anti-stacking: one enforcement owner for the evidence merge).
 
 CRON_MARKER_PATH = get_project_root() / "storage" / "ops" / "cron_last_run.json"
+SCHEDULE_RECEIPT_PATH = (
+    get_project_root() / "storage" / "ops" / "schedule_receipts.json"
+)
 CRON_MARKER_META_KEY = "_meta"
 CRON_MARKER_SCOPE = "piggyback-and-cron_lib-self-report-only"
 
@@ -356,11 +359,13 @@ class JobLiveness:
     marker_eligible: bool
     marker_raw: str | None
     marker_at: datetime | None
+    schedule_receipt_at: datetime | None
+    schedule_receipt_fire_key: str | None
     banner_at: datetime | None
     log_mtime: datetime | None
     log_path: Path | None
     last_success: datetime | None
-    success_source: str | None  # "piggyback_marker" | "log_banner" | None
+    success_source: str | None  # operations_core_receipt | piggyback_marker | log_banner
     last_activity: datetime | None
 
 
@@ -393,6 +398,55 @@ def load_cron_marker_state(path: Path | None = None) -> dict[str, str]:
         for key, value in data.items()
         if isinstance(key, str) and not key.startswith("_")
     }
+
+
+def load_schedule_receipt_success(
+    path: Path | None = None,
+) -> dict[str, tuple[datetime, str]]:
+    """Freshest successful Operations Core receipt per job.
+
+    ``schedule_receipts.json`` is stronger evidence than wrapper-internal
+    markers or log parsing: it is written by the owner that claimed the exact
+    fire and contains the fenced generation/fire identity.  Failed, timed-out,
+    claimed, and running attempts never count as success.
+    """
+    receipt_path = path or SCHEDULE_RECEIPT_PATH
+    if not receipt_path.exists():
+        return {}
+    try:
+        payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        from volpred.ops.diagnostics import warn
+
+        warn(
+            "schedules",
+            "schedule receipt ledger read failed; receipt evidence unavailable",
+            path=str(receipt_path),
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return {}
+    fires = payload.get("fires") if isinstance(payload, dict) else None
+    if not isinstance(fires, dict):
+        from volpred.ops.diagnostics import warn
+
+        warn(
+            "schedules",
+            "schedule receipt ledger schema invalid; receipt evidence unavailable",
+            path=str(receipt_path),
+        )
+        return {}
+    latest: dict[str, tuple[datetime, str]] = {}
+    for fire_key, record in fires.items():
+        if not isinstance(record, dict) or record.get("state") != "succeeded":
+            continue
+        job_id = record.get("job_id")
+        finished_at = _parse_marker_ts(record.get("finished_at"))
+        if not isinstance(job_id, str) or not job_id or finished_at is None:
+            continue
+        previous = latest.get(job_id)
+        if previous is None or finished_at > previous[0]:
+            latest[job_id] = (finished_at, str(fire_key))
+    return latest
 
 
 def marker_eligible(item: dict[str, Any]) -> bool:
@@ -495,6 +549,7 @@ def job_liveness(
     item: dict[str, Any],
     *,
     marker_state: dict[str, str] | None = None,
+    receipt_state: dict[str, tuple[datetime, str]] | None = None,
     repo_root: Path | None = None,
 ) -> JobLiveness:
     """Merge marker + execution-log evidence for one schedule item.
@@ -510,9 +565,20 @@ def job_liveness(
     raw = state.get(job_id)
     marker_raw = raw if isinstance(raw, str) else None
     marker_at = _parse_marker_ts(marker_raw)
+    receipts = (
+        receipt_state
+        if receipt_state is not None
+        else load_schedule_receipt_success(
+            root / "storage" / "ops" / "schedule_receipts.json"
+        )
+    )
+    receipt = receipts.get(job_id)
+    schedule_receipt_at = receipt[0] if receipt is not None else None
+    schedule_receipt_fire_key = receipt[1] if receipt is not None else None
     banner_at, log_mtime = _log_evidence(_resolve_log_path(item, root))
 
     success_candidates = [
+        (schedule_receipt_at, "operations_core_receipt"),
         (marker_at, "piggyback_marker"),
         (banner_at, "log_banner"),
     ]
@@ -529,6 +595,8 @@ def job_liveness(
         marker_eligible=marker_eligible(item),
         marker_raw=marker_raw,
         marker_at=marker_at,
+        schedule_receipt_at=schedule_receipt_at,
+        schedule_receipt_fire_key=schedule_receipt_fire_key,
         banner_at=banner_at,
         log_mtime=log_mtime,
         log_path=_resolve_log_path(item, root),
