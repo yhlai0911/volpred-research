@@ -1,0 +1,59 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1801.py",
+    "args": [],
+    "sha256": "978be712813914db6d249a766b70614d00f6667c29b3ffd100a1f5c991aeb65e",
+    "size_bytes": 13223
+  },
+  "canonical_result": "k1801_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1587/data/k1587_panel.csv",
+      "sha256": "ea35dbf57811deeb7299bbfedba005f1f0f55a7939e2f7d9b29f3de9e6fcce65",
+      "size_bytes": 1133588
+    }
+  ],
+  "outputs": [
+    "k1801_fig1_decile_ladder.png",
+    "k1801_fig2_wildfire_window.png",
+    "k1801_results.json"
+  ],
+  "timeout_seconds": 60,
+  "network": "deny",
+  "randomness": {
+    "status": "not_applicable",
+    "seeds": []
+  },
+  "runtime": {
+    "runtime_seconds": 0.301,
+    "recorded_at": "2026-07-26T08:59:47Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": []
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  }
+}

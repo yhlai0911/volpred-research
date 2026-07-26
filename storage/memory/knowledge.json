@@ -42658,5 +42658,18 @@
   ],
   "confidence": 0.95,
   "created_at": "2026-07-22T16:13:43.093967"
+ },
+ {
+  "item_id": "0bc6524e",
+  "category": "vol_prediction",
+  "content": "K1801 [DESCRIPTIVE/NULL]：以 K1587 固定面板做讀者向描述統計，不新增預測宣稱。資料為 EPA AirData NYC 五郡 PM2.5 與 SPY/VIX，樣本 2006 個交易日（2018-01-03 至 2025-12-24）。Fig 1 的 PM2.5/VIX 分組訊號皆為 shift(1) 的前一日值；PM2.5 第 1/10 十分位後續五日年化波動中位數為 13.6082% / 11.4422%，VIX 第 1/10 十分位則為 7.4285% / 26.8754%（D10/D1=3.6179）。Fig 2 是同期事件對照而非預測檢定：2023-06-07 PM2.5 峰值 189.1301 µg/m³，為樣本 PM2.5 訊號平均 7.5981 的 24.8917 倍；2023-06-05 至 2023-06-16 的同期起算五日波動中位數 9.9582%，低於全樣本中位數 12.4772%。正式預測結論仍以 K1587 OOS 檢定的 NULL verdict 為準；K1801 不應解讀為 PM2.5 的新預測證據。",
+  "evidence": [
+   "experiments/k1801/k1801_results.json",
+   "experiments/k1801/reproduce_spec.json",
+   "experiments/k1801/README.md",
+   "experiments/k1801/review_verdict.json"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-26T17:00:37.699257"
  }
 ]
