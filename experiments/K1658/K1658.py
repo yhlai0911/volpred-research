@@ -378,7 +378,10 @@ def part3_aggregate(daily: dict[str, pd.DataFrame]) -> dict:
                 "asset": tk, "proxy": pname, "n_obs": n,
                 "n_fomc_lag_days": int((X["FOMC_lag1"] == 1.0).sum()),
                 "beta_fomc_lag1": round(beta, 6),
-                "beta_pct_effect_on_vol": round((math.exp(beta) - 1) * 100, 3),
+                # outcome is log realized VARIANCE (log of Parkinson var), so
+                # exp(beta)-1 is a variance %-effect, not a volatility %-effect
+                # (a vol %-effect would be exp(beta/2)-1). Labelled accordingly.
+                "beta_pct_effect_on_variance": round((math.exp(beta) - 1) * 100, 3),
                 "hac_se": round(se, 6), "t_stat": round(tval, 4),
                 "p_value_raw": round(pval, 6), "hac_lag": hac_lag,
                 "resid_acf1": round(acf1, 4),

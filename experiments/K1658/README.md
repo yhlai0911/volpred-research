@@ -1,6 +1,6 @@
 # K1658 — FOMC statement shock (14:00 ET) vs press-conference shock (14:30 ET): distributional response decomposition for rate assets
 
-**Verdict: CONDITIONAL_PASS — core question is `INFEASIBLE` with free data (honest NULL), with a completed lookahead-clean formal test on the feasible aggregate sub-question.**
+**Verdict: CONDITIONAL_PASS — the core statement-vs-presser separation is `INFEASIBLE` with free data (a data-insufficiency limit, N=2 intraday events, not an evidenced null). The feasible aggregate sub-question was answered with a completed lookahead-clean formal test and returned a clean `NULL` (0/6 tests survive Holm). "Infeasible" (cannot be tested) and "null" (tested, no effect) are kept distinct throughout.**
 
 ## Motivation & research question
 
@@ -37,8 +37,10 @@ even to detect a *large* effect (Cohen's d = 0.8; N ≥ 32 for d = 0.5, N ≥ 88
 for d = 0.3) at power 0.80, α = 0.05 — i.e. **1.6–11 years** of *complete*
 intraday coverage. The free window supplies ~0.24 yr. **Cross-event inferential
 separation of the two shocks is therefore `INFEASIBLE` with free data.** This
-NULL/infeasible outcome is reported honestly (brief §6: NULL is a valid, valued
-result — no reactive re-tuning was done to manufacture a positive finding).
+infeasibility (a data-insufficiency limit — the test cannot be run, distinct from
+a tested-and-null result) is reported honestly (brief §6: an honest limit, like a
+null, is a valid and valued result — no reactive re-tuning was done to manufacture
+a positive finding).
 
 ## What *is* feasible and real (and was done)
 
