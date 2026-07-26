@@ -43804,5 +43804,66 @@
       "occurrences": 3,
       "governance_target": null
     }
+  },
+  {
+    "id": "issue43_live_canary_20260727",
+    "title": "[Issue #43 live canary] Verify enforced mutating isolation",
+    "description": "Production acceptance canary. Create docs/ops/issue43_live_canary.md containing the observed job_id, workspace name, candidate/gate/main receipt identifiers available in the assigned prompt or runtime context, and clearly label unavailable values for supervisor read-back. Modify no other repo path. Do not run git add/commit/merge; machine finalizer owns integration.",
+    "status": "closed_no_action",
+    "priority": 1,
+    "task_type": "platform_ops",
+    "source": "user",
+    "issue_ref": "#43",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "docs/ops/issue43_live_canary.md"
+    ],
+    "post_merge_actions": [],
+    "terminalized_at": "2026-07-26T21:42:32+00:00",
+    "terminalized_reason": "deprecated",
+    "blocked_reason": "deprecated",
+    "blocked_at": "2026-07-26T21:42:32+00:00",
+    "blocked_note": "superseded: invalid priority from canary materialization; replacement uses valid P1"
+  },
+  {
+    "id": "issue43_live_canary_v2_20260727",
+    "title": "[Issue #43 live canary] Verify enforced mutating isolation",
+    "description": "Production acceptance canary. Create docs/ops/issue43_live_canary.md containing the assigned task id and a concise note that supervisor receipt identifiers will be appended by the owner after machine integration. Modify no other repo path. Do not run git add/commit/merge; machine finalizer owns integration.",
+    "status": "pending",
+    "priority": 1,
+    "task_type": "platform_ops",
+    "source": "user",
+    "issue_ref": "#43",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "docs/ops/issue43_live_canary.md"
+    ],
+    "post_merge_actions": [],
+    "status_history": [
+      {
+        "ts": "2026-07-26T21:43:21.826528+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-26T21:43:21.826531+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-26T21:44:44.573528+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-eff32f3b5e6148dbbd9c34916c1163ba",
+        "note": "supervisor_settle_empty"
+      }
+    ],
+    "dispatch_settled_session_id": "dispatch-eff32f3b-c6922deb",
+    "last_released_at": "2026-07-26T21:44:44.573511+00:00",
+    "last_release_reason": "workspace_empty"
   }
 ]
