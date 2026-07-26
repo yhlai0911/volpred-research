@@ -80,6 +80,7 @@ KIND_POLICY: dict[str, tuple[str, str]] = {
     "silent_fallback_new": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
     "git_push_backup_hold": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
     "phase_z_baseline_missing": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
+    "phase_z_generation_rejected": (CLASS_MACHINE_SELF, TASK_MODE_NONE),
     "worker_orphaned": (CLASS_MACHINE_SELF, TASK_MODE_ADJUDICATION),
     "worktree_unmerged": (CLASS_MACHINE_SELF, TASK_MODE_ADJUDICATION),
     "ci_red": (CLASS_ORDINARY, TASK_MODE_EXTERNAL),

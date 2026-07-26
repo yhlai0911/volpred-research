@@ -101,6 +101,10 @@ def _never_spawn_the_real_pregate(monkeypatch) -> None:
     just re-apply the same patch); a new test can no longer forget.
     """
     _stub_pregate(monkeypatch)
+    monkeypatch.setattr(
+        scheduler.phase_z, "_default_internal_alert",
+        lambda **_kwargs: {"sent": True, "test_stub": True},
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -691,6 +695,13 @@ def test_scheduler_phase_z_runs_even_if_worker_raises(tmp_path: Path, monkeypatc
     def boom(**kwargs):
         raise RuntimeError("worker exploded")
 
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": True, "reason": "ok", "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
+    )
     monkeypatch.setattr(scheduler.worker, "run_worker", boom)
     monkeypatch.setattr(
         scheduler.phase_z, "run_phase_z",
@@ -740,6 +751,13 @@ def test_scheduler_post_fire_hook_invokes_phase_z(tmp_path: Path, monkeypatch) -
     prompt_path.write_text("prompt-body", encoding="utf-8")
     _stub_pregate(monkeypatch)
 
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": True, "reason": "ok", "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
+    )
     monkeypatch.setattr(
         scheduler.worker, "run_worker",
         lambda **kwargs: worker.WorkerResult(
@@ -822,7 +840,10 @@ def test_scheduler_pre_fire_guard_runs_once_before_worker(tmp_path: Path, monkey
     )
     monkeypatch.setattr(
         scheduler.phase_z, "run_pre_fire_guard",
-        lambda **kwargs: order.append(f"guard:{kwargs['repo_root']}") or {"ran": True, "reason": "ok"},
+        lambda **kwargs: order.append(f"guard:{kwargs['repo_root']}") or {
+            "ran": True, "reason": "ok", "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
     )
     monkeypatch.setattr(
         scheduler.worker, "run_worker",
@@ -865,7 +886,10 @@ def test_scheduler_closeout_recovery_crash_does_not_suppress_guard(
     monkeypatch.setattr(
         scheduler.phase_z,
         "run_pre_fire_guard",
-        lambda **_kwargs: called.__setitem__("guard", called["guard"] + 1) or {},
+        lambda **_kwargs: called.__setitem__("guard", called["guard"] + 1) or {
+            "ran": True, "reason": "ok", "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
     )
     monkeypatch.setattr(
         scheduler.worker,
@@ -907,6 +931,10 @@ def test_scheduler_pre_fire_guard_crash_does_not_prevent_fire(tmp_path: Path, mo
         raise RuntimeError("guard exploded")
 
     monkeypatch.setattr(scheduler.phase_z, "run_pre_fire_guard", exploding_guard)
+    monkeypatch.setattr(
+        scheduler.phase_z, "_default_internal_alert",
+        lambda **_kwargs: {"sent": True},
+    )
     monkeypatch.setattr(
         scheduler.worker, "run_worker",
         lambda **kwargs: ran.__setitem__("worker", ran["worker"] + 1) or _ok_worker(),
@@ -1134,12 +1162,43 @@ def test_pre_fire_guard_is_idempotent_on_a_clean_tree(tmp_path: Path) -> None:
     first = phase_z.run_pre_fire_guard(repo_root=repo)
     second = phase_z.run_pre_fire_guard(repo_root=repo)
 
-    assert first == {"ran": True, "reason": "ok", "dirty_at_fire_start": 0}
-    assert second == first  # idempotent: no-op on a clean tree, twice
+    expected = {"ran": True, "reason": "ok", "dirty_at_fire_start": 0}
+    assert {key: first[key] for key in expected} == expected
+    assert {key: second[key] for key in expected} == expected
+    assert first["fire_lifecycle"]["pre_fire_dirty"] == []
+    assert second["fire_lifecycle"]["pre_fire_dirty"] == []
+    assert (
+        second["fire_lifecycle"]["generation_id"]
+        != first["fire_lifecycle"]["generation_id"]
+    )
     status = subprocess.run(
         ["git", "-C", str(repo), "status", "--porcelain"], capture_output=True, text=True,
     )
     assert status.stdout.strip() == ""
+
+
+def test_failed_new_baseline_capture_removes_previous_singleton(tmp_path: Path) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(["git", "-C", str(repo), "init", "-q"], check=True)
+    assert phase_z._write_pre_fire_snapshot(
+        repo, {"previous-fire.txt"}, subprocess.run,
+    )
+
+    def fail_only_status(args, **kwargs):
+        if "status" in args:
+            return subprocess.CompletedProcess(args, 1, "", "probe failed")
+        return subprocess.run(args, **kwargs)
+
+    outcome = phase_z.run_pre_fire_guard(
+        repo_root=repo, git_runner=fail_only_status,
+    )
+
+    assert outcome["dirty_at_fire_start"] == -1
+    assert "fire_lifecycle" not in outcome
+    snapshot = phase_z._snapshot_path(repo, subprocess.run)
+    assert snapshot is not None
+    assert not snapshot.exists()
 
 
 def test_due_to_fire_warns_on_invalid_last_fire_at(capsys) -> None:
@@ -3050,6 +3109,9 @@ def test_phase_z_recovery_retains_token_on_nonterminal_error(
         job_id=handle.job_id, expected_attempt=1,
         pid=101, pgid=101, started_wall="wall", path=state_path,
     )
+    state.attach_fire_lifecycle(
+        job_id=handle.job_id, lifecycle=_fire_lifecycle(), path=state_path,
+    )
     state.record_completion(
         job_id=handle.job_id, expected_attempt=1, expected_pid=101,
         exit_code=0, outcome="success", final_model="opus", path=state_path,
@@ -4703,9 +4765,331 @@ def _seed_pending_drain(state_path: Path, isolated_flags: list[bool]) -> None:
     with state._locked_state(state_path) as (_fh, data):
         data["phase_z_pending"] = [
             {"job_id": f"job{i}", "cohort_id": f"cohort{i}", "slot_id": i + 1,
-             "created_at": "2026-07-20T00:00:00+00:00", "isolated": flag}
+             "created_at": "2026-07-20T00:00:00+00:00", "isolated": flag,
+             "fire_lifecycle": _fire_lifecycle()}
             for i, flag in enumerate(isolated_flags)
         ]
+
+
+def _fire_lifecycle(generation_id: str = "generation-a") -> dict:
+    return {
+        "generation_id": generation_id,
+        "captured_at": "2026-07-27T00:00:00+00:00",
+        "pre_fire_dirty": ["already-dirty.txt"],
+    }
+
+
+@pytest.mark.parametrize("restart_point", ["pre_fire", "worker_running", "worker_complete"])
+def test_fire_lifecycle_survives_process_restart_at_every_closeout_boundary(
+    tmp_path: Path, restart_point: str,
+) -> None:
+    """Issue #42: process memory must never be the PHASE-Z baseline owner."""
+    state_path = _tmp_state(tmp_path)
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/worker.log", path=state_path,
+    )
+    assert state.attach_fire_lifecycle(
+        job_id=lease.job_id, lifecycle=_fire_lifecycle(), path=state_path,
+    )
+
+    if restart_point in {"worker_running", "worker_complete"}:
+        state.attach_process(
+            job_id=lease.job_id, expected_attempt=1, pid=123, pgid=123,
+            started_wall="Mon Jul 27 00:00:00 2026", path=state_path,
+        )
+    if restart_point == "worker_complete":
+        state.record_completion(
+            job_id=lease.job_id, expected_attempt=1, expected_pid=123,
+            exit_code=0, outcome="success", final_model="opus", path=state_path,
+        )
+
+    # A new interpreter would reconstruct all authority from this file.
+    restarted = state.read_state(state_path)
+    records = (
+        restarted["phase_z_pending"]
+        if restart_point == "worker_complete"
+        else restarted["current_jobs"]
+    )
+    assert records[0]["fire_lifecycle"] == _fire_lifecycle()
+
+
+def test_restart_closeout_uses_matching_durable_generation(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{
+            "job_id": "job-a", "cohort_id": "cohort-a", "slot_id": 1,
+            "created_at": "2026-07-27T00:00:01+00:00", "isolated": False,
+            "fire_lifecycle": _fire_lifecycle(),
+        }]
+    captured: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: captured.append(kwargs)
+        or {"committed": False, "reason": "clean"},
+    )
+    scheduler._PHASE_Z_LOCK = None
+
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path,
+    ))
+
+    assert result["action"] == "phase_z_recovered"
+    assert captured[0]["pre_fire_dirty"] == {"already-dirty.txt"}
+    assert state.read_state(state_path)["phase_z_pending"] == []
+
+
+def test_running_worker_restart_orphan_cleanup_preserves_generation_to_recovery(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/worker.log", path=state_path,
+    )
+    state.attach_fire_lifecycle(
+        job_id=lease.job_id, lifecycle=_fire_lifecycle(), path=state_path,
+    )
+    state.attach_process(
+        job_id=lease.job_id, expected_attempt=1, pid=123, pgid=123,
+        started_wall="Mon Jul 27 00:00:00 2026", path=state_path,
+    )
+
+    # This is the actual supervisor restart-orphan transition, distinct from
+    # normal worker record_completion().
+    orphan = state.mark_restart_orphans_pending(state_path)[0]
+    state.append_completion_entry(
+        orphan, exit_code=-9, outcome="killed_supervisor_restart",
+        final_model="opus", path=state_path, mark_cleanup_recorded=True,
+    )
+    assert state.finalize_restart_orphan_cleanup(
+        state_path, job_id=lease.job_id,
+    )
+    pending = state.read_state(state_path)["phase_z_pending"]
+    assert pending[0]["fire_lifecycle"] == _fire_lifecycle()
+
+    captured: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: captured.append(kwargs)
+        or {"committed": False, "reason": "clean"},
+    )
+    scheduler._PHASE_Z_LOCK = None
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path,
+    ))
+
+    assert result["action"] == "phase_z_recovered"
+    assert captured[0]["pre_fire_dirty"] == {"already-dirty.txt"}
+
+
+def test_scheduler_binds_guard_generation_before_worker_and_closes_with_it(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt", encoding="utf-8")
+    schedules = tmp_path / "schedules.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{
+            "id": "volpred-dispatch-supervisor", "max_slots": 1,
+            "writer_isolation": {"mode": "off"},
+        }],
+    }), encoding="utf-8")
+    _stub_pregate(monkeypatch)
+    monkeypatch.setattr(
+        scheduler.phase_z, "recover_failed_closeout",
+        lambda **_kwargs: {"committed": False, "reason": "no_failed_closeout"},
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": True, "reason": "ok", "dirty_at_fire_start": 1,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
+    )
+    observed_worker_lifecycle: list[dict] = []
+
+    def fake_worker(**kwargs):
+        live = state.read_state(kwargs["state_path"])["current_jobs"][0]
+        observed_worker_lifecycle.append(live["fire_lifecycle"])
+        state.record_completion(
+            job_id=kwargs["job_id"], expected_attempt=1,
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            path=kwargs["state_path"],
+        )
+        return _ok_worker()
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_worker)
+    captured: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **kwargs: captured.append(kwargs)
+        or {"committed": False, "reason": "clean"},
+    )
+    scheduler._PHASE_Z_LOCK = None
+
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=prompt_path, log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path, schedules_path=schedules,
+    ))
+
+    assert result["action"] == "fired"
+    assert observed_worker_lifecycle == [_fire_lifecycle()]
+    assert captured[0]["pre_fire_dirty"] == {"already-dirty.txt"}
+
+
+def test_in_process_fire_without_lifecycle_rejects_instead_of_reading_singleton(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt", encoding="utf-8")
+    schedules = tmp_path / "schedules.json"
+    schedules.write_text(json.dumps({
+        "cron_jobs": [{"id": "volpred-hourly-dispatch", "schedule": "7 * * * *"}],
+        "daemons": [{
+            "id": "volpred-dispatch-supervisor", "max_slots": 1,
+            "writer_isolation": {"mode": "off"},
+        }],
+    }), encoding="utf-8")
+    _stub_pregate(monkeypatch)
+    monkeypatch.setattr(
+        scheduler.phase_z, "recover_failed_closeout",
+        lambda **_kwargs: {"committed": False, "reason": "no_failed_closeout"},
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": False, "reason": "status_error", "dirty_at_fire_start": -1,
+        },
+    )
+
+    def fake_worker(**kwargs):
+        state.record_completion(
+            job_id=kwargs["job_id"], expected_attempt=1,
+            exit_code=0, outcome="success", final_model=worker.OPUS_MODEL,
+            path=kwargs["state_path"],
+        )
+        return _ok_worker()
+
+    monkeypatch.setattr(scheduler.worker, "run_worker", fake_worker)
+    called = {"phase_z": 0}
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **_kwargs: called.__setitem__("phase_z", called["phase_z"] + 1),
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z, "_default_internal_alert",
+        lambda **_kwargs: {"sent": True},
+    )
+    scheduler._PHASE_Z_LOCK = None
+
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=prompt_path, log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path, schedules_path=schedules,
+    ))
+
+    assert result["phase_z"]["reason"] == "missing_generation"
+    assert result["phase_z"]["generation_rejected"] is True
+    assert called["phase_z"] == 0
+    rejected = state.read_state(state_path)["phase_z_rejections"]
+    assert len(rejected) == 1
+    assert rejected[0]["rejection_reason"] == "missing_generation"
+
+
+def test_restart_never_executes_closeout_without_matching_generation(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [
+            {"job_id": "job-a", "cohort_id": "cohort-a", "slot_id": 1,
+             "created_at": "2026-07-27T00:00:01+00:00", "isolated": False,
+             "fire_lifecycle": _fire_lifecycle("generation-a")},
+            {"job_id": "job-b", "cohort_id": "cohort-a", "slot_id": 2,
+             "created_at": "2026-07-27T00:00:02+00:00", "isolated": False,
+             "fire_lifecycle": _fire_lifecycle("different-generation")},
+        ]
+    called = {"phase_z": 0}
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_phase_z",
+        lambda **_kwargs: called.__setitem__("phase_z", called["phase_z"] + 1),
+    )
+    alerts: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.phase_z, "_default_internal_alert",
+        lambda **kwargs: alerts.append(kwargs) or {"sent": True},
+    )
+    scheduler._PHASE_Z_LOCK = None
+
+    result = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path,
+    ))
+
+    assert result["action"] == "phase_z_generation_rejected"
+    assert called["phase_z"] == 0
+    assert state.read_state(state_path)["phase_z_pending"] == []
+    rejected = state.read_state(state_path)["phase_z_rejections"]
+    assert {item["job_id"] for item in rejected} == {"job-a", "job-b"}
+    assert {item["rejection_reason"] for item in rejected} == {"generation_mismatch"}
+    assert alerts[0]["alert_key"] == "phase_z_generation_rejected"
+
+
+def test_closeout_failure_restart_reuses_same_generation_until_terminal(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{
+            "job_id": "job-a", "cohort_id": "cohort-a", "slot_id": 1,
+            "created_at": "2026-07-27T00:00:01+00:00", "isolated": False,
+            "fire_lifecycle": _fire_lifecycle(),
+        }]
+    observed: list[set[str]] = []
+    outcomes = iter([
+        {"committed": False, "reason": "status_error"},
+        {"committed": False, "reason": "clean"},
+    ])
+
+    def flaky_closeout(**kwargs):
+        observed.append(kwargs["pre_fire_dirty"])
+        return next(outcomes)
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", flaky_closeout)
+    scheduler._PHASE_Z_LOCK = None
+    first = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path,
+    ))
+    assert first["action"] == "phase_z_recovery_pending"
+    pending = state.read_state(state_path)["phase_z_pending"]
+    assert pending[0]["fire_lifecycle"] == _fire_lifecycle()
+
+    # A new event loop/process continues from state, not the first call frame.
+    scheduler._PHASE_Z_LOCK = None
+    second = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path,
+    ))
+    assert second["action"] == "phase_z_recovered"
+    assert observed == [{"already-dirty.txt"}, {"already-dirty.txt"}]
+    assert state.read_state(state_path)["phase_z_pending"] == []
 
 
 def test_scheduler_recovery_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:
@@ -4755,6 +5139,13 @@ def test_scheduler_fire_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch
                         lambda **kw: dict(fake_ws))
     monkeypatch.setattr(scheduler.workspace_mod, "finalize_workspace",
                         lambda **kw: {"disposition": "empty_removed"})
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": True, "reason": "ok", "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
+    )
     captured: list[dict] = []
 
     def spy_run_phase_z(**kwargs):

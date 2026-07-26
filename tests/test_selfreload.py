@@ -45,11 +45,18 @@ def _src_dir(tmp_path: Path, *, mtimes: dict[str, datetime]) -> Path:
     return src
 
 
-def _state_file(tmp_path: Path, *, boot: datetime | None, jobs: list[dict]) -> Path:
+def _state_file(
+    tmp_path: Path, *, boot: datetime | None, jobs: list[dict],
+    phase_z_pending: list[dict] | None = None,
+) -> Path:
     import json
 
     p = tmp_path / "dispatch_state.json"
-    payload: dict = {"version": state.SCHEMA_VERSION, "current_jobs": jobs}
+    payload: dict = {
+        "version": state.SCHEMA_VERSION,
+        "current_jobs": jobs,
+        "phase_z_pending": phase_z_pending or [],
+    }
     if boot is not None:
         payload["supervisor_started_at"] = boot.isoformat()
     p.write_text(json.dumps(payload))
@@ -145,6 +152,59 @@ def test_defers_while_a_job_is_in_flight(tmp_path, monkeypatch):
         jobs=[_job()],
         monkeypatch=monkeypatch,
     )
+    assert action == "deferred_in_flight"
+    assert exit_fn.called == 0
+
+
+def test_defers_while_durable_closeout_is_pending(tmp_path, monkeypatch):
+    """Issue #42: idle workers do not mean the fire generation is closed.
+
+    Reloading between completion and PHASE-Z used to strand the old generation,
+    then the fresh process executed it against a missing singleton baseline.
+    """
+    src = _src_dir(
+        tmp_path, mtimes={"phase_z.py": NOW - timedelta(minutes=30)},
+    )
+    st = _state_file(
+        tmp_path, boot=BOOT, jobs=[],
+        phase_z_pending=[{
+            "job_id": "abc123", "cohort_id": "c1", "slot_id": 1,
+            "fire_lifecycle": {
+                "generation_id": "generation-a",
+                "captured_at": NOW.isoformat(),
+                "pre_fire_dirty": [],
+            },
+        }],
+    )
+    exit_fn = _Exit()
+
+    action = selfreload.maybe_self_reload(
+        state_path=st, src_dir=src, now=NOW, exit_fn=exit_fn,
+        marker_path=tmp_path / "restart_marker.json",
+    )
+
+    assert action == "deferred_in_flight"
+    assert exit_fn.called == 0
+
+
+def test_reload_decision_cannot_fall_between_worker_and_closeout_snapshots(
+    tmp_path, monkeypatch,
+):
+    """One state snapshot must cover both sides of current_jobs -> pending."""
+    src = _src_dir(
+        tmp_path, mtimes={"phase_z.py": NOW - timedelta(minutes=30)},
+    )
+    st = _state_file(tmp_path, boot=BOOT, jobs=[_job()])
+    # The former implementation re-read current_jobs after reading pending.
+    # Simulate completion in that gap: a mixed snapshot incorrectly totalled 0.
+    monkeypatch.setattr(state, "get_current_jobs", lambda _path: [])
+    exit_fn = _Exit()
+
+    action = selfreload.maybe_self_reload(
+        state_path=st, src_dir=src, now=NOW, exit_fn=exit_fn,
+        marker_path=tmp_path / "restart_marker.json",
+    )
+
     assert action == "deferred_in_flight"
     assert exit_fn.called == 0
 

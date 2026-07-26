@@ -1378,6 +1378,11 @@ def _drive_every_writer(path: Path) -> None:
                            log_path="/tmp/done.log", path=path)
     st.attach_process(job_id=done.job_id, expected_attempt=1,
                       pid=100, pgid=100, started_wall="wd", path=path)
+    st.attach_fire_lifecycle(job_id=done.job_id, lifecycle={
+        "generation_id": "generation-state-shape",
+        "captured_at": "2026-07-27T00:00:00+00:00",
+        "pre_fire_dirty": ["storage/next_tasks.json"],
+    }, path=path)
     # WS-B: an isolated fire carries its workspace receipt through to the
     # completions ring (ownership audit trail) and marks its pending item.
     st.attach_workspace(job_id=done.job_id, workspace={
@@ -1390,17 +1395,30 @@ def _drive_every_writer(path: Path) -> None:
     token = st.record_completion(job_id=done.job_id, expected_attempt=1, expected_pid=100,
                                  exit_code=0, outcome="success", final_model="opus", path=path)
     assert token is not None
-    st.finish_phase_z(cohort_id=done.cohort_id, path=path)
+    st.reject_phase_z(
+        cohort_ids={done.cohort_id}, reason="shape_gate_rejection", path=path,
+    )
 
     pending = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                               log_path="/tmp/pending.log", path=path)
     st.attach_process(job_id=pending.job_id, expected_attempt=1,
                       pid=101, pgid=101, started_wall="wp", path=path)
+    lifecycle = {
+        "generation_id": "generation-live-shape",
+        "captured_at": "2026-07-27T00:01:00+00:00",
+        "pre_fire_dirty": [],
+    }
+    st.attach_fire_lifecycle(
+        job_id=pending.job_id, lifecycle=lifecycle, path=path,
+    )
     # 第二槽先進 cohort；第一槽完成後留下 phase_z_pending，但 sibling
     # 仍在 current_jobs，正是 multi-slot drain 的 nested shape。
     sibling = st.reserve_fire(
         schedule_id="hourly_dispatch", attempt=2, model="opus",
         log_path="/tmp/z.log", cohort_id=pending.cohort_id, path=path,
+    )
+    st.attach_fire_lifecycle(
+        job_id=sibling.job_id, lifecycle=lifecycle, path=path,
     )
     # WS-B: leave one LIVE job carrying a workspace so the nested-container gate
     # sees $.current_jobs[].workspace / $.current_job.workspace in the final tree.
@@ -1480,7 +1498,11 @@ def _container_shapes(node, path="$"):
 # 保持扁平 —— 一旦有人往裡面塞巢狀 dict，就是一個沒人 gate 的新層。
 KNOWN_CONTAINERS = {
     "$", "$.current_job", "$.current_jobs[]", "$.phase_z_pending[]",
-    "$.completions[]", "$.alerts_dedup",
+    "$.phase_z_rejections[]", "$.completions[]", "$.alerts_dedup",
+    # #42 durable fire generation and rejected-token evidence.
+    "$.current_job.fire_lifecycle", "$.current_jobs[].fire_lifecycle",
+    "$.phase_z_pending[].fire_lifecycle",
+    "$.phase_z_rejections[].fire_lifecycle",
     # WS-B workspace receipt (attach_workspace → record_completion 帶進 ring)。
     # shape gate = test_workspace_receipt_shape_is_flat_and_documented。
     "$.current_job.workspace", "$.current_jobs[].workspace",
@@ -1491,6 +1513,34 @@ KNOWN_CONTAINERS = {
 WORKSPACE_RECEIPT_KEYS = {
     "name", "path", "branch", "base_sha", "lanes", "created_at", "setup_s",
 }
+
+FIRE_LIFECYCLE_KEYS = {
+    "generation_id", "captured_at", "pre_fire_dirty",
+}
+
+
+def test_fire_lifecycle_shape_is_flat_and_documented(tmp_state):
+    """Durable closeout authority has one explicit, bounded schema."""
+    _drive_every_writer(tmp_state)
+    state = st.read_state(tmp_state)
+    lifecycles = [
+        job["fire_lifecycle"]
+        for job in state["current_jobs"]
+        if "fire_lifecycle" in job
+    ] + [
+        entry["fire_lifecycle"]
+        for entry in state["phase_z_rejections"]
+        if "fire_lifecycle" in entry
+    ]
+    assert lifecycles, "驅動沒長出任何 durable fire lifecycle（假綠燈風險）"
+    for lifecycle in lifecycles:
+        assert set(lifecycle) == FIRE_LIFECYCLE_KEYS
+        assert isinstance(lifecycle["pre_fire_dirty"], list)
+        assert all(isinstance(item, str) for item in lifecycle["pre_fire_dirty"])
+        assert all(
+            not isinstance(value, dict)
+            for value in lifecycle.values()
+        )
 
 
 def test_workspace_receipt_shape_is_flat_and_documented(tmp_state):

@@ -63,6 +63,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
@@ -1441,7 +1442,9 @@ def run_pre_fire_guard(
 
     Returns an observability dict: ``ran`` (bool — did the guard execute),
     ``reason`` (str), ``dirty_at_fire_start`` (int — baseline size, -1 if the
-    probe failed), plus ``guard_output`` when it printed anything. Never raises.
+    probe failed), ``fire_lifecycle`` (durable generation + exact baseline when
+    capture succeeded), plus ``guard_output`` when it printed anything. Never
+    raises.
     """
     repo_root = Path(repo_root)
 
@@ -1449,19 +1452,36 @@ def run_pre_fire_guard(
     # subprocess in tests, and a fake that answers `[sys.executable, guard]`
     # cannot also answer `git status`.
     baseline = _dirty_paths(repo_root, git_runner)
-    if baseline is None or not _write_pre_fire_snapshot(repo_root, baseline, git_runner):
+    lifecycle: dict[str, object] = {}
+    if baseline is None:
+        # Never leave a previous fire's singleton available to a new fire that
+        # failed to capture its own generation. New code will reject the
+        # missing durable lifecycle; this unlink also fail-closes any
+        # mixed-version closeout still reading the transitional file.
+        _consume_pre_fire_snapshot(repo_root, git_runner)
         # No baseline → PHASE-Z will decline to commit and say so. Fail-open for
         # the fire itself (this function may never veto a dispatch), fail-closed
         # for the commit that follows it.
         snapshot_size = -1
     else:
         snapshot_size = len(baseline)
+        lifecycle["fire_lifecycle"] = {
+            "generation_id": uuid.uuid4().hex,
+            "captured_at": datetime.now(timezone.utc).isoformat(),
+            "pre_fire_dirty": sorted(baseline),
+        }
+        # Transitional fallback for a mixed-version daemon. New closeout uses
+        # the lifecycle bound into dispatch_state.json, not this singleton.
+        _write_pre_fire_snapshot(repo_root, baseline, git_runner)
         LOG.info("pre_fire_guard: baselined %d dirty path(s) at fire start", snapshot_size)
 
     script = repo_root.joinpath(*_GUARD_SCRIPT_RELPATH)
     if not script.exists():
         LOG.warning("pre_fire_guard: %s missing — no conflict backstop this fire", script)
-        return {"ran": False, "reason": "guard_missing", "dirty_at_fire_start": snapshot_size}
+        return {
+            "ran": False, "reason": "guard_missing",
+            "dirty_at_fire_start": snapshot_size, **lifecycle,
+        }
 
     try:
         proc = runner(
@@ -1474,10 +1494,16 @@ def run_pre_fire_guard(
         )
     except subprocess.TimeoutExpired:
         LOG.warning("pre_fire_guard: timeout after %ss — fail-open, firing anyway", _GUARD_TIMEOUT_S)
-        return {"ran": False, "reason": "timeout", "dirty_at_fire_start": snapshot_size}
+        return {
+            "ran": False, "reason": "timeout",
+            "dirty_at_fire_start": snapshot_size, **lifecycle,
+        }
     except OSError as exc:
         LOG.warning("pre_fire_guard: spawn failed (%s) — fail-open, firing anyway", exc)
-        return {"ran": False, "reason": "spawn_error", "dirty_at_fire_start": snapshot_size}
+        return {
+            "ran": False, "reason": "spawn_error",
+            "dirty_at_fire_start": snapshot_size, **lifecycle,
+        }
 
     # `--quiet` keeps the guard silent on a clean tree, so any output means it
     # acted (or warned). Forward it: the guard's own stdout is the only record
@@ -1490,10 +1516,16 @@ def run_pre_fire_guard(
         # The guard's main() returns 0 on every path, so this is a crash. Not
         # silent (see .claude/rules/no-silent-fallback.md) — but not a veto.
         LOG.warning("pre_fire_guard: exit=%d — fail-open, firing anyway", proc.returncode)
-        return {"ran": True, "reason": "nonzero_exit", "exit_code": proc.returncode,
-                "dirty_at_fire_start": snapshot_size}
+        return {
+            "ran": True, "reason": "nonzero_exit",
+            "exit_code": proc.returncode, "dirty_at_fire_start": snapshot_size,
+            **lifecycle,
+        }
 
-    result = {"ran": True, "reason": "ok", "dirty_at_fire_start": snapshot_size}
+    result = {
+        "ran": True, "reason": "ok",
+        "dirty_at_fire_start": snapshot_size, **lifecycle,
+    }
     if out:
         result["guard_output"] = out[-500:]
     return result

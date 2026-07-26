@@ -26,6 +26,11 @@ Schema (version 1)::
           "scheduled_for": "<ISO|null>",
           "fire_reason": "cron|requested:*|cron+requested:*",
           "fire_key": str | null,                 # atomic cron-slot dedup identity
+          "fire_lifecycle": {                     # durable PHASE-Z authority
+            "generation_id": str,                 # one immutable cohort generation
+            "captured_at": "<ISO>",
+            "pre_fire_dirty": [str]
+          },
           "workspace": {                          # WS-B: producer-scoped worktree receipt
             "name": str, "path": str, "branch": str, "base_sha": str,
             "lanes": [str], "created_at": "<ISO>", "setup_s": float
@@ -63,7 +68,19 @@ Schema (version 1)::
           "job_id": str, "cohort_id": str, "slot_id": int,
           "created_at": "<ISO>",
           "isolated": bool                       # WS-B: this fire ran with a workspace →
+          "fire_lifecycle": {                    # exact generation copied from worker
+            "generation_id": str,
+            "captured_at": "<ISO>",
+            "pre_fire_dirty": [str]
+          }
         }                                        #   cohort drain may demote baseline guessing
+      ],
+      "phase_z_rejections": [                    # fail-closed evidence, never silently dropped
+        {
+          # original phase_z_pending fields, plus:
+          "rejected_at": "<ISO>",
+          "rejection_reason": str
+        }
       ],
       "completions": [                           # ring buffer (max 100 entries)
         {
@@ -214,6 +231,7 @@ def _empty_state() -> dict[str, Any]:
         # _normalise_state refreshes this from the lowest occupied slot.
         "current_job": None,
         "phase_z_pending": [],
+        "phase_z_rejections": [],
         "completions": [],
         "auth_blocked": False,
         "auth_blocked_at": None,
@@ -299,6 +317,8 @@ def _normalise_state(data: dict[str, Any]) -> dict[str, Any]:
     data["current_job"] = jobs[0] if jobs else None
     if not isinstance(data.get("phase_z_pending"), list):
         data["phase_z_pending"] = []
+    if not isinstance(data.get("phase_z_rejections"), list):
+        data["phase_z_rejections"] = []
     return data
 
 
@@ -590,6 +610,20 @@ def finalize_restart_orphan_cleanup(
         return True
 
 
+def _phase_z_pending_record(job: dict[str, Any]) -> dict[str, Any]:
+    """Project one completed job into its durable closeout token."""
+    pending: dict[str, Any] = {
+        "job_id": job.get("job_id"),
+        "cohort_id": job.get("cohort_id"),
+        "slot_id": job.get("slot_id"),
+        "created_at": _now(),
+        "isolated": job.get("workspace") is not None,
+    }
+    if job.get("fire_lifecycle") is not None:
+        pending["fire_lifecycle"] = dict(job["fire_lifecycle"])
+    return pending
+
+
 def append_completion_entry(
     job: dict[str, Any], *, exit_code: int, outcome: str, final_model: str,
     path: Path = STATE_PATH, mark_cleanup_recorded: bool = False,
@@ -661,13 +695,7 @@ def append_completion_entry(
                 current["cleanup_outcome"] = outcome
                 pending = data.get("phase_z_pending") or []
                 if not any(item.get("job_id") == job.get("job_id") for item in pending):
-                    pending.append({
-                        "job_id": job.get("job_id"),
-                        "cohort_id": job.get("cohort_id"),
-                        "slot_id": job.get("slot_id"),
-                        "created_at": _now(),
-                        "isolated": job.get("workspace") is not None,
-                    })
+                    pending.append(_phase_z_pending_record(job))
                 data["phase_z_pending"] = pending
                 _sync_projection(data)
         return entry
@@ -961,6 +989,44 @@ def attach_workspace(
         return True
 
 
+def attach_fire_lifecycle(
+    *, job_id: str, lifecycle: dict[str, Any], path: Path = STATE_PATH,
+) -> bool:
+    """Persist the fire generation before a worker can produce repo bytes.
+
+    PHASE-Z authority must survive a supervisor process restart.  The former
+    singleton file only proved that *some* process had captured a baseline; it
+    could not prove that the fresh process was closing the same logical fire.
+    This exact-job CAS binds the immutable generation and baseline to the
+    reserved fire, and ``record_completion`` carries it into
+    ``phase_z_pending``.
+    """
+    generation_id = str(lifecycle.get("generation_id") or "").strip()
+    captured_at = str(lifecycle.get("captured_at") or "").strip()
+    raw_paths = lifecycle.get("pre_fire_dirty")
+    if not generation_id or not captured_at or not isinstance(raw_paths, list):
+        raise ValueError("fire lifecycle requires generation_id, captured_at, pre_fire_dirty")
+    normalized = {
+        "generation_id": generation_id,
+        "captured_at": captured_at,
+        "pre_fire_dirty": sorted({str(item) for item in raw_paths}),
+    }
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            LOG.warning("attach_fire_lifecycle: job %s not found", job_id)
+            return False
+        _index, job = found
+        existing = job.get("fire_lifecycle")
+        if existing is not None and existing != normalized:
+            raise RuntimeError(
+                f"fire lifecycle already bound to another generation: job_id={job_id}"
+            )
+        job["fire_lifecycle"] = normalized
+        _sync_projection(data)
+        return True
+
+
 def update_started_wall(
     *, pid: int, started_wall: str, job_id: str | None = None,
     expected_attempt: int | None = None, path: Path = STATE_PATH,
@@ -1105,13 +1171,7 @@ def record_completion(
             if managed_phase_z:
                 pending = data.get("phase_z_pending") or []
                 if not any(item.get("job_id") == job.get("job_id") for item in pending):
-                    pending.append({
-                        "job_id": job.get("job_id"),
-                        "cohort_id": job.get("cohort_id"),
-                        "slot_id": job.get("slot_id"),
-                        "created_at": _now(),
-                        "isolated": job.get("workspace") is not None,
-                    })
+                    pending.append(_phase_z_pending_record(job))
                 data["phase_z_pending"] = pending
             cohort_drained = not any(
                 sibling.get("cohort_id") == job.get("cohort_id")
@@ -1153,6 +1213,37 @@ def finish_phase_z(*, cohort_id: str, path: Path = STATE_PATH) -> int:
         removed = len(pending) - len(kept)
         data["phase_z_pending"] = kept
         return removed
+
+
+def reject_phase_z(
+    *, cohort_ids: set[str], reason: str, path: Path = STATE_PATH,
+) -> list[dict[str, Any]]:
+    """Move unauthorised closeout tokens into a durable rejection ledger.
+
+    This releases scheduler capacity without erasing the only evidence that a
+    fire still had an unmatched closeout.  The caller separately routes the
+    rejection to the incident system; this state transition is the atomic
+    receipt that remains even when alert delivery fails.
+    """
+    wanted = {str(item) for item in cohort_ids}
+    with _locked_state(path) as (_fh, data):
+        pending = data.get("phase_z_pending") or []
+        rejected: list[dict[str, Any]] = []
+        kept: list[dict[str, Any]] = []
+        for item in pending:
+            if str(item.get("cohort_id")) not in wanted:
+                kept.append(item)
+                continue
+            rejected.append({
+                **item,
+                "rejected_at": _now(),
+                "rejection_reason": str(reason),
+            })
+        ledger = data.get("phase_z_rejections") or []
+        ledger.extend(rejected)
+        data["phase_z_pending"] = kept
+        data["phase_z_rejections"] = ledger[-COMPLETIONS_MAX:]
+        return rejected
 
 
 def set_auth_blocked(blocked: bool, path: Path = STATE_PATH) -> None:

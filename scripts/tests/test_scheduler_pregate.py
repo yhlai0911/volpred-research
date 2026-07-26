@@ -80,6 +80,11 @@ def worker_calls(monkeypatch: pytest.MonkeyPatch) -> list:
 
     monkeypatch.setattr(scheduler.worker, "run_worker", fake_run_worker)
     monkeypatch.setattr(scheduler.phase_z, "run_phase_z", lambda **kw: {"skipped": True})
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "_default_internal_alert",
+        lambda **_kwargs: {"sent": True, "test_stub": True},
+    )
     return calls
 
 

@@ -148,7 +148,17 @@ def consistency_env(tmp_path: Path, monkeypatch):
     )
     monkeypatch.setattr(scheduler.phase_z, "run_phase_z", lambda **kw: {"skipped": True})
     monkeypatch.setattr(scheduler.phase_z, "recover_failed_closeout", lambda **kw: {"skipped": True})
-    monkeypatch.setattr(scheduler.phase_z, "run_pre_fire_guard", lambda **kw: {"skipped": True})
+    monkeypatch.setattr(
+        scheduler.phase_z, "run_pre_fire_guard",
+        lambda **kw: {
+            "skipped": True,
+            "fire_lifecycle": {
+                "generation_id": "decision-test-generation",
+                "captured_at": "2026-07-20T10:07:00+00:00",
+                "pre_fire_dirty": [],
+            },
+        },
+    )
 
     decisions: list[decision.Decision] = []
     real_decide = decision.decide

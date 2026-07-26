@@ -204,7 +204,16 @@ def maybe_self_reload(
         boot=boot,
         now=now,
     )
-    in_flight = len(state.get_current_jobs(state_path))
+    # Worker exit is not fire completion: the durable PHASE-Z generation still
+    # owns a closeout token until ``finish_phase_z`` commits or rejects it.
+    # Reloading in that narrow window caused the fresh process to execute the
+    # old token against a missing singleton baseline (Issue #42).
+    # Use one atomic-file snapshot for both sides of the transition. Mixing an
+    # old pending list with a fresh current_jobs read recreates the exact race:
+    # the worker can move current_jobs -> phase_z_pending between those reads
+    # and momentarily appear in neither collection.
+    pending_closeouts = len(snapshot.get("phase_z_pending") or [])
+    in_flight = len(snapshot.get("current_jobs") or []) + pending_closeouts
     action, reason = decide(stale=stale, in_flight=in_flight, now=now, quiesce_s=quiesce_s)
 
     if action == _NO_STALE:

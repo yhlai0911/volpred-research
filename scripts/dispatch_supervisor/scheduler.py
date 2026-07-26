@@ -81,7 +81,10 @@ _PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_
                              # of retrying can produce one — retrying is a livelock, and the
                              # alert inside run_phase_z re-fires every tick (2026-07-13:
                              # 12+ identical warns to the boss in 14 min). One alert, done.
-                             "ownership_unknown"}
+                             "ownership_unknown",
+                             "missing_generation", "generation_mismatch",
+                             "invalid_generation_baseline",
+                             "generation_baseline_mismatch"}
 # Retrying a non-terminal drain only helps transient git hiccups (index.lock,
 # probe timeout). Deterministic failures (a pre-commit gate block) would retry
 # every ~64s tick forever. Three attempts ≈ 3 min of transient tolerance, then
@@ -100,6 +103,74 @@ def _phase_z_claim_owners(pending: list[dict[str, Any]]) -> set[str]:
         slot_id = raw_slot if raw_slot.startswith("slot-") else f"slot-{raw_slot}"
         owners.update(identity.task_claim_owners_for_job(slot_id=slot_id, job_id=job_id))
     return owners
+
+
+def _matching_fire_lifecycle(
+    pending: list[dict[str, Any]],
+) -> tuple[set[str] | None, str]:
+    """Return the durable baseline only when every token names one generation.
+
+    A process restart is precisely where the old singleton snapshot became
+    ambiguous.  Missing, mixed, or differently-captured generations therefore
+    carry no authority to execute closeout.
+    """
+    lifecycles = [item.get("fire_lifecycle") for item in pending]
+    if not lifecycles or any(not isinstance(item, dict) for item in lifecycles):
+        return None, "missing_generation"
+    generation_ids = {
+        str(item.get("generation_id") or "").strip() for item in lifecycles
+    }
+    if "" in generation_ids or len(generation_ids) != 1:
+        return None, "generation_mismatch"
+    baselines = [item.get("pre_fire_dirty") for item in lifecycles]
+    if any(not isinstance(paths, list) for paths in baselines):
+        return None, "invalid_generation_baseline"
+    normalized = [{str(path) for path in paths} for paths in baselines]
+    if any(paths != normalized[0] for paths in normalized[1:]):
+        return None, "generation_baseline_mismatch"
+    return normalized[0], next(iter(generation_ids))
+
+
+def _reject_unmatched_generation(
+    *, pending: list[dict[str, Any]], reason: str, state_path: Path,
+) -> dict[str, Any]:
+    """Atomically quarantine unmatched tokens and route one durable incident."""
+    cohorts = {str(item.get("cohort_id")) for item in pending}
+    rejected = state.reject_phase_z(
+        cohort_ids=cohorts, reason=reason, path=state_path,
+    )
+    LOG.error(
+        "phase_z rejected closeout without matching durable generation "
+        "reason=%s jobs=%s",
+        reason,
+        [item.get("job_id") for item in pending],
+    )
+    alert = phase_z._default_internal_alert(
+        alert_key="phase_z_generation_rejected",
+        level="warn",
+        title="PHASE-Z closeout generation 無法驗證 — 已隔離且未執行",
+        body="\n".join([
+            "## 發生什麼",
+            "Supervisor 找到待 closeout 的 fire，但 durable generation "
+            f"無法驗證（{reason}）。",
+            "",
+            "## 安全處置",
+            "沒有執行 PHASE-Z、沒有提交任何檔案。原 token 已原樣移入 "
+            "`dispatch_state.json.phase_z_rejections`，不會靜默消失。",
+            "",
+            "## 行動",
+            "依 rejection receipt 的 job_id / cohort_id 查明原 generation；"
+            "不得用目前工作區的 singleton baseline 代替。",
+        ]),
+        fingerprint=f"phase_z_generation_rejected:{reason}",
+    )
+    return {
+        "committed": False,
+        "reason": reason,
+        "generation_rejected": True,
+        "rejected": len(rejected),
+        "alert": alert,
+    }
 
 
 def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
@@ -489,16 +560,31 @@ async def _run_reserved_fire(
                     isolated_cohort = all(
                         bool(item.get("isolated")) for item in cohort_pending
                     )
-                    phase_z_outcome = await asyncio.to_thread(
-                        phase_z.run_phase_z, repo_root=repo_root,
-                        isolated_cohort=isolated_cohort,
-                        claim_owners=_phase_z_claim_owners(cohort_pending),
-                        fire_ids={
+                    durable_baseline, generation = _matching_fire_lifecycle(
+                        cohort_pending
+                    )
+                    phase_z_kwargs = {
+                        "repo_root": repo_root,
+                        "isolated_cohort": isolated_cohort,
+                        "claim_owners": _phase_z_claim_owners(cohort_pending),
+                        "fire_ids": {
                             str(item["job_id"])
                             for item in cohort_pending
                             if item.get("job_id")
                         },
-                    )
+                    }
+                    if durable_baseline is not None:
+                        phase_z_kwargs["pre_fire_dirty"] = durable_baseline
+                    else:
+                        phase_z_outcome = _reject_unmatched_generation(
+                            pending=cohort_pending,
+                            reason=generation,
+                            state_path=state_path,
+                        )
+                    if phase_z_outcome is None:
+                        phase_z_outcome = await asyncio.to_thread(
+                            phase_z.run_phase_z, **phase_z_kwargs,
+                        )
                     LOG.info("phase_z cohort drain job_id=%s outcome=%s", job_id, phase_z_outcome)
                 except Exception as exc:  # noqa: BLE001
                     LOG.warning("phase_z safety-net failed (non-fatal): %s", exc)
@@ -740,6 +826,24 @@ async def _tick_once(
                 return {"action": "skip", "reason": "cohort_still_running"}
             if not pending_phase_z:
                 return {"action": "phase_z_already_drained", "phase_z": None}
+            durable_baseline, generation = _matching_fire_lifecycle(pending_phase_z)
+            if durable_baseline is None:
+                # A fresh process may observe a token written by an older daemon
+                # or a crash between reservation and lifecycle binding. It must
+                # not execute that old closeout against whichever singleton
+                # snapshot happens to exist now.
+                rejection = _reject_unmatched_generation(
+                    pending=pending_phase_z,
+                    reason=generation,
+                    state_path=state_path,
+                )
+                return {
+                    "action": "phase_z_generation_rejected",
+                    "reason": generation,
+                    "pending_jobs": len(pending_phase_z),
+                    "rejected": rejection["rejected"],
+                    "alert": rejection["alert"],
+                }
             # WS-B: same demotion rule as the fire-task drain — every pending
             # fire must have been isolated for the recovery drain to skip
             # baseline authorship guessing on repo bytes.
@@ -750,6 +854,7 @@ async def _tick_once(
                 phase_z.run_phase_z, repo_root=repo_root,
                 isolated_cohort=recovery_isolated,
                 claim_owners=_phase_z_claim_owners(pending_phase_z),
+                pre_fire_dirty=durable_baseline,
                 fire_ids={
                     str(item["job_id"])
                     for item in pending_phase_z
@@ -788,6 +893,13 @@ async def _tick_once(
     # All reads happen here; decide() is pure. Dry-run and fire consume the
     # SAME Decision — they may only diverge at the write boundary below.
     current_jobs = snap.get("current_jobs") or []
+    # Concurrent members of one cohort share the first fire's exact baseline.
+    # The value is copied into every reserved job before its worker can spawn.
+    fire_lifecycle = (
+        dict(current_jobs[0]["fire_lifecycle"])
+        if current_jobs and isinstance(current_jobs[0].get("fire_lifecycle"), dict)
+        else None
+    )
     capacity = max_slots if max_slots is not None else load_max_slots(schedules_path=schedules_path)
     due, prev_fire = _due_to_fire(cron_expr=cron_expr, last_fire_at=snap.get("last_fire_at"))
     pregate_cfg = load_pregate_config(schedules_path=schedules_path)
@@ -873,6 +985,11 @@ async def _tick_once(
             LOG.warning("phase_z failed-closeout recovery failed (non-fatal): %s", exc)
         try:
             guard_outcome = await asyncio.to_thread(phase_z.run_pre_fire_guard, repo_root=repo_root)
+            if (
+                isinstance(guard_outcome, dict)
+                and isinstance(guard_outcome.get("fire_lifecycle"), dict)
+            ):
+                fire_lifecycle = dict(guard_outcome["fire_lifecycle"])
             LOG.info("pre_fire_guard outcome=%s", guard_outcome)
         except Exception as exc:  # noqa: BLE001
             LOG.warning("pre_fire_guard failed (non-fatal, firing anyway): %s", exc)
@@ -928,6 +1045,10 @@ async def _tick_once(
         path=state_path,
     )
     job_id = lease.job_id
+    if fire_lifecycle is not None:
+        state.attach_fire_lifecycle(
+            job_id=job_id, lifecycle=fire_lifecycle, path=state_path,
+        )
     slot_id = f"slot-{lease.slot_id}"
     job_log_path = _slot_log_path(log_path, slot_id=slot_id, job_id=job_id)
     try:
