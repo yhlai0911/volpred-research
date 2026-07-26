@@ -890,7 +890,24 @@
         "rationale": "matched: K-experiment id",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "created_at_observed_not_after": "2026-04-17T14:25:09+08:00",
+    "creation_time_evidence": {
+      "method": "reviewed_git_snapshot_observation",
+      "evidence_commit": "72c1c7bc9b2635b7804a18e97c3bfc6c6e255b4c"
+    },
+    "source": "user",
+    "provenance_migration": {
+      "source": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "git:72c1c7bc9b2635b7804a18e97c3bfc6c6e255b4c#task/K1161b_paid_options_data-owner-decision"
+      },
+      "blocked_reason": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "git:72c1c7bc9b2635b7804a18e97c3bfc6c6e255b4c#task/K1161b_paid_options_data-description"
+      }
+    },
+    "blocked_reason": "paid_data_source_decision_pending"
   },
   {
     "id": "K1169",
@@ -3533,7 +3550,24 @@
         "rationale": "paper + narrative/decision verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "created_at_observed_not_after": "2026-04-17T12:40:46+08:00",
+    "creation_time_evidence": {
+      "method": "reviewed_git_snapshot_observation",
+      "evidence_commit": "aa9d8c98fa3ea047a74a6c1232fc62d9409dbe2c"
+    },
+    "source": "user",
+    "provenance_migration": {
+      "source": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "git:aa9d8c98fa3ea047a74a6c1232fc62d9409dbe2c#task/Paper2_section5_decision-user-confirmed"
+      },
+      "blocked_reason": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "git:aa9d8c98fa3ea047a74a6c1232fc62d9409dbe2c#task/Paper2_section5_decision-status"
+      }
+    },
+    "blocked_reason": "awaiting_main_thread_body_rewrite"
   },
   {
     "id": "Paper2_section5_major_revision",
@@ -3741,7 +3775,24 @@
         "rationale": "paper + narrative/decision verbs",
         "at": "2026-05-25"
       }
-    ]
+    ],
+    "created_at_observed_not_after": "2026-04-17T13:25:41+08:00",
+    "creation_time_evidence": {
+      "method": "reviewed_git_snapshot_observation",
+      "evidence_commit": "2922e1ff67b15b4efee5e3ba8876abd606551c53"
+    },
+    "source": "user",
+    "provenance_migration": {
+      "source": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "git:2922e1ff67b15b4efee5e3ba8876abd606551c53#task/Paper4_channel_specific_pivot-user-confirmed"
+      },
+      "blocked_reason": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "git:2922e1ff67b15b4efee5e3ba8876abd606551c53#task/Paper4_channel_specific_pivot-status"
+      }
+    },
+    "blocked_reason": "awaiting_main_thread_body_rewrite"
   },
   {
     "id": "Paper4_experiments_md_add_vix_term_structure",
@@ -15241,8 +15292,6 @@
       "VIX1D"
     ],
     "monetization_angle": "direct_intraday_strategy + hft_traffic",
-    "started_at": "2026-07-21T09:36:36.312051+00:00",
-    "completed_at": "2026-06-09T10:28:11.725039+00:00",
     "result": "Created experiments/k1438 feasibility audit: local SPY 5-min sample has 100 days but no canonical local VIX1D series/snapshot column, so HAR-RV+VIX1D cannot be run honestly. Added README + script + results.json documenting the data gap; git commit blocked in this sandbox because .git is read-only (index.lock operation not permitted).",
     "blocked_at": "2026-07-21T09:36:37+00:00",
     "blocked_note": "K1438 已於前輪做過誠實的 feasibility audit（experiments/k1438/，status=BLOCKED_DATA_UNAVAILABLE），結論是資料不足以做正式 forecasting，不是實驗設計問題。本班 2026-07-21 複驗兩個 blocker 都還在：(1) repo 內找不到任何 canonical VIX1D 歷史檔（find/grep 只命中文字提及，無資料檔）；(2) 本地 SPY 5-min 只有 100 個交易日（2026-01-14 ~ 2026-06-08），HAR-RV OOS 最低需 252 日。在補進 VIX1D 歷史 + 加長 5-min 歷史之前，任何再派工都會撞同一面牆（dispatcher 每小時把它當保底席推上來，等於固定燒一個 slot）。解除條件：新增 canonical 本地 VIX1D 時間序列，且 SPY 5-min 歷史 >= 252 交易日；屆時照 k1438_results.json 的 next_steps 三步跑，covariate 一律 lag。",
@@ -15253,8 +15302,6 @@
     "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
     "adjudicated_by": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
     "adjudication_reason": "verified in-fire: yfinance ^VIX1D returns data (21 rows for 2024-01) -- the 'awaiting external data' premise is false",
-    "claimed_by": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
-    "claimed_at": "2026-07-21T09:36:35.216554+00:00",
     "claim_session_id": "8a8956eb4954",
     "status_history": [
       {
@@ -15271,7 +15318,29 @@
       }
     ],
     "blocked_until": "2026-08-04T09:36:37+00:00",
-    "blocked_reason": "awaiting_external_data"
+    "blocked_reason": "awaiting_external_data",
+    "claimed_by_original": "hourly-slot-1-805f4d4c32b442af8ed385c83b595ce3",
+    "provenance_migration": {
+      "claimed_by": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://K1438_vix1d_spy_intraday_vol_covariate#blocked_note-data-unavailable"
+      },
+      "claimed_at": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://K1438_vix1d_spy_intraday_vol_covariate#status_history-reopened-claim"
+      },
+      "started_at": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://K1438_vix1d_spy_intraday_vol_covariate#status_history-reopened-start"
+      },
+      "completed_at": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://K1438_vix1d_spy_intraday_vol_covariate#historical-terminal-trace-precedes-reopen"
+      }
+    },
+    "claimed_at_original": "2026-07-21T09:36:35.216554+00:00",
+    "started_at_original": "2026-07-21T09:36:36.312051+00:00",
+    "completed_at_original": "2026-06-09T10:28:11.725039+00:00"
   },
   {
     "id": "daily_article_k1432_oos_overfitting",
@@ -27332,7 +27401,6 @@
     "task_type": "paper_body",
     "priority": 3,
     "status": "blocked_on_user",
-    "created_at": "2026-07-07T04:31:09.399347",
     "title": "taiwan-vt tab:gamma rolling-block: integrate reproducible re-estimates + rewrite 0056 sensitivity prose",
     "description": "Holistic correction of body_v3.tex tab:gamma rolling-window (w=2000) block, now that the legacy N121 values are proven NON-REPRODUCIBLE (experiments/paper2_taiwan_indiv_rolling_gamma, Codex CONDITIONAL_PASS). Reproducible values (recompute FIRST on calendar-aligned snapshots per Codex caveat — 2886 snapshot currently ends 2025-01): 2317 0.032/0.92, 2454 0.045/1.54, 2886 0.054/1.41, 0056 0.310/3.92, 9-stock rolling avg 0.037 (ratio 7.4x), 10-security 0.064 (ratio 4.3x). TASKS: (1) re-run experiment on calendar-aligned (uniform end-date) snapshots for all 10 securities; (2) update the 3 displayed individual rows + 0056 row + both rolling averages + footnote ratios to reproducible values with %source binding; (3) REWRITE the 0056-inclusion sensitivity paragraph — 0056 is no longer 'second-highest 0.112' but the HIGHEST (0.310, above index 0.272), which STRENGTHENS the diversification-amplification thesis (ETF-internal aggregation -> strongest leverage) but changes the prose logic and requires author sign-off; (4) resolve TWII rolling gamma provenance (0.272 untraceable N120) and 0050 rows if touched; (5) main_v3.tex recompile + reproduce.py rebind + paper-update. MAIN-THREAD ONLY (narrative decision). PRIMARY full-sample claim (gamma_bar=0.027, 4.3x, K1302+K1302b VERIFIED) is UNAFFECTED. Parent: paper2_taiwan_vt_body_v3_individual_stock_provenance. Paper gated do_not_advance=true until done.",
     "status_history": [
@@ -27357,7 +27425,20 @@
     "blocked_reason_original": "Awaiting owner sign-off on narrative reframe (email 9adb9e49, 2026-07-09). Step 1 (calendar-aligned recompute) DONE incl reproducible index rows. CORRECTED canonical values (supersede description's stale own-window 0.310 set): 2317 0.015/0.45, 2454 0.027/1.22, 2886 0.054/1.41, 0056 0.202/2.89 (HIGHEST, above index), TWII 0.158/2.57 (legacy 0.272 non-reproducible), 0050 0.079/1.90, 9-stock avg 0.024, 10-security avg 0.042, amplification 6.5x/3.8x. On owner APPROVE -> unblock + main-thread body_v3.tex rewrite (steps 2-5).",
     "blocked_note": "Awaiting owner sign-off on narrative reframe (email 9adb9e49, 2026-07-09). Step 1 (calendar-aligned recompute) DONE incl reproducible index rows. CORRECTED canonical values (supersede description's stale own-window 0.310 set): 2317 0.015/0.45, 2454 0.027/1.22, 2886 0.054/1.41, 0056 0.202/2.89 (HIGHEST, above index), TWII 0.158/2.57 (legacy 0.272 non-reproducible), 0050 0.079/1.90, 9-stock avg 0.024, 10-security avg 0.042, amplification 6.5x/3.8x. On owner APPROVE -> unblock + main-thread body_v3.tex rewrite (steps 2-5).",
     "vocab_migrated_at": "2026-07-20T05:28:22+00:00",
-    "vocab_migration_rationale": "Long free-text prose is an owner-sign-off wait (email 9adb9e49) on a status=blocked_on_user row -> the new canonical awaiting_owner_decision. Full prose (incl. corrected canonical values) preserved in blocked_reason_original + blocked_note."
+    "vocab_migration_rationale": "Long free-text prose is an owner-sign-off wait (email 9adb9e49) on a status=blocked_on_user row -> the new canonical awaiting_owner_decision. Full prose (incl. corrected canonical values) preserved in blocked_reason_original + blocked_note.",
+    "created_at_original": "2026-07-07T04:31:09.399347",
+    "created_at_observed_not_after": "2026-07-09T11:15:57.733160+00:00",
+    "creation_time_evidence": {
+      "method": "lifecycle_observation_upper_bound",
+      "evidence_field": "updated_at"
+    },
+    "source": "user",
+    "provenance_migration": {
+      "source": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://paper2_taiwan_vt_rolling_block_reestimate#blocked_reason_original-owner-sign-off"
+      }
+    }
   },
   {
     "id": "research_growth_at_risk_equity_vol_at_risk_horizon",
@@ -32776,7 +32857,7 @@
     "title": "K1715: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Chri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 509). Original: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1715.py with signal.shift(1) + seed=42, (c) K1715_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -32823,7 +32904,24 @@
     "claimed_by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
     "claimed_at": "2026-07-26T23:09:32.087458+00:00",
     "claim_session_id": "c7da5a6b4bf6",
-    "started_at": "2026-07-26T23:09:32.321124+00:00"
+    "started_at": "2026-07-26T23:09:32.321124+00:00",
+    "status_original": "in_progress",
+    "provenance_migration": {
+      "status": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1715_adjudicate-27247d.json#status"
+      },
+      "blocked_reason": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1715_adjudicate-27247d.json#completed_at"
+      },
+      "external_execution_ref": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1715_adjudicate-27247d.json#id"
+      }
+    },
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "external_execution_ref": "storage/ops/compute_queue/agent-brief_k1715_adjudicate-27247d.json"
   },
   {
     "id": "K1716",
@@ -37208,7 +37306,14 @@
     "completed_at": "2026-07-21T15:26:08.901625+00:00",
     "result": "未開始重跑，因為指定的驗證工具 detect_price_split_breaks.py --csv-scan 會漏報：k1406/data/0050.TW.csv 與 k1411/data/T0050.csv 的 2013-12-31→2014-01-02 ratio 皆為 0.2494（與已標出的 K1395/k1660/k1671 相同的 4:1 未調整分割），卻不在掃描的 19/1279 清單內 → 受害名單只是下界。已建 detect_price_split_breaks_false_negative_20260721 擋在前面。同時查證：真污染至少 12 個（掃描 10 + 漏報 2）；paper2_taiwan_indiv_rolling_gamma/data/0050_tw.csv ratio=0.9974 已乾淨、原單誤列；k1711 來源歧義未解（載入點不在該層 .py）。完整分類見 storage/ops/k_reruns_0050_contamination_triage_20260721.md。修偵測器→重掃→再重跑，順序不可顛倒。",
     "blocked_until": "2026-08-04T16:08:21+00:00",
-    "needs_adjudication": true
+    "needs_adjudication": true,
+    "blocked_reason": "awaiting_prerequisite_fix",
+    "provenance_migration": {
+      "blocked_reason": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://k_reruns_0050_snapshot_contaminated_20260719#result-detect_price_split_breaks_false_negative"
+      }
+    }
   },
   {
     "id": "clean_tw50_extreme_return_zeroing_20260719",
@@ -40679,9 +40784,20 @@
     "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-21T07:23:18.572000+00:00",
-    "parent_task_id": "agent-brief_k1380_stage-68dea3",
     "description": "PHASE A collect_completed 收件（job agent-brief_k1380_stage-68dea3，completed 2026-07-21T07:13:50Z）。\n2026-07-21 15:07 班次建單：A0 time_critical lane 先行清空後，本班剩餘預算不足以安全完成 canonical worktree merge，\n依「scope 切小、不留 partial」建單而非半做。\n\n**先讀 agent 自己的 artifact，不要重跑**：\n.claude/worktrees/dispatch-slot-1-375ba0e3-k1380/experiments/k1380/k1380_stage_refactor_report.json\n（16.8KB，commit 372c4d145，branch wt/dispatch-slot-1-375ba0e3-k1380）\n\n**關鍵前提 —— agent 自己標明的 scope，收件時不可誤讀為實驗結果**：\nstatus = REFACTOR_COMPLETE_COMPUTE_HELD_PENDING_MERGE。\nagent 的 scope_note 寫得很清楚：brief 只要求「重構成 stage 並 enqueue」，不要求跑 heavy compute。\n**目前沒有任何 SPA / RC 數字存在**，stage 3 沒跑就不可能有。\n→ 原 followup brief 裡的「SANITY GATE（mean QLIKE ~1.4 量級）判定結果」與「A5/C2/C3 重判理由」\n   **本輪無法執行**（沒有數字可判），不要為了交差生出數字。\n→ **絕對禁止**寫 Paper 9 Multiple Testing 子節。agent 已明文：「Nothing here may reach Paper 9.」\n\n**本輪實際可驗、該驗的**：\n1. --stage 三段是否真的落地：forecasts_a / forecasts_midas / spa，各一 artifact、一 success criterion、\n   各自 timeout 且短於 parent 的 7200s。\n2. forecast 階段存的是 σ̂² 本身而非 loss。這是重點：x - log(x) - 1 非單射，存 loss 在 loss 定義修正後無法回推，\n   存 forecast 才能。驗檔案內容不要只看報告自述。\n3. 本地 qlike() 已刪除、改 import volpred.stats.model_evaluation.qlike_pointwise\n   （per .claude/rules/experiments.md；手寫副本正是當初 QLIKE 反向的根因）。\n4. experiments/k1380/test_k1380.py 13 個回歸測試實跑一次，確認全綠（報告自述全過，要自己驗）。\n5. 三個 child stage 是否已 enqueue 且帶 --timeout-parent-job-id + --split-stage\n   （queue 內現有 5 筆含 split-stage，要確認其中哪幾筆屬於 k1380，別跟其他 parent 的混淆）。\n6. 報告的 defects_found_beyond_the_known_reversed_qlike 逐條看過（第 1 條 severity=invalidating），\n   判斷是否影響既有 K1380 結論或已寫入的知識。\n\n**收尾**：過 agent-result-verification skill 後，用正式 scripts/merge_worktree.sh 完整合併\nwt/dispatch-slot-1-375ba0e3-k1380，不留未合併 branch/worktree。knowledge.json 由主線程寫，不由 agent 寫（K1259）。\n\n後續：三個 child stage 跑完才進 SPA/RC 判讀與 Paper 9，那是另一張單。",
-    "d5_finding": "[D5 assign_0e6a740b 2026-07-22] 標題前提「compute 尚未跑，禁寫 Paper 9」已可證偽：K1380_v4 已於 2026-07-05 產出 canonical SPA/RC 結果。請重新評估本任務是否 superseded。詳見 docs/governance/2026-07/d5_k1380_file_adjudication.md"
+    "d5_finding": "[D5 assign_0e6a740b 2026-07-22] 標題前提「compute 尚未跑，禁寫 Paper 9」已可證偽：K1380_v4 已於 2026-07-05 產出 canonical SPA/RC 結果。請重新評估本任務是否 superseded。詳見 docs/governance/2026-07/d5_k1380_file_adjudication.md",
+    "parent_task_id_original": "agent-brief_k1380_stage-68dea3",
+    "provenance_migration": {
+      "parent_task_id": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1380_stage-68dea3.json#completed_at"
+      },
+      "upstream_receipt_ref": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1380_stage-68dea3.json#followup_next_task_id"
+      }
+    },
+    "upstream_receipt_ref": "storage/ops/compute_queue/agent-brief_k1380_stage-68dea3.json"
   },
   {
     "id": "ci-red-29808977711",
@@ -40934,8 +41050,19 @@
     "source": "machine",
     "created_at": "2026-07-21T11:12:22.469480+00:00",
     "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
-    "parent_task_id": "worktree_harvest_wave3_dirty_stale_20260721",
-    "description": "[worktree harvest wave 3 衍生] snapdup worktree 卡住的根因已定位。\n\n**根因**：compute job `compute-codex-audit-snapshot-dup-20260721-1784607109`\n（Codex 認證審查）status=failed / exit_code=1，12 秒就結束。\nstderr（storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md.stderr 末兩行）：\n`ERROR: You've hit your usage limit ... try again at Jul 25th, 2026 1:30 PM.`\n→ **不是腳本 bug，是外部額度耗盡**。verdict.md 是 0 bytes（reap_orphan_deliverables\n以 partial_delivered 投遞了空檔，delivery_commit=cbd1636e9）。\n\n**連帶影響**：worktree `.claude/worktrees/dispatch-slot-1-20b291d5-snapdup`\n（commit 1c30466ae，clean，3864 行稽核成果）沒有 verdict 就過不了 certification gate，\n已閒置 7.2h 並持續占用 agent slot。gate 擋得對，卡的是認證本身。\n\n**另一個發現（值得單獨修）**：這張 failed job 沒有出現在\n`compute_queue.py list --pending-followup` 裡（本班實測回傳 []），\nfollowup_dispatched=false 且 completed_at 有值。PHASE A 的 triage_failed lane\n因此看不到它 —— 失敗的 job 就這樣無聲沉底 7 小時。這是 pending-followup filter 的漏洞。\n\n**要做的事**：\n1. 走專案既有的 usage-limit fallback 路徑 —— 前例在 canonical\n   experiments/k1707/review_verdict.json:\n   `\"reviewer\": \"fresh-context code-reviewer fallback after external Codex usage-limit failure\"`。\n   同法對 experiments/audit_snapshot_dup_20260721 做認證審查\n   （prompt 現成：storage/ops/codex_reviews/audit_snapshot_dup_20260721_prompt.md）。\n2. 判準照 prompt 寫的：PASS = 「這些數字與裁決可以直接拿去行動」，不是「大致合理」。\n   這份稽核會被拿去建 P1 修正任務、可能撤回已發表數字 —— 不要放水。\n3. 之後照原 followup brief 收尾（寫 review_verdict.json → merge_worktree → 主線程寫 knowledge）。\n   原 brief 全文在該 compute job 的 claude_followup.brief。\n4. 若判定應等 Codex（7/25 後）而非 fallback，就明講並把本 task blocked_until 設到 7/25，\n   不要讓 worktree 無限期占 slot 又沒人記得。\n\n**禁止**：手改 verdict 檔繞過 gate；把 0-byte verdict 當成 PASS。"
+    "description": "[worktree harvest wave 3 衍生] snapdup worktree 卡住的根因已定位。\n\n**根因**：compute job `compute-codex-audit-snapshot-dup-20260721-1784607109`\n（Codex 認證審查）status=failed / exit_code=1，12 秒就結束。\nstderr（storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict.md.stderr 末兩行）：\n`ERROR: You've hit your usage limit ... try again at Jul 25th, 2026 1:30 PM.`\n→ **不是腳本 bug，是外部額度耗盡**。verdict.md 是 0 bytes（reap_orphan_deliverables\n以 partial_delivered 投遞了空檔，delivery_commit=cbd1636e9）。\n\n**連帶影響**：worktree `.claude/worktrees/dispatch-slot-1-20b291d5-snapdup`\n（commit 1c30466ae，clean，3864 行稽核成果）沒有 verdict 就過不了 certification gate，\n已閒置 7.2h 並持續占用 agent slot。gate 擋得對，卡的是認證本身。\n\n**另一個發現（值得單獨修）**：這張 failed job 沒有出現在\n`compute_queue.py list --pending-followup` 裡（本班實測回傳 []），\nfollowup_dispatched=false 且 completed_at 有值。PHASE A 的 triage_failed lane\n因此看不到它 —— 失敗的 job 就這樣無聲沉底 7 小時。這是 pending-followup filter 的漏洞。\n\n**要做的事**：\n1. 走專案既有的 usage-limit fallback 路徑 —— 前例在 canonical\n   experiments/k1707/review_verdict.json:\n   `\"reviewer\": \"fresh-context code-reviewer fallback after external Codex usage-limit failure\"`。\n   同法對 experiments/audit_snapshot_dup_20260721 做認證審查\n   （prompt 現成：storage/ops/codex_reviews/audit_snapshot_dup_20260721_prompt.md）。\n2. 判準照 prompt 寫的：PASS = 「這些數字與裁決可以直接拿去行動」，不是「大致合理」。\n   這份稽核會被拿去建 P1 修正任務、可能撤回已發表數字 —— 不要放水。\n3. 之後照原 followup brief 收尾（寫 review_verdict.json → merge_worktree → 主線程寫 knowledge）。\n   原 brief 全文在該 compute job 的 claude_followup.brief。\n4. 若判定應等 Codex（7/25 後）而非 fallback，就明講並把本 task blocked_until 設到 7/25，\n   不要讓 worktree 無限期占 slot 又沒人記得。\n\n**禁止**：手改 verdict 檔繞過 gate；把 0-byte verdict 當成 PASS。",
+    "parent_task_id_original": "worktree_harvest_wave3_dirty_stale_20260721",
+    "provenance_migration": {
+      "parent_task_id": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://snapdup_cert_fallback_codex_usage_limit_20260721#description-worktree-harvest-batch"
+      },
+      "upstream_receipt_ref": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://snapdup_cert_fallback_codex_usage_limit_20260721#description-worktree-harvest-batch"
+      }
+    },
+    "upstream_receipt_ref": "legacy-batch:worktree_harvest_wave3_dirty_stale_20260721"
   },
   {
     "id": "k1707_pseudo_stress_branch_path_collision_20260721",
@@ -40946,8 +41073,19 @@
     "source": "machine",
     "created_at": "2026-07-21T11:12:22.469480+00:00",
     "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
-    "parent_task_id": "worktree_harvest_wave3_dirty_stale_20260721",
-    "description": "[worktree harvest wave 3 衍生] branch `codex/k1707-pseudo-stress`（5 個未合併 commit）\n本班已裁決為 **不可合併**，但殘留一個該決定的問題。\n\n**證據**：branch 與 main 的 experiments/k1707/K1707.py 不是同一份程式的兩個版本，\n是**兩份完全不同的實作撞在同一個檔名上**：\n- main（467 行，commit 36c78b4d2「complete K1707 option auction stress audit」07-16 08:40）：\n  aggregate_raw / build_stress_audit / support_gate / descriptive_benefits / make_figures\n- branch（433 行，tip 07-16 08:49）：\n  aggregate_pseudo_data / load_vix_lagged / attach_vix_signal / exact_label_permutation /\n  holm_adjust / run_inference\n\nmain 另有 branch 完全沒有的 figures/、post_run_review.md、review_verdict.json，\n且該 verdict 的 reviewed_sha256 與 main 現有 blob **逐項相符**\n（K1707.py=d0b21ed71e49…、results=aa2705d7cea1…、README=24a13db1382d…，本班實算核對）。\n→ main 這份是通過認證的成果；合併 branch 會用未經審查的另一份實作把它蓋掉。\n\n**要裁決的**：branch 那份 pseudo-sample 診斷（含 permutation inference + Holm）是否仍有價值。\n- 有價值 → 給它自己的路徑（例如 experiments/k1707_pseudo_stress/），走正常 review 後入 main，\n  不要塞回 experiments/k1707/。\n- 沒價值 → 明確記錄放棄理由後刪 branch，別讓它繼續當幽靈。\n\n**附帶**：branch commit d1263807f 的 `astype(\"datetime64[ns]\")` 正規化（aggregate_pseudo_data /\nload_vix_lagged / attach_vix_signal 三處）是針對 branch 自己那份實作的 dtype 修正。\nmain 沒有 attach_vix_signal，**不要盲目 port 到 main** —— 先確認 main 那份有沒有同類 dtype 問題，\n有才修，且要走自己的 review。"
+    "description": "[worktree harvest wave 3 衍生] branch `codex/k1707-pseudo-stress`（5 個未合併 commit）\n本班已裁決為 **不可合併**，但殘留一個該決定的問題。\n\n**證據**：branch 與 main 的 experiments/k1707/K1707.py 不是同一份程式的兩個版本，\n是**兩份完全不同的實作撞在同一個檔名上**：\n- main（467 行，commit 36c78b4d2「complete K1707 option auction stress audit」07-16 08:40）：\n  aggregate_raw / build_stress_audit / support_gate / descriptive_benefits / make_figures\n- branch（433 行，tip 07-16 08:49）：\n  aggregate_pseudo_data / load_vix_lagged / attach_vix_signal / exact_label_permutation /\n  holm_adjust / run_inference\n\nmain 另有 branch 完全沒有的 figures/、post_run_review.md、review_verdict.json，\n且該 verdict 的 reviewed_sha256 與 main 現有 blob **逐項相符**\n（K1707.py=d0b21ed71e49…、results=aa2705d7cea1…、README=24a13db1382d…，本班實算核對）。\n→ main 這份是通過認證的成果；合併 branch 會用未經審查的另一份實作把它蓋掉。\n\n**要裁決的**：branch 那份 pseudo-sample 診斷（含 permutation inference + Holm）是否仍有價值。\n- 有價值 → 給它自己的路徑（例如 experiments/k1707_pseudo_stress/），走正常 review 後入 main，\n  不要塞回 experiments/k1707/。\n- 沒價值 → 明確記錄放棄理由後刪 branch，別讓它繼續當幽靈。\n\n**附帶**：branch commit d1263807f 的 `astype(\"datetime64[ns]\")` 正規化（aggregate_pseudo_data /\nload_vix_lagged / attach_vix_signal 三處）是針對 branch 自己那份實作的 dtype 修正。\nmain 沒有 attach_vix_signal，**不要盲目 port 到 main** —— 先確認 main 那份有沒有同類 dtype 問題，\n有才修，且要走自己的 review。",
+    "parent_task_id_original": "worktree_harvest_wave3_dirty_stale_20260721",
+    "provenance_migration": {
+      "parent_task_id": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://k1707_pseudo_stress_branch_path_collision_20260721#description-worktree-harvest-batch"
+      },
+      "upstream_receipt_ref": {
+        "method": "reviewed_field_backfill",
+        "evidence_ref": "task://k1707_pseudo_stress_branch_path_collision_20260721#description-worktree-harvest-batch"
+      }
+    },
+    "upstream_receipt_ref": "legacy-batch:worktree_harvest_wave3_dirty_stale_20260721"
   },
   {
     "id": "assign_6aa850cd",
@@ -41288,7 +41426,12 @@
     "parent_task_id": "assign_f3419501",
     "created_by": "hourly-slot-2-eba6b34b618c405cb56abaa5229d4da5",
     "topology": "compute_queue",
-    "description": "由 assign_f3419501 於 2026-07-21 裁決 (a) 正式重跑衍生。裁決全文與理由見 `experiments/paper3_expansion_synthesis/README.md` 的「E3 商品臂裁決」節。\n\n**為什麼要跑（不是為了湊三個資產類別）**：synthesis 最強的發現是唯一顯著的 scaling 關係符號與預先登錄的 H3 相反、且不在 E1 複製，兩臂異質性顯著（Q=8.805, p=0.0030）。只有兩個 equity 臂時無法區分「H3 本身錯」與「E2 跨市場臂 arm-specific」。第三個非 equity 類別在任一方向都有診斷價值。\n\n**硬合約（違反任一條即不算完成）**：\n1. heavy compute → 必須走 `scripts/compute_queue.py`，禁止塞進 hourly fire。\n2. 顯著性判準**必須**沿用 E2（`paper3_E2.py:757-794`：HLN 修正 × `t.ppf(0.975, df)`），禁止重蹈 E1 `paper3_E1.py:717` 的硬編 `abs(t)>3.0`。三臂共用一把尺是裁決前提；已知硬編門檻在 E1 造成 108 檢定中 14 筆假陰性（見 `e1_rescored_unified_criterion.json`）。\n3. 管線沿用 E2（跨市場臂）骨架；資料走既有 yfinance 路徑。\n4. lag 慣例與 E1/E2 一致（t-1 資訊集、rolling refit，比照 K1100b），baseline 同 lag。\n5. 交付 `experiments/paper3_E3_commodities_copula/` 三件套 + `reproduce_spec.json`；先過 `scripts/check_experiment_artifacts.py`，再由 Codex 審碼，通過才寫 knowledge（K1259：只能主線程寫）。\n6. 失敗時**必須把失敗原因寫回本 task**——2026-05-29 那次失敗無原因記錄、無 partial 產物、7 週無人重試，正是本任務存在的原因，不可重演。\n\n**邊界**：E3 成功落地前，任何 Paper 3 產出仍不得宣稱跨資產類別。"
+    "description": "由 assign_f3419501 於 2026-07-21 裁決 (a) 正式重跑衍生。裁決全文與理由見 `experiments/paper3_expansion_synthesis/README.md` 的「E3 商品臂裁決」節。\n\n**為什麼要跑（不是為了湊三個資產類別）**：synthesis 最強的發現是唯一顯著的 scaling 關係符號與預先登錄的 H3 相反、且不在 E1 複製，兩臂異質性顯著（Q=8.805, p=0.0030）。只有兩個 equity 臂時無法區分「H3 本身錯」與「E2 跨市場臂 arm-specific」。第三個非 equity 類別在任一方向都有診斷價值。\n\n**硬合約（違反任一條即不算完成）**：\n1. heavy compute → 必須走 `scripts/compute_queue.py`，禁止塞進 hourly fire。\n2. 顯著性判準**必須**沿用 E2（`paper3_E2.py:757-794`：HLN 修正 × `t.ppf(0.975, df)`），禁止重蹈 E1 `paper3_E1.py:717` 的硬編 `abs(t)>3.0`。三臂共用一把尺是裁決前提；已知硬編門檻在 E1 造成 108 檢定中 14 筆假陰性（見 `e1_rescored_unified_criterion.json`）。\n3. 管線沿用 E2（跨市場臂）骨架；資料走既有 yfinance 路徑。\n4. lag 慣例與 E1/E2 一致（t-1 資訊集、rolling refit，比照 K1100b），baseline 同 lag。\n5. 交付 `experiments/paper3_E3_commodities_copula/` 三件套 + `reproduce_spec.json`；先過 `scripts/check_experiment_artifacts.py`，再由 Codex 審碼，通過才寫 knowledge（K1259：只能主線程寫）。\n6. 失敗時**必須把失敗原因寫回本 task**——2026-05-29 那次失敗無原因記錄、無 partial 產物、7 週無人重試，正是本任務存在的原因，不可重演。\n\n**邊界**：E3 成功落地前，任何 Paper 3 產出仍不得宣稱跨資產類別。",
+    "created_at_observed_not_after": "2026-07-21T23:28:05+08:00",
+    "creation_time_evidence": {
+      "method": "reviewed_git_snapshot_observation",
+      "evidence_commit": "bdd7c3f608ef8331e6305dff3a4be0b6a7ab6b4a"
+    }
   },
   {
     "id": "detect_price_split_breaks_false_negative_20260721",
@@ -41715,7 +41858,12 @@
     "priority": 3,
     "status": "pending",
     "source": "hourly_dispatch",
-    "description": "發現於 2026-07-22 09:38 hourly fire（slot-1）跑 scripts/weekly_quota_estimate.py 時。\n\n症狀：腳本自己印出警告「anchor 已 21 天未校準（> 10）」。目前 anchor = 54.0% @ 2026-06-30T17:00+08:00（116,120,599 billable），推估 cap 215,038,146 tokens，本週回報 8.6% used。\n\n為什麼要修：anchor 漂移正是 2026-06-30 老闆抓到「122% vs dashboard 54%」那次的根因，當時的處置就是 re-anchor + 加 ANCHOR_STALE_DAYS=10 警告。警告現在響了 21 天，代表每班 end summary 報的 quota % 都建立在過期基準上 —— 這個數字老闆會看，不能放著。\n\n為什麼 hourly fire 修不了：re-anchor 需要老闆的 Settings→Usage→Weekly 官方截圖數字，agent 拿不到。**嚴禁自行猜一個數字填進去** —— 上次的教訓正是我誤判報表灌水、被官方截圖打臉，結論是「報表加總方法本來就對」，錯的只有 anchor 新舊。\n\n處置：向老闆要一張最新 Weekly usage 截圖，用其中的百分比與 billable 值重設 config/token_quota_calibration.json 的 ANCHOR_PCT / ANCHOR_BILLABLE / ANCHOR_DATE（或用 weekly_quota_estimate.py --calibrate <fraction>）。"
+    "description": "發現於 2026-07-22 09:38 hourly fire（slot-1）跑 scripts/weekly_quota_estimate.py 時。\n\n症狀：腳本自己印出警告「anchor 已 21 天未校準（> 10）」。目前 anchor = 54.0% @ 2026-06-30T17:00+08:00（116,120,599 billable），推估 cap 215,038,146 tokens，本週回報 8.6% used。\n\n為什麼要修：anchor 漂移正是 2026-06-30 老闆抓到「122% vs dashboard 54%」那次的根因，當時的處置就是 re-anchor + 加 ANCHOR_STALE_DAYS=10 警告。警告現在響了 21 天，代表每班 end summary 報的 quota % 都建立在過期基準上 —— 這個數字老闆會看，不能放著。\n\n為什麼 hourly fire 修不了：re-anchor 需要老闆的 Settings→Usage→Weekly 官方截圖數字，agent 拿不到。**嚴禁自行猜一個數字填進去** —— 上次的教訓正是我誤判報表灌水、被官方截圖打臉，結論是「報表加總方法本來就對」，錯的只有 anchor 新舊。\n\n處置：向老闆要一張最新 Weekly usage 截圖，用其中的百分比與 billable 值重設 config/token_quota_calibration.json 的 ANCHOR_PCT / ANCHOR_BILLABLE / ANCHOR_DATE（或用 weekly_quota_estimate.py --calibrate <fraction>）。",
+    "created_at_observed_not_after": "2026-07-22T09:40:08+08:00",
+    "creation_time_evidence": {
+      "method": "reviewed_git_snapshot_observation",
+      "evidence_commit": "d5586ac11232e2a1ca64a1a30fb2e2684a1ecaa2"
+    }
   },
   {
     "id": "telegram-1298",
@@ -41771,7 +41919,12 @@
     "priority": 2,
     "status": "pending",
     "source": "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
-    "description": "**現象**：任務走 `compute_queue.py enqueue-agent` 派出去之後，任務池沒有能表達「已派給 async agent lane、正在飛」的狀態。`scripts/mark_task_blocked.py` 的 reason vocabulary（awaiting_codex_review / awaiting_external_data / compute_runtime_incompatible …）沒有對應項，所以現行慣例是 annotate 一段 DISPATCHED 字串後 `release` 回 pending。\n\n**後果（有實例）**：`assign_5aa9d5f5`（K1623）於 2026-07-19 12:52 DISPATCHED→compute-queue，但在 `continue_task_dispatch.py --report` 眼中始終是一張沒人認領的 pending，到 2026-07-22 已 aged **111.7h** 並觸發 starvation lockout —— 而它的 agent job 其實早就跑完了。本班（10:07）驗證後確認 rev2 交付物完整、只是卡在 round-3 review，隨即收單。同一個形狀在本班又發生一次：`K1714` 派出 `agent-brief_k1714-cd4315` 後只能 annotate + release。\n\n**根因**：'in-flight in another lane' 與 'starved, nobody picked it up' 這兩個語意共用同一個 `status=pending`。dispatch report 的 aging 是照 created_at / 最後狀態變更算的，它無從分辨。\n\n**建議做法**：\n1. `mark_task_blocked.py` reason vocab 加 `awaiting_agent_job`，必帶 `job_id`，`blocked_until` 由該 job 的 timeout 推導（例如 enqueue 時間 + timeout + 緩衝）。\n2. `unblock_expired_blocked_tasks.py` 對這個 reason 走**主動探測**而非純日期比對：查 compute queue 該 job 的 status —— completed → 解封（或直接由 followup 接手）、failed/cancelled → 解封並標註、still running → 續 block。（此形狀與 docs/error_log.md 2026-07-22 08:2x 那條「額度重置日期寫死當事實」同源：解封條件應該是**重探**，不是**日期到期**。）\n3. dispatch report 把 awaiting_agent_job 從 starvation 計算中排除，但另列一個「in-flight 超過預期 timeout」的清單 —— 那才是真正該有人看的異常。\n\n**驗收**：(a) vocab + blocked_until 推導有測試；(b) 主動探測路徑有測試（三種 job status 各一）；(c) 拿 K1714 當實例跑一遍：派工後應為 blocked/awaiting_agent_job，job 完成後應自動解封或由 followup 接走；(d) dispatch report 不再把 in-flight 任務算進 starvation。\n\nparent_context=本班（hourly-slot-3-3896dcaa）處理 assign_5aa9d5f5 收單與 K1714 派工時發現。"
+    "description": "**現象**：任務走 `compute_queue.py enqueue-agent` 派出去之後，任務池沒有能表達「已派給 async agent lane、正在飛」的狀態。`scripts/mark_task_blocked.py` 的 reason vocabulary（awaiting_codex_review / awaiting_external_data / compute_runtime_incompatible …）沒有對應項，所以現行慣例是 annotate 一段 DISPATCHED 字串後 `release` 回 pending。\n\n**後果（有實例）**：`assign_5aa9d5f5`（K1623）於 2026-07-19 12:52 DISPATCHED→compute-queue，但在 `continue_task_dispatch.py --report` 眼中始終是一張沒人認領的 pending，到 2026-07-22 已 aged **111.7h** 並觸發 starvation lockout —— 而它的 agent job 其實早就跑完了。本班（10:07）驗證後確認 rev2 交付物完整、只是卡在 round-3 review，隨即收單。同一個形狀在本班又發生一次：`K1714` 派出 `agent-brief_k1714-cd4315` 後只能 annotate + release。\n\n**根因**：'in-flight in another lane' 與 'starved, nobody picked it up' 這兩個語意共用同一個 `status=pending`。dispatch report 的 aging 是照 created_at / 最後狀態變更算的，它無從分辨。\n\n**建議做法**：\n1. `mark_task_blocked.py` reason vocab 加 `awaiting_agent_job`，必帶 `job_id`，`blocked_until` 由該 job 的 timeout 推導（例如 enqueue 時間 + timeout + 緩衝）。\n2. `unblock_expired_blocked_tasks.py` 對這個 reason 走**主動探測**而非純日期比對：查 compute queue 該 job 的 status —— completed → 解封（或直接由 followup 接手）、failed/cancelled → 解封並標註、still running → 續 block。（此形狀與 docs/error_log.md 2026-07-22 08:2x 那條「額度重置日期寫死當事實」同源：解封條件應該是**重探**，不是**日期到期**。）\n3. dispatch report 把 awaiting_agent_job 從 starvation 計算中排除，但另列一個「in-flight 超過預期 timeout」的清單 —— 那才是真正該有人看的異常。\n\n**驗收**：(a) vocab + blocked_until 推導有測試；(b) 主動探測路徑有測試（三種 job status 各一）；(c) 拿 K1714 當實例跑一遍：派工後應為 blocked/awaiting_agent_job，job 完成後應自動解封或由 followup 接走；(d) dispatch report 不再把 in-flight 任務算進 starvation。\n\nparent_context=本班（hourly-slot-3-3896dcaa）處理 assign_5aa9d5f5 收單與 K1714 派工時發現。",
+    "created_at_observed_not_after": "2026-07-22T11:09:09+08:00",
+    "creation_time_evidence": {
+      "method": "reviewed_git_snapshot_observation",
+      "evidence_commit": "d2c6bcc9f7b4a33d6afba40bf0c21e19b031672a"
+    }
   },
   {
     "id": "telegram-1300",
@@ -44250,7 +44403,7 @@
     "description": "依既有 Matt Issue #9/spec，修復 live work-shadow v4 的 blocking selection/reconciliation differences；不得手改歷史 JSON，必須以正式 migration/projection contract 處理 legacy provenance/lifecycle，保留 identity與可稽核 quarantine/receipt。完成 TDD、雙軸 review、live replay/read-back；七日時間窗未滿不得關閉 #9。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "blocked",
     "source": "owner_interactive",
     "issue_ref": "#9",
     "declared_output_paths": [
@@ -44268,9 +44421,6 @@
     "denied_canonical_paths": [
       "storage/**"
     ],
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-26T22:02:22.826768+00:00",
-    "claim_session_id": "e0966420b161",
     "status_history": [
       {
         "ts": "2026-07-26T22:02:22.826776+00:00",
@@ -44285,7 +44435,6 @@
         "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-26T22:02:26.253522+00:00",
     "output_paths": [
       "scripts/compute_queue.py",
       "scripts/mark_task_blocked.py",
@@ -44304,7 +44453,22 @@
       "tests/test_migrate_task_pool_provenance.py",
       "storage/ops/task_pool_provenance_migrations/issue9_shadow_reconciliation_closure_20260727.json",
       "storage/ops/task_pool_provenance_migrations/issue9_shadow_reconciliation_closure_20260727.json.intent.json"
-    ]
+    ],
+    "created_at_observed_not_after": "2026-07-26T22:02:22.826768+00:00",
+    "creation_time_evidence": {
+      "method": "lifecycle_observation_upper_bound",
+      "evidence_field": "claimed_at"
+    },
+    "block_transition_previous": {
+      "claimed_by": "codex-vscode",
+      "claimed_at": "2026-07-26T22:02:22.826768+00:00",
+      "claim_session_id": "e0966420b161",
+      "started_at": "2026-07-26T22:02:26.253522+00:00"
+    },
+    "blocked_until": "2026-08-02T12:15:06+00:00",
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-26T23:38:12+00:00",
+    "blocked_note": "contained: live v4 receipt scheduled_20260726T233719957011Z_510c00773026 has reconciliation_issue_count=0; Issue #9 remains open until the mandatory 7-day sustained-clean window ages out historical dirty receipts"
   },
   {
     "id": "ci-red-30222247599",
