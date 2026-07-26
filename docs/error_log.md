@@ -2847,7 +2847,9 @@ regression 讓 transfer 先排 exclusive owner lock、已通過 ACL 的 legacy i
 WorkItem。PG17 full migration chain 以 non-superuser executor replay，formal caller
 catalog read-back確認七個 fixture／九個 production caller topology只能改走 internal
 seam；owned-email transaction另在 Work Coordinator operations_core generation 下
-完成 request／delivery／rollback。
+完成 request／delivery／rollback。最終以外部模型金鑰 unset 且
+`VOLPRED_CI_PARITY=0`（排除只針對本機 untracked checkout 的稽核）重跑 repository
+full suite：**5,156 passed、1 skipped、0 failed**。
 
 **狀態**：owner fencing、expired-lease reconciliation 與 in-flight legacy race
 三個根因在 local schema／tests 層為 **`root_cause_fixed_and_verified`**。但本
