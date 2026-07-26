@@ -2,8 +2,8 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-26",
-    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。"
+    "updated_at": "2026-07-27T05:14:00+08:00",
+    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。 【2026-07-27 shadow 觀察結論（scripts/crosscheck_pregate_outcomes.py --invoker supervisor --since 2026-07-20，即 capacity+novelty rewire 上線後）】新 gate 於 162 班中僅 would_skip 2 班（1.2% skip 率），且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2＝100% 誤判，反例：2026-07-21T07:08 / 08:08 UTC）。雙重不合格：skip 率過低不足以省 token；skip 時全為誤判，遠超 flip 門檻 strict_mismatch_rate≤0.10。判定：維持 shadow，不翻 enforce；live A/B（60min vs 15min）因 enforce 未上線暫緩。後續：gate 需補訊號提高 skip precision/recall 後再評，估算值（15min≈1.84x）尚未由 live A/B 實測取代。"
   },
   "schedule_materialization": {
     "schema": 1,
@@ -842,13 +842,29 @@
     "status": "retired",
     "retired_at": "2026-07-26T10:38:00Z",
     "replacement_jobs": {
-      "daily_planning": ["ops_dashboard"],
-      "continue_task": ["dispatch-supervisor"],
-      "platform_patrol": ["check_alerts", "daily_checkup"],
-      "git_sync": ["git_push_backup"],
-      "knowledge_index_check": ["knowledge_index_maintain"],
-      "ndc_indicator_refresh": ["ndc_indicator_refresh"],
-      "journal_topic_scan": ["research_backlog_daily", "GitHub Issues control plane"]
+      "daily_planning": [
+        "ops_dashboard"
+      ],
+      "continue_task": [
+        "dispatch-supervisor"
+      ],
+      "platform_patrol": [
+        "check_alerts",
+        "daily_checkup"
+      ],
+      "git_sync": [
+        "git_push_backup"
+      ],
+      "knowledge_index_check": [
+        "knowledge_index_maintain"
+      ],
+      "ndc_indicator_refresh": [
+        "ndc_indicator_refresh"
+      ],
+      "journal_topic_scan": [
+        "research_backlog_daily",
+        "GitHub Issues control plane"
+      ]
     },
     "items": [],
     "retired_items": [
@@ -1664,7 +1680,9 @@
       "fires": "Receives model-free ticks only from Operations Core job agent_dispatch_tick; each tick evaluates the hourly volpred-hourly-dispatch policy plus state.fire_requested_at",
       "writer_isolation": {
         "mode": "pilot",
-        "lanes": ["platform_ops"],
+        "lanes": [
+          "platform_ops"
+        ],
         "max_total": 3,
         "disk_floor_gib": 20,
         "rationale": "WS-B producer-scoped execution isolation (docs/dispatch-writer-isolation-design.md; refactor_plan_ops_master_2026_07 §WS-B). pilot = 每班 fire 由 supervisor 機械配發一個 registered worktree（.claude/worktrees/dispatch-<slot>-<job8>），platform_ops lane 的 repo-byte 產出一律寫進去；gate 綠才由 merge_worktree.sh 併入 main，紅則自動開 P2 remediation 單。ownership 由隔離產生，PHASE-Z 基線猜作者降為 fallback。governance lane 於 pilot 穩定一週後加入（改本欄 lanes 即生效，config 每 tick 熱重載）。active cap=1（同時最多一個隔離 fire）；max_total 含 remediation 保留的 worktree；低於 disk_floor_gib 可用空間時 fail-closed 不建（該班照常 fire、不隔離）。"

@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "title": "幣圈一崩，美股就會跟著發抖嗎？八年日資料的答案有點掃興",
+  "subtitle": "波動溢出的方向性檢定：四個方向裡沒有一個過關，同漲同跌不等於誰帶動誰",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1443/k1443_results.json",
+      "sha256": "e6f33d05acaa38a26468b9c20f114f3659582f31dac223bd3efeb1d2fd1a633e",
+      "label": "BTC/ETH vs SPY 波動溢出（SPY 交易日對齊 panel）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_method",
+      "info": "method",
+      "style": "professional",
+      "title": "我們到底在比什麼",
+      "alt": "以八年多的每日資料，檢定加密貨幣與美股之間的波動誰帶動誰",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "對齊後的交易日觀測數",
+          "value": {
+            "source": "result",
+            "path": "sample.n_obs_prices",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "整段樣本都對齊到美股開市日"
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼比",
+          "body": [
+            "把比特幣、以太幣、美股 SPY 的每日波動放進同一個時間軸，檢定「前幾天的甲，能不能幫忙預測今天的乙」（Granger 因果）。若加密貨幣真的會把恐慌傳染給美股，那條方向的訊號就該夠強；反過來也一樣。同時看兩者的動態相關高不高。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_scorecard",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "四個方向的成績單：沒有一個過及格線",
+      "alt": "四個溢出方向的顯著性檢定值，全部未達顯著水準",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "比特幣 → 美股",
+          "value": {
+            "source": "result",
+            "path": "verdict.pairwise_p_values.BTC_to_SPY",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "遠離顯著水準"
+        },
+        {
+          "kind": "metric",
+          "label": "美股 → 比特幣",
+          "value": {
+            "source": "result",
+            "path": "verdict.pairwise_p_values.SPY_to_BTC",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "同樣未達顯著"
+        },
+        {
+          "kind": "metric",
+          "label": "以太幣 → 美股",
+          "value": {
+            "source": "result",
+            "path": "verdict.pairwise_p_values.ETH_to_SPY",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "未達顯著"
+        },
+        {
+          "kind": "metric",
+          "label": "美股 → 以太幣",
+          "value": {
+            "source": "result",
+            "path": "verdict.pairwise_p_values.SPY_to_ETH",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "四個方向裡最接近，但仍只是接近顯著、不算過關"
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "同漲同跌是真的，誰帶動誰是假的",
+      "alt": "動態相關中等偏低，但方向性因果檢定不支持波動溢出",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "比特幣與美股 平均動態相關",
+          "value": {
+            "source": "result",
+            "path": "dcc.BTC-USD_vs_SPY.rho_summary.mean",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          },
+          "note": "中等偏低——會一起動，但不強"
+        },
+        {
+          "kind": "metric",
+          "label": "以太幣與美股 平均動態相關",
+          "value": {
+            "source": "result",
+            "path": "dcc.ETH-USD_vs_SPY.rho_summary.mean",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "數據支持的",
+          "body": [
+            "加密貨幣和美股會同漲同跌，動態相關中等偏低——市場情緒共振是有的。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "數據不支持的",
+          "body": [
+            "「幣圈先崩、美股隨後跟跌」這種帶動關係，八年日資料的方向性檢定四個方向全部沒過。同步 ≠ 因果，用每日收盤波動當替身也難證明誰推動誰。"
+          ]
+        }
+      ]
+    }
+  ]
+}

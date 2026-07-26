@@ -32786,8 +32786,10 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-15T00:00:01Z",
-    "compute_job_id": "compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622",
-    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection"
+    "compute_job_id": "agent-brief_k1715_fix_attempt1-ba80b2",
+    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_fix_attempt1-ba80b2; awaiting PHASE A collection",
+    "fail_reason": "Codex FAIL @87f2fec59: README/JSON number mismatches, optimizer_success_rate=0 (no convergence diagnostics retained), false arch 3-4sigfig agreement claim, unidentified causal attribution. Re-dispatched fix attempt1 (max effort) job agent-brief_k1715_fix_attempt1-ba80b2.",
+    "escalation_attempts": 1
   },
   {
     "id": "K1716",
@@ -33273,7 +33275,7 @@
     "description": "面向 ASIA 第三棒（台股產業層級 — 用戶點名台股產業）。產業代表股：電子 2330/2317/2454、金融 2881/2891、航運 2603/2609、塑化 1301、光學 3008（yfinance 2026-07-15 smoke test 全數可用）。Diebold-Yilmaz spillover index + Granger 網絡；注意 Cholesky-FEVD 排序假象規則（用 generalized FEVD）。對照 T5a（TAIEX gamma > 0050 > TSMC）結構。產出對產業輪動 TA 的一般讀者文章角度。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
     "status_history": [
@@ -33314,16 +33316,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      },
+      {
+        "ts": "2026-07-26T20:37:38.351984+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
       }
     ],
     "last_released_at": "2026-07-26T12:18:47.348063+00:00",
     "last_release_reason": "normalize_pending_claim_residue",
-    "claimed_by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037",
-    "claimed_at": "2026-07-26T19:23:53.080550+00:00",
-    "claim_session_id": "73f26d783330",
     "started_at": "2026-07-26T19:23:57.835658+00:00",
     "compute_job_id": "agent-brief_asia3_tw_sector_spillover-eb8888",
-    "result": "dispatched to compute job agent-brief_asia3_tw_sector_spillover-eb8888; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_asia3_tw_sector_spillover-eb8888; awaiting PHASE A collection\n\nasia3 TW sector vol spillover: PASS verdict merged to main (commit 26a96747a bytes). GFEVD/DY connectedness. Semis(TSMC)+Financials+Petchem net vol transmitters; EMS/Optical/IC-design net receivers (supports T5a aggregation). Crisis intensification NOT confirmed (bear-calm=-1.16pp). Cross-sector VAR OOS edge marginal (DM t=2.51, not Harvey-robust). knowledge item 6e352de3; reproduce_spec.json added.",
+    "completed_at": "2026-07-26T20:37:38.351952+00:00"
   },
   {
     "id": "telegram-813",
@@ -39459,12 +39465,35 @@
     "title": "派工 cadence live A/B：pregate 新 gate 的 shadow 觀察窗 + 15min vs 60min token 實測",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "telegram",
     "parent_task_id": "assign_672c46de",
     "created_by": "hourly-slot-1-ba8cf19340824bff9c43476ca8cbbe4e",
     "created_at": "2026-07-20T11:18:06.854382+00:00",
-    "description": "承接 assign_672c46de（老闆 telegram-1198）。該班已交付 step 1+2 的工程面：\n- scripts/hourly_dispatch_pregate.py 加入 capacity（free slots）+ novelty（actionable signature）兩訊號，gate 從『有沒有工作』改成『能不能增加吞吐 / 世界有沒有變』。critical 也納入 novelty（它是持續 incident 狀態，不是會被消耗的佇列）；email/compute followup/drought 維持絕對不否決；cadence_due 是防餓死地板。tests/test_hourly_dispatch_pregate.py 補 8 個測試（65 passed）。\n- scripts/analyze_dispatch_cadence.py：從池變動史估 cadence 成本。近 7 天實測 15min ≈1.84x、30min ≈1.35x、60min ≈0.87x（相對現況 hourly always-proceed）。\n\n本 task 要做的是那班放不進 50min cap 的部分：\n1. 讀 storage/logs/hourly_pregate.jsonl 中新邏輯上線後的 supervisor entries，看 would_skip 分佈是否合理（重點：被 would_skip 的班次，事後看是否真的沒產出）。scripts/crosscheck_pregate_outcomes.py 是既有的交叉核對工具。\n2. 分佈合理 → 把 config/runtime_schedules.json 的 pregate.mode 由 shadow 翻 enforce。不合理 → 記錄反例並修 gate，不要硬翻。\n3. enforce 穩定後才做 live A/B：60min baseline 2 小時 vs 15min 2 小時，逐 fire 記 input/output token，輸出對照表，驗證上面 1.84x 的估算。\n4. 結論寫回 config/runtime_schedules.json 的 metadata.policy_summary（該處已有估算值，用實測值取代），並回報老闆。\n\n限制（老闆原始指令）：cadence 未經實測不得直接改 production 排程。"
+    "description": "承接 assign_672c46de（老闆 telegram-1198）。該班已交付 step 1+2 的工程面：\n- scripts/hourly_dispatch_pregate.py 加入 capacity（free slots）+ novelty（actionable signature）兩訊號，gate 從『有沒有工作』改成『能不能增加吞吐 / 世界有沒有變』。critical 也納入 novelty（它是持續 incident 狀態，不是會被消耗的佇列）；email/compute followup/drought 維持絕對不否決；cadence_due 是防餓死地板。tests/test_hourly_dispatch_pregate.py 補 8 個測試（65 passed）。\n- scripts/analyze_dispatch_cadence.py：從池變動史估 cadence 成本。近 7 天實測 15min ≈1.84x、30min ≈1.35x、60min ≈0.87x（相對現況 hourly always-proceed）。\n\n本 task 要做的是那班放不進 50min cap 的部分：\n1. 讀 storage/logs/hourly_pregate.jsonl 中新邏輯上線後的 supervisor entries，看 would_skip 分佈是否合理（重點：被 would_skip 的班次，事後看是否真的沒產出）。scripts/crosscheck_pregate_outcomes.py 是既有的交叉核對工具。\n2. 分佈合理 → 把 config/runtime_schedules.json 的 pregate.mode 由 shadow 翻 enforce。不合理 → 記錄反例並修 gate，不要硬翻。\n3. enforce 穩定後才做 live A/B：60min baseline 2 小時 vs 15min 2 小時，逐 fire 記 input/output token，輸出對照表，驗證上面 1.84x 的估算。\n4. 結論寫回 config/runtime_schedules.json 的 metadata.policy_summary（該處已有估算值，用實測值取代），並回報老闆。\n\n限制（老闆原始指令）：cadence 未經實測不得直接改 production 排程。",
+    "status_history": [
+      {
+        "ts": "2026-07-26T21:11:50.812965+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      },
+      {
+        "ts": "2026-07-26T21:12:00.247883+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      },
+      {
+        "ts": "2026-07-26T21:14:22.385891+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      }
+    ],
+    "started_at": "2026-07-26T21:12:00.247868+00:00",
+    "completed_at": "2026-07-26T21:14:22.385870+00:00",
+    "result": "step1+2 完成（step3/4 依 gate 資料合理收斂）：crosscheck_pregate_outcomes.py(--invoker supervisor --since 2026-07-20 rewire) 顯示新 capacity+novelty gate 於 162 班僅 would_skip 2 班(1.2%)，且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2=100% 誤判，反例 2026-07-21T07:08/08:08 UTC）。雙重不合格：skip 率過低不足以省 token + skip 時全誤判（遠超 flip 門檻 strict_rate<=0.10, verdict_hint=不flip）。決策=維持 shadow 不翻 enforce（config pregate.mode 未動）；step4=config/runtime_schedules.json metadata.policy_summary 已寫入實測結論取代待驗字句；step3 live A/B 因 enforce 未上線暫緩。建議：enforce 邊際效益<2% skip，是否值得續投 gate-signal 改造需老闆定調（handoff/receipt 已載）。"
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260720T112715143656Z_a1",
@@ -39829,7 +39858,10 @@
       }
     ],
     "started_at": "2026-07-26T20:09:49.398883+00:00",
-    "completed_at": "2026-07-26T20:09:49.642465+00:00"
+    "completed_at": "2026-07-26T20:09:49.642465+00:00",
+    "review_verdict": "FAIL (Codex primary-path @b2634ed41): detector still trivially defeatable via synonym/binding/denial rephrasings; N1 not earned. Round-7, escalation ladder exhausted.",
+    "escalation_ref": "owned_email effect_owned_email_47366f9722350ee4f73cd46c587a4691 (needs-reply, sent 2026-07-27); worktree k528-round7-204d556b NOT merged; awaiting owner direction (accept best-effort / switch to LLM-judge / abandon N1)",
+    "escalated_to_owner": true
   },
   {
     "id": "k528_primary_codex_certify_merge",
@@ -39837,14 +39869,11 @@
     "description": "B1-B4 已由獨立收件審查驗過 PASS，唯一未關的 gate 是 primary-path Codex 沒跑成功 (額度到 2026-07-25)。依 .claude/rules/experiments.md，fallback reviewer PASS != Codex PASS，不得 merge。額度回來後: 跑 primary-path codex exec review -> PASS 則走正式 merge_worktree.sh 整合 branch k528-nfp-official-dates (HEAD 5b1f154c1) 並 certify K528; FAIL 則建 round-8。先做 k528_round7_gate_hardening 再送 Codex，免得同一輪被打回。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "pending",
     "source": "collection_review",
     "parent_task_id": "k528_round6_collection_verify",
     "created_at": "2026-07-20T21:19:00.806181+00:00",
     "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
-    "claimed_by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4",
-    "claimed_at": "2026-07-26T20:09:55.348596+00:00",
-    "claim_session_id": "777cc8e1ce9d",
     "status_history": [
       {
         "ts": "2026-07-26T20:09:55.348604+00:00",
@@ -39857,9 +39886,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4"
+      },
+      {
+        "ts": "2026-07-26T20:45:29.658914+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 35.6min >= grace 20min"
       }
     ],
-    "started_at": "2026-07-26T20:10:11.950101+00:00"
+    "last_released_at": "2026-07-26T20:45:29.658900+00:00",
+    "last_release_reason": "liveness_reconcile_detached_ea14dc76"
   },
   {
     "id": "dreaming_repeated_tool_failure_dispatch_supervisor_killed_timeout_exi",
@@ -42982,7 +43019,7 @@
     "title": "K1420: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1420 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1420 [NULL]（原始 verdict: NULL_RESULT）：測試 3-state HMM regime-weighted conformal VaR（RWC）能否改善 SPY 與 0050.TW 的 next-day 5% VaR/ES。資料 2012-01-01至2025-12-31，OOS 自2023-01-01，rolling refit window=2000、conformal calibration window=500、每63日refit、HMM multistart=20，seed=42。SPY：RWC violation Canonical evidence: experiments/k1420/k1420_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -42998,7 +43035,30 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T15:36:00+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-26T20:45:09.621176+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      },
+      {
+        "ts": "2026-07-26T20:45:09.851902+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      },
+      {
+        "ts": "2026-07-26T20:58:50.769403+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      }
+    ],
+    "started_at": "2026-07-26T20:45:09.851887+00:00",
+    "completed_at": "2026-07-26T20:58:50.769369+00:00",
+    "result": "general NULL article published as draft mile_a8006dd2 (更聰明的風險模型...反而更常失手). RWC(3-state HMM regime-weighted conformal) over-breaches vs plain GJR: SPY 5.05%→6.12% (38→46 breaches), 0050 4.83%→6.22% (35→45); verdict pass_count=0/2 NULL. anti_ai_gate PASS(exit0); 2 charts (fig_violation_compare + fig_breach_count) uploaded; content-vs-source audit PASS. lazypack render queued lazypack-mile_a8006dd2."
   },
   {
     "id": "ci-red-30207277676",
@@ -43080,14 +43140,16 @@
         "held_escalation"
       ]
     },
-    "created_by": "reap_orphan_deliverables"
+    "created_by": "reap_orphan_deliverables",
+    "diagnosis": "ROOT CAUSE 已定位（未 claim，留給有測試環境的一班做正解，不在 hourly 內急改 reaper 內部狀態）：job lazypack-mile_7c894f46-r2 status=failed、partial_delivered（只交付 plan.json，delivery_commit 7e18502e5），其 output_paths 仍宣告 panels/panel_*.png 但該 run 失敗、panels/ 為空且永不填滿。後續 run r4 已成功產圖、且文章 mile_7c894f46（野火煙霧壓境那天…）status=published(2026-07-26T11:00)。故 r2 的 phantom PNG 路徑本來就不該進版控。reaper 之所以持續 held：failed-job『nothing produced』skip(reap_orphan_deliverables.py:547) 只在 if not exact 分支觸發，而 plan.json 存在使 exact 非空 → 走到 pending/held 邏輯，把不存在的 PNG 以 declared_outputs_not_yet_deliverable held(:573-579)。",
+    "recommended_fix": "正解＝reaper edge-case 修補（WS platform_ops lane，需測試）：對 status=failed 的 job，其『已 partial-delivered 但剩餘 declared outputs 從未產出且 producer 已非零退出』的 phantom 路徑，比照 :547 的 nothing-produced 語意不再 held（維持檔頂不變量：真實存在卻被政策拒收的才 held）。或提供 compute_queue delivery-resolve/supersede CLI 讓 superseded 的 failed run 標記關閉。禁刪檔（此處無檔可刪，panels/ 為空）。"
   },
   {
     "id": "K1443_article_general",
     "title": "K1443: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1443 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1443 [CONDITIONAL_PASS]: BTC-USD/ETH-USD vs SPY 在 SPY 交易日 panel（2018-01-02～2026-04-16，2083 個價格觀測）上，用 log(r²) 波動衝擊 proxy 做 pairwise Granger（lag≤5, BIC選lag）、三變數 conditional VAR、pairwise DCC-GARCH（最近1000個SPY交易日）。主規格結果：BTC→SPY p=0.282、SPY→BTC p=0.160、ETH→SPY p=0.225、SPY→ETH p=0.094（ Canonical evidence: experiments/k1443/k1443_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -43103,14 +43165,37 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T16:08:56+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-26T20:45:10.088405+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      },
+      {
+        "ts": "2026-07-26T20:45:10.317755+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      },
+      {
+        "ts": "2026-07-26T20:54:50.138777+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      }
+    ],
+    "started_at": "2026-07-26T20:45:10.317738+00:00",
+    "completed_at": "2026-07-26T20:54:50.138750+00:00",
+    "result": "general article published as draft mile_ea920f7f (幣圈一崩...八年日資料). anti_ai_gate PASS(exit0,2WARN,0MUST); content-vs-source audit PASS(5 claims/225 vals); anchors 0.282/0.160/0.225/0.094(pairwise p) + DCC rho 0.361/0.376 verbatim vs JSON; 2 figures uploaded. lazypack render queued lazypack-mile_ea920f7f (release_pool holds flip until section lands)."
   },
   {
     "id": "K1439_article_general",
     "title": "K1439: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1439 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: Codex source-code review of K1439 (USD regime conditioning of cross-asset RV: EEM/GLD/DBC/USO/DBB). VERDICT=CONDITIONAL_PASS, PUBLISHABLE_AS_IS=YES, LOOKAHEAD_RISK=NONE. Welch t-test + Bonferroni statistically correct; lookahead protection confirmed (bucket.shift(1) at k1439.py:1 Canonical evidence: experiments/k1439/k1439_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -43126,7 +43211,23 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T16:09:20+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-26T20:44:24.783188+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      },
+      {
+        "ts": "2026-07-26T20:44:25.028396+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-01937c71d3fc4fe78360c10e05f47a52"
+      }
+    ],
+    "completed_at": "2026-07-26T20:44:25.028373+00:00",
+    "result": "mile_de666838 arc-covered (階層式配置 arc); check_arc_dedup exit=1 arc_duplicate"
   },
   {
     "id": "K1497_article_general",
@@ -43364,15 +43465,12 @@
     "description": "依 GitHub Issue #42 與既有 Matt spec 實作 durable fire generation、baseline receipt、restart closeout matching 與 failure-injection tests；完成 production planned reload read-back 與 sustained-clean gate。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "blocked",
     "dispatch_lane": "agent",
     "source": "user_issue42_implementation",
     "issue_ref": "#42",
     "created_at": "2026-07-26T18:41:54.568830+00:00",
     "preferred_agent": "codex",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-26T18:42:18.000382+00:00",
-    "claim_session_id": "20bb66684587",
     "status_history": [
       {
         "ts": "2026-07-26T18:42:18.000390+00:00",
@@ -43385,10 +43483,31 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T20:50:01.181072+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-26T21:02:17.320017+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
       }
     ],
-    "started_at": "2026-07-26T18:42:21.348157+00:00",
-    "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate."
+    "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.",
+    "last_released_at": "2026-07-26T20:50:01.181065+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "claimed_by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8",
+    "claimed_at": "2026-07-26T21:02:17.320009+00:00",
+    "claim_session_id": "028f2d4ccce3",
+    "blocked_until": "2026-07-28",
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-26T21:04:30+00:00",
+    "blocked_note": "Code 已完成並 merge main(74735c9f2, de63029c0/dec1f8057/98f407daf)。剩餘僅 sustained-clean gate：incident inc_537a3ff3304f 需 ≥3 clean obs 跨 ≥24h；現 3 obs 僅跨 ~1.6h(07-26T18:51→20:27 UTC)。等 clean obs 累積至 span≥24h(~07-27T18:51 UTC 後) unblock 重審並 resolve incident。被動觀察窗，hourly fire 無可執行工作。"
   },
   {
     "id": "issue42_production_fire_lifecycle_acceptance_20260727",
@@ -43443,20 +43562,15 @@
     "completed_at": "2026-07-26T19:43:08.035617+00:00",
     "result": "Post-reload acceptance succeeded: job 06c75e969f6c4a1abea609e27ab54524 persisted generation 78987568ef6747e28fcb1a977c33b6ff before worker start; managed workspace committed e08db4da3. Live overlapping slot 35badc1d reused the exact same cohort generation/baseline. Awaiting supervisor finalizer merge/read-back.",
     "acceptance_deferral_note": "NOT-LIVE at 2026-07-27T03:29 CST: de63029c0 committed 03:21 but daemon pid47886 started 02:50 (pre-commit); selfreload deferred_in_flight (2 jobs). RE-RUN CRITERIA: pick this up on a post-reload COHORT-SEED fire (empty slots) so run_pre_fire_guard populates fire_lifecycle; then verify current job has fire_lifecycle{generation_id,captured_at,pre_fire_dirty} before writing docs/ops/issue42_production_fire_lifecycle_acceptance.md.",
-    "issue_close_pending": {
-      "issue_ref": "#42",
-      "task_id": "issue42_production_fire_lifecycle_acceptance_20260727",
-      "completion_owner": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
-      "completed_at": "2026-07-26T19:43:08.035617+00:00",
-      "completion_base_commit": "de63029c0ec84d080c1ebb8c953cbffb6f288ed6"
-    }
+    "issue_closed_at": "2026-07-26T20:27:31.999391+00:00",
+    "issue_closed_commit": "f76a296f0773199cfc0395b2f06ce6a19b27665b"
   },
   {
     "id": "ci-red-30215935113",
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "ci_incident_id": "ci-red-30215935113",
@@ -43464,7 +43578,30 @@
     "created_at": "2026-07-26T20:00:07.427235+00:00",
     "title": "CI 紅燈修復（run 30215935113, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30215935113\nattempt: 1\nhead_sha: dad84187e\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30215935113 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-26T21:06:06.408046+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      },
+      {
+        "ts": "2026-07-26T21:06:11.792704+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      },
+      {
+        "ts": "2026-07-26T21:10:51.837222+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      }
+    ],
+    "started_at": "2026-07-26T21:06:11.792690+00:00",
+    "completed_at": "2026-07-26T21:10:51.837190+00:00",
+    "result": "root_cause=general-audience draft mile_35d8941b �?��??�?� 2 �?? distinct academic keyword hits�?QLIKE + Diebold-Mariano�?�?�??�?��??�?? alt-text�?�?觸�?� publisher _infer_audience upcast�??research�?validate_feed_audience.py 失�??使 CI Test Suite �?� pytest �??被 gate�?Run test suite �?��? skipped�?; repair=�??�?? guarded apply_article_correction() �?? alt-text �??�??Diebold-Mariano 檢�?�??�?�?�模�??表�?��?��??�??scrub �??�??統�?檢�?顯示�?�模�??表�?��??顯�??差�?��??�?distinct signals �??�?� {QLIKE}=1 < �??檻2�?�??章�?�?? general�?class sweep=validate_feed_audience.py �??�? PASS�?1885 entries / 482 general / 0 mismatches�?�?� feed �?��??�? leak�?; repair_commit=pending_post_commit"
   },
   {
     "id": "k1715_bfgs_fix_dephantom_rerun_20260727",
@@ -43508,5 +43645,49 @@
       }
     ],
     "started_at": "2026-07-26T20:14:54.003219+00:00"
+  },
+  {
+    "id": "K1592_article_general",
+    "title": "K1592: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1592 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1592 NULL_OR_WEAK：對leverage-direction論文審查質疑的gamma-rule模型選擇故事，重建為凍結、預註冊的未來OOS賽馬（正gamma門檻>1.65時用GJR否則GARCH），development資產SPY/QQQ/EEM/GLD/TLT + disjoint holdout資產IWM/SLV/BTC-USD，OOS期間2023-01-03至2026-06-26（8個資產873-1202個觀測），論文專屬pinned CSV，21日refit，canonical Patton QLIKE + DM-HAC(h=1) Canonical evidence: experiments/k1592/k1592_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1592",
+    "evidence_source_paths": [
+      "experiments/k1592/k1592_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1592/k1592_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-26T21:05:40+00:00"
+  },
+  {
+    "id": "K1600_article_general",
+    "title": "K1600: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1600 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1600 [CONDITIONAL_PASS]: 低頻proxy版HARQ測量誤差修正檢定(BPQ 2016機制)，SPY/QQQ/0050.TW各自獨立估計(不pooling)，yfinance 2010-2026，OOS約n=3200-3300/資產/horizon。9個資產×horizon cell中，QLIKE loss ratio(HARQ/HAR)僅2格<1(皆|DM t|<1不顯著)，其餘7格HARQ更差；DM-HLN在'挑戰者更優'方向0/9 Harvey顯著；β1Q僅1/9顯著(0050.TW h=22,t=-3.11)但該格loss Canonical evidence: experiments/k1600/k1600_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1600",
+    "evidence_source_paths": [
+      "experiments/k1600/k1600_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1600/k1600_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-26T21:05:47+00:00"
   }
 ]

@@ -21,12 +21,12 @@
     "K1719"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 1,
   "queued_at": "2026-07-26T20:24:59Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-26T20:29:06Z",
+  "completed_at": "2026-07-26T20:34:27Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_1ef77049.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_1ef77049.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels",
@@ -34,9 +34,10 @@
     "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/plan.json",
     "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/1_method.png",
     "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/2_scorecard.png",
-    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/3_takeaway.png"
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/3_takeaway.png",
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/render_lazypack.py"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-26T20:34:21Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -45,5 +46,22 @@
   "source_task_id": null,
   "timeout_seconds": 1800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 36873,
+  "claimed_by_pid_start_wall": "Mon Jul 27 02:45:03 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "c252d4881084be2b4e7ba439faac53ff4b15358d",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/1_method.png",
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/2_scorecard.png",
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/3_takeaway.png",
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/panels/render_lazypack.py",
+    "storage/lazypack_jobs/mile_1ef77049/runs/lazypack-mile_1ef77049/plan.json"
+  ],
+  "delivered_at": "2026-07-26T21:00:42.180526+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

@@ -1,0 +1,165 @@
+{
+  "schema_version": 1,
+  "title": "更聰明的風險模型，為什麼反而更常失手",
+  "subtitle": "把市場分成三種情境再校準尾部風險，結果踩線比樸素模型還多——複雜不等於準",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1420/k1420_results.json",
+      "sha256": "f4e1810d404955b8a5bb51054e7a6653bbc708d05626fe0b96989189f2de4c6d",
+      "label": "三情境校準尾部風險 vs 樸素模型（SPY 與 0050.TW 次日 VaR 回測）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_method",
+      "info": "method",
+      "style": "professional",
+      "title": "我們到底在比什麼",
+      "alt": "以實測交易日回測，比較樸素風險模型與三情境校準模型的尾部踩線表現",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "美股 SPY 實測回測天數",
+          "value": {
+            "source": "result",
+            "path": "assets.SPY.sample.n_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "理論上該踩線的比率",
+          "value": {
+            "source": "result",
+            "path": "assets.SPY.config.alpha",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          },
+          "note": "實際踩線率愈貼近這個數，模型才算準"
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼比",
+          "body": [
+            "樸素版直接用單一波動模型估計每日的風險界線；加料版先把市場分成平靜、震盪、恐慌三種隱藏情境，再分別校準。理論上分情境該更貼合現實。踩線＝當天實際跌幅超過模型預告的風險界線。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2_scorecard",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "成績單：加料版踩線反而更多",
+      "alt": "樸素模型與三情境模型在美股上的踩線率與踩線天數對照",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "美股：樸素版踩線率",
+          "value": {
+            "source": "result",
+            "path": "assets.SPY.methods.gjr_normal.violation_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "幾乎正中理論值，很準"
+        },
+        {
+          "kind": "metric",
+          "label": "美股：三情境版踩線率",
+          "value": {
+            "source": "result",
+            "path": "assets.SPY.methods.rwc.violation_rate",
+            "format": {
+              "kind": "percent",
+              "digits": 2
+            }
+          },
+          "note": "明顯超標，低估了風險"
+        },
+        {
+          "kind": "metric",
+          "label": "美股：樸素版踩線天數",
+          "value": {
+            "source": "result",
+            "path": "assets.SPY.methods.gjr_normal.violations",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "美股：三情境版踩線天數",
+          "value": {
+            "source": "result",
+            "path": "assets.SPY.methods.rwc.violations",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          },
+          "note": "同一段期間，加料版多踩了好幾天"
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "複雜度沒有換到準度",
+      "alt": "兩個資產都沒讓三情境模型過關，複雜方法並未擊敗樸素基準",
+      "sources": [
+        "result"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "過關的資產數",
+          "value": {
+            "source": "result",
+            "path": "verdict.pass_count",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          },
+          "note": "門檻是至少一個資產要贏，結果掛蛋"
+        },
+        {
+          "kind": "metric",
+          "label": "總共測試的資產數",
+          "value": {
+            "source": "result",
+            "path": "verdict.n_assets",
+            "format": {
+              "kind": "integer",
+              "suffix": " 個"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "數據說的話",
+          "body": [
+            "把市場拆成三種情境再校準，聽起來更聰明，但美股與台股兩邊的尾部踩線都沒有變好、反而更常超標。誠實的結論是：這個加料在這兩個資產上沒有換到準度，樸素模型已經夠好。"
+          ]
+        }
+      ]
+    }
+  ]
+}
