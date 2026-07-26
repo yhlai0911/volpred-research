@@ -1,0 +1,1954 @@
+{
+  "experiment_id": "K1714",
+  "title": "Realized-covariance HAR vs shrinkage/EWMA for out-of-sample GMV portfolios",
+  "run_utc": "2026-07-22T03:00:47.550692+00:00",
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT"
+    ],
+    "cholesky_order": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT"
+    ],
+    "sample_start": "2004-11-19",
+    "sample_end": "2026-07-21",
+    "n_daily_returns": 5449,
+    "block_lens": [
+      5,
+      10
+    ],
+    "headline_block_len": 5,
+    "har_lags_in_blocks": [
+      1,
+      4,
+      12
+    ],
+    "burnin_days": 780,
+    "benchmark_window_days": 252,
+    "ewma_lambda": 0.94,
+    "seed": 42,
+    "alpha": 0.05,
+    "harvey_t_threshold": 3.0,
+    "primary_family": [
+      "sample",
+      "ledoit_wolf",
+      "ewma"
+    ],
+    "reference_strategies": [
+      "equal_weight"
+    ],
+    "bootstrap_reps": 2000,
+    "return_type": "simple (arithmetic) returns throughout, so that w'r is the exact portfolio return and Cov(r) is the exact GMV input",
+    "demeaning": "none — block RCov and the sample/LW benchmarks all use the non-demeaned second moment, which makes the benchmark exactly nested in the HAR information set"
+  },
+  "data_provenance": {
+    "source": "yfinance adjusted close (auto_adjust=True)",
+    "cache_file": "data/prices_raw.csv",
+    "cache_sha256": "10102f2a7698d8b0d629203535ebf950479719577f5f30dfc03b73a2e9ffd76d"
+  },
+  "results_by_block_length": {
+    "block_5d": {
+      "audit": {
+        "rule": "every estimator uses daily returns through info_end_day; weights are applied starting at apply_start_day",
+        "all_apply_start_after_info_end": true,
+        "min_gap_days": 1,
+        "max_gap_days": 1,
+        "har_last_training_target_block_offset": -1,
+        "har_forecast_origin_block_offset": -1,
+        "n_rebalances": 933,
+        "parameterisation": "chol",
+        "transform_failures": 0,
+        "forecast_negative_diagonal_count": 0,
+        "forecast_negative_diagonal_rate": 0.0,
+        "forecast_negative_diagonal_note": "Cholesky: a negative L_ii still yields a PD matrix but signals the linear model extrapolating the variance channel through zero. Matrix-log: negative diagonals are the NORM (log of a small variance), so this count carries no diagnostic meaning under 'logm'.",
+        "block_rcov_condition_number": {
+          "min": 5.9305476749078245,
+          "median": 196.19741820123122,
+          "p95": 3205.995506020644,
+          "max": 463462.25624842197
+        },
+        "har_first_train_rows": 144,
+        "har_last_train_rows": 1076,
+        "positive_definite_check": {
+          "har_rcov_chol": {
+            "n_checked": 933,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "sample": {
+            "n_checked": 933,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "ledoit_wolf": {
+            "n_checked": 933,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "ewma": {
+            "n_checked": 933,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "equal_weight": {
+            "n_checked": 933,
+            "n_not_pd": 0,
+            "rate": 0.0
+          }
+        },
+        "block_len": 5,
+        "first_forecast_block": 156,
+        "n_blocks_total": 1089,
+        "oos_start_date": "2007-12-27",
+        "oos_end_date": "2026-07-15"
+      },
+      "metrics": {
+        "har_rcov_chol": {
+          "ann_vol": 0.09256286721873369,
+          "daily_var": 3.399954122124176e-05,
+          "ann_mean": 0.08435966258761886,
+          "sharpe": 0.9113769389648445,
+          "n_days": 4665,
+          "n_rebalances": 933,
+          "turnover_mean_per_rebalance": 0.39959337277762313,
+          "turnover_median_per_rebalance": 0.30353276109003263,
+          "turnover_annualized": 20.139505987992205,
+          "hhi_mean": 0.6753901369607592,
+          "gross_leverage_mean": 1.3171622586302782,
+          "max_abs_weight": 1.5200135929898655,
+          "frac_rebal_with_short": 0.8113612004287245,
+          "min_weight": -0.8608733676779198
+        },
+        "sample": {
+          "ann_vol": 0.08933057843768338,
+          "daily_var": 3.1666477158774215e-05,
+          "ann_mean": 0.08465489451495294,
+          "sharpe": 0.9476586404733496,
+          "n_days": 4665,
+          "n_rebalances": 933,
+          "turnover_mean_per_rebalance": 0.044663091470373506,
+          "turnover_median_per_rebalance": 0.03399498608706865,
+          "turnover_annualized": 2.2510198101068246,
+          "hhi_mean": 0.742602499689761,
+          "gross_leverage_mean": 1.4296301007261853,
+          "max_abs_weight": 1.2614569216289062,
+          "frac_rebal_with_short": 0.8102893890675241,
+          "min_weight": -0.6394415012018797
+        },
+        "ledoit_wolf": {
+          "ann_vol": 0.09029124464616307,
+          "daily_var": 3.235122563394156e-05,
+          "ann_mean": 0.09234743249095499,
+          "sharpe": 1.0227728375309235,
+          "n_days": 4665,
+          "n_rebalances": 933,
+          "turnover_mean_per_rebalance": 0.034312157926904306,
+          "turnover_median_per_rebalance": 0.025836265739157552,
+          "turnover_annualized": 1.729332759515977,
+          "hhi_mean": 0.4775605150147718,
+          "gross_leverage_mean": 1.1707408795940868,
+          "max_abs_weight": 0.8105696957382201,
+          "frac_rebal_with_short": 0.5573419078242229,
+          "min_weight": -0.36577025067529445
+        },
+        "ewma": {
+          "ann_vol": 0.087243896419005,
+          "daily_var": 3.0204355009405046e-05,
+          "ann_mean": 0.09213842378313848,
+          "sharpe": 1.0561016594287194,
+          "n_days": 4665,
+          "n_rebalances": 933,
+          "turnover_mean_per_rebalance": 0.3243108371090032,
+          "turnover_median_per_rebalance": 0.24332463845482902,
+          "turnover_annualized": 16.345266190293763,
+          "hhi_mean": 0.8767124066733584,
+          "gross_leverage_mean": 1.5042356842964089,
+          "max_abs_weight": 1.803259910362852,
+          "frac_rebal_with_short": 0.8510182207931404,
+          "min_weight": -1.2444523846949098
+        },
+        "equal_weight": {
+          "ann_vol": 0.11432743300948935,
+          "daily_var": 5.18681029307114e-05,
+          "ann_mean": 0.10926720588929781,
+          "sharpe": 0.955739169620195,
+          "n_days": 4665,
+          "n_rebalances": 933,
+          "turnover_mean_per_rebalance": 0.014391713543792315,
+          "turnover_median_per_rebalance": 0.01186071831751763,
+          "turnover_annualized": 0.7253423626071327,
+          "hhi_mean": 0.25,
+          "gross_leverage_mean": 1.0,
+          "max_abs_weight": 0.25,
+          "frac_rebal_with_short": 0.0,
+          "min_weight": 0.25
+        }
+      },
+      "inference": {
+        "family": [
+          "sample",
+          "ledoit_wolf",
+          "ewma"
+        ],
+        "family_size": 3,
+        "correction": "Holm-Bonferroni (primary, FWER); Benjamini-Hochberg reported",
+        "tests": {
+          "sample": {
+            "var_a": 3.399225300233046e-05,
+            "var_b": 3.165968906077662e-05,
+            "delta": 2.332563941553839e-06,
+            "se": 1.1652212277621587e-06,
+            "t_stat": 2.0018206723143863,
+            "p_value": 0.045304021798353133,
+            "hac_lag": 17,
+            "n_obs": 4665,
+            "lag_sensitivity": {
+              "0": {
+                "t_stat": 2.1386516269126137,
+                "p_value": 0.03246389299494723
+              },
+              "5": {
+                "t_stat": 1.9858903949290811,
+                "p_value": 0.04704549548475723
+              },
+              "10": {
+                "t_stat": 2.034189606826833,
+                "p_value": 0.04193248203797295
+              },
+              "20": {
+                "t_stat": 1.9998298742334817,
+                "p_value": 0.04551863753104746
+              },
+              "40": {
+                "t_stat": 2.086192686482833,
+                "p_value": 0.03696117246070618
+              },
+              "63": {
+                "t_stat": 2.149597939261403,
+                "p_value": 0.03158703156891063
+              }
+            },
+            "loss_differential_acf": [
+              0.07887090173211363,
+              -0.05629819455448172,
+              0.1039297854688725,
+              0.01398859945722408,
+              -0.03236198446047491,
+              -0.11112769472048536,
+              -0.026885419679588733,
+              0.047822334572627606,
+              0.017701958010627048,
+              0.029644726861256823
+            ],
+            "dm_test_on_squared_returns": {
+              "t_stat": 1.9989248150928351,
+              "p_value": 0.045674419268297184,
+              "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+            },
+            "bootstrap": {
+              "p_value_bootstrap": 0.05647176411794103,
+              "reps": 2000,
+              "block_len": 17,
+              "seed": 42
+            },
+            "p_holm": 0.09060804359670627,
+            "p_bh_fdr": 0.0679560326975297,
+            "survives_holm_at_005": false,
+            "meets_harvey_t3": false
+          },
+          "ledoit_wolf": {
+            "var_a": 3.399225300233046e-05,
+            "var_b": 3.234429075170491e-05,
+            "delta": 1.6479622506255476e-06,
+            "se": 1.1514042285773362e-06,
+            "t_stat": 1.4312629828203374,
+            "p_value": 0.15235485874692567,
+            "hac_lag": 17,
+            "n_obs": 4665,
+            "lag_sensitivity": {
+              "0": {
+                "t_stat": 1.5462240433685468,
+                "p_value": 0.12205046874547154
+              },
+              "5": {
+                "t_stat": 1.43156419511853,
+                "p_value": 0.15226858273950916
+              },
+              "10": {
+                "t_stat": 1.4578198527204311,
+                "p_value": 0.14489020465118618
+              },
+              "20": {
+                "t_stat": 1.4286327070159968,
+                "p_value": 0.1531098283723178
+              },
+              "40": {
+                "t_stat": 1.5066202621170022,
+                "p_value": 0.1319080207127672
+              },
+              "63": {
+                "t_stat": 1.5423218100859442,
+                "p_value": 0.12299541154365667
+              }
+            },
+            "loss_differential_acf": [
+              0.0840070683673229,
+              -0.034311037800968974,
+              0.10082486230312374,
+              -0.032742708074433906,
+              -0.025825696044485678,
+              -0.09760115680825554,
+              -0.02209192149358289,
+              0.06658542233653877,
+              0.02138116798653934,
+              0.052722267694024924
+            ],
+            "dm_test_on_squared_returns": {
+              "t_stat": 1.4088804633627119,
+              "p_value": 0.158937180275059,
+              "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+            },
+            "bootstrap": {
+              "p_value_bootstrap": 0.1539230384807596,
+              "reps": 2000,
+              "block_len": 17,
+              "seed": 42
+            },
+            "p_holm": 0.15235485874692567,
+            "p_bh_fdr": 0.15235485874692567,
+            "survives_holm_at_005": false,
+            "meets_harvey_t3": false
+          },
+          "ewma": {
+            "var_a": 3.399225300233046e-05,
+            "var_b": 3.019788033523368e-05,
+            "delta": 3.7943726670967783e-06,
+            "se": 8.314461158938082e-07,
+            "t_stat": 4.5635821667382634,
+            "p_value": 5.028811522977961e-06,
+            "hac_lag": 17,
+            "n_obs": 4665,
+            "lag_sensitivity": {
+              "0": {
+                "t_stat": 4.7316215933830605,
+                "p_value": 2.227333337101456e-06
+              },
+              "5": {
+                "t_stat": 4.500839884973934,
+                "p_value": 6.768547918367673e-06
+              },
+              "10": {
+                "t_stat": 4.44748114192902,
+                "p_value": 8.688308386295418e-06
+              },
+              "20": {
+                "t_stat": 4.593950835490829,
+                "p_value": 4.349318908136723e-06
+              },
+              "40": {
+                "t_stat": 4.794644952765017,
+                "p_value": 1.6296319491626576e-06
+              },
+              "63": {
+                "t_stat": 4.809113462988039,
+                "p_value": 1.5160114192891427e-06
+              }
+            },
+            "loss_differential_acf": [
+              0.10284351602471449,
+              0.011874558294070216,
+              0.030517565875670123,
+              -0.17599231573633878,
+              0.005240008922409645,
+              -0.04824769801064053,
+              0.09872753317008039,
+              0.12866227162191252,
+              -0.03888405252597139,
+              0.05647759902510411
+            ],
+            "dm_test_on_squared_returns": {
+              "t_stat": 4.546197947333189,
+              "p_value": 5.6006570916533605e-06,
+              "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+            },
+            "bootstrap": {
+              "p_value_bootstrap": 0.0004997501249375312,
+              "reps": 2000,
+              "block_len": 17,
+              "seed": 42
+            },
+            "p_holm": 1.5086434568933882e-05,
+            "p_bh_fdr": 1.5086434568933882e-05,
+            "survives_holm_at_005": true,
+            "meets_harvey_t3": true
+          }
+        }
+      },
+      "adjudication": {
+        "verdict": "LOSE",
+        "model_lower_point_estimate_than_all_three": false,
+        "benchmarks_beaten_after_holm": [],
+        "benchmarks_losing_to_after_holm": [
+          "ewma"
+        ],
+        "rule": {
+          "WIN": "point estimate lower than all three AND the Ledoit-Wolf comparison survives Holm at alpha=0.05",
+          "MIXED": "some comparison survives Holm in the model's favour but the WIN condition is not met",
+          "TIE_NULL": "no comparison survives Holm in either direction",
+          "LOSE": "some benchmark has significantly lower variance after Holm"
+        }
+      },
+      "subperiods_ann_vol": {
+        "gfc_2007_12_to_2009_06": {
+          "har_rcov_chol": 0.1293854545945984,
+          "_n_days": 380,
+          "sample": 0.12497279855899086,
+          "ledoit_wolf": 0.12483184526404735,
+          "ewma": 0.122787883031093,
+          "equal_weight": 0.18605405079262644
+        },
+        "post_gfc_2009_07_to_2019_12": {
+          "har_rcov_chol": 0.0730938270971155,
+          "_n_days": 2644,
+          "sample": 0.06968134108797364,
+          "ledoit_wolf": 0.07040020169292402,
+          "ewma": 0.0691383063014227,
+          "equal_weight": 0.08359551084418475
+        },
+        "covid_and_after_2020_01_to_end": {
+          "har_rcov_chol": 0.1090068983818334,
+          "_n_days": 1641,
+          "sample": 0.10607589542457471,
+          "ledoit_wolf": 0.10764701849136094,
+          "ewma": 0.10223705741435955,
+          "equal_weight": 0.1337368636862886
+        }
+      },
+      "cost_sensitivity_descriptive": {
+        "har_rcov_chol": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.08403625148982506,
+            "net_ann_vol": 0.08853998655258198,
+            "net_sharpe": 0.9491333211341494
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.07397729137149239,
+            "net_ann_vol": 0.08852254327354689,
+            "net_sharpe": 0.8356887255587807
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.06391833125315974,
+            "net_ann_vol": 0.08851956934001884,
+            "net_sharpe": 0.722081362683075
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.043800411016494435,
+            "net_ann_vol": 0.08855702824797564,
+            "net_sharpe": 0.49460118392687474
+          }
+        ],
+        "sample": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.0844691343308935,
+            "net_ann_vol": 0.08651545944904397,
+            "net_sharpe": 0.9763472894765621
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.08334483076014346,
+            "net_ann_vol": 0.08651076357971305,
+            "net_sharpe": 0.9634041743643562
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.08222052718939342,
+            "net_ann_vol": 0.08650635924909157,
+            "net_sharpe": 0.9504564508678807
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.07997192004789337,
+            "net_ann_vol": 0.08649842537916407,
+            "net_sharpe": 0.9245476978030307
+          }
+        ],
+        "ledoit_wolf": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.09216715808106067,
+            "net_ann_vol": 0.08746853331037512,
+            "net_sharpe": 1.0537178867972197
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.09130341846055216,
+            "net_ann_vol": 0.08746500521510911,
+            "net_sharpe": 1.043885131384866
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.09043967884004366,
+            "net_ann_vol": 0.08746169964445231,
+            "net_sharpe": 1.0340489518005866
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.08871219959902661,
+            "net_ann_vol": 0.08745575617619707,
+            "net_sharpe": 1.0143666177935526
+          }
+        ],
+        "ewma": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.09233162236154725,
+            "net_ann_vol": 0.0887138683991522,
+            "net_sharpe": 1.0407800271555923
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.08416774878740269,
+            "net_ann_vol": 0.08864739789354163,
+            "net_sharpe": 0.9494666599067169
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.07600387521325808,
+            "net_ann_vol": 0.08859144294156215,
+            "net_sharpe": 0.857914406737824
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.059676128064968935,
+            "net_ann_vol": 0.08851115572326215,
+            "net_sharpe": 0.6742215439096916
+          }
+        ],
+        "equal_weight": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.10856590801298811,
+            "net_ann_vol": 0.10709828837354089,
+            "net_sharpe": 1.013703483610573
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.10820362554677707,
+            "net_ann_vol": 0.10709888343853896,
+            "net_sharpe": 1.0103151599042777
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.107841343080566,
+            "net_ann_vol": 0.10709949173089588,
+            "net_sharpe": 1.006926749489476
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.10711677814814387,
+            "net_ann_vol": 0.10710074799677988,
+            "net_sharpe": 1.0001496735705757
+          }
+        ]
+      },
+      "long_only_robustness": {
+        "audit_gap_check": true,
+        "metrics": {
+          "har_rcov_chol": {
+            "ann_vol": 0.0950553078453954,
+            "daily_var": 3.585520456183685e-05,
+            "ann_mean": 0.08429311576546626,
+            "sharpe": 0.8867796830721593,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.21373616827321185,
+            "turnover_median_per_rebalance": 0.17919291813157695,
+            "turnover_annualized": 10.772302880969878,
+            "hhi_mean": 0.4776127731077313,
+            "gross_leverage_mean": 1.0,
+            "max_abs_weight": 1.0,
+            "frac_rebal_with_short": 0.0,
+            "min_weight": 0.0
+          },
+          "sample": {
+            "ann_vol": 0.09173581067783412,
+            "daily_var": 3.3394678415553273e-05,
+            "ann_mean": 0.09440509247623038,
+            "sharpe": 1.0290974896136307,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.026799382413570737,
+            "turnover_median_per_rebalance": 0.02013355635436725,
+            "turnover_annualized": 1.350688873643965,
+            "hhi_mean": 0.399370593848305,
+            "gross_leverage_mean": 1.0,
+            "max_abs_weight": 0.7080522581193439,
+            "frac_rebal_with_short": 0.0,
+            "min_weight": 0.0
+          },
+          "ledoit_wolf": {
+            "ann_vol": 0.09200947745221336,
+            "daily_var": 3.359422198821173e-05,
+            "ann_mean": 0.0960395816525731,
+            "sharpe": 1.0438009682475684,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.025982514202121318,
+            "turnover_median_per_rebalance": 0.019815569692685275,
+            "turnover_annualized": 1.3095187157869144,
+            "hhi_mean": 0.3735262451460302,
+            "gross_leverage_mean": 1.0,
+            "max_abs_weight": 0.6295556623774927,
+            "frac_rebal_with_short": 0.0,
+            "min_weight": 0.0
+          },
+          "ewma": {
+            "ann_vol": 0.08867995862953304,
+            "daily_var": 3.120688516879243e-05,
+            "ann_mean": 0.09659579392890524,
+            "sharpe": 1.089262956610537,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.167900894788977,
+            "turnover_median_per_rebalance": 0.12413454941827382,
+            "turnover_annualized": 8.462205097364441,
+            "hhi_mean": 0.42624991073093016,
+            "gross_leverage_mean": 1.0,
+            "max_abs_weight": 0.9992306994817381,
+            "frac_rebal_with_short": 0.0,
+            "min_weight": 0.0
+          },
+          "equal_weight": {
+            "ann_vol": 0.11432743300948935,
+            "daily_var": 5.18681029307114e-05,
+            "ann_mean": 0.10926720588929781,
+            "sharpe": 0.955739169620195,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.014391713543792315,
+            "turnover_median_per_rebalance": 0.01186071831751763,
+            "turnover_annualized": 0.7253423626071327,
+            "hhi_mean": 0.25,
+            "gross_leverage_mean": 1.0,
+            "max_abs_weight": 0.25,
+            "frac_rebal_with_short": 0.0,
+            "min_weight": 0.25
+          }
+        },
+        "inference": {
+          "family": [
+            "sample",
+            "ledoit_wolf",
+            "ewma"
+          ],
+          "family_size": 3,
+          "correction": "Holm-Bonferroni (primary, FWER); Benjamini-Hochberg reported",
+          "tests": {
+            "sample": {
+              "var_a": 3.584751855871534e-05,
+              "var_b": 3.338751985640738e-05,
+              "delta": 2.4599987023079574e-06,
+              "se": 1.1684815785678236e-06,
+              "t_stat": 2.1052952373653264,
+              "p_value": 0.03526561643683479,
+              "hac_lag": 17,
+              "n_obs": 4665,
+              "lag_sensitivity": {
+                "0": {
+                  "t_stat": 2.287728435808132,
+                  "p_value": 0.0221533406587191
+                },
+                "5": {
+                  "t_stat": 2.08927025247563,
+                  "p_value": 0.03668340260047431
+                },
+                "10": {
+                  "t_stat": 2.1190251897612606,
+                  "p_value": 0.034088338191694545
+                },
+                "20": {
+                  "t_stat": 2.1166708215974017,
+                  "p_value": 0.03428779486564992
+                },
+                "40": {
+                  "t_stat": 2.2864007252003633,
+                  "p_value": 0.022230825951738087
+                },
+                "63": {
+                  "t_stat": 2.381363836212425,
+                  "p_value": 0.01724866623807375
+                }
+              },
+              "loss_differential_acf": [
+                0.09783383406601598,
+                -0.02516424082676624,
+                0.11850737622923577,
+                -0.05043442277479019,
+                -0.049402173828073916,
+                -0.123182062884586,
+                0.01933712666411648,
+                0.10079396884896172,
+                0.005792877928357758,
+                0.07768996089834557
+              ],
+              "dm_test_on_squared_returns": {
+                "t_stat": 2.076402228795753,
+                "p_value": 0.03791140266134918,
+                "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+              },
+              "p_holm": 0.07053123287366958,
+              "p_bh_fdr": 0.052898424655252185,
+              "survives_holm_at_005": false,
+              "meets_harvey_t3": false
+            },
+            "ledoit_wolf": {
+              "var_a": 3.584751855871534e-05,
+              "var_b": 3.358702065445221e-05,
+              "delta": 2.2604979042631297e-06,
+              "se": 1.2398793123807313e-06,
+              "t_stat": 1.8231596266596921,
+              "p_value": 0.06827921789082714,
+              "hac_lag": 17,
+              "n_obs": 4665,
+              "lag_sensitivity": {
+                "0": {
+                  "t_stat": 2.0420339833103616,
+                  "p_value": 0.04114816049185932
+                },
+                "5": {
+                  "t_stat": 1.8373999513715071,
+                  "p_value": 0.06615087400675068
+                },
+                "10": {
+                  "t_stat": 1.8411331977074243,
+                  "p_value": 0.06560204181644713
+                },
+                "20": {
+                  "t_stat": 1.8298572655330145,
+                  "p_value": 0.06727128507214819
+                },
+                "40": {
+                  "t_stat": 1.956259075777596,
+                  "p_value": 0.05043464247559348
+                },
+                "63": {
+                  "t_stat": 2.0138520449765567,
+                  "p_value": 0.04402506961493313
+                }
+              },
+              "loss_differential_acf": [
+                0.10416430756201776,
+                -0.002093047149741375,
+                0.1253212646469252,
+                -0.07756566691491759,
+                -0.03252766472433386,
+                -0.11018757091088663,
+                0.028483037528437418,
+                0.10573807782810807,
+                0.004426350911009809,
+                0.08171443933526557
+              ],
+              "dm_test_on_squared_returns": {
+                "t_stat": 1.792538453874153,
+                "p_value": 0.07311153990881425,
+                "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+              },
+              "p_holm": 0.07053123287366958,
+              "p_bh_fdr": 0.06827921789082714,
+              "survives_holm_at_005": false,
+              "meets_harvey_t3": false
+            },
+            "ewma": {
+              "var_a": 3.584751855871534e-05,
+              "var_b": 3.120019558997811e-05,
+              "delta": 4.6473229687372285e-06,
+              "se": 1.0086977813266405e-06,
+              "t_stat": 4.607250114722235,
+              "p_value": 4.0802909557768885e-06,
+              "hac_lag": 17,
+              "n_obs": 4665,
+              "lag_sensitivity": {
+                "0": {
+                  "t_stat": 5.574343242037081,
+                  "p_value": 2.4846541935019673e-08
+                },
+                "5": {
+                  "t_stat": 4.782895162536179,
+                  "p_value": 1.7278825552580201e-06
+                },
+                "10": {
+                  "t_stat": 4.610067357452947,
+                  "p_value": 4.025385271777537e-06
+                },
+                "20": {
+                  "t_stat": 4.633294079295192,
+                  "p_value": 3.5989272670899908e-06
+                },
+                "40": {
+                  "t_stat": 4.823974548756899,
+                  "p_value": 1.4072538252474232e-06
+                },
+                "63": {
+                  "t_stat": 4.839243732946669,
+                  "p_value": 1.3033412933349808e-06
+                }
+              },
+              "loss_differential_acf": [
+                0.1587764252925511,
+                0.03803963557737705,
+                0.11556398725870654,
+                -0.10603984832837754,
+                -0.017529812139108446,
+                -0.07168308909664446,
+                0.0945910972416793,
+                0.1537578932658937,
+                -0.014262012469751981,
+                0.054479544932372524
+              ],
+              "dm_test_on_squared_returns": {
+                "t_stat": 4.582415175062543,
+                "p_value": 4.716358824152778e-06,
+                "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+              },
+              "p_holm": 1.2240872867330665e-05,
+              "p_bh_fdr": 1.2240872867330665e-05,
+              "survives_holm_at_005": true,
+              "meets_harvey_t3": true
+            }
+          }
+        },
+        "adjudication": {
+          "verdict": "LOSE",
+          "model_lower_point_estimate_than_all_three": false,
+          "benchmarks_beaten_after_holm": [],
+          "benchmarks_losing_to_after_holm": [
+            "ewma"
+          ],
+          "rule": {
+            "WIN": "point estimate lower than all three AND the Ledoit-Wolf comparison survives Holm at alpha=0.05",
+            "MIXED": "some comparison survives Holm in the model's favour but the WIN condition is not met",
+            "TIE_NULL": "no comparison survives Holm in either direction",
+            "LOSE": "some benchmark has significantly lower variance after Holm"
+          }
+        }
+      },
+      "cholesky_permutation_sensitivity": {
+        "n_orderings": 24,
+        "ann_vol_min": 0.09056068945359276,
+        "ann_vol_max": 0.09822960565340927,
+        "ann_vol_mean": 0.09359733255660263,
+        "ann_vol_std": 0.002175386981150831,
+        "ann_vol_spread": 0.007668916199816508,
+        "canonical_order": [
+          "SPY",
+          "QQQ",
+          "GLD",
+          "TLT"
+        ],
+        "per_ordering": [
+          {
+            "order": [
+              "SPY",
+              "QQQ",
+              "GLD",
+              "TLT"
+            ],
+            "ann_vol": 0.09256286721873369
+          },
+          {
+            "order": [
+              "SPY",
+              "QQQ",
+              "TLT",
+              "GLD"
+            ],
+            "ann_vol": 0.0909211378536548
+          },
+          {
+            "order": [
+              "SPY",
+              "GLD",
+              "QQQ",
+              "TLT"
+            ],
+            "ann_vol": 0.09396605812060937
+          },
+          {
+            "order": [
+              "SPY",
+              "GLD",
+              "TLT",
+              "QQQ"
+            ],
+            "ann_vol": 0.09082570349286789
+          },
+          {
+            "order": [
+              "SPY",
+              "TLT",
+              "QQQ",
+              "GLD"
+            ],
+            "ann_vol": 0.09274454095930304
+          },
+          {
+            "order": [
+              "SPY",
+              "TLT",
+              "GLD",
+              "QQQ"
+            ],
+            "ann_vol": 0.09094697970485759
+          },
+          {
+            "order": [
+              "QQQ",
+              "SPY",
+              "GLD",
+              "TLT"
+            ],
+            "ann_vol": 0.09283211297172596
+          },
+          {
+            "order": [
+              "QQQ",
+              "SPY",
+              "TLT",
+              "GLD"
+            ],
+            "ann_vol": 0.09056068945359276
+          },
+          {
+            "order": [
+              "QQQ",
+              "GLD",
+              "SPY",
+              "TLT"
+            ],
+            "ann_vol": 0.09398369533534097
+          },
+          {
+            "order": [
+              "QQQ",
+              "GLD",
+              "TLT",
+              "SPY"
+            ],
+            "ann_vol": 0.09165662411649012
+          },
+          {
+            "order": [
+              "QQQ",
+              "TLT",
+              "SPY",
+              "GLD"
+            ],
+            "ann_vol": 0.09096018038058766
+          },
+          {
+            "order": [
+              "QQQ",
+              "TLT",
+              "GLD",
+              "SPY"
+            ],
+            "ann_vol": 0.09138094996448039
+          },
+          {
+            "order": [
+              "GLD",
+              "SPY",
+              "QQQ",
+              "TLT"
+            ],
+            "ann_vol": 0.09502081621278179
+          },
+          {
+            "order": [
+              "GLD",
+              "SPY",
+              "TLT",
+              "QQQ"
+            ],
+            "ann_vol": 0.09359503787045916
+          },
+          {
+            "order": [
+              "GLD",
+              "QQQ",
+              "SPY",
+              "TLT"
+            ],
+            "ann_vol": 0.09555911656556089
+          },
+          {
+            "order": [
+              "GLD",
+              "QQQ",
+              "TLT",
+              "SPY"
+            ],
+            "ann_vol": 0.09405725004576625
+          },
+          {
+            "order": [
+              "GLD",
+              "TLT",
+              "SPY",
+              "QQQ"
+            ],
+            "ann_vol": 0.09822960565340927
+          },
+          {
+            "order": [
+              "GLD",
+              "TLT",
+              "QQQ",
+              "SPY"
+            ],
+            "ann_vol": 0.09811029731177603
+          },
+          {
+            "order": [
+              "TLT",
+              "SPY",
+              "QQQ",
+              "GLD"
+            ],
+            "ann_vol": 0.09399557246180662
+          },
+          {
+            "order": [
+              "TLT",
+              "SPY",
+              "GLD",
+              "QQQ"
+            ],
+            "ann_vol": 0.09425311988683621
+          },
+          {
+            "order": [
+              "TLT",
+              "QQQ",
+              "SPY",
+              "GLD"
+            ],
+            "ann_vol": 0.09404465456157232
+          },
+          {
+            "order": [
+              "TLT",
+              "QQQ",
+              "GLD",
+              "SPY"
+            ],
+            "ann_vol": 0.09452046873596903
+          },
+          {
+            "order": [
+              "TLT",
+              "GLD",
+              "SPY",
+              "QQQ"
+            ],
+            "ann_vol": 0.096086201642303
+          },
+          {
+            "order": [
+              "TLT",
+              "GLD",
+              "QQQ",
+              "SPY"
+            ],
+            "ann_vol": 0.09552230083797833
+          }
+        ]
+      },
+      "matrix_log_parameterisation_secondary": {
+        "status": "POST-HOC — declared after the primary result was known",
+        "audit": {
+          "rule": "every estimator uses daily returns through info_end_day; weights are applied starting at apply_start_day",
+          "all_apply_start_after_info_end": true,
+          "min_gap_days": 1,
+          "max_gap_days": 1,
+          "har_last_training_target_block_offset": -1,
+          "har_forecast_origin_block_offset": -1,
+          "n_rebalances": 933,
+          "parameterisation": "logm",
+          "transform_failures": 0,
+          "forecast_negative_diagonal_count": 3732,
+          "forecast_negative_diagonal_rate": 1.0,
+          "forecast_negative_diagonal_note": "Cholesky: a negative L_ii still yields a PD matrix but signals the linear model extrapolating the variance channel through zero. Matrix-log: negative diagonals are the NORM (log of a small variance), so this count carries no diagnostic meaning under 'logm'.",
+          "block_rcov_condition_number": {
+            "min": 5.9305476749078245,
+            "median": 196.19741820123122,
+            "p95": 3205.995506020644,
+            "max": 463462.25624842197
+          },
+          "har_first_train_rows": 144,
+          "har_last_train_rows": 1076,
+          "positive_definite_check": {
+            "har_rcov_chol": {
+              "n_checked": 933,
+              "n_not_pd": 0,
+              "rate": 0.0
+            },
+            "sample": {
+              "n_checked": 933,
+              "n_not_pd": 0,
+              "rate": 0.0
+            },
+            "ledoit_wolf": {
+              "n_checked": 933,
+              "n_not_pd": 0,
+              "rate": 0.0
+            },
+            "ewma": {
+              "n_checked": 933,
+              "n_not_pd": 0,
+              "rate": 0.0
+            },
+            "equal_weight": {
+              "n_checked": 933,
+              "n_not_pd": 0,
+              "rate": 0.0
+            }
+          },
+          "block_len": 5,
+          "first_forecast_block": 156,
+          "n_blocks_total": 1089,
+          "oos_start_date": "2007-12-27",
+          "oos_end_date": "2026-07-15"
+        },
+        "metrics": {
+          "har_rcov_chol": {
+            "ann_vol": 0.08989680238420104,
+            "daily_var": 3.2069186821047985e-05,
+            "ann_mean": 0.07199795722396012,
+            "sharpe": 0.8008956416075311,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.5281626416166679,
+            "turnover_median_per_rebalance": 0.42273922863762725,
+            "turnover_annualized": 26.619397137480064,
+            "hhi_mean": 1.529235535787972,
+            "gross_leverage_mean": 1.8882350626601352,
+            "max_abs_weight": 2.595116465336532,
+            "frac_rebal_with_short": 0.9228295819935691,
+            "min_weight": -1.780258513744288
+          },
+          "sample": {
+            "ann_vol": 0.08933057843768338,
+            "daily_var": 3.1666477158774215e-05,
+            "ann_mean": 0.08465489451495294,
+            "sharpe": 0.9476586404733496,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.044663091470373506,
+            "turnover_median_per_rebalance": 0.03399498608706865,
+            "turnover_annualized": 2.2510198101068246,
+            "hhi_mean": 0.742602499689761,
+            "gross_leverage_mean": 1.4296301007261853,
+            "max_abs_weight": 1.2614569216289062,
+            "frac_rebal_with_short": 0.8102893890675241,
+            "min_weight": -0.6394415012018797
+          },
+          "ledoit_wolf": {
+            "ann_vol": 0.09029124464616307,
+            "daily_var": 3.235122563394156e-05,
+            "ann_mean": 0.09234743249095499,
+            "sharpe": 1.0227728375309235,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.034312157926904306,
+            "turnover_median_per_rebalance": 0.025836265739157552,
+            "turnover_annualized": 1.729332759515977,
+            "hhi_mean": 0.4775605150147718,
+            "gross_leverage_mean": 1.1707408795940868,
+            "max_abs_weight": 0.8105696957382201,
+            "frac_rebal_with_short": 0.5573419078242229,
+            "min_weight": -0.36577025067529445
+          },
+          "ewma": {
+            "ann_vol": 0.087243896419005,
+            "daily_var": 3.0204355009405046e-05,
+            "ann_mean": 0.09213842378313848,
+            "sharpe": 1.0561016594287194,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.3243108371090032,
+            "turnover_median_per_rebalance": 0.24332463845482902,
+            "turnover_annualized": 16.345266190293763,
+            "hhi_mean": 0.8767124066733584,
+            "gross_leverage_mean": 1.5042356842964089,
+            "max_abs_weight": 1.803259910362852,
+            "frac_rebal_with_short": 0.8510182207931404,
+            "min_weight": -1.2444523846949098
+          },
+          "equal_weight": {
+            "ann_vol": 0.11432743300948935,
+            "daily_var": 5.18681029307114e-05,
+            "ann_mean": 0.10926720588929781,
+            "sharpe": 0.955739169620195,
+            "n_days": 4665,
+            "n_rebalances": 933,
+            "turnover_mean_per_rebalance": 0.014391713543792315,
+            "turnover_median_per_rebalance": 0.01186071831751763,
+            "turnover_annualized": 0.7253423626071327,
+            "hhi_mean": 0.25,
+            "gross_leverage_mean": 1.0,
+            "max_abs_weight": 0.25,
+            "frac_rebal_with_short": 0.0,
+            "min_weight": 0.25
+          }
+        },
+        "inference": {
+          "family": [
+            "sample",
+            "ledoit_wolf",
+            "ewma"
+          ],
+          "family_size": 3,
+          "correction": "Holm-Bonferroni (primary, FWER); Benjamini-Hochberg reported",
+          "tests": {
+            "sample": {
+              "var_a": 3.206231239729213e-05,
+              "var_b": 3.165968906077662e-05,
+              "delta": 4.026233365155086e-07,
+              "se": 8.609321273990193e-07,
+              "t_stat": 0.4676597883875965,
+              "p_value": 0.6400279015807167,
+              "hac_lag": 17,
+              "n_obs": 4665,
+              "lag_sensitivity": {
+                "0": {
+                  "t_stat": 0.5321014881959116,
+                  "p_value": 0.594655706726837
+                },
+                "5": {
+                  "t_stat": 0.4815289481557839,
+                  "p_value": 0.6301406106892922
+                },
+                "10": {
+                  "t_stat": 0.46801080518946686,
+                  "p_value": 0.6397768627071816
+                },
+                "20": {
+                  "t_stat": 0.46790462265218147,
+                  "p_value": 0.639852797584755
+                },
+                "40": {
+                  "t_stat": 0.5132191980315494,
+                  "p_value": 0.6077979982010844
+                },
+                "63": {
+                  "t_stat": 0.5534018578263313,
+                  "p_value": 0.5799882670562018
+                }
+              },
+              "loss_differential_acf": [
+                0.08639463946016374,
+                0.05376478427995853,
+                0.04246939828195981,
+                -0.08999952989995902,
+                0.04485195594485402,
+                0.042761765188049174,
+                0.00559405528491328,
+                0.03308761934904226,
+                -0.05318106831830578,
+                -0.002545171011842691
+              ],
+              "dm_test_on_squared_returns": {
+                "t_stat": 0.43304437048399097,
+                "p_value": 0.6650025601492096,
+                "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+              },
+              "p_holm": 1.0,
+              "p_bh_fdr": 0.7673251116227013,
+              "survives_holm_at_005": false,
+              "meets_harvey_t3": false
+            },
+            "ledoit_wolf": {
+              "var_a": 3.206231239729213e-05,
+              "var_b": 3.234429075170491e-05,
+              "delta": -2.819783544127829e-07,
+              "se": 9.53030215654691e-07,
+              "t_stat": -0.29587556593793396,
+              "p_value": 0.7673251116227013,
+              "hac_lag": 17,
+              "n_obs": 4665,
+              "lag_sensitivity": {
+                "0": {
+                  "t_stat": -0.34057331040809885,
+                  "p_value": 0.7334248246801249
+                },
+                "5": {
+                  "t_stat": -0.3138855020294384,
+                  "p_value": 0.7536080020244011
+                },
+                "10": {
+                  "t_stat": -0.2998288028782056,
+                  "p_value": 0.764307743967469
+                },
+                "20": {
+                  "t_stat": -0.2944300250052574,
+                  "p_value": 0.7684293265185209
+                },
+                "40": {
+                  "t_stat": -0.3123845186624776,
+                  "p_value": 0.7547483144320024
+                },
+                "63": {
+                  "t_stat": -0.3242976668572327,
+                  "p_value": 0.7457126858997862
+                }
+              },
+              "loss_differential_acf": [
+                0.0754535353527937,
+                0.05681577665359016,
+                0.0016916374629237945,
+                -0.088707767837856,
+                0.07408106522641901,
+                0.06508556342566865,
+                0.03073688593241371,
+                0.02020268512956134,
+                -0.042038085051057904,
+                0.007926462479532268
+              ],
+              "dm_test_on_squared_returns": {
+                "t_stat": -0.35239530483711745,
+                "p_value": 0.7245577450910279,
+                "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+              },
+              "p_holm": 1.0,
+              "p_bh_fdr": 0.7673251116227013,
+              "survives_holm_at_005": false,
+              "meets_harvey_t3": false
+            },
+            "ewma": {
+              "var_a": 3.206231239729213e-05,
+              "var_b": 3.019788033523368e-05,
+              "delta": 1.8644320620584478e-06,
+              "se": 7.374837571515478e-07,
+              "t_stat": 2.5280991533421933,
+              "p_value": 0.011468195891810584,
+              "hac_lag": 17,
+              "n_obs": 4665,
+              "lag_sensitivity": {
+                "0": {
+                  "t_stat": 2.0977738854283197,
+                  "p_value": 0.035925124450721935
+                },
+                "5": {
+                  "t_stat": 2.0579064109733083,
+                  "p_value": 0.03959911821683426
+                },
+                "10": {
+                  "t_stat": 2.267285513435376,
+                  "p_value": 0.02337278984761615
+                },
+                "20": {
+                  "t_stat": 2.604064772613797,
+                  "p_value": 0.009212534435886655
+                },
+                "40": {
+                  "t_stat": 3.03428632182736,
+                  "p_value": 0.002411054847250016
+                },
+                "63": {
+                  "t_stat": 3.2994009504339683,
+                  "p_value": 0.0009689141342734686
+                }
+              },
+              "loss_differential_acf": [
+                0.2536102840837539,
+                0.012345225530296534,
+                -0.3132998576569222,
+                -0.1748856677767489,
+                0.07514694062483772,
+                0.03270698243101551,
+                0.040515537121756894,
+                -0.1273732465108283,
+                -0.07171699802740318,
+                -0.0327782232513833
+              ],
+              "dm_test_on_squared_returns": {
+                "t_stat": 2.4838278021179647,
+                "p_value": 0.013032720260233166,
+                "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+              },
+              "p_holm": 0.03440458767543175,
+              "p_bh_fdr": 0.03440458767543175,
+              "survives_holm_at_005": true,
+              "meets_harvey_t3": false
+            }
+          }
+        },
+        "adjudication": {
+          "verdict": "LOSE",
+          "model_lower_point_estimate_than_all_three": false,
+          "benchmarks_beaten_after_holm": [],
+          "benchmarks_losing_to_after_holm": [
+            "ewma"
+          ],
+          "rule": {
+            "WIN": "point estimate lower than all three AND the Ledoit-Wolf comparison survives Holm at alpha=0.05",
+            "MIXED": "some comparison survives Holm in the model's favour but the WIN condition is not met",
+            "TIE_NULL": "no comparison survives Holm in either direction",
+            "LOSE": "some benchmark has significantly lower variance after Holm"
+          }
+        },
+        "widened_correction_over_both_specs": {
+          "n_comparisons": 6,
+          "labels": [
+            "chol_vs_sample",
+            "chol_vs_ledoit_wolf",
+            "chol_vs_ewma",
+            "logm_vs_sample",
+            "logm_vs_ledoit_wolf",
+            "logm_vs_ewma"
+          ],
+          "raw_p": [
+            0.045304021798353133,
+            0.15235485874692567,
+            5.028811522977961e-06,
+            0.6400279015807167,
+            0.7673251116227013,
+            0.011468195891810584
+          ],
+          "holm_adjusted": [
+            0.18121608719341253,
+            0.457064576240777,
+            3.0172869137867764e-05,
+            1.0,
+            1.0,
+            0.05734097945905292
+          ]
+        }
+      }
+    },
+    "block_10d": {
+      "audit": {
+        "rule": "every estimator uses daily returns through info_end_day; weights are applied starting at apply_start_day",
+        "all_apply_start_after_info_end": true,
+        "min_gap_days": 1,
+        "max_gap_days": 1,
+        "har_last_training_target_block_offset": -1,
+        "har_forecast_origin_block_offset": -1,
+        "n_rebalances": 466,
+        "parameterisation": "chol",
+        "transform_failures": 0,
+        "forecast_negative_diagonal_count": 0,
+        "forecast_negative_diagonal_rate": 0.0,
+        "forecast_negative_diagonal_note": "Cholesky: a negative L_ii still yields a PD matrix but signals the linear model extrapolating the variance channel through zero. Matrix-log: negative diagonals are the NORM (log of a small variance), so this count carries no diagnostic meaning under 'logm'.",
+        "block_rcov_condition_number": {
+          "min": 7.918494980469274,
+          "median": 67.47972406824128,
+          "p95": 318.66302065651143,
+          "max": 1580.0136204273458
+        },
+        "har_first_train_rows": 66,
+        "har_last_train_rows": 531,
+        "positive_definite_check": {
+          "har_rcov_chol": {
+            "n_checked": 466,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "sample": {
+            "n_checked": 466,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "ledoit_wolf": {
+            "n_checked": 466,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "ewma": {
+            "n_checked": 466,
+            "n_not_pd": 0,
+            "rate": 0.0
+          },
+          "equal_weight": {
+            "n_checked": 466,
+            "n_not_pd": 0,
+            "rate": 0.0
+          }
+        },
+        "block_len": 10,
+        "first_forecast_block": 78,
+        "n_blocks_total": 544,
+        "oos_start_date": "2007-12-27",
+        "oos_end_date": "2026-07-08"
+      },
+      "metrics": {
+        "har_rcov_chol": {
+          "ann_vol": 0.08811278100900485,
+          "daily_var": 3.080897689341605e-05,
+          "ann_mean": 0.08788216352838132,
+          "sharpe": 0.9973827011475218,
+          "n_days": 4660,
+          "n_rebalances": 466,
+          "turnover_mean_per_rebalance": 0.4681090267013697,
+          "turnover_median_per_rebalance": 0.3845091230352488,
+          "turnover_annualized": 11.796347472874517,
+          "hhi_mean": 0.6913388461166315,
+          "gross_leverage_mean": 1.3544113714297075,
+          "max_abs_weight": 1.6427637298141669,
+          "frac_rebal_with_short": 0.8218884120171673,
+          "min_weight": -0.9209976012588494
+        },
+        "sample": {
+          "ann_vol": 0.08991230782741032,
+          "daily_var": 3.208025039226583e-05,
+          "ann_mean": 0.08227763048957865,
+          "sharpe": 0.915087516689187,
+          "n_days": 4660,
+          "n_rebalances": 466,
+          "turnover_mean_per_rebalance": 0.06751794039889333,
+          "turnover_median_per_rebalance": 0.0536766133773496,
+          "turnover_annualized": 1.701452098052112,
+          "hhi_mean": 0.7414964720324329,
+          "gross_leverage_mean": 1.4286066972490687,
+          "max_abs_weight": 1.2614569216289062,
+          "frac_rebal_with_short": 0.8090128755364807,
+          "min_weight": -0.6394415012018797
+        },
+        "ledoit_wolf": {
+          "ann_vol": 0.09076265888331965,
+          "daily_var": 3.268992161734065e-05,
+          "ann_mean": 0.09078995035322714,
+          "sharpe": 1.0003006905069032,
+          "n_days": 4660,
+          "n_rebalances": 466,
+          "turnover_mean_per_rebalance": 0.05136996793391538,
+          "turnover_median_per_rebalance": 0.038789450716183754,
+          "turnover_annualized": 1.2945231919346676,
+          "hhi_mean": 0.4772952796587576,
+          "gross_leverage_mean": 1.1703688180407312,
+          "max_abs_weight": 0.8105696957382201,
+          "frac_rebal_with_short": 0.5579399141630901,
+          "min_weight": -0.3636249813730985
+        },
+        "ewma": {
+          "ann_vol": 0.0880712583121156,
+          "daily_var": 3.077994658999757e-05,
+          "ann_mean": 0.08838468466952004,
+          "sharpe": 1.003558781416449,
+          "n_days": 4660,
+          "n_rebalances": 466,
+          "turnover_mean_per_rebalance": 0.45618959346189836,
+          "turnover_median_per_rebalance": 0.3580836760001177,
+          "turnover_annualized": 11.495977755239839,
+          "hhi_mean": 0.8688116506180826,
+          "gross_leverage_mean": 1.4986334009783513,
+          "max_abs_weight": 1.803259910362852,
+          "frac_rebal_with_short": 0.8390557939914163,
+          "min_weight": -1.2444523846949098
+        },
+        "equal_weight": {
+          "ann_vol": 0.11430498544185219,
+          "daily_var": 5.1847736892309684e-05,
+          "ann_mean": 0.109177467093178,
+          "sharpe": 0.9551417785597586,
+          "n_days": 4660,
+          "n_rebalances": 466,
+          "turnover_mean_per_rebalance": 0.019803474594794722,
+          "turnover_median_per_rebalance": 0.016019219511388016,
+          "turnover_annualized": 0.499047559788827,
+          "hhi_mean": 0.25,
+          "gross_leverage_mean": 1.0,
+          "max_abs_weight": 0.25,
+          "frac_rebal_with_short": 0.0,
+          "min_weight": 0.25
+        }
+      },
+      "inference": {
+        "family": [
+          "sample",
+          "ledoit_wolf",
+          "ewma"
+        ],
+        "family_size": 3,
+        "correction": "Holm-Bonferroni (primary, FWER); Benjamini-Hochberg reported",
+        "tests": {
+          "sample": {
+            "var_a": 3.080236552498398e-05,
+            "var_b": 3.207336621836191e-05,
+            "delta": -1.2710006933779335e-06,
+            "se": 1.1394003364647776e-06,
+            "t_stat": -1.1154996647811013,
+            "p_value": 0.26463636201687013,
+            "hac_lag": 17,
+            "n_obs": 4660,
+            "lag_sensitivity": {
+              "0": {
+                "t_stat": -1.4308036658131933,
+                "p_value": 0.1524864921866631
+              },
+              "5": {
+                "t_stat": -1.1949071180460336,
+                "p_value": 0.23212332152397264
+              },
+              "10": {
+                "t_stat": -1.1505437406700738,
+                "p_value": 0.24991998943999016
+              },
+              "20": {
+                "t_stat": -1.1064664581909087,
+                "p_value": 0.26852467417498227
+              },
+              "40": {
+                "t_stat": -1.1383829675912445,
+                "p_value": 0.25496060304571966
+              },
+              "63": {
+                "t_stat": -1.183484083682291,
+                "p_value": 0.23661735078869683
+              }
+            },
+            "loss_differential_acf": [
+              0.1393396244983136,
+              0.00675951734871795,
+              0.09916456735612536,
+              0.11925654326228735,
+              0.031143442601884452,
+              -0.09167787099464343,
+              0.0021363978697359794,
+              0.03062444286725233,
+              0.02139072677130663,
+              -0.0036855804916595203
+            ],
+            "dm_test_on_squared_returns": {
+              "t_stat": -1.105656933542463,
+              "p_value": 0.2689321275058023,
+              "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+            },
+            "p_holm": 0.5292727240337403,
+            "p_bh_fdr": 0.3969545430253052,
+            "survives_holm_at_005": false,
+            "meets_harvey_t3": false
+          },
+          "ledoit_wolf": {
+            "var_a": 3.080236552498398e-05,
+            "var_b": 3.268290661270173e-05,
+            "delta": -1.8805410877177517e-06,
+            "se": 1.0511045968660892e-06,
+            "t_stat": -1.7891093743901996,
+            "p_value": 0.07359720273440251,
+            "hac_lag": 17,
+            "n_obs": 4660,
+            "lag_sensitivity": {
+              "0": {
+                "t_stat": -2.241961389115947,
+                "p_value": 0.024963867843228682
+              },
+              "5": {
+                "t_stat": -1.9042150950105912,
+                "p_value": 0.056882176587910616
+              },
+              "10": {
+                "t_stat": -1.8446379501847856,
+                "p_value": 0.0650902226195933
+              },
+              "20": {
+                "t_stat": -1.7721043935409315,
+                "p_value": 0.07637722977337758
+              },
+              "40": {
+                "t_stat": -1.8406960894401123,
+                "p_value": 0.06566610733067635
+              },
+              "63": {
+                "t_stat": -1.91388319176303,
+                "p_value": 0.05563508251783533
+              }
+            },
+            "loss_differential_acf": [
+              0.1259881847370661,
+              0.03338617727044962,
+              0.09127091267787064,
+              0.038380285995863336,
+              0.029348244124609506,
+              -0.07626563222352335,
+              -0.006160422029700887,
+              0.048236577736658175,
+              0.036594164636164536,
+              0.02332000553375361
+            ],
+            "dm_test_on_squared_returns": {
+              "t_stat": -1.8012923324488421,
+              "p_value": 0.07172144882660025,
+              "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+            },
+            "p_holm": 0.22079160820320753,
+            "p_bh_fdr": 0.22079160820320753,
+            "survives_holm_at_005": false,
+            "meets_harvey_t3": false
+          },
+          "ewma": {
+            "var_a": 3.080236552498398e-05,
+            "var_b": 3.077334145124436e-05,
+            "delta": 2.902407373962031e-08,
+            "se": 5.604448140291447e-07,
+            "t_stat": 0.05178756768389149,
+            "p_value": 0.958697961809934,
+            "hac_lag": 17,
+            "n_obs": 4660,
+            "lag_sensitivity": {
+              "0": {
+                "t_stat": 0.05553650631748028,
+                "p_value": 0.9557110469801189
+              },
+              "5": {
+                "t_stat": 0.053087610840669326,
+                "p_value": 0.9576621026504191
+              },
+              "10": {
+                "t_stat": 0.05216924815312792,
+                "p_value": 0.9583938359725679
+              },
+              "20": {
+                "t_stat": 0.05157055675144423,
+                "p_value": 0.9588708804188113
+              },
+              "40": {
+                "t_stat": 0.05134819385313718,
+                "p_value": 0.9590480655873981
+              },
+              "63": {
+                "t_stat": 0.05174660310675612,
+                "p_value": 0.9587306030477505
+              }
+            },
+            "loss_differential_acf": [
+              0.03000423406605685,
+              -0.03387843956855302,
+              0.09924588550793359,
+              -0.02858476477208861,
+              0.008820862459903933,
+              -0.07554343216744429,
+              0.011222765208533981,
+              0.1357691414838442,
+              -0.019759061274407002,
+              -0.0005124210737495614
+            ],
+            "dm_test_on_squared_returns": {
+              "t_stat": 0.04954081719533929,
+              "p_value": 0.9604904332880524,
+              "note": "canonical repo dm_test; tests SECOND MOMENT equality, not variance equality (means are not removed)"
+            },
+            "p_holm": 0.958697961809934,
+            "p_bh_fdr": 0.958697961809934,
+            "survives_holm_at_005": false,
+            "meets_harvey_t3": false
+          }
+        }
+      },
+      "adjudication": {
+        "verdict": "TIE_NULL",
+        "model_lower_point_estimate_than_all_three": false,
+        "benchmarks_beaten_after_holm": [],
+        "benchmarks_losing_to_after_holm": [],
+        "rule": {
+          "WIN": "point estimate lower than all three AND the Ledoit-Wolf comparison survives Holm at alpha=0.05",
+          "MIXED": "some comparison survives Holm in the model's favour but the WIN condition is not met",
+          "TIE_NULL": "no comparison survives Holm in either direction",
+          "LOSE": "some benchmark has significantly lower variance after Holm"
+        }
+      },
+      "subperiods_ann_vol": {
+        "gfc_2007_12_to_2009_06": {
+          "har_rcov_chol": 0.12095510077999388,
+          "_n_days": 380,
+          "sample": 0.1257933167628243,
+          "ledoit_wolf": 0.1255159737630171,
+          "ewma": 0.12322125658508044,
+          "equal_weight": 0.18605405079262644
+        },
+        "post_gfc_2009_07_to_2019_12": {
+          "har_rcov_chol": 0.07117054302599644,
+          "_n_days": 2644,
+          "sample": 0.06993159775140037,
+          "ledoit_wolf": 0.0706143279351759,
+          "ewma": 0.07020893803318488,
+          "equal_weight": 0.08359551084418475
+        },
+        "covid_and_after_2020_01_to_end": {
+          "har_rcov_chol": 0.10264474845757034,
+          "_n_days": 1636,
+          "sample": 0.10702403887146518,
+          "ledoit_wolf": 0.10841087242204482,
+          "ewma": 0.10299247322223418,
+          "equal_weight": 0.13373737973790345
+        }
+      },
+      "cost_sensitivity_descriptive": {
+        "har_rcov_chol": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.08795759488088191,
+            "net_ann_vol": 0.08784894754962494,
+            "net_sharpe": 1.0012367516548288
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.08207207816963014,
+            "net_ann_vol": 0.08788415582030566,
+            "net_sharpe": 0.9338666043221794
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.07618656145837836,
+            "net_ann_vol": 0.08792708893133273,
+            "net_sharpe": 0.8664742843684589
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.06441552803587483,
+            "net_ann_vol": 0.08803608243430144,
+            "net_sharpe": 0.7316946217358787
+          }
+        ],
+        "sample": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.08251462696079515,
+            "net_ann_vol": 0.09128508827370267,
+            "net_sharpe": 0.9039223001394182
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.08166572650414898,
+            "net_ann_vol": 0.09126298855745094,
+            "net_sharpe": 0.8948394940270845
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.0808168260475028,
+            "net_ann_vol": 0.0912412061421258,
+            "net_sharpe": 0.8857492076728467
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.07911902513421046,
+            "net_ann_vol": 0.09119859412037594,
+            "net_sharpe": 0.8675465438620549
+          }
+        ],
+        "ledoit_wolf": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.09093970134148222,
+            "net_ann_vol": 0.09100213536163858,
+            "net_sharpe": 0.9993139279654457
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.09029382871889677,
+            "net_ann_vol": 0.09098754407392845,
+            "net_sharpe": 0.9923757107404942
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.08964795609631136,
+            "net_ann_vol": 0.09097319179371895,
+            "net_sharpe": 0.9854326788883858
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.0883562108511405,
+            "net_ann_vol": 0.09094520470653751,
+            "net_sharpe": 0.9715323764045484
+          }
+        ],
+        "ewma": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.08875471623251442,
+            "net_ann_vol": 0.09103880834933176,
+            "net_sharpe": 0.9749107863093631
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.08301906209497524,
+            "net_ann_vol": 0.09103315912710142,
+            "net_sharpe": 0.9119650783409943
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.07728340795743605,
+            "net_ann_vol": 0.0910352885700756,
+            "net_sharpe": 0.8489390122375032
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.06581209968235766,
+            "net_ann_vol": 0.09106287927547288,
+            "net_sharpe": 0.7227105073547093
+          }
+        ],
+        "equal_weight": [
+          {
+            "cost_bps": 0.0,
+            "net_ann_mean": 0.10878433978550205,
+            "net_ann_vol": 0.10879250451098536,
+            "net_sharpe": 0.9999249513969736
+          },
+          {
+            "cost_bps": 5.0,
+            "net_ann_mean": 0.10853535146436279,
+            "net_ann_vol": 0.10879304348059886,
+            "net_sharpe": 0.9976313557559219
+          },
+          {
+            "cost_bps": 10.0,
+            "net_ann_mean": 0.10828636314322351,
+            "net_ann_vol": 0.10879359703549811,
+            "net_sharpe": 0.9953376494012871
+          },
+          {
+            "cost_bps": 20.0,
+            "net_ann_mean": 0.10778838650094495,
+            "net_ann_vol": 0.10879474790025741,
+            "net_sharpe": 0.9907499082562784
+          }
+        ]
+      }
+    }
+  },
+  "figures": [
+    "fig1_rolling_vol.png",
+    "fig2_cumulative_variance_differential.png",
+    "fig3_turnover_leverage.png",
+    "fig4_rcov_conditioning.png"
+  ],
+  "headline": {
+    "block_len": 5,
+    "verdict": "LOSE",
+    "robustness_block_len_verdict": "TIE_NULL",
+    "verdicts_agree_across_block_lengths": false,
+    "long_only_verdict": "LOSE",
+    "matrix_log_spec_verdict": "LOSE",
+    "model_beats_no_benchmark_in_any_specification": true,
+    "ann_vol": {
+      "har_rcov_chol": 0.09256286721873369,
+      "sample": 0.08933057843768338,
+      "ledoit_wolf": 0.09029124464616307,
+      "ewma": 0.087243896419005,
+      "equal_weight": 0.11432743300948935
+    },
+    "ann_vol_matrix_log_spec": 0.08989680238420104
+  }
+}
