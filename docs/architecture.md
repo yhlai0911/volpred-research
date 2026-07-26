@@ -630,6 +630,27 @@
 > `VOLPRED_NO_REMOTE_WRITE`／pytest mutation fail-closed boundary，full-suite 後
 > test-shaped failover WorkItem 新增數為 0。這不表示其他 effect family 或 Work
 > Coordinator queue owner 已自動切換。
+>
+> Process 若在 owned-email `begin` 後、settlement 前中斷，由 canonical
+> `owned_email_recovery` system schedule 每小時經
+> `check_alerts → run_due_jobs` 的單一 piggy-back owner 執行
+> `cron_owned_email_recovery.sh`。Service-role-only
+> `volpred_recover_expired_owned_email_notification` 以
+> `FOR UPDATE SKIP LOCKED` 選取最舊且 WorkItem／outbox／attempt 三層 lease 都已
+> 過期的 effect，在同一 transaction 先關閉 predecessor、追加 private FORCE-RLS
+> recovery receipt，再透過 canonical begin 建立下一個 fenced attempt。普通 begin
+> 若看見任何 `started` predecessor 會 fail closed，不能在 recovery 前直接增加
+> outbox attempt count；因此 ordinary retry 與 recovery 競爭時，只有 recovery
+> transaction 能 supersede predecessor，不會留下永久 `started` orphan。
+>
+> Python `OwnedEmailRecovery` 與正常 `OwnedEmailNotification` 共用同一個內部
+> execution context，統一 owner generation、worker identity、lease、token 與
+> Primary Authority fencing 驗證。小於一小時的 alert 仍走 deterministic Message-ID
+> Sent Mail exact read-back／必要補送；超過一小時則以 terminal
+> `owned_email_recovery_stale` durable dead-letter，避免部署時補寄失去時效的歷史
+> 告警。Production 初次回收 22 筆後為 21 dead-lettered、1 delivered，三層
+> `started` 均為 0；這是 `email.ops_alert` effect-family 的 runtime 流程，不代表
+> Work Coordinator queue owner 已切換。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

@@ -189,7 +189,12 @@ Canonical `owned_email_recovery` schedule 每小時由 check_alerts piggy-back �
 Production 首跑回收 22/22：21 筆 stale 安全 dead-letter、1 筆以 exact Sent read-back
 確認 delivered；DB 回讀 `expired_started=0`、`active_started=0`、22 recovery receipts、
 22 terminal WorkItems 與 22 terminal outbox，第二次執行為零 mutation no-op。
-此 expired-attempt recovery 根因為 **`root_cause_fixed_and_verified`**；Work
+Matt review 隨後抓到 ordinary begin 可搶先重領並遺留 predecessor `started` 的
+P1 race；初版結案口徑已更正。Follow-up migration 讓普通 begin 看到任何
+`started` predecessor 即 fail closed，只有 recovery 能在同一 transaction 先關舊 attempt
+再 begin；ordinary-first RED→GREEN 且失敗路徑零 mutation。Python delivery/recovery
+也共用同一 execution context。此 follow-up 尚待 final Matt review 與 production
+apply/read-back，因此 expired-attempt incident 暫為 **`contained`**；Work
 Coordinator Issue #9 仍因 owner=`legacy/1`、gate=0 與七日 evidence 未滿而維持
 **`contained`**。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：

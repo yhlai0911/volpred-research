@@ -167,6 +167,12 @@
       "tracked_outputs": ["storage/ops/**", "storage/next_tasks.json", "storage/publication_candidates.json", "storage/reports/feed.json", "storage/.failed_supabase_syncs.json", "dynamic exact output_paths"],
       "reason": "Direct state is PHASE-Z-owned; due jobs retain their own row policy, and compute/lazypack outputs use exact output_paths in the central reaper."
     },
+    "owned_email_recovery": {
+      "entrypoint": "scripts/recover_owned_email_notifications.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Mutates only the fenced Supabase owned-email transaction and ignored notification/log evidence; it never writes or commits Git-tracked repository state."
+    },
     "memory_health_daily": {
       "entrypoint": "scripts/cron_memory_health.sh",
       "policy": "no_repo_tracked_output",

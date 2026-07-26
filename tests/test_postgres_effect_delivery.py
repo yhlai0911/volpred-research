@@ -211,6 +211,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726074028_operations_core_owned_email_recovery.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726075929_fence_owned_email_expired_retry.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -4703,6 +4707,51 @@ def test_expired_owned_email_attempt_is_atomically_recovered(
             (owned_request["effect_id"],),
         )
         connection.execute("SET ROLE service_role")
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="expired attempt requires recovery actuator",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_begin_owned_email_notification(
+                  %s, %s, %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    owner["generation"],
+                    owned_request["effect_id"],
+                    worker_id,
+                    300,
+                    "work-ordinary-retry-must-fail",
+                    "outbox-ordinary-retry-must-fail",
+                    primary_token,
+                ),
+            )
+        connection.execute("RESET ROLE")
+        ordinary_retry_state = connection.execute(
+            """
+            SELECT
+              (SELECT count(*)
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s),
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT attempt_count
+               FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT status
+               FROM volpred_ops.work_items
+               WHERE id = %s)
+            """,
+            (
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["effect_id"],
+                owned_request["work_id"],
+            ),
+        ).fetchone()
+        connection.execute("SET ROLE service_role")
         recovered = connection.execute(
             """
             SELECT public.volpred_recover_expired_owned_email_notification(
@@ -4773,6 +4822,7 @@ def test_expired_owned_email_attempt_is_atomically_recovered(
         ).fetchone()
 
     assert first_attempt["attempt_count"] == 1
+    assert ordinary_retry_state == (1, "started", 1, "running")
     assert recovered["effect"]["id"] == owned_request["effect_id"]
     assert recovered["attempt_count"] == 2
     assert recovery_state == (

@@ -3056,11 +3056,24 @@ alert 先用 deterministic Message-ID 做 Sent Mail exact read-back／必要補�
 以 terminal `owned_email_recovery_stale` 結案，避免大量補寄失去時效的告警。
 `config/runtime_schedules.json` 與同步 wrapper 建立每小時單一 piggy-back actuator。
 
+**Matt review 更正**：初版仍讓 ordinary
+`volpred_begin_owned_email_notification` 直接重領過期 WorkItem/outbox。若 ordinary
+begin 先於 recovery，outbox attempt count 會前進，但 predecessor 不會關閉；後續
+settlement 又讓 recovery selector 永遠無法再選到舊 row。ordinary-first PG17
+regression 在初版實際「沒有拋錯」而 RED，證明不能宣稱同類錯誤已被制度化封死。
+Follow-up migration 現強制任何看見 `started` predecessor 的普通 begin fail closed；
+只有 recovery transaction 能先關閉 predecessor、寫 receipt，再呼叫 canonical begin。
+Python delivery/recovery 的 owner、lease、token 與 Primary Authority 驗證也收斂到同一
+execution context。
+
 **回歸與 live 回讀**：PG17 先以「attempt 1 crash → 三層 lease 過期 → recovery
 attempt 2」得到 UndefinedFunction RED，再驗 old attempt、new attempt、receipt、RLS、
 owner、ACL 與 search path 全部 GREEN。Python 回歸涵蓋近期補送與 stale 不呼叫 provider。
 Production migration 套用後首跑回收 22/22：21 stale dead-letter、1 exact Sent read-back
 delivered；回讀 `expired_started=0`、`active_started=0`、22/22 recovery receipts、
 22/22 WorkItem 與 outbox terminal。相同 wrapper 第二次執行
-`recovered_count=0`，證明 idempotent。此問題五步 gate 完成，狀態為
-**`root_cause_fixed_and_verified`**。
+`recovered_count=0`，證明 idempotent。ordinary-first RED 經 follow-up migration
+轉 GREEN，且 read-back 確認 failed ordinary begin 未新增 attempt、未增加 outbox count、
+未改 WorkItem；但 follow-up migration 尚待 final Matt review 與 production apply/read-back，
+因此本 incident 暫時更正為 **`contained`**，不得沿用初版
+`root_cause_fixed_and_verified` 宣稱。

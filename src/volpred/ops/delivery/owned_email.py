@@ -189,35 +189,41 @@ class _PrimaryLeaseGate(Protocol):
     def current_lease(self) -> PrimaryLease: ...
 
 
-class OwnedEmailNotification:
-    """Deliver one ops-alert email through the current durable owner."""
+class _OwnedEmailExecutionContext:
+    """Share the owner, token, and Primary Authority fence contract."""
 
     def __init__(
         self,
         *,
         store: _OwnedEmailStore,
-        provider: _OwnedEmailProvider,
         primary_authority: _PrimaryLeaseGate,
-        worker_id: str = "effect-worker:ops-alert-email",
-        lease_seconds: int = 300,
-        token_factory: Callable[[], str] | None = None,
+        worker_id: str,
+        lease_seconds: int,
+        token_factory: Callable[[], str] | None,
+        token_prefix: str,
+        operation_label: str,
     ) -> None:
         if not worker_id.strip():
-            raise ValueError("owned email worker_id is required")
+            raise ValueError(
+                f"owned email {operation_label} worker_id is required"
+            )
         if isinstance(lease_seconds, bool) or lease_seconds <= 0:
-            raise ValueError("owned email lease_seconds must be positive")
+            raise ValueError(
+                f"owned email {operation_label} lease_seconds must be positive"
+            )
         self._store = store
-        self._provider = provider
         self._primary_authority = primary_authority
-        self._worker_id = worker_id.strip()
-        self._lease_seconds = lease_seconds
+        self.worker_id = worker_id.strip()
+        self.lease_seconds = lease_seconds
         self._token_factory = token_factory or (
-            lambda: f"owned_email_{uuid4().hex}"
+            lambda: f"{token_prefix}_{uuid4().hex}"
         )
+        self._operation_label = operation_label
 
-    def deliver(self, command: OwnedEmailCommand) -> OwnedEmailReceipt:
-        normalized = _normalize_command(command)
-        primary_lease = self._current_primary_lease()
+    def begin_owner_session(
+        self,
+    ) -> tuple[NotificationOwner, PrimaryLease]:
+        primary_lease = self.current_lease()
         owner = self._store.read_owner()
         if (
             owner.effect_family != _OWNER_FAMILY
@@ -226,36 +232,17 @@ class OwnedEmailNotification:
             raise NotificationOwnershipLost(
                 "operations core does not own email.ops_alert"
             )
-        request_view = self._store.request(
-            normalized,
-            owner_generation=owner.generation,
-        )
-        primary_lease = self._current_primary_lease(
-            expected=primary_lease,
-        )
-        attempt = self._store.begin(
-            request_view,
-            worker_id=self._worker_id,
-            lease_seconds=self._lease_seconds,
-            work_lease_token=self._token("work"),
-            outbox_claim_token=self._token("outbox"),
-            primary_fencing_token=primary_lease.fencing_token,
-        )
-        self._validate_attempt_authority(
-            attempt,
-            primary_lease=primary_lease,
-        )
-        self._current_primary_lease(expected=primary_lease)
-        outcome = self._provider.deliver(attempt.effect, attempt.payload)
-        return self._store.settle(attempt, outcome)
+        return owner, primary_lease
 
-    def _token(self, kind: str) -> str:
+    def token(self, kind: str) -> str:
         token = self._token_factory()
         if not isinstance(token, str) or not token.strip():
-            raise ValueError(f"owned email {kind} token is required")
+            raise ValueError(
+                f"owned email {self._operation_label} {kind} token is required"
+            )
         return token.strip()
 
-    def _current_primary_lease(
+    def current_lease(
         self,
         *,
         expected: PrimaryLease | None = None,
@@ -263,14 +250,16 @@ class OwnedEmailNotification:
         lease = self._primary_authority.current_lease()
         if not isinstance(lease, PrimaryLease):
             raise TypeError(
-                "owned email keepalive returned no typed PrimaryLease"
+                f"owned email {self._operation_label} keepalive returned no "
+                "typed PrimaryLease"
             )
         if (
             lease.authority_key != _PRIMARY_AUTHORITY_KEY
-            or lease.holder_ref != self._worker_id
+            or lease.holder_ref != self.worker_id
         ):
             raise NotificationOwnershipLost(
-                "owned email keepalive lease identity mismatch"
+                f"owned email {self._operation_label} keepalive lease "
+                "identity mismatch"
             )
         if expected is not None and (
             lease.authority_key != expected.authority_key
@@ -280,12 +269,13 @@ class OwnedEmailNotification:
             or lease.acquired_at != expected.acquired_at
         ):
             raise NotificationOwnershipLost(
-                "owned email keepalive lease was replaced"
+                f"owned email {self._operation_label} keepalive lease was "
+                "replaced"
             )
         return lease
 
     @staticmethod
-    def _validate_attempt_authority(
+    def validate_attempt(
         attempt: OwnedEmailAttempt,
         *,
         primary_lease: PrimaryLease,
@@ -304,6 +294,58 @@ class OwnedEmailNotification:
             )
 
 
+class OwnedEmailNotification:
+    """Deliver one ops-alert email through the current durable owner."""
+
+    def __init__(
+        self,
+        *,
+        store: _OwnedEmailStore,
+        provider: _OwnedEmailProvider,
+        primary_authority: _PrimaryLeaseGate,
+        worker_id: str = "effect-worker:ops-alert-email",
+        lease_seconds: int = 300,
+        token_factory: Callable[[], str] | None = None,
+    ) -> None:
+        self._store = store
+        self._provider = provider
+        self._execution = _OwnedEmailExecutionContext(
+            store=store,
+            primary_authority=primary_authority,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+            token_factory=token_factory,
+            token_prefix="owned_email",
+            operation_label="delivery",
+        )
+
+    def deliver(self, command: OwnedEmailCommand) -> OwnedEmailReceipt:
+        normalized = _normalize_command(command)
+        owner, primary_lease = self._execution.begin_owner_session()
+        request_view = self._store.request(
+            normalized,
+            owner_generation=owner.generation,
+        )
+        primary_lease = self._execution.current_lease(
+            expected=primary_lease,
+        )
+        attempt = self._store.begin(
+            request_view,
+            worker_id=self._execution.worker_id,
+            lease_seconds=self._execution.lease_seconds,
+            work_lease_token=self._execution.token("work"),
+            outbox_claim_token=self._execution.token("outbox"),
+            primary_fencing_token=primary_lease.fencing_token,
+        )
+        self._execution.validate_attempt(
+            attempt,
+            primary_lease=primary_lease,
+        )
+        self._execution.current_lease(expected=primary_lease)
+        outcome = self._provider.deliver(attempt.effect, attempt.payload)
+        return self._store.settle(attempt, outcome)
+
+
 class OwnedEmailRecovery:
     """Recover process-interrupted ops-alert deliveries through one fence."""
 
@@ -319,24 +361,21 @@ class OwnedEmailRecovery:
         token_factory: Callable[[], str] | None = None,
         now_factory: Callable[[], datetime] | None = None,
     ) -> None:
-        if not worker_id.strip():
-            raise ValueError("owned email recovery worker_id is required")
-        if isinstance(lease_seconds, bool) or lease_seconds <= 0:
-            raise ValueError(
-                "owned email recovery lease_seconds must be positive"
-            )
         if isinstance(max_age_seconds, bool) or max_age_seconds <= 0:
             raise ValueError(
                 "owned email recovery max_age_seconds must be positive"
             )
         self._store = store
         self._provider = provider
-        self._primary_authority = primary_authority
-        self._worker_id = worker_id.strip()
-        self._lease_seconds = lease_seconds
         self._max_age_seconds = max_age_seconds
-        self._token_factory = token_factory or (
-            lambda: f"owned_email_recovery_{uuid4().hex}"
+        self._execution = _OwnedEmailExecutionContext(
+            store=store,
+            primary_authority=primary_authority,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+            token_factory=token_factory,
+            token_prefix="owned_email_recovery",
+            operation_label="recovery",
         )
         self._now_factory = now_factory or (
             lambda: datetime.now(timezone.utc)
@@ -345,37 +384,29 @@ class OwnedEmailRecovery:
     def recover(self, *, limit: int = 10) -> OwnedEmailRecoverySummary:
         if isinstance(limit, bool) or limit <= 0:
             raise ValueError("owned email recovery limit must be positive")
-        primary_lease = self._current_primary_lease()
-        owner = self._store.read_owner()
-        if (
-            owner.effect_family != _OWNER_FAMILY
-            or owner.owner != _OPERATIONS_CORE_OWNER
-        ):
-            raise NotificationOwnershipLost(
-                "operations core does not own email.ops_alert"
-            )
+        owner, primary_lease = self._execution.begin_owner_session()
 
         receipts: list[OwnedEmailReceipt] = []
         stale_count = 0
         for _ in range(limit):
-            primary_lease = self._current_primary_lease(
+            primary_lease = self._execution.current_lease(
                 expected=primary_lease,
             )
             attempt = self._store.recover_expired(
                 owner_generation=owner.generation,
-                worker_id=self._worker_id,
-                lease_seconds=self._lease_seconds,
-                work_lease_token=self._token("work"),
-                outbox_claim_token=self._token("outbox"),
+                worker_id=self._execution.worker_id,
+                lease_seconds=self._execution.lease_seconds,
+                work_lease_token=self._execution.token("work"),
+                outbox_claim_token=self._execution.token("outbox"),
                 primary_fencing_token=primary_lease.fencing_token,
             )
             if attempt is None:
                 break
-            OwnedEmailNotification._validate_attempt_authority(
+            self._execution.validate_attempt(
                 attempt,
                 primary_lease=primary_lease,
             )
-            self._current_primary_lease(expected=primary_lease)
+            self._execution.current_lease(expected=primary_lease)
             if self._is_stale(attempt):
                 outcome = _stale_recovery_outcome(attempt.effect)
                 stale_count += 1
@@ -412,44 +443,6 @@ class OwnedEmailRecovery:
         return (
             now.astimezone(timezone.utc) - created_at
         ).total_seconds() > self._max_age_seconds
-
-    def _token(self, kind: str) -> str:
-        token = self._token_factory()
-        if not isinstance(token, str) or not token.strip():
-            raise ValueError(
-                f"owned email recovery {kind} token is required"
-            )
-        return token.strip()
-
-    def _current_primary_lease(
-        self,
-        *,
-        expected: PrimaryLease | None = None,
-    ) -> PrimaryLease:
-        lease = self._primary_authority.current_lease()
-        if not isinstance(lease, PrimaryLease):
-            raise TypeError(
-                "owned email recovery keepalive returned no typed "
-                "PrimaryLease"
-            )
-        if (
-            lease.authority_key != _PRIMARY_AUTHORITY_KEY
-            or lease.holder_ref != self._worker_id
-        ):
-            raise NotificationOwnershipLost(
-                "owned email recovery keepalive lease identity mismatch"
-            )
-        if expected is not None and (
-            lease.authority_key != expected.authority_key
-            or lease.holder_ref != expected.holder_ref
-            or lease.epoch != expected.epoch
-            or lease.fencing_token != expected.fencing_token
-            or lease.acquired_at != expected.acquired_at
-        ):
-            raise NotificationOwnershipLost(
-                "owned email recovery keepalive lease was replaced"
-            )
-        return lease
 
 
 class SupabaseOwnedEmailStore:

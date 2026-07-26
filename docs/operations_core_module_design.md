@@ -883,6 +883,26 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   `2026-07-23T23:48:57.414826+00:00`；同班 caller／owned delivery／Sent read-back
   scoped suite 為 `85 passed`。複驗沒有寄信或改 owner，且不擴張上述完成範圍。
 
+### 2026-07-26 owned-email expired-attempt recovery checkpoint
+
+- `OwnedEmailRecovery.recover(limit)` 是 process 在 begin 後、settlement 前中斷時的
+  唯一 actuator。它與正常 `OwnedEmailNotification` 共用 internal execution
+  context，統一 owner generation、worker identity、token、lease 與 Primary
+  Authority fencing；近期 alert 經 deterministic Message-ID Sent read-back 去重，
+  過期一小時則 terminal dead-letter。
+- Service-role-only recovery RPC 以 `FOR UPDATE SKIP LOCKED` 挑出三層 lease 都過期的
+  predecessor，在同一 transaction 先關舊 attempt、追加 private FORCE-RLS recovery
+  receipt，再透過 canonical begin 建立下一個 attempt。初版 Matt review 發現普通
+  begin 仍能搶先增加 outbox attempt count、留下永久 `started` orphan；follow-up
+  migration 現讓普通 begin 只要看見 `started` predecessor 就 fail closed，所以
+  recovery 是唯一 supersede path。
+- Canonical system schedule `owned_email_recovery` 每小時由
+  `check_alerts → run_due_jobs` 單一 piggy-back owner 執行；wrapper manifest 與
+  `scheduled_writer_ownership` 宣告它只寫 fenced Supabase transaction 與 ignored
+  runtime evidence，不寫 Git-tracked state。Initial production cleanup 為
+  21 dead-lettered + 1 exact Sent read-back delivered、0 started；follow-up race gate
+  在 production apply/read-back 前仍只標 `contained`。
+
 ### 2026-07-24 publisher 單篇 Supabase sync shadow checkpoint
 
 - program commit 14 的第一個垂直切片建立
