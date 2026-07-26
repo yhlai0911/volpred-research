@@ -21,7 +21,7 @@ import sys
 import time
 from contextlib import contextmanager
 from dataclasses import replace
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -40,6 +40,7 @@ DEFAULT_LEGACY_MARKERS = ROOT / "storage" / "ops" / "cron_last_run.json"
 DEFAULT_LOCK = Path.home() / ".volpred" / "operations_core_scheduler.lock"
 DEFAULT_LOG = Path.home() / ".volpred" / "logs" / "operations_core_scheduler.log"
 LOG = logging.getLogger("operations-core-scheduler")
+UTC = timezone.utc
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -134,6 +135,91 @@ def validate_config(*, config_path: Path = DEFAULT_CONFIG) -> dict[str, Any]:
         "job_count": len(jobs),
         "owner_counts": owner_counts,
         "active_jobs": sorted(policy.active_jobs),
+    }
+
+
+def build_shadow_report(
+    *,
+    config_path: Path = DEFAULT_CONFIG,
+    receipts_path: Path | None = None,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Summarize settled new-vs-legacy fire predictions as machine-readable parity."""
+    config = _load_json(config_path)
+    policy = load_schedule_policy(config)
+    path = _receipt_path(config, override=receipts_path)
+    payload: dict[str, Any] = {}
+    if path.exists():
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(loaded, dict):
+            raise RuntimeError(f"expected object in {path}")
+        payload = loaded
+    observations = payload.get("shadow") or {}
+    if not isinstance(observations, dict):
+        raise RuntimeError(f"expected shadow object in {path}")
+
+    current = now or datetime.now(UTC)
+    if current.tzinfo is None or current.utcoffset() is None:
+        raise ValueError("now must be timezone-aware")
+    current = current.astimezone(UTC)
+    matched: list[dict[str, Any]] = []
+    missing: list[dict[str, Any]] = []
+    pending: list[dict[str, Any]] = []
+    for fire_key, raw in observations.items():
+        if not isinstance(raw, dict) or raw.get("generation") != policy.generation:
+            continue
+        scheduled_raw = raw.get("scheduled_for")
+        if not isinstance(scheduled_raw, str):
+            missing.append(
+                {
+                    "fire_key": str(fire_key),
+                    "job_id": raw.get("job_id"),
+                    "reason": "invalid_scheduled_for",
+                }
+            )
+            continue
+        scheduled = datetime.fromisoformat(scheduled_raw.replace("Z", "+00:00"))
+        row = {
+            "fire_key": str(fire_key),
+            "job_id": raw.get("job_id"),
+            "scheduled_for": scheduled_raw,
+            "legacy_last_success": raw.get("legacy_last_success"),
+            "observations": int(raw.get("observations") or 0),
+            "first_seen_at": raw.get("first_seen_at"),
+            "last_seen_at": raw.get("last_seen_at"),
+        }
+        if current <= scheduled.astimezone(UTC) + timedelta(
+            seconds=policy.shadow_grace_seconds
+        ):
+            row["reason"] = "observation_window_open"
+            pending.append(row)
+        elif raw.get("legacy_observed") is True:
+            row["reason"] = "legacy_fire_observed"
+            matched.append(row)
+        else:
+            row["reason"] = "legacy_fire_missing"
+            missing.append(row)
+
+    matched.sort(key=lambda item: (str(item.get("scheduled_for")), str(item.get("job_id"))))
+    missing.sort(key=lambda item: (str(item.get("scheduled_for")), str(item.get("job_id"))))
+    pending.sort(key=lambda item: (str(item.get("scheduled_for")), str(item.get("job_id"))))
+    settled = len(matched) + len(missing)
+    return {
+        "schema": 1,
+        "generated_at": current.isoformat().replace("+00:00", "Z"),
+        "generation": policy.generation,
+        "receipt_path": str(path),
+        "shadow_grace_seconds": policy.shadow_grace_seconds,
+        "counts": {
+            "settled": settled,
+            "matched": len(matched),
+            "missing": len(missing),
+            "pending": len(pending),
+        },
+        "parity_rate": (len(matched) / settled) if settled else None,
+        "matched": matched,
+        "missing": missing,
+        "pending": pending,
     }
 
 
@@ -235,6 +321,12 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--receipts", type=Path, default=None)
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("validate")
+    shadow_report = subparsers.add_parser("shadow-report")
+    shadow_report.add_argument(
+        "--fail-on-mismatch",
+        action="store_true",
+        help="exit 1 when a settled shadow fire has no matching legacy success",
+    )
     tick = subparsers.add_parser("tick")
     tick.add_argument("--mode", choices=["shadow", "canary", "active", "disabled"])
     daemon = subparsers.add_parser("daemon")
@@ -246,6 +338,13 @@ def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     if args.command == "validate":
         result = validate_config(config_path=args.config)
+    elif args.command == "shadow-report":
+        result = build_shadow_report(
+            config_path=args.config,
+            receipts_path=args.receipts,
+        )
+        print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
+        return 1 if args.fail_on_mismatch and result["missing"] else 0
     elif args.command == "tick":
         result = run_tick(
             config_path=args.config,
