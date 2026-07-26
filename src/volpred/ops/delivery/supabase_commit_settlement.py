@@ -112,6 +112,7 @@ class SupabaseCommitSettlement:
             message = str(error)
             if message.startswith(
                 (
+                    "commit authority",
                     "commit settlement",
                     "commit ownership",
                     "Primary Authority",

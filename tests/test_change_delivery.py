@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import hashlib
 from pathlib import Path
 import subprocess
+import sys
 
 import pytest
 
@@ -20,12 +21,17 @@ from volpred.ops.delivery import (
 )
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
+    CommitAuthorityAbandonment,
     CommitActuationReceipt,
     CommitAuthorityGrant,
     CommitActuatorBlocked,
     GitCommitActuator,
 )
 from volpred.ops.delivery._change_store import InMemoryChangeSetStore
+from volpred.ops.delivery._check_verifier import (
+    CheckVerificationFailed,
+    IsolatedCheckVerifier,
+)
 
 
 NOW = datetime(2026, 7, 23, 14, 30, tzinfo=timezone.utc)
@@ -116,6 +122,12 @@ class _Actuator:
             observed_at=NOW.isoformat(),
         )
 
+    def recover(
+        self,
+        command: CommitActuation,
+    ) -> CommitActuationReceipt | None:
+        return None
+
 
 class _CheckVerifier:
     def __init__(self, *, failure: Exception | None = None) -> None:
@@ -141,8 +153,12 @@ class _TimestampActuator(_Actuator):
 
 
 class _Authority:
+    def __init__(self) -> None:
+        self.grants: dict[str, CommitAuthorityGrant] = {}
+        self.abandonments: list[CommitAuthorityAbandonment] = []
+
     def authorize(self, request):
-        return CommitAuthorityGrant(
+        grant = CommitAuthorityGrant(
             request_sha256=request.request_sha256,
             commit_owner_generation=request.commit_owner_generation,
             commit_owner_ref=(
@@ -152,6 +168,31 @@ class _Authority:
             work_lease_ref="work-lease:work-1:v7",
             primary_authority_ref="primary-authority:epoch-42",
         )
+        self.grants[request.request_sha256] = grant
+        return grant
+
+    def recover(self, request):
+        return self.grants.get(request.request_sha256)
+
+    def abandon(self, request, grant, *, reason):
+        abandonment = CommitAuthorityAbandonment(
+            schema_version="commit-authority-abandonment.v1",
+            request_sha256=request.request_sha256,
+            reason=reason,
+            abandoned_at=NOW.isoformat(),
+        )
+        self.abandonments.append(abandonment)
+        return abandonment
+
+
+class _CountingAuthority(_Authority):
+    def __init__(self) -> None:
+        super().__init__()
+        self.calls = 0
+
+    def authorize(self, request):
+        self.calls += 1
+        return super().authorize(request)
 
 
 class _LoseFirstReturn:
@@ -163,6 +204,12 @@ class _LoseFirstReturn:
         self.calls += 1
         self._actuator.commit(command)
         raise RuntimeError("process exited before actuation checkpoint")
+
+    def recover(
+        self,
+        command: CommitActuation,
+    ) -> CommitActuationReceipt | None:
+        return self._actuator.recover(command)
 
 
 class _Settlement:
@@ -582,9 +629,10 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
     repo, linked, base_commit = workspace
     store = InMemoryChangeSetStore()
     settlement = _Settlement()
+    authority = _Authority()
     first_git_actuator = GitCommitActuator(
         clock=lambda: NOW,
-        authority=_Authority(),
+        authority=authority,
     )
     lost_return = _LoseFirstReturn(first_git_actuator)
     first_process = ChangeDelivery(
@@ -593,7 +641,12 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
         actuator=lost_return,
         settlement=settlement,
         store=store,
-        check_verifier=_CheckVerifier(),
+        check_verifier=IsolatedCheckVerifier(
+            {
+                "pytest": (sys.executable, "-c", "raise SystemExit(0)"),
+                "ruff": (sys.executable, "-c", "raise SystemExit(0)"),
+            }
+        ),
         commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = first_process.propose(_proposal(linked, base_commit))
@@ -605,16 +658,23 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
     committed_sha = _git(repo, "rev-parse", "HEAD")
     assert committed_sha != base_commit
     assert first_process.inspect(proposed.id).status == "proposed"
+    removed_workspace = linked.with_name("removed-linked-worktree")
+    linked.rename(removed_workspace)
     restarted_process = ChangeDelivery(
         clock=lambda: NOW,
         id_factory=lambda: "unused-after-restart",
         actuator=GitCommitActuator(
             clock=lambda: NOW,
-            authority=_Authority(),
+            authority=authority,
         ),
         settlement=settlement,
         store=store,
-        check_verifier=_CheckVerifier(),
+        check_verifier=IsolatedCheckVerifier(
+            {
+                "pytest": (sys.executable, "-c", "raise SystemExit(0)"),
+                "ruff": (sys.executable, "-c", "raise SystemExit(0)"),
+            }
+        ),
         commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
 
@@ -626,8 +686,12 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
     assert restarted_process.inspect(proposed.id).status == "landed"
     assert lost_return.calls == 1
     assert _git(repo, "rev-list", "--count", f"{base_commit}..HEAD") == "1"
-    assert (repo / "tracked.txt").read_bytes() == (linked / "tracked.txt").read_bytes()
-    assert (repo / "new.txt").read_bytes() == (linked / "new.txt").read_bytes()
+    assert (repo / "tracked.txt").read_bytes() == (
+        removed_workspace / "tracked.txt"
+    ).read_bytes()
+    assert (repo / "new.txt").read_bytes() == (
+        removed_workspace / "new.txt"
+    ).read_bytes()
 
 
 def test_land_rejects_command_drift_after_external_commit(
@@ -723,4 +787,122 @@ def test_land_reverifies_required_checks_before_git_actuation(
 
     assert verifier.change_sets == [proposed]
     assert actuator.commands == []
+    assert delivery.inspect(proposed.id).status == "proposed"
+
+
+def test_isolated_check_runner_fails_closed_before_git(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _Actuator()
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=_Settlement(),
+        check_verifier=IsolatedCheckVerifier(
+            {
+                "pytest": (sys.executable, "-c", "raise SystemExit(0)"),
+                "ruff": (sys.executable, "-c", "raise SystemExit(7)"),
+            }
+        ),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(
+        CheckVerificationFailed,
+        match="required check failed: ruff",
+    ):
+        delivery.land(_land(proposed.id))
+
+    assert actuator.commands == []
+    assert delivery.inspect(proposed.id).status == "proposed"
+
+
+def test_missing_trusted_check_configuration_fails_closed(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _Actuator()
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=_Settlement(),
+        check_verifier=IsolatedCheckVerifier({}),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(
+        CheckVerificationFailed,
+        match="required check is not configured: pytest",
+    ):
+        delivery.land(_land(proposed.id))
+
+    assert actuator.commands == []
+
+
+def test_failed_checks_do_not_create_commit_authority_grants(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    repo, linked, base_commit = workspace
+    authority = _CountingAuthority()
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=GitCommitActuator(
+            clock=lambda: NOW,
+            authority=authority,
+        ),
+        settlement=_Settlement(),
+        check_verifier=IsolatedCheckVerifier({}),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(CheckVerificationFailed, match="not configured"):
+        delivery.land(
+            replace(_land(proposed.id), repository=str(repo))
+        )
+
+    assert authority.calls == 0
+
+
+def test_stale_unrelated_head_does_not_create_commit_authority_grant(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    repo, linked, base_commit = workspace
+    (repo / "unrelated.txt").write_text("other change\n", encoding="utf-8")
+    _git(repo, "add", "unrelated.txt")
+    _git(repo, "commit", "-m", "unrelated concurrent change")
+    authority = _CountingAuthority()
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=GitCommitActuator(
+            clock=lambda: NOW,
+            authority=authority,
+        ),
+        settlement=_Settlement(),
+        check_verifier=IsolatedCheckVerifier(
+            {
+                "pytest": (sys.executable, "-c", "raise SystemExit(0)"),
+                "ruff": (sys.executable, "-c", "raise SystemExit(0)"),
+            }
+        ),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="no exact prior ChangeSet commit",
+    ):
+        delivery.land(
+            replace(_land(proposed.id), repository=str(repo))
+        )
+
+    assert authority.calls == 0
     assert delivery.inspect(proposed.id).status == "proposed"

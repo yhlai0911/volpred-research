@@ -237,6 +237,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726125016_boss_report_owned_email_terminal_replay.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260727001900_commit_authority_terminal_recovery.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -1335,6 +1339,10 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     text, text, bigint, text, text, text, text, integer,
                     bigint, text, text, text, text
                   ),
+                  public.volpred_read_commit_authority_grant(text),
+                  public.volpred_abandon_commit_write(
+                    text, bigint, text, text
+                  ),
                   public.volpred_settle_commit_write(
                     text, text, bigint, text, text, bigint, text, text,
                     text, text, text, text, text, text, text, jsonb,
@@ -1524,10 +1532,11 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.notification_owner_receipts,
               volpred_ops.notification_owners,
               volpred_ops.effect_attempt_receipts,
-              volpred_ops.effect_authority_grants,
-              volpred_ops.change_sets,
-              volpred_ops.commit_delivery_receipts,
-              volpred_ops.commit_authority_grants,
+                  volpred_ops.effect_authority_grants,
+                  volpred_ops.change_sets,
+                  volpred_ops.commit_delivery_receipts,
+                  volpred_ops.commit_authority_abandonments,
+                  volpred_ops.commit_authority_grants,
               volpred_ops.commit_owner_receipts,
               volpred_ops.commit_owners,
               volpred_ops.primary_authority_grants,
@@ -3611,6 +3620,195 @@ def test_stale_change_set_creates_no_grant_and_allows_owner_rollback(
         rollback_of_generation=2,
     )
     assert (rolled_back.owner, rolled_back.generation) == ("legacy", 3)
+
+
+def test_terminal_commit_abandonment_unblocks_owner_rollback(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(
+        postgres_effect_dsn,
+        work_id="work-abandoned-commit",
+        lease_token="work-lease-abandoned-commit",
+    )
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            )
+        ),
+        token_factory=lambda: "primary-abandoned-commit",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:abandoned-commit",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    authority = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(
+            postgres_effect_dsn
+        ),
+        primary_lease=primary_lease,
+    )
+    assert authority.recover(request) is None
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        assert connection.execute(
+            """
+            SELECT count(*)
+            FROM volpred_ops.commit_authority_grants
+            WHERE request_sha256 = %s
+            """,
+            (request.request_sha256,),
+        ).fetchone() == (0,)
+    grant = authority.authorize(request)
+    abandonment = authority.abandon(
+        request,
+        grant,
+        reason="canonical_writer_terminal_failure",
+    )
+
+    assert abandonment.request_sha256 == request.request_sha256
+    assert abandonment.reason == "canonical_writer_terminal_failure"
+    assert authority.abandon(
+        request,
+        grant,
+        reason="canonical_writer_terminal_failure",
+    ) == abandonment
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="terminally abandoned",
+    ):
+        authority.recover(request)
+    with pytest.raises(
+        CommitSettlementBlocked,
+        match="terminally abandoned",
+    ):
+        PostgresCommitSettlement(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+            primary_lease=primary_lease,
+        ).settle(_commit_settlement(request, grant))
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        durable = connection.execute(
+            """
+            SELECT reason
+            FROM volpred_ops.commit_authority_abandonments
+            WHERE request_sha256 = %s
+            """,
+            (request.request_sha256,),
+        ).fetchone()
+    assert durable == ("canonical_writer_terminal_failure",)
+
+    primary.release(primary_lease)
+    rolled_back = PostgresCommitOwnerStore(
+        connection_factory=lambda: _approver_connection(
+            postgres_effect_dsn
+        )
+    ).transfer_owner(
+        expected_owner="operations_core",
+        expected_generation=2,
+        target_owner="legacy",
+        actor_ref="approver:abandoned-commit-rollback",
+        reason="terminally abandoned grant is settled for rollback",
+        rollback_of_generation=2,
+    )
+    assert (rolled_back.owner, rolled_back.generation) == ("legacy", 3)
+
+
+def test_abandonment_and_settlement_share_one_terminal_lock(
+    postgres_effect_dsn: str,
+) -> None:
+    work_lease, running = _seed_running_work(
+        postgres_effect_dsn,
+        work_id="work-terminal-lock",
+        lease_token="work-lease-terminal-lock",
+    )
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            )
+        ),
+        token_factory=lambda: "primary-terminal-lock",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:terminal-lock",
+            lease_seconds=300,
+        )
+    )
+    request = _commit_authority_request(
+        work_id=running.id,
+        work_version=running.version,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+    )
+    grant = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    ).authorize(request)
+    abandonment_connection = _worker_connection(postgres_effect_dsn)
+    try:
+        abandonment_connection.execute(
+            """
+            SELECT *
+            FROM volpred_ops.abandon_commit_write(%s, %s, %s, %s)
+            """,
+            (
+                request.request_sha256,
+                grant.commit_owner_generation,
+                grant.commit_owner_ref,
+                "canonical_writer_terminal_failure",
+            ),
+        ).fetchone()
+
+        def timed_worker_connection() -> psycopg.Connection:
+            connection = _worker_connection(postgres_effect_dsn)
+            connection.execute("SET LOCAL statement_timeout = '250ms'")
+            return connection
+
+        with pytest.raises(psycopg.errors.QueryCanceled):
+            PostgresCommitSettlement(
+                connection_factory=timed_worker_connection,
+                primary_lease=primary_lease,
+            ).settle(_commit_settlement(request, grant))
+        abandonment_connection.commit()
+    finally:
+        abandonment_connection.close()
+
+    with pytest.raises(
+        CommitSettlementBlocked,
+        match="terminally abandoned",
+    ):
+        PostgresCommitSettlement(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+            primary_lease=primary_lease,
+        ).settle(_commit_settlement(request, grant))
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        assert connection.execute(
+            """
+            SELECT
+              (SELECT count(*)
+               FROM volpred_ops.commit_authority_abandonments
+               WHERE request_sha256 = %s),
+              (SELECT count(*)
+               FROM volpred_ops.commit_delivery_receipts
+               WHERE authority_request_sha256 = %s)
+            """,
+            (request.request_sha256, request.request_sha256),
+        ).fetchone() == (1, 0)
 
 
 def test_change_set_service_rpc_creates_and_reads_token_redacted_view(

@@ -18,6 +18,13 @@ import subprocess
 import sys
 from typing import Callable, Protocol
 
+from volpred.ops.git_writer_lock import (
+    GitWriterLease,
+    GitWriterLockError,
+    GitWriterLockTimeout,
+    git_writer_lock,
+)
+
 from . import (
     ContentHash,
     _GIT_OBJECT_ID,
@@ -110,6 +117,7 @@ class CommitAuthorityGrant:
 
 @dataclass(frozen=True)
 class CommitAuthorityAbandonment:
+    schema_version: str
     request_sha256: str
     reason: str
     abandoned_at: str
@@ -127,7 +135,10 @@ class CommitAuthority(Protocol):
 
     def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant: ...
 
-    def recover(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant: ...
+    def recover(
+        self,
+        request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant | None: ...
 
     def abandon(
         self,
@@ -159,6 +170,33 @@ class GitCommitActuator:
     def commit(self, command: CommitActuation) -> CommitActuationReceipt:
         normalized = _normalize_command(command)
         repository = Path(normalized.repository)
+        try:
+            with git_writer_lock(
+                repository,
+                actor=normalized.actor,
+                timeout_s=0,
+            ) as writer_lease:
+                return self._commit_under_writer_lease(
+                    normalized,
+                    writer_lease=writer_lease,
+                )
+        except GitWriterLockTimeout as exc:
+            raise CommitActuatorBusy(str(exc)) from None
+        except GitWriterLockError as exc:
+            raise CommitActuatorBlocked(
+                f"canonical Git writer lock failed: {exc}"
+            ) from None
+
+    def _commit_under_writer_lease(
+        self,
+        command: CommitActuation,
+        *,
+        writer_lease: GitWriterLease,
+    ) -> CommitActuationReceipt:
+        """Authorize, mutate, and terminally reconcile under one repo lease."""
+
+        normalized = _normalize_command(command)
+        repository = Path(normalized.repository)
         authority_request = _authority_request(normalized)
 
         observed_head = _git_text(
@@ -175,6 +213,25 @@ class GitCommitActuator:
                 observed_head=observed_head,
             )
             if recovered is None:
+                existing_grant = self._lookup_request(authority_request)
+                if existing_grant is not None:
+                    if _first_parent_bears_authority_request(
+                        repository,
+                        command=normalized,
+                        observed_head=observed_head,
+                        authority_request_sha256=(
+                            authority_request.request_sha256
+                        ),
+                    ):
+                        raise CommitActuatorBlocked(
+                            "expected HEAD fence failed after an authority-"
+                            "bound non-exact mutation; authority remains "
+                            "active for incident recovery"
+                        )
+                    self._abandon_request(
+                        authority_request,
+                        existing_grant,
+                    )
                 raise CommitActuatorBlocked(
                     "expected HEAD fence failed and no exact prior ChangeSet "
                     "commit was found"
@@ -201,6 +258,8 @@ class GitCommitActuator:
             str(repository),
             "--actor",
             normalized.actor,
+            "--timeout",
+            "0",
             "--expected-head",
             normalized.expected_head,
             "--message",
@@ -225,8 +284,18 @@ class GitCommitActuator:
                 text=True,
                 check=False,
                 timeout=self._timeout_s,
+                env=writer_lease.child_env(),
+                pass_fds=writer_lease.child_pass_fds(),
             )
-        except (OSError, subprocess.TimeoutExpired) as exc:
+        except subprocess.TimeoutExpired as exc:
+            # Timeout is ambiguous: a descendant may still hold the inherited
+            # writer lease or may have mutated Git. Keep the grant active so
+            # rollback remains blocked until a later exact recovery/retry.
+            raise CommitActuatorBusy(
+                "canonical Git writer timed out; authority remains active "
+                "for exact recovery"
+            ) from exc
+        except OSError as exc:
             failure = CommitActuatorBlocked(
                 f"canonical Git writer could not complete: {exc}"
             )
@@ -238,13 +307,11 @@ class GitCommitActuator:
             )
         detail = (proc.stderr or proc.stdout or "").strip()[-600:]
         if proc.returncode == 75:
-            return self._recover_or_abandon(
-                command=normalized,
-                authority_request=authority_request,
-                authority_grant=authority_grant,
-                failure=CommitActuatorBusy(
-                    detail or "canonical Git writer is busy"
-                ),
+            # Exit 75 means another canonical writer owns the repository lock.
+            # That writer may be processing this exact request, so this grant
+            # remains recoverable and must not be terminally abandoned.
+            raise CommitActuatorBusy(
+                detail or "canonical Git writer is busy"
             )
         if proc.returncode != 0:
             return self._recover_or_abandon(
@@ -355,6 +422,17 @@ class GitCommitActuator:
         self,
         authority_request: CommitAuthorityRequest,
     ) -> CommitAuthorityGrant:
+        authority_grant = self._lookup_request(authority_request)
+        if authority_grant is None:
+            raise CommitActuatorBlocked(
+                "commit authority has no existing grant for recovery"
+            )
+        return authority_grant
+
+    def _lookup_request(
+        self,
+        authority_request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant | None:
         try:
             authority_grant = self._authority.recover(authority_request)
         except CommitActuatorError:
@@ -363,9 +441,33 @@ class GitCommitActuator:
             raise CommitActuatorBlocked(
                 "commit authority could not recover the original grant"
             ) from exc
+        if authority_grant is None:
+            return None
         return _validate_authority_grant(
             authority_grant,
             request=authority_request,
+        )
+
+    def _abandon_request(
+        self,
+        authority_request: CommitAuthorityRequest,
+        authority_grant: CommitAuthorityGrant,
+    ) -> None:
+        try:
+            abandonment = self._authority.abandon(
+                authority_request,
+                authority_grant,
+                reason="canonical_writer_terminal_failure",
+            )
+        except Exception as exc:
+            raise CommitActuatorBlocked(
+                "canonical Git writer failed and its authority grant could "
+                "not be terminally abandoned"
+            ) from exc
+        _validate_abandonment(
+            abandonment,
+            request=authority_request,
+            reason="canonical_writer_terminal_failure",
         )
 
     def _recover_or_abandon(
@@ -398,22 +500,15 @@ class GitCommitActuator:
                 authority_grant=authority_grant,
                 recovered=recovered,
             )
-        try:
-            abandonment = self._authority.abandon(
-                authority_request,
-                authority_grant,
-                reason="canonical_writer_terminal_failure",
-            )
-        except Exception as exc:
+        if observed_head != command.expected_head:
+            # A non-exact HEAD mutation is not proof that the authorized write
+            # had no effect. Retain the grant so owner rollback cannot race an
+            # orphan or scope-drifted commit.
             raise CommitActuatorBlocked(
-                "canonical Git writer failed and its authority grant could "
-                "not be terminally abandoned"
-            ) from exc
-        _validate_abandonment(
-            abandonment,
-            request=authority_request,
-            reason="canonical_writer_terminal_failure",
-        )
+                "canonical Git writer failed after an unexpected HEAD "
+                "mutation; authority remains active for incident recovery"
+            ) from failure
+        self._abandon_request(authority_request, authority_grant)
         raise failure
 
 
@@ -472,6 +567,47 @@ def _find_prior_commit(
         parent_sha=parent_sha,
         observed_at=observed_at.isoformat(),
     )
+
+
+def _first_parent_bears_authority_request(
+    repository: Path,
+    *,
+    command: CommitActuation,
+    observed_head: str,
+    authority_request_sha256: str,
+) -> bool:
+    candidates = _git_text(
+        repository,
+        "rev-list",
+        "--first-parent",
+        "--reverse",
+        f"{command.expected_head}..{observed_head}",
+    ).splitlines()
+    if not candidates:
+        return False
+    message = _git_text(
+        repository,
+        "show",
+        "--no-patch",
+        "--format=%B",
+        candidates[0],
+    )
+    return (
+        _authority_trailer_value(message)
+        == authority_request_sha256
+    )
+
+
+def _authority_trailer_value(message: str) -> str | None:
+    prefix = f"{_AUTHORITY_TRAILER}: "
+    values = [
+        line.removeprefix(prefix)
+        for line in message.splitlines()
+        if line.startswith(prefix)
+    ]
+    if len(values) != 1 or _SHA256.fullmatch(values[0]) is None:
+        return None
+    return values[0]
 
 
 def _recovery_receipt(
@@ -799,7 +935,8 @@ def _validate_abandonment(
             "commit authority abandonment timestamp is invalid"
         ) from exc
     if (
-        abandonment.request_sha256 != request.request_sha256
+        abandonment.schema_version != "commit-authority-abandonment.v1"
+        or abandonment.request_sha256 != request.request_sha256
         or abandonment.reason != reason
         or abandoned_at.tzinfo is None
         or abandoned_at.utcoffset() is None

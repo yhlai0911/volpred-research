@@ -11,6 +11,7 @@ from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery import ContentHash
 from volpred.ops.delivery._git_actuator import (
     CommitActuatorBlocked,
+    CommitAuthorityGrant,
     CommitAuthorityRequest,
     _authority_request_sha256,
 )
@@ -82,6 +83,18 @@ def _authority() -> SupabaseCommitAuthority:
         primary_lease=_lease(),
         timeout_seconds=9,
     )
+
+
+def _grant_payload() -> dict[str, object]:
+    return {
+        "request_sha256": _request().request_sha256,
+        "commit_owner_generation": 2,
+        "commit_owner_ref": "commit-owner:git.commit:generation-2",
+        "work_lease_ref": "work-lease:work-1:v3",
+        "primary_authority_ref": (
+            "primary-authority:operations-core-commits:epoch-4"
+        ),
+    }
 
 
 def test_authorize_uses_service_role_rpc_and_decodes_token_redacted_grant(
@@ -171,6 +184,155 @@ def test_request_hash_is_recomputed_before_network(
             replace(_request(), repository="/forged-repository")
         )
     assert called is False
+
+
+def test_recovery_reads_existing_grant_without_authorize_rpc(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_urlopen(call, *, timeout: float):
+        observed["url"] = call.full_url
+        observed["body"] = json.loads(call.data)
+        return _Response(_grant_payload())
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        fake_urlopen,
+    )
+
+    grant = _authority().recover(_request())
+
+    assert grant.request_sha256 == _request().request_sha256
+    assert observed == {
+        "url": (
+            "https://project.supabase.co/rest/v1/rpc/"
+            "volpred_read_commit_authority_grant"
+        ),
+        "body": {"p_request_sha256": _request().request_sha256},
+    }
+
+
+def test_recovery_remains_available_under_remote_write_guard(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    called = False
+
+    def fake_urlopen(call, *, timeout: float):
+        nonlocal called
+        called = True
+        return _Response(_grant_payload())
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        fake_urlopen,
+    )
+
+    assert _authority().recover(_request()).request_sha256 == (
+        _request().request_sha256
+    )
+    assert called is True
+
+
+def test_terminal_abandonment_uses_owner_bound_rpc(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, object] = {}
+    request = _request()
+    grant = CommitAuthorityGrant(
+        request_sha256=request.request_sha256,
+        commit_owner_generation=2,
+        commit_owner_ref="commit-owner:git.commit:generation-2",
+        work_lease_ref="work-lease:work-1:v3",
+        primary_authority_ref=(
+            "primary-authority:operations-core-commits:epoch-4"
+        ),
+    )
+
+    def fake_urlopen(call, *, timeout: float):
+        observed["url"] = call.full_url
+        observed["body"] = json.loads(call.data)
+        return _Response(
+            {
+                "schema_version": "commit-authority-abandonment.v1",
+                "request_sha256": request.request_sha256,
+                "reason": "canonical_writer_terminal_failure",
+                "abandoned_at": "2026-07-24T08:01:00+00:00",
+            }
+        )
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        fake_urlopen,
+    )
+
+    abandonment = _authority().abandon(
+        request,
+        grant,
+        reason="canonical_writer_terminal_failure",
+    )
+
+    assert abandonment.request_sha256 == request.request_sha256
+    assert observed == {
+        "url": (
+            "https://project.supabase.co/rest/v1/rpc/"
+            "volpred_abandon_commit_write"
+        ),
+        "body": {
+            "p_request_sha256": request.request_sha256,
+            "p_commit_owner_generation": 2,
+            "p_commit_owner_ref": (
+                "commit-owner:git.commit:generation-2"
+            ),
+            "p_reason": "canonical_writer_terminal_failure",
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("schema_version", "commit-authority-abandonment.v999"),
+        ("schema_version", None),
+        ("request_sha256", "0" * 64),
+        ("reason", "different_terminal_reason"),
+        ("abandoned_at", "not-a-timestamp"),
+    ],
+)
+def test_terminal_abandonment_payload_drift_fails_closed(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+) -> None:
+    request = _request()
+    payload = {
+        "schema_version": "commit-authority-abandonment.v1",
+        "request_sha256": request.request_sha256,
+        "reason": "canonical_writer_terminal_failure",
+        "abandoned_at": "2026-07-24T08:01:00+00:00",
+    }
+    payload[field] = value
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *args, **kwargs: _Response(payload),
+    )
+    grant = CommitAuthorityGrant(
+        request_sha256=request.request_sha256,
+        commit_owner_generation=2,
+        commit_owner_ref="commit-owner:git.commit:generation-2",
+        work_lease_ref="work-lease:work-1:v3",
+        primary_authority_ref=(
+            "primary-authority:operations-core-commits:epoch-4"
+        ),
+    )
+
+    with pytest.raises(CommitActuatorBlocked):
+        _authority().abandon(
+            request,
+            grant,
+            reason="canonical_writer_terminal_failure",
+        )
 
 
 def test_fencing_failure_and_untrusted_grant_fail_closed(

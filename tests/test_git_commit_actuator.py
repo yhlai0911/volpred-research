@@ -5,15 +5,19 @@ from datetime import datetime, timezone
 import hashlib
 from pathlib import Path
 import subprocess
+import sys
+import time
 
 import pytest
 
 from volpred.ops.delivery import ContentHash
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
+    CommitAuthorityAbandonment,
     CommitAuthorityGrant,
     CommitAuthorityRequest,
     CommitActuatorBlocked,
+    CommitActuatorBusy,
     GitCommitActuator,
     _authority_bound_message,
     _authority_request,
@@ -33,6 +37,8 @@ class _Authority:
         self._work_lease_token = work_lease_token
         self._primary_fencing_token = primary_fencing_token
         self.requests: list[CommitAuthorityRequest] = []
+        self.grants: dict[str, CommitAuthorityGrant] = {}
+        self.abandonments: list[CommitAuthorityAbandonment] = []
 
     def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant:
         self.requests.append(request)
@@ -40,13 +46,37 @@ class _Authority:
             raise CommitActuatorBlocked("stale WorkLease token")
         if request.primary_fencing_token != self._primary_fencing_token:
             raise CommitActuatorBlocked("stale Primary Authority fencing token")
-        return CommitAuthorityGrant(
+        grant = CommitAuthorityGrant(
             request_sha256=request.request_sha256,
             commit_owner_generation=request.commit_owner_generation,
             commit_owner_ref="commit-owner:git.commit:generation-3",
             work_lease_ref="work-lease:work-1:v7",
             primary_authority_ref="primary-authority:epoch-42",
         )
+        self.grants[request.request_sha256] = grant
+        return grant
+
+    def recover(
+        self,
+        request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant | None:
+        return self.grants.get(request.request_sha256)
+
+    def abandon(
+        self,
+        request: CommitAuthorityRequest,
+        grant: CommitAuthorityGrant,
+        *,
+        reason: str,
+    ) -> CommitAuthorityAbandonment:
+        abandonment = CommitAuthorityAbandonment(
+            schema_version="commit-authority-abandonment.v1",
+            request_sha256=request.request_sha256,
+            reason=reason,
+            abandoned_at=NOW.isoformat(),
+        )
+        self.abandonments.append(abandonment)
+        return abandonment
 
 
 class _MalformedGrantAuthority(_Authority):
@@ -179,13 +209,13 @@ def test_actuator_recovers_exact_commit_after_process_return_is_lost(
     (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
     (repo / "new.txt").write_text("new\n", encoding="utf-8")
     command = _command(repo, base_commit)
-    committed = _actuator().commit(command)
+    authority = _Authority()
+    committed = _actuator(authority).commit(command)
 
     (repo / "later.txt").write_text("later\n", encoding="utf-8")
     _git(repo, "add", "later.txt")
     _git(repo, "commit", "-m", "later commit")
     head_after_later_commit = _git(repo, "rev-parse", "HEAD")
-    authority = _Authority()
     restarted = GitCommitActuator(
         clock=lambda: NOW,
         authority=authority,
@@ -202,6 +232,226 @@ def test_actuator_recovers_exact_commit_after_process_return_is_lost(
     assert datetime.fromisoformat(recovered.observed_at).utcoffset() is not None
     assert len(authority.requests) == 1
     assert _git(repo, "rev-parse", "HEAD") == head_after_later_commit
+
+
+def test_actuator_recovery_requires_preexisting_authority_grant(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    request = _authority_request(command)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message(
+            command.message,
+            request.request_sha256,
+        ),
+    )
+    authority = _Authority()
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="no existing grant",
+    ):
+        _actuator(authority).recover(command)
+
+    assert authority.requests == []
+
+
+def test_authority_bound_non_exact_commit_keeps_grant_active(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    request = _authority_request(command)
+    authority = _Authority()
+    authority.authorize(request)
+    _git(repo, "add", "tracked.txt")
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message(command.message, request.request_sha256),
+    )
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="authority-bound non-exact mutation",
+    ):
+        _actuator(authority).commit(command)
+
+    assert authority.abandonments == []
+    assert request.request_sha256 in authority.grants
+
+
+def test_unexpected_head_mutation_retains_grant_and_blocks_rollback(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+
+    class _RacingAuthority(_Authority):
+        def authorize(
+            self,
+            request: CommitAuthorityRequest,
+        ) -> CommitAuthorityGrant:
+            grant = super().authorize(request)
+            (repo / "unrelated.txt").write_text(
+                "concurrent\n",
+                encoding="utf-8",
+            )
+            _git(repo, "add", "unrelated.txt")
+            _git(repo, "commit", "-m", "concurrent unrelated commit")
+            return grant
+
+    authority = _RacingAuthority()
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="expected HEAD",
+    ):
+        _actuator(authority).commit(_command(repo, base_commit))
+
+    assert authority.abandonments == []
+    assert len(authority.grants) == 1
+
+
+def test_busy_writer_preserves_active_grant_for_exact_retry(
+    repository: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    busy_writer = tmp_path / "busy_writer.py"
+    busy_writer.write_text(
+        "import sys\n"
+        "sys.stderr.write('canonical writer lock is busy')\n"
+        "raise SystemExit(75)\n",
+        encoding="utf-8",
+    )
+    authority = _Authority()
+    actuator = GitCommitActuator(
+        clock=lambda: NOW,
+        authority=authority,
+        writer_cli=busy_writer,
+    )
+
+    with pytest.raises(CommitActuatorBusy, match="lock is busy"):
+        actuator.commit(_command(repo, base_commit))
+
+    assert len(authority.grants) == 1
+    assert authority.abandonments == []
+    assert _git(repo, "rev-parse", "HEAD") == base_commit
+
+
+def test_external_writer_lock_blocks_before_authority_grant(
+    repository: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    marker = tmp_path / "holder-ready"
+    release = tmp_path / "holder-release"
+    cli = Path(__file__).resolve().parents[1] / "scripts" / "git_writer_lock.py"
+    holder_code = (
+        "from pathlib import Path\n"
+        "import sys, time\n"
+        "marker, release = map(Path, sys.argv[1:3])\n"
+        "marker.write_text('held', encoding='utf-8')\n"
+        "deadline = time.monotonic() + 10\n"
+        "while not release.exists() and time.monotonic() < deadline:\n"
+        "    time.sleep(0.01)\n"
+        "raise SystemExit(0 if release.exists() else 3)\n"
+    )
+    holder = subprocess.Popen(
+        [
+            sys.executable,
+            str(cli),
+            "run",
+            "--repo",
+            str(repo),
+            "--actor",
+            "external-holder",
+            "--timeout",
+            "0",
+            "--command-timeout",
+            "15",
+            "--",
+            sys.executable,
+            "-c",
+            holder_code,
+            str(marker),
+            str(release),
+        ],
+        cwd=repo,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        deadline = time.monotonic() + 5
+        while not marker.exists() and time.monotonic() < deadline:
+            time.sleep(0.01)
+        assert marker.exists(), holder.communicate(timeout=1)
+        authority = _Authority()
+
+        with pytest.raises(CommitActuatorBusy, match="lock busy"):
+            _actuator(authority).commit(_command(repo, base_commit))
+
+        assert authority.requests == []
+        assert authority.grants == {}
+    finally:
+        release.write_text("release\n", encoding="utf-8")
+        stdout, stderr = holder.communicate(timeout=5)
+        assert holder.returncode == 0, (stdout, stderr)
+
+
+def test_timeout_then_unrelated_commit_terminally_abandons_old_grant(
+    repository: tuple[Path, str],
+    tmp_path: Path,
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    timeout_writer = tmp_path / "timeout_writer.py"
+    timeout_writer.write_text(
+        "import time\n"
+        "time.sleep(5)\n",
+        encoding="utf-8",
+    )
+    authority = _Authority()
+    first = GitCommitActuator(
+        clock=lambda: NOW,
+        authority=authority,
+        writer_cli=timeout_writer,
+        timeout_s=0.05,
+    )
+
+    with pytest.raises(CommitActuatorBusy, match="timed out"):
+        first.commit(_command(repo, base_commit))
+    assert len(authority.grants) == 1
+    assert authority.abandonments == []
+
+    (repo / "unrelated.txt").write_text("other request\n", encoding="utf-8")
+    _git(repo, "add", "unrelated.txt")
+    _git(repo, "commit", "-m", "unrelated request")
+    with pytest.raises(CommitActuatorBlocked, match="expected HEAD"):
+        _actuator(authority).commit(_command(repo, base_commit))
+
+    assert len(authority.abandonments) == 1
+    assert authority.abandonments[0].request_sha256 == (
+        _authority_request(_command(repo, base_commit)).request_sha256
+    )
 
 
 def test_actuator_does_not_recover_lookalike_commit_with_different_message(
@@ -478,9 +728,12 @@ def test_actuator_rejects_writer_success_without_new_commit(
         message="[change-delivery] no-op",
         actor="commit-worker:test",
     )
+    authority = _Authority()
 
     with pytest.raises(CommitActuatorBlocked, match="without creating a commit"):
-        _actuator().commit(command)
+        _actuator(authority).commit(command)
+
+    assert len(authority.abandonments) == 1
 
 
 def test_actuator_validates_complete_hash_scope(

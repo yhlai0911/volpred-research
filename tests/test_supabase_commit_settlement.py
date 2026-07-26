@@ -196,8 +196,16 @@ def test_untrusted_receipt_fails_closed(
         _settlement().settle(_command())
 
 
+@pytest.mark.parametrize(
+    "message",
+    [
+        "commit ownership lost: expected generation 2",
+        "commit authority grant is terminally abandoned",
+    ],
+)
 def test_fencing_failure_is_typed(
     monkeypatch: pytest.MonkeyPatch,
+    message: str,
 ) -> None:
     failure = error.HTTPError(
         url="https://project.supabase.co/rest/v1/rpc/volpred_settle_commit_write",
@@ -205,9 +213,7 @@ def test_fencing_failure_is_typed(
         msg="Bad Request",
         hdrs=None,
         fp=BytesIO(
-            json.dumps(
-                {"message": "commit ownership lost: expected generation 2"}
-            ).encode("utf-8")
+            json.dumps({"message": message}).encode("utf-8")
         ),
     )
     monkeypatch.setattr(
@@ -215,7 +221,7 @@ def test_fencing_failure_is_typed(
         lambda *args, **kwargs: (_ for _ in ()).throw(failure),
     )
 
-    with pytest.raises(CommitSettlementBlocked, match="ownership lost"):
+    with pytest.raises(CommitSettlementBlocked, match=message):
         _settlement().settle(_command())
 
 

@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（Boss Report production owned-delivery verified；physical two-Mac authority pair verified）**
+Last updated: **2026-07-26（T04 ChangeSet shadow-path terminal concurrency hardening under final review；Boss Report production owned-delivery verified；physical two-Mac authority pair verified）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -11,6 +11,46 @@ GitHub planning parent 為
 `https://github.com/yhlai0911/volpred-research/issues/3`，33 張驗收票為 #4–#36；
 GitHub 只負責規劃／驗收，`storage/next_tasks.json` 仍是唯一 runtime pending queue，
 materialized runtime task 必須引用對應 planning issue。
+
+### 2026-07-26 — T04 ChangeSet shadow commit path（Issue #10）
+
+沿用 Issue #3 plan、`docs/refactor_plan_ops_master_2026_07.md` spec 與 T04/#10 ticket，
+沒有另建計畫或 runtime queue。Matt Spec／Standards 初審發現三個結案缺口：
+required checks 只相信作者自述、commit-worker 可由 command 字串冒充，以及 Supabase
+ChangeSet read-back decoder 未逐欄 fail closed。
+
+底層現已改為：正式 caller 先把 running WorkItem id／version／author／required
+attestations 與 ChangeSet 綁定；首次 Git actuation 前由 trusted registry 在 linked
+worktree 實跑每一項 check，前後重驗 base／scope／hash／mode，missing command、
+timeout、failed test 或 workspace drift 全部在 Git writer 前拒絕。外部命令不再接受
+actor，commit principal 固定由 composition root 注入
+`commit-worker:operations-core`。PostgreSQL／Supabase 共用 decoder 會驗 schema、
+strict integer、canonical proposal、重算 proposal SHA 與 actuation／delivery
+cross-field lifecycle identity，並重新推導 owner／settlement ref 與 digest。
+Lost-return recovery 會先在有效 authority 下只讀辨識 exact historical commit；
+只有確定要新寫入才依賴 workspace 與重跑 checks，因此 commit 後、checkpoint 前崩潰
+即使 linked worktree 已移除，也不會留下無法 settlement 的孤兒 commit；HEAD 未前進
+且 checks 失敗時也不會先建立無 commit 的 durable authority grant。Stale／並行 HEAD
+先用 deterministic request digest 唯讀驗 exact first-parent identity；未知 request
+只做 read-only lookup且 grant count=0。隔離 PostgreSQL 並實際完成 owner rollback，
+證明 fail-closed 不會轉成永久 rollback deadlock。
+
+後續 Matt 競爭複審發現 grant 曾在 canonical writer lock 前建立，且 settlement／
+abandonment 沒有共用 terminal arbitration。現已改為先取得 repo-wide canonical
+writer lease，才在同一 lease 內重讀 HEAD、authorize、把 capability 傳給 writer，
+並做終止判定；busy 不再建立 grant，timeout 保留 active grant等待 exact recovery，
+authority-bound non-exact mutation也持續阻擋 rollback。只有同一 lease 內證明未發生
+該 request mutation才可 immutable abandon。DB settlement trigger與abandon共用
+同一 request advisory lock，並新增雙連線競爭回歸；recovery RPC 在
+`VOLPRED_NO_REMOTE_WRITE=1` 下仍可讀，abandonment decoder強制 schema version。
+
+隔離 PostgreSQL + 暫存 Git system test 已回讀唯一 exact-path commit、
+HEAD／diff、ChangeSet、authority receipt 與 succeeded WorkItem，並完成 owner rollback
+rehearsal；目前核心 **66 passed**、完整 PostgreSQL **55 passed**。本輪核心修正被另一 session 的 23:55
+廣域 dispatcher transaction 一併收入 commit `d45c9a307`，未回退或改寫該 shared
+commit；後續證據以 exact-path commit 補齊。最終 Matt Spec／Standards 複審尚在
+進行，Issue #10 此刻與 Change Delivery umbrella 均維持 **`contained`**；
+production `git.commit` owner仍是 `legacy/1`，未做 live CAS。
 
 ### 2026-07-26 — Boss Report caller follow-up（Issue #39）
 

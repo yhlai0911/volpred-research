@@ -7,10 +7,12 @@ from collections.abc import Mapping
 from volpred.ops.authority import PrimaryLease
 
 from ._git_actuator import (
+    CommitAuthorityAbandonment,
     CommitActuatorBlocked,
     CommitAuthorityGrant,
     CommitAuthorityRequest,
     _authority_request_sha256,
+    _validate_abandonment,
     _validate_authority_grant,
 )
 from .supabase_rpc import (
@@ -109,6 +111,116 @@ class SupabaseCommitAuthority:
                 f"commit authority RPC failed: {message}"
             ) from None
 
+        if not isinstance(payload, Mapping):
+            raise CommitActuatorBlocked(
+                "commit authority RPC returned a non-object grant"
+            )
+        generation = payload.get("commit_owner_generation")
+        if (
+            isinstance(generation, bool)
+            or not isinstance(generation, int)
+            or generation <= 0
+        ):
+            raise CommitActuatorBlocked(
+                "commit authority RPC returned an invalid owner generation"
+            )
+        return _validate_authority_grant(
+            CommitAuthorityGrant(
+                request_sha256=payload.get("request_sha256"),
+                commit_owner_generation=generation,
+                commit_owner_ref=payload.get("commit_owner_ref"),
+                work_lease_ref=payload.get("work_lease_ref"),
+                primary_authority_ref=payload.get(
+                    "primary_authority_ref"
+                ),
+            ),
+            request=request,
+        )
+
+    def recover(
+        self,
+        request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant | None:
+        self._validate_request(request)
+        payload = self._call(
+            "volpred_read_commit_authority_grant",
+            {"p_request_sha256": request.request_sha256},
+        )
+        if payload is None:
+            return None
+        return self._grant(payload, request=request)
+
+    def abandon(
+        self,
+        request: CommitAuthorityRequest,
+        grant: CommitAuthorityGrant,
+        *,
+        reason: str,
+    ) -> CommitAuthorityAbandonment:
+        self._validate_request(request)
+        _validate_authority_grant(grant, request=request)
+        payload = self._call(
+            "volpred_abandon_commit_write",
+            {
+                "p_request_sha256": request.request_sha256,
+                "p_commit_owner_generation": (
+                    grant.commit_owner_generation
+                ),
+                "p_commit_owner_ref": grant.commit_owner_ref,
+                "p_reason": reason,
+            },
+        )
+        if not isinstance(payload, Mapping):
+            raise CommitActuatorBlocked(
+                "commit authority RPC returned a non-object abandonment"
+            )
+        return _validate_abandonment(
+            CommitAuthorityAbandonment(
+                schema_version=payload.get("schema_version"),
+                request_sha256=payload.get("request_sha256"),
+                reason=payload.get("reason"),
+                abandoned_at=payload.get("abandoned_at"),
+            ),
+            request=request,
+            reason=reason,
+        )
+
+    def _call(
+        self,
+        function: str,
+        payload: Mapping[str, object],
+    ) -> object:
+        try:
+            return self._client.call(function, payload)
+        except SupabaseRpcError as error:
+            message = str(error)
+            if message.startswith(
+                (
+                    "commit authority",
+                    "commit ownership",
+                    "Primary Authority",
+                )
+            ):
+                raise CommitActuatorBlocked(message) from None
+            raise RuntimeError(
+                f"commit authority RPC failed: {message}"
+            ) from None
+
+    @staticmethod
+    def _validate_request(request: CommitAuthorityRequest) -> None:
+        if not isinstance(request, CommitAuthorityRequest):
+            raise TypeError("CommitAuthorityRequest is required")
+        if request.request_sha256 != _authority_request_sha256(request):
+            raise CommitActuatorBlocked(
+                "commit authority request hash does not match its write intent"
+            )
+
+    @staticmethod
+    def _grant(
+        payload: object,
+        *,
+        request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant:
         if not isinstance(payload, Mapping):
             raise CommitActuatorBlocked(
                 "commit authority RPC returned a non-object grant"

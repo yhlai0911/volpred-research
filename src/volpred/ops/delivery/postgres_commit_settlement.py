@@ -93,6 +93,7 @@ class PostgresCommitSettlement:
                 )
                 if message.startswith(
                     (
+                        "commit authority",
                         "commit settlement",
                         "commit ownership",
                         "Primary Authority",

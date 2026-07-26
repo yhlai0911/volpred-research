@@ -501,6 +501,58 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   exact Git read-back 或 rollback rehearsal，所以 Change Delivery umbrella 仍為
   `contained`。
 
+### 2026-07-26 T04 final review hardening checkpoint
+
+- Matt Spec 複審抓到 proposal 內的 `status="passed"` 仍是作者自述，不能等同隔離驗證。
+  `ChangeDelivery.land()` 現在只在首次 Git actuation 前呼叫 trusted
+  `IsolatedCheckVerifier`；每個 required check 的 argv 由正式 composition registry
+  提供，不從 ChangeSet 接收。Verifier 在 linked worktree 逐項實跑，並在前後重驗
+  HEAD、clean index、完整 dirty scope、file mode 與 content hash。缺 command、timeout、
+  非零 exit，或檢查期間改動 workspace，都在 Git writer 前 fail closed；post-commit
+  settlement retry 不重跑 Git 或依賴已消失的 workspace。為保留 lost-return
+  recovery，actuator 會先在 current WorkLease／Primary Authority 下只讀搜尋 exact
+  authority-bound historical commit；只有 HEAD 尚未前進、確定需要新寫入時，才要求
+  workspace 存在並重新執行 checks。System regression 會在 writer commit 後、durable
+  checkpoint 前模擬程序崩潰，再移走 linked worktree，仍只能回收同一筆 commit；
+  HEAD 尚未前進且 checks 失敗時不會先建立 durable authority grant。
+  Stale／並行 HEAD 則先用 deterministic authority-request digest 唯讀比對 first-parent
+  commit identity；未知 request 只做 read-only lookup、不建立 grant。隔離 PostgreSQL
+  regression 回讀該 WorkItem grant count=0，並實際完成 owner rollback，避免
+  fail-closed 變成永久 rollback deadlock。
+- 後續 Matt 競爭複審再抓到 authority grant 建立早於 canonical writer lock，以及
+  abandonment／settlement 使用不同 terminal lock。現在 `GitCommitActuator` 先取得
+  repo-wide canonical writer lease，才在同一 lease 內重讀 HEAD、authorize、把 lease
+  capability 繼承給 exact-path writer，並做 terminal reconciliation；因此 lock busy
+  在 grant 建立前就拒絕。Timeout 是 ambiguous outcome，只保留 active grant；
+  authority-bound 但非 exact 的 HEAD mutation 同樣保留 grant並阻擋 rollback。
+  只有 writer lease 內確認 HEAD 未變，或 timeout 後重試證明 first-parent 是另一個
+  request，才寫 immutable abandonment。Recovery 只能 read existing grant，不能在
+  看到 effect 後補授權。資料庫端 settlement trigger 與 abandonment 共用
+  `commit-authority:<request_sha256>` advisory transaction lock，並由 abandonment
+  schema version／owner identity／terminal receipt trigger fail closed；雙連線競爭
+  regression 證明同一 request 不會同時落成 abandonment 與 delivery receipt。
+- Formal caller 在 proposal 前先回讀 exact running WorkItem，綁定 id／version／author
+  與 required-attestation set；ChangeSet 不可省略或自行增加 required checks。
+  `actor` 同時從 `OwnedChangeCommand`／`LandChangeSet` 外部介面移除，固定由
+  composition root 注入 `CommitWorkerPrincipal("commit-worker:operations-core")`。
+  Agent 的文字身分不能再自行變成正式 commit principal；真正寫入仍須同時取得
+  WorkLease、Primary Authority 與 current `git.commit` owner generation。
+- Matt Standards 複審抓到 service-role ChangeSet JSON decoder 過度寬鬆。共用
+  PostgreSQL／Supabase decoder 現逐欄驗 schema、strict positive integer（拒絕 bool）、
+  canonical paths/checks/hashes、重算 proposal SHA-256、lifecycle state，以及
+  actuation／delivery receipt 的跨欄 identity；owner ref、settlement ref 與
+  settlement digest 都從 generation／ChangeSet／actuation／repository 重新推導，
+  不能只靠格式正確的任意字串通過。任何 drift 統一回報
+  `malformed ChangeSet record`，不把遠端 payload 當 canonical state。
+- 隔離 PostgreSQL + 暫存 Git system test 已實際產生唯一 exact-path commit，回讀
+  commit object／HEAD／ChangeSet／authority／WorkItem 後完成 rollback rehearsal；
+  另有 external-lock-before-authority、timeout→unrelated commit cleanup、
+  authority-bound non-exact mutation、lost workspace recovery，以及雙連線 terminal
+  arbitration regressions。2026-07-26 當前證據為核心 66 passed、完整 PostgreSQL
+  55 passed；最終 Matt Spec／Standards 複審尚在進行，所以 Issue #10 此刻仍標
+  `contained`。production owner 也仍刻意保持 `legacy/1`，未執行 live ownership
+  CAS，Change Delivery umbrella 同樣為 `contained`。
+
 ### 2026-07-24 service-role Primary Authority lifecycle checkpoint
 
 - `SupabaseAuthorityStore` 是既有 `PrimaryAuthority` external interface 的 production

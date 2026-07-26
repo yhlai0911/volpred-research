@@ -15,6 +15,7 @@ _READ_ONLY_RPCS = frozenset(
         "volpred_diagnose_publisher_article_compare_delete",
         "volpred_read_change_set",
         "volpred_read_change_set_by_idempotency_key",
+        "volpred_read_commit_authority_grant",
         "volpred_read_commit_owner",
         "volpred_read_notification_owner",
         "volpred_read_owned_email_request",
