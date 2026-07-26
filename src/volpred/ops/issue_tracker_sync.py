@@ -443,7 +443,8 @@ def settle_completed_task_issues(
                         continue
                 elif (
                     task_id in explicit_task_ids
-                    or pending.get("completion_base_commit") == parent_sha
+                    if explicit_task_ids
+                    else pending.get("completion_base_commit") == parent_sha
                 ):
                     bound_sha = sha
                     pending = dict(pending)

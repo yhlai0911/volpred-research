@@ -342,7 +342,19 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                         "completed_at": "2026-07-26T12:00:00+00:00",
                         "completion_base_commit": "1" * 40,
                     },
-                }
+                },
+                {
+                    "id": "task-b",
+                    "status": "succeeded",
+                    "issue_ref": "#38",
+                    "issue_close_pending": {
+                        "issue_ref": "#38",
+                        "task_id": "task-b",
+                        "completion_owner": "codex-vscode",
+                        "completed_at": "2026-07-26T12:00:00+00:00",
+                        "completion_base_commit": "1" * 40,
+                    },
+                },
             ]
         ),
         encoding="utf-8",
@@ -361,9 +373,12 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
     )
 
     assert settled[0]["commit_sha"] == "3" * 40
+    assert len(settled) == 1
     assert calls[0]["task_id"] == "task-a"
-    saved = json.loads(queue.read_text(encoding="utf-8"))[0]
-    assert saved["issue_closed_commit"] == "3" * 40
+    saved = json.loads(queue.read_text(encoding="utf-8"))
+    assert saved[0]["issue_closed_commit"] == "3" * 40
+    assert saved[1]["issue_close_pending"]["task_id"] == "task-b"
+    assert "issue_closed_commit" not in saved[1]
 
 
 def test_phase_z_can_snapshot_exact_linked_task_ids_for_unique_owners(
@@ -396,3 +411,42 @@ def test_phase_z_can_snapshot_exact_linked_task_ids_for_unique_owners(
         path=queue,
         claim_owners={"hourly-slot-1-job-a"},
     ) == {"task-a"}
+
+
+def test_explicit_task_ids_exclude_same_owner_same_base_sibling(tmp_path) -> None:
+    queue = tmp_path / "next_tasks.json"
+    tasks = []
+    for task_id, issue_ref in (("task-a", "#37"), ("task-b", "#38")):
+        tasks.append(
+            {
+                "id": task_id,
+                "status": "succeeded",
+                "issue_ref": issue_ref,
+                "issue_close_pending": {
+                    "issue_ref": issue_ref,
+                    "task_id": task_id,
+                    "completion_owner": "codex-vscode",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "completion_base_commit": "1" * 40,
+                },
+            }
+        )
+    queue.write_text(json.dumps(tasks), encoding="utf-8")
+    calls = []
+
+    settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        completed_task_ids={"task-a"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        repo_root=tmp_path,
+        closer=lambda **kwargs: calls.append(kwargs)
+        or {"ok": True, "issue_number": 37},
+    )
+
+    assert [call["task_id"] for call in calls] == ["task-a"]
+    saved = json.loads(queue.read_text(encoding="utf-8"))
+    assert saved[0]["issue_closed_commit"] == "2" * 40
+    assert "issue_closed_commit" not in saved[1]
+    assert saved[1]["issue_close_pending"]["task_id"] == "task-b"
