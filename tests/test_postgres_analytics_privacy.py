@@ -513,6 +513,24 @@ def test_digest_key_drift_and_tombstone_deletion_fail_closed(
             connection.execute(
                 "DELETE FROM volpred_analytics.privacy_tombstones"
             )
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                """
+                UPDATE volpred_analytics.privacy_tombstones
+                SET subject_digest = %s
+                """,
+                (b"z" * 32,),
+            )
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                """
+                UPDATE volpred_analytics.event_dedupe_tombstones
+                SET idempotency_digest = %s
+                """,
+                (b"z" * 32,),
+            )
 
     wrong_key_tracer = AnalyticsPrivacyTracer(
         PostgresAnalyticsStore(

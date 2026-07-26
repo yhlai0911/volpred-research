@@ -642,9 +642,10 @@ class PostgresAnalyticsStore:
                 ) VALUES (%s, %s, %s, %s)
                 ON CONFLICT (idempotency_digest)
                 DO UPDATE SET
-                  event_payload_digest = EXCLUDED.event_payload_digest,
                   suppression_reason = EXCLUDED.suppression_reason,
                   suppressed_at = EXCLUDED.suppressed_at
+                WHERE event_dedupe_tombstones.event_payload_digest
+                  = EXCLUDED.event_payload_digest
                 """,
                 [
                     (

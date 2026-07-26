@@ -348,9 +348,15 @@ GRANT SELECT, INSERT, DELETE
 GRANT SELECT, INSERT, UPDATE, DELETE
   ON volpred_analytics.privacy_preferences
   TO volpred_analytics_worker;
-GRANT SELECT, INSERT, UPDATE
+GRANT SELECT, INSERT
   ON volpred_analytics.privacy_tombstones,
      volpred_analytics.event_dedupe_tombstones
+  TO volpred_analytics_worker;
+GRANT UPDATE (deleted_at)
+  ON volpred_analytics.privacy_tombstones
+  TO volpred_analytics_worker;
+GRANT UPDATE (suppression_reason, suppressed_at)
+  ON volpred_analytics.event_dedupe_tombstones
   TO volpred_analytics_worker;
 GRANT SELECT, INSERT ON volpred_analytics.digest_key_identity
   TO volpred_analytics_worker;
