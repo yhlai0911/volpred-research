@@ -212,6 +212,29 @@ def test_apply_recovers_immutable_receipt_after_post_write_crash(tmp_path):
     assert receipt_path.read_bytes() == first_receipt_bytes
 
 
+def test_dry_run_hashes_the_proposed_queue_without_writing(tmp_path):
+    queue = tmp_path / "next_tasks.json"
+    original = [
+        {
+            "id": "issue9_shadow_reconciliation_closure_20260727",
+            "status": "in_progress",
+            "task_type": "platform_ops",
+            "title": "Issue 9",
+            "priority": 1,
+            "source": "owner_interactive",
+            "claimed_at": "2026-07-26T22:02:22.826768+00:00",
+            "started_at": "2026-07-26T22:02:26.253522+00:00",
+        }
+    ]
+    queue.write_text(json.dumps(original) + "\n", encoding="utf-8")
+
+    receipt = migration.run(path=queue, apply=False)
+
+    assert receipt["changes"]
+    assert receipt["before_sha256"] != receipt["after_sha256"]
+    assert json.loads(queue.read_text(encoding="utf-8")) == original
+
+
 def test_immutable_publish_never_streams_into_final_path(
     tmp_path,
     monkeypatch,

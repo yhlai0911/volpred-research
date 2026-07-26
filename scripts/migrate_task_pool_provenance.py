@@ -615,6 +615,8 @@ def run(
                     raise ProvenanceMigrationError(
                         "canonical writer output disagrees with prepared intent"
                     )
+            elif not apply:
+                after_bytes = proposed_bytes
             else:
                 after_bytes = before_bytes
             if apply and fail_after_queue_write:
