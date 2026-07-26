@@ -449,25 +449,15 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
     session_items = (config.get("session_crons") or {}).get("items") or []
     session_pending = _write_pending_sessions(session_items, state, now_local, now)
 
-    # 2026-04-20: also expand event_jobs entries whose `not_before` has
-    # arrived. The advisory shared-scheduler lane was the intended call site
-    # for this, but it never ran on this host (dead since 2026-04-19) and was
-    # fully retired 2026-07-20 (ops-master D2) — this piggy-back is now the
-    # sole owner. Piggy-backing on hourly check_alerts ensures one_shot
-    # event jobs (e.g. FOMC T-2 windows) materialize in the canonical next_tasks queue
-    # within ~60 min of their `not_before` timestamp. Cost is cheap: iterates
-    # event_jobs.items and no-ops pending/expired entries.
-    event_expansion: dict[str, Any] = {"ok": False, "reason": "not_attempted"}
-    try:
-        import sys as _sys
-        _src = PROJECT_ROOT / "src"
-        if str(_src) not in _sys.path:
-            _sys.path.insert(0, str(_src))
-        from volpred.ops.event_jobs import expand_due_event_jobs  # type: ignore
-        event_expansion = expand_due_event_jobs(storage_dir=str(PROJECT_ROOT / "storage"))
-        event_expansion["ok"] = True
-    except Exception as exc:  # noqa: BLE001
-        event_expansion = {"ok": False, "reason": f"error:{exc}"}
+    # Event windows have their own five-minute Operations Core schedule.  This
+    # compatibility scheduler must never materialize them as a hidden side
+    # effect of check_alerts, or pausing alert delivery also pauses event SLA.
+    event_expansion: dict[str, Any] = {
+        "ok": True,
+        "action": "skip",
+        "reason": "operations_core_owner",
+        "job_id": "event_jobs_materialize",
+    }
 
     summary = {
         "ok": True,

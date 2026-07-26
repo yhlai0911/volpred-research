@@ -249,9 +249,7 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
     }))
     monkeypatch.setattr(rdj, "CONFIG_PATH", config_path)
     monkeypatch.setattr(rdj, "LAST_RUN_PATH", last_run_path)
-    # run_due_jobs() tail-calls expand_due_event_jobs(storage_dir=PROJECT_ROOT/"storage"),
-    # which materializes real event tasks + ledger entries. Patching CONFIG_PATH and
-    # LAST_RUN_PATH is not enough — PROJECT_ROOT is resolved independently.
+    # PROJECT_ROOT drives wrapper/log resolution independently of CONFIG_PATH.
     monkeypatch.setattr(rdj, "PROJECT_ROOT", tmp_path)
     # ...and PENDING_SESSIONS_PATH was bound at import from the ORIGINAL PROJECT_ROOT,
     # so redirecting PROJECT_ROOT does not reach it. run_due_jobs() writes it too.
@@ -259,6 +257,12 @@ def test_run_due_jobs_skips_piggy_back_skip_items(tmp_path, monkeypatch):
 
     result = rdj.run_due_jobs()
 
+    assert result["event_expansion"] == {
+        "ok": True,
+        "action": "skip",
+        "reason": "operations_core_owner",
+        "job_id": "event_jobs_materialize",
+    }
     jobs = {r["job_id"]: r for r in result["jobs"]}
     assert jobs["collect_us_test"]["action"] == "skip"
     assert jobs["collect_us_test"]["reason"] == "piggy_back_skip_host_managed"

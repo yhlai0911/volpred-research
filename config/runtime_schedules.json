@@ -17,6 +17,9 @@
     "max_parallel": 4,
     "shadow_grace_seconds": 120,
     "active_jobs": {
+      "event_jobs_materialize": {
+        "activated_at": "2026-07-26T10:20:00Z"
+      },
       "handoff_regen": {
         "activated_at": "2026-07-26T10:00:00Z"
       },
@@ -34,6 +37,11 @@
       "timeout_seconds": 3000
     },
     "job_overrides": {
+      "event_jobs_materialize": {
+        "catch_up": "skip",
+        "retry_delay_seconds": 60,
+        "timeout_seconds": 300
+      },
       "boss_report_4h": {
         "catch_up": "skip",
         "max_attempts": 1
@@ -389,6 +397,20 @@
           "populate_upcoming_events.py",
           "cron_populate_events.sh",
           "populate_events"
+        ]
+      },
+      {
+        "id": "event_jobs_materialize",
+        "label": "Event windows -> canonical next_tasks materialization",
+        "cron": "*/5 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_event_jobs_materialize.sh",
+        "log_path": "storage/logs/cron/event_jobs_materialize.log",
+        "description": "Operations Core 每五分鐘檢查 event_jobs.not_before/deadline，經 canonical event ledger 與 next_tasks single gateway 冪等 materialize；check_alerts/run_due_jobs 不再藏第二條 hourly owner。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "matchers": [
+          "materialize_event_jobs.py",
+          "cron_event_jobs_materialize.sh"
         ]
       },
       {
