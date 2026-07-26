@@ -3348,6 +3348,32 @@ restore／控制進度可能遺失／舊claim靜默復活」根因完成五步�
 archive、receipt-bound restore、canonical stale cleanup與內容下游acknowledgement
 回讀後，才可把上線切換本身標完成。
 
+### 2026-07-26 — 第二台Mac其實在線，但缺remote identity與同質runtime部署
+
+**證據化症狀與根因層級**：先前Tailscale snapshot把候選
+`IvanLai的MacBook Pro`標為offline，實際喚醒後ping為31ms；真正阻塞是Mac Studio沒有
+SSH identity、MacBook短帳號為`apple`且未授權key。SSH打通後又發現MacBook沒有repo／
+`uv`，只有Python 3.9；第一次依`>=3.12`同步還選到3.13.3。若只把「機器開著」當ready，
+會在正式mutation後才發現source/runtime不相容。根因是physical deployment／access
+precondition缺失，不是authority CAS。
+
+**底層排除與live驗證**：Studio建立專用ED25519 key，MacBook只授權其public key；
+透過SSH部署不含Git history、storage、frontend與排程的最小Operations Core checkout，
+再以`uv.lock`和顯式`--python 3.12.10`建立同質環境。兩端回讀Python
+`3.12.10`、OpenSSL`3.0.16`、implementation
+`b83f7bbc6fdee3d82aafebf7f83ed7212e53bffd1351948c8ee2ad3c332e5003`與backend
+`c6a1e836…a1404` exact match；不同實體fingerprints為`6652d012…57b8`／
+`d9fca0a4…fbde`。
+
+正式rehearsal `operations-core-two-mac-20260726-2000`由Studio取得epoch`1`，
+完成一次健康renew後在transport partition下59.220721秒demote、local gate關閉；
+MacBook在DB-clock expiry後0.162352秒取得exact-next epoch`2`並release。Final receipt
+為`cross_host_verified=true`、successful claims=2、duplicate=0、effect=0、
+provider=0，publisher fence始終`operations_core/8`。Canonical evidence為
+`storage/ops/primary_authority_outage_cross_host_latest.json`及其readiness／primary／
+standby SHA鏈。Physical two-Mac gate與Program commit 15／Operations Core umbrella
+完成五步，狀態 **`root_cause_fixed_and_verified`**。
+
 ### 2026-07-26 — 只查 Claude home，誤判 Codex 全域 Matt skills 不存在
 
 **證據化症狀與根因層級**：`AGENTS.md` 同一節同時寫著「Matt Pocock skills 已安裝」與

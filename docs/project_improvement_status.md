@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（direct-mode restore exit contract）**
+Last updated: **2026-07-26（physical two-Mac authority pair verified）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -2061,6 +2061,23 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ public function／CLI／crash-tamper回歸共37案通過。底層restore可退出性根因已
   `root_cause_fixed_and_verified`；production mode尚未切換，須以live archive、
   restore、canonical stale cleanup與下游content acknowledgement完成正式回讀。
+
+## 2026-07-26 — Physical two-Mac Primary Authority 正式結案
+
+- ✅ Mac Studio與MacBook Pro透過專用SSH key及Tailscale建立可操作的兩個實體failure
+  domains；硬體fingerprint分別為`6652d012…57b8`與`d9fca0a4…fbde`。
+- ✅ MacBook部署最小Operations Core checkout，不啟動scheduler／dispatcher；兩端
+  Python `3.12.10`、OpenSSL `3.0.16`、implementation
+  `b83f7bbc…e5003`與Supabase backend `c6a1e836…a1404` exact match。
+- ✅ readiness v4在15分鐘窗內配對；Studio完成健康renew→partition→59.220721秒demote，
+  local gate關閉且partition probe被拒。
+- ✅ MacBook在primary DB expiry後取得exact-next epoch `2`，handoff
+  `0.162352s`，隨即release；successful claims=2、duplicate/effect/provider=0，
+  publisher fence全程`operations_core/8`。
+- ✅ final `verify-pair`為`cross_host_verified=true`；canonical evidence：
+  `storage/ops/primary_authority_outage_cross_host_latest.json`。Program commit 15及
+  Operations Core umbrella的最後外部硬體gate為
+  `root_cause_fixed_and_verified`。
 
 ## 2026-07-26 — Matt workflow living-doc 漂移修正
 

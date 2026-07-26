@@ -926,8 +926,15 @@ restore receipt為`candidate_count=1/restored_count=1`，standing convergence
 為`converged`、`mismatch_total=0`、零observation error；最後synthetic row不存在、
 owner回到`legacy/19`且approval已撤銷。Canonical evidence為
 `storage/ops/publisher_delete_restore/live-20260726-0503_{recovery.jsonl,receipt.json}`。
-Operations-core umbrella仍維持`contained`，唯一剩餘evidence gate為physical
-two-Mac Primary Authority receipt pair。
+Physical two-Mac Primary Authority evidence gate已於2026-07-26由Mac Studio
+`6652d012…57b8`與MacBook Pro`d9fca0a4…fbde`正式完成。兩端在同一
+implementation `b83f7bbc…e5003`、backend `c6a1e836…a1404`及publisher fence
+`operations_core/8`下，Studio epoch `1`於DB clock expiry後由MacBook取得exact-next
+epoch `2`，handoff為`0.162352s`；successful claims=2、duplicate=0、effect=0、
+provider=0，standby release後final state=`stopped`。Canonical final evidence為
+`storage/ops/primary_authority_outage_cross_host_latest.json`，並由同目錄的readiness、
+primary與standby receipts提供完整SHA鏈。Program commit 15／Operations Core
+umbrella的最後evidence gate因此為 **`root_cause_fixed_and_verified`**。
 
 ### Cross-host receipt code identity（2026-07-26）
 

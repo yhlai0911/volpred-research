@@ -1,0 +1,56 @@
+{
+  "schema_version": "primary-authority-outage-readiness-pair.v4",
+  "rehearsal_id": "operations-core-two-mac-20260726-2000",
+  "authority_key": "operations-core-outage-smoke-84df96c7972a2c286593d2d65fe7263e",
+  "backend_sha256": "c6a1e836d22722263dceef6de6a10a3517e15400e1529fbad803fb89bd0a1404",
+  "verified_at": "2026-07-26T12:05:11.814719+00:00",
+  "valid_until": "2026-07-26T12:19:59.222674+00:00",
+  "primary_host_id": "Mac",
+  "primary_host_fingerprint": "6652d01267d664d621c957b8",
+  "standby_host_id": "IvanLaideMacBook-Pro.local",
+  "standby_host_fingerprint": "d9fca0a405a74dc4d7c5fbde",
+  "implementation_sha256": "b83f7bbc6fdee3d82aafebf7f83ed7212e53bffd1351948c8ee2ad3c332e5003",
+  "publisher_fence": {
+    "effect_family": "publisher.article.supabase.sync",
+    "owner": "operations_core",
+    "generation": 8,
+    "changed_at": "2026-07-24T16:44:54.274958+00:00"
+  },
+  "primary_readiness_sha256": "5ee388d26a6e56f7c6e99da33403047117eeaa45d30ac5c58d230aea6b57de25",
+  "standby_readiness_sha256": "ec0e4adeb17938677091cbd72aedbd5b1be785fe68597982c6e68d6fdbab20d1",
+  "primary_readiness": {
+    "schema_version": "primary-authority-outage-host-readiness.v2",
+    "rehearsal_id": "operations-core-two-mac-20260726-2000",
+    "role": "primary",
+    "host_id": "Mac",
+    "host_fingerprint": "6652d01267d664d621c957b8",
+    "backend_sha256": "c6a1e836d22722263dceef6de6a10a3517e15400e1529fbad803fb89bd0a1404",
+    "implementation_sha256": "b83f7bbc6fdee3d82aafebf7f83ed7212e53bffd1351948c8ee2ad3c332e5003",
+    "authority_key": "operations-core-outage-smoke-84df96c7972a2c286593d2d65fe7263e",
+    "observed_at": "2026-07-26T12:04:59.222674+00:00",
+    "publisher_fence": {
+      "effect_family": "publisher.article.supabase.sync",
+      "owner": "operations_core",
+      "generation": 8,
+      "changed_at": "2026-07-24T16:44:54.274958+00:00"
+    }
+  },
+  "standby_readiness": {
+    "schema_version": "primary-authority-outage-host-readiness.v2",
+    "rehearsal_id": "operations-core-two-mac-20260726-2000",
+    "role": "standby",
+    "host_id": "IvanLaideMacBook-Pro.local",
+    "host_fingerprint": "d9fca0a405a74dc4d7c5fbde",
+    "backend_sha256": "c6a1e836d22722263dceef6de6a10a3517e15400e1529fbad803fb89bd0a1404",
+    "implementation_sha256": "b83f7bbc6fdee3d82aafebf7f83ed7212e53bffd1351948c8ee2ad3c332e5003",
+    "authority_key": "operations-core-outage-smoke-84df96c7972a2c286593d2d65fe7263e",
+    "observed_at": "2026-07-26T12:05:01.123143+00:00",
+    "publisher_fence": {
+      "effect_family": "publisher.article.supabase.sync",
+      "owner": "operations_core",
+      "generation": 8,
+      "changed_at": "2026-07-24T16:44:54.274958+00:00"
+    }
+  },
+  "cross_host_ready": true
+}
