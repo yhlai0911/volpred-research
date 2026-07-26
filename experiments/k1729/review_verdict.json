@@ -1,10 +1,10 @@
 {
   "kid": "k1729",
   "verdict": "PASS",
-  "reviewer": "FALLBACK PATH (primary-path Codex unavailable): two independent reviewers, both PASS. (1) fresh-context adversarial code-reviewer subagent, Claude Opus 4.8, read-only tools, hand-computed the settlement calendar against raw CSV incl. two control non-ambiguous settlement dates -> independent_review_rev2.md. (2) agy / Antigravity (Gemini), independently reimplemented both ex-ante roll conventions plus a third non-expiry-tied control convention, and ran a separate confirmation pass on these exact final bytes -> agy_review_rev2.md. Codex CLI returned a hard usage-limit error ('try again at Jul 25th, 2026') on 2026-07-21 14:33 Taipei, so the primary path could not run; this is the fallback sanctioned by .claude/rules/experiments.md. Per that same rule a fallback PASS is NOT equivalent to a primary-path Codex PASS: Codex re-verification of these bytes is REQUIRED once credits reset (>= 2026-07-25) before this K may be treated as closed. The knowledge.json entry must record reviewer_source as fallback.",
-  "reviewed_at": "2026-07-21T15:05:00+08:00",
+  "reviewer": "PRIMARY-PATH Codex GPT-5 Codex / high effort (re-verification of frozen bytes after fallback; supersedes the 2026-07-21 fallback PASS)",
+  "reviewed_at": "2026-07-27T06:35:42+00:00",
   "reviewed_commit": "ba3642da3fa4d5d56ae481dfcf1e71173beff51d",
-  "review_artifact": "independent_review_rev2.md; agy_review_rev2.md",
+  "review_artifact": "storage/ops/codex_reviews/k1729_primary_reverify_verdict.md (primary-path); prior fallback: independent_review_rev2.md; agy_review_rev2.md",
   "blocking_defects": [],
   "reviewed_sha256": {
     "README.md": "9adaaaeb5906230590fa4aa8bde6ad680c562c5fb231953b201e2aabe21d397b",
@@ -20,5 +20,12 @@
   "reviewer_raised_nonblocking_items_fixed_before_freeze": [
     "Convention-agreement wording was over-broad; now states precisely that the two ex-ante conventions agree with EACH OTHER on every OOS row, the sole whole-file difference being row 0 (2012-01-02), a dataset-boundary artifact in warmup.",
     "Top-level machine verdict was derived from the primary ledger alone; it now requires the ex-ante ledger to concur on both targets."
-  ]
+  ],
+  "fallback_certification_superseded": {
+    "note": "This K first earned a FALLBACK PASS on 2026-07-21 (Codex CLI hit a hard usage-limit; two independent non-Codex reviewers PASSed). Per .claude/rules/experiments.md a fallback PASS is not equivalent to a primary-path Codex PASS and required Codex re-verification of these exact bytes once credits reset (>=2026-07-25). That re-verification has now run and PASSed on the frozen bytes (freeze sha256 == current for README.md/k1729.py/k1729_results.json).",
+    "prior_reviewer": "FALLBACK PATH (primary-path Codex unavailable): two independent reviewers, both PASS. (1) fresh-context adversarial code-reviewer subagent, Claude Opus 4.8, read-only tools, hand-computed the settlement calendar against raw CSV incl. two control non-ambiguous settlement dates -> independent_review_rev2.md. (2) agy / Antigravity (Gemini), independently reimplemented both ex-ante roll conventions plus a third non-expiry-tied control convention, and ran a separate confirmation pass on these exact final bytes -> agy_review_rev2.md. Codex CLI returned a hard usage-limit error ('try again at Jul 25th, 2026') on 2026-07-21 14:33 Taipei, so the primary path could not run; this is the fallback sanctioned by .claude/rules/experiments.md. Per that same rule a fallback PASS is NOT equivalent to a primary-path Codex PASS: Codex re-verification of these bytes is REQUIRED once credits reset (>= 2026-07-25) before this K may be treated as closed. The knowledge.json entry must record reviewer_source as fallback.",
+    "prior_reviewed_at": "2026-07-21T15:05:00+08:00",
+    "prior_review_artifact": "independent_review_rev2.md; agy_review_rev2.md"
+  },
+  "reviewer_source": "primary-path Codex"
 }

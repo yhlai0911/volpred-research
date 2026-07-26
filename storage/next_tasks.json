@@ -32786,11 +32786,11 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-15T00:00:01Z",
-    "compute_job_id": "agent-brief_k1715_adjudicate-27247d",
-    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_fix_attempt1-ba80b2; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_adjudicate-27247d; awaiting PHASE A collection",
+    "compute_job_id": "agent-brief_k1715_recert-5cabc2",
+    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_fix_attempt1-ba80b2; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_adjudicate-27247d; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert-5cabc2; awaiting PHASE A collection",
     "fail_reason": "Codex FAIL @87f2fec59: README/JSON number mismatches, optimizer_success_rate=0 (no convergence diagnostics retained), false arch 3-4sigfig agreement claim, unidentified causal attribution. Re-dispatched fix attempt1 (max effort) job agent-brief_k1715_fix_attempt1-ba80b2.",
     "escalation_attempts": 1,
-    "last_released_at": "2026-07-26T21:50:20.882881+00:00",
+    "last_released_at": "2026-07-26T22:50:30.342982+00:00",
     "last_release_reason": "auto_release_stale_2h",
     "status_history": [
       {
@@ -32799,8 +32799,31 @@
         "to": "pending",
         "by": "release",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-26T22:50:30.342990+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "release",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-26T23:09:32.087466+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4"
+      },
+      {
+        "ts": "2026-07-26T23:09:32.321138+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4"
       }
-    ]
+    ],
+    "claimed_by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
+    "claimed_at": "2026-07-26T23:09:32.087458+00:00",
+    "claim_session_id": "c7da5a6b4bf6",
+    "started_at": "2026-07-26T23:09:32.321124+00:00"
   },
   {
     "id": "K1716",
@@ -40677,15 +40700,12 @@
     "title": "K1729 Codex 二審（primary path；fallback PASS 不算 closure）",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:20:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
     "description": "K1729（TAIFEX 5 分鐘 RV vs 日頻報酬平方當 HAR regressor）已於 2026-07-21 修復 rev1 兩項 Codex FAIL 缺陷並合併進 main，但**審查走的是 fallback path 不是 Codex**：\nCodex CLI 於 2026-07-21 14:33 台灣時間回硬性額度上限（'try again at Jul 25th, 2026'），依 .claude/rules/experiments.md 改派兩路獨立審查（fresh-context adversarial code-reviewer subagent + agy/Antigravity Gemini），兩路皆 PASS。\n\n**依同一條規則，fallback PASS != primary-path Codex PASS**，此 K 在 Codex 對這份 bytes 二審通過前不得視為 closed。knowledge.json 條目已把 reviewer_source 註明為 fallback。\n\n要做什麼：\n1. 確認 Codex CLI 額度已恢復（>= 2026-07-25）\n2. 對 **這份 bytes** 跑 Codex review：experiments/k1729/k1729.py + k1729_results.json（sha256 2f30de1989439d6c6e4b94b989bfa9b3960c47f3804ef4c3f2ac9d0f191886e8）\n3. 重點覆核三項（前兩項是 rev1 FAIL 的修復，第三項是本次新增的裁決）：\n   (a) target 端 ex-post 選約 lookahead 是否真的修掉 —— ex-ante ledger（RULE E：持有近月合約至公告的第三個週三結算日、假日調整後轉倉）在兩個 target 是否都仍 HAR_RV5_WINS\n   (b) README §7 營運宣稱是否已收回射程 —— 只能宣稱『預測增益不為零』，不得宣稱『這條資料線值得維護』（那是成本效益判斷，本實驗三個量一個都沒測）\n   (c) nested-DM gate 被判 pattern-match false positive 的理由是否站得住 —— 兩模型 regressor 集合互斥（5 分鐘 RV d/w/m vs 日頻開收報酬平方 d/w/m），走既有 reviewed_nonnested 退場路徑（先例 K1049 / k1100b），未新建 bypass 機制\n4. 判定寫回 experiments/k1729/review_verdict.json（新增 codex_primary 區段，勿覆蓋 fallback 紀錄），並更新 knowledge.json 條目的 reviewer_source\n5. 若 Codex 提出 blocking defect → 依 3-strike 規則處理，不得直接標 closed\n\nparent_compute_job=agent-brief_k1729_repair-986ef4\nmerge_commit_branch=wt/dispatch-slot-1-30aeb902-taifexrv (29daa5d1c，已合併並刪除)",
     "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
-    "claimed_by": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056",
-    "claimed_at": "2026-07-26T22:16:31.843098+00:00",
-    "claim_session_id": "0ec04473fbec",
     "status_history": [
       {
         "ts": "2026-07-26T22:16:31.843105+00:00",
@@ -40698,9 +40718,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056"
+      },
+      {
+        "ts": "2026-07-26T22:45:28.735372+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056",
+        "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 28.9min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-26T23:19:48.998173+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4"
+      },
+      {
+        "ts": "2026-07-26T23:19:49.241675+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4"
+      },
+      {
+        "ts": "2026-07-26T23:20:55.460025+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4"
       }
     ],
-    "started_at": "2026-07-26T22:16:41.870050+00:00"
+    "last_released_at": "2026-07-26T22:45:28.735358+00:00",
+    "last_release_reason": "liveness_reconcile_detached_c04607b2",
+    "started_at": "2026-07-26T23:19:49.241663+00:00",
+    "completed_at": "2026-07-26T23:20:55.459997+00:00",
+    "result": "K1729 primary-path Codex 認證閉環：Codex GPT-5/high 於 credit reset 後重驗凍結 bytes → VERDICT=PASS、BLOCKING_DEFECTS=none；freeze sha256 與現值逐檔一致(README/py/results)。review_verdict.json reviewer 由 fallback 升級為 primary-path（保留 fallback 紀錄），knowledge 6e49bdf8 reviewer_source=primary-path Codex。verdict.md=storage/ops/codex_reviews/k1729_primary_reverify_verdict.md。commit 交 PHASE-Z。"
   },
   {
     "id": "compute_queue_result_artifact_path_contract",
@@ -44238,15 +44287,38 @@
     ],
     "started_at": "2026-07-26T22:02:26.253522+00:00",
     "output_paths": [
-      "src/volpred/ops/work_shadow_replay.py",
-      "src/volpred/ops/work/legacy.py",
-      "src/volpred/ops/next_tasks.py",
-      "src/volpred/ops/blocked_reasons.py",
+      "scripts/compute_queue.py",
+      "scripts/mark_task_blocked.py",
+      "scripts/task_pool_claim.py",
       "scripts/migrate_task_pool_provenance.py",
-      "tests/test_work_shadow_replay.py",
+      "src/volpred/ops/blocked_reasons.py",
+      "src/volpred/ops/next_tasks.py",
+      "src/volpred/ops/work/legacy.py",
+      "src/volpred/ops/work_cutover.py",
+      "src/volpred/ops/work_shadow_replay.py",
       "tests/test_append_next_task.py",
+      "tests/test_compute_queue.py",
+      "tests/test_mark_task_blocked.py",
+      "tests/test_task_pool_claim.py",
+      "tests/test_work_shadow_replay.py",
       "tests/test_migrate_task_pool_provenance.py",
-      "storage/ops/task_pool_provenance_migrations/issue9_shadow_reconciliation_closure_20260727.json"
+      "storage/ops/task_pool_provenance_migrations/issue9_shadow_reconciliation_closure_20260727.json",
+      "storage/ops/task_pool_provenance_migrations/issue9_shadow_reconciliation_closure_20260727.json.intent.json"
     ]
+  },
+  {
+    "id": "ci-red-30222247599",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-30215935113",
+    "ci_run_key": "30222247599:1",
+    "created_at": "2026-07-26T23:00:04.705189+00:00",
+    "title": "CI 紅燈修復（run 30222247599, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30222247599\nattempt: 1\nhead_sha: 79c5260b3\n偵測摘要（仍須讀完整 failed log）：2026-07-26T22:15:14.7068836Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1714']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30222247599 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "priority_capped_from": 1
   }
 ]

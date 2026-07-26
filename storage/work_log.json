@@ -27582,5 +27582,35 @@
       "storage/drafts/fb_mile_822317c3.md"
     ],
     "mile_id": "mile_822317c3"
+  },
+  {
+    "timestamp": "2026-07-27T07:06:36+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-30222247599",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e481ad16844f46b8a3a463979bfe2785",
+    "owner": "hourly-slot-1-e481ad16844f46b8a3a463979bfe2785",
+    "commit": null,
+    "summary": "CI 紅燈修復（run 30222247599, main Test Suite）：根因為 test_knowledge_unrecorded_ratchet 抓到 K1714（realized-covariance HAR → GMV 組合，2026-07-22 完成、results 已歸檔）從未寫入 knowledge.json，導致 dedup/選題看不到、ratchet gate 轉紅（assert 1<=0）。前一輪 push remediation 只重推 HEAD 未修根因。主線程依 K1259 走 kb_backfill_apply.py 正規寫入路徑（_append_to_index：flock + provenance gate + Mirror sync）補上 K1714 knowledge 條目（item_id d37565b0, verdict=NULL 乾淨負面結果：HAR 未打敗任一共變異數估計量，對 EWMA 顯著更差 t=+4.564 Holm p=1.51e-05 Harvey-robust）。ratchet 測試由 red→green（1 passed）。ci-red-30222247599 為 platform_ops 任務，本 slot 未經 supervisor 預派、claim 被 supervisor_preassignment_required 機械拒絕，未繞過；task 生命週期留給 supervisor / ci_watch（CI 轉綠後自動收斂）。"
+  },
+  {
+    "timestamp": "2026-07-27T07:26:18+08:00",
+    "task_type": "paper_review",
+    "task_id": "k1729_codex_primary_reverify",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
+    "owner": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
+    "commit": null,
+    "summary": "K1729 primary-path Codex 認證閉環（PHASE A compute followup collect_completed）。K1729（TAIFEX 5分鐘 RV vs 日內平方報酬作 HAR 輸入，08:45 盤前預測當日 RV）於 2026-07-21 因 Codex CLI 用量上限（try again Jul 25th）只拿到 FALLBACK-DUAL-INDEPENDENT PASS，依 .claude/rules/experiments.md 規定 fallback PASS 不等同 primary-path Codex PASS，須待 credit reset（>=07-25）由 Codex 重驗凍結 bytes 才可結案。本班收件 compute job compute-k1729-primary-path-codex-certification-fallback-re-verify：verdict.md（storage/ops/codex_reviews/k1729_primary_reverify_verdict.md）VERDICT=PASS、BLOCKING_DEFECTS=none；先核 freeze sha256 與現值逐檔一致（README/py/results 三檔全符，無 bytes 漂移）。主線程升級 experiments/k1729/review_verdict.json：reviewer 由 fallback→PRIMARY-PATH Codex GPT-5/high，保留 fallback 紀錄於 fallback_certification_superseded；knowledge 6e49bdf8 header reviewer 改為 primary-path、reviewer_source=primary-path Codex + reviewer_source_history。complete k1729_codex_primary_reverify=succeeded、compute job mark-followup-dispatched。commit 交 PHASE-Z（knowledge.json/review_verdict.json 非本班 baseline dirty，本班窗口內變更，phase_z 收）。"
+  },
+  {
+    "timestamp": "2026-07-27T07:26:19+08:00",
+    "task_type": "experiment",
+    "task_id": "K1715",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
+    "owner": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
+    "commit": null,
+    "summary": "K1715 codex-adjudicate 收件（PHASE A compute followup collect_completed，agent-brief_k1715_adjudicate-27247d）。K1715（score-driven GAS/DCS Beta-t-EGARCH 直接聯合估 VaR+ES vs GARCH family，SPY 2000-2026，n=6678，OOS 4164，expanding refit/63d×67）：review_verdict.json verdict=PASS、blocking_defects=[]（Codex gpt-5.6-sol/xhigh）。結論 NULL：score-driven 與 GARCH 統計打平（pinball/FZ0 各 sig-better 0/3、worse 0/3、tied 3/3，Harvey |t|>3.0），四族共享左尾覆蓋不足；設計未隔離 distribution/lag/recursion 因素，留 follow-up。收件動作：主線程依 K1259 程式化寫 knowledge（item_id 5e41886b, verdict=NULL, experiment_id=K1715）。merge 被兩道 gate 擋：artifact gate 缺 reproduce_spec + cert gate。比照 k1719 慣例（全 repo reproduce_spec 皆 network=deny+snapshot）補齊：新增 K1715_source_snapshot.csv 凍結 SPY auto-adjusted close 窗口（n_ret=6678、末筆 2026-07-24，與 results 完全吻合）、load_returns() 改讀 snapshot（download 回退）、寫 reproduce_spec.json（deny/seed42/tol 1e-6-1e-8 附 MLE-bootstrap 平台敏感度理由），worktree branch commit。此 load_returns 編輯使 K1715.py 偏離 Codex 已審 bytes（98941ea0->11953fcd），cert gate 正確擋下（禁手改 verdict）。依 cert remedy enqueue 有界 Codex re-cert agent job（agent-brief_k1715_recert-5cabc2，high effort，cwd=worktree，result=review_verdict.json）；followup=merge+complete。K1715 保持 in_progress 連結該 async job（同 heavy-compute 慣例，完成單位是 task 非 fire）；原 adjudicate followup mark-followup-dispatched。"
   }
 ]

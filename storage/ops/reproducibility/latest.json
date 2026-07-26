@@ -1,7 +1,7 @@
 {
   "schema_version": "volpred.reproduce_inventory.v1",
-  "generated_at": "2026-07-26T19:56:19.371711+00:00",
-  "repo_head": "c712ae1adb51c0920d41e6f0434c349178da7c2a",
+  "generated_at": "2026-07-26T23:10:06.132795+00:00",
+  "repo_head": "14a7790ac7ba97df33b6b84152d00027bd94d602",
   "scope": {
     "paper_sources": "paper/*/experiments.md plus canonical submission compile closures; README fallback only when both are absent",
     "recent_feed_articles": "latest 60 records with status=published",
@@ -755,7 +755,7 @@
     "broken_reports": 0,
     "stale_reports": 3,
     "knowledge_base_readable": true,
-    "results_without_knowledge": 2
+    "results_without_knowledge": 0
   },
   "report_status_counts": {
     "pass_tolerated": 3
@@ -7207,38 +7207,7 @@
       "blocker": "no archived *_results.json"
     }
   ],
-  "results_without_knowledge": [
-    {
-      "experiment": "K1658",
-      "path": "experiments/K1658",
-      "priority_sources": [],
-      "code_count": 2,
-      "results_count": 1,
-      "reproduce_report": false,
-      "report_status": null,
-      "report_stale": null,
-      "spec_file": "reproduce_spec.json",
-      "entrypoint": "K1658.py",
-      "result_file": "K1658_results.json",
-      "classification": "runnable",
-      "blocker": null
-    },
-    {
-      "experiment": "K1714",
-      "path": "experiments/K1714",
-      "priority_sources": [],
-      "code_count": 2,
-      "results_count": 1,
-      "reproduce_report": false,
-      "report_status": null,
-      "report_stale": null,
-      "spec_file": null,
-      "entrypoint": "K1714.py",
-      "result_file": "K1714_results.json",
-      "classification": "unverified_missing_spec",
-      "blocker": "missing reproduce_spec.json"
-    }
-  ],
+  "results_without_knowledge": [],
   "broken_reports": [],
   "sample_candidates": [
     {
