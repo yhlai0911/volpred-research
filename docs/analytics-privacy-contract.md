@@ -15,6 +15,12 @@ The canonical `ANALYTICS_EVENT_DICTIONARY` declares each event's:
 - anonymous-or-authenticated identity contract; and
 - caller-supplied idempotency key dedupe contract.
 
+Every admitted property also has a value contract. Identifiers are bounded
+opaque strings that exclude email-like syntax; all other values are closed
+enums. Nested objects, undeclared enum values, and attempts to hide financial
+profile data inside an allowed property are rejected by both the tracer and
+the PostgreSQL trigger.
+
 The five admitted events are `content_impression`, `content_click`,
 `read_depth`, `qualified_action`, and `return_visit`. The tracer rejects
 unknown events, missing required fields, and every undeclared property before
@@ -40,10 +46,17 @@ references:
   and identity link;
 - `delete` removes raw events, identity links, merge receipts, and preferences.
 
-Delete retains only a SHA-256 subject digest tombstone plus a subject-free
-idempotency receipt. The tombstone prevents delayed upstream event or merge
-replays from recreating deleted data; neither artifact exposes the original
-identity.
+Delete retains only HMAC-SHA-256 subject tombstones and one minimal,
+HMAC-bound deletion receipt. The required secret is supplied to the store,
+must contain at least 32 bytes, and must remain stable for the lifetime of
+existing tombstones. These artifacts prevent delayed upstream event or merge
+replays from recreating deleted data without storing the original identity.
+Earlier privacy-action receipts for the linked aliases are removed.
+
+Event idempotency is bound to a canonical payload digest. Retention purge
+replaces an expired raw row with keyed event/payload digests, so a delayed
+matching replay remains expired and a conflicting payload using the same key
+fails closed.
 
 `inspect_privacy()` returns only opt-out state and counts for raw events,
 projected events, and identity links. It never returns event properties or an
@@ -57,8 +70,11 @@ identity list.
 
 PostgreSQL state lives in the private `volpred_analytics` schema. `PUBLIC`,
 `anon`, and `authenticated` receive no schema, table, or sequence privileges.
-All tables also have row-level security enabled without Data API policies.
-Only a trusted backend connection is intended to instantiate the adapter.
+All tables use forced row-level security. A dedicated non-login,
+non-superuser, non-bypass `volpred_analytics_worker` role has only the grants
+and RLS policy needed by the backend adapter. A database trigger independently
+rejects undeclared/nested property values, retention drift, and timestamps
+more than five minutes in the future.
 
 Admin reads go through `admin_summary()`, which returns only event kind and
 group count for a time interval. There is no Admin method for raw events,
@@ -70,8 +86,9 @@ identities, or financial-profile segmentation.
   dedupe, merge, retention, aggregate-only reads, opt-out, clear, delete, and
   deletion-replay suppression.
 - `tests/test_postgres_analytics_privacy.py` applies the migration to an
-  ephemeral PostgreSQL 17 instance and reruns durable lifecycle, RLS,
-  privilege, retention, and replay checks.
+  ephemeral PostgreSQL 17 instance twice and reruns durable lifecycle,
+  forced-RLS/worker privileges, DB-side value validation, retention, payload
+  binding, identity conflict, and replay checks.
 
 The migration is a deployable artifact, not proof of production application.
 Production rollout must use the normal Supabase migration workflow and verify

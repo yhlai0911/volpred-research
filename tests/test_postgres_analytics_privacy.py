@@ -8,6 +8,7 @@ import subprocess
 
 import psycopg
 import pytest
+from psycopg.types.json import Jsonb
 
 from volpred.analytics import AnalyticsEvent, AnalyticsPrivacyTracer
 from volpred.analytics.postgres import PostgresAnalyticsStore
@@ -19,6 +20,7 @@ MIGRATION = next(
         "*_analytics_privacy_tracer.sql"
     )
 )
+TEST_TOMBSTONE_SECRET = b"analytics-postgres-test-secret-32b"
 
 
 def _postgres_bin_dir() -> Path | None:
@@ -84,6 +86,7 @@ def analytics_postgres_dsn(
     try:
         with psycopg.connect(dsn, autocommit=True) as connection:
             connection.execute(MIGRATION.read_text(encoding="utf-8"))
+            connection.execute(MIGRATION.read_text(encoding="utf-8"))
         yield dsn
     finally:
         subprocess.run(
@@ -122,13 +125,19 @@ def reset_analytics_state(analytics_postgres_dsn: str) -> None:
         )
 
 
+def _worker_connection(dsn: str) -> psycopg.Connection:
+    connection = psycopg.connect(dsn)
+    connection.execute("SET ROLE volpred_analytics_worker")
+    return connection
+
+
 def test_migration_keeps_analytics_private_and_enables_rls(
     analytics_postgres_dsn: str,
 ) -> None:
     with psycopg.connect(analytics_postgres_dsn) as connection:
         rows = connection.execute(
             """
-            SELECT c.relname, c.relrowsecurity,
+            SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity,
                    has_table_privilege('public', c.oid, 'SELECT')
             FROM pg_class AS c
             JOIN pg_namespace AS n ON n.oid = c.relnamespace
@@ -144,11 +153,30 @@ def test_migration_keeps_analytics_private_and_enables_rls(
             )
             """
         ).fetchone()[0]
+        worker = connection.execute(
+            """
+            SELECT rolcanlogin, rolbypassrls, rolsuper
+            FROM pg_roles
+            WHERE rolname = 'volpred_analytics_worker'
+            """
+        ).fetchone()
+        worker_can_read_events = connection.execute(
+            """
+            SELECT has_table_privilege(
+              'volpred_analytics_worker',
+              'volpred_analytics.events',
+              'SELECT'
+            )
+            """
+        ).fetchone()[0]
 
     assert rows
     assert all(row[1] is True for row in rows)
-    assert all(row[2] is False for row in rows)
+    assert all(row[2] is True for row in rows)
+    assert all(row[3] is False for row in rows)
     assert public_has_schema_usage is False
+    assert worker == (False, False, False)
+    assert worker_can_read_events is True
 
 
 def test_postgres_adapter_replays_merge_and_privacy_lifecycle(
@@ -156,7 +184,8 @@ def test_postgres_adapter_replays_merge_and_privacy_lifecycle(
 ) -> None:
     tracer = AnalyticsPrivacyTracer(
         PostgresAnalyticsStore(
-            lambda: psycopg.connect(analytics_postgres_dsn)
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
         )
     )
     event = AnalyticsEvent(
@@ -251,7 +280,8 @@ def test_postgres_adapter_enforces_raw_retention(
 ) -> None:
     tracer = AnalyticsPrivacyTracer(
         PostgresAnalyticsStore(
-            lambda: psycopg.connect(analytics_postgres_dsn)
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
         )
     )
     tracer.record(
@@ -294,7 +324,8 @@ def test_postgres_privacy_action_key_is_bound_to_action_and_subject(
 ) -> None:
     tracer = AnalyticsPrivacyTracer(
         PostgresAnalyticsStore(
-            lambda: psycopg.connect(analytics_postgres_dsn)
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
         )
     )
     tracer.set_opt_out(
@@ -315,3 +346,112 @@ def test_postgres_privacy_action_key_is_bound_to_action_and_subject(
             idempotency_key="privacy-action:shared-pg",
             acted_at="2026-07-26T16:01:00+00:00",
         )
+
+
+def test_postgres_event_key_and_identity_are_fail_closed(
+    analytics_postgres_dsn: str,
+) -> None:
+    tracer = AnalyticsPrivacyTracer(
+        PostgresAnalyticsStore(
+            lambda: _worker_connection(analytics_postgres_dsn),
+            tombstone_secret=TEST_TOMBSTONE_SECRET,
+        )
+    )
+    original = AnalyticsEvent(
+        idempotency_key="impression:bound-pg",
+        kind="content_impression",
+        occurred_at="2026-07-26T15:40:00+00:00",
+        anonymous_id="anon-bound-pg",
+        user_id=None,
+        properties={"content_id": "article-pg", "surface": "home"},
+    )
+    tracer.record(original)
+
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key=original.idempotency_key,
+                kind=original.kind,
+                occurred_at=original.occurred_at,
+                anonymous_id=original.anonymous_id,
+                user_id=None,
+                properties={
+                    "content_id": "different-pg",
+                    "surface": "home",
+                },
+            )
+        )
+    tracer.merge_identity(
+        idempotency_key="merge:bound-pg",
+        anonymous_id="anon-bound-pg",
+        user_id="user-a-pg",
+        merged_at="2026-07-26T15:45:00+00:00",
+    )
+    with pytest.raises(ValueError, match="conflicting analytics identities"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key="impression:conflict-pg",
+                kind="content_impression",
+                occurred_at="2026-07-26T15:46:00+00:00",
+                anonymous_id="anon-bound-pg",
+                user_id="user-b-pg",
+                properties={"content_id": "article-pg", "surface": "home"},
+            )
+        )
+
+
+def test_database_trigger_rejects_future_or_nested_raw_event(
+    analytics_postgres_dsn: str,
+) -> None:
+    insert_sql = """
+        INSERT INTO volpred_analytics.events (
+          idempotency_key,
+          kind,
+          occurred_at,
+          anonymous_id,
+          submitted_user_id,
+          user_id,
+          properties,
+          payload_digest,
+          raw_expires_at
+        ) VALUES (%s, %s, %s, %s, NULL, NULL, %s, %s, %s)
+    """
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="too far in the future",
+        ):
+            connection.execute(
+                insert_sql,
+                (
+                    "direct:future",
+                    "content_impression",
+                    "2027-07-26T15:40:00+00:00",
+                    "anon-direct",
+                    Jsonb({"content_id": "article-pg", "surface": "home"}),
+                    b"x" * 32,
+                    "2027-08-25T15:40:00+00:00",
+                ),
+            )
+    with _worker_connection(analytics_postgres_dsn) as connection:
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="properties must be strings",
+        ):
+            connection.execute(
+                insert_sql,
+                (
+                    "direct:nested",
+                    "content_impression",
+                    "2026-07-26T15:40:00+00:00",
+                    "anon-direct",
+                    Jsonb(
+                        {
+                            "content_id": {"portfolio_position": "long"},
+                            "surface": "home",
+                        }
+                    ),
+                    b"x" * 32,
+                    "2026-08-25T15:40:00+00:00",
+                ),
+            )

@@ -11,6 +11,7 @@ from .privacy import (
     AnalyticsPrivacyTracer,
     InMemoryAnalyticsStore,
 )
+from .postgres import PostgresAnalyticsStore
 
 __all__ = [
     "ANALYTICS_EVENT_DICTIONARY",
@@ -22,4 +23,5 @@ __all__ = [
     "AnalyticsPrivacyReadback",
     "AnalyticsPrivacyTracer",
     "InMemoryAnalyticsStore",
+    "PostgresAnalyticsStore",
 ]

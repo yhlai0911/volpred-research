@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from datetime import datetime
 import hashlib
+import hmac
 from typing import Any
 
 import psycopg
@@ -25,8 +26,18 @@ ConnectionFactory = Callable[[], psycopg.Connection[Any]]
 class PostgresAnalyticsStore:
     """Durable private-schema store with transactional identity operations."""
 
-    def __init__(self, connection_factory: ConnectionFactory) -> None:
+    def __init__(
+        self,
+        connection_factory: ConnectionFactory,
+        *,
+        tombstone_secret: bytes,
+    ) -> None:
+        if len(tombstone_secret) < 32:
+            raise ValueError(
+                "analytics tombstone_secret must contain at least 32 bytes"
+            )
         self._connection_factory = connection_factory
+        self._tombstone_secret = tombstone_secret
 
     def _lock_subjects(
         self,
@@ -47,8 +58,23 @@ class PostgresAnalyticsStore:
             )
 
     def _subject_digest(self, subject_kind: str, subject_id: str) -> bytes:
-        return hashlib.sha256(
-            f"{subject_kind}:{subject_id}".encode("utf-8")
+        return self._keyed_digest(
+            f"subject:{subject_kind}:{subject_id}".encode("utf-8")
+        )
+
+    def _event_key_digest(self, idempotency_key: str) -> bytes:
+        return self._keyed_digest(
+            f"event-key:{idempotency_key}".encode("utf-8")
+        )
+
+    def _event_payload_digest(self, event: AnalyticsEvent) -> bytes:
+        return self._keyed_digest(
+            b"event-payload:" + event.canonical_payload_bytes()
+        )
+
+    def _keyed_digest(self, value: bytes) -> bytes:
+        return hmac.new(
+            self._tombstone_secret, value, hashlib.sha256
         ).digest()
 
     def _aliases(
@@ -143,6 +169,7 @@ class PostgresAnalyticsStore:
         raw_expires_at: str,
     ) -> AnalyticsEventReceipt:
         with self._connection_factory() as connection:
+            payload_digest = self._event_payload_digest(event)
             refs = {
                 ref
                 for ref in (
@@ -156,19 +183,48 @@ class PostgresAnalyticsStore:
             self._lock_subjects(connection, refs)
             existing = connection.execute(
                 """
-                SELECT id, idempotency_key, raw_expires_at
+                SELECT id, idempotency_key, raw_expires_at, payload_digest
                 FROM volpred_analytics.events
                 WHERE idempotency_key = %s
                 """,
                 (event.idempotency_key,),
             ).fetchone()
             if existing is not None:
+                if not hmac.compare_digest(
+                    bytes(existing[3]), payload_digest
+                ):
+                    raise ValueError(
+                        "analytics event idempotency_key was reused"
+                    )
                 return AnalyticsEventReceipt(
                     event_id=f"analytics-event-{existing[0]}",
                     idempotency_key=existing[1],
                     accepted=True,
                     duplicate=True,
                     raw_expires_at=existing[2].isoformat(),
+                )
+            expired_replay = connection.execute(
+                """
+                SELECT event_payload_digest
+                  FROM volpred_analytics.event_dedupe_tombstones
+                  WHERE idempotency_digest = %s
+                """,
+                (self._event_key_digest(event.idempotency_key),),
+            ).fetchone()
+            if expired_replay is not None:
+                if not hmac.compare_digest(
+                    bytes(expired_replay[0]), payload_digest
+                ):
+                    raise ValueError(
+                        "analytics event idempotency_key was reused"
+                    )
+                return AnalyticsEventReceipt(
+                    event_id=None,
+                    idempotency_key=event.idempotency_key,
+                    accepted=False,
+                    duplicate=False,
+                    raw_expires_at=None,
+                    reason="expired",
                 )
             anonymous_ids = (
                 {event.anonymous_id} if event.anonymous_id else set()
@@ -184,6 +240,11 @@ class PostgresAnalyticsStore:
                     (event.anonymous_id,),
                 ).fetchone()
                 if linked is not None:
+                    if (
+                        event.user_id is not None
+                        and linked[0] != event.user_id
+                    ):
+                        raise ValueError("conflicting analytics identities")
                     user_ids.add(linked[0])
             identities = {
                 *(("anonymous", value) for value in anonymous_ids),
@@ -217,10 +278,12 @@ class PostgresAnalyticsStore:
                   kind,
                   occurred_at,
                   anonymous_id,
+                  submitted_user_id,
                   user_id,
                   properties,
+                  payload_digest,
                   raw_expires_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id, raw_expires_at
                 """,
                 (
@@ -228,8 +291,10 @@ class PostgresAnalyticsStore:
                     event.kind,
                     event.occurred_at,
                     event.anonymous_id,
+                    event.user_id,
                     canonical_user_id,
                     Jsonb(dict(event.properties)),
+                    payload_digest,
                     raw_expires_at,
                 ),
             ).fetchone()
@@ -257,7 +322,7 @@ class PostgresAnalyticsStore:
             existing_replay = connection.execute(
                 """
                 SELECT anonymous_id, user_id, merged_at, merged_events
-                FROM volpred_analytics.identity_links
+                FROM volpred_analytics.identity_merge_receipts
                 WHERE idempotency_key = %s
                 """,
                 (idempotency_key,),
@@ -311,19 +376,33 @@ class PostgresAnalyticsStore:
                     INSERT INTO volpred_analytics.identity_links (
                       anonymous_id,
                       user_id,
-                      idempotency_key,
-                      merged_at,
-                      merged_events
-                    ) VALUES (%s, %s, %s, %s, %s)
+                      merged_at
+                    ) VALUES (%s, %s, %s)
                     """,
                     (
                         anonymous_id,
                         user_id,
-                        idempotency_key,
                         merged_at,
-                        updated.rowcount,
                     ),
                 )
+            connection.execute(
+                """
+                INSERT INTO volpred_analytics.identity_merge_receipts (
+                  idempotency_key,
+                  anonymous_id,
+                  user_id,
+                  merged_at,
+                  merged_events
+                ) VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    idempotency_key,
+                    anonymous_id,
+                    user_id,
+                    merged_at,
+                    updated.rowcount,
+                ),
+            )
             return AnalyticsIdentityMergeReceipt(
                 idempotency_key=idempotency_key,
                 anonymous_id=anonymous_id,
@@ -386,10 +465,13 @@ class PostgresAnalyticsStore:
         self,
         connection: psycopg.Connection[Any],
         idempotency_key: str,
+        *,
+        action: str,
+        subject_digest: bytes,
     ) -> AnalyticsPrivacyActionReceipt | None:
         row = connection.execute(
             """
-            SELECT action, acted_at, removed_raw_events,
+            SELECT action, subject_digest, acted_at, removed_raw_events,
                    removed_identity_links
             FROM volpred_analytics.privacy_action_receipts
             WHERE idempotency_key = %s
@@ -398,12 +480,14 @@ class PostgresAnalyticsStore:
         ).fetchone()
         if row is None:
             return None
+        if row[0] != action or bytes(row[1]) != subject_digest:
+            raise ValueError("privacy action idempotency_key was reused")
         return AnalyticsPrivacyActionReceipt(
             action=row[0],
             idempotency_key=idempotency_key,
-            acted_at=row[1].isoformat(),
-            removed_raw_events=row[2],
-            removed_identity_links=row[3],
+            acted_at=row[2].isoformat(),
+            removed_raw_events=row[3],
+            removed_identity_links=row[4],
             duplicate=True,
         )
 
@@ -412,6 +496,7 @@ class PostgresAnalyticsStore:
         connection: psycopg.Connection[Any],
         *,
         action: str,
+        subject_digest: bytes,
         idempotency_key: str,
         acted_at: str,
         removed_raw_events: int = 0,
@@ -422,14 +507,16 @@ class PostgresAnalyticsStore:
             INSERT INTO volpred_analytics.privacy_action_receipts (
               idempotency_key,
               action,
+              subject_digest,
               acted_at,
               removed_raw_events,
               removed_identity_links
-            ) VALUES (%s, %s, %s, %s, %s)
+            ) VALUES (%s, %s, %s, %s, %s, %s)
             """,
             (
                 idempotency_key,
                 action,
+                subject_digest,
                 acted_at,
                 removed_raw_events,
                 removed_identity_links,
@@ -457,7 +544,12 @@ class PostgresAnalyticsStore:
                 connection, {f"{subject_kind}:{subject_id}"}
             )
             replay = self._privacy_action_replay(
-                connection, idempotency_key
+                connection,
+                idempotency_key,
+                action="opt_out",
+                subject_digest=self._subject_digest(
+                    subject_kind, subject_id
+                ),
             )
             if replay is not None:
                 return replay
@@ -481,6 +573,9 @@ class PostgresAnalyticsStore:
             return self._save_privacy_action(
                 connection,
                 action="opt_out",
+                subject_digest=self._subject_digest(
+                    subject_kind, subject_id
+                ),
                 idempotency_key=idempotency_key,
                 acted_at=acted_at,
             )
@@ -498,7 +593,12 @@ class PostgresAnalyticsStore:
                 connection, {f"{subject_kind}:{subject_id}"}
             )
             replay = self._privacy_action_replay(
-                connection, idempotency_key
+                connection,
+                idempotency_key,
+                action="clear",
+                subject_digest=self._subject_digest(
+                    subject_kind, subject_id
+                ),
             )
             if replay is not None:
                 return replay
@@ -516,6 +616,9 @@ class PostgresAnalyticsStore:
             return self._save_privacy_action(
                 connection,
                 action="clear",
+                subject_digest=self._subject_digest(
+                    subject_kind, subject_id
+                ),
                 idempotency_key=idempotency_key,
                 acted_at=acted_at,
                 removed_raw_events=removed,
@@ -534,7 +637,12 @@ class PostgresAnalyticsStore:
                 connection, {f"{subject_kind}:{subject_id}"}
             )
             replay = self._privacy_action_replay(
-                connection, idempotency_key
+                connection,
+                idempotency_key,
+                action="delete",
+                subject_digest=self._subject_digest(
+                    subject_kind, subject_id
+                ),
             )
             if replay is not None:
                 return replay
@@ -589,9 +697,37 @@ class PostgresAnalyticsStore:
                 """,
                 (list(anonymous_ids), list(user_ids)),
             ).rowcount
+            connection.execute(
+                """
+                DELETE FROM volpred_analytics.identity_merge_receipts
+                WHERE anonymous_id = ANY(%s)
+                   OR user_id = ANY(%s)
+                """,
+                (list(anonymous_ids), list(user_ids)),
+            )
+            action_digests = [
+                *(
+                    self._subject_digest("anonymous", value)
+                    for value in anonymous_ids
+                ),
+                *(
+                    self._subject_digest("user", value)
+                    for value in user_ids
+                ),
+            ]
+            connection.execute(
+                """
+                DELETE FROM volpred_analytics.privacy_action_receipts
+                WHERE subject_digest = ANY(%s)
+                """,
+                (action_digests,),
+            )
             return self._save_privacy_action(
                 connection,
                 action="delete",
+                subject_digest=self._subject_digest(
+                    subject_kind, subject_id
+                ),
                 idempotency_key=idempotency_key,
                 acted_at=acted_at,
                 removed_raw_events=removed_events,
@@ -638,11 +774,43 @@ class PostgresAnalyticsStore:
 
     def purge_expired(self, *, before: str) -> int:
         with self._connection_factory() as connection:
-            removed = connection.execute(
+            self._lock_subjects(connection, set())
+            expired_rows = connection.execute(
                 """
-                DELETE FROM volpred_analytics.events
+                SELECT id, idempotency_key, payload_digest
+                FROM volpred_analytics.events
                 WHERE raw_expires_at <= %s
+                FOR UPDATE
                 """,
                 (before,),
-            ).rowcount
-        return removed
+            ).fetchall()
+            with connection.cursor() as cursor:
+                cursor.executemany(
+                    """
+                    INSERT INTO volpred_analytics.event_dedupe_tombstones (
+                      idempotency_digest,
+                      event_payload_digest,
+                      expired_at
+                    ) VALUES (%s, %s, %s)
+                    ON CONFLICT (idempotency_digest)
+                    DO UPDATE SET
+                      event_payload_digest = EXCLUDED.event_payload_digest,
+                      expired_at = EXCLUDED.expired_at
+                    """,
+                    [
+                        (
+                            self._event_key_digest(row[1]),
+                            bytes(row[2]),
+                            before,
+                        )
+                        for row in expired_rows
+                    ],
+                )
+            connection.execute(
+                """
+                DELETE FROM volpred_analytics.events
+                WHERE id = ANY(%s)
+                """,
+                ([row[0] for row in expired_rows],),
+            )
+        return len(expired_rows)

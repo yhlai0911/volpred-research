@@ -8,9 +8,13 @@ idempotency identity.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import hashlib
+import hmac
+import json
+import re
 from threading import RLock
+from collections.abc import Callable
 from typing import Any, Mapping, Protocol
 
 
@@ -22,6 +26,7 @@ class AnalyticsEventDefinition:
     raw_retention_days: int
     identity_contract: str
     dedupe_contract: str
+    field_contracts: Mapping[str, str]
 
 
 ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
@@ -32,6 +37,11 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
+        field_contracts={
+            "content_id": "opaque_identifier",
+            "surface": "enum:home|article|search|feed|email",
+            "referrer_class": "enum:direct|internal|search|social|email|other",
+        },
     ),
     "content_click": AnalyticsEventDefinition(
         purpose="measure first-party content engagement",
@@ -40,6 +50,11 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
+        field_contracts={
+            "content_id": "opaque_identifier",
+            "surface": "enum:home|article|search|feed|email",
+            "target_class": "enum:article|navigation|cta|external",
+        },
     ),
     "read_depth": AnalyticsEventDefinition(
         purpose="measure aggregate content reading depth",
@@ -48,6 +63,11 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
+        field_contracts={
+            "content_id": "opaque_identifier",
+            "depth_bucket": "enum:25|50|75|100",
+            "surface": "enum:home|article|search|feed|email",
+        },
     ),
     "qualified_action": AnalyticsEventDefinition(
         purpose="measure aggregate completion of a declared product action",
@@ -56,6 +76,11 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
+        field_contracts={
+            "content_id": "opaque_identifier",
+            "action": "enum:subscribe|share|save|open_paper|open_experiment",
+            "surface": "enum:home|article|search|feed|email",
+        },
     ),
     "return_visit": AnalyticsEventDefinition(
         purpose="measure aggregate first-party audience retention",
@@ -64,6 +89,10 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
+        field_contracts={
+            "surface": "enum:home|article|search|feed|email",
+            "return_window": "enum:day_1|day_7|day_30",
+        },
     ),
 }
 
@@ -76,6 +105,22 @@ class AnalyticsEvent:
     anonymous_id: str | None
     user_id: str | None
     properties: Mapping[str, Any]
+
+    def canonical_payload_bytes(self) -> bytes:
+        occurred_at = datetime.fromisoformat(self.occurred_at)
+        canonical = {
+            "anonymous_id": self.anonymous_id,
+            "kind": self.kind,
+            "occurred_at": occurred_at.astimezone(timezone.utc).isoformat(),
+            "properties": dict(self.properties),
+            "submitted_user_id": self.user_id,
+        }
+        return json.dumps(
+            canonical,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
 
 
 @dataclass(frozen=True)
@@ -181,6 +226,8 @@ class AnalyticsStore(Protocol):
 class _StoredAnalyticsEvent:
     event_id: str
     event: AnalyticsEvent
+    submitted_user_id: str | None
+    payload_digest: bytes
     raw_expires_at: str
 
 
@@ -193,8 +240,13 @@ class _StoredPrivacyAction:
 class InMemoryAnalyticsStore:
     """Transaction-safe adapter used by the public contract suite."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, tombstone_secret: bytes) -> None:
+        if len(tombstone_secret) < 32:
+            raise ValueError(
+                "analytics tombstone_secret must contain at least 32 bytes"
+            )
         self._lock = RLock()
+        self._tombstone_secret = tombstone_secret
         self._events: dict[str, _StoredAnalyticsEvent] = {}
         self._merge_receipts: dict[str, AnalyticsIdentityMergeReceipt] = {}
         self._user_by_anonymous_id: dict[str, str] = {}
@@ -203,7 +255,7 @@ class InMemoryAnalyticsStore:
             str, _StoredPrivacyAction
         ] = {}
         self._deleted_subject_digests: set[bytes] = set()
-        self._expired_event_key_digests: set[bytes] = set()
+        self._expired_event_key_digests: dict[bytes, bytes] = {}
         self._next_event_number = 1
 
     def record(
@@ -213,8 +265,15 @@ class InMemoryAnalyticsStore:
         raw_expires_at: str,
     ) -> AnalyticsEventReceipt:
         with self._lock:
+            payload_digest = self._payload_digest(event)
             existing = self._events.get(event.idempotency_key)
             if existing is not None:
+                if not hmac.compare_digest(
+                    existing.payload_digest, payload_digest
+                ):
+                    raise ValueError(
+                        "analytics event idempotency_key was reused"
+                    )
                 return AnalyticsEventReceipt(
                     event_id=existing.event_id,
                     idempotency_key=existing.event.idempotency_key,
@@ -222,10 +281,16 @@ class InMemoryAnalyticsStore:
                     duplicate=True,
                     raw_expires_at=existing.raw_expires_at,
                 )
-            if (
+            expired_payload_digest = self._expired_event_key_digests.get(
                 self._event_key_digest(event.idempotency_key)
-                in self._expired_event_key_digests
-            ):
+            )
+            if expired_payload_digest is not None:
+                if not hmac.compare_digest(
+                    expired_payload_digest, payload_digest
+                ):
+                    raise ValueError(
+                        "analytics event idempotency_key was reused"
+                    )
                 return AnalyticsEventReceipt(
                     event_id=None,
                     idempotency_key=event.idempotency_key,
@@ -257,6 +322,16 @@ class InMemoryAnalyticsStore:
                 canonical_user_id = self._user_by_anonymous_id.get(
                     event.anonymous_id
                 )
+            elif event.anonymous_id and canonical_user_id is not None:
+                linked_user_id = self._user_by_anonymous_id.get(
+                    event.anonymous_id
+                )
+                if (
+                    linked_user_id is not None
+                    and linked_user_id != canonical_user_id
+                ):
+                    raise ValueError("conflicting analytics identities")
+            submitted_user_id = event.user_id
             if canonical_user_id is not None and event.user_id is None:
                 event = replace(event, user_id=canonical_user_id)
             receipt = AnalyticsEventReceipt(
@@ -270,6 +345,8 @@ class InMemoryAnalyticsStore:
             self._events[event.idempotency_key] = _StoredAnalyticsEvent(
                 event_id=receipt.event_id,
                 event=event,
+                submitted_user_id=submitted_user_id,
+                payload_digest=payload_digest,
                 raw_expires_at=raw_expires_at,
             )
             return receipt
@@ -333,12 +410,24 @@ class InMemoryAnalyticsStore:
         return False
 
     def _subject_digest(self, subject_kind: str, subject_id: str) -> bytes:
-        return hashlib.sha256(
-            f"{subject_kind}:{subject_id}".encode("utf-8")
-        ).digest()
+        return self._keyed_digest(
+            f"subject:{subject_kind}:{subject_id}".encode("utf-8")
+        )
 
     def _event_key_digest(self, idempotency_key: str) -> bytes:
-        return hashlib.sha256(idempotency_key.encode("utf-8")).digest()
+        return self._keyed_digest(
+            f"event-key:{idempotency_key}".encode("utf-8")
+        )
+
+    def _payload_digest(self, event: AnalyticsEvent) -> bytes:
+        return self._keyed_digest(
+            b"event-payload:" + event.canonical_payload_bytes()
+        )
+
+    def _keyed_digest(self, value: bytes) -> bytes:
+        return hmac.new(
+            self._tombstone_secret, value, hashlib.sha256
+        ).digest()
 
     def _event_is_deleted(self, event: AnalyticsEvent) -> bool:
         identities = (
@@ -583,6 +672,18 @@ class InMemoryAnalyticsStore:
                 self._subject_digest("user", value)
                 for value in user_ids
             )
+            deleted_action_digests = {
+                self._subject_digest("anonymous", value)
+                for value in anonymous_ids
+            } | {
+                self._subject_digest("user", value)
+                for value in user_ids
+            }
+            for key, stored_action in tuple(
+                self._privacy_action_receipts.items()
+            ):
+                if stored_action.subject_digest in deleted_action_digests:
+                    del self._privacy_action_receipts[key]
             receipt = AnalyticsPrivacyActionReceipt(
                 action="delete",
                 idempotency_key=idempotency_key,
@@ -648,11 +749,11 @@ class InMemoryAnalyticsStore:
                 if datetime.fromisoformat(stored.raw_expires_at) <= cutoff
             )
             for key in expired_keys:
-                self._expired_event_key_digests.add(
+                self._expired_event_key_digests[
                     self._event_key_digest(
                         self._events[key].event.idempotency_key
                     )
-                )
+                ] = self._events[key].payload_digest
                 del self._events[key]
             return len(expired_keys)
 
@@ -660,8 +761,41 @@ class InMemoryAnalyticsStore:
 class AnalyticsPrivacyTracer:
     """Validate and execute the first-party analytics lifecycle."""
 
-    def __init__(self, store: AnalyticsStore) -> None:
+    def __init__(
+        self,
+        store: AnalyticsStore,
+        *,
+        now: Callable[[], datetime] | None = None,
+    ) -> None:
         self._store = store
+        self._now = now or (lambda: datetime.now(timezone.utc))
+
+    def _validate_property(
+        self,
+        field_name: str,
+        value: Any,
+        contract: str,
+    ) -> None:
+        if not isinstance(value, str):
+            raise ValueError(
+                f"analytics field {field_name} must be a string"
+            )
+        if contract == "opaque_identifier":
+            if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", value):
+                raise ValueError(
+                    f"analytics field {field_name} has invalid value"
+                )
+            return
+        if contract.startswith("enum:"):
+            allowed = frozenset(contract.removeprefix("enum:").split("|"))
+            if value not in allowed:
+                raise ValueError(
+                    f"analytics field {field_name} has invalid value"
+                )
+            return
+        raise RuntimeError(
+            f"unknown analytics field contract for {field_name}: {contract}"
+        )
 
     def record(self, event: AnalyticsEvent) -> AnalyticsEventReceipt:
         definition = ANALYTICS_EVENT_DICTIONARY.get(event.kind)
@@ -679,6 +813,16 @@ class AnalyticsPrivacyTracer:
             raise ValueError(
                 "missing required analytics fields: " + ", ".join(missing)
             )
+        if frozenset(definition.field_contracts) != allowed_fields:
+            raise RuntimeError(
+                f"analytics field contracts drifted for {event.kind}"
+            )
+        for field_name, value in event.properties.items():
+            self._validate_property(
+                field_name,
+                value,
+                definition.field_contracts[field_name],
+            )
         if not event.idempotency_key.strip():
             raise ValueError("analytics idempotency_key is required")
         if not event.anonymous_id and not event.user_id:
@@ -686,6 +830,8 @@ class AnalyticsPrivacyTracer:
         occurred_at = datetime.fromisoformat(event.occurred_at)
         if occurred_at.tzinfo is None:
             raise ValueError("analytics occurred_at must be timezone-aware")
+        if occurred_at > self._now() + timedelta(minutes=5):
+            raise ValueError("analytics occurred_at is too far in the future")
         raw_expires_at = (
             occurred_at + timedelta(days=definition.raw_retention_days)
         ).isoformat()

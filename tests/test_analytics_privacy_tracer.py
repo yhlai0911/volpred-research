@@ -10,6 +10,17 @@ from volpred.analytics import (
 )
 
 
+TEST_TOMBSTONE_SECRET = b"analytics-privacy-tests-secret-32b"
+
+
+def _tracer() -> AnalyticsPrivacyTracer:
+    return AnalyticsPrivacyTracer(
+        InMemoryAnalyticsStore(
+            tombstone_secret=TEST_TOMBSTONE_SECRET
+        )
+    )
+
+
 def test_event_dictionary_declares_privacy_and_dedupe_contract() -> None:
     impression = ANALYTICS_EVENT_DICTIONARY["content_impression"]
 
@@ -33,10 +44,13 @@ def test_event_dictionary_declares_privacy_and_dedupe_contract() -> None:
         assert definition.raw_retention_days == 30
         assert definition.identity_contract == "anonymous_or_authenticated"
         assert definition.dedupe_contract == "idempotency_key"
+        assert set(definition.field_contracts) == (
+            definition.required_fields | definition.optional_fields
+        )
 
 
 def test_record_rejects_fields_outside_the_event_dictionary() -> None:
-    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer = _tracer()
 
     with pytest.raises(
         ValueError,
@@ -58,8 +72,41 @@ def test_record_rejects_fields_outside_the_event_dictionary() -> None:
         )
 
 
+def test_record_rejects_nested_or_profile_values_hidden_in_allowed_fields() -> None:
+    tracer = _tracer()
+
+    with pytest.raises(ValueError, match="must be a string"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key="action:nested-profile",
+                kind="qualified_action",
+                occurred_at="2026-07-26T15:40:00+00:00",
+                anonymous_id="anon-1",
+                user_id=None,
+                properties={
+                    "content_id": "article-1",
+                    "action": {"portfolio_position": "long"},
+                },
+            )
+        )
+    with pytest.raises(ValueError, match="invalid value"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key="action:profile-string",
+                kind="qualified_action",
+                occurred_at="2026-07-26T15:40:00+00:00",
+                anonymous_id="anon-1",
+                user_id=None,
+                properties={
+                    "content_id": "article-1",
+                    "action": "portfolio_position=long",
+                },
+            )
+        )
+
+
 def test_raw_retention_is_executable_not_only_documented() -> None:
-    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer = _tracer()
     tracer.record(
         AnalyticsEvent(
             idempotency_key="impression:retention:anon-1",
@@ -91,7 +138,7 @@ def test_raw_retention_is_executable_not_only_documented() -> None:
 
 
 def test_identity_merge_is_replay_safe_and_admin_summary_is_aggregate_only() -> None:
-    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer = _tracer()
     event = AnalyticsEvent(
         idempotency_key="impression:home:anon-1:2026-07-26",
         kind="content_impression",
@@ -150,7 +197,7 @@ def test_identity_merge_is_replay_safe_and_admin_summary_is_aggregate_only() -> 
 
 
 def test_opt_out_suppresses_linked_identity_and_all_admin_projections() -> None:
-    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer = _tracer()
     tracer.record(
         AnalyticsEvent(
             idempotency_key="impression:home:anon-1:2026-07-26",
@@ -202,7 +249,7 @@ def test_opt_out_suppresses_linked_identity_and_all_admin_projections() -> None:
 
 
 def test_clear_and_delete_are_replay_safe_and_read_back_every_projection() -> None:
-    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer = _tracer()
     event = AnalyticsEvent(
         idempotency_key="impression:home:anon-2:2026-07-26",
         kind="content_impression",
@@ -267,7 +314,7 @@ def test_clear_and_delete_are_replay_safe_and_read_back_every_projection() -> No
 
 
 def test_privacy_action_idempotency_key_is_bound_to_action_and_subject() -> None:
-    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer = _tracer()
     tracer.set_opt_out(
         "user:user-1",
         idempotency_key="privacy-action:shared",
@@ -285,4 +332,66 @@ def test_privacy_action_idempotency_key_is_bound_to_action_and_subject() -> None
             "user:user-2",
             idempotency_key="privacy-action:shared",
             acted_at="2026-07-26T16:01:00+00:00",
+        )
+
+
+def test_event_key_is_bound_to_payload_and_dual_identity_cannot_conflict() -> None:
+    tracer = _tracer()
+    original = AnalyticsEvent(
+        idempotency_key="impression:payload-bound",
+        kind="content_impression",
+        occurred_at="2026-07-26T15:40:00+00:00",
+        anonymous_id="anon-bound",
+        user_id=None,
+        properties={"content_id": "article-1", "surface": "home"},
+    )
+    tracer.record(original)
+
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key=original.idempotency_key,
+                kind=original.kind,
+                occurred_at=original.occurred_at,
+                anonymous_id=original.anonymous_id,
+                user_id=None,
+                properties={
+                    "content_id": "different-article",
+                    "surface": "home",
+                },
+            )
+        )
+
+    tracer.merge_identity(
+        idempotency_key="merge:bound",
+        anonymous_id="anon-bound",
+        user_id="user-a",
+        merged_at="2026-07-26T15:45:00+00:00",
+    )
+    with pytest.raises(ValueError, match="conflicting analytics identities"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key="impression:identity-conflict",
+                kind="content_impression",
+                occurred_at="2026-07-26T15:46:00+00:00",
+                anonymous_id="anon-bound",
+                user_id="user-b",
+                properties={"content_id": "article-1", "surface": "home"},
+            )
+        )
+
+
+def test_future_event_timestamp_cannot_extend_raw_retention() -> None:
+    tracer = _tracer()
+
+    with pytest.raises(ValueError, match="too far in the future"):
+        tracer.record(
+            AnalyticsEvent(
+                idempotency_key="impression:future",
+                kind="content_impression",
+                occurred_at="2027-07-26T15:40:00+00:00",
+                anonymous_id="anon-future",
+                user_id=None,
+                properties={"content_id": "article-1", "surface": "home"},
+            )
         )
