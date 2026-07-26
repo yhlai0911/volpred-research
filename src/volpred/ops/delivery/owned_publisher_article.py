@@ -117,6 +117,14 @@ class OwnedPublisherArticleReceipt:
         )
 
 
+@dataclass(frozen=True)
+class OwnedPublisherArticleRecoverySummary:
+    recovered_count: int
+    delivered_count: int
+    retry_scheduled_count: int
+    receipts: tuple[OwnedPublisherArticleReceipt, ...]
+
+
 class _OwnedPublisherArticleStore(Protocol):
     def read_owner(self) -> PublisherArticleSyncOwner: ...
 
@@ -138,6 +146,17 @@ class _OwnedPublisherArticleStore(Protocol):
         primary_fencing_token: str,
     ) -> OwnedPublisherArticleAttempt: ...
 
+    def recover_due(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedPublisherArticleAttempt | None: ...
+
     def settle(
         self,
         attempt: OwnedPublisherArticleAttempt,
@@ -147,6 +166,132 @@ class _OwnedPublisherArticleStore(Protocol):
 
 class _PrimaryLeaseGate(Protocol):
     def current_lease(self) -> PrimaryLease: ...
+
+
+class _OwnedPublisherExecutionContext:
+    """Share owner, token, and Primary Authority validation."""
+
+    def __init__(
+        self,
+        *,
+        store: _OwnedPublisherArticleStore,
+        primary_authority: _PrimaryLeaseGate,
+        worker_id: str,
+        lease_seconds: int,
+        token_factory: Callable[[], str] | None,
+        token_prefix: str,
+        operation_label: str,
+    ) -> None:
+        if not isinstance(worker_id, str) or not worker_id.strip():
+            raise ValueError(
+                f"owned publisher {operation_label} worker_id is required"
+            )
+        if (
+            isinstance(lease_seconds, bool)
+            or not isinstance(lease_seconds, int)
+            or lease_seconds <= 0
+        ):
+            raise ValueError(
+                f"owned publisher {operation_label} lease_seconds "
+                "must be positive"
+            )
+        self._store = store
+        self._primary_authority = primary_authority
+        self.worker_id = worker_id.strip()
+        self.lease_seconds = lease_seconds
+        self._token_factory = token_factory or (
+            lambda: f"{token_prefix}_{uuid4().hex}"
+        )
+        self._operation_label = operation_label
+
+    def begin_owner_session(
+        self,
+    ) -> tuple[PublisherArticleSyncOwner, PrimaryLease]:
+        primary_lease = self.current_lease()
+        owner = self._store.read_owner()
+        if (
+            owner.effect_family != _OWNER_FAMILY
+            or owner.owner != _OPERATIONS_CORE_OWNER
+        ):
+            raise PublisherArticleSyncOwnershipLost(
+                "operations core does not own "
+                "publisher.article.supabase.sync"
+            )
+        return owner, primary_lease
+
+    def token(self, kind: str) -> str:
+        token = self._token_factory()
+        if not isinstance(token, str) or not token.strip():
+            raise ValueError(
+                f"owned publisher {self._operation_label} {kind} "
+                "token is required"
+            )
+        return token.strip()
+
+    def current_lease(
+        self,
+        *,
+        expected: PrimaryLease | None = None,
+    ) -> PrimaryLease:
+        lease = self._primary_authority.current_lease()
+        if not isinstance(lease, PrimaryLease):
+            raise TypeError(
+                f"owned publisher {self._operation_label} keepalive "
+                "returned no typed PrimaryLease"
+            )
+        if (
+            lease.authority_key != _PRIMARY_AUTHORITY_KEY
+            or lease.holder_ref != self.worker_id
+        ):
+            raise PublisherArticleSyncOwnershipLost(
+                f"owned publisher {self._operation_label} keepalive "
+                "lease identity mismatch"
+            )
+        if expected is not None and (
+            lease.authority_key != expected.authority_key
+            or lease.holder_ref != expected.holder_ref
+            or lease.epoch != expected.epoch
+            or lease.fencing_token != expected.fencing_token
+            or lease.acquired_at != expected.acquired_at
+        ):
+            raise PublisherArticleSyncOwnershipLost(
+                f"owned publisher {self._operation_label} keepalive "
+                "lease was replaced"
+            )
+        return lease
+
+    @staticmethod
+    def validate_attempt(
+        attempt: OwnedPublisherArticleAttempt,
+        *,
+        owner_generation: int,
+        primary_lease: PrimaryLease,
+        expected_work_id: str | None = None,
+        expected_effect_id: str | None = None,
+    ) -> None:
+        if (
+            attempt.owner_generation != owner_generation
+            or attempt.effect.effect_kind != _OWNER_FAMILY
+            or (
+                expected_work_id is not None
+                and attempt.work_id != expected_work_id
+            )
+            or (
+                expected_effect_id is not None
+                and attempt.effect.id != expected_effect_id
+            )
+            or attempt.primary_authority_key
+            != primary_lease.authority_key
+            or attempt.primary_authority_holder_ref
+            != primary_lease.holder_ref
+            or attempt.primary_authority_epoch != primary_lease.epoch
+            or attempt.primary_fencing_token
+            != primary_lease.fencing_token
+        ):
+            raise PublisherArticleSyncOwnershipLost(
+                "owned publisher attempt drifted from its durable request, "
+                "owner, or Primary Authority lease"
+            )
 
 
 class OwnedPublisherArticleSync:
@@ -162,23 +307,16 @@ class OwnedPublisherArticleSync:
         lease_seconds: int = 300,
         token_factory: Callable[[], str] | None = None,
     ) -> None:
-        if not isinstance(worker_id, str) or not worker_id.strip():
-            raise ValueError("owned publisher worker_id is required")
-        if (
-            isinstance(lease_seconds, bool)
-            or not isinstance(lease_seconds, int)
-            or lease_seconds <= 0
-        ):
-            raise ValueError(
-                "owned publisher lease_seconds must be positive"
-            )
         self._store = store
         self._provider = provider
-        self._primary_authority = primary_authority
-        self._worker_id = worker_id.strip()
-        self._lease_seconds = lease_seconds
-        self._token_factory = token_factory or (
-            lambda: f"owned_publisher_{uuid4().hex}"
+        self._execution = _OwnedPublisherExecutionContext(
+            store=store,
+            primary_authority=primary_authority,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+            token_factory=token_factory,
+            token_prefix="owned_publisher",
+            operation_label="delivery",
         )
 
     def sync(
@@ -186,16 +324,7 @@ class OwnedPublisherArticleSync:
         command: OwnedPublisherArticleCommand,
     ) -> OwnedPublisherArticleReceipt:
         normalized = _normalize_command(command)
-        primary_lease = self._current_primary_lease()
-        owner = self._store.read_owner()
-        if (
-            owner.effect_family != _OWNER_FAMILY
-            or owner.owner != _OPERATIONS_CORE_OWNER
-        ):
-            raise PublisherArticleSyncOwnershipLost(
-                "operations core does not own "
-                "publisher.article.supabase.sync"
-            )
+        owner, primary_lease = self._execution.begin_owner_session()
         request_view = self._store.request(
             normalized,
             owner_generation=owner.generation,
@@ -203,27 +332,29 @@ class OwnedPublisherArticleSync:
         if request_view.terminal_receipt is not None:
             self._validate_terminal_receipt(request_view)
             return request_view.terminal_receipt
-        primary_lease = self._current_primary_lease(
+        primary_lease = self._execution.current_lease(
             expected=primary_lease,
         )
         attempt = self._store.begin(
             request_view,
-            worker_id=self._worker_id,
-            lease_seconds=self._lease_seconds,
-            work_lease_token=self._token("work"),
-            outbox_claim_token=self._token("outbox"),
+            worker_id=self._execution.worker_id,
+            lease_seconds=self._execution.lease_seconds,
+            work_lease_token=self._execution.token("work"),
+            outbox_claim_token=self._execution.token("outbox"),
             primary_fencing_token=primary_lease.fencing_token,
         )
-        self._validate_attempt(
+        self._execution.validate_attempt(
             attempt,
-            request_view=request_view,
+            owner_generation=request_view.owner_generation,
             primary_lease=primary_lease,
+            expected_work_id=request_view.work_id,
+            expected_effect_id=request_view.effect_id,
         )
-        self._current_primary_lease(expected=primary_lease)
+        self._execution.current_lease(expected=primary_lease)
         outcome = self._provider.deliver(
             attempt.effect,
             attempt.payload,
-            authorize_mutation=lambda: self._current_primary_lease(
+            authorize_mutation=lambda: self._execution.current_lease(
                 expected=primary_lease,
             ),
         )
@@ -234,41 +365,6 @@ class OwnedPublisherArticleSync:
             outcome=outcome,
         )
         return receipt
-
-    def _token(self, kind: str) -> str:
-        token = self._token_factory()
-        if not isinstance(token, str) or not token.strip():
-            raise ValueError(f"owned publisher {kind} token is required")
-        return token.strip()
-
-    def _current_primary_lease(
-        self,
-        *,
-        expected: PrimaryLease | None = None,
-    ) -> PrimaryLease:
-        lease = self._primary_authority.current_lease()
-        if not isinstance(lease, PrimaryLease):
-            raise TypeError(
-                "owned publisher keepalive returned no typed PrimaryLease"
-            )
-        if (
-            lease.authority_key != _PRIMARY_AUTHORITY_KEY
-            or lease.holder_ref != self._worker_id
-        ):
-            raise PublisherArticleSyncOwnershipLost(
-                "owned publisher keepalive lease identity mismatch"
-            )
-        if expected is not None and (
-            lease.authority_key != expected.authority_key
-            or lease.holder_ref != expected.holder_ref
-            or lease.epoch != expected.epoch
-            or lease.fencing_token != expected.fencing_token
-            or lease.acquired_at != expected.acquired_at
-        ):
-            raise PublisherArticleSyncOwnershipLost(
-                "owned publisher keepalive lease was replaced"
-            )
-        return lease
 
     @staticmethod
     def _validate_terminal_receipt(
@@ -334,34 +430,89 @@ class OwnedPublisherArticleSync:
                 "from its durable attempt"
             )
 
-    @staticmethod
-    def _validate_attempt(
-        attempt: OwnedPublisherArticleAttempt,
+class OwnedPublisherArticleRecovery:
+    """Recover due publisher projections through the current durable owner."""
+
+    def __init__(
+        self,
         *,
-        request_view: OwnedPublisherArticleRequest,
-        primary_lease: PrimaryLease,
+        store: _OwnedPublisherArticleStore,
+        provider: PublisherArticleSyncEffectAdapter,
+        primary_authority: _PrimaryLeaseGate,
+        worker_id: str = _WORKER_ID,
+        lease_seconds: int = 300,
+        token_factory: Callable[[], str] | None = None,
     ) -> None:
-        if (
-            attempt.owner_generation != request_view.owner_generation
-            or attempt.work_id != request_view.work_id
-            or attempt.effect.id != request_view.effect_id
-        ):
-            raise PublisherArticleSyncOwnershipLost(
-                "owned publisher begin drifted from its durable request"
+        self._store = store
+        self._provider = provider
+        self._execution = _OwnedPublisherExecutionContext(
+            store=store,
+            primary_authority=primary_authority,
+            worker_id=worker_id,
+            lease_seconds=lease_seconds,
+            token_factory=token_factory,
+            token_prefix="owned_publisher_recovery",
+            operation_label="recovery",
+        )
+
+    def recover(
+        self,
+        *,
+        limit: int = 10,
+    ) -> OwnedPublisherArticleRecoverySummary:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+            raise ValueError(
+                "owned publisher recovery limit must be positive"
             )
-        if (
-            attempt.primary_authority_key
-            != primary_lease.authority_key
-            or attempt.primary_authority_holder_ref
-            != primary_lease.holder_ref
-            or attempt.primary_authority_epoch != primary_lease.epoch
-            or attempt.primary_fencing_token
-            != primary_lease.fencing_token
-        ):
-            raise PublisherArticleSyncOwnershipLost(
-                "owned publisher begin used a different "
-                "Primary Authority lease"
+        owner, primary_lease = self._execution.begin_owner_session()
+
+        receipts: list[OwnedPublisherArticleReceipt] = []
+        for _ in range(limit):
+            primary_lease = self._execution.current_lease(
+                expected=primary_lease,
             )
+            attempt = self._store.recover_due(
+                owner_generation=owner.generation,
+                worker_id=self._execution.worker_id,
+                lease_seconds=self._execution.lease_seconds,
+                work_lease_token=self._execution.token("work"),
+                outbox_claim_token=self._execution.token("outbox"),
+                primary_fencing_token=primary_lease.fencing_token,
+            )
+            if attempt is None:
+                break
+            self._execution.validate_attempt(
+                attempt,
+                owner_generation=owner.generation,
+                primary_lease=primary_lease,
+            )
+            self._execution.current_lease(expected=primary_lease)
+            outcome = self._provider.deliver(
+                attempt.effect,
+                attempt.payload,
+                authorize_mutation=lambda: self._execution.current_lease(
+                    expected=primary_lease,
+                ),
+            )
+            receipt = self._store.settle(attempt, outcome)
+            OwnedPublisherArticleSync._validate_settlement_receipt(
+                receipt,
+                attempt=attempt,
+                outcome=outcome,
+            )
+            receipts.append(receipt)
+
+        return OwnedPublisherArticleRecoverySummary(
+            recovered_count=len(receipts),
+            delivered_count=sum(
+                receipt.delivered for receipt in receipts
+            ),
+            retry_scheduled_count=sum(
+                receipt.disposition == "retry_scheduled"
+                for receipt in receipts
+            ),
+            receipts=tuple(receipts),
+        )
 
 
 class SupabaseOwnedPublisherArticleStore:
@@ -506,79 +657,41 @@ class SupabaseOwnedPublisherArticleStore:
                 "p_primary_fencing_token": primary_fencing_token,
             },
         )
-        effect = _effect_from_payload(
-            _mapping(response.get("effect"), field="effect")
-        )
-        try:
-            raw_payload = base64.b64decode(
-                _required_text(
-                    response.get("payload_base64"),
-                    field="payload_base64",
-                ),
-                validate=True,
-            )
-        except ValueError as exc:
-            raise RuntimeError(
-                "owned publisher begin returned invalid payload bytes"
-            ) from exc
-        return OwnedPublisherArticleAttempt(
-            owner_generation=_positive_integer(
-                response.get("owner_generation"),
-                field="attempt owner_generation",
-            ),
-            work_id=_required_text(
-                response.get("work_id"),
-                field="work_id",
-            ),
-            work_version=_positive_integer(
-                response.get("work_version"),
-                field="work_version",
-            ),
+        return _attempt_from_payload(
+            response,
             work_lease_token=work_lease_token,
-            effect=effect,
-            payload=raw_payload,
-            outbox_sequence=_positive_integer(
-                response.get("outbox_sequence"),
-                field="outbox_sequence",
-            ),
-            attempt_count=_positive_integer(
-                response.get("attempt_count"),
-                field="attempt_count",
-            ),
             outbox_claim_token=outbox_claim_token,
-            worker_id=_required_text(
-                response.get("worker_id"),
-                field="worker_id",
-            ),
-            primary_authority_key=_required_text(
-                response.get("primary_authority_key"),
-                field="primary_authority_key",
-            ),
-            primary_authority_holder_ref=_required_text(
-                response.get("primary_authority_holder_ref"),
-                field="primary_authority_holder_ref",
-            ),
-            primary_authority_epoch=_positive_integer(
-                response.get("primary_authority_epoch"),
-                field="primary_authority_epoch",
-            ),
             primary_fencing_token=primary_fencing_token,
-            authority_request_sha256=_sha256(
-                response.get("authority_request_sha256"),
-                field="authority request hash",
-            ),
-            outbox_claim_ref=_required_text(
-                response.get("outbox_claim_ref"),
-                field="outbox_claim_ref",
-            ),
-            primary_authority_ref=_required_text(
-                response.get("primary_authority_ref"),
-                field="primary_authority_ref",
-            ),
-            lease_expires_at=_required_text(
-                response.get("lease_expires_at"),
-                field="lease_expires_at",
-            ),
+        )
+
+    def recover_due(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedPublisherArticleAttempt | None:
+        response = self._rpc(
+            "volpred_recover_due_owned_publisher_article_sync",
+            {
+                "p_owner_generation": owner_generation,
+                "p_worker_id": worker_id,
+                "p_lease_seconds": lease_seconds,
+                "p_work_lease_token": work_lease_token,
+                "p_outbox_claim_token": outbox_claim_token,
+                "p_primary_fencing_token": primary_fencing_token,
+            },
+        )
+        if response.get("recovered") is False:
+            return None
+        return _attempt_from_payload(
+            response,
+            work_lease_token=work_lease_token,
+            outbox_claim_token=outbox_claim_token,
+            primary_fencing_token=primary_fencing_token,
         )
 
     def settle(
@@ -754,6 +867,86 @@ def _effect_from_payload(payload: Mapping[str, Any]) -> EffectView:
     )
 
 
+def _attempt_from_payload(
+    payload: Mapping[str, Any],
+    *,
+    work_lease_token: str,
+    outbox_claim_token: str,
+    primary_fencing_token: str,
+) -> OwnedPublisherArticleAttempt:
+    effect = _effect_from_payload(
+        _mapping(payload.get("effect"), field="effect")
+    )
+    try:
+        raw_payload = base64.b64decode(
+            _required_text(
+                payload.get("payload_base64"),
+                field="payload_base64",
+            ),
+            validate=True,
+        )
+    except ValueError as exc:
+        raise RuntimeError(
+            "owned publisher attempt returned invalid payload bytes"
+        ) from exc
+    return OwnedPublisherArticleAttempt(
+        owner_generation=_positive_integer(
+            payload.get("owner_generation"),
+            field="attempt owner_generation",
+        ),
+        work_id=_required_text(payload.get("work_id"), field="work_id"),
+        work_version=_positive_integer(
+            payload.get("work_version"),
+            field="work_version",
+        ),
+        work_lease_token=work_lease_token,
+        effect=effect,
+        payload=raw_payload,
+        outbox_sequence=_positive_integer(
+            payload.get("outbox_sequence"),
+            field="outbox_sequence",
+        ),
+        attempt_count=_positive_integer(
+            payload.get("attempt_count"),
+            field="attempt_count",
+        ),
+        outbox_claim_token=outbox_claim_token,
+        worker_id=_required_text(
+            payload.get("worker_id"),
+            field="worker_id",
+        ),
+        primary_authority_key=_required_text(
+            payload.get("primary_authority_key"),
+            field="primary_authority_key",
+        ),
+        primary_authority_holder_ref=_required_text(
+            payload.get("primary_authority_holder_ref"),
+            field="primary_authority_holder_ref",
+        ),
+        primary_authority_epoch=_positive_integer(
+            payload.get("primary_authority_epoch"),
+            field="primary_authority_epoch",
+        ),
+        primary_fencing_token=primary_fencing_token,
+        authority_request_sha256=_sha256(
+            payload.get("authority_request_sha256"),
+            field="authority request hash",
+        ),
+        outbox_claim_ref=_required_text(
+            payload.get("outbox_claim_ref"),
+            field="outbox_claim_ref",
+        ),
+        primary_authority_ref=_required_text(
+            payload.get("primary_authority_ref"),
+            field="primary_authority_ref",
+        ),
+        lease_expires_at=_required_text(
+            payload.get("lease_expires_at"),
+            field="lease_expires_at",
+        ),
+    )
+
+
 def _owner_from_payload(
     payload: Mapping[str, Any],
 ) -> PublisherArticleSyncOwner:
@@ -891,6 +1084,8 @@ def _sha256(value: object, *, field: str) -> str:
 __all__ = [
     "OwnedPublisherArticleAttempt",
     "OwnedPublisherArticleCommand",
+    "OwnedPublisherArticleRecovery",
+    "OwnedPublisherArticleRecoverySummary",
     "OwnedPublisherArticleReceipt",
     "OwnedPublisherArticleRequest",
     "OwnedPublisherArticleSync",

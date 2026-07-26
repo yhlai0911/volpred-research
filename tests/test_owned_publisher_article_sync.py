@@ -17,6 +17,7 @@ from volpred.ops.delivery import (
 from volpred.ops.delivery.owned_publisher_article import (
     OwnedPublisherArticleAttempt,
     OwnedPublisherArticleCommand,
+    OwnedPublisherArticleRecovery,
     OwnedPublisherArticleReceipt,
     OwnedPublisherArticleRequest,
     OwnedPublisherArticleSync,
@@ -235,6 +236,72 @@ class _LeaseGate:
     def current_lease(self) -> PrimaryLease:
         self.calls += 1
         return self.lease
+
+
+class _RecoveryStore(_Store):
+    def __init__(self, owner: PublisherArticleSyncOwner) -> None:
+        super().__init__(owner)
+        self._candidates = [self.attempt]
+
+    def recover_due(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedPublisherArticleAttempt | None:
+        self.calls.append(
+            (
+                "recover_due",
+                (
+                    owner_generation,
+                    worker_id,
+                    lease_seconds,
+                    work_lease_token,
+                    outbox_claim_token,
+                    primary_fencing_token,
+                ),
+            )
+        )
+        if not self._candidates:
+            return None
+        return replace(
+            self._candidates.pop(),
+            attempt_count=2,
+            work_lease_token=work_lease_token,
+            outbox_claim_token=outbox_claim_token,
+            primary_fencing_token=primary_fencing_token,
+        )
+
+
+def test_recovery_consumes_due_retry_through_existing_provider() -> None:
+    store = _RecoveryStore(_owner())
+    projection = _Projection()
+    lease_gate = _LeaseGate()
+    tokens = iter(("work-recovery-token", "outbox-recovery-token"))
+
+    summary = OwnedPublisherArticleRecovery(
+        store=store,
+        provider=PublisherArticleSyncEffectAdapter(
+            projection=projection
+        ),
+        primary_authority=lease_gate,
+        token_factory=lambda: next(tokens),
+    ).recover(limit=1)
+
+    assert summary.recovered_count == 1
+    assert summary.delivered_count == 1
+    assert summary.retry_scheduled_count == 0
+    assert projection.upserts == 1
+    assert [name for name, _ in store.calls] == [
+        "read_owner",
+        "recover_due",
+        "settle",
+    ]
+    assert lease_gate.calls == 4
 
 
 def test_sync_hides_request_begin_provider_and_settlement() -> None:

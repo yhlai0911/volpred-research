@@ -933,3 +933,19 @@ digest，不暴露URL或credential。Primary／standby raw readiness必須相同
 在首次remote read前把本機publisher adapter的backend digest與pair重比。這使錯接
 clone／staging project即使恰好具有相同`operations_core/8` fence，也不能形成
 cross-host evidence。
+
+## Owned publisher article recovery（2026-07-26）
+
+`publisher.article.supabase.sync` 的 canonical
+`owned_publisher_article_recovery` 每小時經 `check_alerts → run_due_jobs` 單一
+piggy-back owner 執行。Service-role-only
+`volpred_recover_due_owned_publisher_article_sync` 只選 current
+`operations_core` generation、exact request family 與 exact effect kind 的 expired
+`started`／due `retry_scheduled`，以 `SKIP LOCKED` 寫 immutable private receipt後
+重新 begin；ordinary begin 無 receipt 時 fail closed。
+
+既有 `SupabaseArticleProjectionAdapter` 仍是唯一 provider。已收斂的 row 只讀不寫，
+未收斂才 upsert並 exact readback。`tags` 缺欄位表示不在 mutation scope、保留 server
+links；只有明確 `tags`（含空陣列）才比較或替換。Production `operations_core/8`
+的 3 筆 due retry 已全部 delivered，回讀 `due_retry/started/nonterminal=0`；這不授權
+處理屬於舊 generation 的 destructive publisher-delete retry。

@@ -1911,3 +1911,18 @@ temporary file fsync後atomic replace，再fsync父目錄，最後才exact read-
 Outage與Primary Authority相鄰 suites **49 passed**，`py_compile`與diff gate通過。
 此durability切片為`root_cause_fixed_and_verified`；physical paired receipt與
 operations-core umbrella仍因第二台實體Mac離線而維持`contained`。
+
+## 2026-07-26 — Owned publisher sync recovery checkpoint
+
+Publisher sync 的 3 筆 due retry 已完成獨立 actuator：production ledger
+`20260726093801 operations_core_owned_publisher_article_recovery` 提供
+exact-family／kind／generation fenced RPC、ordinary-begin predecessor gate 與
+private immutable receipt；canonical hourly piggy-back wrapper 已安裝並通過最小
+環境 no-op smoke。
+
+首輪 2/3 delivered，剩餘一筆揭露「payload 缺 tags 時 writer 保留、readback 卻要求
+空集合」的 contract 漂移；RED→GREEN 後 attempt 3 delivered。Production 最終回讀
+publisher sync `due_retry=0`、`started=0`、`nonterminal=0`、recovery receipts=4。
+此 publisher-sync slice 為 `root_cause_fixed_and_verified`；6 筆 publisher-delete
+old-generation retry 不屬現 owner authority，仍待獨立 reconcile，Issue #9 umbrella
+保持 `contained`。

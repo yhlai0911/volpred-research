@@ -207,9 +207,14 @@ class SupabaseArticleProjectionAdapter:
         if not rows:
             return None
 
+        requested_tags = (
+            _normalized_tags(article.get("tags"))
+            if "tags" in article
+            else None
+        )
         expected = _canonical_projection(
             expected_row,
-            _normalized_tags(article.get("tags")),
+            requested_tags or [],
             server_resident_keys=sync.SERVER_RESIDENT_DETAILS_KEYS,
         )
         if len(rows) != 1:
@@ -218,6 +223,18 @@ class SupabaseArticleProjectionAdapter:
             row = dict(rows[0])
             article_id = row.pop("id", None)
             tag_names = _read_tag_names(sync, article_id)
+            if requested_tags is None:
+                # Missing tags means the immutable command did not include
+                # that projection field. The writer deliberately preserves
+                # existing links in this case, so read-back must keep them
+                # outside the requested comparison scope too.
+                expected = _canonical_projection(
+                    expected_row,
+                    tag_names,
+                    server_resident_keys=(
+                        sync.SERVER_RESIDENT_DETAILS_KEYS
+                    ),
+                )
             actual = _canonical_projection(
                 row,
                 tag_names,

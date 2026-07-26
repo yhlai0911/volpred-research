@@ -2056,3 +2056,30 @@ Failure injection修前只觀察到regular-file fsync，修後精確觀察到
 Authority相鄰 suites **49 passed**，compile與diff gate通過。此persistence seam缺口
 為`root_cause_fixed_and_verified`；physical two-Mac receipt仍因第二台實體Mac離線而
 未執行，program commit 34與operations-core umbrella維持`contained`。
+
+## 30. Owned publisher article retry recovery（2026-07-26）
+
+`OwnedPublisherArticleRecovery.recover(limit)` 與正常
+`OwnedPublisherArticleSync.sync()` 共用 internal execution context；owner
+generation、worker identity、work/outbox token 與 Primary Authority lease 不再由兩個
+caller各自實作。Store 的 recovery interface 隱藏 candidate selection、receipt append
+與 canonical begin，runtime 只看 typed attempt／settlement receipt。
+
+PostgreSQL seam
+`volpred_recover_due_owned_publisher_article_sync` 同時接受 expired `started` 與 due
+`retry_scheduled`，但 authority boundary 必須同時匹配 current owner generation、
+`owned_request.effect_family` 與 `effect.effect_kind`。Selector 只鎖 attempt row並使用
+`FOR UPDATE SKIP LOCKED`；ordinary begin 若看到尚未有 recovery receipt 的非終態
+predecessor即 fail closed，recovery transaction 先追加 receipt後才可建立下一 attempt，
+因此不會重現 ordinary-first orphan race。
+
+Publisher projection 的欄位 scope也被固定：payload 有 `tags` 才擁有 tag links；
+缺欄位保留 server state並排除於比較，明確空陣列則代表刪除全部 links。這使 writer
+與 readback使用相同語義，同時保留 explicit empty-tag convergence gate。
+
+Production owner `operations_core/8` 原有 3 筆 due retry；migration
+`20260726093801` 後 2 筆立即 delivered，第 3 筆暴露 missing-tags mismatch並在
+contract修正後 delivered。最終 readback為 `due_retry=0`、`started=0`、
+`nonterminal=0`、4 recovery receipts，第二次 actuator與最小 cron環境 wrapper皆
+no-op。此 publisher-sync slice為`root_cause_fixed_and_verified`；6 筆
+publisher-delete old-generation retry不在本 seam authority內。

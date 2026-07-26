@@ -3104,3 +3104,42 @@ stored statement bytes 已各自保存到同版號 repo migration，避免事後
 Follow-up 首跑將唯一 email due retry stale dead-letter；exact-family 回讀
 `expired_started=0`、`due_retry=0`、`nonterminal=0`、recovery receipts=23，第二次
 wrapper no-op。此 actuator 缺口同樣為 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-26 — Publisher sync durable retry 沒有 actuator，缺省 tags 又造成永久 mismatch
+
+**證據化症狀**：owned-email recovery 完成後，production exact-family query 仍有
+3 筆 `publisher.article.supabase.sync` 的 `WorkItem=pending`、
+`EffectRequest=requested`、`outbox=pending` 與最新 attempt=`retry_scheduled`；
+`available_at` 均已過期約兩天，owner 仍是匹配的 `operations_core/8`。另 6 筆
+publisher delete retry 屬舊 owner generation，故不能混入本 actuator。
+
+**根因層級**：sync settlement 能寫 durable backoff，但沒有 reader／schedule 會消費
+due retry，process 在 begin 後中斷也沒有唯一 supersede seam。首輪 actuator 另以真實
+payload 抓到第二個 contract bug：payload 未帶 `tags` 時，writer 正確保留既有 tag
+links，readback 卻把缺欄位解讀成「期望空 tags」，因此寫後永遠
+`publisher_article_sync_readback_mismatch`。這是 actuator 與 projection contract
+語義不一致，不是資料錯誤。
+
+**底層修復**：production migration
+`20260726093801 operations_core_owned_publisher_article_recovery` 新增
+service-role-only recovery RPC。它以 `FOR UPDATE SKIP LOCKED` 原子選取 exact family、
+exact effect kind、current owner generation 的 expired `started` 或 due
+`retry_scheduled`，保存既有 provider evidence、追加 private FORCE-RLS immutable
+receipt，再走 canonical begin。普通 begin 遇到尚無 recovery receipt 的
+`started/retry_scheduled` predecessor 會在任何 Work/outbox mutation 前 fail closed。
+Python delivery／recovery 共用 owner、token 與 Primary Authority execution context。
+Projection readback 現在只在 payload 明確帶 `tags` 時比較 tags；缺欄位與 writer
+同義為「不在本次 mutation scope」，明確 `tags: []` 仍會清空並精確驗證。
+
+**回歸、live readback 與制度化**：PG17 migration chain、ordinary-first 零 mutation、
+due retry、ACL／RLS／search-path 與相鄰 caller／schedule suites共 96 passed；tags
+缺省 RED→GREEN 後 publisher 相鄰 29 passed。Production 首輪 3 recovery 中 2
+delivered、1 暴露上述 tags mismatch；修 contract 後該筆 attempt 3 delivered，
+再跑為零 mutation no-op。最終 DB 回讀 `sync_due_retry=0`、`sync_started=0`、
+`sync_nonterminal=0`、4 recovery receipts，ordinary begin fence 存在；6 筆 delete
+old-generation retry 未變。Canonical `owned_publisher_article_recovery` 每小時由
+`check_alerts → run_due_jobs` 單一 piggy-back owner 執行，wrapper 已原子同步至
+`~/.volpred/bin`，最小 cron environment smoke 為 no-op exit 0。此 publisher-sync
+incident 完成五步 gate，狀態為 **`root_cause_fixed_and_verified`**；publisher delete
+stale-generation reconciliation 與 Issue #9／Work Coordinator umbrella 仍為
+**`contained`**。

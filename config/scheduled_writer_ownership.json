@@ -173,6 +173,12 @@
       "tracked_outputs": [],
       "reason": "Mutates only the fenced Supabase owned-email transaction and ignored notification/log evidence; it never writes or commits Git-tracked repository state."
     },
+    "owned_publisher_article_recovery": {
+      "entrypoint": "scripts/recover_owned_publisher_articles.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Mutates only the fenced Supabase publisher-sync transaction and ignored log evidence; it never writes or commits Git-tracked repository state."
+    },
     "memory_health_daily": {
       "entrypoint": "scripts/cron_memory_health.sh",
       "policy": "no_repo_tracked_output",

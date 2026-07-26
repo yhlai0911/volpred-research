@@ -207,6 +207,21 @@
         ]
       },
       {
+        "id": "owned_publisher_article_recovery",
+        "label": "owned publisher article retry recovery",
+        "cron": "15 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_owned_publisher_article_recovery.sh",
+        "log_path": "storage/logs/cron/owned_publisher_article_recovery.log",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true,
+        "description": "每小時由 check_alerts → run_due_jobs 單一 piggy-back owner 回收 publisher sync 的 expired started 與 due retry；exact-family RPC 以 SKIP LOCKED 原子領取並由既有 Supabase read-back provider 收斂。",
+        "matchers": [
+          "recover_owned_publisher_articles.py",
+          "cron_owned_publisher_article_recovery.sh",
+          "volpred_recover_due_owned_publisher_article_sync"
+        ]
+      },
+      {
         "id": "memory_health_daily",
         "label": "Memory health 日檢",
         "cron": "30 5 * * *",

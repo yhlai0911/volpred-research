@@ -404,6 +404,38 @@ def test_supabase_projection_adapter_compares_full_row_and_tags(
     assert calls == [article]
 
 
+def test_supabase_projection_adapter_preserves_tags_outside_payload_scope(
+    monkeypatch,
+) -> None:
+    from scripts import supabase_sync
+
+    article = {
+        key: value for key, value in _article().items() if key != "tags"
+    }
+    expected = supabase_sync.projected_article_row(article, verbose=False)
+
+    def fake_select(table: str, *, select: str = "*", **filters):
+        if table == "articles":
+            return [{"id": "article-uuid", **expected}]
+        if table == "article_tags":
+            return [{"tag_id": 1}]
+        raise AssertionError(f"unexpected table: {table}")
+
+    monkeypatch.setattr(supabase_sync, "_select_rows", fake_select)
+    monkeypatch.setattr(
+        supabase_sync,
+        "_select_rows_in",
+        lambda table, column, values, *, select="*": [
+            {"id": 1, "name": "existing-server-tag"}
+        ],
+    )
+
+    readback = SupabaseArticleProjectionAdapter().readback(article)
+
+    assert readback is not None
+    assert readback.matches is True
+
+
 def test_direct_sync_converges_an_empty_tag_projection(monkeypatch) -> None:
     from scripts import supabase_sync
 

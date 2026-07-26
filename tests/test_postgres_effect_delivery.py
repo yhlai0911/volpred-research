@@ -227,6 +227,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726083856_fence_owned_email_recovery_family.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726093801_operations_core_owned_publisher_article_recovery.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -1371,6 +1375,9 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   public.volpred_begin_owned_publisher_article_sync(
                     bigint, text, text, integer, text, text, text
                   ),
+                  public.volpred_recover_due_owned_publisher_article_sync(
+                    bigint, text, integer, text, text, text
+                  ),
                   public.volpred_settle_owned_publisher_article_sync(
                     bigint, text, integer, text, text, bigint, integer,
                     text, text, text, text, bigint, text, text, text,
@@ -1501,9 +1508,10 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
             TRUNCATE TABLE
               volpred_ops.work_cutover_gate_receipts,
               volpred_ops.work_cutover_gates,
-              volpred_ops.work_owner_receipts,
-              volpred_ops.work_owners,
-              volpred_ops.owned_notification_recovery_receipts,
+                  volpred_ops.work_owner_receipts,
+                  volpred_ops.work_owners,
+                  volpred_ops.owned_publisher_article_recovery_receipts,
+                  volpred_ops.owned_notification_recovery_receipts,
               volpred_ops.owned_notification_attempts,
               volpred_ops.owned_notification_requests,
               volpred_ops.notification_owner_receipts,
@@ -5448,6 +5456,354 @@ def test_owned_publisher_transaction_cutover_delivery_and_rollback(
     )
 
 
+def test_owned_publisher_recovery_consumes_due_retry_atomically(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "publisher-article-sync.v1",
+        "article": {
+            "id": "mile_pg17_owned_publisher_recovery",
+            "title": "PG17 owned publisher recovery",
+            "content": "Durable recovery fixture.",
+            "description": "Publisher retry actuator fixture.",
+            "status": "published",
+            "audience": "research",
+            "category": "milestone",
+            "phase": "robustness",
+            "published_at": "2026-07-26T09:00:00+00:00",
+            "details": {},
+            "tags": ["recovery"],
+        },
+    }
+    worker_id = "effect-worker:publisher-article-sync"
+    authority_key = "publisher:article.supabase.sync"
+    primary_token = "primary-owned-publisher-recovery-token"
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        owner = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              'legacy', 1, 'operations_core', 'test:recovery',
+              'exercise due retry recovery', NULL
+            )
+            """
+        ).fetchone()[0]
+        request_view = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_sync(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                "publisher:pg17:due-retry-recovery",
+                Jsonb(payload),
+                "test:recovery",
+            ),
+        ).fetchone()[0]
+        connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, 300, %s
+            )
+            """,
+            (authority_key, worker_id, primary_token),
+        )
+        attempt = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_publisher_article_sync(
+              %s, %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                request_view["effect_id"],
+                worker_id,
+                "work-retry-attempt-1",
+                "outbox-retry-attempt-1",
+                primary_token,
+            ),
+        ).fetchone()[0]
+        retry_receipt = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_publisher_article_sync(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                attempt["work_id"],
+                attempt["work_version"],
+                "work-retry-attempt-1",
+                attempt["effect"]["id"],
+                attempt["outbox_sequence"],
+                attempt["attempt_count"],
+                attempt["worker_id"],
+                "outbox-retry-attempt-1",
+                attempt["primary_authority_key"],
+                attempt["primary_authority_holder_ref"],
+                attempt["primary_authority_epoch"],
+                primary_token,
+                attempt["authority_request_sha256"],
+                attempt["outbox_claim_ref"],
+                attempt["primary_authority_ref"],
+                "retryable_failure",
+                None,
+                None,
+                "publisher_projection_temporarily_unavailable",
+                "test:publisher-recovery:attempt-1",
+                "a" * 64,
+            ),
+        ).fetchone()[0]
+        assert retry_receipt["disposition"] == "retry_scheduled"
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET available_at = clock_timestamp() - interval '1 second'
+            WHERE effect_id = %s
+            """,
+            (request_view["effect_id"],),
+        )
+        connection.execute("SET ROLE service_role")
+        recovered = connection.execute(
+            """
+            SELECT public.volpred_recover_due_owned_publisher_article_sync(
+              %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                worker_id,
+                "work-retry-attempt-2",
+                "outbox-retry-attempt-2",
+                primary_token,
+            ),
+        ).fetchone()[0]
+        assert recovered["recovered"] is True
+        assert recovered["attempt_count"] == 2
+        assert recovered["effect"]["id"] == request_view["effect_id"]
+
+        connection.execute("RESET ROLE")
+        durable = connection.execute(
+            """
+            SELECT
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT evidence_ref
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 2),
+              (SELECT reason_code
+               FROM volpred_ops.owned_publisher_article_recovery_receipts
+               WHERE effect_id = %s AND candidate_attempt_count = 1)
+            """,
+            (
+                request_view["effect_id"],
+                request_view["effect_id"],
+                request_view["effect_id"],
+                request_view["effect_id"],
+            ),
+        ).fetchone()
+        assert durable == (
+            "retry_scheduled",
+            "test:publisher-recovery:attempt-1",
+            "started",
+            "retry_due_without_actuator",
+        )
+
+
+def test_owned_publisher_expired_attempt_requires_recovery_seam(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "publisher-article-sync.v1",
+        "article": {
+            "id": "mile_pg17_owned_publisher_expired",
+            "title": "Expired publisher attempt",
+            "content": "Expired-attempt fixture.",
+            "description": "Ordinary begin must fail closed.",
+            "status": "published",
+            "audience": "research",
+            "category": "milestone",
+            "phase": "robustness",
+            "published_at": "2026-07-26T09:05:00+00:00",
+            "details": {},
+            "tags": ["recovery"],
+        },
+    }
+    worker_id = "effect-worker:publisher-article-sync"
+    primary_token = "primary-owned-publisher-expired-token"
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        owner = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              'legacy', 1, 'operations_core', 'test:expired-recovery',
+              'exercise expired attempt recovery', NULL
+            )
+            """
+        ).fetchone()[0]
+        request_view = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_sync(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                "publisher:pg17:expired-recovery",
+                Jsonb(payload),
+                "test:expired-recovery",
+            ),
+        ).fetchone()[0]
+        connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              'publisher:article.supabase.sync', %s, 300, %s
+            )
+            """,
+            (worker_id, primary_token),
+        )
+        first = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_publisher_article_sync(
+              %s, %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                request_view["effect_id"],
+                worker_id,
+                "work-expired-attempt-1",
+                "outbox-expired-attempt-1",
+                primary_token,
+            ),
+        ).fetchone()[0]
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.work_items
+            SET claim_expires_at = clock_timestamp() - interval '1 second'
+            WHERE id = %s
+            """,
+            (first["work_id"],),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET claim_expires_at = clock_timestamp() - interval '1 second'
+            WHERE effect_id = %s
+            """,
+            (first["effect"]["id"],),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.owned_notification_attempts
+            SET lease_expires_at = clock_timestamp() - interval '1 second'
+            WHERE effect_id = %s AND attempt_count = 1
+            """,
+            (first["effect"]["id"],),
+        )
+        before = connection.execute(
+            """
+            SELECT
+              (SELECT version FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT attempt_count FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s)
+            """,
+            (
+                first["work_id"],
+                first["effect"]["id"],
+                first["effect"]["id"],
+            ),
+        ).fetchone()
+
+        connection.execute("SET ROLE service_role")
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="predecessor requires recovery",
+        ):
+            connection.execute(
+                """
+                SELECT public.volpred_begin_owned_publisher_article_sync(
+                  %s, %s, %s, 300, %s, %s, %s
+                )
+                """,
+                (
+                    owner["generation"],
+                    request_view["effect_id"],
+                    worker_id,
+                    "ordinary-work-token",
+                    "ordinary-outbox-token",
+                    primary_token,
+                ),
+            )
+        connection.execute("RESET ROLE")
+        after_failed_begin = connection.execute(
+            """
+            SELECT
+              (SELECT version FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT attempt_count FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s)
+            """,
+            (
+                first["work_id"],
+                first["effect"]["id"],
+                first["effect"]["id"],
+            ),
+        ).fetchone()
+        assert after_failed_begin == before
+
+        connection.execute("SET ROLE service_role")
+        recovered = connection.execute(
+            """
+            SELECT public.volpred_recover_due_owned_publisher_article_sync(
+              %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                worker_id,
+                "work-expired-attempt-2",
+                "outbox-expired-attempt-2",
+                primary_token,
+            ),
+        ).fetchone()[0]
+        assert recovered["attempt_count"] == 2
+
+        connection.execute("RESET ROLE")
+        assert connection.execute(
+            """
+            SELECT candidate_status, reason_code
+            FROM volpred_ops.owned_publisher_article_recovery_receipts
+            WHERE effect_id = %s
+            """,
+            (first["effect"]["id"],),
+        ).fetchone() == (
+            "started",
+            "worker_interrupted_after_begin",
+        )
+
+
 def test_owned_publisher_reconcile_cutover_delivery_and_rollback(
     postgres_effect_dsn: str,
 ) -> None:
@@ -5824,6 +6180,7 @@ def test_owned_publisher_rpc_security_and_definition_shape(
         "volpred_transfer_publisher_article_sync_owner",
         "volpred_request_owned_publisher_article_sync",
         "volpred_begin_owned_publisher_article_sync",
+        "volpred_recover_due_owned_publisher_article_sync",
         "volpred_settle_owned_publisher_article_sync",
     )
     with psycopg.connect(postgres_effect_dsn) as connection:
@@ -5886,7 +6243,7 @@ def test_owned_publisher_rpc_security_and_definition_shape(
             """
         ).fetchone()[0]
 
-    assert len(rows) == 5
+    assert len(rows) == 6
     assert all(
         row[1:8] == (True, True, True, True, False, False, False)
         for row in rows
@@ -5896,6 +6253,18 @@ def test_owned_publisher_rpc_security_and_definition_shape(
         "FROM volpred_ops.primary_authority_lease_reads"
         in definitions["volpred_begin_owned_publisher_article_sync"]
     )
+    recovery_definition = definitions[
+        "volpred_recover_due_owned_publisher_article_sync"
+    ]
+    assert (
+        "owned_request.effect_family = ownership.effect_family"
+        in recovery_definition
+    )
+    assert (
+        "effect.effect_kind = ownership.effect_family"
+        in recovery_definition
+    )
+    assert "FOR UPDATE OF attempt SKIP LOCKED" in recovery_definition
     settlement_definition = definitions[
         "volpred_settle_owned_publisher_article_sync"
     ]

@@ -86,6 +86,8 @@ from .owned_publisher_delete import (
 from .owned_publisher_article import (
     OwnedPublisherArticleAttempt,
     OwnedPublisherArticleCommand,
+    OwnedPublisherArticleRecovery,
+    OwnedPublisherArticleRecoverySummary,
     OwnedPublisherArticleReceipt,
     OwnedPublisherArticleRequest,
     OwnedPublisherArticleSync,
@@ -806,6 +808,8 @@ __all__ = [
     "LandChangeSet",
     "OwnedPublisherArticleAttempt",
     "OwnedPublisherArticleCommand",
+    "OwnedPublisherArticleRecovery",
+    "OwnedPublisherArticleRecoverySummary",
     "OwnedPublisherArticleReceipt",
     "OwnedPublisherArticleRequest",
     "OwnedPublisherArticleSync",
