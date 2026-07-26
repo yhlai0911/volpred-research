@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "title": "隔夜美股會傳染給亞洲嗎？二十年數字只認一個市場",
+  "subtitle": "上游資訊的隔日傳染鏈：日本站得住，往下游就斷",
+  "evidence": {
+    "result": {
+      "path": "experiments/k1719/k1719_results.json",
+      "sha256": "9744ef08b1ea74bf4360e5aa149110337f8e4b32877fb7cf1a389c5121d376ae",
+      "label": "ASIA-5 隔日上游波動溢出 ladder 重跑結果"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_method",
+      "info": "method",
+      "style": "professional",
+      "title": "我們到底比了什麼",
+      "alt": "以二十年每日收盤價，比較樸素模型與加入前一交易日上游資訊的加料模型",
+      "sources": ["result"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "日本實測比對天數",
+          "value": {"source": "result", "path": "targets.JAPAN.n_oos", "format": {"kind": "integer", "suffix": " 天"}}
+        },
+        {
+          "kind": "metric",
+          "label": "站得住腳的及格線",
+          "value": {"source": "result", "path": "method.harvey_threshold", "format": {"kind": "number", "digits": 0}},
+          "note": "訊號強度要超過這條線，才算強到不像雜訊"
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼比",
+          "body": ["樸素版只用市場自己過去的波動；加料版再餵進前一交易日的美股、恐慌指數與鄰近上游市場。傳染若為真，加料版該更準。樣本涵蓋二十年每日收盤。"]
+        }
+      ]
+    },
+    {
+      "name": "2_scorecard",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "六個市場的成績單：只有日本過關",
+      "alt": "六個亞洲市場加入隔日上游資訊後的預測改善與通過情形",
+      "sources": ["result"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "日本：預測誤差改善",
+          "value": {"source": "result", "path": "targets.JAPAN.qlike_improvement_pct", "format": {"kind": "number", "digits": 2, "show_plus": true, "suffix": "%"}}
+        },
+        {
+          "kind": "metric",
+          "label": "日本：訊號強度",
+          "value": {"source": "result", "path": "targets.JAPAN.clark_west_log_variance.t_stat", "format": {"kind": "number", "digits": 1}},
+          "note": "遠高於及格線，近四倍"
+        },
+        {
+          "kind": "metric",
+          "label": "東南亞四國合併：訊號強度",
+          "value": {"source": "result", "path": "southeast_asia_panel.t_stat", "format": {"kind": "number", "digits": 2}},
+          "note": "貼著地板，離及格線差十幾倍"
+        },
+        {
+          "kind": "metric",
+          "label": "改善的市場數（六市場中）",
+          "value": {"source": "result", "path": "success_criteria.qlike_improved_targets", "format": {"kind": "integer", "suffix": " 個"}},
+          "note": "未達通過標準"
+        },
+        {
+          "kind": "metric",
+          "label": "真正站得住腳的市場數",
+          "value": {"source": "result", "path": "success_criteria.clark_west_abs_t_gt_3_targets", "format": {"kind": "integer", "suffix": " 個"}},
+          "note": "只有日本，未達通過標準"
+        },
+        {
+          "kind": "text",
+          "heading": "其餘市場",
+          "body": ["印尼勉強翻正，馬來西亞、新加坡、泰國、台灣加了料反而更差。全擠在零附近。"]
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "傳染鏈推到第二格就散了",
+      "alt": "日本吃得到美股隔夜資訊，往下游台灣與東南亞的傳染鏈站不住腳",
+      "sources": ["result"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "台灣：加料後反而變差",
+          "value": {"source": "result", "path": "targets.TAIWAN.qlike_improvement_pct", "format": {"kind": "number", "digits": 2, "show_plus": true, "suffix": "%"}},
+          "note": "台灣的上游是日本，卻是六市場裡最差"
+        },
+        {
+          "kind": "text",
+          "heading": "能支持",
+          "body": ["美股與恐慌指數的隔夜動靜，對隔天日本波動說得上話——因為東京開盤前有一整段沒交易的時間，資訊還新。"]
+        },
+        {
+          "kind": "text",
+          "heading": "不能支持",
+          "body": ["把「昨天美股跌，今天東南亞一定更抖」當交易依據，二十年數字不支持。每日收盤波動是粗糙替身，也證明不了誰推動誰。"]
+        }
+      ]
+    }
+  ]
+}

@@ -27064,5 +27064,95 @@
     "owner": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
     "commit": null,
     "summary": "Resolved PHASE-Z stuck-files incident (fingerprint 3c0b76a1bcd65274, 77-fire de-rate root cause). 3 foreign tracked-mods in canonical main: 2 M-files (trending_primary_source_verification.jsonl, test_check_matt_skills_installation.py) already in quarantine refs; k1253_general_draft.md was AD (staged-add, WT-deleted) un-quarantined -> preserved staged blob c0fdf255 to refs/volpred/preserve/k1253_general_draft_204d556b before clearing. Cleared all 3 under git_writer_lock (reset k1253, checkout HEAD for 2 M-files). foreign_incident --check green (closeable=true, derates=false), --reconcile closed. Slot cap de-rate lifted 2->6."
+  },
+  {
+    "timestamp": "2026-07-27T03:21:28+08:00",
+    "task_type": "platform_ops",
+    "task_id": "phase_z_test_only_orphan_no_exit",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037",
+    "owner": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037",
+    "commit": "20ee151b4",
+    "summary": "phase_z: 為卡住的 test-only foreign 路徑補上具名人為裁決出口（task phase_z_test_only_orphan_no_exit / ci-red-29797353050）。\n\n問題：orphan-half 自動出口蓄意排除 test 檔（被削弱斷言的工作區測試會 red→green 自我收養），但當真正修好 CI 的改動本身就是 test 檔時，該路徑永遠 foreign、CI 永遠紅，且 stuck-incident 通知只給「讓作者 commit」的空泛指示。\n\n修法（不放寬排除，只補一條 signposted 出口）：新增 `_test_adjudication_lines()`，當 stuck 集合含 test 路徑時，在 incident 通知加一段「需要人為裁決」，附上 path-scoped、可直接複製執行的 `git_writer_lock.py commit --actor phase-z-test-adjudication -- <test paths>` 指令，並提醒先看 diff 確認非削弱斷言。非 test 路徑不洩漏進該指令；paths 經 shlex.quote 保證可貼上。\n\n驗證：新增 3 個單元測試（scoping / 條件出現 / shell metachar quoting）；canonical 環境 pytest test_phase_z_orphan_half.py 16 passed；workspace 環境（PYTHONPATH）3 新測試 passed；ownership-class-gate 4 passed（durable-exit 結構不變）。\n\n交付：commit 至 producer-scoped workspace branch worktree-dispatch-slot-1-a4fe4570（20ee151b4），2 files +89。依 WS-B pilot 規則不自行 merge，交 supervisor gate。canonical_root 已還原 pristine，無外洩。"
+  },
+  {
+    "timestamp": "2026-07-27T03:34:30+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_d94aac64",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037",
+    "owner": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037",
+    "commit": "7b2b309b4",
+    "summary": "next_tasks: urgent-fire gateway 顯式可觀測 lane 安全閘（task assign_d94aac64）。\n\n查證（實跑非臆測）：對 main_thread-lane / pending_main_thread-status / unset-lane / agent-lane 四種 P1 record 跑 is_urgent + is_agent_claimable_lane，確認 is_urgent 今日已對兩種 reserved 形式回 False（is_main_thread_reserved 2026-07-21 讀 lane+status 兩欄）。故一般 class 已修；reported instance（assign_5f17c382）是殘留的 caller-side 競態：append 當下無 lane、事後補蓋 main_thread，那時 is_agent_claimable_lane 對未設 lane 回 True，不在任何 fire-gateway 射程內。\n\n修法（task 指定 option b，regression-safe、不疊）：`_request_urgent_fire` 對非 agent-claimable lane 明確拒絕 + warn，把 lane 安全從 is_urgent 內隱式提升為 fire gateway 顯式、可觀測、對 is_urgent 漂移 fail-safe。unset lane 仍 claimable → CI-red / boss P1 等無 lane 合法急件不受影響。附帶修掉 except 區塊多餘的 local `from ... import warn`（會 shadow module-level warn 使新 warn 呼叫 UnboundLocalError）。\n\n測試：test_urgent_task_lane.py 新增 2 例（模擬 is_urgent 漂移下 reserved lane 仍被拒 + warn 斷言；claimable/unset lane 仍過閘）。全檔 54 passed。\n\n交付：workspace branch commit 7b2b309b4，2 files +73/-2。不自行 merge（WS-B），交 supervisor gate。canonical_root next_tasks.py 已還原 HEAD、canonical 測試檔未觸碰，無外洩。"
+  },
+  {
+    "timestamp": "2026-07-27T03:36:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "issue42_production_fire_lifecycle_acceptance_20260727",
+    "outcome": "deferred",
+    "actor": "hourly-slot-2-03148540bd1f4e09936eeee66024ecb9",
+    "owner": "hourly-slot-2-03148540bd1f4e09936eeee66024ecb9",
+    "commit": null,
+    "summary": "Issue #42 生產驗收 canary（fire_lifecycle 持久化）：precondition 未達，誠實延後不偽造綠燈。\n\n本 fire 為 requested 專用驗收班（fire_reason=requested:user:issue42_production_fire_lifecycle_acceptance）。任務閘門要求「先驗本 job 有非空 fire_lifecycle{generation_id,captured_at,pre_fire_dirty} 再產出 doc」。\n\n查證（實跑非臆測）：\n- 讀 storage/ops/dispatch_state.json：current_jobs 兩個（a4fe4570 slot-1 cron、03148540 slot-2 本 fire）皆 fire_lifecycle=None。\n- commit de63029c0（persist fire lifecycle #42）committed 2026-07-27T03:21:22+08:00；但 running supervisor pid 47886 started 2026-07-27T02:50:28+08:00 —— daemon 早於 commit 31 分鐘，仍跑舊 scheduler。\n- selfreload log（03:29–03:31，每 30s）明確 deferred_in_flight：scheduler.py/state.py/phase_z.py 標 stale，reload 因 2 job in-flight 延後（本驗收 fire 即其一）。\n- scheduler.py 邏輯：fire_lifecycle 僅由 run_pre_fire_guard 在 not current_jobs（空 slot cohort-seed）時產生，並行 job 從 current_jobs[0] 複製。本 job 為 slot 忙碌時的 requested 並行 fire → guard 略過；且被複製源 a4fe4570 本身無 lifecycle（其為 pre-commit 舊碼 seed）→ 本 job 必為 None。\n\n結論：feature 已上 disk 但尚未 live in process。且存在 chicken-and-egg —— 本 in-flight 驗收 job 正是阻擋 reload 的 job 之一，故「本 exact job 有 fire_lifecycle」在本 fire 內永不成立。依任務閘門（verify before output）拒絕偽造 acceptance doc。\n\n處置：任務 blocked→result 記全診斷→unblock 回 pending（reason enum 無「awaiting self-reload」精確項，寧留 pending+free-form note 也不誤標 reason 污染 ops analytics），並 annotate acceptance_deferral_note 記 RE-RUN CRITERIA：待 in-flight job 排空、daemon 自動 reload 後，於 post-reload COHORT-SEED fire（空 slot）重跑，屆時 run_pre_fire_guard 會帶真 fire_lifecycle，canary 方能誠實通過。本 fire 提早收班即為讓 deferred reload 盡快進行。"
+  },
+  {
+    "timestamp": "2026-07-27T04:10:18+08:00",
+    "task_type": "platform_ops",
+    "task_id": "issue42_production_fire_lifecycle_acceptance_20260727",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+    "owner": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+    "commit": null,
+    "summary": "Issue #42 生產驗收 (PASS)：本 job 06c75e96 帶完整 fire_lifecycle (generation 78987568)，supervisor pid 88234 於 commit de63029c0 之後啟動 → feature live in daemon。WS-B workspace 產出 docs/ops/issue42_production_fire_lifecycle_acceptance.md (commit e08db4da3)，未自行 merge（supervisor gate）。"
+  },
+  {
+    "timestamp": "2026-07-27T04:10:18+08:00",
+    "task_type": "experiment",
+    "task_id": "agent-agent-brief_k1658_rerun_204d556b-3104b0",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+    "owner": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+    "commit": null,
+    "summary": "K1658 collect_completed → merged main (b725ed5c6)。FOMC statement vs presser 分離免費資料 INFEASIBLE (N=2)，Part3 aggregate 0/6 Holm（誠實 NULL）。Codex primary-path CONDITIONAL 之 cosmetic：欄位 beta_pct_effect_on_vol 誤標 → 誠實 rename _on_variance（值不變）；README INFEASIBLE/NULL 用詞釐清。補 review_verdict.json(PASS)+reproduce_spec.json，主線程寫 knowledge 442e48fd。"
+  },
+  {
+    "timestamp": "2026-07-27T04:10:18+08:00",
+    "task_type": "experiment",
+    "task_id": "k1715_bfgs_fix_dephantom_rerun_20260727",
+    "outcome": "escalated",
+    "actor": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+    "owner": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+    "commit": null,
+    "summary": "K1715 collect_completed → escalated（未合併）。score-driven GAS/DCS VaR+ES 對 SPY 誠實 NULL（與 GARCH-t 打平，arch library 交叉驗證）。Merge 阻斷：README 幻影驗證宣稱『4M Monte-Carlo』代碼不存在（誠實違規）+ Codex FAIL/CRITICAL（BFGS 無條件覆蓋 NM）。依 K1709 不越 FAIL 認證，重跑屬 heavy compute → 建 escalation task k1715_bfgs_fix_dephantom_rerun_20260727。"
+  },
+  {
+    "timestamp": "2026-07-27T04:12:32+08:00",
+    "task_type": "experiment",
+    "task_id": "K1715",
+    "outcome": "collected_codex_review_enqueued",
+    "actor": "hourly-slot-2-35badc1db8f3475da7accc99abf48522",
+    "owner": "hourly-slot-2-35badc1db8f3475da7accc99abf48522",
+    "commit": null,
+    "summary": "PHASE A 收件 — K1715 (score-driven GAS/DCS 直估 joint VaR+ES) compute agent job 完成。派 general-purpose 驗證 agent 跑 agent-result-verification checklist：VERDICT=NULL（乾淨）。查核通過：12 格 violation-rate 全對、DM 表全對（max |t|=2.39 未過 Harvey |t|>3）、lookahead F_{t-1}-measurable（K1715.py:544/558-559 + filter 先賦值後吃 y[t]）、seed=42、convergence 誠實（BFGS gtol=0 非 fit-fail，靠 boundary_rate~0 / persistence~0.98 / arch 交叉驗證 3-4 位有效數字佐證）、GARCH-t/GJR-t baselines 真實估計並過同一 backtest battery。發現並修正 README overclaim（宣稱 4,000,000 次 MC 驗證閉式解，實際 K1715.py 無此 code；改為 McNeil-Frey-Embrechts 標準閉式解），commit 至 worktree branch 87f2fec59 凍結。merge 硬 gate 於 review_verdict.json → enqueue codex_review_job.sh(detached, read-only sandbox)，followup=收 Codex verdict→certify→merge→寫 knowledge(NULL)→complete。原 collection followup 已 mark-followup-dispatched。結論 NULL：瓶頸在常數-ν Student-t 尾部+一步 lag，非波動遞迴，後續指向 skew-t/EVT/FHS。"
+  },
+  {
+    "timestamp": "2026-07-27T04:12:39+08:00",
+    "task_type": "experiment",
+    "task_id": "k528_round7_gate_hardening",
+    "outcome": "collected_codex_review_enqueued",
+    "actor": "hourly-slot-2-35badc1db8f3475da7accc99abf48522",
+    "owner": "hourly-slot-2-35badc1db8f3475da7accc99abf48522",
+    "commit": null,
+    "summary": "PHASE A 收件 — k528_round7_gate_hardening compute agent job 完成。派 general-purpose 驗證 agent：VERDICT=PASS。實跑 pytest → 15 passed（TestReleaseMisbindingGateIsStructural 14 + live-tree scan 1）；確認 detector 為真結構性（_friday_bindings:966 nearest-governor + _MAX_BIND_GAP=24、quoted-mention exempt、denial clause-local、ast 單元化 python string），非 phrase-list stub；before/after OLD 欄為 base 5b1f154c1 真實重建（5 固定字串 + 兩條 line-level blanket exemption），非新 gate 改標；OLD 1/7 block、NEW 7/7 block + 4/4 legit pass；worktree git status 乾淨無殘留 probe。N1 hardened+regression-locked、N2 README 237/243 in-tree closed、N3 errata 為 draft 刻意延後至 merge 後發。merge 需 primary-path Codex PASS（3-strike active）→ enqueue codex_review_job.sh(detached)，followup=收 verdict→certify→merge→發 N3 errata→寫 knowledge→complete。原 collection followup 已 mark-followup-dispatched。"
+  },
+  {
+    "timestamp": "2026-07-27T04:25:35+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1719_article_general_v2",
+    "outcome": "published_lazypack_queued",
+    "actor": "hourly-slot-2-35badc1db8f3475da7accc99abf48522",
+    "owner": "hourly-slot-2-35badc1db8f3475da7accc99abf48522",
+    "commit": "mile_1ef77049",
+    "summary": "PHASE B — K1719_article_general_v2 (P1 daily_article, ASIA-5 隔日上游波動溢出 ladder, verdict MIXED, Codex-reviewed) 完成。dedup gate (--audience general) clean → 派 opus writer agent 依 3 canonical paths（trending-repost/anti-ai-style/publishing.md）+ evidence-package-first 寫繁中一般讀者稿，數字全綁 experiments/k1719/k1719_results.json（不抄 README prose）。誠實呈現 MIXED：日本加入前一交易日上游資訊隔日波動預測誤差 +7.67%、訊號強度 11.6 過及格線 3（唯一贏家，因東京開盤前有隔夜無交易窗）；東南亞四國合併 panel 訊號僅 0.18、success_criteria.met=false（改善 2/需4、站得住 1/需2），台灣加日本上游反而 -0.66% 最差 → 骨牌推到第二格就散。reader-visible 無 K-id/jargon，provenance 於 frontmatter。主線程串行：獨立複跑 anti_ai_gate PASS(exit0)、修 image 相對路徑、補第二張 JSON-bound 圖(signal_strength)過 image gate(≥2)、publish_draft → mile_1ef77049(draft, 2 圖上傳 Supabase)、授權 lazypack 3-panel data-bound plan(evidence sha256 9744ef08 pinned) enqueue lazypack-mile_1ef77049(*/15 worker 出圖+append section+release)。task complete succeeded。"
   }
 ]

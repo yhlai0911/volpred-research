@@ -27867,7 +27867,7 @@
     "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "in_progress",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -27921,12 +27921,19 @@
         "to": "pending",
         "by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 93.3min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-26T19:50:03.692081+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "release",
+        "note": "auto_release_stale_2h"
       }
     ],
-    "last_released_at": "2026-07-26T17:45:06.377987+00:00",
+    "last_released_at": "2026-07-26T19:50:03.692074+00:00",
     "compute_job_id": "agent-agent-brief_k1658_rerun_204d556b-3104b0",
     "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1658_rerun_204d556b-3104b0; awaiting PHASE A collection",
-    "last_release_reason": "liveness_reconcile_detached_39b53bf6"
+    "last_release_reason": "auto_release_stale_2h"
   },
   {
     "id": "K1659",
@@ -32779,8 +32786,8 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-15T00:00:01Z",
-    "compute_job_id": "agent-agent-brief_k1715_204d556b-e2cc16",
-    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection"
+    "compute_job_id": "compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622",
+    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection"
   },
   {
     "id": "K1716",
@@ -33266,7 +33273,7 @@
     "description": "面向 ASIA 第三棒（台股產業層級 — 用戶點名台股產業）。產業代表股：電子 2330/2317/2454、金融 2881/2891、航運 2603/2609、塑化 1301、光學 3008（yfinance 2026-07-15 smoke test 全數可用）。Diebold-Yilmaz spillover index + Granger 網絡；注意 Cholesky-FEVD 排序假象規則（用 generalized FEVD）。對照 T5a（TAIEX gamma > 0050 > TSMC）結構。產出對產業輪動 TA 的一般讀者文章角度。硬規則：開工先讀 docs/error_log.md + 搜 knowledge.json 相似 K + 至少 3 篇文獻；先做資料期間診斷（smoke test 只驗 2y，實驗要拉最長可得樣本，OOS 必含至少一次空頭）；跨市場假日 alignment 依 methodology.md；signal.shift(1) 明確 lag；DM 用 canonical volpred.stats.model_evaluation.dm_test（HAC bandwidth 規則）；收工跑 experiment_gates.py。",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user_directive_20260715_market_diversification",
     "created_at": "2026-07-15T07:59:24.440660+00:00",
     "status_history": [
@@ -33295,10 +33302,28 @@
         "to": "pending",
         "by": "release",
         "note": "normalize_pending_claim_residue"
+      },
+      {
+        "ts": "2026-07-26T19:23:53.080557+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      },
+      {
+        "ts": "2026-07-26T19:23:57.835678+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
       }
     ],
     "last_released_at": "2026-07-26T12:18:47.348063+00:00",
-    "last_release_reason": "normalize_pending_claim_residue"
+    "last_release_reason": "normalize_pending_claim_residue",
+    "claimed_by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037",
+    "claimed_at": "2026-07-26T19:23:53.080550+00:00",
+    "claim_session_id": "73f26d783330",
+    "started_at": "2026-07-26T19:23:57.835658+00:00",
+    "compute_job_id": "agent-brief_asia3_tw_sector_spillover-eb8888",
+    "result": "dispatched to compute job agent-brief_asia3_tw_sector_spillover-eb8888; awaiting PHASE A collection"
   },
   {
     "id": "telegram-813",
@@ -38861,10 +38886,26 @@
     "description": "觀察（未證實機制，需主線程查證）：本班 fire 的 fire_reason=\"requested:user:assign_5f17c382\"，格式正是 _request_urgent_fire 的 f\"{source}:{id}\"。但 assign_5f17c382 的 dispatch_lane=main_thread，現在跑 task_urgency.classify() 回 deferred、is_urgent()=False —— 依現行程式碼根本不該觸發 request_fire。推測是 ingest 當下記錄尚無 dispatch_lane（is_agent_claimable_lane 對未設 lane 回 True），lane 由後續 writer 補蓋，導致 urgency 判定與最終 lane 不一致。後果：burst fire 起了一整班，卻在 claim gate 被正確拒絕（reason=main_thread_lane），該班對觸發它的 task 完全無能為力。同批 refactor-master 共 8 條 P1 都是 main_thread lane，若每條各燒一班就是 8 個空轉 fire，且從 fire 記錄看會誤以為任務正在被處理。查證起點：append_task_record 在鎖釋放後才算 urgency（src/volpred/ops/next_tasks.py:792）；created_by=refactor_master_plan 但 repo 內無同名腳本，疑為互動 session ad-hoc 建立。修法方向（擇一，勿疊）：(a) append 時先蓋好 lane 再判 urgency；(b) _request_urgent_fire 對非 agent-claimable lane 明確拒絕並留 warn；(c) main_thread task 若確需人為 fire，改用不同 fire_reason 前綴讓 supervisor 不當成可派工。",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-20T05:38:51.600054+00:00",
-    "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9"
+    "created_by": "hourly-slot-1-bc31c9780e6849e0b3e323e2575ea3b9",
+    "status_history": [
+      {
+        "ts": "2026-07-26T19:26:29.170367+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      },
+      {
+        "ts": "2026-07-26T19:34:30.467410+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      }
+    ],
+    "completed_at": "2026-07-26T19:34:30.467386+00:00",
+    "result": "fire gateway 顯式 lane 安全閘（option b）；查證確認一般 class 已由 is_main_thread_reserved 修，殘留為 caller-side lane-set-later 競態；commit 7b2b309b4 workspace，2 新測試，54 passed"
   },
   {
     "id": "assign_be12d6c6",
@@ -39752,12 +39793,43 @@
     "description": "收件審查 (k528_round6_collection_verdict.json) 判 B1-B4 全 PASS，但點出 3 個 non-blocking: N1 (最重要) round-6 裁決自稱的「結構性不變量」gate 其實是 5 詞 blocklist + 兩個無條件豁免 —— 實測 6 個注入有 4 個同義改寫溜過 (如「237 場 NFP 是週五發布的」/「published on a Friday」)，且同行只要出現 243 (即使語意無關) 整行豁免、denial marker 可被挾持。今天樹是乾淨的所以 B1 判 PASS，但這個 gate 擋不住改寫後的迴歸。N2 README.md:268「237 筆在週五」無 243 對照 (內部章節，gate 掃不到)。N3 線上文章 mile_35eef830 errata 只記 2026-07-18 事件日更正，未說明 proxy 期數字已被取代。Worktree: .claude/worktrees/dispatch-slot-3-30adeed7-k528nfp (branch k528-nfp-official-dates, HEAD 5b1f154c1)。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "collection_review",
     "parent_task_id": "k528_round6_collection_verify",
     "created_at": "2026-07-20T21:19:00.806181+00:00",
-    "compute_job_id": "agent-agent-brief_k528_round7_204d556b-3d6f3b",
-    "result": "dispatched to compute job agent-agent-brief_k528_round7_204d556b-3d6f3b; awaiting PHASE A collection"
+    "compute_job_id": "compute-codex-primary-path-review-k528-round-7-gate-hardening-1785096622",
+    "result": "dispatched to compute job agent-agent-brief_k528_round7_204d556b-3d6f3b; awaiting PHASE A collection\n\nround-7 gate hardening 交�?並�?��?�?�??: �?�?�?� nearest-governor gate �??代 5-�? blocklist, evasion suite 7/7 injection BLOCK + 4/4 legitimate PASS, 主�?�?�?��?�??�? pytest (test_nfp_official_release_dates + 2 gate suites) = 107 passed 3.67s. README:268 N2 �?�?��?�?, errata_mile_35eef830.md N3 �??稿�??�?�. �?� merge (governance-gated on primary-path Codex PASS �?? task k528_primary_codex_certify_merge).\n\ndispatched to compute job compute-codex-primary-path-review-k528-round-7-gate-hardening-1785096622; awaiting PHASE A collection",
+    "last_released_at": "2026-07-26T19:50:03.692345+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "status_history": [
+      {
+        "ts": "2026-07-26T19:50:03.692348+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "release",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-26T20:09:40.107084+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4"
+      },
+      {
+        "ts": "2026-07-26T20:09:49.398895+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4"
+      },
+      {
+        "ts": "2026-07-26T20:09:49.642489+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4"
+      }
+    ],
+    "started_at": "2026-07-26T20:09:49.398883+00:00",
+    "completed_at": "2026-07-26T20:09:49.642465+00:00"
   },
   {
     "id": "k528_primary_codex_certify_merge",
@@ -39765,11 +39837,29 @@
     "description": "B1-B4 已由獨立收件審查驗過 PASS，唯一未關的 gate 是 primary-path Codex 沒跑成功 (額度到 2026-07-25)。依 .claude/rules/experiments.md，fallback reviewer PASS != Codex PASS，不得 merge。額度回來後: 跑 primary-path codex exec review -> PASS 則走正式 merge_worktree.sh 整合 branch k528-nfp-official-dates (HEAD 5b1f154c1) 並 certify K528; FAIL 則建 round-8。先做 k528_round7_gate_hardening 再送 Codex，免得同一輪被打回。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "collection_review",
     "parent_task_id": "k528_round6_collection_verify",
     "created_at": "2026-07-20T21:19:00.806181+00:00",
-    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。"
+    "codex_quota_premise_refuted": "2026-07-22 08:2x 本班以 scripts/codex_exec_bounded.sh 連續兩次實測 Codex 皆成功（QUOTA_OK exit 0；一則實質問答 11,486 tokens exit 0）→ 「Codex 額度耗盡至 2026-07-25」前提已被推翻。本任務因該過期前提被凍結約 3 天，現已 --unblock 回 pending。若後續呼叫確實撞 usage limit，請依當次真實錯誤重新 block 並附輸出，不要再沿用文件裡寫死的日期。",
+    "claimed_by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4",
+    "claimed_at": "2026-07-26T20:09:55.348596+00:00",
+    "claim_session_id": "777cc8e1ce9d",
+    "status_history": [
+      {
+        "ts": "2026-07-26T20:09:55.348604+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4"
+      },
+      {
+        "ts": "2026-07-26T20:10:11.950118+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4"
+      }
+    ],
+    "started_at": "2026-07-26T20:10:11.950101+00:00"
   },
   {
     "id": "dreaming_repeated_tool_failure_dispatch_supervisor_killed_timeout_exi",
@@ -40446,10 +40536,33 @@
     "title": "PHASE-Z: test-only 的紅燈修復沒有自動出口，CI 可能永遠紅",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T05:10:20.615004+00:00",
-    "description": "2026-07-21 ci-red-29797353050 實例暴露的類別缺口。\n\n_adopt_orphan_halves 的存在理由（phase_z.py 註解原文）是「Without this exit such a path is foreign forever and CI stays red forever」，但 _orphan_half_candidates 用 _is_test_path 明文排除 test 檔。當紅燈的修復本身**只改 test 檔**（例如測試把「bug 仍會發生」寫成契約，真正修好之後反而 DID NOT RAISE），這條路徑就同時滿足「foreign forever」與「沒有自動出口」——正是那段註解要防的結局。本次靠 hourly fire 具名用 git_writer_lock.py 手動裁決才解掉。\n\n排除 test 檔的理由是正當的（自動採納可能收進一個被削弱的測試以換綠燈），所以不要單純拿掉排除。要找的是一條「能證明不是削弱」的證據形式，或一條明確的人為裁決出口（例如 foreign-streak 命中 test 檔時直接開 incident 並在通知裡附上可執行的 git_writer_lock 指令），而不是讓它靜靜卡著。\n\n參考：commit 75a597735、docs/error_log.md 2026-07-10、phase_z.py _adopt_orphan_halves 註解。"
+    "description": "2026-07-21 ci-red-29797353050 實例暴露的類別缺口。\n\n_adopt_orphan_halves 的存在理由（phase_z.py 註解原文）是「Without this exit such a path is foreign forever and CI stays red forever」，但 _orphan_half_candidates 用 _is_test_path 明文排除 test 檔。當紅燈的修復本身**只改 test 檔**（例如測試把「bug 仍會發生」寫成契約，真正修好之後反而 DID NOT RAISE），這條路徑就同時滿足「foreign forever」與「沒有自動出口」——正是那段註解要防的結局。本次靠 hourly fire 具名用 git_writer_lock.py 手動裁決才解掉。\n\n排除 test 檔的理由是正當的（自動採納可能收進一個被削弱的測試以換綠燈），所以不要單純拿掉排除。要找的是一條「能證明不是削弱」的證據形式，或一條明確的人為裁決出口（例如 foreign-streak 命中 test 檔時直接開 incident 並在通知裡附上可執行的 git_writer_lock 指令），而不是讓它靜靜卡著。\n\n參考：commit 75a597735、docs/error_log.md 2026-07-10、phase_z.py _adopt_orphan_halves 註解。",
+    "status_history": [
+      {
+        "ts": "2026-07-26T19:10:01.481808+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      },
+      {
+        "ts": "2026-07-26T19:10:13.915607+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      },
+      {
+        "ts": "2026-07-26T19:21:33.785552+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-a4fe4570d70f472b819776bd664f0037"
+      }
+    ],
+    "started_at": "2026-07-26T19:10:13.915588+00:00",
+    "completed_at": "2026-07-26T19:21:33.785522+00:00",
+    "result": "phase_z 補具名 git_writer_lock 人為裁決出口給 stuck test-only foreign 路徑；commit 20ee151b4 於 workspace branch，+89，3 新測試 pass；canonical 已還原"
   },
   {
     "id": "compute_queue_failed_script_job_followup_blind_spot",
@@ -41128,7 +41241,7 @@
     "title": "[WS-B 自鎖] writer_isolation pilot 578/578 全判 orphan、成功併入 main 0 次 —— 先驗 _JOB8_RE 假設再解鎖",
     "priority": 2,
     "task_type": "platform_ops",
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "hourly_dispatch_d4_design",
     "tags": [
       "platform_ops",
@@ -41138,9 +41251,6 @@
     ],
     "created_at": "2026-07-21T16:40:00Z",
     "description": "設計依據：docs/governance/2026-07/d4_producer_scoped_workspace_design.md §0 與 §5（S0/S1）。\n\n**主線程已獨立驗證的事實**（不是 agent 轉述）：\n- config/runtime_schedules.json 的 volpred-hourly-dispatch 條目 writer_isolation.mode = 'pilot'（lanes=[platform_ops], max_total=3），也就是隔離**已經開著**。\n- storage/ops/dispatch_workspace_receipts.jsonl 共 628 筆：578 筆 finalized、50 筆 allocation_skipped。\n- 578 筆 finalized 的 worker_outcome **100% 是 orphaned**，disposition 100% 是 remediation_opened。\n- 全檔 grep 'merged' = **0**。也就是 happy path 從上線到現在**一次都沒走通**。\n- remediation 最常見的三筆都是 {\"created\": false}（各 38 次）—— 「絕不 strand」的保證沒有成立。\n- 從未出現 allocated 事件 → setup latency 至今無任何實測值。\n\n**自鎖迴圈**：失敗 → 保留 worktree → 佔滿 max_total=3 → 新 fire 拿不到隔離（50 次 allocation_skipped 原因 100% 是 total_cap）→ 全退回 shared main → PHASE-Z 繼續猜作者。旁證：受害 worktree 名單裡的 dispatch-slot-1-558d7893-k1730 與 dispatch-slot-1-bd00f90a-k1731，本班 2026-07-22 00:0x 都親眼確認過狀態異常（前者目錄已回收、成果只剩 quarantine salvage ref；後者卡 experiment certification gate 未合併）。\n\n**S0（先做，不要跳過）**：設計文件把 `scripts/dispatch_supervisor/workspace.py:93` 的 `_JOB8_RE` 不接受 `-<slug>` 尾綴、而實測 17 個 workspace 全部帶 slug，列為 578/578 全判 orphan 的**待驗假設**。先寫一個能重現的測試證實或推翻它 —— **不要憑這個假設直接改碼**。若成立，這是一個 regex 的修，不是架構問題；若不成立，真因另有其處，繼續往下查。\n\n**S1**：解自鎖 —— quarantine 只留 branch 不留目錄，讓失敗不再吃掉 max_total 額度。\n\n**硬規則**：不得在此加任何新的 recognizer / namespace / 收編條件（D1，已失敗 6 次），scripts/tests/test_phase_z_ownership_class_gate.py 會擋。S2-S7 各自入池，不要在本單一次做完。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-26T17:22:55.379351+00:00",
-    "claim_session_id": "9953560c09bc",
     "status_history": [
       {
         "ts": "2026-07-26T17:22:55.379359+00:00",
@@ -41153,9 +41263,38 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T19:50:03.692373+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-26T20:13:42.208955+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T20:13:42.451055+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T20:13:42.697093+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-26T17:22:55.678839+00:00"
+    "last_released_at": "2026-07-26T19:50:03.692372+00:00",
+    "last_release_reason": "auto_release_stale_2h",
+    "started_at": "2026-07-26T20:13:42.451041+00:00",
+    "completed_at": "2026-07-26T20:13:42.697069+00:00",
+    "result": "Issue #40 root acceptance verified: commit 509f1e227 fixed receipt-driven isolation; post-deploy job 06c75e96 carried task issue42_production_fire_lifecycle_acceptance_20260727, allocated workspace, committed e08db4da3, wrote terminal_intent/finalized receipts, and merged to main 74735c9f2 (ancestor read-back true). Since the last total_cap at 2026-07-26T18:08:32Z, production receipts show allocated/active_cap only and no total_cap recurrence."
   },
   {
     "id": "assign_50256f5f",
@@ -42796,7 +42935,7 @@
     "title": "K1719: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1719 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -42813,7 +42952,30 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T15:35:56+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-26T20:13:52.395275+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-35badc1db8f3475da7accc99abf48522"
+      },
+      {
+        "ts": "2026-07-26T20:13:56.834598+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-35badc1db8f3475da7accc99abf48522"
+      },
+      {
+        "ts": "2026-07-26T20:25:14.794225+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-35badc1db8f3475da7accc99abf48522"
+      }
+    ],
+    "started_at": "2026-07-26T20:13:56.834581+00:00",
+    "completed_at": "2026-07-26T20:25:14.794197+00:00",
+    "result": "K1719 一般讀者文已發佈 mile_1ef77049（draft，2 張 JSON-bound 圖 + provenance frontmatter）；anti_ai_gate PASS、arc-dedup clean；lazypack async render 已 enqueue (lazypack-mile_1ef77049, 3 panels data-bound, evidence sha256 pinned)，*/15 worker 出圖後 release_pool 自動釋出。誠實 MIXED 故事：日本 +7.67%(訊號 11.6 過關) 為唯一贏家、東南亞 panel 訊號 0.18 不成立。"
   },
   {
     "id": "K1420_article_general",
@@ -43193,13 +43355,8 @@
     "started_at": "2026-07-26T18:33:11.387212+00:00",
     "completed_at": "2026-07-26T18:33:40.957325+00:00",
     "result": "Issue #40 acceptance canary: created docs/ops/issue40_production_workspace_acceptance.md in workspace worktree-dispatch-slot-1-204d556b, committed 07938d55d (ASCII msg, task id). Clean tree, only declared path. Supervisor finalizer to gate+merge.",
-    "issue_close_pending": {
-      "issue_ref": "#40",
-      "task_id": "issue40_production_workspace_acceptance_20260727",
-      "completion_owner": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
-      "completed_at": "2026-07-26T18:33:40.957325+00:00",
-      "completion_base_commit": "91a24dc295e796220be271489f2ae83e578f08b5"
-    }
+    "issue_closed_at": "2026-07-26T18:51:34.265762+00:00",
+    "issue_closed_commit": "dad84187eb893ca330c951d5adf95e0815150f85"
   },
   {
     "id": "issue42_persistent_fire_lifecycle_20260727",
@@ -43230,6 +43387,126 @@
         "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-26T18:42:21.348157+00:00"
+    "started_at": "2026-07-26T18:42:21.348157+00:00",
+    "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate."
+  },
+  {
+    "id": "issue42_production_fire_lifecycle_acceptance_20260727",
+    "title": "[Issue #42 acceptance] deployed durable fire lifecycle → workspace → merge canary",
+    "description": "Production acceptance canary for GitHub Issue #42 after commit de63029c0. Use the supervisor-managed producer workspace. Read storage/ops/dispatch_state.json and verify this exact job has a non-empty fire_lifecycle with generation_id, captured_at, and pre_fire_dirty before making output. Create only docs/ops/issue42_production_fire_lifecycle_acceptance.md containing the task id, job id, generation id, and why matching durable generation prevents post-reload PHASE-Z baseline loss. Commit that exact doc in the managed workspace with an ASCII message containing this task id; complete the task. Do not edit canonical machine state directly and do not merge the workspace yourself.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "requested_by": "owner",
+    "issue_ref": "#42",
+    "created_at": "2026-07-26T19:28:00.194311+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-26T19:29:08.480119+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-03148540bd1f4e09936eeee66024ecb9"
+      },
+      {
+        "ts": "2026-07-26T19:32:31.479307+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-03148540bd1f4e09936eeee66024ecb9"
+      },
+      {
+        "ts": "2026-07-26T19:34:06.234657+00:00",
+        "from": "in_progress",
+        "to": "blocked",
+        "by": "hourly-slot-2-03148540bd1f4e09936eeee66024ecb9"
+      },
+      {
+        "ts": "2026-07-26T19:40:21.196322+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524"
+      },
+      {
+        "ts": "2026-07-26T19:40:24.659355+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524"
+      },
+      {
+        "ts": "2026-07-26T19:43:08.035641+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524"
+      }
+    ],
+    "started_at": "2026-07-26T19:40:24.659338+00:00",
+    "completed_at": "2026-07-26T19:43:08.035617+00:00",
+    "result": "Post-reload acceptance succeeded: job 06c75e969f6c4a1abea609e27ab54524 persisted generation 78987568ef6747e28fcb1a977c33b6ff before worker start; managed workspace committed e08db4da3. Live overlapping slot 35badc1d reused the exact same cohort generation/baseline. Awaiting supervisor finalizer merge/read-back.",
+    "acceptance_deferral_note": "NOT-LIVE at 2026-07-27T03:29 CST: de63029c0 committed 03:21 but daemon pid47886 started 02:50 (pre-commit); selfreload deferred_in_flight (2 jobs). RE-RUN CRITERIA: pick this up on a post-reload COHORT-SEED fire (empty slots) so run_pre_fire_guard populates fire_lifecycle; then verify current job has fire_lifecycle{generation_id,captured_at,pre_fire_dirty} before writing docs/ops/issue42_production_fire_lifecycle_acceptance.md.",
+    "issue_close_pending": {
+      "issue_ref": "#42",
+      "task_id": "issue42_production_fire_lifecycle_acceptance_20260727",
+      "completion_owner": "hourly-slot-1-06c75e969f6c4a1abea609e27ab54524",
+      "completed_at": "2026-07-26T19:43:08.035617+00:00",
+      "completion_base_commit": "de63029c0ec84d080c1ebb8c953cbffb6f288ed6"
+    }
+  },
+  {
+    "id": "ci-red-30215935113",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-30215935113",
+    "ci_run_key": "30215935113:1",
+    "created_at": "2026-07-26T20:00:07.427235+00:00",
+    "title": "CI 紅燈修復（run 30215935113, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30215935113\nattempt: 1\nhead_sha: dad84187e\n偵測摘要（仍須讀完整 failed log）：failed log 未提供可解析的一行根因；請見 GitHub run\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30215935113 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "k1715_bfgs_fix_dephantom_rerun_20260727",
+    "title": "K1715 escalation: remove phantom-MC README claim + fix BFGS min-NLL guard + re-run MLE + re-review to clear Codex CRITICAL, then merge",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "hourly_dispatch_collect_completed",
+    "description": "K1715 collect_completed did NOT reach a mergeable state — escalation (attempt 2). The scientific result is an honest, arch-library-cross-validated NULL (GAS-t score-driven TIED with GARCH-t on VaR pinball and joint VaR+ES FZ0 under Harvey |t|>3; all 4 Student-t families share ~1.85-1.87x 1% VaR under-coverage). Two BLOCKERS prevent merge:\n(1) RESEARCH-HONESTY: README.md L67-68 claims the closed-form VaR/ES were validated by '4,000,000 Monte-Carlo ... 見 K1715.py 尾部', but NO such MC-verification block exists in K1715.py (only the 10k-rep Acerbi-Szekely Z2 null). This is a phantom/fabricated validation claim and MUST be removed or replaced with the real validation (the arch-library cross-check).\n(2) Codex primary-path review verdict = FAIL, CRITICAL: BFGS polish overwrites the Nelder-Mead candidate unconditionally (K1715.py:283-286) so a higher-NLL solution can be accepted; optimizer_success=false on all 268/268 fits. Numbers are externally validated by the arch library (params to 3-4 sig figs) so the reported run is likely correct, but the code must guard BFGS to keep min-NLL, and the fit must be RE-RUN (heavy MLE, 268 fits -> compute_queue) so results.json matches the corrected code, then re-reviewed by Codex until the CRITICAL clears. Also soften 'STATISTICALLY TIED' to failure-to-reject framing (1% FZ0 t=2.39 p=0.017, GAS nominally worse) — not an equivalence claim.\nWorktree still present: .claude/worktrees/k1715-204d556b (branch worktree-k1715-204d556b). Do NOT merge until PASS. Source: compute followup agent-agent-brief_k1715_204d556b-e2cc16.",
+    "escalation_attempts": 1,
+    "parent_compute_followup": "agent-agent-brief_k1715_204d556b-e2cc16",
+    "k_id": "K1715",
+    "created_at": "2026-07-26T20:08:01.954844+00:00"
+  },
+  {
+    "id": "issue43_mutating_isolation_20260727",
+    "title": "[Issue #43] 強制 mutating execution isolated-or-requeued，移除 shared-main fallback",
+    "description": "依 GitHub Issue #43 與 docs/refactor_plan_ops_master_2026_07.md D4 S2-S4 實作。先以 production-shaped failing tests 覆蓋 workspace allocation active_cap/total_cap/disk/lock failure 時 mutating lane 不得 unisolated fire；gate receipt 綁 candidate/main CAS、worker cwd identity、canonical-only path fail closed、雙槽 conflict、pre-dirty、CAS lost、stale gate、crash/restart orphan。走既有 Matt implement→TDD→雙軸 code-review→live receipts；不重跑 plan/spec/tickets。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "requested_by": "owner",
+    "issue_ref": "#43",
+    "created_at": "2026-07-26T20:14:50.100733+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-26T20:14:50.401819+00:00",
+    "claim_session_id": "325c5e1e36b3",
+    "status_history": [
+      {
+        "ts": "2026-07-26T20:14:50.401828+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T20:14:54.003232+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-26T20:14:54.003219+00:00"
   }
 ]

@@ -1,23 +1,16 @@
 {
   "note": "held 的時間軸。超過 held_escalation_shifts 班仍無主 → 指名任務。一筆記錄消失 = 那個路徑已經有出口了。",
-  "updated_at": "2026-07-26T18:26:08.488509+00:00",
+  "updated_at": "2026-07-26T20:00:37.829158+00:00",
   "shifts_to_escalate": 6,
   "entries": {
     "job:lazypack-mile_7c894f46-r2": {
       "first_seen": "2026-07-26T11:00:57.105966+00:00",
-      "shifts": 10,
-      "last_seen": "2026-07-26T18:26:08.488509+00:00",
+      "shifts": 12,
+      "last_seen": "2026-07-26T20:00:37.829158+00:00",
       "reason": "declared_outputs_not_yet_deliverable",
       "namespace": "compute_queue",
       "task_id": "assign_8bed8009",
       "escalated_at": "2026-07-26T16:01:21.154110+00:00"
-    },
-    "storage/drafts": {
-      "first_seen": "2026-07-26T16:01:21.154110+00:00",
-      "shifts": 5,
-      "last_seen": "2026-07-26T18:26:08.488509+00:00",
-      "reason": "pending_rename",
-      "namespace": "drafts"
     }
   }
 }

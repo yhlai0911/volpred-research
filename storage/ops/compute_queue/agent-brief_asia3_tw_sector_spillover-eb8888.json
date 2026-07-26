@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_asia3_tw_sector_spillover-eb8888",
+  "title": "agent: brief_asia3_tw_sector_spillover",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_asia3_tw_sector_spillover-eb8888.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/asia3-a4fe4570",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/asia3-a4fe4570/experiments/asia3_tw_sector_spillover/asia3_tw_sector_spillover_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_asia3_tw_sector_spillover-eb8888.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-26T19:25:26Z",
+  "started_at": "2026-07-26T19:44:02Z",
+  "completed_at": "2026-07-26T20:23:10Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_asia3_tw_sector_spillover-eb8888.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_asia3_tw_sector_spillover-eb8888.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/asia3-a4fe4570/experiments/asia3_tw_sector_spillover/asia3_tw_sector_spillover_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_asia3_tw_sector_spillover-eb8888.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/asia3-a4fe4570",
+  "claude_followup": {
+    "brief": "asia3 台股產業 DY spillover 實驗收件：(1) 跑 agent-result-verification checklist 驗 JSON 數字與 README 一致、GFEVD 非 Cholesky、signal.shift(1) lag 正確、樣本含空頭；(2) experiment_gates.py 全綠確認；(3) 合併 worktree asia3-a4fe4570 走 merge_worktree.sh；(4) 寫 knowledge.json 一筆（發現/null 皆記）；(5) 若通過，建 daily_article 選題候選對照 T5a。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "asia3_tw_sector_spillover",
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_asia3_tw_sector_spillover.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_asia3_tw_sector_spillover-eb8888.md",
+  "claimed_by_pid": 36873,
+  "claimed_by_pid_start_wall": "Mon Jul 27 02:45:03 2026",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/asia3-a4fe4570/experiments/asia3_tw_sector_spillover"
+  }
+}

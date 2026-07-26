@@ -1,0 +1,40 @@
+{
+  "id": "compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622",
+  "title": "Codex primary-path review — K1715 score-driven VaR+ES (NULL)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1715_prompt.md",
+    "storage/ops/codex_reviews/k1715_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-26T20:10:22Z",
+  "started_at": "2026-07-26T20:23:10Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1715_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1715_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1715 Codex 收件+合併：讀 storage/ops/codex_reviews/k1715_verdict.md。VERDICT=PASS/CONDITIONAL_PASS 且無 CRITICAL blocking → (1) uv run python scripts/experiment_gates.py verdict-template --path .claude/worktrees/k1715-204d556b/experiments/K1715 --out .claude/worktrees/k1715-204d556b/experiments/K1715/review_verdict.json，(2) 依 Codex verdict 填 verdict/reviewer=\"Codex primary-path\"/reviewed_at/reviewed_commit(worktree HEAD 87f2fec59 或更新)/review_artifact=該 verdict.md/blocking_defects，填完 commit review_verdict.json 到 worktree branch 後不得再動 code，(3) 用 git_writer_lock.py run 跑 scripts/merge_worktree.sh 合併 worktree-k1715-204d556b，(4) merge 後主線程寫 knowledge.json（verdict=NULL，帶 experiment_id=K1715 + reviewer 欄位，per K1259 provenance；NULL 是有效完成），(5) task_pool_claim complete K1715 status=succeeded。VERDICT=FAIL → 不 merge，照 3-strike 拆解 blocking_defects 派修，complete K1715 status=failed 並記原因。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1715",
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 36873,
+  "claimed_by_pid_start_wall": "Mon Jul 27 02:45:03 2026"
+}

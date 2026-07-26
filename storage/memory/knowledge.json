@@ -42671,5 +42671,27 @@
   ],
   "confidence": 0.85,
   "created_at": "2026-07-26T17:00:37.699257"
+ },
+ {
+  "item_id": "442e48fd",
+  "category": "experiment_result",
+  "content": "[K1658 verdict=CONDITIONAL_PASS reviewer=codex primary path (CONDITIONAL, only cosmetic label issues, fixed) + collect_completed interpretation agent] FOMC statement shock (14:00 ET) vs press-conference shock (14:30 ET) distributional response decomposition for rate assets (TLT, IEF, ZN=F). FINDING: the core statement-vs-presser SEPARATION is INFEASIBLE with free intraday data — yfinance 5m bars cap at ~60 trading days, giving only N=2 usable in-window FOMC events (union across assets; N=1 with all three overlapping) vs N>=13 needed even for a large effect. Part 2 is therefore descriptive single-event case studies only, no cross-event test claimed. The feasible aggregate sub-question (logRV_t on FOMC_{t-1} + logRV_{t-1}, HAC/Newey-West, 2019-2026, 3 assets x 2 RV proxies) is a clean NULL: 0/6 tests survive Holm correction, and it measures the COMBINED statement+presser effect (cannot separate the two shocks). 'Infeasible' (cannot test, data-insufficiency) is kept distinct from 'null' (tested, no effect). Lookahead-clean (explicit .shift(1) + runtime assert, independently unit-tested), seed=42, 9/9 unit tests pass.",
+  "evidence": [
+   "experiments/K1658/K1658_results.json",
+   "experiments/K1658/review_verdict.json",
+   "experiments/K1658/codex_review.md"
+  ],
+  "confidence": 0.85,
+  "created_at": "2026-07-27T03:55:53.106423",
+  "k_id": "K1658",
+  "experiment_id": "K1658",
+  "experiment_path": "experiments/K1658",
+  "verdict": "CONDITIONAL_PASS",
+  "review_verdict": "PASS",
+  "reviewer": "experiments/K1658/codex_review.md",
+  "reviewer_source": "codex gpt-5.x primary path (CONDITIONAL, cosmetic issues fixed in c8d0295b9) + collect_completed interpretation agent (opus/medium)",
+  "needs_human": false,
+  "provenance": "main-thread write from artifact JSON; compute-queue collect_completed followup",
+  "results_sha256": "52ac096a086b41a360508c675ccbf1f8079d7d076ebe13f02ba84e050e3548ca"
  }
 ]
