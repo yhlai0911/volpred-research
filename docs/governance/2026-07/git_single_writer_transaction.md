@@ -56,6 +56,10 @@ nested `frontend-v2-fix` 是另一個 Git common-dir，天然取得不同 sentin
   lease 內驗證結果是原 HEAD 的單一 direct child、且 changed paths 不超出 exact scope；
   drift 會以 `update-ref HEAD <old> <new>` CAS 回退、`read-tree` 還原原 index，hook 產生的
   working bytes保留供診斷，且不寫成功 receipt。
+- `--expected-content-hash` 不只驗 hook 前的 staged blob。CLI先保存該entry的Git mode，
+  hook完成後從實際commit tree逐檔回讀blob SHA-256與mode；同scope hook若改寫reviewed
+  bytes或executable bit，也視為result drift並走同一CAS／index rollback。這讓Change
+  Delivery的immutable candidate identity不能被pre-commit hook悄悄替換。
 - 外層 transaction 的 child 必須同時繼承 lock FD 與匿名 pipe capability FD；verifier 先用獨立
   probe 證明 flock 已被占用，再驗 declared FD 是原 open-file-description，並比對 metadata
   內不可由 stale token 重建的 capability inode。這避免 holder crash 後以 stale token 新開 FD
@@ -96,7 +100,8 @@ fake-PATH interpreter、unlocked FD 與 crash 後 stale-token/capability forgery
 可落地，registered linked worktree 的 side branch不受 main gate影響。hook installer另 pin
 canonical-source refusal與 atomic replacement順序。另有 failure injection 讓 pre-commit hook
 刻意 stage foreign path，驗證 helper拒絕、HEAD CAS回退、既有 foreign staged entry逐 byte
-保留、working bytes不被覆寫。
+保留、working bytes不被覆寫；另外兩案讓hook在已授權path內改寫bytes或只切executable bit，
+確認hash-fenced commit同樣拒絕且不留下main commit。
 
 `scripts/tests/test_git_conflict_guard_nondestructive.py` pin 有 markers 時 bytes 與 foreign staged
 entry 不動；只有空 orphan 可刪。`test_pretooluse_deny.sh` 覆蓋 direct、`command`/`env` wrapper、

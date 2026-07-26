@@ -2620,3 +2620,20 @@ Production只讀preflight回讀`operations_core/8`與implementation
 acquire或provider call。此evidence-chain根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac尚未執行roles，physical pair與
 operations-core umbrella仍為 **`contained`**。
+
+### 2026-07-26 — Hash-fenced exact-path commit只驗hook前的candidate
+
+**症狀與根因層級**：canonical writer雖在`git commit --only`前驗
+`--expected-content-hash`，commit後卻只驗changed path scope。Failure injection讓
+pre-commit hook在同一個已授權path重新寫bytes並`git add`；最終commit仍只有exact path，
+helper因此rc=0，但commit blob已不是reviewed ChangeSet。只切executable bit也有同樣問題，
+因blob SHA不變且scope合法。根因是immutable content identity沒有跨越hook boundary，
+不是pathspec或authority grant失效。
+
+**底層修復與驗證**：writer在hook前保存每個hash-fenced staged entry的Git mode，commit
+後從實際tree object回讀blob SHA-256與mode；任一漂移都在同一writer lease內以HEAD CAS
+回退、還原原index，並保留一般working bytes供診斷。Bytes rewrite、mode-only rewrite與
+foreign-path injection三種failure injection均通過；相鄰writer／reference-hook／Change
+Delivery suites **98 passed**，`py_compile`與diff gate通過。此post-hook identity假成功根因為
+**`root_cause_fixed_and_verified`**；operations-core umbrella仍只因physical two-Mac
+authority receipt pair未完成而維持 **`contained`**。

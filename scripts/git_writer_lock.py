@@ -455,6 +455,84 @@ def _committed_scope(
     )
 
 
+def _staged_blob_mode(
+    repo: Path,
+    *,
+    path: str,
+    env: dict[str, str],
+    pass_fds: tuple[int, ...],
+) -> str | None:
+    entry = subprocess.run(
+        _git("ls-files", "--stage", "-z", "--", path),
+        cwd=repo,
+        capture_output=True,
+        env=env,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    if entry.returncode != 0:
+        return None
+    records = [record for record in entry.stdout.split(b"\0") if record]
+    if len(records) != 1:
+        return None
+    metadata, separator, observed_path = records[0].partition(b"\t")
+    fields = metadata.split()
+    if (
+        separator != b"\t"
+        or observed_path.decode("utf-8", errors="surrogateescape") != path
+        or len(fields) != 3
+        or fields[2] != b"0"
+    ):
+        return None
+    return fields[0].decode("ascii", errors="strict")
+
+
+def _committed_blob_identity(
+    repo: Path,
+    *,
+    commit_head: str,
+    path: str,
+    env: dict[str, str],
+    pass_fds: tuple[int, ...],
+) -> tuple[str, str] | None:
+    entry = subprocess.run(
+        _git("ls-tree", "-z", commit_head, "--", path),
+        cwd=repo,
+        capture_output=True,
+        env=env,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    if entry.returncode != 0:
+        return None
+    records = [record for record in entry.stdout.split(b"\0") if record]
+    if len(records) != 1:
+        return None
+    metadata, separator, observed_path = records[0].partition(b"\t")
+    fields = metadata.split()
+    if (
+        separator != b"\t"
+        or observed_path.decode("utf-8", errors="surrogateescape") != path
+        or len(fields) != 3
+        or fields[1] != b"blob"
+    ):
+        return None
+    blob = subprocess.run(
+        _git("cat-file", "blob", fields[2].decode("ascii", errors="strict")),
+        cwd=repo,
+        capture_output=True,
+        env=env,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    if blob.returncode != 0:
+        return None
+    return (
+        fields[0].decode("ascii", errors="strict"),
+        hashlib.sha256(blob.stdout).hexdigest(),
+    )
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     command = _strip_separator(args.command)
     if not command:
@@ -589,6 +667,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
             if staged.returncode != 1:
                 return int(staged.returncode)
 
+            expected_git_modes: dict[str, str] = {}
             for path, expected_sha256 in expected_content_hashes.items():
                 staged_blob = subprocess.run(
                     _git("show", f":{path}"),
@@ -614,6 +693,20 @@ def cmd_commit(args: argparse.Namespace) -> int:
                         file=sys.stderr,
                     )
                     return 2
+                staged_mode = _staged_blob_mode(
+                    repo,
+                    path=path,
+                    env=env,
+                    pass_fds=lease.child_pass_fds(),
+                )
+                if staged_mode is None:
+                    print(
+                        "[git-writer-lock] BLOCKED: cannot read staged Git "
+                        f"mode for expected identity: {path}",
+                        file=sys.stderr,
+                    )
+                    return 2
+                expected_git_modes[path] = staged_mode
 
             commit_cmd = _git("commit", "--only")
             if args.message_file:
@@ -630,11 +723,12 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     capture_output=True,
                     **popen,
                 )
+                committed_head_id = committed_head.stdout.strip()
                 commit_scope = (
                     _committed_scope(
                         repo,
                         base_head=original_head,
-                        commit_head=committed_head.stdout.strip(),
+                        commit_head=committed_head_id,
                         env=env,
                         pass_fds=lease.child_pass_fds(),
                     )
@@ -646,9 +740,43 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     if commit_scope is not None
                     else []
                 )
-                if commit_scope is None or unexpected:
+                content_mismatches: list[
+                    tuple[str, str, str | None]
+                ] = []
+                mode_mismatches: list[
+                    tuple[str, str, str | None]
+                ] = []
+                if commit_scope is not None:
+                    for path, expected_sha256 in (
+                        expected_content_hashes.items()
+                    ):
+                        identity = _committed_blob_identity(
+                            repo,
+                            commit_head=committed_head_id,
+                            path=path,
+                            env=env,
+                            pass_fds=lease.child_pass_fds(),
+                        )
+                        observed_mode, observed_sha256 = (
+                            identity if identity is not None else (None, None)
+                        )
+                        if observed_sha256 != expected_sha256:
+                            content_mismatches.append(
+                                (path, expected_sha256, observed_sha256)
+                            )
+                        expected_mode = expected_git_modes[path]
+                        if observed_mode != expected_mode:
+                            mode_mismatches.append(
+                                (path, expected_mode, observed_mode)
+                            )
+                if (
+                    commit_scope is None
+                    or unexpected
+                    or content_mismatches
+                    or mode_mismatches
+                ):
                     new_head = (
-                        committed_head.stdout.strip()
+                        committed_head_id
                         if committed_head.returncode == 0
                         else ""
                     )
@@ -681,7 +809,29 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     detail = (
                         f"unexpected paths {unexpected}"
                         if unexpected
-                        else "result was not one direct child commit"
+                        else (
+                            "committed content drift for "
+                            + ", ".join(
+                                f"{path} (expected {expected}, observed "
+                                f"{observed or 'missing'})"
+                                for path, expected, observed in (
+                                    content_mismatches
+                                )
+                            )
+                            if content_mismatches
+                            else (
+                                "committed mode drift for "
+                                + ", ".join(
+                                    f"{path} (expected {expected}, observed "
+                                    f"{observed or 'missing'})"
+                                    for path, expected, observed in (
+                                        mode_mismatches
+                                    )
+                                )
+                                if mode_mismatches
+                                else "result was not one direct child commit"
+                            )
+                        )
                     )
                     print(
                         "[git-writer-lock] BLOCKED: commit scope drift after "

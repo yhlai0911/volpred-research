@@ -466,6 +466,84 @@ def test_exact_path_commit_rejects_hook_injected_foreign_path(tmp_path: Path) ->
     assert foreign.read_text() == "hook injected\n"
 
 
+def test_exact_path_commit_rejects_hook_rewriting_hash_fenced_path(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    owned = repo / "owned.txt"
+    expected = b"reviewed candidate\n"
+    owned.write_bytes(expected)
+    before_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "printf 'hook replacement\\n' > owned.txt\n"
+        "git add -- owned.txt\n"
+    )
+    hook.chmod(0o755)
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "hash-fenced-owner",
+        "--expected-content-hash",
+        f"owned.txt={hashlib.sha256(expected).hexdigest()}",
+        "--message",
+        "reviewed candidate only",
+        "--",
+        "owned.txt",
+    )
+
+    assert blocked.returncode == 2
+    assert "committed content drift" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == before_head
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+    assert owned.read_text() == "hook replacement\n"
+
+
+def test_exact_path_commit_rejects_hook_changing_hash_fenced_mode(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    owned = repo / "owned.sh"
+    expected = b"#!/bin/sh\nexit 0\n"
+    owned.write_bytes(expected)
+    before_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "chmod +x owned.sh\n"
+        "git add -- owned.sh\n"
+    )
+    hook.chmod(0o755)
+
+    blocked = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "hash-fenced-owner",
+        "--expected-content-hash",
+        f"owned.sh={hashlib.sha256(expected).hexdigest()}",
+        "--message",
+        "reviewed candidate mode only",
+        "--",
+        "owned.sh",
+    )
+
+    assert blocked.returncode == 2
+    assert "committed mode drift" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == before_head
+    assert _run(repo, "git", "diff", "--cached", "--name-only").stdout == ""
+    assert stat.S_IMODE(owned.stat().st_mode) & 0o111
+
+
 def test_exact_path_commit_expected_head_fails_before_touching_index(
     tmp_path: Path,
 ) -> None:
