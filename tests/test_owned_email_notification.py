@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import datetime, timezone
 
 import pytest
 
@@ -9,6 +10,7 @@ from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
     EffectView,
+    FailedEffect,
 )
 from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery.owned_email import (
@@ -17,6 +19,7 @@ from volpred.ops.delivery.owned_email import (
     OwnedEmailAttempt,
     OwnedEmailCommand,
     OwnedEmailNotification,
+    OwnedEmailRecovery,
     OwnedEmailReceipt,
     OwnedEmailRequest,
     SupabaseOwnedEmailStore,
@@ -150,18 +153,28 @@ class _Store:
     def settle(
         self,
         attempt: OwnedEmailAttempt,
-        outcome: AcknowledgedEffect,
+        outcome: AcknowledgedEffect | FailedEffect,
     ) -> OwnedEmailReceipt:
         self.calls.append(("settle", (attempt, outcome)))
+        delivered = isinstance(outcome, AcknowledgedEffect)
+        disposition = (
+            "delivered"
+            if delivered
+            else (
+                "retry_scheduled"
+                if outcome.retryable
+                else "dead_lettered"
+            )
+        )
         return OwnedEmailReceipt(
             schema_version="owned-email-receipt.v1",
             owner_generation=attempt.owner_generation,
             work_id=attempt.work_id,
-            work_status="succeeded",
+            work_status="succeeded" if delivered else "failed",
             effect_id=attempt.effect.id,
-            effect_status="delivered",
+            effect_status="delivered" if delivered else disposition,
             attempt_count=attempt.attempt_count,
-            disposition="delivered",
+            disposition=disposition,
             evidence_ref=outcome.evidence_ref,
             evidence_sha256=outcome.evidence_sha256,
             primary_authority_ref=attempt.primary_authority_ref,
@@ -183,6 +196,48 @@ class _Provider:
             acknowledgement=effect.acknowledgement,
             evidence_ref="imap-sent:message-id:test",
             evidence_sha256="d" * 64,
+        )
+
+
+class _RecoveryStore(_Store):
+    def __init__(self, owner: NotificationOwner) -> None:
+        super().__init__(owner)
+        self.recoveries: list[OwnedEmailAttempt] = [self.attempt]
+
+    def recover_expired(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedEmailAttempt | None:
+        self.calls.append(
+            (
+                "recover_expired",
+                (
+                    owner_generation,
+                    worker_id,
+                    lease_seconds,
+                    work_lease_token,
+                    outbox_claim_token,
+                    primary_fencing_token,
+                ),
+            )
+        )
+        if not self.recoveries:
+            return None
+        attempt = self.recoveries.pop(0)
+        return OwnedEmailAttempt(
+            **{
+                **attempt.__dict__,
+                "attempt_count": attempt.attempt_count + 1,
+                "work_lease_token": work_lease_token,
+                "outbox_claim_token": outbox_claim_token,
+                "primary_fencing_token": primary_fencing_token,
+            }
         )
 
 
@@ -235,6 +290,81 @@ def test_deliver_owns_request_begin_provider_and_settlement() -> None:
         "primary-token",
     )
     assert primary_authority.calls == 3
+
+
+def test_recover_owns_claim_provider_and_settlement() -> None:
+    store = _RecoveryStore(_owner())
+    provider = _Provider()
+    tokens = iter(
+        (
+            "work-recovery-token",
+            "outbox-recovery-token",
+            "work-unused-token",
+            "outbox-unused-token",
+        )
+    )
+    recovery = OwnedEmailRecovery(
+        store=store,
+        provider=provider,
+        primary_authority=_LeaseGate(),
+        token_factory=lambda: next(tokens),
+        now_factory=lambda: datetime(
+            2026, 7, 24, 7, 30, tzinfo=timezone.utc
+        ),
+        max_age_seconds=3600,
+    )
+
+    summary = recovery.recover(limit=2)
+
+    assert summary.recovered_count == 1
+    assert summary.delivered_count == 1
+    assert summary.stale_count == 0
+    assert provider.calls == [(store.attempt.effect, store.attempt.payload)]
+    assert [name for name, _ in store.calls] == [
+        "read_owner",
+        "recover_expired",
+        "settle",
+        "recover_expired",
+    ]
+
+
+def test_recover_dead_letters_stale_alert_without_provider_send() -> None:
+    store = _RecoveryStore(_owner())
+    provider = _Provider()
+    settled_outcomes: list[object] = []
+    original_settle = store.settle
+
+    def capture_settle(
+        attempt: OwnedEmailAttempt,
+        outcome: object,
+    ) -> OwnedEmailReceipt:
+        settled_outcomes.append(outcome)
+        return original_settle(attempt, outcome)  # type: ignore[arg-type]
+
+    store.settle = capture_settle  # type: ignore[method-assign]
+    recovery = OwnedEmailRecovery(
+        store=store,
+        provider=provider,
+        primary_authority=_LeaseGate(),
+        token_factory=iter(
+            ("work-recovery-token", "outbox-recovery-token")
+        ).__next__,
+        now_factory=lambda: datetime(
+            2026, 7, 24, 9, 0, tzinfo=timezone.utc
+        ),
+        max_age_seconds=3600,
+    )
+
+    summary = recovery.recover(limit=1)
+
+    assert summary.recovered_count == 1
+    assert summary.delivered_count == 0
+    assert summary.stale_count == 1
+    assert provider.calls == []
+    assert len(settled_outcomes) == 1
+    assert isinstance(settled_outcomes[0], FailedEffect)
+    assert settled_outcomes[0].reason_code == "owned_email_recovery_stale"
+    assert settled_outcomes[0].retryable is False
 
 
 def test_deliver_fails_closed_before_request_when_owner_is_legacy() -> None:

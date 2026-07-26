@@ -305,6 +305,9 @@ GitHub CLI 已安裝於 `/opt/homebrew/bin/gh`。Codex 的非互動 shell 可能
 `/opt/homebrew/bin`，因此 `gh: command not found` **不代表未安裝**：先跑
 `zsh -lic 'command -v gh'` 或直接使用 `/opt/homebrew/bin/gh`。只有固定路徑與 login
 shell 都確認不存在後才可討論安裝；禁止因 PATH 漏載而重裝或回報 CLI 不存在。
+Supabase CLI 同樣已安裝於 `/opt/homebrew/bin/supabase`。任何 Homebrew CLI 出現
+`command not found` 時，一律先檢查 `/opt/homebrew/bin/<tool>` 與 login shell，再判定
+是否真的缺少；automation／wrapper 使用已驗證的絕對路徑，不依賴互動 shell PATH。
 
 ### Triage labels
 

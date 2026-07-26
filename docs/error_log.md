@@ -3005,3 +3005,62 @@ owner RPC regression 的 immutable HEAD 上，再以外部模型金鑰 unset、
 **`root_cause_fixed_and_verified`**。原三筆 test-shaped running rows不手改、不刪除，
 保留 audit evidence；Issue #9 的 Work Coordinator queue owner 仍是 `legacy/1`、
 gate／gate receipt 都是 0，所以 Issue #9 整體仍為 **`contained`**。
+
+另以未關閉 CI-parity 的標準 `uv run pytest -q` 重跑，功能測試為
+**5,183 passed、1 skipped、0 test failure**；exit 1 僅是 post-hook 發現 live checkout
+讀到未追蹤 `.claude/worktrees`／ops receipts。Production 在
+`07:16:50.782473Z → 07:29:50.790468Z` 回讀仍為 136 筆、最新仍是
+`07:01:49.8944Z`，baseline 後新增 **0**；不以 post-hook 紅燈掩蓋功能結果，也不把它
+誤報成全套綠燈。
+
+### 2026-07-26 — Work-shadow owner mismatch 被過濾可隱藏 A→B→A；assessor 允許部分 owner evidence
+
+**證據化症狀**：Matt 第三輪 Spec review 發現 assessor 先丟棄 owner evidence 不符的
+v4 receipts，再計算 window／gap。若 owner A 連跑、短暫切到 B、又以同 bytes 回 A，
+B receipt 會消失，剩餘 A timeline 只形成小於 26h 的 gap，可能錯過「連續七日無
+simultaneous owner」要求。Standards review 同時發現 public assessor 的 gate／state
+path／state SHA 都有 `None` default；只傳 mode 也能在測試中回 ready，與 canonical
+文件宣稱的完整 match 不一致。
+
+**根因與修正**：這是 assessment state-model／interface contract 缺口。Public seam
+現在只接受單一必填 `TaskPoolModeEvidence`，mode／enabled／resolved path／SHA／byte
+count 全部逐欄 match，partial caller 直接 TypeError。所有 owner-bound v4 receipts
+先依 append `recorded_at` 排序；最後一張 mismatch 是新的 epoch boundary，assessment
+只從其後連續同 owner generation 起算。v3 仍為 audit-only，不形成 boundary。
+
+**回歸**：A→B→A 精確 regression 在舊版錯誤回 `ready=true`／count 8；修後回
+`observation_window_too_short`／count 5，`recorded_from` 從 B 後第一張 A receipt
+開始。mode-only API regression 由未拋錯轉為 TypeError。Shadow assessment＋cutover
+preflight **45 passed**，最終 Matt Standards／Spec 雙軸複審皆 **PASS**；Issue #9
+仍為 **`contained`**。
+
+### 2026-07-26 — Owned-email begin 後程序中斷，過期 attempt 沒有 recovery actuator
+
+**證據化症狀**：production 在 `2026-07-26T07:40:39Z` 回讀 owner
+`operations_core/4`，owned-email 已有 118 次 delivered，但另有 22 筆
+`owned_notification_attempts.status=started`；對應 WorkItem=`running`、
+outbox=`claimed`、EffectRequest=`requested`，三層 lease 全部過期。最近 24 小時新增
+13 筆、最近兩小時新增 5 筆，故不是單一事故或只需補資料的歷史殘留。
+
+**根因層級**：`volpred_begin_owned_email_notification` 本來就能重新取得過期
+WorkItem/outbox；provider adapter 也會把 SMTP／IMAP exception 轉成 retryable
+`FailedEffect`。真正缺口是程序若在 begin 後、settle 前 crash，repo 沒有任何 reader、
+worker 或 schedule 會列出並回收過期 attempt。這是 actuator／schedule contract 缺失，
+不是資料庫 reacquire、provider exception mapping 或 ACL 故障。
+
+**底層修復**：新增 service-role-only 原子 recovery RPC，以
+`FOR UPDATE SKIP LOCKED` 選最舊過期 attempt，重用 canonical begin 完成新 lease／
+authority fencing，原子關閉舊 attempt，並寫入 private FORCE-RLS append-only
+recovery receipt。Python 公開 seam `OwnedEmailRecovery.recover(limit)` 對一小時內
+alert 先用 deterministic Message-ID 做 Sent Mail exact read-back／必要補送；超過一小時
+以 terminal `owned_email_recovery_stale` 結案，避免大量補寄失去時效的告警。
+`config/runtime_schedules.json` 與同步 wrapper 建立每小時單一 piggy-back actuator。
+
+**回歸與 live 回讀**：PG17 先以「attempt 1 crash → 三層 lease 過期 → recovery
+attempt 2」得到 UndefinedFunction RED，再驗 old attempt、new attempt、receipt、RLS、
+owner、ACL 與 search path 全部 GREEN。Python 回歸涵蓋近期補送與 stale 不呼叫 provider。
+Production migration 套用後首跑回收 22/22：21 stale dead-letter、1 exact Sent read-back
+delivered；回讀 `expired_started=0`、`active_started=0`、22/22 recovery receipts、
+22/22 WorkItem 與 outbox terminal。相同 wrapper 第二次執行
+`recovered_count=0`，證明 idempotent。此問題五步 gate 完成，狀態為
+**`root_cause_fixed_and_verified`**。

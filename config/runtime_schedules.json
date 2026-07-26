@@ -192,6 +192,21 @@
         ]
       },
       {
+        "id": "owned_email_recovery",
+        "label": "owned ops-alert email expired-attempt recovery",
+        "cron": "5 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_owned_email_recovery.sh",
+        "log_path": "storage/logs/cron/owned_email_recovery.log",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true,
+        "description": "每小時由 check_alerts → run_due_jobs 單一 piggy-back owner 回收程序在 begin 後中斷的 owned-email attempt。RPC 以 FOR UPDATE SKIP LOCKED 原子重領 WorkItem/outbox 並寫 immutable recovery receipt；一小時內先以 deterministic Message-ID 查 Sent Mail 去重補送，超過一小時直接 durable dead-letter，避免部署時補炸歷史告警。正式有效 cadence 最長約 60 分鐘；失敗不更新 cron_last_run，下一 tick 重試。",
+        "matchers": [
+          "recover_owned_email_notifications.py",
+          "cron_owned_email_recovery.sh",
+          "volpred_recover_expired_owned_email_notification"
+        ]
+      },
+      {
         "id": "memory_health_daily",
         "label": "Memory health 日檢",
         "cron": "30 5 * * *",

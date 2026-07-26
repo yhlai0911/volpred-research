@@ -1615,6 +1615,16 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   `scheduled_20260726T071908848044Z_db0c9cd079a6` 回讀 owner evidence
   `direct_execution`／gate enabled、source counts `1/0/0`、兩個 reconciliation
   issues；assessment 只計入這張 owner-matched v4 receipt並維持五個 blocking reasons。
+  後續 live smoke `scheduled_20260726T073001085132Z_41a7548d488c` 同樣 exit 0，
+  owner-state SHA 維持 `45aa8c…d630b4`；assessment 只計入兩張同 owner-state v4
+  receipts，仍保留五個 blockers，沒有把先前 v3 或不同 owner generation 計入。
+
+- 第三輪 Matt review 補上 ownership continuity 的 ABA gate：assessor 不再接受四個
+  可各自省略的 owner 欄位，而只接受必填 typed `TaskPoolModeEvidence`；mode、gate、
+  resolved path、SHA 與 byte count 全 match。所有 v4 依 append clock 排序，任何
+  owner mismatch 都是 epoch boundary，窗口從最後 mismatch 後重新起算，不能將
+  A→B→A 中的 B receipt 過濾掉後延續舊 A soak。精確 ABA 與 partial-API regressions
+  加入後，assessment／cutover preflight **45 passed**。
 
 取得七天 shadow 證據、production migration read-back 與 owner-approved window 後，
 才規劃第一個正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與

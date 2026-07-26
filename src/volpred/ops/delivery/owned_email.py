@@ -12,6 +12,8 @@ from __future__ import annotations
 import base64
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from datetime import datetime, timezone
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -125,6 +127,15 @@ class OwnedEmailReceipt:
         )
 
 
+@dataclass(frozen=True)
+class OwnedEmailRecoverySummary:
+    recovered_count: int
+    delivered_count: int
+    stale_count: int
+    retry_scheduled_count: int
+    receipts: tuple[OwnedEmailReceipt, ...]
+
+
 class _OwnedEmailStore(Protocol):
     def read_owner(self) -> NotificationOwner: ...
 
@@ -145,6 +156,17 @@ class _OwnedEmailStore(Protocol):
         outbox_claim_token: str,
         primary_fencing_token: str,
     ) -> OwnedEmailAttempt: ...
+
+    def recover_expired(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedEmailAttempt | None: ...
 
     def settle(
         self,
@@ -282,6 +304,154 @@ class OwnedEmailNotification:
             )
 
 
+class OwnedEmailRecovery:
+    """Recover process-interrupted ops-alert deliveries through one fence."""
+
+    def __init__(
+        self,
+        *,
+        store: _OwnedEmailStore,
+        provider: _OwnedEmailProvider,
+        primary_authority: _PrimaryLeaseGate,
+        worker_id: str = "effect-worker:ops-alert-email",
+        lease_seconds: int = 300,
+        max_age_seconds: int = 3600,
+        token_factory: Callable[[], str] | None = None,
+        now_factory: Callable[[], datetime] | None = None,
+    ) -> None:
+        if not worker_id.strip():
+            raise ValueError("owned email recovery worker_id is required")
+        if isinstance(lease_seconds, bool) or lease_seconds <= 0:
+            raise ValueError(
+                "owned email recovery lease_seconds must be positive"
+            )
+        if isinstance(max_age_seconds, bool) or max_age_seconds <= 0:
+            raise ValueError(
+                "owned email recovery max_age_seconds must be positive"
+            )
+        self._store = store
+        self._provider = provider
+        self._primary_authority = primary_authority
+        self._worker_id = worker_id.strip()
+        self._lease_seconds = lease_seconds
+        self._max_age_seconds = max_age_seconds
+        self._token_factory = token_factory or (
+            lambda: f"owned_email_recovery_{uuid4().hex}"
+        )
+        self._now_factory = now_factory or (
+            lambda: datetime.now(timezone.utc)
+        )
+
+    def recover(self, *, limit: int = 10) -> OwnedEmailRecoverySummary:
+        if isinstance(limit, bool) or limit <= 0:
+            raise ValueError("owned email recovery limit must be positive")
+        primary_lease = self._current_primary_lease()
+        owner = self._store.read_owner()
+        if (
+            owner.effect_family != _OWNER_FAMILY
+            or owner.owner != _OPERATIONS_CORE_OWNER
+        ):
+            raise NotificationOwnershipLost(
+                "operations core does not own email.ops_alert"
+            )
+
+        receipts: list[OwnedEmailReceipt] = []
+        stale_count = 0
+        for _ in range(limit):
+            primary_lease = self._current_primary_lease(
+                expected=primary_lease,
+            )
+            attempt = self._store.recover_expired(
+                owner_generation=owner.generation,
+                worker_id=self._worker_id,
+                lease_seconds=self._lease_seconds,
+                work_lease_token=self._token("work"),
+                outbox_claim_token=self._token("outbox"),
+                primary_fencing_token=primary_lease.fencing_token,
+            )
+            if attempt is None:
+                break
+            OwnedEmailNotification._validate_attempt_authority(
+                attempt,
+                primary_lease=primary_lease,
+            )
+            self._current_primary_lease(expected=primary_lease)
+            if self._is_stale(attempt):
+                outcome = _stale_recovery_outcome(attempt.effect)
+                stale_count += 1
+            else:
+                outcome = self._provider.deliver(
+                    attempt.effect,
+                    attempt.payload,
+                )
+            receipts.append(self._store.settle(attempt, outcome))
+
+        return OwnedEmailRecoverySummary(
+            recovered_count=len(receipts),
+            delivered_count=sum(
+                receipt.delivered for receipt in receipts
+            ),
+            stale_count=stale_count,
+            retry_scheduled_count=sum(
+                receipt.disposition == "retry_scheduled"
+                for receipt in receipts
+            ),
+            receipts=tuple(receipts),
+        )
+
+    def _is_stale(self, attempt: OwnedEmailAttempt) -> bool:
+        created_at = _utc_datetime(
+            attempt.effect.created_at,
+            field="effect created_at",
+        )
+        now = self._now_factory()
+        if not isinstance(now, datetime) or now.tzinfo is None:
+            raise ValueError(
+                "owned email recovery now_factory must return aware datetime"
+            )
+        return (
+            now.astimezone(timezone.utc) - created_at
+        ).total_seconds() > self._max_age_seconds
+
+    def _token(self, kind: str) -> str:
+        token = self._token_factory()
+        if not isinstance(token, str) or not token.strip():
+            raise ValueError(
+                f"owned email recovery {kind} token is required"
+            )
+        return token.strip()
+
+    def _current_primary_lease(
+        self,
+        *,
+        expected: PrimaryLease | None = None,
+    ) -> PrimaryLease:
+        lease = self._primary_authority.current_lease()
+        if not isinstance(lease, PrimaryLease):
+            raise TypeError(
+                "owned email recovery keepalive returned no typed "
+                "PrimaryLease"
+            )
+        if (
+            lease.authority_key != _PRIMARY_AUTHORITY_KEY
+            or lease.holder_ref != self._worker_id
+        ):
+            raise NotificationOwnershipLost(
+                "owned email recovery keepalive lease identity mismatch"
+            )
+        if expected is not None and (
+            lease.authority_key != expected.authority_key
+            or lease.holder_ref != expected.holder_ref
+            or lease.epoch != expected.epoch
+            or lease.fencing_token != expected.fencing_token
+            or lease.acquired_at != expected.acquired_at
+        ):
+            raise NotificationOwnershipLost(
+                "owned email recovery keepalive lease was replaced"
+            )
+        return lease
+
+
 class SupabaseOwnedEmailStore:
     """Service-role-only PostgREST adapter for the ownership RPCs."""
 
@@ -403,143 +573,45 @@ class SupabaseOwnedEmailStore:
                 "p_primary_fencing_token": primary_fencing_token,
             },
         )
-        effect_payload = _mapping(payload.get("effect"), field="effect")
-        acknowledgement = _mapping(
-            effect_payload.get("acknowledgement"),
-            field="effect acknowledgement",
-        )
-        effect = EffectView(
-            schema_version=_required_text(
-                effect_payload.get("schema_version"),
-                field="effect schema_version",
-            ),
-            id=_required_text(effect_payload.get("id"), field="effect id"),
-            idempotency_key=_required_text(
-                effect_payload.get("idempotency_key"),
-                field="effect idempotency_key",
-            ),
-            work_item_id=_required_text(
-                effect_payload.get("work_item_id"),
-                field="effect work_item_id",
-            ),
-            work_item_version=_positive_integer(
-                effect_payload.get("work_item_version"),
-                field="effect work_item_version",
-            ),
-            effect_kind=_required_text(
-                effect_payload.get("effect_kind"),
-                field="effect kind",
-            ),
-            target_ref=_required_text(
-                effect_payload.get("target_ref"),
-                field="effect target_ref",
-            ),
-            payload_ref=_required_text(
-                effect_payload.get("payload_ref"),
-                field="effect payload_ref",
-            ),
-            payload_sha256=_sha256(
-                effect_payload.get("payload_sha256"),
-                field="effect payload hash",
-            ),
-            risk=_required_text(
-                effect_payload.get("risk"),
-                field="effect risk",
-            ),
-            acknowledgement=AcknowledgementExpectation(
-                kind=_required_text(
-                    acknowledgement.get("kind"),
-                    field="acknowledgement kind",
-                ),
-                target_ref=_required_text(
-                    acknowledgement.get("target_ref"),
-                    field="acknowledgement target_ref",
-                ),
-            ),
-            requester_ref=_required_text(
-                effect_payload.get("requester_ref"),
-                field="effect requester_ref",
-            ),
-            request_sha256=_sha256(
-                effect_payload.get("request_sha256"),
-                field="effect request hash",
-            ),
-            status=_required_text(
-                effect_payload.get("status"),
-                field="effect status",
-            ),
-            created_at=_required_text(
-                effect_payload.get("created_at"),
-                field="effect created_at",
-            ),
-        )
-        try:
-            raw_payload = base64.b64decode(
-                _required_text(
-                    payload.get("payload_base64"),
-                    field="payload_base64",
-                ),
-                validate=True,
-            )
-        except ValueError as exc:
-            raise RuntimeError(
-                "owned email begin returned invalid payload bytes"
-            ) from exc
-        return OwnedEmailAttempt(
-            owner_generation=_positive_integer(
-                payload.get("owner_generation"),
-                field="attempt owner_generation",
-            ),
-            work_id=_required_text(payload.get("work_id"), field="work_id"),
-            work_version=_positive_integer(
-                payload.get("work_version"),
-                field="work_version",
-            ),
+        return _attempt_from_payload(
+            payload,
             work_lease_token=work_lease_token,
-            effect=effect,
-            payload=raw_payload,
-            outbox_sequence=_positive_integer(
-                payload.get("outbox_sequence"),
-                field="outbox_sequence",
-            ),
-            attempt_count=_positive_integer(
-                payload.get("attempt_count"),
-                field="attempt_count",
-            ),
             outbox_claim_token=outbox_claim_token,
-            worker_id=_required_text(
-                payload.get("worker_id"),
-                field="worker_id",
-            ),
-            primary_authority_key=_required_text(
-                payload.get("primary_authority_key"),
-                field="primary_authority_key",
-            ),
-            primary_authority_holder_ref=_required_text(
-                payload.get("primary_authority_holder_ref"),
-                field="primary_authority_holder_ref",
-            ),
-            primary_authority_epoch=_positive_integer(
-                payload.get("primary_authority_epoch"),
-                field="primary_authority_epoch",
-            ),
             primary_fencing_token=primary_fencing_token,
-            authority_request_sha256=_sha256(
-                payload.get("authority_request_sha256"),
-                field="authority request hash",
-            ),
-            outbox_claim_ref=_required_text(
-                payload.get("outbox_claim_ref"),
-                field="outbox_claim_ref",
-            ),
-            primary_authority_ref=_required_text(
-                payload.get("primary_authority_ref"),
-                field="primary_authority_ref",
-            ),
-            lease_expires_at=_required_text(
-                payload.get("lease_expires_at"),
-                field="lease_expires_at",
-            ),
+        )
+
+    def recover_expired(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedEmailAttempt | None:
+        payload = self._rpc(
+            "volpred_recover_expired_owned_email_notification",
+            {
+                "p_owner_generation": owner_generation,
+                "p_worker_id": worker_id,
+                "p_lease_seconds": lease_seconds,
+                "p_work_lease_token": work_lease_token,
+                "p_outbox_claim_token": outbox_claim_token,
+                "p_primary_fencing_token": primary_fencing_token,
+            },
+        )
+        if payload.get("recovered") is False:
+            return None
+        if payload.get("recovered") is not True:
+            raise RuntimeError(
+                "owned email recovery returned invalid recovery state"
+            )
+        return _attempt_from_payload(
+            payload,
+            work_lease_token=work_lease_token,
+            outbox_claim_token=outbox_claim_token,
+            primary_fencing_token=primary_fencing_token,
         )
 
     def settle(
@@ -790,6 +862,184 @@ def _owner_from_payload(payload: Mapping[str, Any]) -> NotificationOwner:
     )
 
 
+def _attempt_from_payload(
+    payload: Mapping[str, Any],
+    *,
+    work_lease_token: str,
+    outbox_claim_token: str,
+    primary_fencing_token: str,
+) -> OwnedEmailAttempt:
+    effect_payload = _mapping(payload.get("effect"), field="effect")
+    acknowledgement = _mapping(
+        effect_payload.get("acknowledgement"),
+        field="effect acknowledgement",
+    )
+    effect = EffectView(
+        schema_version=_required_text(
+            effect_payload.get("schema_version"),
+            field="effect schema_version",
+        ),
+        id=_required_text(effect_payload.get("id"), field="effect id"),
+        idempotency_key=_required_text(
+            effect_payload.get("idempotency_key"),
+            field="effect idempotency_key",
+        ),
+        work_item_id=_required_text(
+            effect_payload.get("work_item_id"),
+            field="effect work_item_id",
+        ),
+        work_item_version=_positive_integer(
+            effect_payload.get("work_item_version"),
+            field="effect work_item_version",
+        ),
+        effect_kind=_required_text(
+            effect_payload.get("effect_kind"),
+            field="effect kind",
+        ),
+        target_ref=_required_text(
+            effect_payload.get("target_ref"),
+            field="effect target_ref",
+        ),
+        payload_ref=_required_text(
+            effect_payload.get("payload_ref"),
+            field="effect payload_ref",
+        ),
+        payload_sha256=_sha256(
+            effect_payload.get("payload_sha256"),
+            field="effect payload hash",
+        ),
+        risk=_required_text(
+            effect_payload.get("risk"),
+            field="effect risk",
+        ),
+        acknowledgement=AcknowledgementExpectation(
+            kind=_required_text(
+                acknowledgement.get("kind"),
+                field="acknowledgement kind",
+            ),
+            target_ref=_required_text(
+                acknowledgement.get("target_ref"),
+                field="acknowledgement target_ref",
+            ),
+        ),
+        requester_ref=_required_text(
+            effect_payload.get("requester_ref"),
+            field="effect requester_ref",
+        ),
+        request_sha256=_sha256(
+            effect_payload.get("request_sha256"),
+            field="effect request hash",
+        ),
+        status=_required_text(
+            effect_payload.get("status"),
+            field="effect status",
+        ),
+        created_at=_required_text(
+            effect_payload.get("created_at"),
+            field="effect created_at",
+        ),
+    )
+    try:
+        raw_payload = base64.b64decode(
+            _required_text(
+                payload.get("payload_base64"),
+                field="payload_base64",
+            ),
+            validate=True,
+        )
+    except ValueError as exc:
+        raise RuntimeError(
+            "owned email attempt returned invalid payload bytes"
+        ) from exc
+    return OwnedEmailAttempt(
+        owner_generation=_positive_integer(
+            payload.get("owner_generation"),
+            field="attempt owner_generation",
+        ),
+        work_id=_required_text(payload.get("work_id"), field="work_id"),
+        work_version=_positive_integer(
+            payload.get("work_version"),
+            field="work_version",
+        ),
+        work_lease_token=work_lease_token,
+        effect=effect,
+        payload=raw_payload,
+        outbox_sequence=_positive_integer(
+            payload.get("outbox_sequence"),
+            field="outbox_sequence",
+        ),
+        attempt_count=_positive_integer(
+            payload.get("attempt_count"),
+            field="attempt_count",
+        ),
+        outbox_claim_token=outbox_claim_token,
+        worker_id=_required_text(
+            payload.get("worker_id"),
+            field="worker_id",
+        ),
+        primary_authority_key=_required_text(
+            payload.get("primary_authority_key"),
+            field="primary_authority_key",
+        ),
+        primary_authority_holder_ref=_required_text(
+            payload.get("primary_authority_holder_ref"),
+            field="primary_authority_holder_ref",
+        ),
+        primary_authority_epoch=_positive_integer(
+            payload.get("primary_authority_epoch"),
+            field="primary_authority_epoch",
+        ),
+        primary_fencing_token=primary_fencing_token,
+        authority_request_sha256=_sha256(
+            payload.get("authority_request_sha256"),
+            field="authority request hash",
+        ),
+        outbox_claim_ref=_required_text(
+            payload.get("outbox_claim_ref"),
+            field="outbox_claim_ref",
+        ),
+        primary_authority_ref=_required_text(
+            payload.get("primary_authority_ref"),
+            field="primary_authority_ref",
+        ),
+        lease_expires_at=_required_text(
+            payload.get("lease_expires_at"),
+            field="lease_expires_at",
+        ),
+    )
+
+
+def _utc_datetime(value: object, *, field: str) -> datetime:
+    normalized = _required_text(value, field=field)
+    try:
+        parsed = datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"{field} must be ISO-8601") from exc
+    if parsed.tzinfo is None:
+        raise ValueError(f"{field} must include timezone")
+    return parsed.astimezone(timezone.utc)
+
+
+def _stale_recovery_outcome(effect: EffectView) -> FailedEffect:
+    reason_code = "owned_email_recovery_stale"
+    evidence = json.dumps(
+        {
+            "effect_id": effect.id,
+            "request_sha256": effect.request_sha256,
+            "reason_code": reason_code,
+            "retryable": False,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return FailedEffect(
+        reason_code=reason_code,
+        evidence_ref=f"effect-attempt:{effect.id}:{reason_code}",
+        evidence_sha256=hashlib.sha256(evidence).hexdigest(),
+        retryable=False,
+    )
+
+
 def _mapping(value: object, *, field: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise RuntimeError(f"{field} must be an object")
@@ -834,6 +1084,8 @@ __all__ = [
     "OwnedEmailAttempt",
     "OwnedEmailCommand",
     "OwnedEmailNotification",
+    "OwnedEmailRecovery",
+    "OwnedEmailRecoverySummary",
     "OwnedEmailReceipt",
     "OwnedEmailRequest",
     "SupabaseOwnedEmailStore",

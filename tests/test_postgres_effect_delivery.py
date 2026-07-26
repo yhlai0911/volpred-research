@@ -207,6 +207,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726050256_operations_core_work_cutover_gate.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726074028_operations_core_owned_email_recovery.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -1306,6 +1310,9 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     text, text, text, text, bigint, text, text, text,
                     text, text, text, text, text, text, text
                   ),
+                  public.volpred_recover_expired_owned_email_notification(
+                    bigint, text, integer, text, text, text
+                  ),
                   public.volpred_read_publisher_article_sync_owner(),
                   public.volpred_transfer_publisher_article_sync_owner(
                     text, bigint, text, text, text, bigint
@@ -1448,6 +1455,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.work_cutover_gates,
               volpred_ops.work_owner_receipts,
               volpred_ops.work_owners,
+              volpred_ops.owned_notification_recovery_receipts,
               volpred_ops.owned_notification_attempts,
               volpred_ops.owned_notification_requests,
               volpred_ops.notification_owner_receipts,
@@ -4587,6 +4595,196 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
         1,
         1,
         ["legacy", "operations_core", "legacy", "operations_core"],
+    )
+
+
+def test_expired_owned_email_attempt_is_atomically_recovered(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "email-notification.v1",
+        "subject": "[VolPred Alert][WARN] PG17 expired attempt",
+        "text_body": "PG17 expired owned-email recovery fixture.",
+        "html_body": "<p>PG17 expired owned-email recovery fixture.</p>",
+    }
+    worker_id = "effect-worker:ops-alert-email"
+    primary_token = "primary-owned-email-recovery-token"
+
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        owner = connection.execute(
+            """
+            SELECT public.volpred_transfer_notification_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "test:pg17-recovery",
+                "exercise expired owned-email recovery",
+                None,
+            ),
+        ).fetchone()[0]
+        connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                "notification:email.ops_alert",
+                worker_id,
+                300,
+                primary_token,
+            ),
+        )
+        owned_request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                "ops-alert:pg17-expired-attempt:2026-07-26",
+                "warn",
+                payload["subject"],
+                "owner@example.com",
+                Jsonb(payload),
+                "test:pg17-recovery",
+            ),
+        ).fetchone()[0]
+        first_attempt = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                owned_request["effect_id"],
+                worker_id,
+                300,
+                "work-recovery-attempt-1",
+                "outbox-recovery-attempt-1",
+                primary_token,
+            ),
+        ).fetchone()[0]
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.owned_notification_attempts
+            SET lease_expires_at = clock_timestamp() - interval '1 minute'
+            WHERE effect_id = %s
+              AND attempt_count = 1
+            """,
+            (owned_request["effect_id"],),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.work_items
+            SET claim_expires_at = clock_timestamp() - interval '1 minute'
+            WHERE id = %s
+            """,
+            (owned_request["work_id"],),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET claim_expires_at = clock_timestamp() - interval '1 minute'
+            WHERE effect_id = %s
+            """,
+            (owned_request["effect_id"],),
+        )
+        connection.execute("SET ROLE service_role")
+        recovered = connection.execute(
+            """
+            SELECT public.volpred_recover_expired_owned_email_notification(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                worker_id,
+                300,
+                "work-recovery-attempt-2",
+                "outbox-recovery-attempt-2",
+                primary_token,
+            ),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+
+        recovery_state = connection.execute(
+            """
+            SELECT
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT disposition
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 2),
+              (SELECT count(*)
+               FROM volpred_ops.owned_notification_recovery_receipts
+               WHERE effect_id = %s
+                 AND expired_attempt_count = 1
+                 AND recovery_attempt_count = 2),
+              has_function_privilege(
+                'service_role',
+                'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)',
+                'EXECUTE'
+              ),
+              NOT has_function_privilege(
+                'anon',
+                'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)',
+                'EXECUTE'
+              ),
+              NOT has_table_privilege(
+                'service_role',
+                'volpred_ops.owned_notification_recovery_receipts',
+                'SELECT'
+              ),
+              (SELECT relrowsecurity AND relforcerowsecurity
+               FROM pg_class AS relation
+               JOIN pg_namespace AS namespace
+                 ON namespace.oid = relation.relnamespace
+               WHERE namespace.nspname = 'volpred_ops'
+                 AND relation.relname =
+                   'owned_notification_recovery_receipts'),
+              (SELECT procedure.proowner = (
+                         SELECT oid FROM pg_roles
+                         WHERE rolname = 'volpred_ops_definer'
+                       )
+                     AND procedure.prosecdef
+                     AND procedure.proconfig = ARRAY['search_path=""']
+               FROM pg_proc AS procedure
+               WHERE procedure.oid =
+                 'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)'::regprocedure)
+            """,
+            (owned_request["effect_id"],) * 4,
+        ).fetchone()
+
+    assert first_attempt["attempt_count"] == 1
+    assert recovered["effect"]["id"] == owned_request["effect_id"]
+    assert recovered["attempt_count"] == 2
+    assert recovery_state == (
+        "retry_scheduled",
+        "recovered_after_expired_lease",
+        "started",
+        1,
+        True,
+        True,
+        True,
+        True,
+        True,
     )
 
 

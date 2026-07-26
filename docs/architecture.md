@@ -87,8 +87,10 @@
 > `work_shadow_observe` schedule 每小時 :15 經單一 piggy-back owner 讀取三份 legacy
 > source，並在同一 queue shared lock 內綁定 paired owner-state bytes；scheduled
 > receipt 為 `work-shadow-replay.v4`，內含 mode／gate flag／state path／state SHA。
-> Assessment 只計入與當下 owner evidence 完全相符的 v4 receipts；既有 v3 保留
-> audit 但不再計入 soak。首張正確 scoped live receipt 為
+> Assessment 必須接收同一個 typed `TaskPoolModeEvidence`，不能省略 gate／path／SHA；
+> 並從最後一張 owner evidence 不符的 v4 receipt 後重新起算，防止 A→B→A ownership
+> discontinuity 被過濾成小 gap。既有 v3 保留 audit 但不再計入 soak。首張正確
+> scoped live receipt 為
 > `scheduled_20260726T063140235891Z_097ee6ba7655`，source counts `1/0/0`。
 > Producer 共用 TaskRecord canonical nonterminal lifecycle vocabulary，保留
 > `queued`／`claimed`／`running`／`awaiting_approval`／`blocked` residue。

@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-25（publisher destructive recovery graph gate）**
+Last updated: **2026-07-26（owned-email expired-attempt recovery）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -150,6 +150,16 @@ Live v4 wrapper smoke
 `scheduled_20260726T071908848044Z_db0c9cd079a6` 已 exit 0；receipt 回讀
 `direct_execution`／gate enabled、owner-state SHA 綁定、source counts `1/0/0`，
 assessment observation count 1 且五個既有 blockers 全保留，沒有誤判 ready。
+第二張 live v4
+`scheduled_20260726T073001085132Z_41a7548d488c` 亦 exit 0；assessment count 2，
+同一 owner-state SHA 且仍為五個 blockers。標準 full suite 功能測試
+**5,183 passed、1 skipped、0 test failure**；CI-parity post-hook 因 live 未追蹤
+worktrees／ops receipts 令整體 exit 1，另行透明記錄、不宣稱全綠。
+第三輪 Matt review 發現 owner-mismatch receipt 若直接過濾，A→B→A 可能延續舊 A
+窗口；assessor 的 gate／path／SHA optional 參數也可被 caller 省略。現改為必填 typed
+`TaskPoolModeEvidence`，五欄完整 match；最後一張 mismatch 形成 epoch boundary，
+七日窗口從其後重新起算。ABA／partial API RED→GREEN，assessment＋cutover
+preflight **45 passed**，Matt 最終 Standards／Spec 雙軸皆 PASS。
 
 同次 full-suite production read-back 發現三筆 06:34–06:35 UTC 建立的
 `ops.alert.email` WorkItem 並非新版 runtime 健康流量，而是測試程序在
@@ -164,6 +174,24 @@ fail closed；read-only owner query 不受影響。現存 production rows 依「
 candidate 有同 timestamp／dedupe key，production WorkItem 三筆皆 `succeeded` 且各有
 durable receipt。這證明 owned-email `operations_core/4` 已正式運作；它不代表
 Work Coordinator queue owner 已切換，後者仍是 `legacy/1`。
+Live read-back 隨後發現另一個獨立 runtime 缺口：118 次 owned-email 已成功交付，但
+22 筆 attempt 因程序在 begin 後、settlement 前中斷，永久停在
+`started/running/claimed` 且 lease 已過期；最近兩小時仍持續新增，證明不是歷史殘留。
+根因是既有 begin 雖允許重領過期 WorkItem/outbox，卻沒有 actuator 或 schedule 會找出
+並呼叫它。新 `volpred_recover_expired_owned_email_notification` 以
+`FOR UPDATE SKIP LOCKED` 原子選取最舊過期 attempt、透過 canonical begin 建立下一次
+fenced attempt、關閉舊 attempt，並追加 private FORCE-RLS immutable recovery receipt；
+service-role 只能執行 RPC，不能直接讀私表，anon／authenticated 無權限。Python
+`OwnedEmailRecovery.recover(limit)` 在一小時內先以 deterministic Message-ID 查 Sent
+Mail 去重補送，超過一小時則 durable dead-letter，避免部署時補炸歷史告警。
+Canonical `owned_email_recovery` schedule 每小時由 check_alerts piggy-back 單一 owner
+執行，wrapper 已同步至 `~/.volpred/bin` 並以最小 cron environment smoke。
+Production 首跑回收 22/22：21 筆 stale 安全 dead-letter、1 筆以 exact Sent read-back
+確認 delivered；DB 回讀 `expired_started=0`、`active_started=0`、22 recovery receipts、
+22 terminal WorkItems 與 22 terminal outbox，第二次執行為零 mutation no-op。
+此 expired-attempt recovery 根因為 **`root_cause_fixed_and_verified`**；Work
+Coordinator Issue #9 仍因 owner=`legacy/1`、gate=0 與七日 evidence 未滿而維持
+**`contained`**。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由
