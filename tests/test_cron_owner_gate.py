@@ -108,3 +108,27 @@ def test_operations_core_execution_bypasses_legacy_gate(tmp_path: Path) -> None:
 
     assert completed.returncode == 0
     assert effect.exists()
+
+
+def test_every_operations_core_canary_wrapper_has_pre_action_owner_gate() -> None:
+    config = json.loads(
+        (ROOT / "config" / "runtime_schedules.json").read_text(encoding="utf-8")
+    )
+    active = set(config["schedule_materialization"]["active_jobs"])
+    items = {
+        item["id"]: item
+        for item in config["system_crontab"]["items"]
+        if item.get("id") in active
+    }
+
+    assert set(items) == active
+    for job_id, item in items.items():
+        wrapper = ROOT / "scripts" / Path(item["wrapper_script"]).name
+        body = wrapper.read_text(encoding="utf-8")
+        assert "cron_lib.sh" in body, job_id
+        assert "cron_emit_start" in body, job_id
+
+
+def test_handoff_wrapper_propagates_inner_failure() -> None:
+    body = (ROOT / "scripts" / "cron_handoff_regen.sh").read_text(encoding="utf-8")
+    assert 'exit "$EXIT_CODE"' in body

@@ -6,6 +6,9 @@
 
 exec >> /Users/yhlai0911/.volpred/logs/handoff_regen.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1
+source scripts/cron_lib.sh
+_start=$SECONDS
+cron_emit_start "handoff_regen"
 
 ulimit -Sn 65536 2>/dev/null || true
 
@@ -40,4 +43,5 @@ if [[ "$RC1" -ne 0 || "$RC2" -ne 0 ]]; then
   EXIT_CODE=1
 fi
 echo "=== handoff-regen end $(date '+%Y-%m-%d %H:%M:%S %Z') (rc1=$RC1 rc2=$RC2 exit=$EXIT_CODE) ==="
-echo "=== [handoff_regen] exit $EXIT_CODE at $(date '+%Y-%m-%d %H:%M:%S %Z') ==="
+cron_emit_exit "handoff_regen" "$EXIT_CODE" "$_start"
+exit "$EXIT_CODE"
