@@ -608,6 +608,7 @@ def _repend_task(
     task.pop("claimed_by", None)
     task.pop("claimed_at", None)
     task.pop("claim_session_id", None)
+    task.pop("started_at", None)
     task["last_released_at"] = _now()
     if reason:
         task["last_release_reason"] = reason
@@ -1000,7 +1001,14 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
             else:
                 age_h = (now - claimed_dt).total_seconds() / 3600
             if age_h >= args.stale_hours:
-                prev_owner = t.get("claimed_by")
+                release_reason = (
+                    f"auto_release_stale_{args.stale_hours}h"
+                )
+                prev_owner = _repend_task(
+                    t,
+                    note=release_reason,
+                    reason=release_reason,
+                )
                 released.append(
                     {
                         "id": _task_key(t),
@@ -1008,19 +1016,6 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                         "age_h": round(age_h, 1) if claimed_dt is not None else None,
                         "age_source": age_source,
                     }
-                )
-                t["status"] = "pending"
-                t.pop("claimed_by", None)
-                t.pop("claimed_at", None)
-                t.pop("claim_session_id", None)
-                t["last_released_at"] = _now()
-                t["last_release_reason"] = f"auto_release_stale_{args.stale_hours}h"
-                _record_status_history(
-                    t,
-                    frm=status or "claimed",
-                    to="pending",
-                    by=prev_owner or "cleanup",
-                    note=f"auto_release_stale_{args.stale_hours}h",
                 )
     return {
         "ok": True,

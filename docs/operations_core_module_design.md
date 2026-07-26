@@ -1547,9 +1547,9 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   綁定 generation，並在 lock 返回後、INSERT 前重驗 expiry；任意未 staged hash 不能
   transfer。
 - Runtime worker／approver／PUBLIC 沒有 stage、gate read、transfer 或 ungated
-  primitive execute privilege。這是刻意的 forward ratchet：目前只有 migration-owner
-  local rehearsal seam，尚未部署 production 或建立獨立 operator identity，因此不得
-  開出 live operator seam。
+  primitive execute privilege。這是刻意的 forward ratchet：schema 已部署
+  production，但目前只有 privileged operator rehearsal seam，尚未建立獨立 operator
+  identity，因此不得開出 live transfer seam。
 - CAS 同交易撤銷 legacy runtime mutation functions 的 execute privilege，rollback
   同交易恢復；撤銷在 exclusive owner lock 前執行，legacy wrapper 本身仍 assert
   `legacy`，因此已過 ACL 檢查但排隊中的 caller 也會在 row lock 後 fail closed。
@@ -1576,6 +1576,23 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   **96 passed**。目前仍未產生七日 receipts，也未做 live unique-owner
   read-back／rollback rehearsal。
   因此 formal transfer operator 仍不可用，Issue #9 仍是 `contained`。
+
+- 2026-07-26 已新增 `work_shadow_observe` canonical hourly producer，由
+  `check_alerts → run_due_jobs` 單一 piggy-back owner 在每小時 :15 的 due window
+  執行 `scripts/observe_work_shadow.py`。Producer 以 queue shared lock 凍結
+  `storage/next_tasks.json`，TaskRecord receipts 只納入 canonical pending id 的
+  duplicate／parent dependency 與任何非終態 anomaly，Supabase `ops_jobs` 只納入
+  queued／running residue；不把與 pending ownership 無關的歷史 terminal receipts
+  冒充待遷移 queue。三份 scope 仍由同一 replay snapshot identity 綁定，唯一寫入是
+  gitignored append-only `storage/ops/work_shadow_observations/`。
+- Live wrapper smoke exit 0 並回寫 `cron_last_run.work_shadow_observe`；首輪修正後 receipt
+  source counts 為 `next_tasks=1 / task_records=0 / ops_jobs=0`。它正確抓到 preserved
+  control row `assign_f3f36d75` 的 `missing_parent` 與 `invalid_lifecycle`，所以 assessment
+  reason 仍含 `queue_owner_mode_not_queued_execution`、`observation_window_too_short`、
+  `blocking_selection_difference`、`reconciliation_issue_present` 與
+  `blocking_dimension_difference`。同輪根治 release／stale cleanup 回 pending 後仍保留
+  `started_at` 的 producer bug，所有 re-pend 現在共用 `_repend_task()` 並清除 active
+  trace；既有 preserved row 未直接改資料，仍待 owner-approved canonical reconciliation。
 
 取得七天 shadow 證據、production migration read-back 與 owner-approved window 後，
 才規劃第一個正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與

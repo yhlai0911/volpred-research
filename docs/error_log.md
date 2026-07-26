@@ -2921,3 +2921,33 @@ performance advisor 只有剛建立、尚無 workload 的
 Production schema deployment 與 ACL/catalog read-back 已完成，但七日真實 receipts、
 正式 unique-owner downstream read-back 及 rollback rehearsal 仍缺，故 Issue #9 與
 operations-core umbrella 維持 **`contained`**。
+
+### 2026-07-26 — Work shadow 能 replay 但沒有 producer；release 留下 started_at 污染 pending lifecycle
+
+**證據化症狀**：Issue #7 已有 pure replay／append seam，Issue #9 也有固定七日
+assessment，但 `config/runtime_schedules.json` 沒有任何 Work shadow job，
+`storage/ops/work_shadow_observations/` 不存在，故 observation count 一直是 0。
+建立 producer 後第一張 live receipt 又抓到 preserved
+`assign_f3f36d75` 已由 stale cleanup 從 `in_progress` 回到 `pending`，卻仍保留
+`started_at`；Coordinator 因 `unclaimed status carries active claim trace` fail
+closed。直接把全部 99 筆 TaskRecord 與 11 筆 terminal ops_jobs 歷史餵入 pending
+cutover replay，也把 receipts-only history 誤當 owner migration population。
+
+**根因層級**：第一層是 schedule／actuator 缺口——有 verifier 沒有 evidence
+producer。第二層是 task lifecycle mutation 分叉：manual／owner release 走
+`_repend_task()`，stale cleanup 另複製一套欄位清理，而兩條都沒有清
+`started_at`。第三層是 snapshot scope 混淆：`storage/ops/tasks/` 是 execution
+receipts，不是 pending queue，terminal `ops_jobs` 也不是 owner cutover residue。
+
+**底層修復與回讀**：新增 scheduled `observe_work_shadow()` public seam、canonical
+Python entrypoint、120 秒 bounded wrapper、single-owner hourly :15 schedule、
+wrapper manifest 與 scheduled-writer ownership 分類。Producer 對 next_tasks 用 shared
+lock，只納入同 id／parent dependency、TaskRecord 非終態 anomaly及 queued/running
+ops_jobs，然後用 Issue #7 同一 immutable replay seam 追加 gitignored v3 receipt；
+runtime log 只輸出 bounded summary。Wrapper live smoke exit 0，
+`cron_last_run.work_shadow_observe=2026-07-26T06:26:57+00:00`，修正後 receipt
+source counts `1/0/0`。Re-pend 現在一律走 `_repend_task()` 並清除 `started_at`，
+manual 與 stale cleanup RED→GREEN。既有 preserved row 依「修流程、不手改資料」與
+direct-mode owner instruction 未被修改，因此 live assessment 仍有 missing parent／
+invalid lifecycle，加上七日 window 與 queued-execution mode 未滿；Issue #9 保持
+**`contained`**。

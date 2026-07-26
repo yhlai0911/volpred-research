@@ -127,6 +127,15 @@ suites **96 passed**；Supabase security advisor 對本 scope 零 finding，perf
 advisor 只有新建 receipt timeline index 尚無 workload 的 unused-index INFO。七日
 read-back／正式接管／rollback rehearsal 仍未執行；因此這是 deployed
 evidence-bound transaction gate，不是 cutover，Issue #9 仍為 `contained`。
+同日補上缺失的七日 evidence producer：`work_shadow_observe` 由 canonical
+`runtime_schedules.json` 每小時 :15 經單一 piggy-back owner 執行，wrapper 已安裝且
+live smoke exit 0、marker 回讀成功。它只讀 canonical pending queue、相關 TaskRecord
+parent／active anomaly 與 queued/running `ops_jobs`，追加 gitignored v3 receipt；
+不 stage gate、不 transfer owner。最新 receipt 已把歷史無關 terminal receipts排除，
+source counts 為 `1/0/0`，並正確留下 preserved control row 的 missing-parent 與
+pending+started_at lifecycle blocker。Release／stale cleanup 的產生流程已統一清除
+`started_at`；現存 row 未手改。七日時鐘已開始累積，但 mode 仍為
+`direct_execution` 且 blocking evidence 尚在，因此 Issue #9 仍是 `contained`。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由

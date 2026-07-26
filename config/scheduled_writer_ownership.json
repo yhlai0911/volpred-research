@@ -302,6 +302,12 @@
       "phase_z_probe_paths": ["storage/next_tasks.json"],
       "reason": "Handoff and stale-claim cleanup are machine queue/ops state."
     },
+    "work_shadow_observe": {
+      "entrypoint": "scripts/observe_work_shadow.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Hourly Work Coordinator shadow replay only appends ignored runtime evidence receipts; it does not mutate either queue owner."
+    },
     "liveness_reconcile": {
       "entrypoint": "scripts/liveness_reconcile.py",
       "policy": "phase_z_machine_state",

@@ -54,6 +54,8 @@ uv run volpred ops job-show <job_id>                 # 查看任務詳情及日�
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
 uv run volpred ops work-shadow-replay --next-tasks-snapshot <next_tasks.json> --task-records-snapshot <task_records.json> --ops-jobs-snapshot <ops_jobs.json> --observation-dir <receipts_dir> --worker-id <worker> --capability code  # 純 snapshot 新舊 selection 對帳；只追加 observation receipt
+uv run python scripts/observe_work_shadow.py  # 排程相同的唯讀 producer：凍結 canonical pending queue + 相關 parent／active legacy residue，只追加 ignored receipt
+uv run volpred ops work-shadow-assess --observation-dir storage/ops/work_shadow_observations  # 固定七日／26h gap gate；未達標 exit 2
 uv run python scripts/task_pool_control.py status  # 回讀 mode 與 owner-state CAS identity；restore_in_progress 即使 queue partial 也會回傳 SHA，並標 queue_readable=false
 # 自訂 --queue 時，resolved basename 仍須是 next_tasks.json，--state 必須是其 parent/ops/task_pool_mode.json；sibling typo、detached / symlink alias state 都 fail closed
 uv run python scripts/task_pool_control.py enter-direct --expected-state-sha256 <status的SHA或absent> --actor <actor> --reason '<reason>' [--preserve-task-id <id>]  # CAS 通過後才逐位元備份 → 關閉 admission → 清池

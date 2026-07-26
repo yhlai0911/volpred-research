@@ -483,6 +483,22 @@
         ]
       },
       {
+        "id": "work_shadow_observe",
+        "label": "Hourly Work Coordinator shadow evidence observation",
+        "cron": "15 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_work_shadow_observe.sh",
+        "log_path": "storage/logs/cron/work_shadow_observe.log",
+        "description": "Issue #9 pre-cutover evidence producer. Every hour it freezes canonical next_tasks, local TaskRecord receipts and Supabase ops_jobs once, runs the shared legacy/Work Coordinator selectors, and appends one ignored work-shadow-replay.v3 receipt. It never submits, claims, completes, stages a gate or changes queue ownership. Canonical owner is the hourly check_alerts run_due_jobs piggy-back.",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": true,
+        "staleness_expected_minutes": 90,
+        "matchers": [
+          "observe_work_shadow.py",
+          "cron_work_shadow_observe.sh",
+          "work_shadow_observe.log"
+        ]
+      },
+      {
         "id": "supabase_sync_drain",
         "label": "失敗 sync 隊列排空（Supabase + Mirror）",
         "cron": "*/30 * * * *",

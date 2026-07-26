@@ -1002,13 +1002,15 @@ def test_status_history_release_records_manual_release(tmp_path, monkeypatch) ->
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
 
     assert _run(monkeypatch, "claim", "--id", "tk2", "--owner", "hourly-22") == 0
+    assert _run(monkeypatch, "start", "--id", "tk2") == 0
     assert _run(monkeypatch, "release", "--id", "tk2") == 0
 
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     hist = saved["status_history"]
-    assert hist[-1]["from"] == "claimed"
+    assert hist[-1]["from"] == "in_progress"
     assert hist[-1]["to"] == "pending"
     assert hist[-1].get("note") == "manual_release"
+    assert "started_at" not in saved
 
 
 def test_status_history_handoff_main_thread_records_note(tmp_path, monkeypatch) -> None:
@@ -1054,9 +1056,10 @@ def test_status_history_cleanup_auto_release_marks_note(tmp_path, monkeypatch) -
             [
                 {
                     "id": "tk4",
-                    "status": "claimed",
+                    "status": "in_progress",
                     "claimed_by": "hourly-old",
                     "claimed_at": "2026-06-29T14:00:00+00:00",
+                    "started_at": "2026-06-29T14:01:00+00:00",
                 }
             ],
             ensure_ascii=False,
@@ -1069,10 +1072,11 @@ def test_status_history_cleanup_auto_release_marks_note(tmp_path, monkeypatch) -
 
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     hist = saved["status_history"]
-    assert hist[-1]["from"] == "claimed"
+    assert hist[-1]["from"] == "in_progress"
     assert hist[-1]["to"] == "pending"
     assert "auto_release_stale_6h" in hist[-1].get("note", "")
     assert hist[-1]["by"] == "hourly-old"
+    assert "started_at" not in saved
 
 
 def test_burst_fire_request_is_intercepted_not_written_to_canonical_state(

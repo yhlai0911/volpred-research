@@ -60,9 +60,10 @@ class PostgresWorkOwnerStore:
     """Read and privileged-CAS the private Work Coordinator owner row.
 
     Runtime worker and approver roles can only read ownership. The durable
-    gate exists locally, but transfer remains ungranted until its migration
-    is deployed and a dedicated operator identity is approved; this adapter
-    is therefore limited to migration-owner rehearsals.
+    gate is deployed, but stage and transfer remain ungranted to runtime
+    identities until a dedicated operator identity and cutover window are
+    approved; this adapter is therefore limited to privileged operator
+    rehearsals.
     """
 
     def __init__(self, connection_factory: ConnectionFactory) -> None:
