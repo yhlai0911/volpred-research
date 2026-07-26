@@ -26874,5 +26874,15 @@
     "owner": "codex",
     "backfilled_at": "2026-07-26T11:16:37.237184+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "timestamp": "2026-07-26T20:14:32+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_f3f36d75",
+    "outcome": "contained",
+    "actor": "hourly-slot-1-8ef215cbff0f4bbbab0cbaeb7ba6dc6a",
+    "owner": "hourly-slot-1-8ef215cbff0f4bbbab0cbaeb7ba6dc6a",
+    "commit": null,
+    "summary": "Direct-execution mode 下直接續做 operations-core umbrella (assign_f3f36d75, 未 claim — preserved control row)。本班 live 驗證：(1) operations_core_scheduler validate ok=true，50/50 job 全歸 operations_core、legacy=0；(2) direct-mode gate 健康，舊池 3338 筆備份 sha256 89863b05 完整、無 restore 進行中。確認 umbrella 唯一未結案 blocker = 需兩台實體 Mac 配對 receipt 而第二台離線（外部條件，禁止偽造 physical pair）。已 Telegram 升級老闆 (msg out id=41)：報告底層健康 + 內容飢餓副作用 (direct mode 擋 refill → 文章 1篇/24h、drafts=0)，請老闆 A/B 決策（A=開第二台 Mac 收尾配對；B=授權退出 direct mode 先恢復內容）。未 force-complete、未 mutate queue、未建 repo 檔。"
   }
 ]

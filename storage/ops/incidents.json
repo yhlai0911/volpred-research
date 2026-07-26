@@ -243,21 +243,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-25T23:14:42.855641+00:00"
-    },
-    {
-     "at": "2026-07-26T00:17:30.997051+00:00"
-    },
-    {
-     "at": "2026-07-26T01:20:57.793917+00:00"
-    },
-    {
-     "at": "2026-07-26T02:13:51.970326+00:00"
-    },
-    {
-     "at": "2026-07-26T03:15:28.203882+00:00"
-    },
-    {
      "at": "2026-07-26T04:18:44.287530+00:00"
     },
     {
@@ -277,6 +262,21 @@
     },
     {
      "at": "2026-07-26T09:15:38.519196+00:00"
+    },
+    {
+     "at": "2026-07-26T11:14:37.486015+00:00"
+    },
+    {
+     "at": "2026-07-26T11:15:49.810522+00:00"
+    },
+    {
+     "at": "2026-07-26T11:17:34.531815+00:00"
+    },
+    {
+     "at": "2026-07-26T11:19:16.803169+00:00"
+    },
+    {
+     "at": "2026-07-26T12:15:30.958268+00:00"
     }
    ],
    "current_task_id": null,
@@ -379,13 +379,25 @@
      "first_seen_at": "2026-07-26T09:00:10.015155+00:00",
      "key": "30193818570:1",
      "last_seen_at": "2026-07-26T09:00:10.015155+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:00:07.733043+00:00",
+     "key": "30195653837:1",
+     "last_seen_at": "2026-07-26T11:00:07.733043+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T12:00:06.587132+00:00",
+     "key": "30199301182:1",
+     "last_seen_at": "2026-07-26T12:00:06.587132+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-26T08:14:35.7296051Z E AssertionError: unclassified scheduled process(es): ['owned_email_recovery']",
-   "last_seen_at": "2026-07-26T09:00:10.015155+00:00",
+   "last_breach_detail": "2026-07-26T11:15:33.8571011Z E AssertionError: assert [] == ['com.volpred...heckup.plist']",
+   "last_seen_at": "2026-07-26T12:00:06.587132+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -686,7 +698,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.040266+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-26T09:07:33.485286+00:00"
+     "last_seen_at": "2026-07-26T12:07:09.462001+00:00"
     },
     {
      "cleared_at": null,
@@ -699,7 +711,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.347123+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-26T09:07:33.827091+00:00"
+     "last_seen_at": "2026-07-26T12:07:09.765828+00:00"
     },
     {
      "cleared_at": null,
@@ -712,7 +724,7 @@
      },
      "first_seen_at": "2026-07-21T09:07:09.786806+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-26T09:07:34.566100+00:00"
+     "last_seen_at": "2026-07-26T12:07:10.391182+00:00"
     },
     {
      "cleared_at": null,
@@ -725,7 +737,7 @@
      },
      "first_seen_at": "2026-07-21T17:07:49.055479+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-26T09:07:34.207931+00:00"
+     "last_seen_at": "2026-07-26T12:07:10.051598+00:00"
     },
     {
      "cleared_at": null,
@@ -738,7 +750,7 @@
      },
      "first_seen_at": "2026-07-21T20:07:40.259180+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-26T09:07:34.908982+00:00"
+     "last_seen_at": "2026-07-26T12:07:10.702354+00:00"
     },
     {
      "cleared_at": null,
@@ -764,7 +776,7 @@
      },
      "first_seen_at": "2026-07-22T02:53:18.325364+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-26T09:07:35.217482+00:00"
+     "last_seen_at": "2026-07-26T12:07:11.036376+00:00"
     },
     {
      "cleared_at": null,
@@ -782,9 +794,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-26T09:07:35.217482+00:00",
+   "last_seen_at": "2026-07-26T12:07:11.036376+00:00",
    "notified_at": null,
-   "occurrence_count": 882,
+   "occurrence_count": 894,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -860,44 +872,7 @@
   },
   "inc_c67bec28dd29": {
    "class": "machine_self",
-   "clean_observations": [
-    {
-     "at": "2026-07-25T20:20:17.204043+00:00"
-    },
-    {
-     "at": "2026-07-25T21:12:25.615321+00:00"
-    },
-    {
-     "at": "2026-07-25T22:17:29.962086+00:00"
-    },
-    {
-     "at": "2026-07-25T23:14:49.461869+00:00"
-    },
-    {
-     "at": "2026-07-26T00:17:54.553063+00:00"
-    },
-    {
-     "at": "2026-07-26T01:21:04.597343+00:00"
-    },
-    {
-     "at": "2026-07-26T02:13:58.341158+00:00"
-    },
-    {
-     "at": "2026-07-26T03:15:34.757580+00:00"
-    },
-    {
-     "at": "2026-07-26T04:18:51.667699+00:00"
-    },
-    {
-     "at": "2026-07-26T06:17:54.050173+00:00"
-    },
-    {
-     "at": "2026-07-26T07:31:30.536999+00:00"
-    },
-    {
-     "at": "2026-07-26T08:13:57.939335+00:00"
-    }
-   ],
+   "clean_observations": [],
    "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
@@ -991,14 +966,50 @@
      "first_seen_at": "2026-07-22T03:32:28.624171+00:00",
      "key": "scripts/hooks/gate_edit_guard.py:225",
      "last_seen_at": "2026-07-22T03:36:08.478669+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:16:11.833442+00:00",
+     "key": "scripts/collect_ndc_bci.py:402",
+     "last_seen_at": "2026-07-26T11:17:55.226510+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:16:11.833442+00:00",
+     "key": "scripts/collect_ndc_bci.py:425",
+     "last_seen_at": "2026-07-26T11:17:55.226510+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:16:11.833442+00:00",
+     "key": "scripts/collect_ndc_bci.py:635",
+     "last_seen_at": "2026-07-26T11:17:55.226510+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:19:36.908451+00:00",
+     "key": "scripts/collect_ndc_bci.py:487",
+     "last_seen_at": "2026-07-26T11:19:36.908451+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:19:36.908451+00:00",
+     "key": "scripts/collect_ndc_bci.py:510",
+     "last_seen_at": "2026-07-26T11:19:36.908451+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-26T11:19:36.908451+00:00",
+     "key": "scripts/collect_ndc_bci.py:720",
+     "last_seen_at": "2026-07-26T11:19:36.908451+00:00"
     }
    ],
    "kind": "silent_fallback_new",
    "last_breach_detail": "PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
-   "last_seen_at": "2026-07-22T03:36:08.478669+00:00",
+   "last_seen_at": "2026-07-26T11:19:36.908451+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 26,
+   "occurrence_count": 30,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1071,6 +1082,6 @@
    }
   }
  },
- "updated_at": "2026-07-26T09:15:38.519665+00:00",
+ "updated_at": "2026-07-26T12:15:30.959561+00:00",
  "version": 1
 }

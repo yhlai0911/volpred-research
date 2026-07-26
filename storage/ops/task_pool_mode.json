@@ -1,17 +1,22 @@
 {
-  "schema": 1,
-  "enabled": true,
-  "mode": "direct_execution",
-  "activated_at": "2026-07-23T12:49:35.325675+00:00",
-  "activated_by": "codex-vscode",
-  "reason": "Telegram 1329 owner-directed direct execution; suspend legacy task-pool admission during operations-core cutover",
+  "schema": 2,
+  "enabled": false,
+  "mode": "queued_execution",
   "queue_path": "/Users/yhlai0911/volpred-research/storage/next_tasks.json",
-  "backup_path": "/Users/yhlai0911/volpred-research/storage/backups/task_pool/20260723124935Z_next_tasks_89863b056e1d.json",
-  "backup_sha256": "89863b056e1dc4fb8a661a9ccf5caf1eeb058b063b42c528a25ce602f186d8f3",
-  "backup_bytes": 3041206,
-  "backup_task_count": 3338,
-  "preserve_task_ids": [
-    "assign_f3f36d75"
+  "restored_at": "2026-07-26T12:14:47.692751+00:00",
+  "restored_by": "codex-vscode",
+  "reason": "Operations Core production authorized; physical two-Mac authority verified; resume canonical content queue",
+  "restored_backup_path": "/Users/yhlai0911/volpred-research/storage/backups/task_pool/20260723124935Z_next_tasks_89863b056e1d.json",
+  "restored_backup_sha256": "89863b056e1dc4fb8a661a9ccf5caf1eeb058b063b42c528a25ce602f186d8f3",
+  "restored_task_count": 3338,
+  "restored_source_state_sha256": "45aa8ca239f8b33fd6790e6a022d2277e44491e01c1581101082119e71d630b4",
+  "restored_transaction_state_sha256": "a30c3ddaf7921d96f2bd3c3c3f3d13b36a71acc893d66cd2ce02c491025dd415",
+  "restored_acknowledged_active_task_ids": [
+    "assign_f3f36d75",
+    "assign_k1731_rev9"
   ],
-  "cleared_task_count": 3337
+  "restored_preserved_rows_path": "/Users/yhlai0911/volpred-research/storage/backups/task_pool/20260726121447Z_preserved_rows_8dc619c7f460.json",
+  "restored_preserved_rows_sha256": "8dc619c7f460b5a12876243ffb8c21ba3c5e786b256d18d4863985cae4e3996b",
+  "restored_preserved_rows_bytes": 3557,
+  "restored_preserved_task_count": 1
 }
