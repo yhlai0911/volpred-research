@@ -772,6 +772,95 @@ def test_cleanup_missing_claimed_at_falls_back_to_created_at(tmp_path, monkeypat
     assert saved["fresh_no_claimed_at"]["status"] == "in_progress"
 
 
+def test_cleanup_normalizes_pending_claim_residue(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "restored_pending_residue",
+                    "task_type": "platform_ops",
+                    "status": "pending",
+                    "claimed_by": "retired-worker",
+                    "claimed_at": "2026-07-21T16:21:57+00:00",
+                    "claim_session_id": "retired-session",
+                    "started_at": "2026-07-21T16:22:00+00:00",
+                }
+            ],
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "_compute_job_alive", lambda _job_id: False)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["count"] == 0
+    assert result["normalized_count"] == 1
+    assert result["normalized_pending_claim_residue"] == [
+        {"id": "restored_pending_residue", "owner": "retired-worker"}
+    ]
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "pending"
+    for field in ("claimed_by", "claimed_at", "claim_session_id", "started_at"):
+        assert field not in saved
+    assert saved["last_release_reason"] == "normalize_pending_claim_residue"
+    assert saved["status_history"][-1] == {
+        "from": "pending",
+        "to": "pending",
+        "ts": saved["status_history"][-1]["ts"],
+        "by": "retired-worker",
+        "note": "normalize_pending_claim_residue",
+    }
+
+
+def test_cleanup_does_not_normalize_pending_residue_with_live_compute(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = [
+        {
+            "id": "pending_compute_in_flight",
+            "task_type": "experiment",
+            "status": "pending",
+            "priority": 3,
+            "claimed_by": "compute-dispatch",
+            "claimed_at": "2026-07-21T16:21:57+00:00",
+            "compute_job_id": "job-live",
+        }
+    ]
+    next_tasks.write_text(json.dumps(original, indent=2), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_compute_job_alive",
+        lambda job_id: job_id == "job-live",
+    )
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["normalized_count"] == 0
+    assert result["skipped_compute_in_flight"] == [
+        {"id": "pending_compute_in_flight", "compute_job_id": "job-live"}
+    ]
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+
+
+def test_cleanup_leaves_clean_pending_task_untouched(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = [{"id": "clean_pending", "status": "pending", "priority": 3}]
+    next_tasks.write_text(json.dumps(original, indent=2), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["normalized_count"] == 0
+    assert result["normalized_pending_claim_residue"] == []
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+
+
 @pytest.mark.parametrize(
     ("task_id", "task_type", "status"),
     [

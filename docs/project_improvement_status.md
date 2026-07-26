@@ -2059,8 +2059,16 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   `--expected-active-task-id`精確列出整個集合；漏列、多列或prepared receipt與backup
   漂移都在queue mutation前拒絕。
 - ✅ public function／CLI／crash-tamper回歸共37案通過。底層restore可退出性根因已
-  `root_cause_fixed_and_verified`；production mode尚未切換，須以live archive、
-  restore、canonical stale cleanup與下游content acknowledgement完成正式回讀。
+  `root_cause_fixed_and_verified`。
+- ✅ Production已於12:14 UTC走正式CLI退出：3338筆備份復原，direct期間唯一control
+  row原始bytes另存archive並由SHA-256回讀；mode為`queued_execution`／`enabled=false`。
+- ✅ Restore後發現5筆歷史`pending` row帶active claim trace；cleanup原先只掃
+  `claimed`／`in_progress`。正式cleanup現可留下pending→pending audit再清除 residue，
+  仍有live compute job則fail closed；3個TDD回歸與live readback確認
+  `pending_claim_residue=0`。此cleanup缺口為`root_cause_fixed_and_verified`。
+- ⏳ Operations Core tick已在restore後持續；內容產出是否恢復仍需第一筆publisher
+  acknowledgement，未取得前只宣稱queue/control plane恢復，不把content recovery
+  說成完成。
 
 ## 2026-07-26 — Physical two-Mac Primary Authority 正式結案
 

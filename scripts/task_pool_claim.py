@@ -596,11 +596,13 @@ def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
 def _repend_task(
     task: dict[str, Any], *, note: str, reason: str | None = None
 ) -> str | None:
-    """Return one claimed/in_progress task to `pending` (single mutation site).
+    """Return one task to a clean `pending` lifecycle state (single mutation site).
 
     Every re-pend in this module goes through here so the claim fields, the
     release timestamp and the status_history trace can never drift apart
-    between the manual, kill-triggered and stale-sweep paths.
+    between the manual, kill-triggered, stale-sweep and residue-normalization
+    paths.  A pending→pending transition is intentional audit evidence when an
+    old backup contains claim metadata that contradicts its pending status.
     """
     prev_owner = task.get("claimed_by")
     prev_status = (task.get("status") or "").lower() or "claimed"
@@ -953,11 +955,33 @@ def _compute_job_alive(job_id: str | None) -> bool:
 
 def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
     released = []
+    normalized_pending = []
     skipped_compute = []
     with _locked_load() as (_fh, tasks):
         now = datetime.now(timezone.utc)
         for t in tasks:
             status = (t.get("status") or "").lower()
+            if status == "pending" and any(
+                field in t
+                for field in (
+                    "claimed_by",
+                    "claimed_at",
+                    "claim_session_id",
+                    "started_at",
+                )
+            ):
+                job_id = t.get("compute_job_id")
+                if _compute_job_alive(job_id):
+                    skipped_compute.append(
+                        {"id": _task_key(t), "compute_job_id": job_id}
+                    )
+                    continue
+                reason = "normalize_pending_claim_residue"
+                prev_owner = _repend_task(t, note=reason, reason=reason)
+                normalized_pending.append(
+                    {"id": _task_key(t), "owner": prev_owner}
+                )
+                continue
             if status not in {"claimed", "in_progress"}:
                 continue
             job_id = t.get("compute_job_id")
@@ -1021,6 +1045,8 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
         "ok": True,
         "released": released,
         "count": len(released),
+        "normalized_pending_claim_residue": normalized_pending,
+        "normalized_count": len(normalized_pending),
         "skipped_compute_in_flight": skipped_compute,
     }
 

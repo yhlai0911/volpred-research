@@ -2967,6 +2967,29 @@ receipt 綁定 mode／gate flag／resolved path／SHA-256／byte count。Assessm
 **cutover-eligible 七日時鐘尚未開始**；必須切至核可的 queued owner state 後重新
 連續累積七日。這個 remediation 不改 queue、gate 或 owner。
 
+### 2026-07-26 — Direct-mode restore 帶回 pending claim residue，舊 cleanup 完全跳過
+
+**證據化症狀**：正式 restore 3338 筆備份後，canonical queue 有 5 筆
+`status=pending` 卻仍帶 `claimed_by`／`claimed_at`／`claim_session_id`／`started_at`
+之一；其中 `assign_580c1b3e` 保留舊 hourly worker 的完整 claim trace。原本
+`cleanup --stale-hours 2` 回報 0 release，因為只掃 `claimed`／`in_progress`，這些
+矛盾 row 會永久避開 stale reaper，並可能被 claim eligibility fail closed。
+
+**根因層級與底層修復**：restore 正確保留備份原貌，但 task lifecycle cleanup 把
+「status 是 pending」誤當成「claim trace 必定乾淨」，缺少歷史 schema／備份回復後的
+正規化 seam。`task_pool_claim.py cleanup` 現在先辨識 pending claim residue，經既有
+`_repend_task()` 單一 mutation site 清除四個 active trace 欄位，並留下
+`pending→pending`、`normalize_pending_claim_residue` audit history。若 row 綁定仍在
+執行的 compute job 則 fail closed 跳過，避免清 metadata 後被重複派工；正常 pending
+row 不變。輸出另列 `normalized_pending_claim_residue`／`normalized_count`，不混入
+既有 stale `released` 計數。
+
+**回歸與 live 回讀**：TDD 先得到 3 個 RED，再以 residue normalize、live compute
+skip、clean pending no-op 三案轉 GREEN；cleanup suite 6 passed。正式 cleanup 回報
+`normalized_count=5`、`released=0`、`skipped_compute_in_flight=0`，回讀五筆均已清除
+active trace、保留 normalization history，整池 `pending_claim_residue=0`。根因已
+**`root_cause_fixed_and_verified`**；未手改 `storage/next_tasks.json`。
+
 ### 2026-07-26 — 測試 guard 未包住 owned-email RPC，三筆 WorkItem 誤寫 production
 
 **證據化症狀**：full suite 執行後，production 在 06:34–06:35 UTC 新增三筆
