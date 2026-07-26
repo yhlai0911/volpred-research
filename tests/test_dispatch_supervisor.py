@@ -494,6 +494,11 @@ def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
         "settle_completed_task_issues",
         fake_issue_settlement,
     )
+    monkeypatch.setattr(
+        phase_z,
+        "pending_issue_task_ids_for_owners",
+        lambda **_kwargs: {"linked-ticket"},
+    )
     owner = "hourly-slot-1-job-ci"
     out = phase_z.run_phase_z(
         repo_root=tmp_path,
@@ -534,6 +539,7 @@ def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
                 text=True,
                 check=True,
             ).stdout.strip(),
+            "completed_task_ids": {"linked-ticket"},
             "repo_root": tmp_path,
         }
     ]

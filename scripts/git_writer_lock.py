@@ -869,6 +869,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                             claim_owners={args.actor},
                             commit_sha=commit_sha,
                             commit_parent_sha=original_head,
+                            completed_task_ids=set(args.task_id),
                             repo_root=repo,
                         )
                 except Exception as exc:  # noqa: BLE001 — commit is durable; later PHASE-Z can retry receipt state
@@ -921,6 +922,15 @@ def build_parser() -> argparse.ArgumentParser:
     commit = sub.add_parser("commit", help="stage and commit exact paths under one lease")
     commit.add_argument("--repo", default=str(ROOT))
     commit.add_argument("--actor", required=True)
+    commit.add_argument(
+        "--task-id",
+        action="append",
+        default=[],
+        help=(
+            "canonical completed task ID bound to this commit; repeat for "
+            "multiple tasks"
+        ),
+    )
     commit.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_S)
     commit.add_argument(
         "--expected-head",

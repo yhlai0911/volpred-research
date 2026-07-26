@@ -200,6 +200,8 @@ def test_exact_path_commit_closes_owned_linked_issue_with_real_sha(
         str(repo),
         "--actor",
         owner,
+        "--task-id",
+        "linked-ticket",
         "--message",
         "implement linked ticket",
         "--",

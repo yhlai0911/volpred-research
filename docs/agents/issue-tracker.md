@@ -38,8 +38,12 @@ runtime task links the two with optional canonical `issue_ref="#<number>"`:
   claim;
 - successful task completion writes an `issue_close_pending` receipt; it does
   **not** close the issue against the pre-commit HEAD;
-- the exact-path Git writer or PHASE-Z closes the issue only after obtaining the
-  real commit SHA, then writes `issue_closed_commit` back to the same task;
+- the exact-path Git writer receives `--task-id <id>` (repeatable), or PHASE-Z
+  snapshots the exact task IDs owned by its immutable fire identities; this
+  keeps the task/commit binding valid even if another writer advances HEAD
+  between `complete` and the task's commit;
+- only after obtaining that task's real commit SHA does the writer close the
+  issue and write `issue_closed_commit` back to the same task;
 - close replay requires the task/commit marker already present in GitHub.  A
   foreign manual close is not claimed as runtime completion.
 

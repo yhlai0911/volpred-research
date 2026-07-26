@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from volpred.ops.issue_tracker_sync import (
     assign_issue,
     close_issue,
+    pending_issue_task_ids_for_owners,
     settle_completed_task_issues,
 )
 
@@ -323,3 +324,75 @@ def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -
     assert calls[0]["commit_sha"] == "2" * 40
     saved = json.loads(queue.read_text(encoding="utf-8"))[0]
     assert saved["issue_closed_commit"] == "2" * 40
+
+
+def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) -> None:
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "task-a",
+                    "status": "succeeded",
+                    "issue_ref": "#37",
+                    "issue_close_pending": {
+                        "issue_ref": "#37",
+                        "task_id": "task-a",
+                        "completion_owner": "codex-vscode",
+                        "completed_at": "2026-07-26T12:00:00+00:00",
+                        "completion_base_commit": "1" * 40,
+                    },
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        completed_task_ids={"task-a"},
+        commit_sha="3" * 40,
+        commit_parent_sha="2" * 40,
+        repo_root=tmp_path,
+        closer=lambda **kwargs: calls.append(kwargs)
+        or {"ok": True, "issue_number": 37},
+    )
+
+    assert settled[0]["commit_sha"] == "3" * 40
+    assert calls[0]["task_id"] == "task-a"
+    saved = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert saved["issue_closed_commit"] == "3" * 40
+
+
+def test_phase_z_can_snapshot_exact_linked_task_ids_for_unique_owners(
+    tmp_path,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "task-a",
+                    "status": "succeeded",
+                    "issue_close_pending": {
+                        "completion_owner": "hourly-slot-1-job-a",
+                    },
+                },
+                {
+                    "id": "task-b",
+                    "status": "succeeded",
+                    "issue_close_pending": {
+                        "completion_owner": "hourly-slot-2-job-b",
+                    },
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    assert pending_issue_task_ids_for_owners(
+        path=queue,
+        claim_owners={"hourly-slot-1-job-a"},
+    ) == {"task-a"}

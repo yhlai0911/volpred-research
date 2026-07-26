@@ -73,7 +73,10 @@ from volpred.ops.foreign_incident import (
     upsert_incident,
 )
 from volpred.ops.machine_churn import classify_machine_churn
-from volpred.ops.issue_tracker_sync import settle_completed_task_issues
+from volpred.ops.issue_tracker_sync import (
+    pending_issue_task_ids_for_owners,
+    settle_completed_task_issues,
+)
 from volpred.ops.next_tasks import backfill_ci_repair_commit
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
@@ -3516,11 +3519,16 @@ def run_phase_z(
             except Exception as exc:  # noqa: BLE001 — commit already landed; receipt repair is retryable
                 LOG.warning("phase_z: CI repair commit receipt backfill failed: %s", exc)
             try:
+                linked_task_ids = pending_issue_task_ids_for_owners(
+                    path=repo_root / "storage" / "next_tasks.json",
+                    claim_owners=claim_owners,
+                )
                 issue_tasks_closed = settle_completed_task_issues(
                     path=repo_root / "storage" / "next_tasks.json",
                     claim_owners=claim_owners,
                     commit_sha=committed_sha,
                     commit_parent_sha=base_sha,
+                    completed_task_ids=linked_task_ids,
                     repo_root=repo_root,
                 )
             except Exception as exc:  # noqa: BLE001 — commit already landed; GitHub sync is retryable

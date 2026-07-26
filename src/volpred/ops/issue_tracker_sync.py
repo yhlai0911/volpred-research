@@ -348,12 +348,42 @@ def close_issue(
     }
 
 
+def pending_issue_task_ids_for_owners(
+    *,
+    path: str | Path,
+    claim_owners: set[str] | list[str] | tuple[str, ...],
+) -> set[str]:
+    """Snapshot linked terminal task IDs owned by immutable fire identities."""
+    owners = {str(owner).strip() for owner in claim_owners if str(owner).strip()}
+    queue = Path(path)
+    if not owners or not queue.exists():
+        return set()
+    with queue.open("r", encoding="utf-8") as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+        try:
+            payload = json.load(handle)
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    if not isinstance(payload, list):
+        raise ValueError("next_tasks.json root is not a list")
+    return {
+        str(task["id"])
+        for task in payload
+        if isinstance(task, dict)
+        and task.get("status") == "succeeded"
+        and task.get("id")
+        and isinstance(task.get("issue_close_pending"), dict)
+        and str(task["issue_close_pending"].get("completion_owner") or "") in owners
+    }
+
+
 def settle_completed_task_issues(
     *,
     path: str | Path,
     claim_owners: set[str] | list[str] | tuple[str, ...],
     commit_sha: str,
     commit_parent_sha: str,
+    completed_task_ids: set[str] | list[str] | tuple[str, ...] = (),
     repo_root: str | Path | None = None,
     closer: Callable[..., dict[str, Any]] = close_issue,
 ) -> list[dict[str, Any]]:
@@ -372,6 +402,11 @@ def settle_completed_task_issues(
     if _GIT_OBJECT_ID.fullmatch(parent_sha) is None:
         raise ValueError("commit_parent_sha must be a full Git object id")
     owners = {str(owner).strip() for owner in claim_owners if str(owner).strip()}
+    explicit_task_ids = {
+        str(task_id).strip()
+        for task_id in completed_task_ids
+        if str(task_id).strip()
+    }
     if not owners:
         return []
     queue = Path(path)
@@ -406,7 +441,10 @@ def settle_completed_task_issues(
                 if bound_sha:
                     if _GIT_OBJECT_ID.fullmatch(bound_sha) is None:
                         continue
-                elif pending.get("completion_base_commit") == parent_sha:
+                elif (
+                    task_id in explicit_task_ids
+                    or pending.get("completion_base_commit") == parent_sha
+                ):
                     bound_sha = sha
                     pending = dict(pending)
                     pending["commit_sha"] = bound_sha
@@ -497,5 +535,6 @@ __all__ = [
     "close_issue",
     "issue_number",
     "normalize_issue_ref",
+    "pending_issue_task_ids_for_owners",
     "settle_completed_task_issues",
 ]

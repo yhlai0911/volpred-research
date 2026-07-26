@@ -432,7 +432,8 @@ complete/release 自動退回 pending**。所以 VSCode 關掉或 crash 不會�
 
 - 改動 commit 訊息開頭加 `[codex]` 與 Claude 區分
 - 共用 main checkout 禁止裸跑 `git add` / `git commit`〔L1 機械 deny：`.claude/hooks/pretooluse-bash-optimizer.sh:148-150`，涵蓋 stage/merge/checkout/ref 全 mutation；registered linked worktree 不受攔截〕；完整交易一律走：
-  `uv run python scripts/git_writer_lock.py commit --actor <owner> --message '<ASCII message>' -- <exact paths>`
+  `uv run python scripts/git_writer_lock.py commit --actor <owner> --task-id <id> --message '<ASCII message>' -- <exact paths>`
+  （已 complete 且帶 `issue_ref` 的 task 必須傳 `--task-id`；多 task 可重複）
   （worktree 整合走 `bash scripts/merge_worktree.sh`，它會持有同一把 common-dir lock）
 - **不要 `git push`** — 由用戶或 Claude 主線程統一推
 
