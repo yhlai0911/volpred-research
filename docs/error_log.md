@@ -3082,8 +3082,8 @@ no-login definer owner／SECURITY DEFINER／空 search path／service-role-only�
 21 dead-lettered + 1 delivered、0 nonterminal。16:00 台灣時間的第一個自動
 piggy-back fire 另以 `recovered_count=0` exit 0 並寫回 cron marker。Post-fix
 全專案功能回歸（外部模型 key unset、`VOLPRED_CI_PARITY=0`）為
-**5,190 passed、1 skipped、0 failed**；標準 CI-parity-on 相鄰套件另為
-**110 passed、exit 0**。此 incident 現已完成五步 gate，狀態為
+**5,191 passed、1 skipped、0 failed**；標準 CI-parity-on 相鄰套件另為
+**111 passed、exit 0**。此 incident 現已完成五步 gate，狀態為
 **`root_cause_fixed_and_verified`**。
 
 **Due retry follow-up**：只查 attempt status 的初版驗證把其他 effect family 的

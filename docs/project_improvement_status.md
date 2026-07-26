@@ -196,8 +196,8 @@ P1 race；初版結案口徑已更正。Follow-up migration 讓普通 begin 看�
 也共用同一 execution context。Final Matt Standards／Spec 均 PASS；production
 `20260726081120 fence_owned_email_expired_retry` 已套用，catalog/security 與
 `0 started / 22 terminal receipts` 回讀一致，16:00 第一個自動排程亦
-`recovered_count=0` exit 0。Post-fix 相鄰 CI-parity-on **110 passed**；全專案
-功能回歸 **5,190 passed、1 skipped、0 failed**。此 expired-attempt incident 為
+`recovered_count=0` exit 0。Post-fix 相鄰 CI-parity-on **111 passed**；全專案
+功能回歸 **5,191 passed、1 skipped、0 failed**。此 expired-attempt incident 為
 **`root_cause_fixed_and_verified`**；Work
 Coordinator Issue #9 仍因 owner=`legacy/1`、gate=0 與七日 evidence 未滿而維持
 **`contained`**。
