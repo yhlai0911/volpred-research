@@ -15,13 +15,14 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from volpred.ops.authority import (  # noqa: E402
     build_supabase_host_authority_keepalive,
 )
-from volpred.ops.delivery._publisher_article_sync import (  # noqa: E402
+from volpred.ops.delivery import (  # noqa: E402
+    OwnedPublisherArticleRecovery,
+    OwnedPublisherArticleReconcileRecovery,
+    PublisherArticleReconcileEffectAdapter,
     PublisherArticleSyncEffectAdapter,
     SupabaseArticleProjectionAdapter,
-)
-from volpred.ops.delivery.owned_publisher_article import (  # noqa: E402
-    OwnedPublisherArticleRecovery,
     SupabaseOwnedPublisherArticleStore,
+    SupabaseOwnedPublisherReconcileStore,
 )
 from volpred.ops.delivery.owned_publisher_delete import (  # noqa: E402
     OwnedPublisherDeleteReconciliation,
@@ -30,6 +31,8 @@ from volpred.ops.delivery.owned_publisher_delete import (  # noqa: E402
 
 WORKER_ID = "effect-worker:publisher-article-sync"
 AUTHORITY_KEY = "publisher:article.supabase.sync"
+RECONCILE_WORKER_ID = "effect-worker:publisher-article-reconcile"
+RECONCILE_AUTHORITY_KEY = "publisher:article.supabase.reconcile"
 DELETE_RECONCILIATION_ACTOR = (
     "effect-worker:publisher-delete-reconciliation"
 )
@@ -43,6 +46,25 @@ def recover_owned_publisher_articles(
         store=SupabaseOwnedPublisherDeleteStore.from_environment(),
         actor_ref=DELETE_RECONCILIATION_ACTOR,
     ).reconcile(limit=limit)
+    reconcile_keepalive = build_supabase_host_authority_keepalive(
+        authority_key=RECONCILE_AUTHORITY_KEY,
+        holder_ref=RECONCILE_WORKER_ID,
+    )
+    reconcile_keepalive.start()
+    try:
+        reconcile_summary = OwnedPublisherArticleReconcileRecovery(
+            store=SupabaseOwnedPublisherReconcileStore.from_environment(),
+            provider=PublisherArticleReconcileEffectAdapter(
+                projection=SupabaseArticleProjectionAdapter(
+                    storage_dir="storage",
+                    require_mirror_ack=True,
+                )
+            ),
+            primary_authority=reconcile_keepalive,
+            worker_id=RECONCILE_WORKER_ID,
+        ).recover(limit=limit)
+    finally:
+        reconcile_keepalive.stop()
     keepalive = build_supabase_host_authority_keepalive(
         authority_key=AUTHORITY_KEY,
         holder_ref=WORKER_ID,
@@ -81,6 +103,21 @@ def recover_owned_publisher_articles(
             "receipts": [
                 asdict(receipt)
                 for receipt in delete_summary.receipts
+            ],
+        },
+        "publisher_reconcile_recovery": {
+            "recovered_count": reconcile_summary.recovered_count,
+            "delivered_count": reconcile_summary.delivered_count,
+            "retry_scheduled_count": (
+                reconcile_summary.retry_scheduled_count
+            ),
+            "receipts": [
+                {
+                    key: value
+                    for key, value in asdict(receipt).items()
+                    if key != "primary_authority_ref"
+                }
+                for receipt in reconcile_summary.receipts
             ],
         },
     }

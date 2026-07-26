@@ -41939,7 +41939,10 @@
         "note": "【主線專屬交接｜Telegram msg 1327｜2026-07-22 23:38 Asia/Taipei】先用 task_pool_claim.py claim --id assign_f13a5d5f --owner <interactive-owner> --main-thread 接手。已核實：23:14 request_fire(reason=user:assign_f13a5d5f) 啟動 job c4191cb4，但 fire 沒綁指定 task；該班改做其他 P2，23:35 本 P1 仍未 claim。live feed 最新 published 仍是 mile_a73bb294（19:00 台北），不是已修。執行順序：1) contained：從 3 drafts 找一篇通過證據/品質 gate 的新稿，用正式 publisher 發佈並回讀 feed + live API；2) root cause：重現 request_fire 帶 task id 卻可 claim 無關任務的 selector/claim 契約缺口，納入 c4191cb4 supervisor/worker receipt；3) 底層重構：urgent targeted fire 必須原子保留/claim exact task，或明確失敗並持續重試，禁止用別張任務的 exit 0 當接手成功；4) 補 regression、API/下游回讀、機械 alert；5) 合併 alert_release_pool_deadlock_20260722 與 release_deadlock_repair_20260722_15，按 contained 或 root_cause_fixed_and_verified 回報。禁止只手動補圖、重跑或只更新文字。"
       }
     ],
-    "verify_2026_07_26_2207fire": "ROOT_CAUSE_FIXED_AND_VERIFIED（供 main-thread 結案回報用；hourly lane 無法 claim main_thread_lane 任務）。live 本地源驗證（非 Supabase，feed.json 已 deprecated）：(1) storage/ops/release_deadlock_remediation.json 今日 14:00Z 跑出 reason=not_deadlocked（draft=0/eligible=0 非死鎖）；(2) alert_release_pool_deadlock_20260722 status=succeeded（07-22 16:21 結案）；(3) root-cause repair commit 2985beb4a(07-23)+d0cf3e77a(replenish)+3256626fe(publisher cutover gate)；(4) 今日已發文 mile_beee535c(21:37 daily_digest)、published_today=2。當前 draft=0 是 drain-first backpressure（pending=106>80→auto-refill 主動暫停），非死鎖回歸。判定=已恢復且根因已修（非誤報，07-22 為真死鎖）。剩餘：main-thread 依五步結案 gate 正式 close + 回報老闆（Telegram msg1324）。"
+    "verify_2026_07_26_2207fire": "ROOT_CAUSE_FIXED_AND_VERIFIED（供 main-thread 結案回報用；hourly lane 無法 claim main_thread_lane 任務）。live 本地源驗證（非 Supabase，feed.json 已 deprecated）：(1) storage/ops/release_deadlock_remediation.json 今日 14:00Z 跑出 reason=not_deadlocked（draft=0/eligible=0 非死鎖）；(2) alert_release_pool_deadlock_20260722 status=succeeded（07-22 16:21 結案）；(3) root-cause repair commit 2985beb4a(07-23)+d0cf3e77a(replenish)+3256626fe(publisher cutover gate)；(4) 今日已發文 mile_beee535c(21:37 daily_digest)、published_today=2。當前 draft=0 是 drain-first backpressure（pending=106>80→auto-refill 主動暫停），非死鎖回歸。判定=已恢復且根因已修（非誤報，07-22 為真死鎖）。剩餘：main-thread 依五步結案 gate 正式 close + 回報老闆（Telegram msg1324）。",
+    "root_cause_diagnosis": "compute-worker LaunchAgent (com.volpred.compute-worker) 未 bootstrap 於 launchd（launchctl print gui/UID/... = \"Could not find service\"）。RunAtLoad=False + StartCalendarInterval */15；dispatch-supervisor 只 fire volpred-hourly-dispatch（scheduler.py SCHEDULE_ID），operations-core 管 50 jobs 但不含 compute-worker，reconcile 的 daemons registry 只有 dispatch-supervisor。故 session reset 後無人重載 compute-worker → */15 drain 從不執行 → 3 個 lazypack render job (be7666e2/496e7dce/35d8941b) 卡 queued → 3 drafts content_gate_blocked (missing 懶人包圖組) → eligible=0 → release_pool_deadlock。偵測延遲 6.5h（只靠下游 deadlock alert）。",
+    "immediate_fix": "hourly-slot-1 (fa804663) 已 launchctl bootstrap + kickstart com.volpred.compute-worker；3 lazypack jobs 轉 running（codex gen_lazypack_codex.py 並行）。compute-worker 不在 reconcile bootout list，故 bootstrap 不會被 reconcile 復原掉。",
+    "durable_fix_recommendation": "主線程重構：把 com.volpred.compute-worker 納入存在性守護。選項 A（低風險）：reconcile_schedule_owners.py 的 daemons registry 目前只接受 type=launchd_keepalive_daemon；新增 periodic-agent 類型並在 _restore_missing_required_daemons 一併確保 bootstrap（canonical plist 已存在 ops/launchd/com.volpred.compute-worker.plist，且與已裝版本 in-sync）。選項 B（更廣覆蓋）：新增 compute-queue drain-stall detector（queued>0 且 30min 無 running 就 alert），直接抓任何 worker 停擺原因，比守單一 LaunchAgent 更 robust。建議 A+B。"
   },
   {
     "id": "telegram-1327",
@@ -42984,7 +42987,7 @@
   {
     "id": "assign_7750fcd9",
     "title": "PHASE-Z 卡住檔案 incident（3c0b76a1bcd65274）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 76 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- storage/drafts/k1253_general_draft.md — 5 班\n- storage/logs/trending_primary_source_verification.jsonl — 76 班\n- tests/test_check_matt_skills_installation.py — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T173704933918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173805118048Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173905257186Z:<路徑>`",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 77 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- storage/drafts/k1253_general_draft.md — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 77 班\n- tests/test_check_matt_skills_installation.py — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T173704933918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173805118048Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173905257186Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T182937793148Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -42999,18 +43002,19 @@
         "tests/test_check_matt_skills_installation.py"
       ],
       "streaks": {
-        "storage/drafts/k1253_general_draft.md": 5,
-        "storage/logs/trending_primary_source_verification.jsonl": 76,
-        "tests/test_check_matt_skills_installation.py": 9
+        "storage/drafts/k1253_general_draft.md": 6,
+        "storage/logs/trending_primary_source_verification.jsonl": 77,
+        "tests/test_check_matt_skills_installation.py": 10
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260726T173704933918Z",
         "refs/volpred/quarantine/20260726T173805118048Z",
-        "refs/volpred/quarantine/20260726T173905257186Z"
+        "refs/volpred/quarantine/20260726T173905257186Z",
+        "refs/volpred/quarantine/20260726T182937793148Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-26T17:37:07.900931+00:00",
-      "last_seen_at": "2026-07-26T17:39:08.670708+00:00",
+      "last_seen_at": "2026-07-26T18:29:40.644386+00:00",
       "derates": true,
       "derates_updated_at": "2026-07-26T17:38:05.198668+00:00",
       "deferred": [
@@ -43019,7 +43023,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-26T17:39:08.670708+00:00"
+    "updated_at": "2026-07-26T18:29:40.644386+00:00"
   },
   {
     "id": "release_deadlock_repair_20260726_18",
@@ -43044,12 +43048,35 @@
     "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 3\n- eligible_before_dedup: 3\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 3\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_be7666e2` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_be7666e2) — waiting on the */15 compute worker, no action needed\n  - `mile_496e7dce` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_496e7dce) — waiting on the */15 compute worker, no action needed\n  - `mile_35d8941b` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_35d8941b) — waiting on the */15 compute worker, no action needed\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260726_18`，指定只補仍可放行的 cluster：vix, spy, forecast_method。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-26T18:01:02.560552+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "release_pool_deadlock"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-26T18:15:48.585502+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fa8046638b2e465f884c444edf8d1de4"
+      },
+      {
+        "ts": "2026-07-26T18:15:48.823318+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fa8046638b2e465f884c444edf8d1de4"
+      },
+      {
+        "ts": "2026-07-26T18:26:51.968593+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-fa8046638b2e465f884c444edf8d1de4"
+      }
+    ],
+    "started_at": "2026-07-26T18:15:48.823305+00:00",
+    "completed_at": "2026-07-26T18:26:51.968565+00:00",
+    "result": "ROOT CAUSE: com.volpred.compute-worker LaunchAgent 未 bootstrap 於 launchd → */15 drain 從不執行 → 3 lazypack render job 卡 queued → 3 drafts content_gate_blocked → deadlock。FIX: launchctl bootstrap+kickstart，worker 恢復，3 job queued→running→completed，eligible 0→3。VERIFIED: release-pool-by-settings released=1 mile_be7666e2 published+supabase_synced+verified_live；check_alerts breaches=0。durable 守護記入 assign_f13a5d5f (main-thread)。"
   }
 ]

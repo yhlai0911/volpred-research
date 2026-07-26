@@ -474,11 +474,18 @@ def _validate_restore_receipt(
 
 
 def _validate_convergence(convergence: Mapping[str, object]) -> None:
+    from volpred.ops.public_article_projection_contract import (
+        public_projection_contract_evidence_matches,
+    )
+
     if (
         convergence.get("schema_version") != "publisher-projection-convergence.v2"
         or convergence.get("convergence_status") != "converged"
         or convergence.get("mismatch_total") != 0
         or convergence.get("observation_errors") != []
+        or not public_projection_contract_evidence_matches(
+            convergence.get("public_projection_contract")
+        )
     ):
         raise RuntimeError("publisher projection did not converge after cleanup delete")
 

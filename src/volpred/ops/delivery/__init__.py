@@ -61,8 +61,10 @@ from ._publisher_article_sync import (
 )
 from .owned_publisher_reconcile import (
     OwnedPublisherArticleReconcile,
+    OwnedPublisherArticleReconcileRecovery,
     OwnedPublisherReconcileAttempt,
     OwnedPublisherReconcileCommand,
+    OwnedPublisherReconcileRecoverySummary,
     OwnedPublisherReconcileReceipt,
     OwnedPublisherReconcileRequest,
     PublisherArticleReconcileOwner,
@@ -865,6 +867,7 @@ __all__ = [
     "OwnedPublisherArticleSync",
     "OwnedPublisherArticleDelete",
     "OwnedPublisherArticleReconcile",
+    "OwnedPublisherArticleReconcileRecovery",
     "OwnedPublisherDeleteAttempt",
     "OwnedPublisherDeleteCommand",
     "OwnedPublisherDeleteReconciliation",
@@ -874,6 +877,7 @@ __all__ = [
     "OwnedPublisherDeleteRequest",
     "OwnedPublisherReconcileAttempt",
     "OwnedPublisherReconcileCommand",
+    "OwnedPublisherReconcileRecoverySummary",
     "OwnedPublisherReconcileReceipt",
     "OwnedPublisherReconcileRequest",
     "PUBLISHER_ARTICLE_DELETE_CASCADE_COLUMNS",

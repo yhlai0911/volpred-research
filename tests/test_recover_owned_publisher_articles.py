@@ -8,6 +8,9 @@ from scripts import recover_owned_publisher_articles as recovery_script
 from volpred.ops.delivery.owned_publisher_article import (
     OwnedPublisherArticleReceipt,
 )
+from volpred.ops.delivery.owned_publisher_reconcile import (
+    OwnedPublisherReconcileReceipt,
+)
 from volpred.ops.delivery.owned_publisher_delete import (
     OwnedPublisherDeleteReconciliationReceipt,
     OwnedPublisherDeleteReconciliationSummary,
@@ -90,7 +93,38 @@ def test_recovery_script_binds_keepalive_store_and_projection(
                 ),
             )
 
+    class ReconcileRecovery:
+        def __init__(self, **kwargs) -> None:
+            calls.append(("reconcile_recovery_init", kwargs))
+
+        def recover(self, *, limit: int):
+            calls.append(("reconcile_recover", limit))
+            return SimpleNamespace(
+                recovered_count=1,
+                delivered_count=1,
+                retry_scheduled_count=0,
+                receipts=(
+                    OwnedPublisherReconcileReceipt(
+                        schema_version=(
+                            "owned-publisher-reconcile-receipt.v1"
+                        ),
+                        owner_generation=8,
+                        work_id="work-reconcile-1",
+                        work_status="succeeded",
+                        effect_id="effect-reconcile-1",
+                        effect_status="delivered",
+                        attempt_count=2,
+                        disposition="delivered",
+                        evidence_ref="supabase:articles:reconcile",
+                        evidence_sha256="c" * 64,
+                        primary_authority_ref="primary-authority:2",
+                        recorded_at="2026-07-26T09:30:00+00:00",
+                    ),
+                ),
+            )
+
     store = object()
+    reconcile_store = object()
     delete_store = object()
     projection = object()
     monkeypatch.setattr(
@@ -118,6 +152,23 @@ def test_recovery_script_binds_keepalive_store_and_projection(
         Recovery,
     )
     monkeypatch.setattr(
+        recovery_script.SupabaseOwnedPublisherReconcileStore,
+        "from_environment",
+        lambda: reconcile_store,
+    )
+    monkeypatch.setattr(
+        recovery_script,
+        "OwnedPublisherArticleReconcileRecovery",
+        ReconcileRecovery,
+    )
+    monkeypatch.setattr(
+        recovery_script,
+        "PublisherArticleReconcileEffectAdapter",
+        lambda **kwargs: (
+            calls.append(("reconcile_provider", kwargs)) or object()
+        ),
+    )
+    monkeypatch.setattr(
         recovery_script.SupabaseOwnedPublisherDeleteStore,
         "from_environment",
         lambda: delete_store,
@@ -138,6 +189,9 @@ def test_recovery_script_binds_keepalive_store_and_projection(
     assert result["publisher_delete_reconciliation"][
         "reconciled_count"
     ] == 1
+    assert result["publisher_reconcile_recovery"][
+        "recovered_count"
+    ] == 1
     assert calls[:2] == [
         (
             "delete_reconciliation_init",
@@ -153,9 +207,18 @@ def test_recovery_script_binds_keepalive_store_and_projection(
     assert calls[2] == (
         "keepalive_factory",
         {
-            "authority_key": "publisher:article.supabase.sync",
-            "holder_ref": "effect-worker:publisher-article-sync",
+            "authority_key": "publisher:article.supabase.reconcile",
+            "holder_ref": "effect-worker:publisher-article-reconcile",
         },
+    )
+    reconcile_init = next(
+        value
+        for name, value in calls
+        if name == "reconcile_recovery_init"
+    )
+    assert reconcile_init["store"] is reconcile_store
+    assert reconcile_init["worker_id"] == (
+        "effect-worker:publisher-article-reconcile"
     )
     assert (
         "projection",
@@ -194,15 +257,20 @@ def test_recovery_has_one_canonical_hourly_schedule() -> None:
             "piggy_back_enabled": True,
             "description": (
                 "每小時由 check_alerts → run_due_jobs 單一 piggy-back "
-                "owner 回收 publisher sync 的 expired started 與 due "
-                "retry，並終止 old-generation 且 approval 已撤銷的 "
-                "publisher delete retry；兩個 exact-family RPC 均以 "
-                "SKIP LOCKED 原子領取，delete 路徑不呼叫 provider。"
+                "owner 回收 publisher single-sync 與 immutable batch "
+                "reconcile 的 expired started／due retry，並終止 "
+                "old-generation 且 approval 已撤銷的 publisher delete "
+                "retry；三個 exact-family RPC 均以 SKIP LOCKED "
+                "原子領取，delete 路徑不呼叫 provider。"
             ),
             "matchers": [
                 "recover_owned_publisher_articles.py",
                 "cron_owned_publisher_article_recovery.sh",
                 "volpred_recover_due_owned_publisher_article_sync",
+                (
+                    "volpred_recover_due_owned_"
+                    "publisher_article_reconcile"
+                ),
                 (
                     "volpred_reconcile_stale_owned_"
                     "publisher_article_delete"
@@ -218,10 +286,11 @@ def test_recovery_has_one_canonical_hourly_schedule() -> None:
         "policy": "no_repo_tracked_output",
         "tracked_outputs": [],
         "reason": (
-            "Mutates the fenced Supabase publisher-sync recovery and the "
-            "zero-provider stale publisher-delete reconciliation "
-            "transactions plus ignored log evidence; it never writes or "
-            "commits Git-tracked repository state."
+            "Mutates the fenced Supabase publisher single-sync and "
+            "immutable batch-reconcile recovery transactions plus "
+            "zero-provider stale publisher-delete reconciliation and "
+            "ignored log evidence; it never writes or commits Git-tracked "
+            "repository state."
         ),
     }
     assert (

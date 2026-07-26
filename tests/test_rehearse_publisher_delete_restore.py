@@ -178,6 +178,14 @@ def _restore_receipt(plan, *, restored_count=1):
 def _converged():
     return {
         "schema_version": "publisher-projection-convergence.v2",
+        "public_projection_contract": {
+            "schema_version": "public-article-projection-contract.v1",
+            "policy_sha256": (
+                "6d125ff39bdb951026cdecf6e314d4cd"
+                "56eb6877cc1cf478333375bc78306888"
+            ),
+            "matches": True,
+        },
         "convergence_status": "converged",
         "mismatch_total": 0,
         "observation_errors": [],

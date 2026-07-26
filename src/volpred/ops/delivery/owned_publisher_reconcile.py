@@ -118,6 +118,14 @@ class OwnedPublisherReconcileReceipt:
         )
 
 
+@dataclass(frozen=True)
+class OwnedPublisherReconcileRecoverySummary:
+    recovered_count: int
+    delivered_count: int
+    retry_scheduled_count: int
+    receipts: tuple[OwnedPublisherReconcileReceipt, ...]
+
+
 class _OwnedPublisherReconcileStore(Protocol):
     def read_owner(self) -> PublisherArticleReconcileOwner: ...
 
@@ -138,6 +146,17 @@ class _OwnedPublisherReconcileStore(Protocol):
         outbox_claim_token: str,
         primary_fencing_token: str,
     ) -> OwnedPublisherReconcileAttempt: ...
+
+    def recover_due(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedPublisherReconcileAttempt | None: ...
 
     def settle(
         self,
@@ -366,6 +385,158 @@ class OwnedPublisherArticleReconcile:
             )
 
 
+class OwnedPublisherArticleReconcileRecovery:
+    """Recover due immutable reconcile batches from their original payload."""
+
+    def __init__(
+        self,
+        *,
+        store: _OwnedPublisherReconcileStore,
+        provider: PublisherArticleReconcileEffectAdapter,
+        primary_authority: _PrimaryLeaseGate,
+        worker_id: str = _WORKER_ID,
+        lease_seconds: int = 300,
+        token_factory: Callable[[], str] | None = None,
+    ) -> None:
+        if not isinstance(worker_id, str) or not worker_id.strip():
+            raise ValueError(
+                "owned publisher reconcile recovery worker_id is required"
+            )
+        if (
+            isinstance(lease_seconds, bool)
+            or not isinstance(lease_seconds, int)
+            or lease_seconds <= 0
+        ):
+            raise ValueError(
+                "owned publisher reconcile recovery lease_seconds "
+                "must be positive"
+            )
+        self._store = store
+        self._provider = provider
+        self._primary_authority = primary_authority
+        self._worker_id = worker_id.strip()
+        self._lease_seconds = lease_seconds
+        self._token_factory = token_factory or (
+            lambda: f"owned_reconcile_recovery_{uuid4().hex}"
+        )
+
+    def recover(
+        self,
+        *,
+        limit: int = 10,
+    ) -> OwnedPublisherReconcileRecoverySummary:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+            raise ValueError(
+                "owned publisher reconcile recovery limit must be positive"
+            )
+        lease = self._current_lease()
+        owner = self._store.read_owner()
+        if (
+            owner.effect_family != _OWNER_FAMILY
+            or owner.owner != _OPERATIONS_CORE_OWNER
+        ):
+            raise PublisherArticleReconcileOwnershipLost(
+                "operations core does not own reconcile recovery"
+            )
+        receipts: list[OwnedPublisherReconcileReceipt] = []
+        for _ in range(limit):
+            lease = self._current_lease(expected=lease)
+            attempt = self._store.recover_due(
+                owner_generation=owner.generation,
+                worker_id=self._worker_id,
+                lease_seconds=self._lease_seconds,
+                work_lease_token=self._token("work"),
+                outbox_claim_token=self._token("outbox"),
+                primary_fencing_token=lease.fencing_token,
+            )
+            if attempt is None:
+                break
+            self._validate_recovered_attempt(
+                attempt,
+                owner_generation=owner.generation,
+                lease=lease,
+            )
+            self._current_lease(expected=lease)
+            outcome = self._provider.deliver(
+                attempt.effect,
+                attempt.payload,
+                authorize_mutation=lambda: self._current_lease(
+                    expected=lease,
+                ),
+            )
+            receipt = self._store.settle(attempt, outcome)
+            OwnedPublisherArticleReconcile._validate_settlement_receipt(
+                receipt,
+                attempt=attempt,
+                outcome=outcome,
+            )
+            receipts.append(receipt)
+        return OwnedPublisherReconcileRecoverySummary(
+            recovered_count=len(receipts),
+            delivered_count=sum(
+                receipt.delivered for receipt in receipts
+            ),
+            retry_scheduled_count=sum(
+                receipt.disposition == "retry_scheduled"
+                for receipt in receipts
+            ),
+            receipts=tuple(receipts),
+        )
+
+    def _token(self, kind: str) -> str:
+        token = self._token_factory()
+        if not isinstance(token, str) or not token.strip():
+            raise ValueError(
+                f"owned reconcile recovery {kind} token is required"
+            )
+        return token.strip()
+
+    def _current_lease(
+        self,
+        *,
+        expected: PrimaryLease | None = None,
+    ) -> PrimaryLease:
+        lease = self._primary_authority.current_lease()
+        if not isinstance(lease, PrimaryLease):
+            raise TypeError(
+                "owned reconcile recovery keepalive returned no lease"
+            )
+        if (
+            lease.authority_key != _PRIMARY_AUTHORITY_KEY
+            or lease.holder_ref != self._worker_id
+        ):
+            raise PublisherArticleReconcileOwnershipLost(
+                "owned reconcile recovery lease identity mismatch"
+            )
+        if expected is not None and (
+            lease.epoch != expected.epoch
+            or lease.fencing_token != expected.fencing_token
+            or lease.acquired_at != expected.acquired_at
+        ):
+            raise PublisherArticleReconcileOwnershipLost(
+                "owned reconcile recovery lease was replaced"
+            )
+        return lease
+
+    @staticmethod
+    def _validate_recovered_attempt(
+        attempt: OwnedPublisherReconcileAttempt,
+        *,
+        owner_generation: int,
+        lease: PrimaryLease,
+    ) -> None:
+        if (
+            attempt.owner_generation != owner_generation
+            or attempt.primary_authority_key != lease.authority_key
+            or attempt.primary_authority_holder_ref != lease.holder_ref
+            or attempt.primary_authority_epoch != lease.epoch
+            or attempt.primary_fencing_token != lease.fencing_token
+        ):
+            raise PublisherArticleReconcileOwnershipLost(
+                "owned reconcile recovery attempt drifted"
+            )
+
+
 class SupabaseOwnedPublisherReconcileStore:
     """Service-role PostgREST adapter for reconcile ownership RPCs."""
 
@@ -503,79 +674,41 @@ class SupabaseOwnedPublisherReconcileStore:
                 "p_primary_fencing_token": primary_fencing_token,
             },
         )
-        effect = _effect_from_payload(
-            _mapping(response.get("effect"), field="effect")
-        )
-        try:
-            raw_payload = base64.b64decode(
-                _required_text(
-                    response.get("payload_base64"),
-                    field="payload_base64",
-                ),
-                validate=True,
-            )
-        except ValueError as exc:
-            raise RuntimeError(
-                "owned publisher reconcile begin returned invalid payload bytes"
-            ) from exc
-        return OwnedPublisherReconcileAttempt(
-            owner_generation=_positive_integer(
-                response.get("owner_generation"),
-                field="attempt owner_generation",
-            ),
-            work_id=_required_text(
-                response.get("work_id"),
-                field="work_id",
-            ),
-            work_version=_positive_integer(
-                response.get("work_version"),
-                field="work_version",
-            ),
+        return _attempt_from_payload(
+            response,
             work_lease_token=work_lease_token,
-            effect=effect,
-            payload=raw_payload,
-            outbox_sequence=_positive_integer(
-                response.get("outbox_sequence"),
-                field="outbox_sequence",
-            ),
-            attempt_count=_positive_integer(
-                response.get("attempt_count"),
-                field="attempt_count",
-            ),
             outbox_claim_token=outbox_claim_token,
-            worker_id=_required_text(
-                response.get("worker_id"),
-                field="worker_id",
-            ),
-            primary_authority_key=_required_text(
-                response.get("primary_authority_key"),
-                field="primary_authority_key",
-            ),
-            primary_authority_holder_ref=_required_text(
-                response.get("primary_authority_holder_ref"),
-                field="primary_authority_holder_ref",
-            ),
-            primary_authority_epoch=_positive_integer(
-                response.get("primary_authority_epoch"),
-                field="primary_authority_epoch",
-            ),
             primary_fencing_token=primary_fencing_token,
-            authority_request_sha256=_sha256(
-                response.get("authority_request_sha256"),
-                field="authority request hash",
-            ),
-            outbox_claim_ref=_required_text(
-                response.get("outbox_claim_ref"),
-                field="outbox_claim_ref",
-            ),
-            primary_authority_ref=_required_text(
-                response.get("primary_authority_ref"),
-                field="primary_authority_ref",
-            ),
-            lease_expires_at=_required_text(
-                response.get("lease_expires_at"),
-                field="lease_expires_at",
-            ),
+        )
+
+    def recover_due(
+        self,
+        *,
+        owner_generation: int,
+        worker_id: str,
+        lease_seconds: int,
+        work_lease_token: str,
+        outbox_claim_token: str,
+        primary_fencing_token: str,
+    ) -> OwnedPublisherReconcileAttempt | None:
+        response = self._rpc(
+            "volpred_recover_due_owned_publisher_article_reconcile",
+            {
+                "p_owner_generation": owner_generation,
+                "p_worker_id": worker_id,
+                "p_lease_seconds": lease_seconds,
+                "p_work_lease_token": work_lease_token,
+                "p_outbox_claim_token": outbox_claim_token,
+                "p_primary_fencing_token": primary_fencing_token,
+            },
+        )
+        if response.get("recovered") is False:
+            return None
+        return _attempt_from_payload(
+            response,
+            work_lease_token=work_lease_token,
+            outbox_claim_token=outbox_claim_token,
+            primary_fencing_token=primary_fencing_token,
         )
 
     def settle(
@@ -653,6 +786,89 @@ class SupabaseOwnedPublisherReconcileStore:
             self._client.call(function, payload),
             field=f"{function} response",
         )
+
+
+def _attempt_from_payload(
+    response: Mapping[str, Any],
+    *,
+    work_lease_token: str,
+    outbox_claim_token: str,
+    primary_fencing_token: str,
+) -> OwnedPublisherReconcileAttempt:
+    effect = _effect_from_payload(
+        _mapping(response.get("effect"), field="effect")
+    )
+    try:
+        raw_payload = base64.b64decode(
+            _required_text(
+                response.get("payload_base64"),
+                field="payload_base64",
+            ),
+            validate=True,
+        )
+    except ValueError as exc:
+        raise RuntimeError(
+            "owned publisher reconcile begin returned invalid payload bytes"
+        ) from exc
+    return OwnedPublisherReconcileAttempt(
+        owner_generation=_positive_integer(
+            response.get("owner_generation"),
+            field="attempt owner_generation",
+        ),
+        work_id=_required_text(
+            response.get("work_id"),
+            field="work_id",
+        ),
+        work_version=_positive_integer(
+            response.get("work_version"),
+            field="work_version",
+        ),
+        work_lease_token=work_lease_token,
+        effect=effect,
+        payload=raw_payload,
+        outbox_sequence=_positive_integer(
+            response.get("outbox_sequence"),
+            field="outbox_sequence",
+        ),
+        attempt_count=_positive_integer(
+            response.get("attempt_count"),
+            field="attempt_count",
+        ),
+        outbox_claim_token=outbox_claim_token,
+        worker_id=_required_text(
+            response.get("worker_id"),
+            field="worker_id",
+        ),
+        primary_authority_key=_required_text(
+            response.get("primary_authority_key"),
+            field="primary_authority_key",
+        ),
+        primary_authority_holder_ref=_required_text(
+            response.get("primary_authority_holder_ref"),
+            field="primary_authority_holder_ref",
+        ),
+        primary_authority_epoch=_positive_integer(
+            response.get("primary_authority_epoch"),
+            field="primary_authority_epoch",
+        ),
+        primary_fencing_token=primary_fencing_token,
+        authority_request_sha256=_sha256(
+            response.get("authority_request_sha256"),
+            field="authority request hash",
+        ),
+        outbox_claim_ref=_required_text(
+            response.get("outbox_claim_ref"),
+            field="outbox_claim_ref",
+        ),
+        primary_authority_ref=_required_text(
+            response.get("primary_authority_ref"),
+            field="primary_authority_ref",
+        ),
+        lease_expires_at=_required_text(
+            response.get("lease_expires_at"),
+            field="lease_expires_at",
+        ),
+    )
 
 
 def _normalize_command(
@@ -902,6 +1118,8 @@ __all__ = [
     "OwnedPublisherReconcileReceipt",
     "OwnedPublisherReconcileRequest",
     "OwnedPublisherArticleReconcile",
+    "OwnedPublisherArticleReconcileRecovery",
+    "OwnedPublisherReconcileRecoverySummary",
     "PublisherArticleReconcileOwner",
     "PublisherArticleReconcileOwnershipLost",
     "SupabaseOwnedPublisherReconcileStore",

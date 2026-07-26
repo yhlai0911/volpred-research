@@ -240,6 +240,10 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
+    / "20260726181931_owned_publisher_reconcile_recovery.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
     / "20260727001900_commit_authority_terminal_recovery.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
@@ -1408,6 +1412,9 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   public.volpred_begin_owned_publisher_article_reconcile(
                     bigint, text, text, integer, text, text, text
                   ),
+                  public.volpred_recover_due_owned_publisher_article_reconcile(
+                    bigint, text, integer, text, text, text
+                  ),
                   public.volpred_settle_owned_publisher_article_reconcile(
                     bigint, text, integer, text, text, bigint, integer,
                     text, text, text, text, bigint, text, text, text,
@@ -1525,6 +1532,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.work_cutover_gates,
                   volpred_ops.work_owner_receipts,
                   volpred_ops.work_owners,
+                  volpred_ops.owned_publisher_reconcile_recovery_receipts,
                   volpred_ops.owned_publisher_article_recovery_receipts,
                   volpred_ops.owned_notification_recovery_receipts,
               volpred_ops.owned_notification_attempts,
@@ -6626,6 +6634,7 @@ def test_owned_publisher_reconcile_rpc_security_shape(
         "volpred_transfer_publisher_article_reconcile_owner",
         "volpred_request_owned_publisher_article_reconcile",
         "volpred_begin_owned_publisher_article_reconcile",
+        "volpred_recover_due_owned_publisher_article_reconcile",
         "volpred_settle_owned_publisher_article_reconcile",
     )
     with psycopg.connect(postgres_effect_dsn) as connection:
@@ -6680,7 +6689,7 @@ def test_owned_publisher_reconcile_rpc_security_shape(
             """
         ).fetchone()[0]
 
-    assert len(rows) == 5
+    assert len(rows) == 6
     expected_privileges = (True, True, True, True, False, False, False)
     assert all(row[1:8] == expected_privileges for row in rows)
     assert service_table_access is False
@@ -6689,6 +6698,202 @@ def test_owned_publisher_reconcile_rpc_security_shape(
     assert "publisher:article.supabase.reconcile" in definitions
     assert "publisher.article.supabase.reconcile.readback" in definitions
     assert "supabase:articles" in definitions
+    assert "FOR UPDATE OF attempt SKIP LOCKED" in definitions
+
+
+def test_due_publisher_reconcile_retry_recovers_original_effect(
+    postgres_effect_dsn: str,
+) -> None:
+    payload = {
+        "schema_version": "publisher-article-reconcile.v1",
+        "canonical_feed_sha256": "8" * 64,
+        "articles": [
+            {
+                "id": "mile_partial_a",
+                "title": "Partial A",
+                "content": "A",
+                "status": "published",
+            },
+            {
+                "id": "mile_partial_b",
+                "title": "Partial B",
+                "content": "B",
+                "status": "published",
+            },
+        ],
+    }
+    worker = "effect-worker:publisher-article-reconcile"
+    authority = "publisher:article.supabase.reconcile"
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        owner = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_reconcile_owner(
+              'legacy', 1, 'operations_core', 'test:recovery',
+              'exercise due batch recovery', NULL
+            )
+            """
+        ).fetchone()[0]
+        request_view = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_reconcile(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                "reconcile:partial-recovery",
+                Jsonb(payload),
+                "test:recovery",
+            ),
+        ).fetchone()[0]
+        connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, 300, 'primary-recovery-token'
+            )
+            """,
+            (authority, worker),
+        )
+        attempt_one = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_publisher_article_reconcile(
+              %s, %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                request_view["effect_id"],
+                worker,
+                "work-recovery-1",
+                "outbox-recovery-1",
+                "primary-recovery-token",
+            ),
+        ).fetchone()[0]
+        retry = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_publisher_article_reconcile(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                attempt_one["work_id"],
+                attempt_one["work_version"],
+                "work-recovery-1",
+                attempt_one["effect"]["id"],
+                attempt_one["outbox_sequence"],
+                attempt_one["attempt_count"],
+                worker,
+                "outbox-recovery-1",
+                attempt_one["primary_authority_key"],
+                attempt_one["primary_authority_holder_ref"],
+                attempt_one["primary_authority_epoch"],
+                "primary-recovery-token",
+                attempt_one["authority_request_sha256"],
+                attempt_one["outbox_claim_ref"],
+                attempt_one["primary_authority_ref"],
+                "retryable_failure",
+                None,
+                None,
+                "publisher_article_reconcile_provider_error",
+                (
+                    "effect-attempt:"
+                    + attempt_one["effect"]["id"]
+                    + ":partial|mirror:cache/mile_partial_b#status=503"
+                ),
+                "7" * 64,
+            ),
+        ).fetchone()[0]
+        assert retry["disposition"] == "retry_scheduled"
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET available_at = clock_timestamp() - interval '1 second'
+            WHERE effect_id = %s
+            """,
+            (request_view["effect_id"],),
+        )
+        connection.execute("SET ROLE service_role")
+        attempt_two = connection.execute(
+            """
+            SELECT public.volpred_recover_due_owned_publisher_article_reconcile(
+              %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                worker,
+                "work-recovery-2",
+                "outbox-recovery-2",
+                "primary-recovery-token",
+            ),
+        ).fetchone()[0]
+        assert attempt_two["recovered"] is True
+        assert attempt_two["effect"]["id"] == request_view["effect_id"]
+        assert attempt_two["payload_base64"] == attempt_one["payload_base64"]
+        assert attempt_two["attempt_count"] == 2
+
+        delivered = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_publisher_article_reconcile(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                attempt_two["work_id"],
+                attempt_two["work_version"],
+                "work-recovery-2",
+                attempt_two["effect"]["id"],
+                attempt_two["outbox_sequence"],
+                attempt_two["attempt_count"],
+                worker,
+                "outbox-recovery-2",
+                attempt_two["primary_authority_key"],
+                attempt_two["primary_authority_holder_ref"],
+                attempt_two["primary_authority_epoch"],
+                "primary-recovery-token",
+                attempt_two["authority_request_sha256"],
+                attempt_two["outbox_claim_ref"],
+                attempt_two["primary_authority_ref"],
+                "acknowledged",
+                attempt_two["effect"]["acknowledgement"]["kind"],
+                attempt_two["effect"]["acknowledgement"]["target_ref"],
+                None,
+                "supabase:articles:reconcile:" + "8" * 64,
+                "6" * 64,
+            ),
+        ).fetchone()[0]
+        assert delivered["disposition"] == "delivered"
+
+        connection.execute("RESET ROLE")
+        state = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_requests WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT count(*)
+               FROM volpred_ops.owned_publisher_reconcile_recovery_receipts
+               WHERE effect_id = %s)
+            """,
+            (
+                request_view["work_id"],
+                request_view["effect_id"],
+                request_view["effect_id"],
+                request_view["effect_id"],
+            ),
+        ).fetchone()
+        assert state == ("succeeded", "delivered", "delivered", 1)
 
 
 def test_owned_publisher_rpc_security_and_definition_shape(
