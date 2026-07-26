@@ -2698,3 +2698,24 @@ implementation=`ef95ccf23a39a3fa4b9c724214ff07afc4d1fc5d7b3f0cc5c1d5c37a4fa192b7
 沒有authority acquire或provider call。本physical-identity false-green根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac仍無可操作session，physical pair與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Standby驗過primary receipt但沒有留下exact artifact identity
+
+**證據化症狀與根因層級**：standby正式入口已在任何publisher read／authority RPC前
+驗完整primary v2 receipt，但standby v2 receipt只保存`expected_primary_epoch`。Failure
+injection先讓standby正常完成，再只改final verifier收到的primary `completed_at`；
+舊verifier仍產出`cross_host_verified=true`。根因是pre-mutation evidence identity沒有
+跨越standby receipt boundary，epoch相等被誤當成exact artifact相等，不是Authority CAS。
+
+**底層修復、回歸與live狀態**：standby在完整primary驗證後、remote read前計算canonical
+primary receipt SHA-256，standby schema升v3保存該digest；final verifier重算目前primary
+artifact並要求exact match，final schema亦升v3沿用相同
+`primary_receipt_sha256`。上述failure injection修前紅、修後fail closed；相鄰authority
+suites **41 passed**。Production只讀preflight
+`primary-artifact-preflight-20260726-0940` exact read-back
+publisher=`operations_core/8`與implementation
+`bfa6af660456fb3292b00fbda334c4c21a1dceb79e6e694942077fc24ed34168`。本機Tailscale
+backend由Stopped恢復Running後，live peer狀態顯示候選第二台Mac離線且ping timeout，
+所以沒有執行authority acquire或provider call。本artifact-binding根因為
+**`root_cause_fixed_and_verified`**；physical pair與operations-core umbrella仍維持
+**`contained`**。

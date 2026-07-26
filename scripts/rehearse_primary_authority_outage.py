@@ -249,6 +249,7 @@ class StandbyProcessReceipt:
     completed_at: str
     lease_seconds: int
     expected_primary_epoch: int
+    primary_receipt_sha256: str
     standby: AuthorityLeaseEvidence
     acquisition_wait_seconds: float
     acquisition_attempt_count: int
@@ -585,6 +586,7 @@ def rehearse_standby_process_role(
         lease_seconds=lease_seconds,
     )
     expected_primary_epoch = primary_receipt.primary.epoch
+    primary_receipt_sha256 = _receipt_sha256(primary_receipt)
     readiness_sha256 = _receipt_sha256(readiness)
     implementation_sha256 = _implementation_sha256()
     if implementation_sha256 != readiness.implementation_sha256:
@@ -647,7 +649,7 @@ def rehearse_standby_process_role(
         _verify_implementation_unchanged(implementation_sha256)
 
         return StandbyProcessReceipt(
-            schema_version="primary-authority-outage-standby.v2",
+            schema_version="primary-authority-outage-standby.v3",
             rehearsal_id=rehearsal_id,
             role="standby",
             host_id=host_id,
@@ -659,6 +661,7 @@ def rehearse_standby_process_role(
             completed_at=datetime.now(UTC).isoformat(),
             lease_seconds=lease_seconds,
             expected_primary_epoch=expected_primary_epoch,
+            primary_receipt_sha256=primary_receipt_sha256,
             standby=_lease_evidence(standby_lease),
             acquisition_wait_seconds=round(acquisition_wait, 6),
             acquisition_attempt_count=attempts,
@@ -689,7 +692,7 @@ def verify_cross_host_receipts(
         )
     if primary.schema_version != "primary-authority-outage-primary.v2":
         raise ValueError("unsupported primary receipt schema")
-    if standby.schema_version != "primary-authority-outage-standby.v2":
+    if standby.schema_version != "primary-authority-outage-standby.v3":
         raise ValueError("unsupported standby receipt schema")
     _validate_cross_host_readiness_receipt(readiness)
     _validate_primary_receipt_for_standby(
@@ -754,6 +757,9 @@ def verify_cross_host_receipts(
         raise ValueError("standby authority holder is not bound to its host")
     if standby.expected_primary_epoch != primary.primary.epoch:
         raise ValueError("standby expected a different primary epoch")
+    primary_receipt_sha256 = _receipt_sha256(primary)
+    if standby.primary_receipt_sha256 != primary_receipt_sha256:
+        raise ValueError("standby is not bound to this primary receipt")
     if standby.standby.epoch != primary.primary.epoch + 1:
         raise ValueError("standby receipt is not the exact next epoch")
     if not primary.local_gate_closed or not primary.partition_probe_rejected:
@@ -809,7 +815,7 @@ def verify_cross_host_receipts(
         raise ValueError("database-clock handoff exceeded five-minute RTO")
 
     return CrossHostOutageReceipt(
-        schema_version="primary-authority-outage-cross-host.v2",
+        schema_version="primary-authority-outage-cross-host.v3",
         rehearsal_id=primary.rehearsal_id,
         authority_key=primary.authority_key,
         verified_at=datetime.now(UTC).isoformat(),
@@ -825,7 +831,7 @@ def verify_cross_host_receipts(
         standby_acquired_at=standby.standby.acquired_at,
         database_clock_handoff_seconds=round(handoff_seconds, 6),
         publisher_fence=publisher_fences[0],
-        primary_receipt_sha256=_receipt_sha256(primary),
+        primary_receipt_sha256=primary_receipt_sha256,
         standby_receipt_sha256=_receipt_sha256(standby),
         successful_authority_claims=successful_claims,
         duplicate_authority_claims=duplicate_claims,

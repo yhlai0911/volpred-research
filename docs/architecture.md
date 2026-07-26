@@ -799,10 +799,12 @@ two-Mac Primary Authority receipt pair。
 
 Physical Primary Authority pair的`implementation_sha256`不再只代表rehearsal script。
 兩台host各自從canonical relative paths建立manifest，涵蓋operator與
-`src/volpred/ops/**/*.py`全部Python source，再對manifest做canonical SHA-256。Pair
-verifier另要求receipt的authority key精確等於shared rehearsal ID所導出的隔離key。
-因此同script但authority／keepalive／transport版本不同，或把production authority key
-填入receipt，都不能形成`cross_host_verified` evidence。
+`src/volpred/ops/**/*.py`全部Python source、`pyproject.toml`、`uv.lock`及實際
+Python／OpenSSL runtime identity，再對manifest做canonical SHA-256。macOS physical
+fingerprint只由`IOPlatformUUID`的one-way hash導出，不使用會隨network interface漂移的
+node identity。Pair verifier另要求receipt的authority key精確等於shared rehearsal ID
+所導出的隔離key。因此source／dependency／runtime不同、同一Mac偽裝成兩台，或把
+production authority key填入receipt，都不能形成`cross_host_verified` evidence。
 
 兩個process role現在都在第一個remote read／mutation前快照上述aggregate identity，
 並在remote cleanup完成、建立receipt前重新計算一次。Shared checkout若在演練途中被
@@ -816,3 +818,8 @@ read-back，不 acquire authority lease；若machine fingerprint重複、source 
 停止。正式role CLI必須帶同一份
 `primary-authority-outage-readiness-pair.v1`，並在本機再次核對role、fingerprint與
 source aggregate。
+
+Standby role另必須把mutation前驗過的完整primary receipt之canonical SHA-256寫入
+`primary-authority-outage-standby.v3`。Final verifier只接受該digest與當前primary
+artifact exact match，成功產物為`primary-authority-outage-cross-host.v3`；只相同epoch
+不足以證明兩個process receipt屬於同一條evidence chain。

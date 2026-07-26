@@ -481,7 +481,12 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         "host:standby-fingerprint:outage-standby:cross-host-test"
     )
     assert paired.schema_version == (
-        "primary-authority-outage-cross-host.v2"
+        "primary-authority-outage-cross-host.v3"
+    )
+    assert standby.schema_version == "primary-authority-outage-standby.v3"
+    assert (
+        standby.primary_receipt_sha256
+        == paired.primary_receipt_sha256
     )
     assert (
         primary.cross_host_readiness_sha256
@@ -495,7 +500,7 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert paired.cross_host_verified is True
     saved_pair = json.loads(paired_path.read_text())
     assert saved_pair["schema_version"] == (
-        "primary-authority-outage-cross-host.v2"
+        "primary-authority-outage-cross-host.v3"
     )
     assert saved_pair["primary_receipt_sha256"] == (
         paired.primary_receipt_sha256
@@ -591,6 +596,56 @@ def test_pair_verifier_rejects_process_receipt_from_other_readiness() -> None:
                 standby,
                 cross_host_readiness_sha256="0" * 64,
             ),
+            readiness=readiness,
+        )
+
+
+def test_pair_verifier_rejects_primary_artifact_not_used_by_standby() -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="primary-artifact-binding",
+        publisher=publisher,
+    )
+    primary = rehearse_primary_process_role(
+        rehearsal_id="primary-artifact-binding",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=PartitionableAuthorityStore(
+            healthy=live,
+            unavailable=_UnavailableAuthorityStore(),
+        ),
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+        readiness=readiness,
+    )
+    standby = rehearse_standby_process_role(
+        rehearsal_id="primary-artifact-binding",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        primary_receipt=primary,
+        lease_seconds=10,
+        rto_seconds=1.0,
+        poll_interval_seconds=0.005,
+        store=live,
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+        readiness=readiness,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="standby is not bound to this primary receipt",
+    ):
+        verify_cross_host_receipts(
+            replace(
+                primary,
+                completed_at="2026-07-26T00:00:00+00:00",
+            ),
+            standby,
             readiness=readiness,
         )
 

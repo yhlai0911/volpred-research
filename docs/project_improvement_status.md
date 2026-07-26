@@ -1702,3 +1702,20 @@ exact read-back `operations_core/8`、安全隔離key與implementation
 acquire、effect或provider call。此standby pre-mutation切片為
 `root_cause_fixed_and_verified`；實體第二台Mac仍無可操作session，physical paired
 receipt與operations-core umbrella維持`contained`。
+
+## 2026-07-26 — Program commit 34 primary artifact binding checkpoint
+
+Standby雖已在任何remote mutation前驗完整primary receipt，舊standby receipt只保存
+primary epoch，沒有保存當時驗過的exact artifact identity。Final verifier因此可接受
+同epoch但其他內容事後被改寫的primary receipt。Standby receipt現升v3並保存canonical
+`primary_receipt_sha256`；final verifier與final receipt同步升v3，必須以當前primary
+artifact重算值exact match後才可產生cross-host evidence。
+
+修改primary `completed_at`的failure injection在修前重現假綠、修後fail closed；相鄰
+authority suites **41 passed**。Production只讀preflight
+`primary-artifact-preflight-20260726-0940`已exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`與
+implementation=`bfa6af660456fb3292b00fbda334c4c21a1dceb79e6e694942077fc24ed34168`。
+本機Tailscale恢復Running後，候選第二台Mac仍為offline且ping timeout，故未執行remote
+authority mutation。此artifact-binding切片為`root_cause_fixed_and_verified`；
+physical paired receipt與operations-core umbrella維持`contained`。

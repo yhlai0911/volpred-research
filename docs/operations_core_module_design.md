@@ -1793,3 +1793,25 @@ publisher=`operations_core/8`、安全隔離key與implementation
 acquire或provider call。此pre-mutation identity根因為
 `root_cause_fixed_and_verified`；第二台實體Mac仍未執行roles，physical pair與
 operations-core umbrella維持`contained`。
+
+## 24. Standby-to-primary exact artifact binding（2026-07-26）
+
+Standby雖已在mutation前讀取並驗證完整primary v2 receipt，舊standby v2 receipt卻只
+保存`expected_primary_epoch`。Final verifier因此無法證明standby實際驗過的是現在拿來
+配對的那份primary artifact；只要保留同一epoch與其餘可驗欄位，事後改寫primary
+receipt中未參與epoch比較的內容，仍可形成`cross_host_verified=true`假綠。
+
+Standby現在於所有publisher read／authority RPC前，對已通過完整驗證的typed primary
+receipt計算canonical SHA-256，並寫入standby v3 receipt。Final verifier重新計算當前
+primary artifact digest，要求與standby保存值exact match後才檢查handoff；final receipt
+同步升v3，並以同一digest作為`primary_receipt_sha256`。Failure injection在standby完成後
+只改primary `completed_at`，舊流程先紅燈證實仍會接受，新流程在final verification
+fail closed；相鄰authority suites **41 passed**，未執行production remote mutation。
+
+本artifact-binding根因為`root_cause_fixed_and_verified`。Production只讀preflight
+`primary-artifact-preflight-20260726-0940`已原子落檔並exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`與
+implementation=`bfa6af660456fb3292b00fbda334c4c21a1dceb79e6e694942077fc24ed34168`。
+本機Tailscale backend恢復Running後，候選第二台Mac仍為offline且peer ping timeout；
+因此真實physical pair尚不可執行，program commit 34與operations-core umbrella維持
+`contained`。
