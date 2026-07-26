@@ -14,7 +14,8 @@
         "reason": "The remaining remote trigger is a disabled compatibility declaration; it does not execute a local writer. token_usage_daily_report was removed 2026-07-20 (WS-H2 token convergence)."
       },
       "session_crons.items": {
-        "jobs": {
+        "jobs": {},
+        "retired_jobs": {
           "daily_planning": {
             "policy": "agent_delivery_contract",
             "tracked_outputs": ["storage/next_tasks.json"],
@@ -83,6 +84,13 @@
       "policy": "no_repo_tracked_output",
       "tracked_outputs": [],
       "reason": "Writes ignored scheduler receipt, lock, and log state only; each materialized job retains its separately registered writer policy."
+    },
+    "knowledge_index_maintain": {
+      "entrypoint": "scripts/cron_knowledge_index_maintain.sh",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/.knowledge_index_state.json"],
+      "phase_z_probe_paths": ["storage/.knowledge_index_state.json"],
+      "reason": "Operations Core owns the fixed six-hour maintenance cadence; the tracked freshness ledger is scheduled machine state and the index database itself is ignored."
     },
     "log_rotate": {
       "entrypoint": "scripts/cron_log_rotate.sh",

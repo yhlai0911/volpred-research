@@ -14,4 +14,9 @@ def test_runtime_schedules_config_has_required_sections():
     # WS-H2 2026-07-20: token_usage_daily_report removed (token convergence);
     # only the disabled platform_ops_patrol declaration remains.
     assert len(get_schedule_items("remote_triggers")) >= 1
-    assert len(get_schedule_items("session_crons")) >= 5
+    assert get_schedule_items("session_crons") == []
+    assert data["session_crons"]["status"] == "retired"
+    assert (
+        data["session_crons"]["replacement_jobs"]["knowledge_index_check"]
+        == ["knowledge_index_maintain"]
+    )

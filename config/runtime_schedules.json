@@ -452,6 +452,20 @@
         ]
       },
       {
+        "id": "knowledge_index_maintain",
+        "label": "Knowledge index freshness and maintenance",
+        "cron": "7 */6 * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_knowledge_index_maintain.sh",
+        "log_path": "storage/logs/cron/knowledge_index_maintain.log",
+        "description": "Operations Core 每 6 小時執行 canonical knowledge-index maintenance decision loop；fresh 時 tiny no-op，drift 時更新索引並回讀 after status。取代不可靠、依賴互動 Claude session 的 knowledge_index_check CronCreate。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "matchers": [
+          "knowledge-index-maintain",
+          "cron_knowledge_index_maintain.sh"
+        ]
+      },
+      {
         "id": "digest_daily_enqueue",
         "label": "每日精選導讀例行任務 enqueue",
         "cron": "0 9 * * *",
@@ -797,9 +811,21 @@
     ]
   },
   "session_crons": {
-    "source_label": "Canonical session cron spec",
-    "note": "Recreate these in each new local agent session. Keep continuation low-frequency to control token usage; user-confirmed cadence is every 12 hours.",
-    "items": [
+    "source_label": "Retired session-local cron compatibility archive",
+    "note": "2026-07-26 full Operations Core cutover: do not recreate CronCreate jobs. Executable maintenance moved to system_crontab under Operations Core; agent dispatch remains an explicit worker/control-plane concern, never an in-session scheduler.",
+    "status": "retired",
+    "retired_at": "2026-07-26T10:38:00Z",
+    "replacement_jobs": {
+      "daily_planning": ["ops_dashboard"],
+      "continue_task": ["dispatch-supervisor"],
+      "platform_patrol": ["check_alerts", "daily_checkup"],
+      "git_sync": ["git_push_backup"],
+      "knowledge_index_check": ["knowledge_index_maintain"],
+      "ndc_indicator_refresh": ["ndc_indicator_refresh"],
+      "journal_topic_scan": ["research_backlog_daily", "GitHub Issues control plane"]
+    },
+    "items": [],
+    "retired_items": [
       {
         "id": "daily_planning",
         "cron": "3 9 * * *",

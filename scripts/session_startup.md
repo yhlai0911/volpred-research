@@ -2,7 +2,12 @@
 
 需要手動做 session 初始化、恢復或檢查 legacy cron 路徑時再讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
 
-> **⚠️ 2026-04-19 架構更新（v12 canonical）**：3-terminal supervisor/worker workflow **已廢棄**（見 `.claude/rules/control-plane.md` + `docs/architecture.md`）。目前正式 runtime = **單一主線程 Claude Code + 按需 subagent dispatch**（claude general-purpose / codex-rescue）。下方第 0 段「三終端機」+ 第 1 段「session-bootstrap 指令」**保留作為歷史 reference 不刪除**（某些 legacy path 仍讀 `storage/ops/agents/claude-worker.json` 等檔），但**新 session 直接跳到 §2「Session Cron 標準啟動集」**。CLAUDE.md §系統定位 + §專案地圖 + `.claude/rules/*` 為最高權威。
+> **⚠️ 2026-07-26 Operations Core cutover**：3-terminal supervisor/worker workflow 與
+> session-local `CronCreate` 都已廢棄。目前正式 runtime =
+> **Operations Core scheduler + 明確 worker/control-plane dispatch**。
+> `config/runtime_schedules.json.session_crons.items=[]` 是機械真相；新 session
+> **不得執行 `session_replay_pending.py`，也不得重建下方任何 CronCreate**。
+> 第 0–2 段僅保留作為歷史 incident/reference。
 
 校正後的標準 user story（legacy v11，保留 reference）：
 
@@ -79,7 +84,7 @@ scripts/install_scheduler_cron.sh
 **Canonical source**：`config/runtime_schedules.json`
 若本檔和其他文件不一致，以該檔為準；本檔只是方便複製執行的操作手冊。
 
-## 2. Session Cron 標準啟動集（8 條 recurring，台灣時間，直接複製執行）
+## 2. Session Cron 歷史啟動集（已退役，禁止複製執行）
 
 **2026-04-18 回復 4/11 版本 — supervisor 3-terminal workflow 已廢棄。**
 

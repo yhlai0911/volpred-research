@@ -436,18 +436,24 @@ def run_due_jobs(subprocess_timeout: int = DEFAULT_SUBPROCESS_TIMEOUT_SEC) -> di
 
     _save_last_run(fired_updates)
 
-    # 2026-04-25: session_crons drift coverage. `session_crons.items` in
-    # runtime_schedules.json describes 9 recurring crons (daily_planning /
-    # continue_task / question_research / platform_patrol / git_sync /
-    # knowledge_index_check / token_usage_daily / ndc_indicator_refresh /
-    # codex_quota_resume) that depend on a live Claude Code session to fire
-    # (CronCreate-backed). macOS CronCreate is unreliable and sessions close,
-    # so these can silently miss for days. Piggy-back records each due session
-    # cron to pending_sessions.json so the next session startup can replay
-    # missed windows. Like continue_task_stub, this writes intent, not code
-    # execution — the main-thread (or session_startup.md) decides how to act.
-    session_items = (config.get("session_crons") or {}).get("items") or []
-    session_pending = _write_pending_sessions(session_items, state, now_local, now)
+    # Session-local CronCreate was retired at the Operations Core cutover.
+    # Preserve the compatibility recorder only for old/test configurations that
+    # still declare active items; a retired section must not keep touching
+    # pending_sessions.json or manufacture missed interactive work forever.
+    session_section = config.get("session_crons") or {}
+    session_items = session_section.get("items") or []
+    if session_section.get("status") == "retired":
+        session_pending = {
+            "ok": True,
+            "action": "skip",
+            "reason": "session_crons_retired",
+            "retired_at": session_section.get("retired_at"),
+            "replacement_jobs": session_section.get("replacement_jobs") or {},
+        }
+    else:
+        session_pending = _write_pending_sessions(
+            session_items, state, now_local, now
+        )
 
     # Event windows have their own five-minute Operations Core schedule.  This
     # compatibility scheduler must never materialize them as a hidden side

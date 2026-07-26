@@ -327,3 +327,45 @@ def test_run_due_jobs_never_executes_operations_core_owned_job(tmp_path, monkeyp
             "generation": "g1",
         }
     ]
+
+
+def test_run_due_jobs_does_not_write_pending_sessions_after_retirement(
+    tmp_path, monkeypatch
+):
+    import json
+    import run_due_jobs as rdj
+
+    config_path = tmp_path / "schedules.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "metadata": {"timezone": "Asia/Taipei"},
+                "schedule_materialization": {
+                    "generation": "g1",
+                    "mode": "active",
+                    "active_since": "2026-01-01T00:00:00Z",
+                },
+                "system_crontab": {"items": []},
+                "session_crons": {
+                    "status": "retired",
+                    "retired_at": "2026-07-26T10:38:00Z",
+                    "items": [],
+                    "replacement_jobs": {
+                        "knowledge_index_check": [
+                            "knowledge_index_maintain"
+                        ]
+                    },
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    pending_path = tmp_path / "storage" / "ops" / "pending_sessions.json"
+    monkeypatch.setattr(rdj, "CONFIG_PATH", config_path)
+    monkeypatch.setattr(rdj, "LAST_RUN_PATH", tmp_path / "cron_last_run.json")
+    monkeypatch.setattr(rdj, "PENDING_SESSIONS_PATH", pending_path)
+
+    result = rdj.run_due_jobs()
+
+    assert result["session_pending"]["reason"] == "session_crons_retired"
+    assert pending_path.exists() is False
