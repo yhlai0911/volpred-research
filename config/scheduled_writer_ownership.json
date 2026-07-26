@@ -78,6 +78,12 @@
     }
   },
   "jobs": {
+    "operations_core_scheduler": {
+      "entrypoint": "scripts/operations_core_scheduler.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Writes ignored scheduler receipt, lock, and log state only; each materialized job retains its separately registered writer policy."
+    },
     "log_rotate": {
       "entrypoint": "scripts/cron_log_rotate.sh",
       "policy": "no_repo_tracked_output",
@@ -238,6 +244,13 @@
       "tracked_outputs": ["storage/next_tasks.json", "storage/ops/k_id_registry.json"],
       "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/k_id_registry.json"],
       "reason": "Only materializes pending queue rows."
+    },
+    "event_jobs_materialize": {
+      "entrypoint": "scripts/materialize_event_jobs.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json", "storage/ops/event_ledger/**"],
+      "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/event_ledger/**"],
+      "reason": "Materializes due event windows through the canonical pending queue and records idempotent event-ledger receipts."
     },
     "digest_daily_enqueue": {
       "entrypoint": "scripts/enqueue_daily_digest.py",
@@ -456,6 +469,7 @@
     "com.volpred.market-calendar-sync": {"job_id": "market_calendar_sync", "status": "active"},
     "com.volpred.market-closure-detect": {"job_id": "market_closure_detect", "status": "active"},
     "com.volpred.memory-health-daily": {"job_id": "memory_health_daily", "status": "active"},
+    "com.volpred.operations-core-scheduler": {"job_id": "operations_core_scheduler", "status": "active"},
     "com.volpred.reader-facing-refill": {"job_id": "reader_facing_refill", "status": "active"},
     "com.volpred.reader-metrics-daily": {"job_id": "reader_metrics_daily", "status": "active"},
     "com.volpred.release-pool": {"job_id": "release_pool", "status": "active"},

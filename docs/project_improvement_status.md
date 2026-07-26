@@ -1929,3 +1929,17 @@ fail closed；mocked transport tests 只能經先隔離真網路的 opt-in fixtu
 此 publisher-sync slice 為 `root_cause_fixed_and_verified`；6 筆 publisher-delete
 old-generation retry 不屬現 owner authority，仍待獨立 reconcile，Issue #9 umbrella
 保持 `contained`。
+
+## 2026-07-26 — Operations Core scheduler writer-policy checkpoint
+
+Full-suite 唯一紅燈揭露新 scheduler LaunchAgent 與
+`event_jobs_materialize` 沒有進 canonical writer inventory。現已在
+`schedule_materialization` 補正式 `job_id=operations_core_scheduler`，policy 把
+daemon 分類為只寫 ignored audit/runtime state 的 delegating clock，並把 event
+materializer 的 queue／ledger outputs 歸入 PHASE-Z machine state。Policy suite
+17 passed、相鄰 scheduler suite 71 passed，live daemon 為 running，validator
+`ok=true`（47 jobs、5 canary owners）。
+
+此 writer-policy 缺漏為 `root_cause_fixed_and_verified`。唯讀 reconcile 仍看到
+`audit_publish_sync` 與 `feed_sync` 的 legacy host-crontab simultaneous-owner
+conflict；未經 canary cutover transaction 不手動移除，Issue #9 仍是 `contained`。

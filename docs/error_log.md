@@ -3154,3 +3154,31 @@ old-generation retry 未變。Canonical `owned_publisher_article_recovery` 每�
 incident 完成五步 gate，狀態為 **`root_cause_fixed_and_verified`**；publisher delete
 stale-generation reconciliation 與 Issue #9／Work Coordinator umbrella 仍為
 **`contained`**。
+
+### 2026-07-26 — Operations Core scheduler 已上線，但 writer policy 沒有它的正式身份
+
+**證據化症狀**：publisher recovery 完整 suite 的唯一 failure 是
+`test_launchagent_population_is_registered_when_available`；canonical
+`ops/launchd/com.volpred.operations-core-scheduler.plist` 已存在且 live LaunchAgent
+正在執行，但 `config/scheduled_writer_ownership.json` 沒有同 label。補第一筆後，
+population ratchet 又指出新 `event_jobs_materialize` process 未分類，證明這不是單一
+測試字串，而是 scheduler cutover 新增兩個 runtime identities 時漏了 canonical
+writer inventory。
+
+**根因與底層修復**：`schedule_materialization` 只有 daemon label／plist，沒有正式
+`job_id`；policy population 又只枚舉 `system_crontab.items`、`cron_jobs`、`daemons`，
+所以若直接新增 policy row 會被反判為 stale。Canonical runtime config 現明確宣告
+`job_id=operations_core_scheduler`，population ratchet 同步把這個身份視為 runtime
+process。writer policy 將 scheduler 定義為 `no_repo_tracked_output`：它只寫
+gitignored receipt／lock／log，實際 materialized job 仍各自保留 writer policy。
+`event_jobs_materialize` 則正式歸入 `phase_z_machine_state`，exact outputs 是
+`storage/next_tasks.json` 與 `storage/ops/event_ledger/**`。
+
+**回歸、live readback 與制度化**：兩個政策測試先 RED，修後完整 policy suite
+**17 passed**，scheduler/runtime/reconcile/wrapper 相鄰 suite **71 passed**。
+`launchctl print` 回讀 daemon `state=running`、active count 1；canonical validator
+回報 `ok=true`、47 jobs、5 個 operations-core canary owners。唯讀 owner reconcile
+仍回報 `audit_publish_sync`、`feed_sync` 的 legacy host-crontab conflicts；本輪沒有
+為追求綠燈直接 apply ownership mutation。故「scheduler writer-policy 身份缺漏」
+完成五步，狀態 **`root_cause_fixed_and_verified`**；Issue #9 queue/schedule cutover
+仍因這兩個 live simultaneous-owner conflict 保持 **`contained`**。

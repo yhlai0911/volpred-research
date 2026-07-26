@@ -40,11 +40,15 @@ def _load(path: Path) -> dict:
 
 
 def _runtime_process_ids(runtime: dict) -> set[str]:
-    return {
+    processes = {
         *(item["id"] for item in runtime["system_crontab"]["items"]),
         *(item["id"] for item in runtime["cron_jobs"]),
         *(item["id"] for item in runtime["daemons"]),
     }
+    scheduler = runtime.get("schedule_materialization") or {}
+    if scheduler.get("job_id"):
+        processes.add(str(scheduler["job_id"]))
+    return processes
 
 
 def _uncovered(runtime: dict, policy: dict) -> tuple[set[str], set[str]]:
@@ -262,6 +266,32 @@ def test_launchagent_population_is_registered_when_available() -> None:
             # typically "host plist not yet booted out".
             assert row["status"] in {"host_only_exception", "retired"}, label
             assert str(row.get("reason") or "").strip(), label
+
+
+def test_operations_core_scheduler_is_registered_as_delegating_clock() -> None:
+    policy = _load(POLICY_PATH)
+    runtime = _load(RUNTIME_PATH)
+
+    assert runtime["schedule_materialization"]["job_id"] == (
+        "operations_core_scheduler"
+    )
+    scheduler = policy["jobs"]["operations_core_scheduler"]
+    assert scheduler == {
+        "entrypoint": "scripts/operations_core_scheduler.py",
+        "policy": "no_repo_tracked_output",
+        "tracked_outputs": [],
+        "reason": (
+            "Writes ignored scheduler receipt, lock, and log state only; "
+            "each materialized job retains its separately registered "
+            "writer policy."
+        ),
+    }
+    assert policy["launchagents"][
+        "com.volpred.operations-core-scheduler"
+    ] == {
+        "job_id": "operations_core_scheduler",
+        "status": "active",
+    }
 
 
 def test_this_file_is_the_only_policy_enforcement_owner() -> None:
