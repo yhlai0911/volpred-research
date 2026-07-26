@@ -1,0 +1,43 @@
+{
+  "id": "compute-k1729-primary-path-codex-certification-fallback-re-verify-1785104244",
+  "title": "K1729 primary-path Codex certification (fallback re-verify)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1729_primary_reverify_prompt.md",
+    "storage/ops/codex_reviews/k1729_primary_reverify_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-26T22:17:24Z",
+  "started_at": "2026-07-26T22:30:41Z",
+  "completed_at": "2026-07-26T22:35:42Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1729-primary-path-codex-certification-fallback-re-verify-1785104244.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1729-primary-path-codex-certification-fallback-re-verify-1785104244.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1729_primary_reverify_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1729_primary_reverify_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1729 primary-path Codex 認證收件：讀 storage/ops/codex_reviews/k1729_primary_reverify_verdict.md。先比對 storage/ops/codex_reviews/k1729_primary_reverify_freeze.sha256 與 experiments/K1729/{README.md,k1729.py,k1729_results.json} 現值一致（不一致=受審 bytes 漂移，不可結案）。VERDICT=PASS/CONDITIONAL_PASS 且 BLOCKING_DEFECTS=none → 主線程更新 experiments/K1729/review_verdict.json（reviewer 改為 primary-path Codex + model/effort + reviewed_at + review_artifact 指向本 verdict.md，保留 fallback 紀錄於註記）、更新 knowledge K1729 的 reviewer_source=primary-path Codex（原 fallback）、git_writer_lock commit、complete k1729_codex_primary_reverify status=succeeded（此為 closure）。VERDICT=FAIL → 依 blocking_defects 記錄、complete status=failed 並排修正任務、視情況 escalate。",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 65655,
+  "claimed_by_pid_start_wall": "Mon Jul 27 06:15:01 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

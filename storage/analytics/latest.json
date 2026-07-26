@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-07-25T22:30:05.532622+00:00",
+  "generated_at": "2026-07-26T22:30:25.126541+00:00",
   "window_days": 30,
-  "since_date": "2026-06-25",
+  "since_date": "2026-06-26",
   "top_n": 20,
-  "articles_with_activity": 214,
-  "raw_impression_rows": 503,
+  "articles_with_activity": 217,
+  "raw_impression_rows": 502,
   "raw_reaction_rows": 0,
   "data_source_errors": {
     "article_impressions": null,
@@ -14,7 +14,7 @@
     "read_time_is_proxy": true,
     "read_time_bounce_filter_sec": 5,
     "read_time_outlier_cap_sec": 1200,
-    "read_time_outliers_excluded_total": 38,
+    "read_time_outliers_excluded_total": 37,
     "engaged_threshold_sec": 30,
     "score_formula": "impressions*10 + likes*25 + bookmarks*40 + shares*60 + avg_read_time_sec/10 (mirrors frontend admin-analytics.ts weighted_views)"
   },
@@ -42,7 +42,7 @@
       "slug": "mile_bb62fc66",
       "title": "VIX 在 2026 衝到 31，標普同期漲 8.5%：恐慌指數最常被誤讀的一件事",
       "audience": "general",
-      "impressions": 22,
+      "impressions": 20,
       "avg_read_time_sec": null,
       "median_read_time_sec": null,
       "read_completion_rate_proxy": 0.0,
@@ -53,7 +53,25 @@
         "bookmark": 0,
         "share": 0
       },
-      "score": 220
+      "score": 200
+    },
+    {
+      "article_id": "b8b81e38-6a2f-4b08-aaa2-08ed620e12ef",
+      "slug": "mile_21a40d5a",
+      "title": "CTA ETF 比 SPY 更耐跌嗎？KMLM、DBMF 給的是一半答案",
+      "audience": "general",
+      "impressions": 17,
+      "avg_read_time_sec": 83,
+      "median_read_time_sec": 74,
+      "read_completion_rate_proxy": 0.2353,
+      "read_time_is_proxy": true,
+      "read_time_outliers_excluded": 3,
+      "reactions": {
+        "like": 0,
+        "bookmark": 0,
+        "share": 0
+      },
+      "score": 178
     },
     {
       "article_id": "248c5a43-b01a-4e9e-827b-854596913a59",
@@ -74,32 +92,14 @@
       "score": 170
     },
     {
-      "article_id": "b8b81e38-6a2f-4b08-aaa2-08ed620e12ef",
-      "slug": "mile_21a40d5a",
-      "title": "CTA ETF 比 SPY 更耐跌嗎？KMLM、DBMF 給的是一半答案",
-      "audience": "general",
-      "impressions": 16,
-      "avg_read_time_sec": 63.8,
-      "median_read_time_sec": 74.0,
-      "read_completion_rate_proxy": 0.1875,
-      "read_time_is_proxy": true,
-      "read_time_outliers_excluded": 3,
-      "reactions": {
-        "like": 0,
-        "bookmark": 0,
-        "share": 0
-      },
-      "score": 166
-    },
-    {
       "article_id": "888ef394-a380-435a-8f95-05e1899e66a2",
       "slug": "mile_2e91f5bb",
       "title": "六月科技股回檔實錄：QQQ 只跌 7%，你的持股卻感覺跌更兇",
       "audience": "general",
-      "impressions": 3,
+      "impressions": 4,
       "avg_read_time_sec": 1199,
       "median_read_time_sec": 1199,
-      "read_completion_rate_proxy": 0.3333,
+      "read_completion_rate_proxy": 0.25,
       "read_time_is_proxy": true,
       "read_time_outliers_excluded": 0,
       "reactions": {
@@ -107,25 +107,7 @@
         "bookmark": 0,
         "share": 0
       },
-      "score": 150
-    },
-    {
-      "article_id": "aa978dc4-6e7c-4f37-92f0-bd4e78134fda",
-      "slug": "mile_057f178b",
-      "title": "為什麼 NVDA 每天都讓人心跳加速？不是業績，是它定價不了的事",
-      "audience": "general",
-      "impressions": 4,
-      "avg_read_time_sec": 856,
-      "median_read_time_sec": 856,
-      "read_completion_rate_proxy": 0.25,
-      "read_time_is_proxy": true,
-      "read_time_outliers_excluded": 2,
-      "reactions": {
-        "like": 0,
-        "bookmark": 0,
-        "share": 0
-      },
-      "score": 126
+      "score": 160
     },
     {
       "article_id": "19a832ec-92ae-4872-b880-1cf4590d4255",
@@ -378,6 +360,24 @@
         "share": 0
       },
       "score": 70
+    },
+    {
+      "article_id": "7222b4ac-92c7-4a6d-b3e6-f9aaf87f27de",
+      "slug": "mile_5399bf01",
+      "title": "你買 MTUM 真的買到 Momentum 嗎？7 檔因子 ETF 對紙上學術因子的 13 年體檢",
+      "audience": "research",
+      "impressions": 3,
+      "avg_read_time_sec": 346,
+      "median_read_time_sec": 346,
+      "read_completion_rate_proxy": 0.3333,
+      "read_time_is_proxy": true,
+      "read_time_outliers_excluded": 0,
+      "reactions": {
+        "like": 0,
+        "bookmark": 0,
+        "share": 0
+      },
+      "score": 65
     }
   ]
 }

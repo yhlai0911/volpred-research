@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "title": "科技股恐懼溢價懶人包",
+  "evidence": {
+    "ev": {
+      "path": "experiments/trending_vxnvix_20260727/vxnvix_evidence.json",
+      "sha256": "ab42301c8f5d938a2e4c6b3a949f422ce1c4593404f6407b3c34c4a9113cc881",
+      "label": "VXN/VIX 證據包（CBOE + yfinance, 收盤資料）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "「科技恐懼創新高」？先問到底多高",
+      "alt": "懶人包：VXN/VIX 比值的核心問題與白話結論",
+      "sources": [
+        "ev"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "在吵什麼",
+          "body": [
+            "那斯達克的隱含波動率 VXN，相對大盤的 VIX，比值衝上網路泡沫以來最高。",
+            "標題把它講成泡沫等級的恐慌。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "白話結論",
+          "body": [
+            "「以來最高」是真的，但離真正的泡沫水準還很遠。",
+            "而且選擇權喊的價，還追不上科技股實際在跳的幅度。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "VXN ÷ VIX 當日比值",
+          "value": {
+            "source": "ev",
+            "path": "/implied/ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "×"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "editorial",
+      "title": "怎麼算的：兩把不同的尺",
+      "alt": "懶人包：隱含與已實現波動率的資料與口徑",
+      "sources": [
+        "ev"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "資料",
+          "body": [
+            "CBOE 的 VXN 與 VIX 每日收盤，涵蓋二十多年。",
+            "那斯達克與標普指數，算過去約一個月的年化已實現波動率。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "兩把尺別搞混",
+          "body": [
+            "隱含波動率＝選擇權對「未來一個月」喊的價。",
+            "已實現波動率＝股價「過去一個月」實際在跳的幅度。",
+            "一個前瞻、一個回看，不宜直接劃等號。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "當日比值在歷史的百分位",
+          "value": {
+            "source": "ev",
+            "path": "/implied/pctile_all_hist_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "professional",
+      "title": "數字攤開：中上偏高，不是災難",
+      "alt": "懶人包：主要結果與投資結論",
+      "sources": [
+        "ev"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "隱含比值 近月均值",
+          "value": {
+            "source": "ev",
+            "path": "/implied/ratio_20d_avg",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "×"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "已實現比值（那指÷標普）",
+          "value": {
+            "source": "ev",
+            "path": "/realized/ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "×"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "網路泡沫當年年均比值",
+          "value": {
+            "source": "ev",
+            "path": "/history/annual_mean_2001",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "suffix": "×"
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "一句話",
+          "body": [
+            "今年到目前比一般年份高，但比網路泡沫年份低一大截。",
+            "與其說恐慌創高，不如說市場替科技股的不確定性，多留了一點餘地。"
+          ]
+        }
+      ]
+    }
+  ]
+}

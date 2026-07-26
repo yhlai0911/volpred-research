@@ -27546,5 +27546,41 @@
     "timestamp": "2026-07-27T05:40:00+08:00",
     "summary": "max_slots 2->4 吞吐複驗：乾淨完整日均 45.75 vs 基線 62.0（不升反降）；偵測 07-24/25 兩連續零完成日（真實斷檔）。定案不上調 max_slots，指向上游 cohort 主線程數/wall-clock。更新 throughput_audit md 第1節 1-recheck。",
     "verification": "逐日 succeeded 計數 + 5 欄位時戳交叉核對 07-24/25=0 確認非欄位假象"
+  },
+  {
+    "timestamp": "2026-07-27T06:18:49+08:00",
+    "task_type": "experiment",
+    "task_id": "K1715",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056",
+    "owner": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056",
+    "commit": null,
+    "summary": "PHASE A followup（split_required）：K1715 fix-attempt1 agent job（agent-brief_k1715_fix_attempt1-ba80b2）於 21:33 被 2880s wall-clock kill。盤點 worktree k1715-204d556b：實驗本身已完整且 artifact_ok=True — K1715_results.json（450KB，完整 per_model/head_to_head/backtests）、3 圖、README、build_readme.py 皆於 05:22–05:25 產出。結果為 defensible NULL：score-driven（GAS-t/GAS-t-lev）與 GARCH-family（GARCH-t/GJR-t）在 joint VaR+ES 統計打平（Harvey |t|>3 準則 sig better 0/3、worse 0/3、tied 3/3；四族遠左尾同樣 under-coverage）。唯一未完成 = Codex 獨立 re-review：codex_rereview.md 有 4446 行分析但 timeout 卡在 21:32「collab: Wait」、未輸出最終結構化裁決，review_verdict.json 仍是未填 FILL: 模板。Codex 被 kill 前正查 GJR-t multistart 收斂品質（38% refit 落非最佳 basin）這個可能翻轉 PASS↔FAIL 的關鍵點。依 split_required 規範切一個「只做裁決、禁重跑實驗」的 bounded child stage（agent-brief_k1715_adjudicate-27247d，--split-stage codex-adjudicate、--timeout-parent-job-id 指向 parent、timeout 2400s < parent、--source-task-id K1715 復用既有 worktree 未觸發 collision gate、--result-artifact review_verdict.json），followup 綁 merge_worktree + 主線程寫 knowledge(per K1259) + complete。parent 已 mark-followup-dispatched --next-task-id K1715 防重派。K1715→in_progress 待 async worker 產 verdict、後續 fire PHASE A 收件。未自行代填 verdict（保獨立三模型 gate）、未 in-fire spawn codex（3-STRIKE hook）。"
+  },
+  {
+    "timestamp": "2026-07-27T06:18:49+08:00",
+    "task_type": "paper_review",
+    "task_id": "k1729_codex_primary_reverify",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056",
+    "owner": "hourly-slot-2-c04607b2dcdd4e7dbb89d15f0a4cc056",
+    "commit": null,
+    "summary": "餓死任務清理（STARVATION LOCKOUT，k1729_codex_primary_reverify aged 133.9h）：K1729（intraday VIX-futures roll signal HAR-DAILY vs HAR-RV5，headline = HAR_RV5_WINS 雙 target |t|>3）已 merged 到 main、artifacts 齊全，但 2026-07-21 的 PASS 走 FALLBACK 路徑（Codex CLI 當日撞 usage-limit「try again Jul 25th」），依 .claude/rules/experiments.md fallback PASS ≠ closure、需額度重置（≥07-25）後 primary-path Codex 二審。今天 07-27 額度已回（K1715 codex transcript 亦證實）。動作：claim+start（paper_review 非 platform_ops、未被 supervisor gate 擋）→ 驗證 review_verdict.json 記錄的 3 檔 reviewed_sha256（README/k1729.py/k1729_results.json）與 disk 現值全 MATCH（fallback 認證的 bytes 未漂移）→ freeze 到 storage/ops/codex_reviews/k1729_primary_reverify_freeze.sha256 → 寫聚焦 prompt（lookahead、defect_1 ex-ante ledger 收斂、defect_2 overclaim 撤回、nested-DM false-positive 判定、number integrity）→ 依 codex_review_job.sh canonical 入口 enqueue compute job compute-k1729-primary-path-codex-certification-fallback-re-verify-1785104244（read-only sandbox、detached、timeout 2400/2700）。followup 綁：verdict PASS/CONDITIONAL 且 blocking none → 更新 review_verdict.json reviewer_source 為 primary-path Codex + knowledge reviewer_source + complete succeeded（closure）；FAIL → 記 defect + failed + escalate。k1729→in_progress 待收件。未 in-fire spawn codex（3-STRIKE）。"
+  },
+  {
+    "timestamp": "2026-07-27T06:34",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_27_ai資本支出",
+    "actor": "hourly-slot-1-3fca78ab77e642a6a519c5c79536d22a",
+    "owner": "hourly-slot-1-3fca78ab77e642a6a519c5c79536d22a",
+    "summary": "發佈 trending mile_822317c3 科技股恐懼溢價創22年新高? VXN/VIX 資料校正+隱含vs已實現對照;Codex複算驗證;anti_ai PASS;懶人包3圖;FB稿pending",
+    "artifacts": [
+      "storage/drafts/trending_vxnvix_20260727_general_draft.md",
+      "experiments/trending_vxnvix_20260727/",
+      "storage/reports/assets/vxnvix_ratio_history_20260727.png",
+      "storage/reports/assets/vxnvix_implied_vs_realized_20260727.png",
+      "storage/drafts/fb_mile_822317c3.md"
+    ],
+    "mile_id": "mile_822317c3"
   }
 ]
