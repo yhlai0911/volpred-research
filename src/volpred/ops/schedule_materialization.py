@@ -555,7 +555,10 @@ def due_fires(
     now = _aware(now, name="now")
     zone = ZoneInfo(job.timezone)
     local_now = now.astimezone(zone)
-    iterator = croniter(job.cron, local_now + timedelta(seconds=1))
+    # Include an exact boundary without crossing into the next scheduled
+    # second. ``+1 second`` fired a */5 job at 18:24:59.71 for the 18:25 slot;
+    # one microsecond includes 18:25:00.000000 while keeping 18:24:59.x before it.
+    iterator = croniter(job.cron, local_now + timedelta(microseconds=1))
     newest = iterator.get_prev(datetime)
     if newest.tzinfo is None:
         newest = newest.replace(tzinfo=zone)
@@ -570,7 +573,7 @@ def due_fires(
         if activated_at is not None:
             cutoff = max(cutoff, activated_at.astimezone(zone))
         slots = []
-        cursor = local_now + timedelta(seconds=1)
+        cursor = local_now + timedelta(microseconds=1)
         while True:
             slot = croniter(job.cron, cursor).get_prev(datetime)
             if slot.tzinfo is None:

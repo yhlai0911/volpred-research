@@ -69,6 +69,21 @@ def test_skip_policy_does_not_replay_old_fire() -> None:
     ) == []
 
 
+def test_scheduler_never_materializes_the_next_minute_early() -> None:
+    now = datetime(2026, 7, 26, 10, 24, 59, 900_000, tzinfo=UTC)
+    fires = due_fires(
+        job(cron="*/5 * * * *", grace_seconds=600),
+        generation="g1",
+        now=now,
+    )
+
+    assert [fire.scheduled_for for fire in fires] == ["2026-07-26T10:20:00Z"]
+    assert all(
+        datetime.fromisoformat(fire.scheduled_for.replace("Z", "+00:00")) <= now
+        for fire in fires
+    )
+
+
 def test_replay_all_is_bounded_and_ordered() -> None:
     now = datetime(2026, 7, 26, 9, 5, tzinfo=UTC)
     fires = due_fires(
