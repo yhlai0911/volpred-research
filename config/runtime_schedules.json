@@ -438,11 +438,11 @@
       },
       {
         "id": "ndc_indicator_refresh",
-        "label": "NDC monthly freshness -> canonical task materialization",
+        "label": "NDC monthly freshness gate and controlled work hand-off",
         "cron": "0 10 28 * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_ndc_indicator_refresh.sh",
         "log_path": "storage/logs/cron/ndc_indicator_refresh.log",
-        "description": "Operations Core 每月檢查 NDC canonical CSV；fresh 時 no-op，落後時以 expected_period deterministic id 寫入 storage/next_tasks.json，交由正式 platform_ops worker 更新並回讀。",
+        "description": "Operations Core 每月檢查 NDC canonical CSV；fresh 時 no-op。落後且 legacy queue admission 開啟時，以 expected_period deterministic id 寫入 storage/next_tasks.json；direct_execution cutover 期間則明確 exit 1 並留下 scheduler failure receipt，由 operator 依唯一開放的 GitHub Issues control plane 登記後直接執行，禁止繞過 queue gate 或回報假成功。",
         "host_crontab_managed": false,
         "piggy_back_enabled": false,
         "matchers": [

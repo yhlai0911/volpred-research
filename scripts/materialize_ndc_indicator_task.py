@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Turn a stale monthly NDC indicator check into one canonical queue task."""
+"""Check monthly NDC freshness and materialize work only when admission is open.
+
+During Operations Core direct-execution cutovers the legacy ``next_tasks`` queue
+is intentionally closed to new identities.  A stale indicator must therefore
+fail visibly instead of bypassing the gate or returning a false-success receipt.
+The operator can register the work in the active control plane (GitHub Issues)
+and execute it directly; queued mode keeps the deterministic legacy hand-off.
+"""
 from __future__ import annotations
 
 import json
@@ -10,6 +17,7 @@ from typing import Any
 
 from volpred.ops.next_tasks import append_task_record
 from volpred.ops.summaries import build_ndc_indicator_maintenance
+from volpred.ops.task_pool_mode import TaskPoolAdmissionClosed
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -58,12 +66,28 @@ def run(
         "stale_series": stale_series,
         "followup_commands": commands,
     }
-    persisted, created = append_task_record(
-        record,
-        path=next_tasks_path,
-        if_exists="skip",
-        semantic_dedupe=False,
-    )
+    try:
+        persisted, created = append_task_record(
+            record,
+            path=next_tasks_path,
+            if_exists="skip",
+            semantic_dedupe=False,
+        )
+    except TaskPoolAdmissionClosed as exc:
+        return {
+            "ok": False,
+            "action": "blocked_direct_execution",
+            "reason": str(exc),
+            "expected_period": expected,
+            "task_created": False,
+            "task_id": task_id,
+            "stale_series": stale_series,
+            "followup_commands": commands,
+            "operator_action": (
+                "Register or update a GitHub Issue, then execute the NDC refresh "
+                "directly; do not reopen or bypass legacy task-pool admission."
+            ),
+        }
     return {
         "ok": True,
         "action": "materialize" if created else "already_materialized",
@@ -78,7 +102,7 @@ def run(
 def main() -> int:
     result = run()
     print(json.dumps(result, ensure_ascii=False, indent=2))
-    return 0
+    return 0 if result.get("ok") is True else 1
 
 
 if __name__ == "__main__":

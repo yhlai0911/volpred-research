@@ -257,7 +257,7 @@
       "policy": "phase_z_machine_state",
       "tracked_outputs": ["storage/next_tasks.json"],
       "phase_z_probe_paths": ["storage/next_tasks.json"],
-      "reason": "Freshness check is read-only; a stale monthly NDC period materializes one deterministic platform_ops queue task."
+      "reason": "Freshness check is read-only. A stale monthly period materializes one deterministic platform_ops queue task only when admission is open; direct-execution mode fails visibly and leaves the scheduler receipt as evidence instead of bypassing the queue gate."
     },
     "digest_daily_enqueue": {
       "entrypoint": "scripts/enqueue_daily_digest.py",
