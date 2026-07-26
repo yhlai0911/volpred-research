@@ -1,14 +1,20 @@
 {
-  "active": true,
+  "active": false,
   "pending": 1,
   "pending_by_priority": {
     "p1": 1
   },
   "pending_cap": 80,
   "exit_streak_days": 3,
-  "drain_streak_met": false,
+  "drain_streak_met": true,
   "net_positive_streak": 0,
   "daily": [
+    {
+      "date": "2026-07-25",
+      "created": 0,
+      "succeeded": 0,
+      "net": 0
+    },
     {
       "date": "2026-07-24",
       "created": 0,
@@ -20,16 +26,10 @@
       "created": 0,
       "succeeded": 0,
       "net": 0
-    },
-    {
-      "date": "2026-07-22",
-      "created": 1,
-      "succeeded": 0,
-      "net": 1
     }
   ],
-  "updated_at": "2026-07-25T23:00:08.638182+00:00",
-  "entered_at": "2026-07-21T04:37:15.250332+00:00",
-  "last_transition": "entered",
-  "last_transition_at": "2026-07-21T04:37:15.250332+00:00"
+  "updated_at": "2026-07-26T00:00:08.107679+00:00",
+  "entered_at": null,
+  "last_transition": "exited",
+  "last_transition_at": "2026-07-26T00:00:01.040388+00:00"
 }

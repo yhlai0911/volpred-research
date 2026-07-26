@@ -1761,3 +1761,28 @@ publisher=`operations_core/8`、安全隔離key與implementation
 authority store或provider。此evidence-chain根因為
 `root_cause_fixed_and_verified`；第二台實體Mac仍未執行role，所以physical pair與
 operations-core umbrella仍為`contained`。
+
+## 23. Standby primary-receipt pre-mutation gate（2026-07-26）
+
+Standby先前只接收operator由primary JSON手抄的`expected_primary_epoch`。它會先嘗試取得
+live authority lease，直到final `verify-pair`才檢查該epoch是否真的來自同一份primary
+receipt；錯檔、舊檔或不完整的primary evidence因此會先改控制面、事後才失敗。兩個role
+function也接受caller自填`holder_ref`，authority mutation identity可與readiness宣稱的
+physical host脫鉤。
+
+Standby function與CLI現在強制接受完整primary v2 receipt，在任何publisher read或
+authority RPC前重驗shared rehearsal-derived key、readiness SHA、primary host／source、
+lease window、healthy renewal、local gate closure、partition probe、terminal demotion、
+零effect/provider counters與exact publisher fence，再由receipt直接導出expected epoch。
+Primary／standby holder則由rehearsal ID、role與host fingerprint在module內唯一導出；
+final verifier同樣重驗兩端holder binding。
+
+Failure injection把primary receipt改成`local_gate_closed=false`，standby在零新增remote
+read、零新增authority claim下拒絕；holder drift也不能形成final pair。相鄰authority
+suites **38 passed**，`py_compile`與diff gate通過。Production只讀preflight
+`standby-preflight-20260726-0830`已原子落檔並exact read-back
+publisher=`operations_core/8`、安全隔離key與implementation
+`a273e8bc7ae65fb0f0205dbc9caadf8485f88422bda6bdceccc0a0796d6fab52`；沒有authority
+acquire或provider call。此pre-mutation identity根因為
+`root_cause_fixed_and_verified`；第二台實體Mac仍未執行roles，physical pair與
+operations-core umbrella維持`contained`。

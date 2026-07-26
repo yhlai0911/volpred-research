@@ -1686,3 +1686,19 @@ Failure injections與相鄰authority suites **37 passed**；production只讀pref
 或provider call。此evidence-chain切片為`root_cause_fixed_and_verified`；實體第二台
 Mac仍無可操作session，故physical paired receipt與operations-core umbrella維持
 `contained`。
+
+## 2026-07-26 — Program commit 34 standby primary-evidence checkpoint
+
+Standby不再接受operator手抄的primary epoch或caller自填holder。正式function／CLI要求
+同一份primary v2 receipt，並在任何remote read／mutation前驗readiness hash、主機與
+source identity、lease window、完整fail-closed evidence、零effect counters及publisher
+fence；expected epoch從receipt直接導出。兩端holder ref由shared rehearsal、role與host
+fingerprint內部導出，final verifier亦重驗。
+
+Primary receipt drift與holder drift failure injections、相鄰authority suites
+**38 passed**。Production只讀preflight `standby-preflight-20260726-0830`原子落檔並
+exact read-back `operations_core/8`、安全隔離key與implementation
+`a273e8bc7ae65fb0f0205dbc9caadf8485f88422bda6bdceccc0a0796d6fab52`，沒有authority
+acquire、effect或provider call。此standby pre-mutation切片為
+`root_cause_fixed_and_verified`；實體第二台Mac仍無可操作session，physical paired
+receipt與operations-core umbrella維持`contained`。

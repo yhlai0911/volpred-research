@@ -376,7 +376,6 @@ def rehearse_primary_process_role(
     rehearsal_id: str,
     host_id: str,
     host_fingerprint: str,
-    holder_ref: str,
     lease_seconds: int,
     renew_interval_seconds: float,
     poll_interval_seconds: float,
@@ -390,6 +389,11 @@ def rehearse_primary_process_role(
     """Acquire, renew, partition, and fail closed on the primary host."""
 
     authority_key = _authority_key_for_rehearsal(rehearsal_id)
+    holder_ref = _holder_ref_for_role(
+        rehearsal_id=rehearsal_id,
+        role="primary",
+        host_fingerprint=host_fingerprint,
+    )
     _validate_process_inputs(
         host_id=host_id,
         host_fingerprint=host_fingerprint,
@@ -533,8 +537,7 @@ def rehearse_standby_process_role(
     rehearsal_id: str,
     host_id: str,
     host_fingerprint: str,
-    holder_ref: str,
-    expected_primary_epoch: int,
+    primary_receipt: PrimaryProcessReceipt,
     lease_seconds: int,
     rto_seconds: float,
     poll_interval_seconds: float,
@@ -548,6 +551,11 @@ def rehearse_standby_process_role(
     """Wait for DB-clock expiry, acquire the next epoch, and release it."""
 
     authority_key = _authority_key_for_rehearsal(rehearsal_id)
+    holder_ref = _holder_ref_for_role(
+        rehearsal_id=rehearsal_id,
+        role="standby",
+        host_fingerprint=host_fingerprint,
+    )
     _validate_process_inputs(
         host_id=host_id,
         host_fingerprint=host_fingerprint,
@@ -556,12 +564,6 @@ def rehearse_standby_process_role(
         renew_interval_seconds=min(1.0, lease_seconds / 2),
         poll_interval_seconds=poll_interval_seconds,
     )
-    if (
-        isinstance(expected_primary_epoch, bool)
-        or not isinstance(expected_primary_epoch, int)
-        or expected_primary_epoch <= 0
-    ):
-        raise ValueError("expected_primary_epoch must be positive")
     if rto_seconds <= 0 or rto_seconds > 300:
         raise ValueError("RTO must be positive and at most five minutes")
 
@@ -573,6 +575,13 @@ def rehearse_standby_process_role(
         host_fingerprint=host_fingerprint,
         expected_publisher_generation=expected_publisher_generation,
     )
+    _validate_primary_receipt_for_standby(
+        primary_receipt,
+        readiness=readiness,
+        rehearsal_id=rehearsal_id,
+        lease_seconds=lease_seconds,
+    )
+    expected_primary_epoch = primary_receipt.primary.epoch
     readiness_sha256 = _receipt_sha256(readiness)
     implementation_sha256 = _implementation_sha256()
     if implementation_sha256 != readiness.implementation_sha256:
@@ -680,6 +689,12 @@ def verify_cross_host_receipts(
     if standby.schema_version != "primary-authority-outage-standby.v2":
         raise ValueError("unsupported standby receipt schema")
     _validate_cross_host_readiness_receipt(readiness)
+    _validate_primary_receipt_for_standby(
+        primary,
+        readiness=readiness,
+        rehearsal_id=primary.rehearsal_id,
+        lease_seconds=primary.lease_seconds,
+    )
     if primary.role != "primary" or standby.role != "standby":
         raise ValueError("receipt role mismatch")
     if (
@@ -728,6 +743,12 @@ def verify_cross_host_receipts(
         raise ValueError("cross-host evidence requires two distinct machines")
     if primary.lease_seconds != standby.lease_seconds:
         raise ValueError("primary and standby lease windows differ")
+    if standby.standby.holder_ref != _holder_ref_for_role(
+        rehearsal_id=standby.rehearsal_id,
+        role="standby",
+        host_fingerprint=standby.host_fingerprint,
+    ):
+        raise ValueError("standby authority holder is not bound to its host")
     if standby.expected_primary_epoch != primary.primary.epoch:
         raise ValueError("standby expected a different primary epoch")
     if standby.standby.epoch != primary.primary.epoch + 1:
@@ -1099,6 +1120,28 @@ def _authority_key_for_rehearsal(rehearsal_id: str) -> str:
     return f"{_SAFE_AUTHORITY_PREFIX}{digest}"
 
 
+def _holder_ref_for_role(
+    *,
+    rehearsal_id: str,
+    role: str,
+    host_fingerprint: str,
+) -> str:
+    """Derive the authority holder from the bound rehearsal and host role."""
+
+    _authority_key_for_rehearsal(rehearsal_id)
+    if role not in {"primary", "standby"}:
+        raise ValueError("holder role must be primary or standby")
+    if (
+        not isinstance(host_fingerprint, str)
+        or _REHEARSAL_ID.fullmatch(host_fingerprint) is None
+    ):
+        raise ValueError("host fingerprint must use safe identity characters")
+    return (
+        f"host:{host_fingerprint}:outage-{role}:"
+        f"{rehearsal_id}"
+    )
+
+
 def _validate_process_inputs(
     *,
     host_id: str,
@@ -1298,6 +1341,81 @@ def _validate_cross_host_readiness_receipt(
         raise ValueError("cross-host readiness contains an invalid SHA-256")
 
 
+def _validate_primary_receipt_for_standby(
+    primary: PrimaryProcessReceipt,
+    *,
+    readiness: CrossHostReadinessReceipt,
+    rehearsal_id: str,
+    lease_seconds: int,
+) -> None:
+    """Fail closed before standby touches Primary Authority state."""
+
+    _validate_cross_host_readiness_receipt(readiness)
+    if (
+        primary.schema_version != "primary-authority-outage-primary.v2"
+        or primary.role != "primary"
+    ):
+        raise ValueError("standby requires a completed primary v2 receipt")
+    if primary.authority_key != _authority_key_for_rehearsal(rehearsal_id):
+        raise ValueError(
+            "primary authority key is not derived from rehearsal identity"
+        )
+    if (
+        primary.rehearsal_id != rehearsal_id
+        or readiness.rehearsal_id != rehearsal_id
+        or readiness.authority_key != primary.authority_key
+    ):
+        raise ValueError("primary receipt does not share standby rehearsal identity")
+    if (
+        primary.host_id != readiness.primary_host_id
+        or primary.host_fingerprint != readiness.primary_host_fingerprint
+        or primary.implementation_sha256 != readiness.implementation_sha256
+        or primary.cross_host_readiness_sha256 != _receipt_sha256(readiness)
+    ):
+        raise ValueError("primary receipt drifted from cross-host readiness")
+    if primary.lease_seconds != lease_seconds:
+        raise ValueError("standby lease window differs from primary receipt")
+    if (
+        isinstance(primary.primary.epoch, bool)
+        or not isinstance(primary.primary.epoch, int)
+        or primary.primary.epoch <= 0
+    ):
+        raise ValueError("primary receipt contains an invalid authority epoch")
+    if primary.primary.holder_ref != _holder_ref_for_role(
+        rehearsal_id=rehearsal_id,
+        role="primary",
+        host_fingerprint=primary.host_fingerprint,
+    ):
+        raise ValueError("primary authority holder is not bound to its host")
+    acquired_at = _timestamp(
+        primary.primary.acquired_at,
+        field="primary acquired_at",
+    )
+    expires_at = _timestamp(
+        primary.primary.expires_at,
+        field="primary expires_at",
+    )
+    if expires_at <= acquired_at:
+        raise ValueError("primary receipt contains an invalid lease window")
+    if (
+        primary.healthy_renewal_count < 1
+        or not primary.local_gate_closed
+        or not primary.partition_probe_rejected
+        or primary.final_primary_state != "demoted"
+        or primary.outage_transport != _OUTAGE_URL
+        or primary.successful_authority_claims != 1
+        or primary.duplicate_authority_claims != 0
+        or primary.effect_requests != 0
+        or primary.provider_calls != 0
+    ):
+        raise ValueError("primary fail-closed evidence is incomplete")
+    if (
+        primary.publisher_fence_before != readiness.publisher_fence
+        or primary.publisher_fence_after != readiness.publisher_fence
+    ):
+        raise ValueError("primary publisher fence drifted from readiness")
+
+
 def _lease_evidence(lease: PrimaryLease) -> AuthorityLeaseEvidence:
     return AuthorityLeaseEvidence(
         holder_ref=lease.holder_ref,
@@ -1381,7 +1499,7 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     _add_runtime_arguments(standby)
     standby.add_argument("--rehearsal-id", required=True)
-    standby.add_argument("--expected-primary-epoch", required=True, type=int)
+    standby.add_argument("--primary-receipt", required=True)
     standby.add_argument("--rto-seconds", type=float, default=300.0)
     standby.add_argument("--readiness-receipt", required=True)
 
@@ -1480,10 +1598,6 @@ def main() -> int:
         readiness = _load_cross_host_readiness(
             Path(args.readiness_receipt)
         )
-        holder_ref = (
-            f"host:{host_fingerprint}:outage-{args.role}:"
-            f"{args.rehearsal_id}"
-        )
         publisher_store = (
             SupabaseOwnedPublisherArticleStore.from_environment()
         )
@@ -1492,7 +1606,6 @@ def main() -> int:
                 rehearsal_id=args.rehearsal_id,
                 host_id=host_id,
                 host_fingerprint=host_fingerprint,
-                holder_ref=holder_ref,
                 lease_seconds=args.lease_seconds,
                 renew_interval_seconds=args.renew_interval_seconds,
                 poll_interval_seconds=args.poll_interval_seconds,
@@ -1508,8 +1621,9 @@ def main() -> int:
                 rehearsal_id=args.rehearsal_id,
                 host_id=host_id,
                 host_fingerprint=host_fingerprint,
-                holder_ref=holder_ref,
-                expected_primary_epoch=args.expected_primary_epoch,
+                primary_receipt=_load_primary_receipt(
+                    Path(args.primary_receipt)
+                ),
                 lease_seconds=args.lease_seconds,
                 rto_seconds=args.rto_seconds,
                 poll_interval_seconds=args.poll_interval_seconds,

@@ -407,7 +407,6 @@ def test_primary_rechecks_readiness_source_before_remote_read(
             rehearsal_id="ready-race-test",
             host_id="primary-mac",
             host_fingerprint="primary-fingerprint",
-            holder_ref="host:primary:outage",
             lease_seconds=10,
             renew_interval_seconds=0.01,
             poll_interval_seconds=0.005,
@@ -440,7 +439,6 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         rehearsal_id="cross-host-test",
         host_id="primary-mac",
         host_fingerprint="primary-fingerprint",
-        holder_ref="host:primary:outage",
         lease_seconds=10,
         renew_interval_seconds=0.01,
         poll_interval_seconds=0.005,
@@ -453,8 +451,7 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         rehearsal_id="cross-host-test",
         host_id="standby-mac",
         host_fingerprint="standby-fingerprint",
-        holder_ref="host:standby:outage",
-        expected_primary_epoch=primary.primary.epoch,
+        primary_receipt=primary,
         lease_seconds=10,
         rto_seconds=1.0,
         poll_interval_seconds=0.005,
@@ -474,9 +471,15 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert isinstance(primary, PrimaryProcessReceipt)
     assert primary.final_primary_state == "demoted"
     assert primary.local_gate_closed is True
+    assert primary.primary.holder_ref == (
+        "host:primary-fingerprint:outage-primary:cross-host-test"
+    )
     assert isinstance(standby, StandbyProcessReceipt)
     assert standby.standby.epoch == primary.primary.epoch + 1
     assert standby.final_standby_state == "stopped"
+    assert standby.standby.holder_ref == (
+        "host:standby-fingerprint:outage-standby:cross-host-test"
+    )
     assert paired.schema_version == (
         "primary-authority-outage-cross-host.v2"
     )
@@ -502,6 +505,49 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert live.current is None
 
 
+def test_standby_rejects_unbound_primary_receipt_before_remote_read() -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="standby-primary-preflight",
+        publisher=publisher,
+    )
+    primary = rehearse_primary_process_role(
+        rehearsal_id="standby-primary-preflight",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=PartitionableAuthorityStore(
+            healthy=live,
+            unavailable=_UnavailableAuthorityStore(),
+        ),
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+        readiness=readiness,
+    )
+    remote_reads_before = publisher.read_count
+
+    with pytest.raises(ValueError, match="fail-closed evidence"):
+        rehearse_standby_process_role(
+            rehearsal_id="standby-primary-preflight",
+            host_id="standby-mac",
+            host_fingerprint="standby-fingerprint",
+            primary_receipt=replace(primary, local_gate_closed=False),
+            lease_seconds=10,
+            rto_seconds=1.0,
+            poll_interval_seconds=0.005,
+            store=live,
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            readiness=readiness,
+        )
+
+    assert publisher.read_count == remote_reads_before
+    assert live.acquire_successes == 1
+
+
 def test_pair_verifier_rejects_process_receipt_from_other_readiness() -> None:
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
@@ -513,7 +559,6 @@ def test_pair_verifier_rejects_process_receipt_from_other_readiness() -> None:
         rehearsal_id="readiness-binding-test",
         host_id="primary-mac",
         host_fingerprint="primary-fingerprint",
-        holder_ref="host:primary:outage",
         lease_seconds=10,
         renew_interval_seconds=0.01,
         poll_interval_seconds=0.005,
@@ -529,8 +574,7 @@ def test_pair_verifier_rejects_process_receipt_from_other_readiness() -> None:
         rehearsal_id="readiness-binding-test",
         host_id="standby-mac",
         host_fingerprint="standby-fingerprint",
-        holder_ref="host:standby:outage",
-        expected_primary_epoch=primary.primary.epoch,
+        primary_receipt=primary,
         lease_seconds=10,
         rto_seconds=1.0,
         poll_interval_seconds=0.005,
@@ -566,7 +610,6 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
         rehearsal_id="same-machine-test",
         host_id="mac-a",
         host_fingerprint="fingerprint-a",
-        holder_ref="host:a:outage",
         lease_seconds=10,
         renew_interval_seconds=0.01,
         poll_interval_seconds=0.005,
@@ -582,8 +625,7 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
         rehearsal_id="same-machine-test",
         host_id="mac-b",
         host_fingerprint="fingerprint-b",
-        holder_ref="host:b:outage",
-        expected_primary_epoch=primary.primary.epoch,
+        primary_receipt=primary,
         lease_seconds=10,
         rto_seconds=1.0,
         poll_interval_seconds=0.005,
@@ -610,6 +652,19 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
                 standby,
                 host_fingerprint="standby-fingerprint",
                 implementation_sha256="0" * 64,
+            ),
+            readiness=readiness,
+        )
+
+    with pytest.raises(ValueError, match="standby authority holder"):
+        verify_cross_host_receipts(
+            primary,
+            replace(
+                standby,
+                standby=replace(
+                    standby.standby,
+                    holder_ref="host:forged",
+                ),
             ),
             readiness=readiness,
         )
@@ -644,7 +699,6 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
         rehearsal_id="unsafe-key-test",
         host_id="mac-a",
         host_fingerprint="fingerprint-a",
-        holder_ref="host:a:outage",
         lease_seconds=10,
         renew_interval_seconds=0.01,
         poll_interval_seconds=0.005,
@@ -660,8 +714,7 @@ def test_pair_identity_binds_safe_key_and_all_operations_core_sources() -> None:
         rehearsal_id="unsafe-key-test",
         host_id="mac-b",
         host_fingerprint="fingerprint-b",
-        holder_ref="host:b:outage",
-        expected_primary_epoch=primary.primary.epoch,
+        primary_receipt=primary,
         lease_seconds=10,
         rto_seconds=1.0,
         poll_interval_seconds=0.005,
@@ -694,13 +747,28 @@ def test_process_role_rejects_source_drift(
 ) -> None:
     live = _LiveAuthorityStore()
     publisher = _PublisherStore()
-    if role == "standby":
-        live.epoch = 1
     rehearsal_id = f"source-drift-{role}"
     readiness = _paired_readiness(
         rehearsal_id=rehearsal_id,
         publisher=publisher,
     )
+    primary_receipt = None
+    if role == "standby":
+        primary_receipt = rehearse_primary_process_role(
+            rehearsal_id=rehearsal_id,
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            lease_seconds=10,
+            renew_interval_seconds=0.01,
+            poll_interval_seconds=0.005,
+            store=PartitionableAuthorityStore(
+                healthy=live,
+                unavailable=_UnavailableAuthorityStore(),
+            ),
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            readiness=readiness,
+        )
     digests = iter(
         (
             readiness.implementation_sha256,
@@ -723,7 +791,6 @@ def test_process_role_rejects_source_drift(
                 rehearsal_id=rehearsal_id,
                 host_id="primary-mac",
                 host_fingerprint="primary-fingerprint",
-                holder_ref="host:primary:outage",
                 lease_seconds=10,
                 renew_interval_seconds=0.01,
                 poll_interval_seconds=0.005,
@@ -736,12 +803,12 @@ def test_process_role_rejects_source_drift(
                 readiness=readiness,
             )
         else:
+            assert primary_receipt is not None
             rehearse_standby_process_role(
                 rehearsal_id=rehearsal_id,
                 host_id="standby-mac",
                 host_fingerprint="standby-fingerprint",
-                holder_ref="host:standby:outage",
-                expected_primary_epoch=1,
+                primary_receipt=primary_receipt,
                 lease_seconds=10,
                 rto_seconds=1.0,
                 poll_interval_seconds=0.005,

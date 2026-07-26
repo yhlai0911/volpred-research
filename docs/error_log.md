@@ -2621,6 +2621,31 @@ acquire或provider call。此evidence-chain根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac尚未執行roles，physical pair與
 operations-core umbrella仍為 **`contained`**。
 
+### 2026-07-26 — Standby先改live lease，最後才知道primary evidence不相干
+
+**證據化症狀與根因層級**：standby正式入口只接operator手抄的
+`expected_primary_epoch`，沒有讀primary receipt。它會先嘗試acquire live authority，
+final `verify-pair`才檢查epoch、readiness與primary fail-closed evidence是否屬於同一
+次rehearsal；錯檔、舊檔或不完整primary evidence會先mutation控制面、事後才失敗。
+Primary／standby function另接受caller自填`holder_ref`，authority lease identity可與
+receipt宣稱的physical host脫鉤。根因是standby function interface缺少primary evidence
+的pre-mutation binding，並把identity derivation外洩給caller，不是lease CAS或DB clock。
+
+**底層修復、回歸與live回讀**：standby function／CLI改為強制接收primary v2 receipt，
+在任何publisher read或authority RPC前驗shared rehearsal-derived key、readiness SHA、
+primary host／source、lease window、healthy renewal、local gate closure、partition
+probe、terminal demotion、零effect/provider counters與exact publisher fence，再由
+receipt直接導出epoch。兩端holder改由rehearsal、role及host fingerprint內部唯一導出，
+final verifier同樣重驗。Failure injection將primary
+`local_gate_closed`改為false，回讀standby零新增remote read／零新增claim；holder drift
+亦被拒。相鄰authority suites **38 passed**，`py_compile`與diff gate通過。Production
+只讀preflight `standby-preflight-20260726-0830`原子落檔並exact read-back
+publisher=`operations_core/8`、安全隔離key及implementation
+`a273e8bc7ae65fb0f0205dbc9caadf8485f88422bda6bdceccc0a0796d6fab52`，沒有authority
+acquire或provider call。此standby sequencing／identity根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍無可操作session，physical pair與
+operations-core umbrella維持 **`contained`**。
+
 ### 2026-07-26 — Hash-fenced exact-path commit只驗hook前的candidate
 
 **症狀與根因層級**：canonical writer雖在`git commit --only`前驗

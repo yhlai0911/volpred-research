@@ -96,9 +96,9 @@ uv run python scripts/rehearse_primary_authority_outage.py single-host --receipt
 uv run python scripts/rehearse_primary_authority_outage.py prepare-host --rehearsal-id <shared_id> --process-role primary --receipt-path primary-ready.json
 uv run python scripts/rehearse_primary_authority_outage.py prepare-host --rehearsal-id <shared_id> --process-role standby --receipt-path standby-ready.json
 uv run python scripts/rehearse_primary_authority_outage.py verify-readiness --primary-receipt primary-ready.json --standby-receipt standby-ready.json --receipt-path readiness-pair.json
-# 把同一 readiness-pair.json 放到兩台機器；primary 跑完讀 epoch，再由 standby 接手：
+# 把同一 readiness-pair.json 放到兩台機器；standby直接驗primary receipt並導出epoch：
 uv run python scripts/rehearse_primary_authority_outage.py primary --rehearsal-id <shared_id> --readiness-receipt readiness-pair.json --receipt-path primary.json
-uv run python scripts/rehearse_primary_authority_outage.py standby --rehearsal-id <shared_id> --readiness-receipt readiness-pair.json --expected-primary-epoch <epoch> --receipt-path standby.json
+uv run python scripts/rehearse_primary_authority_outage.py standby --rehearsal-id <shared_id> --readiness-receipt readiness-pair.json --primary-receipt primary.json --receipt-path standby.json
 # 把 readiness 與兩份 process receipt 放到同一台機器後，驗完整 preflight→role→pair 雜湊鏈：
 uv run python scripts/rehearse_primary_authority_outage.py verify-pair --readiness-receipt readiness-pair.json --primary-receipt primary.json --standby-receipt standby.json --receipt-path storage/ops/primary_authority_outage_cross_host_latest.json
 # 注意：所有 CLI 命令加 -i=false 避免互動式 prompt

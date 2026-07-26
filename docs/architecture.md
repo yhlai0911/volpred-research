@@ -332,6 +332,11 @@
 > key、兩端host identity、implementation與publisher fence完全一致，最後的v2 receipt
 > 也保存相同readiness SHA。這讓事後evidence能證明實際roles使用的就是mutation前
 > 通過的preflight，不能只拿任意兩份相容role receipt另行配對。
+> Standby另不再接受operator手抄epoch；它必須在任何publisher／authority remote read
+> 前載入同一份primary v2 receipt，重驗readiness hash、primary host／source、
+> fail-closed counters、publisher fence與lease window，再從receipt直接導出exact
+> expected epoch。兩端authority holder ref也由shared rehearsal、role與host
+> fingerprint內部導出，caller不能自行填入與physical identity脫鉤的holder。
 >
 > Generic durable outbox worker 後續已移除 caller 可自行填入的 authority key／holder／
 > epoch／raw fencing token；`EffectOutboxWorker` 改由注入的 keepalive lease gate
