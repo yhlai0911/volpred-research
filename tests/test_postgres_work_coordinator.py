@@ -105,6 +105,24 @@ def _stage_cutover(
     return manifest
 
 
+def _legacy_submit_execute_granted(postgres_dsn: str) -> bool:
+    with psycopg.connect(postgres_dsn) as connection:
+        return bool(
+            connection.execute(
+                """
+                SELECT has_function_privilege(
+                  'volpred_ops_worker',
+                  'volpred_ops.submit_work('
+                  'text,text,text,text,text,integer,text[],text[],text,text,'
+                  'text,text,timestamptz,text,text,integer,'
+                  'timestamptz,timestamptz)',
+                  'EXECUTE'
+                )
+                """
+            ).fetchone()[0]
+        )
+
+
 def _postgres_bin_dir() -> Path | None:
     homebrew = Path("/opt/homebrew/opt/postgresql@17/bin")
     if (homebrew / "postgres").exists():
@@ -710,6 +728,13 @@ def test_work_cutover_gate_rechecks_expiry_after_staging_owner_lock_wait(
 
     assert isinstance(staging_error, WorkOwnershipLost)
     assert "stale or future-dated" in str(staging_error)
+    owner_store = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_dsn)
+    )
+    assert (
+        owner_store.read_owner().owner,
+        owner_store.read_owner().generation,
+    ) == ("legacy", 1)
     with psycopg.connect(postgres_dsn) as connection:
         assert connection.execute(
             "SELECT count(*) FROM volpred_ops.work_cutover_gates"
@@ -717,6 +742,10 @@ def test_work_cutover_gate_rechecks_expiry_after_staging_owner_lock_wait(
         assert connection.execute(
             "SELECT count(*) FROM volpred_ops.work_cutover_gate_receipts"
         ).fetchone()[0] == 0
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_owner_receipts"
+        ).fetchone()[0] == 1
+    assert _legacy_submit_execute_granted(postgres_dsn)
 
 
 def test_work_cutover_gate_rechecks_expiry_after_owner_lock_wait(
@@ -814,6 +843,10 @@ def test_work_cutover_gate_rechecks_expiry_after_owner_lock_wait(
             ORDER BY sequence
             """
         ).fetchall() == [("staged",)]
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_owner_receipts"
+        ).fetchone()[0] == 1
+    assert _legacy_submit_execute_granted(postgres_dsn)
 
 
 def test_inflight_legacy_wrapper_rechecks_owner_after_transfer_wins_lock(
@@ -1139,18 +1172,6 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
             ORDER BY sequence
             """
         ).fetchall()
-        legacy_submit_access = connection.execute(
-            """
-            SELECT has_function_privilege(
-              'volpred_ops_worker',
-              'volpred_ops.submit_work('
-              'text,text,text,text,text,integer,text[],text[],text,text,'
-              'text,text,timestamptz,text,text,integer,'
-              'timestamptz,timestamptz)',
-              'EXECUTE'
-            )
-            """
-        ).fetchone()[0]
     assert receipt_count == 1
     gate = owner_store.read_cutover_gate(manifest.sha256)
     assert (gate.status, gate.consumed_at, gate.consumed_generation) == (
@@ -1159,7 +1180,7 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
         None,
     )
     assert gate_events == [("staged",)]
-    assert legacy_submit_access is True
+    assert _legacy_submit_execute_granted(postgres_dsn)
 
 
 @pytest.mark.parametrize("start_before_expiry", [False, True])
