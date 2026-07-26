@@ -136,6 +136,7 @@ source counts 為 `1/0/0`，並正確留下 preserved control row 的 missing-pa
 pending+started_at lifecycle blocker。Release／stale cleanup 的產生流程已統一清除
 `started_at`；現存 row 未手改。七日時鐘已開始累積，但 mode 仍為
 `direct_execution` 且 blocking evidence 尚在，因此 Issue #9 仍是 `contained`。
+相鄰回歸 **193 passed**，全專案 **5,171 passed、1 skipped、0 failed**。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由

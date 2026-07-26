@@ -1593,6 +1593,8 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   `blocking_dimension_difference`。同輪根治 release／stale cleanup 回 pending 後仍保留
   `started_at` 的 producer bug，所有 re-pend 現在共用 `_repend_task()` 並清除 active
   trace；既有 preserved row 未直接改資料，仍待 owner-approved canonical reconciliation。
+  相鄰 shadow／cutover／task lifecycle／scheduler suites **193 passed**，全專案
+  **5,171 passed、1 skipped、0 failed**。
 
 取得七天 shadow 證據、production migration read-back 與 owner-approved window 後，
 才規劃第一個正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與
