@@ -29,6 +29,7 @@ _NEXT_TASK_STATUS = {
     "expired": "cancelled",
     "superseded": "cancelled",
     "decision_made_awaiting_body_rewrite": "blocked",
+    "awaiting_agent_job": "blocked",
 }
 
 _CAPABILITY_BY_KIND = {
@@ -80,6 +81,22 @@ _NEXT_TASK_SOURCE = {
     "reap_orphan_deliverables_held_ttl": "schedule",
     "compute_queue_followup": "schedule",
     "question_ops_maintain": "schedule",
+    # Reviewed production ingress labels captured by the owner-bound v4
+    # shadow ledger on 2026-07-27.  Keep exact values: prefixes would let an
+    # unreviewed producer inherit queue authority.
+    "auto_requeue_post_2026-06-30_scan": "schedule",
+    "carve_out_hourly-08": "schedule",
+    "draft_pool_refill": "schedule",
+    "hourly_dispatch_collect_completed": "schedule",
+    "hourly_dispatch_d4_design": "schedule",
+    "hourly_dispatch_finding": "schedule",
+    "hourly_dispatch_phase_a": "schedule",
+    "hourly_dispatch_snapaudit_reconciliation": "schedule",
+    "hourly_dispatch_triage": "schedule",
+    "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22": "schedule",
+    "incident_router": "schedule",
+    "machine": "schedule",
+    "weekly_requeue:governance_self_revise_operating_docs": "schedule",
     # Agent/discovery ingress. Ambiguous producer labels are kept at the
     # lowest-priority canonical class; each value must still be reviewed and
     # registered explicitly.
@@ -87,6 +104,7 @@ _NEXT_TASK_SOURCE = {
     "agent-discovered": "agent",
     "agent_discovered": "agent",
     "auto_discovered": "agent",
+    "auto_discovered_from_k1095_correction": "agent",
     "auto_research_fallback": "agent",
     "auto_journal_discovery_fallback": "agent",
     "auto_remediation": "agent",
@@ -114,6 +132,22 @@ _NEXT_TASK_SOURCE = {
     "orphan_closeout": "agent",
     "governance_error_log_review_200_followup": "agent",
     "refactor_plan_token_ops_waste": "agent",
+    "K1100h_codex_FAIL_2026_05_10": "agent",
+    "K1116d_codex_CONDITIONAL_PASS_2026_05_10": "agent",
+    "K1175_kid_collision_repivot_2026_05_10": "agent",
+    "codex_failover_followup": "agent",
+    "codex_review_fail_k1095_v2": "agent",
+    "collection_review": "agent",
+    "lesson_from_taiwan_vt_abstract_sync": "agent",
+    "paper_portfolio_audit_2026-06-08": "agent",
+    "worktree_harvest_wave2_dirty_stale_20260719": "agent",
+    "root_cause_email_11939": "user",
+    "telegram-132-followup": "user",
+    "telegram-855": "user",
+    "user_directive_20260715_market_diversification": "user",
+    "user_issue40_acceptance": "user",
+    "user_issue42_implementation": "user",
+    "owner_interactive": "user",
 }
 
 _TASK_RECORD_STATUS = {
@@ -204,7 +238,9 @@ class LegacyWorkCandidate:
     legacy_status: str
     legacy_source: str
     source_classification: str
-    created_at: str
+    created_at: str | None
+    created_at_observed_not_after: str | None
+    creation_sort_time: str
     updated_at: str | None = None
     finished_at: str | None = None
     claimed_by: str | None = None
@@ -262,6 +298,10 @@ class ReconciliationReport:
                         "classification": candidate.source_classification,
                     },
                     "created_at": candidate.created_at,
+                    "created_at_observed_not_after": (
+                        candidate.created_at_observed_not_after
+                    ),
+                    "creation_sort_time": candidate.creation_sort_time,
                     "updated_at": candidate.updated_at,
                     "finished_at": candidate.finished_at,
                     "claimed_by": candidate.claimed_by,
@@ -590,7 +630,7 @@ class LegacySnapshotImporter:
             if candidate.status == "blocked" and candidate.blocked_reason is None:
                 problems.append("blocked status has no reason")
             timestamps = {
-                "created_at": candidate.created_at,
+                "creation_sort_time": candidate.creation_sort_time,
                 "claimed_at": candidate.claimed_at,
                 "started_at": candidate.started_at,
                 "finished_at": candidate.finished_at,
@@ -601,11 +641,11 @@ class LegacySnapshotImporter:
                 for name, value in timestamps.items()
                 if value is not None
             }
-            created_at = parsed["created_at"]
+            creation_sort_time = parsed["creation_sort_time"]
             for name in ("claimed_at", "started_at", "finished_at", "updated_at"):
                 value = parsed.get(name)
-                if value is not None and value < created_at:
-                    problems.append(f"created_at > {name}")
+                if value is not None and value < creation_sort_time:
+                    problems.append(f"creation_sort_time > {name}")
             for earlier, later in (
                 ("claimed_at", "started_at"),
                 ("claimed_at", "finished_at"),
@@ -649,7 +689,11 @@ class LegacySnapshotImporter:
                 "unknown_kind",
                 f"next_tasks task_type is not mapped: {kind}",
             )
-        created_at = _timestamp(record["created_at"])
+        (
+            created_at,
+            created_at_observed_not_after,
+            creation_sort_time,
+        ) = _legacy_creation_times(record)
         legacy_source, source, source_classification = (
             _classify_next_task_source(record["source"])
         )
@@ -735,6 +779,8 @@ class LegacySnapshotImporter:
             legacy_source=legacy_source,
             source_classification=source_classification,
             created_at=created_at,
+            created_at_observed_not_after=created_at_observed_not_after,
+            creation_sort_time=creation_sort_time,
             updated_at=_optional_timestamp(record.get("updated_at")),
             finished_at=_optional_timestamp(
                 record.get("completed_at") or record.get("finished_at")
@@ -812,6 +858,7 @@ class LegacySnapshotImporter:
         )
         identity_ref = f"legacy:task_records:{legacy_id}"
         payload_ref = _payload_reference("task_records", legacy_id, record)
+        created_at = _timestamp(record["created_at"])
         return LegacyWorkCandidate(
             source_system="task_records",
             legacy_id=legacy_id,
@@ -835,7 +882,9 @@ class LegacySnapshotImporter:
             legacy_status=legacy_status,
             legacy_source=source,
             source_classification=f"exact:{source}",
-            created_at=_timestamp(record["created_at"]),
+            created_at=created_at,
+            created_at_observed_not_after=None,
+            creation_sort_time=created_at,
             updated_at=_optional_timestamp(record.get("updated_at")),
             finished_at=_optional_timestamp(record.get("finished_at")),
             claimed_by=_optional_identity(
@@ -889,6 +938,7 @@ class LegacySnapshotImporter:
             default=source,
         )
         payload_ref = _payload_reference("ops_jobs", legacy_id, record)
+        created_at = _timestamp(record["created_at"])
         return LegacyWorkCandidate(
             source_system="ops_jobs",
             legacy_id=legacy_id,
@@ -909,7 +959,9 @@ class LegacySnapshotImporter:
             legacy_status=legacy_status,
             legacy_source=legacy_source,
             source_classification=f"exact:{legacy_source}",
-            created_at=_timestamp(record["created_at"]),
+            created_at=created_at,
+            created_at_observed_not_after=None,
+            creation_sort_time=created_at,
             updated_at=_optional_timestamp(record.get("updated_at")),
             finished_at=_optional_timestamp(record.get("finished_at")),
             claimed_by=_optional_identity(
@@ -927,6 +979,25 @@ def _timestamp(value: Any) -> str:
     if parsed.tzinfo is None:
         raise ValueError("legacy timestamp must include a timezone")
     return parsed.astimezone(timezone.utc).isoformat()
+
+
+def _legacy_creation_times(
+    record: Mapping[str, Any],
+) -> tuple[str | None, str | None, str]:
+    """Return exact time, upper bound, and an explicit ordering surrogate."""
+
+    exact = record.get("created_at")
+    if exact is not None:
+        try:
+            normalized = _timestamp(exact)
+            return normalized, None, normalized
+        except (TypeError, ValueError):  # silent-ok: reviewed upper-bound provenance is the explicit fallback.
+            pass
+    upper_bound = record.get("created_at_observed_not_after")
+    if upper_bound is None:
+        raise KeyError("created_at")
+    normalized_bound = _timestamp(upper_bound)
+    return None, normalized_bound, normalized_bound
 
 
 def _classify_next_task_source(value: Any) -> tuple[str, str, str]:

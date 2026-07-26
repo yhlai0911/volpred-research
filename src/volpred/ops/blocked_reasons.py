@@ -36,6 +36,11 @@ BLOCKED_REASONS: frozenset[str] = frozenset(
         "daily_cap_reached",                # task_type hit its per-day publish cap — paired with blocked_until=next local midnight
         "awaiting_codex_review",            # review gate: experiment done, Codex review artifact missing (sync_next_tasks_status.py)
         "awaiting_owner_decision",          # awaiting boss/owner sign-off — pairs with status=blocked_on_user
+        "awaiting_main_thread_body_rewrite",  # narrative decision is final; paper body remains main-thread-only
+        "external_compute_job_active",        # compute queue receipt owns execution until collection
+        "external_compute_job_running",       # source task is fenced by a live compute child
+        "external_compute_receipt_pending_collection",  # terminal job receipt awaits PHASE A
+        "awaiting_prerequisite_fix",          # an identified prerequisite defect must land first
     }
 )
 

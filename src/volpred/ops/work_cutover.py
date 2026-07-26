@@ -60,6 +60,10 @@ def _candidate_identity(
         "id": candidate.legacy_id,
         "status": candidate.status,
         "created_at": candidate.created_at,
+        "created_at_observed_not_after": (
+            candidate.created_at_observed_not_after
+        ),
+        "creation_sort_time": candidate.creation_sort_time,
         "updated_at": candidate.updated_at,
         "kind": request.kind,
         "title": request.title,
@@ -67,8 +71,6 @@ def _candidate_identity(
         "source": request.source,
         "legacy_source": candidate.legacy_source,
         "source_classification": candidate.source_classification,
-        "created_at": candidate.created_at,
-        "updated_at": candidate.updated_at,
         "required_capabilities": sorted(request.required_capabilities),
         "required_attestations": sorted(request.required_attestations),
         "risk": request.risk,

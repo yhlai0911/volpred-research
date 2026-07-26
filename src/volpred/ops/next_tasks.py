@@ -44,9 +44,11 @@ Single enforcement owner for two invariants on the canonical queue:
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import json
 import re
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import IO, Any
 
@@ -59,6 +61,69 @@ from .diagnostics import warn
 
 class InvalidTaskPriority(ValueError):
     """Raised when a task priority cannot be represented as a positive int."""
+
+
+class ActiveTaskExecutionFence(ValueError):
+    """A writer attempted to mutate a task owned by a running external job."""
+
+
+def task_record_sha256(task: dict[str, Any]) -> str:
+    payload = json.dumps(
+        task,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def task_execution_fence_paths(
+    queue_path: str | Path,
+    task_id: str,
+) -> tuple[Path, Path]:
+    digest = hashlib.sha256(task_id.encode("utf-8")).hexdigest()
+    root = Path(queue_path).parent / "ops" / "task_execution_fences"
+    return root / f"{digest}.lock", root / f"{digest}.json"
+
+
+def _enforce_active_task_execution_fences(
+    queue_path: str | Path,
+    tasks: list[Any],
+) -> None:
+    fence_root = Path(queue_path).parent / "ops" / "task_execution_fences"
+    if not fence_root.exists():
+        return
+    task_by_id = {
+        str(task.get("id")): task
+        for task in tasks
+        if isinstance(task, dict) and task.get("id")
+    }
+    for lock_path in fence_root.glob("*.lock"):
+        with lock_path.open("a+", encoding="utf-8") as lock_handle:
+            try:
+                fcntl.flock(
+                    lock_handle.fileno(),
+                    fcntl.LOCK_EX | fcntl.LOCK_NB,
+                )
+            except BlockingIOError:
+                metadata_path = lock_path.with_suffix(".json")
+                try:
+                    metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+                except (OSError, json.JSONDecodeError) as exc:
+                    raise ActiveTaskExecutionFence(
+                        f"active task fence metadata unreadable: {metadata_path}"
+                    ) from exc
+                task_id = str(metadata.get("task_id") or "")
+                task = task_by_id.get(task_id)
+                if (
+                    task is None
+                    or task_record_sha256(task) != metadata.get("record_sha256")
+                ):
+                    raise ActiveTaskExecutionFence(
+                        f"task is owned by running compute job: {task_id}"
+                    )
+            else:
+                fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
 
 
 _DIGIT_PRIORITY_RE = re.compile(r"^\d+$")
@@ -179,6 +244,7 @@ TASK_STATUSES: frozenset[str] = frozenset(
         "superseded",                           # replaced by another task
         "closed_no_action",                     # closed, nothing to do
         "decision_made_awaiting_body_rewrite",  # paper narrative state (CLAUDE.md)
+        "awaiting_agent_job",                    # durable external compute job owns execution
         "cancelled",                            # explicitly cancelled
         "expired",                              # aged out past its window
     }
@@ -672,6 +738,7 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
                 existing_tasks=existing_tasks,
                 proposed_tasks=tasks,
             )
+        _enforce_active_task_execution_fences(handle_name, tasks)
 
     _normalize_priorities_tolerant(tasks)
     _audit_task_statuses(tasks)
@@ -994,6 +1061,18 @@ def append_task_record(
     task_id = record.get("id")
     if not isinstance(task_id, str) or not task_id.strip():
         raise ValueError("task record must carry a non-empty string 'id'")
+    record.setdefault("created_at", datetime.now(timezone.utc).isoformat())
+    created_at = record["created_at"]
+    if not isinstance(created_at, str):
+        raise ValueError("task record 'created_at' must be a timezone-aware ISO-8601 string")
+    try:
+        parsed_created_at = datetime.fromisoformat(created_at)
+    except ValueError as exc:
+        raise ValueError(
+            "task record 'created_at' must be a timezone-aware ISO-8601 string"
+        ) from exc
+    if parsed_created_at.tzinfo is None or parsed_created_at.utcoffset() is None:
+        raise ValueError("task record 'created_at' must include a timezone offset")
     if "issue_ref" in record:
         if record["issue_ref"] is None:
             record.pop("issue_ref")
@@ -1030,6 +1109,21 @@ def append_task_record(
                     if if_exists == "raise":
                         raise ValueError(f"duplicate task id {task_id}")
                     return existing, False
+            parent_task_id = record.get("parent_task_id")
+            if parent_task_id is not None:
+                if not isinstance(parent_task_id, str) or not parent_task_id.strip():
+                    raise ValueError(
+                        "task record 'parent_task_id' must be a non-empty string"
+                    )
+                if not any(
+                    isinstance(existing, dict)
+                    and existing.get("id") == parent_task_id
+                    for existing in tasks
+                ):
+                    raise ValueError(
+                        "task record parent_task_id is absent from the canonical "
+                        f"task pool: {parent_task_id}"
+                    )
             # 語意重複閘門（老闆 2026-07-21：「在建單入口擋，不是事後掃」）。
             # 放在 id 檢查之後、append 之前 —— 同一個 LOCK_EX 之內，所以不會有
             # 「兩個 caller 同時通過檢查再雙雙寫入」的 TOCTOU 窗口。

@@ -194,7 +194,7 @@ def test_issue_sync_failure_never_rolls_back_local_claim(
     assert json.loads(next_tasks.read_text(encoding="utf-8"))[0]["status"] == "claimed"
 
 
-def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
+def test_complete_cli_rejects_blocked_status(tmp_path, monkeypatch) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
         json.dumps(
@@ -226,15 +226,12 @@ def test_complete_accepts_blocked_status(tmp_path, monkeypatch) -> None:
         ],
     )
 
-    rc = task_pool_claim.main()
+    with pytest.raises(SystemExit, match="2"):
+        task_pool_claim.main()
 
-    assert rc == 0
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
-    assert saved[0]["status"] == "blocked"
-    assert "Needs interactive session" in saved[0]["result"]
-    assert "claimed_by" not in saved[0]
-    assert "claimed_at" not in saved[0]
-    assert "claim_session_id" not in saved[0]
+    assert saved[0]["status"] == "in_progress"
+    assert saved[0]["claimed_by"] == "codex-cli"
 
 
 def test_complete_defers_linked_issue_close_until_real_commit(
@@ -282,6 +279,36 @@ def test_complete_defers_linked_issue_close_until_real_commit(
         "completion_base_commit": "1" * 40,
     }
     assert "issue_closed_commit" not in saved
+
+
+def test_complete_rejects_blocked_disposition_in_favor_of_block_cli(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = {
+        "id": "blocked-through-wrong-command",
+        "status": "in_progress",
+        "claimed_by": "worker",
+    }
+    next_tasks.write_text(json.dumps([original]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result, burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id=original["id"],
+            status="blocked",
+            result="prerequisite is not ready",
+        )
+    )
+
+    assert result == {
+        "ok": False,
+        "reason": "use_mark_task_blocked",
+        "task_id": original["id"],
+    }
+    assert burst is None
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == [original]
 
 
 @pytest.mark.parametrize(

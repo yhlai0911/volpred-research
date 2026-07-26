@@ -3,13 +3,79 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime
 
 import pytest
 from click.testing import CliRunner
 
 from volpred.cli import cli
 from volpred.ops import next_tasks
-from volpred.ops.next_tasks import _legacy_priority_to_p, append_next_task
+from volpred.ops.next_tasks import _legacy_priority_to_p, append_next_task, append_task_record
+
+
+def test_append_task_record_stamps_an_aware_created_at(tmp_path):
+    queue = tmp_path / "next_tasks.json"
+
+    rec, created = append_task_record(
+        {
+            "id": "external-contract-task",
+            "title": "external contract",
+            "description": "record-preserving gateway still owns provenance",
+            "task_type": "platform_ops",
+            "priority": 3,
+            "status": "pending",
+            "source": "user",
+        },
+        path=queue,
+    )
+
+    stored = json.loads(queue.read_text(encoding="utf-8"))[0]
+    parsed = datetime.fromisoformat(rec["created_at"])
+    assert created is True
+    assert parsed.tzinfo is not None
+    assert stored["created_at"] == rec["created_at"]
+
+
+def test_append_task_record_rejects_a_naive_created_at(tmp_path):
+    queue = tmp_path / "next_tasks.json"
+
+    with pytest.raises(ValueError, match="created_at.*timezone"):
+        append_task_record(
+            {
+                "id": "naive-provenance",
+                "title": "invalid provenance",
+                "description": "timezone-free timestamps cannot cross the gateway",
+                "task_type": "platform_ops",
+                "priority": 3,
+                "status": "pending",
+                "source": "user",
+                "created_at": "2026-07-27T12:00:00",
+            },
+            path=queue,
+        )
+
+    assert not queue.exists()
+
+
+def test_append_task_record_rejects_an_absent_parent(tmp_path):
+    queue = tmp_path / "next_tasks.json"
+
+    with pytest.raises(ValueError, match="parent_task_id.*missing-parent"):
+        append_task_record(
+            {
+                "id": "orphan-child",
+                "title": "orphan",
+                "description": "a compute job id is not a task dependency",
+                "task_type": "platform_ops",
+                "priority": 3,
+                "status": "pending",
+                "source": "user",
+                "parent_task_id": "missing-parent",
+            },
+            path=queue,
+        )
+
+    assert json.loads(queue.read_text(encoding="utf-8")) == []
 
 
 def test_append_creates_pending_record_with_mapped_fields(tmp_path):

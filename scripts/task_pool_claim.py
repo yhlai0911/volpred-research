@@ -1129,6 +1129,12 @@ def _complete_locked(
     *,
     completion_base_commit: str | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    if args.status == "blocked":
+        return {
+            "ok": False,
+            "reason": "use_mark_task_blocked",
+            "task_id": args.id,
+        }, None
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower() or "in_progress"
@@ -1498,7 +1504,7 @@ def main() -> int:
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
-    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed", "blocked"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
     p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
     p.add_argument("--id", required=True)
     p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")
