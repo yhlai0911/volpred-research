@@ -32,6 +32,9 @@
       },
       "market_closure_detect": {
         "activated_at": "2026-07-26T10:00:00Z"
+      },
+      "ndc_indicator_refresh": {
+        "activated_at": "2026-07-26T10:35:00Z"
       }
     },
     "job_defaults": {
@@ -431,6 +434,20 @@
           "generate_research_backlog.py",
           "cron_research_backlog.sh",
           "research_backlog"
+        ]
+      },
+      {
+        "id": "ndc_indicator_refresh",
+        "label": "NDC monthly freshness -> canonical task materialization",
+        "cron": "0 10 28 * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_ndc_indicator_refresh.sh",
+        "log_path": "storage/logs/cron/ndc_indicator_refresh.log",
+        "description": "Operations Core 每月檢查 NDC canonical CSV；fresh 時 no-op，落後時以 expected_period deterministic id 寫入 storage/next_tasks.json，交由正式 platform_ops worker 更新並回讀。",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "matchers": [
+          "materialize_ndc_indicator_task.py",
+          "cron_ndc_indicator_refresh.sh"
         ]
       },
       {

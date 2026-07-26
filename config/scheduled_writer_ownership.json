@@ -252,6 +252,13 @@
       "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/event_ledger/**"],
       "reason": "Materializes due event windows through the canonical pending queue and records idempotent event-ledger receipts."
     },
+    "ndc_indicator_refresh": {
+      "entrypoint": "scripts/materialize_ndc_indicator_task.py",
+      "policy": "phase_z_machine_state",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "phase_z_probe_paths": ["storage/next_tasks.json"],
+      "reason": "Freshness check is read-only; a stale monthly NDC period materializes one deterministic platform_ops queue task."
+    },
     "digest_daily_enqueue": {
       "entrypoint": "scripts/enqueue_daily_digest.py",
       "policy": "phase_z_machine_state",
