@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（owned-email expired-attempt recovery）**
+Last updated: **2026-07-26（publisher-delete stale retry reconciliation）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -1943,3 +1943,25 @@ materializer 的 queue／ledger outputs 歸入 PHASE-Z machine state。Policy su
 此 writer-policy 缺漏為 `root_cause_fixed_and_verified`。唯讀 reconcile 仍看到
 `audit_publish_sync` 與 `feed_sync` 的 legacy host-crontab simultaneous-owner
 conflict；未經 canary cutover transaction 不手動移除，Issue #9 仍是 `contained`。
+
+## 2026-07-26 — Publisher-delete stale retry reconciliation checkpoint
+
+使用者已授權新架構正式上線。Production 的 publisher-delete owner 已回到
+`legacy/19`，但六次 destructive restore rehearsal 各留下一筆 generation
+6/8/10/12/14/16 的 `retry_scheduled`；六個 scope-bound approval 均已撤銷，
+work/effect/outbox 卻仍為 pending/requested/pending。這些列不可能再合法執行，
+也不能交給 current-generation provider retry。
+
+`20260726103201_reconcile_stale_owned_publisher_delete` 新增唯一 service-role RPC。
+它只選取 exact family/kind、old generation、revoked approval、original immutable
+retry receipt 與三層 nonterminal state 全部一致的列，以 `FOR UPDATE SKIP LOCKED`
+原子領取；不接受 provider／Primary Authority／delete projection。原 attempt 與
+attempt receipt 保持 `retry_scheduled` 作歷史證據，另寫 private FORCE-RLS
+reconciliation receipt，並把 WorkItem、EffectRequest、outbox 終止。
+
+Production 首輪精確收斂 6/6，回讀 `receipt_count=6`、`fully_converged=6`、
+`approvals_still_revoked=6`、`work_receipts=6`；同一 RPC 重跑
+`reconciled_count=0`。既有 hourly `owned_publisher_article_recovery` 入口已升為
+v2，先走零-provider delete reconciliation，再走原 publisher-sync recovery；
+production wrapper smoke 兩邊均為零筆 no-op。此切片完成五步 gate，狀態為
+`root_cause_fixed_and_verified`。

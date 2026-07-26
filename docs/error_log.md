@@ -3182,3 +3182,32 @@ gitignored receipt／lock／log，實際 materialized job 仍各自保留 writer
 為追求綠燈直接 apply ownership mutation。故「scheduler writer-policy 身份缺漏」
 完成五步，狀態 **`root_cause_fixed_and_verified`**；Issue #9 queue/schedule cutover
 仍因這兩個 live simultaneous-owner conflict 保持 **`contained`**。
+
+### 2026-07-26 — Publisher-delete rollback 後的舊世代 retry 沒有合法終止路徑
+
+**證據化症狀**：production owner 已是 `legacy/19`，但六次 destructive restore
+rehearsal 留下 generation 6/8/10/12/14/16 的 `retry_scheduled`。六筆 WorkItem、
+EffectRequest、outbox 分別仍是 `pending/requested/pending`，六個 approval 卻都
+`active=false` 且已有 `revoked_at`；原 immutable attempt receipt 均是
+`retryable_failure/retry_scheduled`。重試它們會跨 owner generation 且使用已撤銷
+授權，直接改狀態或覆寫原 receipt 又會破壞 audit chain。
+
+**根因層級與底層修復**：既有 settlement 只接受 current
+`operations_core/generation` 與 active leases，rollback 後沒有專門的
+stale-generation terminalization state transition。新增 migration
+`20260726103201_reconcile_stale_owned_publisher_delete`：service-role-only、
+`SECURITY DEFINER`、空 search path 的 RPC 僅選 exact delete family/kind、
+attempt/request 同一舊 generation、current generation 較新、approval 已撤銷、
+原 retry receipt 存在、work/effect/outbox 仍為精確 nonterminal lifecycle 的列。
+它以 `FOR UPDATE OF attempt SKIP LOCKED` 領取，保留原 attempt/attempt receipt，
+另寫 private FORCE-RLS immutable reconciliation receipt，再把三層 parent state
+dead-letter。Python 公開 seam 不接受 provider factory、Primary Authority 或
+delete projection，因此這條路徑在介面上即無法刪 article。
+
+**回歸、production 回讀與制度化**：Python seam/store 與 PostgreSQL 真交易都先
+RED 後 GREEN；PG 測試另驗證第二次執行零筆且原 retry receipt 未改。Production
+migration 上線後一次收斂六筆，回讀 `receipt_count=6`、
+`fully_converged=6`、`approvals_still_revoked=6`、`work_receipts=6`，隨即重跑
+`reconciled_count=0`。既有 hourly publisher recovery 入口升級為 v2，每輪先執行
+零-provider reconciliation；production smoke 為 delete=0、sync=0。五步 gate
+全部完成，狀態 **`root_cause_fixed_and_verified`**。

@@ -8,6 +8,10 @@ from scripts import recover_owned_publisher_articles as recovery_script
 from volpred.ops.delivery.owned_publisher_article import (
     OwnedPublisherArticleReceipt,
 )
+from volpred.ops.delivery.owned_publisher_delete import (
+    OwnedPublisherDeleteReconciliationReceipt,
+    OwnedPublisherDeleteReconciliationSummary,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -54,7 +58,40 @@ def test_recovery_script_binds_keepalive_store_and_projection(
                 ),
             )
 
+    class DeleteReconciliation:
+        def __init__(self, **kwargs) -> None:
+            calls.append(("delete_reconciliation_init", kwargs))
+
+        def reconcile(self, *, limit: int):
+            calls.append(("delete_reconcile", limit))
+            return OwnedPublisherDeleteReconciliationSummary(
+                schema_version=(
+                    "owned-publisher-delete-reconciliation-summary.v1"
+                ),
+                reconciled_count=1,
+                receipts=(
+                    OwnedPublisherDeleteReconciliationReceipt(
+                        schema_version=(
+                            "owned-publisher-delete-reconciliation-"
+                            "receipt.v1"
+                        ),
+                        effect_id="effect-delete-1",
+                        attempt_count=1,
+                        stale_owner_generation=4,
+                        current_owner_generation=5,
+                        approval_ref="approval:delete-1",
+                        reason_code=(
+                            "stale_generation_revoked_approval"
+                        ),
+                        evidence_ref="reconciliation:delete-1",
+                        evidence_sha256="b" * 64,
+                        recorded_at="2026-07-26T10:00:00+00:00",
+                    ),
+                ),
+            )
+
     store = object()
+    delete_store = object()
     projection = object()
     monkeypatch.setattr(
         recovery_script,
@@ -80,15 +117,40 @@ def test_recovery_script_binds_keepalive_store_and_projection(
         "OwnedPublisherArticleRecovery",
         Recovery,
     )
+    monkeypatch.setattr(
+        recovery_script.SupabaseOwnedPublisherDeleteStore,
+        "from_environment",
+        lambda: delete_store,
+    )
+    monkeypatch.setattr(
+        recovery_script,
+        "OwnedPublisherDeleteReconciliation",
+        DeleteReconciliation,
+    )
 
     result = recovery_script.recover_owned_publisher_articles(limit=25)
 
     assert result["schema_version"] == (
-        "owned-publisher-article-recovery-run.v1"
+        "owned-publisher-article-recovery-run.v2"
     )
     assert result["recovered_count"] == 1
     assert result["receipts"][0]["effect_id"] == "effect-1"
-    assert calls[0] == (
+    assert result["publisher_delete_reconciliation"][
+        "reconciled_count"
+    ] == 1
+    assert calls[:2] == [
+        (
+            "delete_reconciliation_init",
+            {
+                "store": delete_store,
+                "actor_ref": (
+                    "effect-worker:publisher-delete-reconciliation"
+                ),
+            },
+        ),
+        ("delete_reconcile", 25),
+    ]
+    assert calls[2] == (
         "keepalive_factory",
         {
             "authority_key": "publisher:article.supabase.sync",
