@@ -26326,5 +26326,15 @@
     "owner": "codex-failover-slot-1-919cc230024c4847b84cf88cf146753e",
     "commit": "61eb5e89f",
     "summary": "Verified owned-email remote mutation guard: focused regressions pass, full suite 5182 passed 1 skipped 0 failed, and production readback showed zero new matching WorkItems after the test baseline."
+  },
+  {
+    "timestamp": "2026-07-26T16:12:44+08:00",
+    "task_type": "platform_ops",
+    "task_id": "operations_core_live_verification_16h",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-e89271bfeeb544f2a96787802139fbc2",
+    "owner": "hourly-slot-1-e89271bfeeb544f2a96787802139fbc2",
+    "commit": null,
+    "summary": "Independent live verification of operations-core cutover at HEAD a3a82fcb6 (DIRECT EXECUTION MODE; refactor lane actively owned by live codex_loop — this fire did read-only verification only, no source edit, to avoid co-driving the same transactional core). Focused suite 166 passed across owned-email notification guard, work coordinator/ownership/cutover-preflight/shadow, primary-authority keepalive/session/outage-rehearsal, and publisher owned-delete/delete-restore-rehearsal. Live read-back: publisher_projection_convergence_latest = converged, local=3 / supabase=3, missing/orphan/live_404 empty, mismatch_total=0. drain_first_state active=false, pending=1 (direct-mode control row assign_f3f36d75), drain_streak_met=true. HEAD stable throughout run (no source churn under the verifier). No main-thread-lane work (main_thread_inbox=0); umbrella's remaining gate = program commit 34 physical two-Mac receipt pair, blocked on second physical Mac offline (operator/hardware dependency, not resolvable this fire)."
   }
 ]
