@@ -1,0 +1,411 @@
+{
+  "experiment_id": "K1658",
+  "title": "FOMC statement shock (14:00 ET) vs press-conference shock (14:30 ET): distributional response decomposition for rate assets",
+  "seed": 42,
+  "run_at_utc": "2026-07-26T19:02:53Z",
+  "orthogonality_note": "Distinct from research_program line 1425 (statement/minutes linguistic complexity, a TEXT-readability level). K1658 is a same-day TWO-STAGE market-reaction decomposition, not a text feature.",
+  "assets": [
+    "TLT",
+    "IEF",
+    "ZN=F"
+  ],
+  "data_sources": {
+    "intraday": "yfinance 5m (period=60d, HARD cap), tz->America/New_York",
+    "daily": "yfinance daily OHLC from 2019-01-01 to 2026-07-24",
+    "fomc_calendar": "federalreserve.gov FOMC calendars; 2024-2026 verified directly 2026-07-27, 2019-2023 cross-checked vs Fed rate-decision record",
+    "cached_to": "experiments/K1658/data/ (preserves the 60-day intraday window, which rolls forward in yfinance)"
+  },
+  "lookahead_policy": "Part 3: outcome=logRV_t, predictors=FOMC and control via explicit .shift(1) (from t-1); tests day-AFTER-FOMC volatility. Part 2 next-day RV is the strictly-following session. seed=42.",
+  "part1_feasibility_diagnosis": {
+    "per_asset": {
+      "TLT": {
+        "intraday_coverage_start": "2026-04-29",
+        "intraday_coverage_end": "2026-07-24",
+        "n_trading_days": 60,
+        "usable_fomc_events": [
+          "2026-04-29",
+          "2026-06-17"
+        ],
+        "n_usable_events": 2
+      },
+      "IEF": {
+        "intraday_coverage_start": "2026-04-29",
+        "intraday_coverage_end": "2026-07-24",
+        "n_trading_days": 60,
+        "usable_fomc_events": [
+          "2026-04-29",
+          "2026-06-17"
+        ],
+        "n_usable_events": 2
+      },
+      "ZN=F": {
+        "intraday_coverage_start": "2026-05-14",
+        "intraday_coverage_end": "2026-07-24",
+        "n_trading_days": 58,
+        "usable_fomc_events": [
+          "2026-06-17"
+        ],
+        "n_usable_events": 1
+      }
+    },
+    "note": "Intraday sub-hourly bars from yfinance are capped at ~60 trading days. FOMC meets 8x/year, so only a handful of events fall in-window.",
+    "feasibility": {
+      "usable_events_any_asset": [
+        "2026-04-29",
+        "2026-06-17"
+      ],
+      "n_usable_events": 2,
+      "paired_test_required_N": {
+        "d=0.3": 88,
+        "d=0.5": 32,
+        "d=0.8": 13
+      },
+      "years_of_complete_intraday_needed": {
+        "d=0.3": 11.0,
+        "d=0.5": 4.0,
+        "d=0.8": 1.62
+      },
+      "free_data_window_years": 0.238,
+      "verdict": "INFEASIBLE — cross-event inferential separation of statement vs presser shock cannot be done with free data: the intraday window yields N=2 usable FOMC event(s), while even a LARGE effect (d=0.8) needs N>=13 (~1.62 yr of complete intraday coverage)."
+    }
+  },
+  "part2_intraday_case_studies": {
+    "windows_ET": {
+      "statement": [
+        "13:55",
+        "14:15"
+      ],
+      "presser": [
+        "14:25",
+        "15:30"
+      ]
+    },
+    "events": {
+      "2026-04-29": {
+        "TLT": {
+          "available": true,
+          "statement_window_logret": -0.000116,
+          "presser_window_logret": -0.000643,
+          "statement_window_rv_5min": 2.31e-06,
+          "presser_window_rv_5min": 5e-06,
+          "event_day_session_rv_5min": 2.279e-05,
+          "next_session_date": "2026-04-30",
+          "next_session_rv_5min": 1.383e-05,
+          "abs_stmt_minus_abs_press_logret": -0.000526
+        },
+        "IEF": {
+          "available": true,
+          "statement_window_logret": -0.001122,
+          "presser_window_logret": -0.000185,
+          "statement_window_rv_5min": 1e-06,
+          "presser_window_rv_5min": 2.5e-06,
+          "event_day_session_rv_5min": 8.65e-06,
+          "next_session_date": "2026-04-30",
+          "next_session_rv_5min": 2.89e-06,
+          "abs_stmt_minus_abs_press_logret": 0.000937
+        },
+        "ZN=F": {
+          "available": false
+        }
+      },
+      "2026-06-17": {
+        "TLT": {
+          "available": true,
+          "statement_window_logret": -0.001043,
+          "presser_window_logret": -0.001333,
+          "statement_window_rv_5min": 2.43e-06,
+          "presser_window_rv_5min": 1.525e-05,
+          "event_day_session_rv_5min": 3.812e-05,
+          "next_session_date": "2026-06-18",
+          "next_session_rv_5min": 1.042e-05,
+          "abs_stmt_minus_abs_press_logret": -0.00029
+        },
+        "IEF": {
+          "available": true,
+          "statement_window_logret": -0.002313,
+          "presser_window_logret": -0.002871,
+          "statement_window_rv_5min": 4e-07,
+          "presser_window_rv_5min": 6.21e-06,
+          "event_day_session_rv_5min": 2.053e-05,
+          "next_session_date": "2026-06-18",
+          "next_session_rv_5min": 2.7e-06,
+          "abs_stmt_minus_abs_press_logret": -0.000558
+        },
+        "ZN=F": {
+          "available": true,
+          "statement_window_logret": -0.002562,
+          "presser_window_logret": -0.00314,
+          "statement_window_rv_5min": 2.8e-07,
+          "presser_window_rv_5min": 5.67e-06,
+          "event_day_session_rv_5min": 2.516e-05,
+          "next_session_date": "2026-06-18",
+          "next_session_rv_5min": 8.03e-06,
+          "abs_stmt_minus_abs_press_logret": -0.000578
+        }
+      }
+    },
+    "caveat": "N=2 event(s) with intraday coverage. These are single-event case studies; NO cross-event statistical test is claimed (N far below any power threshold, see Part 1). Signs/magnitudes are descriptive only."
+  },
+  "part3_aggregate_fomc_effect": {
+    "spec": "logRV_t = a + b*FOMC_{t-1} + c*logRV_{t-1} + e ; HAC(Newey-West) SE; b>0 => FOMC raises NEXT-day volatility",
+    "multiple_testing": {
+      "family_size": 6,
+      "method": "holm",
+      "n_significant_after_holm": 0
+    },
+    "results": [
+      {
+        "asset": "TLT",
+        "proxy": "parkinson",
+        "n_obs": 1899,
+        "n_fomc_lag_days": 59,
+        "beta_fomc_lag1": 0.093519,
+        "beta_pct_effect_on_vol": 9.803,
+        "hac_se": 0.117108,
+        "t_stat": 0.7986,
+        "p_value_raw": 0.424539,
+        "hac_lag": 13,
+        "resid_acf1": -0.1594,
+        "hac_lag_sensitivity": {
+          "lag1": {
+            "t": 0.8187,
+            "p": 0.412982
+          },
+          "lag10": {
+            "t": 0.8018,
+            "p": 0.422667
+          },
+          "lag13": {
+            "t": 0.7986,
+            "p": 0.424539
+          },
+          "lag26": {
+            "t": 0.7961,
+            "p": 0.425945
+          }
+        },
+        "mean_logrv_after_fomc": -10.3148,
+        "mean_logrv_other": -10.631,
+        "p_value_holm": 1.0,
+        "holm_significant_0.05": false
+      },
+      {
+        "asset": "TLT",
+        "proxy": "sqret",
+        "n_obs": 1891,
+        "n_fomc_lag_days": 59,
+        "beta_fomc_lag1": 0.239789,
+        "beta_pct_effect_on_vol": 27.098,
+        "hac_se": 0.304609,
+        "t_stat": 0.7872,
+        "p_value_raw": 0.431163,
+        "hac_lag": 13,
+        "resid_acf1": -0.0079,
+        "hac_lag_sensitivity": {
+          "lag1": {
+            "t": 0.779,
+            "p": 0.435952
+          },
+          "lag10": {
+            "t": 0.7846,
+            "p": 0.432678
+          },
+          "lag13": {
+            "t": 0.7872,
+            "p": 0.431163
+          },
+          "lag26": {
+            "t": 0.794,
+            "p": 0.427173
+          }
+        },
+        "mean_logrv_after_fomc": -10.3706,
+        "mean_logrv_other": -10.5924,
+        "p_value_holm": 1.0,
+        "holm_significant_0.05": false
+      },
+      {
+        "asset": "IEF",
+        "proxy": "parkinson",
+        "n_obs": 1899,
+        "n_fomc_lag_days": 59,
+        "beta_fomc_lag1": -0.146255,
+        "beta_pct_effect_on_vol": -13.606,
+        "hac_se": 0.123811,
+        "t_stat": -1.1813,
+        "p_value_raw": 0.23749,
+        "hac_lag": 13,
+        "resid_acf1": -0.1511,
+        "hac_lag_sensitivity": {
+          "lag1": {
+            "t": -1.2141,
+            "p": 0.224703
+          },
+          "lag10": {
+            "t": -1.1866,
+            "p": 0.235373
+          },
+          "lag13": {
+            "t": -1.1813,
+            "p": 0.23749
+          },
+          "lag26": {
+            "t": -1.1921,
+            "p": 0.233214
+          }
+        },
+        "mean_logrv_after_fomc": -11.9911,
+        "mean_logrv_other": -12.3712,
+        "p_value_holm": 1.0,
+        "holm_significant_0.05": false
+      },
+      {
+        "asset": "IEF",
+        "proxy": "sqret",
+        "n_obs": 1883,
+        "n_fomc_lag_days": 59,
+        "beta_fomc_lag1": 0.032915,
+        "beta_pct_effect_on_vol": 3.346,
+        "hac_se": 0.312286,
+        "t_stat": 0.1054,
+        "p_value_raw": 0.916057,
+        "hac_lag": 13,
+        "resid_acf1": -0.009,
+        "hac_lag_sensitivity": {
+          "lag1": {
+            "t": 0.1048,
+            "p": 0.916538
+          },
+          "lag10": {
+            "t": 0.105,
+            "p": 0.91635
+          },
+          "lag13": {
+            "t": 0.1054,
+            "p": 0.916057
+          },
+          "lag26": {
+            "t": 0.1074,
+            "p": 0.914461
+          }
+        },
+        "mean_logrv_after_fomc": -12.1186,
+        "mean_logrv_other": -12.1891,
+        "p_value_holm": 1.0,
+        "holm_significant_0.05": false
+      },
+      {
+        "asset": "ZN=F",
+        "proxy": "parkinson",
+        "n_obs": 1901,
+        "n_fomc_lag_days": 59,
+        "beta_fomc_lag1": 0.150166,
+        "beta_pct_effect_on_vol": 16.203,
+        "hac_se": 0.121307,
+        "t_stat": 1.2379,
+        "p_value_raw": 0.215753,
+        "hac_lag": 13,
+        "resid_acf1": -0.1552,
+        "hac_lag_sensitivity": {
+          "lag1": {
+            "t": 1.207,
+            "p": 0.227421
+          },
+          "lag10": {
+            "t": 1.2312,
+            "p": 0.218232
+          },
+          "lag13": {
+            "t": 1.2379,
+            "p": 0.215753
+          },
+          "lag26": {
+            "t": 1.2621,
+            "p": 0.206925
+          }
+        },
+        "mean_logrv_after_fomc": -11.5576,
+        "mean_logrv_other": -11.8397,
+        "p_value_holm": 1.0,
+        "holm_significant_0.05": false
+      },
+      {
+        "asset": "ZN=F",
+        "proxy": "sqret",
+        "n_obs": 1869,
+        "n_fomc_lag_days": 59,
+        "beta_fomc_lag1": 0.588573,
+        "beta_pct_effect_on_vol": 80.142,
+        "hac_se": 0.259692,
+        "t_stat": 2.2664,
+        "p_value_raw": 0.023425,
+        "hac_lag": 13,
+        "resid_acf1": -0.0101,
+        "hac_lag_sensitivity": {
+          "lag1": {
+            "t": 2.2012,
+            "p": 0.027722
+          },
+          "lag10": {
+            "t": 2.2544,
+            "p": 0.024173
+          },
+          "lag13": {
+            "t": 2.2664,
+            "p": 0.023425
+          },
+          "lag26": {
+            "t": 2.321,
+            "p": 0.020284
+          }
+        },
+        "mean_logrv_after_fomc": -11.9476,
+        "mean_logrv_other": -12.5538,
+        "p_value_holm": 0.140553,
+        "holm_significant_0.05": false
+      }
+    ],
+    "block_bootstrap_parkinson": {
+      "TLT": {
+        "beta_mean": 0.090246,
+        "ci95": [
+          -0.132574,
+          0.320797
+        ],
+        "p_boot_two_sided": 0.446,
+        "block_len": 12,
+        "n_boot_effective": 2000,
+        "n_skipped_singular": 0
+      },
+      "IEF": {
+        "beta_mean": -0.147436,
+        "ci95": [
+          -0.39263,
+          0.098174
+        ],
+        "p_boot_two_sided": 0.242,
+        "block_len": 12,
+        "n_boot_effective": 2000,
+        "n_skipped_singular": 0
+      },
+      "ZN=F": {
+        "beta_mean": 0.154375,
+        "ci95": [
+          -0.087166,
+          0.389734
+        ],
+        "p_boot_two_sided": 0.216,
+        "block_len": 12,
+        "n_boot_effective": 2000,
+        "n_skipped_singular": 0
+      }
+    },
+    "scope_caveat": "Part 3 measures the COMBINED statement+presser next-day volatility effect. It does NOT and cannot separate the two shocks — that separation is the infeasible core question (Part 1)."
+  },
+  "figures": [
+    "K1658_fig1_intraday_casestudies.png",
+    "K1658_fig2_aggregate_fomc_rv.png"
+  ],
+  "verdict": "CONDITIONAL_PASS — core research question (separating statement vs presser shock) is INFEASIBLE with free data (N=2 intraday FOMC events, far below any power threshold). Reported honestly as the primary NULL/infeasible result. A lookahead-clean, HAC-robust, Holm-corrected aggregate FOMC->t+1 volatility test IS completed (Part 3) and 0/6 tests survive multiple-testing correction; it measures the COMBINED effect and does not separate the two shocks.",
+  "unresolved": "Core two-shock SEPARATION remains INFEASIBLE with free data (N=2 events). To answer it properly requires paid intraday Treasury-futures/SOFR tick history (>=1.5-4 yr of complete intraday coverage per Part1 power calc). Options-implied skew/tail outcomes are also out of scope (no free intraday IV surface). Codex primary-path review + worktree merge are handled by the followup fire (per brief)."
+}
