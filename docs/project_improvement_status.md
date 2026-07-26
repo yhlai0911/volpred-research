@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（physical two-Mac authority pair verified）**
+Last updated: **2026-07-26（Boss Report production owned-delivery verified；physical two-Mac authority pair verified）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -24,9 +24,11 @@ materialized runtime task 必須引用對應 planning issue。
 `volpred_read_owned_email_request` 讀回 immutable command 與 optional terminal receipt；
 既有 Operations Core request 不可被 legacy supersede。明確 legacy rollback 同樣取得
 Primary Authority，並以 deterministic Message-ID 先查 Gmail Sent。本機 PostgreSQL
-migration／transaction 與 Python regressions 已通過；production migration、一次
-live WorkItem→EffectRequest→outbox→Gmail Sent read-back及新自然 schedule receipt
-尚未完成，因此狀態為 **`contained`**。
+migration／transaction 與 Python regressions 已通過；production migration
+`20260726134809` 亦已部署並回讀 owner／ACL／transfer fence。live acceptance fire
+建立 WorkItem／EffectRequest／outbox attempt 1，Gmail Sent exact read-back 為
+delivered；同一 fire 重播只回相同 terminal receipt，attempt 仍為 1。新自然
+schedule receipt 與 sustained-clean 尚未完成，因此狀態仍為 **`contained`**。
 Phase 0／ADR-0001 的 module seam、interface、adapter 與第一個 TDD 切片，見
 `docs/operations_core_module_design.md`。
 2026-07-23 已完成 in-memory tracer（24 cases）及 private PostgreSQL 17 shadow adapter
@@ -2138,6 +2140,10 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   Cross-host shared request／terminal read、exact schema、canonical fire validator
   與 legacy Primary Authority／deterministic Gmail Sent replay 已進回歸；owner
   transfer 在該 PA lease 有效時會 fail closed，不能於 legacy SMTP 中途切 owner。
-- 🟡 目前為 **`contained`**：production migration、正式 owned delivery receipt、
-  Gmail Sent evidence 與下一個自然 schedule receipt 尚待回讀；五步 gate 未全過前
-  不稱完成。
+- ✅ production migration `20260726134809` 已部署；函式 owner／ACL、shared-read
+  schema、terminal replay 與 owner-transfer advisory fence 均由 production 回讀確認。
+- ✅ live acceptance fire 建立 WorkItem／EffectRequest／outbox attempt 1，settlement
+  為 delivered，帶 Gmail Sent evidence 與 Primary Authority ref；同 fire 再跑只回
+  相同 terminal receipt，effect 不變且 attempt_count 仍為 1。
+- 🟡 目前仍為 **`contained`**：下一個自然 schedule receipt 與 sustained-clean
+  尚待回讀；五步 gate 未全過前不稱完成。

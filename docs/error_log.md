@@ -3456,6 +3456,8 @@ canonical config 重算 generation／activation／cron slot／digest，假 fire 
 本機真 PostgreSQL 已驗證 migration 可由非 superuser executor 套用，request read 在
 settlement 前後分別回傳 null／exact terminal receipt；Python 回歸亦覆蓋跨 root reuse、
 schema drift、wrong generation 與非 cron minute。Production wrapper 已以 manifest
-lockstep 安裝；尚待 production migration、一次實際 WorkItem／EffectRequest／outbox／
-Gmail Sent read-back與新 schedule receipt，故仍只能標 **`contained`**，不能提前宣稱
-**`root_cause_fixed_and_verified`**。
+lockstep 安裝；production migration `20260726134809` 已部署並回讀 owner／ACL／fence。
+live acceptance fire 產生單一 WorkItem／EffectRequest／outbox attempt 1，Gmail Sent
+exact read-back 為 delivered；同一 fire 重播只回相同 effect／terminal receipt，
+attempt_count 仍為 1。因下一個自然 schedule receipt 與 sustained-clean 尚未回讀，
+故仍只能標 **`contained`**，不能提前宣稱 **`root_cause_fixed_and_verified`**。

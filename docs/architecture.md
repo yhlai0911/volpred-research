@@ -667,6 +667,13 @@
 > 因此兩台 Mac、owner rollback 與 process retry 都使用共享的 durable/external
 > evidence boundary，而不是各自的本機 dedupe 檔。
 >
+> Production migration `20260726134809` 已於 2026-07-26 部署並回讀函式 owner／ACL、
+> shared-read schema、terminal replay 與 owner-transfer advisory fence。live acceptance
+> fire 建立單一 WorkItem／EffectRequest／outbox attempt，Gmail Sent exact read-back
+> 為 delivered；同一 fire 重播只讀回相同 terminal receipt，attempt_count 維持 1。
+> 此證據完成寄送路徑驗收，但 ticket 仍待下一個自然 schedule receipt 與
+> sustained-clean，狀態為 `contained`。
+>
 > Process 若在 owned-email `begin` 後、settlement 前中斷，由 canonical
 > `owned_email_recovery` system schedule 每小時經
 > `check_alerts → run_due_jobs` 的單一 piggy-back owner 執行
