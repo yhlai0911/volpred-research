@@ -319,26 +319,27 @@ class ChangeDelivery:
 
             actuation = record.actuation
             if actuation is None:
-                self._check_verifier.verify(change_set)
-                actuation = self._actuator.commit(
-                    CommitActuation(
-                        proposal_sha256=change_set.proposal_sha256,
-                        work_item_id=change_set.work_item_id,
-                        work_item_version=change_set.work_item_version,
-                        commit_owner_generation=(
-                            normalized.commit_owner_generation
-                        ),
-                        work_lease_token=normalized.work_lease_token,
-                        primary_fencing_token=normalized.primary_fencing_token,
-                        repository=normalized.repository,
-                        expected_head=change_set.base_commit,
-                        exact_paths=change_set.exact_paths,
-                        content_hashes=change_set.content_hashes,
-                        message=normalized.message,
-                        actor=commit_worker_ref,
-                        workspace_ref=change_set.workspace_ref,
-                    )
+                actuation_command = CommitActuation(
+                    proposal_sha256=change_set.proposal_sha256,
+                    work_item_id=change_set.work_item_id,
+                    work_item_version=change_set.work_item_version,
+                    commit_owner_generation=(
+                        normalized.commit_owner_generation
+                    ),
+                    work_lease_token=normalized.work_lease_token,
+                    primary_fencing_token=normalized.primary_fencing_token,
+                    repository=normalized.repository,
+                    expected_head=change_set.base_commit,
+                    exact_paths=change_set.exact_paths,
+                    content_hashes=change_set.content_hashes,
+                    message=normalized.message,
+                    actor=commit_worker_ref,
+                    workspace_ref=change_set.workspace_ref,
                 )
+                actuation = self._actuator.recover(actuation_command)
+                if actuation is None:
+                    self._check_verifier.verify(change_set)
+                    actuation = self._actuator.commit(actuation_command)
                 actuation = _validate_actuation_receipt(
                     actuation,
                     change_set=change_set,

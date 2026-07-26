@@ -27867,7 +27867,7 @@
     "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "in_progress",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -27902,9 +27902,27 @@
         "to": "pending",
         "by": "hourly-slot-1-c789153b7308401daa5077575ffdda23",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-26T16:11:45.916210+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f"
+      },
+      {
+        "ts": "2026-07-26T16:11:49.731590+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f"
       }
     ],
-    "last_released_at": "2026-07-26T15:33:41.816453+00:00"
+    "last_released_at": "2026-07-26T15:33:41.816453+00:00",
+    "claimed_by": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
+    "claimed_at": "2026-07-26T16:11:45.916198+00:00",
+    "claim_session_id": "dd70faaea8cf",
+    "started_at": "2026-07-26T16:11:49.731574+00:00",
+    "compute_job_id": "agent-brief_k1658_39b53bf6-b574ac",
+    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection"
   },
   {
     "id": "K1659",
@@ -42528,7 +42546,7 @@
   {
     "id": "assign_76606948",
     "title": "PHASE-Z 卡住檔案 incident（c173ab459b5f36c7）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 71 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 71 班\n- tests/test_check_matt_skills_installation.py — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T143709021853Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T155527010646Z:<路徑>`",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 72 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 72 班\n- tests/test_check_matt_skills_installation.py — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T143709021853Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T155527010646Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T161855815960Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -42542,16 +42560,17 @@
         "tests/test_check_matt_skills_installation.py"
       ],
       "streaks": {
-        "storage/logs/trending_primary_source_verification.jsonl": 71,
-        "tests/test_check_matt_skills_installation.py": 4
+        "storage/logs/trending_primary_source_verification.jsonl": 72,
+        "tests/test_check_matt_skills_installation.py": 5
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260726T143709021853Z",
-        "refs/volpred/quarantine/20260726T155527010646Z"
+        "refs/volpred/quarantine/20260726T155527010646Z",
+        "refs/volpred/quarantine/20260726T161855815960Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-26T14:37:11.481543+00:00",
-      "last_seen_at": "2026-07-26T15:55:30.096195+00:00",
+      "last_seen_at": "2026-07-26T16:18:59.251695+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-26T15:39:17.065886+00:00",
       "deferred": [
@@ -42583,7 +42602,7 @@
     ],
     "derate_note": "2026-07-26 slot-2 fire: reconcile 已寫 payload.derates=false，slot_budget de-rate 解除（cap 2→6，open_incident=null 已驗）。incident 未關因兩檔仍 active/deferred（trending log idle 17.6h 在 grace 內、test 檔 3.4h 活躍），非無主殘留，工具刻意不 force-remove；待未來檔案清乾淨後 reconcile 機械關閉。release 回 pending。",
     "last_released_at": "2026-07-26T15:39:52.299308+00:00",
-    "updated_at": "2026-07-26T15:55:30.096195+00:00"
+    "updated_at": "2026-07-26T16:18:59.251695+00:00"
   },
   {
     "id": "K1415_article_general",
@@ -42642,7 +42661,7 @@
     "id": "K1719_article_general_v2",
     "title": "K1719: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1719 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'mixed/non-novel']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [K1719 verdict=MIXED reviewer=Codex GPT-5 primary-path (PASS, no blocking defects) artifact=experiments/k1719 task=ci-red-k1719-unrecorded-knowledge] ASIA-5 conservative daily volatility spillover ladder: does the previous local trading day's upstream information improve a target Canonical evidence: experiments/k1719/k1719_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -42659,13 +42678,14 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-26T15:35:56+00:00"
+    "created_at": "2026-07-26T15:35:56+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "K1420_article_general",
     "title": "K1420: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1420 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1420 [NULL]（原始 verdict: NULL_RESULT）：測試 3-state HMM regime-weighted conformal VaR（RWC）能否改善 SPY 與 0050.TW 的 next-day 5% VaR/ES。資料 2012-01-01至2025-12-31，OOS 自2023-01-01，rolling refit window=2000、conformal calibration window=500、每63日refit、HMM multistart=20，seed=42。SPY：RWC violation Canonical evidence: experiments/k1420/k1420_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -42681,6 +42701,114 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-26T15:36:00+00:00"
+    "created_at": "2026-07-26T15:36:00+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+  },
+  {
+    "id": "ci-red-30207277676",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "ci_incident_id": "ci-red-30207277676",
+    "ci_run_key": "30207277676:1",
+    "created_at": "2026-07-26T16:00:05.894651+00:00",
+    "title": "CI 紅燈修復（run 30207277676, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30207277676\nattempt: 1\nhead_sha: 668ed9a87\n偵測摘要（仍須讀完整 failed log）：2026-07-26T15:15:56.0101893Z ##[error]The test suite mutated repo state. Tests must write to tmp_path only.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30207277676 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-26T16:09:23.375685+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-124c1f7009354e779d11e4cb3bd6450e"
+      },
+      {
+        "ts": "2026-07-26T16:09:32.850771+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-124c1f7009354e779d11e4cb3bd6450e"
+      },
+      {
+        "ts": "2026-07-26T16:14:10.700931+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-124c1f7009354e779d11e4cb3bd6450e",
+        "note": "supervisor_kill_124c1f70"
+      }
+    ],
+    "last_released_at": "2026-07-26T16:14:10.700918+00:00",
+    "last_release_reason": "supervisor_kill_124c1f70"
+  },
+  {
+    "id": "assign_8bed8009",
+    "title": "解決長期無主的產物 `job:lazypack-mile_7c894f46-r2`（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `job:lazypack-mile_7c894f46-r2` — declared_outputs_not_yet_deliverable (namespace=compute_queue, first_seen=2026-07-26T11:00:57.105966+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-26T16:01:21.154249+00:00",
+    "payload": {
+      "held_paths": [
+        "job:lazypack-mile_7c894f46-r2"
+      ],
+      "held_reasons": {
+        "job:lazypack-mile_7c894f46-r2": "declared_outputs_not_yet_deliverable"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "K1443_article_general",
+    "title": "K1443: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1443 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1443 [CONDITIONAL_PASS]: BTC-USD/ETH-USD vs SPY 在 SPY 交易日 panel（2018-01-02～2026-04-16，2083 個價格觀測）上，用 log(r²) 波動衝擊 proxy 做 pairwise Granger（lag≤5, BIC選lag）、三變數 conditional VAR、pairwise DCC-GARCH（最近1000個SPY交易日）。主規格結果：BTC→SPY p=0.282、SPY→BTC p=0.160、ETH→SPY p=0.225、SPY→ETH p=0.094（ Canonical evidence: experiments/k1443/k1443_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1443",
+    "evidence_source_paths": [
+      "experiments/k1443/k1443_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1443/k1443_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-26T16:08:56+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+  },
+  {
+    "id": "K1439_article_general",
+    "title": "K1439: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1439 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: Codex source-code review of K1439 (USD regime conditioning of cross-asset RV: EEM/GLD/DBC/USO/DBB). VERDICT=CONDITIONAL_PASS, PUBLISHABLE_AS_IS=YES, LOOKAHEAD_RISK=NONE. Welch t-test + Bonferroni statistically correct; lookahead protection confirmed (bucket.shift(1) at k1439.py:1 Canonical evidence: experiments/k1439/k1439_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 1,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1439",
+    "evidence_source_paths": [
+      "experiments/k1439/k1439_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1439/k1439_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-26T16:09:20+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   }
 ]

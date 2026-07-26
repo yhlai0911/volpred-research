@@ -63,6 +63,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
+
 # Overridable so tests can exercise the real shell helper end-to-end without
 # stamping the live marker file (same convention as VOLPRED_HOME_DIR elsewhere).
 LAST_RUN_PATH = Path(
@@ -81,8 +87,9 @@ def _warn(msg: str) -> None:
     They already printed via `_log`, but audit_silent_fallbacks resolves call
     *names*, not one level of indirection, so a `_log(...)` before `return 0`
     reads as a silent fallback to the gate. `_warn*` is the auditor's sanctioned
-    name for a module-local helper. This script stays free of `volpred` imports
-    on purpose — it is a standalone marker-stamper invoked from shell wrappers.
+    name for a module-local helper. This standalone marker-stamper imports only
+    the stdlib-only canonical-write guard from `src/`; shell wrappers still
+    invoke it with plain system Python.
     """
     _log(f"WARN {msg}")
 
@@ -127,6 +134,7 @@ def _read(path: Path) -> dict:
 
 
 def _atomic_write(path: Path, data: dict) -> None:
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=str(path.parent), prefix=f".{path.name}.tmp")
     try:
@@ -171,6 +179,7 @@ def merge_last_run(updates: dict[str, str], *, path: Path = LAST_RUN_PATH) -> di
     """
     if not updates:
         return _read(path)
+    guard_canonical_write(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     lock_path = path.with_name(path.name + ".lock")
     with open(lock_path, "w", encoding="utf-8") as lock_fh:

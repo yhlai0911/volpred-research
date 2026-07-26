@@ -3478,6 +3478,141 @@ def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
     )
 
 
+def test_stale_change_set_creates_no_grant_and_allows_owner_rollback(
+    postgres_effect_dsn: str,
+    tmp_path: Path,
+) -> None:
+    repository = tmp_path / "stale-repository"
+    workspace = tmp_path / "stale-workspace"
+    repository.mkdir()
+    _git_text(repository, "init", "-b", "main")
+    _git_text(repository, "config", "user.name", "Change Delivery Test")
+    _git_text(
+        repository,
+        "config",
+        "user.email",
+        "change-delivery@example.invalid",
+    )
+    candidate_path = repository / "owned.txt"
+    candidate_path.write_text("legacy\n", encoding="utf-8")
+    _git_text(repository, "add", "owned.txt")
+    _git_text(repository, "commit", "-m", "base")
+    base_commit = _git_text(repository, "rev-parse", "HEAD")
+    _git_text(
+        repository,
+        "worktree",
+        "add",
+        "-b",
+        "stale-change",
+        str(workspace),
+        base_commit,
+    )
+    workspace_candidate = workspace / "owned.txt"
+    workspace_candidate.write_text("candidate\n", encoding="utf-8")
+    (repository / "unrelated.txt").write_text(
+        "concurrent\n",
+        encoding="utf-8",
+    )
+    _git_text(repository, "add", "unrelated.txt")
+    _git_text(repository, "commit", "-m", "concurrent unrelated change")
+
+    work_lease, running = _seed_running_work(
+        postgres_effect_dsn,
+        work_id="work-stale-change-shadow",
+        lease_token="work-lease-stale-change-shadow",
+        required_attestations=frozenset({"shadow-contract"}),
+    )
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            )
+        ),
+        token_factory=lambda: "primary-stale-change-shadow",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:stale-change-shadow",
+            lease_seconds=300,
+        )
+    )
+    delivery = build_postgres_owned_change_delivery(
+        lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+        clock=lambda: datetime.now(timezone.utc),
+        change_set_id_factory=lambda: "changeset-stale-change-shadow",
+        writer_cli=REPO_ROOT / "scripts" / "git_writer_lock.py",
+        check_commands={"shadow-contract": ("git", "diff", "--check")},
+    )
+    proposal = ChangeSetProposal(
+        idempotency_key="changeset:stale-change-shadow:attempt-1",
+        work_item_id=running.id,
+        work_item_version=running.version,
+        base_commit=base_commit,
+        workspace_ref=str(workspace),
+        exact_paths=("owned.txt",),
+        content_hashes=(
+            ContentHash(
+                path="owned.txt",
+                sha256=hashlib.sha256(
+                    workspace_candidate.read_bytes()
+                ).hexdigest(),
+            ),
+        ),
+        required_checks=(
+            CheckEvidence(
+                name="shadow-contract",
+                status="passed",
+                evidence_ref="pytest:stale-change-shadow",
+            ),
+        ),
+        author_ref="agent:change-author",
+        author_evidence_ref="execution:stale-change-shadow",
+    )
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="no exact prior ChangeSet commit",
+    ):
+        delivery.deliver(
+            OwnedChangeCommand(
+                proposal=proposal,
+                work_lease_token=work_lease.token,
+                primary_fencing_token=primary_lease.fencing_token,
+                repository=str(repository),
+                message="[codex] stale shadow ChangeSet",
+            )
+        )
+
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        grant_count = connection.execute(
+            """
+            SELECT count(*)
+            FROM volpred_ops.commit_authority_grants
+            WHERE work_item_id = %s
+            """,
+            (running.id,),
+        ).fetchone()[0]
+    assert grant_count == 0
+
+    primary.release(primary_lease)
+    owner_store = PostgresCommitOwnerStore(
+        connection_factory=lambda: _approver_connection(
+            postgres_effect_dsn
+        )
+    )
+    rolled_back = owner_store.transfer_owner(
+        expected_owner="operations_core",
+        expected_generation=2,
+        target_owner="legacy",
+        actor_ref="approver:stale-change-rollback",
+        reason="stale ChangeSet must not strand a grant",
+        rollback_of_generation=2,
+    )
+    assert (rolled_back.owner, rolled_back.generation) == ("legacy", 3)
+
+
 def test_change_set_service_rpc_creates_and_reads_token_redacted_view(
     postgres_effect_dsn: str,
 ) -> None:

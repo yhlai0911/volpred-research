@@ -53,6 +53,7 @@ CANONICAL_TARGETS: tuple[tuple[str, ...], ...] = (
     ("storage", "ops", "event_ledger"),
     ("storage", "ops", "tasks"),
     ("storage", "ops", "dispatch_state.json"),
+    ("storage", "ops", "cron_last_run.json"),
 )
 
 # Human-readable canonical writer ownership. Values are the exact operation
@@ -86,6 +87,12 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     },
     "scripts/continue_task_dispatch.py:_promote_starved_article_tasks": {"open-write": 1},
     "scripts/continue_task_dispatch.py:_sweep_cleared_dreaming_tasks": {"open-write": 1},
+    "scripts/cron_mark_last_run.py:_atomic_write": {
+        "mkdir": 1, "os.replace": 1, "unlink": 1,
+    },
+    "scripts/cron_mark_last_run.py:merge_last_run": {
+        "mkdir": 1, "open-write": 1,
+    },
     "scripts/daily_update.py:main": {"write_text": 1},
     "scripts/dedupe_next_tasks.py:main": {"open-write": 1},
     "scripts/dispatch_supervisor/state.py:_atomic_write_json": {"os.replace": 1, "unlink": 1},
@@ -192,6 +199,10 @@ GENERIC_OWNER_TARGETS: Mapping[str, frozenset[str]] = {
     "scripts/backfill_arc_dedup_metadata.py:_write_json_atomic": frozenset({"path"}),
     "scripts/check_alerts.py:_ci_close_pending_repair_tasks": frozenset(
         {"next_tasks_path"}
+    ),
+    "scripts/cron_mark_last_run.py:_atomic_write": frozenset({"path", "tmp"}),
+    "scripts/cron_mark_last_run.py:merge_last_run": frozenset(
+        {"path", "lock_path"}
     ),
     "scripts/dispatch_supervisor/state.py:_atomic_write_json": frozenset({"path"}),
     "scripts/dispatch_supervisor/state.py:_locked_state": frozenset({"path"}),

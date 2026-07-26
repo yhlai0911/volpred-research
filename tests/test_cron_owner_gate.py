@@ -67,10 +67,19 @@ def test_cron_lib_suppresses_stale_legacy_trigger_before_business_action(
     )
     wrapper.chmod(0o755)
 
+    marker = tmp_path / "cron_last_run.json"
     completed = subprocess.run(
         [str(wrapper)],
         cwd=ROOT,
-        env={**os.environ, "VOLPRED_REPO_ROOT": str(ROOT)},
+        env={
+            **os.environ,
+            "VOLPRED_REPO_ROOT": str(ROOT),
+            # Suppression stamps an exit-0 marker via cron_lib -> cron_mark_last_run.
+            # Redirect it to tmp so the subprocess never mutates the live marker
+            # ("suite mutated repo state" CI gate). The writer also fails loudly
+            # under VOLPRED_NO_CANONICAL_WRITE if this override is ever dropped.
+            "VOLPRED_CRON_MARKER_PATH": str(marker),
+        },
         capture_output=True,
         text=True,
         check=False,
@@ -79,6 +88,8 @@ def test_cron_lib_suppresses_stale_legacy_trigger_before_business_action(
     assert completed.returncode == 0
     assert not effect.exists()
     assert "legacy trigger suppressed" in completed.stdout
+    data = json.loads(marker.read_text(encoding="utf-8"))
+    assert "handoff_regen" in data
 
 
 def test_operations_core_execution_bypasses_legacy_gate(tmp_path: Path) -> None:

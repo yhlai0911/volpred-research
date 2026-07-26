@@ -26984,5 +26984,25 @@
     "owner": "hourly-slot-2-e8130db73b6942c78607ea1f32eb2d7f",
     "commit": null,
     "summary": "兩份 general drafts audience gate 編輯裁決（assign_6e554fae, P1 aged 100.5h）。\n\nK1253：依 canonical eligibility 判不可發表 — experiments/k1253/README §非目標明令「不發 published 文章只發草稿」，knowledge verdict=UNVERIFIED/needs_human，本質為環境還原後 end-to-end smoke test 非研究發現。移入 storage/drafts/archived/k1253_general_draft_smoketest_not_publishable.md（依 K1120 先例）+ archival header 記錄裁決 provenance；file 為 tracked+clean（orphan reaper 不碰）、未註冊 feed（release pool 不 intake），出口明確。\n\nK1711：research audience 已有覆蓋（arc-dedup=block_arc_dup）故不改分 research；general slot clean。gate 誤判源於 _ACADEMIC_KEYWORD_THRESHOLD=2 純關鍵字計數 — body 命中 K-id/QLIKE/MCS/bootstrap 四類。依 gate 設計意圖（禁 bare jargon，概念+數值以白話保留）將四類全數白話化，含圖 alt text 與 footer 檔名路徑；keyword hits 4→0、inferred=general。anti_ai_gate PASS、content-vs-source audit PASS（0 fabricated）、圖片 2 refs 上傳 HTTPS。正式發佈 mile_496e7dce（status=draft），lazypack async render 已 enqueue，release cron 渲染後釋出（補 throughput CRITICAL 2/6）。"
+  },
+  {
+    "timestamp": "2026-07-27T00:07:51+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci_red_cron_marker_leak_30207277676",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
+    "owner": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
+    "commit": null,
+    "summary": "修 CI-red（Test Suite gate「Assert the suite mutated no repo state」，run 30207277676，觸發本班 fire reason=requested:ci_red）。\n\n根因：commit 668ed9a87（22:37）在 scripts/cron_lib.sh owner-gate suppression 分支（rc=75）新增 `cron_emit_exit ${job} 0`，讓 legacy 觸發被 Operations Core 接管時補寫權威 exit-0 marker。但 tests/test_cron_owner_gate.py::test_cron_lib_suppresses_stale_legacy_trigger_before_business_action 以子行程跑 wrapper 時 cwd=ROOT 且**只設 VOLPRED_REPO_ROOT、未 override VOLPRED_CRON_MARKER_PATH**，於是 cron_emit_exit → cron_mark_last_run.py 寫進真實 storage/ops/cron_last_run.json + .lock，CI 的 repo-state 汙染 gate 因此紅燈。\n\n修法（雙層，fix-at-the-writer + test 隔離）：\n1) scripts/cron_mark_last_run.py 新增 stdlib `_guard_canonical_write(path)`（鏡射 volpred.canonical_write，因本 script 刻意 stdlib-only 不能 import volpred）：VOLPRED_NO_CANONICAL_WRITE=1 且 path 落在本 checkout storage/ 樹 → raise SystemExit（BaseException，production fail-open except Exception 無法吞掉）。呼叫點置於 merge_last_run 建 lock/檔之前，同時覆蓋 cron_lib 與 run_due_jobs（共用同一 merge_last_run）兩條寫入路徑。\n2) tests/test_cron_owner_gate.py 該測試子行程 env 補 VOLPRED_CRON_MARKER_PATH=tmp_path/cron_last_run.json，寫入導向 tmp，本機 guard-off 也隔離。\n\n驗證：CI guard env 下 test_cron_owner_gate.py 5 passed、test_run_due_jobs.py + test_cron_last_run_truth.py + test_job_liveness.py 53 passed；跑後 git status 無 cron_last_run.json 變動、無殘留 .lock、find storage -newer 無 leak；並確認 override 拿掉時 guard 正確 raise。\n\n改檔：scripts/cron_mark_last_run.py、tests/test_cron_owner_gate.py。commit 由 PHASE-Z 收；CI 綠燈待此修推上 main 後新 run 確認。"
+  },
+  {
+    "timestamp": "2026-07-27T00:16:49+08:00",
+    "task_type": "experiment",
+    "task_id": "K1658",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
+    "owner": "hourly-slot-1-39b53bf61ddc490fadcac0f7b029a35f",
+    "commit": null,
+    "summary": "K1658（FOMC statement shock vs press-conference shock 分布反應拆解）派工：建 worktree + 寫 brief + enqueue async agent job。dispatch starvation 保底席（本班必挑）+ Batch-drain 第二張（CI-red 修復後預算充足接續）。\n\n**動作**：\n- 建 registered linked worktree `.claude/worktrees/dispatch-slot-1-39b53bf6-k1658`（branch `wt/dispatch-slot-1-39b53bf6-k1658`），走 scripts/git_writer_lock.py run 序列化建立。\n- brief `/tmp/brief_k1658_39b53bf6.md`：TLT/IEF/ZN=F 為反應資產；用 SOFR/Treasury-futures intraday event window 分離 statement(14:00 ET)/presser(14:30 ET) 兩 shock；檢定二者對次日 RV / rate-vol skew proxy / tail jump 的差異；lookahead(signal.shift(1))/seed=42/多重比較 family 事前寫死；正交聲明 vs line 1425 文本可讀性。\n- enqueue `agent-brief_k1658_39b53bf6-b574ac`（opus/xhigh，timeout 5400s，result-artifact experiments/K1658/K1658_results.json，source-task-id K1658 → in_progress）。followup-task-type=experiment。\n\n**brief 帶進的三條硬紀律**：\n1. 資料可得性是第一風險：US intraday Treasury-futures 若不可得 → 兩 shock 無法分離 → 明令如實回報 NULL/infeasible，禁強行輸出。\n2. FOMC 事件小樣本（每年 8 次）：tail-jump 檢定 power 不足要降級 descriptive 並標示，禁過度宣稱。\n3. NULL 完全可接受且同樣有價值，followup brief 註明「不得因 NULL 退回重跑」，避免 reactive 調參。\n\n**狀態語意**：K1658 現為 in_progress，由 enqueue-agent 的 single-owner source-task-id collision gate 標記，代表「已派 async agent lane、在飛」而非 stall 殘留；由後續某班 fire 的 PHASE A 依 followup-brief 收件（驗三件套 → Codex primary-path review → merge worktree → 寫 knowledge）。\n\n改動：新增 worktree（branch wt/dispatch-slot-1-39b53bf6-k1658）；compute queue 新增 1 job。無 main-repo experiment 檔（async agent 產出）。"
   }
 ]

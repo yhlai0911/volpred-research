@@ -23,6 +23,10 @@ from . import (
     _proposal_sha256,
 )
 from ._change_store import ChangeSetRecord
+from ._change_settlement import (
+    CommitSettlement,
+    commit_settlement_sha256,
+)
 from ._git_actuator import CommitActuationReceipt
 
 
@@ -311,6 +315,18 @@ def _delivery_from_row(
         or receipt.actor != actuation.actor
         or receipt.status != "landed"
         or receipt.actuation_observed_at != actuation.observed_at
+        or receipt.settlement_ref
+        != f"change-delivery:{view.id}:{actuation.commit_sha}"
+        or receipt.settlement_sha256
+        != commit_settlement_sha256(
+            CommitSettlement(
+                change_set_id=view.id,
+                repository=receipt.repository,
+                work_lease_token="redacted-readback",
+                primary_fencing_token="redacted-readback",
+                actuation=actuation,
+            )
+        )
     ):
         raise ValueError("delivery receipt does not match actuation")
     return receipt
@@ -320,6 +336,10 @@ def _validate_actuation(
     view: ChangeSetView,
     receipt: CommitActuationReceipt,
 ) -> None:
+    expected_owner_ref = (
+        "commit-owner:git.commit:"
+        f"generation-{receipt.commit_owner_generation}"
+    )
     if (
         receipt.schema_version != "commit-actuation.v1"
         or receipt.proposal_sha256 != view.proposal_sha256
@@ -328,6 +348,7 @@ def _validate_actuation(
         or receipt.parent_sha != view.base_commit
         or receipt.exact_paths != view.exact_paths
         or receipt.status != "committed"
+        or receipt.commit_owner_ref != expected_owner_ref
     ):
         raise ValueError("actuation receipt does not match ChangeSet")
 

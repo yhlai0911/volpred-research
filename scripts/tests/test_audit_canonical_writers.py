@@ -317,6 +317,8 @@ def test_real_active_tree_matches_frozen_owner_inventory(auditor) -> None:
     # append_task_record gateway and owns no direct canonical mutation.
     formerly_missed_alias_writers = {
         "scripts/check_alerts.py:_ci_close_pending_repair_tasks",
+        "scripts/cron_mark_last_run.py:_atomic_write",
+        "scripts/cron_mark_last_run.py:merge_last_run",
         "scripts/extract_base64_images.py:main",
         "scripts/slim_feed_description.py:main",
         "src/api/routers/mirror.py:append_memory_file",

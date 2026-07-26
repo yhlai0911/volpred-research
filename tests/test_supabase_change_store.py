@@ -18,6 +18,11 @@ from volpred.ops.delivery import (
 from volpred.ops.delivery.supabase_change_store import (
     SupabaseChangeSetStore,
 )
+from volpred.ops.delivery._change_settlement import (
+    CommitSettlement,
+    commit_settlement_sha256,
+)
+from volpred.ops.delivery._git_actuator import CommitActuationReceipt
 
 
 pytestmark = pytest.mark.usefixtures(
@@ -128,6 +133,85 @@ def _row(**overrides: object) -> dict[str, object]:
         "delivery_commit_owner_ref": None,
         **overrides,
     }
+
+
+def _landed_row(**overrides: object) -> dict[str, object]:
+    view = _view()
+    authority_sha = "d" * 64
+    commit_sha = "e" * 40
+    actor = "commit-worker:operations-core"
+    repository = "/repo"
+    change_set_id = view.id
+    actuation = {
+        "schema_version": "commit-actuation.v1",
+        "proposal_sha256": view.proposal_sha256,
+        "work_item_id": view.work_item_id,
+        "work_item_version": view.work_item_version,
+        "commit_owner_generation": 2,
+        "commit_owner_ref": "commit-owner:git.commit:generation-2",
+        "authority_request_sha256": authority_sha,
+        "work_lease_ref": "work-lease:work-1:v3",
+        "primary_authority_ref": "primary-authority:test:epoch-1",
+        "commit_sha": commit_sha,
+        "parent_sha": view.base_commit,
+        "exact_paths": list(view.exact_paths),
+        "actor": actor,
+        "status": "committed",
+        "observed_at": "2026-07-24T08:00:01+00:00",
+    }
+    actuation_receipt = CommitActuationReceipt(
+        schema_version=str(actuation["schema_version"]),
+        proposal_sha256=str(actuation["proposal_sha256"]),
+        work_item_id=str(actuation["work_item_id"]),
+        work_item_version=int(actuation["work_item_version"]),
+        commit_owner_generation=int(
+            actuation["commit_owner_generation"]
+        ),
+        commit_owner_ref=str(actuation["commit_owner_ref"]),
+        authority_request_sha256=str(
+            actuation["authority_request_sha256"]
+        ),
+        work_lease_ref=str(actuation["work_lease_ref"]),
+        primary_authority_ref=str(actuation["primary_authority_ref"]),
+        commit_sha=str(actuation["commit_sha"]),
+        parent_sha=str(actuation["parent_sha"]),
+        exact_paths=tuple(actuation["exact_paths"]),
+        actor=str(actuation["actor"]),
+        status=str(actuation["status"]),
+        observed_at=str(actuation["observed_at"]),
+    )
+    settlement_ref = f"change-delivery:{change_set_id}:{commit_sha}"
+    row = _row(
+        status="landed",
+        land_command_sha256="f" * 64,
+        actuation_receipt=actuation,
+        delivery_schema_version="change-delivery-receipt.v1",
+        delivery_authority_request_sha256=authority_sha,
+        delivery_work_lease_ref=actuation["work_lease_ref"],
+        delivery_primary_authority_ref=actuation["primary_authority_ref"],
+        delivery_repository=repository,
+        delivery_commit_sha=commit_sha,
+        delivery_parent_sha=view.base_commit,
+        delivery_exact_paths=list(view.exact_paths),
+        delivery_commit_worker_ref=actor,
+        delivery_status="landed",
+        delivery_actuation_observed_at=actuation["observed_at"],
+        delivery_settled_at="2026-07-24T08:00:02+00:00",
+        delivery_settlement_ref=settlement_ref,
+        delivery_settlement_sha256=commit_settlement_sha256(
+            CommitSettlement(
+                change_set_id=change_set_id,
+                repository=repository,
+                work_lease_token="unused",
+                primary_fencing_token="unused",
+                actuation=actuation_receipt,
+            )
+        ),
+        delivery_commit_owner_generation=2,
+        delivery_commit_owner_ref="commit-owner:git.commit:generation-2",
+    )
+    row.update(overrides)
+    return row
 
 
 def _store() -> SupabaseChangeSetStore:
@@ -270,6 +354,29 @@ def test_rpc_readback_rejects_malformed_change_set_records(
 ) -> None:
     malformed = deepcopy(_row())
     malformed[field] = value
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *args, **kwargs: _Response(malformed),
+    )
+
+    with pytest.raises(RuntimeError, match="malformed ChangeSet record"):
+        _store().load("change-1")
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("delivery_settlement_ref", "bogus-ref"),
+        ("delivery_settlement_sha256", "a" * 64),
+        ("delivery_commit_owner_ref", "arbitrary-owner-ref"),
+    ],
+)
+def test_rpc_readback_rejects_derived_delivery_identity_drift(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+) -> None:
+    malformed = _landed_row(**{field: value})
     monkeypatch.setattr(
         "volpred.ops.delivery.supabase_rpc.request.urlopen",
         lambda *args, **kwargs: _Response(malformed),

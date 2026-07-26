@@ -108,10 +108,34 @@ class CommitAuthorityGrant:
     primary_authority_ref: str
 
 
+@dataclass(frozen=True)
+class CommitAuthorityAbandonment:
+    request_sha256: str
+    reason: str
+    abandoned_at: str
+
+
+@dataclass(frozen=True)
+class _RecoveredCommit:
+    commit_sha: str
+    parent_sha: str
+    observed_at: str
+
+
 class CommitAuthority(Protocol):
     """Verify both delivery fences against canonical coordination state."""
 
     def authorize(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant: ...
+
+    def recover(self, request: CommitAuthorityRequest) -> CommitAuthorityGrant: ...
+
+    def abandon(
+        self,
+        request: CommitAuthorityRequest,
+        grant: CommitAuthorityGrant,
+        *,
+        reason: str,
+    ) -> CommitAuthorityAbandonment: ...
 
 
 class GitCommitActuator:
@@ -136,18 +160,6 @@ class GitCommitActuator:
         normalized = _normalize_command(command)
         repository = Path(normalized.repository)
         authority_request = _authority_request(normalized)
-        try:
-            authority_grant = self._authority.authorize(authority_request)
-        except CommitActuatorError:
-            raise
-        except Exception as exc:
-            raise CommitActuatorBlocked(
-                "commit authority could not authorize the request"
-            ) from exc
-        authority_grant = _validate_authority_grant(
-            authority_grant,
-            request=authority_request,
-        )
 
         observed_head = _git_text(
             repository,
@@ -156,24 +168,30 @@ class GitCommitActuator:
             "HEAD^{commit}",
         )
         if observed_head != normalized.expected_head:
-            recovered = _recover_prior_commit(
+            recovered = _find_prior_commit(
                 repository,
                 command=normalized,
                 authority_request=authority_request,
-                authority_grant=authority_grant,
                 observed_head=observed_head,
             )
-            if recovered is not None:
-                return recovered
-            raise CommitActuatorBlocked(
-                "expected HEAD fence failed and no exact prior ChangeSet "
-                "commit was found"
+            if recovered is None:
+                raise CommitActuatorBlocked(
+                    "expected HEAD fence failed and no exact prior ChangeSet "
+                    "commit was found"
+                )
+            authority_grant = self._recover_request(authority_request)
+            return _recovery_receipt(
+                command=normalized,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                recovered=recovered,
             )
 
         if not self._writer_cli.is_file():
             raise CommitActuatorBlocked(
                 f"canonical Git writer CLI is unavailable: {self._writer_cli}"
             )
+        authority_grant = self._authorize_request(authority_request)
 
         argv = [
             self._python_executable,
@@ -209,21 +227,46 @@ class GitCommitActuator:
                 timeout=self._timeout_s,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
-            raise CommitActuatorBlocked(
+            failure = CommitActuatorBlocked(
                 f"canonical Git writer could not complete: {exc}"
-            ) from exc
+            )
+            return self._recover_or_abandon(
+                command=normalized,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                failure=failure,
+            )
         detail = (proc.stderr or proc.stdout or "").strip()[-600:]
         if proc.returncode == 75:
-            raise CommitActuatorBusy(detail or "canonical Git writer is busy")
+            return self._recover_or_abandon(
+                command=normalized,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                failure=CommitActuatorBusy(
+                    detail or "canonical Git writer is busy"
+                ),
+            )
         if proc.returncode != 0:
-            raise CommitActuatorBlocked(
-                detail or f"canonical Git writer exited {proc.returncode}"
+            return self._recover_or_abandon(
+                command=normalized,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                failure=CommitActuatorBlocked(
+                    detail
+                    or f"canonical Git writer exited {proc.returncode}"
+                ),
             )
 
         commit_sha = _git_text(repository, "rev-parse", "--verify", "HEAD^{commit}")
         if commit_sha == normalized.expected_head:
-            raise CommitActuatorBlocked(
-                "canonical Git writer returned success without creating a commit"
+            return self._recover_or_abandon(
+                command=normalized,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                failure=CommitActuatorBlocked(
+                    "canonical Git writer returned success without creating "
+                    "a commit"
+                ),
             )
         parent_sha = _verify_commit(
             repository,
@@ -255,15 +298,132 @@ class GitCommitActuator:
             observed_at=observed_at.isoformat(),
         )
 
+    def recover(
+        self,
+        command: CommitActuation,
+    ) -> CommitActuationReceipt | None:
+        """Read back an exact prior writer commit without its workspace."""
 
-def _recover_prior_commit(
+        normalized = _normalize_command(command)
+        repository = Path(normalized.repository)
+        observed_head = _git_text(
+            repository,
+            "rev-parse",
+            "--verify",
+            "HEAD^{commit}",
+        )
+        if observed_head == normalized.expected_head:
+            return None
+        authority_request = _authority_request(normalized)
+        recovered = _find_prior_commit(
+            repository,
+            command=normalized,
+            authority_request=authority_request,
+            observed_head=observed_head,
+        )
+        if recovered is None:
+            raise CommitActuatorBlocked(
+                "expected HEAD fence failed and no exact prior ChangeSet "
+                "commit was found"
+            )
+        authority_grant = self._recover_request(authority_request)
+        return _recovery_receipt(
+            command=normalized,
+            authority_request=authority_request,
+            authority_grant=authority_grant,
+            recovered=recovered,
+        )
+
+    def _authorize_request(
+        self,
+        authority_request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant:
+        try:
+            authority_grant = self._authority.authorize(authority_request)
+        except CommitActuatorError:
+            raise
+        except Exception as exc:
+            raise CommitActuatorBlocked(
+                "commit authority could not authorize the request"
+            ) from exc
+        return _validate_authority_grant(
+            authority_grant,
+            request=authority_request,
+        )
+
+    def _recover_request(
+        self,
+        authority_request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant:
+        try:
+            authority_grant = self._authority.recover(authority_request)
+        except CommitActuatorError:
+            raise
+        except Exception as exc:
+            raise CommitActuatorBlocked(
+                "commit authority could not recover the original grant"
+            ) from exc
+        return _validate_authority_grant(
+            authority_grant,
+            request=authority_request,
+        )
+
+    def _recover_or_abandon(
+        self,
+        *,
+        command: CommitActuation,
+        authority_request: CommitAuthorityRequest,
+        authority_grant: CommitAuthorityGrant,
+        failure: CommitActuatorError,
+    ) -> CommitActuationReceipt:
+        repository = Path(command.repository)
+        observed_head = _git_text(
+            repository,
+            "rev-parse",
+            "--verify",
+            "HEAD^{commit}",
+        )
+        recovered = None
+        if observed_head != command.expected_head:
+            recovered = _find_prior_commit(
+                repository,
+                command=command,
+                authority_request=authority_request,
+                observed_head=observed_head,
+            )
+        if recovered is not None:
+            return _recovery_receipt(
+                command=command,
+                authority_request=authority_request,
+                authority_grant=authority_grant,
+                recovered=recovered,
+            )
+        try:
+            abandonment = self._authority.abandon(
+                authority_request,
+                authority_grant,
+                reason="canonical_writer_terminal_failure",
+            )
+        except Exception as exc:
+            raise CommitActuatorBlocked(
+                "canonical Git writer failed and its authority grant could "
+                "not be terminally abandoned"
+            ) from exc
+        _validate_abandonment(
+            abandonment,
+            request=authority_request,
+            reason="canonical_writer_terminal_failure",
+        )
+        raise failure
+
+
+def _find_prior_commit(
     repository: Path,
     *,
     command: CommitActuation,
     authority_request: CommitAuthorityRequest,
-    authority_grant: CommitAuthorityGrant,
     observed_head: str,
-) -> CommitActuationReceipt | None:
+) -> _RecoveredCommit | None:
     """Recover an exact writer commit whose process return was lost.
 
     The canonical writer can only have created the first mainline child of the
@@ -307,6 +467,20 @@ def _recover_prior_commit(
     ):
         return None
 
+    return _RecoveredCommit(
+        commit_sha=commit_sha,
+        parent_sha=parent_sha,
+        observed_at=observed_at.isoformat(),
+    )
+
+
+def _recovery_receipt(
+    *,
+    command: CommitActuation,
+    authority_request: CommitAuthorityRequest,
+    authority_grant: CommitAuthorityGrant,
+    recovered: _RecoveredCommit,
+) -> CommitActuationReceipt:
     return CommitActuationReceipt(
         schema_version=_RECEIPT_SCHEMA,
         proposal_sha256=command.proposal_sha256,
@@ -317,12 +491,12 @@ def _recover_prior_commit(
         authority_request_sha256=authority_request.request_sha256,
         work_lease_ref=authority_grant.work_lease_ref,
         primary_authority_ref=authority_grant.primary_authority_ref,
-        commit_sha=commit_sha,
-        parent_sha=parent_sha,
+        commit_sha=recovered.commit_sha,
+        parent_sha=recovered.parent_sha,
         exact_paths=command.exact_paths,
         actor=command.actor,
         status="committed",
-        observed_at=observed_at.isoformat(),
+        observed_at=recovered.observed_at,
     )
 
 
@@ -606,6 +780,34 @@ def _validate_authority_grant(
         raise CommitActuatorBlocked(
             "commit authority returned an invalid grant"
         ) from exc
+
+
+def _validate_abandonment(
+    abandonment: CommitAuthorityAbandonment,
+    *,
+    request: CommitAuthorityRequest,
+    reason: str,
+) -> CommitAuthorityAbandonment:
+    if not isinstance(abandonment, CommitAuthorityAbandonment):
+        raise CommitActuatorBlocked(
+            "commit authority returned an invalid abandonment receipt"
+        )
+    try:
+        abandoned_at = datetime.fromisoformat(abandonment.abandoned_at)
+    except (TypeError, ValueError) as exc:
+        raise CommitActuatorBlocked(
+            "commit authority abandonment timestamp is invalid"
+        ) from exc
+    if (
+        abandonment.request_sha256 != request.request_sha256
+        or abandonment.reason != reason
+        or abandoned_at.tzinfo is None
+        or abandoned_at.utcoffset() is None
+    ):
+        raise CommitActuatorBlocked(
+            "commit authority abandonment receipt drifted"
+        )
+    return abandonment
 
 
 def _git_text(repository: Path, *args: str) -> str:

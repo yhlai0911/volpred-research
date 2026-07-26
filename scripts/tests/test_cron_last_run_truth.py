@@ -31,6 +31,8 @@ from pathlib import Path
 
 import pytest
 
+from volpred.canonical_write import CanonicalWriteBlocked
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
@@ -156,6 +158,25 @@ def test_mark_last_run_is_atomic_leaving_no_partial_file(tmp_path: Path) -> None
     assert set(data) == {"j", "_meta"}  # scope stamp rides along on every write
     leftovers = [p.name for p in tmp_path.iterdir() if p.name.startswith(".cron_last_run")]
     assert not [n for n in leftovers if "tmp" in n], f"temp file left behind: {leftovers}"
+
+
+def test_merge_last_run_blocks_canonical_state_when_test_guard_is_armed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    marker = ROOT / "storage" / "ops" / "cron_last_run.guard-regression.json"
+    lock = marker.with_name(marker.name + ".lock")
+    assert not marker.exists()
+    assert not lock.exists()
+    monkeypatch.setenv("VOLPRED_NO_CANONICAL_WRITE", "1")
+
+    with pytest.raises(CanonicalWriteBlocked):
+        merge_last_run(
+            {"j": "2026-07-26T00:00:00+00:00"},
+            path=marker,
+        )
+
+    assert not marker.exists()
+    assert not lock.exists()
 
 
 # ── job id comes from the wrapper PATH, never the log label ──────────────────
