@@ -24,10 +24,11 @@ Denial recording never sends mail inline — several callers hold the
 next_tasks.json flock at denial time and SMTP under that lock would stall
 dispatch.
 
-Escalation tasks (``source == "incident_escalation"``) are deliberately NOT
-counted or capped: escalation is the loop's exit (one per incident, uniqueness
-guaranteed by the escalated state).  Capping the exit could strand an incident
-with no path to a human.
+Escalation and aggregate adjudication tasks (``source`` is
+``incident_escalation`` or ``incident_adjudication``) are deliberately NOT
+counted or capped: both are loop exits (one per incident episode, uniqueness
+guaranteed by incident state).  Capping an exit could strand durable work with
+no path to a human.
 """
 
 from __future__ import annotations
@@ -56,6 +57,8 @@ AUTO_REMEDIATION_SOURCES = frozenset(
     }
 )
 
+INCIDENT_ADJUDICATION_SOURCE = "incident_adjudication"
+
 #: Id prefixes of the historical auto-remediation task families — needed so
 #: the rolling count sees rows created by the pre-store paths too.
 AUTO_REMEDIATION_ID_PREFIXES = (
@@ -77,7 +80,7 @@ def is_auto_remediation(record: dict[str, Any]) -> bool:
     if not isinstance(record, dict):
         return False
     source = str(record.get("source") or "")
-    if source == "incident_escalation":
+    if source in {"incident_escalation", INCIDENT_ADJUDICATION_SOURCE}:
         return False  # the loop's exit is never capped (module docstring)
     if record.get("internal_alert_watermark") is True:
         return False  # bookkeeping receipt, not a disposition

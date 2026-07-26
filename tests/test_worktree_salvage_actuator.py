@@ -82,7 +82,7 @@ def test_salvage_actuator_opens_one_aggregate_task_for_all_held(tmp_path: Path) 
     assert task["status"] == "pending"
     assert task["priority"] == 3
     assert task["dispatch_lane"] == "main_thread"
-    assert task["source"] == "incident_router"
+    assert task["source"] == "incident_adjudication"
     assert "merge_worktree.sh" in task["description"]  # exit path is spelled out
     assert "incidents.json" in task["description"]  # instances live in the store
 

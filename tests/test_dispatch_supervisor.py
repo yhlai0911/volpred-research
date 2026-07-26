@@ -3286,8 +3286,14 @@ def test_workspace_allocate_creates_registered_worktree(tmp_path: Path) -> None:
                           capture_output=True, text=True, check=True).stdout.strip()
     assert ws["base_sha"] == head
     events = _ws_receipt_events(repo)
-    assert [e["event"] for e in events] == ["allocated"]
-    assert events[0]["branch"] == ws["branch"]
+    assert [e["event"] for e in events] == ["allocation_intent", "allocated"]
+    allocated = events[1]
+    assert allocated["branch"] == ws["branch"]
+    assert isinstance(allocated["free_gib_after"], float)
+    assert isinstance(allocated["disk_delta_gib"], float)
+    assert isinstance(allocated["disk_bytes"], int)
+    assert allocated["wall_start"] <= allocated["wall_end"]
+    assert allocated["base_sha"] == ws["base_sha"]
     assert isinstance(ws["setup_s"], float)
 
 
@@ -3319,6 +3325,189 @@ def test_workspace_allocate_respects_caps(tmp_path: Path) -> None:
     assert reasons == ["active_cap", "total_cap"]
 
 
+def test_workspace_capacity_ignores_worktrees_owned_by_other_dispatch_lanes(
+    tmp_path: Path,
+) -> None:
+    """The isolation cap covers this module's live workspaces, not every
+    dispatch-named worktree in the repository.
+
+    Experiment/compute lanes append a task slug to the same historical path
+    prefix. Counting those paths made the pilot permanently hit ``total_cap``
+    and silently fall back to the shared checkout.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    foreign = (
+        repo / ".claude" / "worktrees" / "dispatch-slot-2-deadbeef-k9999"
+    )
+    subprocess.run(
+        [
+            "git", "-C", str(repo), "worktree", "add", "-q", "-b",
+            "wt/dispatch-slot-2-deadbeef-k9999", str(foreign), "HEAD",
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+    ws = _ws_allocate(
+        repo,
+        job_id="a" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+
+    assert ws is not None
+    assert Path(ws["path"]).name == "dispatch-slot-1-aaaaaaaa"
+    assert not [
+        event
+        for event in _ws_receipt_events(repo)
+        if event.get("reason") == "total_cap"
+    ]
+
+
+def test_workspace_capacity_counts_only_receipt_declared_ownership(
+    tmp_path: Path,
+) -> None:
+    """An allocator receipt, not a path regex, is the ownership proof."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    owned_name = "dispatch-slot-2-deadbeef-k9999"
+    owned = repo / ".claude" / "worktrees" / owned_name
+    subprocess.run(
+        [
+            "git", "-C", str(repo), "worktree", "add", "-q", "-b",
+            f"worktree-{owned_name}", str(owned), "HEAD",
+        ],
+        check=True,
+        capture_output=True,
+    )
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "allocated",
+            "workspace": owned_name,
+            "path": str(owned),
+            "branch": f"worktree-{owned_name}",
+        },
+    )
+
+    ws = _ws_allocate(
+        repo,
+        job_id="a" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+
+    assert ws is None
+    assert any(
+        event.get("reason") == "total_cap"
+        for event in _ws_receipt_events(repo)
+    )
+
+
+def test_workspace_allocated_receipt_failure_has_durable_cleanup(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    real_append = workspace._append_receipt
+
+    def fail_allocated(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "allocated":
+            return False
+        return real_append(root, payload)
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_allocated)
+    ws = _ws_allocate(repo)
+
+    assert ws is None
+    path = repo / ".claude" / "worktrees" / "dispatch-slot-1-aaaaaaaa"
+    assert not path.exists()
+    assert [event["event"] for event in _ws_receipt_events(repo)] == [
+        "allocation_intent",
+        "allocation_aborted",
+    ]
+
+
+def test_workspace_registration_failure_never_mutates_unverified_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    real_registration_check = workspace.is_registered_linked_worktree
+    monkeypatch.setattr(
+        workspace,
+        "is_registered_linked_worktree",
+        lambda *_args, **_kwargs: False,
+    )
+
+    swept = workspace.sweep_orphan_workspaces(
+        repo_root=repo,
+        protected_job_ids=[],
+        queue_path=queue,
+    )
+
+    assert swept[0]["reason"] == "registration_verify_failed"
+    assert swept[0]["remediation"]["task_id"]
+    assert Path(ws["path"]).exists()
+    assert not any(
+        event["event"] == "released" for event in _ws_receipt_events(repo)
+    )
+    monkeypatch.setattr(
+        workspace,
+        "is_registered_linked_worktree",
+        real_registration_check,
+    )
+    replacement = _ws_allocate(
+        repo,
+        job_id="b" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+    assert replacement is None
+    assert any(
+        event.get("reason") == "total_cap"
+        for event in _ws_receipt_events(repo)
+    )
+
+
+def test_workspace_replaced_by_independent_repo_is_never_executed_or_removed(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    subprocess.run(
+        ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+        check=True,
+        capture_output=True,
+    )
+    wt.mkdir(parents=True)
+    subprocess.run(["git", "-C", str(wt), "init", "-q"], check=True)
+    sentinel = wt / "independent-only.txt"
+    sentinel.write_text("do not touch\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="orphaned",
+        queue_path=queue,
+    )
+
+    assert out["reason"] == "registration_verify_failed"
+    assert out["checkpoint"]["released"] is False
+    assert sentinel.read_text(encoding="utf-8") == "do not touch\n"
+    assert wt.exists()
+
+
 def test_workspace_finalize_empty_removed(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -3335,7 +3524,81 @@ def test_workspace_finalize_empty_removed(tmp_path: Path) -> None:
         capture_output=True, text=True, check=False,
     )
     assert branch_probe.returncode != 0  # branch cleaned up with the worktree
-    assert [e["event"] for e in _ws_receipt_events(repo)] == ["allocated", "finalized"]
+    assert [e["event"] for e in _ws_receipt_events(repo)] == [
+        "allocation_intent",
+        "allocated",
+        "terminal_intent",
+        "finalized",
+    ]
+
+
+def test_workspace_empty_intent_must_persist_before_remove(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    real_append = workspace._append_receipt
+
+    def fail_terminal_intent(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "terminal_intent":
+            return False
+        return real_append(root, payload)
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_terminal_intent)
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["reason"] == "empty_intent_not_durable"
+    assert Path(ws["path"]).exists()
+
+
+def test_workspace_empty_terminal_receipt_recovers_after_remove(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    real_append = workspace._append_receipt
+    fail_once = {"armed": True}
+
+    def fail_first_finalized(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "finalized" and fail_once["armed"]:
+            fail_once["armed"] = False
+            return False
+        return real_append(root, payload)
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_first_finalized)
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+    assert first["disposition"] == "empty_removed"
+    assert not Path(ws["path"]).exists()
+
+    second = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert second["disposition"] == "empty_removed"
+    assert second["replayed"] is True
+    assert len([
+        event for event in _ws_receipt_events(repo)
+        if event["event"] == "finalized"
+    ]) == 1
 
 
 def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
@@ -3357,6 +3620,11 @@ def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
 
     def fake_merge(**kwargs):
         merges.append(kwargs["workspace"]["name"])
+        subprocess.run(
+            ["git", "-C", str(repo), "merge", "--ff-only", ws["branch"]],
+            check=True,
+            capture_output=True,
+        )
         return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
 
     out = workspace.finalize_workspace(
@@ -3368,12 +3636,383 @@ def test_workspace_finalize_gate_green_merges(tmp_path: Path) -> None:
     assert out["gate"]["verdict"] == "green"
 
 
-def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
+def test_workspace_merge_false_success_never_emits_merged(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "not-integrated.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "not-integrated.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "candidate"],
+        check=True,
+    )
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=queue,
+        gate_fn=lambda **_kwargs: {
+            "verdict": "green",
+            "rc": 0,
+            "targets": ["tests/test_x.py"],
+            "duration_s": 0.1,
+        },
+        merge_fn=lambda **_kwargs: {
+            "ok": True,
+            "rc": 0,
+            "reason": "merged",
+            "output_tail": "",
+        },
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "merge_readback_failed"
+    assert not any(
+        event.get("event") == "finalized"
+        and event.get("disposition") == "merged"
+        for event in _ws_receipt_events(repo)
+    )
+
+
+def test_workspace_false_success_without_path_creates_recovery_ref(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "lost-path.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "lost-path.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "candidate"],
+        check=True,
+    )
+    gated_sha = subprocess.run(
+        ["git", "-C", str(wt), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    def false_success_and_delete(**_kwargs):
+        subprocess.run(
+            ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "branch", "-D", ws["branch"]],
+            check=True,
+            capture_output=True,
+        )
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=queue,
+        gate_fn=lambda **_kwargs: {
+            "verdict": "green",
+            "rc": 0,
+            "targets": ["tests/test_x.py"],
+            "duration_s": 0.1,
+        },
+        merge_fn=false_success_and_delete,
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "merge_readback_failed"
+    recovery_branch = out["branch"]
+    assert recovery_branch.startswith(f"recovery-{ws['name']}-")
+    recovered_sha = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", recovery_branch],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert recovered_sha == gated_sha
+    assert out["remediation"]["task_id"]
+
+
+@pytest.mark.parametrize("failure_mode", ["queue", "released_receipt"])
+def test_workspace_missing_path_recovery_exit_retries_until_durable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure_mode: str,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "retry.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "retry.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "candidate"],
+        check=True,
+    )
+    real_append = workspace._append_receipt
+    fail_once = {"armed": failure_mode == "released_receipt"}
+
+    def fail_first_release(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "released" and fail_once["armed"]:
+            fail_once["armed"] = False
+            return False
+        return real_append(root, payload)
+
+    if failure_mode == "released_receipt":
+        monkeypatch.setattr(workspace, "_append_receipt", fail_first_release)
+    invalid_queue = tmp_path / "queue-directory"
+    invalid_queue.mkdir()
+    first_queue = invalid_queue if failure_mode == "queue" else queue
+
+    def delete_without_integrating(**_kwargs):
+        subprocess.run(
+            ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "branch", "-D", ws["branch"]],
+            check=True,
+            capture_output=True,
+        )
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=first_queue,
+        gate_fn=lambda **_kwargs: {
+            "verdict": "green",
+            "rc": 0,
+            "targets": ["tests/test_x.py"],
+            "duration_s": 0.1,
+        },
+        merge_fn=delete_without_integrating,
+    )
+    assert first["disposition"] == "reconcile_pending"
+    assert first["reason"] in {
+        "remediation_not_durable",
+        "release_receipt_failed",
+    }
+
+    second = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=queue,
+    )
+
+    assert second["disposition"] == "remediation_opened"
+    assert second["checkpoint"]["released"] is True
+    assert second["remediation"]["task_id"]
+
+
+def test_workspace_merged_terminal_receipt_recovers_from_gated_head(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "merged.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "merged.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "candidate"],
+        check=True,
+    )
+    real_append = workspace._append_receipt
+    fail_once = {"armed": True}
+
+    def fail_first_finalized(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "finalized" and fail_once["armed"]:
+            fail_once["armed"] = False
+            return False
+        return real_append(root, payload)
+
+    def merge_and_cleanup(**_kwargs):
+        subprocess.run(
+            ["git", "-C", str(repo), "merge", "--ff-only", ws["branch"]],
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "worktree", "remove", str(wt)],
+            check=True,
+            capture_output=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(repo), "branch", "-d", ws["branch"]],
+            check=True,
+            capture_output=True,
+        )
+        return {"ok": True, "rc": 0, "reason": "merged", "output_tail": ""}
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_first_finalized)
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+        gate_fn=lambda **_kwargs: {
+            "verdict": "green",
+            "rc": 0,
+            "targets": ["tests/test_x.py"],
+            "duration_s": 0.1,
+        },
+        merge_fn=merge_and_cleanup,
+    )
+    assert first["disposition"] == "merged"
+    assert not wt.exists()
+
+    second = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert second["disposition"] == "merged"
+    assert second["gated_head_sha"] == first["gated_head_sha"]
+    assert second["replayed"] is True
+
+
+def test_workspace_reconciles_integrated_head_before_empty_classification(
+    tmp_path: Path,
+) -> None:
+    """Crash after merge but before cleanup retains the merged lineage."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "integrated.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "integrated.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "candidate"],
+        check=True,
+    )
+    head_sha = subprocess.run(
+        ["git", "-C", str(wt), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "terminal_intent",
+            "workspace": ws["name"],
+            "branch": ws["branch"],
+            "target_disposition": "merged",
+            "head_sha": head_sha,
+        },
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "merge", "--ff-only", ws["branch"]],
+        check=True,
+        capture_output=True,
+    )
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert out["disposition"] == "merged"
+    assert out["gated_head_sha"] == head_sha
+    assert out["replayed"] is True
+    assert not wt.exists()
+
+
+def test_workspace_stale_merged_intent_never_cleans_advanced_branch(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "candidate.py").write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "candidate.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "gated candidate"],
+        check=True,
+    )
+    gated_sha = subprocess.run(
+        ["git", "-C", str(wt), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    assert workspace._append_receipt(
+        repo,
+        {
+            "event": "terminal_intent",
+            "workspace": ws["name"],
+            "branch": ws["branch"],
+            "target_disposition": "merged",
+            "head_sha": gated_sha,
+        },
+    )
+    subprocess.run(
+        ["git", "-C", str(repo), "merge", "--ff-only", ws["branch"]],
+        check=True,
+        capture_output=True,
+    )
+    (wt / "candidate.py").write_text("VALUE = 2\n", encoding="utf-8")
+    subprocess.run(["git", "-C", str(wt), "add", "candidate.py"], check=True)
+    subprocess.run(
+        ["git", "-C", str(wt), "commit", "-qm", "post-gate advance"],
+        check=True,
+    )
+    advanced_sha = subprocess.run(
+        ["git", "-C", str(wt), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=queue,
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["reason"] == "post_gate_branch_advanced"
+    assert out["checkpoint"]["commit"] == advanced_sha
+    assert not wt.exists()
+    assert subprocess.run(
+        ["git", "-C", str(repo), "merge-base", "--is-ancestor", advanced_sha, "main"],
+        check=False,
+    ).returncode != 0
+
+
+def test_workspace_finalize_gate_red_opens_remediation_and_keeps_branch(
     tmp_path: Path,
 ) -> None:
     """The no-deadlock invariant: a red gate NEVER strands the output. It must
     become a pending P2 task the normal dispatch loop is guaranteed to pick up,
-    with the worktree preserved -- and re-running the finalizer must not
+    with a durable branch checkpoint -- and re-running the finalizer must not
     duplicate the task."""
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -3396,7 +4035,12 @@ def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
     )
     assert out["disposition"] == "remediation_opened"
     assert out["reason"] == "gate_red"
-    assert wt.exists()  # output preserved, never force-removed
+    assert out["checkpoint"]["ok"] is True
+    assert not wt.exists()
+    assert subprocess.run(
+        ["git", "-C", str(repo), "show", f"{ws['branch']}:broken.py"],
+        check=True, capture_output=True, text=True,
+    ).stdout == "x = 1\n"
     tasks = json.loads(queue.read_text(encoding="utf-8"))
     assert len(tasks) == 1
     task = tasks[0]
@@ -3407,9 +4051,10 @@ def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
     assert task["status"] == "pending"
     assert task["task_type"] == "platform_ops"
     assert task["dispatch_lane"] == "main_thread"
-    assert task["source"] == "incident_router"
+    assert task["source"] == "incident_adjudication"
     assert "merge_worktree.sh" in task["description"]
     assert "incidents.json" in task["description"]
+    assert "git worktree add" in task["description"]
     from volpred.ops import incident as incident_store
 
     rows = incident_store.list_incidents(repo / "storage" / "ops" / "incidents.json")
@@ -3423,8 +4068,288 @@ def test_workspace_finalize_gate_red_opens_remediation_and_keeps_worktree(
         queue_path=queue, gate_fn=red_gate, merge_fn=never_merge,
     )
     assert out2["disposition"] == "remediation_opened"
+    assert out2["replayed"] is True
     tasks2 = json.loads(queue.read_text(encoding="utf-8"))
     assert len(tasks2) == 1
+    terminal = [
+        event for event in _ws_receipt_events(repo)
+        if event["event"] in {"finalized", "released"}
+    ]
+    assert len(terminal) == 1
+    assert terminal[0]["event"] == "released"
+
+
+def test_workspace_finalize_gate_red_checkpoints_branch_and_releases_capacity(
+    tmp_path: Path,
+) -> None:
+    """A failed fire keeps recoverable bytes, not a permanently live checkout.
+
+    The durable branch is the remediation artifact.  Releasing the registered
+    worktree directory prevents three failures from exhausting ``max_total``
+    and sending every later writer back to shared main.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 'checkpointed'\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="success",
+        queue_path=queue,
+        gate_fn=lambda **_kwargs: {
+            "verdict": "red",
+            "rc": 1,
+            "targets": ["tests/test_recoverable.py"],
+            "duration_s": 0.1,
+            "output_tail": "FAILED",
+        },
+        merge_fn=lambda **_kwargs: pytest.fail("red output must not merge"),
+    )
+
+    assert out["disposition"] == "remediation_opened"
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["branch"] == ws["branch"]
+    assert out["checkpoint"]["commit"]
+    assert not wt.exists()
+    recovered = subprocess.run(
+        [
+            "git", "-C", str(repo), "show",
+            f"{ws['branch']}:recoverable.py",
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert recovered.stdout == "VALUE = 'checkpointed'\n"
+
+    replacement = _ws_allocate(
+        repo,
+        job_id="b" * 32,
+        config=_iso_cfg(max_total=1),
+    )
+    assert replacement is not None
+
+
+def test_workspace_checkpoint_receipt_must_persist_before_release(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A receipt write failure leaves the recoverable checkout registered."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    real_append = workspace._append_receipt
+
+    def fail_checkpoint_receipt(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "checkpointed":
+            return False
+        return real_append(root, payload)
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_checkpoint_receipt)
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=queue,
+    )
+
+    assert out["checkpoint"]["reason"] == "checkpoint_receipt_failed"
+    assert out["checkpoint"]["released"] is False
+    assert wt.exists()
+
+
+def test_workspace_release_receipt_is_recovered_without_duplicate_task(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A crash after remove is closed from the pre-cleanup task binding."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    real_append = workspace._append_receipt
+    fail_once = {"armed": True}
+
+    def fail_first_release(root: Path, payload: dict) -> bool:
+        if payload.get("event") == "released" and fail_once["armed"]:
+            fail_once["armed"] = False
+            return False
+        return real_append(root, payload)
+
+    monkeypatch.setattr(workspace, "_append_receipt", fail_first_release)
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=queue,
+    )
+
+    assert first["checkpoint"]["reason"] == "release_receipt_failed"
+    assert first["checkpoint"]["released"] is False
+    assert not wt.exists()
+
+    second = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=queue,
+    )
+
+    assert second["disposition"] == "remediation_opened"
+    assert second["checkpoint"]["released"] is True
+    assert second["replayed"] is True
+    assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
+    assert [
+        event["event"] for event in _ws_receipt_events(repo)
+        if event["event"] == "released"
+    ] == ["released"]
+
+
+def test_workspace_branch_advance_requires_new_remediation_binding(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+    fail_remove_once = {"armed": True}
+
+    def runner(args, **kwargs):
+        if (
+            fail_remove_once["armed"]
+            and "worktree" in args
+            and "remove" in args
+        ):
+            fail_remove_once["armed"] = False
+            return subprocess.CompletedProcess(args, 1, "", "injected remove failure")
+        return subprocess.run(args, **kwargs)
+
+    first = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=queue,
+        runner=runner,
+    )
+    assert first["checkpoint"]["reason"] == "checkpoint_remove_failed"
+    first_sha = first["checkpoint"]["commit"]
+    assert wt.exists()
+
+    (wt / "recoverable.py").write_text("VALUE = 2\n", encoding="utf-8")
+    second = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=queue,
+    )
+
+    second_sha = second["checkpoint"]["commit"]
+    assert second_sha != first_sha
+    bindings = [
+        event for event in _ws_receipt_events(repo)
+        if event["event"] == "remediation_bound"
+    ]
+    assert [event["checkpoint_commit"] for event in bindings] == [
+        first_sha,
+        second_sha,
+    ]
+    assert second["checkpoint"]["released"] is True
+
+
+def test_workspace_adjudication_exit_is_not_blocked_by_auto_remediation_cap(
+    tmp_path: Path,
+) -> None:
+    """The global repair cap may stop repair-task floods, not the aggregate
+    main-thread adjudication that gives an unmergeable branch a human exit.
+    """
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    now = datetime.now(timezone.utc).isoformat()
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": f"alert_auto_{index}",
+                    "title": f"repair {index}",
+                    "description": "automatic repair",
+                    "task_type": "platform_ops",
+                    "priority": 2,
+                    "status": "pending",
+                    "source": "incident_router",
+                    "incident_id": f"inc_auto_{index}",
+                    "created_at": now,
+                }
+                for index in range(8)
+            ]
+        ),
+        encoding="utf-8",
+    )
+    ws = _ws_allocate(repo)
+    (Path(ws["path"]) / "needs_owner.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=queue,
+    )
+
+    assert out["remediation"]["created"] is True
+    tasks = json.loads(queue.read_text(encoding="utf-8"))
+    adjudications = [
+        task for task in tasks if task.get("incident_id") == out["remediation"]["incident_id"]
+    ]
+    assert len(adjudications) == 1
+    assert adjudications[0]["source"] == "incident_adjudication"
+    assert adjudications[0]["dispatch_lane"] == "main_thread"
+
+
+def test_workspace_keeps_live_checkout_when_remediation_exit_is_not_durable(
+    tmp_path: Path,
+) -> None:
+    """Never release the only discoverable copy when the queue exit failed."""
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    invalid_queue = tmp_path / "queue-is-a-directory"
+    invalid_queue.mkdir()
+    ws = _ws_allocate(repo)
+    wt = Path(ws["path"])
+    (wt / "only-copy.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    out = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=ws,
+        worker_outcome="killed_timeout",
+        queue_path=invalid_queue,
+    )
+
+    assert out["remediation"]["created"] is False
+    assert out["remediation"]["error"]
+    assert out["checkpoint"]["ok"] is True
+    assert out["checkpoint"]["released"] is False
+    assert out["checkpoint"]["reason"] == "remediation_not_durable"
+    assert out["checkpoint"]["commit"]
+    assert wt.exists()
+    assert (wt / "only-copy.py").read_text(encoding="utf-8") == "VALUE = 1\n"
 
 
 def test_workspace_finalize_unclean_worker_never_merges(tmp_path: Path) -> None:
@@ -3453,7 +4378,12 @@ def test_workspace_finalize_unclean_worker_never_merges(tmp_path: Path) -> None:
     assert out["disposition"] == "remediation_opened"
     assert out["reason"] == "worker_killed_timeout"
     assert called == {"gate": 0, "merge": 0}
-    assert Path(ws["path"]).exists()
+    assert out["checkpoint"]["ok"] is True
+    assert not Path(ws["path"]).exists()
+    assert subprocess.run(
+        ["git", "-C", str(repo), "show", f"{ws['branch']}:partial.py"],
+        check=True, capture_output=True, text=True,
+    ).stdout == "x = 1\n"
     tasks = json.loads(queue.read_text(encoding="utf-8"))
     assert len(tasks) == 1 and tasks[0]["status"] == "pending"
 
@@ -3474,7 +4404,12 @@ def test_workspace_finalize_merge_failure_opens_remediation(tmp_path: Path) -> N
     )
     assert out["disposition"] == "remediation_opened"
     assert out["reason"] == "merge_failed"
-    assert Path(ws["path"]).exists()
+    assert out["checkpoint"]["ok"] is True
+    assert not Path(ws["path"]).exists()
+    assert subprocess.run(
+        ["git", "-C", str(repo), "show", f"{ws['branch']}:change.py"],
+        check=True, capture_output=True, text=True,
+    ).stdout == "x = 1\n"
     assert len(json.loads(queue.read_text(encoding="utf-8"))) == 1
 
 

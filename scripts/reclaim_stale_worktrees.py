@@ -65,6 +65,9 @@ from volpred.ops.git_writer_lock import (  # noqa: E402
     git_writer_lock,
     git_writer_subprocess_kwargs,
 )
+from volpred.ops.remediation_throttle import (  # noqa: E402
+    INCIDENT_ADJUDICATION_SOURCE,
+)
 
 
 def _holder_pids(worktree: Path) -> list[int]:
@@ -247,7 +250,7 @@ def _build_aggregate_salvage_task(*, incident_id: str, episode: int,
         "id": task_id,
         "task_type": "platform_ops",
         "priority": 3,
-        "source": "incident_router",
+        "source": INCIDENT_ADJUDICATION_SOURCE,
         "status": "pending",
         "dispatch_lane": "main_thread",
         "incident_id": incident_id,
