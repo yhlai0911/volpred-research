@@ -1536,11 +1536,18 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   transaction 恢復為 pending，清除 token／claim metadata、增加 version 並追加
   `released` event；未過期或缺 expiry 的 active lease 仍 fail closed，transfer
   transaction 不留下部分 reconciliation。
-- Runtime worker／approver／PUBLIC 沒有 transfer execute privilege。這是刻意的
-  forward ratchet：目前 DB 只驗證 manifest SHA 格式，尚未持久化並鎖定
-  `prepare_work_ownership_cutover()` 的七日 evidence capsule，所以不得開出 live
-  operator seam。Migration-owner rehearsal 才能呼叫 private CAS；任意 hash 不構成
-  production cutover authority。
+- 後續 private FORCE-RLS `work_cutover_gates` 已把
+  `prepare_work_ownership_cutover()` 的 v3 canonical bytes、來源 owner／generation、
+  15 分鐘有效窗與 `ready → consumed → rolled_back` 狀態持久化，append-only receipts
+  保存 stage／consume／rollback。DB 會重算 payload SHA、驗 exact schema、production
+  projection schema、row parity、evidence digest 格式與 freshness；timestamp 必須帶
+  `Z` 或 UTC offset，不接受 session-dependent wall clock。Stage 再以 owner shared lock
+  綁定 generation，並在 lock 返回後、INSERT 前重驗 expiry；任意未 staged hash 不能
+  transfer。
+- Runtime worker／approver／PUBLIC 沒有 stage、gate read、transfer 或 ungated
+  primitive execute privilege。這是刻意的 forward ratchet：目前只有 migration-owner
+  local rehearsal seam，尚未部署 production 或建立獨立 operator identity，因此不得
+  開出 live operator seam。
 - CAS 同交易撤銷 legacy runtime mutation functions 的 execute privilege，rollback
   同交易恢復；撤銷在 exclusive owner lock 前執行，legacy wrapper 本身仍 assert
   `legacy`，因此已過 ACL 檢查但排隊中的 caller 也會在 row lock 後 fail closed。
@@ -1550,14 +1557,18 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   避免正式 nested caller 斷鏈，同時不重新開放 legacy runtime writer。
 - 本 checkpoint 只有 local PG17 clean migration、non-superuser replay、full
   generation lifecycle、in-flight legacy-vs-transfer race、expired claimed／running
-  rollback 與 owned-email nested workflow evidence；未部署 production、未產生
-  七日 receipts、未建立 durable
-  manifest gate row，也未做 live unique-owner read-back／rollback rehearsal。
+  rollback、manifest expiry／replay gate 與 owned-email nested workflow evidence。
+  Owner-row BEFORE UPDATE trigger 在真正 mutation boundary 以 DB clock 重驗 gate，
+  transfer wrapper 在可能阻塞的 owner CAS 返回後再驗一次；owner lock 等待跨過
+  `valid_until` 會讓 owner／ACL／receipts／lease reconciliation 全部 rollback，gate
+  保持 `ready`。兩個非 UTC session timezone 也確認 naive timestamp 一律拒絕、aware
+  instant 一致。目前未部署 production、未產生七日 receipts，
+  也未做 live unique-owner read-back／rollback rehearsal。
   因此 formal transfer operator 仍不可用，Issue #9 仍是 `contained`。
 
-這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
-正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator
-第一批同時實作。
+取得七天 shadow 證據、production migration read-back 與 owner-approved window 後，
+才規劃第一個正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與
+Work Coordinator 第一批同時切換。
 
 ## 12. Interface-level 測試矩陣
 

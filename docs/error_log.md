@@ -2872,8 +2872,16 @@ approver 用任意 64-hex 接管，但 migration-owner 仍只能把裸 hash 傳�
 與 `ready → consumed → rolled_back` 狀態，append-only receipts 保存三個轉移事件。
 Stage function 在 DB 端重算 SHA-256，驗證 exact top-level contract、production
 projection schema、row-count parity、所有 evidence digests 與 freshness，再以 owner
-shared lock做 source-generation CAS。正式 transfer wrapper 先鎖 gate，只有未過期
-`ready` 可 cutover；owner CAS 成功後同交易標 `consumed`。Rollback 僅接受該 gate
+shared lock做 source-generation CAS，並在 lock 返回後、INSERT 前重驗 expiry。
+Timestamp contract 強制 `Z` 或明確 UTC offset；
+naive wall-clock 不再交由 session `TimeZone` 解讀成不同 instant。正式 transfer wrapper
+先鎖 gate，只有未過期
+`ready` 可 cutover；owner CAS 成功後同交易標 `consumed`。首次實作只在進入底層
+CAS 前檢查 expiry，owner-row lock 若等待到 `valid_until` 之後仍可能成功，形成
+freshness TOCTOU。Owner-row BEFORE UPDATE trigger 現在把 freshness fence 放在真正
+mutation boundary；wrapper 也會在底層 CAS 返回、consume 前以 database clock 再檢查。
+等待期間過期就 raise，讓 owner、legacy ACL、owner receipts、lease
+reconciliation 與 gate mutation 全部隨 transaction rollback。Rollback 僅接受該 gate
 保存的 consumed generation，同交易標 `rolled_back`。未 staged hash、stale manifest、
 衝突 replay 全部 fail closed；ungated primitive 與 stage／transfer 對 runtime roles
 維持不可執行。
@@ -2881,8 +2889,14 @@ shared lock做 source-generation CAS。正式 transfer wrapper 先鎖 gate，只
 **回歸、回讀與狀態**：TDD 先以 manifest v3／freshness expectation 得到 RED，再完成
 GREEN；local PG17 contracts 回讀 unknown hash 與 stale manifest 不留 gate／owner
 mutation、exact stage／transfer replay 只各寫一筆 receipt、cutover 與 rollback durable
-state，以及 worker／approver 對 gate tables、stage、ungated transfer 都無權限。
-Owned-email nested workflow 也在新 gate 後完成 operations_core generation 流程。
+state，以及 worker／approver 對 gate tables、stage、ungated transfer 都無權限。Owner
+lock race regression 另在 gate 尚有效時開始 transfer，持鎖跨過 expiry 後才放行；修前
+實際錯誤切換 owner，修後回讀 owner 仍為 `legacy/1`、gate 仍為 `ready`，且 receipts
+只有 `staged`。Owned-email nested workflow 也在新 gate 後完成 operations_core
+generation 流程。另以 `Pacific/Honolulu`／`Asia/Tokyo` 兩個 session timezone 回歸：
+naive timestamp 均在 stage 前拒絕，帶 offset 的同一 manifest 則解析成同一 UTC instant。
+另一個 barrier case 讓 stage 等 owner lock 跨過 expiry，修前會落 stale gate，修後
+回讀 gate 與 gate receipt 均為零。
 此 local evidence-bound gate 根因為 **`root_cause_fixed_and_verified`**；但 migration
 尚未部署 production、七日真實 receipts 尚未累積，也未做 live cutover／rollback
 rehearsal，所以 Issue #9 整體仍為 **`contained`**。

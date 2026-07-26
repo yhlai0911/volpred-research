@@ -109,9 +109,12 @@ claimed／running lease 會依 DB clock 在同一 transaction 回 pending、保�
 明確 rebind 到 runtime 不可執行的 definer-only internal seam。後續 local migration
 已新增 durable `work_cutover_gates` 與 append-only gate receipts：stage 會重算 canonical
 manifest bytes 的 SHA-256、驗證 v3 exact contract／row parity／15 分鐘 freshness，
-並鎖定當下 legacy generation；owner transfer 只能在同一 transaction consume 該 gate，
-rollback 只能使用 gate 記錄的 consumed generation。Stage、read、transfer 仍不授權
-worker、approver 或 PUBLIC，避免任意 SHA 或 runtime caller 繞過七日 gate。
+並拒絕沒有 `Z`／UTC offset 的 session-dependent timestamp，再鎖定當下 legacy
+generation；stage 在 owner lock 返回後、INSERT 前重驗 expiry。Owner transfer 只能在
+同一 transaction consume 該 gate。Owner-row
+BEFORE UPDATE trigger 與 wrapper post-CAS 會雙重驗證 DB-clock expiry，等待跨過有效窗
+就整筆 rollback；rollback 只能使用 gate 記錄的 consumed generation。Stage、read、transfer
+仍不授權 worker、approver 或 PUBLIC，避免任意 SHA 或 runtime caller 繞過七日 gate。
 目前僅有 local PG17／non-superuser migration replay 與 nested workflow
 integration evidence，未部署 production、未改 live owner、未做七日 read-back／rollback
 rehearsal。因此這是 evidence-bound transaction-gate checkpoint，不是 cutover；Issue #9 仍為

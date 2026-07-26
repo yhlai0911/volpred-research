@@ -191,6 +191,10 @@ BEGIN
       OR jsonb_typeof(manifest->'projection_sha256') <> 'string'
       OR jsonb_typeof(manifest->'prepared_at') <> 'string'
       OR jsonb_typeof(manifest->'valid_until') <> 'string'
+      OR manifest->>'prepared_at'
+        !~ '(Z|[+-][0-9]{2}:[0-9]{2})$'
+      OR manifest->>'valid_until'
+        !~ '(Z|[+-][0-9]{2}:[0-9]{2})$'
       OR manifest->>'schema_version'
         <> 'work-owner-cutover-manifest.v3'
       OR manifest->>'projection_schema_version'
@@ -264,6 +268,11 @@ BEGIN
       ownership.owner,
       ownership.generation;
   END IF;
+  event_at := clock_timestamp();
+  IF expires <= event_at THEN
+    RAISE EXCEPTION
+      'work ownership cutover manifest is stale or future-dated';
+  END IF;
 
   INSERT INTO volpred_ops.work_cutover_gates (
     manifest_sha256,
@@ -325,6 +334,39 @@ BEGIN
     );
 END;
 $$;
+
+CREATE FUNCTION volpred_ops.assert_work_cutover_gate_owner_update()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+DECLARE
+  gate volpred_ops.work_cutover_gates;
+BEGIN
+  IF OLD.owner = 'legacy' AND NEW.owner = 'operations_core' THEN
+    SELECT * INTO gate
+    FROM volpred_ops.work_cutover_gates
+    WHERE manifest_sha256 = NEW.cutover_manifest_sha256;
+    IF gate.manifest_sha256 IS NULL
+        OR gate.status <> 'ready'
+        OR gate.source_owner <> OLD.owner
+        OR gate.source_generation <> OLD.generation
+        OR NEW.generation <> OLD.generation + 1
+        OR gate.valid_until <= clock_timestamp() THEN
+      RAISE EXCEPTION
+        'work ownership cutover gate does not authorize transfer';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER work_owner_cutover_gate_before_update
+BEFORE UPDATE OF owner, generation, cutover_manifest_sha256
+ON volpred_ops.work_owners
+FOR EACH ROW
+EXECUTE FUNCTION volpred_ops.assert_work_cutover_gate_owner_update();
 
 ALTER FUNCTION volpred_ops.transfer_work_owner(
   text, bigint, text, text, text, text, bigint
@@ -400,6 +442,12 @@ BEGIN
   );
 
   event_at := clock_timestamp();
+  IF p_target_owner = 'operations_core'
+      AND gate.status = 'ready'
+      AND gate.valid_until <= event_at THEN
+    RAISE EXCEPTION
+      'work ownership cutover gate does not authorize transfer';
+  END IF;
   IF p_target_owner = 'operations_core' AND gate.status = 'ready' THEN
     UPDATE volpred_ops.work_cutover_gates
     SET status = 'consumed',
@@ -452,6 +500,8 @@ ALTER VIEW volpred_ops.work_cutover_gate_reads
 ALTER FUNCTION volpred_ops.stage_work_cutover_manifest(
   text, bytea, text, bigint, text
 ) OWNER TO volpred_ops_definer;
+ALTER FUNCTION volpred_ops.assert_work_cutover_gate_owner_update()
+  OWNER TO volpred_ops_definer;
 ALTER FUNCTION volpred_ops.transfer_work_owner_ungated(
   text, bigint, text, text, text, text, bigint
 ) OWNER TO volpred_ops_definer;
@@ -470,6 +520,7 @@ REVOKE ALL ON FUNCTION
   volpred_ops.stage_work_cutover_manifest(
     text, bytea, text, bigint, text
   ),
+  volpred_ops.assert_work_cutover_gate_owner_update(),
   volpred_ops.transfer_work_owner_ungated(
     text, bigint, text, text, text, text, bigint
   ),

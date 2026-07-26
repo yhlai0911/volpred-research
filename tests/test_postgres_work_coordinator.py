@@ -12,6 +12,7 @@ import socket
 import subprocess
 from threading import Barrier, Event
 from time import monotonic, sleep
+from typing import Any
 
 import psycopg
 import pytest
@@ -529,6 +530,292 @@ def test_work_cutover_gate_rejects_unstaged_and_stale_manifests(
         ).fetchone()[0] == 0
 
 
+@pytest.mark.parametrize(
+    "session_timezone",
+    ("Pacific/Honolulu", "Asia/Tokyo"),
+)
+def test_work_cutover_gate_rejects_session_dependent_naive_timestamps(
+    postgres_dsn: str,
+    session_timezone: str,
+) -> None:
+    aware = _cutover_manifest(f"naive timestamp {session_timezone}")
+    naive_prepared = datetime.fromisoformat(aware.prepared_at).replace(
+        tzinfo=None
+    )
+    naive = _rehash_manifest(
+        replace(
+            aware,
+            prepared_at=naive_prepared.isoformat(),
+            valid_until=(
+                naive_prepared + timedelta(minutes=15)
+            ).isoformat(),
+        )
+    )
+
+    def connection_factory() -> psycopg.Connection[Any]:
+        connection = psycopg.connect(postgres_dsn)
+        connection.execute(
+            "SELECT set_config('TimeZone', %s, false)",
+            (session_timezone,),
+        )
+        return connection
+
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="manifest contract is invalid",
+    ):
+        PostgresWorkOwnerStore(connection_factory).stage_cutover_manifest(
+            manifest=naive,
+            expected_owner="legacy",
+            expected_generation=1,
+            actor_ref="operator:pytest",
+        )
+
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_cutover_gates"
+        ).fetchone()[0] == 0
+
+
+def test_work_cutover_gate_aware_timestamp_is_session_independent(
+    postgres_dsn: str,
+) -> None:
+    manifest = _cutover_manifest("aware timestamps")
+    gates = []
+    for session_timezone in ("Pacific/Honolulu", "Asia/Tokyo"):
+
+        def connection_factory(
+            timezone_name: str = session_timezone,
+        ) -> psycopg.Connection[Any]:
+            connection = psycopg.connect(postgres_dsn)
+            connection.execute(
+                "SELECT set_config('TimeZone', %s, false)",
+                (timezone_name,),
+            )
+            return connection
+
+        gates.append(
+            PostgresWorkOwnerStore(
+                connection_factory
+            ).stage_cutover_manifest(
+                manifest=manifest,
+                expected_owner="legacy",
+                expected_generation=1,
+                actor_ref="operator:pytest",
+            )
+        )
+
+    assert gates[0] == gates[1]
+    assert gates[0].prepared_at == manifest.prepared_at
+    assert gates[0].valid_until == manifest.valid_until
+
+
+def test_work_cutover_gate_staging_rejects_wrong_owner_generation(
+    postgres_dsn: str,
+) -> None:
+    owner_store = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_dsn)
+    )
+    manifest = _cutover_manifest("wrong source generation")
+
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="staging compare-and-set failed",
+    ):
+        owner_store.stage_cutover_manifest(
+            manifest=manifest,
+            expected_owner="legacy",
+            expected_generation=2,
+            actor_ref="operator:pytest",
+        )
+
+    assert (
+        owner_store.read_owner().owner,
+        owner_store.read_owner().generation,
+    ) == ("legacy", 1)
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_cutover_gates"
+        ).fetchone()[0] == 0
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_owner_receipts"
+        ).fetchone()[0] == 1
+
+
+def test_work_cutover_gate_rechecks_expiry_after_staging_owner_lock_wait(
+    postgres_dsn: str,
+) -> None:
+    prepared_at = datetime.now(timezone.utc) - timedelta(
+        minutes=14,
+        seconds=56,
+    )
+    manifest = _rehash_manifest(
+        replace(
+            _cutover_manifest("staging owner lock expiry race"),
+            prepared_at=prepared_at.isoformat(),
+            valid_until=(
+                prepared_at + timedelta(minutes=15)
+            ).isoformat(),
+        )
+    )
+    expires_at = datetime.fromisoformat(manifest.valid_until)
+    staging_pid: list[int] = []
+
+    def staging_connection() -> psycopg.Connection[Any]:
+        connection = psycopg.connect(postgres_dsn)
+        staging_pid.append(connection.info.backend_pid)
+        return connection
+
+    def stage() -> Exception | None:
+        try:
+            PostgresWorkOwnerStore(
+                staging_connection
+            ).stage_cutover_manifest(
+                manifest=manifest,
+                expected_owner="legacy",
+                expected_generation=1,
+                actor_ref="operator:pytest",
+            )
+        except Exception as error:
+            return error
+        return None
+
+    blocker = psycopg.connect(postgres_dsn)
+    blocker.execute(
+        """
+        SELECT 1
+        FROM volpred_ops.work_owners
+        WHERE capability = 'work.coordinate'
+        FOR UPDATE
+        """
+    ).fetchone()
+    try:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            staging_future = executor.submit(stage)
+            while not staging_pid:
+                sleep(0.01)
+            _wait_for_postgres_lock(postgres_dsn, staging_pid[0])
+            assert datetime.now(timezone.utc) < expires_at
+            sleep(
+                max(
+                    0.0,
+                    (expires_at - datetime.now(timezone.utc)).total_seconds(),
+                )
+                + 0.1
+            )
+            blocker.commit()
+            staging_error = staging_future.result(timeout=10)
+    finally:
+        blocker.close()
+
+    assert isinstance(staging_error, WorkOwnershipLost)
+    assert "stale or future-dated" in str(staging_error)
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_cutover_gates"
+        ).fetchone()[0] == 0
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_cutover_gate_receipts"
+        ).fetchone()[0] == 0
+
+
+def test_work_cutover_gate_rechecks_expiry_after_owner_lock_wait(
+    postgres_dsn: str,
+) -> None:
+    owner_store = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_dsn)
+    )
+    prepared_at = datetime.now(timezone.utc) - timedelta(
+        minutes=14,
+        seconds=56,
+    )
+    manifest = _rehash_manifest(
+        replace(
+            _cutover_manifest("owner lock expiry race"),
+            prepared_at=prepared_at.isoformat(),
+            valid_until=(
+                prepared_at + timedelta(minutes=15)
+            ).isoformat(),
+        )
+    )
+    owner_store.stage_cutover_manifest(
+        manifest=manifest,
+        expected_owner="legacy",
+        expected_generation=1,
+        actor_ref="operator:pytest",
+    )
+    expires_at = datetime.fromisoformat(manifest.valid_until)
+    transfer_pid: list[int] = []
+
+    def transfer_connection() -> psycopg.Connection[Any]:
+        connection = psycopg.connect(postgres_dsn)
+        transfer_pid.append(connection.info.backend_pid)
+        return connection
+
+    def transfer() -> Exception | None:
+        try:
+            PostgresWorkOwnerStore(transfer_connection).transfer_owner(
+                expected_owner="legacy",
+                expected_generation=1,
+                target_owner="operations_core",
+                actor_ref="operator:pytest",
+                reason="expiry must be rechecked after owner lock wait",
+                cutover_manifest_sha256=manifest.sha256,
+            )
+        except Exception as error:
+            return error
+        return None
+
+    blocker = psycopg.connect(postgres_dsn)
+    blocker.execute(
+        """
+        SELECT 1
+        FROM volpred_ops.work_owners
+        WHERE capability = 'work.coordinate'
+        FOR UPDATE
+        """
+    ).fetchone()
+    try:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            transfer_future = executor.submit(transfer)
+            while not transfer_pid:
+                sleep(0.01)
+            _wait_for_postgres_lock(postgres_dsn, transfer_pid[0])
+            assert datetime.now(timezone.utc) < expires_at
+            sleep(
+                max(
+                    0.0,
+                    (expires_at - datetime.now(timezone.utc)).total_seconds(),
+                )
+                + 0.1
+            )
+            blocker.commit()
+            transfer_error = transfer_future.result(timeout=10)
+    finally:
+        blocker.close()
+
+    assert isinstance(transfer_error, WorkOwnershipLost)
+    assert "gate does not authorize transfer" in str(transfer_error)
+    assert (
+        owner_store.read_owner().owner,
+        owner_store.read_owner().generation,
+    ) == ("legacy", 1)
+    gate = owner_store.read_cutover_gate(manifest.sha256)
+    assert (gate.status, gate.consumed_at, gate.consumed_generation) == (
+        "ready",
+        None,
+        None,
+    )
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            """
+            SELECT event
+            FROM volpred_ops.work_cutover_gate_receipts
+            ORDER BY sequence
+            """
+        ).fetchall() == [("staged",)]
+
+
 def test_inflight_legacy_wrapper_rechecks_owner_after_transfer_wins_lock(
     postgres_dsn: str,
 ) -> None:
@@ -845,6 +1132,13 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
         receipt_count = connection.execute(
             "SELECT count(*) FROM volpred_ops.work_owner_receipts"
         ).fetchone()[0]
+        gate_events = connection.execute(
+            """
+            SELECT event
+            FROM volpred_ops.work_cutover_gate_receipts
+            ORDER BY sequence
+            """
+        ).fetchall()
         legacy_submit_access = connection.execute(
             """
             SELECT has_function_privilege(
@@ -858,6 +1152,13 @@ def test_work_owner_transfer_rejects_active_lease_without_state_change(
             """
         ).fetchone()[0]
     assert receipt_count == 1
+    gate = owner_store.read_cutover_gate(manifest.sha256)
+    assert (gate.status, gate.consumed_at, gate.consumed_generation) == (
+        "ready",
+        None,
+        None,
+    )
+    assert gate_events == [("staged",)]
     assert legacy_submit_access is True
 
 
@@ -1027,6 +1328,98 @@ def test_work_owner_transfer_replay_is_exact_and_idempotent(
             ORDER BY sequence
             """
         ).fetchall() == [("staged",), ("consumed",)]
+
+
+def test_work_owner_rollback_requires_consumed_gate_and_replays_exactly(
+    postgres_dsn: str,
+) -> None:
+    owner_store = PostgresWorkOwnerStore(
+        lambda: psycopg.connect(postgres_dsn)
+    )
+    consumed_manifest = _stage_cutover(
+        owner_store,
+        "rollback consumed gate",
+    )
+    other_manifest = _stage_cutover(
+        owner_store,
+        "rollback wrong gate",
+    )
+    cutover = owner_store.transfer_owner(
+        expected_owner="legacy",
+        expected_generation=1,
+        target_owner="operations_core",
+        actor_ref="operator:pytest",
+        reason="prepare exact rollback",
+        cutover_manifest_sha256=consumed_manifest.sha256,
+    )
+
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="gate does not authorize rollback",
+    ):
+        owner_store.transfer_owner(
+            expected_owner="operations_core",
+            expected_generation=cutover.generation,
+            target_owner="legacy",
+            actor_ref="operator:pytest",
+            reason="wrong ready gate cannot roll back",
+            cutover_manifest_sha256=other_manifest.sha256,
+            rollback_of_generation=cutover.generation,
+        )
+    with pytest.raises(
+        WorkOwnershipLost,
+        match="gate does not authorize rollback",
+    ):
+        owner_store.transfer_owner(
+            expected_owner="operations_core",
+            expected_generation=cutover.generation,
+            target_owner="legacy",
+            actor_ref="operator:pytest",
+            reason="wrong consumed generation cannot roll back",
+            cutover_manifest_sha256=consumed_manifest.sha256,
+            rollback_of_generation=cutover.generation + 1,
+        )
+
+    assert owner_store.read_owner() == cutover
+    assert owner_store.read_cutover_gate(
+        consumed_manifest.sha256
+    ).status == "consumed"
+    assert owner_store.read_cutover_gate(
+        other_manifest.sha256
+    ).status == "ready"
+    rollback_command = {
+        "expected_owner": "operations_core",
+        "expected_generation": cutover.generation,
+        "target_owner": "legacy",
+        "actor_ref": "operator:pytest",
+        "reason": "exact durable rollback",
+        "cutover_manifest_sha256": consumed_manifest.sha256,
+        "rollback_of_generation": cutover.generation,
+    }
+    rollback = owner_store.transfer_owner(**rollback_command)
+    replay = owner_store.transfer_owner(**rollback_command)
+
+    assert replay == rollback
+    assert (rollback.owner, rollback.generation) == ("legacy", 3)
+    assert owner_store.read_cutover_gate(
+        consumed_manifest.sha256
+    ).status == "rolled_back"
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            """
+            SELECT manifest_sha256, event
+            FROM volpred_ops.work_cutover_gate_receipts
+            ORDER BY sequence
+            """
+        ).fetchall() == [
+            (consumed_manifest.sha256, "staged"),
+            (other_manifest.sha256, "staged"),
+            (consumed_manifest.sha256, "consumed"),
+            (consumed_manifest.sha256, "rolled_back"),
+        ]
+        assert connection.execute(
+            "SELECT count(*) FROM volpred_ops.work_owner_receipts"
+        ).fetchone()[0] == 3
 
 
 def test_work_owner_security_exposes_only_fenced_public_functions(
@@ -2730,6 +3123,7 @@ def test_postgres_catalog_contains_canonical_audit_fields_and_fk_indexes(
     assert unsafe_memberships == []
     assert function_owners == [("volpred_ops_definer",)]
     assert {row[0] for row in function_return_types} == {
+        "trigger",
         "void",
         "volpred_ops.work_cutover_gate_reads",
         "volpred_ops.work_item_reads",

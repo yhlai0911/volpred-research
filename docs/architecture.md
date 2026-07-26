@@ -96,10 +96,15 @@
 >
 > 後續 migration 已新增 private `work_cutover_gates` 與 append-only gate receipts。
 > Stage transaction 重新計算 canonical payload SHA-256，逐欄驗證 manifest v3、
-> projection schema、row-count parity、15 分鐘 freshness，並以 shared owner lock 綁定
-> 當下 `legacy` generation；等價 replay 回同一 gate，不同 actor／generation／bytes
-> fail closed。Transfer 只接受未過期 `ready` gate，並在 owner CAS 同一 transaction
-> 標成 `consumed`；rollback 只能消耗該 gate 實際記錄的 cutover generation，完成後標成
+> projection schema、row-count parity、15 分鐘 freshness；兩個 timestamp 必須帶 `Z`
+> 或明確 UTC offset，禁止交由 session timezone 猜測。Stage 再以 shared owner lock
+> 綁定當下 `legacy` generation，並在 lock 返回後、INSERT 前重驗 expiry；等價 replay
+> 回同一 gate，不同 actor／generation／bytes fail closed。Transfer 只接受未過期
+> `ready` gate，並在 owner CAS 同一 transaction
+> 標成 `consumed`。Owner-row BEFORE UPDATE trigger 會在真正 mutation boundary 以
+> database clock 重驗 freshness；wrapper 在底層 CAS 返回後再驗一次。等待期間跨過
+> `valid_until` 會讓 owner／ACL／receipts／lease reconciliation 整筆 rollback，不會
+> 消耗過期 gate。Rollback 只能消耗該 gate 實際記錄的 cutover generation，完成後標成
 > `rolled_back`。任意未 staged 的 64-hex hash已不能切換 owner。
 >
 > Stage、gate read 與 transfer function 仍**刻意不授權** worker、approver 或 PUBLIC；
