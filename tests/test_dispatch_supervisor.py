@@ -3136,6 +3136,24 @@ def test_supervisor_restart_planned_reason_suppresses_email(tmp_path: Path, monk
     assert sends == []  # deploy reload never emails
 
 
+def test_dispatch_supervisor_email_title_identifies_new_architecture(
+    monkeypatch,
+) -> None:
+    calls: list[list[str]] = []
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(supervisor.alerts.subprocess, "run", run)
+
+    assert supervisor.alerts._send("info", "supervisor restart", "# body") == 0
+
+    command = calls[0]
+    title_index = command.index("--title") + 1
+    assert command[title_index] == "[新架構派發] supervisor restart"
+
+
 def test_supervisor_restart_unexpected_still_emails(tmp_path: Path, monkeypatch) -> None:
     """No marker (planned_reason=None) --- genuine restart still alerts once."""
     state_path = _tmp_state(tmp_path)

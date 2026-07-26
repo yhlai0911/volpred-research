@@ -111,6 +111,39 @@ def build_owner_plan(
             if (label := _direct_legacy_label(items[value])) is not None
         }
     )
+    daemon_registry = config.get("daemons")
+    if not isinstance(daemon_registry, list):
+        raise RuntimeError(
+            "invalid daemons registry: expected a list of daemon objects"
+        )
+    required_daemons: list[dict[str, str]] = []
+    for index, daemon in enumerate(daemon_registry):
+        if not isinstance(daemon, Mapping):
+            raise RuntimeError(
+                f"invalid daemons registry row {index}: expected an object"
+            )
+        daemon_type = daemon.get("type")
+        if daemon_type != "launchd_keepalive_daemon":
+            raise RuntimeError(
+                f"unsupported daemon type at row {index}: {daemon_type!r}"
+            )
+        if daemon.get("status") in {"disabled", "retired"}:
+            continue
+        for field in ("id", "label", "plist"):
+            value = daemon.get(field)
+            if not isinstance(value, str) or not value.strip():
+                raise RuntimeError(
+                    "active launchd_keepalive_daemon has invalid "
+                    f"{field}: {value!r}"
+                )
+        required_daemons.append(
+            {
+                "id": daemon["id"],
+                "label": daemon["label"],
+                "plist": daemon["plist"],
+            }
+        )
+    required_daemons.sort(key=lambda daemon: daemon["id"])
     return {
         "schema": 1,
         "generation": policy.generation,
@@ -125,6 +158,7 @@ def build_owner_plan(
             if (label := _possible_legacy_label(items[value])) is not None
         },
         "legacy_launchagent_labels": legacy_launchagents,
+        "required_daemons": required_daemons,
         "core_daemon_required": policy.mode != "disabled",
         "core_daemon_label": str(
             (config.get("schedule_materialization") or {}).get("daemon_label")
@@ -183,6 +217,16 @@ def audit_owner_plan(
                 "reason": "operations-core clock not loaded",
             }
         )
+    for daemon in plan.get("required_daemons") or []:
+        label = str(daemon["label"])
+        if label not in loaded_labels:
+            conflicts.append(
+                {
+                    "job_id": str(daemon["id"]),
+                    "surface": label,
+                    "reason": "required control-plane daemon not loaded",
+                }
+            )
     return {
         **dict(plan),
         "ok": not conflicts,
@@ -354,6 +398,86 @@ def _install_core_plist(*, restart: bool = False) -> None:
     )
 
 
+def _restore_missing_required_daemons(
+    required_daemons: list[Mapping[str, str]],
+) -> None:
+    """Bootstrap canonical KeepAlive daemons that disappeared during cutover."""
+    domain = f"gui/{os.getuid()}"
+    root = ROOT.resolve()
+    destination_dir = Path.home() / "Library" / "LaunchAgents"
+    destination_dir.mkdir(parents=True, exist_ok=True)
+    for daemon in required_daemons:
+        label = str(daemon["label"])
+        relative = Path(str(daemon["plist"]))
+        if relative.is_absolute() or ".." in relative.parts:
+            raise RuntimeError(
+                f"required daemon plist must be repo-relative: {relative}"
+            )
+        source = (ROOT / relative).resolve()
+        if not source.is_relative_to(root):
+            raise RuntimeError(
+                f"required daemon plist escapes repository: {relative}"
+            )
+        plist_label = subprocess.run(
+            ["plutil", "-extract", "Label", "raw", "-o", "-", str(source)],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        if plist_label != label:
+            raise RuntimeError(
+                f"required daemon plist label mismatch: {relative}"
+            )
+        loaded = subprocess.run(
+            ["launchctl", "print", f"{domain}/{label}"],
+            capture_output=True,
+            text=True,
+            check=False,
+        ).returncode == 0
+        if loaded:
+            continue
+        destination = destination_dir / source.name
+        fd, tmp_name = tempfile.mkstemp(
+            dir=str(destination_dir),
+            prefix=f".{destination.name}.",
+            suffix=".tmp",
+        )
+        os.close(fd)
+        try:
+            shutil.copyfile(source, tmp_name)
+            os.chmod(tmp_name, 0o644)
+            os.replace(tmp_name, destination)
+        except BaseException:
+            Path(tmp_name).unlink(missing_ok=True)
+            raise
+        bootstrap_command = [
+            "launchctl",
+            "bootstrap",
+            domain,
+            str(destination),
+        ]
+        bootstrap = subprocess.run(
+            bootstrap_command,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if bootstrap.returncode != 0:
+            converged = subprocess.run(
+                ["launchctl", "print", f"{domain}/{label}"],
+                capture_output=True,
+                text=True,
+                check=False,
+            ).returncode == 0
+            if not converged:
+                raise subprocess.CalledProcessError(
+                    bootstrap.returncode,
+                    bootstrap_command,
+                    output=bootstrap.stdout,
+                    stderr=bootstrap.stderr,
+                )
+
+
 def apply_owner_plan(
     config: Mapping[str, Any],
     plan: Mapping[str, Any],
@@ -365,6 +489,9 @@ def apply_owner_plan(
     gated_job_ids = _legacy_gate_covered_job_ids(config)
     if plan["core_daemon_required"]:
         _install_core_plist(restart=restart_core)
+    _restore_missing_required_daemons(
+        list(plan.get("required_daemons") or [])
+    )
 
     host_command = ["bash", str(ROOT / "scripts" / "install_host_crontab.sh")]
     if job_id:

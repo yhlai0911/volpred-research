@@ -45,6 +45,7 @@ LOG = logging.getLogger(__name__)
 
 ROOT = Path(__file__).resolve().parents[2]
 UV_BIN = os.environ.get("UV_BIN", "/Users/yhlai0911/.local/bin/uv")
+NEW_ARCHITECTURE_TITLE_PREFIX = "[新架構派發]"
 
 AUTH_HOTFIX_CMD = (
     'security set-generic-password-partition-list '
@@ -55,6 +56,8 @@ AUTH_HOTFIX_CMD = (
 
 def _send(level: str, title: str, body_md: str) -> int:
     """Invoke `volpred ops send-alert --body-md <tmp>`. Return CLI exit code."""
+    if not title.startswith(NEW_ARCHITECTURE_TITLE_PREFIX):
+        title = f"{NEW_ARCHITECTURE_TITLE_PREFIX} {title}"
     tmp = tempfile.NamedTemporaryFile(
         mode="w", suffix=".md", prefix="supervisor_alert_", delete=False, encoding="utf-8"
     )

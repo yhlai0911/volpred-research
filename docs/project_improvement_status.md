@@ -1993,3 +1993,18 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 Scheduler 已正式提供服務，但 Issue #28 的 sustained-clean 觀察窗仍為
   `contained`。Issue #9 是獨立的 Work Coordinator queue cutover，七日 evidence 未滿，
   不隨 scheduler ownership 自動結案。
+
+## 2026-07-26 — Active daemon owner audit 與新架構通知標示
+
+- 線上查核發現 `com.volpred.dispatch-supervisor` 未載入、heartbeat 停止，但 scheduler
+  owner audit 仍回報 0 conflict。服務已由 canonical plist 恢復，heartbeat 與實際
+  hourly worker 均重新運作。
+- 根因不是 scheduler job ownership，而是 reconciler 只稽核 business clock 與 legacy
+  surfaces，漏掉 `runtime_schedules.json.daemons`。owner plan／audit／apply 現正式管理
+  active KeepAlive daemons：缺失轉紅，apply 自動安裝並 bootstrap，已載入者不重啟。
+- Production `--apply` 已冪等回讀：host crontab unchanged、49/49 Operations Core jobs、
+  required dispatch daemon present、0 conflict；heartbeat checker `breached=false`。
+- dispatch-supervisor 寄出的所有管理通知標題統一加 `[新架構派發]`。19:06 收到的
+  `supervisor restart` 是本次恢復新派發層產生，不是舊逐工作 LaunchAgent。
+- 此 active-daemon 漏查 incident 為 `root_cause_fixed_and_verified`；T09 整體仍須
+  sustained-clean 長窗，維持 `contained`。
