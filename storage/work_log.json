@@ -27528,5 +27528,23 @@
     "owner": "codex",
     "backfilled_at": "2026-07-26T20:35:27.259805+00:00",
     "backfill_source": "scripts/backfill_work_log_from_commits.py"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "merge_worktree_test_suite_20_red_assertions",
+    "actor": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e",
+    "owner": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e",
+    "timestamp": "2026-07-27T05:25:00+08:00",
+    "summary": "merge_worktree 20-red-assertion 債務已恢復：live 重跑 test_merge_worktree.sh = 74/74 assertions, 23/23 cases 全綠（後續硬化 commits 已補齊，非誤報）。closed succeeded。",
+    "verification": "bash scripts/tests/test_merge_worktree.sh -> Assertions PASS 74 / FAIL 0 / Test cases PASS 23/23"
+  },
+  {
+    "task_type": "platform_ops",
+    "task_id": "throughput_recheck_max_slots_20260725",
+    "actor": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e",
+    "owner": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e",
+    "timestamp": "2026-07-27T05:40:00+08:00",
+    "summary": "max_slots 2->4 吞吐複驗：乾淨完整日均 45.75 vs 基線 62.0（不升反降）；偵測 07-24/25 兩連續零完成日（真實斷檔）。定案不上調 max_slots，指向上游 cohort 主線程數/wall-clock。更新 throughput_audit md 第1節 1-recheck。",
+    "verification": "逐日 succeeded 計數 + 5 欄位時戳交叉核對 07-24/25=0 確認非欄位假象"
   }
 ]

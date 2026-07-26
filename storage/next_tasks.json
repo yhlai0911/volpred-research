@@ -40782,10 +40782,34 @@
     "task_type": "platform_ops",
     "priority": 2,
     "description": "2026-07-21 修 K1262-v4 誤判時量到的既有債務（**不是該次修改造成的** —— 已用 out-of-tree baseline 對照確認：修改版 20 條紅是 HEAD baseline 的真子集，零 regression）。\n\n`bash scripts/tests/test_merge_worktree.sh` 目前 Assertions PASS: 49 / **FAIL: 20**，且 runner 最後印 `Test cases: FAIL`。失敗清單：\nA-1, A-2（untracked experiments/ 無 commit → silent data loss）、C-1、5-1, 5-2, 6-1, 6-2（K1262 silent drop pattern + post-merge layer false negative）、7-1, 7-2, 7-3（lock 偵測）、8-1, 8-2（K1618 silent drop 重現）、9-1, 9-2（agent 修改遺失 / 無 auto-restore）、10-1（MAIN_DIR 被 cwd repo 綁架）、11-2（合併被誤 abort 擋掉）、17-1, 18-1, 18-4, 19-1（dirty-main / staged-index preflight contract）。\n\n**為什麼要單獨開單**：這次的修復 agent 把這 20 條描述成「cases 17/18/19 的 dirty-main/index contract」，實際清單裡**多數是 K1262 / K1618 的 silent-drop 重現案例**（A/5/6/8/9/10/11）—— 也就是這支腳本存在的理由本身。主線程逐條比對才發現這個誤述。兩種可能，必須查清楚是哪一種：\n  (a) 這些測試 assert 的是**舊版契約**，腳本後來演進（例如改成 fail-closed 要人工確認，      而測試還在期待「自動合併成功」）→ 那是**測試該更新**，且紅了這麼久沒人動代表沒人在看；\n  (b) 這些防線**真的失效了** → 那是 P1 級事故等級的問題，K1032/K1114/K1262/K1618 四次事故的防護是空的。\n\n在 (a)/(b) 判明之前，任何人看到這支套件「一直是紅的」都會學會忽略它 —— 這比單一 bug 更危險。\n\n要做的：(1) 逐條判定 (a) 或 (b)；(2) (a) 就更新測試到現行契約，(b) 就修腳本；(3) 讓套件回到全綠，之後任何紅都是真訊號；(4) 若某條短期修不了，明確標 skip + 理由 + 解除條件，不要讓它混在紅裡當背景噪音。\n\nparent: merge_worktree_k1262v4_overtrigger_20260719",
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-21T10:48:00+00:00",
-    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014",
+    "status_history": [
+      {
+        "ts": "2026-07-26T21:22:29.931813+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
+      },
+      {
+        "ts": "2026-07-26T21:22:32.961448+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
+      },
+      {
+        "ts": "2026-07-26T21:22:50.391479+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
+      }
+    ],
+    "started_at": "2026-07-26T21:22:32.961432+00:00",
+    "completed_at": "2026-07-26T21:22:50.391447+00:00",
+    "result": "已恢復（非誤報）：2026-07-21 建單當下 test_merge_worktree.sh 確有 49 PASS/20 FAIL（K1262/K1618 silent-drop、lock 偵測、dirty-main preflight 等）。後續 merge_worktree.sh 硬化（commits 503786ece stale-overlap guard、7feb97253 K1262-v6 誤合防線、7d30d8f84 shared-WIP no-stash、a16840bd0 single-writer、7f6adcbd2 bytes-bound PASS gate 等）已補齊防線並擴充測試。本班 live 重跑 scripts/tests/test_merge_worktree.sh = Assertions PASS 74 / FAIL 0、Test cases PASS 23/23，含 Case 22(K1262-v6) 與 Case 23(stale-base 雙邊改) 全綠。零殘紅，任務目標達成。",
+    "worklog": true
   },
   {
     "id": "telegram-1258",
@@ -40888,11 +40912,34 @@
     "title": "[throughput] max_slots 2→4 吞吐複驗：補足 3-4 個完整日樣本後重下判斷",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-21T13:14:14.434697+00:00",
     "source": "dispatch",
     "parent_task_id": "assign_f59976b6",
-    "description": "assign_f59976b6 首次驗收（2026-07-21）結論：吞吐**未能證實提升**，因為變更後只有 1 個乾淨完整日（07-20 = 62，恰等於基線平均 62.0），而基線本身日間全距為 45–98，已覆蓋所有觀測值。\n\n基線（07-14~18）：57 / 98 / 53 / 45 / 57，平均 62.0、中位數 57。\n變更後：07-19 = 111（含變更前 10.7h）、07-20 = 62、07-21 = 99（未整日）。\n\n要做：待 07-22~07-25 累積 3-4 個完整日後，重跑同一比對\n  jq -r '.[] | select(.status==\"succeeded\") | (.completed_at // .updated_at // \"\")[0:10]' storage/next_tasks.json | sort | uniq -c\n並更新 storage/ops/throughput_audit_max_slots_20260721.md 第 1 節。\n\n注意：首驗已發現 66% 的 cohort 只發 1 個 slot、slots_full 全期僅 1 次 —— 若複驗仍無提升，結論應指向上游（supervisor 每 cohort 發幾條主線程 / 單張任務 wall-clock），而非再調 max_slots。"
+    "description": "assign_f59976b6 首次驗收（2026-07-21）結論：吞吐**未能證實提升**，因為變更後只有 1 個乾淨完整日（07-20 = 62，恰等於基線平均 62.0），而基線本身日間全距為 45–98，已覆蓋所有觀測值。\n\n基線（07-14~18）：57 / 98 / 53 / 45 / 57，平均 62.0、中位數 57。\n變更後：07-19 = 111（含變更前 10.7h）、07-20 = 62、07-21 = 99（未整日）。\n\n要做：待 07-22~07-25 累積 3-4 個完整日後，重跑同一比對\n  jq -r '.[] | select(.status==\"succeeded\") | (.completed_at // .updated_at // \"\")[0:10]' storage/next_tasks.json | sort | uniq -c\n並更新 storage/ops/throughput_audit_max_slots_20260721.md 第 1 節。\n\n注意：首驗已發現 66% 的 cohort 只發 1 個 slot、slots_full 全期僅 1 次 —— 若複驗仍無提升，結論應指向上游（supervisor 每 cohort 發幾條主線程 / 單張任務 wall-clock），而非再調 max_slots。",
+    "status_history": [
+      {
+        "ts": "2026-07-26T21:28:42.231356+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
+      },
+      {
+        "ts": "2026-07-26T21:28:42.466691+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
+      },
+      {
+        "ts": "2026-07-26T21:30:20.765020+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-1089e51989e44e7e97dd5096f23f738e"
+      }
+    ],
+    "started_at": "2026-07-26T21:28:42.466674+00:00",
+    "completed_at": "2026-07-26T21:30:20.764993+00:00",
+    "result": "複驗完成（3-4 完整日已累積）：乾淨完整日 07-20=62/07-22=71/07-23=22/07-26=28 → 平均 45.75、中位數 45，vs 基線(07-14~18) 平均 62.0/中位 57 —— max_slots 2→4 未證實提升，甚至略低。另偵測 07-24/07-25 兩連續零完成日（逐時戳欄位交叉核對確認為真實斷檔非欄位假象）。定案：cap 已非 binding（66% cohort 僅 1 slot、slots_full 全期 1 次），不建議再上調 max_slots，下一步查上游(cohort 主線程數 / 單張 wall-clock / 零完成斷檔成因)。已更新 storage/ops/throughput_audit_max_slots_20260721.md 第 1 節新增 1-recheck 段。"
   },
   {
     "id": "phase_z_orphan_half_cap_high_concurrency_20260721",
@@ -43601,7 +43648,8 @@
     ],
     "started_at": "2026-07-26T21:06:11.792690+00:00",
     "completed_at": "2026-07-26T21:10:51.837190+00:00",
-    "result": "root_cause=general-audience draft mile_35d8941b �?��??�?� 2 �?? distinct academic keyword hits�?QLIKE + Diebold-Mariano�?�?�??�?��??�?? alt-text�?�?觸�?� publisher _infer_audience upcast�??research�?validate_feed_audience.py 失�??使 CI Test Suite �?� pytest �??被 gate�?Run test suite �?��? skipped�?; repair=�??�?? guarded apply_article_correction() �?? alt-text �??�??Diebold-Mariano 檢�?�??�?�?�模�??表�?��?��??�??scrub �??�??統�?檢�?顯示�?�模�??表�?��??顯�??差�?��??�?distinct signals �??�?� {QLIKE}=1 < �??檻2�?�??章�?�?? general�?class sweep=validate_feed_audience.py �??�? PASS�?1885 entries / 482 general / 0 mismatches�?�?� feed �?��??�? leak�?; repair_commit=pending_post_commit"
+    "result": "root_cause=general-audience draft mile_35d8941b �?��??�?� 2 �?? distinct academic keyword hits�?QLIKE + Diebold-Mariano�?�?�??�?��??�?? alt-text�?�?觸�?� publisher _infer_audience upcast�??research�?validate_feed_audience.py 失�??使 CI Test Suite �?� pytest �??被 gate�?Run test suite �?��? skipped�?; repair=�??�?? guarded apply_article_correction() �?? alt-text �??�??Diebold-Mariano 檢�?�??�?�?�模�??表�?��?��??�??scrub �??�??統�?檢�?顯示�?�模�??表�?��??顯�??差�?��??�?distinct signals �??�?� {QLIKE}=1 < �??檻2�?�??章�?�?? general�?class sweep=validate_feed_audience.py �??�? PASS�?1885 entries / 482 general / 0 mismatches�?�?� feed �?��??�? leak�?; repair_commit=48ce5adeb88e7a3db4463bf610fa296def12e3b9",
+    "repair_commit_source": "post_commit_receipt"
   },
   {
     "id": "k1715_bfgs_fix_dephantom_rerun_20260727",
@@ -43689,5 +43737,72 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-26T21:05:47+00:00"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_k1095_v2_known_in_advance_schedule",
+    "title": "[dreaming] missing_retry_strategy:k1095_v2_known_in_advance_schedule",
+    "description": "Failed task k1095_v2_known_in_advance_schedule has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-21T21:25:00.758443+00:00）。\n證據：task k1095_v2_known_in_advance_schedule (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-26T21:25:02.047553+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:k1095_v2_known_in_advance_schedule",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 3,
+      "governance_target": null
+    },
+    "follows_up_on": "k1095_v2_known_in_advance_schedule"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_21_ai",
+    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_21_ai變現",
+    "description": "Failed task trending_repost_2026_07_21_ai變現 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-21T21:25:00.758443+00:00）。\n證據：task trending_repost_2026_07_21_ai變現 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-26T21:25:02.047553+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_21_ai變現",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 3,
+      "governance_target": null
+    },
+    "follows_up_on": "trending_repost_2026_07_21_ai變現"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_21",
+    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_21_晶片回檔",
+    "description": "Failed task trending_repost_2026_07_21_晶片回檔 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-21T21:25:00.758443+00:00）。\n證據：task trending_repost_2026_07_21_晶片回檔 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-26T21:25:02.047553+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_21_晶片回檔",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 3,
+      "governance_target": null
+    },
+    "follows_up_on": "trending_repost_2026_07_21_晶片回檔"
+  },
+  {
+    "id": "dreaming_observation_ledger_breach_multi_slot_throughput_acceptance",
+    "title": "[dreaming] observation_ledger_breach:multi_slot_throughput_acceptance",
+    "description": "觀察項 `multi_slot_throughput_acceptance` 逾期未決策。到期動作：完成 assign_f59976b6 驗收：對照基線判定吞吐變化，決定維持 max_slots=4 或回退 2；回退判準 = PHASE-Z cohort 競態 / worktree 磁碟壓力 / quota 連發（de-rate guard 觸發史）。二選一，不准留在 limbo：(a) 執行到期動作並 `uv run volpred ops observation resolve --id multi_slot_throughput_acceptance --resolution <做了什麼>`；(b) 有充分理由才 `uv run volpred ops observation extend --id multi_slot_throughput_acceptance --deadline <ISO> --reason <為什麼>`（展期紀錄留在帳本上）。\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-21T21:25:00.758443+00:00）。\n證據：observation item `multi_slot_throughput_acceptance`: deadline 2026-07-21T18:00:00+08:00 passed (5.5d overdue) — what: max_slots 2→4（assign_794c4bc2，2026-07-19）後的 24h 吞吐驗收；驗收任務 assign_f59976b6（blocked_until 2026-07-20T11:00+08:00）；改動前基線近 5 日 57/98/53/46/57 ≈ 62 任務/日\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-26T21:25:02.047553+00:00",
+    "dreaming": {
+      "signature": "observation_ledger_breach:multi_slot_throughput_acceptance",
+      "pattern_type": "observation_ledger_breach",
+      "occurrences": 3,
+      "governance_target": null
+    }
   }
 ]
