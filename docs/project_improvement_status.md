@@ -115,10 +115,18 @@ generation；stage 在 owner lock 返回後、INSERT 前重驗 expiry。Owner tr
 BEFORE UPDATE trigger 與 wrapper post-CAS 會雙重驗證 DB-clock expiry，等待跨過有效窗
 就整筆 rollback；rollback 只能使用 gate 記錄的 consumed generation。Stage、read、transfer
 仍不授權 worker、approver 或 PUBLIC，避免任意 SHA 或 runtime caller 繞過七日 gate。
-目前僅有 local PG17／non-superuser migration replay 與 nested workflow
-integration evidence，未部署 production、未改 live owner、未做七日 read-back／rollback
-rehearsal。因此這是 evidence-bound transaction-gate checkpoint，不是 cutover；Issue #9 仍為
-`contained`。
+2026-07-26 production 已套用
+`20260726061130 operations_core_work_ownership` 與
+`20260726061244 operations_core_work_cutover_gate`。Catalog 回讀確認 owner／gate
+tables 均 FORCE RLS、owner-update gate trigger 啟用，stage／gate-read／transfer／
+ungated seam 對 PUBLIC、worker、approver 與 deployment role 都無 EXECUTE；既有九個
+formal callers 全數綁到 definer-only internal seam。Live table statistics 只有
+migration 建立的 owner row／receipt 各一筆且零 update，gate／gate receipt 均為零，
+所以 owner 仍是初始 `legacy/1`，本次沒有 staged manifest 或 owner transfer。四個相鄰
+suites **96 passed**；Supabase security advisor 對本 scope 零 finding，performance
+advisor 只有新建 receipt timeline index 尚無 workload 的 unused-index INFO。七日
+read-back／正式接管／rollback rehearsal 仍未執行；因此這是 deployed
+evidence-bound transaction gate，不是 cutover，Issue #9 仍為 `contained`。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由

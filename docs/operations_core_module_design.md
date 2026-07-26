@@ -1522,9 +1522,9 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   或迫使新 owner 接受無法驗證的 claim。Preflight 因此要求 next_tasks 為
   quiescent（零 active lease）；active work id 會在 manifest 產生前明確 fail closed。
 - 這是 **read-only preflight capability**，沒有 filesystem／database mutation、
-  materialize 或 apply interface；它只產生交給下一節 local durable gate stage 的
-  evidence capsule。Local gated CAS 已完成，但 migration 尚未部署 production，
-  `direct_execution` mode 與零 observation evidence 均未變，也未完成 live
+  materialize 或 apply interface；它只產生交給下一節 durable gate stage 的 evidence
+  capsule。Gated CAS migration 已部署 production，但沒有 stage live manifest 或轉移
+  owner；`direct_execution` mode 與零 observation evidence 均未變，也未完成 live
   unique-owner 下游回讀與 rollback rehearsal，因此 Issue #9 保持 `contained`。
 
 ### Issue #9 — Durable Work Coordinator owner fencing
@@ -1564,8 +1564,17 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   transfer wrapper 在可能阻塞的 owner CAS 返回後再驗一次；owner lock 等待跨過
   `valid_until` 會讓 owner／ACL／receipts／lease reconciliation 全部 rollback，gate
   保持 `ready`。兩個非 UTC session timezone 也確認 naive timestamp 一律拒絕、aware
-  instant 一致。目前未部署 production、未產生七日 receipts，
-  也未做 live unique-owner read-back／rollback rehearsal。
+  instant 一致。2026-07-26 production 已套用
+  `20260726061130 operations_core_work_ownership` 與
+  `20260726061244 operations_core_work_cutover_gate`。Catalog 回讀確認 owner／gate
+  tables 均 FORCE RLS，trigger 啟用，所有 stage／gate-read／transfer／ungated seam
+  對 PUBLIC、worker、approver 與 deployment role 都無 EXECUTE。Table statistics
+  只有 migration 建立的 owner row／receipt 各一筆且零 update，gate／gate receipt
+  均為零，故 live owner 仍是初始 `legacy/1`，沒有 staged manifest 或 transfer。
+  Supabase security advisor 對本 scope 為零 finding；performance advisor 只有新建
+  receipt timeline index 尚無 workload 的 unused-index INFO。四個相鄰 suites
+  **96 passed**。目前仍未產生七日 receipts，也未做 live unique-owner
+  read-back／rollback rehearsal。
   因此 formal transfer operator 仍不可用，Issue #9 仍是 `contained`。
 
 取得七天 shadow 證據、production migration read-back 與 owner-approved window 後，

@@ -2900,3 +2900,24 @@ naive timestamp 均在 stage 前拒絕，帶 offset 的同一 manifest 則解析
 此 local evidence-bound gate 根因為 **`root_cause_fixed_and_verified`**；但 migration
 尚未部署 production、七日真實 receipts 尚未累積，也未做 live cutover／rollback
 rehearsal，所以 Issue #9 整體仍為 **`contained`**。
+
+### 2026-07-26 — Work owner durable gate 已部署，live owner 刻意維持 legacy/1
+
+**部署範圍與安全界線**：Production 依序套用
+`20260726061130 operations_core_work_ownership` 與
+`20260726061244 operations_core_work_cutover_gate`。本輪只部署 owner fencing 與
+evidence gate schema；沒有產生 preflight manifest、沒有 stage gate、沒有呼叫
+transfer。Catalog 回讀確認 owner／receipt／gate／gate receipt 四表均 FORCE RLS，
+owner-row gate trigger 已啟用；stage、gate read、gated transfer 與 ungated primitive
+全由 no-login definer 持有、固定 search path，PUBLIC、worker、approver 與 deployment
+role 均無 EXECUTE。九個既有 formal callers 全部回讀為 definer-only internal seam。
+
+**Live 回讀與回歸**：PostgreSQL table statistics 顯示 owner row／receipt 各只有
+migration 建立的 1 insert、0 update，gate／gate receipt 都是 0，因此 live owner
+仍是初始 `legacy/1`，沒有任何 ownership mutation。四個 Work Coordinator／cutover／
+ownership suites **96 passed**。Supabase security advisor 對本 scope 無 finding；
+performance advisor 只有剛建立、尚無 workload 的
+`work_owner_receipts_capability_changed_idx` unused-index INFO，不在零使用樣本下誤刪。
+Production schema deployment 與 ACL/catalog read-back 已完成，但七日真實 receipts、
+正式 unique-owner downstream read-back 及 rollback rehearsal 仍缺，故 Issue #9 與
+operations-core umbrella 維持 **`contained`**。
