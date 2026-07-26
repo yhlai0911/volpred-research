@@ -3080,5 +3080,24 @@ delivered；回讀 `expired_started=0`、`active_started=0`、22/22 recovery rec
 no-login definer owner／SECURITY DEFINER／空 search path／service-role-only。
 資料回讀仍為 `started_total=0`、`expired_started=0`、22 receipts、
 21 dead-lettered + 1 delivered、0 nonterminal。16:00 台灣時間的第一個自動
-piggy-back fire 另以 `recovered_count=0` exit 0 並寫回 cron marker。此 incident
-現已完成五步 gate，狀態為 **`root_cause_fixed_and_verified`**。
+piggy-back fire 另以 `recovered_count=0` exit 0 並寫回 cron marker。Post-fix
+全專案功能回歸（外部模型 key unset、`VOLPRED_CI_PARITY=0`）為
+**5,190 passed、1 skipped、0 failed**；標準 CI-parity-on 相鄰套件另為
+**110 passed、exit 0**。此 incident 現已完成五步 gate，狀態為
+**`root_cause_fixed_and_verified`**。
+
+**Due retry follow-up**：只查 attempt status 的初版驗證把其他 effect family 的
+`retry_scheduled` 混進 email 數字；按 `owned_notification_requests.effect_family`
+重算後，email 自身仍有 1 筆 `WorkItem pending + outbox pending` 且早已超過
+`available_at`。這證明「settlement 寫出 retry」不等於「有人會消費 retry」。
+Recovery RPC 現同時原子選取 expired `started` 或 due `retry_scheduled`；後者不改寫
+原 provider settlement evidence，另追加 `retry_due_without_actuator` recovery receipt。
+初版 selector 只綁 owner generation，但 generation 是 per-family counter，不是跨 family
+authority boundary；same-generation cross-family RED fixture 證實 email worker 可誤領
+別的 family。Forward migration
+`20260726083559_fence_owned_email_recovery_family` 將 request effect family 與
+effect kind 一併納入 SQL selector。Production catalog 回讀
+`explicit_family_fence=true`，且原有 9 筆 publisher／delete due retry 數量不變。
+Follow-up 首跑將唯一 email due retry stale dead-letter；exact-family 回讀
+`expired_started=0`、`due_retry=0`、`nonterminal=0`、recovery receipts=23，第二次
+wrapper no-op。此 actuator 缺口同樣為 **`root_cause_fixed_and_verified`**。

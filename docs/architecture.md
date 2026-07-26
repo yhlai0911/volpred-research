@@ -651,6 +651,13 @@
 > 告警。Production 初次回收 22 筆後為 21 dead-lettered、1 delivered，三層
 > `started` 均為 0；follow-up production receipt
 > `20260726081120 fence_owned_email_expired_retry` 與第一個自動排程 fire 已回讀成功。
+> 同一 actuator 亦會選取 `email.ops_alert` 最新一筆已到期的
+> `retry_scheduled + WorkItem pending + outbox pending`。初版 due-retry selector
+> 只比對 owner generation；因各 family generation 可碰巧相同，follow-up
+> `20260726083559_fence_owned_email_recovery_family` 再強制比對 effect family 與
+> effect kind。Production 回讀確認 exact-family fence 已存在、其餘 9 筆
+> publisher／delete due retry 未變；email follow-up 回收 1 筆後，
+> `expired_started=0`、`due_retry=0`、`nonterminal=0`，recovery receipts 共 23 筆。
 > 這是 `email.ops_alert` effect-family 的 runtime 流程，不代表 Work Coordinator
 > queue owner 已切換。
 

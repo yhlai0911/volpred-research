@@ -196,10 +196,21 @@ P1 race；初版結案口徑已更正。Follow-up migration 讓普通 begin 看�
 也共用同一 execution context。Final Matt Standards／Spec 均 PASS；production
 `20260726081120 fence_owned_email_expired_retry` 已套用，catalog/security 與
 `0 started / 22 terminal receipts` 回讀一致，16:00 第一個自動排程亦
-`recovered_count=0` exit 0。此 expired-attempt incident 為
+`recovered_count=0` exit 0。Post-fix 相鄰 CI-parity-on **110 passed**；全專案
+功能回歸 **5,190 passed、1 skipped、0 failed**。此 expired-attempt incident 為
 **`root_cause_fixed_and_verified`**；Work
 Coordinator Issue #9 仍因 owner=`legacy/1`、gate=0 與七日 evidence 未滿而維持
 **`contained`**。
+Exact-family follow-up 另發現 1 筆 email `retry_scheduled` 已超過 outbox
+`available_at`，但原排程只收 expired `started`。Recovery RPC 現一併消費 due retry，
+保留原 provider settlement evidence並追加 `retry_due_without_actuator` receipt。
+初版 selector 只比對 per-family owner generation；same-generation cross-family
+RED fixture 證實此條件不是 authority boundary。Forward migration
+`20260726083559_fence_owned_email_recovery_family` 增加 request family 與 effect-kind
+fence；production catalog 回讀已確認，且其餘 9 筆 publisher/delete rows 未變。
+Production 首跑將該 email retry stale dead-letter，回讀
+`email_expired_started=0`、`email_due_retry=0`、`email_nonterminal=0`、
+email recovery receipts=23，隨後 wrapper no-op。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由

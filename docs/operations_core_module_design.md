@@ -905,6 +905,15 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   definition、ACL 與 0 nonterminal；第一個自動 piggy-back fire exit 0。Final Matt
   Standards／Spec 均 PASS，因此 expired-attempt slice 為
   `root_cause_fixed_and_verified`。
+- Production 精確 family read-back 另發現一筆 email provider retry 已超過
+  `available_at` 但沒有 consumer。Recovery selector 現同時接受 expired `started`
+  與 due `retry_scheduled`，後者保留原 settlement evidence並另寫
+  `retry_due_without_actuator` receipt。由於 owner generation 只在 family 內遞增，
+  初版 generation-only selector 不構成跨 family authority boundary；forward migration
+  `20260726083559_fence_owned_email_recovery_family` 增加 request family 與 effect-kind
+  fence。Same-generation cross-family 回歸與 production catalog 回讀均通過；
+  follow-up 首跑回收該筆 stale retry，而 9 筆 publisher／delete due retry 未變，
+  email exact-family `expired_started/due_retry/nonterminal` 全為 0。
 
 ### 2026-07-24 publisher 單篇 Supabase sync shadow checkpoint
 

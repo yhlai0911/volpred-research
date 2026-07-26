@@ -215,6 +215,14 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726081120_fence_owned_email_expired_retry.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726081532_operations_core_owned_email_due_retry_recovery.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726083559_fence_owned_email_recovery_family.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -4767,6 +4775,63 @@ def test_expired_owned_email_attempt_is_atomically_recovered(
                 primary_token,
             ),
         ).fetchone()[0]
+        retry_receipt = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                recovered["work_id"],
+                recovered["work_version"],
+                "work-recovery-attempt-2",
+                recovered["effect"]["id"],
+                recovered["outbox_sequence"],
+                recovered["attempt_count"],
+                recovered["worker_id"],
+                "outbox-recovery-attempt-2",
+                recovered["primary_authority_key"],
+                recovered["primary_authority_holder_ref"],
+                recovered["primary_authority_epoch"],
+                primary_token,
+                recovered["authority_request_sha256"],
+                recovered["outbox_claim_ref"],
+                recovered["primary_authority_ref"],
+                "retryable_failure",
+                None,
+                None,
+                "email_provider_error",
+                "effect-attempt:pg17-retryable-provider-error",
+                "f" * 64,
+            ),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET available_at = clock_timestamp() - interval '1 minute'
+            WHERE effect_id = %s
+            """,
+            (owned_request["effect_id"],),
+        )
+        connection.execute("SET ROLE service_role")
+        retried = connection.execute(
+            """
+            SELECT public.volpred_recover_expired_owned_email_notification(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                worker_id,
+                300,
+                "work-recovery-attempt-3",
+                "outbox-recovery-attempt-3",
+                primary_token,
+            ),
+        ).fetchone()[0]
         connection.execute("RESET ROLE")
 
         recovery_state = connection.execute(
@@ -4781,11 +4846,23 @@ def test_expired_owned_email_attempt_is_atomically_recovered(
               (SELECT status
                FROM volpred_ops.owned_notification_attempts
                WHERE effect_id = %s AND attempt_count = 2),
+              (SELECT status
+               FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 3),
               (SELECT count(*)
                FROM volpred_ops.owned_notification_recovery_receipts
                WHERE effect_id = %s
-                 AND expired_attempt_count = 1
-                 AND recovery_attempt_count = 2),
+                 AND (
+                   (expired_attempt_count = 1
+                    AND recovery_attempt_count = 2
+                    AND reason_code =
+                      'worker_interrupted_after_begin')
+                   OR
+                   (expired_attempt_count = 2
+                    AND recovery_attempt_count = 3
+                    AND reason_code =
+                      'retry_due_without_actuator')
+                 )),
               has_function_privilege(
                 'service_role',
                 'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)',
@@ -4816,26 +4893,128 @@ def test_expired_owned_email_attempt_is_atomically_recovered(
                      AND procedure.proconfig = ARRAY['search_path=""']
                FROM pg_proc AS procedure
                WHERE procedure.oid =
+                 'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)'::regprocedure),
+              (SELECT position(
+                        'owned_request.effect_family = ownership.effect_family'
+                        IN pg_get_functiondef(procedure.oid)
+                      ) > 0
+               FROM pg_proc AS procedure
+               WHERE procedure.oid =
+                 'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)'::regprocedure),
+              (SELECT position(
+                        'effect.effect_kind = ''email.notification.send'''
+                        IN pg_get_functiondef(procedure.oid)
+                      ) > 0
+               FROM pg_proc AS procedure
+               WHERE procedure.oid =
                  'public.volpred_recover_expired_owned_email_notification(bigint,text,integer,text,text,text)'::regprocedure)
             """,
-            (owned_request["effect_id"],) * 4,
+            (owned_request["effect_id"],) * 5,
         ).fetchone()
+        connection.execute("SET ROLE service_role")
+        connection.execute(
+            """
+            SELECT public.volpred_settle_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                retried["work_id"],
+                retried["work_version"],
+                "work-recovery-attempt-3",
+                retried["effect"]["id"],
+                retried["outbox_sequence"],
+                retried["attempt_count"],
+                retried["worker_id"],
+                "outbox-recovery-attempt-3",
+                retried["primary_authority_key"],
+                retried["primary_authority_holder_ref"],
+                retried["primary_authority_epoch"],
+                primary_token,
+                retried["authority_request_sha256"],
+                retried["outbox_claim_ref"],
+                retried["primary_authority_ref"],
+                "retryable_failure",
+                None,
+                None,
+                "email_provider_error",
+                "effect-attempt:pg17-cross-family-fixture",
+                "e" * 64,
+            ),
+        )
+        connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_sync_owner(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                "legacy",
+                1,
+                "operations_core",
+                "test:pg17-recovery",
+                "create same-generation cross-family retry fixture",
+                None,
+            ),
+        )
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.effect_outbox
+            SET available_at = clock_timestamp() - interval '1 minute'
+            WHERE effect_id = %s
+            """,
+            (owned_request["effect_id"],),
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.owned_notification_requests
+            SET effect_family = 'publisher.article.supabase.sync'
+            WHERE effect_id = %s
+            """,
+            (owned_request["effect_id"],),
+        )
+        connection.execute("SET ROLE service_role")
+        cross_family = connection.execute(
+            """
+            SELECT public.volpred_recover_expired_owned_email_notification(
+              %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                worker_id,
+                300,
+                "work-cross-family-must-not-recover",
+                "outbox-cross-family-must-not-recover",
+                primary_token,
+            ),
+        ).fetchone()[0]
 
     assert first_attempt["attempt_count"] == 1
     assert ordinary_retry_state == (1, "started", 1, "running")
     assert recovered["effect"]["id"] == owned_request["effect_id"]
     assert recovered["attempt_count"] == 2
+    assert retry_receipt["disposition"] == "retry_scheduled"
+    assert retried["effect"]["id"] == owned_request["effect_id"]
+    assert retried["attempt_count"] == 3
     assert recovery_state == (
         "retry_scheduled",
         "recovered_after_expired_lease",
+        "retry_scheduled",
         "started",
-        1,
+        2,
+        True,
+        True,
         True,
         True,
         True,
         True,
         True,
     )
+    assert cross_family["recovered"] is False
 
 
 def test_owned_publisher_transaction_cutover_delivery_and_rollback(
