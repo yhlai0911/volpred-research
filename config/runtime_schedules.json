@@ -7,6 +7,7 @@
   },
   "schedule_materialization": {
     "schema": 1,
+    "job_id": "operations_core_scheduler",
     "generation": "operations-core-v1",
     "mode": "canary",
     "timezone": "Asia/Taipei",
@@ -17,13 +18,7 @@
     "max_parallel": 4,
     "shadow_grace_seconds": 120,
     "active_jobs": {
-      "audit_publish_sync": {
-        "activated_at": "2026-07-26T10:20:00Z"
-      },
       "event_jobs_materialize": {
-        "activated_at": "2026-07-26T10:20:00Z"
-      },
-      "feed_sync": {
         "activated_at": "2026-07-26T10:20:00Z"
       },
       "handoff_regen": {
