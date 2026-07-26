@@ -416,7 +416,7 @@ def test_external_writer_lock_blocks_before_authority_grant(
         assert holder.returncode == 0, (stdout, stderr)
 
 
-def test_timeout_then_unrelated_commit_terminally_abandons_old_grant(
+def test_timeout_then_unrelated_commit_keeps_old_grant_active(
     repository: tuple[Path, str],
     tmp_path: Path,
 ) -> None:
@@ -450,13 +450,16 @@ def test_timeout_then_unrelated_commit_terminally_abandons_old_grant(
         "-m",
         _authority_bound_message("unrelated request", "d" * 64),
     )
-    with pytest.raises(CommitActuatorBlocked, match="expected HEAD"):
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="ambiguous or authority-bound",
+    ):
         _actuator(authority).commit(_command(repo, base_commit))
 
-    assert len(authority.abandonments) == 1
-    assert authority.abandonments[0].request_sha256 == (
-        _authority_request(_command(repo, base_commit)).request_sha256
-    )
+    assert authority.abandonments == []
+    assert _authority_request(
+        _command(repo, base_commit)
+    ).request_sha256 in authority.grants
 
 
 def test_timeout_with_staged_residue_keeps_grant_active_on_retry(
@@ -514,6 +517,34 @@ def test_missing_authority_trailer_keeps_existing_grant_active(
     authority.authorize(request)
     _git(repo, "add", "new.txt", "tracked.txt")
     _git(repo, "commit", "-m", command.message)
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="ambiguous or authority-bound",
+    ):
+        _actuator(authority).commit(command)
+
+    assert authority.abandonments == []
+    assert request.request_sha256 in authority.grants
+
+
+def test_foreign_valid_trailer_on_exact_content_keeps_grant_active(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    command = _command(repo, base_commit)
+    request = _authority_request(command)
+    authority = _Authority()
+    authority.authorize(request)
+    _git(repo, "add", "new.txt", "tracked.txt")
+    _git(
+        repo,
+        "commit",
+        "-m",
+        _authority_bound_message(command.message, "d" * 64),
+    )
 
     with pytest.raises(
         CommitActuatorBlocked,

@@ -40,8 +40,9 @@ abandonment 沒有共用 terminal arbitration。現已改為先取得 repo-wide 
 writer lease，才在同一 lease 內重讀 HEAD、authorize、把 capability 傳給 writer，
 並做終止判定；busy 不再建立 grant，timeout 保留 active grant等待 exact recovery，
 authority-bound non-exact mutation也持續阻擋 rollback。只有同一 lease 內證明未發生
-該 request mutation才可 immutable abandon；缺失／損壞 trailer 或同 request 的
-非精確 commit 一律視為 ambiguous。Writer 前會保存完整 index tree 與 exact-path
+該 request mutation且repository回到完整基線才可 immutable abandon；跨 retry 的
+stale HEAD完全不信任 Git trailer，即使是另一個格式正確 digest，也一律視為
+ambiguous。Writer 前會保存完整 index tree 與 exact-path
 kind／mode／hash，abandon 前必須全部回到基線。重試看到 target staged 或 formal
 workspace 的 canonical paths 已偏離 base，會在 authorize／writer 前保留舊 grant。
 DB settlement trigger與abandon共用

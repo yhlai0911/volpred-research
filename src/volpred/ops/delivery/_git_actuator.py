@@ -231,24 +231,10 @@ class GitCommitActuator:
             if recovered is None:
                 existing_grant = self._lookup_request(authority_request)
                 if existing_grant is not None:
-                    first_parent_request = _first_parent_authority_request(
-                        repository,
-                        command=normalized,
-                        observed_head=observed_head,
-                    )
-                    if (
-                        first_parent_request is None
-                        or first_parent_request
-                        == authority_request.request_sha256
-                    ):
-                        raise CommitActuatorBlocked(
-                            "expected HEAD fence failed after an ambiguous or "
-                            "authority-bound non-exact mutation; authority "
-                            "remains active for incident recovery"
-                        )
-                    self._abandon_request(
-                        authority_request,
-                        existing_grant,
+                    raise CommitActuatorBlocked(
+                        "expected HEAD fence failed after an ambiguous or "
+                        "authority-bound non-exact mutation; authority "
+                        "remains active for incident recovery"
                     )
                 raise CommitActuatorBlocked(
                     "expected HEAD fence failed and no exact prior ChangeSet "
@@ -603,43 +589,6 @@ def _find_prior_commit(
         parent_sha=parent_sha,
         observed_at=observed_at.isoformat(),
     )
-
-
-def _first_parent_authority_request(
-    repository: Path,
-    *,
-    command: CommitActuation,
-    observed_head: str,
-) -> str | None:
-    candidates = _git_text(
-        repository,
-        "rev-list",
-        "--first-parent",
-        "--reverse",
-        f"{command.expected_head}..{observed_head}",
-    ).splitlines()
-    if not candidates:
-        return None
-    message = _git_text(
-        repository,
-        "show",
-        "--no-patch",
-        "--format=%B",
-        candidates[0],
-    )
-    return _authority_trailer_value(message)
-
-
-def _authority_trailer_value(message: str) -> str | None:
-    prefix = f"{_AUTHORITY_TRAILER}: "
-    values = [
-        line.removeprefix(prefix)
-        for line in message.splitlines()
-        if line.startswith(prefix)
-    ]
-    if len(values) != 1 or _SHA256.fullmatch(values[0]) is None:
-        return None
-    return values[0]
 
 
 def _preflight_repository_state(command: CommitActuation) -> None:

@@ -525,9 +525,9 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   capability 繼承給 exact-path writer，並做 terminal reconciliation；因此 lock busy
   在 grant 建立前就拒絕。Timeout 是 ambiguous outcome，只保留 active grant；
   authority-bound 但非 exact 的 HEAD mutation 同樣保留 grant並阻擋 rollback。
-  只有 writer lease 內確認 HEAD 未變，或 timeout 後重試證明 first-parent 是另一個
-  **有效 authority request**，才可能寫 immutable abandonment；缺失／損壞 trailer
-  或同 request 的非精確 commit 都視為 ambiguous mutation。Writer 前另保存完整
+  只有同一 writer lease 內確認 HEAD 未變且 repository 回到完整基線，才可能寫
+  immutable abandonment。任何跨 retry 的 stale HEAD 都不信任 Git trailer；即使
+  是另一個格式正確 digest，也一律視為 ambiguous mutation並保留 grant。Writer 前另保存完整
   index tree 與 exact-path kind／mode／hash baseline；abandon 前 HEAD、index 與
   worktree 必須全部回到基線。重試若 target 已 staged，或 formal workspace 模式下
   canonical exact paths 已偏離 base，會在 authorize／writer 前保留既有 grant並
@@ -551,7 +551,7 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   `malformed ChangeSet record`，不把遠端 payload 當 canonical state。
 - 隔離 PostgreSQL + 暫存 Git system test 已實際產生唯一 exact-path commit，回讀
   commit object／HEAD／ChangeSet／authority／WorkItem 後完成 rollback rehearsal；
-  另有 external-lock-before-authority、timeout→unrelated commit cleanup、
+  另有 external-lock-before-authority、timeout→unrelated commit retention、
   missing-trailer／authority-bound non-exact mutation、timeout-after-git-add staged
   residue、lost workspace recovery，以及雙連線 terminal arbitration regressions。
   精準提交 `07accb1e1` 後完整 scoped suite 198 passed；最後兩個 review follow-up
