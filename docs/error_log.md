@@ -3321,3 +3321,29 @@ wrapper manifest、writer ownership 與 architecture/ownership 文件同步。li
 Claude／Codex quota 用盡只留下 `quota_blocked`，不會讓純程式排程停止或假綠；下個
 合法 hourly/requested tick 在 quota reset 後自然再試。此雙時鐘 incident 五步完成，
 狀態 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-26 — Direct-mode preserve receipt 讓正式 restore 永久不可達
+
+**證據化症狀與根因層級**：direct-mode receipt明列
+`preserve_task_ids=[assign_f3f36d75]`，`reconcile-direct`也依契約永久保留該control
+row；但`restore_task_pool_backup()`只接受完全空的live queue。兩條各自正確的規則
+組合後，正式退出在任何合法狀態都不可達。Production backup另含兩筆cutover前的
+`in_progress`，原restore會無提示原樣復活；若先移除control row又會遺失direct-mode
+期間新增的checkpoint。這是owner transition／evidence boundary契約缺陷，不是手動
+清一列即可結案。
+
+**底層修復與回歸**：public restore seam現在只允許live queue包含active receipt明列
+的preserved IDs；receipt外、anonymous與duplicate rows在任何archive／state／queue
+mutation前fail closed。合法control rows會先以exact bytes寫入backup旁的durable
+archive，file與parent directory均fsync並read-back；prepared與final owner receipt
+綁定archive path、SHA-256、bytes及row count，crash retry先重算完整identity。Backup
+中的`claimed`／`in_progress` IDs也必須由operator透過重複
+`--expected-active-task-id`精確確認整個集合，prepared transaction持久保存該確認，
+漏列、多列或後續backup漂移都拒絕。
+
+Public function、CLI、receipt外drift、active-set mismatch與prepared archive tamper
+failure injection共 **37 passed**；compile與diff check通過。這個「合法狀態永久無法
+restore／控制進度可能遺失／舊claim靜默復活」根因完成五步，狀態
+**`root_cause_fixed_and_verified`**。Production仍維持direct mode，待live exact
+archive、receipt-bound restore、canonical stale cleanup與內容下游acknowledgement
+回讀後，才可把上線切換本身標完成。

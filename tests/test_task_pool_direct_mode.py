@@ -449,6 +449,317 @@ def test_verified_backup_is_a_working_restore_path(
     assert load_task_pool_mode(state).enabled is False
 
 
+def test_restore_archives_receipt_bound_control_rows_before_overwrite(
+    tmp_path: Path,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    original_rows = [
+        {"id": "old-pending", "status": "pending", "priority": 2},
+        {"id": "control-task", "status": "pending", "priority": 1},
+    ]
+    original_bytes = _write_pool(queue, original_rows)
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="cutover-owner",
+        reason="direct mode",
+        preserve_task_ids=("control-task",),
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    control_bytes = _write_pool(
+        queue,
+        [
+            {
+                "id": "control-task",
+                "status": "pending",
+                "priority": 1,
+                "latest_checkpoint": "two-Mac host still offline",
+            }
+        ],
+    )
+
+    receipt = restore_task_pool_backup(
+        queue_path=queue,
+        state_path=state,
+        backup_path=entered.backup_path,
+        restored_by="rollback-owner",
+        reason="resume queued content",
+        expected_state_sha256=load_task_pool_mode_evidence(state).sha256,
+        now="2026-07-23T12:05:00+00:00",
+    )
+
+    assert queue.read_bytes() == original_bytes
+    assert receipt.archived_preserved_task_count == 1
+    assert receipt.archived_preserved_rows_path is not None
+    archive = Path(receipt.archived_preserved_rows_path)
+    assert archive.read_bytes() == control_bytes
+    assert receipt.archived_preserved_rows_sha256 == hashlib.sha256(
+        control_bytes
+    ).hexdigest()
+    assert receipt.archived_preserved_rows_bytes == len(control_bytes)
+    mode_payload = json.loads(state.read_text())
+    assert mode_payload["restored_preserved_rows_path"] == str(archive.resolve())
+    assert mode_payload["restored_preserved_rows_sha256"] == hashlib.sha256(
+        control_bytes
+    ).hexdigest()
+    assert mode_payload["restored_preserved_rows_bytes"] == len(control_bytes)
+    assert mode_payload["restored_preserved_task_count"] == 1
+
+
+def test_restore_resume_rejects_a_tampered_preserved_row_archive(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    _write_pool(
+        queue,
+        [{"id": "control-task", "status": "pending", "priority": 1}],
+    )
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="cutover-owner",
+        reason="direct mode",
+        preserve_task_ids=("control-task",),
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    control_bytes = _write_pool(
+        queue,
+        [
+            {
+                "id": "control-task",
+                "status": "pending",
+                "latest_checkpoint": "ready to restore",
+            }
+        ],
+    )
+    original_atomic_write = task_pool_mode._atomic_write_json
+
+    def crash_after_prepare(path: Path, payload: dict[str, object]) -> None:
+        original_atomic_write(path, payload)
+        if payload.get("mode") == "restore_in_progress":
+            raise RuntimeError("simulated process death after prepare")
+
+    monkeypatch.setattr(
+        task_pool_mode,
+        "_atomic_write_json",
+        crash_after_prepare,
+    )
+    with pytest.raises(RuntimeError, match="simulated process death"):
+        restore_task_pool_backup(
+            queue_path=queue,
+            state_path=state,
+            backup_path=entered.backup_path,
+            restored_by="rollback-owner",
+            reason="resume queued content",
+            expected_state_sha256=load_task_pool_mode_evidence(state).sha256,
+            now="2026-07-23T12:05:00+00:00",
+        )
+    monkeypatch.setattr(
+        task_pool_mode,
+        "_atomic_write_json",
+        original_atomic_write,
+    )
+    prepared_payload = json.loads(state.read_text())
+    archive = Path(prepared_payload["restore_preserved_rows_path"])
+    archive.write_bytes(b"[]\n")
+    prepared_bytes = state.read_bytes()
+
+    with pytest.raises(
+        ValueError,
+        match="preserved-row archive does not match the restore transaction",
+    ):
+        restore_task_pool_backup(
+            queue_path=queue,
+            state_path=state,
+            backup_path=entered.backup_path,
+            restored_by="retry-worker",
+            reason="resume prepared restore",
+            expected_state_sha256=hashlib.sha256(prepared_bytes).hexdigest(),
+            now="2026-07-23T12:10:00+00:00",
+        )
+
+    assert queue.read_bytes() == control_bytes
+    assert state.read_bytes() == prepared_bytes
+
+
+def test_restore_rejects_rows_outside_the_direct_mode_preserve_receipt(
+    tmp_path: Path,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    original_bytes = _write_pool(
+        queue,
+        [{"id": "control-task", "status": "pending", "priority": 1}],
+    )
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="cutover-owner",
+        reason="direct mode",
+        preserve_task_ids=("control-task",),
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    drift_bytes = _write_pool(
+        queue,
+        [
+            {"id": "control-task", "status": "pending", "priority": 1},
+            {"id": "writer-leak", "status": "pending", "priority": 2},
+        ],
+    )
+    state_bytes = state.read_bytes()
+
+    with pytest.raises(
+        ValueError,
+        match="outside the active direct-mode preserve receipt: writer-leak",
+    ):
+        restore_task_pool_backup(
+            queue_path=queue,
+            state_path=state,
+            backup_path=entered.backup_path,
+            restored_by="rollback-owner",
+            reason="resume queued content",
+            expected_state_sha256=load_task_pool_mode_evidence(state).sha256,
+            now="2026-07-23T12:05:00+00:00",
+        )
+
+    assert queue.read_bytes() == drift_bytes
+    assert state.read_bytes() == state_bytes
+    assert Path(entered.backup_path).read_bytes() == original_bytes
+    assert list((tmp_path / "backups").glob("*_preserved_rows_*.json")) == []
+
+
+def test_restore_requires_exact_acknowledgement_of_active_backup_tasks(
+    tmp_path: Path,
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    original_bytes = _write_pool(
+        queue,
+        [
+            {
+                "id": "stale-claim",
+                "status": "claimed",
+                "claimed_by": "offline-worker",
+            },
+            {
+                "id": "stale-run",
+                "status": "in_progress",
+                "claimed_by": "offline-worker",
+            },
+        ],
+    )
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="cutover-owner",
+        reason="direct mode",
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    active_state_sha = load_task_pool_mode_evidence(state).sha256
+    state_bytes = state.read_bytes()
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "active backup task acknowledgement mismatch: "
+            "expected none; observed stale-claim, stale-run"
+        ),
+    ):
+        restore_task_pool_backup(
+            queue_path=queue,
+            state_path=state,
+            backup_path=entered.backup_path,
+            restored_by="rollback-owner",
+            reason="resume queued content",
+            expected_state_sha256=active_state_sha,
+            now="2026-07-23T12:05:00+00:00",
+        )
+
+    assert json.loads(queue.read_text()) == []
+    assert state.read_bytes() == state_bytes
+
+    receipt = restore_task_pool_backup(
+        queue_path=queue,
+        state_path=state,
+        backup_path=entered.backup_path,
+        restored_by="rollback-owner",
+        reason="resume queued content",
+        expected_state_sha256=active_state_sha,
+        expected_active_task_ids=("stale-run", "stale-claim"),
+        now="2026-07-23T12:05:00+00:00",
+    )
+
+    assert queue.read_bytes() == original_bytes
+    assert receipt.acknowledged_active_task_ids == ("stale-claim", "stale-run")
+    mode_payload = json.loads(state.read_text())
+    assert mode_payload["restored_acknowledged_active_task_ids"] == [
+        "stale-claim",
+        "stale-run",
+    ]
+
+
+def test_restore_cli_accepts_exact_active_backup_task_receipt(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    original_bytes = _write_pool(
+        queue,
+        [{"id": "stale-run", "status": "in_progress"}],
+    )
+    entered = enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="cutover-owner",
+        reason="direct mode",
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "task_pool_control.py",
+            "restore",
+            "--queue",
+            str(queue),
+            "--state",
+            str(state),
+            "--backup",
+            entered.backup_path,
+            "--actor",
+            "rollback-owner",
+            "--reason",
+            "resume queued content",
+            "--expected-state-sha256",
+            load_task_pool_mode_evidence(state).sha256,
+            "--expected-active-task-id",
+            "stale-run",
+            "--now",
+            "2026-07-23T12:05:00+00:00",
+        ],
+    )
+
+    assert task_pool_control.main() == 0
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["acknowledged_active_task_ids"] == ["stale-run"]
+    assert queue.read_bytes() == original_bytes
+
+
 @pytest.mark.parametrize("queue_already_restored", [False, True])
 def test_restore_resumes_a_prepared_transaction_across_queue_write(
     tmp_path: Path,

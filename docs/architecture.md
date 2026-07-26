@@ -11,7 +11,11 @@
 > `next_tasks` 最低寫入 seam 禁止新增 task id，`task_pool_claim.py claim` 同步
 > fail closed；既有 task 仍可 complete／移除。進入模式必先在同一把 queue lock
 > 內產生逐位元備份並 read-back，回復只能用 receipt 綁定的
-> `scripts/task_pool_control.py restore`，且 live pool 必須為空。所有 owner mutation
+> `scripts/task_pool_control.py restore`。Live pool可保留receipt明列的control rows；
+> restore會在覆寫前把其原始bytes、SHA、byte count與row count durable archive，
+> receipt外identity或duplicate/anonymous row一律拒絕。Backup若仍含
+> `claimed`／`in_progress`，operator必須以重複的`--expected-active-task-id`精確確認
+> 整個集合，避免無聲復活舊claim。所有 owner mutation
 > 都必須先由 `status` 取得 `state_sha256`，再以 `--expected-state-sha256` 傳回；
 > transition 在 queue `LOCK_EX` 內對同一份 state bytes 做 compare-and-set，過期
 > operator／process 一律 fail closed；`enter-direct` 只接受 absent 或 disabled
@@ -31,6 +35,9 @@
 > 即可冪等續作。State atomic replace 在 rename 後另 fsync parent directory，確保
 > prepared marker 先於 queue mutation durable；即使 queue 只留下 partial JSON，
 > `status` 仍回傳 state identity，並以 `queue_readable=false`／`queue_error` 明示降級。
+> Prepared transaction另綁定preserved-row archive與已確認的active backup IDs；
+> retry會先重算archive SHA／bytes／row count與active set，任一漂移都在queue mutation
+> 前fail closed。
 > 自動 handoff 在同一把 queue `LOCK_SH` 內讀 owner state 與 queue bytes，避免把
 > partial queue 配到較新的 final state；會把 restore 狀態標為
 > `RESTORE TRANSACTION：IN PROGRESS`。即使 state 顯示 queued execution，只要 queue

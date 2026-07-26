@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（publisher-delete stale retry reconciliation）**
+Last updated: **2026-07-26（direct-mode restore exit contract）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -2046,3 +2046,18 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ live socket round-trip 回傳 `not_due`、owner audit 為 50/50 Operations Core、
   0 legacy／0 conflict；Mac launchd 的 Operations Core 與 dispatch executor 均為
   RunAtLoad／KeepAlive。
+
+## 2026-07-26 — Direct-mode 正式退出契約
+
+- ✅ 修正 active receipt 永遠保留 control row、restore 卻要求 live queue完全為空的
+  自相矛盾；restore現在只接受 receipt-bound control rows，receipt外 identity、
+  anonymous或duplicate row全數 fail closed。
+- ✅ 覆寫前把現行 control rows原始bytes durable archive，prepared／final receipt
+  綁定path、SHA-256、bytes與row count；crash retry會重新驗證，不能靜默遺失
+  direct-mode期間的新checkpoint。
+- ✅ backup內的`claimed`／`in_progress` task必須由operator以
+  `--expected-active-task-id`精確列出整個集合；漏列、多列或prepared receipt與backup
+  漂移都在queue mutation前拒絕。
+- ✅ public function／CLI／crash-tamper回歸共37案通過。底層restore可退出性根因已
+  `root_cause_fixed_and_verified`；production mode尚未切換，須以live archive、
+  restore、canonical stale cleanup與下游content acknowledgement完成正式回讀。

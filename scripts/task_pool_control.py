@@ -99,6 +99,15 @@ def _parser() -> argparse.ArgumentParser:
     restore.add_argument("--backup", type=Path, required=True)
     restore.add_argument("--actor", required=True)
     restore.add_argument("--reason", required=True)
+    restore.add_argument(
+        "--expected-active-task-id",
+        action="append",
+        default=[],
+        help=(
+            "acknowledge one claimed/in_progress task in the backup; repeat "
+            "for the exact active-task set"
+        ),
+    )
     restore.add_argument("--now", default=None, help=argparse.SUPPRESS)
     return parser
 
@@ -184,6 +193,7 @@ def main(argv: list[str] | None = None) -> int:
             reason=args.reason,
             expected_state_sha256=args.expected_state_sha256,
             now=args.now or _now(),
+            expected_active_task_ids=args.expected_active_task_id,
         )
         print(json.dumps({"ok": True, **asdict(receipt)}, ensure_ascii=False, indent=2))
         return 0

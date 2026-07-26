@@ -60,7 +60,7 @@ uv run python scripts/task_pool_control.py status  # 回讀 mode 與 owner-state
 # 自訂 --queue 時，resolved basename 仍須是 next_tasks.json，--state 必須是其 parent/ops/task_pool_mode.json；sibling typo、detached / symlink alias state 都 fail closed
 uv run python scripts/task_pool_control.py enter-direct --expected-state-sha256 <status的SHA或absent> --actor <actor> --reason '<reason>' [--preserve-task-id <id>]  # CAS 通過後才逐位元備份 → 關閉 admission → 清池
 uv run python scripts/task_pool_control.py reconcile-direct --expected-state-sha256 <status的SHA> --actor <actor> --reason '<reason>'  # 只依同一 owner receipt 收斂 stale-writer drift
-uv run python scripts/task_pool_control.py restore --expected-state-sha256 <status的SHA> --backup <receipt綁定路徑> --actor <actor> --reason '<reason>'  # queue/backup 都須符合 owner receipt；初次要求 live pool 為空，restore_in_progress 則沿用原參數與最新 SHA 冪等續作
+uv run python scripts/task_pool_control.py restore --expected-state-sha256 <status的SHA> --backup <receipt綁定路徑> --actor <actor> --reason '<reason>' [--expected-active-task-id <claimed或in_progress id>]  # live queue只可有receipt明列的preserved control rows，覆寫前先逐位元durable archive；backup內active ids須逐一精確確認，restore_in_progress沿用prepared receipt與最新SHA冪等續作
 
 # experiments/ 結構整理（新規先行 + touched-file migration）
 uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選

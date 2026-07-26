@@ -49,6 +49,11 @@ class TaskPoolMode:
     restore_target_sha256: str | None = None
     restore_target_bytes: int | None = None
     restore_target_task_count: int | None = None
+    restore_acknowledged_active_task_ids: tuple[str, ...] = ()
+    restore_preserved_rows_path: str | None = None
+    restore_preserved_rows_sha256: str | None = None
+    restore_preserved_rows_bytes: int | None = None
+    restore_preserved_task_count: int | None = None
 
 
 @dataclass(frozen=True)
@@ -90,6 +95,11 @@ class RestoreReceipt:
     backup_path: str
     restored_task_count: int
     restored_at: str
+    acknowledged_active_task_ids: tuple[str, ...] = ()
+    archived_preserved_rows_path: str | None = None
+    archived_preserved_rows_sha256: str | None = None
+    archived_preserved_rows_bytes: int = 0
+    archived_preserved_task_count: int = 0
 
 
 def task_pool_mode_path(queue_path: str | Path) -> Path:
@@ -134,6 +144,17 @@ def _mode_from_payload(payload: Any) -> TaskPoolMode:
         isinstance(item, str) and item for item in preserve
     ):
         raise ValueError("task-pool mode 'preserve_task_ids' must be string ids")
+    acknowledged_active = payload.get(
+        "restore_acknowledged_active_task_ids",
+        [],
+    )
+    if not isinstance(acknowledged_active, list) or not all(
+        isinstance(item, str) and item for item in acknowledged_active
+    ):
+        raise ValueError(
+            "task-pool mode 'restore_acknowledged_active_task_ids' "
+            "must be string ids"
+        )
     return TaskPoolMode(
         enabled=enabled,
         mode=mode,
@@ -156,6 +177,19 @@ def _mode_from_payload(payload: Any) -> TaskPoolMode:
         restore_target_bytes=_optional_int(payload, "restore_target_bytes"),
         restore_target_task_count=_optional_int(
             payload, "restore_target_task_count"
+        ),
+        restore_acknowledged_active_task_ids=tuple(acknowledged_active),
+        restore_preserved_rows_path=_optional_string(
+            payload, "restore_preserved_rows_path"
+        ),
+        restore_preserved_rows_sha256=_optional_string(
+            payload, "restore_preserved_rows_sha256"
+        ),
+        restore_preserved_rows_bytes=_optional_int(
+            payload, "restore_preserved_rows_bytes"
+        ),
+        restore_preserved_task_count=_optional_int(
+            payload, "restore_preserved_task_count"
         ),
     )
 
@@ -339,6 +373,29 @@ def _backup_name(now: str, digest: str) -> str:
     if len(stamp) != 14:
         raise ValueError("now must contain a full ISO date and time")
     return f"{stamp}Z_next_tasks_{digest[:12]}.json"
+
+
+def _preserved_rows_archive_name(now: str, digest: str) -> str:
+    stamp = "".join(ch for ch in now if ch.isdigit())[:14]
+    if len(stamp) != 14:
+        raise ValueError("now must contain a full ISO date and time")
+    return f"{stamp}Z_preserved_rows_{digest[:12]}.json"
+
+
+def _write_exact_archive(path: Path, payload: bytes) -> None:
+    guard_canonical_write(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with path.open("xb") as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+    except FileExistsError:
+        if path.read_bytes() != payload:
+            raise ValueError(f"archive collision with different bytes: {path}")
+    _fsync_directory(path.parent)
+    if path.read_bytes() != payload:
+        raise RuntimeError("preserved-row archive read-back verification failed")
 
 
 def enter_direct_execution_mode(
@@ -594,8 +651,9 @@ def restore_task_pool_backup(
     reason: str,
     expected_state_sha256: str,
     now: str,
+    expected_active_task_ids: Iterable[str] = (),
 ) -> RestoreReceipt:
-    """Restore the verified cutover backup when the live pool is empty."""
+    """Restore a verified backup after archiving receipt-bound control rows."""
 
     queue = Path(queue_path).resolve()
     state = validate_task_pool_state_path(
@@ -605,6 +663,14 @@ def restore_task_pool_backup(
     backup = Path(backup_path).resolve()
     actor = _validate_identity(restored_by, field="restored_by")
     rationale = _validate_identity(reason, field="reason")
+    requested_active_ids = tuple(
+        sorted(
+            dict.fromkeys(
+                _validate_identity(item, field="expected_active_task_id")
+                for item in expected_active_task_ids
+            )
+        )
+    )
 
     guard_canonical_write(queue)
     if not queue.exists():
@@ -648,6 +714,21 @@ def restore_task_pool_backup(
                 raise ValueError(f"backup is unreadable: {exc}") from exc
             if not isinstance(restored, list):
                 raise ValueError("backup root must be a list")
+            restored_ids, restored_anonymous = _task_ids(restored)
+            if restored_anonymous:
+                raise ValueError(
+                    f"backup has {restored_anonymous} row(s) without a valid id"
+                )
+            if len(restored_ids) != len(restored):
+                raise ValueError("backup has duplicate task ids")
+            active_backup_ids = tuple(
+                sorted(
+                    str(task["id"])
+                    for task in restored
+                    if str(task.get("status") or "").lower()
+                    in {"claimed", "in_progress"}
+                )
+            )
             if (
                 mode.backup_bytes != len(payload)
                 or mode.backup_task_count != len(restored)
@@ -658,18 +739,67 @@ def restore_task_pool_backup(
 
             if mode.mode == "direct_execution":
                 handle.seek(0)
+                current_payload = handle.read()
                 try:
-                    current = json.loads(handle.read().decode("utf-8"))
+                    current = json.loads(current_payload.decode("utf-8"))
                 except (UnicodeError, json.JSONDecodeError) as exc:
                     raise ValueError(
                         f"next_tasks queue is unreadable: {exc}"
                     ) from exc
                 if not isinstance(current, list):
                     raise ValueError("next_tasks queue root must be a list")
-                if current:
+                current_ids, current_anonymous = _task_ids(current)
+                if current_anonymous:
                     raise ValueError(
-                        "refusing restore while the live task pool is non-empty"
+                        "next_tasks queue has "
+                        f"{current_anonymous} row(s) without a valid id"
                     )
+                if len(current_ids) != len(current):
+                    raise ValueError("next_tasks queue has duplicate task ids")
+                outside_receipt = sorted(
+                    current_ids - set(mode.preserve_task_ids)
+                )
+                if outside_receipt:
+                    raise ValueError(
+                        "refusing restore with task id(s) outside the active "
+                        "direct-mode preserve receipt: "
+                        + ", ".join(outside_receipt)
+                    )
+                if requested_active_ids != active_backup_ids:
+                    expected = (
+                        ", ".join(requested_active_ids)
+                        if requested_active_ids
+                        else "none"
+                    )
+                    observed = (
+                        ", ".join(active_backup_ids)
+                        if active_backup_ids
+                        else "none"
+                    )
+                    raise ValueError(
+                        "active backup task acknowledgement mismatch: "
+                        f"expected {expected}; observed {observed}"
+                    )
+
+                preserved_archive_path: str | None = None
+                preserved_archive_sha256: str | None = None
+                preserved_archive_bytes: int | None = None
+                preserved_task_count: int | None = None
+                if current:
+                    preserved_archive_sha256 = hashlib.sha256(
+                        current_payload
+                    ).hexdigest()
+                    preserved_archive = (
+                        backup.parent
+                        / _preserved_rows_archive_name(
+                            now,
+                            preserved_archive_sha256,
+                        )
+                    )
+                    _write_exact_archive(preserved_archive, current_payload)
+                    preserved_archive_path = str(preserved_archive.resolve())
+                    preserved_archive_bytes = len(current_payload)
+                    preserved_task_count = len(current)
                 restore_source_state_sha256 = evidence.sha256
                 restore_requested_by = actor
                 restore_reason = rationale
@@ -693,7 +823,27 @@ def restore_task_pool_backup(
                     "restore_target_sha256": digest,
                     "restore_target_bytes": len(payload),
                     "restore_target_task_count": len(restored),
+                    "restore_acknowledged_active_task_ids": list(
+                        active_backup_ids
+                    ),
                 }
+                if preserved_archive_path is not None:
+                    prepared_payload.update(
+                        {
+                            "restore_preserved_rows_path": (
+                                preserved_archive_path
+                            ),
+                            "restore_preserved_rows_sha256": (
+                                preserved_archive_sha256
+                            ),
+                            "restore_preserved_rows_bytes": (
+                                preserved_archive_bytes
+                            ),
+                            "restore_preserved_task_count": (
+                                preserved_task_count
+                            ),
+                        }
+                    )
                 _atomic_write_json(state, prepared_payload)
                 if state.read_bytes() != _json_bytes(prepared_payload):
                     raise RuntimeError(
@@ -753,6 +903,65 @@ def restore_task_pool_backup(
                     raise ValueError(
                         "restore transaction target does not match the active backup"
                     )
+                active_receipt_ids = tuple(
+                    sorted(mode.restore_acknowledged_active_task_ids)
+                )
+                if active_receipt_ids != active_backup_ids:
+                    raise ValueError(
+                        "restore transaction active-task receipt does not "
+                        "match the active backup"
+                    )
+                archive_metadata = (
+                    mode.restore_preserved_rows_path,
+                    mode.restore_preserved_rows_sha256,
+                    mode.restore_preserved_rows_bytes,
+                    mode.restore_preserved_task_count,
+                )
+                if any(value is not None for value in archive_metadata):
+                    if any(value is None for value in archive_metadata):
+                        raise ValueError(
+                            "restore transaction preserved-row archive "
+                            "receipt is incomplete"
+                        )
+                    assert mode.restore_preserved_rows_path is not None
+                    assert mode.restore_preserved_rows_sha256 is not None
+                    assert mode.restore_preserved_rows_bytes is not None
+                    assert mode.restore_preserved_task_count is not None
+                    _validate_sha256(
+                        mode.restore_preserved_rows_sha256,
+                        field="restore_preserved_rows_sha256",
+                    )
+                    preserved_bytes = Path(
+                        mode.restore_preserved_rows_path
+                    ).read_bytes()
+                    try:
+                        preserved_rows = json.loads(
+                            preserved_bytes.decode("utf-8")
+                        )
+                    except (UnicodeError, json.JSONDecodeError) as exc:
+                        raise ValueError(
+                            f"preserved-row archive is unreadable: {exc}"
+                        ) from exc
+                    if not isinstance(preserved_rows, list):
+                        raise ValueError(
+                            "preserved-row archive root must be a list"
+                        )
+                    if (
+                        hashlib.sha256(preserved_bytes).hexdigest()
+                        != mode.restore_preserved_rows_sha256
+                        or len(preserved_bytes)
+                        != mode.restore_preserved_rows_bytes
+                        or len(preserved_rows)
+                        != mode.restore_preserved_task_count
+                    ):
+                        raise ValueError(
+                            "preserved-row archive does not match the restore "
+                            "transaction receipt"
+                        )
+                preserved_archive_path = mode.restore_preserved_rows_path
+                preserved_archive_sha256 = mode.restore_preserved_rows_sha256
+                preserved_archive_bytes = mode.restore_preserved_rows_bytes
+                preserved_task_count = mode.restore_preserved_task_count
                 restore_source_state_sha256 = (
                     mode.restore_source_state_sha256
                 )
@@ -782,7 +991,27 @@ def restore_task_pool_backup(
                 "restored_task_count": len(restored),
                 "restored_source_state_sha256": restore_source_state_sha256,
                 "restored_transaction_state_sha256": prepared_evidence.sha256,
+                "restored_acknowledged_active_task_ids": list(
+                    active_backup_ids
+                ),
             }
+            if preserved_archive_path is not None:
+                disabled_payload.update(
+                    {
+                        "restored_preserved_rows_path": (
+                            preserved_archive_path
+                        ),
+                        "restored_preserved_rows_sha256": (
+                            preserved_archive_sha256
+                        ),
+                        "restored_preserved_rows_bytes": (
+                            preserved_archive_bytes
+                        ),
+                        "restored_preserved_task_count": (
+                            preserved_task_count
+                        ),
+                    }
+                )
             _atomic_write_json(state, disabled_payload)
             if state.read_bytes() != _json_bytes(disabled_payload):
                 raise RuntimeError(
@@ -797,4 +1026,9 @@ def restore_task_pool_backup(
         backup_path=str(backup.resolve()),
         restored_task_count=len(restored),
         restored_at=now,
+        acknowledged_active_task_ids=active_backup_ids,
+        archived_preserved_rows_path=preserved_archive_path,
+        archived_preserved_rows_sha256=preserved_archive_sha256,
+        archived_preserved_rows_bytes=preserved_archive_bytes or 0,
+        archived_preserved_task_count=preserved_task_count or 0,
     )
