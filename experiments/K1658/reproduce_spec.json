@@ -1,0 +1,51 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "K1658.py",
+    "args": []
+  },
+  "canonical_result": "K1658_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1658/data/daily_IEF.csv",
+      "sha256": "59e5f27df1105af9d58ca997c53a1bd268bf23387996393fbfe27bbd00744602"
+    },
+    {
+      "path": "experiments/K1658/data/daily_TLT.csv",
+      "sha256": "4acad684737e3832c44a71b1b5a61efc8f584c3009b4285c7b9af05862bd5ec6"
+    },
+    {
+      "path": "experiments/K1658/data/daily_ZN_F.csv",
+      "sha256": "12447e3a85592e7d6bb977a3ebeb63f2c47978f0effccba04ff2251a5160b9e6"
+    },
+    {
+      "path": "experiments/K1658/data/intraday_IEF_5m.csv",
+      "sha256": "8f828414d4a9a14baf00ba8c609ef0b8e8c0c899d86cf3265144bf23bca51898"
+    },
+    {
+      "path": "experiments/K1658/data/intraday_TLT_5m.csv",
+      "sha256": "632892382d2b3abe738e660a87306fcafa8189c9146fedc784a0b33aae958dea"
+    },
+    {
+      "path": "experiments/K1658/data/intraday_ZN_F_5m.csv",
+      "sha256": "0f023df3c98e42a9c20b383926a7aa5c2886a3303678710597bc66fb3963e0f5"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [],
+    "ignore_reasons": {}
+  }
+}

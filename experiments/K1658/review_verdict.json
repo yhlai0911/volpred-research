@@ -1,0 +1,17 @@
+{
+  "kid": "K1658",
+  "verdict": "PASS",
+  "reviewer": "codex gpt-5.x primary path (scripts/codex_exec_bounded.sh, timeout 300) reviewed K1658.py: verdict CONDITIONAL with 5 scope/label issues, none a lookahead/seed/Holm error. Second reviewer: collect_completed interpretation agent (opus/medium) audited the full triplet + reran 9/9 unit tests (all pass). The two actual labelling defects Codex raised (results field beta_pct_effect_on_vol mislabels a variance %-effect as volatility; README blended INFEASIBLE with NULL) were fixed in commit c8d0295b9 with no numeric change; the remaining Codex points are disclosed scope limitations, not defects. PASS certifies the corrected bytes below.",
+  "reviewed_at": "2026-07-27T03:52:00+08:00",
+  "reviewed_commit": "c8d0295b9b9db7dd612ef90b71d2db162892e524",
+  "review_artifact": "experiments/K1658/codex_review.md",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "K1658.py": "40ba1284e4bd97ac5b9e2eeded0ef525896b2fae9f94dc0f5af4a7b97ba76bfa",
+    "K1658_fig1_intraday_casestudies.png": "1f1b8c62d46b9e98924cfec757416cbf363832d9c6c77e38ace2f6712637eb13",
+    "K1658_fig2_aggregate_fomc_rv.png": "d4543773874bd2a2b0fddf1a19cc9b1b000bca33ec2064bb80843d58cdec7c10",
+    "K1658_results.json": "52ac096a086b41a360508c675ccbf1f8079d7d076ebe13f02ba84e050e3548ca",
+    "README.md": "5640fda48a17f57d5c3970d39e8bee3a4fa0a9f9d0a6414c7ae5d8a68a50533d",
+    "test_K1658.py": "e1ae9940a5102222ebf8e1d49367bf4608df5ee62478f1bf1375741f7c4050ec"
+  }
+}
