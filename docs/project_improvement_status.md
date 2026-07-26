@@ -97,6 +97,18 @@ projection 中，無法由 ownership transaction 無損移交；因此 active wo
 前 fail closed，不以「欄位相同」冒充 lease continuity。
 此能力無 apply／writer seam，live 仍是 `direct_execution`、observation count 仍為 0，
 所以只是正式 transaction 前的 fail-closed evidence capsule，不構成 ownership cutover。
+2026-07-26 續建 Work Coordinator durable owner fencing：local PostgreSQL schema
+新增唯一 owner row、monotonic generation 與 append-only receipts，七個 mutation
+共用 owner-row lock／generation fence，transfer 用 exclusive-lock CAS。Expired
+claimed／running lease 會依 DB clock 在同一 transaction 回 pending、保留 work identity
+並追加 release event；有效 lease 仍阻擋 transfer。Legacy runtime grants 與 owner
+切換同交易撤銷／恢復，既有 definer-owned notification／publisher／commit workflow
+則可繼續呼叫 current-owner compatibility wrapper。由於 durable preflight gate row
+尚未存在，private transfer 刻意不授權 worker、approver 或 PUBLIC，避免任意 SHA
+繞過七日 gate；目前僅有 local PG17／non-superuser migration replay 與 nested workflow
+integration evidence，未部署 production、未改 live owner、未做七日 read-back／rollback
+rehearsal。因此這是 transaction-fencing checkpoint，不是 cutover；Issue #9 仍為
+`contained`。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：
 `CommitActuation` 強制綁定 WorkItem id／version、WorkLease token、Primary Authority
 fencing token 與 commit-worker identity；完整 write intent 以 canonical SHA-256 交由

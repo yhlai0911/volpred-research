@@ -1525,6 +1525,33 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   evidence 均未變；正式 CAS transaction、唯一 owner 下游回讀及 live rollback
   rehearsal 仍未完成，因此 Issue #9 保持 `contained`。
 
+### Issue #9 — Durable Work Coordinator owner fencing
+
+- 2026-07-26 local PostgreSQL schema 已建立 `work.coordinate` 的唯一 owner row、
+  monotonic generation 與 append-only receipts。所有 submit／acquire／approve／
+  start／checkpoint／release／complete mutation 都在 owner-row shared lock 後進入
+  private body；transfer 以同一 row exclusive lock 執行 exact CAS，所以兩個 owner
+  generation 不會同時取得有效 mutation horizon。
+- Owner transfer 以 database clock 分類 lease。已過期 claimed／running row 在同一
+  transaction 恢復為 pending，清除 token／claim metadata、增加 version 並追加
+  `released` event；未過期或缺 expiry 的 active lease 仍 fail closed，transfer
+  transaction 不留下部分 reconciliation。
+- Runtime worker／approver／PUBLIC 沒有 transfer execute privilege。這是刻意的
+  forward ratchet：目前 DB 只驗證 manifest SHA 格式，尚未持久化並鎖定
+  `prepare_work_ownership_cutover()` 的七日 evidence capsule，所以不得開出 live
+  operator seam。Migration-owner rehearsal 才能呼叫 private CAS；任意 hash 不構成
+  production cutover authority。
+- CAS 同交易撤銷 legacy runtime mutation functions 的 execute privilege，rollback
+  同交易恢復；generation overload 持續要求 exact operations-core owner。既有
+  notification／publisher／commit 等 definer-owned workflow 可經 compatibility
+  wrapper 取得 current owner shared lock並呼叫相同 private body，避免切 owner
+  造成正式 nested caller 斷鏈，同時不重新開放 legacy runtime writer。
+- 本 checkpoint 只有 local PG17 clean migration、non-superuser replay、full
+  generation lifecycle、expired claimed／running rollback 與 owned-email nested
+  workflow evidence；未部署 production、未產生七日 receipts、未建立 durable
+  manifest gate row，也未做 live unique-owner read-back／rollback rehearsal。
+  因此 formal transfer operator 仍不可用，Issue #9 仍是 `contained`。
+
 這四個提交就是下一輪 `tdd` skill 的範圍；完成並取得七天 shadow 證據後，才規劃第一個
 正式接管切片。ChangeSet、EffectRequest、provider 與 scheduler 不與 Work Coordinator
 第一批同時實作。
