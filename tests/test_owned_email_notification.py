@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from datetime import datetime, timezone
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -18,11 +21,13 @@ from volpred.ops.delivery.owned_email import (
     NotificationOwnershipLost,
     OwnedEmailAttempt,
     OwnedEmailCommand,
+    OwnedEmailExistingRequest,
     OwnedEmailNotification,
     OwnedEmailRecovery,
     OwnedEmailReceipt,
     OwnedEmailRequest,
     SupabaseOwnedEmailStore,
+    dispatch_email_by_current_owner,
 )
 
 
@@ -60,6 +65,7 @@ class _Store:
             effect_id="effect-owned-email-1",
             request_sha256="a" * 64,
         )
+        self.existing_request: OwnedEmailExistingRequest | None = None
         payload = b'{"schema_version":"email-notification.v1"}'
         effect = EffectView(
             schema_version="effect-request.v1",
@@ -108,6 +114,12 @@ class _Store:
     def read_owner(self) -> NotificationOwner:
         self.calls.append(("read_owner", None))
         return self.owner
+
+    def read_request(
+        self,
+        idempotency_key: str,
+    ) -> OwnedEmailExistingRequest | None:
+        return self.existing_request
 
     def request(
         self,
@@ -292,6 +304,44 @@ def test_deliver_owns_request_begin_provider_and_settlement() -> None:
     assert primary_authority.calls == 3
 
 
+def test_deliver_returns_terminal_receipt_without_second_provider_call() -> None:
+    store = _Store(_owner())
+    provider = _Provider()
+    terminal = OwnedEmailReceipt(
+        schema_version="owned-email-receipt.v1",
+        owner_generation=store.owner.generation,
+        work_id=store.request_view.work_id,
+        work_status="succeeded",
+        effect_id=store.request_view.effect_id,
+        effect_status="delivered",
+        attempt_count=1,
+        disposition="delivered",
+        evidence_ref="imap-sent:terminal-replay",
+        evidence_sha256="e" * 64,
+        primary_authority_ref="primary-authority:terminal-replay",
+        recorded_at="2026-07-24T07:00:02+00:00",
+    )
+    store.request_view = OwnedEmailRequest(
+        **{
+            **store.request_view.__dict__,
+            "terminal_receipt": terminal,
+        }
+    )
+
+    receipt = OwnedEmailNotification(
+        store=store,
+        provider=provider,
+        primary_authority=_LeaseGate(),
+    ).deliver(_command())
+
+    assert receipt == terminal
+    assert [name for name, _ in store.calls] == [
+        "read_owner",
+        "request",
+    ]
+    assert provider.calls == []
+
+
 def test_recover_owns_claim_provider_and_settlement() -> None:
     store = _RecoveryStore(_owner())
     provider = _Provider()
@@ -385,6 +435,533 @@ def test_deliver_fails_closed_before_request_when_owner_is_legacy() -> None:
     assert provider.calls == []
 
 
+def test_environment_dispatch_routes_operations_core_through_owned_delivery(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _Store(_owner())
+    captured: dict[str, object] = {}
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            captured["storage_dir"] = storage_dir
+
+        def notify(self, **kwargs: object) -> str:
+            raise AssertionError("operations_core route used direct SMTP")
+
+    class FakeKeepalive:
+        def start(self) -> None:
+            captured["keepalive_started"] = True
+
+        def stop(self) -> None:
+            captured["keepalive_stopped"] = True
+
+    class FakeOwnedDelivery:
+        def __init__(self, **kwargs: object) -> None:
+            captured["owned_init"] = kwargs
+
+        def deliver(self, command: OwnedEmailCommand) -> object:
+                captured["command"] = command
+                return SimpleNamespace(
+                    owner_generation=2,
+                    effect_id="effect-boss-report",
+                delivered=True,
+                disposition="delivered",
+                work_id="work-boss-report",
+                effect_status="delivered",
+                attempt_count=1,
+                evidence_ref="imap-sent:boss-report",
+                evidence_sha256="a" * 64,
+            )
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email.OwnedEmailNotification",
+        FakeOwnedDelivery,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "ImapSentMailReader.from_environment",
+        classmethod(lambda cls: object()),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: (
+            captured.update({"keepalive_kwargs": kwargs})
+            or FakeKeepalive()
+        ),
+    )
+
+    result = dispatch_email_by_current_owner(
+        _command(),
+        storage_dir=str(tmp_path / "storage"),
+    )
+
+    assert captured["command"] == _command()
+    assert captured["keepalive_started"] is True
+    assert captured["keepalive_stopped"] is True
+    assert captured["keepalive_kwargs"] == {
+        "authority_key": "notification:email.ops_alert",
+        "holder_ref": "effect-worker:ops-alert-email",
+    }
+    assert result["delivery_owner"] == "operations_core"
+    assert result["effect_status"] == "delivered"
+    assert result["sent"] is True
+
+
+def test_environment_dispatch_fences_and_verifies_explicit_legacy_owner(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+    store = _Store(_owner(owner="legacy"))
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            captured["storage_dir"] = storage_dir
+
+    class FakeAdapter:
+        def __init__(self, **kwargs: object) -> None:
+            captured["adapter"] = kwargs
+
+        def deliver(
+            self,
+            effect: EffectView,
+            payload: bytes,
+        ) -> AcknowledgedEffect:
+            captured["effect"] = effect
+            captured["payload"] = payload
+            return AcknowledgedEffect(
+                acknowledgement=effect.acknowledgement,
+                evidence_ref="imap-sent:legacy",
+                evidence_sha256="f" * 64,
+            )
+
+    class FakeKeepalive:
+        def start(self) -> None:
+            captured["keepalive_started"] = True
+
+        def stop(self) -> None:
+            captured["keepalive_stopped"] = True
+
+        def current_lease(self) -> PrimaryLease:
+            return PrimaryLease(
+                schema_version="primary-lease.v1",
+                authority_key="notification:email.ops_alert",
+                holder_ref="effect-worker:ops-alert-email-legacy",
+                epoch=1,
+                fencing_token="legacy-primary-token",
+                lease_seconds=300,
+                acquired_at="2026-07-26T12:00:00+00:00",
+                expires_at="2026-07-26T12:05:00+00:00",
+            )
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "EmailNotificationEffectAdapter",
+        FakeAdapter,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "ImapSentMailReader.from_environment",
+        classmethod(lambda cls: object()),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: (
+            captured.update({"keepalive_kwargs": kwargs})
+            or FakeKeepalive()
+        ),
+    )
+
+    result = dispatch_email_by_current_owner(
+        _command(),
+        storage_dir=str(tmp_path / "storage"),
+    )
+
+    effect = captured["effect"]
+    assert effect.idempotency_key == _command().idempotency_key
+    assert effect.effect_kind == "email.notification.send"
+    assert captured["keepalive_kwargs"] == {
+        "authority_key": "notification:email.ops_alert",
+        "holder_ref": "effect-worker:ops-alert-email-legacy",
+    }
+    assert captured["keepalive_started"] is True
+    assert captured["keepalive_stopped"] is True
+    assert result["delivery_owner"] == "legacy"
+    assert result["effect_status"] == "legacy_sent_verified"
+    assert result["evidence_ref"] == "imap-sent:legacy"
+    assert result["sent"] is True
+
+
+def test_environment_dispatch_uses_stable_legacy_effect_identity_across_hosts(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _Store(_owner(owner="legacy"))
+    effect_ids: list[str] = []
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            pass
+
+    class FakeAdapter:
+        def __init__(self, **kwargs: object) -> None:
+            pass
+
+        def deliver(
+            self,
+            effect: EffectView,
+            payload: bytes,
+        ) -> AcknowledgedEffect:
+            effect_ids.append(effect.id)
+            return AcknowledgedEffect(
+                acknowledgement=effect.acknowledgement,
+                evidence_ref="imap-sent:already-there",
+                evidence_sha256="e" * 64,
+            )
+
+    class FakeKeepalive:
+        def start(self) -> None:
+            pass
+
+        def stop(self) -> None:
+            pass
+
+        def current_lease(self) -> PrimaryLease:
+            return PrimaryLease(
+                schema_version="primary-lease.v1",
+                authority_key="notification:email.ops_alert",
+                holder_ref="effect-worker:ops-alert-email-legacy",
+                epoch=1,
+                fencing_token="legacy-primary-token",
+                lease_seconds=300,
+                acquired_at="2026-07-26T12:00:00+00:00",
+                expires_at="2026-07-26T12:05:00+00:00",
+            )
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "EmailNotificationEffectAdapter",
+        FakeAdapter,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "ImapSentMailReader.from_environment",
+        classmethod(lambda cls: object()),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: FakeKeepalive(),
+    )
+
+    first = dispatch_email_by_current_owner(
+        _command(),
+        storage_dir=str(tmp_path / "storage"),
+    )
+    second = dispatch_email_by_current_owner(
+        _command(),
+        storage_dir=str(tmp_path / "other-storage"),
+    )
+
+    assert first["sent"] is second["sent"] is True
+    assert effect_ids[0] == effect_ids[1]
+    assert first["evidence_ref"] == "imap-sent:already-there"
+
+
+def test_environment_dispatch_fails_before_provider_when_owner_read_fails(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    notifier_constructed = False
+
+    class FailingStore:
+        def read_request(
+            self,
+            idempotency_key: str,
+        ) -> OwnedEmailExistingRequest | None:
+            return None
+
+        def read_owner(self) -> NotificationOwner:
+            raise RuntimeError("owner read unavailable")
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            nonlocal notifier_constructed
+            notifier_constructed = True
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: FailingStore()),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+
+    with pytest.raises(RuntimeError, match="owner read unavailable"):
+        dispatch_email_by_current_owner(
+            _command(),
+            storage_dir=str(tmp_path / "storage"),
+        )
+
+    assert notifier_constructed is False
+
+
+def test_environment_dispatch_returns_cross_host_terminal_before_legacy_provider(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _Store(_owner(owner="legacy"))
+    terminal = OwnedEmailReceipt(
+        schema_version="owned-email-receipt.v1",
+        owner_generation=2,
+        work_id="work-owned-email-1",
+        work_status="succeeded",
+        effect_id="effect-owned-email-1",
+        effect_status="delivered",
+        attempt_count=1,
+        disposition="delivered",
+        evidence_ref="imap-sent:cross-host",
+        evidence_sha256="d" * 64,
+        primary_authority_ref="primary-authority:cross-host",
+        recorded_at="2026-07-26T12:50:00+00:00",
+    )
+    store.existing_request = OwnedEmailExistingRequest(
+        command=_command(),
+        request=OwnedEmailRequest(
+            owner_generation=2,
+            work_id="work-owned-email-1",
+            effect_id="effect-owned-email-1",
+            request_sha256="a" * 64,
+            terminal_receipt=terminal,
+        ),
+    )
+
+    class ForbiddenNotifier:
+        def __init__(self, **kwargs: object) -> None:
+            raise AssertionError("terminal replay constructed a provider")
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        ForbiddenNotifier,
+    )
+
+    result = dispatch_email_by_current_owner(
+        _command(),
+        storage_dir=str(tmp_path / "storage"),
+    )
+
+    assert result["sent"] is True
+    assert result["delivery_owner"] == "operations_core"
+    assert result["evidence_ref"] == "imap-sent:cross-host"
+
+
+def test_environment_dispatch_refuses_legacy_over_nonterminal_core_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _Store(_owner(owner="legacy"))
+    store.existing_request = OwnedEmailExistingRequest(
+        command=_command(),
+        request=store.request_view,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="cannot supersede",
+    ):
+        dispatch_email_by_current_owner(
+            _command(),
+            storage_dir=str(tmp_path / "storage"),
+        )
+
+
+def test_legacy_fence_rechecks_and_refuses_new_pending_core_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _Store(_owner(owner="legacy"))
+    pending = OwnedEmailExistingRequest(
+        command=_command(),
+        request=store.request_view,
+    )
+    request_reads = iter((None, pending))
+    store.read_request = lambda idempotency_key: next(  # type: ignore[method-assign]
+        request_reads
+    )
+    provider_constructed = False
+
+    class FakeKeepalive:
+        def start(self) -> None:
+            pass
+
+        def stop(self) -> None:
+            pass
+
+        def current_lease(self) -> PrimaryLease:
+            return PrimaryLease(
+                schema_version="primary-lease.v1",
+                authority_key="notification:email.ops_alert",
+                holder_ref="effect-worker:ops-alert-email-legacy",
+                epoch=1,
+                fencing_token="legacy-primary-token",
+                lease_seconds=300,
+                acquired_at="2026-07-26T12:00:00+00:00",
+                expires_at="2026-07-26T12:05:00+00:00",
+            )
+
+    class ForbiddenNotifier:
+        def __init__(self, **kwargs: object) -> None:
+            nonlocal provider_constructed
+            provider_constructed = True
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        ForbiddenNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: FakeKeepalive(),
+    )
+
+    with pytest.raises(RuntimeError, match="pending Operations Core"):
+        dispatch_email_by_current_owner(
+            _command(),
+            storage_dir=str(tmp_path / "storage"),
+        )
+
+    assert provider_constructed is False
+
+
+def test_legacy_fence_rechecks_and_replays_new_terminal_core_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    store = _Store(_owner(owner="legacy"))
+    terminal = OwnedEmailReceipt(
+        schema_version="owned-email-receipt.v1",
+        owner_generation=2,
+        work_id="work-owned-email-1",
+        work_status="succeeded",
+        effect_id="effect-owned-email-1",
+        effect_status="delivered",
+        attempt_count=1,
+        disposition="delivered",
+        evidence_ref="imap-sent:interleaved-terminal",
+        evidence_sha256="c" * 64,
+        primary_authority_ref="primary-authority:interleaved",
+        recorded_at="2026-07-26T12:50:00+00:00",
+    )
+    completed = OwnedEmailExistingRequest(
+        command=_command(),
+        request=OwnedEmailRequest(
+            owner_generation=2,
+            work_id="work-owned-email-1",
+            effect_id="effect-owned-email-1",
+            request_sha256="a" * 64,
+            terminal_receipt=terminal,
+        ),
+    )
+    request_reads = iter((None, completed))
+    store.read_request = lambda idempotency_key: next(  # type: ignore[method-assign]
+        request_reads
+    )
+
+    class FakeKeepalive:
+        def start(self) -> None:
+            pass
+
+        def stop(self) -> None:
+            pass
+
+        def current_lease(self) -> PrimaryLease:
+            return PrimaryLease(
+                schema_version="primary-lease.v1",
+                authority_key="notification:email.ops_alert",
+                holder_ref="effect-worker:ops-alert-email-legacy",
+                epoch=1,
+                fencing_token="legacy-primary-token",
+                lease_seconds=300,
+                acquired_at="2026-07-26T12:00:00+00:00",
+                expires_at="2026-07-26T12:05:00+00:00",
+            )
+
+    class ForbiddenNotifier:
+        def __init__(self, **kwargs: object) -> None:
+            raise AssertionError("terminal interleaving reached provider")
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: store),
+    )
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        ForbiddenNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: FakeKeepalive(),
+    )
+
+    result = dispatch_email_by_current_owner(
+        _command(),
+        storage_dir=str(tmp_path / "storage"),
+    )
+
+    assert result["sent"] is True
+    assert result["delivery_owner"] == "operations_core"
+    assert result["evidence_ref"] == "imap-sent:interleaved-terminal"
+
+
 def test_deliver_fails_closed_before_request_when_keepalive_is_closed() -> None:
     store = _Store(_owner())
     provider = _Provider()
@@ -452,6 +1029,82 @@ def test_environment_adapter_never_falls_back_to_publishable_key(
         match="service-role key",
     ):
         SupabaseOwnedEmailStore.from_environment()
+
+
+def test_supabase_store_parses_terminal_receipt_from_request_replay() -> None:
+    store = SupabaseOwnedEmailStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="fake-service-role-key",
+    )
+    store._rpc = lambda function, payload: {  # type: ignore[method-assign]
+        "schema_version": "owned-email-request.v1",
+        "owner_generation": 2,
+        "work_id": "work-owned-email-1",
+        "effect_id": "effect-owned-email-1",
+        "request_sha256": "a" * 64,
+        "receipt": {
+            "schema_version": "owned-email-receipt.v1",
+            "owner_generation": 2,
+            "work_id": "work-owned-email-1",
+            "work_status": "succeeded",
+            "effect_id": "effect-owned-email-1",
+            "effect_status": "delivered",
+            "attempt_count": 1,
+            "disposition": "delivered",
+            "evidence_ref": "imap-sent:terminal-replay",
+            "evidence_sha256": "b" * 64,
+            "primary_authority_ref": "primary-authority:terminal-replay",
+            "recorded_at": "2026-07-26T12:50:00+00:00",
+        },
+    }
+
+    request_view = store.request(_command(), owner_generation=2)
+
+    assert request_view.terminal_receipt is not None
+    assert request_view.terminal_receipt.delivered is True
+    assert request_view.terminal_receipt.evidence_sha256 == "b" * 64
+
+
+def test_supabase_store_rejects_wrong_request_and_receipt_schemas() -> None:
+    store = SupabaseOwnedEmailStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="fake-service-role-key",
+    )
+    store._rpc = lambda function, payload: {  # type: ignore[method-assign]
+        "schema_version": "owned-email-request.v0",
+    }
+    with pytest.raises(RuntimeError, match="request schema"):
+        store.request(_command(), owner_generation=2)
+
+    store._rpc = lambda function, payload: {  # type: ignore[method-assign]
+        "schema_version": "owned-email-request.v1",
+        "owner_generation": 2,
+        "work_id": "work-owned-email-1",
+        "effect_id": "effect-owned-email-1",
+        "request_sha256": "a" * 64,
+        "receipt": {
+            "schema_version": "owned-email-receipt.v0",
+        },
+    }
+    with pytest.raises(RuntimeError, match="receipt schema"):
+        store.request(_command(), owner_generation=2)
+
+
+def test_owned_email_terminal_replay_migration_returns_receipt() -> None:
+    migration = (
+        Path(__file__).resolve().parents[1]
+        / "supabase"
+        / "migrations"
+        / "20260726125016_boss_report_owned_email_terminal_replay.sql"
+    ).read_text(encoding="utf-8")
+
+    assert "terminal_attempt volpred_ops.owned_notification_attempts" in migration
+    assert "'receipt', terminal_receipt" in migration
+    assert "'receipt', NULL" in migration
+    assert "attempt.status IN ('delivered', 'dead_lettered')" in migration
+    assert "public.volpred_read_owned_email_request" in migration
+    assert "'schema_version', 'owned-email-request-read.v1'" in migration
+    assert "TO service_role" in migration
 
 
 def test_supabase_store_blocks_remote_mutation_when_remote_writes_are_disabled(

@@ -638,6 +638,35 @@
 > test-shaped failover WorkItem 新增數為 0。這不表示其他 effect family 或 Work
 > Coordinator queue owner 已自動切換。
 >
+> 2026-07-26 的 Boss Report caller follow-up 把相同 ownership seam 收斂成
+> `dispatch_email_by_current_owner()`：`volpred ops send-alert` 與
+> `scripts/boss_report.py` 不再各自組裝 store／authority／provider。Operations Core
+> schedule 的 exact fire key 直接成為 email idempotency key；wrapper 在產生報告前
+> 先走 common schedule owner gate，復活的 legacy clock 因此是 no-op。報告 program
+> context 由 typed `boss_report_read_model` 只讀 master spec §7 與當前
+> `task_pool_mode.json`；direct mode 才以 receipt-bound preserved task 補 intent，
+> 正式 restore 後的 queued mode 則顯示 restore reason。舊
+> `current_cycle_intent.json`／`ops_team_structure.md` 不再是報告來源。
+> Scheduler caller 不再以字串前綴猜 identity；它從
+> `config/runtime_schedules.json` 重建 canonical generation、cron slot、activation
+> boundary 與 fire digest，任一不一致都在產生內容前 fail closed。同一 fire 的首次
+> render 以 atomic no-overwrite 檔案保存；一旦 Operations Core request 建立，
+> 任何主機都先透過 service-role-only
+> `volpred_read_owned_email_request` 讀回原 command 與 optional terminal receipt，
+> 不再依賴本機 payload cache。Request RPC 的 terminal replay 與 read RPC 共用
+> `owned-email-request.v1`／`owned-email-receipt.v1` exact schema；錯版 schema
+> 一律拒絕。
+>
+> 明確切回 `legacy` 時也不是無 fence 的 SMTP：同一
+> `notification:email.ops_alert` Primary Authority 保證一次只有一台主機執行，
+> deterministic Message-ID 先查 Gmail Sent；已存在且內容逐欄相符便直接確認，不再
+> 寄第二封。Owner transfer 與 PA acquire 共用同一 advisory lock；PA lease 有效期間，
+> notification owner transfer 由資料庫拒絕；legacy
+> 取得 fence 後還會重讀 durable request 與相同 owner generation。若同一 fire 已有
+> Operations Core request，legacy 路徑不得 supersede；terminal receipt 則直接 replay。
+> 因此兩台 Mac、owner rollback 與 process retry 都使用共享的 durable/external
+> evidence boundary，而不是各自的本機 dedupe 檔。
+>
 > Process 若在 owned-email `begin` 後、settlement 前中斷，由 canonical
 > `owned_email_recovery` system schedule 每小時經
 > `check_alerts → run_due_jobs` 的單一 piggy-back owner 執行

@@ -36,7 +36,12 @@ _OWNER_FAMILY = "email.ops_alert"
 _PRIMARY_AUTHORITY_KEY = "notification:email.ops_alert"
 _OPERATIONS_CORE_OWNER = "operations_core"
 _LEGACY_OWNER = "legacy"
-_READ_ONLY_RPCS = frozenset({"volpred_read_notification_owner"})
+_READ_ONLY_RPCS = frozenset(
+    {
+        "volpred_read_notification_owner",
+        "volpred_read_owned_email_request",
+    }
+)
 
 
 def _remote_mutations_disabled() -> bool:
@@ -79,6 +84,13 @@ class OwnedEmailRequest:
     work_id: str
     effect_id: str
     request_sha256: str
+    terminal_receipt: OwnedEmailReceipt | None = None
+
+
+@dataclass(frozen=True)
+class OwnedEmailExistingRequest:
+    command: OwnedEmailCommand
+    request: OwnedEmailRequest
 
 
 @dataclass(frozen=True)
@@ -138,6 +150,11 @@ class OwnedEmailRecoverySummary:
 
 class _OwnedEmailStore(Protocol):
     def read_owner(self) -> NotificationOwner: ...
+
+    def read_request(
+        self,
+        idempotency_key: str,
+    ) -> OwnedEmailExistingRequest | None: ...
 
     def request(
         self,
@@ -326,6 +343,9 @@ class OwnedEmailNotification:
             normalized,
             owner_generation=owner.generation,
         )
+        if request_view.terminal_receipt is not None:
+            self._validate_terminal_receipt(request_view)
+            return request_view.terminal_receipt
         primary_lease = self._execution.current_lease(
             expected=primary_lease,
         )
@@ -344,6 +364,35 @@ class OwnedEmailNotification:
         self._execution.current_lease(expected=primary_lease)
         outcome = self._provider.deliver(attempt.effect, attempt.payload)
         return self._store.settle(attempt, outcome)
+
+    @staticmethod
+    def _validate_terminal_receipt(
+        request_view: OwnedEmailRequest,
+    ) -> None:
+        receipt = request_view.terminal_receipt
+        if receipt is None:
+            raise AssertionError("terminal receipt is required")
+        if (
+            receipt.owner_generation != request_view.owner_generation
+            or receipt.work_id != request_view.work_id
+            or receipt.effect_id != request_view.effect_id
+        ):
+            raise RuntimeError(
+                "owned email terminal receipt identity drifted"
+            )
+        valid_terminal = (
+            receipt.work_status == "succeeded"
+            and receipt.effect_status == "delivered"
+            and receipt.disposition == "delivered"
+        ) or (
+            receipt.work_status == "failed"
+            and receipt.effect_status == "dead_lettered"
+            and receipt.disposition == "dead_lettered"
+        )
+        if not valid_terminal:
+            raise RuntimeError(
+                "owned email request returned a non-terminal receipt"
+            )
 
 
 class OwnedEmailRecovery:
@@ -445,6 +494,274 @@ class OwnedEmailRecovery:
         ).total_seconds() > self._max_age_seconds
 
 
+def dispatch_email_by_current_owner(
+    command: OwnedEmailCommand,
+    *,
+    storage_dir: str,
+) -> dict[str, Any]:
+    """Route one ops email through the durable owner generation.
+
+    Operations Core owns the normal production path and therefore requires
+    WorkItem/EffectRequest/outbox creation, Primary Authority fencing, exact
+    Sent-mail read-back, and typed settlement. The direct notifier is retained
+    solely as the database-controlled ``legacy`` rollback path; an unavailable
+    or invalid owner read fails before either provider is constructed.
+    """
+
+    normalized = _normalize_command(command)
+    store = SupabaseOwnedEmailStore.from_environment()
+    existing = store.read_request(normalized.idempotency_key)
+    if existing is not None and existing.command != normalized:
+        raise RuntimeError(
+            "owned email idempotency key conflicts with durable command"
+        )
+    owner = store.read_owner()
+    if owner.effect_family != _OWNER_FAMILY:
+        raise RuntimeError(
+            "notification owner read returned the wrong effect family"
+        )
+    if (
+        existing is not None
+        and existing.request.terminal_receipt is not None
+    ):
+        OwnedEmailNotification._validate_terminal_receipt(
+            existing.request
+        )
+        return _receipt_result(
+            existing.request.terminal_receipt,
+            subject=normalized.title,
+            delivery_owner=_OPERATIONS_CORE_OWNER,
+        )
+    if existing is not None and owner.owner == _LEGACY_OWNER:
+        raise RuntimeError(
+            "legacy delivery cannot supersede an existing Operations Core "
+            "owned-email request"
+        )
+
+    if owner.owner == _OPERATIONS_CORE_OWNER:
+        from volpred.ops.authority import (
+            build_supabase_host_authority_keepalive,
+        )
+        from volpred.publisher.email_notifier import EmailNotifier
+
+        from ._email_notification import (
+            EmailNotificationEffectAdapter,
+            ImapSentMailReader,
+        )
+
+        notifier = EmailNotifier(storage_dir=storage_dir)
+        worker_id = "effect-worker:ops-alert-email"
+        keepalive = build_supabase_host_authority_keepalive(
+            authority_key=_PRIMARY_AUTHORITY_KEY,
+            holder_ref=worker_id,
+        )
+        keepalive.start()
+        try:
+            receipt = OwnedEmailNotification(
+                store=store,
+                provider=EmailNotificationEffectAdapter(
+                    notifier=notifier,
+                    sent_mail_reader=ImapSentMailReader.from_environment(),
+                ),
+                primary_authority=keepalive,
+                worker_id=worker_id,
+            ).deliver(normalized)
+        finally:
+            keepalive.stop()
+        return _receipt_result(
+            receipt,
+            subject=normalized.title,
+            delivery_owner=owner.owner,
+        )
+
+    if owner.owner != _LEGACY_OWNER:
+        raise RuntimeError(
+            f"unsupported notification owner: {owner.owner}"
+        )
+    from volpred.ops.authority import (
+        build_supabase_host_authority_keepalive,
+    )
+    from volpred.publisher.email_notifier import EmailNotifier
+
+    from ._email_notification import (
+        EmailNotificationEffectAdapter,
+        ImapSentMailReader,
+    )
+
+    effect, payload_bytes = _legacy_effect_contract(normalized)
+    worker_id = "effect-worker:ops-alert-email-legacy"
+    keepalive = build_supabase_host_authority_keepalive(
+        authority_key=_PRIMARY_AUTHORITY_KEY,
+        holder_ref=worker_id,
+    )
+    execution = _OwnedEmailExecutionContext(
+        store=store,
+        primary_authority=keepalive,
+        worker_id=worker_id,
+        lease_seconds=300,
+        token_factory=None,
+        token_prefix="legacy_owned_email",
+        operation_label="legacy delivery",
+    )
+    keepalive.start()
+    try:
+        primary_lease = execution.current_lease()
+        fenced_existing = store.read_request(
+            normalized.idempotency_key
+        )
+        if (
+            fenced_existing is not None
+            and fenced_existing.command != normalized
+        ):
+            raise RuntimeError(
+                "owned email idempotency key conflicts with durable command"
+            )
+        fenced_owner = store.read_owner()
+        if (
+            fenced_owner.effect_family != _OWNER_FAMILY
+            or fenced_owner.owner != _LEGACY_OWNER
+            or fenced_owner.generation != owner.generation
+        ):
+            raise NotificationOwnershipLost(
+                "legacy email ownership changed after Primary Authority fence"
+            )
+        if fenced_existing is not None:
+            terminal = fenced_existing.request.terminal_receipt
+            if terminal is None:
+                raise RuntimeError(
+                    "legacy delivery cannot supersede a pending "
+                    "Operations Core owned-email request"
+                )
+            OwnedEmailNotification._validate_terminal_receipt(
+                fenced_existing.request
+            )
+            return _receipt_result(
+                terminal,
+                subject=normalized.title,
+                delivery_owner=_OPERATIONS_CORE_OWNER,
+            )
+        outcome = EmailNotificationEffectAdapter(
+            notifier=EmailNotifier(storage_dir=storage_dir),
+            sent_mail_reader=ImapSentMailReader.from_environment(),
+        ).deliver(effect, payload_bytes)
+        execution.current_lease(expected=primary_lease)
+    finally:
+        keepalive.stop()
+    sent = isinstance(outcome, AcknowledgedEffect)
+    return {
+        "notification_id": effect.id,
+        "subject": normalized.title,
+        "sent": sent,
+        "configured": True,
+        "send_error": (
+            None if sent else outcome.reason_code
+        ),
+        "delivery_owner": owner.owner,
+        "owner_generation": owner.generation,
+        "work_id": None,
+        "effect_status": (
+            "legacy_sent_verified" if sent else "legacy_failed"
+        ),
+        "attempt_count": 1,
+        "evidence_ref": outcome.evidence_ref,
+        "evidence_sha256": outcome.evidence_sha256,
+    }
+
+
+def read_existing_owned_email_request(
+    idempotency_key: str,
+) -> OwnedEmailExistingRequest | None:
+    """Read the immutable cross-host command/receipt for one delivery key."""
+
+    return SupabaseOwnedEmailStore.from_environment().read_request(
+        _required_text(
+            idempotency_key,
+            field="owned email idempotency_key",
+        )
+    )
+
+
+def _receipt_result(
+    receipt: OwnedEmailReceipt,
+    *,
+    subject: str,
+    delivery_owner: str,
+) -> dict[str, Any]:
+    return {
+        "notification_id": receipt.effect_id,
+        "subject": subject,
+        "sent": receipt.delivered,
+        "configured": True,
+        "send_error": (
+            None if receipt.delivered else receipt.disposition
+        ),
+        "delivery_owner": delivery_owner,
+        "owner_generation": receipt.owner_generation,
+        "work_id": receipt.work_id,
+        "effect_status": receipt.effect_status,
+        "attempt_count": receipt.attempt_count,
+        "evidence_ref": receipt.evidence_ref,
+        "evidence_sha256": receipt.evidence_sha256,
+    }
+
+
+def _legacy_effect_contract(
+    command: OwnedEmailCommand,
+) -> tuple[EffectView, bytes]:
+    payload = json.dumps(
+        {
+            "schema_version": "email-notification.v1",
+            "subject": command.title,
+            "text_body": command.text_body,
+            "html_body": command.html_body,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    request_identity = json.dumps(
+        {
+            "schema_version": "legacy-owned-email.v1",
+            "idempotency_key": command.idempotency_key,
+            "level": command.level,
+            "title": command.title,
+            "recipient": command.recipient,
+            "text_body": command.text_body,
+            "html_body": command.html_body,
+            "actor_ref": command.actor_ref,
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    request_sha256 = hashlib.sha256(request_identity).hexdigest()
+    identity = request_sha256[:32]
+    target_ref = f"email:{command.recipient}"
+    return (
+        EffectView(
+            schema_version="effect-request.v1",
+            id=f"effect_legacy_owned_email_{identity}",
+            idempotency_key=command.idempotency_key,
+            work_item_id=f"work_legacy_owned_email_{identity}",
+            work_item_version=1,
+            effect_kind="email.notification.send",
+            target_ref=target_ref,
+            payload_ref=f"legacy-owned-email:{identity}",
+            payload_sha256=hashlib.sha256(payload).hexdigest(),
+            risk="safe",
+            acknowledgement=AcknowledgementExpectation(
+                kind="email.sent-mail.readback",
+                target_ref=target_ref,
+            ),
+            requester_ref=command.actor_ref,
+            request_sha256=request_sha256,
+            status="requested",
+            created_at=datetime.now(timezone.utc).isoformat(),
+        ),
+        payload,
+    )
+
+
 class SupabaseOwnedEmailStore:
     """Service-role-only PostgREST adapter for the ownership RPCs."""
 
@@ -480,6 +797,75 @@ class SupabaseOwnedEmailStore:
     def read_owner(self) -> NotificationOwner:
         return _owner_from_payload(
             self._rpc("volpred_read_notification_owner", {})
+        )
+
+    def read_request(
+        self,
+        idempotency_key: str,
+    ) -> OwnedEmailExistingRequest | None:
+        payload = self._rpc_optional(
+            "volpred_read_owned_email_request",
+            {
+                "p_idempotency_key": _required_text(
+                    idempotency_key,
+                    field="owned email idempotency_key",
+                )
+            },
+        )
+        if payload is None:
+            return None
+        if payload.get("schema_version") != "owned-email-request-read.v1":
+            raise RuntimeError(
+                "owned email request read schema is unsupported"
+            )
+        command_payload = _mapping(
+            payload.get("command"),
+            field="owned email request command",
+        )
+        if command_payload.get("schema_version") != "owned-email-command.v1":
+            raise RuntimeError(
+                "owned email command schema is unsupported"
+            )
+        request_payload = _mapping(
+            payload.get("request"),
+            field="owned email request view",
+        )
+        html_body = command_payload.get("html_body")
+        if html_body is not None and not isinstance(html_body, str):
+            raise RuntimeError(
+                "owned email command html_body must be text or null"
+            )
+        return OwnedEmailExistingRequest(
+            command=_normalize_command(
+                OwnedEmailCommand(
+                    idempotency_key=_required_text(
+                        command_payload.get("idempotency_key"),
+                        field="owned email idempotency_key",
+                    ),
+                    level=_required_text(
+                        command_payload.get("level"),
+                        field="owned email level",
+                    ),
+                    title=_required_text(
+                        command_payload.get("title"),
+                        field="owned email title",
+                    ),
+                    recipient=_required_text(
+                        command_payload.get("recipient"),
+                        field="owned email recipient",
+                    ),
+                    text_body=_required_text(
+                        command_payload.get("text_body"),
+                        field="owned email text_body",
+                    ),
+                    html_body=html_body,
+                    actor_ref=_required_text(
+                        command_payload.get("actor_ref"),
+                        field="owned email actor_ref",
+                    ),
+                )
+            ),
+            request=_request_from_payload(request_payload),
         )
 
     def transfer_owner(
@@ -528,21 +914,7 @@ class SupabaseOwnedEmailStore:
                 "p_actor_ref": command.actor_ref,
             },
         )
-        return OwnedEmailRequest(
-            owner_generation=_positive_integer(
-                payload.get("owner_generation"),
-                field="owned request owner_generation",
-            ),
-            work_id=_required_text(payload.get("work_id"), field="work_id"),
-            effect_id=_required_text(
-                payload.get("effect_id"),
-                field="effect_id",
-            ),
-            request_sha256=_sha256(
-                payload.get("request_sha256"),
-                field="owned request hash",
-            ),
-        )
+        return _request_from_payload(payload)
 
     def begin(
         self,
@@ -669,55 +1041,27 @@ class SupabaseOwnedEmailStore:
                 "p_evidence_sha256": outcome.evidence_sha256,
             },
         )
-        return OwnedEmailReceipt(
-            schema_version=_required_text(
-                payload.get("schema_version"),
-                field="owned receipt schema_version",
-            ),
-            owner_generation=_positive_integer(
-                payload.get("owner_generation"),
-                field="owned receipt owner_generation",
-            ),
-            work_id=_required_text(payload.get("work_id"), field="work_id"),
-            work_status=_required_text(
-                payload.get("work_status"),
-                field="work_status",
-            ),
-            effect_id=_required_text(
-                payload.get("effect_id"),
-                field="effect_id",
-            ),
-            effect_status=_required_text(
-                payload.get("effect_status"),
-                field="effect_status",
-            ),
-            attempt_count=_positive_integer(
-                payload.get("attempt_count"),
-                field="attempt_count",
-            ),
-            disposition=_required_text(
-                payload.get("disposition"),
-                field="disposition",
-            ),
-            evidence_ref=_required_text(
-                payload.get("evidence_ref"),
-                field="evidence_ref",
-            ),
-            evidence_sha256=_sha256(
-                payload.get("evidence_sha256"),
-                field="evidence_sha256",
-            ),
-            primary_authority_ref=_required_text(
-                payload.get("primary_authority_ref"),
-                field="primary_authority_ref",
-            ),
-            recorded_at=_required_text(
-                payload.get("recorded_at"),
-                field="recorded_at",
-            ),
-        )
+        return _receipt_from_payload(payload)
 
     def _rpc(self, function: str, payload: Mapping[str, object]) -> Mapping[str, Any]:
+        decoded = self._rpc_value(function, payload)
+        return _mapping(decoded, field=f"{function} response")
+
+    def _rpc_optional(
+        self,
+        function: str,
+        payload: Mapping[str, object],
+    ) -> Mapping[str, Any] | None:
+        decoded = self._rpc_value(function, payload)
+        if decoded is None:
+            return None
+        return _mapping(decoded, field=f"{function} response")
+
+    def _rpc_value(
+        self,
+        function: str,
+        payload: Mapping[str, object],
+    ) -> Any:
         if (
             function not in _READ_ONLY_RPCS
             and _remote_mutations_disabled()
@@ -768,7 +1112,7 @@ class SupabaseOwnedEmailStore:
             raise RuntimeError(
                 "notification ownership RPC returned invalid JSON"
             ) from exc
-        return _mapping(decoded, field=f"{function} response")
+        return decoded
 
 
 def _runtime_environment() -> dict[str, str]:
@@ -823,6 +1167,10 @@ def _normalize_command(command: OwnedEmailCommand) -> OwnedEmailCommand:
 
 
 def _owner_from_payload(payload: Mapping[str, Any]) -> NotificationOwner:
+    if payload.get("schema_version") != "notification-owner.v1":
+        raise RuntimeError(
+            "notification owner schema is unsupported"
+        )
     owner = _required_text(payload.get("owner"), field="notification owner")
     if owner not in {_LEGACY_OWNER, _OPERATIONS_CORE_OWNER}:
         raise RuntimeError(f"unsupported notification owner: {owner}")
@@ -851,6 +1199,93 @@ def _owner_from_payload(payload: Mapping[str, Any]) -> NotificationOwner:
         change_reason=_required_text(
             payload.get("change_reason"),
             field="notification owner change_reason",
+        ),
+    )
+
+
+def _receipt_from_payload(
+    payload: Mapping[str, Any],
+) -> OwnedEmailReceipt:
+    if payload.get("schema_version") != "owned-email-receipt.v1":
+        raise RuntimeError("owned email receipt schema is unsupported")
+    return OwnedEmailReceipt(
+        schema_version=_required_text(
+            payload.get("schema_version"),
+            field="owned receipt schema_version",
+        ),
+        owner_generation=_positive_integer(
+            payload.get("owner_generation"),
+            field="owned receipt owner_generation",
+        ),
+        work_id=_required_text(payload.get("work_id"), field="work_id"),
+        work_status=_required_text(
+            payload.get("work_status"),
+            field="work_status",
+        ),
+        effect_id=_required_text(
+            payload.get("effect_id"),
+            field="effect_id",
+        ),
+        effect_status=_required_text(
+            payload.get("effect_status"),
+            field="effect_status",
+        ),
+        attempt_count=_positive_integer(
+            payload.get("attempt_count"),
+            field="attempt_count",
+        ),
+        disposition=_required_text(
+            payload.get("disposition"),
+            field="disposition",
+        ),
+        evidence_ref=_required_text(
+            payload.get("evidence_ref"),
+            field="evidence_ref",
+        ),
+        evidence_sha256=_sha256(
+            payload.get("evidence_sha256"),
+            field="evidence_sha256",
+        ),
+        primary_authority_ref=_required_text(
+            payload.get("primary_authority_ref"),
+            field="primary_authority_ref",
+        ),
+        recorded_at=_required_text(
+            payload.get("recorded_at"),
+            field="recorded_at",
+        ),
+    )
+
+
+def _request_from_payload(
+    payload: Mapping[str, Any],
+) -> OwnedEmailRequest:
+    if payload.get("schema_version") != "owned-email-request.v1":
+        raise RuntimeError("owned email request schema is unsupported")
+    receipt_payload = payload.get("receipt")
+    return OwnedEmailRequest(
+        owner_generation=_positive_integer(
+            payload.get("owner_generation"),
+            field="owned request owner_generation",
+        ),
+        work_id=_required_text(payload.get("work_id"), field="work_id"),
+        effect_id=_required_text(
+            payload.get("effect_id"),
+            field="effect_id",
+        ),
+        request_sha256=_sha256(
+            payload.get("request_sha256"),
+            field="owned request hash",
+        ),
+        terminal_receipt=(
+            _receipt_from_payload(
+                _mapping(
+                    receipt_payload,
+                    field="owned request terminal receipt",
+                )
+            )
+            if receipt_payload is not None
+            else None
         ),
     )
 
@@ -1076,10 +1511,13 @@ __all__ = [
     "NotificationOwnershipLost",
     "OwnedEmailAttempt",
     "OwnedEmailCommand",
+    "OwnedEmailExistingRequest",
     "OwnedEmailNotification",
     "OwnedEmailRecovery",
     "OwnedEmailRecoverySummary",
     "OwnedEmailReceipt",
     "OwnedEmailRequest",
     "SupabaseOwnedEmailStore",
+    "dispatch_email_by_current_owner",
+    "read_existing_owned_email_request",
 ]

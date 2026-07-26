@@ -11,6 +11,22 @@ GitHub planning parent 為
 `https://github.com/yhlai0911/volpred-research/issues/3`，33 張驗收票為 #4–#36；
 GitHub 只負責規劃／驗收，`storage/next_tasks.json` 仍是唯一 runtime pending queue，
 materialized runtime task 必須引用對應 planning issue。
+
+### 2026-07-26 — Boss Report caller follow-up（Issue #39）
+
+本項不是新計畫；它沿用 Issue #3 plan、master spec 與 T05/#11 owned-effect 架構，
+補上原 ticket inventory 漏列的 Boss Report caller。報告內容已改為 typed read model，
+只讀 master spec §7 與 current task-pool mode；歷史五月 cycle/action 檔不再進信件。
+排程端由 canonical config 重建 generation／activation／cron slot／fire digest，
+同一 fire 首次 render 以 no-overwrite payload 保存。
+
+跨主機重送邊界已從本機 cache 提升至 shared evidence：
+`volpred_read_owned_email_request` 讀回 immutable command 與 optional terminal receipt；
+既有 Operations Core request 不可被 legacy supersede。明確 legacy rollback 同樣取得
+Primary Authority，並以 deterministic Message-ID 先查 Gmail Sent。本機 PostgreSQL
+migration／transaction 與 Python regressions 已通過；production migration、一次
+live WorkItem→EffectRequest→outbox→Gmail Sent read-back及新自然 schedule receipt
+尚未完成，因此狀態為 **`contained`**。
 Phase 0／ADR-0001 的 module seam、interface、adapter 與第一個 TDD 切片，見
 `docs/operations_core_module_design.md`。
 2026-07-23 已完成 in-memory tracer（24 cases）及 private PostgreSQL 17 shadow adapter
@@ -2100,3 +2116,28 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   接續優化按 `ask-matt` 的 `implement` → `tdd` → `code-review` 逐 ticket 執行。
 - ✅ 此 living-doc drift 已 `root_cause_fixed_and_verified`；它沒有修改另一 session
   的 task-pool/runtime state 或任何現行排程。
+
+## 2026-07-26 — Boss Report owned delivery 與 canonical read model（Issue #39）
+
+- 🔎 20:10 production receipt 證明 trigger 已由 Operations Core 擁有，但 caller
+  仍以 direct SMTP 寄信；cycle intent／next actions 又取自 2026-05-19 的
+  pseudo-living files。這是 #11 owned-email 架構未涵蓋 Boss Report caller 的
+  acceptance gap，不是舊 cron 重複觸發。
+- ✅ 寄信入口已收斂為 `dispatch_email_by_current_owner()`；Boss Report 用 exact
+  schedule fire key 作 idempotency key，`operations_core` 必走
+  WorkItem／EffectRequest／outbox／Primary Authority／Gmail Sent read-back，
+  durable owner 明確為 `legacy` 時才保留 direct rollback，owner read failure
+  在 provider 建立前 fail closed。
+- ✅ 新 typed read model 只讀 master spec §7 與 current task-pool mode；完成列省略，
+  contained／pending 保留 exact status 與 source SHA。它同時認得 direct mode 與
+  12:14 UTC 已合法完成的 queued-mode restore，不修改另一 session 的 control state。
+- ✅ 小寫 UTC `z` 於 reader 邊界正規化，未手改 `storage/work_log.json`；dry render
+  回讀確認 5 月 cycle／舊 action／該 historical warning 均消失。
+- ✅ production wrapper、repo source 與 manifest 已 lockstep，SHA-256 均為
+  `f28fab932a917498db7f25472507fbb228538a515c5b1f6d4097ee09ca7eaee6`。
+  Cross-host shared request／terminal read、exact schema、canonical fire validator
+  與 legacy Primary Authority／deterministic Gmail Sent replay 已進回歸；owner
+  transfer 在該 PA lease 有效時會 fail closed，不能於 legacy SMTP 中途切 owner。
+- 🟡 目前為 **`contained`**：production migration、正式 owned delivery receipt、
+  Gmail Sent evidence 與下一個自然 schedule receipt 尚待回讀；五步 gate 未全過前
+  不稱完成。

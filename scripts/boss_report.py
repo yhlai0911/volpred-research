@@ -22,12 +22,15 @@ in the 20:10 daily-close edition. Do not add a second periodic boss email; the
 outbound-channel matrix in .claude/skills/platform-ops-manager/references/
 loop-health-and-dreaming.md is the owner of that rule.
 
-Reuses EmailNotifier.notify(html_body=...) (multipart/alternative).
+Delivery follows the durable ``email.ops_alert`` owner. Operations Core uses
+WorkItem + EffectRequest/outbox + Primary Authority + exact Sent read-back;
+direct SMTP exists only behind an explicit durable ``legacy`` owner rollback.
 """
 from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
 import subprocess
 import sys
@@ -38,6 +41,22 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from volpred.ops.boss_facing import plainify_boss_text
+from volpred.ops.boss_report_read_model import (
+    BossReportProgram,
+    read_boss_report_program,
+)
+from volpred.ops.boss_report_payload import (
+    materialize_boss_report_payload,
+)
+from volpred.ops.delivery.owned_email import (
+    OwnedEmailCommand,
+    dispatch_email_by_current_owner,
+    read_existing_owned_email_request,
+)
+from volpred.config import load_runtime_schedules
+from volpred.ops.schedule_materialization import (
+    validate_schedule_fire_identity,
+)
 
 # Absolute uv path — host-cron processes get a minimal PATH (/usr/bin:/bin)
 # without Homebrew, so bare "uv" subprocess calls fail with FileNotFoundError
@@ -182,14 +201,21 @@ def _autonomous_decisions():
     return out
 
 
-def _cycle_intent():
-    """Read my current cycle's intent + goal + plan from a small state file."""
-    f = PROJECT_ROOT / "storage" / "ops" / "current_cycle_intent.json"
-    if not f.exists(): return {}
-    try: return json.loads(f.read_text())
+def _program_context() -> BossReportProgram | None:
+    """Read one canonical program snapshot for the whole report."""
+    try:
+        return read_boss_report_program(PROJECT_ROOT)
     except Exception as exc:
-        _warn_report("current_cycle_intent read failed", exc)
-        return {}
+        _warn_report("canonical program read failed", exc)
+        return None
+
+
+def _cycle_intent(
+    program: BossReportProgram | None = None,
+) -> dict[str, object]:
+    """Adapt one canonical program snapshot for the HTML report."""
+    current = program if program is not None else _program_context()
+    return current.as_report_fields() if current is not None else {}
 
 
 def _blockers():
@@ -219,22 +245,12 @@ def _blockers():
     return out
 
 
-def _next_actions():
-    """Read rolling next-actions from ops_team_structure.md."""
-    f = PROJECT_ROOT / "docs" / "ops_team_structure.md"
-    if not f.exists(): return []
-    txt = f.read_text()
-    actions = []
-    in_section = False
-    for line in txt.splitlines():
-        if line.startswith("## Next actions"):
-            in_section = True; continue
-        if in_section:
-            if line.startswith("## ") or line.startswith("---"): break
-            stripped = line.strip()
-            if stripped.startswith(("1.", "2.", "3.", "4.", "5.", "-")):
-                actions.append(stripped)
-    return actions[:8]
+def _next_actions(
+    program: BossReportProgram | None = None,
+) -> list[str]:
+    """Adapt the same canonical program snapshot for the action sections."""
+    current = program if program is not None else _program_context()
+    return current.next_actions(limit=8) if current is not None else []
 
 
 # ── daily-close collectors (ported 2026-07-20 WS-H2 from retired work_summary_6h) ──
@@ -243,7 +259,12 @@ def _parse_ts_utc(value):
     """ISO string -> aware UTC datetime, or None (caller logs context)."""
     if not value:
         return None
-    dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    normalized = str(value).strip()
+    if normalized[-2:].lower() == ":z":
+        normalized = normalized[:-2] + ":00+00:00"
+    elif normalized[-1:].lower() == "z":
+        normalized = normalized[:-1] + "+00:00"
+    dt = datetime.fromisoformat(normalized)
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return dt
@@ -461,8 +482,13 @@ def build_html(daily_close: bool = False):
     papers = _paper_portfolio()
     pending = _pending_tasks()
     decisions = _autonomous_decisions()
-    next_actions = _next_actions()
-    intent = _cycle_intent()
+    program = _program_context()
+    next_actions = (
+        program.next_actions(limit=8) if program is not None else []
+    )
+    intent = (
+        program.as_report_fields() if program is not None else {}
+    )
     blockers = _blockers()
     articles = _articles_in_window() if daily_close else {"published": [], "drafts": []}
     work = _work_log_entries() if daily_close else []
@@ -506,9 +532,15 @@ def build_html(daily_close: bool = False):
     if intent:
         parts.append("<h2>⓪ 本 cycle 意圖 / 目標 / 規劃</h2>")
         parts.append("<table>")
-        for k_zh, k_en in [("意圖 Intent", "intent"), ("本週目標 Weekly Goal", "weekly_goal"),
-                            ("本 cycle 計劃 Plan", "plan"), ("成功標準 Success Criteria", "success_criteria"),
-                            ("已知風險 Known Risks", "risks")]:
+        for k_zh, k_en in [
+            ("意圖 Intent", "intent"),
+            ("目前目標 Current Goals", "weekly_goal"),
+            ("Canonical 未完成項 Plan", "plan"),
+            ("成功標準 Success Criteria", "success_criteria"),
+            ("已知風險 Known Risks", "risks"),
+            ("來源 Source", "source_identity"),
+            ("來源警告 Source Warnings", "source_warnings"),
+        ]:
             v = intent.get(k_en)
             if v:
                 if isinstance(v, list): v = "<br>".join("• " + _esc(x) for x in v)
@@ -721,29 +753,154 @@ def main(argv=None):
         _configure_window(24.0)
     elif args.window_hours:
         _configure_window(args.window_hours)
-    title, html_body, plain = build_html(daily_close=args.daily_close)
+    html_body = ""
     try:
-        from volpred.publisher.email_notifier import EmailNotifier
-        notifier = EmailNotifier()
-        # Use notify() with html_body for multipart/alternative
         from volpred.ops.alerts import ALERT_RECIPIENT
-        force = args.force
-        result = notifier.notify(
-            subject=title,
-            body=plain,
-            html_body=html_body,
-            recipients=[ALERT_RECIPIENT],
-            dedupe_type="boss_report",
-            dedupe_key=NOW.strftime("%Y-%m-%d-%H"),
-            force_send=force,
+        schedule_owner = os.environ.get("VOLPRED_SCHEDULE_OWNER", "")
+        schedule_job_id = os.environ.get(
+            "VOLPRED_SCHEDULE_JOB_ID",
+            "manual-boss-report",
+        ).strip()
+        fire_key = os.environ.get(
+            "VOLPRED_SCHEDULE_FIRE_KEY",
+            "",
+        ).strip()
+        scheduled_for = os.environ.get(
+            "VOLPRED_SCHEDULED_FOR",
+            "",
+        ).strip()
+        schedule_generation = os.environ.get(
+            "VOLPRED_SCHEDULE_GENERATION",
+            "",
+        ).strip()
+        if schedule_owner == "operations_core" and (
+            not fire_key
+            or not schedule_generation
+            or schedule_job_id != "boss_report_4h"
+            or not scheduled_for
+        ):
+            raise RuntimeError(
+                "Operations Core Boss Report requires its exact generation, "
+                "fire key, and boss_report_4h schedule identity"
+            )
+        if not fire_key:
+            edition = "daily-close" if args.daily_close else "periodic"
+            fire_key = (
+                f"manual:boss_report:{edition}:"
+                f"{NOW.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+            )
+        if args.force:
+            if schedule_owner == "operations_core":
+                raise RuntimeError(
+                    "--force is not allowed for a scheduled Operations Core fire"
+                )
+            fire_key = f"{fire_key}:force"
+
+        materialized_ref = None
+        materialized_sha256 = None
+        if schedule_owner == "operations_core":
+            fire = validate_schedule_fire_identity(
+                load_runtime_schedules(),
+                fire_key=fire_key,
+                generation=schedule_generation,
+                job_id=schedule_job_id,
+                scheduled_for=scheduled_for,
+            )
+            scheduled_at = _parse_ts_utc(fire.scheduled_for)
+            expected = {
+                8: (False, 12.0),
+                14: (False, 6.0),
+                20: (True, 24.0),
+            }.get(scheduled_at.astimezone(TW).hour)
+            actual = (
+                args.daily_close,
+                WINDOW.total_seconds() / 3600,
+            )
+            if expected is None or actual != expected:
+                raise RuntimeError(
+                    "Operations Core Boss Report edition does not match "
+                    f"scheduled_for: expected={expected} actual={actual}"
+                )
+            actor_ref = (
+                f"schedule:{schedule_job_id}:{fire_key}"
+            )
+            existing = read_existing_owned_email_request(fire_key)
+            if existing is not None:
+                durable = existing.command
+                if (
+                    durable.idempotency_key != fire_key
+                    or durable.level != "info"
+                    or durable.recipient != ALERT_RECIPIENT
+                    or durable.actor_ref != actor_ref
+                ):
+                    raise RuntimeError(
+                        "durable Boss Report command identity drifted"
+                    )
+                title = durable.title
+                html_body = durable.html_body or ""
+                plain = durable.text_body
+            else:
+                payload = materialize_boss_report_payload(
+                    PROJECT_ROOT,
+                    fire_key=fire_key,
+                    job_id=schedule_job_id,
+                    scheduled_for=fire.scheduled_for,
+                    daily_close=args.daily_close,
+                    window_hours=actual[1],
+                    build=lambda: build_html(
+                        daily_close=args.daily_close
+                    ),
+                )
+                title = payload.title
+                html_body = payload.html_body
+                plain = payload.text_body
+                materialized_ref = payload.materialized_ref
+                materialized_sha256 = payload.payload_sha256
+        else:
+            title, html_body, plain = build_html(
+                daily_close=args.daily_close
+            )
+
+        result = dispatch_email_by_current_owner(
+            OwnedEmailCommand(
+                idempotency_key=fire_key,
+                level="info",
+                title=title,
+                recipient=ALERT_RECIPIENT,
+                text_body=plain,
+                html_body=html_body,
+                actor_ref=(
+                    actor_ref
+                    if schedule_owner == "operations_core"
+                    else f"manual:boss_report:{fire_key}"
+                ),
+            ),
+            storage_dir=str(PROJECT_ROOT / "storage"),
         )
-        print(f"[boss_report] sent notification_id={result.get('notification_id') if isinstance(result, dict) else result} subject={title}")
+        if result.get("sent") is not True:
+            raise RuntimeError(
+                "owned Boss Report delivery was not acknowledged: "
+                f"owner={result.get('delivery_owner')} "
+                f"effect_status={result.get('effect_status')} "
+                f"error={result.get('send_error')}"
+            )
+        print(
+            "[boss_report] sent "
+            f"notification_id={result.get('notification_id')} "
+            f"owner={result.get('delivery_owner')} "
+            f"effect_status={result.get('effect_status')} "
+            f"evidence_ref={result.get('evidence_ref')} "
+            f"payload_ref={materialized_ref} "
+            f"payload_sha256={materialized_sha256} "
+            f"subject={title}"
+        )
     except Exception as e:
         print(f"[boss_report] FAILED: {e}", file=sys.stderr)
         # Fallback: write to /tmp for manual inspection
-        out_path = Path("/tmp/boss_report_latest.html")
-        out_path.write_text(html_body)
-        print(f"[boss_report] HTML saved to {out_path}")
+        if html_body:
+            out_path = Path("/tmp/boss_report_latest.html")
+            out_path.write_text(html_body)
+            print(f"[boss_report] HTML saved to {out_path}")
         return 1
     return 0
 

@@ -3,6 +3,7 @@ import os
 import shutil
 import socket
 import subprocess
+import time
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
@@ -231,6 +232,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260726093801_operations_core_owned_publisher_article_recovery.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260726125016_boss_report_owned_email_terminal_replay.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -1348,6 +1353,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     text, text, bigint, text
                   ),
                   public.volpred_read_notification_owner(),
+                  public.volpred_read_owned_email_request(text),
                   public.volpred_transfer_notification_owner(
                     text, bigint, text, text, text, bigint
                   ),
@@ -4374,6 +4380,32 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
             ),
         ).fetchone()[0]
         assert replayed_request == owned_request
+        shared_request = connection.execute(
+            """
+            SELECT public.volpred_read_owned_email_request(%s)
+            """,
+            ("ops-alert:pg17-transaction:2026-07-24",),
+        ).fetchone()[0]
+        assert shared_request["schema_version"] == (
+            "owned-email-request-read.v1"
+        )
+        assert shared_request["command"] == {
+            "schema_version": "owned-email-command.v1",
+            "idempotency_key": (
+                "ops-alert:pg17-transaction:2026-07-24"
+            ),
+            "level": "info",
+            "title": payload["subject"],
+            "recipient": "owner@example.com",
+            "text_body": payload["text_body"],
+            "html_body": payload["html_body"],
+            "actor_ref": "test:pg17",
+        }
+        assert shared_request["request"]["receipt"] is None
+        assert connection.execute(
+            "SELECT public.volpred_read_owned_email_request(%s)",
+            ("ops-alert:missing",),
+        ).fetchone()[0] is None
 
         with pytest.raises(
             psycopg.errors.NoDataFound,
@@ -4431,7 +4463,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
 
         with pytest.raises(
             psycopg.errors.RaiseException,
-            match="requires zero active attempts",
+            match="requires zero active delivery fences",
         ):
             connection.execute(
                 """
@@ -4484,6 +4516,33 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
         assert receipt["work_status"] == "succeeded"
         assert receipt["effect_status"] == "delivered"
         assert receipt["disposition"] == "delivered"
+        terminal_replay = connection.execute(
+            """
+            SELECT public.volpred_request_owned_email_notification(
+              %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                2,
+                "ops-alert:pg17-transaction:2026-07-24",
+                "info",
+                payload["subject"],
+                "owner@example.com",
+                Jsonb(payload),
+                "test:pg17",
+            ),
+        ).fetchone()[0]
+        assert terminal_replay["work_id"] == owned_request["work_id"]
+        assert terminal_replay["effect_id"] == owned_request["effect_id"]
+        assert terminal_replay["receipt"] == receipt
+        shared_terminal = connection.execute(
+            """
+            SELECT public.volpred_read_owned_email_request(%s)
+            """,
+            ("ops-alert:pg17-transaction:2026-07-24",),
+        ).fetchone()[0]
+        assert shared_terminal["command"] == shared_request["command"]
+        assert shared_terminal["request"]["receipt"] == receipt
 
         connection.execute("RESET ROLE")
         held_after_settlement = connection.execute(
@@ -4548,6 +4607,107 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
             ),
         ).fetchone()[0]
         assert replayed_rollback == rollback
+
+        legacy_primary_token = "legacy-primary-owned-email-token"
+
+        def competing_transfer() -> None:
+            with psycopg.connect(
+                postgres_effect_dsn,
+                autocommit=True,
+            ) as transfer_connection:
+                transfer_connection.execute(
+                    "SET application_name = "
+                    "'volpred-owned-email-transfer-race'"
+                )
+                transfer_connection.execute("SET ROLE service_role")
+                transfer_connection.execute(
+                    """
+                    SELECT public.volpred_transfer_notification_owner(
+                      %s, %s, %s, %s, %s, %s
+                    )
+                    """,
+                    (
+                        "legacy",
+                        3,
+                        "operations_core",
+                        "test:pg17",
+                        "must reject cutover during legacy provider fence",
+                        None,
+                    ),
+                )
+
+        with psycopg.connect(postgres_effect_dsn) as lease_connection:
+            lease_connection.execute("SET ROLE service_role")
+            lease_connection.execute(
+                """
+                SELECT pg_advisory_xact_lock(
+                  hashtextextended(
+                    'primary:notification:email.ops_alert',
+                    0
+                  )
+                )
+                """
+            )
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                transfer_future = executor.submit(competing_transfer)
+                deadline = time.monotonic() + 2
+                wait_event = None
+                with psycopg.connect(
+                    postgres_effect_dsn,
+                    autocommit=True,
+                ) as observer_connection:
+                    while time.monotonic() < deadline:
+                        wait_event = observer_connection.execute(
+                            """
+                            SELECT wait_event
+                            FROM pg_stat_activity
+                            WHERE application_name =
+                              'volpred-owned-email-transfer-race'
+                            """
+                        ).fetchone()
+                        if (
+                            wait_event is not None
+                            and str(wait_event[0]).lower() == "advisory"
+                        ):
+                            break
+                        time.sleep(0.01)
+                observed_advisory_wait = (
+                    wait_event is not None
+                    and str(wait_event[0]).lower() == "advisory"
+                )
+                legacy_primary_lease = lease_connection.execute(
+                    """
+                    SELECT public.volpred_acquire_primary_authority(
+                      %s, %s, %s, %s
+                    )
+                    """,
+                    (
+                        "notification:email.ops_alert",
+                        "effect-worker:ops-alert-email-legacy",
+                        300,
+                        legacy_primary_token,
+                    ),
+                ).fetchone()[0]
+                lease_connection.commit()
+                with pytest.raises(
+                    psycopg.errors.RaiseException,
+                    match="zero active delivery fences",
+                ):
+                    transfer_future.result(timeout=2)
+                assert observed_advisory_wait is True
+        connection.execute(
+            """
+            SELECT public.volpred_release_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                "notification:email.ops_alert",
+                "effect-worker:ops-alert-email-legacy",
+                legacy_primary_lease["epoch"],
+                legacy_primary_token,
+            ),
+        )
 
         with pytest.raises(
             psycopg.errors.RaiseException,
@@ -4649,7 +4809,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
         "delivered",
         "delivered",
         1,
-        1,
+        2,
         ["legacy", "operations_core", "legacy", "operations_core"],
     )
 

@@ -3417,3 +3417,45 @@ Matt workflow 或既有 plan/spec/tickets 遺失。
 **回歸與 live readback**：稽核器 complete／missing／wrong-name／CLI JSON 與
 `AGENTS.md` contract 共 4 案；另對本機全域 surface 執行 live audit。錯誤資訊的來源、
 文件與機械防再犯 owner 均已收斂，狀態 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-26 — Boss Report 新 scheduler 仍接舊 SMTP 與五月 pseudo-living source
+
+**證據化症狀**：20:10 信件的 exact fire receipt 是
+`operations-core-v1:boss_report_4h:d75fd5ab20b1875d6ce9ecb4`，證明排程 owner
+已是 Operations Core；但 notification `6e1d914c` 仍由
+`cron_boss_report.sh → boss_report.py → EmailNotifier` direct SMTP 產生，沒有
+WorkItem／EffectRequest／outbox／Sent evidence。畫面中的 cycle 規劃則來自
+2026-05-19 的 `current_cycle_intent.json` 與 `ops_team_structure.md`；另有一筆
+歷史 `2026-06-09T03:30:z` 被誤列成當期 report warning。owner-surface audit 同時
+確認沒有第二個 host cron／LaunchAgent／session cron fire，所以不是雙排程。
+
+**根因層級與底層修復**：T05/#11 已完成 `email.ops_alert` owned transaction，
+但 Boss Report caller 未列入 formal caller inventory；報告 program context 又沒有
+typed source contract，把手動維護的暫存敘事檔當 living truth。Issue #39 沿用 #3
+plan 與 #11 架構補 caller acceptance gap：抽出單一
+`dispatch_email_by_current_owner()`，讓 alert 與 Boss Report 共用 owner read、
+Primary Authority、provider 與 settlement；schedule fire key 綁 email
+idempotency。新 `boss_report_read_model` 只讀 master spec §7 與 current
+task-pool mode，辨認 direct／queued 合法狀態；wrapper 在任何 business effect 前
+執行 common schedule owner gate。小寫 `z` 只在 reader boundary 正規化，不更動來源 JSON。
+
+**回歸與狀態**：read-model source selection／queued restore／完成列過濾／timestamp、
+wrapper gate、Operations Core／legacy／owner-read-failure／terminal replay 均有回歸；
+dry render 已確認舊 cycle、舊 action與假 warning 消失。第二輪 standards review
+指出本機 immutable payload 不能等同跨主機不重送，後續把共享邊界補到底層：
+service-role-only `volpred_read_owned_email_request` 回傳 immutable command 與 optional
+terminal receipt；caller 在 render 前讀它，core→legacy replay 也先被 durable request
+擋下。明確 legacy rollback 則使用同一 Primary Authority 與 deterministic Message-ID
+先查 Gmail Sent，第二台主機不靠本機 dedupe 判斷。最後一輪 review 再抓出
+owner-transfer TOCTOU：transfer 與 PA acquire 現在共用同一 advisory lock，legacy
+持有該 PA lease 時 DB transfer 直接 fail closed；
+取得 fence 後還要重讀 durable request 與同一 legacy generation，pending core request
+拒送、terminal receipt 直接 replay。Schedule identity 同時改由
+canonical config 重算 generation／activation／cron slot／digest，假 fire 不能再混入。
+
+本機真 PostgreSQL 已驗證 migration 可由非 superuser executor 套用，request read 在
+settlement 前後分別回傳 null／exact terminal receipt；Python 回歸亦覆蓋跨 root reuse、
+schema drift、wrong generation 與非 cron minute。Production wrapper 已以 manifest
+lockstep 安裝；尚待 production migration、一次實際 WorkItem／EffectRequest／outbox／
+Gmail Sent read-back與新 schedule receipt，故仍只能標 **`contained`**，不能提前宣稱
+**`root_cause_fixed_and_verified`**。

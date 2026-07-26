@@ -549,11 +549,6 @@ def _dispatch_alert_email(
     storage_dir: str,
     delivery_key: str,
 ) -> dict[str, Any]:
-    # Lazy import：email_notifier 反向 import volpred.ops（canonical_write），
-    # top-level import 形成 alerts ↔ email_notifier 環，token_report 路徑每日撞
-    # ImportError（refactor_plan_token_ops_waste WS4d）。函式內 import 解環。
-    from volpred.publisher.email_notifier import EmailNotifier
-
     display_title, display_body = boss_facing_alert(title, body, level)
     subject = f"[VolPred Alert][{level.upper()}] {display_title}"
     text_body = "\n".join(
@@ -600,104 +595,23 @@ def _dispatch_alert_email(
         print(f"[alerts] html_render_failed level={level} err={exc}", file=_sys.stderr)
         html_body = None
 
-    from volpred.ops.delivery._email_notification import (
-        EmailNotificationEffectAdapter,
-        ImapSentMailReader,
-    )
     from volpred.ops.delivery.owned_email import (
         OwnedEmailCommand,
-        OwnedEmailNotification,
-        SupabaseOwnedEmailStore,
-    )
-    from volpred.ops.authority import (
-        build_supabase_host_authority_keepalive,
+        dispatch_email_by_current_owner,
     )
 
-    ownership_store = SupabaseOwnedEmailStore.from_environment()
-    owner = ownership_store.read_owner()
-    if owner.effect_family != "email.ops_alert":
-        raise RuntimeError(
-            "notification owner read returned the wrong effect family"
-        )
-    notifier = EmailNotifier(storage_dir=storage_dir)
-    if owner.owner == "operations_core":
-        worker_id = "effect-worker:ops-alert-email"
-        keepalive = build_supabase_host_authority_keepalive(
-            authority_key="notification:email.ops_alert",
-            holder_ref=worker_id,
-        )
-        keepalive.start()
-        try:
-            receipt = OwnedEmailNotification(
-                store=ownership_store,
-                provider=EmailNotificationEffectAdapter(
-                    notifier=notifier,
-                    sent_mail_reader=ImapSentMailReader.from_environment(),
-                ),
-                primary_authority=keepalive,
-                worker_id=worker_id,
-            ).deliver(
-                OwnedEmailCommand(
-                    idempotency_key=delivery_key,
-                    level=level,
-                    title=subject,
-                    recipient=recipient,
-                    text_body=text_body,
-                    html_body=html_body,
-                    actor_ref=f"ops-alert:{_alert_key(level, title)}",
-                )
-            )
-        finally:
-            keepalive.stop()
-        return {
-            "notification_id": receipt.effect_id,
-            "subject": subject,
-            "sent": receipt.delivered,
-            "configured": True,
-            "send_error": (
-                None if receipt.delivered else receipt.disposition
-            ),
-            "delivery_owner": owner.owner,
-            "owner_generation": owner.generation,
-            "work_id": receipt.work_id,
-            "effect_status": receipt.effect_status,
-            "attempt_count": receipt.attempt_count,
-            "evidence_ref": receipt.evidence_ref,
-            "evidence_sha256": receipt.evidence_sha256,
-        }
-
-    notification_id = notifier.notify(
-        subject=subject,
-        body=text_body,
-        html_body=html_body,
-        level=level,
-        metadata={
-            "notification_type": "ops_alert",
-            "alert_level": level,
-            "alert_title": display_title,
-            "alert_title_raw": title,
-            "recipient": recipient,
-        },
-        recipients=[recipient],
+    return dispatch_email_by_current_owner(
+        OwnedEmailCommand(
+            idempotency_key=delivery_key,
+            level=level,
+            title=subject,
+            recipient=recipient,
+            text_body=text_body,
+            html_body=html_body,
+            actor_ref=f"ops-alert:{_alert_key(level, title)}",
+        ),
+        storage_dir=storage_dir,
     )
-    notification = load_json(
-        _notification_path(storage_dir, notification_id),
-        {
-            "id": notification_id,
-            "sent": False,
-            "configured": False,
-            "send_error": None,
-        },
-    )
-    return {
-        "notification_id": notification_id,
-        "subject": subject,
-        "sent": bool(notification.get("sent")),
-        "configured": bool(notification.get("configured")),
-        "send_error": notification.get("send_error"),
-        "delivery_owner": owner.owner,
-        "owner_generation": owner.generation,
-    }
 
 
 def send_alert(

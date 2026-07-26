@@ -322,7 +322,7 @@
       "entrypoint": "scripts/boss_report.py",
       "policy": "no_repo_tracked_output",
       "tracked_outputs": [],
-      "reason": "Renders to /tmp and sends a notification."
+      "reason": "Materializes immutable fire payloads under ignored storage/ops/boss_report_payloads, renders failure HTML to /tmp, and sends an owned notification; it has no repo-tracked output."
     },
     "gmail_poll": {
       "entrypoint": "scripts/gmail_inbox_poll.py",
