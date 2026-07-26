@@ -73,6 +73,9 @@ class AuthorityStore(Protocol):
 
 
 class PublisherOwnerReader(Protocol):
+    @property
+    def backend_sha256(self) -> str: ...
+
     def read_owner(self) -> PublisherArticleSyncOwner: ...
 
 
@@ -159,6 +162,7 @@ class HostReadinessReceipt:
     role: str
     host_id: str
     host_fingerprint: str
+    backend_sha256: str
     implementation_sha256: str
     authority_key: str
     observed_at: str
@@ -170,6 +174,7 @@ class CrossHostReadinessReceipt:
     schema_version: str
     rehearsal_id: str
     authority_key: str
+    backend_sha256: str
     verified_at: str
     valid_until: str
     primary_host_id: str
@@ -218,6 +223,7 @@ class PrimaryProcessReceipt:
     role: str
     host_id: str
     host_fingerprint: str
+    backend_sha256: str
     implementation_sha256: str
     cross_host_readiness_sha256: str
     authority_key: str
@@ -247,6 +253,7 @@ class StandbyProcessReceipt:
     role: str
     host_id: str
     host_fingerprint: str
+    backend_sha256: str
     implementation_sha256: str
     cross_host_readiness_sha256: str
     authority_key: str
@@ -277,6 +284,7 @@ class CrossHostOutageReceipt:
     primary_host_fingerprint: str
     standby_host_id: str
     standby_host_fingerprint: str
+    backend_sha256: str
     implementation_sha256: str
     cross_host_readiness_sha256: str
     primary_epoch: int
@@ -309,6 +317,9 @@ def prepare_cross_host_role_readiness(
         raise ValueError("readiness role must be primary or standby")
     if not host_id.strip() or not host_fingerprint.strip():
         raise ValueError("host identity and fingerprint are required")
+    backend_sha256 = _validate_backend_sha256(
+        publisher_store.backend_sha256
+    )
     authority_key = _authority_key_for_rehearsal(rehearsal_id)
     implementation_sha256 = _implementation_sha256()
     publisher_fence = _validate_publisher_fence(
@@ -317,11 +328,12 @@ def prepare_cross_host_role_readiness(
     )
     _verify_implementation_unchanged(implementation_sha256)
     return HostReadinessReceipt(
-        schema_version="primary-authority-outage-host-readiness.v1",
+        schema_version="primary-authority-outage-host-readiness.v2",
         rehearsal_id=rehearsal_id,
         role=role,
         host_id=host_id,
         host_fingerprint=host_fingerprint,
+        backend_sha256=backend_sha256,
         implementation_sha256=implementation_sha256,
         authority_key=authority_key,
         observed_at=datetime.now(UTC).isoformat(),
@@ -343,9 +355,10 @@ def verify_cross_host_readiness(
         verified_at=verified_at,
     )
     return CrossHostReadinessReceipt(
-        schema_version="primary-authority-outage-readiness-pair.v3",
+        schema_version="primary-authority-outage-readiness-pair.v4",
         rehearsal_id=primary.rehearsal_id,
         authority_key=primary.authority_key,
+        backend_sha256=primary.backend_sha256,
         verified_at=verified_at.isoformat(),
         valid_until=valid_until.isoformat(),
         primary_host_id=primary.host_id,
@@ -399,6 +412,7 @@ def rehearse_primary_process_role(
         role="primary",
         host_id=host_id,
         host_fingerprint=host_fingerprint,
+        backend_sha256=publisher_store.backend_sha256,
         expected_publisher_generation=expected_publisher_generation,
     )
     readiness_sha256 = _receipt_sha256(readiness)
@@ -491,11 +505,12 @@ def rehearse_primary_process_role(
         _verify_implementation_unchanged(implementation_sha256)
 
         return PrimaryProcessReceipt(
-            schema_version="primary-authority-outage-primary.v2",
+            schema_version="primary-authority-outage-primary.v3",
             rehearsal_id=rehearsal_id,
             role="primary",
             host_id=host_id,
             host_fingerprint=host_fingerprint,
+            backend_sha256=readiness.backend_sha256,
             implementation_sha256=implementation_sha256,
             cross_host_readiness_sha256=readiness_sha256,
             authority_key=authority_key,
@@ -564,6 +579,7 @@ def rehearse_standby_process_role(
         role="standby",
         host_id=host_id,
         host_fingerprint=host_fingerprint,
+        backend_sha256=publisher_store.backend_sha256,
         expected_publisher_generation=expected_publisher_generation,
     )
     _validate_primary_receipt_for_standby(
@@ -640,11 +656,12 @@ def rehearse_standby_process_role(
         _verify_implementation_unchanged(implementation_sha256)
 
         return StandbyProcessReceipt(
-            schema_version="primary-authority-outage-standby.v3",
+            schema_version="primary-authority-outage-standby.v4",
             rehearsal_id=rehearsal_id,
             role="standby",
             host_id=host_id,
             host_fingerprint=host_fingerprint,
+            backend_sha256=readiness.backend_sha256,
             implementation_sha256=implementation_sha256,
             cross_host_readiness_sha256=readiness_sha256,
             authority_key=authority_key,
@@ -681,9 +698,9 @@ def verify_cross_host_receipts(
         raise ValueError(
             "max_handoff_seconds must be positive and at most five minutes"
         )
-    if primary.schema_version != "primary-authority-outage-primary.v2":
+    if primary.schema_version != "primary-authority-outage-primary.v3":
         raise ValueError("unsupported primary receipt schema")
-    if standby.schema_version != "primary-authority-outage-standby.v3":
+    if standby.schema_version != "primary-authority-outage-standby.v4":
         raise ValueError("unsupported standby receipt schema")
     _validate_cross_host_readiness_receipt(readiness)
     _validate_primary_receipt_for_standby(
@@ -707,6 +724,11 @@ def verify_cross_host_receipts(
         )
     if primary.implementation_sha256 != standby.implementation_sha256:
         raise ValueError("host receipts used different rehearsal code")
+    if (
+        primary.backend_sha256 != readiness.backend_sha256
+        or standby.backend_sha256 != readiness.backend_sha256
+    ):
+        raise ValueError("host receipts used a different Supabase backend")
     readiness_sha256 = _receipt_sha256(readiness)
     if (
         primary.cross_host_readiness_sha256 != readiness_sha256
@@ -806,7 +828,7 @@ def verify_cross_host_receipts(
         raise ValueError("database-clock handoff exceeded five-minute RTO")
 
     return CrossHostOutageReceipt(
-        schema_version="primary-authority-outage-cross-host.v3",
+        schema_version="primary-authority-outage-cross-host.v4",
         rehearsal_id=primary.rehearsal_id,
         authority_key=primary.authority_key,
         verified_at=datetime.now(UTC).isoformat(),
@@ -814,6 +836,7 @@ def verify_cross_host_receipts(
         primary_host_fingerprint=primary.host_fingerprint,
         standby_host_id=standby.host_id,
         standby_host_fingerprint=standby.host_fingerprint,
+        backend_sha256=readiness.backend_sha256,
         implementation_sha256=primary.implementation_sha256,
         cross_host_readiness_sha256=readiness_sha256,
         primary_epoch=primary.primary.epoch,
@@ -1166,6 +1189,17 @@ def _validate_process_inputs(
         raise ValueError("poll interval must be positive")
 
 
+def _validate_backend_sha256(value: str) -> str:
+    """Validate a credential-free Supabase backend identity."""
+
+    if (
+        not isinstance(value, str)
+        or re.fullmatch(r"[0-9a-f]{64}", value) is None
+    ):
+        raise ValueError("Supabase backend identity must be a SHA-256")
+    return value
+
+
 def _timestamp(value: str, *, field: str) -> datetime:
     try:
         observed = datetime.fromisoformat(value)
@@ -1349,6 +1383,7 @@ def _validate_role_readiness(
     role: str,
     host_id: str,
     host_fingerprint: str,
+    backend_sha256: str,
     expected_publisher_generation: int,
 ) -> None:
     _validate_cross_host_readiness_receipt(readiness)
@@ -1371,6 +1406,11 @@ def _validate_role_readiness(
         )
     if (host_id, host_fingerprint) != expected_host:
         raise ValueError("local machine does not match its readiness role")
+    if (
+        _validate_backend_sha256(backend_sha256)
+        != readiness.backend_sha256
+    ):
+        raise ValueError("local Supabase backend drifted after readiness")
     fence = readiness.publisher_fence
     if (
         fence.effect_family != _PUBLISHER_FAMILY
@@ -1387,7 +1427,7 @@ def _validate_cross_host_readiness_receipt(
 
     if (
         readiness.schema_version
-        != "primary-authority-outage-readiness-pair.v3"
+        != "primary-authority-outage-readiness-pair.v4"
         or not readiness.cross_host_ready
     ):
         raise ValueError("cross-host readiness receipt is not verified")
@@ -1404,6 +1444,7 @@ def _validate_cross_host_readiness_receipt(
     if (
         readiness.rehearsal_id != primary.rehearsal_id
         or readiness.authority_key != primary.authority_key
+        or readiness.backend_sha256 != primary.backend_sha256
         or readiness.primary_host_id != primary.host_id
         or readiness.primary_host_fingerprint != primary.host_fingerprint
         or readiness.standby_host_id != standby.host_id
@@ -1446,6 +1487,7 @@ def _validate_cross_host_readiness_receipt(
             "cross-host readiness requires two distinct physical machines"
         )
     digests = (
+        readiness.backend_sha256,
         readiness.implementation_sha256,
         readiness.primary_readiness_sha256,
         readiness.standby_readiness_sha256,
@@ -1458,7 +1500,7 @@ def _validate_host_readiness_pair(
     primary: HostReadinessReceipt,
     standby: HostReadinessReceipt,
 ) -> None:
-    expected_schema = "primary-authority-outage-host-readiness.v1"
+    expected_schema = "primary-authority-outage-host-readiness.v2"
     if (
         primary.schema_version != expected_schema
         or standby.schema_version != expected_schema
@@ -1479,6 +1521,9 @@ def _validate_host_readiness_pair(
         )
     if primary.implementation_sha256 != standby.implementation_sha256:
         raise ValueError("physical hosts are not running the same source")
+    if primary.backend_sha256 != standby.backend_sha256:
+        raise ValueError("physical hosts are using different Supabase backends")
+    _validate_backend_sha256(primary.backend_sha256)
     if (
         primary.host_id == standby.host_id
         or primary.host_fingerprint == standby.host_fingerprint
@@ -1561,10 +1606,10 @@ def _validate_primary_receipt_for_standby(
 
     _validate_cross_host_readiness_receipt(readiness)
     if (
-        primary.schema_version != "primary-authority-outage-primary.v2"
+        primary.schema_version != "primary-authority-outage-primary.v3"
         or primary.role != "primary"
     ):
-        raise ValueError("standby requires a completed primary v2 receipt")
+        raise ValueError("standby requires a completed primary v3 receipt")
     if primary.authority_key != _authority_key_for_rehearsal(rehearsal_id):
         raise ValueError(
             "primary authority key is not derived from rehearsal identity"
@@ -1578,6 +1623,7 @@ def _validate_primary_receipt_for_standby(
     if (
         primary.host_id != readiness.primary_host_id
         or primary.host_fingerprint != readiness.primary_host_fingerprint
+        or primary.backend_sha256 != readiness.backend_sha256
         or primary.implementation_sha256 != readiness.implementation_sha256
         or primary.cross_host_readiness_sha256 != _receipt_sha256(readiness)
     ):

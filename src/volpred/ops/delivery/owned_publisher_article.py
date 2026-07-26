@@ -394,6 +394,12 @@ class SupabaseOwnedPublisherArticleStore:
             ),
         )
 
+    @property
+    def backend_sha256(self) -> str:
+        """Identify the bound Supabase backend without exposing its URL."""
+
+        return self._client.backend_sha256
+
     def read_owner(self) -> PublisherArticleSyncOwner:
         return _owner_from_payload(
             self._rpc("volpred_read_publisher_article_sync_owner", {})

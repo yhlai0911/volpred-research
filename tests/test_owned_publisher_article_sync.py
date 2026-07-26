@@ -532,6 +532,9 @@ def test_service_role_adapter_sends_canonical_request_payload(
 
     response = store.request(_command(), owner_generation=4)
 
+    assert store.backend_sha256 == hashlib.sha256(
+        b"https://project.supabase.co"
+    ).hexdigest()
     assert response.work_id == "work-owned-publisher-1"
     assert calls[0][0] == (
         "volpred_request_owned_publisher_article_sync"

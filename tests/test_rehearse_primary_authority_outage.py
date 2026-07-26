@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
@@ -123,7 +124,15 @@ class _UnavailableAuthorityStore:
 
 
 class _PublisherStore:
-    def __init__(self, generation: int = 8) -> None:
+    def __init__(
+        self,
+        generation: int = 8,
+        *,
+        backend_url: str = "https://primary-test.supabase.co",
+    ) -> None:
+        self.backend_sha256 = hashlib.sha256(
+            backend_url.encode("utf-8")
+        ).hexdigest()
         self.owner = PublisherArticleSyncOwner(
             schema_version="publisher-article-sync-owner.v1",
             effect_family="publisher.article.supabase.sync",
@@ -312,7 +321,7 @@ def test_cross_host_readiness_fails_before_authority_mutation() -> None:
     assert isinstance(primary, HostReadinessReceipt)
     assert isinstance(paired, CrossHostReadinessReceipt)
     assert paired.schema_version == (
-        "primary-authority-outage-readiness-pair.v3"
+        "primary-authority-outage-readiness-pair.v4"
     )
     assert paired.cross_host_ready is True
     assert datetime.fromisoformat(paired.valid_until) > datetime.fromisoformat(
@@ -332,6 +341,68 @@ def test_cross_host_readiness_fails_before_authority_mutation() -> None:
             primary,
             replace(standby, host_fingerprint=primary.host_fingerprint),
         )
+
+
+def test_readiness_rejects_hosts_on_different_supabase_backends() -> None:
+    primary_publisher = _PublisherStore()
+    standby_publisher = _PublisherStore(
+        backend_url="https://standby-wrong-project.supabase.co"
+    )
+    primary = prepare_cross_host_role_readiness(
+        rehearsal_id="readiness-backend-test",
+        role="primary",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        publisher_store=primary_publisher,
+        expected_publisher_generation=8,
+    )
+    standby = prepare_cross_host_role_readiness(
+        rehearsal_id="readiness-backend-test",
+        role="standby",
+        host_id="standby-mac",
+        host_fingerprint="standby-fingerprint",
+        publisher_store=standby_publisher,
+        expected_publisher_generation=8,
+    )
+
+    assert primary.publisher_fence == standby.publisher_fence
+    with pytest.raises(ValueError, match="different Supabase backends"):
+        verify_cross_host_readiness(primary, standby)
+
+
+def test_primary_rejects_backend_drift_before_remote_read() -> None:
+    live = _LiveAuthorityStore()
+    expected_publisher = _PublisherStore()
+    wrong_publisher = _PublisherStore(
+        backend_url="https://wrong-project.supabase.co"
+    )
+    readiness = _paired_readiness(
+        rehearsal_id="role-backend-drift-test",
+        publisher=expected_publisher,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="local Supabase backend drifted after readiness",
+    ):
+        rehearse_primary_process_role(
+            rehearsal_id="role-backend-drift-test",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            lease_seconds=10,
+            renew_interval_seconds=0.01,
+            poll_interval_seconds=0.005,
+            store=PartitionableAuthorityStore(
+                healthy=live,
+                unavailable=_UnavailableAuthorityStore(),
+            ),
+            publisher_store=wrong_publisher,
+            expected_publisher_generation=8,
+            readiness=readiness,
+        )
+
+    assert wrong_publisher.read_count == 0
+    assert live.acquire_successes == 0
 
 
 def test_readiness_pair_rejects_stale_or_future_host_observations() -> None:
@@ -522,6 +593,7 @@ def test_role_readiness_rejects_wrong_machine_or_stale_source(
         role="primary",
         host_id="primary-mac",
         host_fingerprint="primary-fingerprint",
+        backend_sha256=publisher.backend_sha256,
         expected_publisher_generation=8,
     )
     with pytest.raises(ValueError, match="does not match its readiness role"):
@@ -531,6 +603,7 @@ def test_role_readiness_rejects_wrong_machine_or_stale_source(
             role="standby",
             host_id="primary-mac",
             host_fingerprint="primary-fingerprint",
+            backend_sha256=publisher.backend_sha256,
             expected_publisher_generation=8,
         )
 
@@ -546,6 +619,7 @@ def test_role_readiness_rejects_wrong_machine_or_stale_source(
             role="primary",
             host_id="primary-mac",
             host_fingerprint="primary-fingerprint",
+            backend_sha256=publisher.backend_sha256,
             expected_publisher_generation=8,
         )
 
@@ -712,9 +786,15 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         "host:standby-fingerprint:outage-standby:cross-host-test"
     )
     assert paired.schema_version == (
-        "primary-authority-outage-cross-host.v3"
+        "primary-authority-outage-cross-host.v4"
     )
-    assert standby.schema_version == "primary-authority-outage-standby.v3"
+    assert standby.schema_version == "primary-authority-outage-standby.v4"
+    assert (
+        primary.backend_sha256
+        == standby.backend_sha256
+        == paired.backend_sha256
+        == readiness.backend_sha256
+    )
     assert (
         standby.primary_receipt_sha256
         == paired.primary_receipt_sha256
@@ -732,7 +812,7 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert _load_cross_host_readiness(readiness_path) == readiness
     saved_pair = json.loads(paired_path.read_text())
     assert saved_pair["schema_version"] == (
-        "primary-authority-outage-cross-host.v3"
+        "primary-authority-outage-cross-host.v4"
     )
     assert saved_pair["primary_receipt_sha256"] == (
         paired.primary_receipt_sha256

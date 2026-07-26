@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -57,6 +58,12 @@ class ServiceRoleRpcClient:
         if timeout_seconds <= 0:
             raise ValueError("Supabase RPC timeout must be positive")
         self._timeout_seconds = timeout_seconds
+
+    @property
+    def backend_sha256(self) -> str:
+        """Return a credential-free identity for the exact RPC backend."""
+
+        return hashlib.sha256(self._url.encode("utf-8")).hexdigest()
 
     def call(
         self,
