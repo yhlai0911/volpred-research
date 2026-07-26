@@ -52,6 +52,10 @@ never reopens legacy admission in direct-execution mode.  Non-interactive shells
 may omit Homebrew from `PATH`; the implementation checks configured `GH_BIN`,
 normal `PATH`, then `/opt/homebrew/bin/gh`.
 
+Production acceptance is exercised by canonical task `assign_457c838c` linked
+to Issue #37.  Its terminal queue receipt and GitHub task/commit marker are the
+cross-system readback evidence; neither side alone is sufficient.
+
 ## Wayfinding operations
 
 Used by `/wayfinder`. The map is a single issue with child issues as tickets.
