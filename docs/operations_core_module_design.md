@@ -1815,3 +1815,25 @@ implementation=`bfa6af660456fb3292b00fbda334c4c21a1dceb79e6e694942077fc24ed34168
 本機Tailscale backend恢復Running後，候選第二台Mac仍為offline且peer ping timeout；
 因此真實physical pair尚不可執行，program commit 34與operations-core umbrella維持
 `contained`。
+
+## 25. Paired readiness raw-artifact binding（2026-07-26）
+
+Readiness pair v1雖保存primary／standby host receipt SHA-256，正式process與final
+verifier只收到pair artifact，沒有原始host receipts可供重算。Pair內的standby host
+identity因此可以在沒有exact standby preflight artifact的情況下被自行填寫；primary端
+仍可能在第二台尚未完成preflight時進入control-plane mutation。
+
+`primary-authority-outage-readiness-pair.v2`現在內嵌兩份typed host readiness receipts，
+保留各自canonical digest，並在primary、standby及final verifier的function boundary
+逐欄重驗pair identity、publisher fence、source aggregate與raw artifact hashes。Failure
+injection只修改pair的standby host identity、保留原始host receipt不變；流程在零新增
+publisher read、零authority acquire下fail closed。相鄰authority suites **42 passed**，
+`py_compile`與diff gate通過；Ruff未安裝，未把缺工具宣稱為lint通過。
+
+Production只讀preflight `raw-host-binding-preflight-20260726-1010`已原子落檔並exact
+read-back publisher=`operations_core/8`、stable host
+fingerprint=`6652d01267d664d621c957b8`與implementation
+`66030247729b74be53645bd0d9da87fbe3940f2ba4443034083340691b973c38`；沒有authority
+acquire、effect或provider call。此pre-mutation evidence-chain根因為
+`root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair與
+operations-core umbrella維持`contained`。

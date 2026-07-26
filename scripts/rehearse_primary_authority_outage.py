@@ -177,6 +177,8 @@ class CrossHostReadinessReceipt:
     publisher_fence: PublisherFenceEvidence
     primary_readiness_sha256: str
     standby_readiness_sha256: str
+    primary_readiness: HostReadinessReceipt
+    standby_readiness: HostReadinessReceipt
     cross_host_ready: bool
 
 
@@ -330,36 +332,9 @@ def verify_cross_host_readiness(
 ) -> CrossHostReadinessReceipt:
     """Bind two compatible physical hosts before the primary mutates a lease."""
 
-    expected_schema = "primary-authority-outage-host-readiness.v1"
-    if (
-        primary.schema_version != expected_schema
-        or standby.schema_version != expected_schema
-    ):
-        raise ValueError("unsupported host readiness receipt schema")
-    if primary.role != "primary" or standby.role != "standby":
-        raise ValueError("host readiness role mismatch")
-    if (
-        primary.rehearsal_id != standby.rehearsal_id
-        or primary.authority_key != standby.authority_key
-    ):
-        raise ValueError("host readiness receipts do not share one identity")
-    if primary.authority_key != _authority_key_for_rehearsal(
-        primary.rehearsal_id
-    ):
-        raise ValueError(
-            "readiness authority key is not derived from rehearsal identity"
-        )
-    if primary.implementation_sha256 != standby.implementation_sha256:
-        raise ValueError("physical hosts are not running the same source")
-    if (
-        primary.host_id == standby.host_id
-        or primary.host_fingerprint == standby.host_fingerprint
-    ):
-        raise ValueError("readiness requires two distinct physical machines")
-    if primary.publisher_fence != standby.publisher_fence:
-        raise ValueError("publisher fence differs across physical hosts")
+    _validate_host_readiness_pair(primary, standby)
     return CrossHostReadinessReceipt(
-        schema_version="primary-authority-outage-readiness-pair.v1",
+        schema_version="primary-authority-outage-readiness-pair.v2",
         rehearsal_id=primary.rehearsal_id,
         authority_key=primary.authority_key,
         verified_at=datetime.now(UTC).isoformat(),
@@ -371,6 +346,8 @@ def verify_cross_host_readiness(
         publisher_fence=primary.publisher_fence,
         primary_readiness_sha256=_receipt_sha256(primary),
         standby_readiness_sha256=_receipt_sha256(standby),
+        primary_readiness=primary,
+        standby_readiness=standby,
         cross_host_ready=True,
     )
 
@@ -1325,10 +1302,7 @@ def _load_standby_receipt(path: Path) -> StandbyProcessReceipt:
 
 def _load_host_readiness(path: Path) -> HostReadinessReceipt:
     payload = json.loads(path.read_text(encoding="utf-8"))
-    payload["publisher_fence"] = PublisherFenceEvidence(
-        **payload["publisher_fence"]
-    )
-    return HostReadinessReceipt(**payload)
+    return _host_readiness_from_payload(payload)
 
 
 def _load_cross_host_readiness(path: Path) -> CrossHostReadinessReceipt:
@@ -1336,7 +1310,22 @@ def _load_cross_host_readiness(path: Path) -> CrossHostReadinessReceipt:
     payload["publisher_fence"] = PublisherFenceEvidence(
         **payload["publisher_fence"]
     )
+    payload["primary_readiness"] = _host_readiness_from_payload(
+        payload["primary_readiness"]
+    )
+    payload["standby_readiness"] = _host_readiness_from_payload(
+        payload["standby_readiness"]
+    )
     return CrossHostReadinessReceipt(**payload)
+
+
+def _host_readiness_from_payload(payload: dict[str, object]) -> HostReadinessReceipt:
+    values = dict(payload)
+    publisher_fence = values.get("publisher_fence")
+    if not isinstance(publisher_fence, dict):
+        raise ValueError("host readiness publisher fence must be an object")
+    values["publisher_fence"] = PublisherFenceEvidence(**publisher_fence)
+    return HostReadinessReceipt(**values)
 
 
 def _validate_role_readiness(
@@ -1379,14 +1368,38 @@ def _validate_role_readiness(
 def _validate_cross_host_readiness_receipt(
     readiness: CrossHostReadinessReceipt,
 ) -> None:
-    """Recheck structural invariants instead of trusting an edited ready flag."""
+    """Recheck the paired receipt and its exact raw host artifacts."""
 
     if (
         readiness.schema_version
-        != "primary-authority-outage-readiness-pair.v1"
+        != "primary-authority-outage-readiness-pair.v2"
         or not readiness.cross_host_ready
     ):
         raise ValueError("cross-host readiness receipt is not verified")
+    primary = readiness.primary_readiness
+    standby = readiness.standby_readiness
+    _validate_host_readiness_pair(primary, standby)
+    if (
+        readiness.primary_readiness_sha256 != _receipt_sha256(primary)
+        or readiness.standby_readiness_sha256 != _receipt_sha256(standby)
+    ):
+        raise ValueError(
+            "cross-host readiness is not bound to its host receipts"
+        )
+    if (
+        readiness.rehearsal_id != primary.rehearsal_id
+        or readiness.authority_key != primary.authority_key
+        or readiness.primary_host_id != primary.host_id
+        or readiness.primary_host_fingerprint != primary.host_fingerprint
+        or readiness.standby_host_id != standby.host_id
+        or readiness.standby_host_fingerprint != standby.host_fingerprint
+        or readiness.implementation_sha256 != primary.implementation_sha256
+        or readiness.publisher_fence != primary.publisher_fence
+    ):
+        raise ValueError(
+            "cross-host readiness drifted from its host receipts"
+        )
+    _timestamp(readiness.verified_at, field="readiness verified_at")
     if readiness.authority_key != _authority_key_for_rehearsal(
         readiness.rehearsal_id
     ):
@@ -1408,6 +1421,42 @@ def _validate_cross_host_readiness_receipt(
     )
     if any(re.fullmatch(r"[0-9a-f]{64}", digest) is None for digest in digests):
         raise ValueError("cross-host readiness contains an invalid SHA-256")
+
+
+def _validate_host_readiness_pair(
+    primary: HostReadinessReceipt,
+    standby: HostReadinessReceipt,
+) -> None:
+    expected_schema = "primary-authority-outage-host-readiness.v1"
+    if (
+        primary.schema_version != expected_schema
+        or standby.schema_version != expected_schema
+    ):
+        raise ValueError("unsupported host readiness receipt schema")
+    if primary.role != "primary" or standby.role != "standby":
+        raise ValueError("host readiness role mismatch")
+    if (
+        primary.rehearsal_id != standby.rehearsal_id
+        or primary.authority_key != standby.authority_key
+    ):
+        raise ValueError("host readiness receipts do not share one identity")
+    if primary.authority_key != _authority_key_for_rehearsal(
+        primary.rehearsal_id
+    ):
+        raise ValueError(
+            "readiness authority key is not derived from rehearsal identity"
+        )
+    if primary.implementation_sha256 != standby.implementation_sha256:
+        raise ValueError("physical hosts are not running the same source")
+    if (
+        primary.host_id == standby.host_id
+        or primary.host_fingerprint == standby.host_fingerprint
+    ):
+        raise ValueError("readiness requires two distinct physical machines")
+    if primary.publisher_fence != standby.publisher_fence:
+        raise ValueError("publisher fence differs across physical hosts")
+    _timestamp(primary.observed_at, field="primary readiness observed_at")
+    _timestamp(standby.observed_at, field="standby readiness observed_at")
 
 
 def _validate_primary_receipt_for_standby(

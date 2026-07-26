@@ -1719,3 +1719,19 @@ implementation=`bfa6af660456fb3292b00fbda334c4c21a1dceb79e6e694942077fc24ed34168
 本機Tailscale恢復Running後，候選第二台Mac仍為offline且ping timeout，故未執行remote
 authority mutation。此artifact-binding切片為`root_cause_fixed_and_verified`；
 physical paired receipt與operations-core umbrella維持`contained`。
+
+## 2026-07-26 — Program commit 34 raw host-readiness binding checkpoint
+
+舊paired readiness只保存兩份host receipt的digest，roles與final verifier卻沒有raw
+artifacts可重算，因而不能證明pair內的第二台host identity確實來自mutation前preflight。
+Readiness pair現升v2、內嵌兩端typed raw receipts；所有正式consumer都會重算兩份
+canonical hashes並逐欄核對denormalized pair identity。
+
+偽造pair standby identity的failure injection在零新增remote read、零authority acquire
+下fail closed；相鄰authority suites **42 passed**。Production只讀preflight
+`raw-host-binding-preflight-20260726-1010`已exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`與
+implementation=`66030247729b74be53645bd0d9da87fbe3940f2ba4443034083340691b973c38`，
+沒有authority mutation。此raw-artifact binding切片為
+`root_cause_fixed_and_verified`；physical paired receipt與operations-core umbrella
+仍因第二台實體Mac離線而維持`contained`。

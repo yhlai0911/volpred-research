@@ -2719,3 +2719,23 @@ backend由Stopped恢復Running後，live peer狀態顯示候選第二台Mac離�
 所以沒有執行authority acquire或provider call。本artifact-binding根因為
 **`root_cause_fixed_and_verified`**；physical pair與operations-core umbrella仍維持
 **`contained`**。
+
+### 2026-07-26 — Paired readiness有hash欄位但consumer拿不到raw host artifacts
+
+**證據化症狀與根因層級**：readiness pair v1記錄primary／standby host receipt
+SHA-256，但pair沒有內嵌原始artifacts，正式roles與final verifier也不接收它們。只修改
+pair的standby host identity並保留兩個既有digest，primary role仍會接受並開始publisher
+read；這讓「兩端都先完成read-only preflight」只剩無法重算的宣告。根因是raw evidence
+沒有跨越paired receipt boundary，不是Primary Authority CAS。
+
+**底層修復、回歸與live狀態**：pair schema升v2並內嵌兩份typed host readiness receipts；
+每個consumer先重算canonical digest，再逐欄核對rehearsal、authority key、host identity、
+source aggregate及publisher fence。上述identity-drift failure injection在零新增remote
+read、零authority acquire下fail closed；相鄰authority suites **42 passed**，
+`py_compile`與diff gate通過，Ruff未安裝。Production只讀preflight
+`raw-host-binding-preflight-20260726-1010` exact read-back
+publisher=`operations_core/8`、fingerprint=`6652d01267d664d621c957b8`及implementation
+`66030247729b74be53645bd0d9da87fbe3940f2ba4443034083340691b973c38`，沒有authority
+acquire或provider call。本raw-artifact binding根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
+operations-core umbrella維持 **`contained`**。

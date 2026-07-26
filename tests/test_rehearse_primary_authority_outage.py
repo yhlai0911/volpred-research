@@ -16,6 +16,7 @@ from scripts.rehearse_primary_authority_outage import (
     _authority_key_for_rehearsal,
     _implementation_manifest,
     _implementation_sha256,
+    _load_cross_host_readiness,
     _validate_role_readiness,
     _write_receipt,
     prepare_cross_host_role_readiness,
@@ -423,6 +424,68 @@ def test_primary_rechecks_readiness_source_before_remote_read(
     assert live.acquire_successes == 0
 
 
+def test_primary_rejects_paired_readiness_forged_without_raw_host_receipt() -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="raw-host-binding-test",
+        publisher=publisher,
+    )
+    remote_reads_before = publisher.read_count
+
+    with pytest.raises(
+        ValueError,
+        match="drifted from its host receipts",
+    ):
+        rehearse_primary_process_role(
+            rehearsal_id="raw-host-binding-test",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            lease_seconds=10,
+            renew_interval_seconds=0.01,
+            poll_interval_seconds=0.005,
+            store=PartitionableAuthorityStore(
+                healthy=live,
+                unavailable=_UnavailableAuthorityStore(),
+            ),
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            readiness=replace(
+                readiness,
+                standby_host_id="standby-never-preflighted",
+            ),
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="not bound to its host receipts",
+    ):
+        rehearse_primary_process_role(
+            rehearsal_id="raw-host-binding-test",
+            host_id="primary-mac",
+            host_fingerprint="primary-fingerprint",
+            lease_seconds=10,
+            renew_interval_seconds=0.01,
+            poll_interval_seconds=0.005,
+            store=PartitionableAuthorityStore(
+                healthy=live,
+                unavailable=_UnavailableAuthorityStore(),
+            ),
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            readiness=replace(
+                readiness,
+                standby_readiness=replace(
+                    readiness.standby_readiness,
+                    observed_at="2026-07-26T00:00:00+00:00",
+                ),
+            ),
+        )
+
+    assert publisher.read_count == remote_reads_before
+    assert live.acquire_successes == 0
+
+
 def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     live = _LiveAuthorityStore()
     primary_store = PartitionableAuthorityStore(
@@ -465,6 +528,8 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
         standby,
         readiness=readiness,
     )
+    readiness_path = tmp_path / "readiness.json"
+    _write_receipt(readiness_path, readiness)
     paired_path = tmp_path / "cross-host.json"
     _write_receipt(paired_path, paired)
 
@@ -498,6 +563,7 @@ def test_process_roles_produce_verifiable_cross_host_handoff(tmp_path) -> None:
     assert paired.duplicate_authority_claims == 0
     assert paired.effect_requests == paired.provider_calls == 0
     assert paired.cross_host_verified is True
+    assert _load_cross_host_readiness(readiness_path) == readiness
     saved_pair = json.loads(paired_path.read_text())
     assert saved_pair["schema_version"] == (
         "primary-authority-outage-cross-host.v3"
@@ -690,7 +756,7 @@ def test_pair_verifier_rejects_same_machine_fingerprint() -> None:
         readiness=readiness,
     )
 
-    with pytest.raises(ValueError, match="two distinct physical machines"):
+    with pytest.raises(ValueError, match="host receipts"):
         verify_cross_host_receipts(
             primary,
             standby,
