@@ -165,7 +165,7 @@ def sandbox_profile(
         home / ".config" / "gh",
         home / ".config" / "gcloud",
         home / ".config" / "supabase",
-        home / ".volpred",
+        home / ".volpred" / "secrets",
         home / "Library" / "Keychains",
     )
     for path in credential_paths:
@@ -262,6 +262,14 @@ _PASSTHROUGH_ENV = frozenset({
     # also contain remote-effect configuration and are intentionally rejected.
     "ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "OPENAI_API_KEY",
     "CODEX_API_KEY",
+    # Exact non-secret dispatch identity/configuration required by the worker
+    # and fire-manifest contracts. These carry attribution, not authority.
+    "VOLPRED_ACTOR", "VOLPRED_TASK_CLAIM_OWNER", "VOLPRED_DISPATCH_JOB_ID",
+    "VOLPRED_DISPATCH_SLOT", "VOLPRED_FIRE_ID", "VOLPRED_FIRE_REPO_ROOT",
+    "VOLPRED_DISPATCH_DEBUG_FROM_ATTEMPT", "VOLPRED_DISPATCH_EFFORT",
+    "VOLPRED_DISPATCH_FATAL_POLL_S", "VOLPRED_DISPATCH_FATAL_STALL_S",
+    "VOLPRED_DISPATCH_SIDECAR_DEAD_S", "VOLPRED_DISPATCH_SIDECAR_STALL_S",
+    "VOLPRED_DISPATCH_SIDECAR_STARTUP_WINDOW_S",
 })
 
 

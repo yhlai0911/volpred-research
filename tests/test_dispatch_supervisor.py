@@ -5409,9 +5409,14 @@ def test_scheduler_spawns_isolated_worker_from_workspace_cwd(
     assert "inline task 可用絕對路徑編輯 canonical_root" not in received[0]["prompt_text"]
 
 
-def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_paths() -> None:
+def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_paths(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
         pytest.skip("production isolation substrate is macOS sandbox-exec")
+    test_temp_root = Path.home() / ".volpred" / "test-tmp"
+    test_temp_root.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setattr(tempfile, "tempdir", str(test_temp_root))
     with tempfile.TemporaryDirectory(
         prefix="volpred-isolation-", dir=Path.home(),
     ) as root_raw:
@@ -5470,6 +5475,33 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
             ],
             capture_output=True, text=True, check=False,
         )
+        volpred_secret_probe = subprocess.run(
+            [
+                str(isolation.SANDBOX_EXEC), "-f", str(profile), "/bin/sh",
+                "-c",
+                f"/bin/cat {Path.home() / '.volpred' / 'secrets' / 'claude_oauth_token'} "
+                f"> {wt / 'volpred-secret-copy'}",
+            ],
+            capture_output=True, text=True, check=False,
+        )
+        log_dir = Path.home() / ".volpred" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_path = log_dir / "sandbox-inherited-fd-test.log"
+        log_file = log_path.open("w", encoding="utf-8")
+        try:
+            inherited_log_fd = subprocess.run(
+                [
+                    str(isolation.SANDBOX_EXEC), "-f", str(profile),
+                    "/bin/sh", "-c", "test -w /dev/fd/1 && printf ok",
+                ],
+                stdout=log_file, stderr=subprocess.PIPE, text=True,
+                check=False,
+            )
+            log_file.flush()
+            inherited_log_size = log_file.tell()
+        finally:
+            log_file.close()
+            log_path.unlink(missing_ok=True)
 
         assert denied.returncode != 0
         assert not (repo / "forbidden.txt").exists()
@@ -5478,10 +5510,15 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
         assert not (repo / "storage" / "ops" / "denied.json").exists()
         assert git_mutation.returncode != 0
         assert credential_probe.returncode != 0
+        assert volpred_secret_probe.returncode != 0
+        assert inherited_log_fd.returncode == 0
+        assert inherited_log_size == 2
         # The shell may create the redirection target before the denied
         # credential read, but no credential bytes may cross the fence.
         copied = wt / "credential-copy"
         assert not copied.exists() or copied.read_bytes() == b""
+        volpred_copied = wt / "volpred-secret-copy"
+        assert not volpred_copied.exists() or volpred_copied.read_bytes() == b""
 
 
 def test_isolated_environment_is_allowlist_not_secret_denylist(tmp_path: Path) -> None:
@@ -5505,6 +5542,10 @@ def test_isolated_environment_is_allowlist_not_secret_denylist(tmp_path: Path) -
             "GIT_ASKPASS": "/tmp/askpass",
             "GOOGLE_APPLICATION_CREDENTIALS": "/tmp/gcp.json",
             "TELEGRAM_BOT_TOKEN": "external-effect",
+            "VOLPRED_ACTOR": "dispatch-supervisor",
+            "VOLPRED_TASK_CLAIM_OWNER": "dispatch-eff32f3b",
+            "VOLPRED_DISPATCH_JOB_ID": "eff32f3b",
+            "VOLPRED_FIRE_ID": "fire-43",
         },
         prepared,
     )
@@ -5513,6 +5554,10 @@ def test_isolated_environment_is_allowlist_not_secret_denylist(tmp_path: Path) -
     assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "model-only"
     assert env["ANTHROPIC_API_KEY"] == "model-api"
     assert env["HOME"] == str(tmp_path / "home")
+    assert env["VOLPRED_ACTOR"] == "dispatch-supervisor"
+    assert env["VOLPRED_TASK_CLAIM_OWNER"] == "dispatch-eff32f3b"
+    assert env["VOLPRED_DISPATCH_JOB_ID"] == "eff32f3b"
+    assert env["VOLPRED_FIRE_ID"] == "fire-43"
     for denied in (
         "OPENAI_ORG_ID",
         "SSH_AUTH_SOCK",
