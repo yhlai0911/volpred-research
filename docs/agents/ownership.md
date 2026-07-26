@@ -99,6 +99,25 @@ git log -5 --oneline -- <path> && git status --porcelain -- <path>
 **接線方向**（未實作，追蹤中）：next_tasks 任務加 `issue_ref` 欄位，dispatcher 派工時
 `gh issue edit <n> --add-assignee`，完成時 `gh issue close`。這樣三層收斂成一份真相。
 
+### 2026-07-26 接線實作更新（Issue #37）
+
+上述方向已由 runtime bridge 落地，但 ownership 邊界不變：
+
+- `issue_ref` 是 planning foreign key，不是第二套 pending queue；
+- canonical ingress 將 GitHub URL／issue number正規化為 `#N`；
+- local claim 是執行 ownership source of truth，GitHub assignee同步失敗只留下可觀察
+  receipt，不可回滾或阻塞本地 claim；
+- task成功只寫`issue_close_pending`，精確Git writer／PHASE-Z取得真實commit SHA後才
+  close issue並回寫`issue_closed_commit`；
+- GitHub已由同一task/commit marker關閉時可安全replay；無marker的外部關閉不得冒認；
+- direct-execution mode只允許既有identity的lifecycle／metadata settlement，這條橋
+  不會為了同步GitHub而恢復legacy admission。
+
+實作與回歸 owner：`src/volpred/ops/issue_tracker_sync.py`、
+`src/volpred/ops/next_tasks.py`、`scripts/task_pool_claim.py`、
+`scripts/git_writer_lock.py`及PHASE-Z post-commit seam。操作細節以
+`docs/agents/issue-tracker.md`為單一SOP來源。
+
 ## 有效期
 
 Operations-core 重構完成（program commit 15 的 physical two-Mac authority receipt pair 落地）後

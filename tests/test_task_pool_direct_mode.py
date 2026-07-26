@@ -274,7 +274,6 @@ def test_direct_mode_rejects_new_ids_at_canonical_write_seam(
                 "id": "control-task",
                 "status": "in_progress",
                 "priority": 3,
-                "issue_ref": "#37",
             }
         ],
     )
@@ -309,7 +308,15 @@ def test_direct_mode_allows_existing_task_lifecycle_and_removal(
     queue = tmp_path / "storage" / "next_tasks.json"
     state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
     _write_pool(
-        queue, [{"id": "control-task", "status": "in_progress", "priority": 3}]
+        queue,
+        [
+            {
+                "id": "control-task",
+                "status": "in_progress",
+                "priority": 3,
+                "issue_ref": "#37",
+            }
+        ],
     )
     enter_direct_execution_mode(
         queue_path=queue,

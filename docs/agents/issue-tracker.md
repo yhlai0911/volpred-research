@@ -25,6 +25,29 @@ Create a GitHub issue.
 
 Run `gh issue view <number> --comments`.
 
+## Runtime task bridge
+
+GitHub Issues remain the planning and acceptance layer;
+`storage/next_tasks.json` remains the only runtime pending queue.  A materialized
+runtime task links the two with optional canonical `issue_ref="#<number>"`:
+
+- create through `uv run volpred ops assign --issue-ref '#37' ...` or the
+  `volpred.ops.next_tasks` canonical ingress;
+- a successful local claim best-effort adds the current GitHub user as assignee;
+  malformed refs or unavailable `gh` are reported but never roll back the local
+  claim;
+- successful task completion writes an `issue_close_pending` receipt; it does
+  **not** close the issue against the pre-commit HEAD;
+- the exact-path Git writer or PHASE-Z closes the issue only after obtaining the
+  real commit SHA, then writes `issue_closed_commit` back to the same task;
+- close replay requires the task/commit marker already present in GitHub.  A
+  foreign manual close is not claimed as runtime completion.
+
+This bridge never appends a second task to compensate for GitHub failure and
+never reopens legacy admission in direct-execution mode.  Non-interactive shells
+may omit Homebrew from `PATH`; the implementation checks configured `GH_BIN`,
+normal `PATH`, then `/opt/homebrew/bin/gh`.
+
 ## Wayfinding operations
 
 Used by `/wayfinder`. The map is a single issue with child issues as tickets.
