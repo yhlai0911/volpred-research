@@ -195,7 +195,7 @@ def _loaded_launchd_labels() -> set[str]:
     return labels
 
 
-def _install_core_plist() -> None:
+def _install_core_plist(*, restart: bool = False) -> None:
     with CORE_PLIST.open("rb") as handle:
         plistlib.load(handle)
     destination = Path.home() / "Library" / "LaunchAgents" / CORE_PLIST.name
@@ -218,7 +218,8 @@ def _install_core_plist() -> None:
     # 5 while the old service is still unloading) and an unnecessary schedule
     # observation gap.
     if (
-        destination.exists()
+        not restart
+        and destination.exists()
         and destination.read_bytes() == CORE_PLIST.read_bytes()
         and loaded()
     ):
@@ -261,9 +262,10 @@ def apply_owner_plan(
     *,
     config_path: Path,
     job_id: str | None,
+    restart_core: bool = False,
 ) -> None:
     if plan["core_daemon_required"]:
-        _install_core_plist()
+        _install_core_plist(restart=restart_core)
 
     host_command = ["bash", str(ROOT / "scripts" / "install_host_crontab.sh")]
     if job_id:
@@ -303,11 +305,18 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--job-id")
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument(
+        "--restart-core",
+        action="store_true",
+        help="restart the clock after deploying Python code even when the plist is unchanged",
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.restart_core and not args.apply:
+        raise SystemExit("--restart-core requires --apply")
     config = _load_config(args.config)
     plan = build_owner_plan(config, job_id=args.job_id)
     if args.apply:
@@ -316,6 +325,7 @@ def main(argv: list[str] | None = None) -> int:
             plan,
             config_path=args.config,
             job_id=args.job_id,
+            restart_core=args.restart_core,
         )
     audit = audit_owner_plan(
         plan,

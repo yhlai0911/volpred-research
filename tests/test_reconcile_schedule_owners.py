@@ -120,3 +120,36 @@ def test_unchanged_loaded_core_plist_is_not_restarted(
     assert calls == [
         ["launchctl", "print", f"gui/{owners.os.getuid()}/com.volpred.test"]
     ]
+
+
+def test_restart_core_reloads_unchanged_plist(tmp_path, monkeypatch) -> None:
+    source = tmp_path / "source.plist"
+    destination = tmp_path / "Library" / "LaunchAgents" / source.name
+    source.write_bytes(
+        b"<?xml version='1.0'?><plist version='1.0'><dict/></plist>"
+    )
+    destination.parent.mkdir(parents=True)
+    destination.write_bytes(source.read_bytes())
+    calls: list[list[str]] = []
+    loaded_results = iter([True, True, False, False])
+
+    class Result:
+        def __init__(self, returncode: int = 0) -> None:
+            self.returncode = returncode
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        if command[:2] == ["launchctl", "print"]:
+            return Result(0 if next(loaded_results) else 1)
+        return Result()
+
+    monkeypatch.setattr(owners, "CORE_PLIST", source)
+    monkeypatch.setattr(owners, "CORE_LABEL", "com.volpred.test")
+    monkeypatch.setattr(owners.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(owners.subprocess, "run", run)
+
+    owners._install_core_plist(restart=True)
+
+    domain = f"gui/{owners.os.getuid()}"
+    assert ["launchctl", "bootout", f"{domain}/com.volpred.test"] in calls
+    assert ["launchctl", "bootstrap", domain, str(destination)] in calls
