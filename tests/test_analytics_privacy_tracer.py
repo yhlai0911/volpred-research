@@ -76,6 +76,18 @@ def test_raw_retention_is_executable_not_only_documented() -> None:
     )
     assert tracer.purge_expired(before="2026-07-01T00:00:00+00:00") == 1
     assert tracer.inspect_privacy("anonymous:anon-retention").raw_event_count == 0
+    replay = tracer.record(
+        AnalyticsEvent(
+            idempotency_key="impression:retention:anon-1",
+            kind="content_impression",
+            occurred_at="2026-06-01T00:00:00+00:00",
+            anonymous_id="anon-retention",
+            user_id=None,
+            properties={"content_id": "article-1", "surface": "home"},
+        )
+    )
+    assert replay.accepted is False
+    assert replay.reason == "expired"
 
 
 def test_identity_merge_is_replay_safe_and_admin_summary_is_aggregate_only() -> None:
@@ -103,6 +115,18 @@ def test_identity_merge_is_replay_safe_and_admin_summary_is_aggregate_only() -> 
         user_id="user-1",
         merged_at="2026-07-26T15:45:00+00:00",
     )
+    second_key = tracer.merge_identity(
+        idempotency_key="identity-merge:anon-1:user-1:second",
+        anonymous_id="anon-1",
+        user_id="user-1",
+        merged_at="2026-07-26T15:46:00+00:00",
+    )
+    second_key_replay = tracer.merge_identity(
+        idempotency_key="identity-merge:anon-1:user-1:second",
+        anonymous_id="anon-1",
+        user_id="user-1",
+        merged_at="2026-07-26T15:46:00+00:00",
+    )
 
     assert first.duplicate is False
     assert replay.duplicate is True
@@ -110,6 +134,10 @@ def test_identity_merge_is_replay_safe_and_admin_summary_is_aggregate_only() -> 
     assert merged.merged_events == 1
     assert merged.duplicate is False
     assert merge_replay.duplicate is True
+    assert second_key.merged_events == 0
+    assert second_key.duplicate is False
+    assert second_key_replay.merged_events == 0
+    assert second_key_replay.duplicate is True
     assert tracer.admin_summary(
         start_at="2026-07-26T00:00:00+00:00",
         end_at="2026-07-27T00:00:00+00:00",
@@ -236,3 +264,25 @@ def test_clear_and_delete_are_replay_safe_and_read_back_every_projection() -> No
     assert after_delete.identity_link_count == 0
     assert event_replay_after_delete.accepted is False
     assert event_replay_after_delete.reason == "deleted"
+
+
+def test_privacy_action_idempotency_key_is_bound_to_action_and_subject() -> None:
+    tracer = AnalyticsPrivacyTracer(InMemoryAnalyticsStore())
+    tracer.set_opt_out(
+        "user:user-1",
+        idempotency_key="privacy-action:shared",
+        acted_at="2026-07-26T16:00:00+00:00",
+    )
+
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.delete(
+            "user:user-1",
+            idempotency_key="privacy-action:shared",
+            acted_at="2026-07-26T16:01:00+00:00",
+        )
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.set_opt_out(
+            "user:user-2",
+            idempotency_key="privacy-action:shared",
+            acted_at="2026-07-26T16:01:00+00:00",
+        )

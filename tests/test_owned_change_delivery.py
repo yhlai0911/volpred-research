@@ -94,7 +94,7 @@ def _work(*, status: str = "succeeded") -> WorkItemView:
         title="Owned Change Delivery",
         priority=1,
         required_capabilities=frozenset({"code"}),
-        required_attestations=frozenset(),
+        required_attestations=frozenset({"pytest"}),
         risk="safe",
         approval="auto",
         payload_ref="change:owned-shadow-1",
@@ -116,6 +116,9 @@ def _work(*, status: str = "succeeded") -> WorkItemView:
             "2026-07-24T06:00:01+00:00"
             if status == "succeeded"
             else None
+        ),
+        claimed_by=(
+            "agent:change-author" if status == "running" else None
         ),
     )
 
@@ -162,7 +165,7 @@ class _Delivery:
             commit_sha="2" * 40,
             parent_sha=self.change_set.base_commit,
             exact_paths=self.change_set.exact_paths,
-            actor=command.actor,
+            actor="commit-worker:operations-core",
             status="landed",
             actuation_observed_at="2026-07-24T06:00:00+00:00",
             settled_at="2026-07-24T06:00:01+00:00",
@@ -175,12 +178,13 @@ class _Delivery:
 
 class _Coordinator:
     def __init__(self, item: WorkItemView) -> None:
-        self.item = item
+        self.items = [_work(status="running"), item]
         self.queries: list[WorkQuery] = []
 
     def inspect(self, query: WorkQuery) -> WorkSnapshot:
         self.queries.append(query)
-        return WorkSnapshot(items=(self.item,))
+        item = self.items.pop(0) if len(self.items) > 1 else self.items[0]
+        return WorkSnapshot(items=(item,))
 
 
 class _Response:
@@ -204,7 +208,6 @@ def _command() -> OwnedChangeCommand:
         primary_fencing_token="primary-fencing-token",
         repository="/tmp/owned-change-repo",
         message="[codex] owned shadow change",
-        actor="commit-worker:shadow",
     )
 
 
@@ -227,7 +230,12 @@ def test_deliver_owns_generation_proposal_landing_and_work_readback() -> None:
     assert receipt.work_item == _work()
     assert delivery.proposals == [_proposal()]
     assert delivery.commands[0].commit_owner_generation == 2
-    assert coordinator.queries == [WorkQuery(work_id="work-owned-change-1")]
+    assert delivery.commands[0].__dict__.get("actor") is None
+    assert receipt.delivery.actor == "commit-worker:operations-core"
+    assert coordinator.queries == [
+        WorkQuery(work_id="work-owned-change-1"),
+        WorkQuery(work_id="work-owned-change-1"),
+    ]
 
 
 def test_deliver_fails_before_proposal_when_owner_is_legacy() -> None:
@@ -248,6 +256,26 @@ def test_deliver_fails_before_proposal_when_owner_is_legacy() -> None:
     assert delivery.proposals == []
     assert delivery.commands == []
     assert coordinator.queries == []
+
+
+def test_deliver_fails_before_proposal_when_required_checks_drift() -> None:
+    running = replace(
+        _work(status="running"),
+        required_attestations=frozenset({"pytest", "ruff"}),
+    )
+    coordinator = _Coordinator(_work())
+    coordinator.items = [running]
+    delivery = _Delivery()
+
+    with pytest.raises(RuntimeError, match="required checks"):
+        OwnedChangeDelivery(
+            owner_store=_OwnerStore(_owner()),
+            delivery=delivery,
+            coordinator=coordinator,
+        ).deliver(_command())
+
+    assert delivery.proposals == []
+    assert delivery.commands == []
 
 
 def test_deliver_rejects_incomplete_work_readback_after_settlement() -> None:

@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "title": "K1711 懶人包：AI 基礎模型搬進波動率擂台，HAR 沒被打下來",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1711/k1711_results.json",
+      "sha256": "b09006ea38c80ab297ff0d847e139ec4248c57c0922654d01e49815cdc3fc4cd",
+      "label": "experiment K1711 results (TSFM x HAR forecast pool under MCS)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "AI 基礎模型能取代波動率老公式嗎",
+      "alt": "把時序基礎模型和老公式 HAR 放進同一個候選池，問誰會被統計程序淘汰",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "熱門主張",
+          "body": [
+            "時序基礎模型號稱像 ChatGPT，免訓練，丟一段歷史就能預測任何序列。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "我們的問法",
+          "body": [
+            "不辦誰贏的賽馬，改看模型信心集合：哪些模型會被統計證據淘汰。",
+            "留在集合裡只代表沒被淘汰，不代表它最好。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "跨市場共同交易日",
+          "value": {
+            "source": "results",
+            "path": "/pooled/0/n_dates",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "SPY 評分筆數",
+          "value": {
+            "source": "results",
+            "path": "/cells/0/n_scored",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "候選池與評分規則",
+      "alt": "老公式 HAR 對上 AI 模型的裸用、校準與組合版，用 QLIKE 和信心集合評分",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "兩邊陣營",
+          "body": [
+            "老公式：HAR、HAR-A。",
+            "AI：TimesFM、TTM，加上它們的校準版與跟 HAR 的組合版。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "評分",
+          "body": [
+            "QLIKE 損失，數字越低代表預測越準。",
+            "信心集合用大量 bootstrap 重抽樣、固定隨機種子，可完整複現。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "台股 0050.TW 評分筆數",
+          "value": {
+            "source": "results",
+            "path": "/cells/1/n_scored",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台指期 TX 評分筆數",
+          "value": {
+            "source": "results",
+            "path": "/cells/2/n_scored",
+            "format": {
+              "kind": "integer",
+              "suffix": " 筆"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "SPY 實測：裸用落後，校準貼平",
+      "alt": "SPY 上 TimesFM 裸用明顯落後，校準後幾乎追平 HAR，最佳仍是 HAR-A",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "最佳模型 HAR-A（QLIKE，越低越好）",
+          "value": {
+            "source": "results",
+            "path": "/cells/0/mean_loss/qlike/HAR-A",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "TimesFM 裸用",
+          "value": {
+            "source": "results",
+            "path": "/cells/0/mean_loss/qlike/TimesFM",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "TimesFM 校準後",
+          "value": {
+            "source": "results",
+            "path": "/cells/0/mean_loss/qlike/TimesFM-MZ",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "老公式 HAR",
+          "value": {
+            "source": "results",
+            "path": "/cells/0/mean_loss/qlike/HAR",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼讀",
+          "body": [
+            "裸用那欄高出一截，輸在起跑線。",
+            "校準後幾乎跟 HAR 一模一樣，追平，但沒有超前。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "跨市場總結：老公式還沒被打下來",
+      "alt": "三市場合併後信心集合只剩 HAR-A 和 AI 加 HAR 組合，最低誤差仍是 HAR-A",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "跨市場最佳 HAR-A（QLIKE）",
+          "value": {
+            "source": "results",
+            "path": "/pooled/0/mean_loss/HAR-A",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "AI 加 HAR 校準組合 COMB-MZ",
+          "value": {
+            "source": "results",
+            "path": "/pooled/0/mean_loss/COMB-MZ",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "帶走三句話",
+          "body": [
+            "裸用的基礎模型，三個市場全輸給老公式 HAR。",
+            "校準或跟 HAR 組隊能追平、擠進信心集合，但沒有超前。",
+            "要用這批 AI，關鍵是先校準、再跟對的老公式組隊。"
+          ]
+        }
+      ]
+    }
+  ]
+}

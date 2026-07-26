@@ -13,6 +13,7 @@ from volpred.ops.delivery import (
     ChangeSetConflict,
     ChangeSetProposal,
     CheckEvidence,
+    CommitWorkerPrincipal,
     ContentHash,
     DeliveryReceipt,
     LandChangeSet,
@@ -116,6 +117,17 @@ class _Actuator:
         )
 
 
+class _CheckVerifier:
+    def __init__(self, *, failure: Exception | None = None) -> None:
+        self.change_sets = []
+        self._failure = failure
+
+    def verify(self, change_set) -> None:
+        self.change_sets.append(change_set)
+        if self._failure is not None:
+            raise self._failure
+
+
 class _TimestampActuator(_Actuator):
     def __init__(self, observed_at: str) -> None:
         super().__init__()
@@ -196,7 +208,6 @@ def _land(change_set_id: str = "changeset-1") -> LandChangeSet:
         primary_fencing_token="primary-fencing-token",
         repository="/repo",
         message="[change-delivery] land changeset-1",
-        actor="commit-worker:test",
     )
 
 
@@ -462,6 +473,8 @@ def test_land_orchestrates_actuation_and_durable_settlement(
         id_factory=lambda: "changeset-1",
         actuator=actuator,
         settlement=settlement,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = delivery.propose(_proposal(linked, base_commit))
 
@@ -506,6 +519,8 @@ def test_land_retries_only_post_commit_settlement_after_transient_failure(
         id_factory=lambda: "changeset-1",
         actuator=actuator,
         settlement=settlement,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = delivery.propose(_proposal(linked, base_commit))
 
@@ -532,6 +547,8 @@ def test_restart_resumes_durable_checkpoint_without_second_git_write(
         actuator=first_actuator,
         settlement=settlement,
         store=store,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = first_process.propose(_proposal(linked, base_commit))
 
@@ -545,6 +562,8 @@ def test_restart_resumes_durable_checkpoint_without_second_git_write(
         actuator=second_actuator,
         settlement=settlement,
         store=store,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     assert restarted_process.inspect(proposed.id).status == "commit_unsettled"
 
@@ -574,6 +593,8 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
         actuator=lost_return,
         settlement=settlement,
         store=store,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = first_process.propose(_proposal(linked, base_commit))
     command = replace(_land(proposed.id), repository=str(repo))
@@ -593,6 +614,8 @@ def test_restart_recovers_git_commit_when_process_dies_before_checkpoint(
         ),
         settlement=settlement,
         store=store,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
 
     receipt = restarted_process.land(command)
@@ -618,6 +641,8 @@ def test_land_rejects_command_drift_after_external_commit(
         id_factory=lambda: "changeset-1",
         actuator=actuator,
         settlement=settlement,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = delivery.propose(_proposal(linked, base_commit))
     command = _land(proposed.id)
@@ -650,6 +675,8 @@ def test_land_rejects_unverifiable_actuation_time_before_settlement(
         id_factory=lambda: "changeset-1",
         actuator=actuator,
         settlement=settlement,
+        check_verifier=_CheckVerifier(),
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
     )
     proposed = delivery.propose(_proposal(linked, base_commit))
 
@@ -670,4 +697,30 @@ def test_land_requires_configured_actuator_and_settlement(
 
     with pytest.raises(RuntimeError, match="not configured"):
         delivery.land(_land(proposed.id))
+    assert delivery.inspect(proposed.id).status == "proposed"
+
+
+def test_land_reverifies_required_checks_before_git_actuation(
+    workspace: tuple[Path, Path, str],
+) -> None:
+    _, linked, base_commit = workspace
+    actuator = _Actuator()
+    verifier = _CheckVerifier(
+        failure=RuntimeError("required check failed: pytest")
+    )
+    delivery = ChangeDelivery(
+        clock=lambda: NOW,
+        id_factory=lambda: "changeset-1",
+        actuator=actuator,
+        settlement=_Settlement(),
+        check_verifier=verifier,
+        commit_worker=CommitWorkerPrincipal("commit-worker:test"),
+    )
+    proposed = delivery.propose(_proposal(linked, base_commit))
+
+    with pytest.raises(RuntimeError, match="required check failed: pytest"):
+        delivery.land(_land(proposed.id))
+
+    assert verifier.change_sets == [proposed]
+    assert actuator.commands == []
     assert delivery.inspect(proposed.id).status == "proposed"

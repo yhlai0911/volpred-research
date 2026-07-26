@@ -26954,5 +26954,35 @@
     "owner": "hourly-slot-1-228c2436dc224580b633f24236e9b8c4",
     "commit": null,
     "summary": "Boss P1 assign_f13a5d5f（release 死鎖+沒出新文）：hourly lane 無法 claim（main_thread_lane）。已做 live 本地源驗證並 annotate：release_deadlock_remediation.json 今日 14:00Z=not_deadlocked、deadlock alert 07-22 succeeded、root-cause commit 2985beb4a、今日發文 mile_beee535c、published_today=2。判定 root_cause_fixed_and_verified（非誤報）。當前 draft=0 為 drain-first backpressure 非死鎖。正式 close+回報留 main-thread lane。"
+  },
+  {
+    "timestamp": "2026-07-26T23:30:01+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1686_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-c789153b7308401daa5077575ffdda23",
+    "owner": "hourly-slot-1-c789153b7308401daa5077575ffdda23",
+    "commit": null,
+    "summary": "K1686 一般讀者向文章：撰稿→gate→發佈成 draft（refill 空池 0→1）。\n\n**產出**：feed draft `mile_be7666e2`「我們差點親手推翻自己的發現：一個對錯一天的錯誤，怎麼被抓出來又被救回」（audience=general, status=draft）。opus subagent 依 3 canonical paths 撰稿，主線程過閘＋核數＋補圖＋發佈。\n\n**主題（研究誠實）**：K897 主張波動吸收（恐慌時衝擊放大比遞減，實證 calm→high 落差 0.8165）；fable review 抓到 timing 缺陷（舊 null 把衝擊標在大跌隔天，實證 VIX 同期跳動）。K1686 唯一改動波動代理時間對齊（√h[t+1]），其餘全同 → 事前登記主檢定 p 從 0.0006 惡化到 0.409759（一度失守）；但更嚴的 ambient(VIX_{t-1})×fear-shock 規格：真實落差 1.0465、20 日 block-bootstrap 95% CI [0.3286,1.7625]、同種子 null 對照 p=0.032673 → 裁決 ABSORPTION SURVIVES AMBIENT-FEAR-SHOCK GATE。誠實標限制：純上漲×當期落差 -0.1192 內生無法定案、下跌側 null 不可比。\n\n**gate 全過**：check_arc_dedup（general, RC=0）｜anti_ai_gate RC=0｜image gate（補第 2 張 data-bound 圖 experiments/k1686/k1686_empirical_vs_null.png，經 plot_empirical_vs_null.py 綁 JSON 產生）｜audience gate（原 infer=research，把 GARCH/GJR-GARCH/bootstrap/K-id 全改白話 → infer=general；數字零損失）｜sanitize CI/p 語意分級保留數值。\n\n**lazypack**：storage/drafts/K1686_lazypack_plan.json（strict plan v1，3 panel concept/method/results，全數字綁 results JSON，sha256 驗證，digits≤3）；已 enqueue lazypack-mile_be7666e2（*/15 codex-primary 渲染鏈），release_pool 待圖組落地後放行。\n\n**數字核對（皆出自 experiments/k1686/k1686_contemporaneous_null_results.json，未湊整）**：empirical 0.8165 / old p 0.0006 / primary A p 0.409759 / survive empirical 1.0465 / survive p 0.032673 / n_obs 5092 / n_sim 10000 / CI [0.3286,1.7625]。\n\n**附帶清理**：K1719_article_general 標 failed（該 K 在 knowledge.json 不存在，max K id=1718，auto-discovered task 指向不存在 K，永久餓死）。\n\n**未動**：PHASE-Z 卡住檔案 incident assign_76606948 —— foreign_incident --check 顯示 closeable=false、derates=false、兩檔在 24h grace 內仍被改（deferred，非無主殘留），且收拾需 git surgery（PHASE-Z owns git），本班不強行處理，留待 grace 到期自解。"
+  },
+  {
+    "timestamp": "2026-07-26T23:50:25+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_76606948",
+    "outcome": "derate_lifted",
+    "actor": "hourly-slot-2-e8130db73b6942c78607ea1f32eb2d7f",
+    "owner": "hourly-slot-2-e8130db73b6942c78607ea1f32eb2d7f",
+    "commit": null,
+    "summary": "PHASE-Z 卡住檔案 incident de-rate 解除。slot_budget 因 assign_76606948 未關把 cap 壓到 2；查 foreign_incident --check 得 verdict closeable=false 但 derates=false（兩檔皆 active/deferred：trending log idle 17.6h 在 24h grace 內、test 檔 3.4h 活躍，非無主殘留）。跑 foreign_incident --reconcile 把 payload.derates=false 寫入（dispatch_slot_budget line242 `.get(\"derates\",True)` 讀此旗標），slot_budget 恢復 cap 6、open_incident=null 已驗。incident 未關（機械 close 需檔案清乾淨，工具刻意不 force-remove active code），annotate 留 derate_note 後 release 回 pending 待未來 reconcile 機械關閉。"
+  },
+  {
+    "timestamp": "2026-07-26T23:50:25+08:00",
+    "task_type": "daily_article",
+    "task_id": "assign_6e554fae",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-e8130db73b6942c78607ea1f32eb2d7f",
+    "owner": "hourly-slot-2-e8130db73b6942c78607ea1f32eb2d7f",
+    "commit": null,
+    "summary": "兩份 general drafts audience gate 編輯裁決（assign_6e554fae, P1 aged 100.5h）。\n\nK1253：依 canonical eligibility 判不可發表 — experiments/k1253/README §非目標明令「不發 published 文章只發草稿」，knowledge verdict=UNVERIFIED/needs_human，本質為環境還原後 end-to-end smoke test 非研究發現。移入 storage/drafts/archived/k1253_general_draft_smoketest_not_publishable.md（依 K1120 先例）+ archival header 記錄裁決 provenance；file 為 tracked+clean（orphan reaper 不碰）、未註冊 feed（release pool 不 intake），出口明確。\n\nK1711：research audience 已有覆蓋（arc-dedup=block_arc_dup）故不改分 research；general slot clean。gate 誤判源於 _ACADEMIC_KEYWORD_THRESHOLD=2 純關鍵字計數 — body 命中 K-id/QLIKE/MCS/bootstrap 四類。依 gate 設計意圖（禁 bare jargon，概念+數值以白話保留）將四類全數白話化，含圖 alt text 與 footer 檔名路徑；keyword hits 4→0、inferred=general。anti_ai_gate PASS、content-vs-source audit PASS（0 fabricated）、圖片 2 refs 上傳 HTTPS。正式發佈 mile_496e7dce（status=draft），lazypack async render 已 enqueue，release cron 渲染後釋出（補 throughput CRITICAL 2/6）。"
   }
 ]

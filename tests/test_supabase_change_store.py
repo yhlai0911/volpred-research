@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from io import BytesIO
 import json
 from urllib import error
@@ -8,9 +9,11 @@ import pytest
 
 from volpred.ops.delivery import (
     ChangeSetConflict,
+    ChangeSetProposal,
     ChangeSetView,
     CheckEvidence,
     ContentHash,
+    _proposal_sha256,
 )
 from volpred.ops.delivery.supabase_change_store import (
     SupabaseChangeSetStore,
@@ -37,9 +40,7 @@ class _Response:
 
 
 def _view() -> ChangeSetView:
-    return ChangeSetView(
-        schema_version="changeset.v1",
-        id="change-1",
+    proposal = ChangeSetProposal(
         idempotency_key="change:test:1",
         work_item_id="work-1",
         work_item_version=3,
@@ -58,7 +59,21 @@ def _view() -> ChangeSetView:
         ),
         author_ref="agent:test",
         author_evidence_ref="session:test",
-        proposal_sha256="c" * 64,
+    )
+    return ChangeSetView(
+        schema_version="changeset.v1",
+        id="change-1",
+        idempotency_key=proposal.idempotency_key,
+        work_item_id=proposal.work_item_id,
+        work_item_version=proposal.work_item_version,
+        base_commit=proposal.base_commit,
+        workspace_ref=proposal.workspace_ref,
+        exact_paths=proposal.exact_paths,
+        content_hashes=proposal.content_hashes,
+        required_checks=proposal.required_checks,
+        author_ref=proposal.author_ref,
+        author_evidence_ref=proposal.author_evidence_ref,
+        proposal_sha256=_proposal_sha256(proposal),
         status="proposed",
         created_at="2026-07-24T08:00:00+00:00",
     )
@@ -167,7 +182,7 @@ def test_create_uses_service_role_rpc_and_decodes_record(
         ],
         "p_author_ref": "agent:test",
         "p_author_evidence_ref": "session:test",
-        "p_proposal_sha256": "c" * 64,
+        "p_proposal_sha256": _view().proposal_sha256,
         "p_schema_version": "changeset.v1",
         "p_created_at": "2026-07-24T08:00:00+00:00",
     }
@@ -236,3 +251,29 @@ def test_environment_adapter_never_uses_publishable_key(
 
     with pytest.raises(ValueError, match="service-role key"):
         SupabaseChangeSetStore.from_environment()
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("schema_version", "changeset.v2"),
+        ("work_item_version", True),
+        ("proposal_sha256", "not-a-sha"),
+        ("status", "mystery"),
+        ("exact_paths", ["../escape"]),
+    ],
+)
+def test_rpc_readback_rejects_malformed_change_set_records(
+    monkeypatch: pytest.MonkeyPatch,
+    field: str,
+    value: object,
+) -> None:
+    malformed = deepcopy(_row())
+    malformed[field] = value
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *args, **kwargs: _Response(malformed),
+    )
+
+    with pytest.raises(RuntimeError, match="malformed ChangeSet record"):
+        _store().load("change-1")

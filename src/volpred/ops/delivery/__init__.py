@@ -118,6 +118,13 @@ class CheckEvidence:
 
 
 @dataclass(frozen=True)
+class CommitWorkerPrincipal:
+    """Trusted runtime principal used by the formal commit caller."""
+
+    ref: str
+
+
+@dataclass(frozen=True)
 class ChangeSetProposal:
     idempotency_key: str
     work_item_id: str
@@ -158,7 +165,6 @@ class LandChangeSet:
     primary_fencing_token: str
     repository: str
     message: str
-    actor: str
 
 
 @dataclass(frozen=True)
@@ -205,6 +211,8 @@ class ChangeDelivery:
         actuator=None,
         settlement=None,
         store=None,
+        check_verifier=None,
+        commit_worker: CommitWorkerPrincipal | None = None,
     ) -> None:
         from ._change_store import InMemoryChangeSetStore
 
@@ -212,6 +220,12 @@ class ChangeDelivery:
         self._id_factory = id_factory
         self._actuator = actuator
         self._settlement = settlement
+        self._check_verifier = check_verifier
+        self._commit_worker = (
+            _normalize_commit_worker(commit_worker)
+            if commit_worker is not None
+            else None
+        )
         self._store = (
             store if store is not None else InMemoryChangeSetStore()
         )
@@ -271,10 +285,19 @@ class ChangeDelivery:
         database failure from creating a second commit.
         """
 
-        if self._actuator is None or self._settlement is None:
+        if (
+            self._actuator is None
+            or self._settlement is None
+            or self._check_verifier is None
+            or self._commit_worker is None
+        ):
             raise RuntimeError("Change Delivery landing is not configured")
         normalized = _normalize_land_command(command)
-        land_command_sha256 = _land_command_sha256(normalized)
+        commit_worker_ref = self._commit_worker.ref
+        land_command_sha256 = _land_command_sha256(
+            normalized,
+            commit_worker_ref=commit_worker_ref,
+        )
 
         from ._change_settlement import CommitSettlement
         from ._git_actuator import CommitActuation
@@ -296,6 +319,7 @@ class ChangeDelivery:
 
             actuation = record.actuation
             if actuation is None:
+                self._check_verifier.verify(change_set)
                 actuation = self._actuator.commit(
                     CommitActuation(
                         proposal_sha256=change_set.proposal_sha256,
@@ -311,7 +335,7 @@ class ChangeDelivery:
                         exact_paths=change_set.exact_paths,
                         content_hashes=change_set.content_hashes,
                         message=normalized.message,
-                        actor=normalized.actor,
+                        actor=commit_worker_ref,
                         workspace_ref=change_set.workspace_ref,
                     )
                 )
@@ -319,6 +343,7 @@ class ChangeDelivery:
                     actuation,
                     change_set=change_set,
                     command=normalized,
+                    commit_worker_ref=commit_worker_ref,
                 )
                 record = self._store.checkpoint_actuation(
                     change_set_id=change_set.id,
@@ -342,6 +367,7 @@ class ChangeDelivery:
                 change_set=change_set,
                 command=normalized,
                 actuation=actuation,
+                commit_worker_ref=commit_worker_ref,
             )
             landed = self._store.mark_landed(
                 change_set_id=change_set.id,
@@ -363,15 +389,25 @@ def _required_text(value: str, *, field: str) -> str:
     return normalized
 
 
+def _normalize_commit_worker(
+    principal: CommitWorkerPrincipal,
+) -> CommitWorkerPrincipal:
+    if not isinstance(principal, CommitWorkerPrincipal):
+        raise TypeError("CommitWorkerPrincipal is required")
+    ref = _required_text(principal.ref, field="commit worker principal")
+    if not ref.startswith("commit-worker:"):
+        raise ValueError(
+            "commit worker principal must use the commit-worker identity"
+        )
+    return CommitWorkerPrincipal(ref=ref)
+
+
 def _normalize_land_command(command: LandChangeSet) -> LandChangeSet:
     if not isinstance(command, LandChangeSet):
         raise TypeError("LandChangeSet is required")
     repository = Path(command.repository).expanduser()
     if not repository.is_absolute():
         raise ValueError("Change Delivery repository must be an absolute path")
-    actor = _required_text(command.actor, field="commit actor")
-    if not actor.startswith("commit-worker:"):
-        raise ValueError("commit actor must use the commit-worker identity")
     if (
         isinstance(command.commit_owner_generation, bool)
         or command.commit_owner_generation <= 0
@@ -393,11 +429,14 @@ def _normalize_land_command(command: LandChangeSet) -> LandChangeSet:
         ),
         repository=str(repository.resolve()),
         message=_required_text(command.message, field="commit message"),
-        actor=actor,
     )
 
 
-def _land_command_sha256(command: LandChangeSet) -> str:
+def _land_command_sha256(
+    command: LandChangeSet,
+    *,
+    commit_worker_ref: str,
+) -> str:
     encoded = json.dumps(
         {
             "schema_version": "land-change-set.v1",
@@ -407,7 +446,7 @@ def _land_command_sha256(command: LandChangeSet) -> str:
             "primary_fencing_token": command.primary_fencing_token,
             "repository": command.repository,
             "message": command.message,
-            "actor": command.actor,
+            "actor": commit_worker_ref,
         },
         sort_keys=True,
         separators=(",", ":"),
@@ -421,6 +460,7 @@ def _validate_actuation_receipt(
     *,
     change_set: ChangeSetView,
     command: LandChangeSet,
+    commit_worker_ref: str,
 ):
     from ._git_actuator import CommitActuationReceipt, CommitActuatorBlocked
 
@@ -450,7 +490,7 @@ def _validate_actuation_receipt(
         or not receipt.commit_owner_ref.strip()
         or receipt.parent_sha != change_set.base_commit
         or receipt.exact_paths != change_set.exact_paths
-        or receipt.actor != command.actor
+        or receipt.actor != commit_worker_ref
         or receipt.status != "committed"
         or _SHA256.fullmatch(receipt.authority_request_sha256) is None
         or _GIT_OBJECT_ID.fullmatch(receipt.commit_sha) is None
@@ -469,6 +509,7 @@ def _validate_delivery_receipt(
     change_set: ChangeSetView,
     command: LandChangeSet,
     actuation,
+    commit_worker_ref: str,
 ) -> DeliveryReceipt:
     if not isinstance(receipt, DeliveryReceipt):
         raise RuntimeError("commit settlement returned an invalid delivery receipt")
@@ -489,7 +530,7 @@ def _validate_delivery_receipt(
         or receipt.commit_sha != actuation.commit_sha
         or receipt.parent_sha != actuation.parent_sha
         or receipt.exact_paths != actuation.exact_paths
-        or receipt.actor != command.actor
+        or receipt.actor != commit_worker_ref
         or receipt.status != "landed"
         or receipt.actuation_observed_at != actuation.observed_at
         or not receipt.settled_at.strip()
@@ -525,7 +566,11 @@ def _normalize_proposal(proposal: ChangeSetProposal) -> ChangeSetProposal:
         proposal.idempotency_key, field="idempotency_key"
     )
     work_item_id = _required_text(proposal.work_item_id, field="work_item_id")
-    if proposal.work_item_version <= 0:
+    if (
+        isinstance(proposal.work_item_version, bool)
+        or not isinstance(proposal.work_item_version, int)
+        or proposal.work_item_version <= 0
+    ):
         raise ValueError("work_item_version must be positive")
     if _GIT_OBJECT_ID.fullmatch(proposal.base_commit) is None:
         raise ValueError("base_commit must be a lowercase Git object id")
@@ -800,6 +845,7 @@ __all__ = [
     "ChangeSetProposal",
     "ChangeSetView",
     "CheckEvidence",
+    "CommitWorkerPrincipal",
     "ContentHash",
     "DeliveryReceipt",
     "EffectAttemptOutcome",

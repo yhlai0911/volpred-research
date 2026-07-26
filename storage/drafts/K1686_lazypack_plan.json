@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "title": "我們差點推翻自己的發現：懶人包",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1686/k1686_contemporaneous_null_results.json",
+      "sha256": "c3e55a74f3c1b29e22bb3f12f817597c2c6f6d798b1043dc9d695134c9a5f365",
+      "label": "同期化對照模擬結果（波動吸收）"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_concept",
+      "info": "concept",
+      "style": "professional",
+      "title": "市場愈恐慌，衝擊反而被吸收",
+      "alt": "核心發現：市場已經恐慌時，突發衝擊的當日額外震盪反而變小",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "這篇在講什麼",
+          "body": [
+            "平常一個利空砸下來，股價當天會劇烈震盪。",
+            "但當市場已經很恐慌，同樣的利空造成的『額外』震盪反而變小——像驚弓之鳥，第一聲最跳，後面漸漸麻木。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "平靜→恐慌 衝擊放大比落差",
+          "value": {
+            "source": "results",
+            "path": "/sar_decline_comparison/contemporaneous|A/empirical",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本",
+          "value": {
+            "source": "results",
+            "path": "n_observations",
+            "format": {"kind": "integer", "suffix": " 個交易日"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼分辨真相與錯覺",
+      "alt": "用只有波動慣性、沒有市場心理的假世界當對照組",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "作法",
+          "body": [
+            "波動本來就有慣性：高波動之後容易再高波動。",
+            "我們造一個只有慣性、沒有任何市場心理的『假世界』，生出大量假走勢。",
+            "假世界也能輕鬆刷出同樣的落差，發現就沒價值；刷不出來，落差就是慣性以外的真東西。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "假世界模擬路徑",
+          "value": {
+            "source": "results",
+            "path": "n_simulations",
+            "format": {"kind": "integer", "suffix": " 條"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本期間",
+          "value": {
+            "source": "results",
+            "path": "sample_period",
+            "format": {"kind": "text"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_results",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "一場差點翻船的自我檢驗",
+      "alt": "三種問法下的 p 值，以及存活規格的真實落差",
+      "sources": ["results"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "舊版檢定（時間標錯一天）p 值",
+          "value": {
+            "source": "results",
+            "path": "/sar_decline_comparison/k897_lagged|A/p_value_monte_carlo",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "修正後主檢定 p 值（一度失守）",
+          "value": {
+            "source": "results",
+            "path": "/sar_decline_comparison/contemporaneous|A/p_value_monte_carlo",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "存活規格 真實落差",
+          "value": {
+            "source": "results",
+            "path": "/codex_followup_gate/same_seed_null_comparison/empirical",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "存活規格 p 值",
+          "value": {
+            "source": "results",
+            "path": "/codex_followup_gate/same_seed_null_comparison/p_value_monte_carlo",
+            "format": {"kind": "number", "digits": 3}
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "結論與限制",
+          "body": [
+            "修正時間對齊後，事前登記的主檢定一度失守；但更嚴謹的『衝擊前恐懼水位 × 衝擊』規格證明現象存活（見上方數字）。",
+            "限制：純上漲衝擊的估計樣本太少、下跌側對照模型還不能定案，結論僅止於此。"
+          ]
+        }
+      ]
+    }
+  ]
+}

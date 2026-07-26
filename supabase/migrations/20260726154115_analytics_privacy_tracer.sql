@@ -48,13 +48,19 @@ CREATE INDEX analytics_events_expiry_idx
 CREATE TABLE volpred_analytics.identity_links (
   anonymous_id text PRIMARY KEY,
   user_id text NOT NULL,
-  idempotency_key text NOT NULL UNIQUE,
-  merged_at timestamptz NOT NULL,
-  merged_events integer NOT NULL CHECK (merged_events >= 0)
+  merged_at timestamptz NOT NULL
 );
 
 CREATE INDEX analytics_identity_links_user_idx
   ON volpred_analytics.identity_links (user_id);
+
+CREATE TABLE volpred_analytics.identity_merge_receipts (
+  idempotency_key text PRIMARY KEY,
+  anonymous_id text NOT NULL,
+  user_id text NOT NULL,
+  merged_at timestamptz NOT NULL,
+  merged_events integer NOT NULL CHECK (merged_events >= 0)
+);
 
 CREATE TABLE volpred_analytics.privacy_preferences (
   subject_kind text NOT NULL
@@ -69,17 +75,25 @@ CREATE TABLE volpred_analytics.privacy_preferences (
 CREATE TABLE volpred_analytics.privacy_action_receipts (
   idempotency_key text PRIMARY KEY,
   action text NOT NULL CHECK (action IN ('opt_out', 'clear', 'delete')),
+  subject_digest bytea NOT NULL,
   acted_at timestamptz NOT NULL,
   removed_raw_events integer NOT NULL
     CHECK (removed_raw_events >= 0),
   removed_identity_links integer NOT NULL
-    CHECK (removed_identity_links >= 0)
+    CHECK (removed_identity_links >= 0),
+  CHECK (octet_length(subject_digest) = 32)
 );
 
 CREATE TABLE volpred_analytics.privacy_tombstones (
   subject_digest bytea PRIMARY KEY,
   deleted_at timestamptz NOT NULL,
   CHECK (octet_length(subject_digest) = 32)
+);
+
+CREATE TABLE volpred_analytics.event_dedupe_tombstones (
+  idempotency_digest bytea PRIMARY KEY,
+  expired_at timestamptz NOT NULL,
+  CHECK (octet_length(idempotency_digest) = 32)
 );
 
 INSERT INTO volpred_analytics.event_definitions (
@@ -141,11 +155,15 @@ ALTER TABLE volpred_analytics.event_definitions
   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_analytics.events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_analytics.identity_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE volpred_analytics.identity_merge_receipts
+  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_analytics.privacy_preferences
   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_analytics.privacy_action_receipts
   ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_analytics.privacy_tombstones
+  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE volpred_analytics.event_dedupe_tombstones
   ENABLE ROW LEVEL SECURITY;
 
 REVOKE ALL ON ALL TABLES IN SCHEMA volpred_analytics FROM PUBLIC;

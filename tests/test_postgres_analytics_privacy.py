@@ -112,6 +112,8 @@ def reset_analytics_state(analytics_postgres_dsn: str) -> None:
             TRUNCATE TABLE
               volpred_analytics.privacy_action_receipts,
               volpred_analytics.privacy_tombstones,
+              volpred_analytics.event_dedupe_tombstones,
+              volpred_analytics.identity_merge_receipts,
               volpred_analytics.privacy_preferences,
               volpred_analytics.identity_links,
               volpred_analytics.events
@@ -191,6 +193,21 @@ def test_postgres_adapter_replays_merge_and_privacy_lifecycle(
     assert merged.merged_events == 1
     assert merge_replay.duplicate is True
     assert merge_replay.merged_events == 1
+    second_key = tracer.merge_identity(
+        idempotency_key="merge:anon-pg:user-pg:second",
+        anonymous_id="anon-pg",
+        user_id="user-pg",
+        merged_at="2026-07-26T15:46:00+00:00",
+    )
+    second_key_replay = tracer.merge_identity(
+        idempotency_key="merge:anon-pg:user-pg:second",
+        anonymous_id="anon-pg",
+        user_id="user-pg",
+        merged_at="2026-07-26T15:46:00+00:00",
+    )
+    assert second_key.duplicate is False
+    assert second_key.merged_events == 0
+    assert second_key_replay.duplicate is True
     assert tracer.admin_summary(
         start_at="2026-07-26T00:00:00+00:00",
         end_at="2026-07-27T00:00:00+00:00",
@@ -258,3 +275,43 @@ def test_postgres_adapter_enforces_raw_retention(
         ).raw_event_count
         == 0
     )
+    replay = tracer.record(
+        AnalyticsEvent(
+            idempotency_key="impression:retention:anon-pg",
+            kind="content_impression",
+            occurred_at="2026-06-01T00:00:00+00:00",
+            anonymous_id="anon-retention-pg",
+            user_id=None,
+            properties={"content_id": "article-pg", "surface": "home"},
+        )
+    )
+    assert replay.accepted is False
+    assert replay.reason == "expired"
+
+
+def test_postgres_privacy_action_key_is_bound_to_action_and_subject(
+    analytics_postgres_dsn: str,
+) -> None:
+    tracer = AnalyticsPrivacyTracer(
+        PostgresAnalyticsStore(
+            lambda: psycopg.connect(analytics_postgres_dsn)
+        )
+    )
+    tracer.set_opt_out(
+        "user:user-a",
+        idempotency_key="privacy-action:shared-pg",
+        acted_at="2026-07-26T16:00:00+00:00",
+    )
+
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.delete(
+            "user:user-a",
+            idempotency_key="privacy-action:shared-pg",
+            acted_at="2026-07-26T16:01:00+00:00",
+        )
+    with pytest.raises(ValueError, match="idempotency_key was reused"):
+        tracer.set_opt_out(
+            "user:user-b",
+            idempotency_key="privacy-action:shared-pg",
+            acted_at="2026-07-26T16:01:00+00:00",
+        )

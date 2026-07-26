@@ -184,6 +184,12 @@ class _StoredAnalyticsEvent:
     raw_expires_at: str
 
 
+@dataclass(frozen=True)
+class _StoredPrivacyAction:
+    receipt: AnalyticsPrivacyActionReceipt
+    subject_digest: bytes
+
+
 class InMemoryAnalyticsStore:
     """Transaction-safe adapter used by the public contract suite."""
 
@@ -194,9 +200,10 @@ class InMemoryAnalyticsStore:
         self._user_by_anonymous_id: dict[str, str] = {}
         self._opted_out_subjects: set[tuple[str, str]] = set()
         self._privacy_action_receipts: dict[
-            str, AnalyticsPrivacyActionReceipt
+            str, _StoredPrivacyAction
         ] = {}
         self._deleted_subject_digests: set[bytes] = set()
+        self._expired_event_key_digests: set[bytes] = set()
         self._next_event_number = 1
 
     def record(
@@ -214,6 +221,18 @@ class InMemoryAnalyticsStore:
                     accepted=True,
                     duplicate=True,
                     raw_expires_at=existing.raw_expires_at,
+                )
+            if (
+                self._event_key_digest(event.idempotency_key)
+                in self._expired_event_key_digests
+            ):
+                return AnalyticsEventReceipt(
+                    event_id=None,
+                    idempotency_key=event.idempotency_key,
+                    accepted=False,
+                    duplicate=False,
+                    raw_expires_at=None,
+                    reason="expired",
                 )
             if self._event_is_deleted(event):
                 return AnalyticsEventReceipt(
@@ -318,6 +337,9 @@ class InMemoryAnalyticsStore:
             f"{subject_kind}:{subject_id}".encode("utf-8")
         ).digest()
 
+    def _event_key_digest(self, idempotency_key: str) -> bytes:
+        return hashlib.sha256(idempotency_key.encode("utf-8")).digest()
+
     def _event_is_deleted(self, event: AnalyticsEvent) -> bool:
         identities = (
             (("anonymous", event.anonymous_id), ("user", event.user_id))
@@ -408,11 +430,21 @@ class InMemoryAnalyticsStore:
     def _existing_privacy_action(
         self,
         idempotency_key: str,
+        *,
+        action: str,
+        subject_kind: str,
+        subject_id: str,
     ) -> AnalyticsPrivacyActionReceipt | None:
         existing = self._privacy_action_receipts.get(idempotency_key)
         if existing is None:
             return None
-        return replace(existing, duplicate=True)
+        if (
+            existing.receipt.action != action
+            or existing.subject_digest
+            != self._subject_digest(subject_kind, subject_id)
+        ):
+            raise ValueError("privacy action idempotency_key was reused")
+        return replace(existing.receipt, duplicate=True)
 
     def set_opt_out(
         self,
@@ -423,7 +455,12 @@ class InMemoryAnalyticsStore:
         acted_at: str,
     ) -> AnalyticsPrivacyActionReceipt:
         with self._lock:
-            existing = self._existing_privacy_action(idempotency_key)
+            existing = self._existing_privacy_action(
+                idempotency_key,
+                action="opt_out",
+                subject_kind=subject_kind,
+                subject_id=subject_id,
+            )
             if existing is not None:
                 return existing
             self._opted_out_subjects.add((subject_kind, subject_id))
@@ -435,7 +472,14 @@ class InMemoryAnalyticsStore:
                 removed_identity_links=0,
                 duplicate=False,
             )
-            self._privacy_action_receipts[idempotency_key] = receipt
+            self._privacy_action_receipts[idempotency_key] = (
+                _StoredPrivacyAction(
+                    receipt=receipt,
+                    subject_digest=self._subject_digest(
+                        subject_kind, subject_id
+                    ),
+                )
+            )
             return receipt
 
     def clear(
@@ -447,7 +491,12 @@ class InMemoryAnalyticsStore:
         acted_at: str,
     ) -> AnalyticsPrivacyActionReceipt:
         with self._lock:
-            existing = self._existing_privacy_action(idempotency_key)
+            existing = self._existing_privacy_action(
+                idempotency_key,
+                action="clear",
+                subject_kind=subject_kind,
+                subject_id=subject_id,
+            )
             if existing is not None:
                 return existing
             anonymous_ids, user_ids = self._subject_aliases(
@@ -470,7 +519,14 @@ class InMemoryAnalyticsStore:
                 removed_identity_links=0,
                 duplicate=False,
             )
-            self._privacy_action_receipts[idempotency_key] = receipt
+            self._privacy_action_receipts[idempotency_key] = (
+                _StoredPrivacyAction(
+                    receipt=receipt,
+                    subject_digest=self._subject_digest(
+                        subject_kind, subject_id
+                    ),
+                )
+            )
             return receipt
 
     def delete(
@@ -482,7 +538,12 @@ class InMemoryAnalyticsStore:
         acted_at: str,
     ) -> AnalyticsPrivacyActionReceipt:
         with self._lock:
-            existing = self._existing_privacy_action(idempotency_key)
+            existing = self._existing_privacy_action(
+                idempotency_key,
+                action="delete",
+                subject_kind=subject_kind,
+                subject_id=subject_id,
+            )
             if existing is not None:
                 return existing
             anonymous_ids, user_ids = self._subject_aliases(
@@ -530,7 +591,14 @@ class InMemoryAnalyticsStore:
                 removed_identity_links=len(matching_links),
                 duplicate=False,
             )
-            self._privacy_action_receipts[idempotency_key] = receipt
+            self._privacy_action_receipts[idempotency_key] = (
+                _StoredPrivacyAction(
+                    receipt=receipt,
+                    subject_digest=self._subject_digest(
+                        subject_kind, subject_id
+                    ),
+                )
+            )
             return receipt
 
     def inspect_privacy(
@@ -580,6 +648,11 @@ class InMemoryAnalyticsStore:
                 if datetime.fromisoformat(stored.raw_expires_at) <= cutoff
             )
             for key in expired_keys:
+                self._expired_event_key_digests.add(
+                    self._event_key_digest(
+                        self._events[key].event.idempotency_key
+                    )
+                )
                 del self._events[key]
             return len(expired_keys)
 

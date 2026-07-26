@@ -33,6 +33,7 @@ from volpred.ops.delivery import (
     EffectRequest,
     EffectRequestConflict,
     FailedEffect,
+    _proposal_sha256,
 )
 from volpred.ops.delivery._effect_worker import (
     EffectWorkerCommand,
@@ -1845,6 +1846,7 @@ def _seed_running_work(
     *,
     work_id: str = "work-commit-1",
     lease_token: str = "work-lease-commit-1",
+    required_attestations: frozenset[str] = frozenset(),
 ) -> tuple[WorkLease, WorkItemView]:
     _ensure_commit_owner(dsn)
     coordinator = WorkCoordinator(
@@ -1863,7 +1865,7 @@ def _seed_running_work(
             title="Land a durable ChangeSet",
             priority=1,
             required_capabilities=frozenset({"commit"}),
-            required_attestations=frozenset(),
+            required_attestations=required_attestations,
             risk="safe",
             approval="auto",
             payload_ref=f"changeset:{work_id}",
@@ -1873,7 +1875,7 @@ def _seed_running_work(
         WorkerOffer(
             worker_id="agent:change-author",
             capabilities=frozenset({"commit"}),
-            attestations=frozenset(),
+            attestations=required_attestations,
             lease_seconds=300,
         )
     )
@@ -1957,14 +1959,12 @@ def _change_set_view(
     running: WorkItemView,
     request: CommitAuthorityRequest,
 ) -> ChangeSetView:
-    return ChangeSetView(
-        schema_version="changeset.v1",
-        id="changeset-postgres-1",
+    proposal = ChangeSetProposal(
         idempotency_key="changeset:work-commit-1:attempt-1",
         work_item_id=running.id,
         work_item_version=running.version,
         base_commit=request.expected_head,
-        workspace_ref="/tmp/shadow-change-worktree",
+        workspace_ref=str(Path("/tmp/shadow-change-worktree").resolve()),
         exact_paths=request.exact_paths,
         content_hashes=request.content_hashes,
         required_checks=(
@@ -1976,7 +1976,21 @@ def _change_set_view(
         ),
         author_ref="agent:change-author",
         author_evidence_ref="execution:work-commit-1:attempt-1",
-        proposal_sha256=request.proposal_sha256,
+    )
+    return ChangeSetView(
+        schema_version="changeset.v1",
+        id="changeset-postgres-1",
+        idempotency_key=proposal.idempotency_key,
+        work_item_id=proposal.work_item_id,
+        work_item_version=proposal.work_item_version,
+        base_commit=proposal.base_commit,
+        workspace_ref=proposal.workspace_ref,
+        exact_paths=proposal.exact_paths,
+        content_hashes=proposal.content_hashes,
+        required_checks=proposal.required_checks,
+        author_ref=proposal.author_ref,
+        author_evidence_ref=proposal.author_evidence_ref,
+        proposal_sha256=_proposal_sha256(proposal),
         status="proposed",
         created_at=datetime.now(timezone.utc).isoformat(),
     )
@@ -3312,6 +3326,7 @@ def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
         postgres_effect_dsn,
         work_id="work-owned-change-shadow",
         lease_token="work-lease-owned-change-shadow",
+        required_attestations=frozenset({"shadow-contract"}),
     )
     primary = PrimaryAuthority(
         PostgresAuthorityStore(
@@ -3334,6 +3349,7 @@ def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
         clock=lambda: datetime.now(timezone.utc),
         change_set_id_factory=lambda: "changeset-owned-change-shadow",
         writer_cli=REPO_ROOT / "scripts" / "git_writer_lock.py",
+        check_commands={"shadow-contract": ("git", "diff", "--check")},
     )
     proposal = ChangeSetProposal(
         idempotency_key="changeset:owned-change-shadow:attempt-1",
@@ -3368,7 +3384,6 @@ def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
             primary_fencing_token=primary_lease.fencing_token,
             repository=str(repository),
             message="[codex] shadow owner-fenced ChangeSet",
-            actor="commit-worker:owned-change-shadow",
         )
     )
     primary.release(primary_lease)
@@ -3565,6 +3580,17 @@ def test_change_set_store_survives_restart_and_resumes_settlement(
         work_version=running.version,
         work_lease_token=work_lease.token,
         primary_fencing_token=primary_lease.fencing_token,
+    )
+    request = replace(
+        request,
+        proposal_sha256=_change_set_view(
+            running,
+            request,
+        ).proposal_sha256,
+    )
+    request = replace(
+        request,
+        request_sha256=_authority_request_sha256(request),
     )
     grant = PostgresCommitAuthority(
         connection_factory=lambda: _worker_connection(postgres_effect_dsn),

@@ -8,7 +8,7 @@ settlement.  It never changes live Git ownership itself.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -23,6 +23,7 @@ from . import (
     ChangeDelivery,
     ChangeSetProposal,
     ChangeSetView,
+    CommitWorkerPrincipal,
     DeliveryReceipt,
     LandChangeSet,
 )
@@ -30,6 +31,9 @@ from . import (
 
 _COMMIT_CAPABILITY = "git.commit"
 _OPERATIONS_CORE_OWNER = "operations_core"
+_OPERATIONS_CORE_COMMIT_WORKER = CommitWorkerPrincipal(
+    "commit-worker:operations-core"
+)
 _COMPLETION_SUMMARY = "ChangeSet landed with verified commit read-back"
 
 
@@ -61,7 +65,6 @@ class OwnedChangeCommand:
     primary_fencing_token: str
     repository: str
     message: str
-    actor: str
 
 
 @dataclass(frozen=True)
@@ -113,6 +116,31 @@ class OwnedChangeDelivery:
                 "operations core does not own git.commit"
             )
 
+        running_snapshot = self._coordinator.inspect(
+            WorkQuery(work_id=command.proposal.work_item_id)
+        )
+        if len(running_snapshot.items) != 1:
+            raise RuntimeError(
+                "WorkItem preflight read-back returned an invalid cardinality"
+            )
+        running = running_snapshot.items[0]
+        required_checks = frozenset(
+            check.name for check in command.proposal.required_checks
+        )
+        if (
+            running.id != command.proposal.work_item_id
+            or running.version != command.proposal.work_item_version
+            or running.status != "running"
+            or running.claimed_by != command.proposal.author_ref
+        ):
+            raise RuntimeError(
+                "ChangeSet proposal does not match its running WorkItem"
+            )
+        if running.required_attestations != required_checks:
+            raise RuntimeError(
+                "ChangeSet required checks do not match its WorkItem"
+            )
+
         change_set = self._delivery.propose(command.proposal)
         if (
             change_set.work_item_id != command.proposal.work_item_id
@@ -130,12 +158,12 @@ class OwnedChangeDelivery:
                 primary_fencing_token=command.primary_fencing_token,
                 repository=command.repository,
                 message=command.message,
-                actor=command.actor,
             )
         )
         if (
             delivery.commit_owner_generation != owner.generation
             or delivery.commit_owner_ref != owner.owner_ref
+            or delivery.actor != _OPERATIONS_CORE_COMMIT_WORKER.ref
         ):
             raise RuntimeError(
                 "Change Delivery receipt commit owner generation drifted"
@@ -178,6 +206,7 @@ def build_postgres_owned_change_delivery(
     clock: Callable[[], datetime],
     change_set_id_factory: Callable[[], str],
     writer_cli: Path | None = None,
+    check_commands: Mapping[str, Sequence[str]] | None = None,
 ) -> OwnedChangeDelivery:
     """Wire every durable adapter for the non-live formal commit caller."""
 
@@ -185,6 +214,7 @@ def build_postgres_owned_change_delivery(
     from volpred.ops.work.postgres import PostgresCoordinationStore
 
     from ._git_actuator import GitCommitActuator
+    from ._check_verifier import IsolatedCheckVerifier
     from .postgres_change_store import PostgresChangeSetStore
     from .postgres_commit_authority import PostgresCommitAuthority
     from .postgres_commit_ownership import PostgresCommitOwnerStore
@@ -212,6 +242,8 @@ def build_postgres_owned_change_delivery(
             primary_lease=primary_lease,
         ),
         store=PostgresChangeSetStore(connection_factory),
+        check_verifier=IsolatedCheckVerifier(check_commands or {}),
+        commit_worker=_OPERATIONS_CORE_COMMIT_WORKER,
     )
     coordinator = WorkCoordinator(
         PostgresCoordinationStore(connection_factory),
@@ -231,12 +263,14 @@ def build_supabase_owned_change_delivery(
     clock: Callable[[], datetime],
     change_set_id_factory: Callable[[], str],
     writer_cli: Path | None = None,
+    check_commands: Mapping[str, Sequence[str]] | None = None,
 ) -> OwnedChangeDelivery:
     """Wire the production service-role adapters without changing ownership."""
 
     from volpred.ops.work.supabase import SupabaseWorkReadModel
 
     from ._git_actuator import GitCommitActuator
+    from ._check_verifier import IsolatedCheckVerifier
     from .supabase_change_store import SupabaseChangeSetStore
     from .supabase_commit_authority import SupabaseCommitAuthority
     from .supabase_commit_ownership import SupabaseCommitOwnerStore
@@ -279,6 +313,8 @@ def build_supabase_owned_change_delivery(
             service_role_key=service_role_key,
             timeout_seconds=timeout_seconds,
         ),
+        check_verifier=IsolatedCheckVerifier(check_commands or {}),
+        commit_worker=_OPERATIONS_CORE_COMMIT_WORKER,
     )
     return OwnedChangeDelivery(
         owner_store=SupabaseCommitOwnerStore(
