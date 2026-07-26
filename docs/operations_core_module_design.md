@@ -1904,3 +1904,16 @@ backend=`c6a1e836…a1404`、publisher=`operations_core/8`與implementation
 `aacc1959…dd8c`；沒有authority acquire、effect或provider call。本backend-identity
 根因為`root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair、program
 commit 34與operations-core umbrella維持`contained`。
+
+## 29. Cross-host receipt directory durability（2026-07-26）
+
+Cross-host operator的receipt persistence seam不再把「rename後可讀」等同「host重啟後
+durable」。Writer維持單一小介面，implementation依序完成temporary bytes write、
+regular-file fsync、atomic replace、parent-directory fsync與exact read-back；caller
+不需要知道filesystem transaction ordering。
+
+Failure injection修前只觀察到regular-file fsync，修後精確觀察到
+`[regular-file, directory]`，且仍使用真實filesystem與真實fsync。Outage與Primary
+Authority相鄰 suites **49 passed**，compile與diff gate通過。此persistence seam缺口
+為`root_cause_fixed_and_verified`；physical two-Mac receipt仍因第二台實體Mac離線而
+未執行，program commit 34與operations-core umbrella維持`contained`。

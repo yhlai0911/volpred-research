@@ -1784,3 +1784,14 @@ fingerprint=`6652d01267d664d621c957b8`與implementation=`aacc1959…dd8c`，沒�
 authority mutation。此backend-identity切片為`root_cause_fixed_and_verified`；
 physical paired receipt與operations-core umbrella仍因第二台實體Mac離線而維持
 `contained`。
+
+## 2026-07-26 — Program commit 34 receipt directory durability checkpoint
+
+Cross-host receipt writer現在把filesystem transaction完整藏在同一persistence seam：
+temporary file fsync後atomic replace，再fsync父目錄，最後才exact read-back並回報
+成功。修前failure injection只看到regular-file fsync；修後以真實filesystem驗證
+順序為`[regular-file, directory]`，directory open／fsync失敗會fail closed。
+
+Outage與Primary Authority相鄰 suites **49 passed**，`py_compile`與diff gate通過。
+此durability切片為`root_cause_fixed_and_verified`；physical paired receipt與
+operations-core umbrella仍因第二台實體Mac離線而維持`contained`。

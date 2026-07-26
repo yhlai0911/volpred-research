@@ -1700,11 +1700,23 @@ def _write_receipt(path: Path, receipt: object) -> None:
         with temporary.open("rb") as handle:
             os.fsync(handle.fileno())
         os.replace(temporary, path)
+        _fsync_directory(path.parent)
         saved = json.loads(path.read_text(encoding="utf-8"))
         if saved != asdict(receipt):
             raise RuntimeError("saved outage receipt failed exact read-back")
     finally:
         temporary.unlink(missing_ok=True)
+
+
+def _fsync_directory(path: Path) -> None:
+    """Make a completed receipt rename durable across host restart."""
+
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    descriptor = os.open(path, flags)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
 
 
 def _add_runtime_arguments(parser: argparse.ArgumentParser) -> None:

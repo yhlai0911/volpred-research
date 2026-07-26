@@ -2802,3 +2802,20 @@ fingerprint=`6652d01267d664d621c957b8`及implementation=`aacc1959…dd8c`；沒�
 acquire、effect或provider call。本backend false-green根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Cross-host receipt回讀成功但rename沒有directory durability
+
+**證據化症狀與根因層級**：`_write_receipt()`原本先fsync temporary file，再
+`os.replace()`並exact read-back；failure injection記錄實際fsync target只得到
+`[regular-file]`。因此process可回報receipt已保存，但host在rename metadata落盤前
+重啟時，final pathname仍不具durable保證。根因是filesystem transaction少了rename
+後的directory commit，不是JSON payload或receipt hash錯誤。
+
+**底層修復、回歸與制度化**：receipt persistence seam現在於replace後開啟實際父目錄、
+fsync該directory descriptor，關閉descriptor後才做exact read-back與回報成功；任何
+directory open／fsync失敗都會fail closed。介面回歸保留真實filesystem call並驗證
+fsync順序精確為`[regular-file, directory]`；修前RED、修後GREEN。Outage與Primary
+Authority相鄰 suites **49 passed**，`py_compile`與diff gate通過。這個receipt
+durability缺口為 **`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，尚未
+產生physical paired receipt，所以program commit 34與operations-core umbrella維持
+**`contained`**。

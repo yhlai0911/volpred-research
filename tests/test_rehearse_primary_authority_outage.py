@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import stat
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
@@ -270,6 +272,7 @@ def test_rehearsal_refuses_publisher_fence_drift_before_acquire() -> None:
 
 def test_receipt_writer_round_trips_exact_payload(
     tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     live = _LiveAuthorityStore()
     store = PartitionableAuthorityStore(
@@ -289,12 +292,23 @@ def test_receipt_writer_round_trips_exact_payload(
         expected_publisher_generation=8,
     )
     target = tmp_path / "receipts" / "outage.json"
+    fsync_targets: list[bool] = []
+    real_fsync = os.fsync
+
+    def record_fsync(file_descriptor: int) -> None:
+        fsync_targets.append(
+            stat.S_ISDIR(os.fstat(file_descriptor).st_mode)
+        )
+        real_fsync(file_descriptor)
+
+    monkeypatch.setattr(outage_operator.os, "fsync", record_fsync)
 
     _write_receipt(target, receipt)
 
     assert target.is_file()
     assert json.loads(target.read_text())["standby"]["epoch"] == 2
     assert list(target.parent.glob("*.tmp")) == []
+    assert fsync_targets == [False, True]
 
 
 def test_cross_host_readiness_fails_before_authority_mutation() -> None:
