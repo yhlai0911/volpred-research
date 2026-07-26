@@ -2950,5 +2950,5 @@ source counts `1/0/0`。Re-pend 現在一律走 `_repend_task()` 並清除 `star
 manual 與 stale cleanup RED→GREEN。既有 preserved row 依「修流程、不手改資料」與
 direct-mode owner instruction 未被修改，因此 live assessment 仍有 missing parent／
 invalid lifecycle，加上七日 window 與 queued-execution mode 未滿；Issue #9 保持
-**`contained`**。相鄰回歸 **193 passed**；全專案
+**`contained`**。相鄰回歸 **161 passed**；全專案
 **5,171 passed、1 skipped、0 failed**。
