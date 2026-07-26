@@ -1830,3 +1830,264 @@ def test_annotate_rejects_bad_json_and_empty_updates(tmp_path, monkeypatch) -> N
         task_pool_claim.cmd_annotate(_annotate_args(id="t1", set_json=["linked=[broken"]))
     with pytest.raises(SystemExit, match="nothing to set"):
         task_pool_claim.cmd_annotate(_annotate_args(id="t1"))
+
+
+def test_hourly_worker_cannot_claim_mutating_task_without_preassignment(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [{"id": "mutating", "status": "pending", "task_type": "platform_ops"}]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    out = task_pool_claim.cmd_claim(
+        argparse.Namespace(
+            id="mutating",
+            owner="hourly-slot-1-job",
+            session="worker-session",
+            main_thread=False,
+        )
+    )
+
+    assert out["ok"] is False
+    assert out["reason"] == "supervisor_preassignment_required"
+    assert json.loads(next_tasks.read_text())[0]["status"] == "pending"
+
+
+def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "missing-contract",
+                    "status": "pending",
+                    "priority": 1,
+                    "task_type": "platform_ops",
+                },
+                {
+                    "id": "bound",
+                    "status": "pending",
+                    "priority": 2,
+                    "task_type": "platform_ops",
+                    "write_intent": "repo_patch",
+                    "declared_output_paths": [
+                        "scripts/dispatch_supervisor",
+                        "tests/test_dispatch_supervisor.py",
+                    ],
+                    "post_merge_actions": [],
+                    "title": "Bound task",
+                    "description": "Only edit declared paths.",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(owner="hourly-slot-1-job", session="claim-123")
+    )
+
+    assert assigned["ok"] is True
+    assert assigned["assigned"] is True
+    assert assigned["contract"]["task_id"] == "bound"
+    assert assigned["contract"]["claim_session_id"] == "claim-123"
+    assert assigned["blocked_contracts"] == [
+        {"task_id": "missing-contract", "reason": "write_intent_missing_or_not_repo_patch"}
+    ]
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["bound"]["status"] == "in_progress"
+
+    wrong = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="bound",
+            session="wrong",
+            disposition="merged",
+            result="no",
+        )
+    )
+    assert wrong["reason"] == "claim_session_mismatch"
+    settled = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="bound",
+            session="claim-123",
+            disposition="merged",
+            result="candidate merged and read back",
+        )
+    )
+    assert settled["status"] == "succeeded"
+    replay = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="bound",
+            session="claim-123",
+            disposition="merged",
+            result="candidate merged and read back",
+        )
+    )
+    assert replay["already_settled"] is True
+
+
+def test_dispatch_retry_settlement_is_idempotent_after_response_loss(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps([{
+            "id": "retry-bound",
+            "status": "pending",
+            "task_type": "platform_ops",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["scripts/retry.py"],
+            "post_merge_actions": [],
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(owner="dispatch-supervisor", session="retry-session")
+    )
+    assert assigned["assigned"] is True
+
+    args = argparse.Namespace(
+        id="retry-bound",
+        session="retry-session",
+        disposition="retry",
+        result="allocation unavailable",
+    )
+    first = task_pool_claim.cmd_dispatch_settle(args)
+    replay = task_pool_claim.cmd_dispatch_settle(args)
+
+    assert first["status"] == "pending"
+    assert replay["ok"] is True
+    assert replay["already_settled"] is True
+    row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert row["dispatch_settled_session_id"] == "retry-session"
+    assert row.get("dispatch_managed") is None
+
+
+def test_dispatch_preassign_revalidates_and_skips_cleared_dreaming_task(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    contract = {
+        "status": "pending",
+        "task_type": "platform_ops",
+        "write_intent": "repo_patch",
+        "declared_output_paths": ["scripts/fix.py"],
+        "post_merge_actions": [],
+    }
+    next_tasks.write_text(
+        json.dumps([
+            {
+                **contract,
+                "id": "cleared-dream",
+                "priority": 1,
+                "source": "dreaming",
+                "dreaming": {
+                    "signature": "orphaned_experiment:k9999",
+                    "pattern_type": "orphaned_experiment",
+                },
+            },
+            {**contract, "id": "live-task", "priority": 2},
+        ]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    def clear(task, *, owner):
+        if task["id"] != "cleared-dream":
+            return None
+        task["status"] = "succeeded"
+        task["result"] = "live revalidation cleared"
+        return {"ok": False, "reason": "condition_cleared"}
+
+    monkeypatch.setattr(
+        task_pool_claim, "_revalidate_dreaming_before_claim", clear
+    )
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(owner="dispatch-supervisor", session="dream-session")
+    )
+
+    assert assigned["contract"]["task_id"] == "live-task"
+    rows = {row["id"]: row for row in json.loads(next_tasks.read_text())}
+    assert rows["cleared-dream"]["status"] == "succeeded"
+
+
+def test_dispatch_control_plane_requires_recorded_supervisor_parent(
+    tmp_path, monkeypatch
+) -> None:
+    repo = tmp_path / "repo"
+    next_tasks = repo / "storage" / "next_tasks.json"
+    state_path = repo / "storage" / "ops" / "dispatch_state.json"
+    state_path.parent.mkdir(parents=True)
+    next_tasks.write_text("[]", encoding="utf-8")
+    state_path.write_text(
+        json.dumps({"supervisor_pid": 4242}), encoding="utf-8"
+    )
+    monkeypatch.setattr(task_pool_claim, "ROOT", repo)
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim.os, "getppid", lambda: 9999)
+    assert task_pool_claim._dispatch_supervisor_authorized() is False
+    denied = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(owner="dispatch-supervisor", session="proof")
+    )
+    assert denied["reason"] == "supervisor_capability_required"
+
+    monkeypatch.setattr(task_pool_claim.os, "getppid", lambda: 4242)
+    assert task_pool_claim._dispatch_supervisor_authorized() is True
+
+
+def test_dispatch_preassign_atomically_persists_admission_outbox(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps([{
+            "id": "admission-crash",
+            "status": "pending",
+            "task_type": "platform_ops",
+            "write_intent": "repo_patch",
+            "declared_output_paths": ["scripts/admission.py"],
+            "post_merge_actions": [],
+        }]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    assigned = task_pool_claim.cmd_dispatch_preassign(
+        argparse.Namespace(
+            owner="dispatch-supervisor",
+            session="admission-session",
+            job_id="job-before-workspace",
+        )
+    )
+    pending = task_pool_claim.cmd_dispatch_pending(
+        argparse.Namespace(limit=20)
+    )
+
+    assert assigned["contract"]["dispatch_job_id"] == "job-before-workspace"
+    assert pending["pending"] == [{
+        "task_id": "admission-crash",
+        "claim_session_id": "admission-session",
+        "dispatch_job_id": "job-before-workspace",
+        "intent": {
+            "job_id": "job-before-workspace",
+            "task_id": "admission-crash",
+            "claim_session_id": "admission-session",
+            "phase": "admission",
+            "default_disposition": "retry",
+            "created_at": pending["pending"][0]["intent"]["created_at"],
+        },
+    }]

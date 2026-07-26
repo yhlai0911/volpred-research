@@ -40,7 +40,17 @@ import sys
 import traceback
 from pathlib import Path
 
-from . import alerts, health, procutil, scheduler, state, trigger, worker, __version__
+from . import (
+    alerts,
+    health,
+    procutil,
+    scheduler,
+    state,
+    trigger,
+    worker,
+    workspace as workspace_mod,
+    __version__,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = Path(os.environ.get("VOLPRED_HOME_DIR", str(Path.home() / ".volpred"))) / "logs"
@@ -153,7 +163,8 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
             alerts.send_orphan_restart_alert(
                 job=orphan, killed=False, outcome=recorded_outcome, state_path=state_path,
             )
-        state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
+        if _finalize_restart_workspace(orphan, outcome=recorded_outcome):
+            state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
         return
     if orphan.get("pid") is None:
         # Codex review fix #2 (2026-07-04): supervisor crashed between
@@ -170,6 +181,24 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
             "once/if it (re)acquires a pid we happen to observe",
             orphan.get("schedule_id"), orphan.get("attempt"),
         )
+        if orphan.get("workspace") is not None:
+            # Once a workspace is bound, pid=None is not proof that no producer
+            # exists: the old supervisor may have crashed in Popen's tiny
+            # return→attach window. Keep both the slot and workspace protected
+            # until an operator can prove the process group is absent.
+            state.mark_job_phase(
+                job_id=job_id,
+                phase="orphan_unverified_no_pid",
+                expected_attempt=int(orphan.get("attempt", 1)),
+                path=state_path,
+            )
+            alerts.send_orphan_restart_alert(
+                job=orphan,
+                killed=False,
+                outcome="orphan_unverified_no_pid",
+                state_path=state_path,
+            )
+            return
         state.append_completion_entry(
             orphan, exit_code=-1, outcome="reservation_abandoned_no_pid",
             final_model=str(orphan.get("model", "?")), path=state_path,
@@ -249,7 +278,63 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
         mark_cleanup_recorded=True,
     )
     alerts.send_orphan_restart_alert(job=orphan, killed=killed, outcome=outcome, state_path=state_path)
-    state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
+    if _finalize_restart_workspace(orphan, outcome=outcome):
+        state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
+
+
+def _finalize_restart_workspace(orphan: dict, *, outcome: str) -> bool:
+    """Adjudicate a verified-dead orphan before releasing its state identity."""
+    workspace = orphan.get("workspace")
+    if not isinstance(workspace, dict):
+        return True
+    final = workspace_mod.finalize_workspace(
+        repo_root=ROOT,
+        workspace=workspace,
+        worker_outcome="orphaned",
+        job_id=str(orphan.get("job_id") or ""),
+    )
+    disposition = str(final.get("disposition") or "")
+    settlement_disposition = scheduler._settlement_disposition(final)
+    if workspace.get("task_id") and settlement_disposition is not None:
+        settled = scheduler._settle_mutating_task(
+            repo_root=ROOT,
+            workspace=workspace,
+            disposition=settlement_disposition,
+            result=f"restart orphan adjudication: {disposition}",
+        )
+        if not settled.get("ok"):
+            logging.error(
+                "restart: task settlement failed job_id=%s task_id=%s result=%s",
+                orphan.get("job_id"),
+                workspace.get("task_id"),
+                settled,
+            )
+            return False
+        if not workspace_mod.complete_task_settlement(
+            ROOT,
+            task_id=str(workspace["task_id"]),
+            claim_session_id=str(workspace["claim_session_id"]),
+            disposition=settlement_disposition,
+            status=str(settled.get("status") or ""),
+        ):
+            logging.error(
+                "restart: task settlement receipt failed job_id=%s task_id=%s",
+                orphan.get("job_id"),
+                workspace.get("task_id"),
+            )
+            return False
+    terminal = disposition in {"empty_removed", "merged"} or (
+        disposition == "remediation_opened"
+        and bool((final.get("checkpoint") or {}).get("released"))
+    )
+    if not terminal:
+        logging.error(
+            "restart: workspace adjudication not terminal job_id=%s "
+            "disposition=%s; retaining restart_cleanup identity",
+            orphan.get("job_id"),
+            disposition,
+        )
+    return terminal
 
 
 async def _run_async(*, dry_run: bool) -> int:

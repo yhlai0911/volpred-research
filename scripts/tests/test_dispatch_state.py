@@ -1347,6 +1347,14 @@ def _drive_every_writer(path: Path) -> None:
     released = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                                log_path="/tmp/w.log", path=path)
     st.release_reservation(path=path, job_id=released.job_id)
+    deferred = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/deferred.log", path=path,
+    )
+    st.defer_reserved_fire(
+        job_id=deferred.job_id, reason="writer_isolation_deferred:shape", path=path,
+    )
+    st.consume_fire_request(path=path)
 
     orphan_handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                                     log_path="/tmp/x.log", path=path)
@@ -1427,6 +1435,20 @@ def _drive_every_writer(path: Path) -> None:
         "path": "/tmp/wt/dispatch-slot-2-beefcafe",
         "branch": "worktree-dispatch-slot-2-beefcafe",
         "base_sha": "1" * 40, "lanes": ["platform_ops"],
+        "isolation_mode": "enforce", "write_intent": "repo_patch",
+        "task_id": "task-beefcafe", "claim_session_id": "claim-beefcafe",
+        "task_title": "shape", "task_description": "shape",
+        "issue_ref": "#43",
+        "declared_output_paths": ["scripts/dispatch_supervisor"],
+        "post_merge_actions": [],
+        "denied_canonical_paths": ["storage/**"],
+        "isolation_profile_path": "/tmp/run/beef/sandbox.sb",
+        "isolation_run_dir": "/tmp/run/beef",
+        "isolation_synthetic_home": "/tmp/run/beef/home",
+        "isolation_tmp_dir": "/tmp/run/beef/tmp",
+        "isolation_pycache_dir": "/tmp/run/beef/pycache",
+        "isolation_workspace": "/tmp/wt/dispatch-slot-2-beefcafe",
+        "isolation_canonical_root": "/tmp/repo",
         "created_at": "2026-07-20T00:00:00+00:00", "setup_s": 2.0,
     }, path=path)
     st.record_completion(job_id=pending.job_id, expected_attempt=1, expected_pid=101,
@@ -1512,6 +1534,16 @@ KNOWN_CONTAINERS = {
 # WS-B workspace receipt 的欄位契約（state.py docstring schema 同步列出）。
 WORKSPACE_RECEIPT_KEYS = {
     "name", "path", "branch", "base_sha", "lanes", "created_at", "setup_s",
+    "isolation_mode", "write_intent", "task_id", "claim_session_id",
+    "task_title", "task_description", "issue_ref", "declared_output_paths",
+    "post_merge_actions", "denied_canonical_paths",
+    "isolation_profile_path", "isolation_run_dir", "isolation_synthetic_home",
+    "isolation_tmp_dir", "isolation_pycache_dir", "isolation_workspace",
+    "isolation_canonical_root",
+}
+WORKSPACE_LIST_KEYS = {
+    "lanes", "declared_output_paths", "post_merge_actions",
+    "denied_canonical_paths",
 }
 
 FIRE_LIFECYCLE_KEYS = {
@@ -1558,10 +1590,10 @@ def test_workspace_receipt_shape_is_flat_and_documented(tmp_state):
         unknown = set(receipt) - WORKSPACE_RECEIPT_KEYS
         assert not unknown, f"workspace receipt 出現契約外欄位: {sorted(unknown)}"
         for key, value in receipt.items():
-            if key == "lanes":
+            if key in WORKSPACE_LIST_KEYS:
                 assert isinstance(value, list) and all(
                     isinstance(item, str) for item in value
-                ), "lanes 必須是字串 list"
+                ), f"{key} 必須是字串 list"
             else:
                 assert not isinstance(value, (dict, list)), (
                     f"workspace[{key!r}] 是 {type(value).__name__} —— receipt 必須扁平"

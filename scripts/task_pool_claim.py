@@ -83,6 +83,7 @@ FB_DRAFTS_DIR = ROOT / "storage" / "drafts"
 
 DEFAULT_STALE_HOURS = 6  # Claim older than this with no completion -> auto-release
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
+DISPATCH_MUTATING_TASK_TYPES = frozenset({"platform_ops", "governance"})
 FB_DUAL_PUBLISH_TASK_TYPES = {"trending_repost", "event_article"}
 _MILE_ID_RE = re.compile(r"\bmile_[A-Za-z0-9_-]+\b")
 _PUBLISH_EVIDENCE_RE = re.compile(
@@ -91,6 +92,50 @@ _PUBLISH_EVIDENCE_RE = re.compile(
 )
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _dispatch_supervisor_authorized() -> bool:
+    """Production-only parent proof for supervisor control-plane mutations."""
+    if NEXT_TASKS.resolve() != (ROOT / "storage" / "next_tasks.json").resolve():
+        return True
+    state_path = ROOT / "storage" / "ops" / "dispatch_state.json"
+    try:
+        payload = json.loads(state_path.read_text(encoding="utf-8"))
+        supervisor_pid = int(payload.get("supervisor_pid"))
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        from volpred.ops.diagnostics import warn
+        warn(
+            "task_pool_claim",
+            "supervisor capability proof unavailable; denying mutation",
+            err=str(exc),
+        )
+        return False
+    return supervisor_pid > 1 and os.getppid() == supervisor_pid
+
+
+def _dispatch_job_alive(job_id: Any) -> bool:
+    if not job_id:
+        return False
+    try:
+        payload = json.loads(
+            (ROOT / "storage" / "ops" / "dispatch_state.json").read_text(
+                encoding="utf-8"
+            )
+        )
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        from volpred.ops.diagnostics import warn
+        warn(
+            "task_pool_claim",
+            "dispatch job liveness unavailable; treating as not live",
+            job_id=str(job_id),
+            err=str(exc),
+        )
+        return False
+    return any(
+        isinstance(job, dict)
+        and str(job.get("job_id") or "") == str(job_id)
+        for job in (payload.get("current_jobs") or [])
+    )
 
 
 @contextmanager
@@ -510,6 +555,28 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
     session = args.session or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4().hex[:12]
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
+        normalized_type = _normalized_task_type(task)
+        normalized_owner = str(args.owner or "").strip().lower()
+        raw_lane = str(task.get("dispatch_lane") or "").strip().lower()
+        if (
+            normalized_type in DISPATCH_MUTATING_TASK_TYPES
+            and raw_lane not in {"main", "main_thread", "manual", "interactive"}
+            and (task.get("status") or "").lower() != "pending_main_thread"
+            and (
+                normalized_owner.startswith("hourly-")
+                or normalized_owner.startswith("codex-failover-")
+            )
+        ):
+            return {
+                "ok": False,
+                "reason": "supervisor_preassignment_required",
+                "task_id": args.id,
+                "task_type": normalized_type,
+                "hint": (
+                    "mutating dispatch work must be claimed and bound by the "
+                    "supervisor before worker spawn"
+                ),
+            }
         existing_status = (task.get("status") or "").lower()
         observed_at = datetime.now(timezone.utc)
         decision = evaluate_task_claim(
@@ -602,6 +669,248 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
     return result
 
 
+def _dispatch_execution_contract(
+    task: dict[str, Any],
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Validate the fail-closed contract required before mutating dispatch."""
+    if _normalized_task_type(task) not in DISPATCH_MUTATING_TASK_TYPES:
+        return None, "not_mutating_dispatch_type"
+    if str(task.get("write_intent") or "") != "repo_patch":
+        return None, "write_intent_missing_or_not_repo_patch"
+    raw_paths = task.get("declared_output_paths")
+    if not isinstance(raw_paths, list) or not raw_paths:
+        return None, "declared_output_paths_missing"
+    declared = [str(path).strip() for path in raw_paths if str(path).strip()]
+    invalid = [
+        path
+        for path in declared
+        if path.startswith("/")
+        or path.startswith("../")
+        or "/../" in path
+        or path == "storage"
+        or path.startswith("storage/")
+        or any(char in path for char in "*?[")
+    ]
+    if not declared or invalid:
+        return None, "declared_output_paths_invalid"
+    post_actions = task.get("post_merge_actions") or []
+    if not isinstance(post_actions, list):
+        return None, "post_merge_actions_invalid"
+    if post_actions:
+        return None, "post_merge_actions_require_separate_task"
+    return {
+        "task_id": _task_key(task),
+        "write_intent": "repo_patch",
+        "declared_output_paths": declared,
+        "post_merge_actions": post_actions,
+        "title": str(task.get("title") or ""),
+        "description": str(task.get("description") or ""),
+        "issue_ref": task.get("issue_ref"),
+    }, None
+
+
+def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
+    """Atomically claim+start the highest-ranked contract-complete mutating task."""
+    from volpred.ops.task_pool_mode import load_task_pool_mode, task_pool_mode_path
+
+    if not _dispatch_supervisor_authorized():
+        return {"ok": False, "reason": "supervisor_capability_required"}
+    try:
+        mode = load_task_pool_mode(task_pool_mode_path(NEXT_TASKS))
+    except ValueError as exc:
+        return {"ok": False, "reason": "task_pool_mode_unreadable", "error": str(exc)}
+    if mode.enabled:
+        return {
+            "ok": False,
+            "reason": "direct_execution_mode",
+            "mode": mode.mode,
+        }
+    session = args.session or uuid.uuid4().hex[:12]
+    blockers: list[dict[str, str]] = []
+    with _locked_load() as (_fh, tasks):
+        for task in sorted(tasks, key=task_rank_key):
+            if (task.get("status") or "").lower() != "pending":
+                continue
+            if _normalized_task_type(task) not in DISPATCH_MUTATING_TASK_TYPES:
+                continue
+            observed_at = datetime.now(timezone.utc)
+            decision = evaluate_task_claim(
+                task,
+                owner=args.owner,
+                main_thread=False,
+                observed_at=observed_at,
+            )
+            if decision.primary_reason == "live_revalidation_required":
+                cleared = _revalidate_dreaming_before_claim(task, owner=args.owner)
+                if cleared is not None:
+                    continue
+                decision = evaluate_task_claim(
+                    task,
+                    owner=args.owner,
+                    main_thread=False,
+                    observed_at=observed_at,
+                    revalidation_checked=True,
+                )
+            if not decision.eligible:
+                continue
+            contract, error = _dispatch_execution_contract(task)
+            if contract is None:
+                blockers.append({"task_id": _task_key(task), "reason": str(error)})
+                continue
+            now = _now()
+            task["status"] = "in_progress"
+            task["claimed_by"] = args.owner
+            task["claimed_at"] = now
+            task["claim_session_id"] = session
+            task["started_at"] = now
+            task["dispatch_managed"] = True
+            task["dispatch_managed_owner"] = args.owner
+            task["dispatch_job_id"] = str(getattr(args, "job_id", "") or "")
+            task["dispatch_settlement_pending"] = {
+                "job_id": str(getattr(args, "job_id", "") or ""),
+                "task_id": _task_key(task),
+                "claim_session_id": session,
+                "phase": "admission",
+                "default_disposition": "retry",
+                "created_at": now,
+            }
+            _record_status_history(
+                task,
+                frm="pending",
+                to="claimed",
+                by=args.owner,
+                note="supervisor_preassignment",
+            )
+            _record_status_history(
+                task,
+                frm="claimed",
+                to="in_progress",
+                by=args.owner,
+                note="workspace_admission",
+            )
+            return {
+                "ok": True,
+                "assigned": True,
+                "owner": args.owner,
+                "session": session,
+                "contract": {
+                    **contract,
+                    "claim_session_id": session,
+                    "dispatch_job_id": str(getattr(args, "job_id", "") or ""),
+                },
+                "blocked_contracts": blockers[:20],
+            }
+    return {
+        "ok": True,
+        "assigned": False,
+        "reason": "no_contract_complete_mutating_task",
+        "blocked_contracts": blockers[:20],
+    }
+
+
+def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
+    """CAS-settle a supervisor-owned task after landing/adjudication."""
+    if not _dispatch_supervisor_authorized():
+        return {"ok": False, "reason": "supervisor_capability_required"}
+    with _locked_load() as (_fh, tasks):
+        task = _find(tasks, args.id)
+        if (
+            str(task.get("dispatch_settled_session_id") or "") == str(args.session)
+            and (
+                (task.get("status") or "").lower() in TERMINAL_STATUSES
+                or (
+                    (task.get("status") or "").lower() == "pending"
+                    and args.disposition in {"retry", "empty", "failure"}
+                )
+            )
+        ):
+            return {
+                "ok": True,
+                "task_id": args.id,
+                "status": task.get("status"),
+                "already_settled": True,
+            }
+        if str(task.get("claim_session_id") or "") != str(args.session):
+            return {
+                "ok": False,
+                "reason": "claim_session_mismatch",
+                "task_id": args.id,
+            }
+        current = (task.get("status") or "").lower()
+        if current not in {"claimed", "in_progress"}:
+            return {
+                "ok": False,
+                "reason": "wrong_status",
+                "status": current,
+            }
+        owner = str(task.get("claimed_by") or "dispatch-supervisor")
+        if args.disposition == "merged":
+            task["status"] = "succeeded"
+            task["completed_at"] = _now()
+            task["result"] = args.result or "workspace merged and read back"
+            _record_status_history(
+                task, frm=current, to="succeeded", by=owner,
+                note="supervisor_post_merge_settlement",
+            )
+        elif args.disposition == "remediation":
+            task["status"] = "blocked"
+            task["completed_at"] = _now()
+            task["blocked_reason"] = args.result or "workspace remediation opened"
+            task["result"] = args.result or "workspace remediation opened"
+            _record_status_history(
+                task, frm=current, to="blocked", by=owner,
+                note="workspace_adjudication",
+            )
+        else:
+            task["dispatch_settled_session_id"] = str(args.session)
+            previous_owner = _repend_task(
+                task,
+                note=f"supervisor_settle_{args.disposition}",
+                reason=f"workspace_{args.disposition}",
+            )
+            return {
+                "ok": True,
+                "task_id": args.id,
+                "status": "pending",
+                "released_from": previous_owner,
+            }
+        task["dispatch_settled_session_id"] = str(args.session)
+        task.pop("dispatch_managed", None)
+        task.pop("dispatch_managed_owner", None)
+        task.pop("dispatch_job_id", None)
+        task.pop("dispatch_settlement_pending", None)
+        task.pop("claimed_by", None)
+        task.pop("claimed_at", None)
+        task.pop("claim_session_id", None)
+        return {"ok": True, "task_id": args.id, "status": task["status"]}
+
+
+def cmd_dispatch_pending(args: argparse.Namespace) -> dict[str, Any]:
+    """List supervisor-owned admission outbox rows for crash reconciliation."""
+    if not _dispatch_supervisor_authorized():
+        return {"ok": False, "reason": "supervisor_capability_required"}
+    rows: list[dict[str, Any]] = []
+    with _locked_readonly() as tasks:
+        for task in tasks:
+            intent = task.get("dispatch_settlement_pending")
+            if (
+                task.get("dispatch_managed") is not True
+                or not isinstance(intent, dict)
+                or (task.get("status") or "").lower()
+                not in {"claimed", "in_progress"}
+            ):
+                continue
+            rows.append({
+                "task_id": _task_key(task),
+                "claim_session_id": str(task.get("claim_session_id") or ""),
+                "dispatch_job_id": str(task.get("dispatch_job_id") or ""),
+                "intent": dict(intent),
+            })
+            if len(rows) >= max(0, int(args.limit)):
+                break
+    return {"ok": True, "pending": rows, "count": len(rows)}
+
+
 def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
@@ -635,6 +944,10 @@ def _repend_task(
     task.pop("claimed_at", None)
     task.pop("claim_session_id", None)
     task.pop("started_at", None)
+    task.pop("dispatch_managed", None)
+    task.pop("dispatch_managed_owner", None)
+    task.pop("dispatch_job_id", None)
+    task.pop("dispatch_settlement_pending", None)
     task["last_released_at"] = _now()
     if reason:
         task["last_release_reason"] = reason
@@ -1074,6 +1387,15 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 continue
             if status not in {"claimed", "in_progress"}:
                 continue
+            if t.get("dispatch_managed") is True:
+                dispatch_job_id = t.get("dispatch_job_id")
+                if _dispatch_job_alive(dispatch_job_id):
+                    skipped_compute.append({
+                        "id": _task_key(t),
+                        "dispatch_managed": True,
+                        "dispatch_job_id": dispatch_job_id,
+                    })
+                    continue
             job_id = t.get("compute_job_id")
             if _compute_job_alive(job_id):
                 skipped_compute.append({"id": _task_key(t), "compute_job_id": job_id})
@@ -1146,6 +1468,33 @@ def main() -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     p = sub.add_parser("claim"); p.add_argument("--id", required=True); p.add_argument("--owner", required=True); p.add_argument("--session"); p.add_argument("--main-thread", action="store_true", dest="main_thread", help="claim a main_thread-lane task (interactive session only)"); p.set_defaults(fn=cmd_claim)
+    p = sub.add_parser(
+        "dispatch-preassign",
+        help="supervisor-only atomic claim+start for contract-complete mutating work",
+    )
+    p.add_argument("--owner", required=True)
+    p.add_argument("--session", required=True)
+    p.add_argument("--job-id")
+    p.set_defaults(fn=cmd_dispatch_preassign)
+    p = sub.add_parser(
+        "dispatch-pending",
+        help="supervisor-only admission settlement outbox readback",
+    )
+    p.add_argument("--limit", type=int, default=20)
+    p.set_defaults(fn=cmd_dispatch_pending)
+    p = sub.add_parser(
+        "dispatch-settle",
+        help="supervisor-only claim-session CAS after workspace finalization",
+    )
+    p.add_argument("--id", required=True)
+    p.add_argument("--session", required=True)
+    p.add_argument(
+        "--disposition",
+        required=True,
+        choices=["merged", "remediation", "retry", "empty", "failure"],
+    )
+    p.add_argument("--result")
+    p.set_defaults(fn=cmd_dispatch_settle)
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)

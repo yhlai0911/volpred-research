@@ -40,7 +40,8 @@ from typing import Sequence
 from volpred.ops import fire_manifest
 
 from . import (
-    alerts, claim_release, codex_failover, failure_class, identity, procutil, state,
+    alerts, claim_release, codex_failover, failure_class, identity, isolation,
+    procutil, state,
 )
 
 LOG = logging.getLogger(__name__)
@@ -448,6 +449,7 @@ def _run_one_attempt(
     claude_bin: str = CLAUDE_BIN,
     effort: str = DISPATCH_EFFORT,
     workdir: Path | None = None,
+    isolated_workspace: dict | None = None,
 ) -> tuple[int, float]:
     """Single Popen attempt. Returns (exit_code, duration_s, attempt_output).
 
@@ -458,7 +460,22 @@ def _run_one_attempt(
     On timeout: SIGKILL whole PGID, return exit_code=-9 (mapped to killed_timeout
     upstream via HANG_EXIT_CODES + outcome classification).
     """
-    debug_path = log_path.parent / f"{log_path.stem}.attempt{attempt}.debug.log"
+    isolation_receipt = (
+        {
+            key.removeprefix("isolation_"): value
+            for key, value in isolated_workspace.items()
+            if key.startswith("isolation_")
+        }
+        if isinstance(isolated_workspace, dict)
+        else None
+    )
+    debug_root = (
+        Path(str(isolation_receipt["run_dir"]))
+        if isinstance(isolation_receipt, dict)
+        and isolation_receipt.get("run_dir")
+        else log_path.parent
+    )
+    debug_path = debug_root / f"{log_path.stem}.attempt{attempt}.debug.log"
     argv = [
         claude_bin, "-p", "--dangerously-skip-permissions",
         "--effort", effort, "--model", model,
@@ -518,6 +535,18 @@ def _run_one_attempt(
             role="hourly", slot_id=slot_id, job_id=job_id,
         ),
     }
+    if isolated_workspace is not None:
+        expected_workspace = Path(str(isolated_workspace.get("path") or "")).resolve()
+        if workdir is None or Path(workdir).resolve() != expected_workspace:
+            raise isolation.IsolationUnavailable(
+                "worker cwd does not match allocated workspace identity"
+            )
+        if not isinstance(isolation_receipt, dict):
+            raise isolation.IsolationUnavailable(
+                "worker isolation was not prepared during admission"
+            )
+        argv = isolation.wrap_prepared(argv, isolation_receipt)
+        child_env = isolation.isolated_environment(child_env, isolation_receipt)
     # Stage 2 of declared commit ownership: create the change-set before the
     # producer can write.  This remains observability-only; PHASE-Z still uses
     # its fire-start baseline until the seven-day shadow gate passes.
@@ -653,6 +682,7 @@ def _attempt_codex_failover(
     job_id: str,
     slot_id: str,
     workdir: Path | None = None,
+    isolated_workspace: dict | None = None,
 ) -> WorkerResult | None:
     """Hand this hourly slot to Codex. Returns a WorkerResult only if Codex recovered it.
 
@@ -693,6 +723,7 @@ def _attempt_codex_failover(
             on_process_started=_track_started,
             on_process_finished=_track_finished,
             workdir=workdir,
+            isolated_workspace=isolated_workspace,
         )
     except Exception as exc:  # failover must never take the supervisor down
         LOG.exception("codex failover raised unexpectedly reason=%s", reason)
@@ -745,6 +776,7 @@ def run_worker(
     slot_id: str | None = None,
     max_slots: int = 2,
     workdir: Path | None = None,
+    isolated_workspace: dict | None = None,
 ) -> WorkerResult:
     """Run prompt through claude -p with retry ladder.
 
@@ -797,6 +829,7 @@ def run_worker(
             state_path=state_path, claude_bin=claude_bin,
             job_id=job_id, slot_id=slot_id,
             workdir=workdir,
+            isolated_workspace=isolated_workspace,
         )
         total_duration += duration
         final_exit = exit_code
@@ -1040,6 +1073,7 @@ def run_worker(
                 fallback_exit=exit_code, model=model, log_tail=log_tail,
                 state_path=state_path, job_id=job_id, slot_id=slot_id,
                 workdir=workdir,
+                isolated_workspace=isolated_workspace,
             )
             if recovered is not None:
                 if recovered.outcome == "kill_failed_orphan":
@@ -1089,6 +1123,7 @@ def run_worker(
                 fallback_exit=exit_code, model=model, log_tail=log_tail,
                 state_path=state_path, job_id=job_id, slot_id=slot_id,
                 workdir=workdir,
+                isolated_workspace=isolated_workspace,
             )
             if recovered is not None:
                 if recovered.outcome == "kill_failed_orphan":

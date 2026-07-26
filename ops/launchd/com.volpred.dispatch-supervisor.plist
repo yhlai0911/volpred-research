@@ -5,16 +5,16 @@
   <key>Label</key>
   <string>com.volpred.dispatch-supervisor</string>
 
-  <!-- REAL-RUN (Deliverable 7 cutover, 2026-07-04): --dry-run REMOVED. This is
+  <!-- REAL-RUN (Deliverable 7 cutover, 2026-07-04): the dry-run flag is REMOVED. This is
        now the sole real dispatcher — legacy com.volpred.hourly-dispatch was
        `launchctl disable`d at cutover (boss approved twice via Telegram
        msg124 + msg127). Real-run path verified by isolated worker smoke (real
        claude spawn, exit 0) + PHASE-Z safety-net ported (phase_z.py, Codex
        CONDITIONAL_PASS). History: docs/refactor_plan_hourly_dispatch.md
-       §Deliverable 7. INSTANT ROLLBACK if a real fire misbehaves:
-         launchctl enable  gui/<UID>/com.volpred.hourly-dispatch   # re-arm legacy
-         launchctl bootout gui/<UID>/com.volpred.dispatch-supervisor
-         # then re-add <string>--dry-run</string> here + bootstrap to shadow. -->
+       §Deliverable 7. Rollback must retain the single supervisor owner; never
+       re-arm com.volpred.hourly-dispatch. Writer isolation itself is fail-closed:
+       an unavailable workspace requeues the fire instead of falling back to
+       shared-main execution. -->
   <key>ProgramArguments</key>
   <array>
     <string>/opt/homebrew/bin/uv</string>
@@ -33,6 +33,8 @@
     <string>/Users/yhlai0911/.nvm/versions/node/v22.20.0/bin:/Users/yhlai0911/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
     <key>HOME</key>
     <string>/Users/yhlai0911</string>
+    <key>VOLPRED_WRITER_ISOLATION_REQUIRED</key>
+    <string>1</string>
   </dict>
 
   <key>RunAtLoad</key>

@@ -49,7 +49,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from . import identity, procutil
+from . import identity, isolation, procutil
 from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
@@ -207,6 +207,7 @@ def run_codex_failover(
     on_process_started: Callable[[int, int], bool] | None = None,
     on_process_finished: Callable[[int], None] | None = None,
     workdir: Path | None = None,
+    isolated_workspace: dict | None = None,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
     if enabled is None:
@@ -263,6 +264,36 @@ def run_codex_failover(
                 role="codex-failover", slot_id=slot_id, job_id=job_id,
             ),
         })
+    if isolated_workspace is not None:
+        expected_workspace = Path(
+            str(isolated_workspace.get("path") or "")
+        ).resolve()
+        if workdir is None or launch_cwd != expected_workspace or not job_id:
+            return FailoverResult(
+                True,
+                False,
+                RC_DISABLED,
+                "Codex failover isolation identity mismatch; refusing unisolated execution",
+            )
+        isolation_receipt = {
+            key.removeprefix("isolation_"): value
+            for key, value in isolated_workspace.items()
+            if key.startswith("isolation_")
+        }
+        try:
+            if not isinstance(isolation_receipt, dict):
+                raise isolation.IsolationUnavailable(
+                    "Codex failover isolation was not prepared during admission"
+                )
+            argv = isolation.wrap_prepared(argv, isolation_receipt)
+        except isolation.IsolationUnavailable as exc:
+            return FailoverResult(
+                True,
+                False,
+                RC_DISABLED,
+                f"Codex failover isolation unavailable: {exc}",
+            )
+        child_env = isolation.isolated_environment(child_env, isolation_receipt)
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:

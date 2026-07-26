@@ -38,6 +38,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
+import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -49,7 +50,16 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
-from . import alerts, decision, identity, phase_z, state, worker, workspace as workspace_mod
+from . import (
+    alerts,
+    decision,
+    identity,
+    isolation,
+    phase_z,
+    state,
+    worker,
+    workspace as workspace_mod,
+)
 from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
@@ -379,25 +389,322 @@ def _slot_prompt(
     workspace_section = (
         workspace_mod.prompt_fragment(workspace) + "\n" if workspace else ""
     )
+    assigned_contract = (
+        workspace
+        if workspace and workspace.get("task_id")
+        else None
+    )
+    repo_write_policy = (
+        "本 fire 已由 OS sandbox 綁定 producer workspace；canonical_root 僅供讀取。"
+        "task lifecycle 與 canonical/external effects 都由 supervisor 在 sandbox 外執行。"
+        "禁止對 canonical_root 的 storage、程式、設定、文件、測試或 Git metadata 寫入；"
+        "shell redirect 亦會被機械拒絕。"
+        if workspace
+        else
+        "inline task 可用絕對路徑編輯 canonical_root，但禁止 cd 回 shared checkout 後裸跑"
+        "任何 Git mutation；本班 canonical 變更由 cohort-drained PHASE-Z 單一提交。"
+    )
+    cwd_note = (
+        "registered producer workspace" if workspace else "刻意不是 Git repo"
+    )
+    worktree_routing_policy = (
+        "本 fire 已配發唯一 registered workspace，禁止另建 worktree；由 supervisor "
+        "finalizer 負責 gate 與 landing。"
+        if workspace
+        else
+        "若 task routing 明定 worktree，才用 canonical git_writer_lock.py run 建立名稱含"
+        "worktree_prefix 的 registered linked worktree，並在本班結束前透過正式"
+        "merge_worktree.sh 完整整合；不得留下未合併 branch/worktree。"
+    )
+    task_assignment = ""
+    if assigned_contract is not None:
+        task_assignment = (
+            "[Supervisor-assigned mutating task]\n"
+            f"task_id={assigned_contract['task_id']}; "
+            f"claim_session_id={assigned_contract['claim_session_id']}; "
+            f"declared_output_paths={json.dumps(assigned_contract.get('declared_output_paths') or [], ensure_ascii=False)}.\n"
+            f"title={assigned_contract.get('task_title', '')}\n"
+            f"description={assigned_contract.get('task_description', '')}\n"
+            "這張 task 已由 supervisor 原子 claim+start。只完成這張，不跑 PHASE 0/A/B 的"
+            "選工流程；不得再 claim/start/complete/release。只可修改 declared paths，"
+            "不得 git add/commit；完成檔案與測試後停止。machine finalizer 會只 stage declared "
+            "paths 並建立 candidate commit；landing、post-actions 與 complete 由 supervisor"
+            "回讀後處理。\n\n"
+        )
     base_prompt = (
         "[Supervisor multi-slot context]\n"
         f"slot_id={slot_id}; job_id={job_id}; worktree_prefix={prefix}.\n"
-        f"launcher_cwd={workdir}（刻意不是 Git repo）；canonical_root={repo_root}.\n"
+        f"launcher_cwd={workdir}（{cwd_note}）；canonical_root={repo_root}.\n"
         "本 fire 的 task-pool ownership token 已由 supervisor 放在"
         "$VOLPRED_TASK_CLAIM_OWNER；所有 claim、work_log owner/actor 都必須逐字使用它。"
         "缺少此環境變數即停止且回報 dispatcher identity error，禁止退回日期/小時或自訂名稱。"
         "此段規則優先於後文 PHASE-Z：先從 canonical_root 讀 AGENTS.md 與 handoff。"
-        "inline task 可用絕對路徑編輯 canonical_root，但禁止 cd 回 shared checkout 後裸跑"
-        "任何 Git mutation；本班 canonical 變更由 cohort-drained PHASE-Z 單一提交。"
-        "若 task routing 明定 worktree，才用 canonical git_writer_lock.py run 建立名稱含"
-        "worktree_prefix 的 registered linked worktree，並在本班結束前透過正式"
-        "merge_worktree.sh 完整整合；不得留下未合併 branch/worktree。"
-        "task-pool claim/complete 必須用 canonical_root 的絕對 script path，讓 fcntl control"
-        "plane 寫 canonical queue。最後依原 PHASE Z 只留 fire receipt，不自行 git add/commit。\n\n"
+        + repo_write_policy
+        + worktree_routing_policy
+        + (
+            "task-pool lifecycle 已由 supervisor 擁有，worker 不得執行 canonical task CLI。"
+            if assigned_contract
+            else
+            "若選到 platform_ops/governance，task CLI 會以 "
+            "supervisor_preassignment_required 機械拒絕；換非 mutating task，禁止繞過。"
+        )
+        + "最後依原 PHASE Z 只留 fire receipt。\n\n"
+        + task_assignment
         + workspace_section
         + prompt
     )
     return inject_external_report_contract(base_prompt)
+
+
+def _task_pool_command(
+    *,
+    repo_root: Path,
+    args: list[str],
+) -> dict[str, Any]:
+    """Run the canonical queue owner outside the producer sandbox."""
+    proc = subprocess.run(
+        [sys.executable, str(repo_root / "scripts" / "task_pool_claim.py"), *args],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    try:
+        payload = json.loads(proc.stdout or "{}")
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "reason": "task_pool_cli_unreadable",
+            "rc": proc.returncode,
+            "detail": (proc.stderr or proc.stdout or "")[-500:],
+        }
+    if proc.returncode != 0 and payload.get("ok") is not False:
+        payload = {
+            **payload,
+            "ok": False,
+            "reason": payload.get("reason") or "task_pool_cli_failed",
+            "rc": proc.returncode,
+        }
+    return payload
+
+
+def _preassign_mutating_task(
+    *,
+    repo_root: Path,
+    slot_id: str,
+    job_id: str,
+) -> dict[str, Any]:
+    owner = identity.task_claim_owner(
+        role="hourly", slot_id=slot_id, job_id=job_id,
+    )
+    session = f"dispatch-{job_id[:8]}-{uuid.uuid4().hex[:8]}"
+    return _task_pool_command(
+        repo_root=repo_root,
+        args=[
+            "dispatch-preassign",
+            "--owner",
+            owner,
+            "--session",
+            session,
+            "--job-id",
+            job_id,
+        ],
+    )
+
+
+def _settle_mutating_task(
+    *,
+    repo_root: Path,
+    workspace: dict[str, Any],
+    disposition: str,
+    result: str,
+) -> dict[str, Any]:
+    return _task_pool_command(
+        repo_root=repo_root,
+        args=[
+            "dispatch-settle",
+            "--id",
+            str(workspace["task_id"]),
+            "--session",
+            str(workspace["claim_session_id"]),
+            "--disposition",
+            disposition,
+            "--result",
+            result[:800],
+        ],
+    )
+
+
+def _settlement_disposition(workspace_outcome: dict[str, Any]) -> str | None:
+    disposition = str(workspace_outcome.get("disposition") or "")
+    if disposition == "merged":
+        return "merged"
+    if (
+        disposition == "remediation_opened"
+        and bool((workspace_outcome.get("checkpoint") or {}).get("released"))
+    ):
+        return "remediation"
+    if disposition == "empty_removed":
+        return "empty"
+    return None
+
+
+def reconcile_task_settlements(
+    *,
+    repo_root: Path,
+    state_path: Path,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    """Converge completion→finalize→queue settlement across daemon crashes."""
+    snap = state.read_state(state_path)
+    receipt_error = False
+    for completion in reversed(snap.get("completions") or []):
+        workspace = completion.get("workspace")
+        if not isinstance(workspace, dict) or not workspace.get("task_id"):
+            continue
+        if not workspace_mod.ensure_task_settlement_pending(
+            repo_root,
+            workspace=workspace,
+            job_id=str(completion.get("job_id") or ""),
+            worker_outcome=str(completion.get("outcome") or "failure"),
+        ):
+            receipt_error = True
+    if receipt_error:
+        return [{
+            "ok": False,
+            "reason": "completion_settlement_intent_not_durable",
+        }]
+    results: list[dict[str, Any]] = []
+    for pending in workspace_mod.pending_task_settlements(repo_root, limit=limit):
+        pending_job_id = str(pending.get("job_id") or "")
+        active = _ACTIVE_FIRE_TASKS.get(pending_job_id)
+        if active is not None and not active.done():
+            # The owning fire task is between durable intent and settlement.
+            # A new daemon has an empty process-local map and will reconcile;
+            # this daemon must not race its own finalizer.
+            continue
+        workspace = pending.get("workspace")
+        if not isinstance(workspace, dict):
+            results.append({"ok": False, "reason": "pending_workspace_missing"})
+            continue
+        final = workspace_mod.finalize_workspace(
+            repo_root=repo_root,
+            workspace=workspace,
+            worker_outcome=str(pending.get("worker_outcome") or "failure"),
+            job_id=str(pending.get("job_id") or ""),
+        )
+        disposition = _settlement_disposition(final)
+        if disposition is None:
+            results.append({
+                "ok": False,
+                "task_id": workspace.get("task_id"),
+                "reason": "workspace_not_terminal",
+                "workspace_disposition": final.get("disposition"),
+            })
+            continue
+        settled = _settle_mutating_task(
+            repo_root=repo_root,
+            workspace=workspace,
+            disposition=disposition,
+            result=(
+                f"reconciled workspace={final.get('disposition')}; "
+                f"main_sha={final.get('main_sha', '')}"
+            ),
+        )
+        if settled.get("ok") and workspace_mod.complete_task_settlement(
+            repo_root,
+            task_id=str(workspace["task_id"]),
+            claim_session_id=str(workspace["claim_session_id"]),
+            disposition=disposition,
+            status=str(settled.get("status") or ""),
+        ):
+            state.defer_reserved_fire(
+                job_id=str(pending.get("job_id") or ""),
+                reason=(
+                    "workspace_settlement_reconciled:"
+                    f"{str(pending.get('job_id') or '')[:8]}"
+                ),
+                path=state_path,
+            )
+            results.append({**settled, "settlement_completed": True})
+        else:
+            results.append({**settled, "settlement_completed": False})
+    return results
+
+
+def reconcile_admission_settlements(
+    *,
+    repo_root: Path,
+    state_path: Path,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    """Requeue preassigned tasks whose fire died before workspace binding."""
+    outbox = _task_pool_command(
+        repo_root=repo_root,
+        args=["dispatch-pending", "--limit", str(limit)],
+    )
+    if not outbox.get("ok"):
+        return [outbox]
+    snap = state.read_state(state_path)
+    active_job_ids = {
+        str(job.get("job_id") or "")
+        for job in (snap.get("current_jobs") or [])
+        if isinstance(job, dict)
+    }
+    active_job_ids.update(
+        job_id
+        for job_id, task in _ACTIVE_FIRE_TASKS.items()
+        if not task.done()
+    )
+    ownership = workspace_mod.task_settlement_ownership(repo_root)
+    if not ownership.get("ok"):
+        return [{
+            "ok": False,
+            "reason": str(
+                ownership.get("reason") or "workspace_ownership_unavailable"
+            ),
+        }]
+    workspace_owned = {
+        (
+            str(item.get("task_id") or ""),
+            str(item.get("claim_session_id") or ""),
+        )
+        for item in (ownership.get("pending") or [])
+    }
+    workspace_owned.update(
+        (
+            str(workspace.get("task_id") or ""),
+            str(workspace.get("claim_session_id") or ""),
+        )
+        for completion in (snap.get("completions") or [])
+        if isinstance(completion, dict)
+        for workspace in [completion.get("workspace")]
+        if isinstance(workspace, dict) and workspace.get("task_id")
+    )
+    results: list[dict[str, Any]] = []
+    for item in outbox.get("pending") or []:
+        key = (
+            str(item.get("task_id") or ""),
+            str(item.get("claim_session_id") or ""),
+        )
+        if (
+            not all(key)
+            or str(item.get("dispatch_job_id") or "") in active_job_ids
+            or key in workspace_owned
+        ):
+            continue
+        settled = _settle_mutating_task(
+            repo_root=repo_root,
+            workspace={"task_id": key[0], "claim_session_id": key[1]},
+            disposition="retry",
+            result=(
+                "reconciled admission crash before workspace binding; "
+                f"job_id={item.get('dispatch_job_id', '')}"
+            ),
+        )
+        results.append(settled)
+    return results
 
 
 def _phase_z_terminal(outcome: dict[str, Any] | None) -> bool:
@@ -453,6 +760,7 @@ async def _run_reserved_fire(
             log_path=log_path, state_path=state_path,
             job_id=job_id, slot_id=slot_id,
             workdir=workdir,
+            isolated_workspace=fire_workspace,
         )
         LOG.info(
             "worker returned job_id=%s slot=%s outcome=%s attempts=%d duration=%.1fs",
@@ -527,6 +835,43 @@ async def _run_reserved_fire(
                          job_id, (workspace_outcome or {}).get("disposition"))
             except Exception as exc:  # noqa: BLE001
                 LOG.exception("workspace finalize crashed job_id=%s: %s", job_id, exc)
+            if fire_workspace.get("task_id"):
+                workspace_disposition = str(
+                    (workspace_outcome or {}).get("disposition") or "failure"
+                )
+                settlement_disposition = _settlement_disposition(
+                    workspace_outcome or {}
+                )
+                settlement = {"ok": False, "reason": "workspace_not_terminal"}
+                if settlement_disposition is not None:
+                    settlement = await asyncio.to_thread(
+                        _settle_mutating_task,
+                        repo_root=repo_root,
+                        workspace=fire_workspace,
+                        disposition=settlement_disposition,
+                        result=(
+                            f"worker={getattr(result, 'outcome', 'failure')}; "
+                            f"workspace={workspace_disposition}; "
+                            f"main_sha={(workspace_outcome or {}).get('main_sha', '')}"
+                        ),
+                    )
+                    if settlement.get("ok"):
+                        await asyncio.to_thread(
+                            workspace_mod.complete_task_settlement,
+                            repo_root,
+                            task_id=str(fire_workspace["task_id"]),
+                            claim_session_id=str(
+                                fire_workspace["claim_session_id"]
+                            ),
+                            disposition=settlement_disposition,
+                            status=str(settlement.get("status") or ""),
+                        )
+                LOG.info(
+                    "workspace task settlement job_id=%s task_id=%s result=%s",
+                    job_id,
+                    fire_workspace.get("task_id"),
+                    settlement,
+                )
         global _PHASE_Z_LOCK
         if _PHASE_Z_LOCK is None:
             _PHASE_Z_LOCK = asyncio.Lock()
@@ -803,6 +1148,51 @@ async def _tick_once(
 ) -> dict[str, Any]:
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
     state.heartbeat(path=state_path)
+    pre_reconcile = state.read_state(state_path)
+    if (Path(repo_root) / ".git").exists():
+        protected_workspace_jobs = (
+            [
+                str(job.get("job_id") or "")
+                for job in (pre_reconcile.get("current_jobs") or [])
+            ]
+            + [
+                str(item.get("job_id") or "")
+                for item in (pre_reconcile.get("phase_z_pending") or [])
+            ]
+            + [
+                str(item.get("job_id") or "")
+                for item in (pre_reconcile.get("completions") or [])
+            ]
+        )
+        swept = await asyncio.to_thread(
+            workspace_mod.sweep_orphan_workspaces,
+            repo_root=repo_root,
+            protected_job_ids=protected_workspace_jobs,
+        )
+        if swept:
+            LOG.info(
+                "pre-admission orphan workspace reconciliation=%s",
+                [item.get("disposition") for item in swept],
+            )
+    settlements = await asyncio.to_thread(
+        reconcile_task_settlements,
+        repo_root=repo_root,
+        state_path=state_path,
+    )
+    if settlements:
+        LOG.info("task settlement reconciliation results=%s", settlements)
+    admission_settlements: list[dict[str, Any]] = []
+    if (Path(repo_root) / "scripts" / "task_pool_claim.py").is_file():
+        admission_settlements = await asyncio.to_thread(
+            reconcile_admission_settlements,
+            repo_root=repo_root,
+            state_path=state_path,
+        )
+    if admission_settlements:
+        LOG.info(
+            "admission settlement reconciliation results=%s",
+            admission_settlements,
+        )
     snap = state.read_state(state_path)
     pending_phase_z = snap.get("phase_z_pending") or []
     if pending_phase_z:
@@ -1051,23 +1441,74 @@ async def _tick_once(
         )
     slot_id = f"slot-{lease.slot_id}"
     job_log_path = _slot_log_path(log_path, slot_id=slot_id, job_id=job_id)
+    iso_cfg = workspace_mod.load_isolation_config(schedules_path=schedules_path)
+    if (
+        Path(schedules_path).resolve() == SCHEDULES_PATH.resolve()
+        and Path(repo_root).resolve() != ROOT.resolve()
+    ):
+        iso_cfg = {**iso_cfg, "mode": "off"}
+    preassignment: dict[str, Any] = {"ok": True, "assigned": False}
+    task_binding: dict[str, Any] | None = None
+    if iso_cfg["mode"] in {"pilot", "enforce"}:
+        preassignment = await asyncio.to_thread(
+            _preassign_mutating_task,
+            repo_root=repo_root,
+            slot_id=slot_id,
+            job_id=job_id,
+        )
+        if not preassignment.get("ok"):
+            deferred = state.defer_reserved_fire(
+                job_id=job_id,
+                reason=f"mutating_preassignment_failed:{job_id[:8]}",
+                path=state_path,
+            )
+            return {
+                "action": "isolation_deferred",
+                "reason": "mutating_preassignment_failed",
+                "detail": preassignment,
+                "state_deferred": deferred is not None,
+            }
+        if preassignment.get("assigned"):
+            task_binding = dict(preassignment["contract"])
+        elif preassignment.get("blocked_contracts"):
+            LOG.warning(
+                "mutating tasks lack execution contracts; hourly workers cannot "
+                "claim them: %s",
+                preassignment["blocked_contracts"],
+            )
     try:
         workdir = _slot_workdir(
             job_log_path, slot_id=slot_id, job_id=job_id, repo_root=repo_root
         )
     except (OSError, subprocess.TimeoutExpired, RuntimeError) as exc:
-        state.release_reservation(job_id=job_id, path=state_path)
+        if task_binding is not None:
+            await asyncio.to_thread(
+                _settle_mutating_task,
+                repo_root=repo_root,
+                workspace=task_binding,
+                disposition="retry",
+                result=f"scratch_workdir_error: {exc}",
+            )
+        state.defer_reserved_fire(
+            job_id=job_id,
+            reason=f"scratch_workdir_error:{job_id[:8]}",
+            path=state_path,
+        )
         LOG.error("cannot create repo-external dispatch cwd job_id=%s: %s", job_id, exc)
         return {"action": "skip", "reason": "scratch_workdir_error", "error": str(exc)}
-    # ── WS-B producer-scoped workspace (pilot) ──────────────────────────────
-    # Allocation is strictly fail-open: any refusal (mode off, caps, disk floor,
-    # writer-lock busy, git error) fires the slot UNISOLATED and PHASE-Z's
-    # baseline fallback keeps covering it. Runs in a thread: `git worktree add`
-    # checks out the full tree and must not stall the event loop (health_loop
-    # heartbeats share it).
+    # ── WS-B producer-scoped workspace ───────────────────────────────────────
+    # `pilot` retains the observation-period fallback. `enforce` (or the
+    # launchd-required env fence) has exactly two outcomes: isolated workspace
+    # or durable requeue. There is deliberately no shared-main third outcome.
     fire_workspace: dict[str, Any] | None = None
-    iso_cfg = workspace_mod.load_isolation_config(schedules_path=schedules_path)
-    if iso_cfg["mode"] == "pilot":
+    # Once a mutating task is preassigned there is no observation-only
+    # fallback, even if an old config still says pilot. Pilot may observe
+    # non-mutating fires; mutating execution is isolated-or-requeued.
+    isolation_required = task_binding is not None
+    if task_binding is not None and isolation_required and iso_cfg["mode"] == "off":
+        iso_cfg = {**iso_cfg, "mode": "enforce"}
+    allocation_error = ""
+    if task_binding is not None and iso_cfg["mode"] in {"pilot", "enforce"}:
         try:
             # Protect every job the state file still remembers (live, draining,
             # or completed) — the sweep may only close TRUE orphans whose fire
@@ -1092,20 +1533,188 @@ async def _tick_once(
             fire_workspace = await asyncio.to_thread(
                 workspace_mod.allocate_workspace,
                 repo_root=repo_root, slot_id=slot_id, job_id=job_id,
-                config=iso_cfg, active_isolated=active_isolated,
+                config=iso_cfg, task_binding=task_binding,
+                active_isolated=active_isolated,
             )
-        except Exception as exc:  # noqa: BLE001 — isolation must never veto dispatch
-            LOG.warning("workspace allocation crashed (non-fatal, firing unisolated): %s", exc)
+        except Exception as exc:  # noqa: BLE001 — enforce converts this to requeue
+            allocation_error = str(exc)
+            LOG.warning("workspace allocation crashed job_id=%s: %s", job_id, exc)
             fire_workspace = None
         if fire_workspace is not None:
-            state.attach_workspace(
+            # Bind the allocator's durable task/workspace identity before the
+            # first fallible sandbox-preflight operation. A restart can now
+            # adjudicate this exact workspace instead of leaving a zombie
+            # queue claim.
+            attached = state.attach_workspace(
                 job_id=job_id, workspace=fire_workspace, path=state_path,
             )
+            if not attached:
+                attach_final = await asyncio.to_thread(
+                    workspace_mod.finalize_workspace,
+                    repo_root=repo_root,
+                    workspace=fire_workspace,
+                    worker_outcome="reservation_lost",
+                    job_id=job_id,
+                )
+                attach_disposition = _settlement_disposition(attach_final)
+                if attach_disposition is not None:
+                    lost_settlement = await asyncio.to_thread(
+                        _settle_mutating_task,
+                        repo_root=repo_root,
+                        workspace=task_binding,
+                        disposition=attach_disposition,
+                        result=(
+                            "reservation lost before preflight; "
+                            f"workspace={attach_final.get('disposition')}"
+                        ),
+                    )
+                    if lost_settlement.get("ok"):
+                        await asyncio.to_thread(
+                            workspace_mod.complete_task_settlement,
+                            repo_root,
+                            task_id=str(task_binding["task_id"]),
+                            claim_session_id=str(
+                                task_binding["claim_session_id"]
+                            ),
+                            disposition=attach_disposition,
+                            status=str(lost_settlement.get("status") or ""),
+                        )
+                return {
+                    "action": "isolation_deferred",
+                    "reason": (
+                        "reservation_lost"
+                        if attach_disposition is not None
+                        else "workspace_finalize_pending"
+                    ),
+                    "job_id": job_id,
+                    "slot_id": slot_id,
+                    "workspace": attach_final,
+                }
+        if fire_workspace is not None and isolation_required:
+            try:
+                prepared = await asyncio.to_thread(
+                    isolation.prepare,
+                    canonical_root=repo_root,
+                    workspace=Path(str(fire_workspace["path"])),
+                    job_id=job_id,
+                    profile_root=Path(tempfile.gettempdir())
+                    / "volpred-dispatch-isolation",
+                )
+                fire_workspace.update({
+                    f"isolation_{key}": value
+                    for key, value in prepared.to_dict().items()
+                })
+                if not state.attach_workspace(
+                    job_id=job_id, workspace=fire_workspace, path=state_path,
+                ):
+                    raise RuntimeError(
+                        "reservation lost while binding sandbox receipt"
+                    )
+            except Exception as exc:  # noqa: BLE001 — substrate failure requeues
+                allocation_error = f"isolation_preflight: {exc}"
+                LOG.warning(
+                    "writer isolation preflight failed job_id=%s: %s",
+                    job_id,
+                    exc,
+                )
+                preflight_final = await asyncio.to_thread(
+                    workspace_mod.finalize_workspace,
+                    repo_root=repo_root,
+                    workspace=fire_workspace,
+                    worker_outcome="isolation_preflight_failed",
+                    job_id=job_id,
+                )
+                preflight_disposition = _settlement_disposition(preflight_final)
+                settlement: dict[str, Any] = {
+                    "ok": False,
+                    "reason": "workspace_finalize_pending",
+                }
+                if preflight_disposition is not None:
+                    settlement = await asyncio.to_thread(
+                        _settle_mutating_task,
+                        repo_root=repo_root,
+                        workspace=fire_workspace,
+                        disposition=preflight_disposition,
+                        result=(
+                            f"writer isolation preflight failed: {exc}; "
+                            f"workspace={preflight_final.get('disposition')}"
+                        ),
+                    )
+                    if settlement.get("ok"):
+                        await asyncio.to_thread(
+                            workspace_mod.complete_task_settlement,
+                            repo_root,
+                            task_id=str(fire_workspace["task_id"]),
+                            claim_session_id=str(
+                                fire_workspace["claim_session_id"]
+                            ),
+                            disposition=preflight_disposition,
+                            status=str(settlement.get("status") or ""),
+                        )
+                        state.defer_reserved_fire(
+                            job_id=job_id,
+                            reason=f"writer_isolation_preflight:{job_id[:8]}",
+                            path=state_path,
+                        )
+                return {
+                    "action": "isolation_deferred",
+                    "reason": (
+                        "isolation_preflight_failed"
+                        if preflight_disposition is not None
+                        else "workspace_finalize_pending"
+                    ),
+                    "job_id": job_id,
+                    "slot_id": slot_id,
+                    "workspace": preflight_final,
+                    "task_settlement": settlement,
+                }
+        if fire_workspace is None and isolation_required:
+            durable = workspace_mod.record_allocation_deferred(
+                repo_root,
+                job_id=job_id,
+                slot_id=slot_id,
+                reason="workspace_unavailable",
+                error=allocation_error,
+                task_binding=task_binding,
+            )
+            deferred = state.defer_reserved_fire(
+                job_id=job_id,
+                reason=f"writer_isolation_deferred:{job_id[:8]}",
+                path=state_path,
+            )
+            settlement = await asyncio.to_thread(
+                _settle_mutating_task,
+                repo_root=repo_root,
+                workspace=task_binding,
+                disposition="retry",
+                result=f"writer isolation unavailable: {allocation_error}",
+            )
+            LOG.warning(
+                "writer isolation deferred job_id=%s receipt_durable=%s; "
+                "atomic_state_transition=%s",
+                job_id,
+                durable,
+                deferred is not None,
+            )
+            return {
+                "action": "isolation_deferred",
+                "reason": "workspace_unavailable",
+                "job_id": job_id,
+                "slot_id": slot_id,
+                "receipt_durable": durable,
+                "state_deferred": deferred is not None,
+                "task_settlement": settlement,
+            }
+    execution_workdir = (
+        Path(str(fire_workspace["path"]))
+        if fire_workspace is not None
+        else workdir
+    )
     prompt = _slot_prompt(
         prompt,
         slot_id=slot_id,
         job_id=job_id,
-        workdir=workdir,
+        workdir=execution_workdir,
         repo_root=repo_root,
         workspace=fire_workspace,
     )
@@ -1128,7 +1737,7 @@ async def _tick_once(
         job_id=job_id, cohort_id=lease.cohort_id, slot_id=slot_id, prompt=prompt,
         scheduled_for=prev_fire.isoformat(), fire_reason=fire_reason,
         log_path=job_log_path, state_path=state_path, repo_root=repo_root,
-        workdir=workdir, fire_workspace=fire_workspace,
+        workdir=execution_workdir, fire_workspace=fire_workspace,
     )
     if not background:
         return await coro

@@ -1,15 +1,14 @@
-"""Workspace — producer-scoped execution isolation for dispatch fires (WS-B pilot).
+"""Workspace — enforced producer-scoped execution isolation for mutating fires.
 
 Why this module exists (refactor_plan_ops_master_2026_07 §WS-B; design:
 docs/dispatch-writer-isolation-design.md): PHASE-Z's fire-start baseline can only
 GUESS which dirty bytes a fire produced — "ownership must be produced by
 execution isolation, not inferred by a cleanup layer afterwards" (external
 adjudication, 2026-07). Six-plus authorship incidents share that single root
-cause. The pilot gives every admitted fire (when `writer_isolation.mode ==
-"pilot"`) its own registered linked worktree; the slot prompt directs all
-isolated-lane repo-byte writes (platform_ops / governance code, config, docs,
-tests) into it. Anything merged from that branch is that fire's BY CONSTRUCTION
-— no snapshot arithmetic involved.
+cause. Every admitted mutating fire gets its own registered linked worktree and
+an exact task/output contract; the slot prompt directs all repo-byte writes
+(platform_ops / governance code, config, docs, tests) into it. Anything merged
+from that branch is that fire's BY CONSTRUCTION — no snapshot arithmetic.
 
 Mechanism reuse (deliberately zero new git machinery):
 
@@ -35,15 +34,15 @@ removed without force. Failures therefore cannot exhaust live capacity or lose
 their only recovery identity. Orphans from a supervisor crash are swept on the
 next allocation pass through the same finalizer.
 
-Cost controls (design §2 measured-cost snapshot): at most ONE live isolated
-fire at a time (`active_cap`), a total registered-workspace cap, and a free-disk
-floor below which allocation fails CLOSED (the fire still runs, just without
-isolation — PHASE-Z's baseline fallback continues to cover that residue lane).
-Every allocation/finalization appends a JSONL receipt with real measured
-durations — never fabricated numbers.
+Cost controls (design §2 measured-cost snapshot): a configurable live isolated
+fire cap, a total registered-workspace cap, and a free-disk floor. In enforce
+mode any cap/floor refusal requeues the mutating task. There is no shared-main
+fallback for repo mutation. Every allocation/finalization appends a JSONL
+receipt with real measured durations — never fabricated numbers.
 """
 from __future__ import annotations
 
+import fcntl
 import json
 import logging
 import os
@@ -52,6 +51,7 @@ import shutil
 import subprocess
 import time
 import uuid
+from fnmatch import fnmatchcase
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
@@ -83,9 +83,10 @@ _MERGE_TIMEOUT_S = 900
 _GATE_TIMEOUT_S = phase_z._TEST_GATE_TIMEOUT_S
 
 _DEFAULT_LANES = ("platform_ops",)
+_DEFAULT_MAX_ACTIVE = 1
 _DEFAULT_MAX_TOTAL = 3        # registered dispatch-* worktrees, incl. kept-for-remediation
 _DEFAULT_DISK_FLOOR_GIB = 20.0
-_ISOLATION_MODES = ("off", "pilot")
+_ISOLATION_MODES = ("off", "pilot", "enforce")
 
 # Worker outcomes whose output may be integrated. Everything else (hang, retry
 # exhaustion, auth/quota, superseded, orphan sweep) produced bytes nobody
@@ -102,21 +103,28 @@ _JOB8_RE = re.compile(
 def load_isolation_config(*, schedules_path: Path) -> dict[str, Any]:
     """`writer_isolation` block from the supervisor daemon entry.
 
-    Hot-reloaded every tick like max_slots/pregate — flipping off→pilot (or
-    adding "governance" to lanes for wave 2) is a config edit, no restart.
-    Fail-open to mode "off": a broken config must never block dispatch, it just
-    loses isolation for the fire (PHASE-Z fallback still covers it).
+    Hot-reloaded every tick like max_slots/pregate. The launchd
+    ``VOLPRED_WRITER_ISOLATION_REQUIRED=1`` fence makes production fail closed
+    even if this JSON is unreadable; standalone/non-production callers retain
+    the historical mode=off fallback.
     """
+    required = os.environ.get("VOLPRED_WRITER_ISOLATION_REQUIRED") == "1"
     fallback = {
-        "mode": "off",
+        "mode": "enforce" if required else "off",
         "lanes": list(_DEFAULT_LANES),
+        "max_active": _DEFAULT_MAX_ACTIVE,
         "max_total": _DEFAULT_MAX_TOTAL,
         "disk_floor_gib": _DEFAULT_DISK_FLOOR_GIB,
     }
     try:
         data = json.loads(Path(schedules_path).read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError, OSError) as exc:
-        LOG.warning("load_isolation_config fail-open mode=off: %s", exc)
+        LOG.warning(
+            "load_isolation_config %s mode=%s: %s",
+            "fail-closed production fence" if required else "standalone fallback",
+            fallback["mode"],
+            exc,
+        )
         return fallback
     entry = next(
         (
@@ -130,11 +138,25 @@ def load_isolation_config(*, schedules_path: Path) -> dict[str, Any]:
         return fallback
     mode = str(cfg.get("mode", "off")).lower()
     if mode not in _ISOLATION_MODES:
-        LOG.warning("writer_isolation mode %r invalid — fail-open mode=off", mode)
-        mode = "off"
+        mode = "enforce" if required else "off"
+        LOG.warning(
+            "writer_isolation mode invalid — using %s due to production fence=%s",
+            mode,
+            required,
+        )
+    if required and mode != "enforce":
+        LOG.warning(
+            "writer_isolation production fence overrides configured mode=%s to enforce",
+            mode,
+        )
+        mode = "enforce"
     lanes = cfg.get("lanes")
     if not isinstance(lanes, list) or not all(isinstance(x, str) for x in lanes) or not lanes:
         lanes = list(_DEFAULT_LANES)
+    try:
+        max_active = max(1, int(cfg.get("max_active", _DEFAULT_MAX_ACTIVE)))
+    except (TypeError, ValueError):
+        max_active = _DEFAULT_MAX_ACTIVE
     try:
         max_total = max(1, int(cfg.get("max_total", _DEFAULT_MAX_TOTAL)))
     except (TypeError, ValueError):
@@ -143,7 +165,8 @@ def load_isolation_config(*, schedules_path: Path) -> dict[str, Any]:
         disk_floor_gib = float(cfg.get("disk_floor_gib", _DEFAULT_DISK_FLOOR_GIB))
     except (TypeError, ValueError):
         disk_floor_gib = _DEFAULT_DISK_FLOOR_GIB
-    return {"mode": mode, "lanes": lanes, "max_total": max_total,
+    return {"mode": mode, "lanes": lanes, "max_active": max_active,
+            "max_total": max_total,
             "disk_floor_gib": disk_floor_gib}
 
 
@@ -183,13 +206,161 @@ def _append_receipt(repo_root: Path, payload: dict[str, Any]) -> bool:
             ensure_ascii=False,
         )
         with dest.open("a", encoding="utf-8") as fh:
-            fh.write(line + "\n")
-            fh.flush()
-            os.fsync(fh.fileno())
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+            try:
+                fh.write(line + "\n")
+                fh.flush()
+                os.fsync(fh.fileno())
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         return True
     except OSError as exc:
         LOG.warning("workspace receipt append failed (%s): %s", dest, exc)
         return False
+
+
+def _settlement_key(payload: dict[str, Any]) -> tuple[str, str]:
+    return (
+        str(payload.get("task_id") or ""),
+        str(payload.get("claim_session_id") or ""),
+    )
+
+
+def ensure_task_settlement_pending(
+    repo_root: Path,
+    *,
+    workspace: dict[str, Any],
+    job_id: str,
+    worker_outcome: str,
+) -> bool:
+    """Durably bind task settlement before any terminal workspace mutation."""
+    key = _settlement_key(workspace)
+    if not all(key):
+        return True
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    pending = False
+    try:
+        lines = source.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        lines = []
+    except OSError as exc:
+        LOG.warning("task settlement receipt read failed (%s): %s", source, exc)
+        return False
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            LOG.warning("task settlement receipt corrupt (%s): %s", source, exc)
+            return False
+        if not isinstance(event, dict) or _settlement_key(event) != key:
+            continue
+        if event.get("event") == "task_settlement_pending":
+            pending = True
+        elif event.get("event") == "task_settlement_completed":
+            return True
+    if pending:
+        return True
+    return _append_receipt(
+        repo_root,
+        {
+            "event": "task_settlement_pending",
+            "job_id": job_id,
+            "worker_outcome": worker_outcome,
+            "task_id": key[0],
+            "claim_session_id": key[1],
+            "workspace": dict(workspace),
+        },
+    )
+
+
+def task_settlement_ownership(repo_root: Path) -> dict[str, Any]:
+    """Unbounded tri-state ownership read; errors must never mean ``absent``."""
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        lines = source.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        return {"ok": True, "pending": []}
+    except OSError as exc:
+        LOG.warning("task settlement receipt read failed (%s): %s", source, exc)
+        return {"ok": False, "reason": "receipt_observation_unavailable"}
+    pending: dict[tuple[str, str], dict[str, Any]] = {}
+    completed: set[tuple[str, str]] = set()
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            LOG.warning("task settlement receipt corrupt (%s): %s", source, exc)
+            return {"ok": False, "reason": "receipt_observation_corrupt"}
+        if not isinstance(event, dict):
+            continue
+        key = _settlement_key(event)
+        if not all(key):
+            continue
+        if event.get("event") == "task_settlement_pending":
+            pending[key] = event
+        elif event.get("event") == "task_settlement_completed":
+            completed.add(key)
+    return {"ok": True, "pending": [
+        event for key, event in pending.items() if key not in completed
+    ]}
+
+
+def pending_task_settlements(
+    repo_root: Path, *, limit: int = 20
+) -> list[dict[str, Any]]:
+    """Return durable pending-minus-completed settlements, oldest first."""
+    ownership = task_settlement_ownership(repo_root)
+    if not ownership.get("ok"):
+        return []
+    return list(ownership.get("pending") or [])[: max(0, limit)]
+
+
+def complete_task_settlement(
+    repo_root: Path,
+    *,
+    task_id: str,
+    claim_session_id: str,
+    disposition: str,
+    status: str,
+) -> bool:
+    """Seal a settlement only after the canonical queue CAS read-back succeeds."""
+    return _append_receipt(
+        repo_root,
+        {
+            "event": "task_settlement_completed",
+            "task_id": task_id,
+            "claim_session_id": claim_session_id,
+            "disposition": disposition,
+            "status": status,
+        },
+    )
+
+
+def record_allocation_deferred(
+    repo_root: Path,
+    *,
+    job_id: str,
+    slot_id: str,
+    reason: str,
+    error: str = "",
+    task_binding: dict[str, Any] | None = None,
+) -> bool:
+    """Persist admission failure; queue settlement remains pending until CAS."""
+    binding = task_binding or {}
+    return _append_receipt(
+        repo_root,
+        {
+            "event": "allocation_deferred",
+            "job_id": job_id,
+            "slot_id": slot_id,
+            "reason": reason,
+            "error": error[:300],
+            "write_intent": "repo_patch",
+            "task_id": binding.get("task_id"),
+            "claim_session_id": binding.get("claim_session_id"),
+            "disposition": "settlement_pending",
+        },
+    )
 
 
 def _latest_terminal_receipt(
@@ -324,34 +495,77 @@ def allocate_workspace(
     slot_id: str,
     job_id: str,
     config: dict[str, Any],
+    task_binding: dict[str, Any] | None = None,
     active_isolated: int = 0,
     runner=subprocess.run,
 ) -> dict[str, Any] | None:
     """Machine-build this fire's registered worktree BEFORE the agent starts.
 
     Returns a JSON-serializable workspace receipt (stored on the state job
-    entry, echoed into the slot prompt) or None when isolation is skipped —
-    the fire then runs unisolated and PHASE-Z's baseline fallback covers it.
+    entry, echoed into the slot prompt) or None when allocation is refused.
+    The scheduler interprets None according to mode: pilot may observe the
+    historical unisolated path; enforce releases the reservation and requeues.
     The name/branch are machine-derived from slot+job identity so an agent can
     never choose (or spoof) its own ownership namespace.
     """
     repo_root = Path(repo_root)
-    if config.get("mode") != "pilot":
+    if config.get("mode") not in {"pilot", "enforce"}:
         return None
     if _canonical_repo_guarded(repo_root):
         LOG.warning("workspace allocation refused: test process on canonical checkout")
         return None
 
     def _skip(reason: str, **extra: Any) -> None:
-        LOG.warning("workspace allocation skipped (%s) job_id=%s — firing unisolated",
-                    reason, job_id[:8])
+        fallback = (
+            "fire will be requeued"
+            if config.get("mode") == "enforce"
+            else "pilot may fire unisolated"
+        )
+        LOG.warning(
+            "workspace allocation skipped (%s) job_id=%s — %s",
+            reason,
+            job_id[:8],
+            fallback,
+        )
         _append_receipt(repo_root, {
             "event": "allocation_skipped", "reason": reason,
             "job_id": job_id, "slot_id": slot_id, **extra,
         })
 
-    if active_isolated > 0:
-        _skip("active_cap", active=active_isolated)
+    binding = dict(task_binding or {})
+    declared = [
+        str(path).strip()
+        for path in (binding.get("declared_output_paths") or [])
+        if str(path).strip()
+    ]
+    invalid_declared = [
+        path
+        for path in declared
+        if path.startswith("/")
+        or path.startswith("../")
+        or "/../" in path
+        or path == "storage"
+        or path.startswith("storage/")
+        or any(char in path for char in "*?[")
+    ]
+    if config.get("mode") == "enforce" and (
+        not str(binding.get("task_id") or "").strip()
+        or not str(binding.get("claim_session_id") or "").strip()
+        or binding.get("write_intent") != "repo_patch"
+        or not declared
+        or invalid_declared
+    ):
+        _skip(
+            "task_binding_invalid",
+            task_id=binding.get("task_id"),
+            declared_output_paths=declared,
+            invalid_declared_output_paths=invalid_declared,
+        )
+        return None
+
+    max_active = int(config.get("max_active", _DEFAULT_MAX_ACTIVE))
+    if active_isolated >= max_active:
+        _skip("active_cap", active=active_isolated, max_active=max_active)
         return None
     try:
         free_gib = shutil.disk_usage(repo_root).free / 2**30
@@ -446,6 +660,16 @@ def allocate_workspace(
         "branch": branch,
         "base_sha": base_sha,
         "lanes": list(config.get("lanes") or _DEFAULT_LANES),
+        "isolation_mode": str(config.get("mode") or "pilot"),
+        "write_intent": str(binding.get("write_intent") or "repo_patch"),
+        "task_id": binding.get("task_id"),
+        "claim_session_id": binding.get("claim_session_id"),
+        "task_title": str(binding.get("title") or ""),
+        "task_description": str(binding.get("description") or ""),
+        "issue_ref": binding.get("issue_ref"),
+        "declared_output_paths": declared,
+        "post_merge_actions": list(binding.get("post_merge_actions") or []),
+        "denied_canonical_paths": ["storage/**"],
         "created_at": _now_iso(),
         "setup_s": setup_s,
     }
@@ -458,11 +682,15 @@ def allocate_workspace(
         "free_gib_after": round(free_gib_after, 3),
         "disk_delta_gib": round(free_gib - free_gib_after, 3),
         "git_common_dir": common_dir,
-        "write_intent": "repo_patch",
-        "task_id": None,
-        "claim_session_id": None,
-        "task_binding_status": "pending_worker_claim",
-        "declared_output_paths": [],
+        "write_intent": workspace["write_intent"],
+        "task_id": workspace["task_id"],
+        "claim_session_id": workspace["claim_session_id"],
+        "task_binding_status": (
+            "bound" if workspace["task_id"] and workspace["claim_session_id"]
+            else "pilot_unbound"
+        ),
+        "declared_output_paths": declared,
+        "post_merge_actions": workspace["post_merge_actions"],
         "denied_canonical_paths": ["storage/**"],
         **allocation_identity,
         **workspace,
@@ -530,13 +758,54 @@ def _workspace_changed_paths(repo_root: Path, workspace: dict[str, Any],
     if diff.returncode == 0:
         changed.update(p for p in (diff.stdout or "").splitlines() if p)
     else:
-        LOG.warning("workspace: branch diff rc=%d: %s",
-                    diff.returncode, (diff.stderr or "")[-200:])
+        raise RuntimeError(
+            "branch_diff_failed:"
+            f"{diff.returncode}:{(diff.stderr or '')[-200:]}"
+        )
     status = _git(wt, "status", "--porcelain", "-z", "--untracked-files=all",
                   runner=runner, timeout_s=60)
     if status.returncode == 0:
         changed.update(phase_z._porcelain_paths(status.stdout or ""))
+    else:
+        raise RuntimeError(
+            "workspace_status_failed:"
+            f"{status.returncode}:{(status.stderr or '')[-200:]}"
+        )
     return sorted(changed)
+
+
+def _output_contract_violations(
+    workspace: dict[str, Any],
+    changed: list[str],
+) -> dict[str, list[str]]:
+    denied_patterns = tuple(
+        str(pattern)
+        for pattern in (
+            workspace.get("denied_canonical_paths") or ["storage/**"]
+        )
+    )
+    denied = sorted(
+        path
+        for path in changed
+        if any(fnmatchcase(path, pattern) for pattern in denied_patterns)
+    )
+    declared = [
+        str(path).strip().rstrip("/")
+        for path in (workspace.get("declared_output_paths") or [])
+        if str(path).strip()
+    ]
+    undeclared = sorted(
+        path
+        for path in changed
+        if declared
+        and not any(path == allowed or path.startswith(f"{allowed}/")
+                    for allowed in declared)
+    )
+    return {
+        "declared": declared,
+        "denied": denied,
+        "undeclared": undeclared,
+    }
 
 
 def _run_merge_gate(*, repo_root: Path, workspace: dict[str, Any],
@@ -545,7 +814,61 @@ def _run_merge_gate(*, repo_root: Path, workspace: dict[str, Any],
     no-coverage passes; anything else is red. Reuses phase_z's changed-file →
     test-file mapping so there is exactly one owner of that policy."""
     wt = Path(workspace["path"])
-    changed = _workspace_changed_paths(repo_root, workspace, runner=runner)
+    try:
+        changed = _workspace_changed_paths(repo_root, workspace, runner=runner)
+    except RuntimeError as exc:
+        return {
+            "verdict": "red",
+            "reason": "changed_path_probe_failed",
+            "rc": None,
+            "targets": [],
+            "changed": [],
+            "output_tail": str(exc),
+            "duration_s": 0.0,
+        }
+    contract = _output_contract_violations(workspace, changed)
+    denied = contract["denied"]
+    if denied:
+        return {
+            "verdict": "red",
+            "reason": "canonical_path_denied",
+            "rc": None,
+            "targets": [],
+            "changed": changed,
+            "denied": denied,
+            "output_tail": (
+                "isolated producer attempted canonical-only path(s): "
+                + ", ".join(denied)
+            ),
+            "duration_s": 0.0,
+        }
+    declared = contract["declared"]
+    if workspace.get("isolation_mode") == "enforce" and not declared:
+        return {
+            "verdict": "red",
+            "reason": "task_binding_missing",
+            "rc": None,
+            "targets": [],
+            "changed": changed,
+            "output_tail": "enforce workspace has no declared output paths",
+            "duration_s": 0.0,
+        }
+    undeclared = contract["undeclared"]
+    if undeclared:
+        return {
+            "verdict": "red",
+            "reason": "undeclared_output_path",
+            "rc": None,
+            "targets": [],
+            "changed": changed,
+            "declared": declared,
+            "undeclared": undeclared,
+            "output_tail": (
+                "candidate changed path(s) outside its task contract: "
+                + ", ".join(undeclared)
+            ),
+            "duration_s": 0.0,
+        }
     code_files = [p for p in changed if p.startswith(phase_z._GATED_CODE_PREFIXES)]
     if not code_files:
         return {"verdict": "no_coverage", "rc": None, "targets": [],
@@ -575,18 +898,68 @@ def _run_merge_gate(*, repo_root: Path, workspace: dict[str, Any],
 
 
 def _run_merge_script(*, repo_root: Path, workspace: dict[str, Any],
-                      runner=subprocess.run) -> dict[str, Any]:
+                      runner=subprocess.run,
+                      expected_main_sha: str = "",
+                      expected_candidate_sha: str = "") -> dict[str, Any]:
     """Land the branch through the ONE existing integration door."""
     script = Path(repo_root) / MERGE_SCRIPT_RELPATH
     if not script.is_file():
         return {"ok": False, "rc": None, "reason": "merge_script_missing",
                 "output_tail": str(script)}
     try:
-        proc = runner(
-            ["/bin/bash", str(script), workspace["name"]],
-            capture_output=True, text=True, timeout=_MERGE_TIMEOUT_S,
-            cwd=str(repo_root), check=False,  # K1618: never from inside the worktree
-        )
+        with git_writer_lock(
+            repo_root,
+            actor=f"dispatch-workspace-integrator:{workspace['name']}",
+            timeout_s=60,
+        ) as lease:
+            current_main = _git(
+                repo_root, "rev-parse", "main", runner=runner, timeout_s=30,
+            )
+            current_candidate = _git(
+                Path(workspace["path"]),
+                "rev-parse",
+                "HEAD",
+                runner=runner,
+                timeout_s=30,
+            )
+            if (
+                current_main.returncode != 0
+                or current_candidate.returncode != 0
+                or (
+                    expected_main_sha
+                    and (current_main.stdout or "").strip() != expected_main_sha
+                )
+                or (
+                    expected_candidate_sha
+                    and (current_candidate.stdout or "").strip()
+                    != expected_candidate_sha
+                )
+            ):
+                return {
+                    "ok": False,
+                    "rc": None,
+                    "reason": "integration_cas_lost",
+                    "output_tail": (
+                        f"expected main={expected_main_sha} "
+                        f"candidate={expected_candidate_sha}; observed "
+                        f"main={(current_main.stdout or '').strip()} "
+                        f"candidate={(current_candidate.stdout or '').strip()}"
+                    ),
+                }
+            proc = runner(
+                ["/bin/bash", str(script), workspace["name"]],
+                capture_output=True, text=True, timeout=_MERGE_TIMEOUT_S,
+                cwd=str(repo_root), check=False,  # K1618: never from inside the worktree
+                env=lease.child_env(),
+                pass_fds=lease.child_pass_fds(),
+            )
+    except GitWriterLockError as exc:
+        return {
+            "ok": False,
+            "rc": None,
+            "reason": "integration_lock_busy",
+            "output_tail": str(exc)[:300],
+        }
     except subprocess.TimeoutExpired:
         return {"ok": False, "rc": None, "reason": "merge_timeout", "output_tail": ""}
     except OSError as exc:
@@ -782,6 +1155,99 @@ def _latest_workspace_event(
     return None
 
 
+def _commit_declared_workspace_output(
+    *,
+    repo_root: Path,
+    workspace: dict[str, Any],
+    runner=subprocess.run,
+) -> dict[str, Any]:
+    """Machine-commit only task-declared producer bytes under the writer lease."""
+    wt = Path(workspace["path"])
+    name = str(workspace["name"])
+    try:
+        changed = _workspace_changed_paths(
+            repo_root, workspace, runner=runner,
+        )
+    except RuntimeError as exc:
+        return {"ok": False, "reason": "changed_path_probe_failed", "detail": str(exc)}
+    contract = _output_contract_violations(workspace, changed)
+    if contract["denied"]:
+        return {
+            "ok": False,
+            "reason": "canonical_path_denied",
+            "paths": contract["denied"],
+        }
+    if not contract["declared"]:
+        return {"ok": False, "reason": "task_binding_missing"}
+    if contract["undeclared"]:
+        return {
+            "ok": False,
+            "reason": "undeclared_output_path",
+            "paths": contract["undeclared"],
+        }
+    if not changed:
+        return {"ok": True, "created": False}
+    try:
+        with git_writer_lock(
+            repo_root,
+            actor=f"dispatch-workspace-producer-commit:{name}",
+            timeout_s=60,
+        ):
+            add = _git(
+                wt, "add", "--", *changed, runner=runner, timeout_s=60,
+            )
+            if add.returncode != 0:
+                return {
+                    "ok": False,
+                    "reason": "producer_add_failed",
+                    "rc": add.returncode,
+                    "detail": (add.stderr or "")[-300:],
+                }
+            commit = _git(
+                wt,
+                "-c",
+                "user.name=VolPred Dispatch",
+                "-c",
+                "user.email=dispatch@volpred.local",
+                "commit",
+                "--no-verify",
+                "-m",
+                (
+                    "[dispatch] "
+                    f"{workspace.get('task_id') or name} producer output"
+                ),
+                runner=runner,
+                timeout_s=60,
+            )
+            if commit.returncode != 0:
+                return {
+                    "ok": False,
+                    "reason": "producer_commit_failed",
+                    "rc": commit.returncode,
+                    "detail": (commit.stderr or commit.stdout or "")[-300:],
+                }
+            head = _git(
+                wt, "rev-parse", "HEAD", runner=runner, timeout_s=30,
+            )
+            status = _git(
+                wt, "status", "--porcelain", runner=runner, timeout_s=30,
+            )
+    except GitWriterLockError as exc:
+        return {"ok": False, "reason": "writer_lock_busy", "detail": str(exc)[:300]}
+    if head.returncode != 0 or status.returncode != 0 or (status.stdout or "").strip():
+        return {
+            "ok": False,
+            "reason": "producer_commit_readback_failed",
+            "detail": (status.stdout or status.stderr or "")[-300:],
+        }
+    return {
+        "ok": True,
+        "created": True,
+        "head_sha": (head.stdout or "").strip(),
+        "changed": changed,
+    }
+
+
 def _checkpoint_workspace(
     *,
     repo_root: Path,
@@ -809,6 +1275,27 @@ def _checkpoint_workspace(
         "commit": "",
         "released": False,
     }
+    try:
+        all_changed = _workspace_changed_paths(
+            repo_root, workspace, runner=runner,
+        )
+    except RuntimeError as exc:
+        return {
+            **result,
+            "reason": "changed_path_probe_failed",
+            "error": str(exc)[:300],
+        }
+    contract = _output_contract_violations(workspace, all_changed)
+    if contract["denied"] or contract["undeclared"] or not contract["declared"]:
+        return {
+            **result,
+            "reason": (
+                "canonical_path_denied"
+                if contract["denied"]
+                else "undeclared_output_path"
+            ),
+            "paths": contract["denied"] or contract["undeclared"],
+        }
     try:
         with git_writer_lock(
             repo_root,
@@ -1587,6 +2074,97 @@ def _adjudicate_unverified_workspace(
 
 # ── finalization ─────────────────────────────────────────────────────────────
 
+def _align_candidate_with_main(
+    *,
+    repo_root: Path,
+    workspace: dict[str, Any],
+    runner=subprocess.run,
+) -> dict[str, Any]:
+    """Rebase a clean producer branch onto current main under the writer lock.
+
+    A gate evaluates the exact combined tree that may land. If main moved since
+    allocation, testing the stale branch alone is not sufficient; rebase first,
+    then bind the gate to the resulting candidate and main object IDs.
+    """
+    wt = Path(workspace["path"])
+    try:
+        with git_writer_lock(
+            repo_root,
+            actor=f"dispatch-workspace-align:{workspace['name']}",
+            timeout_s=60,
+        ):
+            status = _git(
+                wt,
+                "status",
+                "--porcelain",
+                runner=runner,
+                timeout_s=60,
+            )
+            if status.returncode != 0:
+                return {"ok": False, "reason": "status_error"}
+            if (status.stdout or "").strip():
+                return {"ok": False, "reason": "candidate_uncommitted"}
+            main = _git(
+                repo_root, "rev-parse", "main", runner=runner, timeout_s=30,
+            )
+            candidate = _git(
+                wt, "rev-parse", "HEAD", runner=runner, timeout_s=30,
+            )
+            if main.returncode != 0 or candidate.returncode != 0:
+                return {"ok": False, "reason": "head_read_error"}
+            main_sha = (main.stdout or "").strip()
+            candidate_sha = (candidate.stdout or "").strip()
+            based = _git(
+                repo_root,
+                "merge-base",
+                "--is-ancestor",
+                main_sha,
+                candidate_sha,
+                runner=runner,
+                timeout_s=30,
+            )
+            if based.returncode != 0:
+                rebased = _git(
+                    wt,
+                    "rebase",
+                    main_sha,
+                    runner=runner,
+                    timeout_s=_MERGE_TIMEOUT_S,
+                )
+                if rebased.returncode != 0:
+                    _git(
+                        wt,
+                        "rebase",
+                        "--abort",
+                        runner=runner,
+                        timeout_s=60,
+                    )
+                    return {
+                        "ok": False,
+                        "reason": "rebase_conflict",
+                        "output_tail": (
+                            (rebased.stdout or "") + (rebased.stderr or "")
+                        )[-1000:],
+                    }
+                candidate = _git(
+                    wt, "rev-parse", "HEAD", runner=runner, timeout_s=30,
+                )
+                if candidate.returncode != 0:
+                    return {"ok": False, "reason": "head_read_error"}
+                candidate_sha = (candidate.stdout or "").strip()
+            return {
+                "ok": True,
+                "main_sha": main_sha,
+                "candidate_sha": candidate_sha,
+            }
+    except GitWriterLockError as exc:
+        return {
+            "ok": False,
+            "reason": "integration_lock_busy",
+            "output_tail": str(exc)[:300],
+        }
+
+
 def finalize_workspace(
     *,
     repo_root: Path,
@@ -1609,6 +2187,17 @@ def finalize_workspace(
         LOG.warning("workspace finalize refused: test process on canonical checkout")
         return {"disposition": "canonical_guard", "workspace": workspace.get("name")}
     workspace_name = str(workspace.get("name") or "")
+    if not ensure_task_settlement_pending(
+        repo_root,
+        workspace=workspace,
+        job_id=job_id,
+        worker_outcome=worker_outcome,
+    ):
+        return {
+            "disposition": "receipt_failed",
+            "workspace": workspace_name,
+            "reason": "task_settlement_pending_not_durable",
+        }
     prior = _latest_terminal_receipt(repo_root, workspace_name)
     if prior is not None:
         return {**prior, "replayed": True}
@@ -1696,6 +2285,7 @@ def _finalize_inner(
     runner,
     gate_fn,
     merge_fn,
+    cas_retry_count: int = 0,
 ) -> dict[str, Any]:
     name = workspace["name"]
     wt = Path(workspace["path"])
@@ -1800,33 +2390,170 @@ def _finalize_inner(
                 "checkpoint": checkpoint,
                 "dirty": dirty, "unique_commits": unique_commits}
 
-    gate = gate_fn(repo_root=repo_root, workspace=workspace, runner=runner)
-    if gate.get("verdict") == "red":
-        detail = (
-            f"merge gate rc={gate.get('rc')} targets={gate.get('targets')}\n"
-            + str(gate.get("output_tail") or "")
+    if dirty:
+        committed = _commit_declared_workspace_output(
+            repo_root=repo_root,
+            workspace=workspace,
+            runner=runner,
         )
+        if not committed.get("ok"):
+            reason = str(committed.get("reason") or "producer_commit_failed")
+            remediation, checkpoint = _remediate_workspace(
+                repo_root=repo_root,
+                workspace=workspace,
+                reason=reason,
+                detail=str(
+                    committed.get("detail")
+                    or committed.get("paths")
+                    or ""
+                ),
+                queue_path=queue_path,
+                runner=runner,
+            )
+            return {
+                **base,
+                "disposition": "remediation_opened",
+                "reason": reason,
+                "producer_commit": committed,
+                "remediation": remediation,
+                "checkpoint": checkpoint,
+            }
+        unique_commits += 1 if committed.get("created") else 0
+
+    gate: dict[str, Any] = {}
+    gated_head_sha = ""
+    gated_main_sha = ""
+    for gate_attempt in range(1, 4):
+        aligned = _align_candidate_with_main(
+            repo_root=repo_root,
+            workspace=workspace,
+            runner=runner,
+        )
+        if not aligned.get("ok"):
+            reason = str(aligned.get("reason") or "candidate_alignment_failed")
+            remediation, checkpoint = _remediate_workspace(
+                repo_root=repo_root,
+                workspace=workspace,
+                reason=reason,
+                detail=str(aligned.get("output_tail") or ""),
+                queue_path=queue_path,
+                runner=runner,
+            )
+            return {
+                **base,
+                "disposition": "remediation_opened",
+                "reason": reason,
+                "remediation": remediation,
+                "checkpoint": checkpoint,
+            }
+        candidate_head_sha = str(aligned["candidate_sha"])
+        main_sha_before_gate = str(aligned["main_sha"])
+        gate = gate_fn(repo_root=repo_root, workspace=workspace, runner=runner)
+        if gate.get("verdict") == "red":
+            gate_reason = str(gate.get("reason") or "gate_red")
+            detail = (
+                f"merge gate rc={gate.get('rc')} targets={gate.get('targets')}\n"
+                + str(gate.get("output_tail") or "")
+            )
+            remediation, checkpoint = _remediate_workspace(
+                repo_root=repo_root, workspace=workspace, reason=gate_reason,
+                detail=detail,
+                queue_path=queue_path,
+                runner=runner,
+            )
+            return {
+                **base,
+                "disposition": "remediation_opened",
+                "reason": gate_reason,
+                "gate": {
+                    key: gate.get(key)
+                    for key in ("verdict", "rc", "targets", "duration_s")
+                },
+                "remediation": remediation,
+                "checkpoint": checkpoint,
+            }
+
+        branch_head = _git(
+            wt, "rev-parse", "HEAD", runner=runner, timeout_s=30,
+        )
+        main_head = _git(
+            repo_root, "rev-parse", "main", runner=runner, timeout_s=30,
+        )
+        if branch_head.returncode != 0 or main_head.returncode != 0:
+            return {**base, "disposition": "head_read_error"}
+        observed_candidate = (branch_head.stdout or "").strip()
+        observed_main = (main_head.stdout or "").strip()
+        if observed_candidate != candidate_head_sha:
+            reason = "candidate_head_drift"
+            remediation, checkpoint = _remediate_workspace(
+                repo_root=repo_root,
+                workspace={**workspace, "checkpoint_commit": observed_candidate},
+                reason=reason,
+                detail=(
+                    "workspace HEAD changed while gate was running: "
+                    f"before={candidate_head_sha} after={observed_candidate}"
+                ),
+                queue_path=queue_path,
+                runner=runner,
+            )
+            return {
+                **base,
+                "disposition": "remediation_opened",
+                "reason": reason,
+                "gated_head_sha": candidate_head_sha,
+                "observed_head_sha": observed_candidate,
+                "remediation": remediation,
+                "checkpoint": checkpoint,
+            }
+        if observed_main != main_sha_before_gate:
+            LOG.info(
+                "workspace main advanced during gate name=%s attempt=%d; "
+                "rebasing and re-gating",
+                name,
+                gate_attempt,
+            )
+            continue
+        gated_head_sha = candidate_head_sha
+        gated_main_sha = main_sha_before_gate
+        break
+    else:
+        reason = "main_advance_retry_exhausted"
         remediation, checkpoint = _remediate_workspace(
-            repo_root=repo_root, workspace=workspace, reason="gate_red",
-            detail=detail,
+            repo_root=repo_root,
+            workspace=workspace,
+            reason=reason,
+            detail="main advanced during three consecutive gate attempts",
             queue_path=queue_path,
             runner=runner,
         )
-        return {**base, "disposition": "remediation_opened", "reason": "gate_red",
-                "gate": {k: gate.get(k) for k in ("verdict", "rc", "targets", "duration_s")},
-                "remediation": remediation, "checkpoint": checkpoint}
+        return {
+            **base,
+            "disposition": "remediation_opened",
+            "reason": reason,
+            "remediation": remediation,
+            "checkpoint": checkpoint,
+        }
 
-    branch_head = _git(
-        wt,
-        "rev-parse",
-        "HEAD",
-        runner=runner,
-        timeout_s=30,
-    )
-    if branch_head.returncode != 0:
-        return {**base, "disposition": "head_read_error",
-                "rc": branch_head.returncode}
-    gated_head_sha = (branch_head.stdout or "").strip()
+    if not _append_receipt(
+        repo_root,
+        {
+            "event": "gate_passed",
+            "workspace": name,
+            "branch": branch,
+            "candidate_head_sha": gated_head_sha,
+            "main_base_sha": gated_main_sha,
+            "gate_attempt": gate_attempt,
+            "gate": {
+                key: gate.get(key)
+                for key in ("verdict", "rc", "targets", "duration_s")
+            },
+        },
+    ):
+        return {
+            **base,
+            "disposition": "receipt_failed",
+            "reason": "gate_receipt_not_durable",
+        }
     if not _append_receipt(
         repo_root,
         {
@@ -1835,6 +2562,7 @@ def _finalize_inner(
             "branch": branch,
             "target_disposition": "merged",
             "head_sha": gated_head_sha,
+            "main_base_sha": gated_main_sha,
             "gate": {
                 key: gate.get(key)
                 for key in ("verdict", "rc", "targets", "duration_s")
@@ -1845,9 +2573,42 @@ def _finalize_inner(
         return {**base, "disposition": "receipt_failed",
                 "reason": "merge_intent_not_durable"}
 
-    merge = merge_fn(repo_root=repo_root, workspace=workspace, runner=runner)
+    merge = merge_fn(
+        repo_root=repo_root,
+        workspace=workspace,
+        runner=runner,
+        expected_main_sha=gated_main_sha,
+        expected_candidate_sha=gated_head_sha,
+    )
     if not merge.get("ok"):
         reason = str(merge.get("reason") or "merge_failed")
+        if reason == "integration_cas_lost" and cas_retry_count < 2:
+            # The candidate was green for a main SHA that stopped being
+            # current between the durable gate receipt and integrator CAS.
+            # Rebuild from the now-current main and run the gate again; never
+            # turn an expected concurrency race into a remediation task and
+            # never reuse the stale PASS receipt.
+            _append_receipt(
+                repo_root,
+                {
+                    "event": "integration_cas_retry",
+                    "workspace": name,
+                    "branch": branch,
+                    "stale_candidate_head_sha": gated_head_sha,
+                    "stale_main_base_sha": gated_main_sha,
+                    "retry": cas_retry_count + 1,
+                },
+            )
+            return _finalize_inner(
+                repo_root=repo_root,
+                workspace=workspace,
+                worker_outcome=worker_outcome,
+                queue_path=queue_path,
+                runner=runner,
+                gate_fn=gate_fn,
+                merge_fn=merge_fn,
+                cas_retry_count=cas_retry_count + 1,
+            )
         remediation, checkpoint = _remediate_workspace(
             repo_root=repo_root, workspace=workspace,
             reason=reason,
@@ -1962,13 +2723,15 @@ def sweep_orphan_workspaces(
 def prompt_fragment(workspace: dict[str, Any]) -> str:
     """Slot-prompt section binding isolated-lane repo writes to the workspace."""
     lanes = "／".join(workspace.get("lanes") or _DEFAULT_LANES)
+    mode = str(workspace.get("isolation_mode") or "pilot")
     return (
-        "[Producer-scoped workspace — WS-B pilot]\n"
+        f"[Producer-scoped workspace — WS-B {mode}]\n"
         f"isolated_lanes={lanes}; workspace={workspace['path']}; "
         f"branch={workspace['branch']}.\n"
         f"本班執行上述 lane 任務時，所有 repo-byte 變更（scripts/src/tests/config/docs/"
         f".claude 等 Git-tracked 檔案）一律寫進 workspace（可 cd 進去；它是本 fire 專屬的 "
-        "registered worktree），並在 workspace 內以 ASCII commit message（含 task id）提交。"
+        "registered worktree）。只修改 declared_output_paths；不得 git add/commit，machine "
+        "finalizer 會在 worker 結束後只 stage 宣告路徑並建立 candidate commit。"
         "禁止為這些 lane 另建 worktree、禁止把這些 lane 的 repo 變更直接寫進 canonical_root。"
         "此 workspace 由 supervisor 管理：**不得自行 merge、也不適用「本班結束前完整整合」**"
         "—— supervisor 會在本班結束後跑測試 gate，綠才併入 main；紅則自動開 aggregate "

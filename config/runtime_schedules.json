@@ -1679,13 +1679,14 @@
       "max_slots_rationale": "2026-07-19 老闆『加快清任務池』(assign_794c4bc2)：2→4。2 個 slot 長期滿載，requested fire（email/telegram/急件）撞 slots_full 被延到下一 tick。放大的是「同時幾條主線程」，不是 agent 數 —— agent 並行度的唯一 owner 仍是 scripts/dispatch_slot_budget.py（全 repo worktree occupancy，4/surge 6），不隨 max_slots 倍增。上限依據：10 CPU core（主線程 IO-bound）、64GB RAM、weekly quota 剩 67.7%、磁碟 85GB free（91% used，worktree 是這裡的真限制而非 slot 數）。守門：scheduler.load_max_slots 於連 2 次 outcome=quota_blocked 時自動 clamp 回 2，成功一次即自愈。",
       "fires": "Receives model-free ticks only from Operations Core job agent_dispatch_tick; each tick evaluates the hourly volpred-hourly-dispatch policy plus state.fire_requested_at",
       "writer_isolation": {
-        "mode": "pilot",
+        "mode": "enforce",
         "lanes": [
           "platform_ops"
         ],
+        "max_active": 2,
         "max_total": 3,
         "disk_floor_gib": 20,
-        "rationale": "WS-B producer-scoped execution isolation (docs/dispatch-writer-isolation-design.md; refactor_plan_ops_master_2026_07 §WS-B). pilot = 每班 fire 由 supervisor 機械配發一個 registered worktree（.claude/worktrees/dispatch-<slot>-<job8>），platform_ops lane 的 repo-byte 產出一律寫進去；gate 綠才由 merge_worktree.sh 併入 main，紅則自動開 P2 remediation 單。ownership 由隔離產生，PHASE-Z 基線猜作者降為 fallback。governance lane 於 pilot 穩定一週後加入（改本欄 lanes 即生效，config 每 tick 熱重載）。active cap=1（同時最多一個隔離 fire）；max_total 含 remediation 保留的 worktree；低於 disk_floor_gib 可用空間時 fail-closed 不建（該班照常 fire、不隔離）。"
+        "rationale": "Issue #43 enforce cutover：每班 mutating-capable fire 由 supervisor 在 agent spawn 前機械配發 registered worktree，worker cwd 與 macOS sandbox 綁定該 workspace；allocation/cap/disk/lock 任一失敗只會釋放 slot 並保留 fire request 重派，禁止 shared-main fallback。candidate head + main base 進 durable gate receipt；main 前進必 rebase + re-gate，integrator 以雙 SHA fence 落地。canonical storage 只容許既有帶鎖 CLI；workspace 內 storage/** 變更在 merge gate fail closed。max_active=2 允許雙 slot 不相交工作並行，max_total=3 保留一個 checkpoint/remediation 緩衝；超限只重派。"
       },
       "since": "2026-07-04T16:36:00+08:00",
       "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, max_slots worker pool, retry/failover ladder and cohort-drained PHASE-Z safety commit. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."

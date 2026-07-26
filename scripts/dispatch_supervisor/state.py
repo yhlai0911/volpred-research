@@ -33,7 +33,15 @@ Schema (version 1)::
           },
           "workspace": {                          # WS-B: producer-scoped worktree receipt
             "name": str, "path": str, "branch": str, "base_sha": str,
-            "lanes": [str], "created_at": "<ISO>", "setup_s": float
+            "lanes": [str], "created_at": "<ISO>", "setup_s": float,
+            "task_id": str, "claim_session_id": str,
+            "write_intent": "repo_patch", "declared_output_paths": [str],
+            "post_merge_actions": [], "denied_canonical_paths": [str],
+            # prepared before spawn; flattened so state keeps a bounded schema
+            "isolation_profile_path": str, "isolation_run_dir": str,
+            "isolation_synthetic_home": str, "isolation_tmp_dir": str,
+            "isolation_pycache_dir": str, "isolation_workspace": str,
+            "isolation_canonical_root": str
           },                                      # only present when the fire is isolated
           "restart_cleanup_pending": true,
           "cleanup_recorded": true,
@@ -741,6 +749,41 @@ def request_fire(reason: str, path: Path = STATE_PATH) -> None:
     with _locked_state(path) as (_fh, data):
         data["fire_requested_at"] = _now()
         data["fire_request_reason"] = str(reason)[:200]
+
+
+def defer_reserved_fire(
+    *,
+    job_id: str,
+    reason: str,
+    path: Path = STATE_PATH,
+) -> dict[str, Any] | None:
+    """Atomically return one unstarted reservation to the fire queue.
+
+    Writer-isolation admission has no safe partial state: once the scheduler
+    consumes a fire request and reserves a slot, a workspace/substrate failure
+    must both release that exact reservation *and* restore demand in the same
+    state-file transaction.  The former release_reservation()+request_fire()
+    sequence had a process-crash window that could lose the only fire request.
+
+    Only an unstarted reservation is eligible.  A running pid or a reservation
+    whose workspace was already bound belongs to normal completion/recovery,
+    not admission deferral.
+    """
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return None
+        index, job = found
+        if job.get("pid") is not None or job.get("phase") != "reserved":
+            return None
+        snapshot = dict(job)
+        del data["current_jobs"][index]
+        data["fire_requested_at"] = _now()
+        data["fire_request_reason"] = str(reason)[:200]
+        _sync_projection(data)
+        if _IMPLICIT_JOB_ID.get() == str(job.get("job_id")):
+            _IMPLICIT_JOB_ID.set(None)
+        return snapshot
 
 
 def consume_fire_request(path: Path = STATE_PATH) -> str | None:
