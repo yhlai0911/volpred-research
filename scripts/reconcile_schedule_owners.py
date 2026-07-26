@@ -28,6 +28,7 @@ import plistlib
 import shutil
 import subprocess
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -190,6 +191,30 @@ def _install_core_plist() -> None:
         plistlib.load(handle)
     destination = Path.home() / "Library" / "LaunchAgents" / CORE_PLIST.name
     destination.parent.mkdir(parents=True, exist_ok=True)
+    domain = f"gui/{os.getuid()}"
+
+    def loaded() -> bool:
+        return (
+            subprocess.run(
+                ["launchctl", "print", f"{domain}/{CORE_LABEL}"],
+                capture_output=True,
+                text=True,
+                check=False,
+            ).returncode
+            == 0
+        )
+
+    # Reconcile is run for each canary class.  Restarting an unchanged healthy
+    # clock on every invocation creates a launchd bootout/bootstrap race (exit
+    # 5 while the old service is still unloading) and an unnecessary schedule
+    # observation gap.
+    if (
+        destination.exists()
+        and destination.read_bytes() == CORE_PLIST.read_bytes()
+        and loaded()
+    ):
+        return
+
     fd, tmp_name = tempfile.mkstemp(
         dir=str(destination.parent), prefix=f".{destination.name}.", suffix=".tmp"
     )
@@ -201,13 +226,18 @@ def _install_core_plist() -> None:
     except BaseException:
         Path(tmp_name).unlink(missing_ok=True)
         raise
-    domain = f"gui/{os.getuid()}"
-    subprocess.run(
-        ["launchctl", "bootout", f"{domain}/{CORE_LABEL}"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
+    if loaded():
+        subprocess.run(
+            ["launchctl", "bootout", f"{domain}/{CORE_LABEL}"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        deadline = time.monotonic() + 5.0
+        while loaded() and time.monotonic() < deadline:
+            time.sleep(0.1)
+        if loaded():
+            raise RuntimeError(f"{CORE_LABEL} did not unload within 5 seconds")
     subprocess.run(
         ["launchctl", "bootstrap", domain, str(destination)],
         capture_output=True,

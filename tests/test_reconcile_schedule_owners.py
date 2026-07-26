@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from scripts import reconcile_schedule_owners as owners
 from scripts.reconcile_schedule_owners import audit_owner_plan, build_owner_plan
 
 
@@ -85,3 +86,34 @@ def test_audit_green_requires_core_clock() -> None:
     assert missing["ok"] is False
     assert green["ok"] is True
     assert green["status"] == "owner_surfaces_verified"
+
+
+def test_unchanged_loaded_core_plist_is_not_restarted(
+    tmp_path, monkeypatch
+) -> None:
+    source = tmp_path / "source.plist"
+    destination = tmp_path / "Library" / "LaunchAgents" / source.name
+    source.write_bytes(
+        b"<?xml version='1.0'?><plist version='1.0'><dict/></plist>"
+    )
+    destination.parent.mkdir(parents=True)
+    destination.write_bytes(source.read_bytes())
+    calls: list[list[str]] = []
+
+    class Result:
+        returncode = 0
+
+    def run(command, **_kwargs):
+        calls.append(command)
+        return Result()
+
+    monkeypatch.setattr(owners, "CORE_PLIST", source)
+    monkeypatch.setattr(owners, "CORE_LABEL", "com.volpred.test")
+    monkeypatch.setattr(owners.Path, "home", lambda: tmp_path)
+    monkeypatch.setattr(owners.subprocess, "run", run)
+
+    owners._install_core_plist()
+
+    assert calls == [
+        ["launchctl", "print", f"gui/{owners.os.getuid()}/com.volpred.test"]
+    ]
