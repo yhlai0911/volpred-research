@@ -102,8 +102,9 @@ projection 中，無法由 ownership transaction 無損移交；因此 active wo
 共用 owner-row lock／generation fence，transfer 用 exclusive-lock CAS。Expired
 claimed／running lease 會依 DB clock 在同一 transaction 回 pending、保留 work identity
 並追加 release event；有效 lease 仍阻擋 transfer。Legacy runtime grants 與 owner
-切換同交易撤銷／恢復，既有 definer-owned notification／publisher／commit workflow
-則可繼續呼叫 current-owner compatibility wrapper。由於 durable preflight gate row
+切換同交易撤銷／恢復；legacy wrapper 仍 assert `legacy`，已進入但排隊中的 caller
+也不能越過 owner CAS。既有 notification／publisher／commit formal workflow
+明確 rebind 到 runtime 不可執行的 definer-only internal seam。由於 durable preflight gate row
 尚未存在，private transfer 刻意不授權 worker、approver 或 PUBLIC，避免任意 SHA
 繞過七日 gate；目前僅有 local PG17／non-superuser migration replay 與 nested workflow
 integration evidence，未部署 production、未改 live owner、未做七日 read-back／rollback

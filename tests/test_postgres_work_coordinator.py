@@ -7,7 +7,8 @@ from pathlib import Path
 import shutil
 import socket
 import subprocess
-from threading import Barrier
+from threading import Barrier, Event
+from time import monotonic, sleep
 
 import psycopg
 import pytest
@@ -237,6 +238,26 @@ def _expire_claim(postgres_dsn: str, work_id: str) -> None:
         )
 
 
+def _wait_for_postgres_lock(dsn: str, backend_pid: int) -> None:
+    deadline = monotonic() + 5
+    while monotonic() < deadline:
+        with psycopg.connect(dsn) as connection:
+            wait_event_type = connection.execute(
+                """
+                SELECT wait_event_type
+                FROM pg_catalog.pg_stat_activity
+                WHERE pid = %s
+                """,
+                (backend_pid,),
+            ).fetchone()[0]
+        if wait_event_type == "Lock":
+            return
+        sleep(0.01)
+    raise AssertionError(
+        f"backend {backend_pid} did not reach a PostgreSQL lock wait"
+    )
+
+
 def test_postgres_submit_is_idempotent_and_inspectable(postgres_dsn: str) -> None:
     coordinator = WorkCoordinator(
         PostgresCoordinationStore(
@@ -355,6 +376,100 @@ def test_work_owner_cutover_fences_legacy_mutations_atomically(
 
     assert submitted.id == "work-owned-generation-2"
     assert owner_store.read_owner() == cutover
+
+
+def test_inflight_legacy_wrapper_rechecks_owner_after_transfer_wins_lock(
+    postgres_dsn: str,
+) -> None:
+    transfer_started = Event()
+    submit_started = Event()
+    transfer_pid: list[int] = []
+    submit_pid: list[int] = []
+
+    def transfer() -> None:
+        with psycopg.connect(postgres_dsn) as connection:
+            transfer_pid.append(connection.info.backend_pid)
+            transfer_started.set()
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.transfer_work_owner(
+                  'legacy', 1, 'operations_core', 'operator:pytest',
+                  'transfer wins owner lock race', %s, NULL
+                )
+                """,
+                ("6" * 64,),
+            ).fetchone()
+
+    def submit() -> Exception | None:
+        connection = _worker_connection(postgres_dsn)
+        submit_pid.append(connection.info.backend_pid)
+        submit_started.set()
+        coordinator = WorkCoordinator(
+            PostgresCoordinationStore(lambda: connection),
+            clock=lambda: FIXED_NOW,
+            id_factory=lambda: "work-inflight-legacy-fenced",
+        )
+        try:
+            coordinator.submit(
+                WorkRequest(
+                    idempotency_key="owner:postgres:inflight-legacy-fenced",
+                    source="user",
+                    kind="platform_ops",
+                    title="in-flight legacy call must recheck owner",
+                    priority=1,
+                    required_capabilities=frozenset(),
+                    required_attestations=frozenset(),
+                    risk="safe",
+                    approval="auto",
+                    payload_ref="owner:postgres:inflight-legacy-fenced",
+                    requester_ref="owner:user",
+                )
+            )
+        except Exception as error:
+            connection.close()
+            return error
+        connection.close()
+        return None
+
+    blocker = psycopg.connect(postgres_dsn)
+    blocker.execute(
+        """
+        SELECT 1
+        FROM volpred_ops.work_owners
+        WHERE capability = 'work.coordinate'
+        FOR UPDATE
+        """
+    ).fetchone()
+    try:
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            transfer_future = executor.submit(transfer)
+            assert transfer_started.wait(timeout=5)
+            _wait_for_postgres_lock(postgres_dsn, transfer_pid[0])
+
+            submit_future = executor.submit(submit)
+            assert submit_started.wait(timeout=5)
+            _wait_for_postgres_lock(postgres_dsn, submit_pid[0])
+
+            blocker.commit()
+            transfer_future.result(timeout=10)
+            submit_error = submit_future.result(timeout=10)
+    finally:
+        blocker.close()
+
+    assert isinstance(submit_error, WorkOwnershipLost)
+    assert "legacy mutation lost" in str(submit_error)
+    with psycopg.connect(postgres_dsn) as connection:
+        assert connection.execute(
+            "SELECT owner, generation FROM volpred_ops.work_owners"
+        ).fetchone() == ("operations_core", 2)
+        assert connection.execute(
+            """
+            SELECT count(*)
+            FROM volpred_ops.work_items
+            WHERE id = 'work-inflight-legacy-fenced'
+            """
+        ).fetchone()[0] == 0
 
 
 def test_operations_core_generation_owns_full_lifecycle_and_rollback(
@@ -735,6 +850,14 @@ def test_work_owner_security_exposes_only_fenced_public_functions(
                 'text,text,timestamptz,text,text,integer,'
                 'timestamptz,timestamptz,bigint)',
                 'EXECUTE'
+              ),
+              has_function_privilege(
+                'volpred_ops_worker',
+                'volpred_ops.submit_work_internal('
+                'text,text,text,text,text,integer,text[],text[],text,text,'
+                'text,text,timestamptz,text,text,integer,'
+                'timestamptz,timestamptz)',
+                'EXECUTE'
               )
             """
         ).fetchone()
@@ -771,7 +894,7 @@ def test_work_owner_security_exposes_only_fenced_public_functions(
             """
         ).fetchone()
 
-    assert worker_privileges == (False, False, True)
+    assert worker_privileges == (False, False, True, False)
     assert approver_privileges == (False, True)
     assert worker_table_access == (False, False)
 

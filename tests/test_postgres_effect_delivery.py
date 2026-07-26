@@ -1637,6 +1637,61 @@ def test_commit_owner_service_rpc_cutover_rollback_and_acl(
                 )
 
 
+def test_formal_workflows_are_rebound_to_definer_only_work_seams(
+    postgres_effect_dsn: str,
+) -> None:
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        rows = connection.execute(
+            """
+            SELECT namespace.nspname, procedure.proname, procedure.prosrc
+            FROM pg_catalog.pg_proc AS procedure
+            JOIN pg_catalog.pg_namespace AS namespace
+              ON namespace.oid = procedure.pronamespace
+            WHERE (
+              namespace.nspname,
+              procedure.proname
+            ) IN (
+              ('public', 'volpred_request_owned_email_notification'),
+              ('public', 'volpred_settle_owned_email_notification'),
+              ('volpred_ops', 'settle_commit_write'),
+              ('public', 'volpred_request_owned_publisher_article_sync'),
+              ('public', 'volpred_settle_owned_publisher_article_sync'),
+              ('public', 'volpred_request_owned_publisher_article_reconcile'),
+              ('public', 'volpred_settle_owned_publisher_article_reconcile')
+            )
+              AND procedure.prosrc LIKE '%_work_internal(%'
+            ORDER BY namespace.nspname, procedure.proname
+            """
+        ).fetchall()
+        worker_internal_access = connection.execute(
+            """
+            SELECT has_function_privilege(
+              'volpred_ops_worker',
+              'volpred_ops.submit_work_internal('
+              'text,text,text,text,text,integer,text[],text[],text,text,'
+              'text,text,timestamptz,text,text,integer,'
+              'timestamptz,timestamptz)',
+              'EXECUTE'
+            )
+            """
+        ).fetchone()[0]
+
+    assert len(rows) == 7
+    assert all(
+        not any(
+            legacy_name in source
+            for legacy_name in (
+                "volpred_ops.submit_work(",
+                "volpred_ops.approve_work(",
+                "volpred_ops.complete_work(",
+                "volpred_ops.release_work(",
+            )
+        )
+        for _, _, source in rows
+    )
+    assert worker_internal_access is False
+
+
 def _ensure_commit_owner(dsn: str) -> None:
     store = PostgresCommitOwnerStore(
         connection_factory=lambda: _approver_connection(dsn)

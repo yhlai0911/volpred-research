@@ -263,6 +263,14 @@ BEGIN
       'work ownership cutover cannot carry rollback generation';
   END IF;
 
+  -- Revoke admission before taking the owner-row lock. Existing legacy
+  -- invocations either finish first or later re-check `legacy` under the
+  -- shared row lock; transfer never holds the row while waiting on function
+  -- ACL metadata.
+  IF p_target_owner = 'operations_core' THEN
+    PERFORM volpred_ops.set_legacy_work_mutation_access(false);
+  END IF;
+
   SELECT * INTO STRICT ownership
   FROM volpred_ops.work_owners
   WHERE capability = 'work.coordinate'
@@ -372,9 +380,9 @@ BEGIN
     ownership.changed_at
   );
 
-  PERFORM volpred_ops.set_legacy_work_mutation_access(
-    p_target_owner = 'legacy'
-  );
+  IF p_target_owner = 'legacy' THEN
+    PERFORM volpred_ops.set_legacy_work_mutation_access(true);
+  END IF;
 
   RETURN QUERY SELECT * FROM volpred_ops.read_work_owner();
 END;
@@ -404,11 +412,172 @@ ALTER FUNCTION volpred_ops.complete_work(
   text, text, text, integer, text, text
 ) RENAME TO complete_work_unfenced;
 
--- Compatibility wrappers have no generation argument. Runtime roles can
--- execute them only while legacy owns the capability; Operations Core
--- stored procedures retain owner-only access so their transaction can call
--- the same private mutation body after cutover.
+-- Runtime compatibility wrappers have no generation argument and remain
+-- valid only while legacy owns the capability. Transfer revokes their
+-- runtime grants before changing the owner, while the explicit owner check
+-- fences invocations that already passed their ACL check.
 CREATE FUNCTION volpred_ops.submit_work(
+  p_id text,
+  p_idempotency_key text,
+  p_source text,
+  p_kind text,
+  p_title text,
+  p_priority integer,
+  p_required_capabilities text[],
+  p_required_attestations text[],
+  p_risk text,
+  p_approval text,
+  p_payload_ref text,
+  p_parent_id text,
+  p_deadline timestamptz,
+  p_requester_ref text,
+  p_status text,
+  p_version integer,
+  p_created_at timestamptz,
+  p_updated_at timestamptz
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.submit_work_unfenced(
+    p_id, p_idempotency_key, p_source, p_kind, p_title, p_priority,
+    p_required_capabilities, p_required_attestations, p_risk, p_approval,
+    p_payload_ref, p_parent_id, p_deadline, p_requester_ref, p_status,
+    p_version, p_created_at, p_updated_at
+  );
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.acquire_work(
+  p_worker_id text,
+  p_capabilities text[],
+  p_attestations text[],
+  p_lease_seconds integer,
+  p_token text
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.acquire_work_unfenced(
+    p_worker_id, p_capabilities, p_attestations, p_lease_seconds, p_token
+  );
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.approve_work(
+  p_work_id text,
+  p_expected_version integer,
+  p_approved_by text,
+  p_evidence_ref text
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.approve_work_unfenced(
+    p_work_id, p_expected_version, p_approved_by, p_evidence_ref
+  );
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.start_work(
+  p_work_id text,
+  p_lease_token text,
+  p_expected_version integer
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.start_work_unfenced(
+    p_work_id, p_lease_token, p_expected_version
+  );
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.checkpoint_work(
+  p_work_id text,
+  p_lease_token text,
+  p_expected_version integer,
+  p_checkpoint_id text,
+  p_artifact_ref text,
+  p_artifact_sha256 text,
+  p_verification_ref text
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.checkpoint_work_unfenced(
+    p_work_id, p_lease_token, p_expected_version, p_checkpoint_id,
+    p_artifact_ref, p_artifact_sha256, p_verification_ref
+  );
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.release_work(
+  p_work_id text,
+  p_lease_token text,
+  p_expected_version integer,
+  p_reason text
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.release_work_unfenced(
+    p_work_id, p_lease_token, p_expected_version, p_reason
+  );
+END;
+$$;
+
+CREATE FUNCTION volpred_ops.complete_work(
+  p_report_id text,
+  p_work_id text,
+  p_lease_token text,
+  p_expected_version integer,
+  p_result_ref text,
+  p_summary text
+)
+RETURNS SETOF volpred_ops.work_item_reads
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+BEGIN
+  PERFORM volpred_ops.assert_work_owner('legacy');
+  RETURN QUERY SELECT * FROM volpred_ops.complete_work_unfenced(
+    p_report_id, p_work_id, p_lease_token, p_expected_version,
+    p_result_ref, p_summary
+  );
+END;
+$$;
+
+-- Definer-only seams preserve existing Operations Core orchestrations across
+-- the owner transition. They lock whichever owner is current, but are never
+-- executable by a runtime role; the public formal callers below are rewritten
+-- to use these names instead of the legacy compatibility wrappers.
+CREATE FUNCTION volpred_ops.submit_work_internal(
   p_id text,
   p_idempotency_key text,
   p_source text,
@@ -444,7 +613,7 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION volpred_ops.acquire_work(
+CREATE FUNCTION volpred_ops.acquire_work_internal(
   p_worker_id text,
   p_capabilities text[],
   p_attestations text[],
@@ -464,7 +633,7 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION volpred_ops.approve_work(
+CREATE FUNCTION volpred_ops.approve_work_internal(
   p_work_id text,
   p_expected_version integer,
   p_approved_by text,
@@ -483,7 +652,7 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION volpred_ops.start_work(
+CREATE FUNCTION volpred_ops.start_work_internal(
   p_work_id text,
   p_lease_token text,
   p_expected_version integer
@@ -501,7 +670,7 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION volpred_ops.checkpoint_work(
+CREATE FUNCTION volpred_ops.checkpoint_work_internal(
   p_work_id text,
   p_lease_token text,
   p_expected_version integer,
@@ -524,7 +693,7 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION volpred_ops.release_work(
+CREATE FUNCTION volpred_ops.release_work_internal(
   p_work_id text,
   p_lease_token text,
   p_expected_version integer,
@@ -543,7 +712,7 @@ BEGIN
 END;
 $$;
 
-CREATE FUNCTION volpred_ops.complete_work(
+CREATE FUNCTION volpred_ops.complete_work_internal(
   p_report_id text,
   p_work_id text,
   p_lease_token text,
@@ -744,6 +913,82 @@ BEGIN
 END;
 $$;
 
+-- Rebind the exact existing formal orchestrations to the definer-only seams.
+-- The whitelist and count make this catalog rewrite fail closed if a prior
+-- migration changes the caller topology. A base-schema-only test fixture has
+-- zero formal callers, the Effect Delivery fixture has seven, and the
+-- production chain has exactly nine.
+GRANT CREATE ON SCHEMA public TO volpred_ops_definer;
+GRANT CREATE ON SCHEMA volpred_ops TO volpred_ops_definer;
+SET ROLE volpred_ops_definer;
+DO $$
+DECLARE
+  target_oid oid;
+  definition text;
+  rewritten_count integer := 0;
+BEGIN
+  FOR target_oid IN
+    SELECT procedure.oid
+    FROM pg_catalog.pg_proc AS procedure
+    JOIN pg_catalog.pg_namespace AS namespace
+      ON namespace.oid = procedure.pronamespace
+    WHERE (
+      namespace.nspname,
+      procedure.proname
+    ) IN (
+      ('public', 'volpred_request_owned_email_notification'),
+      ('public', 'volpred_settle_owned_email_notification'),
+      ('volpred_ops', 'settle_commit_write'),
+      ('public', 'volpred_request_owned_publisher_article_sync'),
+      ('public', 'volpred_settle_owned_publisher_article_sync'),
+      ('public', 'volpred_request_owned_publisher_article_reconcile'),
+      ('public', 'volpred_settle_owned_publisher_article_reconcile'),
+      ('public', 'volpred_request_owned_publisher_article_delete'),
+      ('public', 'volpred_settle_owned_publisher_article_delete')
+    )
+      AND (
+        procedure.prosrc LIKE '%volpred_ops.submit_work(%'
+        OR procedure.prosrc LIKE '%volpred_ops.approve_work(%'
+        OR procedure.prosrc LIKE '%volpred_ops.complete_work(%'
+        OR procedure.prosrc LIKE '%volpred_ops.release_work(%'
+      )
+    ORDER BY namespace.nspname, procedure.proname, procedure.oid
+  LOOP
+    definition := pg_catalog.pg_get_functiondef(target_oid);
+    definition := replace(
+      definition,
+      'volpred_ops.submit_work(',
+      'volpred_ops.submit_work_internal('
+    );
+    definition := replace(
+      definition,
+      'volpred_ops.approve_work(',
+      'volpred_ops.approve_work_internal('
+    );
+    definition := replace(
+      definition,
+      'volpred_ops.complete_work(',
+      'volpred_ops.complete_work_internal('
+    );
+    definition := replace(
+      definition,
+      'volpred_ops.release_work(',
+      'volpred_ops.release_work_internal('
+    );
+    EXECUTE definition;
+    rewritten_count := rewritten_count + 1;
+  END LOOP;
+
+  IF rewritten_count NOT IN (0, 7, 9) THEN
+    RAISE EXCEPTION
+      'expected to rebind 0, 7, or 9 formal Work Coordinator callers, found %',
+      rewritten_count;
+  END IF;
+END;
+$$;
+RESET ROLE;
+REVOKE CREATE ON SCHEMA public FROM volpred_ops_definer;
+
 GRANT CREATE ON SCHEMA volpred_ops TO volpred_ops_definer;
 
 ALTER VIEW volpred_ops.work_owner_reads OWNER TO volpred_ops_definer;
@@ -778,6 +1023,17 @@ BEGIN
           'text,text,integer,text,text,text,text'),
         ('release_work_unfenced', 'text,text,integer,text'),
         ('complete_work_unfenced', 'text,text,text,integer,text,text'),
+        ('submit_work_internal',
+          'text,text,text,text,text,integer,text[],text[],text,text,'
+          'text,text,timestamptz,text,text,integer,timestamptz,timestamptz'),
+        ('acquire_work_internal',
+          'text,text[],text[],integer,text'),
+        ('approve_work_internal', 'text,integer,text,text'),
+        ('start_work_internal', 'text,text,integer'),
+        ('checkpoint_work_internal',
+          'text,text,integer,text,text,text,text'),
+        ('release_work_internal', 'text,text,integer,text'),
+        ('complete_work_internal', 'text,text,text,integer,text,text'),
         ('submit_work',
           'text,text,text,text,text,integer,text[],text[],text,text,'
           'text,text,timestamptz,text,text,integer,timestamptz,timestamptz'),
@@ -835,6 +1091,22 @@ REVOKE ALL ON FUNCTION
   ),
   volpred_ops.release_work_unfenced(text, text, integer, text),
   volpred_ops.complete_work_unfenced(
+    text, text, text, integer, text, text
+  ),
+  volpred_ops.submit_work_internal(
+    text, text, text, text, text, integer, text[], text[], text, text,
+    text, text, timestamptz, text, text, integer, timestamptz, timestamptz
+  ),
+  volpred_ops.acquire_work_internal(
+    text, text[], text[], integer, text
+  ),
+  volpred_ops.approve_work_internal(text, integer, text, text),
+  volpred_ops.start_work_internal(text, text, integer),
+  volpred_ops.checkpoint_work_internal(
+    text, text, integer, text, text, text, text
+  ),
+  volpred_ops.release_work_internal(text, text, integer, text),
+  volpred_ops.complete_work_internal(
     text, text, text, integer, text, text
   )
 FROM PUBLIC, volpred_ops_worker, volpred_ops_approver;

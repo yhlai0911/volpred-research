@@ -1542,13 +1542,16 @@ Postgres repository、SQL、filesystem、subprocess、provider parsers、effect 
   operator seam。Migration-owner rehearsal 才能呼叫 private CAS；任意 hash 不構成
   production cutover authority。
 - CAS 同交易撤銷 legacy runtime mutation functions 的 execute privilege，rollback
-  同交易恢復；generation overload 持續要求 exact operations-core owner。既有
-  notification／publisher／commit 等 definer-owned workflow 可經 compatibility
-  wrapper 取得 current owner shared lock並呼叫相同 private body，避免切 owner
-  造成正式 nested caller 斷鏈，同時不重新開放 legacy runtime writer。
+  同交易恢復；撤銷在 exclusive owner lock 前執行，legacy wrapper 本身仍 assert
+  `legacy`，因此已過 ACL 檢查但排隊中的 caller 也會在 row lock 後 fail closed。
+  Generation overload 持續要求 exact operations-core owner。既有
+  notification／publisher／commit 等九個 formal workflow 明確 rebind 到
+  definer-only internal seam；runtime roles 對 internal seam 無 execute 權限，
+  避免正式 nested caller 斷鏈，同時不重新開放 legacy runtime writer。
 - 本 checkpoint 只有 local PG17 clean migration、non-superuser replay、full
-  generation lifecycle、expired claimed／running rollback 與 owned-email nested
-  workflow evidence；未部署 production、未產生七日 receipts、未建立 durable
+  generation lifecycle、in-flight legacy-vs-transfer race、expired claimed／running
+  rollback 與 owned-email nested workflow evidence；未部署 production、未產生
+  七日 receipts、未建立 durable
   manifest gate row，也未做 live unique-owner read-back／rollback rehearsal。
   因此 formal transfer operator 仍不可用，Issue #9 仍是 `contained`。
 

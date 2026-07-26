@@ -96,10 +96,12 @@
 > 這個 schema 尚未把 preflight manifest 持久化成可消耗的 gate row，因此 private
 > transfer function **刻意不授權** worker、approver 或 PUBLIC；runtime 只能 read
 > owner，不能拿任意 64-hex hash 接管。Migration-owner rehearsal 執行 CAS 時，legacy
-> runtime mutation grants 會在同一 transaction 撤銷，rollback 時恢復；既有
-> notification／publisher／commit 等 `SECURITY DEFINER` workflow 仍可經 owner-only
-> compatibility wrapper 進入同一 fenced mutation body，不會在 work owner 切換後
-> 斷鏈。PG17 non-superuser clean replay、generation lifecycle、expired-lease rollback
+> runtime mutation grants 會在取得 owner lock 前撤銷，rollback 時同交易恢復；
+> legacy wrapper 仍在 shared owner lock 下明確 assert `legacy`，所以已通過舊 ACL
+> 但排隊中的 invocation 也不能越過 cutover。既有 notification／publisher／commit
+> 等 formal workflow 則明確 rebind 到 runtime 無 execute 權限的 definer-only
+> internal seam，不會在 work owner 切換後斷鏈。PG17 non-superuser clean replay、
+> generation lifecycle、in-flight legacy race、expired-lease rollback
 > 與 owned-email nested workflow 已通過本地 integration；migration 未套 production，
 > live owner 與 direct-execution containment 均未改變。下一步仍是 durable manifest
 > gate row + 七日真實 receipts + live read-back／rollback rehearsal；Issue #9 維持

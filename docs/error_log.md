@@ -2819,3 +2819,39 @@ Authority相鄰 suites **49 passed**，`py_compile`與diff gate通過。這個re
 durability缺口為 **`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，尚未
 產生physical paired receipt，所以program commit 34與operations-core umbrella維持
 **`contained`**。
+
+### 2026-07-26 — Work owner CAS 可繞 gate、expired lease 阻擋 rollback、nested caller 斷鏈
+
+**證據化症狀**：Issue #9 第一版 owner migration 的 Matt Spec／Standards 雙軸審查
+均 FAIL。`transfer_work_owner()` 只驗 64-hex，卻直接授權 approver 執行；測試用
+`"a" * 64` 即可切換 owner。Transfer 也把所有 claimed／running row 當 active，
+不看 DB-clock expiry；crashed worker 可永久擋 rollback。最後，legacy signature
+wrapper 固定 assert `legacy`，但既有 notification／publisher／commit stored
+procedures 仍呼叫該 signature，owner 一切到 operations_core 就會中斷正式 workflow。
+
+**根因層級與底層修復**：三者都是 ownership transaction 契約缺口。Durable
+preflight gate row 尚未存在前，private transfer 現在不授權 worker、approver 或
+PUBLIC；任意 manifest hash 無法從 runtime claim owner。CAS 交易依 database clock
+原子回收 expired claimed／running lease，保留 work id、增加 version、清 token 並寫
+release event；有效或無 expiry lease 仍 fail closed。Legacy runtime mutation grants
+在取得 owner row 前撤銷、rollback 時同交易恢復；legacy wrapper 仍明確 assert
+`legacy`，所以已過 ACL 檢查但排隊中的 invocation 也不能越過 cutover。九個既有
+formal workflow 由白名單、count-checked migration 明確 rebind 到 definer-only
+internal seams；runtime roles 對 internal seams 無 execute 權限。
+
+**回歸與回讀**：claimed／running expiry cases 先 RED 後 GREEN，驗證 rollback 後
+identity、version、token clearing 與 event；ACL test 回讀 approver 無 transfer 權限，
+generation lifecycle 驗證 legacy grant 在 rollback 後恢復。Barrier concurrency
+regression 讓 transfer 先排 exclusive owner lock、已通過 ACL 的 legacy invocation
+後排 shared lock；transfer 得鎖後舊 invocation 重新核對 owner 並 fail closed，未留下
+WorkItem。PG17 full migration chain 以 non-superuser executor replay，formal caller
+catalog read-back確認七個 fixture／九個 production caller topology只能改走 internal
+seam；owned-email transaction另在 Work Coordinator operations_core generation 下
+完成 request／delivery／rollback。
+
+**狀態**：owner fencing、expired-lease reconciliation 與 in-flight legacy race
+三個根因在 local schema／tests 層為 **`root_cause_fixed_and_verified`**。但本
+checkpoint 仍未把七日 preflight manifest持久化成可消耗 gate row，所以 formal
+transfer operator刻意不可用；migration未部署production、沒有live unique-owner
+read-back或rollback rehearsal。Issue #9 整體維持 **`contained`**，不得把 local
+CAS schema稱為完成 cutover。
