@@ -962,7 +962,7 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
         for t in tasks:
             status = (t.get("status") or "").lower()
             if status == "pending" and any(
-                field in t
+                t.get(field) not in (None, "")
                 for field in (
                     "claimed_by",
                     "claimed_at",

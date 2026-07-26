@@ -850,7 +850,17 @@ def test_cleanup_does_not_normalize_pending_residue_with_live_compute(
 
 def test_cleanup_leaves_clean_pending_task_untouched(tmp_path, monkeypatch) -> None:
     next_tasks = tmp_path / "next_tasks.json"
-    original = [{"id": "clean_pending", "status": "pending", "priority": 3}]
+    original = [
+        {
+            "id": "clean_pending",
+            "status": "pending",
+            "priority": 3,
+            "claimed_by": None,
+            "claimed_at": None,
+            "claim_session_id": None,
+            "started_at": None,
+        }
+    ]
     next_tasks.write_text(json.dumps(original, indent=2), encoding="utf-8")
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
 
