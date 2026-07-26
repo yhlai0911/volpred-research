@@ -1767,3 +1767,20 @@ implementation=`44b9c4059dd4ad35da8a0c5574e2ebadb38c04d81942c1e8c41369127273cbdc
 沒有authority mutation。此retry-freshness切片為
 `root_cause_fixed_and_verified`；physical paired receipt與operations-core umbrella
 仍因第二台實體Mac離線而維持`contained`。
+
+## 2026-07-26 — Program commit 34 Supabase backend binding checkpoint
+
+Cross-host readiness不再把相同publisher fence誤當成相同database。Service Role RPC
+adapter提供只含SHA-256的backend identity；host readiness v2與pair v4要求兩端exact
+match，primary／standby role在第一個remote boundary前再驗本機adapter，process與final
+receipts亦保存並核對同一digest。
+
+「兩個backend、相同`operations_core/8` fence」與「配對後role換backend」failure
+injections均在零authority acquire下fail closed，後者也維持零publisher read；outage與
+publisher adapter相鄰 suites共 **48 passed**。Production只讀preflight
+`backend-binding-clean-20260726-1158`已由合併後乾淨commit worktree exact read-back
+backend=`c6a1e836…a1404`、publisher=`operations_core/8`、stable host
+fingerprint=`6652d01267d664d621c957b8`與implementation=`aacc1959…dd8c`，沒有
+authority mutation。此backend-identity切片為`root_cause_fixed_and_verified`；
+physical paired receipt與operations-core umbrella仍因第二台實體Mac離線而維持
+`contained`。

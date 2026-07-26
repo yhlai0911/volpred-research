@@ -1882,3 +1882,25 @@ fingerprint=`6652d01267d664d621c957b8`與implementation
 acquire、effect或provider call。此retry freshness根因為
 `root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair、program commit
 34與operations-core umbrella維持`contained`。
+
+## 28. Cross-host Supabase backend identity binding（2026-07-26）
+
+Host readiness原本只綁machine、source、isolated key與publisher fence；兩台Mac若分別
+指向production與一個恰好同為`operations_core/8`的clone，readiness仍會配對，兩個獨立
+DB上的epoch也可能碰巧形成exact-next數字。這是backend identity未跨越port／receipt
+boundary的false-green，不是Primary Authority CAS失效。
+
+Service Role RPC client現從實際base URL導出credential-free SHA-256，publisher store
+只暴露digest。Raw host receipt升v2、paired readiness升v4，primary／standby／final
+receipt分別升v3／v4／v4；pair要求兩端backend digest exact match，兩個process role在
+第一個publisher read與authority RPC前再把本機adapter digest與pair重驗，final verifier
+則要求整條artifact chain一致。
+
+不同backend但相同publisher fence，以及pair完成後role換backend的failure injections
+均fail closed；後者確認零publisher read、零authority acquire。Outage與publisher
+adapter相鄰 suites共 **48 passed**，compile與diff gate通過。Production只讀preflight
+`backend-binding-clean-20260726-1158`已由合併後乾淨commit worktree原子落檔並exact read-back
+backend=`c6a1e836…a1404`、publisher=`operations_core/8`與implementation
+`aacc1959…dd8c`；沒有authority acquire、effect或provider call。本backend-identity
+根因為`root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair、program
+commit 34與operations-core umbrella維持`contained`。

@@ -2780,3 +2780,25 @@ publisher=`operations_core/8`、fingerprint=`6652d01267d664d621c957b8`及impleme
 acquire、effect或provider call。本retry-window根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Cross-host readiness沒綁backend，clone DB可形成假綠pair
+
+**證據化症狀與根因層級**：兩份host readiness只比較machine、source、isolated key及
+publisher fence。Failure injection讓primary與standby分別連到兩個backend，但兩邊都
+回`operations_core/8`；舊pairing沒有任何backend欄位可拒絕。兩個獨立DB的authority
+epoch若碰巧相鄰，final receipt即可假稱physical failover成功。根因是Supabase backend
+identity沒有跨越RPC port與evidence artifacts，不是Primary Authority CAS。
+
+**底層修復、回歸與live狀態**：Service Role RPC base URL現只以SHA-256暴露backend
+identity；host readiness／pair／primary／standby／final schema依序升
+v2／v4／v3／v4／v4。Pair要求兩份raw artifacts的backend digest exact match，role在
+首次publisher read／authority acquire前再驗本機adapter，final verifier重驗整條chain。
+不同backend但相同fence，以及pair後role換backend的failure injections均fail closed；
+後者零publisher read、零authority acquire。相鄰 suites **48 passed**，compile與diff
+gate通過。Production只讀preflight `backend-binding-clean-20260726-1158`已由合併後
+乾淨commit worktree原子落檔
+並exact read-back backend=`c6a1e836…a1404`、publisher=`operations_core/8`、
+fingerprint=`6652d01267d664d621c957b8`及implementation=`aacc1959…dd8c`；沒有authority
+acquire、effect或provider call。本backend false-green根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
+operations-core umbrella維持 **`contained`**。

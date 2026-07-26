@@ -812,28 +812,34 @@ dispatcher、互動session或deploy更新，該role會fail closed且不產生rec
 「舊loaded code執行、新disk bytes入證」形成假綠pair。
 
 兩台實體host在進入上述角色前還必須交換並配對
-`primary-authority-outage-host-readiness.v1` receipts。配對只做publisher owner
+`primary-authority-outage-host-readiness.v2` receipts。配對只做publisher owner
 read-back，不 acquire authority lease；若machine fingerprint重複、source aggregate
-不同、rehearsal key不一致或publisher fence不同，流程在live authority mutation前就
-停止。正式role CLI必須帶同一份
-`primary-authority-outage-readiness-pair.v3`，並在本機再次核對role、fingerprint與
-source aggregate。Pair v3內嵌兩端原始host readiness artifacts及各自canonical
+不同、Supabase backend SHA-256不同、rehearsal key不一致或publisher fence不同，流程在
+live authority mutation前就停止。正式role CLI必須帶同一份
+`primary-authority-outage-readiness-pair.v4`，並在本機再次核對role、fingerprint、
+backend identity與source aggregate。Pair v4內嵌兩端原始host readiness artifacts及各自canonical
 SHA-256；primary、standby與final verifier都會重算digest並逐欄核對pair的denormalized
 identity。只有一份自行填寫host欄位、沒有exact preflight artifacts的paired receipt，
 會在第一個publisher read或authority RPC前fail closed。
 
-Pair v3另由兩端`observed_at`中較早者唯一導出15分鐘`valid_until`；配對時拒絕超過
+Pair v4另由兩端`observed_at`中較早者唯一導出15分鐘`valid_until`；配對時拒絕超過
 15分鐘的host observation及領先verifier clock超過60秒的時間戳。兩個正式role在第一個
 publisher read／authority RPC前重驗pair仍在有效期內，因此舊的「曾經online」receipt
 不能代替本次演練的contemporaneous readiness。Final verifier只重算這段歷史窗口與
 raw artifacts是否一致，不會因事後保存、稽核而讓有效evidence過期。
 
 Standby role另必須把mutation前驗過的完整primary receipt之canonical SHA-256寫入
-`primary-authority-outage-standby.v3`。Final verifier只接受該digest與當前primary
-artifact exact match，成功產物為`primary-authority-outage-cross-host.v3`；只相同epoch
+`primary-authority-outage-standby.v4`。Final verifier只接受該digest與當前primary
+artifact exact match，成功產物為`primary-authority-outage-cross-host.v4`；只相同epoch
 不足以證明兩個process receipt屬於同一條evidence chain。
 
 Standby的freshness fence也涵蓋等待primary lease到期的整段RTO loop，不只role入口。
 每一次remote authority acquire attempt前都重新驗同一pair的`valid_until`；窗口一旦
 過期，loop立即fail closed，不會因先前曾以fresh receipt進入role而繼續碰control
 plane。
+
+Supabase backend identity由實際Service Role RPC base URL做SHA-256；receipt只保存
+digest，不暴露URL或credential。Primary／standby raw readiness必須相同，兩個role也會
+在首次remote read前把本機publisher adapter的backend digest與pair重比。這使錯接
+clone／staging project即使恰好具有相同`operations_core/8` fence，也不能形成
+cross-host evidence。
