@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import plistlib
 import subprocess
 from pathlib import Path
 
@@ -17,10 +16,13 @@ def _schedule() -> dict:
     return matches[0]
 
 
-def test_daily_checkup_has_one_launchagent_owner() -> None:
+def test_daily_checkup_has_one_operations_core_owner() -> None:
     item = _schedule()
+    data = json.loads(
+        (ROOT / "config/runtime_schedules.json").read_text(encoding="utf-8")
+    )
     assert item["cron"] == "40 9 * * *"
-    assert item["mechanism"] == "launchd"
+    assert data["schedule_materialization"]["mode"] == "active"
     assert item["launchagent_label"] == "com.volpred.daily-checkup"
     assert item["host_crontab_managed"] is False
     assert item.get("piggy_back_enabled") is not True
@@ -38,7 +40,9 @@ def test_daily_checkup_wrapper_emits_observable_completion() -> None:
     assert "CHECKUP_CAP_SEC=300" in text
 
 
-def test_targeted_launchagent_render_matches_canonical_schedule(tmp_path: Path) -> None:
+def test_targeted_launchagent_render_decommissions_operations_core_job(
+    tmp_path: Path,
+) -> None:
     launchagents = tmp_path / "LaunchAgents"
     env = os.environ.copy()
     env.update(
@@ -49,7 +53,7 @@ def test_targeted_launchagent_render_matches_canonical_schedule(tmp_path: Path) 
             "VOLPRED_LAUNCHD_LOG_DIR": str(tmp_path / "logs"),
         }
     )
-    subprocess.run(
+    completed = subprocess.run(
         ["bash", str(ROOT / "scripts/install_launchd_jobs.sh"), "--id", "daily_checkup", "--render-only"],
         cwd=ROOT,
         env=env,
@@ -59,12 +63,9 @@ def test_targeted_launchagent_render_matches_canonical_schedule(tmp_path: Path) 
     )
 
     rendered = list(launchagents.glob("com.volpred.*.plist"))
-    assert [path.name for path in rendered] == ["com.volpred.daily-checkup.plist"]
-    with rendered[0].open("rb") as handle:
-        plist = plistlib.load(handle)
-
-    item = _schedule()
-    assert plist["Label"] == item["launchagent_label"]
-    assert plist["ProgramArguments"] == ["/bin/bash", "-c", item["wrapper_script"]]
-    assert plist["StartCalendarInterval"] == {"Minute": 40, "Hour": 9}
-    assert plist["RunAtLoad"] is False
+    assert rendered == []
+    assert (
+        "[decommission] daily_checkup "
+        "(operations-core owner; legacy label=com.volpred.daily-checkup)"
+        in completed.stdout
+    )
