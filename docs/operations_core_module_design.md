@@ -554,10 +554,11 @@ Implementation 隱藏現有 Git writer lock、dirty ownership、worktree merge�
   另有 external-lock-before-authority、timeout→unrelated commit retention、
   missing-trailer／authority-bound non-exact mutation、timeout-after-git-add staged
   residue、lost workspace recovery，以及雙連線 terminal arbitration regressions。
-  精準提交 `07accb1e1` 後完整 scoped suite 198 passed；最後兩個 review follow-up
-  另有 62 passed。最終 Matt Spec／Standards 複審尚在進行，所以 Issue #10 此刻仍標
-  `contained`。production owner 也仍刻意保持 `legacy/1`，未執行 live ownership
-  CAS，Change Delivery umbrella 同樣為 `contained`。
+  最終精準提交鏈 `07accb1e1`、`02b160858`、`9cda15ef2` 後完整 scoped suite
+  201 passed；Matt Spec 與 Standards 最終複審均為 PASS、無 P1/P2。Issue #10 的
+  shadow-path acceptance 因此為 `root_cause_fixed_and_verified`。production owner
+  仍刻意保持 `legacy/1`，未執行 live ownership CAS，所以 Change Delivery umbrella
+  仍為 `contained`。
 
 ### 2026-07-24 service-role Primary Authority lifecycle checkpoint
 

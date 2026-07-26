@@ -1,6 +1,6 @@
 # Project Improvement Status
 
-Last updated: **2026-07-26（T04 ChangeSet shadow-path terminal concurrency hardening under final review；Boss Report production owned-delivery verified；physical two-Mac authority pair verified）**
+Last updated: **2026-07-26（T04 ChangeSet shadow-path root cause fixed and verified；Boss Report production owned-delivery verified；physical two-Mac authority pair verified）**
 
 ## 2026-07-23 平台運營優化總計畫（accepted charter）
 
@@ -51,12 +51,12 @@ DB settlement trigger與abandon共用
 
 隔離 PostgreSQL + 暫存 Git system test 已回讀唯一 exact-path commit、
 HEAD／diff、ChangeSet、authority receipt 與 succeeded WorkItem，並完成 owner rollback
-rehearsal；精準提交 `07accb1e1` 後完整 scoped suite **198 passed**，最後兩個 review
-follow-up另有 **62 passed**。本輪核心修正被另一 session 的 23:55
+rehearsal；最終精準提交鏈 `07accb1e1`、`02b160858`、`9cda15ef2` 後完整 scoped
+suite **201 passed**，Matt Spec／Standards 最終複審均 PASS、無 P1/P2。本輪核心修正被另一 session 的 23:55
 廣域 dispatcher transaction 一併收入 commit `d45c9a307`，未回退或改寫該 shared
-commit；後續證據以 exact-path commit 補齊。最終 Matt Spec／Standards 複審尚在
-進行，Issue #10 此刻與 Change Delivery umbrella 均維持 **`contained`**；
-production `git.commit` owner仍是 `legacy/1`，未做 live CAS。
+commit；後續證據以 exact-path commit 補齊。Issue #10 shadow acceptance 為
+**`root_cause_fixed_and_verified`**；但 production `git.commit` owner仍是
+`legacy/1`、未做 live CAS，所以 Change Delivery umbrella 繼續標 **`contained`**。
 
 ### 2026-07-26 — Boss Report caller follow-up（Issue #39）
 
