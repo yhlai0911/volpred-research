@@ -263,8 +263,10 @@ def _exact_repo_file(raw: object) -> tuple[str | None, str | None]:
         rel = resolved.relative_to(ROOT.resolve(strict=False))
     except ValueError:
         return None, "outside_repo"
-    if not resolved.is_file():
+    if not resolved.exists():
         return None, "missing_or_not_regular_file"
+    if not resolved.is_file():
+        return None, "existing_not_regular_file"
     if rel.parts and rel.parts[0] == ".git":
         return None, "git_internal_path"
     if rel.as_posix().startswith(":") or any(ch in rel.as_posix() for ch in "*?["):
@@ -282,6 +284,59 @@ def _path_is_dirty(rel: str) -> bool:
     # Fail closed toward preserving the file: if git cannot classify it, make
     # the delivery attempt surface the concrete error instead of skipping it.
     return status.returncode != 0 or bool(status.stdout.strip())
+
+
+def _verified_failed_partial_delivery(
+    job: dict,
+    exact: list[str],
+    rejected: list[dict],
+) -> bool:
+    """Whether missing declarations are terminal after a proven partial delivery.
+
+    A producer that exited non-zero has reached a terminal execution state.
+    Once this reaper has durably delivered every file that *does* exist,
+    declarations that are still missing are phantom outputs rather than
+    artifacts needing a human exit.  Receipt flags alone are not evidence: the
+    delivery commit must exist and contain each exact delivered path.  If an
+    escaped subprocess lands bytes later, the next scan sees a dirty exact path
+    and reopens delivery normally.
+    """
+    if (
+        job.get("status") != "failed"
+        or job.get("delivery_status") != "partial_delivered"
+        or job.get("partial_delivered") is not True
+        or job.get("delivery_source") != "reap_orphan_deliverables"
+        or not rejected
+        or not all(
+            item.get("reason") in _NOTHING_WAS_PRODUCED
+            for item in rejected
+        )
+    ):
+        return False
+
+    delivered = job.get("delivered_paths")
+    if (
+        not isinstance(delivered, list)
+        or not delivered
+        or any(not isinstance(path, str) for path in delivered)
+        or set(delivered) != set(exact)
+    ):
+        return False
+
+    commit_hash = job.get("delivery_commit")
+    if (
+        not isinstance(commit_hash, str)
+        or re.fullmatch(r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}", commit_hash) is None
+    ):
+        return False
+    commit = _git("rev-parse", "--verify", "--quiet", f"{commit_hash}^{{commit}}")
+    if commit.returncode != 0:
+        return False
+    for path in exact:
+        tree = _git("ls-tree", "-r", "--name-only", commit_hash, "--", path)
+        if tree.returncode != 0 or tree.stdout.splitlines() != [path]:
+            return False
+    return True
 
 
 _WORKTREE_PREFIX_RE = re.compile(r"^\.claude/worktrees/[^/]+/")
@@ -566,11 +621,21 @@ def scan_job_deliverables() -> dict:
         previous = {str(path) for path in previously_delivered}
         pending = [path for path in exact if path not in previous or _path_is_dirty(path)]
         if not pending:
+            if _verified_failed_partial_delivery(job, exact, rejected):
+                # The failed producer is terminal, the receipt proves every
+                # existing output was delivered, and the remaining declarations
+                # never became files.  They are non-deliverable phantoms, not a
+                # permanent held condition.  A late file would still re-enter
+                # `pending` on a later sweep and be preserved.
+                continue
             # A declared output that `.gitignore` excludes (`__pycache__`,
             # scratch `*_article.md`) is not a deliverable this reaper can ever
             # deliver — every real output already landed. Holding on those alone
             # is bookkeeping noise, not a preserved artifact.
-            if rejected and any(r.get("reason") != "git_ignored" for r in rejected):
+            if rejected and (
+                job.get("status") == "failed"
+                or any(r.get("reason") != "git_ignored" for r in rejected)
+            ):
                 held.append({
                     "job_id": str(job.get("id") or job_path.stem),
                     "reason": "declared_outputs_not_yet_deliverable",

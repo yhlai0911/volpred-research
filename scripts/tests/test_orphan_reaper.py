@@ -340,7 +340,7 @@ def test_job_reaper_rejects_agent_external_directory_symlink_and_ignored_paths(
     assert result["candidates"] == []
     held = next(item for item in result["held"] if item["job_id"] == "compute-invalid")
     reasons = {item["reason"] for item in held["rejected"]}
-    assert reasons == {"git_ignored", "missing_or_not_regular_file",
+    assert reasons == {"git_ignored", "existing_not_regular_file",
                        "outside_repo", "symlink_not_owned"}
 
 
@@ -368,6 +368,178 @@ def test_job_reaper_does_not_hold_a_failed_job_that_produced_nothing(
     result = reaper.scan_job_deliverables()
     assert result["candidates"] == []
     assert [item["job_id"] for item in result["held"]] == []
+
+
+def test_job_reaper_does_not_hold_verified_phantoms_after_partial_delivery(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Failed producer + verified partial receipt makes missing tails terminal.
+
+    The plan was delivered by the reaper, while the failed renderer never wrote
+    its declared PNGs.  A non-empty ``exact`` set must not hide that the only
+    remaining declarations are nonexistent phantom outputs.
+    """
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    queue = root / "storage" / "ops" / "compute_queue"
+    run = root / "storage" / "lazypack_jobs" / "mile_partial" / "runs" / "r2"
+    queue.mkdir(parents=True)
+    run.mkdir(parents=True)
+    plan = run / "plan.json"
+    plan.write_text('{"panels": 3}\n', encoding="utf-8")
+    plan_rel = str(plan.relative_to(root))
+    _repo_git(root, "add", plan_rel)
+    _repo_git(root, "commit", "-qm", "deliver plan")
+    delivery_commit = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    phantom_paths = [
+        str((run / "panels" / name).relative_to(root))
+        for name in ("question.png", "result.png", "takeaway.png")
+    ]
+    (queue / "lazypack-mile_partial-r2.json").write_text(json.dumps({
+        "id": "lazypack-mile_partial-r2",
+        "kind": "compute",
+        "status": "failed",
+        "exit_code": 1,
+        "output_paths": [plan_rel, *phantom_paths],
+        "delivery_status": "partial_delivered",
+        "partial_delivered": True,
+        "delivery_source": "reap_orphan_deliverables",
+        "delivery_commit": delivery_commit,
+        "delivered_paths": [plan_rel],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    result = reaper.scan_job_deliverables()
+
+    assert result == {"candidates": [], "held": []}
+    assert plan.exists()
+    assert all(not (root / path).exists() for path in phantom_paths)
+
+
+@pytest.mark.parametrize("refused_kind", ["git_ignored", "directory"])
+def test_failed_partial_delivery_still_holds_a_real_policy_refused_path(
+    tmp_path: Path,
+    monkeypatch,
+    refused_kind: str,
+) -> None:
+    """Only nonexistent tails are terminal; real refused paths stay preserved."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    if refused_kind == "git_ignored":
+        (root / ".gitignore").write_text("*.scratch\n", encoding="utf-8")
+        _repo_git(root, "add", ".gitignore")
+        _repo_git(root, "commit", "-qm", "ignore scratch outputs")
+    queue = root / "storage" / "ops" / "compute_queue"
+    run = root / "storage" / "lazypack_jobs" / "mile_partial" / "runs" / "r2"
+    queue.mkdir(parents=True)
+    run.mkdir(parents=True)
+    plan = run / "plan.json"
+    plan.write_text('{"panels": 1}\n', encoding="utf-8")
+    plan_rel = str(plan.relative_to(root))
+    _repo_git(root, "add", plan_rel)
+    _repo_git(root, "commit", "-qm", "deliver plan")
+    delivery_commit = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    refused = run / ("render.scratch" if refused_kind == "git_ignored" else "panels")
+    if refused_kind == "git_ignored":
+        refused.write_text("real producer bytes\n", encoding="utf-8")
+        expected_reason = "git_ignored"
+    else:
+        refused.mkdir()
+        expected_reason = "existing_not_regular_file"
+    refused_rel = str(refused.relative_to(root))
+    (queue / "lazypack-mile_partial-r2.json").write_text(json.dumps({
+        "id": "lazypack-mile_partial-r2",
+        "kind": "compute",
+        "status": "failed",
+        "exit_code": 1,
+        "output_paths": [plan_rel, refused_rel],
+        "delivery_status": "partial_delivered",
+        "partial_delivered": True,
+        "delivery_source": "reap_orphan_deliverables",
+        "delivery_commit": delivery_commit,
+        "delivered_paths": [plan_rel],
+    }), encoding="utf-8")
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    result = reaper.scan_job_deliverables()
+
+    assert result["candidates"] == []
+    assert result["held"] == [{
+        "job_id": "lazypack-mile_partial-r2",
+        "reason": "declared_outputs_not_yet_deliverable",
+        "rejected": [{"path": refused_rel, "reason": expected_reason}],
+    }]
+    assert refused.exists()
+
+
+@pytest.mark.parametrize(
+    ("receipt_override", "use_pre_delivery_commit"),
+    [
+        ({"delivery_status": "delivered"}, False),
+        ({"partial_delivered": False}, False),
+        ({"delivery_source": "producer"}, False),
+        ({"delivery_commit": "0" * 40}, False),
+        ({}, True),
+    ],
+    ids=[
+        "wrong-status",
+        "false-partial-flag",
+        "foreign-source",
+        "unknown-commit",
+        "commit-missing-delivered-path",
+    ],
+)
+def test_failed_partial_phantoms_require_verifiable_delivery_evidence(
+    tmp_path: Path,
+    monkeypatch,
+    receipt_override: dict,
+    use_pre_delivery_commit: bool,
+) -> None:
+    """A claimed partial delivery cannot suppress held without durable proof."""
+    root = tmp_path / "repo"
+    _init_git_repo(root)
+    pre_delivery_commit = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    queue = root / "storage" / "ops" / "compute_queue"
+    run = root / "storage" / "lazypack_jobs" / "mile_partial" / "runs" / "r2"
+    queue.mkdir(parents=True)
+    run.mkdir(parents=True)
+    plan = run / "plan.json"
+    plan.write_text('{"panels": 1}\n', encoding="utf-8")
+    plan_rel = str(plan.relative_to(root))
+    _repo_git(root, "add", plan_rel)
+    _repo_git(root, "commit", "-qm", "deliver plan")
+    delivery_commit = _repo_git(root, "rev-parse", "HEAD").stdout.strip()
+    phantom = str((run / "panels" / "never-written.png").relative_to(root))
+    receipt = {
+        "id": "lazypack-mile_partial-r2",
+        "kind": "compute",
+        "status": "failed",
+        "output_paths": [plan_rel, phantom],
+        "delivery_status": "partial_delivered",
+        "partial_delivered": True,
+        "delivery_source": "reap_orphan_deliverables",
+        "delivery_commit": (
+            pre_delivery_commit if use_pre_delivery_commit else delivery_commit
+        ),
+        "delivered_paths": [plan_rel],
+    }
+    receipt.update(receipt_override)
+    (queue / "lazypack-mile_partial-r2.json").write_text(
+        json.dumps(receipt),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(reaper, "ROOT", root)
+    monkeypatch.setattr(reaper, "QUEUE_DIR", queue)
+
+    result = reaper.scan_job_deliverables()
+
+    assert result["candidates"] == []
+    assert result["held"][0]["job_id"] == "lazypack-mile_partial-r2"
+    assert result["held"][0]["reason"] == "declared_outputs_not_yet_deliverable"
+    assert plan.exists()
 
 
 def test_job_reaper_leaves_clean_tracked_worktree_output_for_merge(
