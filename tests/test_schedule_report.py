@@ -55,6 +55,45 @@ def test_build_schedule_report_matches_live_items(monkeypatch):
     assert report["missing_system_tasks"] == []
 
 
+def test_build_schedule_report_ignores_operations_core_owned_host_item(
+    monkeypatch,
+) -> None:
+    config = {
+        "metadata": {"timezone": "Asia/Taipei"},
+        "schedule_materialization": {
+            "generation": "g1",
+            "mode": "canary",
+            "active_jobs": {
+                "core-job": {"activated_at": "2026-07-26T10:00:00Z"}
+            },
+        },
+        "system_crontab": {
+            "items": [
+                {
+                    "id": "core-job",
+                    "label": "core job",
+                    "cron": "0 * * * *",
+                    "host_crontab_managed": True,
+                    "matchers": ["core-job"],
+                }
+            ]
+        },
+        "session_crons": {"items": []},
+        "remote_triggers": {"items": []},
+    }
+    monkeypatch.setattr(schedules, "load_runtime_schedules", lambda: config)
+    monkeypatch.setattr(
+        schedules,
+        "read_system_crontab",
+        lambda: {"available": True, "items": [], "note": "test"},
+    )
+
+    report = schedules.build_schedule_report()
+
+    assert report["expected_system_task_count"] == 0
+    assert report["missing_system_tasks"] == []
+
+
 def test_cron_matches_date_weekday_guard():
     # 2026-06-21 is Sunday; daily_update cron is Monday-Saturday.
     assert schedules.cron_matches_date("3 8 * * 1-6", date(2026, 6, 21)) is False

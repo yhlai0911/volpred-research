@@ -28,10 +28,10 @@ from typing import Any, Iterator
 from volpred.ops.schedule_materialization import (
     FileReceiptStore,
     ScheduleMaterializer,
-    load_legacy_success_markers,
     load_schedule_jobs,
     load_schedule_policy,
 )
+from volpred.ops.schedules import job_liveness, load_cron_marker_state
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config" / "runtime_schedules.json"
@@ -76,8 +76,41 @@ def build_materializer(
         jobs=jobs,
         receipts=FileReceiptStore(_receipt_path(config, override=receipts_path)),
         repo_root=ROOT,
-        legacy_last_success=load_legacy_success_markers(DEFAULT_LEGACY_MARKERS),
+        legacy_last_success=legacy_success_evidence(
+            config,
+            repo_root=ROOT,
+            marker_path=DEFAULT_LEGACY_MARKERS,
+        ),
     )
+
+
+def legacy_success_evidence(
+    config: dict[str, Any],
+    *,
+    repo_root: Path,
+    marker_path: Path,
+) -> dict[str, str]:
+    """Resolve legacy success without consulting Operations Core receipts.
+
+    Shadow comparison used to read ``cron_last_run`` directly, recreating the
+    exact observability bug WS-D1 removed: direct LaunchAgents can run
+    successfully without stamping that marker.
+    """
+    markers = load_cron_marker_state(marker_path)
+    items = (config.get("system_crontab") or {}).get("items") or []
+    evidence: dict[str, str] = {}
+    for item in items:
+        if not isinstance(item, dict) or not item.get("id"):
+            continue
+        live = job_liveness(
+            item,
+            marker_state=markers,
+            receipt_state={},
+            repo_root=repo_root,
+        )
+        if live.last_success is not None:
+            evidence[str(item["id"])] = live.last_success.isoformat()
+    return evidence
 
 
 def validate_config(*, config_path: Path = DEFAULT_CONFIG) -> dict[str, Any]:

@@ -264,6 +264,11 @@ def read_system_crontab() -> dict[str, Any]:
 def build_schedule_report() -> dict[str, Any]:
     config = load_runtime_schedules()
     system_spec_items = config.get("system_crontab", {}).get("items", [])
+    operations_core_policy = None
+    if "schedule_materialization" in config:
+        from volpred.ops.schedule_materialization import load_schedule_policy
+
+        operations_core_policy = load_schedule_policy(config)
     # This report compares canonical items with the live *host crontab* only.
     # LaunchAgent/piggy-back owners deliberately set host_crontab_managed=false;
     # counting them here as missing produces a false schedule-drift alarm.
@@ -271,6 +276,11 @@ def build_schedule_report() -> dict[str, Any]:
         item
         for item in system_spec_items
         if isinstance(item, dict) and item.get("host_crontab_managed") is not False
+        and (
+            operations_core_policy is None
+            or operations_core_policy.owner_for(str(item.get("id") or ""))
+            != "operations_core"
+        )
     ]
     session_items = config.get("session_crons", {}).get("items", [])
     remote_items = config.get("remote_triggers", {}).get("items", [])

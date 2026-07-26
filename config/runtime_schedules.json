@@ -717,6 +717,7 @@
         "label": "台股臨時休市偵測（颱風）",
         "cron": "0 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_market_closure.sh",
+        "log_path": "storage/logs/cron/market_closure.log",
         "launchd_label": "com.volpred.market-closure-detect",
         "mechanism": "launchd",
         "host_crontab_managed": false,
