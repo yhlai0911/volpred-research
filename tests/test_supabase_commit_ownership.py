@@ -12,6 +12,11 @@ from volpred.ops.delivery.supabase_commit_ownership import (
 )
 
 
+pytestmark = pytest.mark.usefixtures(
+    "mocked_operations_core_rpc_transport"
+)
+
+
 class _Response:
     def __init__(self, payload: object) -> None:
         self._raw = json.dumps(payload).encode("utf-8")

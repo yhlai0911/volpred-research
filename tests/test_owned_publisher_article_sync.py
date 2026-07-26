@@ -25,6 +25,7 @@ from volpred.ops.delivery.owned_publisher_article import (
     PublisherArticleSyncOwnershipLost,
     SupabaseOwnedPublisherArticleStore,
 )
+from volpred.ops.delivery import supabase_rpc as supabase_rpc_module
 
 
 def _article() -> dict[str, object]:
@@ -572,6 +573,89 @@ def test_environment_adapter_never_uses_publishable_key(
 
     with pytest.raises(ValueError, match="service-role key"):
         SupabaseOwnedPublisherArticleStore.from_environment()
+
+
+def test_recovery_rpc_blocks_remote_mutation_before_network(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    network_calls = 0
+
+    def fail_if_called(*args: object, **kwargs: object) -> object:
+        nonlocal network_calls
+        network_calls += 1
+        raise AssertionError("network attempted")
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setattr(
+        supabase_rpc_module.request,
+        "urlopen",
+        fail_if_called,
+    )
+    store = SupabaseOwnedPublisherArticleStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="service-role-secret",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="remote writes are disabled",
+    ):
+        store.recover_due(
+            owner_generation=4,
+            worker_id="effect-worker:publisher-article-sync",
+            lease_seconds=300,
+            work_lease_token="work-token",
+            outbox_claim_token="outbox-token",
+            primary_fencing_token="primary-token",
+        )
+
+    assert network_calls == 0
+
+
+def test_owner_read_rpc_is_allowed_when_remote_writes_are_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Response:
+        def __enter__(self) -> Response:
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+        def read(self) -> bytes:
+            return (
+                b'{"schema_version":"publisher-article-sync-owner.v1",'
+                b'"effect_family":"publisher.article.supabase.sync",'
+                b'"owner":"operations_core","generation":4,'
+                b'"changed_at":"2026-07-24T12:00:00+00:00",'
+                b'"changed_by":"operator:test",'
+                b'"change_reason":"test owner"}'
+            )
+
+    requested_urls: list[str] = []
+
+    def respond(call: object, **kwargs: object) -> Response:
+        requested_urls.append(call.full_url)  # type: ignore[attr-defined]
+        return Response()
+
+    monkeypatch.setenv("VOLPRED_NO_REMOTE_WRITE", "1")
+    monkeypatch.setattr(
+        supabase_rpc_module.request,
+        "urlopen",
+        respond,
+    )
+    store = SupabaseOwnedPublisherArticleStore(
+        supabase_url="https://project.supabase.co",
+        service_role_key="service-role-secret",
+    )
+
+    owner = store.read_owner()
+
+    assert owner.owner == "operations_core"
+    assert requested_urls == [
+        "https://project.supabase.co/rest/v1/rpc/"
+        "volpred_read_publisher_article_sync_owner"
+    ]
 
 
 def test_service_role_adapter_sends_canonical_request_payload(

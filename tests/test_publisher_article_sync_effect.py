@@ -157,6 +157,14 @@ def test_provider_failure_is_retryable_and_keeps_typed_evidence() -> None:
             ),
             "invalid_publisher_article_sync_payload",
         ),
+        (
+            {},
+            (
+                b'{"schema_version":"publisher-article-sync.v1",'
+                b'"article":{"id":"mile_effect_sync","tags":null}}'
+            ),
+            "invalid_publisher_article_sync_payload",
+        ),
     ],
 )
 def test_invalid_intent_is_terminal_before_projection_write(

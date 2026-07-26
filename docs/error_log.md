@@ -3129,14 +3129,25 @@ receipt，再走 canonical begin。普通 begin 遇到尚無 recovery receipt �
 `started/retry_scheduled` predecessor 會在任何 Work/outbox mutation 前 fail closed。
 Python delivery／recovery 共用 owner、token 與 Primary Authority execution context。
 Projection readback 現在只在 payload 明確帶 `tags` 時比較 tags；缺欄位與 writer
-同義為「不在本次 mutation scope」，明確 `tags: []` 仍會清空並精確驗證。
+同義為「不在本次 mutation scope」，明確 `tags: []` 仍會清空並精確驗證；
+present `tags` 必須是 `list[str]`，`null`／object 會在 immutable payload decode
+階段 fail closed，不能用第二種表示法繞過 destructive-clear 契約。
+
+Matt Standards review 另抓到 recovery RPC 原先未承接 repo-wide
+`VOLPRED_NO_REMOTE_WRITE` 邊界。共用 `ServiceRoleRpcClient` 現以 explicit
+read-only RPC allowlist 分流，其他 function 在 remote-write guard 或 pytest runtime
+都於建立 HTTP request 前 fail closed。需要驗證 transport／decoder 的測試必須明確
+opt in `mocked_operations_core_rpc_transport`；fixture 先把真實 transport 換成必定
+失敗的 sentinel，未再注入 fake 就不可能碰網路，不能以關閉 guard 當測試 workaround。
 
 **回歸、live readback 與制度化**：PG17 migration chain、ordinary-first 零 mutation、
 due retry、ACL／RLS／search-path 與相鄰 caller／schedule suites共 96 passed；tags
-缺省 RED→GREEN 後 publisher 相鄰 29 passed。Production 首輪 3 recovery 中 2
+缺省、`tags:null` 與 remote-write guard 都先取得 RED，再於含 shared RPC clients 的
+相鄰 suite **165 passed**。Production 首輪 3 recovery 中 2
 delivered、1 暴露上述 tags mismatch；修 contract 後該筆 attempt 3 delivered，
-再跑為零 mutation no-op。最終 DB 回讀 `sync_due_retry=0`、`sync_started=0`、
-`sync_nonterminal=0`、4 recovery receipts，ordinary begin fence 存在；6 筆 delete
+再跑為零 mutation no-op。最終 DB 回讀未被 receipt 消費的
+`sync_due_retry=0`、`sync_started=0`、4 recovery receipts，ordinary begin fence
+存在；歷史 retry predecessor 仍原樣保留作 audit，不冒充 current work；6 筆 delete
 old-generation retry 未變。Canonical `owned_publisher_article_recovery` 每小時由
 `check_alerts → run_due_jobs` 單一 piggy-back owner 執行，wrapper 已原子同步至
 `~/.volpred/bin`，最小 cron environment smoke 為 no-op exit 0。此 publisher-sync

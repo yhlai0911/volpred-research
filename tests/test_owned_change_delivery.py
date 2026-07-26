@@ -24,6 +24,11 @@ from volpred.ops.delivery.owned_change import (
 from volpred.ops.work import WorkItemView, WorkQuery, WorkSnapshot
 
 
+pytestmark = pytest.mark.usefixtures(
+    "mocked_operations_core_rpc_transport"
+)
+
+
 def _proposal() -> ChangeSetProposal:
     return ChangeSetProposal(
         idempotency_key="change:owned-shadow-1",

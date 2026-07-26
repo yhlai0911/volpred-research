@@ -1922,7 +1922,10 @@ private immutable receipt；canonical hourly piggy-back wrapper 已安裝並通�
 
 首輪 2/3 delivered，剩餘一筆揭露「payload 缺 tags 時 writer 保留、readback 卻要求
 空集合」的 contract 漂移；RED→GREEN 後 attempt 3 delivered。Production 最終回讀
-publisher sync `due_retry=0`、`started=0`、`nonterminal=0`、recovery receipts=4。
+publisher sync 未回收 `due_retry=0`、`started=0`、recovery receipts=4。
+Matt 雙軸 review 後再封住兩個邊界：`tags:null` 現在不能冒充 explicit `[]` 清空，
+shared service-role RPC 也會在 remote-write guard／pytest runtime 於 HTTP 前
+fail closed；mocked transport tests 只能經先隔離真網路的 opt-in fixture 執行。
 此 publisher-sync slice 為 `root_cause_fixed_and_verified`；6 筆 publisher-delete
 old-generation retry 不屬現 owner authority，仍待獨立 reconcile，Issue #9 umbrella
 保持 `contained`。

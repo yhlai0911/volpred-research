@@ -15,6 +15,11 @@ from volpred.ops.authority import (
 from volpred.ops.authority.supabase import SupabaseAuthorityStore
 
 
+pytestmark = pytest.mark.usefixtures(
+    "mocked_operations_core_rpc_transport"
+)
+
+
 class _Response:
     def __init__(self, payload: object) -> None:
         self._raw = json.dumps(payload).encode("utf-8")

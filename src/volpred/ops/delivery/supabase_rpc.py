@@ -10,6 +10,23 @@ from pathlib import Path
 from urllib import error, request
 
 
+_READ_ONLY_RPCS = frozenset(
+    {
+        "volpred_diagnose_publisher_article_compare_delete",
+        "volpred_read_change_set",
+        "volpred_read_change_set_by_idempotency_key",
+        "volpred_read_commit_owner",
+        "volpred_read_notification_owner",
+        "volpred_read_publisher_article_delete_approval",
+        "volpred_read_publisher_article_delete_candidate",
+        "volpred_read_publisher_article_delete_owner",
+        "volpred_read_publisher_article_reconcile_owner",
+        "volpred_read_publisher_article_sync_owner",
+        "volpred_read_work_snapshot",
+    }
+)
+
+
 class SupabaseRpcError(RuntimeError):
     """A PostgREST RPC returned a structured database error."""
 
@@ -70,6 +87,13 @@ class ServiceRoleRpcClient:
         function: str,
         payload: Mapping[str, object],
     ) -> object:
+        if (
+            function not in _READ_ONLY_RPCS
+            and _remote_mutations_disabled()
+        ):
+            raise RuntimeError(
+                "Operations Core RPC remote writes are disabled"
+            )
         encoded = json.dumps(
             payload,
             ensure_ascii=False,
@@ -106,6 +130,14 @@ class ServiceRoleRpcClient:
             raise RuntimeError(
                 "Operations Core RPC returned invalid JSON"
             ) from exc
+
+
+def _remote_mutations_disabled() -> bool:
+    return (
+        os.environ.get("VOLPRED_NO_REMOTE_WRITE") == "1"
+        or "PYTEST_CURRENT_TEST" in os.environ
+        or "PYTEST_VERSION" in os.environ
+    )
 
 
 __all__ = [

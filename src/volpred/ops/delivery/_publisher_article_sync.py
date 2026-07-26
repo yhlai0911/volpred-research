@@ -271,12 +271,14 @@ def _normalize_article(article: Mapping[str, object]) -> dict:
     slug = normalized.get("id")
     if not isinstance(slug, str) or _SLUG.fullmatch(slug) is None:
         raise ValueError("publisher article id must be a safe slug")
-    tags = normalized.get("tags")
-    if tags is not None and (
-        not isinstance(tags, list)
-        or any(not isinstance(tag, str) for tag in tags)
-    ):
-        raise ValueError("publisher article tags must be a list of strings")
+    if "tags" in normalized:
+        tags = normalized["tags"]
+        if not isinstance(tags, list) or any(
+            not isinstance(tag, str) for tag in tags
+        ):
+            raise ValueError(
+                "publisher article tags must be a list of strings"
+            )
     return normalized
 
 
@@ -360,8 +362,6 @@ def _read_tag_names(sync, article_id: object) -> list[str]:
 
 
 def _normalized_tags(raw: object) -> list[str]:
-    if raw is None:
-        return []
     if isinstance(raw, (str, bytes)) or not hasattr(raw, "__iter__"):
         raise ValueError("publisher article tags must be a list")
     return sorted(
