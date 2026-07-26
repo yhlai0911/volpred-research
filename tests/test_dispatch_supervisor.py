@@ -2875,9 +2875,13 @@ def test_multislot_half_pool_launches_second_without_waiting(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     state_path = _tmp_state(tmp_path)
+    lifecycle = _fire_lifecycle("shared-cohort-generation")
     first = state.reserve_fire(
         schedule_id="hourly_dispatch", attempt=1, model="opus",
         log_path="/tmp/first.log", max_slots=2, path=state_path,
+    )
+    state.attach_fire_lifecycle(
+        job_id=first.job_id, lifecycle=lifecycle, path=state_path,
     )
     state.attach_process(
         job_id=first.job_id, expected_attempt=1,
@@ -2910,7 +2914,10 @@ def test_multislot_half_pool_launches_second_without_waiting(
         assert decision["action"] == "launched"
         assert decision["slot_id"] == "slot-2"
         assert await asyncio.to_thread(started.wait, 1)
-        assert len(state.read_state(state_path)["current_jobs"]) == 2
+        jobs = state.read_state(state_path)["current_jobs"]
+        assert len(jobs) == 2
+        assert {job["cohort_id"] for job in jobs} == {first.cohort_id}
+        assert [job["fire_lifecycle"] for job in jobs] == [lifecycle, lifecycle]
         release.set()
         await asyncio.gather(*list(scheduler._ACTIVE_FIRE_TASKS.values()))
 
