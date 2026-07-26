@@ -29,9 +29,15 @@ operations-core 重構（`docs/refactor_plan_ops_master_2026_07.md` program comm
 - `tests/test_postgres_*.py`、`tests/test_work_*.py`、`tests/test_change_delivery.py`
 - `scripts/rehearse_primary_authority_outage.py`、`scripts/git_writer_lock.py`
 
-**Claude 要動這些 → 先 `gh issue comment` 對應 ticket 或在 `storage/next_tasks.json` 建單並註明
-`blocked_by: codex-operations-core`，不要直接改。** 例外：production 掛掉的止血，改完當回合在
-`docs/error_log.md` 記錄並標記給 Codex。
+**Claude 要動這些 → 先開 GitHub Issue 或 `gh issue comment` 對應 ticket，不要直接改。**
+例外：production 掛掉的止血，改完當回合在 `docs/error_log.md` 記錄並標記給 Codex。
+
+> **⚠️ 不要用 `volpred ops assign` 建單。** `storage/ops/task_pool_mode.json` 自 2026-07-23T12:49Z
+> 起 `enabled=true, mode=direct_execution`（`activated_by: codex-vscode`，理由「Telegram 1329
+> owner-directed direct execution; suspend legacy task-pool admission during operations-core
+> cutover」）。**legacy next_tasks admission 已關閉**，任何新 task id 會被
+> `task_pool_mode.enforce_task_pool_write()` 擋下並拋 `TaskPoolAdmissionClosed`（生命週期更新與
+> 刪除仍放行）。operations-core cutover 期間，**新工作的唯一登記處是 GitHub Issues**。
 
 ### B. Claude 主線程專屬 — Codex 不應主動改
 
@@ -78,6 +84,8 @@ git log -5 --oneline -- <path> && git status --porcelain -- <path>
 | Plan（策略） | GitHub Issue #3「VolPred 平台全域優化」 | 存在 |
 | Spec（設計） | `docs/refactor_plan_ops_master_2026_07.md`（WS-A~H + 狀態表）、`docs/operations_core_module_design.md` | 存在，Codex 正在執行 |
 | Ticket（工單） | GitHub Issues #5~#36，25 張 `[Plan T01~T33]`，含 What to build / Acceptance criteria / Blocked by | **存在但斷線** |
+
+**cutover 期間 GitHub Issues 是唯一開著的工單入口**（`next_tasks` admission 已關，見上方 A 區警示）。
 
 **斷線點**：25 張 ticket 全部 `ready-for-agent`、零 assignee，且 `storage/next_tasks.json`
 沒有任何一筆引用 issue 編號（實測 grep = 0）。`docs/agents/issue-tracker.md` 明寫
