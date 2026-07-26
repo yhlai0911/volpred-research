@@ -15,6 +15,9 @@ from volpred.ops.delivery import (
     OwnedPublisherArticleDelete,
     OwnedPublisherDeleteAttempt,
     OwnedPublisherDeleteCommand,
+    OwnedPublisherDeleteReconciliation,
+    OwnedPublisherDeleteReconciliationReceipt,
+    OwnedPublisherDeleteReconciliationSummary,
     OwnedPublisherDeleteReceipt,
     OwnedPublisherDeleteRequest,
     PublisherArticleDeleteApprovalReadback,
@@ -148,6 +151,56 @@ def _attempt(prepared) -> OwnedPublisherDeleteAttempt:
         ),
         lease_expires_at="2026-07-25T00:05:00+00:00",
     )
+
+
+def test_stale_retry_reconciliation_has_no_provider_mutation_seam():
+    expected = OwnedPublisherDeleteReconciliationSummary(
+        schema_version="owned-publisher-delete-reconciliation-summary.v1",
+        reconciled_count=1,
+        receipts=(
+            OwnedPublisherDeleteReconciliationReceipt(
+                schema_version=(
+                    "owned-publisher-delete-reconciliation-receipt.v1"
+                ),
+                effect_id="effect-owned-publisher-delete-1",
+                attempt_count=1,
+                stale_owner_generation=4,
+                current_owner_generation=5,
+                approval_ref="approval:publisher-delete/owned-1",
+                reason_code="stale_generation_revoked_approval",
+                evidence_ref=(
+                    "owned-publisher-delete-reconciliation:"
+                    "effect-owned-publisher-delete-1:attempt-1"
+                ),
+                evidence_sha256="e" * 64,
+                recorded_at="2026-07-26T10:00:00+00:00",
+            ),
+        ),
+    )
+
+    class Store:
+        def __init__(self) -> None:
+            self.calls: list[tuple[int, str]] = []
+
+        def reconcile_stale_retries(
+            self,
+            *,
+            limit: int,
+            actor_ref: str,
+        ) -> OwnedPublisherDeleteReconciliationSummary:
+            self.calls.append((limit, actor_ref))
+            return expected
+
+    store = Store()
+    result = OwnedPublisherDeleteReconciliation(
+        store=store,
+        actor_ref="effect-worker:publisher-delete-reconciliation",
+    ).reconcile(limit=25)
+
+    assert result == expected
+    assert store.calls == [
+        (25, "effect-worker:publisher-delete-reconciliation")
+    ]
 
 
 class _Approval:
@@ -363,6 +416,62 @@ def test_supabase_store_preserves_exact_canonical_payload_text():
     assert function == "volpred_request_owned_publisher_article_delete"
     assert payload["p_payload_text"].encode() == prepared.payload
     assert "p_payload" not in payload
+
+
+def test_supabase_store_reconciles_stale_retries_through_exact_rpc():
+    response = {
+        "schema_version": (
+            "owned-publisher-delete-reconciliation-summary.v1"
+        ),
+        "reconciled_count": 1,
+        "receipts": [
+            {
+                "schema_version": (
+                    "owned-publisher-delete-reconciliation-receipt.v1"
+                ),
+                "effect_id": "effect-owned-publisher-delete-1",
+                "attempt_count": 1,
+                "stale_owner_generation": 4,
+                "current_owner_generation": 5,
+                "approval_ref": "approval:publisher-delete/owned-1",
+                "reason_code": "stale_generation_revoked_approval",
+                "evidence_ref": (
+                    "owned-publisher-delete-reconciliation:"
+                    "effect-owned-publisher-delete-1:attempt-1"
+                ),
+                "evidence_sha256": "e" * 64,
+                "recorded_at": "2026-07-26T10:00:00+00:00",
+            }
+        ],
+    }
+    client = _RpcClient(
+        {
+            "volpred_reconcile_stale_owned_publisher_article_delete": (
+                response
+            )
+        }
+    )
+    store = object.__new__(SupabaseOwnedPublisherDeleteStore)
+    store._client = client
+
+    summary = store.reconcile_stale_retries(
+        limit=25,
+        actor_ref="effect-worker:publisher-delete-reconciliation",
+    )
+
+    assert summary.reconciled_count == 1
+    assert summary.receipts[0].stale_owner_generation == 4
+    assert client.calls == [
+        (
+            "volpred_reconcile_stale_owned_publisher_article_delete",
+            {
+                "p_limit": 25,
+                "p_actor_ref": (
+                    "effect-worker:publisher-delete-reconciliation"
+                ),
+            },
+        )
+    ]
 
 
 def test_projection_compare_delete_sends_attempt_and_approval_identity():

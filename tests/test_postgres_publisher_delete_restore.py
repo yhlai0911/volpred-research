@@ -49,10 +49,12 @@ DELETE_REQUEST_DEPENDENCIES = tuple(
         "20260724060000_operations_core_effect_payload_primary_authority.sql",
         "20260724070000_operations_core_notification_ownership.sql",
         "20260724071000_operations_core_notification_ownership_index.sql",
+        "20260724160000_operations_core_primary_authority_rpc.sql",
         "20260725002427_operations_core_publisher_delete_ownership.sql",
         "20260725004020_fix_publisher_delete_approval_record_ambiguity.sql",
         "20260725202655_promote_publisher_delete_scope_approval.sql",
         "20260725205013_remove_owned_request_share_lock.sql",
+        "20260726103201_reconcile_stale_owned_publisher_delete.sql",
     )
 )
 ARTICLE_ID = "11111111-1111-4111-8111-111111111111"
@@ -546,6 +548,242 @@ def test_owned_delete_request_promotes_scope_approval_into_work_approval(
     assert work == ("approved", "pending", 2)
     assert visible_request == (request["effect_id"],)
     assert locked_request is None
+
+
+def test_stale_revoked_delete_retry_is_terminalized_without_provider(
+    delete_request_postgres_dsn: str,
+) -> None:
+    candidate = _candidate(
+        article_id=SECOND_ARTICLE_ID,
+        slug="stale-owned-delete-retry",
+    )
+    plan = plan_publisher_article_delete(
+        canonical_feed=json.dumps(
+            [{"id": f"mile_stale_{index}"} for index in range(500)]
+        ).encode(),
+        candidates=(candidate,),
+        recovery_artifact_ref="private://stale-owned-delete-recovery",
+    )
+    authorization = PublisherArticleDeleteAuthorization(
+        approval_ref="approval:postgres-stale-owned-delete",
+        approver_ref="owner:postgres-test",
+        approved_at="2026-07-26T10:00:00+00:00",
+        scope_sha256=plan.scope_sha256,
+    )
+    prepared = prepare_publisher_article_delete(
+        plan=plan,
+        authorization=authorization,
+        idempotency_key="postgres-stale-owned-delete",
+        work_item_id="publisher-delete-reconciliation:test:stale",
+        work_item_version=1,
+        payload_ref="private://stale-owned-delete-payload",
+        requester_ref="operator:postgres-test",
+    )
+    worker_id = "effect-worker:publisher-article-delete"
+    primary_token = "primary-stale-owned-delete-token"
+
+    with psycopg.connect(
+        delete_request_postgres_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        owner = connection.execute(
+            "SELECT public.volpred_read_publisher_article_delete_owner()"
+        ).fetchone()[0]
+        if owner["owner"] == "legacy":
+            owner = connection.execute(
+                """
+                SELECT public.volpred_transfer_publisher_article_delete_owner(
+                  %s, %s, 'operations_core', %s, %s, NULL
+                )
+                """,
+                (
+                    "legacy",
+                    owner["generation"],
+                    "operator:postgres-test",
+                    "prepare stale retry reconciliation",
+                ),
+            ).fetchone()[0]
+        connection.execute(
+            """
+            SELECT public.volpred_record_publisher_article_delete_approval(
+              %s, %s
+            )
+            """,
+            (
+                Jsonb(
+                    {
+                        "approval_ref": authorization.approval_ref,
+                        "approver_ref": authorization.approver_ref,
+                        "approved_at": authorization.approved_at,
+                        "scope_sha256": authorization.scope_sha256,
+                    }
+                ),
+                "operator:postgres-test",
+            ),
+        )
+        request = connection.execute(
+            """
+            SELECT public.volpred_request_owned_publisher_article_delete(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                prepared.request.idempotency_key,
+                prepared.payload.decode(),
+                "operator:postgres-test",
+            ),
+        ).fetchone()[0]
+        primary = connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              'publisher:article.supabase.delete', %s, 300, %s
+            )
+            """,
+            (worker_id, primary_token),
+        ).fetchone()[0]
+        attempt = connection.execute(
+            """
+            SELECT public.volpred_begin_owned_publisher_article_delete(
+              %s, %s, %s, 300, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                request["effect_id"],
+                worker_id,
+                "work-stale-delete-attempt-1",
+                "outbox-stale-delete-attempt-1",
+                primary_token,
+            ),
+        ).fetchone()[0]
+        retry = connection.execute(
+            """
+            SELECT public.volpred_settle_owned_publisher_article_delete(
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+              %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                attempt["work_id"],
+                attempt["work_version"],
+                "work-stale-delete-attempt-1",
+                attempt["effect"]["id"],
+                attempt["outbox_sequence"],
+                attempt["attempt_count"],
+                attempt["worker_id"],
+                "outbox-stale-delete-attempt-1",
+                attempt["primary_authority_key"],
+                attempt["primary_authority_holder_ref"],
+                attempt["primary_authority_epoch"],
+                primary_token,
+                attempt["authority_request_sha256"],
+                attempt["outbox_claim_ref"],
+                attempt["primary_authority_ref"],
+                "retryable_failure",
+                None,
+                None,
+                "publisher_article_delete_provider_error",
+                "test:stale-delete:retryable-provider-error",
+                "a" * 64,
+            ),
+        ).fetchone()[0]
+        assert retry["disposition"] == "retry_scheduled"
+        connection.execute(
+            """
+            SELECT public.volpred_revoke_publisher_article_delete_approval(
+              %s, %s, %s
+            )
+            """,
+            (
+                authorization.approval_ref,
+                "operator:postgres-test",
+                "revoke destructive rehearsal approval",
+            ),
+        )
+        connection.execute(
+            """
+            SELECT public.volpred_release_primary_authority(
+              'publisher:article.supabase.delete', %s, %s, %s
+            )
+            """,
+            (worker_id, primary["epoch"], primary_token),
+        )
+        rolled_back = connection.execute(
+            """
+            SELECT public.volpred_transfer_publisher_article_delete_owner(
+              'operations_core', %s, 'legacy', %s, %s, %s
+            )
+            """,
+            (
+                owner["generation"],
+                "operator:postgres-test",
+                "exact rollback after destructive rehearsal",
+                owner["generation"],
+            ),
+        ).fetchone()[0]
+
+        reconciliation = connection.execute(
+            """
+            SELECT public.volpred_reconcile_stale_owned_publisher_article_delete(
+              25, %s
+            )
+            """,
+            ("effect-worker:publisher-delete-reconciliation",),
+        ).fetchone()[0]
+        replay = connection.execute(
+            """
+            SELECT public.volpred_reconcile_stale_owned_publisher_article_delete(
+              25, %s
+            )
+            """,
+            ("effect-worker:publisher-delete-reconciliation",),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        durable = connection.execute(
+            """
+            SELECT
+              (SELECT status FROM volpred_ops.work_items WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_requests WHERE id = %s),
+              (SELECT status FROM volpred_ops.effect_outbox
+               WHERE effect_id = %s),
+              (SELECT status FROM volpred_ops.owned_notification_attempts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT disposition
+               FROM volpred_ops.effect_attempt_receipts
+               WHERE effect_id = %s AND attempt_count = 1),
+              (SELECT count(*)
+               FROM volpred_ops.owned_publisher_delete_reconciliation_receipts
+               WHERE effect_id = %s),
+              (SELECT count(*) FROM volpred_ops.work_receipts
+               WHERE work_id = %s AND outcome = 'failed')
+            """,
+            (
+                request["work_id"],
+                request["effect_id"],
+                request["effect_id"],
+                request["effect_id"],
+                request["effect_id"],
+                request["effect_id"],
+                request["work_id"],
+            ),
+        ).fetchone()
+
+    assert rolled_back["owner"] == "legacy"
+    assert reconciliation["reconciled_count"] == 1
+    assert reconciliation["receipts"][0]["effect_id"] == request["effect_id"]
+    assert replay["reconciled_count"] == 0
+    assert durable == (
+        "failed",
+        "dead_lettered",
+        "dead_lettered",
+        "retry_scheduled",
+        "retry_scheduled",
+        1,
+        1,
+    )
 
 
 def _article(article_id: str, slug: str) -> dict:

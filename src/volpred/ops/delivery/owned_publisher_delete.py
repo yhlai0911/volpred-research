@@ -121,6 +121,27 @@ class OwnedPublisherDeleteReceipt:
         )
 
 
+@dataclass(frozen=True)
+class OwnedPublisherDeleteReconciliationReceipt:
+    schema_version: str
+    effect_id: str
+    attempt_count: int
+    stale_owner_generation: int
+    current_owner_generation: int
+    approval_ref: str
+    reason_code: str
+    evidence_ref: str
+    evidence_sha256: str
+    recorded_at: str
+
+
+@dataclass(frozen=True)
+class OwnedPublisherDeleteReconciliationSummary:
+    schema_version: str
+    reconciled_count: int
+    receipts: tuple[OwnedPublisherDeleteReconciliationReceipt, ...]
+
+
 class _OwnedPublisherDeleteStore(Protocol):
     def read_owner(self) -> PublisherArticleDeleteOwner: ...
 
@@ -147,6 +168,15 @@ class _OwnedPublisherDeleteStore(Protocol):
         attempt: OwnedPublisherDeleteAttempt,
         outcome: EffectAttemptOutcome,
     ) -> OwnedPublisherDeleteReceipt: ...
+
+
+class _OwnedPublisherDeleteReconciliationStore(Protocol):
+    def reconcile_stale_retries(
+        self,
+        *,
+        limit: int,
+        actor_ref: str,
+    ) -> OwnedPublisherDeleteReconciliationSummary: ...
 
 
 class _PrimaryLeaseGate(Protocol):
@@ -381,6 +411,36 @@ class OwnedPublisherArticleDelete:
             )
 
 
+class OwnedPublisherDeleteReconciliation:
+    """Terminalize impossible stale retries without invoking a provider."""
+
+    def __init__(
+        self,
+        *,
+        store: _OwnedPublisherDeleteReconciliationStore,
+        actor_ref: str,
+    ) -> None:
+        self._store = store
+        self._actor_ref = _required_text(
+            actor_ref,
+            field="publisher delete reconciliation actor_ref",
+        )
+
+    def reconcile(
+        self,
+        *,
+        limit: int,
+    ) -> OwnedPublisherDeleteReconciliationSummary:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+            raise ValueError(
+                "publisher delete reconciliation limit must be positive"
+            )
+        return self._store.reconcile_stale_retries(
+            limit=limit,
+            actor_ref=self._actor_ref,
+        )
+
+
 class SupabaseOwnedPublisherDeleteStore:
     """Service-role PostgREST adapter for delete ownership RPCs."""
 
@@ -493,6 +553,31 @@ class SupabaseOwnedPublisherDeleteStore:
             field="publisher delete approval revoke",
         )
         return _approval_readback_from_payload(response)
+
+    def reconcile_stale_retries(
+        self,
+        *,
+        limit: int,
+        actor_ref: str,
+    ) -> OwnedPublisherDeleteReconciliationSummary:
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit <= 0:
+            raise ValueError(
+                "publisher delete reconciliation limit must be positive"
+            )
+        return _reconciliation_summary_from_payload(
+            self._rpc(
+                "volpred_reconcile_stale_owned_publisher_article_delete",
+                {
+                    "p_limit": limit,
+                    "p_actor_ref": _required_text(
+                        actor_ref,
+                        field=(
+                            "publisher delete reconciliation actor_ref"
+                        ),
+                    ),
+                },
+            )
+        )
 
     def request(
         self,
@@ -1312,6 +1397,92 @@ def _receipt_lifecycle_is_consistent(
     ) == expected_states.get(receipt.disposition)
 
 
+def _reconciliation_summary_from_payload(
+    payload: Mapping[str, Any],
+) -> OwnedPublisherDeleteReconciliationSummary:
+    if (
+        payload.get("schema_version")
+        != "owned-publisher-delete-reconciliation-summary.v1"
+    ):
+        raise RuntimeError(
+            "owned publisher delete reconciliation summary schema drift"
+        )
+    receipts_payload = payload.get("receipts")
+    if not isinstance(receipts_payload, list):
+        raise RuntimeError(
+            "owned publisher delete reconciliation receipts must be a list"
+        )
+    receipts: list[OwnedPublisherDeleteReconciliationReceipt] = []
+    for value in receipts_payload:
+        receipt = _mapping(
+            value,
+            field="owned publisher delete reconciliation receipt",
+        )
+        if (
+            receipt.get("schema_version")
+            != "owned-publisher-delete-reconciliation-receipt.v1"
+        ):
+            raise RuntimeError(
+                "owned publisher delete reconciliation receipt schema drift"
+            )
+        receipts.append(
+            OwnedPublisherDeleteReconciliationReceipt(
+                schema_version=str(receipt["schema_version"]),
+                effect_id=_required_text(
+                    receipt.get("effect_id"),
+                    field="reconciliation effect_id",
+                ),
+                attempt_count=_positive_integer(
+                    receipt.get("attempt_count"),
+                    field="reconciliation attempt_count",
+                ),
+                stale_owner_generation=_positive_integer(
+                    receipt.get("stale_owner_generation"),
+                    field="reconciliation stale_owner_generation",
+                ),
+                current_owner_generation=_positive_integer(
+                    receipt.get("current_owner_generation"),
+                    field="reconciliation current_owner_generation",
+                ),
+                approval_ref=_required_text(
+                    receipt.get("approval_ref"),
+                    field="reconciliation approval_ref",
+                ),
+                reason_code=_required_text(
+                    receipt.get("reason_code"),
+                    field="reconciliation reason_code",
+                ),
+                evidence_ref=_required_text(
+                    receipt.get("evidence_ref"),
+                    field="reconciliation evidence_ref",
+                ),
+                evidence_sha256=_sha256(
+                    receipt.get("evidence_sha256"),
+                    field="reconciliation evidence_sha256",
+                ),
+                recorded_at=_required_text(
+                    receipt.get("recorded_at"),
+                    field="reconciliation recorded_at",
+                ),
+            )
+        )
+    reconciled_count = payload.get("reconciled_count")
+    if (
+        isinstance(reconciled_count, bool)
+        or not isinstance(reconciled_count, int)
+        or reconciled_count < 0
+        or reconciled_count != len(receipts)
+    ):
+        raise RuntimeError(
+            "owned publisher delete reconciliation count drift"
+        )
+    return OwnedPublisherDeleteReconciliationSummary(
+        schema_version=str(payload["schema_version"]),
+        reconciled_count=reconciled_count,
+        receipts=tuple(receipts),
+    )
+
+
 def _mapping(value: object, *, field: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise RuntimeError(f"{field} must be an object")
@@ -1342,6 +1513,9 @@ def _sha256(value: object, *, field: str) -> str:
 __all__ = [
     "OwnedPublisherDeleteAttempt",
     "OwnedPublisherDeleteCommand",
+    "OwnedPublisherDeleteReconciliation",
+    "OwnedPublisherDeleteReconciliationReceipt",
+    "OwnedPublisherDeleteReconciliationSummary",
     "OwnedPublisherDeleteReceipt",
     "OwnedPublisherDeleteRequest",
     "OwnedPublisherArticleDelete",
