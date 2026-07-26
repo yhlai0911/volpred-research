@@ -193,6 +193,22 @@ def main() -> int:
             print(f"[mark_task_blocked] unblocked id={args.id}")
         else:
             reason = str(args.reason or "").strip().lower()
+            incompatible = {
+                field: matched[field]
+                for field in (
+                    "claimed_by",
+                    "claimed_at",
+                    "claim_session_id",
+                    "started_at",
+                    "completed_at",
+                )
+                if field in matched
+            }
+            if incompatible:
+                previous = matched.setdefault("block_transition_previous", {})
+                previous.update(incompatible)
+                for field in incompatible:
+                    matched.pop(field, None)
             if reason in TERMINAL_INTENT_REASONS:
                 matched["status"] = "closed_no_action"
                 matched["terminalized_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")

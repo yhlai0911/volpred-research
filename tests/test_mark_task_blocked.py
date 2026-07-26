@@ -66,6 +66,61 @@ def test_mark_task_blocked_sets_awaiting_interactive_session(
     assert "awaiting_interactive_session" in out
 
 
+def test_mark_blocked_retires_incompatible_claim_and_terminal_fields(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "reopened-data-task",
+                    "status": "in_progress",
+                    "claimed_by": "worker",
+                    "claimed_at": "2026-07-21T09:36:35+00:00",
+                    "claim_session_id": "session-1",
+                    "started_at": "2026-07-21T09:36:36+00:00",
+                    "completed_at": "2026-06-09T10:28:11+00:00",
+                }
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mark_task_blocked.py",
+            "--id",
+            "reopened-data-task",
+            "--reason",
+            "awaiting_external_data",
+        ],
+    )
+
+    assert mark_task_blocked.main() == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "blocked"
+    assert all(
+        field not in saved
+        for field in (
+            "claimed_by",
+            "claimed_at",
+            "claim_session_id",
+            "started_at",
+            "completed_at",
+        )
+    )
+    assert saved["block_transition_previous"]["claimed_by"] == "worker"
+    assert saved["block_transition_previous"]["completed_at"] == (
+        "2026-06-09T10:28:11+00:00"
+    )
+
+
 def test_unblock_restores_pending_status(tmp_path, monkeypatch) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
@@ -109,12 +164,8 @@ def test_load_warns_and_refuses_bad_next_tasks_json(tmp_path, monkeypatch, capsy
     next_tasks.write_text("{bad json", encoding="utf-8")
     monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
 
-    try:
+    with pytest.raises(json.JSONDecodeError):
         mark_task_blocked._load()
-    except json.JSONDecodeError:
-        pass
-    else:
-        raise AssertionError("_load should raise JSONDecodeError")
 
     err = capsys.readouterr().err
     assert "[mark_task_blocked] WARN next_tasks read failed; refusing to update" in err

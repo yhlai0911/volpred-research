@@ -255,11 +255,29 @@ def _write_job_file(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(f".{path.name}.{os.getpid()}.{uuid.uuid4().hex}.tmp")
     try:
-        tmp.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
+        serialized = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+        with tmp.open("w", encoding="utf-8") as handle:
+            handle.write(serialized)
+            handle.flush()
+            os.fsync(handle.fileno())
         os.replace(tmp, path)
+        last_error: OSError | None = None
+        for _attempt in range(3):
+            directory_fd = os.open(path.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory_fd)
+                last_error = None
+                break
+            except OSError as exc:
+                last_error = exc
+            finally:
+                os.close(directory_fd)
+        if last_error is not None:
+            visible = _read_job_file(path, context="durability-uncertain")
+            raise OSError(
+                "directory fsync failed after replace; receipt durability "
+                f"is uncertain visible_payload_matches={visible == payload}"
+            ) from last_error
     finally:
         try:
             tmp.unlink()
@@ -714,6 +732,15 @@ def enqueue(args) -> int:
         "claude_followup": followup,
         "followup_dispatched": False,
         "source_task_id": getattr(args, "source_task_id", None),
+        "source_task_link": (
+            {
+                "state": "pending",
+                "attempted_at": None,
+                "error": None,
+            }
+            if getattr(args, "source_task_id", None)
+            else None
+        ),
         "timeout_seconds": args.timeout or 3600,
         # Where the brief came from vs the frozen copy the runner will actually read.
         # Keeping both makes "the agent read something else than I wrote" auditable.
@@ -726,11 +753,23 @@ def enqueue(args) -> int:
         return 2
     _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
-    _link_source_task(job_id, entry.get("source_task_id"))
+    link_receipt = _link_source_task(job_id, entry.get("source_task_id"))
+    if link_receipt is not None:
+        with _receipt_lock():
+            latest = _read_job_file(job_path, context="enqueue-source-task-link")
+            if latest is None:
+                raise RuntimeError(
+                    f"job receipt disappeared after enqueue: {job_id}"
+                )
+            latest["source_task_link"] = link_receipt
+            _write_job_file(job_path, latest)
     return 0
 
 
-def _link_source_task(job_id: str, task_id: str | None) -> None:
+def _link_source_task(
+    job_id: str,
+    task_id: str | None,
+) -> dict[str, Any] | None:
     """Mark the pool task that spawned this job as in_progress.
 
     Without this the task stays `pending` while its job sits in the queue, so
@@ -745,7 +784,8 @@ def _link_source_task(job_id: str, task_id: str | None) -> None:
     unlinked task is strictly better than a fire that aborts mid-dispatch.
     """
     if not task_id:
-        return
+        return None
+    attempted_at = utc_now()
     try:
         # Import under the canonical `scripts.` name. Path-inserting scripts/ and
         # importing bare `task_pool_claim` would create a second module object
@@ -757,20 +797,202 @@ def _link_source_task(job_id: str, task_id: str | None) -> None:
             sys.path.insert(0, repo_root)
         from scripts import task_pool_claim as tpc
 
-        # _locked_load writes the mutated list back on context exit; mutating in
-        # place is the whole contract, there is no separate write call.
         with tpc._locked_load() as (_fh, tasks):
-            task = tpc._find(tasks, task_id)
-            task["compute_job_id"] = job_id
-            if task.get("status") in ("pending", "claimed"):
-                task["status"] = "in_progress"
-            task["result"] = tpc._append_note(
-                task.get("result"),
-                f"dispatched to compute job {job_id}; awaiting PHASE A collection",
+            _link_source_task_record(
+                tpc=tpc,
+                tasks=tasks,
+                job_id=job_id,
+                task_id=task_id,
             )
-        print(f"linked source task: {task_id} -> in_progress")
-    except Exception as exc:  # noqa: BLE001 — advisory link, never blocks enqueue
+        print(f"linked source task: {task_id} -> awaiting_agent_job")
+        return {
+            "state": "linked",
+            "attempted_at": attempted_at,
+            "linked_at": utc_now(),
+            "error": None,
+        }
+    except (Exception, SystemExit) as exc:  # noqa: BLE001 — durable retry receipt below
         print(f"warning: could not link source task {task_id}: {exc}", file=sys.stderr)
+        return {
+            "state": "error",
+            "attempted_at": attempted_at,
+            "linked_at": None,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
+def _link_source_task_record(
+    *,
+    tpc: Any,
+    tasks: list[dict[str, Any]],
+    job_id: str,
+    task_id: str,
+    allow_running_requeue_recovery: bool = False,
+) -> None:
+    task = tpc._find(tasks, task_id)
+    status = str(task.get("status") or "pending")
+    bound_job_id = task.get("compute_job_id")
+    is_idempotent = (
+        status == "awaiting_agent_job"
+        and str(bound_job_id or "") == job_id
+        and task.get("blocked_reason") == "external_compute_job_active"
+    )
+    is_recoverable_requeue_split = (
+        status == "awaiting_agent_job"
+        and str(bound_job_id or "") == job_id
+        and task.get("blocked_reason")
+        == "external_compute_receipt_pending_collection"
+    )
+    is_recoverable_worker_killed_split = (
+        allow_running_requeue_recovery
+        and status == "awaiting_agent_job"
+        and str(bound_job_id or "") == job_id
+        and task.get("blocked_reason") == "external_compute_job_running"
+    )
+    can_transition = (
+        status in {"pending", "claimed", "in_progress"}
+        and (not bound_job_id or str(bound_job_id) == job_id)
+    )
+    if not (
+        is_idempotent
+        or is_recoverable_requeue_split
+        or is_recoverable_worker_killed_split
+        or can_transition
+    ):
+        raise RuntimeError(
+            "source task is not legally bindable: "
+            f"task_id={task_id} status={status} "
+            f"compute_job_id={bound_job_id!r} requested_job_id={job_id}"
+        )
+    task["compute_job_id"] = job_id
+    if is_recoverable_requeue_split or is_recoverable_worker_killed_split:
+        task["blocked_reason"] = "external_compute_job_active"
+        task.pop("compute_finished_at", None)
+    if can_transition:
+        previous_status = status
+        task["status"] = "awaiting_agent_job"
+        task["blocked_reason"] = "external_compute_job_active"
+        for field in (
+            "claimed_by",
+            "claimed_at",
+            "claim_session_id",
+            "started_at",
+        ):
+            task.pop(field, None)
+        tpc._record_status_history(
+            task,
+            frm=previous_status,
+            to="awaiting_agent_job",
+            by=f"compute-job:{job_id}",
+            note="durable_external_execution_receipt",
+        )
+    note = f"dispatched to compute job {job_id}; awaiting PHASE A collection"
+    if job_id not in str(task.get("result") or ""):
+        task["result"] = tpc._append_note(task.get("result"), note)
+
+
+def _source_task_binding_is_valid(
+    tasks: list[dict[str, Any]],
+    *,
+    task_id: str,
+    job_id: str,
+) -> bool:
+    """Validate the canonical half of the task↔compute-job ownership pair."""
+    try:
+        from scripts import task_pool_claim as tpc
+
+        task = tpc._find(tasks, task_id)
+    except SystemExit as exc:
+        warn(
+            "compute_queue",
+            "canonical source task binding validation failed",
+            task_id=task_id,
+            job_id=job_id,
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return False
+    return (
+        task.get("status") == "awaiting_agent_job"
+        and str(task.get("compute_job_id") or "") == job_id
+        and task.get("blocked_reason")
+        == "external_compute_job_active"
+    )
+
+
+def _canonical_source_task_binding_is_valid(
+    *,
+    task_id: str,
+    job_id: str,
+) -> bool:
+    from scripts import task_pool_claim as tpc
+
+    with tpc._locked_readonly() as tasks:
+        return _source_task_binding_is_valid(
+            tasks,
+            task_id=task_id,
+            job_id=job_id,
+        )
+
+
+def _reconcile_job_source_task_link(
+    job_path: Path,
+    job: dict[str, Any],
+) -> bool:
+    task_id = job.get("source_task_id")
+    if not task_id:
+        return True
+    current = job.get("source_task_link")
+    if (
+        isinstance(current, dict)
+        and current.get("state") == "linked"
+        and _canonical_source_task_binding_is_valid(
+            task_id=str(task_id),
+            job_id=str(job["id"]),
+        )
+    ):
+        return True
+    from scripts import task_pool_claim as tpc
+
+    attempted_at = utc_now()
+    with tpc._locked_load() as (_fh, tasks):
+        with _receipt_lock():
+            latest = _read_job_file(job_path, context="source-task-link")
+            if latest is None or latest.get("status") != "queued":
+                return False
+            try:
+                history = latest.get("requeue_history")
+                last_requeue_reason = (
+                    history[-1].get("reason")
+                    if isinstance(history, list)
+                    and history
+                    and isinstance(history[-1], dict)
+                    else None
+                )
+                _link_source_task_record(
+                    tpc=tpc,
+                    tasks=tasks,
+                    job_id=str(latest["id"]),
+                    task_id=str(latest["source_task_id"]),
+                    allow_running_requeue_recovery=(
+                        last_requeue_reason == "manual:worker_killed"
+                    ),
+                )
+                receipt = {
+                    "state": "linked",
+                    "attempted_at": attempted_at,
+                    "linked_at": utc_now(),
+                    "error": None,
+                }
+            except (Exception, SystemExit) as exc:
+                receipt = {
+                    "state": "error",
+                    "attempted_at": attempted_at,
+                    "linked_at": None,
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            latest["source_task_link"] = receipt
+            _write_job_file(job_path, latest)
+    return isinstance(receipt, dict) and receipt.get("state") == "linked"
 
 
 def _find_task_dispatch_collision(
@@ -1761,6 +1983,7 @@ def _reap_stale_running(context: str) -> int:
                 evidence=evidence,
             )
             continue
+        source_settlement = _transition_source_task_after_worker_exit(job)
         with _receipt_lock():
             current = _read_job_file(path, context=context)
             if current is None or current.get("status") != "running":
@@ -1779,6 +2002,7 @@ def _reap_stale_running(context: str) -> int:
                 "evidence": evidence,
                 "orphaned_started_at": current.get("started_at"),
             }
+            current["source_task_settlement"] = source_settlement
             _write_job_file(path, current)
         stderr_file = current.get("stderr_file")
         if stderr_file:
@@ -1797,6 +2021,57 @@ def _reap_stale_running(context: str) -> int:
     return reaped
 
 
+def _transition_source_task_after_worker_exit(
+    job: dict[str, Any],
+) -> dict[str, Any] | None:
+    task_id = job.get("source_task_id")
+    if not task_id:
+        return None
+    attempted_at = utc_now()
+    try:
+        from scripts import task_pool_claim as tpc
+
+        with tpc._locked_load() as (_fh, tasks):
+            task = tpc._find(tasks, str(task_id))
+            if (
+                task.get("status") != "awaiting_agent_job"
+                or str(task.get("compute_job_id") or "") != str(job["id"])
+                or task.get("blocked_reason")
+                not in {
+                    "external_compute_job_active",
+                    "external_compute_job_running",
+                    "external_compute_receipt_pending_collection",
+                }
+            ):
+                raise RuntimeError(
+                    "source task no longer matches reaped compute job"
+                )
+            task["blocked_reason"] = (
+                "external_compute_receipt_pending_collection"
+            )
+            task["compute_finished_at"] = attempted_at
+        return {
+            "state": "settled",
+            "task_id": str(task_id),
+            "settled_at": attempted_at,
+            "error": None,
+        }
+    except (Exception, SystemExit) as exc:
+        warn(
+            "compute_queue",
+            "reaper could not settle source task",
+            job=job.get("id"),
+            task_id=task_id,
+            err=f"{type(exc).__name__}: {exc}",
+        )
+        return {
+            "state": "error",
+            "task_id": str(task_id),
+            "settled_at": None,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
 def _ready_queued_jobs(context: str) -> tuple[list[tuple[int, str, Path]], int]:
     """Queued jobs allowed to start now, priority-then-arrival ordered.
 
@@ -1813,7 +2088,12 @@ def _ready_queued_jobs(context: str) -> tuple[list[tuple[int, str, Path]], int]:
         j = _read_job_file(p, context=context)
         if j is None:
             continue
+        if j.get("status") == "cancelled":
+            _reconcile_cancelled_source_task(p, j)
+            continue
         if j.get("status") != "queued":
+            continue
+        if not _reconcile_job_source_task_link(p, j):
             continue
         if _sleeping_until(j) is not None:
             sleeping += 1
@@ -1834,9 +2114,30 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
     and walks away. Before this, the scan-then-mark in run_next was a TOCTOU
     that only stayed safe because the worker mutex forbade a second worker.
     """
-    with _receipt_lock():
+    def claim_under_receipt_lock(
+        canonical_tasks: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any] | None:
         job = _read_job_file(job_path, context=context)
         if job is None or job.get("status") != "queued":
+            return None
+        current_task_id = job.get("source_task_id")
+        if current_task_id and (
+            canonical_tasks is None
+            or not _source_task_binding_is_valid(
+                canonical_tasks,
+                task_id=str(current_task_id),
+                job_id=str(job["id"]),
+            )
+        ):
+            return None
+        source_link = job.get("source_task_link")
+        if (
+            job.get("source_task_id")
+            and (
+                not isinstance(source_link, dict)
+                or source_link.get("state") != "linked"
+            )
+        ):
             return None
         if _sleeping_until(job) is not None:
             return None
@@ -1848,7 +2149,113 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
         # the reaper then falls back to the worker-flock invariant.
         job["claimed_by_pid_start_wall"] = _own_start_wall()
         _write_job_file(job_path, job)
-    return job
+        return job
+
+    initial = _read_job_file(job_path, context=context)
+    if initial is None or initial.get("status") != "queued":
+        return None
+    task_id = initial.get("source_task_id")
+    if not task_id:
+        with _receipt_lock():
+            return claim_under_receipt_lock()
+
+    # Lock order is canonical task SH -> compute receipt EX, matching the
+    # writer's canonical task EX -> compute receipt EX order. Holding the task
+    # lock through the receipt compare-and-set prevents a reassignment between
+    # validation and publishing `running`.
+    from scripts import task_pool_claim as tpc
+
+    with tpc._locked_readonly() as tasks:
+        if not _source_task_binding_is_valid(
+            tasks,
+            task_id=str(task_id),
+            job_id=str(initial["id"]),
+        ):
+            return None
+        with _receipt_lock():
+            return claim_under_receipt_lock(tasks)
+
+
+@contextmanager
+def _source_task_execution_fence(job: dict[str, Any]):
+    """Fence only the source task while its external child is running."""
+    task_id = job.get("source_task_id")
+    if not task_id:
+        yield True
+        return
+    from scripts import task_pool_claim as tpc
+    from volpred.ops.next_tasks import (
+        normalize_task_priority,
+        task_execution_fence_paths,
+        task_record_sha256,
+    )
+
+    lock_path, metadata_path = task_execution_fence_paths(
+        tpc.NEXT_TASKS,
+        str(task_id),
+    )
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    with lock_path.open("a+", encoding="utf-8") as fence_handle:
+        fcntl.flock(fence_handle.fileno(), fcntl.LOCK_EX)
+        activated = False
+        try:
+            with tpc._locked_load() as (_fh, tasks):
+                if not _source_task_binding_is_valid(
+                    tasks,
+                    task_id=str(task_id),
+                    job_id=str(job["id"]),
+                ):
+                    current = tpc._find(tasks, str(task_id))
+                    normalize_task_priority(current)
+                    _write_job_file(
+                        metadata_path,
+                        {
+                            "task_id": str(task_id),
+                            "job_id": str(job["id"]),
+                            "record_sha256": task_record_sha256(current),
+                            "activated_at": None,
+                        },
+                    )
+                    yield False
+                    return
+                task = tpc._find(tasks, str(task_id))
+                task["blocked_reason"] = "external_compute_job_running"
+                task["compute_started_at"] = utc_now()
+                normalize_task_priority(task)
+                activated = True
+                _write_job_file(
+                    metadata_path,
+                    {
+                        "task_id": str(task_id),
+                        "job_id": str(job["id"]),
+                        "record_sha256": task_record_sha256(task),
+                        "activated_at": utc_now(),
+                    },
+                )
+            yield True
+        finally:
+            fcntl.flock(fence_handle.fileno(), fcntl.LOCK_UN)
+            if activated:
+                try:
+                    with tpc._locked_load() as (_fh, tasks):
+                        task = tpc._find(tasks, str(task_id))
+                        if (
+                            str(task.get("compute_job_id") or "") == str(job["id"])
+                            and task.get("blocked_reason")
+                            == "external_compute_job_running"
+                        ):
+                            task["blocked_reason"] = (
+                                "external_compute_receipt_pending_collection"
+                            )
+                            task["compute_finished_at"] = utc_now()
+                except (Exception, SystemExit) as exc:
+                    warn(
+                        "compute_queue",
+                        "could not settle source task execution fence",
+                        task_id=task_id,
+                        job_id=job.get("id"),
+                        err=f"{type(exc).__name__}: {exc}",
+                    )
 
 
 def _run_claimed(job_path: Path, job: dict[str, Any]) -> None:
@@ -1921,16 +2328,32 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
 
     try:
         with stdout_p.open("w") as so, stderr_p.open("w") as se:
-            proc = subprocess.run(
-                cmd_parts,
-                cwd=str(ROOT),
-                env=env,
-                stdout=so,
-                stderr=se,
-                timeout=job.get("timeout_seconds", 3600),
+            # A task-local fence protects only this source record from the last
+            # binding CAS until the child exits. Other queue tasks remain fully
+            # writable, and a child may safely materialize unrelated work.
+            with _source_task_execution_fence(job) as binding_valid:
+                if binding_valid:
+                    proc = subprocess.run(
+                        cmd_parts,
+                        cwd=str(ROOT),
+                        env=env,
+                        stdout=so,
+                        stderr=se,
+                        timeout=job.get("timeout_seconds", 3600),
+                    )
+        if not binding_valid:
+            job["status"] = "cancelled"
+            job["exit_code"] = None
+            job["failure_reason"] = "source_task_binding_lost_before_spawn"
+            warn(
+                "compute_queue",
+                "refused stale compute job before spawn",
+                job=job.get("id"),
+                source_task_id=job.get("source_task_id"),
             )
-        job["exit_code"] = proc.returncode
-        if proc.returncode != 0:
+        else:
+            job["exit_code"] = proc.returncode
+        if binding_valid and proc.returncode != 0:
             job["status"] = "failed"
             if _runner_timed_out(job):
                 _mark_timeout(job)
@@ -1942,7 +2365,7 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
                 # Non-quota terminal failure: lazypack jobs escalate to a real
                 # P1 repair task instead of a receipt nobody owns (D3).
                 _maybe_open_lazypack_repair_task(job)
-        else:
+        elif binding_valid:
             artifact_path = _declared_result_artifact(job)
             if artifact_path is not None and not artifact_path.exists():
                 # A successful process without its declared output is not a
@@ -2241,25 +2664,153 @@ def cancel(args) -> int:
     if not reason:
         print("error: cancel requires a non-empty --reason for the audit trail", file=sys.stderr)
         return 2
-    with _receipt_lock():
+    path = QUEUE_DIR / f"{args.id}.json"
+
+    def cancel_under_receipt_lock(
+        source_task: dict[str, Any] | None = None,
+    ) -> tuple[int, dict[str, Any] | None]:
         loaded = _load_queued_job(args.id, "cancel")
         if loaded is None:
-            return 2
-        path, job = loaded
+            return 2, None
+        loaded_path, job = loaded
+        job["cancel_reason"] = reason
+        if job.get("source_task_id"):
+            if source_task is None or not _release_cancelled_source_task(
+                source_task,
+                job,
+                tpc=tpc,
+            ):
+                print(
+                    f"error: cannot cancel {args.id} — canonical source task "
+                    "binding no longer matches.",
+                    file=sys.stderr,
+                )
+                return 2, None
         job["status"] = "cancelled"
         cancelled_at = utc_now()
         job["cancelled_at"] = cancelled_at
         # Keep completed_at populated for generic terminal-state consumers while
         # preserving the semantically precise cancellation timestamp for audit.
         job["completed_at"] = cancelled_at
-        job["cancel_reason"] = reason
         # A cancelled job has no result, so it has nothing to follow up on. Saying so
         # explicitly keeps it out of `list --pending-followup` instead of relying on the
         # collector to infer that "cancelled" means "do not triage me".
         job["followup_dispatched"] = True
-        _write_job_file(path, job)
+        if job.get("source_task_id"):
+            job["source_task_settlement"] = {
+                "state": "pending_queue_commit",
+                "task_id": str(job["source_task_id"]),
+                "attempted_at": cancelled_at,
+            }
+        _write_job_file(loaded_path, job)
+        return 0, job
+
+    preview = _read_job_file(path, context="cancel-preview")
+    if preview is None:
+        return 2
+    if preview.get("source_task_id"):
+        from scripts import task_pool_claim as tpc
+
+        with tpc._locked_load() as (_fh, tasks):
+            source_task = tpc._find(tasks, str(preview["source_task_id"]))
+            with _receipt_lock():
+                rc, cancelled_job = cancel_under_receipt_lock(source_task)
+        if rc == 0 and cancelled_job is not None:
+            _ack_cancelled_source_task_settlement(path)
+    else:
+        with _receipt_lock():
+            rc, _cancelled_job = cancel_under_receipt_lock()
+    if rc != 0:
+        return rc
     print(f"cancelled: {args.id}")
     return 0
+
+
+def _release_cancelled_source_task(
+    task: dict[str, Any],
+    job: dict[str, Any],
+    *,
+    tpc: Any,
+) -> bool:
+    if (
+        str(task.get("id") or "") != str(job.get("source_task_id"))
+        or task.get("status") != "awaiting_agent_job"
+        or str(task.get("compute_job_id") or "") != str(job.get("id"))
+        or task.get("blocked_reason")
+        not in {
+            "external_compute_job_active",
+            "external_compute_job_running",
+            "external_compute_receipt_pending_collection",
+        }
+    ):
+        return False
+    released_at = utc_now()
+    task["status"] = "pending"
+    tpc._record_status_history(
+        task,
+        frm="awaiting_agent_job",
+        to="pending",
+        by=f"compute-cancel:{job.get('id')}",
+        note=str(job.get("cancel_reason") or "compute_job_cancelled"),
+    )
+    task["compute_released_at"] = released_at
+    task["compute_release_reason"] = str(
+        job.get("cancel_reason") or "compute_job_cancelled"
+    )
+    for field in (
+        "blocked_reason",
+        "compute_job_id",
+        "compute_started_at",
+        "compute_finished_at",
+        "external_execution_ref",
+    ):
+        task.pop(field, None)
+    return True
+
+
+def _ack_cancelled_source_task_settlement(path: Path) -> None:
+    with _receipt_lock():
+        current = _read_job_file(path, context="cancel-settlement-ack")
+        if (
+            current is None
+            or current.get("status") != "cancelled"
+            or not current.get("source_task_id")
+        ):
+            return
+        current["source_task_settlement"] = {
+            "state": "settled",
+            "task_id": str(current["source_task_id"]),
+            "settled_at": utc_now(),
+        }
+        _write_job_file(path, current)
+
+
+def _reconcile_cancelled_source_task(path: Path, job: dict[str, Any]) -> None:
+    settlement = job.get("source_task_settlement")
+    if (
+        job.get("status") != "cancelled"
+        or not job.get("source_task_id")
+        or (
+            isinstance(settlement, dict)
+            and settlement.get("state") == "settled"
+        )
+    ):
+        return
+    from scripts import task_pool_claim as tpc
+
+    with tpc._locked_load() as (_fh, tasks):
+        task = tpc._find(tasks, str(job["source_task_id"]))
+        if task.get("status") == "pending" and not task.get("compute_job_id"):
+            pass
+        elif not _release_cancelled_source_task(task, job, tpc=tpc):
+            warn(
+                "compute_queue",
+                "cancelled source task settlement did not match",
+                job=job.get("id"),
+                task_id=job.get("source_task_id"),
+            )
+            return
+    _ack_cancelled_source_task_settlement(path)
 
 
 def requeue(args) -> int:
@@ -2284,25 +2835,37 @@ def requeue(args) -> int:
     confirm the worktree holds nothing worth salvaging before re-running.
     """
     path = QUEUE_DIR / f"{args.id}.json"
-    with _receipt_lock():
-        if not path.exists():
-            print(f"error: not found {args.id}", file=sys.stderr)
-            return 2
+    if not path.exists():
+        print(f"error: not found {args.id}", file=sys.stderr)
+        return 2
+    preview = _read_job_file(path, context="requeue-preview")
+    if preview is None:
+        return 2
+    source_task_id = preview.get("source_task_id")
+
+    def requeue_under_receipt_lock(
+        source_task: dict[str, Any] | None = None,
+    ) -> tuple[int, str | None]:
         job = _read_job_file(path, context="requeue")
         if job is None:
-            return 2
+            return 2, None
         if job.get("status") != "failed":
-            print(f"error: cannot requeue {args.id} — status={job.get('status')}, not failed.",
-                  file=sys.stderr)
-            return 2
+            print(
+                f"error: cannot requeue {args.id} — "
+                f"status={job.get('status')}, not failed.",
+                file=sys.stderr,
+            )
+            return 2, None
         if job.get("followup_dispatched"):
-            followup_id = job.get("followup_next_task_id") or "(unknown followup task)"
+            followup_id = (
+                job.get("followup_next_task_id") or "(unknown followup task)"
+            )
             print(
                 f"error: cannot requeue {args.id} — disposition is owned by "
                 f"followup {followup_id}. Do not retry the delegated original receipt.",
                 file=sys.stderr,
             )
-            return 2
+            return 2, None
         failure = _runner_failure_class(job)
         worker_killed = job.get("failure_reason") == "worker_killed"
         if failure not in ("auth", "quota") and not worker_killed:
@@ -2313,8 +2876,34 @@ def requeue(args) -> int:
                 f"job) died. Triage this one's worktree instead.",
                 file=sys.stderr,
             )
-            return 2
-        blocked_kind = failure if failure in ("auth", "quota") else "worker_killed"
+            return 2, None
+        blocked_kind = (
+            failure if failure in ("auth", "quota") else "worker_killed"
+        )
+        if job.get("source_task_id"):
+            if source_task is None:
+                return 2, None
+            if (
+                str(source_task.get("id") or "")
+                != str(job.get("source_task_id"))
+                or source_task.get("status") != "awaiting_agent_job"
+                or str(source_task.get("compute_job_id") or "")
+                != str(job["id"])
+                or source_task.get("blocked_reason")
+                not in {
+                    "external_compute_job_active",
+                    "external_compute_job_running",
+                    "external_compute_receipt_pending_collection",
+                }
+            ):
+                print(
+                    f"error: cannot requeue {args.id} — canonical source task "
+                    "binding no longer matches.",
+                    file=sys.stderr,
+                )
+                return 2, None
+            source_task["blocked_reason"] = "external_compute_job_active"
+            source_task.pop("compute_finished_at", None)
 
         job.setdefault("requeue_history", []).append({
             "at": utc_now(),
@@ -2322,21 +2911,42 @@ def requeue(args) -> int:
             "exit_code": job.get("exit_code"),
             "started_at": job.get("started_at"),
             "failure_reason": job.get("failure_reason"),
-            "by": os.environ.get("VOLPRED_ACTOR") or os.environ.get("VOLPRED_TASK_CLAIM_OWNER"),
+            "by": os.environ.get("VOLPRED_ACTOR")
+            or os.environ.get("VOLPRED_TASK_CLAIM_OWNER"),
         })
         job["status"] = "queued"
         job["started_at"] = None
         job["completed_at"] = None
         job["exit_code"] = None
         job["not_before"] = None
-        # The retired attempt's verdict and claim identity now live in
-        # requeue_history / reap; leaving them on a queued job would let a
-        # LATER unrelated failure inherit `worker_killed` and slip past this
-        # very gate on a second requeue.
         job["failure_reason"] = None
         job["claimed_by_pid"] = None
         job["claimed_by_pid_start_wall"] = None
+        job["source_task_link"] = (
+            {
+                "state": "linked",
+                "attempted_at": utc_now(),
+                "linked_at": utc_now(),
+                "error": None,
+            }
+            if job.get("source_task_id")
+            else job.get("source_task_link")
+        )
         _write_job_file(path, job)
+        return 0, blocked_kind
+
+    if source_task_id:
+        from scripts import task_pool_claim as tpc
+
+        with tpc._locked_load() as (_fh, tasks):
+            source_task = tpc._find(tasks, str(source_task_id))
+            with _receipt_lock():
+                rc, blocked_kind = requeue_under_receipt_lock(source_task)
+    else:
+        with _receipt_lock():
+            rc, blocked_kind = requeue_under_receipt_lock()
+    if rc != 0:
+        return rc
     if blocked_kind == "worker_killed":
         print(f"requeued: {args.id} (worker died mid-claim; job re-runs from scratch)")
     else:

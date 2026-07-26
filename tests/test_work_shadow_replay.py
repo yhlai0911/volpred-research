@@ -9,7 +9,7 @@ import pytest
 
 from volpred.ops import work_shadow_replay
 from volpred.ops.work import WorkCoordinator, WorkerOffer
-from volpred.ops.work_migration import LegacySnapshots
+from volpred.ops.work_migration import LegacySnapshots, preview_legacy_snapshots
 from volpred.ops.work_shadow_replay import (
     append_shadow_observation,
     replay_legacy_selection,
@@ -585,7 +585,7 @@ def test_unrepresentable_parent_corruption_propagates_to_child_readiness() -> No
     )
 
 
-def test_present_but_unmapped_parent_is_not_reported_as_absent() -> None:
+def test_terminal_parent_metadata_does_not_hide_its_disposition() -> None:
     parent = _pending_task("unmapped_parent", priority=9)
     parent.update(
         {
@@ -607,17 +607,7 @@ def test_present_but_unmapped_parent_is_not_reported_as_absent() -> None:
         observation_id="obs_unmapped_parent",
     )
 
-    issue_codes = {
-        (issue["record_id"], issue["code"])
-        for issue in ledger.reconciliation_issues
-    }
-    assert ("unmapped_parent", "unknown_source") in issue_codes
-    assert ("child_of_unmapped", "unrepresentable_parent") in issue_codes
-    assert ("child_of_unmapped", "missing_parent") not in issue_codes
-    assert all(
-        "absent from supplied snapshots" not in issue["detail"]
-        for issue in ledger.reconciliation_issues
-    )
+    assert ledger.reconciliation_issues == ()
     child_comparison = next(
         comparison
         for comparison in ledger.comparisons
@@ -629,23 +619,51 @@ def test_present_but_unmapped_parent_is_not_reported_as_absent() -> None:
         for dimension in child_comparison.dimensions
         if dimension.name == "parent"
     )
-    assert parent_dimension.classification == "legacy_corruption"
+    assert parent_dimension.coordinator["satisfied"] is True
+    assert parent_dimension.coordinator_reason_codes == ("parent_succeeded",)
+    assert parent_dimension.classification == "policy_change"
     assert parent_dimension.classification_reason_code == (
-        "reconciliation:unknown_source,unrepresentable_parent"
+        "coordinator_parent_readiness"
     )
-    assert (
-        "reconciliation://next_tasks/unmapped_parent/record-0/unknown_source"
-        in parent_dimension.evidence_refs
+    assert ledger.selection_difference is None
+
+
+def test_terminal_tombstone_can_satisfy_a_child_without_execution_metadata() -> None:
+    parent = {
+        "id": "archived_parent",
+        "status": "succeeded",
+        "task_type": "retired_kind",
+        "title": "Compacted dependency disposition",
+        "priority": 4,
+        "completed_at": "2026-06-01T00:00:00+00:00",
+    }
+    child = _pending_task(
+        "child_after_archive",
+        priority=1,
+        parent_task_id="archived_parent",
     )
-    assert (
-        "reconciliation://next_tasks/child_of_unmapped/unrepresentable_parent"
-        in parent_dimension.evidence_refs
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(parent, child)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_archived_dependency",
     )
-    assert ledger.selection_difference is not None
-    assert ledger.selection_difference.classification == "legacy_corruption"
-    assert ledger.selection_difference.classification_reason_code == (
-        "reconciliation:unknown_source,unrepresentable_parent"
+
+    assert ledger.reconciliation_issues == ()
+    child_comparison = next(
+        comparison
+        for comparison in ledger.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/child_after_archive"
     )
+    parent_dimension = next(
+        dimension
+        for dimension in child_comparison.dimensions
+        if dimension.name == "parent"
+    )
+    assert parent_dimension.coordinator["satisfied"] is True
+    assert parent_dimension.coordinator_reason_codes == ("parent_succeeded",)
 
 
 def test_task_record_parent_is_dependency_context_not_selection_candidate() -> None:
@@ -701,6 +719,183 @@ def test_task_record_parent_is_dependency_context_not_selection_candidate() -> N
     assert (
         parent_dimension.classification_reason_code
         == "coordinator_parent_readiness"
+    )
+
+
+def test_terminal_tombstone_is_a_read_only_disposition_not_work_to_import() -> None:
+    tombstone = {
+        "id": "legacy_completed",
+        "status": "succeeded",
+        "task_type": "retired_legacy_kind",
+        "title": "Archived terminal history",
+        "priority": 4,
+        "tombstone": True,
+        "completed_at": "2026-06-01T00:00:00+00:00",
+        "archived_at": "2026-07-14T00:00:00+00:00",
+    }
+    pending = _pending_task("current_work", priority=1)
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(tombstone, pending)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_terminal_tombstone",
+    )
+
+    assert ledger.snapshot.source_counts["next_tasks"] == 2
+    assert ledger.reconciliation_issues == ()
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/current_work"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/current_work"
+    )
+    archived = next(
+        comparison
+        for comparison in ledger.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/legacy_completed"
+    )
+    assert archived.legacy_eligible is False
+    assert archived.coordinator_eligible is False
+    assert all(dimension.matches for dimension in archived.dimensions)
+    terminal = next(
+        dimension
+        for dimension in archived.dimensions
+        if dimension.name == "terminal_disposition"
+    )
+    assert terminal.legacy == terminal.coordinator == {
+        "terminal": True,
+        "outcome": "succeeded",
+    }
+
+
+def test_uncompacted_terminal_history_does_not_require_execution_metadata() -> None:
+    historical = {
+        "id": "legacy_superseded",
+        "status": "superseded",
+        "task_type": "platform_ops",
+        "title": "Old work replaced before lifecycle receipts existed",
+        "priority": 4,
+    }
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(historical,)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_terminal_history",
+    )
+
+    assert ledger.reconciliation_issues == ()
+    assert ledger.legacy_selection.selected_candidate_ref is None
+    assert ledger.coordinator_selection.selected_candidate_ref is None
+    comparison = ledger.comparisons[0]
+    assert comparison.legacy_eligible is False
+    assert comparison.coordinator_eligible is False
+    terminal = next(
+        dimension
+        for dimension in comparison.dimensions
+        if dimension.name == "terminal_disposition"
+    )
+    assert terminal.legacy == {"terminal": True, "outcome": "superseded"}
+    assert terminal.coordinator == {"terminal": True, "outcome": "cancelled"}
+    assert terminal.classification == "policy_change"
+    assert terminal.classification_reason_code == (
+        "coordinator_terminal_mapping"
+    )
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "hourly_dispatch_triage",
+        "hourly_dispatch_finding",
+        "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
+        "auto_discovered_from_k1095_correction",
+        "owner_interactive",
+    ],
+)
+def test_reviewed_live_ingress_source_preserves_pending_selection_parity(
+    source: str,
+) -> None:
+    task = _pending_task("triaged_work")
+    task["source"] = source
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(task,)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_reviewed_ingress",
+    )
+
+    assert ledger.reconciliation_issues == ()
+    assert ledger.selection_difference is None
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        "legacy://next_tasks/triaged_work"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        "legacy://next_tasks/triaged_work"
+    )
+
+
+def test_legacy_creation_upper_bound_is_not_reported_as_missing_created_at() -> None:
+    task = _pending_task("legacy_creation_bound")
+    task.pop("created_at")
+    task["created_at_observed_not_after"] = "2026-07-22T11:09:09+08:00"
+    task["creation_time_evidence"] = {
+        "method": "reviewed_git_snapshot_observation",
+        "evidence_commit": "a" * 40,
+    }
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(task,)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_creation_upper_bound",
+    )
+
+    assert ledger.reconciliation_issues == ()
+    assert ledger.selection_difference is None
+    candidate = preview_legacy_snapshots(
+        LegacySnapshots(next_tasks=(task,))
+    ).as_dict()["candidates"][0]
+    assert candidate["created_at"] is None
+    assert candidate["created_at_observed_not_after"] == (
+        "2026-07-22T03:09:09+00:00"
+    )
+    assert candidate["creation_sort_time"] == (
+        "2026-07-22T03:09:09+00:00"
+    )
+
+
+def test_scheduled_shadow_records_capability_enforcement_as_policy_change() -> None:
+    research = _pending_task("research_work", priority=1)
+    research["task_type"] = "experiment"
+    code = _pending_task("code_work", priority=2)
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(research, code)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id="obs_capability_policy",
+    )
+
+    capability = next(
+        dimension
+        for comparison in ledger.comparisons
+        if comparison.candidate_ref
+        == "legacy://next_tasks/research_work"
+        for dimension in comparison.dimensions
+        if dimension.name == "capability"
+    )
+    assert capability.classification == "policy_change"
+    assert capability.classification_reason_code == (
+        "coordinator_capability_contract"
+    )
+    assert ledger.selection_difference is not None
+    assert ledger.selection_difference.classification == "policy_change"
+    assert ledger.selection_difference.classification_reason_code == (
+        "coordinator_capability_contract"
     )
 
 

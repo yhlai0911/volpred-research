@@ -31,7 +31,7 @@ from .task_pool_selection import (
     select_task_for_claim,
     task_identity,
 )
-from .work import WorkItemView, WorkerOffer
+from .work import WorkItemView, WorkerOffer, WorkRequest
 from .work.legacy import (
     LegacySnapshots,
     LegacyWorkCandidate,
@@ -126,6 +126,15 @@ _LEGACY_TERMINAL_STATUSES = frozenset(
         "superseded",
     }
 )
+_LEGACY_TERMINAL_OUTCOME = {
+    "succeeded": "succeeded",
+    "succeeded_null_result": "succeeded",
+    "failed": "failed",
+    "cancelled": "cancelled",
+    "closed_no_action": "cancelled",
+    "expired": "cancelled",
+    "superseded": "cancelled",
+}
 _COORDINATOR_STATUS_REASONS = frozenset(
     {
         "ready_pending",
@@ -319,10 +328,24 @@ def replay_legacy_selection(
         dict(task) for task in immutable_snapshots.next_tasks
     )
     raw_records = _raw_next_task_records(raw_next_tasks)
+    terminal_history_indexes = _terminal_history_indexes(
+        raw_records,
+        report.issues,
+    )
+    reconciliation_issues = _without_terminal_history_issues(
+        report.issues,
+        raw_records=raw_records,
+        terminal_history_indexes=terminal_history_indexes,
+    )
     mapped_candidates = tuple(
         candidate
         for candidate in report.candidates
         if candidate.source_system == "next_tasks"
+        and candidate.legacy_id
+        not in {
+            raw_records[index].task_id
+            for index in terminal_history_indexes
+        }
     )
     legacy_result = select_task_for_claim(
         raw_next_tasks,
@@ -338,7 +361,7 @@ def replay_legacy_selection(
         for candidate in mapped_candidates
         if not _candidate_identity_is_unrepresentable(
             candidate,
-            report.issues,
+            reconciliation_issues,
         )
     )
     dependency_candidates = tuple(
@@ -347,8 +370,21 @@ def replay_legacy_selection(
         if candidate.source_system != "next_tasks"
         and not _candidate_identity_is_unrepresentable(
             candidate,
-            report.issues,
+            reconciliation_issues,
         )
+    )
+    terminal_dependency_candidates = tuple(
+        _terminal_dependency_candidate(raw_records[index])
+        for index in terminal_history_indexes
+        if any(
+            record.task.get("parent_task_id")
+            == raw_records[index].task_id
+            for record in raw_records
+        )
+    )
+    dependency_candidates = (
+        *dependency_candidates,
+        *terminal_dependency_candidates,
     )
     coordinator_context = (
         *coordinator_candidates,
@@ -380,6 +416,18 @@ def replay_legacy_selection(
         legacy_result.decisions,
         strict=True,
     ):
+        if raw_record.index in terminal_history_indexes:
+            comparisons_buffer.append(
+                _compare_terminal_history(
+                    raw_record,
+                    legacy_decision=legacy_decision,
+                    legacy_selection_eligible=(
+                        raw_record.index in legacy_eligible_indexes
+                    ),
+                    snapshot_sha256=snapshot.sha256,
+                )
+            )
+            continue
         candidate = coordinator_candidates_by_id.get(raw_record.task_id)
         if candidate is None:
             comparison = _compare_unavailable_next_task(
@@ -389,7 +437,7 @@ def replay_legacy_selection(
                     raw_record.index in legacy_eligible_indexes
                 ),
                 snapshot_sha256=snapshot.sha256,
-                reconciliation_issues=report.issues,
+                reconciliation_issues=reconciliation_issues,
             )
         else:
             comparison = _compare_candidate(
@@ -404,7 +452,7 @@ def replay_legacy_selection(
                     candidate.legacy_id
                 ],
                 snapshot_sha256=snapshot.sha256,
-                reconciliation_issues=report.issues,
+                reconciliation_issues=reconciliation_issues,
             )
         comparisons_buffer.append(comparison)
     comparisons = tuple(
@@ -475,7 +523,7 @@ def replay_legacy_selection(
                 ),
                 "evidence_ref": _issue_evidence_ref(issue),
             }
-            for issue in report.issues
+            for issue in reconciliation_issues
         ),
     )
 
@@ -597,6 +645,13 @@ _POLICY_ORACLE = (
     _PolicyOracleRule(
         "capability",
         frozenset({"legacy_capability_not_enforced"}),
+        frozenset({"capability_mismatch"}),
+        "policy_change",
+        "coordinator_capability_contract",
+    ),
+    _PolicyOracleRule(
+        "capability",
+        frozenset({"legacy_no_capability_requirement"}),
         frozenset({"capability_mismatch"}),
         "policy_change",
         "coordinator_capability_contract",
@@ -1035,6 +1090,74 @@ def _compare_unavailable_next_task(
     )
 
 
+def _compare_terminal_history(
+    raw_record: _RawNextTaskRecord,
+    *,
+    legacy_decision: LegacyClaimDecision,
+    legacy_selection_eligible: bool,
+    snapshot_sha256: str,
+) -> ShadowCandidateComparison:
+    """Compare a final disposition without rematerialising it as work."""
+
+    candidate_ref = raw_record.candidate_ref
+    legacy_values, legacy_reasons = _legacy_dimension_projection(
+        raw_record.task,
+        legacy_decision,
+        candidate=None,
+    )
+    coordinator_values = dict(legacy_values)
+    raw_status = str(raw_record.task["status"]).strip().lower()
+    coordinator_values["terminal_disposition"] = {
+        "terminal": True,
+        "outcome": _LEGACY_TERMINAL_OUTCOME[raw_status],
+    }
+    dimensions: list[ShadowDimensionComparison] = []
+    for spec in _DIMENSION_SPECS:
+        legacy_value = legacy_values[spec.name]
+        coordinator_value = coordinator_values[spec.name]
+        matches = legacy_value == coordinator_value
+        coordinator_reasons = (
+            ("coordinator_terminal_mapping",)
+            if spec.name == "terminal_disposition"
+            else legacy_reasons[spec.name]
+        )
+        classification: str | None = None
+        reason_code: str | None = None
+        evidence_refs: tuple[str, ...] = ()
+        if not matches:
+            classification, reason_code = _classify_difference(
+                spec.name,
+                legacy_reason_codes=legacy_reasons[spec.name],
+                coordinator_reason_codes=coordinator_reasons,
+                reconciliation_issues=(),
+            )
+            evidence_refs = (
+                f"{candidate_ref}#{spec.name}",
+                spec.evidence_ref,
+                f"snapshot://sha256/{snapshot_sha256}",
+                f"oracle://work-selection/{reason_code}",
+            )
+        dimensions.append(
+            ShadowDimensionComparison(
+                name=spec.name,
+                legacy=legacy_value,
+                coordinator=coordinator_value,
+                matches=matches,
+                classification=classification,
+                classification_reason_code=reason_code,
+                legacy_reason_codes=legacy_reasons[spec.name],
+                coordinator_reason_codes=coordinator_reasons,
+                evidence_refs=evidence_refs,
+            )
+        )
+    return ShadowCandidateComparison(
+        candidate_ref=candidate_ref,
+        legacy_eligible=legacy_selection_eligible,
+        coordinator_eligible=False,
+        dimensions=tuple(dimensions),
+    )
+
+
 def _legacy_dimension_projection(
     raw_task: Mapping[str, Any],
     legacy_decision: LegacyClaimDecision,
@@ -1276,7 +1399,7 @@ def _coordinator_item(candidate: LegacyWorkCandidate) -> WorkItemView:
         payload_ref=candidate.request.payload_ref,
         status=candidate.status,
         version=1,
-        created_at=candidate.created_at,
+        created_at=candidate.creation_sort_time,
         parent_id=candidate.request.parent_id,
         deadline=candidate.request.deadline,
         requester_ref=candidate.request.requester_ref,
@@ -1618,6 +1741,119 @@ def _selection_view(
 
 def _next_task_candidate_ref(task_id: str) -> str:
     return f"legacy://next_tasks/{quote(task_id, safe='')}"
+
+
+_ARCHIVED_TOMBSTONE_NOTICE_CODES = frozenset(
+    {"invalid_lifecycle", "invalid_record", "unknown_kind", "unknown_source"}
+)
+
+
+def _terminal_history_indexes(
+    records: tuple[_RawNextTaskRecord, ...],
+    issues: tuple[ReconciliationIssue, ...],
+) -> frozenset[int]:
+    """Return exact terminal rows that cannot own executable work."""
+
+    indexes: set[int] = set()
+    for record in records:
+        task = record.task
+        if (
+            not record.task_id
+            or str(task.get("status") or "").strip().lower()
+            not in _LEGACY_TERMINAL_OUTCOME
+        ):
+            continue
+        row_issues = _issues_for_raw_next_task(record, issues)
+        if any(
+            issue.code not in _ARCHIVED_TOMBSTONE_NOTICE_CODES
+            for issue in row_issues
+        ):
+            continue
+        indexes.add(record.index)
+    return frozenset(indexes)
+
+
+def _without_terminal_history_issues(
+    issues: tuple[ReconciliationIssue, ...],
+    *,
+    raw_records: tuple[_RawNextTaskRecord, ...],
+    terminal_history_indexes: frozenset[int],
+) -> tuple[ReconciliationIssue, ...]:
+    archived_issues = {
+        issue
+        for index in terminal_history_indexes
+        for issue in _issues_for_raw_next_task(raw_records[index], issues)
+        if issue.code in _ARCHIVED_TOMBSTONE_NOTICE_CODES
+    }
+    archived_ids = {
+        raw_records[index].task_id for index in terminal_history_indexes
+    }
+    terminal_parent_issues = {
+        issue
+        for issue in issues
+        if issue.code == "unrepresentable_parent"
+        and any(
+            raw_record.task_id == issue.record_id
+            and raw_record.task.get("parent_task_id") in archived_ids
+            for raw_record in raw_records
+        )
+    }
+    return tuple(
+        issue
+        for issue in issues
+        if issue not in archived_issues
+        and issue not in terminal_parent_issues
+    )
+
+
+def _terminal_dependency_candidate(
+    record: _RawNextTaskRecord,
+) -> LegacyWorkCandidate:
+    """Project an archived terminal row only as dependency disposition."""
+
+    task = record.task
+    raw_status = str(task["status"]).strip().lower()
+    outcome = _LEGACY_TERMINAL_OUTCOME[raw_status]
+    finished_at = next(
+        (
+            str(task[field])
+            for field in ("completed_at", "finished_at", "updated_at")
+            if task.get(field)
+        ),
+        None,
+    )
+    created_at = next(
+        (
+            str(task[field])
+            for field in ("created_at", "completed_at", "finished_at", "updated_at")
+            if task.get(field)
+        ),
+        "1970-01-01T00:00:00+00:00",
+    )
+    return LegacyWorkCandidate(
+        source_system="next_tasks_terminal_dependency",
+        legacy_id=record.task_id,
+        request=WorkRequest(
+            idempotency_key=f"legacy-terminal:{record.task_id}",
+            source="agent",
+            kind="dependency_receipt",
+            title=str(task.get("title") or record.task_id),
+            priority=4,
+            required_capabilities=frozenset(),
+            required_attestations=frozenset(),
+            risk="safe",
+            approval="auto",
+            payload_ref=f"legacy://next_tasks/{quote(record.task_id, safe='')}",
+        ),
+        status=outcome,
+        legacy_status=raw_status,
+        legacy_source=str(task.get("source") or ""),
+        source_classification="archived_terminal_dependency",
+        created_at=created_at,
+        created_at_observed_not_after=None,
+        creation_sort_time=created_at,
+        finished_at=finished_at,
+    )
 
 
 def _raw_next_task_records(

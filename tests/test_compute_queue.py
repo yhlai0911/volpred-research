@@ -9,8 +9,11 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 from scripts import audit_silent_fallbacks
 import scripts.compute_queue as module
+from volpred.ops.next_tasks import ActiveTaskExecutionFence
 
 
 def _patch_queue_paths(tmp_path: Path, monkeypatch) -> Path:
@@ -306,7 +309,7 @@ def test_enqueue_normalizes_and_deduplicates_explicit_output_paths(
     assert job["output_paths"] == ["results/a.json", "results/b.png"]
 
 
-def test_enqueue_links_source_task_to_in_progress(
+def test_enqueue_links_source_task_to_external_execution_wait(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -332,9 +335,501 @@ def test_enqueue_links_source_task_to_in_progress(
     assert job["source_task_id"] == "assign_x"
 
     task = json.loads(pool.read_text())[0]
-    assert task["status"] == "in_progress"
+    assert task["status"] == "awaiting_agent_job"
     assert task["compute_job_id"] == "owned-output-job"
+    assert task["blocked_reason"] == "external_compute_job_active"
     assert "owned-output-job" in task["result"]
+
+
+def test_source_task_link_failure_is_durable_and_reconciled_before_run(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text("[]\n", encoding="utf-8")
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+
+    assert module.enqueue(_enqueue_args(source_task_id="assign_x")) == 0
+
+    job_path = queue_dir / "owned-output-job.json"
+    failed_receipt = json.loads(job_path.read_text(encoding="utf-8"))
+    assert failed_receipt["source_task_link"]["state"] == "error"
+    ready, _sleeping = module._ready_queued_jobs("test-link-failure")
+    assert ready == []
+
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "pending",
+                    "result": None,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    ready, _sleeping = module._ready_queued_jobs("test-link-recovery")
+
+    assert [item[2] for item in ready] == [job_path]
+    recovered = json.loads(job_path.read_text(encoding="utf-8"))
+    assert recovered["source_task_link"]["state"] == "linked"
+    linked_task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert linked_task["status"] == "awaiting_agent_job"
+
+
+def test_cancel_releases_linked_source_task_to_pending(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps([{"id": "assign_x", "status": "pending", "priority": 1}]),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+
+    assert module.enqueue(_enqueue_args(source_task_id="assign_x")) == 0
+    receipt_path = queue_dir / "owned-output-job.json"
+    stale_scanner_snapshot = json.loads(
+        receipt_path.read_text(encoding="utf-8")
+    )
+    assert (
+        module.cancel(
+            SimpleNamespace(id="owned-output-job", reason="operator abort")
+        )
+        == 0
+    )
+
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["status"] == "pending"
+    assert "compute_job_id" not in task
+    assert "blocked_reason" not in task
+    cancel_transitions = [
+        entry
+        for entry in task["status_history"]
+        if entry["from"] == "awaiting_agent_job"
+        and entry["to"] == "pending"
+        and entry["by"] == "compute-cancel:owned-output-job"
+    ]
+    assert len(cancel_transitions) == 1
+    assert cancel_transitions[0]["note"] == "operator abort"
+    assert task["compute_release_reason"] == "operator abort"
+    assert (
+        module._reconcile_job_source_task_link(
+            receipt_path,
+            stale_scanner_snapshot,
+        )
+        is False
+    )
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["status"] == "pending"
+    assert "compute_job_id" not in task
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["status"] == "cancelled"
+    assert receipt["source_task_settlement"]["state"] == "settled"
+
+
+def test_cancel_split_is_repaired_by_terminal_scanner(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps([{"id": "assign_x", "status": "pending", "priority": 1}]),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+    assert module.enqueue(_enqueue_args(source_task_id="assign_x")) == 0
+
+    original_writer = tpc.write_tasks_to_handle
+
+    def fail_queue_commit(_handle, _tasks) -> None:
+        raise OSError("injected cancel queue commit failure")
+
+    monkeypatch.setattr(tpc, "write_tasks_to_handle", fail_queue_commit)
+    with pytest.raises(OSError, match="injected cancel queue commit failure"):
+        module.cancel(
+            SimpleNamespace(id="owned-output-job", reason="operator abort")
+        )
+
+    receipt_path = queue_dir / "owned-output-job.json"
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["status"] == "cancelled"
+    assert (
+        receipt["source_task_settlement"]["state"]
+        == "pending_queue_commit"
+    )
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["status"] == "awaiting_agent_job"
+
+    monkeypatch.setattr(tpc, "write_tasks_to_handle", original_writer)
+    ready, _sleeping = module._ready_queued_jobs("test-cancel-split")
+
+    assert ready == []
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["status"] == "pending"
+    assert "compute_job_id" not in task
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["source_task_settlement"]["state"] == "settled"
+    cancel_transitions = [
+        entry
+        for entry in task["status_history"]
+        if entry["from"] == "awaiting_agent_job"
+        and entry["to"] == "pending"
+        and entry["by"] == "compute-cancel:owned-output-job"
+    ]
+    assert len(cancel_transitions) == 1
+    module._ready_queued_jobs("test-cancel-split-idempotent")
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert len(
+        [
+            entry
+            for entry in task["status_history"]
+            if entry["from"] == "awaiting_agent_job"
+            and entry["to"] == "pending"
+            and entry["by"] == "compute-cancel:owned-output-job"
+        ]
+    ) == 1
+
+
+def test_source_task_link_refuses_terminal_task_without_mutation(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _patch_queue_paths(tmp_path, monkeypatch)
+    pool = tmp_path / "next_tasks.json"
+    original = [{"id": "assign_x", "status": "succeeded", "result": "done"}]
+    pool.write_text(json.dumps(original), encoding="utf-8")
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+
+    receipt = module._link_source_task("job-new", "assign_x")
+
+    assert receipt["state"] == "error"
+    assert json.loads(pool.read_text(encoding="utf-8")) == original
+
+
+def test_source_task_link_refuses_task_bound_to_different_job(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _patch_queue_paths(tmp_path, monkeypatch)
+    pool = tmp_path / "next_tasks.json"
+    original = [
+        {
+            "id": "assign_x",
+            "status": "awaiting_agent_job",
+            "compute_job_id": "job-old",
+            "blocked_reason": "external_compute_job_active",
+        }
+    ]
+    pool.write_text(json.dumps(original), encoding="utf-8")
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+
+    receipt = module._link_source_task("job-new", "assign_x")
+
+    assert receipt["state"] == "error"
+    assert json.loads(pool.read_text(encoding="utf-8")) == original
+
+
+def test_claim_job_refuses_stale_link_after_canonical_task_reassignment(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    job_path = _queued_stub_job(queue_dir, module.LOG_DIR, "job-old")
+    job = json.loads(job_path.read_text(encoding="utf-8"))
+    job["source_task_id"] = "assign_x"
+    job["source_task_link"] = {"state": "linked"}
+    job_path.write_text(json.dumps(job), encoding="utf-8")
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "awaiting_agent_job",
+                    "compute_job_id": "job-new",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+
+    assert module._claim_job(job_path, context="test-stale-link") is None
+    assert json.loads(job_path.read_text(encoding="utf-8"))["status"] == "queued"
+
+
+def test_run_claimed_refuses_binding_changed_after_claim_before_spawn(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    job_path = _queued_stub_job(queue_dir, module.LOG_DIR, "job-old")
+    job = json.loads(job_path.read_text(encoding="utf-8"))
+    job["source_task_id"] = "assign_x"
+    job["source_task_link"] = {"state": "linked"}
+    job_path.write_text(json.dumps(job), encoding="utf-8")
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "awaiting_agent_job",
+                    "compute_job_id": "job-old",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    claimed = module._claim_job(job_path, context="test-post-claim-race")
+    assert claimed is not None
+
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "awaiting_agent_job",
+                    "compute_job_id": "job-new",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    executed = []
+    monkeypatch.setattr(
+        module.subprocess,
+        "run",
+        lambda *_args, **_kwargs: executed.append(True),
+    )
+
+    module._run_claimed(job_path, claimed)
+
+    assert executed == []
+    final = json.loads(job_path.read_text(encoding="utf-8"))
+    assert final["status"] == "cancelled"
+    assert final["failure_reason"] == "source_task_binding_lost_before_spawn"
+
+
+def test_running_source_job_fences_only_its_task_record(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    monkeypatch.setattr(module, "ROOT", tmp_path)
+    job_path = _queued_stub_job(queue_dir, module.LOG_DIR, "job-old")
+    job = json.loads(job_path.read_text(encoding="utf-8"))
+    job["source_task_id"] = "assign_x"
+    job["source_task_link"] = {"state": "linked"}
+    job_path.write_text(json.dumps(job), encoding="utf-8")
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "awaiting_agent_job",
+                    "compute_job_id": "job-old",
+                    "blocked_reason": "external_compute_job_active",
+                },
+                {
+                    "id": "unrelated",
+                    "status": "pending",
+                    "priority": 4,
+                    "created_at": "2026-07-27T00:00:00+00:00",
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    claimed = module._claim_job(job_path, context="test-running-fence")
+    assert claimed is not None
+
+    child_started = threading.Event()
+    release_child = threading.Event()
+
+    def fake_run(*_args, **_kwargs):
+        child_started.set()
+        assert release_child.wait(timeout=5)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    worker = threading.Thread(target=module._run_claimed, args=(job_path, claimed))
+    worker.start()
+    assert child_started.wait(timeout=5)
+
+    with tpc._locked_load() as (_fh, tasks):
+        tpc._find(tasks, "unrelated")["result"] = "writer remained live"
+    with pytest.raises(
+        ActiveTaskExecutionFence,
+        match="owned by running compute job",
+    ):
+        with tpc._locked_load() as (_fh, tasks):
+            tpc._find(tasks, "assign_x")["title"] = "illegal mutation"
+
+    release_child.set()
+    worker.join(timeout=5)
+
+    assert not worker.is_alive()
+    assert json.loads(job_path.read_text(encoding="utf-8"))["status"] == "completed"
+    tasks = {task["id"]: task for task in json.loads(pool.read_text(encoding="utf-8"))}
+    assert tasks["unrelated"]["result"] == "writer remained live"
+    assert "title" not in tasks["assign_x"]
+
+
+def test_write_job_file_fsyncs_file_and_directory_before_readback(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "queue" / "job.json"
+    real_fsync = module.os.fsync
+    fsync_calls: list[int] = []
+
+    def recording_fsync(fd: int) -> None:
+        fsync_calls.append(fd)
+        real_fsync(fd)
+
+    monkeypatch.setattr(module.os, "fsync", recording_fsync)
+
+    module._write_job_file(target, {"id": "job", "status": "linked"})
+
+    assert json.loads(target.read_text(encoding="utf-8")) == {
+        "id": "job",
+        "status": "linked",
+    }
+    assert len(fsync_calls) == 2
+
+
+def test_write_job_file_replace_failure_preserves_previous_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "queue" / "job.json"
+    target.parent.mkdir(parents=True)
+    target.write_text('{"id":"old"}\n', encoding="utf-8")
+
+    def fail_replace(_source, _target):
+        raise OSError("injected replace failure")
+
+    monkeypatch.setattr(module.os, "replace", fail_replace)
+
+    with pytest.raises(OSError, match="injected replace failure"):
+        module._write_job_file(target, {"id": "new"})
+
+    assert json.loads(target.read_text(encoding="utf-8")) == {"id": "old"}
+    assert list(target.parent.glob(".*.tmp")) == []
+
+
+def test_write_job_file_fsync_failure_never_replaces_previous_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "queue" / "job.json"
+    target.parent.mkdir(parents=True)
+    target.write_text('{"id":"old"}\n', encoding="utf-8")
+
+    def fail_fsync(_fd: int) -> None:
+        raise OSError("injected fsync failure")
+
+    monkeypatch.setattr(module.os, "fsync", fail_fsync)
+
+    with pytest.raises(OSError, match="injected fsync failure"):
+        module._write_job_file(target, {"id": "new"})
+
+    assert json.loads(target.read_text(encoding="utf-8")) == {"id": "old"}
+    assert list(target.parent.glob(".*.tmp")) == []
+
+
+def test_write_job_file_retries_directory_fsync_after_replace(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "queue" / "job.json"
+    real_fsync = module.os.fsync
+    calls = 0
+
+    def fail_directory_fsync_once(fd: int) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("injected directory fsync failure")
+        real_fsync(fd)
+
+    monkeypatch.setattr(module.os, "fsync", fail_directory_fsync_once)
+
+    module._write_job_file(target, {"id": "new"})
+
+    assert calls == 3
+    assert json.loads(target.read_text(encoding="utf-8")) == {"id": "new"}
+
+
+def test_write_job_file_reports_ambiguous_commit_after_persistent_dir_fsync_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    target = tmp_path / "queue" / "job.json"
+    real_fsync = module.os.fsync
+    calls = 0
+
+    def fail_directory_fsync(fd: int) -> None:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            real_fsync(fd)
+            return
+        raise OSError("persistent directory fsync failure")
+
+    monkeypatch.setattr(module.os, "fsync", fail_directory_fsync)
+
+    with pytest.raises(
+        OSError,
+        match="durability is uncertain visible_payload_matches=True",
+    ):
+        module._write_job_file(target, {"id": "new"})
+
+    assert calls == 4
+    assert json.loads(target.read_text(encoding="utf-8")) == {"id": "new"}
 
 
 def test_enqueue_agent_forwards_source_task_id(tmp_path: Path, monkeypatch) -> None:
@@ -1105,6 +1600,162 @@ def test_reaper_finalizes_running_receipt_with_dead_pid(
     assert "reaped: orphan-dead-pid" in capsys.readouterr().out
     stderr_text = Path(job["stderr_file"]).read_text(encoding="utf-8")
     assert "[WORKER_KILLED]" in stderr_text
+
+
+def test_reaper_requeue_recovers_source_task_and_job_claimability(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _running_stub_job(
+        queue_dir,
+        module.LOG_DIR,
+        "source-orphan",
+        pid=424242,
+        start_wall="Mon Jan  1 00:00:00 2001",
+        kind="agent",
+    )
+    job = json.loads(path.read_text(encoding="utf-8"))
+    job["source_task_id"] = "assign_x"
+    job["source_task_link"] = {"state": "linked"}
+    job["followup_dispatched"] = False
+    path.write_text(json.dumps(job), encoding="utf-8")
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "awaiting_agent_job",
+                    "priority": 1,
+                    "compute_job_id": "source-orphan",
+                    "blocked_reason": "external_compute_job_running",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+    monkeypatch.setattr(
+        module,
+        "_stale_running_verdict",
+        lambda _job: (True, "injected SIGKILL; no surviving process group"),
+    )
+
+    assert module._reap_stale_running("test-sigkill-recovery") == 1
+    reaped = json.loads(path.read_text(encoding="utf-8"))
+    assert reaped["status"] == "failed"
+    assert reaped["source_task_settlement"]["state"] == "settled"
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert (
+        task["blocked_reason"]
+        == "external_compute_receipt_pending_collection"
+    )
+
+    assert module.requeue(SimpleNamespace(id="source-orphan")) == 0
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["blocked_reason"] == "external_compute_job_active"
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "queued"
+
+    ready, _sleeping = module._ready_queued_jobs("test-requeue-ready")
+    assert [item[2] for item in ready] == [path]
+    claimed = module._claim_job(path, context="test-requeue-claim")
+    assert claimed is not None
+    assert claimed["status"] == "running"
+
+
+@pytest.mark.parametrize("failure_mode", ["queue_commit", "receipt_ambiguous"])
+@pytest.mark.parametrize(
+    "source_reason",
+    [
+        "external_compute_receipt_pending_collection",
+        "external_compute_job_running",
+    ],
+)
+def test_queued_reconciler_repairs_requeue_receipt_task_split(
+    tmp_path: Path,
+    monkeypatch,
+    failure_mode: str,
+    source_reason: str,
+) -> None:
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _queued_stub_job(queue_dir, module.LOG_DIR, "split-job")
+    job = json.loads(path.read_text(encoding="utf-8"))
+    job.update(
+        {
+            "status": "failed",
+            "kind": "agent",
+            "source_task_id": "assign_x",
+            "source_task_link": {"state": "linked"},
+            "failure_reason": "worker_killed",
+            "exit_code": module.WORKER_KILLED_EXIT_CODE,
+            "followup_dispatched": False,
+        }
+    )
+    path.write_text(json.dumps(job), encoding="utf-8")
+
+    pool = tmp_path / "next_tasks.json"
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "awaiting_agent_job",
+                    "priority": 1,
+                    "compute_job_id": "split-job",
+                    "blocked_reason": source_reason,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    import scripts.task_pool_claim as tpc
+
+    monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
+    monkeypatch.setattr(tpc, "guard_canonical_write", lambda *_a, **_k: None)
+    original_writer = tpc.write_tasks_to_handle
+    original_receipt_writer = module._write_job_file
+
+    def fail_queue_commit(_handle, _tasks) -> None:
+        raise OSError("injected queue commit failure after receipt write")
+
+    def ambiguous_receipt_write(target, payload) -> None:
+        original_receipt_writer(target, payload)
+        if target == path and payload.get("status") == "queued":
+            raise OSError(
+                "directory fsync failed after replace; "
+                "receipt durability is uncertain visible_payload_matches=True"
+            )
+
+    expected_error = (
+        "injected queue commit failure"
+        if failure_mode == "queue_commit"
+        else "receipt durability is uncertain"
+    )
+    if failure_mode == "queue_commit":
+        monkeypatch.setattr(tpc, "write_tasks_to_handle", fail_queue_commit)
+    else:
+        monkeypatch.setattr(module, "_write_job_file", ambiguous_receipt_write)
+    with pytest.raises(OSError, match=expected_error):
+        module.requeue(SimpleNamespace(id="split-job"))
+
+    assert json.loads(path.read_text(encoding="utf-8"))["status"] == "queued"
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["blocked_reason"] == source_reason
+
+    monkeypatch.setattr(tpc, "write_tasks_to_handle", original_writer)
+    monkeypatch.setattr(module, "_write_job_file", original_receipt_writer)
+    ready, _sleeping = module._ready_queued_jobs("test-split-recovery")
+
+    assert [item[2] for item in ready] == [path]
+    task = json.loads(pool.read_text(encoding="utf-8"))[0]
+    assert task["blocked_reason"] == "external_compute_job_active"
 
 
 def test_reaper_flock_verdict_reaps_receipt_without_pid(
