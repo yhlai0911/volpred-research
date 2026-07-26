@@ -44,16 +44,17 @@ working tree against a baseline snapshot captured at fire start (`pre_fire_dirty
 = the files already dirty before the fire touched anything). Any file dirty at
 PHASE-Z that is NOT in that baseline is attributed to this fire.
 
-Before Issue #42 the baseline lived only in the supervisor's in-memory process
-state. When the supervisor self-reloaded mid-fire (scheduler/state/phase_z code
-changes, or a scheduled restart), the new process started with an empty baseline.
-At PHASE-Z it would then either:
-
-- treat pre-existing dirty files (belonging to other slots / interactive
-  sessions) as this fire's output and sweep them into the commit, or
-- lose the true baseline entirely and mis-attribute the diff —
-
-exactly the class of mis-attribution recorded in `docs/error_log.md` (2026-07-10).
+Before Issue #42 the baseline was persisted only as one transitional singleton
+under that checkout's `<git-dir>`.  It was not bound to an exact job, cohort, or
+generation.  When self-reload landed between worker completion and closeout, the
+successor process could not prove that the singleton belonged to the pending
+fire.  The observed production result was therefore fail-closed but incomplete:
+PHASE-Z reported `no fire-start baseline`, declined the commit, preserved the
+dirty files, and treated that closeout token as terminal; the file author then
+had to confirm and commit the work manually.  Reusing a current or stale singleton
+to avoid that refusal would have reintroduced the cross-session mis-attribution
+class recorded in `docs/error_log.md` (2026-07-10), so guessing was not an
+acceptable repair.
 
 Issue #42 persists the baseline as a **durable fire lifecycle** keyed by
 `generation_id`, written to `storage/ops/dispatch_state.json` at fire start. After
@@ -67,3 +68,16 @@ reload boundary and cannot silently absorb another actor's uncommitted work.
 This canary confirms the durable lifecycle is written and readable in a live,
 post-reload daemon for job `06c75e969f6c4a1abea609e27ab54524`, generation
 `78987568ef6747e28fcb1a977c33b6ff`.
+
+## Terminal read-back
+
+- The worker committed this document as `e08db4da3f042cf35fb7a928e25c54cee46d19d9`.
+- The workspace finalizer wrote `terminal_intent`, then a `finalized` receipt
+  with `disposition=merged`, `gated_head_sha=e08db4da3…`, and
+  `main_sha=74735c9f2a45a054b1f4216a2b3affbe3adb7e5e`.
+- Git read-back confirms `e08db4da3…` is an ancestor of that main SHA.
+- While the canary was still running, jobs `35badc1d…` and `ea14dc76…` joined
+  cohort `b978d748…`; live state showed all three jobs carrying the exact same
+  generation `78987568…` and the same 16-path baseline.
+- PHASE-Z correctly deferred after the canary merged because two cohort siblings
+  were still running.  No baseline-missing fallback was used for this fire.
