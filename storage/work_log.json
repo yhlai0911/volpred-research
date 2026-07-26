@@ -26884,5 +26884,15 @@
     "owner": "hourly-slot-1-8ef215cbff0f4bbbab0cbaeb7ba6dc6a",
     "commit": null,
     "summary": "Direct-execution mode 下直接續做 operations-core umbrella (assign_f3f36d75, 未 claim — preserved control row)。本班 live 驗證：(1) operations_core_scheduler validate ok=true，50/50 job 全歸 operations_core、legacy=0；(2) direct-mode gate 健康，舊池 3338 筆備份 sha256 89863b05 完整、無 restore 進行中。確認 umbrella 唯一未結案 blocker = 需兩台實體 Mac 配對 receipt 而第二台離線（外部條件，禁止偽造 physical pair）。已 Telegram 升級老闆 (msg out id=41)：報告底層健康 + 內容飢餓副作用 (direct mode 擋 refill → 文章 1篇/24h、drafts=0)，請老闆 A/B 決策（A=開第二台 Mac 收尾配對；B=授權退出 direct mode 先恢復內容）。未 force-complete、未 mutate queue、未建 repo 檔。"
+  },
+  {
+    "timestamp": "2026-07-26T21:37:55+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260723",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-5605659d7f7242c2b4eef3e9b474a98b",
+    "owner": "hourly-slot-1-5605659d7f7242c2b4eef3e9b474a98b",
+    "commit": null,
+    "summary": "PHASE A0 time_critical lane：撰寫並立即發佈每日精選導讀 mile_beee535c（daily_digest/general/published）。框架「兩支溫度計＋事件日避險三查」，回應降息路徑分歧的事件日避險議題。curate archive 8 篇跨度33天（06-15→07-18，過14天 span gate）；content 7346字/10圖；anti_ai_gate PASS；懶人包 codex primary 卡關→logged fallback lazypack_render 產3張 poster 全200。獨立 jq 驗證 status=published、8篇來源皆published。剩餘2條 trending_repost 預算不足完整收尾，留下一班。"
   }
 ]

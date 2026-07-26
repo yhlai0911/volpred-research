@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "title": "兩支溫度計 + 事件日避險三查",
+  "evidence": {
+    "fw": {
+      "path": "storage/drafts/assets/daily_digest_20260726/evidence.json",
+      "sha256": "4ad7269312ed2f2fc50165781f7ebe3acb41476107c5952560cb76b39849c910",
+      "label": "本站 2026-06-15 至 07-18 市場觀察與研究整合"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "professional",
+      "title": "兩支溫度計：MOVE 量債市，VIX 量股市",
+      "alt": "兩支溫度計框架：MOVE 是債市溫度計、VIX 是股市溫度計，以 Warsh 首場 FOMC 前夕讀數為例",
+      "sources": [
+        "fw"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一個 Fed，兩支溫度計不同調",
+          "body": [
+            "MOVE 量債市對利率路徑的定價，往往先亮。",
+            "VIX 量股市對大盤的恐慌，常常後知後覺甚至睡著。",
+            "別只盯一支溫度計（讀數為 Warsh 首場 FOMC 前夕）。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "MOVE 債市溫度計",
+          "value": {
+            "source": "fw",
+            "path": "two_thermometers.fomc_eve_2026_06_16.move",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 股市溫度計",
+          "value": {
+            "source": "fw",
+            "path": "two_thermometers.fomc_eve_2026_06_16.vix",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "MOVE／VIX 比值",
+          "value": {
+            "source": "fw",
+            "path": "two_thermometers.fomc_eve_2026_06_16.move_vix_ratio",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "比值歷史百分位",
+          "value": {
+            "source": "fw",
+            "path": "two_thermometers.fomc_eve_2026_06_16.move_vix_ratio_percentile_90d",
+            "format": {
+              "kind": "integer",
+              "suffix": " 百分位"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_method",
+      "info": "method",
+      "style": "bento-grid",
+      "title": "事件日避險三查：查時機、查標的",
+      "alt": "事件日避險三查的三個動作與對應數字：查百分位、查保費節奏、查標的",
+      "sources": [
+        "fw"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "三查怎麼打勾",
+          "body": [
+            "第一查：MOVE 與 VIX 各站歷史百分位哪裡，誰先亮。",
+            "第二查：短天期／長天期波動率比值看保費進場沒，前一天進、兩天退。",
+            "第三查：避的是不是對的目標，大盤 VIX 睡覺≠你的股沒事。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "MOVE 歷史百分位",
+          "value": {
+            "source": "fw",
+            "path": "check1_percentile.fomc_eve_2026_06_15.move_percentile_since_2003",
+            "format": {
+              "kind": "integer",
+              "suffix": " 百分位"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "VIX 百分位（同期）",
+          "value": {
+            "source": "fw",
+            "path": "check1_percentile.fomc_eve_2026_06_15.vix_percentile_approx",
+            "format": {
+              "kind": "integer",
+              "suffix": " 百分位"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "CPI 前一天 VIX 跳升",
+          "value": {
+            "source": "fw",
+            "path": "check2_premium_timing.cpi_2026_07.t1_vix_change_pct_2026_07_13",
+            "format": {
+              "kind": "number",
+              "digits": 2,
+              "show_plus": true,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "短天期／長天期比值事件前峰值",
+          "value": {
+            "source": "fw",
+            "path": "check2_premium_timing.vix9d_vix_ratio.peak_2026_06_10",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "對準真正在動的東西，別把工具當保證",
+      "alt": "第三查與局限：費半修正時大盤 VIX 幾乎沒動，以及框架不承諾預測方向",
+      "sources": [
+        "fw"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "避險對準標的；框架不預測方向",
+          "body": [
+            "費半修正時大盤 VIX 幾乎沒動，該用費半自己的選擇權避險。",
+            "事件日方向近乎抽籤，單一 VIX 門檻不能當即時交易規則。",
+            "框架是判讀角度，不是進出場訊號。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "費半（SMH）自高點回撤",
+          "value": {
+            "source": "fw",
+            "path": "check3_right_target.smh_drawdown_from_june_high_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "同期大盤 VIX",
+          "value": {
+            "source": "fw",
+            "path": "check3_right_target.vix_during_sox_selloff",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "費半選擇權隱含波動",
+          "value": {
+            "source": "fw",
+            "path": "check3_right_target.smh_implied_vol_pct",
+            "format": {
+              "kind": "number",
+              "digits": 1,
+              "suffix": "%"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "恐慌進場事件研究樣本",
+          "value": {
+            "source": "fw",
+            "path": "limits.k1640_sample_days",
+            "format": {
+              "kind": "integer",
+              "thousands": true,
+              "suffix": " 交易日"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

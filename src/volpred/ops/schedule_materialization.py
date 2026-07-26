@@ -888,6 +888,72 @@ def load_schedule_jobs(config: Mapping[str, Any]) -> list[ScheduleJob]:
     return jobs
 
 
+def validate_schedule_fire_identity(
+    config: Mapping[str, Any],
+    *,
+    fire_key: str,
+    generation: str,
+    job_id: str,
+    scheduled_for: str,
+) -> ScheduleFire:
+    """Reconstruct and validate one exact canonical Operations Core fire."""
+
+    policy = load_schedule_policy(config)
+    if generation != policy.generation:
+        raise ScheduleConfigurationError(
+            "schedule generation does not match canonical policy"
+        )
+    matches = [
+        job for job in load_schedule_jobs(config)
+        if job.id == job_id
+    ]
+    if len(matches) != 1:
+        raise ScheduleConfigurationError(
+            f"schedule job must resolve exactly once: {job_id}"
+        )
+    job = matches[0]
+    if not job.enabled:
+        raise ScheduleConfigurationError(
+            f"schedule job is disabled: {job_id}"
+        )
+    if policy.owner_for(job_id) != "operations_core":
+        raise ScheduleConfigurationError(
+            f"Operations Core does not own schedule job: {job_id}"
+        )
+    scheduled = _parse_iso(scheduled_for)
+    if scheduled is None:
+        raise ScheduleConfigurationError(
+            "scheduled_for is required"
+        )
+    if scheduled.second != 0 or scheduled.microsecond != 0:
+        raise ScheduleConfigurationError(
+            "scheduled_for must identify an exact cron minute"
+        )
+    local = scheduled.astimezone(ZoneInfo(job.timezone))
+    if not croniter.match(job.cron, local):
+        raise ScheduleConfigurationError(
+            "scheduled_for is not a canonical cron slot"
+        )
+    activated_at = policy.activation_for(job_id)
+    if (
+        activated_at is not None
+        and scheduled < activated_at.astimezone(UTC)
+    ):
+        raise ScheduleConfigurationError(
+            "scheduled_for predates Operations Core activation"
+        )
+    expected = _fire(job, policy.generation, local)
+    if scheduled_for != expected.scheduled_for:
+        raise ScheduleConfigurationError(
+            "scheduled_for must use canonical UTC representation"
+        )
+    if fire_key != expected.fire_key:
+        raise ScheduleConfigurationError(
+            "schedule fire key digest does not match canonical identity"
+        )
+    return expected
+
+
 def load_legacy_success_markers(path: Path) -> dict[str, str]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))

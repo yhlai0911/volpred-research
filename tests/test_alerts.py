@@ -21,6 +21,8 @@ from volpred.ops.alerts import (
     send_alert,
 )
 from volpred.ops.boss_facing import boss_facing_alert, plainify_boss_text
+from volpred.ops.authority import PrimaryLease
+from volpred.ops.delivery import AcknowledgedEffect, EffectView
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -471,6 +473,7 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
 ):
     storage_dir = tmp_path / "storage"
     fake_store = SimpleNamespace(
+        read_request=lambda idempotency_key: None,
         read_owner=lambda: SimpleNamespace(
             effect_family="email.ops_alert",
             owner="operations_core",
@@ -510,6 +513,7 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
         def deliver(self, command: object) -> object:
             captured["command"] = command
             return SimpleNamespace(
+                owner_generation=4,
                 effect_id="effect-owned-email-test",
                 delivered=True,
                 disposition="delivered",
@@ -591,8 +595,9 @@ def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy
     monkeypatch,
 ):
     storage_dir = tmp_path / "storage"
-    notify_calls: list[dict[str, object]] = []
+    adapter_calls: list[EffectView] = []
     fake_store = SimpleNamespace(
+        read_request=lambda idempotency_key: None,
         read_owner=lambda: SimpleNamespace(
             effect_family="email.ops_alert",
             owner="legacy",
@@ -602,23 +607,42 @@ def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy
 
     class FakeNotifier:
         def __init__(self, *, storage_dir: str) -> None:
-            self.storage_dir = Path(storage_dir)
+            pass
 
-        def notify(self, **kwargs: object) -> str:
-            notify_calls.append(kwargs)
-            notification_id = "legacy-notification-test"
-            _write_json(
-                self.storage_dir
-                / "notifications"
-                / f"{notification_id}.json",
-                {
-                    "id": notification_id,
-                    "sent": True,
-                    "configured": True,
-                    "send_error": None,
-                },
+    class FakeAdapter:
+        def __init__(self, **kwargs: object) -> None:
+            pass
+
+        def deliver(
+            self,
+            effect: EffectView,
+            payload: bytes,
+        ) -> AcknowledgedEffect:
+            adapter_calls.append(effect)
+            return AcknowledgedEffect(
+                acknowledgement=effect.acknowledgement,
+                evidence_ref="imap-sent:legacy-alert",
+                evidence_sha256="b" * 64,
             )
-            return notification_id
+
+    class FakeKeepalive:
+        def start(self) -> None:
+            pass
+
+        def stop(self) -> None:
+            pass
+
+        def current_lease(self) -> PrimaryLease:
+            return PrimaryLease(
+                schema_version="primary-lease.v1",
+                authority_key="notification:email.ops_alert",
+                holder_ref="effect-worker:ops-alert-email-legacy",
+                epoch=1,
+                fencing_token="legacy-primary-token",
+                lease_seconds=300,
+                acquired_at="2026-07-26T12:00:00+00:00",
+                expires_at="2026-07-26T12:05:00+00:00",
+            )
 
     monkeypatch.setattr(
         "volpred.publisher.email_notifier.EmailNotifier",
@@ -628,6 +652,21 @@ def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy
         "volpred.ops.delivery.owned_email."
         "SupabaseOwnedEmailStore.from_environment",
         classmethod(lambda cls: fake_store),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "EmailNotificationEffectAdapter",
+        FakeAdapter,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "ImapSentMailReader.from_environment",
+        classmethod(lambda cls: object()),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **kwargs: FakeKeepalive(),
     )
 
     result = alerts_module._dispatch_alert_email(
@@ -639,10 +678,14 @@ def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy
         delivery_key="ops-alert:legacy-gate:2026-07-24",
     )
 
-    assert len(notify_calls) == 1
+    assert len(adapter_calls) == 1
+    assert adapter_calls[0].idempotency_key == (
+        "ops-alert:legacy-gate:2026-07-24"
+    )
     assert result["sent"] is True
     assert result["delivery_owner"] == "legacy"
     assert result["owner_generation"] == 1
+    assert result["effect_status"] == "legacy_sent_verified"
 
 
 def test_dispatch_alert_email_fails_closed_when_owner_read_is_unavailable(
@@ -652,6 +695,9 @@ def test_dispatch_alert_email_fails_closed_when_owner_read_is_unavailable(
     notifier_constructed = False
 
     class FailingStore:
+        def read_request(self, idempotency_key: str) -> None:
+            return None
+
         def read_owner(self) -> object:
             raise RuntimeError("ownership database unavailable")
 

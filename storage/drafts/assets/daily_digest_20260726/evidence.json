@@ -1,0 +1,76 @@
+{
+  "framework": {
+    "name_two_thermometers": "兩支溫度計",
+    "name_three_checks": "事件日避險三查",
+    "move_label": "MOVE 債市溫度計",
+    "vix_label": "VIX 股市溫度計"
+  },
+  "two_thermometers": {
+    "fomc_eve_2026_06_16": {
+      "vix": 16.41,
+      "move": 67.28,
+      "move_vix_ratio": 4.10,
+      "move_vix_ratio_percentile_90d": 75
+    },
+    "move_leads_vix_weeks_min": 4,
+    "move_leads_vix_weeks_max": 8,
+    "move_direction_full_sample": {
+      "trading_days": 4065,
+      "yield_up_move_pct": 0.51,
+      "yield_down_move_pct": -0.28,
+      "gap_pct": 0.79,
+      "per_bp_up": 0.40,
+      "per_bp_down": 0.27,
+      "up_down_ratio": 1.47,
+      "recent_90d_gap_pct": 4.53
+    }
+  },
+  "check1_percentile": {
+    "fomc_eve_2026_06_15": {
+      "move": 69.38,
+      "move_percentile_since_2003": 34,
+      "move_3m_avg": 78.11,
+      "vix": 17.68,
+      "vix_percentile_approx": 58
+    },
+    "six_fomc_spy_5d_avg_pct": -0.96,
+    "six_fomc_positive_count": 2,
+    "six_fomc_total": 6
+  },
+  "check2_premium_timing": {
+    "vix9d_vix_ratio": {
+      "shock_2026_06_05_from": 0.821,
+      "shock_2026_06_05_to": 1.112,
+      "peak_2026_06_10": 1.155,
+      "fomc_eve_2026_06_16": 0.961
+    },
+    "cpi_2026_07": {
+      "t2_vix_2026_07_10": 15.03,
+      "iv_rv_spread": 0.26,
+      "t1_vix_change_pct_2026_07_13": 14.17,
+      "t1_vix_close": 17.16,
+      "t0_vix_change_pct": -3.85,
+      "t1day_vix_change_pct": -5.03
+    }
+  },
+  "check3_right_target": {
+    "smh_drawdown_from_june_high_pct": 16.8,
+    "vix_during_sox_selloff": 18.77,
+    "vix_mid_june": 16.41,
+    "vix_ytd_percentile": 60,
+    "spx_drawdown_pct": 1.55,
+    "smh_realized_vol_pct": 58.3,
+    "smh_implied_vol_pct": 50.3,
+    "smh_vix_beta": -0.01,
+    "vix_avg_rise_on_smh_down_days": 1.1
+  },
+  "limits": {
+    "cpi_dates_wrong": 7,
+    "cpi_dates_total": 13,
+    "cpi_vix_old_estimate_pct": 2.18,
+    "cpi_vix_corrected_pct": -0.85,
+    "k1640_sample_days": 8413,
+    "k1640_vix40_h60_excess_pp": 6.19,
+    "k1640_fdr5_survivors": 0
+  }
+}
