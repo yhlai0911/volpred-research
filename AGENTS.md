@@ -304,16 +304,21 @@ hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artif
 
 ### Matt Pocock flow
 
-> **2026-07-26 事實更正**：本節開頭原稱「全域 Matt Pocock skills 已安裝」，實測
-> `~/.claude` 底下**沒有** `ask-matt`、`writing-great-skills` 或任何 Matt Pocock skill
-> （已安裝的 marketplace 只有 `claude-plugins-official` / `karpathy-skills` / `openai-codex`）。
-> 讀到本節不要去找 `ask-matt` router —— 它不存在，會撲空。專案實際使用的 plan/spec/ticket
-> 三層是：GitHub Issue #3（plan）→ `docs/refactor_plan_ops_master_2026_07.md`（spec）→
-> GitHub Issues #5~#36 `[Plan T*]`（ticket），見下方 Issue tracker 節與 `docs/agents/ownership.md`。
-> 以下原文保留，待 owner 裁決是刪除或重新安裝 skills。
+**2026-07-26 live verification**：Matt Pocock skills 已安裝在 Codex / Agent Skills 的
+全域 surface `$HOME/.agents/skills/`，包含 `ask-matt`、`grill-with-docs`、`to-spec`、
+`to-tickets`、`implement`、`tdd`、`code-review`、`writing-great-skills` 與
+`setup-matt-pocock-skills`。`~/.claude` 是另一個 runtime surface；該處沒有上述 skill
+**不能**推導 Codex 的 Matt skills 未安裝。任何「缺少 Matt skill」回報前，先執行
+`uv run python scripts/check_matt_skills_installation.py --json`，以實際 manifest 回讀為準。
+這個全域 home surface 也不等於 repo 內已退役的 `.agents/skills/` 副本，禁止因而復活後者。
 
-全域 Matt Pocock skills 已安裝。使用者明確要求依 Matt skills 選流程時，先讀
-`ask-matt` router，依其 main flow／on-ramp 選擇 user-invoked skill，不可自行拼湊替代順序。
+使用者明確要求依 Matt skills 選流程時，先讀 `ask-matt` router，依其 main flow／on-ramp
+選擇 user-invoked skill，不可自行拼湊替代順序。現有全域優化已完成 plan/spec/ticket：
+GitHub Issue #3（plan）→ `docs/refactor_plan_ops_master_2026_07.md`（spec）→
+GitHub Issues #5~#36 `[Plan T*]`（tickets）。使用者要求「依先前規劃繼續」時，不重跑
+grill／to-spec／to-tickets；先讀 spec §7 與 ticket blocking edge，從第一張未阻塞 ticket
+走 `implement` → `tdd` → `code-review`，除非 scope 確實改變且 owner 明確要求重規劃。
+
 標示 `disable-model-invocation: true` 的 skill 只在使用者明確呼叫時啟動；其餘
 model-invoked skills 可按任務描述自動採用。建立或修改 skill 時以
 `writing-great-skills` 的 predictability、information hierarchy、completion criterion

@@ -2061,3 +2061,17 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ public function／CLI／crash-tamper回歸共37案通過。底層restore可退出性根因已
   `root_cause_fixed_and_verified`；production mode尚未切換，須以live archive、
   restore、canonical stale cleanup與下游content acknowledgement完成正式回讀。
+
+## 2026-07-26 — Matt workflow living-doc 漂移修正
+
+- ✅ Live 回讀確認 Matt Pocock suite 位於 Codex / Agent Skills 全域 surface
+  `$HOME/.agents/skills/`；先前只查 `~/.claude` 就宣稱 `ask-matt` 不存在，是
+  runtime surface 身分混淆。
+- ✅ `AGENTS.md` 已移除互相矛盾的舊聲明，記錄正確安裝位置、驗證命令與三種 skill
+  surface 的邊界；current docs 關鍵字稽核無其他同類錯誤聲明。
+- ✅ 新增九項必要 manifest 的可執行稽核與 4 個 regression；缺檔、frontmatter 錯名、
+  不完整 CLI 都 fail closed，文件也不能再宣稱 router 不存在。
+- ✅ 既有計畫不重建：GitHub Issue #3 → master spec → Issues #5~#36 仍是 canonical；
+  接續優化按 `ask-matt` 的 `implement` → `tdd` → `code-review` 逐 ticket 執行。
+- ✅ 此 living-doc drift 已 `root_cause_fixed_and_verified`；它沒有修改另一 session
+  的 task-pool/runtime state 或任何現行排程。

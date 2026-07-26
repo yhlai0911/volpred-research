@@ -3347,3 +3347,24 @@ restore／控制進度可能遺失／舊claim靜默復活」根因完成五步�
 **`root_cause_fixed_and_verified`**。Production仍維持direct mode，待live exact
 archive、receipt-bound restore、canonical stale cleanup與內容下游acknowledgement
 回讀後，才可把上線切換本身標完成。
+
+### 2026-07-26 — 只查 Claude home，誤判 Codex 全域 Matt skills 不存在
+
+**證據化症狀與根因層級**：`AGENTS.md` 同一節同時寫著「Matt Pocock skills 已安裝」與
+「`ask-matt` 不存在」，後者只檢查 `~/.claude` 就推論所有 runtime 都缺少 skill。
+Live 回讀 `$HOME/.agents/skills/` 可見九個必要 manifest，且 `ask-matt/SKILL.md`
+明確定義既有多 session tickets 應逐張走 `implement`、內部 `tdd`、最後 `code-review`。
+這是 runtime skill-surface 身分混淆與 living-doc verification contract 缺口，不是
+Matt workflow 或既有 plan/spec/tickets 遺失。
+
+**底層修復與制度化**：`AGENTS.md` 改記實際全域 surface，並明確區分
+`$HOME/.agents/skills/`、`~/.claude` 與 repo 內已退役的 `.agents/skills/`。
+新增 `scripts/check_matt_skills_installation.py`，逐一驗證九個必要目錄的 `SKILL.md`
+及 frontmatter `name`，缺漏或錯名即 non-zero；living-doc regression 同時禁止舊的
+「router 不存在」字句復活，並固定既有 GitHub Issue #3 → master spec → Issues #5~#36
+流程。全 repo current-doc 關鍵字稽核沒有找到第二份現行錯誤聲明；archive 與 worktree
+歷史物證不回寫。
+
+**回歸與 live readback**：稽核器 complete／missing／wrong-name／CLI JSON 與
+`AGENTS.md` contract 共 4 案；另對本機全域 surface 執行 live audit。錯誤資訊的來源、
+文件與機械防再犯 owner 均已收斂，狀態 **`root_cause_fixed_and_verified`**。
