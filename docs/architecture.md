@@ -649,8 +649,10 @@
 > Sent Mail exact read-back／必要補送；超過一小時則以 terminal
 > `owned_email_recovery_stale` durable dead-letter，避免部署時補寄失去時效的歷史
 > 告警。Production 初次回收 22 筆後為 21 dead-lettered、1 delivered，三層
-> `started` 均為 0；這是 `email.ops_alert` effect-family 的 runtime 流程，不代表
-> Work Coordinator queue owner 已切換。
+> `started` 均為 0；follow-up production receipt
+> `20260726081120 fence_owned_email_expired_retry` 與第一個自動排程 fire 已回讀成功。
+> 這是 `email.ops_alert` effect-family 的 runtime 流程，不代表 Work Coordinator
+> queue owner 已切換。
 
 > ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。

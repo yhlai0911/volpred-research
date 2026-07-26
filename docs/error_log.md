@@ -3074,6 +3074,11 @@ delivered；回讀 `expired_started=0`、`active_started=0`、22/22 recovery rec
 22/22 WorkItem 與 outbox terminal。相同 wrapper 第二次執行
 `recovered_count=0`，證明 idempotent。ordinary-first RED 經 follow-up migration
 轉 GREEN，且 read-back 確認 failed ordinary begin 未新增 attempt、未增加 outbox count、
-未改 WorkItem；但 follow-up migration 尚待 final Matt review 與 production apply/read-back，
-因此本 incident 暫時更正為 **`contained`**，不得沿用初版
-`root_cause_fixed_and_verified` 宣稱。
+未改 WorkItem。Final Matt Standards／Spec 均 PASS；production receipt
+`20260726081120 fence_owned_email_expired_retry` 套用後，catalog 回讀 begin gate
+存在、recovery 的 predecessor UPDATE 先於 nested begin，兩個 functions 都是
+no-login definer owner／SECURITY DEFINER／空 search path／service-role-only。
+資料回讀仍為 `started_total=0`、`expired_started=0`、22 receipts、
+21 dead-lettered + 1 delivered、0 nonterminal。16:00 台灣時間的第一個自動
+piggy-back fire 另以 `recovered_count=0` exit 0 並寫回 cron marker。此 incident
+現已完成五步 gate，狀態為 **`root_cause_fixed_and_verified`**。

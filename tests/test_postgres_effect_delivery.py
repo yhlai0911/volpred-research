@@ -214,7 +214,7 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
-    / "20260726075929_fence_owned_email_expired_retry.sql",
+    / "20260726081120_fence_owned_email_expired_retry.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT

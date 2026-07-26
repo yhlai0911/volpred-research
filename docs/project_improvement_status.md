@@ -193,8 +193,11 @@ Matt review 隨後抓到 ordinary begin 可搶先重領並遺留 predecessor `st
 P1 race；初版結案口徑已更正。Follow-up migration 讓普通 begin 看到任何
 `started` predecessor 即 fail closed，只有 recovery 能在同一 transaction 先關舊 attempt
 再 begin；ordinary-first RED→GREEN 且失敗路徑零 mutation。Python delivery/recovery
-也共用同一 execution context。此 follow-up 尚待 final Matt review 與 production
-apply/read-back，因此 expired-attempt incident 暫為 **`contained`**；Work
+也共用同一 execution context。Final Matt Standards／Spec 均 PASS；production
+`20260726081120 fence_owned_email_expired_retry` 已套用，catalog/security 與
+`0 started / 22 terminal receipts` 回讀一致，16:00 第一個自動排程亦
+`recovered_count=0` exit 0。此 expired-attempt incident 為
+**`root_cause_fixed_and_verified`**；Work
 Coordinator Issue #9 仍因 owner=`legacy/1`、gate=0 與七日 evidence 未滿而維持
 **`contained`**。
 同日完成 platform program commit 10 的 actuator-side authority fencing contract：

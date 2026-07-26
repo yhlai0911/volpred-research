@@ -900,8 +900,11 @@ Implementation 隱藏 retry、backoff、dead letter、provider-specific request�
   `check_alerts → run_due_jobs` 單一 piggy-back owner 執行；wrapper manifest 與
   `scheduled_writer_ownership` 宣告它只寫 fenced Supabase transaction 與 ignored
   runtime evidence，不寫 Git-tracked state。Initial production cleanup 為
-  21 dead-lettered + 1 exact Sent read-back delivered、0 started；follow-up race gate
-  在 production apply/read-back 前仍只標 `contained`。
+  21 dead-lettered + 1 exact Sent read-back delivered、0 started。Follow-up
+  `20260726081120 fence_owned_email_expired_retry` 已套用並回讀 begin/recovery
+  definition、ACL 與 0 nonterminal；第一個自動 piggy-back fire exit 0。Final Matt
+  Standards／Spec 均 PASS，因此 expired-attempt slice 為
+  `root_cause_fixed_and_verified`。
 
 ### 2026-07-24 publisher 單篇 Supabase sync shadow checkpoint
 
