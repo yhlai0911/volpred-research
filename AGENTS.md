@@ -288,7 +288,29 @@ hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artif
 
 ## Agent skills
 
+### Path ownership — Codex loop 與 Claude 主線程的分工（2026-07-26 立）
+
+兩個 runtime 從**同一個** `storage/next_tasks.json` claim 任務，近 7 天有 40+ 個檔案被雙方都寫過。
+`git_writer_lock` 只擋「同時寫壞」，不擋設計分岔。**動 `.claude/skills/**`、`.claude/rules/**`、
+`paper/**`、`experiments/k*/`、`frontend-v2-fix/**`、`research_program.md` 之前先確認是否屬主線程專屬**
+（近 7 天 Codex 改過 `.claude/rules/publishing.md` 與 `.claude/skills/feed-publisher/SKILL.md`，
+違反下方 skill 通知規則）。三區分工表：`docs/agents/ownership.md`。
+
+### Skill 修改通知（與 CLAUDE.md 同步，2026-07-26 補）
+
+- **新建 skill**：可自主用 `.claude/skills/<name>/SKILL.md` 建立，之後口頭通知 owner
+- **修改既有 skill**：**必寄 email** 給 owner（`send-alert --title "Skill 修改通知: <name>"`），
+  含 diff 摘要 + 觸發 incident + 影響範圍。此規則原本只寫在 `CLAUDE.md`，Codex 讀不到而漏守。
+
 ### Matt Pocock flow
+
+> **2026-07-26 事實更正**：本節開頭原稱「全域 Matt Pocock skills 已安裝」，實測
+> `~/.claude` 底下**沒有** `ask-matt`、`writing-great-skills` 或任何 Matt Pocock skill
+> （已安裝的 marketplace 只有 `claude-plugins-official` / `karpathy-skills` / `openai-codex`）。
+> 讀到本節不要去找 `ask-matt` router —— 它不存在，會撲空。專案實際使用的 plan/spec/ticket
+> 三層是：GitHub Issue #3（plan）→ `docs/refactor_plan_ops_master_2026_07.md`（spec）→
+> GitHub Issues #5~#36 `[Plan T*]`（ticket），見下方 Issue tracker 節與 `docs/agents/ownership.md`。
+> 以下原文保留，待 owner 裁決是刪除或重新安裝 skills。
 
 全域 Matt Pocock skills 已安裝。使用者明確要求依 Matt skills 選流程時，先讀
 `ask-matt` router，依其 main flow／on-ramp 選擇 user-invoked skill，不可自行拼湊替代順序。

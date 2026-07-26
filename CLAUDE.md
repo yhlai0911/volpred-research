@@ -344,6 +344,15 @@ Context compaction 時，**優先保留**：
 
 ## Agent skills
 
+### Path ownership — Codex loop 與主線程的分工（2026-07-26 立）
+
+`scripts/codex_loop.sh` 每小時常駐 tick，與主線程從**同一個** `storage/next_tasks.json` claim 任務。
+`git_writer_lock` 只擋「同時寫壞」，**不擋「各自 lock、各自 commit、設計往兩個方向走」**。
+動 `src/volpred/ops/**`、`supabase/migrations/**`、`scripts/dispatch_supervisor/**`、`tests/**`
+之前，先 `git log -5 --oneline -- <path>`：最近有 `[codex]` 就先協調，`git status` 非空代表
+Codex 這個 tick 正在寫，等他 commit 完再動。三區分工表（Codex 專屬 / 主線程專屬 / 共用）與
+plan-spec-ticket 現況：`docs/agents/ownership.md`。
+
 ### Issue tracker
 
 本專案使用 GitHub Issues 追蹤工程工作。See `docs/agents/issue-tracker.md`.
