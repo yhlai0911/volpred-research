@@ -2760,3 +2760,23 @@ publisher=`operations_core/8`、fingerprint=`6652d01267d664d621c957b8`及impleme
 acquire或provider call。本freshness-window根因為
 **`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
 operations-core umbrella維持 **`contained`**。
+
+### 2026-07-26 — Standby只在role入口驗freshness，過期後仍可重試acquire
+
+**證據化症狀與根因層級**：paired readiness v3已帶15分鐘`valid_until`，但standby只在
+進入role時呼叫active-window validator。Primary lease尚未到期時，standby會在最長五
+分鐘RTO內重試；因此pair可在第一次「already held」後過期，舊loop仍繼續呼叫remote
+authority acquire。根因是temporal fence只放在function入口，沒有包住真正可能成功的
+每個mutation boundary，不是Primary Authority CAS。
+
+**底層修復、回歸與live狀態**：standby現在於每一次`standby.start()`前重新驗同一
+readiness窗口；failure injection讓第一次acquire被既有primary拒絕、隨後把wall clock
+推過`valid_until`，第二次嘗試前即以`readiness receipt expired`停止，store
+`acquire_attempts`維持1。相鄰authority suites **45 passed**，`py_compile`與diff gate
+通過。Production只讀preflight
+`retry-freshness-preflight-20260726-1111`已原子落檔並exact read-back
+publisher=`operations_core/8`、fingerprint=`6652d01267d664d621c957b8`及implementation
+`44b9c4059dd4ad35da8a0c5574e2ebadb38c04d81942c1e8c41369127273cbdc`；沒有authority
+acquire、effect或provider call。本retry-window根因為
+**`root_cause_fixed_and_verified`**；第二台實體Mac仍離線，physical pair與
+operations-core umbrella維持 **`contained`**。

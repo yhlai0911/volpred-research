@@ -1861,3 +1861,24 @@ implementation=`4feea2fb05dc0db72eedc92afe13f665586e4e5148a64c120d12454cd707e809
 沒有authority acquire、effect或provider call。此freshness根因為
 `root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair與
 operations-core umbrella維持`contained`。
+
+## 27. Standby acquire-retry freshness boundary（2026-07-26）
+
+Readiness pair v3雖在role入口驗`valid_until`，standby等待既有primary DB-clock lease
+到期時卻可在最長五分鐘RTO內持續重試。只驗入口會讓第一次fresh的「already held」
+response成為後續attempt的通行證；pair過期後仍可能成功取得下一epoch，事後才由其他
+evidence發現時間漂移。
+
+Standby takeover loop現在把active-window validator緊貼每一個
+`HostAuthorityKeepalive.start()` boundary。Failure injection讓第一次attempt被既有
+primary拒絕，再把clock推過pair的`valid_until`；第二次remote call前流程fail closed，
+authority store只看見一次attempt。相鄰authority suites **45 passed**，`py_compile`
+與diff gate通過。
+
+Production只讀preflight `retry-freshness-preflight-20260726-1111`已原子落檔並exact
+read-back publisher=`operations_core/8`、stable host
+fingerprint=`6652d01267d664d621c957b8`與implementation
+`44b9c4059dd4ad35da8a0c5574e2ebadb38c04d81942c1e8c41369127273cbdc`；沒有authority
+acquire、effect或provider call。此retry freshness根因為
+`root_cause_fixed_and_verified`；第二台實體Mac仍離線，physical pair、program commit
+34與operations-core umbrella維持`contained`。

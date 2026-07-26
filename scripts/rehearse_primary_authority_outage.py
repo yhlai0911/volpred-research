@@ -596,6 +596,10 @@ def rehearse_standby_process_role(
     deadline = acquisition_started + rto_seconds
     try:
         while monotonic() < deadline:
+            _require_active_readiness(
+                readiness,
+                observed_at=datetime.now(UTC),
+            )
             attempts += 1
             try:
                 standby_lease = standby.start()

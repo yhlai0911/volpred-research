@@ -1752,3 +1752,18 @@ implementation=`4feea2fb05dc0db72eedc92afe13f665586e4e5148a64c120d12454cd707e809
 沒有authority mutation。此freshness-window切片為
 `root_cause_fixed_and_verified`；physical paired receipt與operations-core umbrella
 仍因第二台實體Mac離線而維持`contained`。
+
+## 2026-07-26 — Program commit 34 standby retry-freshness checkpoint
+
+Paired readiness的active window不再只守住standby role入口。Takeover等待primary
+DB-clock lease到期的每一次acquire attempt，都會在remote authority boundary前重驗
+同一`valid_until`；pair在RTO loop中途過期就立即停止，不再繼續碰control plane。
+
+第一次「already held」後推進clock至過期的failure injection確認第二次attempt為零；
+相鄰authority suites **45 passed**，`py_compile`與diff gate通過。Production只讀
+preflight `retry-freshness-preflight-20260726-1111`已exact read-back
+publisher=`operations_core/8`、stable host fingerprint=`6652d01267d664d621c957b8`與
+implementation=`44b9c4059dd4ad35da8a0c5574e2ebadb38c04d81942c1e8c41369127273cbdc`，
+沒有authority mutation。此retry-freshness切片為
+`root_cause_fixed_and_verified`；physical paired receipt與operations-core umbrella
+仍因第二台實體Mac離線而維持`contained`。

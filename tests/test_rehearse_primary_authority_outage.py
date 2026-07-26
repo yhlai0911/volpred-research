@@ -415,6 +415,85 @@ def test_primary_rejects_expired_readiness_before_remote_read(
     assert live.acquire_successes == 0
 
 
+def test_standby_stops_acquire_retries_when_readiness_expires(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    live = _LiveAuthorityStore()
+    publisher = _PublisherStore()
+    readiness = _paired_readiness(
+        rehearsal_id="standby-readiness-expiry-test",
+        publisher=publisher,
+    )
+    primary = rehearse_primary_process_role(
+        rehearsal_id="standby-readiness-expiry-test",
+        host_id="primary-mac",
+        host_fingerprint="primary-fingerprint",
+        lease_seconds=10,
+        renew_interval_seconds=0.01,
+        poll_interval_seconds=0.005,
+        store=PartitionableAuthorityStore(
+            healthy=live,
+            unavailable=_UnavailableAuthorityStore(),
+        ),
+        publisher_store=publisher,
+        expected_publisher_generation=8,
+        readiness=readiness,
+    )
+
+    class _HeldAuthorityStore:
+        def __init__(self) -> None:
+            self.acquire_attempts = 0
+
+        def acquire(self, *_args, **_kwargs):
+            self.acquire_attempts += 1
+            raise ValueError("Primary Authority is already held")
+
+    held = _HeldAuthorityStore()
+    fresh = datetime.fromisoformat(readiness.verified_at)
+    expired = datetime.fromisoformat(readiness.valid_until) + timedelta(
+        seconds=1
+    )
+
+    class _AdvancingDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            observed = fresh if held.acquire_attempts == 0 else expired
+            if tz is None:
+                return observed.replace(tzinfo=None)
+            return observed.astimezone(tz)
+
+    elapsed = [0.0]
+
+    def monotonic() -> float:
+        return elapsed[0]
+
+    def sleep(seconds: float) -> None:
+        elapsed[0] += seconds
+
+    monkeypatch.setattr(outage_operator, "datetime", _AdvancingDateTime)
+    remote_reads_before = publisher.read_count
+
+    with pytest.raises(ValueError, match="readiness receipt expired"):
+        rehearse_standby_process_role(
+            rehearsal_id="standby-readiness-expiry-test",
+            host_id="standby-mac",
+            host_fingerprint="standby-fingerprint",
+            primary_receipt=primary,
+            lease_seconds=10,
+            rto_seconds=1.0,
+            poll_interval_seconds=0.1,
+            store=held,
+            publisher_store=publisher,
+            expected_publisher_generation=8,
+            readiness=readiness,
+            monotonic=monotonic,
+            sleep=sleep,
+        )
+
+    assert held.acquire_attempts == 1
+    assert publisher.read_count == remote_reads_before + 1
+
+
 def test_role_readiness_rejects_wrong_machine_or_stale_source(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

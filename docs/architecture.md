@@ -832,3 +832,8 @@ Standby role另必須把mutation前驗過的完整primary receipt之canonical SH
 `primary-authority-outage-standby.v3`。Final verifier只接受該digest與當前primary
 artifact exact match，成功產物為`primary-authority-outage-cross-host.v3`；只相同epoch
 不足以證明兩個process receipt屬於同一條evidence chain。
+
+Standby的freshness fence也涵蓋等待primary lease到期的整段RTO loop，不只role入口。
+每一次remote authority acquire attempt前都重新驗同一pair的`valid_until`；窗口一旦
+過期，loop立即fail closed，不會因先前曾以fresh receipt進入role而繼續碰control
+plane。
