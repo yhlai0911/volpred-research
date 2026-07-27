@@ -691,6 +691,10 @@ def test_router_options_and_next_redirects_are_audited(tmp_path: Path) -> None:
     _write(
         tmp_path / "web/src/components/Redirects.tsx",
         """
+        import {
+          redirect,
+          permanentRedirect,
+        } from "next/navigation"
         const router = useRouter()
         router.push("/reports/demo", { scroll: false })
         redirect(redirectTarget)
@@ -712,6 +716,46 @@ def test_router_options_and_next_redirects_are_audited(tmp_path: Path) -> None:
         and item["source_ref"].endswith("Redirects.tsx")
     ]
     assert unresolved == ["redirectTarget"]
+
+
+def test_router_indirection_and_navigation_import_alias_fail_closed(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/RouterAliases.tsx",
+        """
+        import { redirect as navigate } from "next/navigation"
+        const router = useRouter()
+        const alias = router
+        alias.push(aliasTarget)
+        router?.push(optionalTarget)
+        router["replace"](bracketTarget)
+        navigate(redirectTarget)
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    scoped = [
+        item
+        for item in report["blockers"]
+        if str(item.get("source_ref", "")).endswith("RouterAliases.tsx")
+    ]
+    assert any(
+        item["kind"] == "unresolved_router_reference"
+        and item["symbol"] == "router"
+        for item in scoped
+    )
+    assert any(
+        item["kind"] == "unresolved_internal_navigation"
+        and item["expression"] == "redirectTarget"
+        for item in scoped
+    )
 
 
 def test_unrecognized_use_router_shape_cannot_silently_pass(
@@ -736,6 +780,41 @@ def test_unrecognized_use_router_shape_cannot_silently_pass(
     )
 
 
+def test_redirect_and_href_examples_in_non_code_do_not_change_results(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/next.config.js",
+        """
+        // { source: '/retired', destination: '/' }
+        const example = "source: '/retired'"
+        module.exports = { async redirects() { return [] } }
+        """,
+    )
+    _write(
+        tmp_path / "web/src/components/Examples.tsx",
+        """
+        // <Link href="/comment-only" />
+        const docs = '<a href="/string-only">example</a>'
+        export const Real = () => <a href="/retired">retired</a>
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    dead_paths = {
+        item["path"]
+        for item in report["blockers"]
+        if item["kind"] == "dead_internal_link"
+    }
+    assert dead_paths == {"/retired"}
+
+
 def test_frontend_source_symlink_escape_fails_closed(tmp_path: Path) -> None:
     contract, targets = _fixture_repo(tmp_path)
     outside = tmp_path.parent / f"{tmp_path.name}-source-outside"
@@ -754,6 +833,52 @@ def test_frontend_source_symlink_escape_fails_closed(tmp_path: Path) -> None:
         item["kind"] == "frontend_source_escape"
         and item["source_ref"].endswith("escaped/page.tsx")
         for item in report["blockers"]
+    )
+
+
+def test_frontend_reader_uses_resolved_path_after_symlink_check(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    _contract, _targets = _fixture_repo(tmp_path)
+    inside = tmp_path / "web/src/components/Inside.tsx"
+    outside = tmp_path.parent / f"{tmp_path.name}-swap-outside.tsx"
+    _write(inside, "export const X = () => null")
+    _write(outside, '<a href="/external-after-check">outside</a>')
+    link = tmp_path / "web/src/components/Swappable.tsx"
+    link.symlink_to(inside)
+    original = parity_module._safe_frontend_file
+    swapped = False
+
+    def swap_after_resolve(path: Path, **kwargs):
+        nonlocal swapped
+        resolved = original(path, **kwargs)
+        if path == link and resolved is not None and not swapped:
+            link.unlink()
+            link.symlink_to(outside)
+            swapped = True
+        return resolved
+
+    monkeypatch.setattr(
+        parity_module,
+        "_safe_frontend_file",
+        swap_after_resolve,
+    )
+    routes = parity_module._discover_routes(
+        tmp_path,
+        tmp_path / "web",
+        [],
+    )
+
+    findings = parity_module._dead_links(
+        tmp_path,
+        tmp_path / "web",
+        routes,
+    )
+
+    assert not any(
+        item.get("path") == "/external-after-check"
+        for item in findings
     )
 
 

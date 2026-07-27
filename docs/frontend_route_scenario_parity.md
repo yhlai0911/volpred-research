@@ -29,8 +29,9 @@ symlink escape 或 audit 期間不可讀都只產生 typed blocker，不讀取�
 靜態內部 link 會對實體 route、dynamic segment 與 `next.config.js`
 redirect source 做解析；expression／router navigation 無法靜態證明目的地時也 fail
 closed，不以「大概是合法」略過；typed binding、destructure、direct chain、
-`redirect`／`permanentRedirect` 及多參數 router call 均有 adversarial regression，
-其餘無法辨識的 `useRouter()` shape 直接阻擋。
+`redirect`／`permanentRedirect` import alias 及多參數 router call 均有 adversarial
+regression；router alias／optional／bracket access 或其餘無法辨識的 `useRouter()`
+shape 直接阻擋。註解與字串範例不會被當成 route／redirect／href。
 
 active frontend 是獨立 nested Git repository。每份 report 都記 nested HEAD、dirty
 status digest，以及本次真正讀取的 `src/**/*.{ts,tsx,js,jsx}`／`next.config.js`／
@@ -45,7 +46,7 @@ status digest，以及本次真正讀取的 `src/**/*.{ts,tsx,js,jsx}`／`next.c
 | route owner rules | 25 | 每項都有逐 mode owner；handler 另有逐 HTTP method access class |
 | core scenarios | 7 | public first paint、auth、member、Admin、SEO、mobile、accessibility |
 | explicit known gaps | 4 | `/brand` 原版缺口；`/indicators`、`/pricing`、`/radar` v3 缺口 |
-| blockers | 33 | 3 dead link、2 scenario evidence gap、28 unresolved navigation targets |
+| blockers | 32 | 3 dead link、2 scenario evidence gap、27 unresolved navigation targets |
 
 本次 baseline 的 nested HEAD 為 `03bad28434251df1f7094f87ffcaf85ec70e40d0`；
 frontend 正由另一 session 修改，因此 report 同時標 `dirty=true`，並以 `tree_sha256`
@@ -57,7 +58,7 @@ frontend 正由另一 session 修改，因此 report 同時標 `dirty=true`，�
 2. 原版 `MobileNav.tsx` 沒有 `aria-label`／`aria-expanded`。
 3. `/v3` 的 server page 沒有 authoritative `getFeed`／`initialData`，首屏仍由
    client `useV3Data` 在 hydration 後取得。
-4. 另有 28 個 navigation expression（例如 `href={item.href}`、report helper 與
+4. 另有 27 個 navigation expression（例如 `href={item.href}`、report helper 與
    provider PDF URL）目前無 typed route registry 可供 checker 證明；依 fail-closed
    契約列為 unresolved，而不是靜默假設合法。
 
