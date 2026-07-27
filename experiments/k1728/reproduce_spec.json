@@ -1,0 +1,63 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1728.py",
+    "args": []
+  },
+  "canonical_result": "k1728_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1728/data/spy_ohlc.csv",
+      "sha256": "7cffe997210c8415f4734efe5a3192579a51b4cfe367ac813dd25243bcfe9301"
+    },
+    {
+      "path": "experiments/k1728/data/qqq_ohlc.csv",
+      "sha256": "ff5f7402a77e64780932591af4bc8c02fd4926b23bf2cbe72f3c2f523ca0798e"
+    },
+    {
+      "path": "experiments/k1728/data/fred_USEPUINDXD.csv",
+      "sha256": "b881898c17e9322d64a465f69deb31aa348426a7c0a4bf4dabffe5f9cfff9703"
+    },
+    {
+      "path": "experiments/k1728/data/fred_VIXCLS.csv",
+      "sha256": "80222a9dfb128f675dc7356cf285930c01b32ec670aa7960447a16837ce8f4b5"
+    },
+    {
+      "path": "experiments/k1728/data/sf_news_sentiment.csv",
+      "sha256": "ad0e6edd351f76916f8c0666f7d149a0665300a55d0e697e637d63c5bea5fb75"
+    },
+    {
+      "path": "experiments/k1728/data/provenance.json",
+      "sha256": "74213e03ac030bbd78f86eb834dbc0daa0879e1651d03e4136e3a193c8827ee2"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca"
+    }
+  ],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/primary_SPY/sample",
+      "/data_provenance",
+      "/robustness_QQQ/sample"
+    ],
+    "ignore_reasons": {
+      "/data_provenance": "download-date metadata, not a computed result",
+      "/primary_SPY/sample": "sample dates are provenance not computed claim",
+      "/robustness_QQQ/sample": "sample dates are provenance not computed claim"
+    }
+  }
+}
