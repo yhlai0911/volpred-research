@@ -7,6 +7,7 @@ from pathlib import Path
 
 
 SOURCE_SCRIPT = Path(__file__).resolve().parents[1] / "backup_user_claude.sh"
+SNAPSHOT_SCRIPT = Path(__file__).resolve().parents[1] / "snapshot_skill_tree.py"
 
 
 def _sandbox_script(tmp_path: Path) -> tuple[Path, Path]:
@@ -15,6 +16,8 @@ def _sandbox_script(tmp_path: Path) -> tuple[Path, Path]:
     scripts.mkdir(parents=True)
     script = scripts / "backup_user_claude.sh"
     shutil.copy2(SOURCE_SCRIPT, script)
+    shutil.copy2(SNAPSHOT_SCRIPT, scripts / "snapshot_skill_tree.py")
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
     home = tmp_path / "home"
     home.mkdir()
     return script, home
@@ -68,5 +71,62 @@ def test_skill_snapshot_refuses_symlink_outside_approved_roots(
     result = _run(script, home)
 
     assert result.returncode != 0
-    assert "outside approved roots" in result.stderr
+    assert "escapes approved roots" in result.stderr
     assert not (script.parent.parent / "ops" / "claude_user_backup" / "skills").exists()
+
+
+def test_skill_snapshot_refuses_nested_escape_inside_approved_agent_skill(
+    tmp_path: Path,
+) -> None:
+    script, home = _sandbox_script(tmp_path)
+    secret = home / "secret.txt"
+    secret.write_text("do not snapshot\n", encoding="utf-8")
+    agent_skill = home / ".agents" / "skills" / "ask-matt"
+    agent_skill.mkdir(parents=True)
+    (agent_skill / "nested-secret").symlink_to(secret)
+    claude_skills = home / ".claude" / "skills"
+    claude_skills.mkdir(parents=True)
+    (claude_skills / "ask-matt").symlink_to(agent_skill, target_is_directory=True)
+
+    result = _run(script, home)
+
+    assert result.returncode != 0
+    assert "escapes approved roots" in result.stderr
+    assert not (script.parent.parent / "ops" / "claude_user_backup" / "skills").exists()
+
+
+def test_skill_snapshot_refuses_non_skill_file_inside_claude_home(
+    tmp_path: Path,
+) -> None:
+    script, home = _sandbox_script(tmp_path)
+    claude = home / ".claude"
+    claude_skills = claude / "skills"
+    claude_skills.mkdir(parents=True)
+    settings = claude / "settings.json"
+    settings.write_text('{"token": "secret"}\n', encoding="utf-8")
+    (claude_skills / "unsafe").symlink_to(settings)
+
+    result = _run(script, home)
+
+    assert result.returncode != 0
+    assert "escapes approved roots" in result.stderr
+
+
+def test_failed_snapshot_removes_preexisting_symlink_destination(
+    tmp_path: Path,
+) -> None:
+    script, home = _sandbox_script(tmp_path)
+    secret = home / "secret.txt"
+    secret.write_text("do not snapshot\n", encoding="utf-8")
+    claude_skills = home / ".claude" / "skills"
+    claude_skills.mkdir(parents=True)
+    (claude_skills / "unsafe").symlink_to(secret)
+    destination = script.parent.parent / "ops" / "claude_user_backup" / "skills"
+    destination.parent.mkdir(parents=True)
+    destination.symlink_to(secret)
+
+    result = _run(script, home)
+
+    assert result.returncode != 0
+    assert not destination.exists()
+    assert not destination.is_symlink()

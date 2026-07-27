@@ -23,25 +23,18 @@ mkdir -p "$DEST"
 
 # 2. user-level skills
 if [ -d "$SRC/skills" ]; then
-  # Matt/Agent Skills installs expose ~/.claude/skills entries as symlinks into
-  # ~/.agents/skills.  A portable Git snapshot must contain their bytes, not the
-  # host-specific absolute symlinks.  Refuse any link outside the two declared
-  # config roots, then dereference the approved links while copying.
-  while IFS= read -r -d '' _skill_link; do
-    _skill_target="$(realpath "$_skill_link")"
-    case "$_skill_target" in
-      "$SRC"/*|"$AGENT_SKILLS_ROOT"/*) ;;
-      *)
-        echo "✗ refusing skill symlink outside approved roots: $_skill_link -> $_skill_target" >&2
-        exit 1
-        ;;
-    esac
-  done < <(find "$SRC/skills" -type l -print0)
-  rm -rf "$DEST/skills"; cp -RL "$SRC/skills" "$DEST/skills"
-  if find "$DEST/skills" -type l -print -quit | grep -q .; then
-    echo "✗ skills snapshot still contains symlinks" >&2
-    exit 1
-  fi
+  # The controlled walker follows only links that remain under the two skill
+  # roots, catches nested escapes/cycles and builds under .git before swapping
+  # the complete symlink-free snapshot into the tracked tree.
+  _PYTHON="$REPO_ROOT/.venv/bin/python3"
+  [ -x "$_PYTHON" ] || _PYTHON="$(command -v python3)"
+  _GIT_DIR="$(git -C "$REPO_ROOT" rev-parse --absolute-git-dir)"
+  "$_PYTHON" "$REPO_ROOT/scripts/snapshot_skill_tree.py" \
+    --source "$SRC/skills" \
+    --destination "$DEST/skills" \
+    --approved-root "$SRC/skills" \
+    --approved-root "$AGENT_SKILLS_ROOT" \
+    --temp-root "$_GIT_DIR"
   echo "✓ skills ($(find "$DEST/skills" -type f | wc -l | tr -d ' ') 檔)"
 fi
 
