@@ -3618,34 +3618,46 @@ Spec／Standards 均 PASS，避免用解除循環換來 production compatibility
 diagnostics、release audit 與 publisher sync suites為 **104 passed, 1 skipped**。
 真實 `audit_release_settings.py --fix --json` 回讀 Supabase
 `status=ok / cadence=aligned / starved_drafts=[]`，原 detector fresh read-back 為
-`host_cron_fail.breached=false / failing_logs=[]`。底層修復與 detector 已收斂；截至
-11:56 台灣時間，下一個 Operations Core natural slot 12:17 尚未產生新 schedule
-receipt，因此此刻狀態為 **`contained`**。只有新 fire 在 `1297eff40`＋`744e18920`
-後回讀 succeeded，才升級為 **`root_cause_fixed_and_verified`**。
+`host_cron_fail.breached=false / failing_logs=[]`。2026-07-27 12:17 台灣時間的下一個
+自然 Operations Core fire
+`operations-core-v1:release_settings_audit:3b48587d8d30502028edc5d2`
+由 `operations-core-scheduler` attempt 1 執行成功，receipt 回讀
+`state=succeeded / exit_code=0 / duration=0.691004s`，fence token 與前一筆失敗
+fire 不同，證明不是重播舊綠燈或 legacy wrapper。五步 Gate 已全過，此 incident
+升級為 **`root_cause_fixed_and_verified`**。
 
 ### 2026-07-27 — 同 owner 的歷史壞 shadow receipt 永久污染七日 cutover window
 
 **證據化症狀**：Issue #9 live queue 已回到 `queued_execution`，23:37 UTC 後的
-scheduled v4 receipts 連續回讀 0 reconciliation issue，selection difference 也只剩
-有完整 oracle／snapshot evidence 的 registered capability policy change；但
-`work-shadow-assess` 仍把 12:15–23:15 已修復的 legacy corruption／implementation
-receipt 全部納入，持續回報 `reconciliation_issue_present`、
-`blocking_selection_difference` 與 `blocking_dimension_difference`。只要 owner state
-SHA 不變，append 再多乾淨 receipt 也不會移除這些歷史 blocker。
+scheduled v4 receipts 連續回讀 0 reconciliation issue，selection difference 是
+有完整 oracle／snapshot evidence 的 registered capability policy change；但最新
+receipt 仍有 8 個 implementation mismatch（active claim 缺 durable expiry、main-thread
+lane 未映射 capability），因此 clean suffix 目前尚未開始。除此之外，
+`work-shadow-assess` 還會把 12:15–23:15 已修復的 legacy corruption／implementation
+receipt 永久納入：即使後續把上述 8 個 mismatch 修完，只要 owner state SHA 不變，
+舊 blocker 仍不會離開窗口，ticket 在數學上依舊無法結案。
 
 **根因層級與底層修復**：根因是 observation state machine 只有
 「owner evidence 改變」一種 epoch boundary，沒有「同 owner 下修復完成後重新累積
 連續乾淨窗口」的語意。這不是刪舊 receipt 或手改 live state 的問題。公開
-`assess_shadow_observation_directory()` 現逐 receipt 判定 row count、candidate
-identity、必要 dimensions、selection evidence、registered policy、reconciliation
-與非 policy mismatch；最後一筆 blocking／incomplete receipt 會切斷 soak。只有其後
-clean suffix 的 append wall-clock 真正跨滿七日，assessment 才改以該 suffix 裁決；
-舊 receipt 仍完整保留供 audit，短窗或新 blocker 仍 fail closed。
+`assess_shadow_observation_directory()` 現以單一 chronological pass 同時計算內容與
+時間邊界：row count、candidate identity、必要 dimensions、selection evidence、
+registered policy、reconciliation、非 policy mismatch、超過 max-gap 與 replay clock
+非 live 都會重啟 segment。Matt Standards 複審再證明若先信任未驗證的
+`recorded_at` 排序，最新 receipt 可大幅 backdate 到完整舊窗口之前，連 owner mismatch
+也能被同法藏掉而 false-green；owner epoch 與 clean segment 現統一以
+`max(recorded_at, observed_at)` 排序，使非 live receipt 只能留在其 observation
+位置或更晚，不能向歷史移動。只有最新 clean segment 的 append wall-clock真正跨滿七日，
+assessment 才改以該 segment 裁決；舊 receipt仍完整保留供audit，短窗或近期新
+blocker仍fail closed。
 
 **回歸與狀態界線**：兩個 public-interface cases 先分別以
-`reconciliation_issue_present`、`receipt_row_count_mismatch` 重現永久污染，再證明
-其後八筆／七日乾淨 evidence 可核可；assessment 全檔 **31 passed**。Live clean suffix
-尚未滿七日，正式 Work Coordinator owner 仍為 `legacy/1`，沒有 stage gate、owner
+`reconciliation_issue_present`、`receipt_row_count_mismatch`、歷史 observation gap
+與歷史 replay-clock violation 重現永久污染，再證明其後八筆／七日乾淨 evidence
+可核可；另以近期 gap／clock violation及最新 receipt／owner mismatch 大幅 backdate
+證明舊完整窗口不可被誤用。Assessment 全檔 **37 passed**、相鄰 suites
+**104 passed**。Live clean suffix
+尚未開始，正式 Work Coordinator owner 仍為 `legacy/1`，沒有 stage gate、owner
 transfer、下游 acknowledgement 或 rollback rehearsal。因此本 assessor 根因修復可在
 完成雙軸 review 後標 `root_cause_fixed_and_verified`；Issue #9 umbrella 仍只能標
 **`contained`**。
