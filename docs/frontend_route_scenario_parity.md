@@ -22,10 +22,15 @@ inventory；`/v3/*` 同時保留 surface path 與去掉 `/v3` 後的 canonical r
 逐 route 比較。每一個 surface row 都帶 mode-keyed source／authoritative data owner、
 capabilities 與 mode-specific advantages，不會把兩種模式的 owner union 假裝成同一份
 實作。`route.ts` 另按實際 export 的 HTTP method 展開；GET／POST 等權限逐 method
-比對，缺 method contract 或無法解析 handler method 都 fail closed。靜態內部 link
-會對實體 route、dynamic segment 與 `next.config.js`
+雙向 exact 比對（契約宣告但 source 消失也會阻擋），lexical scan 會排除註解／字串並
+支援 alias export；缺 method contract 或無法解析 handler method 都 fail closed。
+source tree 內每個檔案會先 resolve 並驗證仍在 active frontend／repo boundary，
+symlink escape 或 audit 期間不可讀都只產生 typed blocker，不讀取外部檔案。
+靜態內部 link 會對實體 route、dynamic segment 與 `next.config.js`
 redirect source 做解析；expression／router navigation 無法靜態證明目的地時也 fail
-closed，不以「大概是合法」略過。
+closed，不以「大概是合法」略過；typed binding、destructure、direct chain、
+`redirect`／`permanentRedirect` 及多參數 router call 均有 adversarial regression，
+其餘無法辨識的 `useRouter()` shape 直接阻擋。
 
 active frontend 是獨立 nested Git repository。每份 report 都記 nested HEAD、dirty
 status digest，以及本次真正讀取的 `src/**/*.{ts,tsx,js,jsx}`／`next.config.js`／

@@ -544,6 +544,83 @@ def test_route_handler_without_method_contract_fails_closed(
     )
 
 
+def test_declared_http_method_must_still_be_exported(tmp_path: Path) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/app/api/questions/route.ts",
+        "export async function GET() { return Response.json([]); }",
+    )
+    payload = json.loads(contract.read_text(encoding="utf-8"))
+    payload["route_rules"].append(
+        {
+            "id": "api_questions",
+            "pattern": "^/api/questions$",
+            "expected_modes": ["shared"],
+            "access": "public",
+            "method_access": {"GET": "public", "POST": "member"},
+            "authoritative_data_owner_refs": {"shared": ["$surface"]},
+            "capabilities": ["questions"],
+            "mode_advantages": {"shared": ["single_api_contract"]},
+        }
+    )
+    contract.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    assert any(
+        item["kind"] == "missing_route_handler_method"
+        and item["methods"] == ["POST"]
+        for item in report["blockers"]
+    )
+
+
+def test_http_method_discovery_ignores_text_and_supports_alias_export(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/app/api/jobs/route.ts",
+        """
+        // export async function DELETE() {}
+        const example = "export async function PATCH() {}"
+        async function readJob() { return Response.json({}); }
+        export { readJob as GET }
+        """,
+    )
+    payload = json.loads(contract.read_text(encoding="utf-8"))
+    payload["route_rules"].append(
+        {
+            "id": "api_jobs",
+            "pattern": "^/api/jobs$",
+            "expected_modes": ["shared"],
+            "access": "service",
+            "method_access": {"GET": "service"},
+            "authoritative_data_owner_refs": {"shared": ["$surface"]},
+            "capabilities": ["job_read"],
+            "mode_advantages": {"shared": ["single_api_contract"]},
+        }
+    )
+    contract.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    rows = [
+        row for row in report["routes"]
+        if row["canonical_route"] == "/api/jobs"
+    ]
+    assert [(row["method"], row["access"]) for row in rows] == [
+        ("GET", "service")
+    ]
+
+
 def test_multiline_router_navigation_is_audited(tmp_path: Path) -> None:
     contract, targets = _fixture_repo(tmp_path)
     _write(
@@ -574,6 +651,112 @@ def test_multiline_router_navigation_is_audited(tmp_path: Path) -> None:
     assert [item["expression"] for item in unresolved] == ["target"]
 
 
+def test_typed_destructured_and_direct_router_navigation_fail_closed(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/RouterVariants.tsx",
+        """
+        const typed: AppRouterInstance = useRouter()
+        typed.push(typedTarget)
+        const { push: navigate, replace } = useRouter()
+        navigate(destructuredTarget)
+        replace("/reports/demo")
+        useRouter().push(directTarget)
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    unresolved = {
+        item["expression"]
+        for item in report["blockers"]
+        if item["kind"] == "unresolved_internal_navigation"
+        and item["source_ref"].endswith("RouterVariants.tsx")
+    }
+    assert unresolved == {
+        "typedTarget",
+        "destructuredTarget",
+        "directTarget",
+    }
+
+
+def test_router_options_and_next_redirects_are_audited(tmp_path: Path) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/Redirects.tsx",
+        """
+        const router = useRouter()
+        router.push("/reports/demo", { scroll: false })
+        redirect(redirectTarget)
+        permanentRedirect("/reports/demo")
+        // redirect(commentTarget)
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    unresolved = [
+        item["expression"]
+        for item in report["blockers"]
+        if item["kind"] == "unresolved_internal_navigation"
+        and item["source_ref"].endswith("Redirects.tsx")
+    ]
+    assert unresolved == ["redirectTarget"]
+
+
+def test_unrecognized_use_router_shape_cannot_silently_pass(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/RouterEscape.tsx",
+        "const routers = [useRouter()]; routers[0].push(target)",
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    assert any(
+        item["kind"] == "unresolved_router_binding"
+        and item["source_ref"].endswith("RouterEscape.tsx")
+        for item in report["blockers"]
+    )
+
+
+def test_frontend_source_symlink_escape_fails_closed(tmp_path: Path) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    outside = tmp_path.parent / f"{tmp_path.name}-source-outside"
+    _write(outside / "page.tsx", "export default function Page() {}")
+    escaped = tmp_path / "web/src/app/escaped/page.tsx"
+    escaped.parent.mkdir(parents=True, exist_ok=True)
+    escaped.symlink_to(outside / "page.tsx")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    assert any(
+        item["kind"] == "frontend_source_escape"
+        and item["source_ref"].endswith("escaped/page.tsx")
+        for item in report["blockers"]
+    )
+
+
 def test_source_mutation_during_audit_invalidates_receipt(
     tmp_path: Path,
     monkeypatch,
@@ -581,9 +764,13 @@ def test_source_mutation_during_audit_invalidates_receipt(
     contract, targets = _fixture_repo(tmp_path)
     original = parity_module._discover_routes
 
-    def mutate_then_discover(repo_root: Path, frontend_root: Path):
+    def mutate_then_discover(
+        repo_root: Path,
+        frontend_root: Path,
+        blockers: list[dict[str, object]],
+    ):
         _write(frontend_root / "src/app/late/page.tsx")
-        return original(repo_root, frontend_root)
+        return original(repo_root, frontend_root, blockers)
 
     monkeypatch.setattr(
         parity_module,

@@ -36,15 +36,28 @@ _HREF_EXPRESSION = re.compile(
     r"""\bhref\s*=\s*\{(?P<expression>[^{}\n]+)\}"""
 )
 _ROUTER_BINDING = re.compile(
-    r"""\b(?:const|let|var)\s+(?P<name>[A-Za-z_$][\w$]*)\s*=\s*"""
+    r"""\b(?:const|let|var)\s+(?P<name>[A-Za-z_$][\w$]*)"""
+    r"""(?:\s*:\s*[^=;\n]+)?\s*=\s*"""
     r"""useRouter\s*\(\s*\)"""
 )
+_ROUTER_DESTRUCTURE = re.compile(
+    r"""\b(?:const|let|var)\s*\{(?P<bindings>[^{}]+)\}\s*=\s*"""
+    r"""useRouter\s*\(\s*\)"""
+)
+_ROUTER_DIRECT = re.compile(
+    r"""\buseRouter\s*\(\s*\)\s*\.\s*(?:push|replace)\s*\("""
+)
+_USE_ROUTER = re.compile(r"""\buseRouter\s*\(\s*\)""")
 _HTTP_METHOD = re.compile(
     r"""\bexport\s+(?:async\s+)?(?:function|const)\s+"""
     r"""(?P<method>GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\b"""
 )
+_EXPORT_BLOCK = re.compile(r"""\bexport\s*\{(?P<bindings>[^{}]+)\}""")
 _TEMPLATE_SLOT = re.compile(r"\$\{[^{}]*\}")
 _ACCESS_LEVELS = frozenset({"public", "member", "admin", "service"})
+_HTTP_METHODS = frozenset(
+    {"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"}
+)
 
 
 @dataclass(frozen=True)
@@ -109,10 +122,132 @@ def _surface_identity(parts: tuple[str, ...]) -> tuple[str, str]:
     return "original", _web_route(parts)
 
 
-def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
+def _mask_typescript_non_code(text: str) -> str:
+    """Mask comments and string bodies while preserving offsets/newlines."""
+
+    characters = list(text)
+    index = 0
+    state: str | None = None
+    escaped = False
+    regex_character_class = False
+    while index < len(text):
+        current = text[index]
+        following = text[index + 1] if index + 1 < len(text) else ""
+        if state == "line_comment":
+            if current == "\n":
+                state = None
+            else:
+                characters[index] = " "
+        elif state == "block_comment":
+            characters[index] = "\n" if current == "\n" else " "
+            if current == "*" and following == "/":
+                characters[index + 1] = " "
+                index += 1
+                state = None
+        elif state == "regex":
+            characters[index] = "\n" if current == "\n" else " "
+            if escaped:
+                escaped = False
+            elif current == "\\":
+                escaped = True
+            elif current == "[":
+                regex_character_class = True
+            elif current == "]":
+                regex_character_class = False
+            elif current == "/" and not regex_character_class:
+                state = None
+        elif state in {"'", '"', "`"}:
+            characters[index] = "\n" if current == "\n" else " "
+            if escaped:
+                escaped = False
+            elif current == "\\":
+                escaped = True
+            elif current == state:
+                state = None
+        elif current == "/" and following == "/":
+            characters[index] = characters[index + 1] = " "
+            index += 1
+            state = "line_comment"
+        elif current == "/" and following == "*":
+            characters[index] = characters[index + 1] = " "
+            index += 1
+            state = "block_comment"
+        elif current == "/":
+            previous = index - 1
+            while previous >= 0 and text[previous].isspace():
+                previous -= 1
+            if previous < 0 or text[previous] in "(=,:;!&|?{}[":
+                characters[index] = " "
+                state = "regex"
+                regex_character_class = False
+        elif current in {"'", '"', "`"}:
+            characters[index] = " "
+            state = current
+        index += 1
+    return "".join(characters)
+
+
+def _exported_http_methods(text: str) -> set[str]:
+    masked = _mask_typescript_non_code(text)
+    methods = {
+        match.group("method") for match in _HTTP_METHOD.finditer(masked)
+    }
+    for block in _EXPORT_BLOCK.finditer(masked):
+        for binding in block.group("bindings").split(","):
+            pieces = re.split(r"\s+as\s+", binding.strip())
+            exported = pieces[-1].strip()
+            if exported in _HTTP_METHODS:
+                methods.add(exported)
+    return methods
+
+
+def _safe_frontend_file(
+    path: Path,
+    *,
+    repo_root: Path,
+    frontend_root: Path,
+    blockers: list[dict[str, object]],
+) -> bool:
+    try:
+        resolved = path.resolve(strict=True)
+    except (OSError, RuntimeError):  # silent-ok: typed unreadable blocker
+        blockers.append(
+            _block(
+                "frontend_source_unreadable",
+                source_ref=path.relative_to(repo_root).as_posix(),
+            )
+        )
+        return False
+    if not (
+        resolved.is_file()
+        and resolved.is_relative_to(frontend_root)
+        and resolved.is_relative_to(repo_root)
+    ):
+        blockers.append(
+            _block(
+                "frontend_source_escape",
+                source_ref=path.relative_to(repo_root).as_posix(),
+            )
+        )
+        return False
+    return True
+
+
+def _discover_routes(
+    repo_root: Path,
+    frontend_root: Path,
+    blockers: list[dict[str, object]],
+) -> list[_Route]:
     app_root = frontend_root / "src" / "app"
     routes: list[_Route] = []
     for page in sorted(app_root.rglob("page.tsx")):
+        if not _safe_frontend_file(
+            page,
+            repo_root=repo_root,
+            frontend_root=frontend_root,
+            blockers=blockers,
+        ):
+            continue
         relative = page.parent.relative_to(app_root)
         parts = tuple(relative.parts)
         mode, surface = _surface_identity(parts)
@@ -131,6 +266,13 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
             )
         )
     for handler in sorted(app_root.rglob("route.ts")):
+        if not _safe_frontend_file(
+            handler,
+            repo_root=repo_root,
+            frontend_root=frontend_root,
+            blockers=blockers,
+        ):
+            continue
         relative = handler.parent.relative_to(app_root)
         parts = tuple(relative.parts)
         mode, surface = _surface_identity(parts)
@@ -139,14 +281,17 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
             if mode == "v3"
             else _web_route(parts)
         )
-        methods = sorted(
-            {
-                match.group("method")
-                for match in _HTTP_METHOD.finditer(
-                    handler.read_text(encoding="utf-8")
+        try:
+            handler_text = handler.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):  # silent-ok: typed unreadable blocker
+            blockers.append(
+                _block(
+                    "frontend_source_unreadable",
+                    source_ref=handler.relative_to(repo_root).as_posix(),
                 )
-            }
-        )
+            )
+            handler_text = ""
+        methods = sorted(_exported_http_methods(handler_text))
         for method in methods or [None]:
             routes.append(
                 _Route(
@@ -159,7 +304,12 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
                 )
             )
     sitemap = app_root / "sitemap.ts"
-    if sitemap.exists():
+    if sitemap.exists() and _safe_frontend_file(
+        sitemap,
+        repo_root=repo_root,
+        frontend_root=frontend_root,
+        blockers=blockers,
+    ):
         routes.append(
             _Route(
                 canonical_route="/sitemap.xml",
@@ -170,7 +320,12 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
             )
         )
     robots = frontend_root / "public" / "robots.txt"
-    if robots.exists():
+    if robots.exists() and _safe_frontend_file(
+        robots,
+        repo_root=repo_root,
+        frontend_root=frontend_root,
+        blockers=blockers,
+    ):
         routes.append(
             _Route(
                 canonical_route="/robots.txt",
@@ -340,11 +495,31 @@ def _route_pattern(route: str) -> re.Pattern[str]:
     return re.compile(r"^/" + "/".join(pieces) + r"/?$")
 
 
-def _redirect_sources(frontend_root: Path) -> set[str]:
+def _redirect_sources(
+    frontend_root: Path,
+    repo_root: Path,
+    blockers: list[dict[str, object]],
+) -> set[str]:
     config = frontend_root / "next.config.js"
     if not config.exists():
         return set()
-    text = config.read_text(encoding="utf-8")
+    if not _safe_frontend_file(
+        config,
+        repo_root=repo_root,
+        frontend_root=frontend_root,
+        blockers=blockers,
+    ):
+        return set()
+    try:
+        text = config.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        blockers.append(
+            _block(
+                "frontend_source_unreadable",
+                source_ref=config.relative_to(repo_root).as_posix(),
+            )
+        )
+        return set()
     return {
         (match.group("double") or match.group("single")).rstrip("/") or "/"
         for match in _REDIRECT_SOURCE.finditer(text)
@@ -380,18 +555,26 @@ def _expression_path(expression: str) -> str | None:
     return None
 
 
-def _call_arguments(text: str, call_pattern: re.Pattern[str]) -> list[str]:
+def _call_arguments(
+    text: str,
+    call_pattern: re.Pattern[str],
+    *,
+    source_text: str | None = None,
+) -> list[str]:
     """Return complete first arguments for calls, including multiline calls."""
 
+    source = source_text if source_text is not None else text
     arguments: list[str] = []
     for match in call_pattern.finditer(text):
         start = match.end()
-        depth = 1
+        paren_depth = 1
+        brace_depth = 0
+        bracket_depth = 0
         quote: str | None = None
         escaped = False
         cursor = start
-        while cursor < len(text):
-            character = text[cursor]
+        while cursor < len(source):
+            character = source[cursor]
             if escaped:
                 escaped = False
             elif character == "\\" and quote is not None:
@@ -402,12 +585,28 @@ def _call_arguments(text: str, call_pattern: re.Pattern[str]) -> list[str]:
             elif character in {"'", '"', "`"}:
                 quote = character
             elif character == "(":
-                depth += 1
+                paren_depth += 1
             elif character == ")":
-                depth -= 1
-                if depth == 0:
-                    arguments.append(text[start:cursor].strip())
+                paren_depth -= 1
+                if paren_depth == 0:
+                    arguments.append(source[start:cursor].strip())
                     break
+            elif character == "{":
+                brace_depth += 1
+            elif character == "}":
+                brace_depth = max(0, brace_depth - 1)
+            elif character == "[":
+                bracket_depth += 1
+            elif character == "]":
+                bracket_depth = max(0, bracket_depth - 1)
+            elif (
+                character == ","
+                and paren_depth == 1
+                and brace_depth == 0
+                and bracket_depth == 0
+            ):
+                arguments.append(source[start:cursor].strip())
+                break
             cursor += 1
     return arguments
 
@@ -417,6 +616,7 @@ def _dead_links(
     frontend_root: Path,
     routes: list[_Route],
 ) -> list[dict[str, object]]:
+    findings: list[dict[str, object]] = []
     valid_patterns = [
         _route_pattern(route.surface_route)
         for route in routes
@@ -426,15 +626,31 @@ def _dead_links(
         route.surface_route.rstrip("/") or "/"
         for route in routes
         if route.kind != "page"
-    } | _redirect_sources(frontend_root)
-    findings: list[dict[str, object]] = []
+    } | _redirect_sources(frontend_root, repo_root, findings)
     source_files = sorted(
         path
         for path in (frontend_root / "src").rglob("*")
         if path.suffix in {".ts", ".tsx", ".js", ".jsx"}
     )
     for source in source_files:
-        text = source.read_text(encoding="utf-8")
+        if not _safe_frontend_file(
+            source,
+            repo_root=repo_root,
+            frontend_root=frontend_root,
+            blockers=findings,
+        ):
+            continue
+        try:
+            text = source.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):  # silent-ok: typed unreadable blocker
+            findings.append(
+                _block(
+                    "frontend_source_unreadable",
+                    source_ref=source.relative_to(repo_root).as_posix(),
+                )
+            )
+            continue
+        code_text = _mask_typescript_non_code(text)
         for match in _HREF.finditer(text):
             raw = match.group("double") or match.group("single")
             if _valid_internal_path(
@@ -495,18 +711,64 @@ def _dead_links(
                     source_ref=source.relative_to(repo_root).as_posix(),
                 )
             )
-        router_names = {
-            binding.group("name")
-            for binding in _ROUTER_BINDING.finditer(text)
-        }
+        consumed_use_router_spans: list[tuple[int, int]] = []
+        router_names: set[str] = set()
+        for binding in _ROUTER_BINDING.finditer(code_text):
+            router_names.add(binding.group("name"))
+            use_router = _USE_ROUTER.search(
+                code_text,
+                binding.start(),
+                binding.end(),
+            )
+            if use_router is not None:
+                consumed_use_router_spans.append(use_router.span())
         navigation_patterns = [
             re.compile(
                 rf"\b{re.escape(name)}\.(?:push|replace)\s*\("
             )
             for name in sorted(router_names)
         ]
+        for destructure in _ROUTER_DESTRUCTURE.finditer(code_text):
+            use_router = _USE_ROUTER.search(
+                code_text,
+                destructure.start(),
+                destructure.end(),
+            )
+            if use_router is not None:
+                consumed_use_router_spans.append(use_router.span())
+            for raw_binding in destructure.group("bindings").split(","):
+                pieces = raw_binding.strip().split(":", 1)
+                member = pieces[0].strip()
+                local_name = pieces[-1].strip()
+                if member not in {"push", "replace"} or not re.fullmatch(
+                    r"[A-Za-z_$][\w$]*",
+                    local_name,
+                ):
+                    continue
+                navigation_patterns.append(
+                    re.compile(rf"\b{re.escape(local_name)}\s*\(")
+                )
+        navigation_patterns.append(_ROUTER_DIRECT)
+        for direct in _ROUTER_DIRECT.finditer(code_text):
+            use_router = _USE_ROUTER.search(
+                code_text,
+                direct.start(),
+                direct.end(),
+            )
+            if use_router is not None:
+                consumed_use_router_spans.append(use_router.span())
+        navigation_patterns.extend(
+            [
+                re.compile(r"(?<![\w.])redirect\s*\("),
+                re.compile(r"(?<![\w.])permanentRedirect\s*\("),
+            ]
+        )
         for navigation in navigation_patterns:
-            for expression in _call_arguments(text, navigation):
+            for expression in _call_arguments(
+                code_text,
+                navigation,
+                source_text=text,
+            ):
                 raw = _expression_path(expression)
                 if raw is not None and _valid_internal_path(
                     raw,
@@ -521,6 +783,18 @@ def _dead_links(
                         source_ref=source.relative_to(repo_root).as_posix(),
                     )
                 )
+        for use_router in _USE_ROUTER.finditer(code_text):
+            if any(
+                start <= use_router.start() < end
+                for start, end in consumed_use_router_spans
+            ):
+                continue
+            findings.append(
+                _block(
+                    "unresolved_router_binding",
+                    source_ref=source.relative_to(repo_root).as_posix(),
+                )
+            )
     return findings
 
 
@@ -531,26 +805,42 @@ def _frontend_revision(
     nested_git_required: bool,
     blockers: list[dict[str, object]],
 ) -> dict[str, object]:
-    relevant = sorted(
-        [
-            path
-            for path in (frontend_root / "src").rglob("*")
-            if path.is_file()
-            and path.suffix in {".ts", ".tsx", ".js", ".jsx"}
-        ]
-        + [
-            path
-            for path in (
-                frontend_root / "next.config.js",
-                frontend_root / "public" / "robots.txt",
-            )
-            if path.is_file()
-        ]
-    )
+    candidates = [
+        path
+        for path in (frontend_root / "src").rglob("*")
+        if path.is_file()
+        and path.suffix in {".ts", ".tsx", ".js", ".jsx"}
+    ] + [
+        path
+        for path in (
+            frontend_root / "next.config.js",
+            frontend_root / "public" / "robots.txt",
+        )
+        if path.is_file()
+    ]
+    relevant = [
+        path
+        for path in sorted(candidates)
+        if _safe_frontend_file(
+            path,
+            repo_root=repo_root,
+            frontend_root=frontend_root,
+            blockers=blockers,
+        )
+    ]
     digest = hashlib.sha256()
     for path in relevant:
         relative = path.relative_to(frontend_root).as_posix().encode()
-        content = path.read_bytes()
+        try:
+            content = path.read_bytes()
+        except OSError:  # silent-ok: typed unreadable blocker
+            blockers.append(
+                _block(
+                    "frontend_source_unreadable",
+                    source_ref=path.relative_to(repo_root).as_posix(),
+                )
+            )
+            continue
         digest.update(len(relative).to_bytes(8, "big"))
         digest.update(relative)
         digest.update(len(content).to_bytes(8, "big"))
@@ -781,7 +1071,17 @@ def _scenario_blockers(
             )
             if path is None:
                 continue
-            text = path.read_text(encoding="utf-8")
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError):  # silent-ok: typed evidence blocker
+                blockers.append(
+                    _block(
+                        "scenario_evidence_unreadable",
+                        scenario_id=scenario_id,
+                        source_ref=evidence["path"],
+                    )
+                )
+                continue
             missing = [
                 token
                 for token in contains
@@ -930,10 +1230,11 @@ def audit_frontend_parity(
         nested_git_required=nested_git_required,
         blockers=blockers,
     )
-    routes = _discover_routes(repo_root, frontend_root)
+    routes = _discover_routes(repo_root, frontend_root, blockers)
     compiled = _compile_rules(contract.get("route_rules"), blockers)
     route_rows: list[dict[str, object]] = []
     by_rule_route: dict[tuple[str, str], set[str]] = defaultdict(set)
+    by_rule_route_methods: dict[tuple[str, str], set[str]] = defaultdict(set)
     for route in routes:
         matched = [
             rule
@@ -963,6 +1264,10 @@ def audit_frontend_parity(
         else:
             rule_id = matched[0]["id"]
             by_rule_route[(rule_id, route.canonical_route)].add(route.mode)
+            if route.kind == "route_handler" and route.method is not None:
+                by_rule_route_methods[
+                    (rule_id, route.canonical_route)
+                ].add(route.method)
         matched_rule = matched[0] if len(matched) == 1 else {}
         owner_contract = matched_rule.get(
             "authoritative_data_owner_refs",
@@ -1084,6 +1389,32 @@ def audit_frontend_parity(
             blockers.append(_block("route_rule_without_routes", rule_id=rule_id))
             continue
         dispositions = rule.get("mode_dispositions", {})
+        method_access = rule.get("method_access")
+        required_methods = (
+            {
+                method
+                for method in method_access
+                if method != "*"
+            }
+            if isinstance(method_access, dict)
+            else set()
+        )
+        for (
+            current_rule,
+            canonical,
+        ), observed_methods in by_rule_route_methods.items():
+            if current_rule != rule_id:
+                continue
+            missing_methods = sorted(required_methods - observed_methods)
+            if missing_methods:
+                blockers.append(
+                    _block(
+                        "missing_route_handler_method",
+                        rule_id=rule_id,
+                        route=canonical,
+                        methods=missing_methods,
+                    )
+                )
         for canonical in sorted(matched_routes):
             observed_modes = by_rule_route[(rule_id, canonical)]
             for mode in expected_modes:
