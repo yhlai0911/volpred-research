@@ -26,7 +26,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from scripts import compute_queue  # noqa: E402
+from scripts import compute_queue, task_pool_claim  # noqa: E402
 
 
 @pytest.fixture
@@ -41,7 +41,14 @@ def queue(tmp_path, monkeypatch):
     monkeypatch.setattr(compute_queue, "AGENT_BRIEF_DIR", tmp_path / "agent_briefs")
     monkeypatch.setattr(compute_queue, "is_registered_linked_worktree", lambda *_: True)
     monkeypatch.setattr(compute_queue, "_find_task_dispatch_collision", lambda **_k: None)
-    monkeypatch.setattr(compute_queue, "_link_source_task", lambda *_a, **_k: None)
+    task_pool = tmp_path / "next_tasks.json"
+    task_pool.write_text(json.dumps([{
+        "id": "assign_compute_queue_amend",
+        "status": "pending",
+        "priority": 1,
+        "result": None,
+    }]))
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", task_pool)
     qdir.mkdir(parents=True)
     return qdir
 
@@ -52,7 +59,9 @@ def _enqueue_agent(brief: Path, job_id: str = "j1", **over) -> int:
         effort="xhigh", cwd=str(brief.parent), result_artifact=None,
         followup_brief=over.get("followup_brief", "collect it"),
         followup_task_type="experiment", followup_priority=1, timeout=600,
-        source_task_id="assign_compute_queue_amend",
+        source_task_id=over.get(
+            "source_task_id", "assign_compute_queue_amend"
+        ),
     )
     return compute_queue.enqueue_agent(args)
 

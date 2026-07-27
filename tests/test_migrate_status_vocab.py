@@ -144,16 +144,23 @@ def test_dry_run_on_real_queue_copy_converges_to_zero_residue(tmp_path):
     shutil.copyfile(REAL_NEXT_TASKS, copy)
     tasks = json.loads(copy.read_text(encoding="utf-8"))
     before = migrate._residual_counts(tasks)
-    report = migrate.migrate_tasks(tasks)
+    migrated_at = "2026-07-21T00:00:00+00:00"
+    report = migrate.migrate_tasks(tasks, now_iso=migrated_at)
     after = migrate._residual_counts(tasks)
     assert after == (0, 0), (
         f"residue {after} after migration (before {before}); "
         f"needs_review={report['needs_review']}"
     )
     assert report["needs_review"] == []
-    # every converted row kept its original value
+    # Every row converted by *this invocation* kept its invalid original value.
+    # Historical provenance may legitimately contain a value that later became
+    # canonical (for example K1715's earlier in_progress transition).
     for t in tasks:
-        if isinstance(t, dict) and "status_original" in t:
+        if (
+            isinstance(t, dict)
+            and t.get("vocab_migrated_at") == migrated_at
+            and "status_original" in t
+        ):
             assert not nt.is_valid_status(t["status_original"])
             assert nt.is_valid_status(t["status"])
 

@@ -84,6 +84,7 @@ def test_db_lag_flags_critical_and_opens_repair_task(monkeypatch, tmp_path):
     assert task["status"] == "pending"
     assert task["source"] == "daily_checkup_db_landing"
     assert "supabase_sync.py market-daily" in task["description"]
+    assert datetime.datetime.fromisoformat(task["created_at"]).utcoffset() is not None
 
 
 def test_rerun_same_gap_does_not_duplicate_repair_task(monkeypatch, tmp_path):

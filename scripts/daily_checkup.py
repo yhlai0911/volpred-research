@@ -101,6 +101,13 @@ _ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _now = datetime.datetime.now()
 
 
+def _task_timestamp_iso(value: datetime.datetime) -> str:
+    """Return a TaskRecord-safe timestamp from the injectable checkup clock."""
+    if value.tzinfo is None or value.utcoffset() is None:
+        value = value.astimezone()
+    return value.isoformat()
+
+
 def _age_h(path: str | Path) -> float | None:
     try:
         return (_now - datetime.datetime.fromtimestamp(os.path.getmtime(path))).total_seconds() / 3600
@@ -336,7 +343,7 @@ def _open_db_landing_repair_task(table: str, msg: str, recovery: str, local_late
         "priority": 1,
         "status": "pending",
         "source": "daily_checkup_db_landing",
-        "created_at": _now.isoformat(),
+        "created_at": _task_timestamp_iso(_now),
         "trigger": "db_landing_mismatch",
     }
     rec, created = append_task_record(

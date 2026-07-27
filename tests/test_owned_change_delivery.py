@@ -5,7 +5,7 @@ import json
 
 import pytest
 
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.authority import FORMAL_PRIMARY_AUTHORITY_KEY, PrimaryLease
 from volpred.ops.delivery import (
     ChangeSetProposal,
     ChangeSetView,
@@ -342,7 +342,7 @@ def test_supabase_builder_is_a_fail_closed_formal_caller(
     )
     primary_lease = PrimaryLease(
         schema_version="primary-lease.v1",
-        authority_key="operations-core-commits",
+        authority_key=FORMAL_PRIMARY_AUTHORITY_KEY,
         holder_ref="host:commit-primary",
         epoch=1,
         fencing_token="primary-secret",
