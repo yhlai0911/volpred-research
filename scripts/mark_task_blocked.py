@@ -198,6 +198,7 @@ def main() -> int:
                 for field in (
                     "claimed_by",
                     "claimed_at",
+                    "claim_expires_at",
                     "claim_session_id",
                     "started_at",
                     "completed_at",

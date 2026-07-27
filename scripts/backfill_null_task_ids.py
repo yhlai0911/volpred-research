@@ -37,7 +37,12 @@ from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.next_tasks import write_tasks_to_handle  # noqa: E402
 
 TERMINAL = {"succeeded", "failed", "deprecated"}
-STALE_CLAIM_FIELDS = ("claimed_by", "claimed_at", "claim_session_id")
+STALE_CLAIM_FIELDS = (
+    "claimed_by",
+    "claimed_at",
+    "claim_expires_at",
+    "claim_session_id",
+)
 
 
 def synth_id(task: dict, existing: set[str]) -> str:

@@ -189,11 +189,23 @@ def test_sweep_never_closes_work_another_fire_is_doing(repo: Path) -> None:
 
 def test_close_records_why_so_the_no_op_is_auditable(repo: Path) -> None:
     task = _task("k1630")
+    task["claimed_by"] = "hourly-slot-4"
+    task["claimed_at"] = "2026-07-19T04:00:00Z"
+    task["claim_expires_at"] = "2026-07-19T06:00:00Z"
+    task["claim_session_id"] = "session-4"
     verdict = dr.Revalidation("orphaned_experiment", True, dr.CLEARED_REASON, "k1630 已被消費")
 
     dr.close_as_cleared(task, verdict, by="hourly-slot-4", now="2026-07-19T06:00:00Z")
 
     assert task["status"] == "succeeded"
-    assert task["claimed_by"] is None
+    assert all(
+        field not in task
+        for field in (
+            "claimed_by",
+            "claimed_at",
+            "claim_expires_at",
+            "claim_session_id",
+        )
+    )
     assert "k1630 已被消費" in task["result"]
     assert task["status_history"][-1]["by"] == "hourly-slot-4"

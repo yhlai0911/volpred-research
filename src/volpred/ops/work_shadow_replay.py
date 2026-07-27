@@ -19,6 +19,7 @@ from typing import Any, Mapping
 from urllib.parse import quote
 
 from .next_tasks import (
+    MAIN_THREAD_DISPATCH_LANES,
     is_main_thread_reserved,
     normalize_dispatch_lane,
     priority_sort_key,
@@ -851,13 +852,17 @@ def _compare_candidate(
         code in {"ready_pending", "ready_expired_claim"}
         for code in coordinator_status_codes
     )
-    business_missing_capabilities = (
-        coordinator_decision.missing_capabilities
-        - frozenset({MAIN_THREAD_CAPABILITY})
+    main_thread_capability_applies = (
+        candidate.legacy_status == "pending_main_thread"
+        or candidate.dispatch_lane in MAIN_THREAD_DISPATCH_LANES
     )
+    business_missing_capabilities = coordinator_decision.missing_capabilities
+    if main_thread_capability_applies:
+        business_missing_capabilities -= frozenset({MAIN_THREAD_CAPABILITY})
     coordinator_capability_match = not business_missing_capabilities
     main_thread_capability_missing = (
-        MAIN_THREAD_CAPABILITY
+        main_thread_capability_applies
+        and MAIN_THREAD_CAPABILITY
         in coordinator_decision.missing_capabilities
     )
     coordinator_attestation_match = (
@@ -1454,12 +1459,16 @@ def _coordinator_dimension_reason_codes(
     preferred_agent = (
         candidate.preferred_agent or candidate.target_agent
     )
-    business_missing_capabilities = (
-        coordinator_decision.missing_capabilities
-        - frozenset({MAIN_THREAD_CAPABILITY})
+    main_thread_capability_applies = (
+        candidate.legacy_status == "pending_main_thread"
+        or candidate.dispatch_lane in MAIN_THREAD_DISPATCH_LANES
     )
+    business_missing_capabilities = coordinator_decision.missing_capabilities
+    if main_thread_capability_applies:
+        business_missing_capabilities -= frozenset({MAIN_THREAD_CAPABILITY})
     main_thread_capability_enforced = (
-        MAIN_THREAD_CAPABILITY
+        main_thread_capability_applies
+        and MAIN_THREAD_CAPABILITY
         in coordinator_decision.missing_capabilities
     )
     return {

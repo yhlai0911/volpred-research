@@ -955,6 +955,77 @@ def test_release_clears_persisted_claim_expiry(tmp_path, monkeypatch) -> None:
     assert "claim_expires_at" not in saved
 
 
+def test_cleanup_uses_persisted_expiry_before_stale_hours_fallback(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    now = datetime.now(timezone.utc)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "expired-lease",
+                    "task_type": "platform_ops",
+                    "status": "claimed",
+                    "claimed_by": "worker",
+                    "claimed_at": (now - timedelta(hours=1)).isoformat(),
+                    "claim_expires_at": (
+                        now - timedelta(minutes=1)
+                    ).isoformat(),
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=6))
+
+    assert result["count"] == 1
+    assert result["released"][0]["age_source"] == "claim_expires_at"
+    assert json.loads(next_tasks.read_text(encoding="utf-8"))[0][
+        "status"
+    ] == "pending"
+
+
+def test_list_stale_uses_persisted_expiry_before_stale_hours_fallback(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    now = datetime.now(timezone.utc)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "expired-lease",
+                    "task_type": "platform_ops",
+                    "status": "claimed",
+                    "claimed_by": "worker",
+                    "claimed_at": (now - timedelta(hours=1)).isoformat(),
+                    "claim_expires_at": (
+                        now - timedelta(minutes=1)
+                    ).isoformat(),
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_list(
+        argparse.Namespace(
+            status="stale",
+            stale_hours=6,
+            owner=None,
+            codex_eligible=False,
+            limit=10,
+        )
+    )
+
+    assert result["count"] == 1
+    assert result["tasks"][0]["id"] == "expired-lease"
+
+
 def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(
@@ -1114,6 +1185,7 @@ def test_cleanup_normalizes_pending_claim_residue(tmp_path, monkeypatch) -> None
                     "status": "pending",
                     "claimed_by": "retired-worker",
                     "claimed_at": "2026-07-21T16:21:57+00:00",
+                    "claim_expires_at": "2026-07-21T18:21:57+00:00",
                     "claim_session_id": "retired-session",
                     "started_at": "2026-07-21T16:22:00+00:00",
                 }
@@ -1135,7 +1207,13 @@ def test_cleanup_normalizes_pending_claim_residue(tmp_path, monkeypatch) -> None
     ]
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     assert saved["status"] == "pending"
-    for field in ("claimed_by", "claimed_at", "claim_session_id", "started_at"):
+    for field in (
+        "claimed_by",
+        "claimed_at",
+        "claim_expires_at",
+        "claim_session_id",
+        "started_at",
+    ):
         assert field not in saved
     assert saved["last_release_reason"] == "normalize_pending_claim_residue"
     assert saved["status_history"][-1] == {
@@ -1571,7 +1649,7 @@ def test_claim_refuses_dreaming_task_whose_condition_already_cleared(
     assert result["reason"] == "dreaming_condition_cleared"
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "succeeded"
-    assert saved[0]["claimed_by"] is None
+    assert "claimed_by" not in saved[0]
     assert "fresh no-op" in saved[0]["result"]
 
 

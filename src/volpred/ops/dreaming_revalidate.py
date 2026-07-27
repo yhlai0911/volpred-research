@@ -248,8 +248,13 @@ def close_as_cleared(task: dict[str, Any], verdict: Revalidation, *, by: str, no
     task["status"] = "succeeded"
     task["completed_at"] = now
     task["result"] = f"{CLEARED_RESULT}: {verdict.detail}"
-    task["claimed_by"] = None
-    task["claimed_at"] = None
+    for field in (
+        "claimed_by",
+        "claimed_at",
+        "claim_expires_at",
+        "claim_session_id",
+    ):
+        task.pop(field, None)
     history = task.setdefault("status_history", [])
     if isinstance(history, list):
         history.append(

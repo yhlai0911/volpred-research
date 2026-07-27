@@ -79,6 +79,7 @@ def test_mark_blocked_retires_incompatible_claim_and_terminal_fields(
                     "status": "in_progress",
                     "claimed_by": "worker",
                     "claimed_at": "2026-07-21T09:36:35+00:00",
+                    "claim_expires_at": "2026-07-21T11:36:35+00:00",
                     "claim_session_id": "session-1",
                     "started_at": "2026-07-21T09:36:36+00:00",
                     "completed_at": "2026-06-09T10:28:11+00:00",
@@ -110,12 +111,16 @@ def test_mark_blocked_retires_incompatible_claim_and_terminal_fields(
         for field in (
             "claimed_by",
             "claimed_at",
+            "claim_expires_at",
             "claim_session_id",
             "started_at",
             "completed_at",
         )
     )
     assert saved["block_transition_previous"]["claimed_by"] == "worker"
+    assert saved["block_transition_previous"]["claim_expires_at"] == (
+        "2026-07-21T11:36:35+00:00"
+    )
     assert saved["block_transition_previous"]["completed_at"] == (
         "2026-06-09T10:28:11+00:00"
     )

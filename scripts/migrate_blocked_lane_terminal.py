@@ -29,7 +29,12 @@ from volpred.ops.next_tasks import (  # noqa: E402
     write_tasks_to_handle,
 )
 
-CLAIM_FIELDS = ("claimed_by", "claimed_at", "claim_session_id")
+CLAIM_FIELDS = (
+    "claimed_by",
+    "claimed_at",
+    "claim_expires_at",
+    "claim_session_id",
+)
 
 SUPERSEDED_HINTS = (
     "already covered",

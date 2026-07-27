@@ -714,11 +714,21 @@ class LegacySnapshotImporter:
         dispatch_lane = normalize_dispatch_lane(dict(record)) or None
         required_capabilities = _CAPABILITY_BY_KIND[kind]
         if capabilities is not None:
-            required_capabilities |= _string_set(
+            explicit_capabilities = _string_set(
                 capabilities,
                 field="required_capabilities",
                 allow_empty=False,
             )
+            if (
+                MAIN_THREAD_CAPABILITY in explicit_capabilities
+                and not is_main_thread_reserved(dict(record))
+            ):
+                raise _LegacyMappingError(
+                    "unknown_policy",
+                    f"{MAIN_THREAD_CAPABILITY} is reserved for main-thread "
+                    "dispatch lanes",
+                )
+            required_capabilities |= explicit_capabilities
         if is_main_thread_reserved(dict(record)):
             required_capabilities |= frozenset({MAIN_THREAD_CAPABILITY})
         risk = str(record.get("risk") or "safe")

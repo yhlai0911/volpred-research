@@ -24,6 +24,7 @@ def test_migrate_deprecated_blocked_to_superseded_and_clears_claim() -> None:
             "blocked_until": "2099-01-01",
             "claimed_by": "codex-cli",
             "claimed_at": "2026-05-26T00:00:00+00:00",
+            "claim_expires_at": "2026-05-26T02:00:00+00:00",
             "claim_session_id": "old",
         }
     ]
@@ -38,6 +39,7 @@ def test_migrate_deprecated_blocked_to_superseded_and_clears_claim() -> None:
     assert tasks[0]["terminal_migration_from_status"] == "blocked"
     assert "blocked_until" not in tasks[0]
     assert "claimed_by" not in tasks[0]
+    assert "claim_expires_at" not in tasks[0]
     assert tasks[0]["stale_claim_previous_claimed_by"] == "codex-cli"
 
 

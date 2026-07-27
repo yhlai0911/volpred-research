@@ -1338,22 +1338,36 @@ def cmd_list(args: argparse.Namespace) -> dict[str, Any]:
             if args.status == "stale":
                 if status not in {"claimed", "in_progress"}:
                     continue
-                claimed_at = t.get("claimed_at")
-                if not claimed_at:
-                    continue
-                claimed_dt = parse_iso_warn(
-                    claimed_at,
-                    tag="claim",
-                    field_name="claimed_at",
-                    fallback=None,
-                    site="list_stale",
-                    task_id=_task_key(t),
-                )
-                if claimed_dt is None:
-                    continue
-                age_h = (datetime.now(timezone.utc) - claimed_dt).total_seconds() / 3600
-                if age_h < args.stale_hours:
-                    continue
+                now = datetime.now(timezone.utc)
+                claim_expires_at = t.get("claim_expires_at")
+                if claim_expires_at:
+                    expiry = parse_iso_warn(
+                        claim_expires_at,
+                        tag="claim",
+                        field_name="claim_expires_at",
+                        fallback=None,
+                        site="list_stale",
+                        task_id=_task_key(t),
+                    )
+                    if expiry is None or now < expiry:
+                        continue
+                else:
+                    claimed_at = t.get("claimed_at")
+                    if not claimed_at:
+                        continue
+                    claimed_dt = parse_iso_warn(
+                        claimed_at,
+                        tag="claim",
+                        field_name="claimed_at",
+                        fallback=None,
+                        site="list_stale",
+                        task_id=_task_key(t),
+                    )
+                    if claimed_dt is None:
+                        continue
+                    age_h = (now - claimed_dt).total_seconds() / 3600
+                    if age_h < args.stale_hours:
+                        continue
             elif args.status == "pending":
                 if not is_pending_list_candidate(
                     t,
@@ -1436,6 +1450,7 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 for field in (
                     "claimed_by",
                     "claimed_at",
+                    "claim_expires_at",
                     "claim_session_id",
                     "started_at",
                 )
@@ -1467,19 +1482,34 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
             if _compute_job_alive(job_id):
                 skipped_compute.append({"id": _task_key(t), "compute_job_id": job_id})
                 continue
-            claimed_at = t.get("claimed_at")
+            claim_expires_at = t.get("claim_expires_at")
             claimed_dt = None
-            age_source = "claimed_at"
-            if claimed_at:
+            age_source = "claim_expires_at"
+            expiry_authoritative = bool(claim_expires_at)
+            if claim_expires_at:
                 claimed_dt = parse_iso_warn(
-                    claimed_at,
+                    claim_expires_at,
                     tag="claim",
-                    field_name="claimed_at",
+                    field_name="claim_expires_at",
                     fallback=None,
                     site="cleanup_stale",
                     task_id=_task_key(t),
                 )
-            if claimed_dt is None:
+                if claimed_dt is not None and now < claimed_dt:
+                    continue
+            if not expiry_authoritative:
+                claimed_at = t.get("claimed_at")
+                age_source = "claimed_at"
+                if claimed_at:
+                    claimed_dt = parse_iso_warn(
+                        claimed_at,
+                        tag="claim",
+                        field_name="claimed_at",
+                        fallback=None,
+                        site="cleanup_stale",
+                        task_id=_task_key(t),
+                    )
+            if claimed_dt is None and not expiry_authoritative:
                 # claim 沒留（或留了壞的）claimed_at：退而用其他生命週期欄位推
                 # 年齡；全缺 = 無法證明活著，視為無限 stale 立即回收
                 # （P4 claimed_at 盲點，refactor_plan_ops_master_2026_07 WS-A2）
@@ -1503,9 +1533,11 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                 age_source = None
             else:
                 age_h = (now - claimed_dt).total_seconds() / 3600
-            if age_h >= args.stale_hours:
+            if expiry_authoritative or age_h >= args.stale_hours:
                 release_reason = (
-                    f"auto_release_stale_{args.stale_hours}h"
+                    "auto_release_claim_expired"
+                    if expiry_authoritative
+                    else f"auto_release_stale_{args.stale_hours}h"
                 )
                 prev_owner = _repend_task(
                     t,

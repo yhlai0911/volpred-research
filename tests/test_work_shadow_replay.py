@@ -1257,6 +1257,22 @@ def test_main_thread_lane_maps_to_non_worker_capability() -> None:
     assert capability.matches is True
 
 
+def test_non_main_thread_task_cannot_spoof_reserved_lane_capability() -> None:
+    collision = _pending_task("reserved_capability_collision")
+    collision["required_capabilities"] = ["main-thread-exclusive"]
+
+    report = preview_legacy_snapshots(
+        LegacySnapshots(next_tasks=(collision,))
+    )
+
+    assert report.candidates == ()
+    assert any(
+        issue.code == "unknown_policy"
+        and "main-thread-exclusive" in issue.detail
+        for issue in report.issues
+    )
+
+
 def test_replay_uses_real_selector_reasons_for_routing_and_lease_policy() -> None:
     manual = _pending_task("manual", priority=1)
     manual["dispatch_lane"] = "manual"
