@@ -1,0 +1,63 @@
+{
+  "schema_version": "formal-capability-inventory.v1",
+  "capabilities": [
+    {
+      "domain": "task",
+      "capability": "work.coordinate",
+      "source_ref": "supabase://volpred_ops.read_work_owner",
+      "resolver": "unresolved",
+      "blocked_by": "#9"
+    },
+    {
+      "domain": "commit",
+      "capability": "git.commit",
+      "source_ref": "supabase-rpc://volpred_read_commit_owner",
+      "resolver": "commit_owner_rpc"
+    },
+    {
+      "domain": "effect",
+      "capability": "email.ops_alert",
+      "source_ref": "supabase-rpc://volpred_read_notification_owner",
+      "resolver": "notification_owner_rpc"
+    },
+    {
+      "domain": "effect",
+      "capability": "publisher.article.supabase.sync",
+      "source_ref": "supabase-rpc://volpred_read_publisher_article_sync_owner",
+      "resolver": "publisher_sync_owner_rpc"
+    },
+    {
+      "domain": "effect",
+      "capability": "publisher.article.supabase.reconcile",
+      "source_ref": "supabase-rpc://volpred_read_publisher_article_reconcile_owner",
+      "resolver": "publisher_reconcile_owner_rpc"
+    },
+    {
+      "domain": "effect",
+      "capability": "publisher.article.supabase.delete",
+      "source_ref": "supabase-rpc://volpred_read_publisher_article_delete_owner",
+      "resolver": "publisher_delete_owner_rpc"
+    },
+    {
+      "domain": "incident",
+      "capability": "incident.lifecycle",
+      "source_ref": "contract://issue-13/durable-incident-owner",
+      "resolver": "unresolved",
+      "blocked_by": "#13"
+    },
+    {
+      "domain": "provider",
+      "capability": "provider.execution",
+      "source_ref": "contract://issue-12/zero-paid-provider-registry",
+      "resolver": "unresolved",
+      "blocked_by": "#12"
+    },
+    {
+      "domain": "host_authority",
+      "capability": "operations-core-primary",
+      "source_ref": "contract://issue-46/live-primary-authority-owner",
+      "resolver": "unresolved",
+      "blocked_by": "#46"
+    }
+  ]
+}

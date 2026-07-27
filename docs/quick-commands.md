@@ -49,6 +49,7 @@ uv run volpred ops strategy-upsert --strategy-key xxx --strategy-name "名稱" -
 uv run volpred ops strategy-set-active xxx --inactive
 
 # Jobs 與 Worker（agent-first ops）
+uv run python scripts/audit_formal_owners.py            # 七領域正式 owner census；unknown／duplicate／legacy owner 都 exit 1
 uv run volpred ops jobs --status queued              # 查看待處理任務
 uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務

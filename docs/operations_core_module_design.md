@@ -2243,3 +2243,31 @@ FORCE RLS、anon／authenticated／service_role無直讀、SECURITY DEFINER RPC�
 service_role可execute；部署後candidate count與canonical runner均為0。
 固定base的Matt最終複審為spec PASS／standards PASS；scoped行為測試合計208 passed，
 另有1 skipped與1個既有基線案例deselect。
+
+## 32. Formal owner census（2026-07-27）
+
+Issue #46 的 owner census 不再由多份局部 audit 人工拼接。
+`config/formal_capability_inventory.json` 只宣告 task、commit、effect、incident、
+provider、host authority 的完整 capability universe 與 read-only resolver；schedule
+universe則直接由 `config/runtime_schedules.json` 產生，避免維護第二份 job 清單。
+`scripts/audit_formal_owners.py` 每次重跑都會讀 live Supabase owner RPC與 live
+launchd／crontab schedule audit，再交由
+`volpred.ops.owner_census` 做單一 fail-closed 裁決。
+
+每個正式 capability 必須同時滿足：
+
+1. 七個 domain 都存在，claim 不得指向 inventory 外能力；
+2. 恰有一個 active execution surface；同 owner 的兩條 live path 仍算 duplicate；
+3. active owner 必須是 `operations_core`，唯一但仍為 `legacy` 也屬 blocker；
+4. dormant rollback surface保留在 evidence，但不冒充第二個 active owner；
+5. RPC／schedule probe失敗不能退回 declared owner；schedule evidence需吻合
+   schema、generation、完整job set、status與30秒 freshness；
+6. effect inventory必須與formal owned-family程式常數反向掃描的集合完全相等；沒有
+   domain-specific live resolver的能力維持unknown，不能用任意JSON claim補綠。
+
+首輪 production read-back共盤點60項：51個schedule皆為單一Operations Core owner，
+沒有duplicate／unknown schedule；email與publisher sync／reconcile亦通過。Census
+仍為`ownership_blocked`：`git.commit`及publisher delete仍由legacy持有，
+`work.coordinate`、incident lifecycle、provider execution與live host authority
+尚缺正式可讀owner evidence。這些結果是後續#9→#12/#13→#21/#24/#46的機械
+blocking edges，不是新架構已完成的宣稱。
