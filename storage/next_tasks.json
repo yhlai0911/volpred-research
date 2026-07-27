@@ -34174,8 +34174,9 @@
     "compute_released_at": "2026-07-27T15:50:07.174608+00:00",
     "compute_release_reason": "external_compute_job_failed",
     "compute_job_id": "agent-agent-brief_k1720-6c33b8-3674b6",
-    "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-27T16:30:05Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-27T16:30:05Z",
+    "compute_finished_at": "2026-07-27T16:44:52Z"
   },
   {
     "id": "K1721",
@@ -36016,7 +36017,7 @@
     "title": "K1733: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 606). Original: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1733.py with signal.shift(1) + seed=42, (c) K1733_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36059,15 +36060,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1733-c3ccb0",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T16:50:05.947362+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
       }
     ],
     "result": "dispatched to compute job agent-agent-brief_k1733-bf0e58; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1733-c3ccb0; awaiting PHASE A collection",
-    "last_released_at": "2026-07-27T15:50:07.175118+00:00",
+    "last_released_at": "2026-07-27T16:50:05.947354+00:00",
     "last_release_reason": "external_compute_job_failed",
-    "compute_released_at": "2026-07-27T15:50:07.174608+00:00",
-    "compute_release_reason": "external_compute_job_failed",
-    "compute_job_id": "agent-agent-brief_k1733-c3ccb0",
-    "blocked_reason": "external_compute_job_active"
+    "compute_released_at": "2026-07-27T16:50:05.946908+00:00",
+    "compute_release_reason": "external_compute_job_failed"
   },
   {
     "id": "K1734",
@@ -44304,12 +44310,36 @@
   {
     "id": "K1708_gatecert_s14_rerun",
     "task_type": "experiment",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "priority": 2,
     "source": "hourly_dispatch_triage",
     "created_at": "2026-07-26T14:24:53.684396+00:00",
     "title": "K1708 gate-cert 收尾：§14 real-data rerun 評估新收緊 gate criterion + 重新裁決（3-strike active）",
-    "description": "來源：triage of failed compute job agent-brief_k1708_stage2-e9aa0b（quota_exhausted，stage2 remediation 從未執行，無 K1708_stage2_summary.json）。\n\n背景：K1708（time-varying state-space HAR vs fixed/rolling HAR）研究結論=NULL（state-space 未勝 HAR），此結論不在爭議。Codex round-1/2/3 全 FAIL，round-3 已觸發 3-STRIKE（commit e26236de3）。所有 blocker 是 GATE 機制可證性，非研究結論。round-3 誠實結論：rev2 的 gate 修正在門檻/併行條件收緊、comparator 上橫移，但『新口徑 gate 從未在真實資料上被評估』——要有新口徑數字必須重跑（§14，前幾輪明列不重跑）。\n\n3-STRIKE 已 active → 禁止同法 identical re-enqueue。bounded scope（唯一未做的具體步驟）：\n1) 在 worktree .claude/worktrees/dispatch-slot-1-457427c2-k1708 的既有 K1708.py 上，跑 §14 full-sample rerun，產生新口徑欄位 cw_vs_own_restriction_primary / cw_holm_family / regime qlike_vs_own_restriction，寫入 results.json。預期仍 NULL（t 無理由更大、門檻 1.645→3.0）；若非 NULL 視為異常訊號要追。\n2) 用新資料跑 experiment_gates + 完整 test（含 legacy_derive_verdict 對照），確認 4 blocker CLOSED。\n3) Codex round-4 primary-path 二審（禁 fallback reviewer）。\n4) PASS 才 merge_worktree.sh + 由主線程寫 knowledge.json；若再 FAIL → escalate email 老闆（3-strike ceiling）。\n此為 heavy compute+review，走 compute_queue / enqueue-agent，不塞 hourly fire。"
+    "description": "來源：triage of failed compute job agent-brief_k1708_stage2-e9aa0b（quota_exhausted，stage2 remediation 從未執行，無 K1708_stage2_summary.json）。\n\n背景：K1708（time-varying state-space HAR vs fixed/rolling HAR）研究結論=NULL（state-space 未勝 HAR），此結論不在爭議。Codex round-1/2/3 全 FAIL，round-3 已觸發 3-STRIKE（commit e26236de3）。所有 blocker 是 GATE 機制可證性，非研究結論。round-3 誠實結論：rev2 的 gate 修正在門檻/併行條件收緊、comparator 上橫移，但『新口徑 gate 從未在真實資料上被評估』——要有新口徑數字必須重跑（§14，前幾輪明列不重跑）。\n\n3-STRIKE 已 active → 禁止同法 identical re-enqueue。bounded scope（唯一未做的具體步驟）：\n1) 在 worktree .claude/worktrees/dispatch-slot-1-457427c2-k1708 的既有 K1708.py 上，跑 §14 full-sample rerun，產生新口徑欄位 cw_vs_own_restriction_primary / cw_holm_family / regime qlike_vs_own_restriction，寫入 results.json。預期仍 NULL（t 無理由更大、門檻 1.645→3.0）；若非 NULL 視為異常訊號要追。\n2) 用新資料跑 experiment_gates + 完整 test（含 legacy_derive_verdict 對照），確認 4 blocker CLOSED。\n3) Codex round-4 primary-path 二審（禁 fallback reviewer）。\n4) PASS 才 merge_worktree.sh + 由主線程寫 knowledge.json；若再 FAIL → escalate email 老闆（3-strike ceiling）。\n此為 heavy compute+review，走 compute_queue / enqueue-agent，不塞 hourly fire。",
+    "status_history": [
+      {
+        "ts": "2026-07-27T16:48:14.994819+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ddbf834bafb6463f8c2ddad40c1145f8"
+      },
+      {
+        "ts": "2026-07-27T16:48:26.658041+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ddbf834bafb6463f8c2ddad40c1145f8"
+      },
+      {
+        "ts": "2026-07-27T16:49:34.475088+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1708_s14-3ca4dd",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1708_s14-3ca4dd",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1708_s14-3ca4dd; awaiting PHASE A collection"
   },
   {
     "id": "K1436_article_general",
@@ -49661,7 +49691,7 @@
     "description": "Bounded T11 pre-cutover slice after provider-registry launchers are root-fixed. Implement one durable capability probe engine driven only by config/provider_registry.json probe_policy: typed quota/auth/unavailable/policy-denied outcomes, minimum interval, exponential backoff capped by maximum_backoff_seconds, rolling max_probe_cost_units budget, provider/model/executable/registry-SHA receipts, and crash-safe atomic ledger. Probe must be diagnostic/no-business-effect and fail closed; no busy polling, no hard-coded reset time, no provider reroute, no task resume, no owner transfer, no #9/#12 bypass, and do not close #16. TDD, Matt Spec/Standards review, live no-provider-I/O policy/budget read-back, docs required.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "pending",
     "source": "user",
     "created_at": "2026-07-27T14:39:20.092761+00:00",
     "payload": {
@@ -49678,10 +49708,6 @@
     },
     "created_by": "codex-vscode",
     "issue_ref": "#16",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T14:39:26.718764+00:00",
-    "claim_expires_at": "2026-07-27T16:39:26.718764+00:00",
-    "claim_session_id": "7226330621ca",
     "status_history": [
       {
         "ts": "2026-07-27T14:39:26.718776+00:00",
@@ -49694,9 +49720,15 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T16:50:05.947544+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "auto_release_claim_expired"
       }
     ],
-    "started_at": "2026-07-27T14:39:30.491199+00:00",
     "declared_paths": [
       "config/provider_registry.json",
       "src/volpred/ops/execution/probe.py",
@@ -49709,7 +49741,9 @@
       "docs/error_log.md",
       "docs/project_improvement_status.md",
       "docs/refactor_plan_ops_master_2026_07.md"
-    ]
+    ],
+    "last_released_at": "2026-07-27T16:50:05.947541+00:00",
+    "last_release_reason": "auto_release_claim_expired"
   },
   {
     "id": "ci-root-30277897265",
@@ -49845,7 +49879,7 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:42:42.477026+00:00",
       "deferred": [
-        "experiments/k1698/review_verdict.json: 已保存，且 2.5 小時內還在改 — 活躍碼，不算無主殘留"
+        "experiments/k1698/review_verdict.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -49976,7 +50010,7 @@
   {
     "id": "assign_34f33e28",
     "title": "PHASE-Z 卡住檔案 incident（52c5231c69eb52f3）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 3 班\n- experiments/k1698/review_verdict.json — 4 班\n- src/volpred/ops/next_tasks.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T164242405578Z:<路徑>`",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 5 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 4 班\n- experiments/k1698/review_verdict.json — 5 班\n- src/volpred/ops/next_tasks.py — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T164242405578Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T165321107294Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -49991,17 +50025,26 @@
         "src/volpred/ops/next_tasks.py"
       ],
       "streaks": {
-        "docs/error_log.md": 3,
-        "experiments/k1698/review_verdict.json": 4,
-        "src/volpred/ops/next_tasks.py": 3
+        "docs/error_log.md": 4,
+        "experiments/k1698/review_verdict.json": 5,
+        "src/volpred/ops/next_tasks.py": 4
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T164242405578Z"
+        "refs/volpred/quarantine/20260727T164242405578Z",
+        "refs/volpred/quarantine/20260727T165321107294Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-27T16:42:45.364821+00:00",
-      "last_seen_at": "2026-07-27T16:42:45.364821+00:00"
+      "last_seen_at": "2026-07-27T16:53:26.599186+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 0.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1698/review_verdict.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-27T16:53:26.599186+00:00"
   }
 ]
