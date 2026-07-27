@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T17:00:13.114285+00:00",
+  "generated_at": "2026-07-27T18:00:46.899303+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 147.6
+      "age_hours": 148.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 7.7
+      "age_hours": 8.7
     }
   ],
   "held": [
@@ -28,7 +28,7 @@
   "skipped": {
     "baseline": 519,
     "registered": 58,
-    "grace": 0,
+    "grace": 1,
     "inflight": 0
   },
   "orphan_count": 3,
@@ -53,7 +53,7 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 0,
+        "grace": 3,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -63,23 +63,28 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 1,
+        "grace": 0,
         "inflight": 0,
-        "unclaimed": 0
+        "unclaimed": 1
       },
       "collections": []
     },
     "experiments": {
       "collectable": [
         {
-          "path": "experiments/k1698/review_verdict.json",
-          "kind": "json",
-          "reason": "untracked"
+          "path": "experiments/k1391/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1396/README.md",
+          "kind": "md",
+          "reason": "modified"
         }
       ],
       "held": [],
       "skipped": {
-        "grace": 2,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -87,10 +92,11 @@
         {
           "namespace": "experiments",
           "paths": [
-            "experiments/k1698/review_verdict.json"
+            "experiments/k1391/README.md",
+            "experiments/k1396/README.md"
           ],
           "committed": true,
-          "detail": "[main 1a3c7ca3f] chore(experiment-reap): collect orphaned experiment artifacts (1 files)\n 1 file changed, 18 insertions(+)\n create mode 100644 experim"
+          "detail": "[main 17080f072] chore(experiment-reap): collect orphaned experiment artifacts (2 files)\n 2 files changed, 37 insertions(+), 10 deletions(-)\n"
         }
       ]
     }

@@ -44338,9 +44338,10 @@
       }
     ],
     "compute_job_id": "agent-brief_k1708_s14-3ca4dd",
-    "blocked_reason": "external_compute_job_running",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "result": "dispatched to compute job agent-brief_k1708_s14-3ca4dd; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T17:00:02Z"
+    "compute_started_at": "2026-07-27T17:00:02Z",
+    "compute_finished_at": "2026-07-27T17:34:42Z"
   },
   {
     "id": "K1436_article_general",
@@ -50184,8 +50185,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 2.8 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 3.5 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -50194,7 +50195,7 @@
   {
     "id": "assign_c1bf7075",
     "title": "PHASE-Z 卡住檔案 incident（8d59211178179b4a）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 5 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 5 班\n- src/volpred/ops/next_tasks.py — 5 班\n- storage/memory/knowledge.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T172938307322Z:<路徑>`",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 6 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 6 班\n- src/volpred/ops/next_tasks.py — 6 班\n- storage/memory/knowledge.json — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T172938307322Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T181619976659Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -50209,17 +50210,136 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "docs/error_log.md": 5,
-        "src/volpred/ops/next_tasks.py": 5,
-        "storage/memory/knowledge.json": 3
+        "docs/error_log.md": 6,
+        "src/volpred/ops/next_tasks.py": 6,
+        "storage/memory/knowledge.json": 4
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T172938307322Z"
+        "refs/volpred/quarantine/20260727T172938307322Z",
+        "refs/volpred/quarantine/20260727T181619976659Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-27T17:29:44.022422+00:00",
-      "last_seen_at": "2026-07-27T17:29:44.022422+00:00"
+      "last_seen_at": "2026-07-27T18:16:25.700978+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T18:16:20.046596+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 3.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-27T18:16:25.700978+00:00"
+  },
+  {
+    "id": "K781_article_general",
+    "title": "K781: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K781 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K781 [NULL]：Multiplicative Volatility Factor(MVF,5參數:σ²=exp(f_t)×g_t)在SPY日頻r²(Patton 2011 proxy-robust)上是否優於GJR-GARCH。README為空白樣板，結論取自k781_mvf_results.json。資料yfinance，2007-01-04~2026-03-31，OOS 2009-12-24~2026-03-31(N_oos=4090,N_total=4840)。QLIKE排名：GJR-GARCH=1.536481(第1)、MVF=1.549 Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K781",
+    "evidence_source_paths": [
+      "experiments/k781/k781_mvf_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T18:12:36+00:00"
+  },
+  {
+    "id": "K1357_article_general",
+    "title": "K1357: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1357 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1357 EVENT_ONLY_WEAK：檢驗市場做市成本衝擊後的價差不對稱footprint（RLMM微觀結構代理，SPY/QQQ/IWM+7大型股，2012年起，OOS 2020起）。事件研究：負向市場衝擊日後次日Corwin-Schultz價差變化，比正向衝擊日高+0.0457（bootstrap 95% CI [0.0006, 0.0896]，908個負向 vs 1,062個正向衝擊日），CI不含零，通過事件不對稱門檻。但預測面失敗：HAR+VIX+量+價差不對稱模型 vs baseline，pooled DM t=+0.626 (p=0.53 Canonical evidence: experiments/k1357/K1357_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1357",
+    "evidence_source_paths": [
+      "experiments/k1357/K1357_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1357/K1357_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T18:12:38+00:00"
+  },
+  {
+    "id": "K1366_article_general",
+    "title": "K1366: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1366 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1366 [CONDITIONAL_PASS]：用 EWMA(λ=0.94) 條件共變異數建構 SPY/TLT/UUP/GLD/HYG 歷史衝擊後 variance response template pilot（非結構性 BEKK/DCC）。樣本 2016-01-05至2026-06-22，2630 個日頻報酬列，1000 次 placebo 事件抽樣（seed=42）。4 個歷史事件中 2 個通過 total-variance placebo gate：2018Q4 equity/credit selloff（2018-10-10）peak lif Canonical evidence: experiments/k1366/K1366_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1366",
+    "evidence_source_paths": [
+      "experiments/k1366/K1366_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1366/K1366_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T18:12:38+00:00"
+  },
+  {
+    "id": "K1419_article_general",
+    "title": "K1419: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1419 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1419 pilot_offline_first_pass：因SPY/QQQ/0050本地5分鐘RV歷史過短或缺失（SPY僅99筆、0050僅72筆、QQQ無檔），改用Parkinson range-based log變異數為共同target，比較HAR點預測+高斯/經驗殘差分位數 vs 直接分位數HAR（qHAR），SPY/QQQ/0050.TW樣本2023-01-03起、OOS 2025-01-02起、每21日refit，τ∈{0.05,0.25,0.5,0.75,0.95}。結果：SPY全部分位數由高斯baseline勝出，無訊號；QQQ的qHA Canonical evidence: experiments/k1419/k1419_probabilistic_rv_quantile_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1419",
+    "evidence_source_paths": [
+      "experiments/k1419/k1419_probabilistic_rv_quantile_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1419/k1419_probabilistic_rv_quantile_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T18:12:41+00:00"
+  },
+  {
+    "id": "K1492_article_general",
+    "title": "K1492: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1492 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1492 [CONDITIONAL_PASS]: Stablecoin(USDT/USDC) redemption pressure與peg deviation對crypto/Treasury波動預測力測試，DefiLlama供給資料+yfinance，OOS起自2024-01-01。四資產結果分歧：BTC-USD(n=895) QLIKE改善+0.00535，DM-HLN p=0.0000004，通過；ETH-USD(n=895)改善-0.00207,p=0.463；SHY(n=614)改善-0.13576,p=0.079；TLT(n=614)改善- Canonical evidence: experiments/k1492/k1492_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1492",
+    "evidence_source_paths": [
+      "experiments/k1492/k1492_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1492/k1492_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T18:12:45+00:00"
   }
 ]
