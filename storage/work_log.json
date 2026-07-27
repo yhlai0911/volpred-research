@@ -28339,5 +28339,15 @@
     "owner": "hourly-slot-1-637271aee10247c18a31cae9038638bc",
     "commit": null,
     "summary": "PHASE A collect_completed followup for compute job agent-brief_k1708_s14-3ca4dd (K1708 §14 gate-cert rerun, exit 0). Read K1708_stage2_summary.json: study_conclusion NULL (state-space did not beat HAR), max Clark-West t vs own restriction = 1.97 < pre-registered 3.0 bar, anomaly_flag=false, all 4 blockers self-assessed CLOSED, 54 tests pass, lookahead audit clean. The deciding step — Codex round-4 primary-path review — was explicitly out of scope of that run. Authored storage/ops/codex_reviews/k1708_r4_prompt.md (primary-path, read-only,禁 fallback; verifies 3 new-caliber fields still NULL, 4 blockers genuinely closed vs legacy_derive_verdict, the 4 reconciled tests strengthened-not-loosened, lookahead discipline, and whether certifying the existing provenance-clean 2026-07-22 rerun instead of a fresh run is defensible). Enqueued as compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876 via scripts/codex_review_job.sh (timeout 2400/2700s, detached */15 worker — not run in-fire per codex-exec ban). Wired two-branch collection followup: PASS -> main-thread knowledge.json NULL entry (numbers programmatic from K1708_results.json) + merge_worktree dispatch-slot-1-457427c2-k1708 + mark task succeeded; FAIL -> 3-strike ceiling, no merge, escalate email [新架構派發] + mark failed. mark-followup-dispatched set on the source job. No PHASE B dispatch this fire: slot cap de-rated to 2 by open stuck-file incident assign_c1bf7075, 6 live worktrees occupied, free=0; all top-pending pool tasks are supervisor-gated platform_ops (assign_8d6442f3 P1 urgent lane returned supervisor_preassignment_required). Reclaiming the 10 stale worktrees would not unlock dispatch (occupied 6 > cap 2 regardless)."
+  },
+  {
+    "timestamp": "2026-07-28T03:16:18+08:00",
+    "task_type": "experiment",
+    "task_id": "K1727",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-2333e549592c42c58e670bc6c1753a4e",
+    "owner": "hourly-slot-1-2333e549592c42c58e670bc6c1753a4e",
+    "commit": null,
+    "summary": "K1727 跨資產波動率目標再驗證（VT 對風險性資產有效、對債/匯/商品近乎無效）— 重新派發。前一次 dispatch（agent-brief_k1727-f47651）external_compute_job_failed 且 worktree 產出為 0（0 unmerged / 0 dirty），本班以乾淨 worktree 重派 compute-agent job `agent-brief_K1727_v2-da5fc1`（opus/xhigh，result-artifact=experiments/K1727/K1727_results.json，followup-task-type=experiment）。此 job 指向乾淨 cwd，不受當前 worktree-unmerged 死鎖影響，可於下個 */15 tick 執行。收件由後續 fire PHASE A 負責（驗 shift(1)+seed、Codex/subagent 審、merge_worktree、寫 knowledge）。outcome=dispatched（非 completed — 非同步 agent 尚未執行）。"
   }
 ]

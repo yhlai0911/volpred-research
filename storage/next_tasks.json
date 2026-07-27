@@ -35103,7 +35103,7 @@
     "title": "K1727: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JP",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1727.py with signal.shift(1) + seed=42, (c) K1727_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35139,13 +35139,34 @@
         "to": "pending",
         "by": "release",
         "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T19:13:41.211837+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2333e549592c42c58e670bc6c1753a4e"
+      },
+      {
+        "ts": "2026-07-27T19:13:48.304599+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2333e549592c42c58e670bc6c1753a4e"
+      },
+      {
+        "ts": "2026-07-27T19:15:09.037746+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_K1727_v2-da5fc1",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1727-f47651; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_k1727-f47651; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_K1727_v2-da5fc1; awaiting PHASE A collection",
     "last_released_at": "2026-07-27T15:03:43.024403+00:00",
     "last_release_reason": "external_compute_job_failed",
     "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
-    "compute_release_reason": "external_compute_job_failed"
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "agent-brief_K1727_v2-da5fc1",
+    "blocked_reason": "external_compute_job_active"
   },
   {
     "id": "K1728",
@@ -40952,17 +40973,22 @@
     "task_type": "governance",
     "priority": 2,
     "source": "weekly_requeue:governance_self_revise_operating_docs",
-    "status": "blocked",
-    "blocked_until": "2026-07-27T19:00:00+00:00",
-    "blocked_reason": "awaiting_event_window",
-    "blocked_note": "每週 cadence successor；2026-07-27 19:00Z 前不得 pending",
+    "status": "pending",
     "dispatch_lane": "agent",
     "created_at": "2026-07-21T03:16:23.514350+00:00",
     "created_by": "hourly-slot-1-20b291d5f7f842d6b0e0c11f2a42e0da",
     "recurrence_key": "governance_operating_docs_weekly",
     "predecessor_task_id": "governance_self_revise_operating_docs_20260721",
     "title": "自我修訂運作指示文件（2026-07-28 週次）",
-    "description": "Telegram msg 604 standing directive 的日期化 successor。依 pdca-operations Act 做每週 doc-drift audit：比對 CLAUDE.md / AGENTS.md / .claude/rules / .claude/skills 與實際 hook、dispatcher、schedule；用 fresh-session A/B 驗證 path-trigger（只有內建 Read/open 可當 trigger，Bash rg/jq/cat 不算）；把已機械化 prose 縮成 pointer、合併矛盾，不新增第二套 enforcement。同步檢查 Codex discovery surface。輸出 docs/governance/YYYY-MM/ 一頁報告；改既有 skill 必寄 email。完成時建立下一個唯一日期化 blocked successor，不重用 task id、不得立即 pending。\n\n[2026-07-21 successor] 上一輪報告：docs/governance/2026-07/doc_drift_audit_20260721.md。開工第一件事 = 讀該報告的「下週追蹤清單」逐條交代現況。已知遺留：(1) read_context_budget.py 對帶 explicit limit 的 Read 從不覆寫 → 「禁止整檔 Read feed.json」在 Read 路徑上仍是 prose-only，此為知情選擇（補洞 = 新增第二套 enforcement，違反 anti-stacking），只需複核決策是否仍成立；(2) 維度 3（已機械化 prose 縮成 pointer）上輪只掃了 AGENTS.md 與 .claude/rules，SKILL.md 內部未掃，本輪補完。"
+    "description": "Telegram msg 604 standing directive 的日期化 successor。依 pdca-operations Act 做每週 doc-drift audit：比對 CLAUDE.md / AGENTS.md / .claude/rules / .claude/skills 與實際 hook、dispatcher、schedule；用 fresh-session A/B 驗證 path-trigger（只有內建 Read/open 可當 trigger，Bash rg/jq/cat 不算）；把已機械化 prose 縮成 pointer、合併矛盾，不新增第二套 enforcement。同步檢查 Codex discovery surface。輸出 docs/governance/YYYY-MM/ 一頁報告；改既有 skill 必寄 email。完成時建立下一個唯一日期化 blocked successor，不重用 task id、不得立即 pending。\n\n[2026-07-21 successor] 上一輪報告：docs/governance/2026-07/doc_drift_audit_20260721.md。開工第一件事 = 讀該報告的「下週追蹤清單」逐條交代現況。已知遺留：(1) read_context_budget.py 對帶 explicit limit 的 Read 從不覆寫 → 「禁止整檔 Read feed.json」在 Read 路徑上仍是 prose-only，此為知情選擇（補洞 = 新增第二套 enforcement，違反 anti-stacking），只需複核決策是否仍成立；(2) 維度 3（已機械化 prose 縮成 pointer）上輪只掃了 AGENTS.md 與 .claude/rules，SKILL.md 內部未掃，本輪補完。",
+    "status_history": [
+      {
+        "at": "2026-07-27T19:07:57.095506+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-27T19:00:00+00:00)"
+      }
+    ]
   },
   {
     "id": "alert_internal_silent_fallback_new_c67bec28dd_20260721T031902855969Z_a1",
@@ -50198,7 +50224,7 @@
     "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 6 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 6 班\n- src/volpred/ops/next_tasks.py — 6 班\n- storage/memory/knowledge.json — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T172938307322Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T181619976659Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-27T17:29:44.033983+00:00",
     "payload": {
@@ -50230,7 +50256,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T18:16:25.700978+00:00"
+    "updated_at": "2026-07-27T18:16:25.700978+00:00",
+    "superseded_at": "2026-07-27T19:18:10.356942+00:00",
+    "superseded_by": "assign_7a453d3e",
+    "completed_at": "2026-07-27T19:18:10.356942+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "K781_article_general",
@@ -50341,5 +50371,61 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-27T18:12:45+00:00"
+  },
+  {
+    "id": "assign_74451e79",
+    "title": "解決長期無主的產物 `storage/drafts/K1649_general_draft.md`（reaper held 超過 TTL）",
+    "description": "reap_orphan_deliverables 連續多班仍無法為以下路徑找到出口。held 不是永久狀態：作者 session 結束後永不回來是常態（不是例外），所以出口必須由系統指派，不能等作者自己回來 commit。\n\n- `storage/drafts/K1649_general_draft.md` — no_title (namespace=drafts_intake, first_seen=2026-07-27T14:00:33.309288+00:00, shifts=6)\n\n逐一判定：收編（走正常 commit）、或修正 reaper 設定（config/orphan_namespaces.json 加/調一筆 namespace）、或說明為何這些檔案本來就不該進版控。**不得刪除**：檔案頂部不變量禁止 reaper 與其下游丟棄產物。\n\n若這些路徑不再被 held（已收編或設定已修），下一輪sweep 會自行關閉本單並記下理由 —— 不需要人來收尾。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "reap_orphan_deliverables_held_ttl",
+    "created_at": "2026-07-27T19:00:31.773032+00:00",
+    "payload": {
+      "held_paths": [
+        "storage/drafts/K1649_general_draft.md"
+      ],
+      "held_reasons": {
+        "storage/drafts/K1649_general_draft.md": "no_title"
+      },
+      "tags": [
+        "orphan_reap",
+        "held_escalation"
+      ]
+    },
+    "created_by": "reap_orphan_deliverables"
+  },
+  {
+    "id": "assign_7a453d3e",
+    "title": "PHASE-Z 卡住檔案 incident（4f44f01f0d685436）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 7 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 7 班\n- src/volpred/ops/next_tasks.py — 7 班\n- storage/drafts/assets/k1710_overnight_edge.png — 3 班\n- storage/memory/knowledge.json — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T19:18:10.368972+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "4f44f01f0d685436",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1710_overnight_edge.png",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 7,
+        "src/volpred/ops/next_tasks.py": 7,
+        "storage/drafts/assets/k1710_overnight_edge.png": 3,
+        "storage/memory/knowledge.json": 5
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T191804307871Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T19:18:10.356942+00:00",
+      "last_seen_at": "2026-07-27T19:18:10.356942+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

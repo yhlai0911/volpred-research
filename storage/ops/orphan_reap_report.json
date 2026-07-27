@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T18:00:46.899303+00:00",
+  "generated_at": "2026-07-27T19:00:18.931458+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 148.6
+      "age_hours": 149.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -15,23 +15,17 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 8.7
+      "age_hours": 9.7
     }
   ],
-  "held": [
-    {
-      "path": "storage/drafts/K1649_general_draft.md",
-      "reason": "no_title",
-      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
-    }
-  ],
+  "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 58,
     "grace": 1,
     "inflight": 0
   },
-  "orphan_count": 3,
+  "orphan_count": 2,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -70,37 +64,25 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [
-        {
-          "path": "experiments/k1391/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1396/README.md",
-          "kind": "md",
-          "reason": "modified"
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "experiments",
-          "paths": [
-            "experiments/k1391/README.md",
-            "experiments/k1396/README.md"
-          ],
-          "committed": true,
-          "detail": "[main 17080f072] chore(experiment-reap): collect orphaned experiment artifacts (2 files)\n 2 files changed, 37 insertions(+), 10 deletions(-)\n"
-        }
-      ]
+      "collections": []
     }
   },
-  "held_escalations": [],
-  "held_escalated_paths": []
+  "held_escalations": [
+    {
+      "task_id": "assign_74451e79",
+      "paths": [
+        "storage/drafts/K1649_general_draft.md"
+      ]
+    }
+  ],
+  "held_escalated_paths": [
+    "storage/drafts/K1649_general_draft.md"
+  ]
 }

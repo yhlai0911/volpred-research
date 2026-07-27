@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_K1727_v2-da5fc1",
+  "title": "agent: brief_K1727_v2",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_K1727_v2-da5fc1.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-4-6ba995a0-k1727",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-4-6ba995a0-k1727/experiments/K1727/K1727_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_K1727_v2-da5fc1.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T19:15:09Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_K1727_v2-da5fc1.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_K1727_v2-da5fc1.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-4-6ba995a0-k1727/experiments/K1727/K1727_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_K1727_v2-da5fc1.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-4-6ba995a0-k1727",
+  "claude_followup": {
+    "brief": "Collect K1727 cross-asset VT results: verify signal.shift(1) lookahead + seed=42, sanity-check per-asset Sharpe gains and left-tail metrics against JPM/Man priors, run Codex/subagent review, merge worktree via merge_worktree.sh, then main-thread writes knowledge.json entry (CONDITIONAL_PASS min).",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1727",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T19:15:09Z",
+    "linked_at": "2026-07-27T19:15:09Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_K1727_v2.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_K1727_v2-da5fc1.md"
+}
