@@ -11,7 +11,7 @@
     "lookahead_rule": "Train on [:i], apply beta to return spanning i-1 -> i."
   },
   "caveats": [
-    "The return-OLS vs PCH comparison is a POINT ESTIMATE, not a test. k1426_oos_results.json stores no PCH hedged-return series and truncates refit snapshots to the head, so a paired DM / block-bootstrap of return-OLS vs PCH requires re-running the PCH MLE and is out of scope here.",
+    "The return-OLS vs levels-beta DM (dm_return_beta_vs_levels_beta) is always computed here. The return-OLS vs PCH comparison is a paired DM / block-bootstrap (paired_return_ols_vs_pch) ONLY when k1426_oos_results.json carries the persisted daily PCH hedged-return series; otherwise it degrades to a point-estimate flag (return_beta_beats_pch_point_estimate_only) because the PCH MLE would have to be re-run to recover the series.",
     "The DM test reported here compares return-beta vs levels-beta only, and uses squared hedged returns (second moment) while HE uses de-meaned variance; when the two hedges differ in mean these are not the same estimand. Same convention as oos.py, kept for comparability.",
     "PCH HE is read from the earlier run while levels/return HE are recomputed from a fresh yfinance download; sample_matches_merged and levels_beta_replicates_merged record whether that comparison is valid."
   ],
@@ -24,21 +24,43 @@
       "n_obs_oos": 1759,
       "n_refits": 28,
       "hedge_effectiveness": {
-        "ols_levels_beta": 0.998124053142667,
-        "ols_return_beta": 0.9982213720412598,
-        "pch_from_merged": 0.9983437329579633
+        "ols_levels_beta": 0.9981239908393508,
+        "ols_return_beta": 0.9982212850436848,
+        "pch_from_merged": 0.9983436744391353
       },
       "mean_beta": {
-        "levels": 1.0028941429056348,
-        "returns": 0.9879704084770407
+        "levels": 1.0028940940748388,
+        "returns": 0.9879704322694601
       },
       "dm_return_beta_vs_levels_beta": {
-        "t_stat": -0.5888706843892536,
-        "p_value": 0.5560236787577666
+        "t_stat": -0.5887746180039455,
+        "p_value": 0.5560881144908743
       },
       "sample_matches_merged": true,
       "levels_beta_replicates_merged": true,
-      "return_beta_beats_pch_point_estimate_only": false
+      "return_beta_beats_pch_point_estimate_only": false,
+      "paired_return_ols_vs_pch": {
+        "n_common": 1759,
+        "he_return_ols": 0.9982212850436848,
+        "he_pch": 0.9983436736249386,
+        "dm_return_ols_vs_pch": {
+          "t_stat": 7.6617125627503215,
+          "p_value": 3.019806626980426e-14,
+          "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+          "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing."
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": {
+          "point_diff": -0.00012238858125379615,
+          "ci_95": [
+            -0.0001903547785883447,
+            -7.162952061934015e-05
+          ],
+          "bootstrap_median": -0.0001265386553825909,
+          "n_boot": 1000,
+          "block_len": 20,
+          "seed": 42
+        }
+      }
     },
     "pair_2_USO_BNO": {
       "symbols": {
@@ -62,10 +84,75 @@
       },
       "sample_matches_merged": true,
       "levels_beta_replicates_merged": true,
-      "return_beta_beats_pch_point_estimate_only": false
+      "return_beta_beats_pch_point_estimate_only": false,
+      "paired_return_ols_vs_pch": {
+        "n_common": 1759,
+        "he_return_ols": 0.8834457413944412,
+        "he_pch": 0.8834613922282876,
+        "dm_return_ols_vs_pch": {
+          "t_stat": 0.04517749653693104,
+          "p_value": 0.9639709620082315,
+          "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+          "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing."
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": {
+          "point_diff": -1.5650833846359014e-05,
+          "ci_95": [
+            -0.00043314303448525605,
+            0.0004387214336258216
+          ],
+          "bootstrap_median": 2.0764807802386986e-05,
+          "n_boot": 1000,
+          "block_len": 20,
+          "seed": 42
+        }
+      }
     },
     "pair_3_GLD_IAU": {
-      "error": "skipped; merged results carry: yfinance returned empty for GLD/IAU"
+      "symbols": {
+        "x": "GLD",
+        "y": "IAU"
+      },
+      "n_obs_oos": 1759,
+      "n_refits": 28,
+      "hedge_effectiveness": {
+        "ols_levels_beta": 0.9948000773015371,
+        "ols_return_beta": 0.9950661696495653,
+        "pch_from_merged": 0.995103269052459
+      },
+      "mean_beta": {
+        "levels": 0.9831610756196068,
+        "returns": 0.9942804408026703
+      },
+      "dm_return_beta_vs_levels_beta": {
+        "t_stat": -3.5721211029080613,
+        "p_value": 0.00036363722248111685
+      },
+      "sample_matches_merged": true,
+      "levels_beta_replicates_merged": true,
+      "return_beta_beats_pch_point_estimate_only": false,
+      "paired_return_ols_vs_pch": {
+        "n_common": 1759,
+        "he_return_ols": 0.9950661696495653,
+        "he_pch": 0.995103269052459,
+        "dm_return_ols_vs_pch": {
+          "t_stat": 1.4496245982888867,
+          "p_value": 0.1473415959143225,
+          "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+          "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing."
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": {
+          "point_diff": -3.709940289375879e-05,
+          "ci_95": [
+            -8.483040093073823e-05,
+            8.950279693389904e-06
+          ],
+          "bootstrap_median": -3.698384247080577e-05,
+          "n_boot": 1000,
+          "block_len": 20,
+          "seed": 42
+        }
+      }
     },
     "pair_4_GLD_SLV": {
       "symbols": {
@@ -89,7 +176,29 @@
       },
       "sample_matches_merged": true,
       "levels_beta_replicates_merged": true,
-      "return_beta_beats_pch_point_estimate_only": false
+      "return_beta_beats_pch_point_estimate_only": false,
+      "paired_return_ols_vs_pch": {
+        "n_common": 1759,
+        "he_return_ols": 0.6026611238421122,
+        "he_pch": 0.6026749741988451,
+        "dm_return_ols_vs_pch": {
+          "t_stat": 0.32038793090610224,
+          "p_value": 0.7487123494838177,
+          "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+          "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing."
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": {
+          "point_diff": -1.3850356732847402e-05,
+          "ci_95": [
+            -9.622193456058358e-05,
+            7.004571509096611e-05
+          ],
+          "bootstrap_median": -1.2309028622092821e-05,
+          "n_boot": 1000,
+          "block_len": 20,
+          "seed": 42
+        }
+      }
     },
     "pair_5_XLE_USO": {
       "symbols": {
@@ -99,21 +208,43 @@
       "n_obs_oos": 1759,
       "n_refits": 28,
       "hedge_effectiveness": {
-        "ols_levels_beta": 0.2949515958038017,
-        "ols_return_beta": 0.3579001330010021,
-        "pch_from_merged": 0.3581469073734669
+        "ols_levels_beta": 0.2949516459140017,
+        "ols_return_beta": 0.35790020191878424,
+        "pch_from_merged": 0.3581127505051356
       },
       "mean_beta": {
-        "levels": 0.28970432827989356,
-        "returns": 0.4572528484508969
+        "levels": 0.28970429939037234,
+        "returns": 0.457253058038174
       },
       "dm_return_beta_vs_levels_beta": {
-        "t_stat": -1.4269677682357929,
-        "p_value": 0.15376676394953326
+        "t_stat": -1.4269649545325824,
+        "p_value": 0.15376757490819215
       },
       "sample_matches_merged": true,
       "levels_beta_replicates_merged": true,
-      "return_beta_beats_pch_point_estimate_only": false
+      "return_beta_beats_pch_point_estimate_only": false,
+      "paired_return_ols_vs_pch": {
+        "n_common": 1759,
+        "he_return_ols": 0.35790020191878424,
+        "he_pch": 0.3581127725874168,
+        "dm_return_ols_vs_pch": {
+          "t_stat": 0.41513460851106876,
+          "p_value": 0.6780940230401238,
+          "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+          "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing."
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": {
+          "point_diff": -0.00021257066863256124,
+          "ci_95": [
+            -0.0013951090301750097,
+            0.0006668976944961851
+          ],
+          "bootstrap_median": -0.0001408903431583397,
+          "n_boot": 1000,
+          "block_len": 20,
+          "seed": 42
+        }
+      }
     },
     "pair_6_XLF_XLK": {
       "symbols": {
@@ -123,21 +254,43 @@
       "n_obs_oos": 1759,
       "n_refits": 28,
       "hedge_effectiveness": {
-        "ols_levels_beta": 0.4868503722488128,
-        "ols_return_beta": 0.4405297761784712,
-        "pch_from_merged": 0.4410640893790386
+        "ols_levels_beta": 0.48685002643909536,
+        "ols_return_beta": 0.4405293937131459,
+        "pch_from_merged": 0.4410260776531222
       },
       "mean_beta": {
-        "levels": 0.5927160001594165,
-        "returns": 0.7269322724757468
+        "levels": 0.5927159522065146,
+        "returns": 0.7269320278491122
       },
       "dm_return_beta_vs_levels_beta": {
-        "t_stat": 3.943255967577766,
-        "p_value": 8.353716446873882e-05
+        "t_stat": 3.9432492496203877,
+        "p_value": 8.353948492434426e-05
       },
       "sample_matches_merged": true,
       "levels_beta_replicates_merged": true,
-      "return_beta_beats_pch_point_estimate_only": false
+      "return_beta_beats_pch_point_estimate_only": false,
+      "paired_return_ols_vs_pch": {
+        "n_common": 1759,
+        "he_return_ols": 0.4405293937131459,
+        "he_pch": 0.44102560471752206,
+        "dm_return_ols_vs_pch": {
+          "t_stat": 5.262857826566223,
+          "p_value": 1.5922551099833981e-07,
+          "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+          "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing."
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": {
+          "point_diff": -0.0004962110043761347,
+          "ci_95": [
+            -0.0008015887638088609,
+            -0.0003336843946645992
+          ],
+          "bootstrap_median": -0.0004903650341672172,
+          "n_boot": 1000,
+          "block_len": 20,
+          "seed": 42
+        }
+      }
     }
   }
 }

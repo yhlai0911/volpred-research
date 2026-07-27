@@ -146,12 +146,13 @@ high (our Pair 1 R²_MR = 0.81), the ρ may be uninformative.
 |---|---|---|---|---|---|---|
 | SPY/IVV | 0.9981 | 0.9983 | +0.0002 | [0.0000, 0.0004] | −1.36 | null（t 未過） |
 | USO/BNO | 0.8044 | 0.8835 | +0.0791 | [0.0562, 0.1155] | −6.70 | 兩 gate 皆過 |
-| GLD/IAU | — | — | — | — | — | **無資料**（yfinance 回空） |
+| GLD/IAU | 0.9948 | 0.9951 | +0.0003 | [0.0001, 0.0005] | −3.13 | 兩 gate 邊際過（diff 僅 +0.0003，見下） |
 | GLD/SLV | 0.2405 | 0.6027 | +0.3622 | [0.2407, 0.5125] | −6.53 | 兩 gate 皆過 |
 | XLE/USO | 0.2950 | 0.3581 | +0.0632 | [−0.0144, 0.1240] | −1.44 | null（CI 含 0） |
 | XLF/XLK | 0.4869 | 0.4411 | −0.0458 | [−0.0974, −0.0169] | +3.91 | PCH 顯著**較差** |
 
-若停在這裡，會得出「PCH 在 2/6 pairs 顯著勝出」的結論。**那是錯的。**
+若停在這裡，會得出「PCH 在多個 pairs（USO/BNO、GLD/SLV 大幅，GLD/IAU 邊際）顯著勝出」
+的結論。**那是錯的。**
 
 ### 為什麼表面結果不成立
 
@@ -169,6 +170,7 @@ OOS 樣本數相符（`sample_matches_merged=true`），故比較有效：
 |---|---|---|---|---|---|---|
 | SPY/IVV | 0.9951 | 0.9880 | 0.0072 | 0.9983 | 0.9982 | 0.00012 |
 | USO/BNO | 1.0009 | 0.9976 | 0.0033 | 0.8835 | 0.8834 | 0.00002 |
+| GLD/IAU | 0.9972 | 0.9943 | 0.0029 | 0.9951 | 0.9951 | 0.00003 |
 | GLD/SLV | 0.4414 | 0.4413 | 0.0001 | 0.6027 | 0.6027 | 0.00001 |
 | XLE/USO | 0.4556 | 0.4573 | −0.0016 | 0.3581 | 0.3579 | 0.00025 |
 | XLF/XLK | 0.7261 | 0.7269 | −0.0008 | 0.4411 | 0.4405 | 0.00053 |
@@ -186,16 +188,43 @@ XLF/XLK 的反向證據同樣支持這個解釋：PCH 在該對「輸」給 leve
 （USO/BNO：mean_rho = −0.374、R²_MR = 0.072；GLD/SLV：rho = 0.216、R²_MR = 0.116）。
 負 rho 是振盪而非均值回歸，PCH 實質退化為 random walk + noise。
 
+### 配對檢定：return-OLS vs PCH（2026-07-27 補齊）
+
+原殘留（return-OLS vs PCH 只有點估計、GLD/IAU 資料缺）已解決：daily-series-persistence
+patch 下 3 個 shard（6 pairs）全部重跑，每 pair 都持久化了逐日 PCH 避險報酬序列，
+`oos_return_benchmark.py` 因此能對每 pair 算出**配對** DM + block-bootstrap（1000 reps,
+block_len=20, seed=42），寫入 `paired_return_ols_vs_pch`（n_common=1759/pair）。數字直接
+讀自 `k1426_oos_return_benchmark.json`：
+
+| pair | HE_報酬OLS | HE_PCH | diff(報酬OLS−PCH) | 配對 DM \|t\| | boot 95% CI | CI 跨 0？ |
+|---|---|---|---|---|---|---|
+| SPY/IVV | 0.99822 | 0.99834 | −0.00012 | 7.66 | [−0.00019, −0.00007] | **否** |
+| USO/BNO | 0.88345 | 0.88346 | −0.00002 | 0.05 | [−0.00043, +0.00044] | 是 |
+| GLD/IAU | 0.99507 | 0.99510 | −0.00004 | 1.45 | [−0.00008, +0.00001] | 是 |
+| GLD/SLV | 0.60266 | 0.60267 | −0.00001 | 0.32 | [−0.00010, +0.00007] | 是 |
+| XLE/USO | 0.35790 | 0.35811 | −0.00021 | 0.42 | [−0.00140, +0.00067] | 是 |
+| XLF/XLK | 0.44053 | 0.44103 | −0.00050 | 5.26 | [−0.00080, −0.00033] | **否** |
+
+**判決：NULL confirmed（未翻轉）。** 六對的點估計 HE 差全部 |diff| ≤ 0.0005（最大 XLF/XLK
+0.00050），量級與先前點估計一致 —— PCH 的 levels-likelihood beta 恰好回收報酬最適 beta，
+標題那個 GLD/SLV +0.3622 完全來自對照組用錯 beta，與 partial cointegration 無關。
+
+honesty note（不粉飾）：4/6 pairs 如預期 DM |t| 偏小且 CI 跨 0（統計上無法區分）；但
+**SPY/IVV（|t|=7.66）與 XLF/XLK（|t|=5.26）配對 DM 顯著、CI 排除 0**。這兩對的差異是
+「統計顯著、經濟為零」的教科書情形：HE 差僅 0.00012 與 0.00050（皆 ≤0.0005 的 null 尺度），
+方向是 PCH 微幅較佳。以「無增量價值」的經濟判準看，可被統計偵測到的 ≤0.0005 HE edge
+不足以推翻 null，反而印證 +0.36 標題塌縮至零。**整體 NULL 判斷不變。**
+
 ### 判定與後續
 
 - **K1426 OOS = NULL**：PCH 對報酬避險相對報酬 OLS 無增量價值。
 - **Multivariate PCH 不排入 queue**（原第 5 點）。在 PCH 能勝過報酬 OLS 之前，
   把它擴到 3+ assets 只是把一個無增益的方法變複雜。門檻應為：先在單 pair 上
   對報酬 OLS 顯示增益，才談 multivariate。
-- 已知殘留（已開 child task，不影響上述結論）：GLD/IAU 資料缺、
-  return-OLS vs PCH 只有點估計而無配對檢定（artifact 未存 PCH 每日避險報酬序列、
-  refit snapshots 被截斷為 head，要配對檢定須重跑當初 timeout 的 PCH MLE）。
-  因 HE 差距 ≤0.0005 而 PCH-vs-levels 差距達 0.36，此殘留不改變 null 判定。
+- ~~已知殘留：GLD/IAU 資料缺、return-OLS vs PCH 只有點估計而無配對檢定~~
+  **已於 2026-07-27 解決**（daily-series-persistence patch 重跑 3 shard → 每 pair 持久化
+  逐日 PCH 避險報酬序列）：GLD/IAU 已補齊資料，六對皆有配對 DM + block-bootstrap
+  （見上「配對檢定」節）。配對後 null 判定不變（|diff| ≤0.0005；2 對統計顯著但經濟為零）。
 
 ### Codex 審查
 
@@ -210,8 +239,10 @@ XLF/XLK 的反向證據同樣支持這個解釋：PCH 在該對「輸」給 leve
 
 shard notes 寫「Monthly (21-day) refit cadence」與 `spec.refit_every=63`（季度）矛盾。
 `merge_shards.py` 以 spec 為準（那是代碼實際消費的值）並在合併輸出中更正該註記。
-`oos.py:8,273,345` 的 docstring 仍寫 21 日/monthly，為 reproducibility metadata 錯誤，
-已記於 child task。
+`oos.py` 的 docstring 與 metadata note **已更正**（2026-07-27）：refit cadence 現寫
+63 日/quarterly、n_starts=50、line-345 的 `lookahead_rule` 為
+「Train on [:t-1], apply hedge beta to return t via shift(1).」，reproducibility metadata
+與代碼實際消費值一致。
 
 ## OOS 後續方向（→ compute_queue followup brief）
 

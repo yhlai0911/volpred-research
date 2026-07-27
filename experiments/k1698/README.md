@@ -19,19 +19,19 @@
 > robust GJR 的非巢狀 QLIKE DM **t = +1.47（p = 0.14, n = 436）**：沒有 HAR 勝出的證據，
 > 點估計方向還是 GJR 較優。沒有共同 target 上的預測損失優勢，就沒有「divergence」可談。
 
-**v2 比 K1684 更深一層的發現：連 HAR 自家 target 的著名 t ≈ −5.6 都是 RV 建構 artifact 的一部分。**
+**v2 比 K1684 更深一層的發現：連 HAR 自家 target 上對 GJR 的 own-target 優勢（bridge run，舊 RV：t=−5.25）都大半是 RV 建構 artifact —— 換成正確建構的新 RV 後掉到 t=−2.06。**
 
 | DM（QLIKE, canonical, h=1） | 舊 RV（bridge run，K854 建構） | 新 RV（primary，active-contract gap-complete aligned） |
 |---|---|---|
 | HAR vs GJR，**HAR 自家 RV target** | **t = −5.25**（p < 0.001；K850 世界的 headline） | **t = −2.06**（p = 0.040）— **未過事前門檻** |
 | HAR vs GJR，**aligned target（0050 r²）** | t = +2.31（p = 0.021，GJR 優） | **t = +1.47（p = 0.14）— 無顯著差異** |
-| HAR+CF 1% 違規 | **17/450**（= K854 published，完全復現） | **14/450**（仍 FAIL，但 RED → yellow） |
-| 校正因子 (a) std(z) / (b) MZ / (c) HL | 1.354 / 1.349 / 1.204（= K1684 数值，完全復現） | **1.203 / 1.211 / 1.075** |
+| HAR+CF 1% 違規 | **17/450**（= K854 published，此格一致） | **14/450**（仍 FAIL，但 RED → yellow） |
+| 校正因子 (a) std(z) / (b) MZ / (c) HL | 1.354 / 1.349 / 1.204（K1684 数值，供對照） | **1.203 / 1.211 / 1.075** |
 | Placebo（同機器套在 GJR 上） | 1.119 | **1.119** |
 
-Bridge run（同 code、同 robust GJR、只把 RV 換回 K854 建構）**完全復現 K1684/K854 的世界**（HAR+CF
-17/450、46/450；因子 1.354/1.349/1.204；own-target t=−5.25 ≈ K1684 的 −5.13）→ 上表左右欄的差
-**全部來自 RV 重建本身**，乾淨隔離。
+Bridge run（同 code、同 robust GJR、只把 RV 換回 K854 建構）**部分復現 K1684/K854 的世界：14 格中
+11 格一致（match_rate 78.57%），差的 3 格全是 1% GJR 家族（見 §4.7）**（RV-driven cells 逐格一致：HAR+CF
+17/450、46/450；own-target t=−5.25）→ 上表左右欄的差 **全部來自 RV 重建本身**，乾淨隔離。
 
 **含義**：K850/K854 的「QLIKE 大勝 + VaR 大敗」敘事由**四個**建構性混淆疊出來（K1684 找到三個，
 v2 加上第四個且它吃掉最多）：
@@ -49,7 +49,7 @@ v2 加上第四個且它吃掉最多）：
 |---|---|---|---|
 | **1** | GJR ≥100 starts + convergence + basin 分佈；robust fit 重算全部 headline | `fit_gjr_robust()` **120 個 seeded 起點**/refit，逐 refit 存 convergence、objective、LL 分群；全部 QLIKE/DM/VaR/ES 用 robust fit | fragility probe v2（同 1e-6 資料修訂）：σ 最大漂移 **29.03% → 5.03%**，GJR+Normal 違規數 **[8,10]/[20,21] → [9,9]/[21,21]（零翻動）**。LL 面診斷：120 起點散佈在 ~0.4 LL 單位的平坦 ridge（1e-3 分群得 116–120 群 — 是 flat ridge 上的 optimizer scatter，不是分離 basins），best-of-120 消掉了 4-start 的抽籤性 |
 | **2** | 全 TX 每日成交量選 active contract；連續 tick path 含所有 session boundary jumps；封 13:30/13:45 資訊集 | `build_aligned_rv()`：per-day max-volume 合約、**單一合約**連續 5-min path，視窗 **13:30(D−1) → 13:30(D)**（含 day-tail、13:45→15:00 gap、PM→AM、05:00→08:45 gap 全部 jumps）；RV(t−1) 終點 = target 視窗起點 → 資訊集**建構上不相交** | 2,191 天、108 個 roll 日（無跨合約 return）、anchor 缺失 **0**、平均 222 returns/日；`rv_window_boundary_audit` **60 天全過**；vs 舊 RV corr 0.820、mean ratio 1.256 |
-| **3** | 修 CI 單調性；implied_c 僅在可識別 cell 解讀；bootstrap 取代 0.10 閾值 | 通道診斷改用**分佈自由** `c_emp(α) = Q_{1−α}(r/VaR)`（等價於精確覆蓋所需的 σ 乘數，任何尾層都可識別）＋ **paired moving-block bootstrap**（B=2000, block=25, 共用 index draws）對 Δc=0 做正式檢定；Normal 映射僅 +Normal cells 報告且修正為遞增（K1684 反了，倒置 154 個 CI） | §4.3 表：分類全部帶 95% CI；無任何 lo>hi |
+| **3** | 修 CI 單調性；implied_c 僅在可識別 cell 解讀；bootstrap 取代 0.10 閾值 | 通道診斷改用**分佈自由** `c_emp(α) = Q_{1−α}(r/VaR)`（等價於精確覆蓋所需的 σ 乘數，任何尾層都可識別）＋ **paired moving-block bootstrap**（B=2000, block=25, 共用 index draws）對 Δc=0 做正式檢定；Normal 映射僅 +Normal cells 報告且修正為遞增（K1684 的 Normal CI 方向反了，本次已更正） | §4.3 表：分類全部帶 95% CI；無任何 lo>hi |
 | **4** | Placebo 完整口徑報告；不得寫「near 1」；三 estimator 非獨立 | GJRf/GJRf-a 進**所有**表格（trinity 兩 α、ES、FZ0、c_emp bootstrap）；三 estimator 相關性入 JSON | OOS placebo s = **1.119**（與 HAR 的 1.075–1.211 同量級 — 校正機器**確實會動** GJR，照實報告）；**IS placebo = 0.993**（§4.5 的關鍵發現）；corr(s_a, s_c)=0.71 / corr(s_a, s_mz)=−0.23 / corr(s_c, s_mz)=−0.52，JSON 內註明非獨立 |
 | **5** | 事前 \|t\|>3 保守 guardrail；gate 檢查 leg 2 GJR PASS；sensitivity 用 pairwise mask 報 n；補 1%/5%、IS/OOS VaR+ES、joint loss | `decide_gate_v2()` 事前寫死（§3.3）且**明確檢查** leg-2 pattern（本次 = true：HAR+CF FAIL 且 GJR+CF PASS @1%）；raw DM 僅保留明確非巢狀 pairs，逐筆存 role / relation / feeds_gate；**1%+5% × IS+OOS × VaR trinity + McNeil-Frey + Acerbi-Szekely Z2 + FZ0 joint loss** 全報 | aligned DM n=436、mismatched n=450 各自標明；`sens_theta_short` 掉 HAR-b 三格→**declared dropped**，其餘 cell 完整 450 天 |
 | **6** | Results 原子寫入 | `write_results_atomic()`：tmp → `json.load` 驗證 → `os.replace` | ✓ |
@@ -186,7 +186,7 @@ GJRf+CF —— 一個 σ 打在自己 target 上、零錯配的模型 —— 給
 | `sens_theta_short` | θ 也用 OOS-only 短池（HAR-b 三格不可估，declared drop） | verdict 同；**但 HAR-c+CF 兩 α 全 trinity PASS**（5/450 綠、24/450 綠）— 在此組態尺度校正完全 rescue，rescue 結論對 θ 窗有敏感性，照實報告 |
 | `sens_daily_refresh` | 尾池每日更新 | verdict 同、量級同 |
 | `sens_burnin_tailpool`（診斷，不裁決） | 尾池延長含 COVID | 未校正 HAR+CF 自己變 **3/450 綠 PASS** — 殘差池窗口第三通道再確認（與 K1684 一致） |
-| `bridge_old_rv`（診斷） | 全套換回 K854 RV | 完全復現 K1684 世界（§1 表）— RV 重建效果的乾淨隔離 |
+| `bridge_old_rv`（診斷） | 全套換回 K854 RV | 部分復現 K1684 世界（14 格中 11 格一致，見 §4.7）— RV 重建效果的乾淨隔離 |
 
 ### 4.7 Robust GJR 與 K854 復現 bridge
 
@@ -196,7 +196,7 @@ GJRf+CF —— 一個 σ 打在自己 target 上、零錯配的模型 —— 給
   5.03%，**兩個 α 的違規數零翻動**（[9,9]、[21,21]）— blocker 1 的「不穩定 GJR 不能承擔裁決」已解。
 - K854 replication bridge：**11/14 格完全一致**；差的 3 格全是 GJR 家族（10→9、3→2、9→7），方向
   一致 = robust fit 略保守 — 這就是 4-start 不穩定值多少違規的量化答案。RV-driven cells（HAR×3、
-  RGL）在舊 RV 下**逐格完全復現**（17、9、15、46...）。
+  RGL）在舊 RV 下**逐格一致**（17、9、15、46...）。
 
 ---
 
@@ -212,7 +212,7 @@ GJRf+CF —— 一個 σ 打在自己 target 上、零錯配的模型 —— 給
    (iii) 「SCALE 指紋不專屬錯配」的否定結果（GJRf+CF 對照）。
 3. **不可宣稱**：HAR 劣於 GJR（aligned t=+1.47 n.s.）；divergence 存在；GJR+CF「校準良好」（它是
    c_emp=0.80 的過度保守 PASS）。
-4. **回溯更正義務**（主線程）：K850/K854 knowledge entries 的 headline（t=−5.6 建立在有缺陷的 RV
+4. **回溯更正義務**（主線程）：K850/K854 knowledge entries 的 own-target headline（建立在有缺陷的 RV
    建構上）；深審 E1 條目中「缺隔夜」前提（K1684 已推翻）與「純尺度 30%」量級。
 
 ---
@@ -251,7 +251,7 @@ GJRf+CF —— 一個 σ 打在自己 target 上、零錯配的模型 —— 給
 
 | 來源 | 內容 | Snapshot |
 |---|---|---|
-| TAIFEX 全合約 TX tick（`~/Dropbox/TAIFEXDATA/`，2,192 檔） | 每日 active contract 連續 path → aligned RV | `data/tx_rv_aligned_1330_active_contract_2017_2025.csv`（本次建構並 pin） |
+| TAIFEX 全合約 TX tick（`~/Dropbox/TAIFEXDATA/`） | 每日 active contract 連續 path → aligned RV（`rv_construction.n_days`=2,191 交易日；`session_alignment_check.files_checked`=40 檔抽查夜盤歸屬） | `data/tx_rv_aligned_1330_active_contract_2017_2025.csv`（本次建構並 pin） |
 | K854/K1684 TX1 RV（bridge 用） | trade-date convention 分段 RV | `data/tx1_rv_tradedate_convention_2017_2025.csv`（k1684 snapshot 複本） |
 | yfinance `0050.TW`（`auto_adjust=True`） | 調整後收盤 | `data/tw0050_adjclose_2016_2025.csv`（k1684 snapshot 複本） |
 | 視窗邊界 audit | 60 天段落時間戳檢查 | `data/rv_boundary_audit.json` |
@@ -262,7 +262,7 @@ GJRf+CF —— 一個 σ 打在自己 target 上、零錯配的模型 —— 給
 uv run --extra dev python experiments/k1698/k1698.py
 ```
 
-Snapshot 已 pin：本次 cache-hit 重跑 **57.3 秒**；首次建 RV 約再 +1 分鐘。Seed = `20260712`。
+Snapshot 已 pin：本次 cache-hit 重跑 **57.3 秒**（`elapsed_sec`）；首建 RV 需額外時間，本 run 無首建 receipt 故不列數字。Seed = `20260712`。
 Lookahead audit（30 assertions）或 RV boundary audit 失敗時腳本 `raise`，不輸出結果。
 
 **圖**：`fig1_implied_scale_bootstrap.png`（c_emp 通道診斷 + Δc 檢定）、
