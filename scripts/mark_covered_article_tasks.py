@@ -32,6 +32,7 @@ continue_task_dispatch.build_report so every dispatch self-heals.
 """
 from __future__ import annotations
 
+import fcntl
 import json
 import sys
 from datetime import datetime, timezone
@@ -45,9 +46,13 @@ if str(ROOT / "scripts") not in sys.path:
 
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
 
-# Reuse canonical block-writer helpers (lock + atomic load/save) so this sweep
-# and mark_task_blocked.py share identical serialization + control-plane lock.
-from mark_task_blocked import shared_state_lock, _load, _save  # noqa: E402
+# Reuse canonical block-writer plumbing so this sweep and mark_task_blocked.py
+# share identical serialization + the single flock-based control plane. The old
+# shared_state_lock("control_plane") did NOT coordinate with the flock the
+# canonical writer holds on next_tasks.json, so we go through the same handle.
+from mark_task_blocked import NEXT_TASKS, _decode_tasks  # noqa: E402
+from volpred.canonical_write import guard_canonical_write  # noqa: E402
+from volpred.ops.next_tasks import write_tasks_to_handle  # noqa: E402
 # Coverage authority — the exact set refill uses to skip creating dup tasks.
 from refill_task_pool import _kids_with_audience_article  # noqa: E402
 
@@ -150,30 +155,41 @@ def find_covered(tasks: list) -> list[dict]:
 
 def sweep(apply: bool) -> dict:
     """Retire covered pending article tasks as terminal superseded rows. Idempotent."""
-    with shared_state_lock("control_plane"):
-        payload, tasks = _load()
-        hits = find_covered(tasks)
-        if apply and hits:
-            now = datetime.now(timezone.utc).isoformat(timespec="seconds")
-            for h in hits:
-                t = h["task"]
-                mile = h["mile_id"]
-                note = (
-                    f"{h['audience']}-audience article for {h['kid']} already in feed"
-                    + (f" ({mile})" if mile else "")
-                    + "; auto-retired to prevent duplicate dispatch"
-                )
-                t["status"] = "superseded"
-                t["blocked_reason"] = "deprecated"
-                t["blocked_at"] = now
-                t["blocked_note"] = note
-                t["terminalized_at"] = now
-                t["terminalized_reason"] = "deprecated"
-                t.pop("blocked_until", None)  # deprecated = terminal; no recheck
-                t.setdefault("status_history", []).append(
-                    {"at": now, "from": "pending", "to": "superseded", "reason": note}
-                )
-            _save(payload, tasks)
+    guard_canonical_write(NEXT_TASKS)
+    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            payload, tasks = _decode_tasks(fh.read())
+            hits = find_covered(tasks)
+            if apply and hits:
+                if isinstance(payload, dict):
+                    raise ValueError(
+                        "next_tasks.json root must be a list "
+                        "(single-gateway 2026-07-16)"
+                    )
+                now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+                for h in hits:
+                    t = h["task"]
+                    mile = h["mile_id"]
+                    note = (
+                        f"{h['audience']}-audience article for {h['kid']} already in feed"
+                        + (f" ({mile})" if mile else "")
+                        + "; auto-retired to prevent duplicate dispatch"
+                    )
+                    t["status"] = "superseded"
+                    t["blocked_reason"] = "deprecated"
+                    t["blocked_at"] = now
+                    t["blocked_note"] = note
+                    t["terminalized_at"] = now
+                    t["terminalized_reason"] = "deprecated"
+                    t.pop("blocked_until", None)  # deprecated = terminal; no recheck
+                    t.setdefault("status_history", []).append(
+                        {"at": now, "from": "pending", "to": "superseded", "reason": note}
+                    )
+                write_tasks_to_handle(fh, tasks)
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
     return {
         "ok": True,
         "count": len(hits),

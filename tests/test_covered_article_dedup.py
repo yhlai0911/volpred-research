@@ -7,7 +7,6 @@ The stale task stayed pending and was still an agentable candidate at 20:08.
 """
 from __future__ import annotations
 
-from contextlib import contextmanager
 import importlib.util
 from pathlib import Path
 
@@ -92,28 +91,21 @@ def test_non_article_task_ignored(monkeypatch):
     assert hits == []
 
 
-def test_sweep_apply_marks_covered_task_superseded(monkeypatch):
+def test_sweep_apply_marks_covered_task_superseded(monkeypatch, tmp_path):
     _patch_coverage(monkeypatch, general=["K1590"], mile_maps={"general": {"K1590": "mile_4518e9d8"}})
-    payload = [_task("K1590_article_general")]
+    # Round-trip through the canonical flock read-mutate-write path against a
+    # tmp queue (not shared repo state), mirroring mark_task_blocked.main().
+    import json as _json
 
-    @contextmanager
-    def fake_lock(_name):
-        yield
-
-    def fake_load():
-        return payload, payload
-
-    def fake_save(_payload, _tasks):
-        return None
-
-    monkeypatch.setattr(mod, "shared_state_lock", fake_lock)
-    monkeypatch.setattr(mod, "_load", fake_load)
-    monkeypatch.setattr(mod, "_save", fake_save)
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(_json.dumps([_task("K1590_article_general")]), encoding="utf-8")
+    monkeypatch.setattr(mod, "NEXT_TASKS", queue)
 
     result = mod.sweep(apply=True)
 
     assert result["count"] == 1
-    assert payload[0]["status"] == "superseded"
-    assert payload[0]["blocked_reason"] == "deprecated"
-    assert payload[0]["terminalized_reason"] == "deprecated"
-    assert payload[0]["status_history"][-1]["to"] == "superseded"
+    written = _json.loads(queue.read_text(encoding="utf-8"))
+    assert written[0]["status"] == "superseded"
+    assert written[0]["blocked_reason"] == "deprecated"
+    assert written[0]["terminalized_reason"] == "deprecated"
+    assert written[0]["status_history"][-1]["to"] == "superseded"
