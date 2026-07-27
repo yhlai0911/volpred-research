@@ -1,0 +1,477 @@
+{
+  "schema_version": "frontend-route-scenario-parity.v1",
+  "frontend_target": "frontend-v2-fix",
+  "route_rules": [
+    {
+      "id": "public_home",
+      "pattern": "^/$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/components/v3/hooks/useV3Data.ts"
+      ]
+    },
+    {
+      "id": "public_static",
+      "pattern": "^/(about|disclaimer)$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/about/page.tsx",
+        "frontend-v2-fix/src/app/disclaimer/page.tsx",
+        "frontend-v2-fix/src/app/v3/about/page.tsx",
+        "frontend-v2-fix/src/app/v3/disclaimer/page.tsx"
+      ]
+    },
+    {
+      "id": "admin",
+      "pattern": "^/admin(?:/.*)?$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "admin",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/admin-auth.ts",
+        "frontend-v2-fix/src/lib/admin-ops.ts",
+        "frontend-v2-fix/src/app/api/admin/session/route.ts"
+      ]
+    },
+    {
+      "id": "auth_callback",
+      "pattern": "^/auth/callback$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/auth/callback/route.ts",
+        "frontend-v2-fix/src/lib/supabase-browser.ts"
+      ]
+    },
+    {
+      "id": "v3_brand",
+      "pattern": "^/brand$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/v3/brand/page.tsx"
+      ],
+      "mode_dispositions": {
+        "original": {
+          "status": "known_gap",
+          "reason": "v3-only brand reference surface; T20 decides whether original needs an equivalent"
+        }
+      }
+    },
+    {
+      "id": "digest",
+      "pattern": "^/digest/\\[id\\]$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/digest-display.ts",
+        "frontend-v2-fix/src/lib/data-server.ts"
+      ]
+    },
+    {
+      "id": "indicator_arena",
+      "pattern": "^/indicators$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/indicator-arena.ts"
+      ],
+      "mode_dispositions": {
+        "v3": {
+          "status": "known_gap",
+          "reason": "original-only tool; v3 route decision belongs to T20"
+        }
+      }
+    },
+    {
+      "id": "member",
+      "pattern": "^/me(?:/.*)?$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "member",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/request-auth.ts",
+        "frontend-v2-fix/src/lib/supabase-server.ts",
+        "frontend-v2-fix/src/app/api/me/summary/route.ts"
+      ]
+    },
+    {
+      "id": "papers",
+      "pattern": "^/paper$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/app/api/papers/route.ts"
+      ]
+    },
+    {
+      "id": "portfolio",
+      "pattern": "^/portfolio$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/app/api/portfolio-overview/route.ts"
+      ]
+    },
+    {
+      "id": "pricing",
+      "pattern": "^/pricing$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/pricing/page.tsx",
+        "frontend-v2-fix/src/app/api/radar/entitlements/route.ts"
+      ],
+      "mode_dispositions": {
+        "v3": {
+          "status": "known_gap",
+          "reason": "original-only pricing surface; v3 parity is tracked by T20"
+        }
+      }
+    },
+    {
+      "id": "questions",
+      "pattern": "^/questions$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/app/api/questions/route.ts"
+      ]
+    },
+    {
+      "id": "radar",
+      "pattern": "^/radar$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "member",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/radar-data.ts",
+        "frontend-v2-fix/src/app/api/radar/entitlements/route.ts"
+      ],
+      "mode_dispositions": {
+        "v3": {
+          "status": "known_gap",
+          "reason": "original-only Radar product surface; v3 parity is tracked by T20"
+        }
+      }
+    },
+    {
+      "id": "reports",
+      "pattern": "^/reports/\\[id\\]$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/lib/research-mirror.ts",
+        "frontend-v2-fix/src/app/api/publications/feed/[id]/route.ts"
+      ]
+    },
+    {
+      "id": "risk_forecast",
+      "pattern": "^/risk-forecast$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/app/api/risk-forecast/route.ts"
+      ]
+    },
+    {
+      "id": "seo_discovery",
+      "pattern": "^/(robots\\.txt|rss\\.xml|sitemap\\.xml)$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/layout.tsx",
+        "frontend-v2-fix/src/app/sitemap.ts",
+        "frontend-v2-fix/src/app/rss.xml/route.ts",
+        "frontend-v2-fix/public/robots.txt"
+      ]
+    },
+    {
+      "id": "strategy_selector",
+      "pattern": "^/strategy-selector$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/strategy-performance.ts",
+        "frontend-v2-fix/src/lib/strategy-regimes.ts"
+      ]
+    },
+    {
+      "id": "vix_calculator",
+      "pattern": "^/vix-calculator$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/vix-calculator/page.tsx",
+        "frontend-v2-fix/src/app/v3/vix-calculator/page.tsx"
+      ]
+    },
+    {
+      "id": "vt_calculator",
+      "pattern": "^/vt-calculator$",
+      "expected_modes": [
+        "original",
+        "v3"
+      ],
+      "access": "public",
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/app/vt-calculator/page.tsx",
+        "frontend-v2-fix/src/app/v3/vt-calculator/page.tsx"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "public_first_paint",
+      "required_route_rules": [
+        "public_home",
+        "reports",
+        "digest"
+      ],
+      "required_modes": [
+        "original",
+        "v3"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/app/page.tsx",
+          "contains": [
+            "getFeed",
+            "initialFeed"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/app/v3/page.tsx",
+          "contains": [
+            "getFeed",
+            "initialData"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "auth_callback",
+      "required_route_rules": [
+        "auth_callback"
+      ],
+      "required_modes": [
+        "shared"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/app/auth/callback/route.ts",
+          "contains": [
+            "NEXT_PUBLIC_SITE_URL",
+            "window.location.hash"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/components/AuthButton.tsx",
+          "contains": [
+            "/me",
+            "/admin"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "member_navigation",
+      "required_route_rules": [
+        "member"
+      ],
+      "required_modes": [
+        "original",
+        "v3"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/components/MyMemberHomeConsole.tsx",
+          "contains": [
+            "/me/bookmarks",
+            "/me/questions"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/components/v3/editorial/me/EditorialMemberHome.tsx",
+          "contains": [
+            "/v3/me/bookmarks",
+            "/v3/me/questions"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "admin_observer",
+      "required_route_rules": [
+        "admin"
+      ],
+      "required_modes": [
+        "original",
+        "v3"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/lib/admin-auth.ts",
+          "contains": [
+            "admin"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/lib/admin-ops.ts",
+          "contains": [
+            "REMOTE_JOB_ACTIONS",
+            "executeRemoteJobAction"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seo",
+      "required_route_rules": [
+        "seo_discovery"
+      ],
+      "required_modes": [
+        "shared"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/app/layout.tsx",
+          "contains": [
+            "metadata",
+            "application/ld+json"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/app/sitemap.ts",
+          "contains": [
+            "MetadataRoute.Sitemap"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/public/robots.txt",
+          "contains": [
+            "Sitemap:"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mobile_navigation",
+      "required_route_rules": [
+        "public_home",
+        "member",
+        "admin"
+      ],
+      "required_modes": [
+        "original",
+        "v3"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/components/MobileNav.tsx",
+          "contains": [
+            "sm:hidden",
+            "navItems"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/components/v3/V3Shell.tsx",
+          "contains": [
+            "MOBILE_LINKS",
+            "drawerOpen"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "accessibility_navigation",
+      "required_route_rules": [
+        "public_home"
+      ],
+      "required_modes": [
+        "original",
+        "v3"
+      ],
+      "evidence": [
+        {
+          "path": "frontend-v2-fix/src/app/layout.tsx",
+          "contains": [
+            "<main",
+            "<nav"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/components/MobileNav.tsx",
+          "contains": [
+            "aria-label",
+            "aria-expanded"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/components/v3/V3Shell.tsx",
+          "contains": [
+            "aria-label",
+            "aria-expanded"
+          ]
+        }
+      ]
+    }
+  ]
+}
