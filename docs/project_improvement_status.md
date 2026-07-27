@@ -2680,3 +2680,25 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 其他utility／legacy AI CLI seam由follow-up `assign_5938ee83`納管；本slice未
   transfer owner、未繞過#9、未close #12。Issue #12與operations-core umbrella仍為
   **`contained`**。
+
+## 2026-07-27 — T10 全 production AI CLI source-census 與旁路封閉（Issue #12）
+
+- ✅ Production Python source已成為AST ratchet：已知清單與自動發現必須完全相等；
+  新增Claude／Codex／agy business spawn若未在Popen前呼叫canonical provider policy，
+  CI立即失敗。`codex help/--version`只有在argv可證明純metadata時列diagnostic，不能
+  替`codex exec`取得豁免。
+- ✅ `execution_brief`、member-QA warn-band、trending scan、Codex／agy lazypack及
+  prepublish audit均綁定不可由caller降級的semantic/capability/formal=false contract、
+  實際model、executable/hash、registry SHA與receipt environment；agy只允許owner既有
+  Google OAuth的`gemini-3.6-flash-high`，API key／credits／paid overflow仍fail closed。
+- ✅ Shell census另抓到`codex_exec_bounded.sh`與`telegram_responder.sh`兩條live seam。
+  前者改用repo `.venv`（live測得舊system Python在policy前即因型別語法crash），固定
+  registry-pinned nvm Codex及model；後者用`authorized_provider_exec.py`在同PID
+  `execve`前授權Claude，Codex fallback傳專屬contract。Legacy
+  `cron_hourly_dispatch.sh`只接受canonical schedule的`status=retired`且
+  `host_crontab_managed=false`作非live證據。
+- ✅ 相鄰範圍 **167 passed**，另有3組alternate-auth live no-spawn denial、shell
+  syntax、compileall／diff-check／critical ruff checks全綠。此launcher旁路根因為
+  **`root_cause_fixed_and_verified`**。
+- 🟡 本slice沒有transfer `provider.execution` owner、沒有繞過#9；Issue #12／#46
+  umbrella仍為 **`contained`**。

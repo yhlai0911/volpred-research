@@ -46,6 +46,11 @@ if str(ROOT / "src") not in sys.path:
 import gen_lazypack_codex as glc  # noqa: E402 — single owner of the loop
 from dispatch_supervisor.procutil import kill_tree  # noqa: E402
 from volpred.ops import termination  # noqa: E402
+from volpred.ops.execution.registry import (  # noqa: E402
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 
 
 def _resolve_agy_bin() -> str:
@@ -60,6 +65,7 @@ def _resolve_agy_bin() -> str:
 
 
 AGY_BIN = _resolve_agy_bin()
+AGY_DEFAULT_MODEL = "gemini-3.6-flash-high"
 
 
 def _run_agy(prompt: str, out_dir: Path, timeout_s: float,
@@ -72,10 +78,26 @@ def _run_agy(prompt: str, out_dir: Path, timeout_s: float,
     reaches agy's workers too (same escaped-descendant class as codex; see
     _kill_process_group in gen_lazypack_codex.py).
     """
-    cmd = [AGY_BIN, "-p", prompt, "--dangerously-skip-permissions"]
     env = os.environ.copy()
-    if model:
-        env["ANTIGRAVITY_MODEL"] = model
+    selected_model = model or AGY_DEFAULT_MODEL
+    env["ANTIGRAVITY_MODEL"] = selected_model
+    try:
+        receipt = authorize_provider_spawn(
+            contract_id="lazypack.agy",
+            model_id=selected_model,
+            executable_path=AGY_BIN,
+            environment=env,
+        )
+        verify_spawn_receipt(receipt)
+    except ProviderRegistryError as exc:
+        return 4, f"provider policy denied agy: {exc}"
+    cmd = [
+        receipt.resolved_executable,
+        "-p",
+        prompt,
+        "--dangerously-skip-permissions",
+    ]
+    env.update(receipt.environment())
     try:
         proc = subprocess.Popen(
             cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,

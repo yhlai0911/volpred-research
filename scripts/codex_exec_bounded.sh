@@ -21,6 +21,14 @@
 #   uv run python scripts/compute_queue.py enqueue --script <path> --timeout 1800
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PYTHON_BIN="$REPO_ROOT/.venv/bin/python"
+if [[ ! -x "$PYTHON_BIN" ]]; then
+  echo "ERROR: repo Python missing: $PYTHON_BIN" >&2
+  exit 127
+fi
+export VOLPRED_REPO_ROOT="$REPO_ROOT"
+
 TIMEOUT_S=600
 if [[ "${1:-}" == "--timeout" ]]; then
   TIMEOUT_S="${2:?--timeout needs a value}"
@@ -38,20 +46,32 @@ fi
 # instead of 124 — and either way only codex itself is signalled, not the tools
 # it spawned. `start_new_session` + `killpg` takes the whole tree down and keeps
 # the GNU-timeout exit convention that callers actually check for.
-exec python3 -c '
+exec "$PYTHON_BIN" -c '
 import glob, os, shutil, signal, subprocess, sys
-sys.path.insert(0, os.path.join(os.getcwd(), "src"))
+repo_root = os.environ["VOLPRED_REPO_ROOT"]
+sys.path.insert(0, os.path.join(repo_root, "src"))
 from volpred.ops import termination
+from volpred.ops.execution.registry import (
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 
 def resolve_codex():
-    # nvm puts codex on PATH only for interactive shells (nvm init lives in
-    # .zshrc), so a Bash-tool / subagent / launchd caller sees no `codex` and
-    # reads the resulting rc as "codex is broken". Resolve it ourselves.
-    found = os.environ.get("CODEX_BIN") or shutil.which("codex")
+    # Prefer the owner-pinned nvm surface. Codex Desktop injects its bundled
+    # binary ahead of nvm in some sessions; that is a different executable
+    # identity and must not silently replace the registry-pinned CLI.
+    found = os.environ.get("CODEX_BIN")
     if found and os.access(found, os.X_OK):
         return found
-    for pattern in (os.path.expanduser("~/.nvm/versions/node/*/bin/codex"),
-                    "/opt/homebrew/bin/codex", "/usr/local/bin/codex"):
+    for pattern in (os.path.expanduser("~/.nvm/versions/node/*/bin/codex"),):
+        for cand in glob.glob(pattern):
+            if os.access(cand, os.X_OK):
+                return cand
+    found = shutil.which("codex")
+    if found and os.access(found, os.X_OK):
+        return found
+    for pattern in ("/opt/homebrew/bin/codex", "/usr/local/bin/codex"):
         for cand in glob.glob(pattern):
             if os.access(cand, os.X_OK):
                 return cand
@@ -64,7 +84,28 @@ codex_bin = resolve_codex()
 bin_dir = os.path.dirname(os.path.abspath(codex_bin))  # NOT realpath: bin/codex is a symlink into lib/node_modules, where node is not
 if bin_dir and bin_dir not in os.environ.get("PATH", "").split(os.pathsep):
     os.environ["PATH"] = os.pathsep.join([bin_dir, os.environ.get("PATH", "")])
-proc = subprocess.Popen([codex_bin, "exec", *sys.argv[2:]], start_new_session=True)
+model = "gpt-5.6-sol"
+contract_id = os.environ.get(
+    "VOLPRED_CODEX_EXEC_CONTRACT",
+    "bounded-codex.agentic",
+)
+try:
+    receipt = authorize_provider_spawn(
+        contract_id=contract_id,
+        model_id=model,
+        executable_path=codex_bin,
+        environment=os.environ,
+    )
+    verify_spawn_receipt(receipt)
+except ProviderRegistryError as exc:
+    print(f"ERROR: provider policy denied codex: {exc}", file=sys.stderr)
+    sys.exit(126)
+child_env = {**os.environ, **receipt.environment()}
+proc = subprocess.Popen(
+    [receipt.resolved_executable, "exec", "-m", model, *sys.argv[2:]],
+    start_new_session=True,
+    env=child_env,
+)
 try:
     sys.exit(proc.wait(timeout=timeout))
 except subprocess.TimeoutExpired:

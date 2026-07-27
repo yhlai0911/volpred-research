@@ -48,6 +48,33 @@ Q_GAP_FOLLOWUP = (
 )
 
 
+def test_warn_band_provider_policy_denial_precedes_agy_popen(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(questions.shutil, "which", lambda _name: "/usr/local/bin/agy")
+    monkeypatch.setattr(
+        questions,
+        "authorize_provider_spawn",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            questions.ProviderRegistryError("credits denied")
+        ),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        questions.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: pytest.fail(
+            "provider policy denial must precede Popen"
+        ),
+    )
+
+    with pytest.raises(
+        questions.WarnBandAdjudicatorUnavailable,
+        match="provider policy denied.*credits denied",
+    ):
+        questions._agy_warn_band_adjudicator("a", "b", 0.5)
+
+
 def _patch_project_path(monkeypatch, tmp_path: Path) -> None:
     def fake_project_path(*parts: str) -> Path:
         path = tmp_path

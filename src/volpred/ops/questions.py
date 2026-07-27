@@ -20,6 +20,11 @@ from volpred.memory.system import MemorySystem
 from volpred.canonical_write import guard_canonical_write
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
+from .execution.registry import (
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 from .next_tasks import normalize_task_priority, validate_task_status, write_tasks_to_handle
 
 
@@ -699,6 +704,7 @@ B: {question_b}
 
 duplicate = 同一份研究可以回答兩者，重做等於重複勞動。
 distinct = B 需要新的資料、新的檢定或新的結論，不是重問。"""
+AGY_ADJUDICATOR_MODEL = "gemini-3.6-flash-high"
 
 
 def _agy_warn_band_adjudicator(
@@ -718,13 +724,31 @@ def _agy_warn_band_adjudicator(
     prompt = _ADJUDICATOR_PROMPT.format(
         question_a=question_a, question_b=question_b, similarity=round(similarity, 4)
     )
+    child_env = {
+        **os.environ,
+        "ANTIGRAVITY_MODEL": AGY_ADJUDICATOR_MODEL,
+    }
+    try:
+        receipt = authorize_provider_spawn(
+            contract_id="member-qa-adjudicator.agy",
+            model_id=AGY_ADJUDICATOR_MODEL,
+            executable_path=binary,
+            environment=child_env,
+        )
+        verify_spawn_receipt(receipt)
+    except ProviderRegistryError as exc:
+        raise WarnBandAdjudicatorUnavailable(
+            f"provider policy denied agy: {exc}"
+        ) from exc
+    child_env.update(receipt.environment())
     try:
         proc = subprocess.Popen(
-            [binary, "-p", prompt],
+            [receipt.resolved_executable, "-p", prompt],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             start_new_session=True,
+            env=child_env,
         )
     except OSError as exc:
         raise WarnBandAdjudicatorUnavailable(f"agy spawn failed: {exc}") from exc

@@ -38,6 +38,7 @@ import json
 import math
 import os
 import re
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
@@ -47,6 +48,13 @@ _REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 from scripts.dispatch_supervisor import procutil  # noqa: E402
+from volpred.ops.execution.registry import (  # noqa: E402
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
+
+AGY_AUDIT_MODEL = "gemini-3.6-flash-high"
 
 # Statistics-context keywords. A numeric token is only audited if at least one
 # of these appears within +/-15 chars of it. Keeps pure prose numbers (page
@@ -367,13 +375,32 @@ def run_llm_consistency_check(key_claims: str, source_summary: str) -> dict:
     # `agy` spawns tool subprocesses of its own, so a plain subprocess.run timeout
     # would kill only the pid we hold and leave its workers running unsupervised.
     # Own process group + kill_pgid. Gate: scripts/tests/test_agentic_cli_timeout_killpg.py
+    agy_bin = shutil.which("agy")
+    if not agy_bin:
+        return {"verdict": "SKIP", "error": "agy_not_found"}
+    child_env = {**os.environ, "ANTIGRAVITY_MODEL": AGY_AUDIT_MODEL}
+    try:
+        receipt = authorize_provider_spawn(
+            contract_id="prepublish-audit.agy",
+            model_id=AGY_AUDIT_MODEL,
+            executable_path=agy_bin,
+            environment=child_env,
+        )
+        verify_spawn_receipt(receipt)
+    except ProviderRegistryError as exc:
+        return {
+            "verdict": "SKIP",
+            "error": f"provider_policy_denied:{exc}",
+        }
+    child_env.update(receipt.environment())
     try:
         proc = subprocess.Popen(
-            ["agy", "-p", prompt],
+            [receipt.resolved_executable, "-p", prompt],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
             start_new_session=True,
+            env=child_env,
         )
     except FileNotFoundError:
         return {"verdict": "SKIP", "error": "agy_not_found"}

@@ -38,6 +38,13 @@ glc = importlib.util.module_from_spec(_spec)
 sys.modules["gen_lazypack_codex"] = glc
 _spec.loader.exec_module(glc)
 
+_agy_spec = importlib.util.spec_from_file_location(
+    "gen_lazypack_agy",
+    ROOT / "scripts" / "gen_lazypack_agy.py",
+)
+gla = importlib.util.module_from_spec(_agy_spec)
+_agy_spec.loader.exec_module(gla)
+
 
 @pytest.fixture(autouse=True)
 def _isolated_termination_ledger(
@@ -62,6 +69,14 @@ sleep {hang}
 """
 
 
+class _FakeReceipt:
+    def __init__(self, executable: str) -> None:
+        self.resolved_executable = executable
+
+    def environment(self) -> dict[str, str]:
+        return {"VOLPRED_PROVIDER_ID": "codex-cli"}
+
+
 @pytest.fixture()
 def fake_codex(tmp_path, monkeypatch):
     victim = tmp_path / "render_lazypack.py"
@@ -72,9 +87,79 @@ def fake_codex(tmp_path, monkeypatch):
             delay=delay, hang=hang, victim=victim))
         script.chmod(script.stat().st_mode | stat.S_IEXEC)
         monkeypatch.setattr(glc, "CODEX_BIN", str(script))
+        monkeypatch.setattr(
+            glc,
+            "authorize_provider_spawn",
+            lambda **_kwargs: _FakeReceipt(str(script)),
+        )
+        monkeypatch.setattr(glc, "verify_spawn_receipt", lambda _receipt: None)
         return victim
 
     return _install
+
+
+def test_provider_policy_denial_precedes_codex_popen(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(glc, "CODEX_BIN", sys.executable)
+    monkeypatch.setattr(
+        glc,
+        "authorize_provider_spawn",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            glc.ProviderRegistryError("metered provider denied")
+        ),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        glc.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: pytest.fail(
+            "provider policy denial must precede Popen"
+        ),
+    )
+
+    rc, detail = glc._run_codex(
+        "prompt",
+        tmp_path,
+        timeout_s=10,
+        model=None,
+    )
+
+    assert rc == 4
+    assert "metered provider denied" in detail
+
+
+def test_provider_policy_denial_precedes_agy_popen(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(gla, "AGY_BIN", "/usr/local/bin/agy")
+    monkeypatch.setattr(
+        gla,
+        "authorize_provider_spawn",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            gla.ProviderRegistryError("unknown billing denied")
+        ),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        gla.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: pytest.fail(
+            "provider policy denial must precede Popen"
+        ),
+    )
+
+    rc, detail = gla._run_agy(
+        "prompt",
+        tmp_path,
+        timeout_s=10,
+        model=None,
+    )
+
+    assert rc == 4
+    assert "unknown billing denied" in detail
 
 
 def test_timeout_kills_the_worker_not_just_the_parent(fake_codex, tmp_path):
@@ -124,6 +209,12 @@ def escaping_codex(tmp_path, monkeypatch):
             python=sys.executable, delay=delay, hang=hang, victim=str(victim)))
         script.chmod(script.stat().st_mode | stat.S_IEXEC)
         monkeypatch.setattr(glc, "CODEX_BIN", str(script))
+        monkeypatch.setattr(
+            glc,
+            "authorize_provider_spawn",
+            lambda **_kwargs: _FakeReceipt(str(script)),
+        )
+        monkeypatch.setattr(glc, "verify_spawn_receipt", lambda _receipt: None)
         return victim
 
     return _install
@@ -183,6 +274,12 @@ def test_clean_exit_still_returns_codex_rc(tmp_path, monkeypatch):
     script.write_text("#!/bin/sh\ncat > /dev/null\necho hello\nexit 0\n")
     script.chmod(script.stat().st_mode | stat.S_IEXEC)
     monkeypatch.setattr(glc, "CODEX_BIN", str(script))
+    monkeypatch.setattr(
+        glc,
+        "authorize_provider_spawn",
+        lambda **_kwargs: _FakeReceipt(str(script)),
+    )
+    monkeypatch.setattr(glc, "verify_spawn_receipt", lambda _receipt: None)
 
     rc, tail = glc._run_codex("prompt", tmp_path, timeout_s=30.0, model=None)
 

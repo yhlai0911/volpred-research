@@ -163,6 +163,86 @@
         "initial": "unknown",
         "probe_required": true
       }
+    },
+    {
+      "provider_id": "agy-cli",
+      "executables": [
+        {
+          "realpath": "/Users/yhlai0911/.local/bin/agy",
+          "sha256": "48e37ce7ef2db0e8972b6fed36ce866d4b094c587d377029ba7223565f49aed8"
+        }
+      ],
+      "model_ids": [
+        "gemini-3.6-flash-high"
+      ],
+      "auth": {
+        "surface": "subscription_oauth",
+        "api_key_env": null,
+        "auto_reload": false,
+        "settings_surface": null,
+        "forbidden_env": [
+          "ANTHROPIC_API_KEY",
+          "ANTHROPIC_AUTH_TOKEN",
+          "ANTHROPIC_BASE_URL",
+          "ANTHROPIC_BEDROCK_BASE_URL",
+          "ANTHROPIC_CUSTOM_HEADERS",
+          "ANTHROPIC_FOUNDRY_API_KEY",
+          "ANTHROPIC_FOUNDRY_BASE_URL",
+          "ANTHROPIC_VERTEX_BASE_URL",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_BEARER_TOKEN_BEDROCK",
+          "AWS_PROFILE",
+          "AWS_SECRET_ACCESS_KEY",
+          "AWS_WEB_IDENTITY_TOKEN_FILE",
+          "AZURE_OPENAI_API_KEY",
+          "AZURE_OPENAI_ENDPOINT",
+          "CLAUDE_CODE_USE_BEDROCK",
+          "CLAUDE_CODE_USE_FOUNDRY",
+          "CLAUDE_CODE_USE_VERTEX",
+          "CLAUDE_CODE_SKIP_BEDROCK_AUTH",
+          "CLAUDE_CODE_SKIP_VERTEX_AUTH",
+          "CODEX_API_KEY",
+          "CODEX_HOME",
+          "GEMINI_API_KEY",
+          "GOOGLE_API_KEY",
+          "OPENAI_API_BASE",
+          "OPENAI_API_KEY",
+          "OPENAI_BASE_URL",
+          "OPENAI_ORGANIZATION"
+        ]
+      },
+      "billing": {
+        "mode": "subscription_included",
+        "metered": false,
+        "uses_credits": false,
+        "paid_overflow": false
+      },
+      "semantic_classes": [
+        "code-change",
+        "content-discovery",
+        "research-review",
+        "semantic-adjudication"
+      ],
+      "capabilities": [
+        "current-events-discovery",
+        "filesystem",
+        "python",
+        "shell",
+        "source-consistency-review",
+        "text-reasoning"
+      ],
+      "attestations": [
+        "oauth-authenticated",
+        "owner-zero-paid-attested-2026-05-29",
+        "zero-paid"
+      ],
+      "formal_gate_eligible": false,
+      "enabled": true,
+      "probe_cost_units": 1,
+      "health_state": {
+        "initial": "unknown",
+        "probe_required": true
+      }
     }
   ]
 }

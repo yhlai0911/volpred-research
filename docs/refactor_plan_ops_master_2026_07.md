@@ -336,3 +336,15 @@ alternate config、`apiKeyHelper`與付費fallback全部在provider I/O前拒絕
 **`root_cause_fixed_and_verified`**。全repo其餘AI CLI seam已materialize為不重疊
 follow-up `assign_5938ee83`；未transfer owner、未繞過#9、未關#12，T10 umbrella
 維持 **`contained`**。
+
+**T10 production AI CLI source-ratchet follow-up（2026-07-27）**：
+`assign_5938ee83`完成9個Python business launcher、2個metadata-only diagnostic
+launcher及兩條live shell seam的全量接管。所有business process creation都必須在
+I/O前重載`provider-registry.v1`、符合不可降級launch contract、驗證actual
+executable/settings bytes並繼承receipt env；新增spawn會由AST inventory mismatch或
+unguarded boundary直接擋下。agy只以既有Google OAuth及zero-paid owner attestation
+啟用，固定`gemini-3.6-flash-high`且formal-gate eligibility=false。Bounded Codex
+wrapper改綁repo Python／pinned nvm CLI；Telegram responder改走receipt-bound execve。
+Legacy hourly shell維持retired rollback artifact，不是production owner。
+相鄰範圍167 passed與live alternate-auth no-spawn denial均綠；此slice不轉移
+`provider.execution` owner，#9未成熟前#12仍`contained`。

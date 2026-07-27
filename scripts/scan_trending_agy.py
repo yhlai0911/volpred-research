@@ -27,8 +27,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.dispatch_supervisor import procutil  # noqa: E402
+from volpred.ops.execution.registry import (  # noqa: E402
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 
 AGY = "/Users/yhlai0911/.local/bin/agy"
+AGY_MODEL = "gemini-3.6-flash-high"
 
 # 掃描範疇對齊 memory reference_trending_blog_sources：
 # havingchien / Stratechery / 凱基·Ranger·元大 + 國外 forums + high-viral 3 類
@@ -91,11 +97,34 @@ def main() -> int:
     # gen_lazypack_codex (2026-07-11) and run_agent_job (2026-07-12) — the fix is a
     # process group + procutil.kill_pgid, which is the single owner of this concern.
     # Gate: scripts/tests/test_agentic_cli_timeout_killpg.py
+    child_env = {**os.environ, "ANTIGRAVITY_MODEL": AGY_MODEL}
+    try:
+        receipt = authorize_provider_spawn(
+            contract_id="trending-scan.agy",
+            model_id=AGY_MODEL,
+            executable_path=AGY,
+            environment=child_env,
+        )
+        verify_spawn_receipt(receipt)
+    except ProviderRegistryError as exc:
+        _warn_scan("provider policy denied agy before scan", exc)
+        print(
+            json.dumps(
+                {
+                    "candidates": [],
+                    "error": "provider_policy_denied",
+                    "detail": str(exc)[:200],
+                },
+                ensure_ascii=False,
+            )
+        )
+        return 0
+    child_env.update(receipt.environment())
     try:
         proc = subprocess.Popen(
-            [AGY, "-p", PROMPT],
+            [receipt.resolved_executable, "-p", PROMPT],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
-            start_new_session=True,
+            start_new_session=True, env=child_env,
         )
     except FileNotFoundError as exc:
         _warn_scan("agy command failed before producing output", exc)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -21,6 +22,11 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .common import project_path
 from . import termination
+from .execution.registry import (
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 from .local_control_plane import (
     ExecutionReceipt,
     _atomic_write_json,
@@ -42,10 +48,14 @@ COORDINATOR_TIMEOUT_SECONDS = 90
 EXECUTOR_TIMEOUT_SECONDS = 180
 CLAUDE_PRINT_EXTRA_ARGS: tuple[str, ...] = ()
 CODEX_EXEC_EXTRA_ARGS: tuple[str, ...] = ("--full-auto",)
+CLAUDE_EXECUTION_MODEL = "claude-opus-4-8"
+CODEX_EXECUTION_MODEL = "gpt-5.6-sol"
 
 
 def _run_agentic(
     argv: list[str], *, cwd: Any, timeout: int,
+    contract_id: str,
+    model_id: str,
     termination_ledger_path: Path | None = None,
 ) -> subprocess.CompletedProcess:
     """`subprocess.run` for an agentic CLI, with the whole process tree killed on timeout.
@@ -64,13 +74,28 @@ def _run_agentic(
     difference is entirely in what is dead afterwards. Gate:
     scripts/tests/test_agentic_cli_timeout_killpg.py
     """
+    executable = shutil.which(argv[0]) if not Path(argv[0]).is_absolute() else argv[0]
+    if not executable:
+        raise ProviderRegistryError(
+            f"provider executable {argv[0]!r} is not available"
+        )
+    receipt = authorize_provider_spawn(
+        contract_id=contract_id,
+        model_id=model_id,
+        executable_path=executable,
+        environment=os.environ,
+    )
+    verify_spawn_receipt(receipt)
+    authorized_argv = [receipt.resolved_executable, *argv[1:]]
+    child_env = {**os.environ, **receipt.environment()}
     proc = subprocess.Popen(
-        argv,
+        authorized_argv,
         cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         start_new_session=True,  # its own process group, so it can be killed as one
+        env=child_env,
     )
     try:
         stdout, stderr = proc.communicate(timeout=timeout)
@@ -94,8 +119,18 @@ def _run_agentic(
                 file=sys.stderr,
             )
         stdout, stderr = proc.communicate()  # reap; the group is gone
-        raise subprocess.TimeoutExpired(argv, timeout, output=stdout, stderr=stderr)
-    return subprocess.CompletedProcess(argv, proc.returncode, stdout, stderr)
+        raise subprocess.TimeoutExpired(
+            authorized_argv,
+            timeout,
+            output=stdout,
+            stderr=stderr,
+        )
+    return subprocess.CompletedProcess(
+        authorized_argv,
+        proc.returncode,
+        stdout,
+        stderr,
+    )
 WORKFLOW_ID_BY_TEMPLATE = {
     "code.yaml": "code-implement",
     "content.yaml": "feed-write",
@@ -681,9 +716,22 @@ def run_coordinator_brief(task_id: str, *, storage_dir: str = "storage") -> dict
     for _ in range(3):
         try:
             result = _run_agentic(
-                ["claude", "-p", *CLAUDE_PRINT_EXTRA_ARGS, "--output-format", "json", "--json-schema", schema, prompt],
+                [
+                    "claude",
+                    "-p",
+                    *CLAUDE_PRINT_EXTRA_ARGS,
+                    "--model",
+                    CLAUDE_EXECUTION_MODEL,
+                    "--output-format",
+                    "json",
+                    "--json-schema",
+                    schema,
+                    prompt,
+                ],
                 cwd=project_path(),
                 timeout=COORDINATOR_TIMEOUT_SECONDS,
+                contract_id="execution-brief.claude",
+                model_id=CLAUDE_EXECUTION_MODEL,
             )
         except subprocess.TimeoutExpired:
             # The tree is dead before we loop: otherwise this retry would run
@@ -849,9 +897,22 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
         schema = json.dumps(ExecutorResult.model_json_schema(), ensure_ascii=False)
         try:
             result = _run_agentic(
-                ["claude", "-p", *CLAUDE_PRINT_EXTRA_ARGS, "--output-format", "json", "--json-schema", schema, prompt],
+                [
+                    "claude",
+                    "-p",
+                    *CLAUDE_PRINT_EXTRA_ARGS,
+                    "--model",
+                    CLAUDE_EXECUTION_MODEL,
+                    "--output-format",
+                    "json",
+                    "--json-schema",
+                    schema,
+                    prompt,
+                ],
                 cwd=project_path(),
                 timeout=EXECUTOR_TIMEOUT_SECONDS,
+                contract_id="execution-brief.claude",
+                model_id=CLAUDE_EXECUTION_MODEL,
             )
         except subprocess.TimeoutExpired as exc:
             raise RuntimeError(
@@ -872,6 +933,8 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
                     [
                         "codex",
                         "exec",
+                        "-m",
+                        CODEX_EXECUTION_MODEL,
                         "--cd",
                         str(project_path()),
                         *CODEX_EXEC_EXTRA_ARGS,
@@ -883,6 +946,8 @@ def run_executor_task(task_id: str, *, agent_name: str, storage_dir: str = "stor
                     ],
                     cwd=project_path(),
                     timeout=EXECUTOR_TIMEOUT_SECONDS,
+                    contract_id="execution-brief.codex",
+                    model_id=CODEX_EXECUTION_MODEL,
                 )
             except subprocess.TimeoutExpired as exc:
                 raise RuntimeError(

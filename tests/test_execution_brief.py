@@ -5,6 +5,9 @@ import subprocess
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import pytest
+
+import volpred.ops.execution_brief as execution_brief
 from volpred.ops.common import project_path
 from volpred.ops.execution_brief import (
     BriefContent,
@@ -23,6 +26,36 @@ from volpred.ops.execution_brief import (
     task_unmet_preconditions,
 )
 from volpred.ops.local_control_plane import create_task, get_task
+
+
+def test_agentic_runner_denies_before_provider_io(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(
+        execution_brief,
+        "authorize_provider_spawn",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            execution_brief.ProviderRegistryError("paid provider denied")
+        ),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        execution_brief.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: pytest.fail(
+            "provider policy denial must precede Popen"
+        ),
+    )
+
+    with pytest.raises(
+        execution_brief.ProviderRegistryError,
+        match="paid provider denied",
+    ):
+        execution_brief._run_agentic(
+            ["claude", "-p", "work"],
+            cwd=tmp_path,
+            timeout=10,
+            contract_id="execution-brief.claude",
+            model_id="claude-opus-4-8",
+        )
 
 
 def _write_template(root: Path, name: str, body: str) -> None:

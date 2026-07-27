@@ -15,6 +15,7 @@ from pathlib import Path
 
 import pytest
 
+import volpred.publisher.prepublish_audit as prepublish_audit
 from volpred.publisher.prepublish_audit import (
     audit_content_provenance,
     extract_numeric_claims,
@@ -23,6 +24,32 @@ from volpred.publisher.prepublish_audit import (
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 K1413_RESULTS = REPO_ROOT / "experiments" / "k1413" / "k1413_results.json"
+
+
+def test_llm_audit_provider_policy_denial_precedes_agy_popen(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        prepublish_audit,
+        "authorize_provider_spawn",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            prepublish_audit.ProviderRegistryError("paid overflow denied")
+        ),
+        raising=False,
+    )
+    monkeypatch.setattr(
+        prepublish_audit.subprocess,
+        "Popen",
+        lambda *_args, **_kwargs: pytest.fail(
+            "provider policy denial must precede Popen"
+        ),
+    )
+
+    result = prepublish_audit.run_llm_consistency_check("claim", "source")
+
+    assert result["verdict"] == "SKIP"
+    assert result["error"].startswith("provider_policy_denied:")
+    assert "paid overflow denied" in result["error"]
 
 
 @pytest.fixture

@@ -88,6 +88,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dispatch_supervisor.procutil import kill_tree  # noqa: E402
+from volpred.ops.execution.registry import (  # noqa: E402
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 
 
 def _resolve_codex_bin() -> str:
@@ -128,6 +133,7 @@ def _ensure_codex_runtime_on_path(codex_bin: str) -> None:
 
 CODEX_BIN = _resolve_codex_bin()
 _ensure_codex_runtime_on_path(CODEX_BIN)
+CODEX_DEFAULT_MODEL = "gpt-5.6-sol"
 
 # One wall-clock budget for the whole generation; every phase draws from it.
 # Stays under the 1800s compute_queue job timeout with room for the upload →
@@ -406,15 +412,28 @@ def _run_codex(prompt: str, out_dir: Path, timeout_s: float,
     worktree until PHASE-Z flagged it (3 shifts). A timeout must mean nothing
     further lands, otherwise "failed" jobs keep writing behind our back.
     """
-    cmd = [CODEX_BIN, "exec", "-s", "workspace-write", "-C", str(ROOT),
+    selected_model = model or CODEX_DEFAULT_MODEL
+    if not os.access(CODEX_BIN, os.X_OK):
+        return 3, "codex CLI not found on PATH (see CLAUDE.md dual-CLI note)"
+    try:
+        receipt = authorize_provider_spawn(
+            contract_id="lazypack.codex",
+            model_id=selected_model,
+            executable_path=CODEX_BIN,
+            environment=os.environ,
+        )
+        verify_spawn_receipt(receipt)
+    except ProviderRegistryError as exc:
+        return 4, f"provider policy denied codex: {exc}"
+    cmd = [receipt.resolved_executable, "exec", "-m", selected_model,
+           "-s", "workspace-write", "-C", str(ROOT),
            "--add-dir", str(out_dir), "--skip-git-repo-check"]
-    if model:
-        cmd += ["-m", model]
+    child_env = {**os.environ, **receipt.environment()}
     try:
         proc = subprocess.Popen(
             cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, text=True, cwd=str(ROOT),
-            start_new_session=True,
+            start_new_session=True, env=child_env,
         )
     except FileNotFoundError:
         return 3, "codex CLI not found on PATH (see CLAUDE.md dual-CLI note)"

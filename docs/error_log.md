@@ -4170,3 +4170,29 @@ guard的 targeted suite **119 passed**；supervisor class sweep另 **233 tests p
 legacy／utility AI CLI launcher已另立不重疊follow-up `assign_5938ee83`；因此沒有
 transfer `provider.execution` owner、沒有繞過#9、沒有關閉#12，umbrella仍為
 **`contained`**。
+
+### 2026-07-27 — 三條主路徑受保護，不代表其他AI CLI沒有付費／身分旁路
+
+**證據化症狀**：repo-wide source census在三條主launcher之外找到
+`execution_brief.py`、`questions.py`、`scan_trending_agy.py`、兩條lazypack harness與
+`prepublish_audit.py`直接建立AI CLI subprocess；另有兩條live shell seam。它們沒有讀
+canonical registry，且多數用PATH/default model，實際binary/model/auth可與receipt宣告
+不同。第一次live denial也證明`codex_exec_bounded.sh`用到舊system Python，在policy
+執行前就因`list | dict`型別語法crash。
+
+**根因層級與底層修復**：provider policy只接在列舉過的caller，沒有「新增spawn必須
+被擋」的class invariant。Python AST audit與shell ownership證據現在共同擁有此邊界；
+所有business seam在provider I/O前重載strict registry、驗receipt後再以pinned
+executable啟動，model明確寫入argv/env。新增`agy-cli`只接受本機既有OAuth surface與
+owner先前zero-paid指令，固定一個model；API key、alternate base URL、credits與未知
+billing仍拒絕。Shell wrapper綁repo Python及canonical root，Telegram Claude以
+authorize→verify→同PID execve消除TOCTOU；retired hourly wrapper不因留作rollback
+artifact被誤列live。
+
+**回歸與制度化**：獨立literal inventory與AST discovery互相校驗，測試另動態建立
+同檔`codex --version`加`codex exec`，證明diagnostic豁免不能遮住business call；每個
+launcher都有policy-denial-before-Popen／execve負向案例。相鄰範圍 **167 passed**；
+live以注入`OPENAI_API_KEY=sentinel`回讀bounded Codex、Telegram exec與agy scan都在
+provider I/O前exit 126／policy_denied，未呼叫模型。此旁路類根因狀態為
+**`root_cause_fixed_and_verified`**；真正owner cutover仍等#9，Issue #12維持
+`contained`。

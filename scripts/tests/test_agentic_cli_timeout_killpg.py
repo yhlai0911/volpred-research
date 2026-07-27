@@ -162,6 +162,11 @@ def _analyze(path: Path) -> dict:
     """Return what this file does about spawning/bounding/killing an agentic CLI."""
     src = path.read_text(encoding="utf-8", errors="replace")
     tree = ast.parse(src, filename=str(path))
+    module_agentic_candidates = [
+        value
+        for value in _string_constants(tree)
+        if value.rsplit("/", 1)[-1].lower() in AGENTIC_MARKERS
+    ]
 
     # Helper functions that answer "where does the binary live". Built first because
     # the const_map pass below resolves calls through it.
@@ -245,7 +250,17 @@ def _analyze(path: Path) -> dict:
                     isinstance(e, ast.Constant) and e.value in PROBE_ONLY_FLAGS for e in rest
                 ):
                     continue  # `codex --version` — prints and exits, nothing to orphan
-                heads = _head_candidates(argv.elts[0], const_map, resolver_map)
+                if (
+                    isinstance(argv.elts[0], ast.Attribute)
+                    and argv.elts[0].attr == "resolved_executable"
+                ):
+                    heads = module_agentic_candidates
+                else:
+                    heads = _head_candidates(
+                        argv.elts[0],
+                        const_map,
+                        resolver_map,
+                    )
             elif isinstance(argv, ast.Name):
                 heads = head_map.get(argv.id, const_map.get(argv.id, []))
             elif isinstance(argv, ast.Constant) and isinstance(argv.value, str):
@@ -333,7 +348,10 @@ def test_timed_out_agentic_cli_is_killed_as_a_group() -> None:
     )
 
 
-def test_timeout_actually_reaps_the_grandchild(tmp_path: Path) -> None:
+def test_timeout_actually_reaps_the_grandchild(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Behavioural companion to the sweep: prove the kill reaches the grandchild.
 
     The static gate can only prove the word `killpg` appears in the file. It cannot
@@ -347,7 +365,7 @@ def test_timeout_actually_reaps_the_grandchild(tmp_path: Path) -> None:
     Without start_new_session + killpg this test fails by finding the file — which is
     exactly what K1685 did in production, 24 minutes late and 37KB large.
     """
-    from volpred.ops.execution_brief import _run_agentic  # the shared helper
+    import volpred.ops.execution_brief as execution_brief
 
     canary = tmp_path / "grandchild_was_here.txt"
     fake_cli = tmp_path / "fake_agentic_cli.sh"
@@ -359,9 +377,29 @@ def test_timeout_actually_reaps_the_grandchild(tmp_path: Path) -> None:
     )
     fake_cli.chmod(0o755)
 
+    class _Receipt:
+        resolved_executable = str(fake_cli)
+
+        @staticmethod
+        def environment() -> dict[str, str]:
+            return {"VOLPRED_PROVIDER_ID": "test-cli"}
+
+    monkeypatch.setattr(
+        execution_brief,
+        "authorize_provider_spawn",
+        lambda **_kwargs: _Receipt(),
+    )
+    monkeypatch.setattr(
+        execution_brief,
+        "verify_spawn_receipt",
+        lambda _receipt: None,
+    )
+
     with pytest.raises(subprocess.TimeoutExpired):
-        _run_agentic(
+        execution_brief._run_agentic(
             [str(fake_cli)], cwd=str(tmp_path), timeout=1,
+            contract_id="test.agentic",
+            model_id="test-model",
             termination_ledger_path=tmp_path / "termination_intents.jsonl",
         )
 

@@ -26,6 +26,8 @@ unset _nvm_bin
 
 CLAUDE_BIN="${CLAUDE_BIN:-/Users/yhlai0911/.local/bin/claude}"
 CODEX_BOUNDED="${CODEX_BOUNDED:-$REPO_ROOT/scripts/codex_exec_bounded.sh}"
+PROVIDER_EXEC="$REPO_ROOT/scripts/authorized_provider_exec.py"
+PROVIDER_PYTHON="$REPO_ROOT/.venv/bin/python"
 LOCK_DIR="/Users/yhlai0911/.volpred/run/telegram_responder.lock"
 RESPONDER_WORKDIR="/Users/yhlai0911/.volpred/run/telegram_responder_workdir"
 AUTO_MEMORY_DIR="/Users/yhlai0911/.claude/projects/-Users-yhlai0911-volpred-research/memory"
@@ -113,7 +115,10 @@ run_claude_pass() {
     # watchdog：CAP_SEC 後殺 responder
     (
         cd "$RESPONDER_WORKDIR" || exit 1
-        "$CLAUDE_BIN" -p --dangerously-skip-permissions \
+        "$PROVIDER_PYTHON" "$PROVIDER_EXEC" \
+            --contract telegram-responder.claude \
+            --model "$RESPONDER_MODEL" --executable "$CLAUDE_BIN" -- \
+            -p --dangerously-skip-permissions \
             --effort "$RESPONDER_EFFORT" --model "$RESPONDER_MODEL" \
             --add-dir "$REPO_ROOT" --add-dir "$AUTO_MEMORY_DIR" \
             --settings "$RESPONDER_SETTINGS_JSON" \
@@ -144,6 +149,7 @@ run_codex_pass() {
     # otherwise outlive this responder and keep the single-flight lock stale.
     (
         cd "$RESPONDER_WORKDIR" || exit 1
+        VOLPRED_CODEX_EXEC_CONTRACT=telegram-responder.codex \
         bash "$CODEX_BOUNDED" --timeout "$CAP_SEC" \
             --skip-git-repo-check -s danger-full-access \
             -C "$RESPONDER_WORKDIR" --add-dir "$REPO_ROOT" \

@@ -50,6 +50,7 @@ def test_canonical_registry_is_strict_and_sha_bound() -> None:
     registry = load_provider_registry()
 
     assert {provider.provider_id for provider in registry.providers} == {
+        "agy-cli",
         "claude-cli",
         "codex-cli",
     }

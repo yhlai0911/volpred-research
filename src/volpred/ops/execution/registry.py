@@ -164,6 +164,78 @@ _LAUNCH_CONTRACTS = {
         ),
         requires_formal_gate=False,
     ),
+    "execution-brief.claude": LaunchContract(
+        provider_id="claude-cli",
+        semantic_class="task-orchestration",
+        required_capabilities=frozenset(
+            {"filesystem", "shell", "task-routing"}
+        ),
+        requires_formal_gate=False,
+    ),
+    "execution-brief.codex": LaunchContract(
+        provider_id="codex-cli",
+        semantic_class="task-orchestration",
+        required_capabilities=frozenset(
+            {"filesystem", "shell", "task-routing"}
+        ),
+        requires_formal_gate=False,
+    ),
+    "lazypack.codex": LaunchContract(
+        provider_id="codex-cli",
+        semantic_class="code-change",
+        required_capabilities=frozenset({"filesystem", "python", "shell"}),
+        requires_formal_gate=False,
+    ),
+    "lazypack.agy": LaunchContract(
+        provider_id="agy-cli",
+        semantic_class="code-change",
+        required_capabilities=frozenset({"filesystem", "python", "shell"}),
+        requires_formal_gate=False,
+    ),
+    "trending-scan.agy": LaunchContract(
+        provider_id="agy-cli",
+        semantic_class="content-discovery",
+        required_capabilities=frozenset(
+            {"current-events-discovery", "text-reasoning"}
+        ),
+        requires_formal_gate=False,
+    ),
+    "member-qa-adjudicator.agy": LaunchContract(
+        provider_id="agy-cli",
+        semantic_class="semantic-adjudication",
+        required_capabilities=frozenset({"text-reasoning"}),
+        requires_formal_gate=False,
+    ),
+    "prepublish-audit.agy": LaunchContract(
+        provider_id="agy-cli",
+        semantic_class="research-review",
+        required_capabilities=frozenset(
+            {"source-consistency-review", "text-reasoning"}
+        ),
+        requires_formal_gate=False,
+    ),
+    "bounded-codex.agentic": LaunchContract(
+        provider_id="codex-cli",
+        semantic_class="agentic-execution",
+        required_capabilities=frozenset({"filesystem", "shell"}),
+        requires_formal_gate=False,
+    ),
+    "telegram-responder.claude": LaunchContract(
+        provider_id="claude-cli",
+        semantic_class="task-orchestration",
+        required_capabilities=frozenset(
+            {"filesystem", "shell", "task-routing"}
+        ),
+        requires_formal_gate=False,
+    ),
+    "telegram-responder.codex": LaunchContract(
+        provider_id="codex-cli",
+        semantic_class="task-orchestration",
+        required_capabilities=frozenset(
+            {"filesystem", "shell", "task-routing"}
+        ),
+        requires_formal_gate=False,
+    ),
 }
 
 

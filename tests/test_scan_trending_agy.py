@@ -45,6 +45,24 @@ def _stub_popen(monkeypatch, proc: FakeProc) -> None:
     monkeypatch.setattr(MODULE.subprocess, "Popen", lambda *args, **kwargs: proc)
 
 
+def test_provider_policy_denial_precedes_agy_popen(monkeypatch, capsys):
+    monkeypatch.setattr(
+        MODULE,
+        "authorize_provider_spawn",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            MODULE.ProviderRegistryError("API key path denied")
+        ),
+        raising=False,
+    )
+
+    assert MODULE.main() == 0
+
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["candidates"] == []
+    assert payload["error"] == "provider_policy_denied"
+    assert "API key path denied" in payload["detail"]
+
+
 def test_main_warns_on_nonzero_agy_exit(monkeypatch, capsys):
     _stub_popen(monkeypatch, FakeProc(returncode=2, stdout="", stderr="auth failed"))
 
