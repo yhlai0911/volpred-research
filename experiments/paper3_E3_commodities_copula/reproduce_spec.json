@@ -1,0 +1,57 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "paper3_E3.py",
+    "args": [],
+    "sha256": "77424e4237f88d5bcdc98e78f32774db5207740b7e9ee277a37c73acbd89794b",
+    "size_bytes": 78854
+  },
+  "canonical_result": "paper3_E3_results.json",
+  "inputs": [],
+  "outputs": [],
+  "timeout_seconds": 1800,
+  "network": "allow",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 438.0,
+    "recorded_at": "2026-07-27T14:01:26Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/metadata/timestamp",
+      "/metadata/runtime_seconds",
+      "/config/ticker_used"
+    ],
+    "ignore_reasons": {
+      "/metadata/timestamp": "Wall-clock generation timestamp; not part of the empirical claim surface.",
+      "/metadata/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/config/ticker_used": "Records which yfinance ticker (primary futures vs ETF fallback) served each asset; a data-availability artifact, not a claim. Futures primaries fired on this run."
+    }
+  }
+}
