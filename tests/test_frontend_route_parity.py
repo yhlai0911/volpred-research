@@ -819,7 +819,16 @@ def test_namespace_navigation_and_reexport_cannot_silently_pass(
     _write(
         tmp_path / "web/src/lib/navigation-export.ts",
         """
-        export { redirect as navigate } from "next/navigation"
+        export {
+          redirect as navigate,
+        } from "next/navigation"
+        """,
+    )
+    _write(
+        tmp_path / "web/src/lib/navigation-export-all.ts",
+        """
+        export *
+        from "next/navigation"
         """,
     )
 
@@ -837,6 +846,11 @@ def test_namespace_navigation_and_reexport_cannot_silently_pass(
     assert any(
         item["kind"] == "unsupported_next_navigation_binding"
         and item["source_ref"].endswith("navigation-export.ts")
+        for item in report["blockers"]
+    )
+    assert any(
+        item["kind"] == "unsupported_next_navigation_binding"
+        and item["source_ref"].endswith("navigation-export-all.ts")
         for item in report["blockers"]
     )
 
