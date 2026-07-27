@@ -1,8 +1,8 @@
 # Codex CLI — 完整指令與參數對照（機器產生，勿手改）
 
-- **產生時間**：2026-07-20 09:01 台灣時間
-- **來源**：本機 `codex help` 逐節點輸出（`codex-cli 0.144.6`）
-- **npm `@openai/codex` latest**：0.144.6
+- **產生時間**：2026-07-27 09:01 台灣時間
+- **來源**：本機 `codex help` 逐節點輸出（`codex-cli 0.145.0`）
+- **npm `@openai/codex` latest**：0.145.0
 - **重新產生**：`uv run python scripts/gen_codex_cli_reference.py`
 
 > 這份檔是**本機實際安裝的 binary 自己吐的**，不是人寫的摘要。任何與這裡衝突的說明，以這裡為準；要改內容請改 CLI 版本或重跑產生器，不要手改本檔。
@@ -13,7 +13,7 @@
 
 ```toml
 model = "gpt-5.6-sol"
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 personality = "pragmatic"
 sandbox_mode = "danger-full-access"
 ```
@@ -97,7 +97,7 @@ Commands:
   mcp-server      Start Codex as an MCP server (stdio)
   app-server      [experimental] Run the app server or related tooling
   remote-control  [experimental] Manage the app-server daemon with remote control enabled
-  app             Launch the Codex desktop app (opens the app installer if missing)
+  app             Launch the Desktop app (opens the app installer if missing)
   completion      Generate shell completion scripts
   update          Update Codex to the latest version
   doctor          Diagnose local Codex installation, config, auth, and runtime health
@@ -1403,13 +1403,13 @@ Options:
 ## codex app
 
 ```
-Launch the Codex desktop app (opens the app installer if missing)
+Launch the Desktop app (opens the app installer if missing)
 
 Usage: codex app [OPTIONS] [PATH]
 
 Arguments:
   [PATH]
-          Workspace path to open in Codex Desktop
+          Workspace path to open in the Desktop app
           
           [default: .]
 
