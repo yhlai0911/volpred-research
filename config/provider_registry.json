@@ -1,0 +1,89 @@
+{
+  "schema_version": "provider-registry.v1",
+  "probe_policy": {
+    "minimum_interval_seconds": 300,
+    "maximum_backoff_seconds": 3600,
+    "window_seconds": 3600,
+    "max_probe_cost_units": 6
+  },
+  "providers": [
+    {
+      "provider_id": "claude-cli",
+      "executable": "claude",
+      "model_ids": [
+        "claude-opus-4-8",
+        "claude-sonnet-5"
+      ],
+      "auth": {
+        "surface": "subscription_oauth",
+        "api_key_env": null,
+        "auto_reload": false
+      },
+      "billing": {
+        "mode": "subscription_included",
+        "metered": false,
+        "uses_credits": false,
+        "paid_overflow": false
+      },
+      "semantic_classes": [
+        "agentic-execution",
+        "code-change",
+        "research-compute"
+      ],
+      "capabilities": [
+        "filesystem",
+        "python",
+        "shell"
+      ],
+      "attestations": [
+        "subscription-authenticated",
+        "zero-paid"
+      ],
+      "formal_gate_eligible": false,
+      "enabled": true,
+      "probe_cost_units": 1,
+      "health_state": {
+        "initial": "unknown",
+        "probe_required": true
+      }
+    },
+    {
+      "provider_id": "codex-cli",
+      "executable": "codex",
+      "model_ids": [
+        "codex-failover"
+      ],
+      "auth": {
+        "surface": "desktop_subscription",
+        "api_key_env": null,
+        "auto_reload": false
+      },
+      "billing": {
+        "mode": "subscription_included",
+        "metered": false,
+        "uses_credits": false,
+        "paid_overflow": false
+      },
+      "semantic_classes": [
+        "agentic-execution",
+        "code-change"
+      ],
+      "capabilities": [
+        "filesystem",
+        "python",
+        "shell"
+      ],
+      "attestations": [
+        "subscription-authenticated",
+        "zero-paid"
+      ],
+      "formal_gate_eligible": false,
+      "enabled": true,
+      "probe_cost_units": 1,
+      "health_state": {
+        "initial": "unknown",
+        "probe_required": true
+      }
+    }
+  ]
+}
