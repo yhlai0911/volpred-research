@@ -413,6 +413,9 @@
     },
     {
      "at": "2026-07-27T00:18:58.260992+00:00"
+    },
+    {
+     "at": "2026-07-27T01:32:27.989346+00:00"
     }
    ],
    "current_task_id": null,
@@ -1043,6 +1046,9 @@
     },
     {
      "at": "2026-07-26T23:29:00.893859+00:00"
+    },
+    {
+     "at": "2026-07-27T00:19:06.552840+00:00"
     }
    ],
    "current_task_id": null,
@@ -1369,13 +1375,19 @@
      "first_seen_at": "2026-07-27T00:00:14.072358+00:00",
      "key": "30224293356:1",
      "last_seen_at": "2026-07-27T00:00:14.072358+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T01:00:49.740626+00:00",
+     "key": "30226431059:1",
+     "last_seen_at": "2026-07-27T01:00:49.740626+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-26T23:16:07.2124617Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1714']",
-   "last_seen_at": "2026-07-27T00:00:14.072358+00:00",
+   "last_breach_detail": "2026-07-27T00:14:49.9475629Z tests/test_daily_checkup_db_landing.py:68: AssertionError",
+   "last_seen_at": "2026-07-27T01:00:49.740626+00:00",
    "notified_at": null,
-   "occurrence_count": 5,
+   "occurrence_count": 6,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1399,6 +1411,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T00:18:58.262892+00:00",
+ "updated_at": "2026-07-27T01:32:27.991113+00:00",
  "version": 1
 }

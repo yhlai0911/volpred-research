@@ -22,6 +22,10 @@
     {
       "experiment": "k1623",
       "reason": "Legacy pre-spec run used the gitignored mutable data/cache/price_cache.db without a frozen source snapshot. The exact input vintage no longer exists: the documented TW0050 history revision changed n from 4,263 to 4,264 and prevents exact reconstruction of the archived k1623_results.json. A retroactive reproduce_spec would therefore describe today's database, not the bytes that produced the archived result."
+    },
+    {
+      "experiment": "k528",
+      "reason": "k528_nfp_event_study.py (lines 495-496) fetches SPY and ^VIX daily OHLCV live via yf.download over 2005-01..2026-03 with no committed price snapshot -- data/ holds only the NFP release-calendar fixture (nfp_release_feed_fixture.json). yfinance retroactively revises SPY/VIX history (adjusted-close/split/dividend restatements), so a re-download yields different bytes than the archived k528_nfp_event_study_results.json / k528_nfp_official_dates_results.json. A retroactive reproduce_spec would describe today's yfinance vintage, not the input that produced the archived result -- same unfrozen-live-source class as k1623. The finding itself is recorded (K528 knowledge entry) and Codex primary-path certified PASS @ b2634ed41 on the claim surface; only offline byte-reproduction of the market-data input is impossible."
     }
   ]
 }

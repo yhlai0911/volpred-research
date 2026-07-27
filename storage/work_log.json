@@ -27662,5 +27662,42 @@
     "owner": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855",
     "commit": null,
     "summary": "K1721（GPR 日頻 Acts vs Threats 分解對 vol 不對稱預測，Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，SPY/GLD/XLE/ITA 多 horizon）依 experiment topology=worktree/xhigh 走 compute_queue。建 registered worktree dispatch-slot-3-87c7269d-k1721，寫 brief（含 HAR-RV 基準+GPR 擴充、OOS QLIKE、DM/Clark-West 檢定、signal.shift(1)+seed=42、多重檢定校正、NULL 可接受），enqueue-agent job=agent-brief_k1721-6f6bbb，source task → awaiting_agent_job。收件由後續 fire PHASE A。"
+  },
+  {
+    "timestamp": "2026-07-27T09:18:45+08:00",
+    "task_type": "platform_ops",
+    "task_id": "k528_primary_codex_certify_merge",
+    "outcome": "blocked",
+    "actor": "hourly-slot-3-619db8ebb1fb4d339e39f1a424e4fde4",
+    "owner": "hourly-slot-3-619db8ebb1fb4d339e39f1a424e4fde4",
+    "commit": null,
+    "summary": "K528 primary-path Codex 認證 → rebase + 完整性重驗（merge 被新 artifact gate 擋下）\n\n依 brief /tmp/brief_k528_merge.md 逐步執行：\n\n1. 進 worktree k528-round7-204d556b（branch k528-nfp-official-dates）。\n2. `git rebase main` 成功：16 個 commit 乾淨 rebase，**無衝突**。brief 預期的兩個 review-log 衝突\n   （storage/ops/codex_reviews/k528_round5_prompt.md / k528_round5_verdict.md）被 git 三方合併自動化解，\n   union 內容保留（diff main..HEAD 已不含此二檔，代表雙方內容一致）。rebase 後 HEAD=371299771，落後 main 0。\n3. 【研究誠實重驗】rebase 後重跑 sha256 比對：8 個 claim-surface 檔案**全部 byte-match**\n   review_verdict.json 的 reviewed_sha256（README.md / build_article_correction.py /\n   k528_nfp_event_study.py / k528_nfp_event_study_results.json / k528_nfp_official_dates_results.json /\n   test_k528_completeness_gate.py / test_k528_price_coverage_gate.py / verify_residual_gap_probe.py）。\n   → rebase 未動 claim surface，認證仍實質有效。\n4. 重跑測試 gate：test_k528_completeness_gate.py + test_k528_price_coverage_gate.py → 24 passed。\n5. Merge 經 git_writer_lock → merge_worktree.sh：**ABORT（非 stale-base）**。rebase 已解掉 stale-base，\n   但觸發另一道 artifact 完整性 gate（scripts/check_experiment_artifacts.py check）：\n   experiments/k528 缺 reproduce_spec.json（K528 knowledge entry 已存在，僅缺此檔）。\n\n阻擋原因（研究誠實判斷，未擅自繞過）：\n- k528_nfp_event_study.py 第 495-496 行對 SPY 與 ^VIX 做 **live yfinance 網路抓取**，無 committed 價格快照\n  （data/ 只有 nfp_release_feed_fixture.json 這個 NFP 行事曆 fixture）。\n- 因此 archived k528 結果無法從 committed bytes 離線 byte-for-byte 重現：network:deny 會失敗，network:allow\n  又因 yfinance 歷史修訂而漂移。此為與 k1623 相同的情境（legacy 網路 run、無 frozen snapshot）。\n- 寫 reproduce_spec.json 會構成**假的可重現性宣稱**；加入 config/experiment_artifact_exclusions.json 則是\n  政策層決定（承認此 finding 將維持不可重現），超出本 bounded git surgery 授權範圍。\n- 依 brief 守則「不確定就在 work_log 記錄並回報，讓主線程處理」與「不得把未驗證狀態當成功」→ 停止 merge，\n  不執行 step 6/7/8（未 certify、未 complete task succeeded、未 mark-followup-dispatched）。\n\n狀態：branch k528-nfp-official-dates 已乾淨 rebase 到 main、完整性與測試全綠、**待主線程裁決** reproduce_spec\n處理方式（補 frozen SPY/VIX 快照 + 寫真實 spec，或以正當理由加入 artifact exclusions）後即可 merge。"
+  },
+  {
+    "timestamp": "2026-07-27T09:22:03+08:00",
+    "task_type": "platform_ops",
+    "task_id": "k528_primary_codex_certify_merge",
+    "outcome": "completed",
+    "actor": "hourly-slot-3-619db8ebb1fb4d339e39f1a424e4fde4",
+    "owner": "hourly-slot-3-619db8ebb1fb4d339e39f1a424e4fde4",
+    "commit": "371299771",
+    "summary": "K528 primary-path Codex 認證 → rebase + merge + 收尾（blocker 經主線程解除後完成）\n\n承先前 blocked entry。主線程已在 canonical config/experiment_artifact_exclusions.json 加入 k528 reasoned\nexclusion（誠實記錄 yfinance live-download 無 frozen snapshot、無法離線 byte 重現，與 k1623 同類；claim\nsurface 已 Codex PASS 認證），未寫假 reproduce_spec。續跑 brief step 5-9：\n\n5. Merge（git_writer_lock → merge_worktree.sh k528-round7-204d556b）：**[OK] 合併成功**（非 ABORT/SKIP）。\n   artifact gate 因 working-tree exclusion 生效而通過。merge_worktree 完整性驗證：所有 experiments/ 新增檔\n   已正確合併、modified files 全採 worktree 版本（無 silent drop）；branch k528-nfp-official-dates 已刪除、\n   worktree 已移除。前段（rebase/claim-surface/測試）未重做。\n6. Certify K528：倉庫無 dedicated certify script（scripts/*certify* 空）、README 無 certify SOP。K528\n   knowledge entry 已存在。durable 認證記錄 = codex_review_primary_certify.md + review_verdict.json\n   (verdict=PASS, reviewed_commit=b2634ed41, blocking_defects=[], reviewer=Codex gpt-5.6-sol/xhigh\n   primary-path) 已隨 merge 進 main experiments/k528/。**未直寫 knowledge.json（K1259）**；knowledge entry\n   之 cert 註記更新（無 CLI 可用）保守 defer 主線程處理。\n7. task_pool complete --id k528_primary_codex_certify_merge --status succeeded（ok=true）。\n8. compute_queue mark-followup-dispatched --id agent-brief_k528_primary_certify-b7d432\n   --next-task-id k528_primary_codex_certify_merge（followup_dispatched=true）。\n\n結果：K528 primary-path Codex PASS 已 merge 進 main；claim-surface 8/8 sha256 全程 byte-match、測試 24 pass；\ngit surgery（769-behind rebase + 2 review-log union 自動化解）乾淨完成。唯一 defer 項＝knowledge entry 的\ncert 註記更新，留主線程以既有流程處理。"
+  },
+  {
+    "timestamp": "2026-07-27T09:28:11+08:00",
+    "task_type": "platform_ops",
+    "task_id": "compute_followup_triage_k1720_k1721",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-4d1829ef7d85461cb5882a779ba85cec",
+    "owner": "hourly-slot-2-4d1829ef7d85461cb5882a779ba85cec",
+    "commit": null,
+    "summary": "PHASE A triage_failed 收件：k1720 / k1721 兩個 agent compute job 同於 2026-07-27 00:15:05Z exit_code=-2（SIGINT）死於啟動階段，stderr = \"active task fence metadata unreadable\"，零產物、worktree 乾淨。判定為兩 job 同時啟動的 fence-read race（基礎設施型，非研究失敗；worker 本身健康 —— k528 job 於 00:40 正常完成）。\n\nrequeue 被機械拒絕（failure_class=None：runner 未寫 lifecycle metadata 就死，系統無法證明 worker-killed）→ 走 triage_failed 的 re-enqueue 路徑：各自 re-enqueue 進既有乾淨 worktree（dispatch-slot-3-87c7269d-k1720 / -k1721），新 job id agent-agent-brief_k1720-6c33b8-586d6a / agent-agent-brief_k1721-6f6bbb-6be58f，followup-task-type=platform_ops。舊 failed job 標 followup_dispatched（指向新 job）以免重複 triage。\n\n驗證 stale K1721 fence（e1f76936，owner job 已 dead）無害：fence 只在活著行程持有 flock 時 block，flock 隨行程死亡由 OS 釋放，metadata 僅在 lock 被 live process 持有時才讀 → 新 K1721 job 可乾淨取得 fence，無需清理。\n\npending-followup 池已清空（k528 由 concurrent slot-3 收尾）。"
+  },
+  {
+    "timestamp": "2026-07-27T09:29:08.364569+08:00",
+    "task_type": "daily_digest",
+    "event": "lazypack_fallback",
+    "mile_id": "mile_cdade7c8",
+    "note": "codex-primary lazypack render 進行至 write phase 約10分鐘未出圖，依 coordinator 指示改用 deterministic fallback scripts/lazypack_render.py 產 3 張 poster（repair_rounds=0，layout guard pass），上傳 Supabase 後 append 懶人包圖組發佈。plan=storage/lazypack_jobs/daily_digest_20260727/plan.json"
   }
 ]

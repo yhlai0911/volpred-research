@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "title": "前哨測謊四問",
+  "subtitle": "有人說某指標能提前預告 Fed 波動時，照順序盤這四題",
+  "evidence": {
+    "reg": {
+      "path": "experiments/k1568/k1568_results.json",
+      "sha256": "2ef4ce5b52ce3dfbbdfa9f10f456c241ef983d79fb8f87f8eb72415202fc5a37",
+      "label": "聯邦公報監管發文流量對 ETF 波動的檢定"
+    },
+    "em": {
+      "path": "experiments/k1621/k1621_results.json",
+      "sha256": "7fa9205c24d8f021595cb96947811b925c5d0ae2482230bdfc8aca480d398d68",
+      "label": "EM 主權債波動對 EM 股票波動的領先與增量檢定"
+    },
+    "crowd": {
+      "path": "experiments/k1683/k1683_results.json",
+      "sha256": "b555d9b788d068694309b8663814791471a36e87bcd864622c019ab51dab1da4",
+      "label": "對沖基金國債期貨擁擠度對週度風險的預測檢定"
+    },
+    "move": {
+      "path": "experiments/trending_2026_07_06_fed_move_asymmetry/results.json",
+      "sha256": "0e2c5c2feb6483e46d9354b4b5cc6583f63a9c5422a3cfafcb3dfeea2a7e4efe",
+      "label": "MOVE 對利率上行與下行反應的不對稱"
+    },
+    "carry": {
+      "path": "storage/article_assets/jpy_carry_move_transmission/evidence.json",
+      "sha256": "3d212df51c7758067d9cc6fdfa0de05c91fb9899264add468d45f13a2f9b3cd9",
+      "label": "美債波動跳升與日圓套利傳導檢定"
+    }
+  },
+  "panels": [
+    {
+      "name": "1_framework",
+      "info": "concept",
+      "style": "editorial",
+      "title": "前哨測謊四問",
+      "alt": "驗證波動率前哨指標真偽的四道盤問",
+      "sources": ["reg"],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "第一問｜拔大盤",
+          "body": ["把大盤與 VIX 的同期波動扣掉，這個指標自己還剩多少解釋力。"]
+        },
+        {
+          "kind": "text",
+          "heading": "第二問｜對時鐘",
+          "body": ["它在事件前就先亮，還是跟事件同一天才亮。同時亮的是同伴，不是哨兵。"]
+        },
+        {
+          "kind": "text",
+          "heading": "第三問｜數關卡",
+          "body": ["為了挑出這個訊號一共試了幾種組合。換上嚴格校正後還剩幾個活著。"]
+        },
+        {
+          "kind": "text",
+          "heading": "第四問｜抽樣本",
+          "body": ["把最戲劇性的那一次抽掉，它還站得住，還是整個結論靠一次事件撐著。"]
+        },
+        {
+          "kind": "metric",
+          "label": "監管發文那篇一共試了幾種組合",
+          "value": {
+            "source": "reg",
+            "path": "/multiple_testing/n_tests",
+            "format": {"kind": "integer", "suffix": " 種"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2_placebo",
+      "info": "results",
+      "style": "bento-grid",
+      "title": "假前哨的成績單：試很多、過很少",
+      "alt": "多個所謂前哨指標的檢定結果",
+      "sources": ["reg", "crowd", "em", "carry"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "監管發文：檢定過的組合數",
+          "value": {
+            "source": "reg",
+            "path": "/multiple_testing/n_tests",
+            "format": {"kind": "integer", "suffix": " 種"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對沖基金擁擠度：四個週度風險通過門檻數",
+          "value": {
+            "source": "crowd",
+            "path": "/verdict/n_primary_pass",
+            "format": {"kind": "integer", "suffix": " 格"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "EM 債與 EM 股票同期相關（尖峰落在同一天）",
+          "value": {
+            "source": "em",
+            "path": "/lead_lag_ccf/emb_rv_vs_equity/EEM/0",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "EM 債預測 EM 股票的增益統計強度（t 值）",
+          "value": {
+            "source": "em",
+            "path": "/pooled_cluster_robust_primary/primary_date_aggregated/dm_hln_t",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "日圓套利傳導：美債波動跳升事件數",
+          "value": {
+            "source": "carry",
+            "path": "/meta/n_move_jump_events",
+            "format": {"kind": "integer", "suffix": " 次"}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "MOVE 日變動與日圓的全樣本相關",
+          "value": {
+            "source": "carry",
+            "path": "/correlation/dMOVE_vs_dUSDJPY_full_sample",
+            "format": {"kind": "number", "digits": 3}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3_direction",
+      "info": "results",
+      "style": "professional",
+      "title": "通過第一問的兩個：給的是方向感，不是計時器",
+      "alt": "MOVE 方向不對稱與擁擠度水位的真訊號但非擇時",
+      "sources": ["move", "crowd"],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "MOVE 對利率上行的反應是下行的幾倍",
+          "value": {
+            "source": "move",
+            "path": "/magnitude_controlled_slope/slope_ratio_up_over_down",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "上行下行差距的同期統計強度（t 值）",
+          "value": {
+            "source": "move",
+            "path": "/conditional_move_response/welch_t",
+            "format": {"kind": "number", "digits": 2}
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對沖基金擁擠度兩年多的漲幅（%）",
+          "value": {
+            "source": "crowd",
+            "path": "/signal/descriptive_proxy_change/change_pct",
+            "format": {"kind": "number", "digits": 1}
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "怎麼用",
+          "body": ["方向感告訴你往哪邊怕、現在多平靜；計時器才告訴你哪一天會爆。把描述性的方向感硬拗成擇時，是這個週期最常見的誤用。"]
+        }
+      ]
+    }
+  ]
+}
