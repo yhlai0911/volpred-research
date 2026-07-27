@@ -41,6 +41,11 @@ _RETIRED_BY_DESIGN: dict[str, str] = {
     # (scripts/continue_task_dispatch.py), not in the fire path: the supervisor
     # always spawns opus. See dispatch_supervisor/worker.py OPUS_MODEL.
     "model_router.py": "per-task routing runs inside the dispatched agent, not the fire path",
+    # The unloaded wrapper needs a CLI boundary to write a durable signal
+    # receipt before shell-owned kills. Operations Core imports the canonical
+    # termination module directly, so carrying this compatibility adapter into
+    # the supervisor would recreate a second termination owner.
+    "termination_signal.py": "legacy-only CLI bridge; supervisor calls volpred.ops.termination directly",
 }
 
 

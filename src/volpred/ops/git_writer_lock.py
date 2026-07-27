@@ -17,12 +17,14 @@ flocked inode would split one lock into two independent locks.
 from __future__ import annotations
 
 import fcntl
+import importlib.util
 import json
 import math
 import os
 import select
 import signal
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -32,8 +34,6 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator, Sequence
-
-from volpred.ops import termination
 
 LOCK_BASENAME = "volpred-git-writer.lock"
 LOCK_TOKEN_ENV = "VOLPRED_GIT_WRITER_LOCK_TOKEN"
@@ -84,6 +84,24 @@ class GitWriterLease:
 _CURRENT_LEASE: ContextVar[GitWriterLease | None] = ContextVar(
     "volpred_git_writer_lease", default=None
 )
+_TERMINATION_OWNER: object | None = None
+
+
+def _termination_owner():
+    """Load the stdlib-only termination owner without importing ``volpred.ops``."""
+    global _TERMINATION_OWNER
+    if _TERMINATION_OWNER is not None:
+        return _TERMINATION_OWNER
+    path = Path(__file__).with_name("termination.py")
+    module_name = "_volpred_termination_owner"
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise GitWriterLockError(f"cannot load termination owner: {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    spec.loader.exec_module(module)
+    _TERMINATION_OWNER = module
+    return module
 
 
 def _clear_lease_after_fork() -> None:
@@ -428,6 +446,7 @@ def run_locked(
         raise ValueError("locked command must not be empty")
     if not math.isfinite(command_timeout_s) or command_timeout_s <= 0:
         raise ValueError("command_timeout_s must be finite and positive")
+    termination = _termination_owner()
     with git_writer_lock(repo_root, actor=actor, timeout_s=timeout_s):
         proc = subprocess.Popen(
             list(command),
@@ -592,6 +611,7 @@ def _terminate_process_group(proc: subprocess.Popen[str]) -> None:
     members = _live_process_group_members(pgid)
     if members == [] or (members is None and not _process_group_exists(pgid)):
         return
+    termination = _termination_owner()
     intent = termination.arm(
         target_kind="pgid", target_id=pgid,
         reason="git_writer_descendant_cleanup",

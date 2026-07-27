@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import json
+import signal
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,10 @@ def _install_fixture(repo: Path) -> None:
     shutil.copy2(
         ROOT / "src/volpred/ops/git_writer_lock.py",
         repo / "src/volpred/ops/git_writer_lock.py",
+    )
+    shutil.copy2(
+        ROOT / "src/volpred/ops/termination.py",
+        repo / "src/volpred/ops/termination.py",
     )
     hook_source = ROOT / "scripts/git_hooks/reference-transaction"
     shutil.copy2(hook_source, repo / "scripts/git_hooks/reference-transaction")
@@ -276,10 +281,17 @@ def test_installer_from_linked_worktree_targets_common_hook_directory(
     source_dir = repo / "scripts" / "git_hooks"
     source_dir.mkdir(parents=True)
     (repo / "src" / "volpred" / "ops").mkdir(parents=True)
-    shutil.copy2(ROOT / "scripts" / "git_writer_lock.py", repo / "scripts" / "git_writer_lock.py")
+    shutil.copy2(
+        ROOT / "scripts" / "git_writer_lock.py",
+        repo / "scripts" / "git_writer_lock.py",
+    )
     shutil.copy2(
         ROOT / "src" / "volpred" / "ops" / "git_writer_lock.py",
         repo / "src" / "volpred" / "ops" / "git_writer_lock.py",
+    )
+    shutil.copy2(
+        ROOT / "src" / "volpred" / "ops" / "termination.py",
+        repo / "src" / "volpred" / "ops" / "termination.py",
     )
     for name in (
         "install.sh",
@@ -318,6 +330,62 @@ def test_installer_from_linked_worktree_targets_common_hook_directory(
     )
     assert (common_dir / "hooks" / "reference-transaction").is_file()
     assert not (linked / ".git" / "hooks").exists()
+
+
+def test_standalone_runner_forwards_signal_with_bootstrap_owner(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    ready = tmp_path / "child-ready"
+    ledger = tmp_path / "termination-intents.jsonl"
+    child = (
+        "import pathlib,time; "
+        f"pathlib.Path({str(ready)!r}).touch(); "
+        "time.sleep(30)"
+    )
+    runner = subprocess.Popen(
+        [
+            sys.executable,
+            str(repo / "scripts" / "git_writer_lock.py"),
+            "run",
+            "--repo",
+            str(repo),
+            "--actor",
+            "standalone-signal-test",
+            "--",
+            sys.executable,
+            "-c",
+            child,
+        ],
+        cwd=repo,
+        env={
+            **os.environ,
+            "PYTHONPATH": "",
+            "VOLPRED_TERMINATION_LEDGER_PATH": str(ledger),
+        },
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    deadline = time.monotonic() + 5
+    while not ready.exists() and time.monotonic() < deadline:
+        time.sleep(0.01)
+    assert ready.exists(), runner.communicate(timeout=1)
+
+    os.kill(runner.pid, signal.SIGTERM)
+    stdout, stderr = runner.communicate(timeout=10)
+
+    assert runner.returncode == 128 + signal.SIGTERM, (stdout, stderr)
+    events = [
+        json.loads(line)
+        for line in ledger.read_text(encoding="utf-8").splitlines()
+    ]
+    assert any(
+        event.get("event") == "signal_result"
+        and event.get("status") == "sent"
+        and event.get("signum") == signal.SIGTERM
+        for event in events
+    )
 
 
 def test_installer_replaces_live_gate_atomically() -> None:

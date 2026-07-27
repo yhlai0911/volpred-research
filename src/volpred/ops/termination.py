@@ -18,14 +18,13 @@ import os
 import signal
 import stat
 import subprocess
+import sys
 import time
 import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Literal
-
-from volpred.ops.diagnostics import warn
 
 TargetKind = Literal["pid", "pgid"]
 DEFAULT_LEDGER_PATH = (
@@ -36,6 +35,27 @@ DEFAULT_LEDGER_PATH = (
 )
 DEFAULT_MATCH_MAX_AGE_S = 6 * 60 * 60
 LEDGER_PATH_ENV = "VOLPRED_TERMINATION_LEDGER_PATH"
+
+
+def warn(tag: str, msg: str, *, stream=None, **ctx: object) -> None:
+    """Emit diagnostics without making the signal owner depend on app imports.
+
+    Git-hook bootstrap loads this file directly under the system Python before
+    the ``volpred`` package (and its third-party dependencies) is installed.
+    The canonical diagnostic sink remains preferred in the application; the
+    JSON stderr fallback keeps bootstrap failures observable.
+    """
+    try:
+        from volpred.ops.diagnostics import warn as canonical_warn
+    except ImportError:
+        payload = {"tag": tag, "message": msg, **ctx}
+        print(
+            "[volpred-warning] "
+            + json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str),
+            file=stream or sys.stderr,
+        )
+        return
+    canonical_warn(tag, msg, stream=stream, **ctx)
 
 
 class TerminationIntentError(RuntimeError):

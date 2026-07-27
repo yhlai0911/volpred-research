@@ -7,6 +7,8 @@ from pathlib import Path
 
 import pytest
 
+from volpred.ops import termination
+
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "scan_trending_agy.py"
 SPEC = importlib.util.spec_from_file_location("scan_trending_agy", MODULE_PATH)
@@ -96,7 +98,8 @@ def test_main_returns_candidates_from_agy_json(monkeypatch, capsys):
 
 
 def test_main_kills_process_group_on_timeout(monkeypatch, capsys):
-    killed: list[int] = []
+    killed: list[tuple[int, object | None]] = []
+    armed_intent = object()
 
     class TimingOutProc(FakeProc):
         def communicate(self, timeout=None):
@@ -107,11 +110,18 @@ def test_main_kills_process_group_on_timeout(monkeypatch, capsys):
 
     _stub_popen(monkeypatch, TimingOutProc(returncode=-9, stdout="", stderr=""))
     monkeypatch.setattr(MODULE.os, "getpgid", lambda pid: 4242)
-    monkeypatch.setattr(MODULE.procutil, "kill_pgid", lambda pgid: killed.append(pgid))
+    monkeypatch.setattr(termination, "arm", lambda **kwargs: armed_intent)
+    monkeypatch.setattr(
+        MODULE.procutil,
+        "kill_pgid",
+        lambda pgid, *, intent=None: killed.append((pgid, intent)),
+    )
 
     assert MODULE.main() == 0
 
     payload = json.loads(capsys.readouterr().out)
     assert payload["candidates"] == []
     assert payload["error"] == "TimeoutExpired"
-    assert killed == [4242], "agy's process group must be killed, not just the pid we spawned"
+    assert killed == [
+        (4242, armed_intent)
+    ], "agy's process group must be killed under its durable intent"
