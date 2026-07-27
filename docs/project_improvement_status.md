@@ -74,7 +74,11 @@ migration／transaction 與 Python regressions 已通過；production migration
 `20260726134809` 亦已部署並回讀 owner／ACL／transfer fence。live acceptance fire
 建立 WorkItem／EffectRequest／outbox attempt 1，Gmail Sent exact read-back 為
 delivered；同一 fire 重播只回相同 terminal receipt，attempt 仍為 1。新自然
-schedule receipt 與 sustained-clean 尚未完成，因此狀態仍為 **`contained`**。
+schedule 已於 2026-07-27 08:10 台灣時間由 Operations Core 一次成功；canonical RPC
+回讀同一 fire 的 WorkItem／Effect／attempt 1／Primary Authority epoch 211 與 Gmail
+Sent evidence 完全一致，owner 維持 `operations_core/4`，未見 direct SMTP、重送或
+owner drift。closure scoped regression 103 passed，五步 gate 全過，狀態為
+**`root_cause_fixed_and_verified`**。
 Phase 0／ADR-0001 的 module seam、interface、adapter 與第一個 TDD 切片，見
 `docs/operations_core_module_design.md`。
 2026-07-23 已完成 in-memory tracer（24 cases）及 private PostgreSQL 17 shadow adapter
@@ -2191,8 +2195,13 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ live acceptance fire 建立 WorkItem／EffectRequest／outbox attempt 1，settlement
   為 delivered，帶 Gmail Sent evidence 與 Primary Authority ref；同 fire 再跑只回
   相同 terminal receipt，effect 不變且 attempt_count 仍為 1。
-- 🟡 目前仍為 **`contained`**：下一個自然 schedule receipt 與 sustained-clean
-  尚待回讀；五步 gate 未全過前不稱完成。
+- ✅ 2026-07-27 08:10 台灣時間自然 fire
+  `operations-core-v1:boss_report_4h:35208392b85064c22499c492` 由
+  `operations-core-scheduler` attempt 1 成功；RPC 回讀 owner=`operations_core/4`、
+  WorkItem=`succeeded`、Effect=`delivered`、attempt_count=`1`、Primary Authority
+  epoch `211`，Gmail Sent evidence 與 scheduler receipt 完全一致。未見 direct
+  SMTP、重送或 owner drift；closure scoped regression 103 passed，狀態為
+  **`root_cause_fixed_and_verified`**。
 
 ## 2026-07-27 — Publisher／Sync Effect Delivery 完成 Mirror acknowledgement（Issue #14）
 

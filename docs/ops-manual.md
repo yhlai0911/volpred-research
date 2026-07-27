@@ -99,8 +99,10 @@ command 或 terminal receipt。Rollback 路徑也受 Primary Authority 保護，
 Message-ID 先查 Gmail Sent；所以重啟 Codex／Claude、切換 Mac 或重跑同一班次，
 都不會因本機 cache 不同而再寄一次。
 2026-07-26 production acceptance 已實測：首次 fire 只有一筆 delivered attempt，
-同 fire 重跑只回相同 terminal receipt，沒有第二次 provider send。自然排程驗收仍以
-下一筆 scheduler receipt 為準，手動 acceptance 不取代 sustained-clean gate。
+同 fire 重跑只回相同 terminal receipt，沒有第二次 provider send。2026-07-27 08:10
+台灣時間的下一筆自然 scheduler receipt 亦由 Operations Core attempt 1 成功，RPC
+回讀同一 WorkItem／Effect／Gmail Sent evidence，owner 維持 `operations_core/4`；
+此 caller 的 sustained-clean gate 已完成。
 
 ### 範例：一篇文章從產出到你看到
 

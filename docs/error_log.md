@@ -3483,8 +3483,13 @@ schema drift、wrong generation 與非 cron minute。Production wrapper 已以 m
 lockstep 安裝；production migration `20260726134809` 已部署並回讀 owner／ACL／fence。
 live acceptance fire 產生單一 WorkItem／EffectRequest／outbox attempt 1，Gmail Sent
 exact read-back 為 delivered；同一 fire 重播只回相同 effect／terminal receipt，
-attempt_count 仍為 1。因下一個自然 schedule receipt 與 sustained-clean 尚未回讀，
-故仍只能標 **`contained`**，不能提前宣稱 **`root_cause_fixed_and_verified`**。
+attempt_count 仍為 1。2026-07-27 08:10 台灣時間的下一個自然 fire
+`operations-core-v1:boss_report_4h:35208392b85064c22499c492` 由
+`operations-core-scheduler` 一次成功；canonical RPC 回讀 owner=`operations_core/4`、
+WorkItem=`succeeded`、Effect=`delivered`、attempt_count=`1`、Primary Authority epoch
+`211`，Gmail Sent evidence 與 scheduler receipt 完全一致，未見 direct SMTP、重送或
+owner drift。closure scoped regression 103 passed，五步 gate 全過，狀態為
+**`root_cause_fixed_and_verified`**。
 
 ### 2026-07-27 — two-Mac isolated lease 被誤報為全系統 Primary Authority 結案
 
