@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import volpred.ops.frontend_parity as parity_module
 from volpred.ops.frontend_parity import audit_frontend_parity
 
 
@@ -412,5 +413,74 @@ def test_unresolved_navigation_expression_fails_closed(tmp_path: Path) -> None:
     assert any(
         item["kind"] == "unresolved_internal_navigation"
         and item["source_ref"].endswith("VariableLink.tsx")
+        for item in report["blockers"]
+    )
+
+
+def test_api_links_use_real_dynamic_route_inventory(tmp_path: Path) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(tmp_path / "web/src/app/api/jobs/[id]/route.ts")
+    _write(
+        tmp_path / "web/src/components/ApiLinks.tsx",
+        '<a href="/api/jobs/123">ok</a><a href="/api/missing">bad</a>',
+    )
+    payload = json.loads(contract.read_text(encoding="utf-8"))
+    payload["route_rules"].append(
+        {
+            "id": "api_jobs",
+            "pattern": "^/api/jobs/\\[id\\]$",
+            "expected_modes": ["shared"],
+            "access": "service",
+            "authoritative_data_owner_refs": [
+                "web/src/app/api/jobs/[id]/route.ts"
+            ],
+            "capabilities": ["job_read"],
+            "mode_advantages": {
+                "shared": ["single_api_contract"],
+            },
+        }
+    )
+    contract.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    dead_paths = {
+        item["path"]
+        for item in report["blockers"]
+        if item["kind"] == "dead_internal_link"
+    }
+    assert dead_paths == {"/api/missing"}
+
+
+def test_source_mutation_during_audit_invalidates_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    original = parity_module._discover_routes
+
+    def mutate_then_discover(repo_root: Path, frontend_root: Path):
+        _write(frontend_root / "src/app/late/page.tsx")
+        return original(repo_root, frontend_root)
+
+    monkeypatch.setattr(
+        parity_module,
+        "_discover_routes",
+        mutate_then_discover,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    assert report["source_revision"]["stable"] is False
+    assert any(
+        item["kind"] == "frontend_source_drift"
         for item in report["blockers"]
     )

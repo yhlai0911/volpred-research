@@ -324,8 +324,7 @@ def _valid_internal_path(
     path = raw.split("#", 1)[0].split("?", 1)[0]
     path = path.rstrip("/") or "/"
     return (
-        path.startswith("/api/")
-        or path in valid_exact
+        path in valid_exact
         or any(pattern.fullmatch(path) for pattern in valid_patterns)
     )
 
@@ -351,7 +350,7 @@ def _dead_links(
     valid_patterns = [
         _route_pattern(route.surface_route)
         for route in routes
-        if route.kind == "page"
+        if route.kind in {"page", "route_handler"}
     ]
     valid_exact = {
         route.surface_route.rstrip("/") or "/"
@@ -1007,6 +1006,37 @@ def audit_frontend_parity(
         contract.get("required_scenario_ids"),
     )
     blockers.extend(scenario_findings)
+    post_revision = _frontend_revision(
+        repo_root=repo_root,
+        frontend_root=frontend_root,
+        nested_git_required=nested_git_required,
+        blockers=blockers,
+    )
+    revision_keys = {
+        "kind",
+        "tree_sha256",
+        "file_count",
+        "git_head",
+        "dirty",
+        "status_sha256",
+    }
+    stable_revision = {
+        key: source_revision.get(key) for key in revision_keys
+    } == {
+        key: post_revision.get(key) for key in revision_keys
+    }
+    source_revision["stable"] = stable_revision
+    if not stable_revision:
+        blockers.append(
+            _block(
+                "frontend_source_drift",
+                before_tree_sha256=source_revision.get("tree_sha256"),
+                after_tree_sha256=post_revision.get("tree_sha256"),
+                before_status_sha256=source_revision.get("status_sha256"),
+                after_status_sha256=post_revision.get("status_sha256"),
+            )
+        )
+        source_revision["post_audit"] = post_revision
     return _report(
         route_rows,
         known_gaps,
