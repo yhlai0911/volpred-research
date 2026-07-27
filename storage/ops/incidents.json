@@ -382,21 +382,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T05:39:04.670590+00:00"
-    },
-    {
-     "at": "2026-07-27T06:07:31.168204+00:00"
-    },
-    {
-     "at": "2026-07-27T06:30:02.827412+00:00"
-    },
-    {
-     "at": "2026-07-27T06:30:13.138333+00:00"
-    },
-    {
-     "at": "2026-07-27T07:02:13.853944+00:00"
-    },
-    {
      "at": "2026-07-27T07:38:51.147834+00:00"
     },
     {
@@ -416,6 +401,21 @@
     },
     {
      "at": "2026-07-27T08:18:15.096502+00:00"
+    },
+    {
+     "at": "2026-07-27T08:21:18.864163+00:00"
+    },
+    {
+     "at": "2026-07-27T08:26:19.357612+00:00"
+    },
+    {
+     "at": "2026-07-27T08:32:21.348286+00:00"
+    },
+    {
+     "at": "2026-07-27T09:07:16.718576+00:00"
+    },
+    {
+     "at": "2026-07-27T09:27:42.441924+00:00"
     }
    ],
    "current_task_id": null,
@@ -1247,19 +1247,19 @@
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:161",
-     "last_seen_at": "2026-07-27T08:08:55.589291+00:00"
+     "last_seen_at": "2026-07-27T09:07:30.255931+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:246",
-     "last_seen_at": "2026-07-27T08:08:55.589291+00:00"
+     "last_seen_at": "2026-07-27T09:07:30.255931+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1592/k1592.py:203",
-     "last_seen_at": "2026-07-27T08:08:55.589291+00:00"
+     "last_seen_at": "2026-07-27T09:07:30.255931+00:00"
     },
     {
      "cleared_at": null,
@@ -1324,10 +1324,10 @@
    ],
    "kind": "silent_fallback_new",
    "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-   "last_seen_at": "2026-07-27T08:08:55.589291+00:00",
+   "last_seen_at": "2026-07-27T09:07:30.255931+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 52,
+   "occurrence_count": 53,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1565,8 +1565,74 @@
     "count": 0,
     "last_at": null
    }
+  },
+  "inc_f5900ccd042d": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-27T08:20:19.717683+00:00",
+   "escalation": null,
+   "fingerprint": "f5900ccd042d04f3b600b8f5067252f30ab677008ddf0a9dca37eed8a301527f",
+   "fingerprint_parts": [
+    "ci-red-30248226455"
+   ],
+   "first_seen_at": "2026-07-27T08:20:19.717683+00:00",
+   "incident_id": "inc_f5900ccd042d",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T08:20:19.717683+00:00",
+     "key": "30248226455:1",
+     "last_seen_at": "2026-07-27T08:20:19.717683+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T08:25:23.286502+00:00",
+     "key": "30249525073:1",
+     "last_seen_at": "2026-07-27T08:25:23.286502+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T08:50:30.462871+00:00",
+     "key": "30250165856:1",
+     "last_seen_at": "2026-07-27T08:50:30.462871+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-27T08:45:27.5543740Z E AssertionError: Cutover orphan(s): scripts/termination_signal.py.",
+   "last_seen_at": "2026-07-27T08:50:30.462871+00:00",
+   "notified_at": null,
+   "occurrence_count": 3,
+   "resolution": {
+    "at": "2026-07-27T09:07:27.893514+00:00",
+    "by": "ci-red-30248226455",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-27T09:07:27.893514+00:00",
+     "by": "ci-red-30248226455",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-27T08:20:19.868007+00:00",
+     "task_id": "ci-root-30248226455"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
   }
  },
- "updated_at": "2026-07-27T08:18:15.097007+00:00",
+ "updated_at": "2026-07-27T09:27:42.442422+00:00",
  "version": 1
 }

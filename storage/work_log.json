@@ -27999,5 +27999,35 @@
     "owner": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683",
     "commit": null,
     "summary": "snapaudit_paper_leverage_direction_k1591_k1592_contaminated — leverage-direction 論文污染數字更正（近投稿 IJF）。\n\nK1592 (tab:prespec_retest + 表註 + prose 全更正為 clean dedup rerun git dd2e70b42):\n- SPY rule-vs-GARCH: t -2.85->-2.74, p 0.005->0.006, Holm 0.104->0.145\n- QQQ rule-vs-GJR: t 2.08->1.49 (Holm 1.00; 此即 reconciliation 提的 raw p 0.038->0.137 翻轉，但論文表格只列 Holm p 故不涉顯著性宣稱)\n- dev panel DM: t -2.90->-2.95, p 0.004->0.003; MCS GARCH 淘汰 p 0.033->0.026\n- HEADLINE 不變且強化: no asset and no panel meets |t|>3 & Holm<0.05 (0/8)\n\nK1591 (body_v_ijf.tex:358 safe-haven regime): 點估計 gamma_diff=-0.087/HAC t=-0.66 在 contaminated 與 clean rerun byte-identical -> 未受實質污染. bootstrap CI [-0.71,+0.39]/69.8%neg 僅微移到 ~[-0.69,+0.37]/70.0%, 含零、directionally-supportive-but-insignificant 結論不變 -> 不改論文數字(遵守 do-not-inject-uncertain-vintage guidance).\n\n驗證: main_v_ijf.tex xelatex 編譯 exit 0, 39 頁, 0 error. paper_pipeline_status.json 記 snapaudit_contamination_revision. 污染 block 解除; 獨立 multi_round_review FAIL blocker 仍在, 仍 gate 投稿."
+  },
+  {
+    "timestamp": "2026-07-27T17:17:49+08:00",
+    "task_type": "paper_review",
+    "task_id": "k892_k994_pinned_snapshot_repoint_20260721",
+    "outcome": "blocked_awaiting_owner_decision",
+    "actor": "hourly-slot-1-2999a2556c724131842ce0fbd8a2ddb3",
+    "owner": "hourly-slot-1-2999a2556c724131842ce0fbd8a2ddb3",
+    "commit": null,
+    "summary": "k892_k994_pinned_snapshot_repoint_20260721 — 可重現性修復（k892 half 交付；k994 half 轉 owner-decision，止住每小時 claim-release churn）。\n\n**k892 half — DONE + verified 本 fire：**\n- 修 experiments/k892/k892_verify_tw_gamma.py:606 的 dead-worktree 硬編碼 output_path（.claude/worktrees/agent-adc7e97d/... 已不存在，導致腳本算完 MLE 卻在寫檔時 FileNotFoundError）→ 改為寫在腳本自身目錄，腳本自成一體可重現。\n- 重跑確認 0050.TW 從 pinned taiwan-vt CSV（0050_tw_adj_close 欄）逐位元重現：gamma=0.097042 / t=3.5965 / n_obs=4219 / loglik=-6319.35414941891，對上論文 taiwan-vt body_v3.tex:53 的 0.097/3.60。K892_USE_PINNED=0 顯式 fallback 到 live yfinance 保留。\n\n**k994 half — BLOCKED awaiting_owner_decision（非失敗）：**\n- 0050.TW 的 pinned snapshot（paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv）只到 2022，但論文引用的 DM t=1.44（main.tex:531）是 2019-01-01…2026-04-08 的 OOS 統計 → 直接 repoint 會把 OOS 樣本截到 2019-2022、改動已發表統計量。這是資料 provenance 決策，非數字錯誤。\n- 3 選項見 experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md。建議 Option 1：把 0050.TW+^VIX adj-close snapshot 延伸到 2026-04-08 → repoint → 經 compute_queue bounded OOS re-run 驗 DM≈1.44 是否重現（若重現則數字不變，純可重現性修復）。k994 非-0050 資產可依 recipe 從各自 2026-covering snapshot 獨立 repoint。\n- 沿用專案既有慣例（前一 slot 完成 k892 half 後刻意停下寫 decision doc 而非自行執行）：改動已發表論文所附 pinned data 需 owner 裁決。標 blocked awaiting_owner_decision，止住本 task 今日已 2 次的 claim→manual_release churn。\n\nPHASE A 另收：triage 失敗的 compute job k1698_rev4_codex_round5_rerun_20260727（enqueue 時 interpreter 誤設 uv-run-python 跑 bash 腳本 → SyntaxError，從未觸及 codex）→ 以正確 interpreter=bash 重新 enqueue 為 k1698_rev4_codex_round5_rerun2_20260727（codex 今日 06:36 已確認可達），並 mark-followup-dispatched 防重派。"
+  },
+  {
+    "timestamp": "2026-07-27T17:21:42+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1600_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb",
+    "owner": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb",
+    "commit": null,
+    "summary": "撰寫 K1600 讀者向（general）文章草稿：HARQ 測量誤差修正的低頻代理誠實 NULL。\n證據套件取自 experiments/k1600/k1600_results.json（9 cell = 3 資產 SPY/QQQ/0050.TW × 3 期距 1/5/22；expanding OLS 2010-2026、~3200 OOS/檔）：\nβ1Q 係數 9/9 為負（BPQ 理論指紋present），但 loss_ratio 美股 1.02-1.11（HARQ 更差、最差 SPY h5=1.112）、台股約打平；DM+Harvey |t|>3 顯著=0/9、joint_support=0/9。\n核心洞見：瓶頸不在公式而在測量解析度——日頻 r^4 quarticity 代理無法定位「哪幾天」噪音大。\nGates：check_arc_dedup（general）verdict=clean；anti_ai_gate PASS（warn 2/3 為 FB-tone 段落/列表提醒，非阻塞、且列表為資料表）；editor-sop 快檢全過（不是…而是=空、無 source claim、然而0/真正的1/事實上0、無吊書袋、無禁詞、3294字）。\n交付物：storage/drafts/k1600_general_draft.md + 2 圖 copy 至 storage/drafts/article_images/（qlike_loss_ratio、dm_and_beta1q）。daily_article 進 draft pool 由 cadence cron 發佈。"
+  },
+  {
+    "timestamp": "2026-07-27T17:25:52+08:00",
+    "task_type": "paper_review",
+    "task_id": "k1698_rev4_codex_round5_rerun2_20260727",
+    "outcome": "collect_completed_dispatched",
+    "actor": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb",
+    "owner": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb",
+    "commit": null,
+    "summary": "PHASE A collect_completed followup 處理：compute job k1698_rev4_codex_round5_rerun2_20260727（Codex round-5 review）已 completed 但 abort。\n判讀：受審 frozen worktree dispatch-slot-2-c5cafe39-k1698 早已被 salvage 裁決（worktree_salvage_* + wsb_remed_* 皆 succeeded、worktree 已不存在），此 rerun 對過時 rev4 freeze 硬審，freeze 驗證 5 缺檔 + 4 雜湊不符（僅 fig2 相符）→ Codex 依規中止，未出 verdict、未填 review_verdict.json、未 PASS/FAIL。prior k1698_rev4_round5_collect 已 failed。\n不自簽、不追已消失 worktree、不對錯配 freeze 再審。建根因導向 followup assign_80535ab4（paper_review P2）：確認主庫是否為 certify 目標 → 重建 freeze → 對主庫重 enqueue Codex review → PASS 才 certify（3-strike active）。\ncompute_queue mark-followup-dispatched --next-task-id assign_80535ab4 完成，pending-followup 佇列清空。"
   }
 ]
