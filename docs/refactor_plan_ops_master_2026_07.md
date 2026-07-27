@@ -322,3 +322,17 @@ fresh census回讀`legacy/generation 1/wrong_owner`且`probe_errors=[]`。此
 unknown-observability slice為 **`root_cause_fixed_and_verified`**；#9→#12尚未完成
 前不切owner、不啟動14日recorder或physical retirement，T40 umbrella仍為
 **`contained`**。
+
+**T10 Zero-paid Provider Registry live-launcher增量（2026-07-27）**：
+commits `7e46f10e8`,`dc902d4be`建立strict `provider-registry.v1`，並把
+supervisor Claude、compute-agent Claude、Codex failover三條production seam接到
+startup + per-spawn reload guard。Canonical launch contract固定
+task-orchestration／research-compute需求，formal eligibility一律false；receipt綁
+實際model、executable realpath+SHA、pinned settings SHA、final child env與registry
+SHA。API key、gateway/base URL、Bedrock/Vertex/Foundry、AWS profile、Codex/OpenAI
+alternate config、`apiKeyHelper`與付費fallback全部在provider I/O前拒絕。Codex固定
+`gpt-5.6-sol --ignore-user-config`。Targeted **119 passed**、live no-spawn正負向
+回讀與Matt Spec／Standards雙PASS；此bounded launcher slice為
+**`root_cause_fixed_and_verified`**。全repo其餘AI CLI seam已materialize為不重疊
+follow-up `assign_5938ee83`；未transfer owner、未繞過#9、未關#12，T10 umbrella
+維持 **`contained`**。

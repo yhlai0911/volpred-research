@@ -2659,3 +2659,24 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 本slice沒有owner transfer、provider execution、#9 bypass、14日recorder或
   physical retirement。#9七日gate與#12 acceptance完成前不切owner；#12與#46
   umbrella維持`contained`。
+
+## 2026-07-27 — T10 canonical zero-paid registry 接上三條 live launcher（Issue #12）
+
+- ✅ `config/provider_registry.json`成為versioned exact-schema registry；provider
+  identity、實際model、subscription auth surface、billing、semantic classes、
+  capabilities、attestations、formal eligibility、enabled、health與bounded probe policy
+  均有明確schema。未知欄位、metered、credits、paid overflow、API key與auto-reload
+  直接拒絕。
+- ✅ Supervisor Claude、compute-agent Claude、Codex failover改由三個canonical launch
+  contract派生不可降級需求；startup與每次subprocess前都重讀policy。Receipt綁
+  executable realpath+SHA、pinned settings SHA、registry SHA與final child env；
+  Claude排除user/local/project drift及`apiKeyHelper`，Codex固定
+  `gpt-5.6-sol --ignore-user-config`。
+- ✅ Commits=`7e46f10e8`,`dc902d4be`；targeted **119 passed**、
+  compileall／ruff／diff-check綠，live no-spawn三份receipt同SHA且alternate-auth
+  injection全部fail closed；Matt Spec／Standards最終雙PASS。
+- ✅ 本三條production launcher接管slice通過五步Gate，狀態為
+  **`root_cause_fixed_and_verified`**。
+- 🟡 其他utility／legacy AI CLI seam由follow-up `assign_5938ee83`納管；本slice未
+  transfer owner、未繞過#9、未close #12。Issue #12與operations-core umbrella仍為
+  **`contained`**。

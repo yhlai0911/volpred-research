@@ -4140,3 +4140,33 @@ mode pairing／dedupe／provenance importer class sweep **194 passed**；Matt Sp
 Standards雙PASS。程式根因與制度化測試已完成；因本session依規不push，尚待platform
 owner推送後由GitHub Test Suite回讀成功，incident目前僅為 **`contained`**，不得提前
 宣稱`root_cause_fixed_and_verified`。
+
+### 2026-07-27 — Zero-paid 宣告若未綁到真正 spawn，仍可能暗中走付費 auth
+
+**證據化症狀**：Issue #12 已有 in-memory `ProviderExecution` policy，但 production
+Claude supervisor、compute-agent 與 Codex failover 都直接建立 subprocess，沒有讀同一份
+registry。單純在 config 寫 `api_key_env=null` 也不足夠：child env、同名假 binary、
+Claude `apiKeyHelper`／gateway route、Codex user config 都可能讓實際 provider/model/auth
+與宣稱的 `zero-paid` receipt 不一致。
+
+**根因與底層修復**：commits `7e46f10e8`,`dc902d4be`建立 strict
+`provider-registry.v1`及不可由 caller 降級的 launcher contracts。每次 subprocess 前
+重讀 exact-schema registry，核對 provider/model、固定 semantic/capability/formal=false、
+實際 executable realpath+SHA、pinned Claude settings SHA，並檢查 final child env。
+API key、gateway token/base URL、Bedrock/Vertex/Foundry skip-auth、AWS profile、
+Codex/OpenAI alternate config 與未知欄位一律 fail closed。Claude 只載入 receipt-bound
+settings（拒絕 `apiKeyHelper`）；Codex 固定 `gpt-5.6-sol` 並
+`--ignore-user-config`。Executable與settings在Popen前再次讀回雜湊，receipt綁定
+contract/provider/model/path/hash/registry SHA。
+
+**回歸、live read-back與邊界**：付費模式、同名 wrapper、惡意 symlink、授權後替換、
+API-key/gateway env、settings helper、retry stale receipt、三條 real spawn seam及startup
+guard的 targeted suite **119 passed**；supervisor class sweep另 **233 tests passed**，
+但該次命令最後被既有CI-parity harness偵測到live `dispatch_state.json`／`tmp`讀取而返回
+非零，未把它誤報成此slice regression。Live no-spawn回讀三個contract共用registry SHA
+`32bb49aac533bdfd47f1f78429f7214edd516840c6bd4b8b399a09519f094f30`，
+四種alternate-auth注入均在provider I/O前拒絕；Matt Spec／Standards最終雙PASS。
+本三條launcher根因為 **`root_cause_fixed_and_verified`**。Class sweep發現的其他
+legacy／utility AI CLI launcher已另立不重疊follow-up `assign_5938ee83`；因此沒有
+transfer `provider.execution` owner、沒有繞過#9、沒有關閉#12，umbrella仍為
+**`contained`**。
