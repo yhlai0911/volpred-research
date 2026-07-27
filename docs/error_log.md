@@ -4086,7 +4086,8 @@ canonical migration replay、ACL/FORCE-RLS、ungated drift與no-mint回歸全綠
 Canonical replay為`130815→132000→132229`；production ledger另誠實保留兩次
 並行duplicate apply receipt `131925`與`132700`。`132000`曾被較弱並行版本覆蓋，
 最終`132229/132700`均重新安裝extra-receipt fail-closed RPC；直接回讀
-`pg_get_functiondef`含`NOT EXISTS`且owner／receipt各恰一筆。Catalog回讀function
+`pg_get_functiondef`含`NOT EXISTS`且owner／receipt各恰一筆；四個normalized-nonempty
+CHECK與capability FK共5項皆存在且`convalidated=true`。Catalog回讀function
 owner=`volpred_ops_definer`、service-role-only execute、私表FORCE RLS。Fresh census
 回讀`incident.lifecycle=legacy/wrong_owner`、generation 1、`probe_errors=[]`。
 unknown-observability根因為 **`root_cause_fixed_and_verified`**；正式owner切換仍受

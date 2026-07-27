@@ -298,7 +298,7 @@ freshness fail closed。Canonical chain
 `132229`安裝前要求exact一筆owner與matching receipt，RPC亦拒絕任何額外receipt。
 Production另保留並行duplicate apply receipts `131925`與`132700`；最後兩次
 finalizer已覆蓋曾被弱版`132000`降級的RPC，live function definition含`NOT EXISTS`，
-owner／receipt各恰一筆。
+owner／receipt各恰一筆；四個normalized-nonempty CHECK與capability FK皆已validate。
 真PG回歸保證owner drift後重播canonical bootstrap必raise、receipt數不增。
 Fresh census誠實回讀`legacy/generation 1/wrong_owner`且`probe_errors=[]`。此
 unknown-observability slice為 **`root_cause_fixed_and_verified`**；沒有transfer或

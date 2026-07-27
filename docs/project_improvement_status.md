@@ -2625,6 +2625,7 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   收斂。Live function definition含`NOT EXISTS`，owner／receipt各一筆。Catalog回讀
   `SECURITY DEFINER`／STABLE／空`search_path`、owner=`volpred_ops_definer`；
   service role只能execute RPC，anon/authenticated不可執行，兩張私表皆FORCE RLS。
+  四個normalized-nonempty CHECK與capability FK亦5/5存在且已validate。
 - ✅ Adapter／census與相鄰owner範圍 **122 passed**；真PG另證明owner漂移後
   重播canonical bootstrap必raise、receipt count不增加。ruff／compileall綠。Fresh production
   census為`legacy/generation 1/wrong_owner`且
