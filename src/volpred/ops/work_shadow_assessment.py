@@ -53,6 +53,13 @@ class ShadowObservationAssessment:
     observed_through: str | None = None
     recorded_from: str | None = None
     recorded_through: str | None = None
+    clean_observation_count: int = 0
+    clean_observed_from: str | None = None
+    clean_observed_through: str | None = None
+    clean_recorded_from: str | None = None
+    clean_recorded_through: str | None = None
+    clean_window_seconds: int | None = None
+    next_eligible_at: str | None = None
     required_window_seconds: int = 0
     max_gap_seconds: int = 0
     max_observed_gap_seconds: int | None = None
@@ -76,6 +83,13 @@ class ShadowObservationAssessment:
             "observed_through": self.observed_through,
             "recorded_from": self.recorded_from,
             "recorded_through": self.recorded_through,
+            "clean_observation_count": self.clean_observation_count,
+            "clean_observed_from": self.clean_observed_from,
+            "clean_observed_through": self.clean_observed_through,
+            "clean_recorded_from": self.clean_recorded_from,
+            "clean_recorded_through": self.clean_recorded_through,
+            "clean_window_seconds": self.clean_window_seconds,
+            "next_eligible_at": self.next_eligible_at,
             "required_window_seconds": self.required_window_seconds,
             "max_gap_seconds": self.max_gap_seconds,
             "max_observed_gap_seconds": self.max_observed_gap_seconds,
@@ -288,10 +302,24 @@ def assess_shadow_observation_directory(
             clean_start = index + 1
         previous_recorded = recorded
     clean_suffix = timed_receipts[clean_start:]
+    clean_recorded_at = tuple(item[0] for item in clean_suffix)
+    clean_observed_at = tuple(item[1] for item in clean_suffix)
+    clean_window = (
+        clean_recorded_at[-1] - clean_recorded_at[0]
+        if clean_recorded_at
+        else None
+    )
+    next_eligible_at = (
+        clean_recorded_at[0] + required_window
+        if clean_recorded_at
+        and clean_window is not None
+        and clean_window < required_window
+        else None
+    )
     if (
         clean_suffix
-        and clean_suffix[-1][0] - clean_suffix[0][0]
-        >= required_window
+        and clean_window is not None
+        and clean_window >= required_window
     ):
         recorded_at = tuple(item[0] for item in clean_suffix)
         observed_at = tuple(item[1] for item in clean_suffix)
@@ -429,6 +457,37 @@ def assess_shadow_observation_directory(
         ),
         recorded_through=(
             recorded_at[-1].isoformat() if recorded_at else None
+        ),
+        clean_observation_count=len(clean_suffix),
+        clean_observed_from=(
+            clean_observed_at[0].isoformat()
+            if clean_observed_at
+            else None
+        ),
+        clean_observed_through=(
+            clean_observed_at[-1].isoformat()
+            if clean_observed_at
+            else None
+        ),
+        clean_recorded_from=(
+            clean_recorded_at[0].isoformat()
+            if clean_recorded_at
+            else None
+        ),
+        clean_recorded_through=(
+            clean_recorded_at[-1].isoformat()
+            if clean_recorded_at
+            else None
+        ),
+        clean_window_seconds=(
+            int(clean_window.total_seconds())
+            if clean_window is not None
+            else None
+        ),
+        next_eligible_at=(
+            next_eligible_at.isoformat()
+            if next_eligible_at is not None
+            else None
         ),
         required_window_seconds=int(required_window.total_seconds()),
         max_gap_seconds=int(max_gap.total_seconds()),

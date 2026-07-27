@@ -205,9 +205,9 @@ def test_expired_named_gate_stays_blocked_until_live_probe_is_ready(
     monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
     calls: list[str] = []
 
-    def not_ready(task: dict) -> tuple[bool, str]:
+    def not_ready(task: dict) -> tuple[bool, str, str | None]:
         calls.append(task["id"])
-        return False, "observation_window_too_short"
+        return False, "observation_window_too_short", None
 
     monkeypatch.setattr(
         unblock_expired_blocked_tasks,
@@ -223,6 +223,48 @@ def test_expired_named_gate_stays_blocked_until_live_probe_is_ready(
     assert saved[0]["unblock_gate"] == "work_shadow_cutover_ready_v1"
     assert saved[0]["blocked_until"] == "2000-01-01T00:00:00+00:00"
     assert "1 live gate(s) retained" in capsys.readouterr().out
+
+
+def test_expired_shadow_gate_rearms_to_new_clean_window(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_eligible_at = "2099-08-03T12:40:16+00:00"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "shadow_soak",
+                    "task_type": "platform_ops",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_event_window",
+                    "blocked_until": "2000-01-01T00:00:00+00:00",
+                    "unblock_gate": "work_shadow_cutover_ready_v1",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
+    monkeypatch.setattr(
+        unblock_expired_blocked_tasks,
+        "_probe_unblock_gate",
+        lambda _task: (
+            False,
+            "observation_window_too_short",
+            next_eligible_at,
+        ),
+    )
+
+    assert unblock_expired_blocked_tasks.main(apply=True) == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "blocked"
+    assert saved[0]["blocked_until"] == next_eligible_at
+    assert saved[0]["unblock_gate"] == "work_shadow_cutover_ready_v1"
+    assert saved[0]["status_history"][-1]["reason"] == (
+        f"unblock_gate_rearmed_until ({next_eligible_at})"
+    )
 
 
 def test_expired_named_gate_unblocks_only_after_live_probe_is_ready(
@@ -248,7 +290,7 @@ def test_expired_named_gate_unblocks_only_after_live_probe_is_ready(
     monkeypatch.setattr(
         unblock_expired_blocked_tasks,
         "_probe_unblock_gate",
-        lambda _task: (True, "ready_for_cutover"),
+        lambda _task: (True, "ready_for_cutover", None),
     )
 
     assert unblock_expired_blocked_tasks.main(apply=True) == 0
@@ -296,12 +338,18 @@ def test_unexpired_named_gate_is_not_probed(
 
 
 def test_unknown_unblock_gate_fails_closed_without_execution() -> None:
-    ready, detail = unblock_expired_blocked_tasks._probe_unblock_gate(
-        {"id": "unsafe", "unblock_gate": "shell:touch /tmp/unsafe"}
+    ready, detail, next_eligible_at = (
+        unblock_expired_blocked_tasks._probe_unblock_gate(
+            {
+                "id": "unsafe",
+                "unblock_gate": "shell:touch /tmp/unsafe",
+            }
+        )
     )
 
     assert ready is False
     assert detail.startswith("unknown_unblock_gate:")
+    assert next_eligible_at is None
 
 
 def test_production_work_shadow_gate_maps_ready_assessment(
@@ -320,7 +368,7 @@ def test_production_work_shadow_gate_maps_ready_assessment(
 
     assert unblock_expired_blocked_tasks._probe_unblock_gate(
         {"unblock_gate": "work_shadow_cutover_ready_v1"}
-    ) == (True, "ready_for_cutover")
+    ) == (True, "ready_for_cutover", None)
 
 
 def test_production_work_shadow_gate_maps_short_window_fail_closed(
@@ -337,12 +385,15 @@ def test_production_work_shadow_gate_maps_short_window_fail_closed(
         tmp_path,
     )
 
-    ready, detail = unblock_expired_blocked_tasks._probe_unblock_gate(
-        {"unblock_gate": "work_shadow_cutover_ready_v1"}
+    ready, detail, next_eligible_at = (
+        unblock_expired_blocked_tasks._probe_unblock_gate(
+            {"unblock_gate": "work_shadow_cutover_ready_v1"}
+        )
     )
 
     assert ready is False
     assert detail == "observation_window_too_short"
+    assert next_eligible_at is not None
 
 
 def test_production_work_shadow_gate_rejects_owner_mismatch(
@@ -360,12 +411,15 @@ def test_production_work_shadow_gate_rejects_owner_mismatch(
         tmp_path,
     )
 
-    ready, detail = unblock_expired_blocked_tasks._probe_unblock_gate(
-        {"unblock_gate": "work_shadow_cutover_ready_v1"}
+    ready, detail, next_eligible_at = (
+        unblock_expired_blocked_tasks._probe_unblock_gate(
+            {"unblock_gate": "work_shadow_cutover_ready_v1"}
+        )
     )
 
     assert ready is False
     assert "no_observations" in detail
+    assert next_eligible_at is None
 
 
 def test_production_work_shadow_gate_rejects_unreadable_owner_evidence(
@@ -382,12 +436,15 @@ def test_production_work_shadow_gate_rejects_unreadable_owner_evidence(
         tmp_path,
     )
 
-    ready, detail = unblock_expired_blocked_tasks._probe_unblock_gate(
-        {"unblock_gate": "work_shadow_cutover_ready_v1"}
+    ready, detail, next_eligible_at = (
+        unblock_expired_blocked_tasks._probe_unblock_gate(
+            {"unblock_gate": "work_shadow_cutover_ready_v1"}
+        )
     )
 
     assert ready is False
     assert detail.startswith("work_shadow_assessment_unavailable:")
+    assert next_eligible_at is None
 
 
 def test_successful_codex_probe_unblocks_before_reset_date(tmp_path, monkeypatch, capsys) -> None:

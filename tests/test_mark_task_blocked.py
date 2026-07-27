@@ -307,7 +307,11 @@ def test_reblock_preserves_gate_and_expiry_sweeper_still_fails_closed(
     monkeypatch.setattr(
         sweep,
         "_probe_unblock_gate",
-        lambda _task: (False, "observation_window_too_short"),
+        lambda _task: (
+            False,
+            "observation_window_too_short",
+            None,
+        ),
     )
 
     assert sweep.main(apply=True) == 0

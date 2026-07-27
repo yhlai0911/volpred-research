@@ -277,3 +277,12 @@ consumed gate，rollback owner則須匹配rolled-back gate與時間順序。兩�
 fresh census為`legacy`／generation 1、`wrong_owner`、probe errors=0。此可觀測性
 slice為 **`root_cause_fixed_and_verified`**；#9 gate未成熟前不轉owner，T40
 umbrella維持 **`contained`**。
+
+**T03 clean-soak evidence 增量（2026-07-27）**：assessment公開輸出最後一次
+breach後的clean receipt數、recorded／observed起訖、clean window秒數與
+`next_eligible_at`；named-gate expiry sweep若發現clean window已向後重置，只能把
+not-before單調re-arm至新成熟時間並寫durable status history，不能提前解封。Live
+回讀clean起點=`2026-07-27T12:40:16.244030Z`、next eligible=
+`2026-08-03T12:40:16.244030Z`、ready=false；相關246 tests綠。此slice為
+**`root_cause_fixed_and_verified`**，T03／#9仍須真實七日後才可cutover，維持
+**`contained`**。

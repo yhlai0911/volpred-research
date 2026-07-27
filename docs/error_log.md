@@ -4021,3 +4021,30 @@ Matt Spec／Standards雙PASS。Production receipts=`20260727125501`,
 Fresh census把`work.coordinate`明確回讀為`legacy/wrong_owner`且
 `probe_errors=[]`。可觀測性根因為 **`root_cause_fixed_and_verified`**；真正owner
 轉移仍受Issue #9七日clean gate約束，umbrella維持`contained`。
+
+### 2026-07-27 — Shadow soak 重置後不可靠人工推算下一次 gate 時間
+
+**證據化症狀**：Issue #9 assessor其實已在每張blocking receipt後更新內部
+`clean_start`，但clean suffix未滿七日前，公開report仍只輸出包含歷史breach的整包
+`recorded_from`／reason codes。12:38 的新producer breach發生後，正式task的
+`blocked_until`只能由人手讀receipt再計算「第一張clean recorded_at + 7d」；漏校正
+雖不會繞過named gate，卻會在舊日期到期後每班重探並持續產生過時診斷。
+
+**根因層級與底層修復**：clean segment是cutover state machine的一等狀態，不能只留在
+函式區域變數。`work-shadow-assessment.v1`現在以additive fields輸出clean receipt數、
+observed／recorded起訖、已覆蓋秒數與`next_eligible_at`；沒有clean receipt時明確為
+`null`，完整七日時則ready且不再提供未來日期。expiry sweeper的allowlisted
+`work_shadow_cutover_ready_v1` probe改讀同一typed assessment；若gate仍未成熟且新的
+eligible time晚於舊not-before，就在同一queue lock交易內把task重新arm到新時間並寫
+`blocked→blocked` history。只允許時間向後移、永不縮短七日；observer仍保持read-only，
+未知gate、owner mismatch或assessment不可讀仍fail closed。
+
+**回歸與live read-back**：先以「中途blocking receipt、其後僅一張clean」及
+「expired task遇到較晚clean window」重現缺欄位／不會re-arm的RED，修後assessment、
+replay、observer、mark／claim／status lifecycle相鄰套件 **246 passed**。Production
+report直接回讀`clean_observation_count=1`、
+`clean_recorded_from=2026-07-27T12:40:16.244030+00:00`、
+`clean_window_seconds=0`、`next_eligible_at=2026-08-03T12:40:16.244030+00:00`，
+與canonical #9 row完全一致；`ready_for_cutover=false`且原四項reason仍保留作歷史稽核。
+此人工校時計算根因為 **`root_cause_fixed_and_verified`**；七日尚未經過，#9 umbrella
+仍為`contained`，不得stage或transfer owner。

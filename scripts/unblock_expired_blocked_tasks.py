@@ -92,12 +92,14 @@ def _probe_codex_available() -> tuple[bool, str]:
     return True, detail
 
 
-def _probe_unblock_gate(task: dict) -> tuple[bool, str]:
+def _probe_unblock_gate(
+    task: dict,
+) -> tuple[bool, str, str | None]:
     """Evaluate one allowlisted durable gate without executing task content."""
 
     gate = task.get("unblock_gate")
     if gate != WORK_SHADOW_CUTOVER_GATE:
-        return False, f"unknown_unblock_gate:{gate!r}"
+        return False, f"unknown_unblock_gate:{gate!r}", None
     from volpred.ops.task_pool_mode import (
         load_task_pool_mode_evidence,
         task_pool_mode_path,
@@ -124,10 +126,18 @@ def _probe_unblock_gate(task: dict) -> tuple[bool, str]:
             max_gap=MAX_OBSERVATION_GAP,
         )
     except (OSError, TypeError, ValueError) as exc:
-        return False, f"work_shadow_assessment_unavailable:{exc}"
+        return (
+            False,
+            f"work_shadow_assessment_unavailable:{exc}",
+            None,
+        )
     if report.ready_for_cutover:
-        return True, "ready_for_cutover"
-    return False, ",".join(report.reason_codes) or "not_ready"
+        return True, "ready_for_cutover", None
+    return (
+        False,
+        ",".join(report.reason_codes) or "not_ready",
+        report.next_eligible_at,
+    )
 
 
 def _sweep_unblock(
@@ -158,6 +168,7 @@ def _sweep_unblock(
         until = t.get("blocked_until")
         if not until and unblock_reason is None:
             continue
+        until_dt: datetime | None = None
         # Strict ISO parsing still accepts the plain `YYYY-MM-DD` form. Invalid
         # blocked_until values must stay blocked; a lexical fallback can unblock
         # malformed metadata by accident.
@@ -176,8 +187,41 @@ def _sweep_unblock(
             unblock_reason = f"blocked_until_expired ({until})"
         gate = t.get("unblock_gate")
         if gate is not None:
-            gate_ready, gate_detail = _probe_unblock_gate(t)
+            gate_ready, gate_detail, next_eligible_at = (
+                _probe_unblock_gate(t)
+            )
             if not gate_ready:
+                rearmed_until = None
+                if next_eligible_at is not None:
+                    next_eligible_dt = parse_iso_warn(
+                        next_eligible_at,
+                        tag="unblock",
+                        field_name="next_eligible_at",
+                        fallback=None,
+                        task_id=str(t.get("id") or ""),
+                    )
+                    if (
+                        next_eligible_dt is not None
+                        and (
+                            until_dt is None
+                            or next_eligible_dt > until_dt
+                        )
+                        and next_eligible_dt > now
+                    ):
+                        rearmed_until = next_eligible_at
+                        if apply:
+                            t["blocked_until"] = next_eligible_at
+                            t.setdefault("status_history", []).append(
+                                {
+                                    "at": now.isoformat(),
+                                    "from": "blocked",
+                                    "to": "blocked",
+                                    "reason": (
+                                        "unblock_gate_rearmed_until "
+                                        f"({next_eligible_at})"
+                                    ),
+                                }
+                            )
                 gated.append(
                     {
                         "id": t.get("id"),
@@ -186,6 +230,8 @@ def _sweep_unblock(
                         "blocked_until": until,
                         "unblock_gate": gate,
                         "gate_detail": gate_detail,
+                        "next_eligible_at": next_eligible_at,
+                        "rearmed_until": rearmed_until,
                     }
                 )
                 continue

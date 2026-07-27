@@ -182,6 +182,53 @@ def test_seven_clean_days_after_a_blocking_receipt_restart_the_soak(
     assert report.recorded_from == (START + timedelta(days=1)).isoformat()
 
 
+def test_incomplete_clean_suffix_exposes_next_eligible_time(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(3):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    blocked_path = observations / "scheduled_01.json"
+    blocked = json.loads(blocked_path.read_text(encoding="utf-8"))
+    blocked["reconciliation_issues"] = [
+        {
+            "classification": "legacy_corruption",
+            "code": "unknown_source",
+            "source_system": "next_tasks",
+            "record_id": "task-1",
+            "detail": "new producer reset the clean soak",
+            "evidence_ref": "snapshot://reset",
+        }
+    ]
+    blocked_path.write_text(json.dumps(blocked), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=2, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.observation_count == 3
+    assert report.clean_observation_count == 1
+    assert report.clean_recorded_from == (
+        START + timedelta(days=2)
+    ).isoformat()
+    assert report.clean_recorded_through == (
+        START + timedelta(days=2)
+    ).isoformat()
+    assert report.clean_window_seconds == 0
+    assert report.next_eligible_at == (
+        START + timedelta(days=9)
+    ).isoformat()
+
+
 def test_seven_clean_days_after_an_incomplete_receipt_restart_the_soak(
     tmp_path: Path,
 ) -> None:
