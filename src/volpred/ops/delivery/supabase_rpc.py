@@ -25,6 +25,7 @@ _READ_ONLY_RPCS = frozenset(
         "volpred_read_publisher_article_delete_owner",
         "volpred_read_publisher_article_reconcile_owner",
         "volpred_read_publisher_article_sync_owner",
+        "volpred_read_work_owner",
         "volpred_read_work_snapshot",
     }
 )
