@@ -382,12 +382,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T02:29:14.568707+00:00"
-    },
-    {
-     "at": "2026-07-27T02:30:14.953927+00:00"
-    },
-    {
      "at": "2026-07-27T02:30:52.986849+00:00"
     },
     {
@@ -416,6 +410,12 @@
     },
     {
      "at": "2026-07-27T04:22:41.916059+00:00"
+    },
+    {
+     "at": "2026-07-27T04:26:06.346919+00:00"
+    },
+    {
+     "at": "2026-07-27T04:51:30.470200+00:00"
     }
    ],
    "current_task_id": null,
@@ -721,24 +721,24 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
-      "idle_hours": 128.3,
+      "idle_hours": 134.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
-      "idle_hours": 128.4,
+      "idle_hours": 134.4,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
     },
     {
      "cleared_at": null,
@@ -757,55 +757,79 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
-      "idle_hours": 122.2,
+      "idle_hours": 128.2,
       "unmerged_commits": 3
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "worktree-agent-a148e8a94105f7935",
       "dirty": true,
-      "idle_hours": 115.6,
+      "idle_hours": 121.6,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "agent-a148e8a94105f7935",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "dirty": false,
-      "idle_hours": 97.3,
+      "idle_hours": 103.3,
       "unmerged_commits": 5
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-3-3896dcaa-k1714",
       "dirty": true,
-      "idle_hours": 115.3,
+      "idle_hours": 121.3,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "worktree-dispatch-slot-1-a4fe4570",
+      "dirty": false,
+      "idle_hours": 8.9,
+      "unmerged_commits": 2
+     },
+     "first_seen_at": "2026-07-27T04:25:30.568624+00:00",
+     "key": "dispatch-slot-1-a4fe4570",
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "worktree-k1715-204d556b",
+      "dirty": false,
+      "idle_hours": 4.3,
+      "unmerged_commits": 8
+     },
+     "first_seen_at": "2026-07-27T04:25:30.568624+00:00",
+     "key": "k1715-204d556b",
+     "last_seen_at": "2026-07-27T04:25:30.568624+00:00"
     }
    ],
    "kind": "worktree_unmerged",
-   "last_breach_detail": "held worktree dispatch-slot-3-3896dcaa-k1714",
-   "last_seen_at": "2026-07-26T22:25:45.176659+00:00",
+   "last_breach_detail": "held worktree k1715-204d556b",
+   "last_seen_at": "2026-07-27T04:25:30.568624+00:00",
    "notified_at": null,
-   "occurrence_count": 134,
+   "occurrence_count": 142,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1175,19 +1199,19 @@
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:161",
-     "last_seen_at": "2026-07-27T03:46:29.088660+00:00"
+     "last_seen_at": "2026-07-27T04:26:17.269363+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:246",
-     "last_seen_at": "2026-07-27T03:46:29.088660+00:00"
+     "last_seen_at": "2026-07-27T04:26:17.269363+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1592/k1592.py:203",
-     "last_seen_at": "2026-07-27T03:46:29.088660+00:00"
+     "last_seen_at": "2026-07-27T04:26:17.269363+00:00"
     },
     {
      "cleared_at": null,
@@ -1252,10 +1276,10 @@
    ],
    "kind": "silent_fallback_new",
    "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-   "last_seen_at": "2026-07-27T03:46:29.088660+00:00",
+   "last_seen_at": "2026-07-27T04:26:17.269363+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 45,
+   "occurrence_count": 46,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1485,6 +1509,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T04:22:41.916602+00:00",
+ "updated_at": "2026-07-27T04:51:30.470805+00:00",
  "version": 1
 }

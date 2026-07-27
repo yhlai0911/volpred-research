@@ -27879,5 +27879,25 @@
     "owner": "hourly-slot-2-7087efc05b0f4eeaaa23c9e3b339ed20",
     "commit": null,
     "summary": "方向（漲跌）可預測性誠實 OOS 檢定 — dispatched via compute_queue enqueue-agent（dispatcher 標「保底席 本班必挑」）。任務源 Telegram msg855、topology=worktree、router=opus/xhigh，任務本身要求「重運算走 compute_queue，不 inline 硬跑」→ 走 enqueue-agent 而非 fire 內 spawn（避免 3000s cap SIGKILL）。建立 registered worktree `.claude/worktrees/dispatch-slot-2-7087efc0-signfc`（canonical git_writer_lock.py run，含 worktree_prefix）；brief 涵蓋 SPY/QQQ/0050.TW/TWII、HAR/GARCH 波動特徵+報酬滯後/動能、logistic+GBM、rolling OOS 命中率 vs 50%、Pesaran-Timmermann+DM、BH 多重檢定校正、交易成本後 edge 存活、方向vs波動可預測性對照；lookahead shift(1)、固定 seed、null 照實、文獻 grounded（Christoffersen-Diebold 2006、Pesaran-Timmermann 1995/2004）。enqueued job=agent-brief_signforecast-3df319，source task 連結 awaiting_agent_job，result-artifact=experiments/direction_predictability_signforecast/..._results.json。followup：驗數字+Codex round2+merge worktree+主線程寫 knowledge。fire 職責到 enqueue 為止。"
+  },
+  {
+    "timestamp": "2026-07-27T12:44:04+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_k1731_rev9",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-e69f603f5d3f45a49fd8caa3f100a4dc",
+    "owner": "hourly-slot-1-e69f603f5d3f45a49fd8caa3f100a4dc",
+    "commit": "76b55a73d",
+    "summary": "K1731 arm B round-10 bounded overcorrection fix + Codex round-10 review enqueue (PHASE A compute-followup 收 round-9 verdict)。Round-9 Codex verdict=FAIL：round-9 改寫過度修正，斷言 PIP「carries no information about out-of-sample predictive value」（強於證據所允許）；freeze 本身已由 Codex 驗過 35/35、verification 111/111、regression UNEXPECTED=0、drift 0/0/0，僅此一 blocking finding。修正依 Codex 指定最小措辭「does not directly measure or by itself establish out-of-sample predictive value」，且套用到**兩個**帶相同片語的 claim surface（k1731_finalize_report.py 的 HEADLINE_VERDICT.why_not[0] 與 ARM_A_ENGINE_ISSUES[0].why_it_matters）—— Codex 只點第二處，但第一處帶同片語，只修被點那處會重演本實驗記錄在案的 whack-a-mole（每輪修「被找的地方」、別處續留）。finalizer 重跑重建三份 JSON（獨立 leaf diff：numeric change/add/remove=0/0/0，僅兩個 string leaf 改動），collection §1 blockquote 同步、加 round-10 §5 addendum（含 finding/fix/新 SHA-256/gate 重跑表/誠實殘留）。所有 freeze 契約 gate 在修正後 bytes 上 PASS：verification exit0 111/111、verification --self-test 正確、regression UNEXPECTED=0、drift vs f5338d54d 0/0/0 rerun 0 mismatch、drift --self-test 正確、108-ratchet（worktree）108 passed。建 rev10 freeze manifest（k1731_armB_rev10_freeze.txt，python 自我驗證 35/35 一致，3 個 repo-level hash 與 rev9 byte-identical）。worktree branch wt/dispatch-slot-1-bd00f90a-k1731 提交 HEAD 76b55a73d（只 add 本輪 8 個變更檔，非 -A）。enqueue Codex round 10 到 compute_queue（compute-k1731-armb-codex-review-round-10-1785127371，codex_review_job.sh，prompt/verdict/2400，timeout2700），followup brief 交代 PASS→merge_worktree.sh（提醒 canonical main 的 check_experiment_artifacts.py 現要求 reproduce_spec.json merge-time gate，合併前需補檔或加例外）+unblock+complete succeeded；FAIL→若仍 whack-a-mole 則把該 phrase 加入 verification gate ratchet 結構收斂而非再開純 review。mark round-9 job followup_dispatched=true 防重派；annotate assign_k1731_rev9 round10_action。誠實殘留（已於 collection §5.6 揭露、非 blocking）：verification gate 尚未 ratchet round-9 phrase、drift docstring line19 stale comment——為守 Codex 最小修正指令本輪未動 gate 邏輯。fire 職責到 enqueue 為止，不等 async worker。"
+  },
+  {
+    "timestamp": "2026-07-27T12:47:35+08:00",
+    "task_type": "experiment",
+    "task_id": "K1722",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-e69f603f5d3f45a49fd8caa3f100a4dc",
+    "owner": "hourly-slot-1-e69f603f5d3f45a49fd8caa3f100a4dc",
+    "commit": null,
+    "summary": "K1811 (task K1722) failed-agent triage（PHASE A compute-followup，followup_mode=triage_failed）。job agent-brief_k1811-e2748d status=failed exit_code=-2：stdout 0 行、stderr 僅 `[EXCEPTION] active task fence metadata unreadable: storage/ops/task_execution_fences/68a4465c...json`。盤點 worktree dispatch-slot-3-047f093b-k1811：find 全域無任何 k1811 檔、experiments/k1811/ 目錄不存在 → agent 在 task-execution-fence 階段 infra-abort，從未啟動研究、零產出、無 partial 可救援。判定為基礎設施/lifecycle 中斷，非研究 NULL、非收斂失敗 → 不套 effort escalation（失敗非 agent 推理）。處置＝fresh re-enqueue（per-job fence 新 job 會刷新，不會復發舊 fence 損毀）：enqueue-agent brief snapshot storage/ops/agent_briefs/agent-brief_k1811-e2748d.md、opus/xhigh、重用空 worktree、result-artifact experiments/k1811/k1811_results.json、followup 4 步（Codex review→agent-result-verification 查 lookahead shift(1)→merge_worktree.sh→CONDITIONAL_PASS 以上寫 knowledge，NULL 照實記）。新 job=agent-agent-brief_k1811-e2748d-6bc0b3。mark 舊 job followup_dispatched=true 防重複 triage；annotate K1722 retry_note+新 job id（K1722 仍 awaiting_agent_job，legally-bindable 警告為 stale pointer 無妨）。未 force-remove 舊 worktree（守規）。fire 職責到 re-enqueue 為止，不等 async worker。"
   }
 ]

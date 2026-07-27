@@ -34208,7 +34208,8 @@
     ],
     "compute_job_id": "agent-brief_k1811-e2748d",
     "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1811-e2748d; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k1811-e2748d; awaiting PHASE A collection",
+    "retry_note": "job agent-brief_k1811-e2748d infra-aborted at task-execution-fence (fence metadata unreadable, exit -2, zero output, worktree had no experiments/k1811). Triaged: nothing salvageable → fresh re-enqueue agent-agent-brief_k1811-e2748d-6bc0b3 (opus/xhigh, same worktree, per-job fence refreshes). Awaiting PHASE A collection on new job."
   },
   {
     "id": "K1723",
@@ -34338,8 +34339,9 @@
       }
     ],
     "compute_job_id": "agent-brief_signforecast-3df319",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_signforecast-3df319; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-brief_signforecast-3df319; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T04:30:00Z"
   },
   {
     "id": "ci-red-29470286001",
@@ -42711,7 +42713,8 @@
     "triage_2026_07_26": "arm B rev9 remediation compute job quota_exhausted 未執行（無 k1731_armB_rev9_remediation.json）。registered worktree .claude/worktrees/dispatch-slot-1-bd00f90a-k1731 仍在、可續用。此 pending 任務即續辦載體；重派走 compute_queue/enqueue-agent（3-strike ladder 注意）。",
     "blocked_reason": "external_compute_receipt_pending_collection",
     "compute_started_at": "2026-07-27T02:57:31Z",
-    "compute_finished_at": "2026-07-27T03:21:11Z"
+    "compute_finished_at": "2026-07-27T03:21:11Z",
+    "round10_action": "round-9 Codex FAIL (new overclaim). Fixed on BOTH claim surfaces (why_not[0] + why_it_matters), regenerated 3 JSONs (drift 0/0/0), synced collection §5, rebuilt rev10 freeze (35/35), committed worktree 76b55a73d, enqueued Codex round 10 (compute-k1731-armb-codex-review-round-10-1785127371). Awaiting round-10 verdict."
   },
   {
     "id": "platform_ops_release_audit_fix_mile_2d1d356b",
@@ -45396,7 +45399,7 @@
   {
     "id": "assign_aab28069",
     "title": "PHASE-Z 卡住檔案 incident（af9de64b83c8b8b3）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 13 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- experiments/k1319/k1319_results.json — 6 班\n- experiments/k1399/k1399_qlike_comparison.png — 6 班\n- experiments/k1399/k1399_vix_decomp_results.json — 6 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 6 班\n- experiments/k1591/k1591_results.json — 6 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 6 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 6 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 6 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 6 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 6 班\n- experiments/k1592/fig3_origin_gamma_t.png — 6 班\n- experiments/k1705/k1705_results.json — 6 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 13 班\n- storage/memory/knowledge.json — 6 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T031713135099Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T031813256903Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042205269278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042242499278Z:<路徑>`",
+    "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 14 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- experiments/k1319/k1319_results.json — 7 班\n- experiments/k1399/k1399_qlike_comparison.png — 7 班\n- experiments/k1399/k1399_vix_decomp_results.json — 7 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 7 班\n- experiments/k1591/k1591_results.json — 7 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 7 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 7 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 7 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 7 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 7 班\n- experiments/k1592/fig3_origin_gamma_t.png — 7 班\n- experiments/k1705/k1705_results.json — 7 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 7 班\n- storage/logs/trending_primary_source_verification.jsonl — 14 班\n- storage/memory/knowledge.json — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T031713135099Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T031813256903Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042205269278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042242499278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T045131033785Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -45423,31 +45426,32 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "experiments/k1319/k1319_results.json": 6,
-        "experiments/k1399/k1399_qlike_comparison.png": 6,
-        "experiments/k1399/k1399_vix_decomp_results.json": 6,
-        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 6,
-        "experiments/k1591/k1591_results.json": 6,
-        "experiments/k1591/tables/k1591_daily_panel.csv": 6,
-        "experiments/k1591/tables/k1591_regime_summary.csv": 6,
-        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 6,
-        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 6,
-        "experiments/k1592/fig2_gammarule_gjr_share.png": 6,
-        "experiments/k1592/fig3_origin_gamma_t.png": 6,
-        "experiments/k1705/k1705_results.json": 6,
-        "experiments/paper2_table1_summary_stats_provenance/results.json": 6,
-        "storage/logs/trending_primary_source_verification.jsonl": 13,
-        "storage/memory/knowledge.json": 6
+        "experiments/k1319/k1319_results.json": 7,
+        "experiments/k1399/k1399_qlike_comparison.png": 7,
+        "experiments/k1399/k1399_vix_decomp_results.json": 7,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 7,
+        "experiments/k1591/k1591_results.json": 7,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 7,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 7,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 7,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 7,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 7,
+        "experiments/k1592/fig3_origin_gamma_t.png": 7,
+        "experiments/k1705/k1705_results.json": 7,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 7,
+        "storage/logs/trending_primary_source_verification.jsonl": 14,
+        "storage/memory/knowledge.json": 7
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T031713135099Z",
         "refs/volpred/quarantine/20260727T031813256903Z",
         "refs/volpred/quarantine/20260727T042205269278Z",
-        "refs/volpred/quarantine/20260727T042242499278Z"
+        "refs/volpred/quarantine/20260727T042242499278Z",
+        "refs/volpred/quarantine/20260727T045131033785Z"
       ],
-      "fires": 4,
+      "fires": 5,
       "first_seen_at": "2026-07-27T03:17:15.679626+00:00",
-      "last_seen_at": "2026-07-27T04:22:45.155791+00:00",
+      "last_seen_at": "2026-07-27T04:51:33.752750+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T03:18:13.326932+00:00",
       "deferred": [
@@ -45469,7 +45473,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T04:22:45.155791+00:00"
+    "updated_at": "2026-07-27T04:51:33.752750+00:00"
   },
   {
     "id": "issue18_mutation_boundary_partition_canary_20260727",
@@ -45512,14 +45516,11 @@
     "description": "Implement existing Matt ticket #16 without replanning: production ProviderExecution seam, zero-paid allowlist validation, bounded low-cost probe/backoff with typed quota/auth/unavailable/policy blockers, semantically equivalent provider reroute only, and verified-checkpoint resume with exact-once outcome identity. TDD, dual-axis review, live read-back, and five-step Gate required. Do not close #16 unless all acceptance criteria are evidenced.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "failed",
     "source": "user",
     "created_at": "2026-07-27T04:00:13.943737+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#16",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T04:00:27.841271+00:00",
-    "claim_session_id": "4c304d746a5f",
     "status_history": [
       {
         "ts": "2026-07-27T04:00:27.841280+00:00",
@@ -45532,8 +45533,52 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T04:23:59.090011+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T04:00:31.526609+00:00"
+    "started_at": "2026-07-27T04:00:31.526609+00:00",
+    "completed_at": "2026-07-27T04:23:59.089989+00:00",
+    "result": "Contained contract slice only, commits 8c634847e..1378c33bf. ProviderExecution external seam now has atomic execution/probe reservations, typed blockers/exceptions, per-dispatch zero-paid revalidation, bounded backoff, verified checkpoint exact-once replay, crash recovery evidence, and 30 scoped/61 adjacent tests; Matt Standards PASS. Matt Spec remains FAIL and Issue #16 stays OPEN because its formal blocker #12 is OPEN, #12 is blocked by Issue #9 seven-day observation (earliest 2026-08-02), and no durable production adapter/runtime cutover exists. Re-materialize after #12 closes; do not treat this task as architecture completion."
+  },
+  {
+    "id": "assign_8262c921",
+    "title": "[Issue #9] Represent claim expiry and main-thread lane in shadow migration",
+    "description": "Fresh 12:15 v4 receipt has 10 implementation mismatches: six claim_expiry_unrepresentable rows from two live claims and four migration_missing_dispatch_lane_capability_mapping rows. Fix producer contract so new claims persist deterministic claim_expires_at matching stale cleanup, and map main_thread dispatch lane into an explicit non-worker capability in legacy→Work migration. Do not mutate old queue rows; verify natural disappearance as live claims finish and next scheduled receipt lands. TDD + Matt dual review; #9 remains contained until seven-day clean suffix.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-27T04:25:10.157090+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#9",
+    "status_history": [
+      {
+        "ts": "2026-07-27T04:25:14.577793+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T04:25:18.026146+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T04:48:55.881288+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T04:25:18.026129+00:00",
+    "completed_at": "2026-07-27T04:48:55.881262+00:00",
+    "result": "Issue #9 shadow migration blockers fixed: new claims persist authoritative 2h expiry; verified 30s supervisor heartbeat renews live dispatch leases; all terminal/delegation paths clear lease metadata; main-thread lanes map to an enforced non-worker capability. TDD 550 functional passes; Matt Spec PASS and Standards PASS. Issue #9 remains contained/open for the required seven-day clean ledger and ownership cutover.",
+    "issue_disposition": "contained"
   }
 ]
