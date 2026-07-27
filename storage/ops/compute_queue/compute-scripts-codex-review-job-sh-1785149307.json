@@ -1,0 +1,44 @@
+{
+  "id": "compute-scripts-codex-review-job-sh-1785149307",
+  "title": "scripts/codex_review_job.sh",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1698_rev5_prompt.md",
+    "storage/ops/codex_reviews/k1698_rev5_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T10:48:27Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-scripts-codex-review-job-sh-1785149307.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-scripts-codex-review-job-sh-1785149307.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1698_rev5_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1698_rev5_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1698 rev5 primary-path certification review 收件（源 task assign_80535ab4）。讀 storage/ops/codex_reviews/k1698_rev5_verdict.md 末行 VERDICT。(1) 若 VERDICT: PASS → 主線程填 experiments/k1698/review_verdict.json：verdict=PASS / reviewer=codex / reviewed_at / review_artifact=storage/ops/codex_reviews/k1698_rev5_verdict.md / reviewed_sha256 取自 k1698_rev5_freeze.txt / blocking_defects=[]（禁自簽：verdict 來源必須是 codex 這份 verdict.md，非主線程主張）→ 跑 scripts/experiment_gates.py certify 收尾 → complete assign_80535ab4 succeeded。(2) 若 VERDICT: FAIL → 逐條列 blocker 進 review_verdict.json blocking_defects，建 rev6 remediation followup，complete assign_80535ab4 failed 並說明。(3) 若 verdict.md 顯示 freeze hash mismatch 或 abort → 不得當 PASS/FAIL，查主庫 bytes 是否被改動、重建 freeze 再 enqueue。3-strike active，禁自簽、禁對錯配舊 freeze 再審。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_80535ab4",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T10:48:27Z",
+    "linked_at": "2026-07-27T10:48:27Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}

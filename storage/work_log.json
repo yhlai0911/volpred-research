@@ -28049,5 +28049,25 @@
     "owner": "hourly-slot-2-6b117151bfaf46528046d0157c97215a",
     "commit": null,
     "summary": "K1426 OOS 殘留任務 enabling 工作（heavy compute 已 enqueue，待後續 PHASE A 收尾）。\nitem3（docstring reproducibility metadata）已 inline 修正並驗證：oos.py L8-9 refit cadence 21日/100-start → 63日季度/50-start（實際 default），L345 metadata \"Monthly (21-day)\" → \"Quarterly (63-day default)\"。\nitem2 enabling：oos.py 新增持久化每日避險報酬序列 daily_hedged_returns（oos_dates/unhedged/hedged_ols/hedged_eg/hedged_pch）；oos_return_benchmark.py 新增 paired_return_ols_vs_pch()，重用 oos.py 的 bootstrap_he_diff_ci + dm_test，在有每日 PCH 序列時做 return-OLS vs PCH 的日期對齊配對 DM + block-bootstrap（含 <100 重疊守衛）。合成序列驗證函式回傳結構正確、py_compile + import 皆通過。\nitem1+2 heavy compute：enqueue 3 個 compute_queue shard job（k1426-oos-rerun-shard-a/b/c-dailyseries-20260727，各 timeout 4h）重跑 PCH MLE 產生每日序列；shard_b 重試 GLD/IAU（先前 yfinance 回空）。shard_c 掛 source-task-id + followup（merge_shards + benchmark + 驗證 NULL + README + close），precondition guard 驗三 shard 皆帶 daily_hedged_returns 才 merge/close。\n點估計顯示 PCH vs return-OLS 差異全 ≤0.0005，預期配對檢定確認既有 NULL（不改變判定）。任務轉 awaiting_agent_job。"
+  },
+  {
+    "timestamp": "2026-07-27T18:50:37+08:00",
+    "task_type": "paper_review",
+    "task_id": "assign_80535ab4",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-3-dd7c4b885f294f89b5b8c294a67891dc",
+    "owner": "hourly-slot-3-dd7c4b885f294f89b5b8c294a67891dc",
+    "commit": null,
+    "summary": "K1698 rev4 certify 重啟（assign_80535ab4，餓死 P2 aged 189h）：對 salvage-consolidated 主庫 canonical 重建 certification review，取代 obsolete rev4 freeze。\n\n步驟 1 確認 certify target：三張 salvage 裁決（worktree_salvage_dispatch-slot-2-c5cafe39-k1698 / wsb_remed_* / k1698_rev3_remediation）皆 succeeded → 主庫 experiments/k1698（Jul 21 consolidated）為最終 canonical。headline 數字對照通過：results.json /gate/leg1_qlike/aligned_target_r2_0050 t_stat=1.4694、n=436、GATE_VERDICT=H2_REJECTED 與 round-4 一致；README §1 宣稱同值。rev-series 專屬 delta_min/p_TOST 不在 base bytes（屬 rev remediation 特有量），不影響 headline 一致性。\n\n步驟 2 重建 freeze：storage/ops/codex_reviews/k1698_rev5_freeze.txt（7 檔 sha256：README/k1698.py/results.json/run_log.txt/fig1-3，全部取自主庫現行 bytes；fig2 hash 08c2f28b 與舊 freeze 相符，佐證連續性）。\n\n步驟 3 enqueue Codex primary-path review：job compute-scripts-codex-review-job-sh-1785149307（codex_review_job.sh，read-only sandbox，timeout 2700s），prompt = k1698_rev5_prompt.md（明確標示 rev-series worktree 已 salvage、舊 freeze obsolete、禁對錯配舊 freeze 再審、fresh full certification、禁自簽 review_verdict.json）。源 task 已 linked → awaiting_agent_job。\n\n收件（後續 PHASE A）：讀 verdict.md 末行 VERDICT；PASS 由主線程填 review_verdict.json + experiment_gates.py certify + complete succeeded；FAIL 列 blocker 建 rev6 + complete failed。3-strike active，禁自簽、禁 naive re-retry。本班完成單位 = enqueue（長 agent 工作正路）。"
+  },
+  {
+    "timestamp": "2026-07-27T19:05:51+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1436_article_general_v2",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-3cd2ea553372468d88d08657717888d8",
+    "owner": "hourly-slot-2-3cd2ea553372468d88d08657717888d8",
+    "commit": null,
+    "summary": "K1436 一般讀者文章（retry-v2）：發佈到草稿池 mile_3c83e665（audience=general）。發現＝BTC 永續資金費率對次日已實現波動無增量預測力：帶方向 Clark-West p=0.080（NULL），取絕對值 p=0.041 但 QLIKE 改善 <1%（經濟上約等於零）。2 張 data-bound 圖表，anti-AI gate PASS，content-vs-source audit PASS（4 claims / 164 source values）。補齊既有 research 版 mile_5193647b 的 general 缺口。懶人包 render 已入列 lazypack-mile_3c83e665，經 cadence 釋出。"
   }
 ]

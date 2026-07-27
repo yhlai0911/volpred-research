@@ -34695,10 +34695,11 @@
       }
     ],
     "compute_job_id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
-    "blocked_reason": "external_compute_job_active",
+    "blocked_reason": "external_compute_job_running",
     "result": "dispatched to compute job k1426-oos-rerun-shard-c-dailyseries-20260727; awaiting PHASE A collection",
     "plan": "item3 docstring 修正已完成 inline（oos.py L8-9 refit 63/quarterly + n_starts=50；L345 metadata Quarterly）。item1+2 需 heavy PCH MLE 重跑：已 enqueue 3 shard job（a/b/c，各 timeout 4h）重跑並持久化每日避險報酬序列（oos.py 新增 daily_hedged_returns），benchmark 已改寫可做 return-OLS vs PCH 配對 DM+bootstrap（paired_return_ols_vs_pch）。shard b 重試 GLD/IAU（item1）。",
-    "enabling_commits_pending": true
+    "enabling_commits_pending": true,
+    "compute_started_at": "2026-07-27T10:30:06Z"
   },
   {
     "id": "assign_quota_requeue_agentjobs",
@@ -46712,11 +46713,35 @@
     "description": "K1698 rev4 round-5 Codex review 無法出裁決（compute job k1698_rev4_codex_round5_rerun2_20260727 已 completed 但 abort）。\n\n【根因】受審的 frozen worktree dispatch-slot-2-c5cafe39-k1698 早已被 salvage 裁決（worktree_salvage_dispatch-slot-2-c5cafe39-k1698 + wsb_remed_* 皆 succeeded），該 worktree 已不存在。這次 rerun 對著過時的 rev4 freeze 清單（storage/ops/codex_reviews/k1698_rev4_freeze.txt）硬審，freeze 驗證：5 缺檔（k1698_rev2_results.json / run_log_rev4.txt / run_log_rev2.txt / k1698_rev3_remediation.json / review_verdict.json）+ 4 雜湊不符，僅 fig2_trinity_before_after.png 相符 → Codex 依規中止，未產 verdict、未填 review_verdict.json、未 PASS/FAIL。prior collect task k1698_rev4_round5_collect 已 failed。\n\n【現況】主庫 experiments/k1698/ 是 salvage 後 consolidate 的 canonical（k1698_results.json 584KB、run_log.txt、fig1-3、README.md、k1698.py），檔名與 rev-系列 freeze 不同。review_verdict.json 目前不存在。\n\n【下一步（禁自簽；3-strike active，禁 naive re-retry 同法）】\n1. 先確認主庫 experiments/k1698 是否即為要 certify 的目標（cross-check worktree_salvage 裁決 outcome，判定 salvage 是否已代表最終結果）。\n2. 若是 → 用主庫現行 bytes 產生「新的」freeze 清單（取代 obsolete rev4 freeze），走 canonical helper。\n3. 重新 enqueue Codex review 對 main checkout（無 worktree，已 salvage）+ 新 freeze，走 compute_queue（codex_exec）。\n4. PASS 才由主線程填 experiments/k1698/review_verdict.json + 跑 experiment_gates.py certify；FAIL 列 blocker 續 rev5。\n禁止：追已消失的 worktree、對錯配的舊 freeze 再審、自簽 verdict。",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "hourly-dispatch",
     "created_at": "2026-07-27T09:25:33.913825+00:00",
     "parent_task_id": "k1698_rev4_round5_collect",
-    "created_by": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb"
+    "created_by": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb",
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:44:46.145409+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-dd7c4b885f294f89b5b8c294a67891dc"
+      },
+      {
+        "ts": "2026-07-27T10:44:52.763583+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-dd7c4b885f294f89b5b8c294a67891dc"
+      },
+      {
+        "ts": "2026-07-27T10:48:27.453520+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-scripts-codex-review-job-sh-1785149307",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-scripts-codex-review-job-sh-1785149307",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job compute-scripts-codex-review-job-sh-1785149307; awaiting PHASE A collection"
   },
   {
     "id": "assign_091ddcb9",
@@ -46759,7 +46784,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "incident_escalation",
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "incident_id": "ci-red-30256296797",
@@ -46789,16 +46814,37 @@
         "to": "pending",
         "by": "codex-vscode",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-27T10:58:38.344471+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:58:38.618683+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:58:38.901986+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "last_released_at": "2026-07-27T10:16:01.282776+00:00"
+    "last_released_at": "2026-07-27T10:16:01.282776+00:00",
+    "started_at": "2026-07-27T10:58:38.618670+00:00",
+    "completed_at": "2026-07-27T10:58:38.901964+00:00",
+    "result": "root_cause=committed mark_covered_article_tasks imported removed shared_state_lock and bypassed canonical flock writer; repair_commit=c0a62a612fe3c165f03aeaeb7c33035489f0312b; committed-version repro and 8 targeted tests pass"
   },
   {
     "id": "K1436_article_general_v2",
     "title": "K1436: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1436 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [K1436 verdict=NULL reviewer=feature-dev:code-reviewer subagent (PASS, no blocking defects; Codex CLI unavailable until 2026-07-25) artifact=experiments/k1436 task=compute-queue-followup-agent-brief_k1436_v2-70286f] Does BTC perpetual funding rate carry incremental information fo Canonical evidence: experiments/k1436/k1436_results.json, experiments/k1436/v1_feasibility_audit_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -46815,7 +46861,30 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T10:13:20+00:00"
+    "created_at": "2026-07-27T10:13:20+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:54:08.995982+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-3cd2ea553372468d88d08657717888d8"
+      },
+      {
+        "ts": "2026-07-27T10:54:18.521287+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-3cd2ea553372468d88d08657717888d8"
+      },
+      {
+        "ts": "2026-07-27T11:05:12.178805+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-3cd2ea553372468d88d08657717888d8"
+      }
+    ],
+    "started_at": "2026-07-27T10:54:18.521272+00:00",
+    "completed_at": "2026-07-27T11:05:12.178779+00:00",
+    "result": "K1436 general-audience article published to draft pool as mile_3c83e665 (audience=general, 2 data-bound charts, anti-AI gate PASS, content-vs-source audit PASS 4 claims/164 values). Finding: BTC perp funding rate carries no incremental vol info — signed funding Clark-West p=0.080 (NULL), |funding| p=0.041 but QLIKE gain <1% (economically nil). Complements existing research article mile_5193647b. Lazypack render queued lazypack-mile_3c83e665; releases via cadence once rendered."
   },
   {
     "id": "K1595_article_general",
@@ -46845,7 +46914,7 @@
     "description": "依既有Matt Issue #46 Deliverable-8補齊fail-closed機械退休閘：以可重跑依賴census盤點cron_hourly_dispatch canonical/live copy、launchd label、runtime schedule與writer/manifest references，綁定formal owner census；任何unknown/wrong/duplicate owner、active host surface、未宣告runtime依賴或未完成14-day gate都阻止退休。此slice只建preflight與TDD/read-back，不在blocking chain成熟前刪除rollback artifact。完成implement→TDD→兩軸code-review→live read-back。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T10:19:53.831539+00:00",
     "payload": {
@@ -46854,10 +46923,6 @@
     },
     "created_by": "codex-loop",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T10:19:58.321544+00:00",
-    "claim_expires_at": "2026-07-27T12:19:58.321544+00:00",
-    "claim_session_id": "05dff93377e3",
     "status_history": [
       {
         "ts": "2026-07-27T10:19:58.321560+00:00",
@@ -46870,14 +46935,23 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:46:50.479639+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T10:20:01.837717+00:00"
+    "started_at": "2026-07-27T10:20:01.837717+00:00",
+    "completed_at": "2026-07-27T10:46:50.479617+00:00",
+    "result": "root_cause_fixed_and_verified slice: commit 49f167cfa adds fail-closed atomic legacy retirement preflight, typed hash-chained gap-free 14-day evidence, no-follow path pinning, and live read-back. 107 tests + Matt Spec/Standards PASS. Issue #46 umbrella remains contained/retirement_blocked: 6 owner blockers, missing canonical event signals, 0-day clean window, rollback artifacts retained.",
+    "issue_disposition": "contained"
   },
   {
     "id": "assign_e6334a67",
     "title": "PHASE-Z 卡住檔案 incident（e31d4511cfd8f08f）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n53 個未提交檔案不是任何一班 fire 產出的，最長已連續 27 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1319/README.md — 6 班\n- experiments/k1319/k1319.py — 6 班\n- experiments/k1319/k1319_results.json — 20 班\n- experiments/k1399/k1399_qlike_comparison.png — 20 班\n- experiments/k1399/k1399_vix_decomp_results.json — 20 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 20 班\n- experiments/k1591/k1591_results.json — 20 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 20 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 20 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 20 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 20 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 20 班\n- experiments/k1592/fig3_origin_gamma_t.png — 20 班\n- experiments/k1705/k1705_results.json — 20 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 9 班\n- experiments/k1730/README.md — 9 班\n- experiments/k1730/REMEDIATION_v2.md — 9 班\n- experiments/k1730/codex_review_v1.md — 9 班\n- experiments/k1730/data/CPI_first_release.csv — 9 班\n- experiments/k1730/data/DGS10_daily.csv — 9 班\n- experiments/k1730/data/DTB3_daily.csv — 9 班\n- experiments/k1730/data/IP_first_release.csv — 9 班\n- experiments/k1730/data/NFP_first_release.csv — 9 班\n- experiments/k1730/data/UNRATE_first_release.csv — 9 班\n- experiments/k1730/data/VIX_daily.csv — 9 班\n- experiments/k1730/data/spy_daily_rv.csv — 9 班\n- experiments/k1730/fig1_rolling_coverage.png — 9 班\n- experiments/k1730/fig2_ssvs_pip.png — 9 班\n- experiments/k1730/fig3_interval_vs_realized.png — 9 班\n- experiments/k1730/fig4_pit_calibration.png — 9 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T102844873101Z:<路徑>`",
+    "description": "## 發生什麼\n53 個未提交檔案不是任何一班 fire 產出的，最長已連續 28 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- experiments/k1319/README.md — 7 班\n- experiments/k1319/k1319.py — 7 班\n- experiments/k1319/k1319_results.json — 21 班\n- experiments/k1399/k1399_qlike_comparison.png — 21 班\n- experiments/k1399/k1399_vix_decomp_results.json — 21 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 21 班\n- experiments/k1591/k1591_results.json — 21 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 21 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 21 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 21 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 21 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 21 班\n- experiments/k1592/fig3_origin_gamma_t.png — 21 班\n- experiments/k1705/k1705_results.json — 21 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 10 班\n- experiments/k1730/README.md — 10 班\n- experiments/k1730/REMEDIATION_v2.md — 10 班\n- experiments/k1730/codex_review_v1.md — 10 班\n- experiments/k1730/data/CPI_first_release.csv — 10 班\n- experiments/k1730/data/DGS10_daily.csv — 10 班\n- experiments/k1730/data/DTB3_daily.csv — 10 班\n- experiments/k1730/data/IP_first_release.csv — 10 班\n- experiments/k1730/data/NFP_first_release.csv — 10 班\n- experiments/k1730/data/UNRATE_first_release.csv — 10 班\n- experiments/k1730/data/VIX_daily.csv — 10 班\n- experiments/k1730/data/spy_daily_rv.csv — 10 班\n- experiments/k1730/fig1_rolling_coverage.png — 10 班\n- experiments/k1730/fig2_ssvs_pip.png — 10 班\n- experiments/k1730/fig3_interval_vs_realized.png — 10 班\n- experiments/k1730/fig4_pit_calibration.png — 10 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T102844873101Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T110759836535Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -46942,67 +47016,211 @@
         "storage/paper_pipeline_status.json"
       ],
       "streaks": {
-        "experiments/k1319/README.md": 6,
-        "experiments/k1319/k1319.py": 6,
-        "experiments/k1319/k1319_results.json": 20,
-        "experiments/k1399/k1399_qlike_comparison.png": 20,
-        "experiments/k1399/k1399_vix_decomp_results.json": 20,
-        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 20,
-        "experiments/k1591/k1591_results.json": 20,
-        "experiments/k1591/tables/k1591_daily_panel.csv": 20,
-        "experiments/k1591/tables/k1591_regime_summary.csv": 20,
-        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 20,
-        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 20,
-        "experiments/k1592/fig2_gammarule_gjr_share.png": 20,
-        "experiments/k1592/fig3_origin_gamma_t.png": 20,
-        "experiments/k1705/k1705_results.json": 20,
-        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 9,
-        "experiments/k1730/README.md": 9,
-        "experiments/k1730/REMEDIATION_v2.md": 9,
-        "experiments/k1730/codex_review_v1.md": 9,
-        "experiments/k1730/data/CPI_first_release.csv": 9,
-        "experiments/k1730/data/DGS10_daily.csv": 9,
-        "experiments/k1730/data/DTB3_daily.csv": 9,
-        "experiments/k1730/data/IP_first_release.csv": 9,
-        "experiments/k1730/data/NFP_first_release.csv": 9,
-        "experiments/k1730/data/UNRATE_first_release.csv": 9,
-        "experiments/k1730/data/VIX_daily.csv": 9,
-        "experiments/k1730/data/spy_daily_rv.csv": 9,
-        "experiments/k1730/fig1_rolling_coverage.png": 9,
-        "experiments/k1730/fig2_ssvs_pip.png": 9,
-        "experiments/k1730/fig3_interval_vs_realized.png": 9,
-        "experiments/k1730/fig4_pit_calibration.png": 9,
-        "experiments/k1730/k1730_data.py": 9,
-        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 9,
-        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 9,
-        "experiments/k1730/k1730_models.py": 9,
-        "experiments/k1730/k1730_quickmode_results.json": 9,
-        "experiments/k1730/k1730_report_tables.py": 9,
-        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 9,
-        "experiments/k1730/k1730_scoring.py": 9,
-        "experiments/k1730/reproduce_spec.json": 9,
-        "experiments/k1730/review_verdict.json": 9,
-        "experiments/k1730/run_production.log": 9,
-        "experiments/k1730/run_production_v2.log": 9,
-        "experiments/k1730/test_k1730_recovery.py": 9,
-        "experiments/k1730/verify_readme_alignment.py": 9,
-        "experiments/k892/k892_verify_tw_gamma.py": 3,
-        "experiments/k892/k892_verify_tw_gamma_results.json": 3,
-        "experiments/paper2_table1_summary_stats_provenance/results.json": 20,
-        "paper/leverage-direction/main_v_ijf.pdf": 6,
-        "storage/drafts/article_images/k1600_dm_and_beta1q.png": 3,
-        "storage/drafts/article_images/k1600_qlike_loss_ratio.png": 3,
-        "storage/logs/trending_primary_source_verification.jsonl": 27,
-        "storage/memory/knowledge.json": 20,
-        "storage/paper_pipeline_status.json": 6
+        "experiments/k1319/README.md": 7,
+        "experiments/k1319/k1319.py": 7,
+        "experiments/k1319/k1319_results.json": 21,
+        "experiments/k1399/k1399_qlike_comparison.png": 21,
+        "experiments/k1399/k1399_vix_decomp_results.json": 21,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 21,
+        "experiments/k1591/k1591_results.json": 21,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 21,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 21,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 21,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 21,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 21,
+        "experiments/k1592/fig3_origin_gamma_t.png": 21,
+        "experiments/k1705/k1705_results.json": 21,
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 10,
+        "experiments/k1730/README.md": 10,
+        "experiments/k1730/REMEDIATION_v2.md": 10,
+        "experiments/k1730/codex_review_v1.md": 10,
+        "experiments/k1730/data/CPI_first_release.csv": 10,
+        "experiments/k1730/data/DGS10_daily.csv": 10,
+        "experiments/k1730/data/DTB3_daily.csv": 10,
+        "experiments/k1730/data/IP_first_release.csv": 10,
+        "experiments/k1730/data/NFP_first_release.csv": 10,
+        "experiments/k1730/data/UNRATE_first_release.csv": 10,
+        "experiments/k1730/data/VIX_daily.csv": 10,
+        "experiments/k1730/data/spy_daily_rv.csv": 10,
+        "experiments/k1730/fig1_rolling_coverage.png": 10,
+        "experiments/k1730/fig2_ssvs_pip.png": 10,
+        "experiments/k1730/fig3_interval_vs_realized.png": 10,
+        "experiments/k1730/fig4_pit_calibration.png": 10,
+        "experiments/k1730/k1730_data.py": 10,
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 10,
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 10,
+        "experiments/k1730/k1730_models.py": 10,
+        "experiments/k1730/k1730_quickmode_results.json": 10,
+        "experiments/k1730/k1730_report_tables.py": 10,
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 10,
+        "experiments/k1730/k1730_scoring.py": 10,
+        "experiments/k1730/reproduce_spec.json": 10,
+        "experiments/k1730/review_verdict.json": 10,
+        "experiments/k1730/run_production.log": 10,
+        "experiments/k1730/run_production_v2.log": 10,
+        "experiments/k1730/test_k1730_recovery.py": 10,
+        "experiments/k1730/verify_readme_alignment.py": 10,
+        "experiments/k892/k892_verify_tw_gamma.py": 4,
+        "experiments/k892/k892_verify_tw_gamma_results.json": 4,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 21,
+        "paper/leverage-direction/main_v_ijf.pdf": 7,
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png": 4,
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png": 4,
+        "storage/logs/trending_primary_source_verification.jsonl": 28,
+        "storage/memory/knowledge.json": 21,
+        "storage/paper_pipeline_status.json": 7
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T102844873101Z"
+        "refs/volpred/quarantine/20260727T102844873101Z",
+        "refs/volpred/quarantine/20260727T110759836535Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-27T10:28:48.713802+00:00",
-      "last_seen_at": "2026-07-27T10:28:48.713802+00:00"
+      "last_seen_at": "2026-07-27T11:08:04.024505+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-27T10:29:32.920982+00:00",
+      "deferred": [
+        "experiments/k1319/README.md: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1319/k1319.py: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1319/k1319_results.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1399/k1399_qlike_comparison.png: 已保存，且 8.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1399/k1399_vix_decomp_results.json: 已保存，且 8.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png: 已保存，且 8.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/k1591_results.json: 已保存，且 8.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_daily_panel.csv: 已保存，且 8.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_regime_summary.csv: 已保存，且 8.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv: 已保存，且 8.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png: 已保存，且 8.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig2_gammarule_gjr_share.png: 已保存，且 8.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig3_origin_gamma_t.png: 已保存，且 8.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1705/k1705_results.json: 已保存，且 8.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k892/k892_verify_tw_gamma.py: 已保存，且 1.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k892/k892_verify_tw_gamma_results.json: 已保存，且 1.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/paper2_table1_summary_stats_provenance/results.json: 已保存，且 8.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "paper/leverage-direction/main_v_ijf.pdf: 已保存，且 2.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png: 已保存，且 1.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png: 已保存，且 1.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 12.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/paper_pipeline_status.json: 已保存，且 2.4 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-27T11:08:04.024505+00:00"
+  },
+  {
+    "id": "assign_b119d7be",
+    "title": "[Issue #46] Add fail-closed legacy business-fire tripwire ledger",
+    "description": "Implement the first canonical retirement event source without rerunning planning: instrument the rollback-only legacy hourly wrapper at its unavoidable business-entry boundary; append durable tamper-evident legacy_business_fire events; derive the typed interval signal only from verified ledger bytes; fail closed if evidence cannot be recorded; TDD, Matt two-axis review, live read-back, exact-path [codex] commit. Do not schedule the four-signal recorder or start the 14-day window in this slice.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-27T10:48:49.057141+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:48:53.426000+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:48:57.066141+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:02:05.444544+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T10:48:57.066129+00:00",
+    "completed_at": "2026-07-27T11:02:05.444519+00:00",
+    "result": "Root-cause-fixed slice: legacy rollback entry now fail-closes unless it appends a strict hash-chain event with independent durable head; Operations Core derives interval count by sequence watermark. Tail/whole-ledger deletion, equal-time boundary, symlink/tamper and wrapper placement regressions pass; umbrella remains contained.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_c1eeb9bb",
+    "title": "[Issue #46] Register legacy retirement signal under Operations Core scheduler",
+    "description": "Formal schedule change linked to the legacy-business-fire producer slice: add one model-free hourly Operations Core-owned materializer job and canonical wrapper; it refreshes only the typed legacy_business_fire signal and never records an observation or starts the 14-day window. Add writer ownership, schedule validation, live schedule receipt/read-back, Matt review.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-27T10:57:48.022961+00:00",
+    "payload": {
+      "governance_area": "schedule",
+      "schedule_proposal": {
+        "job_id": "legacy_retirement_signal_materialize",
+        "cron": "45 * * * *",
+        "timezone": "Asia/Taipei",
+        "owner": "operations_core",
+        "effect": "refresh one ignored typed signal only; no observation receipt",
+        "rollback": "remove active_jobs row and system_crontab item; installed wrapper becomes unreferenced"
+      }
+    },
+    "parent_task_id": "assign_b119d7be",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:57:52.580243+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:57:56.401198+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:02:05.716140+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T10:57:56.401184+00:00",
+    "completed_at": "2026-07-27T11:02:05.716118+00:00",
+    "result": "Formal schedule change: Operations Core uniquely owns */5 legacy_retirement_signal_materialize; host cron and piggy-back disabled. Natural 2026-07-27T11:00Z fire succeeded with durable schedule receipt and typed signal read-back; observation recorder remains unscheduled, so 14-day window has not started.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_6d5f1390",
+    "title": "[Issue #46] Add durable duplicate-effect violation producer",
+    "description": "Implement next retirement signal without replanning: at the formal PostgreSQL Effect Delivery settlement boundary, append any second acknowledged delivery for one EffectRequest to a private durable sequence ledger; expose service-role-only read RPC; materialize duplicate_effect signal from verified DB sequence cursor under Operations Core schedule; deploy migration, TDD, Matt two-axis review, live DB/scheduler read-back. Do not start observation recorder.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T11:06:13.545954+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T11:06:23.149331+00:00",
+    "claim_expires_at": "2026-07-27T13:06:23.149331+00:00",
+    "claim_session_id": "ce265b208717",
+    "status_history": [
+      {
+        "ts": "2026-07-27T11:06:23.149345+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:06:26.588551+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T11:06:26.588539+00:00"
   }
 ]
