@@ -4,6 +4,8 @@ import argparse
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from scripts import task_pool_claim
 from volpred.ops.issue_tracker_sync import (
     assign_issue,
@@ -187,6 +189,7 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
                 {
                     "id": "linked-ticket",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
                     "issue_disposition": "close",
                     "priority": 2,
                     "result": "implemented acceptance criteria",
@@ -256,6 +259,7 @@ def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
         {
             "id": "linked-ticket",
             "status": "succeeded",
+            "completed_at": "2026-07-26T12:00:00+00:00",
             "issue_disposition": "close",
             "priority": 2,
             "issue_ref": "#37",
@@ -389,6 +393,7 @@ def test_settlement_does_not_acknowledge_disposition_changed_during_close(
                 {
                     "id": "whole-issue",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
                     "issue_ref": "#37",
                     "issue_disposition": "close",
                     "issue_close_pending": pending,
@@ -418,6 +423,58 @@ def test_settlement_does_not_acknowledge_disposition_changed_during_close(
     assert "issue_closed_commit" not in saved
 
 
+@pytest.mark.parametrize(
+    ("drifted_field", "drifted_value"),
+    [
+        ("task_id", "different-task"),
+        ("issue_ref", "#47"),
+        ("completed_at", "2026-07-26T12:01:00+00:00"),
+    ],
+)
+def test_ambiguous_pending_identity_never_calls_external_closer(
+    tmp_path,
+    drifted_field,
+    drifted_value,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    pending = {
+        "issue_disposition": "close",
+        "issue_ref": "#37",
+        "task_id": "whole-issue",
+        "completion_owner": "codex-vscode",
+        "completed_at": "2026-07-26T12:00:00+00:00",
+        "completion_base_commit": "1" * 40,
+    }
+    pending[drifted_field] = drifted_value
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "whole-issue",
+                    "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_ref": "#37",
+                    "issue_disposition": "close",
+                    "issue_close_pending": pending,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=lambda **kwargs: calls.append(kwargs),
+    )
+
+    assert settled == []
+    assert calls == []
+
+
 def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
@@ -434,6 +491,7 @@ def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -
                 {
                     "id": "task-a",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
                     "issue_disposition": "close",
                     "issue_ref": "#37",
                     "issue_close_pending": pending,
@@ -478,6 +536,7 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                 {
                     "id": "task-a",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
                     "issue_disposition": "close",
                     "issue_ref": "#37",
                     "issue_close_pending": {
@@ -492,6 +551,7 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                 {
                     "id": "task-b",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
                     "issue_disposition": "close",
                     "issue_ref": "#38",
                     "issue_close_pending": {
@@ -569,6 +629,7 @@ def test_explicit_task_ids_exclude_same_owner_same_base_sibling(tmp_path) -> Non
             {
                 "id": task_id,
                 "status": "succeeded",
+                "completed_at": "2026-07-26T12:00:00+00:00",
                 "issue_disposition": "close",
                 "issue_ref": issue_ref,
                 "issue_close_pending": {

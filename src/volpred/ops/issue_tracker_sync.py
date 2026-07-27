@@ -439,7 +439,17 @@ def settle_completed_task_issues(
                     continue
                 task_id = str(task.get("id") or "")
                 issue_ref = pending.get("issue_ref")
-                if not task_id or issue_number(issue_ref) is None:
+                task_issue_ref = task.get("issue_ref")
+                if (
+                    not task_id
+                    or str(pending.get("task_id") or "") != task_id
+                    or issue_number(issue_ref) is None
+                    or issue_number(task_issue_ref) is None
+                    or normalize_issue_ref(task_issue_ref)
+                    != normalize_issue_ref(issue_ref)
+                    or pending.get("completed_at")
+                    != task.get("completed_at")
+                ):
                     continue
 
                 bound_sha = str(pending.get("commit_sha") or "").strip().lower()
@@ -514,6 +524,13 @@ def settle_completed_task_issues(
                     or task.get("status") != "succeeded"
                     or task.get("issue_disposition") != "close"
                     or task.get("issue_close_pending") != receipt["pending"]
+                    or str(receipt["pending"].get("task_id") or "")
+                    != receipt["task_id"]
+                    or issue_number(task.get("issue_ref")) is None
+                    or normalize_issue_ref(task.get("issue_ref"))
+                    != receipt["issue_ref"]
+                    or receipt["pending"].get("completed_at")
+                    != task.get("completed_at")
                 ):
                     continue
                 task.pop("issue_close_pending", None)

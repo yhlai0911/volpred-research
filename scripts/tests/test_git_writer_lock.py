@@ -145,6 +145,7 @@ def test_exact_path_commit_closes_owned_linked_issue_with_real_sha(
                     "task_type": "platform_ops",
                     "priority": 2,
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
                     "issue_disposition": "close",
                     "result": "implemented acceptance criteria",
                     "issue_ref": "#37",
