@@ -2279,3 +2279,16 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 Issue #18仍為 **`contained`**：synthetic authorize不等於真實Git／email mutation
   partition canary；direct legacy caller cutover與全域retirement仍由#24／#46完成，
   五步Gate未齊前不關Issue、不宣稱新架構已完全取代舊架構。
+
+## 2026-07-27 — Task success／Issue closure lifecycle 分離（Issue #47）
+
+- ✅ Linked runtime task成功預設`issue_disposition=contained`，不再自動關閉parent
+  GitHub issue；只有整張issue五步Gate全過才可明確指定`close`。
+- ✅ Close receipt在producer、candidate與ack三段都綁task id、canonical issue ref、
+  completion timestamp、commit SHA及exact pending receipt；legacy／ambiguous／drift
+  一律在GitHub IO前fail closed。
+- ✅ Missing HEAD／invalid issue會保留task in-progress，annotate不能改closure lifecycle。
+- ✅ 相關測試 **315 passed**，Matt Spec／Standards雙軸PASS。
+- ✅ Live default-contained task commit `6036b7c6a`後#47保持OPEN且marker=0；
+  explicit-close task commit `9677d28bb`才產生exact marker並CLOSED。Issue #47為
+  **`root_cause_fixed_and_verified`**。

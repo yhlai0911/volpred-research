@@ -2038,6 +2038,30 @@ RLS／direct SELECT denial與 function rewrite markers全正確，publisher scop
 `legacy/1`、0 request、0 active attempt、0 lease。此 terminal-replay seam為
 **`root_cause_fixed_and_verified`**。
 
+### 2026-07-27 — runtime task `succeeded` 誤關仍為 contained 的 GitHub umbrella issue
+
+**證據化症狀**：Issue #18 closure-audit slice 的 result 明寫
+`Issue #18維持contained/OPEN`，但 `task_pool_claim.py complete --status succeeded`
+仍無條件產生 `issue_close_pending`；exact-path commit `72beed8fa` 隨即由 settlement
+關閉整張 #18，必須人工reopen。Task outcome與issue disposition被混成同一狀態，
+使五步Gate只存在於文字規範，控制面反而能機械違反它。
+
+**根因與底層修復**：新增正交的`issue_disposition` lifecycle。Linked task成功預設
+`contained`並保持issue OPEN；只有整張issue acceptance與五步Gate全過後明確傳
+`--issue-disposition close`，才產生commit-bound close receipt。Disposition加入
+annotate protected fields；explicit close遇invalid issue或讀不到HEAD時，在任何
+terminal mutation前fail closed。Settlement candidate與ack CAS都exact-match
+disposition、task id、canonical issue ref、completion timestamp與完整pending receipt；
+legacy、ambiguous或漂移receipt不呼叫GitHub。
+
+**回歸與live read-back**：tight RED先重現default completion產生close receipt及
+settlement呼叫closer；最終task-pool／issue-sync／writer-lock／supervisor測試
+**315 passed**，Matt Spec／Standards雙軸PASS。Live task `assign_e474aaf2`以預設
+contained完成後，commit `6036b7c6a`回讀#47仍OPEN、marker=0、無close receipt；
+只有closure task `assign_abe5bb43`明確close，commit `9677d28bb`後GitHub才CLOSED，
+comment marker與`issue_closed_commit` exact match。Issue #47狀態為
+**`root_cause_fixed_and_verified`**。
+
 Python owner router與 active frontend owner fence已實作，後者在獨立 repo commit
 `ae14890`；但 frontend尚未 push／deploy。若現在切 production owner，舊 live
 `/api/sync`仍可能保留競爭 writer，因此 publisher整體只能標 **`contained`**。下一個
