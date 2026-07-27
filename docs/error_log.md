@@ -3593,3 +3593,59 @@ namespace／multiline re-export等escape。Live report 133 rows／25 rules／7 s
 聚合維度必須至少與被稽核ownership boundary同細，且「無法解析」只能是typed blocker，
 不能靠regex未命中當作不存在。#6 checker為`root_cause_fixed_and_verified`；它揭露的
 frontend內容缺口仍由#8處理。
+
+### 2026-07-27 — 低層 Supabase script 反向初始化 eager ops package，Operations Core schedule retry exhausted
+
+**證據化症狀與根因層級**：`release_settings_audit` 的 Operations Core fire
+`operations-core-v1:release_settings_audit:7993935c6a79e4e4efb529fe` 連續三次 exit 1。
+fresh traceback 是
+`audit_release_settings → scripts.supabase_sync → volpred.ops.__init__ →
+volpred.ops.content → scripts.supabase_sync`；`content` 從尚未完成初始化的 module
+取 `_delete_where` 時拋 `ImportError`。這不是 cron/FDA 或暫時網路錯誤，而是依賴方向
+違反：低層同步 script 為了 diagnostics 與 public projection contract，反向載入了
+會 eager re-export business modules 的整個 `volpred.ops` package。
+
+**底層修復與制度化**：將 dependency-neutral diagnostics 與 public projection
+contract 下移為 `volpred.diagnostics`、`volpred.public_article_projection_contract`；
+舊 `volpred.ops.*` 路徑只保留完整 compatibility surface。`supabase_sync` 直接依賴
+新低層路徑，不再於 module load 初始化 ops。fresh-interpreter regression 固定
+`supabase_sync-first`、`audit_release_settings-first` 與「低層 script 禁止 top-level
+`volpred.ops` edge」；另固定 legacy projection surface 的四個 public symbols。
+Matt 首輪雙審曾抓到 matcher 漏 re-export 的 P1，follow-up `744e18920` 補齊後
+Spec／Standards 均 PASS，避免用解除循環換來 production compatibility break。
+
+**回歸與狀態**：相關 credential guard、remote guard、projection convergence、
+diagnostics、release audit 與 publisher sync suites為 **104 passed, 1 skipped**。
+真實 `audit_release_settings.py --fix --json` 回讀 Supabase
+`status=ok / cadence=aligned / starved_drafts=[]`，原 detector fresh read-back 為
+`host_cron_fail.breached=false / failing_logs=[]`。底層修復與 detector 已收斂；截至
+11:56 台灣時間，下一個 Operations Core natural slot 12:17 尚未產生新 schedule
+receipt，因此此刻狀態為 **`contained`**。只有新 fire 在 `1297eff40`＋`744e18920`
+後回讀 succeeded，才升級為 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-27 — 同 owner 的歷史壞 shadow receipt 永久污染七日 cutover window
+
+**證據化症狀**：Issue #9 live queue 已回到 `queued_execution`，23:37 UTC 後的
+scheduled v4 receipts 連續回讀 0 reconciliation issue，selection difference 也只剩
+有完整 oracle／snapshot evidence 的 registered capability policy change；但
+`work-shadow-assess` 仍把 12:15–23:15 已修復的 legacy corruption／implementation
+receipt 全部納入，持續回報 `reconciliation_issue_present`、
+`blocking_selection_difference` 與 `blocking_dimension_difference`。只要 owner state
+SHA 不變，append 再多乾淨 receipt 也不會移除這些歷史 blocker。
+
+**根因層級與底層修復**：根因是 observation state machine 只有
+「owner evidence 改變」一種 epoch boundary，沒有「同 owner 下修復完成後重新累積
+連續乾淨窗口」的語意。這不是刪舊 receipt 或手改 live state 的問題。公開
+`assess_shadow_observation_directory()` 現逐 receipt 判定 row count、candidate
+identity、必要 dimensions、selection evidence、registered policy、reconciliation
+與非 policy mismatch；最後一筆 blocking／incomplete receipt 會切斷 soak。只有其後
+clean suffix 的 append wall-clock 真正跨滿七日，assessment 才改以該 suffix 裁決；
+舊 receipt 仍完整保留供 audit，短窗或新 blocker 仍 fail closed。
+
+**回歸與狀態界線**：兩個 public-interface cases 先分別以
+`reconciliation_issue_present`、`receipt_row_count_mismatch` 重現永久污染，再證明
+其後八筆／七日乾淨 evidence 可核可；assessment 全檔 **31 passed**。Live clean suffix
+尚未滿七日，正式 Work Coordinator owner 仍為 `legacy/1`，沒有 stage gate、owner
+transfer、下游 acknowledgement 或 rollback rehearsal。因此本 assessor 根因修復可在
+完成雙軸 review 後標 `root_cause_fixed_and_verified`；Issue #9 umbrella 仍只能標
+**`contained`**。
