@@ -7,7 +7,7 @@ healthy trail that must NOT page:
 
 1. black hole   — gate firing for 24h with zero passes → critical
 2. block rate   — weekly hard-block rate > 30% → warn
-3. arc repeat   — same narrative arc blocked ≥3 times → warn
+3. arc repeat   — same narrative arc blocks ≥3 distinct candidates → warn
 4. healthy      — mixed pass/warn/block traffic → no findings, no breach
 
 Also pins the mixed-schema normalization (legacy ``action`` records, structured
@@ -167,13 +167,106 @@ def test_same_arc_blocked_three_times_breaches(tmp_path: Path) -> None:
     assert arc["breached"] is True
     assert arc["repeat_arcs"][0]["arc_id"] == "mile_arc_hot"
     assert arc["repeat_arcs"][0]["blocks"] == 3
+    assert arc["repeat_arcs"][0]["distinct_candidates"] == 3
     # cross-schema: the three blocks came from action / gate / task_generation
     assert len(arc["repeat_arcs"][0]["gates"]) == 3
     assert [f["id"] for f in verdict["findings"]] == ["arc_repeat_block"]
+    assert "3 個不同候選" in verdict["findings"][0]["summary"]
 
     state = _parse_dedup_gate_health_state(str(tmp_path), NOW)
     assert state["breached"] is True
     assert state["level"] == "warn"
+
+
+def test_retries_of_same_candidate_do_not_fake_arc_repeat_breach(
+    tmp_path: Path,
+) -> None:
+    entries = [
+        {
+            **_action(1.0 + index, "block_arc_dup", "mile_arc_hot"),
+            "new_title": "same candidate retried",
+        }
+        for index in range(3)
+    ]
+    entries += [
+        _gate(0.5 + i, "publish_throttle", "pass", f"mile_ok{i}")
+        for i in range(10)
+    ]
+    _write_log(tmp_path, entries)
+
+    verdict = audit_dedup_decisions(storage_dir=str(tmp_path), now=NOW)
+
+    arc = verdict["conditions"]["arc_repeat_block"]
+    assert arc["breached"] is False
+    assert arc["repeat_arcs"] == []
+    assert verdict["healthy"] is True
+
+
+def test_candidate_identity_is_stable_across_supported_schemas(
+    tmp_path: Path,
+) -> None:
+    entries = [
+        _gate(1.0 + index, "gate", "block", "same-target", "arc-target")
+        for index in range(3)
+    ]
+    entries += [
+        {
+            **_action(5.0 + index, "block_arc_dup", "arc-candidate"),
+            "candidate_id": "same-candidate",
+            "new_title": f"different retry title {index}",
+        }
+        for index in range(3)
+    ]
+    entries += [
+        {
+            **_action(10.0, "block_arc_dup", "arc-title"),
+            "new_title": "  Same   TITLE ",
+        },
+        {
+            **_action(11.0, "block_arc_dup", "arc-title"),
+            "new_title": "same title",
+        },
+        {
+            **_action(12.0, "block_arc_dup", "arc-title"),
+            "new_title": "SAME TITLE",
+        },
+    ]
+    entries += [
+        _gate(0.1 + i, "publish_throttle", "pass", f"mile_ok{i}")
+        for i in range(30)
+    ]
+    _write_log(tmp_path, entries)
+
+    verdict = audit_dedup_decisions(storage_dir=str(tmp_path), now=NOW)
+
+    assert verdict["conditions"]["arc_repeat_block"]["breached"] is False
+    assert verdict["healthy"] is True
+
+
+def test_identityless_legacy_blocks_remain_conservatively_distinct(
+    tmp_path: Path,
+) -> None:
+    entries = [
+        {
+            "ts": (NOW - timedelta(hours=index + 1)).isoformat(),
+            "action": "block_arc_dup",
+            "matched_id": "arc-identityless",
+            "reason": "legacy",
+        }
+        for index in range(3)
+    ]
+    entries += [
+        _gate(0.1 + i, "publish_throttle", "pass", f"mile_ok{i}")
+        for i in range(10)
+    ]
+    _write_log(tmp_path, entries)
+
+    verdict = audit_dedup_decisions(storage_dir=str(tmp_path), now=NOW)
+
+    repeat = verdict["conditions"]["arc_repeat_block"]["repeat_arcs"][0]
+    assert repeat["blocks"] == 3
+    assert repeat["distinct_candidates"] == 3
+    assert verdict["conditions"]["arc_repeat_block"]["breached"] is True
 
 
 # ---------------------------------------------------------------- healthy / edges

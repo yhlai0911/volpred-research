@@ -3846,3 +3846,24 @@ duplicate/effect/provider=0。aggregate receipt已由final verifier重算SHA cha
 migration/cold restore、TCC/runtime capability與formal effects分別仍由#17/#16/#24
 負責，且#16/#17受#12→#9七日gate阻塞。Issue #21因此維持
 **`contained`／OPEN**，不得升級為`root_cause_fixed_and_verified`。
+
+### 2026-07-27 — Dedup health把同一候選重試誤算成多個被吞掉的narrative arc
+
+**證據化症狀**：canonical `audit_dedup_gate_decisions.py`穩定回
+`healthy=false`，宣稱三個arc各被block四次；逐筆回讀卻顯示三個arc都只來自同四班
+CLI呼叫，其中兩班為同一FOMC標題retry、兩班為診斷標題`x`。同時近24h仍有170次
+allow、最後allow距當下不到一分鐘，沒有content black hole。警報把「同一候選重跑」
+錯當成「同一arc吞掉三個不同候選」，人工unlock建議因此是false positive。
+
+**根因層級與底層修復**：audit只按`matched_id`累加raw rows，沒有candidate
+identity。現在跨structured/legacy schema優先用`target_id`／`candidate_id`，舊
+pre-write紀錄則用正規化`new_title`／`title`；只有完全沒有identity的歷史row才維持
+逐列計數，避免猜測性合併。arc-repeat條件改計distinct candidates；block-rate與
+no-pass仍保留每筆正式decision，不會美化真實hard block或黑洞。
+
+**回歸與live read-back**：公開audit seam先以「同arc、同candidate三次」重現RED，
+修後GREEN；原有跨schema三個不同candidate仍會breach。dedup/event/arc/release相鄰
+套件**144 passed**，silent-fallback strict=`new=0`。production log不刪、不改，
+40個hard block全保留；同一原detector fresh read-back為
+`arc_repeat_block.breached=false`、`findings=[]`、`healthy=true`。此alert計數根因
+完成五步Gate，狀態為 **`root_cause_fixed_and_verified`**。

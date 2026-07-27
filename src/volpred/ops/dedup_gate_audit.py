@@ -22,9 +22,10 @@ This module is the single adjudicator for the three §4 conditions:
    one block-class decision in it. A window with no entries at all is NOT this
    breach — a silent pipeline is the publishing_freshness dead-man switch's
    concern (outcome-level), not the gate audit's.
-3. **same narrative arc blocked ≥ 3 times** (default) in the window → the arc
-   anchor (``matched_id``) keeps swallowing new content; review whether it
-   deserves a manual unlock.
+3. **same narrative arc blocks ≥ 3 distinct candidates** (default) in the
+   window → the arc anchor (``matched_id``) keeps swallowing new content;
+   review whether it deserves a manual unlock. Retries/probes of one candidate
+   are one decision for this condition, not evidence of three swallowed ideas.
 
 The trail mixes two schemas (legacy ``action`` records and structured
 ``gate``/``decision`` records, plus ``task_generation`` records that carry an
@@ -121,6 +122,22 @@ def _log_path(storage_dir: str) -> Path:
     return project_path(storage_dir, "logs", "dedup_decisions.jsonl")
 
 
+def _candidate_identity(entry: dict[str, Any], *, fallback: str) -> str:
+    """Return the stable candidate identity available in each trail schema."""
+    for key in ("target_id", "candidate_id"):
+        value = entry.get(key)
+        if isinstance(value, str) and value.strip():
+            return f"id:{value.strip()}"
+    for key in ("new_title", "title"):
+        value = entry.get(key)
+        if isinstance(value, str) and value.strip():
+            normalized = " ".join(value.casefold().split())
+            return f"title:{normalized}"
+    # Old rows without a target or title cannot be safely collapsed. Preserve
+    # their historical one-row-one-candidate semantics instead of guessing.
+    return fallback
+
+
 def audit_dedup_decisions(
     *,
     storage_dir: str = "storage",
@@ -201,10 +218,22 @@ def audit_dedup_decisions(
                     recent_blocks += 1
                 blocking_gates[gate] = blocking_gates.get(gate, 0) + 1
                 if arc_id:
-                    bucket = arc_blocks.setdefault(
-                        arc_id, {"arc_id": arc_id, "blocks": 0, "gates": set(), "last_ts": ts}
+                    candidate = _candidate_identity(
+                        entry,
+                        fallback=f"row:{scanned}:{ts.isoformat()}",
                     )
-                    bucket["blocks"] += 1
+                    bucket = arc_blocks.setdefault(
+                        arc_id,
+                        {
+                            "arc_id": arc_id,
+                            "candidates": set(),
+                            "raw_blocks": 0,
+                            "gates": set(),
+                            "last_ts": ts,
+                        },
+                    )
+                    bucket["candidates"].add(candidate)
+                    bucket["raw_blocks"] += 1
                     bucket["gates"].add(gate)
                     if ts > bucket["last_ts"]:
                         bucket["last_ts"] = ts
@@ -230,14 +259,15 @@ def audit_dedup_decisions(
         (
             {
                 "arc_id": info["arc_id"],
-                "blocks": info["blocks"],
+                "blocks": info["raw_blocks"],
+                "distinct_candidates": len(info["candidates"]),
                 "gates": sorted(info["gates"]),
                 "last_block_ts": info["last_ts"].isoformat(),
             }
             for info in arc_blocks.values()
-            if info["blocks"] >= arc_block_threshold
+            if len(info["candidates"]) >= arc_block_threshold
         ),
-        key=lambda item: item["blocks"],
+        key=lambda item: (item["distinct_candidates"], item["blocks"]),
         reverse=True,
     )
     arc_breached = bool(repeat_arcs)
@@ -267,8 +297,11 @@ def audit_dedup_decisions(
             "id": "arc_repeat_block",
             "level": "warn",
             "summary": (
-                f"{len(repeat_arcs)} 個 narrative arc 被 block ≥{arc_block_threshold} 次"
-                f"（最多 {worst['arc_id']}：{worst['blocks']} 次）— review 是否人工 unlock"
+                f"{len(repeat_arcs)} 個 narrative arc 擋下"
+                f" ≥{arc_block_threshold} 個不同候選"
+                f"（最多 {worst['arc_id']}："
+                f"{worst['distinct_candidates']} 候選／{worst['blocks']} raw blocks）"
+                "— review 是否人工 unlock"
             ),
         })
 

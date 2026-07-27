@@ -65,6 +65,10 @@ except Exception as e:
 - block rate > 30%（≥10 筆決策才計）→ warn（可能 gate 過鬆變過嚴）
 - 連續 24h 無 pass 且 gate 有在 block → **critical**（black hole 復發特徵；純 idle 不算，交給 publishing_freshness）
 - 同一 narrative arc block ≥3 次 → warn（review 是否該人工 unlock）
+  - 此處「次數」指 **≥3 個不同 candidate identity** 被擋；同一 `target_id`／
+    `candidate_id` 或同一正規化標題的 retry、replay、人工 probe 只算一個候選。
+    Raw block rows 仍保留在 verdict 的 `blocks`，告警判定與文案使用
+    `distinct_candidates`，不得以去重掩蓋 block-rate 或 no-pass black hole。
 
 Alert 出口 = `volpred.ops.alerts._parse_dedup_gate_health_state`（condition id `dedup_gate_health`，掛在 `build_alert_condition_report` registry，hourly check_alerts 自動掃，單一 alert owner per `.claude/rules/alert.md`）。手動 / cron 檢視：`uv run python scripts/audit_dedup_gate_decisions.py`（healthy → exit 0，任一條 breach → exit 1）。Regression gate：`tests/test_dedup_gate_audit.py`。
 
