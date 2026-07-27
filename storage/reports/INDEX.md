@@ -1,23 +1,25 @@
 # Feed Index
 
-_Last built: 2026-07-27 00:04 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
+_Last built: 2026-07-27 06:00 UTC — source: `storage/reports/feed.json` (do NOT read full; use this index)_
 
 ## Summary
 
-- Total articles: **1888**  (with thumbnail: 87)
-- Last 30 days: **223**
-- Total chars (content): 5,854,911
+- Total articles: **1889**  (with thumbnail: 87)
+- Last 30 days: **224**
+- Total chars (content): 5,861,840
 
-**Status**: published=1679, archived=124, unpublished=66, retracted=13, draft=5, wont_fix=1
+**Status**: published=1681, archived=124, unpublished=66, retracted=13, draft=4, wont_fix=1
 
-**Audience**: research=1144, general=483, daily=161, unknown=77, member_qa=15, event=8
+**Audience**: research=1144, general=484, daily=161, unknown=77, member_qa=15, event=8
 
-**Category**: milestone=915, general=851, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
+**Category**: milestone=915, general=852, unknown=73, member_qa=15, research=10, daily_article=8, event_article=6, qa=5, experiment=4, diary=1
 
-## 最近 30 天 (223)
+## 最近 30 天 (224)
 
 | 日期 | id | 標題 | audience | category | status | 字數 | 縮圖 | tags |
 |---|---|---|---|---|---|---|---|---|
+| 2026-07-27 | `mile_496e7dce` | AI 圈的「時序基礎模型」搬進波動率擂台：老公式 HAR 沒被打下來 | general | general | published | 4685 |  | 一般讀者 |
+| 2026-07-27 | `mile_cdade7c8` | 後天就開會：市場最愛的幾個「Fed 波動率前哨」，哪些是真哨兵、哪些只是安慰劑 | general | general | published | 6929 |  | 一般讀者, 精選導讀, FOMC, 波動率, 前哨指標, 訊號驗證 |
 | 2026-07-27 | `mile_21498beb` | 每日策略建議：VIX 18.58（正常）— 2026-07-27 | daily | general | published | 1515 | Y | 每日建議, VIX, 策略配置 |
 | 2026-07-27 | `mile_17f41578` | 2026-07-27 本日持倉比率建議（依據 2026-07-24 收盤數據） | daily | milestone | published | 939 |  | 每日建議, 持倉建議, 12/VIX, SPY, GLD, 0050.TW |
 | 2026-07-26 | `mile_822317c3` | 科技股的恐懼溢價「創22年新高」？我把 CBOE 的原始數字翻出來，故事沒那麼嚇人 | general | general | published | 3419 |  | 一般讀者, 波動率, VIX, VXN, 科技股, 那斯達克 |
@@ -26,7 +28,6 @@ _Last built: 2026-07-27 00:04 UTC — source: `storage/reports/feed.json` (do NO
 | 2026-07-26 | `mile_1ef77049` | 隔夜美股的震盪，真會傳染給亞洲嗎？二十年數字只認一個市場 | general | general | draft | 2662 |  | 一般讀者, 波動率, 亞洲股市, 風險管理, 日本股市, 東南亞 |
 | 2026-07-26 | `mile_be7666e2` | 我們差點親手推翻自己的發現：一個對錯一天的錯誤，怎麼被抓出來又被救回 | general | general | published | 4626 |  | 一般讀者, 研究誠實, 波動率, VIX, 恐慌, 統計檢定 |
 | 2026-07-26 | `mile_35d8941b` | 9 天 VIX 一旦跑贏 30 天 VIX，SPY 隔天波動就偏高：一個 6.56% 的可複現訊號 | general | general | draft | 3251 |  | 一般讀者, 波動率預測, VIX, SPY, 期限結構, 風險管理 |
-| 2026-07-26 | `mile_496e7dce` | AI 圈的「時序基礎模型」搬進波動率擂台：老公式 HAR 沒被打下來 | general | general | draft | 4685 |  | 一般讀者 |
 | 2026-07-26 | `mile_beee535c` | 兩支溫度計：MOVE 先亮、VIX 後知後覺，事件日的避險保費怎麼抓時機 | general | general | published | 7346 |  | 一般讀者, 精選導讀, MOVE, VIX, 利率波動率, 避險 |
 | 2026-07-26 | `mile_7c894f46` | 野火煙霧壓境那天，紐約空氣髒了 25 倍，股市卻比平常安靜 | general | milestone | published | 4564 |  | 一般讀者, 空氣污染, 另類數據, 波動預測, 標普500, 行為財務 |
 | 2026-07-24 | `mile_f00be77f` | 每日策略建議：VIX 18.7（正常）— 2026-07-24 | daily | general | published | 1825 | Y | 每日建議, VIX, 策略配置 |
