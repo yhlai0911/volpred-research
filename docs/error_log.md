@@ -3816,3 +3816,33 @@ idempotency key 重試。成功 delivery 另會清掉舊 `last_error`，避免 s
 verified green head=`0693506341c2`。Primary lifecycle 後續亦回讀 epoch 40
 expired → epoch 41 acquired → demoted，證明不是永久霸占。五步 Gate 已全過，
 本 incident 升級為 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-27 — Warm standby部署誤疊full repo，且isolated handoff不能證明formal RPO=0
+
+**證據化症狀**：#21 closure audit回讀MacBook目錄時發現沒有`.git`，但含
+`.env.local`、`.venv`、storage、experiments與frontend等約3.1GB內容；這不是宣告的
+最小tracked snapshot，不能拿來證明guided parity。另有既有
+`cross_host_verified=true` receipt，但其`effect_requests=0`、`provider_calls=0`，
+只能證明isolated authority key的排他與RTO，不能證明formal effect receipt的RPO=0。
+
+**根因層級與止血**：部署來源邊界與ticket證據口徑混淆。誤疊目錄已完整移到MacBook
+垃圾桶`volpred-research-unsafe-20260727T1608`，未刪除；新目錄只從固定Git tree匯出
+`src/volpred`、`scripts`、`config`與lockfiles，保留MacBook本機既有mode-600
+credential及Python `3.12.10` venv，不從Studio複製secret，也不安裝任何VolPred
+LaunchAgent／cron。第一次缺`config`的import preflight在remote read/mutation前
+fail closed，補齊tracked config後兩端implementation hash exact match
+`9db5479f…e401`。
+
+**live read-back與裁決**：readiness v4確認兩個不同實體fingerprint、相同Supabase
+backend、publisher owner `operations_core/8`與相同runtime。演練
+`issue21-warm-standby-20260727-1615`由Studio epoch 1健康renew後注入transport
+partition，`9.635672s`內關閉local gate；MacBook等待`29.034066s`且只能在舊lease
+DB-clock expiry後取得exact-next epoch 2，handoff=`0.528014s`，claims=2、
+duplicate/effect/provider=0。aggregate receipt已由final verifier重算SHA chain後落
+`storage/ops/primary_authority_outage_cross_host_latest.json`。
+
+**狀態**：誤疊部署已`contained`並留下可復原原件；本次isolated takeover rehearsal
+為有效live evidence，但不是formal RPO=0或完整warm standby結案。可重複guided
+migration/cold restore、TCC/runtime capability與formal effects分別仍由#17/#16/#24
+負責，且#16/#17受#12→#9七日gate阻塞。Issue #21因此維持
+**`contained`／OPEN**，不得升級為`root_cause_fixed_and_verified`。

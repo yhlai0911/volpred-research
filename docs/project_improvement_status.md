@@ -2404,3 +2404,26 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   mutation-boundary五步Gate已全過，狀態升級為
   **`root_cause_fixed_and_verified`**；Issue #18 acceptance scope完成，可關閉。
   #24/#46 direct legacy writer retirement仍由各自ticket追蹤，不再混入本Issue狀態。
+
+## 2026-07-27 — Warm Standby closure audit 與雙機重演（Issue #21）
+
+- ✅ 沿用既有Matt plan/spec/ticket，不重跑規劃；closure audit確認#21的GitHub
+  blocking edges仍包含#16/#17，而兩者等待#12→#9七日ownership gate，因此本輪不得
+  關閉#21或宣稱持續warm standby完成。
+- ✅ MacBook上的誤疊full-repo部署已移到
+  `~/.Trash/volpred-research-unsafe-20260727T1608`保留可復原副本；正式目錄重建為
+  最小tracked Operations Core runtime，不含Git history、storage、experiments、
+  frontend或Studio secret。MacBook只沿用本機既有mode-600 authority環境與已驗證
+  Python `3.12.10`／OpenSSL `3.0.16` venv，且沒有VolPred LaunchAgent／cron。
+- ✅ 雙機readiness v4在任何lease mutation前確認不同硬體fingerprint、相同backend、
+  相同publisher owner `operations_core/8`及相同implementation
+  `9db5479f…e401`。新演練`issue21-warm-standby-20260727-1615`中，Studio於
+  transport partition後`9.635672s`關閉local gate；MacBook只在舊lease的DB-clock
+  expiry後取得exact-next epoch `2`，standby等待`29.034066s`、DB-clock handoff
+  `0.528014s`，claims=2、duplicate/effect/provider=0。
+- 🟡 Canonical aggregate receipt已更新為
+  `storage/ops/primary_authority_outage_cross_host_latest.json`；五份raw receipt另以
+  mode 600保存於`~/.volpred/handoffs/issue21-20260727T0811Z/`。本輪只完成
+  isolated no-effect takeover slice；formal effect RPO=0、guided parity／TCC、
+  可重複cold restore與持續standby仍待#16/#17/#24，因此#21維持
+  **`contained`／OPEN**。
