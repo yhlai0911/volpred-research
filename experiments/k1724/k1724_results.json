@@ -1,0 +1,264 @@
+{
+  "experiment_id": "K1724",
+  "title": "台股當沖佔比與波動：散戶 herding 的在地量化",
+  "generated_at_utc": "2026-07-27T13:40:45.451434Z",
+  "sample": {
+    "start": "2014-06-30",
+    "end": "2026-07-27",
+    "n_trading_days": 2935
+  },
+  "data_provenance": {
+    "daytrade_ratio": {
+      "source": "TWSE exchangeReport TWTB4U 當日沖銷交易統計資訊 (aggregate table)",
+      "endpoint": "https://www.twse.com.tw/exchangeReport/TWTB4U?response=json&date=YYYYMMDD",
+      "variable": "dt_ratio = mean(當沖總買進金額占市場比重%, 當沖總賣出金額占市場比重%)",
+      "note": "value-based day-trade turnover ratio; TWSE definition uses (market buy+sell)/2 as denominator",
+      "coverage_verified": "2014-01-06 (start of 現股當沖) onward"
+    },
+    "realized_vol": {
+      "source": "yfinance ^TWII (TAIEX) daily OHLCV",
+      "rv_primary": "Garman-Klass range-based variance proxy x1e4",
+      "rv_robustness": [
+        "Parkinson",
+        "close-to-close squared return"
+      ],
+      "limitation": "no free intraday for TAIEX; range-based proxies used (not 5-min RV)"
+    }
+  },
+  "summary_stats": {
+    "dt_ratio_value_pct": {
+      "mean": 27.6594,
+      "std": 12.5253,
+      "min": 2.705,
+      "max": 52.425,
+      "n": 2935
+    },
+    "dt_vol_ratio_pct": {
+      "mean": 15.1671,
+      "std": 8.2353,
+      "min": 0.9,
+      "max": 39.69,
+      "n": 2935
+    },
+    "rv_gk_daily_vol_pct": {
+      "mean": 0.6057,
+      "std": 0.3716,
+      "min": 0.1235,
+      "max": 5.7252,
+      "n": 2935
+    },
+    "corr_dt_ratio_vs_rvvol": 0.1908
+  },
+  "predictive_test_primary": {
+    "rv_proxy": "rv_gk",
+    "controls": false,
+    "n_total": 2913,
+    "min_train": 750,
+    "n_oos": 2163,
+    "oos_r2_baseline_vs_mean": 0.174297,
+    "oos_r2_augmented_vs_mean": 0.176685,
+    "oos_incremental_r2_aug_vs_base": 0.002891,
+    "oos_mse_baseline": 1.15628464265411,
+    "oos_mse_augmented": 1.1529415180508242,
+    "oos_qlike_baseline": 0.35095073841427454,
+    "oos_qlike_augmented": 0.35948793789062244,
+    "dm_mse_stat": 0.5283,
+    "dm_mse_pvalue": 0.5973,
+    "dm_qlike_stat": -1.4874,
+    "dm_qlike_pvalue": 0.137,
+    "dm_convention": "positive DM => baseline loss > augmented loss (augmented better)",
+    "clark_west_nested": {
+      "t_stat": 1.6052,
+      "p_value_one_sided": 0.0542,
+      "hac_lag": 13,
+      "note": "one-sided; small p => augmented has incremental predictive content (correct test for nested comparison)"
+    },
+    "insample": {
+      "adj_r2_baseline": 0.183328,
+      "adj_r2_augmented": 0.189719,
+      "adj_r2_gain": 0.006391,
+      "dt_joint_wald_stat": 8.4914,
+      "dt_joint_wald_pvalue": 0.036876,
+      "dt_coefs": {
+        "dt_d": -0.044356,
+        "dt_w": 0.035267,
+        "dt_m": 0.010782
+      }
+    }
+  },
+  "granger_primary": {
+    "rv_proxy": "rv_gk",
+    "stationarity_levels": [
+      {
+        "series": "log_rv_level",
+        "n": 2935,
+        "adf_stat": -5.3226,
+        "adf_pvalue": 0.0,
+        "adf_stationary_5pct": true,
+        "kpss_stat": 2.2571,
+        "kpss_pvalue": 0.01,
+        "kpss_stationary_5pct": false
+      },
+      {
+        "series": "dt_ratio_level",
+        "n": 2935,
+        "adf_stat": -1.8035,
+        "adf_pvalue": 0.3787,
+        "adf_stationary_5pct": false,
+        "kpss_stat": 7.5442,
+        "kpss_pvalue": 0.01,
+        "kpss_stationary_5pct": false
+      }
+    ],
+    "transforms": {
+      "rv": "log_level",
+      "dt": "first_difference"
+    },
+    "stationarity_used": [
+      {
+        "series": "rv_log_level",
+        "n": 2935,
+        "adf_stat": -5.3226,
+        "adf_pvalue": 0.0,
+        "adf_stationary_5pct": true,
+        "kpss_stat": 2.2571,
+        "kpss_pvalue": 0.01,
+        "kpss_stationary_5pct": false
+      },
+      {
+        "series": "dt_first_difference",
+        "n": 2934,
+        "adf_stat": -21.4094,
+        "adf_pvalue": 0.0,
+        "adf_stationary_5pct": true,
+        "kpss_stat": 0.0807,
+        "kpss_pvalue": 0.1,
+        "kpss_stationary_5pct": true
+      }
+    ],
+    "var_lag_selection": {
+      "aic": 16,
+      "bic": 7,
+      "used": 16,
+      "search_maxlag": 30,
+      "at_search_boundary": false
+    },
+    "n_obs": 2934,
+    "granger_DT_to_RV": {
+      "hypothesis": "day-trading -> volatility (retail herding amplifies vol)",
+      "F_stat": 2.9198,
+      "pvalue": 7.9e-05,
+      "significant_5pct": true,
+      "lag": 16
+    },
+    "granger_RV_to_DT": {
+      "hypothesis": "volatility -> day-trading (vol attracts speculators)",
+      "F_stat": 4.9893,
+      "pvalue": 0.0,
+      "significant_5pct": true,
+      "lag": 16
+    },
+    "contemporaneous_corr": 0.0768
+  },
+  "robustness": {
+    "subperiods": {
+      "pre_2020": {
+        "n": 1344,
+        "oos_incremental_r2": -0.004276,
+        "dm_qlike_stat": -1.1634,
+        "dm_qlike_pvalue": 0.2451,
+        "is_dt_joint_wald_pvalue": 0.014937
+      },
+      "2020_onward": {
+        "n": 1591,
+        "oos_incremental_r2": 0.02028,
+        "dm_qlike_stat": -1.1671,
+        "dm_qlike_pvalue": 0.2435,
+        "is_dt_joint_wald_pvalue": 0.065116
+      }
+    },
+    "rv_proxy_swap": {
+      "rv_park": {
+        "oos_incremental_r2": -0.003404,
+        "dm_qlike_stat": -1.5642,
+        "dm_qlike_pvalue": 0.1179,
+        "granger_DT_to_RV_p": 0.074808,
+        "granger_RV_to_DT_p": 0.0
+      },
+      "rv_sq": {
+        "oos_incremental_r2": 0.002051,
+        "dm_qlike_stat": -1.4722,
+        "dm_qlike_pvalue": 0.1411,
+        "granger_DT_to_RV_p": 0.316285,
+        "granger_RV_to_DT_p": 0.0
+      }
+    },
+    "with_controls": {
+      "oos_incremental_r2": -0.002628,
+      "dm_qlike_stat": -1.5779,
+      "dm_qlike_pvalue": 0.1147,
+      "is_dt_joint_wald_pvalue": 0.033546
+    },
+    "granger_both_differenced": {
+      "rv_gk": {
+        "transforms": {
+          "rv": "log_first_difference",
+          "dt": "first_difference"
+        },
+        "lag": 22,
+        "at_search_boundary": false,
+        "granger_DT_to_RV_p": 0.001232,
+        "granger_RV_to_DT_p": 0.0
+      },
+      "rv_park": {
+        "transforms": {
+          "rv": "log_first_difference",
+          "dt": "first_difference"
+        },
+        "lag": 24,
+        "at_search_boundary": false,
+        "granger_DT_to_RV_p": 0.196428,
+        "granger_RV_to_DT_p": 0.0
+      },
+      "rv_sq": {
+        "transforms": {
+          "rv": "log_first_difference",
+          "dt": "first_difference"
+        },
+        "lag": 24,
+        "at_search_boundary": false,
+        "granger_DT_to_RV_p": 0.115166,
+        "granger_RV_to_DT_p": 0.0
+      }
+    }
+  },
+  "figures": [
+    "fig1_daytrade_vs_rv.png",
+    "fig2_ddt_vs_drv.png"
+  ],
+  "honest_conclusion": {
+    "rq1_incremental_predictive_power": false,
+    "rq1_verdict": "NULL at 5%: augmented model does not significantly beat HAR-RV out of sample. Clark-West (nested) is borderline (one-sided p=0.0542), not a strong 'zero information' claim; DM(MSE)/DM(QLIKE) insignificant; incremental OOS R2 economically trivial and not robust across subperiods / RV proxies / with controls.",
+    "oos_incremental_r2": 0.002891,
+    "clark_west_t": 1.6052,
+    "clark_west_p_one_sided": 0.0542,
+    "dm_qlike_pvalue": 0.137,
+    "insample_dt_joint_wald_p": 0.036876,
+    "granger_direction_gk_proxy": "bidirectional_feedback",
+    "granger_DT_to_RV_p_gk": 7.9e-05,
+    "granger_RV_to_DT_p_gk": 0.0,
+    "granger_DT_to_RV_pvalues_across_proxies": [
+      8e-05,
+      0.07481,
+      0.31628
+    ],
+    "granger_RV_to_DT_pvalues_across_proxies": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "granger_DT_to_RV_robust_across_proxies": false,
+    "granger_RV_to_DT_robust_across_proxies": true,
+    "rq2_verdict": "RV->DT (volatility attracts day-trading): ROBUST (significant across all RV proxies); DT->RV (day-trading amplifies volatility): FRAGILE (significant under some but not all RV proxies)"
+  }
+}
