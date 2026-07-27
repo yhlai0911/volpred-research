@@ -1520,6 +1520,19 @@ _COMPUTE_QUEUE_DIR = ROOT / "storage" / "ops" / "compute_queue"
 _COMPUTE_JOB_LIVE = {"pending", "queued", "running", "claimed"}
 
 
+def _read_compute_job(job_id: str | None) -> dict[str, Any] | None:
+    """Read the durable compute owner receipt, or return ``None`` if absent."""
+    if not job_id:
+        return None
+    path = _COMPUTE_QUEUE_DIR / f"{job_id}.json"
+    try:
+        with path.open(encoding="utf-8") as fh:
+            payload = json.load(fh)
+    except (OSError, ValueError):  # silent-ok: cleanup emits gone release receipt
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
 def _compute_job_alive(job_id: str | None) -> bool:
     """True 若 task 掛著的 compute-queue job 仍在飛。
 
@@ -1531,15 +1544,10 @@ def _compute_job_alive(job_id: str | None) -> bool:
 
     job 已進終態（completed / failed / timeout）則不擋 —— task 本來就該回池等收件。
     """
-    if not job_id:
+    job = _read_compute_job(job_id)
+    if job is None:
         return False
-    path = _COMPUTE_QUEUE_DIR / f"{job_id}.json"
-    try:
-        with path.open(encoding="utf-8") as fh:
-            status = (json.load(fh).get("status") or "").lower()
-    except (OSError, ValueError):  # silent-ok: 缺檔/壞檔 = 無法證明 job 活著，回退到原回收邏輯
-        # 讀不到 job 檔 = 無法證明它活著，照原邏輯回收（不要因為 IO 錯誤把 task 永久釘住）
-        return False
+    status = str(job.get("status") or "").lower()
     return status in _COMPUTE_JOB_LIVE
 
 
@@ -1549,10 +1557,89 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
     skipped_compute = []
     renewed_live_claims = []
     invalid_claim_expiries = []
+    reconciled_awaiting_agent_jobs = []
+    awaiting_receipt_collection = []
     with _locked_load() as (_fh, tasks):
         now = datetime.now(timezone.utc)
         for t in tasks:
             status = (t.get("status") or "").lower()
+            if status == "awaiting_agent_job":
+                job_id = str(t.get("compute_job_id") or "")
+                blocked_reason = str(t.get("blocked_reason") or "")
+                if (
+                    blocked_reason
+                    == "external_compute_receipt_pending_collection"
+                ):
+                    awaiting_receipt_collection.append(
+                        {"id": _task_key(t), "compute_job_id": job_id}
+                    )
+                    continue
+                if blocked_reason not in {
+                    "external_compute_job_active",
+                    "external_compute_job_running",
+                }:
+                    continue
+                job = _read_compute_job(job_id)
+                job_status = (
+                    str(job.get("status") or "").lower()
+                    if job is not None
+                    else "gone"
+                )
+                binding_matches = (
+                    job is not None
+                    and str(job.get("id") or job_id) == job_id
+                    and str(job.get("source_task_id") or "") == _task_key(t)
+                )
+                if binding_matches and job_status in _COMPUTE_JOB_LIVE:
+                    skipped_compute.append(
+                        {"id": _task_key(t), "compute_job_id": job_id}
+                    )
+                    continue
+                if binding_matches and job_status == "completed":
+                    t["blocked_reason"] = (
+                        "external_compute_receipt_pending_collection"
+                    )
+                    t["compute_finished_at"] = (
+                        job.get("completed_at") or now.isoformat()
+                    )
+                    reconciled_awaiting_agent_jobs.append(
+                        {
+                            "id": _task_key(t),
+                            "compute_job_id": job_id,
+                            "job_status": job_status,
+                            "action": "await_receipt_collection",
+                        }
+                    )
+                    continue
+                release_status = (
+                    job_status if binding_matches or job is None
+                    else "binding_mismatch"
+                )
+                release_reason = f"external_compute_job_{release_status}"
+                _repend_task(
+                    t,
+                    note=release_reason,
+                    reason=release_reason,
+                )
+                t["compute_released_at"] = now.isoformat()
+                t["compute_release_reason"] = release_reason
+                for field in (
+                    "blocked_reason",
+                    "compute_job_id",
+                    "compute_started_at",
+                    "compute_finished_at",
+                    "external_execution_ref",
+                ):
+                    t.pop(field, None)
+                reconciled_awaiting_agent_jobs.append(
+                    {
+                        "id": _task_key(t),
+                        "compute_job_id": job_id,
+                        "job_status": release_status,
+                        "action": "repend",
+                    }
+                )
+                continue
             if status == "pending" and any(
                 t.get(field) not in (None, "")
                 for field in (
@@ -1687,6 +1774,8 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
         "skipped_compute_in_flight": skipped_compute,
         "renewed_live_claims": renewed_live_claims,
         "invalid_claim_expiries": invalid_claim_expiries,
+        "reconciled_awaiting_agent_jobs": reconciled_awaiting_agent_jobs,
+        "awaiting_receipt_collection": awaiting_receipt_collection,
     }
 
 

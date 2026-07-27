@@ -1473,6 +1473,181 @@ def test_cleanup_leaves_clean_pending_task_untouched(tmp_path, monkeypatch) -> N
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
 
 
+@pytest.mark.parametrize("job_status", ["failed", "cancelled", None])
+def test_cleanup_repends_awaiting_agent_task_when_compute_owner_is_terminal_or_gone(
+    job_status, tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    compute_queue = tmp_path / "compute_queue"
+    compute_queue.mkdir()
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "delegated-task",
+                    "status": "awaiting_agent_job",
+                    "priority": 2,
+                    "compute_job_id": "job-terminal",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    if job_status is not None:
+        (compute_queue / "job-terminal.json").write_text(
+            json.dumps(
+                {
+                    "id": "job-terminal",
+                    "status": job_status,
+                    "source_task_id": "delegated-task",
+                }
+            ),
+            encoding="utf-8",
+        )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "_COMPUTE_QUEUE_DIR", compute_queue)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["reconciled_awaiting_agent_jobs"] == [
+        {
+            "id": "delegated-task",
+            "compute_job_id": "job-terminal",
+            "job_status": job_status or "gone",
+            "action": "repend",
+        }
+    ]
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "pending"
+    assert saved["compute_release_reason"] == (
+        f"external_compute_job_{job_status or 'gone'}"
+    )
+    assert "compute_job_id" not in saved
+    assert "blocked_reason" not in saved
+    assert saved["status_history"][-1]["from"] == "awaiting_agent_job"
+    assert saved["status_history"][-1]["to"] == "pending"
+
+
+def test_cleanup_promotes_completed_compute_owner_to_receipt_collection(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    compute_queue = tmp_path / "compute_queue"
+    compute_queue.mkdir()
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "completed-task",
+                    "status": "awaiting_agent_job",
+                    "compute_job_id": "job-completed",
+                    "blocked_reason": "external_compute_job_active",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (compute_queue / "job-completed.json").write_text(
+        json.dumps(
+            {
+                "id": "job-completed",
+                "status": "completed",
+                "source_task_id": "completed-task",
+                "completed_at": "2026-07-27T12:34:56+00:00",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "_COMPUTE_QUEUE_DIR", compute_queue)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["reconciled_awaiting_agent_jobs"] == [
+        {
+            "id": "completed-task",
+            "compute_job_id": "job-completed",
+            "job_status": "completed",
+            "action": "await_receipt_collection",
+        }
+    ]
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "awaiting_agent_job"
+    assert saved["blocked_reason"] == "external_compute_receipt_pending_collection"
+    assert saved["compute_finished_at"] == "2026-07-27T12:34:56+00:00"
+
+
+def test_cleanup_preserves_running_compute_owner(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    compute_queue = tmp_path / "compute_queue"
+    compute_queue.mkdir()
+    original = [
+        {
+            "id": "running-task",
+            "status": "awaiting_agent_job",
+            "priority": 3,
+            "compute_job_id": "job-running",
+            "blocked_reason": "external_compute_job_running",
+        }
+    ]
+    next_tasks.write_text(json.dumps(original), encoding="utf-8")
+    (compute_queue / "job-running.json").write_text(
+        json.dumps(
+            {
+                "id": "job-running",
+                "status": "running",
+                "source_task_id": "running-task",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "_COMPUTE_QUEUE_DIR", compute_queue)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["skipped_compute_in_flight"] == [
+        {"id": "running-task", "compute_job_id": "job-running"}
+    ]
+    assert result["reconciled_awaiting_agent_jobs"] == []
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+
+
+def test_cleanup_never_repends_receipt_pending_collection(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = [
+        {
+            "id": "receipt-task",
+            "status": "awaiting_agent_job",
+            "priority": 3,
+            "compute_job_id": "job-missing-after-completion",
+            "blocked_reason": "external_compute_receipt_pending_collection",
+            "compute_finished_at": "2026-07-27T12:34:56+00:00",
+        }
+    ]
+    next_tasks.write_text(json.dumps(original), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_COMPUTE_QUEUE_DIR",
+        tmp_path / "empty-compute-queue",
+    )
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["awaiting_receipt_collection"] == [
+        {
+            "id": "receipt-task",
+            "compute_job_id": "job-missing-after-completion",
+        }
+    ]
+    assert result["reconciled_awaiting_agent_jobs"] == []
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+
+
 @pytest.mark.parametrize(
     ("task_id", "task_type", "status"),
     [

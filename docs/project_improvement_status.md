@@ -2702,3 +2702,18 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   **`root_cause_fixed_and_verified`**。
 - 🟡 本slice沒有transfer `provider.execution` owner、沒有繞過#9；Issue #12／#46
   umbrella仍為 **`contained`**。
+
+## 2026-07-27 — Async agent task ownership 終態 reconciler
+
+- ✅ `task_pool_claim.py cleanup` 不再只處理 `claimed/in_progress` lease；它會回讀
+  `awaiting_agent_job` 綁定的 durable compute receipt。`queued/running/claimed/pending`
+  保持 external ownership，`completed` 轉成
+  `external_compute_receipt_pending_collection`，`failed/cancelled/gone` 才清除 binding
+  並 re-pend；已在 receipt collection 的 task 永不因 job file 消失而誤重派。
+- ✅ TDD 先建立 5 個紅燈案例，再完成最小狀態轉移；task-pool／compute-queue／starvation
+  相鄰範圍 **170 passed**。
+- ✅ Live cleanup 回讀 10 個 external tasks：K1728 的 running owner 保留，3 個
+  receipt-pending 保留，6 個 failed owner（K1720/K1721/K1722/K1727 與兩個
+  snapdupfix）以正式 CLI re-pend，且每筆留下 `compute_release_reason` 與
+  `status_history`。同類「dead compute job 永久冒充 in-flight」根因狀態為
+  **`root_cause_fixed_and_verified`**。
