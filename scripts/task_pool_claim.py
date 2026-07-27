@@ -1559,6 +1559,7 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
     invalid_claim_expiries = []
     reconciled_awaiting_agent_jobs = []
     awaiting_receipt_collection = []
+    invalid_compute_bindings = []
     with _locked_load() as (_fh, tasks):
         now = datetime.now(timezone.utc)
         for t in tasks:
@@ -1590,6 +1591,17 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                     and str(job.get("id") or job_id) == job_id
                     and str(job.get("source_task_id") or "") == _task_key(t)
                 )
+                if job is not None and not binding_matches:
+                    invalid_compute_bindings.append(
+                        {
+                            "id": _task_key(t),
+                            "compute_job_id": job_id,
+                            "job_source_task_id": str(
+                                job.get("source_task_id") or ""
+                            ),
+                        }
+                    )
+                    continue
                 if binding_matches and job_status in _COMPUTE_JOB_LIVE:
                     skipped_compute.append(
                         {"id": _task_key(t), "compute_job_id": job_id}
@@ -1611,10 +1623,7 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                         }
                     )
                     continue
-                release_status = (
-                    job_status if binding_matches or job is None
-                    else "binding_mismatch"
-                )
+                release_status = job_status
                 release_reason = f"external_compute_job_{release_status}"
                 _repend_task(
                     t,
@@ -1776,6 +1785,7 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
         "invalid_claim_expiries": invalid_claim_expiries,
         "reconciled_awaiting_agent_jobs": reconciled_awaiting_agent_jobs,
         "awaiting_receipt_collection": awaiting_receipt_collection,
+        "invalid_compute_bindings": invalid_compute_bindings,
     }
 
 

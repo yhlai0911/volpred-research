@@ -2709,9 +2709,11 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   `awaiting_agent_job` 綁定的 durable compute receipt。`queued/running/claimed/pending`
   保持 external ownership，`completed` 轉成
   `external_compute_receipt_pending_collection`，`failed/cancelled/gone` 才清除 binding
-  並 re-pend；已在 receipt collection 的 task 永不因 job file 消失而誤重派。
+  並 re-pend；已在 receipt collection 的 task 永不因 job file 消失而誤重派。若
+  receipt 的 `source_task_id` 不匹配則 fail closed，只回報
+  `invalid_compute_bindings`，不猜測 ownership。
 - ✅ TDD 先建立 5 個紅燈案例，再完成最小狀態轉移；task-pool／compute-queue／starvation
-  相鄰範圍 **170 passed**。
+  相鄰範圍 **171 passed**。
 - ✅ Live cleanup 回讀 10 個 external tasks：K1728 的 running owner 保留，3 個
   receipt-pending 保留，6 個 failed owner（K1720/K1721/K1722/K1727 與兩個
   snapdupfix）以正式 CLI re-pend，且每筆留下 `compute_release_reason` 與

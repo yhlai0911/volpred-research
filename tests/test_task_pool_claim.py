@@ -1614,6 +1614,48 @@ def test_cleanup_preserves_running_compute_owner(tmp_path, monkeypatch) -> None:
     assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
 
 
+def test_cleanup_fails_closed_when_compute_receipt_belongs_to_another_task(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    compute_queue = tmp_path / "compute_queue"
+    compute_queue.mkdir()
+    original = [
+        {
+            "id": "task-a",
+            "status": "awaiting_agent_job",
+            "priority": 3,
+            "compute_job_id": "shared-job-id",
+            "blocked_reason": "external_compute_job_active",
+        }
+    ]
+    next_tasks.write_text(json.dumps(original), encoding="utf-8")
+    (compute_queue / "shared-job-id.json").write_text(
+        json.dumps(
+            {
+                "id": "shared-job-id",
+                "status": "failed",
+                "source_task_id": "task-b",
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(task_pool_claim, "_COMPUTE_QUEUE_DIR", compute_queue)
+
+    result = task_pool_claim.cmd_cleanup(argparse.Namespace(stale_hours=2))
+
+    assert result["invalid_compute_bindings"] == [
+        {
+            "id": "task-a",
+            "compute_job_id": "shared-job-id",
+            "job_source_task_id": "task-b",
+        }
+    ]
+    assert result["reconciled_awaiting_agent_jobs"] == []
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+
+
 def test_cleanup_never_repends_receipt_pending_collection(
     tmp_path, monkeypatch
 ) -> None:
