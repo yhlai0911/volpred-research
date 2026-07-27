@@ -44,6 +44,7 @@ def test_gen_platform_ops_tasks_prefers_fresh_log_over_stale_last_run(tmp_path, 
         encoding="utf-8",
     )
 
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
     monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
@@ -77,6 +78,7 @@ def test_gen_platform_ops_tasks_still_emits_when_log_missing_and_last_run_stale(
         encoding="utf-8",
     )
 
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
     monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
@@ -472,6 +474,7 @@ def test_fresh_log_with_only_odd_banners_is_not_flagged_stale(
         encoding="utf-8",
     )
 
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
     monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
@@ -529,6 +532,7 @@ def test_bad_cron_last_run_timestamp_uses_fresh_log_fallback(
         encoding="utf-8",
     )
 
+    monkeypatch.setattr(generate_diverse_tasks, "ROOT", tmp_path)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LAST_RUN", cron_last_run)
     monkeypatch.setattr(generate_diverse_tasks, "RUNTIME_SCHEDULES", runtime_schedules)
     monkeypatch.setattr(generate_diverse_tasks, "CRON_LOGS", cron_logs)
