@@ -1142,6 +1142,14 @@ def _complete_locked(
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower() or "in_progress"
         completion_owner = task.get("claimed_by") or "complete"
+        issue_ref = task.get("issue_ref")
+        issue_disposition = getattr(
+            args, "issue_disposition", "contained"
+        )
+        if issue_disposition not in {"contained", "close"}:
+            raise ValueError(
+                "issue_disposition must be contained or close"
+            )
         if prev_status in TERMINAL_STATUSES and prev_status == args.status:
             # Idempotent repair path: terminal rows are historical receipts,
             # never active ownership. Older complete() versions left these
@@ -1155,6 +1163,26 @@ def _complete_locked(
                 "status": prev_status,
                 "already_completed": True,
             }, None
+        if (
+            args.status == "succeeded"
+            and issue_ref is not None
+            and issue_disposition == "close"
+        ):
+            number = issue_number(issue_ref)
+            if number is None:
+                return {
+                    "ok": False,
+                    "reason": "invalid_issue_ref",
+                    "task_id": args.id,
+                }, None
+            if not completion_base_commit:
+                return {
+                    "ok": False,
+                    "reason": "git_head_unavailable",
+                    "task_id": args.id,
+                    "issue_ref": normalize_issue_ref(issue_ref),
+                    "issue_number": number,
+                }, None
         existing_result = str(task.get("result") or "")
         result_text = (
             (existing_result + "\n\n" + args.result).strip()
@@ -1181,15 +1209,7 @@ def _complete_locked(
         if args.status == "succeeded":
             effect = _apply_codex_review_followup_fail(tasks, task, result_text)
         out = {"ok": True, "task_id": args.id, "status": args.status}
-        issue_ref = task.get("issue_ref")
         if args.status == "succeeded" and issue_ref is not None:
-            issue_disposition = getattr(
-                args, "issue_disposition", "contained"
-            )
-            if issue_disposition not in {"contained", "close"}:
-                raise ValueError(
-                    "issue_disposition must be contained or close"
-                )
             number = issue_number(issue_ref)
             if number is None:
                 out["issue_tracker_sync"] = {
@@ -1254,7 +1274,8 @@ ANNOTATE_PROTECTED_FIELDS = frozenset({
     "id", "status", "priority", "task_type", "created_at", "completed_at",
     "claimed_by", "claimed_at", "claim_session_id",
     "blocked_reason", "blocked_at", "blocked_until",
-    "issue_ref", "issue_close_pending", "issue_closed_commit", "issue_closed_at",
+    "issue_ref", "issue_close_pending", "issue_disposition",
+    "issue_closed_commit", "issue_closed_at",
 })
 
 

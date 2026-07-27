@@ -512,6 +512,7 @@ def settle_completed_task_issues(
                 if (
                     task is None
                     or task.get("status") != "succeeded"
+                    or task.get("issue_disposition") != "close"
                     or task.get("issue_close_pending") != receipt["pending"]
                 ):
                     continue

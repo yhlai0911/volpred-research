@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import argparse
 import json
 from types import SimpleNamespace
 
+from scripts import task_pool_claim
 from volpred.ops.issue_tracker_sync import (
     assign_issue,
     close_issue,
@@ -317,6 +319,103 @@ def test_contained_issue_receipt_never_calls_external_closer(
 
     assert settled == []
     assert calls == []
+
+
+def test_complete_receipt_flows_into_exact_commit_issue_settlement(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "whole-issue",
+                    "status": "in_progress",
+                    "claimed_by": "codex-vscode",
+                    "issue_ref": "#37",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", queue)
+    result, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="whole-issue",
+            status="succeeded",
+            result="all acceptance gates passed",
+            issue_disposition="close",
+        ),
+        completion_base_commit="1" * 40,
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        completed_task_ids={"whole-issue"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=lambda **kwargs: calls.append(kwargs)
+        or {"ok": True, "issue_number": 37},
+    )
+
+    assert result["issue_tracker_sync"]["action"] == (
+        "defer_close_until_commit"
+    )
+    assert [call["task_id"] for call in calls] == ["whole-issue"]
+    assert settled[0]["commit_sha"] == "2" * 40
+    saved = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert saved["issue_closed_commit"] == "2" * 40
+    assert "issue_close_pending" not in saved
+
+
+def test_settlement_does_not_acknowledge_disposition_changed_during_close(
+    tmp_path,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    pending = {
+        "issue_disposition": "close",
+        "issue_ref": "#37",
+        "task_id": "whole-issue",
+        "completion_owner": "codex-vscode",
+        "completed_at": "2026-07-26T12:00:00+00:00",
+        "completion_base_commit": "1" * 40,
+    }
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "whole-issue",
+                    "status": "succeeded",
+                    "issue_ref": "#37",
+                    "issue_disposition": "close",
+                    "issue_close_pending": pending,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    def drift_disposition(**_kwargs):
+        payload = json.loads(queue.read_text(encoding="utf-8"))
+        payload[0]["issue_disposition"] = "contained"
+        queue.write_text(json.dumps(payload), encoding="utf-8")
+        return {"ok": True, "issue_number": 37}
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=drift_disposition,
+    )
+
+    assert settled == []
+    saved = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert saved["issue_disposition"] == "contained"
+    assert "issue_closed_commit" not in saved
 
 
 def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -> None:
