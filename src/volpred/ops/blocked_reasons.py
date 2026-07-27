@@ -44,6 +44,9 @@ BLOCKED_REASONS: frozenset[str] = frozenset(
     }
 )
 
+WORK_SHADOW_CUTOVER_GATE = "work_shadow_cutover_ready_v1"
+UNBLOCK_GATES: frozenset[str] = frozenset({WORK_SHADOW_CUTOVER_GATE})
+
 
 def is_valid(reason: str | None) -> bool:
     """Return True iff ``reason`` is a registered block reason."""

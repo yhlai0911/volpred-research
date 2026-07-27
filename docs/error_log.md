@@ -3867,3 +3867,37 @@ no-pass仍保留每筆正式decision，不會美化真實hard block或黑洞。
 40個hard block全保留；同一原detector fresh read-back為
 `arc_repeat_block.breached=false`、`findings=[]`、`healthy=true`。此alert計數根因
 完成五步Gate，狀態為 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-27 — observation window 重啟後，日期式 unblock 可早於真實 gate
+
+**證據化症狀**：Issue #9 的正式 clean suffix 已於
+`scheduled_20260727T045614581709Z_def2f814b885` 重啟，但 canonical parent task
+仍帶舊 `blocked_until=2026-08-02T12:15:06Z`；真正七日成熟時間應為 receipt
+`recorded_at + 7d = 2026-08-03T04:56:16.743114Z`。generic queue maintenance
+只要日期過期就把 `blocked` 轉 `pending`，沒有回讀 durable observation gate，
+因此可能提早約16小時41分進入 cutover 工作。
+
+**根因層級與底層修復**：`blocked_until` 把「下次可檢查時間」誤當成「外部條件已成立」
+的證明。現在 lifecycle 增加 allowlisted `unblock_gate` contract；只能由
+`mark_task_blocked.py --unblock-gate` 寫入，free-form annotate 被機械禁止。
+`work_shadow_cutover_ready_v1` 在日期到期後重新載入 queue-paired owner evidence與
+append-only receipts，跑同一 fail-closed assessment；只有
+`ready_for_cutover=true` 才清 block/gate並轉 pending。未知名稱、owner evidence
+讀取失敗、窗口不足或任何 historical/recent blocker都保持 blocked。手動 unblock、
+release、claim、start、handoff與supervisor preassign都不能越過未滿gate；
+非terminal re-block必須保留既有gate，只有成功evaluator或真正terminal transition
+可消耗；`mark_task_blocked`以同一queue descriptor的`LOCK_EX`完成
+read→mutate→write，避免並行claim被舊snapshot覆蓋。共同
+`next_tasks` writer另強制gate必須是allowlist、status=`blocked`、
+reason=`awaiting_event_window`且有not-before，任何其他合法writer也無法繞過CLI。
+
+**回歸與live read-back**：expiry-before-ready、ready後解除、not-before不探測、
+unknown gate不執行、所有dispatchable transition bypass、whole-writer schema與
+CLI reason/gate pairing均有RED→GREEN；production adapter以temp owner evidence與
+真receipt shape覆蓋ready、短窗口、owner mismatch及evidence不可讀。
+queue lifecycle／assessment／pool-pressure／canonical-writer 相鄰套件 **217 passed**。正式 #9 row 已由受控CLI綁定
+正確到期與gate；把該row的日期只在記憶體副本改成過期後執行production probe，
+回讀`swept=[]`、`status=blocked`、gate保留，理由含
+`observation_window_too_short`。此「提前解除」根因已
+**`root_cause_fixed_and_verified`**；Issue #9 umbrella仍須等真實七日與cutover
+transaction，維持`contained`。

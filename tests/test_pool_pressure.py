@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from volpred.ops import next_tasks
 from volpred.ops.pool_pressure import (
     Admission,
     evaluate_drain_first,
@@ -168,6 +169,22 @@ def test_writer_warn_fires_for_machine_source(capsys, monkeypatch, rules):
                                          "exit_streak_days": 3})
     fired = warn_if_over_cap({"id": "x", "source": "auto_discovered"}, _pending(11))
     assert fired and "[pool_pressure] WARN" in capsys.readouterr().err
+
+
+def test_writer_warns_when_pool_pressure_check_crashes(monkeypatch, capsys):
+    def _raise(_task, _tasks):
+        raise RuntimeError("injected pool-pressure failure")
+
+    monkeypatch.setattr("volpred.ops.pool_pressure.warn_if_over_cap", _raise)
+
+    next_tasks._warn_if_over_pending_cap(
+        {"id": "task-1"},
+        [{"id": "task-1", "status": "pending"}],
+    )
+
+    captured = capsys.readouterr()
+    assert "[next_tasks_pool_pressure] WARN" in captured.err
+    assert "injected pool-pressure failure" in captured.err
 
 
 @pytest.mark.parametrize("source", ["user", "telegram", "gmail_inbox_poll",

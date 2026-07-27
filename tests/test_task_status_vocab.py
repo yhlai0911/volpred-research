@@ -420,6 +420,50 @@ def test_enforce_blocked_until_raises_on_unusable_value():
         nt.enforce_blocked_until({"id": "k4", "status": "blocked", "blocked_until": 1234})
 
 
+def test_canonical_writer_rejects_invalid_unblock_gate_pairing(
+    tmp_path,
+) -> None:
+    path = tmp_path / "next_tasks.json"
+    original = [{"id": "safe", "status": "pending", "priority": 3}]
+    path.write_text(json.dumps(original), encoding="utf-8")
+
+    with pytest.raises(nt.InvalidUnblockGate):
+        nt.write_tasks_locked(
+            path,
+            [
+                {
+                    "id": "unsafe",
+                    "status": "blocked",
+                    "priority": 1,
+                    "blocked_reason": "awaiting_external_data",
+                    "blocked_until": "2099-01-01T00:00:00+00:00",
+                    "unblock_gate": "work_shadow_cutover_ready_v1",
+                }
+            ],
+        )
+
+    assert json.loads(path.read_text(encoding="utf-8")) == original
+
+
+def test_canonical_writer_accepts_allowlisted_event_window_gate(
+    tmp_path,
+) -> None:
+    path = tmp_path / "next_tasks.json"
+    task = {
+        "id": "shadow-soak",
+        "status": "blocked",
+        "priority": 1,
+        "blocked_reason": "awaiting_event_window",
+        "blocked_until": "2099-01-01T00:00:00+00:00",
+        "unblock_gate": "work_shadow_cutover_ready_v1",
+    }
+    path.write_text("[]", encoding="utf-8")
+
+    nt.write_tasks_locked(path, [task])
+
+    assert json.loads(path.read_text(encoding="utf-8")) == [task]
+
+
 def test_blocked_until_audit_is_quiet_on_well_formed_blocked_rows(tmp_path, capsys):
     """A properly-expiring block is the normal case and must stay silent."""
     tasks = [

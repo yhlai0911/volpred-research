@@ -9,11 +9,11 @@ from pathlib import Path
 
 import pytest
 
+from volpred.ops.next_tasks import InvalidUnblockGate
 from volpred.ops.task_pool_selection import (
     evaluate_task_claim,
     select_task_for_claim,
 )
-
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "scripts" / "task_pool_claim.py"
 SPEC = importlib.util.spec_from_file_location("task_pool_claim", MODULE_PATH)
@@ -403,6 +403,7 @@ def test_complete_rejects_blocked_disposition_in_favor_of_block_cli(
         "issue_disposition",
         "issue_closed_commit",
         "issue_closed_at",
+        "unblock_gate",
     ],
 )
 def test_annotate_refuses_issue_bridge_identity_and_receipt_fields(
@@ -953,6 +954,79 @@ def test_release_clears_persisted_claim_expiry(tmp_path, monkeypatch) -> None:
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     assert saved["status"] == "pending"
     assert "claim_expires_at" not in saved
+
+
+def test_release_cannot_repend_a_blocked_live_gate(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = {
+        "id": "shadow-soak",
+        "task_type": "platform_ops",
+        "status": "blocked",
+        "blocked_reason": "awaiting_event_window",
+        "blocked_until": "2000-01-01T00:00:00+00:00",
+        "unblock_gate": "work_shadow_cutover_ready_v1",
+    }
+    next_tasks.write_text(json.dumps([original]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_release(
+        argparse.Namespace(id="shadow-soak")
+    )
+
+    assert result == {
+        "ok": False,
+        "reason": "wrong_status",
+        "status": "blocked",
+    }
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "blocked"
+    assert saved["unblock_gate"] == original["unblock_gate"]
+
+
+def test_repend_primitive_fails_closed_for_unresolved_live_gate() -> None:
+    task = {
+        "id": "corrupt-live-claim",
+        "status": "claimed",
+        "claimed_by": "worker",
+        "unblock_gate": "work_shadow_cutover_ready_v1",
+    }
+
+    with pytest.raises(ValueError, match="unresolved unblock_gate"):
+        task_pool_claim._repend_task(task, note="must-not-bypass")
+
+    assert task["status"] == "claimed"
+    assert task["claimed_by"] == "worker"
+
+
+def test_claim_cannot_dispatch_pending_row_with_unresolved_live_gate(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = {
+        "id": "corrupt-pending-gate",
+        "task_type": "platform_ops",
+        "status": "pending",
+        "unblock_gate": "work_shadow_cutover_ready_v1",
+    }
+    next_tasks.write_text(json.dumps([original]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    with pytest.raises(
+        InvalidUnblockGate,
+        match="invalid unblock_gate lifecycle",
+    ):
+        task_pool_claim.cmd_claim(
+            argparse.Namespace(
+                id=original["id"],
+                owner="codex-vscode",
+                session="test-session",
+                main_thread=False,
+            )
+        )
+
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == [original]
 
 
 def test_cleanup_uses_persisted_expiry_before_stale_hours_fallback(

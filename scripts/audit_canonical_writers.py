@@ -106,6 +106,7 @@ LOW_LEVEL_OWNERS: Mapping[str, Mapping[str, int]] = {
     "scripts/extract_base64_images.py:main": {"write_text": 1},
     "scripts/fb_page_post.py:_mark_success": {"write_text": 1},
     "scripts/mark_fb_post_status.py:_write_json": {"write_text": 1},
+    "scripts/mark_task_blocked.py:main": {"open-write": 1},
     "scripts/merge_feed_files.py:<module>": {"open-write": 2},
     "scripts/migrate_fb_post_status_single_source.py:main": {"write_text": 1},
     "scripts/reap_orphan_deliverables.py:_close_resolved_escalations": {

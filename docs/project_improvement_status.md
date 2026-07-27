@@ -2334,7 +2334,7 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   Coordinator exclusive capability；claim／migration／replay 141 tests 綠。
 - ✅ 04:31 UTC receipt 的 blocking dimension mismatch 由 10 降為 3；僅剩修復前
   已在執行的 `assign_8262c921` 缺 readiness／claim ownership／durable lease expiry。
-  該 claim 屬另一個 active session，未人工釋放；自然結束後，04:56:14 UTC 正式
+  該 claim 當時仍在執行，未人工釋放；自然結束後，04:56:14 UTC 正式
   receipt `scheduled_20260727T045614581709Z_def2f814b885` 已回讀 3,389／3,389
   comparisons、0 reconciliation、0 blocking dimensions，252 個差異全為 evidence-bound
   registered policy change，七日 continuous-clean suffix 已由該時刻啟動。
@@ -2350,6 +2350,23 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   **37 passed**，相鄰 cutover／replay／observer suites 合計 **104 passed**。
 - ✅ 修正 schedule-receipt test isolation 後，全專案回歸為 **5,721 passed、
   1 skipped**；Matt Spec／Standards 雙軸 review 皆 PASS，沒有 P1／P2。
+- ✅ Closure read-back 另發現 `blocked_until` 仍保留舊窗口日期；generic expiry
+  sweeper 原本只看日期，可能在新 clean suffix 滿七日前把 #9 提早轉 pending。
+  現在日期只作 not-before：`mark_task_blocked.py --unblock-gate
+  work_shadow_cutover_ready_v1` 寫入 allowlisted lifecycle contract，expiry sweep
+  必須再從 owner-bound append-only receipts 跑 canonical assessment，唯有
+  `ready_for_cutover=true` 才能 re-pend；未知 gate、讀取失敗或窗口不足皆 fail closed。
+  正式 parent task 已回讀 `blocked_until=2026-08-03T04:56:16.743114Z` 且 gate 綁定；
+  把其日期在記憶體中改成已過期後重播，結果仍為 `swept=[]`／status=`blocked`。
+  Reviewer 另抓到 manual unblock／release bypass與whole-writer schema缺口；現已禁止
+  gated row 經 manual unblock、release、claim、start、handoff或supervisor preassign
+  進入dispatchable狀態，且canonical `next_tasks` writer機械拒絕非法
+  gate/status/reason/until組合。Production adapter以真owner evidence與receipt fixtures
+  覆蓋ready、短窗口、owner mismatch及evidence不可讀。Reviewer第二輪發現re-block
+  可移除gate及mark CLI分離讀寫鎖；現改為既有gate在非terminal re-block不可移除，
+  且同一queue descriptor持`LOCK_EX`完成read→mutate→write，並行writer交錯測試證明
+  兩邊transition皆保留；含 pool-pressure fail-visible 與 canonical-writer
+  guard 回歸的相鄰套件 **217 passed**。
 - 🟡 clean suffix 已開始但尚未滿七日；Work Coordinator owner 仍為 `legacy/1`，且
   未執行 stage／owner transfer／downstream acknowledgement／rollback rehearsal；
   Issue #9 維持 **`contained`**，不得提前標完成。

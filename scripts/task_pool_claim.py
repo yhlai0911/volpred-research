@@ -593,6 +593,13 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
     session = args.session or os.environ.get("CLAUDE_SESSION_ID") or uuid.uuid4().hex[:12]
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
+        if task.get("unblock_gate") is not None:
+            return {
+                "ok": False,
+                "reason": "unblock_gate_not_satisfied",
+                "status": task.get("status"),
+                "unblock_gate": task.get("unblock_gate"),
+            }
         normalized_type = _normalized_task_type(task)
         normalized_owner = str(args.owner or "").strip().lower()
         raw_lane = str(task.get("dispatch_lane") or "").strip().lower()
@@ -771,6 +778,14 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
             if (task.get("status") or "").lower() != "pending":
                 continue
             if _normalized_task_type(task) not in DISPATCH_MUTATING_TASK_TYPES:
+                continue
+            if task.get("unblock_gate") is not None:
+                blockers.append(
+                    {
+                        "task_id": _task_key(task),
+                        "reason": "unblock_gate_not_satisfied",
+                    }
+                )
                 continue
             observed_at = datetime.now(timezone.utc)
             decision = evaluate_task_claim(
@@ -954,6 +969,12 @@ def cmd_dispatch_pending(args: argparse.Namespace) -> dict[str, Any]:
 def cmd_start(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
+        if task.get("unblock_gate") is not None:
+            return {
+                "ok": False,
+                "reason": "unblock_gate_not_satisfied",
+                "status": task.get("status"),
+            }
         prev = (task.get("status") or "").lower()
         if prev not in {"claimed", "in_progress"}:
             return {"ok": False, "reason": "not_claimed", "status": task.get("status")}
@@ -977,6 +998,10 @@ def _repend_task(
     paths.  A pending→pending transition is intentional audit evidence when an
     old backup contains claim metadata that contradicts its pending status.
     """
+    if task.get("unblock_gate") is not None:
+        raise ValueError(
+            "cannot re-pend a task with an unresolved unblock_gate"
+        )
     prev_owner = task.get("claimed_by")
     prev_status = (task.get("status") or "").lower() or "claimed"
     task["status"] = "pending"
@@ -1071,6 +1096,19 @@ def renew_verified_dispatch_claims(
 def cmd_release(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
+        status = (task.get("status") or "").lower()
+        if status not in {"claimed", "in_progress"}:
+            return {
+                "ok": False,
+                "reason": "wrong_status",
+                "status": task.get("status"),
+            }
+        if task.get("unblock_gate") is not None:
+            return {
+                "ok": False,
+                "reason": "unblock_gate_not_satisfied",
+                "status": task.get("status"),
+            }
         prev_owner = _repend_task(task, note="manual_release")
         return {"ok": True, "task_id": args.id, "released_from": prev_owner}
 
@@ -1079,6 +1117,12 @@ def cmd_handoff_main_thread(args: argparse.Namespace) -> dict[str, Any]:
     with _locked_load() as (_fh, tasks):
         task = _find(tasks, args.id)
         prev_status = (task.get("status") or "").lower()
+        if task.get("unblock_gate") is not None:
+            return {
+                "ok": False,
+                "reason": "unblock_gate_not_satisfied",
+                "status": task.get("status"),
+            }
         if prev_status not in {"claimed", "in_progress", "pending", "pending_main_thread"}:
             return {"ok": False, "reason": "wrong_status", "status": task.get("status")}
         prev_owner = task.get("claimed_by") or "handoff"
@@ -1349,6 +1393,7 @@ ANNOTATE_PROTECTED_FIELDS = frozenset({
     "id", "status", "priority", "task_type", "created_at", "completed_at",
     "claimed_by", "claimed_at", "claim_expires_at", "claim_session_id",
     "blocked_reason", "blocked_at", "blocked_until",
+    "unblock_gate",
     "issue_ref", "issue_close_pending", "issue_disposition",
     "issue_closed_commit", "issue_closed_at",
 })

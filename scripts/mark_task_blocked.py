@@ -28,12 +28,19 @@ Usage:
     --until 2026-06-01 \
     --note "Awaiting Dropbox tick data 2017-2021 access from user"
 
+  # expiry is only a not-before; named live gate must also pass:
+  uv run python scripts/mark_task_blocked.py --id issue9 \
+    --reason awaiting_event_window \
+    --until 2026-08-03T04:56:16+00:00 \
+    --unblock-gate work_shadow_cutover_ready_v1
+
 Inverse:
   uv run python scripts/mark_task_blocked.py --id <id> --unblock
 """
 from __future__ import annotations
 
 import argparse
+import fcntl
 import json
 import sys
 from datetime import datetime, timezone
@@ -43,21 +50,21 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
-from volpred.ops.next_tasks import write_tasks_locked  # noqa: E402
-from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS  # noqa: E402
-from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason  # noqa: E402
-from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS
+from volpred.ops.blocked_reasons import (
+    UNBLOCK_GATES as VALID_UNBLOCK_GATES,
+)
+from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason
+from volpred.canonical_write import guard_canonical_write
+from volpred.ops.diagnostics import warn as _diag_warn
+
 # 2026-07-18: the 14-day default window used to be this module's own constant.
 # It is now owned by volpred.ops.next_tasks (which enforces the same invariant on
 # every writer, not just this CLI) so the number cannot drift into two.
-from volpred.ops.next_tasks import default_blocked_until as _default_blocked_until  # noqa: E402
-# 2026-07-10: this module used to define its OWN `shared_state_lock` — same name, same
-# semantics, its own hardcoded LOCK_DIR — shadowing the real one. It therefore never
-# picked up the sandboxing that keeps tests off the production lock, and
-# test_mark_task_blocked_sets_awaiting_interactive_session took a blocking LOCK_EX on
-# the very `control_plane` lock the cron writers use. One implementation, not two.
-from volpred.ops.shared_lock import shared_state_lock  # noqa: E402
-
+from volpred.ops.next_tasks import (
+    default_blocked_until as _default_blocked_until,
+)
+from volpred.ops.next_tasks import write_tasks_to_handle
 
 TERMINAL_INTENT_REASONS = {"deprecated"}
 CANONICAL_STATUSES = {
@@ -82,9 +89,9 @@ def _warn_block_cli(message: str) -> None:
     _diag_warn("mark_task_blocked", message)
 
 
-def _load() -> tuple[dict | list, list]:
+def _decode_tasks(raw: str) -> tuple[dict | list, list]:
     try:
-        data = json.loads(NEXT_TASKS.read_text(encoding="utf-8"))
+        data = json.loads(raw)
     except Exception as exc:
         _warn_block_cli(
             "next_tasks read failed; refusing to update "
@@ -109,23 +116,8 @@ def _load() -> tuple[dict | list, list]:
     return data, data
 
 
-def _save(payload: dict | list, tasks: list) -> None:
-    """Persist the full task list via the canonical one-shot writer (WS-A1b).
-
-    The old tmp+replace held no LOCK_EX — the host-UI daemon's only repo
-    mutation could clobber a concurrent claim/dispatch write wholesale.
-    write_tasks_locked owns flock + serialize-first + priority normalization.
-    The legacy dict-root wrapper is read tolerance only; the canonical queue
-    root has been a list since the 2026-07-16 single-gateway refactor
-    (append_next_task refuses non-list roots), so writing it back is refused
-    loudly instead of silently re-materializing a retired schema.
-    """
-    if isinstance(payload, dict):
-        _warn_block_cli(
-            "next_tasks dict-root shape is no longer writable; canonical root is a list"
-        )
-        raise ValueError("next_tasks.json root must be a list (single-gateway 2026-07-16)")
-    write_tasks_locked(NEXT_TASKS, tasks)
+def _load() -> tuple[dict | list, list]:
+    return _decode_tasks(NEXT_TASKS.read_text(encoding="utf-8"))
 
 
 def _validate_task_schema(task: dict) -> None:
@@ -140,96 +132,183 @@ def _validate_task_schema(task: dict) -> None:
         raise ValueError("status=blocked requires a valid blocked_reason")
     if reason not in TERMINAL_INTENT_REASONS and not task.get("blocked_until"):
         raise ValueError("non-terminal blocked task requires blocked_until")
+    gate = task.get("unblock_gate")
+    if gate is not None and (
+        gate not in VALID_UNBLOCK_GATES
+        or reason != "awaiting_event_window"
+    ):
+        raise ValueError(
+            "unblock_gate requires an allowlisted gate and "
+            "blocked_reason=awaiting_event_window"
+        )
+
+
+def _mutate_tasks(args: argparse.Namespace, tasks: list) -> int:
+    matched = None
+    for idx, task in enumerate(tasks):
+        if not isinstance(task, dict):
+            _warn_block_cli(
+                "next_tasks entry schema invalid; skipping "
+                f"path={NEXT_TASKS} index={idx} "
+                f"type={type(task).__name__}"
+            )
+            continue
+        if task.get("id") == args.id:
+            matched = task
+            break
+    if matched is None:
+        print(f"error: no task with id={args.id}", file=sys.stderr)
+        return 1
+
+    if args.unblock:
+        if matched.get("unblock_gate") is not None:
+            print(
+                "error: task has an unresolved unblock_gate; "
+                "run the canonical expiry sweeper",
+                file=sys.stderr,
+            )
+            return 2
+        status_before = (matched.get("status") or "").lower()
+        if status_before in {"blocked", "closed_no_action", "superseded"}:
+            matched["status"] = "pending"
+        for key in (
+            "blocked_reason",
+            "blocked_at",
+            "blocked_until",
+            "blocked_note",
+            "unblock_gate",
+            "terminalized_at",
+            "terminalized_reason",
+        ):
+            matched.pop(key, None)
+        _validate_task_schema(matched)
+        print(f"[mark_task_blocked] unblocked id={args.id}")
+        return 0
+
+    reason = str(args.reason or "").strip().lower()
+    existing_gate = matched.get("unblock_gate")
+    if existing_gate is not None and (
+        reason not in {"awaiting_event_window", *TERMINAL_INTENT_REASONS}
+        or (
+            args.unblock_gate is not None
+            and args.unblock_gate != existing_gate
+        )
+    ):
+        print(
+            "error: unresolved unblock_gate cannot be changed by a "
+            "non-terminal re-block",
+            file=sys.stderr,
+        )
+        return 2
+    incompatible = {
+        field: matched[field]
+        for field in (
+            "claimed_by",
+            "claimed_at",
+            "claim_expires_at",
+            "claim_session_id",
+            "started_at",
+            "completed_at",
+        )
+        if field in matched
+    }
+    if incompatible:
+        previous = matched.setdefault("block_transition_previous", {})
+        previous.update(incompatible)
+        for field in incompatible:
+            matched.pop(field, None)
+    if reason in TERMINAL_INTENT_REASONS:
+        matched["status"] = "closed_no_action"
+        matched["terminalized_at"] = datetime.now(timezone.utc).isoformat(
+            timespec="seconds"
+        )
+        matched["terminalized_reason"] = reason
+        matched.pop("blocked_until", None)
+        matched.pop("unblock_gate", None)
+    else:
+        matched["status"] = "blocked"
+        matched["blocked_until"] = args.until or _default_blocked_until()
+        if existing_gate is None and args.unblock_gate:
+            matched["unblock_gate"] = args.unblock_gate
+    matched["blocked_reason"] = args.reason
+    matched["blocked_at"] = datetime.now(timezone.utc).isoformat(
+        timespec="seconds"
+    )
+    if args.note:
+        matched["blocked_note"] = args.note
+    _validate_task_schema(matched)
+    print(
+        f"[mark_task_blocked] id={args.id} "
+        f"status={matched['status']} reason={args.reason}"
+        + (
+            f" until={matched.get('blocked_until')}"
+            if matched.get("blocked_until")
+            else ""
+        )
+    )
+    return 0
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--id", required=True, help="task id to mark")
-    parser.add_argument("--reason", choices=sorted(VALID_REASONS),
-                        help=f"block reason (one of: {sorted(VALID_REASONS)})")
+    parser.add_argument(
+        "--reason",
+        choices=sorted(VALID_REASONS),
+        help=f"block reason (one of: {sorted(VALID_REASONS)})",
+    )
     parser.add_argument("--note", default=None, help="free-form context")
-    parser.add_argument("--until", default=None,
-                        help="ISO date for auto-recheck; after this dispatcher treats block as expired")
-    parser.add_argument("--unblock", action="store_true",
-                        help="remove block fields instead of setting them")
+    parser.add_argument(
+        "--until",
+        default=None,
+        help=(
+            "ISO date for auto-recheck; after this dispatcher treats "
+            "block as expired"
+        ),
+    )
+    parser.add_argument(
+        "--unblock-gate",
+        choices=sorted(VALID_UNBLOCK_GATES),
+        help="Named live condition that must pass after --until before re-pending",
+    )
+    parser.add_argument(
+        "--unblock",
+        action="store_true",
+        help="remove block fields instead of setting them",
+    )
     args = parser.parse_args()
 
     if not args.unblock and not args.reason:
         print("error: --reason required unless --unblock", file=sys.stderr)
         return 2
+    if args.unblock_gate and args.reason != "awaiting_event_window":
+        print(
+            "error: --unblock-gate requires --reason awaiting_event_window",
+            file=sys.stderr,
+        )
+        return 2
 
-    with shared_state_lock("control_plane"):
-        payload, tasks = _load()
-        matched = None
-        for idx, t in enumerate(tasks):
-            if not isinstance(t, dict):
-                _warn_block_cli(
-                    "next_tasks entry schema invalid; skipping "
-                    f"path={NEXT_TASKS} index={idx} type={type(t).__name__}"
-                )
-                continue
-            if t.get("id") == args.id:
-                matched = t
-                break
-
-        if matched is None:
-            print(f"error: no task with id={args.id}", file=sys.stderr)
-            return 1
-
-        if args.unblock:
-            status_before = (matched.get("status") or "").lower()
-            if status_before in {"blocked", "closed_no_action", "superseded"}:
-                matched["status"] = "pending"
-            for k in (
-                "blocked_reason",
-                "blocked_at",
-                "blocked_until",
-                "blocked_note",
-                "terminalized_at",
-                "terminalized_reason",
-            ):
-                matched.pop(k, None)
-            _validate_task_schema(matched)
-            print(f"[mark_task_blocked] unblocked id={args.id}")
-        else:
-            reason = str(args.reason or "").strip().lower()
-            incompatible = {
-                field: matched[field]
-                for field in (
-                    "claimed_by",
-                    "claimed_at",
-                    "claim_expires_at",
-                    "claim_session_id",
-                    "started_at",
-                    "completed_at",
-                )
-                if field in matched
-            }
-            if incompatible:
-                previous = matched.setdefault("block_transition_previous", {})
-                previous.update(incompatible)
-                for field in incompatible:
-                    matched.pop(field, None)
-            if reason in TERMINAL_INTENT_REASONS:
-                matched["status"] = "closed_no_action"
-                matched["terminalized_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-                matched["terminalized_reason"] = reason
-                matched.pop("blocked_until", None)
-            else:
-                matched["status"] = "blocked"
-                matched["blocked_until"] = args.until or _default_blocked_until()
-            matched["blocked_reason"] = args.reason
-            matched["blocked_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
-            if args.note:
-                matched["blocked_note"] = args.note
-            _validate_task_schema(matched)
-            print(
-                f"[mark_task_blocked] id={args.id} status={matched['status']} reason={args.reason}"
-                + (f" until={matched.get('blocked_until')}" if matched.get("blocked_until") else "")
-            )
-
-        _save(payload, tasks)
-    return 0
+    guard_canonical_write(NEXT_TASKS)
+    with NEXT_TASKS.open("r+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            payload, tasks = _decode_tasks(fh.read())
+            result = _mutate_tasks(args, tasks)
+            if result == 0:
+                if isinstance(payload, dict):
+                    _warn_block_cli(
+                        "next_tasks dict-root shape is no longer writable; "
+                        "canonical root is a list"
+                    )
+                    raise ValueError(
+                        "next_tasks.json root must be a list "
+                        "(single-gateway 2026-07-16)"
+                    )
+                write_tasks_to_handle(fh, tasks)
+            return result
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
 
 
 if __name__ == "__main__":

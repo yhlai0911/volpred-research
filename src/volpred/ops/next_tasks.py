@@ -54,7 +54,7 @@ from typing import IO, Any
 
 from volpred.canonical_write import guard_canonical_write
 
-from .blocked_reasons import BLOCKED_REASONS
+from .blocked_reasons import BLOCKED_REASONS, UNBLOCK_GATES
 from .blocked_reasons import is_valid as is_valid_blocked_reason
 from .diagnostics import warn
 
@@ -417,6 +417,34 @@ class InvalidBlockedUntil(ValueError):
     """Raised when a ``status=blocked`` row cannot be given a valid ``blocked_until``."""
 
 
+class InvalidUnblockGate(ValueError):
+    """Raised when a task carries an invalid live unblock contract."""
+
+
+def validate_unblock_gates(tasks: list[Any]) -> None:
+    """Reject any lifecycle shape that could bypass a named live gate."""
+
+    for task in tasks:
+        if not isinstance(task, dict):
+            continue
+        gate = task.get("unblock_gate")
+        if gate is None:
+            continue
+        if (
+            gate not in UNBLOCK_GATES
+            or str(task.get("status") or "").strip().lower() != "blocked"
+            or str(task.get("blocked_reason") or "").strip().lower()
+            != "awaiting_event_window"
+            or not isinstance(task.get("blocked_until"), str)
+            or not str(task["blocked_until"]).strip()
+        ):
+            raise InvalidUnblockGate(
+                f"task {task.get('id')!r} has invalid unblock_gate lifecycle "
+                f"shape: gate={gate!r} status={task.get('status')!r} "
+                f"blocked_reason={task.get('blocked_reason')!r}"
+            )
+
+
 # Default auto-recheck window for a block with no explicit expiry. Semantics are
 # owned here and re-exported to scripts/mark_task_blocked.py (which defined the
 # 14-day window first) so one number cannot drift into two.
@@ -439,7 +467,9 @@ LEGACY_BLOCKED_WITHOUT_UNTIL_BASELINE = 0
 
 def default_blocked_until(now: "datetime | None" = None) -> str:
     """ISO timestamp ``DEFAULT_BLOCKED_UNTIL_DAYS`` from now (seconds precision)."""
-    from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+    from datetime import datetime as _dt
+    from datetime import timedelta as _td
+    from datetime import timezone as _tz
 
     base = now or _dt.now(_tz.utc)
     return (base + _td(days=DEFAULT_BLOCKED_UNTIL_DAYS)).isoformat(timespec="seconds")
@@ -634,7 +664,8 @@ def compact_terminal_tasks(
     parseable terminal timestamp. Caller must persist the returned full
     records to the archive BEFORE writing the compacted queue.
     """
-    from datetime import datetime, timedelta, timezone as _tz
+    from datetime import datetime, timedelta
+    from datetime import timezone as _tz
 
     now_dt = now or datetime.now(_tz.utc)
     cutoff = now_dt - timedelta(days=age_days)
@@ -744,6 +775,7 @@ def write_tasks_to_handle(fh: IO[str], tasks: list[Any]) -> None:
     _audit_task_statuses(tasks)
     _audit_blocked_until(tasks)
     _audit_blocked_reasons(tasks)
+    validate_unblock_gates(tasks)
     payload = json.dumps(tasks, indent=2, ensure_ascii=False)
     try:
         payload.encode("utf-8")
@@ -909,8 +941,12 @@ def _warn_if_over_pending_cap(record: dict[str, Any], tasks: list[Any]) -> None:
         from volpred.ops.pool_pressure import warn_if_over_cap
 
         warn_if_over_cap(record, tasks)
-    except Exception:  # noqa: BLE001 — silent-ok: observability must not break ingress
-        pass
+    except Exception as exc:
+        warn(
+            "next_tasks_pool_pressure",
+            "pending-cap watchdog failed; append remains authoritative",
+            err=f"{type(exc).__name__}: {exc}",
+        )
 
 
 def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
@@ -956,7 +992,7 @@ def _request_urgent_fire(record: dict[str, Any], path: Path) -> bool:
 
         dispatch_state.request_fire(f"{record.get('source')}:{record['id']}")
         return True
-    except Exception as exc:  # noqa: BLE001 — 任務已入池，hourly 兜底
+    except Exception as exc:
         from volpred.ops.diagnostics import warn
 
         warn(
