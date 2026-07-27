@@ -40649,8 +40649,9 @@
       }
     ],
     "compute_job_id": "compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T02:30:03Z"
   },
   {
     "id": "snapdupfix_paper2_table1_summary_stats_provenance",
@@ -44928,7 +44929,7 @@
   {
     "id": "assign_d0f90705",
     "title": "PHASE-Z 卡住檔案 incident（51839b3927ff05a9）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 6 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 6 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T001858409953Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T013228200702Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022839552235Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022914757958Z:<路徑>`",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 7 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T001858409953Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T013228200702Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022839552235Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022914757958Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T023015179257Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -44941,17 +44942,18 @@
         "storage/logs/trending_primary_source_verification.jsonl"
       ],
       "streaks": {
-        "storage/logs/trending_primary_source_verification.jsonl": 6
+        "storage/logs/trending_primary_source_verification.jsonl": 7
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T001858409953Z",
         "refs/volpred/quarantine/20260727T013228200702Z",
         "refs/volpred/quarantine/20260727T022839552235Z",
-        "refs/volpred/quarantine/20260727T022914757958Z"
+        "refs/volpred/quarantine/20260727T022914757958Z",
+        "refs/volpred/quarantine/20260727T023015179257Z"
       ],
-      "fires": 4,
+      "fires": 5,
       "first_seen_at": "2026-07-27T00:18:58.489275+00:00",
-      "last_seen_at": "2026-07-27T02:29:17.769997+00:00",
+      "last_seen_at": "2026-07-27T02:30:18.303641+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T01:32:28.270825+00:00",
       "deferred": [
@@ -44959,7 +44961,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T02:29:17.769997+00:00"
+    "updated_at": "2026-07-27T02:30:18.303641+00:00"
   },
   {
     "id": "daily_digest_20260727",
@@ -45060,5 +45062,49 @@
     "completed_at": "2026-07-27T02:29:49.341950+00:00",
     "result": "Issue #47 root contract implemented: default contained, explicit close only, identity-bound settlement; 315 tests and Matt Spec/Standards PASS. This implementation slice intentionally keeps Issue #47 OPEN for live close-path verification.",
     "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_abe5bb43",
+    "title": "[Issue #47] Live close-disposition settlement receipt",
+    "description": "Closure-only receipt after implementation, 315 tests, dual review and live contained-path read-back prove all Issue #47 acceptance criteria. Complete with explicit issue-disposition close and verify exact commit marker plus GitHub CLOSED read-back.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-27T02:30:17.237840+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#47",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:30:25.222818+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T02:30:28.656981+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T02:30:28.963778+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T02:30:28.656967+00:00",
+    "completed_at": "2026-07-27T02:30:28.963753+00:00",
+    "result": "All Issue #47 acceptance gates passed: default contained path stayed OPEN with no marker; explicit close receipt is identity-bound; 315 tests and Matt Spec/Standards PASS.",
+    "issue_disposition": "close",
+    "issue_close_pending": {
+      "issue_disposition": "close",
+      "issue_ref": "#47",
+      "task_id": "assign_abe5bb43",
+      "completion_owner": "codex-vscode",
+      "completed_at": "2026-07-27T02:30:28.963753+00:00",
+      "completion_base_commit": "6036b7c6a316aacd9f9e13f292a48919d8df84e3"
+    }
   }
 ]
