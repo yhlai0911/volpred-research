@@ -272,6 +272,46 @@ git -C "$WORK" reset -q HEAD -- scripts/audit_test_imports.py tests/test_weakene
 git -C "$WORK" checkout -q -- scripts/audit_test_imports.py
 rm -f "$WORK/tests/test_weakened_gate.py"
 
+# ---------------------------------------------------------------------------
+# Case 8 (2026-07-27 incident): the silent-fallback gate must judge only the
+#   rule's declared scope (scripts/, src/volpred/, .claude/hooks/). The baseline
+#   never recorded experiments/, so auditing a staged experiment script reported
+#   its pre-existing bare `except` as NEW and no in-scope fix could clear it —
+#   a dead-end gate that stranded finished research work for hours.
+# ---------------------------------------------------------------------------
+mkdir -p "$WORK/experiments/k9999"
+write_violation "$WORK/experiments/k9999/k9999.py"
+git -C "$WORK" add experiments/k9999/k9999.py
+
+OUT8="$(cd "$WORK" && git commit -m "research: staged experiment script" 2>&1)"
+RC8=$?
+if [ "$RC8" -eq 0 ] && contains "outside rule scope" "$OUT8"; then
+  ok "case 8: out-of-scope experiments/ .py commits, and the skip is reported"
+else
+  bad "case 8: experiments/ .py judged by a gate whose baseline never covered it (rc=$RC8)"
+  echo "$OUT8" | sed 's/^/      /' | head -10
+fi
+
+# ---------------------------------------------------------------------------
+# Case 9: the receipt PHASE-Z greps for must survive the scoping. phase_z.py's
+#   _is_silent_fallback_clean_gate_output() accepts a commit only when it sees
+#   "silent-fallback-audit passed new=0 scope=" — losing that line on a mixed
+#   commit would make PHASE-Z treat a gated commit as ungated.
+# ---------------------------------------------------------------------------
+printf 'def in_scope():\n    return 1\n' > "$WORK/scripts/mixed_clean.py"
+mkdir -p "$WORK/experiments/k9998"
+write_violation "$WORK/experiments/k9998/k9998.py"
+git -C "$WORK" add scripts/mixed_clean.py experiments/k9998/k9998.py
+
+OUT9="$(cd "$WORK" && git commit -m "mixed: in-scope clean + out-of-scope experiment" 2>&1)"
+RC9=$?
+if [ "$RC9" -eq 0 ] && contains "silent-fallback-audit passed new=0 scope=1" "$OUT9"; then
+  ok "case 9: mixed commit emits the PHASE-Z receipt counting only in-scope files"
+else
+  bad "case 9: PHASE-Z clean receipt lost or miscounted on a mixed commit (rc=$RC9)"
+  echo "$OUT9" | sed 's/^/      /' | head -10
+fi
+
 echo
 echo "pre-commit staged-scope: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ] || exit 1

@@ -217,14 +217,41 @@ if [ -z "$AUDIT_TOOL" ] || [ -z "$BL_FILE" ]; then
   exit 1
 fi
 
+# Narrow to the rule's declared scope before auditing. Four sources agree on what
+# that scope is — .claude/rules/no-silent-fallback.md `paths:`, the audit's own
+# default_targets(), the CI job (which passes no paths and therefore sweeps exactly
+# those targets), and storage/qa/silent_fallback_baseline.json, which only ever
+# recorded findings under them. Handing the audit every staged .py overrode
+# default_targets() and made this gate judge trees (experiments/, paper/) the
+# baseline never covered: a pre-existing bare `except` in a research script had no
+# baseline entry to match, so it reported as NEW the moment an unrelated edit shifted
+# its line number, and no in-scope fix could clear it. Gate 1 above stays repo-wide —
+# mojibake breaks any file that carries it.
+AUDIT_PY=()
+for f in "${STAGED_PY[@]:-}"; do
+  [ -n "$f" ] || continue
+  case "$f" in
+    scripts/*|src/volpred/*|.claude/hooks/*) AUDIT_PY+=("$f") ;;
+  esac
+done
+
 # bash 3.2 (macOS /bin/bash) errors on "${arr[@]}" when arr is empty under `set -u`,
 # so the full-sweep fallback must not go through the array expansion.
-if [ "${#STAGED_PY[@]}" -gt 0 ]; then
-  OUT="$($PY "$AUDIT_TOOL" --root "$ROOT" --strict --baseline "$BL_FILE" --limit 20 "${STAGED_PY[@]}" 2>&1)"
-else
+SKIPPED_OUT_OF_SCOPE=0
+if [ "${#STAGED_PY[@]}" -eq 0 ]; then
+  # Missing-file fallback from above: audit the default targets, not nothing.
   OUT="$($PY "$AUDIT_TOOL" --root "$ROOT" --strict --baseline "$BL_FILE" --limit 20 2>&1)"
+  RC=$?
+elif [ "${#AUDIT_PY[@]}" -gt 0 ]; then
+  OUT="$($PY "$AUDIT_TOOL" --root "$ROOT" --strict --baseline "$BL_FILE" --limit 20 "${AUDIT_PY[@]}" 2>&1)"
+  RC=$?
+else
+  # Every staged .py is outside the rule's scope. Report it rather than let a
+  # scope=0 receipt read like a gate that ran — this must stay observable.
+  SKIPPED_OUT_OF_SCOPE=${#STAGED_PY[@]}
+  OUT=""
+  RC=0
 fi
-RC=$?
 
 if [ "$RC" -ne 0 ]; then
   echo "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):"
@@ -235,6 +262,9 @@ if [ "$RC" -ne 0 ]; then
   exit 1
 fi
 
-echo "[pre-commit] silent-fallback-audit passed new=0 scope=${#STAGED_PY[@]}"
+if [ "$SKIPPED_OUT_OF_SCOPE" -gt 0 ]; then
+  echo "[pre-commit] silent-fallback-audit: $SKIPPED_OUT_OF_SCOPE staged .py outside rule scope (scripts/, src/volpred/, .claude/hooks/)"
+fi
+echo "[pre-commit] silent-fallback-audit passed new=0 scope=${#AUDIT_PY[@]}"
 
 exit 0
