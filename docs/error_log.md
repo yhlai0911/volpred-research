@@ -3797,6 +3797,22 @@ closed，不再預設 pending。
 獨立 `ci_watch`（`*/5 * * * *`），wrapper 已同步至 live `~/.volpred/bin` 並逐 byte
 回讀一致；schedule validate 顯示 51/51 jobs 由 Operations Core 擁有。CI watchdog
 完整 **63 passed**，涵蓋 throttle fallback、全 admission 失敗誠實通知、舊 phantom
-重建與 missing task 禁派工。正式 GitHub read-back 遇到 API TLS handshake timeout，
-因此本次只標 **`contained`**；待 provider 恢復後仍須回讀新 cadence receipt、確認
-最新 green 收口 active incident，再升級為 `root_cause_fixed_and_verified`。
+重建與 missing task 禁派工。
+
+**收口時發現的 Primary contention 與最終驗證**：第一次 live recovery 已確認
+green run `30244586073` 涵蓋失敗 head，但 email worker 在 durable request 建立前
+先搶全域 Primary Authority；另一個同 holder 的長通知 attempt 正續租 epoch 40，
+因此新 attempt 收到 `already_held` 並讓 incident 卡在
+`recovery_notification_pending`。底層順序已改為先建立 WorkItem/outbox，再嘗試
+Primary；正常 contention 回傳 `effect_status=pending`／
+`send_error=primary_authority_busy`，不丟失意圖、不假稱已寄送，下一輪以同
+idempotency key 重試。成功 delivery 另會清掉舊 `last_error`，避免 sent receipt
+同時殘留過期失敗訊息。
+
+完整 alert／owned-email／CI watchdog 回歸 **158 passed**；Ruff 基準比較修前後均
+無新增告警。live retry 回讀 `notification_delivered=true`、recovery effect
+`effect_owned_email_fda6e6767da5c2f74557697604906fed`，incident
+`ci-red-30241354854` 已於 `2026-07-27T07:44:02Z` 移出 active、phase=`recovered`，
+verified green head=`0693506341c2`。Primary lifecycle 後續亦回讀 epoch 40
+expired → epoch 41 acquired → demoted，證明不是永久霸占。五步 Gate 已全過，
+本 incident 升級為 **`root_cause_fixed_and_verified`**。

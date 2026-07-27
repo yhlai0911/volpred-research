@@ -724,6 +724,33 @@ def test_recovery_notification_failure_retries_until_delivered(tmp_path):
     assert "active_incident" not in _state(tmp_path)
 
 
+def test_successful_recovery_clears_prior_notification_error(tmp_path):
+    run, _sent, _dispatches = _harness(
+        tmp_path,
+        send_results=[
+            ValueError(
+                "Primary Authority is already held: operations-core-primary"
+            ),
+            {"sent": True, "notification_id": "n-recovered"},
+        ],
+    )
+    run(RED1)
+    _complete_repair_task(tmp_path)
+
+    run(GREEN)
+    assert "last_error" in (
+        _state(tmp_path)["active_incident"]["notifications"]["recovery"]
+    )
+
+    run(GREEN)
+
+    recovery = (
+        _state(tmp_path)["last_closed_incident"]["notifications"]["recovery"]
+    )
+    assert recovery["status"] == "sent"
+    assert "last_error" not in recovery
+
+
 def test_github_poll_outage_retries_verified_recovery_notification(tmp_path):
     run, sent, _dispatches = _harness(
         tmp_path,

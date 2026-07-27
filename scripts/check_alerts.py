@@ -2508,6 +2508,7 @@ def _notify_ci_incident(
         summary["reason"] = f"{kind}_notification_pending"
         return summary
 
+    notice.pop("last_error", None)
     notice["delivery_accepted"] = True
     notice.setdefault("delivery_accepted_at", now_iso)
     if kind == "escalation":

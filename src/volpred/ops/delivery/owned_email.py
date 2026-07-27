@@ -562,13 +562,44 @@ def dispatch_email_by_current_owner(
             ImapSentMailReader,
         )
 
-        notifier = EmailNotifier(storage_dir=storage_dir)
+        # Intake is durable before this short-lived caller contends for the
+        # host-wide Primary Authority. A concurrent effect holder is normal;
+        # losing the notification before it reaches WorkItem/outbox is not.
+        request_view = (
+            existing.request
+            if existing is not None
+            else store.request(
+                normalized,
+                owner_generation=owner.generation,
+            )
+        )
+        if request_view.terminal_receipt is not None:
+            OwnedEmailNotification._validate_terminal_receipt(request_view)
+            return _receipt_result(
+                request_view.terminal_receipt,
+                subject=normalized.title,
+                delivery_owner=owner.owner,
+            )
+
         worker_id = "effect-worker:ops-alert-email"
         keepalive = build_supabase_host_authority_keepalive(
             holder_ref=worker_id,
         )
-        keepalive.start()
         try:
+            keepalive.start()
+        except ValueError as exc:
+            if not str(exc).startswith(
+                "Primary Authority is already held:"
+            ):
+                raise
+            return _pending_request_result(
+                request_view,
+                subject=normalized.title,
+                delivery_owner=owner.owner,
+                reason="primary_authority_busy",
+            )
+        try:
+            notifier = EmailNotifier(storage_dir=storage_dir)
             receipt = OwnedEmailNotification(
                 store=store,
                 provider=EmailNotificationEffectAdapter(
@@ -719,6 +750,32 @@ def _receipt_result(
         "attempt_count": receipt.attempt_count,
         "evidence_ref": receipt.evidence_ref,
         "evidence_sha256": receipt.evidence_sha256,
+    }
+
+
+def _pending_request_result(
+    request_view: OwnedEmailRequest,
+    *,
+    subject: str,
+    delivery_owner: str,
+    reason: str,
+) -> dict[str, Any]:
+    """Return durable queue acceptance without claiming provider delivery."""
+    return {
+        "notification_id": request_view.effect_id,
+        "subject": subject,
+        "sent": False,
+        "configured": True,
+        "send_error": reason,
+        "delivery_owner": delivery_owner,
+        "owner_generation": request_view.owner_generation,
+        "work_id": request_view.work_id,
+        "effect_status": "pending",
+        "attempt_count": 0,
+        "evidence_ref": (
+            f"owned-email-request:{request_view.request_sha256}"
+        ),
+        "evidence_sha256": request_view.request_sha256,
     }
 
 

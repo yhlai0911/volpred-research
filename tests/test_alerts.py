@@ -478,7 +478,14 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
             effect_family="email.ops_alert",
             owner="operations_core",
             generation=4,
-        )
+        ),
+        request=lambda command, owner_generation: SimpleNamespace(
+            owner_generation=owner_generation,
+            work_id="work-owned-email-test",
+            effect_id="effect-owned-email-test",
+            request_sha256="a" * 64,
+            terminal_receipt=None,
+        ),
     )
     captured: dict[str, object] = {}
 
@@ -732,6 +739,84 @@ def test_dispatch_alert_email_fails_closed_when_owner_read_is_unavailable(
         )
 
     assert notifier_constructed is False
+
+
+def test_dispatch_alert_email_durably_queues_when_primary_is_busy(
+    tmp_path: Path,
+    monkeypatch,
+):
+    """A busy host Primary must delay delivery, not lose the notification."""
+    requested = []
+
+    class BusyStore:
+        def read_request(self, _idempotency_key: str):
+            return None
+
+        def read_owner(self):
+            return SimpleNamespace(
+                effect_family="email.ops_alert",
+                owner="operations_core",
+                generation=4,
+            )
+
+        def request(self, command, *, owner_generation: int):
+            requested.append((command, owner_generation))
+            return SimpleNamespace(
+                owner_generation=owner_generation,
+                work_id="work-primary-busy",
+                effect_id="effect-primary-busy",
+                request_sha256="a" * 64,
+                terminal_receipt=None,
+            )
+
+    class FakeNotifier:
+        def __init__(self, *, storage_dir: str) -> None:
+            pass
+
+    class BusyKeepalive:
+        def start(self):
+            raise ValueError(
+                "Primary Authority is already held: operations-core-primary"
+            )
+
+        def stop(self) -> None:
+            pass
+
+    monkeypatch.setattr(
+        "volpred.publisher.email_notifier.EmailNotifier",
+        FakeNotifier,
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery.owned_email."
+        "SupabaseOwnedEmailStore.from_environment",
+        classmethod(lambda cls: BusyStore()),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.delivery._email_notification."
+        "ImapSentMailReader.from_environment",
+        classmethod(lambda cls: object()),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.authority."
+        "build_supabase_host_authority_keepalive",
+        lambda **_kwargs: BusyKeepalive(),
+    )
+
+    result = alerts_module._dispatch_alert_email(
+        level="info",
+        title="CI recovery",
+        body="green",
+        recipient="owner@example.com",
+        storage_dir=str(tmp_path / "storage"),
+        delivery_key="ops-alert:ci-recovery:2026-07-27",
+    )
+
+    assert len(requested) == 1
+    assert requested[0][1] == 4
+    assert result["sent"] is False
+    assert result["send_error"] == "primary_authority_busy"
+    assert result["effect_status"] == "pending"
+    assert result["notification_id"] == "effect-primary-busy"
 
 
 def test_send_alert_save_prunes_dedup_entries_idle_beyond_retention(tmp_path: Path, monkeypatch):
