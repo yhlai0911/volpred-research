@@ -1,6 +1,18 @@
 {
   "schema_version": "frontend-route-scenario-parity.v1",
   "frontend_target": "frontend-v2-fix",
+  "source_revision_policy": {
+    "nested_git_required": true
+  },
+  "required_scenario_ids": [
+    "public_first_paint",
+    "auth_callback",
+    "member_navigation",
+    "admin_observer",
+    "seo",
+    "mobile_navigation",
+    "accessibility_navigation"
+  ],
   "route_rules": [
     {
       "id": "public_home",
@@ -10,6 +22,19 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "feed",
+        "strategy_overview",
+        "digest"
+      ],
+      "mode_advantages": {
+        "original": [
+          "server_authoritative_first_paint"
+        ],
+        "v3": [
+          "editorial_information_architecture"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/data-server.ts",
         "frontend-v2-fix/src/components/v3/hooks/useV3Data.ts"
@@ -23,6 +48,18 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "about",
+        "disclaimer"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_public_chrome"
+        ],
+        "v3": [
+          "editorial_brand_presentation"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/about/page.tsx",
         "frontend-v2-fix/src/app/disclaimer/page.tsx",
@@ -38,6 +75,18 @@
         "v3"
       ],
       "access": "admin",
+      "capabilities": [
+        "admin_observer",
+        "admin_commands"
+      ],
+      "mode_advantages": {
+        "original": [
+          "full_operational_console_set"
+        ],
+        "v3": [
+          "editorial_admin_navigation"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/admin-auth.ts",
         "frontend-v2-fix/src/lib/admin-ops.ts",
@@ -51,9 +100,100 @@
         "shared"
       ],
       "access": "public",
+      "capabilities": [
+        "oauth_callback"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "single_auth_callback_contract"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/auth/callback/route.ts",
         "frontend-v2-fix/src/lib/supabase-browser.ts"
+      ]
+    },
+    {
+      "id": "api_admin",
+      "pattern": "^/api/admin(?:/.*)?$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "admin",
+      "capabilities": [
+        "admin_api"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "single_admin_api_contract"
+        ]
+      },
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/admin-auth.ts",
+        "frontend-v2-fix/src/app/api/admin/session/route.ts"
+      ]
+    },
+    {
+      "id": "api_member",
+      "pattern": "^/api/(me|radar)(?:/.*)?$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "member",
+      "capabilities": [
+        "member_api",
+        "radar_api"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "single_member_api_contract"
+        ]
+      },
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/request-auth.ts",
+        "frontend-v2-fix/src/lib/supabase-server.ts"
+      ]
+    },
+    {
+      "id": "api_privileged_mutation",
+      "pattern": "^/api/(publications/publish|sync/\\[\\.\\.\\.path\\])$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "service",
+      "capabilities": [
+        "publication_mutation",
+        "remote_sync"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "single_privileged_mutation_contract"
+        ]
+      },
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/request-auth.ts",
+        "frontend-v2-fix/src/app/api/publications/publish/route.ts",
+        "frontend-v2-fix/src/app/api/sync/[...path]/route.ts"
+      ]
+    },
+    {
+      "id": "api_shared_read",
+      "pattern": "^/api/(analytics|health|market-status|notifications|papers|portfolio-overview|publications/feed|questions|research|risk-forecast|strategy-metrics|strategy-overview|strategy-signals|strategy-trades)(?:/.*)?$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "public",
+      "capabilities": [
+        "shared_read_api"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "single_read_model_contract"
+        ]
+      },
+      "authoritative_data_owner_refs": [
+        "frontend-v2-fix/src/lib/data-server.ts",
+        "frontend-v2-fix/src/lib/supabase-server.ts"
       ]
     },
     {
@@ -64,6 +204,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "brand_reference"
+      ],
+      "mode_advantages": {
+        "original": [
+          "known_gap_explicitly_tracked"
+        ],
+        "v3": [
+          "dedicated_brand_reference"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/v3/brand/page.tsx"
       ],
@@ -82,6 +233,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "digest_detail"
+      ],
+      "mode_advantages": {
+        "original": [
+          "standard_site_reader"
+        ],
+        "v3": [
+          "editorial_digest_reader"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/digest-display.ts",
         "frontend-v2-fix/src/lib/data-server.ts"
@@ -95,6 +257,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "indicator_arena"
+      ],
+      "mode_advantages": {
+        "original": [
+          "complete_indicator_tool"
+        ],
+        "v3": [
+          "known_gap_explicitly_tracked"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/indicator-arena.ts"
       ],
@@ -113,6 +286,19 @@
         "v3"
       ],
       "access": "member",
+      "capabilities": [
+        "member_home",
+        "bookmarks",
+        "questions"
+      ],
+      "mode_advantages": {
+        "original": [
+          "global_member_chrome"
+        ],
+        "v3": [
+          "editorial_member_experience"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/request-auth.ts",
         "frontend-v2-fix/src/lib/supabase-server.ts",
@@ -127,6 +313,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "paper_catalog"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_paper_catalog"
+        ],
+        "v3": [
+          "editorial_paper_catalog"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/data-server.ts",
         "frontend-v2-fix/src/app/api/papers/route.ts"
@@ -140,6 +337,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "portfolio_overview"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_portfolio_view"
+        ],
+        "v3": [
+          "editorial_portfolio_view"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/data-server.ts",
         "frontend-v2-fix/src/app/api/portfolio-overview/route.ts"
@@ -153,6 +361,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "pricing"
+      ],
+      "mode_advantages": {
+        "original": [
+          "complete_pricing_surface"
+        ],
+        "v3": [
+          "known_gap_explicitly_tracked"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/pricing/page.tsx",
         "frontend-v2-fix/src/app/api/radar/entitlements/route.ts"
@@ -172,6 +391,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "public_questions"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_questions_view"
+        ],
+        "v3": [
+          "editorial_questions_view"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/data-server.ts",
         "frontend-v2-fix/src/app/api/questions/route.ts"
@@ -185,6 +415,17 @@
         "v3"
       ],
       "access": "member",
+      "capabilities": [
+        "radar_product"
+      ],
+      "mode_advantages": {
+        "original": [
+          "complete_radar_surface"
+        ],
+        "v3": [
+          "known_gap_explicitly_tracked"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/radar-data.ts",
         "frontend-v2-fix/src/app/api/radar/entitlements/route.ts"
@@ -204,6 +445,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "report_detail"
+      ],
+      "mode_advantages": {
+        "original": [
+          "standard_report_reader"
+        ],
+        "v3": [
+          "editorial_report_reader"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/data-server.ts",
         "frontend-v2-fix/src/lib/research-mirror.ts",
@@ -218,6 +470,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "risk_forecast"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_forecast_view"
+        ],
+        "v3": [
+          "editorial_forecast_view"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/data-server.ts",
         "frontend-v2-fix/src/app/api/risk-forecast/route.ts"
@@ -230,6 +493,16 @@
         "shared"
       ],
       "access": "public",
+      "capabilities": [
+        "robots",
+        "rss",
+        "sitemap"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "single_seo_discovery_contract"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/layout.tsx",
         "frontend-v2-fix/src/app/sitemap.ts",
@@ -245,6 +518,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "strategy_selection"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_strategy_tool"
+        ],
+        "v3": [
+          "editorial_strategy_tool"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/lib/strategy-performance.ts",
         "frontend-v2-fix/src/lib/strategy-regimes.ts"
@@ -258,6 +542,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "vix_calculator"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_calculator"
+        ],
+        "v3": [
+          "editorial_calculator"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/vix-calculator/page.tsx",
         "frontend-v2-fix/src/app/v3/vix-calculator/page.tsx"
@@ -271,6 +566,17 @@
         "v3"
       ],
       "access": "public",
+      "capabilities": [
+        "volatility_target_calculator"
+      ],
+      "mode_advantages": {
+        "original": [
+          "established_calculator"
+        ],
+        "v3": [
+          "editorial_calculator"
+        ]
+      },
       "authoritative_data_owner_refs": [
         "frontend-v2-fix/src/app/vt-calculator/page.tsx",
         "frontend-v2-fix/src/app/v3/vt-calculator/page.tsx"
@@ -283,12 +589,18 @@
       "required_route_rules": [
         "public_home",
         "reports",
-        "digest"
+        "digest",
+        "api_shared_read"
       ],
       "required_modes": [
         "original",
         "v3"
       ],
+      "required_rule_modes": {
+        "api_shared_read": [
+          "shared"
+        ]
+      },
       "evidence": [
         {
           "path": "frontend-v2-fix/src/app/page.tsx",
@@ -334,12 +646,18 @@
     {
       "id": "member_navigation",
       "required_route_rules": [
-        "member"
+        "member",
+        "api_member"
       ],
       "required_modes": [
         "original",
         "v3"
       ],
+      "required_rule_modes": {
+        "api_member": [
+          "shared"
+        ]
+      },
       "evidence": [
         {
           "path": "frontend-v2-fix/src/components/MyMemberHomeConsole.tsx",
@@ -360,12 +678,22 @@
     {
       "id": "admin_observer",
       "required_route_rules": [
-        "admin"
+        "admin",
+        "api_admin",
+        "api_privileged_mutation"
       ],
       "required_modes": [
         "original",
         "v3"
       ],
+      "required_rule_modes": {
+        "api_admin": [
+          "shared"
+        ],
+        "api_privileged_mutation": [
+          "shared"
+        ]
+      },
       "evidence": [
         {
           "path": "frontend-v2-fix/src/lib/admin-auth.ts",

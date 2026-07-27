@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
+import subprocess
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -16,6 +18,16 @@ _HREF = re.compile(
 _REDIRECT_SOURCE = re.compile(
     r"""\bsource\s*:\s*(?:"(?P<double>/[^"]*)"|'(?P<single>/[^']*)')"""
 )
+_HREF_TEMPLATE = re.compile(
+    r"""\bhref\s*=\s*\{`(?P<template>[^`]*)`\}"""
+)
+_HREF_EXPRESSION = re.compile(
+    r"""\bhref\s*=\s*\{(?P<expression>[^{}\n]+)\}"""
+)
+_ROUTER_BINDING = re.compile(
+    r"""\bconst\s+(?P<name>[A-Za-z_$][\w$]*)\s*=\s*useRouter\s*\(\s*\)"""
+)
+_TEMPLATE_SLOT = re.compile(r"\$\{[^{}]*\}")
 
 
 @dataclass(frozen=True)
@@ -33,6 +45,36 @@ def _load_json(path: Path) -> Any:
 
 def _block(kind: str, **details: object) -> dict[str, object]:
     return {"kind": kind, **details}
+
+
+def _repo_path(
+    repo_root: Path,
+    raw: object,
+    *,
+    blockers: list[dict[str, object]],
+    field: str,
+    kind: str,
+) -> Path | None:
+    if not isinstance(raw, str) or not raw.strip():
+        blockers.append(_block("path_contract", field=field, observed=raw))
+        return None
+    try:
+        resolved = (repo_root / raw).resolve()
+    except (OSError, RuntimeError):  # silent-ok: typed path_unreadable receipt
+        blockers.append(_block("path_unreadable", field=field, source_ref=raw))
+        return None
+    if not resolved.is_relative_to(repo_root):
+        blockers.append(_block("path_escape", field=field, source_ref=raw))
+        return None
+    if kind == "file" and not resolved.is_file():
+        blockers.append(_block("missing_file", field=field, source_ref=raw))
+        return None
+    if kind == "directory" and not resolved.is_dir():
+        blockers.append(
+            _block("missing_directory", field=field, source_ref=raw)
+        )
+        return None
+    return resolved
 
 
 def _web_route(parts: tuple[str, ...]) -> str:
@@ -73,8 +115,6 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
     for handler in sorted(app_root.rglob("route.ts")):
         relative = handler.parent.relative_to(app_root)
         parts = tuple(relative.parts)
-        if parts and parts[0] == "api":
-            continue
         mode, surface = _surface_identity(parts)
         canonical = (
             _web_route(parts[1:])
@@ -153,6 +193,76 @@ def _compile_rules(
                 _block("contract_route_rule", rule_id=rule_id, reason="missing_pattern")
             )
             continue
+        expected_modes = value.get("expected_modes")
+        if (
+            not isinstance(expected_modes, list)
+            or not expected_modes
+            or any(
+                not isinstance(mode, str)
+                or mode not in {"original", "v3", "shared"}
+                for mode in expected_modes
+            )
+        ):
+            blockers.append(
+                _block("contract_expected_modes", rule_id=rule_id)
+            )
+            value = {**value, "expected_modes": []}
+        if value.get("access") not in {
+            "public",
+            "member",
+            "admin",
+            "service",
+        }:
+            blockers.append(_block("contract_access", rule_id=rule_id))
+        owner_refs = value.get("authoritative_data_owner_refs")
+        if (
+            not isinstance(owner_refs, list)
+            or not owner_refs
+            or any(
+                not isinstance(owner_ref, str) or not owner_ref.strip()
+                for owner_ref in owner_refs
+            )
+        ):
+            blockers.append(_block("missing_owner", rule_id=rule_id))
+            value = {**value, "authoritative_data_owner_refs": []}
+        capabilities = value.get("capabilities")
+        if (
+            not isinstance(capabilities, list)
+            or not capabilities
+            or any(
+                not isinstance(capability, str) or not capability.strip()
+                for capability in capabilities
+            )
+        ):
+            blockers.append(
+                _block("contract_capabilities", rule_id=rule_id)
+            )
+            value = {**value, "capabilities": []}
+        mode_advantages = value.get("mode_advantages")
+        if not isinstance(mode_advantages, dict):
+            blockers.append(
+                _block("contract_mode_advantages", rule_id=rule_id)
+            )
+            value = {**value, "mode_advantages": {}}
+        else:
+            invalid_advantage_modes = [
+                mode
+                for mode in value.get("expected_modes", [])
+                if not isinstance(mode_advantages.get(mode), list)
+                or not mode_advantages[mode]
+                or any(
+                    not isinstance(advantage, str) or not advantage.strip()
+                    for advantage in mode_advantages[mode]
+                )
+            ]
+            if invalid_advantage_modes:
+                blockers.append(
+                    _block(
+                        "contract_mode_advantages",
+                        rule_id=rule_id,
+                        modes=invalid_advantage_modes,
+                    )
+                )
         try:
             compiled.append((value, re.compile(pattern)))
         except re.error as error:
@@ -192,6 +302,36 @@ def _redirect_sources(frontend_root: Path) -> set[str]:
     }
 
 
+def _valid_internal_path(
+    raw: str,
+    *,
+    valid_patterns: list[re.Pattern[str]],
+    valid_exact: set[str],
+) -> bool:
+    if not raw.startswith("/") or raw.startswith("//"):
+        return True
+    path = raw.split("#", 1)[0].split("?", 1)[0]
+    path = path.rstrip("/") or "/"
+    return (
+        path.startswith("/api/")
+        or path in valid_exact
+        or any(pattern.fullmatch(path) for pattern in valid_patterns)
+    )
+
+
+def _expression_path(expression: str) -> str | None:
+    value = expression.strip()
+    if (
+        len(value) >= 2
+        and value[0] == value[-1]
+        and value[0] in {"'", '"'}
+    ):
+        return value[1:-1]
+    if len(value) >= 2 and value[0] == value[-1] == "`":
+        return _TEMPLATE_SLOT.sub("sample", value[1:-1])
+    return None
+
+
 def _dead_links(
     repo_root: Path,
     frontend_root: Path,
@@ -208,26 +348,181 @@ def _dead_links(
         if route.kind != "page"
     } | _redirect_sources(frontend_root)
     findings: list[dict[str, object]] = []
-    for source in sorted((frontend_root / "src").rglob("*.tsx")):
+    source_files = sorted(
+        path
+        for path in (frontend_root / "src").rglob("*")
+        if path.suffix in {".ts", ".tsx", ".js", ".jsx"}
+    )
+    for source in source_files:
         text = source.read_text(encoding="utf-8")
         for match in _HREF.finditer(text):
             raw = match.group("double") or match.group("single")
-            path = raw.split("#", 1)[0].split("?", 1)[0]
-            path = path.rstrip("/") or "/"
-            if (
-                path.startswith("/api/")
-                or path in valid_exact
-                or any(pattern.fullmatch(path) for pattern in valid_patterns)
+            if _valid_internal_path(
+                raw,
+                valid_patterns=valid_patterns,
+                valid_exact=valid_exact,
             ):
                 continue
             findings.append(
                 _block(
                     "dead_internal_link",
-                    path=path,
+                    path=raw,
                     source_ref=source.relative_to(repo_root).as_posix(),
                 )
             )
+        expression_spans: list[tuple[int, int]] = []
+        for match in _HREF_TEMPLATE.finditer(text):
+            expression_spans.append(match.span())
+            raw = _TEMPLATE_SLOT.sub("sample", match.group("template"))
+            if not _valid_internal_path(
+                raw,
+                valid_patterns=valid_patterns,
+                valid_exact=valid_exact,
+            ):
+                findings.append(
+                    _block(
+                        "dead_internal_link",
+                        path=raw,
+                        source_ref=source.relative_to(repo_root).as_posix(),
+                    )
+                )
+        for match in _HREF_EXPRESSION.finditer(text):
+            expression_spans.append(match.span())
+            raw = _expression_path(match.group("expression"))
+            if raw is not None and _valid_internal_path(
+                raw,
+                valid_patterns=valid_patterns,
+                valid_exact=valid_exact,
+            ):
+                continue
+            findings.append(
+                _block(
+                    "unresolved_internal_navigation",
+                    expression=match.group("expression").strip(),
+                    source_ref=source.relative_to(repo_root).as_posix(),
+                )
+            )
+        for occurrence in re.finditer(r"\bhref\s*=\s*\{", text):
+            if any(
+                start <= occurrence.start() < end
+                for start, end in expression_spans
+            ):
+                continue
+            findings.append(
+                _block(
+                    "unresolved_internal_navigation",
+                    expression="<nested-or-multiline>",
+                    source_ref=source.relative_to(repo_root).as_posix(),
+                )
+            )
+        for binding in _ROUTER_BINDING.finditer(text):
+            name = re.escape(binding.group("name"))
+            navigation = re.compile(
+                rf"\b{name}\.(?:push|replace)\s*\((?P<expression>[^)\n]+)\)"
+            )
+            for match in navigation.finditer(text):
+                raw = _expression_path(match.group("expression"))
+                if raw is not None and _valid_internal_path(
+                    raw,
+                    valid_patterns=valid_patterns,
+                    valid_exact=valid_exact,
+                ):
+                    continue
+                findings.append(
+                    _block(
+                        "unresolved_internal_navigation",
+                        expression=match.group("expression").strip(),
+                        source_ref=source.relative_to(repo_root).as_posix(),
+                    )
+                )
     return findings
+
+
+def _frontend_revision(
+    *,
+    repo_root: Path,
+    frontend_root: Path,
+    nested_git_required: bool,
+    blockers: list[dict[str, object]],
+) -> dict[str, object]:
+    relevant = sorted(
+        [
+            path
+            for path in (frontend_root / "src").rglob("*")
+            if path.is_file()
+            and path.suffix in {".ts", ".tsx", ".js", ".jsx"}
+        ]
+        + [
+            path
+            for path in (
+                frontend_root / "next.config.js",
+                frontend_root / "public" / "robots.txt",
+            )
+            if path.is_file()
+        ]
+    )
+    digest = hashlib.sha256()
+    for path in relevant:
+        relative = path.relative_to(frontend_root).as_posix().encode()
+        content = path.read_bytes()
+        digest.update(len(relative).to_bytes(8, "big"))
+        digest.update(relative)
+        digest.update(len(content).to_bytes(8, "big"))
+        digest.update(content)
+    revision: dict[str, object] = {
+        "kind": "nested_git" if nested_git_required else "filesystem",
+        "tree_sha256": digest.hexdigest(),
+        "file_count": len(relevant),
+    }
+    if not nested_git_required:
+        return revision
+    commands = {
+        "top_level": ["git", "rev-parse", "--show-toplevel"],
+        "head": ["git", "rev-parse", "--verify", "HEAD^{commit}"],
+        "status": ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+    }
+    outputs: dict[str, str] = {}
+    for key, command in commands.items():
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=frontend_root,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=10,
+            )
+        except (OSError, subprocess.SubprocessError):
+            blockers.append(
+                _block("frontend_revision_unreadable", operation=key)
+            )
+            return revision
+        if completed.returncode != 0:
+            blockers.append(
+                _block("frontend_revision_unreadable", operation=key)
+            )
+            return revision
+        outputs[key] = completed.stdout.strip()
+    try:
+        observed_top = Path(outputs["top_level"]).resolve()
+    except (OSError, RuntimeError):
+        observed_top = Path("/")
+    if observed_top != frontend_root:
+        blockers.append(
+            _block(
+                "frontend_revision_boundary",
+                expected=frontend_root.relative_to(repo_root).as_posix(),
+            )
+        )
+    status_bytes = outputs["status"].encode()
+    revision.update(
+        {
+            "git_head": outputs["head"],
+            "dirty": bool(outputs["status"]),
+            "status_sha256": hashlib.sha256(status_bytes).hexdigest(),
+        }
+    )
+    return revision
 
 
 def _scenario_blockers(
@@ -235,11 +530,24 @@ def _scenario_blockers(
     scenarios: object,
     rule_ids: set[str],
     rule_modes: dict[str, set[str]],
+    required_scenario_ids: object,
 ) -> tuple[list[dict[str, object]], int]:
     if not isinstance(scenarios, list):
         return [_block("contract_scenarios", reason="must_be_list")], 0
     blockers: list[dict[str, object]] = []
     seen: set[str] = set()
+    if (
+        not isinstance(required_scenario_ids, list)
+        or not required_scenario_ids
+        or any(
+            not isinstance(scenario_id, str) or not scenario_id.strip()
+            for scenario_id in required_scenario_ids
+        )
+    ):
+        blockers.append(
+            _block("required_scenario_contract", reason="invalid_ids")
+        )
+        required_scenario_ids = []
     for index, scenario in enumerate(scenarios):
         if not isinstance(scenario, dict):
             blockers.append(
@@ -259,8 +567,19 @@ def _scenario_blockers(
         seen.add(scenario_id)
         required_rules = scenario.get("required_route_rules", [])
         required_modes = scenario.get("required_modes", [])
-        if not isinstance(required_rules, list) or not isinstance(
-            required_modes, list
+        required_rule_modes = scenario.get("required_rule_modes", {})
+        if (
+            not isinstance(required_rules, list)
+            or not required_rules
+            or any(not isinstance(rule_id, str) for rule_id in required_rules)
+            or not isinstance(required_modes, list)
+            or not required_modes
+            or any(
+                not isinstance(mode, str)
+                or mode not in {"original", "v3", "shared"}
+                for mode in required_modes
+            )
+            or not isinstance(required_rule_modes, dict)
         ):
             blockers.append(
                 _block(
@@ -268,7 +587,22 @@ def _scenario_blockers(
                     scenario_id=scenario_id,
                 )
             )
-            continue
+            required_rules = [
+                rule_id
+                for rule_id in required_rules
+                if isinstance(rule_id, str)
+            ] if isinstance(required_rules, list) else []
+            required_modes = [
+                mode
+                for mode in required_modes
+                if isinstance(mode, str)
+                and mode in {"original", "v3", "shared"}
+            ] if isinstance(required_modes, list) else []
+            required_rule_modes = (
+                required_rule_modes
+                if isinstance(required_rule_modes, dict)
+                else {}
+            )
         for rule_id in required_rules:
             if rule_id not in rule_ids:
                 blockers.append(
@@ -279,10 +613,30 @@ def _scenario_blockers(
                     )
                 )
                 continue
+            rule_required_modes = required_rule_modes.get(
+                rule_id,
+                required_modes,
+            )
+            if (
+                not isinstance(rule_required_modes, list)
+                or any(
+                    not isinstance(mode, str)
+                    or mode not in {"original", "v3", "shared"}
+                    for mode in rule_required_modes
+                )
+            ):
+                blockers.append(
+                    _block(
+                        "scenario_coverage_contract",
+                        scenario_id=scenario_id,
+                        rule_id=rule_id,
+                    )
+                )
+                continue
             missing_modes = sorted(
                 {
                     mode
-                    for mode in required_modes
+                    for mode in rule_required_modes
                     if mode not in rule_modes.get(rule_id, set())
                 }
             )
@@ -295,7 +649,16 @@ def _scenario_blockers(
                         missing_modes=missing_modes,
                     )
                 )
-        for evidence in scenario.get("evidence", []):
+        evidence_rows = scenario.get("evidence")
+        if not isinstance(evidence_rows, list) or not evidence_rows:
+            blockers.append(
+                _block(
+                    "scenario_evidence_contract",
+                    scenario_id=scenario_id,
+                )
+            )
+            evidence_rows = []
+        for evidence in evidence_rows:
             if not isinstance(evidence, dict) or not isinstance(
                 evidence.get("path"), str
             ):
@@ -306,21 +669,34 @@ def _scenario_blockers(
                     )
                 )
                 continue
-            path = repo_root / evidence["path"]
-            if not path.is_file():
+            contains = evidence.get("contains")
+            if (
+                not isinstance(contains, list)
+                or not contains
+                or any(not isinstance(token, str) for token in contains)
+            ):
                 blockers.append(
                     _block(
-                        "scenario_evidence_missing",
+                        "scenario_evidence_contract",
                         scenario_id=scenario_id,
                         source_ref=evidence["path"],
                     )
                 )
                 continue
+            path = _repo_path(
+                repo_root,
+                evidence["path"],
+                blockers=blockers,
+                field="scenario_evidence",
+                kind="file",
+            )
+            if path is None:
+                continue
             text = path.read_text(encoding="utf-8")
             missing = [
                 token
-                for token in evidence.get("contains", [])
-                if not isinstance(token, str) or token not in text
+                for token in contains
+                if token not in text
             ]
             if missing:
                 blockers.append(
@@ -331,6 +707,14 @@ def _scenario_blockers(
                         missing=missing,
                     )
                 )
+    for required_id in required_scenario_ids:
+        if required_id not in seen:
+            blockers.append(
+                _block(
+                    "missing_required_scenario",
+                    scenario_id=required_id,
+                )
+            )
     return blockers, len(scenarios)
 
 
@@ -383,8 +767,21 @@ def audit_frontend_parity(
             _block("project_targets_unreadable", error=type(error).__name__)
         )
         return _report([], [], blockers, 0, 0)
+    if not isinstance(targets, dict):
+        blockers.append(
+            _block("project_targets_schema", reason="root_must_be_object")
+        )
+        return _report([], [], blockers, 0, 0)
     active = targets.get("active_frontend")
     expected = contract.get("frontend_target")
+    if not isinstance(active, str) or not isinstance(expected, str):
+        blockers.append(
+            _block(
+                "project_targets_schema",
+                reason="active_frontend_must_be_text",
+            )
+        )
+        return _report([], [], blockers, 0, 0)
     if active != expected:
         blockers.append(
             _block(
@@ -393,12 +790,57 @@ def audit_frontend_parity(
                 observed=active,
             )
         )
-    frontend_spec = targets.get("frontends", {}).get(active, {})
+    frontends = targets.get("frontends")
+    if not isinstance(frontends, dict):
+        blockers.append(
+            _block("project_targets_schema", reason="frontends_must_be_object")
+        )
+        return _report([], [], blockers, 0, 0)
+    frontend_spec = frontends.get(active, {})
+    if not isinstance(frontend_spec, dict):
+        blockers.append(
+            _block(
+                "project_targets_schema",
+                reason="frontend_spec_must_be_object",
+            )
+        )
+        return _report([], [], blockers, 0, 0)
     frontend_path = frontend_spec.get("path")
     if not isinstance(frontend_path, str):
         blockers.append(_block("active_target_missing", target=active))
         return _report([], [], blockers, 0, 0)
-    frontend_root = repo_root / frontend_path
+    frontend_root = _repo_path(
+        repo_root,
+        frontend_path,
+        blockers=blockers,
+        field="active_frontend",
+        kind="directory",
+    )
+    if frontend_root is None:
+        return _report([], [], blockers, 0, 0)
+    revision_policy = contract.get("source_revision_policy")
+    if (
+        not isinstance(revision_policy, dict)
+        or not isinstance(
+            revision_policy.get("nested_git_required"),
+            bool,
+        )
+    ):
+        blockers.append(
+            _block(
+                "source_revision_contract",
+                reason="nested_git_required_must_be_boolean",
+            )
+        )
+        nested_git_required = True
+    else:
+        nested_git_required = revision_policy["nested_git_required"]
+    source_revision = _frontend_revision(
+        repo_root=repo_root,
+        frontend_root=frontend_root,
+        nested_git_required=nested_git_required,
+        blockers=blockers,
+    )
     routes = _discover_routes(repo_root, frontend_root)
     compiled = _compile_rules(contract.get("route_rules"), blockers)
     route_rows: list[dict[str, object]] = []
@@ -433,6 +875,16 @@ def audit_frontend_parity(
             rule_id = matched[0]["id"]
             by_rule_route[(rule_id, route.canonical_route)].add(route.mode)
         matched_rule = matched[0] if len(matched) == 1 else {}
+        shared_owners = matched_rule.get(
+            "authoritative_data_owner_refs",
+            [],
+        )
+        per_mode_owners = (
+            [route.source_ref, *shared_owners]
+            if isinstance(shared_owners, list)
+            else [route.source_ref]
+        )
+        mode_advantages = matched_rule.get("mode_advantages", {})
         route_rows.append(
             {
                 "canonical_route": route.canonical_route,
@@ -442,9 +894,14 @@ def audit_frontend_parity(
                 "kind": route.kind,
                 "rule_id": rule_id,
                 "access": matched_rule.get("access"),
-                "authoritative_data_owner_refs": matched_rule.get(
-                    "authoritative_data_owner_refs",
-                    [],
+                "authoritative_data_owner_refs": list(
+                    dict.fromkeys(per_mode_owners)
+                ),
+                "capabilities": matched_rule.get("capabilities", []),
+                "advantages": (
+                    mode_advantages.get(route.mode, [])
+                    if isinstance(mode_advantages, dict)
+                    else []
                 ),
             }
         )
@@ -456,9 +913,14 @@ def audit_frontend_parity(
             blockers.append(_block("missing_owner", rule_id=rule_id))
         else:
             for owner_ref in owner_refs:
-                if not isinstance(owner_ref, str) or not (
-                    repo_root / owner_ref
-                ).exists():
+                resolved_owner = _repo_path(
+                    repo_root,
+                    owner_ref,
+                    blockers=blockers,
+                    field="authoritative_data_owner_ref",
+                    kind="path",
+                )
+                if resolved_owner is not None and not resolved_owner.is_file():
                     blockers.append(
                         _block(
                             "missing_owner_ref",
@@ -528,6 +990,7 @@ def audit_frontend_parity(
             }
             for rule_id in {rule["id"] for rule, _pattern in compiled}
         },
+        contract.get("required_scenario_ids"),
     )
     blockers.extend(scenario_findings)
     return _report(
@@ -536,6 +999,7 @@ def audit_frontend_parity(
         blockers,
         len(compiled),
         scenario_count,
+        source_revision=source_revision,
     )
 
 
@@ -545,6 +1009,8 @@ def _report(
     blockers: list[dict[str, object]],
     rule_count: int,
     scenario_count: int,
+    *,
+    source_revision: dict[str, object] | None = None,
 ) -> dict[str, object]:
     blockers = sorted(
         blockers,
@@ -560,6 +1026,7 @@ def _report(
         "blockers": blockers,
         "known_gaps": known_gaps,
         "routes": routes,
+        "source_revision": source_revision,
         "summary": {
             "route_count": len(routes),
             "rule_count": rule_count,
