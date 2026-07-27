@@ -6,26 +6,66 @@ receive commit, notification, publish, or other formal-effect authority.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
-from enum import Enum
 import hashlib
 import json
 import math
 import re
+from collections.abc import Callable, Iterable
+from dataclasses import asdict, dataclass
+from datetime import UTC, datetime, timedelta
+from enum import Enum
 from threading import RLock
-from typing import Callable, Iterable, Protocol
+from typing import Protocol
 from uuid import uuid4
 
 from volpred.diagnostics import warn
 
+from .probe import (
+    DurableProviderProbeLedger as DurableProviderProbeLedger,
+)
+from .probe import (
+    ProbeDecision as ProbeDecision,
+)
+from .probe import (
+    ProbeObservation as ProbeObservation,
+)
+from .probe import (
+    ProbeOutcome as ProbeOutcome,
+)
+from .probe import (
+    ProbePolicyError as ProbePolicyError,
+)
+from .probe import (
+    ProbeReceipt as ProbeReceipt,
+)
+from .probe import (
+    ProbeRunResult as ProbeRunResult,
+)
+from .registry import (
+    ProviderProbeAuthorization as ProviderProbeAuthorization,
+)
 from .registry import (
     ProviderRegistry as ProviderRegistry,
+)
+from .registry import (
     ProviderRegistryError as ProviderRegistryError,
+)
+from .registry import (
     ProviderSpawnReceipt as ProviderSpawnReceipt,
+)
+from .registry import (
     RegisteredProvider as RegisteredProvider,
+)
+from .registry import (
+    authorize_provider_probe as authorize_provider_probe,
+)
+from .registry import (
     authorize_provider_spawn as authorize_provider_spawn,
+)
+from .registry import (
     load_provider_registry as load_provider_registry,
+)
+from .registry import (
     verify_spawn_receipt as verify_spawn_receipt,
 )
 
@@ -41,7 +81,7 @@ class BlockerKind(str, Enum):
 def _aware(value: datetime, *, field: str) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError(f"{field} must include a real timezone offset")
-    return value.astimezone(timezone.utc)
+    return value.astimezone(UTC)
 
 
 @dataclass(frozen=True)

@@ -3226,8 +3226,9 @@ def test_stale_auth_line_in_shared_log_does_not_freeze_loop(tmp_path: Path, monk
     )
     assert spawned[0]["cwd"] == scratch
     assert spawned[0]["argv"][spawned[0]["argv"].index("--add-dir") + 1] == str(worker.PROJECT_ROOT)
-    assert spawned[0]["argv"][spawned[0]["argv"].index("--settings") + 1] == str(
-        worker.PROJECT_ROOT / ".claude" / "settings.json"
+    assert (
+        spawned[0]["argv"][spawned[0]["argv"].index("--settings") + 1]
+        == "/tmp/pinned-claude-settings.json"
     )
     assert "Not logged in" not in attempt_output, "stale auth line must not leak into classification input"
     assert worker._classify(exit_code, attempt_output) == "hard_failure"

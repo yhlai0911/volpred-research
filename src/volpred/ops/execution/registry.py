@@ -134,6 +134,23 @@ class ProviderRegistry:
 
 
 @dataclass(frozen=True)
+class ProviderProbeAuthorization:
+    provider_id: str
+    model_id: str
+    resolved_executable: str
+    executable_sha256: str
+    auth_surface: str
+    registry_sha256: str
+    cost_units: int
+    minimum_interval_seconds: int
+    maximum_backoff_seconds: int
+    window_seconds: int
+    max_probe_cost_units: int
+    settings_path: str | None
+    settings_sha256: str | None
+
+
+@dataclass(frozen=True)
 class LaunchContract:
     provider_id: str
     semantic_class: str
@@ -547,29 +564,30 @@ def load_provider_registry(
     )
 
 
-def authorize_provider_spawn(
+def _authorize_registered_provider(
     *,
-    contract_id: str,
+    provider_id: str,
     model_id: str,
     executable_path: str,
     environment: Mapping[str, str],
-    path: Path = DEFAULT_REGISTRY_PATH,
-) -> ProviderSpawnReceipt:
-    """Reload the registry and fail closed before provider process creation."""
+    path: Path,
+) -> tuple[
+    ProviderRegistry,
+    RegisteredProvider,
+    str,
+    str,
+    str | None,
+    str | None,
+]:
     registry = load_provider_registry(path)
-    contract = _LAUNCH_CONTRACTS.get(contract_id)
-    if contract is None:
-        raise ProviderRegistryError(
-            f"unknown provider launch contract {contract_id!r}"
-        )
     matches = [
         provider
         for provider in registry.providers
-        if provider.provider_id == contract.provider_id
+        if provider.provider_id == provider_id
     ]
     if len(matches) != 1:
         raise ProviderRegistryError(
-            f"provider {contract.provider_id!r} is not uniquely registered"
+            f"provider {provider_id!r} is not uniquely registered"
         )
     provider = matches[0]
     if not provider.enabled:
@@ -612,12 +630,9 @@ def authorize_provider_spawn(
         )
     settings_path: str | None = None
     settings_sha256: str | None = None
-    if (
-        contract.provider_id == "claude-cli"
-        and provider.settings_surface is None
-    ):
+    if provider.provider_id == "claude-cli" and provider.settings_surface is None:
         raise ProviderRegistryError(
-            "Claude launch contract requires a pinned settings surface"
+            "Claude provider requires a pinned settings surface"
         )
     if provider.settings_surface is not None:
         settings = ROOT / provider.settings_surface.path
@@ -652,6 +667,94 @@ def authorize_provider_spawn(
                 "provider settings contain forbidden alternate-auth variables "
                 f"{forbidden_settings_env}"
             )
+    if "zero-paid" not in provider.attestations:
+        raise ProviderRegistryError(
+            f"provider {provider.provider_id!r} lacks zero-paid attestation"
+        )
+    return (
+        registry,
+        provider,
+        resolved_executable,
+        executable_sha256,
+        settings_path,
+        settings_sha256,
+    )
+
+
+def authorize_provider_probe(
+    *,
+    provider_id: str,
+    model_id: str,
+    executable_path: str,
+    environment: Mapping[str, str],
+    path: Path = DEFAULT_REGISTRY_PATH,
+) -> ProviderProbeAuthorization:
+    """Authorize one bounded diagnostic probe without granting business work."""
+    (
+        registry,
+        provider,
+        resolved_executable,
+        executable_sha256,
+        settings_path,
+        settings_sha256,
+    ) = _authorize_registered_provider(
+        provider_id=provider_id,
+        model_id=model_id,
+        executable_path=executable_path,
+        environment=environment,
+        path=path,
+    )
+    return ProviderProbeAuthorization(
+        provider_id=provider.provider_id,
+        model_id=model_id,
+        resolved_executable=resolved_executable,
+        executable_sha256=executable_sha256,
+        auth_surface=provider.auth_surface,
+        registry_sha256=registry.sha256,
+        cost_units=provider.probe_cost_units,
+        minimum_interval_seconds=registry.probe_policy[
+            "minimum_interval_seconds"
+        ],
+        maximum_backoff_seconds=registry.probe_policy[
+            "maximum_backoff_seconds"
+        ],
+        window_seconds=registry.probe_policy["window_seconds"],
+        max_probe_cost_units=registry.probe_policy[
+            "max_probe_cost_units"
+        ],
+        settings_path=settings_path,
+        settings_sha256=settings_sha256,
+    )
+
+
+def authorize_provider_spawn(
+    *,
+    contract_id: str,
+    model_id: str,
+    executable_path: str,
+    environment: Mapping[str, str],
+    path: Path = DEFAULT_REGISTRY_PATH,
+) -> ProviderSpawnReceipt:
+    """Reload the registry and fail closed before provider process creation."""
+    contract = _LAUNCH_CONTRACTS.get(contract_id)
+    if contract is None:
+        raise ProviderRegistryError(
+            f"unknown provider launch contract {contract_id!r}"
+        )
+    (
+        registry,
+        provider,
+        resolved_executable,
+        executable_sha256,
+        settings_path,
+        settings_sha256,
+    ) = _authorize_registered_provider(
+        provider_id=contract.provider_id,
+        model_id=model_id,
+        executable_path=executable_path,
+        environment=environment,
+        path=path,
+    )
     if contract.semantic_class not in provider.semantic_classes:
         raise ProviderRegistryError(
             f"provider {provider.provider_id!r} does not attest semantic class "
@@ -666,10 +769,6 @@ def authorize_provider_spawn(
     if contract.requires_formal_gate and not provider.formal_gate_eligible:
         raise ProviderRegistryError(
             f"provider {provider.provider_id!r} is not formal-gate eligible"
-        )
-    if "zero-paid" not in provider.attestations:
-        raise ProviderRegistryError(
-            f"provider {provider.provider_id!r} lacks zero-paid attestation"
         )
     return ProviderSpawnReceipt(
         contract_id=contract_id,
