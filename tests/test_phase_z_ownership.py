@@ -1017,11 +1017,17 @@ def test_missing_machine_file_reappearing_as_directory_is_not_broad_staged(
     (repo / ledger).unlink()
     phase_z.run_pre_fire_guard(repo_root=repo)
     replaced = False
+    broad_add_seen = False
 
     def racing_runner(cmd, **kwargs):
-        nonlocal replaced
-        if not replaced and "add" in cmd and any(
-            "--pathspec-from-file=" in arg for arg in cmd
+        nonlocal broad_add_seen, replaced
+        if "add" in cmd and any("--pathspec-from-file=" in arg for arg in cmd):
+            broad_add_seen = True
+        if (
+            not replaced
+            and "update-index" in cmd
+            and "--force-remove" in cmd
+            and ledger in cmd
         ):
             directory = repo / ledger
             directory.mkdir()
@@ -1040,6 +1046,7 @@ def test_missing_machine_file_reappearing_as_directory_is_not_broad_staged(
     )
 
     assert replaced is True
+    assert broad_add_seen is False
     assert outcome["committed"] is False
     assert outcome["reason"] == "candidate_churn_identity_error"
     assert outcome["identity_mismatches"] == [ledger]

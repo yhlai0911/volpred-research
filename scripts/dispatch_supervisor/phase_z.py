@@ -3325,14 +3325,28 @@ def run_phase_z(
                     )
                 to_stage = [p for p in to_stage if p not in split_deferred]
 
+            # A classified deletion must never go back through ``git add -A``.
+            # If that missing pathname reappears as a directory between the
+            # classifier and staging, add would recursively ingest unverified
+            # descendants (and write their blobs even when this alternate index
+            # is later discarded). Remove exact index entries instead; this
+            # operation never reads working-tree bytes.
+            missing_churn = {
+                path
+                for path, identity in churn_classification.identities.items()
+                if not identity.exists and path in to_stage
+            }
+            add_paths = [path for path in to_stage if path not in missing_churn]
             pathspec_file = tx_root / "paths.nul"
             try:
-                pathspec_file.write_bytes(b"\0".join(os.fsencode(path) for path in to_stage))
+                pathspec_file.write_bytes(
+                    b"\0".join(os.fsencode(path) for path in add_paths)
+                )
             except OSError as exc:
                 LOG.warning("phase_z: cannot write candidate pathspec (%s)", exc)
                 return {"committed": False, "reason": "pathspec_error", "rolled_back": True}
 
-            if to_stage:
+            if add_paths:
                 add = _git(
                     repo_root, "add", "-A", f"--pathspec-from-file={pathspec_file}",
                     "--pathspec-file-nul", timeout_s=_SHORT_TIMEOUT_S,
@@ -3343,6 +3357,30 @@ def run_phase_z(
                                 add.returncode, (add.stderr or "")[-300:])
                     return {"committed": False, "reason": "add_error", "untracked": untracked,
                             "rolled_back": True}
+
+            for rel in sorted(missing_churn):
+                remove = _git(
+                    repo_root,
+                    "update-index",
+                    "--force-remove",
+                    "--",
+                    rel,
+                    timeout_s=_SHORT_TIMEOUT_S,
+                    runner=runner,
+                    env=candidate_env,
+                )
+                if remove.returncode != 0:
+                    LOG.warning(
+                        "phase_z: candidate exact deletion %s rc=%d: %s",
+                        rel,
+                        remove.returncode,
+                        (remove.stderr or "")[-300:],
+                    )
+                    return {
+                        "committed": False,
+                        "reason": "candidate_index_error",
+                        "rolled_back": True,
+                    }
 
             staged_churn_identities = {
                 path: identity
