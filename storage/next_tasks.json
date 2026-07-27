@@ -34695,11 +34695,12 @@
       }
     ],
     "compute_job_id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
-    "blocked_reason": "external_compute_job_running",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "result": "dispatched to compute job k1426-oos-rerun-shard-c-dailyseries-20260727; awaiting PHASE A collection",
     "plan": "item3 docstring 修正已完成 inline（oos.py L8-9 refit 63/quarterly + n_starts=50；L345 metadata Quarterly）。item1+2 需 heavy PCH MLE 重跑：已 enqueue 3 shard job（a/b/c，各 timeout 4h）重跑並持久化每日避險報酬序列（oos.py 新增 daily_hedged_returns），benchmark 已改寫可做 return-OLS vs PCH 配對 DM+bootstrap（paired_return_ols_vs_pch）。shard b 重試 GLD/IAU（item1）。",
     "enabling_commits_pending": true,
-    "compute_started_at": "2026-07-27T10:30:06Z"
+    "compute_started_at": "2026-07-27T10:30:06Z",
+    "compute_finished_at": "2026-07-27T12:37:35Z"
   },
   {
     "id": "assign_quota_requeue_agentjobs",
@@ -42169,7 +42170,7 @@
     "title": "[experiment] Paper 3 E3 商品臂正式重跑（Gold/Oil/Copper/Wheat × SPY/Bonds，統一 E2 判準）",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "agent",
     "parent_task_id": "assign_f3419501",
     "created_by": "hourly-slot-2-eba6b34b618c405cb56abaa5229d4da5",
@@ -42179,7 +42180,31 @@
     "creation_time_evidence": {
       "method": "reviewed_git_snapshot_observation",
       "evidence_commit": "bdd7c3f608ef8331e6305dff3a4be0b6a7ab6b4a"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-27T12:34:10.029267+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-96717b140b484f88810d281371c8868e"
+      },
+      {
+        "ts": "2026-07-27T12:34:16.266476+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-96717b140b484f88810d281371c8868e"
+      },
+      {
+        "ts": "2026-07-27T12:36:46.897649+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_paper3_E3_commodities_copula-4e0072",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_paper3_E3_commodities_copula-4e0072",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_paper3_E3_commodities_copula-4e0072; awaiting PHASE A collection"
   },
   {
     "id": "detect_price_split_breaks_false_negative_20260721",
@@ -46853,8 +46878,9 @@
       }
     ],
     "compute_job_id": "compute-scripts-codex-review-job-sh-1785149307",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job compute-scripts-codex-review-job-sh-1785149307; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job compute-scripts-codex-review-job-sh-1785149307; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T12:37:38Z"
   },
   {
     "id": "assign_091ddcb9",
@@ -48515,15 +48541,11 @@
     "description": "Matt implement/TDD/code-review slice. Replace the hard-coded unresolved host_authority/operations-core-primary census binding with a read-only, fail-closed database attestation. The public RPC and Python adapter must prove canonical authority key, operations_core owner, and exact contract generation; malformed, legacy, duplicate/drifted, unavailable, or unauthorized evidence remains unknown_owner. Add regression tests, deploy migration, perform live read-back, update Issue #46 living evidence. Do not acquire/release a lease, change owner, schedule retirement recorder, bypass Issue #9 gates, or touch other sessions orphan-signal files.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T12:12:03.188396+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T12:12:08.058764+00:00",
-    "claim_expires_at": "2026-07-27T14:12:08.058764+00:00",
-    "claim_session_id": "54ce17dc6815",
     "status_history": [
       {
         "ts": "2026-07-27T12:12:08.058782+00:00",
@@ -48536,14 +48558,23 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T12:24:15.647188+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T12:12:11.358033+00:00"
+    "started_at": "2026-07-27T12:12:11.358033+00:00",
+    "completed_at": "2026-07-27T12:24:15.647164+00:00",
+    "result": "Replaced hard-coded unresolved host authority with a service-role-only immutable PostgreSQL owner attestation and strict fail-closed adapter/census resolver. Commits db804d760 + 5deb97fa7; 50 selected unit/PG/non-superuser tests pass; Matt Spec/Standards PASS; production census reads operations-core-primary unique_owner with probe_errors=[] while five unrelated blockers remain.",
+    "issue_disposition": "contained"
   },
   {
     "id": "assign_38b0050c",
     "title": "PHASE-Z 卡住檔案 incident（bb6021b8e7ca3644）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/drafts/article_images/K1649_coverage.png — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T122229510585Z:<路徑>`",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- storage/drafts/article_images/K1649_coverage.png — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T122229510585Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T124023803989Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -48556,14 +48587,124 @@
         "storage/drafts/article_images/K1649_coverage.png"
       ],
       "streaks": {
-        "storage/drafts/article_images/K1649_coverage.png": 3
+        "storage/drafts/article_images/K1649_coverage.png": 4
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T122229510585Z"
+        "refs/volpred/quarantine/20260727T122229510585Z",
+        "refs/volpred/quarantine/20260727T124023803989Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-27T12:22:29.606318+00:00",
-      "last_seen_at": "2026-07-27T12:22:29.606318+00:00"
+      "last_seen_at": "2026-07-27T12:40:27.424905+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T12:40:23.890284+00:00",
+      "deferred": [
+        "storage/drafts/article_images/K1649_coverage.png: 已保存，且 1.3 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-27T12:40:27.424905+00:00"
+  },
+  {
+    "id": "assign_c5dc939b",
+    "title": "[Issue #46] Resolve work.coordinate owner from live attestation",
+    "description": "Replace the hardcoded unresolved work.coordinate census binding with a read-only, fail-closed production owner attestation. Acceptance: fixed service-role-only RPC over the private FORCE-RLS owner row; exact schema/capability/generation/manifest/timestamp validation; backend SHA binding and freshness/future-skew rejection; malformed/extra/duplicate/unavailable evidence remains unknown_owner; no owner transfer, cutover staging, queue mutation, recorder scheduling, or Issue #9 bypass. Complete with TDD, Matt Spec/Standards review, production migration/catalog/ACL/live census read-back, and keep Issue #46 contained unless all umbrella gates pass.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T12:30:42.100120+00:00",
+    "payload": {
+      "write_intent": "repo_patch",
+      "declared_output_paths": [
+        "config/formal_capability_inventory.json",
+        "scripts/audit_formal_owners.py",
+        "src/volpred/ops/work/__init__.py",
+        "src/volpred/ops/work/supabase_ownership.py",
+        "src/volpred/ops/delivery/supabase_rpc.py",
+        "supabase/migrations/20260727123500_work_owner_attestation.sql",
+        "tests/test_audit_formal_owners.py",
+        "tests/test_supabase_work_ownership.py",
+        "tests/test_supabase_work_ownership_postgres.py",
+        "tests/test_postgres_effect_delivery.py",
+        "docs/error_log.md",
+        "docs/project_improvement_status.md",
+        "docs/refactor_plan_ops_master_2026_07.md"
+      ],
+      "post_actions": []
+    },
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T12:30:47.220538+00:00",
+    "claim_expires_at": "2026-07-27T14:30:47.220538+00:00",
+    "claim_session_id": "92cf5b24c8a2",
+    "status_history": [
+      {
+        "ts": "2026-07-27T12:30:47.220554+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T12:30:50.396627+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T12:30:50.396611+00:00"
+  },
+  {
+    "id": "assign_802b2943",
+    "title": "[Issue #9] Register incident control-plane provenance in Work Coordinator shadow",
+    "description": "Root cause: reviewed next_tasks provenance registry omits the formal machine-generated sources incident_escalation and incident_adjudication. A live incident_escalation task reset the seven-day #9 clean observation window at 2026-07-27T10:16:47Z. Implement exact source mapping to canonical schedule ingress, add importer/replay regressions and class-sweep tests, verify with live shadow readback, and preserve the durable cutover gate. Parent issue #9; do not unblock or cut over early.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "in_progress",
+    "source": "agent",
+    "created_at": "2026-07-27T12:35:57.493995+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#9",
+    "priority_capped_from": 1,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T12:36:03.252070+00:00",
+    "claim_expires_at": "2026-07-27T14:36:03.252070+00:00",
+    "claim_session_id": "ebec13cbae79",
+    "status_history": [
+      {
+        "ts": "2026-07-27T12:36:03.252084+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T12:36:06.785060+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T12:36:06.785046+00:00"
+  },
+  {
+    "id": "lazypack_render_repair_mile_3c83e665",
+    "title": "[lazypack] mile_3c83e665 懶人包 render 三層全敗，文章卡在草稿",
+    "description": "compute job `lazypack-mile_3c83e665` 的懶人包 render 鏈（codex → agy → deterministic self-repair）全數失敗，文章 `mile_3c83e665` 因缺 `## 懶人包圖組` 被 release gate 擋住。\n\n先重新驗證：文章若已補上圖組（後續 job 救回），只記錄 no-op 後完成。\n仍缺圖時依序排查：\n1. 讀 stderr 找出 deterministic 層的具體 violation：/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_3c83e665.stderr\n2. plan 檔：storage/lazypack_jobs/mile_3c83e665/runs/lazypack-mile_3c83e665/plan.json — 三層都救不回通常代表 plan 的文案量超過版面（縮短 blocks 文字或拆面板），修 plan 後重新 enqueue。\n3. 若是 renderer bug，修 scripts/lazypack_render.py 並補 regression test。\n重新排隊：uv run python scripts/lazypack_async_render.py enqueue --article-id mile_3c83e665 --plan <fixed-plan>",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "compute_queue_lazypack_failure",
+    "created_at": "2026-07-27T12:37:37.202792+00:00",
+    "tags": [
+      "lazypack",
+      "render_failure"
+    ],
+    "payload": {
+      "job_id": "lazypack-mile_3c83e665",
+      "article_id": "mile_3c83e665",
+      "exit_code": 1,
+      "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_3c83e665.stderr"
     },
     "priority_capped_from": 1
   }

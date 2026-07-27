@@ -28089,5 +28089,15 @@
     "owner": "hourly-slot-1-f4a65558fd2043428a67f2a934d57de5",
     "commit": null,
     "summary": "K1724（台股當沖佔比 × 波動）dispatched to compute queue as long xhigh research agent (job agent-brief_k1724-d68901). 建 registered worktree dispatch-slot-1-f4a65558-k1724；enqueue-agent 帶 --source-task-id K1724（collision gate）+ result-artifact experiments/k1724/k1724_results.json + followup(verify→codex→merge→knowledge)。task 狀態 awaiting_agent_job，由後續 fire PHASE A 收。本班未動 assign_e6334a67（PHASE-Z 卡住檔案 incident）— platform_ops 被 supervisor_preassignment_required 機械拒絕，且不得經 foreign_disposition actuator 繞道；由 supervisor 預派 channel（codex-vscode 持 sibling Issue#46）處理。slot 2/2 de-rated cap 已滿，本班收班。"
+  },
+  {
+    "timestamp": "2026-07-27T20:37:28+08:00",
+    "task_type": "experiment",
+    "task_id": "paper3_E3_commodities_copula_rerun_20260721",
+    "outcome": "dispatched_to_queue",
+    "actor": "hourly-slot-1-96717b140b484f88810d281371c8868e",
+    "owner": "hourly-slot-1-96717b140b484f88810d281371c8868e",
+    "commit": null,
+    "summary": "Paper 3 E3 商品臂 copula 正式重跑 dispatched to compute queue as long xhigh research agent (job agent-brief_paper3_E3_commodities_copula-4e0072). 建 registered worktree dispatch-slot-1-96717b14-e3copula；enqueue-agent 帶 --source-task-id paper3_E3_commodities_copula_rerun_20260721（collision gate → awaiting_agent_job）+ result-artifact experiments/paper3_E3_commodities_copula/paper3_E3_results.json + followup(verify→check_artifacts→codex→merge→knowledge→解除跨資產類別邊界)。Brief 釘死硬合約：判準逐字沿用 E2 dm_test(HLN×t.ppf 0.975)、禁 E1 硬編 abs(t)>3.0；管線沿用 E2 骨架；商品臂 Gold/Oil/Copper/Wheat × SPY/TLT via yfinance；失敗必記原因+partial（治 2026-05-29 無聲失敗）。fire 職責到 enqueue 為止，detached compute worker 執行、未來班 PHASE A 收件。"
   }
 ]

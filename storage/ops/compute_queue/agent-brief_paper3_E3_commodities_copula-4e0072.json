@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_paper3_E3_commodities_copula-4e0072",
+  "title": "Paper3 E3 商品臂 copula 正式重跑 (統一 E2 判準)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_paper3_E3_commodities_copula-4e0072.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-96717b14-e3copula",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-96717b14-e3copula/experiments/paper3_E3_commodities_copula/paper3_E3_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_paper3_E3_commodities_copula-4e0072.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T12:36:46Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_paper3_E3_commodities_copula-4e0072.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_paper3_E3_commodities_copula-4e0072.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-96717b14-e3copula/experiments/paper3_E3_commodities_copula/paper3_E3_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_paper3_E3_commodities_copula-4e0072.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-96717b14-e3copula",
+  "claude_followup": {
+    "brief": "收件：驗 results.json 數字→跑 check_experiment_artifacts.py→Codex 審碼→通過才主線程寫 knowledge→merge_worktree.sh 整合→解除跨資產類別邊界。若失敗讀 worktree README 失敗原因節，判斷續跑/split/記錄無救援。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "paper3_E3_commodities_copula_rerun_20260721",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T12:36:46Z",
+    "linked_at": "2026-07-27T12:36:46Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_paper3_E3_commodities_copula.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_paper3_E3_commodities_copula-4e0072.md"
+}
