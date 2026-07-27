@@ -50400,7 +50400,7 @@
   {
     "id": "assign_7a453d3e",
     "title": "PHASE-Z 卡住檔案 incident（4f44f01f0d685436）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 9 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- docs/error_log.md — 9 班\n- src/volpred/ops/next_tasks.py — 9 班\n- storage/drafts/assets/k1710_overnight_edge.png — 5 班\n- storage/memory/knowledge.json — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T200734550380Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T210753714072Z:<路徑>`",
+    "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 10 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- docs/error_log.md — 10 班\n- src/volpred/ops/next_tasks.py — 10 班\n- storage/drafts/assets/k1710_overnight_edge.png — 6 班\n- storage/memory/knowledge.json — 8 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T200734550380Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T210753714072Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T220736129013Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -50416,19 +50416,20 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "docs/error_log.md": 9,
-        "src/volpred/ops/next_tasks.py": 9,
-        "storage/drafts/assets/k1710_overnight_edge.png": 5,
-        "storage/memory/knowledge.json": 7
+        "docs/error_log.md": 10,
+        "src/volpred/ops/next_tasks.py": 10,
+        "storage/drafts/assets/k1710_overnight_edge.png": 6,
+        "storage/memory/knowledge.json": 8
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T191804307871Z",
         "refs/volpred/quarantine/20260727T200734550380Z",
-        "refs/volpred/quarantine/20260727T210753714072Z"
+        "refs/volpred/quarantine/20260727T210753714072Z",
+        "refs/volpred/quarantine/20260727T220736129013Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-27T19:18:10.356942+00:00",
-      "last_seen_at": "2026-07-27T21:08:00.554764+00:00",
+      "last_seen_at": "2026-07-27T22:07:42.853800+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T20:07:34.625263+00:00",
       "deferred": [
@@ -50439,6 +50440,485 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T21:08:00.554764+00:00"
+    "updated_at": "2026-07-27T22:07:42.853800+00:00"
+  },
+  {
+    "id": "dreaming_repeated_tool_failure_dispatch_supervisor_failure_exit1",
+    "title": "[dreaming] repeated_tool_failure:dispatch_supervisor:failure:exit1",
+    "description": "Cron job `dispatch_supervisor` returned a non-zero exit 6× in the window. Investigate the wrapper/script root cause (API death / auth / path). If sustained, open docs/refactor_plan_<job>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：dispatch_supervisor:failure:exit1 ×6 over 0.78d (first 2026-07-26T21:43:29.410615+00:00 → last 2026-07-27T16:22:33.612092+00:00) — clean for 5.0h since last occurrence (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "repeated_tool_failure:dispatch_supervisor:failure:exit1",
+      "pattern_type": "repeated_tool_failure",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_k709_article_general_v2",
+    "title": "[dreaming] missing_retry_strategy:K709_article_general_v2",
+    "description": "Failed task K709_article_general_v2 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：task K709_article_general_v2 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:K709_article_general_v2",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 2,
+      "governance_target": null
+    },
+    "follows_up_on": "K709_article_general_v2"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_research_direction_predictability_sig",
+    "title": "[dreaming] missing_retry_strategy:research_direction_predictability_signforecast",
+    "description": "Failed task research_direction_predictability_signforecast has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task research_direction_predictability_signforecast (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:research_direction_predictability_signforecast",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "research_direction_predictability_signforecast"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_assign_24ebe308",
+    "title": "[dreaming] missing_retry_strategy:assign_24ebe308",
+    "description": "Failed task assign_24ebe308 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 3 晚偵測到此模式（首見 2026-07-22T21:25:01.464713+00:00）。\n證據：task assign_24ebe308 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:assign_24ebe308",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 3,
+      "governance_target": null
+    },
+    "follows_up_on": "assign_24ebe308"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_k1698_rev4_round5_collect",
+    "title": "[dreaming] missing_retry_strategy:k1698_rev4_round5_collect",
+    "description": "Failed task k1698_rev4_round5_collect has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task k1698_rev4_round5_collect (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:k1698_rev4_round5_collect",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "k1698_rev4_round5_collect"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_snapdup_cert_fallback_codex_usage_lim",
+    "title": "[dreaming] missing_retry_strategy:snapdup_cert_fallback_codex_usage_limit_20260721",
+    "description": "Failed task snapdup_cert_fallback_codex_usage_limit_20260721 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task snapdup_cert_fallback_codex_usage_limit_20260721 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:snapdup_cert_fallback_codex_usage_limit_20260721",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "snapdup_cert_fallback_codex_usage_limit_20260721"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_trending_repost_2026_07_23",
+    "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_23_美聯儲降息",
+    "description": "Failed task trending_repost_2026_07_23_美聯儲降息 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：task trending_repost_2026_07_23_美聯儲降息 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:trending_repost_2026_07_23_美聯儲降息",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 2,
+      "governance_target": null
+    },
+    "follows_up_on": "trending_repost_2026_07_23_美聯儲降息"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_k1715",
+    "title": "[dreaming] missing_retry_strategy:K1715",
+    "description": "Failed task k1715_bfgs_fix_dephantom_rerun_20260727 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task k1715_bfgs_fix_dephantom_rerun_20260727 (k_id=K1715) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:K1715",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "k1715_bfgs_fix_dephantom_rerun_20260727"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_issue18_mutation_boundary_partition_c",
+    "title": "[dreaming] missing_retry_strategy:issue18_mutation_boundary_partition_canary_20260727",
+    "description": "Failed task issue18_mutation_boundary_partition_canary_20260727 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task issue18_mutation_boundary_partition_canary_20260727 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:issue18_mutation_boundary_partition_canary_20260727",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "issue18_mutation_boundary_partition_canary_20260727"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_assign_efa89ec8",
+    "title": "[dreaming] missing_retry_strategy:assign_efa89ec8",
+    "description": "Failed task assign_efa89ec8 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task assign_efa89ec8 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:assign_efa89ec8",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "assign_efa89ec8"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_assign_80535ab4",
+    "title": "[dreaming] missing_retry_strategy:assign_80535ab4",
+    "description": "Failed task assign_80535ab4 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task assign_80535ab4 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:assign_80535ab4",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "assign_80535ab4"
+  },
+  {
+    "id": "dreaming_missing_retry_strategy_assign_c14fb33b",
+    "title": "[dreaming] missing_retry_strategy:assign_c14fb33b",
+    "description": "Failed task assign_c14fb33b has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：task assign_c14fb33b (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "missing_retry_strategy:assign_c14fb33b",
+      "pattern_type": "missing_retry_strategy",
+      "occurrences": 1,
+      "governance_target": null
+    },
+    "follows_up_on": "assign_c14fb33b"
+  },
+  {
+    "id": "dreaming_persistent_alert_dc4663d2a50dcce8",
+    "title": "[dreaming] persistent_alert:dc4663d2a50dcce8",
+    "description": "Alert `Draft pool below threshold (<4)` fired 5× over 26.3d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=dc4663d2a50dcce8 title='Draft pool below threshold (<4)' send_count=5 span=26.3d (first 2026-06-29T16:00:30.648316+00:00 → last 2026-07-26T00:01:02.546372+00:00) — no fire in 45.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:dc4663d2a50dcce8",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_828495642996f377",
+    "title": "[dreaming] persistent_alert:828495642996f377",
+    "description": "Alert `supervisor restart` fired 13× over 22.7d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=828495642996f377 title='supervisor restart' send_count=13 span=22.7d (first 2026-07-03T18:35:09.410921+00:00 → last 2026-07-26T11:06:35.297091+00:00) — no fire in 34.3h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:828495642996f377",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_057dee02b001fd81",
+    "title": "[dreaming] persistent_alert:057dee02b001fd81",
+    "description": "Alert `派工程式有改動沒生效（daemon 未重載）` fired 4× over 16.9d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=057dee02b001fd81 title='派工程式有改動沒生效（daemon 未重載）' send_count=4 span=16.9d (first 2026-07-10T16:00:24.374022+00:00 → last 2026-07-27T14:00:44.748362+00:00) — no fire in 7.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:057dee02b001fd81",
+      "pattern_type": "persistent_alert",
+      "occurrences": 2,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_bdcaaeca83c90606",
+    "title": "[dreaming] persistent_alert:bdcaaeca83c90606",
+    "description": "Alert `PHASE-Z 放棄了已被覆寫的 failed-closeout 認領` fired 4× over 7.6d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=bdcaaeca83c90606 title='PHASE-Z 放棄了已被覆寫的 failed-closeout 認領' send_count=4 span=7.6d (first 2026-07-19T04:05:00.973699+00:00 → last 2026-07-26T18:07:10.461884+00:00) — no fire in 27.3h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:bdcaaeca83c90606",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_8d9fc520145c7f58",
+    "title": "[dreaming] persistent_alert:8d9fc520145c7f58",
+    "description": "Alert `Release pool deadlocked — 3 drafts, 0 eligible (due now)` fired 3× over 6.2d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=8d9fc520145c7f58 title='Release pool deadlocked — 3 drafts, 0 eligible (due now)' send_count=3 span=6.2d (first 2026-07-20T12:01:11.911972+00:00 → last 2026-07-26T18:01:02.614692+00:00) — no fire in 27.4h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:8d9fc520145c7f58",
+      "pattern_type": "persistent_alert",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_persistent_alert_ce0fdba9f1a00af6",
+    "title": "[dreaming] persistent_alert:ce0fdba9f1a00af6",
+    "description": "Alert `PHASE-Z 無主或過期檔案達處置門檻` fired 5× over 4.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=ce0fdba9f1a00af6 title='PHASE-Z 無主或過期檔案達處置門檻' send_count=5 span=4.8d (first 2026-07-23T00:13:40.646097+00:00 → last 2026-07-27T19:18:10.501417+00:00) — no fire in 2.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "persistent_alert:ce0fdba9f1a00af6",
+      "pattern_type": "persistent_alert",
+      "occurrences": 2,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_8b681480cd8b6ca2",
+    "title": "[dreaming] unfiled_incident_class:8b681480cd8b6ca2",
+    "description": "Alert class `Event receipt watchdog stale (next_task_bridge_missing)` occurred 75x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 8b681480cd8b6ca2...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 8b681480cd8b6ca2) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=8b681480cd8b6ca2 title='Event receipt watchdog stale (next_task_bridge_missing)' occurred 75x over 3.0d (first 2026-07-23T13:01:08.891027+00:00 → last 2026-07-26T12:00:31.214658+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:8b681480cd8b6ca2",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_739fcf1bb7ffd6f1",
+    "title": "[dreaming] unfiled_incident_class:739fcf1bb7ffd6f1",
+    "description": "Alert class `Release pool starved > 8.0h (cron healthy)` occurred 72x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 739fcf1bb7ffd6f1...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 739fcf1bb7ffd6f1) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=739fcf1bb7ffd6f1 title='Release pool starved > 8.0h (cron healthy)' occurred 72x over 3.1d (first 2026-07-23T06:01:09.763414+00:00 → last 2026-07-26T08:01:29.727721+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:739fcf1bb7ffd6f1",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_8e08e46929dc07ef",
+    "title": "[dreaming] unfiled_incident_class:8e08e46929dc07ef",
+    "description": "Alert class `PHASE-Z 產出已 commit，但 agent 沒交代原因` occurred 44x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 8e08e46929dc07ef...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 8e08e46929dc07ef) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=8e08e46929dc07ef title='PHASE-Z 產出已 commit，但 agent 沒交代原因' occurred 44x over 6.7d (first 2026-07-20T12:41:26.320032+00:00 → last 2026-07-27T04:22:54.069613+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:8e08e46929dc07ef",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 2,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_542378afb7b6a3b9",
+    "title": "[dreaming] unfiled_incident_class:542378afb7b6a3b9",
+    "description": "Alert class `發文脫班（無新文超過 release 節奏門檻）` occurred 39x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 542378afb7b6a3b9...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 542378afb7b6a3b9) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=542378afb7b6a3b9 title='發文脫班（無新文超過 release 節奏門檻）' occurred 39x over 5.8d (first 2026-07-20T13:02:43.319137+00:00 → last 2026-07-26T09:02:17.285077+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:542378afb7b6a3b9",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_2d99bdcd3277e3cc",
+    "title": "[dreaming] unfiled_incident_class:2d99bdcd3277e3cc",
+    "description": "Alert class `內容品質巡檢：發文間隔過久` occurred 39x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key 2d99bdcd3277e3cc...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix 2d99bdcd3277e3cc) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=2d99bdcd3277e3cc title='內容品質巡檢：發文間隔過久' occurred 39x over 5.8d (first 2026-07-20T13:02:48.421020+00:00 → last 2026-07-26T09:02:17.309934+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:2d99bdcd3277e3cc",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_ce0fdba9f1a00af6",
+    "title": "[dreaming] unfiled_incident_class:ce0fdba9f1a00af6",
+    "description": "Alert class `PHASE-Z 無主或過期檔案達處置門檻` occurred 26x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key ce0fdba9f1a00af6...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix ce0fdba9f1a00af6) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：dedupe_key=ce0fdba9f1a00af6 title='PHASE-Z 無主或過期檔案達處置門檻' occurred 26x over 4.8d (first 2026-07-23T00:13:40.646097+00:00 → last 2026-07-27T19:18:10.501417+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:ce0fdba9f1a00af6",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_d32f00ad64eb4c58",
+    "title": "[dreaming] unfiled_incident_class:d32f00ad64eb4c58",
+    "description": "Alert class `自動補救任務 24h 上限觸發（2026-07-22）` occurred 24x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key d32f00ad64eb4c58...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix d32f00ad64eb4c58) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=d32f00ad64eb4c58 title='自動補救任務 24h 上限觸發（2026-07-22）' occurred 24x over 0.9d (first 2026-07-22T00:28:47.042432+00:00 → last 2026-07-22T23:01:09.362651+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:d32f00ad64eb4c58",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_unfiled_incident_class_e61ef2cbd245f377",
+    "title": "[dreaming] unfiled_incident_class:e61ef2cbd245f377",
+    "description": "Alert class `自動補救任務 24h 上限觸發（2026-07-23）` occurred 23x but was never filed in docs/error_log.md — the class has no institutional memory, so each recurrence restarts diagnosis from zero. Adjudicate the candidate (storage/ops/incident_candidates.jsonl, dedupe_key e61ef2cbd245f377...) into a real error_log entry: root cause, lesson, enforcement owner. Include the alert title verbatim (or the dedupe-key prefix e61ef2cbd245f377) in the entry so this detector recognises the filing. If the class is deliberately not worth filing, record that decision in the entry instead — silence is the only wrong answer.\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：dedupe_key=e61ef2cbd245f377 title='自動補救任務 24h 上限觸發（2026-07-23）' occurred 23x over 1.0d (first 2026-07-23T00:01:33.855810+00:00 → last 2026-07-23T23:01:06.253953+00:00) with NO docs/error_log.md entry\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "unfiled_incident_class:e61ef2cbd245f377",
+      "pattern_type": "unfiled_incident_class",
+      "occurrences": 1,
+      "governance_target": "docs/error_log.md"
+    }
+  },
+  {
+    "id": "dreaming_observation_ledger_breach_hourly_dispatch_deliverable8_legac",
+    "title": "[dreaming] observation_ledger_breach:hourly_dispatch_deliverable8_legacy_retirement",
+    "description": "觀察項 `hourly_dispatch_deliverable8_legacy_retirement` 逾期未決策。到期動作：執行 Deliverable-8：launchctl bootout legacy + mv scripts/cron_hourly_dispatch.sh scripts/_legacy/ + retro；同步 refactor_plan_cron_dispatch.md 標 SUPERSEDED 歸檔、更新 test_cutover_orphans.py _RETIRED_BY_DESIGN；或 observation extend 明文展期附理由。二選一，不准留在 limbo：(a) 執行到期動作並 `uv run volpred ops observation resolve --id hourly_dispatch_deliverable8_legacy_retirement --resolution <做了什麼>`；(b) 有充分理由才 `uv run volpred ops observation extend --id hourly_dispatch_deliverable8_legacy_retirement --deadline <ISO> --reason <為什麼>`（展期紀錄留在帳本上）。\n\n— dreaming 連續 1 晚偵測到此模式（首見 2026-07-27T21:25:04.703274+00:00）。\n證據：observation item `hourly_dispatch_deliverable8_legacy_retirement`: deadline 2026-07-27T23:59:00+08:00 passed (0.2d overdue) — what: legacy cron_hourly_dispatch.sh 已 launchctl-disabled（2026-07-04 supervisor cutover）但實體未退役；refactor_plan_hourly_dispatch Deliverable-8（bootout + mv scripts/_legac\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
+    "task_type": "platform_ops",
+    "priority": 3,
+    "status": "pending",
+    "source": "dreaming",
+    "created_at": "2026-07-27T21:25:04.703274+00:00",
+    "dreaming": {
+      "signature": "observation_ledger_breach:hourly_dispatch_deliverable8_legacy_retirement",
+      "pattern_type": "observation_ledger_breach",
+      "occurrences": 1,
+      "governance_target": null
+    }
+  },
+  {
+    "id": "trending_repost_2026_07_28_ai資本支出",
+    "title": "[trending_repost] AI巨頭資本支出擴張，科技股選擇權隱含波動率Skew分析",
+    "description": "評估美股巨頭財報季中 AI 資本支出對財務結構與企業估值的衝擊。透過科技類股選擇權隱含波動率 skew 與跨月價差，驗證市場對高估值修正與尾部風險的定價變化。",
+    "task_type": "trending_repost",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-27T22:00:43+00:00",
+    "source": "reader_facing_refill",
+    "tags": [
+      "trending_repost",
+      "reader_facing",
+      "auto_refill"
+    ],
+    "primary_source_verification": {
+      "decision": "pass",
+      "reason": "no_quantitative_claims",
+      "checks": []
+    },
+    "dedup_screen": {
+      "verdict": "clean",
+      "blocked": false,
+      "reason": "no K coverage, no arc dup, theme saturation 2 < 5",
+      "saturation": 2,
+      "theme_terms": [
+        "財報",
+        "驗證",
+        "尾部",
+        "科技",
+        "結構",
+        "技股"
+      ],
+      "near_misses": [],
+      "screened_at": "2026-07-27T22:00:45+00:00"
+    }
   }
 ]

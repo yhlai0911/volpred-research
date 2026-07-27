@@ -5,11 +5,19 @@ metadata:
   node_type: memory
   type: reference
   originSessionId: 0ca8f10c-d34e-4570-af41-a25c2fff4e5c
+  modified: 2026-07-27T15:03:57.936Z
 ---
 
-# 雙 AI CLI 可用性快照（2026-07-10 更新）
+# 雙 AI CLI 可用性快照（2026-07-27 更新）
 
-## Codex CLI `codex-cli 0.144.1` ✅（2026-07-10 boss 指示升級）
+## ⛔ 2026-07-27：Codex 額度用罄，primary review path 到 2026-08-02 前不可用
+- `codex exec` 回 `You've hit your usage limit … try again at Aug 2nd, 2026`（ChatGPT 帳號 credits 耗盡）。
+- **影響**：所有需要 Codex primary-path 審碼的流程（experiment review gate / lazypack / paper review）在此窗口內都會撞限。
+- **正解**：直接走 sanctioned fallback = `general-purpose`/`code-reviewer` subagent 做 fresh-context review（`.claude/rules/experiments.md`），別再浪費一輪打 Codex。K1728 已這樣過關（subagent PASS）。
+- **注意 K1259 硬規**：subagent fallback PASS ≠ primary-path Codex PASS；8/2 額度恢復後，關鍵 closure 可用 Codex 二次驗證。
+- 觀察：CLI 已是 `codex-cli 0.145.0`；`~/.codex/config.toml` 的 `model_reasoning_effort` 現為 `medium`（非 canonical `ultra`，boss 若要鎖 ultra 需改 config + smoke）。
+
+## Codex CLI `codex-cli 0.145.0`（2026-07-10 boss 指示升級，0.144.1→0.145.0）
 - 預設模型：`gpt-5.6-sol`，`model_reasoning_effort = "ultra"`（`~/.codex/config.toml`；升級日三組 smoke 全過：gpt-5.6-sol、ultra effort、config 預設）
 - ⚠️ **config model × CLI 版本必須同步 smoke**：2026-07-10 incident — config 被設 gpt-5.6-sol 但當時 CLI 0.142.5 不支援 → API 400 → 全平台 codex 流程（review gate / lazypack / paper review）靜默失敗數小時。診斷 SOP 在 `.claude/rules/experiments.md`（含 step 6 smoke 硬規）
 - reinstall / 升級：`npm install -g @openai/codex@latest --include=optional` 才會帶 `@openai/codex-darwin-arm64` binary（少了會 crash）
