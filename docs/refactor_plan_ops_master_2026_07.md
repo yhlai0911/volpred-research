@@ -261,7 +261,8 @@
 改為service-role-only PostgreSQL typed attestation。私有singleton為FORCE RLS，
 service role沒有table權限，只能呼叫固定schema／canonical key／owner／generation／
 contract-ref的read-only RPC；inventory另pin production backend SHA-256，claim沿用
-DB `attested_at`且拒絕stale/future evidence與extra fields。Production回讀為
+DB `attested_at`，並以RPC回傳後的本機clock拒絕stale/future evidence與extra
+fields，避免前置probe延遲造成假性future。Production回讀為
 `operations_core`／generation `1`／row count `1`、ACL與owner全符，fresh census
 該capability=`unique_owner`且probe errors為0，總blockers由6降為5。其餘五個
 blocker仍由#9／#12／#13及formal cutover gates持有，故T40 umbrella仍為

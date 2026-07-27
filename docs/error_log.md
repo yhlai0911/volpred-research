@@ -3950,12 +3950,14 @@ pending intent + fsynced temp + no-clobber hard-link + durable head。on-disk格
 FORCE RLS私表不對service role開放，resolver逐欄驗schema、canonical capability/key、
 `operations_core`、generation、contract identity與exact key set；inventory pin
 production backend SHA-256，claim使用DB `attested_at`而非本機重標，超過30秒或
-未來超過5秒即拒絕。任何backend／ACL／payload／time drift皆fail closed為unknown，
+未來超過5秒即拒絕；比較clock在owner RPC回傳後取得，避免schedule／其他probe延遲
+使新鮮DB timestamp相對audit起始時間看似來自未來。任何backend／ACL／payload／time
+drift皆fail closed為unknown，
 且read seam不acquire、renew或release lease。
 
 **回歸與live read-back**：公開audit seam先以缺resolver／缺adapter重現RED，並補
 wrong backend、stale/future timestamp與extra field案例；修後Primary Authority與
-formal census範圍**61 passed**；真PG17驗RLS、ACL、function owner、
+formal census範圍**62 passed**；真PG17驗RLS、ACL、function owner、
 non-superuser migration與role cleanup。Production回讀singleton=1、
 owner=`operations_core`、generation=1、service table privileges=false、RPC只有
 service role可執行；fresh census host-authority=`unique_owner`、probe errors=0，

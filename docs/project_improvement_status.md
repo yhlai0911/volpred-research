@@ -2552,14 +2552,15 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   `unresolved`。Inventory綁定`volpred_read_primary_authority_owner`，Supabase
   adapter只接受schema v1、canonical capability/key、`operations_core`、
   generation 1、exact contract ref與exact key set；inventory pin production
-  backend SHA-256，census沿用DB `attested_at`並拒絕stale/future evidence。
+  backend SHA-256，census沿用DB `attested_at`，以owner read完成後的clock驗
+  stale/future evidence，不拿audit起始時間誤判較晚產生的合法DB timestamp。
   RPC失敗或任一identity／時間欄漂移都不產生claim。
 - ✅ PostgreSQL用一筆immutable owner singleton作live source；table為FORCE RLS且
   owner=`volpred_ops_definer`，service role沒有SELECT或mutation權，只能執行
   `SECURITY DEFINER` read RPC；anon/authenticated無execute。migration與non-superuser
   role cleanup均有真PG17回歸。
-- ✅ commits `db804d760`,`5deb97fa7`,`df1e9c2c5`；Primary Authority／
-  formal-census範圍 **61 passed**。Production migration已部署，回讀owner=`operations_core`、
+- ✅ commits `db804d760`,`5deb97fa7`,`df1e9c2c5`,`01a9a8512`；Primary Authority／
+  formal-census範圍 **62 passed**。Production migration已部署，回讀owner=`operations_core`、
   authority key=`operations-core-primary`、generation=`1`、row count=`1`，
   RLS／ACL／function owner全符。
 - ✅ Fresh production census的host-authority row為`unique_owner`、probe errors=0，
