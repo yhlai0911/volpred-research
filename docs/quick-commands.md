@@ -50,6 +50,9 @@ uv run volpred ops strategy-set-active xxx --inactive
 
 # Jobs 與 Worker（agent-first ops）
 uv run python scripts/audit_formal_owners.py            # 七領域正式 owner census；unknown／duplicate／legacy owner 都 exit 1
+uv run python scripts/audit_legacy_retirement.py        # Issue #46 實體退休閘：0=已退休、1=仍blocked、2=證據/probe失敗
+# 四個 Operations Core typed signal source 全部存在後才可啟用；禁止手建 observation JSON
+uv run python scripts/record_legacy_retirement_observation.py
 uv run volpred ops jobs --status queued              # 查看待處理任務
 uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務

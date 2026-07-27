@@ -2271,3 +2271,42 @@ launchd／crontab schedule audit，再交由
 `work.coordinate`、incident lifecycle、provider execution與live host authority
 尚缺正式可讀owner evidence。這些結果是後續#9→#12/#13→#21/#24/#46的機械
 blocking edges，不是新架構已完成的宣稱。
+
+## 33. Legacy execution physical-retirement preflight（2026-07-27）
+
+Issue #46 Deliverable-8 的實體退休不再靠人工搜尋後直接刪除
+`cron_hourly_dispatch.sh`。`scripts/audit_legacy_retirement.py` 把四組證據綁成同一個
+fail-closed verdict：
+
+1. `audit_formal_owners.py` 的七領域 production owner census 必須全數唯一且為
+   Operations Core；
+2. `legacy_retirement_observations/` 內由 canonical recorder 建立的immutable bundle
+   必須形成連續14日、最大間隔75分鐘、最新證據不超過75分鐘的乾淨窗；silent loss、
+   duplicate effect、orphan work、unknown ownership、legacy business fire 任一非零
+   都重算；
+3. canonical wrapper、live TCC copy及legacy launchd plist必須實體不存在，launchctl
+   也不得仍載入舊label；launchctl probe失敗不能冒充unloaded；
+4. runtime schedule的command／canonical／TCC copy欄位、wrapper manifest與scheduled
+   writer registry都不得仍引用舊executor。
+
+CLI只做read-only audit，不帶可注入任意owner或host evidence的參數；回傳碼0代表已
+實體退休、1代表有效但仍blocked、2代表證據／probe無法裁決。當前production預期為
+`retirement_blocked`：舊wrapper保留作rollback artifact、正式owner chain與14日窗也
+尚未通過。只有blocking chain成熟後，才能在同一transaction移除所有列出的surface，
+重跑本閘並以0結束作為physical retirement read-back。
+
+觀察檔不是self-attested count。`record_legacy_retirement_observation.py` 沒有路徑、
+時間或count參數：它現場重跑完整formal owner census，並只讀
+`storage/ops/legacy_retirement_signals/<dimension>.json` 四個固定typed source。
+writer把實際source bytes及完整owner report存入0700 bundle，以SHA-256綁住五個
+snapshot、前一筆receipt hash、sequence與當下時間，exclusive-create、flock及file／
+directory fsync後才publish。reader逐byte重算snapshot與receipt chain，並要求source
+schema、Operations Core producer identity、固定source ref、exact dimension、freshness
+與count相符。四個event signal另必須帶`window_from/window_to`及單調
+`high_watermark`；`observed_at == window_to`，相鄰bundle逐dimension要求
+`current.window_from == previous.window_to`，避免兩次點狀snapshot之間的短暫事件
+消失後被漏算。recorder只接受repo內固定signals／observations路徑，逐層拒絕symlink，
+source與lock用no-follow open；人工換ref、改hash、改count、回填、coverage gap／
+watermark倒退或留下crash temp bundle都會讓整個
+audit exit 2，而不是縮短觀察窗。目前四個signal source尚未全部materialize，因此
+recorder會fail loud，觀察窗維持0；不可為了開始計時而手建JSON。
