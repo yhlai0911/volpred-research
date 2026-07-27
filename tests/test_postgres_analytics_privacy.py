@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from pathlib import Path
+import hashlib
+import hmac
 import shutil
 import socket
 import subprocess
@@ -18,6 +20,11 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 MIGRATION = next(
     (REPO_ROOT / "supabase" / "migrations").glob(
         "*_analytics_privacy_tracer.sql"
+    )
+)
+INGRESS_MIGRATION = next(
+    (REPO_ROOT / "supabase" / "migrations").glob(
+        "*_analytics_ingress_rpc.sql"
     )
 )
 TEST_TOMBSTONE_SECRET = b"analytics-postgres-test-secret-32b"
@@ -86,8 +93,27 @@ def analytics_postgres_dsn(
     dsn = f"postgresql://127.0.0.1:{port}/postgres"
     try:
         with psycopg.connect(dsn, autocommit=True) as connection:
+            connection.execute(
+                "CREATE ROLE analytics_migration_runner "
+                "NOLOGIN CREATEROLE BYPASSRLS"
+            )
+            connection.execute(
+                "GRANT CREATE ON DATABASE postgres "
+                "TO analytics_migration_runner"
+            )
+            connection.execute(
+                "GRANT CREATE ON SCHEMA public "
+                "TO analytics_migration_runner"
+            )
+            connection.execute("CREATE ROLE anon NOLOGIN")
+            connection.execute("CREATE ROLE authenticated NOLOGIN")
+            connection.execute("CREATE ROLE service_role NOLOGIN")
+            connection.execute("SET ROLE analytics_migration_runner")
             connection.execute(MIGRATION.read_text(encoding="utf-8"))
             connection.execute(MIGRATION.read_text(encoding="utf-8"))
+            connection.execute(INGRESS_MIGRATION.read_text(encoding="utf-8"))
+            connection.execute(INGRESS_MIGRATION.read_text(encoding="utf-8"))
+            connection.execute("RESET ROLE")
         yield dsn
     finally:
         subprocess.run(
@@ -130,6 +156,141 @@ def _worker_connection(dsn: str) -> psycopg.Connection:
     connection = psycopg.connect(dsn)
     connection.execute("SET ROLE volpred_analytics_worker")
     return connection
+
+
+def _ingress_args(
+    *,
+    idempotency_key: str = "impression:home:anon-rpc:2026-07-27",
+    kind: str = "content_impression",
+    properties: Jsonb = Jsonb(
+        {"content_id": "article-rpc", "surface": "home"}
+    ),
+) -> tuple[object, ...]:
+    return (
+        idempotency_key,
+        kind,
+        "2026-07-27T00:00:00+00:00",
+        "anon-rpc",
+        None,
+        properties,
+        b"p" * 32,
+        b"k" * 32,
+        TEST_DIGEST_KEY_ID,
+        hmac.new(
+            TEST_TOMBSTONE_SECRET,
+            f"digest-key-verifier:{TEST_DIGEST_KEY_ID}".encode(),
+            hashlib.sha256,
+        ).digest(),
+        b"a" * 32,
+        None,
+    )
+
+
+INGRESS_SQL = """
+SELECT public.record_volpred_analytics_event(
+  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+)
+"""
+
+
+def test_ingress_is_server_only_and_keeps_tables_private(
+    analytics_postgres_dsn: str,
+) -> None:
+    with psycopg.connect(analytics_postgres_dsn) as connection:
+        function_name = (
+            "public.record_volpred_analytics_event("
+            "text,text,timestamp with time zone,text,text,jsonb,"
+            "bytea,bytea,text,bytea,bytea,bytea)"
+        )
+        privileges = {
+            role: connection.execute(
+                """
+                SELECT
+                  has_function_privilege(%s, %s, 'EXECUTE'),
+                  has_schema_privilege(
+                    %s, 'volpred_analytics', 'USAGE'
+                  ),
+                  has_table_privilege(
+                    %s, 'volpred_analytics.events', 'SELECT'
+                  )
+                """,
+                (role, function_name, role, role),
+            ).fetchone()
+            for role in ("public", "anon", "authenticated", "service_role")
+        }
+        owner = connection.execute(
+            """
+            SELECT pg_get_userbyid(p.proowner), p.prosecdef
+            FROM pg_proc AS p
+            JOIN pg_namespace AS n ON n.oid = p.pronamespace
+            WHERE n.nspname = 'public'
+              AND p.proname = 'record_volpred_analytics_event'
+            """
+        ).fetchone()
+
+    assert privileges["public"] == (False, False, False)
+    assert privileges["anon"] == (False, False, False)
+    assert privileges["authenticated"] == (False, False, False)
+    assert privileges["service_role"] == (True, False, False)
+    assert owner == ("analytics_migration_runner", True)
+
+
+def test_ingress_accepts_once_and_replays_without_duplicate_row(
+    analytics_postgres_dsn: str,
+) -> None:
+    with psycopg.connect(analytics_postgres_dsn) as connection:
+        connection.execute("SET ROLE service_role")
+        first = connection.execute(
+            INGRESS_SQL, _ingress_args()
+        ).fetchone()[0]
+        replay = connection.execute(
+            INGRESS_SQL, _ingress_args()
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        count = connection.execute(
+            "SELECT count(*) FROM volpred_analytics.events"
+        ).fetchone()[0]
+
+    assert first["accepted"] is True
+    assert first["duplicate"] is False
+    assert replay["accepted"] is True
+    assert replay["duplicate"] is True
+    assert count == 1
+
+
+def test_ingress_rejects_conflicting_replay_and_invalid_contract(
+    analytics_postgres_dsn: str,
+) -> None:
+    with psycopg.connect(analytics_postgres_dsn) as connection:
+        connection.execute("SET ROLE service_role")
+        connection.execute(INGRESS_SQL, _ingress_args())
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="idempotency_key was reused",
+        ):
+            connection.execute(
+                INGRESS_SQL,
+                (*_ingress_args()[:6], b"x" * 32, *_ingress_args()[7:]),
+            )
+        connection.rollback()
+        connection.execute("SET ROLE service_role")
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="undeclared property",
+        ):
+            connection.execute(
+                INGRESS_SQL,
+                _ingress_args(
+                    idempotency_key="impression:undeclared",
+                    properties=Jsonb(
+                        {
+                            "content_id": "article-rpc",
+                            "surface": "home",
+                            "portfolio_position": "secret",
+                        }
+                    ),
+                ),
+            )
 
 
 def test_migration_keeps_analytics_private_and_enables_rls(

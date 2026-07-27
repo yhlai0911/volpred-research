@@ -3901,3 +3901,31 @@ queue lifecycle／assessment／pool-pressure／canonical-writer 相鄰套件 **2
 `observation_window_too_short`。此「提前解除」根因已
 **`root_cause_fixed_and_verified`**；Issue #9 umbrella仍須等真實七日與cutover
 transaction，維持`contained`。
+### 2026-07-27 — First-paint 指標語意分岔、Zeabur env 全量同步與 upload secret boundary
+
+**證據化症狀**：Issue #8 第一輪 production deployment 先後暴露四個不同層級問題：
+deployment monitor把上一個／瞬時狀態判成新部署失敗；strict navigation contract拒絕
+合法`#feed`而令原版首頁500；`zeabur variable env`全量同步刪除兩個analytics變數，
+使有效事件回503；最後原版raw HTML顯示`115+`，hydration後卻被
+`/api/research/stats`以knowledge count誤標的`3,198+`覆寫。初版Keychain補救又把
+注入secret的`.env.production`放在source staging tree，雖未進Git仍可能進build
+context。
+
+**根因與底層重構**：這不是單一前端bug，而是deployment identity、navigation
+allowlist、environment ownership、metric semantics與secret boundary五個契約缺口。
+監控器現只接受不同deployment ID的durable terminal state；fragment採strict regex；
+analytics HMAC材料固定從macOS Keychain取得，缺失即拒絕部署；原版/v3與stats API共用
+`getResearchSummary().n_experiments`，API失敗回503而非假0；variable sync使用upload
+tree外的temp env，copy與`.zeaburignore`均排除所有`.env*`。
+
+**回歸與live read-back**：navigation／first-paint／analytics／deploy tests、typecheck
+與Next production build（88 routes）通過。Deployment
+`6a6736c7225290ec74322de0`為RUNNING；container回讀`.env.production=false`但兩個
+analytics vars均存在。原版/v3 raw HTML與desktop/mobile hydrated DOM同為實驗數115，
+navigation實際成功。Supabase回讀browser事件impression 4、click 6、depth 4、
+qualified 1，15列皆15個distinct keys、retention drift 0；live canary重播回
+`duplicate=true`。相關契約已落入tests、deploy script、migration與本紀錄。
+
+**狀態**：GitHub #8／T20為`root_cause_fixed_and_verified`。舊文章view-count資料面
+仍保留供既有UI讀取，但不寫入新的`volpred_analytics`事件表；其正式retirement由既有
+legacy-retirement tickets處理，不在#8內冒充完成。

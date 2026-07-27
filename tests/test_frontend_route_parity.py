@@ -265,6 +265,37 @@ def test_scenario_evidence_and_active_target_drift_fail_closed(
     }
 
 
+def test_production_first_paint_contract_follows_server_snapshot_seam() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    contract = json.loads(
+        (
+            repo_root / "config" / "frontend_route_scenario_parity.json"
+        ).read_text(encoding="utf-8")
+    )
+    scenario = next(
+        row for row in contract["scenarios"] if row["id"] == "public_first_paint"
+    )
+    evidence = {row["path"]: set(row["contains"]) for row in scenario["evidence"]}
+
+    assert evidence["frontend-v2-fix/src/app/v3/page.tsx"] == {
+        "getV3HomeSnapshot",
+        "initialSnapshot",
+    }
+    assert evidence["frontend-v2-fix/src/lib/v3-home-data.ts"] >= {
+        "getFeed",
+        "getStrategyOverview",
+        "getPapers",
+        "getQuestions",
+        "getResearchSummary",
+    }
+    assert evidence[
+        "frontend-v2-fix/src/components/v3/hooks/useV3Data.ts"
+    ] == {
+        "fallbackData: [initialSnapshot.feed]",
+        "fallbackData: initialSnapshot.overview",
+    }
+
+
 def test_contract_schema_drift_fails_closed(tmp_path: Path) -> None:
     contract, targets = _fixture_repo(tmp_path)
     payload = json.loads(contract.read_text(encoding="utf-8"))
@@ -423,6 +454,44 @@ def test_unresolved_navigation_expression_fails_closed(tmp_path: Path) -> None:
         and item["source_ref"].endswith("VariableLink.tsx")
         for item in report["blockers"]
     )
+
+
+def test_canonical_navigation_contract_proves_dynamic_href_only_by_import(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/ContractLink.tsx",
+        """
+        import { toInternalHref } from '@/lib/navigation-contract'
+        export const X = ({ target }) => (
+          <a href={toInternalHref(target)}>safe</a>
+        )
+        """,
+    )
+    _write(
+        tmp_path / "web/src/components/SpoofedContractLink.tsx",
+        """
+        const toInternalHref = (target) => target
+        export const X = ({ target }) => (
+          <a href={toInternalHref(target)}>unsafe</a>
+        )
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    unresolved_sources = {
+        item["source_ref"]
+        for item in report["blockers"]
+        if item["kind"] == "unresolved_internal_navigation"
+    }
+    assert "web/src/components/ContractLink.tsx" not in unresolved_sources
+    assert "web/src/components/SpoofedContractLink.tsx" in unresolved_sources
 
 
 def test_api_links_use_real_dynamic_route_inventory(tmp_path: Path) -> None:

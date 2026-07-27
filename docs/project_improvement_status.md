@@ -2444,3 +2444,20 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   isolated no-effect takeover slice；formal effect RPO=0、guided parity／TCC、
   可重複cold restore與持續standby仍待#16/#17/#24，因此#21維持
   **`contained`／OPEN**。
+## 2026-07-27 — T20 Original／v3 First-paint 與 Beacon（Issue #8）
+
+- ✅ 原版與v3首頁以同一server snapshot首屏；raw HTML、desktop/mobile立即DOM與
+  hydration後DOM均回讀實驗數115，沒有mock、`—`或knowledge count 3,198覆寫。
+- ✅ 同一typed analytics contract涵蓋impression、click、read depth、
+  qualified action與return visit；browser E2E實際產生前四類，production DB回讀
+  15列／15 distinct idempotency keys、retention drift 0，exact replay為duplicate。
+- ✅ PostgreSQL private schema／FORCE RLS／RPC ACL已精確部署並回讀；production
+  receipts為`20260727100227`與`20260727100422`。
+- ✅ Zeabur deployment `6a6736c7225290ec74322de0`為RUNNING。部署secret由Keychain
+  供應，只進variable API的外部temp file；source upload與container均沒有
+  `.env.production`，runtime仍回讀必要analytics vars。
+- ✅ 原版／v3在desktop與mobile皆完成首屏及navigation實際操作；兩者均保持原路徑。
+  Nested frontend commits為`01913b6..c8832bf`，Next production build 88 routes成功。
+- ✅ Issue #8 acceptance與五步Gate全過，狀態
+  **`root_cause_fixed_and_verified`**。文章view-count舊資料面之後由既有
+  legacy-retirement tickets收斂，不混入本ticket結案口徑。

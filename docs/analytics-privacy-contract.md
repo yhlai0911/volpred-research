@@ -114,9 +114,24 @@ Issue #5 implementation is accepted at commit `7c6660dc4`:
   changing Change Delivery / Git actuator / canonical-writer inventory paths;
   none of the failures touch analytics code or this migration.
 
-The linked Supabase migration ledger contains many unrelated local-only and
-remote-only versions, plus another session's pending migration. Therefore
-`db push` was intentionally not run: it cannot safely deploy only
-`20260726154115_analytics_privacy_tracer.sql`. The migration remains staged
-until an exact-single-migration deployment path or ledger reconciliation is
-available.
+The linked Supabase migration ledger contains unrelated local-only and
+remote-only versions, so broad `db push` remains prohibited. On 2026-07-27 the
+two exact files were applied independently and recorded as production receipts
+`20260727100227 analytics_privacy_tracer` and
+`20260727100422 analytics_ingress_rpc`.
+
+Production read-back confirms all nine `volpred_analytics` tables use RLS plus
+forced RLS; `PUBLIC`, `anon`, and `authenticated` have no schema/table/RPC
+access; and only `service_role` may execute the fixed-search-path,
+security-definer ingress RPC. The Zeabur caller computes all HMAC digests
+server-side. Its stable secret lives in macOS Keychain service
+`volpred-analytics-tombstone`; the deploy script injects it into a sibling
+temporary variable file, excludes every `.env*` file from the upload tree, and
+fails closed if the credential is absent. Deployment
+`6a6736c7225290ec74322de0` read back both required runtime variables while
+confirming `.env.production` was absent from the container source tree.
+
+Live ingress accepted a keyed canary, persisted the matching digest and 30-day
+expiry, then returned `duplicate=true` for an exact replay. Desktop/mobile
+browser E2E subsequently produced impression, click, depth, and qualified
+action rows with one distinct idempotency key per row.

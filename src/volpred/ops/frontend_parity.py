@@ -71,6 +71,13 @@ _NEXT_NAVIGATION_BINDING = re.compile(
     r"""|\b(?:require|import)\s*\(\s*"""
     r"""(?:"next/navigation"|'next/navigation')\s*\)"""
 )
+_NAVIGATION_CONTRACT_IMPORT = re.compile(
+    r"""\bimport\s*\{(?P<bindings>[^{}]+)\}\s*from\s*"""
+    r"""(?:"@/lib/navigation-contract"|'@/lib/navigation-contract')"""
+)
+_NAVIGATION_CONTRACT_HELPERS = frozenset(
+    {"toInternalHref", "toPublicAssetHref"}
+)
 _TEMPLATE_SLOT = re.compile(r"\$\{[^{}]*\}")
 _ACCESS_LEVELS = frozenset({"public", "member", "admin", "service"})
 _HTTP_METHODS = frozenset(
@@ -580,6 +587,30 @@ def _expression_path(expression: str) -> str | None:
     return None
 
 
+def _navigation_contract_helpers(text: str, code_text: str) -> set[str]:
+    helpers: set[str] = set()
+    for match in _NAVIGATION_CONTRACT_IMPORT.finditer(text):
+        if code_text[match.start():match.start() + 6] != "import":
+            continue
+        for raw_binding in match.group("bindings").split(","):
+            binding = raw_binding.strip()
+            if binding in _NAVIGATION_CONTRACT_HELPERS:
+                helpers.add(binding)
+    return helpers
+
+
+def _is_contract_navigation_expression(
+    expression: str,
+    *,
+    helpers: set[str],
+) -> bool:
+    value = expression.strip()
+    return any(
+        re.fullmatch(rf"{re.escape(helper)}\s*\(.+\)", value) is not None
+        for helper in helpers
+    )
+
+
 def _call_arguments(
     text: str,
     call_pattern: re.Pattern[str],
@@ -677,6 +708,10 @@ def _dead_links(
             )
             continue
         code_text = _mask_typescript_non_code(text)
+        navigation_contract_helpers = _navigation_contract_helpers(
+            text,
+            code_text,
+        )
         for match in _HREF.finditer(text):
             if code_text[match.start():match.start() + 4] != "href":
                 continue
@@ -721,6 +756,11 @@ def _dead_links(
                 raw,
                 valid_patterns=valid_patterns,
                 valid_exact=valid_exact,
+            ):
+                continue
+            if _is_contract_navigation_expression(
+                match.group("expression"),
+                helpers=navigation_contract_helpers,
             ):
                 continue
             findings.append(

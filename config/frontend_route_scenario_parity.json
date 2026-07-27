@@ -773,8 +773,25 @@
         {
           "path": "frontend-v2-fix/src/app/v3/page.tsx",
           "contains": [
+            "getV3HomeSnapshot",
+            "initialSnapshot"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/lib/v3-home-data.ts",
+          "contains": [
             "getFeed",
-            "initialData"
+            "getStrategyOverview",
+            "getPapers",
+            "getQuestions",
+            "getResearchSummary"
+          ]
+        },
+        {
+          "path": "frontend-v2-fix/src/components/v3/hooks/useV3Data.ts",
+          "contains": [
+            "fallbackData: [initialSnapshot.feed]",
+            "fallbackData: initialSnapshot.overview"
           ]
         }
       ]
