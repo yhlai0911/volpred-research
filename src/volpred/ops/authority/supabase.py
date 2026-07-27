@@ -237,7 +237,10 @@ class SupabaseAuthorityStore:
             return 0
         reconciled = 0
         for path in sorted(directory.glob("*.json")):
-            intent = self._read_demotion_intent(path)
+            try:
+                intent = self._read_demotion_intent(path)
+            except FileNotFoundError:  # silent-ok: peer reconciled intent
+                continue
             if intent["backend_sha256"] != self._client.backend_sha256:
                 raise ValueError(
                     "Primary Authority demotion intent backend drifted"
@@ -390,6 +393,8 @@ class SupabaseAuthorityStore:
     def _read_demotion_intent(path: Path) -> dict[str, Any]:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            raise
         except (OSError, UnicodeError, json.JSONDecodeError) as error:
             raise RuntimeError(
                 "Primary Authority demotion intent is unreadable"

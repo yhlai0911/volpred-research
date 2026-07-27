@@ -458,6 +458,62 @@ def test_demotion_intent_refuses_replay_to_a_different_backend(
         different.reconcile_pending_demotions()
 
 
+def test_concurrent_reconcilers_ignore_peer_cleaned_stale_path(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    intent_dir = tmp_path / "demotion-intents"
+    first = _store(demotion_intent_dir=intent_dir)
+    second = _store(demotion_intent_dir=intent_dir)
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            error.URLError("backend unavailable")
+        ),
+    )
+    with pytest.raises(RuntimeError, match="RPC unavailable"):
+        first.release(_lease())
+
+    calls = 0
+
+    def recovered_urlopen(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return _Response(
+            {
+                "schema_version": (
+                    "primary-authority-demotion-reconcile.v1"
+                ),
+                "status": "reconciled",
+                "authority_key": "operations-core-commits",
+                "holder_ref": "host:primary",
+                "epoch": 4,
+                "event_ref": "primary-authority-event:21",
+                "occurred_at": "2026-07-24T10:06:00+00:00",
+            }
+        )
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        recovered_urlopen,
+    )
+    read_intent = second._read_demotion_intent
+
+    def peer_cleans_before_read(path: Path) -> dict[str, object]:
+        assert first.reconcile_pending_demotions() == 1
+        return read_intent(path)
+
+    monkeypatch.setattr(
+        second,
+        "_read_demotion_intent",
+        peer_cleans_before_read,
+    )
+
+    assert second.reconcile_pending_demotions() == 0
+    assert calls == 1
+    assert list(intent_dir.glob("*.json")) == []
+
+
 def test_read_events_returns_typed_token_redacted_lifecycle_receipts(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
