@@ -66,6 +66,7 @@ class ProbePolicy:
     maximum_backoff: timedelta = timedelta(hours=1)
     window: timedelta = timedelta(hours=1)
     max_probe_cost_units: int = 6
+    probe_reservation_ttl: timedelta = timedelta(minutes=2)
 
     def __post_init__(self) -> None:
         if self.minimum_interval <= timedelta(0):
@@ -74,6 +75,8 @@ class ProbePolicy:
             raise ValueError("maximum probe backoff must cover the minimum interval")
         if self.window <= timedelta(0) or self.max_probe_cost_units <= 0:
             raise ValueError("probe window and cost budget must be positive")
+        if self.probe_reservation_ttl <= timedelta(0):
+            raise ValueError("probe reservation TTL must be positive")
 
 
 @dataclass(frozen=True)
@@ -202,6 +205,7 @@ class ExecutionReservation:
 class ProbeReservation:
     acquired: bool
     state: ProviderStateView
+    usable_without_probe: bool = False
 
 
 class ProviderExecutionStore(Protocol):
@@ -212,7 +216,6 @@ class ProviderExecutionStore(Protocol):
         fingerprint: str,
         owner: str,
         observed_at: datetime,
-        expires_at: datetime,
     ) -> ExecutionReservation: ...
 
     def settle_execution(
@@ -220,6 +223,14 @@ class ProviderExecutionStore(Protocol):
     ) -> None: ...
 
     def release_execution(self, *, key: str, owner: str) -> None: ...
+
+    def recover_execution(
+        self,
+        *,
+        key: str,
+        expected_owner: str,
+        liveness_evidence_ref: str,
+    ) -> None: ...
 
     def reserve_probe(
         self,
@@ -240,6 +251,8 @@ class ProviderExecutionStore(Protocol):
         policy: ProbePolicy,
     ) -> ProviderStateView: ...
 
+    def release_probe(self, *, provider_id: str, owner: str) -> None: ...
+
     def observe(
         self,
         *,
@@ -256,9 +269,9 @@ class _InMemoryProviderExecutionStore:
         self._lock = RLock()
         self._request_fingerprints: dict[str, str] = {}
         self._terminal_outcomes: dict[str, ExecutionOutcome] = {}
-        self._execution_reservations: dict[str, tuple[str, datetime]] = {}
+        self._execution_reservations: dict[str, str] = {}
         self._provider_states: dict[str, ProviderStateView] = {}
-        self._probe_reservations: dict[str, str] = {}
+        self._probe_reservations: dict[str, tuple[str, datetime, datetime]] = {}
 
     def reserve_execution(
         self,
@@ -267,9 +280,9 @@ class _InMemoryProviderExecutionStore:
         fingerprint: str,
         owner: str,
         observed_at: datetime,
-        expires_at: datetime,
     ) -> ExecutionReservation:
         with self._lock:
+            _aware(observed_at, field="execution reservation clock")
             previous = self._request_fingerprints.setdefault(key, fingerprint)
             if previous != fingerprint:
                 raise ValueError("idempotency key is already bound to another request")
@@ -277,9 +290,9 @@ class _InMemoryProviderExecutionStore:
             if replay is not None:
                 return ExecutionReservation(acquired=False, replay=replay)
             reservation = self._execution_reservations.get(key)
-            if reservation is not None and reservation[1] > observed_at:
+            if reservation is not None:
                 return ExecutionReservation(acquired=False)
-            self._execution_reservations[key] = (owner, expires_at)
+            self._execution_reservations[key] = owner
             return ExecutionReservation(acquired=True)
 
     def settle_execution(
@@ -287,7 +300,7 @@ class _InMemoryProviderExecutionStore:
     ) -> None:
         with self._lock:
             reservation = self._execution_reservations.get(key)
-            if reservation is None or reservation[0] != owner:
+            if reservation is None or reservation != owner:
                 raise RuntimeError("execution reservation was lost before settlement")
             previous = self._terminal_outcomes.setdefault(key, outcome)
             if previous != outcome:
@@ -297,8 +310,25 @@ class _InMemoryProviderExecutionStore:
     def release_execution(self, *, key: str, owner: str) -> None:
         with self._lock:
             reservation = self._execution_reservations.get(key)
-            if reservation is not None and reservation[0] == owner:
+            if reservation is not None and reservation == owner:
                 self._execution_reservations.pop(key, None)
+
+    def recover_execution(
+        self,
+        *,
+        key: str,
+        expected_owner: str,
+        liveness_evidence_ref: str,
+    ) -> None:
+        if not liveness_evidence_ref:
+            raise ValueError("execution recovery requires liveness evidence")
+        with self._lock:
+            reservation = self._execution_reservations.get(key)
+            if reservation is None:
+                return
+            if reservation != expected_owner:
+                raise RuntimeError("execution recovery owner does not match")
+            self._execution_reservations.pop(key, None)
 
     def reserve_probe(
         self,
@@ -313,11 +343,25 @@ class _InMemoryProviderExecutionStore:
             previous = self._provider_states.get(provider_id)
             if previous is not None and observed_at < previous.observed_at:
                 raise ValueError("probe clock is older than provider state")
-            if previous is not None and observed_at < previous.next_probe_at:
-                return ProbeReservation(acquired=False, state=previous)
-            if provider_id in self._probe_reservations:
+            reservation = self._probe_reservations.get(provider_id)
+            expired_reservation = False
+            if reservation is not None and reservation[1] <= observed_at:
+                self._probe_reservations.pop(provider_id, None)
+                reservation = None
+                expired_reservation = True
+            if reservation is not None:
                 state = previous or _unknown_provider_state(provider_id, observed_at)
                 return ProbeReservation(acquired=False, state=state)
+            if (
+                not expired_reservation
+                and previous is not None
+                and observed_at < previous.next_probe_at
+            ):
+                return ProbeReservation(
+                    acquired=False,
+                    state=previous,
+                    usable_without_probe=True,
+                )
             used = 0
             window_started_at = observed_at
             if (
@@ -350,7 +394,11 @@ class _InMemoryProviderExecutionStore:
                 probe_cost_used=used + cost_units,
             )
             self._provider_states[provider_id] = provisional
-            self._probe_reservations[provider_id] = owner
+            self._probe_reservations[provider_id] = (
+                owner,
+                observed_at + policy.probe_reservation_ttl,
+                observed_at,
+            )
             return ProbeReservation(acquired=True, state=provisional)
 
     def settle_probe(
@@ -362,15 +410,22 @@ class _InMemoryProviderExecutionStore:
         policy: ProbePolicy,
     ) -> ProviderStateView:
         with self._lock:
-            if self._probe_reservations.get(provider_id) != owner:
+            reservation = self._probe_reservations.get(provider_id)
+            if reservation is None or reservation[0] != owner:
                 raise RuntimeError("probe reservation was lost before settlement")
             try:
                 return self._observe_locked(
                     observation=observation,
-                    observed_now=observation.observed_at,
+                    observed_now=reservation[2],
                     policy=policy,
                 )
             finally:
+                self._probe_reservations.pop(provider_id, None)
+
+    def release_probe(self, *, provider_id: str, owner: str) -> None:
+        with self._lock:
+            reservation = self._probe_reservations.get(provider_id)
+            if reservation is not None and reservation[0] == owner:
                 self._probe_reservations.pop(provider_id, None)
 
     def observe(
@@ -518,7 +573,6 @@ class ProviderExecution:
             fingerprint=fingerprint,
             owner=owner,
             observed_at=now,
-            expires_at=now + timedelta(hours=1),
         )
         if reservation.replay is not None:
             return reservation.replay
@@ -561,6 +615,10 @@ class ProviderExecution:
                 if probe.acquired:
                     try:
                         observation = adapter.probe(descriptor, observed_at=now)
+                        if not isinstance(observation, ProviderObservation):
+                            raise TypeError(
+                                "provider probe must return ProviderObservation"
+                            )
                         if observation.provider_id != descriptor.provider_id:
                             raise RuntimeError(
                                 "provider probe returned the wrong identity"
@@ -581,12 +639,44 @@ class ProviderExecution:
                                 f"{type(exc).__name__}"
                             ),
                         )
-                    state = self._store.settle_probe(
-                        provider_id=descriptor.provider_id,
-                        owner=probe_owner,
-                        observation=observation,
-                        policy=self._probe_policy,
+                    except BaseException:
+                        self._store.release_probe(
+                            provider_id=descriptor.provider_id,
+                            owner=probe_owner,
+                        )
+                        raise
+                    try:
+                        state = self._store.settle_probe(
+                            provider_id=descriptor.provider_id,
+                            owner=probe_owner,
+                            observation=observation,
+                            policy=self._probe_policy,
+                        )
+                    except Exception as exc:
+                        warn(
+                            "provider-execution",
+                            "provider probe evidence violated its contract",
+                            provider_id=descriptor.provider_id,
+                            error_type=type(exc).__name__,
+                        )
+                        state = self.observe(
+                            ProviderObservation(
+                                provider_id=descriptor.provider_id,
+                                observed_at=now,
+                                blocker=BlockerKind.PROVIDER_UNAVAILABLE,
+                                evidence_ref=(
+                                    f"provider-contract://"
+                                    f"{descriptor.provider_id}/"
+                                    f"{type(exc).__name__}"
+                                ),
+                            )
+                        )
+                elif not probe.usable_without_probe:
+                    evidence.append(
+                        f"probe-reservation://{descriptor.provider_id}/unavailable"
                     )
+                    blockers.append(BlockerKind.PROVIDER_UNAVAILABLE)
+                    continue
                 evidence.append(state.evidence_ref)
 
                 if state.blocker is not None:
@@ -598,6 +688,10 @@ class ProviderExecution:
                         request,
                         resume_checkpoint=request.resume_checkpoint,
                     )
+                    if not isinstance(attempt, ExecutionAttempt):
+                        raise TypeError(
+                            "provider execute must return ExecutionAttempt"
+                        )
                 except Exception as exc:
                     warn(
                         "provider-execution",

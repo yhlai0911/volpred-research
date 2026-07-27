@@ -380,6 +380,44 @@ def test_concurrent_same_idempotency_key_executes_provider_once() -> None:
     assert execution.execute(request()) == outcomes[0]
 
 
+def test_crashed_execution_never_time_takeovers_without_liveness_evidence() -> None:
+    store = InMemoryProviderExecutionStore()
+    first = store.reserve_execution(
+        key="same-key",
+        fingerprint="a" * 64,
+        owner="dead-worker",
+        observed_at=NOW,
+    )
+    much_later = store.reserve_execution(
+        key="same-key",
+        fingerprint="a" * 64,
+        owner="replacement",
+        observed_at=NOW + timedelta(days=365),
+    )
+
+    assert first.acquired is True
+    assert much_later.acquired is False
+    with pytest.raises(ValueError, match="liveness evidence"):
+        store.recover_execution(
+            key="same-key",
+            expected_owner="dead-worker",
+            liveness_evidence_ref="",
+        )
+
+    store.recover_execution(
+        key="same-key",
+        expected_owner="dead-worker",
+        liveness_evidence_ref="liveness://pid-dead-and-workspace-absent",
+    )
+    recovered = store.reserve_execution(
+        key="same-key",
+        fingerprint="a" * 64,
+        owner="replacement",
+        observed_at=NOW + timedelta(days=365),
+    )
+    assert recovered.acquired is True
+
+
 def test_concurrent_requests_share_one_atomic_probe_reservation() -> None:
     entered = Event()
     release = Event()
@@ -485,3 +523,101 @@ def test_stale_and_future_observations_cannot_move_backoff_clock() -> None:
                 evidence_ref="probe://future",
             )
         )
+
+
+def test_malicious_future_probe_is_typed_and_rerouted() -> None:
+    class FutureProbe(FakeProvider):
+        def probe(self, descriptor, *, observed_at):
+            return ProviderObservation(
+                provider_id=descriptor.provider_id,
+                observed_at=observed_at + timedelta(days=365),
+                blocker=None,
+                evidence_ref="probe://malicious-future",
+            )
+
+    healthy = FakeProvider()
+    outcome = engine(
+        [
+            (descriptor("bad"), FutureProbe()),
+            (descriptor("healthy"), healthy),
+        ]
+    ).execute(request())
+
+    assert outcome.kind == "completed"
+    assert outcome.provider_id == "healthy"
+    assert "provider-contract://bad/ValueError" in outcome.evidence_refs
+
+
+def test_expired_probe_reservation_recovers_after_crash() -> None:
+    store = InMemoryProviderExecutionStore()
+    policy = ProbePolicy(probe_reservation_ttl=timedelta(seconds=5))
+    first = store.reserve_probe(
+        provider_id="codex",
+        owner="dead-process",
+        observed_at=NOW,
+        cost_units=1,
+        policy=policy,
+    )
+    blocked = store.reserve_probe(
+        provider_id="codex",
+        owner="too-early",
+        observed_at=NOW + timedelta(seconds=4),
+        cost_units=1,
+        policy=policy,
+    )
+    takeover = store.reserve_probe(
+        provider_id="codex",
+        owner="replacement",
+        observed_at=NOW + timedelta(seconds=5),
+        cost_units=1,
+        policy=policy,
+    )
+
+    assert first.acquired is True
+    assert blocked.acquired is False
+    assert takeover.acquired is True
+
+
+def test_malformed_execute_return_is_typed_and_rerouted() -> None:
+    class MalformedProvider(FakeProvider):
+        def execute(self, request, *, resume_checkpoint):
+            self.execute_calls.append((request, resume_checkpoint))
+            return object()
+
+    healthy = FakeProvider()
+    outcome = engine(
+        [
+            (descriptor("bad"), MalformedProvider()),
+            (descriptor("healthy"), healthy),
+        ]
+    ).execute(request())
+
+    assert outcome.kind == "completed"
+    assert outcome.provider_id == "healthy"
+    assert "provider-exception://bad/TypeError" in outcome.evidence_refs
+
+
+def test_exhausted_probe_budget_never_uses_stale_healthy_state_for_full_work() -> None:
+    now = NOW
+
+    def clock() -> datetime:
+        return now
+
+    adapter = FakeProvider(probe_outcomes=[None, None])
+    execution = engine(
+        [(descriptor("codex"), adapter)],
+        clock=clock,
+        policy=ProbePolicy(
+            minimum_interval=timedelta(minutes=5),
+            max_probe_cost_units=1,
+        ),
+    )
+    assert execution.execute(request(key="initial")).kind == "completed"
+    now += timedelta(minutes=5)
+
+    outcome = execution.execute(request(key="budget-exhausted"))
+
+    assert outcome.kind == "blocked"
+    assert outcome.blocker == BlockerKind.PROVIDER_UNAVAILABLE
+    assert adapter.probe_calls == 1
+    assert len(adapter.execute_calls) == 1
