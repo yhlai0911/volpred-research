@@ -34095,7 +34095,7 @@
     "title": "K1720: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arX",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 571). Original: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1720.py with signal.shift(1) + seed=42, (c) K1720_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34159,13 +34159,23 @@
         "to": "pending",
         "by": "release",
         "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T16:16:08.637102+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1720-6c33b8-3674b6",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-586d6a; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-b5cbfd; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-586d6a; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-b5cbfd; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-3674b6; awaiting PHASE A collection",
     "last_released_at": "2026-07-27T15:50:07.174962+00:00",
     "last_release_reason": "external_compute_job_failed",
     "compute_released_at": "2026-07-27T15:50:07.174608+00:00",
-    "compute_release_reason": "external_compute_job_failed"
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "agent-agent-brief_k1720-6c33b8-3674b6",
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-27T16:30:05Z"
   },
   {
     "id": "K1721",
@@ -36006,7 +36016,7 @@
     "title": "K1733: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 606). Original: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1733.py with signal.shift(1) + seed=42, (c) K1733_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36042,13 +36052,22 @@
         "to": "pending",
         "by": "release",
         "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T16:15:27.244124+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1733-c3ccb0",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-agent-brief_k1733-bf0e58; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-agent-brief_k1733-bf0e58; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1733-c3ccb0; awaiting PHASE A collection",
     "last_released_at": "2026-07-27T15:50:07.175118+00:00",
     "last_release_reason": "external_compute_job_failed",
     "compute_released_at": "2026-07-27T15:50:07.174608+00:00",
-    "compute_release_reason": "external_compute_job_failed"
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "agent-agent-brief_k1733-c3ccb0",
+    "blocked_reason": "external_compute_job_active"
   },
   {
     "id": "K1734",
@@ -36087,9 +36106,10 @@
       }
     ],
     "compute_job_id": "agent-agent-brief_k1734-205644",
-    "blocked_reason": "external_compute_job_running",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T15:34:23Z"
+    "compute_started_at": "2026-07-27T15:34:23Z",
+    "compute_finished_at": "2026-07-27T16:03:02Z"
   },
   {
     "id": "daily_digest_20260718",
@@ -42168,15 +42188,11 @@
     "title": "[gate 缺陷] PHASE-Z orphan-half 認領在高併發下失效：38 次 'candidates exceeds cap 8' 直接放棄",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "in_progress",
+    "status": "succeeded",
     "created_at": "2026-07-21T13:14:14.434697+00:00",
     "source": "dispatch",
     "parent_task_id": "assign_f59976b6",
     "description": "驗收 assign_f59976b6 時發現（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 4 節）。\n\n現象：dispatch_supervisor.log 全期出現 38 次 'phase_z: orphan-half probe skipped — N candidates exceeds cap 8'（實例 2026-07-20 03:12 為 23 candidates）。多條主線程共用同一個 checkout 時，單次 drain 的 foreign 清單長達 50+ 檔，orphan-half 認領機制因超過全域 cap 8 直接整批放棄。\n\n影響：不會造成錯誤 commit（foreign 已被正確排除，safety-net auto-commit 自 07-19 起 = 0 次），但**孤兒半成品的自動回收在高併發下等於沒開**。max_slots 加碼後此情形只會更常見。\n\n要做：把全域 cap 8 改為依 ownership 分群後再套 cap（每個 owner 各自判定），讓「別人的髒檔很多」不再連帶淹掉自己那幾個孤兒半成品的認領。改動點：scripts/dispatch_supervisor/phase_z.py 的 orphan-half probe；需補 test。",
-    "claimed_by": "codex-vscode-root",
-    "claimed_at": "2026-07-27T15:33:47.564580+00:00",
-    "claim_expires_at": "2026-07-27T17:33:47.564580+00:00",
-    "claim_session_id": "3d99d33a99ae",
     "status_history": [
       {
         "ts": "2026-07-27T15:33:47.564596+00:00",
@@ -42189,9 +42205,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T16:02:11.040437+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode-root"
       }
     ],
-    "started_at": "2026-07-27T15:33:47.844357+00:00"
+    "started_at": "2026-07-27T15:33:47.844357+00:00",
+    "completed_at": "2026-07-27T16:02:11.040415+00:00",
+    "result": "root_cause_fixed_and_verified: orphan-half safety cap now applies per declared ownership cohort, so an oversized noisy owner cannot disable another owner probe; 15 focused + 105 PHASE-Z tests passed; commits 306bb5700,b972f50f0; production self-reload loaded phase_z.py at 2026-07-28 00:01 CST (PID 85797, heartbeat healthy, auth_blocked=false) after graceful cohort drain."
   },
   {
     "id": "k892_k994_pinned_snapshot_repoint_20260721",
@@ -49817,7 +49841,166 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-27T16:00:04.458754+00:00",
-      "last_seen_at": "2026-07-27T16:00:04.458754+00:00"
+      "last_seen_at": "2026-07-27T16:00:04.458754+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T16:42:42.477026+00:00",
+      "deferred": [
+        "experiments/k1698/review_verdict.json: 已保存，且 2.5 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-27T16:03:10.194712+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T16:03:10.451345+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T16:03:35.008490+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode-root",
+        "note": "manual_release"
+      }
+    ],
+    "last_released_at": "2026-07-27T16:03:35.008476+00:00"
+  },
+  {
+    "id": "alert_dispatch_supervisor_stale_code_20260727",
+    "title": "[alert] 派工程式有改動沒生效（daemon 未重載）",
+    "description": "由 alert `dispatch_supervisor_stale_code` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n派工程式的程式碼被改過，但那個常駐程式還在跑舊版 —— 改動沒有生效。\n- daemon 開機時間: 2026-07-27T15:32:28.510660+00:00\n- 改了但沒生效的檔案: ['phase_z.py', '__init__.py']\n- 最久的一個已經放置: 27.2 分鐘\n- 門檻: warn>20.0分 / critical>120.0分\n\n## 影響\n常駐程式讀的是它啟動當下的程式碼。改了檔案不重載，等於沒改 —— 而且它看起來\n完全正常：心跳新鮮、任務照跑、零告警。2026-07-10 有三個修好的問題就這樣躺了\n三個多小時沒生效，沒有任何訊號。\n\n## 建議行動\n1. 確認沒有派工正在跑：uv run python -m scripts.dispatch_supervisor.cli status\n2. 重載：bash scripts/reload_dispatch_supervisor.sh --reason <為什麼>\n   （它會拒絕殺掉在飛的工作，也會避免這次重啟被誤報成崩潰）\n3. 若那些改動是刻意不上線的，把它們 revert 或說明，別讓磁碟與線上長期分岔。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "succeeded",
+    "created_at": "2026-07-27T16:00:42.753987+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "dispatch_supervisor_stale_code"
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-27T16:02:24.824739+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T16:02:25.083161+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T16:03:05.467915+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode-root"
+      }
+    ],
+    "started_at": "2026-07-27T16:02:25.083144+00:00",
+    "completed_at": "2026-07-27T16:03:05.467894+00:00",
+    "result": "fresh no-op after live readback: alert first created 2026-07-27T16:00:42.753987Z from evidence daemon boot=2026-07-27T15:32:28.510660Z with stale phase_z.py/__init__.py age 27.2m; original detector rerun at close reports breached=false, stale_files=[], unsettled_files=[], live boot=2026-07-27T16:01:04.055665Z. Condition genuinely recovered via graceful self-reload; it was not a detector false positive and no additional mutation was performed."
+  },
+  {
+    "id": "ci-root-30282693453",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "incident_escalation",
+    "status": "closed_no_action",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "incident_id": "ci-red-30277897265",
+    "ci_incident_id": "ci-red-30277897265",
+    "ci_run_key": "30282693453:1",
+    "denied_repair_task_id": "ci-red-30282693453",
+    "created_at": "2026-07-27T16:20:23.431685+00:00",
+    "title": "CI 單一根因修復（run 30282693453）— main Test Suite",
+    "description": "CI incident ci-red-30277897265 的一般修復任務 ci-red-30282693453 被 24h G6 上限拒絕；本任務是同一 incident 唯一、可越過上限的根因出口。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30282693453\nattempt: 1\n已知失敗摘要：2026-07-27T16:16:46.0584163Z E AssertionError: assert [JSONDecodeEr... 1 (char 0)')] == []\n\n行動：讀完整 failed log、本地重現、修底層契約並做同類掃描；不可只 rerun、清狀態或回報既有綠燈。result 必須帶 `root_cause=<一行>; repair_commit=pending_post_commit`，由 CI watcher 以後續 GitHub green 獨立結案。",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "scripts/lazypack_layout_guard.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_mark_task_blocked.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_shared_lock.py"
+    ],
+    "post_merge_actions": [],
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-27T16:21:22.484561+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-fb40786e14df4884bdd699e3a6d37498",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-27T16:21:22.484567+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-fb40786e14df4884bdd699e3a6d37498",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-27T16:22:49.895549+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-fb40786e14df4884bdd699e3a6d37498",
+        "note": "supervisor_settle_empty"
+      }
+    ],
+    "dispatch_settled_session_id": "dispatch-fb40786e-2211d6df",
+    "last_released_at": "2026-07-27T16:22:49.895536+00:00",
+    "last_release_reason": "workspace_empty",
+    "completed_at": "2026-07-27T16:40:34.454370+00:00",
+    "result": "CI watcher verified recovery before this repair task started; green_run=30284276231; no action required",
+    "ci_closed_after_green": true
+  },
+  {
+    "id": "assign_34f33e28",
+    "title": "PHASE-Z 卡住檔案 incident（52c5231c69eb52f3）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 3 班\n- experiments/k1698/review_verdict.json — 4 班\n- src/volpred/ops/next_tasks.py — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T164242405578Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T16:42:45.376470+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "52c5231c69eb52f3",
+      "paths": [
+        "docs/error_log.md",
+        "experiments/k1698/review_verdict.json",
+        "src/volpred/ops/next_tasks.py"
+      ],
+      "streaks": {
+        "docs/error_log.md": 3,
+        "experiments/k1698/review_verdict.json": 4,
+        "src/volpred/ops/next_tasks.py": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T164242405578Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T16:42:45.364821+00:00",
+      "last_seen_at": "2026-07-27T16:42:45.364821+00:00"
     },
     "priority_capped_from": 1
   }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T15:00:34.876837+00:00",
+  "generated_at": "2026-07-27T16:00:12.872484+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 145.6
+      "age_hours": 146.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 5.7
+      "age_hours": 6.7
     }
   ],
   "held": [
@@ -47,14 +47,55 @@
   "applied": true,
   "job_deliverable_candidates": [
     {
-      "job_id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1426-oos-rerun-shard-c-dailyseries-20260727.json",
-      "execution_status": "completed",
+      "job_id": "compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525.json",
+      "execution_status": "failed",
       "paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
+        "experiments/k1391/k1391_results.json"
       ],
       "existing_paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
+        "experiments/k1391/k1391_results.json"
+      ],
+      "previously_delivered_paths": [
+        "experiments/k1391/k1391_results.json"
+      ],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1391/k1391_results.json"
+      ],
+      "existing_paths": [
+        "experiments/k1391/k1391_results.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140.json",
+      "execution_status": "failed",
+      "paths": [
+        "experiments/k1396/k1396_legacy_rerun_results.json"
+      ],
+      "existing_paths": [
+        "experiments/k1396/k1396_legacy_rerun_results.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1396/k1396_legacy_rerun_results.json"
+      ],
+      "existing_paths": [
+        "experiments/k1396/k1396_legacy_rerun_results.json"
       ],
       "previously_delivered_paths": [],
       "rejected": []
@@ -63,13 +104,43 @@
   "job_deliverable_held": [],
   "job_deliveries": [
     {
-      "job_id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
+      "job_id": "compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
       "paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
+        "experiments/k1391/k1391_results.json"
+      ],
+      "delivered": true,
+      "delivery_status": "partial_delivered",
+      "delivery_commit": "9bb1a0c1cd793301a097a410ed98cf79de0bfd3c",
+      "reason": "committed"
+    },
+    {
+      "job_id": "compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985",
+      "paths": [
+        "experiments/k1391/k1391_results.json"
       ],
       "delivered": true,
       "delivery_status": "delivered",
-      "delivery_commit": "88e33a14cc533c85e05edab16efa471881841619",
+      "delivery_commit": "9bb1a0c1cd793301a097a410ed98cf79de0bfd3c",
+      "reason": "already_committed"
+    },
+    {
+      "job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
+      "paths": [
+        "experiments/k1396/k1396_legacy_rerun_results.json"
+      ],
+      "delivered": true,
+      "delivery_status": "partial_delivered",
+      "delivery_commit": "648a1a15d5abfa79600aca829ff9e8e59c7939b7",
+      "reason": "committed"
+    },
+    {
+      "job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985",
+      "paths": [
+        "experiments/k1396/k1396_legacy_rerun_results.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "648a1a15d5abfa79600aca829ff9e8e59c7939b7",
       "reason": "already_committed"
     }
   ],
@@ -88,21 +159,54 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 0,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/k1426/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1426/k1426_oos_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1426/k1426_oos_return_benchmark.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1698/README.md",
+          "kind": "md",
+          "reason": "modified"
+        }
+      ],
       "held": [],
       "skipped": {
         "grace": 5,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/k1426/README.md",
+            "experiments/k1426/k1426_oos_results.json",
+            "experiments/k1426/k1426_oos_return_benchmark.json",
+            "experiments/k1698/README.md"
+          ],
+          "committed": true,
+          "detail": "[main 2bc5cb814] chore(experiment-reap): collect orphaned experiment artifacts (4 files)\n 4 files changed, 53464 insertions(+), 272 deletions(-)\n"
+        }
+      ]
     }
   },
   "held_escalations": [],

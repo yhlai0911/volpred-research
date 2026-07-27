@@ -20,12 +20,12 @@
     "3360"
   ],
   "env": {},
-  "status": "running",
+  "status": "failed",
   "queue_priority": 5,
   "queued_at": "2026-07-27T15:12:32Z",
   "started_at": "2026-07-27T15:34:23Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-27T16:03:03Z",
+  "exit_code": 4,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1734-205644.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1734-205644.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/K1734_results.json",
@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1734",
   "source_task_link": {
     "state": "linked",
@@ -51,5 +51,15 @@
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1734.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1734-205644.md",
   "claimed_by_pid": 34225,
-  "claimed_by_pid_start_wall": "Mon Jul 27 22:30:05 2026"
+  "claimed_by_pid_start_wall": "Mon Jul 27 22:30:05 2026",
+  "process_exit_code": 0,
+  "failure_reason": "experiment_gate_failed",
+  "experiment_gate": {
+    "status": "failed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734",
+    "exit_code": 1,
+    "report": "[gate] FAIL — 1 violation(s) under experiments/k1734:\n\n  [nested-dm-misuse]\n    - experiments/k1734/k1734.py  (primary_raw_dm)\n    → Raw DM/HLN is not valid inference under a nested-model null. Use Clark-West (2007) for squared-error, or a general-loss / recursive-bootstrap design for QLIKE/pinball, and wire THAT into the verdict. If the DM is descriptive only, say so with `nested-dm: diagnostic-only` and keep it out of the claim sink. A primary unconditional GW/DM statistic under nesting is accepted only with the versioned fixed-memory cell manifest, matching runtime provenance, locally narrow claims, and a trusted external PASS receipt. Owner: scripts/tests/test_nested_dm_misuse_ratchet.py\n\nThis experiment is not accepted. Your own tests passing only shows it ran the way you meant it to; these gates check it does not break a rule the repo already learned the hard way."
+  },
+  "followup_dispatched_at": "2026-07-27T16:38:45Z",
+  "followup_next_task_id": "K1734"
 }

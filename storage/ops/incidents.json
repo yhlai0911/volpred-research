@@ -75,7 +75,7 @@
   "inc_0769d254c27b": {
    "class": "ordinary",
    "clean_observations": [],
-   "current_task_id": "ci-root-30277897265",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-27T15:20:29.921728+00:00",
@@ -98,22 +98,43 @@
      "first_seen_at": "2026-07-27T15:45:10.094562+00:00",
      "key": "30279928160:1",
      "last_seen_at": "2026-07-27T15:45:10.094562+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T16:20:26.376269+00:00",
+     "key": "30282693453:1",
+     "last_seen_at": "2026-07-27T16:20:26.376269+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-27T15:44:32.8571906Z E AssertionError: Regex pattern did not match.",
-   "last_seen_at": "2026-07-27T15:45:10.094562+00:00",
+   "last_breach_detail": "2026-07-27T16:16:46.0584163Z E AssertionError: assert [JSONDecodeEr... 1 (char 0)')] == []",
+   "last_seen_at": "2026-07-27T16:20:26.376269+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "occurrence_count": 3,
+   "resolution": {
+    "at": "2026-07-27T16:40:44.832821+00:00",
+    "by": "ci-red-30277897265",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-27T16:40:44.832821+00:00",
+     "by": "ci-red-30277897265",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
      "episode": 1,
      "opened_at": "2026-07-27T15:20:30.070594+00:00",
      "task_id": "ci-root-30277897265"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-07-27T16:20:26.549044+00:00",
+     "task_id": "ci-root-30282693453"
     }
    ],
    "task_mode": "external",
@@ -504,9 +525,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T11:07:42.905710+00:00"
-    },
-    {
      "at": "2026-07-27T11:08:28.790529+00:00"
     },
     {
@@ -538,6 +556,9 @@
     },
     {
      "at": "2026-07-27T15:59:45.982724+00:00"
+    },
+    {
+     "at": "2026-07-27T16:42:28.443904+00:00"
     }
    ],
    "current_task_id": null,
@@ -843,96 +864,96 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
-      "idle_hours": 140.3,
+      "idle_hours": 146.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
-      "idle_hours": 140.4,
+      "idle_hours": 146.4,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
       "dirty": false,
-      "idle_hours": 126.6,
-      "unmerged_commits": 21
+      "idle_hours": 8.9,
+      "unmerged_commits": 24
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-26T22:25:45.176659+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
-      "idle_hours": 134.2,
+      "idle_hours": 140.2,
       "unmerged_commits": 3
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "worktree-agent-a148e8a94105f7935",
       "dirty": true,
-      "idle_hours": 127.6,
+      "idle_hours": 133.6,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "agent-a148e8a94105f7935",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "dirty": false,
-      "idle_hours": 109.3,
+      "idle_hours": 115.3,
       "unmerged_commits": 5
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-3-3896dcaa-k1714",
       "dirty": true,
-      "idle_hours": 127.3,
+      "idle_hours": 133.3,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-3-3896dcaa-k1714",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "worktree-dispatch-slot-1-a4fe4570",
       "dirty": false,
-      "idle_hours": 14.9,
+      "idle_hours": 20.9,
       "unmerged_commits": 2
      },
      "first_seen_at": "2026-07-27T04:25:30.568624+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     },
     {
      "cleared_at": null,
@@ -945,13 +966,25 @@
      "first_seen_at": "2026-07-27T04:25:30.568624+00:00",
      "key": "k1715-204d556b",
      "last_seen_at": "2026-07-27T10:25:54.285677+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "branch": "wt/dispatch-slot-2-7087efc0-signfc",
+      "dirty": true,
+      "idle_hours": 9.3,
+      "unmerged_commits": 1
+     },
+     "first_seen_at": "2026-07-27T16:25:51.225239+00:00",
+     "key": "dispatch-slot-2-7087efc0-signfc",
+     "last_seen_at": "2026-07-27T16:25:51.225239+00:00"
     }
    ],
    "kind": "worktree_unmerged",
-   "last_breach_detail": "held worktree k1715-204d556b",
-   "last_seen_at": "2026-07-27T10:25:54.285677+00:00",
+   "last_breach_detail": "held worktree dispatch-slot-3-3896dcaa-k1714",
+   "last_seen_at": "2026-07-27T16:25:51.225239+00:00",
    "notified_at": null,
-   "occurrence_count": 150,
+   "occurrence_count": 159,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1822,6 +1855,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T15:59:45.984008+00:00",
+ "updated_at": "2026-07-27T16:42:28.445424+00:00",
  "version": 1
 }
