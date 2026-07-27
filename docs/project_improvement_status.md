@@ -2353,3 +2353,23 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 clean suffix 已開始但尚未滿七日；Work Coordinator owner 仍為 `legacy/1`，且
   未執行 stage／owner transfer／downstream acknowledgement／rollback rehearsal；
   Issue #9 維持 **`contained`**，不得提前標完成。
+
+## 2026-07-27 — Git formal commit mutation-boundary fencing（Issue #18）
+
+- ✅ 依既有 Matt Issue #3 → master spec → T13 ticket 接續，未重跑
+  plan/spec/tickets；Issue #9 的七日 clean suffix 尚未滿，因此改接 blockers 已完成且
+  不碰 frontend／PHASE-Z session 的 #18 tracer slice。
+- 🔎 `GitCommitActuator` 原本只在準備階段取得一次 durable authority grant；grant
+  返回後若 WorkLease、commit owner generation 或全域 Primary Authority 在真正 Git
+  writer 啟動前失效，現行流程仍可能落 commit。原公開 seam RED case 確實在第二次
+  authority 應拒絕時產生新 HEAD。
+- ✅ actuator 現在於持有 canonical Git writer lock、argv 與 exact content hashes
+  固定後，緊貼 subprocess 前重跑同一 durable authority transaction；第二次 grant
+  必須與第一次完全一致。partition、stale lease、owner generation 或 grant identity
+  漂移皆在 Git mutation 前 fail closed，原 grant 保留供精確事故復原。
+- ✅ `tests/test_git_commit_actuator.py` **26 passed**；Change Delivery、Supabase／
+  Primary Authority、session／keepalive／outage相鄰套件 **107 passed**；
+  PostgreSQL commit-authority transaction **5 passed**，`git diff --check`通過。
+- ✅ 此 Git mutation-boundary fencing根因為
+  **`root_cause_fixed_and_verified`**。Issue #18整體仍為 **`contained`**：
+  Email真實partition canary與 #24/#46 direct legacy writer cutover／retirement尚未完成。

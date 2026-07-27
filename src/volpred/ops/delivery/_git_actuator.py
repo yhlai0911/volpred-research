@@ -285,6 +285,10 @@ class GitCommitActuator:
             argv.extend(["--source-workspace", normalized.workspace_ref])
         argv.extend(["--", *normalized.exact_paths])
 
+        authority_grant = self._revalidate_request(
+            authority_request,
+            expected=authority_grant,
+        )
         try:
             proc = subprocess.run(
                 argv,
@@ -429,6 +433,19 @@ class GitCommitActuator:
             authority_grant,
             request=authority_request,
         )
+
+    def _revalidate_request(
+        self,
+        authority_request: CommitAuthorityRequest,
+        *,
+        expected: CommitAuthorityGrant,
+    ) -> CommitAuthorityGrant:
+        observed = self._authorize_request(authority_request)
+        if observed != expected:
+            raise CommitActuatorBlocked(
+                "commit authority grant changed at Git mutation boundary"
+            )
+        return observed
 
     def _recover_request(
         self,

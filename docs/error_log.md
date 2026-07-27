@@ -3683,3 +3683,25 @@ monkeypatch marker／schedule／log 路徑，卻漏掉 module-level `ROOT`；`jo
 完成五步 Gate，狀態為 **`root_cause_fixed_and_verified`**；Issue #9 的七日
 continuous-clean suffix 雖已於 04:56:14 UTC 啟動，但 owner transfer、下游
 acknowledgement 與 rollback rehearsal仍未完成，因此 umbrella 維持 **`contained`**。
+
+### 2026-07-27 — Git authority grant 與真正 mutation boundary 間存在換代窗口
+
+**證據化症狀**：`GitCommitActuator.commit()` 在持有 canonical writer lock後先呼叫
+`CommitAuthority.authorize()`，但取得 grant後便直接啟動Git writer。公開介面failure
+injection讓authority在第二次邊界驗證時回報Primary Authority lease lost；修正前因為
+根本沒有第二次驗證，案例沒有拋錯且HEAD真的前進。這不是Supabase CAS或Git lock失效，
+而是正式外部mutation前缺少緊貼邊界的fencing revalidation。
+
+**根因層級與底層修復**：在writer argv、exact paths與content hashes固定完成後、
+`subprocess.run()`前重跑同一durable authorize transaction。既有PostgreSQL／Supabase
+transaction會再次驗WorkLease、commit owner generation、全域
+`operations-core-primary` epoch／token；回傳grant還必須與第一次完全一致。任何
+partition、stale lease、owner或grant漂移都在Git write前fail closed；不abandon原grant，
+保留精確recovery所需identity。
+
+**回歸、制度化與狀態**：原案例RED→GREEN並回讀HEAD不變；
+`test_git_commit_actuator.py` **26 passed**，authority／Change Delivery相鄰套件
+**107 passed**，PostgreSQL commit-authority transaction **5 passed**，
+`git diff --check`通過。Git mutation-boundary fencing這個根因完成五步Gate，狀態為
+**`root_cause_fixed_and_verified`**；Issue #18仍因Email真實partition canary與
+#24/#46 legacy writer cutover／retirement未完成而維持 **`contained`**。

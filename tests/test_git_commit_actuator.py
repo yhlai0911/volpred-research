@@ -112,6 +112,19 @@ class _MismatchedOwnerAuthority(_Authority):
         )
 
 
+class _PartitionedAtMutationBoundaryAuthority(_Authority):
+    def authorize(
+        self,
+        request: CommitAuthorityRequest,
+    ) -> CommitAuthorityGrant:
+        grant = super().authorize(request)
+        if len(self.requests) == 2:
+            raise CommitActuatorBlocked(
+                "Primary Authority lease lost at Git mutation boundary"
+            )
+        return grant
+
+
 def _git(repo: Path, *args: str) -> str:
     proc = subprocess.run(
         ["git", "-C", str(repo), *args],
@@ -201,6 +214,25 @@ def test_actuator_lands_and_reads_back_exact_changeset(
     ]
 
 
+def test_actuator_revalidates_primary_authority_at_git_mutation_boundary(
+    repository: tuple[Path, str],
+) -> None:
+    repo, base_commit = repository
+    (repo / "tracked.txt").write_text("candidate\n", encoding="utf-8")
+    (repo / "new.txt").write_text("new\n", encoding="utf-8")
+    authority = _PartitionedAtMutationBoundaryAuthority()
+
+    with pytest.raises(
+        CommitActuatorBlocked,
+        match="lease lost at Git mutation boundary",
+    ):
+        _actuator(authority).commit(_command(repo, base_commit))
+
+    assert len(authority.requests) == 2
+    assert authority.abandonments == []
+    assert _git(repo, "rev-parse", "HEAD") == base_commit
+
+
 def test_actuator_recovers_exact_commit_after_process_return_is_lost(
     repository: tuple[Path, str],
     tmp_path: Path,
@@ -230,7 +262,7 @@ def test_actuator_recovers_exact_commit_after_process_return_is_lost(
     assert recovered.actor == command.actor
     assert recovered.status == "committed"
     assert datetime.fromisoformat(recovered.observed_at).utcoffset() is not None
-    assert len(authority.requests) == 1
+    assert len(authority.requests) == 2
     assert _git(repo, "rev-parse", "HEAD") == head_after_later_commit
 
 
@@ -304,12 +336,13 @@ def test_unexpected_head_mutation_retains_grant_and_blocks_rollback(
             request: CommitAuthorityRequest,
         ) -> CommitAuthorityGrant:
             grant = super().authorize(request)
-            (repo / "unrelated.txt").write_text(
-                "concurrent\n",
-                encoding="utf-8",
-            )
-            _git(repo, "add", "unrelated.txt")
-            _git(repo, "commit", "-m", "concurrent unrelated commit")
+            if len(self.requests) == 1:
+                (repo / "unrelated.txt").write_text(
+                    "concurrent\n",
+                    encoding="utf-8",
+                )
+                _git(repo, "add", "unrelated.txt")
+                _git(repo, "commit", "-m", "concurrent unrelated commit")
             return grant
 
     authority = _RacingAuthority()
@@ -494,13 +527,13 @@ def test_timeout_with_staged_residue_keeps_grant_active_on_retry(
         "new.txt",
         "tracked.txt",
     ]
-    assert len(authority.requests) == 1
+    assert len(authority.requests) == 2
     assert authority.abandonments == []
 
     with pytest.raises(CommitActuatorBlocked, match="already staged"):
         _actuator(authority).commit(command)
 
-    assert len(authority.requests) == 1
+    assert len(authority.requests) == 2
     assert authority.abandonments == []
     assert _authority_request(command).request_sha256 in authority.grants
 
