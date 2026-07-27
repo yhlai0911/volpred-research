@@ -505,6 +505,11 @@ class ProviderExecution:
     def execute(self, request: ExecutionRequest) -> ExecutionOutcome:
         fingerprint = _request_fingerprint(request)
         now = _aware(self._clock(), field="provider execution clock")
+        # Startup validation is not enough: a long-lived process may observe a
+        # config reload or adapter registry drift. Re-run the zero-paid guard at
+        # every dispatch before any reservation, probe, or provider I/O.
+        for descriptor, _adapter in self._providers:
+            self._validate_descriptor(descriptor)
         owner = self._token_factory()
         if not owner:
             raise ValueError("provider execution reservation token is required")

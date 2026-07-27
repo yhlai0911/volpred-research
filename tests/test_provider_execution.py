@@ -154,6 +154,19 @@ def test_selection_rejects_non_equivalent_provider_without_probing_it() -> None:
     assert adapter.execute_calls == []
 
 
+def test_zero_paid_guard_runs_again_at_every_dispatch() -> None:
+    provider = descriptor("claude")
+    adapter = FakeProvider()
+    execution = engine([(provider, adapter)])
+    object.__setattr__(provider, "metered_paid", True)
+
+    with pytest.raises(ValueError, match="metered-paid"):
+        execution.execute(request())
+
+    assert adapter.probe_calls == 0
+    assert adapter.execute_calls == []
+
+
 @pytest.mark.parametrize(
     "blocker",
     [
