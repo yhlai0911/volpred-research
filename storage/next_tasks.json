@@ -34841,9 +34841,28 @@
         "to": "pending",
         "by": "release",
         "note": "normalize_pending_claim_residue"
+      },
+      {
+        "ts": "2026-07-27T11:11:56.517740+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cac9ecfb2d0548b1b3f3254e4e07d926"
+      },
+      {
+        "ts": "2026-07-27T11:12:01.733168+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cac9ecfb2d0548b1b3f3254e4e07d926"
+      },
+      {
+        "ts": "2026-07-27T11:14:37.631471+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-cac9ecfb2d0548b1b3f3254e4e07d926",
+        "note": "manual_release"
       }
     ],
-    "last_released_at": "2026-07-26T12:18:47.348079+00:00",
+    "last_released_at": "2026-07-27T11:14:37.631458+00:00",
     "last_release_reason": "normalize_pending_claim_residue",
     "triage_2026_07_26": "compute job agent-brief_k1724 exit=2 instant launch-fail（job_metadata 缺、worktree dispatch-slot-1-cb097ccd-k1724 已消失、無任何產出）。無可救援→需 fresh re-run；此 pending 任務即載體，重派走 compute_queue/enqueue-agent。"
   },
@@ -44688,13 +44707,37 @@
     "title": "K1715 escalation: remove phantom-MC README claim + fix BFGS min-NLL guard + re-run MLE + re-review to clear Codex CRITICAL, then merge",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "hourly_dispatch_collect_completed",
     "description": "K1715 collect_completed did NOT reach a mergeable state — escalation (attempt 2). The scientific result is an honest, arch-library-cross-validated NULL (GAS-t score-driven TIED with GARCH-t on VaR pinball and joint VaR+ES FZ0 under Harvey |t|>3; all 4 Student-t families share ~1.85-1.87x 1% VaR under-coverage). Two BLOCKERS prevent merge:\n(1) RESEARCH-HONESTY: README.md L67-68 claims the closed-form VaR/ES were validated by '4,000,000 Monte-Carlo ... 見 K1715.py 尾部', but NO such MC-verification block exists in K1715.py (only the 10k-rep Acerbi-Szekely Z2 null). This is a phantom/fabricated validation claim and MUST be removed or replaced with the real validation (the arch-library cross-check).\n(2) Codex primary-path review verdict = FAIL, CRITICAL: BFGS polish overwrites the Nelder-Mead candidate unconditionally (K1715.py:283-286) so a higher-NLL solution can be accepted; optimizer_success=false on all 268/268 fits. Numbers are externally validated by the arch library (params to 3-4 sig figs) so the reported run is likely correct, but the code must guard BFGS to keep min-NLL, and the fit must be RE-RUN (heavy MLE, 268 fits -> compute_queue) so results.json matches the corrected code, then re-reviewed by Codex until the CRITICAL clears. Also soften 'STATISTICALLY TIED' to failure-to-reject framing (1% FZ0 t=2.39 p=0.017, GAS nominally worse) — not an equivalence claim.\nWorktree still present: .claude/worktrees/k1715-204d556b (branch worktree-k1715-204d556b). Do NOT merge until PASS. Source: compute followup agent-agent-brief_k1715_204d556b-e2cc16.",
     "escalation_attempts": 1,
     "parent_compute_followup": "agent-agent-brief_k1715_204d556b-e2cc16",
     "k_id": "K1715",
-    "created_at": "2026-07-26T20:08:01.954844+00:00"
+    "created_at": "2026-07-26T20:08:01.954844+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T11:16:25.022847+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-c1f5b7d85c144d02b0e501adfd981658"
+      },
+      {
+        "ts": "2026-07-27T11:16:32.493452+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-c1f5b7d85c144d02b0e501adfd981658"
+      },
+      {
+        "ts": "2026-07-27T11:21:15.492060+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275; awaiting PHASE A collection"
   },
   {
     "id": "issue43_mutating_isolation_20260727",
@@ -46951,7 +46994,7 @@
   {
     "id": "assign_e6334a67",
     "title": "PHASE-Z 卡住檔案 incident（e31d4511cfd8f08f）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n53 個未提交檔案不是任何一班 fire 產出的，最長已連續 28 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- experiments/k1319/README.md — 7 班\n- experiments/k1319/k1319.py — 7 班\n- experiments/k1319/k1319_results.json — 21 班\n- experiments/k1399/k1399_qlike_comparison.png — 21 班\n- experiments/k1399/k1399_vix_decomp_results.json — 21 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 21 班\n- experiments/k1591/k1591_results.json — 21 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 21 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 21 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 21 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 21 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 21 班\n- experiments/k1592/fig3_origin_gamma_t.png — 21 班\n- experiments/k1705/k1705_results.json — 21 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 10 班\n- experiments/k1730/README.md — 10 班\n- experiments/k1730/REMEDIATION_v2.md — 10 班\n- experiments/k1730/codex_review_v1.md — 10 班\n- experiments/k1730/data/CPI_first_release.csv — 10 班\n- experiments/k1730/data/DGS10_daily.csv — 10 班\n- experiments/k1730/data/DTB3_daily.csv — 10 班\n- experiments/k1730/data/IP_first_release.csv — 10 班\n- experiments/k1730/data/NFP_first_release.csv — 10 班\n- experiments/k1730/data/UNRATE_first_release.csv — 10 班\n- experiments/k1730/data/VIX_daily.csv — 10 班\n- experiments/k1730/data/spy_daily_rv.csv — 10 班\n- experiments/k1730/fig1_rolling_coverage.png — 10 班\n- experiments/k1730/fig2_ssvs_pip.png — 10 班\n- experiments/k1730/fig3_interval_vs_realized.png — 10 班\n- experiments/k1730/fig4_pit_calibration.png — 10 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T102844873101Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T110759836535Z:<路徑>`",
+    "description": "## 發生什麼\n53 個未提交檔案不是任何一班 fire 產出的，最長已連續 29 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- experiments/k1319/README.md — 8 班\n- experiments/k1319/k1319.py — 8 班\n- experiments/k1319/k1319_results.json — 22 班\n- experiments/k1399/k1399_qlike_comparison.png — 22 班\n- experiments/k1399/k1399_vix_decomp_results.json — 22 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 22 班\n- experiments/k1591/k1591_results.json — 22 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 22 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 22 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 22 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 22 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 22 班\n- experiments/k1592/fig3_origin_gamma_t.png — 22 班\n- experiments/k1705/k1705_results.json — 22 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 11 班\n- experiments/k1730/README.md — 11 班\n- experiments/k1730/REMEDIATION_v2.md — 11 班\n- experiments/k1730/codex_review_v1.md — 11 班\n- experiments/k1730/data/CPI_first_release.csv — 11 班\n- experiments/k1730/data/DGS10_daily.csv — 11 班\n- experiments/k1730/data/DTB3_daily.csv — 11 班\n- experiments/k1730/data/IP_first_release.csv — 11 班\n- experiments/k1730/data/NFP_first_release.csv — 11 班\n- experiments/k1730/data/UNRATE_first_release.csv — 11 班\n- experiments/k1730/data/VIX_daily.csv — 11 班\n- experiments/k1730/data/spy_daily_rv.csv — 11 班\n- experiments/k1730/fig1_rolling_coverage.png — 11 班\n- experiments/k1730/fig2_ssvs_pip.png — 11 班\n- experiments/k1730/fig3_interval_vs_realized.png — 11 班\n- experiments/k1730/fig4_pit_calibration.png — 11 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T102844873101Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T110759836535Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T112901552644Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -47016,67 +47059,68 @@
         "storage/paper_pipeline_status.json"
       ],
       "streaks": {
-        "experiments/k1319/README.md": 7,
-        "experiments/k1319/k1319.py": 7,
-        "experiments/k1319/k1319_results.json": 21,
-        "experiments/k1399/k1399_qlike_comparison.png": 21,
-        "experiments/k1399/k1399_vix_decomp_results.json": 21,
-        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 21,
-        "experiments/k1591/k1591_results.json": 21,
-        "experiments/k1591/tables/k1591_daily_panel.csv": 21,
-        "experiments/k1591/tables/k1591_regime_summary.csv": 21,
-        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 21,
-        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 21,
-        "experiments/k1592/fig2_gammarule_gjr_share.png": 21,
-        "experiments/k1592/fig3_origin_gamma_t.png": 21,
-        "experiments/k1705/k1705_results.json": 21,
-        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 10,
-        "experiments/k1730/README.md": 10,
-        "experiments/k1730/REMEDIATION_v2.md": 10,
-        "experiments/k1730/codex_review_v1.md": 10,
-        "experiments/k1730/data/CPI_first_release.csv": 10,
-        "experiments/k1730/data/DGS10_daily.csv": 10,
-        "experiments/k1730/data/DTB3_daily.csv": 10,
-        "experiments/k1730/data/IP_first_release.csv": 10,
-        "experiments/k1730/data/NFP_first_release.csv": 10,
-        "experiments/k1730/data/UNRATE_first_release.csv": 10,
-        "experiments/k1730/data/VIX_daily.csv": 10,
-        "experiments/k1730/data/spy_daily_rv.csv": 10,
-        "experiments/k1730/fig1_rolling_coverage.png": 10,
-        "experiments/k1730/fig2_ssvs_pip.png": 10,
-        "experiments/k1730/fig3_interval_vs_realized.png": 10,
-        "experiments/k1730/fig4_pit_calibration.png": 10,
-        "experiments/k1730/k1730_data.py": 10,
-        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 10,
-        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 10,
-        "experiments/k1730/k1730_models.py": 10,
-        "experiments/k1730/k1730_quickmode_results.json": 10,
-        "experiments/k1730/k1730_report_tables.py": 10,
-        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 10,
-        "experiments/k1730/k1730_scoring.py": 10,
-        "experiments/k1730/reproduce_spec.json": 10,
-        "experiments/k1730/review_verdict.json": 10,
-        "experiments/k1730/run_production.log": 10,
-        "experiments/k1730/run_production_v2.log": 10,
-        "experiments/k1730/test_k1730_recovery.py": 10,
-        "experiments/k1730/verify_readme_alignment.py": 10,
-        "experiments/k892/k892_verify_tw_gamma.py": 4,
-        "experiments/k892/k892_verify_tw_gamma_results.json": 4,
-        "experiments/paper2_table1_summary_stats_provenance/results.json": 21,
-        "paper/leverage-direction/main_v_ijf.pdf": 7,
-        "storage/drafts/article_images/k1600_dm_and_beta1q.png": 4,
-        "storage/drafts/article_images/k1600_qlike_loss_ratio.png": 4,
-        "storage/logs/trending_primary_source_verification.jsonl": 28,
-        "storage/memory/knowledge.json": 21,
-        "storage/paper_pipeline_status.json": 7
+        "experiments/k1319/README.md": 8,
+        "experiments/k1319/k1319.py": 8,
+        "experiments/k1319/k1319_results.json": 22,
+        "experiments/k1399/k1399_qlike_comparison.png": 22,
+        "experiments/k1399/k1399_vix_decomp_results.json": 22,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 22,
+        "experiments/k1591/k1591_results.json": 22,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 22,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 22,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 22,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 22,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 22,
+        "experiments/k1592/fig3_origin_gamma_t.png": 22,
+        "experiments/k1705/k1705_results.json": 22,
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 11,
+        "experiments/k1730/README.md": 11,
+        "experiments/k1730/REMEDIATION_v2.md": 11,
+        "experiments/k1730/codex_review_v1.md": 11,
+        "experiments/k1730/data/CPI_first_release.csv": 11,
+        "experiments/k1730/data/DGS10_daily.csv": 11,
+        "experiments/k1730/data/DTB3_daily.csv": 11,
+        "experiments/k1730/data/IP_first_release.csv": 11,
+        "experiments/k1730/data/NFP_first_release.csv": 11,
+        "experiments/k1730/data/UNRATE_first_release.csv": 11,
+        "experiments/k1730/data/VIX_daily.csv": 11,
+        "experiments/k1730/data/spy_daily_rv.csv": 11,
+        "experiments/k1730/fig1_rolling_coverage.png": 11,
+        "experiments/k1730/fig2_ssvs_pip.png": 11,
+        "experiments/k1730/fig3_interval_vs_realized.png": 11,
+        "experiments/k1730/fig4_pit_calibration.png": 11,
+        "experiments/k1730/k1730_data.py": 11,
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 11,
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 11,
+        "experiments/k1730/k1730_models.py": 11,
+        "experiments/k1730/k1730_quickmode_results.json": 11,
+        "experiments/k1730/k1730_report_tables.py": 11,
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 11,
+        "experiments/k1730/k1730_scoring.py": 11,
+        "experiments/k1730/reproduce_spec.json": 11,
+        "experiments/k1730/review_verdict.json": 11,
+        "experiments/k1730/run_production.log": 11,
+        "experiments/k1730/run_production_v2.log": 11,
+        "experiments/k1730/test_k1730_recovery.py": 11,
+        "experiments/k1730/verify_readme_alignment.py": 11,
+        "experiments/k892/k892_verify_tw_gamma.py": 5,
+        "experiments/k892/k892_verify_tw_gamma_results.json": 5,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 22,
+        "paper/leverage-direction/main_v_ijf.pdf": 8,
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png": 5,
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png": 5,
+        "storage/logs/trending_primary_source_verification.jsonl": 29,
+        "storage/memory/knowledge.json": 22,
+        "storage/paper_pipeline_status.json": 8
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T102844873101Z",
-        "refs/volpred/quarantine/20260727T110759836535Z"
+        "refs/volpred/quarantine/20260727T110759836535Z",
+        "refs/volpred/quarantine/20260727T112901552644Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-27T10:28:48.713802+00:00",
-      "last_seen_at": "2026-07-27T11:08:04.024505+00:00",
+      "last_seen_at": "2026-07-27T11:29:06.270864+00:00",
       "derates": true,
       "derates_updated_at": "2026-07-27T10:29:32.920982+00:00",
       "deferred": [
@@ -47106,7 +47150,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T11:08:04.024505+00:00"
+    "updated_at": "2026-07-27T11:29:06.270864+00:00"
   },
   {
     "id": "assign_b119d7be",
@@ -47198,15 +47242,11 @@
     "description": "Implement next retirement signal without replanning: at the formal PostgreSQL Effect Delivery settlement boundary, append any second acknowledged delivery for one EffectRequest to a private durable sequence ledger; expose service-role-only read RPC; materialize duplicate_effect signal from verified DB sequence cursor under Operations Core schedule; deploy migration, TDD, Matt two-axis review, live DB/scheduler read-back. Do not start observation recorder.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T11:06:13.545954+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T11:06:23.149331+00:00",
-    "claim_expires_at": "2026-07-27T13:06:23.149331+00:00",
-    "claim_session_id": "ce265b208717",
     "status_history": [
       {
         "ts": "2026-07-27T11:06:23.149345+00:00",
@@ -47219,8 +47259,175 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:25:30.188042+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T11:06:26.588539+00:00"
+    "started_at": "2026-07-27T11:06:26.588539+00:00",
+    "completed_at": "2026-07-27T11:25:30.188018+00:00",
+    "result": "root_cause_fixed_and_verified: private FORCE-RLS duplicate-effect ledger + serialized trigger + dense rollback-safe cursor deployed. PG17 concurrency/reverse-order/rollback/replay tests and live RPC/RLS/ACL/advisor read-back passed; natural Operations Core fire a08baf4868d03695348302f5 succeeded.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "K1649_article_general",
+    "title": "K1649: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1649 has verdict signal (score=3, reasons=['PASS/Harvey-significant', 'robust inference', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: K1649 [NULL — results.json verdict=NULL_NO_EXPECTILE_EDGE_VS_LINEARQR]：檢驗 expectile 型風險測度是否在 TLT/HYG 日報酬 VaR backtest 中，以 OOS pinball loss 穩健打敗 quantile-VaR baseline。資料 Yahoo Finance adjusted close 2010-01-04~2026-07-02，OOS 自 2015-01-01（每 asset-alpha common obs=2,891），quarterly e Canonical evidence: experiments/k1649/K1649_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "succeeded",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1649",
+    "evidence_source_paths": [
+      "experiments/k1649/K1649_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1649/K1649_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T11:10:45+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T11:15:26.655959+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cac9ecfb2d0548b1b3f3254e4e07d926"
+      },
+      {
+        "ts": "2026-07-27T11:15:26.921751+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cac9ecfb2d0548b1b3f3254e4e07d926"
+      },
+      {
+        "ts": "2026-07-27T11:22:17.015481+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-cac9ecfb2d0548b1b3f3254e4e07d926"
+      }
+    ],
+    "started_at": "2026-07-27T11:15:26.921737+00:00",
+    "completed_at": "2026-07-27T11:22:17.015387+00:00",
+    "result": "K1649 一般讀者向 NULL 文章草稿完成：storage/drafts/K1649_general_draft.md（1231字），anti_ai_gate exit0，coverage 圖重繪去除 K-id 標題。expectile/CARE 在 TLT/HYG VaR backtest 未顯著打敗 LinearQR（8場 DM 全未過 Harvey|t|>3.0）。draft→pool（drafts 4→5 回到 floor）。"
+  },
+  {
+    "id": "assign_d53b34c0",
+    "title": "[Issue #46] Add duplicate-effect source to retirement materializer schedule",
+    "description": "Formal schedule behavior change: extend existing Operations Core */5 legacy_retirement_signal_materialize wrapper to refresh duplicate_effect after legacy_business_fire. Same cadence/owner; no host cron/piggyback; fail nonzero if private Supabase RPC unavailable or sequence/schema drifts; observation recorder remains unscheduled.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-27T11:11:19.519610+00:00",
+    "payload": {
+      "governance_area": "schedule",
+      "schedule_proposal": {
+        "job_id": "legacy_retirement_signal_materialize",
+        "change": "append duplicate_effect materializer after legacy_business_fire",
+        "cadence": "*/5 * * * *",
+        "owner": "operations_core",
+        "failure": "nonzero and retry; no clean observation",
+        "rollback": "restore prior one-source wrapper while retaining private DB ledger"
+      }
+    },
+    "parent_task_id": "assign_6d5f1390",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "status_history": [
+      {
+        "ts": "2026-07-27T11:11:23.169631+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:11:26.190791+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:25:30.476555+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T11:11:26.190775+00:00",
+    "completed_at": "2026-07-27T11:25:30.476529+00:00",
+    "result": "root_cause_fixed_and_verified: Operations Core-only */5 materializer now publishes both legacy-business-fire and duplicate-effect typed signals. Canonical/live wrapper SHA a89ce994... matched and natural 2026-07-27T11:25Z fire exited 0 with duplicate count=0 watermark=0.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "K1599_article_general",
+    "title": "K1599: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1599 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1599 [CONDITIONAL_PASS]（Codex 已審查，verdict CONDITIONAL_PASS）: 12檔ETF（SPY/QQQ/IWM/XLB/XLE/XLF/XLI/XLK/XLP/XLU/XLV/XLY，2005起，OOS從2016-01-01）用日頻BNS-style rolling bipower scale偵測jump（|r_t|/sqrt((pi/2)*rolling_mean(|r_t-1|*|r_t-2|))>2.5），檢定跨ETF co-jump proxy是否改善次日平方報酬QLIKE預測。結果：HAR_CJ Canonical evidence: experiments/k1599/k1599_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1599",
+    "evidence_source_paths": [
+      "experiments/k1599/k1599_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1599/k1599_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T11:26:00+00:00"
+  },
+  {
+    "id": "assign_04d8e4d7",
+    "title": "[Issue #46] Add durable silent-loss retirement evidence producer",
+    "description": "Implement the next unblocked T40 slice from docs/refactor_plan_ops_master_2026_07.md §7 and GitHub #46 without re-planning. Define silent loss at unavoidable canonical acceptance/finalization boundaries, append durable gap-free events for every accepted unit that can disappear without a terminal acknowledgement, materialize the fixed silent_loss typed interval signal under Operations Core ownership, fail closed on unreadable/gapped evidence, add TDD regressions for crash/race/replay/late visibility, obtain Matt Spec+Standards PASS, deploy and live-read back a natural scheduled fire. Do not start the 14-day recorder or retire rollback artifacts until all four signal producers and owner census pass.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T11:28:26.545584+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T11:28:30.647180+00:00",
+    "claim_expires_at": "2026-07-27T13:28:30.647180+00:00",
+    "claim_session_id": "7007a525e479",
+    "status_history": [
+      {
+        "ts": "2026-07-27T11:28:30.647199+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:28:34.184180+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T11:28:34.184162+00:00"
+  },
+  {
+    "id": "issue46_orphan_work_signal",
+    "title": "[Issue #46] Add durable orphan-work violation producer",
+    "description": "Continue existing T40 without replanning: instrument the enforced dispatch workspace orphan-sweep boundary after durable allocator ownership proves a registered workspace but the job is absent from current_jobs, phase_z_pending, and completions. Before any orphan finalization, append a tamper-evident durable orphan_work event; fail closed if evidence cannot be recorded; derive typed interval signal only from the verified ledger. TDD must cover protected/remediation/non-owned exclusions, append failure, truncation/tamper, restart sweep, and no double count. Do not start the observation recorder.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "created_at": "2026-07-27T11:29:01.799026+00:00"
   }
 ]

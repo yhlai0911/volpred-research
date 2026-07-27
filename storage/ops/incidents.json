@@ -3,7 +3,7 @@
   "inc_03e5a0637780": {
    "class": "ordinary",
    "clean_observations": [],
-   "current_task_id": "ci-root-30256296797",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-27T10:05:23.865318+00:00",
@@ -45,9 +45,19 @@
    "last_seen_at": "2026-07-27T10:55:09.122096+00:00",
    "notified_at": null,
    "occurrence_count": 4,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-27T11:25:17.640541+00:00",
+    "by": "ci-red-30256296797",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-27T11:25:17.640541+00:00",
+     "by": "ci-red-30256296797",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -444,12 +454,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T08:21:18.864163+00:00"
-    },
-    {
-     "at": "2026-07-27T08:26:19.357612+00:00"
-    },
-    {
      "at": "2026-07-27T08:32:21.348286+00:00"
     },
     {
@@ -478,6 +482,12 @@
     },
     {
      "at": "2026-07-27T11:07:42.905710+00:00"
+    },
+    {
+     "at": "2026-07-27T11:08:28.790529+00:00"
+    },
+    {
+     "at": "2026-07-27T11:28:59.924173+00:00"
     }
    ],
    "current_task_id": null,
@@ -1309,19 +1319,19 @@
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:161",
-     "last_seen_at": "2026-07-27T10:31:22.576333+00:00"
+     "last_seen_at": "2026-07-27T11:08:42.726867+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:246",
-     "last_seen_at": "2026-07-27T10:31:22.576333+00:00"
+     "last_seen_at": "2026-07-27T11:08:42.726867+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1592/k1592.py:203",
-     "last_seen_at": "2026-07-27T10:31:22.576333+00:00"
+     "last_seen_at": "2026-07-27T11:08:42.726867+00:00"
     },
     {
      "cleared_at": null,
@@ -1386,10 +1396,10 @@
    ],
    "kind": "silent_fallback_new",
    "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-   "last_seen_at": "2026-07-27T10:31:22.576333+00:00",
+   "last_seen_at": "2026-07-27T11:08:42.726867+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 56,
+   "occurrence_count": 57,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1695,6 +1705,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T11:07:42.906301+00:00",
+ "updated_at": "2026-07-27T11:28:59.924797+00:00",
  "version": 1
 }

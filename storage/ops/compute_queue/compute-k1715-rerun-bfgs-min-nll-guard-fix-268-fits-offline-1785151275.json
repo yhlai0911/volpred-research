@@ -1,0 +1,38 @@
+{
+  "id": "compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275",
+  "title": "K1715 rerun (BFGS min-NLL guard fix) — 268 fits offline",
+  "script_path": ".claude/worktrees/k1715-204d556b/experiments/K1715/K1715.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T11:21:15Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275.stderr",
+  "result_artifact": ".claude/worktrees/k1715-204d556b/experiments/K1715/K1715_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "# K1715 rerun 收件 followup（BFGS min-NLL guard 修正後）\n\n## 背景\nK1715 escalation attempt 2。本 compute job 是在 worktree `.claude/worktrees/k1715-204d556b`\n用**修正後的** `K1715.py` 重跑 268 fits（67 refits × 4 Student-t 模型），使 `K1715_results.json`\n與修正後代碼一致。\n\n本次修正（已 commit 在 worktree branch `worktree-k1715-204d556b`）：\n1. **BFGS min-NLL guard**（Codex CRITICAL）：`fit_model()` 迴圈原本無條件採用 BFGS polish 的\n   `res`，若 BFGS 在 near-integrated ridge 上 line-search 失敗而回傳較高 NLL，較差解會被接受。\n   已改為 `res = res_bfgs if (isfinite and res_bfgs.fun <= res_nm.fun) else res_nm`，保留 NM/BFGS\n   兩者中 NLL 較低者。\n2. **build_readme.py**：把「統計上打平」措辭改為明確 fail-to-reject（非等價宣稱）。\n   （phantom 4M-MC 驗證宣稱在前次 attempt 已移除，現版明確聲明「本次 run 未另跑獨立 MC 對照」。）\n\n## 收件時要做（依序）\n1. 讀 fresh `experiments/K1715/K1715_results.json`（**在 worktree cwd**）。**禁止從 README 或摘要\n   轉抄數字**。\n2. **驗 guard 生效**：確認 `per_model.*` 的 fit 診斷中 `nm_to_bfgs_improve`（NM→採用解的 NLL 改變）\n   一律 ≥ 0（不得為負 = 不得比 NM 更差）。任一為負 = guard 未生效，退回修 code。\n3. **驗數字一致性**：GARCH-t / GJR-t 兩個 baseline 的參數應與 `arch` 套件交叉檢核吻合到 3–4 位\n   有效數字（原本就外部驗證過；rerun 後應維持）。核心結論不變：score-driven 在 SPY 上對 VaR\n   (pinball) 與聯合 VaR+ES (FZ0) 於 Harvey |t|>3 門檻下**未能拒絕與 GARCH-t 相等**；四個 Student-t\n   模型共享 1% 左尾覆蓋不足。若結論翻轉 → 停下回報（重大變化需人工裁決）。\n4. **regen README**：`uv run python experiments/K1715/build_readme.py`（README 機械生成，數字全來自\n   results.json）。\n5. **Codex primary-path 二審** `K1715.py`（走 codex-rescue / codex:review），聚焦：BFGS guard 是否\n   真的消除「接受較高 NLL 解」的路徑；`optimizer_success` 語意說明是否誠實。審到 CRITICAL 清除。\n6. **PASS 才 merge**：先 `python3 scripts/check_experiment_artifacts.py check --path experiments/K1715`\n   → 再 `bash scripts/merge_worktree.sh`（走 worktree-merge-verification skill 的驗證）。\n   knowledge 條目**只能主線程寫**、數字程式化取自 results.json。\n7. **FAIL**：不 merge，記錄失敗根因，這是 attempt 3 → 觸發 3-strike（拆解 / 補文獻 / Codex 二審 /\n   escalate email 給老闆），不得原樣再重試。\n\n## 成功標準\nguard 驗證通過 + 數字與 arch 交叉一致 + Codex CRITICAL 清除 + worktree 已 merge + knowledge 條目寫入。\n\n**Model**: opus / high (per model_router; escalation attempt → high effort)",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "k1715_bfgs_fix_dephantom_rerun_20260727",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T11:21:15Z",
+    "linked_at": "2026-07-27T11:21:15Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": null,
+  "brief_snapshot": null
+}

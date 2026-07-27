@@ -28069,5 +28069,15 @@
     "owner": "hourly-slot-2-3cd2ea553372468d88d08657717888d8",
     "commit": null,
     "summary": "K1436 一般讀者文章（retry-v2）：發佈到草稿池 mile_3c83e665（audience=general）。發現＝BTC 永續資金費率對次日已實現波動無增量預測力：帶方向 Clark-West p=0.080（NULL），取絕對值 p=0.041 但 QLIKE 改善 <1%（經濟上約等於零）。2 張 data-bound 圖表，anti-AI gate PASS，content-vs-source audit PASS（4 claims / 164 source values）。補齊既有 research 版 mile_5193647b 的 general 缺口。懶人包 render 已入列 lazypack-mile_3c83e665，經 cadence 釋出。"
+  },
+  {
+    "timestamp": "2026-07-27T19:24:02+08:00",
+    "task_type": "experiment",
+    "task_id": "k1715_bfgs_fix_dephantom_rerun_20260727",
+    "outcome": "awaiting_agent_job",
+    "actor": "hourly-slot-2-c1f5b7d85c144d02b0e501adfd981658",
+    "owner": "hourly-slot-2-c1f5b7d85c144d02b0e501adfd981658",
+    "commit": "9926bca90",
+    "summary": "K1715 escalation attempt 2：修兩個 merge blocker 後把 heavy MLE 重跑派進 compute_queue。\n\n**修正（worktree `k1715-204d556b` branch，commit 9926bca90）**：\n1. BFGS min-NLL guard（Codex CRITICAL）：`fit_model()` 原無條件採用 BFGS polish 的 `res`，\n   BFGS line-search 在 near-integrated ridge 失敗回傳較高 NLL 時較差解會被接受\n   （optimizer_success=false on 268/268 fits 的根源之一）。改為保留 NM/BFGS 中 NLL 較低者。\n2. build_readme.py：「統計上打平」→ 明確 fail-to-reject（非等價宣稱）。phantom 4M-MC 驗證宣稱\n   前次 attempt 已移除，現版明確聲明未另跑獨立 MC。\n\n**重跑**：268 fits（67 refits × 4 Student-t 模型）離線確定性（K1715_source_snapshot.csv 存在），\nheavy compute → compute_queue job `compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275`。\nsource task 標 awaiting_agent_job。followup（experiment/P2）：驗 guard 生效（nm_to_bfgs_improve≥0）+\narch 交叉一致 + regen README + Codex 二審清 CRITICAL + merge_worktree + 主線程寫 knowledge。\n\n**驗證**：py_compile OK；worktree branch commit 落地（2 files, 16+/7-）。fire 職責到 enqueue 為止。"
   }
 ]
