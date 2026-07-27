@@ -19,6 +19,16 @@ from uuid import uuid4
 
 from volpred.diagnostics import warn
 
+from .registry import (
+    ProviderRegistry as ProviderRegistry,
+    ProviderRegistryError as ProviderRegistryError,
+    ProviderSpawnReceipt as ProviderSpawnReceipt,
+    RegisteredProvider as RegisteredProvider,
+    authorize_provider_spawn as authorize_provider_spawn,
+    load_provider_registry as load_provider_registry,
+    verify_spawn_receipt as verify_spawn_receipt,
+)
+
 
 class BlockerKind(str, Enum):
     QUOTA = "quota"

@@ -40,6 +40,11 @@ from typing import Sequence
 from typing import Callable
 
 from volpred.ops import fire_manifest, termination
+from volpred.ops.execution.registry import (
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 
 from . import (
     alerts, claim_release, codex_failover, failure_class, identity, isolation,
@@ -504,6 +509,7 @@ def _run_one_attempt(
         claude_bin, "-p", "--dangerously-skip-permissions",
         "--effort", effort, "--model", model,
         "--add-dir", str(PROJECT_ROOT),
+        "--setting-sources", "",
         "--settings", str(PROJECT_ROOT / ".claude" / "settings.json"),
         *(["--debug-file", str(debug_path)]
           if attempt >= DEBUG_SIDECAR_FROM_ATTEMPT else []),
@@ -586,6 +592,23 @@ def _run_one_attempt(
         except Exception as exc:  # noqa: BLE001 — attribution must never veto a fire
             LOG.warning("fire manifest open failed for job_id=%s: %s", job_id, exc)
     try:
+        # This is intentionally adjacent to Popen. It reloads canonical config
+        # on every retry attempt and stamps the exact registry bytes into the
+        # provider process environment.
+        provider_receipt = authorize_provider_spawn(
+            contract_id="dispatch-supervisor.claude",
+            model_id=model,
+            executable_path=claude_bin,
+            environment=child_env,
+        )
+        child_env.update(provider_receipt.environment())
+        argv[0] = provider_receipt.resolved_executable
+        if provider_receipt.settings_path is None:
+            raise ProviderRegistryError(
+                "Claude launch contract requires pinned settings"
+            )
+        argv[argv.index("--settings") + 1] = provider_receipt.settings_path
+        verify_spawn_receipt(provider_receipt)
         proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)
     except OSError:
         # Spawn itself failed (e.g. claude_bin missing) — free the slot we
@@ -862,18 +885,36 @@ def run_worker(
         final_model = model
         LOG.info("worker attempt=%d/%d model=%s effort=%s", attempt, max_attempts, model, DISPATCH_EFFORT)
         attempt_identity: dict[str, int] = {}
-        exit_code, duration, attempt_output = _run_one_attempt(
-            prompt_text=prompt_text, model=model, timeout_s=timeout_s,
-            log_path=log_path, attempt=attempt, schedule_id=schedule_id,
-            scheduled_for=scheduled_for, fire_reason=fire_reason,
-            state_path=state_path, claude_bin=claude_bin,
-            job_id=job_id, slot_id=slot_id,
-            workdir=workdir,
-            isolated_workspace=isolated_workspace,
-            process_identity_sink=lambda pgid: attempt_identity.__setitem__(
-                "pgid", pgid,
-            ),
-        )
+        try:
+            exit_code, duration, attempt_output = _run_one_attempt(
+                prompt_text=prompt_text, model=model, timeout_s=timeout_s,
+                log_path=log_path, attempt=attempt, schedule_id=schedule_id,
+                scheduled_for=scheduled_for, fire_reason=fire_reason,
+                state_path=state_path, claude_bin=claude_bin,
+                job_id=job_id, slot_id=slot_id,
+                workdir=workdir,
+                isolated_workspace=isolated_workspace,
+                process_identity_sink=lambda pgid: attempt_identity.__setitem__(
+                    "pgid", pgid,
+                ),
+            )
+        except ProviderRegistryError as exc:
+            LOG.error("provider registry denied worker spawn: %s", exc)
+            state.record_completion(
+                job_id=job_id,
+                exit_code=2,
+                outcome="provider_policy_denied",
+                final_model=model,
+                path=state_path,
+            )
+            return WorkerResult(
+                exit_code=2,
+                outcome="provider_policy_denied",
+                final_model=model,
+                attempts=attempt,
+                duration_s=total_duration,
+                log_tail=str(exc),
+            )
         total_duration += duration
         final_exit = exit_code
 

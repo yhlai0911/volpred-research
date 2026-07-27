@@ -15,6 +15,33 @@ import pytest
 from scripts.dispatch_supervisor import codex_failover, worker
 
 
+@pytest.fixture(autouse=True)
+def _provider_guard_stub(monkeypatch):
+    def authorize(codex_bin, environment):
+        forbidden = [
+            key
+            for key in ("OPENAI_API_KEY", "CODEX_API_KEY")
+            if environment.get(key)
+        ]
+        if forbidden:
+            raise codex_failover.ProviderRegistryError(
+                f"forbidden API-key variables {forbidden}"
+            )
+        return SimpleNamespace(
+            resolved_executable=codex_bin,
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "codex-cli",
+                "VOLPRED_PROVIDER_MODEL_ID": codex_failover.CODEX_MODEL,
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        )
+
+    monkeypatch.setattr(codex_failover, "_authorize_codex", authorize)
+    monkeypatch.setattr(
+        codex_failover, "verify_spawn_receipt", lambda _receipt: None
+    )
+
+
 # ── codex_failover unit ────────────────────────────────────────────────────
 
 def test_disabled_by_env_flag() -> None:
@@ -128,8 +155,53 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     assert calls[1][1] == "exec", "reachability is probed before the slot is bet on it"
     assert "danger-full-access" not in calls[1], "the probe must not be able to write"
     assert "danger-full-access" in calls[2]
+    assert "--ignore-user-config" in calls[1]
+    assert "--ignore-user-config" in calls[2]
+    assert calls[1][calls[1].index("-m") + 1] == codex_failover.CODEX_MODEL
+    assert calls[2][calls[2].index("-m") + 1] == codex_failover.CODEX_MODEL
     assert "claimed task X" in result.output_tail
-    assert work_envs == [dict(codex_failover.os.environ)]
+    assert len(work_envs) == 1
+    assert work_envs[0]["VOLPRED_PROVIDER_ID"] == "codex-cli"
+    assert work_envs[0]["VOLPRED_PROVIDER_MODEL_ID"] == codex_failover.CODEX_MODEL
+    assert len(work_envs[0]["VOLPRED_PROVIDER_REGISTRY_SHA256"]) == 64
+
+
+def test_registry_denial_prevents_any_codex_subprocess(monkeypatch) -> None:
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(
+        codex_failover,
+        "_authorize_codex",
+        lambda *_a: (_ for _ in ()).throw(
+            codex_failover.ProviderRegistryError("paid overflow")
+        ),
+    )
+    monkeypatch.setattr(
+        codex_failover.subprocess,
+        "run",
+        lambda *_a, **_k: pytest.fail("policy denial must precede provider I/O"),
+    )
+
+    result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+
+    assert result.attempted is False
+    assert result.exit_code == codex_failover.RC_POLICY_DENIED
+    assert "paid overflow" in result.detail
+
+
+def test_api_key_environment_prevents_all_codex_subprocesses(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setenv("OPENAI_API_KEY", "metered-secret")
+    monkeypatch.setattr(
+        codex_failover.subprocess,
+        "run",
+        lambda *_a, **_k: pytest.fail("API key denial must precede provider I/O"),
+    )
+
+    result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+
+    assert result.exit_code == codex_failover.RC_POLICY_DENIED
 
 
 def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:

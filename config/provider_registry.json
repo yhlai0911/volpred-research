@@ -9,7 +9,12 @@
   "providers": [
     {
       "provider_id": "claude-cli",
-      "executable": "claude",
+      "executables": [
+        {
+          "realpath": "/Users/yhlai0911/.local/share/claude/versions/2.1.220",
+          "sha256": "8addc857f3fe64d5a0368af9ee50321b50afb4a6918ba3ef018ab84f5dbbe081"
+        }
+      ],
       "model_ids": [
         "claude-opus-4-8",
         "claude-sonnet-5"
@@ -17,7 +22,41 @@
       "auth": {
         "surface": "subscription_oauth",
         "api_key_env": null,
-        "auto_reload": false
+        "auto_reload": false,
+        "settings_surface": {
+          "path": ".claude/settings.json",
+          "sha256": "95f06ba0c432ad6ab868a604368fa51ad9473ed37b8afaff0eb04d04ea507891"
+        },
+        "forbidden_env": [
+          "ANTHROPIC_API_KEY",
+          "ANTHROPIC_AUTH_TOKEN",
+          "ANTHROPIC_BASE_URL",
+          "ANTHROPIC_BEDROCK_BASE_URL",
+          "ANTHROPIC_CUSTOM_HEADERS",
+          "ANTHROPIC_FOUNDRY_API_KEY",
+          "ANTHROPIC_FOUNDRY_BASE_URL",
+          "ANTHROPIC_VERTEX_BASE_URL",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_BEARER_TOKEN_BEDROCK",
+          "AWS_PROFILE",
+          "AWS_SECRET_ACCESS_KEY",
+          "AWS_WEB_IDENTITY_TOKEN_FILE",
+          "AZURE_OPENAI_API_KEY",
+          "AZURE_OPENAI_ENDPOINT",
+          "CLAUDE_CODE_USE_BEDROCK",
+          "CLAUDE_CODE_USE_FOUNDRY",
+          "CLAUDE_CODE_USE_VERTEX",
+          "CLAUDE_CODE_SKIP_BEDROCK_AUTH",
+          "CLAUDE_CODE_SKIP_VERTEX_AUTH",
+          "CODEX_API_KEY",
+          "CODEX_HOME",
+          "GEMINI_API_KEY",
+          "GOOGLE_API_KEY",
+          "OPENAI_API_BASE",
+          "OPENAI_API_KEY",
+          "OPENAI_BASE_URL",
+          "OPENAI_ORGANIZATION"
+        ]
       },
       "billing": {
         "mode": "subscription_included",
@@ -28,12 +67,14 @@
       "semantic_classes": [
         "agentic-execution",
         "code-change",
-        "research-compute"
+        "research-compute",
+        "task-orchestration"
       ],
       "capabilities": [
         "filesystem",
         "python",
-        "shell"
+        "shell",
+        "task-routing"
       ],
       "attestations": [
         "subscription-authenticated",
@@ -49,14 +90,50 @@
     },
     {
       "provider_id": "codex-cli",
-      "executable": "codex",
+      "executables": [
+        {
+          "realpath": "/Users/yhlai0911/.nvm/versions/node/v22.20.0/lib/node_modules/@openai/codex/bin/codex.js",
+          "sha256": "134063e133f0b4244fa3b251acf973d4fe4b4aeeacbdc135211bf480f59f1477"
+        }
+      ],
       "model_ids": [
-        "codex-failover"
+        "gpt-5.6-sol"
       ],
       "auth": {
         "surface": "desktop_subscription",
         "api_key_env": null,
-        "auto_reload": false
+        "auto_reload": false,
+        "settings_surface": null,
+        "forbidden_env": [
+          "ANTHROPIC_API_KEY",
+          "ANTHROPIC_AUTH_TOKEN",
+          "ANTHROPIC_BASE_URL",
+          "ANTHROPIC_BEDROCK_BASE_URL",
+          "ANTHROPIC_CUSTOM_HEADERS",
+          "ANTHROPIC_FOUNDRY_API_KEY",
+          "ANTHROPIC_FOUNDRY_BASE_URL",
+          "ANTHROPIC_VERTEX_BASE_URL",
+          "AWS_ACCESS_KEY_ID",
+          "AWS_BEARER_TOKEN_BEDROCK",
+          "AWS_PROFILE",
+          "AWS_SECRET_ACCESS_KEY",
+          "AWS_WEB_IDENTITY_TOKEN_FILE",
+          "AZURE_OPENAI_API_KEY",
+          "AZURE_OPENAI_ENDPOINT",
+          "CLAUDE_CODE_USE_BEDROCK",
+          "CLAUDE_CODE_USE_FOUNDRY",
+          "CLAUDE_CODE_USE_VERTEX",
+          "CLAUDE_CODE_SKIP_BEDROCK_AUTH",
+          "CLAUDE_CODE_SKIP_VERTEX_AUTH",
+          "CODEX_API_KEY",
+          "CODEX_HOME",
+          "GEMINI_API_KEY",
+          "GOOGLE_API_KEY",
+          "OPENAI_API_BASE",
+          "OPENAI_API_KEY",
+          "OPENAI_BASE_URL",
+          "OPENAI_ORGANIZATION"
+        ]
       },
       "billing": {
         "mode": "subscription_included",
@@ -66,12 +143,14 @@
       },
       "semantic_classes": [
         "agentic-execution",
-        "code-change"
+        "code-change",
+        "task-orchestration"
       ],
       "capabilities": [
         "filesystem",
         "python",
-        "shell"
+        "shell",
+        "task-routing"
       ],
       "attestations": [
         "subscription-authenticated",

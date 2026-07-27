@@ -15,6 +15,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -31,8 +32,10 @@ class _FakeAgent:
     def __init__(self, attempts: list[tuple[int, str]]) -> None:
         self.attempts = attempts
         self.calls = 0
+        self.environments: list[dict[str, str]] = []
 
     def __call__(self, argv, workdir, env, timeout):
+        self.environments.append(dict(env))
         exit_code, output = self.attempts[min(self.calls, len(self.attempts) - 1)]
         self.calls += 1
         return exit_code, False, output
@@ -42,7 +45,7 @@ AUTH_BANNER = "Not logged in · Please run /login\n"
 QUOTA_BANNER = "You've hit your weekly limit · resets 4pm\n"
 
 
-def _run(monkeypatch, tmp_path, attempts, extra_argv=()):
+def _run(monkeypatch, tmp_path, attempts, extra_argv=(), authorize=None):
     fake = _FakeAgent(attempts)
     monkeypatch.setattr(run_agent_job, "_run_attempt", fake)
     monkeypatch.setattr(run_agent_job.time, "sleep", lambda _s: None)  # don't really wait
@@ -53,7 +56,32 @@ def _run(monkeypatch, tmp_path, attempts, extra_argv=()):
     # main() still resolves it before writing metadata, and a CI runner has no
     # `claude` on PATH. Without this the guard returns 2 and these tests fail on
     # the host difference rather than on the behaviour they pin.
-    monkeypatch.setattr(run_agent_job, "_resolve_claude_bin", lambda: "/usr/bin/true")
+    monkeypatch.setattr(run_agent_job, "_resolve_claude_bin", lambda: "/usr/bin/claude")
+    if authorize is None:
+        def authorize(**kwargs):
+            forbidden = [
+                key
+                for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY")
+                if kwargs["environment"].get(key)
+            ]
+            if forbidden:
+                raise run_agent_job.ProviderRegistryError(
+                    f"forbidden API-key variables {forbidden}"
+                )
+            return SimpleNamespace(
+                provider_id="claude-cli",
+                registry_sha256="a" * 64,
+                resolved_executable=kwargs["executable_path"],
+                settings_path="/tmp/pinned-claude-settings.json",
+                environment=lambda: {
+                    "VOLPRED_PROVIDER_ID": "claude-cli",
+                    "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+                },
+            )
+    monkeypatch.setattr(run_agent_job, "authorize_provider_spawn", authorize)
+    monkeypatch.setattr(
+        run_agent_job, "verify_spawn_receipt", lambda _receipt: None
+    )
 
     brief = tmp_path / "brief.md"
     brief.write_text("do the thing")
@@ -78,6 +106,101 @@ def test_transient_auth_wall_is_retried_and_the_agent_still_runs(monkeypatch, tm
     assert rc == 0
     assert meta["failure_class"] is None
     assert meta["attempts"] == 2
+    assert all(
+        env["VOLPRED_PROVIDER_ID"] == "claude-cli"
+        and len(env["VOLPRED_PROVIDER_REGISTRY_SHA256"]) == 64
+        for env in fake.environments
+    )
+    assert meta["provider_id"] == "claude-cli"
+    assert len(meta["provider_registry_sha256"]) == 64
+
+
+def test_registry_is_reloaded_for_each_retry(monkeypatch, tmp_path):
+    calls = 0
+
+    def counted_authorize(**kwargs):
+        nonlocal calls
+        calls += 1
+        return SimpleNamespace(
+            provider_id="claude-cli",
+            registry_sha256="b" * 64,
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {},
+        )
+
+    rc, _meta, fake = _run(
+        monkeypatch,
+        tmp_path,
+        [(1, AUTH_BANNER), (0, "done\n")],
+        authorize=counted_authorize,
+    )
+
+    assert rc == 0
+    assert fake.calls == 2
+    assert calls == 2
+
+
+def test_registry_denial_prevents_agent_attempt(monkeypatch, tmp_path):
+    denial = lambda **_kw: (_ for _ in ()).throw(
+        run_agent_job.ProviderRegistryError("API-key auth")
+    )
+    rc, meta, fake = _run(
+        monkeypatch,
+        tmp_path,
+        [(0, "must not run")],
+        authorize=denial,
+    )
+
+    assert rc == 1
+    assert fake.calls == 0
+    assert meta["failure_class"] == "policy_denial"
+    assert meta["provider_registry_sha256"] is None
+
+
+def test_api_key_environment_prevents_compute_agent_spawn(
+    monkeypatch, tmp_path,
+) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "metered-secret")
+
+    rc, meta, fake = _run(monkeypatch, tmp_path, [(0, "must not run")])
+
+    assert rc == 1
+    assert fake.calls == 0
+    assert meta["failure_class"] == "policy_denial"
+
+
+def test_retry_denial_does_not_reuse_previous_receipt(
+    monkeypatch, tmp_path,
+) -> None:
+    calls = 0
+
+    def authorize(**kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise run_agent_job.ProviderRegistryError("registry changed")
+        return SimpleNamespace(
+            provider_id="claude-cli",
+            registry_sha256="c" * 64,
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {},
+        )
+
+    rc, meta, fake = _run(
+        monkeypatch,
+        tmp_path,
+        [(1, AUTH_BANNER), (0, "must not run")],
+        authorize=authorize,
+    )
+
+    assert rc == 1
+    assert fake.calls == 1
+    assert meta["failure_class"] == "policy_denial"
+    assert meta["provider_id"] is None
+    assert meta["provider_registry_sha256"] is None
+    assert meta["provider_policy_denial"] == "registry changed"
 
 
 def test_persistent_auth_wall_is_named_not_blamed_on_the_research(monkeypatch, tmp_path):

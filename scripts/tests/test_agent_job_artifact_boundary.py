@@ -11,6 +11,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -24,6 +25,23 @@ def _registered_worktree_fixture(monkeypatch):
     monkeypatch.setattr(compute_queue, "_find_task_dispatch_collision", lambda **_k: None)
     monkeypatch.setattr(compute_queue, "_link_source_task", lambda *_a, **_k: None)
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: True)
+    monkeypatch.setattr(
+        run_agent_job,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            provider_id="claude-cli",
+            registry_sha256="a" * 64,
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "claude-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        ),
+    )
+    monkeypatch.setattr(
+        run_agent_job, "verify_spawn_receipt", lambda _receipt: None
+    )
 
 
 def _fake_agent(path: Path, body: str) -> Path:
@@ -64,7 +82,7 @@ def test_runner_verifies_worktree_result_without_writing_main(monkeypatch, tmp_p
     rel_artifact = "experiments/k-test/k-test_results.json"
     real_artifact = worktree / rel_artifact
     fake = _fake_agent(
-        tmp_path / "fake-claude",
+        tmp_path / "claude",
         f'mkdir -p "{real_artifact.parent}"\n'
         f'printf \'{{"source":"agent"}}\' > "{real_artifact}"\n',
     )
@@ -102,7 +120,7 @@ def test_runner_fails_when_successful_agent_omits_declared_result(
     brief.write_text("forget the result")
     near_miss = worktree / "experiments/k-missing/k-missing_results.json"
     fake = _fake_agent(
-        tmp_path / "fake-claude",
+        tmp_path / "claude",
         f'mkdir -p "{near_miss.parent}"\n'
         f'printf \'{{"source":"agent"}}\' > "{near_miss}"\n',
     )
@@ -140,7 +158,7 @@ def test_runner_never_overwrites_absolute_worktree_result(monkeypatch, tmp_path:
     result_artifact = worktree / "experiments/k-absolute/k-absolute_results.json"
     result_artifact.parent.mkdir(parents=True)
     result_artifact.write_text('{"source":"agent","rows":42}')
-    fake = _fake_agent(tmp_path / "fake-claude", "exit 0\n")
+    fake = _fake_agent(tmp_path / "claude", "exit 0\n")
     metadata = main / "storage/ops/agent_jobs/job-absolute.json"
 
     monkeypatch.setattr(run_agent_job, "ROOT", main)
@@ -319,7 +337,7 @@ def test_runner_defense_in_depth_rejects_non_worktree_cwd(
     main.mkdir()
     brief = main / "brief.md"
     brief.write_text("do not start")
-    fake = _fake_agent(tmp_path / "fake-claude", "exit 99\n")
+    fake = _fake_agent(tmp_path / "claude", "exit 99\n")
     monkeypatch.setattr(run_agent_job, "ROOT", main)
     monkeypatch.setenv("VOLPRED_CLAUDE_BIN", str(fake))
     monkeypatch.setattr(run_agent_job, "is_registered_linked_worktree", lambda *_: False)

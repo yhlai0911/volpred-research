@@ -44,6 +44,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
 from volpred.ops import termination  # noqa: E402
+from volpred.ops.execution.registry import (  # noqa: E402
+    ProviderRegistryError,
+    authorize_provider_spawn,
+    load_provider_registry,
+    verify_spawn_receipt,
+)
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -284,6 +290,16 @@ def main() -> int:
                     help="Seconds before the agent tree is killed. Callers MUST derive this "
                          "from the compute job's timeout_seconds (enqueue-agent does).")
     args = ap.parse_args()
+    try:
+        # Startup guard catches an invalid registry even if validation below
+        # returns before the first attempt. Every actual attempt reloads again.
+        load_provider_registry()
+    except ProviderRegistryError as exc:
+        print(
+            f"[run_agent_job] provider registry startup denied: {exc}",
+            file=sys.stderr,
+        )
+        return 2
 
     brief_path = Path(args.brief_file)
     if not brief_path.is_absolute():
@@ -340,7 +356,10 @@ def main() -> int:
 
     argv = [
         claude_bin, "-p", "--dangerously-skip-permissions",
-        "--effort", args.effort, "--model", args.model, brief,
+        "--effort", args.effort, "--model", args.model,
+        "--setting-sources", "",
+        "--settings", str(ROOT / ".claude" / "settings.json"),
+        brief,
     ]
 
     # The agent runs under the compute worker, NOT under a dispatch fire. Stamp
@@ -355,10 +374,49 @@ def main() -> int:
     deadline = time.monotonic() + args.timeout
     attempts = 0
     failure = None
+    provider_receipt = None
+    provider_policy_denial = None
     while True:
         attempts += 1
         remaining = int(deadline - time.monotonic())
-        exit_code, timed_out, output = _run_attempt(argv, workdir, env, remaining)
+        provider_receipt = None
+        try:
+            # Reload immediately before every Popen, including auth retries.
+            # A config change between attempts therefore fails closed rather
+            # than inheriting a once-valid startup decision.
+            provider_receipt = authorize_provider_spawn(
+                contract_id="compute-agent.claude",
+                model_id=args.model,
+                executable_path=claude_bin,
+                environment=env,
+            )
+            verify_spawn_receipt(provider_receipt)
+        except ProviderRegistryError as exc:
+            print(
+                f"[run_agent_job] provider policy denied spawn: {exc}",
+                file=sys.stderr,
+                flush=True,
+            )
+            exit_code, timed_out, output = 2, False, str(exc)
+            failure = "policy_denial"
+            provider_policy_denial = str(exc)
+            break
+        attempt_env = {**env, **provider_receipt.environment()}
+        attempt_argv = [provider_receipt.resolved_executable, *argv[1:]]
+        if provider_receipt.settings_path is None:
+            provider_policy_denial = (
+                "Claude launch contract requires pinned settings"
+            )
+            exit_code, timed_out = 2, False
+            failure = "policy_denial"
+            provider_receipt = None
+            break
+        attempt_argv[attempt_argv.index("--settings") + 1] = (
+            provider_receipt.settings_path
+        )
+        exit_code, timed_out, output = _run_attempt(
+            attempt_argv, workdir, attempt_env, remaining
+        )
         if exit_code == 0:
             failure = None
             break
@@ -400,6 +458,15 @@ def main() -> int:
         # worth triaging.
         "failure_class": failure,
         "attempts": attempts,
+        "provider_id": (
+            provider_receipt.provider_id if provider_receipt is not None else None
+        ),
+        "provider_registry_sha256": (
+            provider_receipt.registry_sha256
+            if provider_receipt is not None
+            else None
+        ),
+        "provider_policy_denial": provider_policy_denial,
         "result_artifact": str(result_artifact) if result_artifact is not None else None,
         "result_artifact_exists": artifact_exists,
         "result_artifact_near_misses": artifact_near_misses,

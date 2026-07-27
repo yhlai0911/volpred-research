@@ -41,6 +41,8 @@ import sys
 import traceback
 from pathlib import Path
 
+from volpred.ops.execution.registry import load_provider_registry
+
 from . import (
     alerts,
     health,
@@ -425,6 +427,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     _setup_logging(getattr(logging, args.log_level.upper(), logging.INFO))
     _set_runtime_env()
+    # Startup half of the zero-paid guard. Worker attempts reload the same
+    # canonical bytes immediately before each provider Popen.
+    load_provider_registry()
     # NOTE: resolve `state.STATE_PATH` here and pass it down explicitly — the
     # same definition-time default-binding trap `_handle_restart_orphan()`
     # documents. These two calls used to rely on `mark_supervisor_started`'s own

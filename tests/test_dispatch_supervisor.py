@@ -16,6 +16,7 @@ import threading
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -34,6 +35,32 @@ from scripts.dispatch_supervisor import (
 )
 from volpred.ops import legacy_retirement_events
 from volpred.ops.legacy_retirement import LegacyRetirementInputError
+
+
+@pytest.fixture(autouse=True)
+def _provider_guard_stub(monkeypatch):
+    def authorize(**kwargs):
+        environment = kwargs["environment"]
+        forbidden = [
+            key
+            for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY")
+            if environment.get(key)
+        ]
+        if forbidden:
+            raise worker.ProviderRegistryError(
+                f"forbidden API-key variables {forbidden}"
+            )
+        return SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "claude-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        )
+
+    monkeypatch.setattr(worker, "authorize_provider_spawn", authorize)
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
 
 
 def _tmp_state(tmp_path: Path) -> Path:
@@ -2128,6 +2155,64 @@ def test_health_cas_loss_preserves_raw_signal_for_intent_classification(
     assert seen_pgid == [456]
 
 
+def test_worker_registry_denial_happens_before_popen(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+    monkeypatch.setattr(
+        worker,
+        "authorize_provider_spawn",
+        lambda **_kw: (_ for _ in ()).throw(
+            worker.ProviderRegistryError("metered billing")
+        ),
+    )
+    monkeypatch.setattr(
+        worker,
+        "_spawn",
+        lambda **_kw: pytest.fail("policy denial must precede Popen"),
+    )
+
+    with pytest.raises(worker.ProviderRegistryError, match="metered billing"):
+        worker._run_one_attempt(
+            prompt_text="prompt",
+            model=worker.OPUS_MODEL,
+            timeout_s=10,
+            log_path=tmp_path / "worker.log",
+            attempt=1,
+            schedule_id="hourly_dispatch",
+            state_path=tmp_path / "state.json",
+            job_id="job-policy-denial",
+            slot_id="slot-1",
+        )
+
+
+def test_worker_api_key_environment_halts_before_popen(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "metered-secret")
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+    monkeypatch.setattr(
+        worker,
+        "_spawn",
+        lambda **_kw: pytest.fail("API key denial must precede Popen"),
+    )
+
+    with pytest.raises(worker.ProviderRegistryError, match="API-key"):
+        worker._run_one_attempt(
+            prompt_text="prompt",
+            model=worker.OPUS_MODEL,
+            timeout_s=10,
+            log_path=tmp_path / "worker.log",
+            attempt=1,
+            schedule_id="hourly_dispatch",
+            state_path=tmp_path / "state.json",
+            job_id="job-api-key-denial",
+            slot_id="slot-1",
+        )
+
+
 def test_unresolved_system_attempt_is_not_mislabeled_unknown_external(
     tmp_path: Path, monkeypatch,
 ) -> None:
@@ -2898,6 +2983,30 @@ def test_supervisor_main_top_level_crash_sends_alert_and_reraises(tmp_path: Path
     assert "gather exploded" in crash_calls[0][1]
     # `main()` must honour the monkeypatched STATE_PATH — see below.
     assert state.read_state(state_path)["supervisor_pid"] == os.getpid()
+
+
+def test_supervisor_startup_registry_denial_precedes_state_and_provider_io(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(supervisor, "_setup_logging", lambda _level: None)
+    monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
+    monkeypatch.setattr(
+        supervisor,
+        "load_provider_registry",
+        lambda: (_ for _ in ()).throw(
+            worker.ProviderRegistryError("credits are forbidden")
+        ),
+    )
+    monkeypatch.setattr(
+        supervisor.state,
+        "read_state",
+        lambda *_a, **_k: pytest.fail(
+            "startup policy denial must precede state mutation"
+        ),
+    )
+
+    with pytest.raises(worker.ProviderRegistryError, match="credits"):
+        supervisor.main([])
 
 
 def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monkeypatch) -> None:

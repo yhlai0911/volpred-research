@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
 from scripts.dispatch_supervisor import identity, scheduler, supervisor, worker
 from volpred.ops import writer_log
@@ -61,6 +62,19 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
     _neutralize_state(monkeypatch)
     monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")  # daemon default
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    monkeypatch.setattr(
+        worker,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "claude-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        ),
+    )
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
 
     captured: dict[str, dict[str, str]] = {}
 
@@ -99,6 +113,7 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
         if key in (
             "VOLPRED_ACTOR", "VOLPRED_DISPATCH_SLOT",
             "VOLPRED_DISPATCH_JOB_ID", "VOLPRED_TASK_CLAIM_OWNER",
+            "VOLPRED_PROVIDER_ID", "VOLPRED_PROVIDER_REGISTRY_SHA256",
         ):
             continue
         assert env.get(key) == value

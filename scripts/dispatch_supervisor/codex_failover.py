@@ -51,6 +51,12 @@ from pathlib import Path
 from typing import Callable
 
 from volpred.ops import termination
+from volpred.ops.execution.registry import (
+    ProviderRegistryError,
+    ProviderSpawnReceipt,
+    authorize_provider_spawn,
+    verify_spawn_receipt,
+)
 
 from . import identity, isolation, procutil, state
 from .report_contract import inject_external_report_contract
@@ -105,6 +111,21 @@ RC_PREFLIGHT_TIMEOUT = 142  # matches the shell version's perl SIGALRM code
 RC_DISABLED = -3
 RC_UNREACHABLE = -4   # the probe could not get an answer out of ChatGPT
 RC_WORK_TIMEOUT = -5  # ChatGPT answered the probe; the task itself then ran long
+RC_POLICY_DENIED = -6
+CODEX_MODEL = "gpt-5.6-sol"
+
+
+def _authorize_codex(
+    codex_bin: str,
+    environment: dict[str, str],
+) -> ProviderSpawnReceipt:
+    """Reload zero-paid policy immediately before one Codex subprocess."""
+    return authorize_provider_spawn(
+        contract_id="dispatch-supervisor.codex-failover",
+        model_id=CODEX_MODEL,
+        executable_path=codex_bin,
+        environment=environment,
+    )
 
 
 @dataclass
@@ -138,10 +159,17 @@ def resolve_codex_bin() -> str | None:
 def preflight(codex_bin: str, *, timeout_s: int = PREFLIGHT_TIMEOUT_S) -> tuple[bool, int, str]:
     """`codex --version`. Returns (ok, rc, detail)."""
     try:
+        child_env = dict(os.environ)
+        receipt = _authorize_codex(codex_bin, child_env)
+        child_env.update(receipt.environment())
+        verify_spawn_receipt(receipt)
         result = subprocess.run(
-            [codex_bin, "--version"],
+            [receipt.resolved_executable, "--version"],
             capture_output=True, text=True, timeout=timeout_s,
+            env=child_env,
         )
+    except ProviderRegistryError as exc:
+        return False, RC_POLICY_DENIED, f"provider policy denied Codex preflight: {exc}"
     except subprocess.TimeoutExpired:
         return False, RC_PREFLIGHT_TIMEOUT, (
             f"`codex --version` 逾時（{timeout_s}s 上限）——通常是主機負載過高，"
@@ -165,10 +193,25 @@ def check_reachable(codex_bin: str, *, timeout_s: int = REACHABILITY_TIMEOUT_S) 
     in seconds, whose failure is real evidence the API is unavailable.
     """
     try:
+        child_env = dict(os.environ)
+        receipt = _authorize_codex(codex_bin, child_env)
+        child_env.update(receipt.environment())
+        verify_spawn_receipt(receipt)
         result = subprocess.run(
-            [codex_bin, "exec", "--skip-git-repo-check", REACHABILITY_PROMPT],
+            [
+                receipt.resolved_executable,
+                "exec",
+                "--ignore-user-config",
+                "-m",
+                CODEX_MODEL,
+                "--skip-git-repo-check",
+                REACHABILITY_PROMPT,
+            ],
             cwd=str(ROOT), capture_output=True, text=True, timeout=timeout_s,
+            env=child_env,
         )
+    except ProviderRegistryError as exc:
+        return False, RC_POLICY_DENIED, f"provider policy denied Codex probe: {exc}"
     except subprocess.TimeoutExpired:
         return False, RC_UNREACHABLE, (
             f"ChatGPT 沒有回應（{timeout_s}s 內連一句話都答不出來）——"
@@ -257,8 +300,32 @@ def run_codex_failover(
             "task-pool CLI 必須使用 canonical_root 的絕對 script path。\n\n"
             + prompt
         )
-    argv = [codex_bin, "exec", "--skip-git-repo-check", "-s", "danger-full-access", prompt]
-    child_env = {**os.environ}
+    argv = [
+        codex_bin,
+        "exec",
+        "--ignore-user-config",
+        "-m",
+        CODEX_MODEL,
+        "--skip-git-repo-check",
+        "-s",
+        "danger-full-access",
+        prompt,
+    ]
+    child_env = dict(os.environ)
+    try:
+        # The version and reachability calls were independently authorized;
+        # reload once more for the process that can claim and mutate work.
+        provider_receipt = _authorize_codex(codex_bin, child_env)
+        verify_spawn_receipt(provider_receipt)
+    except ProviderRegistryError as exc:
+        return FailoverResult(
+            False,
+            False,
+            RC_POLICY_DENIED,
+            f"provider policy denied Codex work spawn: {exc}",
+        )
+    child_env = {**child_env, **provider_receipt.environment()}
+    argv[0] = provider_receipt.resolved_executable
     if slot_id and job_id:
         child_env.update({
             "VOLPRED_ACTOR": f"codex-failover:{slot_id}:{job_id[:8]}",
