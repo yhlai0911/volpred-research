@@ -2609,3 +2609,28 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   **225 passed**、Matt Spec／Standards雙PASS。
 - 🟡 `ready_for_cutover=false`；真正七日尚未經過，未stage、未transfer owner。
   本人工校時根因為 **`root_cause_fixed_and_verified`**，Issue #9維持`contained`。
+
+## 2026-07-27 — T40 formal Incident Lifecycle owner attestation（Issue #46）
+
+- ✅ `incident.lifecycle`不再由formal census硬編碼為`unresolved`。Production
+  backend-pinned `volpred_read_incident_owner`回讀私有owner singleton及逐欄相同的
+  immutable receipt；adapter拒絕schema、identity、contract、chronology、stale／future
+  或extra-field drift，probe失敗時保持`unknown_owner`。
+- ✅ Canonical chain
+  `20260727130815→20260727132000→20260727132229`可乾淨重播。
+  Matt雙審發現並行`131500`可能補造receipt後，convergence commit `714bb25f6`
+  將它自canonical鏈移除、remote標reverted；`132229`安裝前要求exact一筆owner與
+  matching receipt，RPC亦拒絕任何額外receipt。Production ledger另含並行重複套用
+  `131925`與`132700`；最後兩個finalizer receipt把曾被弱版`132000`覆蓋的RPC重新
+  收斂。Live function definition含`NOT EXISTS`，owner／receipt各一筆。Catalog回讀
+  `SECURITY DEFINER`／STABLE／空`search_path`、owner=`volpred_ops_definer`；
+  service role只能execute RPC，anon/authenticated不可執行，兩張私表皆FORCE RLS。
+- ✅ Adapter／census與相鄰owner範圍 **122 passed**；真PG另證明owner漂移後
+  重播canonical bootstrap必raise、receipt count不增加。ruff／compileall綠。Fresh production
+  census為`legacy/generation 1/wrong_owner`且
+  `probe_errors=[]`。此可觀測性slice為
+  **`root_cause_fixed_and_verified`**。
+- ✅ Commits=`0d95e67b8`,`e9f411582`,`714bb25f6`,`49fb8a7ae`；Matt
+  Spec／Standards最終雙PASS。
+- 🟡 本slice刻意沒有transfer或incident mutation RPC；#9七日gate與#13整體
+  acceptance未完成前不切owner。#13與#46 umbrella維持`contained`。

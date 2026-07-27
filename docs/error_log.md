@@ -4054,3 +4054,40 @@ report直接回讀`clean_observation_count=1`、
 
 Final hardening commit=`0a0dc7b64`；assessment／gate lifecycle／cutover／replay／
 observer相鄰範圍 **225 passed**，Matt Spec與Standards最終雙PASS。
+
+### 2026-07-27 — Formal census 不可把 incident owner 永久留成 unknown
+
+**證據化症狀**：Issue #46 的`incident.lifecycle`在正式inventory中綁定
+`resolver=unresolved`。即使incident store與3-Strike流程已運作，census仍無法回答
+目前誰持有正式lifecycle mutation authority；unknown owner會讓日後physical retirement
+無法區分「尚未切換」與「觀測器壞掉」。
+
+**根因層級與底層修復**：實作存在不等於owner evidence存在。新增私有
+`incident_owners` singleton與append-only bootstrap receipt，明確記錄目前仍為
+`legacy/generation 1`；service role沒有表權限，只能呼叫STABLE、
+`SECURITY DEFINER`、空`search_path`的固定read RPC。RPC必須把owner row逐欄綁到同
+generation receipt，且拒絕未來時間。Python adapter再以exact key set、canonical
+capability／contract、normalized text、receipt identity與chronology fail closed；
+inventory pin exact production backend SHA，stale、future、extra field或RPC失敗皆不
+產生claim。此slice沒有transfer function，也沒有incident mutation authority，因此
+不會繞過#9/#13。
+
+**並行部署教訓與收斂**：兩個session同時產生`130815`與`131500` migration；
+`131500`的replay會從現存owner row補receipt，可能把未經gate的漂移事後合法化。
+Matt雙審判P1後，並行convergence commit `714bb25f6`移除未被接受的`131500`，
+production ledger亦標reverted；canonical鏈只重播fail-closed `130815`、schema
+hardening `132000`與finalizer `132229`。finalizer安裝前要求exact一筆legacy/gen1
+owner與exact一筆matching receipt，read RPC另以`NOT EXISTS`拒絕任何額外receipt。
+新增真PG回歸先製造owner drift，再重播canonical bootstrap migration；必須raise且
+receipt count不增加。
+
+**回歸與live read-back**：adapter/census與相鄰owner契約合計 **122 passed**；
+canonical migration replay、ACL/FORCE-RLS、ungated drift與no-mint回歸全綠。
+Canonical replay為`130815→132000→132229`；production ledger另誠實保留兩次
+並行duplicate apply receipt `131925`與`132700`。`132000`曾被較弱並行版本覆蓋，
+最終`132229/132700`均重新安裝extra-receipt fail-closed RPC；直接回讀
+`pg_get_functiondef`含`NOT EXISTS`且owner／receipt各恰一筆。Catalog回讀function
+owner=`volpred_ops_definer`、service-role-only execute、私表FORCE RLS。Fresh census
+回讀`incident.lifecycle=legacy/wrong_owner`、generation 1、`probe_errors=[]`。
+unknown-observability根因為 **`root_cause_fixed_and_verified`**；正式owner切換仍受
+#9→#13 gate約束，#13/#46 umbrella維持`contained`。

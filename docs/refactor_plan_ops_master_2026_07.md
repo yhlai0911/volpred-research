@@ -287,3 +287,20 @@ not-before單調re-arm至新成熟時間並寫durable status history，不能提
 **`root_cause_fixed_and_verified`**，T03／#9仍須真實七日後才可cutover，維持
 **`contained`**。Follow-up `0a0dc7b64`另保證stale suffix、future receipt與錯誤
 owner mode都不會輸出假`next_eligible_at`；最終Matt Spec／Standards雙PASS。
+
+**T40 Incident Lifecycle owner attestation 增量（2026-07-27）**：
+`incident.lifecycle`從硬編碼`unresolved`改為production backend-pinned、
+service-role-only typed attestation。私有FORCE-RLS singleton必須逐欄匹配同generation
+immutable receipt；adapter以exact schema、canonical contract、chronology及30秒
+freshness fail closed。Canonical chain
+`20260727130815→20260727132000→20260727132229`可乾淨重播；
+有receipt-mint風險的並行`131500`已自canonical鏈移除並在remote標reverted。
+`132229`安裝前要求exact一筆owner與matching receipt，RPC亦拒絕任何額外receipt。
+Production另保留並行duplicate apply receipts `131925`與`132700`；最後兩次
+finalizer已覆蓋曾被弱版`132000`降級的RPC，live function definition含`NOT EXISTS`，
+owner／receipt各恰一筆。
+真PG回歸保證owner drift後重播canonical bootstrap必raise、receipt數不增。
+Fresh census誠實回讀`legacy/generation 1/wrong_owner`且`probe_errors=[]`。此
+unknown-observability slice為 **`root_cause_fixed_and_verified`**；沒有transfer或
+incident mutation authority，#9→#13未完成前不切owner，T40 umbrella仍為
+**`contained`**。
