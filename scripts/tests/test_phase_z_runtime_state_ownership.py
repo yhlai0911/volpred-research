@@ -89,3 +89,58 @@ def test_corrupt_work_log_is_refused(tmp_path: Path) -> None:
     committable, _, corrupt = _churn(tmp_path, "storage/work_log.json", '[{"task": "trunc')
     assert corrupt == ["storage/work_log.json"]
     assert not committable
+
+
+def test_untracked_directory_expands_to_sorted_exact_files(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "ops" / "claude_user_backup" / "skills" / "ask-matt"
+    (root / "references").mkdir(parents=True)
+    (root / "SKILL.md").write_text("router", encoding="utf-8")
+    (root / "references" / "flow.json").write_text(
+        json.dumps({"flow": "implement"}), encoding="utf-8"
+    )
+
+    committable, deferred, corrupt = _classify_machine_churn(
+        tmp_path,
+        ["ops/claude_user_backup/skills/ask-matt"],
+    )
+
+    assert committable == [
+        "ops/claude_user_backup/skills/ask-matt/SKILL.md",
+        "ops/claude_user_backup/skills/ask-matt/references/flow.json",
+    ]
+    assert deferred == []
+    assert corrupt == []
+
+
+def test_directory_expansion_refuses_symlink_children(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "ops" / "claude_user_backup" / "skills" / "unsafe"
+    root.mkdir(parents=True)
+    outside = tmp_path / "outside.txt"
+    outside.write_text("secret", encoding="utf-8")
+    (root / "escape").symlink_to(outside)
+
+    committable, deferred, corrupt = _classify_machine_churn(
+        tmp_path,
+        ["ops/claude_user_backup/skills/unsafe"],
+    )
+
+    assert committable == []
+    assert deferred == []
+    assert corrupt == [
+        "ops/claude_user_backup/skills/unsafe/escape"
+    ]
+
+
+def test_machine_churn_refuses_parent_path_escape(tmp_path: Path) -> None:
+    committable, deferred, corrupt = _classify_machine_churn(
+        tmp_path,
+        ["../outside.json"],
+    )
+
+    assert committable == []
+    assert deferred == []
+    assert corrupt == ["../outside.json"]

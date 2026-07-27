@@ -28,9 +28,111 @@ from __future__ import annotations
 import fcntl
 import json
 import logging
+import os
 from pathlib import Path
 
 LOG = logging.getLogger(__name__)
+
+
+def _expand_candidate(
+    repo_root: Path,
+    rel: str,
+    *,
+    label: str,
+) -> tuple[list[str], list[str]]:
+    """Return exact files for one candidate and any fail-closed paths.
+
+    Git reports an untracked directory as one status entry.  Returning that
+    directory to a later ``git add`` would create a race: files appearing after
+    classification would be staged without passing the lock/parse gates.  Walk
+    directories here instead, never follow symlinks, and return only the exact
+    regular-file paths that were inspected.
+    """
+    relative = Path(rel)
+    if (
+        not rel
+        or relative.is_absolute()
+        or relative == Path(".")
+        or ".." in relative.parts
+    ):
+        LOG.warning("%s: machine-churn path escapes repository: %s", label, rel)
+        return [], [rel]
+
+    root = repo_root.resolve()
+    candidate = repo_root / relative
+
+    # Refuse a symlink in any existing component, including a broken final
+    # symlink.  ``resolve()`` containment alone would still permit a symlink
+    # whose target happens to be inside the repository.
+    cursor = repo_root
+    for part in relative.parts:
+        cursor = cursor / part
+        if cursor.is_symlink():
+            bad = cursor.relative_to(repo_root).as_posix()
+            LOG.warning("%s: refusing symlink machine-churn path: %s", label, bad)
+            return [], [bad]
+
+    try:
+        candidate.resolve(strict=False).relative_to(root)
+    except (OSError, ValueError):
+        LOG.warning("%s: machine-churn path escapes repository: %s", label, rel)
+        return [], [rel]
+
+    if not candidate.exists():
+        return [relative.as_posix()], []
+    if not candidate.is_dir():
+        if not candidate.is_file():
+            LOG.warning("%s: refusing non-regular machine-churn path: %s", label, rel)
+            return [], [relative.as_posix()]
+        return [relative.as_posix()], []
+
+    files: list[str] = []
+    rejected: list[str] = []
+
+    def walk(directory: Path) -> None:
+        try:
+            with os.scandir(directory) as iterator:
+                entries = sorted(iterator, key=lambda entry: entry.name)
+        except OSError as exc:
+            rejected_path = directory.relative_to(repo_root).as_posix()
+            LOG.warning(
+                "%s: cannot enumerate machine-churn directory %s (%s) — refusing it",
+                label,
+                rejected_path,
+                exc,
+            )
+            rejected.append(rejected_path)
+            return
+        for entry in entries:
+            path = Path(entry.path)
+            child = path.relative_to(repo_root).as_posix()
+            try:
+                if entry.is_symlink():
+                    LOG.warning(
+                        "%s: refusing symlink machine-churn path: %s", label, child
+                    )
+                    rejected.append(child)
+                elif entry.is_dir(follow_symlinks=False):
+                    walk(path)
+                elif entry.is_file(follow_symlinks=False):
+                    files.append(child)
+                else:
+                    LOG.warning(
+                        "%s: refusing non-regular machine-churn path: %s",
+                        label,
+                        child,
+                    )
+                    rejected.append(child)
+            except OSError:
+                LOG.warning(
+                    "%s: cannot inspect machine-churn path %s — refusing it",
+                    label,
+                    child,
+                )
+                rejected.append(child)
+
+    walk(candidate)
+    return files, rejected
 
 
 def classify_machine_churn(
@@ -57,7 +159,19 @@ def classify_machine_churn(
     committable: list[str] = []
     deferred: list[str] = []
     corrupt: list[str] = []
-    for rel in candidates:
+    expanded: list[str] = []
+    seen: set[str] = set()
+    for candidate in candidates:
+        exact_paths, rejected = _expand_candidate(
+            repo_root, candidate, label=label
+        )
+        corrupt.extend(path for path in rejected if path not in corrupt)
+        for exact in exact_paths:
+            if exact not in seen:
+                seen.add(exact)
+                expanded.append(exact)
+
+    for rel in expanded:
         if not (repo_root / rel).exists():
             committable.append(rel)
             continue
