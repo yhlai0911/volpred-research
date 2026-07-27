@@ -55,6 +55,16 @@ duplicate dates. Consequently the 1,866-observation result is not independently
 reproducible from the committed input. The numbers are preserved as an audit
 trail; this provenance gap is not evidence that they were fabricated.
 
+**Snapshot-dedup clean rerun (2026-07-27)**: the loader was fixed to drop duplicate
+trading days (`sort_index()` then `~index.duplicated(keep="last")`) and the experiment
+was rerun on the clean+extended canonical snapshot, written to a **separate**
+[k1396_legacy_rerun_results.json](k1396_legacy_rerun_results.json) (the frozen
+`k1396_results.json` above is untouched). Clean values: n_oos=1900 (no duplicate dates;
+the old 1,866 count included dups), HAR_VIX_vs_HAR DM t=−2.522 p=0.0117 (contaminated
+was p=0.00843 — direction consistent, still <0.05, **no verdict flip**), HAR_vs_A4f
+t=+0.846 p=0.397, HAR_VIX_vs_A4f t=−0.839 p=0.402. Severity LOW: this experiment is
+superseded by K1379, so no feed/paper/knowledge change is required.
+
 ## Frozen historical values
 
 The original [k1396_results.json](k1396_results.json) is preserved byte for

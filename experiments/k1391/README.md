@@ -47,28 +47,45 @@ Both models enforce `alpha + gamma/2 + beta < 0.999` via SLSQP constraint.
 
 `paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv` (local snapshot, no live fetch)
 
-## Results (computed 2026-05-22T03:45:56 UTC, n_oos=1866)
+## Results (recomputed 2026-07-27T15:06 UTC after snapshot-dedup, n_oos=1900)
+
+> **Snapshot-dedup guard (2026-07-27)**: the 2026-05-22 run (n_oos=1866) ran on a
+> canonical snapshot that contained duplicate trading days, which leaked into the DM
+> test. Root cause fixed in the loader (`sort_index()` then
+> `df_raw[~df_raw.index.duplicated(keep="last")]`). Rerun on the clean+extended
+> snapshot yields n_oos=1900. **Verdict does not flip** — GJR still wins full/non-COVID/
+> post-COVID — but post-COVID now reaches Harvey significance (see notes). Old
+> contaminated numbers preserved below under "prior contaminated run" for audit.
 
 | Period | n | DM t | p-value | Harvey sig | Winner |
 |--------|---|------|---------|------------|--------|
-| Full OOS (2019-05-20) | 1866 | **−2.030** | 0.042 | ✗ | GJR |
-| Non-COVID | 1762 | **−2.554** | 0.011 | ✗ | GJR |
-| Pre-COVID | 273 | −0.767 | 0.443 | ✗ | GJR (small) |
-| COVID window | 104 | +1.084 | 0.281 | ✗ | A4f (not sig) |
-| Post-COVID | 1489 | −2.460 | 0.014 | ✗ | GJR |
+| Full OOS (2019-05-20) | 1900 | **−2.054** | 0.040 | ✗ | GJR |
+| Non-COVID | 1796 | **−2.924** | 0.0035 | ✗ | GJR |
+| Pre-COVID | 273 | −0.351 | 0.726 | ✗ | GJR (small) |
+| COVID window | 104 | +1.465 | 0.146 | ✗ | A4f (not sig) |
+| Post-COVID | 1523 | **−3.208** | 0.0014 | **✓** | GJR |
 
 Notes:
 - DM convention: positive t = A4f better (lower QLIKE loss), negative t = GJR better
 - QLIKE kernel: log(σ²) + r²/σ², full kernel (not r² proxy)
-- None of the subperiods reach Harvey significance (|t| > 3.0)
+- **Post-COVID now reaches Harvey significance** (|t|=3.21 > 3.0) on the clean snapshot;
+  all other subperiods remain below the Harvey threshold.
+
+### Prior contaminated run (2026-05-22, n_oos=1866 — superseded, kept for audit)
+
+| Period | n | DM t | p-value | Winner |
+|--------|---|------|---------|--------|
+| Full OOS | 1866 | −2.030 | 0.042 | GJR |
+| Non-COVID | 1762 | −2.554 | 0.011 | GJR |
+| Post-COVID | 1489 | −2.460 | 0.014 | GJR |
 
 ## Critical Finding: OOS Period Mismatch
 
-**K1391 OOS extends to 2026-05-20 (n=1866), paper's stated OOS ends 2026-04-07 (n=1825).**  
-The 41 extra trading days (Apr 8 – May 20, 2026) are sufficient to flip the result:
+**K1391 OOS extends to 2026-05-20 (clean n=1900), paper's stated OOS ends 2026-04-07 (n=1825).**  
+The extra trading days are sufficient to flip the result:
 
 - Paper / pinned snapshot (n=1825): A4f DM t ≈ +4.148 (Harvey-sig) ← A4f wins
-- K1391 (n=1866, 41 more days): DM t = −2.030 ← GJR wins
+- K1391 (clean n=1900): DM t = −2.054 ← GJR wins
 
 This reversal indicates **A4f advantage collapsed in April–May 2026 data**. Likely cause: VIX remained elevated (trade-war period) but SPY returns were lower-than-expected volatility, causing A4f's large τ_t (via VIX²) to over-predict variance → worse QLIKE.
 
