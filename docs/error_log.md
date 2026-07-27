@@ -4093,6 +4093,34 @@ owner=`volpred_ops_definer`、service-role-only execute、私表FORCE RLS。Fres
 unknown-observability根因為 **`root_cause_fixed_and_verified`**；正式owner切換仍受
 #9→#13 gate約束，#13/#46 umbrella維持`contained`。
 
+### 2026-07-27 — Provider module 存在不等於正式 execution owner 已可證明
+
+**證據化症狀**：Issue #12 的zero-paid provider模組與測試已存在，但Issue #46
+inventory仍把`provider.execution`寫成`resolver=unresolved`；production caller與
+正式持久化owner尚未cutover，因此既不能誠實宣稱Operations Core擁有，也無法分辨
+「目前仍是legacy」與「owner observer壞掉」。
+
+**根因與底層修復**：formal ownership沒有production evidence seam。新增私有
+`provider_owners` singleton與immutable bootstrap receipt，明確記錄現況
+`legacy/generation 1`。Migration只在owner完全不存在時同交易建立兩者，之後要求
+exact一筆owner與exact一筆matching receipt；漂移時重播直接raise，不替既存狀態
+補造receipt。Read RPC固定只接受legacy/gen1、canonical #12 contract與唯一receipt，
+使用STABLE、SECURITY DEFINER、空`search_path`且僅service role可執行；service role
+無私表權限。Python adapter再驗exact schema、逐欄receipt identity、chronology與
+production backend SHA，census以30秒freshness及future-skew fail closed。
+
+**驗證與邊界**：commits `52157406e`,`23a5ea5bf`；Matt Standards初審另抓到
+replay negative test在autocommit下永久留下drift，以及incident/provider parser與
+backend-bound resolver metadata的複製。修正後前者改成transaction rollback並回讀
+canonical legacy/gen1，後者收斂成共用typed parser/store與單一resolver registry。
+相鄰測試117 passed，完整PostgreSQL effect contract 62 passed，ruff／diff-check
+全綠，Matt Spec／Standards最終雙PASS。Production migration
+`20260727133500` local=remote；catalog、ACL、FORCE RLS、owner/receipt各一筆皆回讀
+符合，fresh census為`provider.execution=legacy/generation 1/wrong_owner`且
+`probe_errors=[]`。Unknown-observability根因為
+**`root_cause_fixed_and_verified`**；此slice沒有owner transfer或provider execution，
+#9→#12未完成前兩個umbrella仍為`contained`。
+
 ### 2026-07-27 — Task source provenance 不可搶在 direct-mode owner gate 前失敗
 
 **證據化症狀**：GitHub Test Suite run `30268312681` 在5,985案中僅兩案失敗：

@@ -2635,3 +2635,27 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   Spec／Standards最終雙PASS。
 - 🟡 本slice刻意沒有transfer或incident mutation RPC；#9七日gate與#13整體
   acceptance未完成前不切owner。#13與#46 umbrella維持`contained`。
+
+## 2026-07-27 — T40 formal Provider Execution owner attestation（Issue #46）
+
+- ✅ `provider.execution`不再由formal census硬編碼為`unresolved`。Production
+  backend-pinned `volpred_read_provider_owner`回讀私有owner singleton及逐欄相同的
+  immutable receipt；adapter拒絕schema、identity、contract、chronology、
+  stale／future與extra-field drift，probe失敗時仍保持`unknown_owner`。
+- ✅ Canonical migration `20260727133500`可重播，且只在owner不存在時同交易建立
+  `legacy/generation 1`與bootstrap receipt。Owner漂移、缺receipt或額外receipt都
+  會使migration／RPC fail closed，不會從既存漂移狀態補造「合法」receipt。
+- ✅ Production ledger已回讀local=remote。RPC為STABLE、SECURITY DEFINER、空
+  `search_path`、owner=`volpred_ops_definer`；只有service role可execute，
+  anon/authenticated不可執行。`provider_owners`與`provider_owner_receipts`皆
+  FORCE RLS，service role無table SELECT；live owner／receipt各恰一筆。
+- ✅ Commits=`52157406e`,`23a5ea5bf`；incident/provider共用typed attestation
+  parser，backend-bound resolver metadata收斂到單一registry，並修正replay測試
+  autocommit污染共享fixture。相鄰範圍 **117 passed**，
+  完整PostgreSQL effect contract **62 passed**，ruff／diff-check全綠，Matt
+  Spec／Standards最終雙PASS。Fresh
+  production census為`legacy/generation 1/wrong_owner`且`probe_errors=[]`。
+  此可觀測性slice為 **`root_cause_fixed_and_verified`**。
+- 🟡 本slice沒有owner transfer、provider execution、#9 bypass、14日recorder或
+  physical retirement。#9七日gate與#12 acceptance完成前不切owner；#12與#46
+  umbrella維持`contained`。

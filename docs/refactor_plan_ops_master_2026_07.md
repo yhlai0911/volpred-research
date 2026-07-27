@@ -304,3 +304,21 @@ Fresh census誠實回讀`legacy/generation 1/wrong_owner`且`probe_errors=[]`。
 unknown-observability slice為 **`root_cause_fixed_and_verified`**；沒有transfer或
 incident mutation authority，#9→#13未完成前不切owner，T40 umbrella仍為
 **`contained`**。
+
+**T40 Provider Execution owner attestation 增量（2026-07-27）**：
+commits `52157406e`,`23a5ea5bf`把`provider.execution`從永久`unresolved`改為production
+backend-pinned、service-role-only typed attestation。Migration
+`20260727133500`只在完全不存在owner時建立`legacy/generation 1`與一筆逐欄
+matching bootstrap receipt；重播遇到owner漂移、缺失或額外receipt會raise，不會
+補造證據。RPC固定接受exact legacy/gen1、canonical #12 contract與唯一receipt，
+沒有transfer或provider execution authority。Production ledger local=remote；
+catalog回讀為STABLE／SECURITY DEFINER／空`search_path`、僅service role可execute，
+兩張私表皆FORCE RLS且service role無SELECT，owner／receipt各一筆。Incident／provider
+共用單一typed attestation parser，backend-bound resolver metadata亦由單一registry
+驅動，避免新增capability時shotgun surgery。相鄰範圍 **117 passed**、完整PostgreSQL
+effect contract **62 passed**，ruff與diff-check全綠，Matt Spec／Standards最終
+雙PASS；
+fresh census回讀`legacy/generation 1/wrong_owner`且`probe_errors=[]`。此
+unknown-observability slice為 **`root_cause_fixed_and_verified`**；#9→#12尚未完成
+前不切owner、不啟動14日recorder或physical retirement，T40 umbrella仍為
+**`contained`**。
