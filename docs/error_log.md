@@ -3493,9 +3493,20 @@ demote與reject因此皆可由同一 audit RPC回讀。
 tests通過；non-superuser migration executor與重放 idempotency亦納入。這只完成 global
 key＋durable lifecycle contract；另以「無 takeover 自然 expiry」及「release backend
 unavailable→intent→recovery replay」回歸證明兩個原漏口。production
-migration/read-back、formal Git／email
-mutation-boundary partition canary、以及 direct legacy writers退役仍未完成，分別由
-Issue #18後續、#24與#46接續。因此目前狀態只能是 **`contained`**。
+migration `20260727080000` 已用 exact-file query 部署（未以 drifted ledger 執行全量
+`db push`），migration ledger exact repair後本地／遠端皆為 applied；production回讀
+確認 event table/view/identity sequence owner、FORCE RLS、service-role-only RPC ACL，
+且 legacy capability-key SQL boundaries為0。Global-key live canary取得epoch 1、
+renew、拒絕第二holder、authorize synthetic resource、release，RPC回讀依序為
+acquired／rejected(already_held)／renewed／demoted，grant與release ref皆為
+`primary-authority:operations-core-primary:epoch-1`且無raw token。相鄰最終回歸
+**467 passed**，Matt Spec／Standards雙軸複審皆PASS；supervisor經canonical planned
+reload後heartbeat正常，兩次reload通知皆被正確suppressed。
+
+這一輪已完成production migration/read-back及安全的global-key transaction canary；
+formal Git／email真實mutation-boundary partition canary、direct legacy writers
+cutover與retirement仍分別由Issue #18後續、#24與#46接續。因此目前狀態仍只能是
+**`contained`**，不得把本次synthetic authorize冒充外部副作用結案。
 
 ### 2026-07-26 — owner-gate suppression 新增 exit-0 marker，綠測試仍寫髒 CI checkout
 

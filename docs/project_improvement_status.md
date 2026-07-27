@@ -2262,3 +2262,20 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   authority。重載後 live replay 通過，狀態為 **`root_cause_fixed_and_verified`**。
 - ⏭️ 這只結案 T35；PHASE-Z legacy recognizer、舊 wrapper及其他 compatibility path
   仍須按後續 ticket 各自完成五步 Gate 後才能宣稱「新架構完全取代舊架構」。
+
+## 2026-07-27 — Global Primary Authority production deployment（Issue #18）
+
+- ✅ Formal commit/effect authority 已收斂為單一
+  `operations-core-primary`；Python adapters、database formal-grant trigger及live
+  owned-effect SQL mutation boundaries均拒絕capability-scoped formal authority。
+- ✅ Append-only lifecycle ledger保存acquire／renew／natural expiry／demote／reject；
+  release未確認或回讀drift時以token-redacted、backend-bound、fsync journal在恢復後
+  reconcile，多worker peer cleanup具冪等競態回歸。
+- ✅ Production migration `20260727080000` 已精確部署並回讀owner／FORCE RLS／ACL，
+  migration ledger本地與remote exact match，legacy SQL authority boundary計數為0。
+- ✅ Global-key live canary證明epoch 1 acquire→renew→release、第二holder fail closed、
+  synthetic authorize grant及durable事件回讀；最終相關套件 **467 passed**，
+  Matt Spec／Standards雙軸review皆PASS，supervisor planned reload後heartbeat正常。
+- 🟡 Issue #18仍為 **`contained`**：synthetic authorize不等於真實Git／email mutation
+  partition canary；direct legacy caller cutover與全域retirement仍由#24／#46完成，
+  五步Gate未齊前不關Issue、不宣稱新架構已完全取代舊架構。
