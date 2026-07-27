@@ -382,12 +382,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T04:26:06.346919+00:00"
-    },
-    {
-     "at": "2026-07-27T04:51:30.470200+00:00"
-    },
-    {
      "at": "2026-07-27T04:54:13.088799+00:00"
     },
     {
@@ -416,6 +410,12 @@
     },
     {
      "at": "2026-07-27T06:30:13.138333+00:00"
+    },
+    {
+     "at": "2026-07-27T07:02:13.853944+00:00"
+    },
+    {
+     "at": "2026-07-27T07:38:51.147834+00:00"
     }
    ],
    "current_task_id": null,
@@ -1050,6 +1050,44 @@
     "last_at": null
    }
   },
+  "inc_8276fc1225bd": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-27T07:00:23.077138+00:00",
+   "escalation": null,
+   "fingerprint": "8276fc1225bdc2829239199207b4e2edfcf3c7a1e3cc741da23c92d61b4a98e0",
+   "fingerprint_parts": [
+    "ci-red-30241354854"
+   ],
+   "first_seen_at": "2026-07-27T07:00:23.077138+00:00",
+   "incident_id": "inc_8276fc1225bd",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T07:00:23.077138+00:00",
+     "key": "30241354854:1",
+     "last_seen_at": "2026-07-27T07:00:23.077138+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-27T06:15:19.3859201Z E KeyError: 'incident'",
+   "last_seen_at": "2026-07-27T07:00:23.077138+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_c67bec28dd29": {
    "class": "machine_self",
    "clean_observations": [],
@@ -1199,19 +1237,19 @@
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:161",
-     "last_seen_at": "2026-07-27T06:07:45.107142+00:00"
+     "last_seen_at": "2026-07-27T07:02:25.688966+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1391/k1391.py:246",
-     "last_seen_at": "2026-07-27T06:07:45.107142+00:00"
+     "last_seen_at": "2026-07-27T07:02:25.688966+00:00"
     },
     {
      "cleared_at": null,
      "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
      "key": "experiments/k1592/k1592.py:203",
-     "last_seen_at": "2026-07-27T06:07:45.107142+00:00"
+     "last_seen_at": "2026-07-27T07:02:25.688966+00:00"
     },
     {
      "cleared_at": null,
@@ -1276,10 +1314,10 @@
    ],
    "kind": "silent_fallback_new",
    "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
-   "last_seen_at": "2026-07-27T06:07:45.107142+00:00",
+   "last_seen_at": "2026-07-27T07:02:25.688966+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 49,
+   "occurrence_count": 50,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1519,6 +1557,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T06:30:13.138917+00:00",
+ "updated_at": "2026-07-27T07:38:51.148486+00:00",
  "version": 1
 }

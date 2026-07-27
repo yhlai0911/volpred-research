@@ -27929,5 +27929,45 @@
     "owner": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
     "commit": null,
     "summary": "STARVED lane 第2張：snapdup_cert_fallback_codex_usage_limit_20260721（aged 139.2h）。根因＝2026-07-21 的 Codex 認證審查 job（compute-codex-audit-snapshot-dup-20260721-1784607109）因外部額度耗盡（鎖到 7/25）exit 1、留 0-byte verdict、followup_dispatched=false 且被 pending-followup filter 漏掉而無聲沉底 7h；連帶 worktree dispatch-slot-1-20b291d5-snapdup（commit 1c30466ae，3864 行稽核）過不了 cert gate。今天 7/27＞7/25 額度已解。處置：確認 codex_review_job.sh 對額度/0-byte/EMPTY 皆 fail-closed（不會再產生假 PASS）、prompt 現成、worktree 仍在（可 merge）→ 重派 canonical Codex 認證審查（job compute-snapdup-codex-re-review-7-25-1785133446，fresh verdict path audit_snapshot_dup_20260721_verdict_rerun20260727.md）。followup brief 完整承接原 brief：PASS→worktree 寫 review_verdict.json（reviewed_commit 1c30466ae, shasum 實算）→git_writer_lock+merge_worktree→主線程寫 knowledge（audit_snapshot_dup_20260721：9/9 snapshot 同批 10 重複交易日、51 consumer 裁決、7 重跑全變動、2 顯著翻轉 k1319 |t|2.9319→3.1085/k1592 p0.038→0.137、diff-before-dedup 教訓）→complete 本 pool task；FAIL→逐條建修正 task。task 已 annotate linked job + needs_followup_close，留 in_progress 待 followup 依 id 收尾（complete 不強制 owner 比對，已驗）。若重派仍撞額度鎖，followup 改走 k1707 fresh-context reviewer fallback 先例，不硬等。"
+  },
+  {
+    "timestamp": "2026-07-27T15:22:06+08:00",
+    "task_type": "experiment",
+    "task_id": "research_direction_predictability_signforecast",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+    "owner": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+    "commit": null,
+    "summary": "PHASE A 收 collect_completed followup `compute-signforecast-codex-round-2-review`：Codex round 2 verdict=FAIL（freeze hash 核對通過，非 mismatch）。3 個 blocking defects：(1) GARCH no-silent-fallback 診斷缺失（py 45 全域關 warnings、不檢查 convergence flag、finiteness 漏 mu/resid_prev）；(2) DM 單尾 p 值誤讀 8/8 vs 實際 6/8 顯著；(3) multiple-correction 不顯著被寫成「證實 NULL」、「波動明顯可預測」缺正式 HAC DM/bootstrap（failure-to-reject≠證實）。已填 review_verdict.json=FAIL（保留凍結 sha256）、complete research_direction_predictability_signforecast=failed、enqueue bounded remediation agent-signforecast-rev2-remediation（opus/max，既有 canonical worktree dispatch-slot-2-7087efc0-signfc，followup=Codex round 3 複審）、mark-followup-dispatched。不 merge worktree。"
+  },
+  {
+    "timestamp": "2026-07-27T15:22:06+08:00",
+    "task_type": "experiment",
+    "task_id": "k1731_f1_bootstrap_merge_deadlock",
+    "outcome": "blocked",
+    "actor": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+    "owner": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 下唯一 agentable starved pick k1731_f1_bootstrap_merge_deadlock（P2 aged 142h）。診斷：任務描述的 Exit A（寫 arm B knowledge 解 merge 鎖）已被 in-flight codex round-10 review 取代。實查 arm B：k1731_armB_verification.json verdict=needs_fix，B1（SSVS ES 用 component-wise 而非 mixture ES，污染 §3.1 ES p=0.0145/§3.5）與 B3（review_verdict 在 B1 修好前不能誠實寫 PASS，Codex OVERALL:issues）尚未解；compute-k1731-armb-codex-review-round-10 仍 queued（04:42Z，worker 未跑到，verdict.md 不存在）。merge 由 round-10 followup pipeline 擁有。結論：強寫 knowledge/force-merge 會提交未修 ES 數學缺陷，違研究誠實 → 不執行 Exit A。改 re-block（external_compute_job_active, until 2026-07-28），blocked_reason 記 UNBLOCK 條件=arm B merged 後 requeue k1731-f1-boot-c0-parametric+block（round-10 followup 未涵蓋 shard requeue，本 task 是唯一 home）。"
+  },
+  {
+    "timestamp": "2026-07-27T15:22:06+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-red-30241354854",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+    "owner": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+    "commit": null,
+    "summary": "本 fire fire_reason=requested:ci_red:ci-red-30241354854。查 CI：紅燈 run 30241354854（sha 48240039，06:15Z）真實 pytest 失敗 test_phase_z_foreign_incident.py::test_the_same_stuck_paths...（KeyError 'incident'，1 failed/5729 passed）。已由後續 commit aca35928d（改 phase_z.py）修復，屬批次 0693506341（07:00 push）；該 sha CI runs 4 綠+1 in_progress，本地 HEAD 該測試實跑通過。真實紅燈已恢復（非誤報），無對應 ci-red task 需收尾（matched 0）。\n\n兩個運營 finding 供 reconcile：(1) 雙收 race：compute followup 無 claim 保護，本 slot 07:11 enqueue signforecast rev2、另一 slot 07:12 enqueue rev3，同 cwd(dispatch-slot-2-7087efc0-signfc)/同 artifact。cancel CLI 對兩者皆被 source-task-binding 完整性擋（rev2 source 不在池；rev3 source 已 failed→mismatch），amend 無 not_before，禁 hand-edit queue → 保留兩者，殘餘風險為冗餘重跑（git_writer_lock 保護，非 corruption）。根因：compute followup 缺 claim 保護，建議加 followup claim。(2) snapdup re-review verdict=FAIL（5 BLOCKING，含 k1583 實際污染卻誤判 PROTECTED_DEDUP→污染數低估）但 cert task snapdup_cert_fallback_codex_usage_limit_20260721 被 slot-2 active claim（未過期）→ 依「已 claim 禁強推」放手，交回 claim owner，verdict.md 已 durable 落盤。"
+  },
+  {
+    "timestamp": "2026-07-27T15:33:23+08:00",
+    "task_type": "experiment",
+    "task_id": "k1730_adjudication_doc_amend_factual_errors",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce",
+    "owner": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce",
+    "commit": "8a172d79a",
+    "summary": "STARVATION LOCKOUT 指定挑此餓死任務（P2，aged 140.8h）。K1730_NESTED_DM_ADJUDICATION.md（worktree dispatch-slot-1-bd00f90a-k1731，唯一副本、canonical 無）逐條修訂 8 條事實錯誤 —— 全部方向都是「低估待修債務」（nested_dm_misuse_baseline 自註的 worse error direction）。派 opus 同步 agent 逐條 verify-then-amend，我保留 git/收尾。\n\n修訂內容（每條先驗證證據源再改寫）：(1) §5/§0 回復「曾外部曝光於 knowledge f932cb04（已 2026-07-21 修訂）」非零曝光；(2)(3) §1.0 訂正 agent brief 兩實檔存在、README 227 行存於 salvage ref edcb5b0d0；(4) §1.1/§3.2/§6.1 數字換成 production（quick_mode=false, edcb5b0d0）：DM t=2.1589、p=0.0311、mean_loss_diff=0.002106、harvey_significant=false，方向同號、裁決不翻轉；(5) §3.2 移除已被 REMEDIATION_v2.md 因 leakage 撤回的 single-draw permutation 支柱，改述 lag-shift placebo（one-sided p=0.833、下限 0.167、粗解析度）；(6) §3.2 註明支柱(1)(3)非獨立（同一 t），結論降級為「偵測不到/無辨別力」非「無增量價值」；(7) §3.4/§7 標明 baseline 196/106 僅 worktree 狀態、canonical 為 193/103/90 且無 k1730；(8) §6.6/§1.2/§4.1/§1.0 更新過時 task 狀態、行號微調（verbatim 293-294、loop 290、註解 288-289）、docs 命中改 nested_dm_coefficient_mask_audit.md:25,32。文末加 §8 Amendment log。\n\nAgent 誠實標出 2 處 discrepancy 並保守處理：REMEDIATION_v2.md 在 canonical 非 worktree（內容相符）；k1730_nested_dm_detector_exposure 實為 status=succeeded 非 in_progress（用實際值）。核心 RETRACT 判定、§3.1 文獻論證、§4.2 randomization 路線未動（全文最紮實部分）。驗證：檔 493 行（+83）、關鍵編輯 30 命中、§8 log line 470。交付：於 worktree branch 單寫鎖提交 8a172d79a（1 file, +169/-86），隨該 worktree 日後 merge（assign_580c1b3e K1730 v2 收件）一起進 main —— 未複製到 canonical 以免與 tracked 檔分岔。\n\n【並發 ops finding，供 reconcile — 非本任務】compute followup 缺 claim 保護（與 slot-1 15:22 work_log 同一根因）：signforecast Codex round-2 followup 被 slot-1（rev2, 07:11）與本 slot（rev3, 07:12）於 list→mark 之間 TOCTOU 雙 enqueue，兩 job 同 cwd(dispatch-slot-2-7087efc0-signfc)/同 artifact。enqueue-agent 的 collision gate 只按 task-id 去重、不按 cwd，故未擋。已把 parent followup 指標改指 rev2（等價 brief、更早）；rev3 因 source task 已 failed→binding mismatch，cancel CLI fail-closed（防手改），無法移除→保留為孤兒 queued job，殘餘風險＝冗餘重跑（git_writer_lock 保護、非 corruption）。建議治本：(a) compute followup 加 claim 保護（fcntl 同 next_tasks）；(b) enqueue-agent collision gate 增加 cwd/artifact 去重；(c) cancel CLI 對孤兒 binding 提供 operator override。snapdup remediation 無此問題（slot-1 已釋放 claim，僅一 job afafc5）。"
   }
 ]

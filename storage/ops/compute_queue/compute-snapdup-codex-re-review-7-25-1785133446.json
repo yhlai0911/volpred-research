@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-27T06:24:06Z",
   "started_at": "2026-07-27T06:30:06Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-27T06:36:20Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdup-codex-re-review-7-25-1785133446.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdup-codex-re-review-7-25-1785133446.stderr",
   "result_artifact": "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict_rerun20260727.md",
@@ -30,12 +30,25 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": null,
   "source_task_link": null,
   "timeout_seconds": 2700,
   "brief_source": null,
   "brief_snapshot": null,
   "claimed_by_pid": 75795,
-  "claimed_by_pid_start_wall": "Mon Jul 27 14:30:05 2026"
+  "claimed_by_pid_start_wall": "Mon Jul 27 14:30:05 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "659b6b83b692ce18b13c4d604c4e962b6ceefed1",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict_rerun20260727.md"
+  ],
+  "delivered_at": "2026-07-27T07:01:44.081513+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-27T07:14:34Z",
+  "followup_next_task_id": "agent-brief_snapdup_audit_remediation-afafc5"
 }

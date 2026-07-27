@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_snapdup_audit_remediation-afafc5",
+  "title": "snapdup audit bounded remediation（逐項修 Codex FAIL 5 blocking）",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapdup_audit_remediation-afafc5.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "max",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-snapdup",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-snapdup/experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_snapdup_audit_remediation-afafc5.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T07:14:28Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapdup_audit_remediation-afafc5.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapdup_audit_remediation-afafc5.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-snapdup/experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_snapdup_audit_remediation-afafc5.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-20b291d5-snapdup",
+  "claude_followup": {
+    "brief": "讀 review_verdict.json + README『Remediation 修訂紀錄』。派 Codex re-review 逐項檢查 B1-B5 是否修好（含 k1583 重分類、翻轉計數、repo scan 全集、provenance、reproduce_spec 完整性）。PASS → 填 review_verdict.json(verdict=PASS) + 正式 merge_worktree.sh 合併 dispatch-slot-1-20b291d5-snapdup + 主線寫 knowledge(category=research_methodology, k_id=audit_snapshot_dup_20260721, evidence 指修正後 results.json：新確認污染下限含k1583、1正式verdict翻轉k1319、k1592 diff-before-dedup機制、consumer全集可重建)。FAIL → 逐條建修正 task、complete failed、3-strike escalate email 老闆(--needs-reply)、禁手改verdict。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "snapdup_cert_fallback_codex_usage_limit_20260721",
+  "source_task_link": {
+    "state": "error",
+    "attempted_at": "2026-07-27T07:30:05Z",
+    "linked_at": null,
+    "error": "RuntimeError: source task is not legally bindable: task_id=snapdup_cert_fallback_codex_usage_limit_20260721 status=failed compute_job_id=None requested_job_id=agent-brief_snapdup_audit_remediation-afafc5"
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_snapdup_audit_remediation.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapdup_audit_remediation-afafc5.md"
+}

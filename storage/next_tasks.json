@@ -34310,7 +34310,7 @@
   {
     "id": "research_direction_predictability_signforecast",
     "task_type": "experiment",
-    "status": "awaiting_agent_job",
+    "status": "failed",
     "priority": 3,
     "title": "方向（漲跌）可預測性的誠實樣本外檢定",
     "description": "老闆 Telegram msg855 問研究線為何不多研究漲跌預測。做誠實方向檢定（非過度承諾）：對 SPY/QQQ/0050.TW/TWII 用既有 HAR/GARCH 波動率特徵 + 報酬滯後/動能特徵建方向分類器（logistic / gradient boosting），rolling 樣本外評估次日 sign 命中率 vs 50% 基準，Pesaran-Timmermann 方向檢定 + DM，並與波動率可預測性對照。預期方向近隨機漫步（EMH），命中率難穩定 >50%；若有 edge 需過多重檢定 + 交易成本後仍成立才算。null 照實寫。文獻 grounded：Christoffersen-Diebold 2006、Pesaran-Timmermann 1995/2004。重運算走 compute_queue，不 inline 硬跑。",
@@ -34336,13 +34336,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_signforecast-3df319",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T07:11:06.309210+00:00",
+        "from": "awaiting_agent_job",
+        "to": "failed",
+        "by": "complete"
       }
     ],
     "compute_job_id": "agent-brief_signforecast-3df319",
     "blocked_reason": "external_compute_receipt_pending_collection",
-    "result": "dispatched to compute job agent-brief_signforecast-3df319; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_signforecast-3df319; awaiting PHASE A collection\n\nCodex round 2 = FAIL (3 blocking defects: GARCH silent-fallback 診斷缺失、DM 單尾 p 值誤讀 8/8 vs 實際 6/8、multiple-correction 不顯著被寫成證實 NULL 且波動可預測缺正式 HAC DM/bootstrap)。review_verdict.json 已記 FAIL；bounded remediation 已 enqueue (signforecast_rev2_remediation)。不 merge worktree。",
     "compute_started_at": "2026-07-27T04:30:00Z",
-    "compute_finished_at": "2026-07-27T04:57:50Z"
+    "compute_finished_at": "2026-07-27T04:57:50Z",
+    "completed_at": "2026-07-27T07:11:06.309182+00:00"
   },
   {
     "id": "ci-red-29470286001",
@@ -41329,19 +41336,37 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4"
+      },
+      {
+        "at": "2026-07-27T07:05:12.325066+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-27T15:00:00+08:00)"
+      },
+      {
+        "ts": "2026-07-27T07:14:34.380225+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af"
+      },
+      {
+        "ts": "2026-07-27T07:14:34.664991+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af"
       }
     ],
     "block_transition_previous": {
-      "claimed_by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4",
-      "claimed_at": "2026-07-27T05:05:43.983960+00:00",
-      "claim_expires_at": "2026-07-27T07:05:43.983960+00:00",
-      "claim_session_id": "c445430011ee",
-      "started_at": "2026-07-27T05:05:59.666813+00:00"
+      "claimed_by": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
+      "claimed_at": "2026-07-27T07:14:34.380210+00:00",
+      "claim_expires_at": "2026-07-27T09:14:34.380210+00:00",
+      "claim_session_id": "ae58a16e1ff1",
+      "started_at": "2026-07-27T07:14:34.664977+00:00"
     },
-    "blocked_until": "2026-07-27T15:00:00+08:00",
-    "blocked_reason": "awaiting_codex_review",
-    "blocked_at": "2026-07-27T05:09:12+00:00",
-    "blocked_note": "LIVE re-read 2026-07-27 ~13:00: 07-21 Exit-A premise STALE. arm B NOT Codex-clean: round 9 FAIL, round 10 fix applied today by hourly-slot-1, Codex round 10 review QUEUED (k1731_armB_rev10_verdict.md not yet written); agent-brief_k1731_rev9-87d87e also queued. Cannot write arm B knowledge (Codex-pass-first) nor merge (unverified claim surface + races live remediation). Compute worker healthy (job done 04:57:50Z). AFTER round 10 PASS: main-thread writes arm B knowledge from final results JSON (arm B scope only) -> merge_worktree.sh -> compute_queue requeue k1731-f1-boot-c0-parametric / k1731-f1-boot-c0-block. Single blocker now = round-10 verdict."
+    "blocked_until": "2026-07-28",
+    "blocked_reason": "external_compute_job_active",
+    "blocked_at": "2026-07-27T07:21:06+00:00",
+    "blocked_note": "Exit A（寫 arm B knowledge 解 merge 鎖）已被 in-flight codex round-10 review 取代：arm B verification=needs_fix（B1 SSVS ES 用 component-wise 非 mixture ES，影響 §3.1 ES p=0.0145；B3 review_verdict 在 B1 修好前不能誠實 PASS），且 compute-k1731-armb-codex-review-round-10 仍 queued（04:42Z 起，worker 尚未跑到）。merge 由該 pipeline 擁有（followup: PASS→merge_worktree dispatch-slot-1-bd00f90a-k1731 + reproduce_spec.json gate）。強寫 knowledge/force-merge = 提交未修 ES 缺陷，違研究誠實。UNBLOCK 條件=arm B merged 後 requeue k1731-f1-boot-c0-parametric + k1731-f1-boot-c0-block（README §11.6；round-10 followup 未涵蓋 shard requeue，本 task 是唯一 home）。"
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -41419,14 +41444,32 @@
     "task_type": "experiment",
     "priority": 2,
     "description": "K1730_NESTED_DM_ADJUDICATION.md（worktree dispatch-slot-1-bd00f90a-k1731）核心裁決（nested + pinball + expanding → RETRACT 而非 repair）經逐條複核成立、與 K1731 arm B 先例一致，§1.1/§1.4/§2/§3.3/§6.1 md5 與 code 行號複核為真。但以下八點必須修訂 —— 錯的方向全是**低估待修債務**，正是 nested_dm_misuse_baseline.json 自己註記的『understating debt is the worse error direction』那一種：\n\n1. §5 + §0『zero outward exposure / correction list is empty』**不成立**：knowledge.json item f932cb04 引用該 raw DM 為關鍵數字、並稱 permutation『決定性』（該條已於 2026-07-21 由主線程經 revise_knowledge_entry.py 修訂，但裁決書本文仍寫零曝光）。\n2. §1.0『no agent brief was ever written』**錯**：canonical storage/ops/agent_briefs/ 有 agent-brief_k1730_gevreg_midas_ssvs-cdcac4.md、agent-brief_k1730_remediation-832ffa.md 兩個實檔。\n3. §1.0『K1730 never went through closeout / no README』**錯**：README.md 227 行存在於 salvage ref edcb5b0d0（見 task k1730_salvage_ref_integrate_v2_closeout）。\n4. §6.1『每個數字都是 quick-mode、production 尚待』**錯**：quick_mode=false 的 production artifact 存在於 edcb5b0d0，DM t=+2.1589、p=0.0311、mean_loss_differential=+0.002106、harvey_significant=false。方向與 quick-mode 同號同結論，**裁決不翻轉**，但 §1.1/§3.2 的數字要換成這組。\n5. **§3.2 pillar 2 引用的是已被撤回的證據**（最實質的一點）：裁決書把 v1 的 single-draw permutation 當成『存活的 null』三支柱之一，但 K1730 自己的 REMEDIATION_v2.md（2026-07-19）已因 leakage（全樣本 shuffle 把較晚 release 放到較早 origin 前）撤回它，改用 lag-shift placebo（one-sided p=0.833、5 shifts 下限 0.167、明載為粗解析度佐證）。裁決書等於用被撤回的證據重建 null。\n6. §3.2 三支柱不獨立：(1) loss ordering 與 (3) harvey_significant=false 是同一個 t 的兩種呈現。且標題宣稱『Macro adds no incremental value』超出證據 —— nested bias 與 null 同向的真正後果是**此設計對零訊號與弱訊號沒有辨別力**，可支持的最強說法是『偵測不到』。\n7. §3.4/§7 的 nested_dm_misuse_baseline.json 引用（count 196 / exposed 106 / k1730 in active.exposed）**只在 worktree 副本成立**；canonical 該檔 grep k1730 = 0、buckets 為 193/103/90。須標明是 worktree 狀態。\n8. §6.6 已過時：k1730_nested_dm_detector_exposure 現存於 storage/next_tasks.json（status=in_progress）；§1.2 A4 / §4.1 item 1 行號微調（verbatim 在 293-294，DM loop header 在 290，註解應加 288-289）；§1.0 docs 註記錯誤（真實命中是 docs/governance/2026-07/nested_dm_coefficient_mask_audit.md:25,32，不是『1730 篇』的 false positive）。\n\n**不需改的**：RETRACT 判定本身、§3.1 文獻不可修復論證、§4.2 randomization test 路線與成本計算（這是全文最紮實的一段）。",
-    "status": "blocked",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-21T10:30:00+00:00",
     "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014",
-    "blocked_until": "2026-07-27T15:00:00+08:00",
-    "blocked_reason": "awaiting_prerequisite_fix",
-    "blocked_at": "2026-07-27T05:11:10+00:00",
-    "blocked_note": "LIVE re-read 2026-07-27 ~13:00: target file K1730_NESTED_DM_ADJUDICATION.md exists ONLY in worktree dispatch-slot-1-bd00f90a-k1731 (no canonical copy). That worktree is frozen: (a) merge gated on arm B Codex round 10 (see k1731_f1_bootstrap_merge_deadlock; round 10 verdict k1731_armB_rev10_verdict.md QUEUED not yet written), (b) under active concurrent remediation by hourly-slot-1 (arm B files written 12:31-12:41 today; rev9 agent + round-10 review queued). Editing it now = commit that cannot merge + concurrent-write race. Task spec itself is complete (8 documented corrections ready to apply). PREREQ: worktree becomes mergeable (arm B round 10 PASS) -> then apply the 8 amendments and merge via merge_worktree.sh. Same freeze as the K1730/K1731 cluster."
+    "status_history": [
+      {
+        "at": "2026-07-27T07:05:12.325076+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-27T15:00:00+08:00)"
+      },
+      {
+        "ts": "2026-07-27T07:15:32.665114+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce"
+      },
+      {
+        "ts": "2026-07-27T07:33:33.697536+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce"
+      }
+    ],
+    "completed_at": "2026-07-27T07:33:33.697508+00:00",
+    "result": "8 條事實錯誤逐條 verify-then-amend 完成（全為低估待修債務方向）：f932cb04 曝光回復、production 數字 t=2.1589/p=0.0311 換入、撤回的 permutation 支柱移除改 lag-shift placebo、過度宣稱降級為非辨別力、baseline 196/106 標為 worktree-only、行號/task狀態/docs命中訂正 + §8 Amendment log。核心 RETRACT/§3.1/§4.2 未動。worktree branch 提交 8a172d79a（+169/-86），隨 dispatch-slot-1-bd00f90a-k1731 日後 merge 進 main。agent 誠實標 2 discrepancy 保守處理。"
   },
   {
     "id": "k1730_randomization_test_upgrade_null",
@@ -41526,7 +41569,7 @@
     "title": "audit_snapshot_dup_20260721 認證審查改走 fallback reviewer（Codex 額度鎖到 7/25）",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "failed",
     "source": "machine",
     "created_at": "2026-07-21T11:12:22.469480+00:00",
     "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
@@ -41543,10 +41586,6 @@
       }
     },
     "upstream_receipt_ref": "legacy-batch:worktree_harvest_wave3_dirty_stale_20260721",
-    "claimed_by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
-    "claimed_at": "2026-07-27T06:23:48.264161+00:00",
-    "claim_expires_at": "2026-07-27T08:23:48.264161+00:00",
-    "claim_session_id": "9100c4f0cccd",
     "status_history": [
       {
         "ts": "2026-07-27T06:23:48.264177+00:00",
@@ -41559,12 +41598,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
+      },
+      {
+        "ts": "2026-07-27T07:14:16.426759+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
       }
     ],
     "started_at": "2026-07-27T06:23:48.530490+00:00",
     "redispatch_note": "2026-07-27 slot-2：Codex 額度(鎖到7/25)已解，重派 canonical codex_review_job.sh（fresh verdict path，fail-closed）；merge+knowledge+complete 由 review-job followup 收尾。worktree dispatch-slot-1-20b291d5-snapdup 仍在。",
     "linked_compute_job": "compute-snapdup-codex-re-review-7-25-1785133446",
-    "needs_followup_close": true
+    "needs_followup_close": true,
+    "completed_at": "2026-07-27T07:14:16.426730+00:00",
+    "result": "Codex re-review FAIL（非額度/非空，5833 bytes 真審）。5 BLOCKING: (B1) k1583 錯判 PROTECTED_DEDUP 實為真污染者→『9 確認污染』下限不可信、18 dedup 無罪至少錯一; (B2) 『2 顯著性翻轉』過度宣稱，k1592 僅 nominal p 跨線正式判定不變，實際只 k1319 正式翻轉; (B3) 70 檔掃描硬編碼無實際 repo scan/無候選全集; (B4) generated_from_revision 指不到生成 bytes; (B5) reproduce_spec/rerun_cache 不完整無法第三方重現。裁決數字尚不能用於撤回/P1。已派 bounded remediation（逐項拆解）。verdict: storage/ops/codex_reviews/audit_snapshot_dup_20260721_verdict_rerun20260727.md"
   },
   {
     "id": "k1707_pseudo_stress_branch_path_collision_20260721",
@@ -41679,7 +41726,24 @@
     "created_at": "2026-07-21T13:19:03.439519+00:00",
     "source": "dispatch",
     "parent_task_id": "paper_0050_snapshot_repoint_20260719",
-    "description": "由 paper_0050_snapshot_repoint_20260719 稽核衍生（agent 主動發現，超出原 brief 四項）。\n\n問題：k892（line 38）與 k994（lines 371/392）在執行時**直接向 yfinance 拉即時資料**，兩者都沒有讀任何 pinned CSV；experiments/k892/data/ 下只有 .gitkeep。但兩篇論文都隨附了 pinned snapshot —— 那些檔案**沒有任何分析腳本在消費**。\n\n影響：paper/taiwan-vt body_v3.tex:53 的 0050 GJR gamma=0.097 / t=3.60（來自 k892）與 paper/garch-x-vix main.tex:531 的 DM t=1.44（來自 k994）今天都能精確復現（本次已驗：k892 重擬 gamma=0.0970 / t=3.5965 / loglik=-6319.355，對上記錄值 5-6 位），**但 referee 重跑 k892 拿到的是他當天的 yfinance 回傳值**，不是論文的資料。這是可重現性宣稱與實際程式行為不一致，不是數字錯誤。\n\n要做：把 k892 / k994 的資料入口改為讀 pinned CSV（保留 yfinance 為 fallback 但需顯式開關），重跑確認數字不變，並在兩篇論文的 data section 說明 pinned snapshot 就是分析輸入。\n\n附帶（cosmetic，可一併修）：body_v3.tex:53 表格宣稱窗口 'January 2009 to March 2026 (4,217 trading days)'，但 0.097/3.60 的擬合實際用 n=4219 且結束於 2026-04-04。誠實截到 2026-03-31 得 gamma=0.0965 / t=3.58，即表中 '3.60' 與其自述窗口差 0.02。"
+    "description": "由 paper_0050_snapshot_repoint_20260719 稽核衍生（agent 主動發現，超出原 brief 四項）。\n\n問題：k892（line 38）與 k994（lines 371/392）在執行時**直接向 yfinance 拉即時資料**，兩者都沒有讀任何 pinned CSV；experiments/k892/data/ 下只有 .gitkeep。但兩篇論文都隨附了 pinned snapshot —— 那些檔案**沒有任何分析腳本在消費**。\n\n影響：paper/taiwan-vt body_v3.tex:53 的 0050 GJR gamma=0.097 / t=3.60（來自 k892）與 paper/garch-x-vix main.tex:531 的 DM t=1.44（來自 k994）今天都能精確復現（本次已驗：k892 重擬 gamma=0.0970 / t=3.5965 / loglik=-6319.355，對上記錄值 5-6 位），**但 referee 重跑 k892 拿到的是他當天的 yfinance 回傳值**，不是論文的資料。這是可重現性宣稱與實際程式行為不一致，不是數字錯誤。\n\n要做：把 k892 / k994 的資料入口改為讀 pinned CSV（保留 yfinance 為 fallback 但需顯式開關），重跑確認數字不變，並在兩篇論文的 data section 說明 pinned snapshot 就是分析輸入。\n\n附帶（cosmetic，可一併修）：body_v3.tex:53 表格宣稱窗口 'January 2009 to March 2026 (4,217 trading days)'，但 0.097/3.60 的擬合實際用 n=4219 且結束於 2026-04-04。誠實截到 2026-03-31 得 gamma=0.0965 / t=3.58，即表中 '3.60' 與其自述窗口差 0.02。",
+    "status_history": [
+      {
+        "ts": "2026-07-27T07:34:51.075082+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce"
+      },
+      {
+        "ts": "2026-07-27T07:36:57.412019+00:00",
+        "from": "claimed",
+        "to": "pending",
+        "by": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce",
+        "note": "manual_release"
+      }
+    ],
+    "scope_note": "拆解建議（.tex 硬規：background agent 禁寫 .tex，僅主線程）：(A) worktree agent 做非-.tex 部分 — repoint k892.py:38/k994.py:371,392 讀 pinned CSV（yfinance 保留為顯式開關 fallback）+ 重跑驗 k892 gamma=0.0970/t=3.5965/loglik=-6319.355、k994 DM t=1.44 不變；(B) 主線程 paper_body 收尾兩篇 data section 說明 pinned snapshot 為輸入 + body_v3.tex:53 cosmetic 窗口訂正(4217 vs 實際 4219/截 2026-03-31 得 gamma=0.0965/t=3.58)。需完整時段(≥30min)，非 20min 尾段可收。",
+    "last_released_at": "2026-07-27T07:36:57.412001+00:00"
   },
   {
     "id": "audience_gate_general_lane_starvation_20260721",
@@ -45500,7 +45564,7 @@
     "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 11 次觀察到這組）\n- experiments/k1319/k1319_results.json — 13 班\n- experiments/k1399/k1399_qlike_comparison.png — 13 班\n- experiments/k1399/k1399_vix_decomp_results.json — 13 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 13 班\n- experiments/k1591/k1591_results.json — 13 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 13 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 13 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 13 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 13 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 13 班\n- experiments/k1592/fig3_origin_gamma_t.png — 13 班\n- experiments/k1705/k1705_results.json — 13 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 13 班\n- storage/logs/trending_primary_source_verification.jsonl — 20 班\n- storage/memory/knowledge.json — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T053707835861Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T053804373918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T053905336627Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T063003440331Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T063013710483Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-27T03:17:15.690129+00:00",
     "payload": {
@@ -45577,7 +45641,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T06:30:16.520108+00:00"
+    "updated_at": "2026-07-27T06:30:16.520108+00:00",
+    "superseded_at": "2026-07-27T07:38:55.453387+00:00",
+    "superseded_by": "assign_40626ae8",
+    "completed_at": "2026-07-27T07:38:55.453387+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "issue18_mutation_boundary_partition_canary_20260727",
@@ -45787,19 +45855,55 @@
     "description": "依既有 Matt Issue #45/T39 做 bounded contained slice：inventory 所有 production kill/killpg/terminate callsites；所有 system-owned termination 在 signal 前 durable 寫入 intent receipt，completion classifier 僅在 matching intent 時歸因 system-owned，否則 SIGTERM=unknown_external；補 kill-boundary failure injection、receipt read-back 與 production rehearsal。不得提前做 #24 formal effect cutover；Issue #45 full acceptance 仍保持 OPEN。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T06:12:54.096389+00:00",
     "payload": {
       "declared_output_paths": [
-        "scripts/dispatch_supervisor/procutil.py",
-        "scripts/dispatch_supervisor/worker.py",
+        ".gitignore",
+        "conftest.py",
+        "config/cron_wrapper_manifest.json",
+        "docs/error_log.md",
+        "scripts/codex_exec_bounded.sh",
+        "scripts/codex_loop.sh",
+        "scripts/cron_check_alerts.sh",
+        "scripts/cron_continue_task_stub.sh",
+        "scripts/cron_daily_checkup.sh",
+        "scripts/cron_hourly_dispatch.sh",
+        "scripts/dispatch_supervisor/alerts.py",
+        "scripts/dispatch_supervisor/codex_failover.py",
         "scripts/dispatch_supervisor/health.py",
-        "scripts/dispatch_supervisor/state.py",
-        "scripts/dispatch_supervisor/scheduler.py",
+        "scripts/dispatch_supervisor/procutil.py",
+        "scripts/dispatch_supervisor/selfreload.py",
+        "scripts/dispatch_supervisor/supervisor.py",
+        "scripts/dispatch_supervisor/worker.py",
+        "scripts/gen_codex_cli_reference.py",
+        "scripts/gen_lazypack_agy.py",
+        "scripts/gen_lazypack_codex.py",
+        "scripts/reclaim_stale_worktrees.py",
+        "scripts/reconcile_schedule_owners.py",
+        "scripts/reload_dispatch_supervisor.sh",
+        "scripts/reproduce_check.py",
+        "scripts/run_agent_job.py",
+        "scripts/scan_trending_agy.py",
+        "scripts/telegram_responder.sh",
+        "scripts/termination_launchd_restart.py",
+        "scripts/termination_signal.py",
+        "scripts/tests/test_agentic_cli_timeout_killpg.py",
+        "scripts/tests/test_git_writer_lock.py",
+        "scripts/tests/test_hang_alert_ownership.py",
+        "scripts/tests/test_lazypack_codex_timeout_orphan.py",
         "scripts/tests/test_termination_intent.py",
+        "src/volpred/ops/execution_brief.py",
+        "src/volpred/ops/git_writer_lock.py",
+        "src/volpred/ops/questions.py",
+        "src/volpred/ops/termination.py",
+        "src/volpred/publisher/prepublish_audit.py",
         "tests/test_dispatch_supervisor.py",
-        "docs/error_log.md"
+        "tests/test_dispatch_supervisor_codex_failover.py",
+        "tests/test_dispatch_supervisor_procutil.py",
+        "tests/test_selfreload.py",
+        "tests/test_worker_fatal_marker_fastfail.py"
       ],
       "denied_canonical_paths": [
         "storage/**"
@@ -45809,10 +45913,6 @@
     },
     "created_by": "codex-vscode",
     "issue_ref": "#45",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T06:13:03.608611+00:00",
-    "claim_expires_at": "2026-07-27T08:13:03.608611+00:00",
-    "claim_session_id": "4b8b4e78504a",
     "status_history": [
       {
         "ts": "2026-07-27T06:13:03.608629+00:00",
@@ -45825,8 +45925,132 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T07:32:40.807804+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T06:13:07.207337+00:00"
+    "started_at": "2026-07-27T06:13:07.207337+00:00",
+    "completed_at": "2026-07-27T07:32:40.807779+00:00",
+    "result": "Implemented durable termination intent owner and migrated production signal paths; exact lineage/PID generation, fsync rollback+retry, unknown-external classifier, raw-callsite gates, and launchd KeepAlive restart readback. Relevant regression suite 339 passed; Matt Standards/Spec dual review PASS; wrapper canonical/manifest/live lockstep. Full Issue #45 remains OPEN/contained behind #9/#24.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_40626ae8",
+    "title": "PHASE-Z 卡住檔案 incident（2a58c24fafb9c304）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 21 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1319/k1319_results.json — 14 班\n- experiments/k1399/k1399_qlike_comparison.png — 14 班\n- experiments/k1399/k1399_vix_decomp_results.json — 14 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 14 班\n- experiments/k1591/k1591_results.json — 14 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 14 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 14 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 14 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 14 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 14 班\n- experiments/k1592/fig3_origin_gamma_t.png — 14 班\n- experiments/k1705/k1705_results.json — 14 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 3 班\n- experiments/k1730/README.md — 3 班\n- experiments/k1730/REMEDIATION_v2.md — 3 班\n- experiments/k1730/codex_review_v1.md — 3 班\n- experiments/k1730/data/CPI_first_release.csv — 3 班\n- experiments/k1730/data/DGS10_daily.csv — 3 班\n- experiments/k1730/data/DTB3_daily.csv — 3 班\n- experiments/k1730/data/IP_first_release.csv — 3 班\n- experiments/k1730/data/NFP_first_release.csv — 3 班\n- experiments/k1730/data/UNRATE_first_release.csv — 3 班\n- experiments/k1730/data/VIX_daily.csv — 3 班\n- experiments/k1730/data/spy_daily_rv.csv — 3 班\n- experiments/k1730/fig1_rolling_coverage.png — 3 班\n- experiments/k1730/fig2_ssvs_pip.png — 3 班\n- experiments/k1730/fig3_interval_vs_realized.png — 3 班\n- experiments/k1730/fig4_pit_calibration.png — 3 班\n- experiments/k1730/k1730_data.py — 3 班\n- experiments/k1730/k1730_gevreg_midas_ssvs.py — 3 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T073852613261Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T07:38:55.464690+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "2a58c24fafb9c304",
+      "paths": [
+        "experiments/k1319/k1319_results.json",
+        "experiments/k1399/k1399_qlike_comparison.png",
+        "experiments/k1399/k1399_vix_decomp_results.json",
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
+        "experiments/k1591/k1591_results.json",
+        "experiments/k1591/tables/k1591_daily_panel.csv",
+        "experiments/k1591/tables/k1591_regime_summary.csv",
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
+        "experiments/k1592/fig2_gammarule_gjr_share.png",
+        "experiments/k1592/fig3_origin_gamma_t.png",
+        "experiments/k1705/k1705_results.json",
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md",
+        "experiments/k1730/README.md",
+        "experiments/k1730/REMEDIATION_v2.md",
+        "experiments/k1730/codex_review_v1.md",
+        "experiments/k1730/data/CPI_first_release.csv",
+        "experiments/k1730/data/DGS10_daily.csv",
+        "experiments/k1730/data/DTB3_daily.csv",
+        "experiments/k1730/data/IP_first_release.csv",
+        "experiments/k1730/data/NFP_first_release.csv",
+        "experiments/k1730/data/UNRATE_first_release.csv",
+        "experiments/k1730/data/VIX_daily.csv",
+        "experiments/k1730/data/spy_daily_rv.csv",
+        "experiments/k1730/fig1_rolling_coverage.png",
+        "experiments/k1730/fig2_ssvs_pip.png",
+        "experiments/k1730/fig3_interval_vs_realized.png",
+        "experiments/k1730/fig4_pit_calibration.png",
+        "experiments/k1730/k1730_data.py",
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py",
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+        "experiments/k1730/k1730_models.py",
+        "experiments/k1730/k1730_quickmode_results.json",
+        "experiments/k1730/k1730_report_tables.py",
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json",
+        "experiments/k1730/k1730_scoring.py",
+        "experiments/k1730/reproduce_spec.json",
+        "experiments/k1730/review_verdict.json",
+        "experiments/k1730/run_production.log",
+        "experiments/k1730/run_production_v2.log",
+        "experiments/k1730/test_k1730_recovery.py",
+        "experiments/k1730/verify_readme_alignment.py",
+        "experiments/paper2_table1_summary_stats_provenance/results.json",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        "experiments/k1319/k1319_results.json": 14,
+        "experiments/k1399/k1399_qlike_comparison.png": 14,
+        "experiments/k1399/k1399_vix_decomp_results.json": 14,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 14,
+        "experiments/k1591/k1591_results.json": 14,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 14,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 14,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 14,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 14,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 14,
+        "experiments/k1592/fig3_origin_gamma_t.png": 14,
+        "experiments/k1705/k1705_results.json": 14,
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 3,
+        "experiments/k1730/README.md": 3,
+        "experiments/k1730/REMEDIATION_v2.md": 3,
+        "experiments/k1730/codex_review_v1.md": 3,
+        "experiments/k1730/data/CPI_first_release.csv": 3,
+        "experiments/k1730/data/DGS10_daily.csv": 3,
+        "experiments/k1730/data/DTB3_daily.csv": 3,
+        "experiments/k1730/data/IP_first_release.csv": 3,
+        "experiments/k1730/data/NFP_first_release.csv": 3,
+        "experiments/k1730/data/UNRATE_first_release.csv": 3,
+        "experiments/k1730/data/VIX_daily.csv": 3,
+        "experiments/k1730/data/spy_daily_rv.csv": 3,
+        "experiments/k1730/fig1_rolling_coverage.png": 3,
+        "experiments/k1730/fig2_ssvs_pip.png": 3,
+        "experiments/k1730/fig3_interval_vs_realized.png": 3,
+        "experiments/k1730/fig4_pit_calibration.png": 3,
+        "experiments/k1730/k1730_data.py": 3,
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 3,
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 3,
+        "experiments/k1730/k1730_models.py": 3,
+        "experiments/k1730/k1730_quickmode_results.json": 3,
+        "experiments/k1730/k1730_report_tables.py": 3,
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 3,
+        "experiments/k1730/k1730_scoring.py": 3,
+        "experiments/k1730/reproduce_spec.json": 3,
+        "experiments/k1730/review_verdict.json": 3,
+        "experiments/k1730/run_production.log": 3,
+        "experiments/k1730/run_production_v2.log": 3,
+        "experiments/k1730/test_k1730_recovery.py": 3,
+        "experiments/k1730/verify_readme_alignment.py": 3,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 14,
+        "storage/logs/trending_primary_source_verification.jsonl": 21,
+        "storage/memory/knowledge.json": 14
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T073852613261Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T07:38:55.453387+00:00",
+      "last_seen_at": "2026-07-27T07:38:55.453387+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
