@@ -256,6 +256,10 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
+    / "20260727121500_primary_authority_owner_attestation.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
     / "20260727110626_operations_core_duplicate_effect_retirement_signal.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
@@ -2925,6 +2929,67 @@ def test_primary_authority_fences_concurrent_and_stale_holders(
     receipt = second.release(replacement)
     assert receipt.epoch == 2
     assert second.release(replacement) == receipt
+
+
+def test_primary_authority_owner_attestation_is_typed_and_read_only(
+    postgres_effect_dsn: str,
+) -> None:
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        security = connection.execute(
+            """
+            SELECT
+              has_function_privilege(
+                'service_role',
+                'public.volpred_read_primary_authority_owner()',
+                'EXECUTE'
+              ),
+              has_function_privilege(
+                'anon',
+                'public.volpred_read_primary_authority_owner()',
+                'EXECUTE'
+              ),
+              has_table_privilege(
+                'service_role',
+                'volpred_ops.primary_authority_ownership',
+                'SELECT,INSERT,UPDATE,DELETE'
+              ),
+              (
+                SELECT relrowsecurity AND relforcerowsecurity
+                FROM pg_class AS relation
+                JOIN pg_namespace AS namespace
+                  ON namespace.oid = relation.relnamespace
+                WHERE namespace.nspname = 'volpred_ops'
+                  AND relation.relname = 'primary_authority_ownership'
+              ),
+              (
+                SELECT procedure.prosecdef
+                  AND procedure.proowner = (
+                    SELECT oid
+                    FROM pg_roles
+                    WHERE rolname = 'volpred_ops_definer'
+                  )
+                FROM pg_proc AS procedure
+                WHERE procedure.oid =
+                  'public.volpred_read_primary_authority_owner()'::regprocedure
+              )
+            """
+        ).fetchone()
+        connection.execute("SET ROLE service_role")
+        payload = connection.execute(
+            "SELECT public.volpred_read_primary_authority_owner()"
+        ).fetchone()[0]
+
+    assert security == (True, False, False, True, True)
+    assert payload["schema_version"] == "primary-authority-owner.v1"
+    assert payload["capability"] == "operations-core-primary"
+    assert payload["authority_key"] == "operations-core-primary"
+    assert payload["owner"] == "operations_core"
+    assert payload["generation"] == 1
+    assert payload["contract_ref"] == "primary-authority-contract.v1"
+    assert datetime.fromisoformat(payload["attested_at"]).tzinfo is not None
 
 
 def test_commit_authority_atomically_verifies_both_leases(

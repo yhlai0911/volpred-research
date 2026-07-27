@@ -18,10 +18,14 @@ from volpred.ops.delivery.supabase_rpc import (
 )
 
 from . import (
+    FORMAL_PRIMARY_AUTHORITY_CONTRACT_REF,
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    FORMAL_PRIMARY_AUTHORITY_OWNER_GENERATION,
     AuthorityLifecycleEvent,
     AuthorityReceipt,
     AuthorityRequest,
     FencingGrant,
+    PrimaryAuthorityOwner,
     PrimaryLease,
     WriteIntent,
 )
@@ -136,6 +140,49 @@ class SupabaseAuthorityStore:
         ):
             raise ValueError("Primary Authority acquire read-back drifted")
         return lease
+
+    def read_owner(self) -> PrimaryAuthorityOwner:
+        """Read the immutable formal-owner attestation without taking a lease."""
+
+        payload = self._rpc("volpred_read_primary_authority_owner", {})
+        if payload.get("schema_version") != "primary-authority-owner.v1":
+            raise ValueError(
+                "Primary Authority owner RPC returned an invalid schema"
+            )
+        capability = _text(payload, "capability")
+        if capability != FORMAL_PRIMARY_AUTHORITY_KEY:
+            raise ValueError(
+                "Primary Authority owner RPC returned another capability"
+            )
+        authority_key = _text(payload, "authority_key")
+        if authority_key != FORMAL_PRIMARY_AUTHORITY_KEY:
+            raise ValueError(
+                "Primary Authority owner RPC returned another authority key"
+            )
+        owner = _text(payload, "owner")
+        if owner != "operations_core":
+            raise ValueError(
+                "Primary Authority owner RPC returned an invalid owner"
+            )
+        generation = _positive_integer(payload, "generation")
+        if generation != FORMAL_PRIMARY_AUTHORITY_OWNER_GENERATION:
+            raise ValueError(
+                "Primary Authority owner RPC returned an invalid generation"
+            )
+        contract_ref = _text(payload, "contract_ref")
+        if contract_ref != FORMAL_PRIMARY_AUTHORITY_CONTRACT_REF:
+            raise ValueError(
+                "Primary Authority owner RPC returned an invalid contract"
+            )
+        return PrimaryAuthorityOwner(
+            schema_version="primary-authority-owner.v1",
+            capability=capability,
+            authority_key=authority_key,
+            owner=owner,
+            generation=generation,
+            contract_ref=contract_ref,
+            attested_at=_timestamp(payload, "attested_at"),
+        )
 
     def renew(self, lease: PrimaryLease) -> PrimaryLease:
         payload = self._rpc(

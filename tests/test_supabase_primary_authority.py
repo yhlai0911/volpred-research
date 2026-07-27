@@ -70,6 +70,74 @@ def _store(
     )
 
 
+def _owner_payload(**overrides: object) -> dict[str, object]:
+    return {
+        "schema_version": "primary-authority-owner.v1",
+        "capability": "operations-core-primary",
+        "authority_key": "operations-core-primary",
+        "owner": "operations_core",
+        "generation": 1,
+        "contract_ref": "primary-authority-contract.v1",
+        "attested_at": "2026-07-27T12:00:00+00:00",
+        **overrides,
+    }
+
+
+def test_read_owner_uses_typed_read_only_attestation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_urlopen(call, *, timeout: float):
+        observed["url"] = call.full_url
+        observed["body"] = json.loads(call.data)
+        return _Response(_owner_payload())
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        fake_urlopen,
+    )
+
+    owner = _store().read_owner()
+
+    assert owner.owner == "operations_core"
+    assert owner.generation == 1
+    assert owner.authority_key == "operations-core-primary"
+    assert observed == {
+        "url": (
+            "https://project.supabase.co/rest/v1/rpc/"
+            "volpred_read_primary_authority_owner"
+        ),
+        "body": {},
+    }
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        ({"schema_version": "primary-authority-owner.v0"}, "schema"),
+        ({"capability": "other"}, "capability"),
+        ({"authority_key": "other"}, "authority key"),
+        ({"owner": "legacy"}, "owner"),
+        ({"generation": 2}, "generation"),
+        ({"contract_ref": "other"}, "contract"),
+        ({"attested_at": "not-a-time"}, "attested_at"),
+    ],
+)
+def test_read_owner_rejects_drifted_attestation(
+    monkeypatch: pytest.MonkeyPatch,
+    overrides: dict[str, object],
+    message: str,
+) -> None:
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *_args, **_kwargs: _Response(_owner_payload(**overrides)),
+    )
+
+    with pytest.raises(ValueError, match=message):
+        _store().read_owner()
+
+
 def test_acquire_uses_service_role_rpc_without_returning_raw_token(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

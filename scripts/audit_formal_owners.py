@@ -20,6 +20,7 @@ from typing import Any
 
 from volpred.diagnostics import warn
 from volpred.ops.authority import FORMAL_PRIMARY_AUTHORITY_KEY
+from volpred.ops.authority.supabase import SupabaseAuthorityStore
 from volpred.ops.delivery.owned_email import SupabaseOwnedEmailStore
 from volpred.ops.delivery.owned_publisher_article import (
     SupabaseOwnedPublisherArticleStore,
@@ -56,6 +57,7 @@ _ALLOWED_RESOLVERS = frozenset(
         "publisher_sync_owner_rpc",
         "publisher_reconcile_owner_rpc",
         "publisher_delete_owner_rpc",
+        "primary_authority_owner_rpc",
     }
 )
 _ROOT_CAPABILITIES = frozenset(
@@ -85,7 +87,10 @@ _EXPECTED_RESOLVERS = {
     ): "publisher_delete_owner_rpc",
     ("incident", "incident.lifecycle"): "unresolved",
     ("provider", "provider.execution"): "unresolved",
-    ("host_authority", FORMAL_PRIMARY_AUTHORITY_KEY): "unresolved",
+    (
+        "host_authority",
+        FORMAL_PRIMARY_AUTHORITY_KEY,
+    ): "primary_authority_owner_rpc",
 }
 _SCHEDULE_PROBE_TIMEOUT_SECONDS = 15
 _SCHEDULE_EVIDENCE_MAX_AGE_SECONDS = 30
@@ -497,6 +502,9 @@ def _owner_readers() -> dict[str, Callable[[], object]]:
         ),
         "publisher_delete_owner_rpc": (
             lambda: SupabaseOwnedPublisherDeleteStore.from_environment().read_owner()
+        ),
+        "primary_authority_owner_rpc": (
+            lambda: SupabaseAuthorityStore.from_environment().read_owner()
         ),
     }
 

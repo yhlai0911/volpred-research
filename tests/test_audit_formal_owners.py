@@ -36,6 +36,7 @@ def _readers() -> dict[str, Callable[[], object]]:
             "operations_core"
         ),
         "publisher_delete_owner_rpc": lambda: _Owner("operations_core"),
+        "primary_authority_owner_rpc": lambda: _Owner("operations_core"),
     }
 
 
@@ -101,7 +102,7 @@ def _inventory(path: Path) -> None:
                     "domain": "host_authority",
                     "capability": "operations-core-primary",
                     "source_ref": "test://host-authority",
-                    "resolver": "unresolved",
+                    "resolver": "primary_authority_owner_rpc",
                 },
             ],
         },
@@ -175,9 +176,45 @@ def test_live_probes_do_not_fill_unresolved_capabilities(tmp_path: Path) -> None
         "work.coordinate",
         "incident.lifecycle",
         "provider.execution",
-        "operations-core-primary",
     }
     assert report["probe_errors"] == []
+
+
+def test_primary_authority_probe_failure_remains_unknown_owner(
+    tmp_path: Path,
+) -> None:
+    inventory = tmp_path / "inventory.json"
+    schedules = tmp_path / "runtime.json"
+    _inventory(inventory)
+    _schedules(schedules)
+
+    def failed() -> object:
+        raise RuntimeError("attestation unavailable")
+
+    report = run_audit(
+        inventory_path=inventory,
+        schedule_path=schedules,
+        observed_at="2026-07-27T09:00:00+00:00",
+        readers={
+            **_readers(),
+            "primary_authority_owner_rpc": failed,
+        },
+        schedule_audit=_schedule_audit(),
+        discovered_effect_families=_EFFECT_FAMILIES,
+    )
+
+    row = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "operations-core-primary"
+    )
+    assert row["status"] == "unknown_owner"
+    assert report["probe_errors"] == [
+        {
+            "resolver": "primary_authority_owner_rpc",
+            "error": "RuntimeError: attestation unavailable",
+        }
+    ]
 
 
 def test_probe_failure_is_visible_and_fails_closed(tmp_path: Path) -> None:

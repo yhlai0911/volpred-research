@@ -8,8 +8,9 @@ and grants contain token-redacted authority references.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Protocol
+from typing import Protocol
 from uuid import uuid4
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -18,6 +19,8 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 # lease.  Capability-specific authority keys recreate a cross-host
 # double-primary even when each individual row is perfectly fenced.
 FORMAL_PRIMARY_AUTHORITY_KEY = "operations-core-primary"
+FORMAL_PRIMARY_AUTHORITY_OWNER_GENERATION = 1
+FORMAL_PRIMARY_AUTHORITY_CONTRACT_REF = "primary-authority-contract.v1"
 
 
 @dataclass(frozen=True)
@@ -83,6 +86,19 @@ class AuthorityLifecycleEvent:
     reason: str | None
     lease_expires_at: str | None
     occurred_at: str
+
+
+@dataclass(frozen=True)
+class PrimaryAuthorityOwner:
+    """Live database attestation for the formal host-authority capability."""
+
+    schema_version: str
+    capability: str
+    authority_key: str
+    owner: str
+    generation: int
+    contract_ref: str
+    attested_at: str
 
 
 class _AuthorityStore(Protocol):
@@ -242,7 +258,9 @@ from .session import (  # noqa: E402
 )
 
 __all__ = [
+    "FORMAL_PRIMARY_AUTHORITY_CONTRACT_REF",
     "FORMAL_PRIMARY_AUTHORITY_KEY",
+    "FORMAL_PRIMARY_AUTHORITY_OWNER_GENERATION",
     "AuthorityInactive",
     "AuthorityLifecycleEvent",
     "AuthorityReceipt",
@@ -254,6 +272,7 @@ __all__ = [
     "HostAuthorityStatus",
     "KeepaliveState",
     "PrimaryAuthority",
+    "PrimaryAuthorityOwner",
     "PrimaryLease",
     "WriteIntent",
     "build_supabase_host_authority_keepalive",

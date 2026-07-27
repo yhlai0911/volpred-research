@@ -55,9 +55,8 @@
     {
       "domain": "host_authority",
       "capability": "operations-core-primary",
-      "source_ref": "contract://issue-46/live-primary-authority-owner",
-      "resolver": "unresolved",
-      "blocked_by": "#46"
+      "source_ref": "supabase-rpc://volpred_read_primary_authority_owner",
+      "resolver": "primary_authority_owner_rpc"
     }
   ]
 }
