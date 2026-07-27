@@ -35,6 +35,7 @@ from .work import WorkItemView, WorkerOffer, WorkRequest
 from .work.legacy import (
     LegacySnapshots,
     LegacyWorkCandidate,
+    MAIN_THREAD_CAPABILITY,
     ReconciliationIssue,
 )
 from .work.selection import (
@@ -850,8 +851,14 @@ def _compare_candidate(
         code in {"ready_pending", "ready_expired_claim"}
         for code in coordinator_status_codes
     )
-    coordinator_capability_match = (
-        not coordinator_decision.missing_capabilities
+    business_missing_capabilities = (
+        coordinator_decision.missing_capabilities
+        - frozenset({MAIN_THREAD_CAPABILITY})
+    )
+    coordinator_capability_match = not business_missing_capabilities
+    main_thread_capability_missing = (
+        MAIN_THREAD_CAPABILITY
+        in coordinator_decision.missing_capabilities
     )
     coordinator_attestation_match = (
         not coordinator_decision.missing_attestations
@@ -874,7 +881,7 @@ def _compare_candidate(
         ),
         "dispatch_lane": {
             "value": candidate.dispatch_lane,
-            "claimable": True,
+            "claimable": not main_thread_capability_missing,
         },
         "preferred_agent": (
             {"value": None}
@@ -1447,12 +1454,20 @@ def _coordinator_dimension_reason_codes(
     preferred_agent = (
         candidate.preferred_agent or candidate.target_agent
     )
+    business_missing_capabilities = (
+        coordinator_decision.missing_capabilities
+        - frozenset({MAIN_THREAD_CAPABILITY})
+    )
+    main_thread_capability_enforced = (
+        MAIN_THREAD_CAPABILITY
+        in coordinator_decision.missing_capabilities
+    )
     return {
         "priority": ("coordinator_priority_deadline_created_id_rank",),
         "readiness": coordinator_status_codes,
         "capability": (
             ("coordinator_capability_enforced", "capability_mismatch")
-            if coordinator_decision.missing_capabilities
+            if business_missing_capabilities
             else ("coordinator_capability_enforced", "capability_match")
         ),
         "attestation": (
@@ -1463,7 +1478,11 @@ def _coordinator_dimension_reason_codes(
         "claim_ownership": coordinator_status_codes,
         "lease_expiry": coordinator_status_codes,
         "dispatch_lane": (
-            "coordinator_dispatch_lane_unrepresented",
+            (
+                "coordinator_dispatch_lane_capability_enforced"
+                if main_thread_capability_enforced
+                else "coordinator_dispatch_lane_allowed"
+            ),
             *coordinator_status_codes,
         ),
         "preferred_agent": (

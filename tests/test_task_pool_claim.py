@@ -923,6 +923,36 @@ def test_legacy_task_id_field_is_claimable_and_listed(tmp_path, monkeypatch, cap
     saved = json.loads(next_tasks.read_text(encoding="utf-8"))
     assert saved[0]["status"] == "claimed"
     assert saved[0]["claimed_by"] == "codex-cli"
+    claimed_at = datetime.fromisoformat(saved[0]["claimed_at"])
+    claim_expires_at = datetime.fromisoformat(saved[0]["claim_expires_at"])
+    assert claim_expires_at - claimed_at == timedelta(hours=2)
+
+
+def test_release_clears_persisted_claim_expiry(tmp_path, monkeypatch) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "leased-task",
+                    "task_type": "platform_ops",
+                    "status": "claimed",
+                    "claimed_by": "worker",
+                    "claimed_at": "2026-07-27T04:00:00+00:00",
+                    "claim_expires_at": "2026-07-27T06:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result = task_pool_claim.cmd_release(argparse.Namespace(id="leased-task"))
+
+    assert result["ok"] is True
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "pending"
+    assert "claim_expires_at" not in saved
 
 
 def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -> None:

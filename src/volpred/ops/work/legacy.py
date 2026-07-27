@@ -10,7 +10,11 @@ from typing import Any, Mapping
 from urllib.parse import quote
 
 from . import WorkRequest
-from ..next_tasks import normalize_dispatch_lane, normalize_priority
+from ..next_tasks import (
+    is_main_thread_reserved,
+    normalize_dispatch_lane,
+    normalize_priority,
+)
 from ..task_pool_selection import task_identity
 
 
@@ -48,6 +52,7 @@ _CAPABILITY_BY_KIND = {
     "telegram_reply": frozenset({"content"}),
     "trending_repost": frozenset({"content"}),
 }
+MAIN_THREAD_CAPABILITY = "main-thread-exclusive"
 
 _NEXT_TASK_SOURCE = {
     # Direct human ingress. These exact legacy producer labels retain user
@@ -706,6 +711,16 @@ class LegacySnapshotImporter:
         payload_ref = _payload_reference("next_tasks", legacy_id, record)
         capabilities = record.get("required_capabilities")
         attestations = record.get("required_attestations")
+        dispatch_lane = normalize_dispatch_lane(dict(record)) or None
+        required_capabilities = _CAPABILITY_BY_KIND[kind]
+        if capabilities is not None:
+            required_capabilities |= _string_set(
+                capabilities,
+                field="required_capabilities",
+                allow_empty=False,
+            )
+        if is_main_thread_reserved(dict(record)):
+            required_capabilities |= frozenset({MAIN_THREAD_CAPABILITY})
         risk = str(record.get("risk") or "safe")
         approval = str(
             record.get("approval")
@@ -748,16 +763,7 @@ class LegacySnapshotImporter:
                 kind=kind,
                 title=str(record["title"]),
                 priority=normalize_priority(record["priority"]),
-                required_capabilities=(
-                    _CAPABILITY_BY_KIND[kind]
-                    | _string_set(
-                        capabilities,
-                        field="required_capabilities",
-                        allow_empty=False,
-                    )
-                    if capabilities is not None
-                    else _CAPABILITY_BY_KIND[kind]
-                ),
+                required_capabilities=required_capabilities,
                 required_attestations=_string_set(
                     attestations,
                     field="required_attestations",
@@ -796,7 +802,7 @@ class LegacySnapshotImporter:
             blocked_reason=_optional_string(
                 record.get("blocked_reason") or record.get("blocked_note")
             ),
-            dispatch_lane=normalize_dispatch_lane(dict(record)) or None,
+            dispatch_lane=dispatch_lane,
             preferred_agent=_optional_string(record.get("preferred_agent")),
             target_agent=_optional_string(record.get("target_agent")),
             fallback_allowed=_optional_bool(record.get("fallback_allowed")),

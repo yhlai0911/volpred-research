@@ -1223,9 +1223,15 @@ def test_succeeded_parent_gate_is_an_explicit_policy_change() -> None:
     )
 
 
-def test_unrepresented_main_thread_lane_is_classified_as_implementation_bug() -> None:
+def test_main_thread_lane_maps_to_non_worker_capability() -> None:
     main_thread_only = _pending_task("main_thread_only")
     main_thread_only["status"] = "pending_main_thread"
+
+    report = preview_legacy_snapshots(
+        LegacySnapshots(next_tasks=(main_thread_only,))
+    )
+    candidate = report.candidates[0]
+    assert "main-thread-exclusive" in candidate.request.required_capabilities
 
     ledger = replay_legacy_selection(
         LegacySnapshots(next_tasks=(main_thread_only,)),
@@ -1240,12 +1246,15 @@ def test_unrepresented_main_thread_lane_is_classified_as_implementation_bug() ->
         if dimension.name == "dispatch_lane"
     )
     assert lane.legacy["claimable"] is False
-    assert lane.coordinator["claimable"] is True
-    assert lane.classification == "implementation_bug"
-    assert (
-        lane.classification_reason_code
-        == "migration_missing_dispatch_lane_capability_mapping"
+    assert lane.coordinator["claimable"] is False
+    assert lane.matches is True
+    assert lane.classification is None
+    capability = next(
+        dimension
+        for dimension in ledger.comparisons[0].dimensions
+        if dimension.name == "capability"
     )
+    assert capability.matches is True
 
 
 def test_replay_uses_real_selector_reasons_for_routing_and_lease_policy() -> None:
@@ -1284,7 +1293,7 @@ def test_replay_uses_real_selector_reasons_for_routing_and_lease_policy() -> Non
         "legacy://next_tasks/preferred"
     )
     assert ledger.coordinator_selection.selected_candidate_ref == (
-        "legacy://next_tasks/manual"
+        "legacy://next_tasks/expired_claim"
     )
     by_candidate = {
         comparison.candidate_ref: {
@@ -1295,12 +1304,11 @@ def test_replay_uses_real_selector_reasons_for_routing_and_lease_policy() -> Non
     }
     manual_lane = by_candidate["legacy://next_tasks/manual"]["dispatch_lane"]
     assert manual_lane.legacy_reason_codes == ("main_thread_lane",)
-    assert "ready_pending" in manual_lane.coordinator_reason_codes
-    assert manual_lane.classification == "implementation_bug"
-    assert (
-        manual_lane.classification_reason_code
-        == "migration_missing_dispatch_lane_capability_mapping"
+    assert "coordinator_dispatch_lane_capability_enforced" in (
+        manual_lane.coordinator_reason_codes
     )
+    assert manual_lane.matches is True
+    assert manual_lane.classification is None
     preference = by_candidate["legacy://next_tasks/preferred"][
         "preferred_agent"
     ]

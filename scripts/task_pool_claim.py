@@ -45,7 +45,7 @@ import subprocess
 import sys
 import uuid
 from contextlib import contextmanager
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -84,7 +84,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 FB_DRAFTS_DIR = ROOT / "storage" / "drafts"
 
-DEFAULT_STALE_HOURS = 6  # Claim older than this with no completion -> auto-release
+DEFAULT_STALE_HOURS = 2  # Canonical handoff stale sweep contract
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
 DISPATCH_MUTATING_TASK_TYPES = frozenset({"platform_ops", "governance"})
 FB_DUAL_PUBLISH_TASK_TYPES = {"trending_repost", "event_article"}
@@ -95,6 +95,14 @@ _PUBLISH_EVIDENCE_RE = re.compile(
 )
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _write_claim_window(task: dict[str, Any], claimed_at: str) -> None:
+    """Persist the deterministic lease boundary used by stale cleanup."""
+    task["claimed_at"] = claimed_at
+    task["claim_expires_at"] = (
+        datetime.fromisoformat(claimed_at) + timedelta(hours=DEFAULT_STALE_HOURS)
+    ).isoformat()
 
 
 def _dispatch_supervisor_authorized() -> bool:
@@ -648,7 +656,7 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
         prev = existing_status or "pending"
         task["status"] = "claimed"
         task["claimed_by"] = args.owner
-        task["claimed_at"] = _now()
+        _write_claim_window(task, _now())
         task["claim_session_id"] = session
         _record_status_history(task, frm=prev, to="claimed", by=args.owner)
         result = {
@@ -657,6 +665,7 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             "owner": args.owner,
             "session": session,
             "status": "claimed",
+            "claim_expires_at": task["claim_expires_at"],
         }
         issue_ref = task.get("issue_ref")
     if issue_ref is not None:
@@ -763,7 +772,7 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
             now = _now()
             task["status"] = "in_progress"
             task["claimed_by"] = args.owner
-            task["claimed_at"] = now
+            _write_claim_window(task, now)
             task["claim_session_id"] = session
             task["started_at"] = now
             task["dispatch_managed"] = True
@@ -884,6 +893,7 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
         task.pop("dispatch_settlement_pending", None)
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
+        task.pop("claim_expires_at", None)
         task.pop("claim_session_id", None)
         return {"ok": True, "task_id": args.id, "status": task["status"]}
 
@@ -945,6 +955,7 @@ def _repend_task(
     task["status"] = "pending"
     task.pop("claimed_by", None)
     task.pop("claimed_at", None)
+    task.pop("claim_expires_at", None)
     task.pop("claim_session_id", None)
     task.pop("started_at", None)
     task.pop("dispatch_managed", None)
@@ -1015,6 +1026,7 @@ def cmd_handoff_main_thread(args: argparse.Namespace) -> dict[str, Any]:
         task["handoff_at"] = _now()
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
+        task.pop("claim_expires_at", None)
         task.pop("claim_session_id", None)
         _record_status_history(
             task,
@@ -1156,6 +1168,7 @@ def _complete_locked(
             # fields behind, so a safe re-run must clean them too.
             task.pop("claimed_by", None)
             task.pop("claimed_at", None)
+            task.pop("claim_expires_at", None)
             task.pop("claim_session_id", None)
             return {
                 "ok": True,
@@ -1201,6 +1214,7 @@ def _complete_locked(
         )
         task.pop("claimed_by", None)
         task.pop("claimed_at", None)
+        task.pop("claim_expires_at", None)
         task.pop("claim_session_id", None)
         if args.result:
             task["result"] = result_text
@@ -1272,7 +1286,7 @@ def _complete_locked(
 #: 它們的 guard 與 status vocab 檢查。
 ANNOTATE_PROTECTED_FIELDS = frozenset({
     "id", "status", "priority", "task_type", "created_at", "completed_at",
-    "claimed_by", "claimed_at", "claim_session_id",
+    "claimed_by", "claimed_at", "claim_expires_at", "claim_session_id",
     "blocked_reason", "blocked_at", "blocked_until",
     "issue_ref", "issue_close_pending", "issue_disposition",
     "issue_closed_commit", "issue_closed_at",
