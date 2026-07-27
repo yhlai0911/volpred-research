@@ -41,6 +41,7 @@ from volpred.ops.owner_census import (
     OwnerCensusInputError,
     build_owner_census,
 )
+from volpred.ops.provider_ownership import SupabaseProviderOwnerStore
 from volpred.ops.schedule_materialization import (
     ScheduleConfigurationError,
     load_schedule_jobs,
@@ -62,6 +63,7 @@ _ALLOWED_RESOLVERS = frozenset(
         "publisher_reconcile_owner_rpc",
         "publisher_delete_owner_rpc",
         "primary_authority_owner_rpc",
+        "provider_owner_rpc",
     }
 )
 _ROOT_CAPABILITIES = frozenset(
@@ -90,7 +92,7 @@ _EXPECTED_RESOLVERS = {
         "publisher.article.supabase.delete",
     ): "publisher_delete_owner_rpc",
     ("incident", "incident.lifecycle"): "incident_owner_rpc",
-    ("provider", "provider.execution"): "unresolved",
+    ("provider", "provider.execution"): "provider_owner_rpc",
     (
         "host_authority",
         FORMAL_PRIMARY_AUTHORITY_KEY,
@@ -101,6 +103,7 @@ _SCHEDULE_EVIDENCE_MAX_AGE_SECONDS = 30
 _PRIMARY_AUTHORITY_EVIDENCE_MAX_AGE_SECONDS = 30
 _WORK_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
 _INCIDENT_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
+_PROVIDER_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
 _CLOCK_SKEW_SECONDS = 5
 _NON_EFFECT_OWNED_MODULES = frozenset({"owned_change.py"})
 
@@ -501,6 +504,9 @@ def _owner_readers() -> dict[str, Callable[[], object]]:
         "incident_owner_rpc": (
             lambda: SupabaseIncidentOwnerStore.from_environment().read_owner()
         ),
+        "provider_owner_rpc": (
+            lambda: SupabaseProviderOwnerStore.from_environment().read_owner()
+        ),
         "commit_owner_rpc": (
             lambda: SupabaseCommitOwnerStore.from_environment().read_owner()
         ),
@@ -629,6 +635,23 @@ def _incident_owner_claim_observed_at(
     )
 
 
+def _provider_owner_claim_observed_at(
+    *,
+    owner_view: object,
+    source_ref: str,
+    audit_clock: str,
+) -> str:
+    return _backend_bound_claim_observed_at(
+        owner_view=owner_view,
+        source_ref=source_ref,
+        audit_clock=audit_clock,
+        resolver="provider_owner_rpc",
+        rpc_name="volpred_read_provider_owner",
+        label="Provider owner",
+        max_age_seconds=_PROVIDER_OWNER_EVIDENCE_MAX_AGE_SECONDS,
+    )
+
+
 def run_audit(
     *,
     inventory_path: Path = DEFAULT_INVENTORY,
@@ -703,6 +726,7 @@ def run_audit(
                 "primary_authority_owner_rpc",
                 "work_owner_rpc",
                 "incident_owner_rpc",
+                "provider_owner_rpc",
             }:
                 validation_clock = (
                     owner_validation_clock()
@@ -726,9 +750,17 @@ def run_audit(
                         source_ref=spec.source_ref,
                         audit_clock=validation_clock,
                     )
-                else:
+                elif resolver == "incident_owner_rpc":
                     claim_observed_at = (
                         _incident_owner_claim_observed_at(
+                            owner_view=owner_view,
+                            source_ref=spec.source_ref,
+                            audit_clock=validation_clock,
+                        )
+                    )
+                else:
+                    claim_observed_at = (
+                        _provider_owner_claim_observed_at(
                             owner_view=owner_view,
                             source_ref=spec.source_ref,
                             audit_clock=validation_clock,

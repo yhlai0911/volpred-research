@@ -272,6 +272,10 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
+    / "20260727133500_provider_owner_attestation.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
     / "20260727110626_operations_core_duplicate_effect_retirement_signal.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
@@ -1383,6 +1387,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   public.volpred_read_work_snapshot(text),
                   public.volpred_read_work_owner(),
                   public.volpred_read_incident_owner(),
+                  public.volpred_read_provider_owner(),
                   public.volpred_acquire_primary_authority(
                     text, text, integer, text
                   ),
