@@ -2330,9 +2330,10 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   owner-state SHA-256 `3653409c0c3e22dcdb3e5c12c3a5d86014789db6718e19af5b48033f002fb1f2`。
 - ✅ 23:37 UTC 後五筆 hourly v4 receipt 均為 0 reconciliation issue；winner 差異是
   已由 policy oracle 與 snapshot evidence 綁定的 `coordinator_capability_contract`。
-- 🟡 這五筆尚不是 clean suffix：最新 receipt 另有 8 個 implementation mismatch，
-  其中 3 個來自 active legacy claim 沒有 durable expiry，5 個來自 main-thread lane
-  尚未映射到 Coordinator capability；兩類都仍是 Issue #9 的真 blocker。
+- 🟡 這些 receipt 尚不是 clean suffix：04:15 UTC 最新一筆有 10 個 blocking
+  dimension mismatch，其中 2 筆 active legacy claim 各缺 readiness／claim
+  ownership／durable lease expiry（共 6），另有 4 筆 main-thread lane 尚未映射到
+  Coordinator capability；兩類都仍是 Issue #9 的真 blocker。
 - ✅ Closure audit 證明原 assessor 只在 owner SHA 改變時重啟窗口；同 owner 下即使
   legacy provenance／row evidence 已修好，舊 blocking receipt 仍會永久留在七日集合，
   使 ticket 在數學上永遠無法完成。
