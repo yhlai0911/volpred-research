@@ -40475,13 +40475,36 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1319/k1319_results.json + storage/memory/knowledge.json K1319\n**嚴重度**：HIGH\n\n**為什麼要修**：DM har_vs_ewma t moves -2.9319 -> -3.1085 across the Harvey |t|>3.0 threshold, so the significance verdict itself is wrong, not just the decimals. p 0.0034 -> 0.0019.\n\n**污染證據（稽核逐行查證）**：k1319.py:26 DATA_PATH is the canonical file; :35-40 read->dropna->filter>=2010 with no dedup and no sort. stored data.n_total=4129 == polluted count, clean=4119. Rerun: DM har_vs_ewma t -2.9319 -> -3.1085, crossing the Harvey |t|>3.0 threshold.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
     "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:04:15.944870+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:04:37.644743+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:10:06.655328+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      }
+    ],
+    "started_at": "2026-07-27T02:04:37.644732+00:00",
+    "completed_at": "2026-07-27T02:10:06.655301+00:00",
+    "result": "去重快照重跑 k1319；主 verdict NULL 不變，次要 har_vs_ewma 顯著性翻轉（t -2.93→-3.112,|t|>3.0）。更新 results.json/knowledge K1319/README/草稿；script 補 dedup+sort 治本。"
   },
   {
     "id": "snapdupfix_k1592",
@@ -40489,13 +40512,39 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1592/k1592_results.json + any K1592 knowledge entry\n**嚴重度**：HIGH\n\n**為什麼要修**：10 fabricated zero returns inflate panel mean_losses by ~25-30% and move dm_GammaRule_minus_GJR_p from 0.038 to 0.137, crossing 5%. MCS p for GARCH 0.033 -> 0.026. Row count is clean so this is invisible to a count audit.\n\n**污染證據（稽核逐行查證）**：k1592.py:80 builds ret via .diff() BEFORE :82 dedups with keep='last'. The retained copy is the second of the identical pair, whose diff is 0, so all 10 dup dates survive as fabricated 0.0 returns while n stays 873 (count audits miss this). True returns were -0.367,0.799,1.380,...; rerun moved panel mean_losses ~25-30% and dm_GammaRule_minus_GJR_p from 0.038 to 0.137, crossing 5%.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
     "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
     "priority_capped_from": 1,
-    "migrated_at": "2026-07-21T06:58:10.992290+00:00"
+    "migrated_at": "2026-07-21T06:58:10.992290+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:10:32.717428+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:10:32.968154+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:13:54.092796+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433",
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "result": "dispatched to compute job compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T02:15:00Z",
+    "compute_finished_at": "2026-07-27T02:15:10Z"
   },
   {
     "id": "snapdupfix_k1705",
@@ -40503,11 +40552,34 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1705/k1705_results.json + any K1705 knowledge entry\n**嚴重度**：MEDIUM\n\n**為什麼要修**：143 fields change; mean_dcc_rho 0.00215 -> 0.00109 (~96%), Joe mean negative log score -7.34e-4 -> -5.49e-4. Marginal KS/Ljung-Box gate verdicts do not flip.\n\n**污染證據（稽核逐行查證）**：k1705.py:26-28 canonical path; :295 read, no dedup; :231-232 diff on the raw frame. stored data.rows=5426 == polluted count through 2026-07-10; clean=5416. Rerun changed 143 fields.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:12:28.265608+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-71426efdc48a4581a7777d241378f15a"
+      },
+      {
+        "ts": "2026-07-27T02:12:34.205782+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-71426efdc48a4581a7777d241378f15a"
+      },
+      {
+        "ts": "2026-07-27T02:20:17.268620+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-71426efdc48a4581a7777d241378f15a"
+      }
+    ],
+    "started_at": "2026-07-27T02:12:34.205765+00:00",
+    "completed_at": "2026-07-27T02:20:17.268596+00:00",
+    "result": "canonical clean-snapshot 重跑 k1705.py（5426列全unique/0重複, 期間至2026-07-24），覆寫 k1705_results.json（135欄刷新）；verdict 不翻轉（PARENT_JOE_SUPERIORITY_SIGN_REVERSED...），SPY-GLD mean_dcc_rho 0.00215→0.00234；非翻轉案例故無feed/paper更正；knowledge item 37968dc2 + README recert 已補"
   },
   {
     "id": "snapdupfix_k1399",
@@ -40515,11 +40587,34 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1399/k1399_vix_decomp_results.json + K1399 knowledge entry + storage/drafts/k1399_article_revise_overclaim.md\n**嚴重度**：MEDIUM\n\n**為什麼要修**：All OOS QLIKE and every DM-HLN statistic shift (H1 t -4.55 -> -4.98, H4 t -3.71 -> -4.07). H1..H5 PASS/PARTIAL/FAIL verdicts are unchanged, so the narrative holds but the reported numbers do not.\n\n**污染證據（稽核逐行查證）**：k1399_vix_decomp.py:63 canonical path; :80 read with no dedup; :185 open-ended OOS slice. stored n_obs.oos=1865 == polluted, clean=1855; n_obs.is=3522 matches clean exactly (IS ends 2018-12-31, pre-dup) - an internal negative control.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:15:45.322391+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:15:45.570990+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:20:56.288870+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      }
+    ],
+    "started_at": "2026-07-27T02:15:45.570977+00:00",
+    "completed_at": "2026-07-27T02:20:56.288846+00:00",
+    "result": "去重後 inline 重跑；數字符合稽核 clean 預測，H1..H5 verdict 全不變。更新 results.json/README/草稿；script 補 dedup+sort 治本。"
   },
   {
     "id": "snapdupfix_k1398",
@@ -40527,11 +40622,35 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1398/k1398_results.json + K1398 knowledge entry\n**嚴重度**：LOW\n\n**為什麼要修**：All three assets contaminated but effects are <=1.7% and DM t-stats are 9-35, far from any threshold. No verdict flips.\n\n**污染證據（稽核逐行查證）**：k1398.py:39/44/49 canonical paths for SPY/QQQ/GLD; :56-62 sort but no dedup. stored oos_n 4643 (SPY,QQQ) and 3417 (GLD) == polluted; clean 4633/3407. Sorting makes each dup pair adjacent so r=log(P/P)=0.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:21:47.266526+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:25:06.249889+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:25:40.879469+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140; awaiting PHASE A collection"
   },
   {
     "id": "snapdupfix_paper2_table1_summary_stats_provenance",
@@ -40539,11 +40658,27 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/paper2_table1_summary_stats_provenance/results.json; check whether paper/taiwan-vt Table 1 SPY row was sourced from it\n**嚴重度**：MEDIUM\n\n**為什麼要修**：SPY row only: n_obs 4668 -> 4658, kurt 14.1197 -> 14.0832, mean/std shift. This is a provenance artifact for a PAPER TABLE, so the published Table 1 SPY column should be re-derived. Its own verdict was already NOT_REPRODUCIBLE_FROM_PINNED_SNAPSHOT.\n\n**污染證據（稽核逐行查證）**：load_twii_full() dedups at :92 but load_col() at :96-99 does not; the SPY row (2008-01-03..2026-07-02) uses the undeduped loader. Rerun: n_obs 4668->4658, kurt 14.1197->14.0832, mean 0.0426->0.0427. The 0050.TW and TSMC rows end 2026-04-17 so are not exposed despite the same loader.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:21:46.767015+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:24:04.060182+00:00",
+        "from": "claimed",
+        "to": "succeeded",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      }
+    ],
+    "completed_at": "2026-07-27T02:24:04.060150+00:00",
+    "result": "load_col() 補 dedup 治本 + clean 重跑；n_obs=4668 為 CSV 上游去重+延伸後當前值，verdict NOT_REPRODUCIBLE 不變（Table1 drift 屬 vintage 另案）。更新 results.json/README。"
   },
   {
     "id": "snapdupfix_k1391",
@@ -40551,11 +40686,35 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1391/k1391_results.json + K1391 knowledge entry\n**嚴重度**：MEDIUM_UNQUANTIFIED\n\n**為什麼要修**：Stored n_full_oos=1866 proves it consumed the 10 dup rows, but it was not rerun, so the magnitude of the change in its DM tests is unmeasured.\n\n**污染證據（稽核逐行查證）**：k1391.py:58-59 canonical path; :77 read, sort only; :96 open-ended OOS mask. stored sample_sizes.n_full_oos=1866 == polluted count through 2026-05-20 (run 2026-05-22); clean=1856. Not rerun.\n\n**是否已有 clean 重跑**：否 — 只有存檔計數證明污染，變動幅度未測\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:14:29.705121+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:14:29.941196+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:15:25.208802+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525; awaiting PHASE A collection"
   },
   {
     "id": "snapdupfix_k1591",
@@ -40563,11 +40722,34 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1591/k1591_results.json + K1591 knowledge entry\n**嚴重度**：MEDIUM_UNQUANTIFIED\n\n**為什麼要修**：Stored data.n_obs=4091 proves contamination. Not rerun because it fetches macro series over the network; magnitude unmeasured.\n\n**污染證據（稽核逐行查證）**：k1591.py:57-59 canonical path; :163 read with sort_index only; :175 join against a unique macro index replicates rather than collapses. stored data.n_obs=4091 == polluted; clean=4081. Not rerun (needs yfinance).\n\n**是否已有 clean 重跑**：否 — 只有存檔計數證明污染，變動幅度未測\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:20:49.822550+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-71426efdc48a4581a7777d241378f15a"
+      },
+      {
+        "ts": "2026-07-27T02:20:54.950641+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-71426efdc48a4581a7777d241378f15a"
+      },
+      {
+        "ts": "2026-07-27T02:23:27.052966+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-71426efdc48a4581a7777d241378f15a"
+      }
+    ],
+    "started_at": "2026-07-27T02:21:14.798329+00:00",
+    "completed_at": "2026-07-27T02:23:27.052943+00:00",
+    "result": "canonical 離線重跑 k1591.py（pinned 快照0重複 + macro cache 無網路），覆寫 k1591_results.json（99欄刷新）；n_obs 4091→4100，sample_end→2026-07-24；conclusion 不變(directionally_supportive)，holdout safe-haven gamma_diff=-0.0870/t=-0.663/p=0.507 不變；非翻轉故無feed/paper更正；knowledge de6252c2 + README recert 已補"
   },
   {
     "id": "snapdupfix_k1396",
@@ -40575,11 +40757,35 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1396/k1396_legacy_rerun_results.json\n**嚴重度**：LOW\n\n**為什麼要修**：Only the legacy-rerun artifact is affected; the frozen k1396_results.json is untouched and K1379 already supersedes the public interpretation.\n\n**污染證據（稽核逐行查證）**：k1396.py:55-56 canonical path; :76-78 no dedup; open-ended OOS. Rerun: n_oos 1900->1890, DM HAR_VIX_vs_HAR p 0.00843->0.01083. Writes only k1396_legacy_rerun_results.json; the frozen k1396_results.json is untouched and the experiment is self-declared superseded by K1379.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
-    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579"
+    "created_by": "hourly-slot-2-81e510a5afe645f0817da827ebeda579",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:21:47.015643+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:25:05.979366+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df"
+      },
+      {
+        "ts": "2026-07-27T02:25:40.572025+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140; awaiting PHASE A collection"
   },
   {
     "id": "telegram-1231",
@@ -44722,7 +44928,7 @@
   {
     "id": "assign_d0f90705",
     "title": "PHASE-Z 卡住檔案 incident（51839b3927ff05a9）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T001858409953Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T013228200702Z:<路徑>`",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 6 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 6 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T001858409953Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T013228200702Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022839552235Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022914757958Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -44735,15 +44941,17 @@
         "storage/logs/trending_primary_source_verification.jsonl"
       ],
       "streaks": {
-        "storage/logs/trending_primary_source_verification.jsonl": 4
+        "storage/logs/trending_primary_source_verification.jsonl": 6
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T001858409953Z",
-        "refs/volpred/quarantine/20260727T013228200702Z"
+        "refs/volpred/quarantine/20260727T013228200702Z",
+        "refs/volpred/quarantine/20260727T022839552235Z",
+        "refs/volpred/quarantine/20260727T022914757958Z"
       ],
-      "fires": 2,
+      "fires": 4,
       "first_seen_at": "2026-07-27T00:18:58.489275+00:00",
-      "last_seen_at": "2026-07-27T01:32:30.485851+00:00",
+      "last_seen_at": "2026-07-27T02:29:17.769997+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T01:32:28.270825+00:00",
       "deferred": [
@@ -44751,7 +44959,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T01:32:30.485851+00:00"
+    "updated_at": "2026-07-27T02:29:17.769997+00:00"
   },
   {
     "id": "daily_digest_20260727",
@@ -44798,12 +45006,23 @@
     "description": "由 alert `codex_failover_ready` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\nClaude→Codex 失效轉移所需的 codex binary 無法執行。\n- 解析到的 binary：(找不到)\n- `codex --version` rc：(未取得)\n- 原因：binary_missing\n\n## 影響\n這條備援只在 Claude 額度用盡或認證失效時才會走，壞掉時平常完全沒有症狀。要等到下一次額度中斷，整排每小時的派工才會再次被靜默丟掉（2026-07-04 cutover 後就這樣連丟六天）。主要派工路徑不受影響，故列 warn。\n\n## 建議行動\n1. `which codex && codex --version`（預期 codex-cli 0.144.1）\n2. 路徑消失多半是 nvm 換了 node 版本：\n   `npm install -g @openai/codex@latest --include=optional`\n3. 更新 `scripts/dispatch_supervisor/codex_failover.py::_NVM_CODEX`，\n   `alerts.py::CODEX_FAILOVER_BIN_DEFAULT` 必須同時改\n   （只改一邊會被 test_alerts_codex_default_matches_failover 擋下）。\n4. 不必等額度中斷就能驗整條路徑：用無害 prompt 呼叫\n   `run_codex_failover(reason='smoke', prompt_path=..., enabled=True)`。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-27T01:01:18.298485+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "codex_failover_ready"
+    ],
+    "completed_at": "2026-07-27T02:01:04.473550+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:01:04.473550+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   },
   {
@@ -44812,14 +45031,11 @@
     "description": "Tight repro: linked runtime task completed succeeded with contained/OPEN result still creates issue_close_pending and settlement closes GitHub. Implement explicit issue_disposition (default contained; only close may settle), TDD public complete→settlement seam, code review, then live dry read-back. parent_goal=operations-core legacy retirement.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T01:06:10.962031+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#47",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T01:06:15.588260+00:00",
-    "claim_session_id": "005bccece7a3",
     "status_history": [
       {
         "ts": "2026-07-27T01:06:15.588268+00:00",
@@ -44832,8 +45048,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T02:29:49.341974+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T01:06:19.053054+00:00"
+    "started_at": "2026-07-27T01:06:19.053054+00:00",
+    "completed_at": "2026-07-27T02:29:49.341950+00:00",
+    "result": "Issue #47 root contract implemented: default contained, explicit close only, identity-bound settlement; 315 tests and Matt Spec/Standards PASS. This implementation slice intentionally keeps Issue #47 OPEN for live close-path verification.",
+    "issue_disposition": "contained"
   }
 ]
