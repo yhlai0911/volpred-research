@@ -13,7 +13,9 @@ from volpred.ops import legacy_retirement_events
 from volpred.ops.legacy_retirement import LegacyRetirementInputError
 from volpred.ops.legacy_retirement_events import (
     append_legacy_business_fire,
+    append_orphan_work_event,
     load_verified_legacy_business_fire_events,
+    load_verified_orphan_work_events,
     materialize_duplicate_effect_signal,
     materialize_legacy_business_fire_signal,
 )
@@ -45,6 +47,163 @@ def test_tripwire_appends_hash_chained_durable_events(tmp_path: Path) -> None:
     assert events[1]["previous_event_sha256"] == events[0]["event_sha256"]
     assert oct(first.stat().st_mode & 0o777) == "0o600"
     assert oct(second.parent.stat().st_mode & 0o777) == "0o700"
+
+
+def test_orphan_tripwire_is_durable_hash_chained_and_idempotent(
+    tmp_path: Path,
+) -> None:
+    first_at = datetime(2026, 7, 27, 11, 30, tzinfo=UTC)
+    first = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=first_at,
+    )
+    replay = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=first_at + timedelta(minutes=1),
+    )
+    second = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-2-cafebabe",
+        branch="worktree-dispatch-slot-2-cafebabe",
+        job_id="cafebabe",
+        occurred_at=first_at + timedelta(minutes=2),
+    )
+
+    events = load_verified_orphan_work_events(tmp_path)
+
+    assert replay == first
+    assert [event["sequence"] for event in events] == [1, 2]
+    assert events[1]["previous_event_sha256"] == events[0]["event_sha256"]
+    assert oct(first.stat().st_mode & 0o777) == "0o600"
+    assert oct(second.parent.stat().st_mode & 0o777) == "0o700"
+
+
+def test_orphan_tripwire_rejects_identity_drift_and_truncation(
+    tmp_path: Path,
+) -> None:
+    first_at = datetime(2026, 7, 27, 11, 30, tzinfo=UTC)
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=first_at,
+    )
+    second = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-2-cafebabe",
+        branch="worktree-dispatch-slot-2-cafebabe",
+        job_id="cafebabe",
+        occurred_at=first_at + timedelta(minutes=1),
+    )
+
+    with pytest.raises(LegacyRetirementInputError, match="identity drifted"):
+        append_orphan_work_event(
+            tmp_path,
+            workspace="dispatch-slot-1-deadbeef",
+            branch="worktree-dispatch-slot-1-deadbeef-drift",
+            job_id="deadbeef",
+        )
+
+    second.unlink()
+    with pytest.raises(LegacyRetirementInputError, match="durable head"):
+        load_verified_orphan_work_events(tmp_path)
+
+
+def test_orphan_tripwire_rejects_tamper_and_symlink(tmp_path: Path) -> None:
+    path = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["workspace"] = "dispatch-slot-1-cafebabe"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(LegacyRetirementInputError, match="chain is invalid"):
+        load_verified_orphan_work_events(tmp_path)
+
+    ledger = path.parent
+    for child in ledger.iterdir():
+        child.unlink()
+    ledger.rmdir()
+    target = tmp_path / "untrusted-ledger"
+    target.mkdir()
+    os.symlink(target, ledger)
+    with pytest.raises(LegacyRetirementInputError, match="traverses symlink"):
+        load_verified_orphan_work_events(tmp_path)
+
+
+def test_orphan_materializer_uses_verified_sequence_delta(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    boundary = datetime(2026, 7, 27, 11, 35, tzinfo=UTC)
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=boundary - timedelta(minutes=1),
+    )
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-2-cafebabe",
+        branch="worktree-dispatch-slot-2-cafebabe",
+        job_id="cafebabe",
+        occurred_at=boundary,
+    )
+    monkeypatch.setattr(
+        legacy_retirement_events,
+        "_previous_dimension_signal",
+        lambda _root, _dimension: {
+            "schema_version": "legacy-retirement-signal.v1",
+            "dimension": "orphan_work",
+            "producer": "operations_core",
+            "window_to": boundary.isoformat(),
+            "high_watermark": 1,
+        },
+    )
+
+    path = legacy_retirement_events.materialize_orphan_work_signal(
+        tmp_path,
+        observed_at=boundary,
+    )
+    signal = json.loads(path.read_text(encoding="utf-8"))
+
+    assert signal["dimension"] == "orphan_work"
+    assert signal["count"] == 1
+    assert signal["high_watermark"] == 2
+    assert signal["window_from"] == boundary.isoformat()
+    assert signal["window_to"] == boundary.isoformat()
+    assert len(signal["evidence_refs"]) == 1
+    assert oct(path.stat().st_mode & 0o777) == "0o600"
+
+
+def test_orphan_materializer_emits_verified_empty_high_watermark(
+    tmp_path: Path,
+) -> None:
+    now = datetime(2026, 7, 27, 11, 35, tzinfo=UTC)
+
+    path = legacy_retirement_events.materialize_orphan_work_signal(
+        tmp_path,
+        observed_at=now,
+    )
+    signal = json.loads(path.read_text(encoding="utf-8"))
+
+    assert signal["count"] == 0
+    assert signal["high_watermark"] == 0
+    assert signal["window_from"] == now.isoformat()
+    assert signal["evidence_refs"] == [
+        "legacy-retirement-event-ledger://orphan_work/high-watermark/0"
+    ]
 
 
 def test_event_tampering_and_deletion_fail_closed(tmp_path: Path) -> None:
@@ -208,6 +367,13 @@ def test_operations_core_schedule_owns_signal_materialization() -> None:
     assert item["piggy_back_enabled"] is False
     assert item["wrapper_script"].endswith(
         "/cron_legacy_retirement_signal_materialize.sh"
+    )
+    assert "materialize_orphan_work_signal.py" in item["matchers"]
+    wrapper = (
+        root / "scripts" / "cron_legacy_retirement_signal_materialize.sh"
+    ).read_text(encoding="utf-8")
+    assert wrapper.index("materialize_duplicate_effect_signal.py") < wrapper.index(
+        "materialize_orphan_work_signal.py"
     )
 
 

@@ -51,12 +51,13 @@ import shutil
 import subprocess
 import time
 import uuid
-from fnmatch import fnmatchcase
 from datetime import datetime, timezone
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any, Callable
 
 from volpred.canonical_write import canonical_writes_disabled
+from volpred.ops import legacy_retirement_events
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
@@ -2709,6 +2710,16 @@ def sweep_orphan_workspaces(
             LOG.warning("workspace sweep: cannot resolve branch for %s — leaving alone",
                         wt_path)
             continue
+        if job8 is None:
+            raise legacy_retirement_events.LegacyRetirementInputError(
+                f"allocator-owned orphan workspace has no job identity: {wt_path.name}"
+            )
+        legacy_retirement_events.append_orphan_work_event(
+            repo_root,
+            workspace=wt_path.name,
+            branch=branch,
+            job_id=job8,
+        )
         workspace = {"name": wt_path.name, "path": str(wt_path), "branch": branch,
                      "base_sha": ""}
         results.append(finalize_workspace(

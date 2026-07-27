@@ -361,7 +361,7 @@
       "entrypoint": "scripts/cron_legacy_retirement_signal_materialize.sh",
       "policy": "no_repo_tracked_output",
       "tracked_outputs": [],
-      "reason": "Operations Core refreshes one ignored typed signal from its immutable legacy-fire ledger; it never writes authored repository state or records a retirement observation."
+      "reason": "Operations Core refreshes three ignored typed signals from the immutable legacy-fire ledger, private duplicate-effect ledger, and dispatch orphan-work ledger; it never writes authored repository state or records a retirement observation."
     },
     "liveness_reconcile": {
       "entrypoint": "scripts/liveness_reconcile.py",

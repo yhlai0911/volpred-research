@@ -21,9 +21,19 @@ import pytest
 
 from scripts import task_pool_claim
 from scripts.dispatch_supervisor import (
-    claim_release, health, isolation, phase_z, procutil, scheduler, state,
-    supervisor, worker, workspace,
+    claim_release,
+    health,
+    isolation,
+    phase_z,
+    procutil,
+    scheduler,
+    state,
+    supervisor,
+    worker,
+    workspace,
 )
+from volpred.ops import legacy_retirement_events
+from volpred.ops.legacy_retirement import LegacyRetirementInputError
 
 
 def _tmp_state(tmp_path: Path) -> Path:
@@ -4945,6 +4955,108 @@ def test_workspace_sweep_closes_true_orphans_only(tmp_path: Path) -> None:
     assert [r["disposition"] for r in results] == ["empty_removed"]
     assert not Path(orphan_ws["path"]).exists()
     assert Path(protected_ws["path"]).exists()
+    events = legacy_retirement_events.load_verified_orphan_work_events(repo)
+    assert [event["workspace"] for event in events] == [orphan_ws["name"]]
+
+
+def test_workspace_sweep_fails_closed_when_orphan_evidence_cannot_append(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    orphan_ws = _ws_allocate(repo, job_id="d" * 32)
+    assert orphan_ws is not None
+    monkeypatch.setattr(
+        legacy_retirement_events,
+        "append_orphan_work_event",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            LegacyRetirementInputError("injected append failure")
+        ),
+    )
+
+    with pytest.raises(LegacyRetirementInputError, match="injected append failure"):
+        workspace.sweep_orphan_workspaces(
+            repo_root=repo,
+            protected_job_ids=[],
+            queue_path=_tmp_queue(tmp_path),
+        )
+
+    assert Path(orphan_ws["path"]).exists()
+
+
+def test_workspace_sweep_restart_does_not_double_count_orphan(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    orphan_ws = _ws_allocate(repo, job_id="e" * 32)
+    assert orphan_ws is not None
+    real_finalize = workspace.finalize_workspace
+    calls = 0
+
+    def crash_once(**kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise RuntimeError("injected crash after evidence append")
+        return real_finalize(**kwargs)
+
+    monkeypatch.setattr(workspace, "finalize_workspace", crash_once)
+    with pytest.raises(RuntimeError, match="injected crash"):
+        workspace.sweep_orphan_workspaces(
+            repo_root=repo,
+            protected_job_ids=[],
+            queue_path=_tmp_queue(tmp_path),
+        )
+    assert len(legacy_retirement_events.load_verified_orphan_work_events(repo)) == 1
+
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo,
+        protected_job_ids=[],
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert [result["disposition"] for result in results] == ["empty_removed"]
+    assert len(legacy_retirement_events.load_verified_orphan_work_events(repo)) == 1
+
+
+def test_workspace_sweep_ignores_unowned_dispatch_shaped_worktree(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    path = repo / ".claude" / "worktrees" / "dispatch-slot-3-feedface"
+    path.parent.mkdir(parents=True)
+    subprocess.run(
+        [
+            "git",
+            "-C",
+            str(repo),
+            "worktree",
+            "add",
+            "-b",
+            "worktree-dispatch-slot-3-feedface",
+            str(path),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo,
+        protected_job_ids=[],
+        queue_path=_tmp_queue(tmp_path),
+    )
+
+    assert results == []
+    assert path.exists()
+    assert legacy_retirement_events.load_verified_orphan_work_events(repo) == []
 
 
 def test_workspace_isolation_config_defaults_off(tmp_path: Path) -> None:

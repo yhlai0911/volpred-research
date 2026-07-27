@@ -721,13 +721,14 @@
         "cron": "*/5 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_legacy_retirement_signal_materialize.sh",
         "log_path": "storage/logs/cron/legacy_retirement_signal_materialize.log",
-        "description": "Issue #46 production evidence producer owned exclusively by Operations Core. Every five minutes it verifies the immutable legacy-business-fire event chain, reads the private database duplicate-effect tripwire ledger through its service-role-only RPC, and refreshes both fixed typed interval signals. Five minutes is strictly below the retirement recorder's ten-minute source-freshness ceiling. It does not append a retirement observation, start the fourteen-day clean window, execute legacy business work, or call an external provider.",
+        "description": "Issue #46 production evidence producer owned exclusively by Operations Core. Every five minutes it verifies the immutable legacy-business-fire and dispatch orphan-work event chains, reads the private database duplicate-effect tripwire ledger through its service-role-only RPC, and refreshes all three fixed typed interval signals. Five minutes is strictly below the retirement recorder's ten-minute source-freshness ceiling. It does not append a retirement observation, start the fourteen-day clean window, execute legacy business work, or call an external provider.",
         "host_crontab_managed": false,
         "piggy_back_enabled": false,
         "staleness_expected_minutes": 15,
         "matchers": [
           "materialize_legacy_business_fire_signal.py",
           "materialize_duplicate_effect_signal.py",
+          "materialize_orphan_work_signal.py",
           "cron_legacy_retirement_signal_materialize.sh",
           "legacy_retirement_signal_materialize.log"
         ]
