@@ -1,0 +1,45 @@
+{
+  "SPY": {
+    "source": "yfinance",
+    "ticker": "SPY",
+    "n": 5424,
+    "start": "2005-01-03",
+    "end": "2026-07-27"
+  },
+  "QQQ": {
+    "source": "yfinance",
+    "ticker": "QQQ",
+    "n": 5424,
+    "start": "2005-01-03",
+    "end": "2026-07-27"
+  },
+  "EPU": {
+    "source": "FRED official API",
+    "series_id": "USEPUINDXD",
+    "name": "Daily Economic Policy Uncertainty Index (Baker-Bloom-Davis)",
+    "n": 13356,
+    "start": "1990-01-01",
+    "end": "2026-07-26"
+  },
+  "VIX": {
+    "source": "FRED official API",
+    "series_id": "VIXCLS",
+    "name": "CBOE Volatility Index (VIX) Close",
+    "n": 9237,
+    "start": "1990-01-02",
+    "end": "2026-07-24"
+  },
+  "news_sentiment": {
+    "source": "Federal Reserve Bank of San Francisco",
+    "series": "Daily News Sentiment Index (Buckman-Shapiro-Sudhof-Wilson)",
+    "url": "https://www.frbsf.org/wp-content/uploads/sites/4/news_sentiment_data.xlsx",
+    "n": 16017,
+    "start": "1980-01-01",
+    "end": "2023-11-26"
+  },
+  "google_trends": {
+    "source": "pytrends (Google Trends)",
+    "status": "UNAVAILABLE",
+    "reason": "HTTP 429 rate-limited on 2026-07-27; fell back to FRED EPU/VIX per brief."
+  }
+}
