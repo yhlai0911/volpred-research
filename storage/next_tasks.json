@@ -41385,10 +41385,33 @@
     "task_type": "experiment",
     "priority": 2,
     "description": "根因單。2026-07-21 收 K1730 nested-DM 裁決書時查出：K1730 arm A 的完整 closeout 產物（experiments/k1730/README.md 227 行、REMEDIATION_v2.md 261 行、codex_review_v1.md 6101 行、K1730_ARM_A_FULL_RUN_COLLECTION.md、以及 quick_mode=false 的 full-production results.json）**只存在於 salvage checkpoint commit edcb5b0d0**，未合併進 canonical main；原 worktree dispatch-slot-1-558d7893-k1730 已從 .claude/worktrees/ 消失。\n\n後果已經發生（不是假設）：2026-07-21 的 nested-DM 裁決 agent 在 K1731 worktree 作業，看不到這些檔，因而寫下四項與事實相反的宣稱 —— 『K1730 從未 closeout / 無 README』『無 agent brief』『knowledge.json 零命中』『production 尚未跑、numbers pending』。實際上 canonical 有 3 個 storage/ops/agent_briefs/*k1730* 檔、有 knowledge 條目 f932cb04（已於本次修訂）、production 早在 2026-07-18 就跑完（compute job compute-k1730-arm-a-production-quick-mode-1784358686，exit 0）。\n\n要做的：(1) 檢視 edcb5b0d0 的 15 個檔，判斷哪些該進 canonical main（至少 README.md / REMEDIATION_v2.md / full-production results.json 三個 claim surface）；(2) 走正式 merge 路徑，禁止 cherry-pick 後裸 commit；(3) 若 merge gate 仍卡 experiments/k1730/review_verdict.json（Codex 審凍結後的 claim-surface sha256 pin），在本單記錄卡點並判斷是要補審還是降級 gate — 不要再讓它無限期躺在 salvage ref；(4) 順帶處理 compute job k1730_armA_production_run_20260721（2026-07-21T10:11:26Z status=failed，followup 未派）：**先確認它要的 production 結果是否就是 edcb5b0d0 已有的那份**，是的話不要重跑，直接回收 + 標註，避免第三次重算同一個 21 分鐘 pipeline。\n\nparent: compute followup k1730_nested_dm_adjudication_20260721",
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch",
     "created_at": "2026-07-21T10:30:00+00:00",
-    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014",
+    "status_history": [
+      {
+        "ts": "2026-07-27T06:18:07.479297+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
+      },
+      {
+        "ts": "2026-07-27T06:18:13.820708+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
+      },
+      {
+        "ts": "2026-07-27T06:22:18.181362+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
+      }
+    ],
+    "started_at": "2026-07-27T06:18:13.820694+00:00",
+    "completed_at": "2026-07-27T06:22:18.181338+00:00",
+    "result": "salvage ref edcb5b0d0 的 K1730 arm-A 完整 closeout（30 檔 2.5M）已重建進 canonical 工作樹交 PHASE-Z 提交；artifact gate PASS；FAIL verdict 隨產物進入＝誠實記錄；full-production results（quick_mode=false, md5 cd931fbf）確認已有，failed 重跑 job 不需再算。canonical 補齊後根治下游『K1730 從未 closeout』誤述。"
   },
   {
     "id": "k1730_adjudication_doc_amend_factual_errors",
@@ -41503,7 +41526,7 @@
     "title": "audit_snapshot_dup_20260721 認證審查改走 fallback reviewer（Codex 額度鎖到 7/25）",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "machine",
     "created_at": "2026-07-21T11:12:22.469480+00:00",
     "created_by": "hourly-slot-1-715a4a6be3db465d85d8ec63394b5bcc",
@@ -41519,7 +41542,29 @@
         "evidence_ref": "task://snapdup_cert_fallback_codex_usage_limit_20260721#description-worktree-harvest-batch"
       }
     },
-    "upstream_receipt_ref": "legacy-batch:worktree_harvest_wave3_dirty_stale_20260721"
+    "upstream_receipt_ref": "legacy-batch:worktree_harvest_wave3_dirty_stale_20260721",
+    "claimed_by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "claimed_at": "2026-07-27T06:23:48.264161+00:00",
+    "claim_expires_at": "2026-07-27T08:23:48.264161+00:00",
+    "claim_session_id": "9100c4f0cccd",
+    "status_history": [
+      {
+        "ts": "2026-07-27T06:23:48.264177+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
+      },
+      {
+        "ts": "2026-07-27T06:23:48.530511+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be"
+      }
+    ],
+    "started_at": "2026-07-27T06:23:48.530490+00:00",
+    "redispatch_note": "2026-07-27 slot-2：Codex 額度(鎖到7/25)已解，重派 canonical codex_review_job.sh（fresh verdict path，fail-closed）；merge+knowledge+complete 由 review-job followup 收尾。worktree dispatch-slot-1-20b291d5-snapdup 仍在。",
+    "linked_compute_job": "compute-snapdup-codex-re-review-7-25-1785133446",
+    "needs_followup_close": true
   },
   {
     "id": "k1707_pseudo_stress_branch_path_collision_20260721",
@@ -45452,7 +45497,7 @@
   {
     "id": "assign_aab28069",
     "title": "PHASE-Z 卡住檔案 incident（af9de64b83c8b8b3）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 15 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 6 次觀察到這組）\n- experiments/k1319/k1319_results.json — 8 班\n- experiments/k1399/k1399_qlike_comparison.png — 8 班\n- experiments/k1399/k1399_vix_decomp_results.json — 8 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 8 班\n- experiments/k1591/k1591_results.json — 8 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 8 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 8 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 8 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 8 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 8 班\n- experiments/k1592/fig3_origin_gamma_t.png — 8 班\n- experiments/k1705/k1705_results.json — 8 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 8 班\n- storage/logs/trending_primary_source_verification.jsonl — 15 班\n- storage/memory/knowledge.json — 8 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T031813256903Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042205269278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042242499278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T045131033785Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T051429910489Z:<路徑>`",
+    "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 11 次觀察到這組）\n- experiments/k1319/k1319_results.json — 13 班\n- experiments/k1399/k1399_qlike_comparison.png — 13 班\n- experiments/k1399/k1399_vix_decomp_results.json — 13 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 13 班\n- experiments/k1591/k1591_results.json — 13 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 13 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 13 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 13 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 13 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 13 班\n- experiments/k1592/fig3_origin_gamma_t.png — 13 班\n- experiments/k1705/k1705_results.json — 13 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 13 班\n- storage/logs/trending_primary_source_verification.jsonl — 20 班\n- storage/memory/knowledge.json — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T053707835861Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T053804373918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T053905336627Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T063003440331Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T063013710483Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -45479,21 +45524,21 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "experiments/k1319/k1319_results.json": 8,
-        "experiments/k1399/k1399_qlike_comparison.png": 8,
-        "experiments/k1399/k1399_vix_decomp_results.json": 8,
-        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 8,
-        "experiments/k1591/k1591_results.json": 8,
-        "experiments/k1591/tables/k1591_daily_panel.csv": 8,
-        "experiments/k1591/tables/k1591_regime_summary.csv": 8,
-        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 8,
-        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 8,
-        "experiments/k1592/fig2_gammarule_gjr_share.png": 8,
-        "experiments/k1592/fig3_origin_gamma_t.png": 8,
-        "experiments/k1705/k1705_results.json": 8,
-        "experiments/paper2_table1_summary_stats_provenance/results.json": 8,
-        "storage/logs/trending_primary_source_verification.jsonl": 15,
-        "storage/memory/knowledge.json": 8
+        "experiments/k1319/k1319_results.json": 13,
+        "experiments/k1399/k1399_qlike_comparison.png": 13,
+        "experiments/k1399/k1399_vix_decomp_results.json": 13,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 13,
+        "experiments/k1591/k1591_results.json": 13,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 13,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 13,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 13,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 13,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 13,
+        "experiments/k1592/fig3_origin_gamma_t.png": 13,
+        "experiments/k1705/k1705_results.json": 13,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 13,
+        "storage/logs/trending_primary_source_verification.jsonl": 20,
+        "storage/memory/knowledge.json": 13
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T031713135099Z",
@@ -45501,11 +45546,16 @@
         "refs/volpred/quarantine/20260727T042205269278Z",
         "refs/volpred/quarantine/20260727T042242499278Z",
         "refs/volpred/quarantine/20260727T045131033785Z",
-        "refs/volpred/quarantine/20260727T051429910489Z"
+        "refs/volpred/quarantine/20260727T051429910489Z",
+        "refs/volpred/quarantine/20260727T053707835861Z",
+        "refs/volpred/quarantine/20260727T053804373918Z",
+        "refs/volpred/quarantine/20260727T053905336627Z",
+        "refs/volpred/quarantine/20260727T063003440331Z",
+        "refs/volpred/quarantine/20260727T063013710483Z"
       ],
-      "fires": 6,
+      "fires": 11,
       "first_seen_at": "2026-07-27T03:17:15.679626+00:00",
-      "last_seen_at": "2026-07-27T05:14:32.770284+00:00",
+      "last_seen_at": "2026-07-27T06:30:16.520108+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T03:18:13.326932+00:00",
       "deferred": [
@@ -45527,7 +45577,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T05:14:32.770284+00:00"
+    "updated_at": "2026-07-27T06:30:16.520108+00:00"
   },
   {
     "id": "issue18_mutation_boundary_partition_canary_20260727",
@@ -45641,15 +45691,11 @@
     "description": "PHASE-Z currently passes untracked directories under ops/claude_user_backup/skills to classify_machine_churn, which open() treats as files and defers forever with EISDIR warnings. Implement deterministic directory expansion to regular-file exact paths before lock/parse/stage; refuse symlink/path escape and preserve writer-race safety. TDD, Matt dual review, natural PHASE-Z read-back. This is a contained #41 slice and does not close queue-cutover blockers.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "owner_interactive",
     "created_by": "codex-vscode",
     "issue_ref": "#41",
     "created_at": "2026-07-27T04:55:24.674163+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T04:55:24.988512+00:00",
-    "claim_expires_at": "2026-07-27T06:55:24.988512+00:00",
-    "claim_session_id": "7eda39854b7f",
     "status_history": [
       {
         "ts": "2026-07-27T04:55:24.988531+00:00",
@@ -45662,8 +45708,125 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T05:27:53.318386+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T04:55:29.350037+00:00"
+    "started_at": "2026-07-27T04:55:29.350037+00:00",
+    "completed_at": "2026-07-27T05:27:53.318365+00:00",
+    "result": "Issue #41 contained slice: deterministic exact-file expansion plus inode/stat/SHA-256/mode candidate-index fence; missing deletions use exact update-index removal (no broad staging). Portable skill producer now uses pinned approved-root directory FDs and controlled symlink-free snapshot traversal. 97 related tests passed; Matt Spec/Standards PASS; live supervisor reloaded 13:15, PHASE-Z e7f122f3c004 adopted exact files, producer rerun yielded 132 regular files, 0 symlink, 0 dirty drift. Full #41 remains open pending #9 and machine-state single-writer migration.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_issue44_retire_legacy_nonmachine_autoclaim_20260727",
+    "title": "[Issue #44] Retire PHASE-Z non-machine timing-based authorship auto-claim",
+    "description": "Live incident ee095d3e5: an unisolated legacy PHASE-Z fire started before Codex edited scripts/backup_user_claude.sh, then classified that unrelated interactive-session edit as fire-owned and swept it into a FOMC/K1731 dispatch commit. Issue #43 already guarantees automated mutating lanes isolated-or-requeued, so any canonical non-machine newly-dirty path is now isolation residue/foreign, never legitimate PHASE-Z output. Remove the non-machine dirty_now-baseline auto-claim path for all cohorts (not only isolated_cohort), preserve machine-state exact adoption, add real-git regression reproducing the unrelated mid-fire edit, Matt Spec/Standards review, live read-back. Contained #44 slice; full recognizer/baseline physical removal still requires acceptance window and #41.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "dispatch_lane": "agent",
+    "source": "owner_interactive",
+    "issue_ref": "#44",
+    "tags": [
+      "matt-plan",
+      "phase-z",
+      "legacy-retirement",
+      "root-cause"
+    ],
+    "output_paths": [
+      "scripts/dispatch_supervisor/phase_z.py",
+      "tests/test_phase_z_ownership.py"
+    ],
+    "created_at": "2026-07-27T05:28:52.336886+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T05:28:52.615808+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T05:28:56.119908+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T06:08:06.464816+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T05:28:56.119891+00:00",
+    "completed_at": "2026-07-27T06:08:06.464794+00:00",
+    "result": "Issue #44 contained slice: retired PHASE-Z fresh non-machine timing auto-claim for every cohort; legacy closeout drains require private exact-path capability plus live/index blob/mode identity; machine-only commits cannot settle worker tasks; internal queue mutation is classified after incident write. Verification: 168 PHASE-Z tests passed; Matt Spec PASS; Standards PASS. Full #44 remains open for 20 production tasks and 14-day sustained-clean retirement gate.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "alert_dedup_gate_health_20260727",
+    "title": "[alert] dedup gate 健康異常：3 個 narrative arc 被 block ≥3 次（最多 mile_35eef830：4 次）— review",
+    "description": "由 alert `dedup_gate_health` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- [warn] 3 個 narrative arc 被 block ≥3 次（最多 mile_35eef830：4 次）— review 是否人工 unlock\n\n## 影響\ndedup/publish gate 是 feed 的總閘門（Mission #1/#4/#5 上游）。2026-06-23 同款故障曾讓平台 8 天零新文，靠老闆肉眼才發現；這則警報就是那次事故承諾的機械偵測器。\n\n## 觀察\n- 近 7 天決策：398 放行 / 40 block / 0 其他（hold/skip）\n- 最近一次放行：2026-07-27T06:00:11.247750+00:00\n- block 最多的 gate：{'legacy:block_arc_dup': 23, 'task_generation': 15, 'legacy:block_k_coverage': 2}\n\n## 修復入口\n完整裁決：`uv run python scripts/audit_dedup_gate_decisions.py`；black hole → 檢查 `src/volpred/publisher/publisher.py` 與 `volpred.ops.content` 的 gate 是否違反 fail-open（rule §3）；同 arc 重複 block → review 是否人工 unlock 該 arc。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-27T06:01:57.844042+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "dedup_gate_health"
+    ]
+  },
+  {
+    "id": "assign_2fa5abac",
+    "title": "[Issue #45] Enforce durable intent before system-owned termination",
+    "description": "依既有 Matt Issue #45/T39 做 bounded contained slice：inventory 所有 production kill/killpg/terminate callsites；所有 system-owned termination 在 signal 前 durable 寫入 intent receipt，completion classifier 僅在 matching intent 時歸因 system-owned，否則 SIGTERM=unknown_external；補 kill-boundary failure injection、receipt read-back 與 production rehearsal。不得提前做 #24 formal effect cutover；Issue #45 full acceptance 仍保持 OPEN。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T06:12:54.096389+00:00",
+    "payload": {
+      "declared_output_paths": [
+        "scripts/dispatch_supervisor/procutil.py",
+        "scripts/dispatch_supervisor/worker.py",
+        "scripts/dispatch_supervisor/health.py",
+        "scripts/dispatch_supervisor/state.py",
+        "scripts/dispatch_supervisor/scheduler.py",
+        "scripts/tests/test_termination_intent.py",
+        "tests/test_dispatch_supervisor.py",
+        "docs/error_log.md"
+      ],
+      "denied_canonical_paths": [
+        "storage/**"
+      ],
+      "implementation_flow": "implement->tdd->code-review->live-readback",
+      "issue_disposition": "contained"
+    },
+    "created_by": "codex-vscode",
+    "issue_ref": "#45",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T06:13:03.608611+00:00",
+    "claim_expires_at": "2026-07-27T08:13:03.608611+00:00",
+    "claim_session_id": "4b8b4e78504a",
+    "status_history": [
+      {
+        "ts": "2026-07-27T06:13:03.608629+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T06:13:07.207356+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T06:13:07.207337+00:00"
   }
 ]

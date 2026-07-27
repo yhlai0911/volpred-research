@@ -27899,5 +27899,35 @@
     "owner": "hourly-slot-1-e69f603f5d3f45a49fd8caa3f100a4dc",
     "commit": null,
     "summary": "K1811 (task K1722) failed-agent triage（PHASE A compute-followup，followup_mode=triage_failed）。job agent-brief_k1811-e2748d status=failed exit_code=-2：stdout 0 行、stderr 僅 `[EXCEPTION] active task fence metadata unreadable: storage/ops/task_execution_fences/68a4465c...json`。盤點 worktree dispatch-slot-3-047f093b-k1811：find 全域無任何 k1811 檔、experiments/k1811/ 目錄不存在 → agent 在 task-execution-fence 階段 infra-abort，從未啟動研究、零產出、無 partial 可救援。判定為基礎設施/lifecycle 中斷，非研究 NULL、非收斂失敗 → 不套 effort escalation（失敗非 agent 推理）。處置＝fresh re-enqueue（per-job fence 新 job 會刷新，不會復發舊 fence 損毀）：enqueue-agent brief snapshot storage/ops/agent_briefs/agent-brief_k1811-e2748d.md、opus/xhigh、重用空 worktree、result-artifact experiments/k1811/k1811_results.json、followup 4 步（Codex review→agent-result-verification 查 lookahead shift(1)→merge_worktree.sh→CONDITIONAL_PASS 以上寫 knowledge，NULL 照實記）。新 job=agent-agent-brief_k1811-e2748d-6bc0b3。mark 舊 job followup_dispatched=true 防重複 triage；annotate K1722 retry_note+新 job id（K1722 仍 awaiting_agent_job，legally-bindable 警告為 stale pointer 無妨）。未 force-remove 舊 worktree（守規）。fire 職責到 re-enqueue 為止，不等 async worker。"
+  },
+  {
+    "timestamp": "2026-07-27T14:17:03+08:00",
+    "task_type": "experiment",
+    "task_id": "agent-brief_signforecast-3df319",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "owner": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "commit": null,
+    "summary": "PHASE A compute-followup（followup_mode=collect_completed）：收 agent-brief_signforecast-3df319（方向可預測性誠實 OOS 檢定 SPY/QQQ/0050/TWII）。驗證 result_artifact 存在、freeze sha256（README/py/json/3圖）全數與 review_verdict.json.reviewed_sha256 吻合、README §5 各表數字與 results.json 逐格一致（SPY logistic 命中 0.5368、PT 1.14/p=0.128、DM −2.16/p=0.985、vol QLIKE +22.6%）。結論為誠實 NULL：4資產×2模型命中率全低於 always-up baseline、PT 經 BH/Bonferroni 校正後 0/8 顯著、成本後 0/8 贏 buy-hold；波動同框架 3/4 資產 HAR-RV OOS R² 12–18% 可預測。依 routing 未在 fire 內裸跑 codex：改寫 review prompt 並經 compute_queue enqueue canonical scripts/codex_review_job.sh（job compute-signforecast-codex-round-2-review-1785132990，聚焦 lookahead + 方法），followup 收 verdict 後填 review_verdict.json → PASS 才 merge_worktree + 寫 knowledge + complete source task。已 mark-followup-dispatched 防重派。"
+  },
+  {
+    "timestamp": "2026-07-27T14:22:11+08:00",
+    "task_type": "experiment",
+    "task_id": "k1730_salvage_ref_integrate_v2_closeout",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "owner": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "commit": null,
+    "summary": "STARVED lane（diversity 暫停）：k1730_salvage_ref_integrate_v2_closeout（aged 139.8h）。根因＝K1730 arm A 完整 closeout 產物只存在 dangling salvage commit edcb5b0d0，canonical main 的 experiments/k1730/ 整個目錄不存在（git diff HEAD..edcb5b0d0 全為新增），導致 2026-07-21 nested-DM 裁決 agent 寫下「K1730 從未 closeout」等 4 項與事實相反宣稱。原 worktree dispatch-slot-1-558d7893-k1730 已消失，無法走 merge_worktree.sh。處置：以 `git archive edcb5b0d0 experiments/k1730 | tar -x` 把 30 檔（README/REMEDIATION_v2/codex_review_v1/full-production results/data CSV/figs/spec/verdict）重建進 canonical 工作樹——只寫工作樹、不動 index、不 cherry-pick、不裸 commit，交 PHASE-Z 單一提交。check_experiment_artifacts.py check --path experiments/k1730 = PASS（knowledge k1730 命中 + reproduce_spec strict；spec entrypoint 無 sha256 pin 故無 drift）。review_verdict.json 為 FAIL（whole-sample permutation 無效、README 缺失原判、GEV 收斂偽影、SSVS 非混合 R-hat 1.61）——FAIL verdict 隨產物一同進 canonical＝誠實完整審計記錄，非把失敗當成功。任務第(4)項：核對 failed job k1730_armA_production_run_20260721（exit 4，followup 已 dispatched）想要的 production 結果＝salvage ref 已有的 k1730_gevreg_midas_ssvs_results.json（quick_mode=false、config n_starts=30/n_draws=40000/n_burnin=15000、runtime 13448.6s、md5 cd931fbf 與兩份 quickmode af6167/6296 皆不同）→ 確認不需第三次重算同一 3.7h pipeline。"
+  },
+  {
+    "timestamp": "2026-07-27T14:25:11+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdup_cert_fallback_codex_usage_limit_20260721",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "owner": "hourly-slot-2-2853794eb3ca4e89bcf86a38134fb1be",
+    "commit": null,
+    "summary": "STARVED lane 第2張：snapdup_cert_fallback_codex_usage_limit_20260721（aged 139.2h）。根因＝2026-07-21 的 Codex 認證審查 job（compute-codex-audit-snapshot-dup-20260721-1784607109）因外部額度耗盡（鎖到 7/25）exit 1、留 0-byte verdict、followup_dispatched=false 且被 pending-followup filter 漏掉而無聲沉底 7h；連帶 worktree dispatch-slot-1-20b291d5-snapdup（commit 1c30466ae，3864 行稽核）過不了 cert gate。今天 7/27＞7/25 額度已解。處置：確認 codex_review_job.sh 對額度/0-byte/EMPTY 皆 fail-closed（不會再產生假 PASS）、prompt 現成、worktree 仍在（可 merge）→ 重派 canonical Codex 認證審查（job compute-snapdup-codex-re-review-7-25-1785133446，fresh verdict path audit_snapshot_dup_20260721_verdict_rerun20260727.md）。followup brief 完整承接原 brief：PASS→worktree 寫 review_verdict.json（reviewed_commit 1c30466ae, shasum 實算）→git_writer_lock+merge_worktree→主線程寫 knowledge（audit_snapshot_dup_20260721：9/9 snapshot 同批 10 重複交易日、51 consumer 裁決、7 重跑全變動、2 顯著翻轉 k1319 |t|2.9319→3.1085/k1592 p0.038→0.137、diff-before-dedup 教訓）→complete 本 pool task；FAIL→逐條建修正 task。task 已 annotate linked job + needs_followup_close，留 in_progress 待 followup 依 id 收尾（complete 不強制 owner 比對，已驗）。若重派仍撞額度鎖，followup 改走 k1707 fresh-context reviewer fallback 先例，不硬等。"
   }
 ]
