@@ -17,6 +17,7 @@ _READ_ONLY_RPCS = frozenset(
         "volpred_read_commit_authority_grant",
         "volpred_read_commit_owner",
         "volpred_read_duplicate_effect_retirement_events",
+        "volpred_read_incident_owner",
         "volpred_read_notification_owner",
         "volpred_read_owned_email_request",
         "volpred_read_primary_authority_owner",

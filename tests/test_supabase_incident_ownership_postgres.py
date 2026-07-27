@@ -7,11 +7,14 @@ import psycopg
 import pytest
 from test_postgres_effect_delivery import postgres_effect_dsn  # noqa: F401
 
-INCIDENT_OWNER_ATTESTATION_MIGRATION = (
-    Path(__file__).resolve().parents[1]
-    / "supabase"
-    / "migrations"
-    / "20260727130815_incident_owner_attestation.sql"
+MIGRATION_ROOT = (
+    Path(__file__).resolve().parents[1] / "supabase" / "migrations"
+)
+INCIDENT_OWNER_ATTESTATION_MIGRATIONS = (
+    MIGRATION_ROOT / "20260727130815_incident_owner_attestation.sql",
+    MIGRATION_ROOT / "20260727131500_incident_owner_attestation.sql",
+    MIGRATION_ROOT
+    / "20260727132000_harden_incident_owner_attestation.sql",
 )
 
 
@@ -21,11 +24,11 @@ def incident_owner_attestation_dsn(
 ) -> Iterator[str]:
     dsn = request.getfixturevalue("postgres_effect_dsn")
     with psycopg.connect(dsn, autocommit=True) as connection:
-        migration = INCIDENT_OWNER_ATTESTATION_MIGRATION.read_text(
-            encoding="utf-8"
-        )
         for _ in range(2):
-            connection.execute(migration)
+            for migration_path in INCIDENT_OWNER_ATTESTATION_MIGRATIONS:
+                connection.execute(
+                    migration_path.read_text(encoding="utf-8")
+                )
     yield dsn
 
 
@@ -124,6 +127,100 @@ def test_incident_owner_rpc_fails_closed_on_unbound_owner_state(
                 "SELECT public.volpred_read_incident_owner()"
             )
         connection.rollback()
+
+
+def test_incident_owner_rpc_fails_closed_on_extra_receipt(
+    incident_owner_attestation_dsn: str,
+) -> None:
+    with psycopg.connect(
+        incident_owner_attestation_dsn,
+    ) as connection:
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.incident_owner_receipts (
+              capability,
+              owner,
+              generation,
+              contract_ref,
+              changed_at,
+              actor_ref,
+              reason
+            )
+            VALUES (
+              'incident.lifecycle',
+              'operations_core',
+              2,
+              'contract://issue-13/durable-incident-owner',
+              statement_timestamp(),
+              'operator:drift',
+              'ungated extra receipt'
+            )
+            """
+        )
+        connection.execute("SET LOCAL ROLE service_role")
+        with pytest.raises(psycopg.errors.NoDataFound):
+            connection.execute(
+                "SELECT public.volpred_read_incident_owner()"
+            )
+        connection.rollback()
+
+
+def test_migration_replay_rejects_drift_without_minting_receipt(
+    incident_owner_attestation_dsn: str,
+) -> None:
+    migration = INCIDENT_OWNER_ATTESTATION_MIGRATIONS[0].read_text(
+        encoding="utf-8"
+    )
+    with psycopg.connect(
+        incident_owner_attestation_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute(
+            """
+            UPDATE volpred_ops.incident_owners
+            SET owner = 'operations_core',
+                generation = 2,
+                changed_at = statement_timestamp(),
+                changed_by = 'operator:drift',
+                change_reason = 'ungated drift'
+            WHERE capability = 'incident.lifecycle'
+            """
+        )
+        before = connection.execute(
+            """
+            SELECT count(*)
+            FROM volpred_ops.incident_owner_receipts
+            """
+        ).fetchone()[0]
+
+        with pytest.raises(
+            psycopg.errors.RaiseException,
+            match="Incident owner attestation drifted",
+        ):
+            connection.execute(migration)
+
+        after = connection.execute(
+            """
+            SELECT count(*)
+            FROM volpred_ops.incident_owner_receipts
+            """
+        ).fetchone()[0]
+        assert after == before
+
+        connection.execute(
+            """
+            UPDATE volpred_ops.incident_owners AS ownership
+            SET owner = receipt.owner,
+                generation = receipt.generation,
+                contract_ref = receipt.contract_ref,
+                changed_at = receipt.changed_at,
+                changed_by = receipt.actor_ref,
+                change_reason = receipt.reason
+            FROM volpred_ops.incident_owner_receipts AS receipt
+            WHERE ownership.capability = receipt.capability
+              AND receipt.generation = 1
+            """
+        )
 
 
 def test_incident_owner_tables_are_force_rls_singletons(

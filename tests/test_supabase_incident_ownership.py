@@ -89,6 +89,25 @@ def test_read_owner_uses_exact_read_only_attestation(
     }
 
 
+def test_read_owner_remains_available_when_remote_writes_are_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from volpred.ops.delivery import supabase_rpc
+
+    monkeypatch.setattr(
+        supabase_rpc,
+        "_remote_mutations_disabled",
+        lambda: True,
+    )
+    monkeypatch.setattr(
+        supabase_rpc.request,
+        "urlopen",
+        lambda *_args, **_kwargs: _Response(_payload()),
+    )
+
+    assert _store().read_owner().owner == "legacy"
+
+
 @pytest.mark.parametrize(
     ("overrides", "message"),
     [
