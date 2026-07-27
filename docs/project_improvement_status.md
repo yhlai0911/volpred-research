@@ -2472,7 +2472,8 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ 結構死鎖根因不是fire未啟動，而是watcher建出的mutating task缺producer
   isolation contract。現在完整failed log會產生bounded literal repo paths與
   repo-patch contract；真run回放精確取3路徑，absolute/traversal/storage/glob
-  fail closed，CI watcher／preassignment 73案綠。
+  fail closed；paths與failure run key持久化避免restart失憶，CI
+  watcher／preassignment 74案綠。
 - 🟡 此slice為`root_cause_fixed_and_verified`；整體Issue #46仍缺owner-only push後
   GitHub green read-back、其餘legacy physical retirement及14日sustained-clean，
   umbrella維持`contained`。

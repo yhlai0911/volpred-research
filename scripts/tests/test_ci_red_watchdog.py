@@ -1165,6 +1165,26 @@ def test_ci_trace_paths_create_a_supervisor_preassignable_contract():
         assert task["post_merge_actions"] == []
 
 
+def test_ci_trace_paths_are_persisted_and_bound_to_the_failure_run(tmp_path):
+    paths = [
+        "scripts/mark_covered_article_tasks.py",
+        "tests/test_covered_article_dedup.py",
+    ]
+
+    def summarize(run):
+        run["_ci_declared_output_paths"] = paths
+        return CAUSE
+
+    run, _sent, _dispatches = _harness(tmp_path, summarizer=summarize)
+    run(RED1)
+
+    incident = _state(tmp_path)["active_incident"]
+    assert incident["declared_output_paths"] == paths
+    assert incident["declared_output_paths_run_key"] == "29233920234:1"
+    task = _tasks(tmp_path)[0]
+    assert task["declared_output_paths"] == paths
+
+
 def test_ci_trace_path_extraction_is_repo_relative_and_fail_closed():
     log = """
 job\tstep\t2026-07-13T09:00:00Z\t/home/runner/work/volpred-research/volpred-research/tests/test_ci.py:8

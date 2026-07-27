@@ -17,13 +17,15 @@ evidence；「已建修復 task」與「task 可執行」兩個狀態被混為�
 拒絕 absolute/traversal/storage/glob 並限制 32 路徑；有可信路徑才把
 `write_intent=repo_patch`、exact `declared_output_paths` 與空 post-actions 綁進
 一般及 uncapped root repair task，讓既有 supervisor preassignment/finalizer 契約接管。
+Paths 與 `root_cause_run_key` 一起持久化到 incident state；process restart 可重建同一
+contract，但新 failure run 不能沿用舊 run 的路徑授權。
 
 ## 回歸與 live read-back
 
 真實 run `30258321227` log 回放精確得到
 `scripts/mark_covered_article_tasks.py`、`scripts/mark_task_blocked.py` 與
 `tests/test_covered_article_dedup.py`，沒有 runner 絕對路徑；惡意 path fixture 全被拒。
-CI watcher 與 task preassignment scoped suite 73 passed。直接修復已由互動 session
+CI watcher 與 task preassignment scoped suite 74 passed。直接修復已由互動 session
 以 task `ci-root-30256296797` 正式 claim/start/complete，repair commit
 `c0a62a612fe3c165f03aeaeb7c33035489f0312b`；committed-version 最小重現及 8 個
 target tests 皆綠。

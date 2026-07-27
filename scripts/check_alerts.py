@@ -1957,6 +1957,13 @@ def _reduce_ci_run(
             incident["root_cause"] = failure_summarizer(run)
             incident["root_cause_status"] = "complete"
             incident["root_cause_run_key"] = run_key
+            raw_paths = run.get("_ci_declared_output_paths")
+            if isinstance(raw_paths, list):
+                incident["declared_output_paths"] = list(raw_paths)
+                incident["declared_output_paths_run_key"] = run_key
+            else:
+                incident.pop("declared_output_paths", None)
+                incident.pop("declared_output_paths_run_key", None)
             checkpoint()
 
         is_new_failure = _ci_record_failure(incident, run)
@@ -1990,8 +1997,16 @@ def _reduce_ci_run(
                     stale_keys.append(run_key)
         hard_failure: str | None = None
         if should_ensure:
+            task_run = dict(run)
+            if (
+                incident.get("declared_output_paths_run_key") == run_key
+                and isinstance(incident.get("declared_output_paths"), list)
+            ):
+                task_run["_ci_declared_output_paths"] = list(
+                    incident["declared_output_paths"]
+                )
             task = _build_ci_repair_task(
-                run,
+                task_run,
                 now_iso=now_iso,
                 failure_cause=incident.get("root_cause"),
                 incident_id=incident.get("incident_id"),
@@ -2010,7 +2025,7 @@ def _reduce_ci_run(
                 else:
                     denied_task_id = task["id"]
                     root_task = _build_ci_root_cause_task(
-                        run,
+                        task_run,
                         now_iso=now_iso,
                         failure_cause=str(incident.get("root_cause") or "原因待查"),
                         incident_id=str(incident.get("incident_id") or denied_task_id),
