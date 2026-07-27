@@ -42911,5 +42911,19 @@
   ],
   "confidence": 0.8,
   "created_at": "2026-07-27T23:22:13.973685"
+ },
+ {
+  "item_id": "909134dd",
+  "category": "experiment_result",
+  "content": "[執行: Claude compute agent (worktree dispatch-slot-3-047f093b-k1811); 收件+code-review+knowledge: Claude main thread hourly-slot-1] K1811: Climate / physical-risk (hurricanes + heat waves) as volatility drivers for US insurance/utility sector ETFs, event-study design. Data: HURDAT2 Atlantic hurricanes (NOAA NHC) + NOAA StormEvents heat waves; ETF daily OHLC via yfinance (Parkinson range vol, adjustment-invariant); n=43 events (28 hurricane, 15 heat), seed=42. Design: estimation window (-60,-11) strictly pre-event, event window (-5,10), cumulative abnormal-vol windows (0,5)/(0,10), 2000-perm month-matched placebo. VERDICT = MIXED_MOSTLY_NULL. (1) Hurricane MEAN abnormal vol is NULL: KIE p=0.73, KBWP p=0.25, XLU p=0.74, placebo non-significant. (2) A positive Saffir-category DOSE-RESPONSE exists (KIE cum_0_10 OLS slope=+3.78, t=3.07, p=0.0049; KBWP/XLU also positive) BUT it is FRAGILE and partly market-wide: Cook's D of the single Cat-5 event (Michael 2018) = 1.36, ~10-11x the next most influential; dropping the Cat-5 stratum raises KIE dose p to 0.078; the SPY market-control gradient is itself p=0.067, and Michael's KIE abnormal vol (+36.4) ~ its SPY abnormal vol (+35.5) — i.e. the signal is largely a market-wide vol spike, not insurance-specific. (3) Heat waves are fully NULL (mean AV negative = summer seasonal, placebo NS; dose-response all p>0.37). Refines K117/K148 (markets largely absorb climate-event vol): only the strongest, market-confounded events lift sector vol, and that lift is not robust. Review: fallback code-reviewer subagent (Codex primary path credit-limited until 2026-08-02) — VERDICT PASS, no blocking defects; lookahead clean (estimation window strictly precedes event window, no shift/full-sample leak); every headline number reconciles exactly with the computed arrays. Non-blocking: two README prose lines (§6.1 placebo rounding 0.116->'>=0.12'; §6.2 un-reproducible drop-cluster color) are narrative, not headline figures. Caveat: cross-event time-clustering (2017/2020 seasons) inflates iid-based SEs (acknowledged, partly mitigated by non-overlap subset + placebo).",
+  "evidence": [
+   "experiments/k1811/k1811_results.json",
+   "experiments/k1811/k1811.py",
+   "experiments/k1811/README.md",
+   "https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt",
+   "https://www.ncei.noaa.gov/pub/data/swdi/stormevents/csvfiles/StormEvents_details-ftp_v1.0_d{YEAR}_c{REV}.csv.gz"
+  ],
+  "confidence": 0.7,
+  "created_at": "2026-07-27T23:50:08.241257"
  }
 ]
