@@ -35,7 +35,7 @@ from volpred.ops.legacy_retirement import (
 _DIMENSION = "legacy_business_fire"
 _ORPHAN_DIMENSION = "orphan_work"
 _EVENT_SCHEMA = "legacy-retirement-event.v1"
-_ORPHAN_EVENT_SCHEMA = "orphan-work-retirement-event.v2"
+_ORPHAN_EVENT_SCHEMA = "orphan-work-retirement-event.v1"
 _HEAD_SCHEMA = "legacy-retirement-event-head.v1"
 _PENDING_SCHEMA = "legacy-retirement-event-append-intent.v1"
 _SIGNAL_SCHEMA = "legacy-retirement-signal.v1"
@@ -68,8 +68,6 @@ _ORPHAN_EVENT_KEYS = frozenset(
         "workspace",
         "branch",
         "job_id",
-        "event_kind",
-        "resolution_of_event_id",
         "event_sha256",
     }
 )
@@ -258,8 +256,6 @@ def _event_payload_is_valid(
         workspace = event.get("workspace")
         branch = event.get("branch")
         job_id = event.get("job_id")
-        event_kind = event.get("event_kind")
-        resolution_of = event.get("resolution_of_event_id")
         return (
             isinstance(workspace, str)
             and _SAFE_IDENTITY.fullmatch(workspace) is not None
@@ -267,16 +263,6 @@ def _event_payload_is_valid(
             and _SAFE_IDENTITY.fullmatch(branch) is not None
             and isinstance(job_id, str)
             and re.fullmatch(r"[0-9a-f]{8}", job_id) is not None
-            and event_kind in {"detected", "branch_resolved"}
-            and (
-                (event_kind == "detected" and resolution_of is None)
-                or (
-                    event_kind == "branch_resolved"
-                    and branch != "unresolved"
-                    and isinstance(resolution_of, str)
-                    and _HEX_32.fullmatch(resolution_of) is not None
-                )
-            )
         )
     return False
 
@@ -370,7 +356,46 @@ def _scan_verified_event_chain(
             raise LegacyRetirementInputError(f"{spec.label} event time regressed")
         previous_sha = str(event["event_sha256"])
         events.append(event)
+    if spec.dimension == _ORPHAN_DIMENSION:
+        _validate_orphan_event_history(events)
     return events
+
+
+def _validate_orphan_event_history(
+    events: list[dict[str, object]],
+) -> None:
+    by_workspace: dict[str, list[dict[str, object]]] = {}
+    for event in events:
+        by_workspace.setdefault(str(event["workspace"]), []).append(event)
+    for workspace, history in by_workspace.items():
+        if len(history) > 2:
+            raise LegacyRetirementInputError(
+                f"orphan-work workspace history is invalid: {workspace}"
+            )
+        if len(history) == 1:
+            continue
+        detected, resolution = history
+        if (
+            detected.get("branch") != "unresolved"
+            or resolution.get("branch") == "unresolved"
+            or resolution.get("job_id") != detected.get("job_id")
+        ):
+            raise LegacyRetirementInputError(
+                f"orphan-work workspace history is invalid: {workspace}"
+            )
+
+
+def _orphan_resolution_event_ids(
+    events: list[dict[str, object]],
+) -> set[str]:
+    by_workspace: dict[str, list[dict[str, object]]] = {}
+    for event in events:
+        by_workspace.setdefault(str(event["workspace"]), []).append(event)
+    return {
+        str(history[1]["event_id"])
+        for history in by_workspace.values()
+        if len(history) == 2
+    }
 
 
 def _decode_durable_head(
@@ -699,34 +724,20 @@ def _append_local_event(
                 if event.get(spec.identity_key) == identity
             ]
             if spec.dimension == _ORPHAN_DIMENSION and matching:
-                detected = [
-                    event
-                    for event in matching
-                    if event.get("event_kind") == "detected"
-                ]
-                resolved = [
-                    event
-                    for event in matching
-                    if event.get("event_kind") == "branch_resolved"
-                ]
-                if len(detected) != 1 or len(resolved) > 1:
+                if len(matching) > 2:
                     raise LegacyRetirementInputError(
                         f"{spec.label} {spec.identity_key} history is invalid"
                     )
-                first = detected[0]
+                first = matching[0]
                 if first.get("job_id") != payload.get("job_id"):
                     raise LegacyRetirementInputError(
                         f"{spec.label} {spec.identity_key} identity drifted"
                     )
                 requested_branch = payload.get("branch")
                 detected_branch = first.get("branch")
-                if resolved:
-                    resolution = resolved[0]
-                    if (
-                        resolution.get("job_id") != payload.get("job_id")
-                        or resolution.get("resolution_of_event_id")
-                        != first.get("event_id")
-                    ):
+                if len(matching) == 2:
+                    resolution = matching[1]
+                    if resolution.get("job_id") != payload.get("job_id"):
                         raise LegacyRetirementInputError(
                             f"{spec.label} {spec.identity_key} history is invalid"
                         )
@@ -761,12 +772,6 @@ def _append_local_event(
                         f"{int(first['sequence']):012d}-"
                         f"{first['event_id']}.json"
                     )
-                append_payload.update(
-                    {
-                        "event_kind": "branch_resolved",
-                        "resolution_of_event_id": first["event_id"],
-                    }
-                )
             elif matching:
                 existing = matching[0]
                 if len(matching) > 1 or any(
@@ -878,8 +883,6 @@ def append_orphan_work_event(
             "workspace": workspace,
             "branch": branch,
             "job_id": job_id,
-            "event_kind": "detected",
-            "resolution_of_event_id": None,
         },
         occurred_at=occurred_at,
     )
@@ -1101,11 +1104,15 @@ def _materialize_local_event_signal_locked(
             f"{dimension}/high-watermark/{high_watermark}"
         )
     ]
+    resolution_ids = (
+        _orphan_resolution_event_ids(events)
+        if dimension == _ORPHAN_DIMENSION
+        else set()
+    )
     violations = [
         event
         for event in covered
-        if dimension != _ORPHAN_DIMENSION
-        or event.get("event_kind") == "detected"
+        if event.get("event_id") not in resolution_ids
     ]
     signal: dict[str, object] = {
         "schema_version": _SIGNAL_SCHEMA,

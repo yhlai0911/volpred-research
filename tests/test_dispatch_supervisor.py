@@ -5145,11 +5145,10 @@ def test_workspace_sweep_records_unreadable_branch_and_fails_closed(
 
     assert len(results) == 1
     assert not Path(orphan_ws["path"]).exists()
-    assert [event["event_kind"] for event in events] == [
-        "detected",
-        "branch_resolved",
+    assert [event["branch"] for event in events] == [
+        "unresolved",
+        orphan_ws["branch"],
     ]
-    assert events[1]["resolution_of_event_id"] == events[0]["event_id"]
 
 
 def test_workspace_isolation_config_defaults_off(tmp_path: Path) -> None:

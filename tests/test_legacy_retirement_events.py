@@ -79,6 +79,11 @@ def test_orphan_tripwire_is_durable_hash_chained_and_idempotent(
 
     assert replay == first
     assert [event["sequence"] for event in events] == [1, 2]
+    assert all(
+        event["schema_version"] == "orphan-work-retirement-event.v1"
+        for event in events
+    )
+    assert all("event_kind" not in event for event in events)
     assert events[1]["previous_event_sha256"] == events[0]["event_sha256"]
     assert oct(first.stat().st_mode & 0o777) == "0o600"
     assert oct(second.parent.stat().st_mode & 0o777) == "0o700"
@@ -114,11 +119,10 @@ def test_orphan_tripwire_resolves_unreadable_branch_monotonically(
 
     assert resolved != detected
     assert replay == resolved
-    assert [event["event_kind"] for event in events] == [
-        "detected",
-        "branch_resolved",
+    assert [event["branch"] for event in events] == [
+        "unresolved",
+        "worktree-dispatch-slot-1-deadbeef",
     ]
-    assert events[1]["resolution_of_event_id"] == events[0]["event_id"]
     with pytest.raises(LegacyRetirementInputError, match="identity drifted"):
         append_orphan_work_event(
             tmp_path,
@@ -126,6 +130,67 @@ def test_orphan_tripwire_resolves_unreadable_branch_monotonically(
             branch="worktree-dispatch-slot-1-deadbeef-drift",
             job_id="deadbeef",
         )
+
+
+@pytest.mark.parametrize(
+    ("event_index", "field", "value"),
+    [
+        (0, "branch", "worktree-dispatch-slot-1-deadbeef"),
+        (1, "job_id", "cafebabe"),
+    ],
+)
+def test_orphan_loader_rejects_rehashed_invalid_resolution_history(
+    tmp_path: Path,
+    event_index: int,
+    field: str,
+    value: str,
+) -> None:
+    first_at = datetime(2026, 7, 27, 11, 30, tzinfo=UTC)
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="unresolved",
+        job_id="deadbeef",
+        occurred_at=first_at,
+    )
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=first_at + timedelta(minutes=1),
+    )
+    spec = legacy_retirement_events._orphan_event_spec()
+    directory = legacy_retirement_events._dimension_event_directory(
+        tmp_path,
+        "orphan_work",
+    )
+    paths = sorted(directory.glob("*.json"))
+    payloads = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in paths
+    ]
+    payloads[event_index][field] = value
+    previous_sha = None
+    for path, payload in zip(paths, payloads, strict=True):
+        payload["previous_event_sha256"] = previous_sha
+        payload["event_sha256"] = legacy_retirement_events._event_sha(payload)
+        legacy_retirement_events._atomic_replace_payload(path, payload)
+        previous_sha = payload["event_sha256"]
+    head = legacy_retirement_events._build_durable_head(
+        spec,
+        event=payloads[-1],
+    )
+    legacy_retirement_events._atomic_replace_payload(
+        legacy_retirement_events._dimension_head_path(
+            tmp_path,
+            "orphan_work",
+        ),
+        head,
+    )
+
+    with pytest.raises(LegacyRetirementInputError, match="history is invalid"):
+        load_verified_orphan_work_events(tmp_path)
 
 
 def test_orphan_tripwire_rejects_identity_drift_and_truncation(
