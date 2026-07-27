@@ -99,6 +99,7 @@ class PrimaryAuthorityOwner:
     generation: int
     contract_ref: str
     attested_at: str
+    backend_sha256: str
 
 
 class _AuthorityStore(Protocol):

@@ -17,6 +17,13 @@ class _Owner:
     owner: str
 
 
+@dataclass(frozen=True)
+class _PrimaryOwner:
+    owner: str = "operations_core"
+    backend_sha256: str = "a" * 64
+    attested_at: str = "2026-07-27T08:59:55+00:00"
+
+
 _EFFECT_FAMILIES = frozenset(
     {
         "email.ops_alert",
@@ -36,7 +43,7 @@ def _readers() -> dict[str, Callable[[], object]]:
             "operations_core"
         ),
         "publisher_delete_owner_rpc": lambda: _Owner("operations_core"),
-        "primary_authority_owner_rpc": lambda: _Owner("operations_core"),
+        "primary_authority_owner_rpc": _PrimaryOwner,
     }
 
 
@@ -101,7 +108,11 @@ def _inventory(path: Path) -> None:
                 {
                     "domain": "host_authority",
                     "capability": "operations-core-primary",
-                    "source_ref": "test://host-authority",
+                    "source_ref": (
+                        "supabase://backend-sha256/"
+                        f"{'a' * 64}/rpc/"
+                        "volpred_read_primary_authority_owner"
+                    ),
                     "resolver": "primary_authority_owner_rpc",
                 },
             ],
@@ -178,6 +189,12 @@ def test_live_probes_do_not_fill_unresolved_capabilities(tmp_path: Path) -> None
         "provider.execution",
     }
     assert report["probe_errors"] == []
+    primary = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "operations-core-primary"
+    )
+    assert primary["claims"][0]["observed_at"] == "2026-07-27T08:59:55Z"
 
 
 def test_primary_authority_probe_failure_remains_unknown_owner(
@@ -215,6 +232,58 @@ def test_primary_authority_probe_failure_remains_unknown_owner(
             "error": "RuntimeError: attestation unavailable",
         }
     ]
+
+
+@pytest.mark.parametrize(
+    ("reader", "message"),
+    [
+        (
+            lambda: _PrimaryOwner(backend_sha256="b" * 64),
+            "backend identity drifted",
+        ),
+        (
+            lambda: _PrimaryOwner(
+                attested_at="2026-07-27T08:58:00+00:00"
+            ),
+            "attestation is stale",
+        ),
+        (
+            lambda: _PrimaryOwner(
+                attested_at="2026-07-27T09:00:06+00:00"
+            ),
+            "attestation is from the future",
+        ),
+    ],
+)
+def test_primary_authority_evidence_identity_and_time_fail_closed(
+    tmp_path: Path,
+    reader: Callable[[], object],
+    message: str,
+) -> None:
+    inventory = tmp_path / "inventory.json"
+    schedules = tmp_path / "runtime.json"
+    _inventory(inventory)
+    _schedules(schedules)
+
+    report = run_audit(
+        inventory_path=inventory,
+        schedule_path=schedules,
+        observed_at="2026-07-27T09:00:00+00:00",
+        readers={
+            **_readers(),
+            "primary_authority_owner_rpc": reader,
+        },
+        schedule_audit=_schedule_audit(),
+        discovered_effect_families=_EFFECT_FAMILIES,
+    )
+
+    row = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "operations-core-primary"
+    )
+    assert row["status"] == "unknown_owner"
+    assert message in report["probe_errors"][0]["error"]
 
 
 def test_probe_failure_is_visible_and_fails_closed(tmp_path: Path) -> None:

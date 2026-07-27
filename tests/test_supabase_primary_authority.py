@@ -103,6 +103,7 @@ def test_read_owner_uses_typed_read_only_attestation(
     assert owner.owner == "operations_core"
     assert owner.generation == 1
     assert owner.authority_key == "operations-core-primary"
+    assert owner.backend_sha256 == _store()._client.backend_sha256
     assert observed == {
         "url": (
             "https://project.supabase.co/rest/v1/rpc/"
@@ -122,6 +123,7 @@ def test_read_owner_uses_typed_read_only_attestation(
         ({"generation": 2}, "generation"),
         ({"contract_ref": "other"}, "contract"),
         ({"attested_at": "not-a-time"}, "attested_at"),
+        ({"unexpected": "field"}, "fields"),
     ],
 )
 def test_read_owner_rejects_drifted_attestation(

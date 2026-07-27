@@ -94,6 +94,7 @@ _EXPECTED_RESOLVERS = {
 }
 _SCHEDULE_PROBE_TIMEOUT_SECONDS = 15
 _SCHEDULE_EVIDENCE_MAX_AGE_SECONDS = 30
+_PRIMARY_AUTHORITY_EVIDENCE_MAX_AGE_SECONDS = 30
 _CLOCK_SKEW_SECONDS = 5
 _NON_EFFECT_OWNED_MODULES = frozenset({"owned_change.py"})
 
@@ -509,6 +510,66 @@ def _owner_readers() -> dict[str, Callable[[], object]]:
     }
 
 
+def _primary_authority_claim_observed_at(
+    *,
+    owner_view: object,
+    source_ref: str,
+    audit_clock: str,
+) -> str:
+    prefix = "supabase://backend-sha256/"
+    suffix = "/rpc/volpred_read_primary_authority_owner"
+    if not source_ref.startswith(prefix) or not source_ref.endswith(suffix):
+        raise OwnerCensusInputError(
+            "Primary Authority owner source_ref is not backend-pinned"
+        )
+    expected_backend = source_ref[
+        len(prefix) : -len(suffix)
+    ]
+    if (
+        len(expected_backend) != 64
+        or any(character not in "0123456789abcdef" for character in expected_backend)
+    ):
+        raise OwnerCensusInputError(
+            "Primary Authority owner source_ref has invalid backend identity"
+        )
+    actual_backend = _required_text(
+        getattr(owner_view, "backend_sha256", None),
+        field="primary_authority_owner_rpc backend_sha256",
+    )
+    if actual_backend != expected_backend:
+        raise ValueError("Primary Authority owner backend identity drifted")
+    attested_raw = _required_text(
+        getattr(owner_view, "attested_at", None),
+        field="primary_authority_owner_rpc attested_at",
+    )
+    try:
+        attested = datetime.fromisoformat(attested_raw)
+        clock = datetime.fromisoformat(audit_clock)
+    except ValueError as exc:
+        raise ValueError(
+            "Primary Authority owner attested_at must be ISO-8601"
+        ) from exc
+    if (
+        attested.tzinfo is None
+        or attested.utcoffset() is None
+        or clock.tzinfo is None
+        or clock.utcoffset() is None
+    ):
+        raise ValueError(
+            "Primary Authority owner attested_at must include UTC offset"
+        )
+    age = (
+        clock.astimezone(UTC) - attested.astimezone(UTC)
+    ).total_seconds()
+    if age < -_CLOCK_SKEW_SECONDS:
+        raise ValueError(
+            "Primary Authority owner attestation is from the future"
+        )
+    if age > _PRIMARY_AUTHORITY_EVIDENCE_MAX_AGE_SECONDS:
+        raise ValueError("Primary Authority owner attestation is stale")
+    return attested.astimezone(UTC).isoformat()
+
+
 def run_audit(
     *,
     inventory_path: Path = DEFAULT_INVENTORY,
@@ -577,6 +638,13 @@ def run_audit(
                 getattr(owner_view, "owner", None),
                 field=f"{resolver} owner",
             )
+            claim_observed_at = now
+            if resolver == "primary_authority_owner_rpc":
+                claim_observed_at = _primary_authority_claim_observed_at(
+                    owner_view=owner_view,
+                    source_ref=spec.source_ref,
+                    audit_clock=now,
+                )
         except Exception as exc:  # noqa: BLE001 - any probe failure blocks.
             warn(
                 "formal-owner-census",
@@ -597,7 +665,7 @@ def run_audit(
                 capability=spec.capability,
                 owner=owner,
                 source_ref=spec.source_ref,
-                observed_at=now,
+                observed_at=claim_observed_at,
             )
         )
     report = build_owner_census(specs=specs, claims=claims).as_dict()

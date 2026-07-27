@@ -145,6 +145,19 @@ class SupabaseAuthorityStore:
         """Read the immutable formal-owner attestation without taking a lease."""
 
         payload = self._rpc("volpred_read_primary_authority_owner", {})
+        expected_fields = {
+            "schema_version",
+            "capability",
+            "authority_key",
+            "owner",
+            "generation",
+            "contract_ref",
+            "attested_at",
+        }
+        if set(payload) != expected_fields:
+            raise ValueError(
+                "Primary Authority owner RPC returned invalid fields"
+            )
         if payload.get("schema_version") != "primary-authority-owner.v1":
             raise ValueError(
                 "Primary Authority owner RPC returned an invalid schema"
@@ -182,6 +195,7 @@ class SupabaseAuthorityStore:
             generation=generation,
             contract_ref=contract_ref,
             attested_at=_timestamp(payload, "attested_at"),
+            backend_sha256=self._client.backend_sha256,
         )
 
     def renew(self, lease: PrimaryLease) -> PrimaryLease:
