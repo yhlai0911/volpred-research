@@ -3709,6 +3709,41 @@ mutation-boundary fencing這個根因完成五步Gate，狀態為
 **`root_cause_fixed_and_verified`**；Issue #18仍因Email真實partition canary與
 #24/#46 legacy writer cutover／retirement未完成而維持 **`contained`**。
 
+### 2026-07-27 — 系統 termination 沒有 durable intent，raw SIGTERM 無法誠實歸因
+
+**證據化症狀**：dispatch worker 收到 signal 15 時只能從 wait status 知道「被
+SIGTERM」，無法知道 sender。舊路徑同時散落在 supervisor、agentic CLI timeout、
+Git writer cleanup、canonical shell wrappers 與 `launchctl kickstart -k`；因此
+`external_signal`、watchdog 與實際 system-owned kill 在事後長得完全一樣。Health
+watchdog若先贏 completion CAS，還會先移除 current job，使 worker直接走
+`superseded`，連後補歸因都不可達。
+
+**根因層級與底層修復**：新增單一 `volpred.ops.termination` owner。每次 signal
+先以 stable flock、`O_NOFOLLOW`、regular-file/owner/mode檢查與 fsync append
+`intent_armed`、`signal_attempted`，首次建立檔案／lock再 fsync父目錄；signal後
+append `signal_result`。Intent綁定 pid/pgid start-time generation、signal sequence、
+job/attempt，且同一 exact target+signal只能 attempt一次；per-pid fallback還要在
+syscall前重驗 start identity。Reader持 shared lock、拒絕 symlink及不安全檔案，
+malformed row只會fail closed；partial tail會在下一次append前回滾至最後完整newline。
+Python、Bash與launchctl正式路徑均收斂至此 owner，AST/shell gate禁止raw
+`kill/killpg/terminate/pthread_kill`、subprocess `kill` command及 shell TERM/KILL
+重新出現。
+
+**回歸、live rehearsal與狀態界線**：真實 process-group rehearsal證明
+attempt receipt在 syscall 前可回讀，TERM後 group確實清空，sent receipt能以
+job/attempt/target精確匹配；ledger寫失敗則 sender呼叫為0。Health CAS race保留
+raw exit與記憶體中的 exact PGID；sent publication短窗先bounded wait，若 sender
+在 syscall後、result fsync前死亡，改記
+`system_termination_unconfirmed`，不冒稱已確認，也不誤標
+`unknown_external`。無任何 matching sent／unresolved attempt才使用
+`unknown_external`，alert與completion口徑一致。Focused termination／supervisor／
+Git writer／agentic CLI suites **304 passed**；child-process tests以
+`VOLPRED_TERMINATION_LEDGER_PATH`隔離，runtime ledger列入gitignore，沒有再污染
+正式 evidence。本 termination-intent bounded slice完成五步Gate後可標
+**`root_cause_fixed_and_verified`**；Issue #45完整 checkpoint resume、formal
+ChangeSet/outbox/effect零重複與host-restart/lease-expiry演練仍被 #9/#24 阻塞，
+umbrella必須維持 **`contained`**、OPEN。
+
 ### 2026-07-27 — Sent read-back 與 SMTP send 間缺少 Primary Authority 再驗證
 
 **證據化症狀**：`OwnedEmailNotification.deliver()`在呼叫provider前會驗證目前
@@ -3725,10 +3760,14 @@ delivery、recovery與legacy rollback都把同一Primary Lease identity綁進cal
 若Message-ID已存在，冪等replay仍直接以true-external evidence acknowledgement，
 不會再次寄信。
 
-**回歸與狀態界線**：原公開案例先RED後GREEN，並回讀notifier calls=0、
+**回歸、真實回讀與制度化**：原公開案例先RED後GREEN，並回讀notifier calls=0、
 settlement calls=0；Email相關完整範圍 **206 passed**，Matt Spec／Standards雙審均
 PASS、0 P1／P2。全庫另有3個失敗，精確落在另一個session未提交的termination、
-Git hook packaging與K1730 nested-DM變更，未修改或回退。因共享工作區仍有並行髒狀態，
-本輪刻意不執行live Email mutation；真實partition／Sent read-back canary尚未完成，
-所以此incident與Issue #18 umbrella目前均標 **`contained`**，不可提前稱
-`root_cause_fixed_and_verified`。
+Git hook packaging與K1730 nested-DM變更，未修改或回退；真實驗收改由已審commit的
+乾淨archive執行。owner-only正式寄送由`operations_core/4`完成，Gmail Sent evidence
+回讀成功，同key重播identity／evidence不變且`attempt_count=1`。authority-loss案在
+真實IMAP read後demote全域Primary Authority epoch 35；notification log沒有該subject，
+獨立Message-ID再讀亦不存在。token／recipient去敏receipt固定於
+`storage/ops/email_mutation_boundary_canary_latest.json`。五步Gate全過，此incident
+與Issue #18狀態升級為 **`root_cause_fixed_and_verified`**；#24/#46 legacy writer
+retirement屬獨立ticket。

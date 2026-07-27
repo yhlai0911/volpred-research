@@ -2393,9 +2393,14 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ 原案例RED→GREEN；Email notification／owned delivery／alerts／worker／boss report／
   PostgreSQL settlement完整相關範圍 **206 passed**，Matt Spec／Standards雙軸review
   均PASS、0 P1／P2，commit `6ca2d9adf`通過`git show --check`。
-- 🟡 全庫回歸為 **5,746 passed、1 skipped、3 failed**；三個失敗分別來自另一個
+- ✅ 全庫回歸為 **5,746 passed、1 skipped、3 failed**；三個失敗分別來自另一個
   session未提交的termination API、Git hook packaging及新實驗K1730 nested-DM gate，
-  與本slice四個commit檔案無交集。為避免從並行髒工作區執行真實外部mutation，本輪
-  未寄live canary email。SMTP boundary程式根因已修正並通過範圍回歸，但五步Gate尚缺
-  乾淨工作區的真實Email partition／read-back canary，因此Issue #18整體維持
-  **`contained`**，不得宣稱完全結案。
+  與本slice四個commit檔案無交集；真實外部驗收因此改由commit `069350634`的乾淨
+  archive執行，不載入共享髒檔。owner-only正式寄送由`operations_core/4`完成，
+  WorkItem／Effect均delivered、Gmail Sent evidence回讀成功；同key立即重播仍為
+  `attempt_count=1`且所有identity／evidence完全相同。第二案在真實IMAP read後demote
+  Primary Authority epoch 35，SMTP notification log=0，獨立Message-ID回讀亦不存在。
+  去敏receipt為`storage/ops/email_mutation_boundary_canary_latest.json`。Email SMTP
+  mutation-boundary五步Gate已全過，狀態升級為
+  **`root_cause_fixed_and_verified`**；Issue #18 acceptance scope完成，可關閉。
+  #24/#46 direct legacy writer retirement仍由各自ticket追蹤，不再混入本Issue狀態。

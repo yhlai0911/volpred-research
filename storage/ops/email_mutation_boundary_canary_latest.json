@@ -1,0 +1,43 @@
+{
+  "schema_version": "email-mutation-boundary-canary.v1",
+  "completed_at": "2026-07-27T07:14:26.033658+00:00",
+  "code_revision": "6ca2d9adf",
+  "environment_revision": "069350634",
+  "recipient_scope": "single-configured-owner",
+  "healthy_delivery": {
+    "status": "passed",
+    "delivery_owner": "operations_core",
+    "owner_generation": 4,
+    "work_id": "work_owned_email_e848a6a0761b991e48b96d0a15764723",
+    "effect_id": "effect_owned_email_e848a6a0761b991e48b96d0a15764723",
+    "effect_status": "delivered",
+    "attempt_count": 1,
+    "evidence_ref": "email:sent-mail:0a3c8d88dfaa0199308fc3ad95bce2cade85acd8eab0e65ebb6b607152224b53",
+    "evidence_sha256": "bca5ee27e78465b4f2d481d6f9c297116404d1557747eac293f19d6ada9acca6",
+    "same_key_replay_identity_stable": true
+  },
+  "authority_loss_before_smtp": {
+    "status": "passed",
+    "authority_key": "operations-core-primary",
+    "authority_epoch": 35,
+    "holder_ref": "codex:issue18-email-partition-canary",
+    "effect_id": "effect_legacy_owned_email_14a9f18385e011c7665fc2f4497178ef",
+    "notifier_log_match_count": 0,
+    "sent_mail_copy_found": false,
+    "lifecycle": [
+      {
+        "event_type": "acquired",
+        "occurred_at": "2026-07-27T07:13:02.758297+00:00"
+      },
+      {
+        "event_type": "renewed",
+        "occurred_at": "2026-07-27T07:14:04.141447+00:00"
+      },
+      {
+        "event_type": "demoted",
+        "occurred_at": "2026-07-27T07:14:26.033658+00:00"
+      }
+    ]
+  },
+  "secrets_included": false
+}
