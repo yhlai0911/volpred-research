@@ -1026,6 +1026,107 @@ def test_list_stale_uses_persisted_expiry_before_stale_hours_fallback(
     assert result["tasks"][0]["id"] == "expired-lease"
 
 
+def test_invalid_persisted_expiry_is_not_released_or_listed(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    task = {
+        "id": "invalid-expiry",
+        "task_type": "platform_ops",
+        "status": "claimed",
+        "claimed_by": "worker",
+        "claimed_at": (
+            datetime.now(timezone.utc) - timedelta(hours=8)
+        ).isoformat(),
+        "claim_expires_at": "not-a-timestamp",
+    }
+    next_tasks.write_text(json.dumps([task]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    cleanup = task_pool_claim.cmd_cleanup(
+        argparse.Namespace(stale_hours=2)
+    )
+    listed = task_pool_claim.cmd_list(
+        argparse.Namespace(
+            status="stale",
+            stale_hours=2,
+            owner=None,
+            codex_eligible=False,
+            limit=10,
+        )
+    )
+
+    assert cleanup["count"] == 0
+    assert cleanup["invalid_claim_expiries"] == [
+        {
+            "id": "invalid-expiry",
+            "claim_expires_at": "not-a-timestamp",
+        }
+    ]
+    assert listed["count"] == 0
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "claimed"
+    assert saved["claimed_by"] == "worker"
+    assert saved["claim_expires_at"] == "not-a-timestamp"
+
+
+def test_live_dispatch_evidence_renews_expiry_before_shadow_replay(
+    tmp_path, monkeypatch
+) -> None:
+    from volpred.ops.work import WorkerOffer
+    from volpred.ops.work_migration import LegacySnapshots
+    from volpred.ops.work_shadow_replay import replay_legacy_selection
+
+    next_tasks = tmp_path / "next_tasks.json"
+    now = datetime.now(timezone.utc)
+    task = {
+        "id": "live-dispatch",
+        "task_type": "platform_ops",
+        "title": "live-dispatch",
+        "source": "user",
+        "priority": 1,
+        "status": "in_progress",
+        "claimed_by": "dispatch-supervisor",
+        "claimed_at": (now - timedelta(hours=3)).isoformat(),
+        "claim_expires_at": (now - timedelta(hours=1)).isoformat(),
+        "started_at": (now - timedelta(hours=3)).isoformat(),
+        "dispatch_managed": True,
+        "dispatch_job_id": "job-live",
+    }
+    next_tasks.write_text(json.dumps([task]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        task_pool_claim,
+        "_dispatch_job_alive",
+        lambda job_id: job_id == "job-live",
+    )
+
+    cleanup = task_pool_claim.cmd_cleanup(
+        argparse.Namespace(stale_hours=2)
+    )
+    renewed = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(renewed,)),
+        offer=WorkerOffer(
+            worker_id="shadow-worker",
+            capabilities=frozenset({"code"}),
+            attestations=frozenset(),
+            lease_seconds=300,
+        ),
+        observed_at=now,
+        observation_id="live_dispatch_renewal",
+    )
+
+    assert cleanup["renewed_live_claims"][0]["evidence"] == (
+        "dispatch_job_alive"
+    )
+    assert datetime.fromisoformat(renewed["claim_expires_at"]) > now
+    assert not any(
+        dimension.classification == "implementation_bug"
+        for dimension in ledger.comparisons[0].dimensions
+    )
+
+
 def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -> None:
     next_tasks = tmp_path / "next_tasks.json"
     next_tasks.write_text(

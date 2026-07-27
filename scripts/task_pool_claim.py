@@ -100,8 +100,16 @@ def _now() -> str:
 def _write_claim_window(task: dict[str, Any], claimed_at: str) -> None:
     """Persist the deterministic lease boundary used by stale cleanup."""
     task["claimed_at"] = claimed_at
+    _renew_claim_expiry(task, renewed_at=claimed_at)
+
+
+def _renew_claim_expiry(
+    task: dict[str, Any], *, renewed_at: str
+) -> None:
+    """Extend a claim from verified live-execution evidence."""
     task["claim_expires_at"] = (
-        datetime.fromisoformat(claimed_at) + timedelta(hours=DEFAULT_STALE_HOURS)
+        datetime.fromisoformat(renewed_at)
+        + timedelta(hours=DEFAULT_STALE_HOURS)
     ).isoformat()
 
 
@@ -1441,6 +1449,8 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
     released = []
     normalized_pending = []
     skipped_compute = []
+    renewed_live_claims = []
+    invalid_claim_expiries = []
     with _locked_load() as (_fh, tasks):
         now = datetime.now(timezone.utc)
         for t in tasks:
@@ -1472,6 +1482,12 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
             if t.get("dispatch_managed") is True:
                 dispatch_job_id = t.get("dispatch_job_id")
                 if _dispatch_job_alive(dispatch_job_id):
+                    _renew_claim_expiry(t, renewed_at=now.isoformat())
+                    renewed_live_claims.append({
+                        "id": _task_key(t),
+                        "evidence": "dispatch_job_alive",
+                        "claim_expires_at": t["claim_expires_at"],
+                    })
                     skipped_compute.append({
                         "id": _task_key(t),
                         "dispatch_managed": True,
@@ -1480,6 +1496,12 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                     continue
             job_id = t.get("compute_job_id")
             if _compute_job_alive(job_id):
+                _renew_claim_expiry(t, renewed_at=now.isoformat())
+                renewed_live_claims.append({
+                    "id": _task_key(t),
+                    "evidence": "compute_job_alive",
+                    "claim_expires_at": t["claim_expires_at"],
+                })
                 skipped_compute.append({"id": _task_key(t), "compute_job_id": job_id})
                 continue
             claim_expires_at = t.get("claim_expires_at")
@@ -1495,6 +1517,12 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
                     site="cleanup_stale",
                     task_id=_task_key(t),
                 )
+                if claimed_dt is None:
+                    invalid_claim_expiries.append({
+                        "id": _task_key(t),
+                        "claim_expires_at": claim_expires_at,
+                    })
+                    continue
                 if claimed_dt is not None and now < claimed_dt:
                     continue
             if not expiry_authoritative:
@@ -1559,6 +1587,8 @@ def cmd_cleanup(args: argparse.Namespace) -> dict[str, Any]:
         "normalized_pending_claim_residue": normalized_pending,
         "normalized_count": len(normalized_pending),
         "skipped_compute_in_flight": skipped_compute,
+        "renewed_live_claims": renewed_live_claims,
+        "invalid_claim_expiries": invalid_claim_expiries,
     }
 
 

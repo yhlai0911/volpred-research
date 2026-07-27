@@ -323,7 +323,21 @@ def test_enqueue_links_source_task_to_external_execution_wait(
     monkeypatch.setattr(module, "ROOT", tmp_path)
 
     pool = tmp_path / "next_tasks.json"
-    pool.write_text(json.dumps([{"id": "assign_x", "status": "pending", "result": None}]))
+    pool.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "assign_x",
+                    "status": "claimed",
+                    "result": None,
+                    "claimed_by": "dispatcher",
+                    "claimed_at": "2026-07-27T04:00:00+00:00",
+                    "claim_expires_at": "2026-07-27T06:00:00+00:00",
+                    "claim_session_id": "dispatch-session",
+                }
+            ]
+        )
+    )
     import scripts.task_pool_claim as tpc
 
     monkeypatch.setattr(tpc, "NEXT_TASKS", pool)
@@ -339,6 +353,13 @@ def test_enqueue_links_source_task_to_external_execution_wait(
     assert task["compute_job_id"] == "owned-output-job"
     assert task["blocked_reason"] == "external_compute_job_active"
     assert "owned-output-job" in task["result"]
+    for field in (
+        "claimed_by",
+        "claimed_at",
+        "claim_expires_at",
+        "claim_session_id",
+    ):
+        assert field not in task
 
 
 def test_source_task_link_failure_is_durable_and_reconciled_before_run(

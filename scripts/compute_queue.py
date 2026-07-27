@@ -875,6 +875,7 @@ def _link_source_task_record(
         for field in (
             "claimed_by",
             "claimed_at",
+            "claim_expires_at",
             "claim_session_id",
             "started_at",
         ):
