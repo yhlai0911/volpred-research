@@ -2545,3 +2545,24 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   live read-back確認服務於20:06:56重生，現為running且health loop／trigger socket已啟動。
 - 🟡 此producer slice為`root_cause_fixed_and_verified`；Issue #46 umbrella仍須等
   direct blocking edges、14日sustained-clean與physical retirement，維持`contained`。
+
+## 2026-07-27 — T40 formal Primary Authority owner attestation（Issue #46）
+
+- ✅ Formal census不再把`host_authority/operations-core-primary`永久寫死為
+  `unresolved`。Inventory綁定`volpred_read_primary_authority_owner`，Supabase
+  adapter只接受schema v1、canonical capability/key、`operations_core`、
+  generation 1與exact contract ref；RPC失敗或任一欄漂移都不產生claim。
+- ✅ PostgreSQL用一筆immutable owner singleton作live source；table為FORCE RLS且
+  owner=`volpred_ops_definer`，service role沒有SELECT或mutation權，只能執行
+  `SECURITY DEFINER` read RPC；anon/authenticated無execute。migration與non-superuser
+  role cleanup均有真PG17回歸。
+- ✅ commits `db804d760`,`5deb97fa7`；Primary Authority／formal-census範圍
+  **57 passed**。Production migration已部署，回讀owner=`operations_core`、
+  authority key=`operations-core-primary`、generation=`1`、row count=`1`，
+  RLS／ACL／function owner全符。
+- ✅ Fresh production census的host-authority row為`unique_owner`、probe errors=0，
+  blockers由6降為5；這個slice通過五步Gate，狀態為
+  **`root_cause_fixed_and_verified`**。
+- 🟡 Issue #46仍保留work、commit、publisher delete、incident與provider五個
+  blocker；#9等gate未成熟前不轉owner、不啟動14日recorder、不做physical
+  retirement，umbrella維持`contained`。
