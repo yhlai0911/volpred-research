@@ -454,9 +454,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T10:28:26.886601+00:00"
-    },
-    {
      "at": "2026-07-27T10:29:32.888200+00:00"
     },
     {
@@ -488,6 +485,9 @@
     },
     {
      "at": "2026-07-27T13:44:59.493896+00:00"
+    },
+    {
+     "at": "2026-07-27T14:34:51.482569+00:00"
     }
    ],
    "current_task_id": null,
@@ -1173,7 +1173,7 @@
   "inc_90de679cab21": {
    "class": "ordinary",
    "clean_observations": [],
-   "current_task_id": "ci-red-30268312681",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-27T13:20:36.728481+00:00",
@@ -1203,9 +1203,19 @@
    "last_seen_at": "2026-07-27T13:45:16.537887+00:00",
    "notified_at": null,
    "occurrence_count": 2,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-27T14:15:28.505003+00:00",
+    "by": "ci-red-30268312681",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-27T14:15:28.505003+00:00",
+     "by": "ci-red-30268312681",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -1759,6 +1769,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T13:50:35.088996+00:00",
+ "updated_at": "2026-07-27T14:34:51.483146+00:00",
  "version": 1
 }

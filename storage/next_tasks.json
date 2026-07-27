@@ -34813,7 +34813,7 @@
     "title": "K1724: 台股當沖佔比與波動：散戶 herding 在地量化 — TWSE 免費日頻當沖比率，對次日 RV 預測力 + 雙向 Granger（vol 吸引當沖 vs 當沖放大 vol）；台灣數據完整國際罕見（來源：JFQA/JEF 2024-25 r",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 580). Original: 台股當沖佔比與波動：散戶 herding 在地量化 — TWSE 免費日頻當沖比率，對次日 RV 預測力 + 雙向 Granger（vol 吸引當沖 vs 當沖放大 vol）；台灣數據完整國際罕見（來源：JFQA/JEF 2024-25 retail order-imbalance 辯論）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1724.py with signal.shift(1) + seed=42, (c) K1724_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34887,6 +34887,12 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1724-d68901",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T14:04:46.153655+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "last_released_at": "2026-07-27T11:14:37.631458+00:00",
@@ -34894,16 +34900,17 @@
     "triage_2026_07_26": "compute job agent-brief_k1724 exit=2 instant launch-fail（job_metadata 缺、worktree dispatch-slot-1-cb097ccd-k1724 已消失、無任何產出）。無可救援→需 fresh re-run；此 pending 任務即載體，重派走 compute_queue/enqueue-agent。",
     "compute_job_id": "agent-brief_k1724-d68901",
     "blocked_reason": "external_compute_receipt_pending_collection",
-    "result": "dispatched to compute job agent-brief_k1724-d68901; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_k1724-d68901; awaiting PHASE A collection\n\nK1724 collection 收件完成：results.json 完整、README 數字全對上(agent-result-verification PASS)、Codex round-2 二審 PASS(修正 RQ2 表 GK p typo)、reproduce_spec.json 產出、knowledge ce3e9e5b 已寫、worktree dispatch-slot-1-f4a65558-k1724 已 merge_worktree.sh 整合到 main(19a061e9f)。結論：RQ1 增量預測力 NULL(邊界)；RQ2 RV->DT robust / DT->RV fragile。",
     "compute_started_at": "2026-07-27T12:46:21Z",
-    "compute_finished_at": "2026-07-27T13:44:22Z"
+    "compute_finished_at": "2026-07-27T13:44:22Z",
+    "completed_at": "2026-07-27T14:04:46.153628+00:00"
   },
   {
     "id": "K1725",
     "title": "K1725: 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spi",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 581). Original: 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spillover 不同 — 時間分配結構非外溢）（來源：J.Futures Markets 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1725.py with signal.shift(1) + seed=42, (c) K1725_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34932,13 +34939,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1725-84d8fd",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T14:07:59.951365+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "compute_job_id": "agent-brief_k1725-84d8fd",
     "blocked_reason": "external_compute_receipt_pending_collection",
-    "result": "dispatched to compute job agent-brief_k1725-84d8fd; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_k1725-84d8fd; awaiting PHASE A collection\n\nK1725 collection 完成：results.json 自洽、claim-surface sha256 凍結對上 Codex v2 PASS(blocking=[])、reproduce_spec.json 產出、knowledge cd48b94a 已寫、worktree dispatch-slot-1-a630a051-k1725 已 merge 到 main。結論 NULL：BTC ETF 後 US-session RV 佔比 +1.86pp 不顯著(Welch p=0.441)，僅非時段下降穩健(bootstrap 排除0)，週末反升矛盾，最強內生斷點 2023-06-19 早於 IBIT → 不支持乾淨因果重分配主張。",
     "compute_started_at": "2026-07-27T12:50:45Z",
-    "compute_finished_at": "2026-07-27T13:37:16Z"
+    "compute_finished_at": "2026-07-27T13:37:16Z",
+    "completed_at": "2026-07-27T14:07:59.951343+00:00"
   },
   {
     "id": "K1726",
@@ -34977,16 +34991,17 @@
       }
     ],
     "compute_job_id": "agent-brief_k1812_bab_vol-f55e3c",
-    "blocked_reason": "external_compute_job_running",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "result": "dispatched to compute job agent-brief_k1812_bab_vol-f55e3c; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T12:55:28Z"
+    "compute_started_at": "2026-07-27T12:55:28Z",
+    "compute_finished_at": "2026-07-27T13:53:28Z"
   },
   {
     "id": "K1727",
     "title": "K1727: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JP",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1727.py with signal.shift(1) + seed=42, (c) K1727_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34995,14 +35010,38 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-17T00:00:01Z"
+    "created_at": "2026-07-17T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T14:24:39.671724+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-4-6ba995a0eafe4a8aa8b3450e18aa31dc"
+      },
+      {
+        "ts": "2026-07-27T14:25:05.783385+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-4-6ba995a0eafe4a8aa8b3450e18aa31dc"
+      },
+      {
+        "ts": "2026-07-27T14:27:32.065027+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1727-f47651",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1727-f47651",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1727-f47651; awaiting PHASE A collection"
   },
   {
     "id": "K1728",
     "title": "K1728: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-at",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 594). Original: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-attention & sentiment vol）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1728.py with signal.shift(1) + seed=42, (c) K1728_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35011,7 +35050,32 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-17T00:00:01Z"
+    "created_at": "2026-07-17T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T14:25:27.313926+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-c632207252794b988da25943aeb497f1"
+      },
+      {
+        "ts": "2026-07-27T14:25:39.655395+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-c632207252794b988da25943aeb497f1"
+      },
+      {
+        "ts": "2026-07-27T14:27:36.576860+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1728-slot3-89dfe5",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-agent-brief_k1728-slot3-89dfe5",
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-agent-brief_k1728-slot3-89dfe5; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T14:30:06Z"
   },
   {
     "id": "ci-red-29541122360",
@@ -42182,7 +42246,7 @@
     "title": "[experiment] Paper 3 E3 商品臂正式重跑（Gold/Oil/Copper/Wheat × SPY/Bonds，統一 E2 判準）",
     "task_type": "experiment",
     "priority": 2,
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "source": "agent",
     "parent_task_id": "assign_f3419501",
     "created_by": "hourly-slot-2-eba6b34b618c405cb56abaa5229d4da5",
@@ -42212,12 +42276,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_paper3_E3_commodities_copula-4e0072",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T14:22:26.596344+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "compute_job_id": "agent-brief_paper3_E3_commodities_copula-4e0072",
-    "blocked_reason": "external_compute_job_running",
-    "result": "dispatched to compute job agent-brief_paper3_E3_commodities_copula-4e0072; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T13:37:18Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "result": "dispatched to compute job agent-brief_paper3_E3_commodities_copula-4e0072; awaiting PHASE A collection\n\nPaper3_E3 商品臂 (8 pairs Gold/Oil/Copper/Wheat × SPY/TLT) 收件完成：NULL — 1/8 uncorrected Harvey (COPPER-SPY) 但 0 survive BH-FDR (q10/q05=0/16 tests)。E2 reverse-sign λ_L→DM scaling 在商品不 replicate (Student-t ρ=+0.190 p=0.65, opposite sign) → arm-specific 非 cross-asset-class law。primary-path audit PASS (dm_test+9 核心函式 byte-identical E2, BH-FDR/lag ver證), merge_worktree 整合 (main c19be2d18), knowledge=Paper3_E3_commodities_copula。跨資產類別邊界解除。",
+    "compute_started_at": "2026-07-27T13:37:18Z",
+    "compute_finished_at": "2026-07-27T14:07:53Z",
+    "completed_at": "2026-07-27T14:22:26.596322+00:00"
   },
   {
     "id": "detect_price_split_breaks_false_negative_20260721",
@@ -48607,7 +48679,7 @@
     "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 5 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- storage/drafts/article_images/K1649_coverage.png — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T122229510585Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T124023803989Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T135058805283Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-27T12:22:29.618781+00:00",
     "payload": {
@@ -48634,7 +48706,33 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T13:51:02.075443+00:00"
+    "updated_at": "2026-07-27T13:51:02.075443+00:00",
+    "completed_at": "2026-07-27T14:34:51.517339+00:00",
+    "result": "關閉條件機械滿足：1 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "storage/drafts/article_images/K1649_coverage.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-c6322072-k1728",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "storage/drafts/article_images/K1649_coverage.png"
+      ],
+      "grace_s": 86400
+    }
   },
   {
     "id": "assign_c5dc939b",
@@ -48880,15 +48978,11 @@
     "description": "K1698 rev6 README remediation + re-certify（rev5 Codex primary-path 判 FAIL；freeze integrity PASS，4 個 blocker 全在 README 過度宣稱 / 未溯源數字，code+data+lookahead+gate 全 PASS）。\n\n修這 4 條（全部只改 README.md 措辭，不動 code/results.json）：\n1. COMPLETE-REPLICATION-OVERCLAIM：README:32-34,189 的「完全復現 K1684/K854 的世界」→ 改成 results.json /k854_replication_bridge 實載的 11/14（match_rate=0.7857）部分復現。README:197 已正確寫 11/14，前段對齊。\n2. UNTRACED-HISTORICAL-NUMERICS：README:22,215 的 t≈−5.6、README:33 的 K1684 −5.13、README:52 的「倒置 154 個 CI」在 k1698_results.json 全無對應 → 刪除或改引 JSON 內真有的數字。\n3. UNTRACED-SOURCE-FILE-COUNT：README:254 的 TAIFEX「2,192 檔」JSON 無此數；/rv_construction/n_days=2191 與 /session_alignment_check/files_checked=40 是不同量不可代替 → 改引正確溯源量或刪。\n4. UNRECEIPTED-FIRST-BUILD-RUNTIME：README:265 首建 RV「約再 +1 分鐘」JSON 只有 /elapsed_sec=57.3（cache-hit run），無首建 receipt → 刪該宣稱或補真 receipt。\n\n流程：改 README → 重新 freeze（scripts 產 k1698_rev6_freeze.txt，7 檔 sha）→ enqueue Codex rev6 primary-path 二審（走 compute_queue job.sh，禁自簽、禁對舊 freeze）→ 收件填 review_verdict.json → PASS 才 experiment_gates.py certify 收尾。\n\n前置：rev5 verdict 在 storage/ops/codex_reviews/k1698_rev5_verdict.md；FAIL 明細已寫 experiments/k1698/review_verdict.json（blocking_defects）。3-strike active（rev5 是 round 5），禁原樣重試、禁自簽。",
     "task_type": "paper_review",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "hourly-dispatch",
     "created_at": "2026-07-27T13:10:49.512690+00:00",
     "parent_task_id": "assign_80535ab4",
     "created_by": "hourly-slot-1-1b047793c8a943cd945e375624659445",
-    "claimed_by": "hourly-slot-2-143c171826d146d1b9309156269436dc",
-    "claimed_at": "2026-07-27T13:34:37.683215+00:00",
-    "claim_expires_at": "2026-07-27T15:34:37.683215+00:00",
-    "claim_session_id": "215e0151cf54",
     "status_history": [
       {
         "ts": "2026-07-27T13:34:37.683230+00:00",
@@ -48901,12 +48995,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-143c171826d146d1b9309156269436dc"
+      },
+      {
+        "ts": "2026-07-27T14:11:35.639193+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-143c171826d146d1b9309156269436dc"
       }
     ],
     "started_at": "2026-07-27T13:34:37.947000+00:00",
     "pipeline_state": "README rev6 remediated (4 blockers, JSON-sourced); rev6 freeze written; codex rev6 review enqueued; awaiting collection via review-followup (PASS->certify->close / FAIL->escalate)",
     "review_job": "compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753",
-    "rev6_freeze": "storage/ops/codex_reviews/k1698_rev6_freeze.txt"
+    "rev6_freeze": "storage/ops/codex_reviews/k1698_rev6_freeze.txt",
+    "completed_at": "2026-07-27T14:11:35.639167+00:00",
+    "result": "K1698 rev6 PASS：4 個 README 過度宣稱/未溯源 blocker 全 RESOLVED（完全復現→11/14 78.57%；刪 t−5.6/−5.13/154CI；2192→n_days2191+files40；刪+1min first-build claim），Codex rev6 primary-path review CRITICAL=none + freeze 7 檔 sha 全合，experiment_gates certify PASS。review_verdict.json 更新為 PASS 綁 rev6 bytes。3-strike round 6 clear。"
   },
   {
     "id": "assign_c14fb33b",
@@ -48914,15 +49016,11 @@
     "description": "K1715 attempt 3（最終 ladder rung；router exhausted=ceiling → 3-strike，已 escalate 老闆）。這是 bounded 診斷欄位誠實性修正，非 compute 問題 —— guard/numbers/NULL 結論 attempt 2 已全驗證正確（勿重跑求不同結果）。\n\nworktree：.claude/worktrees/k1715-204d556b（branch worktree-k1715-204d556b，README/figures 已重生未 commit）。\n\n## Codex CRITICAL（attempt 2 rev 未清）— fit_model convergence block + convergence_note，逐條修：\n1. bfgs_success / bfgs_status / bfgs_message / optimizer_success 目前取自 accepted best（guard 選 NM 時就是 NM 結果），卻標成 BFGS 診斷；convergence_note 又宣稱 optimizer_success_rate 報 scipy 嚴格 BFGS gtol flag → 不實。\n2. bfgs_nll 目前實存 guarded accepted NLL（min(NM,BFGS)），非 raw BFGS，且未揭露。\n3. nm_to_bfgs_improve 由構造截斷非負：BFGS polish 失敗顯示 0，被讀成「NM 已 stationary」→ 掩蓋失敗為正證據。\n\n## Codex 指定修法（照做）：\n- 保留 raw res_bfgs 的真值：bfgs_* 欄位一律存 raw BFGS 結果（success/status/message/nll），不得被 accepted 覆寫。\n- 新增 accepted_method 欄位（'NM' | 'BFGS'）記錄 guard 實際採用者；optimizer_success 語意改為誠實描述 accepted solver。\n- 重命名 nm_to_bfgs_improve → 明確名（如 guarded_polish_gain），且停止把其 0 當 stationarity 證明；raw BFGS 失敗要能從 bfgs_success 看出。\n- convergence_note 措辭改為與實際欄位一致（不再宣稱報嚴格 BFGS gtol flag）。\n\n## 流程（嚴格）：\n1. 在 worktree 改 K1715.py（僅 fit_model 診斷 block + convergence_note；不動 fit 邏輯/guard/種子）。\n2. Codex primary-path 二審該 edit（走 codex-rescue Agent 或 queue，禁 fire 內裸跑 codex exec）→ CRITICAL 清除。\n3. 因診斷欄位進 results.json，需確定性重跑 268 fits 使 JSON 與修正碼一致（seeded 決定性，headline 數字必不變）：走 compute_queue（offline ~2min），禁 fire 內父等子。\n4. 驗：headline（1% 覆蓋率、DM t、verdict=NULL）與 attempt 2 逐格一致；新 bfgs_success 能反映 raw BFGS；accepted_method 存在；guarded_polish_gain 可為負（若 raw BFGS 較差）。\n5. check_experiment_artifacts.py + merge_worktree.sh（worktree-merge-verification skill，reflog 確認），PASS 才 merge。knowledge 主線程寫、數字取自 results.json。\n6. 若 Codex 再出新 unresolved CRITICAL（第 3 個 distinct 誠實性缺陷）→ 硬性停，不再自行續修，回報老闆 escalate email 已寄之判斷點。\n\n前置：attempt 2 verdict/細節見 source task k1715_bfgs_fix_dephantom_rerun_20260727（failed, escalation_attempts=2）result 欄。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "in_progress",
+    "status": "failed",
     "source": "hourly-dispatch",
     "created_at": "2026-07-27T13:19:40.802442+00:00",
     "parent_task_id": "k1715_bfgs_fix_dephantom_rerun_20260727",
     "created_by": "hourly-slot-1-1b047793c8a943cd945e375624659445",
-    "claimed_by": "hourly-slot-2-143c171826d146d1b9309156269436dc",
-    "claimed_at": "2026-07-27T13:23:45.510119+00:00",
-    "claim_expires_at": "2026-07-27T15:23:45.510119+00:00",
-    "claim_session_id": "e23d2f6de680",
     "status_history": [
       {
         "ts": "2026-07-27T13:23:45.510133+00:00",
@@ -48935,12 +49033,20 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-2-143c171826d146d1b9309156269436dc"
+      },
+      {
+        "ts": "2026-07-27T14:13:24.098493+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-2-143c171826d146d1b9309156269436dc"
       }
     ],
     "started_at": "2026-07-27T13:24:51.630816+00:00",
     "pipeline_state": "edit_committed_c9d75cf1d; codex_review_enqueued; awaiting collection via review-followup chain (review->rerun->merge)",
     "review_job": "compute-k1715-attempt3-codex-review-fit-diagnostic-honesty-final-run-1785159188",
-    "worktree_commit": "c9d75cf1d28471d69a9b463becc1ccbd8594c545"
+    "worktree_commit": "c9d75cf1d28471d69a9b463becc1ccbd8594c545",
+    "completed_at": "2026-07-27T14:13:24.098467+00:00",
+    "result": "K1715 attempt3(3-strike final rung) FAIL：Codex diag-honesty review 出現 2 個 Genuinely NEW distinct 誠實性缺陷 + issue1 restatement。(1)restatement: K1715.py:1197 小 guarded_polish_gain 仍被當『已收斂』，BFGS reject/NM accept 時 gain=0 by construction 反被當正向證據。(2)NEW: L723-726/1192-1195 註解稱 raw BFGS 失敗才 fallback NM，但 guard(L381-386)忽略 res_bfgs.success、僅以 finite/lower NLL 選 → 失敗 BFGS 可被接受、成功 BFGS 可被拒，註解描述了代碼未實作的行為。(3)NEW: res_nm.fun=+inf 且 BFGS 有限較低時 nm_nll=Infinity、guarded_polish_gain=Infinity，L1229 json.dumps 預設放行非法 JSON token。Codex bottom line: diagnostics 仍非完全誠實亦非 JSON-safe，不安全 merge。final rung 已達 → 不自修、不重試、escalate 老闆裁示。"
   },
   {
     "id": "ci-red-30268312681",
@@ -49110,6 +49216,121 @@
         "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T13:39:30.787194+00:00"
+    "started_at": "2026-07-27T13:39:30.787194+00:00",
+    "declared_paths": [
+      "config/provider_registry.json",
+      "src/volpred/ops/execution/registry.py",
+      "src/volpred/ops/execution/__init__.py",
+      "scripts/run_agent_job.py",
+      "scripts/dispatch_supervisor/worker.py",
+      "scripts/dispatch_supervisor/codex_failover.py",
+      "scripts/dispatch_supervisor/supervisor.py",
+      "tests/test_provider_registry.py",
+      "tests/test_provider_execution.py",
+      "tests/test_dispatch_supervisor.py",
+      "tests/test_dispatch_supervisor_codex_failover.py",
+      "tests/test_run_agent_job_claude_bin.py",
+      "tests/test_worker_actor_env.py",
+      "scripts/tests/test_agent_job_auth_class.py",
+      "scripts/tests/test_agent_job_artifact_boundary.py",
+      "docs/error_log.md",
+      "docs/project_improvement_status.md",
+      "docs/refactor_plan_ops_master_2026_07.md"
+    ]
+  },
+  {
+    "id": "assign_5938ee83",
+    "title": "[Issue #12/#46] Ratchet every production AI CLI spawn into provider policy",
+    "description": "Follow-up to assign_e9992acd, non-overlapping source-census slice. Build a mechanical AST/source audit for every production Claude/Codex/agy process creation seam. Require canonical zero-paid authorization immediately before provider I/O, bind the actual executable identity and task semantic/capability/formal-review contract, add agy only if its auth/billing can be explicitly attested zero-paid, otherwise fail closed or retire the launcher. Cover execution_brief, member-QA adjudicator, scheduled trending scan, lazypack Codex/agy chain, and scheduled Codex reference generation; distinguish diagnostic --version probes from business execution. TDD, class-sweep negative tests, Matt dual review, live no-spawn denial and docs. Do not edit the active assign_e9992acd launcher files, transfer provider.execution, bypass #9, or close #12.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T13:52:16.091373+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#12",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T13:52:22.307873+00:00",
+    "claim_expires_at": "2026-07-27T15:52:22.307873+00:00",
+    "claim_session_id": "02586febc177",
+    "status_history": [
+      {
+        "ts": "2026-07-27T13:52:22.307888+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T13:52:25.410463+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T13:52:25.410451+00:00"
+  },
+  {
+    "id": "email-12189-7429ea",
+    "title": "[email_reply] Re: [VolPred Alert][WARN] 🔴【需老闆回信】[新架構派發] K1715 3-strike 最終 rung 仍未過誠實性 gate，等您裁",
+    "description": "Gmail UID: 12189\nMessage-ID: <7472E959-48BC-4F94-9C44-51FC92A1F298@gmail.com>\nFrom: \" 咲戈戈 \" <yihao.lai@gmail.com>\nDate: Mon, 27 Jul 2026 22:15:00 +0800\nSubject: Re: [VolPred Alert][WARN] 🔴【需老闆回信】[新架構派發] K1715 3-strike 最終 rung 仍未過誠實性 gate，等您裁示\n\n--- 用戶回信內容 ---\n你自己決定\n\n--- 原始助理寄出內容（引用部分） ---\n> VolPred <yihao.lai@gmail.com> 於 2026年7月27日 22:14 寫道：\r\n> \r\n> VOLPRED 管理通知\r\n> 🔴【需老闆回信】[新架構派發] K1715 3-strike 最終 rung 仍未過誠實性 gate，等您裁示\r\n> Alert level: warn\r\n> ⚠\r\n> WARN\r\n> 白話結論\r\n> \r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 影響\r\n> \r\n> 影響平台自動運作的穩定性。\r\n> 行動\r\n> \r\n> 依下方行動清單處理，完成後讓下一輪巡檢自動解除警報。\r\n> 🔴 此 email 需老闆做出決定才能繼續推進。\r\n> 請看下方「需要的決定」段，回信告知選項即可。\r\n> K1715 已到 3-strike 最終 rung 仍未過誠實性 gate，等您裁示\r\n> \r\n> 任務：assign_c14fb33b — K1715 attempt 3（3-strike final rung）：Codex 診斷欄位誠實性 bounded 修正\r\n> 本輪判定：Codex diag-honesty review = FAIL（不安全 merge），已標 task failed，未 merge、未自修、未重試，依規則停手等您裁示。\r\n> 為什麼停手（而非再修一輪）\r\n> \r\n> 這是 3-strike 機制的第 3（最終）rung。規則明定：final rung 仍未清乾淨、或出現「Genuinely NEW distinct」新缺陷 → 硬性停，禁自簽、禁原樣重試，escalate 由您裁決。本輪同時命中兩者：issue 1 是舊缺陷 restatement，issue 2、3 是 Codex 明確標記的兩個全新 distinct 誠實性缺陷。連修三輪仍在同一處（optimizer polish 診斷欄位的誠實性）反覆製造新問題，代表這不是再多修一次能收斂的問題。\r\n> 具體殘留缺陷（Codex verdict 原文摘要）\r\n> \r\n> #\t類型\t位置\t問題\r\n> 1\trestatement（舊缺陷未清）\tK1715.py:1197\t小的 guarded_polish_gain 仍被當「已收斂/stationary」；當 BFGS 被拒、NM 被接受時 gain 恆為 0（by construction），反被當成正向證據，與 L454-457、L727-728 自相矛盾。\r\n> 2\tNEW distinct\tK1715.py:723-726, 1192-1195 vs guard 381-386\t註解宣稱「raw BFGS 失敗 → fallback 到 NM」，但 guard 忽略 res_bfgs.success，僅以 finite / lower NLL 選解 → 失敗的 BFGS 可被接受、成功的 BFGS 可被拒。註解描述了代碼並未實作的行為。\r\n> 3\tNEW distinct（JSON-safety）\tK1715.py:394, 458, 1229\t若 res_nm.fun = +inf 但 BFGS 回傳有限較低 NLL，nm_nll 留 Infinity、guarded_polish_gain 變 Infinity；json.dumps 預設放行此非標準 JSON token → 產出非法 JSON。\r\n> Codex bottom line 原文：「The diagnostics remain neither fully honest nor JSON-safe and are not safe to merge.」\r\n> 補充：科學結論本身不受影響\r\n> \r\n> 需釐清的是——失敗的是「診斷欄位的誠實性/JSON-safety」，不是科學結果。attempt 2 的 headline（1% VaR 覆蓋率、DM t、verdict=NULL：score-driven 與 GARCH-t 在 Harvey |t|>3 下 fail-to-reject 相等、四個 Student-t 共享左尾覆蓋不足）並未被本輪推翻。卡關的是 optimizer polish 的 convergence 診斷欄位如何誠實表述。\r\n> 請您裁示（擇一）\r\n> \r\n> 接受科學結論、豁免診斷欄位：headline 是 NULL、診斷欄位屬 meta，可否以「已知限制」註記後放行 merge，不再糾結 polish 診斷的完美誠實？\r\n> 換人續修：改由 Codex 直接 own 這段 convergence 診斷重寫（非 Claude agent 轉述修正），一次到位。\r\n> 降級封存：K1715 診斷收尾成本已超過其邊際價值，暫封存不 merge，資源轉其他實驗。\r\n> 我不自行選擇方向——這是 3-strike 設計要求的人工裁決點。收到您的指示後照辦。\r\n> slot-2 hourly-dispatch / job 703ecc5c；本班另已完整收尾 K1724（NULL，已 merge）與 K1698 rev6（README honesty PASS，已 certify）。\n",
+    "task_type": "email_reply",
+    "priority": 3,
+    "status": "succeeded",
+    "tags": [
+      "email_reply",
+      "user_input"
+    ],
+    "created_at": "2026-07-27T14:15:20.837157+00:00",
+    "source": "gmail_inbox_poll",
+    "email_uid": 12189,
+    "email_message_id": "<7472E959-48BC-4F94-9C44-51FC92A1F298@gmail.com>",
+    "email_subject": "Re: [VolPred Alert][WARN] 🔴【需老闆回信】[新架構派發] K1715 3-strike 最終 rung 仍未過誠實性 gate，等您裁示",
+    "email_from": "\" 咲戈戈 \" <yihao.lai@gmail.com>",
+    "status_history": [
+      {
+        "ts": "2026-07-27T14:19:37.796451+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-4-6ba995a0eafe4a8aa8b3450e18aa31dc"
+      },
+      {
+        "ts": "2026-07-27T14:19:38.073248+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-4-6ba995a0eafe4a8aa8b3450e18aa31dc"
+      },
+      {
+        "ts": "2026-07-27T14:22:24.553493+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-4-6ba995a0eafe4a8aa8b3450e18aa31dc"
+      }
+    ],
+    "started_at": "2026-07-27T14:19:38.073229+00:00",
+    "completed_at": "2026-07-27T14:22:24.553467+00:00",
+    "result": "Boss 回「你自己決定」→ 接下 K1715 3-strike 裁決：降級封存(Option 3)。科學結論(NULL)早已存於 knowledge 5e41886b(Codex 科學審 PASS)，卡的只是 optimizer 診斷 meta 欄位；merge 只會把 JSON-unsafe/overclaiming 碼帶進 main 且科學零增益 → 不 merge worktree k1715-204d556b，記封存裁決+pattern lesson 進 knowledge f745bff0。已寄 close email(delivered)+Telegram 1527。"
+  },
+  {
+    "id": "K1710_article_general",
+    "title": "K1710: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1710 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: K1710 PASS（Codex review PASS，兩輪修正後）：為prg-periodic-garch論文三時點convention flip主表補齊open/mixed兩面板，在K1699 pinned vintage（六市場SHA256驗證一致，未重新下載資料）上重跑。DM全表（canonical dm_test, h=1, HAC）：Open面板（PRG open-known vs Fair GJR-X）六市場全負t，5/6通過Harvey |t|>3（SPY -3.557, GLD -3.643, EEM -10.137, 0050.TW Canonical evidence: experiments/k1710/K1710_results.json, experiments/k1710/results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1710",
+    "evidence_source_paths": [
+      "experiments/k1710/K1710_results.json",
+      "experiments/k1710/results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1710/K1710_results.json, experiments/k1710/results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T14:23:43+00:00"
   }
 ]

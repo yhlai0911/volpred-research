@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T13:00:25.510742+00:00",
+  "generated_at": "2026-07-27T14:00:19.809368+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 143.6
+      "age_hours": 144.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -15,17 +15,23 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 3.7
+      "age_hours": 4.7
     }
   ],
-  "held": [],
+  "held": [
+    {
+      "path": "storage/drafts/K1649_general_draft.md",
+      "reason": "no_title",
+      "detail": "缺 frontmatter title — 入池需要標題，保留等作者確認"
+    }
+  ],
   "skipped": {
     "baseline": 519,
-    "registered": 57,
-    "grace": 2,
+    "registered": 58,
+    "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 2,
+  "orphan_count": 3,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -41,59 +47,27 @@
   "applied": true,
   "job_deliverable_candidates": [
     {
-      "job_id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380.json",
+      "job_id": "compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753.json",
       "execution_status": "completed",
       "paths": [
-        "experiments/k1426/k1426_oos_shard_a.json"
+        "storage/ops/codex_reviews/k1698_rev6_verdict.md"
       ],
       "existing_paths": [
-        "experiments/k1426/k1426_oos_shard_a.json"
+        "storage/ops/codex_reviews/k1698_rev6_verdict.md"
       ],
-      "previously_delivered_paths": [
-        "experiments/k1426/k1426_oos_shard_a.json"
-      ],
+      "previously_delivered_paths": [],
       "rejected": []
     },
     {
-      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380.json",
+      "job_id": "compute-k1715-attempt3-codex-review-fit-diagnostic-honesty-final-run-1785159188",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1715-attempt3-codex-review-fit-diagnostic-honesty-final-run-1785159188.json",
       "execution_status": "completed",
       "paths": [
-        "experiments/k1426/k1426_oos_shard_b.json"
+        "storage/ops/codex_reviews/k1715_attempt3_diag_honesty_verdict.md"
       ],
       "existing_paths": [
-        "experiments/k1426/k1426_oos_shard_b.json"
-      ],
-      "previously_delivered_paths": [
-        "experiments/k1426/k1426_oos_shard_b.json"
-      ],
-      "rejected": []
-    },
-    {
-      "job_id": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380.json",
-      "execution_status": "completed",
-      "paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
-      ],
-      "existing_paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
-      ],
-      "previously_delivered_paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
-      ],
-      "rejected": []
-    },
-    {
-      "job_id": "compute-scripts-codex-review-job-sh-1785149307",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-scripts-codex-review-job-sh-1785149307.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/ops/codex_reviews/k1698_rev5_verdict.md"
-      ],
-      "existing_paths": [
-        "storage/ops/codex_reviews/k1698_rev5_verdict.md"
+        "storage/ops/codex_reviews/k1715_attempt3_diag_honesty_verdict.md"
       ],
       "previously_delivered_paths": [],
       "rejected": []
@@ -141,56 +115,83 @@
   "job_deliverable_held": [],
   "job_deliveries": [
     {
-      "job_id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
+      "job_id": "compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev6_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "9fc7acc5e55da133b060bff81ff6b88768d4eb76",
+      "reason": "already_committed"
+    },
+    {
+      "job_id": "compute-k1715-attempt3-codex-review-fit-diagnostic-honesty-final-run-1785159188",
+      "paths": [
+        "storage/ops/codex_reviews/k1715_attempt3_diag_honesty_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "9fc7acc5e55da133b060bff81ff6b88768d4eb76",
+      "reason": "already_committed"
+    },
+    {
+      "job_id": "k1426-oos-rerun-shard-a-dailyseries-20260727",
       "paths": [
         "experiments/k1426/k1426_oos_shard_a.json"
       ],
       "delivered": true,
       "delivery_status": "delivered",
       "delivery_commit": "a3842d7680f8548bed35cb728a13eb5b8ab983ab",
-      "reason": "committed"
+      "reason": "already_committed"
     },
     {
-      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
+      "job_id": "k1426-oos-rerun-shard-b-dailyseries-20260727",
       "paths": [
         "experiments/k1426/k1426_oos_shard_b.json"
       ],
       "delivered": true,
       "delivery_status": "delivered",
       "delivery_commit": "5b641e59301d198af9260fde33e1d4b14a0878f9",
-      "reason": "committed"
-    },
-    {
-      "job_id": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
-      "paths": [
-        "experiments/k1426/k1426_oos_shard_c.json"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "88e33a14cc533c85e05edab16efa471881841619",
-      "reason": "committed"
-    },
-    {
-      "job_id": "compute-scripts-codex-review-job-sh-1785149307",
-      "paths": [
-        "storage/ops/codex_reviews/k1698_rev5_verdict.md"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "fbf121b54236c73922bf1c07ada927a094616582",
-      "reason": "committed"
+      "reason": "already_committed"
     }
   ],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/K1649_general_draft.md",
+          "kind": "md",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/article_images/K1649_coverage.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/k1436_general_draft.md",
+          "kind": "md",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/K1649_general_draft.md",
+            "storage/drafts/article_images/K1649_coverage.png",
+            "storage/drafts/k1436_general_draft.md"
+          ],
+          "committed": true,
+          "detail": "[main 06a207b6b] chore(draft-reap): collect orphaned draft artifacts (3 files)\n 3 files changed, 122 insertions(+)\n create mode 100644 storage/drafts/"
+        }
+      ]
     },
     "paper": {
       "collectable": [],
@@ -206,7 +207,7 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 5,
         "inflight": 0,
         "unclaimed": 0
       },

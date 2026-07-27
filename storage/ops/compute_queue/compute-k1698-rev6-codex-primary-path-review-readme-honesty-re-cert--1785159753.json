@@ -30,7 +30,7 @@
     "task_type": "paper_review",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": null,
   "source_task_link": null,
   "timeout_seconds": 2700,
@@ -40,5 +40,15 @@
   "claimed_by_pid_start_wall": "Mon Jul 27 18:30:05 2026",
   "experiment_gate": {
     "status": "out_of_scope"
-  }
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "9fc7acc5e55da133b060bff81ff6b88768d4eb76",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1698_rev6_verdict.md"
+  ],
+  "delivered_at": "2026-07-27T14:00:30.960798+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-27T14:11:35Z",
+  "followup_next_task_id": "assign_1f80cef2"
 }
