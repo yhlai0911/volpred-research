@@ -276,6 +276,50 @@ def test_too_many_candidates_declines_instead_of_probing_a_subset(repo: Path) ->
     assert outcome["reason"] == "too_many_candidates"
 
 
+def test_oversized_owner_group_does_not_suppress_another_owners_candidate(
+    repo: Path,
+) -> None:
+    """The cap is per producer; one noisy owner cannot disable every probe."""
+    (repo / "scripts" / "asset_lane.md").write_text("prompt with TOKEN\n")
+    foreign = ["scripts/asset_lane.md"]
+    owner_groups = {"scripts/asset_lane.md": "owner-small"}
+    for i in range(phase_z._ORPHAN_HALF_MAX_CANDIDATES + 1):
+        rel = f"scripts/noisy_{i}.py"
+        (repo / rel).write_text("x = 1\n")
+        foreign.append(rel)
+        owner_groups[rel] = "owner-noisy"
+
+    outcome = phase_z._adopt_orphan_halves(
+        repo,
+        foreign,
+        runner=subprocess.run,
+        test_runner=_fake_pytest(),
+        owner_groups=owner_groups,
+    )
+
+    assert outcome["adopted"] == ["scripts/asset_lane.md"]
+    assert outcome["skipped_groups"] == {
+        "owner-noisy": sorted(rel for rel in foreign if "noisy_" in rel)
+    }
+    assert outcome["considered"] == ["scripts/asset_lane.md"]
+
+
+def test_probe_budget_groups_follow_declared_ownership_lanes() -> None:
+    groups = phase_z._orphan_half_owner_groups(
+        {
+            "stale": {"scripts/a.py": "fire-a"},
+            "contested": {"scripts/b.py": ["fire-c", "fire-b"]},
+            "unowned": ["scripts/c.py"],
+        }
+    )
+
+    assert groups == {
+        "scripts/a.py": "stale:fire-a",
+        "scripts/b.py": "contested:fire-b,fire-c",
+        "scripts/c.py": "unowned",
+    }
+
+
 def test_budget_exhaustion_stops_the_probe(repo: Path) -> None:
     (repo / "scripts" / "asset_lane.md").write_text("prompt with TOKEN\n")
     clock = iter([0.0, 10.0 ** 9, 10.0 ** 9])

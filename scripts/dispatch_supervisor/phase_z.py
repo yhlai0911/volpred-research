@@ -67,6 +67,7 @@ import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from volpred.ops.foreign_incident import (
     QUARANTINE_REF_PREFIX,
@@ -2418,6 +2419,19 @@ def _orphan_half_candidates(repo_root: Path, foreign: list[str]) -> list[str]:
     return candidates
 
 
+def _orphan_half_owner_groups(foreign_ownership: dict) -> dict[str, str]:
+    """Map each risky path to the producer cohort that owns its probe budget."""
+    groups: dict[str, str] = {}
+    for rel, owner in (foreign_ownership.get("stale") or {}).items():
+        groups[str(rel)] = f"stale:{owner}"
+    for rel, owners in (foreign_ownership.get("contested") or {}).items():
+        owner_key = ",".join(sorted(str(owner) for owner in owners))
+        groups[str(rel)] = f"contested:{owner_key}"
+    for rel in foreign_ownership.get("unowned") or []:
+        groups[str(rel)] = "unowned"
+    return groups
+
+
 def _failure_ids_for(failure_ids: set[str], targets: list[str]) -> set[str]:
     """Failing node ids that live in ``targets``.
 
@@ -2448,6 +2462,7 @@ def _adopt_orphan_halves(
     runner,
     test_runner,
     monotonic=time.monotonic,
+    owner_groups: dict[str, str] | None = None,
 ) -> dict:
     """Prove (or fail to prove) which foreign dirty paths are missing halves.
 
@@ -2461,16 +2476,49 @@ def _adopt_orphan_halves(
     (candidates actually probed) and ``evidence`` (per adopted path: the node
     ids it turned green, and the test files that ran).
     """
-    result: dict = {"adopted": [], "reason": "no_candidates", "considered": [], "evidence": {}}
+    result: dict = {
+        "adopted": [],
+        "reason": "no_candidates",
+        "considered": [],
+        "evidence": {},
+        "skipped_groups": {},
+    }
     candidates = _orphan_half_candidates(repo_root, foreign)
     if not candidates:
         return result
-    if len(candidates) > _ORPHAN_HALF_MAX_CANDIDATES:
-        # Fail-closed rather than probing an arbitrary subset: a truncated scan
-        # would silently decide "not a missing half" for paths it never tested.
-        LOG.info("phase_z: orphan-half probe skipped — %d candidates exceeds cap %d",
-                 len(candidates), _ORPHAN_HALF_MAX_CANDIDATES)
-        return {**result, "reason": "too_many_candidates", "considered": candidates}
+    grouped: dict[str, list[str]] = {}
+    for rel in candidates:
+        group = (owner_groups or {}).get(rel, "unowned")
+        grouped.setdefault(group, []).append(rel)
+    skipped_groups = {
+        group: paths
+        for group, paths in sorted(grouped.items())
+        if len(paths) > _ORPHAN_HALF_MAX_CANDIDATES
+    }
+    candidates = [
+        rel
+        for group, paths in sorted(grouped.items())
+        if group not in skipped_groups
+        for rel in paths
+    ]
+    result["skipped_groups"] = skipped_groups
+    if skipped_groups:
+        LOG.info(
+            "phase_z: orphan-half probe skipped %d oversized owner group(s): %s",
+            len(skipped_groups),
+            {
+                group: len(paths)
+                for group, paths in skipped_groups.items()
+            },
+        )
+    if not candidates:
+        return {
+            **result,
+            "reason": "too_many_candidates",
+            "considered": sorted(
+                rel for paths in skipped_groups.values() for rel in paths
+            ),
+        }
 
     deadline = monotonic() + _ORPHAN_HALF_BUDGET_S
     try:
@@ -2531,7 +2579,8 @@ def _adopt_orphan_halves(
                     result_reason = "budget_exhausted"
                     return {"adopted": adopted, "reason": result_reason,
                             "considered": considered, "evidence": evidence,
-                            "unprobed": candidates[index:]}
+                            "unprobed": candidates[index:],
+                            "skipped_groups": skipped_groups}
                 own = _resolve_test_targets(head_root, [rel])["targets"]
                 own_red = _failure_ids_for(head_ids, own)
                 if not own_red:
@@ -2578,6 +2627,7 @@ def _adopt_orphan_halves(
         "reason": "adopted" if adopted else "no_proof",
         "considered": considered,
         "evidence": evidence,
+        "skipped_groups": skipped_groups,
     }
 
 
@@ -3157,7 +3207,11 @@ def run_phase_z(
         {"adopted": [], "reason": "recovery_mode", "considered": [], "evidence": {}}
         if authorized_recovery
         else _adopt_orphan_halves(
-            repo_root, risk_foreign, runner=runner, test_runner=test_runner or subprocess.run,
+            repo_root,
+            risk_foreign,
+            runner=runner,
+            test_runner=test_runner or subprocess.run,
+            owner_groups=_orphan_half_owner_groups(foreign_ownership),
         )
     )
     adopted_halves = list(orphan_halves["adopted"])

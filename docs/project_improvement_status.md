@@ -2738,3 +2738,14 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   business effect、owner transfer 或 #9/#12 bypass。Durable probe 底層 slice 為
   **`root_cause_fixed_and_verified`**；Issue #16 umbrella 仍為 **`contained`** 且
   保持 OPEN，等 #9→#12 owner cutover 才進下一階段。
+
+## 2026-07-27 — PHASE-Z orphan-half 高併發 owner 分群
+
+- ✅ Orphan-half 的 8-path safety cap 從全域計數改為 declared ownership cohort：
+  `stale:<fire-id>`、排序後的 `contested:<fire-ids>` 與 `unowned` 各自計算。超額
+  cohort 只回報在 `skipped_groups`，不再讓其他 owner 的小型、可證明候選一起被放棄。
+- ✅ Clone revision pin、HEAD-red→candidate-green 證明、禁止採用 test bytes 與整體
+  wall-clock budget 均維持不變；這不是放寬 adoption，只移除跨 owner 的連坐拒絕。
+- ✅ TDD 證明 9-path noisy owner 不會壓掉另一 owner 的 missing half；PHASE-Z 相鄰
+  **105 passed**。同類高併發 `candidates exceeds cap 8` 造成 recovery 全關閉的根因為
+  **`root_cause_fixed_and_verified`**。
