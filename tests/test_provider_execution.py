@@ -653,6 +653,30 @@ def test_in_memory_probe_budget_uses_same_rolling_window_as_durable_policy() -> 
     assert reserve_and_release(NOW + timedelta(minutes=65), "fourth") is False
 
 
+def test_in_memory_probe_budget_is_global_like_registry_policy() -> None:
+    store = InMemoryProviderExecutionStore()
+    policy = ProbePolicy(max_probe_cost_units=1)
+    first = store.reserve_probe(
+        provider_id="codex",
+        owner="codex-owner",
+        observed_at=NOW,
+        cost_units=1,
+        policy=policy,
+    )
+    store.release_probe(provider_id="codex", owner="codex-owner")
+
+    second_provider = store.reserve_probe(
+        provider_id="claude",
+        owner="claude-owner",
+        observed_at=NOW,
+        cost_units=1,
+        policy=policy,
+    )
+
+    assert first.acquired is True
+    assert second_provider.acquired is False
+
+
 def test_malformed_execute_return_is_typed_and_rerouted() -> None:
     class MalformedProvider(FakeProvider):
         def execute(self, request, *, resume_checkpoint):

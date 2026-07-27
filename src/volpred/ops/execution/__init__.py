@@ -298,9 +298,7 @@ class _InMemoryProviderExecutionStore:
         self._execution_reservations: dict[str, str] = {}
         self._provider_states: dict[str, ProviderStateView] = {}
         self._probe_reservations: dict[str, tuple[str, datetime, datetime]] = {}
-        self._probe_budget_events: dict[
-            str, list[tuple[datetime, int]]
-        ] = {}
+        self._probe_budget_events: list[tuple[datetime, int]] = []
 
     def reserve_execution(
         self,
@@ -380,7 +378,7 @@ class _InMemoryProviderExecutionStore:
                 if reservation is not None and reservation[1] > observed_at
                 else None
             )
-            events = self._probe_budget_events.setdefault(provider_id, [])
+            events = self._probe_budget_events
             decision = policy.admission(
                 now=observed_at,
                 requested_cost_units=cost_units,
