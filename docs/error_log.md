@@ -3948,11 +3948,14 @@ pending intent + fsynced temp + no-clobber hard-link + durable head。on-disk格
 不是「目前formal capability owner」；拿歷史event推owner會在正常release後製造
 假證據。現在新增獨立immutable owner singleton與service-role-only typed RPC；
 FORCE RLS私表不對service role開放，resolver逐欄驗schema、canonical capability/key、
-`operations_core`、generation與contract identity，任何backend／ACL／payload drift
-皆fail closed為unknown，且read seam不acquire、renew或release lease。
+`operations_core`、generation、contract identity與exact key set；inventory pin
+production backend SHA-256，claim使用DB `attested_at`而非本機重標，超過30秒或
+未來超過5秒即拒絕。任何backend／ACL／payload／time drift皆fail closed為unknown，
+且read seam不acquire、renew或release lease。
 
-**回歸與live read-back**：公開audit seam先以缺resolver／缺adapter重現RED，修後
-Primary Authority與formal census範圍**57 passed**；真PG17驗RLS、ACL、function owner、
+**回歸與live read-back**：公開audit seam先以缺resolver／缺adapter重現RED，並補
+wrong backend、stale/future timestamp與extra field案例；修後Primary Authority與
+formal census範圍**61 passed**；真PG17驗RLS、ACL、function owner、
 non-superuser migration與role cleanup。Production回讀singleton=1、
 owner=`operations_core`、generation=1、service table privileges=false、RPC只有
 service role可執行；fresh census host-authority=`unique_owner`、probe errors=0，
