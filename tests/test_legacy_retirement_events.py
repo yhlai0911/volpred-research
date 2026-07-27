@@ -141,6 +141,54 @@ def test_orphan_tripwire_rejects_tamper_and_symlink(tmp_path: Path) -> None:
         load_verified_orphan_work_events(tmp_path)
 
 
+def test_orphan_tripwire_recovers_crash_between_event_and_head(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    real_replace = legacy_retirement_events._atomic_replace_payload
+    fail_once = {"armed": True}
+
+    def fail_first_head(path: Path, payload: dict[str, object]) -> None:
+        if path.name == "orphan_work.json" and fail_once["armed"]:
+            fail_once["armed"] = False
+            raise OSError("injected head publish crash")
+        real_replace(path, payload)
+
+    monkeypatch.setattr(
+        legacy_retirement_events,
+        "_atomic_replace_payload",
+        fail_first_head,
+    )
+    with pytest.raises(OSError, match="injected head publish crash"):
+        append_orphan_work_event(
+            tmp_path,
+            workspace="dispatch-slot-1-deadbeef",
+            branch="worktree-dispatch-slot-1-deadbeef",
+            job_id="deadbeef",
+        )
+    with pytest.raises(LegacyRetirementInputError, match="needs recovery"):
+        load_verified_orphan_work_events(tmp_path)
+
+    path = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+    )
+    events = load_verified_orphan_work_events(tmp_path)
+
+    assert path.exists()
+    assert len(events) == 1
+    assert events[0]["workspace"] == "dispatch-slot-1-deadbeef"
+    assert not (
+        tmp_path
+        / "storage"
+        / "ops"
+        / "legacy_retirement_event_heads"
+        / ".orphan_work.append-intent.json"
+    ).exists()
+
+
 def test_orphan_materializer_uses_verified_sequence_delta(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

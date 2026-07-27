@@ -17,6 +17,7 @@ import socket
 import stat
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -36,6 +37,7 @@ _ORPHAN_DIMENSION = "orphan_work"
 _EVENT_SCHEMA = "legacy-retirement-event.v1"
 _ORPHAN_EVENT_SCHEMA = "orphan-work-retirement-event.v1"
 _HEAD_SCHEMA = "legacy-retirement-event-head.v1"
+_PENDING_SCHEMA = "legacy-retirement-event-append-intent.v1"
 _SIGNAL_SCHEMA = "legacy-retirement-signal.v1"
 _EVENT_KEYS = frozenset(
     {
@@ -69,6 +71,36 @@ _ORPHAN_EVENT_KEYS = frozenset(
         "event_sha256",
     }
 )
+_HEAD_KEYS = frozenset(
+    {
+        "schema_version",
+        "dimension",
+        "high_watermark",
+        "last_event_sha256",
+        "updated_at",
+        "head_sha256",
+    }
+)
+_PENDING_KEYS = frozenset(
+    {
+        "schema_version",
+        "dimension",
+        "event",
+        "head",
+        "intent_sha256",
+    }
+)
+
+
+@dataclass(frozen=True)
+class _LocalEventLedgerSpec:
+    dimension: str
+    event_schema: str
+    producer: str
+    event_keys: frozenset[str]
+    label: str
+    identity_key: str | None = None
+    identity_fields: tuple[str, ...] = ()
 
 
 def _canonical_bytes(payload: Mapping[str, object]) -> bytes:
@@ -152,20 +184,6 @@ def _event_sha(event: Mapping[str, object]) -> str:
     return _sha256(_canonical_bytes(unsigned))
 
 
-def _event_directory(root: Path) -> Path:
-    return root / "storage" / "ops" / "legacy_retirement_events" / _DIMENSION
-
-
-def _head_path(root: Path) -> Path:
-    return (
-        root
-        / "storage"
-        / "ops"
-        / "legacy_retirement_event_heads"
-        / f"{_DIMENSION}.json"
-    )
-
-
 def _dimension_event_directory(root: Path, dimension: str) -> Path:
     return root / "storage" / "ops" / "legacy_retirement_events" / dimension
 
@@ -187,22 +205,110 @@ def _secure_directory(path: Path) -> bool:
     return existed
 
 
-def load_verified_legacy_business_fire_events(root: Path) -> list[dict[str, object]]:
-    """Verify the complete gap-free event chain; reject deletions and tampering."""
+def _dimension_pending_path(root: Path, dimension: str) -> Path:
+    return (
+        root
+        / "storage"
+        / "ops"
+        / "legacy_retirement_event_heads"
+        / f".{dimension}.append-intent.json"
+    )
 
-    repo_root = Path(root)
-    directory = _event_directory(repo_root)
-    head_path = _head_path(repo_root)
-    _reject_symlink_components(repo_root, directory)
-    _reject_symlink_components(repo_root, head_path)
+
+def _legacy_event_spec() -> _LocalEventLedgerSpec:
+    return _LocalEventLedgerSpec(
+        dimension=_DIMENSION,
+        event_schema=_EVENT_SCHEMA,
+        producer="legacy_entry_tripwire",
+        event_keys=_EVENT_KEYS,
+        label="legacy business-fire",
+    )
+
+
+def _orphan_event_spec() -> _LocalEventLedgerSpec:
+    return _LocalEventLedgerSpec(
+        dimension=_ORPHAN_DIMENSION,
+        event_schema=_ORPHAN_EVENT_SCHEMA,
+        producer="dispatch_supervisor_orphan_sweep",
+        event_keys=_ORPHAN_EVENT_KEYS,
+        label="orphan-work",
+        identity_key="workspace",
+        identity_fields=("branch", "job_id"),
+    )
+
+
+def _event_payload_is_valid(
+    event: Mapping[str, object],
+    spec: _LocalEventLedgerSpec,
+) -> bool:
+    if spec.dimension == _DIMENSION:
+        pid = event.get("pid")
+        host = event.get("host")
+        return (
+            not isinstance(pid, bool)
+            and isinstance(pid, int)
+            and pid >= 1
+            and isinstance(host, str)
+            and bool(host.strip())
+            and host == host.strip()
+        )
+    if spec.dimension == _ORPHAN_DIMENSION:
+        workspace = event.get("workspace")
+        branch = event.get("branch")
+        job_id = event.get("job_id")
+        return (
+            isinstance(workspace, str)
+            and _SAFE_IDENTITY.fullmatch(workspace) is not None
+            and isinstance(branch, str)
+            and _SAFE_IDENTITY.fullmatch(branch) is not None
+            and isinstance(job_id, str)
+            and re.fullmatch(r"[0-9a-f]{8}", job_id) is not None
+        )
+    return False
+
+
+def _event_is_valid(
+    event: Mapping[str, object],
+    *,
+    spec: _LocalEventLedgerSpec,
+    expected_sequence: int,
+    previous_sha: str | None,
+    path: Path,
+) -> bool:
+    event_id = event.get("event_id")
+    event_sha256 = event.get("event_sha256")
+    prior = event.get("previous_event_sha256")
+    return (
+        set(event) == spec.event_keys
+        and event.get("schema_version") == spec.event_schema
+        and event.get("dimension") == spec.dimension
+        and event.get("producer") == spec.producer
+        and isinstance(event_id, str)
+        and _HEX_32.fullmatch(event_id) is not None
+        and event.get("sequence") == expected_sequence
+        and prior == previous_sha
+        and (
+            prior is None
+            or (isinstance(prior, str) and _HEX_64.fullmatch(prior) is not None)
+        )
+        and isinstance(event_sha256, str)
+        and _HEX_64.fullmatch(event_sha256) is not None
+        and event_sha256 == _event_sha(event)
+        and _event_payload_is_valid(event, spec)
+        and path.name == f"{expected_sequence:012d}-{event_id}.json"
+    )
+
+
+def _scan_verified_event_chain(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+) -> list[dict[str, object]]:
+    directory = _dimension_event_directory(root, spec.dimension)
+    _reject_symlink_components(root, directory)
     if not directory.exists():
-        if head_path.exists():
-            raise LegacyRetirementInputError(
-                "legacy business-fire event ledger was removed behind its durable head"
-            )
         return []
     if not directory.is_dir() or directory.is_symlink():
-        raise LegacyRetirementInputError("legacy business-fire ledger is unsafe")
+        raise LegacyRetirementInputError(f"{spec.label} event ledger is unsafe")
     unexpected = [
         path.name
         for path in directory.iterdir()
@@ -210,7 +316,7 @@ def load_verified_legacy_business_fire_events(root: Path) -> list[dict[str, obje
     ]
     if unexpected:
         raise LegacyRetirementInputError(
-            "legacy business-fire ledger contains unexpected entries"
+            f"{spec.label} event ledger contains unexpected entries"
         )
     events: list[dict[str, object]] = []
     previous_sha: str | None = None
@@ -222,44 +328,22 @@ def load_verified_legacy_business_fire_events(root: Path) -> list[dict[str, obje
             decoded = json.loads(_read_regular_nofollow(path))
         except (UnicodeError, json.JSONDecodeError) as error:
             raise LegacyRetirementInputError(
-                f"legacy business-fire event is invalid: {path.name}"
+                f"{spec.label} event is invalid: {path.name}"
             ) from error
         if not isinstance(decoded, dict):
             raise LegacyRetirementInputError(
-                f"legacy business-fire event is not an object: {path.name}"
+                f"{spec.label} event is not an object: {path.name}"
             )
         event: dict[str, object] = decoded
-        event_id = event.get("event_id")
-        event_sha256 = event.get("event_sha256")
-        prior = event.get("previous_event_sha256")
-        pid = event.get("pid")
-        host = event.get("host")
-        if (
-            set(event) != _EVENT_KEYS
-            or event.get("schema_version") != _EVENT_SCHEMA
-            or event.get("dimension") != _DIMENSION
-            or event.get("producer") != "legacy_entry_tripwire"
-            or not isinstance(event_id, str)
-            or _HEX_32.fullmatch(event_id) is None
-            or event.get("sequence") != expected_sequence
-            or event.get("previous_event_sha256") != previous_sha
-            or (
-                prior is not None
-                and (not isinstance(prior, str) or _HEX_64.fullmatch(prior) is None)
-            )
-            or not isinstance(event_sha256, str)
-            or _HEX_64.fullmatch(event_sha256) is None
-            or event_sha256 != _event_sha(event)
-            or isinstance(pid, bool)
-            or not isinstance(pid, int)
-            or pid < 1
-            or not isinstance(host, str)
-            or not host.strip()
-            or host != host.strip()
-            or path.name != f"{expected_sequence:012d}-{event_id}.json"
+        if not _event_is_valid(
+            event,
+            spec=spec,
+            expected_sequence=expected_sequence,
+            previous_sha=previous_sha,
+            path=path,
         ):
             raise LegacyRetirementInputError(
-                f"legacy business-fire event chain is invalid: {path.name}"
+                f"{spec.label} event chain is invalid: {path.name}"
             )
         occurred_at = _timestamp(
             event.get("occurred_at"),
@@ -267,62 +351,361 @@ def load_verified_legacy_business_fire_events(root: Path) -> list[dict[str, obje
         )
         if events and occurred_at < _timestamp(
             events[-1]["occurred_at"],
-            field="previous occurred_at",
+            field=f"previous {spec.label} occurred_at",
         ):
-            raise LegacyRetirementInputError(
-                "legacy business-fire event time regressed"
-            )
+            raise LegacyRetirementInputError(f"{spec.label} event time regressed")
         previous_sha = str(event["event_sha256"])
         events.append(event)
-    if not events:
-        if head_path.exists():
-            raise LegacyRetirementInputError(
-                "legacy business-fire event chain was truncated"
-            )
-        return []
+    return events
+
+
+def _decode_durable_head(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+) -> dict[str, object] | None:
+    head_path = _dimension_head_path(root, spec.dimension)
+    _reject_symlink_components(root, head_path)
     if not head_path.exists():
-        raise LegacyRetirementInputError(
-            "legacy business-fire durable head is missing"
-        )
+        return None
     try:
-        decoded_head = json.loads(_read_regular_nofollow(head_path))
+        decoded = json.loads(_read_regular_nofollow(head_path))
     except (UnicodeError, json.JSONDecodeError) as error:
         raise LegacyRetirementInputError(
-            "legacy business-fire durable head is invalid"
+            f"{spec.label} durable head is invalid"
         ) from error
-    if not isinstance(decoded_head, dict):
+    if not isinstance(decoded, dict):
         raise LegacyRetirementInputError(
-            "legacy business-fire durable head is not an object"
+            f"{spec.label} durable head is not an object"
         )
-    head = decoded_head
+    head: dict[str, object] = decoded
+    unsigned = dict(head)
+    head_sha = unsigned.pop("head_sha256", None)
     if (
-        set(head)
-        != {
-            "schema_version",
-            "dimension",
-            "high_watermark",
-            "last_event_sha256",
-            "updated_at",
-            "head_sha256",
-        }
+        set(head) != _HEAD_KEYS
         or head.get("schema_version") != _HEAD_SCHEMA
-        or head.get("dimension") != _DIMENSION
-        or head.get("high_watermark") != len(events)
-        or head.get("last_event_sha256") != previous_sha
-        or not isinstance(head.get("head_sha256"), str)
-        or _HEX_64.fullmatch(str(head["head_sha256"])) is None
+        or head.get("dimension") != spec.dimension
+        or isinstance(head.get("high_watermark"), bool)
+        or not isinstance(head.get("high_watermark"), int)
+        or int(head["high_watermark"]) < 1
+        or not isinstance(head.get("last_event_sha256"), str)
+        or _HEX_64.fullmatch(str(head["last_event_sha256"])) is None
+        or not isinstance(head_sha, str)
+        or _HEX_64.fullmatch(head_sha) is None
+        or head_sha != _sha256(_canonical_bytes(unsigned))
     ):
         raise LegacyRetirementInputError(
-            "legacy business-fire durable head does not match the event chain"
+            f"{spec.label} durable head is invalid"
         )
-    unsigned_head = dict(head)
-    unsigned_head.pop("head_sha256")
-    if head["head_sha256"] != _sha256(_canonical_bytes(unsigned_head)):
+    _timestamp(
+        head.get("updated_at"),
+        field=f"{spec.label} durable head updated_at",
+    )
+    return head
+
+
+def _load_verified_local_events(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+) -> list[dict[str, object]]:
+    pending_path = _dimension_pending_path(root, spec.dimension)
+    _reject_symlink_components(root, pending_path)
+    if pending_path.exists():
         raise LegacyRetirementInputError(
-            "legacy business-fire durable head hash is invalid"
+            f"{spec.label} append transaction needs recovery"
         )
-    _timestamp(head.get("updated_at"), field="durable head updated_at")
+    directory = _dimension_event_directory(root, spec.dimension)
+    head_path = _dimension_head_path(root, spec.dimension)
+    events = _scan_verified_event_chain(root, spec)
+    head = _decode_durable_head(root, spec)
+    if not directory.exists():
+        if head is not None:
+            raise LegacyRetirementInputError(
+                f"{spec.label} event ledger was removed behind its durable head"
+            )
+        return []
+    if not events:
+        if head is not None:
+            raise LegacyRetirementInputError(
+                f"{spec.label} event chain was truncated"
+            )
+        return []
+    if head is None:
+        raise LegacyRetirementInputError(f"{spec.label} durable head is missing")
+    if (
+        head.get("high_watermark") != len(events)
+        or head.get("last_event_sha256") != events[-1].get("event_sha256")
+    ):
+        raise LegacyRetirementInputError(
+            f"{spec.label} durable head does not match the event chain"
+        )
+    if not head_path.exists():
+        raise LegacyRetirementInputError(f"{spec.label} durable head is missing")
     return events
+
+
+def _atomic_replace_payload(path: Path, payload: Mapping[str, object]) -> None:
+    temporary = path.with_name(f".{path.name}.{uuid4().hex}.tmp")
+    try:
+        with temporary.open("xb") as handle:
+            os.fchmod(handle.fileno(), 0o600)
+            handle.write(_canonical_bytes(payload))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+        _fsync_directory(path.parent)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+
+
+def _build_durable_head(
+    spec: _LocalEventLedgerSpec,
+    *,
+    event: Mapping[str, object],
+) -> dict[str, object]:
+    head: dict[str, object] = {
+        "schema_version": _HEAD_SCHEMA,
+        "dimension": spec.dimension,
+        "high_watermark": event["sequence"],
+        "last_event_sha256": event["event_sha256"],
+        "updated_at": event["occurred_at"],
+    }
+    head["head_sha256"] = _sha256(_canonical_bytes(head))
+    return head
+
+
+def _write_pending_append(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+    *,
+    event: Mapping[str, object],
+    head: Mapping[str, object],
+) -> Path:
+    pending_path = _dimension_pending_path(root, spec.dimension)
+    _reject_symlink_components(root, pending_path)
+    head_directory_existed = _secure_directory(pending_path.parent)
+    if not head_directory_existed:
+        _fsync_directory(pending_path.parent.parent)
+    if pending_path.exists():
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction is already pending"
+        )
+    pending: dict[str, object] = {
+        "schema_version": _PENDING_SCHEMA,
+        "dimension": spec.dimension,
+        "event": dict(event),
+        "head": dict(head),
+    }
+    pending["intent_sha256"] = _sha256(_canonical_bytes(pending))
+    _atomic_replace_payload(pending_path, pending)
+    return pending_path
+
+
+def _decode_pending_append(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+) -> tuple[dict[str, object], dict[str, object]] | None:
+    pending_path = _dimension_pending_path(root, spec.dimension)
+    _reject_symlink_components(root, pending_path)
+    if not pending_path.exists():
+        return None
+    try:
+        decoded = json.loads(_read_regular_nofollow(pending_path))
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction is invalid"
+        ) from error
+    if not isinstance(decoded, dict):
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction is not an object"
+        )
+    pending: dict[str, object] = decoded
+    unsigned = dict(pending)
+    intent_sha = unsigned.pop("intent_sha256", None)
+    event = pending.get("event")
+    head = pending.get("head")
+    if (
+        set(pending) != _PENDING_KEYS
+        or pending.get("schema_version") != _PENDING_SCHEMA
+        or pending.get("dimension") != spec.dimension
+        or not isinstance(event, dict)
+        or not isinstance(head, dict)
+        or not isinstance(intent_sha, str)
+        or _HEX_64.fullmatch(intent_sha) is None
+        or intent_sha != _sha256(_canonical_bytes(unsigned))
+    ):
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction is invalid"
+        )
+    return event, head
+
+
+def _recover_pending_append(root: Path, spec: _LocalEventLedgerSpec) -> None:
+    decoded = _decode_pending_append(root, spec)
+    if decoded is None:
+        return
+    event, intended_head = decoded
+    sequence = event.get("sequence")
+    event_id = event.get("event_id")
+    if (
+        isinstance(sequence, bool)
+        or not isinstance(sequence, int)
+        or sequence < 1
+        or not isinstance(event_id, str)
+    ):
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction event is invalid"
+        )
+    directory = _dimension_event_directory(root, spec.dimension)
+    event_path = directory / f"{sequence:012d}-{event_id}.json"
+    events = _scan_verified_event_chain(root, spec)
+    if len(events) == sequence:
+        if events[-1] != event:
+            raise LegacyRetirementInputError(
+                f"{spec.label} append transaction event drifted"
+            )
+    elif len(events) == sequence - 1:
+        previous_sha = (
+            str(events[-1]["event_sha256"]) if events else None
+        )
+        if not _event_is_valid(
+            event,
+            spec=spec,
+            expected_sequence=sequence,
+            previous_sha=previous_sha,
+            path=event_path,
+        ):
+            raise LegacyRetirementInputError(
+                f"{spec.label} append transaction event is invalid"
+            )
+        if events and _timestamp(
+            event.get("occurred_at"),
+            field=f"{spec.label} pending occurred_at",
+        ) < _timestamp(
+            events[-1].get("occurred_at"),
+            field=f"previous {spec.label} occurred_at",
+        ):
+            raise LegacyRetirementInputError(
+                f"{spec.label} append transaction time regressed"
+            )
+        with event_path.open("xb") as handle:
+            os.fchmod(handle.fileno(), 0o600)
+            handle.write(_canonical_bytes(event))
+            handle.flush()
+            os.fsync(handle.fileno())
+        _fsync_directory(directory)
+        events.append(event)
+    else:
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction sequence drifted"
+        )
+    expected_head = _build_durable_head(spec, event=event)
+    if intended_head != expected_head:
+        raise LegacyRetirementInputError(
+            f"{spec.label} append transaction head drifted"
+        )
+    current_head = _decode_durable_head(root, spec)
+    if current_head != intended_head:
+        if sequence == 1:
+            if current_head is not None:
+                raise LegacyRetirementInputError(
+                    f"{spec.label} append transaction prior head drifted"
+                )
+        elif (
+            current_head is None
+            or current_head.get("high_watermark") != sequence - 1
+            or current_head.get("last_event_sha256")
+            != events[-2].get("event_sha256")
+        ):
+            raise LegacyRetirementInputError(
+                f"{spec.label} append transaction prior head drifted"
+            )
+        head_path = _dimension_head_path(root, spec.dimension)
+        _atomic_replace_payload(head_path, intended_head)
+    pending_path = _dimension_pending_path(root, spec.dimension)
+    pending_path.unlink()
+    _fsync_directory(pending_path.parent)
+
+
+def _append_local_event(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+    *,
+    payload: Mapping[str, object],
+    occurred_at: datetime | None,
+) -> Path:
+    repo_root = Path(root)
+    directory = _dimension_event_directory(repo_root, spec.dimension)
+    with _dimension_event_append_lock(repo_root, spec.dimension):
+        _recover_pending_append(repo_root, spec)
+        events = _load_verified_local_events(repo_root, spec)
+        if spec.identity_key is not None:
+            identity = payload.get(spec.identity_key)
+            for existing in events:
+                if existing.get(spec.identity_key) != identity:
+                    continue
+                if any(
+                    existing.get(field) != payload.get(field)
+                    for field in spec.identity_fields
+                ):
+                    raise LegacyRetirementInputError(
+                        f"{spec.label} {spec.identity_key} identity drifted"
+                    )
+                return directory / (
+                    f"{int(existing['sequence']):012d}-"
+                    f"{existing['event_id']}.json"
+                )
+        now = _utc(occurred_at or datetime.now(UTC), field="occurred_at")
+        if events and now < _timestamp(
+            events[-1].get("occurred_at"),
+            field=f"previous {spec.label} occurred_at",
+        ):
+            raise LegacyRetirementInputError(
+                f"{spec.label} event time regressed"
+            )
+        sequence = len(events) + 1
+        event_id = uuid4().hex
+        event: dict[str, object] = {
+            "schema_version": spec.event_schema,
+            "dimension": spec.dimension,
+            "producer": spec.producer,
+            "event_id": event_id,
+            "sequence": sequence,
+            "previous_event_sha256": (
+                events[-1]["event_sha256"] if events else None
+            ),
+            "occurred_at": now.isoformat(),
+            **payload,
+        }
+        event["event_sha256"] = _event_sha(event)
+        event_path = directory / f"{sequence:012d}-{event_id}.json"
+        if not _event_is_valid(
+            event,
+            spec=spec,
+            expected_sequence=sequence,
+            previous_sha=(
+                str(events[-1]["event_sha256"]) if events else None
+            ),
+            path=event_path,
+        ):
+            raise LegacyRetirementInputError(
+                f"{spec.label} event payload is invalid"
+            )
+        head = _build_durable_head(spec, event=event)
+        _write_pending_append(
+            repo_root,
+            spec,
+            event=event,
+            head=head,
+        )
+        _recover_pending_append(repo_root, spec)
+        return event_path
+
+
+def load_verified_legacy_business_fire_events(root: Path) -> list[dict[str, object]]:
+    """Verify the complete gap-free event chain; reject deletions and tampering."""
+
+    return _load_verified_local_events(Path(root), _legacy_event_spec())
 
 
 def append_legacy_business_fire(
@@ -336,209 +719,21 @@ def append_legacy_business_fire(
     not expose it and always use the local UTC clock.
     """
 
-    repo_root = Path(root)
-    directory = _event_directory(repo_root)
-    _reject_symlink_components(repo_root, directory)
-    event_root = directory.parent
-    event_root_existed = _secure_directory(event_root)
-    directory_existed = _secure_directory(directory)
-    if not event_root_existed:
-        _fsync_directory(event_root.parent)
-    if not directory_existed:
-        _fsync_directory(directory.parent)
-    lock_path = directory / ".append.lock"
-    flags = os.O_CREAT | os.O_RDWR
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-    try:
-        descriptor = os.open(lock_path, flags, 0o600)
-    except OSError as error:
-        raise LegacyRetirementInputError(
-            "legacy business-fire append lock is unsafe"
-        ) from error
-    with os.fdopen(descriptor, "a+b") as lock:
-        os.fchmod(lock.fileno(), 0o600)
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-        now = _utc(occurred_at or datetime.now(UTC), field="occurred_at")
-        events = load_verified_legacy_business_fire_events(repo_root)
-        sequence = len(events) + 1
-        event_id = uuid4().hex
-        event: dict[str, object] = {
-            "schema_version": _EVENT_SCHEMA,
-            "dimension": _DIMENSION,
-            "producer": "legacy_entry_tripwire",
-            "event_id": event_id,
-            "sequence": sequence,
-            "previous_event_sha256": (
-                events[-1]["event_sha256"] if events else None
-            ),
-            "occurred_at": now.isoformat(),
+    return _append_local_event(
+        Path(root),
+        _legacy_event_spec(),
+        payload={
             "host": socket.gethostname(),
             "pid": os.getpid(),
-        }
-        event["event_sha256"] = _event_sha(event)
-        path = directory / f"{sequence:012d}-{event_id}.json"
-        with path.open("xb") as handle:
-            os.fchmod(handle.fileno(), 0o600)
-            handle.write(_canonical_bytes(event))
-            handle.flush()
-            os.fsync(handle.fileno())
-        _fsync_directory(directory)
-        head_path = _head_path(repo_root)
-        _reject_symlink_components(repo_root, head_path)
-        head_directory_existed = _secure_directory(head_path.parent)
-        if not head_directory_existed:
-            _fsync_directory(head_path.parent.parent)
-        head: dict[str, object] = {
-            "schema_version": _HEAD_SCHEMA,
-            "dimension": _DIMENSION,
-            "high_watermark": sequence,
-            "last_event_sha256": event["event_sha256"],
-            "updated_at": now.isoformat(),
-        }
-        head["head_sha256"] = _sha256(_canonical_bytes(head))
-        temporary_head = head_path.with_name(f".{head_path.name}.{uuid4().hex}.tmp")
-        try:
-            with temporary_head.open("xb") as handle:
-                os.fchmod(handle.fileno(), 0o600)
-                handle.write(_canonical_bytes(head))
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(temporary_head, head_path)
-            _fsync_directory(head_path.parent)
-        except BaseException:
-            temporary_head.unlink(missing_ok=True)
-            raise
-        return path
+        },
+        occurred_at=occurred_at,
+    )
 
 
 def load_verified_orphan_work_events(root: Path) -> list[dict[str, object]]:
     """Verify the complete orphan-work chain and its independent durable head."""
 
-    repo_root = Path(root)
-    directory = _dimension_event_directory(repo_root, _ORPHAN_DIMENSION)
-    head_path = _dimension_head_path(repo_root, _ORPHAN_DIMENSION)
-    _reject_symlink_components(repo_root, directory)
-    _reject_symlink_components(repo_root, head_path)
-    if not directory.exists():
-        if head_path.exists():
-            raise LegacyRetirementInputError(
-                "orphan-work event ledger was removed behind its durable head"
-            )
-        return []
-    if not directory.is_dir() or directory.is_symlink():
-        raise LegacyRetirementInputError("orphan-work event ledger is unsafe")
-    unexpected = [
-        path.name
-        for path in directory.iterdir()
-        if path.name != ".append.lock" and path.suffix != ".json"
-    ]
-    if unexpected:
-        raise LegacyRetirementInputError(
-            "orphan-work event ledger contains unexpected entries"
-        )
-    events: list[dict[str, object]] = []
-    previous_sha: str | None = None
-    for expected_sequence, path in enumerate(
-        sorted(directory.glob("*.json")),
-        start=1,
-    ):
-        try:
-            decoded = json.loads(_read_regular_nofollow(path))
-        except (UnicodeError, json.JSONDecodeError) as error:
-            raise LegacyRetirementInputError(
-                f"orphan-work event is invalid: {path.name}"
-            ) from error
-        if not isinstance(decoded, dict):
-            raise LegacyRetirementInputError(
-                f"orphan-work event is not an object: {path.name}"
-            )
-        event: dict[str, object] = decoded
-        event_id = event.get("event_id")
-        event_sha256 = event.get("event_sha256")
-        prior = event.get("previous_event_sha256")
-        workspace = event.get("workspace")
-        branch = event.get("branch")
-        job_id = event.get("job_id")
-        if (
-            set(event) != _ORPHAN_EVENT_KEYS
-            or event.get("schema_version") != _ORPHAN_EVENT_SCHEMA
-            or event.get("dimension") != _ORPHAN_DIMENSION
-            or event.get("producer") != "dispatch_supervisor_orphan_sweep"
-            or not isinstance(event_id, str)
-            or _HEX_32.fullmatch(event_id) is None
-            or event.get("sequence") != expected_sequence
-            or prior != previous_sha
-            or (
-                prior is not None
-                and (not isinstance(prior, str) or _HEX_64.fullmatch(prior) is None)
-            )
-            or not isinstance(event_sha256, str)
-            or _HEX_64.fullmatch(event_sha256) is None
-            or event_sha256 != _event_sha(event)
-            or not isinstance(workspace, str)
-            or _SAFE_IDENTITY.fullmatch(workspace) is None
-            or not isinstance(branch, str)
-            or _SAFE_IDENTITY.fullmatch(branch) is None
-            or not isinstance(job_id, str)
-            or re.fullmatch(r"[0-9a-f]{8}", job_id) is None
-            or path.name != f"{expected_sequence:012d}-{event_id}.json"
-        ):
-            raise LegacyRetirementInputError(
-                f"orphan-work event chain is invalid: {path.name}"
-            )
-        occurred_at = _timestamp(
-            event.get("occurred_at"),
-            field=f"{path.name}.occurred_at",
-        )
-        if events and occurred_at < _timestamp(
-            events[-1]["occurred_at"],
-            field="previous orphan-work occurred_at",
-        ):
-            raise LegacyRetirementInputError("orphan-work event time regressed")
-        previous_sha = event_sha256
-        events.append(event)
-    if not events:
-        if head_path.exists():
-            raise LegacyRetirementInputError("orphan-work event chain was truncated")
-        return []
-    if not head_path.exists():
-        raise LegacyRetirementInputError("orphan-work durable head is missing")
-    try:
-        decoded_head = json.loads(_read_regular_nofollow(head_path))
-    except (UnicodeError, json.JSONDecodeError) as error:
-        raise LegacyRetirementInputError("orphan-work durable head is invalid") from error
-    if not isinstance(decoded_head, dict):
-        raise LegacyRetirementInputError(
-            "orphan-work durable head is not an object"
-        )
-    head = decoded_head
-    if (
-        set(head)
-        != {
-            "schema_version",
-            "dimension",
-            "high_watermark",
-            "last_event_sha256",
-            "updated_at",
-            "head_sha256",
-        }
-        or head.get("schema_version") != _HEAD_SCHEMA
-        or head.get("dimension") != _ORPHAN_DIMENSION
-        or head.get("high_watermark") != len(events)
-        or head.get("last_event_sha256") != previous_sha
-        or not isinstance(head.get("head_sha256"), str)
-        or _HEX_64.fullmatch(str(head["head_sha256"])) is None
-    ):
-        raise LegacyRetirementInputError(
-            "orphan-work durable head does not match the event chain"
-        )
-    unsigned_head = dict(head)
-    unsigned_head.pop("head_sha256")
-    if head["head_sha256"] != _sha256(_canonical_bytes(unsigned_head)):
-        raise LegacyRetirementInputError("orphan-work durable head hash is invalid")
-    _timestamp(head.get("updated_at"), field="orphan-work durable head updated_at")
-    return events
+    return _load_verified_local_events(Path(root), _orphan_event_spec())
 
 
 def append_orphan_work_event(
@@ -551,106 +746,16 @@ def append_orphan_work_event(
 ) -> Path:
     """Append one idempotent orphan detection before workspace finalization."""
 
-    for field, value in (
-        ("workspace", workspace),
-        ("branch", branch),
-    ):
-        if not isinstance(value, str) or _SAFE_IDENTITY.fullmatch(value) is None:
-            raise LegacyRetirementInputError(
-                f"orphan-work {field} identity is invalid"
-            )
-    if not isinstance(job_id, str) or re.fullmatch(r"[0-9a-f]{8}", job_id) is None:
-        raise LegacyRetirementInputError("orphan-work job identity is invalid")
-    repo_root = Path(root)
-    directory = _dimension_event_directory(repo_root, _ORPHAN_DIMENSION)
-    _reject_symlink_components(repo_root, directory)
-    event_root = directory.parent
-    event_root_existed = _secure_directory(event_root)
-    directory_existed = _secure_directory(directory)
-    if not event_root_existed:
-        _fsync_directory(event_root.parent)
-    if not directory_existed:
-        _fsync_directory(directory.parent)
-    lock_path = directory / ".append.lock"
-    flags = os.O_CREAT | os.O_RDWR
-    if hasattr(os, "O_NOFOLLOW"):
-        flags |= os.O_NOFOLLOW
-    try:
-        descriptor = os.open(lock_path, flags, 0o600)
-    except OSError as error:
-        raise LegacyRetirementInputError(
-            "orphan-work append lock is unsafe"
-        ) from error
-    with os.fdopen(descriptor, "a+b") as lock:
-        os.fchmod(lock.fileno(), 0o600)
-        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-        events = load_verified_orphan_work_events(repo_root)
-        for existing in events:
-            if existing.get("workspace") != workspace:
-                continue
-            if (
-                existing.get("branch") != branch
-                or existing.get("job_id") != job_id
-            ):
-                raise LegacyRetirementInputError(
-                    "orphan-work workspace identity drifted"
-                )
-            return directory / (
-                f"{int(existing['sequence']):012d}-{existing['event_id']}.json"
-            )
-        now = _utc(occurred_at or datetime.now(UTC), field="occurred_at")
-        sequence = len(events) + 1
-        event_id = uuid4().hex
-        event: dict[str, object] = {
-            "schema_version": _ORPHAN_EVENT_SCHEMA,
-            "dimension": _ORPHAN_DIMENSION,
-            "producer": "dispatch_supervisor_orphan_sweep",
-            "event_id": event_id,
-            "sequence": sequence,
-            "previous_event_sha256": (
-                events[-1]["event_sha256"] if events else None
-            ),
-            "occurred_at": now.isoformat(),
+    return _append_local_event(
+        Path(root),
+        _orphan_event_spec(),
+        payload={
             "workspace": workspace,
             "branch": branch,
             "job_id": job_id,
-        }
-        event["event_sha256"] = _event_sha(event)
-        path = directory / f"{sequence:012d}-{event_id}.json"
-        with path.open("xb") as handle:
-            os.fchmod(handle.fileno(), 0o600)
-            handle.write(_canonical_bytes(event))
-            handle.flush()
-            os.fsync(handle.fileno())
-        _fsync_directory(directory)
-        head_path = _dimension_head_path(repo_root, _ORPHAN_DIMENSION)
-        _reject_symlink_components(repo_root, head_path)
-        head_directory_existed = _secure_directory(head_path.parent)
-        if not head_directory_existed:
-            _fsync_directory(head_path.parent.parent)
-        head: dict[str, object] = {
-            "schema_version": _HEAD_SCHEMA,
-            "dimension": _ORPHAN_DIMENSION,
-            "high_watermark": sequence,
-            "last_event_sha256": event["event_sha256"],
-            "updated_at": now.isoformat(),
-        }
-        head["head_sha256"] = _sha256(_canonical_bytes(head))
-        temporary_head = head_path.with_name(
-            f".{head_path.name}.{uuid4().hex}.tmp"
-        )
-        try:
-            with temporary_head.open("xb") as handle:
-                os.fchmod(handle.fileno(), 0o600)
-                handle.write(_canonical_bytes(head))
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(temporary_head, head_path)
-            _fsync_directory(head_path.parent)
-        except BaseException:
-            temporary_head.unlink(missing_ok=True)
-            raise
-        return path
+        },
+        occurred_at=occurred_at,
+    )
 
 
 def _previous_signal(root: Path) -> Mapping[str, Any] | None:
@@ -900,6 +1005,7 @@ def materialize_orphan_work_signal(
         _dimension_materialization_lock(repo_root, _ORPHAN_DIMENSION),
         _dimension_event_append_lock(repo_root, _ORPHAN_DIMENSION),
     ):
+        _recover_pending_append(repo_root, _orphan_event_spec())
         events = load_verified_orphan_work_events(repo_root)
         return _materialize_local_event_signal_locked(
             repo_root,
@@ -1108,7 +1214,7 @@ def materialize_legacy_business_fire_signal(
     with os.fdopen(descriptor, "a+b") as lock:
         os.fchmod(lock.fileno(), 0o600)
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-        event_directory = _event_directory(repo_root)
+        event_directory = _dimension_event_directory(repo_root, _DIMENSION)
         event_root = event_directory.parent
         event_root_existed = _secure_directory(event_root)
         event_directory_existed = _secure_directory(event_directory)
@@ -1129,6 +1235,7 @@ def materialize_legacy_business_fire_signal(
         with os.fdopen(event_descriptor, "a+b") as event_lock:
             os.fchmod(event_lock.fileno(), 0o600)
             fcntl.flock(event_lock.fileno(), fcntl.LOCK_EX)
+            _recover_pending_append(repo_root, _legacy_event_spec())
             events = load_verified_legacy_business_fire_events(repo_root)
             if events and _timestamp(
                 events[-1]["occurred_at"],

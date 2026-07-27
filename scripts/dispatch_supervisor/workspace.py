@@ -2705,14 +2705,26 @@ def sweep_orphan_workspaces(
         job8 = match.group(1) if match else None
         if job8 is not None and job8 in active8:
             continue
-        branch = _worktree_branch(repo_root, wt_path, runner=runner)
-        if branch is None:
-            LOG.warning("workspace sweep: cannot resolve branch for %s — leaving alone",
-                        wt_path)
+        if _latest_workspace_event(
+            repo_root,
+            event_name="remediation_bound",
+            workspace_name=wt_path.name,
+        ) is not None:
             continue
         if job8 is None:
             raise legacy_retirement_events.LegacyRetirementInputError(
                 f"allocator-owned orphan workspace has no job identity: {wt_path.name}"
+            )
+        branch = _worktree_branch(repo_root, wt_path, runner=runner)
+        if branch is None:
+            legacy_retirement_events.append_orphan_work_event(
+                repo_root,
+                workspace=wt_path.name,
+                branch="unresolved",
+                job_id=job8,
+            )
+            raise legacy_retirement_events.LegacyRetirementInputError(
+                f"allocator-owned orphan workspace branch is unreadable: {wt_path.name}"
             )
         legacy_retirement_events.append_orphan_work_event(
             repo_root,

@@ -5059,6 +5059,84 @@ def test_workspace_sweep_ignores_unowned_dispatch_shaped_worktree(
     assert legacy_retirement_events.load_verified_orphan_work_events(repo) == []
 
 
+def test_workspace_sweep_ignores_durable_remediation_owner(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    queue = _tmp_queue(tmp_path)
+    orphan_ws = _ws_allocate(repo, job_id="a" * 32)
+    assert orphan_ws is not None
+    wt = Path(orphan_ws["path"])
+    (wt / "recoverable.py").write_text("VALUE = 1\n", encoding="utf-8")
+
+    def fail_remove(args, **kwargs):
+        if "worktree" in args and "remove" in args:
+            return subprocess.CompletedProcess(
+                args,
+                1,
+                "",
+                "injected remediation release failure",
+            )
+        kwargs["check"] = False
+        return subprocess.run(args, **kwargs)
+
+    outcome = workspace.finalize_workspace(
+        repo_root=repo,
+        workspace=orphan_ws,
+        worker_outcome="killed_timeout",
+        job_id="a" * 8,
+        queue_path=queue,
+        runner=fail_remove,
+    )
+    assert outcome["checkpoint"]["reason"] == "checkpoint_remove_failed"
+    assert wt.exists()
+
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo,
+        protected_job_ids=[],
+        queue_path=queue,
+    )
+
+    assert results == []
+    assert wt.exists()
+    assert legacy_retirement_events.load_verified_orphan_work_events(repo) == []
+
+
+def test_workspace_sweep_records_unreadable_branch_and_fails_closed(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    orphan_ws = _ws_allocate(repo, job_id="f" * 32)
+    assert orphan_ws is not None
+
+    def fail_branch_probe(args, **kwargs):
+        if "rev-parse" in args and "--abbrev-ref" in args:
+            return subprocess.CompletedProcess(args, 1, "", "injected branch failure")
+        kwargs["check"] = False
+        return subprocess.run(args, **kwargs)
+
+    with pytest.raises(
+        LegacyRetirementInputError,
+        match="branch is unreadable",
+    ):
+        workspace.sweep_orphan_workspaces(
+            repo_root=repo,
+            protected_job_ids=[],
+            queue_path=_tmp_queue(tmp_path),
+            runner=fail_branch_probe,
+        )
+
+    assert Path(orphan_ws["path"]).exists()
+    events = legacy_retirement_events.load_verified_orphan_work_events(repo)
+    assert len(events) == 1
+    assert events[0]["workspace"] == orphan_ws["name"]
+    assert events[0]["branch"] == "unresolved"
+
+
 def test_workspace_isolation_config_defaults_off(tmp_path: Path) -> None:
     missing = workspace.load_isolation_config(schedules_path=tmp_path / "nope.json")
     assert missing["mode"] == "off"
