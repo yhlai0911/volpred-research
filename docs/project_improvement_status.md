@@ -2501,3 +2501,22 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   `operations-core-v1:legacy_retirement_signal_materialize:a08baf4868d03695348302f5`
   attempt 1／exit 0，兩個typed signal均由正式owner刷新；duplicate signal為mode 600、
   `count=0/high_watermark=0`。observation recorder仍未排程，不提前啟動14日窗。
+
+## 2026-07-27 — T40 四類 retirement evidence producer live（Issue #46）
+
+- ✅ orphan-work commit `b30b3bd8a`與silent-loss commit `f99249718`補齊後，
+  legacy business fire、duplicate effect、orphan work、silent loss四個typed signal
+  均由同一Operations Core `*/5` fail-fast wrapper刷新；recorder仍未排程。
+- ✅ silent-loss以version-exact lifecycle與bidirectional terminal receipt
+  cardinality／outcome reconciliation辨識遺失；durable event delta與active violations
+  聯集，避免短暫違規漏記與persistent violation在cursor前進後假乾淨。
+- ✅ Production catalog回讀確認兩張新table為private FORCE RLS、`service_role`
+  無直接讀權；VOLATILE `SECURITY DEFINER` reconcile RPC固定空`search_path`且只授權
+  `service_role`。ledger回讀event=0／high=0／head_rows=1，advisor 0 matching finding。
+- ✅ 19:50自然fire
+  `operations-core-v1:legacy_retirement_signal_materialize:a18842f93993dcde184ae363`
+  attempt 1／exit 0並落出四個signal；silent-loss為`count=0/high_watermark=0`。
+  Post-commit相鄰回歸110 passed，Matt Spec／Standards雙審PASS、0 P1/P2。
+- 🟡 四個producer完成不等於Issue #46結案。其目前仍OPEN的direct blocking edges為
+  #9、#13、#21、#24、#28、#44、#45；全部通過前不啟動14日gap-free recorder。
+  physical legacy retirement亦未完成，umbrella維持`contained`。
