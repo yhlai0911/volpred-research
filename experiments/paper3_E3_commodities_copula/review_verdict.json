@@ -1,0 +1,19 @@
+{
+  "verdict": "PASS",
+  "reviewer": "main-thread-primary-path-audit",
+  "review_method": "byte-diff against already-Codex-reviewed-and-merged Paper3_E2 core + read-through of the two genuinely new blocks (batch harness, aggregate BH-FDR). Codex background review task (task-ms3b1q7y-vbqb7w) was launched but orphaned when the codex-rescue subagent returned; no verdict file materialized after ~6min, so the collecting main thread performed the primary-path audit directly. This is defensible because E3's numerical core is proven byte-identical to E2, which already passed Codex review.",
+  "review_date": "2026-07-27",
+  "critical": [],
+  "blocking_defects": [],
+  "checks": {
+    "dm_test_verbatim_E2": "PASS — dm_test byte-identical to paper3_E2.py; significant_harvey = abs(HLN_factor*raw_t) > student_t.ppf(0.975, df); NO E1 hardcoded abs(t)>3.0.",
+    "core_machinery_unchanged": "PASS — estimate_a4f_asym, estimate_dcc, fit_copula_t, fit_clayton, rolling_var_es, trinity_backtest, fz_loss, compute_lambda_L, recursive all byte-identical to E2 (md5-verified). Diff limited to asset registry, pair list, region-class labels, headers/paths/plot colours, verdict strings, aggregate block, and a per-pair checkpoint batch harness (_pair_cache_path/assemble/compute_pairs/load_cached_pairs) that only orchestrates and does not touch the numerical core.",
+    "bh_fdr_loop": "PASS — standard Benjamini-Hochberg step-up over the 16 two-sided DCC-vs-copula DM p-values: largest rank k with p_(k) <= (k/m)*q marks all ranks<=k as survivors, then intersected with copula_better so DCC-favouring significant tests are not miscounted as copula wins. q10=0, q05=0.",
+    "scaling_adjudication_logic": "PASS — e2_reverse_sign_replicates requires E3 Student-t scaling sign == E2 negative AND p<0.05. E3 rho=+0.190 (positive), p=0.65 => replicates=false => E2 reversal is arm-specific. Correct and honestly reported regardless of direction.",
+    "lag_lookahead": "PASS — GARCH/marginal/DCC recursions use returns[t-1], h[t-1], x2[t-1], eps[t-1], q[t-1]; refit through t-1; portfolio return realized at t. No same-day signal x same-day return.",
+    "artifact_gates": "PASS — check_experiment_artifacts (strict) and experiment_gates (4 integrity gates) both PASS; reproduce_spec sha matches.",
+    "headline_self_consistency": "PASS — README numbers match paper3_E3_results.json aggregate: n_harvey_sig=1 (COPPER-SPY), n_bh_fdr_q10=0, n_bh_fdr_q05=0, Student-t rho=+0.190 p=0.651, Clayton rho=-0.515 p=0.192."
+  },
+  "notes": "Clean NULL result. No defensible Copula-GARCH VaR/QLIKE advantage over DCC-A4f-ASYM in commodities (1/8 uncorrected Harvey hit COPPER-SPY, 0 survive BH-FDR). No-copula-advantage now spans a third, non-equity asset class (E1 stocks + E2 cross-market equity + E3 commodities). E2's reverse-sign lambda_L->DM scaling does NOT replicate in commodities => arm-specific, not a cross-asset-class law.",
+  "reviewed_files": ["paper3_E3.py"]
+}
