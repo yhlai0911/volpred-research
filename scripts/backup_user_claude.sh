@@ -8,6 +8,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DEST="$REPO_ROOT/ops/claude_user_backup"
 SRC="$HOME/.claude"
+AGENT_SKILLS_ROOT="$HOME/.agents/skills"
 # 動態推導當前 repo 對應的 Claude Code session memory 目錄。
 # 2026-07-03 修：原 hardcode 舊 Desktop 路徑（-Users-yhlai0911-Desktop-volpred-research），
 # repo 2026-07-02 搬到 ~/volpred-research 後 stale → 每日 cron 用錯 source + 有人把
@@ -22,7 +23,25 @@ mkdir -p "$DEST"
 
 # 2. user-level skills
 if [ -d "$SRC/skills" ]; then
-  rm -rf "$DEST/skills"; cp -R "$SRC/skills" "$DEST/skills"
+  # Matt/Agent Skills installs expose ~/.claude/skills entries as symlinks into
+  # ~/.agents/skills.  A portable Git snapshot must contain their bytes, not the
+  # host-specific absolute symlinks.  Refuse any link outside the two declared
+  # config roots, then dereference the approved links while copying.
+  while IFS= read -r -d '' _skill_link; do
+    _skill_target="$(realpath "$_skill_link")"
+    case "$_skill_target" in
+      "$SRC"/*|"$AGENT_SKILLS_ROOT"/*) ;;
+      *)
+        echo "✗ refusing skill symlink outside approved roots: $_skill_link -> $_skill_target" >&2
+        exit 1
+        ;;
+    esac
+  done < <(find "$SRC/skills" -type l -print0)
+  rm -rf "$DEST/skills"; cp -RL "$SRC/skills" "$DEST/skills"
+  if find "$DEST/skills" -type l -print -quit | grep -q .; then
+    echo "✗ skills snapshot still contains symlinks" >&2
+    exit 1
+  fi
   echo "✓ skills ($(find "$DEST/skills" -type f | wc -l | tr -d ' ') 檔)"
 fi
 

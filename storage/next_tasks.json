@@ -34339,9 +34339,10 @@
       }
     ],
     "compute_job_id": "agent-brief_signforecast-3df319",
-    "blocked_reason": "external_compute_job_running",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "result": "dispatched to compute job agent-brief_signforecast-3df319; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T04:30:00Z"
+    "compute_started_at": "2026-07-27T04:30:00Z",
+    "compute_finished_at": "2026-07-27T04:57:50Z"
   },
   {
     "id": "ci-red-29470286001",
@@ -41311,11 +41312,36 @@
     "title": "K1731 F1 三方循環相依：shard 要 merge、merge 要 knowledge、knowledge 要 shard 結果",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "blocked",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:35:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
-    "description": "來源：PHASE A 收 `agent-brief_k1731_f1-29394c`（timeout 5279s / 88min，followup_mode=split_required）。\n\n## 結論先講：**這個 job 不該被 re-split，split_required 這個分類對它是錯的**\n\ncompute_queue 的 split_contract 要求 `child_timeout_lt_seconds=5400`。但 F1 的 bootstrap 單次完整 pipeline 實測 26.4 分鐘（README §11.3），6 workers 平行，smoke 實測 `f1/bootstrap_smoke_c0.json` 6 replicates / 3547.7s。硬套 90 分鐘上限 → 300 replicates 要拆成約 150 個 shard，而且 production MCMC 是**釘死在 entry point 裡**的（README §11.6：刻意不做成 flag，以免未來的 caller 悄悄改跑便宜設定、bootstrap 到一個被污染的統計量上；validate-mcmc 實測便宜設定會讓 mean pinball loss 偏移達受測差異本身的 30%）。**再切一次不是把工作變小，是把設計打壞。**\n\n## 工作其實早就切好了\n\n`run_nested_bootstrap_shard.py` 的 docstring 就是為分片寫的（seed 契約：shard 間距必須 >= 自己的 n_boot，assemble 時從記錄的 data_seed 反查碰撞、不信任 caller；procedure seed 固定 42 因為 multistart 與 MCMC stream 屬於受測方法本身、不是被模擬的抽樣噪音）。兩個 shard 已入列：\n- `k1731-f1-boot-c0-parametric`（c=0, B=200, timeout 22h）\n- `k1731-f1-boot-c0-block`（c=0, B=100, block_len=20, timeout 11h）\n\n兩者現在都是 `status=failed, exit_code=2`，秒殺。stderr 就一行：\n`can't open file '<main-repo>/experiments/k1731/run_nested_bootstrap_shard.py': No such file or directory`\n\n**這不是意外，agent 事先就寫在 README §11.6**：compute_queue 把 script_path 解析到主 repo root，腳本只存在於 worktree，所以「兩個 shard 會在數秒內 file-not-found 失敗，直到這個 branch 被 merge」。已驗證 `compute_queue.py enqueue` **沒有 --cwd**（只有 enqueue-agent 有），所以這個限制是真的、繞不掉。\n\n## 真正的阻塞：三方循環相依（agent 記了其中兩條邊，沒點出這是個環）\n\n1. **shard 跑不了** → 因為 branch 沒 merge（script_path 解析到 main）\n2. **branch merge 不了** → 因為 `check_experiment_artifacts.py` 要求 knowledge.json 有 k1731 條目（已驗證 canonical knowledge.json 的 k1731 條目數 = **0**）\n3. **knowledge 條目寫不了（誠實地）** → 因為 F1 的發現要等 bootstrap 跑完才存在；宣告的 result artifact `k1731_F1_bootstrap_interval.json` 依設計此刻本來就不該存在\n\n## 兩條候選出口（請擇一，並在 work_log 記選擇理由）\n\n**出口 A（建議）：先寫 arm B 的 knowledge 條目，用它解 merge 鎖，不碰 F1。**\narm B 已完成且經多輪 remediation 與獨立審查（`k1731_armB_rev8_remediation.json`、`k1731_armB_verification.json`、`k1731_armB_traceability_rows.json`、17 個未合併 commit）。它的發現**現在就存在**，本來就欠一筆 knowledge。寫它既誠實又解鎖 —— 不是繞過 gate，是補上真的欠的東西。merge 後 `compute_queue.py requeue --id k1731-f1-boot-c0-parametric` / `--id k1731-f1-boot-c0-block`（README §11.6 已指明 requeue 是預定回收路徑）。\n⚠️ 寫 arm B 條目時**射程只能到 arm B**，禁止順手替 F1 預寫任何結論。\n\n**出口 B：用絕對路徑 `--script` 指進 worktree，先跑再說。**\n未驗證是否可行（runner 對絕對 script_path 的行為要先實測，別假設 pathlib 語意）。即便可行也**不建議**：一個 22 小時的 job 綁在隨時可能被 merge/移除的 worktree 上，中途消失就是整輪重來——而 agent 選 merge-first 正是為了避這個。若採此路，必須先小規模實測（B=1）確認 runner 吃絕對路徑。\n\n## 順帶查證的兩件事（都已排除，不必重查）\n\n- worktree 內 `f1/rolling_gw_prod.json`（generated 08:05:21Z）與 `f1/bootstrap_smoke_c0.json` 寫入時間**晚於 kill（07:43:07Z）22 分鐘**。已確認**現在沒有任何 k1731 進程存活**，最可能是 tree-kill 漏掉的 multiprocessing worker 完成後寫出——產物本身有效，非污染。\n- README 頂端 commit `dc3e5be04` 記錄了另一個已修的陷阱：第一次 enqueue 跑的是 **worktree 那份 CLI**，job 被寫進 worktree 自己的 `storage/ops/compute_queue/`，worker 永遠讀不到，**而且它印 `enqueued: <id>` 回成功**。已改用主 repo CLI 重新入列並清掉殘留。\n\n## 禁止\n- ❌ 依 split_required 的字面把兩個 shard 再切成 <5400s 的子段（見開頭理由）\n- ❌ 用 `config/experiment_artifact_exclusions.json` 把 k1731 排除掉來硬解 merge 鎖\n- ❌ 為了解鎖而替 F1 預寫一個 bootstrap 還沒跑出來的結論\n\nparent_compute_job=agent-brief_k1731_f1-29394c\nworktree=.claude/worktrees/dispatch-slot-1-bd00f90a-k1731（17 unmerged commits，HEAD dc3e5be04）"
+    "description": "來源：PHASE A 收 `agent-brief_k1731_f1-29394c`（timeout 5279s / 88min，followup_mode=split_required）。\n\n## 結論先講：**這個 job 不該被 re-split，split_required 這個分類對它是錯的**\n\ncompute_queue 的 split_contract 要求 `child_timeout_lt_seconds=5400`。但 F1 的 bootstrap 單次完整 pipeline 實測 26.4 分鐘（README §11.3），6 workers 平行，smoke 實測 `f1/bootstrap_smoke_c0.json` 6 replicates / 3547.7s。硬套 90 分鐘上限 → 300 replicates 要拆成約 150 個 shard，而且 production MCMC 是**釘死在 entry point 裡**的（README §11.6：刻意不做成 flag，以免未來的 caller 悄悄改跑便宜設定、bootstrap 到一個被污染的統計量上；validate-mcmc 實測便宜設定會讓 mean pinball loss 偏移達受測差異本身的 30%）。**再切一次不是把工作變小，是把設計打壞。**\n\n## 工作其實早就切好了\n\n`run_nested_bootstrap_shard.py` 的 docstring 就是為分片寫的（seed 契約：shard 間距必須 >= 自己的 n_boot，assemble 時從記錄的 data_seed 反查碰撞、不信任 caller；procedure seed 固定 42 因為 multistart 與 MCMC stream 屬於受測方法本身、不是被模擬的抽樣噪音）。兩個 shard 已入列：\n- `k1731-f1-boot-c0-parametric`（c=0, B=200, timeout 22h）\n- `k1731-f1-boot-c0-block`（c=0, B=100, block_len=20, timeout 11h）\n\n兩者現在都是 `status=failed, exit_code=2`，秒殺。stderr 就一行：\n`can't open file '<main-repo>/experiments/k1731/run_nested_bootstrap_shard.py': No such file or directory`\n\n**這不是意外，agent 事先就寫在 README §11.6**：compute_queue 把 script_path 解析到主 repo root，腳本只存在於 worktree，所以「兩個 shard 會在數秒內 file-not-found 失敗，直到這個 branch 被 merge」。已驗證 `compute_queue.py enqueue` **沒有 --cwd**（只有 enqueue-agent 有），所以這個限制是真的、繞不掉。\n\n## 真正的阻塞：三方循環相依（agent 記了其中兩條邊，沒點出這是個環）\n\n1. **shard 跑不了** → 因為 branch 沒 merge（script_path 解析到 main）\n2. **branch merge 不了** → 因為 `check_experiment_artifacts.py` 要求 knowledge.json 有 k1731 條目（已驗證 canonical knowledge.json 的 k1731 條目數 = **0**）\n3. **knowledge 條目寫不了（誠實地）** → 因為 F1 的發現要等 bootstrap 跑完才存在；宣告的 result artifact `k1731_F1_bootstrap_interval.json` 依設計此刻本來就不該存在\n\n## 兩條候選出口（請擇一，並在 work_log 記選擇理由）\n\n**出口 A（建議）：先寫 arm B 的 knowledge 條目，用它解 merge 鎖，不碰 F1。**\narm B 已完成且經多輪 remediation 與獨立審查（`k1731_armB_rev8_remediation.json`、`k1731_armB_verification.json`、`k1731_armB_traceability_rows.json`、17 個未合併 commit）。它的發現**現在就存在**，本來就欠一筆 knowledge。寫它既誠實又解鎖 —— 不是繞過 gate，是補上真的欠的東西。merge 後 `compute_queue.py requeue --id k1731-f1-boot-c0-parametric` / `--id k1731-f1-boot-c0-block`（README §11.6 已指明 requeue 是預定回收路徑）。\n⚠️ 寫 arm B 條目時**射程只能到 arm B**，禁止順手替 F1 預寫任何結論。\n\n**出口 B：用絕對路徑 `--script` 指進 worktree，先跑再說。**\n未驗證是否可行（runner 對絕對 script_path 的行為要先實測，別假設 pathlib 語意）。即便可行也**不建議**：一個 22 小時的 job 綁在隨時可能被 merge/移除的 worktree 上，中途消失就是整輪重來——而 agent 選 merge-first 正是為了避這個。若採此路，必須先小規模實測（B=1）確認 runner 吃絕對路徑。\n\n## 順帶查證的兩件事（都已排除，不必重查）\n\n- worktree 內 `f1/rolling_gw_prod.json`（generated 08:05:21Z）與 `f1/bootstrap_smoke_c0.json` 寫入時間**晚於 kill（07:43:07Z）22 分鐘**。已確認**現在沒有任何 k1731 進程存活**，最可能是 tree-kill 漏掉的 multiprocessing worker 完成後寫出——產物本身有效，非污染。\n- README 頂端 commit `dc3e5be04` 記錄了另一個已修的陷阱：第一次 enqueue 跑的是 **worktree 那份 CLI**，job 被寫進 worktree 自己的 `storage/ops/compute_queue/`，worker 永遠讀不到，**而且它印 `enqueued: <id>` 回成功**。已改用主 repo CLI 重新入列並清掉殘留。\n\n## 禁止\n- ❌ 依 split_required 的字面把兩個 shard 再切成 <5400s 的子段（見開頭理由）\n- ❌ 用 `config/experiment_artifact_exclusions.json` 把 k1731 排除掉來硬解 merge 鎖\n- ❌ 為了解鎖而替 F1 預寫一個 bootstrap 還沒跑出來的結論\n\nparent_compute_job=agent-brief_k1731_f1-29394c\nworktree=.claude/worktrees/dispatch-slot-1-bd00f90a-k1731（17 unmerged commits，HEAD dc3e5be04）",
+    "status_history": [
+      {
+        "ts": "2026-07-27T05:05:43.983975+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4"
+      },
+      {
+        "ts": "2026-07-27T05:05:59.666826+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4"
+      }
+    ],
+    "block_transition_previous": {
+      "claimed_by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4",
+      "claimed_at": "2026-07-27T05:05:43.983960+00:00",
+      "claim_expires_at": "2026-07-27T07:05:43.983960+00:00",
+      "claim_session_id": "c445430011ee",
+      "started_at": "2026-07-27T05:05:59.666813+00:00"
+    },
+    "blocked_until": "2026-07-27T15:00:00+08:00",
+    "blocked_reason": "awaiting_codex_review",
+    "blocked_at": "2026-07-27T05:09:12+00:00",
+    "blocked_note": "LIVE re-read 2026-07-27 ~13:00: 07-21 Exit-A premise STALE. arm B NOT Codex-clean: round 9 FAIL, round 10 fix applied today by hourly-slot-1, Codex round 10 review QUEUED (k1731_armB_rev10_verdict.md not yet written); agent-brief_k1731_rev9-87d87e also queued. Cannot write arm B knowledge (Codex-pass-first) nor merge (unverified claim surface + races live remediation). Compute worker healthy (job done 04:57:50Z). AFTER round 10 PASS: main-thread writes arm B knowledge from final results JSON (arm B scope only) -> merge_worktree.sh -> compute_queue requeue k1731-f1-boot-c0-parametric / k1731-f1-boot-c0-block. Single blocker now = round-10 verdict."
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -41370,10 +41396,14 @@
     "task_type": "experiment",
     "priority": 2,
     "description": "K1730_NESTED_DM_ADJUDICATION.md（worktree dispatch-slot-1-bd00f90a-k1731）核心裁決（nested + pinball + expanding → RETRACT 而非 repair）經逐條複核成立、與 K1731 arm B 先例一致，§1.1/§1.4/§2/§3.3/§6.1 md5 與 code 行號複核為真。但以下八點必須修訂 —— 錯的方向全是**低估待修債務**，正是 nested_dm_misuse_baseline.json 自己註記的『understating debt is the worse error direction』那一種：\n\n1. §5 + §0『zero outward exposure / correction list is empty』**不成立**：knowledge.json item f932cb04 引用該 raw DM 為關鍵數字、並稱 permutation『決定性』（該條已於 2026-07-21 由主線程經 revise_knowledge_entry.py 修訂，但裁決書本文仍寫零曝光）。\n2. §1.0『no agent brief was ever written』**錯**：canonical storage/ops/agent_briefs/ 有 agent-brief_k1730_gevreg_midas_ssvs-cdcac4.md、agent-brief_k1730_remediation-832ffa.md 兩個實檔。\n3. §1.0『K1730 never went through closeout / no README』**錯**：README.md 227 行存在於 salvage ref edcb5b0d0（見 task k1730_salvage_ref_integrate_v2_closeout）。\n4. §6.1『每個數字都是 quick-mode、production 尚待』**錯**：quick_mode=false 的 production artifact 存在於 edcb5b0d0，DM t=+2.1589、p=0.0311、mean_loss_differential=+0.002106、harvey_significant=false。方向與 quick-mode 同號同結論，**裁決不翻轉**，但 §1.1/§3.2 的數字要換成這組。\n5. **§3.2 pillar 2 引用的是已被撤回的證據**（最實質的一點）：裁決書把 v1 的 single-draw permutation 當成『存活的 null』三支柱之一，但 K1730 自己的 REMEDIATION_v2.md（2026-07-19）已因 leakage（全樣本 shuffle 把較晚 release 放到較早 origin 前）撤回它，改用 lag-shift placebo（one-sided p=0.833、5 shifts 下限 0.167、明載為粗解析度佐證）。裁決書等於用被撤回的證據重建 null。\n6. §3.2 三支柱不獨立：(1) loss ordering 與 (3) harvey_significant=false 是同一個 t 的兩種呈現。且標題宣稱『Macro adds no incremental value』超出證據 —— nested bias 與 null 同向的真正後果是**此設計對零訊號與弱訊號沒有辨別力**，可支持的最強說法是『偵測不到』。\n7. §3.4/§7 的 nested_dm_misuse_baseline.json 引用（count 196 / exposed 106 / k1730 in active.exposed）**只在 worktree 副本成立**；canonical 該檔 grep k1730 = 0、buckets 為 193/103/90。須標明是 worktree 狀態。\n8. §6.6 已過時：k1730_nested_dm_detector_exposure 現存於 storage/next_tasks.json（status=in_progress）；§1.2 A4 / §4.1 item 1 行號微調（verbatim 在 293-294，DM loop header 在 290，註解應加 288-289）；§1.0 docs 註記錯誤（真實命中是 docs/governance/2026-07/nested_dm_coefficient_mask_audit.md:25,32，不是『1730 篇』的 false positive）。\n\n**不需改的**：RETRACT 判定本身、§3.1 文獻不可修復論證、§4.2 randomization test 路線與成本計算（這是全文最紮實的一段）。",
-    "status": "pending",
+    "status": "blocked",
     "source": "hourly_dispatch",
     "created_at": "2026-07-21T10:30:00+00:00",
-    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014"
+    "created_by": "hourly-slot-1-ad6c5e1cdea54ad0834ad15d992b1014",
+    "blocked_until": "2026-07-27T15:00:00+08:00",
+    "blocked_reason": "awaiting_prerequisite_fix",
+    "blocked_at": "2026-07-27T05:11:10+00:00",
+    "blocked_note": "LIVE re-read 2026-07-27 ~13:00: target file K1730_NESTED_DM_ADJUDICATION.md exists ONLY in worktree dispatch-slot-1-bd00f90a-k1731 (no canonical copy). That worktree is frozen: (a) merge gated on arm B Codex round 10 (see k1731_f1_bootstrap_merge_deadlock; round 10 verdict k1731_armB_rev10_verdict.md QUEUED not yet written), (b) under active concurrent remediation by hourly-slot-1 (arm B files written 12:31-12:41 today; rev9 agent + round-10 review queued). Editing it now = commit that cannot merge + concurrent-write race. Task spec itself is complete (8 documented corrections ready to apply). PREREQ: worktree becomes mergeable (arm B round 10 PASS) -> then apply the 8 amendments and merge via merge_worktree.sh. Same freeze as the K1730/K1731 cluster."
   },
   {
     "id": "k1730_randomization_test_upgrade_null",
@@ -45051,7 +45081,7 @@
     "description": "Auto-generated by event_jobs single-owner materializer.\nref_event_job_id: fomc-2026-07-29-t2\nevent_key: FOMC_2026_07_29\nevent_type: fomc\nevent_date: 2026-07-29\nevent_series_slot: T-2\n\nAuto-populated by populate_upcoming_events.py. FOMC 2026-07-29 T-2 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
     "task_type": "event_article",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "main_thread",
     "created_at": "2026-07-27T00:00:09.482922+00:00",
     "source": "event_expander",
@@ -45100,7 +45130,30 @@
         }
       ],
       "screened_at": "2026-07-27T00:00:09+00:00"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-27T04:58:04.138725+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4"
+      },
+      {
+        "ts": "2026-07-27T04:58:04.411120+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4"
+      },
+      {
+        "ts": "2026-07-27T05:04:47.785892+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-7b3d00c2c154493c8e349403a3ca1bb4"
+      }
+    ],
+    "started_at": "2026-07-27T04:58:04.411105+00:00",
+    "completed_at": "2026-07-27T05:04:47.785862+00:00",
+    "result": "T-2 FOMC(2026-07-29) event article: ran feed-publisher 3-layer dedup gate -> ARC DUPLICATE block (3 descriptive_strict dups + prior FOMC pre-event term-structure notes). k_coverage empty but the 'do not de-risk into a macro event / VIX already prices it' arc is thoroughly covered. Gathered live evidence (VIX 18.58 @2026-07-24 = 68th pct of 1y; SPX 21d realized vol ann 10.1%; ~8.5pt vol risk premium; VVIX 100.73; 3mo Tbill 3.81%) but produced NO new empirical finding beyond existing K513/K514/K856/K1345. Per publishing.md no dup_waiver was forced; NOTHING published. Correct gate outcome, not a failure. NOTE: recurring FOMC T-7/T-2 auto-event slots keep hitting arc-dup = treadmill signal for the event_expander."
   },
   {
     "id": "alert_host_cron_fail_20260727",
@@ -45399,7 +45452,7 @@
   {
     "id": "assign_aab28069",
     "title": "PHASE-Z 卡住檔案 incident（af9de64b83c8b8b3）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 14 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- experiments/k1319/k1319_results.json — 7 班\n- experiments/k1399/k1399_qlike_comparison.png — 7 班\n- experiments/k1399/k1399_vix_decomp_results.json — 7 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 7 班\n- experiments/k1591/k1591_results.json — 7 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 7 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 7 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 7 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 7 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 7 班\n- experiments/k1592/fig3_origin_gamma_t.png — 7 班\n- experiments/k1705/k1705_results.json — 7 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 7 班\n- storage/logs/trending_primary_source_verification.jsonl — 14 班\n- storage/memory/knowledge.json — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T031713135099Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T031813256903Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042205269278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042242499278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T045131033785Z:<路徑>`",
+    "description": "## 發生什麼\n15 個未提交檔案不是任何一班 fire 產出的，最長已連續 15 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 6 次觀察到這組）\n- experiments/k1319/k1319_results.json — 8 班\n- experiments/k1399/k1399_qlike_comparison.png — 8 班\n- experiments/k1399/k1399_vix_decomp_results.json — 8 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 8 班\n- experiments/k1591/k1591_results.json — 8 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 8 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 8 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 8 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 8 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 8 班\n- experiments/k1592/fig3_origin_gamma_t.png — 8 班\n- experiments/k1705/k1705_results.json — 8 班\n- experiments/paper2_table1_summary_stats_provenance/results.json — 8 班\n- storage/logs/trending_primary_source_verification.jsonl — 15 班\n- storage/memory/knowledge.json — 8 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T031813256903Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042205269278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T042242499278Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T045131033785Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T051429910489Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -45426,32 +45479,33 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "experiments/k1319/k1319_results.json": 7,
-        "experiments/k1399/k1399_qlike_comparison.png": 7,
-        "experiments/k1399/k1399_vix_decomp_results.json": 7,
-        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 7,
-        "experiments/k1591/k1591_results.json": 7,
-        "experiments/k1591/tables/k1591_daily_panel.csv": 7,
-        "experiments/k1591/tables/k1591_regime_summary.csv": 7,
-        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 7,
-        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 7,
-        "experiments/k1592/fig2_gammarule_gjr_share.png": 7,
-        "experiments/k1592/fig3_origin_gamma_t.png": 7,
-        "experiments/k1705/k1705_results.json": 7,
-        "experiments/paper2_table1_summary_stats_provenance/results.json": 7,
-        "storage/logs/trending_primary_source_verification.jsonl": 14,
-        "storage/memory/knowledge.json": 7
+        "experiments/k1319/k1319_results.json": 8,
+        "experiments/k1399/k1399_qlike_comparison.png": 8,
+        "experiments/k1399/k1399_vix_decomp_results.json": 8,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 8,
+        "experiments/k1591/k1591_results.json": 8,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 8,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 8,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 8,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 8,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 8,
+        "experiments/k1592/fig3_origin_gamma_t.png": 8,
+        "experiments/k1705/k1705_results.json": 8,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 8,
+        "storage/logs/trending_primary_source_verification.jsonl": 15,
+        "storage/memory/knowledge.json": 8
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T031713135099Z",
         "refs/volpred/quarantine/20260727T031813256903Z",
         "refs/volpred/quarantine/20260727T042205269278Z",
         "refs/volpred/quarantine/20260727T042242499278Z",
-        "refs/volpred/quarantine/20260727T045131033785Z"
+        "refs/volpred/quarantine/20260727T045131033785Z",
+        "refs/volpred/quarantine/20260727T051429910489Z"
       ],
-      "fires": 5,
+      "fires": 6,
       "first_seen_at": "2026-07-27T03:17:15.679626+00:00",
-      "last_seen_at": "2026-07-27T04:51:33.752750+00:00",
+      "last_seen_at": "2026-07-27T05:14:32.770284+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T03:18:13.326932+00:00",
       "deferred": [
@@ -45473,7 +45527,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T04:51:33.752750+00:00"
+    "updated_at": "2026-07-27T05:14:32.770284+00:00"
   },
   {
     "id": "issue18_mutation_boundary_partition_canary_20260727",
@@ -45580,5 +45634,36 @@
     "completed_at": "2026-07-27T04:48:55.881262+00:00",
     "result": "Issue #9 shadow migration blockers fixed: new claims persist authoritative 2h expiry; verified 30s supervisor heartbeat renews live dispatch leases; all terminal/delegation paths clear lease metadata; main-thread lanes map to an enforced non-worker capability. TDD 550 functional passes; Matt Spec PASS and Standards PASS. Issue #9 remains contained/open for the required seven-day clean ledger and ownership cutover.",
     "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_issue41_machine_churn_directory_expansion_20260727",
+    "title": "[Issue #41] Expand machine-churn directories into exact file paths",
+    "description": "PHASE-Z currently passes untracked directories under ops/claude_user_backup/skills to classify_machine_churn, which open() treats as files and defers forever with EISDIR warnings. Implement deterministic directory expansion to regular-file exact paths before lock/parse/stage; refuse symlink/path escape and preserve writer-race safety. TDD, Matt dual review, natural PHASE-Z read-back. This is a contained #41 slice and does not close queue-cutover blockers.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "owner_interactive",
+    "created_by": "codex-vscode",
+    "issue_ref": "#41",
+    "created_at": "2026-07-27T04:55:24.674163+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T04:55:24.988512+00:00",
+    "claim_expires_at": "2026-07-27T06:55:24.988512+00:00",
+    "claim_session_id": "7eda39854b7f",
+    "status_history": [
+      {
+        "ts": "2026-07-27T04:55:24.988531+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T04:55:29.350054+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T04:55:29.350037+00:00"
   }
 ]

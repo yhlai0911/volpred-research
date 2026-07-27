@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T04:00:33.678107+00:00",
+  "generated_at": "2026-07-27T05:01:07.525138+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 134.6
+      "age_hours": 135.7
     }
   ],
   "held": [],
@@ -26,19 +26,65 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1731-armb-codex-review-round-9-1785124478",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1731-armb-codex-review-round-9-1785124478.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1731_armB_rev9_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1731_armB_rev9_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1731-armb-codex-review-round-9-1785124478",
+      "paths": [
+        "storage/ops/codex_reviews/k1731_armB_rev9_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "3731d2a8fb10f7daae5da29d1dba28da881dd435",
+      "reason": "already_committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/k1319_general_draft.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "storage/drafts/k1399_article_revise_overclaim.md",
+          "kind": "md",
+          "reason": "modified"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 2,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/k1319_general_draft.md",
+            "storage/drafts/k1399_article_revise_overclaim.md"
+          ],
+          "committed": true,
+          "detail": "[main d1b617ae6] chore(draft-reap): collect orphaned draft artifacts (2 files)\n 2 files changed, 20 insertions(+), 20 deletions(-)\n"
+        }
+      ]
     },
     "paper": {
       "collectable": [],
@@ -51,14 +97,173 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/k1319/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1319/k1319.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1319/k1319_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1391/k1391.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1396/k1396.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1398/k1398.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1399/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1399/k1399_qlike_comparison.png",
+          "kind": "png",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1399/k1399_vix_decomp.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1399/k1399_vix_decomp_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1591/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
+          "kind": "png",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1591/k1591_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1591/tables/k1591_daily_panel.csv",
+          "kind": "csv",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1591/tables/k1591_regime_summary.csv",
+          "kind": "csv",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
+          "kind": "csv",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
+          "kind": "png",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1592/fig2_gammarule_gjr_share.png",
+          "kind": "png",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1592/fig3_origin_gamma_t.png",
+          "kind": "png",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1592/k1592.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1705/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1705/k1705_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/paper2_table1_summary_stats_provenance/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/paper2_table1_summary_stats_provenance/reproduce_table1_summary.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/paper2_table1_summary_stats_provenance/results.json",
+          "kind": "json",
+          "reason": "modified"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 25,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/k1319/README.md",
+            "experiments/k1319/k1319.py",
+            "experiments/k1319/k1319_results.json",
+            "experiments/k1391/k1391.py",
+            "experiments/k1396/k1396.py",
+            "experiments/k1398/k1398.py",
+            "experiments/k1399/README.md",
+            "experiments/k1399/k1399_qlike_comparison.png",
+            "experiments/k1399/k1399_vix_decomp.py",
+            "experiments/k1399/k1399_vix_decomp_results.json",
+            "experiments/k1591/README.md",
+            "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
+            "experiments/k1591/k1591_results.json",
+            "experiments/k1591/tables/k1591_daily_panel.csv",
+            "experiments/k1591/tables/k1591_regime_summary.csv",
+            "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
+            "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
+            "experiments/k1592/fig2_gammarule_gjr_share.png",
+            "experiments/k1592/fig3_origin_gamma_t.png",
+            "experiments/k1592/k1592.py",
+            "experiments/k1705/README.md",
+            "experiments/k1705/k1705_results.json",
+            "experiments/paper2_table1_summary_stats_provenance/README.md",
+            "experiments/paper2_table1_summary_stats_provenance/reproduce_table1_summary.py",
+            "experiments/paper2_table1_summary_stats_provenance/results.json"
+          ],
+          "committed": false,
+          "detail": "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vr"
+        }
+      ]
     }
   },
   "held_escalations": [],
