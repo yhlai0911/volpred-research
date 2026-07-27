@@ -616,7 +616,10 @@ def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy
             self,
             effect: EffectView,
             payload: bytes,
+            *,
+            authorize_mutation,
         ) -> AcknowledgedEffect:
+            authorize_mutation()
             adapter_calls.append(effect)
             return AcknowledgedEffect(
                 acknowledgement=effect.acknowledgement,

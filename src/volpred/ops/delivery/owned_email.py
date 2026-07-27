@@ -199,6 +199,8 @@ class _OwnedEmailProvider(Protocol):
         self,
         effect: EffectView,
         payload: bytes,
+        *,
+        authorize_mutation: Callable[[], object],
     ) -> EffectAttemptOutcome: ...
 
 
@@ -364,7 +366,13 @@ class OwnedEmailNotification:
             primary_lease=primary_lease,
         )
         self._execution.current_lease(expected=primary_lease)
-        outcome = self._provider.deliver(attempt.effect, attempt.payload)
+        outcome = self._provider.deliver(
+            attempt.effect,
+            attempt.payload,
+            authorize_mutation=lambda: self._execution.current_lease(
+                expected=primary_lease,
+            ),
+        )
         return self._store.settle(attempt, outcome)
 
     @staticmethod
@@ -465,6 +473,9 @@ class OwnedEmailRecovery:
                 outcome = self._provider.deliver(
                     attempt.effect,
                     attempt.payload,
+                    authorize_mutation=lambda: self._execution.current_lease(
+                        expected=primary_lease,
+                    ),
                 )
             receipts.append(self._store.settle(attempt, outcome))
 
@@ -643,7 +654,13 @@ def dispatch_email_by_current_owner(
         outcome = EmailNotificationEffectAdapter(
             notifier=EmailNotifier(storage_dir=storage_dir),
             sent_mail_reader=ImapSentMailReader.from_environment(),
-        ).deliver(effect, payload_bytes)
+        ).deliver(
+            effect,
+            payload_bytes,
+            authorize_mutation=lambda: execution.current_lease(
+                expected=primary_lease,
+            ),
+        )
         execution.current_lease(expected=primary_lease)
     finally:
         keepalive.stop()

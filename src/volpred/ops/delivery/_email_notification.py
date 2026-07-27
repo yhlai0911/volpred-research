@@ -14,7 +14,7 @@ import imaplib
 import json
 import os
 import re
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from email.message import Message
 from email.parser import BytesParser
@@ -240,6 +240,8 @@ class EmailNotificationEffectAdapter:
         self,
         effect: EffectView,
         payload: bytes,
+        *,
+        authorize_mutation: Callable[[], object] | None = None,
     ) -> EffectAttemptOutcome:
         if not isinstance(payload, bytes):
             return _failure(
@@ -288,6 +290,8 @@ class EmailNotificationEffectAdapter:
                 raw_message=existing,
             )
 
+        if authorize_mutation is not None:
+            authorize_mutation()
         try:
             self._notifier.notify(
                 subject=decoded.subject,

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Callable
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -16,6 +18,9 @@ from volpred.ops.delivery import (
     FailedEffect,
 )
 from volpred.ops.authority import PrimaryLease
+from volpred.ops.delivery._email_notification import (
+    EmailNotificationEffectAdapter,
+)
 from volpred.ops.delivery.owned_email import (
     NotificationOwner,
     NotificationOwnershipLost,
@@ -202,7 +207,10 @@ class _Provider:
         self,
         effect: EffectView,
         payload: bytes,
+        *,
+        authorize_mutation: Callable[[], object],
     ) -> AcknowledgedEffect:
+        authorize_mutation()
         self.calls.append((effect, payload))
         return AcknowledgedEffect(
             acknowledgement=effect.acknowledgement,
@@ -301,7 +309,7 @@ def test_deliver_owns_request_begin_provider_and_settlement() -> None:
         "outbox-token",
         "primary-token",
     )
-    assert primary_authority.calls == 3
+    assert primary_authority.calls == 4
 
 
 def test_deliver_returns_terminal_receipt_without_second_provider_call() -> None:
@@ -536,7 +544,10 @@ def test_environment_dispatch_fences_and_verifies_explicit_legacy_owner(
             self,
             effect: EffectView,
             payload: bytes,
+            *,
+            authorize_mutation: Callable[[], object],
         ) -> AcknowledgedEffect:
+            authorize_mutation()
             captured["effect"] = effect
             captured["payload"] = payload
             return AcknowledgedEffect(
@@ -630,7 +641,10 @@ def test_environment_dispatch_uses_stable_legacy_effect_identity_across_hosts(
             self,
             effect: EffectView,
             payload: bytes,
+            *,
+            authorize_mutation: Callable[[], object],
         ) -> AcknowledgedEffect:
+            authorize_mutation()
             effect_ids.append(effect.id)
             return AcknowledgedEffect(
                 acknowledgement=effect.acknowledgement,
@@ -1009,6 +1023,76 @@ def test_deliver_fails_closed_before_provider_when_keepalive_is_replaced() -> No
         ).deliver(_command())
 
     assert provider.calls == []
+
+
+def test_deliver_revalidates_primary_authority_at_smtp_mutation_boundary() -> None:
+    store = _Store(_owner())
+    primary_authority = _LeaseGate()
+    payload = json.dumps(
+        {
+            "schema_version": "email-notification.v1",
+            "subject": "Authority boundary canary",
+            "text_body": "This message must not be sent.",
+            "html_body": "<p>This message must not be sent.</p>",
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    store.attempt = OwnedEmailAttempt(
+        **{
+            **store.attempt.__dict__,
+            "effect": replace(
+                store.attempt.effect,
+                payload_sha256=hashlib.sha256(payload).hexdigest(),
+            ),
+            "payload": payload,
+        }
+    )
+
+    class ReplacingSentMailbox:
+        def __init__(self) -> None:
+            self.reads = 0
+
+        def read(self, _message_id: str) -> bytes | None:
+            self.reads += 1
+            original = primary_authority.lease
+            primary_authority.lease = PrimaryLease(
+                **{
+                    **original.__dict__,
+                    "epoch": original.epoch + 1,
+                    "fencing_token": "replacement-token",
+                }
+            )
+            return None
+
+    class ForbiddenNotifier:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def notify(self, **_kwargs: object) -> str:
+            self.calls += 1
+            raise AssertionError("stale authority reached SMTP mutation")
+
+    mailbox = ReplacingSentMailbox()
+    notifier = ForbiddenNotifier()
+    provider = EmailNotificationEffectAdapter(
+        notifier=notifier,
+        sent_mail_reader=mailbox,
+    )
+
+    with pytest.raises(
+        NotificationOwnershipLost,
+        match="lease was replaced",
+    ):
+        OwnedEmailNotification(
+            store=store,
+            provider=provider,
+            primary_authority=primary_authority,
+        ).deliver(_command())
+
+    assert mailbox.reads == 1
+    assert notifier.calls == 0
+    assert "settle" not in [name for name, _ in store.calls]
 
 
 def test_environment_adapter_never_falls_back_to_publishable_key(
