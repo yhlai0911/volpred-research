@@ -1,8 +1,8 @@
--- Forward-only convergence after two concurrent read-only attestation
--- migrations. Preserve both deployed migrations, then make clean replay and
--- production converge on the stricter pre-cutover contract: only the exact
--- legacy generation-1 owner may be attested until Issue #13 adds a separately
--- gated transfer contract.
+-- Forward-only hardening for the canonical 20260727130815 read-only
+-- attestation. Clean replay and production must both expose only the exact
+-- legacy generation-1 owner until Issue #13 adds a separately gated transfer
+-- contract. The rejected concurrent 20260727131500 migration is not part of
+-- the canonical chain and must never be replayed.
 
 DO $$
 BEGIN

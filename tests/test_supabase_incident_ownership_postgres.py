@@ -12,7 +12,6 @@ MIGRATION_ROOT = (
 )
 INCIDENT_OWNER_ATTESTATION_MIGRATIONS = (
     MIGRATION_ROOT / "20260727130815_incident_owner_attestation.sql",
-    MIGRATION_ROOT / "20260727131500_incident_owner_attestation.sql",
     MIGRATION_ROOT
     / "20260727132000_harden_incident_owner_attestation.sql",
 )
