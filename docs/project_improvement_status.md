@@ -2719,3 +2719,22 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   snapdupfix）以正式 CLI re-pend，且每筆留下 `compute_release_reason` 與
   `status_history`。同類「dead compute job 永久冒充 in-flight」根因狀態為
   **`root_cause_fixed_and_verified`**。
+
+## 2026-07-27 — T11 durable bounded capability probe（Issue #16）
+
+- ✅ `provider-registry.v1#probe_policy` 現在由單一 `ProbePolicy` 契約執行：
+  minimum interval、exponential backoff、全域 rolling cost budget 與 reservation
+  TTL 在 in-memory reference store／durable ledger 使用相同 admission 順序；TTL
+  只釋放 ownership，不會縮短 minimum interval。
+- ✅ Durable ledger 以 lock + fsync + atomic replace 保存 reservation、typed
+  admission/outcome、identity-bound receipt、policy-denial hash chain 與完整檔案
+  integrity。Crash reservation 納入 budget；舊 `provider-probe-ledger.v1`
+  reservation shape 可直接回讀；逾 TTL 才完成的 provider I/O 仍以 `late+` receipt
+  留下不可靜默遺失的證據。
+- ✅ 公開 mutation seam 只有 `run()`；callback 前重新授權 registry SHA、
+  executable realpath/SHA、model、auth surface 與 cost。Policy denial 在 provider
+  I/O 前 fail closed 並 dedup，admission throttle 不冒充 provider failure。
+- ✅ Matt Spec／Standards 最終雙 PASS；本 slice 沒有 provider reroute、task resume、
+  business effect、owner transfer 或 #9/#12 bypass。Durable probe 底層 slice 為
+  **`root_cause_fixed_and_verified`**；Issue #16 umbrella 仍為 **`contained`** 且
+  保持 OPEN，等 #9→#12 owner cutover 才進下一階段。

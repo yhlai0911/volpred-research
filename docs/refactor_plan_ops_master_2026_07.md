@@ -348,3 +348,17 @@ wrapper改綁repo Python／pinned nvm CLI；Telegram responder改走receipt-boun
 Legacy hourly shell維持retired rollback artifact，不是production owner。
 相鄰範圍167 passed與live alternate-auth no-spawn denial均綠；此slice不轉移
 `provider.execution` owner，#9未成熟前#12仍`contained`。
+
+**T11 Durable bounded capability probe 增量（2026-07-27）**：
+commits `28fba26d6`,`772c3fe66`,`483eaa5bf`,`b6cb2f6a3`,`4dd6c463b`
+建立由`provider-registry.v1#probe_policy`唯一驅動的durable probe ledger。Canonical
+policy同時供reference store與durable store使用，統一minimum interval、failure
+backoff、全域rolling budget與reservation TTL；crash不會重複probe或重置budget，
+TTL只釋放ownership。Ledger以lock／fsync／atomic replace保存identity-bound receipt、
+完整檔案integrity、receipt/denial hash chain與typed admission/outcome；v1 reservation
+舊shape保持可讀，late callback亦必留下`late+` receipt。`run()`在provider I/O前重驗
+registry／executable／model／auth／cost，alternate auth與policy drift fail closed。
+Matt Spec／Standards最終雙PASS。本slice無reroute、resume、business effect、owner
+transfer或#9/#12 bypass，底層probe slice為
+**`root_cause_fixed_and_verified`**；Issue #16 umbrella維持 **`contained`**／OPEN，
+後續cutover仍受#9→#12 blocking edge約束。
