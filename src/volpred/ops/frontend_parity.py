@@ -54,8 +54,18 @@ _HTTP_METHOD = re.compile(
 )
 _EXPORT_BLOCK = re.compile(r"""\bexport\s*\{(?P<bindings>[^{}]+)\}""")
 _NEXT_NAVIGATION_IMPORT = re.compile(
-    r"""\bimport\s*\{(?P<bindings>[^{}]+)\}\s*from\s*"""
+    r"""\bimport\s+(?:type\s+)?\{(?P<bindings>[^{}]+)\}\s*from\s*"""
     r"""(?:"next/navigation"|'next/navigation')"""
+)
+_NEXT_NAVIGATION_NAMESPACE_IMPORT = re.compile(
+    r"""\bimport\s+\*\s+as\s+(?P<name>[A-Za-z_$][\w$]*)\s+from\s*"""
+    r"""(?:"next/navigation"|'next/navigation')"""
+)
+_NEXT_NAVIGATION_BINDING = re.compile(
+    r"""\b(?:import|export)\b[^;\n]*\bfrom\s*"""
+    r"""(?:"next/navigation"|'next/navigation')"""
+    r"""|\b(?:require|import)\s*\(\s*"""
+    r"""(?:"next/navigation"|'next/navigation')\s*\)"""
 )
 _TEMPLATE_SLOT = re.compile(r"\$\{[^{}]*\}")
 _ACCESS_LEVELS = frozenset({"public", "member", "admin", "service"})
@@ -787,11 +797,13 @@ def _dead_links(
             )
             if use_router is not None:
                 consumed_use_router_spans.append(use_router.span())
+        recognized_navigation_import_spans: list[tuple[int, int]] = []
         for import_match in _NEXT_NAVIGATION_IMPORT.finditer(text):
             if code_text[
                 import_match.start():import_match.start() + 6
             ] != "import":
                 continue
+            recognized_navigation_import_spans.append(import_match.span())
             for raw_binding in import_match.group("bindings").split(","):
                 pieces = re.split(r"\s+as\s+", raw_binding.strip())
                 imported = pieces[0].strip()
@@ -809,6 +821,45 @@ def _dead_links(
                         local_name,
                     )
                 )
+        for namespace_import in _NEXT_NAVIGATION_NAMESPACE_IMPORT.finditer(
+            text
+        ):
+            if code_text[
+                namespace_import.start():namespace_import.start() + 6
+            ] != "import":
+                continue
+            recognized_navigation_import_spans.append(
+                namespace_import.span()
+            )
+            namespace = namespace_import.group("name")
+            tracked_navigation_names[namespace].append(
+                namespace_import.span()
+            )
+            navigation_patterns.append(
+                (
+                    re.compile(
+                        rf"\b{re.escape(namespace)}\."
+                        rf"(?:redirect|permanentRedirect)\s*\("
+                    ),
+                    namespace,
+                )
+            )
+        if any(
+            not any(
+                start <= binding.start() < end
+                for start, end in recognized_navigation_import_spans
+            )
+            for binding in _NEXT_NAVIGATION_BINDING.finditer(text)
+            if code_text[
+                binding.start():binding.start() + 6
+            ].strip() in {"import", "export", "requir"}
+        ):
+            findings.append(
+                _block(
+                    "unsupported_next_navigation_binding",
+                    source_ref=source.relative_to(repo_root).as_posix(),
+                )
+            )
         for navigation, tracked_name in navigation_patterns:
             if tracked_name is not None:
                 tracked_navigation_names[tracked_name].extend(
@@ -1307,7 +1358,9 @@ def audit_frontend_parity(
     compiled = _compile_rules(contract.get("route_rules"), blockers)
     route_rows: list[dict[str, object]] = []
     by_rule_route: dict[tuple[str, str], set[str]] = defaultdict(set)
-    by_rule_route_methods: dict[tuple[str, str], set[str]] = defaultdict(set)
+    by_rule_handler_methods: dict[
+        tuple[str, str, str, str], set[str]
+    ] = defaultdict(set)
     for route in routes:
         matched = [
             rule
@@ -1338,8 +1391,13 @@ def audit_frontend_parity(
             rule_id = matched[0]["id"]
             by_rule_route[(rule_id, route.canonical_route)].add(route.mode)
             if route.kind == "route_handler" and route.method is not None:
-                by_rule_route_methods[
-                    (rule_id, route.canonical_route)
+                by_rule_handler_methods[
+                    (
+                        rule_id,
+                        route.canonical_route,
+                        route.mode,
+                        route.source_ref,
+                    )
                 ].add(route.method)
         matched_rule = matched[0] if len(matched) == 1 else {}
         owner_contract = matched_rule.get(
@@ -1475,7 +1533,9 @@ def audit_frontend_parity(
         for (
             current_rule,
             canonical,
-        ), observed_methods in by_rule_route_methods.items():
+            mode,
+            source_ref,
+        ), observed_methods in by_rule_handler_methods.items():
             if current_rule != rule_id:
                 continue
             missing_methods = sorted(required_methods - observed_methods)
@@ -1485,6 +1545,8 @@ def audit_frontend_parity(
                         "missing_route_handler_method",
                         rule_id=rule_id,
                         route=canonical,
+                        mode=mode,
+                        source_ref=source_ref,
                         methods=missing_methods,
                     )
                 )

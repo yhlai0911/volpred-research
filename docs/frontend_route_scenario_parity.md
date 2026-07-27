@@ -30,8 +30,9 @@ symlink escape 或 audit 期間不可讀都只產生 typed blocker，不讀取�
 redirect source 做解析；expression／router navigation 無法靜態證明目的地時也 fail
 closed，不以「大概是合法」略過；typed binding、destructure、direct chain、
 `redirect`／`permanentRedirect` import alias 及多參數 router call 均有 adversarial
-regression；router alias／optional／bracket access 或其餘無法辨識的 `useRouter()`
-shape 直接阻擋。註解與字串範例不會被當成 route／redirect／href。
+regression；namespace import 會追蹤，navigation re-export 等無法局部證明的 binding
+直接阻擋。router alias／optional／bracket access 或其餘無法辨識的 `useRouter()`
+shape 同樣阻擋。註解與字串範例不會被當成 route／redirect／href。
 
 active frontend 是獨立 nested Git repository。每份 report 都記 nested HEAD、dirty
 status digest，以及本次真正讀取的 `src/**/*.{ts,tsx,js,jsx}`／`next.config.js`／

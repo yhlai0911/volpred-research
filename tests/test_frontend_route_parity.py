@@ -578,6 +578,53 @@ def test_declared_http_method_must_still_be_exported(tmp_path: Path) -> None:
     )
 
 
+def test_declared_methods_are_required_on_each_handler_surface(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/app/api/jobs/route.ts",
+        "export async function GET() { return Response.json({}); }",
+    )
+    _write(
+        tmp_path / "web/src/app/v3/api/jobs/route.ts",
+        "export async function POST() { return Response.json({}); }",
+    )
+    payload = json.loads(contract.read_text(encoding="utf-8"))
+    payload["route_rules"].append(
+        {
+            "id": "api_jobs",
+            "pattern": "^/api/jobs$",
+            "expected_modes": ["shared", "v3"],
+            "access": "service",
+            "method_access": {"GET": "service", "POST": "service"},
+            "authoritative_data_owner_refs": {
+                "shared": ["$surface"],
+                "v3": ["$surface"],
+            },
+            "capabilities": ["jobs"],
+            "mode_advantages": {
+                "shared": ["shared_handler"],
+                "v3": ["v3_handler"],
+            },
+        }
+    )
+    contract.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    gaps = {
+        (item["mode"], tuple(item["methods"]))
+        for item in report["blockers"]
+        if item["kind"] == "missing_route_handler_method"
+    }
+    assert gaps == {("shared", ("POST",)), ("v3", ("GET",))}
+
+
 def test_http_method_discovery_ignores_text_and_supports_alias_export(
     tmp_path: Path,
 ) -> None:
@@ -755,6 +802,42 @@ def test_router_indirection_and_navigation_import_alias_fail_closed(
         item["kind"] == "unresolved_internal_navigation"
         and item["expression"] == "redirectTarget"
         for item in scoped
+    )
+
+
+def test_namespace_navigation_and_reexport_cannot_silently_pass(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/NamespaceNavigation.tsx",
+        """
+        import * as nav from "next/navigation"
+        nav.redirect(namespaceTarget)
+        """,
+    )
+    _write(
+        tmp_path / "web/src/lib/navigation-export.ts",
+        """
+        export { redirect as navigate } from "next/navigation"
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    assert any(
+        item["kind"] == "unresolved_internal_navigation"
+        and item["expression"] == "namespaceTarget"
+        for item in report["blockers"]
+    )
+    assert any(
+        item["kind"] == "unsupported_next_navigation_binding"
+        and item["source_ref"].endswith("navigation-export.ts")
+        for item in report["blockers"]
     )
 
 
