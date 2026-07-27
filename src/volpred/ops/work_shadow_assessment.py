@@ -172,6 +172,10 @@ def assess_shadow_observation_directory(
             sorted(
                 (
                     (
+                        max(
+                            _parse_observed_at(receipt["recorded_at"]),
+                            _parse_observed_at(receipt["observed_at"]),
+                        ),
                         _parse_observed_at(receipt["recorded_at"]),
                         receipt,
                     )
@@ -186,7 +190,7 @@ def assess_shadow_observation_directory(
             reason_code="invalid_receipt",
             observation_count=len(receipt_paths),
         )
-    owner_timestamps = tuple(item[0] for item in owner_timeline)
+    owner_timestamps = tuple(item[1] for item in owner_timeline)
     if len(set(owner_timestamps)) != len(owner_timestamps):
         return _failed_assessment(
             context,
@@ -196,14 +200,14 @@ def assess_shadow_observation_directory(
     last_owner_mismatch = max(
         (
             index
-            for index, (_, receipt) in enumerate(owner_timeline)
+            for index, (_, _, receipt) in enumerate(owner_timeline)
             if not _owner_evidence_matches_context(receipt, context)
         ),
         default=-1,
     )
     receipts = [
         receipt
-        for _, receipt in owner_timeline[last_owner_mismatch + 1 :]
+        for _, _, receipt in owner_timeline[last_owner_mismatch + 1 :]
     ]
     snapshot_identity_mismatch = any(
         receipt["legacy_selection"]["snapshot_sha256"]
@@ -262,12 +266,36 @@ def assess_shadow_observation_directory(
                 receipts,
                 strict=True,
             ),
-            key=lambda item: item[0],
+            key=lambda item: max(item[0], item[1]),
         )
     )
     recorded_at = tuple(item[0] for item in timed_receipts)
     observed_at = tuple(item[1] for item in timed_receipts)
     receipts = [item[2] for item in timed_receipts]
+    clean_start = 0
+    previous_recorded: datetime | None = None
+    for index, (recorded, observed, receipt) in enumerate(timed_receipts):
+        if (
+            previous_recorded is not None
+            and recorded - previous_recorded > max_gap
+        ):
+            clean_start = index
+        if (
+            recorded < observed
+            or recorded - observed > MAX_REPLAY_CLOCK_SKEW
+            or _receipt_breaks_clean_soak(receipt)
+        ):
+            clean_start = index + 1
+        previous_recorded = recorded
+    clean_suffix = timed_receipts[clean_start:]
+    if (
+        clean_suffix
+        and clean_suffix[-1][0] - clean_suffix[0][0]
+        >= required_window
+    ):
+        recorded_at = tuple(item[0] for item in clean_suffix)
+        observed_at = tuple(item[1] for item in clean_suffix)
+        receipts = [item[2] for item in clean_suffix]
     receipt_set_sha256 = hashlib.sha256(
         json.dumps(
             receipts,
@@ -696,6 +724,47 @@ def _has_unregistered_policy_change(
         } - set(evidence_refs):
             return True
     return False
+
+
+def _receipt_breaks_clean_soak(receipt: dict[str, Any]) -> bool:
+    """Return whether this observation restarts the consecutive clean window."""
+
+    comparisons = receipt["comparisons"]
+    candidate_refs = [
+        comparison["candidate_ref"] for comparison in comparisons
+    ]
+    if (
+        len(comparisons)
+        != receipt["snapshot"]["source_counts"]["next_tasks"]
+        or len(candidate_refs) != len(set(candidate_refs))
+        or any(
+            not _REQUIRED_DIMENSION_SET.issubset(
+                {
+                    dimension["name"]
+                    for dimension in comparison["dimensions"]
+                }
+            )
+            for comparison in comparisons
+        )
+        or not _selection_evidence_is_consistent(receipt)
+    ):
+        return True
+    if receipt.get("reconciliation_issues"):
+        return True
+    selection = receipt.get("selection_difference")
+    if (
+        isinstance(selection, dict)
+        and selection.get("classification") != "policy_change"
+    ):
+        return True
+    if _has_unregistered_policy_change([receipt]):
+        return True
+    return any(
+        dimension.get("matches") is False
+        and dimension.get("classification") != "policy_change"
+        for comparison in comparisons
+        for dimension in comparison["dimensions"]
+    )
 
 
 def _selection_evidence_is_consistent(

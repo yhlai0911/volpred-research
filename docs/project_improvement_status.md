@@ -2322,3 +2322,27 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ Issue #6 checker本身為 **`root_cause_fixed_and_verified`**。Live report的3個
   dead links、2個scenario evidence gaps、27個unresolved navigation targets以及
   4個single-mode gaps是#8/T20的精確輸入；frontend parity仍未完成，不得混淆口徑。
+
+## 2026-07-27 — Queue Ownership 七日 clean-suffix gate（Issue #9）
+
+- ✅ 依既有 Matt Issue #3 → master spec → T03 ticket 接續，未重跑規劃。Live queue
+  已回復 `queued_execution`；read-back 為 3,386 rows／84 pending／0 active claim，
+  owner-state SHA-256 `3653409c0c3e22dcdb3e5c12c3a5d86014789db6718e19af5b48033f002fb1f2`。
+- ✅ 23:37 UTC 後五筆 hourly v4 receipt 均為 0 reconciliation issue；winner 差異是
+  已由 policy oracle 與 snapshot evidence 綁定的 `coordinator_capability_contract`。
+- 🟡 這五筆尚不是 clean suffix：最新 receipt 另有 8 個 implementation mismatch，
+  其中 3 個來自 active legacy claim 沒有 durable expiry，5 個來自 main-thread lane
+  尚未映射到 Coordinator capability；兩類都仍是 Issue #9 的真 blocker。
+- ✅ Closure audit 證明原 assessor 只在 owner SHA 改變時重啟窗口；同 owner 下即使
+  legacy provenance／row evidence 已修好，舊 blocking receipt 仍會永久留在七日集合，
+  使 ticket 在數學上永遠無法完成。
+- ✅ 公開 assessment seam 現取最新一段內容乾淨、時間連續且 replay clock live 的
+  segment；只有該 segment 真正滿七日才取代舊集合，歷史 receipt 仍 append-only 保留。
+  Owner epoch 與 segment 皆以 `max(recorded_at, observed_at)` 的有效順序處理，最新
+  receipt 無法靠大幅 backdate 移到舊窗口前方，也無法藏掉 owner mismatch。
+  Legacy corruption、incomplete row-count、歷史 gap 與歷史 clock violation均先紅後綠；
+  近期 gap／clock violation與兩種 backdate attack仍會推翻較舊完整窗口。Assessment
+  **37 passed**，相鄰 cutover／replay／observer suites 合計 **104 passed**。
+- 🟡 clean suffix 目前尚未開始，Work Coordinator owner 仍為 `legacy/1`，且未執行
+  stage／owner transfer／downstream acknowledgement／rollback rehearsal；Issue #9
+  維持 **`contained`**，不得提前標完成。

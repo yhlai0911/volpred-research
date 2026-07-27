@@ -144,6 +144,241 @@ def test_seven_continuous_clean_days_are_ready_for_cutover(tmp_path: Path) -> No
     assert report.covered_dimensions == REQUIRED_DIMENSIONS
 
 
+def test_seven_clean_days_after_a_blocking_receipt_restart_the_soak(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    blocked_path = observations / "scheduled_00.json"
+    blocked = json.loads(blocked_path.read_text(encoding="utf-8"))
+    blocked["reconciliation_issues"] = [
+        {
+            "classification": "legacy_corruption",
+            "code": "unknown_source",
+            "source_system": "next_tasks",
+            "record_id": "task-1",
+            "detail": "legacy provenance had not been reconciled yet",
+            "evidence_ref": "snapshot://pre-repair",
+        }
+    ]
+    blocked_path.write_text(json.dumps(blocked), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is True
+    assert report.reason_codes == ()
+    assert report.observation_count == 8
+    assert report.recorded_from == (START + timedelta(days=1)).isoformat()
+
+
+def test_seven_clean_days_after_an_incomplete_receipt_restart_the_soak(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    incomplete_path = observations / "scheduled_00.json"
+    incomplete = json.loads(incomplete_path.read_text(encoding="utf-8"))
+    incomplete["comparisons"] = []
+    incomplete_path.write_text(json.dumps(incomplete), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is True
+    assert report.reason_codes == ()
+    assert report.observation_count == 8
+    assert report.recorded_from == (START + timedelta(days=1)).isoformat()
+
+
+def test_seven_clean_days_after_a_historical_gap_restart_the_soak(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index, day in enumerate((0, 1, 2, 5, 6, 7, 8, 9, 10, 11, 12)):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=day),
+        )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=12, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is True
+    assert report.reason_codes == ()
+    assert report.observation_count == 8
+    assert report.recorded_from == (START + timedelta(days=5)).isoformat()
+
+
+def test_seven_clean_days_after_a_historical_clock_error_restart_the_soak(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    invalid_path = observations / "scheduled_00.json"
+    invalid = json.loads(invalid_path.read_text(encoding="utf-8"))
+    invalid["recorded_at"] = (
+        START - timedelta(seconds=1)
+    ).isoformat()
+    invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is True
+    assert report.reason_codes == ()
+    assert report.observation_count == 8
+    assert report.recorded_from == (START + timedelta(days=1)).isoformat()
+
+
+def test_recent_gap_invalidates_an_older_complete_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index, day in enumerate((*range(8), 10)):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=day),
+        )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=10, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("observation_gap_exceeded",)
+
+
+def test_recent_clock_error_invalidates_an_older_complete_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    invalid_path = observations / "scheduled_08.json"
+    invalid = json.loads(invalid_path.read_text(encoding="utf-8"))
+    invalid["recorded_at"] = (
+        START + timedelta(days=8, seconds=-1)
+    ).isoformat()
+    invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.reason_codes == ("replay_clock_not_live",)
+
+
+def test_backdated_latest_clock_error_cannot_hide_before_a_clean_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    invalid_path = observations / "scheduled_08.json"
+    invalid = json.loads(invalid_path.read_text(encoding="utf-8"))
+    invalid["recorded_at"] = (
+        START - timedelta(seconds=1)
+    ).isoformat()
+    invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert "replay_clock_not_live" in report.reason_codes
+
+
+def test_backdated_latest_owner_mismatch_cannot_hide_before_clean_window(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(9):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(days=index),
+        )
+    invalid_path = observations / "scheduled_08.json"
+    invalid = json.loads(invalid_path.read_text(encoding="utf-8"))
+    invalid["recorded_at"] = (
+        START - timedelta(seconds=1)
+    ).isoformat()
+    invalid["queue_owner_evidence"]["state_sha256"] = "d" * 64
+    invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(days=8, hours=1),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert report.ready_for_cutover is False
+    assert report.observation_count == 0
+    assert "no_observations" in report.reason_codes
+
+
 def test_only_receipts_bound_to_current_owner_state_count_toward_window(
     tmp_path: Path,
 ) -> None:
