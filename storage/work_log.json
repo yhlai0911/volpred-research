@@ -28269,5 +28269,25 @@
     "owner": "hourly-slot-2-55ae23658b3f4d4abeb5f8133dda8c96",
     "commit": null,
     "summary": "PHASE A triage_failed: K1721 same collision-guard failure as K1720. Freed stale binding via cleanup, re-enqueued agent job 534021 (linked cleanly) with corrected artifact path. Marked old followup dispatched."
+  },
+  {
+    "timestamp": "2026-07-27T23:42:41+08:00",
+    "task_type": "platform_ops",
+    "task_id": "K1728",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-39041f4be7f54483ae4ab604703cbfec",
+    "owner": "hourly-slot-1-39041f4be7f54483ae4ab604703cbfec",
+    "commit": "cfc0a4f84",
+    "summary": "CI Experiment Artifacts Gate red remediation (fire_reason=requested:ci_red). Root cause: experiments/k1728 reached main in merge bebfe96 without its knowledge.json entry (invisible to topic dedup / article selection). The entry existed but was stranded uncommitted across fires (daemon-churn, no session collected it; per-fire phase_z skips knowledge.json as baseline-dirty from another session). Main-thread K1259 re-verification: numbers match experiments/k1728/k1728_results.json exactly (verdict=NULL, seed=42, n_rows=4741, n_oos=2246; free EPU/News specs all negative incremental OOS R2 vs HAR, non-sig Clark-West; paid VIX +0.0803 CW t=9.56). Landed knowledge.json (with k1728 + 6 other stranded same-day entries: K1724/K1725/K1715/Paper3_E3 x2) via git_writer_lock.py commit under lock+HEAD-fence -> cfc0a4f84. check_experiment_artifacts now PASS on all bases; fix carried to tip for cohort-drain push. Note: fire's ci-root-30277897265 label is a stale/reused reference (that task already succeeded, provider-test fix); the live red was the artifacts gate. Test Suite pytest on origin tip is independent/in_progress (repo churn cancels it per push), not the identified root cause."
+  },
+  {
+    "timestamp": "2026-07-27T23:55:36+08:00",
+    "task_type": "experiment",
+    "task_id": "K1811",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-39041f4be7f54483ae4ab604703cbfec",
+    "owner": "hourly-slot-1-39041f4be7f54483ae4ab604703cbfec",
+    "commit": "4a7cf3c7b",
+    "summary": "PHASE A collect_completed: K1811 climate/physical-risk volatility event study (oldest pending compute followup, queued 04:47, experiment_gate passed). Ran fallback code-reviewer subagent (Codex primary path credit-limited until 2026-08-02) — VERDICT PASS, lookahead clean (estimation window (-60,-11) strictly precedes event window (-5,10), no shift/full-sample leak), every headline number reconciles exactly with k1811_results.json (K1259 main-thread verification). Verdict MIXED_MOSTLY_NULL: hurricane mean abnormal vol NULL (KIE p=0.73); positive Saffir dose-response (KIE cum_0_10 OLS slope +3.78 p=0.0049) but FRAGILE (Cat-5 Michael Cook's D=1.36 ~10x next; drop-Cat5 p=0.078) and market-confounded (SPY gradient p=0.067); heat fully NULL. seed=42, n=43 events. Emitted review_verdict.json (PASS, sha256-pinned claim surface) + reproduce_spec.json (volpred.reproduce_spec.v1) into the worktree; merged dispatch-slot-3-047f093b-k1811 via merge_worktree.sh (cert PASS + artifact PASS) -> merge cabc7dbe9; wrote knowledge entry (item 909134dd) and committed it in the same push via git_writer_lock -> 4a7cf3c7b. check_experiment_artifacts PASS on push base and full scan. mark-followup-dispatched set on the compute job."
   }
 ]

@@ -34145,12 +34145,26 @@
         "to": "pending",
         "by": "release",
         "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:34:23.211069+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1720-6c33b8-b5cbfd",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:50:07.174970+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-586d6a; awaiting PHASE A collection",
-    "last_released_at": "2026-07-27T15:14:21.862440+00:00",
+    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-586d6a; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-b5cbfd; awaiting PHASE A collection",
+    "last_released_at": "2026-07-27T15:50:07.174962+00:00",
     "last_release_reason": "external_compute_job_failed",
-    "compute_released_at": "2026-07-27T15:14:21.862048+00:00",
+    "compute_released_at": "2026-07-27T15:50:07.174608+00:00",
     "compute_release_reason": "external_compute_job_failed"
   },
   {
@@ -34223,7 +34237,9 @@
     "compute_released_at": "2026-07-27T15:14:21.862048+00:00",
     "compute_release_reason": "external_compute_job_failed",
     "compute_job_id": "agent-agent-brief_k1721-6f6bbb-534021",
-    "blocked_reason": "external_compute_job_active"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-27T15:34:24Z",
+    "compute_finished_at": "2026-07-27T15:56:35Z"
   },
   {
     "id": "K1722",
@@ -34282,8 +34298,9 @@
     "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
     "compute_release_reason": "external_compute_job_failed",
     "compute_job_id": "agent-agent-brief_k1811-e2748d-6bc0b3",
-    "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-27T15:05:55Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-27T15:05:55Z",
+    "compute_finished_at": "2026-07-27T15:34:22Z"
   },
   {
     "id": "K1723",
@@ -35989,7 +36006,7 @@
     "title": "K1733: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 606). Original: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1733.py with signal.shift(1) + seed=42, (c) K1733_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36018,11 +36035,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1733-bf0e58",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:50:07.175121+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
       }
     ],
-    "compute_job_id": "agent-agent-brief_k1733-bf0e58",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-agent-brief_k1733-bf0e58; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-agent-brief_k1733-bf0e58; awaiting PHASE A collection",
+    "last_released_at": "2026-07-27T15:50:07.175118+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:50:07.174608+00:00",
+    "compute_release_reason": "external_compute_job_failed"
   },
   {
     "id": "K1734",
@@ -36061,8 +36087,9 @@
       }
     ],
     "compute_job_id": "agent-agent-brief_k1734-205644",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T15:34:23Z"
   },
   {
     "id": "daily_digest_20260718",
@@ -42141,11 +42168,30 @@
     "title": "[gate 缺陷] PHASE-Z orphan-half 認領在高併發下失效：38 次 'candidates exceeds cap 8' 直接放棄",
     "task_type": "platform_ops",
     "priority": 3,
-    "status": "pending",
+    "status": "in_progress",
     "created_at": "2026-07-21T13:14:14.434697+00:00",
     "source": "dispatch",
     "parent_task_id": "assign_f59976b6",
-    "description": "驗收 assign_f59976b6 時發現（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 4 節）。\n\n現象：dispatch_supervisor.log 全期出現 38 次 'phase_z: orphan-half probe skipped — N candidates exceeds cap 8'（實例 2026-07-20 03:12 為 23 candidates）。多條主線程共用同一個 checkout 時，單次 drain 的 foreign 清單長達 50+ 檔，orphan-half 認領機制因超過全域 cap 8 直接整批放棄。\n\n影響：不會造成錯誤 commit（foreign 已被正確排除，safety-net auto-commit 自 07-19 起 = 0 次），但**孤兒半成品的自動回收在高併發下等於沒開**。max_slots 加碼後此情形只會更常見。\n\n要做：把全域 cap 8 改為依 ownership 分群後再套 cap（每個 owner 各自判定），讓「別人的髒檔很多」不再連帶淹掉自己那幾個孤兒半成品的認領。改動點：scripts/dispatch_supervisor/phase_z.py 的 orphan-half probe；需補 test。"
+    "description": "驗收 assign_f59976b6 時發現（證據見 storage/ops/throughput_audit_max_slots_20260721.md 第 4 節）。\n\n現象：dispatch_supervisor.log 全期出現 38 次 'phase_z: orphan-half probe skipped — N candidates exceeds cap 8'（實例 2026-07-20 03:12 為 23 candidates）。多條主線程共用同一個 checkout 時，單次 drain 的 foreign 清單長達 50+ 檔，orphan-half 認領機制因超過全域 cap 8 直接整批放棄。\n\n影響：不會造成錯誤 commit（foreign 已被正確排除，safety-net auto-commit 自 07-19 起 = 0 次），但**孤兒半成品的自動回收在高併發下等於沒開**。max_slots 加碼後此情形只會更常見。\n\n要做：把全域 cap 8 改為依 ownership 分群後再套 cap（每個 owner 各自判定），讓「別人的髒檔很多」不再連帶淹掉自己那幾個孤兒半成品的認領。改動點：scripts/dispatch_supervisor/phase_z.py 的 orphan-half probe；需補 test。",
+    "claimed_by": "codex-vscode-root",
+    "claimed_at": "2026-07-27T15:33:47.564580+00:00",
+    "claim_expires_at": "2026-07-27T17:33:47.564580+00:00",
+    "claim_session_id": "3d99d33a99ae",
+    "status_history": [
+      {
+        "ts": "2026-07-27T15:33:47.564596+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T15:33:47.844371+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-root"
+      }
+    ],
+    "started_at": "2026-07-27T15:33:47.844357+00:00"
   },
   {
     "id": "k892_k994_pinned_snapshot_repoint_20260721",
@@ -49646,7 +49692,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "incident_escalation",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "incident_id": "ci-red-30277897265",
@@ -49681,10 +49727,6 @@
     ],
     "post_merge_actions": [],
     "priority_capped_from": 1,
-    "claimed_by": "codex-vscode-root",
-    "claimed_at": "2026-07-27T15:31:30.976895+00:00",
-    "claim_expires_at": "2026-07-27T17:31:30.976895+00:00",
-    "claim_session_id": "1723f6d0034c",
     "status_history": [
       {
         "ts": "2026-07-27T15:31:30.976911+00:00",
@@ -49697,9 +49739,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T15:33:37.305245+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode-root"
       }
     ],
-    "started_at": "2026-07-27T15:31:31.240882+00:00"
+    "started_at": "2026-07-27T15:31:31.240882+00:00",
+    "completed_at": "2026-07-27T15:33:37.305222+00:00",
+    "result": "root_cause=CI injects OPENAI_API_KEY sentinel before the full suite, but eight positive-path tests lacked explicit authorized fake provider receipts/binaries and were correctly denied before their asserted behavior; repair_commit=pending_post_commit; local_commit=6814bef0a; verification=OPENAI_API_KEY sentinel 58 passed, knowledge ratchet now passes via concurrent main-thread write"
   },
   {
     "id": "assign_2e4e9461",
@@ -49707,7 +49757,7 @@
     "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1426/k1426_oos_results.json — 3 班\n- experiments/k1426/k1426_oos_return_benchmark.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T153202097882Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-27T15:32:02.188578+00:00",
     "payload": {
@@ -49726,7 +49776,48 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-27T15:32:02.176618+00:00",
-      "last_seen_at": "2026-07-27T15:32:02.176618+00:00"
+      "last_seen_at": "2026-07-27T15:32:02.176618+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T16:00:01.130160+00:00",
+      "deferred": [
+        "experiments/k1426/k1426_oos_results.json: 已保存，且 2.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1426/k1426_oos_return_benchmark.json: 已保存，且 2.8 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "superseded_at": "2026-07-27T16:00:04.458754+00:00",
+    "superseded_by": "assign_430e0693",
+    "completed_at": "2026-07-27T16:00:04.458754+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
+  },
+  {
+    "id": "assign_430e0693",
+    "title": "PHASE-Z 卡住檔案 incident（8b33de33840bada3）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1426/k1426_oos_results.json — 4 班\n- experiments/k1426/k1426_oos_return_benchmark.json — 4 班\n- experiments/k1698/review_verdict.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T160001038582Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T16:00:04.470704+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "8b33de33840bada3",
+      "paths": [
+        "experiments/k1426/k1426_oos_results.json",
+        "experiments/k1426/k1426_oos_return_benchmark.json",
+        "experiments/k1698/review_verdict.json"
+      ],
+      "streaks": {
+        "experiments/k1426/k1426_oos_results.json": 4,
+        "experiments/k1426/k1426_oos_return_benchmark.json": 4,
+        "experiments/k1698/review_verdict.json": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T160001038582Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T16:00:04.458754+00:00",
+      "last_seen_at": "2026-07-27T16:00:04.458754+00:00"
     },
     "priority_capped_from": 1
   }

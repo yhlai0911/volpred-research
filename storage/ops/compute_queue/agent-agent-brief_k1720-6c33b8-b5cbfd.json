@@ -20,12 +20,12 @@
     "5280"
   ],
   "env": {},
-  "status": "queued",
+  "status": "failed",
   "queue_priority": 5,
   "queued_at": "2026-07-27T15:09:55Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-27T15:34:23Z",
+  "completed_at": "2026-07-27T15:34:24Z",
+  "exit_code": -2,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1720-6c33b8-b5cbfd.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1720-6c33b8-b5cbfd.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-87c7269d-k1720/experiments/K1720/K1720_results.json",
@@ -42,12 +42,14 @@
   "followup_dispatched": false,
   "source_task_id": "K1720",
   "source_task_link": {
-    "state": "error",
-    "attempted_at": "2026-07-27T15:09:55Z",
-    "linked_at": null,
-    "error": "RuntimeError: source task is not legally bindable: task_id=K1720 status=awaiting_agent_job compute_job_id='agent-agent-brief_k1720-6c33b8-586d6a' requested_job_id=agent-agent-brief_k1720-6c33b8-b5cbfd"
+    "state": "linked",
+    "attempted_at": "2026-07-27T15:34:23Z",
+    "linked_at": "2026-07-27T15:34:23Z",
+    "error": null
   },
   "timeout_seconds": 5400,
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1720-6c33b8.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1720-6c33b8-b5cbfd.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1720-6c33b8-b5cbfd.md",
+  "claimed_by_pid": 34225,
+  "claimed_by_pid_start_wall": "Mon Jul 27 22:30:05 2026"
 }
