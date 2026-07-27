@@ -1,6 +1,6 @@
 # K1399：VIX 四個分量裡，水準最強；5 日均線也過門檻，但沒有增量優勢
 
-**摘要**：把 VIX 拆成水準（Level）、變化量（ΔVIX）、波動率溢酬（Vol Premium）、5 日均線（MA5）四個分量，分別放進 HAR-ABS 預測 SPY 日絕對報酬。結果要講得更精確：VIX 水準是表現最好的單一分量（DM t = -4.40 vs HAR-ABS），5 日均線也能單獨擊敗基準（DM t = -3.53），但直接和水準相比則顯著較差（DM t = +3.47）。ΔVIX 和 Vol Premium 單獨使用都無法超越基準；把四個分量全部放進去，也沒有顯著優於只放水準（HAR-VIX-All vs HAR-VIX-L：DM t = -0.40，p = 0.69）。
+**摘要**：把 VIX 拆成水準（Level）、變化量（ΔVIX）、波動率溢酬（Vol Premium）、5 日均線（MA5）四個分量，分別放進 HAR-ABS 預測 SPY 日絕對報酬。結果要講得更精確：VIX 水準是表現最好的單一分量（DM t = -4.97 vs HAR-ABS），5 日均線也能單獨擊敗基準（DM t = -4.08），但直接和水準相比則顯著較差（DM t = +3.66）。ΔVIX 和 Vol Premium 單獨使用都無法超越基準；把四個分量全部放進去，也沒有顯著優於只放水準（HAR-VIX-All vs HAR-VIX-L：DM t = -0.16，p = 0.87）。
 
 ---
 
@@ -26,7 +26,7 @@ K1399 的設計是把 VIX 拆成四個特徵，分別檢查：
 | 資產 | SPY（本地 CSV：`paper/leverage-direction/data/spy_vix_2004-2026.csv`） |
 | 預測目標 | 日絕對 log 報酬 `|r_t|` |
 | IS 期間 | 2005-01-04 至 2018-12-31（n = 3,522） |
-| OOS 期間 | 2019-01-02 至 2026-05-19（n = 1,865） |
+| OOS 期間 | 2019-01-02 至 2026-07-24（n = 1,900） |
 | 模型估計 | OLS + HC3（IS 固定係數，OOS 靜態預測） |
 | 損失函數 | QLIKE（Patton 2011 Form B：`mean[log(ŷ) + |r| / ŷ]`） |
 | 顯著性門檻 | Harvey et al. (2016) 建議的 `|t| > 3.0` |
@@ -69,12 +69,12 @@ Vol Premium 的 winsorize 邊界只用 IS 樣本估計，再套用到 OOS，避�
 
 | 排名 | 模型 | OOS QLIKE | vs HAR-ABS | DM t vs 基準 | Harvey 通過 |
 |------|------|-----------|-----------|--------------|-------------|
-| 1 | HAR-VIX-All | -3.9423 | -0.0260 | -4.36 | ✓ |
-| 2 | HAR-VIX-L | -3.9411 | -0.0248 | -4.40 | ✓ |
-| 3 | HAR-VIX-T | -3.9312 | -0.0150 | -3.53 | ✓ |
-| 4 | HAR-ABS（基準） | -3.9163 | — | — | — |
-| 5 | HAR-VIX-P | -3.9161 | +0.0001 | +0.82 | ✗ |
-| 6 | HAR-VIX-dV | -3.9121 | +0.0042 | +1.01 | ✗ |
+| 1 | HAR-VIX-All | -3.9380 | -0.0270 | -4.70 | ✓ |
+| 2 | HAR-VIX-L | -3.9375 | -0.0265 | -4.97 | ✓ |
+| 3 | HAR-VIX-T | -3.9275 | -0.0164 | -4.08 | ✓ |
+| 4 | HAR-ABS（基準） | -3.9110 | — | — | — |
+| 5 | HAR-VIX-P | -3.9109 | +0.0001 | +0.72 | ✗ |
+| 6 | HAR-VIX-dV | -3.9064 | +0.0046 | +1.15 | ✗ |
 
 這張表最重要的訊息有兩層：
 
@@ -89,16 +89,16 @@ Vol Premium 的 winsorize 邊界只用 IS 樣本估計，再套用到 OOS，避�
 
 | 比較 | DM t | p-value | Harvey 通過 | 解讀 |
 |------|------|---------|-------------|------|
-| HAR-VIX-dV vs L | +4.15 | 3.4e-05 | ✓ | dV 顯著差於 L |
-| HAR-VIX-P vs L | +4.42 | 1.1e-05 | ✓ | P 顯著差於 L |
-| HAR-VIX-T vs L | +3.47 | 5.3e-04 | ✓ | T 顯著差於 L |
-| HAR-VIX-All vs L | -0.40 | 0.690 | ✗ | 與 L 無顯著差異 |
+| HAR-VIX-dV vs L | +4.68 | 3.1e-06 | ✓ | dV 顯著差於 L |
+| HAR-VIX-P vs L | +4.98 | 6.9e-07 | ✓ | P 顯著差於 L |
+| HAR-VIX-T vs L | +3.66 | 2.6e-04 | ✓ | T 顯著差於 L |
+| HAR-VIX-All vs L | -0.16 | 0.871 | ✗ | 與 L 無顯著差異 |
 
 這裡的訊息很清楚：**HAR-VIX-T 雖然能贏基準，但在直接對決裡仍然輸給 HAR-VIX-L。** 因此，若你的問題是「最值得加進 HAR 的那一個 VIX 分量是誰」，答案還是水準，不是 5 日均線。
 
 ### 發現三：HAR-VIX-All 拿到最佳 QLIKE，但沒有顯著贏過 HAR-VIX-L
 
-HAR-VIX-All 的 OOS QLIKE 排名第一，但只比 HAR-VIX-L 好 0.0012 左右；對應的 pairwise DM t = -0.40，p = 0.69，完全不到 Harvey 門檻。
+HAR-VIX-All 的 OOS QLIKE 排名第一，但只比 HAR-VIX-L 好 0.0005 左右；對應的 pairwise DM t = -0.16，p = 0.87，完全不到 Harvey 門檻。
 
 這代表：
 
@@ -162,8 +162,8 @@ HAR-VIX-All 的 IS 樣本 VIF：
 
 ## 結論
 
-K1399 的結論應改寫成更精確的版本：**VIX 水準是最強的單一分量；5 日均線也能單獨擊敗 HAR-ABS，但沒有贏過水準；ΔVIX 與 Vol Premium 則無法單獨超越基準。** 進一步看增量比較，HAR-VIX-All 並沒有顯著優於 HAR-VIX-L（DM t = -0.40，p = 0.69），因此 parsimonious 的讀法仍然成立。
+K1399 的結論應改寫成更精確的版本：**VIX 水準是最強的單一分量；5 日均線也能單獨擊敗 HAR-ABS，但沒有贏過水準；ΔVIX 與 Vol Premium 則無法單獨超越基準。** 進一步看增量比較，HAR-VIX-All 並沒有顯著優於 HAR-VIX-L（DM t = -0.16，p = 0.87），因此 parsimonious 的讀法仍然成立。
 
 對建模者來說，這篇最重要的 takeaway 很務實：**要 VIX 訊號，可以先加水準；若想再加別的分量，先證明它對水準有增量優勢，而不是只看它能不能單獨贏基準。**
 
-*本文基於實驗 K1399（腳本：`experiments/k1399/k1399_vix_decomp.py`，結果：`experiments/k1399/k1399_vix_decomp_results.json`）。數據來源：SPY 與 VIX 本地整理資料，期間涵蓋 2004-2026；本文檢定樣本為 IS 3,522、OOS 1,865。*
+*本文基於實驗 K1399（腳本：`experiments/k1399/k1399_vix_decomp.py`，結果：`experiments/k1399/k1399_vix_decomp_results.json`）。數據來源：SPY 與 VIX 本地整理資料，期間涵蓋 2004-2026；本文檢定樣本為 IS 3,522、OOS 1,900。*

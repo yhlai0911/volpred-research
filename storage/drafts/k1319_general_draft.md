@@ -51,7 +51,7 @@ experiment_refs:
 ## 測試設定
 
 資產：標普 500 ETF（SPY）
-樣本外測試期間：2020 年 1 月至 2026 年 5 月，共 1613 個交易日
+樣本外測試期間：2020 年 1 月至 2026 年 7 月，共 1647 個交易日
 波動率代理：日 squared log return（r²）
 基準模型：HAR，以及更簡單的 EWMA（指數加權移動平均，λ = 0.94）
 
@@ -70,15 +70,15 @@ experiment_refs:
 
 ![QLIKE 損失對比：HAR 最佳，HAR-W 最差](storage/drafts/article_images/k1319_qlike.png)
 
-MSE 退步幅度更為明顯：HAR-W 比 HAR 惡化 121.439%，誤差超過兩倍。
+MSE 退步幅度更為明顯：HAR-W 比 HAR 惡化 121.451%，誤差超過兩倍。
 
 ![MSE 對比：HAR-W 比 HAR 差](storage/drafts/article_images/k1319_mse.png)
 
 更重要的是，這個差距不是抽樣的運氣。用 Diebold-Mariano 統計量（附 Harvey-Leybourne-Newbold 有限樣本修正）正式檢定：
 
-> **t = +6.2929，p < 0.001**
+> **t = +6.2317，p < 0.001**
 
-t 是正的代表 HAR-W 的損失較高；p 幾乎是零代表這個差異不會是偶然。1613 個樣本外交易日裡，HAR-W 系統性地比 HAR 差。
+t 是正的代表 HAR-W 的損失較高；p 幾乎是零代表這個差異不會是偶然。1647 個樣本外交易日裡，HAR-W 系統性地比 HAR 差。
 
 ---
 
@@ -120,4 +120,4 @@ t 是正的代表 HAR-W 的損失較高；p 幾乎是零代表這個差異不會
 
 ---
 
-**數據來源**：SPY 日收盤價來自 yfinance，實驗期間 2020-01-01 至 2026-05-20，OOS N = 1613。
+**數據來源**：SPY 日收盤價來自 yfinance，實驗期間 2020-01-01 至 2026-07-24，OOS N = 1647。
