@@ -181,6 +181,12 @@
       "tracked_outputs": ["storage/ops/**", "storage/next_tasks.json", "storage/publication_candidates.json", "storage/reports/feed.json", "storage/.failed_supabase_syncs.json", "dynamic exact output_paths"],
       "reason": "Direct state is PHASE-Z-owned; due jobs retain their own row policy, and compute/lazypack outputs use exact output_paths in the central reaper."
     },
+    "ci_watch": {
+      "entrypoint": "scripts/cron_ci_watch.sh",
+      "policy": "delegated_delivery_contract",
+      "tracked_outputs": ["storage/ops/ci_watch_state.json", "storage/ops/incidents.json", "storage/next_tasks.json"],
+      "reason": "The dedicated watcher delegates canonical task writes to the queue gateway and incident lifecycle owner; durable task/result state remains PHASE-Z-owned."
+    },
     "owned_email_recovery": {
       "entrypoint": "scripts/recover_owned_email_notifications.py",
       "policy": "no_repo_tracked_output",

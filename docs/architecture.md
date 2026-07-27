@@ -917,7 +917,13 @@ opt-out／clear／delete 邊界見 `docs/analytics-privacy-contract.md`；Admin 
 `config/runtime_schedules.json.schedule_materialization.mode=active` 是目前正式時鐘。
 單一 LaunchAgent `com.volpred.operations-core-scheduler` 讀取同一份 canonical spec，
 以 `generation + job_id + scheduled UTC` 建 immutable fire identity，並以 fenced lease、
-retry、timeout、terminal receipt 與 catch-up policy 執行 49 個 `system_crontab` jobs。
+retry、timeout、terminal receipt 與 catch-up policy 執行 51 個 `system_crontab` jobs。
+
+`ci_watch` 是其中的獨立 5 分鐘工作，呼叫 `scripts/check_alerts.py --ci-only`。
+它與每小時 `check_alerts` 分離：CI 紅燈的入池、派工、GitHub 綠燈驗證與 incident
+回收，不再等待發文／旱災／orphan 等重型警報流程。修復任務若被 G6 24h 上限拒絕，
+只建立同 incident 一張 `incident_escalation` 根因任務；沒有 durable task receipt
+時，偵測通知不得宣稱「已啟動自動修復」。
 
 - 主機 crontab 的 VolPred entries 已收斂為 0；它不再是 business schedule owner。
 - 舊 per-job LaunchAgents 已 bootout；wrapper 邊界另有 fail-closed owner gate，避免 stale

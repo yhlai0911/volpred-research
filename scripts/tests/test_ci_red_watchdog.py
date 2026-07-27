@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -893,7 +894,7 @@ def test_task_append_hard_failure_escalates_once(tmp_path, monkeypatch):
     def fail_append(_task, _path):
         raise OSError("disk unavailable")
 
-    monkeypatch.setattr(check_alerts, "_append_next_task_locked", fail_append)
+    monkeypatch.setattr(check_alerts, "_append_next_task_record", fail_append)
     run, sent, _dispatches = _harness(tmp_path)
 
     summary = run(RED1)
@@ -1094,12 +1095,15 @@ def test_failure_summary_reads_the_exact_attempt(monkeypatch):
     assert captured["cmd"][captured["cmd"].index("--attempt") + 1] == "2"
 
 
-def test_main_polls_ci_before_long_remediation_steps():
+def test_ci_poll_has_a_dedicated_small_entrypoint():
     source = (PROJECT_ROOT / "scripts" / "check_alerts.py").read_text(encoding="utf-8")
     main_source = source[source.index("def main()") :]
-    assert main_source.index("ci_watch = _auto_remediate_ci_red()") < main_source.index(
-        "drought_remediation = _auto_remediate_publish_drought()"
-    )
+    ci_source = source[source.index("def ci_watch_main()") :]
+
+    assert "ci_watch = _auto_remediate_ci_red()" not in main_source.split(
+        "def ci_watch_main()"
+    )[0]
+    assert "result = _auto_remediate_ci_red()" in ci_source
 
 
 def test_failure_cause_extractor_prefers_specific_error():
@@ -1160,6 +1164,108 @@ def test_detection_notice_is_sent_once_per_incident(tmp_path):
     assert len(run.detections) == 1  # idempotent: second tick does not resend
     assert summary["detection"]["reason"] == "detection_already_notified"
     assert sent == []
+
+
+def test_throttled_ci_repair_falls_back_to_one_uncapped_root_task(tmp_path):
+    """G6 may collapse repair work, but it must never strand a red main."""
+    created_at = datetime.now(timezone.utc).isoformat()
+    capped = [
+        {
+            "id": f"alert_fixture_{index}",
+            "source": "auto_discovered",
+            "task_type": "platform_ops",
+            "priority": 2,
+            "status": "pending",
+            "created_at": created_at,
+        }
+        for index in range(8)
+    ]
+    (tmp_path / "next_tasks.json").write_text(
+        json.dumps(capped),
+        encoding="utf-8",
+    )
+    run, _sent, dispatches = _harness(tmp_path)
+
+    summary = run(RED1)
+
+    tasks = _tasks(tmp_path)
+    root_task = next(task for task in tasks if task["id"] == "ci-root-29233920234")
+    assert root_task["source"] == "incident_escalation"
+    assert root_task["ci_incident_id"] == "ci-red-29233920234"
+    assert root_task["status"] == "pending"
+    assert not any(task["id"] == "ci-red-29233920234" for task in tasks)
+    incident = _state(tmp_path)["active_incident"]
+    assert incident["repair_task_ids"] == [root_task["id"]]
+    assert incident["repair_admission"]["status"] == "fallback_escalation_admitted"
+    assert incident["repair_admission"]["denied_task_id"] == "ci-red-29233920234"
+    assert dispatches == [root_task["id"]]
+    assert summary["task_added"] is True
+    assert "已啟動自動修復" in run.detections[0]["body"]
+    assert root_task["id"] in run.detections[0]["body"]
+
+
+def test_detection_does_not_claim_repair_started_when_all_admission_fails(
+    tmp_path,
+    monkeypatch,
+):
+    """A detection notice must report the durable admission fact, not intent."""
+
+    def deny_every_task(task, _path):
+        return {
+            **task,
+            "throttled_by_remediation_cap": True,
+        }, False
+
+    monkeypatch.setattr(
+        check_alerts,
+        "_append_next_task_record",
+        deny_every_task,
+    )
+    run, _sent, dispatches = _harness(tmp_path)
+
+    run(RED1)
+
+    incident = _state(tmp_path)["active_incident"]
+    assert incident["repair_task_ids"] == []
+    assert incident["repair_admission"]["status"] == "failed"
+    assert dispatches == []
+    body = run.detections[0]["body"]
+    assert "尚未啟動自動修復" in body
+    assert "已啟動自動修復" not in body
+
+
+def test_legacy_phantom_task_is_rebuilt_before_dispatch(tmp_path):
+    run, _sent, dispatches = _harness(tmp_path)
+    run(RED1)
+    (tmp_path / "next_tasks.json").write_text("[]\n", encoding="utf-8")
+    dispatches.clear()
+
+    summary = run(RED1)
+
+    assert summary["task_added"] is True
+    assert [task["id"] for task in _tasks(tmp_path)] == ["ci-red-29233920234"]
+    assert dispatches == ["ci-red-29233920234"]
+    incident = _state(tmp_path)["active_incident"]
+    assert incident["missing_repair_task_ids"] == ["ci-red-29233920234"]
+
+
+def test_missing_task_is_never_dispatched_as_pending():
+    dispatches = []
+    incident = {
+        "repair_task_ids": ["ci-red-missing"],
+        "dispatch_requested_task_ids": [],
+    }
+
+    result, error = check_alerts._ci_dispatch_pending_task(
+        incident,
+        {},
+        dispatcher=lambda task_id: dispatches.append(task_id),
+        now_iso=NOW,
+    )
+
+    assert result is None
+    assert error == "repair_task_missing_from_queue: ci-red-missing"
+    assert dispatches == []
 
 
 # --- stale-red supersession (assign_cb9c9fd1, second recurrence 2026-07-19) ----

@@ -716,6 +716,16 @@ def _ci_latest_completed_run() -> dict | None:
     )
 
 
+def _append_next_task_record(
+    task: dict,
+    next_tasks_path: Path,
+) -> tuple[dict, bool]:
+    """Return the durable admission result instead of discarding its reason."""
+    from volpred.ops.next_tasks import append_task_record
+
+    return append_task_record(task, path=next_tasks_path, if_exists="skip")
+
+
 def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
     """Append one caller-built task via the single ingress gateway.
 
@@ -734,9 +744,7 @@ def _append_next_task_locked(task: dict, next_tasks_path: Path) -> bool:
     release 死鎖補救同理：死鎖 detector 每小時重評，且文章類任務在真乾涸時由
     dispatch 端 ``_promote_starved_article_tasks`` 現場量測後晉升。
     """
-    from volpred.ops.next_tasks import append_task_record
-
-    _, created = append_task_record(task, path=next_tasks_path, if_exists="skip")
+    _, created = _append_next_task_record(task, next_tasks_path)
     return created
 
 
@@ -837,6 +845,7 @@ def _build_ci_repair_task(
         # ``request_fire`` wakes the generic dispatcher rather than targeting a
         # task id. This schema flag lets a fresh CI P1 pierce starvation lockout.
         "dispatch_preempt": True,
+        "incident_id": incident_id,
         "ci_incident_id": incident_id,
         "ci_run_key": _ci_run_key(run),
         "created_at": now_iso,
@@ -857,6 +866,50 @@ def _build_ci_repair_task(
             "5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n"
             "成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，"
             "最終 GitHub success 由 CI watcher 獨立驗證。"
+        ),
+    }
+
+
+def _build_ci_root_cause_task(
+    run: dict,
+    *,
+    now_iso: str,
+    failure_cause: str,
+    incident_id: str,
+    denied_task_id: str,
+) -> dict:
+    """Build the single uncapped loop-exit task for a throttled CI incident."""
+    run_id = run.get("databaseId")
+    attempt = int(run.get("attempt") or 1)
+    url = run.get("url") or (
+        "https://github.com/yhlai0911/volpred-research/actions/runs/"
+        f"{run_id}"
+    )
+    return {
+        "id": f"ci-root-{run_id}",
+        "task_type": "platform_ops",
+        "priority": 1,
+        # G6 deliberately exempts incident escalation: this is the one bounded
+        # exit from a saturated remediation loop, not another retry ticket.
+        "source": "incident_escalation",
+        "status": "pending",
+        "dispatch_lane": "agent",
+        "dispatch_preempt": True,
+        "incident_id": incident_id,
+        "ci_incident_id": incident_id,
+        "ci_run_key": _ci_run_key(run),
+        "denied_repair_task_id": denied_task_id,
+        "created_at": now_iso,
+        "title": f"CI 單一根因修復（run {run_id}）— main Test Suite",
+        "description": (
+            f"CI incident {incident_id} 的一般修復任務 {denied_task_id} "
+            "被 24h G6 上限拒絕；本任務是同一 incident 唯一、可越過上限的根因出口。\n"
+            f"Run: {url}\nattempt: {attempt}\n"
+            f"已知失敗摘要：{failure_cause}\n\n"
+            "行動：讀完整 failed log、本地重現、修底層契約並做同類掃描；"
+            "不可只 rerun、清狀態或回報既有綠燈。result 必須帶 "
+            "`root_cause=<一行>; repair_commit=pending_post_commit`，"
+            "由 CI watcher 以後續 GitHub green 獨立結案。"
         ),
     }
 
@@ -1551,8 +1604,12 @@ def _ci_dispatch_pending_task(
     now_iso: str,
 ) -> tuple[dict | None, str | None]:
     dispatched = incident.setdefault("dispatch_requested_task_ids", [])
+    missing_task_ids = []
     for task_id in incident.get("repair_task_ids") or []:
-        status = str((records.get(task_id) or {}).get("status") or "pending").lower()
+        if task_id not in records:
+            missing_task_ids.append(task_id)
+            continue
+        status = str(records[task_id].get("status") or "").lower()
         if status != "pending":
             continue
         # request_fire is a generic wake-up, not a targeted claim. Re-request on
@@ -1569,6 +1626,8 @@ def _ci_dispatch_pending_task(
             return result if isinstance(result, dict) else {"requested": True}, None
         error = (result or {}).get("error") if isinstance(result, dict) else "request returned false"
         return result if isinstance(result, dict) else {"requested": False}, f"dispatch_failed: {error}"
+    if missing_task_ids:
+        return None, f"repair_task_missing_from_queue: {', '.join(missing_task_ids)}"
     return None, None
 
 
@@ -1887,15 +1946,82 @@ def _reduce_ci_run(
                 incident_id=incident.get("incident_id"),
             )
             try:
-                summary["task_added"] = _append_next_task_locked(task, next_tasks_path)
-                if task["id"] not in task_ids:
-                    task_ids.append(task["id"])
-                state["last_task_id"] = task["id"]
-                summary["task_id"] = task["id"]
-                if summary["task_added"]:
-                    _ci_incident_store_sync("bind", incident, task_id=task["id"])
+                admitted, created = _append_next_task_record(task, next_tasks_path)
+                rejected_reason = None
+                if admitted.get("throttled_by_remediation_cap"):
+                    rejected_reason = "remediation_cap"
+                elif admitted.get("duplicate_of"):
+                    rejected_reason = f"semantic_duplicate:{admitted['duplicate_of']}"
+
+                if created or not rejected_reason:
+                    actual_task_id = str(admitted.get("id") or task["id"])
+                    admission_status = "admitted" if created else "already_admitted"
+                else:
+                    denied_task_id = task["id"]
+                    root_task = _build_ci_root_cause_task(
+                        run,
+                        now_iso=now_iso,
+                        failure_cause=str(incident.get("root_cause") or "原因待查"),
+                        incident_id=str(incident.get("incident_id") or denied_task_id),
+                        denied_task_id=denied_task_id,
+                    )
+                    root_record, root_created = _append_next_task_record(
+                        root_task,
+                        next_tasks_path,
+                    )
+                    root_rejected = bool(
+                        root_record.get("throttled_by_remediation_cap")
+                        or root_record.get("duplicate_of")
+                    )
+                    if root_created or not root_rejected:
+                        actual_task_id = str(root_record.get("id") or root_task["id"])
+                        created = root_created
+                        admission_status = "fallback_escalation_admitted"
+                    else:
+                        actual_task_id = ""
+                        created = False
+                        admission_status = "failed"
+
+                    incident["repair_admission"] = {
+                        "status": admission_status,
+                        "denied_task_id": denied_task_id,
+                        "denied_reason": rejected_reason,
+                        "task_id": actual_task_id or None,
+                        "at": now_iso,
+                    }
+
+                if actual_task_id:
+                    if "repair_admission" not in incident:
+                        incident["repair_admission"] = {
+                            "status": admission_status,
+                            "task_id": actual_task_id,
+                            "at": now_iso,
+                        }
+                    if actual_task_id not in task_ids:
+                        task_ids.append(actual_task_id)
+                    state["last_task_id"] = actual_task_id
+                    summary["task_id"] = actual_task_id
+                    summary["task_added"] = created
+                    if created:
+                        _ci_incident_store_sync(
+                            "bind",
+                            incident,
+                            task_id=actual_task_id,
+                        )
+                else:
+                    hard_failure = (
+                        "repair_task_admission_failed: "
+                        f"{incident['repair_admission'].get('denied_reason')}"
+                    )
             except Exception as exc:  # noqa: BLE001
                 warn("ci_watch", "P1 repair task append failed", err=str(exc), task_id=task["id"])
+                incident["repair_admission"] = {
+                    "status": "failed",
+                    "denied_task_id": task["id"],
+                    "denied_reason": f"{type(exc).__name__}: {exc}",
+                    "task_id": None,
+                    "at": now_iso,
+                }
                 hard_failure = f"append_failed: {type(exc).__name__}: {exc}"
 
         records = task_status_probe(task_ids)
@@ -2163,11 +2289,27 @@ def _notify_ci_detection(state: dict, *, now_iso: str, sender=None) -> dict:
     failure = incident.get("latest_failure") or incident.get("first_failure") or {}
     run_url = failure.get("url") or "（run URL 待補；請見 GitHub Actions）"
     head_sha = str(failure.get("head_sha") or "")
+    admission = incident.get("repair_admission") or {}
+    repair_task_ids = [
+        str(task_id) for task_id in (incident.get("repair_task_ids") or []) if task_id
+    ]
+    repair_started = bool(repair_task_ids) and admission.get("status") != "failed"
+    if repair_started:
+        repair_heading = "## CI Test Suite 於 main 失敗，已啟動自動修復"
+        repair_detail = f"修復任務：{repair_task_ids[-1]}"
+    else:
+        repair_heading = "## CI Test Suite 於 main 失敗，尚未啟動自動修復"
+        repair_detail = (
+            "入池失敗："
+            f"{admission.get('denied_reason') or '尚未取得 durable task receipt'}；"
+            "已轉 critical escalation，不能把意圖誤報成已啟動。"
+        )
     level = "warn"
     title = f"CI 紅燈偵測（{incident_id}）"
     body = (
         f"白話原因：{cause}\n\n"
-        "## CI Test Suite 於 main 失敗，已啟動自動修復\n"
+        f"{repair_heading}\n"
+        f"{repair_detail}\n"
         f"原始 run：{run_url}\n"
         f"run id：{failure.get('run_id')}（attempt {int(failure.get('attempt') or 1)}）\n"
         f"head_sha：{head_sha[:12]}\n\n"
@@ -2450,8 +2592,56 @@ def _handle_ci_runs(
 
         observed = max(runs, key=_ci_run_sort_key)
         _ci_set_latest_observed(state, observed)
+        incident = state.get("active_incident")
+        if isinstance(incident, dict):
+            task_ids = list(incident.get("repair_task_ids") or [])
+            records = task_status_probe(task_ids)
+            missing_task_ids = [task_id for task_id in task_ids if task_id not in records]
+            if missing_task_ids:
+                incident["missing_repair_task_ids"] = sorted(
+                    set(incident.get("missing_repair_task_ids") or [])
+                    | set(missing_task_ids)
+                )
+                incident["repair_task_ids"] = [
+                    task_id for task_id in task_ids if task_id in records
+                ]
+                incident["repair_admission"] = {
+                    "status": "failed",
+                    "denied_reason": (
+                        "legacy_phantom_task_missing_from_queue: "
+                        + ", ".join(missing_task_ids)
+                    ),
+                    "task_id": None,
+                    "at": now_iso,
+                }
+
+        runs_to_process = _ci_runs_to_process(runs, state)
+        incident = state.get("active_incident")
+        if isinstance(incident, dict) and not incident.get("repair_task_ids"):
+            latest_failure = incident.get("latest_failure") or {}
+            failure_sort = _ci_record_sort_key(latest_failure)
+            has_newer_green = any(
+                str(run.get("conclusion") or "").lower() == "success"
+                and _ci_run_sort_key(run) > failure_sort
+                for run in runs
+            )
+            if not has_newer_green:
+                failed_run = next(
+                    (
+                        run
+                        for run in runs
+                        if int(run.get("databaseId") or 0)
+                        == int(latest_failure.get("run_id") or 0)
+                        and int(run.get("attempt") or 1)
+                        == int(latest_failure.get("attempt") or 1)
+                    ),
+                    None,
+                )
+                if failed_run is not None and failed_run not in runs_to_process:
+                    runs_to_process.insert(0, failed_run)
+
         transitions = []
-        for run in _ci_runs_to_process(runs, state):
+        for run in runs_to_process:
             transitions.append(
                 _reduce_ci_run(
                     state,
@@ -2835,11 +3025,10 @@ def main() -> int:
     # the hourly check gives live React-error / 5xx detection (2026-06-24 #418).
     os.environ.setdefault("VOLPRED_FRONTEND_PROBE", "1")
 
-    # CI is the most time-sensitive check and owns a cross-tick repair state
-    # machine. Run it before release/drought/orphan subprocesses: some of those
-    # have 240-600s internal caps while this wrapper itself is capped at 300s,
-    # which previously meant the CI poll could be killed before it even started.
-    ci_watch = _auto_remediate_ci_red()
+    # CI has a dedicated five-minute Operations Core job. Keeping it inside this
+    # hourly, long-running alert pass made recovery latency depend on unrelated
+    # release/drought work and created two schedule owners for one state machine.
+    ci_watch = {"checked": False, "reason": "dedicated_ci_watch_job"}
 
     # 2026-04-20 universal piggy-back scheduler: macOS host cron daemon only
     # reliably fires `0 * * * *` pattern on this machine (confirmed via
@@ -3044,5 +3233,25 @@ def main() -> int:
     return 0
 
 
+def ci_watch_main() -> int:
+    """Small dedicated entrypoint for the five-minute CI incident owner."""
+    result = _auto_remediate_ci_red()
+    print("=== ci-watch ===")
+    print("JSON: " + json.dumps(result, ensure_ascii=False, sort_keys=True))
+    # Provider outages and durable admission failures live in incident state and
+    # notification outboxes; a non-zero wrapper retry would multiply the same
+    # fire in addition to the next five-minute scheduled observation.
+    return 0
+
+
+def _entrypoint(argv: list[str]) -> int:
+    if not argv:
+        return main()
+    if argv == ["--ci-only"]:
+        return ci_watch_main()
+    print("usage: check_alerts.py [--ci-only]", file=sys.stderr)
+    return 2
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(_entrypoint(sys.argv[1:]))
