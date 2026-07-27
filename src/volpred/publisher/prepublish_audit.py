@@ -383,8 +383,17 @@ def run_llm_consistency_check(key_claims: str, source_summary: str) -> dict:
     try:
         stdout, stderr = proc.communicate(timeout=60)
     except subprocess.TimeoutExpired:
+        from volpred.ops import termination
+
         try:
-            procutil.kill_pgid(os.getpgid(proc.pid))
+            pgid = os.getpgid(proc.pid)
+            intent = termination.arm(
+                target_kind="pgid", target_id=pgid,
+                reason="prepublish_audit_timeout",
+                actor="prepublish_audit",
+                signal_sequence=termination.terminating_signals(),
+            )
+            procutil.kill_pgid(pgid, intent=intent)
         except (ProcessLookupError, PermissionError) as kill_exc:
             print(f"[prepublish_audit] agy timed out; killpg failed: {kill_exc}", file=sys.stderr)
         proc.wait()

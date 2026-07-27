@@ -734,9 +734,17 @@ def _agy_warn_band_adjudicator(
         )
     except subprocess.TimeoutExpired as exc:
         from scripts.dispatch_supervisor import procutil
+        from volpred.ops import termination
 
         try:
-            procutil.kill_pgid(os.getpgid(proc.pid))
+            pgid = os.getpgid(proc.pid)
+            intent = termination.arm(
+                target_kind="pgid", target_id=pgid,
+                reason="member_qa_adjudicator_timeout",
+                actor="questions",
+                signal_sequence=termination.terminating_signals(),
+            )
+            procutil.kill_pgid(pgid, intent=intent)
         except (ProcessLookupError, PermissionError):  # silent-ok: cleanup race-safe; the timeout still raises below
             pass
         proc.wait()

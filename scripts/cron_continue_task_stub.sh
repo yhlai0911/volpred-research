@@ -51,9 +51,14 @@ cleanup() {
   for pid in "${STUB_PID:-}" "${DISPATCH_PID:-}"; do
     if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
       echo "[CLEANUP] parent exiting (status=$exit_status); killing PGID $pid"
-      kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null
-      sleep 2
-      kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null
+      /opt/homebrew/bin/uv run python scripts/termination_signal.py \
+        --target-kind pgid --target-id "$pid" --signal TERM_KILL \
+        --grace-seconds 2 \
+        --reason continue_task_cleanup --actor cron_continue_task_stub 2>/dev/null || \
+      /opt/homebrew/bin/uv run python scripts/termination_signal.py \
+        --target-kind pid --target-id "$pid" --signal TERM_KILL \
+        --grace-seconds 2 \
+        --reason continue_task_cleanup_fallback --actor cron_continue_task_stub 2>/dev/null
     fi
   done
 }

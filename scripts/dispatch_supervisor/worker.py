@@ -30,14 +30,16 @@ from __future__ import annotations
 
 import logging
 import os
+import signal
 import subprocess
 import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Sequence
+from typing import Callable
 
-from volpred.ops import fire_manifest
+from volpred.ops import fire_manifest, termination
 
 from . import (
     alerts, claim_release, codex_failover, failure_class, identity, isolation,
@@ -340,7 +342,15 @@ def _wait_with_fatal_probe(
             return "fatal_stall", None
 
 
-def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> bool:
+def _kill_pgid(
+    pgid: int,
+    *,
+    reason: str = "worker_watchdog",
+    job_id: str | None = None,
+    attempt: int | None = None,
+    state_path: Path = state.STATE_PATH,
+    grace_s: float = GRACE_PERIOD_S,
+) -> bool:
     """SIGTERM whole process group; SIGKILL after grace_s if still alive.
 
     Codex review fix #5 (2026-07-04): the actual implementation moved to
@@ -349,7 +359,20 @@ def _kill_pgid(pgid: int, *, grace_s: float = GRACE_PERIOD_S) -> bool:
     so both now share one implementation. Kept as a thin wrapper so existing
     callers/tests referencing `worker._kill_pgid` by name are unaffected.
     """
-    return procutil.kill_pgid(pgid, grace_s=grace_s)
+    ledger_path = termination.ledger_for_state(state_path)
+    intent = termination.arm(
+        target_kind="pgid",
+        target_id=pgid,
+        reason=reason,
+        actor="dispatch-supervisor.worker",
+        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+        job_id=job_id,
+        attempt=attempt,
+        ledger_path=ledger_path,
+    )
+    return procutil.kill_pgid(
+        pgid, intent=intent, ledger_path=ledger_path, grace_s=grace_s,
+    )
 
 
 def _dispatch_actor(
@@ -450,6 +473,7 @@ def _run_one_attempt(
     effort: str = DISPATCH_EFFORT,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    process_identity_sink: Callable[[int], None] | None = None,
 ) -> tuple[int, float]:
     """Single Popen attempt. Returns (exit_code, duration_s, attempt_output).
 
@@ -569,6 +593,8 @@ def _run_one_attempt(
         state.release_reservation(job_id=job_id, path=state_path)
         raise
     pgid = os.getpgid(proc.pid)
+    if process_identity_sink is not None:
+        process_identity_sink(pgid)
     # Attach pid+pgid IMMEDIATELY (fast — os.getpgid() is a plain syscall) so
     # the pid=None reservation window (a supervisor crash here would strand
     # current_job forever — see supervisor._handle_restart_orphan's
@@ -603,7 +629,10 @@ def _run_one_attempt(
             "instead of waiting out the %ds hang cap",
             attempt, FATAL_STALL_S, pgid, timeout_s,
         )
-        killed = bool(_kill_pgid(pgid))
+        killed = bool(_kill_pgid(
+            pgid, reason="fatal_stall", job_id=job_id, attempt=attempt,
+            state_path=state_path,
+        ))
         try:
             proc.wait(timeout=GRACE_PERIOD_S + 5)
         except subprocess.TimeoutExpired:
@@ -631,7 +660,10 @@ def _run_one_attempt(
         # "hang" and short-circuit retry. Returning the sentinel makes the
         # classification path single-source and impossible to misread.
         LOG.warning("worker attempt=%d timeout=%ds — SIGTERM→SIGKILL pgid=%d", attempt, timeout_s, pgid)
-        killed = bool(_kill_pgid(pgid))
+        killed = bool(_kill_pgid(
+            pgid, reason="work_timeout", job_id=job_id, attempt=attempt,
+            state_path=state_path,
+        ))
         try:
             proc.wait(timeout=GRACE_PERIOD_S + 5)
         except subprocess.TimeoutExpired:
@@ -662,12 +694,18 @@ def _run_one_attempt(
             pass  # silent-ok: sidecar disabled or never written
         except OSError as exc:
             LOG.warning("debug sidecar cleanup %s failed: %s", debug_path, exc)
+    normalized_exit = _normalize_signal_exit(exit_code)
     if managed_state and not state.mark_job_phase(
         job_id=job_id, phase="classifying", expected_phase="running",
         expected_attempt=attempt, expected_pid=proc.pid, path=state_path,
     ):
+        if _classify(normalized_exit, attempt_output) == "external_signal":
+            # Health may have won completion CAS after sending this signal.
+            # Preserve the raw exit for durable intent attribution instead of
+            # collapsing the exact race into a generic superseded result.
+            return normalized_exit, duration, attempt_output
         return OWNERSHIP_LOST_SENTINEL, duration, attempt_output
-    return _normalize_signal_exit(exit_code), duration, attempt_output
+    return normalized_exit, duration, attempt_output
 
 
 def _attempt_codex_failover(
@@ -724,6 +762,7 @@ def _attempt_codex_failover(
             on_process_finished=_track_finished,
             workdir=workdir,
             isolated_workspace=isolated_workspace,
+            state_path=state_path,
         )
     except Exception as exc:  # failover must never take the supervisor down
         LOG.exception("codex failover raised unexpectedly reason=%s", reason)
@@ -822,6 +861,7 @@ def run_worker(
         model = OPUS_MODEL
         final_model = model
         LOG.info("worker attempt=%d/%d model=%s effort=%s", attempt, max_attempts, model, DISPATCH_EFFORT)
+        attempt_identity: dict[str, int] = {}
         exit_code, duration, attempt_output = _run_one_attempt(
             prompt_text=prompt_text, model=model, timeout_s=timeout_s,
             log_path=log_path, attempt=attempt, schedule_id=schedule_id,
@@ -830,6 +870,9 @@ def run_worker(
             job_id=job_id, slot_id=slot_id,
             workdir=workdir,
             isolated_workspace=isolated_workspace,
+            process_identity_sink=lambda pgid: attempt_identity.__setitem__(
+                "pgid", pgid,
+            ),
         )
         total_duration += duration
         final_exit = exit_code
@@ -925,22 +968,84 @@ def run_worker(
             attempt_outcome = "fatal_fastfail"
 
         if category == "external_signal":
-            # Dead child WE never killed: something outside the supervisor
-            # signalled the group (sender unknown — this receipt is the
-            # attribution groundwork, assign_7f15f261). Same claim-release as a
-            # hang (the process is confirmed gone; the claim must not strand),
-            # but the notification is an honest WARN naming the signal, never a
-            #「卡住 N 分鐘」CRITICAL about a fire that was working to its last
-            # second (2026-07-21: three healthy fires died this way at ~600s).
+            signum = exit_code - 128 if exit_code > 128 else exit_code
+            sent_receipt = termination.wait_for_sent_signal(
+                target_kind="pgid",
+                target_id=int(attempt_identity.get("pgid", -1)),
+                signum=signum,
+                job_id=job_id,
+                attempt=attempt,
+                ledger_path=termination.ledger_for_state(state_path),
+            )
+            if sent_receipt is not None:
+                # A durable *sent* receipt is the only evidence allowed to
+                # attribute a raw wait status to this system. An armed intent
+                # or failed syscall is deliberately insufficient.
+                repended_tasks = claim_release.repend_killed_job_claims(
+                    job_id=job_id, slot_id=slot_id,
+                    source="worker-system-termination",
+                )
+                entry = state.record_completion(
+                    job_id=job_id, expected_attempt=attempt,
+                    expected_phase="classifying",
+                    exit_code=exit_code, outcome="system_terminated",
+                    final_model=model, path=state_path,
+                )
+                LOG.warning(
+                    "worker attempt=%d matched system termination intent=%s "
+                    "reason=%s signal=%d released claims=%s",
+                    attempt, sent_receipt.get("intent_id"),
+                    sent_receipt.get("reason"), signum,
+                    repended_tasks or "none",
+                )
+                return WorkerResult(
+                    exit_code=exit_code, outcome="system_terminated",
+                    final_model=model, attempts=attempt,
+                    duration_s=total_duration, log_tail=log_tail,
+                )
+
+            unresolved_attempt = termination.match_unresolved_signal_attempt(
+                target_kind="pgid",
+                target_id=int(attempt_identity.get("pgid", -1)),
+                signum=signum,
+                job_id=job_id,
+                attempt=attempt,
+                ledger_path=termination.ledger_for_state(state_path),
+            )
+            if unresolved_attempt is not None:
+                repended_tasks = claim_release.repend_killed_job_claims(
+                    job_id=job_id, slot_id=slot_id,
+                    source="worker-system-termination-unconfirmed",
+                )
+                state.record_completion(
+                    job_id=job_id, expected_attempt=attempt,
+                    expected_phase="classifying", exit_code=exit_code,
+                    outcome="system_termination_unconfirmed",
+                    final_model=model, path=state_path,
+                )
+                LOG.error(
+                    "worker signal=%d matches durable system attempt intent=%s "
+                    "but sender died before result receipt; attribution is unconfirmed",
+                    signum, unresolved_attempt.get("intent_id"),
+                )
+                return WorkerResult(
+                    exit_code=exit_code,
+                    outcome="system_termination_unconfirmed",
+                    final_model=model, attempts=attempt,
+                    duration_s=total_duration, log_tail=log_tail,
+                )
+
+            # No exact sent receipt exists. POSIX cannot identify the sender;
+            # therefore the only honest attribution is unknown_external.
             # No in-fire retry: the killer is still out there and a fresh fire
             # from the next tick re-dispatches the released claims anyway.
             repended_tasks = claim_release.repend_killed_job_claims(
-                job_id=job_id, slot_id=slot_id, source="worker-external-signal",
+                job_id=job_id, slot_id=slot_id,
+                source="worker-unknown-external-signal",
             )
-            signum = exit_code - 128 if exit_code > 128 else exit_code
             LOG.warning(
-                "worker attempt=%d killed by EXTERNAL signal %d after %.1fs "
-                "(not our watchdog); released claims=%s",
+                "worker attempt=%d killed by UNKNOWN EXTERNAL signal %d after %.1fs "
+                "(no matching sent intent); released claims=%s",
                 attempt, signum, total_duration, repended_tasks or "none",
             )
             # Killer tracer (2026-07-21, 4th unattributed kill): POSIX cannot
@@ -961,7 +1066,7 @@ def run_worker(
             entry = state.record_completion(
                 job_id=job_id, expected_attempt=attempt,
                 expected_phase="classifying",
-                exit_code=exit_code, outcome="external_signal", final_model=model,
+                    exit_code=exit_code, outcome="unknown_external", final_model=model,
                 path=state_path,
             )
             if entry is not None:
@@ -976,7 +1081,7 @@ def run_worker(
                     state_path=state_path,
                 )
             return WorkerResult(
-                exit_code=exit_code, outcome="external_signal", final_model=model,
+                exit_code=exit_code, outcome="unknown_external", final_model=model,
                 attempts=attempt, duration_s=total_duration, log_tail=log_tail,
             )
 

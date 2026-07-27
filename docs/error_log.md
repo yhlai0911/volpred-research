@@ -3725,7 +3725,11 @@ append `signal_result`。Intent綁定 pid/pgid start-time generation、signal se
 job/attempt，且同一 exact target+signal只能 attempt一次；per-pid fallback還要在
 syscall前重驗 start identity。Reader持 shared lock、拒絕 symlink及不安全檔案，
 malformed row只會fail closed；partial tail會在下一次append前回滾至最後完整newline。
-Python、Bash與launchctl正式路徑均收斂至此 owner，AST/shell gate禁止raw
+完整row若在file或parent-directory fsync失敗，writer會在同一把exclusive lock內
+回滾到append前offset並再次fsync，因此reader不會把未durable的attempt/result當成
+歸因證據。Python、Bash與launchd正式路徑均收斂至此 owner；daemon reload改為
+精確PID的durable SIGTERM，並回讀KeepAlive產生的新PID，不再透過無法綁定generation
+的`launchctl kickstart -k`。AST/shell gate禁止raw
 `kill/killpg/terminate/pthread_kill`、subprocess `kill` command及 shell TERM/KILL
 重新出現。
 
@@ -3737,7 +3741,7 @@ raw exit與記憶體中的 exact PGID；sent publication短窗先bounded wait，
 `system_termination_unconfirmed`，不冒稱已確認，也不誤標
 `unknown_external`。無任何 matching sent／unresolved attempt才使用
 `unknown_external`，alert與completion口徑一致。Focused termination／supervisor／
-Git writer／agentic CLI suites **304 passed**；child-process tests以
+Git writer／agentic CLI suites **339 passed**；child-process tests以
 `VOLPRED_TERMINATION_LEDGER_PATH`隔離，runtime ledger列入gitignore，沒有再污染
 正式 evidence。本 termination-intent bounded slice完成五步Gate後可標
 **`root_cause_fixed_and_verified`**；Issue #45完整 checkpoint resume、formal
@@ -3771,3 +3775,28 @@ Git hook packaging與K1730 nested-DM變更，未修改或回退；真實驗收�
 `storage/ops/email_mutation_boundary_canary_latest.json`。五步Gate全過，此incident
 與Issue #18狀態升級為 **`root_cause_fixed_and_verified`**；#24/#46 legacy writer
 retirement屬獨立ticket。
+
+### 2026-07-27 — CI 自動修復把限流拒單誤記為已入池，形成 phantom task
+
+**證據化症狀**：run `30241354854` 因 `KeyError: 'incident'` 紅燈；G6 ledger 明確
+拒絕 `ci-red-30241354854`，canonical `storage/next_tasks.json` 卻沒有該 task。
+`ci_watch_state.json` 仍把同一 id 寫進 `repair_task_ids`，通知宣稱「已啟動自動
+修復」，GitHub 暫時不可用時還會把不存在的 task 當 pending 重複 request fire。
+後續 main 轉綠並非該 repair task 的可歸因成果。
+
+**根因層級與底層修復**：`_append_next_task_locked()` 丟棄
+`append_task_record()` 回傳的 durable admission record，只保留 `created` bool；
+caller 又無條件綁定原始 id。現在 CI owner 保存完整 admission receipt，只有
+canonical queue 真有 row 才綁定與派工。一般修復被 G6／semantic dedupe 拒絕時，
+建立同 incident 唯一 `ci-root-<run>`、`source=incident_escalation` 的 uncapped
+loop-exit task；連此出口都失敗則轉 critical，偵測通知明寫「尚未啟動」。舊
+phantom id 會與 queue 回讀對帳、移除並在仍紅時重建；dispatch 對缺 row fail
+closed，不再預設 pending。
+
+**時鐘與驗證**：CI state machine 從每小時重型 `check_alerts` 拆成 Operations Core
+獨立 `ci_watch`（`*/5 * * * *`），wrapper 已同步至 live `~/.volpred/bin` 並逐 byte
+回讀一致；schedule validate 顯示 51/51 jobs 由 Operations Core 擁有。CI watchdog
+完整 **63 passed**，涵蓋 throttle fallback、全 admission 失敗誠實通知、舊 phantom
+重建與 missing task 禁派工。正式 GitHub read-back 遇到 API TLS handshake timeout，
+因此本次只標 **`contained`**；待 provider 恢復後仍須回讀新 cadence receipt、確認
+最新 green 收口 active incident，再升級為 `root_cause_fixed_and_verified`。

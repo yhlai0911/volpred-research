@@ -20,6 +20,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .common import project_path
+from . import termination
 from .local_control_plane import (
     ExecutionReceipt,
     _atomic_write_json,
@@ -44,7 +45,8 @@ CODEX_EXEC_EXTRA_ARGS: tuple[str, ...] = ("--full-auto",)
 
 
 def _run_agentic(
-    argv: list[str], *, cwd: Any, timeout: int
+    argv: list[str], *, cwd: Any, timeout: int,
+    termination_ledger_path: Path | None = None,
 ) -> subprocess.CompletedProcess:
     """`subprocess.run` for an agentic CLI, with the whole process tree killed on timeout.
 
@@ -74,7 +76,17 @@ def _run_agentic(
         stdout, stderr = proc.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         try:
-            procutil.kill_pgid(os.getpgid(proc.pid))
+            pgid = os.getpgid(proc.pid)
+            intent = termination.arm(
+                target_kind="pgid", target_id=pgid,
+                reason="execution_brief_agent_timeout",
+                actor="execution_brief",
+                signal_sequence=termination.terminating_signals(),
+                ledger_path=termination_ledger_path,
+            )
+            procutil.kill_pgid(
+                pgid, intent=intent, ledger_path=termination_ledger_path,
+            )
         except (ProcessLookupError, PermissionError) as exc:
             print(
                 f"[execution_brief] {argv[0]} timed out and its process group "

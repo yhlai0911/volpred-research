@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import logging
 import os
+import signal
 import shutil
 import subprocess
 import time
@@ -49,7 +50,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from . import identity, isolation, procutil
+from volpred.ops import termination
+
+from . import identity, isolation, procutil, state
 from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
@@ -208,6 +211,7 @@ def run_codex_failover(
     on_process_finished: Callable[[int], None] | None = None,
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
+    state_path: Path = state.STATE_PATH,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
     if enabled is None:
@@ -310,7 +314,17 @@ def run_codex_failover(
             tracked_pid = proc.pid
             pgid = os.getpgid(proc.pid)
             if not on_process_started(proc.pid, pgid):
-                group_drained = procutil.kill_pgid(pgid)
+                ledger_path = termination.ledger_for_state(state_path)
+                intent = termination.arm(
+                    target_kind="pgid", target_id=pgid,
+                    reason="codex_failover_admission_rejected",
+                    actor="dispatch-supervisor.codex-failover",
+                    signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+                    ledger_path=ledger_path,
+                )
+                group_drained = procutil.kill_pgid(
+                    pgid, intent=intent, ledger_path=ledger_path,
+                )
                 stdout, _ = proc.communicate(timeout=10)
                 process_confirmed_finished = group_drained
                 result = subprocess.CompletedProcess(argv, proc.returncode or 1, stdout, "")
@@ -318,7 +332,17 @@ def run_codex_failover(
                 try:
                     stdout, _ = proc.communicate(timeout=cap_s)
                 except subprocess.TimeoutExpired as exc:
-                    group_drained = procutil.kill_pgid(pgid)
+                    ledger_path = termination.ledger_for_state(state_path)
+                    intent = termination.arm(
+                        target_kind="pgid", target_id=pgid,
+                        reason="codex_failover_timeout",
+                        actor="dispatch-supervisor.codex-failover",
+                        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+                        ledger_path=ledger_path,
+                    )
+                    group_drained = procutil.kill_pgid(
+                        pgid, intent=intent, ledger_path=ledger_path,
+                    )
                     stdout, _ = proc.communicate(timeout=15)
                     process_confirmed_finished = group_drained
                     raise subprocess.TimeoutExpired(

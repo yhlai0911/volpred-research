@@ -83,9 +83,12 @@ cleanup_legacy_codex_loop_siblings() {
   SIBLINGS=$(list_codex_loop_pids | grep -vx "$SELF" || true)
   if [ -n "$SIBLINGS" ]; then
     echo "[loop] single-instance guard: stopping $(echo "$SIBLINGS" | wc -l | tr -d ' ') existing codex_loop.sh: $(echo "$SIBLINGS" | tr '\n' ' ')"
-    for opid in $SIBLINGS; do kill -TERM "$opid" 2>/dev/null; done
-    sleep 2
-    for opid in $(list_codex_loop_pids | grep -vx "$SELF" || true); do kill -KILL "$opid" 2>/dev/null; done
+    for opid in $SIBLINGS; do
+      /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+        --target-kind pid --target-id "$opid" --signal TERM_KILL \
+        --grace-seconds 2 \
+        --reason codex_loop_singleton_cleanup --actor codex_loop 2>/dev/null
+    done
   fi
 }
 

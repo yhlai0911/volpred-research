@@ -169,7 +169,7 @@ def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
 
 
 def test_tracked_failover_keeps_pid_attached_when_timeout_kill_is_unverified(
-    monkeypatch,
+    monkeypatch, tmp_path,
 ) -> None:
     """A refused SIGKILL must leave the Codex child visible to the watchdog."""
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
@@ -192,13 +192,20 @@ def test_tracked_failover_keeps_pid_attached_when_timeout_kill_is_unverified(
 
     monkeypatch.setattr(codex_failover.subprocess, "Popen", lambda *a, **k: FakeProc())
     monkeypatch.setattr(codex_failover.os, "getpgid", lambda pid: 888)
-    monkeypatch.setattr(codex_failover.procutil, "kill_pgid", lambda pgid: False)
+    monkeypatch.setattr(
+        codex_failover.termination, "_target_identity",
+        lambda kind, target: f"{kind}:{target}:start",
+    )
+    monkeypatch.setattr(
+        codex_failover.procutil, "kill_pgid", lambda pgid, **_kwargs: False,
+    )
     seen: list[tuple] = []
 
     result = codex_failover.run_codex_failover(
         reason="quota", enabled=True, slot_id="slot-2", job_id="abcdef123456",
         on_process_started=lambda pid, pgid: bool(seen.append(("start", pid, pgid)) or True),
         on_process_finished=lambda pid: seen.append(("finish", pid)),
+        state_path=tmp_path / "dispatch_state.json",
     )
 
     assert result.recovered is False

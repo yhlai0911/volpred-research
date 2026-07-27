@@ -40,6 +40,8 @@ fi
 # the GNU-timeout exit convention that callers actually check for.
 exec python3 -c '
 import glob, os, shutil, signal, subprocess, sys
+sys.path.insert(0, os.path.join(os.getcwd(), "src"))
+from volpred.ops import termination
 
 def resolve_codex():
     # nvm puts codex on PATH only for interactive shells (nvm init lives in
@@ -66,11 +68,21 @@ proc = subprocess.Popen([codex_bin, "exec", *sys.argv[2:]], start_new_session=Tr
 try:
     sys.exit(proc.wait(timeout=timeout))
 except subprocess.TimeoutExpired:
+    intent = termination.arm(
+        target_kind="pgid", target_id=proc.pid,
+        reason="bounded_codex_timeout", actor="codex_exec_bounded",
+        signal_sequence=[signal.SIGKILL],
+    )
     try:
-        os.killpg(proc.pid, signal.SIGKILL)  # start_new_session => pgid == pid
+        termination.send_pgid(intent, signal.SIGKILL)
     except (ProcessLookupError, PermissionError) as exc:
         print(f"WARN: killpg failed ({exc}); killing pid only", file=sys.stderr)
-        proc.kill()
+        pid_intent = termination.arm(
+            target_kind="pid", target_id=proc.pid,
+            reason="bounded_codex_timeout_pid_fallback",
+            actor="codex_exec_bounded", signal_sequence=[signal.SIGKILL],
+        )
+        termination.send_pid(pid_intent, signal.SIGKILL)
     proc.wait()
     print(f"\nERROR: codex exec exceeded {timeout:.0f}s — killed", file=sys.stderr)
     sys.exit(124)

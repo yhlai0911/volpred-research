@@ -20,6 +20,21 @@ from pathlib import Path
 import pytest
 
 from scripts.dispatch_supervisor import selfreload, state
+from volpred.ops import termination
+
+
+@pytest.fixture(autouse=True)
+def _isolated_termination_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        termination, "DEFAULT_LEDGER_PATH",
+        tmp_path / "termination_intents.jsonl",
+    )
+    monkeypatch.setenv(
+        termination.LEDGER_PATH_ENV,
+        str(tmp_path / "termination_intents.jsonl"),
+    )
 
 
 @pytest.fixture(autouse=True)

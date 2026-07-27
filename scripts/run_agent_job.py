@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import signal
 import shutil
 import subprocess
 import sys
@@ -42,6 +43,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from scripts.dispatch_supervisor import failure_class, procutil  # noqa: E402
+from volpred.ops import termination  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -223,9 +225,19 @@ def _kill_agent_tree(proc: subprocess.Popen) -> bool:
         pgid = os.getpgid(proc.pid)
     except (ProcessLookupError, PermissionError) as e:
         print(f"[run_agent_job] cannot resolve pgid for {proc.pid}: {e}", file=sys.stderr, flush=True)
-        proc.kill()
+        intent = termination.arm(
+            target_kind="pid", target_id=proc.pid,
+            reason="agent_job_unresolved_pgid", actor="run_agent_job",
+            signal_sequence=[signal.SIGKILL],
+        )
+        termination.send_pid(intent, signal.SIGKILL)
         return False
-    return procutil.kill_pgid(pgid)
+    intent = termination.arm(
+        target_kind="pgid", target_id=pgid,
+        reason="agent_job_timeout", actor="run_agent_job",
+        signal_sequence=termination.terminating_signals(),
+    )
+    return procutil.kill_pgid(pgid, intent=intent)
 
 
 def main() -> int:

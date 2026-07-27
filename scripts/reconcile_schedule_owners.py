@@ -40,6 +40,7 @@ from volpred.ops.schedule_materialization import (
     load_schedule_jobs,
     load_schedule_policy,
 )
+from volpred.ops import termination
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "config" / "runtime_schedules.json"
@@ -277,11 +278,17 @@ def _run_host_reconcile(
     try:
         stdout, stderr = process.communicate(timeout=HOST_RECONCILE_TIMEOUT_SECONDS)
     except subprocess.TimeoutExpired:
-        os.killpg(process.pid, signal.SIGTERM)
+        intent = termination.arm(
+            target_kind="pgid", target_id=process.pid,
+            reason="schedule_owner_reconcile_timeout",
+            actor="reconcile_schedule_owners",
+            signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+        )
+        termination.send_pgid(intent, signal.SIGTERM)
         try:
             stdout, stderr = process.communicate(timeout=2)
         except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGKILL)
+            termination.send_pgid(intent, signal.SIGKILL)
             stdout, stderr = process.communicate()
         uncovered = sorted(required_job_ids - gated_job_ids)
         if uncovered:

@@ -94,7 +94,10 @@ def test_dead_on_arrival_child_is_reaped_in_seconds_not_at_the_hang_cap(
         assert raw_exit is None
         assert elapsed < 30, f"took {elapsed:.1f}s — that is hang-cap territory, not fast-fail"
     finally:
-        worker._kill_pgid(proc.pid and __import__("os").getpgid(proc.pid))
+        worker._kill_pgid(
+            proc.pid and __import__("os").getpgid(proc.pid),
+            state_path=tmp_path / "dispatch_state.json",
+        )
         proc.wait(timeout=15)
 
 

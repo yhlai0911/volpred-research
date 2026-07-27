@@ -58,6 +58,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
+from volpred.ops import termination
+
 from . import state
 
 LOG = logging.getLogger(__name__)
@@ -254,7 +256,14 @@ def maybe_self_reload(
 def _sigterm_self() -> None:
     """Exactly what `launchctl kickstart -k` delivers (exit 143). `KeepAlive` in
     the plist respawns us — on the new code."""
-    os.kill(os.getpid(), signal.SIGTERM)
+    intent = termination.arm(
+        target_kind="pid",
+        target_id=os.getpid(),
+        reason="supervisor_self_reload",
+        actor="dispatch-supervisor.selfreload",
+        signal_sequence=[signal.SIGTERM],
+    )
+    termination.send_pid(intent, signal.SIGTERM)
 
 
 def _parse_iso(raw: object) -> datetime | None:

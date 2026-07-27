@@ -123,12 +123,17 @@ run_claude_pass() {
             sleep "$CAP_SEC"
             if kill -0 "$CPID" 2>/dev/null; then
                 echo "[WATCHDOG] cap ${CAP_SEC}s reached — killing responder $CPID"
-                kill -TERM "$CPID" 2>/dev/null; sleep 5; kill -KILL "$CPID" 2>/dev/null
+                /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+                  --target-kind pid --target-id "$CPID" --signal TERM_KILL \
+                  --grace-seconds 5 \
+                  --reason telegram_child_cleanup --actor telegram_responder 2>/dev/null
             fi
         ) &
         WPID=$!
         wait "$CPID"; RC=$?
-        kill "$WPID" 2>/dev/null
+        /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+          --target-kind pid --target-id "$WPID" --signal TERM \
+          --reason telegram_watchdog_stop --actor telegram_responder 2>/dev/null
         exit "$RC"
     )
 }

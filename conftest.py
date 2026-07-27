@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,10 @@ os.environ["VOLPRED_NO_EMAIL"] = "1"
 os.environ["VOLPRED_NO_REMOTE_WRITE"] = "1"
 os.environ["VOLPRED_NO_REMOTE_READ"] = "1"
 os.environ["VOLPRED_NO_CANONICAL_WRITE"] = "1"
+_termination_test_dir = Path(tempfile.mkdtemp(prefix="volpred-pytest-termination-"))
+os.environ["VOLPRED_TERMINATION_LEDGER_PATH"] = str(
+    _termination_test_dir / "termination_intents.jsonl"
+)
 
 # 2026-07-14: this file was .gitignore'd (`/conftest.py`, ignored as a "stray")
 # for the whole four days the guards above existed, so no CI runner ever had it.

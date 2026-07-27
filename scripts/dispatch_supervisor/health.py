@@ -29,8 +29,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import signal
 import traceback
 from pathlib import Path
+
+from volpred.ops import termination
 
 from . import alerts, claim_release, procutil, selfreload, state
 from . import identity  # noqa: F401 — re-exported for callers/tests of health.identity
@@ -48,14 +51,33 @@ QUARANTINE_PHASES = {
 }
 
 
-def _force_kill_pgid(pgid: int) -> bool:
+def _force_kill_pgid(
+    pgid: int,
+    *,
+    job_id: str | None = None,
+    attempt: int | None = None,
+    state_path: Path = state.STATE_PATH,
+) -> bool:
     """Codex review fix #5 (2026-07-04): this used to be a near-duplicate of
     worker.py's kill routine and missed a PermissionError fix applied there
     (found via a live smoke test) — now both share `procutil.kill_pgid()`.
 
     Returns whether the group is CONFIRMED gone (2026-07-11) — a denied killpg
     used to be indistinguishable from a successful one here."""
-    return procutil.kill_pgid(pgid)
+    ledger_path = termination.ledger_for_state(state_path)
+    intent = termination.arm(
+        target_kind="pgid",
+        target_id=pgid,
+        reason="health_max_age_watchdog",
+        actor="dispatch-supervisor.health",
+        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+        job_id=job_id,
+        attempt=attempt,
+        ledger_path=ledger_path,
+    )
+    return procutil.kill_pgid(
+        pgid, intent=intent, ledger_path=ledger_path,
+    )
 
 
 def _repend_killed_job_claims(*, job_id: str, slot_id: int | str) -> list[str]:
@@ -106,7 +128,10 @@ def _check_job(
     if job.age_seconds > max_age_s:
         if identity_verdict == procutil.IDENTITY_MATCH:
             LOG.warning("health: worker pgid=%d age=%.0fs > %.0fs cap — force-killing", job.pgid, job.age_seconds, max_age_s)
-            if _force_kill_pgid(job.pgid):
+            if _force_kill_pgid(
+                job.pgid, job_id=job_id, attempt=job.attempt,
+                state_path=state_path,
+            ):
                 exit_code, outcome = -9, "killed_timeout"
                 # The process is confirmed gone, so nothing can still be acting
                 # on its claim — release it now rather than stranding the task

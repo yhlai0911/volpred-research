@@ -368,12 +368,20 @@ def _kill_process_group(proc: subprocess.Popen) -> bool:
     wrote render_lazypack.py minutes after we declared the job dead). Group-only
     kills are why a "failed" job kept writing to disk behind our back.
     """
-    ok = kill_tree(proc.pid)
+    from volpred.ops import termination
+
+    ledger = termination.DEFAULT_LEDGER_PATH
+    intent = termination.arm(
+        target_kind="pgid", target_id=proc.pid,
+        reason="lazypack_codex_timeout", actor="gen_lazypack_codex",
+        signal_sequence=termination.terminating_signals(),
+        ledger_path=ledger,
+    )
+    ok = kill_tree(proc.pid, intent=intent, ledger_path=ledger)
     if not ok:
         print(f"[gen_lazypack_codex] WARNING: could not confirm codex pid "
               f"{proc.pid} and its children are dead — a surviving worker may "
               f"still write to the output dir", file=sys.stderr)
-    proc.kill()  # reap our own handle; the tree kill already covered the group
     return ok
 
 

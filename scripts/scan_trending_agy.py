@@ -105,8 +105,17 @@ def main() -> int:
     try:
         stdout, stderr = proc.communicate(timeout=180)
     except subprocess.TimeoutExpired as exc:
+        from volpred.ops import termination
+
         try:
-            procutil.kill_pgid(os.getpgid(proc.pid))
+            pgid = os.getpgid(proc.pid)
+            intent = termination.arm(
+                target_kind="pgid", target_id=pgid,
+                reason="trending_scan_timeout",
+                actor="scan_trending_agy",
+                signal_sequence=termination.terminating_signals(),
+            )
+            procutil.kill_pgid(pgid, intent=intent)
         except (ProcessLookupError, PermissionError) as kill_exc:
             _warn_scan("agy timed out and its process group could not be killed", kill_exc)
         proc.wait()

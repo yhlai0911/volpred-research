@@ -24,6 +24,7 @@ import argparse
 import json
 import os
 import re
+import signal
 import shutil
 import subprocess
 import sys
@@ -33,6 +34,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from volpred.ops.diagnostics import warn
+from volpred.ops import termination
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from dispatch_supervisor import procutil  # noqa: E402
@@ -70,9 +72,21 @@ def run_help(path: list[str]) -> str | None:
         stdout, stderr = proc.communicate(timeout=HELP_TIMEOUT)
     except subprocess.TimeoutExpired as e:
         try:
-            procutil.kill_pgid(os.getpgid(proc.pid))
+            pgid = os.getpgid(proc.pid)
+            intent = termination.arm(
+                target_kind="pgid", target_id=pgid,
+                reason="codex_help_timeout", actor="gen_codex_cli_reference",
+                signal_sequence=termination.terminating_signals(),
+            )
+            procutil.kill_pgid(pgid, intent=intent)
         except (ProcessLookupError, PermissionError):
-            proc.kill()
+            intent = termination.arm(
+                target_kind="pid", target_id=proc.pid,
+                reason="codex_help_unresolved_pgid",
+                actor="gen_codex_cli_reference",
+                signal_sequence=[signal.SIGKILL],
+            )
+            termination.send_pid(intent, signal.SIGKILL)
         proc.wait()
         warn("codex-ref", "codex help failed", path=" ".join(path) or "<root>", err=str(e))
         return None

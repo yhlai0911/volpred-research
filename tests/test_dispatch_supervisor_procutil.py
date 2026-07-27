@@ -5,16 +5,29 @@ from __future__ import annotations
 
 import signal
 import subprocess
+from pathlib import Path
 
 import pytest
 
 from scripts.dispatch_supervisor import procutil
+from volpred.ops import termination
 
 
 class _FakeCompleted:
     def __init__(self, returncode: int, stdout: str = "") -> None:
         self.returncode = returncode
         self.stdout = stdout
+
+
+def _armed_pgid(pgid: int, ledger: Path) -> termination.TerminationIntent:
+    return termination.arm(
+        target_kind="pgid",
+        target_id=pgid,
+        reason="unit_test",
+        actor="pytest",
+        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+        ledger_path=ledger,
+    )
 
 
 def test_get_process_start_wall_returns_none_for_nonpositive_pid() -> None:
@@ -135,17 +148,20 @@ def test_pgid_members_excludes_zombies(monkeypatch) -> None:
     assert procutil.pgid_members(999) == [501, 503]
 
 
-def test_kill_pgid_reports_success_when_only_zombies_remain(monkeypatch) -> None:
+def test_kill_pgid_reports_success_when_only_zombies_remain(monkeypatch, tmp_path) -> None:
     """End of the same story: once the group holds nothing but zombies, the kill
     succeeded and kill_pgid must say so (not raise a false orphan alarm)."""
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: None)
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])  # zombies filtered out
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
-    assert procutil.kill_pgid(69948, grace_s=1) is True
+    ledger = tmp_path / "termination.jsonl"
+    assert procutil.kill_pgid(
+        69948, intent=_armed_pgid(69948, ledger), ledger_path=ledger, grace_s=1,
+    ) is True
 
 
-def test_kill_pgid_no_sigkill_when_group_dies_after_sigterm(monkeypatch) -> None:
+def test_kill_pgid_no_sigkill_when_group_dies_after_sigterm(monkeypatch, tmp_path) -> None:
     """Invariant (unchanged): a group that exits on SIGTERM is never SIGKILL'd.
 
     2026-07-11: liveness is now observed with `ps -g` rather than an
@@ -157,22 +173,28 @@ def test_kill_pgid_no_sigkill_when_group_dies_after_sigterm(monkeypatch) -> None
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])  # gone after SIGTERM
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
-    assert procutil.kill_pgid(456, grace_s=1) is True
+    ledger = tmp_path / "termination.jsonl"
+    assert procutil.kill_pgid(
+        456, intent=_armed_pgid(456, ledger), ledger_path=ledger, grace_s=1,
+    ) is True
     assert sigs == [signal.SIGTERM]
 
 
-def test_kill_pgid_escalates_to_sigkill_when_group_survives(monkeypatch) -> None:
+def test_kill_pgid_escalates_to_sigkill_when_group_survives(monkeypatch, tmp_path) -> None:
     sigs: list[int] = []
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: sigs.append(sig))
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [777])  # never dies
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
     # Survivors remain after SIGKILL → the caller must be told the kill FAILED.
-    assert procutil.kill_pgid(456, grace_s=1) is False
+    ledger = tmp_path / "termination.jsonl"
+    assert procutil.kill_pgid(
+        456, intent=_armed_pgid(456, ledger), ledger_path=ledger, grace_s=1,
+    ) is False
     assert sigs == [signal.SIGTERM, signal.SIGKILL]
 
 
-def test_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) -> None:
+def test_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch, tmp_path) -> None:
     """The 2026-07-11 hang: macOS refused `killpg` (EPERM: `killpg SIGKILL
     denied pgid=69948`) so the SIGKILL never landed — yet kill_pgid returned as
     though it had, and the supervisor mailed "SIGKILL'd a worker" about a
@@ -194,15 +216,22 @@ def test_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) -> None
     monkeypatch.setattr(procutil.os, "killpg", denied_killpg)
     monkeypatch.setattr(procutil.os, "kill", kill_one)
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: sorted(alive))
+    monkeypatch.setattr(procutil, "get_process_start_wall", lambda pid: f"start-{pid}")
+    monkeypatch.setattr(
+        procutil, "check_identity", lambda _pid, _expected: procutil.IDENTITY_MATCH,
+    )
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
-    assert procutil.kill_pgid(999, grace_s=1) is True, \
+    ledger = tmp_path / "termination.jsonl"
+    assert procutil.kill_pgid(
+        999, intent=_armed_pgid(999, ledger), ledger_path=ledger, grace_s=1,
+    ) is True, \
         "the per-pid fallback did kill it — that must be reported as success"
     assert (321, signal.SIGTERM) in per_pid
     assert (321, signal.SIGKILL) in per_pid
 
 
-def test_kill_pgid_reports_failure_when_every_signal_is_denied(monkeypatch) -> None:
+def test_kill_pgid_reports_failure_when_every_signal_is_denied(monkeypatch, tmp_path) -> None:
     """If the group cannot be signalled at all, kill_pgid must return False so
     health.py records `kill_failed_orphan` instead of claiming a clean kill."""
     def denied(*a, **k):
@@ -211,9 +240,16 @@ def test_kill_pgid_reports_failure_when_every_signal_is_denied(monkeypatch) -> N
     monkeypatch.setattr(procutil.os, "killpg", denied)
     monkeypatch.setattr(procutil.os, "kill", denied)
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [4242])
+    monkeypatch.setattr(procutil, "get_process_start_wall", lambda pid: f"start-{pid}")
+    monkeypatch.setattr(
+        procutil, "check_identity", lambda _pid, _expected: procutil.IDENTITY_MATCH,
+    )
     monkeypatch.setattr(procutil.time, "sleep", lambda s: None)
 
-    assert procutil.kill_pgid(4242, grace_s=1) is False
+    ledger = tmp_path / "termination.jsonl"
+    assert procutil.kill_pgid(
+        4242, intent=_armed_pgid(4242, ledger), ledger_path=ledger, grace_s=1,
+    ) is False
 
 
 if __name__ == "__main__":

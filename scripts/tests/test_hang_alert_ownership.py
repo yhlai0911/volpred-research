@@ -111,7 +111,7 @@ def _force_hang(monkeypatch: pytest.MonkeyPatch, *, kill_ok: bool = True) -> lis
     Returns the list that captures any hang alert it decides to send."""
     monkeypatch.setattr(procutil, "check_identity", lambda *_a, **_k: procutil.IDENTITY_MATCH)
     monkeypatch.setattr(health.procutil, "check_identity", lambda *_a, **_k: procutil.IDENTITY_MATCH)
-    monkeypatch.setattr(health, "_force_kill_pgid", lambda _pgid: kill_ok)
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda _pgid, **_kw: kill_ok)
     monkeypatch.setattr(health.procutil, "pgid_members", lambda _pgid: [])
 
     sent: list[dict] = []

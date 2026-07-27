@@ -43,6 +43,7 @@ import time
 from pathlib import Path
 
 import pytest
+from volpred.ops import termination
 
 ROOT = Path(__file__).resolve().parents[2]
 SEARCH_DIRS = ("scripts", "src")
@@ -56,6 +57,20 @@ TIMEOUT_CALLS = {"run", "call", "check_call", "check_output", "communicate", "wa
 # Every function that actually reaps a timed-out spawn's whole group. Matched as
 # a called name in the AST, so the word appearing in a docstring does not count.
 KILL_OWNERS = {"killpg", "kill_pgid", "kill_tree"}
+
+
+@pytest.fixture(autouse=True)
+def _isolated_termination_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        termination, "DEFAULT_LEDGER_PATH",
+        tmp_path / "termination_intents.jsonl",
+    )
+    monkeypatch.setenv(
+        termination.LEDGER_PATH_ENV,
+        str(tmp_path / "termination_intents.jsonl"),
+    )
 
 # Pure-metadata probes: the binary prints one line and exits, spawning nothing.
 # `codex --version` is how src/volpred/ops/alerts.py checks the failover binary is
@@ -345,7 +360,10 @@ def test_timeout_actually_reaps_the_grandchild(tmp_path: Path) -> None:
     fake_cli.chmod(0o755)
 
     with pytest.raises(subprocess.TimeoutExpired):
-        _run_agentic([str(fake_cli)], cwd=str(tmp_path), timeout=1)
+        _run_agentic(
+            [str(fake_cli)], cwd=str(tmp_path), timeout=1,
+            termination_ledger_path=tmp_path / "termination_intents.jsonl",
+        )
 
     # Outlive the grandchild's own schedule, then look.
     time.sleep(7)

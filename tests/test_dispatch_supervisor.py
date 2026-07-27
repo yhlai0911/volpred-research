@@ -232,6 +232,7 @@ def test_worker_hang_alert_and_no_retry(tmp_path: Path, monkeypatch) -> None:
     def fake_run_one_attempt(**kwargs):
         attempts.append(kwargs["attempt"])
         _reserve_like_production(kwargs)
+        kwargs["process_identity_sink"](456)
         log_path.write_text("worker timed out", encoding="utf-8")
         # Our own watchdog kill surfaces as the sentinel (2026-07-21: a raw 137
         # now means an OUTSIDE kill and takes the external_signal path instead).
@@ -1223,7 +1224,7 @@ def test_health_check_kills_overdue_job(tmp_path: Path, monkeypatch) -> None:
     # a REFUSED kill can no longer masquerade as a successful one; a mock that
     # returns None would now (correctly) be read as "the orphan survived".
     monkeypatch.setattr(
-        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        health, "_force_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
@@ -1310,7 +1311,7 @@ def test_health_kill_repends_the_claim_the_dead_fire_was_holding(
     )
 
     alerts_called: list[dict] = []
-    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: True)
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid, **_kw: True)
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
         health.alerts, "send_hang_alert",
@@ -1363,7 +1364,7 @@ def test_health_kill_repends_codex_failover_claim_for_the_same_slot(
         tmp_path, monkeypatch, task_id="assign_codex_zombie", owner=owner,
     )
 
-    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid: True)
+    monkeypatch.setattr(health, "_force_kill_pgid", lambda pgid, **_kw: True)
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **kwargs: True)
     monkeypatch.setattr(
@@ -1398,7 +1399,7 @@ def test_health_kill_completes_even_when_the_task_pool_is_unreadable(
 
     kills: list[int] = []
     monkeypatch.setattr(
-        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        health, "_force_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **kwargs: True)
@@ -1628,7 +1629,7 @@ def test_health_check_kills_overdue_job_skips_kill_on_identity_mismatch(
     # a REFUSED kill can no longer masquerade as a successful one; a mock that
     # returns None would now (correctly) be read as "the orphan survived".
     monkeypatch.setattr(
-        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        health, "_force_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
@@ -1675,7 +1676,7 @@ def test_health_check_kills_overdue_job_skips_kill_when_unverified(
     # a REFUSED kill can no longer masquerade as a successful one; a mock that
     # returns None would now (correctly) be read as "the orphan survived".
     monkeypatch.setattr(
-        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        health, "_force_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(health.procutil, "pgid_members", lambda pgid: [])
     monkeypatch.setattr(
@@ -1745,7 +1746,7 @@ def test_health_check_leaves_unverified_job_alone_when_not_overdue(
     assert state.read_state(state_path)["current_job"] is not None
 
 
-def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
+def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch, tmp_path) -> None:
     calls: list[int] = []
 
     def missing_pgid(pgid: int, sig: int) -> None:
@@ -1761,12 +1762,12 @@ def test_force_kill_pgid_tolerates_process_lookup_races(monkeypatch) -> None:
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
-    health._force_kill_pgid(456)
+    health._force_kill_pgid(456, state_path=tmp_path / "dispatch_state.json")
 
     assert calls == [signal.SIGTERM]
 
 
-def test_force_kill_pgid_tolerates_exit_after_term(monkeypatch) -> None:
+def test_force_kill_pgid_tolerates_exit_after_term(monkeypatch, tmp_path) -> None:
     """health._force_kill_pgid delegates to procutil.kill_pgid, which must now
     RETURN whether the group is confirmed gone (2026-07-11) — a refused kill
     used to be indistinguishable from a successful one."""
@@ -1775,16 +1776,20 @@ def test_force_kill_pgid_tolerates_exit_after_term(monkeypatch) -> None:
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [])
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
-    assert health._force_kill_pgid(456) is True
+    assert health._force_kill_pgid(
+        456, state_path=tmp_path / "dispatch_state.json",
+    ) is True
     assert sigs == [signal.SIGTERM]
 
 
-def test_force_kill_pgid_reports_false_when_orphan_survives(monkeypatch) -> None:
+def test_force_kill_pgid_reports_false_when_orphan_survives(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(procutil.os, "killpg", lambda pgid, sig: None)
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: [456])  # never dies
     monkeypatch.setattr(procutil.time, "sleep", lambda seconds: None)
 
-    assert health._force_kill_pgid(456) is False
+    assert health._force_kill_pgid(
+        456, state_path=tmp_path / "dispatch_state.json",
+    ) is False
 
 
 def test_supervisor_set_runtime_env_raises_soft_limit(
@@ -1883,7 +1888,7 @@ def test_run_one_attempt_warns_when_child_survives_sigkill_grace(
     monkeypatch.setattr(worker, "_spawn", lambda **kwargs: StuckProc())
     monkeypatch.setattr(worker.os, "getpgid", lambda pid: 456)
     monkeypatch.setattr(
-        worker, "_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda pid: "Wed Jan  1 00:00:00 2026")
     monkeypatch.setattr(
@@ -1979,7 +1984,7 @@ def test_worker_killed_by_external_signal_is_not_reported_as_a_hang(
     Every kill the supervisor initiates returns through a sentinel, so a raw
     143 can ONLY be an outside kill. The old contract classified it "hang" and
     mailed a「卡住 N 分鐘」CRITICAL about a fire that was working to its last
-    second — three times in one day. New contract: outcome=external_signal,
+    second — three times in one day. New contract: outcome=unknown_external,
     claims handed back, one WARN via the dedicated alert, NO hang alert, no
     in-fire retry.
     """
@@ -2011,6 +2016,9 @@ def test_worker_killed_by_external_signal_is_not_reported_as_a_hang(
         worker.claim_release, "repend_killed_job_claims",
         lambda **kw: released.append(kw) or ["task-under-test"],
     )
+    monkeypatch.setattr(
+        worker.termination, "wait_for_sent_signal", lambda **_kw: None,
+    )
 
     result = worker.run_worker(
         prompt_text="prompt",
@@ -2019,13 +2027,13 @@ def test_worker_killed_by_external_signal_is_not_reported_as_a_hang(
         sleep_fn=lambda sec: None,
     )
 
-    assert result.outcome == "external_signal"
+    assert result.outcome == "unknown_external"
     assert result.attempts == 1, "no in-fire retry — the killer is still out there"
     assert attempts == [1]
     assert result.exit_code == 143
     assert len(external_alerts) == 1
     assert external_alerts[0]["signum"] == 15
-    assert released and released[0]["source"] == "worker-external-signal"
+    assert released and released[0]["source"] == "worker-unknown-external-signal"
 
 
 def test_supervisor_initiated_kill_is_still_a_hang() -> None:
@@ -2035,6 +2043,114 @@ def test_supervisor_initiated_kill_is_still_a_hang() -> None:
     assert worker._classify(143, "") == "external_signal"
     assert worker._classify(137, "") == "external_signal"
     assert worker._classify(worker._normalize_signal_exit(-14), "") == "external_signal"
+
+
+def test_raw_signal_with_exact_sent_intent_is_system_terminated(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+    released: list[dict] = []
+
+    def fake_run_one_attempt(**kwargs):
+        _reserve_like_production(kwargs)
+        kwargs["process_identity_sink"](456)
+        log_path.write_text("working until signal", encoding="utf-8")
+        return worker._normalize_signal_exit(-15), 7.0, "working until signal"
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.termination, "wait_for_sent_signal",
+        lambda **_kw: {
+            "intent_id": "intent-1",
+            "reason": "health_max_age_watchdog",
+            "status": "sent",
+        },
+    )
+    monkeypatch.setattr(
+        worker.alerts, "send_external_signal_alert",
+        lambda **_kw: pytest.fail("matched system signal must not send external alert"),
+    )
+    monkeypatch.setattr(
+        worker.claim_release, "repend_killed_job_claims",
+        lambda **kw: released.append(kw) or ["task-under-test"],
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda _sec: None,
+    )
+
+    assert result.outcome == "system_terminated"
+    assert released[0]["source"] == "worker-system-termination"
+
+
+def test_health_cas_loss_preserves_raw_signal_for_intent_classification(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    class ExitedProc:
+        pid = 123
+
+    seen_pgid: list[int] = []
+    monkeypatch.setattr(worker, "_spawn", lambda **_kw: ExitedProc())
+    monkeypatch.setattr(worker.os, "getpgid", lambda _pid: 456)
+    monkeypatch.setattr(
+        worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", -15),
+    )
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.state, "attach_process", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)
+    monkeypatch.setattr(
+        worker.procutil, "get_process_start_wall", lambda _pid: "start-id",
+    )
+    monkeypatch.setattr(worker.state, "mark_job_phase", lambda **_kw: False)
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+
+    exit_code, _duration, _output = worker._run_one_attempt(
+        prompt_text="prompt", model=worker.OPUS_MODEL, timeout_s=10,
+        log_path=tmp_path / "worker.log", attempt=1,
+        schedule_id="hourly_dispatch", state_path=tmp_path / "state.json",
+        job_id="job-health-race", slot_id="slot-1",
+        process_identity_sink=seen_pgid.append,
+    )
+
+    assert exit_code == 143
+    assert seen_pgid == [456]
+
+
+def test_unresolved_system_attempt_is_not_mislabeled_unknown_external(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    log_path = tmp_path / "worker.log"
+
+    def fake_run_one_attempt(**kwargs):
+        _reserve_like_production(kwargs)
+        kwargs["process_identity_sink"](456)
+        return 143, 3.0, "working until signal"
+
+    monkeypatch.setattr(worker, "_run_one_attempt", fake_run_one_attempt)
+    monkeypatch.setattr(
+        worker.termination, "wait_for_sent_signal", lambda **_kw: None,
+    )
+    monkeypatch.setattr(
+        worker.termination, "match_unresolved_signal_attempt",
+        lambda **_kw: {"intent_id": "attempt-only"},
+    )
+    monkeypatch.setattr(
+        worker.alerts, "send_external_signal_alert",
+        lambda **_kw: pytest.fail("unresolved system attempt is not external"),
+    )
+    monkeypatch.setattr(
+        worker.claim_release, "repend_killed_job_claims",
+        lambda **_kw: ["task-under-test"],
+    )
+
+    result = worker.run_worker(
+        prompt_text="prompt", log_path=log_path, state_path=state_path,
+        sleep_fn=lambda _seconds: None,
+    )
+    assert result.outcome == "system_termination_unconfirmed"
 
 
 def test_load_cron_expr_reads_schedule_field_first(tmp_path: Path) -> None:
@@ -2126,7 +2242,7 @@ def test_handle_restart_orphan_kills_live_identity_matched_job(tmp_path: Path, m
     kills: list[int] = []
     alerts_called: list[dict] = []
     monkeypatch.setattr(
-        supervisor.worker, "_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        supervisor.worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MATCH)
     monkeypatch.setattr(
@@ -2155,7 +2271,7 @@ def test_handle_restart_orphan_skips_kill_on_identity_mismatch(tmp_path: Path, m
     kills: list[int] = []
     alerts_called: list[dict] = []
     monkeypatch.setattr(
-        supervisor.worker, "_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        supervisor.worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MISMATCH)
     monkeypatch.setattr(supervisor.procutil, "pgid_members_checked", lambda pgid: [])
@@ -2291,7 +2407,9 @@ def test_handle_restart_orphan_skips_kill_when_unverified(tmp_path: Path, monkey
     monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
     kills: list[int] = []
     alerts_called: list[dict] = []
-    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(
+        supervisor.worker, "_kill_pgid", lambda pgid, **_kw: kills.append(pgid),
+    )
     monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_UNVERIFIED)
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert",
@@ -2338,7 +2456,9 @@ def test_handle_restart_orphan_clears_abandoned_pid_none_reservation(
     monkeypatch.setattr(supervisor.state, "STATE_PATH", state_path)
     kills: list[int] = []
     alerts_called: list[dict] = []
-    monkeypatch.setattr(supervisor.worker, "_kill_pgid", lambda pgid: kills.append(pgid))
+    monkeypatch.setattr(
+        supervisor.worker, "_kill_pgid", lambda pgid, **_kw: kills.append(pgid),
+    )
     monkeypatch.setattr(
         supervisor.alerts, "send_orphan_restart_alert",
         lambda **kwargs: alerts_called.append(kwargs) or True,
@@ -2388,7 +2508,7 @@ def test_handle_restart_orphan_skips_duplicate_entry_when_cleanup_already_record
     kills: list[int] = []
     alerts_called: list[dict] = []
     monkeypatch.setattr(
-        supervisor.worker, "_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        supervisor.worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MATCH)
     monkeypatch.setattr(
@@ -2487,7 +2607,7 @@ def test_handle_restart_orphan_retries_after_partial_crash_mid_cleanup(
     kills: list[int] = []
     alerts_called: list[dict] = []
     monkeypatch.setattr(
-        supervisor.worker, "_kill_pgid", lambda pgid: bool(kills.append(pgid) or True)
+        supervisor.worker, "_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True)
     )
     monkeypatch.setattr(supervisor.procutil, "check_identity", lambda pid, wall: procutil.IDENTITY_MATCH)
     monkeypatch.setattr(
@@ -2827,7 +2947,9 @@ def test_supervisor_main_writes_only_to_patched_state_path(tmp_path: Path, monke
 # ---------------------------------------------------------------------------
 
 
-def test_worker_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) -> None:
+def test_worker_kill_pgid_falls_back_to_per_pid_when_killpg_denied(
+    monkeypatch, tmp_path,
+) -> None:
     """worker._kill_pgid delegates to procutil.kill_pgid, so the 2026-07-11
     EPERM fix must hold through this entry point too: a refused `killpg` falls
     back to per-pid signalling instead of leaving the hung worker alive."""
@@ -2845,9 +2967,15 @@ def test_worker_kill_pgid_falls_back_to_per_pid_when_killpg_denied(monkeypatch) 
     monkeypatch.setattr(worker.os, "killpg", denied_killpg)
     monkeypatch.setattr(worker.os, "kill", kill_one)
     monkeypatch.setattr(procutil, "pgid_members_checked", lambda pgid: sorted(alive))
+    monkeypatch.setattr(procutil, "get_process_start_wall", lambda pid: f"start-{pid}")
+    monkeypatch.setattr(
+        procutil, "check_identity", lambda _pid, _expected: procutil.IDENTITY_MATCH,
+    )
     monkeypatch.setattr(worker.time, "sleep", lambda s: None)
 
-    worker._kill_pgid(999, grace_s=1)
+    worker._kill_pgid(
+        999, state_path=tmp_path / "dispatch_state.json", grace_s=1,
+    )
 
     assert signal.SIGKILL in [sig for _, sig in per_pid], \
         "killpg was denied — must escalate per-pid, not give up"
@@ -3163,7 +3291,7 @@ def test_multislot_health_timeout_kills_only_the_overdue_slot_in_same_cohort(
     )
     kills: list[int] = []
     monkeypatch.setattr(
-        health, "_force_kill_pgid", lambda pgid: bool(kills.append(pgid) or True),
+        health, "_force_kill_pgid", lambda pgid, **_kw: bool(kills.append(pgid) or True),
     )
     monkeypatch.setattr(health.procutil, "pgid_members", lambda _pgid: [])
     monkeypatch.setattr(health.alerts, "send_hang_alert", lambda **_kwargs: True)

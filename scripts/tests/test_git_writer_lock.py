@@ -17,6 +17,22 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
+from volpred.ops import termination  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _isolated_termination_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        termination, "DEFAULT_LEDGER_PATH",
+        tmp_path / "termination_intents.jsonl",
+    )
+    monkeypatch.setenv(
+        termination.LEDGER_PATH_ENV,
+        str(tmp_path / "termination_intents.jsonl"),
+    )
+
 from volpred.ops.git_writer_lock import (  # noqa: E402
     LOCK_BASENAME,
     GitWriterLockError,

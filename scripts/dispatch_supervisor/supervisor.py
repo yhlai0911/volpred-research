@@ -271,7 +271,13 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
         logging.warning(
             "restart: orphan job pid=%d pgid=%d still alive (identity-verified) — killing", pid, pgid,
         )
-        killed = worker._kill_pgid(pgid)
+        killed = worker._kill_pgid(
+            pgid,
+            reason="supervisor_restart_orphan",
+            job_id=job_id,
+            attempt=int(orphan.get("attempt", 1)),
+            state_path=state_path,
+        )
         if not killed:
             outcome = "kill_failed_orphan"
             state.mark_job_phase(

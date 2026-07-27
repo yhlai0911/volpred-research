@@ -53,6 +53,8 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO / "src"))
+from volpred.ops import termination  # noqa: E402
 if str(REPO / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO / "scripts"))
 if str(REPO / "src") not in sys.path:
@@ -206,7 +208,13 @@ def reclaim(apply: bool) -> dict:
                     continue
                 for pid in pids:
                     try:
-                        os.kill(pid, signal.SIGTERM)
+                        intent = termination.arm(
+                            target_kind="pid", target_id=pid,
+                            reason="stale_worktree_holder_reclaim",
+                            actor="reclaim_stale_worktrees",
+                            signal_sequence=[signal.SIGTERM],
+                        )
+                        termination.send_pid(intent, signal.SIGTERM)
                         action["killed"].append(pid)
                     except OSError as exc:
                         warn("reclaim", f"kill {pid} 失敗 ({exc}) — worktree 仍會嘗試移除")

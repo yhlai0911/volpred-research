@@ -28,6 +28,7 @@ import time
 from pathlib import Path
 
 import pytest
+from volpred.ops import termination
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -36,6 +37,20 @@ _spec = importlib.util.spec_from_file_location(
 glc = importlib.util.module_from_spec(_spec)
 sys.modules["gen_lazypack_codex"] = glc
 _spec.loader.exec_module(glc)
+
+
+@pytest.fixture(autouse=True)
+def _isolated_termination_ledger(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        termination, "DEFAULT_LEDGER_PATH",
+        tmp_path / "termination_intents.jsonl",
+    )
+    monkeypatch.setenv(
+        termination.LEDGER_PATH_ENV,
+        str(tmp_path / "termination_intents.jsonl"),
+    )
 
 
 # A codex stand-in that behaves like the real incident: it forks a worker which

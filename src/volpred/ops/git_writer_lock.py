@@ -33,6 +33,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterator, Sequence
 
+from volpred.ops import termination
+
 LOCK_BASENAME = "volpred-git-writer.lock"
 LOCK_TOKEN_ENV = "VOLPRED_GIT_WRITER_LOCK_TOKEN"
 LOCK_PATH_ENV = "VOLPRED_GIT_WRITER_LOCK_PATH"
@@ -441,7 +443,13 @@ def run_locked(
             nonlocal forwarded_signal
             forwarded_signal = signum
             try:
-                os.killpg(proc.pid, signum)
+                intent = termination.arm(
+                    target_kind="pgid", target_id=proc.pid,
+                    reason="git_writer_parent_signal_forward",
+                    actor=actor,
+                    signal_sequence=[signum],
+                )
+                termination.send_pgid(intent, signum)
             except (ProcessLookupError, PermissionError):  # silent-ok: forwarding races with exit; bounded group cleanup still runs before lease release.
                 pass
 
@@ -584,8 +592,14 @@ def _terminate_process_group(proc: subprocess.Popen[str]) -> None:
     members = _live_process_group_members(pgid)
     if members == [] or (members is None and not _process_group_exists(pgid)):
         return
+    intent = termination.arm(
+        target_kind="pgid", target_id=pgid,
+        reason="git_writer_descendant_cleanup",
+        actor="git_writer_lock",
+        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+    )
     try:
-        os.killpg(pgid, signal.SIGTERM)
+        termination.send_pgid(intent, signal.SIGTERM)
     except ProcessLookupError:  # silent-ok: the process group exited between the liveness probe and TERM.
         return
     deadline = time.monotonic() + 1.0
@@ -597,7 +611,7 @@ def _terminate_process_group(proc: subprocess.Popen[str]) -> None:
     members = _live_process_group_members(pgid)
     if members != [] and (members is not None or _process_group_exists(pgid)):
         try:
-            os.killpg(pgid, signal.SIGKILL)
+            termination.send_pgid(intent, signal.SIGKILL)
         except (ProcessLookupError, PermissionError):  # silent-ok: final KILL may race with exit; inherited descriptors keep any survivor serialized.
             pass
 

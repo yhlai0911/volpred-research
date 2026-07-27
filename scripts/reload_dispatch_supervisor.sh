@@ -4,11 +4,11 @@
 # WHY THIS EXISTS (2026-07-10, ops-superv-restart-noise-20260710):
 #   - The daemon freezes its Python image at boot; a change to
 #     scripts/dispatch_supervisor/**.py only takes effect on reload.
-#   - `launchctl kickstart -k` SIGTERMs the running instance (exit 143) and
-#     launchd's KeepAlive respawns it — which, on plain reload, fired an INFO
+#   - A durable-intent SIGTERM ends the exact running instance and launchd's
+#     KeepAlive respawns it — which, on plain reload, fired an INFO
 #     "supervisor restart" email every time (5 in 80min during a dev session →
 #     boss Telegram msg 352 noise complaint).
-#   - This wrapper drops a short-lived planned-restart marker BEFORE kickstart;
+#   - This wrapper drops a short-lived planned-restart marker BEFORE SIGTERM;
 #     the fresh boot consumes it and downgrades that one restart alert to a
 #     log-only breadcrumb. Genuine (unexpected) KeepAlive respawns have no
 #     marker and still alert.
@@ -70,7 +70,7 @@ if [ "$ACTIVE_COUNT" != "0" ] && [ "$FORCE" -ne 1 ]; then
     exit 1
   fi
   # Detached waiter: poll until the worker clears, then re-enter this script.
-  # Re-entering (rather than inlining the reload) keeps the marker + kickstart
+  # Re-entering (rather than inlining the reload) keeps the marker + restart
   # path single-source. `setsid`-equivalent detach so it outlives this fire.
   echo "DEFERRED: ${ACTIVE_COUNT} workers in flight; reload will fire when current_jobs clears (max ${DEFER_MAX_WAIT_S}s)."
   DEFER_LOG="${HOME}/.volpred/logs/supervisor_deferred_reload.log"
@@ -107,7 +107,8 @@ print(f'planned-restart marker written (reason=${REASON}, expires_at={exp})')
 
 # 3. Reload the daemon.
 UID_NUM="$(id -u)"
-echo "kickstart -k gui/${UID_NUM}/${LABEL} ..."
-launchctl kickstart -k "gui/${UID_NUM}/${LABEL}"
+echo "durable SIGTERM + KeepAlive restart gui/${UID_NUM}/${LABEL} ..."
+uv run python scripts/termination_launchd_restart.py \
+  --service "gui/${UID_NUM}/${LABEL}" --reason "dispatch_supervisor_reload:${REASON}"
 echo "Reload requested. Verify: launchctl list | grep dispatch-supervisor"
 echo "The next boot's 'supervisor restart' INFO alert is suppressed (deploy)."

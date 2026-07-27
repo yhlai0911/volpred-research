@@ -19,6 +19,8 @@ import signal
 import subprocess
 import time
 
+from volpred.ops import termination
+
 LOG = logging.getLogger(__name__)
 
 
@@ -175,7 +177,13 @@ def pgid_members(pgid: int) -> list[int]:
     return pgid_members_checked(pgid) or []
 
 
-def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
+def kill_pgid(
+    pgid: int,
+    *,
+    intent: termination.TerminationIntent | None = None,
+    ledger_path=None,
+    grace_s: float = DEFAULT_KILL_GRACE_S,
+) -> bool:
     """SIGTERM the group, SIGKILL after `grace_s`, then VERIFY. Returns True
     only if the group is confirmed empty afterwards.
 
@@ -198,13 +206,21 @@ def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
     """
     if pgid <= 0:
         return True
+    if intent is None:
+        raise termination.TerminationIntentRequired(
+            f"kill_pgid({pgid}) requires a durable termination intent"
+        )
 
     def _signal_all(sig: int) -> None:
         try:
-            os.killpg(pgid, sig)
+            result = termination.send_pgid(
+                intent,
+                sig,
+                ledger_path=ledger_path,
+            )
+            if result == "gone":
+                return
             return
-        except ProcessLookupError:
-            return  # silent-ok: group already gone.
         except PermissionError as exc:
             LOG.warning("killpg %s denied pgid=%d: %s — falling back to per-pid",
                         sig, pgid, exc)
@@ -213,10 +229,23 @@ def kill_pgid(pgid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
             LOG.warning("cannot enumerate pgid=%d for per-pid signal fallback", pgid)
             return
         for pid in members:
+            expected_start = get_process_start_wall(pid)
+            if not expected_start or expected_start is PROBE_FAILED:
+                LOG.warning(
+                    "cannot identity-pin pgid=%d member pid=%d; refusing signal",
+                    pgid, pid,
+                )
+                continue
             try:
-                os.kill(pid, sig)
-            except ProcessLookupError:
-                continue  # silent-ok: exited between ps and kill.
+                termination.send_member_pid(
+                    intent,
+                    pid,
+                    sig,
+                    ledger_path=ledger_path,
+                    identity_verifier=lambda target, expected=expected_start: (
+                        check_identity(target, expected) == IDENTITY_MATCH
+                    ),
+                )
             except PermissionError as exc:
                 LOG.warning("kill %s denied pid=%d (pgid=%d): %s", sig, pid, pgid, exc)
 
@@ -317,7 +346,13 @@ def descendants_of(root_pid: int) -> list[int] | None:
     return found
 
 
-def kill_tree(pid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
+def kill_tree(
+    pid: int,
+    *,
+    intent: termination.TerminationIntent | None = None,
+    ledger_path=None,
+    grace_s: float = DEFAULT_KILL_GRACE_S,
+) -> bool:
     """Kill `pid`, its process group, AND any descendant that left the group.
 
     Returns True only when every target is confirmed gone.
@@ -339,6 +374,10 @@ def kill_tree(pid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
     """
     if pid <= 0:
         return True
+    if intent is None:
+        raise termination.TerminationIntentRequired(
+            f"kill_tree({pid}) requires a durable termination intent"
+        )
 
     try:
         pgid = os.getpgid(pid)
@@ -354,8 +393,20 @@ def kill_tree(pid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
 
     def _signal(sig: int, pids: list[int]) -> None:
         for target in pids:
+            expected_start = get_process_start_wall(target)
+            if not expected_start or expected_start is PROBE_FAILED:
+                LOG.warning(
+                    "kill_tree cannot identity-pin pid=%d; refusing signal",
+                    target,
+                )
+                continue
             try:
-                os.kill(target, sig)
+                termination.send_member_pid(
+                    intent, target, sig, ledger_path=ledger_path,
+                    identity_verifier=lambda pid, expected=expected_start: (
+                        check_identity(pid, expected) == IDENTITY_MATCH
+                    ),
+                )
             except ProcessLookupError:
                 continue  # silent-ok: exited between ps and kill.
             except PermissionError as exc:
@@ -363,7 +414,9 @@ def kill_tree(pid: int, *, grace_s: float = DEFAULT_KILL_GRACE_S) -> bool:
 
     _signal(signal.SIGTERM, targets)
     if pgid > 0:
-        kill_pgid(pgid, grace_s=grace_s)  # group path: TERM → grace → KILL → verify
+        kill_pgid(
+            pgid, intent=intent, ledger_path=ledger_path, grace_s=grace_s,
+        )  # group path: TERM → grace → KILL → verify
 
     # Re-enumerate: the group kill may have freed children, and a slow spawner
     # may have produced new ones while we were signalling.

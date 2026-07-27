@@ -45,6 +45,7 @@ if str(ROOT / "src") not in sys.path:
 
 import gen_lazypack_codex as glc  # noqa: E402 — single owner of the loop
 from dispatch_supervisor.procutil import kill_tree  # noqa: E402
+from volpred.ops import termination  # noqa: E402
 
 
 def _resolve_agy_bin() -> str:
@@ -87,11 +88,17 @@ def _run_agy(prompt: str, out_dir: Path, timeout_s: float,
     try:
         out, err = proc.communicate(timeout=timeout_s)
     except subprocess.TimeoutExpired:
-        if not kill_tree(proc.pid):
+        ledger = termination.DEFAULT_LEDGER_PATH
+        intent = termination.arm(
+            target_kind="pgid", target_id=proc.pid,
+            reason="lazypack_agy_timeout", actor="gen_lazypack_agy",
+            signal_sequence=termination.terminating_signals(),
+            ledger_path=ledger,
+        )
+        if not kill_tree(proc.pid, intent=intent, ledger_path=ledger):
             print(f"[gen_lazypack_agy] WARNING: could not confirm agy pid "
                   f"{proc.pid} and its children are dead — a surviving worker "
                   f"may still write to the output dir", file=sys.stderr)
-        proc.kill()
         try:
             out, err = proc.communicate(timeout=30)
         except Exception as e:  # noqa: BLE001

@@ -37,9 +37,14 @@ cleanup() {
   local exit_status=$?
   if [ -n "${ALERTS_PID:-}" ] && kill -0 "$ALERTS_PID" 2>/dev/null; then
     echo "[CLEANUP] parent exiting (status=$exit_status); killing alerts PGID $ALERTS_PID"
-    kill -TERM -- "-$ALERTS_PID" 2>/dev/null || kill -TERM "$ALERTS_PID" 2>/dev/null
-    sleep 2
-    kill -KILL -- "-$ALERTS_PID" 2>/dev/null || kill -KILL "$ALERTS_PID" 2>/dev/null
+    /opt/homebrew/bin/uv run python scripts/termination_signal.py \
+      --target-kind pgid --target-id "$ALERTS_PID" --signal TERM_KILL \
+      --grace-seconds 2 \
+      --reason check_alerts_cleanup --actor cron_check_alerts 2>/dev/null || \
+    /opt/homebrew/bin/uv run python scripts/termination_signal.py \
+      --target-kind pid --target-id "$ALERTS_PID" --signal TERM_KILL \
+      --grace-seconds 2 \
+      --reason check_alerts_cleanup_fallback --actor cron_check_alerts 2>/dev/null
   fi
 }
 trap cleanup EXIT TERM INT HUP

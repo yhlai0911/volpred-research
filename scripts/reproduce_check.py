@@ -1052,7 +1052,18 @@ def _kill_process_tree(proc: subprocess.Popen[str]) -> bool:
         from scripts.dispatch_supervisor import procutil
     except ModuleNotFoundError:  # direct ``python scripts/reproduce_check.py``
         from dispatch_supervisor import procutil
-    return bool(procutil.kill_tree(proc.pid))
+    from volpred.ops import termination
+
+    ledger = termination.DEFAULT_LEDGER_PATH
+    intent = termination.arm(
+        target_kind="pgid", target_id=proc.pid,
+        reason="reproduce_check_timeout", actor="reproduce_check",
+        signal_sequence=termination.terminating_signals(),
+        ledger_path=ledger,
+    )
+    return bool(procutil.kill_tree(
+        proc.pid, intent=intent, ledger_path=ledger,
+    ))
 
 
 def audit_experiment(

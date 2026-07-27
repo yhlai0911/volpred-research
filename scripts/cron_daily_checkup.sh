@@ -20,7 +20,12 @@ CHECKUP_PID=""
 cleanup() {
   local exit_status=$?
   if [ -n "$CHECKUP_PID" ] && kill -0 "$CHECKUP_PID" 2>/dev/null; then
-    kill -TERM -- "-$CHECKUP_PID" 2>/dev/null || kill -TERM "$CHECKUP_PID" 2>/dev/null
+    /opt/homebrew/bin/uv run python scripts/termination_signal.py \
+      --target-kind pgid --target-id "$CHECKUP_PID" --signal TERM \
+      --reason daily_checkup_cleanup --actor cron_daily_checkup 2>/dev/null || \
+    /opt/homebrew/bin/uv run python scripts/termination_signal.py \
+      --target-kind pid --target-id "$CHECKUP_PID" --signal TERM \
+      --reason daily_checkup_cleanup_fallback --actor cron_daily_checkup 2>/dev/null
   fi
   rmdir "$LOCKDIR" 2>/dev/null || true
   return "$exit_status"

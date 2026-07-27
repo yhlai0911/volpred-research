@@ -181,12 +181,19 @@ cleanup() {
   local exit_status=$?
   if [ -n "${CLAUDE_PID:-}" ] && kill -0 "$CLAUDE_PID" 2>/dev/null; then
     echo "[CLEANUP] parent exiting (status=$exit_status); killing claude PGID $CLAUDE_PID"
-    kill -TERM -- "-$CLAUDE_PID" 2>/dev/null || kill -TERM "$CLAUDE_PID" 2>/dev/null
-    sleep 2
-    kill -KILL -- "-$CLAUDE_PID" 2>/dev/null || kill -KILL "$CLAUDE_PID" 2>/dev/null
+    /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+      --target-kind pgid --target-id "$CLAUDE_PID" --signal TERM_KILL \
+      --grace-seconds 2 \
+      --reason legacy_hourly_cleanup --actor cron_hourly_dispatch 2>/dev/null || \
+    /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+      --target-kind pid --target-id "$CLAUDE_PID" --signal TERM_KILL \
+      --grace-seconds 2 \
+      --reason legacy_hourly_cleanup_fallback --actor cron_hourly_dispatch 2>/dev/null
   fi
   if [ -n "${WATCHDOG_PID:-}" ] && kill -0 "$WATCHDOG_PID" 2>/dev/null; then
-    kill -KILL "$WATCHDOG_PID" 2>/dev/null
+    /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+      --target-kind pid --target-id "$WATCHDOG_PID" --signal KILL \
+      --reason legacy_hourly_watchdog_cleanup --actor cron_hourly_dispatch 2>/dev/null
   fi
 }
 trap cleanup EXIT TERM INT HUP
@@ -619,13 +626,14 @@ run_one_attempt() {
     ACTUAL_CMD=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
     if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD" == *"$CLAUDE_CMD_PATTERN"* ]]; then
       echo "[WATCHDOG] claude PID $CLAUDE_PID (cmd=$ACTUAL_CMD) alive past cap+60s; SIGTERM to PGID"
-      kill -TERM -- "-$CLAUDE_PID" 2>/dev/null || kill -TERM "$CLAUDE_PID" 2>/dev/null
-      sleep 10
-      ACTUAL_CMD2=$(ps -p "$CLAUDE_PID" -o comm= 2>/dev/null | tr -d '[:space:]')
-      if kill -0 "$CLAUDE_PID" 2>/dev/null && [[ "$ACTUAL_CMD2" == *"$CLAUDE_CMD_PATTERN"* ]]; then
-        echo "[WATCHDOG] SIGTERM ignored; SIGKILL to PGID"
-        kill -KILL -- "-$CLAUDE_PID" 2>/dev/null || kill -KILL "$CLAUDE_PID" 2>/dev/null
-      fi
+      /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+        --target-kind pgid --target-id "$CLAUDE_PID" --signal TERM_KILL \
+        --grace-seconds 10 \
+        --reason legacy_hourly_timeout --actor cron_hourly_dispatch 2>/dev/null || \
+      /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+        --target-kind pid --target-id "$CLAUDE_PID" --signal TERM_KILL \
+        --grace-seconds 10 \
+        --reason legacy_hourly_timeout_fallback --actor cron_hourly_dispatch 2>/dev/null
     elif [ -n "$ACTUAL_CMD" ] && [[ "$ACTUAL_CMD" != *"$CLAUDE_CMD_PATTERN"* ]]; then
       echo "[WATCHDOG] aborted — PID $CLAUDE_PID now belongs to '$ACTUAL_CMD' (PID reuse)"
     fi
@@ -635,7 +643,9 @@ run_one_attempt() {
   wait $CLAUDE_PID
   EXIT_CODE=$?
 
-  kill $WATCHDOG_PID 2>/dev/null
+  /opt/homebrew/bin/uv run python "$REPO_ROOT/scripts/termination_signal.py" \
+    --target-kind pid --target-id "$WATCHDOG_PID" --signal TERM \
+    --reason legacy_hourly_watchdog_stop --actor cron_hourly_dispatch 2>/dev/null
   WATCHDOG_PID=""
 
   if [ $EXIT_CODE -eq 142 ]; then
