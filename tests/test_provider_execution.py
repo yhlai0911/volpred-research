@@ -300,6 +300,33 @@ def test_candidate_effect_replay_is_exact_once_and_adapter_has_no_effect_api() -
     assert not hasattr(adapter, "send")
 
 
+def test_checkpoint_response_loss_replays_verified_checkpoint_without_reexecution() -> None:
+    checkpoint = VerifiedExecutionCheckpoint(
+        checkpoint_id="checkpoint-new",
+        artifact_ref="artifact://checkpoint-new",
+        artifact_sha256="b" * 64,
+        verification_ref="pytest://checkpoint-new",
+    )
+    adapter = FakeProvider(
+        attempts=[
+            ExecutionAttempt(
+                kind="checkpointed",
+                result_ref=checkpoint.artifact_ref,
+                evidence_ref="receipt://checkpoint-new",
+                checkpoint=checkpoint,
+            )
+        ]
+    )
+    execution = engine([(descriptor("codex"), adapter)])
+
+    first = execution.execute(request())
+    lost_response_retry = execution.execute(request())
+
+    assert first == lost_response_retry
+    assert first.checkpoint == checkpoint
+    assert len(adapter.execute_calls) == 1
+
+
 def test_idempotency_key_conflict_fails_closed_before_provider_io() -> None:
     adapter = FakeProvider()
     execution = engine([(descriptor("codex"), adapter)])
@@ -621,3 +648,30 @@ def test_exhausted_probe_budget_never_uses_stale_healthy_state_for_full_work() -
     assert outcome.blocker == BlockerKind.PROVIDER_UNAVAILABLE
     assert adapter.probe_calls == 1
     assert len(adapter.execute_calls) == 1
+
+
+def test_long_outage_backoff_saturates_without_timedelta_overflow() -> None:
+    store = InMemoryProviderExecutionStore()
+    policy = ProbePolicy(
+        minimum_interval=timedelta(minutes=5),
+        maximum_backoff=timedelta(hours=1),
+        window=timedelta(days=365),
+        max_probe_cost_units=1000,
+    )
+    observed_at = NOW
+    state = None
+    for index in range(100):
+        state = store.observe(
+            observation=ProviderObservation(
+                provider_id="claude",
+                observed_at=observed_at,
+                blocker=BlockerKind.QUOTA,
+                evidence_ref=f"probe://quota/{index}",
+            ),
+            observed_now=observed_at,
+            policy=policy,
+        )
+        observed_at = state.next_probe_at
+
+    assert state is not None
+    assert state.next_probe_at - state.observed_at == timedelta(hours=1)

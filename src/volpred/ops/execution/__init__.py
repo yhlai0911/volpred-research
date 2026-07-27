@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone
 from enum import Enum
 import hashlib
 import json
+import math
 import re
 from threading import RLock
 from typing import Callable, Iterable, Protocol
@@ -141,6 +142,7 @@ _ATTEMPT_KINDS = frozenset(
 _REPLAYABLE_KINDS = frozenset(
     {
         "completed",
+        "checkpointed",
         "candidate_change_set",
         "candidate_effect_request",
         "terminal_failure",
@@ -154,6 +156,7 @@ class ExecutionAttempt:
     result_ref: str | None
     evidence_ref: str
     blocker: BlockerKind | None = None
+    checkpoint: VerifiedExecutionCheckpoint | None = None
 
     def __post_init__(self) -> None:
         if self.kind not in _ATTEMPT_KINDS:
@@ -166,6 +169,10 @@ class ExecutionAttempt:
             raise ValueError("only blocked attempts carry a typed blocker")
         if self.kind not in {"blocked", "terminal_failure"} and not self.result_ref:
             raise ValueError(f"{self.kind} attempt requires a result reference")
+        if (self.kind == "checkpointed") != (self.checkpoint is not None):
+            raise ValueError(
+                "only checkpointed attempts carry a verified checkpoint"
+            )
 
 
 @dataclass(frozen=True)
@@ -177,6 +184,7 @@ class ExecutionOutcome:
     blocker: BlockerKind | None
     evidence_refs: tuple[str, ...]
     resume_checkpoint_id: str | None
+    checkpoint: VerifiedExecutionCheckpoint | None = None
 
 
 class ProviderAdapter(Protocol):
@@ -470,10 +478,16 @@ class _InMemoryProviderExecutionStore:
             if observation.blocker is None
             else (previous.consecutive_failures if previous else 0) + 1
         )
-        multiplier = 1 if failures == 0 else 2 ** (failures - 1)
-        delay = min(
-            policy.minimum_interval * multiplier,
-            policy.maximum_backoff,
+        exponent = max(0, failures - 1)
+        ratio = (
+            policy.maximum_backoff.total_seconds()
+            / policy.minimum_interval.total_seconds()
+        )
+        saturation_exponent = max(0, math.ceil(math.log2(ratio)))
+        delay = (
+            policy.maximum_backoff
+            if exponent >= saturation_exponent
+            else policy.minimum_interval * (2**exponent)
         )
         state = ProviderStateView(
             provider_id=observation.provider_id,
@@ -735,6 +749,7 @@ class ProviderExecution:
                         if request.resume_checkpoint is not None
                         else None
                     ),
+                    checkpoint=attempt.checkpoint,
                 )
                 if attempt.kind in _REPLAYABLE_KINDS:
                     self._store.settle_execution(
