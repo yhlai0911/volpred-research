@@ -1,0 +1,24 @@
+{
+  "kid": "k1811",
+  "verdict": "PASS",
+  "reviewer": "code-reviewer subagent (general-purpose, Claude Opus, high effort) — FALLBACK: Codex primary path credit-limited until 2026-08-02; independent fresh-context adversarial review with full numeric reproduction. Per K1259, subagent-fallback PASS != primary-path Codex PASS.",
+  "reviewed_at": "2026-07-27T23:50:00+08:00",
+  "reviewed_commit": "dab31f33ee52a8ee3fb42d5e1a0f84b9c9445a43",
+  "review_artifact": "inline hourly-slot-1 fire (agent a44fb67d3d9822ec3)",
+  "blocking_defects": [],
+  "non_blocking_notes": [
+    "README 6.1 placebo rounding: KBWP=0.116 stated as >=0.12 (still NS)",
+    "README 6.2 drop-cluster prose (p=0.2-0.9) not reproducible from JSON (computed drop_top2 p=0.045); narrative color, not a headline figure",
+    "summary.self_verification.sign_convention_ok is a trivially-true is-not-None check (cosmetic)",
+    "cross-event time-clustering (2017/2020) inflates iid SEs; acknowledged in 7, mitigated by non-overlap subset + placebo"
+  ],
+  "reviewed_sha256": {
+    "README.md": "5f349b0a8f07ed8bf7606248a278d36c445ed89596e58d3f2b53a82a1cf4c38f",
+    "figures/caav_heat.png": "1f4729faeea7309e5759c4b6d3f7f4fc475d813320a5fd152412770f584dbde7",
+    "figures/caav_hurricane.png": "d23941c54eb01a31452453edf7e208cd54475ffce456a19006681e73278b8946",
+    "figures/dose_heat.png": "5743133220d41081394c63ec7fe5ec701223adbe65ef6a0b9e659842a0124deb",
+    "figures/dose_hurricane.png": "2b942c20601b0c7f3b4269257bdf94138012f6d257d1698f9774630e5a75dd7a",
+    "k1811.py": "1844bcc6d1804a16b4cc897e2d2518d55e43085a260fea684552728c14ab0708",
+    "k1811_results.json": "fbe271e081a62cbdb8d0a4c041ce52a02a536d7618c0b5b8bf87d82afce354a9"
+  }
+}
