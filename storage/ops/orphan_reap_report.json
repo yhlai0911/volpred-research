@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T12:00:26.332035+00:00",
+  "generated_at": "2026-07-27T13:00:25.510742+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 142.6
+      "age_hours": 143.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 2.7
+      "age_hours": 3.7
     }
   ],
   "held": [],
@@ -39,249 +39,178 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "previously_delivered_paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "previously_delivered_paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "previously_delivered_paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-scripts-codex-review-job-sh-1785149307",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-scripts-codex-review-job-sh-1785149307.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev5_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1698_rev5_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "k1426-oos-rerun-shard-a-dailyseries-20260727",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1426-oos-rerun-shard-a-dailyseries-20260727.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "k1426-oos-rerun-shard-b-dailyseries-20260727",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1426-oos-rerun-shard-b-dailyseries-20260727.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1426-oos-rerun-shard-c-dailyseries-20260727.json",
+      "execution_status": "completed",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "existing_paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-k1426-oos-split-shard-a-pair-1-spy-ivv-pair-2-uso-bno-1784182380",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_a.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "a3842d7680f8548bed35cb728a13eb5b8ab983ab",
+      "reason": "committed"
+    },
+    {
+      "job_id": "compute-k1426-oos-split-shard-b-pair-3-gld-iau-pair-4-gld-slv-1784182380",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_b.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "5b641e59301d198af9260fde33e1d4b14a0878f9",
+      "reason": "committed"
+    },
+    {
+      "job_id": "compute-k1426-oos-split-shard-c-pair-5-xle-uso-pair-6-xlf-xlk-1784182380",
+      "paths": [
+        "experiments/k1426/k1426_oos_shard_c.json"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "88e33a14cc533c85e05edab16efa471881841619",
+      "reason": "committed"
+    },
+    {
+      "job_id": "compute-scripts-codex-review-job-sh-1785149307",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev5_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "fbf121b54236c73922bf1c07ada927a094616582",
+      "reason": "committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
-      "collectable": [
-        {
-          "path": "storage/drafts/article_images/k1600_dm_and_beta1q.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/article_images/k1600_qlike_loss_ratio.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/k1600_general_draft.md",
-          "kind": "md",
-          "reason": "untracked"
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 5,
+        "grace": 3,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "drafts",
-          "paths": [
-            "storage/drafts/article_images/k1600_dm_and_beta1q.png",
-            "storage/drafts/article_images/k1600_qlike_loss_ratio.png",
-            "storage/drafts/k1600_general_draft.md"
-          ],
-          "committed": true,
-          "detail": "[main 750e16053] chore(draft-reap): collect orphaned draft artifacts (3 files)\n 3 files changed, 111 insertions(+)\n create mode 100644 storage/drafts/"
-        }
-      ]
+      "collections": []
     },
     "paper": {
       "collectable": [],
-      "held": [
-        {
-          "path": "paper/leverage-direction/main_v_ijf.pdf",
-          "kind": "pdf",
-          "reason": "sources_dirty:['paper/leverage-direction/body_v_ijf.tex']"
-        }
-      ],
+      "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
-        "unclaimed": 2
+        "unclaimed": 0
       },
       "collections": []
     },
     "experiments": {
-      "collectable": [
-        {
-          "path": "experiments/k1319/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1319/k1319.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1319/k1319_results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1391/k1391.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1396/k1396.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1398/k1398.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1399/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1399/k1399_qlike_comparison.png",
-          "kind": "png",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1399/k1399_vix_decomp.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1399/k1399_vix_decomp_results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1591/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
-          "kind": "png",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1591/k1591_results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1591/tables/k1591_daily_panel.csv",
-          "kind": "csv",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1591/tables/k1591_regime_summary.csv",
-          "kind": "csv",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
-          "kind": "csv",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
-          "kind": "png",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1592/fig2_gammarule_gjr_share.png",
-          "kind": "png",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1592/fig3_origin_gamma_t.png",
-          "kind": "png",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1592/k1592.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1705/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k1705/k1705_results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k892/k892_verify_tw_gamma.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k892/k892_verify_tw_gamma_results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/paper2_table1_summary_stats_provenance/README.md",
-          "kind": "md",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/paper2_table1_summary_stats_provenance/reproduce_table1_summary.py",
-          "kind": "py",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/paper2_table1_summary_stats_provenance/results.json",
-          "kind": "json",
-          "reason": "modified"
-        },
-        {
-          "path": "experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md",
-          "kind": "md",
-          "reason": "untracked"
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 2,
+        "grace": 3,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "experiments",
-          "paths": [
-            "experiments/k1319/README.md",
-            "experiments/k1319/k1319.py",
-            "experiments/k1319/k1319_results.json",
-            "experiments/k1391/k1391.py",
-            "experiments/k1396/k1396.py",
-            "experiments/k1398/k1398.py",
-            "experiments/k1399/README.md",
-            "experiments/k1399/k1399_qlike_comparison.png",
-            "experiments/k1399/k1399_vix_decomp.py",
-            "experiments/k1399/k1399_vix_decomp_results.json",
-            "experiments/k1591/README.md",
-            "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
-            "experiments/k1591/k1591_results.json",
-            "experiments/k1591/tables/k1591_daily_panel.csv",
-            "experiments/k1591/tables/k1591_regime_summary.csv",
-            "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
-            "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
-            "experiments/k1592/fig2_gammarule_gjr_share.png",
-            "experiments/k1592/fig3_origin_gamma_t.png",
-            "experiments/k1592/k1592.py",
-            "experiments/k1705/README.md",
-            "experiments/k1705/k1705_results.json",
-            "experiments/k892/k892_verify_tw_gamma.py",
-            "experiments/k892/k892_verify_tw_gamma_results.json",
-            "experiments/paper2_table1_summary_stats_provenance/README.md",
-            "experiments/paper2_table1_summary_stats_provenance/reproduce_table1_summary.py",
-            "experiments/paper2_table1_summary_stats_provenance/results.json",
-            "experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md"
-          ],
-          "committed": false,
-          "detail": "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   [silent-fallback-audit] findings=4 baseline=/var/folders/f1/g41vr"
-        }
-      ]
+      "collections": []
     }
   },
   "held_escalations": [],

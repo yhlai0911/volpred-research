@@ -5,12 +5,12 @@
   "interpreter": "uv run python",
   "args": [],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-27T11:21:15Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-27T12:44:30Z",
+  "completed_at": "2026-07-27T12:46:21Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275.stderr",
   "result_artifact": ".claude/worktrees/k1715-204d556b/experiments/K1715/K1715_results.json",
@@ -24,7 +24,7 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "k1715_bfgs_fix_dephantom_rerun_20260727",
   "source_task_link": {
     "state": "linked",
@@ -34,5 +34,13 @@
   },
   "timeout_seconds": 3600,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 28095,
+  "claimed_by_pid_start_wall": "Mon Jul 27 18:30:05 2026",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715"
+  },
+  "followup_dispatched_at": "2026-07-27T13:20:24Z",
+  "followup_next_task_id": "compute-k1715-codex-primary-path-review-bfgs-min-nll-guard-esc-attem-1785158408"
 }

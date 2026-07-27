@@ -454,9 +454,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T10:06:33.870149+00:00"
-    },
-    {
      "at": "2026-07-27T10:28:26.886601+00:00"
     },
     {
@@ -488,6 +485,9 @@
     },
     {
      "at": "2026-07-27T12:40:05.593166+00:00"
+    },
+    {
+     "at": "2026-07-27T13:44:59.493896+00:00"
     }
    ],
    "current_task_id": null,
@@ -1170,6 +1170,56 @@
     "last_at": null
    }
   },
+  "inc_90de679cab21": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": "ci-red-30268312681",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-27T13:20:36.728481+00:00",
+   "escalation": null,
+   "fingerprint": "90de679cab21d2106f60853981d72eed18e81fb3e77d168fda9c579fda1fda77",
+   "fingerprint_parts": [
+    "ci-red-30268312681"
+   ],
+   "first_seen_at": "2026-07-27T13:20:36.728481+00:00",
+   "incident_id": "inc_90de679cab21",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T13:20:36.728481+00:00",
+     "key": "30268312681:1",
+     "last_seen_at": "2026-07-27T13:20:36.728481+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T13:45:16.537887+00:00",
+     "key": "30270229338:1",
+     "last_seen_at": "2026-07-27T13:45:16.537887+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-27T13:40:40.3953114Z already queued (idempotent ingress replay); ``'raise'`` raises ValueError.",
+   "last_seen_at": "2026-07-27T13:45:16.537887+00:00",
+   "notified_at": null,
+   "occurrence_count": 2,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-27T13:20:37.178481+00:00",
+     "task_id": "ci-red-30268312681"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_c67bec28dd29": {
    "class": "machine_self",
    "clean_observations": [
@@ -1709,6 +1759,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T12:40:05.595387+00:00",
+ "updated_at": "2026-07-27T13:50:35.088996+00:00",
  "version": 1
 }

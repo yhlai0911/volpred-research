@@ -1,0 +1,44 @@
+{
+  "id": "compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753",
+  "title": "K1698 rev6 Codex primary-path review — README honesty re-cert (3-strike)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1698_rev6_prompt.md",
+    "storage/ops/codex_reviews/k1698_rev6_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T13:42:33Z",
+  "started_at": "2026-07-27T13:48:19Z",
+  "completed_at": "2026-07-27T13:50:32Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1698-rev6-codex-primary-path-review-readme-honesty-re-cert--1785159753.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1698_rev6_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1698_rev6_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1698 rev6（Codex primary-path README honesty review 已完成）收件。task=assign_1f80cef2（in_progress）。rev6 只改 experiments/k1698/README.md；freeze=storage/ops/codex_reviews/k1698_rev6_freeze.txt（7 檔 sha，README=b8c82d58...，其餘 6 檔與 rev5 逐字相同）。3-strike active（round 6）。\n\n步驟：讀 storage/ops/codex_reviews/k1698_rev6_verdict.md，依 verdict 分流：\n\n(A) PASS 且 CRITICAL=none 且 4 blocker 全 RESOLVED → 收尾：\n  1. 更新 experiments/k1698/review_verdict.json：verdict=PASS、reviewer=codex、review_artifact 指向 k1698_rev6_verdict.md、reviewed_commit/reviewed_sha256 對齊 rev6 freeze、清空 blocking_defects。\n  2. uv run python scripts/experiment_gates.py（查 --help 取 certify 子命令）對 experiments/k1698 certify 收尾；PASS 才算完成。\n  3. complete --id assign_1f80cef2 --status succeeded --result \"K1698 rev6 PASS：4 個 README 過度宣稱/未溯源 blocker 全 RESOLVED（完全復現→11/14 78.57%；刪 t−5.6/−5.13/154CI；2192→n_days2191+files40；刪+1min），Codex rev6 PASS + certify 收尾\"。\n  （不動 code/results.json/figs；knowledge 主線程寫且僅有全新 finding 時，本案無。）\n\n(B) FAIL / 有 CRITICAL（blocker 未清或 NEW distinct）→ 不 certify：complete --id assign_1f80cef2 --status failed --result \"rev6 FAIL：<摘要哪條未清/新缺陷>\"；因 3-strike round 6 已達，send-alert --level warn --needs-reply 標題以 [新架構派發] 開頭，回報 K1698 已到 round 6 仍未過 README honesty gate + 具體殘留，等老闆裁示，禁自簽、禁原樣重試。\n\nModel: opus / high (3-strike paper_review re-cert).",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 28095,
+  "claimed_by_pid_start_wall": "Mon Jul 27 18:30:05 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

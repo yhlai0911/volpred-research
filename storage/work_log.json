@@ -28099,5 +28099,45 @@
     "owner": "hourly-slot-1-96717b140b484f88810d281371c8868e",
     "commit": null,
     "summary": "Paper 3 E3 商品臂 copula 正式重跑 dispatched to compute queue as long xhigh research agent (job agent-brief_paper3_E3_commodities_copula-4e0072). 建 registered worktree dispatch-slot-1-96717b14-e3copula；enqueue-agent 帶 --source-task-id paper3_E3_commodities_copula_rerun_20260721（collision gate → awaiting_agent_job）+ result-artifact experiments/paper3_E3_commodities_copula/paper3_E3_results.json + followup(verify→check_artifacts→codex→merge→knowledge→解除跨資產類別邊界)。Brief 釘死硬合約：判準逐字沿用 E2 dm_test(HLN×t.ppf 0.975)、禁 E1 硬編 abs(t)>3.0；管線沿用 E2 骨架；商品臂 Gold/Oil/Copper/Wheat × SPY/TLT via yfinance；失敗必記原因+partial（治 2026-05-29 無聲失敗）。fire 職責到 enqueue 為止，detached compute worker 執行、未來班 PHASE A 收件。"
+  },
+  {
+    "timestamp": "2026-07-27T21:15:11+08:00",
+    "task_type": "compute_followup",
+    "task_id": "assign_k1426_oos_residuals",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-143c171826d146d1b9309156269436dc",
+    "owner": "hourly-slot-2-143c171826d146d1b9309156269436dc",
+    "commit": null,
+    "summary": "K1426 OOS residual 收尾（collect_completed compute followup）。daily-series-persistence patch 下 3 shard（6 pairs）全部重跑完成，每 pair 已持久化逐日 PCH 避險報酬序列。merge_shards.py（exit 0）→ k1426_oos_results.json；oos_return_benchmark.py（exit 0）→ 每 pair 產出 paired_return_ols_vs_pch（配對 DM + block-bootstrap，n_common=1759）。\n\n驗數字（直讀 JSON）：6 對點估計 HE 差全部 |diff| <=0.0005（最大 XLF/XLK 0.00050）。4/6 pairs 如預期 DM |t| 偏小、bootstrap CI 跨 0（USO/BNO |t|=0.05、GLD/IAU |t|=1.45、GLD/SLV |t|=0.32、XLE/USO |t|=0.42）。SPY/IVV（|t|=7.66, CI[-0.00019,-0.00007]）與 XLF/XLK（|t|=5.26, CI[-0.00080,-0.00033]）配對 DM 顯著且 CI 排除 0，但 HE 差僅 0.00012 / 0.00050（<=0.0005 的 null 尺度、方向為 PCH 微幅較佳）——統計顯著、經濟為零，不推翻 null。判決：K1426 OOS NULL confirmed，未翻轉。GLD/IAU（pair_3）資料已補齊並 merge（HE ols=0.9948 / pch=0.9951，1759 筆逐日序列）。\n\n已更新 README OOS 結果段落：新增「配對檢定 return-OLS vs PCH」節（真實數字表 + honesty note）、補 GLD/IAU 表列、標記舊殘留已解決、註記 oos.py docstring（63/quarterly, n_starts=50）與 line-345 metadata note 已更正、整體 NULL 判斷不變。無新 finding，故不寫 knowledge.json。"
+  },
+  {
+    "timestamp": "2026-07-27T21:15:24+08:00",
+    "task_type": "paper_review",
+    "task_id": "assign_80535ab4",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-1b047793c8a943cd945e375624659445",
+    "owner": "hourly-slot-1-1b047793c8a943cd945e375624659445",
+    "commit": null,
+    "summary": "K1698 rev5 primary-path certification collect_completed followup 收件：Codex 判 VERDICT: FAIL（freeze integrity PASS，7 檔 sha 全 match）。code/data/lookahead/gate 全 PASS，4 條 blocker 全在 README 過度宣稱/未溯源數字：(1) 「完全復現 K1684/K854」vs results.json 實載 n_matching=11/14（0.7857）(2) t≈−5.6/−5.13/154 CI 無 JSON 對應 (3) TAIFEX「2192 檔」無 JSON 對應（/rv_construction/n_days=2191 與 /session_alignment_check/files_checked=40 是不同量）(4) 首建 RV「+1分鐘」無 run-log receipt（只有 cache-hit /elapsed_sec=57.3）。寫 experiments/k1698/review_verdict.json（verdict=FAIL + blocking_defects 逐條）；建 rev6 remediation 任務 assign_1f80cef2（P2 paper_review：改 README→re-freeze→Codex rev6 二審→certify）；母任務 assign_80535ab4 complete failed；compute followup mark-followup-dispatched 防重派。3-strike active，禁自簽。"
+  },
+  {
+    "timestamp": "2026-07-27T21:15:24+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_k1426_oos_residuals",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-1b047793c8a943cd945e375624659445",
+    "owner": "hourly-slot-1-1b047793c8a943cd945e375624659445",
+    "commit": null,
+    "summary": "K1426 OOS residual collect_completed followup：前置驗過（3 shard 全帶 daily_hedged_returns，含先前缺資料的 GLD/IAU）→ 派 collection agent 跑 merge_shards + oos_return_benchmark。agent 依 stop-rule 未自行 close（2/6 pair 命中 |t|>3 且 CI 排除 0）並 loud escalate。主線程裁決：方向為 PCH 微幅較佳（return-OLS 從未勝 PCH），非「return-OLS 揭穿 PCH 為 artifact」的危險方向 → K1426 NULL confirmed 不變。補齊配對檢定（6 pairs paired DM + block-bootstrap 1000reps block_len=20 seed=42, n=1759/pair）：六對 HE 點估計差全部 |diff|≤0.0005，標題 GLD/SLV +0.3622 完全來自對照組用錯 levels beta。honesty caveat 已入 README：4/6 CI 跨 0，SPY/IVV(|t|=7.66) 與 XLF/XLK(|t|=5.26) 統計顯著但經濟為零。產出 k1426_oos_results.json / k1426_oos_return_benchmark.json + README 更新。close assign_k1426_oos_residuals succeeded；followup mark-dispatched。無新 knowledge（原 NULL 已存在，本次為方法補強+驗證）。"
+  },
+  {
+    "timestamp": "2026-07-27T21:19:57+08:00",
+    "task_type": "experiment",
+    "task_id": "k1715_bfgs_fix_dephantom_rerun_20260727",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-1b047793c8a943cd945e375624659445",
+    "owner": "hourly-slot-1-1b047793c8a943cd945e375624659445",
+    "commit": null,
+    "summary": "K1715 escalation attempt 2 collect_completed followup 收件（背景 verify agent）。RESULT: FAIL — 但非科學失敗。guard 修正驗證正確：268 fits nm_to_bfgs_improve min=0/max=5.18e-11/negatives=0，本 run 0 fits 觸發 NM-override。headline 全對、NULL 結論不變（max|DM t|=2.813<3；四 Student-t 模型 1% 左尾覆蓋不足 kupiec 全 reject；arch 交叉一致）。BLOCKER=Codex unresolved CRITICAL（診斷欄位誠實性，latent this run）：bfgs_* 與 optimizer_success 取自 accepted best 卻標為 BFGS 診斷；bfgs_nll 實為 guarded accepted NLL；nm_to_bfgs_improve 構造截斷非負掩蓋 BFGS 失敗。agent 依 stop-rule 未 merge（正確）。router attempt3 exhausted=ceiling → 3-strike 處置：complete source task failed（escalation_attempts=2）；decompose bounded 最終修任務 assign_c14fb33b（Codex 指定 relabel spec：分離 raw BFGS + accepted_method + rename guarded gain + convergence_note → Codex 二審 → 決定性重跑 → merge）；followup mark-dispatched；escalate 老闆 email（--needs-reply）。worktree k1715-204d556b 保留未 merge。無 knowledge（未 merge）。"
   }
 ]

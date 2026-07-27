@@ -1,0 +1,41 @@
+{
+  "id": "compute-k1715-codex-primary-path-review-bfgs-min-nll-guard-esc-attem-1785158408",
+  "title": "K1715 Codex primary-path review — BFGS min-NLL guard (esc attempt 2)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1715_rev_bfgs_guard_prompt.md",
+    "storage/ops/codex_reviews/k1715_rev_bfgs_guard_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "cancelled",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T13:20:08Z",
+  "started_at": null,
+  "completed_at": "2026-07-27T13:23:01Z",
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-codex-primary-path-review-bfgs-min-nll-guard-esc-attem-1785158408.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-codex-primary-path-review-bfgs-min-nll-guard-esc-attem-1785158408.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1715_rev_bfgs_guard_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1715_rev_bfgs_guard_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1715 esc attempt2 收件（Codex primary-path review of BFGS min-NLL guard 已完成）。工作在 worktree .claude/worktrees/k1715-204d556b。收件步驟：(1) 讀 storage/ops/codex_reviews/k1715_rev_bfgs_guard_verdict.md — 有任何 CRITICAL 或 FAIL → 不 merge，記錄根因，這是 attempt 3 → 觸發 3-strike（拆解/補文獻/escalate email 給老闆），不得原樣重試。(2) 無 CRITICAL/PASS → 在 worktree 內 uv run python experiments/K1715/build_readme.py 重生 README（數字全來自 results.json），git add+commit 這些 rerun 產物（K1715_results.json、三張 fig、README.md）到 worktree branch。(3) python3 scripts/check_experiment_artifacts.py check --path experiments/K1715 → 通過後 bash scripts/merge_worktree.sh（走 worktree-merge-verification skill 驗證，確認 reflog commit 沒遺失）。(4) 主線程驗證：guard 已由前一班確認 268/268 nm_to_bfgs_improve>=0、NULL verdict 未翻轉（score-driven 與 GARCH-t 在 Harvey|t|>3 下 fail-to-reject 相等，四個 Student-t 共享左尾覆蓋不足）。(5) knowledge.json 只主線程寫且僅在有全新 finding 時（本案為既有 NULL 確認，預期只寫 work_log）。(6) 關 source task：uv run python scripts/task_pool_claim.py complete --id k1715_bfgs_fix_dephantom_rerun_20260727 --status succeeded --result <摘要含 verdict 結論+guard 驗證>。Model: opus/high (escalation attempt).",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "cancel_reason": "Redundant: K1715 attempt 2 already marked failed (escalation_attempts=2, 3-strike escalated); the Codex CRITICAL on diagnostic-field honesty is already captured in attempt-3 task assign_c14fb33b with a prescribed fix. A fresh review would re-derive the known CRITICAL and waste compute. Enqueued on stale state before reading assign_c14fb33b.",
+  "cancelled_at": "2026-07-27T13:23:01Z"
+}
