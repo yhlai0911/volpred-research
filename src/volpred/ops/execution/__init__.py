@@ -12,7 +12,11 @@ from enum import Enum
 import hashlib
 import json
 import re
-from typing import Iterable, Protocol
+from threading import RLock
+from typing import Callable, Iterable, Protocol
+from uuid import uuid4
+
+from volpred.diagnostics import warn
 
 
 class BlockerKind(str, Enum):
@@ -20,6 +24,13 @@ class BlockerKind(str, Enum):
     AUTH = "auth"
     PROVIDER_UNAVAILABLE = "provider_unavailable"
     POLICY_DENIAL = "policy_denial"
+    EXECUTION_IN_PROGRESS = "execution_in_progress"
+
+
+def _aware(value: datetime, *, field: str) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError(f"{field} must include a real timezone offset")
+    return value.astimezone(timezone.utc)
 
 
 @dataclass(frozen=True)
@@ -73,10 +84,11 @@ class ProviderObservation:
     evidence_ref: str
 
     def __post_init__(self) -> None:
-        if self.observed_at.tzinfo is None:
-            raise ValueError("provider observation timestamp must include a timezone")
+        _aware(self.observed_at, field="provider observation timestamp")
         if not self.evidence_ref:
             raise ValueError("provider observation requires evidence")
+        if self.blocker is not None and not isinstance(self.blocker, BlockerKind):
+            raise ValueError("provider observation blocker must be a BlockerKind")
 
 
 @dataclass(frozen=True)
@@ -145,6 +157,8 @@ class ExecutionAttempt:
             raise ValueError(f"unsupported execution attempt kind: {self.kind!r}")
         if not self.evidence_ref:
             raise ValueError("execution attempt evidence is required")
+        if self.blocker is not None and not isinstance(self.blocker, BlockerKind):
+            raise ValueError("execution attempt blocker must be a BlockerKind")
         if (self.kind == "blocked") != (self.blocker is not None):
             raise ValueError("only blocked attempts carry a typed blocker")
         if self.kind not in {"blocked", "terminal_failure"} and not self.result_ref:
@@ -178,32 +192,262 @@ class ProviderAdapter(Protocol):
     ) -> ExecutionAttempt: ...
 
 
-class InMemoryProviderExecutionStore:
+@dataclass(frozen=True)
+class ExecutionReservation:
+    acquired: bool
+    replay: ExecutionOutcome | None = None
+
+
+@dataclass(frozen=True)
+class ProbeReservation:
+    acquired: bool
+    state: ProviderStateView
+
+
+class ProviderExecutionStore(Protocol):
+    def reserve_execution(
+        self,
+        *,
+        key: str,
+        fingerprint: str,
+        owner: str,
+        observed_at: datetime,
+        expires_at: datetime,
+    ) -> ExecutionReservation: ...
+
+    def settle_execution(
+        self, *, key: str, owner: str, outcome: ExecutionOutcome
+    ) -> None: ...
+
+    def release_execution(self, *, key: str, owner: str) -> None: ...
+
+    def reserve_probe(
+        self,
+        *,
+        provider_id: str,
+        owner: str,
+        observed_at: datetime,
+        cost_units: int,
+        policy: ProbePolicy,
+    ) -> ProbeReservation: ...
+
+    def settle_probe(
+        self,
+        *,
+        provider_id: str,
+        owner: str,
+        observation: ProviderObservation,
+        policy: ProbePolicy,
+    ) -> ProviderStateView: ...
+
+    def observe(
+        self,
+        *,
+        observation: ProviderObservation,
+        observed_now: datetime,
+        policy: ProbePolicy,
+    ) -> ProviderStateView: ...
+
+
+class _InMemoryProviderExecutionStore:
     """Deterministic reference store; production stores implement the same rules."""
 
     def __init__(self) -> None:
+        self._lock = RLock()
         self._request_fingerprints: dict[str, str] = {}
         self._terminal_outcomes: dict[str, ExecutionOutcome] = {}
+        self._execution_reservations: dict[str, tuple[str, datetime]] = {}
         self._provider_states: dict[str, ProviderStateView] = {}
+        self._probe_reservations: dict[str, str] = {}
 
-    def bind_request(self, key: str, fingerprint: str) -> None:
-        previous = self._request_fingerprints.setdefault(key, fingerprint)
-        if previous != fingerprint:
-            raise ValueError("idempotency key is already bound to another request")
+    def reserve_execution(
+        self,
+        *,
+        key: str,
+        fingerprint: str,
+        owner: str,
+        observed_at: datetime,
+        expires_at: datetime,
+    ) -> ExecutionReservation:
+        with self._lock:
+            previous = self._request_fingerprints.setdefault(key, fingerprint)
+            if previous != fingerprint:
+                raise ValueError("idempotency key is already bound to another request")
+            replay = self._terminal_outcomes.get(key)
+            if replay is not None:
+                return ExecutionReservation(acquired=False, replay=replay)
+            reservation = self._execution_reservations.get(key)
+            if reservation is not None and reservation[1] > observed_at:
+                return ExecutionReservation(acquired=False)
+            self._execution_reservations[key] = (owner, expires_at)
+            return ExecutionReservation(acquired=True)
 
-    def terminal_outcome(self, key: str) -> ExecutionOutcome | None:
-        return self._terminal_outcomes.get(key)
+    def settle_execution(
+        self, *, key: str, owner: str, outcome: ExecutionOutcome
+    ) -> None:
+        with self._lock:
+            reservation = self._execution_reservations.get(key)
+            if reservation is None or reservation[0] != owner:
+                raise RuntimeError("execution reservation was lost before settlement")
+            previous = self._terminal_outcomes.setdefault(key, outcome)
+            if previous != outcome:
+                raise RuntimeError("terminal provider outcome conflicts with durable replay")
+            self._execution_reservations.pop(key, None)
 
-    def save_terminal(self, key: str, outcome: ExecutionOutcome) -> None:
-        previous = self._terminal_outcomes.setdefault(key, outcome)
-        if previous != outcome:
-            raise RuntimeError("terminal provider outcome conflicts with durable replay")
+    def release_execution(self, *, key: str, owner: str) -> None:
+        with self._lock:
+            reservation = self._execution_reservations.get(key)
+            if reservation is not None and reservation[0] == owner:
+                self._execution_reservations.pop(key, None)
 
-    def provider_state(self, provider_id: str) -> ProviderStateView | None:
-        return self._provider_states.get(provider_id)
+    def reserve_probe(
+        self,
+        *,
+        provider_id: str,
+        owner: str,
+        observed_at: datetime,
+        cost_units: int,
+        policy: ProbePolicy,
+    ) -> ProbeReservation:
+        with self._lock:
+            previous = self._provider_states.get(provider_id)
+            if previous is not None and observed_at < previous.observed_at:
+                raise ValueError("probe clock is older than provider state")
+            if previous is not None and observed_at < previous.next_probe_at:
+                return ProbeReservation(acquired=False, state=previous)
+            if provider_id in self._probe_reservations:
+                state = previous or _unknown_provider_state(provider_id, observed_at)
+                return ProbeReservation(acquired=False, state=state)
+            used = 0
+            window_started_at = observed_at
+            if (
+                previous is not None
+                and observed_at - previous.probe_window_started_at < policy.window
+            ):
+                used = previous.probe_cost_used
+                window_started_at = previous.probe_window_started_at
+            if used + cost_units > policy.max_probe_cost_units:
+                state = previous or _unknown_provider_state(provider_id, observed_at)
+                return ProbeReservation(acquired=False, state=state)
+            provisional = ProviderStateView(
+                provider_id=provider_id,
+                blocker=(
+                    previous.blocker
+                    if previous is not None
+                    else BlockerKind.PROVIDER_UNAVAILABLE
+                ),
+                observed_at=observed_at,
+                evidence_ref=(
+                    previous.evidence_ref
+                    if previous is not None
+                    else f"probe://{provider_id}/reserved"
+                ),
+                consecutive_failures=(
+                    previous.consecutive_failures if previous is not None else 0
+                ),
+                next_probe_at=observed_at + policy.minimum_interval,
+                probe_window_started_at=window_started_at,
+                probe_cost_used=used + cost_units,
+            )
+            self._provider_states[provider_id] = provisional
+            self._probe_reservations[provider_id] = owner
+            return ProbeReservation(acquired=True, state=provisional)
 
-    def save_provider_state(self, state: ProviderStateView) -> None:
-        self._provider_states[state.provider_id] = state
+    def settle_probe(
+        self,
+        *,
+        provider_id: str,
+        owner: str,
+        observation: ProviderObservation,
+        policy: ProbePolicy,
+    ) -> ProviderStateView:
+        with self._lock:
+            if self._probe_reservations.get(provider_id) != owner:
+                raise RuntimeError("probe reservation was lost before settlement")
+            try:
+                return self._observe_locked(
+                    observation=observation,
+                    observed_now=observation.observed_at,
+                    policy=policy,
+                )
+            finally:
+                self._probe_reservations.pop(provider_id, None)
+
+    def observe(
+        self,
+        *,
+        observation: ProviderObservation,
+        observed_now: datetime,
+        policy: ProbePolicy,
+    ) -> ProviderStateView:
+        with self._lock:
+            return self._observe_locked(
+                observation=observation,
+                observed_now=observed_now,
+                policy=policy,
+            )
+
+    def _observe_locked(
+        self,
+        *,
+        observation: ProviderObservation,
+        observed_now: datetime,
+        policy: ProbePolicy,
+    ) -> ProviderStateView:
+        observed_at = _aware(
+            observation.observed_at, field="provider observation timestamp"
+        )
+        now = _aware(observed_now, field="provider observation clock")
+        if observed_at > now + timedelta(seconds=5):
+            raise ValueError("provider observation is implausibly in the future")
+        previous = self._provider_states.get(observation.provider_id)
+        if previous is not None and observed_at < previous.observed_at:
+            raise ValueError("provider observation is older than current state")
+        window_started_at = (
+            previous.probe_window_started_at if previous else observed_at
+        )
+        cost = previous.probe_cost_used if previous else 0
+        if observed_at - window_started_at >= policy.window:
+            window_started_at = observed_at
+            cost = 0
+        failures = (
+            0
+            if observation.blocker is None
+            else (previous.consecutive_failures if previous else 0) + 1
+        )
+        multiplier = 1 if failures == 0 else 2 ** (failures - 1)
+        delay = min(
+            policy.minimum_interval * multiplier,
+            policy.maximum_backoff,
+        )
+        state = ProviderStateView(
+            provider_id=observation.provider_id,
+            blocker=observation.blocker,
+            observed_at=observed_at,
+            evidence_ref=observation.evidence_ref,
+            consecutive_failures=failures,
+            next_probe_at=observed_at + delay,
+            probe_window_started_at=window_started_at,
+            probe_cost_used=cost,
+        )
+        self._provider_states[observation.provider_id] = state
+        return state
+
+
+def _unknown_provider_state(
+    provider_id: str,
+    observed_at: datetime,
+) -> ProviderStateView:
+    return ProviderStateView(
+        provider_id=provider_id,
+        blocker=BlockerKind.PROVIDER_UNAVAILABLE,
+        observed_at=observed_at,
+        evidence_ref=f"probe://{provider_id}/unavailable",
+        consecutive_failures=0,
+        next_probe_at=observed_at,
+        probe_window_started_at=observed_at,
+        probe_cost_used=0,
+    )
 
 
 class ProviderExecution:
@@ -217,14 +461,16 @@ class ProviderExecution:
         self,
         *,
         providers: Iterable[tuple[ProviderDescriptor, ProviderAdapter]],
-        store: InMemoryProviderExecutionStore,
-        clock,
+        store: ProviderExecutionStore,
+        clock: Callable[[], datetime],
         probe_policy: ProbePolicy | None = None,
+        token_factory: Callable[[], str] | None = None,
     ) -> None:
         self._providers = tuple(providers)
         self._store = store
         self._clock = clock
         self._probe_policy = probe_policy or ProbePolicy()
+        self._token_factory = token_factory or (lambda: uuid4().hex)
         provider_ids = [descriptor.provider_id for descriptor, _ in self._providers]
         if len(provider_ids) != len(set(provider_ids)):
             raise ValueError("provider ids must be unique")
@@ -244,61 +490,39 @@ class ProviderExecution:
         if descriptor.probe_cost_units <= 0:
             raise ValueError("provider probe cost must be positive and bounded")
 
-    def observe(
-        self,
-        observation: ProviderObservation,
-        *,
-        _probe_cost_units: int = 0,
-    ) -> ProviderStateView:
+    def observe(self, observation: ProviderObservation) -> ProviderStateView:
         known_ids = {
             descriptor.provider_id for descriptor, _adapter in self._providers
         }
         if observation.provider_id not in known_ids:
             raise ValueError("observation names an unknown provider")
-        observed_at = observation.observed_at.astimezone(timezone.utc)
-        previous = self._store.provider_state(observation.provider_id)
-        if (
-            previous is None
-            or observed_at - previous.probe_window_started_at
-            >= self._probe_policy.window
-        ):
-            window_started_at = observed_at
-            prior_cost = 0
-        else:
-            window_started_at = previous.probe_window_started_at
-            prior_cost = previous.probe_cost_used
-        descriptor = self._descriptor(observation.provider_id)
-        failures = (
-            0
-            if observation.blocker is None
-            else (previous.consecutive_failures if previous else 0) + 1
+        return self._store.observe(
+            observation=observation,
+            observed_now=_aware(self._clock(), field="provider execution clock"),
+            policy=self._probe_policy,
         )
-        multiplier = 1 if failures == 0 else 2 ** (failures - 1)
-        delay = min(
-            self._probe_policy.minimum_interval * multiplier,
-            self._probe_policy.maximum_backoff,
-        )
-        state = ProviderStateView(
-            provider_id=observation.provider_id,
-            blocker=observation.blocker,
-            observed_at=observed_at,
-            evidence_ref=observation.evidence_ref,
-            consecutive_failures=failures,
-            next_probe_at=observed_at + delay,
-            probe_window_started_at=window_started_at,
-            probe_cost_used=prior_cost + _probe_cost_units,
-        )
-        self._store.save_provider_state(state)
-        return state
 
     def execute(self, request: ExecutionRequest) -> ExecutionOutcome:
         fingerprint = _request_fingerprint(request)
-        self._store.bind_request(request.idempotency_key, fingerprint)
-        replay = self._store.terminal_outcome(request.idempotency_key)
-        if replay is not None:
-            return replay
-
-        now = self._clock().astimezone(timezone.utc)
+        now = _aware(self._clock(), field="provider execution clock")
+        owner = self._token_factory()
+        if not owner:
+            raise ValueError("provider execution reservation token is required")
+        reservation = self._store.reserve_execution(
+            key=request.idempotency_key,
+            fingerprint=fingerprint,
+            owner=owner,
+            observed_at=now,
+            expires_at=now + timedelta(hours=1),
+        )
+        if reservation.replay is not None:
+            return reservation.replay
+        if not reservation.acquired:
+            return self._blocked(
+                request,
+                BlockerKind.EXECUTION_IN_PROGRESS,
+                evidence_refs=("execution://reservation/in-progress",),
+            )
         candidates = tuple(
             (descriptor, adapter)
             for descriptor, adapter in self._providers
@@ -308,96 +532,133 @@ class ProviderExecution:
             and request.required_attestations <= descriptor.attestations
         )
         if not candidates:
-            return self._blocked(
+            outcome = self._blocked(
                 request,
                 BlockerKind.POLICY_DENIAL,
                 evidence_refs=("policy://no-semantically-equivalent-provider",),
             )
+            self._store.release_execution(key=request.idempotency_key, owner=owner)
+            return outcome
 
         evidence: list[str] = []
         blockers: list[BlockerKind] = []
-        for descriptor, adapter in candidates:
-            state = self._store.provider_state(descriptor.provider_id)
-            if state is None or now >= state.next_probe_at:
-                if not self._probe_budget_available(descriptor, state, now):
-                    blockers.append(
-                        state.blocker
-                        if state is not None and state.blocker is not None
-                        else BlockerKind.PROVIDER_UNAVAILABLE
-                    )
-                    evidence.append(
-                        f"probe-budget://{descriptor.provider_id}/exhausted"
-                    )
-                    continue
-                observation = adapter.probe(descriptor, observed_at=now)
-                if observation.provider_id != descriptor.provider_id:
-                    raise RuntimeError("provider probe returned the wrong identity")
-                state = self.observe(
-                    observation,
-                    _probe_cost_units=descriptor.probe_cost_units,
+        try:
+            for descriptor, adapter in candidates:
+                probe_owner = self._token_factory()
+                probe = self._store.reserve_probe(
+                    provider_id=descriptor.provider_id,
+                    owner=probe_owner,
+                    observed_at=now,
+                    cost_units=descriptor.probe_cost_units,
+                    policy=self._probe_policy,
                 )
-                evidence.append(observation.evidence_ref)
-            else:
+                state = probe.state
+                if probe.acquired:
+                    try:
+                        observation = adapter.probe(descriptor, observed_at=now)
+                        if observation.provider_id != descriptor.provider_id:
+                            raise RuntimeError(
+                                "provider probe returned the wrong identity"
+                            )
+                    except Exception as exc:
+                        warn(
+                            "provider-execution",
+                            "provider probe failed; trying an equivalent provider",
+                            provider_id=descriptor.provider_id,
+                            error_type=type(exc).__name__,
+                        )
+                        observation = ProviderObservation(
+                            provider_id=descriptor.provider_id,
+                            observed_at=now,
+                            blocker=BlockerKind.PROVIDER_UNAVAILABLE,
+                            evidence_ref=(
+                                f"provider-exception://{descriptor.provider_id}/"
+                                f"{type(exc).__name__}"
+                            ),
+                        )
+                    state = self._store.settle_probe(
+                        provider_id=descriptor.provider_id,
+                        owner=probe_owner,
+                        observation=observation,
+                        policy=self._probe_policy,
+                    )
                 evidence.append(state.evidence_ref)
 
-            if state.blocker is not None:
-                blockers.append(state.blocker)
-                continue
+                if state.blocker is not None:
+                    blockers.append(state.blocker)
+                    continue
 
-            attempt = adapter.execute(
-                request,
-                resume_checkpoint=request.resume_checkpoint,
-            )
-            evidence.append(attempt.evidence_ref)
-            if attempt.kind == "blocked":
-                observation = ProviderObservation(
+                try:
+                    attempt = adapter.execute(
+                        request,
+                        resume_checkpoint=request.resume_checkpoint,
+                    )
+                except Exception as exc:
+                    warn(
+                        "provider-execution",
+                        "provider execution failed; trying an equivalent provider",
+                        provider_id=descriptor.provider_id,
+                        error_type=type(exc).__name__,
+                    )
+                    observation = ProviderObservation(
+                        provider_id=descriptor.provider_id,
+                        observed_at=now,
+                        blocker=BlockerKind.PROVIDER_UNAVAILABLE,
+                        evidence_ref=(
+                            f"provider-exception://{descriptor.provider_id}/"
+                            f"{type(exc).__name__}"
+                        ),
+                    )
+                    state = self.observe(observation)
+                    evidence.append(state.evidence_ref)
+                    blockers.append(BlockerKind.PROVIDER_UNAVAILABLE)
+                    continue
+                evidence.append(attempt.evidence_ref)
+                if attempt.kind == "blocked":
+                    observation = ProviderObservation(
+                        provider_id=descriptor.provider_id,
+                        observed_at=now,
+                        blocker=attempt.blocker,
+                        evidence_ref=attempt.evidence_ref,
+                    )
+                    self.observe(observation)
+                    blockers.append(attempt.blocker)
+                    continue
+                outcome = ExecutionOutcome(
+                    kind=attempt.kind,
+                    work_id=request.work_id,
                     provider_id=descriptor.provider_id,
-                    observed_at=now,
-                    blocker=attempt.blocker,
-                    evidence_ref=attempt.evidence_ref,
+                    result_ref=attempt.result_ref,
+                    blocker=None,
+                    evidence_refs=tuple(evidence),
+                    resume_checkpoint_id=(
+                        request.resume_checkpoint.checkpoint_id
+                        if request.resume_checkpoint is not None
+                        else None
+                    ),
                 )
-                self.observe(observation)
-                blockers.append(attempt.blocker)
-                continue
-            outcome = ExecutionOutcome(
-                kind=attempt.kind,
-                work_id=request.work_id,
-                provider_id=descriptor.provider_id,
-                result_ref=attempt.result_ref,
-                blocker=None,
+                if attempt.kind in _REPLAYABLE_KINDS:
+                    self._store.settle_execution(
+                        key=request.idempotency_key,
+                        owner=owner,
+                        outcome=outcome,
+                    )
+                else:
+                    self._store.release_execution(
+                        key=request.idempotency_key, owner=owner
+                    )
+                return outcome
+
+            outcome = self._blocked(
+                request,
+                blockers[0] if blockers else BlockerKind.PROVIDER_UNAVAILABLE,
                 evidence_refs=tuple(evidence),
-                resume_checkpoint_id=(
-                    request.resume_checkpoint.checkpoint_id
-                    if request.resume_checkpoint is not None
-                    else None
-                ),
             )
-            if attempt.kind in _REPLAYABLE_KINDS:
-                self._store.save_terminal(request.idempotency_key, outcome)
+            self._store.release_execution(key=request.idempotency_key, owner=owner)
             return outcome
-
-        return self._blocked(
-            request,
-            blockers[0] if blockers else BlockerKind.PROVIDER_UNAVAILABLE,
-            evidence_refs=tuple(evidence),
-        )
-
-    def _probe_budget_available(
-        self,
-        descriptor: ProviderDescriptor,
-        state: ProviderStateView | None,
-        now: datetime,
-    ) -> bool:
-        used = 0
-        if (
-            state is not None
-            and now - state.probe_window_started_at < self._probe_policy.window
-        ):
-            used = state.probe_cost_used
-        return (
-            used + descriptor.probe_cost_units
-            <= self._probe_policy.max_probe_cost_units
-        )
+        except BaseException:
+            self._store.release_execution(key=request.idempotency_key, owner=owner)
+            raise
 
     def _descriptor(self, provider_id: str) -> ProviderDescriptor:
         return next(
@@ -446,11 +707,11 @@ __all__ = [
     "ExecutionAttempt",
     "ExecutionOutcome",
     "ExecutionRequest",
-    "InMemoryProviderExecutionStore",
     "ProbePolicy",
     "ProviderAdapter",
     "ProviderDescriptor",
     "ProviderExecution",
+    "ProviderExecutionStore",
     "ProviderObservation",
     "ProviderStateView",
     "VerifiedExecutionCheckpoint",

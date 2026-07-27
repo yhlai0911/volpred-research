@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from threading import Event, Thread
 
 import pytest
 
@@ -9,13 +10,13 @@ from volpred.ops.execution import (
     BlockerKind,
     ExecutionAttempt,
     ExecutionRequest,
-    InMemoryProviderExecutionStore,
     ProbePolicy,
     ProviderDescriptor,
     ProviderExecution,
     ProviderObservation,
     VerifiedExecutionCheckpoint,
 )
+from volpred.ops.execution._testing import InMemoryProviderExecutionStore
 
 
 NOW = datetime(2026, 7, 27, 4, 0, tzinfo=timezone.utc)
@@ -311,3 +312,163 @@ def test_observe_requires_real_evidence_and_never_accepts_reset_time() -> None:
         )
 
     assert "reset" not in ProviderObservation.__dataclass_fields__
+
+
+def test_runtime_rejects_string_blockers_despite_python_type_erasure() -> None:
+    with pytest.raises(ValueError, match="BlockerKind"):
+        ProviderObservation(
+            provider_id="claude",
+            observed_at=NOW,
+            blocker="quota",  # type: ignore[arg-type]
+            evidence_ref="probe://bad",
+        )
+    with pytest.raises(ValueError, match="BlockerKind"):
+        ExecutionAttempt(
+            kind="blocked",
+            result_ref=None,
+            evidence_ref="attempt://bad",
+            blocker="quota",  # type: ignore[arg-type]
+        )
+
+
+def test_concurrent_same_idempotency_key_executes_provider_once() -> None:
+    entered = Event()
+    release = Event()
+
+    class BlockingProvider(FakeProvider):
+        def execute(self, request, *, resume_checkpoint):
+            self.execute_calls.append((request, resume_checkpoint))
+            entered.set()
+            assert release.wait(timeout=2)
+            return ExecutionAttempt(
+                kind="candidate_effect_request",
+                result_ref="effect-request://one",
+                evidence_ref="attempt://one",
+            )
+
+    adapter = BlockingProvider()
+    execution = engine(
+        [(descriptor("codex"), adapter)],
+        policy=ProbePolicy(minimum_interval=timedelta(hours=1)),
+    )
+    outcomes = []
+    first = Thread(target=lambda: outcomes.append(execution.execute(request())))
+    first.start()
+    assert entered.wait(timeout=2)
+
+    concurrent = execution.execute(request())
+    release.set()
+    first.join(timeout=2)
+
+    assert concurrent.kind == "blocked"
+    assert concurrent.blocker == BlockerKind.EXECUTION_IN_PROGRESS
+    assert outcomes[0].kind == "candidate_effect_request"
+    assert len(adapter.execute_calls) == 1
+    assert execution.execute(request()) == outcomes[0]
+
+
+def test_concurrent_requests_share_one_atomic_probe_reservation() -> None:
+    entered = Event()
+    release = Event()
+
+    class BlockingProbeProvider(FakeProvider):
+        def probe(self, descriptor, *, observed_at):
+            self.probe_calls += 1
+            entered.set()
+            assert release.wait(timeout=2)
+            return ProviderObservation(
+                provider_id=descriptor.provider_id,
+                observed_at=observed_at,
+                blocker=None,
+                evidence_ref="probe://one",
+            )
+
+    adapter = BlockingProbeProvider()
+    execution = engine([(descriptor("codex"), adapter)])
+    outcomes = []
+    first = Thread(
+        target=lambda: outcomes.append(execution.execute(request(key="one")))
+    )
+    first.start()
+    assert entered.wait(timeout=2)
+
+    concurrent = execution.execute(request(key="two"))
+    release.set()
+    first.join(timeout=2)
+
+    assert concurrent.kind == "blocked"
+    assert concurrent.blocker == BlockerKind.PROVIDER_UNAVAILABLE
+    assert outcomes[0].kind == "completed"
+    assert adapter.probe_calls == 1
+    assert len(adapter.execute_calls) == 1
+
+
+def test_probe_exception_is_typed_and_reroutes_to_equivalent_provider() -> None:
+    class BrokenProbe(FakeProvider):
+        def probe(self, descriptor, *, observed_at):
+            self.probe_calls += 1
+            raise OSError("token-redacted outage")
+
+    broken = BrokenProbe()
+    healthy = FakeProvider()
+    outcome = engine(
+        [
+            (descriptor("claude"), broken),
+            (descriptor("codex"), healthy),
+        ]
+    ).execute(request())
+
+    assert outcome.kind == "completed"
+    assert outcome.provider_id == "codex"
+    assert outcome.evidence_refs[0] == "provider-exception://claude/OSError"
+
+
+def test_execute_exception_is_typed_and_reroutes_to_equivalent_provider() -> None:
+    class BrokenExecution(FakeProvider):
+        def execute(self, request, *, resume_checkpoint):
+            self.execute_calls.append((request, resume_checkpoint))
+            raise RuntimeError("provider transport died")
+
+    broken = BrokenExecution()
+    healthy = FakeProvider()
+    outcome = engine(
+        [
+            (descriptor("claude"), broken),
+            (descriptor("codex"), healthy),
+        ]
+    ).execute(request())
+
+    assert outcome.kind == "completed"
+    assert outcome.provider_id == "codex"
+    assert "provider-exception://claude/RuntimeError" in outcome.evidence_refs
+
+
+def test_stale_and_future_observations_cannot_move_backoff_clock() -> None:
+    execution = engine([(descriptor("claude"), FakeProvider())])
+    execution.observe(
+        ProviderObservation(
+            provider_id="claude",
+            observed_at=NOW,
+            blocker=BlockerKind.QUOTA,
+            evidence_ref="probe://current",
+        )
+    )
+
+    with pytest.raises(ValueError, match="older"):
+        execution.observe(
+            ProviderObservation(
+                provider_id="claude",
+                observed_at=NOW - timedelta(seconds=1),
+                blocker=None,
+                evidence_ref="probe://stale",
+            )
+        )
+    with pytest.raises(ValueError, match="future"):
+        execution.observe(
+            ProviderObservation(
+                provider_id="claude",
+                observed_at=NOW + timedelta(seconds=6),
+                blocker=None,
+                evidence_ref="probe://future",
+            )
+        )
