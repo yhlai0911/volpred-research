@@ -44338,8 +44338,9 @@
       }
     ],
     "compute_job_id": "agent-brief_k1708_s14-3ca4dd",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1708_s14-3ca4dd; awaiting PHASE A collection"
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-brief_k1708_s14-3ca4dd; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T17:00:02Z"
   },
   {
     "id": "K1436_article_general",
@@ -45317,7 +45318,7 @@
     "title": "K1592: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1592 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1592 NULL_OR_WEAK：對leverage-direction論文審查質疑的gamma-rule模型選擇故事，重建為凍結、預註冊的未來OOS賽馬（正gamma門檻>1.65時用GJR否則GARCH），development資產SPY/QQQ/EEM/GLD/TLT + disjoint holdout資產IWM/SLV/BTC-USD，OOS期間2023-01-03至2026-06-26（8個資產873-1202個觀測），論文專屬pinned CSV，21日refit，canonical Patton QLIKE + DM-HAC(h=1) Canonical evidence: experiments/k1592/k1592_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -45332,7 +45333,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-26T21:05:40+00:00"
+    "created_at": "2026-07-26T21:05:40+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T17:14:11.407134+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:14:31.998947+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:16:37.123613+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      }
+    ],
+    "started_at": "2026-07-27T17:14:31.998930+00:00",
+    "completed_at": "2026-07-27T17:16:37.123590+00:00",
+    "result": "arc-covered: check_arc_dedup --audience general = block_arc_dup. K1592 gamma-rule GJR/GARCH model-selection NULL_OR_WEAK arc is the same methodology_robustness/null_no_info story already delivered by mile_7b02f9e2 ('冠軍換了十六次，統計上一個都沒贏', shares K1583 model-horse-race null arc) + mile_de666838. No genuinely new reader angle to justify details['dup_waiver']; writing would create a content-black-hole duplicate. No new draft written."
   },
   {
     "id": "K1600_article_general",
@@ -47474,7 +47498,7 @@
     "title": "K1595: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1595 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: k1595 [NULL]（NULL_OR_NEGATIVE，Codex CONDITIONAL_PASS）：檢驗 pooled MultiTransformerLite（3個獨立seed TransformerLite平均）能否在 SPY/QQQ/IWM/XLF/XLE/XLU 六檔 OOS 打敗 HAR/Ridge/EWMA/GJR-GARCH。資料：frozen local cache 2005-2026，OOS 2016-01-01至2026-06-26共15,678 asset-days（每檔2,613筆）。Mean QLIKE六檔全部由GJR- Canonical evidence: experiments/k1595/k1595_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -47489,7 +47513,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T10:13:31+00:00"
+    "created_at": "2026-07-27T10:13:31+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T17:16:37.381462+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:16:37.629463+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:16:38.404874+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      }
+    ],
+    "started_at": "2026-07-27T17:16:37.629450+00:00",
+    "completed_at": "2026-07-27T17:16:38.404842+00:00",
+    "result": "arc-covered: check_arc_dedup --audience general = block_arc_dup (conclusion null_no_info); story already delivered by mile_50ce135b ('AI 瓶頸轉電力...波動率還沒買單'). No new angle for dup_waiver; no draft written."
   },
   {
     "id": "assign_69a14293",
@@ -47914,7 +47961,7 @@
     "title": "K1599: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1599 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1599 [CONDITIONAL_PASS]（Codex 已審查，verdict CONDITIONAL_PASS）: 12檔ETF（SPY/QQQ/IWM/XLB/XLE/XLF/XLI/XLK/XLP/XLU/XLV/XLY，2005起，OOS從2016-01-01）用日頻BNS-style rolling bipower scale偵測jump（|r_t|/sqrt((pi/2)*rolling_mean(|r_t-1|*|r_t-2|))>2.5），檢定跨ETF co-jump proxy是否改善次日平方報酬QLIKE預測。結果：HAR_CJ Canonical evidence: experiments/k1599/k1599_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -47929,7 +47976,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T11:26:00+00:00"
+    "created_at": "2026-07-27T11:26:00+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T17:16:37.881169+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:16:38.132016+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:16:38.720276+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      }
+    ],
+    "started_at": "2026-07-27T17:16:38.132003+00:00",
+    "completed_at": "2026-07-27T17:16:38.720252+00:00",
+    "result": "arc-covered: check_arc_dedup --audience general = block_arc_dup (conclusion descriptive); story already delivered by mile_382127b9 ('風險區間天天調會更準嗎？12 檔 ETF 只贏了一格', shares K1552). No new angle for dup_waiver; no draft written."
   },
   {
     "id": "assign_04d8e4d7",
@@ -49667,7 +49737,7 @@
     "title": "K1710: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1710 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: K1710 PASS（Codex review PASS，兩輪修正後）：為prg-periodic-garch論文三時點convention flip主表補齊open/mixed兩面板，在K1699 pinned vintage（六市場SHA256驗證一致，未重新下載資料）上重跑。DM全表（canonical dm_test, h=1, HAC）：Open面板（PRG open-known vs Fair GJR-X）六市場全負t，5/6通過Harvey |t|>3（SPY -3.557, GLD -3.643, EEM -10.137, 0050.TW Canonical evidence: experiments/k1710/K1710_results.json, experiments/k1710/results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -49683,7 +49753,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T14:23:43+00:00"
+    "created_at": "2026-07-27T14:23:43+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-27T17:17:15.763572+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:17:16.026392+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      },
+      {
+        "ts": "2026-07-27T17:26:46.029851+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39"
+      }
+    ],
+    "started_at": "2026-07-27T17:17:16.026380+00:00",
+    "completed_at": "2026-07-27T17:26:46.029828+00:00",
+    "result": "General-audience draft written to storage/drafts/K1710_general_draft.md (title '開盤那一刻，隔夜的跳動就先劇透了今天的風浪') + chart assets/k1710_overnight_edge.png. Story: open-known overnight signal beats fair GJR-X baseline in all 6 markets, 5/6 Harvey-significant; edge scales with overnight variance share (EEM t-10.14/71%share strongest, QQQ non-sig/39% weakest — coherent cross-section). Numbers verified against experiments/k1710/K1710_results.json. anti_ai_gate exit 0, audience=general. Draft enters release pool (daily_article, not direct-published)."
   },
   {
     "id": "assign_8d6442f3",
@@ -49854,7 +49947,7 @@
     "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 4 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1426/k1426_oos_results.json — 4 班\n- experiments/k1426/k1426_oos_return_benchmark.json — 4 班\n- experiments/k1698/review_verdict.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T160001038582Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-27T16:00:04.470704+00:00",
     "payload": {
@@ -49904,7 +49997,59 @@
         "note": "manual_release"
       }
     ],
-    "last_released_at": "2026-07-27T16:03:35.008476+00:00"
+    "last_released_at": "2026-07-27T16:03:35.008476+00:00",
+    "completed_at": "2026-07-27T17:29:38.378490+00:00",
+    "result": "關閉條件機械滿足：3 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "experiments/k1426/k1426_oos_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1426/k1426_oos_return_benchmark.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1698/review_verdict.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "experiments/k1426/k1426_oos_results.json",
+        "experiments/k1426/k1426_oos_return_benchmark.json",
+        "experiments/k1698/review_verdict.json"
+      ],
+      "grace_s": 86400
+    }
   },
   {
     "id": "alert_dispatch_supervisor_stale_code_20260727",
@@ -50039,12 +50184,42 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 0.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "experiments/k1698/review_verdict.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 2.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
     "updated_at": "2026-07-27T16:53:26.599186+00:00"
+  },
+  {
+    "id": "assign_c1bf7075",
+    "title": "PHASE-Z 卡住檔案 incident（8d59211178179b4a）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 5 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 5 班\n- src/volpred/ops/next_tasks.py — 5 班\n- storage/memory/knowledge.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T172938307322Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T17:29:44.033983+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "8d59211178179b4a",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 5,
+        "src/volpred/ops/next_tasks.py": 5,
+        "storage/memory/knowledge.json": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T172938307322Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T17:29:44.022422+00:00",
+      "last_seen_at": "2026-07-27T17:29:44.022422+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

@@ -28299,5 +28299,35 @@
     "owner": "hourly-slot-1-ddbf834bafb6463f8c2ddad40c1145f8",
     "commit": null,
     "summary": "PHASE B dispatch: claimed P2 starved experiment K1708_gatecert_s14_rerun (aged 26.3h, top-priority claimable — platform_ops starved tasks all blocked by supervisor_preassignment_required; agent lane free=0). Routed to compute_queue enqueue-agent per task's own bounded-scope directive (\"heavy compute+review，走 compute_queue\"). Job agent-brief_k1708_s14-3ca4dd, opus/max effort (router attempt=4, at_ceiling+exhausted → this is the 3-strike ceiling attempt). Bounded scope = §14 full-sample real-data rerun (the one concrete step round-3 explicitly never ran: \"new-caliber gate never evaluated on real data\"), producing cw_vs_own_restriction_primary / cw_holm_family / regime qlike_vs_own_restriction into K1708_results.json + missing K1708_stage2_summary.json, plus experiment_gates + legacy_derive_verdict test rerun to confirm 4 blockers CLOSED. Study conclusion NULL (state-space did not beat HAR) is fixed and not up for revision; brief hard-flags any non-NULL result as an anomaly to investigate, not a positive. Followup (paper_review P2): Codex round-4 primary-path review → PASS merges worktree dispatch-slot-1-457427c2-k1708 + main-thread writes knowledge; FAIL escalates email to boss (3-strike ceiling, no further same-method retry). Source task bound awaiting_agent_job; collected by a future PHASE A. No collision (existing k1708 worktree reused via --cwd)."
+  },
+  {
+    "timestamp": "2026-07-28T01:27:26+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1710_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39",
+    "owner": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39",
+    "commit": null,
+    "summary": "daily_article: wrote general-audience draft storage/drafts/K1710_general_draft.md (\"開盤那一刻，隔夜的跳動就先劇透了今天的風浪\") + chart assets/k1710_overnight_edge.png. Finding: open-known overnight signal beats fair GJR-X baseline in all 6 markets, 5/6 Harvey-significant; edge scales with overnight variance share (EEM t=-10.14 @71% strongest; QQQ non-sig @39% weakest — coherent cross-section). Numbers verified vs experiments/k1710/K1710_results.json. anti_ai_gate exit 0, audience=general. Passed check_arc_dedup (clean). Draft enters release pool (not direct-published)."
+  },
+  {
+    "timestamp": "2026-07-28T01:27:26+08:00",
+    "task_type": "experiment",
+    "task_id": "K1720",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39",
+    "owner": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39",
+    "commit": null,
+    "summary": "PHASE A collect_completed for K1720 (LETF mechanical rebalance / EOD vol amplification, verdict NULL). Verified numbers/lookahead-policy (shift(1), seed 42) consistent, experiment gate passed. Per K1259 gate (Codex review before knowledge.json write) enqueued long Codex review to compute_queue (job compute-codex-review-k1720-...-1785172252, codex_review_job.sh, verdict->storage/ops/codex_reviews/k1720_verdict.md); followup will write knowledge + merge worktree on PASS. Marked agent-agent-brief_k1720-6c33b8-3674b6 followup_dispatched."
+  },
+  {
+    "timestamp": "2026-07-28T01:27:26+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1592_article_general",
+    "outcome": "arc_covered",
+    "actor": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39",
+    "owner": "hourly-slot-1-7b4cd8abbd134b82a0bac847fc9e9b39",
+    "commit": null,
+    "summary": "Triaged 3 auto_discovered daily_article candidates (K1592/K1595/K1599) — all check_arc_dedup --audience general = block_arc_dup (arcs already covered by mile_7b02f9e2 / mile_50ce135b / mile_382127b9). Closed succeeded as arc-covered, no drafts written (no new angle to justify dup_waiver). Note: auto_discovery generator does not run arc-dedup before flagging, so arc-covered K's keep re-surfacing — generator-side fix worth a followup."
   }
 ]
