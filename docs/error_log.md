@@ -3963,3 +3963,39 @@ owner=`operations_core`、generation=1、service table privileges=false、RPC只
 service role可執行；fresh census host-authority=`unique_owner`、probe errors=0，
 總blockers 6→5。此slice為 **`root_cause_fixed_and_verified`**；#46仍因其餘五個
 formal blockers、physical retirement與14日sustained-clean而維持`contained`。
+
+### 2026-07-27 — 新正式 machine source 未註冊會重置 Work Coordinator soak
+
+**證據化症狀**：Issue #9 的七日 clean suffix 原已從
+`2026-07-27T04:56:16Z` 起算；10:16 的正式 CI 根因任務
+`ci-root-30256296797` 使用 `source=incident_escalation`，shadow receipt 以
+`unknown_source` fail closed並重置窗口。修正 incident family 後的第一次 live
+read-back又立即捕捉 12:37 新建的
+`lazypack_render_repair_mile_3c83e665`（`compute_queue_lazypack_failure`）造成同類
+breach，證明只補單一觀察值不能結案。
+
+**根因層級與底層修復**：machine writer observability registry
+`MACHINE_SOURCE_TOKENS`與legacy→Work Coordinator reviewed provenance registry
+各自演化，正式 producer 可被 admission 接受，卻在 shadow migration 層變成未知來源。
+現在把 `incident_escalation`、`incident_adjudication` 納入 machine registry，並將
+兩個 incident source及class sweep找到的
+`compute_queue_lazypack_failure`、`daily_checkup_db_landing`、
+`phase_z_gate_review`逐字映射為canonical `schedule` ingress。回歸 gate強制所有
+`MACHINE_SOURCE_TOKENS`都必須存在於reviewed provenance registry；任一已登記的
+machine producer日後漏做migration分類，CI直接失敗。更重要的是canonical
+`append_task_record`現在在真正寫入前呼叫同一個exact classifier；即使新producer
+同時漏登machine registry與migration registry，也會被creation gateway拒絕且queue
+保持原樣，不再等七日live soak才發現。scratch／外部契約測試queue不受此production
+admission限制。未知、未review來源仍維持fail closed，沒有 prefix 或 fallback白名單。
+
+**回歸與live read-back**：先以五個正式來源重現 importer/replay RED，再驗證
+exact source、schedule classification及incident雙selector一致；相關 importer、
+replay、compute queue與pool-pressure套件 **102 passed**；另以rebound canonical
+queue證明雙registry都漏登的producer在append前RED→拒絕、queue仍為空，已登記來源
+仍正常通過。正式 observer第一次回讀
+準確抓到新lazypack來源（issue=1），補完class sweep後第二張v4 receipt
+`scheduled_20260727T124014223082Z_f71c43880b3e`回讀
+`reconciliation_issues=[]`；selection difference僅剩已註冊的
+`coordinator_capability_contract` policy change。此producer/provenance缺口為
+**`root_cause_fixed_and_verified`**；#9 umbrella仍需從最後一次bad receipt之後重新
+累積真實七日，維持`contained`，不可提前cutover。

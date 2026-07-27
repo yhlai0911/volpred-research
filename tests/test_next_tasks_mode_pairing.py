@@ -39,7 +39,12 @@ def test_rebound_canonical_queue_uses_its_paired_mode_receipt(
 
     with pytest.raises(TaskPoolAdmissionClosed, match="admission is closed"):
         next_tasks.append_task_record(
-            {"id": "must-not-land", "status": "pending", "priority": 1},
+            {
+                "id": "must-not-land",
+                "status": "pending",
+                "priority": 2,
+                "source": "user",
+            },
             path=queue,
         )
 
@@ -71,7 +76,12 @@ def test_rebound_canonical_queue_does_not_read_live_mode_receipt(
     )
 
     record, created = next_tasks.append_task_record(
-        {"id": "isolated", "status": "pending", "priority": 1},
+        {
+            "id": "isolated",
+            "status": "pending",
+            "priority": 2,
+            "source": "user",
+        },
         path=queue,
     )
 

@@ -1117,6 +1117,23 @@ def append_task_record(
 
             record["issue_ref"] = normalize_issue_ref(record["issue_ref"])
 
+    p = Path(path)
+    guard_canonical_write(p)
+    if p.resolve() == CANONICAL_NEXT_TASKS.resolve():
+        # The shadow importer is fail-closed on source provenance. Letting a
+        # canonical writer invent a label here would admit work that the new
+        # coordinator cannot represent and silently restart the seven-day
+        # cutover soak. Scratch/external-contract queues remain unrestricted.
+        from volpred.ops.work.legacy import classify_next_task_source
+
+        try:
+            classify_next_task_source(record.get("source"))
+        except ValueError as exc:
+            raise ValueError(
+                "unreviewed canonical task source: "
+                f"{record.get('source')!r}"
+            ) from exc
+
     # R2 admission clamp（單一 gateway = 單一 enforcement 點）：機器來源不得自封
     # P1。boss 來源 / 時效類 / dedicated-owner ingress 原樣通過。
     clamp_machine_priority_inflation(record)
@@ -1128,8 +1145,6 @@ def append_task_record(
     throttle_denied = False
     dup_verdict: dict[str, Any] | None = None
 
-    p = Path(path)
-    guard_canonical_write(p)
     p.parent.mkdir(parents=True, exist_ok=True)
     if not p.exists():
         p.write_text("[]\n", encoding="utf-8")

@@ -208,6 +208,7 @@ def test_replay_runs_legacy_selection_before_importer_filtering() -> None:
     assert ledger.legacy_selection.selected_candidate_ref == (
         "legacy://next_tasks/raw_legacy_winner"
     )
+
     assert ledger.coordinator_selection.selected_candidate_ref == (
         "legacy://next_tasks/mapped_coordinator_winner"
     )
@@ -248,6 +249,33 @@ def test_replay_runs_legacy_selection_before_importer_filtering() -> None:
     assert (
         "reconciliation://next_tasks/raw_legacy_winner/record-0/unknown_source"
         in ledger.selection_difference.evidence_refs
+    )
+
+
+@pytest.mark.parametrize(
+    "source",
+    ("incident_escalation", "incident_adjudication"),
+)
+def test_replay_accepts_reviewed_incident_control_sources(
+    source: str,
+) -> None:
+    task = _pending_task(f"{source}_task")
+    task["source"] = source
+
+    ledger = replay_legacy_selection(
+        LegacySnapshots(next_tasks=(task,)),
+        offer=_offer(),
+        observed_at=FIXED_NOW,
+        observation_id=f"obs_{source}",
+    )
+
+    assert ledger.reconciliation_issues == ()
+    assert ledger.selection_difference is None
+    assert ledger.legacy_selection.selected_candidate_ref == (
+        f"legacy://next_tasks/{source}_task"
+    )
+    assert ledger.coordinator_selection.selected_candidate_ref == (
+        f"legacy://next_tasks/{source}_task"
     )
 
 

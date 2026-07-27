@@ -1,3 +1,7 @@
+import pytest
+
+from volpred.ops.pool_pressure import MACHINE_SOURCE_TOKENS
+from volpred.ops.work.legacy import _NEXT_TASK_SOURCE
 from volpred.ops.work_migration import (
     LegacySnapshots,
     preview_legacy_snapshots,
@@ -85,6 +89,49 @@ def test_next_tasks_snapshot_accepts_production_identity_and_priority_aliases() 
     assert tuple(
         candidate.request.priority for candidate in report.candidates
     ) == (1, 2)
+
+
+@pytest.mark.parametrize(
+    "source",
+    (
+        "compute_queue_lazypack_failure",
+        "daily_checkup_db_landing",
+        "incident_escalation",
+        "incident_adjudication",
+        "phase_z_gate_review",
+    ),
+)
+def test_machine_control_tasks_are_reviewed_schedule_ingress(
+    source: str,
+) -> None:
+    report = preview_legacy_snapshots(
+        LegacySnapshots(
+            next_tasks=(
+                {
+                    "id": f"{source}_task",
+                    "status": "pending",
+                    "task_type": "platform_ops",
+                    "title": "Machine-generated control task",
+                    "priority": 2,
+                    "source": source,
+                    "created_at": "2026-07-27T10:15:00+00:00",
+                },
+            ),
+        )
+    )
+
+    assert report.issues == ()
+    assert len(report.candidates) == 1
+    candidate = report.candidates[0]
+    assert candidate.request.source == "schedule"
+    assert candidate.legacy_source == source
+    assert candidate.source_classification == f"exact:{source}"
+
+
+def test_every_machine_source_token_has_reviewed_work_provenance() -> None:
+    missing = MACHINE_SOURCE_TOKENS.difference(_NEXT_TASK_SOURCE)
+
+    assert missing == set()
 
 
 def test_unmapped_task_id_alias_keeps_record_level_reconciliation_evidence() -> None:

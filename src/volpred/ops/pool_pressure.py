@@ -99,6 +99,8 @@ MACHINE_SOURCE_TOKENS = frozenset(
         "dispatch_workspace_gate",
         "compute_queue_lazypack_failure",
         "daily_checkup_db_landing",
+        "incident_adjudication",
+        "incident_escalation",
         "reap_orphan_deliverables_held_ttl",
     }
 )

@@ -74,6 +74,9 @@ _NEXT_TASK_SOURCE = {
     "dispatch": "schedule",
     "dispatch_workspace_gate": "schedule",
     "continue_task_dispatch_pool_dry_breaker": "schedule",
+    "compute_queue_lazypack_failure": "schedule",
+    "daily_checkup_db_landing": "schedule",
+    "operations_core_ndc_indicator_schedule": "schedule",
     "task_generator_v2_daily_article": "schedule",
     "task_generator_v2_experiment": "schedule",
     "task_generator_v2_paper_body": "schedule",
@@ -99,7 +102,13 @@ _NEXT_TASK_SOURCE = {
     "hourly_dispatch_snapaudit_reconciliation": "schedule",
     "hourly_dispatch_triage": "schedule",
     "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22": "schedule",
+    # Machine-generated incident control-plane work. These producers create
+    # durable, deduplicated queue records through canonical append gateways;
+    # they are scheduled system ingress, never human directives.
+    "incident_adjudication": "schedule",
+    "incident_escalation": "schedule",
     "incident_router": "schedule",
+    "phase_z_gate_review": "schedule",
     "machine": "schedule",
     "weekly_requeue:governance_self_revise_operating_docs": "schedule",
     # Agent/discovery ingress. Ambiguous producer labels are kept at the
@@ -114,6 +123,7 @@ _NEXT_TASK_SOURCE = {
     "auto_journal_discovery_fallback": "agent",
     "auto_remediation": "agent",
     "auto_publish_drought_emergency": "agent",
+    "auto_audience_correction_rewrite": "agent",
     "research_backlog_auto": "agent",
     "reader_facing_refill": "agent",
     "diverse_gen": "agent",
@@ -700,7 +710,7 @@ class LegacySnapshotImporter:
             creation_sort_time,
         ) = _legacy_creation_times(record)
         legacy_source, source, source_classification = (
-            _classify_next_task_source(record["source"])
+            classify_next_task_source(record["source"])
         )
         requester_ref = _identity_or_default(
             record.get("created_by"),
@@ -1016,7 +1026,9 @@ def _legacy_creation_times(
     return None, normalized_bound, normalized_bound
 
 
-def _classify_next_task_source(value: Any) -> tuple[str, str, str]:
+def classify_next_task_source(value: Any) -> tuple[str, str, str]:
+    """Return the reviewed legacy label, canonical ingress and evidence tag."""
+
     if not isinstance(value, str) or not value or value != value.strip():
         raise _LegacyMappingError(
             "unknown_source",

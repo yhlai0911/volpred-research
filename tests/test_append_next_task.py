@@ -78,6 +78,32 @@ def test_append_task_record_rejects_an_absent_parent(tmp_path):
     assert json.loads(queue.read_text(encoding="utf-8")) == []
 
 
+def test_canonical_append_rejects_unreviewed_source(
+    tmp_path,
+    monkeypatch,
+):
+    queue = tmp_path / "storage" / "next_tasks.json"
+    queue.parent.mkdir(parents=True)
+    queue.write_text("[]\n", encoding="utf-8")
+    monkeypatch.setattr(next_tasks, "CANONICAL_NEXT_TASKS", queue)
+
+    with pytest.raises(ValueError, match="unreviewed canonical task source"):
+        append_task_record(
+            {
+                "id": "must-not-reset-shadow-soak",
+                "title": "unknown producer",
+                "description": "canonical writers must declare provenance",
+                "task_type": "platform_ops",
+                "priority": 2,
+                "status": "pending",
+                "source": "new_machine_source_omitted_everywhere",
+            },
+            path=queue,
+        )
+
+    assert json.loads(queue.read_text(encoding="utf-8")) == []
+
+
 def test_append_creates_pending_record_with_mapped_fields(tmp_path):
     queue = tmp_path / "next_tasks.json"
     rec = append_next_task(
