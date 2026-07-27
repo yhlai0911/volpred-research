@@ -6,6 +6,7 @@ from volpred.public_article_projection_contract import (
     PublicArticleProjectionContractError,
     audit_frontend_public_article_projection_contract,
     load_public_article_projection_contract,
+    public_projection_contract_evidence_matches,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "PublicArticleProjectionContractError",
     "audit_frontend_public_article_projection_contract",
     "load_public_article_projection_contract",
+    "public_projection_contract_evidence_matches",
 ]

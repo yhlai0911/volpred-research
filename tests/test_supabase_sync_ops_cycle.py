@@ -37,6 +37,19 @@ def test_release_settings_audit_imports_in_fresh_interpreter() -> None:
     assert "OK" in proc.stdout
 
 
+def test_legacy_projection_contract_exports_all_public_symbols() -> None:
+    proc = _fresh_import(
+        "from volpred.ops.public_article_projection_contract import ("
+        "PublicArticleProjectionContractError,"
+        "audit_frontend_public_article_projection_contract,"
+        "load_public_article_projection_contract,"
+        "public_projection_contract_evidence_matches"
+        "); print('OK')"
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert "OK" in proc.stdout
+
+
 def test_supabase_sync_has_no_top_level_ops_dependency() -> None:
     tree = ast.parse(SOURCE.read_text(encoding="utf-8"))
     for node in tree.body:
