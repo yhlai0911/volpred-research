@@ -1119,20 +1119,7 @@ def append_task_record(
 
     p = Path(path)
     guard_canonical_write(p)
-    if p.resolve() == CANONICAL_NEXT_TASKS.resolve():
-        # The shadow importer is fail-closed on source provenance. Letting a
-        # canonical writer invent a label here would admit work that the new
-        # coordinator cannot represent and silently restart the seven-day
-        # cutover soak. Scratch/external-contract queues remain unrestricted.
-        from volpred.ops.work.legacy import classify_next_task_source
-
-        try:
-            classify_next_task_source(record.get("source"))
-        except ValueError as exc:
-            raise ValueError(
-                "unreviewed canonical task source: "
-                f"{record.get('source')!r}"
-            ) from exc
+    is_canonical_queue = p.resolve() == CANONICAL_NEXT_TASKS.resolve()
 
     # R2 admission clamp（單一 gateway = 單一 enforcement 點）：機器來源不得自封
     # P1。boss 來源 / 時效類 / dedicated-owner ingress 原樣通過。
@@ -1160,6 +1147,40 @@ def append_task_record(
                     if if_exists == "raise":
                         raise ValueError(f"duplicate task id {task_id}")
                     return existing, False
+            if is_canonical_queue:
+                # Admission ownership precedes payload provenance: direct mode
+                # and an unreadable owner-state must fail closed before any
+                # lower-level record validation. The check stays under the
+                # queue lock so mode admission and the observed task set form
+                # one snapshot; write_tasks_to_handle rechecks immediately
+                # before mutation to close a concurrent mode transition.
+                from volpred.ops.task_pool_mode import (
+                    enforce_task_pool_write,
+                    task_pool_mode_path,
+                )
+
+                enforce_task_pool_write(
+                    state_path=(
+                        TASK_POOL_MODE_PATH
+                        if TASK_POOL_MODE_PATH != _DEFAULT_TASK_POOL_MODE_PATH
+                        else task_pool_mode_path(CANONICAL_NEXT_TASKS)
+                    ),
+                    existing_tasks=tasks,
+                    proposed_tasks=[*tasks, record],
+                )
+
+                # Only a genuinely new, mode-admitted canonical record needs
+                # source provenance. Idempotent replay returned above and must
+                # not be retroactively invalidated by a newer schema rule.
+                from volpred.ops.work.legacy import classify_next_task_source
+
+                try:
+                    classify_next_task_source(record.get("source"))
+                except ValueError as exc:
+                    raise ValueError(
+                        "unreviewed canonical task source: "
+                        f"{record.get('source')!r}"
+                    ) from exc
             parent_task_id = record.get("parent_task_id")
             if parent_task_id is not None:
                 if not isinstance(parent_task_id, str) or not parent_task_id.strip():

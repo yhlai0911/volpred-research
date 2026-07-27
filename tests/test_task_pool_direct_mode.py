@@ -302,6 +302,41 @@ def test_direct_mode_rejects_new_ids_at_canonical_write_seam(
     ]
 
 
+def test_direct_mode_allows_idempotent_replay_before_source_validation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    queue = tmp_path / "storage" / "next_tasks.json"
+    state = tmp_path / "storage" / "ops" / "task_pool_mode.json"
+    control = {
+        "id": "control-task",
+        "status": "in_progress",
+        "priority": 3,
+    }
+    _write_pool(queue, [control])
+    enter_direct_execution_mode(
+        queue_path=queue,
+        state_path=state,
+        backup_dir=tmp_path / "backups",
+        activated_by="test",
+        reason="test",
+        preserve_task_ids=("control-task",),
+        expected_state_sha256=None,
+        now="2026-07-23T12:00:00+00:00",
+    )
+    monkeypatch.setattr(next_tasks, "CANONICAL_NEXT_TASKS", queue)
+    monkeypatch.setattr(next_tasks, "TASK_POOL_MODE_PATH", state)
+
+    existing, created = next_tasks.append_task_record(
+        dict(control),
+        path=queue,
+        semantic_dedupe=False,
+    )
+
+    assert created is False
+    assert existing == control
+    assert json.loads(queue.read_text()) == [control]
+
+
 def test_direct_mode_allows_existing_task_lifecycle_and_removal(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
