@@ -54,6 +54,8 @@ uv run python scripts/audit_legacy_retirement.py        # Issue #46 實體退休
 # 第一個正式事件源：legacy wrapper自動寫immutable tripwire；Operations Core每5分鐘彙整typed signal
 uv run python scripts/materialize_legacy_business_fire_signal.py
 uv run python scripts/materialize_duplicate_effect_signal.py  # private DB violation ledger → typed signal
+uv run python scripts/materialize_orphan_work_signal.py        # dispatch orphan event chain → typed signal
+uv run python scripts/materialize_silent_loss_signal.py        # DB-clock WorkItem reconciliation → typed signal
 # 四個 Operations Core typed signal source 全部存在後才可啟用；禁止手建 observation JSON
 uv run python scripts/record_legacy_retirement_observation.py
 uv run volpred ops jobs --status queued              # 查看待處理任務

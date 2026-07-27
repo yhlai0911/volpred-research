@@ -1,21 +1,22 @@
+import hashlib
+import json
+import os
+import shutil
+import socket
+import subprocess
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
-import hashlib
 from ipaddress import ip_address
-import json
-import os
 from pathlib import Path
-import shutil
-import socket
-import subprocess
 from threading import Barrier, Event
 from time import monotonic, sleep
 from typing import Any
 
 import psycopg
 import pytest
+from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict
 
 from volpred.ops.work import (
@@ -26,15 +27,14 @@ from volpred.ops.work import (
     Released,
     Started,
     WorkCoordinator,
+    WorkerOffer,
     WorkQuery,
     WorkRequest,
-    WorkerOffer,
 )
-from volpred.ops.work.postgres import PostgresCoordinationStore
 from volpred.ops.work.ownership import WorkOwnershipLost
+from volpred.ops.work.postgres import PostgresCoordinationStore
 from volpred.ops.work.postgres_ownership import PostgresWorkOwnerStore
 from volpred.ops.work_cutover import WorkOwnershipCutoverManifest
-
 
 FIXED_NOW = datetime(2026, 7, 23, 6, 30, tzinfo=timezone.utc)
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -53,6 +53,25 @@ CUTOVER_GATE_MIGRATION = next(
         "*_operations_core_work_cutover_gate.sql"
     )
 )
+SILENT_LOSS_MIGRATION = next(
+    (REPO_ROOT / "supabase" / "migrations").glob(
+        "*_operations_core_silent_loss_retirement_signal.sql"
+    )
+)
+
+
+def _ensure_supabase_api_roles(connection: psycopg.Connection) -> None:
+    for role in ("anon", "authenticated", "service_role"):
+        exists = connection.execute(
+            "SELECT 1 FROM pg_roles WHERE rolname = %s",
+            (role,),
+        ).fetchone()
+        if exists is None:
+            connection.execute(
+                sql.SQL("CREATE ROLE {} NOLOGIN").format(
+                    sql.Identifier(role)
+                )
+            )
 
 
 def _cutover_manifest(seed: str) -> WorkOwnershipCutoverManifest:
@@ -180,6 +199,10 @@ def postgres_dsn(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
             connection.execute(
                 CUTOVER_GATE_MIGRATION.read_text(encoding="utf-8")
             )
+            _ensure_supabase_api_roles(connection)
+            connection.execute(
+                SILENT_LOSS_MIGRATION.read_text(encoding="utf-8")
+            )
         yield external_dsn
         return
     bin_dir = _postgres_bin_dir()
@@ -234,6 +257,10 @@ def postgres_dsn(tmp_path_factory: pytest.TempPathFactory) -> Iterator[str]:
             connection.execute(
                 CUTOVER_GATE_MIGRATION.read_text(encoding="utf-8")
             )
+            _ensure_supabase_api_roles(connection)
+            connection.execute(
+                SILENT_LOSS_MIGRATION.read_text(encoding="utf-8")
+            )
         yield dsn
     finally:
         subprocess.run(
@@ -258,6 +285,7 @@ def reset_postgres_contract_state(postgres_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.legacy_retirement_silent_loss_events,
               volpred_ops.work_cutover_gate_receipts,
               volpred_ops.work_cutover_gates,
               volpred_ops.work_owner_receipts,
@@ -266,6 +294,13 @@ def reset_postgres_contract_state(postgres_dsn: str) -> None:
               volpred_ops.work_events,
               volpred_ops.work_items
             RESTART IDENTITY
+            """
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.legacy_retirement_silent_loss_head
+            SET high_watermark = 0
+            WHERE singleton
             """
         )
         connection.execute(
@@ -376,6 +411,299 @@ def test_postgres_submit_is_idempotent_and_inspectable(postgres_dsn: str) -> Non
     assert first.blocked_reason is None
     assert snapshot.items == (first,)
     assert tuple(event.kind for event in snapshot.events) == ("submitted",)
+
+
+def test_silent_loss_reconcile_is_dense_concurrent_private_and_replay_safe(
+    postgres_dsn: str,
+) -> None:
+    def insert_work(
+        connection: psycopg.Connection,
+        *,
+        work_id: str,
+        with_submitted_event: bool,
+    ) -> None:
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_items (
+              id, idempotency_key, source, kind, title, priority,
+              required_capabilities, required_attestations, risk, approval,
+              payload_ref, parent_id, deadline, requester_ref, status,
+              version, created_at, updated_at
+            )
+            VALUES (
+              %s, %s, 'user', 'platform_ops', 'silent-loss test', 1,
+              '{}', '{}', 'safe', 'auto',
+              %s, NULL, clock_timestamp() - interval '1 minute',
+              'owner:pytest', 'pending', 1,
+              clock_timestamp() - interval '2 minutes',
+              clock_timestamp() - interval '2 minutes'
+            )
+            """,
+            (work_id, f"idempotency:{work_id}", f"payload:{work_id}"),
+        )
+        if with_submitted_event:
+            connection.execute(
+                """
+                INSERT INTO volpred_ops.work_events (
+                  work_id, kind, version, created_at
+                )
+                VALUES (
+                  %s, 'submitted', 1,
+                  clock_timestamp() - interval '2 minutes'
+                )
+                """,
+                (work_id,),
+            )
+
+    with psycopg.connect(postgres_dsn, autocommit=True) as connection:
+        connection.execute(
+            SILENT_LOSS_MIGRATION.read_text(encoding="utf-8")
+        )
+        insert_work(
+            connection,
+            work_id="work-silent-deadline",
+            with_submitted_event=True,
+        )
+
+    barrier = Barrier(2)
+
+    def reconcile() -> dict[str, Any]:
+        with psycopg.connect(postgres_dsn, autocommit=True) as connection:
+            connection.execute("SET ROLE service_role")
+            barrier.wait()
+            return connection.execute(
+                """
+                SELECT public.volpred_reconcile_silent_loss_retirement_events(0)
+                """
+            ).fetchone()[0]
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        snapshots = list(executor.map(lambda _index: reconcile(), range(2)))
+
+    assert {snapshot["high_watermark"] for snapshot in snapshots} == {1}
+    assert all(len(snapshot["events"]) == 1 for snapshot in snapshots)
+    assert {
+        snapshot["events"][0]["violation_kind"] for snapshot in snapshots
+    } == {"deadline_missed"}
+
+    with psycopg.connect(postgres_dsn, autocommit=True) as connection:
+        connection.execute(
+            SILENT_LOSS_MIGRATION.read_text(encoding="utf-8")
+        )
+        assert connection.execute(
+            """
+            SELECT count(*), max(sequence), min(violation_kind)
+            FROM volpred_ops.legacy_retirement_silent_loss_events
+            """
+        ).fetchone() == (1, 1, "deadline_missed")
+        connection.execute("SET ROLE service_role")
+        persistent = connection.execute(
+            """
+            SELECT public.volpred_reconcile_silent_loss_retirement_events(1)
+            """
+        ).fetchone()[0]
+        assert persistent["events"] == []
+        assert len(persistent["active_violations"]) == 1
+        assert persistent["active_violations"][0]["sequence"] == 1
+        connection.execute("RESET ROLE")
+
+        with (
+            pytest.raises(RuntimeError, match="rollback silent loss"),
+            connection.transaction(),
+        ):
+            insert_work(
+                connection,
+                work_id="work-silent-rolled-back",
+                with_submitted_event=False,
+            )
+            rolled_back = connection.execute(
+                """
+                SELECT public.volpred_reconcile_silent_loss_retirement_events(1)
+                """
+            ).fetchone()[0]
+            assert rolled_back["high_watermark"] == 3
+            raise RuntimeError("rollback silent loss")
+
+        insert_work(
+            connection,
+            work_id="work-silent-committed",
+            with_submitted_event=False,
+        )
+        connection.execute("SET ROLE service_role")
+        committed = connection.execute(
+            """
+            SELECT public.volpred_reconcile_silent_loss_retirement_events(1)
+            """
+        ).fetchone()[0]
+        assert committed["high_watermark"] == 3
+        assert [event["sequence"] for event in committed["events"]] == [2, 3]
+        assert {
+            event["violation_kind"] for event in committed["events"]
+        } == {"submitted_event_missing", "deadline_missed"}
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_receipts (
+              id, work_id, outcome, result_ref, summary, created_at
+            )
+            VALUES (
+              'receipt-nonterminal', 'work-silent-committed',
+              'succeeded', 'test://result', 'unexpected receipt',
+              clock_timestamp()
+            )
+            """
+        )
+        connection.execute("SET ROLE service_role")
+        nonterminal = connection.execute(
+            """
+            SELECT public.volpred_reconcile_silent_loss_retirement_events(3)
+            """
+        ).fetchone()[0]
+        assert nonterminal["high_watermark"] == 4
+        assert nonterminal["events"][0]["violation_kind"] == (
+            "receipt_without_terminal_state"
+        )
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.work_items
+            SET status = 'succeeded',
+                finished_at = clock_timestamp(),
+                updated_at = clock_timestamp()
+            WHERE id = 'work-silent-committed'
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_events (
+              work_id, kind, version, created_at
+            )
+            VALUES (
+              'work-silent-committed', 'completed', 1, clock_timestamp()
+            )
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_receipts (
+              id, work_id, outcome, result_ref, summary, created_at
+            )
+            VALUES (
+              'receipt-conflicting', 'work-silent-committed',
+              'failed', 'test://conflict', 'conflicting receipt',
+              clock_timestamp()
+            )
+            """
+        )
+        connection.execute("SET ROLE service_role")
+        conflicting = connection.execute(
+            """
+            SELECT public.volpred_reconcile_silent_loss_retirement_events(4)
+            """
+        ).fetchone()[0]
+        assert conflicting["high_watermark"] == 5
+        assert conflicting["events"][0]["violation_kind"] == (
+            "terminal_receipt_mismatch"
+        )
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.legacy_retirement_silent_loss_events
+                """
+            )
+
+    for role in ("anon", "authenticated"):
+        with psycopg.connect(postgres_dsn, autocommit=True) as connection:
+            connection.execute(f"SET ROLE {role}")
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                connection.execute(
+                    """
+                    SELECT public.volpred_reconcile_silent_loss_retirement_events(0)
+                    """
+                )
+
+
+def test_silent_loss_rejects_old_lifecycle_events_for_current_version(
+    postgres_dsn: str,
+) -> None:
+    with psycopg.connect(postgres_dsn, autocommit=True) as connection:
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_items (
+              id, idempotency_key, source, kind, title, priority,
+              required_capabilities, required_attestations, risk, approval,
+              payload_ref, parent_id, deadline, requester_ref, status,
+              version, created_at, updated_at, claimed_by, claim_token,
+              claim_expires_at, result_ref, result_summary, finished_at
+            )
+            VALUES
+              (
+                'work-old-acquired', 'idempotency:old-acquired', 'user',
+                'platform_ops', 'old acquired', 1, '{}', '{}', 'safe', 'auto',
+                'payload:old-acquired', NULL, NULL, 'owner:pytest', 'claimed',
+                2, clock_timestamp(), clock_timestamp(), 'worker', 'token-a',
+                clock_timestamp() + interval '1 hour', NULL, NULL, NULL
+              ),
+              (
+                'work-old-started', 'idempotency:old-started', 'user',
+                'platform_ops', 'old started', 1, '{}', '{}', 'safe', 'auto',
+                'payload:old-started', NULL, NULL, 'owner:pytest', 'running',
+                2, clock_timestamp(), clock_timestamp(), 'worker', 'token-b',
+                clock_timestamp() + interval '1 hour', NULL, NULL, NULL
+              ),
+              (
+                'work-old-completed', 'idempotency:old-completed', 'user',
+                'platform_ops', 'old completed', 1, '{}', '{}', 'safe', 'auto',
+                'payload:old-completed', NULL, NULL, 'owner:pytest',
+                'succeeded', 2, clock_timestamp(), clock_timestamp(),
+                NULL, NULL, NULL, 'test://result', 'done', clock_timestamp()
+              )
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_events (
+              work_id, kind, version, created_at
+            )
+            VALUES
+              ('work-old-acquired', 'submitted', 1, clock_timestamp()),
+              ('work-old-acquired', 'acquired', 1, clock_timestamp()),
+              ('work-old-started', 'submitted', 1, clock_timestamp()),
+              ('work-old-started', 'started', 1, clock_timestamp()),
+              ('work-old-completed', 'submitted', 1, clock_timestamp()),
+              ('work-old-completed', 'completed', 1, clock_timestamp())
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_ops.work_receipts (
+              id, work_id, outcome, result_ref, summary, created_at
+            )
+            VALUES (
+              'receipt-old-completed', 'work-old-completed', 'succeeded',
+              'test://result', 'done', clock_timestamp()
+            )
+            """
+        )
+        connection.execute("SET ROLE service_role")
+        snapshot = connection.execute(
+            """
+            SELECT public.volpred_reconcile_silent_loss_retirement_events(0)
+            """
+        ).fetchone()[0]
+
+    assert snapshot["high_watermark"] == 3
+    assert {
+        (event["work_id"], event["violation_kind"])
+        for event in snapshot["events"]
+    } == {
+        ("work-old-acquired", "active_event_missing"),
+        ("work-old-started", "active_event_missing"),
+        ("work-old-completed", "terminal_event_missing"),
+    }
 
 
 def test_external_postgres_dsn_requires_local_dedicated_database_and_opt_in(
@@ -3005,6 +3333,8 @@ def test_postgres_migration_enables_rls_and_denies_untrusted_schema_access(
             connection.execute("DROP ROLE volpred_ops_untrusted")
 
     assert rows == [
+        ("legacy_retirement_silent_loss_events", True),
+        ("legacy_retirement_silent_loss_head", True),
         ("work_checkpoints", True),
         ("work_cutover_gate_receipts", True),
         ("work_cutover_gates", True),
@@ -3151,6 +3481,18 @@ def test_postgres_catalog_contains_canonical_audit_fields_and_fk_indexes(
         "volpred_ops.work_owner_reads",
     }
     assert definer_write_privileges == [
+        (
+            "legacy_retirement_silent_loss_events",
+            True,
+            True,
+            True,
+        ),
+        (
+            "legacy_retirement_silent_loss_head",
+            True,
+            True,
+            True,
+        ),
         ("work_checkpoints", True, False, False),
         ("work_cutover_gate_receipts", True, False, False),
         ("work_cutover_gates", True, True, False),
@@ -3211,6 +3553,10 @@ def test_postgres_migration_can_be_rolled_back_and_reapplied(
         connection.execute(
             CUTOVER_GATE_MIGRATION.read_text(encoding="utf-8")
         )
+        _ensure_supabase_api_roles(connection)
+        connection.execute(
+            SILENT_LOSS_MIGRATION.read_text(encoding="utf-8")
+        )
 
         table_count = connection.execute(
             """
@@ -3222,7 +3568,7 @@ def test_postgres_migration_can_be_rolled_back_and_reapplied(
             """
         ).fetchone()[0]
 
-    assert table_count == 8
+    assert table_count == 10
 
 
 def test_postgres_schema_is_private_rls_enabled_and_transactionally_removable(

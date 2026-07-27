@@ -2324,10 +2324,28 @@ ignored signal；host cron與piggy-back皆不得成為第二owner。
 
 `duplicate_effect` 不以可消失的provider現況或永久污染的歷史總數裁決。正式Effect
 Delivery每次settlement insert都經private PostgreSQL trigger；同一EffectRequest若出現
-第二筆`delivered` receipt，trigger會追加帶DB identity sequence的violation event。
+第二筆`delivered` receipt，trigger會先以per-effect transaction advisory lock序列化，
+再追加由transactional durable head配置的連續violation event；外層transaction rollback
+時head也一併rollback，不會留下IDENTITY缺號。
 event table採FORCE RLS，service role無direct table權限，只能呼叫固定空
 `search_path`、service-role-only read RPC。Operations Core以上一份已驗證observation的
 `high_watermark`作cursor，要求RPC回傳完整連續sequence delta後才產生typed signal；
 RPC unavailable、cursor倒退、schema／sequence gap或未授權讀取都fail closed。既有
-`*/5` materializer會依序刷新`legacy_business_fire`與`duplicate_effect`；任一維失敗
-整個scheduled fire非零，但仍不會自行寫observation。
+`*/5` materializer會依序刷新所有四維signal；任一維失敗整個scheduled fire非零，
+但仍不會自行寫observation。
+
+`orphan_work`在dispatch supervisor判定workspace已失去live worker、且即將進入
+orphan裁決時，由不可避sweep邊界先追加本機hash-chain event。event以workspace identity
+冪等，sequence、previous hash與獨立durable head共同防止尾端截斷、ledger刪除或重播；
+append失敗時sweep fail closed，不可先釋放workspace再補證據。Operations Core重驗完整
+chain後才按observation cursor產生interval signal。
+
+`silent_loss`不是一次性snapshot。service-role-only mutation RPC在DB-clock與global
+advisory lock內，對formal WorkItem檢查：submitted v1、claimed/current acquired、
+running/current started或checkpointed、terminal/current lifecycle event、explicit
+deadline，以及terminal status與receipt的雙向exact-cardinality。非終態卻已有receipt、
+0份／多份／conflicting terminal receipt、舊version event掩蓋current state都會追加
+rollback-safe dense event。RPC同時回傳cursor後的新event與目前仍未修復的active set；
+materializer以sequence聯集計數，因此短暫發生後已修復的loss不會漏，持續未修的loss
+也不會在cursor前進後假裝clean。`blocked`與`awaiting_approval`若沒有receipt屬明確狀態，
+不冒充silent loss。
