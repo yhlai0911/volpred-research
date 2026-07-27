@@ -4092,3 +4092,23 @@ owner=`volpred_ops_definer`、service-role-only execute、私表FORCE RLS。Fres
 回讀`incident.lifecycle=legacy/wrong_owner`、generation 1、`probe_errors=[]`。
 unknown-observability根因為 **`root_cause_fixed_and_verified`**；正式owner切換仍受
 #9→#13 gate約束，#13/#46 umbrella維持`contained`。
+
+### 2026-07-27 — Task source provenance 不可搶在 direct-mode owner gate 前失敗
+
+**證據化症狀**：GitHub Test Suite run `30268312681` 在5,985案中僅兩案失敗：
+`test_direct_mode_rejects_new_ids_at_canonical_write_seam`與
+`test_malformed_direct_mode_state_fails_closed`。兩案本應由task-pool owner state拒絕
+新id，卻先收到`unreviewed canonical task source: None`，使direct-mode fail-closed
+契約被後加的legacy source provenance validator遮蔽。
+
+**根因與底層修復**：commit `dcb3e2c09`把新canonical id的首次mode admission移進
+queue `LOCK_EX`，以同一份existing-task snapshot在source validation之前執行；只有
+通過owner gate的新record才檢查source。Exact-id replay在鎖內先回既有durable row，
+不被新schema追溯拒絕。真正mutation仍由`write_tasks_to_handle`在同一鎖內二次檢查
+mode，與enter／reconcile／restore共用鎖序，避免transition TOCTOU。
+
+**回歸與狀態**：新增existing-id replay regression，direct mode／append／claim／
+mode pairing／dedupe／provenance importer class sweep **194 passed**；Matt Spec與
+Standards雙PASS。程式根因與制度化測試已完成；因本session依規不push，尚待platform
+owner推送後由GitHub Test Suite回讀成功，incident目前僅為 **`contained`**，不得提前
+宣稱`root_cause_fixed_and_verified`。
