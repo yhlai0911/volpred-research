@@ -3925,3 +3925,13 @@ event cursor，但PostgreSQL sequence不隨交易rollback回捲；一次後續�
 交易內配號，並以effect-scoped advisory transaction lock序列化分類；event insert
 失敗會連head更新一起rollback。完整物證、production receipt與回歸見
 `docs/error_log_archive/2026-Q3-duplicate-effect-retirement-signal.md`。
+
+### 2026-07-27 — Orphan evidence 不可把 unreadable identity 或半寫 event 當完成
+
+Issue #46 的orphan sweep若在branch probe失敗後只寫`unresolved`，下一輪直接把actual
+branch視為identity drift，會永久卡死；若event final path直接`open("xb")`，process
+中止也可能留下partial JSON，使pending intent尚未有機會恢復就先被scanner拒絕。
+底層修正為單調的`unresolved → actual`跨事件狀態機、loader獨立語意驗證，以及
+pending intent + fsynced temp + no-clobber hard-link + durable head。on-disk格式刻意
+維持v1，避免新版部署或回滾拒讀既有證據。完整物證、review與live fire見
+`docs/error_log_archive/2026-Q3-orphan-work-retirement-signal.md`。

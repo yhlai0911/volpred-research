@@ -2520,3 +2520,28 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 四個producer完成不等於Issue #46結案。其目前仍OPEN的direct blocking edges為
   #9、#13、#21、#24、#28、#44、#45；全部通過前不啟動14日gap-free recorder。
   physical legacy retirement亦未完成，umbrella維持`contained`。
+
+## 2026-07-27 — T40 orphan-work durable evidence hardening（Issue #46）
+
+- ✅ orphan裁決在finalize前先寫hash-chain event；寫入失敗即fail closed，重啟依同一
+  workspace identity冪等，不會「workspace已移除但證據未落地」。
+- ✅ event append改成durable pending intent → fsynced temp inode → no-clobber
+  hard-link → durable head；event或head中途crash均可恢復，legacy-business-fire與
+  orphan-work兩個本機ledger都有partial-temp／event-head gap回歸。
+- ✅ branch讀取失敗先記`unresolved`再中止；下一輪只允許單調解析成一個actual
+  branch。loader會獨立驗證每個workspace最多兩筆、第一筆必為unresolved、第二筆
+  必為actual且job相同；重新計算hash與head的偽造chain仍被拒絕。resolution只推進
+  watermark，不重複計為事故。
+- ✅ on-disk schema與key set維持`orphan-work-retirement-event.v1`，舊版reader
+  回滾仍能讀完整證據；不採用會造成既有ledger永久拒讀的一次性v2切換。
+- ✅ commits `d72311c86`,`3959bdfe6`,`b586aa48c`；event tests **24 passed**、
+  workspace相鄰tests **11 passed**、ruff／compileall／diff-check全綠，Matt Spec與
+  Standards最終雙PASS。
+- ✅ 20:10 Operations Core自然fire
+  `operations-core-v1:legacy_retirement_signal_materialize:1302e10729ea1f2566623753`
+  attempt 1／exit 0；orphan signal mode 600、`count=0/high_watermark=0`，pending
+  intent不存在，installed wrapper SHA與manifest均為`c9a9c6d9…9037ac`。
+  planned reload工具曾因launchd minimum-runtime throttle在30秒內拿不到PID而exit 1；
+  live read-back確認服務於20:06:56重生，現為running且health loop／trigger socket已啟動。
+- 🟡 此producer slice為`root_cause_fixed_and_verified`；Issue #46 umbrella仍須等
+  direct blocking edges、14日sustained-clean與physical retirement，維持`contained`。
