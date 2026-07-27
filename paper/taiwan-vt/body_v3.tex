@@ -50,7 +50,7 @@ Log returns are computed as $r_t = \ln(P_t / P_{t-1}) \times 100$. Table~\ref{ta
 \midrule
 TWII (1997--2026) & 0.019 & 1.45 & $-0.31$ & 5.82 & 0.105 & 5.31 \\
 % source: experiments/paper2_twii_fullsample_gamma_provenance/results.json (full-sample 1997-2026 GJR constant-mean QMLE BW-robust: gamma=0.1047, t=5.312; corroborated by K892 full_sample gamma=0.109, t=5.62). Owner sign-off 2026-07-12: legacy 0.272/3.18 was provenance-untraceable and is retired throughout.
-0050.TW (2009--2026) & 0.034 & 1.38 & $-0.47$ & 4.73 & 0.097 & 3.60 \\% source: experiments/k892/k892_verify_tw_gamma_results.json .summary.assets["0050.TW"].full_sample (gamma=0.0970, gamma_t=3.5965, n_obs=4219; D3 errata fix 2026-05-26 — sample period aligned to yfinance availability 2009-01-02 onward)
+0050.TW (2009--2026) & 0.034 & 1.38 & $-0.47$ & 4.73 & 0.097 & 3.60 \\% source: experiments/k892/k892_verify_tw_gamma_results.json .summary.assets["0050.TW"].full_sample (gamma=0.0970, gamma_t=3.5965, n_obs=4219; D3 errata fix 2026-05-26 — sample period aligned to yfinance availability 2009-01-02 onward; 2026-07-27 reproducibility repoint — analysis input is now the pinned snapshot data/0050\_tw\_...\_2008-2026.csv column 0050\_tw\_adj\_close, verified to reproduce these values byte-for-byte, no live yfinance dependency)
 SPY (2008--2026) & 0.042 & 1.18 & $-0.52$ & 12.30 & 0.211 & 5.79 \\
 TSMC (2330.TW) & 0.051 & 1.92 & $-0.18$ & 3.41 & 0.052 & 3.98 \\
 9-stock average (excl.\ 2330 \& 0056) & 0.026 & 1.74 & $-0.21$ & 3.62 & 0.032 & --- \\% source: experiments/k1697/k1697_results.json aligned rolling averages (9-stock 0.032, was legacy 0.054)
