@@ -2369,7 +2369,9 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   漂移皆在 Git mutation 前 fail closed，原 grant 保留供精確事故復原。
 - ✅ `tests/test_git_commit_actuator.py` **26 passed**；Change Delivery、Supabase／
   Primary Authority、session／keepalive／outage相鄰套件 **107 passed**；
-  PostgreSQL commit-authority transaction **5 passed**，`git diff --check`通過。
+  PostgreSQL commit-authority transaction **8 passed**，其中三個end-to-end案例在
+  durable grant後分別使WorkLease、owner generation、Primary Authority失效，均回讀
+  HEAD／index不變；`git diff --check`通過。
 - ✅ 此 Git mutation-boundary fencing根因為
   **`root_cause_fixed_and_verified`**。Issue #18整體仍為 **`contained`**：
   Email真實partition canary與 #24/#46 direct legacy writer cutover／retirement尚未完成。

@@ -50,6 +50,7 @@ from volpred.ops.delivery._git_actuator import (
     CommitActuationReceipt,
     CommitActuatorBlocked,
     CommitAuthorityRequest,
+    GitCommitActuator,
     _authority_request_sha256,
 )
 from volpred.ops.delivery._git_actuator import (
@@ -2722,6 +2723,170 @@ def test_commit_authority_atomically_verifies_both_leases(
     )
     assert work_lease.token not in repr(durable)
     assert primary_lease.fencing_token not in repr(durable)
+
+
+@pytest.mark.parametrize(
+    ("lost_fence", "message"),
+    [
+        ("work_lease", "WorkLease is stale"),
+        ("commit_owner", "commit ownership lost"),
+        ("primary_authority", "Primary Authority"),
+    ],
+)
+def test_git_actuator_revalidates_existing_database_grant_at_mutation_boundary(
+    postgres_effect_dsn: str,
+    tmp_path: Path,
+    lost_fence: str,
+    message: str,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    subprocess.run(
+        ("git", "-C", str(repo), "init", "-b", "main"),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    subprocess.run(
+        ("git", "-C", str(repo), "config", "user.name", "Fence Test"),
+        check=True,
+    )
+    subprocess.run(
+        (
+            "git",
+            "-C",
+            str(repo),
+            "config",
+            "user.email",
+            "fence-test@example.invalid",
+        ),
+        check=True,
+    )
+    target = repo / "tracked.txt"
+    target.write_text("base\n", encoding="utf-8")
+    subprocess.run(
+        ("git", "-C", str(repo), "add", "tracked.txt"),
+        check=True,
+    )
+    subprocess.run(
+        ("git", "-C", str(repo), "commit", "-m", "base"),
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    base_commit = _git_text(repo, "rev-parse", "HEAD")
+    target.write_text("candidate\n", encoding="utf-8")
+
+    work_lease, running = _seed_running_work(
+        postgres_effect_dsn,
+        work_id=f"work-commit-revalidation-{lost_fence}",
+        lease_token=f"work-lease-revalidation-{lost_fence}",
+    )
+    primary = PrimaryAuthority(
+        PostgresAuthorityStore(
+            connection_factory=lambda: _worker_connection(
+                postgres_effect_dsn
+            ),
+        ),
+        token_factory=lambda: f"primary-revalidation-{lost_fence}",
+    )
+    primary_lease = primary.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-primary",
+            holder_ref=f"host:revalidation-{lost_fence}",
+            lease_seconds=300,
+        )
+    )
+    delegate = PostgresCommitAuthority(
+        connection_factory=lambda: _worker_connection(postgres_effect_dsn),
+        primary_lease=primary_lease,
+    )
+
+    class FenceDroppingAuthority:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def authorize(self, request: CommitAuthorityRequest):
+            self.calls += 1
+            grant = delegate.authorize(request)
+            if self.calls == 1:
+                with psycopg.connect(
+                    postgres_effect_dsn,
+                    autocommit=True,
+                ) as connection:
+                    if lost_fence == "work_lease":
+                        connection.execute(
+                            """
+                            UPDATE volpred_ops.work_items
+                            SET claim_expires_at =
+                              clock_timestamp() - interval '1 second'
+                            WHERE id = %s
+                            """,
+                            (running.id,),
+                        )
+                    elif lost_fence == "commit_owner":
+                        connection.execute(
+                            """
+                            UPDATE volpred_ops.commit_owners
+                            SET generation = generation + 1
+                            WHERE capability = 'git.commit'
+                            """
+                        )
+                    else:
+                        connection.execute(
+                            """
+                            UPDATE volpred_ops.primary_authority_leases
+                            SET acquired_at =
+                                  clock_timestamp() - interval '2 seconds',
+                                lease_expires_at =
+                                  clock_timestamp() - interval '1 second'
+                            WHERE authority_key = %s
+                            """,
+                            (primary_lease.authority_key,),
+                        )
+            return grant
+
+        def recover(self, request: CommitAuthorityRequest):
+            return delegate.recover(request)
+
+        def abandon(self, request, grant, *, reason):
+            return delegate.abandon(request, grant, reason=reason)
+
+    authority = FenceDroppingAuthority()
+    command = CommitActuation(
+        proposal_sha256="a" * 64,
+        work_item_id=running.id,
+        work_item_version=running.version,
+        commit_owner_generation=2,
+        work_lease_token=work_lease.token,
+        primary_fencing_token=primary_lease.fencing_token,
+        repository=str(repo),
+        expected_head=base_commit,
+        exact_paths=("tracked.txt",),
+        content_hashes=(
+            ContentHash(
+                path="tracked.txt",
+                sha256=hashlib.sha256(target.read_bytes()).hexdigest(),
+            ),
+        ),
+        message="[change-delivery] mutation-boundary fence",
+        actor="commit-worker:postgres-revalidation",
+    )
+
+    with pytest.raises(CommitActuatorBlocked, match=message):
+        GitCommitActuator(
+            clock=lambda: datetime.now(timezone.utc),
+            authority=authority,
+        ).commit(command)
+
+    assert authority.calls == 2
+    assert _git_text(repo, "rev-parse", "HEAD") == base_commit
+    assert _git_text(repo, "diff", "--cached", "--name-only") == ""
+    with psycopg.connect(postgres_effect_dsn) as connection:
+        grant_count = connection.execute(
+            "SELECT count(*) FROM volpred_ops.commit_authority_grants"
+        ).fetchone()[0]
+    assert grant_count == 1
 
 
 def test_commit_authority_service_rpc_returns_token_redacted_grant(

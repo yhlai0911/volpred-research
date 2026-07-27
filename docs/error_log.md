@@ -3701,7 +3701,9 @@ partition、stale lease、owner或grant漂移都在Git write前fail closed；不
 
 **回歸、制度化與狀態**：原案例RED→GREEN並回讀HEAD不變；
 `test_git_commit_actuator.py` **26 passed**，authority／Change Delivery相鄰套件
-**107 passed**，PostgreSQL commit-authority transaction **5 passed**，
-`git diff --check`通過。Git mutation-boundary fencing這個根因完成五步Gate，狀態為
+**107 passed**，PostgreSQL commit-authority transaction **8 passed**；後者逐一在
+durable grant後使WorkLease、commit owner generation與Primary Authority失效，均拒絕
+第二次授權且回讀HEAD／index未改變。`git diff --check`通過。Git
+mutation-boundary fencing這個根因完成五步Gate，狀態為
 **`root_cause_fixed_and_verified`**；Issue #18仍因Email真實partition canary與
 #24/#46 legacy writer cutover／retirement未完成而維持 **`contained`**。
