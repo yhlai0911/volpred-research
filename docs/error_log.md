@@ -98,8 +98,9 @@
 ## D. Silent fallback / fail-open guard / exit-code masking
 
 **規則**：不可用 silent fallback / try-except swallow / 靜默降級掩蓋 schema 或流程缺陷；護欄不可放在 fail-open 的 `try` 內（等於沒護欄）。hook / wrapper 不可把 shell pipeline exit code 當 tool outcome（pytest false-green）。silent fallback **當場修**，不丟下一班。
-**機械 owner**：`.claude/rules/no-silent-fallback.md`（規則本體）+ pre-push silent-fallback baseline sweep + CI silent-fallback check（baseline 只准變少）。
+**機械 owner**：`.claude/rules/no-silent-fallback.md`（規則本體）+ pre-push silent-fallback baseline sweep + CI silent-fallback check（baseline 只准變少）。**gate 的 scope 必須等於 rule 宣告的 scope** —— pre-commit Gate 2 只餵 `scripts/` / `src/volpred/` / `.claude/hooks/` 的 staged path 給 auditor（其餘印明確 skip 行），regression pin = `scripts/tests/test_pre_commit_staged_scope.sh` case 8/9。
 **代表 incident**：
+- 2026-07-27 **STRIKE 2｜gate 的 enforcement scope 超出它 baseline 的 scope**：pre-commit Gate 2 把**所有** staged `.py` 餵給 auditor，覆蓋掉 auditor 自己的 `default_targets()`。baseline（`storage/qa/silent_fallback_baseline.json`，60 筆）只涵蓋 `scripts/` + `src/volpred/`，光 `experiments/` 就有 1237+ 個 finding 從未入 baseline → 研究腳本裡**早就存在**的 bare `except` 沒有 baseline entry 可比對，只要無關的編輯讓行號位移就被判 `NEW`，且**沒有任何 in-scope 修法能清掉**。當天 k1391/k1592 的 snapshot-dup 清潔重跑因此被擋，成果在工作區滯留數小時無人認領（PHASE-Z 的 pre-fire dirty baseline 又正確地把它們排除在自動 commit 外 → 誰都不會收）。**為什麼前次沒修好**：2026-07-21（`f7d9d1400`）已診斷出「子集稽核 vs 全 repo baseline」，但只修**訊息**（加 `scope_is_full` → 印 partial audit 註記），沒修 **scope 本身**，於是 gate 照擋。修法＝在 hook 內把 staged path 過濾到 rule `paths:` 宣告的範圍（與 `default_targets()`、CI 呼叫、baseline 內容四者一致），out-of-scope-only 的 commit 印明確 skip 行、保留 PHASE-Z 認的 `scope=` receipt。教訓：**gate 被繞不過去時，先問「它判的範圍是不是它有能力判的範圍」，不要先改訊息** — Q3
 - 2026-07-19 review_verdict.json 全 FILL 佔位仍被 compute job 標 completed（k528 一審「存在≠內容」）→ `_review_verdict_unfilled` 內容後置條件 + test；同日互動 session 兩度把 `cmd | tail` 的 pipeline exit code 當 tool outcome（claim/complete 在 commit 失敗後照跑）— 關鍵步驟禁 pipe 尾接、驗證一律無管道直測 — Q3
 - 2026-06-22 ~ 06-23 silent-fallback batch fix（多筆，governance sweep）— Q2
 - 2026-06-23 **3-STRIKE** 測試 hook 假報「Tests passed」（exit-code masking）— Q2
@@ -3935,3 +3936,25 @@ branch視為identity drift，會永久卡死；若event final path直接`open("x
 pending intent + fsynced temp + no-clobber hard-link + durable head。on-disk格式刻意
 維持v1，避免新版部署或回滾拒讀既有證據。完整物證、review與live fire見
 `docs/error_log_archive/2026-Q3-orphan-work-retirement-signal.md`。
+
+### 2026-07-27 — Formal owner census 不可把已完成的 Primary Authority 永久 unresolved
+
+**證據化症狀**：Issue #18已完成global Primary Authority與真實mutation-boundary
+驗收，但`audit_formal_owners.py`仍把
+`host_authority/operations-core-primary`綁到`unresolved`。Live census因此固定產生
+第六個`unknown_owner` blocker；即使其餘cutover日後完成，#46仍不可能收斂。
+
+**根因層級與底層修復**：Issue #18的lease lifecycle receipt證明「曾發生租約事件」，
+不是「目前formal capability owner」；拿歷史event推owner會在正常release後製造
+假證據。現在新增獨立immutable owner singleton與service-role-only typed RPC；
+FORCE RLS私表不對service role開放，resolver逐欄驗schema、canonical capability/key、
+`operations_core`、generation與contract identity，任何backend／ACL／payload drift
+皆fail closed為unknown，且read seam不acquire、renew或release lease。
+
+**回歸與live read-back**：公開audit seam先以缺resolver／缺adapter重現RED，修後
+Primary Authority與formal census範圍**57 passed**；真PG17驗RLS、ACL、function owner、
+non-superuser migration與role cleanup。Production回讀singleton=1、
+owner=`operations_core`、generation=1、service table privileges=false、RPC只有
+service role可執行；fresh census host-authority=`unique_owner`、probe errors=0，
+總blockers 6→5。此slice為 **`root_cause_fixed_and_verified`**；#46仍因其餘五個
+formal blockers、physical retirement與14日sustained-clean而維持`contained`。
