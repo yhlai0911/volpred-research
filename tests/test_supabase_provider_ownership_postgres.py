@@ -160,6 +160,11 @@ def test_migration_replay_rejects_drift_without_minting_receipt(
         provider_owner_attestation_dsn,
         autocommit=True,
     ) as connection:
+        before = connection.execute(
+            "SELECT count(*) FROM volpred_ops.provider_owner_receipts"
+        ).fetchone()[0]
+
+    with psycopg.connect(provider_owner_attestation_dsn) as connection:
         connection.execute(
             """
             UPDATE volpred_ops.provider_owners
@@ -171,20 +176,28 @@ def test_migration_replay_rejects_drift_without_minting_receipt(
             WHERE capability = 'provider.execution'
             """
         )
-        before = connection.execute(
-            "SELECT count(*) FROM volpred_ops.provider_owner_receipts"
-        ).fetchone()[0]
-
         with pytest.raises(
             psycopg.errors.RaiseException,
             match="Provider owner attestation drifted",
         ):
             connection.execute(migration)
+        connection.rollback()
 
+    with psycopg.connect(
+        provider_owner_attestation_dsn,
+        autocommit=True,
+    ) as connection:
         after = connection.execute(
             "SELECT count(*) FROM volpred_ops.provider_owner_receipts"
         ).fetchone()[0]
         assert after == before
+        assert connection.execute(
+            """
+            SELECT owner, generation
+            FROM volpred_ops.provider_owners
+            WHERE capability = 'provider.execution'
+            """
+        ).fetchone() == ("legacy", 1)
 
 
 def test_provider_owner_tables_force_rls_and_have_one_bound_receipt(

@@ -14,6 +14,7 @@ import json
 import subprocess
 import sys
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -52,18 +53,67 @@ from volpred.ops.work.supabase_ownership import SupabaseWorkOwnerStore
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INVENTORY = ROOT / "config" / "formal_capability_inventory.json"
 DEFAULT_SCHEDULES = ROOT / "config" / "runtime_schedules.json"
+_SCHEDULE_PROBE_TIMEOUT_SECONDS = 15
+_SCHEDULE_EVIDENCE_MAX_AGE_SECONDS = 30
+_CLOCK_SKEW_SECONDS = 5
+_NON_EFFECT_OWNED_MODULES = frozenset({"owned_change.py"})
+
+
+@dataclass(frozen=True)
+class _BackendBoundResolver:
+    rpc_name: str
+    label: str
+    store_type: type[Any]
+    max_age_seconds: int = 30
+
+    def read_owner(self) -> object:
+        return self.store_type.from_environment().read_owner()
+
+
+_BACKEND_BOUND_RESOLVERS = {
+    "primary_authority_owner_rpc": _BackendBoundResolver(
+        rpc_name="volpred_read_primary_authority_owner",
+        label="Primary Authority owner",
+        store_type=SupabaseAuthorityStore,
+    ),
+    "work_owner_rpc": _BackendBoundResolver(
+        rpc_name="volpred_read_work_owner",
+        label="Work owner",
+        store_type=SupabaseWorkOwnerStore,
+    ),
+    "incident_owner_rpc": _BackendBoundResolver(
+        rpc_name="volpred_read_incident_owner",
+        label="Incident owner",
+        store_type=SupabaseIncidentOwnerStore,
+    ),
+    "provider_owner_rpc": _BackendBoundResolver(
+        rpc_name="volpred_read_provider_owner",
+        label="Provider owner",
+        store_type=SupabaseProviderOwnerStore,
+    ),
+}
+_DIRECT_OWNER_READERS = {
+    "commit_owner_rpc": (
+        lambda: SupabaseCommitOwnerStore.from_environment().read_owner()
+    ),
+    "notification_owner_rpc": (
+        lambda: SupabaseOwnedEmailStore.from_environment().read_owner()
+    ),
+    "publisher_sync_owner_rpc": (
+        lambda: SupabaseOwnedPublisherArticleStore.from_environment().read_owner()
+    ),
+    "publisher_reconcile_owner_rpc": (
+        lambda: SupabaseOwnedPublisherReconcileStore.from_environment().read_owner()
+    ),
+    "publisher_delete_owner_rpc": (
+        lambda: SupabaseOwnedPublisherDeleteStore.from_environment().read_owner()
+    ),
+}
 _ALLOWED_RESOLVERS = frozenset(
     {
         "unresolved",
-        "work_owner_rpc",
-        "commit_owner_rpc",
-        "incident_owner_rpc",
-        "notification_owner_rpc",
-        "publisher_sync_owner_rpc",
-        "publisher_reconcile_owner_rpc",
-        "publisher_delete_owner_rpc",
-        "primary_authority_owner_rpc",
-        "provider_owner_rpc",
+        *_BACKEND_BOUND_RESOLVERS,
+        *_DIRECT_OWNER_READERS,
     }
 )
 _ROOT_CAPABILITIES = frozenset(
@@ -98,16 +148,6 @@ _EXPECTED_RESOLVERS = {
         FORMAL_PRIMARY_AUTHORITY_KEY,
     ): "primary_authority_owner_rpc",
 }
-_SCHEDULE_PROBE_TIMEOUT_SECONDS = 15
-_SCHEDULE_EVIDENCE_MAX_AGE_SECONDS = 30
-_PRIMARY_AUTHORITY_EVIDENCE_MAX_AGE_SECONDS = 30
-_WORK_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
-_INCIDENT_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
-_PROVIDER_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
-_CLOCK_SKEW_SECONDS = 5
-_NON_EFFECT_OWNED_MODULES = frozenset({"owned_change.py"})
-
-
 def _load_object(path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -498,33 +538,11 @@ def _schedule_claims(
 
 def _owner_readers() -> dict[str, Callable[[], object]]:
     return {
-        "work_owner_rpc": (
-            lambda: SupabaseWorkOwnerStore.from_environment().read_owner()
-        ),
-        "incident_owner_rpc": (
-            lambda: SupabaseIncidentOwnerStore.from_environment().read_owner()
-        ),
-        "provider_owner_rpc": (
-            lambda: SupabaseProviderOwnerStore.from_environment().read_owner()
-        ),
-        "commit_owner_rpc": (
-            lambda: SupabaseCommitOwnerStore.from_environment().read_owner()
-        ),
-        "notification_owner_rpc": (
-            lambda: SupabaseOwnedEmailStore.from_environment().read_owner()
-        ),
-        "publisher_sync_owner_rpc": (
-            lambda: SupabaseOwnedPublisherArticleStore.from_environment().read_owner()
-        ),
-        "publisher_reconcile_owner_rpc": (
-            lambda: SupabaseOwnedPublisherReconcileStore.from_environment().read_owner()
-        ),
-        "publisher_delete_owner_rpc": (
-            lambda: SupabaseOwnedPublisherDeleteStore.from_environment().read_owner()
-        ),
-        "primary_authority_owner_rpc": (
-            lambda: SupabaseAuthorityStore.from_environment().read_owner()
-        ),
+        **_DIRECT_OWNER_READERS,
+        **{
+            resolver: config.read_owner
+            for resolver, config in _BACKEND_BOUND_RESOLVERS.items()
+        },
     }
 
 
@@ -582,74 +600,6 @@ def _backend_bound_claim_observed_at(
     if age > max_age_seconds:
         raise ValueError(f"{label} attestation is stale")
     return attested.astimezone(UTC).isoformat()
-
-
-def _primary_authority_claim_observed_at(
-    *,
-    owner_view: object,
-    source_ref: str,
-    audit_clock: str,
-) -> str:
-    return _backend_bound_claim_observed_at(
-        owner_view=owner_view,
-        source_ref=source_ref,
-        audit_clock=audit_clock,
-        resolver="primary_authority_owner_rpc",
-        rpc_name="volpred_read_primary_authority_owner",
-        label="Primary Authority owner",
-        max_age_seconds=_PRIMARY_AUTHORITY_EVIDENCE_MAX_AGE_SECONDS,
-    )
-
-
-def _work_owner_claim_observed_at(
-    *,
-    owner_view: object,
-    source_ref: str,
-    audit_clock: str,
-) -> str:
-    return _backend_bound_claim_observed_at(
-        owner_view=owner_view,
-        source_ref=source_ref,
-        audit_clock=audit_clock,
-        resolver="work_owner_rpc",
-        rpc_name="volpred_read_work_owner",
-        label="Work owner",
-        max_age_seconds=_WORK_OWNER_EVIDENCE_MAX_AGE_SECONDS,
-    )
-
-
-def _incident_owner_claim_observed_at(
-    *,
-    owner_view: object,
-    source_ref: str,
-    audit_clock: str,
-) -> str:
-    return _backend_bound_claim_observed_at(
-        owner_view=owner_view,
-        source_ref=source_ref,
-        audit_clock=audit_clock,
-        resolver="incident_owner_rpc",
-        rpc_name="volpred_read_incident_owner",
-        label="Incident owner",
-        max_age_seconds=_INCIDENT_OWNER_EVIDENCE_MAX_AGE_SECONDS,
-    )
-
-
-def _provider_owner_claim_observed_at(
-    *,
-    owner_view: object,
-    source_ref: str,
-    audit_clock: str,
-) -> str:
-    return _backend_bound_claim_observed_at(
-        owner_view=owner_view,
-        source_ref=source_ref,
-        audit_clock=audit_clock,
-        resolver="provider_owner_rpc",
-        rpc_name="volpred_read_provider_owner",
-        label="Provider owner",
-        max_age_seconds=_PROVIDER_OWNER_EVIDENCE_MAX_AGE_SECONDS,
-    )
 
 
 def run_audit(
@@ -722,12 +672,8 @@ def run_audit(
                 field=f"{resolver} owner",
             )
             claim_observed_at = now
-            if resolver in {
-                "primary_authority_owner_rpc",
-                "work_owner_rpc",
-                "incident_owner_rpc",
-                "provider_owner_rpc",
-            }:
+            backend_bound = _BACKEND_BOUND_RESOLVERS.get(resolver)
+            if backend_bound is not None:
                 validation_clock = (
                     owner_validation_clock()
                     if owner_validation_clock is not None
@@ -736,36 +682,15 @@ def run_audit(
                         or datetime.now(UTC).isoformat()
                     )
                 )
-                if resolver == "primary_authority_owner_rpc":
-                    claim_observed_at = (
-                        _primary_authority_claim_observed_at(
-                            owner_view=owner_view,
-                            source_ref=spec.source_ref,
-                            audit_clock=validation_clock,
-                        )
-                    )
-                elif resolver == "work_owner_rpc":
-                    claim_observed_at = _work_owner_claim_observed_at(
-                        owner_view=owner_view,
-                        source_ref=spec.source_ref,
-                        audit_clock=validation_clock,
-                    )
-                elif resolver == "incident_owner_rpc":
-                    claim_observed_at = (
-                        _incident_owner_claim_observed_at(
-                            owner_view=owner_view,
-                            source_ref=spec.source_ref,
-                            audit_clock=validation_clock,
-                        )
-                    )
-                else:
-                    claim_observed_at = (
-                        _provider_owner_claim_observed_at(
-                            owner_view=owner_view,
-                            source_ref=spec.source_ref,
-                            audit_clock=validation_clock,
-                        )
-                    )
+                claim_observed_at = _backend_bound_claim_observed_at(
+                    owner_view=owner_view,
+                    source_ref=spec.source_ref,
+                    audit_clock=validation_clock,
+                    resolver=resolver,
+                    rpc_name=backend_bound.rpc_name,
+                    label=backend_bound.label,
+                    max_age_seconds=backend_bound.max_age_seconds,
+                )
         except Exception as exc:  # noqa: BLE001 - any probe failure blocks.
             warn(
                 "formal-owner-census",
