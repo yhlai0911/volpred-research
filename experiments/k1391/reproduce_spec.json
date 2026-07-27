@@ -1,0 +1,41 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1391.py",
+    "args": []
+  },
+  "canonical_result": "k1391_results.json",
+  "inputs": [
+    {
+      "path": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "sha256": "2aa9e3b70ae1bf2a4e8335f1f4a552b4eca4b6389e2a2a6e4ac87aa87fe9b019"
+    }
+  ],
+  "timeout_seconds": 1800,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  }
+}

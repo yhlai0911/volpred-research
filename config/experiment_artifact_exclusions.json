@@ -26,6 +26,14 @@
     {
       "experiment": "k528",
       "reason": "k528_nfp_event_study.py (lines 495-496) fetches SPY and ^VIX daily OHLCV live via yf.download over 2005-01..2026-03 with no committed price snapshot -- data/ holds only the NFP release-calendar fixture (nfp_release_feed_fixture.json). yfinance retroactively revises SPY/VIX history (adjusted-close/split/dividend restatements), so a re-download yields different bytes than the archived k528_nfp_event_study_results.json / k528_nfp_official_dates_results.json. A retroactive reproduce_spec would describe today's yfinance vintage, not the input that produced the archived result -- same unfrozen-live-source class as k1623. The finding itself is recorded (K528 knowledge entry) and Codex primary-path certified PASS @ b2634ed41 on the claim surface; only offline byte-reproduction of the market-data input is impossible."
+    },
+    {
+      "experiment": "k1426",
+      "reason": "k1426.py fetch_pair() (lines 53-65) downloads every pair leg live via yf.download with auto_adjust=True and no committed price snapshot; oos.py and oos_return_benchmark.py both import that same loader, so every archived result here (k1426_results.json, k1426_oos_results.json, k1426_oos_return_benchmark.json and the three shards) shares the unfrozen input. auto_adjust restates history on every split and dividend, so a re-download yields different bytes than the archived runs -- same unfrozen-live-source class as k528 and k1623. A retroactive reproduce_spec would pin today's yfinance vintage and claim a reproducibility the archived numbers do not have. The 2026-07-27 change to this directory adds no finding: it persists the daily hedged-return series so the paired return-OLS vs PCH test needs no PCH re-estimation, and corrects the module docstring to state the refit cadence and multistart count the code actually runs."
+    },
+    {
+      "experiment": "k994",
+      "reason": "k994.py (lines 368-392) downloads ^VIX and every asset live via yf.download over DATA_START 2005-01-01 to DATA_END 2026-04-08 with no committed price snapshot, so archived k994_results.json cannot be byte-reproduced offline -- same unfrozen-live-source class as k528 and k1623. This is a KNOWN OPEN GAP, not a settled exemption: task k892_k994_pinned_snapshot_repoint_20260721 exists to repoint this loader at a pinned snapshot, and is blocked because the available 0050.TW snapshot (paper/garch-x-vix/data/0050_tw_vix_2007-2022.csv) ends in 2022 while the paper-cited DM t=1.44 (paper/garch-x-vix/main.tex:531) is an OOS statistic over 2019-01-01..2026-04-08. Repointing at that CSV would truncate the OOS window and silently change a published number. The gap and the decision it needs are written up in experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md -- the only 2026-07-27 change to this directory. Remove this exclusion once a snapshot covers the cited window; the k892 half of the same task is already done and verified."
     }
   ]
 }

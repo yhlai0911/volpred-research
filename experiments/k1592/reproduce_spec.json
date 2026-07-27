@@ -1,0 +1,49 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "entrypoint": {
+    "path": "k1592.py",
+    "args": []
+  },
+  "canonical_result": "k1592_results.json",
+  "inputs": [
+    {
+      "path": "paper/leverage-direction/data/spy_qqq_gld_tlt_eem_iwm_slv_btc_usd_vix_2010-2026.csv",
+      "sha256": "cf21d61690000088d39a666ed8cf7232611021e4f83dacd3eba66a188def126f"
+    },
+    {
+      "path": "src/volpred/stats/mcs.py",
+      "sha256": "407dd064ea6b02cdefdd6b690202c447952518993bef636ee50658f31d8b453f"
+    },
+    {
+      "path": "src/volpred/stats/model_evaluation.py",
+      "sha256": "c33b4617cf92e92696d2cb15d4eafa39316e1422332f7ef154cce7195a8493ca"
+    }
+  ],
+  "timeout_seconds": 3600,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1592
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/run_utc",
+      "/runtime_env",
+      "/runtime_seconds"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  }
+}
