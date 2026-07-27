@@ -1,0 +1,39 @@
+{
+  "id": "k1698_rev4_codex_round5_rerun_20260727",
+  "title": "Codex primary-path review — K1698 rev4 (round 5 rerun; prior job transient-failed, Codex reachable 07-26)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "uv run python",
+  "args": [
+    "storage/ops/codex_reviews/k1698_rev4_prompt.md",
+    "storage/ops/codex_reviews/k1698_rev4_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T08:15:05Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1698_rev4_codex_round5_rerun_20260727.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1698_rev4_codex_round5_rerun_20260727.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1698_rev4_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "收 round 5 verdict：PASS 才可合併 worktree（k1698 worktree 已消失，改由主線程從 experiments/k1698 主庫版本核實後 certify）；PASS 時審查者填 experiments/k1698/review_verdict.json（現全 FILL），未填 experiment_gates.py certify 會擋；FAIL 則列 blocker 續 rev5。禁止自簽。凍結清單 storage/ops/codex_reviews/k1698_rev4_freeze.txt。",
+    "task_type": "paper_review",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}
