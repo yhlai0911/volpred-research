@@ -1,0 +1,95 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1811.py",
+    "args": [],
+    "sha256": "1844bcc6d1804a16b4cc897e2d2518d55e43085a260fea684552728c14ab0708",
+    "size_bytes": 34228
+  },
+  "canonical_result": "k1811_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1811/data/events_heatwaves.csv",
+      "sha256": "d5efdb6c167168fb59a48d3788dde2d7896e2c8430c847fee7953793950bc9fd",
+      "size_bytes": 1739
+    },
+    {
+      "path": "experiments/k1811/data/events_hurricanes.csv",
+      "sha256": "11610466f2f78d843e03cd2fd5c009e92081caa19f3ebdbcfe4dbb4429ce9dbd",
+      "size_bytes": 2785
+    },
+    {
+      "path": "experiments/k1811/data/ohlc_KBWP.csv",
+      "sha256": "37630d54e8676abe8c8a6f73b21506dad19a93bdcac2318333acd8e93d36c083",
+      "size_bytes": 285013
+    },
+    {
+      "path": "experiments/k1811/data/ohlc_KIE.csv",
+      "sha256": "03aeb999fd550f168b7b2bce04a5a9dcb88b0ec21816b0d7890408d9c4d1580a",
+      "size_bytes": 317258
+    },
+    {
+      "path": "experiments/k1811/data/ohlc_SPY.csv",
+      "sha256": "53195190c036cc0d23c053e56f7433d1ca860a0baf2fe347c51d106277bf5031",
+      "size_bytes": 311508
+    },
+    {
+      "path": "experiments/k1811/data/ohlc_XLU.csv",
+      "sha256": "e088acb434b90f986ee7af13aa36c552960f7bda3420e5d8634378ad8ec821c7",
+      "size_bytes": 313207
+    },
+    {
+      "path": "experiments/k1811/data/provenance_manifest.json",
+      "sha256": "7d0d1e22228022e905c93a911d323f99d2d3148524a77b5f32586281c82ff92e",
+      "size_bytes": 4565
+    }
+  ],
+  "outputs": [],
+  "timeout_seconds": 900,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": null,
+    "recorded_at": "2026-07-27T15:53:50Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  }
+}
