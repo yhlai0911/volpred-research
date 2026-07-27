@@ -19,8 +19,8 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 
-from volpred.ops.diagnostics import warn
-from volpred.ops.public_article_projection_contract import (
+from volpred.diagnostics import warn
+from volpred.public_article_projection_contract import (
     load_public_article_projection_contract,
 )
 
