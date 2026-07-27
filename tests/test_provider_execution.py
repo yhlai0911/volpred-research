@@ -327,6 +327,21 @@ def test_checkpoint_response_loss_replays_verified_checkpoint_without_reexecutio
     assert len(adapter.execute_calls) == 1
 
 
+def test_checkpoint_artifact_identity_mismatch_fails_before_settlement() -> None:
+    with pytest.raises(ValueError, match="exactly match"):
+        ExecutionAttempt(
+            kind="checkpointed",
+            result_ref="artifact://unverified-A",
+            evidence_ref="receipt://bad-checkpoint",
+            checkpoint=VerifiedExecutionCheckpoint(
+                checkpoint_id="checkpoint-B",
+                artifact_ref="artifact://verified-B",
+                artifact_sha256="b" * 64,
+                verification_ref="pytest://checkpoint-B",
+            ),
+        )
+
+
 def test_idempotency_key_conflict_fails_closed_before_provider_io() -> None:
     adapter = FakeProvider()
     execution = engine([(descriptor("codex"), adapter)])

@@ -173,6 +173,14 @@ class ExecutionAttempt:
             raise ValueError(
                 "only checkpointed attempts carry a verified checkpoint"
             )
+        if (
+            self.kind == "checkpointed"
+            and self.checkpoint is not None
+            and self.result_ref != self.checkpoint.artifact_ref
+        ):
+            raise ValueError(
+                "checkpoint result_ref must exactly match its verified artifact_ref"
+            )
 
 
 @dataclass(frozen=True)
