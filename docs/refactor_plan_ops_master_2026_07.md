@@ -285,4 +285,5 @@ not-before單調re-arm至新成熟時間並寫durable status history，不能提
 回讀clean起點=`2026-07-27T12:40:16.244030Z`、next eligible=
 `2026-08-03T12:40:16.244030Z`、ready=false；相關246 tests綠。此slice為
 **`root_cause_fixed_and_verified`**，T03／#9仍須真實七日後才可cutover，維持
-**`contained`**。
+**`contained`**。Follow-up `0a0dc7b64`另保證stale suffix、future receipt與錯誤
+owner mode都不會輸出假`next_eligible_at`；最終Matt Spec／Standards雙PASS。

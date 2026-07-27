@@ -4037,7 +4037,10 @@ observed／recorded起訖、已覆蓋秒數與`next_eligible_at`；沒有clean r
 `work_shadow_cutover_ready_v1` probe改讀同一typed assessment；若gate仍未成熟且新的
 eligible time晚於舊not-before，就在同一queue lock交易內把task重新arm到新時間並寫
 `blocked→blocked` history。只允許時間向後移、永不縮短七日；observer仍保持read-only，
-未知gate、owner mismatch或assessment不可讀仍fail closed。
+未知gate、owner mismatch或assessment不可讀仍fail closed。後續adversarial TDD另
+封閉三種假成熟時間：最後receipt已超過max-gap、receipt時間在assessment未來、或
+queue owner mode不是可累積cutover soak的`queued_execution/disabled`時，
+`next_eligible_at`一律為`null`，不讓時間欄掩蓋已知不連續或owner錯誤。
 
 **回歸與live read-back**：先以「中途blocking receipt、其後僅一張clean」及
 「expired task遇到較晚clean window」重現缺欄位／不會re-arm的RED，修後assessment、
@@ -4048,3 +4051,6 @@ report直接回讀`clean_observation_count=1`、
 與canonical #9 row完全一致；`ready_for_cutover=false`且原四項reason仍保留作歷史稽核。
 此人工校時計算根因為 **`root_cause_fixed_and_verified`**；七日尚未經過，#9 umbrella
 仍為`contained`，不得stage或transfer owner。
+
+Final hardening commit=`0a0dc7b64`；assessment／gate lifecycle／cutover／replay／
+observer相鄰範圍 **225 passed**，Matt Spec與Standards最終雙PASS。

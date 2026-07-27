@@ -2593,3 +2593,19 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   狀態為 **`root_cause_fixed_and_verified`**。
 - 🟡 此slice不轉移ownership。Issue #9七日clean gate成熟前，`legacy`是誠實現況；
   因此Issue #46與operations-core umbrella仍為`contained`。
+
+## 2026-07-27 — T03 clean-soak evidence 與自動 re-arm（Issue #9）
+
+- ✅ `work-shadow-assessment.v1`以additive fields公開最後一次breach後的clean
+  receipt數、observed／recorded起訖、連續秒數與`next_eligible_at`。Live回讀
+  clean起點=`2026-07-27T12:40:16.244030Z`、count=1、window=0秒、next eligible=
+  `2026-08-03T12:40:16.244030Z`。
+- ✅ Allowlisted `work_shadow_cutover_ready_v1`在舊not-before到期但七日仍不足時，
+  只可於canonical queue `LOCK_EX`交易內把`blocked_until`單調向後re-arm並寫
+  `blocked→blocked` history；未知gate、不可讀assessment與owner mismatch保持blocked，
+  observer不取得mutation authority。
+- ✅ Final hardening拒絕對stale suffix、future receipt或錯誤owner mode提供假
+  `next_eligible_at`。Commits=`de75c25c5`,`0a0dc7b64`；相鄰範圍
+  **225 passed**、Matt Spec／Standards雙PASS。
+- 🟡 `ready_for_cutover=false`；真正七日尚未經過，未stage、未transfer owner。
+  本人工校時根因為 **`root_cause_fixed_and_verified`**，Issue #9維持`contained`。
