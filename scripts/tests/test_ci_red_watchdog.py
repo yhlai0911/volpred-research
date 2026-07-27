@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -1168,7 +1168,7 @@ def test_detection_notice_is_sent_once_per_incident(tmp_path):
 
 def test_throttled_ci_repair_falls_back_to_one_uncapped_root_task(tmp_path):
     """G6 may collapse repair work, but it must never strand a red main."""
-    created_at = datetime.now(timezone.utc).isoformat()
+    created_at = datetime.now(UTC).isoformat()
     capped = [
         {
             "id": f"alert_fixture_{index}",
