@@ -3569,3 +3569,27 @@ marker smoke 通過。完整無憑證 suite 為 **5352 passed, 2 skipped**；測
 已完成；但新 commit 尚待主線 push，GitHub hosted runner 尚未回讀 sustained green，
 故目前只能標 **`contained`**。新 run 全綠並確認下游通知收斂後才升級為
 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-27 — Parity checker 本身可被 union／regex／symlink escape 騙成假綠
+
+**證據化症狀**：Issue #6 初版雖有route inventory，owner仍是原版／v3 union，
+API只標route-level access；`/api/questions` GET與POST因此被歸成同一權限。後續review
+再以adversarial cases證明：兩個handler可各缺GET／POST卻靠canonical-route union過關；
+註解中的export／redirect可冒充真surface；router type、destructure、alias、optional、
+bracket、namespace import與re-export可逃出navigation scanner；source symlink在
+validate後仍從原path讀取，存在check-to-read邊界。
+
+**根因層級與底層修復**：根因是checker把文字模式匹配當語意證明，且聚合key低於實際
+ownership boundary。Contract改為mode-keyed owner與method-keyed access；method反向
+gate以`(rule, canonical route, mode, source_ref)`逐handler驗exact exports。TypeScript
+lexical mask排除comment/string並支援alias export；router與`next/navigation` symbols
+追蹤所有已消費reference，無法證明的binding/re-export fail closed。Frontend source
+resolve後只讀resolved path，audit前後另以nested Git與content tree CAS防並行漂移。
+
+**回歸與制度化**：27個測試固定method互補union、comment/string、dynamic API、path
+escape、symlink swap、typed/destructured/direct/aliased router、redirect import／
+namespace／multiline re-export等escape。Live report 133 rows／25 rules／7 scenarios，
+兩次digest byte-identical；Matt Spec與Standards雙軸review均PASS。教訓是：稽核器的
+聚合維度必須至少與被稽核ownership boundary同細，且「無法解析」只能是typed blocker，
+不能靠regex未命中當作不存在。#6 checker為`root_cause_fixed_and_verified`；它揭露的
+frontend內容缺口仍由#8處理。

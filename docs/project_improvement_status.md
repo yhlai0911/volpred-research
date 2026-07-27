@@ -2301,3 +2301,24 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ Live default-contained task commit `6036b7c6a`後#47保持OPEN且marker=0；
   explicit-close task commit `9677d28bb`才產生exact marker並CLOSED。Issue #47為
   **`root_cause_fixed_and_verified`**。
+
+## 2026-07-27 — Frontend Route／Scenario Parity Checker（Issue #6）
+
+- ✅ 沿用既有 Matt Issue #3 → master spec → T19 ticket，未重做 plan/spec/tickets。
+  Active frontend只從`config/project_targets.json`讀取；contract逐mode／surface記
+  authoritative owner、capability、advantage、access與explicit known gap。
+- ✅ App Router pages、route handlers、metadata與redirect組成唯一inventory；
+  handler逐實際source與HTTP method展開，contract→source與source→contract雙向exact，
+  不會把兩個surface的GET／POST union成假完整。
+- ✅ Navigation fail-closed涵蓋href、dynamic segment、typed/destructured/direct router、
+  alias／optional／bracket reference、`next/navigation` named／namespace import及各種
+  re-export；無法局部證明的binding直接block。註解／字串不會製造假route或假link。
+- ✅ 每個source先resolve在active frontend／repo boundary內，後續只讀resolved path；
+  nested Git HEAD、dirty digest與source tree SHA在audit前後CAS，漂移receipt無效。
+- ✅ 最終adversarial suite **27 passed**，Matt Spec／Standards雙軸均PASS。live
+  read-back為133 route-method rows、25 rules、7 required scenarios、4 known gaps、
+  32 blockers，`source_revision.stable=true`；同一source連跑兩次SHA-256皆
+  `0e3b70851ad0e9350df7a92f4a4395837cee6bd61d111c9da10fd22c806e989a`。
+- ✅ Issue #6 checker本身為 **`root_cause_fixed_and_verified`**。Live report的3個
+  dead links、2個scenario evidence gaps、27個unresolved navigation targets以及
+  4個single-mode gaps是#8/T20的精確輸入；frontend parity仍未完成，不得混淆口徑。
