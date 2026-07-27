@@ -72,6 +72,50 @@
     "last_at": null
    }
   },
+  "inc_0769d254c27b": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": "ci-root-30277897265",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-27T15:20:29.921728+00:00",
+   "escalation": null,
+   "fingerprint": "0769d254c27bc90e6cefb9d2f6923fe5cb79f3b1f03ae99e3aff8c87b5114a12",
+   "fingerprint_parts": [
+    "ci-red-30277897265"
+   ],
+   "first_seen_at": "2026-07-27T15:20:29.921728+00:00",
+   "incident_id": "inc_0769d254c27b",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T15:20:29.921728+00:00",
+     "key": "30277897265:1",
+     "last_seen_at": "2026-07-27T15:20:29.921728+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-27T15:17:09.5377072Z E AssertionError: Regex pattern did not match.",
+   "last_seen_at": "2026-07-27T15:20:29.921728+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-27T15:20:30.070594+00:00",
+     "task_id": "ci-root-30277897265"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_1b45ed55e555": {
    "class": "ordinary",
    "clean_observations": [],
@@ -454,9 +498,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T10:29:32.888200+00:00"
-    },
-    {
      "at": "2026-07-27T10:31:09.898540+00:00"
     },
     {
@@ -488,6 +529,9 @@
     },
     {
      "at": "2026-07-27T14:34:51.482569+00:00"
+    },
+    {
+     "at": "2026-07-27T15:31:47.310540+00:00"
     }
    ],
    "current_task_id": null,
@@ -1235,6 +1279,9 @@
    "clean_observations": [
     {
      "at": "2026-07-27T12:22:38.836371+00:00"
+    },
+    {
+     "at": "2026-07-27T14:35:03.508048+00:00"
     }
    ],
    "current_task_id": null,
@@ -1769,6 +1816,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T14:34:51.483146+00:00",
+ "updated_at": "2026-07-27T15:31:47.311933+00:00",
  "version": 1
 }

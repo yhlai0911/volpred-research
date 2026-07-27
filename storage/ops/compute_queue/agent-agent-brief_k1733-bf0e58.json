@@ -1,0 +1,53 @@
+{
+  "id": "agent-agent-brief_k1733-bf0e58",
+  "title": "agent: agent-brief_k1733",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1733-bf0e58.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733/experiments/k1733/K1733_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-agent-brief_k1733-bf0e58.json",
+    "--timeout",
+    "3360"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T15:09:23Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1733-bf0e58.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1733-bf0e58.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733/experiments/k1733/K1733_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-agent-brief_k1733-bf0e58.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+  "claude_followup": {
+    "brief": "K1733 AI基建資金鏈波動傳導 agent 完成：(1) 依 agent-result-verification skill 驗 K1733_results.json==README==agent 回報三者一致；(2) 檢 review_verdict.json，未達 CONDITIONAL_PASS 按 3-strike；(3) verify 過主線程寫 knowledge.json（K1259：agent 禁寫）；(4) 正式 merge_worktree.sh 整合 dispatch-slot-1-1e5922b4-k1733；(5) 若 infra/credit→tech RV 傳導 OOS 顯著且乾淨，考慮 reader-facing 選題（AI capex vol 早警訊號，先過 arc-dedup gate）。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1733",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T15:09:23Z",
+    "linked_at": "2026-07-27T15:09:23Z",
+    "error": null
+  },
+  "timeout_seconds": 3480,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1733.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1733-bf0e58.md"
+}

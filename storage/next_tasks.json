@@ -34095,7 +34095,7 @@
     "title": "K1720: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arX",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 571). Original: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1720.py with signal.shift(1) + seed=42, (c) K1720_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34124,11 +34124,34 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1720-6c33b8",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:03:43.024195+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:05:53.589831+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1720-6c33b8-586d6a",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:14:21.862448+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
       }
     ],
-    "compute_job_id": "agent-brief_k1720-6c33b8",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720-6c33b8-586d6a; awaiting PHASE A collection",
+    "last_released_at": "2026-07-27T15:14:21.862440+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:14:21.862048+00:00",
+    "compute_release_reason": "external_compute_job_failed"
   },
   {
     "id": "K1721",
@@ -34164,11 +34187,43 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1721-6f6bbb",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:03:43.024271+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:05:53.643489+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1721-6f6bbb-6be58f",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:14:21.862520+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:15:18.066248+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1721-6f6bbb-534021",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "compute_job_id": "agent-brief_k1721-6f6bbb",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1721-6f6bbb; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k1721-6f6bbb; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1721-6f6bbb-6be58f; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1721-6f6bbb-534021; awaiting PHASE A collection",
+    "last_released_at": "2026-07-27T15:14:21.862517+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:14:21.862048+00:00",
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "agent-agent-brief_k1721-6f6bbb-534021",
+    "blocked_reason": "external_compute_job_active"
   },
   {
     "id": "K1722",
@@ -34204,12 +34259,31 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1811-e2748d",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:03:43.024334+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:05:53.696714+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1811-e2748d-6bc0b3",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "compute_job_id": "agent-brief_k1811-e2748d",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1811-e2748d; awaiting PHASE A collection",
-    "retry_note": "job agent-brief_k1811-e2748d infra-aborted at task-execution-fence (fence metadata unreadable, exit -2, zero output, worktree had no experiments/k1811). Triaged: nothing salvageable → fresh re-enqueue agent-agent-brief_k1811-e2748d-6bc0b3 (opus/xhigh, same worktree, per-job fence refreshes). Awaiting PHASE A collection on new job."
+    "result": "dispatched to compute job agent-brief_k1811-e2748d; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1811-e2748d-6bc0b3; awaiting PHASE A collection",
+    "retry_note": "job agent-brief_k1811-e2748d infra-aborted at task-execution-fence (fence metadata unreadable, exit -2, zero output, worktree had no experiments/k1811). Triaged: nothing salvageable → fresh re-enqueue agent-agent-brief_k1811-e2748d-6bc0b3 (opus/xhigh, same worktree, per-job fence refreshes). Awaiting PHASE A collection on new job.",
+    "last_released_at": "2026-07-27T15:03:43.024332+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "agent-agent-brief_k1811-e2748d-6bc0b3",
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-27T15:05:55Z"
   },
   {
     "id": "K1723",
@@ -35001,7 +35075,7 @@
     "title": "K1727: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JP",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1727.py with signal.shift(1) + seed=42, (c) K1727_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35030,18 +35104,27 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1727-f47651",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:03:43.024405+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
       }
     ],
-    "compute_job_id": "agent-brief_k1727-f47651",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job agent-brief_k1727-f47651; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k1727-f47651; awaiting PHASE A collection",
+    "last_released_at": "2026-07-27T15:03:43.024403+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
+    "compute_release_reason": "external_compute_job_failed"
   },
   {
     "id": "K1728",
     "title": "K1728: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-at",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 594). Original: 新聞情緒 / 總經注意力增益波動預測 — FRED EPU + 免費情緒/Google Trends 注意力加入 HAR/RV，檢定對美股 RV 的增量 OOS R²（來源：J.Forecasting/arXiv 2025 macro-attention & sentiment vol）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1728.py with signal.shift(1) + seed=42, (c) K1728_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35070,12 +35153,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1728-slot3-89dfe5",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:23:23.839315+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "compute_job_id": "agent-agent-brief_k1728-slot3-89dfe5",
-    "blocked_reason": "external_compute_job_running",
-    "result": "dispatched to compute job agent-agent-brief_k1728-slot3-89dfe5; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T14:30:06Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "result": "dispatched to compute job agent-agent-brief_k1728-slot3-89dfe5; awaiting PHASE A collection\n\nCollect_completed: K1728 (free macro-attention/news-sentiment vs HAR-RV) NULL verdict verified + merged. Review PASS (code-reviewer subagent fallback, Codex quota-limited to 2026-08-02; lookahead probed clean, gates 4/4 PASS). SPY/QQQ log-RV 2005-2023, OOS n=2246: all EPU/News specs negative incremental OOS R2 + NS Clark-West; VIX benchmark strongly sig (pipeline power check). Knowledge id 7192cff9 written (main thread, numbers from results.json). Worktree merged via merge_worktree.sh, artifact check PASS on main. Caveats: proxy RV, single index family, subagent-fallback review.",
+    "compute_started_at": "2026-07-27T14:30:06Z",
+    "compute_finished_at": "2026-07-27T15:05:53Z",
+    "completed_at": "2026-07-27T15:23:23.839298+00:00"
   },
   {
     "id": "ci-red-29541122360",
@@ -35840,7 +35931,30 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-18T00:00:01Z"
+    "created_at": "2026-07-18T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T15:04:17.421502+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1"
+      },
+      {
+        "ts": "2026-07-27T15:04:25.604097+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1"
+      },
+      {
+        "ts": "2026-07-27T15:07:40.913712+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1",
+        "note": "manual_release"
+      }
+    ],
+    "dispatch_blocker": "enqueue-agent 被 _find_task_dispatch_collision 擋下：stale worktree dispatch-slot-1-bd00f90a-k1731（dispatch report 已標 stale, 無進度 7.5h）的 quarantine commit（\"NN stuck foreign path(s)\"）掃進 k1730-named 路徑，git log --grep=K1730 命中未 merge 分支 → 機械拒派（正確，不可繞過）。解法先決條件：reclaim/清理該 stale worktree（reclaim_stale_worktrees.py）——但該 worktree 另含今日(07-27 12:38) k1731 近期產物，reclaim 需謹慎不可 force。brief 已備妥 storage/ops/agent_briefs/agent-brief_k1730.md 供解阻後直接 enqueue。",
+    "last_released_at": "2026-07-27T15:07:40.913694+00:00"
   },
   {
     "id": "K1731",
@@ -35875,7 +35989,7 @@
     "title": "K1733: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 606). Original: AI 基建資金鏈的波動傳導 — 建 hyperscaler/semis（MSFT/NVDA/SMH）× power-grid/utility（XLU/PAVE）× credit（HYG/LQD）三籃，檢定 AI capex shock 是否先在電力/基建/credit vol 出現，再傳到 Nasdaq RV（來源：J.P. Morgan 2026 alternatives outlook；AI data-center financing / public-private market shift）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1733.py with signal.shift(1) + seed=42, (c) K1733_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35884,14 +35998,38 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-18T00:00:02Z"
+    "created_at": "2026-07-18T00:00:02Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T15:08:14.320631+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1"
+      },
+      {
+        "ts": "2026-07-27T15:08:14.589860+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1"
+      },
+      {
+        "ts": "2026-07-27T15:09:23.484419+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1733-bf0e58",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-agent-brief_k1733-bf0e58",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-agent-brief_k1733-bf0e58; awaiting PHASE A collection"
   },
   {
     "id": "K1734",
     "title": "K1734: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carr",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 625). Original: EM 貨幣 carry unwind 的 crash-risk 不對稱 — yfinance EM 貨幣/債 ETF（CEW/EMLC/EMB）+ FXY，建 carry proxy 與 yen-funding stress，檢定 carry 報酬分佈左尾是否在 risk-off 急速放大、unwind 是否領先 EM 股 vol；明確標示 leveraged/crowded position 數據 blocked 用 proxy（來源：BIS/IMF GFSR 2025；EM drawdown 為 EUR 的 3-5 倍）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1734.py with signal.shift(1) + seed=42, (c) K1734_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35900,7 +36038,31 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-18T00:00:02Z"
+    "created_at": "2026-07-18T00:00:02Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T15:11:27.671847+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1"
+      },
+      {
+        "ts": "2026-07-27T15:11:27.930711+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1e5922b40a3143e1ac2cc691f58803b1"
+      },
+      {
+        "ts": "2026-07-27T15:12:32.522060+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1734-205644",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-agent-brief_k1734-205644",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection"
   },
   {
     "id": "daily_digest_20260718",
@@ -41030,7 +41192,7 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1391/k1391_results.json + K1391 knowledge entry\n**嚴重度**：MEDIUM_UNQUANTIFIED\n\n**為什麼要修**：Stored n_full_oos=1866 proves it consumed the 10 dup rows, but it was not rerun, so the magnitude of the change in its DM tests is unmeasured.\n\n**污染證據（稽核逐行查證）**：k1391.py:58-59 canonical path; :77 read, sort only; :96 open-ended OOS mask. stored sample_sizes.n_full_oos=1866 == polluted count through 2026-05-20 (run 2026-05-22); clean=1856. Not rerun.\n\n**是否已有 clean 重跑**：否 — 只有存檔計數證明污染，變動幅度未測\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
@@ -41054,11 +41216,38 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:03:43.024568+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:05:54.168063+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:18:08.253813+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
-    "compute_job_id": "compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525; awaiting PHASE A collection"
+    "result": "dispatched to compute job compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525; awaiting PHASE A collection\n\ndispatched to compute job compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985; awaiting PHASE A collection\n\nCollect_completed: k1391 rerun on deduped snapshot verified. n_full_oos 1866(contam)→1900(clean), no dup trading days. DM full t=-2.054 p=0.040, non_covid t=-2.924 p=0.0035, post_covid t=-3.208 p=0.0014 (now Harvey-sig). Verdict unchanged: GJR beats A4f. Updated README results table+guard note and paper/garch-x-vix/errata_pending.md dedup note. Numbers from k1391_results.json run_at 2026-07-27T15:06Z.",
+    "last_released_at": "2026-07-27T15:03:43.024566+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985",
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-27T15:05:54Z",
+    "compute_finished_at": "2026-07-27T15:06:10Z",
+    "completed_at": "2026-07-27T15:18:08.253791+00:00"
   },
   {
     "id": "snapdupfix_k1591",
@@ -41101,7 +41290,7 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1396/k1396_legacy_rerun_results.json\n**嚴重度**：LOW\n\n**為什麼要修**：Only the legacy-rerun artifact is affected; the frozen k1396_results.json is untouched and K1379 already supersedes the public interpretation.\n\n**污染證據（稽核逐行查證）**：k1396.py:55-56 canonical path; :76-78 no dedup; open-ended OOS. Rerun: n_oos 1900->1890, DM HAR_VIX_vs_HAR p 0.00843->0.01083. Writes only k1396_legacy_rerun_results.json; the frozen k1396_results.json is untouched and the experiment is self-declared superseded by K1379.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 3,
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
@@ -41125,11 +41314,38 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:03:43.024624+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "release",
+        "note": "external_compute_job_failed"
+      },
+      {
+        "ts": "2026-07-27T15:05:54.220254+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T15:19:16.882338+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
-    "compute_job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
-    "blocked_reason": "external_compute_job_active",
-    "result": "dispatched to compute job compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140; awaiting PHASE A collection"
+    "result": "dispatched to compute job compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140; awaiting PHASE A collection\n\ndispatched to compute job compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985; awaiting PHASE A collection\n\nCollect_completed (LOW, superseded by K1379): k1396 legacy rerun on deduped snapshot verified. n_oos 1866(contam,dups)→1900(clean). HAR_VIX_vs_HAR DM t=-2.522 p=0.0117 (contam 0.00843→clean 0.0117, direction consistent, still <0.05, no flip). Frozen k1396_results.json untouched; clean numbers in k1396_legacy_rerun_results.json. Added clean-rerun note to README; no feed/paper/knowledge change (superseded, only citation is frozen v7 review record).",
+    "last_released_at": "2026-07-27T15:03:43.024622+00:00",
+    "last_release_reason": "external_compute_job_failed",
+    "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
+    "compute_release_reason": "external_compute_job_failed",
+    "compute_job_id": "compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985",
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-27T15:05:55Z",
+    "compute_finished_at": "2026-07-27T15:06:39Z",
+    "completed_at": "2026-07-27T15:19:16.882316+00:00"
   },
   {
     "id": "telegram-1231",
@@ -42823,14 +43039,39 @@
     "title": "任務池缺 awaiting_agent_job 狀態：派給 async agent lane 的任務在儀表上與「沒人做」無法區分",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly-slot-3-3896dcaa98a24e49b7d1fc3202335a22",
     "description": "**現象**：任務走 `compute_queue.py enqueue-agent` 派出去之後，任務池沒有能表達「已派給 async agent lane、正在飛」的狀態。`scripts/mark_task_blocked.py` 的 reason vocabulary（awaiting_codex_review / awaiting_external_data / compute_runtime_incompatible …）沒有對應項，所以現行慣例是 annotate 一段 DISPATCHED 字串後 `release` 回 pending。\n\n**後果（有實例）**：`assign_5aa9d5f5`（K1623）於 2026-07-19 12:52 DISPATCHED→compute-queue，但在 `continue_task_dispatch.py --report` 眼中始終是一張沒人認領的 pending，到 2026-07-22 已 aged **111.7h** 並觸發 starvation lockout —— 而它的 agent job 其實早就跑完了。本班（10:07）驗證後確認 rev2 交付物完整、只是卡在 round-3 review，隨即收單。同一個形狀在本班又發生一次：`K1714` 派出 `agent-brief_k1714-cd4315` 後只能 annotate + release。\n\n**根因**：'in-flight in another lane' 與 'starved, nobody picked it up' 這兩個語意共用同一個 `status=pending`。dispatch report 的 aging 是照 created_at / 最後狀態變更算的，它無從分辨。\n\n**建議做法**：\n1. `mark_task_blocked.py` reason vocab 加 `awaiting_agent_job`，必帶 `job_id`，`blocked_until` 由該 job 的 timeout 推導（例如 enqueue 時間 + timeout + 緩衝）。\n2. `unblock_expired_blocked_tasks.py` 對這個 reason 走**主動探測**而非純日期比對：查 compute queue 該 job 的 status —— completed → 解封（或直接由 followup 接手）、failed/cancelled → 解封並標註、still running → 續 block。（此形狀與 docs/error_log.md 2026-07-22 08:2x 那條「額度重置日期寫死當事實」同源：解封條件應該是**重探**，不是**日期到期**。）\n3. dispatch report 把 awaiting_agent_job 從 starvation 計算中排除，但另列一個「in-flight 超過預期 timeout」的清單 —— 那才是真正該有人看的異常。\n\n**驗收**：(a) vocab + blocked_until 推導有測試；(b) 主動探測路徑有測試（三種 job status 各一）；(c) 拿 K1714 當實例跑一遍：派工後應為 blocked/awaiting_agent_job，job 完成後應自動解封或由 followup 接走；(d) dispatch report 不再把 in-flight 任務算進 starvation。\n\nparent_context=本班（hourly-slot-3-3896dcaa）處理 assign_5aa9d5f5 收單與 K1714 派工時發現。",
     "created_at_observed_not_after": "2026-07-22T11:09:09+08:00",
     "creation_time_evidence": {
       "method": "reviewed_git_snapshot_observation",
       "evidence_commit": "d2c6bcc9f7b4a33d6afba40bf0c21e19b031672a"
-    }
+    },
+    "evidence_2026_07_27": "6 個 awaiting_agent_job + blocked_reason=external_compute_job_active 綁死 job 的殭屍：K1720/K1721/K1722/K1727/snapdupfix_k1391/snapdupfix_k1396（其 compute_job 皆已 failed/gone）。無合法 CLI 釋放：requeue 只收 auth/quota/worker_killed；cancel 只處理 queued job；cmd_cleanup(scripts/task_pool_claim.py:1546) 只掃 claimed/in_progress/pending-residue。合法轉移邏輯 _release_cancelled_source_task(scripts/compute_queue.py:2730 awaiting_agent_job→pending) 只在 cancel queued job 時觸發，failed job 到不了。",
+    "proposed_fix": "cmd_cleanup 增一分支：status==awaiting_agent_job 且 blocked_reason==external_compute_job_active 且 _compute_job_alive(compute_job_id)==False（job failed/cancelled/gone，非 succeeded/pending-collection）→ re-pend（mirror _release_cancelled_source_task 的欄位清理）。守則：blocked_reason==external_compute_receipt_pending_collection 一律略過（有結果待收）。注意 K1721 疑由 slot-3 active，需與 live slot 協調避免 double-dispatch。",
+    "status_history": [
+      {
+        "ts": "2026-07-27T14:59:21.330862+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T14:59:21.600153+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T15:30:51.260803+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode-root"
+      }
+    ],
+    "started_at": "2026-07-27T14:59:21.600135+00:00",
+    "completed_at": "2026-07-27T15:30:51.260783+00:00",
+    "result": "Commits 364bb205a/1a9308ca6 add terminal async-owner reconciliation with fail-closed receipt binding. TDD adjacent suite 171 passed; live cleanup preserved K1728 running + 3 receipt-pending owners and formally re-pended 6 failed owners with history/reasons. Full suite ran once: 6111 passed/20 failed/1 skipped; immediate failed-node rerun 45 passed/1 unrelated pre-existing fake-Claude registry-fixture failure."
   },
   {
     "id": "telegram-1300",
@@ -42975,7 +43216,8 @@
     "created_at": "2026-07-22T05:00:33.410158+00:00",
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物批次裁決（worktree_unmerged，episode 1）",
-    "description": "一個或多個 stale worktree 持有未落地成果，reclaim 依 fail-closed 規則不動它們。全部未清實例見 `storage/ops/incidents.json` 的 `inc_776caf84f125` row（instances[] 中 cleared_at 為空者）。這單是批次裁決出口，逐實例三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh <name>`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result；worktree 消失後下次 reclaim 會自動 clear 對應 instance。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I / incident-lifecycle P3）。"
+    "description": "一個或多個 stale worktree 持有未落地成果，reclaim 依 fail-closed 規則不動它們。全部未清實例見 `storage/ops/incidents.json` 的 `inc_776caf84f125` row（instances[] 中 cleared_at 為空者）。這單是批次裁決出口，逐實例三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh <name>`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result；worktree 消失後下次 reclaim 會自動 clear 對應 instance。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I / incident-lifecycle P3）。",
+    "triage_note": "2026-07-27 23:30 hourly-slot-2 pre-scan (not claimed; deferred, needs full-budget fire). 9 open instances. NOT-on-main + verdict=PASS + unmerged commits (real merge/salvage, silent-loss risk): k1731(21 commits,clean), k1715(8,clean), k1708(5,worktree-dir GONE branch wt/dispatch-slot-2-8dda242d-k1708 only), a4fe4570(2,clean). Likely-redundant (exp already on main): k1380(4,dirty), k1095v2(3,clean), k1714(0 commits,dirty=scratch->discard). snapdup(1,dirty,verdict PASS - check vs main snapdup work). agent-a148e8a9(0 commits,dirty=scratch->discard). Each merge triggers artifact-gate knowledge check; budget a full fire."
   },
   {
     "id": "assign_db64b82b",
@@ -49174,7 +49416,7 @@
     "description": "Bounded T10 pre-cutover slice. Build one canonical versioned provider registry for the real Claude CLI, Codex CLI and compute-agent spawn paths. Schema must cover identity, auth surface, semantic classes, capabilities, attestations, formal-gate eligibility, enabled state and bounded probe policy; reject metered billing, API-key auth, credits, auto-reload, paid overflow and unknown fields. Every real spawn boundary must reload and validate the same registry immediately before subprocess creation, fail closed before provider I/O, and bind selected model/provider identity to an auditable registry SHA. Do not transfer provider.execution ownership, do not claim #12 complete, and do not bypass #9. TDD, class sweep, Matt Spec/Standards review, live no-spawn validation and docs required.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T13:39:19.657852+00:00",
     "payload": {
@@ -49198,10 +49440,6 @@
     },
     "created_by": "codex-vscode",
     "issue_ref": "#12",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T13:39:26.933119+00:00",
-    "claim_expires_at": "2026-07-27T15:39:26.933119+00:00",
-    "claim_session_id": "49696997ec16",
     "status_history": [
       {
         "ts": "2026-07-27T13:39:26.933134+00:00",
@@ -49213,6 +49451,12 @@
         "ts": "2026-07-27T13:39:30.787208+00:00",
         "from": "claimed",
         "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T14:37:53.359113+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
         "by": "codex-vscode"
       }
     ],
@@ -49236,7 +49480,10 @@
       "docs/error_log.md",
       "docs/project_improvement_status.md",
       "docs/refactor_plan_ops_master_2026_07.md"
-    ]
+    ],
+    "completed_at": "2026-07-27T14:37:53.359094+00:00",
+    "result": "Commits 7e46f10e8/dc902d4be/3290006cf deployed through safe launchd reload; daemon PID 41705 heartbeat healthy and receipts bind registry SHA 7cabd75e with pinned Claude/Codex identities. 119 targeted tests plus Matt Spec/Standards PASS and live alternate-auth denial verified; bounded three-launcher slice root_cause_fixed_and_verified, Issue #12 remains contained/open.",
+    "issue_disposition": "contained"
   },
   {
     "id": "assign_5938ee83",
@@ -49244,15 +49491,11 @@
     "description": "Follow-up to assign_e9992acd, non-overlapping source-census slice. Build a mechanical AST/source audit for every production Claude/Codex/agy process creation seam. Require canonical zero-paid authorization immediately before provider I/O, bind the actual executable identity and task semantic/capability/formal-review contract, add agy only if its auth/billing can be explicitly attested zero-paid, otherwise fail closed or retire the launcher. Cover execution_brief, member-QA adjudicator, scheduled trending scan, lazypack Codex/agy chain, and scheduled Codex reference generation; distinguish diagnostic --version probes from business execution. TDD, class-sweep negative tests, Matt dual review, live no-spawn denial and docs. Do not edit the active assign_e9992acd launcher files, transfer provider.execution, bypass #9, or close #12.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T13:52:16.091373+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#12",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T13:52:22.307873+00:00",
-    "claim_expires_at": "2026-07-27T15:52:22.307873+00:00",
-    "claim_session_id": "02586febc177",
     "status_history": [
       {
         "ts": "2026-07-27T13:52:22.307888+00:00",
@@ -49265,9 +49508,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T14:37:53.655136+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T13:52:25.410451+00:00"
+    "started_at": "2026-07-27T13:52:25.410451+00:00",
+    "completed_at": "2026-07-27T14:37:53.655112+00:00",
+    "result": "Commit 0e9ffc7ae ratchets all discovered production AI CLI Python/shell seams behind canonical zero-paid policy. Independent rerun: 166 passed, AST census 9 business files with 0 unguarded/0 unclassified, Claude/Codex/agy alternate-auth injections exit 126 before I/O; bounded bypass class root_cause_fixed_and_verified, Issue #12 remains contained/open pending #9 and owner cutover.",
+    "issue_disposition": "contained"
   },
   {
     "id": "email-12189-7429ea",
@@ -49332,5 +49584,150 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-27T14:23:43+00:00"
+  },
+  {
+    "id": "assign_8d6442f3",
+    "title": "[Issue #16] Implement bounded zero-paid capability probe ledger",
+    "description": "Bounded T11 pre-cutover slice after provider-registry launchers are root-fixed. Implement one durable capability probe engine driven only by config/provider_registry.json probe_policy: typed quota/auth/unavailable/policy-denied outcomes, minimum interval, exponential backoff capped by maximum_backoff_seconds, rolling max_probe_cost_units budget, provider/model/executable/registry-SHA receipts, and crash-safe atomic ledger. Probe must be diagnostic/no-business-effect and fail closed; no busy polling, no hard-coded reset time, no provider reroute, no task resume, no owner transfer, no #9/#12 bypass, and do not close #16. TDD, Matt Spec/Standards review, live no-provider-I/O policy/budget read-back, docs required.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T14:39:20.092761+00:00",
+    "payload": {
+      "write_intent": "repo_patch",
+      "declared_output_paths": [
+        "src/volpred/ops/execution/probe.py",
+        "src/volpred/ops/execution/__init__.py",
+        "config/provider_registry.json",
+        "tests/test_provider_probe.py",
+        "docs/error_log.md",
+        "docs/project_improvement_status.md",
+        "docs/refactor_plan_ops_master_2026_07.md"
+      ]
+    },
+    "created_by": "codex-vscode",
+    "issue_ref": "#16",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T14:39:26.718764+00:00",
+    "claim_expires_at": "2026-07-27T16:39:26.718764+00:00",
+    "claim_session_id": "7226330621ca",
+    "status_history": [
+      {
+        "ts": "2026-07-27T14:39:26.718776+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T14:39:30.491213+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T14:39:30.491199+00:00",
+    "declared_paths": [
+      "config/provider_registry.json",
+      "src/volpred/ops/execution/probe.py",
+      "src/volpred/ops/execution/probe_policy.py",
+      "src/volpred/ops/execution/registry.py",
+      "src/volpred/ops/execution/__init__.py",
+      "tests/test_provider_probe.py",
+      "tests/test_provider_execution.py",
+      "tests/test_dispatch_supervisor.py",
+      "docs/error_log.md",
+      "docs/project_improvement_status.md",
+      "docs/refactor_plan_ops_master_2026_07.md"
+    ]
+  },
+  {
+    "id": "ci-root-30277897265",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "incident_escalation",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "incident_id": "ci-red-30277897265",
+    "ci_incident_id": "ci-red-30277897265",
+    "ci_run_key": "30277897265:1",
+    "denied_repair_task_id": "ci-red-30277897265",
+    "created_at": "2026-07-27T15:20:26.803054+00:00",
+    "title": "CI 單一根因修復（run 30277897265）— main Test Suite",
+    "description": "CI incident ci-red-30277897265 的一般修復任務 ci-red-30277897265 被 24h G6 上限拒絕；本任務是同一 incident 唯一、可越過上限的根因出口。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30277897265\nattempt: 1\n已知失敗摘要：2026-07-27T15:17:09.5377072Z E AssertionError: Regex pattern did not match.\n\n行動：讀完整 failed log、本地重現、修底層契約並做同類掃描；不可只 rerun、清狀態或回報既有綠燈。result 必須帶 `root_cause=<一行>; repair_commit=pending_post_commit`，由 CI watcher 以後續 GitHub green 獨立結案。",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "scripts/lazypack_layout_guard.py",
+      "scripts/tests/test_agentic_cli_timeout_killpg.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_knowledge_unrecorded_ratchet.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/execution_brief.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_execution_brief.py",
+      "tests/test_prepublish_audit.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_scan_trending_agy.py",
+      "tests/test_shared_lock.py",
+      "tests/test_worker_fatal_marker_fastfail.py"
+    ],
+    "post_merge_actions": [],
+    "priority_capped_from": 1,
+    "claimed_by": "codex-vscode-root",
+    "claimed_at": "2026-07-27T15:31:30.976895+00:00",
+    "claim_expires_at": "2026-07-27T17:31:30.976895+00:00",
+    "claim_session_id": "1723f6d0034c",
+    "status_history": [
+      {
+        "ts": "2026-07-27T15:31:30.976911+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode-root"
+      },
+      {
+        "ts": "2026-07-27T15:31:31.240901+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode-root"
+      }
+    ],
+    "started_at": "2026-07-27T15:31:31.240882+00:00"
+  },
+  {
+    "id": "assign_2e4e9461",
+    "title": "PHASE-Z 卡住檔案 incident（149350993e79c664）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n2 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1426/k1426_oos_results.json — 3 班\n- experiments/k1426/k1426_oos_return_benchmark.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T153202097882Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T15:32:02.188578+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "149350993e79c664",
+      "paths": [
+        "experiments/k1426/k1426_oos_results.json",
+        "experiments/k1426/k1426_oos_return_benchmark.json"
+      ],
+      "streaks": {
+        "experiments/k1426/k1426_oos_results.json": 3,
+        "experiments/k1426/k1426_oos_return_benchmark.json": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T153202097882Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T15:32:02.176618+00:00",
+      "last_seen_at": "2026-07-27T15:32:02.176618+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
