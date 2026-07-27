@@ -2474,6 +2474,30 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   repo-patch contract；真run回放精確取3路徑，absolute/traversal/storage/glob
   fail closed；paths與failure run key持久化避免restart失憶，CI
   watcher／preassignment 74案綠。
-- 🟡 此slice為`root_cause_fixed_and_verified`；整體Issue #46仍缺owner-only push後
-  GitHub green read-back、其餘legacy physical retirement及14日sustained-clean，
+- ✅ GitHub Test Suite run `30260596460`已在包含`c0a62a612`與結構修正的
+  `dec3708bb`全綠，直接ImportError與CI修復派工contract兩個slice均為
+  `root_cause_fixed_and_verified`。
+- 🟡 整體Issue #46仍缺其餘legacy physical retirement及14日sustained-clean，
   umbrella維持`contained`。
+
+## 2026-07-27 — T40 duplicate-effect retirement evidence producer（Issue #46）
+
+- ✅ 在formal PostgreSQL Effect Delivery receipt的不可避settlement邊界增加獨立
+  duplicate-delivery tripwire；同一EffectRequest出現第二筆`delivered`時，原交易必須
+  同步寫入private retirement ledger，寫不成即整筆settlement rollback。
+- ✅ Matt review抓出兩個初版阻斷缺陷：PostgreSQL `IDENTITY`在rollback後會留下永久
+  sequence gap；並行delivery若沒有per-effect serialization可能互相看不到。現以
+  transactionally updated durable head密集配號、advisory xact lock序列化同effect；
+  rollback、並行與attempt編號逆序皆有PG17回歸。
+- ✅ event/head表均為FORCE RLS且owner=`volpred_ops_definer`；RPC固定空
+  `search_path`並只授權`service_role`。RPC回傳exact cursor→high-watermark範圍，
+  materializer拒絕gap、schema/cursor drift、越界時間與不連續sequence。
+- ✅ Production migration receipt=`20260727112014`；catalog回讀trigger enabled、
+  anon/authenticated execute=false、service_role execute=true、event/head
+  `0/0`。直接production materializer生成mode-600
+  `duplicate_effect.json`，`count=0/high_watermark=0`。
+- ✅ 既有Operations Core `*/5` wrapper已改為依序刷新legacy-business-fire與
+  duplicate-effect，任一來源失敗整個job非零。19:25自然fire
+  `operations-core-v1:legacy_retirement_signal_materialize:a08baf4868d03695348302f5`
+  attempt 1／exit 0，兩個typed signal均由正式owner刷新；duplicate signal為mode 600、
+  `count=0/high_watermark=0`。observation recorder仍未排程，不提前啟動14日窗。

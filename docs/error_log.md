@@ -3914,3 +3914,14 @@ queue lifecycle／assessment／pool-pressure／canonical-writer 相鄰套件 **2
 `observation_window_too_short`。此「提前解除」根因已
 **`root_cause_fixed_and_verified`**；Issue #9 umbrella仍須等真實七日與cutover
 transaction，維持`contained`。
+
+### 2026-07-27 — Retirement event ledger 不可用 PostgreSQL IDENTITY 證明 gap-free
+
+Issue #46 duplicate-effect producer初版使用`GENERATED ... AS IDENTITY`當作不可缺號的
+event cursor，但PostgreSQL sequence不隨交易rollback回捲；一次後續失敗的settlement
+就能消耗號碼、移除event row，讓`high_watermark - cursor == event count`永久失敗。
+同時，沒有per-effect serialization的AFTER INSERT trigger在並行delivery下可能互相
+看不到，漏掉第二次外部效果。底層修正是由受RLS保護的singleton durable head在同一
+交易內配號，並以effect-scoped advisory transaction lock序列化分類；event insert
+失敗會連head更新一起rollback。完整物證、production receipt與回歸見
+`docs/error_log_archive/2026-Q3-duplicate-effect-retirement-signal.md`。
