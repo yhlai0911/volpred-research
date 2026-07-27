@@ -5,9 +5,7 @@ from pathlib import Path
 
 import psycopg
 import pytest
-
 from test_postgres_effect_delivery import postgres_effect_dsn
-
 
 PRIMARY_AUTHORITY_RPC_MIGRATION = (
     Path(__file__).resolve().parents[1]
@@ -154,6 +152,8 @@ def test_public_rpc_acl_is_service_role_only(
         "(text,text,bigint,text,text,text)",
         "public.volpred_release_primary_authority"
         "(text,text,bigint,text)",
+        "public.volpred_reconcile_primary_authority_demotion"
+        "(text,text,bigint)",
         "public.volpred_read_primary_authority_events"
         "(text,integer)",
     )
@@ -196,6 +196,37 @@ def test_public_rpc_acl_is_service_role_only(
                 False,
                 False,
             )
+
+        owned_relations = connection.execute(
+            """
+            SELECT relation.relname, relation.relkind, owner.rolname
+            FROM pg_class AS relation
+            JOIN pg_namespace AS namespace
+              ON namespace.oid = relation.relnamespace
+            JOIN pg_roles AS owner
+              ON owner.oid = relation.relowner
+            WHERE namespace.nspname = 'volpred_ops'
+              AND relation.relname IN (
+                'primary_authority_events',
+                'primary_authority_event_reads',
+                'primary_authority_events_sequence_seq'
+              )
+            ORDER BY relation.relname
+            """
+        ).fetchall()
+        assert owned_relations == [
+            (
+                "primary_authority_event_reads",
+                "v",
+                "volpred_ops_definer",
+            ),
+            ("primary_authority_events", "r", "volpred_ops_definer"),
+            (
+                "primary_authority_events_sequence_seq",
+                "S",
+                "volpred_ops_definer",
+            ),
+        ]
 
         connection.execute("SET ROLE service_role")
         with pytest.raises(psycopg.errors.InsufficientPrivilege):
@@ -336,6 +367,138 @@ def test_lifecycle_events_are_append_only_and_rejections_return_receipts(
     assert events[3]["epoch"] == acquired["epoch"]
     assert events[-1]["holder_ref"] == standby_holder
     assert all("fencing_token" not in event for event in events)
+
+
+def test_read_materializes_natural_expiry_without_takeover(
+    primary_authority_rpc_dsn: str,
+) -> None:
+    authority_key = "primary-natural-expiry-test"
+    holder_ref = "host:natural-expiry"
+    with psycopg.connect(
+        primary_authority_rpc_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        lease = connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (authority_key, holder_ref, 300, "expiry-secret"),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.primary_authority_leases
+            SET acquired_at = clock_timestamp() - interval '10 seconds',
+                lease_expires_at =
+                  clock_timestamp() - interval '1 second'
+            WHERE authority_key = %s
+            """,
+            (authority_key,),
+        )
+        connection.execute("SET ROLE service_role")
+        events = connection.execute(
+            """
+            SELECT public.volpred_read_primary_authority_events(%s, 20)
+            """,
+            (authority_key,),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        current = connection.execute(
+            """
+            SELECT holder_ref, lease_expires_at
+            FROM volpred_ops.primary_authority_leases
+            WHERE authority_key = %s
+            """,
+            (authority_key,),
+        ).fetchone()
+
+    assert lease["epoch"] == 1
+    assert [event["event_type"] for event in events] == [
+        "acquired",
+        "expired",
+        "demoted",
+    ]
+    assert events[1]["operation"] == "reconcile"
+    assert events[2]["operation"] == "reconcile"
+    assert current == (None, None)
+
+
+def test_unconfirmed_demotion_reconciles_after_backend_recovery(
+    primary_authority_rpc_dsn: str,
+) -> None:
+    authority_key = "primary-demotion-recovery-test"
+    holder_ref = "host:demotion-recovery"
+    with psycopg.connect(
+        primary_authority_rpc_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        lease = connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (authority_key, holder_ref, 300, "demotion-secret"),
+        ).fetchone()[0]
+        pending = connection.execute(
+            """
+            SELECT public.volpred_reconcile_primary_authority_demotion(
+              %s, %s, %s
+            )
+            """,
+            (authority_key, holder_ref, lease["epoch"]),
+        ).fetchone()[0]
+        assert pending["status"] == "pending"
+
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.primary_authority_leases
+            SET acquired_at = clock_timestamp() - interval '10 seconds',
+                lease_expires_at =
+                  clock_timestamp() - interval '1 second'
+            WHERE authority_key = %s
+            """,
+            (authority_key,),
+        )
+        connection.execute("SET ROLE service_role")
+        reconciled = connection.execute(
+            """
+            SELECT public.volpred_reconcile_primary_authority_demotion(
+              %s, %s, %s
+            )
+            """,
+            (authority_key, holder_ref, lease["epoch"]),
+        ).fetchone()[0]
+        replay = connection.execute(
+            """
+            SELECT public.volpred_reconcile_primary_authority_demotion(
+              %s, %s, %s
+            )
+            """,
+            (authority_key, holder_ref, lease["epoch"]),
+        ).fetchone()[0]
+        events = connection.execute(
+            """
+            SELECT public.volpred_read_primary_authority_events(%s, 20)
+            """,
+            (authority_key,),
+        ).fetchone()[0]
+
+    assert reconciled["status"] == "reconciled"
+    assert replay["event_ref"] == reconciled["event_ref"]
+    assert [event["event_type"] for event in events] == [
+        "acquired",
+        "expired",
+        "demoted",
+    ]
+    assert sum(
+        event["event_type"] == "demoted" for event in events
+    ) == 1
 
 
 def test_formal_grant_rejects_capability_scoped_primary_lease(

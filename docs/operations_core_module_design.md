@@ -1356,7 +1356,11 @@ commit／effect 共用唯一 authority key `operations-core-primary`；capabilit
 一般 WorkItem 純計算、讀取與 checkpoint 不要求 primary lease，因此 standby 或
 provider failover 仍可做安全工作。租約 current-state row 不是 audit history；
 acquire／renew／expiry／demote／reject 另寫 append-only lifecycle event，raw fencing
-token 不出現在 event 或 read API。
+token 不出現在 event 或 read API。Audit read/reconcile seam以database clock
+materialize沒有 takeover 的自然 expiry；release backend unavailable時，host只將
+token-redacted demotion identity以fsync＋atomic replace落本機 journal，下一次
+acquire前重播。Remote lease仍有效時不得偽造 demotion receipt，只有expiry／既有
+release／較新epoch已證明舊holder失效後才收斂 journal。
 
 ## 9. Package 與 visibility
 

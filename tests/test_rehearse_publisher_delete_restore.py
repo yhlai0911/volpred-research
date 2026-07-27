@@ -157,7 +157,7 @@ def _delete_receipt(owner, prepared, *, suffix="ok"):
         evidence_ref=f"supabase:publisher-delete:{suffix}",
         evidence_sha256="b" * 64,
         primary_authority_ref=(
-            "primary-authority:publisher:article.supabase.delete:epoch-1"
+            "primary-authority:operations-core-primary:epoch-1"
         ),
         recorded_at="2026-07-25T03:05:00+00:00",
     )

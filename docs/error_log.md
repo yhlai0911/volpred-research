@@ -3480,13 +3480,20 @@ canonical key，database `primary_authority_grants` trigger再次 fail closed，
 rehearsal key可測 lease但不能取得正式 grant。Forward migration
 `20260727080000_primary_authority_lifecycle_audit.sql` 新增 append-only transition
 trigger及 typed try-functions：失敗的 lease subtransaction先 rollback，外層再保存
-token-redacted rejection receipt；acquire／renew／expiry／demote與reject皆可由
-service-role-only read RPC回讀。
+token-redacted rejection receipt。初版仍漏了「無後續 takeover 的自然 expiry」與
+「backend outage 時 local demote 但 remote release 未確認」；固定基準雙審抓出後，
+再補 DB-clock read/reconcile materialization（expired lease會原子清 holder並留下
+唯一 expired＋demoted events），以及 fsync＋atomic replace 的 token-redacted local
+demotion intent。Store在下一次 acquire 前重播 service-role reconcile；有效 lease
+維持 pending，DB expiry後才收成唯一 demoted receipt。acquire／renew／expiry／
+demote與reject因此皆可由同一 audit RPC回讀。
 
 **回歸與狀態界線**：TDD先證明 typed rejection未被 adapter辨識、lifecycle table
 不存在、capability-scoped key仍可取得 formal grant，修正後 unit／PG17 transaction
 tests通過；non-superuser migration executor與重放 idempotency亦納入。這只完成 global
-key＋durable lifecycle contract；production migration/read-back、formal Git／email
+key＋durable lifecycle contract；另以「無 takeover 自然 expiry」及「release backend
+unavailable→intent→recovery replay」回歸證明兩個原漏口。production
+migration/read-back、formal Git／email
 mutation-boundary partition canary、以及 direct legacy writers退役仍未完成，分別由
 Issue #18後續、#24與#46接續。因此目前狀態只能是 **`contained`**。
 

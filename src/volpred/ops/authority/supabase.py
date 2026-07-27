@@ -2,9 +2,14 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 from collections.abc import Mapping
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 from volpred.ops.delivery.supabase_rpc import (
     ServiceRoleRpcClient,
@@ -25,8 +30,10 @@ _EVENT_TYPES = frozenset(
     {"acquired", "renewed", "expired", "demoted", "rejected"}
 )
 _EVENT_OPERATIONS = frozenset(
-    {"acquire", "renew", "authorize", "release"}
+    {"acquire", "renew", "authorize", "release", "reconcile"}
 )
+_DEMOTION_INTENT_SCHEMA = "primary-authority-demotion-intent.v1"
+_DEMOTION_RECONCILE_SCHEMA = "primary-authority-demotion-reconcile.v1"
 
 
 def _text(payload: Mapping[str, Any], field: str) -> str:
@@ -62,6 +69,14 @@ def _timestamp(payload: Mapping[str, Any], field: str) -> str:
     return observed.astimezone(UTC).isoformat()
 
 
+def _fsync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 class SupabaseAuthorityStore:
     """Persist DB-clock primary leases through narrow public RPCs."""
 
@@ -71,16 +86,24 @@ class SupabaseAuthorityStore:
         supabase_url: str,
         service_role_key: str,
         timeout_seconds: float = 45.0,
+        demotion_intent_dir: Path | None = None,
     ) -> None:
         self._client = ServiceRoleRpcClient(
             supabase_url=supabase_url,
             service_role_key=service_role_key,
             timeout_seconds=timeout_seconds,
         )
+        self._demotion_intent_dir = demotion_intent_dir
 
     @classmethod
     def from_environment(cls) -> SupabaseAuthorityStore:
         values = runtime_environment()
+        repo_root = Path(__file__).resolve().parents[4]
+        storage_dir = Path(
+            values.get("VOLPRED_STORAGE_DIR", str(repo_root / "storage"))
+        )
+        if not storage_dir.is_absolute():
+            storage_dir = repo_root / storage_dir
         return cls(
             supabase_url=values.get("SUPABASE_URL", ""),
             service_role_key=values.get(
@@ -88,6 +111,11 @@ class SupabaseAuthorityStore:
             ),
             timeout_seconds=float(
                 values.get("VOLPRED_OPERATIONS_RPC_TIMEOUT_SEC", "45")
+            ),
+            demotion_intent_dir=(
+                storage_dir
+                / "ops"
+                / "primary_authority_demotion_intents"
             ),
         )
 
@@ -97,6 +125,7 @@ class SupabaseAuthorityStore:
         *,
         fencing_token: str,
     ) -> PrimaryLease:
+        self.reconcile_pending_demotions()
         payload = self._rpc(
             "volpred_acquire_primary_authority",
             {
@@ -182,15 +211,25 @@ class SupabaseAuthorityStore:
         )
 
     def release(self, lease: PrimaryLease) -> AuthorityReceipt:
-        payload = self._rpc(
-            "volpred_release_primary_authority",
-            {
-                "p_authority_key": lease.authority_key,
-                "p_holder_ref": lease.holder_ref,
-                "p_epoch": lease.epoch,
-                "p_fencing_token": lease.fencing_token,
-            },
-        )
+        try:
+            payload = self._rpc(
+                "volpred_release_primary_authority",
+                {
+                    "p_authority_key": lease.authority_key,
+                    "p_holder_ref": lease.holder_ref,
+                    "p_epoch": lease.epoch,
+                    "p_fencing_token": lease.fencing_token,
+                },
+            )
+        except Exception:
+            try:
+                self._record_demotion_intent(lease)
+            except Exception as journal_error:
+                raise RuntimeError(
+                    "Primary Authority release failed and demotion "
+                    "intent could not be persisted"
+                ) from journal_error
+            raise
         if (
             _text(payload, "authority_key") != lease.authority_key
             or _text(payload, "holder_ref") != lease.holder_ref
@@ -199,7 +238,7 @@ class SupabaseAuthorityStore:
             raise ValueError(
                 "Primary Authority release read-back drifted"
             )
-        return AuthorityReceipt(
+        receipt = AuthorityReceipt(
             schema_version="primary-authority-receipt.v1",
             authority_key=lease.authority_key,
             holder_ref=lease.holder_ref,
@@ -209,6 +248,57 @@ class SupabaseAuthorityStore:
             ),
             released_at=_timestamp(payload, "released_at"),
         )
+        self._clear_demotion_intent(lease)
+        return receipt
+
+    def reconcile_pending_demotions(self) -> int:
+        """Replay token-redacted local demotion intents after recovery."""
+
+        if self._demotion_intent_dir is None:
+            return 0
+        directory = self._demotion_intent_dir
+        if not directory.exists():
+            return 0
+        reconciled = 0
+        for path in sorted(directory.glob("*.json")):
+            intent = self._read_demotion_intent(path)
+            payload = self._rpc(
+                "volpred_reconcile_primary_authority_demotion",
+                {
+                    "p_authority_key": intent["authority_key"],
+                    "p_holder_ref": intent["holder_ref"],
+                    "p_epoch": intent["epoch"],
+                },
+            )
+            if (
+                payload.get("schema_version")
+                != _DEMOTION_RECONCILE_SCHEMA
+                or _text(payload, "authority_key")
+                != intent["authority_key"]
+                or _text(payload, "holder_ref") != intent["holder_ref"]
+                or _positive_integer(payload, "epoch") != intent["epoch"]
+            ):
+                raise ValueError(
+                    "Primary Authority demotion reconcile read-back drifted"
+                )
+            status = _text(payload, "status")
+            if status == "pending":
+                continue
+            if status != "reconciled":
+                raise ValueError(
+                    "Primary Authority demotion reconcile returned "
+                    "an invalid status"
+                )
+            _text(payload, "event_ref")
+            _timestamp(payload, "occurred_at")
+            try:
+                path.unlink()
+            except FileNotFoundError:  # silent-ok: idempotent peer cleanup
+                pass
+            else:
+                _fsync_directory(directory)
+            reconciled += 1
+        return reconciled
 
     def read_events(
         self,
@@ -230,6 +320,7 @@ class SupabaseAuthorityStore:
             raise ValueError(
                 "Primary Authority event limit must be between 1 and 500"
             )
+        self.reconcile_pending_demotions()
         try:
             payload = self._client.call(
                 "volpred_read_primary_authority_events",
@@ -254,6 +345,98 @@ class SupabaseAuthorityStore:
                 )
             events.append(self._event(item, authority_key=normalized_key))
         return tuple(events)
+
+    def _record_demotion_intent(self, lease: PrimaryLease) -> None:
+        if self._demotion_intent_dir is None:
+            raise RuntimeError(
+                "Primary Authority demotion journal is not configured"
+            )
+        directory = self._demotion_intent_dir
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / self._demotion_intent_name(lease)
+        payload = {
+            "schema_version": _DEMOTION_INTENT_SCHEMA,
+            "authority_key": lease.authority_key,
+            "holder_ref": lease.holder_ref,
+            "epoch": lease.epoch,
+            "reason_code": "release_unconfirmed",
+            "recorded_at": datetime.now(UTC).isoformat(),
+        }
+        temporary = path.with_name(
+            f".{path.name}.{os.getpid()}.{uuid4().hex}.tmp"
+        )
+        try:
+            with temporary.open("x", encoding="utf-8") as handle:
+                json.dump(
+                    payload,
+                    handle,
+                    ensure_ascii=False,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                )
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+            _fsync_directory(directory)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    def _clear_demotion_intent(self, lease: PrimaryLease) -> None:
+        if self._demotion_intent_dir is None:
+            return
+        path = (
+            self._demotion_intent_dir
+            / self._demotion_intent_name(lease)
+        )
+        try:
+            path.unlink()
+        except FileNotFoundError:  # silent-ok: no failed-release intent
+            return
+        _fsync_directory(self._demotion_intent_dir)
+
+    @staticmethod
+    def _demotion_intent_name(lease: PrimaryLease) -> str:
+        identity = json.dumps(
+            {
+                "authority_key": lease.authority_key,
+                "holder_ref": lease.holder_ref,
+                "epoch": lease.epoch,
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+        return f"{hashlib.sha256(identity).hexdigest()}.json"
+
+    @staticmethod
+    def _read_demotion_intent(path: Path) -> dict[str, Any]:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, json.JSONDecodeError) as error:
+            raise RuntimeError(
+                "Primary Authority demotion intent is unreadable"
+            ) from error
+        if not isinstance(payload, Mapping):
+            raise ValueError(
+                "Primary Authority demotion intent is not an object"
+            )
+        if payload.get("schema_version") != _DEMOTION_INTENT_SCHEMA:
+            raise ValueError(
+                "Primary Authority demotion intent schema is invalid"
+            )
+        authority_key = _text(payload, "authority_key")
+        holder_ref = _text(payload, "holder_ref")
+        epoch = _positive_integer(payload, "epoch")
+        if _text(payload, "reason_code") != "release_unconfirmed":
+            raise ValueError(
+                "Primary Authority demotion intent reason is invalid"
+            )
+        _timestamp(payload, "recorded_at")
+        return {
+            "authority_key": authority_key,
+            "holder_ref": holder_ref,
+            "epoch": epoch,
+        }
 
     def _rpc(
         self,

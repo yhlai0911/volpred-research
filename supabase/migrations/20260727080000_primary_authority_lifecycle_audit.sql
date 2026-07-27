@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS volpred_ops.primary_authority_events (
     event_type IN ('acquired', 'renewed', 'expired', 'demoted', 'rejected')
   ),
   operation text NOT NULL CHECK (
-    operation IN ('acquire', 'renew', 'authorize', 'release')
+    operation IN ('acquire', 'renew', 'authorize', 'release', 'reconcile')
   ),
   epoch bigint CHECK (epoch IS NULL OR epoch > 0),
   holder_ref text,
@@ -93,9 +93,9 @@ CREATE TABLE IF NOT EXISTS volpred_ops.primary_authority_events (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS
-  primary_authority_events_single_expiry_idx
+  primary_authority_events_single_terminal_idx
 ON volpred_ops.primary_authority_events (authority_key, epoch, event_type)
-WHERE event_type = 'expired';
+WHERE event_type IN ('expired', 'demoted');
 
 CREATE INDEX IF NOT EXISTS primary_authority_events_read_idx
 ON volpred_ops.primary_authority_events (
@@ -115,6 +115,13 @@ SELECT
   lease_expires_at,
   occurred_at
 FROM volpred_ops.primary_authority_events;
+
+ALTER TABLE volpred_ops.primary_authority_events
+  OWNER TO volpred_ops_definer;
+ALTER VIEW volpred_ops.primary_authority_event_reads
+  OWNER TO volpred_ops_definer;
+ALTER SEQUENCE volpred_ops.primary_authority_events_sequence_seq
+  OWNER TO volpred_ops_definer;
 
 ALTER TABLE volpred_ops.primary_authority_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE volpred_ops.primary_authority_events FORCE ROW LEVEL SECURITY;
@@ -172,7 +179,7 @@ BEGIN
         OLD.lease_expires_at, event_at
       )
       ON CONFLICT (authority_key, epoch, event_type)
-        WHERE event_type = 'expired'
+        WHERE event_type IN ('expired', 'demoted')
       DO NOTHING;
     END IF;
 
@@ -193,7 +200,10 @@ BEGIN
       VALUES (
         OLD.authority_key, 'demoted', 'release', OLD.epoch, OLD.holder_ref,
         OLD.lease_expires_at, event_at
-      );
+      )
+      ON CONFLICT (authority_key, epoch, event_type)
+        WHERE event_type IN ('expired', 'demoted')
+      DO NOTHING;
     ELSIF NEW.epoch = OLD.epoch
         AND NEW.holder_ref IS NOT DISTINCT FROM OLD.holder_ref
         AND NEW.lease_expires_at > OLD.lease_expires_at THEN
@@ -222,6 +232,191 @@ CREATE TRIGGER audit_primary_authority_transition
 AFTER INSERT OR UPDATE ON volpred_ops.primary_authority_leases
 FOR EACH ROW
 EXECUTE FUNCTION volpred_ops.audit_primary_authority_transition();
+
+-- Preserve the identity of a lease that was already active when this
+-- forward-only migration was applied.
+INSERT INTO volpred_ops.primary_authority_events (
+  authority_key, event_type, operation, epoch, holder_ref,
+  lease_expires_at, occurred_at
+)
+SELECT
+  lease.authority_key,
+  'acquired',
+  'acquire',
+  lease.epoch,
+  lease.holder_ref,
+  lease.lease_expires_at,
+  lease.acquired_at
+FROM volpred_ops.primary_authority_leases AS lease
+WHERE lease.holder_ref IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM volpred_ops.primary_authority_events AS event
+    WHERE event.authority_key = lease.authority_key
+      AND event.epoch = lease.epoch
+      AND event.event_type = 'acquired'
+  );
+
+CREATE OR REPLACE FUNCTION
+  volpred_ops.materialize_primary_authority_expiry(
+    p_authority_key text
+  )
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+DECLARE
+  authority volpred_ops.primary_authority_leases;
+  event_at timestamptz;
+BEGIN
+  IF p_authority_key IS NULL OR btrim(p_authority_key) = '' THEN
+    RAISE EXCEPTION 'Primary Authority key is required';
+  END IF;
+  event_at := clock_timestamp();
+  SELECT * INTO authority
+  FROM volpred_ops.primary_authority_leases
+  WHERE authority_key = btrim(p_authority_key)
+  FOR UPDATE;
+  IF authority.authority_key IS NULL
+      OR authority.holder_ref IS NULL
+      OR authority.lease_expires_at > event_at THEN
+    RETURN false;
+  END IF;
+
+  INSERT INTO volpred_ops.primary_authority_events (
+    authority_key, event_type, operation, epoch, holder_ref,
+    lease_expires_at, occurred_at
+  )
+  VALUES (
+    authority.authority_key, 'expired', 'reconcile', authority.epoch,
+    authority.holder_ref, authority.lease_expires_at, event_at
+  )
+  ON CONFLICT (authority_key, epoch, event_type)
+    WHERE event_type IN ('expired', 'demoted')
+  DO NOTHING;
+  INSERT INTO volpred_ops.primary_authority_events (
+    authority_key, event_type, operation, epoch, holder_ref,
+    lease_expires_at, occurred_at
+  )
+  VALUES (
+    authority.authority_key, 'demoted', 'reconcile', authority.epoch,
+    authority.holder_ref, authority.lease_expires_at, event_at
+  )
+  ON CONFLICT (authority_key, epoch, event_type)
+    WHERE event_type IN ('expired', 'demoted')
+  DO NOTHING;
+  UPDATE volpred_ops.primary_authority_leases
+  SET holder_ref = NULL,
+      fencing_token_sha256 = NULL,
+      acquired_at = NULL,
+      lease_expires_at = NULL,
+      updated_at = event_at
+  WHERE authority_key = authority.authority_key
+    AND epoch = authority.epoch;
+  RETURN true;
+END;
+$$;
+
+ALTER FUNCTION volpred_ops.materialize_primary_authority_expiry(text)
+  OWNER TO volpred_ops_definer;
+REVOKE ALL ON FUNCTION
+  volpred_ops.materialize_primary_authority_expiry(text)
+  FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION
+  volpred_ops.materialize_primary_authority_expiry(text)
+  TO volpred_ops_definer;
+
+CREATE OR REPLACE FUNCTION
+  volpred_ops.reconcile_primary_authority_demotion(
+    p_authority_key text,
+    p_holder_ref text,
+    p_epoch bigint
+  )
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, volpred_ops
+AS $$
+DECLARE
+  authority volpred_ops.primary_authority_leases;
+  acquired_event volpred_ops.primary_authority_events;
+  demoted_event volpred_ops.primary_authority_events;
+  event_at timestamptz;
+BEGIN
+  IF p_authority_key IS NULL OR btrim(p_authority_key) = ''
+      OR p_holder_ref IS NULL OR btrim(p_holder_ref) = ''
+      OR p_epoch IS NULL OR p_epoch <= 0 THEN
+    RAISE EXCEPTION 'Primary Authority demotion identity is required';
+  END IF;
+  PERFORM volpred_ops.materialize_primary_authority_expiry(
+    btrim(p_authority_key)
+  );
+  SELECT * INTO acquired_event
+  FROM volpred_ops.primary_authority_events
+  WHERE authority_key = btrim(p_authority_key)
+    AND epoch = p_epoch
+    AND holder_ref = btrim(p_holder_ref)
+    AND event_type = 'acquired'
+  ORDER BY sequence
+  LIMIT 1;
+  IF acquired_event.sequence IS NULL THEN
+    RAISE EXCEPTION 'Primary Authority demotion identity is unknown';
+  END IF;
+  SELECT * INTO authority
+  FROM volpred_ops.primary_authority_leases
+  WHERE authority_key = btrim(p_authority_key)
+  FOR UPDATE;
+  IF authority.epoch = p_epoch
+      AND authority.holder_ref = btrim(p_holder_ref)
+      AND authority.lease_expires_at > clock_timestamp() THEN
+    RETURN jsonb_build_object(
+      'schema_version', 'primary-authority-demotion-reconcile.v1',
+      'status', 'pending',
+      'authority_key', btrim(p_authority_key),
+      'holder_ref', btrim(p_holder_ref),
+      'epoch', p_epoch
+    );
+  END IF;
+  event_at := clock_timestamp();
+  INSERT INTO volpred_ops.primary_authority_events (
+    authority_key, event_type, operation, epoch, holder_ref,
+    lease_expires_at, occurred_at
+  )
+  VALUES (
+    btrim(p_authority_key), 'demoted', 'reconcile', p_epoch,
+    btrim(p_holder_ref), acquired_event.lease_expires_at, event_at
+  )
+  ON CONFLICT (authority_key, epoch, event_type)
+    WHERE event_type IN ('expired', 'demoted')
+  DO NOTHING;
+  SELECT * INTO STRICT demoted_event
+  FROM volpred_ops.primary_authority_events
+  WHERE authority_key = btrim(p_authority_key)
+    AND epoch = p_epoch
+    AND event_type = 'demoted';
+  RETURN jsonb_build_object(
+    'schema_version', 'primary-authority-demotion-reconcile.v1',
+    'status', 'reconciled',
+    'authority_key', demoted_event.authority_key,
+    'holder_ref', demoted_event.holder_ref,
+    'epoch', demoted_event.epoch,
+    'event_ref',
+      'primary-authority-event:' || demoted_event.sequence::text,
+    'occurred_at', demoted_event.occurred_at
+  );
+END;
+$$;
+
+ALTER FUNCTION volpred_ops.reconcile_primary_authority_demotion(
+  text, text, bigint
+) OWNER TO volpred_ops_definer;
+REVOKE ALL ON FUNCTION volpred_ops.reconcile_primary_authority_demotion(
+  text, text, bigint
+) FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION volpred_ops.reconcile_primary_authority_demotion(
+  text, text, bigint
+) TO volpred_ops_definer;
 
 CREATE OR REPLACE FUNCTION volpred_ops.enforce_formal_primary_grant()
 RETURNS trigger
@@ -438,7 +633,7 @@ BEGIN
         NULLIF(btrim(p_holder_ref), ''), expired_at, clock_timestamp()
       )
       ON CONFLICT (authority_key, epoch, event_type)
-        WHERE event_type = 'expired'
+        WHERE event_type IN ('expired', 'demoted')
       DO NOTHING;
     END IF;
     RETURN volpred_ops.record_primary_authority_rejection(
@@ -490,7 +685,7 @@ BEGIN
         NULLIF(btrim(p_holder_ref), ''), expired_at, clock_timestamp()
       )
       ON CONFLICT (authority_key, epoch, event_type)
-        WHERE event_type = 'expired'
+        WHERE event_type IN ('expired', 'demoted')
       DO NOTHING;
     END IF;
     RETURN volpred_ops.record_primary_authority_rejection(
@@ -638,6 +833,22 @@ AS $$
   )
 $$;
 
+CREATE OR REPLACE FUNCTION
+  public.volpred_reconcile_primary_authority_demotion(
+    p_authority_key text,
+    p_holder_ref text,
+    p_epoch bigint
+  )
+RETURNS jsonb
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT volpred_ops.reconcile_primary_authority_demotion(
+    p_authority_key, p_holder_ref, p_epoch
+  )
+$$;
+
 CREATE OR REPLACE FUNCTION public.volpred_read_primary_authority_events(
   p_authority_key text,
   p_limit integer DEFAULT 100
@@ -656,6 +867,9 @@ BEGIN
   IF p_limit IS NULL OR p_limit <= 0 OR p_limit > 500 THEN
     RAISE EXCEPTION 'Primary Authority event limit must be between 1 and 500';
   END IF;
+  PERFORM volpred_ops.materialize_primary_authority_expiry(
+    btrim(p_authority_key)
+  );
   SELECT COALESCE(
     jsonb_agg(
       jsonb_build_object(
@@ -717,6 +931,9 @@ ALTER FUNCTION public.volpred_authorize_primary_write(
 ALTER FUNCTION public.volpred_release_primary_authority(
   text, text, bigint, text
 ) OWNER TO volpred_ops_definer;
+ALTER FUNCTION public.volpred_reconcile_primary_authority_demotion(
+  text, text, bigint
+) OWNER TO volpred_ops_definer;
 ALTER FUNCTION public.volpred_read_primary_authority_events(
   text, integer
 ) OWNER TO volpred_ops_definer;
@@ -734,6 +951,9 @@ REVOKE ALL ON FUNCTION public.volpred_authorize_primary_write(
 REVOKE ALL ON FUNCTION public.volpred_release_primary_authority(
   text, text, bigint, text
 ) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.volpred_reconcile_primary_authority_demotion(
+  text, text, bigint
+) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.volpred_read_primary_authority_events(
   text, integer
 ) FROM PUBLIC, anon, authenticated;
@@ -749,6 +969,9 @@ GRANT EXECUTE ON FUNCTION public.volpred_authorize_primary_write(
 ) TO service_role;
 GRANT EXECUTE ON FUNCTION public.volpred_release_primary_authority(
   text, text, bigint, text
+) TO service_role;
+GRANT EXECUTE ON FUNCTION public.volpred_reconcile_primary_authority_demotion(
+  text, text, bigint
 ) TO service_role;
 GRANT EXECUTE ON FUNCTION public.volpred_read_primary_authority_events(
   text, integer

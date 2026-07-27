@@ -26,7 +26,10 @@ from pathlib import Path
 from typing import Protocol
 from uuid import uuid4
 
-from volpred.ops.authority import build_supabase_host_authority_keepalive
+from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    build_supabase_host_authority_keepalive,
+)
 from volpred.ops.delivery import (
     OwnedPublisherArticleDelete,
     OwnedPublisherDeleteCommand,
@@ -47,7 +50,6 @@ from volpred.ops.delivery import (
 )
 
 _EFFECT_FAMILY = "publisher.article.supabase.delete"
-_AUTHORITY_KEY = "publisher:article.supabase.delete"
 _WORKER_ID = "effect-worker:publisher-article-delete"
 _SYNTHETIC_PREFIX = "ops-core-delete-restore-smoke-"
 _CONFIRMATION = "DELETE-RESTORE-SYNTHETIC"
@@ -430,7 +432,7 @@ def _validate_delete_receipt(
             for character in receipt.evidence_sha256
         )
         or not receipt.primary_authority_ref.startswith(
-            f"primary-authority:{_AUTHORITY_KEY}:epoch-"
+            f"primary-authority:{FORMAL_PRIMARY_AUTHORITY_KEY}:epoch-"
         )
         or not receipt.recorded_at.strip()
     ):

@@ -366,8 +366,12 @@
 > outage rehearsal 的隔離 key 仍可 acquire／renew，但永遠不能取得 formal grant。
 > Forward migration `20260727080000` 另以 append-only ledger 保存
 > acquire／renew／expiry／demote／reject receipts，typed rejection 會先回滾失敗的
-> lease subtransaction，再於外層保存 token-redacted event；service-role read RPC
-> 是唯一 production read-back seam。這個 contract 尚待 production migration、
+> lease subtransaction，再於外層保存 token-redacted event。Audit read 會用 DB
+> clock 將無 takeover 的自然 expiry materialize 成唯一 expired＋demoted events，
+> 並清除已失效 current holder；backend outage 令 release 無法確認時，host 先以
+> fsync＋atomic replace 保存不含 fencing token 的 demotion intent，下次 acquire
+> 前經 service-role reconcile RPC 重播，租約仍有效則保留 pending、DB expiry 後
+> 才保存唯一 demoted receipt。這個 contract 尚待 production migration、
 > global-key live acquire/read-back，以及 Formal Commit／Effect Worker cutover 的
 > mutation-boundary canary，因此 Issue #18 仍為 `contained`。
 >

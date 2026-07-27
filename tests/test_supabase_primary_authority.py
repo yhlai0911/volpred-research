@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from io import BytesIO
 import json
+from io import BytesIO
+from pathlib import Path
 from urllib import error
 
 import pytest
@@ -13,7 +14,6 @@ from volpred.ops.authority import (
     WriteIntent,
 )
 from volpred.ops.authority.supabase import SupabaseAuthorityStore
-
 
 pytestmark = pytest.mark.usefixtures(
     "mocked_operations_core_rpc_transport"
@@ -60,11 +60,15 @@ def _lease(**overrides: object) -> PrimaryLease:
     )
 
 
-def _store() -> SupabaseAuthorityStore:
+def _store(
+    *,
+    demotion_intent_dir: Path | None = None,
+) -> SupabaseAuthorityStore:
     return SupabaseAuthorityStore(
         supabase_url="https://project.supabase.co/",
         service_role_key="secret-service-role",
         timeout_seconds=9,
+        demotion_intent_dir=demotion_intent_dir,
     )
 
 
@@ -324,6 +328,75 @@ def test_typed_rejection_receipt_fails_closed_with_auditable_reason(
             ),
             fencing_token="must-not-appear-in-receipt",
         )
+
+
+def test_release_outage_journals_and_replays_token_redacted_demotion(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    intent_dir = tmp_path / "demotion-intents"
+    store = _store(demotion_intent_dir=intent_dir)
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            error.URLError("backend unavailable")
+        ),
+    )
+
+    with pytest.raises(RuntimeError, match="RPC unavailable"):
+        store.release(_lease())
+
+    intent_paths = list(intent_dir.glob("*.json"))
+    assert len(intent_paths) == 1
+    raw_intent = intent_paths[0].read_text(encoding="utf-8")
+    assert "primary-secret" not in raw_intent
+    assert json.loads(raw_intent) == {
+        "schema_version": "primary-authority-demotion-intent.v1",
+        "authority_key": "operations-core-commits",
+        "holder_ref": "host:primary",
+        "epoch": 4,
+        "reason_code": "release_unconfirmed",
+        "recorded_at": json.loads(raw_intent)["recorded_at"],
+    }
+
+    calls: list[str] = []
+
+    def recovered_urlopen(call, *, timeout: float):
+        calls.append(call.full_url.rsplit("/", 1)[-1])
+        if calls[-1] == "volpred_reconcile_primary_authority_demotion":
+            return _Response(
+                {
+                    "schema_version": (
+                        "primary-authority-demotion-reconcile.v1"
+                    ),
+                    "status": "reconciled",
+                    "authority_key": "operations-core-commits",
+                    "holder_ref": "host:primary",
+                    "epoch": 4,
+                    "event_ref": "primary-authority-event:19",
+                    "occurred_at": "2026-07-24T10:06:00+00:00",
+                }
+            )
+        return _Response(_lease_payload())
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        recovered_urlopen,
+    )
+    store.acquire(
+        AuthorityRequest(
+            authority_key="operations-core-commits",
+            holder_ref="host:primary",
+            lease_seconds=300,
+        ),
+        fencing_token="primary-secret",
+    )
+
+    assert calls == [
+        "volpred_reconcile_primary_authority_demotion",
+        "volpred_acquire_primary_authority",
+    ]
+    assert list(intent_dir.glob("*.json")) == []
 
 
 def test_read_events_returns_typed_token_redacted_lifecycle_receipts(

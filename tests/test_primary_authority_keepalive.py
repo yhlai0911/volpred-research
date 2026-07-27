@@ -1,23 +1,21 @@
 from __future__ import annotations
 
+import time
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from threading import Event, Lock, Thread
-import time
 
 import pytest
 
 from volpred.ops.authority import (
     FORMAL_PRIMARY_AUTHORITY_KEY,
+    AuthorityInactive,
     AuthorityReceipt,
     AuthorityRequest,
-    PrimaryAuthority,
-    PrimaryLease,
-)
-from volpred.ops.authority import (
-    AuthorityInactive,
     HostAuthorityKeepalive,
     HostAuthoritySession,
+    PrimaryAuthority,
+    PrimaryLease,
     build_supabase_host_authority_keepalive,
 )
 from volpred.ops.authority.supabase import SupabaseAuthorityStore
@@ -33,6 +31,7 @@ class _AuthorityStore:
         self.block_renew = False
         self.renew_error: BaseException | None = None
         self.release_error: BaseException | None = None
+        self.release_attempts = 0
 
     def clock(self) -> datetime:
         return self.now
@@ -78,6 +77,7 @@ class _AuthorityStore:
         raise AssertionError("not used by keepalive tests")
 
     def release(self, lease: PrimaryLease) -> AuthorityReceipt:
+        self.release_attempts += 1
         if self.release_error is not None:
             raise self.release_error
         if lease != self.current:
@@ -287,7 +287,8 @@ def test_renew_failure_demotes_and_closes_local_enable_gate() -> None:
     status = keepalive.status()
     assert status.failure_type == "AuthorityInactive"
     assert status.worker_alive is False
-    assert store.current is not None
+    assert store.current is None
+    assert store.release_attempts == 1
     with pytest.raises(AuthorityInactive, match="not running"):
         keepalive.current_lease()
     with pytest.raises(
@@ -295,6 +296,23 @@ def test_renew_failure_demotes_and_closes_local_enable_gate() -> None:
         match="stopped after failure",
     ):
         keepalive.stop()
+
+
+def test_renew_outage_attempts_release_for_durable_demotion_recovery() -> None:
+    store = _AuthorityStore()
+    store.renew_error = RuntimeError("control plane unavailable")
+    store.release_error = RuntimeError("release response unavailable")
+    keepalive = _keepalive(store)
+
+    keepalive.start()
+    assert store.renewed.wait(1.0)
+    _wait_for_state(keepalive, "demoted")
+    _wait_for_worker_exit(keepalive)
+
+    assert store.release_attempts == 1
+    assert store.current is not None
+    with pytest.raises(AuthorityInactive, match="not running"):
+        keepalive.current_lease()
 
 
 def test_base_exception_in_renew_worker_still_demotes_locally() -> None:

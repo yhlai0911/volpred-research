@@ -25,8 +25,8 @@ from volpred.ops.authority.postgres import PostgresAuthorityStore
 from volpred.ops.delivery import (
     AcknowledgedEffect,
     AcknowledgementExpectation,
-    ChangeSetProposal,
     ChangeSetConflict,
+    ChangeSetProposal,
     ChangeSetView,
     CheckEvidence,
     ContentHash,
@@ -35,23 +35,30 @@ from volpred.ops.delivery import (
     FailedEffect,
     _proposal_sha256,
 )
+from volpred.ops.delivery._change_settlement import (
+    CommitSettlement,
+    CommitSettlementBlocked,
+    commit_settlement_sha256,
+)
 from volpred.ops.delivery._effect_worker import (
-    EffectWorkerCommand,
     EffectWorkerBlocked,
+    EffectWorkerCommand,
     _authority_request,
 )
 from volpred.ops.delivery._git_actuator import (
     CommitActuation,
     CommitActuationReceipt,
-    CommitAuthorityRequest,
     CommitActuatorBlocked,
-    _authority_request as commit_authority_request,
+    CommitAuthorityRequest,
     _authority_request_sha256,
 )
-from volpred.ops.delivery._change_settlement import (
-    CommitSettlement,
-    CommitSettlementBlocked,
-    commit_settlement_sha256,
+from volpred.ops.delivery._git_actuator import (
+    _authority_request as commit_authority_request,
+)
+from volpred.ops.delivery.owned_change import (
+    CommitOwnershipLost,
+    OwnedChangeCommand,
+    build_postgres_owned_change_delivery,
 )
 from volpred.ops.delivery.postgres import (
     EffectOutboxLease,
@@ -59,6 +66,7 @@ from volpred.ops.delivery.postgres import (
     PostgresEffectDelivery,
 )
 from volpred.ops.delivery.postgres_authority import PostgresEffectAuthority
+from volpred.ops.delivery.postgres_change_store import PostgresChangeSetStore
 from volpred.ops.delivery.postgres_commit_authority import (
     PostgresCommitAuthority,
 )
@@ -68,12 +76,6 @@ from volpred.ops.delivery.postgres_commit_ownership import (
 from volpred.ops.delivery.postgres_commit_settlement import (
     PostgresCommitSettlement,
 )
-from volpred.ops.delivery.postgres_change_store import PostgresChangeSetStore
-from volpred.ops.delivery.owned_change import (
-    CommitOwnershipLost,
-    OwnedChangeCommand,
-    build_postgres_owned_change_delivery,
-)
 from volpred.ops.delivery.postgres_payload import (
     EffectPayloadConflict,
     PostgresEffectPayloadStore,
@@ -81,9 +83,9 @@ from volpred.ops.delivery.postgres_payload import (
 from volpred.ops.work import (
     Started,
     WorkCoordinator,
+    WorkerOffer,
     WorkItemView,
     WorkLease,
-    WorkerOffer,
     WorkRequest,
 )
 from volpred.ops.work.postgres import PostgresCoordinationStore
@@ -1368,6 +1370,9 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   ),
                   public.volpred_release_primary_authority(
                     text, text, bigint, text
+                  ),
+                  public.volpred_reconcile_primary_authority_demotion(
+                    text, text, bigint
                   ),
                   public.volpred_read_notification_owner(),
                   public.volpred_read_owned_email_request(text),
