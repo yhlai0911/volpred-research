@@ -357,6 +357,12 @@
       "tracked_outputs": [],
       "reason": "Hourly Work Coordinator shadow replay only appends ignored runtime evidence receipts; it does not mutate either queue owner."
     },
+    "legacy_retirement_signal_materialize": {
+      "entrypoint": "scripts/materialize_legacy_business_fire_signal.py",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Operations Core refreshes one ignored typed signal from its immutable legacy-fire ledger; it never writes authored repository state or records a retirement observation."
+    },
     "liveness_reconcile": {
       "entrypoint": "scripts/liveness_reconcile.py",
       "policy": "phase_z_machine_state",

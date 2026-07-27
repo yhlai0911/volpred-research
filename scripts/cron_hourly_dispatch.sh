@@ -107,6 +107,15 @@ if [ "${HOURLY_PREFLIGHT_ONLY:-0}" != "1" ]; then
     echo "[git-writer-lock] BLOCKED: legacy dispatch requires canonical symbolic main" >&2
     exit 2
   fi
+
+  # Retirement tripwire: this is the first unavoidable business-entry boundary
+  # after lock recursion.  A mistakenly re-enabled legacy fire must leave a
+  # durable event before any pre-gate, dispatch, or external effect.  Failure is
+  # fail-closed: unobservable legacy execution is forbidden.
+  if ! "$UV_BIN" run python "$REPO_ROOT/scripts/record_legacy_business_fire.py"; then
+    echo "[legacy-retirement] BLOCKED: could not record business-fire event" >&2
+    exit 2
+  fi
 fi
 
 # Raise file-descriptor SOFT limit. LaunchAgent-spawned processes inherit

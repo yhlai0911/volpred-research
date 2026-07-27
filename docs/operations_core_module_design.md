@@ -2310,3 +2310,14 @@ source與lock用no-follow open；人工換ref、改hash、改count、回填、co
 watermark倒退或留下crash temp bundle都會讓整個
 audit exit 2，而不是縮短觀察窗。目前四個signal source尚未全部materialize，因此
 recorder會fail loud，觀察窗維持0；不可為了開始計時而手建JSON。
+
+`legacy_business_fire` 的正式source已先落地：rollback-only
+`cron_hourly_dispatch.sh` 在git-writer lock遞迴完成後、任何pregate／business
+execution之前，必須由 `record_legacy_business_fire.py` 寫入0600、hash-chain、
+file/dir fsync的immutable event；tripwire失敗會阻止舊executor繼續。
+`materialize_legacy_business_fire_signal.py` 再由Operations Core重驗完整事件鏈，
+並從最後一份已驗證observation推導gap-free interval與monotonic watermark。舊
+entrypoint不能自行產生「clean」signal；在其餘三個event producer完成前，也不啟動
+recorder或14日計時。canonical job `legacy_retirement_signal_materialize` 由
+Operations Core每5分鐘執行（短於source freshness 10分鐘上限），只刷新這一維
+ignored signal；host cron與piggy-back皆不得成為第二owner。

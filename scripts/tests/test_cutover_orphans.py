@@ -46,6 +46,10 @@ _RETIRED_BY_DESIGN: dict[str, str] = {
     # termination module directly, so carrying this compatibility adapter into
     # the supervisor would recreate a second termination owner.
     "termination_signal.py": "legacy-only CLI bridge; supervisor calls volpred.ops.termination directly",
+    # This tripwire exists specifically to catch an accidental resurrection of
+    # the retired wrapper. The active supervisor must never emit a
+    # legacy_business_fire event merely because normal Operations Core work ran.
+    "record_legacy_business_fire.py": "legacy-entry tripwire; active supervisor must not self-report as legacy",
 }
 
 
