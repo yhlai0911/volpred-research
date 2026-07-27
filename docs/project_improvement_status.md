@@ -2332,11 +2332,12 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   已由 policy oracle 與 snapshot evidence 綁定的 `coordinator_capability_contract`。
 - ✅ `9eb9845f1` 已讓新 claim 持久化兩小時 expiry，並把 main-thread lane 映射成
   Coordinator exclusive capability；claim／migration／replay 141 tests 綠。
-- 🟡 04:31 UTC 新 receipt 的 blocking dimension mismatch 已由 10 降為 3，
-  main-thread mismatch 4→0；僅剩修復前已在執行的 `assign_8262c921` 缺
-  readiness／claim ownership／durable lease expiry。該 claim 屬另一個 active
-  session，不人工釋放；待自然 complete/release 後，下一筆乾淨 receipt 才能啟動
-  七日 clean suffix。
+- ✅ 04:31 UTC receipt 的 blocking dimension mismatch 由 10 降為 3；僅剩修復前
+  已在執行的 `assign_8262c921` 缺 readiness／claim ownership／durable lease expiry。
+  該 claim 屬另一個 active session，未人工釋放；自然結束後，04:56:14 UTC 正式
+  receipt `scheduled_20260727T045614581709Z_def2f814b885` 已回讀 3,389／3,389
+  comparisons、0 reconciliation、0 blocking dimensions，252 個差異全為 evidence-bound
+  registered policy change，七日 continuous-clean suffix 已由該時刻啟動。
 - ✅ Closure audit 證明原 assessor 只在 owner SHA 改變時重啟窗口；同 owner 下即使
   legacy provenance／row evidence 已修好，舊 blocking receipt 仍會永久留在七日集合，
   使 ticket 在數學上永遠無法完成。
@@ -2347,6 +2348,8 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   Legacy corruption、incomplete row-count、歷史 gap 與歷史 clock violation均先紅後綠；
   近期 gap／clock violation與兩種 backdate attack仍會推翻較舊完整窗口。Assessment
   **37 passed**，相鄰 cutover／replay／observer suites 合計 **104 passed**。
-- 🟡 clean suffix 目前尚未開始，Work Coordinator owner 仍為 `legacy/1`，且未執行
-  stage／owner transfer／downstream acknowledgement／rollback rehearsal；Issue #9
-  維持 **`contained`**，不得提前標完成。
+- ✅ 修正 schedule-receipt test isolation 後，全專案回歸為 **5,721 passed、
+  1 skipped**；Matt Spec／Standards 雙軸 review 皆 PASS，沒有 P1／P2。
+- 🟡 clean suffix 已開始但尚未滿七日；Work Coordinator owner 仍為 `legacy/1`，且
+  未執行 stage／owner transfer／downstream acknowledgement／rollback rehearsal；
+  Issue #9 維持 **`contained`**，不得提前標完成。

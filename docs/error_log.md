@@ -3661,3 +3661,25 @@ blocker仍fail closed。
 transfer、下游 acknowledgement 或 rollback rehearsal。因此本 assessor 根因修復可在
 完成雙軸 review 後標 `root_cause_fixed_and_verified`；Issue #9 umbrella 仍只能標
 **`contained`**。
+
+### 2026-07-27 — diverse-task 排程測試讀到正式 schedule receipt，造成 clean checkout 假紅
+
+**證據化症狀**：全專案回歸唯一失敗為
+`tests/test_generate_diverse_tasks.py::test_gen_platform_ops_tasks_still_emits_when_log_missing_and_last_run_stale`；
+案例預期建立一張 platform-ops 任務，實際為 0。CI parity 回讀顯示測試使用了正式
+`storage/ops/schedule_receipts.json`，而不是 `tmp_path` 的隔離資料。
+
+**根因層級與底層修復**：production 的 receipt precedence 正確，問題在四個測試只
+monkeypatch marker／schedule／log 路徑，卻漏掉 module-level `ROOT`；`job_liveness`
+因此仍從正式 repo 解析 schedule receipt。四案統一將
+`generate_diverse_tasks.ROOT` 綁到 `tmp_path`，沒有更動 production generator、
+排程或正式 receipt 判定。修正落於 commit `2769db29d`。
+
+**回歸與制度化**：原始單案先 RED 後 GREEN；`test_generate_diverse_tasks.py`
+**28 passed** 且 CI parity clean，相鄰 generator／liveness／schedule／owner suites
+**71 passed**，Matt Spec／Standards 雙軸 review 皆 PASS、0 P1／P2。最後以
+`VOLPRED_NO_REMOTE_WRITE=1 VOLPRED_CI_PARITY=0` 跑全專案，結果
+**5,721 passed、1 skipped、13 warnings**（17m36s）。本 test-isolation incident
+完成五步 Gate，狀態為 **`root_cause_fixed_and_verified`**；Issue #9 的七日
+continuous-clean suffix 雖已於 04:56:14 UTC 啟動，但 owner transfer、下游
+acknowledgement 與 rollback rehearsal仍未完成，因此 umbrella 維持 **`contained`**。
