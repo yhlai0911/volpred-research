@@ -32,25 +32,21 @@ _EVENT_TYPES = frozenset(
 _EVENT_OPERATIONS = frozenset(
     {"acquire", "renew", "authorize", "release", "reconcile"}
 )
-_DEMOTION_INTENT_SCHEMA = "primary-authority-demotion-intent.v1"
+_DEMOTION_INTENT_SCHEMA = "primary-authority-demotion-intent.v2"
 _DEMOTION_RECONCILE_SCHEMA = "primary-authority-demotion-reconcile.v1"
 
 
 def _text(payload: Mapping[str, Any], field: str) -> str:
     value = payload.get(field)
     if not isinstance(value, str) or not value.strip():
-        raise ValueError(
-            f"Primary Authority RPC returned an invalid {field}"
-        )
+        raise ValueError(f"Primary Authority RPC returned an invalid {field}")
     return value.strip()
 
 
 def _positive_integer(payload: Mapping[str, Any], field: str) -> int:
     value = payload.get(field)
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-        raise ValueError(
-            f"Primary Authority RPC returned an invalid {field}"
-        )
+        raise ValueError(f"Primary Authority RPC returned an invalid {field}")
     return value
 
 
@@ -63,9 +59,7 @@ def _timestamp(payload: Mapping[str, Any], field: str) -> str:
             f"Primary Authority RPC returned an invalid {field}"
         ) from None
     if observed.tzinfo is None:
-        raise ValueError(
-            f"Primary Authority RPC returned an invalid {field}"
-        )
+        raise ValueError(f"Primary Authority RPC returned an invalid {field}")
     return observed.astimezone(UTC).isoformat()
 
 
@@ -106,16 +100,12 @@ class SupabaseAuthorityStore:
             storage_dir = repo_root / storage_dir
         return cls(
             supabase_url=values.get("SUPABASE_URL", ""),
-            service_role_key=values.get(
-                "SUPABASE_SERVICE_ROLE_KEY", ""
-            ),
+            service_role_key=values.get("SUPABASE_SERVICE_ROLE_KEY", ""),
             timeout_seconds=float(
                 values.get("VOLPRED_OPERATIONS_RPC_TIMEOUT_SEC", "45")
             ),
             demotion_intent_dir=(
-                storage_dir
-                / "ops"
-                / "primary_authority_demotion_intents"
+                storage_dir / "ops" / "primary_authority_demotion_intents"
             ),
         )
 
@@ -144,9 +134,7 @@ class SupabaseAuthorityStore:
             lease.authority_key != request.authority_key
             or lease.holder_ref != request.holder_ref
         ):
-            raise ValueError(
-                "Primary Authority acquire read-back drifted"
-            )
+            raise ValueError("Primary Authority acquire read-back drifted")
         return lease
 
     def renew(self, lease: PrimaryLease) -> PrimaryLease:
@@ -171,9 +159,7 @@ class SupabaseAuthorityStore:
             or renewed.epoch != lease.epoch
             or renewed.acquired_at != lease.acquired_at
         ):
-            raise ValueError(
-                "Primary Authority renew read-back drifted"
-            )
+            raise ValueError("Primary Authority renew read-back drifted")
         return renewed
 
     def authorize(self, intent: WriteIntent) -> FencingGrant:
@@ -189,24 +175,18 @@ class SupabaseAuthorityStore:
             },
         )
         if (
-            _text(payload, "request_sha256")
-            != intent.request_sha256
-            or _text(payload, "authority_key")
-            != intent.authority_key
+            _text(payload, "request_sha256") != intent.request_sha256
+            or _text(payload, "authority_key") != intent.authority_key
             or _positive_integer(payload, "epoch") != intent.epoch
             or _text(payload, "holder_ref") != intent.holder_ref
             or _text(payload, "resource_ref") != intent.resource_ref
         ):
-            raise ValueError(
-                "Primary Authority grant read-back drifted"
-            )
+            raise ValueError("Primary Authority grant read-back drifted")
         return FencingGrant(
             schema_version="primary-fencing-grant.v1",
             request_sha256=intent.request_sha256,
             resource_ref=intent.resource_ref,
-            primary_authority_ref=_text(
-                payload, "primary_authority_ref"
-            ),
+            primary_authority_ref=_text(payload, "primary_authority_ref"),
             granted_at=_timestamp(payload, "granted_at"),
         )
 
@@ -221,6 +201,20 @@ class SupabaseAuthorityStore:
                     "p_fencing_token": lease.fencing_token,
                 },
             )
+            if (
+                _text(payload, "authority_key") != lease.authority_key
+                or _text(payload, "holder_ref") != lease.holder_ref
+                or _positive_integer(payload, "epoch") != lease.epoch
+            ):
+                raise ValueError("Primary Authority release read-back drifted")
+            receipt = AuthorityReceipt(
+                schema_version="primary-authority-receipt.v1",
+                authority_key=lease.authority_key,
+                holder_ref=lease.holder_ref,
+                epoch=lease.epoch,
+                primary_authority_ref=_text(payload, "primary_authority_ref"),
+                released_at=_timestamp(payload, "released_at"),
+            )
         except Exception:
             try:
                 self._record_demotion_intent(lease)
@@ -230,24 +224,6 @@ class SupabaseAuthorityStore:
                     "intent could not be persisted"
                 ) from journal_error
             raise
-        if (
-            _text(payload, "authority_key") != lease.authority_key
-            or _text(payload, "holder_ref") != lease.holder_ref
-            or _positive_integer(payload, "epoch") != lease.epoch
-        ):
-            raise ValueError(
-                "Primary Authority release read-back drifted"
-            )
-        receipt = AuthorityReceipt(
-            schema_version="primary-authority-receipt.v1",
-            authority_key=lease.authority_key,
-            holder_ref=lease.holder_ref,
-            epoch=lease.epoch,
-            primary_authority_ref=_text(
-                payload, "primary_authority_ref"
-            ),
-            released_at=_timestamp(payload, "released_at"),
-        )
         self._clear_demotion_intent(lease)
         return receipt
 
@@ -262,6 +238,10 @@ class SupabaseAuthorityStore:
         reconciled = 0
         for path in sorted(directory.glob("*.json")):
             intent = self._read_demotion_intent(path)
+            if intent["backend_sha256"] != self._client.backend_sha256:
+                raise ValueError(
+                    "Primary Authority demotion intent backend drifted"
+                )
             payload = self._rpc(
                 "volpred_reconcile_primary_authority_demotion",
                 {
@@ -271,10 +251,8 @@ class SupabaseAuthorityStore:
                 },
             )
             if (
-                payload.get("schema_version")
-                != _DEMOTION_RECONCILE_SCHEMA
-                or _text(payload, "authority_key")
-                != intent["authority_key"]
+                payload.get("schema_version") != _DEMOTION_RECONCILE_SCHEMA
+                or _text(payload, "authority_key") != intent["authority_key"]
                 or _text(payload, "holder_ref") != intent["holder_ref"]
                 or _positive_integer(payload, "epoch") != intent["epoch"]
             ):
@@ -286,8 +264,7 @@ class SupabaseAuthorityStore:
                 continue
             if status != "reconciled":
                 raise ValueError(
-                    "Primary Authority demotion reconcile returned "
-                    "an invalid status"
+                    "Primary Authority demotion reconcile returned an invalid status"
                 )
             _text(payload, "event_ref")
             _timestamp(payload, "occurred_at")
@@ -352,10 +329,14 @@ class SupabaseAuthorityStore:
                 "Primary Authority demotion journal is not configured"
             )
         directory = self._demotion_intent_dir
+        directory_existed = directory.exists()
         directory.mkdir(parents=True, exist_ok=True)
+        if not directory_existed:
+            _fsync_directory(directory.parent)
         path = directory / self._demotion_intent_name(lease)
         payload = {
             "schema_version": _DEMOTION_INTENT_SCHEMA,
+            "backend_sha256": self._client.backend_sha256,
             "authority_key": lease.authority_key,
             "holder_ref": lease.holder_ref,
             "epoch": lease.epoch,
@@ -385,21 +366,18 @@ class SupabaseAuthorityStore:
     def _clear_demotion_intent(self, lease: PrimaryLease) -> None:
         if self._demotion_intent_dir is None:
             return
-        path = (
-            self._demotion_intent_dir
-            / self._demotion_intent_name(lease)
-        )
+        path = self._demotion_intent_dir / self._demotion_intent_name(lease)
         try:
             path.unlink()
         except FileNotFoundError:  # silent-ok: no failed-release intent
             return
         _fsync_directory(self._demotion_intent_dir)
 
-    @staticmethod
-    def _demotion_intent_name(lease: PrimaryLease) -> str:
+    def _demotion_intent_name(self, lease: PrimaryLease) -> str:
         identity = json.dumps(
             {
                 "authority_key": lease.authority_key,
+                "backend_sha256": self._client.backend_sha256,
                 "holder_ref": lease.holder_ref,
                 "epoch": lease.epoch,
             },
@@ -424,6 +402,13 @@ class SupabaseAuthorityStore:
             raise ValueError(
                 "Primary Authority demotion intent schema is invalid"
             )
+        backend_sha256 = _text(payload, "backend_sha256")
+        if len(backend_sha256) != 64 or any(
+            character not in "0123456789abcdef" for character in backend_sha256
+        ):
+            raise ValueError(
+                "Primary Authority demotion intent backend is invalid"
+            )
         authority_key = _text(payload, "authority_key")
         holder_ref = _text(payload, "holder_ref")
         epoch = _positive_integer(payload, "epoch")
@@ -433,6 +418,7 @@ class SupabaseAuthorityStore:
             )
         _timestamp(payload, "recorded_at")
         return {
+            "backend_sha256": backend_sha256,
             "authority_key": authority_key,
             "holder_ref": holder_ref,
             "epoch": epoch,
@@ -462,8 +448,7 @@ class SupabaseAuthorityStore:
                 != "primary-authority-rejection.v1"
             ):
                 raise ValueError(
-                    "Primary Authority RPC returned an invalid "
-                    "rejection schema"
+                    "Primary Authority RPC returned an invalid rejection schema"
                 )
             reason = _text(payload, "reason")
             _text(payload, "operation")
@@ -473,8 +458,7 @@ class SupabaseAuthorityStore:
             _timestamp(payload, "occurred_at")
             if not reason.startswith("Primary Authority"):
                 raise ValueError(
-                    "Primary Authority RPC returned an invalid "
-                    "rejection reason"
+                    "Primary Authority RPC returned an invalid rejection reason"
                 )
             raise ValueError(reason)
         return payload
@@ -521,15 +505,16 @@ class SupabaseAuthorityStore:
             )
         event_type = _text(payload, "event_type")
         operation = _text(payload, "operation")
-        if event_type not in _EVENT_TYPES or operation not in _EVENT_OPERATIONS:
+        if (
+            event_type not in _EVENT_TYPES
+            or operation not in _EVENT_OPERATIONS
+        ):
             raise ValueError(
                 "Primary Authority event RPC returned an invalid lifecycle"
             )
         epoch = payload.get("epoch")
         if epoch is not None and (
-            isinstance(epoch, bool)
-            or not isinstance(epoch, int)
-            or epoch <= 0
+            isinstance(epoch, bool) or not isinstance(epoch, int) or epoch <= 0
         ):
             raise ValueError(
                 "Primary Authority event RPC returned an invalid epoch"
@@ -551,8 +536,7 @@ class SupabaseAuthorityStore:
                 or not reason.startswith("Primary Authority")
             ):
                 raise ValueError(
-                    "Primary Authority event RPC returned an invalid "
-                    "rejection"
+                    "Primary Authority event RPC returned an invalid rejection"
                 )
         elif reason_code is not None or reason is not None:
             raise ValueError(
@@ -570,9 +554,7 @@ class SupabaseAuthorityStore:
             epoch=epoch,
             holder_ref=holder_ref.strip() if holder_ref is not None else None,
             reason_code=(
-                reason_code.strip()
-                if isinstance(reason_code, str)
-                else None
+                reason_code.strip() if isinstance(reason_code, str) else None
             ),
             reason=reason if isinstance(reason, str) else None,
             lease_expires_at=lease_expires_at,

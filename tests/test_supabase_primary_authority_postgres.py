@@ -81,9 +81,7 @@ def test_service_role_lifecycle_is_db_clock_fenced_and_token_redacted(
             ),
         ).fetchone()[0]
         assert grant["request_sha256"] == "a" * 64
-        assert grant["resource_ref"] == (
-            "git.commit:work-primary-rpc-test"
-        )
+        assert grant["resource_ref"] == ("git.commit:work-primary-rpc-test")
         assert grant["primary_authority_ref"] == (
             "primary-authority:operations-core-primary:epoch-1"
         )
@@ -144,18 +142,12 @@ def test_public_rpc_acl_is_service_role_only(
     primary_authority_rpc_dsn: str,
 ) -> None:
     signatures = (
-        "public.volpred_acquire_primary_authority"
-        "(text,text,integer,text)",
-        "public.volpred_renew_primary_authority"
-        "(text,text,bigint,integer,text)",
-        "public.volpred_authorize_primary_write"
-        "(text,text,bigint,text,text,text)",
-        "public.volpred_release_primary_authority"
-        "(text,text,bigint,text)",
-        "public.volpred_reconcile_primary_authority_demotion"
-        "(text,text,bigint)",
-        "public.volpred_read_primary_authority_events"
-        "(text,integer)",
+        "public.volpred_acquire_primary_authority(text,text,integer,text)",
+        "public.volpred_renew_primary_authority(text,text,bigint,integer,text)",
+        "public.volpred_authorize_primary_write(text,text,bigint,text,text,text)",
+        "public.volpred_release_primary_authority(text,text,bigint,text)",
+        "public.volpred_reconcile_primary_authority_demotion(text,text,bigint)",
+        "public.volpred_read_primary_authority_events(text,integer)",
     )
     with psycopg.connect(
         primary_authority_rpc_dsn,
@@ -300,15 +292,11 @@ def test_lifecycle_events_are_append_only_and_rejections_return_receipts(
         ).fetchone()[0]
 
         assert renewed["lease_expires_at"] > acquired["lease_expires_at"]
-        assert rejected["schema_version"] == (
-            "primary-authority-rejection.v1"
-        )
+        assert rejected["schema_version"] == ("primary-authority-rejection.v1")
         assert rejected["status"] == "rejected"
         assert rejected["operation"] == "acquire"
         assert rejected["reason_code"] == "already_held"
-        assert rejected["event_ref"].startswith(
-            "primary-authority-event:"
-        )
+        assert rejected["event_ref"].startswith("primary-authority-event:")
         assert "primary-secret" not in str(rejected)
         assert "standby-secret" not in str(rejected)
 
@@ -426,6 +414,66 @@ def test_read_materializes_natural_expiry_without_takeover(
     assert current == (None, None)
 
 
+def test_release_after_expiry_records_expired_before_demotion(
+    primary_authority_rpc_dsn: str,
+) -> None:
+    authority_key = "primary-expired-release-test"
+    holder_ref = "host:expired-release"
+    with psycopg.connect(
+        primary_authority_rpc_dsn,
+        autocommit=True,
+    ) as connection:
+        connection.execute("SET ROLE service_role")
+        lease = connection.execute(
+            """
+            SELECT public.volpred_acquire_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (authority_key, holder_ref, 300, "expiry-secret"),
+        ).fetchone()[0]
+        connection.execute("RESET ROLE")
+        connection.execute(
+            """
+            UPDATE volpred_ops.primary_authority_leases
+            SET acquired_at = clock_timestamp() - interval '10 seconds',
+                lease_expires_at =
+                  clock_timestamp() - interval '1 second'
+            WHERE authority_key = %s
+            """,
+            (authority_key,),
+        )
+        connection.execute("SET ROLE service_role")
+        released = connection.execute(
+            """
+            SELECT public.volpred_release_primary_authority(
+              %s, %s, %s, %s
+            )
+            """,
+            (
+                authority_key,
+                holder_ref,
+                lease["epoch"],
+                "expiry-secret",
+            ),
+        ).fetchone()[0]
+        events = connection.execute(
+            """
+            SELECT public.volpred_read_primary_authority_events(%s, 20)
+            """,
+            (authority_key,),
+        ).fetchone()[0]
+
+    assert released["epoch"] == lease["epoch"]
+    assert [event["event_type"] for event in events] == [
+        "acquired",
+        "expired",
+        "demoted",
+    ]
+    assert events[1]["operation"] == "release"
+    assert events[2]["operation"] == "release"
+
+
 def test_unconfirmed_demotion_reconciles_after_backend_recovery(
     primary_authority_rpc_dsn: str,
 ) -> None:
@@ -496,9 +544,7 @@ def test_unconfirmed_demotion_reconciles_after_backend_recovery(
         "expired",
         "demoted",
     ]
-    assert sum(
-        event["event_type"] == "demoted" for event in events
-    ) == 1
+    assert sum(event["event_type"] == "demoted" for event in events) == 1
 
 
 def test_formal_grant_rejects_capability_scoped_primary_lease(

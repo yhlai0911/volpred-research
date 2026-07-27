@@ -193,6 +193,21 @@ BEGIN
         NEW.lease_expires_at, event_at
       );
     ELSIF OLD.holder_ref IS NOT NULL AND NEW.holder_ref IS NULL THEN
+      IF OLD.lease_expires_at IS NOT NULL
+          AND OLD.lease_expires_at <= event_at THEN
+        INSERT INTO volpred_ops.primary_authority_events (
+          authority_key, event_type, operation, epoch, holder_ref,
+          lease_expires_at, occurred_at
+        )
+        VALUES (
+          OLD.authority_key, 'expired', 'release', OLD.epoch, OLD.holder_ref,
+          OLD.lease_expires_at, event_at
+        )
+        ON CONFLICT (authority_key, epoch, event_type)
+          WHERE event_type IN ('expired', 'demoted')
+        DO NOTHING;
+      END IF;
+
       INSERT INTO volpred_ops.primary_authority_events (
         authority_key, event_type, operation, epoch, holder_ref,
         lease_expires_at, occurred_at
