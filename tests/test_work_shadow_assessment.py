@@ -229,6 +229,81 @@ def test_incomplete_clean_suffix_exposes_next_eligible_time(
     ).isoformat()
 
 
+def test_stale_clean_suffix_has_no_claimed_next_eligible_time(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    for index in range(2):
+        _write_receipt(
+            observations,
+            index=index,
+            observed_at=START + timedelta(hours=index),
+        )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(hours=28),
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert "observation_stale" in report.reason_codes
+    assert report.clean_observation_count == 2
+    assert report.next_eligible_at is None
+
+
+def test_future_clean_suffix_has_no_claimed_next_eligible_time(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    _write_receipt(
+        observations,
+        index=0,
+        observed_at=START + timedelta(hours=1),
+    )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START,
+        queue_owner=_owner_evidence(),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert "observation_in_future" in report.reason_codes
+    assert report.clean_observation_count == 1
+    assert report.next_eligible_at is None
+
+
+def test_wrong_owner_mode_has_no_claimed_next_eligible_time(
+    tmp_path: Path,
+) -> None:
+    observations = tmp_path / "observations"
+    _write_receipt(
+        observations,
+        index=0,
+        observed_at=START,
+        queue_owner_mode="direct_execution",
+        queue_owner_gate_enabled=True,
+    )
+
+    report = assess_shadow_observation_directory(
+        observations,
+        assessed_at=START + timedelta(hours=1),
+        queue_owner=_owner_evidence(
+            mode="direct_execution",
+            gate_enabled=True,
+        ),
+        required_window=timedelta(days=7),
+        max_gap=timedelta(hours=26),
+    )
+
+    assert "queue_owner_mode_not_queued_execution" in report.reason_codes
+    assert report.clean_observation_count == 1
+    assert report.next_eligible_at is None
+
+
 def test_seven_clean_days_after_an_incomplete_receipt_restart_the_soak(
     tmp_path: Path,
 ) -> None:

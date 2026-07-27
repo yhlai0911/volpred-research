@@ -309,9 +309,16 @@ def assess_shadow_observation_directory(
         if clean_recorded_at
         else None
     )
+    clean_suffix_can_mature = (
+        bool(clean_recorded_at)
+        and clean_recorded_at[-1] <= context.assessed_at
+        and context.assessed_at - clean_recorded_at[-1] <= max_gap
+        and queue_owner.mode.mode == "queued_execution"
+        and queue_owner.mode.enabled is False
+    )
     next_eligible_at = (
         clean_recorded_at[0] + required_window
-        if clean_recorded_at
+        if clean_suffix_can_mature
         and clean_window is not None
         and clean_window < required_window
         else None
