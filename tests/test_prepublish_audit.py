@@ -29,6 +29,7 @@ K1413_RESULTS = REPO_ROOT / "experiments" / "k1413" / "k1413_results.json"
 def test_llm_audit_provider_policy_denial_precedes_agy_popen(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setattr(prepublish_audit.shutil, "which", lambda _name: "/fake/agy")
     monkeypatch.setattr(
         prepublish_audit,
         "authorize_provider_spawn",

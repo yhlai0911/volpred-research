@@ -29,6 +29,7 @@ from volpred.ops.local_control_plane import create_task, get_task
 
 
 def test_agentic_runner_denies_before_provider_io(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(execution_brief.shutil, "which", lambda _name: "/fake/claude")
     monkeypatch.setattr(
         execution_brief,
         "authorize_provider_spawn",

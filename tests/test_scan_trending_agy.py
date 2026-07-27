@@ -4,6 +4,7 @@ import importlib.util
 import json
 import subprocess
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -39,6 +40,18 @@ def no_real_agy(monkeypatch):
         raise AssertionError("scan_trending_agy tests must not spawn the real agy CLI")
 
     monkeypatch.setattr(MODULE.subprocess, "Popen", forbidden)
+    monkeypatch.setattr(
+        MODULE,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "agy-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        ),
+    )
+    monkeypatch.setattr(MODULE, "verify_spawn_receipt", lambda _receipt: None)
 
 
 def _stub_popen(monkeypatch, proc: FakeProc) -> None:

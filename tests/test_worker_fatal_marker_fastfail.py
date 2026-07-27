@@ -23,6 +23,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -164,6 +165,19 @@ def test_run_worker_releases_the_claim_and_sends_no_hang_alert(
     )
     monkeypatch.setattr(worker, "FATAL_STALL_S", 1.0)
     monkeypatch.setattr(worker, "FATAL_POLL_S", 0.1)
+    monkeypatch.setattr(
+        worker,
+        "authorize_provider_spawn",
+        lambda **kwargs: SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path=str(worker.PROJECT_ROOT / ".claude" / "settings.json"),
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "claude-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        ),
+    )
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
 
     started = time.time()
     result = worker.run_worker(
