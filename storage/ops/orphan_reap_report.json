@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T11:00:07.504192+00:00",
+  "generated_at": "2026-07-27T12:00:26.332035+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,15 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 141.6
+      "age_hours": 142.6
+    },
+    {
+      "path": "storage/drafts/k1600_general_draft.md",
+      "title": "係數對了，預測卻沒進步：一個測量誤差修正的誠實踩空",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 3108,
+      "age_hours": 2.7
     }
   ],
   "held": [],
@@ -17,12 +25,17 @@
     "grace": 2,
     "inflight": 0
   },
-  "orphan_count": 1,
+  "orphan_count": 2,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
       "adopted": false,
       "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
+    },
+    {
+      "path": "storage/drafts/k1600_general_draft.md",
+      "adopted": false,
+      "reason": "gate_rejected (rc=7):   Refusing to publish. Rewrite the draft in general-reader language (remove K-id / statistical jargon from title and body) or intentionally publish it as research."
     }
   ],
   "applied": true,
@@ -31,14 +44,41 @@
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/article_images/k1600_dm_and_beta1q.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/article_images/k1600_qlike_loss_ratio.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/k1600_general_draft.md",
+          "kind": "md",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 6,
+        "grace": 5,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/article_images/k1600_dm_and_beta1q.png",
+            "storage/drafts/article_images/k1600_qlike_loss_ratio.png",
+            "storage/drafts/k1600_general_draft.md"
+          ],
+          "committed": true,
+          "detail": "[main 750e16053] chore(draft-reap): collect orphaned draft artifacts (3 files)\n 3 files changed, 111 insertions(+)\n create mode 100644 storage/drafts/"
+        }
+      ]
     },
     "paper": {
       "collectable": [],
@@ -169,6 +209,16 @@
           "reason": "modified"
         },
         {
+          "path": "experiments/k892/k892_verify_tw_gamma.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k892/k892_verify_tw_gamma_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
+        {
           "path": "experiments/paper2_table1_summary_stats_provenance/README.md",
           "kind": "md",
           "reason": "modified"
@@ -184,156 +234,6 @@
           "reason": "modified"
         },
         {
-          "path": "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/README.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/REMEDIATION_v2.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/codex_review_v1.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/CPI_first_release.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/DGS10_daily.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/DTB3_daily.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/IP_first_release.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/NFP_first_release.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/UNRATE_first_release.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/VIX_daily.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/data/spy_daily_rv.csv",
-          "kind": "csv",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/fig1_rolling_coverage.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/fig2_ssvs_pip.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/fig3_interval_vs_realized.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/fig4_pit_calibration.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_data.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_gevreg_midas_ssvs.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
-          "kind": "json",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_models.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_quickmode_results.json",
-          "kind": "json",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_report_tables.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_results_quickmode_20260719T2020.json",
-          "kind": "json",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/k1730_scoring.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/reproduce_spec.json",
-          "kind": "json",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/review_verdict.json",
-          "kind": "json",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/run_production.log",
-          "kind": "log",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/run_production_v2.log",
-          "kind": "log",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/test_k1730_recovery.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/k1730/verify_readme_alignment.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
           "path": "experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md",
           "kind": "md",
           "reason": "untracked"
@@ -341,7 +241,7 @@
       ],
       "held": [],
       "skipped": {
-        "grace": 4,
+        "grace": 2,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -371,27 +271,15 @@
             "experiments/k1592/k1592.py",
             "experiments/k1705/README.md",
             "experiments/k1705/k1705_results.json",
+            "experiments/k892/k892_verify_tw_gamma.py",
+            "experiments/k892/k892_verify_tw_gamma_results.json",
             "experiments/paper2_table1_summary_stats_provenance/README.md",
             "experiments/paper2_table1_summary_stats_provenance/reproduce_table1_summary.py",
             "experiments/paper2_table1_summary_stats_provenance/results.json",
-            "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md",
-            "experiments/k1730/README.md",
-            "experiments/k1730/REMEDIATION_v2.md",
-            "experiments/k1730/codex_review_v1.md",
-            "experiments/k1730/data/CPI_first_release.csv",
-            "experiments/k1730/data/DGS10_daily.csv",
-            "experiments/k1730/data/DTB3_daily.csv",
-            "experiments/k1730/data/IP_first_release.csv",
-            "experiments/k1730/data/NFP_first_release.csv",
-            "experiments/k1730/data/UNRATE_first_release.csv",
-            "experiments/k1730/data/VIX_daily.csv",
-            "experiments/k1730/data/spy_daily_rv.csv",
-            "experiments/k1730/fig1_rolling_coverage.png",
-            "experiments/k1730/fig2_ssvs_pip.png",
-            "experiments/k1730/fig3_interval_vs_realized.png"
+            "experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md"
           ],
           "committed": false,
-          "detail": "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vr"
+          "detail": "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   [silent-fallback-audit] findings=4 baseline=/var/folders/f1/g41vr"
         }
       ]
     }

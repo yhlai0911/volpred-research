@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1812_bab_vol-f55e3c",
+  "title": "agent: brief_k1812_bab_vol",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1812_bab_vol-f55e3c.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dc4437b8-k1812",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dc4437b8-k1812/experiments/k1812/k1812_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1812_bab_vol-f55e3c.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T12:19:27Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1812_bab_vol-f55e3c.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1812_bab_vol-f55e3c.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dc4437b8-k1812/experiments/k1812/k1812_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1812_bab_vol-f55e3c.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-dc4437b8-k1812",
+  "claude_followup": {
+    "brief": "收 K1812/K1726 BAB×vol 實驗：(1) 依 agent-result-verification 核對 k1812_results.json 數字（Sharpe/mean/t/p 與 README 一致，無 lookahead）；(2) 跑 experiment_gates.py run + certify 產 review_verdict.json（Codex primary，quota 掛則 code-reviewer subagent）；(3) 依 worktree-merge-verification 合併 wt/dispatch-slot-2-dc4437b8-k1812；(4) CONDITIONAL_PASS 以上才寫 knowledge（附 reviewer/provenance）；(5) task_pool_claim complete --id K1726。注意 survivorship caveat 必須帶進結論。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1726",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T12:19:27Z",
+    "linked_at": "2026-07-27T12:19:27Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1812_bab_vol.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1812_bab_vol-f55e3c.md"
+}

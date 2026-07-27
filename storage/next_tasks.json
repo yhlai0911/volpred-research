@@ -34893,7 +34893,7 @@
     "title": "K1725: 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spi",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 581). Original: 現貨 BTC ETF 上市對加密 vol「時段結構」的改變 — BTC-USD 小時資料拆美股時段/非時段/週末 RV，斷點檢定 2024-01 IBIT 前後（ETF-ization 拉向傳統市場時鐘；與既有 vol-of-vol spillover 不同 — 時間分配結構非外溢）（來源：J.Futures Markets 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1725.py with signal.shift(1) + seed=42, (c) K1725_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34902,14 +34902,38 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-17T00:00:01Z"
+    "created_at": "2026-07-17T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T12:12:09.476992+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a630a051952c470ab0a719c479654d82"
+      },
+      {
+        "ts": "2026-07-27T12:12:18.420313+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a630a051952c470ab0a719c479654d82"
+      },
+      {
+        "ts": "2026-07-27T12:14:12.083311+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1725-84d8fd",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1725-84d8fd",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1725-84d8fd; awaiting PHASE A collection"
   },
   {
     "id": "K1726",
     "title": "K1726: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 586). Original: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1726.py with signal.shift(1) + seed=42, (c) K1726_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34918,7 +34942,31 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-17T00:00:01Z"
+    "created_at": "2026-07-17T00:00:01Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T12:15:12.017676+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-dc4437b8e2254293a2f71a2e4dd6fcc2"
+      },
+      {
+        "ts": "2026-07-27T12:15:29.586102+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-dc4437b8e2254293a2f71a2e4dd6fcc2"
+      },
+      {
+        "ts": "2026-07-27T12:19:27.936341+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1812_bab_vol-f55e3c",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1812_bab_vol-f55e3c",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1812_bab_vol-f55e3c; awaiting PHASE A collection"
   },
   {
     "id": "K1727",
@@ -47419,15 +47467,11 @@
     "description": "Implement the next unblocked T40 slice from docs/refactor_plan_ops_master_2026_07.md §7 and GitHub #46 without re-planning. Define silent loss at unavoidable canonical acceptance/finalization boundaries, append durable gap-free events for every accepted unit that can disappear without a terminal acknowledgement, materialize the fixed silent_loss typed interval signal under Operations Core ownership, fail closed on unreadable/gapped evidence, add TDD regressions for crash/race/replay/late visibility, obtain Matt Spec+Standards PASS, deploy and live-read back a natural scheduled fire. Do not start the 14-day recorder or retire rollback artifacts until all four signal producers and owner census pass.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T11:28:26.545584+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T11:28:30.647180+00:00",
-    "claim_expires_at": "2026-07-27T13:28:30.647180+00:00",
-    "claim_session_id": "7007a525e479",
     "status_history": [
       {
         "ts": "2026-07-27T11:28:30.647199+00:00",
@@ -47440,9 +47484,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:54:31.603596+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T11:28:34.184162+00:00"
+    "started_at": "2026-07-27T11:28:34.184162+00:00",
+    "completed_at": "2026-07-27T11:54:31.603570+00:00",
+    "result": "Added durable FORCE-RLS silent-loss ledger + service-role reconcile RPC, version-exact bidirectional invariants, and Operations Core */5 materializer. 109 scoped tests passed; Matt Spec/Standards reviews PASS (0 P1/P2); production migration, ACL/RLS read-back, natural fire a18842f93993dcde184ae363, signal count=0/high=0, and advisors all verified.",
+    "issue_disposition": "contained"
   },
   {
     "id": "issue46_orphan_work_signal",
@@ -47450,15 +47503,11 @@
     "description": "Continue existing T40 without replanning: instrument the enforced dispatch workspace orphan-sweep boundary after durable allocator ownership proves a registered workspace but the job is absent from current_jobs, phase_z_pending, and completions. Before any orphan finalization, append a tamper-evident durable orphan_work event; fail closed if evidence cannot be recorded; derive typed interval signal only from the verified ledger. TDD must cover protected/remediation/non-owned exclusions, append failure, truncation/tamper, restart sweep, and no double count. Do not start the observation recorder.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_by": "codex-vscode",
     "issue_ref": "#46",
     "created_at": "2026-07-27T11:29:01.799026+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T11:29:07.776715+00:00",
-    "claim_expires_at": "2026-07-27T13:29:07.776715+00:00",
-    "claim_session_id": "14c673dfad23",
     "status_history": [
       {
         "ts": "2026-07-27T11:29:07.776729+00:00",
@@ -47471,9 +47520,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T12:13:00.728274+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T11:29:10.875189+00:00"
+    "started_at": "2026-07-27T11:29:10.875189+00:00",
+    "completed_at": "2026-07-27T12:13:00.728248+00:00",
+    "result": "Durable orphan evidence now fails closed before finalize, recovers partial event/head crashes, and validates monotonic unresolved-to-actual history. 24 event + 11 workspace tests pass; Matt Spec/Standards PASS; Operations Core natural fire 1302e107 exit 0 with mode-600 count=0 signal.",
+    "issue_disposition": "contained"
   },
   {
     "id": "issue46_orphan_work_signal_schedule",
@@ -47481,7 +47539,7 @@
     "description": "Schedule-governance child of issue46_orphan_work_signal. Extend the existing Operations Core-owned legacy_retirement_signal_materialize wrapper to refresh the verified orphan_work typed source after legacy_business_fire and duplicate_effect. Keep */5 cadence, host cron disabled, piggy-back disabled, fail non-zero if any source fails, sync the canonical wrapper, and do not start the 14-day observation recorder.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "source": "user",
     "issue_ref": "#46",
@@ -47493,10 +47551,6 @@
       "source": "orphan_work"
     },
     "created_at": "2026-07-27T11:36:50.185367+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T11:37:38.596464+00:00",
-    "claim_expires_at": "2026-07-27T13:37:38.596464+00:00",
-    "claim_session_id": "ad21aae788f9",
     "status_history": [
       {
         "ts": "2026-07-27T11:37:38.596477+00:00",
@@ -47509,9 +47563,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T12:13:01.054920+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T11:37:42.367341+00:00"
+    "started_at": "2026-07-27T11:37:42.367341+00:00",
+    "completed_at": "2026-07-27T12:13:01.054896+00:00",
+    "result": "Operations Core */5 owner and fail-fast wrapper are live. Canonical/installed/manifest SHA c9a9c6d9 match; 20:10 natural fire succeeded and orphan pending intent is absent.",
+    "issue_disposition": "contained"
   },
   {
     "id": "assign_9d3f2d42",
@@ -47519,7 +47582,7 @@
     "description": "## 發生什麼\n56 個未提交檔案不是任何一班 fire 產出的，最長已連續 30 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1319/README.md — 9 班\n- experiments/k1319/k1319.py — 9 班\n- experiments/k1319/k1319_results.json — 23 班\n- experiments/k1399/k1399_qlike_comparison.png — 23 班\n- experiments/k1399/k1399_vix_decomp_results.json — 23 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 23 班\n- experiments/k1591/k1591_results.json — 23 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 23 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 23 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 23 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 23 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 23 班\n- experiments/k1592/fig3_origin_gamma_t.png — 23 班\n- experiments/k1705/k1705_results.json — 23 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 12 班\n- experiments/k1730/README.md — 12 班\n- experiments/k1730/REMEDIATION_v2.md — 12 班\n- experiments/k1730/codex_review_v1.md — 12 班\n- experiments/k1730/data/CPI_first_release.csv — 12 班\n- experiments/k1730/data/DGS10_daily.csv — 12 班\n- experiments/k1730/data/DTB3_daily.csv — 12 班\n- experiments/k1730/data/IP_first_release.csv — 12 班\n- experiments/k1730/data/NFP_first_release.csv — 12 班\n- experiments/k1730/data/UNRATE_first_release.csv — 12 班\n- experiments/k1730/data/VIX_daily.csv — 12 班\n- experiments/k1730/data/spy_daily_rv.csv — 12 班\n- experiments/k1730/fig1_rolling_coverage.png — 12 班\n- experiments/k1730/fig2_ssvs_pip.png — 12 班\n- experiments/k1730/fig3_interval_vs_realized.png — 12 班\n- experiments/k1730/fig4_pit_calibration.png — 12 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T114740648423Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-27T11:47:44.666026+00:00",
     "payload": {
@@ -47646,7 +47709,861 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-27T11:47:44.654005+00:00",
-      "last_seen_at": "2026-07-27T11:47:44.654005+00:00"
+      "last_seen_at": "2026-07-27T11:47:44.654005+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T11:58:58.422841+00:00",
+      "deferred": [
+        "experiments/k1319/README.md: 已保存，且 4.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1319/k1319.py: 已保存，且 4.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1319/k1319_results.json: 已保存，且 4.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1399/k1399_qlike_comparison.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1399/k1399_vix_decomp_results.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/k1591_results.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_daily_panel.csv: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_regime_summary.csv: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig2_gammarule_gjr_share.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig3_origin_gamma_t.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1705/k1705_results.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k892/k892_verify_tw_gamma.py: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k892/k892_verify_tw_gamma_results.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/paper2_table1_summary_stats_provenance/results.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "paper/leverage-direction/main_v_ijf.pdf: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/article_images/k1436_funding_distribution.png: 已保存，且 1.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/article_images/k1436_funding_qlike.png: 已保存，且 1.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/mile_3c83e665/runs/lazypack-mile_3c83e665/plan.json: 已保存，且 0.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 14.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/paper_pipeline_status.json: 已保存，且 3.9 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T11:56:30.953935+00:00",
+    "claim_expires_at": "2026-07-27T13:56:30.953935+00:00",
+    "claim_session_id": "739983e3874f",
+    "status_history": [
+      {
+        "ts": "2026-07-27T11:56:30.953949+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T11:56:31.217743+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T11:56:31.217729+00:00",
+    "completed_at": "2026-07-27T12:03:29.407286+00:00",
+    "result": "關閉條件機械滿足：56 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "experiments/k1319/README.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1319/k1319.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "dm_audit.json",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 dm_audit.json 引用"
+          ]
+        },
+        "experiments/k1319/k1319_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1399/k1399_qlike_comparison.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1399/k1399_vix_decomp_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1591/k1591_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1591/tables/k1591_daily_panel.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1591/tables/k1591_regime_summary.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1592/fig2_gammarule_gjr_share.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1592/fig3_origin_gamma_t.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1705/k1705_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/README.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/REMEDIATION_v2.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/codex_review_v1.md": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/CPI_first_release.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/DGS10_daily.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/DTB3_daily.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/IP_first_release.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/NFP_first_release.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/UNRATE_first_release.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/VIX_daily.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/data/spy_daily_rv.csv": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/fig1_rolling_coverage.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/fig2_ssvs_pip.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/fig3_interval_vs_realized.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/fig4_pit_calibration.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_data.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "tests/test_compute_queue.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 tests/test_compute_queue.py 引用"
+          ]
+        },
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_models.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_quickmode_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_report_tables.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/k1730_scoring.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/reproduce_spec.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/review_verdict.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/run_production.log": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/run_production_v2.log": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/test_k1730_recovery.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1730/verify_readme_alignment.py": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k892/k892_verify_tw_gamma.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "experiments/paper2_sec45_gamma_refit/refit_concentration_gamma.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 experiments/paper2_sec45_gamma_refit/refit_concentration_gamma.py 引用"
+          ]
+        },
+        "experiments/k892/k892_verify_tw_gamma_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/paper2_table1_summary_stats_provenance/results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "paper/leverage-direction/main_v_ijf.pdf": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/article_images/k1436_funding_distribution.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/article_images/k1436_funding_qlike.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/lazypack_jobs/mile_3c83e665/runs/lazypack-mile_3c83e665/plan.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-a4fe4570",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/paper_pipeline_status.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "experiments/k1319/README.md",
+        "experiments/k1319/k1319.py",
+        "experiments/k1319/k1319_results.json",
+        "experiments/k1399/k1399_qlike_comparison.png",
+        "experiments/k1399/k1399_vix_decomp_results.json",
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
+        "experiments/k1591/k1591_results.json",
+        "experiments/k1591/tables/k1591_daily_panel.csv",
+        "experiments/k1591/tables/k1591_regime_summary.csv",
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
+        "experiments/k1592/fig2_gammarule_gjr_share.png",
+        "experiments/k1592/fig3_origin_gamma_t.png",
+        "experiments/k1705/k1705_results.json",
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md",
+        "experiments/k1730/README.md",
+        "experiments/k1730/REMEDIATION_v2.md",
+        "experiments/k1730/codex_review_v1.md",
+        "experiments/k1730/data/CPI_first_release.csv",
+        "experiments/k1730/data/DGS10_daily.csv",
+        "experiments/k1730/data/DTB3_daily.csv",
+        "experiments/k1730/data/IP_first_release.csv",
+        "experiments/k1730/data/NFP_first_release.csv",
+        "experiments/k1730/data/UNRATE_first_release.csv",
+        "experiments/k1730/data/VIX_daily.csv",
+        "experiments/k1730/data/spy_daily_rv.csv",
+        "experiments/k1730/fig1_rolling_coverage.png",
+        "experiments/k1730/fig2_ssvs_pip.png",
+        "experiments/k1730/fig3_interval_vs_realized.png",
+        "experiments/k1730/fig4_pit_calibration.png",
+        "experiments/k1730/k1730_data.py",
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py",
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+        "experiments/k1730/k1730_models.py",
+        "experiments/k1730/k1730_quickmode_results.json",
+        "experiments/k1730/k1730_report_tables.py",
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json",
+        "experiments/k1730/k1730_scoring.py",
+        "experiments/k1730/reproduce_spec.json",
+        "experiments/k1730/review_verdict.json",
+        "experiments/k1730/run_production.log",
+        "experiments/k1730/run_production_v2.log",
+        "experiments/k1730/test_k1730_recovery.py",
+        "experiments/k1730/verify_readme_alignment.py",
+        "experiments/k892/k892_verify_tw_gamma.py",
+        "experiments/k892/k892_verify_tw_gamma_results.json",
+        "experiments/paper2_table1_summary_stats_provenance/results.json",
+        "paper/leverage-direction/main_v_ijf.pdf",
+        "storage/drafts/article_images/k1436_funding_distribution.png",
+        "storage/drafts/article_images/k1436_funding_qlike.png",
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png",
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png",
+        "storage/lazypack_jobs/mile_3c83e665/runs/lazypack-mile_3c83e665/plan.json",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/paper_pipeline_status.json"
+      ],
+      "grace_s": 86400.0
+    }
+  },
+  {
+    "id": "assign_d65ff962",
+    "title": "[Issue #46] Resolve formal Primary Authority owner from live attestation",
+    "description": "Matt implement/TDD/code-review slice. Replace the hard-coded unresolved host_authority/operations-core-primary census binding with a read-only, fail-closed database attestation. The public RPC and Python adapter must prove canonical authority key, operations_core owner, and exact contract generation; malformed, legacy, duplicate/drifted, unavailable, or unauthorized evidence remains unknown_owner. Add regression tests, deploy migration, perform live read-back, update Issue #46 living evidence. Do not acquire/release a lease, change owner, schedule retirement recorder, bypass Issue #9 gates, or touch other sessions orphan-signal files.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T12:12:03.188396+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T12:12:08.058764+00:00",
+    "claim_expires_at": "2026-07-27T14:12:08.058764+00:00",
+    "claim_session_id": "54ce17dc6815",
+    "status_history": [
+      {
+        "ts": "2026-07-27T12:12:08.058782+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T12:12:11.358047+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T12:12:11.358033+00:00"
+  },
+  {
+    "id": "assign_38b0050c",
+    "title": "PHASE-Z 卡住檔案 incident（bb6021b8e7ca3644）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/drafts/article_images/K1649_coverage.png — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T122229510585Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T12:22:29.618781+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "bb6021b8e7ca3644",
+      "paths": [
+        "storage/drafts/article_images/K1649_coverage.png"
+      ],
+      "streaks": {
+        "storage/drafts/article_images/K1649_coverage.png": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T122229510585Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T12:22:29.606318+00:00",
+      "last_seen_at": "2026-07-27T12:22:29.606318+00:00"
     },
     "priority_capped_from": 1
   }
