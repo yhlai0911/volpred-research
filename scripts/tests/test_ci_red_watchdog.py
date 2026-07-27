@@ -1108,18 +1108,75 @@ def test_large_attempt_history_rotates_bounded_windows_until_complete():
 
 def test_failure_summary_reads_the_exact_attempt(monkeypatch):
     captured = {}
+    run = {**RED1, "attempt": 2}
 
     def fake_run(cmd, **kwargs):
         captured["cmd"] = cmd
-        return subprocess.CompletedProcess(cmd, 0, stdout="E   AssertionError: boom\n", stderr="")
+        return subprocess.CompletedProcess(
+            cmd,
+            0,
+            stdout=(
+                "tests/test_ci_red_watchdog.py:12: in test_boom\n"
+                "scripts/check_alerts.py:1308: in _ci_failure_summary\n"
+                "E   AssertionError: boom\n"
+            ),
+            stderr="",
+        )
 
     monkeypatch.setattr(check_alerts, "_gh_bin", lambda: "/usr/bin/gh")
     monkeypatch.setattr(subprocess, "run", fake_run)
 
-    cause = check_alerts._ci_failure_summary({**RED1, "attempt": 2})
+    cause = check_alerts._ci_failure_summary(run)
 
     assert cause == "E AssertionError: boom"
     assert captured["cmd"][captured["cmd"].index("--attempt") + 1] == "2"
+    assert run["_ci_declared_output_paths"] == [
+        "scripts/check_alerts.py",
+        "tests/test_ci_red_watchdog.py",
+    ]
+
+
+def test_ci_trace_paths_create_a_supervisor_preassignable_contract():
+    run = {
+        **RED1,
+        "_ci_declared_output_paths": [
+            "scripts/mark_covered_article_tasks.py",
+            "scripts/mark_task_blocked.py",
+            "tests/test_covered_article_dedup.py",
+        ],
+    }
+
+    repair = check_alerts._build_ci_repair_task(
+        run,
+        now_iso=NOW,
+        failure_cause=CAUSE,
+    )
+    root = check_alerts._build_ci_root_cause_task(
+        run,
+        now_iso=NOW,
+        failure_cause=CAUSE,
+        incident_id="ci-red-29233920234",
+        denied_task_id="ci-red-29233920234",
+    )
+
+    for task in (repair, root):
+        assert task["write_intent"] == "repo_patch"
+        assert task["declared_output_paths"] == run["_ci_declared_output_paths"]
+        assert task["post_merge_actions"] == []
+
+
+def test_ci_trace_path_extraction_is_repo_relative_and_fail_closed():
+    log = """
+job\tstep\t2026-07-13T09:00:00Z\t/home/runner/work/volpred-research/volpred-research/tests/test_ci.py:8
+job\tstep\t2026-07-13T09:00:00Z\tscripts/check_alerts.py:1308: in helper
+job\tstep\t2026-07-13T09:00:00Z\t../../outside.py:1
+job\tstep\t2026-07-13T09:00:00Z\t/etc/passwd:1
+"""
+
+    assert check_alerts._ci_extract_declared_output_paths(log) == [
+        "scripts/check_alerts.py",
+        "tests/test_ci.py",
+    ]
 
 
 def test_ci_poll_has_a_dedicated_small_entrypoint():

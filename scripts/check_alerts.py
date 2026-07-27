@@ -18,6 +18,7 @@ Exit code:
 from __future__ import annotations
 
 import json
+import re
 import sys
 from contextlib import contextmanager
 from datetime import datetime
@@ -835,7 +836,7 @@ def _build_ci_repair_task(
     task_id = _ci_task_id(run)
     incident_id = incident_id or task_id
     cause = failure_cause or "failed log 未提供可解析的一行根因；以 run URL 為準"
-    return {
+    task = {
         "id": task_id,
         "task_type": "platform_ops",
         "priority": 1,
@@ -868,6 +869,8 @@ def _build_ci_repair_task(
             "最終 GitHub success 由 CI watcher 獨立驗證。"
         ),
     }
+    task.update(_ci_execution_contract_fields(run))
+    return task
 
 
 def _build_ci_root_cause_task(
@@ -885,7 +888,7 @@ def _build_ci_root_cause_task(
         "https://github.com/yhlai0911/volpred-research/actions/runs/"
         f"{run_id}"
     )
-    return {
+    task = {
         "id": f"ci-root-{run_id}",
         "task_type": "platform_ops",
         "priority": 1,
@@ -912,6 +915,8 @@ def _build_ci_root_cause_task(
             "由 CI watcher 以後續 GitHub green 獨立結案。"
         ),
     }
+    task.update(_ci_execution_contract_fields(run))
+    return task
 
 
 def _ci_local_ahead(run: dict) -> dict:
@@ -1305,6 +1310,50 @@ def _ci_pick_failure_cause(log_text: str) -> str:
     return best[:280]
 
 
+_CI_REPO_PATH = re.compile(
+    r"(?<![A-Za-z0-9_.-])"
+    r"((?:\.github|config|docs|experiments|frontend-v2-fix|paper|scripts|src|"
+    r"supabase|tests)/[A-Za-z0-9_./@+\-]+\.[A-Za-z0-9]+)"
+)
+
+
+def _ci_extract_declared_output_paths(log_text: str) -> list[str]:
+    """Extract bounded repo-relative traceback paths for producer isolation.
+
+    GitHub's failed-step log is evidence, not an authorization language. Only
+    known source roots and literal file paths are admitted; storage, globs,
+    absolute paths and traversal cannot enter the execution contract.
+    """
+    paths: set[str] = set()
+    for match in _CI_REPO_PATH.finditer(log_text):
+        path = match.group(1)
+        parts = Path(path).parts
+        if ".." in parts or any(char in path for char in "*?["):
+            continue
+        paths.add(path)
+        if len(paths) >= 32:
+            break
+    return sorted(paths)
+
+
+def _ci_execution_contract_fields(run: dict) -> dict:
+    raw_paths = run.get("_ci_declared_output_paths")
+    if not isinstance(raw_paths, list) or not raw_paths:
+        return {}
+    paths = [
+        path
+        for path in _ci_extract_declared_output_paths("\n".join(map(str, raw_paths)))
+        if path in raw_paths
+    ]
+    if not paths:
+        return {}
+    return {
+        "write_intent": "repo_patch",
+        "declared_output_paths": paths,
+        "post_merge_actions": [],
+    }
+
+
 def _ci_failure_summary(run: dict) -> str:
     import subprocess
 
@@ -1340,7 +1389,9 @@ def _ci_failure_summary(run: dict) -> str:
             stderr_tail=(proc.stderr or "")[-160:],
         )
         return f"failed log 無法取得：gh rc={proc.returncode}"
-    return _ci_pick_failure_cause(proc.stdout or "")
+    log_text = proc.stdout or ""
+    run["_ci_declared_output_paths"] = _ci_extract_declared_output_paths(log_text)
+    return _ci_pick_failure_cause(log_text)
 
 
 def _ci_task_records(task_ids: list[str], next_tasks_path: Path) -> dict[str, dict]:

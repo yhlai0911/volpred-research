@@ -250,6 +250,12 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
 **規則**：文章系列身分 / 成員 / 格式一律讀 machine-readable registry（`config/article_series.json`），禁從標題 / 代號重新推導（無 SoT → 同系列反覆搞錯）。config 是唯一源頭；registry 存第二份 status = dual SoT。Supabase 1000-row cap 要 explicit 處理。
 **機械 owner**：`scripts/series_registry.py --audit`（drift 每小時 check_alerts 告警）+ config single-source 規則。
 **代表 incident**：
+- 2026-07-27 **root_cause_fixed_and_verified** 原版/v3 first-paint共用server snapshot後，
+  原版stats API仍把knowledge count當實驗數在hydration覆寫；Zeabur env全量同步另刪
+  analytics key，初版補救又把secret放進upload tree。Metric seam現統一
+  `n_experiments`，Keychain只經source tree外temp env送variable API，container回讀
+  無`.env.production`；desktop/mobile與production DB beacon驗收通過 — 全文：
+  `docs/error_log_archive/2026-Q3-issue8-frontend-analytics.md`
 - 2026-07-24 **root_cause_fixed_and_verified** generic effect outbox claim不帶
   provider capability，所有 narrow worker都會拿全域最舊 row；第二個 family上線後
   可能把他族合法 effect當 unsupported而 dead-letter。Provider現強制宣告
@@ -299,6 +305,12 @@ schedule 現綁回 wrapper execution log；單一 `job_liveness` owner 同時支
 **規則**：測試與原始碼要一起上（測試先上、code 沒跟 → main 紅）。pytest guard 要覆蓋 worktree（不能只在被忽略的 root conftest）；collection 不可讀 production `.env.local`。驅動 git 的測試須隔離（臨時 repo，不碰真庫）。「測試寫 canonical state」整個 class 由 CI tree-clean owner 擋。機器要訂閱自己的 CI 狀態（別紅 12 小時沒人看見）。
 **機械 owner**：CI pytest（零憑證必全綠）+ pytest.yml tree-clean step（唯一 owner）+ hermetic-git 測試規則 + cron wrapper manifest。
 **代表 incident**：
+- 2026-07-27 **root_cause_fixed_and_verified** CI watcher建立的`ci-root`雖為
+  `platform_ops`，卻沒有producer-isolation execution contract；supervisor能fire但
+  不能preassign，worker只能重複診斷。Watcher現從完整failed log只抽known-root literal
+  repo paths，拒絕absolute/traversal/storage/glob，並把exact paths綁
+  `repo_patch` contract；真run 30258321227回放精確取得3路徑，73 regressions綠 —
+  全文：`docs/error_log_archive/2026-Q3-ci-root-execution-contract.md`
 - 2026-07-23 **root_cause_fixed_and_verified** Issue #7 shadow replay：54 個綠測試只證明兩套 replay 專用 selector copy 彼此自洽；第一輪 Matt Spec review 回讀 production claim／acquire 後抓到 dispatch lane、preferred agent 與 expired-lease reclaim 全缺，第二輪又抓到 replay 把 blocked／same-owner claimed 排進虛構 winner，且漏掉 dreaming live revalidation；reimplementation 複審再抓到 importer 先過濾 raw winner、duplicate id 讓 dict 覆蓋跨 record evidence、missing id 使整次 replay crash、未送入 Coordinator 的 record 被冒稱有 selector reason、跨來源 duplicate 因一份 record 無法映射而從母體消失，以及 parent 位於 TaskRecord 時因 replay 只把 `next_tasks` 傳入 selector 而虛構 `parent_missing`。修復規則：shadow／audit 不得複製或拼湊 production policy；legacy selector 必須先吃 hash-bound raw snapshot，candidate filter、identity uniqueness、判定與 ranking 必須由 production caller 也執行的 pure seam 組成；full-population identity reconciliation 必須在 mapping 前掃 supplied raw records，不能讓 importer filter 決定真實母體；unrepresentable record 以 ordinal + content hash 留存並由 reconciliation 分類，未實際進 selector 就只能標 migration `not_evaluated`；selection scope 外的 parent 只能透過 production selector 的 non-selectable dependency context 提供 status，不得進入 winner pool；無法由 immutable snapshot 重播的 live gate 必須帶穩定 reason fail closed，SQL adapter 另用 integration contract 做 parity；差異分類必須由 selector／reconciliation reason code + 顯式 oracle 驅動，禁止按 dimension 名稱猜 `policy_change`。機械 owner：`volpred.ops.task_pool_selection`、`volpred.ops.work.selection`、`volpred.ops.dreaming_revalidate.requires_live_revalidation`、`tests/test_work_shadow_replay.py` — Q3
 - 2026-07-16 CI run 29450374699：`refill_task_pool` 的 candidate/task paths 已指向隔離 storage，但 cluster planner 仍偷讀 live feed/knowledge，讓 K1120 fixture 被 production VIX 飽和度擋掉；修成 planner/classifier 與 `NEXT_TASKS.parent` 共用同一 storage root，回歸測試驗證 exact binding — 全文：`docs/error_log_archive/2026-Q3-ci-294503.md`
 - 2026-07-15 00:57 module-import 時算好的路徑常數不吃 monkeypatch ROOT：frozen-brief 寫進真 repo，auto-commit 再捲進 main，tree-clean gate 連紅兩班 — 修在 writer（enqueue+amend 皆 guard_canonical_write）+ 測試補 patch AGENT_BRIEF_DIR（4e52f1351）— Q3
@@ -3901,31 +3913,3 @@ queue lifecycle／assessment／pool-pressure／canonical-writer 相鄰套件 **2
 `observation_window_too_short`。此「提前解除」根因已
 **`root_cause_fixed_and_verified`**；Issue #9 umbrella仍須等真實七日與cutover
 transaction，維持`contained`。
-### 2026-07-27 — First-paint 指標語意分岔、Zeabur env 全量同步與 upload secret boundary
-
-**證據化症狀**：Issue #8 第一輪 production deployment 先後暴露四個不同層級問題：
-deployment monitor把上一個／瞬時狀態判成新部署失敗；strict navigation contract拒絕
-合法`#feed`而令原版首頁500；`zeabur variable env`全量同步刪除兩個analytics變數，
-使有效事件回503；最後原版raw HTML顯示`115+`，hydration後卻被
-`/api/research/stats`以knowledge count誤標的`3,198+`覆寫。初版Keychain補救又把
-注入secret的`.env.production`放在source staging tree，雖未進Git仍可能進build
-context。
-
-**根因與底層重構**：這不是單一前端bug，而是deployment identity、navigation
-allowlist、environment ownership、metric semantics與secret boundary五個契約缺口。
-監控器現只接受不同deployment ID的durable terminal state；fragment採strict regex；
-analytics HMAC材料固定從macOS Keychain取得，缺失即拒絕部署；原版/v3與stats API共用
-`getResearchSummary().n_experiments`，API失敗回503而非假0；variable sync使用upload
-tree外的temp env，copy與`.zeaburignore`均排除所有`.env*`。
-
-**回歸與live read-back**：navigation／first-paint／analytics／deploy tests、typecheck
-與Next production build（88 routes）通過。Deployment
-`6a6736c7225290ec74322de0`為RUNNING；container回讀`.env.production=false`但兩個
-analytics vars均存在。原版/v3 raw HTML與desktop/mobile hydrated DOM同為實驗數115，
-navigation實際成功。Supabase回讀browser事件impression 4、click 6、depth 4、
-qualified 1，15列皆15個distinct keys、retention drift 0；live canary重播回
-`duplicate=true`。相關契約已落入tests、deploy script、migration與本紀錄。
-
-**狀態**：GitHub #8／T20為`root_cause_fixed_and_verified`。舊文章view-count資料面
-仍保留供既有UI讀取，但不寫入新的`volpred_analytics`事件表；其正式retirement由既有
-legacy-retirement tickets處理，不在#8內冒充完成。

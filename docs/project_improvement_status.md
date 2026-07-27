@@ -2461,3 +2461,18 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ Issue #8 acceptance與五步Gate全過，狀態
   **`root_cause_fixed_and_verified`**。文章view-count舊資料面之後由既有
   legacy-retirement tickets收斂，不混入本ticket結案口徑。
+
+## 2026-07-27 — T40 CI remediation execution-contract slice（Issue #46）
+
+- ✅ 郵件所述 main CI red 屬本專案真實 run `30258321227`；committed-version
+  minimal probe穩定重現`shared_state_lock` ImportError，不是單純陳舊告警。
+- ✅ 直接修復已由唯一互動session接管，exact-path commit `c0a62a612`；
+  committed probe與`tests/test_covered_article_dedup.py` 8案全綠，canonical task
+  `ci-root-30256296797`已正式claim/start/complete並帶真repair SHA。
+- ✅ 結構死鎖根因不是fire未啟動，而是watcher建出的mutating task缺producer
+  isolation contract。現在完整failed log會產生bounded literal repo paths與
+  repo-patch contract；真run回放精確取3路徑，absolute/traversal/storage/glob
+  fail closed，CI watcher／preassignment 73案綠。
+- 🟡 此slice為`root_cause_fixed_and_verified`；整體Issue #46仍缺owner-only push後
+  GitHub green read-back、其餘legacy physical retirement及14日sustained-clean，
+  umbrella維持`contained`。
