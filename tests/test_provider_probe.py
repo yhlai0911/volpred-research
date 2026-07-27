@@ -333,6 +333,19 @@ def test_crashed_reservation_is_recovered_only_after_durable_expiry(
     assert concurrent.reason == "probe_in_progress"
 
     clock.value += timedelta(minutes=2)
+    ttl_released_but_interval_held = _run(
+        ledger,
+        perform_probe=lambda _reservation: pytest.fail(
+            "reservation TTL must not bypass the minimum interval"
+        ),
+    )
+    assert (
+        ttl_released_but_interval_held.admission
+        is ProbeAdmission.MINIMUM_INTERVAL
+    )
+    assert ttl_released_but_interval_held.outcome is None
+
+    clock.value += timedelta(minutes=3)
     recovered = _run(ledger)
     assert recovered.admission is ProbeAdmission.ACQUIRED
     assert recovered.receipt is not None

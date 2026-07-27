@@ -624,6 +624,27 @@ class DurableProviderProbeLedger:
                     registry_sha256=authorization.registry_sha256,
                     next_probe_at=min(item.expires_at for item in active),
                 )
+            provider_reservations = [
+                item for item in reservations if item.provider_id == provider_id
+            ]
+            if provider_reservations:
+                latest_reservation = max(
+                    provider_reservations,
+                    key=lambda item: item.reserved_at,
+                )
+                reservation_interval_end = (
+                    latest_reservation.reserved_at
+                    + timedelta(
+                        seconds=latest_reservation.minimum_interval_seconds
+                    )
+                )
+                if now < reservation_interval_end:
+                    return ProbeDecision(
+                        acquired=False,
+                        reason="minimum_interval",
+                        registry_sha256=authorization.registry_sha256,
+                        next_probe_at=reservation_interval_end,
+                    )
             latest = self._latest(receipts, provider_id)
             if latest is not None and now < latest.next_probe_at:
                 return ProbeDecision(
