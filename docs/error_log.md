@@ -3708,3 +3708,27 @@ durable grant後使WorkLease、commit owner generation與Primary Authority失效
 mutation-boundary fencing這個根因完成五步Gate，狀態為
 **`root_cause_fixed_and_verified`**；Issue #18仍因Email真實partition canary與
 #24/#46 legacy writer cutover／retirement未完成而維持 **`contained`**。
+
+### 2026-07-27 — Sent read-back 與 SMTP send 間缺少 Primary Authority 再驗證
+
+**證據化症狀**：`OwnedEmailNotification.deliver()`在呼叫provider前會驗證目前
+Primary Lease，但`EmailNotificationEffectAdapter.deliver()`內部先查Sent mailbox，
+確認沒有既有Message-ID後才真正呼叫SMTP notifier。公開seam使用concrete adapter，
+在第一次Sent read-back期間把authority lease換代；修正前案例沒有拋出
+`NotificationOwnershipLost`且notifier被呼叫，證明舊holder可在read-back與SMTP間的
+窗口越過fence。這是mutation-boundary contract缺口，不是SMTP或IMAP資料錯誤。
+
+**根因層級與底層修復**：adapter新增窄的`authorize_mutation` callback，只在確定沒有
+既有Sent copy後、緊貼notifier前呼叫。callback位於provider例外轉換區塊之外，authority
+lost／partition會原樣fail closed，不會settle成provider retry或dead-letter。normal
+delivery、recovery與legacy rollback都把同一Primary Lease identity綁進callback；
+若Message-ID已存在，冪等replay仍直接以true-external evidence acknowledgement，
+不會再次寄信。
+
+**回歸與狀態界線**：原公開案例先RED後GREEN，並回讀notifier calls=0、
+settlement calls=0；Email相關完整範圍 **206 passed**，Matt Spec／Standards雙審均
+PASS、0 P1／P2。全庫另有3個失敗，精確落在另一個session未提交的termination、
+Git hook packaging與K1730 nested-DM變更，未修改或回退。因共享工作區仍有並行髒狀態，
+本輪刻意不執行live Email mutation；真實partition／Sent read-back canary尚未完成，
+所以此incident與Issue #18 umbrella目前均標 **`contained`**，不可提前稱
+`root_cause_fixed_and_verified`。
