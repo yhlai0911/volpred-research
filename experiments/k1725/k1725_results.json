@@ -1,0 +1,279 @@
+{
+  "experiment_id": "k1725",
+  "seed": 42,
+  "generated_at_utc": "2026-07-27T13:22:16.366063+00:00",
+  "ibit_date": "2024-01-11",
+  "primary_pre_start": "2023-01-11",
+  "extended_pre_start": "2022-01-11",
+  "rth_definition": "ET weekday, open-hour in {9..15} (~9:00-16:00 ET, +/-30min approx of 9:30-16:00 RTH); DST via America/New_York",
+  "aggregation_unit": "ISO week (ET calendar, Monday-anchored)",
+  "complete_week_gate": {
+    "min_week_bars": 160,
+    "weeks_before_gate": 237,
+    "weeks_after_gate": 236,
+    "partial_weeks_dropped": 1
+  },
+  "data_hygiene": {
+    "rows_raw": 40044,
+    "rows_after_dedup": 40044,
+    "duplicate_rows_removed": 0,
+    "expected_hourly_bars": 40045,
+    "missing_bars": 1,
+    "missing_bar_fraction": 2.5e-05,
+    "utc_start": "2022-01-01T00:00:00+00:00",
+    "utc_end": "2026-07-27T12:00:00+00:00",
+    "source": "Binance klines (api.binance.com / data-api.binance.vision)",
+    "symbol": "BTCUSDT",
+    "interval": "1h"
+  },
+  "n_weeks_total": 236,
+  "consistency_shares_sum_to_one": {
+    "max_abs_dev_from_1": 2.220446049250313e-16,
+    "passed": true
+  },
+  "primary_weekly_shares_1y_pre": {
+    "us_session": {
+      "welch": {
+        "pre_mean": 0.39933247360175766,
+        "post_mean": 0.417883815707231,
+        "pre_n": 52,
+        "post_n": 132,
+        "diff_pp": 1.8551342105473323,
+        "welch_t": 0.7747661993508178,
+        "welch_p": 0.44101688387366833,
+        "cohens_d": 0.14697668080446077
+      },
+      "block_bootstrap": {
+        "point_diff": 0.018551342105473323,
+        "boot_mean_diff": 0.018947163614512035,
+        "ci95_low": -0.021363640118338537,
+        "ci95_high": 0.059324122058773666,
+        "excludes_zero": false,
+        "n_boot": 5000,
+        "block_len_pre": 4,
+        "block_len_post": 5
+      }
+    },
+    "non_session": {
+      "welch": {
+        "pre_mean": 0.46327325435744804,
+        "post_mean": 0.4172135701489273,
+        "pre_n": 52,
+        "post_n": 132,
+        "diff_pp": -4.605968420852075,
+        "welch_t": -1.8925912935414069,
+        "welch_p": 0.0626980656569472,
+        "cohens_d": -0.3751823927321021
+      },
+      "block_bootstrap": {
+        "point_diff": -0.046059684208520746,
+        "boot_mean_diff": -0.04642634100424658,
+        "ci95_low": -0.08289730923276821,
+        "ci95_high": -0.011471607942695009,
+        "excludes_zero": true,
+        "n_boot": 5000,
+        "block_len_pre": 4,
+        "block_len_post": 5
+      }
+    },
+    "weekend": {
+      "welch": {
+        "pre_mean": 0.1373942720407943,
+        "post_mean": 0.16490261414384172,
+        "pre_n": 52,
+        "post_n": 132,
+        "diff_pp": 2.7508342103047423,
+        "welch_t": 1.6148136060287688,
+        "welch_p": 0.10951926061172819,
+        "cohens_d": 0.2567440873909498
+      },
+      "block_bootstrap": {
+        "point_diff": 0.027508342103047423,
+        "boot_mean_diff": 0.027479177389734547,
+        "ci95_low": -0.004985440739616157,
+        "ci95_high": 0.05997120188425981,
+        "excludes_zero": false,
+        "n_boot": 5000,
+        "block_len_pre": 4,
+        "block_len_post": 5
+      }
+    }
+  },
+  "sup_wald_break_us_session": {
+    "sup_f": 9.495967164231539,
+    "break_index": 74,
+    "break_date": "2023-06-19",
+    "asymptotic_crit_5pct_1993": 8.85,
+    "asymptotic_crit_5pct_2003_corrigendum": 8.68,
+    "significant_5pct": true,
+    "n": 236,
+    "trim": 0.15,
+    "legal_break_index_range": [
+      36,
+      200
+    ],
+    "inference_note": "classical sup-F, no HAC; weekly share loss has mild serial dependence, so treat significance as assumption-heavy and read date location only, not as a proof of a unique break.",
+    "days_from_ibit": -206
+  },
+  "chow_at_ibit_us_session": {
+    "chow_f": 5.427501146392677,
+    "chow_p": 0.02067380007792775,
+    "pre_n": 104,
+    "post_n": 132
+  },
+  "serial_dependence_diagnostic": {
+    "ibit_demeaned_us_share_acf1": 0.09728871229116492,
+    "ljung_box_lag4_pvalue": 0.030907673029196822,
+    "note": "acf1 != 0 or LB p < 0.05 => classical Chow/sup-F standard errors are not exact; break inference is assumption-heavy, so we read direction/location, not p-values, as primary."
+  },
+  "robustness": {
+    "event_buffer_4w": {
+      "us_session": {
+        "pre_mean": 0.4018004350307393,
+        "post_mean": 0.4161503561095632,
+        "pre_n": 48,
+        "post_n": 128,
+        "diff_pp": 1.434992107882388,
+        "welch_t": 0.5685564995610805,
+        "welch_p": 0.571643314699587,
+        "cohens_d": 0.11389062770242095
+      },
+      "non_session": {
+        "pre_mean": 0.458650390855376,
+        "post_mean": 0.4181815969438881,
+        "pre_n": 48,
+        "post_n": 128,
+        "diff_pp": -4.046879391148789,
+        "welch_t": -1.5691218100151594,
+        "welch_p": 0.12180855951736992,
+        "cohens_d": -0.32751895387728286
+      },
+      "weekend": {
+        "pre_mean": 0.13954917411388465,
+        "post_mean": 0.16566804694654866,
+        "pre_n": 48,
+        "post_n": 128,
+        "diff_pp": 2.611887283266401,
+        "welch_t": 1.4514813723348559,
+        "welch_p": 0.15018993894909663,
+        "cohens_d": 0.24027570488372227
+      }
+    },
+    "logit_shares": {
+      "us_session": {
+        "pre_mean": -0.44287243708055846,
+        "post_mean": -0.34861404933911017,
+        "pre_n": 52,
+        "post_n": 132,
+        "diff_pp": 9.425838774144829,
+        "welch_t": 0.8530859123102903,
+        "welch_p": 0.39657716411678234,
+        "cohens_d": 0.16709551531171735
+      },
+      "non_session": {
+        "pre_mean": -0.1676619824573786,
+        "post_mean": -0.35208490114805374,
+        "pre_n": 52,
+        "post_n": 132,
+        "diff_pp": -18.442291869067514,
+        "welch_t": -1.677707427826611,
+        "welch_p": 0.09814123330621322,
+        "cohens_d": -0.33880514699350794
+      },
+      "weekend": {
+        "pre_mean": -2.062465516722247,
+        "post_mean": -1.7910120136509076,
+        "pre_n": 52,
+        "post_n": 132,
+        "diff_pp": 27.145350307133963,
+        "welch_t": 2.099230265257745,
+        "welch_p": 0.038768835251863,
+        "cohens_d": 0.3610667508226231
+      },
+      "_scale_note": "values are log-odds (logit of share), not percentage points"
+    },
+    "extended_pre_2y": {
+      "us_session": {
+        "pre_mean": 0.3790633251245649,
+        "post_mean": 0.417883815707231,
+        "pre_n": 104,
+        "post_n": 132,
+        "diff_pp": 3.882049058266607,
+        "welch_t": 2.260344364569208,
+        "welch_p": 0.024937094757786566,
+        "cohens_d": 0.3054585797620093
+      },
+      "non_session": {
+        "pre_mean": 0.4701160899899219,
+        "post_mean": 0.4172135701489273,
+        "pre_n": 104,
+        "post_n": 132,
+        "diff_pp": -5.290251984099459,
+        "welch_t": -3.154783361763028,
+        "welch_p": 0.0018842978579553238,
+        "cohens_d": -0.43016833990269177
+      },
+      "weekend": {
+        "pre_mean": 0.15082058488551323,
+        "post_mean": 0.16490261414384172,
+        "pre_n": 104,
+        "post_n": 132,
+        "diff_pp": 1.4082029258328492,
+        "welch_t": 1.0536867476268894,
+        "welch_p": 0.2931265310569328,
+        "cohens_d": 0.1360648263814137
+      }
+    },
+    "daily_weekday_rth_concentration": {
+      "welch": {
+        "pre_mean": 0.4587242596849354,
+        "post_mean": 0.488323979116076,
+        "pre_n": 261,
+        "post_n": 662,
+        "diff_pp": 2.959971943114059,
+        "welch_t": 1.8310244685510055,
+        "welch_p": 0.0678164145528205,
+        "cohens_d": 0.1440453260861599
+      },
+      "block_bootstrap": {
+        "point_diff": 0.029599719431140592,
+        "boot_mean_diff": 0.029282729271790403,
+        "ci95_low": -0.005681080312280707,
+        "ci95_high": 0.06437198935640334,
+        "excludes_zero": false,
+        "n_boot": 5000,
+        "block_len_pre": 6,
+        "block_len_post": 9
+      },
+      "min_day_bars": 20,
+      "note": "share of weekday RV occurring in RTH vs non-RTH (weekends excluded)"
+    }
+  },
+  "redistribution_check": {
+    "us_session_direction": "up",
+    "weekend_direction": "up",
+    "non_session_direction": "down",
+    "us_significant_5pct": false,
+    "is_redistribution_toward_rth": true,
+    "weekend_contradicts_clean_hypothesis": true
+  },
+  "conclusion": {
+    "verdict": "NULL",
+    "primary_hypothesis": "US-session RV share rises AND weekend/non-session share falls after IBIT 2024-01-11 (compositional, directional)",
+    "checks": {
+      "us_direction_up": true,
+      "weekend_direction_down_as_predicted": false,
+      "non_session_direction_down_as_predicted": true,
+      "primary_us_welch_sig5pct": false,
+      "primary_us_bootstrap_excludes_zero": false,
+      "event_buffer_us_welch_sig5pct": false,
+      "logit_us_welch_sig5pct": false,
+      "endogenous_break_within_60d_of_ibit": false,
+      "chow_at_ibit_sig5pct": true,
+      "extended_pre_us_welch_sig5pct": true,
+      "non_session_decline_bootstrap_excludes_zero": true
+    },
+    "weekend_contradicts_clean_hypothesis": true,
+    "one_line": "Primary 1y-pre weekly US-session RV share rose only +1.86pp (0.399->0.418), NOT significant (Welch p=0.441, d=0.15, bootstrap CI includes 0). The only primary effect whose bootstrap CI excludes 0 is the non-session DECLINE (-4.61pp), but weekend share ROSE (+2.75pp), contradicting the clean toward-traditional-clock redistribution. The strongest endogenous mean-shift candidate is 2023-06-19 (sup-F=9.50, 5% crit 8.68, -206d from IBIT), i.e. far from the ETF; break inference is assumption-heavy (serial dependence). Nominal significance appears only in the 2y extended-pre and Chow specs (which reuse the confounded 2022 regime) and vanishes under both the event-buffer and logit-normalization robustness checks."
+  }
+}
