@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from threading import Event, Thread
 
 import pytest
@@ -18,8 +18,7 @@ from volpred.ops.execution import (
 )
 from volpred.ops.execution._testing import InMemoryProviderExecutionStore
 
-
-NOW = datetime(2026, 7, 27, 4, 0, tzinfo=timezone.utc)
+NOW = datetime(2026, 7, 27, 4, 0, tzinfo=UTC)
 
 
 class FakeProvider:
@@ -614,10 +613,44 @@ def test_expired_probe_reservation_recovers_after_crash() -> None:
         cost_units=1,
         policy=policy,
     )
+    after_interval = store.reserve_probe(
+        provider_id="codex",
+        owner="replacement",
+        observed_at=NOW + policy.minimum_interval,
+        cost_units=1,
+        policy=policy,
+    )
 
     assert first.acquired is True
     assert blocked.acquired is False
-    assert takeover.acquired is True
+    assert takeover.acquired is False
+    assert after_interval.acquired is True
+
+
+def test_in_memory_probe_budget_uses_same_rolling_window_as_durable_policy() -> None:
+    store = InMemoryProviderExecutionStore()
+    policy = ProbePolicy(
+        minimum_interval=timedelta(minutes=5),
+        window=timedelta(hours=1),
+        max_probe_cost_units=2,
+    )
+
+    def reserve_and_release(at: datetime, owner: str) -> bool:
+        reservation = store.reserve_probe(
+            provider_id="codex",
+            owner=owner,
+            observed_at=at,
+            cost_units=1,
+            policy=policy,
+        )
+        if reservation.acquired:
+            store.release_probe(provider_id="codex", owner=owner)
+        return reservation.acquired
+
+    assert reserve_and_release(NOW, "first") is True
+    assert reserve_and_release(NOW + timedelta(minutes=30), "second") is True
+    assert reserve_and_release(NOW + timedelta(minutes=60), "third") is True
+    assert reserve_and_release(NOW + timedelta(minutes=65), "fourth") is False
 
 
 def test_malformed_execute_return_is_typed_and_rerouted() -> None:

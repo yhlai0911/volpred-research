@@ -8,6 +8,13 @@ from datetime import datetime, timedelta
 
 
 @dataclass(frozen=True)
+class ProbeAdmissionDecision:
+    acquired: bool
+    reason: str
+    next_probe_at: datetime | None
+
+
+@dataclass(frozen=True)
 class ProbePolicy:
     minimum_interval: timedelta = timedelta(minutes=5)
     maximum_backoff: timedelta = timedelta(hours=1)
@@ -90,3 +97,73 @@ class ProbePolicy:
                 return occurred_at + self.window
         return now + self.window
 
+    def admission(
+        self,
+        *,
+        now: datetime,
+        requested_cost_units: int,
+        active_until: datetime | None,
+        latest_started_at: datetime | None,
+        latest_next_probe_at: datetime | None,
+        latest_was_healthy: bool | None,
+        events: list[tuple[datetime, int]],
+    ) -> ProbeAdmissionDecision:
+        """Apply the one canonical ordering for probe admission gates."""
+        if active_until is not None and now < active_until:
+            return ProbeAdmissionDecision(
+                acquired=False,
+                reason="probe_in_progress",
+                next_probe_at=active_until,
+            )
+        if latest_started_at is not None:
+            interval_end = latest_started_at + self.minimum_interval
+            if now < interval_end:
+                return ProbeAdmissionDecision(
+                    acquired=False,
+                    reason="minimum_interval",
+                    next_probe_at=interval_end,
+                )
+        if latest_next_probe_at is not None and now < latest_next_probe_at:
+            return ProbeAdmissionDecision(
+                acquired=False,
+                reason=(
+                    "minimum_interval"
+                    if latest_was_healthy
+                    else "backoff"
+                ),
+                next_probe_at=latest_next_probe_at,
+            )
+        budget_next = self.budget_next_at(
+            now=now,
+            requested_cost_units=requested_cost_units,
+            events=events,
+        )
+        if budget_next is not None:
+            return ProbeAdmissionDecision(
+                acquired=False,
+                reason="budget_exhausted",
+                next_probe_at=budget_next,
+            )
+        return ProbeAdmissionDecision(
+            acquired=True,
+            reason="acquired",
+            next_probe_at=None,
+        )
+
+    def budget_snapshot(
+        self,
+        *,
+        now: datetime,
+        events: list[tuple[datetime, int]],
+    ) -> tuple[datetime, int]:
+        active = sorted(
+            (
+                (occurred_at, cost)
+                for occurred_at, cost in events
+                if occurred_at > now - self.window
+            ),
+            key=lambda item: item[0],
+        )
+        if not active:
+            return now, 0
+        return active[0][0], sum(cost for _, cost in active)

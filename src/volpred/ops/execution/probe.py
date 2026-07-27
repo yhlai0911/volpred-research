@@ -55,7 +55,6 @@ _RESERVATION_FIELDS = frozenset(
         "maximum_backoff_seconds",
         "window_seconds",
         "max_probe_cost_units",
-        "reservation_ttl_seconds",
         "reserved_at",
         "expires_at",
     }
@@ -133,7 +132,6 @@ class ProbeReservation:
     maximum_backoff_seconds: int
     window_seconds: int
     max_probe_cost_units: int
-    reservation_ttl_seconds: int
     reserved_at: datetime
     expires_at: datetime
 
@@ -298,7 +296,6 @@ def _reservation_from_record(value: object) -> ProbeReservation:
             maximum_backoff_seconds=int(value["maximum_backoff_seconds"]),
             window_seconds=int(value["window_seconds"]),
             max_probe_cost_units=int(value["max_probe_cost_units"]),
-            reservation_ttl_seconds=int(value["reservation_ttl_seconds"]),
             reserved_at=_parse_time(value["reserved_at"], label="reserved_at"),
             expires_at=_parse_time(value["expires_at"], label="expires_at"),
         )
@@ -324,10 +321,9 @@ def _reservation_from_record(value: object) -> ProbeReservation:
         < reservation.minimum_interval_seconds
         or reservation.window_seconds <= 0
         or reservation.max_probe_cost_units <= 0
-        or reservation.reservation_ttl_seconds <= 0
-        or reservation.reservation_ttl_seconds
-        > reservation.minimum_interval_seconds
         or reservation.expires_at <= reservation.reserved_at
+        or reservation.expires_at - reservation.reserved_at
+        > timedelta(seconds=reservation.minimum_interval_seconds)
     ):
         raise ProbePolicyError("provider probe ledger reservation fields are invalid")
     return reservation
@@ -612,51 +608,12 @@ class DurableProviderProbeLedger:
             receipts = [
                 _receipt_from_record(item) for item in payload["receipts"]
             ]
-            active = [
+            provider_reservations = [
                 item
                 for item in reservations
-                if item.provider_id == provider_id and item.expires_at > now
+                if item.provider_id == provider_id
             ]
-            if active:
-                return ProbeDecision(
-                    acquired=False,
-                    reason="probe_in_progress",
-                    registry_sha256=authorization.registry_sha256,
-                    next_probe_at=min(item.expires_at for item in active),
-                )
-            provider_reservations = [
-                item for item in reservations if item.provider_id == provider_id
-            ]
-            if provider_reservations:
-                latest_reservation = max(
-                    provider_reservations,
-                    key=lambda item: item.reserved_at,
-                )
-                reservation_interval_end = (
-                    latest_reservation.reserved_at
-                    + timedelta(
-                        seconds=latest_reservation.minimum_interval_seconds
-                    )
-                )
-                if now < reservation_interval_end:
-                    return ProbeDecision(
-                        acquired=False,
-                        reason="minimum_interval",
-                        registry_sha256=authorization.registry_sha256,
-                        next_probe_at=reservation_interval_end,
-                    )
             latest = self._latest(receipts, provider_id)
-            if latest is not None and now < latest.next_probe_at:
-                return ProbeDecision(
-                    acquired=False,
-                    reason=(
-                        "minimum_interval"
-                        if latest.outcome is ProbeOutcome.HEALTHY
-                        else "backoff"
-                    ),
-                    registry_sha256=authorization.registry_sha256,
-                    next_probe_at=latest.next_probe_at,
-                )
             policy = ProbePolicy.from_seconds(
                 minimum_interval_seconds=authorization.minimum_interval_seconds,
                 maximum_backoff_seconds=authorization.maximum_backoff_seconds,
@@ -664,9 +621,38 @@ class DurableProviderProbeLedger:
                 max_probe_cost_units=authorization.max_probe_cost_units,
                 reservation_ttl_seconds=authorization.reservation_ttl_seconds,
             )
-            budget_next = policy.budget_next_at(
+            active = [
+                item for item in provider_reservations if item.expires_at > now
+            ]
+            latest_reservation = (
+                max(
+                    provider_reservations,
+                    key=lambda item: item.reserved_at,
+                )
+                if provider_reservations
+                else None
+            )
+            admission = policy.admission(
                 now=now,
                 requested_cost_units=authorization.cost_units,
+                active_until=(
+                    min(item.expires_at for item in active)
+                    if active
+                    else None
+                ),
+                latest_started_at=(
+                    latest_reservation.reserved_at
+                    if latest_reservation is not None
+                    else None
+                ),
+                latest_next_probe_at=(
+                    latest.next_probe_at if latest is not None else None
+                ),
+                latest_was_healthy=(
+                    latest.outcome is ProbeOutcome.HEALTHY
+                    if latest is not None
+                    else None
+                ),
                 events=[
                     (item.observed_at, item.cost_units) for item in receipts
                 ]
@@ -675,12 +661,12 @@ class DurableProviderProbeLedger:
                     for item in reservations
                 ],
             )
-            if budget_next is not None:
+            if not admission.acquired:
                 return ProbeDecision(
                     acquired=False,
-                    reason="budget_exhausted",
+                    reason=admission.reason,
                     registry_sha256=authorization.registry_sha256,
-                    next_probe_at=budget_next,
+                    next_probe_at=admission.next_probe_at,
                 )
             token = self._token_factory()
             if not token or any(item.token == token for item in reservations):
@@ -727,7 +713,6 @@ class DurableProviderProbeLedger:
             maximum_backoff_seconds=authorization.maximum_backoff_seconds,
             window_seconds=authorization.window_seconds,
             max_probe_cost_units=authorization.max_probe_cost_units,
-            reservation_ttl_seconds=authorization.reservation_ttl_seconds,
             reserved_at=now,
             expires_at=now
             + timedelta(seconds=authorization.reservation_ttl_seconds),
@@ -757,15 +742,7 @@ class DurableProviderProbeLedger:
                 raise ProbePolicyError("probe reservation is missing")
             reservation = matches[0]
             if now >= reservation.expires_at:
-                raise ProbePolicyError("probe reservation expired before settlement")
-            newer = [
-                item
-                for item in reservations
-                if item.provider_id == reservation.provider_id
-                and item.reserved_at > reservation.reserved_at
-            ]
-            if newer:
-                raise ProbePolicyError("probe reservation was superseded")
+                evidence_ref = f"late+{evidence_ref}"
             receipts = [
                 _receipt_from_record(item) for item in payload["receipts"]
             ]
@@ -780,7 +757,15 @@ class DurableProviderProbeLedger:
                 maximum_backoff_seconds=reservation.maximum_backoff_seconds,
                 window_seconds=reservation.window_seconds,
                 max_probe_cost_units=reservation.max_probe_cost_units,
-                reservation_ttl_seconds=reservation.reservation_ttl_seconds,
+                reservation_ttl_seconds=max(
+                    1,
+                    int(
+                        (
+                            reservation.expires_at
+                            - reservation.reserved_at
+                        ).total_seconds()
+                    ),
+                ),
             )
             delay = policy.backoff_delay(failures)
             previous_hash = (

@@ -351,6 +351,60 @@ def test_crashed_reservation_is_recovered_only_after_durable_expiry(
     assert recovered.receipt is not None
 
 
+def test_v1_reservation_shape_remains_readable_without_policy_field(
+    tmp_path: Path,
+    portable_registry: Path,
+) -> None:
+    clock = Clock()
+    ledger = _ledger(tmp_path, portable_registry, clock)
+
+    class SimulatedProcessCrash(BaseException):
+        pass
+
+    with pytest.raises(SimulatedProcessCrash):
+        _run(
+            ledger,
+            perform_probe=lambda _reservation: (_ for _ in ()).throw(
+                SimulatedProcessCrash()
+            ),
+        )
+
+    payload = json.loads(ledger.path.read_text())
+    assert "reservation_ttl_seconds" not in payload["reservations"][0]
+    reread = _run(
+        _ledger(tmp_path, portable_registry, clock),
+        perform_probe=lambda _reservation: pytest.fail(
+            "existing v1 reservation must remain readable and block provider I/O"
+        ),
+    )
+    assert reread.admission is ProbeAdmission.PROBE_IN_PROGRESS
+
+
+def test_probe_finishing_after_reservation_ttl_gets_late_receipt(
+    tmp_path: Path,
+    portable_registry: Path,
+) -> None:
+    clock = Clock()
+    ledger = _ledger(tmp_path, portable_registry, clock)
+
+    def slow_probe(_reservation):
+        clock.value += timedelta(minutes=3)
+        return ProbeObservation(
+            outcome=ProbeOutcome.HEALTHY,
+            evidence_ref="probe://codex/slow-healthy",
+        )
+
+    result = _run(ledger, perform_probe=slow_probe)
+
+    assert result.admission is ProbeAdmission.ACQUIRED
+    assert result.outcome is ProbeOutcome.HEALTHY
+    assert result.receipt is not None
+    assert result.receipt.evidence_ref == (
+        "late+probe://codex/slow-healthy"
+    )
+    assert result.receipt.observed_at == clock.value
+
+
 def test_atomic_replace_failure_preserves_last_verified_ledger(
     tmp_path: Path,
     portable_registry: Path,

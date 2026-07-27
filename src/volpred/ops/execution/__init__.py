@@ -298,6 +298,9 @@ class _InMemoryProviderExecutionStore:
         self._execution_reservations: dict[str, str] = {}
         self._provider_states: dict[str, ProviderStateView] = {}
         self._probe_reservations: dict[str, tuple[str, datetime, datetime]] = {}
+        self._probe_budget_events: dict[
+            str, list[tuple[datetime, int]]
+        ] = {}
 
     def reserve_execution(
         self,
@@ -370,35 +373,48 @@ class _InMemoryProviderExecutionStore:
             if previous is not None and observed_at < previous.observed_at:
                 raise ValueError("probe clock is older than provider state")
             reservation = self._probe_reservations.get(provider_id)
-            expired_reservation = False
             if reservation is not None and reservation[1] <= observed_at:
                 self._probe_reservations.pop(provider_id, None)
-                reservation = None
-                expired_reservation = True
-            if reservation is not None:
+            active_reservation = (
+                reservation
+                if reservation is not None and reservation[1] > observed_at
+                else None
+            )
+            events = self._probe_budget_events.setdefault(provider_id, [])
+            decision = policy.admission(
+                now=observed_at,
+                requested_cost_units=cost_units,
+                active_until=(
+                    active_reservation[1]
+                    if active_reservation is not None
+                    else None
+                ),
+                latest_started_at=(
+                    reservation[2] if reservation is not None else None
+                ),
+                latest_next_probe_at=(
+                    previous.next_probe_at if previous is not None else None
+                ),
+                latest_was_healthy=(
+                    previous.blocker is None if previous is not None else None
+                ),
+                events=events,
+            )
+            if not decision.acquired:
                 state = previous or _unknown_provider_state(provider_id, observed_at)
-                return ProbeReservation(acquired=False, state=state)
-            if (
-                not expired_reservation
-                and previous is not None
-                and observed_at < previous.next_probe_at
-            ):
                 return ProbeReservation(
                     acquired=False,
-                    state=previous,
-                    usable_without_probe=True,
+                    state=state,
+                    usable_without_probe=(
+                        previous is not None
+                        and decision.reason in {"minimum_interval", "backoff"}
+                    ),
                 )
-            used = 0
-            window_started_at = observed_at
-            if (
-                previous is not None
-                and observed_at - previous.probe_window_started_at < policy.window
-            ):
-                used = previous.probe_cost_used
-                window_started_at = previous.probe_window_started_at
-            if used + cost_units > policy.max_probe_cost_units:
-                state = previous or _unknown_provider_state(provider_id, observed_at)
-                return ProbeReservation(acquired=False, state=state)
+            events.append((observed_at, cost_units))
+            window_started_at, used = policy.budget_snapshot(
+                now=observed_at,
+                events=events,
+            )
             provisional = ProviderStateView(
                 provider_id=provider_id,
                 blocker=(
@@ -417,7 +433,7 @@ class _InMemoryProviderExecutionStore:
                 ),
                 next_probe_at=observed_at + policy.minimum_interval,
                 probe_window_started_at=window_started_at,
-                probe_cost_used=used + cost_units,
+                probe_cost_used=used,
             )
             self._provider_states[provider_id] = provisional
             self._probe_reservations[provider_id] = (
