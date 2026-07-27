@@ -429,6 +429,11 @@ def settle_completed_task_issues(
                 pending = task.get("issue_close_pending")
                 if not isinstance(pending, dict):
                     continue
+                if (
+                    task.get("issue_disposition") != "close"
+                    or pending.get("issue_disposition") != "close"
+                ):
+                    continue
                 owner = str(pending.get("completion_owner") or "")
                 if owner not in owners:
                     continue

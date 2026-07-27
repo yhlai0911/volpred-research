@@ -21,7 +21,8 @@ Commands:
   release  --id <task_id>
   start    --id <task_id>
   handoff-main-thread --id <task_id> --note <text>
-  complete --id <task_id> [--result <text>] [--status succeeded|failed|blocked]
+  complete --id <task_id> [--result <text>] [--status succeeded|failed]
+           [--issue-disposition contained|close]
   list     [--status pending|claimed|in_progress|stale] [--owner <name>] [--limit N] [--codex-eligible]
   cleanup  --stale-hours <N>   (auto-release claims older than N hours with no completion)
 
@@ -30,6 +31,8 @@ File lock: fcntl.LOCK_EX on next_tasks.json across read-modify-write.
 Run:
   uv run python scripts/task_pool_claim.py claim --id <id> --owner hourly-dispatch
   uv run python scripts/task_pool_claim.py complete --id <id> --result "summary" --status succeeded
+  # Only after the linked GitHub issue itself passes every acceptance gate:
+  uv run python scripts/task_pool_claim.py complete --id <id> --status succeeded --issue-disposition close
 """
 from __future__ import annotations
 
@@ -1180,25 +1183,48 @@ def _complete_locked(
         out = {"ok": True, "task_id": args.id, "status": args.status}
         issue_ref = task.get("issue_ref")
         if args.status == "succeeded" and issue_ref is not None:
+            issue_disposition = getattr(
+                args, "issue_disposition", "contained"
+            )
+            if issue_disposition not in {"contained", "close"}:
+                raise ValueError(
+                    "issue_disposition must be contained or close"
+                )
             number = issue_number(issue_ref)
             if number is None:
                 out["issue_tracker_sync"] = {
                     "ok": False,
-                    "action": "defer_close_until_commit",
+                    "action": (
+                        "defer_close_until_commit"
+                        if issue_disposition == "close"
+                        else "keep_open"
+                    ),
                     "reason": "invalid_issue_ref",
-                }
-            elif not completion_base_commit:
-                out["issue_tracker_sync"] = {
-                    "ok": False,
-                    "action": "defer_close_until_commit",
-                    "issue_ref": normalize_issue_ref(issue_ref),
-                    "issue_number": number,
-                    "reason": "git_head_unavailable",
                 }
             else:
                 canonical_ref = normalize_issue_ref(issue_ref)
                 task["issue_ref"] = canonical_ref
+                task["issue_disposition"] = issue_disposition
+            if number is not None and issue_disposition == "contained":
+                task.pop("issue_close_pending", None)
+                out["issue_tracker_sync"] = {
+                    "ok": True,
+                    "action": "keep_open",
+                    "issue_ref": canonical_ref,
+                    "issue_number": number,
+                    "disposition": "contained",
+                }
+            elif number is not None and not completion_base_commit:
+                out["issue_tracker_sync"] = {
+                    "ok": False,
+                    "action": "defer_close_until_commit",
+                    "issue_ref": canonical_ref,
+                    "issue_number": number,
+                    "reason": "git_head_unavailable",
+                }
+            elif number is not None:
                 task["issue_close_pending"] = {
+                    "issue_disposition": "close",
                     "issue_ref": canonical_ref,
                     "task_id": args.id,
                     "completion_owner": completion_owner,
@@ -1504,7 +1530,7 @@ def main() -> int:
     p = sub.add_parser("start"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_start)
     p = sub.add_parser("release"); p.add_argument("--id", required=True); p.set_defaults(fn=cmd_release)
     p = sub.add_parser("handoff-main-thread"); p.add_argument("--id", required=True); p.add_argument("--note", required=True); p.set_defaults(fn=cmd_handoff_main_thread)
-    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.set_defaults(fn=cmd_complete)
+    p = sub.add_parser("complete"); p.add_argument("--id", required=True); p.add_argument("--status", choices=["succeeded", "failed"], default="succeeded"); p.add_argument("--result"); p.add_argument("--issue-disposition", choices=["contained", "close"], default="contained", help="GitHub issue lifecycle: keep open by default; close only after all issue acceptance gates pass"); p.set_defaults(fn=cmd_complete)
     p = sub.add_parser("annotate", help="set free-form metadata fields on a task (locked canonical write; replaces jq-edit)")
     p.add_argument("--id", required=True)
     p.add_argument("--set", action="append", metavar="FIELD=VALUE", help="set FIELD to a string VALUE (repeatable)")

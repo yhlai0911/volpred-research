@@ -172,6 +172,7 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
 ) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "linked-ticket",
         "completion_owner": "codex-vscode",
@@ -184,6 +185,7 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
                 {
                     "id": "linked-ticket",
                     "status": "succeeded",
+                    "issue_disposition": "close",
                     "priority": 2,
                     "result": "implemented acceptance criteria",
                     "issue_ref": "#37",
@@ -241,6 +243,7 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
 def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "linked-ticket",
         "completion_owner": "codex-vscode",
@@ -251,6 +254,7 @@ def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
         {
             "id": "linked-ticket",
             "status": "succeeded",
+            "issue_disposition": "close",
             "priority": 2,
             "issue_ref": "#37",
             "issue_close_pending": pending,
@@ -276,9 +280,49 @@ def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
     assert saved[0]["issue_close_pending"]["commit_sha"] == "b" * 40
 
 
+def test_contained_issue_receipt_never_calls_external_closer(
+    tmp_path,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "contained-slice",
+                    "status": "succeeded",
+                    "issue_ref": "#37",
+                    "issue_disposition": "contained",
+                    "issue_close_pending": {
+                        "issue_ref": "#37",
+                        "task_id": "contained-slice",
+                        "completion_owner": "codex-vscode",
+                        "completed_at": "2026-07-26T12:00:00+00:00",
+                        "completion_base_commit": "1" * 40,
+                    },
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        completed_task_ids={"contained-slice"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=lambda **kwargs: calls.append(kwargs),
+    )
+
+    assert settled == []
+    assert calls == []
+
+
 def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "task-a",
         "completion_owner": "codex-vscode",
@@ -291,6 +335,7 @@ def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -
                 {
                     "id": "task-a",
                     "status": "succeeded",
+                    "issue_disposition": "close",
                     "issue_ref": "#37",
                     "issue_close_pending": pending,
                 }
@@ -334,8 +379,10 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                 {
                     "id": "task-a",
                     "status": "succeeded",
+                    "issue_disposition": "close",
                     "issue_ref": "#37",
                     "issue_close_pending": {
+                        "issue_disposition": "close",
                         "issue_ref": "#37",
                         "task_id": "task-a",
                         "completion_owner": "codex-vscode",
@@ -346,8 +393,10 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                 {
                     "id": "task-b",
                     "status": "succeeded",
+                    "issue_disposition": "close",
                     "issue_ref": "#38",
                     "issue_close_pending": {
+                        "issue_disposition": "close",
                         "issue_ref": "#38",
                         "task_id": "task-b",
                         "completion_owner": "codex-vscode",
@@ -421,8 +470,10 @@ def test_explicit_task_ids_exclude_same_owner_same_base_sibling(tmp_path) -> Non
             {
                 "id": task_id,
                 "status": "succeeded",
+                "issue_disposition": "close",
                 "issue_ref": issue_ref,
                 "issue_close_pending": {
+                    "issue_disposition": "close",
                     "issue_ref": issue_ref,
                     "task_id": task_id,
                     "completion_owner": "codex-vscode",
