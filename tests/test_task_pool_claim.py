@@ -260,6 +260,7 @@ def test_complete_defers_linked_issue_close_until_real_commit(
             id="linked-ticket",
             status="succeeded",
             result="implemented acceptance criteria",
+            issue_disposition="close",
         ),
         completion_base_commit="1" * 40,
     )
@@ -272,13 +273,96 @@ def test_complete_defers_linked_issue_close_until_real_commit(
         "issue_number": 37,
     }
     assert saved["issue_close_pending"] == {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "linked-ticket",
         "completion_owner": "codex-vscode",
         "completed_at": saved["completed_at"],
         "completion_base_commit": "1" * 40,
     }
+    assert saved["issue_disposition"] == "close"
     assert "issue_closed_commit" not in saved
+
+
+def test_linked_success_defaults_to_contained_without_issue_close_receipt(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "contained-slice",
+                    "status": "in_progress",
+                    "claimed_by": "codex-vscode",
+                    "issue_ref": "#37",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="contained-slice",
+            status="succeeded",
+            result="slice passed; umbrella remains contained",
+        ),
+        completion_base_commit="1" * 40,
+    )
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert result["issue_tracker_sync"] == {
+        "ok": True,
+        "action": "keep_open",
+        "issue_ref": "#37",
+        "issue_number": 37,
+        "disposition": "contained",
+    }
+    assert saved["issue_disposition"] == "contained"
+    assert "issue_close_pending" not in saved
+
+
+def test_explicit_issue_close_without_git_head_keeps_task_in_progress(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = {
+        "id": "close-after-commit",
+        "status": "in_progress",
+        "claimed_by": "codex-vscode",
+        "issue_ref": "#37",
+    }
+    next_tasks.write_text(json.dumps([original]), encoding="utf-8")
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    result, burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="close-after-commit",
+            status="succeeded",
+            result="all issue gates passed",
+            issue_disposition="close",
+        ),
+        completion_base_commit=None,
+    )
+
+    assert result == {
+        "ok": False,
+        "reason": "git_head_unavailable",
+        "task_id": "close-after-commit",
+        "issue_ref": "#37",
+        "issue_number": 37,
+    }
+    assert burst is None
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["status"] == "in_progress"
+    assert saved["claimed_by"] == "codex-vscode"
+    assert "completed_at" not in saved
+    assert "issue_disposition" not in saved
+    assert "issue_close_pending" not in saved
 
 
 def test_complete_rejects_blocked_disposition_in_favor_of_block_cli(
@@ -316,6 +400,7 @@ def test_complete_rejects_blocked_disposition_in_favor_of_block_cli(
     [
         "issue_ref",
         "issue_close_pending",
+        "issue_disposition",
         "issue_closed_commit",
         "issue_closed_at",
     ],

@@ -390,7 +390,10 @@ uv run python scripts/task_pool_claim.py claim --id <task_id> --owner codex-vsco
 ```bash
 uv run python scripts/task_pool_claim.py start --id <task_id>
 # ... 執行任務（完整完成、不留半成品）...
+# 預設 contained：task 成功但 GitHub issue 保持 OPEN
 uv run python scripts/task_pool_claim.py complete --id <task_id> --status succeeded --result "<2-3 行摘要>"
+# 只有整張 issue 的 acceptance + 五步 Gate 全過才可追加：
+#   --issue-disposition close
 ```
 
 中途要放棄（誤抓 / 不適合做）：

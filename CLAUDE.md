@@ -356,6 +356,9 @@ plan-spec-ticket 現況：`docs/agents/ownership.md`。
 ### Issue tracker
 
 本專案使用 GitHub Issues 追蹤工程工作。See `docs/agents/issue-tracker.md`.
+Runtime task 的 `succeeded` 預設只代表 slice 完成並保持 issue
+`contained/OPEN`；只有整張 issue 的 acceptance 與五步 Gate 全過，才可在
+`task_pool_claim.py complete` 明確傳 `--issue-disposition close`。
 
 GitHub CLI 已安裝於 `/opt/homebrew/bin/gh`。非互動 shell 可能沒有
 `/opt/homebrew/bin`，因此 `gh: command not found` **不代表未安裝**：先跑

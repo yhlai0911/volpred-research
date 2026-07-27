@@ -36,14 +36,20 @@ runtime task links the two with optional canonical `issue_ref="#<number>"`:
 - a successful local claim best-effort adds the current GitHub user as assignee;
   malformed refs or unavailable `gh` are reported but never roll back the local
   claim;
-- successful task completion writes an `issue_close_pending` receipt; it does
-  **not** close the issue against the pre-commit HEAD;
+- task success and issue closure are separate lifecycle dimensions.  Successful
+  linked tasks default to `issue_disposition=contained`, keep the issue open,
+  and do not create a close receipt;
+- only `complete ... --issue-disposition close` may write an
+  `issue_close_pending` receipt, and only after every acceptance criterion plus
+  the five-step Gate for the **whole issue** has passed.  Completing a slice,
+  audit, canary or blocker is not authority to close its umbrella issue;
 - the exact-path Git writer receives `--task-id <id>` (repeatable), or PHASE-Z
   snapshots the exact task IDs owned by its immutable fire identities; this
   keeps the task/commit binding valid even if another writer advances HEAD
   between `complete` and the task's commit;
-- only after obtaining that task's real commit SHA does the writer close the
-  issue and write `issue_closed_commit` back to the same task;
+- only after obtaining that task's real commit SHA does the writer close an
+  explicitly `close`-disposed issue and write `issue_closed_commit` back to the
+  same task.  Missing, legacy or mismatched disposition receipts fail closed;
 - close replay requires the task/commit marker already present in GitHub.  A
   foreign manual close is not claimed as runtime completion.
 

@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import argparse
 import json
 from types import SimpleNamespace
 
+import pytest
+
+from scripts import task_pool_claim
 from volpred.ops.issue_tracker_sync import (
     assign_issue,
     close_issue,
@@ -172,6 +176,7 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
 ) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "linked-ticket",
         "completion_owner": "codex-vscode",
@@ -184,6 +189,8 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
                 {
                     "id": "linked-ticket",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_disposition": "close",
                     "priority": 2,
                     "result": "implemented acceptance criteria",
                     "issue_ref": "#37",
@@ -241,6 +248,7 @@ def test_post_commit_settlement_closes_issue_and_binds_exact_commit(
 def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "linked-ticket",
         "completion_owner": "codex-vscode",
@@ -251,6 +259,8 @@ def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
         {
             "id": "linked-ticket",
             "status": "succeeded",
+            "completed_at": "2026-07-26T12:00:00+00:00",
+            "issue_disposition": "close",
             "priority": 2,
             "issue_ref": "#37",
             "issue_close_pending": pending,
@@ -276,9 +286,199 @@ def test_post_commit_issue_failure_stays_retryable(tmp_path) -> None:
     assert saved[0]["issue_close_pending"]["commit_sha"] == "b" * 40
 
 
+def test_contained_issue_receipt_never_calls_external_closer(
+    tmp_path,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "contained-slice",
+                    "status": "succeeded",
+                    "issue_ref": "#37",
+                    "issue_disposition": "contained",
+                    "issue_close_pending": {
+                        "issue_ref": "#37",
+                        "task_id": "contained-slice",
+                        "completion_owner": "codex-vscode",
+                        "completed_at": "2026-07-26T12:00:00+00:00",
+                        "completion_base_commit": "1" * 40,
+                    },
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        completed_task_ids={"contained-slice"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=lambda **kwargs: calls.append(kwargs),
+    )
+
+    assert settled == []
+    assert calls == []
+
+
+def test_complete_receipt_flows_into_exact_commit_issue_settlement(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "whole-issue",
+                    "status": "in_progress",
+                    "claimed_by": "codex-vscode",
+                    "issue_ref": "#37",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", queue)
+    result, _burst = task_pool_claim._complete_locked(
+        argparse.Namespace(
+            id="whole-issue",
+            status="succeeded",
+            result="all acceptance gates passed",
+            issue_disposition="close",
+        ),
+        completion_base_commit="1" * 40,
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        completed_task_ids={"whole-issue"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=lambda **kwargs: calls.append(kwargs)
+        or {"ok": True, "issue_number": 37},
+    )
+
+    assert result["issue_tracker_sync"]["action"] == (
+        "defer_close_until_commit"
+    )
+    assert [call["task_id"] for call in calls] == ["whole-issue"]
+    assert settled[0]["commit_sha"] == "2" * 40
+    saved = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert saved["issue_closed_commit"] == "2" * 40
+    assert "issue_close_pending" not in saved
+
+
+def test_settlement_does_not_acknowledge_disposition_changed_during_close(
+    tmp_path,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    pending = {
+        "issue_disposition": "close",
+        "issue_ref": "#37",
+        "task_id": "whole-issue",
+        "completion_owner": "codex-vscode",
+        "completed_at": "2026-07-26T12:00:00+00:00",
+        "completion_base_commit": "1" * 40,
+    }
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "whole-issue",
+                    "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_ref": "#37",
+                    "issue_disposition": "close",
+                    "issue_close_pending": pending,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    def drift_disposition(**_kwargs):
+        payload = json.loads(queue.read_text(encoding="utf-8"))
+        payload[0]["issue_disposition"] = "contained"
+        queue.write_text(json.dumps(payload), encoding="utf-8")
+        return {"ok": True, "issue_number": 37}
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=drift_disposition,
+    )
+
+    assert settled == []
+    saved = json.loads(queue.read_text(encoding="utf-8"))[0]
+    assert saved["issue_disposition"] == "contained"
+    assert "issue_closed_commit" not in saved
+
+
+@pytest.mark.parametrize(
+    ("drifted_field", "drifted_value"),
+    [
+        ("task_id", "different-task"),
+        ("issue_ref", "#47"),
+        ("completed_at", "2026-07-26T12:01:00+00:00"),
+    ],
+)
+def test_ambiguous_pending_identity_never_calls_external_closer(
+    tmp_path,
+    drifted_field,
+    drifted_value,
+) -> None:
+    queue = tmp_path / "next_tasks.json"
+    pending = {
+        "issue_disposition": "close",
+        "issue_ref": "#37",
+        "task_id": "whole-issue",
+        "completion_owner": "codex-vscode",
+        "completed_at": "2026-07-26T12:00:00+00:00",
+        "completion_base_commit": "1" * 40,
+    }
+    pending[drifted_field] = drifted_value
+    queue.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "whole-issue",
+                    "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_ref": "#37",
+                    "issue_disposition": "close",
+                    "issue_close_pending": pending,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    calls = []
+
+    settled = settle_completed_task_issues(
+        path=queue,
+        claim_owners={"codex-vscode"},
+        commit_sha="2" * 40,
+        commit_parent_sha="1" * 40,
+        closer=lambda **kwargs: calls.append(kwargs),
+    )
+
+    assert settled == []
+    assert calls == []
+
+
 def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -> None:
     queue = tmp_path / "next_tasks.json"
     pending = {
+        "issue_disposition": "close",
         "issue_ref": "#37",
         "task_id": "task-a",
         "completion_owner": "codex-vscode",
@@ -291,6 +491,8 @@ def test_failed_close_retries_original_commit_not_later_owner_commit(tmp_path) -
                 {
                     "id": "task-a",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_disposition": "close",
                     "issue_ref": "#37",
                     "issue_close_pending": pending,
                 }
@@ -334,8 +536,11 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                 {
                     "id": "task-a",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_disposition": "close",
                     "issue_ref": "#37",
                     "issue_close_pending": {
+                        "issue_disposition": "close",
                         "issue_ref": "#37",
                         "task_id": "task-a",
                         "completion_owner": "codex-vscode",
@@ -346,8 +551,11 @@ def test_explicit_task_identity_survives_intervening_unrelated_commit(tmp_path) 
                 {
                     "id": "task-b",
                     "status": "succeeded",
+                    "completed_at": "2026-07-26T12:00:00+00:00",
+                    "issue_disposition": "close",
                     "issue_ref": "#38",
                     "issue_close_pending": {
+                        "issue_disposition": "close",
                         "issue_ref": "#38",
                         "task_id": "task-b",
                         "completion_owner": "codex-vscode",
@@ -421,8 +629,11 @@ def test_explicit_task_ids_exclude_same_owner_same_base_sibling(tmp_path) -> Non
             {
                 "id": task_id,
                 "status": "succeeded",
+                "completed_at": "2026-07-26T12:00:00+00:00",
+                "issue_disposition": "close",
                 "issue_ref": issue_ref,
                 "issue_close_pending": {
+                    "issue_disposition": "close",
                     "issue_ref": issue_ref,
                     "task_id": task_id,
                     "completion_owner": "codex-vscode",
