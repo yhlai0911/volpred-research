@@ -2749,3 +2749,7 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - ✅ TDD 證明 9-path noisy owner 不會壓掉另一 owner 的 missing half；PHASE-Z 相鄰
   **105 passed**。同類高併發 `candidates exceeds cap 8` 造成 recovery 全關閉的根因為
   **`root_cause_fixed_and_verified`**。
+- ✅ Production 採 deferred self-reload：先讓既有 worker／舊 PHASE-Z cohort 自然 drain，
+  再於 2026-07-28 00:01 台北時間明確回報載入 `phase_z.py`，daemon 從 PID 39318
+  換為 PID 85797；新進程 heartbeat 正常、`auth_blocked=false`，全程沒有用 signal
+  終止 worker 或回滾 claim。
