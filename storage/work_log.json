@@ -27612,5 +27612,55 @@
     "owner": "hourly-slot-2-212d96ce0cfe45b984fb85d72e2390b4",
     "commit": null,
     "summary": "K1715 codex-adjudicate 收件（PHASE A compute followup collect_completed，agent-brief_k1715_adjudicate-27247d）。K1715（score-driven GAS/DCS Beta-t-EGARCH 直接聯合估 VaR+ES vs GARCH family，SPY 2000-2026，n=6678，OOS 4164，expanding refit/63d×67）：review_verdict.json verdict=PASS、blocking_defects=[]（Codex gpt-5.6-sol/xhigh）。結論 NULL：score-driven 與 GARCH 統計打平（pinball/FZ0 各 sig-better 0/3、worse 0/3、tied 3/3，Harvey |t|>3.0），四族共享左尾覆蓋不足；設計未隔離 distribution/lag/recursion 因素，留 follow-up。收件動作：主線程依 K1259 程式化寫 knowledge（item_id 5e41886b, verdict=NULL, experiment_id=K1715）。merge 被兩道 gate 擋：artifact gate 缺 reproduce_spec + cert gate。比照 k1719 慣例（全 repo reproduce_spec 皆 network=deny+snapshot）補齊：新增 K1715_source_snapshot.csv 凍結 SPY auto-adjusted close 窗口（n_ret=6678、末筆 2026-07-24，與 results 完全吻合）、load_returns() 改讀 snapshot（download 回退）、寫 reproduce_spec.json（deny/seed42/tol 1e-6-1e-8 附 MLE-bootstrap 平台敏感度理由），worktree branch commit。此 load_returns 編輯使 K1715.py 偏離 Codex 已審 bytes（98941ea0->11953fcd），cert gate 正確擋下（禁手改 verdict）。依 cert remedy enqueue 有界 Codex re-cert agent job（agent-brief_k1715_recert-5cabc2，high effort，cwd=worktree，result=review_verdict.json）；followup=merge+complete。K1715 保持 in_progress 連結該 async job（同 heavy-compute 慣例，完成單位是 task 非 fire）；原 adjudicate followup mark-followup-dispatched。"
+  },
+  {
+    "timestamp": "2026-07-27T08:09:06+08:00",
+    "task_type": "experiment",
+    "task_id": "K1658",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-2-478cbadd879c4d62896429dcf0e681de",
+    "owner": "hourly-slot-2-478cbadd879c4d62896429dcf0e681de",
+    "commit": "c712ae1ad",
+    "summary": "K1658 收班結案（starved 保底席）：FOMC statement(14:00 ET) vs press-conference(14:30 ET) 兩段 shock 分布反應拆解。核心分離問題以免費資料 INFEASIBLE（intraday FOMC N=2，遠低於 power 門檻），如實記為 primary NULL/infeasible；Part3 lookahead-clean(.shift(1)+runtime assert)、HAC-robust、Holm-corrected 的 aggregate FOMC→t+1 vol 檢定完成，0/6 survive Holm（clean NULL，量的是 COMBINED effect）。已於 03:56 merge 進 main（commits 6b71f23f2/c8d0295b9/0845c8dca/c712ae1ad），codex primary-path review + interpretation agent 二審 = PASS，9/9 unit tests pass，reproduce_spec.json 已加，knowledge k_id=K1658 已寫。本班僅收尾核實+翻 status，無新 compute。"
+  },
+  {
+    "timestamp": "2026-07-27T08:09:23+08:00",
+    "task_type": "experiment",
+    "task_id": "K1715",
+    "outcome": "collected_recert_fail_optionB_fix_enqueued_recert2",
+    "actor": "hourly-slot-1-a9c8b1f2094b4d44a5ececbada417490",
+    "owner": "hourly-slot-1-a9c8b1f2094b4d44a5ececbada417490",
+    "commit": "fdf4ab297",
+    "summary": "PHASE A followup 收件（collect_completed，agent-brief_k1715_recert-5cabc2）：K1715 re-cert round 1 verdict=FAIL。裁 defect=「lossy %.10f snapshot serialization」— max |Δclose|≈5.0e-11、max |Δreturn|≈1.6e-10，Codex 明列為 reproducibility-artifact defect（非 science defect：primary review 已 PASS、blocking_defects=[]、model/estimation/eval/seed/lag 未變、無 lookahead；NULL 結論與 knowledge item 5e41886b 完好）。\n\n決策：拆解「科學 PASS vs 打包 FAIL」。router experiment 已 exhausted=true/at_ceiling=true → 禁止同法 fix-attempt（heavy re-run），改採 Codex recert 自列的 option B（re-scope 到已宣告 tolerance）。關鍵證據：reproduce_spec 早已宣告 rtol=1e-6/atol=1e-8（near-integrated likelihood ridge 非 bit-reproducible 之 rationale），而 snapshot Δreturn 1.6e-10 « atol 1e-8 → 在宣告契約下 snapshot 就是合法 tolerance-level 重現，byte-exact 從非其標準。\n\ninline 施作 option B（無 re-run、snapshot 檔 sha256 d5dae218 不變）：(1) load_returns() docstring 移除「freezes the exact ... window that produced the archived results」偽 byte-exact 宣稱，改述 tolerance-level freeze；(2) snapshot writer %.10f→%.17g（未來 re-freeze 無損，read path/pinned snapshot 不動）；(3) reproduce_spec comparison.reason 增補 snapshot tolerance-level 範圍說明。diff 驗證：僅 docstring+comment+write-format+reason，零 model/eval 邏輯變動；py/json 語法 OK。K1715.py sha256 11953fcd→379a67cd。\n\ngit_writer_lock 提交 worktree branch fdf4ab297。因 K1715.py bytes 變動必經 cert gate → enqueue Codex re-cert round 2（compute job agent-brief_k1715_recert2-e2b9fd，opus/high，cwd=worktree，source-task-id=K1715，timeout 3600），followup=PASS→merge_worktree+complete K1715 succeeded；FAIL→因 exhausted 不再 fix，改 3-strike terminal（escalate email 給老闆裁 byte-exact vs tolerance 標準、complete failed，禁 loop）。舊 followup 已 mark-followup-dispatched→recert2。本 fire 職責到 enqueue 為止（async 收件由後續 PHASE A）。"
+  },
+  {
+    "timestamp": "2026-07-27T08:14:46+08:00",
+    "task_type": "experiment",
+    "task_id": "k528_primary_codex_certify_merge",
+    "outcome": "dispatched_primary_codex_certify",
+    "actor": "hourly-slot-1-a9c8b1f2094b4d44a5ececbada417490",
+    "owner": "hourly-slot-1-a9c8b1f2094b4d44a5ececbada417490",
+    "commit": null,
+    "summary": "STARVATION LOCKOUT 派工（本班 dispatch 僅 3 candidates：ci-red[platform_ops→supervisor_preassignment_required 本 slot 不可 claim]、k528[P2 選中]、K1720[P3 保底]）。選 k528_primary_codex_certify_merge（P2、餓死 146.8h、experiment/worktree、可 claim）。\n\n盤點確認可開工：prerequisite k528_round7_gate_hardening 今日 04:12 已完成（PASS，15 pytest；phrase-list gate 換成 structural nearest-governor release-misbinding gate + evasion suite）；Codex 額度今日確認可用（04:12 QUOTA_OK）。worktree k528-round7-204d556b / branch k528-nfp-official-dates / HEAD b2634ed41；無任何 review_verdict 指向當前 HEAD（v2/v6 皆舊 commit 且 FAIL）→ 需 fresh primary Codex 認證。唯一未關 gate = primary-path Codex（fallback B1-B4 PASS ≠ Codex PASS，不得 merge，per experiments.md）。\n\n派 primary-path Codex 認證 compute job（agent-brief_k528_primary_certify-b7d432，opus/high，cwd=worktree，source-task-id=k528_primary_codex_certify_merge 已 legally bind → awaiting_agent_job，timeout 5400，result-artifact review_verdict.json）。Brief 內建 saga 三大歷史 defect class 供 Codex 重驗是否關閉：(1) v2 wrong official dates（max() 撿 off-cycle FRED release-id-50）(2) v2 contaminated corrections（正確日期下 sig→NS flip 不成立、1.1779x p~0.0249）(3) v6 completeness fail-closed bypass（KNOWN_MISSING_MONTHS+REVIEWED_MULTI_ENTRY_MONTHS 繞過）；並釘死 claim-surface 當前 sha256（k528_nfp_event_study.py 917133ce…等）+ reviewed_commit 必須==當前 HEAD 否則視為未認證。followup=PASS→正式 merge_worktree.sh+certify+complete succeeded；FAIL→建 round-8+complete failed，禁 merge/禁 hand-edit PASS。本 fire 職責到 enqueue 為止（async 收件由後續 PHASE A）。"
+  },
+  {
+    "timestamp": "2026-07-27T08:15:10+08:00",
+    "task_type": "experiment",
+    "task_id": "K1720",
+    "outcome": "dispatched_to_compute_queue",
+    "actor": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855",
+    "owner": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855",
+    "commit": null,
+    "summary": "K1720（LETF 機械再平衡×尾盤波動放大，TQQQ/SQQQ/SSO 1h bar）依 experiment topology=worktree/xhigh 走 compute_queue。建 registered worktree dispatch-slot-3-87c7269d-k1720，寫 brief（含 experiments.md workflow：README+lookahead policy+success criteria、K1720.py signal.shift(1)+seed=42、K1720_results.json byte-traceable、Codex primary review、多重檢定誠實 NULL 可接受），enqueue-agent job=agent-brief_k1720-6c33b8，source task → awaiting_agent_job。收件由後續 fire PHASE A（Codex review→驗數字→CONDITIONAL_PASS 才寫 knowledge→merge_worktree.sh）。"
+  },
+  {
+    "timestamp": "2026-07-27T08:15:10+08:00",
+    "task_type": "experiment",
+    "task_id": "K1721",
+    "outcome": "dispatched_to_compute_queue",
+    "actor": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855",
+    "owner": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855",
+    "commit": null,
+    "summary": "K1721（GPR 日頻 Acts vs Threats 分解對 vol 不對稱預測，Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，SPY/GLD/XLE/ITA 多 horizon）依 experiment topology=worktree/xhigh 走 compute_queue。建 registered worktree dispatch-slot-3-87c7269d-k1721，寫 brief（含 HAR-RV 基準+GPR 擴充、OOS QLIKE、DM/Clark-West 檢定、signal.shift(1)+seed=42、多重檢定校正、NULL 可接受），enqueue-agent job=agent-brief_k1721-6f6bbb，source task → awaiting_agent_job。收件由後續 fire PHASE A。"
   }
 ]

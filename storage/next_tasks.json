@@ -27948,7 +27948,7 @@
     "title": "K1658: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Tre",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 1492). Original: FOMC statement vs press-conference shock 的分布反應拆解** — 用 FOMC statement、press-conference transcript/time stamps + SOFR/Treasury futures event windows，分離 statement shock 與 press-conference shock，檢定二者對 TLT/IEF/ZN=F 次日 RV、rate-vol skew proxy、tail jump 的不同影響；與 line 1425「聲明/紀要語言複雜度」正交——這裡是同日兩階段 market-reaction 分解，不是文本可讀性 level（來源：Fed FEDS 2026-029 “Coarse Statements and Predictive Pressers”）。\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1658.py with signal.shift(1) + seed=42, (c) K1658_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -28009,12 +28009,32 @@
         "to": "pending",
         "by": "release",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-27T00:07:23.121773+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-478cbadd879c4d62896429dcf0e681de"
+      },
+      {
+        "ts": "2026-07-27T00:08:29.167055+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-478cbadd879c4d62896429dcf0e681de"
+      },
+      {
+        "ts": "2026-07-27T00:09:07.056146+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-478cbadd879c4d62896429dcf0e681de"
       }
     ],
     "last_released_at": "2026-07-26T19:50:03.692074+00:00",
     "compute_job_id": "agent-agent-brief_k1658_rerun_204d556b-3104b0",
-    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1658_rerun_204d556b-3104b0; awaiting PHASE A collection",
-    "last_release_reason": "auto_release_stale_2h"
+    "result": "dispatched to compute job agent-brief_k1658_39b53bf6-b574ac; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1658_rerun_204d556b-3104b0; awaiting PHASE A collection\n\nstarved 保底席收班：K1658 FOMC statement vs presser shock 分離 INFEASIBLE(N=2)如實記 NULL；Part3 aggregate FOMC→t+1 vol Holm-corrected 0/6 survive(clean NULL)。已 merge main(c712ae1ad) + codex PASS + 9/9 tests + reproduce_spec + knowledge K1658。本班僅核實收尾。",
+    "last_release_reason": "auto_release_stale_2h",
+    "started_at": "2026-07-27T00:08:29.167040+00:00",
+    "completed_at": "2026-07-27T00:09:07.056124+00:00"
   },
   {
     "id": "K1659",
@@ -34042,7 +34062,7 @@
     "title": "K1720: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arX",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 571). Original: 槓桿 ETF 機械再平衡與尾盤波動放大 — rebalance 需求 ∝(k²−k)×報酬×AUM（TQQQ/SQQQ/SSO，1h bar），檢定大漲跌日尾盤 vol/continuation 是否隨 LETF AUM 放大（來源：arXiv/JPM 2025 beyond volatility drag）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1720.py with signal.shift(1) + seed=42, (c) K1720_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34051,14 +34071,38 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-16T00:00:02Z"
+    "created_at": "2026-07-16T00:00:02Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T00:10:36.496421+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855"
+      },
+      {
+        "ts": "2026-07-27T00:10:41.408837+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855"
+      },
+      {
+        "ts": "2026-07-27T00:12:29.342876+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1720-6c33b8",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1720-6c33b8",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1720-6c33b8; awaiting PHASE A collection"
   },
   {
     "id": "K1721",
     "title": "K1721: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 574). Original: GPR 日頻 Acts vs Threats 分解對 vol 的不對稱預測 — Caldara-Iacoviello GPRD 拆 GPRA/GPRT 入 HAR-RV，檢定對 SPY/GLD/XLE/ITA 不同 horizon 預測力（來源：AER 2022 + IMF GFSR 2025-04 Ch.2）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1721.py with signal.shift(1) + seed=42, (c) K1721_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -34067,7 +34111,31 @@
       "experiment",
       "autonomous-research"
     ],
-    "created_at": "2026-07-16T00:00:02Z"
+    "created_at": "2026-07-16T00:00:02Z",
+    "status_history": [
+      {
+        "ts": "2026-07-27T00:13:22.057302+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855"
+      },
+      {
+        "ts": "2026-07-27T00:13:22.310940+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-87c7269d45984cdcbeff14f1cdfb1855"
+      },
+      {
+        "ts": "2026-07-27T00:14:15.801721+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1721-6f6bbb",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1721-6f6bbb",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job agent-brief_k1721-6f6bbb; awaiting PHASE A collection"
   },
   {
     "id": "K1722",
@@ -40008,7 +40076,7 @@
     "description": "B1-B4 已由獨立收件審查驗過 PASS，唯一未關的 gate 是 primary-path Codex 沒跑成功 (額度到 2026-07-25)。依 .claude/rules/experiments.md，fallback reviewer PASS != Codex PASS，不得 merge。額度回來後: 跑 primary-path codex exec review -> PASS 則走正式 merge_worktree.sh 整合 branch k528-nfp-official-dates (HEAD 5b1f154c1) 並 certify K528; FAIL 則建 round-8。先做 k528_round7_gate_hardening 再送 Codex，免得同一輪被打回。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "collection_review",
     "parent_task_id": "k528_round6_collection_verify",
     "created_at": "2026-07-20T21:19:00.806181+00:00",
@@ -40032,10 +40100,33 @@
         "to": "pending",
         "by": "hourly-slot-3-ea14dc763eff478fb798c7a33deb4ed4",
         "note": "liveness_reconcile: 進程與磁碟兩項均證明脫鉤 — process dead (dispatch_state.completions) AND no worktree on disk AND claim age 35.6min >= grace 20min"
+      },
+      {
+        "ts": "2026-07-27T00:11:33.477256+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-a9c8b1f2094b4d44a5ececbada417490"
+      },
+      {
+        "ts": "2026-07-27T00:12:03.179114+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-a9c8b1f2094b4d44a5ececbada417490"
+      },
+      {
+        "ts": "2026-07-27T00:14:18.411202+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k528_primary_certify-b7d432",
+        "note": "durable_external_execution_receipt"
       }
     ],
     "last_released_at": "2026-07-26T20:45:29.658900+00:00",
-    "last_release_reason": "liveness_reconcile_detached_ea14dc76"
+    "last_release_reason": "liveness_reconcile_detached_ea14dc76",
+    "compute_job_id": "agent-brief_k528_primary_certify-b7d432",
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-brief_k528_primary_certify-b7d432; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T00:15:05Z"
   },
   {
     "id": "dreaming_repeated_tool_failure_dispatch_supervisor_killed_timeout_exi",
@@ -44510,6 +44601,134 @@
     "created_at": "2026-07-26T23:00:04.705189+00:00",
     "title": "CI 紅燈修復（run 30222247599, attempt 1）— main Test Suite",
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30222247599\nattempt: 1\nhead_sha: 79c5260b3\n偵測摘要（仍須讀完整 failed log）：2026-07-26T22:15:14.7068836Z E AssertionError: 1 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1714']\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30222247599 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "issue18_primary_lease_closure_audit_20260727",
+    "title": "[Issue #18] Primary Lease / Fencing 五步 closure audit",
+    "description": "依既有 Matt Issue #18 與 docs/refactor_plan_ops_master_2026_07.md，逐項驗證唯一 remote primary、commit/effect transaction 最新 fencing、stale/network-partition/double-primary fail closed、backend unavailable fail closed、renew/demote/expiry/reject durable receipts。先回讀現有 two-Mac production evidence；任何 acceptance 缺口以 implement→TDD→雙軸 code-review 補底層。未通過五步 Gate 不得關閉 Issue。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "owner_interactive",
+    "created_by": "codex-vscode",
+    "issue_ref": "#18",
+    "created_at": "2026-07-26T23:56:50.373268+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-26T23:56:50.679674+00:00",
+    "claim_session_id": "038c63b50821",
+    "status_history": [
+      {
+        "ts": "2026-07-26T23:56:50.679682+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-26T23:56:54.238466+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-26T23:56:54.238453+00:00"
+  },
+  {
+    "id": "event_article_fomc_2026-07-29_tminus2",
+    "title": "[event_article] Event article: FOMC 2026-07-29 T-2",
+    "description": "Auto-generated by event_jobs single-owner materializer.\nref_event_job_id: fomc-2026-07-29-t2\nevent_key: FOMC_2026_07_29\nevent_type: fomc\nevent_date: 2026-07-29\nevent_series_slot: T-2\n\nAuto-populated by populate_upcoming_events.py. FOMC 2026-07-29 T-2 slot. Run feed-publisher event template; 3-layer dedup; audience=general (T-7 may use research).",
+    "task_type": "event_article",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "main_thread",
+    "created_at": "2026-07-27T00:00:09.482922+00:00",
+    "source": "event_expander",
+    "preferred_agent": "claude",
+    "public_effect": "published",
+    "payload": {
+      "audience": "general",
+      "event_series_slot": "T-2",
+      "event_date": "2026-07-29",
+      "event_type": "FOMC",
+      "event_key": "FOMC_2026_07_29",
+      "event_job_id": "fomc-2026-07-29-t2",
+      "preconditions": []
+    },
+    "ref_event_job_id": "fomc-2026-07-29-t2",
+    "event_key": "FOMC_2026_07_29",
+    "event_type": "fomc",
+    "event_date": "2026-07-29",
+    "event_series_slot": "T-2",
+    "not_before": "2026-07-27T00:00:00+00:00",
+    "deadline": "2026-07-28T12:00:00+00:00",
+    "tags": [
+      "event_article",
+      "reader_facing",
+      "fomc",
+      "T-2",
+      "main-thread-only"
+    ],
+    "dedup_screen": {
+      "verdict": "warn_arc_near_miss",
+      "blocked": false,
+      "reason": "fuzzy descriptive arc near-miss of mile_8d8b8877; entity+mechanism overlap alone is not duplicate evidence — caller must do the 3-layer dedup check",
+      "saturation": 0,
+      "theme_terms": [
+        "fomc",
+        "event",
+        "research",
+        "may",
+        "audience",
+        "auto"
+      ],
+      "near_misses": [
+        {
+          "id": "mile_8d8b8877",
+          "title": "NFP 前夕，VIX 跌到 15.4——市場算便宜了，但就業日波動還是會放大 1.5 倍"
+        }
+      ],
+      "screened_at": "2026-07-27T00:00:09+00:00"
+    }
+  },
+  {
+    "id": "alert_host_cron_fail_20260727",
+    "title": "[alert] Host cron failure detected",
+    "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=3；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/release_settings_audit.log exit=1 at unknown recency=unknown_exited_at\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-27T00:00:42.944199+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "host_cron_fail"
+    ]
+  },
+  {
+    "id": "assign_d0f90705",
+    "title": "PHASE-Z 卡住檔案 incident（51839b3927ff05a9）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 3 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T001858409953Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T00:18:58.499723+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "51839b3927ff05a9",
+      "paths": [
+        "storage/logs/trending_primary_source_verification.jsonl"
+      ],
+      "streaks": {
+        "storage/logs/trending_primary_source_verification.jsonl": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T001858409953Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T00:18:58.489275+00:00",
+      "last_seen_at": "2026-07-27T00:18:58.489275+00:00"
+    },
     "priority_capped_from": 1
   }
 ]
