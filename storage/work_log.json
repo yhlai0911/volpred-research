@@ -28079,5 +28079,15 @@
     "owner": "hourly-slot-2-c1f5b7d85c144d02b0e501adfd981658",
     "commit": "9926bca90",
     "summary": "K1715 escalation attempt 2：修兩個 merge blocker 後把 heavy MLE 重跑派進 compute_queue。\n\n**修正（worktree `k1715-204d556b` branch，commit 9926bca90）**：\n1. BFGS min-NLL guard（Codex CRITICAL）：`fit_model()` 原無條件採用 BFGS polish 的 `res`，\n   BFGS line-search 在 near-integrated ridge 失敗回傳較高 NLL 時較差解會被接受\n   （optimizer_success=false on 268/268 fits 的根源之一）。改為保留 NM/BFGS 中 NLL 較低者。\n2. build_readme.py：「統計上打平」→ 明確 fail-to-reject（非等價宣稱）。phantom 4M-MC 驗證宣稱\n   前次 attempt 已移除，現版明確聲明未另跑獨立 MC。\n\n**重跑**：268 fits（67 refits × 4 Student-t 模型）離線確定性（K1715_source_snapshot.csv 存在），\nheavy compute → compute_queue job `compute-k1715-rerun-bfgs-min-nll-guard-fix-268-fits-offline-1785151275`。\nsource task 標 awaiting_agent_job。followup（experiment/P2）：驗 guard 生效（nm_to_bfgs_improve≥0）+\narch 交叉一致 + regen README + Codex 二審清 CRITICAL + merge_worktree + 主線程寫 knowledge。\n\n**驗證**：py_compile OK；worktree branch commit 落地（2 files, 16+/7-）。fire 職責到 enqueue 為止。"
+  },
+  {
+    "timestamp": "2026-07-27T19:38:49+08:00",
+    "task_type": "experiment",
+    "task_id": "K1724",
+    "outcome": "dispatched_to_queue",
+    "actor": "hourly-slot-1-f4a65558fd2043428a67f2a934d57de5",
+    "owner": "hourly-slot-1-f4a65558fd2043428a67f2a934d57de5",
+    "commit": null,
+    "summary": "K1724（台股當沖佔比 × 波動）dispatched to compute queue as long xhigh research agent (job agent-brief_k1724-d68901). 建 registered worktree dispatch-slot-1-f4a65558-k1724；enqueue-agent 帶 --source-task-id K1724（collision gate）+ result-artifact experiments/k1724/k1724_results.json + followup(verify→codex→merge→knowledge)。task 狀態 awaiting_agent_job，由後續 fire PHASE A 收。本班未動 assign_e6334a67（PHASE-Z 卡住檔案 incident）— platform_ops 被 supervisor_preassignment_required 機械拒絕，且不得經 foreign_disposition actuator 繞道；由 supervisor 預派 channel（codex-vscode 持 sibling Issue#46）處理。slot 2/2 de-rated cap 已滿，本班收班。"
   }
 ]
