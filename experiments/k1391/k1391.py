@@ -76,6 +76,10 @@ print("=" * 70)
 print("\n[1] Loading data from local snapshot...")
 df_raw = pd.read_csv(DATA_PATH, parse_dates=['date'], index_col='date')
 df_raw = df_raw.sort_index()
+# snapshot-dup guard (audit_snapshot_dup_20260721): the canonical CSV was found to
+# carry duplicate trading days; dedup on the date index so DM tests are not computed
+# over repeated rows (count audits miss this — n stayed 1866 vs clean 1856).
+df_raw = df_raw[~df_raw.index.duplicated(keep="last")]
 
 # Use adjusted close for SPY, close for VIX
 spy_prices = df_raw['spy_adj_close'].dropna()

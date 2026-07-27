@@ -310,31 +310,31 @@ The preceding paragraph summarises the frozen-rule evaluation qualitatively; thi
 \cmidrule(lr){5-7} \cmidrule(lr){8-9}
 Asset & Split & $N$ & GJR share & DM $t$ & $p$ & Holm $p$ & DM $t$ & Holm $p$ \\
 \midrule
-SPY & dev.\ & 873 & 0.81 & $-$2.85 & 0.005 & 0.104 & 0.99 & 1.00 \\
-QQQ & dev.\ & 873 & 0.59 & $-$1.10 & 0.273 & 1.00 & 2.08 & 0.841 \\
-EEM & dev.\ & 873 & 0.60 & $-$1.11 & 0.269 & 1.00 & $-$0.49 & 1.00 \\
+SPY & dev.\ & 873 & 0.81 & $-$2.74 & 0.006 & 0.145 & 0.99 & 1.00 \\
+QQQ & dev.\ & 873 & 0.59 & $-$1.35 & 0.178 & 1.00 & 1.49 & 1.00 \\
+EEM & dev.\ & 873 & 0.60 & $-$1.11 & 0.269 & 1.00 & $-$0.39 & 1.00 \\
 GLD & dev.\ & 873 & 0.00 & \multicolumn{3}{c}{(rule $\equiv$ GARCH)} & $-$0.13 & 1.00 \\
-TLT & dev.\ & 873 & 0.36 & $-$0.26 & 0.792 & 1.00 & $-$1.02 & 1.00 \\
-IWM & holdout & 873 & 0.54 & $-$0.65 & 0.518 & 1.00 & $-$0.79 & 1.00 \\
+TLT & dev.\ & 873 & 0.36 & $-$0.26 & 0.792 & 1.00 & $-$1.00 & 1.00 \\
+IWM & holdout & 873 & 0.54 & $-$0.59 & 0.557 & 1.00 & $-$0.79 & 1.00 \\
 SLV & holdout & 825 & 0.02 & 0.88 & 0.379 & 1.00 & 1.39 & 1.00 \\
 BTC-USD & holdout & 1{,}202 & 0.10 & $-$0.75 & 0.452 & 1.00 & 0.00 & 1.00 \\
 \midrule
 \multicolumn{9}{@{}l}{\textit{Date-clustered panel DM (common dates, losses averaged across assets per date)}} \\
-Dev.\ panel & & 873 & & $-$2.90 & 0.004 & & 0.73 & \\
+Dev.\ panel & & 873 & & $-$2.95 & 0.003 & & 0.58 & \\
 Holdout panel & & & & \multicolumn{5}{l}{no comparison reaches $|t|>3$} \\
 \midrule
-\multicolumn{9}{@{}l}{\textit{Model confidence sets (10\% level)}: dev.\ panel retains \{GJR, Rule\}, eliminates GARCH ($p=0.033$);} \\
+\multicolumn{9}{@{}l}{\textit{Model confidence sets (10\% level)}: dev.\ panel retains \{GJR, Rule\}, eliminates GARCH ($p=0.026$);} \\
 \multicolumn{9}{@{}l}{holdout panel retains all three models ($p=0.629$); all-assets panel retains \{GJR, Rule\} ($p=0.287$).} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Evaluation window 2023-01-03 to 2026-06-26 (BTC-USD from its own maximal window, $N=1{,}202$; SLV 825). GJR share is the fraction of forecast origins at which the frozen rule selects GJR-GARCH. Negative DM $t$ favours the rule (lower QLIKE). GLD's rule-vs-GARCH comparison is degenerate because the rule never selects GJR for GLD. Strict superiority requires $|t|>3$ and Holm $p<0.05$; \textbf{no asset and no panel meets this criterion in either direction} --- the strongest case, SPY rule-vs-GARCH, reaches only Holm $p=0.104$. Experiment K1592; per-origin choices in \texttt{k1592\_forecast\_origin\_decision\_log.csv}.
+\item \textit{Notes:} Evaluation window 2023-01-03 to 2026-06-26 (BTC-USD from its own maximal window, $N=1{,}202$; SLV 825). GJR share is the fraction of forecast origins at which the frozen rule selects GJR-GARCH. Negative DM $t$ favours the rule (lower QLIKE). GLD's rule-vs-GARCH comparison is degenerate because the rule never selects GJR for GLD. Strict superiority requires $|t|>3$ and Holm $p<0.05$; \textbf{no asset and no panel meets this criterion in either direction} --- the strongest case, SPY rule-vs-GARCH, reaches only Holm $p=0.145$. Experiment K1592; per-origin choices in \texttt{k1592\_forecast\_origin\_decision\_log.csv}.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-Three features of Table~\ref{tab:prespec_retest} discipline the interpretation. First, no asset shows statistically significant out-of-sample superiority of the selected model over the symmetric benchmark: zero of eight assets pass the pre-specified criterion, and the best raw $p$-value (SPY, $p=0.005$) does not survive the Holm correction ($p=0.104$). Second, the direction of the point estimates is not embarrassing for the rule---mean losses favour it on three assets, and the development-panel DM reaches $t=-2.90$ before multiple-testing control---which is precisely why the distinction between ``equal accuracy not rejected'' and ``significant superiority'' matters and is maintained throughout this paper. Third, the holdout evidence is strictly weaker than the development evidence (all three models survive the holdout MCS), which is the expected signature of a rule whose apparent edge partly reflects design-sample familiarity. The rule's value is therefore defensive: it avoids the significant losses from imposing asymmetry where none is stable, without delivering a forecasting edge.
+Three features of Table~\ref{tab:prespec_retest} discipline the interpretation. First, no asset shows statistically significant out-of-sample superiority of the selected model over the symmetric benchmark: zero of eight assets pass the pre-specified criterion, and the best raw $p$-value (SPY, $p=0.006$) does not survive the Holm correction ($p=0.145$). Second, the direction of the point estimates is not embarrassing for the rule---mean losses favour it on three assets, and the development-panel DM reaches $t=-2.95$ before multiple-testing control---which is precisely why the distinction between ``equal accuracy not rejected'' and ``significant superiority'' matters and is maintained throughout this paper. Third, the holdout evidence is strictly weaker than the development evidence (all three models survive the holdout MCS), which is the expected signature of a rule whose apparent edge partly reflects design-sample familiarity. The rule's value is therefore defensive: it avoids the significant losses from imposing asymmetry where none is stable, without delivering a forecasting edge.
 
 \subsection{Allocation-Level Results: The Measurement-to-Allocation Wedge}
 \label{sec:allocation_results}

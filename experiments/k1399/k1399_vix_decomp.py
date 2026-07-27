@@ -78,6 +78,10 @@ print("K1399: VIX Feature Decomposition in HAR")
 print("=" * 60)
 print(f"\nLoading data from: {DATA_PATH}")
 df_raw = pd.read_csv(DATA_PATH, parse_dates=['date'], index_col='date')
+# snapshot-dup guard (audit_snapshot_dup_20260721): dedup on the date index + sort so
+# DM-HLN statistics are not computed over duplicated trading days (count audits missed
+# this — stored n_obs.oos=1865 vs clean 1855).
+df_raw = df_raw[~df_raw.index.duplicated(keep="last")].sort_index()
 print(f"Raw data shape: {df_raw.shape}")
 print(f"Columns available: {list(df_raw.columns)}")
 print(f"Date range: {df_raw.index[0].date()} to {df_raw.index[-1].date()}")

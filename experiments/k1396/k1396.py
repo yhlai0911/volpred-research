@@ -74,6 +74,10 @@ print("=" * 70)
 # ============================================================
 print("\n[1] Loading data from snapshot CSV...")
 df_raw = pd.read_csv(DATA_FILE, index_col=0, parse_dates=True)
+# snapshot-dup guard (audit_snapshot_dup_20260721): dedup on the date index + sort so
+# duplicate trading days are not carried into the rolling OOS design (count audits miss
+# this — stored n_oos=1900 vs clean 1890).
+df_raw = df_raw[~df_raw.index.duplicated(keep="last")].sort_index()
 df_raw = df_raw[df_raw.index >= DATA_START]
 df_raw = df_raw.dropna(subset=['spy_adj_close', 'vix_close'])
 

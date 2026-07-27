@@ -1,5 +1,19 @@
 # k1591 - Ex-ante macro regimes for GLD leverage direction
 
+> **Snapshot-dup re-certification (2026-07-27).** Per the
+> `audit_snapshot_dup_20260721` adjudication (parent `assign_7f508612`), this
+> experiment was re-run in the canonical repository on the deduplicated pinned
+> snapshot plus the offline macro cache (no network fetch), and
+> `k1591_results.json` was overwritten (99 fields refreshed). Effective sample
+> is now 2010-04-07 → 2026-07-24, n_obs corrected from the contaminated 4091 to
+> 4100. The conclusion is **unchanged** — `status = directionally_supportive`;
+> the holdout safe-haven regression (gamma_diff = -0.0870, HAC t = -0.663,
+> p = 0.507) is bit-for-bit identical, only the liquidation-regime coefficients
+> shift slightly with the extended clean sample. Only a regime-dependent,
+> externally defined gold claim remains allowed. K1591 is not a significance-flip
+> case (only K1319 and K1592 flipped), so no feed article or paper passage
+> requires correction.
+
 ## Question
 
 Can the gold component of the leverage-direction manuscript be rebuilt as a

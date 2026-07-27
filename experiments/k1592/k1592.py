@@ -77,9 +77,14 @@ def load_returns() -> dict[str, pd.Series]:
     out: dict[str, pd.Series] = {}
     for asset, col in ASSETS.items():
         px = raw[col].dropna()
+        # snapshot-dup guard (audit_snapshot_dup_20260721): dedup dates on the PRICE
+        # series BEFORE differencing. Deduping AFTER .diff() (the previous order)
+        # retained a fabricated 0.0 return for every duplicate date — the second copy
+        # of an identical price pair diffs to 0 — and count audits missed it because
+        # the row count stayed unchanged.
+        px = px[~px.index.duplicated(keep="last")]
         ret = 100.0 * np.log(px).diff()
         ret = ret.replace([np.inf, -np.inf], np.nan).dropna()
-        ret = ret[~ret.index.duplicated(keep="last")]
         out[asset] = ret
     return out
 

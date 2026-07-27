@@ -96,7 +96,12 @@ def load_twii_full() -> pd.Series:
 def load_col(col: str) -> pd.Series:
     df = pd.read_csv(DATA_MAIN)
     df["date"] = pd.to_datetime(df["date"])
-    return df.set_index("date")[col].sort_index()
+    s = df.set_index("date")[col].sort_index()
+    # snapshot-dup guard (audit_snapshot_dup_20260721): load_twii_full() already dedups,
+    # but this loader (used for the SPY row) did not, inflating n_obs 4668->4658 and
+    # skewing kurtosis/mean. Dedup on the date index here too.
+    s = s[~s.index.duplicated(keep="last")]
+    return s
 
 
 def pick_matching_variant(computed: dict, paper_val: float, keys: list[str]) -> tuple[str, float]:

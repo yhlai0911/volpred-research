@@ -13,8 +13,9 @@ K1315 確認 HAR-VIX（加入 VIX level 作為外生變量）以 DM t≈4.4（Ha
 | 資產 | SPY（本地 CSV: `paper/leverage-direction/data/spy_vix_2004-2026.csv`）|
 | 預測目標 | `\|r_t\|`（日絕對 log 報酬，HAR-ABS paradigm，與 K1315 一致）|
 | IS 期間 | 2005-01-04 至 2018-12-31（n=3522）|
-| OOS 期間 | 2019-01-02 至 2026-05-19（n=1865）|
+| OOS 期間 | 2019-01-02 至 2026-07-24（n=1900）|
 | 模型估計 | OLS + HC3（IS 固定係數，OOS 靜態預測）|
+| 快照去重 | 2026-07-27 snapdupfix_k1399：load 補 `index.duplicated` 去重+排序（audit_snapshot_dup_20260721）。污染版 n_obs.oos=1865、H1 t=-4.55、H4 t=-3.71；clean 重跑數字如下表，H1..H5 verdict 全數不變 |
 | 評估損失函數 | QLIKE（Patton 2011 form B: mean[log(ŷ)+\|r\|/ŷ]）|
 | 顯著性標準 | DM-HLN（Harvey 1997），Harvey threshold \|t\|>3.0（Harvey et al. 2016）|
 
@@ -49,21 +50,21 @@ K1315 確認 HAR-VIX（加入 VIX level 作為外生變量）以 DM t≈4.4（Ha
 
 | 排名 | 模型 | QLIKE | vs HAR-ABS | DM t vs baseline | Harvey pass |
 |------|------|-------|-----------|-----------------|-------------|
-| 1 | HAR-VIX-All | **-3.9423** | -0.0260 | -4.36 | ✓ |
-| 2 | HAR-VIX-L | -3.9411 | -0.0248 | -4.40 | ✓ |
-| 3 | HAR-VIX-T | -3.9312 | -0.0150 | -3.53 | ✓ |
-| 4 | HAR-ABS | -3.9163 | — | — | — |
-| 5 | HAR-VIX-P | -3.9161 | +0.0001 | +0.82 | ✗ |
-| 6 | HAR-VIX-dV | -3.9121 | +0.0042 | +1.01 | ✗ |
+| 1 | HAR-VIX-All | **-3.9380** | -0.0270 | -4.70 | ✓ |
+| 2 | HAR-VIX-L | -3.9375 | -0.0265 | -4.97 | ✓ |
+| 3 | HAR-VIX-T | -3.9275 | -0.0164 | -4.08 | ✓ |
+| 4 | HAR-ABS | -3.9110 | — | — | — |
+| 5 | HAR-VIX-P | -3.9109 | +0.0001 | +0.72 | ✗ |
+| 6 | HAR-VIX-dV | -3.9064 | +0.0046 | +1.15 | ✗ |
 
 ### DM 配對檢定 vs HAR-VIX-L（增量資訊檢定）
 
 | 比較 | DM t | Harvey pass | 解讀 |
 |------|------|------------|------|
-| HAR-VIX-dV vs L | +4.15 | ✓ | dV 顯著**差於** L |
-| HAR-VIX-P vs L | +4.42 | ✓ | P 顯著**差於** L |
-| HAR-VIX-T vs L | +3.47 | ✓ | T 顯著**差於** L |
-| HAR-VIX-All vs L | -0.40 | ✗ | All 與 L 無顯著差異 |
+| HAR-VIX-dV vs L | +4.68 | ✓ | dV 顯著**差於** L |
+| HAR-VIX-P vs L | +4.98 | ✓ | P 顯著**差於** L |
+| HAR-VIX-T vs L | +3.66 | ✓ | T 顯著**差於** L |
+| HAR-VIX-All vs L | -0.16 | ✗ | All 與 L 無顯著差異 |
 
 ### VIF（HAR-VIX-All，IS 樣本）
 
@@ -81,23 +82,23 @@ K1315 確認 HAR-VIX（加入 VIX level 作為外生變量）以 DM t≈4.4（Ha
 
 | 假說 | 內容 | 結果 | DM t | 說明 |
 |------|------|------|------|------|
-| H1 | VIX level 顯著 | **PASS** | -4.40 | 複製 K1315；輕微差異因 OOS 延長至 2026 |
-| H2 | ΔVIX 有增量資訊 | **PARTIAL** | vs baseline: +1.01; vs L: +4.15 | 絕對預測力不如 baseline；但 ΔVIX 使預測顯著惡化（不是 level 的補充）|
-| H3 | Vol premium 有 regime 資訊 | **PARTIAL** | vs baseline: +0.82; vs L: +4.42 | 單獨使用無法超越 baseline；相比 L 亦顯著較差 |
-| H4 | VIX trend（MA5）無增量資訊 | **FAIL** | vs baseline: -3.53 | MA5 VIX 本身是 Harvey-significant predictor；但 vs L 差（+3.47），說明 MA5 資訊已在 level 中 |
-| H5 | All-feature 不優於最佳單一特徵 | **PASS** | All vs L: -0.40 | HAR-VIX-All 與 HAR-VIX-L 無顯著差異，parsimony confirmed |
+| H1 | VIX level 顯著 | **PASS** | -4.97 | 複製 K1315；輕微差異因 OOS 延長至 2026 |
+| H2 | ΔVIX 有增量資訊 | **PARTIAL** | vs baseline: +1.15; vs L: +4.68 | 絕對預測力不如 baseline；但 ΔVIX 使預測顯著惡化（不是 level 的補充）|
+| H3 | Vol premium 有 regime 資訊 | **PARTIAL** | vs baseline: +0.72; vs L: +4.98 | 單獨使用無法超越 baseline；相比 L 亦顯著較差 |
+| H4 | VIX trend（MA5）無增量資訊 | **FAIL** | vs baseline: -4.08 | MA5 VIX 本身是 Harvey-significant predictor；但 vs L 差（+3.66），說明 MA5 資訊已在 level 中 |
+| H5 | All-feature 不優於最佳單一特徵 | **PASS** | All vs L: -0.16 | HAR-VIX-All 與 HAR-VIX-L 無顯著差異，parsimony confirmed |
 
 ## 結論
 
-1. **VIX level 是充分分量**：在四個 VIX 子特徵中，VIX 水準（HAR-VIX-L）是唯一 Harvey-significant 且最優的單一特徵（QLIKE=-3.941）。其他三個分量單獨使用均無法超越 HAR-ABS baseline（H2, H3 PARTIAL/FAIL）。
+1. **VIX level 是充分分量**：在四個 VIX 子特徵中，VIX 水準（HAR-VIX-L）是唯一 Harvey-significant 且最優的單一特徵（QLIKE=-3.9375）。其他三個分量單獨使用均無法超越 HAR-ABS baseline（H2, H3 PARTIAL/FAIL）。
 
-2. **VIX trend（MA5）異常顯著但受共線性污染**：HAR-VIX-T 本身 DM t=-3.53（Harvey-significant），但 vs HAR-VIX-L 則 DM t=+3.47（顯著差於 L）。這反映 MA5 VIX 實質上只是 VIX level 的低頻近似，VIF=68.3 證實高度共線性。
+2. **VIX trend（MA5）異常顯著但受共線性污染**：HAR-VIX-T 本身 DM t=-4.08（Harvey-significant），但 vs HAR-VIX-L 則 DM t=+3.66（顯著差於 L）。這反映 MA5 VIX 實質上只是 VIX level 的低頻近似，VIF=68.3 證實高度共線性。
 
-3. **All-feature 不增加顯著預測力**（H5 PASS）：HAR-VIX-All vs HAR-VIX-L 的 DM t=-0.40（p=0.69），parsimony principle 獲得支持。高 VIF（vix_L=60、ma5_vix=68）亦說明全特徵模型存在嚴重多重共線性。
+3. **All-feature 不增加顯著預測力**（H5 PASS）：HAR-VIX-All vs HAR-VIX-L 的 DM t=-0.16（p=0.87），parsimony principle 獲得支持。高 VIF（vix_L=60、ma5_vix=68）亦說明全特徵模型存在嚴重多重共線性。
 
 4. **ΔVIX 和 Vol premium 均無獨立預測力**：ΔVIX 和 vol premium 不僅無法超越 baseline，相較 VIX level 還顯著較差（H2, H3 PARTIAL）。VIX 的預測資訊集中在水準本身，而非其變化或與已實現波動率的比值。
 
-5. **K1315 複製確認**：HAR-VIX-L DM t=4.40（K1315 reported 4.58），差異源自 OOS 延長 2024→2026，屬預期誤差範圍。
+5. **K1315 複製確認**：HAR-VIX-L DM t=4.97（K1315 reported 4.58），差異源自 OOS 延長 2024→2026 + snapshot 去重（audit_snapshot_dup_20260721），屬預期誤差範圍。
 
 ## 方法論注意事項
 

@@ -21,7 +21,19 @@ cannot generally be ranked independently of their marginal forecasts.
 
 - Repository-pinned yfinance adjusted-close snapshot:
   `paper/volatility-absorption/data/spy_gld_tlt_qqq_eem_vix_2005-2026.csv`
-- Period available in the snapshot: 2005-01-03 through 2026-07-10.
+- Period available in the snapshot: 2005-01-03 through 2026-07-24.
+
+> **Snapshot-dup re-certification (2026-07-27).** Per the
+> `audit_snapshot_dup_20260721` adjudication (parent `assign_7f508612`), this
+> experiment was re-run in the canonical repository on the current
+> deduplicated snapshot (5426 rows, all unique trading days, 0 duplicate
+> dates) and `k1705_results.json` was overwritten (135 fields refreshed). The
+> verdict is **unchanged** — the parent K1100c Joe-superiority interpretation
+> remains retracted and neither DCC superiority nor a dependence-family
+> attribution is established; every marginal calibration gate still fails and
+> the one-day delay still reverses both score directions without Harvey
+> |t|>3. K1705 is not a significance-flip case (only K1319 and K1592 flipped),
+> so no feed article or paper passage requires correction.
 - Pairs: SPY–TLT and SPY–GLD, the two K1100c “winning” pairs.
 - Parent artifacts are read-only inputs. Their SHA-256 hashes are recorded in
   `k1705_results.json`.

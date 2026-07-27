@@ -3,6 +3,7 @@
 **類型**: governance / provenance reproduction（非新研究發現）
 **起因**: `paper/PROVENANCE_SWEEP_20260710.md` Finding 2 — taiwan-vt 論文 Table 1（Summary Statistics for Key Assets）的 mean/std/skew/kurt 四欄無活 JSON 來源（23 untraceable 之一）。task `provenance-sweep-taiwan-vt-untraceable-batch2`。
 **日期**: 2026-07-10
+**修正 (2026-07-27, snapdupfix_paper2_table1_summary_stats_provenance)**: `load_col()`（SPY row 使用）先前無去重，而 `load_twii_full()` 有——稽核 audit_snapshot_dup_20260721 指出 SPY row n_obs 曾受污染（4668 vs clean 4658、kurt 14.1197 vs 14.0832）。已補 `index.duplicated` 去重（治本）。canonical CSV 現已上游去重（SPY 0 重複、延伸至 2026-07-24），故本次 clean 重跑 n_obs=4668 為當前正確值；`verdict=NOT_REPRODUCIBLE_FROM_PINNED_SNAPSHOT` 不變——paper Table 1 與 computed 的 drift 跨全部四資產，屬 yfinance vintage / skew-kurt variant 差異，非重複列污染，另案追蹤（不在本 snapdupfix 範圍）。無 paper `.tex` 引用本 provenance 產物。
 
 ## 目標
 

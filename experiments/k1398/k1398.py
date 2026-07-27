@@ -56,6 +56,11 @@ def load_asset_series(config: AssetConfig) -> pd.DataFrame:
     df = pd.read_csv(config.csv_path, usecols=["date", config.price_col])
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date").dropna().copy()
+    # snapshot-dup guard (audit_snapshot_dup_20260721): dedup on date BEFORE differencing.
+    # After sort_values each duplicate pair is adjacent, so the log-return of the second
+    # copy is log(P/P)=0 — a fabricated zero return that count audits miss (n stays
+    # 4643/3417 vs clean 4633/3407). Collapse duplicate dates first.
+    df = df.drop_duplicates(subset="date", keep="last")
     df["r"] = np.log(df[config.price_col] / df[config.price_col].shift(1))
     df["rv"] = np.square(df["r"])
     df = df.replace([np.inf, -np.inf], np.nan).dropna(subset=["r", "rv"]).reset_index(drop=True)
