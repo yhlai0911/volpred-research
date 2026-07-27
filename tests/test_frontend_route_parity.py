@@ -49,7 +49,10 @@ def _fixture_repo(tmp_path: Path) -> tuple[Path, Path]:
                 "pattern": "^/$",
                 "expected_modes": ["original", "v3"],
                 "access": "public",
-                "authoritative_data_owner_refs": ["web/src/lib/feed.ts"],
+                "authoritative_data_owner_refs": {
+                    "original": ["$surface", "web/src/lib/feed.ts"],
+                    "v3": ["$surface", "web/src/lib/feed.ts"],
+                },
                 "capabilities": ["feed"],
                 "mode_advantages": {
                     "original": ["authoritative_first_paint"],
@@ -61,7 +64,10 @@ def _fixture_repo(tmp_path: Path) -> tuple[Path, Path]:
                 "pattern": "^/reports/\\[id\\]$",
                 "expected_modes": ["original", "v3"],
                 "access": "public",
-                "authoritative_data_owner_refs": ["web/src/lib/feed.ts"],
+                "authoritative_data_owner_refs": {
+                    "original": ["$surface", "web/src/lib/feed.ts"],
+                    "v3": ["$surface", "web/src/lib/feed.ts"],
+                },
                 "capabilities": ["report_detail"],
                 "mode_advantages": {
                     "original": ["legacy_reader"],
@@ -73,10 +79,9 @@ def _fixture_repo(tmp_path: Path) -> tuple[Path, Path]:
                 "pattern": "^/(sitemap\\.xml|robots\\.txt)$",
                 "expected_modes": ["shared"],
                 "access": "public",
-                "authoritative_data_owner_refs": [
-                    "web/src/app/sitemap.ts",
-                    "web/public/robots.txt",
-                ],
+                "authoritative_data_owner_refs": {
+                    "shared": ["$surface"],
+                },
                 "capabilities": ["discovery_metadata"],
                 "mode_advantages": {
                     "shared": ["single_shared_contract"],
@@ -207,7 +212,10 @@ def test_duplicate_rule_missing_owner_and_dead_link_fail_closed(
             "pattern": "^/$",
                 "expected_modes": ["original", "v3"],
                 "access": "public",
-                "authoritative_data_owner_refs": ["web/src/lib/missing.ts"],
+                "authoritative_data_owner_refs": {
+                    "original": ["$surface", "web/src/lib/missing.ts"],
+                    "v3": ["$surface"],
+                },
                 "capabilities": ["duplicate"],
                 "mode_advantages": {
                     "original": ["none"],
@@ -316,10 +324,10 @@ def test_repo_path_traversal_and_symlink_escape_fail_closed(
     _write(outside / "owner.ts")
     (tmp_path / "escaped-owner.ts").symlink_to(outside / "owner.ts")
     payload = json.loads(contract.read_text(encoding="utf-8"))
-    payload["route_rules"][0]["authoritative_data_owner_refs"] = [
-        "escaped-owner.ts",
-        "../outside-owner.ts",
-    ]
+    payload["route_rules"][0]["authoritative_data_owner_refs"] = {
+        "original": ["$surface", "escaped-owner.ts", "../outside-owner.ts"],
+        "v3": ["$surface"],
+    }
     payload["scenarios"][0]["evidence"][0]["path"] = str(
         outside / "owner.ts"
     )
@@ -419,7 +427,10 @@ def test_unresolved_navigation_expression_fails_closed(tmp_path: Path) -> None:
 
 def test_api_links_use_real_dynamic_route_inventory(tmp_path: Path) -> None:
     contract, targets = _fixture_repo(tmp_path)
-    _write(tmp_path / "web/src/app/api/jobs/[id]/route.ts")
+    _write(
+        tmp_path / "web/src/app/api/jobs/[id]/route.ts",
+        "export async function GET() { return Response.json({}); }",
+    )
     _write(
         tmp_path / "web/src/components/ApiLinks.tsx",
         '<a href="/api/jobs/123">ok</a><a href="/api/missing">bad</a>',
@@ -431,9 +442,8 @@ def test_api_links_use_real_dynamic_route_inventory(tmp_path: Path) -> None:
             "pattern": "^/api/jobs/\\[id\\]$",
             "expected_modes": ["shared"],
             "access": "service",
-            "authoritative_data_owner_refs": [
-                "web/src/app/api/jobs/[id]/route.ts"
-            ],
+            "method_access": {"GET": "service"},
+            "authoritative_data_owner_refs": {"shared": ["$surface"]},
             "capabilities": ["job_read"],
             "mode_advantages": {
                 "shared": ["single_api_contract"],
@@ -454,6 +464,114 @@ def test_api_links_use_real_dynamic_route_inventory(tmp_path: Path) -> None:
         if item["kind"] == "dead_internal_link"
     }
     assert dead_paths == {"/api/missing"}
+
+
+def test_route_handler_access_is_classified_per_http_method(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/app/api/questions/route.ts",
+        """
+        export async function GET() { return Response.json([]); }
+        export async function POST() { return Response.json({}); }
+        """,
+    )
+    payload = json.loads(contract.read_text(encoding="utf-8"))
+    payload["route_rules"].append(
+        {
+            "id": "api_questions",
+            "pattern": "^/api/questions$",
+            "expected_modes": ["shared"],
+            "access": "public",
+            "method_access": {"GET": "public", "POST": "member"},
+            "authoritative_data_owner_refs": {"shared": ["$surface"]},
+            "capabilities": ["question_read", "question_write"],
+            "mode_advantages": {"shared": ["single_api_contract"]},
+        }
+    )
+    contract.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    rows = [
+        row for row in report["routes"]
+        if row["canonical_route"] == "/api/questions"
+    ]
+    assert {(row["method"], row["access"]) for row in rows} == {
+        ("GET", "public"),
+        ("POST", "member"),
+    }
+
+
+def test_route_handler_without_method_contract_fails_closed(
+    tmp_path: Path,
+) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/app/api/jobs/route.ts",
+        "export async function POST() { return Response.json({}); }",
+    )
+    payload = json.loads(contract.read_text(encoding="utf-8"))
+    payload["route_rules"].append(
+        {
+            "id": "api_jobs",
+            "pattern": "^/api/jobs$",
+            "expected_modes": ["shared"],
+            "access": "service",
+            "authoritative_data_owner_refs": {"shared": ["$surface"]},
+            "capabilities": ["job_write"],
+            "mode_advantages": {"shared": ["single_api_contract"]},
+        }
+    )
+    contract.write_text(json.dumps(payload), encoding="utf-8")
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    assert any(
+        item["kind"] == "missing_method_access"
+        and item["route"] == "/api/jobs"
+        and item["method"] == "POST"
+        for item in report["blockers"]
+    )
+
+
+def test_multiline_router_navigation_is_audited(tmp_path: Path) -> None:
+    contract, targets = _fixture_repo(tmp_path)
+    _write(
+        tmp_path / "web/src/components/RouterLinks.tsx",
+        """
+        const router =
+          useRouter()
+        router.push(
+          "/reports/demo"
+        )
+        router.replace(
+          target
+        )
+        """,
+    )
+
+    report = audit_frontend_parity(
+        repo_root=tmp_path,
+        contract_path=contract,
+        targets_path=targets,
+    )
+
+    unresolved = [
+        item for item in report["blockers"]
+        if item["kind"] == "unresolved_internal_navigation"
+        and item["source_ref"].endswith("RouterLinks.tsx")
+    ]
+    assert [item["expression"] for item in unresolved] == ["target"]
 
 
 def test_source_mutation_during_audit_invalidates_receipt(

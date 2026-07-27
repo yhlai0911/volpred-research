@@ -19,9 +19,11 @@ checker 只讀 `config/project_targets.json` 指定的 active frontend，不能�
 contract 的 `frontend_target` 若與 active target 不同會 fail closed。Next.js App Router 的
 `page.tsx`、API／非 API `route.ts`、`sitemap.ts` 與 `public/robots.txt` 會轉為同一份 route
 inventory；`/v3/*` 同時保留 surface path 與去掉 `/v3` 後的 canonical route，供原版／v3
-逐 route 比較。每一個 surface row 都帶自己的 source owner、共享 authoritative data
-owner、capabilities 與 mode-specific advantages，不會把兩種模式的 owner union 假裝成
-同一份實作。靜態內部 link 會對實體 route、dynamic segment 與 `next.config.js`
+逐 route 比較。每一個 surface row 都帶 mode-keyed source／authoritative data owner、
+capabilities 與 mode-specific advantages，不會把兩種模式的 owner union 假裝成同一份
+實作。`route.ts` 另按實際 export 的 HTTP method 展開；GET／POST 等權限逐 method
+比對，缺 method contract 或無法解析 handler method 都 fail closed。靜態內部 link
+會對實體 route、dynamic segment 與 `next.config.js`
 redirect source 做解析；expression／router navigation 無法靜態證明目的地時也 fail
 closed，不以「大概是合法」略過。
 
@@ -34,8 +36,8 @@ status digest，以及本次真正讀取的 `src/**/*.{ts,tsx,js,jsx}`／`next.c
 
 | 項目 | 數量 | 結果 |
 |---|---:|---|
-| route surfaces | 118 | page、shared API 與 metadata 全由唯一 rule 認領，unknown 0、duplicate 0 |
-| route owner rules | 23 | 每項都有存在於 repo 的 authoritative data owner ref 與 access class |
+| route surfaces | 133 | page、method-level API 與 metadata 全由唯一 rule 認領，unknown 0、duplicate 0 |
+| route owner rules | 25 | 每項都有逐 mode owner；handler 另有逐 HTTP method access class |
 | core scenarios | 7 | public first paint、auth、member、Admin、SEO、mobile、accessibility |
 | explicit known gaps | 4 | `/brand` 原版缺口；`/indicators`、`/pricing`、`/radar` v3 缺口 |
 | blockers | 33 | 3 dead link、2 scenario evidence gap、28 unresolved navigation targets |

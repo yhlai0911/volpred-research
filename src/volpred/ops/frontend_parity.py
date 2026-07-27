@@ -36,9 +36,15 @@ _HREF_EXPRESSION = re.compile(
     r"""\bhref\s*=\s*\{(?P<expression>[^{}\n]+)\}"""
 )
 _ROUTER_BINDING = re.compile(
-    r"""\bconst\s+(?P<name>[A-Za-z_$][\w$]*)\s*=\s*useRouter\s*\(\s*\)"""
+    r"""\b(?:const|let|var)\s+(?P<name>[A-Za-z_$][\w$]*)\s*=\s*"""
+    r"""useRouter\s*\(\s*\)"""
+)
+_HTTP_METHOD = re.compile(
+    r"""\bexport\s+(?:async\s+)?(?:function|const)\s+"""
+    r"""(?P<method>GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\b"""
 )
 _TEMPLATE_SLOT = re.compile(r"\$\{[^{}]*\}")
+_ACCESS_LEVELS = frozenset({"public", "member", "admin", "service"})
 
 
 @dataclass(frozen=True)
@@ -48,6 +54,7 @@ class _Route:
     mode: str
     source_ref: str
     kind: str
+    method: str | None = None
 
 
 def _load_json(path: Path) -> Any:
@@ -132,15 +139,25 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
             if mode == "v3"
             else _web_route(parts)
         )
-        routes.append(
-            _Route(
-                canonical_route=canonical,
-                surface_route=surface,
-                mode=("shared" if mode == "original" else mode),
-                source_ref=handler.relative_to(repo_root).as_posix(),
-                kind="route_handler",
-            )
+        methods = sorted(
+            {
+                match.group("method")
+                for match in _HTTP_METHOD.finditer(
+                    handler.read_text(encoding="utf-8")
+                )
+            }
         )
+        for method in methods or [None]:
+            routes.append(
+                _Route(
+                    canonical_route=canonical,
+                    surface_route=surface,
+                    mode=("shared" if mode == "original" else mode),
+                    source_ref=handler.relative_to(repo_root).as_posix(),
+                    kind="route_handler",
+                    method=method,
+                )
+            )
     sitemap = app_root / "sitemap.ts"
     if sitemap.exists():
         routes.append(
@@ -169,6 +186,7 @@ def _discover_routes(repo_root: Path, frontend_root: Path) -> list[_Route]:
             item.canonical_route,
             item.mode,
             item.source_ref,
+            item.method or "",
         ),
     )
 
@@ -218,24 +236,44 @@ def _compile_rules(
                 _block("contract_expected_modes", rule_id=rule_id)
             )
             value = {**value, "expected_modes": []}
-        if value.get("access") not in {
-            "public",
-            "member",
-            "admin",
-            "service",
-        }:
+        if value.get("access") not in _ACCESS_LEVELS:
             blockers.append(_block("contract_access", rule_id=rule_id))
         owner_refs = value.get("authoritative_data_owner_refs")
         if (
-            not isinstance(owner_refs, list)
+            not isinstance(owner_refs, dict)
             or not owner_refs
             or any(
-                not isinstance(owner_ref, str) or not owner_ref.strip()
-                for owner_ref in owner_refs
+                mode not in value.get("expected_modes", [])
+                or not isinstance(refs, list)
+                or not refs
+                or any(
+                    not isinstance(owner_ref, str) or not owner_ref.strip()
+                    for owner_ref in refs
+                )
+                for mode, refs in owner_refs.items()
+            )
+            or any(
+                mode not in owner_refs
+                for mode in value.get("expected_modes", [])
             )
         ):
             blockers.append(_block("missing_owner", rule_id=rule_id))
-            value = {**value, "authoritative_data_owner_refs": []}
+            value = {**value, "authoritative_data_owner_refs": {}}
+        method_access = value.get("method_access")
+        if method_access is not None and (
+            not isinstance(method_access, dict)
+            or not method_access
+            or any(
+                method not in {
+                    "*", "GET", "POST", "PUT", "PATCH", "DELETE",
+                    "OPTIONS", "HEAD",
+                }
+                or access not in _ACCESS_LEVELS
+                for method, access in method_access.items()
+            )
+        ):
+            blockers.append(_block("contract_method_access", rule_id=rule_id))
+            value = {**value, "method_access": {}}
         capabilities = value.get("capabilities")
         if (
             not isinstance(capabilities, list)
@@ -342,6 +380,38 @@ def _expression_path(expression: str) -> str | None:
     return None
 
 
+def _call_arguments(text: str, call_pattern: re.Pattern[str]) -> list[str]:
+    """Return complete first arguments for calls, including multiline calls."""
+
+    arguments: list[str] = []
+    for match in call_pattern.finditer(text):
+        start = match.end()
+        depth = 1
+        quote: str | None = None
+        escaped = False
+        cursor = start
+        while cursor < len(text):
+            character = text[cursor]
+            if escaped:
+                escaped = False
+            elif character == "\\" and quote is not None:
+                escaped = True
+            elif quote is not None:
+                if character == quote:
+                    quote = None
+            elif character in {"'", '"', "`"}:
+                quote = character
+            elif character == "(":
+                depth += 1
+            elif character == ")":
+                depth -= 1
+                if depth == 0:
+                    arguments.append(text[start:cursor].strip())
+                    break
+            cursor += 1
+    return arguments
+
+
 def _dead_links(
     repo_root: Path,
     frontend_root: Path,
@@ -425,13 +495,19 @@ def _dead_links(
                     source_ref=source.relative_to(repo_root).as_posix(),
                 )
             )
-        for binding in _ROUTER_BINDING.finditer(text):
-            name = re.escape(binding.group("name"))
-            navigation = re.compile(
-                rf"\b{name}\.(?:push|replace)\s*\((?P<expression>[^)\n]+)\)"
+        router_names = {
+            binding.group("name")
+            for binding in _ROUTER_BINDING.finditer(text)
+        }
+        navigation_patterns = [
+            re.compile(
+                rf"\b{re.escape(name)}\.(?:push|replace)\s*\("
             )
-            for match in navigation.finditer(text):
-                raw = _expression_path(match.group("expression"))
+            for name in sorted(router_names)
+        ]
+        for navigation in navigation_patterns:
+            for expression in _call_arguments(text, navigation):
+                raw = _expression_path(expression)
                 if raw is not None and _valid_internal_path(
                     raw,
                     valid_patterns=valid_patterns,
@@ -441,7 +517,7 @@ def _dead_links(
                 findings.append(
                     _block(
                         "unresolved_internal_navigation",
-                        expression=match.group("expression").strip(),
+                        expression=expression,
                         source_ref=source.relative_to(repo_root).as_posix(),
                     )
                 )
@@ -888,15 +964,57 @@ def audit_frontend_parity(
             rule_id = matched[0]["id"]
             by_rule_route[(rule_id, route.canonical_route)].add(route.mode)
         matched_rule = matched[0] if len(matched) == 1 else {}
-        shared_owners = matched_rule.get(
+        owner_contract = matched_rule.get(
             "authoritative_data_owner_refs",
-            [],
+            {},
         )
-        per_mode_owners = (
-            [route.source_ref, *shared_owners]
-            if isinstance(shared_owners, list)
-            else [route.source_ref]
+        configured_owners = (
+            owner_contract.get(route.mode, [])
+            if isinstance(owner_contract, dict)
+            else []
         )
+        per_mode_owners = [
+            route.source_ref if owner_ref == "$surface" else owner_ref
+            for owner_ref in configured_owners
+            if isinstance(owner_ref, str)
+        ]
+        method_access = matched_rule.get("method_access")
+        access = matched_rule.get("access")
+        if route.kind == "route_handler":
+            if route.method is None:
+                blockers.append(
+                    _block(
+                        "route_handler_method_unknown",
+                        route=route.canonical_route,
+                        source_ref=route.source_ref,
+                    )
+                )
+                access = None
+            elif not isinstance(method_access, dict):
+                blockers.append(
+                    _block(
+                        "missing_method_access",
+                        route=route.canonical_route,
+                        method=route.method,
+                        rule_id=rule_id,
+                    )
+                )
+                access = None
+            else:
+                access = method_access.get(
+                    route.method,
+                    method_access.get("*"),
+                )
+                if access not in _ACCESS_LEVELS:
+                    blockers.append(
+                        _block(
+                            "missing_method_access",
+                            route=route.canonical_route,
+                            method=route.method,
+                            rule_id=rule_id,
+                        )
+                    )
+                    access = None
         mode_advantages = matched_rule.get("mode_advantages", {})
         route_rows.append(
             {
@@ -905,8 +1023,9 @@ def audit_frontend_parity(
                 "mode": route.mode,
                 "source_ref": route.source_ref,
                 "kind": route.kind,
+                "method": route.method,
                 "rule_id": rule_id,
-                "access": matched_rule.get("access"),
+                "access": access,
                 "authoritative_data_owner_refs": list(
                     dict.fromkeys(per_mode_owners)
                 ),
@@ -922,25 +1041,34 @@ def audit_frontend_parity(
     for rule, _pattern in compiled:
         rule_id = rule["id"]
         owner_refs = rule.get("authoritative_data_owner_refs")
-        if not isinstance(owner_refs, list) or not owner_refs:
+        if not isinstance(owner_refs, dict) or not owner_refs:
             blockers.append(_block("missing_owner", rule_id=rule_id))
         else:
-            for owner_ref in owner_refs:
-                resolved_owner = _repo_path(
-                    repo_root,
-                    owner_ref,
-                    blockers=blockers,
-                    field="authoritative_data_owner_ref",
-                    kind="path",
-                )
-                if resolved_owner is not None and not resolved_owner.is_file():
-                    blockers.append(
-                        _block(
-                            "missing_owner_ref",
-                            rule_id=rule_id,
-                            source_ref=owner_ref,
-                        )
+            for mode, mode_owner_refs in owner_refs.items():
+                if not isinstance(mode_owner_refs, list):
+                    continue
+                for owner_ref in mode_owner_refs:
+                    if owner_ref == "$surface":
+                        continue
+                    resolved_owner = _repo_path(
+                        repo_root,
+                        owner_ref,
+                        blockers=blockers,
+                        field="authoritative_data_owner_ref",
+                        kind="path",
                     )
+                    if (
+                        resolved_owner is not None
+                        and not resolved_owner.is_file()
+                    ):
+                        blockers.append(
+                            _block(
+                                "missing_owner_ref",
+                                rule_id=rule_id,
+                                mode=mode,
+                                source_ref=owner_ref,
+                            )
+                        )
         expected_modes = rule.get("expected_modes", [])
         if not isinstance(expected_modes, list) or not expected_modes:
             blockers.append(

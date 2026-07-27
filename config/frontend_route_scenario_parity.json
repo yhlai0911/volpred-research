@@ -35,10 +35,16 @@
           "editorial_information_architecture"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/components/v3/hooks/useV3Data.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/data-server.ts"
+        ],
+        "v3": [
+          "$surface",
+          "frontend-v2-fix/src/components/v3/hooks/useV3Data.ts"
+        ]
+      }
     },
     {
       "id": "public_static",
@@ -60,12 +66,14 @@
           "editorial_brand_presentation"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/about/page.tsx",
-        "frontend-v2-fix/src/app/disclaimer/page.tsx",
-        "frontend-v2-fix/src/app/v3/about/page.tsx",
-        "frontend-v2-fix/src/app/v3/disclaimer/page.tsx"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "admin",
@@ -87,11 +95,18 @@
           "editorial_admin_navigation"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/admin-auth.ts",
-        "frontend-v2-fix/src/lib/admin-ops.ts",
-        "frontend-v2-fix/src/app/api/admin/session/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/admin-auth.ts",
+          "frontend-v2-fix/src/lib/admin-ops.ts"
+        ],
+        "v3": [
+          "$surface",
+          "frontend-v2-fix/src/lib/admin-auth.ts",
+          "frontend-v2-fix/src/lib/admin-ops.ts"
+        ]
+      }
     },
     {
       "id": "auth_callback",
@@ -100,6 +115,9 @@
         "shared"
       ],
       "access": "public",
+      "method_access": {
+        "GET": "public"
+      },
       "capabilities": [
         "oauth_callback"
       ],
@@ -108,10 +126,12 @@
           "single_auth_callback_contract"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/auth/callback/route.ts",
-        "frontend-v2-fix/src/lib/supabase-browser.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface",
+          "frontend-v2-fix/src/lib/supabase-browser.ts"
+        ]
+      }
     },
     {
       "id": "api_admin",
@@ -120,6 +140,9 @@
         "shared"
       ],
       "access": "admin",
+      "method_access": {
+        "*": "admin"
+      },
       "capabilities": [
         "admin_api"
       ],
@@ -128,10 +151,12 @@
           "single_admin_api_contract"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/admin-auth.ts",
-        "frontend-v2-fix/src/app/api/admin/session/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface",
+          "frontend-v2-fix/src/lib/admin-auth.ts"
+        ]
+      }
     },
     {
       "id": "api_member",
@@ -140,6 +165,9 @@
         "shared"
       ],
       "access": "member",
+      "method_access": {
+        "*": "member"
+      },
       "capabilities": [
         "member_api",
         "radar_api"
@@ -149,10 +177,13 @@
           "single_member_api_contract"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/request-auth.ts",
-        "frontend-v2-fix/src/lib/supabase-server.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface",
+          "frontend-v2-fix/src/lib/request-auth.ts",
+          "frontend-v2-fix/src/lib/supabase-server.ts"
+        ]
+      }
     },
     {
       "id": "api_privileged_mutation",
@@ -160,7 +191,10 @@
       "expected_modes": [
         "shared"
       ],
-      "access": "service",
+      "access": "admin",
+      "method_access": {
+        "*": "admin"
+      },
       "capabilities": [
         "publication_mutation",
         "remote_sync"
@@ -170,19 +204,23 @@
           "single_privileged_mutation_contract"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/request-auth.ts",
-        "frontend-v2-fix/src/app/api/publications/publish/route.ts",
-        "frontend-v2-fix/src/app/api/sync/[...path]/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface",
+          "frontend-v2-fix/src/lib/admin-auth.ts"
+        ]
+      }
     },
     {
       "id": "api_shared_read",
-      "pattern": "^/api/(analytics|health|market-status|notifications|papers|portfolio-overview|publications/feed|questions|research|risk-forecast|strategy-metrics|strategy-overview|strategy-signals|strategy-trades)(?:/.*)?$",
+      "pattern": "^(?:/api/(analytics|health|market-status|notifications|papers|portfolio-overview|publications/feed|research|risk-forecast|strategy-metrics|strategy-signals|strategy-trades)(?:/.*)?|/api/strategy-overview)$",
       "expected_modes": [
         "shared"
       ],
       "access": "public",
+      "method_access": {
+        "*": "public"
+      },
       "capabilities": [
         "shared_read_api"
       ],
@@ -191,10 +229,61 @@
           "single_read_model_contract"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/lib/supabase-server.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface"
+        ]
+      }
+    },
+    {
+      "id": "api_questions",
+      "pattern": "^/api/questions$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "public",
+      "method_access": {
+        "GET": "public",
+        "POST": "member"
+      },
+      "capabilities": [
+        "public_question_read",
+        "member_question_write"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "method_scoped_question_contract"
+        ]
+      },
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface"
+        ]
+      }
+    },
+    {
+      "id": "api_strategy_refresh",
+      "pattern": "^/api/strategy-overview/refresh$",
+      "expected_modes": [
+        "shared"
+      ],
+      "access": "service",
+      "method_access": {
+        "POST": "service"
+      },
+      "capabilities": [
+        "strategy_overview_refresh"
+      ],
+      "mode_advantages": {
+        "shared": [
+          "service_scoped_refresh_contract"
+        ]
+      },
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "v3_brand",
@@ -215,9 +304,14 @@
           "dedicated_brand_reference"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/v3/brand/page.tsx"
-      ],
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      },
       "mode_dispositions": {
         "original": {
           "status": "known_gap",
@@ -244,10 +338,16 @@
           "editorial_digest_reader"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/digest-display.ts",
-        "frontend-v2-fix/src/lib/data-server.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/digest-display.ts"
+        ],
+        "v3": [
+          "$surface",
+          "frontend-v2-fix/src/lib/digest-display.ts"
+        ]
+      }
     },
     {
       "id": "indicator_arena",
@@ -268,9 +368,15 @@
           "known_gap_explicitly_tracked"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/indicator-arena.ts"
-      ],
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/indicator-arena.ts"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      },
       "mode_dispositions": {
         "v3": {
           "status": "known_gap",
@@ -299,11 +405,16 @@
           "editorial_member_experience"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/request-auth.ts",
-        "frontend-v2-fix/src/lib/supabase-server.ts",
-        "frontend-v2-fix/src/app/api/me/summary/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/request-auth.ts"
+        ],
+        "v3": [
+          "$surface",
+          "frontend-v2-fix/src/lib/request-auth.ts"
+        ]
+      }
     },
     {
       "id": "papers",
@@ -324,10 +435,15 @@
           "editorial_paper_catalog"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/app/api/papers/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/data-server.ts"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "portfolio",
@@ -348,10 +464,15 @@
           "editorial_portfolio_view"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/app/api/portfolio-overview/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/data-server.ts"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "pricing",
@@ -372,10 +493,14 @@
           "known_gap_explicitly_tracked"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/pricing/page.tsx",
-        "frontend-v2-fix/src/app/api/radar/entitlements/route.ts"
-      ],
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      },
       "mode_dispositions": {
         "v3": {
           "status": "known_gap",
@@ -402,10 +527,15 @@
           "editorial_questions_view"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/app/api/questions/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/data-server.ts"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "radar",
@@ -426,10 +556,15 @@
           "known_gap_explicitly_tracked"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/radar-data.ts",
-        "frontend-v2-fix/src/app/api/radar/entitlements/route.ts"
-      ],
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/radar-data.ts"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      },
       "mode_dispositions": {
         "v3": {
           "status": "known_gap",
@@ -456,11 +591,16 @@
           "editorial_report_reader"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/lib/research-mirror.ts",
-        "frontend-v2-fix/src/app/api/publications/feed/[id]/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/data-server.ts"
+        ],
+        "v3": [
+          "$surface",
+          "frontend-v2-fix/src/lib/research-mirror.ts"
+        ]
+      }
     },
     {
       "id": "risk_forecast",
@@ -481,10 +621,15 @@
           "editorial_forecast_view"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/data-server.ts",
-        "frontend-v2-fix/src/app/api/risk-forecast/route.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/data-server.ts"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "seo_discovery",
@@ -493,6 +638,9 @@
         "shared"
       ],
       "access": "public",
+      "method_access": {
+        "GET": "public"
+      },
       "capabilities": [
         "robots",
         "rss",
@@ -503,12 +651,11 @@
           "single_seo_discovery_contract"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/layout.tsx",
-        "frontend-v2-fix/src/app/sitemap.ts",
-        "frontend-v2-fix/src/app/rss.xml/route.ts",
-        "frontend-v2-fix/public/robots.txt"
-      ]
+      "authoritative_data_owner_refs": {
+        "shared": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "strategy_selector",
@@ -529,10 +676,16 @@
           "editorial_strategy_tool"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/lib/strategy-performance.ts",
-        "frontend-v2-fix/src/lib/strategy-regimes.ts"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface",
+          "frontend-v2-fix/src/lib/strategy-performance.ts"
+        ],
+        "v3": [
+          "$surface",
+          "frontend-v2-fix/src/lib/strategy-regimes.ts"
+        ]
+      }
     },
     {
       "id": "vix_calculator",
@@ -553,10 +706,14 @@
           "editorial_calculator"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/vix-calculator/page.tsx",
-        "frontend-v2-fix/src/app/v3/vix-calculator/page.tsx"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     },
     {
       "id": "vt_calculator",
@@ -577,10 +734,14 @@
           "editorial_calculator"
         ]
       },
-      "authoritative_data_owner_refs": [
-        "frontend-v2-fix/src/app/vt-calculator/page.tsx",
-        "frontend-v2-fix/src/app/v3/vt-calculator/page.tsx"
-      ]
+      "authoritative_data_owner_refs": {
+        "original": [
+          "$surface"
+        ],
+        "v3": [
+          "$surface"
+        ]
+      }
     }
   ],
   "scenarios": [
