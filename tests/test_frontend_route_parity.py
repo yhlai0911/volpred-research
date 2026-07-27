@@ -831,6 +831,14 @@ def test_namespace_navigation_and_reexport_cannot_silently_pass(
         from "next/navigation"
         """,
     )
+    _write(
+        tmp_path / "web/src/lib/navigation-export-namespace.ts",
+        """
+        export *
+        as navigation
+        from "next/navigation"
+        """,
+    )
 
     report = audit_frontend_parity(
         repo_root=tmp_path,
@@ -851,6 +859,11 @@ def test_namespace_navigation_and_reexport_cannot_silently_pass(
     assert any(
         item["kind"] == "unsupported_next_navigation_binding"
         and item["source_ref"].endswith("navigation-export-all.ts")
+        for item in report["blockers"]
+    )
+    assert any(
+        item["kind"] == "unsupported_next_navigation_binding"
+        and item["source_ref"].endswith("navigation-export-namespace.ts")
         for item in report["blockers"]
     )
 

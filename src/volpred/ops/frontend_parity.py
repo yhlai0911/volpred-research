@@ -64,7 +64,7 @@ _NEXT_NAVIGATION_NAMESPACE_IMPORT = re.compile(
 _NEXT_NAVIGATION_BINDING = re.compile(
     r"""\bexport\s*\{[^{}]*\}\s*from\s*"""
     r"""(?:"next/navigation"|'next/navigation')"""
-    r"""|\bexport\s*\*\s*from\s*"""
+    r"""|\bexport\s*\*\s*(?:as\s+[A-Za-z_$][\w$]*\s*)?from\s*"""
     r"""(?:"next/navigation"|'next/navigation')"""
     r"""|\bimport\s+(?!(?:type\s+)?\{|\*)[^;\n]+\s+from\s*"""
     r"""(?:"next/navigation"|'next/navigation')"""
