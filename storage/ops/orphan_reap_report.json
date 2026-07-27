@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T19:00:18.931458+00:00",
+  "generated_at": "2026-07-27T20:00:10.021443+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,15 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 149.6
+      "age_hours": 150.6
+    },
+    {
+      "path": "storage/drafts/K1710_general_draft.md",
+      "title": "開盤那一刻，隔夜的跳動就先劇透了今天的風浪",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 2497,
+      "age_hours": 2.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -15,17 +23,17 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 9.7
+      "age_hours": 10.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 58,
-    "grace": 1,
+    "grace": 0,
     "inflight": 0
   },
-  "orphan_count": 2,
+  "orphan_count": 3,
   "adopted": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -33,9 +41,9 @@
       "reason": "gate_rejected (rc=5):   Per .claude/rules/publishing.md, every published article needs 2+ real PNG charts. Generate the charts and embed them in a `## 圖表` section, then retry. Use `--no-image-gate` only for genuinely text-"
     },
     {
-      "path": "storage/drafts/k1600_general_draft.md",
+      "path": "storage/drafts/K1710_general_draft.md",
       "adopted": false,
-      "reason": "gate_rejected (rc=7):   Refusing to publish. Rewrite the draft in general-reader language (remove K-id / statistical jargon from title and body) or intentionally publish it as research."
+      "reason": "gate_rejected (rc=6): [publish_draft] IMAGE PATH ERROR: local image not found: assets/k1710_overnight_edge.png (resolved to /Users/yhlai0911/volpred-research/assets/k1710_overnight_edge.png). Image alt='六個市場的散佈圖：橫軸是隔夜佔全日風險"
     }
   ],
   "applied": true,
@@ -44,14 +52,41 @@
   "job_deliveries": [],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/K1710_general_draft.md",
+          "kind": "md",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1710_overnight_edge.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/make_k1710_chart.py",
+          "kind": "py",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/K1710_general_draft.md",
+            "storage/drafts/assets/k1710_overnight_edge.png",
+            "storage/drafts/assets/make_k1710_chart.py"
+          ],
+          "committed": false,
+          "err": "致命錯誤: 無法建立 '/Users/yhlai0911/volpred-research/.git/index.lock'：File exists。\n\n這個版本庫似乎有另一個 git 處理程序在執行，\n例如「git commit」命令開啟的編輯器。\n請確認所有處理程序都已經終止後再重試一次。如果錯"
+        }
+      ]
     },
     "paper": {
       "collectable": [],
@@ -74,14 +109,7 @@
       "collections": []
     }
   },
-  "held_escalations": [
-    {
-      "task_id": "assign_74451e79",
-      "paths": [
-        "storage/drafts/K1649_general_draft.md"
-      ]
-    }
-  ],
+  "held_escalations": [],
   "held_escalated_paths": [
     "storage/drafts/K1649_general_draft.md"
   ]

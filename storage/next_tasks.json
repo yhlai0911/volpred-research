@@ -35166,7 +35166,9 @@
     "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
     "compute_release_reason": "external_compute_job_failed",
     "compute_job_id": "agent-brief_K1727_v2-da5fc1",
-    "blocked_reason": "external_compute_job_active"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-27T19:30:04Z",
+    "compute_finished_at": "2026-07-27T19:44:13Z"
   },
   {
     "id": "K1728",
@@ -50211,8 +50213,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 3.5 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 3.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -50398,7 +50400,7 @@
   {
     "id": "assign_7a453d3e",
     "title": "PHASE-Z 卡住檔案 incident（4f44f01f0d685436）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 7 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 7 班\n- src/volpred/ops/next_tasks.py — 7 班\n- storage/drafts/assets/k1710_overnight_edge.png — 3 班\n- storage/memory/knowledge.json — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`",
+    "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 8 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 8 班\n- src/volpred/ops/next_tasks.py — 8 班\n- storage/drafts/assets/k1710_overnight_edge.png — 4 班\n- storage/memory/knowledge.json — 6 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T200734550380Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -50414,18 +50416,28 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "docs/error_log.md": 7,
-        "src/volpred/ops/next_tasks.py": 7,
-        "storage/drafts/assets/k1710_overnight_edge.png": 3,
-        "storage/memory/knowledge.json": 5
+        "docs/error_log.md": 8,
+        "src/volpred/ops/next_tasks.py": 8,
+        "storage/drafts/assets/k1710_overnight_edge.png": 4,
+        "storage/memory/knowledge.json": 6
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T191804307871Z"
+        "refs/volpred/quarantine/20260727T191804307871Z",
+        "refs/volpred/quarantine/20260727T200734550380Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-27T19:18:10.356942+00:00",
-      "last_seen_at": "2026-07-27T19:18:10.356942+00:00"
+      "last_seen_at": "2026-07-27T20:07:41.265913+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-27T20:07:34.625263+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 3.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1710_overnight_edge.png: 已保存，且 2.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 3.6 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-27T20:07:41.265913+00:00"
   }
 ]
