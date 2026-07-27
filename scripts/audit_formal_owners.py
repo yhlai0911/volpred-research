@@ -34,6 +34,7 @@ from volpred.ops.delivery.owned_publisher_reconcile import (
 from volpred.ops.delivery.supabase_commit_ownership import (
     SupabaseCommitOwnerStore,
 )
+from volpred.ops.incident_ownership import SupabaseIncidentOwnerStore
 from volpred.ops.owner_census import (
     CapabilityClaim,
     CapabilitySpec,
@@ -55,6 +56,7 @@ _ALLOWED_RESOLVERS = frozenset(
         "unresolved",
         "work_owner_rpc",
         "commit_owner_rpc",
+        "incident_owner_rpc",
         "notification_owner_rpc",
         "publisher_sync_owner_rpc",
         "publisher_reconcile_owner_rpc",
@@ -87,7 +89,7 @@ _EXPECTED_RESOLVERS = {
         "effect",
         "publisher.article.supabase.delete",
     ): "publisher_delete_owner_rpc",
-    ("incident", "incident.lifecycle"): "unresolved",
+    ("incident", "incident.lifecycle"): "incident_owner_rpc",
     ("provider", "provider.execution"): "unresolved",
     (
         "host_authority",
@@ -98,6 +100,7 @@ _SCHEDULE_PROBE_TIMEOUT_SECONDS = 15
 _SCHEDULE_EVIDENCE_MAX_AGE_SECONDS = 30
 _PRIMARY_AUTHORITY_EVIDENCE_MAX_AGE_SECONDS = 30
 _WORK_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
+_INCIDENT_OWNER_EVIDENCE_MAX_AGE_SECONDS = 30
 _CLOCK_SKEW_SECONDS = 5
 _NON_EFFECT_OWNED_MODULES = frozenset({"owned_change.py"})
 
@@ -495,6 +498,9 @@ def _owner_readers() -> dict[str, Callable[[], object]]:
         "work_owner_rpc": (
             lambda: SupabaseWorkOwnerStore.from_environment().read_owner()
         ),
+        "incident_owner_rpc": (
+            lambda: SupabaseIncidentOwnerStore.from_environment().read_owner()
+        ),
         "commit_owner_rpc": (
             lambda: SupabaseCommitOwnerStore.from_environment().read_owner()
         ),
@@ -606,6 +612,23 @@ def _work_owner_claim_observed_at(
     )
 
 
+def _incident_owner_claim_observed_at(
+    *,
+    owner_view: object,
+    source_ref: str,
+    audit_clock: str,
+) -> str:
+    return _backend_bound_claim_observed_at(
+        owner_view=owner_view,
+        source_ref=source_ref,
+        audit_clock=audit_clock,
+        resolver="incident_owner_rpc",
+        rpc_name="volpred_read_incident_owner",
+        label="Incident owner",
+        max_age_seconds=_INCIDENT_OWNER_EVIDENCE_MAX_AGE_SECONDS,
+    )
+
+
 def run_audit(
     *,
     inventory_path: Path = DEFAULT_INVENTORY,
@@ -679,6 +702,7 @@ def run_audit(
             if resolver in {
                 "primary_authority_owner_rpc",
                 "work_owner_rpc",
+                "incident_owner_rpc",
             }:
                 validation_clock = (
                     owner_validation_clock()
@@ -696,11 +720,19 @@ def run_audit(
                             audit_clock=validation_clock,
                         )
                     )
-                else:
+                elif resolver == "work_owner_rpc":
                     claim_observed_at = _work_owner_claim_observed_at(
                         owner_view=owner_view,
                         source_ref=spec.source_ref,
                         audit_clock=validation_clock,
+                    )
+                else:
+                    claim_observed_at = (
+                        _incident_owner_claim_observed_at(
+                            owner_view=owner_view,
+                            source_ref=spec.source_ref,
+                            audit_clock=validation_clock,
+                        )
                     )
         except Exception as exc:  # noqa: BLE001 - any probe failure blocks.
             warn(

@@ -41,8 +41,8 @@
     {
       "domain": "incident",
       "capability": "incident.lifecycle",
-      "source_ref": "contract://issue-13/durable-incident-owner",
-      "resolver": "unresolved",
+      "source_ref": "supabase://backend-sha256/c6a1e836d22722263dceef6de6a10a3517e15400e1529fbad803fb89bd0a1404/rpc/volpred_read_incident_owner",
+      "resolver": "incident_owner_rpc",
       "blocked_by": "#13"
     },
     {

@@ -31,6 +31,13 @@ class _WorkOwner:
     attested_at: str = "2026-07-27T08:59:55+00:00"
 
 
+@dataclass(frozen=True)
+class _IncidentOwner:
+    owner: str = "legacy"
+    backend_sha256: str = "a" * 64
+    attested_at: str = "2026-07-27T08:59:55+00:00"
+
+
 _EFFECT_FAMILIES = frozenset(
     {
         "email.ops_alert",
@@ -44,6 +51,7 @@ _EFFECT_FAMILIES = frozenset(
 def _readers() -> dict[str, Callable[[], object]]:
     return {
         "work_owner_rpc": _WorkOwner,
+        "incident_owner_rpc": _IncidentOwner,
         "commit_owner_rpc": lambda: _Owner("operations_core"),
         "notification_owner_rpc": lambda: _Owner("operations_core"),
         "publisher_sync_owner_rpc": lambda: _Owner("operations_core"),
@@ -107,8 +115,11 @@ def _inventory(path: Path) -> None:
                 {
                     "domain": "incident",
                     "capability": "incident.lifecycle",
-                    "source_ref": "test://incident",
-                    "resolver": "unresolved",
+                    "source_ref": (
+                        "supabase://backend-sha256/"
+                        f"{'a' * 64}/rpc/volpred_read_incident_owner"
+                    ),
+                    "resolver": "incident_owner_rpc",
                 },
                 {
                     "domain": "provider",
@@ -214,6 +225,100 @@ def test_live_probes_report_attested_legacy_work_owner(tmp_path: Path) -> None:
     assert work["status"] == "wrong_owner"
     assert work["claims"][0]["owner"] == "legacy"
     assert work["claims"][0]["observed_at"] == "2026-07-27T08:59:55Z"
+    incident = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "incident.lifecycle"
+    )
+    assert incident["status"] == "wrong_owner"
+    assert incident["claims"][0]["owner"] == "legacy"
+    assert (
+        incident["claims"][0]["observed_at"]
+        == "2026-07-27T08:59:55Z"
+    )
+
+
+def test_incident_owner_probe_failure_remains_unknown_owner(
+    tmp_path: Path,
+) -> None:
+    inventory = tmp_path / "inventory.json"
+    schedules = tmp_path / "runtime.json"
+    _inventory(inventory)
+    _schedules(schedules)
+
+    def failed() -> object:
+        raise RuntimeError("attestation unavailable")
+
+    report = run_audit(
+        inventory_path=inventory,
+        schedule_path=schedules,
+        observed_at="2026-07-27T09:00:00+00:00",
+        readers={**_readers(), "incident_owner_rpc": failed},
+        schedule_audit=_schedule_audit(),
+        discovered_effect_families=_EFFECT_FAMILIES,
+    )
+
+    row = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "incident.lifecycle"
+    )
+    assert row["status"] == "unknown_owner"
+    assert report["probe_errors"] == [
+        {
+            "resolver": "incident_owner_rpc",
+            "error": "RuntimeError: attestation unavailable",
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("reader", "message"),
+    [
+        (
+            lambda: _IncidentOwner(backend_sha256="b" * 64),
+            "backend identity drifted",
+        ),
+        (
+            lambda: _IncidentOwner(
+                attested_at="2026-07-27T08:58:00+00:00"
+            ),
+            "attestation is stale",
+        ),
+        (
+            lambda: _IncidentOwner(
+                attested_at="2026-07-27T09:00:06+00:00"
+            ),
+            "attestation is from the future",
+        ),
+    ],
+)
+def test_incident_owner_evidence_identity_and_time_fail_closed(
+    tmp_path: Path,
+    reader: Callable[[], object],
+    message: str,
+) -> None:
+    inventory = tmp_path / "inventory.json"
+    schedules = tmp_path / "runtime.json"
+    _inventory(inventory)
+    _schedules(schedules)
+
+    report = run_audit(
+        inventory_path=inventory,
+        schedule_path=schedules,
+        observed_at="2026-07-27T09:00:00+00:00",
+        readers={**_readers(), "incident_owner_rpc": reader},
+        schedule_audit=_schedule_audit(),
+        discovered_effect_families=_EFFECT_FAMILIES,
+    )
+
+    row = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "incident.lifecycle"
+    )
+    assert row["status"] == "unknown_owner"
+    assert message in report["probe_errors"][0]["error"]
 
 
 def test_work_owner_probe_failure_remains_unknown_owner(
