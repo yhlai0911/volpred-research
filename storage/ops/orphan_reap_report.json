@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-27T09:00:30.442835+00:00",
+  "generated_at": "2026-07-27T10:00:53.422421+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,14 +7,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 139.6
+      "age_hours": 140.6
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 57,
-    "grace": 0,
+    "grace": 1,
     "inflight": 0
   },
   "orphan_count": 1,
@@ -26,21 +26,59 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "k1698_rev4_codex_round5_rerun2_20260727",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1698_rev4_codex_round5_rerun2_20260727.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "k1698_rev4_codex_round5_rerun_20260727",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/k1698_rev4_codex_round5_rerun_20260727.json",
+      "execution_status": "failed",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "k1698_rev4_codex_round5_rerun2_20260727",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "e125f11e2b6247d6ee83340bb02902e324b2e1b2",
+      "reason": "already_committed"
+    },
+    {
+      "job_id": "k1698_rev4_codex_round5_rerun_20260727",
+      "paths": [
+        "storage/ops/codex_reviews/k1698_rev4_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "partial_delivered",
+      "delivery_commit": "e125f11e2b6247d6ee83340bb02902e324b2e1b2",
+      "reason": "already_committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
-      "collectable": [],
-      "held": [],
-      "skipped": {
-        "grace": 0,
-        "inflight": 0,
-        "unclaimed": 0
-      },
-      "collections": []
-    },
-    "paper": {
       "collectable": [],
       "held": [],
       "skipped": {
@@ -50,8 +88,33 @@
       },
       "collections": []
     },
+    "paper": {
+      "collectable": [],
+      "held": [],
+      "skipped": {
+        "grace": 2,
+        "inflight": 0,
+        "unclaimed": 1
+      },
+      "collections": []
+    },
     "experiments": {
       "collectable": [
+        {
+          "path": "experiments/k1319/README.md",
+          "kind": "md",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1319/k1319.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/k1319/k1319_results.json",
+          "kind": "json",
+          "reason": "modified"
+        },
         {
           "path": "experiments/k1391/k1391.py",
           "kind": "py",
@@ -311,11 +374,16 @@
           "path": "experiments/k1730/verify_readme_alignment.py",
           "kind": "py",
           "reason": "untracked"
+        },
+        {
+          "path": "experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md",
+          "kind": "md",
+          "reason": "untracked"
         }
       ],
       "held": [],
       "skipped": {
-        "grace": 5,
+        "grace": 2,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -323,6 +391,9 @@
         {
           "namespace": "experiments",
           "paths": [
+            "experiments/k1319/README.md",
+            "experiments/k1319/k1319.py",
+            "experiments/k1319/k1319_results.json",
             "experiments/k1391/k1391.py",
             "experiments/k1396/k1396.py",
             "experiments/k1398/k1398.py",
@@ -359,10 +430,7 @@
             "experiments/k1730/data/spy_daily_rv.csv",
             "experiments/k1730/fig1_rolling_coverage.png",
             "experiments/k1730/fig2_ssvs_pip.png",
-            "experiments/k1730/fig3_interval_vs_realized.png",
-            "experiments/k1730/fig4_pit_calibration.png",
-            "experiments/k1730/k1730_data.py",
-            "experiments/k1730/k1730_gevreg_midas_ssvs.py"
+            "experiments/k1730/fig3_interval_vs_realized.png"
           ],
           "committed": false,
           "detail": "[pre-commit] BLOCKED — this commit introduces new silent fallback(s):\n[pre-commit]   [silent-fallback-audit] findings=3 baseline=/var/folders/f1/g41vr"

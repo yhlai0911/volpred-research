@@ -34667,12 +34667,38 @@
     "id": "assign_k1426_oos_residuals",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "agent-discovered",
     "created_at": "2026-07-17T00:25:00+08:00",
     "created_by": "hourly-slot-1-63816151dde64af1acfec8a4e532c8b4",
     "title": "K1426 OOS 殘留：GLD/IAU 資料缺 + return-OLS vs PCH 配對檢定 + oos.py docstring 修正",
-    "description": "K1426 OOS 已收尾為 NULL（PCH 對報酬避險相對報酬 OLS 無增益，見 experiments/k1426/README.md 『OOS 結果（2026-07-17 收尾）』）。以下殘留不改變該 null 判定，但為完整性應補：\n(1) pair_3 GLD/IAU 在 shard_b 因 yfinance 回空而無資料 → 重抓後跑 oos.py 單 pair + oos_return_benchmark.py，補進 merged 結果。\n(2) return-OLS vs PCH 目前只有點估計（HE 差 ≤0.0005），無配對 DM/bootstrap，因為 k1426_oos_results.json 未存 PCH 每日避險報酬序列且 refit_snapshots 只留 head。若要正式的等價性宣稱，需重跑 PCH MLE 並保留每日 hedged return 序列（走 compute_queue，原 parent job 曾 6h timeout，務必分 shard）。\n(3) oos.py:8,273,345 docstring 仍寫 21 日/monthly refit，實際預設 refit_every=63（季度）→ reproducibility metadata 錯誤，修正 docstring。merge_shards.py 已在合併輸出更正該註記。\n來源：Codex 審查 oos_return_benchmark.py 時提出的 Critical/High/Low findings。"
+    "description": "K1426 OOS 已收尾為 NULL（PCH 對報酬避險相對報酬 OLS 無增益，見 experiments/k1426/README.md 『OOS 結果（2026-07-17 收尾）』）。以下殘留不改變該 null 判定，但為完整性應補：\n(1) pair_3 GLD/IAU 在 shard_b 因 yfinance 回空而無資料 → 重抓後跑 oos.py 單 pair + oos_return_benchmark.py，補進 merged 結果。\n(2) return-OLS vs PCH 目前只有點估計（HE 差 ≤0.0005），無配對 DM/bootstrap，因為 k1426_oos_results.json 未存 PCH 每日避險報酬序列且 refit_snapshots 只留 head。若要正式的等價性宣稱，需重跑 PCH MLE 並保留每日 hedged return 序列（走 compute_queue，原 parent job 曾 6h timeout，務必分 shard）。\n(3) oos.py:8,273,345 docstring 仍寫 21 日/monthly refit，實際預設 refit_every=63（季度）→ reproducibility metadata 錯誤，修正 docstring。merge_shards.py 已在合併輸出更正該註記。\n來源：Codex 審查 oos_return_benchmark.py 時提出的 Critical/High/Low findings。",
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:15:20.241719+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-6b117151bfaf46528046d0157c97215a"
+      },
+      {
+        "ts": "2026-07-27T10:17:53.838615+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-6b117151bfaf46528046d0157c97215a"
+      },
+      {
+        "ts": "2026-07-27T10:23:54.362259+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:k1426-oos-rerun-shard-c-dailyseries-20260727",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job k1426-oos-rerun-shard-c-dailyseries-20260727; awaiting PHASE A collection",
+    "plan": "item3 docstring 修正已完成 inline（oos.py L8-9 refit 63/quarterly + n_starts=50；L345 metadata Quarterly）。item1+2 需 heavy PCH MLE 重跑：已 enqueue 3 shard job（a/b/c，各 timeout 4h）重跑並持久化每日避險報酬序列（oos.py 新增 daily_hedged_returns），benchmark 已改寫可做 return-OLS vs PCH 配對 DM+bootstrap（paired_return_ols_vs_pch）。shard b 重試 GLD/IAU（item1）。",
+    "enabling_commits_pending": true
   },
   {
     "id": "assign_quota_requeue_agentjobs",
@@ -46383,7 +46409,7 @@
     "description": "## 發生什麼\n49 個未提交檔案不是任何一班 fire 產出的，最長已連續 26 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- experiments/k1319/README.md — 5 班\n- experiments/k1319/k1319.py — 5 班\n- experiments/k1319/k1319_results.json — 19 班\n- experiments/k1399/k1399_qlike_comparison.png — 19 班\n- experiments/k1399/k1399_vix_decomp_results.json — 19 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 19 班\n- experiments/k1591/k1591_results.json — 19 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 19 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 19 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 19 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 19 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 19 班\n- experiments/k1592/fig3_origin_gamma_t.png — 19 班\n- experiments/k1705/k1705_results.json — 19 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 8 班\n- experiments/k1730/README.md — 8 班\n- experiments/k1730/REMEDIATION_v2.md — 8 班\n- experiments/k1730/codex_review_v1.md — 8 班\n- experiments/k1730/data/CPI_first_release.csv — 8 班\n- experiments/k1730/data/DGS10_daily.csv — 8 班\n- experiments/k1730/data/DTB3_daily.csv — 8 班\n- experiments/k1730/data/IP_first_release.csv — 8 班\n- experiments/k1730/data/NFP_first_release.csv — 8 班\n- experiments/k1730/data/UNRATE_first_release.csv — 8 班\n- experiments/k1730/data/VIX_daily.csv — 8 班\n- experiments/k1730/data/spy_daily_rv.csv — 8 班\n- experiments/k1730/fig1_rolling_coverage.png — 8 班\n- experiments/k1730/fig2_ssvs_pip.png — 8 班\n- experiments/k1730/fig3_interval_vs_realized.png — 8 班\n- experiments/k1730/fig4_pit_calibration.png — 8 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T081816567038Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T093207878653Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T095710559679Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-27T08:18:20.284975+00:00",
     "payload": {
@@ -46524,7 +46550,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T09:57:14.304664+00:00"
+    "updated_at": "2026-07-27T09:57:14.304664+00:00",
+    "superseded_at": "2026-07-27T10:28:48.713802+00:00",
+    "superseded_by": "assign_e6334a67",
+    "completed_at": "2026-07-27T10:28:48.713802+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "ci-root-30248226455",
@@ -46694,15 +46724,11 @@
     "description": "Implement the missing Issue #46 acceptance slice without changing live ownership: a deterministic, fail-closed census covering task, schedule, commit, effect, incident, provider, and host authority. The inventory must reject omitted domains/capabilities, zero active claims, duplicate active claims, unknown claims, and malformed evidence; expose machine-readable blockers for remaining cutovers; TDD, Matt spec/standards review, exact-path commit, and read-back required. Parent Issue #46 remains contained until all blocking cutovers and 14-day clean gate pass.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-27T09:45:53.892159+00:00",
     "created_by": "codex-loop",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-27T09:46:01.174171+00:00",
-    "claim_expires_at": "2026-07-27T11:46:01.174171+00:00",
-    "claim_session_id": "356927fc61b8",
     "status_history": [
       {
         "ts": "2026-07-27T09:46:01.174190+00:00",
@@ -46715,8 +46741,268 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:14:36.410404+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-27T09:46:04.690262+00:00"
+    "started_at": "2026-07-27T09:46:04.690262+00:00",
+    "completed_at": "2026-07-27T10:14:36.410376+00:00",
+    "result": "Issue #46 formal owner census root slice landed in 8ec80c692. Seven-domain inventory is fail-closed against omitted/duplicate/wrong/legacy owners; 79 tests and Matt Spec/Standards PASS. Live read-back: 60 capabilities, schedules 51 unique/0 duplicate/0 unknown; six remaining cutover blockers are now mechanical, so umbrella remains contained.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "ci-root-30256296797",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "incident_escalation",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "incident_id": "ci-red-30256296797",
+    "ci_incident_id": "ci-red-30256296797",
+    "ci_run_key": "30256296797:1",
+    "denied_repair_task_id": "ci-red-30256296797",
+    "created_at": "2026-07-27T10:05:21.124970+00:00",
+    "title": "CI 單一根因修復（run 30256296797）— main Test Suite",
+    "description": "CI incident ci-red-30256296797 的一般修復任務 ci-red-30256296797 被 24h G6 上限拒絕；本任務是同一 incident 唯一、可越過上限的根因出口。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30256296797\nattempt: 1\n已知失敗摘要：2026-07-27T10:04:23.8476445Z ImportError while importing test module '/home/runner/work/volpred-research/volpred-research/tests/test_covered_article_dedup.py'.\n\n行動：讀完整 failed log、本地重現、修底層契約並做同類掃描；不可只 rerun、清狀態或回報既有綠燈。result 必須帶 `root_cause=<一行>; repair_commit=pending_post_commit`，由 CI watcher 以後續 GitHub green 獨立結案。",
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:15:13.266297+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:15:13.574361+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:16:01.282790+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "manual_release"
+      }
+    ],
+    "last_released_at": "2026-07-27T10:16:01.282776+00:00"
+  },
+  {
+    "id": "K1436_article_general_v2",
+    "title": "K1436: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1436 has verdict signal (score=6, reasons=['PASS/Harvey-significant', 'methodology/mechanism lesson', 'robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: [K1436 verdict=NULL reviewer=feature-dev:code-reviewer subagent (PASS, no blocking defects; Codex CLI unavailable until 2026-07-25) artifact=experiments/k1436 task=compute-queue-followup-agent-brief_k1436_v2-70286f] Does BTC perpetual funding rate carry incremental information fo Canonical evidence: experiments/k1436/k1436_results.json, experiments/k1436/v1_feasibility_audit_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1436",
+    "evidence_source_paths": [
+      "experiments/k1436/k1436_results.json",
+      "experiments/k1436/v1_feasibility_audit_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1436/k1436_results.json, experiments/k1436/v1_feasibility_audit_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T10:13:20+00:00"
+  },
+  {
+    "id": "K1595_article_general",
+    "title": "K1595: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1595 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: k1595 [NULL]（NULL_OR_NEGATIVE，Codex CONDITIONAL_PASS）：檢驗 pooled MultiTransformerLite（3個獨立seed TransformerLite平均）能否在 SPY/QQQ/IWM/XLF/XLE/XLU 六檔 OOS 打敗 HAR/Ridge/EWMA/GJR-GARCH。資料：frozen local cache 2005-2026，OOS 2016-01-01至2026-06-26共15,678 asset-days（每檔2,613筆）。Mean QLIKE六檔全部由GJR- Canonical evidence: experiments/k1595/k1595_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1595",
+    "evidence_source_paths": [
+      "experiments/k1595/k1595_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1595/k1595_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-27T10:13:31+00:00"
+  },
+  {
+    "id": "assign_69a14293",
+    "title": "[Issue #46] Legacy hourly dispatch atomic retirement preflight",
+    "description": "依既有Matt Issue #46 Deliverable-8補齊fail-closed機械退休閘：以可重跑依賴census盤點cron_hourly_dispatch canonical/live copy、launchd label、runtime schedule與writer/manifest references，綁定formal owner census；任何unknown/wrong/duplicate owner、active host surface、未宣告runtime依賴或未完成14-day gate都阻止退休。此slice只建preflight與TDD/read-back，不在blocking chain成熟前刪除rollback artifact。完成implement→TDD→兩軸code-review→live read-back。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T10:19:53.831539+00:00",
+    "payload": {
+      "dispatch_lane": "agent",
+      "task_type": "platform_ops"
+    },
+    "created_by": "codex-loop",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T10:19:58.321544+00:00",
+    "claim_expires_at": "2026-07-27T12:19:58.321544+00:00",
+    "claim_session_id": "05dff93377e3",
+    "status_history": [
+      {
+        "ts": "2026-07-27T10:19:58.321560+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T10:20:01.837733+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T10:20:01.837717+00:00"
+  },
+  {
+    "id": "assign_e6334a67",
+    "title": "PHASE-Z 卡住檔案 incident（e31d4511cfd8f08f）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n53 個未提交檔案不是任何一班 fire 產出的，最長已連續 27 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1319/README.md — 6 班\n- experiments/k1319/k1319.py — 6 班\n- experiments/k1319/k1319_results.json — 20 班\n- experiments/k1399/k1399_qlike_comparison.png — 20 班\n- experiments/k1399/k1399_vix_decomp_results.json — 20 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 20 班\n- experiments/k1591/k1591_results.json — 20 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 20 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 20 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 20 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 20 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 20 班\n- experiments/k1592/fig3_origin_gamma_t.png — 20 班\n- experiments/k1705/k1705_results.json — 20 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 9 班\n- experiments/k1730/README.md — 9 班\n- experiments/k1730/REMEDIATION_v2.md — 9 班\n- experiments/k1730/codex_review_v1.md — 9 班\n- experiments/k1730/data/CPI_first_release.csv — 9 班\n- experiments/k1730/data/DGS10_daily.csv — 9 班\n- experiments/k1730/data/DTB3_daily.csv — 9 班\n- experiments/k1730/data/IP_first_release.csv — 9 班\n- experiments/k1730/data/NFP_first_release.csv — 9 班\n- experiments/k1730/data/UNRATE_first_release.csv — 9 班\n- experiments/k1730/data/VIX_daily.csv — 9 班\n- experiments/k1730/data/spy_daily_rv.csv — 9 班\n- experiments/k1730/fig1_rolling_coverage.png — 9 班\n- experiments/k1730/fig2_ssvs_pip.png — 9 班\n- experiments/k1730/fig3_interval_vs_realized.png — 9 班\n- experiments/k1730/fig4_pit_calibration.png — 9 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T102844873101Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-27T10:28:48.725086+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "e31d4511cfd8f08f",
+      "paths": [
+        "experiments/k1319/README.md",
+        "experiments/k1319/k1319.py",
+        "experiments/k1319/k1319_results.json",
+        "experiments/k1399/k1399_qlike_comparison.png",
+        "experiments/k1399/k1399_vix_decomp_results.json",
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png",
+        "experiments/k1591/k1591_results.json",
+        "experiments/k1591/tables/k1591_daily_panel.csv",
+        "experiments/k1591/tables/k1591_regime_summary.csv",
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv",
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png",
+        "experiments/k1592/fig2_gammarule_gjr_share.png",
+        "experiments/k1592/fig3_origin_gamma_t.png",
+        "experiments/k1705/k1705_results.json",
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md",
+        "experiments/k1730/README.md",
+        "experiments/k1730/REMEDIATION_v2.md",
+        "experiments/k1730/codex_review_v1.md",
+        "experiments/k1730/data/CPI_first_release.csv",
+        "experiments/k1730/data/DGS10_daily.csv",
+        "experiments/k1730/data/DTB3_daily.csv",
+        "experiments/k1730/data/IP_first_release.csv",
+        "experiments/k1730/data/NFP_first_release.csv",
+        "experiments/k1730/data/UNRATE_first_release.csv",
+        "experiments/k1730/data/VIX_daily.csv",
+        "experiments/k1730/data/spy_daily_rv.csv",
+        "experiments/k1730/fig1_rolling_coverage.png",
+        "experiments/k1730/fig2_ssvs_pip.png",
+        "experiments/k1730/fig3_interval_vs_realized.png",
+        "experiments/k1730/fig4_pit_calibration.png",
+        "experiments/k1730/k1730_data.py",
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py",
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json",
+        "experiments/k1730/k1730_models.py",
+        "experiments/k1730/k1730_quickmode_results.json",
+        "experiments/k1730/k1730_report_tables.py",
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json",
+        "experiments/k1730/k1730_scoring.py",
+        "experiments/k1730/reproduce_spec.json",
+        "experiments/k1730/review_verdict.json",
+        "experiments/k1730/run_production.log",
+        "experiments/k1730/run_production_v2.log",
+        "experiments/k1730/test_k1730_recovery.py",
+        "experiments/k1730/verify_readme_alignment.py",
+        "experiments/k892/k892_verify_tw_gamma.py",
+        "experiments/k892/k892_verify_tw_gamma_results.json",
+        "experiments/paper2_table1_summary_stats_provenance/results.json",
+        "paper/leverage-direction/main_v_ijf.pdf",
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png",
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/paper_pipeline_status.json"
+      ],
+      "streaks": {
+        "experiments/k1319/README.md": 6,
+        "experiments/k1319/k1319.py": 6,
+        "experiments/k1319/k1319_results.json": 20,
+        "experiments/k1399/k1399_qlike_comparison.png": 20,
+        "experiments/k1399/k1399_vix_decomp_results.json": 20,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 20,
+        "experiments/k1591/k1591_results.json": 20,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 20,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 20,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 20,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 20,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 20,
+        "experiments/k1592/fig3_origin_gamma_t.png": 20,
+        "experiments/k1705/k1705_results.json": 20,
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 9,
+        "experiments/k1730/README.md": 9,
+        "experiments/k1730/REMEDIATION_v2.md": 9,
+        "experiments/k1730/codex_review_v1.md": 9,
+        "experiments/k1730/data/CPI_first_release.csv": 9,
+        "experiments/k1730/data/DGS10_daily.csv": 9,
+        "experiments/k1730/data/DTB3_daily.csv": 9,
+        "experiments/k1730/data/IP_first_release.csv": 9,
+        "experiments/k1730/data/NFP_first_release.csv": 9,
+        "experiments/k1730/data/UNRATE_first_release.csv": 9,
+        "experiments/k1730/data/VIX_daily.csv": 9,
+        "experiments/k1730/data/spy_daily_rv.csv": 9,
+        "experiments/k1730/fig1_rolling_coverage.png": 9,
+        "experiments/k1730/fig2_ssvs_pip.png": 9,
+        "experiments/k1730/fig3_interval_vs_realized.png": 9,
+        "experiments/k1730/fig4_pit_calibration.png": 9,
+        "experiments/k1730/k1730_data.py": 9,
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 9,
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 9,
+        "experiments/k1730/k1730_models.py": 9,
+        "experiments/k1730/k1730_quickmode_results.json": 9,
+        "experiments/k1730/k1730_report_tables.py": 9,
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 9,
+        "experiments/k1730/k1730_scoring.py": 9,
+        "experiments/k1730/reproduce_spec.json": 9,
+        "experiments/k1730/review_verdict.json": 9,
+        "experiments/k1730/run_production.log": 9,
+        "experiments/k1730/run_production_v2.log": 9,
+        "experiments/k1730/test_k1730_recovery.py": 9,
+        "experiments/k1730/verify_readme_alignment.py": 9,
+        "experiments/k892/k892_verify_tw_gamma.py": 3,
+        "experiments/k892/k892_verify_tw_gamma_results.json": 3,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 20,
+        "paper/leverage-direction/main_v_ijf.pdf": 6,
+        "storage/drafts/article_images/k1600_dm_and_beta1q.png": 3,
+        "storage/drafts/article_images/k1600_qlike_loss_ratio.png": 3,
+        "storage/logs/trending_primary_source_verification.jsonl": 27,
+        "storage/memory/knowledge.json": 20,
+        "storage/paper_pipeline_status.json": 6
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260727T102844873101Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-27T10:28:48.713802+00:00",
+      "last_seen_at": "2026-07-27T10:28:48.713802+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

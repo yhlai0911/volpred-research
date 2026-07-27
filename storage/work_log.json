@@ -28029,5 +28029,25 @@
     "owner": "hourly-slot-2-3dd8c5669f3d4ee98f6f7ea4dfb0afbb",
     "commit": null,
     "summary": "PHASE A collect_completed followup 處理：compute job k1698_rev4_codex_round5_rerun2_20260727（Codex round-5 review）已 completed 但 abort。\n判讀：受審 frozen worktree dispatch-slot-2-c5cafe39-k1698 早已被 salvage 裁決（worktree_salvage_* + wsb_remed_* 皆 succeeded、worktree 已不存在），此 rerun 對過時 rev4 freeze 硬審，freeze 驗證 5 缺檔 + 4 雜湊不符（僅 fig2 相符）→ Codex 依規中止，未出 verdict、未填 review_verdict.json、未 PASS/FAIL。prior k1698_rev4_round5_collect 已 failed。\n不自簽、不追已消失 worktree、不對錯配 freeze 再審。建根因導向 followup assign_80535ab4（paper_review P2）：確認主庫是否為 certify 目標 → 重建 freeze → 對主庫重 enqueue Codex review → PASS 才 certify（3-strike active）。\ncompute_queue mark-followup-dispatched --next-task-id assign_80535ab4 完成，pending-followup 佇列清空。"
+  },
+  {
+    "timestamp": "2026-07-27T18:13:34+08:00",
+    "task_type": "platform_ops",
+    "task_id": "ci-root-30256296797",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-85536397b79f4194b4c30c12c4ffe2e3",
+    "owner": "hourly-slot-1-85536397b79f4194b4c30c12c4ffe2e3",
+    "commit": null,
+    "summary": "CI 紅燈根因修復（run 30256296797, head c42739cd7）：tests/test_covered_article_dedup.py collection ImportError（cannot import shared_state_lock from mark_task_blocked）。根因 = canonical-writers 重構 da04993c6 移除 mark_task_blocked 的 shared_state_lock/_save，但 scripts/mark_covered_article_tasks.py 是漏網 straggler 仍舊 import。修法：sweep() 遷移到與 mark_task_blocked.main() 一致的 canonical flock read-mutate-write（guard_canonical_write + LOCK_EX + write_tasks_to_handle），同時消除舊 shared_state_lock(\"control_plane\") 與 flock 不協調的潛在原子性 bug。test apply 案例改 monkeypatch NEXT_TASKS→tmp_path 真實 round-trip。驗證：該檔 8 passed、pytest --collect-only 5851 collected（error 消失）、CLI dry-run would retire 0、僅寫 tmp_path 不動 repo state。任務 ci-root-30256296797（platform_ops）claim 遭 supervisor_preassignment_required 機械拒絕，未 mutate task record；本修復為 fire_reason=requested:ci_red 直接 remediation，走 PHASE-Z 提交。"
+  },
+  {
+    "timestamp": "2026-07-27T18:24:35+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_k1426_oos_residuals",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-2-6b117151bfaf46528046d0157c97215a",
+    "owner": "hourly-slot-2-6b117151bfaf46528046d0157c97215a",
+    "commit": null,
+    "summary": "K1426 OOS 殘留任務 enabling 工作（heavy compute 已 enqueue，待後續 PHASE A 收尾）。\nitem3（docstring reproducibility metadata）已 inline 修正並驗證：oos.py L8-9 refit cadence 21日/100-start → 63日季度/50-start（實際 default），L345 metadata \"Monthly (21-day)\" → \"Quarterly (63-day default)\"。\nitem2 enabling：oos.py 新增持久化每日避險報酬序列 daily_hedged_returns（oos_dates/unhedged/hedged_ols/hedged_eg/hedged_pch）；oos_return_benchmark.py 新增 paired_return_ols_vs_pch()，重用 oos.py 的 bootstrap_he_diff_ci + dm_test，在有每日 PCH 序列時做 return-OLS vs PCH 的日期對齊配對 DM + block-bootstrap（含 <100 重疊守衛）。合成序列驗證函式回傳結構正確、py_compile + import 皆通過。\nitem1+2 heavy compute：enqueue 3 個 compute_queue shard job（k1426-oos-rerun-shard-a/b/c-dailyseries-20260727，各 timeout 4h）重跑 PCH MLE 產生每日序列；shard_b 重試 GLD/IAU（先前 yfinance 回空）。shard_c 掛 source-task-id + followup（merge_shards + benchmark + 驗證 NULL + README + close），precondition guard 驗三 shard 皆帶 daily_hedged_returns 才 merge/close。\n點估計顯示 PCH vs return-OLS 差異全 ≤0.0005，預期配對檢定確認既有 NULL（不改變判定）。任務轉 awaiting_agent_job。"
   }
 ]

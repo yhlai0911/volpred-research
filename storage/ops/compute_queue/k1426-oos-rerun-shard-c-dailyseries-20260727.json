@@ -1,0 +1,42 @@
+{
+  "id": "k1426-oos-rerun-shard-c-dailyseries-20260727",
+  "title": "K1426 OOS shard c rerun (XLE/USO, XLF/XLK) — persist daily series + merge/benchmark followup",
+  "script_path": "experiments/k1426/oos.py",
+  "interpreter": "uv run python",
+  "args": [
+    "c"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T10:23:54Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1426-oos-rerun-shard-c-dailyseries-20260727.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/k1426-oos-rerun-shard-c-dailyseries-20260727.stderr",
+  "result_artifact": "experiments/k1426/k1426_oos_shard_c.json",
+  "output_paths": [
+    "experiments/k1426/k1426_oos_shard_c.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "# K1426 OOS residual — merge + benchmark + close (collect_completed followup)\n\n**Parent task**: `assign_k1426_oos_residuals` (P3, in_progress). Close it when this is done.\n\n## Preconditions (verify FIRST — do not proceed if any fail)\nThis followup fires when shard_c completes, but shards a/b/c run as separate jobs.\nBefore merging, confirm ALL THREE shard files were regenerated under the new\ndaily-series-persistence patch:\n\n```bash\nfor s in a b c; do\n  python3 -c \"import json;d=json.load(open('experiments/k1426/k1426_oos_shard_$s.json'));\\\nprint('$s', {k:('daily' in (v or {}) or 'daily_hedged_returns' in (v or {})) for k,v in d['pairs'].items()})\"\ndone\n```\nEach pair (except a still-failing GLD/IAU) MUST carry key `daily_hedged_returns`.\nIf shard_a or shard_b has NOT yet been regenerated (no `daily_hedged_returns`),\nDO NOT merge or close — leave the parent task in_progress and re-defer this\nfollowup one cycle (the other shard jobs are still running).\n\n## Steps once all shards ready\n1. `uv run python experiments/k1426/merge_shards.py` → regenerates k1426_oos_results.json.\n2. `uv run python experiments/k1426/oos_return_benchmark.py` → now emits\n   `paired_return_ols_vs_pch` per pair (paired DM + block-bootstrap of\n   return-OLS vs PCH), because oos.py now persists the daily PCH hedged-return\n   series. Point estimates showed diffs ≤0.0005 (PCH vs return-OLS), so expect\n   the paired DM |t| to be small and the bootstrap HE-diff CI to straddle 0 —\n   i.e. return-OLS and PCH are statistically indistinguishable, confirming the\n   existing NULL. VERIFY the numbers rather than assuming (agent-result-verification skill).\n3. **item (1) GLD/IAU**: if pair_3_GLD_IAU still errors \"yfinance returned empty\"\n   after the rerun, the data source is unavailable for that pair — document it\n   as data-unavailable in the README (best-effort), do NOT block closure on it.\n   If it now has data, confirm its HE numbers merged in.\n4. Update `experiments/k1426/README.md` 『OOS 結果』section: note the paired\n   return-OLS vs PCH test now exists and its verdict (NULL confirmed / or not),\n   and that oos.py docstrings (refit cadence 63/quarterly, n_starts=50) + the\n   line-345 metadata note were corrected. The NULL judgment is unchanged.\n5. Write a knowledge.json entry ONLY if there is a genuine new finding; otherwise\n   just work_log. Do NOT fabricate numbers — read them from the JSON.\n6. Close parent: `uv run python scripts/task_pool_claim.py complete --id assign_k1426_oos_residuals --status succeeded --result '<摘要>'`.\n\n**Model**: opus / medium (per model_router; light interpretation + verification, no new compute).",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_k1426_oos_residuals",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T10:23:54Z",
+    "linked_at": "2026-07-27T10:23:54Z",
+    "error": null
+  },
+  "timeout_seconds": 14400,
+  "brief_source": null,
+  "brief_snapshot": null
+}
