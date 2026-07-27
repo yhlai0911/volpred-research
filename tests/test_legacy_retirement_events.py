@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from threading import Event
 
 import pytest
 
@@ -12,8 +14,21 @@ from volpred.ops.legacy_retirement import LegacyRetirementInputError
 from volpred.ops.legacy_retirement_events import (
     append_legacy_business_fire,
     load_verified_legacy_business_fire_events,
+    materialize_duplicate_effect_signal,
     materialize_legacy_business_fire_signal,
 )
+
+
+class _DuplicateEffectRpc:
+    backend_sha256 = "b" * 64
+
+    def __init__(self, payload: object) -> None:
+        self.payload = payload
+        self.calls: list[tuple[str, dict[str, object]]] = []
+
+    def call(self, function: str, payload: dict[str, object]) -> object:
+        self.calls.append((function, payload))
+        return self.payload
 
 
 def test_tripwire_appends_hash_chained_durable_events(tmp_path: Path) -> None:
@@ -194,3 +209,191 @@ def test_operations_core_schedule_owns_signal_materialization() -> None:
     assert item["wrapper_script"].endswith(
         "/cron_legacy_retirement_signal_materialize.sh"
     )
+
+
+def test_duplicate_effect_signal_uses_exact_database_sequence_delta(
+    tmp_path: Path,
+) -> None:
+    rpc = _DuplicateEffectRpc(
+        {
+            "schema_version": "duplicate-effect-retirement-events.v1",
+            "observed_at": "2026-07-27T11:10:00+00:00",
+            "after_sequence": 0,
+            "high_watermark": 2,
+            "events": [
+                {
+                    "sequence": 1,
+                    "effect_id": "effect-one",
+                    "first_delivered_attempt_count": 1,
+                    "offending_attempt_count": 2,
+                    "offending_evidence_sha256": "1" * 64,
+                    "detected_at": "2026-07-27T11:08:00+00:00",
+                },
+                {
+                    "sequence": 2,
+                    "effect_id": "effect-two",
+                    "first_delivered_attempt_count": 3,
+                    "offending_attempt_count": 2,
+                    "offending_evidence_sha256": "2" * 64,
+                    "detected_at": "2026-07-27T11:09:00+00:00",
+                },
+            ],
+        }
+    )
+
+    path = materialize_duplicate_effect_signal(tmp_path, rpc_client=rpc)  # type: ignore[arg-type]
+    signal = json.loads(path.read_text(encoding="utf-8"))
+
+    assert rpc.calls == [
+        (
+            "volpred_read_duplicate_effect_retirement_events",
+            {"p_after_sequence": 0},
+        )
+    ]
+    assert signal["count"] == 2
+    assert signal["high_watermark"] == 2
+    assert signal["window_from"] == "2026-07-27T11:08:00+00:00"
+    assert signal["window_to"] == "2026-07-27T11:10:00+00:00"
+    assert len(signal["evidence_refs"]) == 2
+
+
+def test_duplicate_effect_signal_rejects_gap_or_cursor_drift(
+    tmp_path: Path,
+) -> None:
+    rpc = _DuplicateEffectRpc(
+        {
+            "schema_version": "duplicate-effect-retirement-events.v1",
+            "observed_at": "2026-07-27T11:10:00+00:00",
+            "after_sequence": 0,
+            "high_watermark": 2,
+            "events": [],
+        }
+    )
+
+    with pytest.raises(
+        LegacyRetirementInputError,
+        match="sequence coverage",
+    ):
+        materialize_duplicate_effect_signal(tmp_path, rpc_client=rpc)  # type: ignore[arg-type]
+
+
+def test_duplicate_effect_signal_assigns_late_commit_to_current_sequence_delta(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "volpred.ops.legacy_retirement_events._previous_dimension_signal",
+        lambda _root, _dimension: {
+            "schema_version": "legacy-retirement-signal.v1",
+            "dimension": "duplicate_effect",
+            "producer": "operations_core",
+            "observed_at": "2026-07-27T11:10:00+00:00",
+            "window_from": "2026-07-27T11:00:00+00:00",
+            "window_to": "2026-07-27T11:10:00+00:00",
+            "count": 0,
+            "high_watermark": 0,
+            "evidence_refs": ["test://initial"],
+        },
+    )
+    rpc = _DuplicateEffectRpc(
+        {
+            "schema_version": "duplicate-effect-retirement-events.v1",
+            "observed_at": "2026-07-27T11:15:00+00:00",
+            "after_sequence": 0,
+            "high_watermark": 1,
+            "events": [
+                {
+                    "sequence": 1,
+                    "effect_id": "effect-late",
+                    "first_delivered_attempt_count": 1,
+                    "offending_attempt_count": 2,
+                    "offending_evidence_sha256": "3" * 64,
+                    "detected_at": "2026-07-27T11:09:59+00:00",
+                }
+            ],
+        }
+    )
+
+    path = materialize_duplicate_effect_signal(tmp_path, rpc_client=rpc)  # type: ignore[arg-type]
+    signal = json.loads(path.read_text(encoding="utf-8"))
+
+    assert signal["count"] == 1
+    assert signal["high_watermark"] == 1
+    assert signal["window_from"] == "2026-07-27T11:10:00+00:00"
+    assert signal["window_to"] == "2026-07-27T11:15:00+00:00"
+
+
+def test_duplicate_effect_materialization_serializes_rpc_through_publish(
+    tmp_path: Path,
+) -> None:
+    first_entered = Event()
+    release_first = Event()
+    second_entered = Event()
+
+    class BlockingRpc(_DuplicateEffectRpc):
+        def call(self, function: str, payload: dict[str, object]) -> object:
+            first_entered.set()
+            assert release_first.wait(timeout=2)
+            return super().call(function, payload)
+
+    class ObservedRpc(_DuplicateEffectRpc):
+        def call(self, function: str, payload: dict[str, object]) -> object:
+            second_entered.set()
+            return super().call(function, payload)
+
+    first_rpc = BlockingRpc(
+        {
+            "schema_version": "duplicate-effect-retirement-events.v1",
+            "observed_at": "2026-07-27T11:10:00+00:00",
+            "after_sequence": 0,
+            "high_watermark": 0,
+            "events": [],
+        }
+    )
+    second_rpc = ObservedRpc(
+        {
+            "schema_version": "duplicate-effect-retirement-events.v1",
+            "observed_at": "2026-07-27T11:11:00+00:00",
+            "after_sequence": 0,
+            "high_watermark": 1,
+            "events": [
+                {
+                    "sequence": 1,
+                    "effect_id": "effect-concurrent",
+                    "first_delivered_attempt_count": 1,
+                    "offending_attempt_count": 2,
+                    "offending_evidence_sha256": "4" * 64,
+                    "detected_at": "2026-07-27T11:10:30+00:00",
+                }
+            ],
+        }
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        first = executor.submit(
+            materialize_duplicate_effect_signal,
+            tmp_path,
+            rpc_client=first_rpc,  # type: ignore[arg-type]
+        )
+        assert first_entered.wait(timeout=2)
+        second = executor.submit(
+            materialize_duplicate_effect_signal,
+            tmp_path,
+            rpc_client=second_rpc,  # type: ignore[arg-type]
+        )
+        assert not second_entered.wait(timeout=0.1)
+        release_first.set()
+        first.result(timeout=2)
+        second.result(timeout=2)
+
+    signal = json.loads(
+        (
+            tmp_path
+            / "storage"
+            / "ops"
+            / "legacy_retirement_signals"
+            / "duplicate_effect.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert signal["high_watermark"] == 1
+    assert signal["count"] == 1

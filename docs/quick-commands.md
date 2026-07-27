@@ -53,6 +53,7 @@ uv run python scripts/audit_formal_owners.py            # 七領域正式 owner 
 uv run python scripts/audit_legacy_retirement.py        # Issue #46 實體退休閘：0=已退休、1=仍blocked、2=證據/probe失敗
 # 第一個正式事件源：legacy wrapper自動寫immutable tripwire；Operations Core每5分鐘彙整typed signal
 uv run python scripts/materialize_legacy_business_fire_signal.py
+uv run python scripts/materialize_duplicate_effect_signal.py  # private DB violation ledger → typed signal
 # 四個 Operations Core typed signal source 全部存在後才可啟用；禁止手建 observation JSON
 uv run python scripts/record_legacy_retirement_observation.py
 uv run volpred ops jobs --status queued              # 查看待處理任務

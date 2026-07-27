@@ -2321,3 +2321,13 @@ entrypoint不能自行產生「clean」signal；在其餘三個event producer完
 recorder或14日計時。canonical job `legacy_retirement_signal_materialize` 由
 Operations Core每5分鐘執行（短於source freshness 10分鐘上限），只刷新這一維
 ignored signal；host cron與piggy-back皆不得成為第二owner。
+
+`duplicate_effect` 不以可消失的provider現況或永久污染的歷史總數裁決。正式Effect
+Delivery每次settlement insert都經private PostgreSQL trigger；同一EffectRequest若出現
+第二筆`delivered` receipt，trigger會追加帶DB identity sequence的violation event。
+event table採FORCE RLS，service role無direct table權限，只能呼叫固定空
+`search_path`、service-role-only read RPC。Operations Core以上一份已驗證observation的
+`high_watermark`作cursor，要求RPC回傳完整連續sequence delta後才產生typed signal；
+RPC unavailable、cursor倒退、schema／sequence gap或未授權讀取都fail closed。既有
+`*/5` materializer會依序刷新`legacy_business_fire`與`duplicate_effect`；任一維失敗
+整個scheduled fire非零，但仍不會自行寫observation。

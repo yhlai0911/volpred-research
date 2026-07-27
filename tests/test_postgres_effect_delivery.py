@@ -10,6 +10,7 @@ from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from pathlib import Path
+from threading import Barrier
 
 import psycopg
 import pytest
@@ -252,6 +253,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260727080000_primary_authority_lifecycle_audit.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260727110626_operations_core_duplicate_effect_retirement_signal.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -1430,6 +1435,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     text, text, text, text, bigint, text, text, text,
                     text, text, text, text, text, text, text
                   ),
+                  public.volpred_read_duplicate_effect_retirement_events(bigint),
                   public.volpred_read_primary_authority_events(text, integer)
                 """
             )
@@ -1539,6 +1545,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
         connection.execute(
             """
             TRUNCATE TABLE
+              volpred_ops.legacy_retirement_duplicate_effect_events,
               volpred_ops.work_cutover_gate_receipts,
               volpred_ops.work_cutover_gates,
                   volpred_ops.work_owner_receipts,
@@ -1570,6 +1577,13 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
               volpred_ops.work_events,
               volpred_ops.work_items
             RESTART IDENTITY
+            """
+        )
+        connection.execute(
+            """
+            UPDATE volpred_ops.legacy_retirement_duplicate_effect_head
+            SET high_watermark = 0
+            WHERE singleton
             """
         )
         connection.execute(
@@ -2080,6 +2094,261 @@ def test_request_and_outbox_are_atomic_durable_and_replay_safe(
     assert inspected == first
     assert first.created_at.endswith("+00:00")
     assert rows == [("effect-postgres-1", "pending", 0)]
+
+
+def test_duplicate_delivered_receipt_appends_private_retirement_event(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    _delivery(postgres_effect_dsn).request(_request())
+    with psycopg.connect(
+        postgres_effect_dsn,
+        autocommit=True,
+    ) as connection:
+        # Production migration runners may replay an already-recorded file.
+        # The schema and backfill must remain idempotent.
+        connection.execute(MIGRATIONS[-1].read_text(encoding="utf-8"))
+        sequence = connection.execute(
+            """
+            SELECT sequence
+            FROM volpred_ops.effect_outbox
+            WHERE effect_id = 'effect-postgres-1'
+            """
+        ).fetchone()[0]
+        connection.execute(
+            """
+            ALTER TABLE volpred_ops.effect_attempt_receipts
+            DISABLE TRIGGER require_effect_authority_grant
+            """
+        )
+        try:
+            barrier = Barrier(2)
+
+            def insert_delivered(attempt: int) -> None:
+                with psycopg.connect(
+                    postgres_effect_dsn,
+                    autocommit=True,
+                ) as worker_connection:
+                    barrier.wait()
+                    worker_connection.execute(
+                        """
+                        INSERT INTO volpred_ops.effect_attempt_receipts (
+                          effect_id, outbox_sequence, attempt_count, worker_id,
+                          claim_token_sha256, reported_outcome, disposition,
+                          acknowledgement_kind, acknowledgement_target_ref,
+                          reason_code, evidence_ref, evidence_sha256, retry_at,
+                          recorded_at
+                        )
+                        VALUES (
+                          'effect-postgres-1', %s, %s, 'test-worker',
+                          %s, 'acknowledged', 'delivered',
+                          'telegram.message.readback', 'telegram:owner-chat',
+                          NULL, %s, %s, NULL, clock_timestamp()
+                        )
+                        """,
+                        (
+                            sequence,
+                            attempt,
+                            hashlib.sha256(
+                                f"token-{attempt}".encode()
+                            ).hexdigest(),
+                            f"test:duplicate-effect:{attempt}",
+                            hashlib.sha256(
+                                f"evidence-{attempt}".encode()
+                            ).hexdigest(),
+                        ),
+                    )
+
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                list(executor.map(insert_delivered, (1, 2)))
+        finally:
+            connection.execute(
+                """
+                ALTER TABLE volpred_ops.effect_attempt_receipts
+                ENABLE TRIGGER require_effect_authority_grant
+                """
+            )
+
+        # Replaying after a captured violation must not duplicate the backfill
+        # or advance its transactional cursor.
+        connection.execute(MIGRATIONS[-1].read_text(encoding="utf-8"))
+        event = connection.execute(
+            """
+            SELECT sequence, effect_id, first_delivered_attempt_count,
+                   offending_attempt_count
+            FROM volpred_ops.legacy_retirement_duplicate_effect_events
+            """
+        ).fetchone()
+        assert event[0:2] == (1, "effect-postgres-1")
+        assert {event[2], event[3]} == {1, 2}
+        assert event[2] != event[3]
+
+        connection.execute("SET ROLE service_role")
+        snapshot = connection.execute(
+            """
+            SELECT public.volpred_read_duplicate_effect_retirement_events(0)
+            """
+        ).fetchone()[0]
+        assert snapshot["schema_version"] == (
+            "duplicate-effect-retirement-events.v1"
+        )
+        assert snapshot["after_sequence"] == 0
+        assert snapshot["high_watermark"] == 1
+        assert len(snapshot["events"]) == 1
+        assert {
+            snapshot["events"][0]["first_delivered_attempt_count"],
+            snapshot["events"][0]["offending_attempt_count"],
+        } == {1, 2}
+        empty = connection.execute(
+            """
+            SELECT public.volpred_read_duplicate_effect_retirement_events(1)
+            """
+        ).fetchone()[0]
+        assert empty["events"] == []
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.legacy_retirement_duplicate_effect_events
+                """
+            )
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                """
+                SELECT *
+                FROM volpred_ops.legacy_retirement_duplicate_effect_head
+                """
+            )
+
+    for role in ("anon", "authenticated"):
+        with psycopg.connect(
+            postgres_effect_dsn,
+            autocommit=True,
+        ) as connection:
+            connection.execute(f"SET ROLE {role}")
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                connection.execute(
+                    """
+                    SELECT public.volpred_read_duplicate_effect_retirement_events(0)
+                    """
+                )
+
+
+def test_duplicate_effect_sequence_does_not_gap_after_transaction_rollback(
+    postgres_effect_dsn: str,
+) -> None:
+    _seed_work(postgres_effect_dsn)
+    _delivery(postgres_effect_dsn).request(_request())
+    with psycopg.connect(postgres_effect_dsn, autocommit=True) as connection:
+        outbox_sequence = connection.execute(
+            """
+            SELECT sequence
+            FROM volpred_ops.effect_outbox
+            WHERE effect_id = 'effect-postgres-1'
+            """
+        ).fetchone()[0]
+        connection.execute(
+            """
+            ALTER TABLE volpred_ops.effect_attempt_receipts
+            DISABLE TRIGGER require_effect_authority_grant
+            """
+        )
+        try:
+            connection.execute(
+                """
+                INSERT INTO volpred_ops.effect_attempt_receipts (
+                  effect_id, outbox_sequence, attempt_count, worker_id,
+                  claim_token_sha256, reported_outcome, disposition,
+                  acknowledgement_kind, acknowledgement_target_ref,
+                  reason_code, evidence_ref, evidence_sha256, retry_at,
+                  recorded_at
+                )
+                VALUES (
+                  'effect-postgres-1', %s, 3, 'test-worker',
+                  %s, 'acknowledged', 'delivered',
+                  'telegram.message.readback', 'telegram:owner-chat',
+                  NULL, 'test:original', %s, NULL, clock_timestamp()
+                )
+                """,
+                (
+                    outbox_sequence,
+                    hashlib.sha256(b"token-3").hexdigest(),
+                    hashlib.sha256(b"evidence-3").hexdigest(),
+                ),
+            )
+            with (
+                pytest.raises(RuntimeError, match="rollback duplicate"),
+                connection.transaction(),
+            ):
+                connection.execute(
+                    """
+                    INSERT INTO volpred_ops.effect_attempt_receipts (
+                      effect_id, outbox_sequence, attempt_count, worker_id,
+                      claim_token_sha256, reported_outcome, disposition,
+                      acknowledgement_kind, acknowledgement_target_ref,
+                      reason_code, evidence_ref, evidence_sha256, retry_at,
+                      recorded_at
+                    )
+                    VALUES (
+                      'effect-postgres-1', %s, 2, 'test-worker',
+                      %s, 'acknowledged', 'delivered',
+                      'telegram.message.readback', 'telegram:owner-chat',
+                      NULL, 'test:rolled-back', %s, NULL, clock_timestamp()
+                    )
+                    """,
+                    (
+                        outbox_sequence,
+                        hashlib.sha256(b"token-2").hexdigest(),
+                        hashlib.sha256(b"evidence-2").hexdigest(),
+                    ),
+                )
+                raise RuntimeError("rollback duplicate")
+            connection.execute(
+                """
+                INSERT INTO volpred_ops.effect_attempt_receipts (
+                  effect_id, outbox_sequence, attempt_count, worker_id,
+                  claim_token_sha256, reported_outcome, disposition,
+                  acknowledgement_kind, acknowledgement_target_ref,
+                  reason_code, evidence_ref, evidence_sha256, retry_at,
+                  recorded_at
+                )
+                VALUES (
+                  'effect-postgres-1', %s, 1, 'test-worker',
+                  %s, 'acknowledged', 'delivered',
+                  'telegram.message.readback', 'telegram:owner-chat',
+                  NULL, 'test:committed', %s, NULL, clock_timestamp()
+                )
+                """,
+                (
+                    outbox_sequence,
+                    hashlib.sha256(b"token-1").hexdigest(),
+                    hashlib.sha256(b"evidence-1").hexdigest(),
+                ),
+            )
+        finally:
+            connection.execute(
+                """
+                ALTER TABLE volpred_ops.effect_attempt_receipts
+                ENABLE TRIGGER require_effect_authority_grant
+                """
+            )
+        rows = connection.execute(
+            """
+            SELECT sequence, offending_attempt_count
+            FROM volpred_ops.legacy_retirement_duplicate_effect_events
+            ORDER BY sequence
+            """
+        ).fetchall()
+        connection.execute("SET ROLE service_role")
+        head = connection.execute(
+            """
+            SELECT (
+              public.volpred_read_duplicate_effect_retirement_events(0)
+            )->>'high_watermark'
+            """
+        ).fetchone()[0]
+    assert rows == [(1, 1)]
+    assert head == "1"
 
 
 def test_conflicting_replay_does_not_append_an_outbox_row(

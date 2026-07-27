@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-27T18:58:00+08:00",
+    "updated_at": "2026-07-27T19:11:00+08:00",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。 【2026-07-27 shadow 觀察結論（scripts/crosscheck_pregate_outcomes.py --invoker supervisor --since 2026-07-20，即 capacity+novelty rewire 上線後）】新 gate 於 162 班中僅 would_skip 2 班（1.2% skip 率），且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2＝100% 誤判，反例：2026-07-21T07:08 / 08:08 UTC）。雙重不合格：skip 率過低不足以省 token；skip 時全為誤判，遠超 flip 門檻 strict_mismatch_rate≤0.10。判定：維持 shadow，不翻 enforce；live A/B（60min vs 15min）因 enforce 未上線暫緩。後續：gate 需補訊號提高 skip precision/recall 後再評，估算值（15min≈1.84x）尚未由 live A/B 實測取代。"
   },
   "schedule_materialization": {
@@ -721,12 +721,13 @@
         "cron": "*/5 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_legacy_retirement_signal_materialize.sh",
         "log_path": "storage/logs/cron/legacy_retirement_signal_materialize.log",
-        "description": "Issue #46 production evidence producer owned exclusively by Operations Core. Every five minutes it verifies the immutable legacy-business-fire event chain and refreshes only the fixed typed interval signal. Five minutes is strictly below the retirement recorder's ten-minute source-freshness ceiling. It does not append a retirement observation, start the fourteen-day clean window, execute legacy business work, or call an external provider.",
+        "description": "Issue #46 production evidence producer owned exclusively by Operations Core. Every five minutes it verifies the immutable legacy-business-fire event chain, reads the private database duplicate-effect tripwire ledger through its service-role-only RPC, and refreshes both fixed typed interval signals. Five minutes is strictly below the retirement recorder's ten-minute source-freshness ceiling. It does not append a retirement observation, start the fourteen-day clean window, execute legacy business work, or call an external provider.",
         "host_crontab_managed": false,
         "piggy_back_enabled": false,
         "staleness_expected_minutes": 15,
         "matchers": [
           "materialize_legacy_business_fire_signal.py",
+          "materialize_duplicate_effect_signal.py",
           "cron_legacy_retirement_signal_materialize.sh",
           "legacy_retirement_signal_materialize.log"
         ]

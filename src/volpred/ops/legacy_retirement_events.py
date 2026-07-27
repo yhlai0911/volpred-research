@@ -15,12 +15,17 @@ import os
 import re
 import socket
 import stat
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from volpred.ops.delivery.supabase_rpc import (
+    ServiceRoleRpcClient,
+    runtime_environment,
+)
 from volpred.ops.legacy_retirement import (
     LegacyRetirementInputError,
     load_verified_retirement_observations,
@@ -376,6 +381,13 @@ def append_legacy_business_fire(
 
 
 def _previous_signal(root: Path) -> Mapping[str, Any] | None:
+    return _previous_dimension_signal(root, _DIMENSION)
+
+
+def _previous_dimension_signal(
+    root: Path,
+    dimension: str,
+) -> Mapping[str, Any] | None:
     observations = load_verified_retirement_observations(root)
     if not observations:
         return None
@@ -390,7 +402,7 @@ def _previous_signal(root: Path) -> Mapping[str, Any] | None:
         / "legacy_retirement_observations"
         / receipt_id
         / "sources"
-        / f"{_DIMENSION}.json"
+        / f"{dimension}.json"
     )
     try:
         decoded = json.loads(_read_regular_nofollow(path))
@@ -403,6 +415,243 @@ def _previous_signal(root: Path) -> Mapping[str, Any] | None:
             "previous legacy business-fire signal is not an object"
         )
     return decoded
+
+
+def _write_typed_signal(
+    root: Path,
+    *,
+    dimension: str,
+    signal: Mapping[str, object],
+) -> Path:
+    signal_dir = root / "storage" / "ops" / "legacy_retirement_signals"
+    path = signal_dir / f"{dimension}.json"
+    _reject_symlink_components(root, signal_dir)
+    signal_dir_existed = _secure_directory(signal_dir)
+    if not signal_dir_existed:
+        _fsync_directory(signal_dir.parent)
+    lock_path = signal_dir / ".materialize.lock"
+    flags = os.O_CREAT | os.O_RDWR
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(lock_path, flags, 0o600)
+    except OSError as error:
+        raise LegacyRetirementInputError(
+            f"{dimension} materializer lock is unsafe"
+        ) from error
+    with os.fdopen(descriptor, "a+b") as lock:
+        os.fchmod(lock.fileno(), 0o600)
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        temporary = signal_dir / f".{path.name}.{uuid4().hex}.tmp"
+        try:
+            with temporary.open("xb") as handle:
+                os.fchmod(handle.fileno(), 0o600)
+                handle.write(_canonical_bytes(signal))
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temporary, path)
+            _fsync_directory(signal_dir)
+        except BaseException:
+            temporary.unlink(missing_ok=True)
+            raise
+    return path
+
+
+@contextmanager
+def _dimension_materialization_lock(
+    root: Path,
+    dimension: str,
+) -> Iterator[None]:
+    signal_dir = root / "storage" / "ops" / "legacy_retirement_signals"
+    _reject_symlink_components(root, signal_dir)
+    signal_dir_existed = _secure_directory(signal_dir)
+    if not signal_dir_existed:
+        _fsync_directory(signal_dir.parent)
+    lock_path = signal_dir / f".{dimension}.transaction.lock"
+    flags = os.O_CREAT | os.O_RDWR
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(lock_path, flags, 0o600)
+    except OSError as error:
+        raise LegacyRetirementInputError(
+            f"{dimension} transaction lock is unsafe"
+        ) from error
+    with os.fdopen(descriptor, "a+b") as lock:
+        os.fchmod(lock.fileno(), 0o600)
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        yield
+
+
+def _materialize_duplicate_effect_signal_locked(
+    root: Path,
+    *,
+    rpc_client: ServiceRoleRpcClient | None = None,
+) -> Path:
+    """Derive duplicate-effect violations from the private DB trigger ledger."""
+
+    repo_root = Path(root)
+    previous = _previous_dimension_signal(repo_root, "duplicate_effect")
+    after_sequence = 0
+    window_from: datetime | None = None
+    if previous is not None:
+        if (
+            previous.get("schema_version") != _SIGNAL_SCHEMA
+            or previous.get("dimension") != "duplicate_effect"
+            or previous.get("producer") != "operations_core"
+        ):
+            raise LegacyRetirementInputError(
+                "previous duplicate-effect signal identity drifted"
+            )
+        watermark = previous.get("high_watermark")
+        if isinstance(watermark, bool) or not isinstance(watermark, int):
+            raise LegacyRetirementInputError(
+                "previous duplicate-effect watermark is invalid"
+            )
+        after_sequence = watermark
+        window_from = _timestamp(
+            previous.get("window_to"),
+            field="duplicate-effect previous window_to",
+        )
+    client = rpc_client
+    if client is None:
+        environment = runtime_environment()
+        client = ServiceRoleRpcClient(
+            supabase_url=environment.get("SUPABASE_URL", ""),
+            service_role_key=environment.get("SUPABASE_SERVICE_ROLE_KEY", ""),
+        )
+    raw = client.call(
+        "volpred_read_duplicate_effect_retirement_events",
+        {"p_after_sequence": after_sequence},
+    )
+    if not isinstance(raw, Mapping) or set(raw) != {
+        "schema_version",
+        "observed_at",
+        "after_sequence",
+        "high_watermark",
+        "events",
+    }:
+        raise LegacyRetirementInputError(
+            "duplicate-effect RPC response schema is invalid"
+        )
+    if (
+        raw.get("schema_version")
+        != "duplicate-effect-retirement-events.v1"
+        or raw.get("after_sequence") != after_sequence
+    ):
+        raise LegacyRetirementInputError(
+            "duplicate-effect RPC cursor identity drifted"
+        )
+    observed_at = _timestamp(
+        raw.get("observed_at"),
+        field="duplicate-effect observed_at",
+    )
+    high_watermark = raw.get("high_watermark")
+    events = raw.get("events")
+    if (
+        isinstance(high_watermark, bool)
+        or not isinstance(high_watermark, int)
+        or high_watermark < after_sequence
+        or not isinstance(events, list)
+        or len(events) != high_watermark - after_sequence
+    ):
+        raise LegacyRetirementInputError(
+            "duplicate-effect RPC sequence coverage is invalid"
+        )
+    expected_sequence = after_sequence + 1
+    evidence_refs: list[str] = []
+    earliest_event: datetime | None = None
+    for event in events:
+        if not isinstance(event, Mapping) or set(event) != {
+            "sequence",
+            "effect_id",
+            "first_delivered_attempt_count",
+            "offending_attempt_count",
+            "offending_evidence_sha256",
+            "detected_at",
+        }:
+            raise LegacyRetirementInputError(
+                "duplicate-effect RPC event schema is invalid"
+            )
+        effect_id = event.get("effect_id")
+        first_attempt = event.get("first_delivered_attempt_count")
+        offending_attempt = event.get("offending_attempt_count")
+        evidence_sha = event.get("offending_evidence_sha256")
+        detected_at = _timestamp(
+            event.get("detected_at"),
+            field="duplicate-effect detected_at",
+        )
+        if (
+            event.get("sequence") != expected_sequence
+            or not isinstance(effect_id, str)
+            or not effect_id.strip()
+            or isinstance(first_attempt, bool)
+            or not isinstance(first_attempt, int)
+            or first_attempt < 1
+            or isinstance(offending_attempt, bool)
+            or not isinstance(offending_attempt, int)
+            or offending_attempt < 1
+            or offending_attempt == first_attempt
+            or not isinstance(evidence_sha, str)
+            or _HEX_64.fullmatch(evidence_sha) is None
+            or detected_at > observed_at
+        ):
+            raise LegacyRetirementInputError(
+                "duplicate-effect RPC event identity is invalid"
+            )
+        earliest_event = min(
+            detected_at,
+            earliest_event or detected_at,
+        )
+        evidence_refs.append(
+            "supabase-effect-delivery://duplicate-effect/"
+            f"{expected_sequence}/{effect_id}/{evidence_sha}"
+        )
+        expected_sequence += 1
+    if window_from is None:
+        window_from = earliest_event or observed_at
+    if window_from > observed_at:
+        raise LegacyRetirementInputError(
+            "duplicate-effect signal interval regressed"
+        )
+    if not evidence_refs:
+        evidence_refs = [
+            (
+                "supabase-effect-delivery://duplicate-effect/high-watermark/"
+                f"{high_watermark}/backend/{client.backend_sha256}"
+            )
+        ]
+    signal: dict[str, object] = {
+        "schema_version": _SIGNAL_SCHEMA,
+        "dimension": "duplicate_effect",
+        "producer": "operations_core",
+        "observed_at": observed_at.isoformat(),
+        "window_from": window_from.isoformat(),
+        "window_to": observed_at.isoformat(),
+        "count": len(events),
+        "high_watermark": high_watermark,
+        "evidence_refs": evidence_refs,
+    }
+    return _write_typed_signal(
+        repo_root,
+        dimension="duplicate_effect",
+        signal=signal,
+    )
+
+
+def materialize_duplicate_effect_signal(
+    root: Path,
+    *,
+    rpc_client: ServiceRoleRpcClient | None = None,
+) -> Path:
+    """Atomically advance the duplicate-effect evidence cursor and signal."""
+
+    repo_root = Path(root)
+    with _dimension_materialization_lock(repo_root, "duplicate_effect"):
+        return _materialize_duplicate_effect_signal_locked(
+            repo_root,
+            rpc_client=rpc_client,
+        )
 
 
 def materialize_legacy_business_fire_signal(
