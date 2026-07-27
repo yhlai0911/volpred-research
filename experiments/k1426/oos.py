@@ -5,8 +5,11 @@ This script is intended for async execution via scripts/compute_queue.py.
 Scope:
 - 6 pairs: original 3 + GLD/SLV, XLE/USO, XLF/XLK
 - Expanding-window estimation with strict t-1 information set
-- Refit cadence defaults to every 21 trading days to keep compute tractable
-- PCH uses 100 multistarts on each refit
+- Refit cadence defaults to every 63 trading days (quarterly) to keep compute tractable
+  (reduced from the original 21-day spec after the full-grid parent job timed out at 6h;
+  see parse_args comment)
+- PCH uses 50 multistarts on each refit (reduced from the original 100-start spec for the
+  same tractability reason)
 - OOS comparison: unhedged vs OLS / EG-VECM / PCH hedged returns
 - Inference:
     * HE = 1 - Var(hedged) / Var(unhedged)
@@ -254,6 +257,17 @@ def analyze_pair(
             ),
         },
         "refit_snapshots_head": [asdict(snap) for snap in refits[:10]],
+        # Full daily hedged-return series, persisted so a downstream paired
+        # DM / block-bootstrap of return-OLS vs PCH is possible without
+        # re-running the PCH MLE (K1426 OOS residual item 2). Aligned by
+        # oos_dates; each list has n_obs_oos entries.
+        "daily_hedged_returns": {
+            "oos_dates": list(oos_dates),
+            "unhedged": [float(v) for v in unhedged],
+            "hedged_ols": [float(v) for v in hedged_ols],
+            "hedged_eg": [float(v) for v in hedged_eg],
+            "hedged_pch": [float(v) for v in hedged_pch],
+        },
     }
     print(
         f"[{pair_name}] OOS HE ols={he_ols:.4f} eg={he_eg:.4f} pch={he_pch:.4f} "
@@ -342,7 +356,7 @@ def main() -> None:
             "OOS HE is computed from hedged daily returns, not in-sample spread variance.",
             "EG-VECM hedge ratio equals stage-1 OLS beta here; alpha is omitted because OOS return hedge uses beta only.",
             "DM uses squared hedged returns as variance-loss proxy; negative t means PCH lower variance than OLS.",
-            "Monthly (21-day) refit cadence is a compute tractability choice; parameters remain strictly lagged.",
+            "Quarterly (63-day default) refit cadence is a compute tractability choice; parameters remain strictly lagged.",
         ],
         "reproduce": "uv run python experiments/k1426/oos.py",
     }

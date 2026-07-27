@@ -34,6 +34,10 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
 from k1426 import fetch_pair, fit_ols_hedge  # noqa: E402
+from oos import (  # noqa: E402
+    bootstrap_he_diff_ci,
+    hedge_effectiveness_from_returns,
+)
 from volpred.stats.model_evaluation import dm_test  # noqa: E402
 
 START, END = "2015-01-01", "2024-12-31"
@@ -62,7 +66,9 @@ def analyze(sym_x: str, sym_y: str) -> dict:
     log_x = df["log_x"].to_numpy()
     log_y = df["log_y"].to_numpy()
 
+    dates = df.index if hasattr(df, "index") else None
     unhedged, hedged_lvl, hedged_ret = [], [], []
+    oos_dates = []
     beta_lvl_snaps, beta_ret_snaps = [], []
     current = None
     last_refit = -1
@@ -84,6 +90,7 @@ def analyze(sym_x: str, sym_y: str) -> dict:
         unhedged.append(rx)
         hedged_lvl.append(rx - current["lvl"] * ry)
         hedged_ret.append(rx - current["ret"] * ry)
+        oos_dates.append(str(dates[i].date()) if dates is not None else str(i))
 
     unhedged = np.asarray(unhedged)
     hedged_lvl = np.asarray(hedged_lvl)
@@ -103,6 +110,56 @@ def analyze(sym_x: str, sym_y: str) -> dict:
             "returns": float(np.mean(beta_ret_snaps)),
         },
         "dm_return_beta_vs_levels_beta": {"t_stat": float(t_stat), "p_value": float(p_value)},
+        # Kept in-memory (not serialised) for the paired return-OLS vs PCH test
+        # in main(); stripped before writing OUT.
+        "_series": {
+            "oos_dates": oos_dates,
+            "unhedged": unhedged,
+            "hedged_ret": hedged_ret,
+        },
+    }
+
+
+def paired_return_ols_vs_pch(res_series: dict, pch_series: dict, seed: int = 42) -> dict:
+    """Paired DM + block-bootstrap of return-OLS vs PCH on date-aligned series.
+
+    ``res_series`` carries the freshly recomputed return-OLS hedged returns and
+    their OOS dates; ``pch_series`` is the persisted daily PCH hedged-return
+    series from k1426_oos_results.json. Aligns on the date intersection so the
+    two hedges are compared on exactly the same days.
+    """
+    ret_by_date = dict(zip(res_series["oos_dates"], res_series["hedged_ret"]))
+    un_by_date = dict(zip(res_series["oos_dates"], res_series["unhedged"]))
+    pch_by_date = dict(zip(pch_series["oos_dates"], pch_series["hedged_pch"]))
+    common = [d for d in res_series["oos_dates"] if d in pch_by_date]
+    if len(common) < 100:
+        return {
+            "error": (
+                f"only {len(common)} overlapping OOS dates between fresh return-OLS "
+                "run and persisted PCH series; paired test not run"
+            ),
+            "n_common": len(common),
+        }
+    unhedged = np.asarray([un_by_date[d] for d in common])
+    hedged_ret = np.asarray([ret_by_date[d] for d in common])
+    hedged_pch = np.asarray([pch_by_date[d] for d in common])
+    dm_t, dm_p = dm_test(hedged_ret**2, hedged_pch**2, h=1)
+    # bootstrap_he_diff_ci returns HE(first) - HE(second); pass (ret, pch) so a
+    # positive diff means return-OLS hedges better than PCH.
+    ci = bootstrap_he_diff_ci(
+        unhedged, hedged_ret, hedged_pch, block_len=20, n_boot=1000, seed=seed
+    )
+    return {
+        "n_common": len(common),
+        "he_return_ols": hedge_effectiveness_from_returns(unhedged, hedged_ret),
+        "he_pch": hedge_effectiveness_from_returns(unhedged, hedged_pch),
+        "dm_return_ols_vs_pch": {
+            "t_stat": float(dm_t),
+            "p_value": float(dm_p),
+            "note": "squared-hedged-return loss; positive t => return-OLS higher variance than PCH.",
+            "harvey_threshold_note": "Use |t| > 3.0 for a strong claim under multiple testing.",
+        },
+        "bootstrap_he_diff_return_ols_minus_pch": ci,
     }
 
 
@@ -130,12 +187,24 @@ def main() -> None:
         res["levels_beta_replicates_merged"] = bool(
             np.isclose(hh["ols_levels_beta"], payload["hedge_effectiveness"]["ols"], atol=1e-6)
         )
-        # Point estimate only: the merged artifact stores no PCH hedged-return
-        # series and truncates refit snapshots, so a paired DM/bootstrap of
-        # return-OLS vs PCH is impossible without re-running the PCH MLE.
         res["return_beta_beats_pch_point_estimate_only"] = (
             hh["ols_return_beta"] > hh["pch_from_merged"]
         )
+        # If the merged run persisted the daily PCH hedged-return series (added
+        # 2026-07-27 for K1426 OOS residual item 2), run a genuine paired
+        # DM/block-bootstrap of return-OLS vs PCH instead of the point-estimate
+        # comparison above.
+        pch_series = payload.get("daily_hedged_returns")
+        if pch_series and pch_series.get("hedged_pch"):
+            res["paired_return_ols_vs_pch"] = paired_return_ols_vs_pch(
+                res.pop("_series"), pch_series
+            )
+        else:
+            res.pop("_series", None)
+            res["paired_test_note"] = (
+                "merged results carry no daily PCH series; paired test skipped "
+                "(re-run oos.py after the daily-series persistence patch)."
+            )
         results[name] = res
         print(
             f"{name}: HE levels-OLS={hh['ols_levels_beta']:.4f} "
@@ -157,10 +226,12 @@ def main() -> None:
                     "lookahead_rule": "Train on [:i], apply beta to return spanning i-1 -> i.",
                 },
                 "caveats": [
-                    "The return-OLS vs PCH comparison is a POINT ESTIMATE, not a test. "
-                    "k1426_oos_results.json stores no PCH hedged-return series and truncates "
-                    "refit snapshots to the head, so a paired DM / block-bootstrap of "
-                    "return-OLS vs PCH requires re-running the PCH MLE and is out of scope here.",
+                    "The return-OLS vs levels-beta DM (dm_return_beta_vs_levels_beta) is always "
+                    "computed here. The return-OLS vs PCH comparison is a paired DM / block-"
+                    "bootstrap (paired_return_ols_vs_pch) ONLY when k1426_oos_results.json carries "
+                    "the persisted daily PCH hedged-return series; otherwise it degrades to a "
+                    "point-estimate flag (return_beta_beats_pch_point_estimate_only) because the "
+                    "PCH MLE would have to be re-run to recover the series.",
                     "The DM test reported here compares return-beta vs levels-beta only, and "
                     "uses squared hedged returns (second moment) while HE uses de-meaned "
                     "variance; when the two hedges differ in mean these are not the same "
