@@ -1,25 +1,13 @@
 {
-  "generated_at": "2026-07-27T09:40:15.682252",
+  "generated_at": "2026-07-27T12:13:56.762041",
   "overall": "critical",
-  "critical_count": 3,
-  "warn_count": 8,
+  "critical_count": 2,
+  "warn_count": 7,
   "findings": [
-    {
-      "dimension": "data_freshness",
-      "severity": "critical",
-      "message": "indicator_arena_daily: 最後一次執行失敗 —— rc=1（2h 前）；log mtime 仍新，漏班檢查看不到",
-      "recovery": "tail -40 storage/logs/cron/indicator_arena_daily.log  # 查失敗點，再跑對應 wrapper"
-    },
-    {
-      "dimension": "cron_completion",
-      "severity": "warn",
-      "message": "indicator_arena_daily: 最近一輪 exit=1（非 0）",
-      "recovery": "tail storage/logs/cron/indicator_arena_daily.log"
-    },
     {
       "dimension": "alert_conditions",
       "severity": "warn",
-      "message": "host_cron_fail: Host cron failure detected",
+      "message": "dispatch_supervisor_stale_code: 派工程式有改動沒生效（daemon 未重載）",
       "recovery": "uv run volpred ops check-alerts --storage-dir storage"
     },
     {
@@ -31,7 +19,7 @@
     {
       "dimension": "dedup_calibration",
       "severity": "warn",
-      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=851, AI saturation=12 (threshold=5, margin=7), NFP control=3, FOMC theme=0 / hard=0",
+      "message": "arc/theme 校準漂移：legitimate recurring FOMC control did not retain its calibrated warning (verdict warn_arc_near_miss, blocked=False)；corpus=850, AI saturation=12 (threshold=5, margin=7), NFP control=3, FOMC theme=0 / hard=0",
       "recovery": "uv run python scripts/daily_checkup.py --json  # 檢查 dedup_calibration"
     },
     {
@@ -73,7 +61,7 @@
     {
       "dimension": "task_pool_pressure",
       "severity": "warn",
-      "message": "pending=98 超過 drain-first 閾值 80（{'p1': 1, 'p2': 35, 'p3': 57, 'p4': 4, 'p5': 1}）—— 自動 refill/discovery 應已停止",
+      "message": "pending=82 超過 drain-first 閾值 80（{'p1': 1, 'p2': 24, 'p3': 53, 'p4': 4}）—— 自動 refill/discovery 應已停止",
       "recovery": "清既有 pending；超齡任務走 superseded / closed_no_action 正式裁決"
     },
     {

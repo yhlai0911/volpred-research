@@ -1,0 +1,44 @@
+{
+  "id": "compute-k1731-armb-codex-review-round-9-1785124478",
+  "title": "K1731 armB Codex review round 9",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1731_armB_rev9_prompt.md",
+    "storage/ops/codex_reviews/k1731_armB_rev9_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T03:54:38Z",
+  "started_at": "2026-07-27T04:00:05Z",
+  "completed_at": "2026-07-27T04:10:08Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1731-armb-codex-review-round-9-1785124478.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1731-armb-codex-review-round-9-1785124478.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1731_armB_rev9_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1731_armB_rev9_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1731 armB Codex round 9 verdict 已產出。讀 storage/ops/codex_reviews/k1731_armB_rev9_verdict.md 末行 VERDICT。先確認 verdict 有先 verify freeze hashes（k1731_armB_rev9_freeze.txt）未 STOP。PASS → (1) merge worktree dispatch-slot-1-bd00f90a-k1731 經正式 scripts/merge_worktree.sh（走 git_writer_lock canonical），(2) unblock assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725，(3) complete assign_k1731_rev9 succeeded。FAIL → complete assign_k1731_rev9 failed，依 3-strike active + escalation ladder 建下一個 bounded remediation task（勿原樣重派）。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 15621,
+  "claimed_by_pid_start_wall": "Mon Jul 27 12:00:04 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

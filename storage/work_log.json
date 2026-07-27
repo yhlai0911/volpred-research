@@ -27819,5 +27819,65 @@
     "owner": "hourly-slot-2-290c4238c72046b2bceee7b4b994fdf4",
     "commit": null,
     "summary": "解除 assign_k1731_rev9（K1731 arm B rev9 bounded remediation）112h starvation 死鎖並重新派工。\n\n根因（證據化）：該 task 綁定的 compute job `agent-k1731-armb-rev9-remediation` 早期 launch 失敗（exit 1、無 commit、無 artifact、worktree HEAD 仍 f5338d54d），且 `followup_dispatched=true` / `followup_next_task_id==source_task_id==assign_k1731_rev9`（自我 re-remediation 處置）。但 task.compute_job_id 從未 reset → 每條重派路徑 by-design 拒絕：enqueue-agent binding gate 報 not-legally-bindable；requeue 報 disposition owned by followup。task 因此卡 pending 112h（dispatcher starvation lockout 唯一可選）。\n\n處置（contained 止血）：以 annotate（sanctioned locked-write；compute_job_id 不在 protected 清單）清除指向死 job 的 stale pointer → 走 sanctioned enqueue-agent 重綁乾淨 job `agent-brief_k1731_rev9-c47c03`（cwd=現行 k1731 worktree，禁 merge/禁重跑估計，brief 依 Codex round-8 verdict 逐條：修 ARM_A_ENGINE_ISSUES[0].why_it_matters 的 unsupported OOS-null 措辭、finalizer 重生三份 JSON、擴 armB_verification+drift_check 加 negative control、跑 108-test ratchet+3834-leaf regression、送 Codex round 9）。task 現為 awaiting_agent_job（compute-queue 長 agent 正確狀態，由後續 PHASE A 收）。\n\n副作用註記：本 fire 過程曾先建一個未綁定的重複 job `agent-brief_k1731_rev9-87d87e`（source_task_link=error）→ run-next 依 state!=linked 永久跳過，inert 不會執行；cancel 因 binding 不匹配無法移除，待 queue 維護 reaper GC。\n\n流程缺陷（待 root fix，非本 slot 權限）：terminal-failed compute job 若 followup_next_task_id==source_task_id，source task 的 compute_job_id 未被 reset，形成無法重派死鎖。已寫入 docs/error_log.md。此條標 contained，非 root_cause_fixed。"
+  },
+  {
+    "timestamp": "2026-07-27T11:06:06+08:00",
+    "task_type": "paper_body",
+    "task_id": "BTC_GAS_tex_conversion",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-5d621b1af9ba4905a22b0bcb605c74b9",
+    "owner": "hourly-slot-1-5d621b1af9ba4905a22b0bcb605c74b9",
+    "commit": "801e7acde",
+    "summary": "PHASE A collect_completed 收件：BTC-GAS negative-result paper markdown→LaTeX 轉換。\n驗證 main.pdf(537KB,46頁,9節/2表/3圖/24refs) 存在且非 trivial；compliance gate 獨立 grep 確認 clean(單一作者 Yi-Hao Lai,無 volpred/AI/LLM/Claude/co-author 違規)；headline QLIKE 2.1904/1.9926 對得上 experiments/k1133b/k1133b_results.json；references.bib 5 處 %TODO verify 標為 pre-submission blocker；reproduce_report.json 尚未存在(誠實記於 README,非造假)。\nworktree dispatch-slot-1-2e78555e-btcgas 經 merge_worktree.sh 正式合併至 main(commit 801e7acde,8檔+753行)，已驗證 .tex tracked + worktree 清除。compute followup mark-followup-dispatched 防重派。"
+  },
+  {
+    "timestamp": "2026-07-27T11:55:18+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_k1731_rev9",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-2fb989f9b1bf4f589258cd2a4faa1f71",
+    "owner": "hourly-slot-1-2fb989f9b1bf4f589258cd2a4faa1f71",
+    "commit": null,
+    "summary": "PHASE A collect_completed: 收 K1731 arm B rev9 remediation compute job (agent-brief_k1731_rev9-c47c03, exit 0)。主線程獨立重跑全部 gate 並回讀實際 stdout（不信 COLLECTION.md 摘要）：108-test nested-DM ratchet 108 passed；armB verification exit 0（checked_n=111 ok=111 problems=0，README 0 violations）；armB --self-test 負控正確偵測三個 retracted phrase；3834-leaf regression exit 0（UNEXPECTED=0）；drift vs f5338d54d exit 0（numeric moved/added/removed=0/0/0）；drift --self-test 負控正確。發現重跑 finalizer 會改寫 finalized_utc → 三份 result JSON 的 sha256 偏離凍結值，經 git_writer_lock canonical checkout 還原至 committed（sha256 已對回 feb7d/5f343/716a5），freeze manifest 完整。全部真 PASS。已 enqueue Codex round 9 review（compute-k1731-armb-codex-review-round-9-1785124478，prompt+freeze 複製到 shared checkout），followup 帶 PASS→merge+unblock(assign_67f56b79 / k1731_k1730_merge_after_codex_round8)+complete 的裁決指令。mark-followup-dispatched 已標。parent assign_k1731_rev9 維持 awaiting（等 Codex verdict），不在本班結案。"
+  },
+  {
+    "timestamp": "2026-07-27T12:03:56+08:00",
+    "task_type": "daily_article",
+    "task_id": "assign_f13a5d5f",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-2fb989f9b1bf4f589258cd2a4faa1f71",
+    "owner": "hourly-slot-1-2fb989f9b1bf4f589258cd2a4faa1f71",
+    "commit": null,
+    "summary": "P1 boss-designated（Telegram msg 1324「平台又壞掉、沒持續出新文章」）release_pool 死鎖 incident 收斂。回讀 2026-07-22 告警當下證據（3 drafts/eligible=0，懶人包 gate 擋 mile_2d1d356b/mile_63ec8636），確認告警為真；live source 驗證已恢復：兩篇被擋文章皆 published（07-22 16:21/17:09Z）。根因=草稿無懶人包 render job 入池；結構修復已在位（publish_draft.py:_settle_deferred_lazypack 建稿即結清 + release audit gate + :00 release_deadlock_remediation 監測回 not_deadlocked/4 eligible）。live 健康（04:02Z）：last_released 01:28Z / next 05:28Z on-cadence、cadence ok、published_today=3、settings local↔Supabase aligned。未強推手動發佈（距下次 ~85min，避免 cadence 過密違規）。alert task 皆 tombstone/succeeded（含 host_cron_fail supabase_sync 循環 import 已修）；release_deadlock_repair_15/16 為過期重複但受 supervisor preassignment gate 保護，標記待 supervisor 收斂，未繞過。未稱誤報。"
+  },
+  {
+    "timestamp": "2026-07-27T12:18:21+08:00",
+    "task_type": "experiment",
+    "task_id": "K1722",
+    "outcome": "enqueued",
+    "actor": "hourly-slot-3-047f093b945e4b90aeb6a05e92bed690",
+    "owner": "hourly-slot-3-047f093b945e4b90aeb6a05e92bed690",
+    "commit": null,
+    "summary": "K1722（極端高溫/颶風 × 保險/公用 ETF vol event study）在 STARVATION LOCKOUT 下作為保底席派出。\n\n- 依 kid_reserve 正式預留 experiment id **K1811**（task id K1722 來自 research_program 自動編號、未在 registry，直接用會被 kid-registry merge gate 擋）。\n- git_writer_lock 下建立 registered worktree `.claude/worktrees/dispatch-slot-3-047f093b-k1811`。\n- 撰寫嚴謹 agent brief（NOAA 颶風 Saffir-Simpson category + Storm Events 熱浪 dose、yfinance KIE/KBWP/XLU + SPY 對照、classic event study CAAV + bootstrap/permutation seed=42 + dose-response 迴歸、lookahead 政策、CONDITIONAL_PASS 門檻、NULL 可接受）。\n- enqueue-agent 到 compute_queue：job `agent-brief_k1811-e2748d`，opus/xhigh，timeout 3600，result-artifact experiments/k1811/k1811_results.json，followup=experiment（Codex review → 驗數字 → merge → knowledge）。task K1722 → awaiting_agent_job（async worker 執行，後續 fire PHASE A 收）。\n\n未動兩個同 starved 集的 P2（k1731_f1_bootstrap_merge_deadlock、k1730_adjudication_doc_amend_factual_errors）：兩者均糾纏於 foreign in-flight worktree dispatch-slot-1-bd00f90a-k1731（17 unmerged commits，arm B bootstrap + k1730 裁決書 + k1730 salvage 混合），且 slot-1 fire 正在運行；wholesale merge 會帶入 k1730 半成品，屬 main-thread worktree 批次裁決（inc_776caf84f125_e1）範疇，非 hourly fire 可安全單邊處理。"
+  },
+  {
+    "timestamp": "2026-07-27T12:20:38+08:00",
+    "task_type": "platform_ops",
+    "task_id": "indicator_arena_daily_sync_recovery_20260727",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-7087efc05b0f4eeaaa23c9e3b339ed20",
+    "owner": "hourly-slot-2-7087efc05b0f4eeaaa23c9e3b339ed20",
+    "commit": null,
+    "summary": "indicator_arena_daily 每日 pipeline recovery。daily_checkup overall=critical，data_freshness+cron_completion 指向 indicator_arena_daily 07:10 CST exit=1。回讀 log 根因：emit 為 weekend market-closed 良性 skip，真正失敗在 sync 步驟 `ImportError: cannot import name '_delete_where' from partially initialized module scripts.supabase_sync`（circular import，import-order transient race）。standalone 重現 supabase_sync/content 皆乾淨載入 → 確認為 cron 執行環境特定 import 順序造成的 partial-init，非確定性可重現 bug。依 recovery hint 重跑 wrapper：先直跑 scripts/indicator_arena_daily.py（sync ok=true，registry 6 / daily_signals 158 / outcome_reviews 149 全同步至 Supabase），再跑 cron_indicator_arena_daily.sh 記錄 last-run exit 0。verify：daily_checkup critical 3→2、warn 8→7，indicator_arena 兩項清除。latent 結構脆弱點（ops/__init__.py:12 eager-import content → content.py:33 top-level `from scripts.supabase_sync import _delete_where`）依研究誠實未做無法驗證的中央模組侵入式改動，留 fire receipt 供主線程 grounded 修復。剩餘 2 critical 為 worktree_reconcile 殭屍任務（vanished worktree + reflog-only，屬 main-thread git 裁決）。"
+  },
+  {
+    "timestamp": "2026-07-27T12:20:38+08:00",
+    "task_type": "experiment",
+    "task_id": "research_direction_predictability_signforecast",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-2-7087efc05b0f4eeaaa23c9e3b339ed20",
+    "owner": "hourly-slot-2-7087efc05b0f4eeaaa23c9e3b339ed20",
+    "commit": null,
+    "summary": "方向（漲跌）可預測性誠實 OOS 檢定 — dispatched via compute_queue enqueue-agent（dispatcher 標「保底席 本班必挑」）。任務源 Telegram msg855、topology=worktree、router=opus/xhigh，任務本身要求「重運算走 compute_queue，不 inline 硬跑」→ 走 enqueue-agent 而非 fire 內 spawn（避免 3000s cap SIGKILL）。建立 registered worktree `.claude/worktrees/dispatch-slot-2-7087efc0-signfc`（canonical git_writer_lock.py run，含 worktree_prefix）；brief 涵蓋 SPY/QQQ/0050.TW/TWII、HAR/GARCH 波動特徵+報酬滯後/動能、logistic+GBM、rolling OOS 命中率 vs 50%、Pesaran-Timmermann+DM、BH 多重檢定校正、交易成本後 edge 存活、方向vs波動可預測性對照；lookahead shift(1)、固定 seed、null 照實、文獻 grounded（Christoffersen-Diebold 2006、Pesaran-Timmermann 1995/2004）。enqueued job=agent-brief_signforecast-3df319，source task 連結 awaiting_agent_job，result-artifact=experiments/direction_predictability_signforecast/..._results.json。followup：驗數字+Codex round2+merge worktree+主線程寫 knowledge。fire 職責到 enqueue 為止。"
   }
 ]

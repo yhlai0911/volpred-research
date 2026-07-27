@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1811-e2748d",
+  "title": "K1811 climate/physical-risk vol event study (KIE/KBWP/XLU dose-response) [task K1722]",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1811-e2748d.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-047f093b-k1811",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-047f093b-k1811/experiments/k1811/k1811_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1811-e2748d.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T04:16:31Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1811-e2748d.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1811-e2748d.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-047f093b-k1811/experiments/k1811/k1811_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1811-e2748d.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-047f093b-k1811",
+  "claude_followup": {
+    "brief": "收件流程：(1) Codex code review K1811 (primary path，quota 掛則 feature-dev:code-reviewer fallback) (2) agent-result-verification checklist 驗 k1811_results.json 數字與 README/stdout 一致、查 lookahead (3) merge_worktree.sh 整合 dispatch-slot-3-047f093b-k1811 (4) CONDITIONAL_PASS 以上才由主線程寫 knowledge (實驗 id K1811)；NULL 結果照實記",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1722",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T04:16:31Z",
+    "linked_at": "2026-07-27T04:16:32Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1811.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1811-e2748d.md"
+}
