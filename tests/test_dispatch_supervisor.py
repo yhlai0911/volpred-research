@@ -5136,6 +5136,21 @@ def test_workspace_sweep_records_unreadable_branch_and_fails_closed(
     assert events[0]["workspace"] == orphan_ws["name"]
     assert events[0]["branch"] == "unresolved"
 
+    results = workspace.sweep_orphan_workspaces(
+        repo_root=repo,
+        protected_job_ids=[],
+        queue_path=_tmp_queue(tmp_path),
+    )
+    events = legacy_retirement_events.load_verified_orphan_work_events(repo)
+
+    assert len(results) == 1
+    assert not Path(orphan_ws["path"]).exists()
+    assert [event["event_kind"] for event in events] == [
+        "detected",
+        "branch_resolved",
+    ]
+    assert events[1]["resolution_of_event_id"] == events[0]["event_id"]
+
 
 def test_workspace_isolation_config_defaults_off(tmp_path: Path) -> None:
     missing = workspace.load_isolation_config(schedules_path=tmp_path / "nope.json")

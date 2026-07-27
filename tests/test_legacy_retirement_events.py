@@ -84,6 +84,50 @@ def test_orphan_tripwire_is_durable_hash_chained_and_idempotent(
     assert oct(second.parent.stat().st_mode & 0o777) == "0o700"
 
 
+def test_orphan_tripwire_resolves_unreadable_branch_monotonically(
+    tmp_path: Path,
+) -> None:
+    first_at = datetime(2026, 7, 27, 11, 30, tzinfo=UTC)
+    detected = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="unresolved",
+        job_id="deadbeef",
+        occurred_at=first_at,
+    )
+    resolved = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=first_at + timedelta(minutes=1),
+    )
+    replay = append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=first_at + timedelta(minutes=2),
+    )
+
+    events = load_verified_orphan_work_events(tmp_path)
+
+    assert resolved != detected
+    assert replay == resolved
+    assert [event["event_kind"] for event in events] == [
+        "detected",
+        "branch_resolved",
+    ]
+    assert events[1]["resolution_of_event_id"] == events[0]["event_id"]
+    with pytest.raises(LegacyRetirementInputError, match="identity drifted"):
+        append_orphan_work_event(
+            tmp_path,
+            workspace="dispatch-slot-1-deadbeef",
+            branch="worktree-dispatch-slot-1-deadbeef-drift",
+            job_id="deadbeef",
+        )
+
+
 def test_orphan_tripwire_rejects_identity_drift_and_truncation(
     tmp_path: Path,
 ) -> None:
@@ -189,6 +233,79 @@ def test_orphan_tripwire_recovers_crash_between_event_and_head(
     ).exists()
 
 
+@pytest.mark.parametrize("dimension", ["legacy_business_fire", "orphan_work"])
+def test_local_event_append_recovers_partial_temporary_event(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    dimension: str,
+) -> None:
+    real_install = legacy_retirement_events._install_event_payload
+    fail_once = {"armed": True}
+
+    def leave_partial_temporary(
+        root: Path,
+        spec,
+        *,
+        event_path: Path,
+        event: dict[str, object],
+    ) -> None:
+        if fail_once["armed"]:
+            fail_once["armed"] = False
+            temporary = legacy_retirement_events._pending_event_temp_path(
+                root,
+                spec,
+                str(event["event_id"]),
+            )
+            temporary.write_bytes(b'{"partial"')
+            raise OSError("injected partial event crash")
+        real_install(
+            root,
+            spec,
+            event_path=event_path,
+            event=event,
+        )
+
+    monkeypatch.setattr(
+        legacy_retirement_events,
+        "_install_event_payload",
+        leave_partial_temporary,
+    )
+    if dimension == "orphan_work":
+        append = lambda: append_orphan_work_event(
+            tmp_path,
+            workspace="dispatch-slot-1-deadbeef",
+            branch="worktree-dispatch-slot-1-deadbeef",
+            job_id="deadbeef",
+        )
+        load = lambda: load_verified_orphan_work_events(tmp_path)
+        spec = legacy_retirement_events._orphan_event_spec()
+    else:
+        append = lambda: append_legacy_business_fire(tmp_path)
+        load = lambda: load_verified_legacy_business_fire_events(tmp_path)
+        spec = legacy_retirement_events._legacy_event_spec()
+
+    with pytest.raises(OSError, match="injected partial event crash"):
+        append()
+    with legacy_retirement_events._dimension_event_append_lock(
+        tmp_path,
+        dimension,
+    ):
+        legacy_retirement_events._recover_pending_append(tmp_path, spec)
+
+    events = load()
+    assert len(events) == 1
+    assert not legacy_retirement_events._dimension_pending_path(
+        tmp_path,
+        dimension,
+    ).exists()
+    assert not list(
+        legacy_retirement_events._dimension_head_path(
+            tmp_path,
+            dimension,
+        ).parent.glob(f".{dimension}.*.event.tmp")
+    )
+
+
 def test_orphan_materializer_uses_verified_sequence_delta(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -233,6 +350,48 @@ def test_orphan_materializer_uses_verified_sequence_delta(
     assert signal["window_to"] == boundary.isoformat()
     assert len(signal["evidence_refs"]) == 1
     assert oct(path.stat().st_mode & 0o777) == "0o600"
+
+
+def test_orphan_materializer_advances_over_resolution_without_double_count(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    boundary = datetime(2026, 7, 27, 11, 35, tzinfo=UTC)
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="unresolved",
+        job_id="deadbeef",
+        occurred_at=boundary - timedelta(minutes=1),
+    )
+    append_orphan_work_event(
+        tmp_path,
+        workspace="dispatch-slot-1-deadbeef",
+        branch="worktree-dispatch-slot-1-deadbeef",
+        job_id="deadbeef",
+        occurred_at=boundary,
+    )
+    monkeypatch.setattr(
+        legacy_retirement_events,
+        "_previous_dimension_signal",
+        lambda _root, _dimension: {
+            "schema_version": "legacy-retirement-signal.v1",
+            "dimension": "orphan_work",
+            "producer": "operations_core",
+            "window_to": (boundary - timedelta(seconds=1)).isoformat(),
+            "high_watermark": 1,
+        },
+    )
+
+    path = legacy_retirement_events.materialize_orphan_work_signal(
+        tmp_path,
+        observed_at=boundary,
+    )
+    signal = json.loads(path.read_text(encoding="utf-8"))
+
+    assert signal["count"] == 0
+    assert signal["high_watermark"] == 2
+    assert len(signal["evidence_refs"]) == 1
 
 
 def test_orphan_materializer_emits_verified_empty_high_watermark(

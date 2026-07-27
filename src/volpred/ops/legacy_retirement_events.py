@@ -35,7 +35,7 @@ from volpred.ops.legacy_retirement import (
 _DIMENSION = "legacy_business_fire"
 _ORPHAN_DIMENSION = "orphan_work"
 _EVENT_SCHEMA = "legacy-retirement-event.v1"
-_ORPHAN_EVENT_SCHEMA = "orphan-work-retirement-event.v1"
+_ORPHAN_EVENT_SCHEMA = "orphan-work-retirement-event.v2"
 _HEAD_SCHEMA = "legacy-retirement-event-head.v1"
 _PENDING_SCHEMA = "legacy-retirement-event-append-intent.v1"
 _SIGNAL_SCHEMA = "legacy-retirement-signal.v1"
@@ -68,6 +68,8 @@ _ORPHAN_EVENT_KEYS = frozenset(
         "workspace",
         "branch",
         "job_id",
+        "event_kind",
+        "resolution_of_event_id",
         "event_sha256",
     }
 )
@@ -256,6 +258,8 @@ def _event_payload_is_valid(
         workspace = event.get("workspace")
         branch = event.get("branch")
         job_id = event.get("job_id")
+        event_kind = event.get("event_kind")
+        resolution_of = event.get("resolution_of_event_id")
         return (
             isinstance(workspace, str)
             and _SAFE_IDENTITY.fullmatch(workspace) is not None
@@ -263,6 +267,16 @@ def _event_payload_is_valid(
             and _SAFE_IDENTITY.fullmatch(branch) is not None
             and isinstance(job_id, str)
             and re.fullmatch(r"[0-9a-f]{8}", job_id) is not None
+            and event_kind in {"detected", "branch_resolved"}
+            and (
+                (event_kind == "detected" and resolution_of is None)
+                or (
+                    event_kind == "branch_resolved"
+                    and branch != "unresolved"
+                    and isinstance(resolution_of, str)
+                    and _HEX_32.fullmatch(resolution_of) is not None
+                )
+            )
         )
     return False
 
@@ -458,6 +472,43 @@ def _atomic_replace_payload(path: Path, payload: Mapping[str, object]) -> None:
         raise
 
 
+def _pending_event_temp_path(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+    event_id: str,
+) -> Path:
+    return (
+        _dimension_head_path(root, spec.dimension).parent
+        / f".{spec.dimension}.{event_id}.event.tmp"
+    )
+
+
+def _install_event_payload(
+    root: Path,
+    spec: _LocalEventLedgerSpec,
+    *,
+    event_path: Path,
+    event: Mapping[str, object],
+) -> None:
+    event_id = str(event["event_id"])
+    temporary = _pending_event_temp_path(root, spec, event_id)
+    _reject_symlink_components(root, temporary)
+    if temporary.exists():
+        temporary.unlink()
+        _fsync_directory(temporary.parent)
+    try:
+        with temporary.open("xb") as handle:
+            os.fchmod(handle.fileno(), 0o600)
+            handle.write(_canonical_bytes(event))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary, event_path)
+        _fsync_directory(event_path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+        _fsync_directory(temporary.parent)
+
+
 def _build_durable_head(
     spec: _LocalEventLedgerSpec,
     *,
@@ -588,12 +639,12 @@ def _recover_pending_append(root: Path, spec: _LocalEventLedgerSpec) -> None:
             raise LegacyRetirementInputError(
                 f"{spec.label} append transaction time regressed"
             )
-        with event_path.open("xb") as handle:
-            os.fchmod(handle.fileno(), 0o600)
-            handle.write(_canonical_bytes(event))
-            handle.flush()
-            os.fsync(handle.fileno())
-        _fsync_directory(directory)
+        _install_event_payload(
+            root,
+            spec,
+            event_path=event_path,
+            event=event,
+        )
         events.append(event)
     else:
         raise LegacyRetirementInputError(
@@ -639,12 +690,86 @@ def _append_local_event(
     with _dimension_event_append_lock(repo_root, spec.dimension):
         _recover_pending_append(repo_root, spec)
         events = _load_verified_local_events(repo_root, spec)
+        append_payload = dict(payload)
         if spec.identity_key is not None:
             identity = payload.get(spec.identity_key)
-            for existing in events:
-                if existing.get(spec.identity_key) != identity:
-                    continue
-                if any(
+            matching = [
+                event
+                for event in events
+                if event.get(spec.identity_key) == identity
+            ]
+            if spec.dimension == _ORPHAN_DIMENSION and matching:
+                detected = [
+                    event
+                    for event in matching
+                    if event.get("event_kind") == "detected"
+                ]
+                resolved = [
+                    event
+                    for event in matching
+                    if event.get("event_kind") == "branch_resolved"
+                ]
+                if len(detected) != 1 or len(resolved) > 1:
+                    raise LegacyRetirementInputError(
+                        f"{spec.label} {spec.identity_key} history is invalid"
+                    )
+                first = detected[0]
+                if first.get("job_id") != payload.get("job_id"):
+                    raise LegacyRetirementInputError(
+                        f"{spec.label} {spec.identity_key} identity drifted"
+                    )
+                requested_branch = payload.get("branch")
+                detected_branch = first.get("branch")
+                if resolved:
+                    resolution = resolved[0]
+                    if (
+                        resolution.get("job_id") != payload.get("job_id")
+                        or resolution.get("resolution_of_event_id")
+                        != first.get("event_id")
+                    ):
+                        raise LegacyRetirementInputError(
+                            f"{spec.label} {spec.identity_key} history is invalid"
+                        )
+                    if (
+                        requested_branch != "unresolved"
+                        and resolution.get("branch") != requested_branch
+                    ):
+                        raise LegacyRetirementInputError(
+                            f"{spec.label} {spec.identity_key} identity drifted"
+                        )
+                    chosen = (
+                        first if requested_branch == "unresolved" else resolution
+                    )
+                    return directory / (
+                        f"{int(chosen['sequence']):012d}-"
+                        f"{chosen['event_id']}.json"
+                    )
+                if detected_branch != "unresolved":
+                    if (
+                        requested_branch != "unresolved"
+                        and detected_branch != requested_branch
+                    ):
+                        raise LegacyRetirementInputError(
+                            f"{spec.label} {spec.identity_key} identity drifted"
+                        )
+                    return directory / (
+                        f"{int(first['sequence']):012d}-"
+                        f"{first['event_id']}.json"
+                    )
+                if requested_branch == "unresolved":
+                    return directory / (
+                        f"{int(first['sequence']):012d}-"
+                        f"{first['event_id']}.json"
+                    )
+                append_payload.update(
+                    {
+                        "event_kind": "branch_resolved",
+                        "resolution_of_event_id": first["event_id"],
+                    }
+                )
+            elif matching:
+                existing = matching[0]
+                if len(matching) > 1 or any(
                     existing.get(field) != payload.get(field)
                     for field in spec.identity_fields
                 ):
@@ -675,7 +800,7 @@ def _append_local_event(
                 events[-1]["event_sha256"] if events else None
             ),
             "occurred_at": now.isoformat(),
-            **payload,
+            **append_payload,
         }
         event["event_sha256"] = _event_sha(event)
         event_path = directory / f"{sequence:012d}-{event_id}.json"
@@ -753,6 +878,8 @@ def append_orphan_work_event(
             "workspace": workspace,
             "branch": branch,
             "job_id": job_id,
+            "event_kind": "detected",
+            "resolution_of_event_id": None,
         },
         occurred_at=occurred_at,
     )
@@ -974,6 +1101,12 @@ def _materialize_local_event_signal_locked(
             f"{dimension}/high-watermark/{high_watermark}"
         )
     ]
+    violations = [
+        event
+        for event in covered
+        if dimension != _ORPHAN_DIMENSION
+        or event.get("event_kind") == "detected"
+    ]
     signal: dict[str, object] = {
         "schema_version": _SIGNAL_SCHEMA,
         "dimension": dimension,
@@ -981,7 +1114,7 @@ def _materialize_local_event_signal_locked(
         "observed_at": observed_at.isoformat(),
         "window_from": window_from.isoformat(),
         "window_to": observed_at.isoformat(),
-        "count": len(covered),
+        "count": len(violations),
         "high_watermark": high_watermark,
         "evidence_refs": evidence_refs,
     }
