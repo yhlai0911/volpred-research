@@ -1,0 +1,24 @@
+你先前對 K1724 給 CONDITIONAL_PASS，列出的缺陷已修。這是第二輪：請驗證每項修正是否正確落地，並給最終 verdict。工作目錄是本 git repo worktree。
+
+請重讀（現行 bytes）：
+- experiments/k1724/k1724.py
+- experiments/k1724/k1724_results.json
+- experiments/k1724/README.md
+
+我宣稱做的修正：
+1. Granger：`bidirectional_granger` 的 `maxlag` 由 10 提高到 30；primary（GK level）AIC 選 lag=16 且回報 `at_search_boundary=false`。三個 proxy（GK/Parkinson/squared-return）都補了雙邊差分 Granger（`robustness.granger_both_differenced`）。log RV 保留 level 的正式理由（ADF 拒單根→無單根；KPSS 拒定態反映長記憶非單根；對 I(0) 長記憶再差分會 over-difference）已寫入 code 註解與 README。
+2. RQ1 nested：新增 Clark–West（`clark_west_test`，canonical）於 `predictive_test_primary.clark_west_nested`（t=1.605、單尾 p=0.054、HAC lag=13）；`honest_conclusion` 的 rq1 判定改以 CW 為準，README 語氣改為「5% 下 NULL、邊界、非強式零資訊」。
+3. README 文字：Wald 由「F」更正為「HAC Wald χ²(3)」；刪除「當沖→RV 訊號來自 GK close-to-open 分量」的機制歸因，改為 proxy-sensitive；控制變數由「lagged」正名為 contemporaneous（time-t）。
+
+請確認：
+- 上述每項修正在現行 code / JSON / README 是否確實、正確存在（非只改文字沒改 code）。
+- Clark–West 的呼叫方向是否正確（small=baseline, large=augmented）？結論強度與 p=0.054 是否相稱、無 overclaim？
+- Granger lag 是否不再撞邊界？雙邊差分三 proxy 結果是否與 RQ2「RV→DT 穩健、DT→RV 脆弱」一致？
+- README 每個關鍵數字是否仍與 k1724_results.json 對得上，有無新引入的不一致或 placeholder？
+- 是否還有任何會推翻 RQ1(NULL, 邊界) 或 RQ2(RV→DT robust / DT→RV fragile) 的方法論問題？
+
+最後輸出：
+- FINAL VERDICT: PASS / CONDITIONAL_PASS / FAIL
+- 若非 PASS，列具體 blocking defect（檔案+行號+修法）。
+- 一段 <=200 字中文 verdict 摘要（我會貼進 README，取代前一版）。
+務實、只報真正影響結論的問題。

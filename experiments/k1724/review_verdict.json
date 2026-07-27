@@ -1,0 +1,17 @@
+{
+  "kid": "k1724",
+  "verdict": "PASS",
+  "reviewer": "Codex (codex-rescue shared runtime) / xhigh -- round 2",
+  "reviewed_at": "2026-07-27T13:59:21.187971+00:00",
+  "reviewed_commit": "branch k1724-dispatch-slot-1-f4a65558 (pre-merge worktree bytes; sha256 pinned below)",
+  "review_artifact": "experiments/k1724/README.md (## Codex review section)",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "README.md": "25d1a529b84fc09465ca577e1b3e1c3c8fbda1fb48f91dc5e3357d38a18eeabb",
+    "fig1_daytrade_vs_rv.png": "59a7ec5a5c74e2a0160de4a2a9805eb84698272d6c4d805c103b9acf675cbc61",
+    "fig2_ddt_vs_drv.png": "d404f72f0861f0aeee1236aad0dc7b342a13854082d8fac1181ae0a244e8635d",
+    "k1724.py": "77cada6714edfde150ead285b02e313e4e6a8f7c4991e7a8b9acc0571ce22551",
+    "k1724_results.json": "a70d652fcc561e3f73d3d9592744d52cf8138028c4ebee5e4210f3b0911ac107"
+  },
+  "note": "Round 1 = CONDITIONAL_PASS; round-2 sole blocking defect (README RQ2 RV->DT GK p mis-written as 7.9e-05, should be ~0) fixed at collection; Codex confirmed PASS after fix."
+}
