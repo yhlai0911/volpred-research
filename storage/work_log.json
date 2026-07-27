@@ -27969,5 +27969,35 @@
     "owner": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce",
     "commit": "8a172d79a",
     "summary": "STARVATION LOCKOUT 指定挑此餓死任務（P2，aged 140.8h）。K1730_NESTED_DM_ADJUDICATION.md（worktree dispatch-slot-1-bd00f90a-k1731，唯一副本、canonical 無）逐條修訂 8 條事實錯誤 —— 全部方向都是「低估待修債務」（nested_dm_misuse_baseline 自註的 worse error direction）。派 opus 同步 agent 逐條 verify-then-amend，我保留 git/收尾。\n\n修訂內容（每條先驗證證據源再改寫）：(1) §5/§0 回復「曾外部曝光於 knowledge f932cb04（已 2026-07-21 修訂）」非零曝光；(2)(3) §1.0 訂正 agent brief 兩實檔存在、README 227 行存於 salvage ref edcb5b0d0；(4) §1.1/§3.2/§6.1 數字換成 production（quick_mode=false, edcb5b0d0）：DM t=2.1589、p=0.0311、mean_loss_diff=0.002106、harvey_significant=false，方向同號、裁決不翻轉；(5) §3.2 移除已被 REMEDIATION_v2.md 因 leakage 撤回的 single-draw permutation 支柱，改述 lag-shift placebo（one-sided p=0.833、下限 0.167、粗解析度）；(6) §3.2 註明支柱(1)(3)非獨立（同一 t），結論降級為「偵測不到/無辨別力」非「無增量價值」；(7) §3.4/§7 標明 baseline 196/106 僅 worktree 狀態、canonical 為 193/103/90 且無 k1730；(8) §6.6/§1.2/§4.1/§1.0 更新過時 task 狀態、行號微調（verbatim 293-294、loop 290、註解 288-289）、docs 命中改 nested_dm_coefficient_mask_audit.md:25,32。文末加 §8 Amendment log。\n\nAgent 誠實標出 2 處 discrepancy 並保守處理：REMEDIATION_v2.md 在 canonical 非 worktree（內容相符）；k1730_nested_dm_detector_exposure 實為 status=succeeded 非 in_progress（用實際值）。核心 RETRACT 判定、§3.1 文獻論證、§4.2 randomization 路線未動（全文最紮實部分）。驗證：檔 493 行（+83）、關鍵編輯 30 命中、§8 log line 470。交付：於 worktree branch 單寫鎖提交 8a172d79a（1 file, +169/-86），隨該 worktree 日後 merge（assign_580c1b3e K1730 v2 收件）一起進 main —— 未複製到 canonical 以免與 tracked 檔分岔。\n\n【並發 ops finding，供 reconcile — 非本任務】compute followup 缺 claim 保護（與 slot-1 15:22 work_log 同一根因）：signforecast Codex round-2 followup 被 slot-1（rev2, 07:11）與本 slot（rev3, 07:12）於 list→mark 之間 TOCTOU 雙 enqueue，兩 job 同 cwd(dispatch-slot-2-7087efc0-signfc)/同 artifact。enqueue-agent 的 collision gate 只按 task-id 去重、不按 cwd，故未擋。已把 parent followup 指標改指 rev2（等價 brief、更早）；rev3 因 source task 已 failed→binding mismatch，cancel CLI fail-closed（防手改），無法移除→保留為孤兒 queued job，殘餘風險＝冗餘重跑（git_writer_lock 保護、非 corruption）。建議治本：(a) compute followup 加 claim 保護（fcntl 同 next_tasks）；(b) enqueue-agent collision gate 增加 cwd/artifact 去重；(c) cancel CLI 對孤兒 binding 提供 operator override。snapdup remediation 無此問題（slot-1 已釋放 claim，僅一 job afafc5）。"
+  },
+  {
+    "timestamp": "2026-07-27T15:55:39+08:00",
+    "task_type": "paper_review",
+    "task_id": "k892_k994_pinned_snapshot_repoint_20260721",
+    "outcome": "partial",
+    "actor": "hourly-slot-1-eb12b4e2ce1d4d1589cf37256ddb426e",
+    "owner": "hourly-slot-1-eb12b4e2ce1d4d1589cf37256ddb426e",
+    "commit": null,
+    "summary": "k892_k994 pinned-snapshot repoint — 完成 k892 半部（taiwan-vt 近投稿論文的 0050.TW 引用數字）。\n\nk892: download_data 加入 pinned-snapshot 路徑 —— 0050.TW 改讀 paper/taiwan-vt/data/0050_tw_..._2008-2026.csv 的 0050_tw_adj_close 欄（yfinance auto_adjust 使 df['Close'] 為還原價，故對應 *_adj_close），截到原始 end<2026-04-05。逐位重現 gamma=0.097042 / t=3.5965 / n_obs=4219（已於編輯後腳本內驗證 MATCH）。數字不變，results.json 無需改；body_v3.tex:53 source note 補 2026-07-27 repoint 說明（去除 live yfinance 依賴）。K892_USE_PINNED=0 保留 live fallback；^TWII/2330/SPY 為 cross-check 非論文輸入，其 full_sample 窗口早於 2008 快照，維持 yfinance。\n\nk994: 發現 coverage gap 未做 —— 論文引用 0050.TW DM t=1.44（main.tex:531，OOS 2019–2026-04-08），但 garch-x-vix 的 0050_tw_vix pinned CSV 只到 2022，不覆蓋引用窗口，機械 repoint 會改變統計量。寫 experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md（含 gap + 可重用 adj_close recipe + 三個決策選項），task annotate 記 k994_status=BLOCKED_COVERAGE_GAP，任務 release 回 pending 待資料決策（k994 OOS 重跑走 compute_queue）。\n\n另：CI red 30241354854（本 fire 觸發原因）經查已恢復綠燈（run 30244586073 success，push remediation ahead_after=0），為 stale trigger，無需動作。"
+  },
+  {
+    "timestamp": "2026-07-27T15:56:18+08:00",
+    "task_type": "experiment",
+    "task_id": "snapaudit_correct_k1319_k1592_original_vintage",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683",
+    "owner": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683",
+    "commit": null,
+    "summary": "snapaudit_correct_k1319_k1592_original_vintage — 原 vintage 污染更正，兩個顯著性判定翻轉。\n\nk1319: 前班 dedup-fix 誤把窗口延到 live 2026-07-24 CSV(n=4163)＝錯 vintage。加 VINTAGE_END=2026-05-20 pin(保留 dedup guard)重跑 → n_total 4119(原 4129 含10重複日)。DM(HAR vs EWMA) t -3.0226→-3.1021, p 0.0025→0.0020，跨 Harvey|t|>3 → 不顯著翻為顯著。results.json 加 snapaudit_provenance，README 加更正表。HAR-W vs HAR headline(NULL)不變。\n\nk1592: 乾淨 dedup 重跑已由 compute job committed(dd2e70b42)，git before/after 完整。SPY dm_GammaRule_minus_GJR p 0.038→0.137(跨5%不再顯著)；panel MCS GARCH 0.033→0.026；panel mean_losses GARCH 1.929→1.535(10偽造零報酬列膨脹~26%)。headline NULL_OR_WEAK 不變且強化。三方(audit B/C/本班)一致。\n\nknowledge 1ebc1453 主線程寫(K1259 gate)。下游 leverage-direction paper / feed articles 更正任務已解鎖(annotate 精確值)。"
+  },
+  {
+    "timestamp": "2026-07-27T16:04:13+08:00",
+    "task_type": "paper_review",
+    "task_id": "snapaudit_paper_leverage_direction_k1591_k1592_contaminated",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683",
+    "owner": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683",
+    "commit": null,
+    "summary": "snapaudit_paper_leverage_direction_k1591_k1592_contaminated — leverage-direction 論文污染數字更正（近投稿 IJF）。\n\nK1592 (tab:prespec_retest + 表註 + prose 全更正為 clean dedup rerun git dd2e70b42):\n- SPY rule-vs-GARCH: t -2.85->-2.74, p 0.005->0.006, Holm 0.104->0.145\n- QQQ rule-vs-GJR: t 2.08->1.49 (Holm 1.00; 此即 reconciliation 提的 raw p 0.038->0.137 翻轉，但論文表格只列 Holm p 故不涉顯著性宣稱)\n- dev panel DM: t -2.90->-2.95, p 0.004->0.003; MCS GARCH 淘汰 p 0.033->0.026\n- HEADLINE 不變且強化: no asset and no panel meets |t|>3 & Holm<0.05 (0/8)\n\nK1591 (body_v_ijf.tex:358 safe-haven regime): 點估計 gamma_diff=-0.087/HAC t=-0.66 在 contaminated 與 clean rerun byte-identical -> 未受實質污染. bootstrap CI [-0.71,+0.39]/69.8%neg 僅微移到 ~[-0.69,+0.37]/70.0%, 含零、directionally-supportive-but-insignificant 結論不變 -> 不改論文數字(遵守 do-not-inject-uncertain-vintage guidance).\n\n驗證: main_v_ijf.tex xelatex 編譯 exit 0, 39 頁, 0 error. paper_pipeline_status.json 記 snapaudit_contamination_revision. 污染 block 解除; 獨立 multi_round_review FAIL blocker 仍在, 仍 gate 投稿."
   }
 ]

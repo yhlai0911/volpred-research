@@ -41740,10 +41740,32 @@
         "to": "pending",
         "by": "hourly-slot-2-3109992c09e2455fb6c4e6d0953e99ce",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-27T07:45:59.041293+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-eb12b4e2ce1d4d1589cf37256ddb426e"
+      },
+      {
+        "ts": "2026-07-27T07:45:59.357520+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-eb12b4e2ce1d4d1589cf37256ddb426e"
+      },
+      {
+        "ts": "2026-07-27T07:55:08.590283+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-eb12b4e2ce1d4d1589cf37256ddb426e",
+        "note": "manual_release"
       }
     ],
     "scope_note": "拆解建議（.tex 硬規：background agent 禁寫 .tex，僅主線程）：(A) worktree agent 做非-.tex 部分 — repoint k892.py:38/k994.py:371,392 讀 pinned CSV（yfinance 保留為顯式開關 fallback）+ 重跑驗 k892 gamma=0.0970/t=3.5965/loglik=-6319.355、k994 DM t=1.44 不變；(B) 主線程 paper_body 收尾兩篇 data section 說明 pinned snapshot 為輸入 + body_v3.tex:53 cosmetic 窗口訂正(4217 vs 實際 4219/截 2026-03-31 得 gamma=0.0965/t=3.58)。需完整時段(≥30min)，非 20min 尾段可收。",
-    "last_released_at": "2026-07-27T07:36:57.412001+00:00"
+    "last_released_at": "2026-07-27T07:55:08.590270+00:00",
+    "k892_status": "DONE_VERIFIED: 0050.TW loader repointed to pinned 0050_tw_adj_close; reproduces gamma=0.097042/t=3.5965/n_obs=4219 byte-for-byte; body_v3.tex source note updated",
+    "k994_status": "BLOCKED_COVERAGE_GAP: 0050_tw_vix pinned CSV ends 2022 but k994 OOS runs 2019-2026-04-08; DM t=1.44 not reproducible from short CSV — needs data decision (extend snapshot / restate window). Diagnostic + recipe: experiments/k994/PINNED_REPOINT_COVERAGE_GAP.md",
+    "repro_recipe": "pinned *_adj_close column + truncate to original end (yfinance end exclusive) reproduces exactly"
   },
   {
     "id": "audience_gate_general_lane_starvation_20260721",
@@ -42048,7 +42070,7 @@
     "title": "snapaudit HIGH 更正：k1319 / k1592 在原 vintage 重跑取精確更正值 + 修 results.json 與 knowledge",
     "priority": 2,
     "task_type": "experiment",
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch_snapaudit_reconciliation",
     "tags": [
       "experiment",
@@ -42057,7 +42079,30 @@
       "correction"
     ],
     "created_at": "2026-07-21T16:25:00Z",
-    "description": "裁決依據：storage/ops/snapaudit_reconciliation_20260722.md（三份平行 audit 對帳，audit C 為權威集）。\n\n這兩個是 2026-05-18 快照重複列污染中**唯二會翻轉顯著性判定**的案例，不是小數位問題：\n- k1319：DM har_vs_ewma t −2.9319 → −3.1085，跨 Harvey |t|>3.0 門檻；p 0.0034 → 0.0019。audit B 與 audit C 各自獨立重跑得到相同數字，方向確定。\n- k1592：dm_GammaRule_minus_GJR_p 0.038 → 0.137，跨 5%；panel mean_losses 因 10 筆偽造零報酬膨脹 ~25-30%；MCS p for GARCH 0.033 → 0.026。**其列數是乾淨的**，所以 count-only 稽核看不見它 —— 別用列數當通過條件。\n\n**為什麼還要再跑一次**：現有 A/B 重跑落在 2026-07-19 vintage，與原始執行 vintage 不同（audit B 自己標了 vintage_caveat）。方向與量級可信，但要寫進 results.json 與 knowledge 的**精確更正值**必須在原 vintage 重跑。不要直接把 B 的 after 值抄進產物。\n\n交付：(1) 兩個實驗在原 vintage 的乾淨重跑（去重後）；(2) 更正 experiments/k1319/k1319_results.json 與 experiments/k1592/k1592_results.json，保留 before/after 可追溯；(3) 主線程寫 knowledge 條目（K1259 gate：agent 不得自寫）記錄判定翻轉；(4) 若 K1319/K1592 的結論已進入任何已發表文章或論文，開對應更正 task。\n\n重跑昂貴 → 走 compute_queue，不要塞進 hourly fire。"
+    "description": "裁決依據：storage/ops/snapaudit_reconciliation_20260722.md（三份平行 audit 對帳，audit C 為權威集）。\n\n這兩個是 2026-05-18 快照重複列污染中**唯二會翻轉顯著性判定**的案例，不是小數位問題：\n- k1319：DM har_vs_ewma t −2.9319 → −3.1085，跨 Harvey |t|>3.0 門檻；p 0.0034 → 0.0019。audit B 與 audit C 各自獨立重跑得到相同數字，方向確定。\n- k1592：dm_GammaRule_minus_GJR_p 0.038 → 0.137，跨 5%；panel mean_losses 因 10 筆偽造零報酬膨脹 ~25-30%；MCS p for GARCH 0.033 → 0.026。**其列數是乾淨的**，所以 count-only 稽核看不見它 —— 別用列數當通過條件。\n\n**為什麼還要再跑一次**：現有 A/B 重跑落在 2026-07-19 vintage，與原始執行 vintage 不同（audit B 自己標了 vintage_caveat）。方向與量級可信，但要寫進 results.json 與 knowledge 的**精確更正值**必須在原 vintage 重跑。不要直接把 B 的 after 值抄進產物。\n\n交付：(1) 兩個實驗在原 vintage 的乾淨重跑（去重後）；(2) 更正 experiments/k1319/k1319_results.json 與 experiments/k1592/k1592_results.json，保留 before/after 可追溯；(3) 主線程寫 knowledge 條目（K1259 gate：agent 不得自寫）記錄判定翻轉；(4) 若 K1319/K1592 的結論已進入任何已發表文章或論文，開對應更正 task。\n\n重跑昂貴 → 走 compute_queue，不要塞進 hourly fire。",
+    "status_history": [
+      {
+        "ts": "2026-07-27T07:49:20.940736+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683"
+      },
+      {
+        "ts": "2026-07-27T07:49:28.475929+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683"
+      },
+      {
+        "ts": "2026-07-27T07:55:41.111806+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683"
+      }
+    ],
+    "started_at": "2026-07-27T07:49:28.475912+00:00",
+    "completed_at": "2026-07-27T07:55:41.111785+00:00",
+    "result": "k1319 原 vintage(2026-05-20) dedup 重跑: DM(HAR vs EWMA) t -3.0226->-3.1021, p 0.0025->0.0020, 跨 Harvey|t|>3 顯著性翻轉 (n 4129->4119, 移除10重複日); results.json+README 加 before/after provenance. k1592 乾淨 dedup 重跑已 committed(dd2e70b42): SPY dm_GammaRule_minus_GJR p 0.038->0.137 跨5%不再顯著, MCS GARCH 0.033->0.026, panel mean_losses GARCH 1.929->1.535(~26%膨脹), headline NULL_OR_WEAK 不變且強化. 三方(audit B/C/本班)一致. knowledge 1ebc1453 主線程寫(K1259 gate). 下游 leverage-direction paper / feed articles 更正任務已解鎖."
   },
   {
     "id": "snapaudit_quantify_unmeasured_exposure",
@@ -42079,7 +42124,7 @@
     "title": "[投稿完整性] leverage-direction body_v_ijf.tex 引用的 K1591/K1592 數字源自受污染面板",
     "priority": 2,
     "task_type": "paper_review",
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch_snapaudit_reconciliation",
     "tags": [
       "paper_review",
@@ -42089,7 +42134,31 @@
     ],
     "created_at": "2026-07-21T16:30:00Z",
     "description": "裁決依據：storage/ops/snapaudit_reconciliation_20260722.md；證據來源 audit B（branch snapaudit-dcc222db，experiments/snapshot_dup_audit_20260720/audit_results.json 的 downstream 盤點）。\n\n**為什麼是 P1**：leverage-direction 是目前唯一接近 ready-for-submission 的論文，而它 body 裡的兩處數字直接來自 2026-05-18 快照重複列污染的面板：\n- `paper/leverage-direction/body_v_ijf.tex:358` 引用 K1591 的 gamma_diff=-0.087、HAC t=-0.66、bootstrap 95% CI [-0.71,+0.39]、69.8% negative draws（附 inline `% source: experiments/k1591/README.md`）。K1591 重跑 95 個欄位改變。\n- `paper/leverage-direction/body_v_ijf.tex:332` 表註引用 K1592 的 2023-01-03..2026-06-26 窗、per-asset N、GJR share、DM t，以及**頭條結論**「no asset and no panel meets this criterion」與 SPY Holm p=0.104，全部源自該面板；L22/L124/L130 亦有註。K1592 重跑 85 個欄位改變，其中 dm_GammaRule_minus_GJR_p 0.038 → 0.137 **跨過 5%**。\n\n**先確認再動手**：audit B 的重跑落在 2026-07-19 vintage（B 自標 vintage_caveat），方向與量級可信但精確值須回原 vintage。本任務依賴 `snapaudit_correct_k1319_k1592_original_vintage` 產出的精確更正值 —— 不要用 B 的 after 值直接改論文。\n\n交付：(1) 逐一核對 body_v_ijf.tex 上述行號的每個數字是否真的來自受污染產物（不接受推定）；(2) 取得原 vintage 更正值後更新；(3) 判定頭條結論是否仍成立 —— 若 K1592 的 p 跨 5% 影響「no asset and no panel meets this criterion」，這是結論層而非數字層的修訂；(4) 更新 paper_pipeline_status.json 的 stage 並記錄此次污染修訂。\n\n**在本任務關閉前，leverage-direction 不得推進 arXiv 或投稿。**",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "snapaudit_precise_values": "K1592 SPY dm_GammaRule_minus_GJR p 0.038->0.137 (crosses 5%, no longer sig); panel MCS GARCH 0.033->0.026; panel mean_losses GARCH 1.929->1.535. Source: git dd2e70b42 before/after + experiments/k1592/k1592_results.json. K1591 numbers: rerun in dd2e70b42 clean set. Precise vals ready — unblocked.",
+    "status_history": [
+      {
+        "ts": "2026-07-27T07:57:10.989922+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683"
+      },
+      {
+        "ts": "2026-07-27T07:57:18.083544+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683"
+      },
+      {
+        "ts": "2026-07-27T08:04:23.018289+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-64781ab4f68541f687c97b4e82f44683"
+      }
+    ],
+    "started_at": "2026-07-27T07:57:18.083526+00:00",
+    "completed_at": "2026-07-27T08:04:23.018265+00:00",
+    "result": "leverage-direction K1592 表格+prose 全更正為 clean dedup(dd2e70b42): SPY RvG t-2.85->-2.74/p0.005->0.006/Holm0.104->0.145, QQQ RvJ t2.08->1.49, dev panel t-2.90->-2.95, MCS GARCH 0.033->0.026; headline no-asset/panel-meets-criterion 不變且強化. K1591:358 點估計-0.087/t-0.66 byte-identical 未污染, CI 微移不改結論 -> 不動. main_v_ijf.tex xelatex 編譯 39pp exit0. paper_pipeline_status 記污染修訂; 污染 block 解除, multi_round_review FAIL blocker 仍 gate 投稿."
   },
   {
     "id": "snapaudit_feed_articles_contaminated_numbers",
@@ -45941,7 +46010,7 @@
   {
     "id": "assign_40626ae8",
     "title": "PHASE-Z 卡住檔案 incident（2a58c24fafb9c304）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 21 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/k1319/k1319_results.json — 14 班\n- experiments/k1399/k1399_qlike_comparison.png — 14 班\n- experiments/k1399/k1399_vix_decomp_results.json — 14 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 14 班\n- experiments/k1591/k1591_results.json — 14 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 14 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 14 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 14 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 14 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 14 班\n- experiments/k1592/fig3_origin_gamma_t.png — 14 班\n- experiments/k1705/k1705_results.json — 14 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 3 班\n- experiments/k1730/README.md — 3 班\n- experiments/k1730/REMEDIATION_v2.md — 3 班\n- experiments/k1730/codex_review_v1.md — 3 班\n- experiments/k1730/data/CPI_first_release.csv — 3 班\n- experiments/k1730/data/DGS10_daily.csv — 3 班\n- experiments/k1730/data/DTB3_daily.csv — 3 班\n- experiments/k1730/data/IP_first_release.csv — 3 班\n- experiments/k1730/data/NFP_first_release.csv — 3 班\n- experiments/k1730/data/UNRATE_first_release.csv — 3 班\n- experiments/k1730/data/VIX_daily.csv — 3 班\n- experiments/k1730/data/spy_daily_rv.csv — 3 班\n- experiments/k1730/fig1_rolling_coverage.png — 3 班\n- experiments/k1730/fig2_ssvs_pip.png — 3 班\n- experiments/k1730/fig3_interval_vs_realized.png — 3 班\n- experiments/k1730/fig4_pit_calibration.png — 3 班\n- experiments/k1730/k1730_data.py — 3 班\n- experiments/k1730/k1730_gevreg_midas_ssvs.py — 3 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T073852613261Z:<路徑>`",
+    "description": "## 發生什麼\n45 個未提交檔案不是任何一班 fire 產出的，最長已連續 22 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- experiments/k1319/k1319_results.json — 15 班\n- experiments/k1399/k1399_qlike_comparison.png — 15 班\n- experiments/k1399/k1399_vix_decomp_results.json — 15 班\n- experiments/k1591/figures/k1591_holdout_regime_asymmetry.png — 15 班\n- experiments/k1591/k1591_results.json — 15 班\n- experiments/k1591/tables/k1591_daily_panel.csv — 15 班\n- experiments/k1591/tables/k1591_regime_summary.csv — 15 班\n- experiments/k1591/tables/k1591_rolling_gjr_gamma.csv — 15 班\n- experiments/k1592/fig1_oos_mean_qlike_by_asset.png — 15 班\n- experiments/k1592/fig2_gammarule_gjr_share.png — 15 班\n- experiments/k1592/fig3_origin_gamma_t.png — 15 班\n- experiments/k1705/k1705_results.json — 15 班\n- experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md — 4 班\n- experiments/k1730/README.md — 4 班\n- experiments/k1730/REMEDIATION_v2.md — 4 班\n- experiments/k1730/codex_review_v1.md — 4 班\n- experiments/k1730/data/CPI_first_release.csv — 4 班\n- experiments/k1730/data/DGS10_daily.csv — 4 班\n- experiments/k1730/data/DTB3_daily.csv — 4 班\n- experiments/k1730/data/IP_first_release.csv — 4 班\n- experiments/k1730/data/NFP_first_release.csv — 4 班\n- experiments/k1730/data/UNRATE_first_release.csv — 4 班\n- experiments/k1730/data/VIX_daily.csv — 4 班\n- experiments/k1730/data/spy_daily_rv.csv — 4 班\n- experiments/k1730/fig1_rolling_coverage.png — 4 班\n- experiments/k1730/fig2_ssvs_pip.png — 4 班\n- experiments/k1730/fig3_interval_vs_realized.png — 4 班\n- experiments/k1730/fig4_pit_calibration.png — 4 班\n- experiments/k1730/k1730_data.py — 4 班\n- experiments/k1730/k1730_gevreg_midas_ssvs.py — 4 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T073852613261Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T080741782413Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -45998,59 +46067,127 @@
         "storage/memory/knowledge.json"
       ],
       "streaks": {
-        "experiments/k1319/k1319_results.json": 14,
-        "experiments/k1399/k1399_qlike_comparison.png": 14,
-        "experiments/k1399/k1399_vix_decomp_results.json": 14,
-        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 14,
-        "experiments/k1591/k1591_results.json": 14,
-        "experiments/k1591/tables/k1591_daily_panel.csv": 14,
-        "experiments/k1591/tables/k1591_regime_summary.csv": 14,
-        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 14,
-        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 14,
-        "experiments/k1592/fig2_gammarule_gjr_share.png": 14,
-        "experiments/k1592/fig3_origin_gamma_t.png": 14,
-        "experiments/k1705/k1705_results.json": 14,
-        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 3,
-        "experiments/k1730/README.md": 3,
-        "experiments/k1730/REMEDIATION_v2.md": 3,
-        "experiments/k1730/codex_review_v1.md": 3,
-        "experiments/k1730/data/CPI_first_release.csv": 3,
-        "experiments/k1730/data/DGS10_daily.csv": 3,
-        "experiments/k1730/data/DTB3_daily.csv": 3,
-        "experiments/k1730/data/IP_first_release.csv": 3,
-        "experiments/k1730/data/NFP_first_release.csv": 3,
-        "experiments/k1730/data/UNRATE_first_release.csv": 3,
-        "experiments/k1730/data/VIX_daily.csv": 3,
-        "experiments/k1730/data/spy_daily_rv.csv": 3,
-        "experiments/k1730/fig1_rolling_coverage.png": 3,
-        "experiments/k1730/fig2_ssvs_pip.png": 3,
-        "experiments/k1730/fig3_interval_vs_realized.png": 3,
-        "experiments/k1730/fig4_pit_calibration.png": 3,
-        "experiments/k1730/k1730_data.py": 3,
-        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 3,
-        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 3,
-        "experiments/k1730/k1730_models.py": 3,
-        "experiments/k1730/k1730_quickmode_results.json": 3,
-        "experiments/k1730/k1730_report_tables.py": 3,
-        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 3,
-        "experiments/k1730/k1730_scoring.py": 3,
-        "experiments/k1730/reproduce_spec.json": 3,
-        "experiments/k1730/review_verdict.json": 3,
-        "experiments/k1730/run_production.log": 3,
-        "experiments/k1730/run_production_v2.log": 3,
-        "experiments/k1730/test_k1730_recovery.py": 3,
-        "experiments/k1730/verify_readme_alignment.py": 3,
-        "experiments/paper2_table1_summary_stats_provenance/results.json": 14,
-        "storage/logs/trending_primary_source_verification.jsonl": 21,
-        "storage/memory/knowledge.json": 14
+        "experiments/k1319/k1319_results.json": 15,
+        "experiments/k1399/k1399_qlike_comparison.png": 15,
+        "experiments/k1399/k1399_vix_decomp_results.json": 15,
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png": 15,
+        "experiments/k1591/k1591_results.json": 15,
+        "experiments/k1591/tables/k1591_daily_panel.csv": 15,
+        "experiments/k1591/tables/k1591_regime_summary.csv": 15,
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv": 15,
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png": 15,
+        "experiments/k1592/fig2_gammarule_gjr_share.png": 15,
+        "experiments/k1592/fig3_origin_gamma_t.png": 15,
+        "experiments/k1705/k1705_results.json": 15,
+        "experiments/k1730/K1730_ARM_A_FULL_RUN_COLLECTION.md": 4,
+        "experiments/k1730/README.md": 4,
+        "experiments/k1730/REMEDIATION_v2.md": 4,
+        "experiments/k1730/codex_review_v1.md": 4,
+        "experiments/k1730/data/CPI_first_release.csv": 4,
+        "experiments/k1730/data/DGS10_daily.csv": 4,
+        "experiments/k1730/data/DTB3_daily.csv": 4,
+        "experiments/k1730/data/IP_first_release.csv": 4,
+        "experiments/k1730/data/NFP_first_release.csv": 4,
+        "experiments/k1730/data/UNRATE_first_release.csv": 4,
+        "experiments/k1730/data/VIX_daily.csv": 4,
+        "experiments/k1730/data/spy_daily_rv.csv": 4,
+        "experiments/k1730/fig1_rolling_coverage.png": 4,
+        "experiments/k1730/fig2_ssvs_pip.png": 4,
+        "experiments/k1730/fig3_interval_vs_realized.png": 4,
+        "experiments/k1730/fig4_pit_calibration.png": 4,
+        "experiments/k1730/k1730_data.py": 4,
+        "experiments/k1730/k1730_gevreg_midas_ssvs.py": 4,
+        "experiments/k1730/k1730_gevreg_midas_ssvs_results.json": 4,
+        "experiments/k1730/k1730_models.py": 4,
+        "experiments/k1730/k1730_quickmode_results.json": 4,
+        "experiments/k1730/k1730_report_tables.py": 4,
+        "experiments/k1730/k1730_results_quickmode_20260719T2020.json": 4,
+        "experiments/k1730/k1730_scoring.py": 4,
+        "experiments/k1730/reproduce_spec.json": 4,
+        "experiments/k1730/review_verdict.json": 4,
+        "experiments/k1730/run_production.log": 4,
+        "experiments/k1730/run_production_v2.log": 4,
+        "experiments/k1730/test_k1730_recovery.py": 4,
+        "experiments/k1730/verify_readme_alignment.py": 4,
+        "experiments/paper2_table1_summary_stats_provenance/results.json": 15,
+        "storage/logs/trending_primary_source_verification.jsonl": 22,
+        "storage/memory/knowledge.json": 15
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260727T073852613261Z"
+        "refs/volpred/quarantine/20260727T073852613261Z",
+        "refs/volpred/quarantine/20260727T080741782413Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-27T07:38:55.453387+00:00",
-      "last_seen_at": "2026-07-27T07:38:55.453387+00:00"
+      "last_seen_at": "2026-07-27T08:07:45.478788+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-27T07:39:15.220526+00:00",
+      "deferred": [
+        "experiments/k1319/k1319_results.json: 已保存，且 5.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1399/k1399_qlike_comparison.png: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1399/k1399_vix_decomp_results.json: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/figures/k1591_holdout_regime_asymmetry.png: 已保存，且 5.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/k1591_results.json: 已保存，且 5.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_daily_panel.csv: 已保存，且 5.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_regime_summary.csv: 已保存，且 5.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1591/tables/k1591_rolling_gjr_gamma.csv: 已保存，且 5.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig1_oos_mean_qlike_by_asset.png: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig2_gammarule_gjr_share.png: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1592/fig3_origin_gamma_t.png: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1705/k1705_results.json: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/paper2_table1_summary_stats_provenance/results.json: 已保存，且 5.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.0 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-27T08:07:45.478788+00:00"
+  },
+  {
+    "id": "assign_a742d7ac",
+    "title": "[Issue #21] Warm Standby closure audit and root-cause completion",
+    "description": "依既有 Matt Issue #21/T14 做五步 closure audit：逐項以 durable live evidence 驗證 warm standby health、exact-next authority takeover、RTO、primary restoration/rollback、零雙主/零重複 effect；先讀現有 two-Mac receipts 與 formal authority contracts。任何 acceptance 缺口必用 implement→TDD→code-review 修底層並 live read-back；未全過不得 close #21。完成後解除 #24 blocking edge，不重跑 plan/spec/tickets。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T07:43:59.007014+00:00",
+    "payload": {
+      "declared_output_paths": [
+        "docs/refactor_plan_ops_master_2026_07.md",
+        "docs/project_improvement_status.md",
+        "docs/error_log.md",
+        "src/volpred/ops/authority/**",
+        "scripts/rehearse_primary_authority_outage.py",
+        "tests/test_rehearse_primary_authority_outage.py",
+        "storage/ops/primary_authority_outage_cross_host_latest.json"
+      ],
+      "denied_canonical_paths": [
+        "storage/next_tasks.json"
+      ],
+      "implementation_flow": "implement->tdd->code-review->live-readback",
+      "issue_disposition": "close_only_if_five_gates_pass"
+    },
+    "created_by": "codex-vscode",
+    "issue_ref": "#21",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T07:44:03.950433+00:00",
+    "claim_expires_at": "2026-07-27T09:44:03.950433+00:00",
+    "claim_session_id": "0c1123f44917",
+    "status_history": [
+      {
+        "ts": "2026-07-27T07:44:03.950447+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T07:44:21.440910+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T07:44:27.634446+00:00"
   }
 ]
