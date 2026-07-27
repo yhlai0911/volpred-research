@@ -1,6 +1,6 @@
 {
   "schema": "observation_ledger.v1",
-  "updated_at": "2026-07-20T10:09:01.212645+00:00",
+  "updated_at": "2026-07-27T08:49:42.681599+00:00",
   "items": [
     {
       "id": "pregate_shadow",
@@ -35,8 +35,10 @@
       "started_at": "2026-07-19T00:00:00+08:00",
       "deadline": "2026-07-21T18:00:00+08:00",
       "action_on_expiry": "完成 assign_f59976b6 驗收：對照基線判定吞吐變化，決定維持 max_slots=4 或回退 2；回退判準 = PHASE-Z cohort 競態 / worktree 磁碟壓力 / quota 連發（de-rate guard 觸發史）",
-      "status": "observing",
-      "note": "ops_master 驗收留原 blocked task assign_f59976b6；此帳本項只保證『逾期未驗收』會浮上 dreaming"
+      "status": "decided",
+      "note": "ops_master 驗收留原 blocked task assign_f59976b6；此帳本項只保證『逾期未驗收』會浮上 dreaming",
+      "decided_at": "2026-07-27T08:49:42.681589+00:00",
+      "resolution": "維持 configured max_slots=4，不永久回退。assign_f59976b6 與 2026-07-27 recheck 均確認 cap 非 binding constraint、吞吐提升未獲證實；現場 quota_derate=False、scheduler effective=4，但 foreign-incident/worktree 壓力 guard 已把 agent slot cap 機械降為 2（dispatch_slot_budget.py --cap=2），因此用動態 fail-safe 收斂當前壓力，不把暫時 incident 固化成全域回退。證據：storage/ops/throughput_audit_max_slots_20260721.md；worktrees=21、disk=92% used。"
     },
     {
       "id": "wsb_isolation_pilot",
