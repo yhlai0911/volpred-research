@@ -93,6 +93,11 @@ class HostAuthoritySession:
         self._lock = RLock()
         self._state: Literal["standby", "active", "demoted"] = "standby"
         self._lease: PrimaryLease | None = None
+        # Never exposed to callers after local demotion.  It is retained only
+        # long enough for demote() to attempt a fenced remote release; the
+        # production store journals the token-redacted identity if that call
+        # cannot be confirmed.
+        self._pending_demotion_lease: PrimaryLease | None = None
         self._last_release_ref: str | None = None
 
     def status(self) -> HostAuthorityStatus:
@@ -101,6 +106,7 @@ class HostAuthoritySession:
                 try:
                     expired = self._lease_expired(self._lease)
                 except Exception as error:
+                    self._pending_demotion_lease = self._lease
                     self._lease = None
                     self._state = "demoted"
                     raise AuthorityInactive(
@@ -108,6 +114,7 @@ class HostAuthoritySession:
                         "local host demoted"
                     ) from error
                 if expired:
+                    self._pending_demotion_lease = self._lease
                     self._lease = None
                     self._state = "demoted"
             lease = self._lease
@@ -134,6 +141,7 @@ class HostAuthoritySession:
                     "Primary Authority activation returned an expired lease"
                 )
             self._lease = lease
+            self._pending_demotion_lease = None
             self._state = "active"
             self._last_release_ref = None
             return lease
@@ -149,6 +157,7 @@ class HostAuthoritySession:
                         "Primary Authority renewal returned an expired lease"
                     )
             except Exception as error:
+                self._pending_demotion_lease = lease
                 self._lease = None
                 self._state = "demoted"
                 raise AuthorityInactive(
@@ -163,10 +172,11 @@ class HostAuthoritySession:
 
     def demote(self) -> AuthorityReceipt | None:
         with self._lock:
-            if self._state != "active" or self._lease is None:
+            lease = self._lease or self._pending_demotion_lease
+            if lease is None:
                 return None
-            lease = self._lease
             self._lease = None
+            self._pending_demotion_lease = None
             self._state = "demoted"
             try:
                 receipt = self._authority.release(lease)
@@ -187,6 +197,7 @@ class HostAuthoritySession:
         try:
             expired = self._lease_expired(self._lease)
         except Exception as error:
+            self._pending_demotion_lease = self._lease
             self._lease = None
             self._state = "demoted"
             raise AuthorityInactive(
@@ -194,6 +205,7 @@ class HostAuthoritySession:
                 "local host demoted"
             ) from error
         if expired:
+            self._pending_demotion_lease = self._lease
             self._lease = None
             self._state = "demoted"
             raise AuthorityInactive(

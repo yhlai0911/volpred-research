@@ -7,13 +7,17 @@ and grants contain token-redacted authority references.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 from typing import Callable, Protocol
 from uuid import uuid4
 
-
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+
+# Every production commit/effect capability must contend on this one remote
+# lease.  Capability-specific authority keys recreate a cross-host
+# double-primary even when each individual row is perfectly fenced.
+FORMAL_PRIMARY_AUTHORITY_KEY = "operations-core-primary"
 
 
 @dataclass(frozen=True)
@@ -62,6 +66,23 @@ class AuthorityReceipt:
     epoch: int
     primary_authority_ref: str
     released_at: str
+
+
+@dataclass(frozen=True)
+class AuthorityLifecycleEvent:
+    """Token-redacted, append-only receipt for one lease lifecycle event."""
+
+    schema_version: str
+    event_ref: str
+    authority_key: str
+    event_type: str
+    operation: str
+    epoch: int | None
+    holder_ref: str | None
+    reason_code: str | None
+    reason: str | None
+    lease_expires_at: str | None
+    occurred_at: str
 
 
 class _AuthorityStore(Protocol):
@@ -220,9 +241,10 @@ from .session import (  # noqa: E402
     HostAuthorityStatus,
 )
 
-
 __all__ = [
+    "FORMAL_PRIMARY_AUTHORITY_KEY",
     "AuthorityInactive",
+    "AuthorityLifecycleEvent",
     "AuthorityReceipt",
     "AuthorityRequest",
     "FencingGrant",

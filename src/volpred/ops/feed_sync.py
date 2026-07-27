@@ -477,7 +477,6 @@ def _apply_safe_projection_upserts(
     from volpred.ops.authority import build_supabase_host_authority_keepalive
 
     keepalive = build_supabase_host_authority_keepalive(
-        authority_key="publisher:article.supabase.reconcile",
         holder_ref=worker_id,
     )
     keepalive.start()

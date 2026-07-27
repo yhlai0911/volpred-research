@@ -248,7 +248,7 @@ class _PrimaryAuthority:
     def current_lease(self) -> PrimaryLease:
         return PrimaryLease(
             schema_version="primary-lease.v1",
-            authority_key="operations-core-effects",
+            authority_key="operations-core-primary",
             holder_ref="host:primary",
             epoch=7,
             fencing_token="primary-token",
@@ -1291,7 +1291,6 @@ def test_public_sync_routes_operations_core_through_formal_caller(
             keepalive
             if kwargs
             == {
-                "authority_key": "publisher:article.supabase.sync",
                 "holder_ref": "effect-worker:publisher-article-sync",
             }
             else None

@@ -30,9 +30,7 @@ from volpred.ops.delivery.owned_publisher_delete import (  # noqa: E402
 )
 
 WORKER_ID = "effect-worker:publisher-article-sync"
-AUTHORITY_KEY = "publisher:article.supabase.sync"
 RECONCILE_WORKER_ID = "effect-worker:publisher-article-reconcile"
-RECONCILE_AUTHORITY_KEY = "publisher:article.supabase.reconcile"
 DELETE_RECONCILIATION_ACTOR = (
     "effect-worker:publisher-delete-reconciliation"
 )
@@ -47,7 +45,6 @@ def recover_owned_publisher_articles(
         actor_ref=DELETE_RECONCILIATION_ACTOR,
     ).reconcile(limit=limit)
     reconcile_keepalive = build_supabase_host_authority_keepalive(
-        authority_key=RECONCILE_AUTHORITY_KEY,
         holder_ref=RECONCILE_WORKER_ID,
     )
     reconcile_keepalive.start()
@@ -66,7 +63,6 @@ def recover_owned_publisher_articles(
     finally:
         reconcile_keepalive.stop()
     keepalive = build_supabase_host_authority_keepalive(
-        authority_key=AUTHORITY_KEY,
         holder_ref=WORKER_ID,
     )
     keepalive.start()

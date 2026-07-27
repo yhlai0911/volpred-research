@@ -137,7 +137,7 @@ def _attempt(prepared) -> OwnedPublisherDeleteAttempt:
         attempt_count=1,
         outbox_claim_token="outbox-token",
         worker_id="effect-worker:publisher-article-delete",
-        primary_authority_key="publisher:article.supabase.delete",
+        primary_authority_key="operations-core-primary",
         primary_authority_holder_ref=(
             "effect-worker:publisher-article-delete"
         ),
@@ -147,7 +147,7 @@ def _attempt(prepared) -> OwnedPublisherDeleteAttempt:
         outbox_claim_ref="effect-outbox:41:attempt-1",
         primary_authority_ref=(
             "primary-authority:"
-            "publisher:article.supabase.delete:epoch-7"
+            "operations-core-primary:epoch-7"
         ),
         lease_expires_at="2026-07-25T00:05:00+00:00",
     )
@@ -293,7 +293,7 @@ class _LeaseGate:
     def current_lease(self):
         return PrimaryLease(
             schema_version="primary-lease.v1",
-            authority_key="publisher:article.supabase.delete",
+            authority_key="operations-core-primary",
             holder_ref="effect-worker:publisher-article-delete",
             epoch=7,
             fencing_token="primary-token",

@@ -301,7 +301,7 @@ class _PrimaryAuthority:
     def current_lease(self) -> PrimaryLease:
         return PrimaryLease(
             schema_version="primary-lease.v1",
-            authority_key="operations-core-effects",
+            authority_key="operations-core-primary",
             holder_ref="host:primary",
             epoch=9,
             fencing_token="primary-token",

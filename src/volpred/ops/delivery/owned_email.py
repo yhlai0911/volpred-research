@@ -10,18 +10,21 @@ mutations itself.
 from __future__ import annotations
 
 import base64
-from collections.abc import Callable, Mapping
-from dataclasses import dataclass
-from datetime import datetime, timezone
 import hashlib
 import json
 import os
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 from urllib import error, request
 from uuid import uuid4
 
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    PrimaryLease,
+)
 
 from ._effect import (
     AcknowledgedEffect,
@@ -31,9 +34,8 @@ from ._effect import (
     FailedEffect,
 )
 
-
 _OWNER_FAMILY = "email.ops_alert"
-_PRIMARY_AUTHORITY_KEY = "notification:email.ops_alert"
+_PRIMARY_AUTHORITY_KEY = FORMAL_PRIMARY_AUTHORITY_KEY
 _OPERATIONS_CORE_OWNER = "operations_core"
 _LEGACY_OWNER = "legacy"
 _READ_ONLY_RPCS = frozenset(
@@ -552,7 +554,6 @@ def dispatch_email_by_current_owner(
         notifier = EmailNotifier(storage_dir=storage_dir)
         worker_id = "effect-worker:ops-alert-email"
         keepalive = build_supabase_host_authority_keepalive(
-            authority_key=_PRIMARY_AUTHORITY_KEY,
             holder_ref=worker_id,
         )
         keepalive.start()
@@ -591,7 +592,6 @@ def dispatch_email_by_current_owner(
     effect, payload_bytes = _legacy_effect_contract(normalized)
     worker_id = "effect-worker:ops-alert-email-legacy"
     keepalive = build_supabase_host_authority_keepalive(
-        authority_key=_PRIMARY_AUTHORITY_KEY,
         holder_ref=worker_id,
     )
     execution = _OwnedEmailExecutionContext(
@@ -1513,9 +1513,9 @@ __all__ = [
     "OwnedEmailCommand",
     "OwnedEmailExistingRequest",
     "OwnedEmailNotification",
+    "OwnedEmailReceipt",
     "OwnedEmailRecovery",
     "OwnedEmailRecoverySummary",
-    "OwnedEmailReceipt",
     "OwnedEmailRequest",
     "SupabaseOwnedEmailStore",
     "dispatch_email_by_current_owner",

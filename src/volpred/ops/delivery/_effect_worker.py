@@ -14,7 +14,10 @@ from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 from typing import Protocol
 
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    PrimaryLease,
+)
 
 from ._effect import EffectAttemptOutcome, EffectView, FailedEffect
 from .postgres import (
@@ -25,7 +28,7 @@ from .postgres import (
 
 _RECEIPT_SCHEMA = "effect-worker-receipt.v1"
 _AUTHORITY_SCHEMA = "effect-authority-request.v1"
-_EFFECT_AUTHORITY_KEY = "operations-core-effects"
+_EFFECT_AUTHORITY_KEY = FORMAL_PRIMARY_AUTHORITY_KEY
 _SHA256 = frozenset("0123456789abcdef")
 
 

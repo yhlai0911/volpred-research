@@ -1290,7 +1290,6 @@ def sync_article(
     )
     worker_id = "effect-worker:publisher-article-sync"
     keepalive = build_supabase_host_authority_keepalive(
-        authority_key="publisher:article.supabase.sync",
         holder_ref=worker_id,
     )
     keepalive.start()

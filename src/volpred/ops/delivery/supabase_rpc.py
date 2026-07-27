@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 import hashlib
 import json
 import os
+from collections.abc import Mapping
 from pathlib import Path
 from urllib import error, request
-
 
 _READ_ONLY_RPCS = frozenset(
     {

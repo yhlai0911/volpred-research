@@ -1349,7 +1349,18 @@ class PrimaryAuthority:
     def release(self, lease: PrimaryLease) -> AuthorityReceipt: ...
 ```
 
-只有 Change Delivery 與 Effect Delivery 需要 `authorize`。一般 WorkItem 純計算、讀取與 checkpoint 不要求 primary lease，因此 standby 或 provider failover 仍可做安全工作。
+只有 Change Delivery 與 Effect Delivery 需要 `authorize`。所有 formal
+commit／effect 共用唯一 authority key `operations-core-primary`；capability family
+只用於 owner routing，不得再衍生第二把主控租約。Production keepalive builder
+刻意不接受 authority key 參數，database grant trigger 也拒絕任何非 canonical key。
+一般 WorkItem 純計算、讀取與 checkpoint 不要求 primary lease，因此 standby 或
+provider failover 仍可做安全工作。租約 current-state row 不是 audit history；
+acquire／renew／expiry／demote／reject 另寫 append-only lifecycle event，raw fencing
+token 不出現在 event 或 read API。Audit read/reconcile seam以database clock
+materialize沒有 takeover 的自然 expiry；release backend unavailable時，host只將
+token-redacted demotion identity以fsync＋atomic replace落本機 journal，下一次
+acquire前重播。Remote lease仍有效時不得偽造 demotion receipt，只有expiry／既有
+release／較新epoch已證明舊holder失效後才收斂 journal。
 
 ## 9. Package 與 visibility
 

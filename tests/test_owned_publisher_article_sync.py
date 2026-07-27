@@ -138,7 +138,7 @@ class _Store:
             outbox_claim_token="assigned-by-caller",
             worker_id="effect-worker:publisher-article-sync",
             primary_authority_key=(
-                "publisher:article.supabase.sync"
+                "operations-core-primary"
             ),
             primary_authority_holder_ref=(
                 "effect-worker:publisher-article-sync"
@@ -149,7 +149,7 @@ class _Store:
             outbox_claim_ref="effect-outbox:41:attempt-1",
             primary_authority_ref=(
                 "primary-authority:"
-                "publisher:article.supabase.sync:epoch-7"
+                "operations-core-primary:epoch-7"
             ),
             lease_expires_at="2026-07-24T12:05:00+00:00",
         )
@@ -225,7 +225,7 @@ class _LeaseGate:
         self.calls = 0
         self.lease = PrimaryLease(
             schema_version="primary-lease.v1",
-            authority_key="publisher:article.supabase.sync",
+            authority_key="operations-core-primary",
             holder_ref="effect-worker:publisher-article-sync",
             epoch=7,
             fencing_token="primary-token",
@@ -379,7 +379,7 @@ def test_sync_returns_terminal_replay_without_calling_provider() -> None:
         evidence_sha256="d" * 64,
         primary_authority_ref=(
             "primary-authority:"
-            "publisher:article.supabase.sync:epoch-7"
+            "operations-core-primary:epoch-7"
         ),
         recorded_at="2026-07-24T12:00:01+00:00",
     )
@@ -424,7 +424,7 @@ def test_sync_fails_closed_on_inconsistent_terminal_replay() -> None:
             evidence_sha256="d" * 64,
             primary_authority_ref=(
                 "primary-authority:"
-                "publisher:article.supabase.sync:epoch-7"
+                "operations-core-primary:epoch-7"
             ),
             recorded_at="2026-07-24T12:00:01+00:00",
         ),
@@ -719,7 +719,7 @@ def test_service_role_adapter_parses_terminal_request_receipt(
         "evidence_sha256": "d" * 64,
         "primary_authority_ref": (
             "primary-authority:"
-            "publisher:article.supabase.sync:epoch-7"
+            "operations-core-primary:epoch-7"
         ),
         "recorded_at": "2026-07-24T12:00:01+00:00",
     }
