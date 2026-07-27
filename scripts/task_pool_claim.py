@@ -150,11 +150,30 @@ def _dispatch_job_alive(job_id: Any) -> bool:
             err=str(exc),
         )
         return False
-    return any(
-        isinstance(job, dict)
-        and str(job.get("job_id") or "") == str(job_id)
-        for job in (payload.get("current_jobs") or [])
-    )
+    from scripts.dispatch_supervisor import procutil
+
+    for job in payload.get("current_jobs") or []:
+        if (
+            not isinstance(job, dict)
+            or str(job.get("job_id") or "") != str(job_id)
+        ):
+            continue
+        try:
+            pid = int(job.get("pid"))
+        except (TypeError, ValueError) as exc:
+            from volpred.ops.diagnostics import warn
+            warn(
+                "task_pool_claim",
+                "dispatch job pid invalid; refusing liveness proof",
+                job_id=str(job_id),
+                err=str(exc),
+            )
+            return False
+        return (
+            procutil.check_identity(pid, job.get("started_wall"))
+            == procutil.IDENTITY_MATCH
+        )
+    return False
 
 
 @contextmanager
@@ -1013,6 +1032,40 @@ def release_owner_claims(
             prev_owner = _repend_task(task, note=note or reason, reason=reason)
             released.append({"id": _task_key(task), "owner": prev_owner})
     return {"ok": True, "released": released, "count": len(released)}
+
+
+def renew_verified_dispatch_claims(
+    job_ids: Any, *, renewed_at: str | None = None
+) -> dict[str, Any]:
+    """Renew active dispatch claims after the health loop verifies processes.
+
+    The caller must supply only job ids whose PID/start-wall identity matched
+    the current worker process.  This runs every health heartbeat, well before
+    the two-hour expiry; hourly cleanup only remains a safety net.
+    """
+    verified = {
+        str(job_id) for job_id in job_ids if str(job_id or "").strip()
+    }
+    if not verified:
+        return {"ok": True, "renewed": [], "count": 0}
+    timestamp = renewed_at or _now()
+    renewed: list[dict[str, str]] = []
+    with _locked_load() as (_fh, tasks):
+        for task in tasks:
+            if (
+                (task.get("status") or "").lower()
+                not in {"claimed", "in_progress"}
+                or task.get("dispatch_managed") is not True
+                or str(task.get("dispatch_job_id") or "") not in verified
+            ):
+                continue
+            _renew_claim_expiry(task, renewed_at=timestamp)
+            renewed.append({
+                "id": _task_key(task),
+                "dispatch_job_id": str(task["dispatch_job_id"]),
+                "claim_expires_at": str(task["claim_expires_at"]),
+            })
+    return {"ok": True, "renewed": renewed, "count": len(renewed)}
 
 
 def cmd_release(args: argparse.Namespace) -> dict[str, Any]:

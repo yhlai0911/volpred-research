@@ -1070,7 +1070,7 @@ def test_invalid_persisted_expiry_is_not_released_or_listed(
     assert saved["claim_expires_at"] == "not-a-timestamp"
 
 
-def test_live_dispatch_evidence_renews_expiry_before_shadow_replay(
+def test_verified_dispatch_heartbeat_renews_before_shadow_replay(
     tmp_path, monkeypatch
 ) -> None:
     from volpred.ops.work import WorkerOffer
@@ -1095,15 +1095,11 @@ def test_live_dispatch_evidence_renews_expiry_before_shadow_replay(
     }
     next_tasks.write_text(json.dumps([task]), encoding="utf-8")
     monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
-    monkeypatch.setattr(
-        task_pool_claim,
-        "_dispatch_job_alive",
-        lambda job_id: job_id == "job-live",
+    renewal = task_pool_claim.renew_verified_dispatch_claims(
+        {"job-live"},
+        renewed_at=now.isoformat(),
     )
 
-    cleanup = task_pool_claim.cmd_cleanup(
-        argparse.Namespace(stale_hours=2)
-    )
     renewed = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
     ledger = replay_legacy_selection(
         LegacySnapshots(next_tasks=(renewed,)),
@@ -1117,14 +1113,36 @@ def test_live_dispatch_evidence_renews_expiry_before_shadow_replay(
         observation_id="live_dispatch_renewal",
     )
 
-    assert cleanup["renewed_live_claims"][0]["evidence"] == (
-        "dispatch_job_alive"
-    )
+    assert renewal["count"] == 1
     assert datetime.fromisoformat(renewed["claim_expires_at"]) > now
     assert not any(
         dimension.classification == "implementation_bug"
         for dimension in ledger.comparisons[0].dimensions
     )
+
+
+def test_stale_dispatch_state_does_not_prove_worker_liveness(
+    tmp_path, monkeypatch
+) -> None:
+    state_path = tmp_path / "storage" / "ops" / "dispatch_state.json"
+    state_path.parent.mkdir(parents=True)
+    state_path.write_text(
+        json.dumps(
+            {
+                "current_jobs": [
+                    {
+                        "job_id": "dead-job",
+                        "pid": 999_999_999,
+                        "started_wall": "Mon Jul 27 12:00:00 2026",
+                    }
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "ROOT", tmp_path)
+
+    assert task_pool_claim._dispatch_job_alive("dead-job") is False
 
 
 def test_list_stale_warns_on_invalid_claimed_at(tmp_path, monkeypatch, capsys) -> None:

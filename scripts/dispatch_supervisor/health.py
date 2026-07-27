@@ -270,6 +270,21 @@ def check_once(*, state_path: Path = state.STATE_PATH, max_age_s: float = MAX_JO
     return actions[0] if len(actions) == 1 else ",".join(actions)
 
 
+def _renew_live_dispatch_claims(*, state_path: Path) -> dict[str, object]:
+    """Renew only claims backed by PID-reuse-safe worker identity evidence."""
+    verified_job_ids = [
+        job.job_id
+        for job in state.get_current_jobs(state_path)
+        if (
+            procutil.check_identity(job.pid, job.started_wall)
+            == procutil.IDENTITY_MATCH
+        )
+    ]
+    return _task_pool_claim().renew_verified_dispatch_claims(
+        verified_job_ids
+    )
+
+
 async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: int = CHECK_INTERVAL_S) -> None:
     """Long-running health monitor coroutine. Also owns the supervisor
     liveness heartbeat.
@@ -294,6 +309,7 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             await asyncio.sleep(check_interval_s)
             state.heartbeat(path=state_path)
             check_once(state_path=state_path)
+            _renew_live_dispatch_claims(state_path=state_path)
             # Last: a reload SIGTERMs this process, so anything after it in the
             # tick would not run. The heartbeat and the hang check are what keep
             # the platform safe; deploying a fix is what keeps it improving.

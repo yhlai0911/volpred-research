@@ -2589,6 +2589,11 @@ def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -
 
     monkeypatch.setattr(health.asyncio, "sleep", fake_sleep)
     monkeypatch.setattr(health, "check_once", fake_check_once)
+    monkeypatch.setattr(
+        health,
+        "_renew_live_dispatch_claims",
+        lambda **_kwargs: {"ok": True, "renewed": [], "count": 0},
+    )
 
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(health.health_loop(state_path=state_path))
@@ -2597,6 +2602,68 @@ def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -
     assert all(b["last_heartbeat_at"] > "2001" for b in beats), "no beat before check_once"
     assert beats[1]["last_heartbeat_at"] > beats[0]["last_heartbeat_at"], "beat did not advance"
     assert beats[0]["supervisor_pid"] == os.getpid(), "stale pid not re-stamped"
+
+
+def test_health_renews_only_identity_verified_dispatch_jobs(
+    tmp_path: Path, monkeypatch
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["current_jobs"] = [
+            {
+                "job_id": "verified-job",
+                "cohort_id": "verified-job",
+                "slot_id": 1,
+                "phase": "running",
+                "pid": 111,
+                "pgid": 111,
+                "schedule_id": "test",
+                "started_at": "2026-07-27T04:00:00+00:00",
+                "attempt_started_at": "2026-07-27T04:00:00+00:00",
+                "attempt": 1,
+                "model": "test",
+                "log_path": "/tmp/test.log",
+                "started_wall": "verified-start",
+            },
+            {
+                "job_id": "stale-job",
+                "cohort_id": "stale-job",
+                "slot_id": 2,
+                "phase": "running",
+                "pid": 222,
+                "pgid": 222,
+                "schedule_id": "test",
+                "started_at": "2026-07-27T04:00:00+00:00",
+                "attempt_started_at": "2026-07-27T04:00:00+00:00",
+                "attempt": 1,
+                "model": "test",
+                "log_path": "/tmp/test.log",
+                "started_wall": "stale-start",
+            },
+        ]
+    captured: list[list[str]] = []
+
+    class FakeTaskPool:
+        @staticmethod
+        def renew_verified_dispatch_claims(job_ids):
+            captured.append(list(job_ids))
+            return {"ok": True, "renewed": [], "count": 0}
+
+    monkeypatch.setattr(
+        health.procutil,
+        "check_identity",
+        lambda pid, _wall: (
+            health.procutil.IDENTITY_MATCH
+            if pid == 111
+            else health.procutil.IDENTITY_MISMATCH
+        ),
+    )
+    monkeypatch.setattr(health, "_task_pool_claim", lambda: FakeTaskPool)
+
+    result = health._renew_live_dispatch_claims(state_path=state_path)
+
+    assert result["ok"] is True
+    assert captured == [["verified-job"]]
 
 
 def test_heartbeat_advances_while_worker_in_flight(tmp_path: Path, monkeypatch) -> None:
