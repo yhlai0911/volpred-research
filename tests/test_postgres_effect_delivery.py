@@ -260,6 +260,10 @@ MIGRATIONS = (
     REPO_ROOT
     / "supabase"
     / "migrations"
+    / "20260727123500_work_owner_attestation.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
     / "20260727124801_work_owner_attestation.sql",
     REPO_ROOT
     / "supabase"

@@ -7,11 +7,15 @@ import psycopg
 import pytest
 from test_postgres_effect_delivery import postgres_effect_dsn  # noqa: F401
 
-WORK_OWNER_ATTESTATION_MIGRATION = (
+WORK_OWNER_ATTESTATION_MIGRATIONS = (
     Path(__file__).resolve().parents[1]
     / "supabase"
     / "migrations"
-    / "20260727124801_work_owner_attestation.sql"
+    / "20260727123500_work_owner_attestation.sql",
+    Path(__file__).resolve().parents[1]
+    / "supabase"
+    / "migrations"
+    / "20260727124801_work_owner_attestation.sql",
 )
 
 
@@ -24,11 +28,11 @@ def work_owner_attestation_dsn(
         dsn,
         autocommit=True,
     ) as connection:
-        migration = WORK_OWNER_ATTESTATION_MIGRATION.read_text(
-            encoding="utf-8"
-        )
         for _ in range(2):
-            connection.execute(migration)
+            for migration_path in WORK_OWNER_ATTESTATION_MIGRATIONS:
+                connection.execute(
+                    migration_path.read_text(encoding="utf-8")
+                )
     yield dsn
 
 
