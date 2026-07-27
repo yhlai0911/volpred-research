@@ -3999,3 +3999,25 @@ queue證明雙registry都漏登的producer在append前RED→拒絕、queue仍為
 `coordinator_capability_contract` policy change。此producer/provenance缺口為
 **`root_cause_fixed_and_verified`**；#9 umbrella仍需從最後一次bad receipt之後重新
 累積真實七日，維持`contained`，不可提前cutover。
+
+### 2026-07-27 — Formal census 不可用未綁定的 Work owner row 宣稱接管
+
+**證據化症狀**：Issue #46 的`work.coordinate`原本永久`unresolved`；初版RPC雖能
+讀owner singleton，卻只驗owner、generation與任意64-hex manifest。若資料被錯誤
+更新成`operations_core`／generation 999，census仍可能產生`unique_owner`假證據。
+
+**根因層級與底層修復**：owner row本身不是完整cutover證據。RPC現在必須找到逐欄
+相同的immutable ownership receipt；Operations Core狀態還必須綁同manifest與
+generation的consumed gate，rollback則必須綁rolled-back gate及單調時間順序。
+Python adapter再次以exact key set、無首尾空白、receipt/gate identity與chronology
+fail closed。已提交的migration不得刪改：原始`20260727123500`保持SHA-256
+`8c885d474c0d86ebfef86f7059a3f8d9f53b55d66b846cf7656d355801471070`，
+hardening只可追加`20260727124801`。
+
+**回歸與live read-back**：真PostgreSQL依序重播舊→新migration兩次，涵蓋合法
+cutover、缺receipt、未來時間、ACL與rollback契約；相關套件**126 passed**，
+Matt Spec／Standards雙PASS。Production receipts=`20260727125501`,
+`20260727125509`；RPC只有service role可執行，私表FORCE RLS且service role無SELECT。
+Fresh census把`work.coordinate`明確回讀為`legacy/wrong_owner`且
+`probe_errors=[]`。可觀測性根因為 **`root_cause_fixed_and_verified`**；真正owner
+轉移仍受Issue #9七日clean gate約束，umbrella維持`contained`。

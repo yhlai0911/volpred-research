@@ -267,3 +267,13 @@ fields，避免前置probe延遲造成假性future。Production回讀為
 該capability=`unique_owner`且probe errors為0，總blockers由6降為5。其餘五個
 blocker仍由#9／#12／#13及formal cutover gates持有，故T40 umbrella仍為
 **`contained`**，不得啟動14日recorder或實體retirement。
+
+**T40 Work Coordinator owner attestation 增量（2026-07-27）**：commits
+`64e10c933`,`0bcdcc8dd`,`e27ae2cd4`把`work.coordinate`從硬編碼
+`unresolved`改為production PostgreSQL typed attestation。Owner singleton必須逐欄
+匹配immutable receipt；Operations Core owner另須匹配同manifest／generation的
+consumed gate，rollback owner則須匹配rolled-back gate與時間順序。兩個migration
+保持append-only並已依序上線；production回讀function ACL／FORCE RLS符合契約，
+fresh census為`legacy`／generation 1、`wrong_owner`、probe errors=0。此可觀測性
+slice為 **`root_cause_fixed_and_verified`**；#9 gate未成熟前不轉owner，T40
+umbrella維持 **`contained`**。

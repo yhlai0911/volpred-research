@@ -2569,3 +2569,27 @@ inventory 也已明列零-provider delete reconciliation。Production function d
 - 🟡 Issue #46仍保留work、commit、publisher delete、incident與provider五個
   blocker；#9等gate未成熟前不轉owner、不啟動14日recorder、不做physical
   retirement，umbrella維持`contained`。
+
+## 2026-07-27 — T40 formal Work Coordinator owner attestation（Issue #46）
+
+- ✅ Formal census的`work.coordinate`不再永久寫死`unresolved`。Inventory綁定
+  production backend SHA與service-role-only `volpred_read_work_owner`；adapter以
+  exact key set驗owner singleton、同generation immutable receipt，以及對應
+  consumed／rolled-back cutover gate與完整時間順序。不存在、額外欄位、空白漂移、
+  receipt/gate不一致或未來時間全部fail closed，不會偽造owner claim。
+- ✅ Supabase migration history保持append-only：原始
+  `20260727123500_work_owner_attestation.sql` bytes原樣保留，hardening另以
+  `20260727124801_work_owner_attestation.sql`前進。Production receipts為
+  `20260727125501 work_owner_attestation`與
+  `20260727125509 harden_work_owner_attestation`。
+- ✅ Production catalog回讀：function owner=`volpred_ops_definer`、
+  `SECURITY DEFINER`、STABLE、空`search_path`；ACL只有definer與service role，
+  anon/authenticated不可執行；`work_owners`為FORCE RLS且service role無SELECT。
+  Security advisor沒有此RPC的新finding。
+- ✅ commits `64e10c933`,`0bcdcc8dd`,`e27ae2cd4`；相鄰範圍
+  **126 passed**、ruff／compileall／diff-check全綠，Matt Spec／Standards最終雙PASS。
+  Fresh production census回讀`legacy`／generation 1／receipt 1，
+  `work.coordinate=wrong_owner`且`probe_errors=[]`。可觀測性slice通過五步Gate，
+  狀態為 **`root_cause_fixed_and_verified`**。
+- 🟡 此slice不轉移ownership。Issue #9七日clean gate成熟前，`legacy`是誠實現況；
+  因此Issue #46與operations-core umbrella仍為`contained`。
