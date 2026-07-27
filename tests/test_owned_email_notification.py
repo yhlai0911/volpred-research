@@ -98,14 +98,14 @@ class _Store:
             attempt_count=1,
             outbox_claim_token="",
             worker_id="effect-worker:ops-alert-email",
-            primary_authority_key="notification:email.ops_alert",
+            primary_authority_key="operations-core-primary",
             primary_authority_holder_ref="effect-worker:ops-alert-email",
             primary_authority_epoch=1,
             primary_fencing_token="",
             authority_request_sha256="c" * 64,
             outbox_claim_ref="outbox:1:attempt:1",
             primary_authority_ref=(
-                "primary-authority:notification:email.ops_alert:"
+                "primary-authority:operations-core-primary:"
                 "effect-worker:ops-alert-email:epoch:1"
             ),
             lease_expires_at="2026-07-24T07:05:00+00:00",
@@ -258,7 +258,7 @@ class _LeaseGate:
         self.calls = 0
         self.lease = PrimaryLease(
             schema_version="primary-lease.v1",
-            authority_key="notification:email.ops_alert",
+            authority_key="operations-core-primary",
             holder_ref="effect-worker:ops-alert-email",
             epoch=1,
             fencing_token="primary-token",
@@ -510,7 +510,6 @@ def test_environment_dispatch_routes_operations_core_through_owned_delivery(
     assert captured["keepalive_started"] is True
     assert captured["keepalive_stopped"] is True
     assert captured["keepalive_kwargs"] == {
-        "authority_key": "notification:email.ops_alert",
         "holder_ref": "effect-worker:ops-alert-email",
     }
     assert result["delivery_owner"] == "operations_core"
@@ -556,7 +555,7 @@ def test_environment_dispatch_fences_and_verifies_explicit_legacy_owner(
         def current_lease(self) -> PrimaryLease:
             return PrimaryLease(
                 schema_version="primary-lease.v1",
-                authority_key="notification:email.ops_alert",
+                authority_key="operations-core-primary",
                 holder_ref="effect-worker:ops-alert-email-legacy",
                 epoch=1,
                 fencing_token="legacy-primary-token",
@@ -602,7 +601,6 @@ def test_environment_dispatch_fences_and_verifies_explicit_legacy_owner(
     assert effect.idempotency_key == _command().idempotency_key
     assert effect.effect_kind == "email.notification.send"
     assert captured["keepalive_kwargs"] == {
-        "authority_key": "notification:email.ops_alert",
         "holder_ref": "effect-worker:ops-alert-email-legacy",
     }
     assert captured["keepalive_started"] is True
@@ -650,7 +648,7 @@ def test_environment_dispatch_uses_stable_legacy_effect_identity_across_hosts(
         def current_lease(self) -> PrimaryLease:
             return PrimaryLease(
                 schema_version="primary-lease.v1",
-                authority_key="notification:email.ops_alert",
+                authority_key="operations-core-primary",
                 holder_ref="effect-worker:ops-alert-email-legacy",
                 epoch=1,
                 fencing_token="legacy-primary-token",
@@ -842,7 +840,7 @@ def test_legacy_fence_rechecks_and_refuses_new_pending_core_request(
         def current_lease(self) -> PrimaryLease:
             return PrimaryLease(
                 schema_version="primary-lease.v1",
-                authority_key="notification:email.ops_alert",
+                authority_key="operations-core-primary",
                 holder_ref="effect-worker:ops-alert-email-legacy",
                 epoch=1,
                 fencing_token="legacy-primary-token",
@@ -924,7 +922,7 @@ def test_legacy_fence_rechecks_and_replays_new_terminal_core_request(
         def current_lease(self) -> PrimaryLease:
             return PrimaryLease(
                 schema_version="primary-lease.v1",
-                authority_key="notification:email.ops_alert",
+                authority_key="operations-core-primary",
                 holder_ref="effect-worker:ops-alert-email-legacy",
                 epoch=1,
                 fencing_token="legacy-primary-token",

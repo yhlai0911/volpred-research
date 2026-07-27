@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 import hashlib
 import json
 import os
+from collections.abc import Mapping
 from pathlib import Path
 from urllib import error, request
-
 
 _READ_ONLY_RPCS = frozenset(
     {
@@ -24,6 +23,7 @@ _READ_ONLY_RPCS = frozenset(
         "volpred_read_publisher_article_delete_owner",
         "volpred_read_publisher_article_reconcile_owner",
         "volpred_read_publisher_article_sync_owner",
+        "volpred_read_primary_authority_events",
         "volpred_read_work_snapshot",
     }
 )

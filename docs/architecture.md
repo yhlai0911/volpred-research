@@ -356,6 +356,21 @@
 > network-partition／五分鐘 RTO rehearsal，所以 program commit 34 仍維持
 > `contained`。
 >
+> **Primary Authority global-formal key 與 lifecycle audit（2026-07-27，
+> contract implemented / production pending）**
+> 先前每個 notification／publisher capability 自帶 authority key，只能保證
+> per-key 單主；兩台主機也可能各持一把不同 key 後同時做正式效果。
+> Production builder 現不再接受 caller 傳入 key，所有 formal commit／effect
+> 共用唯一 `operations-core-primary`。Delivery adapters 在 public seam 驗 exact
+> key，資料庫的 `primary_authority_grants` trigger 再做一次 fail-closed enforcement；
+> outage rehearsal 的隔離 key 仍可 acquire／renew，但永遠不能取得 formal grant。
+> Forward migration `20260727080000` 另以 append-only ledger 保存
+> acquire／renew／expiry／demote／reject receipts，typed rejection 會先回滾失敗的
+> lease subtransaction，再於外層保存 token-redacted event；service-role read RPC
+> 是唯一 production read-back seam。這個 contract 尚待 production migration、
+> global-key live acquire/read-back，以及 Formal Commit／Effect Worker cutover 的
+> mutation-boundary canary，因此 Issue #18 仍為 `contained`。
+>
 > **Primary Authority live outage／RTO rehearsal（2026-07-25）**
 > `scripts/rehearse_primary_authority_outage.py` 現在是唯一的 no-effect outage
 > operator seam：只允許自動產生的隔離 authority key，先回讀
@@ -975,6 +990,15 @@ provider=0，standby release後final state=`stopped`。Canonical final evidence�
 `storage/ops/primary_authority_outage_cross_host_latest.json`，並由同目錄的readiness、
 primary與standby receipts提供完整SHA鏈。Program commit 15／Operations Core
 umbrella的最後evidence gate因此為 **`root_cause_fixed_and_verified`**。
+
+> **2026-07-27 證據口徑更正**：上句把 isolated no-effect two-Mac lease handoff
+> 誤當成整個 Operations Core umbrella 結案。該 receipt 明載
+> `effect_requests=0`、`provider_calls=0`，且當時 formal capabilities 使用多個
+> authority key；它只能證明同一 key 的跨機排他與 RTO，不能證明全系統單一 primary、
+> 每個正式 mutation 的最新 fencing 或 legacy writer 退役。正確狀態是 two-Mac
+> rehearsal slice=`root_cause_fixed_and_verified`，Issue #18／Operations Core
+> umbrella=`contained`；最終結案歸 Issue #24 formal-worker cutover 與 Issue #46
+> legacy-retirement sustained-clean gate。
 
 ### Cross-host receipt code identity（2026-07-26）
 

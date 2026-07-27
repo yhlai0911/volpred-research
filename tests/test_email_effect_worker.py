@@ -141,7 +141,7 @@ class _LeaseGate:
     ) -> None:
         self.lease = PrimaryLease(
             schema_version="primary-lease.v1",
-            authority_key="operations-core-effects",
+            authority_key="operations-core-primary",
             holder_ref="host:shadow-primary",
             epoch=42,
             fencing_token=fencing_token,
@@ -195,7 +195,7 @@ class _Authority:
     ) -> EffectAuthorityGrant:
         self.requests.append(request)
         if (
-            request.primary_authority_key != "operations-core-effects"
+            request.primary_authority_key != "operations-core-primary"
             or request.primary_authority_holder_ref != "host:shadow-primary"
             or request.primary_authority_epoch != 42
         ):
@@ -452,7 +452,7 @@ def test_worker_refuses_wrong_effect_authority_before_claim() -> None:
     primary_authority = _LeaseGate()
     primary_authority.lease = replace(
         primary_authority.lease,
-        authority_key="operations-core-commits",
+        authority_key="operations-core-effects",
     )
     worker, store, notifier, reader, _gate = _worker(
         authority=authority,

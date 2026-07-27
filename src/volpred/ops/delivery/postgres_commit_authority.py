@@ -13,18 +13,20 @@ from typing import Any
 from psycopg import Connection
 from psycopg.rows import dict_row
 
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    PrimaryLease,
+)
 
 from ._git_actuator import (
+    CommitActuatorBlocked,
     CommitAuthorityAbandonment,
     CommitAuthorityGrant,
     CommitAuthorityRequest,
-    CommitActuatorBlocked,
     _authority_request_sha256,
     _validate_abandonment,
     _validate_authority_grant,
 )
-
 
 ConnectionFactory = Callable[[], Connection[Any]]
 
@@ -44,6 +46,11 @@ class PostgresCommitAuthority:
             raise ValueError("unsupported PrimaryLease schema")
         if primary_lease.epoch <= 0:
             raise ValueError("PrimaryLease epoch must be positive")
+        if primary_lease.authority_key != FORMAL_PRIMARY_AUTHORITY_KEY:
+            raise ValueError(
+                "commit authority requires the formal primary authority "
+                "lease"
+            )
         self._connection_factory = connection_factory
         self._primary_lease = primary_lease
 

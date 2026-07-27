@@ -571,7 +571,6 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
     assert captured["keepalive_started"] is True
     assert captured["keepalive_stopped"] is True
     assert captured["keepalive_kwargs"] == {
-        "authority_key": "notification:email.ops_alert",
         "holder_ref": "effect-worker:ops-alert-email",
     }
     assert result == {
@@ -633,9 +632,9 @@ def test_dispatch_alert_email_routes_legacy_only_when_database_owner_says_legacy
             pass
 
         def current_lease(self) -> PrimaryLease:
-            return PrimaryLease(
-                schema_version="primary-lease.v1",
-                authority_key="notification:email.ops_alert",
+                return PrimaryLease(
+                    schema_version="primary-lease.v1",
+                    authority_key="operations-core-primary",
                 holder_ref="effect-worker:ops-alert-email-legacy",
                 epoch=1,
                 fencing_token="legacy-primary-token",

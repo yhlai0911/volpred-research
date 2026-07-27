@@ -293,6 +293,112 @@ def test_untrusted_payload_and_fencing_failure_fail_closed(
         _store().renew(_lease())
 
 
+def test_typed_rejection_receipt_fails_closed_with_auditable_reason(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        lambda *args, **kwargs: _Response(
+            {
+                "schema_version": "primary-authority-rejection.v1",
+                "status": "rejected",
+                "operation": "acquire",
+                "authority_key": "operations-core-commits",
+                "event_ref": "primary-authority-event:17",
+                "reason_code": "already_held",
+                "reason": (
+                    "Primary Authority is already held: "
+                    "operations-core-commits"
+                ),
+                "occurred_at": "2026-07-24T10:01:00+00:00",
+            }
+        ),
+    )
+
+    with pytest.raises(ValueError, match="already held"):
+        _store().acquire(
+            AuthorityRequest(
+                authority_key="operations-core-commits",
+                holder_ref="host:standby",
+                lease_seconds=300,
+            ),
+            fencing_token="must-not-appear-in-receipt",
+        )
+
+
+def test_read_events_returns_typed_token_redacted_lifecycle_receipts(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_urlopen(call, *, timeout: float):
+        observed["url"] = call.full_url
+        observed["body"] = json.loads(call.data)
+        return _Response(
+            [
+                {
+                    "schema_version": "primary-authority-event.v1",
+                    "event_ref": "primary-authority-event:21",
+                    "authority_key": "operations-core-commits",
+                    "event_type": "renewed",
+                    "operation": "renew",
+                    "epoch": 4,
+                    "holder_ref": "host:primary",
+                    "reason_code": None,
+                    "reason": None,
+                    "lease_expires_at": (
+                        "2026-07-24T10:06:00+00:00"
+                    ),
+                    "occurred_at": "2026-07-24T10:01:00+00:00",
+                },
+                {
+                    "schema_version": "primary-authority-event.v1",
+                    "event_ref": "primary-authority-event:22",
+                    "authority_key": "operations-core-commits",
+                    "event_type": "rejected",
+                    "operation": "acquire",
+                    "epoch": None,
+                    "holder_ref": "host:standby",
+                    "reason_code": "already_held",
+                    "reason": (
+                        "Primary Authority is already held: "
+                        "operations-core-commits"
+                    ),
+                    "lease_expires_at": None,
+                    "occurred_at": "2026-07-24T10:01:01+00:00",
+                },
+            ]
+        )
+
+    monkeypatch.setattr(
+        "volpred.ops.delivery.supabase_rpc.request.urlopen",
+        fake_urlopen,
+    )
+
+    events = _store().read_events(
+        "operations-core-commits",
+        limit=20,
+    )
+
+    assert [event.event_type for event in events] == [
+        "renewed",
+        "rejected",
+    ]
+    assert events[0].epoch == 4
+    assert events[1].reason_code == "already_held"
+    assert "fencing_token" not in repr(events)
+    assert observed == {
+        "url": (
+            "https://project.supabase.co/rest/v1/rpc/"
+            "volpred_read_primary_authority_events"
+        ),
+        "body": {
+            "p_authority_key": "operations-core-commits",
+            "p_limit": 20,
+        },
+    }
+
+
 def test_grant_identity_drift_fails_closed(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

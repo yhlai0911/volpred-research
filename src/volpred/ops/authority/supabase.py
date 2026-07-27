@@ -13,11 +13,19 @@ from volpred.ops.delivery.supabase_rpc import (
 )
 
 from . import (
+    AuthorityLifecycleEvent,
     AuthorityReceipt,
     AuthorityRequest,
     FencingGrant,
     PrimaryLease,
     WriteIntent,
+)
+
+_EVENT_TYPES = frozenset(
+    {"acquired", "renewed", "expired", "demoted", "rejected"}
+)
+_EVENT_OPERATIONS = frozenset(
+    {"acquire", "renew", "authorize", "release"}
 )
 
 
@@ -202,6 +210,51 @@ class SupabaseAuthorityStore:
             released_at=_timestamp(payload, "released_at"),
         )
 
+    def read_events(
+        self,
+        authority_key: str,
+        *,
+        limit: int = 100,
+    ) -> tuple[AuthorityLifecycleEvent, ...]:
+        """Read the latest token-redacted lifecycle receipts in event order."""
+
+        normalized_key = authority_key.strip()
+        if not normalized_key:
+            raise ValueError("Primary Authority key is required")
+        if (
+            isinstance(limit, bool)
+            or not isinstance(limit, int)
+            or limit <= 0
+            or limit > 500
+        ):
+            raise ValueError(
+                "Primary Authority event limit must be between 1 and 500"
+            )
+        try:
+            payload = self._client.call(
+                "volpred_read_primary_authority_events",
+                {
+                    "p_authority_key": normalized_key,
+                    "p_limit": limit,
+                },
+            )
+        except SupabaseRpcError as error:
+            raise RuntimeError(
+                f"Primary Authority event read failed: {error}"
+            ) from None
+        if not isinstance(payload, list):
+            raise ValueError(
+                "Primary Authority event RPC returned a non-list response"
+            )
+        events: list[AuthorityLifecycleEvent] = []
+        for item in payload:
+            if not isinstance(item, Mapping):
+                raise ValueError(
+                    "Primary Authority event RPC returned an invalid event"
+                )
+            events.append(self._event(item, authority_key=normalized_key))
+        return tuple(events)
+
     def _rpc(
         self,
         function: str,
@@ -220,6 +273,27 @@ class SupabaseAuthorityStore:
             raise ValueError(
                 "Primary Authority RPC returned a non-object response"
             )
+        if payload.get("status") == "rejected":
+            if (
+                payload.get("schema_version")
+                != "primary-authority-rejection.v1"
+            ):
+                raise ValueError(
+                    "Primary Authority RPC returned an invalid "
+                    "rejection schema"
+                )
+            reason = _text(payload, "reason")
+            _text(payload, "operation")
+            _text(payload, "authority_key")
+            _text(payload, "event_ref")
+            _text(payload, "reason_code")
+            _timestamp(payload, "occurred_at")
+            if not reason.startswith("Primary Authority"):
+                raise ValueError(
+                    "Primary Authority RPC returned an invalid "
+                    "rejection reason"
+                )
+            raise ValueError(reason)
         return payload
 
     @staticmethod
@@ -246,6 +320,80 @@ class SupabaseAuthorityStore:
             lease_seconds=lease_seconds,
             acquired_at=acquired_at,
             expires_at=expires_at,
+        )
+
+    @staticmethod
+    def _event(
+        payload: Mapping[str, Any],
+        *,
+        authority_key: str,
+    ) -> AuthorityLifecycleEvent:
+        if payload.get("schema_version") != "primary-authority-event.v1":
+            raise ValueError(
+                "Primary Authority event RPC returned an invalid schema"
+            )
+        if _text(payload, "authority_key") != authority_key:
+            raise ValueError(
+                "Primary Authority event RPC returned another authority key"
+            )
+        event_type = _text(payload, "event_type")
+        operation = _text(payload, "operation")
+        if event_type not in _EVENT_TYPES or operation not in _EVENT_OPERATIONS:
+            raise ValueError(
+                "Primary Authority event RPC returned an invalid lifecycle"
+            )
+        epoch = payload.get("epoch")
+        if epoch is not None and (
+            isinstance(epoch, bool)
+            or not isinstance(epoch, int)
+            or epoch <= 0
+        ):
+            raise ValueError(
+                "Primary Authority event RPC returned an invalid epoch"
+            )
+        holder_ref = payload.get("holder_ref")
+        if holder_ref is not None and (
+            not isinstance(holder_ref, str) or not holder_ref.strip()
+        ):
+            raise ValueError(
+                "Primary Authority event RPC returned an invalid holder"
+            )
+        reason_code = payload.get("reason_code")
+        reason = payload.get("reason")
+        if event_type == "rejected":
+            if (
+                not isinstance(reason_code, str)
+                or not reason_code.strip()
+                or not isinstance(reason, str)
+                or not reason.startswith("Primary Authority")
+            ):
+                raise ValueError(
+                    "Primary Authority event RPC returned an invalid "
+                    "rejection"
+                )
+        elif reason_code is not None or reason is not None:
+            raise ValueError(
+                "Primary Authority event RPC leaked a non-rejection reason"
+            )
+        lease_expires_at = payload.get("lease_expires_at")
+        if lease_expires_at is not None:
+            lease_expires_at = _timestamp(payload, "lease_expires_at")
+        return AuthorityLifecycleEvent(
+            schema_version="primary-authority-event.v1",
+            event_ref=_text(payload, "event_ref"),
+            authority_key=authority_key,
+            event_type=event_type,
+            operation=operation,
+            epoch=epoch,
+            holder_ref=holder_ref.strip() if holder_ref is not None else None,
+            reason_code=(
+                reason_code.strip()
+                if isinstance(reason_code, str)
+                else None
+            ),
+            reason=reason if isinstance(reason, str) else None,
+            lease_expires_at=lease_expires_at,
+            occurred_at=_timestamp(payload, "occurred_at"),
         )
 
 

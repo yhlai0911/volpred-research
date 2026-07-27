@@ -207,7 +207,6 @@ def test_recovery_script_binds_keepalive_store_and_projection(
     assert calls[2] == (
         "keepalive_factory",
         {
-            "authority_key": "publisher:article.supabase.reconcile",
             "holder_ref": "effect-worker:publisher-article-reconcile",
         },
     )

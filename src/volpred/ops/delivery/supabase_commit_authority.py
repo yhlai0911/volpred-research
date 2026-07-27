@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    PrimaryLease,
+)
 
 from ._git_actuator import (
-    CommitAuthorityAbandonment,
     CommitActuatorBlocked,
+    CommitAuthorityAbandonment,
     CommitAuthorityGrant,
     CommitAuthorityRequest,
     _authority_request_sha256,
@@ -39,6 +42,11 @@ class SupabaseCommitAuthority:
             raise ValueError("unsupported PrimaryLease schema")
         if primary_lease.epoch <= 0:
             raise ValueError("PrimaryLease epoch must be positive")
+        if primary_lease.authority_key != FORMAL_PRIMARY_AUTHORITY_KEY:
+            raise ValueError(
+                "commit authority requires the formal primary authority "
+                "lease"
+            )
         self._client = ServiceRoleRpcClient(
             supabase_url=supabase_url,
             service_role_key=service_role_key,

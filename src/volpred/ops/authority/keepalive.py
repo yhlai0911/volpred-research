@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from threading import Event, RLock, Thread, current_thread
 from typing import Literal
 
 from volpred.ops.diagnostics import warn
 
 from . import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
     AuthorityRequest,
     PrimaryAuthority,
     PrimaryLease,
@@ -19,7 +20,6 @@ from .session import (
     HostAuthoritySession,
     HostAuthorityStatus,
 )
-
 
 KeepaliveState = Literal[
     "standby",
@@ -294,7 +294,6 @@ class HostAuthorityKeepalive:
 
 def build_supabase_host_authority_keepalive(
     *,
-    authority_key: str,
     holder_ref: str,
     lease_seconds: int = 300,
     renew_interval_seconds: float = 60.0,
@@ -306,7 +305,7 @@ def build_supabase_host_authority_keepalive(
     session = HostAuthoritySession(
         PrimaryAuthority(SupabaseAuthorityStore.from_environment()),
         AuthorityRequest(
-            authority_key=authority_key,
+            authority_key=FORMAL_PRIMARY_AUTHORITY_KEY,
             holder_ref=holder_ref,
             lease_seconds=lease_seconds,
         ),

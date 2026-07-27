@@ -264,7 +264,6 @@ def _build_delivery(
         articles: tuple[Mapping[str, object], ...],
     ) -> OwnedPublisherReconcileReceipt:
         keepalive = build_supabase_host_authority_keepalive(
-            authority_key=_AUTHORITY_KEY,
             holder_ref=_WORKER_ID,
         )
         keepalive.start()

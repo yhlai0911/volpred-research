@@ -8,6 +8,7 @@ import time
 import pytest
 
 from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
     AuthorityReceipt,
     AuthorityRequest,
     PrimaryAuthority,
@@ -381,13 +382,12 @@ def test_environment_builder_composes_the_canonical_keepalive(
     )
 
     keepalive = build_supabase_host_authority_keepalive(
-        authority_key="operations-core-effects",
         holder_ref="host:primary-a",
         renew_interval_seconds=60.0,
     )
     lease = keepalive.start()
 
-    assert lease.authority_key == "operations-core-effects"
+    assert lease.authority_key == FORMAL_PRIMARY_AUTHORITY_KEY
     assert lease.holder_ref == "host:primary-a"
     keepalive.stop()
     assert store.current is None

@@ -56,6 +56,7 @@ DELETE_REQUEST_DEPENDENCIES = tuple(
         "20260725205013_remove_owned_request_share_lock.sql",
         "20260726103201_reconcile_stale_owned_publisher_delete.sql",
         "20260726104730_fence_publisher_delete_reconciliation_identity.sql",
+        "20260727080000_primary_authority_lifecycle_audit.sql",
     )
 )
 ARTICLE_ID = "11111111-1111-4111-8111-111111111111"
@@ -652,7 +653,7 @@ def test_stale_revoked_delete_retry_is_terminalized_without_provider(
         primary = connection.execute(
             """
             SELECT public.volpred_acquire_primary_authority(
-              'publisher:article.supabase.delete', %s, 300, %s
+              'operations-core-primary', %s, 300, %s
             )
             """,
             (worker_id, primary_token),
@@ -720,7 +721,7 @@ def test_stale_revoked_delete_retry_is_terminalized_without_provider(
         connection.execute(
             """
             SELECT public.volpred_release_primary_authority(
-              'publisher:article.supabase.delete', %s, %s, %s
+              'operations-core-primary', %s, %s, %s
             )
             """,
             (worker_id, primary["epoch"], primary_token),

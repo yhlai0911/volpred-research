@@ -3462,6 +3462,34 @@ exact read-back 為 delivered；同一 fire 重播只回相同 effect／terminal
 attempt_count 仍為 1。因下一個自然 schedule receipt 與 sustained-clean 尚未回讀，
 故仍只能標 **`contained`**，不能提前宣稱 **`root_cause_fixed_and_verified`**。
 
+### 2026-07-27 — two-Mac isolated lease 被誤報為全系統 Primary Authority 結案
+
+**證據化症狀**：`primary_authority_outage_cross_host_latest.json` 確實證明 Mac
+Studio→MacBook Pro 對同一 isolated key 的 epoch `1→2` 與 0.162352 秒 handoff，
+但 receipt 同時明載 `effect_requests=0`、`provider_calls=0`。Production code 仍讓
+email、publisher sync／reconcile／delete、generic effect 各自使用不同 authority key；
+lease table以 key 為 PK，所以不同 Mac 可各持不同 key 而同時成為合法 formal writer。
+DB 另只永久保存 release/grant，renew覆寫 current row，expiry只是時間條件，reject
+直接 raise 後整筆交易回滾。先前文件把這個 rehearsal slice寫成 Operations Core
+umbrella `root_cause_fixed_and_verified`，結論強度超過證據。
+
+**根因層級與底層修復**：這是 Primary Authority domain boundary與 receipt model
+錯誤，不是演練少跑一次。Formal production builder 現移除 caller-supplied key，
+統一使用 `operations-core-primary`；effect／publisher／email／commit adapters均驗
+canonical key，database `primary_authority_grants` trigger再次 fail closed，隔離
+rehearsal key可測 lease但不能取得正式 grant。Forward migration
+`20260727080000_primary_authority_lifecycle_audit.sql` 新增 append-only transition
+trigger及 typed try-functions：失敗的 lease subtransaction先 rollback，外層再保存
+token-redacted rejection receipt；acquire／renew／expiry／demote與reject皆可由
+service-role-only read RPC回讀。
+
+**回歸與狀態界線**：TDD先證明 typed rejection未被 adapter辨識、lifecycle table
+不存在、capability-scoped key仍可取得 formal grant，修正後 unit／PG17 transaction
+tests通過；non-superuser migration executor與重放 idempotency亦納入。這只完成 global
+key＋durable lifecycle contract；production migration/read-back、formal Git／email
+mutation-boundary partition canary、以及 direct legacy writers退役仍未完成，分別由
+Issue #18後續、#24與#46接續。因此目前狀態只能是 **`contained`**。
+
 ### 2026-07-26 — owner-gate suppression 新增 exit-0 marker，綠測試仍寫髒 CI checkout
 
 **證據化症狀與根因層級**：GitHub Actions Test Suite run

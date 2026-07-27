@@ -525,7 +525,6 @@ def _build_delete_delivery(
         prepared: PreparedPublisherArticleDelete,
     ) -> OwnedPublisherDeleteReceipt:
         keepalive = build_supabase_host_authority_keepalive(
-            authority_key=_AUTHORITY_KEY,
             holder_ref=_WORKER_ID,
         )
         keepalive.start()

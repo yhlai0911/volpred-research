@@ -34,7 +34,6 @@ def recover_owned_email_notifications(
     max_age_seconds: int,
 ) -> dict[str, object]:
     keepalive = build_supabase_host_authority_keepalive(
-        authority_key="notification:email.ops_alert",
         holder_ref=WORKER_ID,
     )
     keepalive.start()

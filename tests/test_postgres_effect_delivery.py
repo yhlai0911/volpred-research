@@ -245,6 +245,10 @@ MIGRATIONS = (
     / "supabase"
     / "migrations"
     / "20260727001900_commit_authority_terminal_recovery.sql",
+    REPO_ROOT
+    / "supabase"
+    / "migrations"
+    / "20260727080000_primary_authority_lifecycle_audit.sql",
 )
 IDEMPOTENT_REPLAY_MIGRATION = (
     REPO_ROOT
@@ -1419,7 +1423,8 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                     bigint, text, integer, text, text, bigint, integer,
                     text, text, text, text, bigint, text, text, text,
                     text, text, text, text, text, text, text
-                  )
+                  ),
+                  public.volpred_read_primary_authority_events(text, integer)
                 """
             )
             connection.execute("DROP SCHEMA IF EXISTS volpred_ops CASCADE")
@@ -1547,6 +1552,7 @@ def reset_effect_state(postgres_effect_dsn: str) -> None:
                   volpred_ops.commit_authority_grants,
               volpred_ops.commit_owner_receipts,
               volpred_ops.commit_owners,
+              volpred_ops.primary_authority_events,
               volpred_ops.primary_authority_grants,
               volpred_ops.primary_authority_receipts,
               volpred_ops.primary_authority_leases,
@@ -2449,7 +2455,7 @@ def _grant_authority(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-effects",
+            authority_key="operations-core-primary",
             holder_ref="host:effect-test-primary",
             lease_seconds=300,
         )
@@ -2587,7 +2593,7 @@ def test_primary_authority_fences_concurrent_and_stale_holders(
         token_factory=lambda: "primary-token-b",
     )
     request = AuthorityRequest(
-        authority_key="operations-core-effects",
+        authority_key="operations-core-primary",
         holder_ref="host:primary-a",
         lease_seconds=300,
     )
@@ -2660,7 +2666,7 @@ def test_commit_authority_atomically_verifies_both_leases(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -2683,7 +2689,7 @@ def test_commit_authority_atomically_verifies_both_leases(
         f"work-lease:{running.id}:v{running.version}"
     )
     assert grant.primary_authority_ref == (
-        "primary-authority:operations-core-commits:epoch-1"
+        "primary-authority:operations-core-primary:epoch-1"
     )
 
     with psycopg.connect(postgres_effect_dsn) as connection:
@@ -2728,7 +2734,7 @@ def test_commit_authority_service_rpc_returns_token_redacted_grant(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-rpc-primary",
             lease_seconds=300,
         )
@@ -2820,7 +2826,7 @@ def test_commit_settlement_service_rpc_returns_token_redacted_receipt(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-settlement-rpc-primary",
             lease_seconds=300,
         )
@@ -2959,7 +2965,7 @@ def test_commit_authority_rejects_stale_fences(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -3004,7 +3010,7 @@ def test_commit_authority_rejects_forged_request_hash_before_database(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -3044,7 +3050,7 @@ def test_commit_owner_rollback_blocks_unsettled_generation(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -3096,7 +3102,7 @@ def test_commit_settlement_revalidates_both_leases_and_replays_receipt(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -3197,7 +3203,7 @@ def test_commit_settlement_rejects_lease_loss_during_external_write(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -3267,7 +3273,7 @@ def test_commit_settlement_conflicting_replay_fails_closed(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -3355,7 +3361,7 @@ def test_owned_change_shadow_path_settles_work_and_rehearses_rollback(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:owned-change-shadow",
             lease_seconds=300,
         )
@@ -3549,7 +3555,7 @@ def test_stale_change_set_creates_no_grant_and_allows_owner_rollback(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:stale-change-shadow",
             lease_seconds=300,
         )
@@ -3648,7 +3654,7 @@ def test_terminal_commit_abandonment_unblocks_owner_rollback(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:abandoned-commit",
             lease_seconds=300,
         )
@@ -3750,7 +3756,7 @@ def test_abandonment_and_settlement_share_one_terminal_lock(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:terminal-lock",
             lease_seconds=300,
         )
@@ -3911,7 +3917,7 @@ def test_change_set_store_survives_restart_and_resumes_settlement(
     )
     primary_lease = primary.acquire(
         AuthorityRequest(
-            authority_key="operations-core-commits",
+            authority_key="operations-core-primary",
             holder_ref="host:commit-primary",
             lease_seconds=300,
         )
@@ -4194,7 +4200,7 @@ def test_acknowledged_attempt_atomically_delivers_and_replays_receipt(
         "effect-outbox:1:attempt-1"
     )
     assert receipt.primary_authority_ref == (
-        "primary-authority:operations-core-effects:epoch-1"
+        "primary-authority:operations-core-primary:epoch-1"
     )
     assert receipt.retry_at is None
     assert delivery.inspect(effect.id).status == "delivered"
@@ -4228,7 +4234,7 @@ def test_settlement_without_durable_authority_grant_is_rejected(
                 request_sha256="d" * 64,
                 outbox_claim_ref="effect-outbox:1:attempt-1",
                 primary_authority_ref=(
-                    "primary-authority:operations-core-effects:epoch-1"
+                    "primary-authority:operations-core-primary:epoch-1"
                 ),
             ),
         )
@@ -4802,7 +4808,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
             )
             """,
             (
-                "notification:email.ops_alert",
+                "operations-core-primary",
                 "effect-worker:pg17",
                 300,
                 primary_token,
@@ -4916,7 +4922,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
             """
             SELECT holder_ref, epoch
             FROM volpred_ops.primary_authority_lease_reads
-            WHERE authority_key = 'notification:email.ops_alert'
+            WHERE authority_key = 'operations-core-primary'
             """
         ).fetchone()
         assert held_after_settlement == (
@@ -4932,7 +4938,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
             )
             """,
             (
-                "notification:email.ops_alert",
+                "operations-core-primary",
                 "effect-worker:pg17",
                 primary_lease["epoch"],
                 primary_token,
@@ -5009,7 +5015,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
                 """
                 SELECT pg_advisory_xact_lock(
                   hashtextextended(
-                    'primary:notification:email.ops_alert',
+                    'primary:operations-core-primary',
                     0
                   )
                 )
@@ -5049,7 +5055,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
                     )
                     """,
                     (
-                        "notification:email.ops_alert",
+                        "operations-core-primary",
                         "effect-worker:ops-alert-email-legacy",
                         300,
                         legacy_primary_token,
@@ -5069,7 +5075,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
             )
             """,
             (
-                "notification:email.ops_alert",
+                "operations-core-primary",
                 "effect-worker:ops-alert-email-legacy",
                 legacy_primary_lease["epoch"],
                 legacy_primary_token,
@@ -5156,7 +5162,7 @@ def test_owned_email_transaction_cutover_delivery_rollback_and_recutover(
                WHERE effect_id = %s),
               (SELECT count(*)
                FROM volpred_ops.primary_authority_receipts
-               WHERE authority_key = 'notification:email.ops_alert'),
+               WHERE authority_key = 'operations-core-primary'),
               (SELECT array_agg(owner ORDER BY generation)
                FROM volpred_ops.notification_owner_receipts
                WHERE effect_family = 'email.ops_alert')
@@ -5220,7 +5226,7 @@ def test_expired_owned_email_attempt_is_atomically_recovered(
             )
             """,
             (
-                "notification:email.ops_alert",
+                "operations-core-primary",
                 worker_id,
                 300,
                 primary_token,
@@ -5611,7 +5617,7 @@ def test_owned_publisher_transaction_cutover_delivery_and_rollback(
     outbox_token = "outbox-owned-publisher-token"
     primary_token = "primary-owned-publisher-token"
     worker_id = "effect-worker:publisher-article-sync"
-    authority_key = "publisher:article.supabase.sync"
+    authority_key = "operations-core-primary"
 
     with psycopg.connect(
         postgres_effect_dsn,
@@ -6003,7 +6009,7 @@ def test_owned_publisher_recovery_consumes_due_retry_atomically(
         },
     }
     worker_id = "effect-worker:publisher-article-sync"
-    authority_key = "publisher:article.supabase.sync"
+    authority_key = "operations-core-primary"
     primary_token = "primary-owned-publisher-recovery-token"
 
     with psycopg.connect(
@@ -6200,7 +6206,7 @@ def test_owned_publisher_expired_attempt_requires_recovery_seam(
         connection.execute(
             """
             SELECT public.volpred_acquire_primary_authority(
-              'publisher:article.supabase.sync', %s, 300, %s
+              'operations-core-primary', %s, 300, %s
             )
             """,
             (worker_id, primary_token),
@@ -6348,7 +6354,7 @@ def test_owned_publisher_reconcile_cutover_delivery_and_rollback(
         ],
     }
     worker_id = "effect-worker:publisher-article-reconcile"
-    authority_key = "publisher:article.supabase.reconcile"
+    authority_key = "operations-core-primary"
     work_token = "work-owned-reconcile-token"
     outbox_token = "outbox-owned-reconcile-token"
     primary_token = "primary-owned-reconcile-token"
@@ -6695,7 +6701,8 @@ def test_owned_publisher_reconcile_rpc_security_shape(
     assert service_table_access is False
     definitions = "\n".join(row[8] for row in rows)
     assert "publisher.article.supabase.reconcile" in definitions
-    assert "publisher:article.supabase.reconcile" in definitions
+    assert "operations-core-primary" in definitions
+    assert "publisher:article.supabase.reconcile" not in definitions
     assert "publisher.article.supabase.reconcile.readback" in definitions
     assert "supabase:articles" in definitions
     assert "FOR UPDATE OF attempt SKIP LOCKED" in definitions
@@ -6723,7 +6730,7 @@ def test_due_publisher_reconcile_retry_recovers_original_effect(
         ],
     }
     worker = "effect-worker:publisher-article-reconcile"
-    authority = "publisher:article.supabase.reconcile"
+    authority = "operations-core-primary"
     with psycopg.connect(
         postgres_effect_dsn,
         autocommit=True,

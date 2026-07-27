@@ -10,15 +10,18 @@ publishable Supabase key.
 from __future__ import annotations
 
 import base64
-from collections.abc import Callable, Mapping
-from dataclasses import dataclass
 import hashlib
 import json
 import re
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from typing import Any, Protocol
 from uuid import uuid4
 
-from volpred.ops.authority import PrimaryLease
+from volpred.ops.authority import (
+    FORMAL_PRIMARY_AUTHORITY_KEY,
+    PrimaryLease,
+)
 
 from ._effect import (
     AcknowledgedEffect,
@@ -36,9 +39,8 @@ from ._publisher_article_delete import (
 )
 from .supabase_rpc import ServiceRoleRpcClient, runtime_environment
 
-
 _OWNER_FAMILY = "publisher.article.supabase.delete"
-_PRIMARY_AUTHORITY_KEY = "publisher:article.supabase.delete"
+_PRIMARY_AUTHORITY_KEY = FORMAL_PRIMARY_AUTHORITY_KEY
 _OPERATIONS_CORE_OWNER = "operations_core"
 _LEGACY_OWNER = "legacy"
 _WORKER_ID = "effect-worker:publisher-article-delete"
@@ -1522,19 +1524,19 @@ def _sha256(value: object, *, field: str) -> str:
 
 
 __all__ = [
+    "OwnedPublisherArticleDelete",
     "OwnedPublisherDeleteAttempt",
     "OwnedPublisherDeleteCommand",
+    "OwnedPublisherDeleteReceipt",
     "OwnedPublisherDeleteReconciliation",
     "OwnedPublisherDeleteReconciliationReceipt",
     "OwnedPublisherDeleteReconciliationSummary",
-    "OwnedPublisherDeleteReceipt",
     "OwnedPublisherDeleteRequest",
-    "OwnedPublisherArticleDelete",
     "PublisherArticleDeleteOwner",
     "PublisherArticleDeleteOwnershipLost",
+    "SupabaseOwnedPublisherDeleteStore",
     "SupabasePublisherArticleDeleteApprovalVerifier",
     "SupabasePublisherArticleDeleteProjection",
     "SupabasePublisherArticleDeleteRestoreProjection",
     "SupabasePublisherDeleteProviderFactory",
-    "SupabaseOwnedPublisherDeleteStore",
 ]

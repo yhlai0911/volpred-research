@@ -42,7 +42,7 @@ class _Response:
 def _lease() -> PrimaryLease:
     return PrimaryLease(
         schema_version="primary-lease.v1",
-        authority_key="operations-core-commits",
+        authority_key="operations-core-primary",
         holder_ref="host:commit-primary",
         epoch=4,
         fencing_token="primary-secret",
@@ -92,9 +92,21 @@ def _grant_payload() -> dict[str, object]:
         "commit_owner_ref": "commit-owner:git.commit:generation-2",
         "work_lease_ref": "work-lease:work-1:v3",
         "primary_authority_ref": (
-            "primary-authority:operations-core-commits:epoch-4"
+            "primary-authority:operations-core-primary:epoch-4"
         ),
     }
+
+
+def test_commit_authority_rejects_capability_scoped_primary_lease() -> None:
+    with pytest.raises(ValueError, match="formal primary authority"):
+        SupabaseCommitAuthority(
+            supabase_url="https://project.supabase.co/",
+            service_role_key="secret-service-role",
+            primary_lease=replace(
+                _lease(),
+                authority_key="operations-core-commits",
+            ),
+        )
 
 
 def test_authorize_uses_service_role_rpc_and_decodes_token_redacted_grant(
@@ -117,7 +129,7 @@ def test_authorize_uses_service_role_rpc_and_decodes_token_redacted_grant(
                 ),
                 "work_lease_ref": "work-lease:work-1:v3",
                 "primary_authority_ref": (
-                    "primary-authority:operations-core-commits:epoch-4"
+                    "primary-authority:operations-core-primary:epoch-4"
                 ),
             }
         )
@@ -143,7 +155,7 @@ def test_authorize_uses_service_role_rpc_and_decodes_token_redacted_grant(
             "Accept": "application/json",
         },
         "body": {
-            "p_authority_key": "operations-core-commits",
+            "p_authority_key": "operations-core-primary",
             "p_authority_holder_ref": "host:commit-primary",
             "p_authority_epoch": 4,
             "p_primary_fencing_token": "primary-secret",
@@ -246,7 +258,7 @@ def test_terminal_abandonment_uses_owner_bound_rpc(
         commit_owner_ref="commit-owner:git.commit:generation-2",
         work_lease_ref="work-lease:work-1:v3",
         primary_authority_ref=(
-            "primary-authority:operations-core-commits:epoch-4"
+            "primary-authority:operations-core-primary:epoch-4"
         ),
     )
 
@@ -323,7 +335,7 @@ def test_terminal_abandonment_payload_drift_fails_closed(
         commit_owner_ref="commit-owner:git.commit:generation-2",
         work_lease_ref="work-lease:work-1:v3",
         primary_authority_ref=(
-            "primary-authority:operations-core-commits:epoch-4"
+            "primary-authority:operations-core-primary:epoch-4"
         ),
     )
 
@@ -368,7 +380,7 @@ def test_fencing_failure_and_untrusted_grant_fail_closed(
                 ),
                 "work_lease_ref": "work-lease:work-1:v3",
                 "primary_authority_ref": (
-                    "primary-authority:operations-core-commits:epoch-4"
+                    "primary-authority:operations-core-primary:epoch-4"
                 ),
             }
         ),

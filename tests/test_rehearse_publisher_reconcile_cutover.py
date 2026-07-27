@@ -108,7 +108,7 @@ def _delivery(
         evidence_sha256="e" * 64,
         primary_authority_ref=(
             "primary-authority:"
-            "publisher:article.supabase.reconcile:epoch-1"
+            "operations-core-primary:epoch-1"
         ),
         recorded_at="2026-07-25T00:01:00+00:00",
     )
