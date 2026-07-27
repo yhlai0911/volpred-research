@@ -12,6 +12,17 @@ from pathlib import Path
 from typing import Any
 
 _SCHEMA = "frontend-route-scenario-parity.v1"
+_REQUIRED_SCENARIOS = frozenset(
+    {
+        "public_first_paint",
+        "auth_callback",
+        "member_navigation",
+        "admin_observer",
+        "seo",
+        "mobile_navigation",
+        "accessibility_navigation",
+    }
+)
 _HREF = re.compile(
     r"""\bhref\s*(?:=|:)\s*(?:"(?P<double>/[^"]*)"|'(?P<single>/[^']*)')"""
 )
@@ -538,16 +549,19 @@ def _scenario_blockers(
     seen: set[str] = set()
     if (
         not isinstance(required_scenario_ids, list)
-        or not required_scenario_ids
         or any(
             not isinstance(scenario_id, str) or not scenario_id.strip()
             for scenario_id in required_scenario_ids
         )
+        or set(required_scenario_ids) != _REQUIRED_SCENARIOS
     ):
         blockers.append(
-            _block("required_scenario_contract", reason="invalid_ids")
+            _block(
+                "required_scenario_contract",
+                expected=sorted(_REQUIRED_SCENARIOS),
+            )
         )
-        required_scenario_ids = []
+        required_scenario_ids = sorted(_REQUIRED_SCENARIOS)
     for index, scenario in enumerate(scenarios):
         if not isinstance(scenario, dict):
             blockers.append(

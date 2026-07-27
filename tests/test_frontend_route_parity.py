@@ -33,7 +33,15 @@ def _fixture_repo(tmp_path: Path) -> tuple[Path, Path]:
         "schema_version": "frontend-route-scenario-parity.v1",
         "frontend_target": "web",
         "source_revision_policy": {"nested_git_required": False},
-        "required_scenario_ids": ["mobile_navigation"],
+        "required_scenario_ids": [
+            "public_first_paint",
+            "auth_callback",
+            "member_navigation",
+            "admin_observer",
+            "seo",
+            "mobile_navigation",
+            "accessibility_navigation",
+        ],
         "route_rules": [
             {
                 "id": "home",
@@ -76,7 +84,7 @@ def _fixture_repo(tmp_path: Path) -> tuple[Path, Path]:
         ],
         "scenarios": [
             {
-                "id": "mobile_navigation",
+                "id": scenario_id,
                 "required_route_rules": ["home"],
                 "required_modes": ["original", "v3"],
                 "evidence": [
@@ -86,6 +94,15 @@ def _fixture_repo(tmp_path: Path) -> tuple[Path, Path]:
                     }
                 ],
             }
+            for scenario_id in (
+                "public_first_paint",
+                "auth_callback",
+                "member_navigation",
+                "admin_observer",
+                "seo",
+                "mobile_navigation",
+                "accessibility_navigation",
+            )
         ],
     }
     contract_path = tmp_path / "config/frontend_route_scenario_parity.json"
@@ -129,7 +146,7 @@ def test_audit_builds_unique_inventory_and_matches_dynamic_links(
     assert report["summary"] == {
         "route_count": 6,
         "rule_count": 3,
-        "scenario_count": 1,
+        "scenario_count": 7,
         "known_gap_count": 0,
         "blocker_count": 0,
     }
