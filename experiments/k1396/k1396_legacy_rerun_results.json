@@ -1,0 +1,51 @@
+{
+  "experiment_id": "K1396",
+  "run_at": "2026-07-27T15:06:39.032301+00:00",
+  "elapsed_seconds": 42.4,
+  "configuration": {
+    "data_file": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+    "data_start": "2005-01-01",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "loss": "QLIKE_Patton2011",
+    "seed": 42
+  },
+  "sample_sizes": {
+    "n_oos": 1900,
+    "n_refits": 31
+  },
+  "mean_qlike": {
+    "HAR": 1.5586615128490338,
+    "HAR_VIX": 1.5221591538706343,
+    "A4f": 1.537310941750179
+  },
+  "dm_tests": {
+    "HAR_vs_A4f": {
+      "t_stat": 0.8462943099399891,
+      "p_value": 0.3974952099148034,
+      "legacy_abs_t_gt_3_screen": false,
+      "interpretation": "historical diagnostic; positive t = approximation has lower QLIKE"
+    },
+    "HAR_VIX_vs_A4f": {
+      "t_stat": -0.8386095715738486,
+      "p_value": 0.401793982106219,
+      "legacy_abs_t_gt_3_screen": false,
+      "interpretation": "historical diagnostic; positive t = approximation has lower QLIKE"
+    },
+    "HAR_VIX_vs_HAR": {
+      "t_stat": -2.522268506803413,
+      "p_value": 0.011741212222947616,
+      "legacy_abs_t_gt_3_screen": false,
+      "interpretation": "nested raw-loss diagnostic only; positive t = daily-r\u00b2 HAR has lower QLIKE"
+    }
+  },
+  "notes": [
+    "SUPERSEDED historical diagnostic; public interpretation withdrawn by K1379",
+    "HAR-style regressions use daily r\u00b2, not canonical intraday realized variance",
+    "A4f approximation uses steady-state g on every OOS date, not only at refits",
+    "Failure to reject equal predictive accuracy is not non-inferiority or equivalence",
+    "HAR-style daily-r\u00b2-VIX vs HAR-style daily-r\u00b2 is nested; raw QLIKE DM is diagnostic only",
+    "Features are lagged and pass the lookahead audit"
+  ]
+}
