@@ -70,12 +70,49 @@ def _run(repo: Path, alerts: list[dict]) -> dict:
     )
 
 
+def _pin_legacy_closeout(repo: Path, *paths: str) -> None:
+    """Materialize the finite compatibility state without reviving auto-claim."""
+    assert phase_z._ensure_failed_closeout(
+        repo,
+        owned=list(paths),
+        reason="commit_nonzero",
+        commit_tail="[pre-commit] BLOCKED — legacy fixture",
+        receipt={"subject": "legacy rejected fire", "body": "", "task_id": ""},
+        runner=subprocess.run,
+    )
+
+
+def test_recovery_mode_flag_alone_cannot_authorize_nonmachine_bytes(repo: Path):
+    """Only recover_failed_closeout's pinned-byte capability may use the bridge."""
+    (repo / "out.txt").write_text("fresh canonical edit\n")
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="07:07",
+        pre_fire_dirty=set(),
+        recovery_mode=True,
+        commit_receipt_override={
+            "subject": "forged recovery metadata",
+            "body": "",
+            "task_id": "",
+        },
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
+    assert outcome["isolation_residue"] == ["out.txt"]
+    assert _git(repo, "log", "-1", "--format=%s").strip() == "seed"
+
+
 def test_blocked_commit_keeps_baseline_and_never_degrades(repo: Path):
     """Pin 1: the incident's exact shape. Commit blocked by a pre-commit gate →
     the snapshot survives, so a retry is still `commit_nonzero` (ownership
     intact), NOT `ownership_unknown`. Before the fix the second run degraded."""
     assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
-    (repo / "out.txt").write_text("agent output\n")
+    state_path = repo / "storage" / "ops" / "out.txt"
+    state_path.parent.mkdir(parents=True)
+    state_path.write_text("machine output\n")
     _install_blocking_hook(repo)
     alerts: list[dict] = []
 
@@ -83,7 +120,9 @@ def test_blocked_commit_keeps_baseline_and_never_degrades(repo: Path):
     assert first["reason"] == "commit_nonzero"
     assert "BLOCKED" in first["commit_tail"]  # the actionable fact travels with the outcome
     assert _snapshot_file(repo).exists(), "failed commit must not consume the baseline"
-    assert _failed_closeout_file(repo).exists(), "failed ownership must survive the drain cap"
+    assert not _failed_closeout_file(repo).exists(), (
+        "hot machine state retries under the next baseline; it must never be hash-pinned"
+    )
 
     second = _run(repo, alerts)
     assert second["reason"] == "commit_nonzero", (
@@ -92,10 +131,8 @@ def test_blocked_commit_keeps_baseline_and_never_degrades(repo: Path):
 
 
 def test_hash_pinned_closeout_recovers_after_gate_is_fixed(repo: Path):
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "out.txt").write_text("agent output\n")
-    _install_blocking_hook(repo)
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    _pin_legacy_closeout(repo, "out.txt")
 
     hook = repo / ".git" / "hooks" / "pre-commit"
     hook.write_text("#!/bin/sh\nexit 0\n")
@@ -112,6 +149,65 @@ def test_hash_pinned_closeout_recovers_after_gate_is_fixed(repo: Path):
     assert not _git(repo, "status", "--porcelain").strip()
 
 
+def test_hash_pinned_closeout_rejects_index_blob_swap_race(repo: Path):
+    target = repo / "out.txt"
+    target.write_text("authorized A\n")
+    _pin_legacy_closeout(repo, "out.txt")
+    head_before = _git(repo, "rev-parse", "HEAD").strip()
+    swapped = False
+
+    def racing_runner(argv, **kwargs):
+        nonlocal swapped
+        if len(argv) > 3 and argv[3] == "add" and not swapped:
+            swapped = True
+            target.write_text("unauthorized B\n")
+            result = subprocess.run(argv, **kwargs)
+            target.write_text("authorized A\n")
+            return result
+        return subprocess.run(argv, **kwargs)
+
+    recovered = phase_z.recover_failed_closeout(
+        repo_root=repo,
+        runner=racing_runner,
+        test_runner=lambda *a, **k: subprocess.CompletedProcess([], 0, "", ""),
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert swapped is True
+    assert recovered["committed"] is False
+    assert recovered["reason"] == "closeout_identity_error"
+    assert recovered["identity_mismatches"] == ["out.txt"]
+    assert _git(repo, "rev-parse", "HEAD").strip() == head_before
+    assert target.read_text() == "authorized A\n"
+    assert _failed_closeout_file(repo).exists()
+
+
+def test_hash_pinned_closeout_rejects_byte_identical_chmod_drift(repo: Path):
+    target = repo / "tool.sh"
+    target.write_text("#!/bin/sh\nexit 0\n")
+    target.chmod(0o644)
+    _git(repo, "add", "tool.sh")
+    _git(repo, "commit", "-qm", "track non-executable tool")
+
+    target.write_text("#!/bin/sh\necho authorized\n")
+    _pin_legacy_closeout(repo, "tool.sh")
+    target.chmod(0o755)  # same receipt bytes, unauthorized mode mutation
+    head_before = _git(repo, "rev-parse", "HEAD").strip()
+
+    recovered = phase_z.recover_failed_closeout(
+        repo_root=repo,
+        test_runner=lambda *a, **k: subprocess.CompletedProcess([], 0, "", ""),
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert recovered["committed"] is False
+    assert recovered["reason"] == "closeout_identity_error"
+    assert recovered["identity_mismatches"] == ["tool.sh"]
+    assert _git(repo, "rev-parse", "HEAD").strip() == head_before
+    assert stat.S_IMODE(target.stat().st_mode) == 0o755
+    assert _failed_closeout_file(repo).exists()
+
+
 def test_hash_pinned_closeout_refuses_later_edits(repo: Path):
     """A later session's edits are never committed under the failed fire's name.
 
@@ -121,10 +217,8 @@ def test_hash_pinned_closeout_refuses_later_edits(repo: Path):
     of re-raising a CRITICAL every fire with no way to stop. See
     test_phase_z_untracked_closeout.py for the self-heal pins.
     """
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "out.txt").write_text("agent output\n")
-    _install_blocking_hook(repo)
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    _pin_legacy_closeout(repo, "out.txt")
     before_head = _git(repo, "rev-parse", "HEAD").strip()
 
     (repo / "out.txt").write_text("edited by a later session\n")
@@ -146,11 +240,9 @@ def test_landed_closeout_clears_silently_despite_hot_state_drift(repo: Path):
     committed must clear, not scream. The pinned set mixes the fire's own output
     with a hot shared state file that every later fire rewrites — drift there is
     normal progress once a later commit has carried the content forward."""
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "out.txt").write_text("agent output\n")
     (repo / "work_log.json").write_text('[{"fire": 1}]\n')
-    _install_blocking_hook(repo)
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    _pin_legacy_closeout(repo, "out.txt", "work_log.json")
 
     # A later fire commits both paths — carrying fire 1's log line along with its
     # own — and a third is mid-append, so work_log.json is dirty again and no
@@ -175,16 +267,12 @@ def test_landed_closeout_clears_silently_despite_hot_state_drift(repo: Path):
 
 
 def test_failed_closeout_accumulates_distinct_later_batches(repo: Path):
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "first.txt").write_text("first\n")
-    _install_blocking_hook(repo)
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    _pin_legacy_closeout(repo, "first.txt")
 
-    # A later cohort starts with the first batch already dirty and produces a
-    # distinct path. Its ownership must append, not erase the first receipt.
-    assert phase_z._write_pre_fire_snapshot(repo, {"first.txt"}, subprocess.run)
+    # A second pre-retirement receipt appends instead of erasing the first.
     (repo / "second.txt").write_text("second\n")
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    _pin_legacy_closeout(repo, "second.txt")
 
     payload = json.loads(_failed_closeout_file(repo).read_text())
     assert {entry["path"] for entry in payload["paths"]} == {"first.txt", "second.txt"}
@@ -199,14 +287,18 @@ def test_machine_state_is_never_pinned_into_failed_closeout(repo: Path):
     the recurring 放棄認領 orphan alert. The churn lane re-adopts them under the
     next fire's own baseline; only real work is worth deferring.
     """
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "out.txt").write_text("agent output\n")
     wl = repo / "storage" / "work_log.json"
     wl.parent.mkdir(parents=True)
     wl.write_text("[]\n")
-    _install_blocking_hook(repo)
-
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    assert phase_z._ensure_failed_closeout(
+        repo,
+        owned=["out.txt", "storage/work_log.json"],
+        reason="commit_nonzero",
+        commit_tail="blocked",
+        receipt=None,
+        runner=subprocess.run,
+    )
 
     payload = json.loads(_failed_closeout_file(repo).read_text())
     pinned = [entry["path"] for entry in payload["paths"]]
@@ -221,10 +313,8 @@ def test_pre_invariant_machine_state_claims_release_silently(repo: Path):
     design, not an incident — while leaving the working bytes untouched and the
     real work fully recoverable.
     """
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "out.txt").write_text("agent output\n")
-    _install_blocking_hook(repo)
-    assert _run(repo, [])["reason"] == "commit_nonzero"
+    _pin_legacy_closeout(repo, "out.txt")
 
     wl = repo / "storage" / "work_log.json"
     wl.parent.mkdir(parents=True)
@@ -260,7 +350,9 @@ def test_blocked_candidate_preserves_head_index_and_working_bytes(repo: Path):
     before_tree = _git(repo, "write-tree").strip()
     before_head = _git(repo, "rev-parse", "HEAD").strip()
     assert phase_z._write_pre_fire_snapshot(repo, {"foreign.txt"}, subprocess.run)
-    (repo / "out.txt").write_text("agent output\n")
+    out_path = repo / "storage" / "ops" / "out.txt"
+    out_path.parent.mkdir(parents=True)
+    out_path.write_text("machine output\n")
     _install_blocking_hook(repo)
 
     out = _run(repo, [])
@@ -269,7 +361,7 @@ def test_blocked_candidate_preserves_head_index_and_working_bytes(repo: Path):
     assert out["rolled_back"] is True
     assert _git(repo, "rev-parse", "HEAD").strip() == before_head
     assert _git(repo, "write-tree").strip() == before_tree
-    assert (repo / "out.txt").read_text() == "agent output\n"
+    assert out_path.read_text() == "machine output\n"
     assert (repo / "foreign.txt").read_text() == "another writer\n"
 
 
@@ -280,19 +372,23 @@ def test_blocking_hook_side_effect_stays_in_disposable_candidate(repo: Path):
     )
     hook.chmod(0o755)
     assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
-    (repo / "out.txt").write_text("agent output\n")
+    out_path = repo / "storage" / "ops" / "out.txt"
+    out_path.parent.mkdir(parents=True)
+    out_path.write_text("machine output\n")
 
     out = _run(repo, [])
 
     assert out["reason"] == "commit_nonzero"
     assert not (repo / "hook-side-effect.txt").exists()
-    assert (repo / "out.txt").read_text() == "agent output\n"
+    assert out_path.read_text() == "machine output\n"
 
 
 def test_successful_commit_still_consumes_baseline(repo: Path):
     """One snapshot, one fire — the settled path still burns it."""
     assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
-    (repo / "out.txt").write_text("agent output\n")
+    out_path = repo / "storage" / "ops" / "out.txt"
+    out_path.parent.mkdir(parents=True)
+    out_path.write_text("machine output\n")
     alerts: list[dict] = []
 
     out = _run(repo, alerts)

@@ -72,6 +72,17 @@ def repo(tmp_path: Path) -> Path:
     return tmp_path
 
 
+@pytest.fixture(autouse=True)
+def isolate_slot_occupancy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Never let slot-budget assertions inspect the developer's live checkout."""
+    worktrees = tmp_path / "slot-budget-worktrees"
+    agents = tmp_path / "slot-budget-agents"
+    worktrees.mkdir(exist_ok=True)
+    agents.mkdir(exist_ok=True)
+    monkeypatch.setattr(sb, "WORKTREES_DIR", worktrees)
+    monkeypatch.setattr(sb, "AGENTS_DIR", agents)
+
+
 def _fire(repo: Path, alerts: list | None = None) -> dict:
     def _alert(*, level, title, body):
         if alerts is not None:

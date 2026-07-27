@@ -114,6 +114,29 @@ def _recording_review(filed: list, created: bool = True):
 
 # ── the incident ─────────────────────────────────────────────────────────────
 
+def test_mid_fire_nonmachine_edit_is_never_claimed_by_legacy_timing(
+    repo: Path,
+) -> None:
+    """Regression for ee095d3e5: another session edited during a live fire.
+
+    Issue #43 made every legitimate mutating worker isolated-or-requeued, so a
+    canonical non-machine path appearing after the baseline can only be foreign
+    residue or an isolation breach. PHASE-Z must not caption/commit it.
+    """
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    target = "scripts/backup_user_claude.sh"
+    _write(repo, target, "# interactive Codex edit\n")
+    before = _git(repo, "rev-parse", "HEAD").stdout
+
+    outcome = _fire(repo)
+
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
+    assert outcome["isolation_residue"] == [target]
+    assert _git(repo, "rev-parse", "HEAD").stdout == before
+    assert target in _dirty(repo)
+
+
 def test_another_writers_edit_is_not_committed(repo: Path) -> None:
     """The 2026-07-10 incident, reduced: someone is mid-edit when the fire runs."""
     _write(repo, "scripts/merge_worktree.sh", "half-finished edit\n")  # theirs, dirty BEFORE
@@ -122,10 +145,15 @@ def test_another_writers_edit_is_not_committed(repo: Path) -> None:
     _write(repo, "experiments/k1/k1.py", "agent output\n")  # ours, during the fire
     outcome = _fire(repo)
 
-    assert outcome["committed"] is True
-    assert _head_files(repo) == {"experiments/k1/k1.py"}
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
+    assert _head_files(repo) == {"seed.txt"}
     assert "scripts/merge_worktree.sh" in _dirty(repo), "their edit must survive uncommitted"
-    assert outcome["foreign"] == ["scripts/merge_worktree.sh"]
+    assert outcome["foreign"] == [
+        "experiments/k1/k1.py",
+        "scripts/merge_worktree.sh",
+    ]
+    assert outcome["isolation_residue"] == ["experiments/k1/k1.py"]
 
 
 def test_foreign_path_staged_by_another_writer_is_unstaged_not_committed(repo: Path) -> None:
@@ -138,8 +166,10 @@ def test_foreign_path_staged_by_another_writer_is_unstaged_not_committed(repo: P
     _write(repo, "ours.txt", "agent output\n")
     outcome = _fire(repo)
 
-    assert outcome["committed"] is True
-    assert _head_files(repo) == {"ours.txt"}
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
+    assert _head_files(repo) == {"seed.txt"}
+    assert "ours.txt" in _dirty(repo)
     assert (repo / "theirs.txt").read_text(encoding="utf-8") == "staged by someone else\n"
 
 
@@ -211,7 +241,7 @@ def test_1316_receipt_active_sessions_are_skipped_without_warn_or_risk(repo: Pat
             fire_manifest.record(repo, fire_id, rel)
 
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "experiments/k1/result.json", "{}\n")
+    _write(repo, "storage/ops/result.json", "{}\n")
     alerts: list = []
     outcome = _fire(
         repo, alerts=alerts,
@@ -289,18 +319,21 @@ def test_foreign_streak_resets_once_the_path_is_cleaned_up(repo: Path) -> None:
     assert json.loads(streak_path.read_text(encoding="utf-8"))["theirs.txt"] == 1
 
 
-# ── the fire's own work still lands ──────────────────────────────────────────
+# ── canonical producer residue never lands ───────────────────────────────────
 
-def test_agent_work_is_committed_when_tree_was_clean(repo: Path) -> None:
+def test_agent_work_is_left_for_workspace_finalizer_when_tree_was_clean(
+    repo: Path,
+) -> None:
     phase_z.run_pre_fire_guard(repo_root=repo)
     _write(repo, "experiments/k2/k2.py", "x\n")
     _write(repo, "docs/note.md", "y\n")
 
     outcome = _fire(repo)
 
-    assert outcome["committed"] is True
-    assert _head_files(repo) == {"experiments/k2/k2.py", "docs/note.md"}
-    assert outcome["foreign"] == []
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
+    assert _head_files(repo) == {"seed.txt"}
+    assert outcome["isolation_residue"] == ["docs/note.md", "experiments/k2/k2.py"]
 
 
 def test_clean_tree_resolves_prior_internal_phase_z_episodes(repo: Path) -> None:
@@ -322,7 +355,7 @@ def test_clean_tree_resolves_prior_internal_phase_z_episodes(repo: Path) -> None
 
 def test_successful_candidate_resolves_internal_silent_fallback_episode(repo: Path) -> None:
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "ours.txt", "candidate bytes\n")
+    _write(repo, "storage/ops/ours.txt", "candidate bytes\n")
     resolved: list[str] = []
 
     outcome = phase_z.run_phase_z(
@@ -342,7 +375,7 @@ def test_successful_candidate_resolves_internal_silent_fallback_episode(repo: Pa
 def test_candidate_success_does_not_resolve_foreign_dirty_python_incident(repo: Path) -> None:
     _write(repo, "foreign.py", "def broken():\n    return None\n")
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "owned.md", "safe non-Python output\n")
+    _write(repo, "storage/ops/owned.md", "safe non-Python output\n")
     resolved: list[str] = []
 
     outcome = phase_z.run_phase_z(
@@ -364,7 +397,7 @@ def test_candidate_success_does_not_resolve_foreign_dirty_python_incident(repo: 
 def test_candidate_adoption_cas_rejects_concurrent_head_advance(repo: Path) -> None:
     """A commit arriving during the candidate gate wins; PHASE-Z never overwrites it."""
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "ours.txt", "candidate bytes\n")
+    _write(repo, "storage/ops/ours.txt", "candidate bytes\n")
     advanced = False
 
     def racing_runner(cmd, **kwargs):
@@ -387,13 +420,14 @@ def test_candidate_adoption_cas_rejects_concurrent_head_advance(repo: Path) -> N
     assert outcome["reason"] == "commit_nonzero"
     assert outcome["rolled_back"] is True
     assert _git(repo, "log", "-1", "--pretty=%s").stdout.strip() == "concurrent winner"
-    assert (repo / "ours.txt").read_text() == "candidate bytes\n"
+    assert (repo / "storage/ops/ours.txt").read_text() == "candidate bytes\n"
 
 
 def test_shared_index_refresh_preserves_same_path_concurrent_stage(repo: Path) -> None:
     """A same-path git add after adoption is data, not refreshable base state."""
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "ours.txt", "candidate bytes\n")
+    candidate = "storage/ops/ours.txt"
+    _write(repo, candidate, "candidate bytes\n")
     staged = False
 
     def racing_runner(cmd, **kwargs):
@@ -405,7 +439,7 @@ def test_shared_index_refresh_preserves_same_path_concurrent_stage(repo: Path) -
                 ["git", "-C", str(repo), "hash-object", "-w", "--stdin"],
                 input="concurrent staged bytes\n", capture_output=True, text=True, check=True,
             ).stdout.strip()
-            _git(repo, "update-index", "--add", "--cacheinfo", "100644", blob, "ours.txt")
+            _git(repo, "update-index", "--add", "--cacheinfo", "100644", blob, candidate)
         return proc
 
     outcome = phase_z.run_phase_z(
@@ -418,29 +452,29 @@ def test_shared_index_refresh_preserves_same_path_concurrent_stage(repo: Path) -
 
     assert outcome["committed"] is True
     assert staged is True
-    assert outcome["index_refresh"]["preserved"] == ["ours.txt"]
-    assert _git(repo, "show", "HEAD:ours.txt").stdout == "candidate bytes\n"
-    assert _git(repo, "show", ":ours.txt").stdout == "concurrent staged bytes\n"
+    assert outcome["index_refresh"]["preserved"] == [candidate]
+    assert _git(repo, "show", f"HEAD:{candidate}").stdout == "candidate bytes\n"
+    assert _git(repo, "show", f":{candidate}").stdout == "concurrent staged bytes\n"
 
 
 def test_candidate_hook_reads_candidate_tree_and_side_effects_are_isolated(repo: Path) -> None:
     hook = repo / ".git" / "hooks" / "pre-commit"
     hook.write_text(
         "#!/bin/sh\n"
-        "[ \"$(cat ours.txt)\" = \"candidate bytes\" ] || exit 17\n"
+        "[ \"$(cat storage/ops/ours.txt)\" = \"candidate bytes\" ] || exit 17\n"
         "echo isolated > hook-side-effect.txt\n",
         encoding="utf-8",
     )
     hook.chmod(0o755)
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "ours.txt", "candidate bytes\n")
+    _write(repo, "storage/ops/ours.txt", "candidate bytes\n")
     changed_live = False
 
     def racing_runner(cmd, **kwargs):
         nonlocal changed_live
         if not changed_live and cmd and cmd[0] == "bash" and "trusted-pre-commit" in cmd[1]:
             changed_live = True
-            _write(repo, "ours.txt", "concurrent live bytes\n")
+            _write(repo, "storage/ops/ours.txt", "concurrent live bytes\n")
         return subprocess.run(cmd, **kwargs)
 
     outcome = phase_z.run_phase_z(
@@ -453,22 +487,22 @@ def test_candidate_hook_reads_candidate_tree_and_side_effects_are_isolated(repo:
 
     assert outcome["committed"] is True
     assert changed_live is True
-    assert _git(repo, "show", "HEAD:ours.txt").stdout == "candidate bytes\n"
-    assert (repo / "ours.txt").read_text() == "concurrent live bytes\n"
+    assert _git(repo, "show", "HEAD:storage/ops/ours.txt").stdout == "candidate bytes\n"
+    assert (repo / "storage/ops/ours.txt").read_text() == "concurrent live bytes\n"
     assert not (repo / "hook-side-effect.txt").exists()
 
 
 def test_missing_immutable_hook_fails_closed(repo: Path) -> None:
     (repo / ".git" / "hooks" / "pre-commit").unlink()
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "ours.txt", "candidate bytes\n")
+    _write(repo, "storage/ops/ours.txt", "candidate bytes\n")
 
     outcome = _fire(repo)
 
     assert outcome["committed"] is False
     assert outcome["reason"] == "candidate_gate_missing"
     assert subprocess.run(
-        ["git", "-C", str(repo), "cat-file", "-e", "HEAD:ours.txt"],
+        ["git", "-C", str(repo), "cat-file", "-e", "HEAD:storage/ops/ours.txt"],
         capture_output=True, text=True, check=False,
     ).returncode != 0
 
@@ -489,17 +523,15 @@ def test_trusted_gate_change_is_held_back_without_blocking_the_batch(repo: Path)
     filed: list[list[str]] = []
     outcome = _fire(repo, gate_review_fn=_recording_review(filed))
 
-    assert outcome["committed"] is True
-    assert "experiments/k1/k1.py" in _head_files(repo)          # collateral freed
-    assert outcome["gate_deferred"] == [
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
+    assert set(outcome["isolation_residue"]) == {
+        "experiments/k1/k1.py",
         "scripts/audit_silent_fallbacks.py",
         "scripts/audit_test_imports.py",
         "storage/qa/silent_fallback_baseline.json",
-    ]
-    for rel in outcome["gate_deferred"]:                        # threat still held
-        assert rel not in _head_files(repo)
-        assert rel in _dirty(repo)
-    assert filed == [outcome["gate_deferred"]]                  # forward path exists
+    }
+    assert filed == []
 
 
 def test_gate_only_fire_is_not_reported_as_nothing_owned(repo: Path) -> None:
@@ -509,8 +541,8 @@ def test_gate_only_fire_is_not_reported_as_nothing_owned(repo: Path) -> None:
     outcome = _fire(repo, gate_review_fn=_recording_review([]))
 
     assert outcome["committed"] is False
-    assert outcome["reason"] == "gate_deferred_only"
-    assert outcome["gate_deferred"] == ["scripts/audit_test_imports.py"]
+    assert outcome["reason"] == "nothing_owned"
+    assert outcome["isolation_residue"] == ["scripts/audit_test_imports.py"]
 
 
 def test_unchanged_gate_change_does_not_refile_or_realert_each_fire(repo: Path) -> None:
@@ -531,12 +563,12 @@ def test_unchanged_gate_change_does_not_refile_or_realert_each_fire(repo: Path) 
     alerts_two: list = []
     second = _fire(repo, alerts=alerts_two, gate_review_fn=review)
 
-    assert first["committed"] is True and second["committed"] is True
-    assert "experiments/k1/second.py" in _head_files(repo)      # batch keeps flowing
-    # Fire two never re-enters the split at all: the gate file was already dirty
-    # at its baseline, so it is foreign to that fire and left alone. One review
-    # task, one alert, then silence — not the same reason every hour.
-    assert len(review.fingerprints) == 1
+    assert first["committed"] is False and second["committed"] is False
+    assert first["reason"] == second["reason"] == "nothing_owned"
+    assert "experiments/k1/second.py" in _dirty(repo)
+    # Legacy gate review filing was part of timing-based producer ownership.
+    # Workspace finalizers now own that path, so PHASE-Z files no review task.
+    assert len(review.fingerprints) == 0
     assert [t for _lvl, t in alerts_two if "gate" in t] == []
     assert "scripts/audit_test_imports.py" in _dirty(repo)      # still awaiting review
     assert "scripts/audit_test_imports.py" not in _head_files(repo)
@@ -576,7 +608,7 @@ def test_candidate_gate_blocks_test_without_its_foreign_script(repo: Path) -> No
     outcome = _fire(repo)
 
     assert outcome["committed"] is False
-    assert outcome["reason"] == "nothing_to_commit"
+    assert outcome["reason"] == "nothing_owned"
     assert "rolled_back" not in outcome
     assert _git(repo, "rev-parse", "HEAD").stdout.strip() == before_head
     assert _git(repo, "write-tree").stdout.strip() == before_index
@@ -608,7 +640,7 @@ def test_foreign_worktree_hook_cannot_weaken_pinned_base_gate(repo: Path) -> Non
     outcome = _fire(repo)
 
     assert outcome["committed"] is False
-    assert outcome["reason"] == "nothing_to_commit"
+    assert outcome["reason"] == "nothing_owned"
     assert "rolled_back" not in outcome
 
 
@@ -619,29 +651,29 @@ def test_lazypack_outputs_are_not_broad_machine_churn() -> None:
     ) is False
 
 
-def test_agent_deletion_is_committed(repo: Path) -> None:
-    """`git add -A -- <path>` stages the removal; a naive `git add <path>` does not."""
+def test_nonmachine_deletion_is_left_for_workspace_finalizer(repo: Path) -> None:
     phase_z.run_pre_fire_guard(repo_root=repo)
     (repo / "seed.txt").unlink()
 
     outcome = _fire(repo)
 
-    assert outcome["committed"] is True
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "nothing_owned"
     still_in_head = subprocess.run(
         ["git", "-C", str(repo), "cat-file", "-e", "HEAD:seed.txt"], capture_output=True,
     ).returncode == 0
-    assert not still_in_head, "deletion must be recorded, not just left in the worktree"
+    assert still_in_head
 
 
 def test_path_with_spaces_survives(repo: Path) -> None:
     """Argv-joined pathspecs and `core.quotePath` both mangle these; NUL does not."""
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "storage/drafts/a draft with spaces.md", "z\n")
+    _write(repo, "storage/ops/a state with spaces.md", "z\n")
 
     outcome = _fire(repo)
 
     assert outcome["committed"] is True
-    assert _head_files(repo) == {"storage/drafts/a draft with spaces.md"}
+    assert _head_files(repo) == {"storage/ops/a state with spaces.md"}
 
 
 def test_clean_tree_is_a_noop(repo: Path) -> None:
@@ -696,7 +728,7 @@ def test_silent_fallback_gate_routes_internally_but_other_gates_do_not(repo: Pat
     )
     hook.chmod(0o755)
     phase_z.run_pre_fire_guard(repo_root=repo)
-    _write(repo, "owned.py", "def f():\n    return None\n")
+    _write(repo, "storage/ops/owned.py", "def f():\n    return None\n")
     generic: list[dict] = []
     internal: list[dict] = []
 

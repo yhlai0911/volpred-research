@@ -290,25 +290,26 @@ def test_budget_exhaustion_stops_the_probe(repo: Path) -> None:
 
 
 # --------------------------------------------------------------------------
-# The existing ownership model must be untouched.
+# The legacy timing ownership model is retired by Issue #44.
 # --------------------------------------------------------------------------
 
-def test_this_fires_own_output_still_commits_normally(repo: Path) -> None:
-    """The probe is an added exception, not a rewrite of the ownership model."""
+def test_this_fires_nonmachine_output_is_left_for_the_workspace_finalizer(repo: Path) -> None:
+    """Timing is not authorship, even when the path appeared during this fire."""
     (repo / "scripts" / "new_output.md").write_text("produced by this fire\n")
     alerts: list[dict] = []
 
     result = _fire(repo, alerts, baseline=set())
 
-    assert result["committed"] is True, result
-    assert result["owned"] == ["scripts/new_output.md"]
+    assert result["committed"] is False, result
+    assert result["reason"] == "nothing_owned"
+    assert result["foreign"] == ["scripts/new_output.md"]
     assert result["orphan_halves"]["adopted"] == []
-    committed = _git(repo, "show", "--name-only", "--pretty=format:", "HEAD").split()
-    assert committed == ["scripts/new_output.md"], committed
+    assert _git(repo, "log", "-1", "--format=%s").strip() == "seed"
+    assert (repo / "scripts" / "new_output.md").read_text() == "produced by this fire\n"
 
 
-def test_recovery_pass_does_not_pay_for_the_probe_twice(repo: Path) -> None:
-    """The real fire follows immediately; probing in both halves buys one answer."""
+def test_raw_recovery_flag_does_not_bypass_foreign_enforcement(repo: Path) -> None:
+    """Only the private pinned-receipt capability may suppress duplicate probes."""
     (repo / "scripts" / "asset_lane.md").write_text("prompt with TOKEN\n")
     calls: list[list] = []
 
@@ -321,6 +322,6 @@ def test_recovery_pass_does_not_pay_for_the_probe_twice(repo: Path) -> None:
         test_runner=counting, alert_fn=lambda **k: {}, recovery_mode=True,
     )
 
-    assert result["orphan_halves"]["reason"] == "recovery_mode"
-    assert result["orphan_halves"]["adopted"] == []
-    assert calls == []
+    assert result["orphan_halves"]["reason"] != "recovery_mode"
+    assert result["orphan_halves"]["adopted"] == ["scripts/asset_lane.md"]
+    assert calls, "raw recovery_mode suppressed the normal orphan-proof lane"

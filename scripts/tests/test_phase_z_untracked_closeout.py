@@ -85,13 +85,18 @@ def _recover(repo: Path, alerts: list[dict]) -> dict:
 
 
 def _pin_untracked_failure(repo: Path, rel: str = "scripts/gen_ref.py") -> None:
-    """Reproduce the incident's setup: an untracked path pinned by a blocked fire."""
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    """Materialize a pre-retirement receipt without reviving timing auto-claim."""
     target = repo / rel
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text("original agent output\n")
-    _block(repo)
-    assert _fire(repo, [])["reason"] == "commit_nonzero"
+    assert phase_z._ensure_failed_closeout(
+        repo,
+        owned=[rel],
+        reason="commit_nonzero",
+        commit_tail="[pre-commit] BLOCKED — legacy fixture",
+        receipt={"subject": "legacy rejected fire", "body": "", "task_id": ""},
+        runner=subprocess.run,
+    )
     assert _receipt(repo).exists()
     # The path must really be untracked — that is the whole premise.
     assert _git(repo, "status", "--porcelain", "--", rel).startswith("??")
@@ -131,11 +136,16 @@ def test_release_keeps_the_other_claims_recoverable(repo: Path):
     file. Dropping the file wholesale (the manual workaround) would have thrown
     away 9 legitimate claims.
     """
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "poisoned.py").write_text("original\n")
     (repo / "still_mine.py").write_text("untouched agent output\n")
-    _block(repo)
-    assert _fire(repo, [])["reason"] == "commit_nonzero"
+    assert phase_z._ensure_failed_closeout(
+        repo,
+        owned=["poisoned.py", "still_mine.py"],
+        reason="commit_nonzero",
+        commit_tail="blocked",
+        receipt=None,
+        runner=subprocess.run,
+    )
 
     (repo / "poisoned.py").write_text("edited by someone else\n")
     _unblock(repo)
@@ -170,10 +180,15 @@ def test_untracked_unchanged_still_recovers_normally(repo: Path):
 
 # (c) tracked + carried forward → the 2026-07-17 fix must not regress ────────
 def test_tracked_carried_forward_still_closes_silently(repo: Path):
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
     (repo / "seed.txt").write_text("seed\nagent line\n")  # tracked, modified
-    _block(repo)
-    assert _fire(repo, [])["reason"] == "commit_nonzero"
+    assert phase_z._ensure_failed_closeout(
+        repo,
+        owned=["seed.txt"],
+        reason="commit_nonzero",
+        commit_tail="blocked",
+        receipt=None,
+        runner=subprocess.run,
+    )
 
     _unblock(repo)
     # A later fire commits the tracked path, then a third writer appends again.
@@ -201,11 +216,16 @@ def test_corrupt_receipt_is_quarantined_not_wedged(repo: Path):
     assert len(quarantined) == 1, quarantined
     assert quarantined[0].read_text() == "{ this is not json", "forensics bytes kept"
 
-    # And the module is functional again: a new failure can record ownership.
-    assert phase_z._write_pre_fire_snapshot(repo, set(), subprocess.run)
+    # And the compatibility reader/writer is functional again.
     (repo / "out.txt").write_text("agent output\n")
-    _block(repo)
-    assert _fire(repo, [])["reason"] == "commit_nonzero"
+    assert phase_z._ensure_failed_closeout(
+        repo,
+        owned=["out.txt"],
+        reason="commit_nonzero",
+        commit_tail="blocked",
+        receipt=None,
+        runner=subprocess.run,
+    )
     assert _receipt(repo).exists()
     payload = json.loads(_receipt(repo).read_text())
     assert [e["path"] for e in payload["paths"]] == ["out.txt"]

@@ -451,40 +451,37 @@ def test_phase_z_clean_tree_no_commit(tmp_path: Path) -> None:
     assert _git_head_count(tmp_path) == before  # no empty commit on clean tree
 
 
-def test_phase_z_dirty_tree_commits_with_correct_message(tmp_path: Path) -> None:
+def test_phase_z_dirty_nonmachine_tree_is_left_for_finalizer(tmp_path: Path) -> None:
     _git_init_repo(tmp_path)
     before = _git_head_count(tmp_path)
-    # Simulate an agent that produced real work but forgot to commit it.
+    # A canonical edit appearing during the fire is not proof of authorship.
     (tmp_path / "experiments").mkdir()
     (tmp_path / "experiments" / "k9999.py").write_text("print('result')\n", encoding="utf-8")
     out = phase_z.run_phase_z(
         repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
         alert_fn=lambda **_kwargs: {},
     )
-    assert out["committed"] is True
-    assert out["reason"] == "committed"
-    assert _git_head_count(tmp_path) == before + 1
-    # A receipt-less fire still owes the reader a WHAT. The subject names the diff
-    # groups (_generated_subject) rather than only stating that the account is
-    # missing — 「本班產出未附說明」 told the reader nothing, which is what made the
-    # audit gap read as a system fault in `git log` (boss, msg 886).
-    assert _git_head_subject(tmp_path) == (
-        "dispatch(16:07): 自動摘要（agent 未留 receipt）: 動到 experiments(1)"
-    )
-    # the real work is now tracked
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert out["isolation_residue"] == ["experiments/k9999.py"]
+    assert _git_head_count(tmp_path) == before
     tracked = subprocess.run(
         ["git", "-C", str(tmp_path), "ls-files", "experiments/k9999.py"],
         capture_output=True, text=True, check=True,
     ).stdout.strip()
-    assert tracked == "experiments/k9999.py"
+    assert tracked == ""
+    assert (tmp_path / "experiments" / "k9999.py").exists()
 
 
-def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
+def test_phase_z_does_not_bind_claim_to_unrelated_machine_churn(
     tmp_path: Path, monkeypatch,
 ) -> None:
     _git_init_repo(tmp_path)
     (tmp_path / "experiments").mkdir()
     (tmp_path / "experiments" / "repair.py").write_text("FIXED = True\n", encoding="utf-8")
+    machine = tmp_path / "storage" / "ops" / "state.json"
+    machine.parent.mkdir(parents=True)
+    machine.write_text("{}\n", encoding="utf-8")
     calls: list[dict] = []
     issue_calls: list[dict] = []
 
@@ -517,40 +514,13 @@ def test_phase_z_binds_commit_to_explicit_ci_repair_receipt(
     )
 
     assert out["committed"] is True
-    assert out["ci_repair_tasks_backfilled"] == ["ci-red-123"]
-    assert calls == [{
-        "path": tmp_path / "storage" / "next_tasks.json",
-        "claim_owners": {owner},
-        "commit_sha": subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=tmp_path,
-            capture_output=True, text=True, check=True,
-        ).stdout.strip(),
-    }]
-    assert out["issue_tasks_closed"] == [
-        {"task_id": "linked-ticket", "issue_ref": "#37"}
-    ]
-    assert issue_calls == [
-        {
-            "path": tmp_path / "storage" / "next_tasks.json",
-            "claim_owners": {owner},
-            "commit_sha": subprocess.run(
-                ["git", "rev-parse", "HEAD"],
-                cwd=tmp_path,
-                capture_output=True,
-                text=True,
-                check=True,
-            ).stdout.strip(),
-            "commit_parent_sha": subprocess.run(
-                ["git", "rev-parse", "HEAD^"],
-                cwd=tmp_path,
-                capture_output=True,
-                text=True,
-                check=True,
-            ).stdout.strip(),
-            "completed_task_ids": {"linked-ticket"},
-            "repo_root": tmp_path,
-        }
-    ]
+    assert out["owned"] == []
+    assert out["churn"] == ["storage/ops/state.json"]
+    assert out["ci_repair_tasks_backfilled"] == []
+    assert out["issue_tasks_closed"] == []
+    assert calls == []
+    assert issue_calls == []
+    assert (tmp_path / "experiments" / "repair.py").exists()
 
 
 def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
@@ -571,6 +541,9 @@ def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
     # Now the agent leaves BOTH a stale mutation to the leaked file AND real work.
     leaked.write_text('{"interval_minutes": 999}\n', encoding="utf-8")
     (tmp_path / "real_work.md").write_text("real\n", encoding="utf-8")
+    machine = tmp_path / "storage" / "ops" / "state.json"
+    machine.parent.mkdir(parents=True)
+    machine.write_text("{}\n", encoding="utf-8")
 
     # baseline = clean tree at fire start → everything dirty now is this fire's.
     out = phase_z.run_phase_z(
@@ -587,11 +560,16 @@ def test_phase_z_untracks_leaked_ignored_state_file(tmp_path: Path) -> None:
         capture_output=True, text=True, check=True,
     ).stdout.strip()
     assert tracked == ""
-    # ...but the real work WAS committed
+    # Explicit machine state landed, but unrelated real work stayed for its
+    # declared workspace finalizer.
     assert subprocess.run(
         ["git", "-C", str(tmp_path), "ls-files", "real_work.md"],
         capture_output=True, text=True, check=True,
-    ).stdout.strip() == "real_work.md"
+    ).stdout.strip() == ""
+    assert subprocess.run(
+        ["git", "-C", str(tmp_path), "ls-files", "storage/ops/state.json"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip() == "storage/ops/state.json"
 
 
 def test_phase_z_untracks_leaked_supervisor_dispatch_state(tmp_path: Path) -> None:
@@ -636,20 +614,19 @@ class _FakeCompleted:
 def test_phase_z_add_failure_aborts_commit(tmp_path: Path) -> None:
     # Codex review #3: a failed `git add -A` leaves the index in an unknown
     # state — PHASE-Z must NOT proceed to commit a partial tree.
+    _git_init_repo(tmp_path)
+    machine = tmp_path / "storage" / "ops" / "dirty.txt"
+    machine.parent.mkdir(parents=True)
+    machine.write_text("state\n", encoding="utf-8")
     commits: list = []
 
     def fake_runner(argv, **kwargs):
         sub = argv[3]  # ["git", "-C", root, <subcommand>, ...]
-        if sub == "status":
-            return _FakeCompleted(0, stdout=" M dirty.txt\0")
-        if sub == "ls-files":
-            return _FakeCompleted(0, stdout="")
         if sub == "add":
             return _FakeCompleted(1, stderr="fatal: index lock held")
         if sub == "commit":
             commits.append(argv)
-            return _FakeCompleted(0)
-        return _FakeCompleted(0)
+        return subprocess.run(argv, **kwargs)
 
     out = phase_z.run_phase_z(
         repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
@@ -664,17 +641,17 @@ def test_phase_z_lsfiles_failure_discards_candidate(tmp_path: Path) -> None:
     # The alternate-index transaction is fail-closed: if it cannot inventory
     # leaked tracked state, it cannot prove the candidate tree is complete.
     calls: list[str] = []
+    _git_init_repo(tmp_path)
+    machine = tmp_path / "storage" / "ops" / "work.txt"
+    machine.parent.mkdir(parents=True)
+    machine.write_text("state\n", encoding="utf-8")
 
     def fake_runner(argv, **kwargs):
         sub = argv[3]
         calls.append(sub)
-        if sub == "status":
-            return _FakeCompleted(0, stdout=" M work.txt\0")
         if sub == "ls-files":
             return _FakeCompleted(128, stderr="fatal: bad revision")
-        if sub == "add":
-            return _FakeCompleted(0)
-        return _FakeCompleted(0)
+        return subprocess.run(argv, **kwargs)
 
     out = phase_z.run_phase_z(
         repo_root=tmp_path, now_hhmm="16:07", runner=fake_runner,
@@ -5970,12 +5947,10 @@ def test_workspace_integrator_child_inherits_the_single_writer_lease(
     assert len(child_calls) == 1
 
 
-# -- WS-B commit 2: PHASE-Z baseline guessing demoted for isolated cohorts ----
-# The recognizer stays (retirement is a separate decision after a stable
-# month); what changes is AUTHORSHIP CLAIMING: an isolated cohort's repo-byte
-# output lands through its workspace merge gate, so PHASE-Z may no longer
-# commit non-machine-state paths by timing arithmetic. Machine-state churn
-# (scheduled jobs) keeps its adoption -- that is the fallback's residue lane.
+# -- Issue #44: PHASE-Z baseline guessing retired for every cohort ------------
+# Issue #43 made all automated mutating lanes isolated-or-requeued. A legacy
+# token flag can no longer authorize canonical non-machine bytes by timing.
+# Machine-state churn keeps its explicit namespace + byte-identity adoption.
 
 
 def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> None:
@@ -6028,9 +6003,8 @@ def test_phase_z_isolated_cohort_all_residue_is_terminal(tmp_path: Path) -> None
     assert (tmp_path / "docs" / "note.md").exists()
 
 
-def test_phase_z_unisolated_cohort_keeps_legacy_adoption(tmp_path: Path) -> None:
-    """Contrast pin: without the isolation flag the legacy baseline fallback
-    still adopts fire-produced paths (unisolated lanes keep their safety net)."""
+def test_phase_z_unisolated_token_cannot_restore_legacy_adoption(tmp_path: Path) -> None:
+    """A stale/unisolated token is an isolation breach, not commit authority."""
     _git_init_repo(tmp_path)
     before = _git_head_count(tmp_path)
     (tmp_path / "docs").mkdir()
@@ -6039,14 +6013,16 @@ def test_phase_z_unisolated_cohort_keeps_legacy_adoption(tmp_path: Path) -> None
         repo_root=tmp_path, now_hhmm="16:07", pre_fire_dirty=set(),
         alert_fn=lambda **_kwargs: {},
     )
-    assert out["committed"] is True
-    assert "isolation_residue" not in out
-    assert _git_head_count(tmp_path) == before + 1
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert out["isolation_residue"] == ["docs/note.md"]
+    assert _git_head_count(tmp_path) == before
     tracked = subprocess.run(
         ["git", "-C", str(tmp_path), "ls-files", "docs/note.md"],
         capture_output=True, text=True, check=True,
     ).stdout.strip()
-    assert tracked == "docs/note.md"
+    assert tracked == ""
+    assert (tmp_path / "docs" / "note.md").read_text() == "agent output\n"
 
 
 def test_record_completion_stamps_isolated_on_pending(tmp_path: Path) -> None:

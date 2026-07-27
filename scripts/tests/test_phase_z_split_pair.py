@@ -182,7 +182,9 @@ def test_real_phase_z_commits_other_output_without_splitting_pair(repo: Path) ->
 
     test = repo / "tests" / "test_task_signature.py"
     test.write_text("from volpred.ops.task_signature import sign\n", encoding="utf-8")
-    (repo / "fire_output.txt").write_text("useful output\n", encoding="utf-8")
+    machine_output = repo / "storage" / "ops" / "fire_output.txt"
+    machine_output.parent.mkdir(parents=True, exist_ok=True)
+    machine_output.write_text("useful output\n", encoding="utf-8")
     hook = repo / ".git" / "hooks" / "pre-commit"
     hook.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     hook.chmod(0o755)
@@ -198,6 +200,6 @@ def test_real_phase_z_commits_other_output_without_splitting_pair(repo: Path) ->
     assert outcome["committed"] is True
     assert outcome.get("rolled_back") is not True
     committed = set(_git(repo, "show", "--name-only", "--pretty=format:", "HEAD").split())
-    assert "fire_output.txt" in committed
+    assert "storage/ops/fire_output.txt" in committed
     assert "tests/test_task_signature.py" not in committed
     assert "src/volpred/ops/task_signature.py" not in committed

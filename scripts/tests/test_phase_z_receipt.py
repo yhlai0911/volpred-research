@@ -59,26 +59,23 @@ def _fire(repo: Path, *, baseline: set[str] | list[str], **kw) -> dict:
     )
 
 
-def test_receipt_becomes_the_commit_subject(repo: Path):
-    """Incident 1: the shift's own account of WHY reaches git log."""
+def test_receipt_cannot_authorize_canonical_nonmachine_bytes(repo: Path):
+    """A receipt is metadata, never proof that shared-checkout bytes are the worker's."""
     phase_z.write_fire_receipt(repo, subject="K1702 收件：raw-MDD 是 scale artifact",
                                body="掃 12 筆", task_id="k1702_followup")
     (repo / "out.txt").write_text("agent output\n")
 
     out = _fire(repo, baseline=set())
 
-    assert out["committed"] is True
-    assert _subject(repo) == "dispatch(07:07): K1702 收件：raw-MDD 是 scale artifact"
-    body = _git(repo, "log", "-1", "--format=%b")
-    assert "k1702_followup" in body and "掃 12 筆" in body
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert out["foreign"] == ["out.txt"]
+    assert _subject(repo) == "seed"
+    assert (repo / "out.txt").read_text() == "agent output\n"
 
 
-def test_no_receipt_still_commits_and_warns(repo: Path):
-    """Incident 1, the failure mode: forgetting the receipt costs a MESSAGE, not the work.
-
-    This is the whole point of moving git out of the prompt — the agent's
-    unreliability now lands on an audit-quality axis, never on a data-loss one.
-    """
+def test_no_receipt_does_not_restore_legacy_timing_autoclaim(repo: Path):
+    """Missing metadata cannot turn a canonical non-machine edit into PHASE-Z output."""
     (repo / "out.txt").write_text("agent output\n")
     alerts: list[dict] = []
 
@@ -88,14 +85,10 @@ def test_no_receipt_still_commits_and_warns(repo: Path):
         alert_fn=lambda **k: alerts.append(k) or {},
     )
 
-    assert out["committed"] is True, "work must land even with no receipt"
-    subject = _subject(repo)
-    assert "未留 receipt" in subject
-    # The 2026-07-17 fallback names WHAT moved (the diff knows that much) instead of
-    # the old content-free 「本班產出未附說明」. It still cannot know WHY — that gap is
-    # what the Stop gate exists to prevent, and what the warn below reports.
-    assert "out.txt" in subject
-    assert [a for a in alerts if a["level"] == "warn" and "沒交代原因" in a["title"]]
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert _subject(repo) == "seed"
+    assert not [a for a in alerts if "沒交代原因" in a["title"]]
 
 
 def test_normal_commit_no_longer_reads_as_a_failure(repo: Path):
@@ -105,8 +98,8 @@ def test_normal_commit_no_longer_reads_as_a_failure(repo: Path):
     (agent left uncommitted)" on the normal path, the owner starts seeing
     「還是一直出錯啊」 again — and this test goes red first.
     """
-    phase_z.write_fire_receipt(repo, subject="正常產出")
-    (repo / "out.txt").write_text("x\n")
+    (repo / "storage" / "ops").mkdir(parents=True)
+    (repo / "storage" / "ops" / "state.txt").write_text("x\n")
 
     _fire(repo, baseline=set())
 
@@ -115,11 +108,10 @@ def test_normal_commit_no_longer_reads_as_a_failure(repo: Path):
     assert "left uncommitted" not in subject
 
 
-def test_foreign_paths_are_never_swept_in(repo: Path):
+def test_all_canonical_nonmachine_paths_are_never_swept_in(repo: Path):
     """Incident 2: the agent's `git add -A` stealing another session's work.
 
-    PHASE-Z stages only what appeared AFTER the fire started; a path already dirty
-    at fire start belongs to whoever is mid-edit on it.
+    Neither pre-fire nor mid-fire timing grants ownership after Issue #43 isolation.
     """
     (repo / "someone_elses.txt").write_text("interactive session, mid-edit\n")
     (repo / "mine.txt").write_text("this fire's output\n")
@@ -127,31 +119,28 @@ def test_foreign_paths_are_never_swept_in(repo: Path):
 
     out = _fire(repo, baseline={"someone_elses.txt"})  # dirty BEFORE the fire
 
-    assert out["committed"] is True
-    committed = _git(repo, "show", "--name-only", "--format=", "HEAD").split()
-    assert "mine.txt" in committed
-    assert "someone_elses.txt" not in committed, "PHASE-Z committed a foreign path"
+    assert out["committed"] is False
+    assert out["reason"] == "nothing_owned"
+    assert set(out["foreign"]) == {"mine.txt", "someone_elses.txt"}
+    assert _subject(repo) == "seed"
     assert (repo / "someone_elses.txt").exists()  # left in the tree for its author
+    assert (repo / "mine.txt").exists()
 
 
-def test_receipt_does_not_survive_its_fire(repo: Path):
+def test_receipt_is_consumed_even_when_no_nonmachine_commit_is_authorized(repo: Path):
     """Incident 3 — the one that only a consume-on-read design prevents.
 
-    A fire that writes a receipt and commits must not leave it behind: the NEXT
-    fire would then caption its own, unrelated commit with the previous shift's
-    reasons — a false audit trail, which is worse than a generated one.
+    Compatibility receipts may still arrive during rollout. Consume them even
+    though they can no longer authorize shared-checkout non-machine bytes.
     """
     phase_z.write_fire_receipt(repo, subject="第一班的原因")
     (repo / "a.txt").write_text("a\n")
     _fire(repo, baseline=set())
-    assert _subject(repo) == "dispatch(07:07): 第一班的原因"
+    assert _subject(repo) == "seed"
 
-    # Second fire: different work, no receipt of its own.
-    (repo / "b.txt").write_text("b\n")
-    _fire(repo, baseline=set())
-
-    assert "第一班的原因" not in _subject(repo), "a stale receipt captioned the next fire"
-    assert "未留 receipt" in _subject(repo)
+    receipt_path = phase_z._receipt_path(repo, subprocess.run)
+    assert receipt_path is not None
+    assert not receipt_path.exists()
 
 
 def test_cli_refuses_mangled_cjk_argv_with_an_actionable_message(repo: Path):

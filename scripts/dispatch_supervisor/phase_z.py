@@ -107,7 +107,12 @@ _TEST_GATE_TIMEOUT_S = 600
 # smuggle into main (docs/error_log.md dab3baa12: a gmail_inbox_poll rewrite went
 # in via PHASE-Z with a red test nobody saw for 5 days). experiments/ and paper/
 # are research artifacts, not the runtime the gate protects.
-_GATED_CODE_PREFIXES = ("src/volpred/", "scripts/", "tests/")
+# Candidate commits are normally control data, but the explicit machine
+# namespace can contain generated Python helpers. If one ever does, it needs
+# the same post-commit attribution gate as source code; excluding storage/ops
+# merely because the legacy timing recognizer used to own code was a coverage
+# hole after Issue #44 retired that recognizer.
+_GATED_CODE_PREFIXES = ("src/volpred/", "scripts/", "tests/", "storage/ops/")
 _TRUSTED_GATE_PATHS = {
     "scripts/audit_silent_fallbacks.py",
     "scripts/audit_test_imports.py",
@@ -287,6 +292,7 @@ _SNAPSHOT_BASENAME = "volpred_phase_z_pre_fire_dirty.json"
 # the rejected candidate contained, so a later pre-fire pass can close it out
 # without ever adopting an unrelated dirty path.
 _FAILED_CLOSEOUT_BASENAME = "volpred_phase_z_failed_closeout.json"
+_FAILED_CLOSEOUT_RECOVERY_CAPABILITY = object()
 # A fire is bounded by the worker timeout (~50min). A snapshot older than this is
 # from a fire whose PHASE-Z never ran (daemon killed mid-fire); trusting it would
 # mean judging today's dirt against yesterday's baseline.
@@ -828,6 +834,12 @@ def recover_failed_closeout(
         pre_fire_dirty=dirty - set(unresolved),
         commit_receipt_override=stored_receipt,
         recovery_mode=True,
+        _recovery_capability=_FAILED_CLOSEOUT_RECOVERY_CAPABILITY,
+        _closeout_authorization={
+            entry["path"]: entry["fingerprint"]
+            for entry in payload["paths"]
+            if entry["path"] in unresolved
+        },
     )
     if result.get("committed"):
         _clear_failed_closeout(repo_root, runner)
@@ -1634,6 +1646,117 @@ def _verify_machine_churn_candidate(
             or hashlib.sha256(blob.stdout or b"").hexdigest() != identity.sha256
             or not machine_churn_identity_matches(repo_root, identity)
         ):
+            mismatches.append(rel)
+    return mismatches
+
+
+def _verify_closeout_candidate(
+    repo_root: Path,
+    authorization: dict[str, dict[str, object]],
+    *,
+    base_sha: str,
+    runner,
+    env: dict[str, str],
+) -> list[str]:
+    """Bind a legacy receipt to the exact candidate-index bytes it authorized.
+
+    Checking only the live path after ``git add`` is insufficient: a writer can
+    swap A→B while Git reads it, then restore pinned A before the live recheck.
+    Validate both surfaces so the candidate cannot contain B under A's receipt.
+    Old receipts did not persist mode, so tracked files inherit the pinned base
+    tree mode and untracked regular files are limited to conservative 100644;
+    the staged Git mode must match that fail-closed fallback.
+    """
+    mismatches: list[str] = []
+    for rel, expected in sorted(authorization.items()):
+        staged = _git(
+            repo_root,
+            "ls-files",
+            "--stage",
+            "-z",
+            "--",
+            rel,
+            timeout_s=_SHORT_TIMEOUT_S,
+            runner=runner,
+            env=env,
+        )
+        if staged.returncode != 0:
+            mismatches.append(rel)
+            continue
+        entries = _parse_stage_entries(staged.stdout or "")
+        live = _path_fingerprint(repo_root / rel)
+        if live != expected:
+            mismatches.append(rel)
+            continue
+
+        kind = expected.get("kind")
+        if kind == "missing":
+            if entries:
+                mismatches.append(rel)
+            continue
+
+        records = entries.get(rel, ())
+        if set(entries) != {rel} or len(records) != 1:
+            mismatches.append(rel)
+            continue
+        fields = records[0].split()
+        if len(fields) != 3 or fields[2] != "0":
+            mismatches.append(rel)
+            continue
+        staged_mode, blob_oid = fields[0], fields[1]
+        blob = _git_bytes(
+            repo_root,
+            "cat-file",
+            "blob",
+            blob_oid,
+            timeout_s=_SHORT_TIMEOUT_S,
+            runner=runner,
+            env=env,
+        )
+        if blob.returncode != 0:
+            mismatches.append(rel)
+            continue
+
+        if kind == "file":
+            # Pre-retirement receipts did not persist mode. They therefore
+            # cannot authorize a later chmod: tracked files inherit the pinned
+            # base tree's mode; an untracked regular file gets Git's conservative
+            # 100644 default. An old untracked executable is left for manual
+            # attribution rather than guessing that +x belonged to the receipt.
+            base_entries = _base_tree_entries(
+                repo_root,
+                base_sha,
+                [rel],
+                runner=runner,
+            )
+            if base_entries is None:
+                mismatches.append(rel)
+                continue
+            base_records = base_entries.get(rel, ())
+            if len(base_records) > 1:
+                mismatches.append(rel)
+                continue
+            expected_mode = (
+                base_records[0].split()[0]
+                if base_records
+                else "100644"
+            )
+            if (
+                staged_mode != expected_mode
+                or len(blob.stdout or b"") != expected.get("size")
+                or hashlib.sha256(blob.stdout or b"").hexdigest()
+                != expected.get("sha256")
+            ):
+                mismatches.append(rel)
+        elif kind == "symlink":
+            if (
+                staged_mode != "120000"
+                or blob.stdout != os.fsencode(str(expected.get("target", "")))
+            ):
+                mismatches.append(rel)
+        else:
+            # Directories/special files were representable in old fingerprints
+            # but are not safe Git blob authorizations.
             mismatches.append(rel)
     return mismatches
 
@@ -2820,23 +2943,17 @@ def run_phase_z(
     gate_review_fn=None,
     claim_owners: set[str] | list[str] | tuple[str, ...] | None = None,
     fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
+    _recovery_capability: object | None = None,
+    _closeout_authorization: dict[str, dict[str, object]] | None = None,
 ) -> dict:
     """Deterministic post-fire commit. Returns an observability dict.
 
-    ``isolated_cohort`` (WS-B demotion, 2026-07-20): True when EVERY fire in
-    the drained cohort ran with a producer-scoped workspace (see workspace.py).
-    Isolated fires land their repo-byte output through their own worktree merge
-    gate, so the baseline arithmetic below may no longer CLAIM authorship of
-    non-machine-state paths by timing alone — a new dirty code/docs path on the
-    canonical checkout during an isolated fire is either another writer or an
-    isolation breach, and committing it under the fire's name is exactly the
-    guessing this pilot retires. Such paths are demoted to
-    ``isolation_residue``: left in the tree, surfaced once, and picked up by
-    the existing foreign-streak machinery if they stick around. Machine-state
-    adoption (scheduled-job churn — the residue lane isolation cannot cover)
-    is unchanged, and ``isolated_cohort=False`` keeps the full legacy fallback
-    for unisolated fires. The recognizer itself is retained (retirement is a
-    separate decision after a stable month — plan §WS-B).
+    ``isolated_cohort`` is retained temporarily as a scheduler-call compatibility
+    field while Issue #44 removes the old cohort recognizer. It no longer changes
+    ownership policy: Issue #43 established that every automated mutating lane is
+    isolated-or-requeued, so *all* canonical non-machine residue is foreign to
+    PHASE-Z regardless of a legacy token's flag. Machine-state adoption remains
+    explicit by namespace and byte identity.
 
     Returns keys: ``committed`` (bool), ``reason`` (str), and — when it acted —
     ``untracked`` (list of leaked-ignored paths removed from the index),
@@ -2951,34 +3068,54 @@ def run_phase_z(
         observed_at=datetime.now(timezone.utc),
     )
     # A path becoming dirty during the fire proves only WHEN PHASE-Z first saw
-    # it, not WHO wrote it.  For agent-authored paths the unisolated fallback
-    # still uses that timing signal, but machine-state namespaces already have
-    # an explicit owner: the supervisor.  Keep those paths out of ``owned`` so
-    # they cannot generate an "agent omitted receipt" subject/alert merely
-    # because a worker updated queue state after the agent's Stop hook ran.
+    # it, not WHO wrote it. Split machine state first because its namespace has
+    # an explicit owner; every canonical non-machine candidate is demoted below.
     newly_dirty = sorted(dirty_now - baseline)
     owned = [p for p in newly_dirty if not _is_machine_state(p)]
     newly_dirty_machine = [p for p in newly_dirty if _is_machine_state(p)]
     dirty_before = sorted(dirty_now & baseline)
-    # ── WS-B demotion: isolated cohorts get NO baseline authorship guessing ──
-    # for repo bytes. Every fire in this cohort had its own workspace, so its
-    # repo-byte output landed (or went to remediation) through the worktree
-    # merge gate — a non-machine-state path that turned dirty on the canonical
-    # checkout during the fire is another writer or an isolation breach, and
-    # timing arithmetic can no longer prove which. Leave it, say so once, and
-    # let the foreign-streak machinery own it if it sticks around. Machine
-    # state (scheduled-job churn) keeps its adoption — that residue lane is
-    # exactly what the fallback still exists for.
-    isolation_residue: list[str] = []
-    if isolated_cohort:
-        isolation_residue = [p for p in owned if not _is_machine_state(p)]
-        owned = [p for p in owned if _is_machine_state(p)]
-        if isolation_residue:
-            LOG.info(
-                "phase_z: isolated cohort — leaving %d canonical non-machine "
-                "path(s) for declared-ownership classification: %s",
-                len(isolation_residue), isolation_residue[:10],
-            )
+    # ── Issue #44 retirement: timing no longer grants producer authorship ──
+    # Issue #43 made every automated mutating lane isolated-or-requeued. Its
+    # output lands through the workspace finalizer, so there is now *no* valid
+    # worker path by which a non-machine file should appear dirty on canonical
+    # main and need PHASE-Z to rescue it. The old ``dirty_now - baseline``
+    # inference proved the opposite in live commit ee095d3e5: an interactive
+    # session edited backup_user_claude.sh during an unrelated FOMC/K1731 fire,
+    # and PHASE-Z swept that script into the dispatch commit. Demote canonical
+    # non-machine residue for every cohort, including legacy/unisolated tokens;
+    # such a token is itself an isolation breach, not authority to claim bytes.
+    # Machine-state adoption remains on its explicit namespace + identity gate.
+    # One compatibility exception drains a pre-retirement failed-closeout
+    # receipt. Recovery reaches here only after recover_failed_closeout has
+    # re-read the durable receipt and proved every unresolved path still matches
+    # its recorded SHA/shape. That is explicit byte authority, not timing
+    # inference. It cannot authorize a fresh cohort and disappears when the
+    # finite legacy receipt set is drained.
+    authorized_recovery = (
+        recovery_mode
+        and _recovery_capability is _FAILED_CLOSEOUT_RECOVERY_CAPABILITY
+        and bool(_closeout_authorization)
+    )
+    closeout_authorization = (
+        dict(_closeout_authorization or {})
+        if authorized_recovery
+        else {}
+    )
+    recovery_owned = [
+        path
+        for path in owned
+        if path in closeout_authorization
+        and _path_fingerprint(repo_root / path) == closeout_authorization[path]
+    ]
+    isolation_residue = [path for path in owned if path not in set(recovery_owned)]
+    owned = recovery_owned
+    if isolation_residue:
+        LOG.info(
+            "phase_z: isolation contract — leaving %d canonical non-machine "
+            "path(s) for declared-ownership classification: %s",
+            len(isolation_residue),
+            isolation_residue[:10],
+        )
     # The snapshot is consumed only on a SETTLED outcome (committed / clean /
     # nothing_owned / nothing_to_commit — the scheduler's terminal set). A failed
     # commit attempt (pre-commit gate block, add/reset error) keeps the baseline,
@@ -2990,14 +3127,10 @@ def run_phase_z(
     # this fire.  Classify both sets through the lock+parse gate.  Previously the
     # during-fire half bypassed this classifier as ``owned``; besides inventing
     # an agent attribution, that also skipped the corruption/live-writer checks.
-    churn_classification = _classify_machine_churn(
-        repo_root,
-        sorted(
-            set(newly_dirty_machine)
-            | {p for p in dirty_before if _is_machine_state(p)}
-        ),
+    machine_candidates = sorted(
+        set(newly_dirty_machine)
+        | {p for p in dirty_before if _is_machine_state(p)}
     )
-    churn, churn_deferred, churn_corrupt = churn_classification
     foreign = sorted(
         set(p for p in dirty_before if not _is_machine_state(p))
         | set(isolation_residue)
@@ -3012,26 +3145,6 @@ def run_phase_z(
             len(active_foreign), list(active_foreign.items())[:10],
         )
 
-    if churn_corrupt:
-        alert_fn(
-            level="critical",
-            title=f"PHASE-Z 控制檔內容壞掉，拒絕提交 — {', '.join(churn_corrupt)}",
-            body="\n".join([
-                f"（fire 時間: {hhmm}）",
-                "",
-                "## 發生什麼",
-                "任務池等控制檔的內容無法解析（可能是某次寫入被中斷截斷）。PHASE-Z 沒有把它 commit "
-                "進歷史 —— 曾經有一次截斷的任務池被當成正常歷史提交，這道閘門就是為了擋那件事。",
-                "",
-                "## 現在該做什麼",
-                "檔案還在工作區、沒被覆蓋。從上一個 commit 取回可用版本："
-                "`git checkout HEAD -- <檔案>`，確認寫入端為何中斷。",
-                "",
-                "## 檔案",
-                *[f"- {p}" for p in churn_corrupt],
-            ]),
-        )
-
     # Foreign dirt splits once more. Most of it really is another session's work
     # in progress. A subset can be MECHANICALLY PROVED to be the missing half of
     # a commit that already landed — a red test at HEAD that this path's bytes
@@ -3042,7 +3155,7 @@ def run_phase_z(
     # pay for the whole clone+pytest sweep twice in one tick for one answer.
     orphan_halves = (
         {"adopted": [], "reason": "recovery_mode", "considered": [], "evidence": {}}
-        if recovery_mode
+        if authorized_recovery
         else _adopt_orphan_halves(
             repo_root, risk_foreign, runner=runner, test_runner=test_runner or subprocess.run,
         )
@@ -3067,7 +3180,11 @@ def run_phase_z(
 
     # A recovery pass runs immediately before the real pre-fire snapshot. It
     # must not count the same unrelated dirty paths as another hourly shift.
-    streaks = {} if recovery_mode else _bump_foreign_streaks(repo_root, runner, risk_foreign)
+    streaks = (
+        {}
+        if authorized_recovery
+        else _bump_foreign_streaks(repo_root, runner, risk_foreign)
+    )
     stuck = sorted((p for p, n in streaks.items() if n >= _FOREIGN_STREAK_CRITICAL),
                    key=lambda p: (-streaks[p], p))
     worst_streak = max(streaks.values(), default=0)
@@ -3161,6 +3278,42 @@ def run_phase_z(
                     *[f"- {p}" for p, why in sorted(quarantine["skipped"].items())
                       if why == "live_writer"],
                 ] if any(w == "live_writer" for w in quarantine["skipped"].values()) else []),
+            ]),
+        )
+
+    # Classify machine state only after every PHASE-Z-owned control-plane
+    # mutation above. Opening/updating a stuck-path incident writes the
+    # canonical queue itself; capturing the queue identity before that write
+    # made the later candidate fence reject PHASE-Z's own transaction as
+    # external churn. Re-read status here so a queue that was clean at entry but
+    # dirtied by the incident is included. A real writer racing after this
+    # point is still caught by _verify_machine_churn_candidate before commit.
+    refreshed_dirty = _dirty_paths(repo_root, runner)
+    if refreshed_dirty is not None:
+        machine_candidates = sorted(
+            set(machine_candidates)
+            | {p for p in refreshed_dirty if _is_machine_state(p)}
+        )
+    churn_classification = _classify_machine_churn(repo_root, machine_candidates)
+    churn, churn_deferred, churn_corrupt = churn_classification
+
+    if churn_corrupt:
+        alert_fn(
+            level="critical",
+            title=f"PHASE-Z 控制檔內容壞掉，拒絕提交 — {', '.join(churn_corrupt)}",
+            body="\n".join([
+                f"（fire 時間: {hhmm}）",
+                "",
+                "## 發生什麼",
+                "任務池等控制檔的內容無法解析（可能是某次寫入被中斷截斷）。PHASE-Z 沒有把它 commit "
+                "進歷史 —— 曾經有一次截斷的任務池被當成正常歷史提交，這道閘門就是為了擋那件事。",
+                "",
+                "## 現在該做什麼",
+                "檔案還在工作區、沒被覆蓋。從上一個 commit 取回可用版本："
+                "`git checkout HEAD -- <檔案>`，確認寫入端為何中斷。",
+                "",
+                "## 檔案",
+                *[f"- {p}" for p in churn_corrupt],
             ]),
         )
 
@@ -3357,6 +3510,33 @@ def run_phase_z(
                                 add.returncode, (add.stderr or "")[-300:])
                     return {"committed": False, "reason": "add_error", "untracked": untracked,
                             "rolled_back": True}
+
+            # A pre-retirement closeout receipt authorizes only its exact pinned
+            # bytes. Recheck after staging: direct recovery_mode calls have no
+            # capability, and a later writer racing the recovery cannot have its
+            # new bytes committed under the rejected fire's attribution.
+            closeout_identity_mismatches = _verify_closeout_candidate(
+                repo_root,
+                {
+                    path: closeout_authorization[path]
+                    for path in owned
+                    if path in closeout_authorization
+                },
+                base_sha=base_sha,
+                runner=runner,
+                env=candidate_env,
+            )
+            if closeout_identity_mismatches:
+                LOG.warning(
+                    "phase_z: closeout identity changed before staging: %s",
+                    closeout_identity_mismatches,
+                )
+                return {
+                    "committed": False,
+                    "reason": "closeout_identity_error",
+                    "rolled_back": True,
+                    "identity_mismatches": closeout_identity_mismatches,
+                }
 
             for rel in sorted(missing_churn):
                 remove = _git(
@@ -3690,7 +3870,11 @@ def run_phase_z(
         LOG.info("phase_z: committed — %s", out.splitlines()[-1] if out else "(no output)")
         ci_repair_tasks_backfilled: list[str] = []
         issue_tasks_closed: list[dict[str, Any]] = []
-        if claim_owners:
+        # A machine-churn-only commit is not evidence that any worker claim's
+        # deliverable landed. After Issue #44 demotes all canonical non-machine
+        # residue, backfilling/closing the fire's task from such a commit would
+        # falsely settle work based on unrelated queue state.
+        if claim_owners and owned:
             try:
                 ci_repair_tasks_backfilled = backfill_ci_repair_commit(
                     path=repo_root / "storage" / "next_tasks.json",
