@@ -9,7 +9,6 @@ from __future__ import annotations
 import fcntl
 import hashlib
 import json
-import math
 import os
 import tempfile
 from collections.abc import Callable, Mapping
@@ -20,6 +19,9 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from volpred.ops.diagnostics import warn
+
+from .probe_policy import ProbePolicy
 from .registry import (
     DEFAULT_REGISTRY_PATH,
     ProviderProbeAuthorization,
@@ -53,6 +55,7 @@ _RESERVATION_FIELDS = frozenset(
         "maximum_backoff_seconds",
         "window_seconds",
         "max_probe_cost_units",
+        "reservation_ttl_seconds",
         "reserved_at",
         "expires_at",
     }
@@ -107,6 +110,15 @@ class ProbeOutcome(StrEnum):
     POLICY_DENIED = "policy_denied"
 
 
+class ProbeAdmission(StrEnum):
+    ACQUIRED = "acquired"
+    PROBE_IN_PROGRESS = "probe_in_progress"
+    MINIMUM_INTERVAL = "minimum_interval"
+    BACKOFF = "backoff"
+    BUDGET_EXHAUSTED = "budget_exhausted"
+    POLICY_DENIED = "policy_denied"
+
+
 @dataclass(frozen=True)
 class ProbeReservation:
     token: str
@@ -121,6 +133,7 @@ class ProbeReservation:
     maximum_backoff_seconds: int
     window_seconds: int
     max_probe_cost_units: int
+    reservation_ttl_seconds: int
     reserved_at: datetime
     expires_at: datetime
 
@@ -181,7 +194,8 @@ class ProbeObservation:
 
 @dataclass(frozen=True)
 class ProbeRunResult:
-    outcome: ProbeOutcome
+    admission: ProbeAdmission
+    outcome: ProbeOutcome | None
     provider_io_attempted: bool
     reason: str
     receipt: ProbeReceipt | ProbePolicyDenialReceipt | None
@@ -284,6 +298,7 @@ def _reservation_from_record(value: object) -> ProbeReservation:
             maximum_backoff_seconds=int(value["maximum_backoff_seconds"]),
             window_seconds=int(value["window_seconds"]),
             max_probe_cost_units=int(value["max_probe_cost_units"]),
+            reservation_ttl_seconds=int(value["reservation_ttl_seconds"]),
             reserved_at=_parse_time(value["reserved_at"], label="reserved_at"),
             expires_at=_parse_time(value["expires_at"], label="expires_at"),
         )
@@ -309,6 +324,9 @@ def _reservation_from_record(value: object) -> ProbeReservation:
         < reservation.minimum_interval_seconds
         or reservation.window_seconds <= 0
         or reservation.max_probe_cost_units <= 0
+        or reservation.reservation_ttl_seconds <= 0
+        or reservation.reservation_ttl_seconds
+        > reservation.minimum_interval_seconds
         or reservation.expires_at <= reservation.reserved_at
     ):
         raise ProbePolicyError("provider probe ledger reservation fields are invalid")
@@ -568,40 +586,7 @@ class DurableProviderProbeLedger:
         matches = [item for item in receipts if item.provider_id == provider_id]
         return matches[-1] if matches else None
 
-    @staticmethod
-    def _budget_next_at(
-        *,
-        now: datetime,
-        cost_units: int,
-        window_seconds: int,
-        max_units: int,
-        receipts: list[ProbeReceipt],
-        reservations: list[ProbeReservation],
-    ) -> datetime | None:
-        window = timedelta(seconds=window_seconds)
-        events = sorted(
-            [
-                (item.observed_at, item.cost_units)
-                for item in receipts
-                if item.observed_at > now - window
-            ]
-            + [
-                (item.reserved_at, item.cost_units)
-                for item in reservations
-                if item.reserved_at > now - window
-            ],
-            key=lambda item: item[0],
-        )
-        used = sum(cost for _, cost in events)
-        if used + cost_units <= max_units:
-            return None
-        for occurred_at, cost in events:
-            used -= cost
-            if used + cost_units <= max_units:
-                return occurred_at + window
-        return now + window
-
-    def reserve(
+    def _reserve(
         self,
         *,
         provider_id: str,
@@ -651,13 +636,23 @@ class DurableProviderProbeLedger:
                     registry_sha256=authorization.registry_sha256,
                     next_probe_at=latest.next_probe_at,
                 )
-            budget_next = self._budget_next_at(
-                now=now,
-                cost_units=authorization.cost_units,
+            policy = ProbePolicy.from_seconds(
+                minimum_interval_seconds=authorization.minimum_interval_seconds,
+                maximum_backoff_seconds=authorization.maximum_backoff_seconds,
                 window_seconds=authorization.window_seconds,
-                max_units=authorization.max_probe_cost_units,
-                receipts=receipts,
-                reservations=reservations,
+                max_probe_cost_units=authorization.max_probe_cost_units,
+                reservation_ttl_seconds=authorization.reservation_ttl_seconds,
+            )
+            budget_next = policy.budget_next_at(
+                now=now,
+                requested_cost_units=authorization.cost_units,
+                events=[
+                    (item.observed_at, item.cost_units) for item in receipts
+                ]
+                + [
+                    (item.reserved_at, item.cost_units)
+                    for item in reservations
+                ],
             )
             if budget_next is not None:
                 return ProbeDecision(
@@ -711,12 +706,13 @@ class DurableProviderProbeLedger:
             maximum_backoff_seconds=authorization.maximum_backoff_seconds,
             window_seconds=authorization.window_seconds,
             max_probe_cost_units=authorization.max_probe_cost_units,
+            reservation_ttl_seconds=authorization.reservation_ttl_seconds,
             reserved_at=now,
             expires_at=now
-            + timedelta(seconds=authorization.minimum_interval_seconds),
+            + timedelta(seconds=authorization.reservation_ttl_seconds),
         )
 
-    def settle(
+    def _settle(
         self,
         *,
         token: str,
@@ -758,19 +754,14 @@ class DurableProviderProbeLedger:
                 if outcome is ProbeOutcome.HEALTHY
                 else (latest.consecutive_failures if latest else 0) + 1
             )
-            delay_seconds = reservation.minimum_interval_seconds
-            if failures:
-                ratio = (
-                    reservation.maximum_backoff_seconds
-                    / reservation.minimum_interval_seconds
-                )
-                saturation = max(0, math.ceil(math.log2(ratio)))
-                exponent = max(0, failures - 1)
-                delay_seconds = (
-                    reservation.maximum_backoff_seconds
-                    if exponent >= saturation
-                    else reservation.minimum_interval_seconds * (2**exponent)
-                )
+            policy = ProbePolicy.from_seconds(
+                minimum_interval_seconds=reservation.minimum_interval_seconds,
+                maximum_backoff_seconds=reservation.maximum_backoff_seconds,
+                window_seconds=reservation.window_seconds,
+                max_probe_cost_units=reservation.max_probe_cost_units,
+                reservation_ttl_seconds=reservation.reservation_ttl_seconds,
+            )
+            delay = policy.backoff_delay(failures)
             previous_hash = (
                 receipts[-1].receipt_sha256 if receipts else None
             )
@@ -788,7 +779,7 @@ class DurableProviderProbeLedger:
                 "observed_at": now.isoformat(),
                 "consecutive_failures": failures,
                 "next_probe_at": (
-                    now + timedelta(seconds=delay_seconds)
+                    now + delay
                 ).isoformat(),
                 "previous_receipt_sha256": previous_hash,
             }
@@ -856,7 +847,13 @@ class DurableProviderProbeLedger:
             registry_sha256 = hashlib.sha256(
                 self.registry_path.read_bytes()
             ).hexdigest()
-        except OSError:
+        except OSError as exc:
+            warn(
+                "provider-probe",
+                "registry bytes unavailable while recording policy denial",
+                path=str(self.registry_path),
+                error=type(exc).__name__,
+            )
             registry_sha256 = None
         lock = self._locked()
         try:
@@ -918,7 +915,7 @@ class DurableProviderProbeLedger:
         perform_probe: Callable[[ProbeReservation], ProbeObservation],
     ) -> ProbeRunResult:
         try:
-            decision = self.reserve(
+            decision = self._reserve(
                 provider_id=provider_id,
                 model_id=model_id,
                 executable_path=executable_path,
@@ -936,6 +933,7 @@ class DurableProviderProbeLedger:
                 ),
             )
             return ProbeRunResult(
+                admission=ProbeAdmission.POLICY_DENIED,
                 outcome=ProbeOutcome.POLICY_DENIED,
                 provider_io_attempted=False,
                 reason=f"policy_denied:{exc}",
@@ -943,17 +941,9 @@ class DurableProviderProbeLedger:
                 next_probe_at=None,
             )
         if not decision.acquired:
-            prior = [
-                item
-                for item in self.receipts()
-                if item.provider_id == provider_id
-            ]
             return ProbeRunResult(
-                outcome=(
-                    prior[-1].outcome
-                    if prior
-                    else ProbeOutcome.PROVIDER_UNAVAILABLE
-                ),
+                admission=ProbeAdmission(decision.reason),
+                outcome=None,
                 provider_io_attempted=False,
                 reason=decision.reason,
                 receipt=None,
@@ -982,12 +972,13 @@ class DurableProviderProbeLedger:
                 reservation.cost_units,
             )
             if identity != reserved_identity:
-                receipt = self.settle(
+                receipt = self._settle(
                     token=reservation.token,
                     outcome=ProbeOutcome.POLICY_DENIED,
                     evidence_ref="probe://policy/changed-after-reservation",
                 )
                 return ProbeRunResult(
+                    admission=ProbeAdmission.ACQUIRED,
                     outcome=receipt.outcome,
                     provider_io_attempted=False,
                     reason="policy_changed_after_reservation",
@@ -997,12 +988,13 @@ class DurableProviderProbeLedger:
             try:
                 observation = perform_probe(reservation)
             except Exception as exc:  # noqa: BLE001 - typed adapter boundary
-                receipt = self.settle(
+                receipt = self._settle(
                     token=reservation.token,
                     outcome=ProbeOutcome.PROVIDER_UNAVAILABLE,
                     evidence_ref=f"probe://adapter/error/{type(exc).__name__}",
                 )
                 return ProbeRunResult(
+                    admission=ProbeAdmission.ACQUIRED,
                     outcome=receipt.outcome,
                     provider_io_attempted=True,
                     reason=f"probe_adapter_error:{type(exc).__name__}",
@@ -1010,24 +1002,26 @@ class DurableProviderProbeLedger:
                     next_probe_at=receipt.next_probe_at,
                 )
             if not isinstance(observation, ProbeObservation):
-                receipt = self.settle(
+                receipt = self._settle(
                     token=reservation.token,
                     outcome=ProbeOutcome.POLICY_DENIED,
                     evidence_ref="probe://adapter/invalid-observation",
                 )
                 return ProbeRunResult(
+                    admission=ProbeAdmission.ACQUIRED,
                     outcome=receipt.outcome,
                     provider_io_attempted=True,
                     reason="probe_adapter_contract_violation",
                     receipt=receipt,
                     next_probe_at=receipt.next_probe_at,
                 )
-            receipt = self.settle(
+            receipt = self._settle(
                 token=reservation.token,
                 outcome=observation.outcome,
                 evidence_ref=observation.evidence_ref,
             )
             return ProbeRunResult(
+                admission=ProbeAdmission.ACQUIRED,
                 outcome=receipt.outcome,
                 provider_io_attempted=True,
                 reason="settled",
@@ -1035,12 +1029,13 @@ class DurableProviderProbeLedger:
                 next_probe_at=receipt.next_probe_at,
             )
         except ProviderRegistryError as exc:
-            receipt = self.settle(
+            receipt = self._settle(
                 token=reservation.token,
                 outcome=ProbeOutcome.POLICY_DENIED,
                 evidence_ref=f"probe://policy/denied/{type(exc).__name__}",
             )
             return ProbeRunResult(
+                admission=ProbeAdmission.ACQUIRED,
                 outcome=receipt.outcome,
                 provider_io_attempted=False,
                 reason=f"policy_denied:{exc}",

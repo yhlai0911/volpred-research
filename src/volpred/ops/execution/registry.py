@@ -23,6 +23,7 @@ _PROBE_FIELDS = frozenset(
         "maximum_backoff_seconds",
         "window_seconds",
         "max_probe_cost_units",
+        "reservation_ttl_seconds",
     }
 )
 _PROVIDER_FIELDS = frozenset(
@@ -146,6 +147,7 @@ class ProviderProbeAuthorization:
     maximum_backoff_seconds: int
     window_seconds: int
     max_probe_cost_units: int
+    reservation_ttl_seconds: int
     settings_path: str | None
     settings_sha256: str | None
 
@@ -342,6 +344,10 @@ def _validate_probe_policy(value: object) -> Mapping[str, int]:
     if policy["maximum_backoff_seconds"] < policy["minimum_interval_seconds"]:
         raise ProviderRegistryError(
             "probe maximum backoff must cover minimum interval"
+        )
+    if policy["reservation_ttl_seconds"] > policy["minimum_interval_seconds"]:
+        raise ProviderRegistryError(
+            "probe reservation TTL cannot exceed minimum interval"
         )
     return policy
 
@@ -721,6 +727,9 @@ def authorize_provider_probe(
         window_seconds=registry.probe_policy["window_seconds"],
         max_probe_cost_units=registry.probe_policy[
             "max_probe_cost_units"
+        ],
+        reservation_ttl_seconds=registry.probe_policy[
+            "reservation_ttl_seconds"
         ],
         settings_path=settings_path,
         settings_sha256=settings_sha256,

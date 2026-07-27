@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import math
 import re
 from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass
@@ -20,27 +19,7 @@ from uuid import uuid4
 
 from volpred.diagnostics import warn
 
-from .probe import (
-    DurableProviderProbeLedger as DurableProviderProbeLedger,
-)
-from .probe import (
-    ProbeDecision as ProbeDecision,
-)
-from .probe import (
-    ProbeObservation as ProbeObservation,
-)
-from .probe import (
-    ProbeOutcome as ProbeOutcome,
-)
-from .probe import (
-    ProbePolicyError as ProbePolicyError,
-)
-from .probe import (
-    ProbeReceipt as ProbeReceipt,
-)
-from .probe import (
-    ProbeRunResult as ProbeRunResult,
-)
+from .probe_policy import ProbePolicy as ProbePolicy
 from .registry import (
     ProviderProbeAuthorization as ProviderProbeAuthorization,
 )
@@ -109,25 +88,6 @@ class ProviderDescriptor:
     api_key_env: str | None
     probe_cost_units: int
     enabled: bool = True
-
-
-@dataclass(frozen=True)
-class ProbePolicy:
-    minimum_interval: timedelta = timedelta(minutes=5)
-    maximum_backoff: timedelta = timedelta(hours=1)
-    window: timedelta = timedelta(hours=1)
-    max_probe_cost_units: int = 6
-    probe_reservation_ttl: timedelta = timedelta(minutes=2)
-
-    def __post_init__(self) -> None:
-        if self.minimum_interval <= timedelta(0):
-            raise ValueError("minimum probe interval must be positive")
-        if self.maximum_backoff < self.minimum_interval:
-            raise ValueError("maximum probe backoff must cover the minimum interval")
-        if self.window <= timedelta(0) or self.max_probe_cost_units <= 0:
-            raise ValueError("probe window and cost budget must be positive")
-        if self.probe_reservation_ttl <= timedelta(0):
-            raise ValueError("probe reservation TTL must be positive")
 
 
 @dataclass(frozen=True)
@@ -536,17 +496,7 @@ class _InMemoryProviderExecutionStore:
             if observation.blocker is None
             else (previous.consecutive_failures if previous else 0) + 1
         )
-        exponent = max(0, failures - 1)
-        ratio = (
-            policy.maximum_backoff.total_seconds()
-            / policy.minimum_interval.total_seconds()
-        )
-        saturation_exponent = max(0, math.ceil(math.log2(ratio)))
-        delay = (
-            policy.maximum_backoff
-            if exponent >= saturation_exponent
-            else policy.minimum_interval * (2**exponent)
-        )
+        delay = policy.backoff_delay(failures)
         state = ProviderStateView(
             provider_id=observation.provider_id,
             blocker=observation.blocker,
