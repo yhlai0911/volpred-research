@@ -1,0 +1,60 @@
+{
+  "id": "compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433",
+  "title": "snapdupfix_k1592 clean rerun (dedup-before-diff fix)",
+  "script_path": "experiments/k1592/k1592.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T02:13:53Z",
+  "started_at": "2026-07-27T02:15:00Z",
+  "completed_at": "2026-07-27T02:15:10Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433.stderr",
+  "result_artifact": "experiments/k1592/k1592_results.json",
+  "output_paths": [
+    "experiments/k1592/k1592_results.json",
+    "experiments/k1592/k1592_oos_losses.csv",
+    "experiments/k1592/k1592_forecast_origin_decision_log.csv"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "# Followup: snapdupfix_k1592 收件驗證 + 下游更正\n\n## 背景\ncompute worker 已在**去重後 canonical 快照**上重跑 `experiments/k1592/k1592.py`（GARCH/GJR/GammaRule OOS 賽馬，leverage-direction 論文專屬）。根因修正已落地：`load_returns()` 現在**先在價格序列去重（`px[~px.index.duplicated(keep=\"last\")]`）再 `.diff()`**，避免舊順序（先 diff 後去重）為每個重複日期造出 fabricated 0.0 報酬（count audit 看不到，因 row count 不變）。\n\n稽核（audit_snapshot_dup_20260721）預測 clean 重跑會讓 **dm_GammaRule_minus_GJR_p 由 0.038 → 約 0.137（跨越 5%）**，MCS GARCH p 0.033→0.026，panel mean_losses 變動約 25-30%。\n\n## 你要做的事\n1. **驗證數字**：讀 `experiments/k1592/k1592_results.json`（compute job 剛寫）。確認：\n   - dm_GammaRule_minus_GJR_p 已從 0.038 移到 ~0.13 區間（不再 <5%）。若仍是 0.038 表示 script 未用新 code 或資料仍污染 → 回報 FAIL，勿硬收。\n   - verdict 仍為 NULL_OR_WEAK（主結論不變，這是預期的）。\n   - 對照 audit reran[] / rerun_cache 的 before/after 方向一致（不是抄數字，是核對方向）。\n2. **同步 knowledge.json K1592**（item_id=cdd5a484, idx≈2594）：現有敘事「0 個資產通過嚴格 Harvey+Holm 門檻 / NULL_OR_WEAK」仍正確，但若條目引用任何具體 p 值需更新為 clean 值；加一句 `【2026-07-27 修正 snapdupfix_k1592：去重後重跑，dm_GammaRule_minus_GJR_p 0.038→<clean值>，主 verdict 不變】`，並設 corrected_at/corrected_by 欄位。用 main-thread 直接編輯（非 agent 造假），數字須來自剛重跑的 results.json。\n3. **檢查 leverage-direction 論文引用**（`paper/leverage-direction/body.tex` 與 `body_v_ijf.tex`）：grep 是否有段落引用 gamma-rule vs GJR 的具體 DM p 值（尤其 0.038 或宣稱該比較「significant / 顯著」）。results.json 的 `required_paper_change` 已明列「Delete or demote any 'never significantly beaten' / 'genuine OOS gains' headline」。若 body.tex 有這類 claim 或引用舊 p，一併更正並在文中標明修正（禁只改數字不改結論措辭）。若無引用具體 p、且已是 equal-accuracy 敘事，則記錄「無需改，已與 clean 一致」。\n4. **更新 README**：`experiments/k1592/README.md` 若列了舊 p/loss 數字，改為 clean 值並加一行 snapshot-dup guard 註記。\n5. **完工**：`task_pool_claim.py complete --id snapdupfix_k1592 --status succeeded --result \"<摘要：clean p 值 + verdict 不變 + 是否動 paper>\"`（若步驟 1 驗證 FAIL 則 `--status failed` 並說明）。work_log actor 用當班 owner token。\n\n**Model**: opus / high (per model_router paper_review)\n**禁止**：抄 rerun_cache 當正式數字（步驟 1 要讀 canonical 重跑的 results.json）；只改 README 不改 results.json；force merge。",
+    "task_type": "paper_review",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "source_task_id": "snapdupfix_k1592",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T02:13:54Z",
+    "linked_at": "2026-07-27T02:13:54Z",
+    "error": null
+  },
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 86588,
+  "claimed_by_pid_start_wall": "Mon Jul 27 10:15:00 2026",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1592"
+  },
+  "followup_dispatched_at": "2026-07-27T02:38:47Z",
+  "followup_next_task_id": "snapdupfix_k1592",
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "dd2e70b423f1aea404d526a588759aa23b1d1fd8",
+  "delivered_paths": [
+    "experiments/k1592/k1592_forecast_origin_decision_log.csv",
+    "experiments/k1592/k1592_oos_losses.csv",
+    "experiments/k1592/k1592_results.json"
+  ],
+  "delivered_at": "2026-07-27T03:00:51.574753+00:00",
+  "delivery_source": "reap_orphan_deliverables"
+}

@@ -1,0 +1,52 @@
+{
+  "id": "compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525",
+  "title": "snapdupfix_k1391 clean rerun (dedup guard)",
+  "script_path": "experiments/k1391/k1391.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T02:15:25Z",
+  "started_at": "2026-07-27T02:30:03Z",
+  "completed_at": "2026-07-27T02:30:03Z",
+  "exit_code": -2,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1391-clean-rerun-dedup-guard-1785118525.stderr",
+  "result_artifact": "experiments/k1391/k1391_results.json",
+  "output_paths": [
+    "experiments/k1391/k1391_results.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "# Followup: snapdupfix_k1391 收件驗證\n\n## 背景\ncompute worker 已在去重後 canonical 快照重跑 `experiments/k1391/k1391.py`（GJR-GARCH-X VIX spec，K988 baseline 比較）。根因修正已落地：load 在 `sort_index()` 後補 `df_raw[~df_raw.index.duplicated(keep=\"last\")]`，杜絕重複交易日進入 DM 檢定。稽核：stored n_full_oos=1866（污染，run 2026-05-22）vs clean=1856；變動幅度先前未測（MEDIUM_UNQUANTIFIED）。\n\n## 你要做的事\n1. 讀 `experiments/k1391/k1391_results.json`（compute job 剛寫）。確認 `sample_sizes.n_full_oos` 不再是 1866（應為 clean 值，資料延伸後可能 >1856，只要不含重複即可）。記錄 clean 後 dm_tests 的 t/p 與污染版差異方向（這正是先前 unquantified 的部分）。\n2. **無 K1391 knowledge 條目**（已確認），故無 knowledge 需同步；若判斷此 clean 結果值得建 knowledge，可用 main-thread 建一條 factual entry（數字來自 results.json）。\n3. `experiments/k1391/README.md` 若列舊數字則更正並加 snapshot-dup guard 註記（禁只改 README 不改 results.json——但 results.json 已由重跑更新）。\n4. verdict 不翻轉（稽核僅 k1319/k1592 翻轉），無 feed/paper 引用需改，除非 grep 發現 k1391 被引用。\n5. 完工 `task_pool_claim.py complete --id snapdupfix_k1391 --status succeeded --result \"<摘要>\"`；work_log actor 用當班 owner token。\n\n**Model**: opus / medium (per model_router)\n**禁止**：抄 rerun_cache 當正式數字；force merge。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": true,
+  "source_task_id": "snapdupfix_k1391",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T02:15:25Z",
+    "linked_at": "2026-07-27T02:15:25Z",
+    "error": null
+  },
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 53831,
+  "claimed_by_pid_start_wall": "Mon Jul 27 10:30:03 2026",
+  "followup_dispatched_at": "2026-07-27T02:39:58Z",
+  "followup_next_task_id": "compute-snapdupfix-k1391-clean-rerun-fence-race-retry-1785119985",
+  "delivery_status": "partial_delivered",
+  "partial_delivered": true,
+  "delivery_commit": "9545b2b171a054031c03f6fade140c1d1534de6e",
+  "delivered_paths": [
+    "experiments/k1391/k1391_results.json"
+  ],
+  "delivered_at": "2026-07-27T03:00:50.415152+00:00",
+  "delivery_source": "reap_orphan_deliverables"
+}

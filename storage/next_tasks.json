@@ -13804,7 +13804,7 @@
     "title": "BTC-GAS paper markdown→LaTeX JBF template conversion",
     "task_type": "paper_body",
     "priority": 5,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "blocked_note": "Blocked until R0 review converges. Then convert markdown drafts to JBF main.tex using paper/prg-periodic-garch/main.tex as template reference.",
     "description": "Convert paper/btc-gas-negative/drafts/v0_*.md to LaTeX. JBF template style (Elsevier elsarticle). Compile main.tex with xelatex; check reproduce_report.json.",
     "source": "BTC_GAS_negative_paper",
@@ -13819,7 +13819,33 @@
     "parent_task_id": "BTC_GAS_negative_paper",
     "adjudicated_at": "2026-07-18T15:14:21.054308+00:00",
     "adjudicated_by": "hourly-slot-1-22a06d16729b49caaf877cd2bbde5cfc",
-    "adjudication_reason": "prior_attempts_failed is a retry signal, not a blocker -- route through the effort escalation ladder instead of parking indefinitely"
+    "adjudication_reason": "prior_attempts_failed is a retry signal, not a blocker -- route through the effort escalation ladder instead of parking indefinitely",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:42:28.462335+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b"
+      },
+      {
+        "ts": "2026-07-27T02:42:48.317772+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b"
+      },
+      {
+        "ts": "2026-07-27T02:44:59.403127+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_btc_gas_tex-3c9904",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_btc_gas_tex-3c9904",
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "result": "dispatched to compute job agent-brief_btc_gas_tex-3c9904; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-27T02:45:01Z",
+    "compute_finished_at": "2026-07-27T02:57:30Z"
   },
   {
     "id": "paper_review_mile_5f57d3f9",
@@ -40512,7 +40538,7 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1592/k1592_results.json + any K1592 knowledge entry\n**嚴重度**：HIGH\n\n**為什麼要修**：10 fabricated zero returns inflate panel mean_losses by ~25-30% and move dm_GammaRule_minus_GJR_p from 0.038 to 0.137, crossing 5%. MCS p for GARCH 0.033 -> 0.026. Row count is clean so this is invisible to a count audit.\n\n**污染證據（稽核逐行查證）**：k1592.py:80 builds ret via .diff() BEFORE :82 dedups with keep='last'. The retained copy is the second of the identical pair, whose diff is 0, so all 10 dup dates survive as fabricated 0.0 returns while n stays 873 (count audits miss this). True returns were -0.367,0.799,1.380,...; rerun moved panel mean_losses ~25-30% and dm_GammaRule_minus_GJR_p from 0.038 to 0.137, crossing 5%.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 2,
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
@@ -40538,13 +40564,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T02:38:46.879128+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "compute_job_id": "compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433",
     "blocked_reason": "external_compute_receipt_pending_collection",
-    "result": "dispatched to compute job compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433; awaiting PHASE A collection",
+    "result": "dispatched to compute job compute-snapdupfix-k1592-clean-rerun-dedup-before-diff-fix-1785118433; awaiting PHASE A collection\n\n去重後 canonical 快照 clean 重跑驗證：QQQ dm_GammaRule_minus_GJR_p 0.038→0.137（跨越5%），3/8資產(EEM/TLT/IWM)平均損失最低、0通過Harvey+Holm，verdict NULL_OR_WEAK 不變。已補 knowledge cdd5a484 corrected_at + README dedup guard note。paper 無 literal 0.038 引用（QQQ 報 p_holm=1.00）不受影響。",
     "compute_started_at": "2026-07-27T02:15:00Z",
-    "compute_finished_at": "2026-07-27T02:15:10Z"
+    "compute_finished_at": "2026-07-27T02:15:10Z",
+    "completed_at": "2026-07-27T02:38:46.879099+00:00"
   },
   {
     "id": "snapdupfix_k1705",
@@ -40622,7 +40655,7 @@
     "description": "來源：audit_snapshot_dup_20260721（parent assign_7f508612）。\n\n**受影響產物**：experiments/k1398/k1398_results.json + K1398 knowledge entry\n**嚴重度**：LOW\n\n**為什麼要修**：All three assets contaminated but effects are <=1.7% and DM t-stats are 9-35, far from any threshold. No verdict flips.\n\n**污染證據（稽核逐行查證）**：k1398.py:39/44/49 canonical paths for SPY/QQQ/GLD; :56-62 sort but no dedup. stored oos_n 4643 (SPY,QQQ) and 3417 (GLD) == polluted; clean 4633/3407. Sorting makes each dup pair adjacent so r=log(P/P)=0.\n\n**是否已有 clean 重跑**：是 — before/after 見稽核 reran[] 與 rerun_cache.json\n\n要做的事：\n1. 在**已修好**的 snapshot 上重跑（若稽核已重跑，仍需在 canonical repo 重跑一次並存檔，不可直接抄 rerun_cache 的數字當正式結果）。\n2. 更新 *_results.json，並同步更新 knowledge.json 對應 K 條目的數字與 verdict。\n3. 若 verdict 翻轉（k1319 / k1592）：檢查是否已有 feed 文章 / paper 段落引用舊結論，有則一併更正並在文中標明修正。\n4. 禁止只改 README 不改 results.json，也禁止只改數字不改結論措辭。\n\n稽核產物路徑（合併後）：experiments/audit_snapshot_dup_20260721/audit_snapshot_dup_20260721_results.json",
     "task_type": "experiment",
     "priority": 3,
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "source": "auto_discovered",
     "created_at": "2026-07-21T04:12:42.820951+00:00",
     "parent_task_id": "assign_7f508612",
@@ -40646,12 +40679,20 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-27T02:38:47.441152+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "compute_job_id": "compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140",
-    "blocked_reason": "external_compute_job_running",
-    "result": "dispatched to compute job compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-27T02:30:03Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "result": "dispatched to compute job compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140; awaiting PHASE A collection\n\n去重後 clean 重跑驗證：oos_n SPY/QQQ=4678、GLD=3452（污染版4643/4643/3417），DM MEM/AMEM vs GJR 全 p<0.001 方向一致（MEM/AMEM 各0/3優於GJR），verdict NULL 不變。README 已由重跑更新為 clean 數字；knowledge 0c4aa148 補 corrected_at + clean t 值取代污染值。",
+    "compute_started_at": "2026-07-27T02:30:03Z",
+    "compute_finished_at": "2026-07-27T02:34:08Z",
+    "completed_at": "2026-07-27T02:38:47.441131+00:00"
   },
   {
     "id": "snapdupfix_paper2_table1_summary_stats_provenance",
@@ -42527,7 +42568,7 @@
     "description": "Codex round 8 對 frozen target bb57bda98 裁決 FAIL；完整裁決：storage/ops/codex_reviews/k1731_armB_rev8_verdict.md。只修一個 blocking claim-surface defect與一個非 blocking gate hole，不重跑估計。\n\n1. 修 experiments/k1731/k1731_finalize_report.py 的 ARM_A_ENGINE_ISSUES[0].why_it_matters：不得再稱 low PIP 是「evidence of no effect」，不得稱「arm B null rests ...」。改成只支持 under-this-prior 的 weak in-sample selection，且明說不建立 OOS null。\n2. 由 canonical finalizer 重生三份 results JSON；禁止手改。獨立 leaf diff 必須維持 numeric change/add/remove = 0，rename values exact。\n3. 擴 k1731_armB_verification.py：artifact claim scan 必須涵蓋 armA_engine_issues（全部三份 artifact），加 negative control 證明殘留 null phrase 會 exit 1。\n4. 補 k1731_rev8_drift_check.py：numeric additions/removals 也必須讓 gate FAIL；加 regression test/negative control。\n5. 目前 worktree HEAD 已含 bb57bda98 後的 F1/F3 commits；不得回退或覆蓋後續成果。修正要套在現行 branch 上並重新建立完整 current claim-surface freeze。\n6. 跑 108-test nested-DM ratchet、arm-B verification、3834-leaf regression/drift gates；全部 PASS 後送 Codex round 9。PASS 才能解除 assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725；FAIL 再建下一個 bounded remediation。\n\n禁止 merge worktree、禁止寫 knowledge.json、禁止重跑估計。",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "codex_review_followup",
     "parent_task_id": "assign_24ebe308",
     "created_by": "codex-failover-slot-2-9e02458ba42b49668cb008bff360750d",
@@ -42564,13 +42605,34 @@
         "to": "pending",
         "by": "codex-failover-slot-1-72b8a83ad6834037a2884c1b93b58cb3",
         "note": "auto_release_stale_2h"
+      },
+      {
+        "ts": "2026-07-27T02:44:17.013004+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-290c4238c72046b2bceee7b4b994fdf4"
+      },
+      {
+        "ts": "2026-07-27T02:45:18.523813+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-290c4238c72046b2bceee7b4b994fdf4"
+      },
+      {
+        "ts": "2026-07-27T02:56:07.576035+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1731_rev9-c47c03",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "compute_job_id": "agent-k1731-armb-rev9-remediation",
-    "result": "dispatched to compute job agent-k1731-armb-rev9-remediation; awaiting PHASE A collection",
+    "compute_job_id": "agent-brief_k1731_rev9-c47c03",
+    "result": "dispatched to compute job agent-k1731-armb-rev9-remediation; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1731_rev9-c47c03; awaiting PHASE A collection",
     "last_released_at": "2026-07-26T12:14:58.502833+00:00",
     "last_release_reason": "auto_release_stale_2h",
-    "triage_2026_07_26": "arm B rev9 remediation compute job quota_exhausted 未執行（無 k1731_armB_rev9_remediation.json）。registered worktree .claude/worktrees/dispatch-slot-1-bd00f90a-k1731 仍在、可續用。此 pending 任務即續辦載體；重派走 compute_queue/enqueue-agent（3-strike ladder 注意）。"
+    "triage_2026_07_26": "arm B rev9 remediation compute job quota_exhausted 未執行（無 k1731_armB_rev9_remediation.json）。registered worktree .claude/worktrees/dispatch-slot-1-bd00f90a-k1731 仍在、可續用。此 pending 任務即續辦載體；重派走 compute_queue/enqueue-agent（3-strike ladder 注意）。",
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-27T02:57:31Z"
   },
   {
     "id": "platform_ops_release_audit_fix_mile_2d1d356b",
@@ -44929,7 +44991,7 @@
   {
     "id": "assign_d0f90705",
     "title": "PHASE-Z 卡住檔案 incident（51839b3927ff05a9）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 7 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 7 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T001858409953Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T013228200702Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022839552235Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022914757958Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T023015179257Z:<路徑>`",
+    "description": "## 發生什麼\n1 個未提交檔案不是任何一班 fire 產出的，最長已連續 8 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 6 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 8 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T013228200702Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022839552235Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T022914757958Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T023015179257Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T030048578268Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -44942,18 +45004,19 @@
         "storage/logs/trending_primary_source_verification.jsonl"
       ],
       "streaks": {
-        "storage/logs/trending_primary_source_verification.jsonl": 7
+        "storage/logs/trending_primary_source_verification.jsonl": 8
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260727T001858409953Z",
         "refs/volpred/quarantine/20260727T013228200702Z",
         "refs/volpred/quarantine/20260727T022839552235Z",
         "refs/volpred/quarantine/20260727T022914757958Z",
-        "refs/volpred/quarantine/20260727T023015179257Z"
+        "refs/volpred/quarantine/20260727T023015179257Z",
+        "refs/volpred/quarantine/20260727T030048578268Z"
       ],
-      "fires": 5,
+      "fires": 6,
       "first_seen_at": "2026-07-27T00:18:58.489275+00:00",
-      "last_seen_at": "2026-07-27T02:30:18.303641+00:00",
+      "last_seen_at": "2026-07-27T03:00:51.687618+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-27T01:32:28.270825+00:00",
       "deferred": [
@@ -44961,7 +45024,7 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T02:30:18.303641+00:00"
+    "updated_at": "2026-07-27T03:00:51.687618+00:00"
   },
   {
     "id": "daily_digest_20260727",
@@ -45098,13 +45161,75 @@
     "completed_at": "2026-07-27T02:30:28.963753+00:00",
     "result": "All Issue #47 acceptance gates passed: default contained path stayed OPEN with no marker; explicit close receipt is identity-bound; 315 tests and Matt Spec/Standards PASS.",
     "issue_disposition": "close",
-    "issue_close_pending": {
-      "issue_disposition": "close",
-      "issue_ref": "#47",
-      "task_id": "assign_abe5bb43",
-      "completion_owner": "codex-vscode",
-      "completed_at": "2026-07-27T02:30:28.963753+00:00",
-      "completion_base_commit": "6036b7c6a316aacd9f9e13f292a48919d8df84e3"
-    }
+    "issue_closed_at": "2026-07-27T02:30:38.068288+00:00",
+    "issue_closed_commit": "9677d28bba8297971699178476d94b8c3f20e3cd"
+  },
+  {
+    "id": "assign_c94e98de",
+    "title": "[Issue #39] Natural Boss Report owned-delivery closure audit",
+    "description": "依既有 Issue #39 acceptance，只讀回查 2026-07-26 live acceptance後的下一個自然 boss_report_4h scheduler receipt、owned email WorkItem/Effect/outbox terminal、Gmail Sent evidence、attempt exact-once、owner/generation drift與direct SMTP absence。證據齊走Matt雙軸review＋explicit close；缺任一維持contained。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "succeeded",
+    "source": "user",
+    "created_at": "2026-07-27T02:32:51.247443+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#39",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:32:55.878062+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T02:32:59.082076+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T02:39:07.820078+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T02:32:59.082061+00:00",
+    "completed_at": "2026-07-27T02:39:07.820055+00:00",
+    "result": "Natural 2026-07-27 08:10 Asia/Taipei fire succeeded under operations-core-v1. Canonical RPC read-back: owner operations_core/4, WorkItem succeeded, Effect delivered, attempt_count 1, PA epoch 211, exact Gmail Sent evidence; 103 scoped tests passed. root_cause_fixed_and_verified.",
+    "issue_disposition": "close",
+    "issue_closed_at": "2026-07-27T02:39:11.897642+00:00",
+    "issue_closed_commit": "50be881be1f78f021213cbf6f14c0218ff48f7b7"
+  },
+  {
+    "id": "assign_4ad6121f",
+    "title": "[Issue #6] Frontend route and scenario parity checker",
+    "description": "Implement existing T19 ticket without replanning. Build a deterministic, rerunnable route/scenario/auth/member/Admin/SEO/mobile/accessibility inventory and parity checker against the active frontend target. Treat frontend-v2-fix as read-only because another session owns it; place checker contract and tests outside that path. Follow implement -> TDD -> code-review and five-step gate.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-27T02:40:39.282751+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#6",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-27T02:40:51.558066+00:00",
+    "claim_session_id": "a23ab99b063a",
+    "status_history": [
+      {
+        "ts": "2026-07-27T02:40:51.558075+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-27T02:40:55.488426+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-27T02:40:55.488410+00:00"
   }
 ]

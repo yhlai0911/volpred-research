@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1731_rev9-87d87e",
+  "title": "agent: brief_k1731_rev9",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1731_rev9-87d87e.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/K1731_ARMB_REV9_COLLECTION.md",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1731_rev9-87d87e.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T02:46:41Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1731_rev9-87d87e.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1731_rev9-87d87e.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/K1731_ARMB_REV9_COLLECTION.md",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1731_rev9-87d87e.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+  "claude_followup": {
+    "brief": "收 K1731 rev9 remediation：先跑 agent-result-verification 核對三份 results JSON leaf diff numeric change/add/remove=0、兩個 gate negative control 的 exit code、108-test ratchet + arm-B verification + 3834-leaf regression 的實際 PASS 輸出（不信摘要，回讀 gate stdout）。全部真 PASS → 派 Codex round 9 review（baseline/frozen 見 COLLECTION.md），PASS 才解除 assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725，並 complete assign_k1731_rev9 succeeded；任一 FAIL → complete failed 並建下一個 bounded remediation（3-strike active，注意 escalation）。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_k1731_rev9",
+  "source_task_link": {
+    "state": "error",
+    "attempted_at": "2026-07-27T02:57:31Z",
+    "linked_at": null,
+    "error": "RuntimeError: source task is not legally bindable: task_id=assign_k1731_rev9 status=awaiting_agent_job compute_job_id='agent-brief_k1731_rev9-c47c03' requested_job_id=agent-brief_k1731_rev9-87d87e"
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1731_rev9.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1731_rev9-87d87e.md"
+}

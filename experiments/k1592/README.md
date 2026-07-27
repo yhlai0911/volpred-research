@@ -1,5 +1,7 @@
 # K1592 - Genuine OOS Gamma-Rule Horse Race
 
+> **[2026-07-27 snapshot-dup guard 修正]** 本 README 表格數字對應去重後 canonical 快照的 clean 重跑（`load_returns()` 已改為價格序列先去重再 `.diff()`，杜絕重複交易日造出 fabricated 0.0 報酬）。clean 後 QQQ 的 `dm_GammaRule_minus_GJR_p` 由污染版 0.038 移到 0.137（不再 <5%）；gamma rule 仍在 3/8 資產（EEM/TLT/IWM）平均損失最低、0 個資產通過 Harvey+Holm 門檻，verdict 維持 `NULL_OR_WEAK`。數字唯一來源：`k1592_results.json`。
+
 ## Motivation
 
 The leverage-direction paper's JBF review gate flagged the current model-selection story as too close to an in-sample or weak-OOS claim. The specific concern was that phrases such as "never significantly beaten" and "genuine OOS gains" blurred three distinct outcomes:

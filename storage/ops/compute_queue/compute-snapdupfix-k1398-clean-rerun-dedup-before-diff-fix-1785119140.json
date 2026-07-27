@@ -1,0 +1,56 @@
+{
+  "id": "compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140",
+  "title": "snapdupfix_k1398 clean rerun (dedup-before-diff fix)",
+  "script_path": "experiments/k1398/k1398.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T02:25:40Z",
+  "started_at": "2026-07-27T02:30:03Z",
+  "completed_at": "2026-07-27T02:34:08Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-1785119140.stderr",
+  "result_artifact": "experiments/k1398/k1398_results.json",
+  "output_paths": [
+    "experiments/k1398/k1398_results.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "# Followup: snapdupfix_k1398 收件驗證（LOW，無 verdict flip）\n\ncompute worker 已在去重後 canonical 快照重跑 `experiments/k1398/k1398.py`（SPY/QQQ/GLD MEM/AMEM/GJR/HAR rolling 賽馬）。根因修正已落地：`load_asset_series()` 在 `.shift(1)` 差分**之前**補 `drop_duplicates(subset=\"date\")`——舊版先 diff 後（無）去重，排序後每個重複對的第二列 log(P/P)=0 造出假零報酬（count audit 看不到，n 停在 4643/3417）。\n\n## 你要做的事\n1. 讀 `experiments/k1398/k1398_results.json`。確認各資產 oos_n 不再是污染值（SPY/QQQ 4643、GLD 3417 → clean 4633/3407 或延伸後更大且無重複）。稽核：三資產效果 <=1.7%、DM t 介於 9–35 遠離門檻，**無 verdict flip**——核對方向一致即可。\n2. 同步 `knowledge.json` K1398 條目數字（若有具體 oos_n/DM 值），加 `【2026-07-27 修正 snapdupfix_k1398：去重後重跑，無 verdict flip】` + corrected_at。main-thread 直接編輯，數字取自 results.json。\n3. README 若列舊數字則更正 + snapshot-dup 註記。\n4. grep 確認無 feed/paper 引用 K1398 舊數字（LOW severity，通常無）。\n5. 完工 `task_pool_claim.py complete --id snapdupfix_k1398 --status succeeded --result \"<摘要>\"`；work_log actor 用當班 owner token。\n\n**Model**: opus / medium。**禁止**：抄 rerun_cache 當正式數字；force merge。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": "snapdupfix_k1398",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T02:25:40Z",
+    "linked_at": "2026-07-27T02:25:40Z",
+    "error": null
+  },
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 53831,
+  "claimed_by_pid_start_wall": "Mon Jul 27 10:30:03 2026",
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/experiments/k1398"
+  },
+  "followup_dispatched_at": "2026-07-27T02:38:47Z",
+  "followup_next_task_id": "snapdupfix_k1398",
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "7c0ed80cdbb3fcff4cb3e693dcfbeee7c9f67b7a",
+  "delivered_paths": [
+    "experiments/k1398/k1398_results.json"
+  ],
+  "delivered_at": "2026-07-27T03:00:50.954228+00:00",
+  "delivery_source": "reap_orphan_deliverables"
+}

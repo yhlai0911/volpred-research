@@ -1,0 +1,58 @@
+{
+  "id": "agent-brief_btc_gas_tex-3c9904",
+  "title": "agent: brief_btc_gas_tex",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_btc_gas_tex-3c9904.md",
+    "--model",
+    "claude-opus-4-8",
+    "--effort",
+    "high",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2e78555e-btcgas",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2e78555e-btcgas/paper/btc-gas-negative/main.pdf",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_btc_gas_tex-3c9904.json",
+    "--timeout",
+    "2880"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T02:44:59Z",
+  "started_at": "2026-07-27T02:45:01Z",
+  "completed_at": "2026-07-27T02:57:31Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_btc_gas_tex-3c9904.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_btc_gas_tex-3c9904.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2e78555e-btcgas/paper/btc-gas-negative/main.pdf",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_btc_gas_tex-3c9904.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-2e78555e-btcgas",
+  "claude_followup": {
+    "brief": "收件 BTC-GAS LaTeX 轉換：(1) 確認 paper/btc-gas-negative/main.pdf 存在且非 trivial（9 節齊全）；(2) grep .tex/.bib 確認 compliance gate 無 volpred/AI/LLM/Claude/co-author 違規；(3) 抽查 body.tex 表格數字對得上 body_v1.md 與 reproduce_report.json；(4) 讀 CONVERSION_NOTES.md 看有無 % TODO verify 引用或數字差異；(5) 用 worktree-merge-verification skill 正式 merge worktree dispatch-slot-1-2e78555e-btcgas（merge_worktree.sh），驗 reflog 有 commit；(6) complete BTC_GAS_tex_conversion。若 pdf 缺失或 compliance 違規 → 回報 FAIL 勿硬收。",
+    "task_type": "paper_body",
+    "priority": 5
+  },
+  "followup_dispatched": false,
+  "source_task_id": "BTC_GAS_tex_conversion",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T02:44:59Z",
+    "linked_at": "2026-07-27T02:44:59Z",
+    "error": null
+  },
+  "timeout_seconds": 3000,
+  "brief_source": "/tmp/brief_btc_gas_tex.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_btc_gas_tex-3c9904.md",
+  "claimed_by_pid": 17842,
+  "claimed_by_pid_start_wall": "Mon Jul 27 10:45:00 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140",
+  "title": "snapdupfix_k1396 clean legacy rerun (dedup guard)",
+  "script_path": "experiments/k1396/k1396.py",
+  "interpreter": "uv run python",
+  "args": [],
+  "env": {},
+  "status": "failed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-27T02:25:40Z",
+  "started_at": "2026-07-27T02:30:03Z",
+  "completed_at": "2026-07-27T02:30:04Z",
+  "exit_code": -2,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-1785119140.stderr",
+  "result_artifact": "experiments/k1396/k1396_legacy_rerun_results.json",
+  "output_paths": [
+    "experiments/k1396/k1396_legacy_rerun_results.json"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "# Followup: snapdupfix_k1396 收件驗證（LOW，已被 K1379 supersede）\n\ncompute worker 已在去重後 canonical 快照重跑 `experiments/k1396/k1396.py`（寫 `k1396_legacy_rerun_results.json`，**不**動 frozen `k1396_results.json`）。根因修正已落地：load 補 `index.duplicated` 去重+排序。\n\n## 你要做的事\n1. 讀 `experiments/k1396/k1396_legacy_rerun_results.json`。確認 n_oos 不再是 1900（clean，資料延伸後可能略增，只要不含重複）。稽核預測 DM HAR_VIX_vs_HAR p 0.00843→0.01083（仍 <0.05，無 verdict flip）——核對方向一致。\n2. 嚴重度 LOW：此實驗自宣告被 **K1379** supersede，frozen artifact 未受影響，故**不需**改 feed/paper/knowledge（除非 grep 發現 legacy 數字被引用）。README 若列舊 n_oos/p 則更正並加 snapshot-dup 註記。\n3. 完工 `task_pool_claim.py complete --id snapdupfix_k1396 --status succeeded --result \"<摘要>\"`；work_log actor 用當班 owner token。\n\n**Model**: opus / medium。**禁止**：抄 rerun_cache 當正式數字；動 frozen k1396_results.json；force merge。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": "snapdupfix_k1396",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-27T02:25:40Z",
+    "linked_at": "2026-07-27T02:25:40Z",
+    "error": null
+  },
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 53831,
+  "claimed_by_pid_start_wall": "Mon Jul 27 10:30:03 2026",
+  "followup_dispatched_at": "2026-07-27T02:39:58Z",
+  "followup_next_task_id": "compute-snapdupfix-k1396-clean-legacy-rerun-fence-race-retry-1785119985"
+}

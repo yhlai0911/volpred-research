@@ -382,24 +382,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-26T18:51:20.878588+00:00"
-    },
-    {
-     "at": "2026-07-26T19:37:29.039648+00:00"
-    },
-    {
-     "at": "2026-07-26T20:27:18.433937+00:00"
-    },
-    {
-     "at": "2026-07-26T21:18:36.007534+00:00"
-    },
-    {
-     "at": "2026-07-26T21:32:16.916360+00:00"
-    },
-    {
-     "at": "2026-07-26T21:44:44.899500+00:00"
-    },
-    {
      "at": "2026-07-26T21:52:56.170634+00:00"
     },
     {
@@ -416,6 +398,24 @@
     },
     {
      "at": "2026-07-27T01:32:27.989346+00:00"
+    },
+    {
+     "at": "2026-07-27T02:28:39.388393+00:00"
+    },
+    {
+     "at": "2026-07-27T02:29:14.568707+00:00"
+    },
+    {
+     "at": "2026-07-27T02:30:14.953927+00:00"
+    },
+    {
+     "at": "2026-07-27T02:30:52.986849+00:00"
+    },
+    {
+     "at": "2026-07-27T02:33:20.433058+00:00"
+    },
+    {
+     "at": "2026-07-27T03:00:48.418136+00:00"
     }
    ],
    "current_task_id": null,
@@ -1028,29 +1028,7 @@
   },
   "inc_c67bec28dd29": {
    "class": "machine_self",
-   "clean_observations": [
-    {
-     "at": "2026-07-26T18:51:28.305148+00:00"
-    },
-    {
-     "at": "2026-07-26T20:27:26.718520+00:00"
-    },
-    {
-     "at": "2026-07-26T21:18:44.463583+00:00"
-    },
-    {
-     "at": "2026-07-26T21:32:24.917850+00:00"
-    },
-    {
-     "at": "2026-07-26T22:37:02.665352+00:00"
-    },
-    {
-     "at": "2026-07-26T23:29:00.893859+00:00"
-    },
-    {
-     "at": "2026-07-27T00:19:06.552840+00:00"
-    }
-   ],
+   "clean_observations": [],
    "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
@@ -1192,14 +1170,32 @@
      "first_seen_at": "2026-07-26T17:39:15.663243+00:00",
      "key": "scripts/supabase_sync.py:797",
      "last_seen_at": "2026-07-26T17:39:15.663243+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
+     "key": "experiments/k1391/k1391.py:161",
+     "last_seen_at": "2026-07-27T02:33:30.515832+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
+     "key": "experiments/k1391/k1391.py:246",
+     "last_seen_at": "2026-07-27T02:33:30.515832+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T02:28:50.109149+00:00",
+     "key": "experiments/k1592/k1592.py:203",
+     "last_seen_at": "2026-07-27T02:33:30.515832+00:00"
     }
    ],
    "kind": "silent_fallback_new",
-   "last_breach_detail": "PHASE-Z 重試 3 次仍無法收班（commit_nonzero）— 停止重試，不再連發此警報",
-   "last_seen_at": "2026-07-26T17:39:15.663243+00:00",
+   "last_breach_detail": "PHASE-Z candidate 被 pre-commit 擋下（未進 main）",
+   "last_seen_at": "2026-07-27T02:33:30.515832+00:00",
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
-   "occurrence_count": 34,
+   "occurrence_count": 39,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1381,13 +1377,25 @@
      "first_seen_at": "2026-07-27T01:00:49.740626+00:00",
      "key": "30226431059:1",
      "last_seen_at": "2026-07-27T01:00:49.740626+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T02:00:34.292226+00:00",
+     "key": "30228761289:1",
+     "last_seen_at": "2026-07-27T02:00:34.292226+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-27T03:00:30.495392+00:00",
+     "key": "30231129233:1",
+     "last_seen_at": "2026-07-27T03:00:30.495392+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-27T00:14:49.9475629Z tests/test_daily_checkup_db_landing.py:68: AssertionError",
-   "last_seen_at": "2026-07-27T01:00:49.740626+00:00",
+   "last_breach_detail": "2026-07-27T02:15:49.3028996Z tests/test_daily_checkup_db_landing.py:68: AssertionError",
+   "last_seen_at": "2026-07-27T03:00:30.495392+00:00",
    "notified_at": null,
-   "occurrence_count": 6,
+   "occurrence_count": 8,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1411,6 +1419,6 @@
    }
   }
  },
- "updated_at": "2026-07-27T01:32:27.991113+00:00",
+ "updated_at": "2026-07-27T03:00:48.418647+00:00",
  "version": 1
 }

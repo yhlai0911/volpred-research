@@ -27699,5 +27699,125 @@
     "event": "lazypack_fallback",
     "mile_id": "mile_cdade7c8",
     "note": "codex-primary lazypack render 進行至 write phase 約10分鐘未出圖，依 coordinator 指示改用 deterministic fallback scripts/lazypack_render.py 產 3 張 poster（repair_rounds=0，layout guard pass），上傳 Supabase 後 append 懶人包圖組發佈。plan=storage/lazypack_jobs/daily_digest_20260727/plan.json"
+  },
+  {
+    "timestamp": "2026-07-27T10:10:01+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1319",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_k1319：在去重後 canonical 快照重跑 k1319（HAR-W vs HAR wavelet）。stored 污染 n_total=4129 → clean 4163（0 重複、已排序）。主 verdict NULL 不變（DM HAR-W vs HAR t=+6.23>0，HAR-W 顯著更差）；次要 har_vs_ewma DM t 由 -2.93（不顯著）→ -3.112（p=0.0019，|t|>3.0 通過 Harvey 門檻，significance 翻轉）。修正：k1319.py 補 drop_duplicates(date)+sort_values（治本，防未來再污染）+ 動態 period 標籤；重跑 k1319_results.json；同步 knowledge.json K1319（corrected_at=2026-07-27）+ README + 未發布草稿 k1319_general_draft.md 數字。無 feed/paper 引用舊結論（grep 確認）。"
+  },
+  {
+    "timestamp": "2026-07-27T10:14:12+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1592",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_k1592：治本修正 k1592.py load_returns() 順序 bug——改為先在價格序列去重（px[~index.duplicated]）再 .diff()，杜絕舊順序（先 diff 後去重 keep='last'）為每個重複日期造出 fabricated 0.0 報酬（count audit 看不到，row count 不變）。CSV 現已 clean（0 重複），但潛在隱患治本消除。GARCH/GJR MLE + MCS B=1000 bootstrap 屬 heavy compute，依 HARD RULE enqueue compute_queue（job=compute-snapdupfix-k1592-clean-rerun-...，--source-task-id 使 task→awaiting_agent_job），followup(paper_review) 將驗 dm_GammaRule_minus_GJR_p 0.038→~0.137、同步 knowledge K1592、檢查 leverage-direction body.tex 引用。本 fire 職責到 enqueue 為止。"
+  },
+  {
+    "timestamp": "2026-07-27T10:15:32+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1391",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_k1391：治本修正 k1391.py load（sort_index 後補 index dedup keep='last'），杜絕重複交易日進 DM 檢定（stored n_full_oos=1866 污染 vs clean 1856）。GJR-GARCH-X MLE multistart 屬 heavy compute，enqueue compute_queue（job=compute-snapdupfix-k1391-clean-rerun-dedup-guard-...）+ followup(experiment) 驗數字/更新 README。無 K1391 knowledge 條目、verdict 不翻轉。本 fire 職責到 enqueue 為止。"
+  },
+  {
+    "timestamp": "2026-07-27T10:20:56+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1399",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_k1399：k1399_vix_decomp.py（OLS/HAR VIX 分解 + DM-HLN, light compute）補 load dedup+sort 治本後 inline 重跑。stored n_obs.oos=1865 污染→clean 1900（資料延伸至 2026-07-24，0 重複）。DM 數字符合稽核 clean 預測（H1 HAR_VIX_L t -4.55→-4.97、H4 HAR_VIX_T t -3.71→-4.08、All_vs_L -0.40/p0.69→-0.16/p0.87）；H1..H5 verdict(PASS|PARTIAL|PARTIAL|FAIL|PASS) 全不變。更新 results.json + README（排名表/pairwise/假設表/highlights 全數對齊 clean）+ 未發布草稿 k1399_article_revise_overclaim.md（摘要+2 表+結論數字）。無 K1399 knowledge 條目。圖表 supabase URL 值移動 <0.01，視覺結論不變，留註。"
+  },
+  {
+    "timestamp": "2026-07-27T10:24:03+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_paper2_table1_summary_stats_provenance",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_paper2_table1_summary_stats_provenance：治本修正 reproduce_table1_summary.py load_col()（SPY row 用）補 index dedup——load_twii_full() 早有去重但 load_col() 無，故 SPY row 曾受污染（稽核 n_obs 4668 vs 4658、kurt 14.1197 vs 14.0832）。CSV 現已上游去重（SPY 0 重複、至 2026-07-24），clean 重跑 n_obs=4668 為當前正確值。verdict NOT_REPRODUCIBLE_FROM_PINNED_SNAPSHOT 不變（paper Table 1 drift 跨四資產、屬 vintage/variant，非 dup 污染，另案追蹤）。無 paper .tex 引用本 provenance。更新 results.json + README 註記。light compute inline。"
+  },
+  {
+    "timestamp": "2026-07-27T10:25:52+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1396",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_k1396（LOW，已被 K1379 supersede）：k1396.py load 補 index dedup+sort 治本。rolling WINDOW=2000/REFIT_EVERY=63 屬 heavy compute，enqueue compute_queue（job=compute-snapdupfix-k1396-clean-legacy-rerun-dedup-guard-...）+ followup(experiment)。只寫 legacy_rerun artifact，不動 frozen k1396_results.json。稽核預測 DM p 0.00843→0.01083 無翻轉。本 fire 職責到 enqueue 為止。"
+  },
+  {
+    "timestamp": "2026-07-27T10:25:52+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1398",
+    "outcome": "in_progress",
+    "actor": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "owner": "hourly-slot-1-cd5d8ac9c7d3446fb728d916f31341df",
+    "commit": null,
+    "summary": "snapdupfix_k1398（LOW，無翻轉）：治本修正 load_asset_series() 在 .shift(1) 差分前補 drop_duplicates(date)——舊版先 diff 後去重，排序後重複對第二列 log(P/P)=0 造假零（同 k1592 類型，n 停 4643/3417）。MEM/AMEM/GJR GARCH rolling 屬 heavy compute，enqueue compute_queue（job=compute-snapdupfix-k1398-clean-rerun-dedup-before-diff-fix-...）+ followup(experiment)。三資產效果<=1.7%、DM t 9-35 遠離門檻無翻轉。本 fire 職責到 enqueue 為止。"
+  },
+  {
+    "timestamp": "2026-07-27T10:46:00+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1592",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "owner": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "commit": null,
+    "summary": "PHASE A collect_completed 收件驗證 snapdupfix_k1592（GARCH/GJR/GammaRule OOS 賽馬，leverage-direction 論文專屬）。去重後 canonical 快照 clean 重跑結果驗證：QQQ dm_GammaRule_minus_GJR_p 由污染版 0.038 移到 clean 0.137（跨越 5%，符合 audit_snapshot_dup_20260721 預測）；gamma rule 仍在 3/8 資產（EEM/TLT/IWM）平均損失最低、0 個資產通過 Harvey+Holm 門檻，verdict=NULL_OR_WEAK 不變。已補 knowledge cdd5a484 corrected_at + 修正註記、experiments/k1592/README.md dedup guard note。paper/leverage-direction 無 literal 0.038 引用（QQQ 表列 p_holm=1.00）不受影響。mark-followup-dispatched 完成，task complete=succeeded。"
+  },
+  {
+    "timestamp": "2026-07-27T10:46:00+08:00",
+    "task_type": "experiment",
+    "task_id": "snapdupfix_k1398",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "owner": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "commit": null,
+    "summary": "PHASE A collect_completed 收件驗證 snapdupfix_k1398（SPY/QQQ/GLD MEM/AMEM/GJR/HAR rolling 賽馬）。去重後 clean 重跑驗證：oos_n SPY/QQQ=4678、GLD=3452（污染版 4643/4643/3417）；DM MEM/AMEM vs GJR 全 p<0.001 且方向一致（MEM/AMEM 各 0/3 優於 GJR），verdict=NULL 無翻轉。README 已由重跑更新為 clean 數字；knowledge 0c4aa148 補 corrected_at + clean DM t 值（MEM SPY9.12/QQQ28.86/GLD15.38、AMEM SPY14.02/QQQ16.99/GLD35.62）取代污染版。task complete=succeeded。"
+  },
+  {
+    "timestamp": "2026-07-27T10:46:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "snapdupfix_k1391_k1396_triage",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "owner": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "commit": null,
+    "summary": "PHASE A triage_failed：snapdupfix_k1391 / snapdupfix_k1396 兩 compute job exit_code=-2 於 transient fence-read race（4 個 snapdupfix job 皆 activated_at 02:30:03，互撞讀對方 task_execution_fence——k1391 讀 k1396 fence、k1396 讀 k1398 fence 皆 unreadable）。確認：(a) 兩腳本 dedup guard 已落地（k1391:82 index dedup keep=last、k1396:80 dedup+sort）；(b) results.json 仍停在 Jul 21（clean rerun 從未實跑）。判定=非腳本問題、可救援，clean re-enqueue（compute-snapdupfix-k1391/k1396-...-fence-race-retry-1785119985），並 mark-followup-dispatched 舊 failed followup 防下一 tick 重派。"
+  },
+  {
+    "timestamp": "2026-07-27T10:46:00+08:00",
+    "task_type": "paper_body",
+    "task_id": "BTC_GAS_tex_conversion",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "owner": "hourly-slot-1-2e78555edaeb4a33935fd01cdb15c70b",
+    "commit": null,
+    "summary": "PHASE B（starvation lockout lane）：claim + dispatch BTC_GAS_tex_conversion（paper_body，P5，aged 1202h，唯一可認領之 starved 任務——其餘 starved 皆 platform_ops preassignment-locked 或 blocked-on-external-data）。BTC-GAS negative-result 論文 markdown（body_v1.md ~87KB + 分節檔）→ Elsevier elsarticle LaTeX + xelatex 編譯，屬全篇轉換 + 編譯 debug loop，實測 >50min fire cap，故 enqueue 給 async compute agent（opus/high，3000s，worktree dispatch-slot-1-2e78555e-btcgas，result-artifact main.pdf）。topology_override: inline→compute_queue（router type_default=inline，但全篇 LaTeX 轉換+編譯超出 fire 容器，走 sanctioned 長 agent queue 路徑）。source task 已 bound → awaiting_agent_job；後續 fire PHASE A 收件 + merge worktree。"
+  },
+  {
+    "timestamp": "2026-07-27T10:57:39+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_k1731_rev9",
+    "outcome": "dispatched_to_compute_queue",
+    "actor": "hourly-slot-2-290c4238c72046b2bceee7b4b994fdf4",
+    "owner": "hourly-slot-2-290c4238c72046b2bceee7b4b994fdf4",
+    "commit": null,
+    "summary": "解除 assign_k1731_rev9（K1731 arm B rev9 bounded remediation）112h starvation 死鎖並重新派工。\n\n根因（證據化）：該 task 綁定的 compute job `agent-k1731-armb-rev9-remediation` 早期 launch 失敗（exit 1、無 commit、無 artifact、worktree HEAD 仍 f5338d54d），且 `followup_dispatched=true` / `followup_next_task_id==source_task_id==assign_k1731_rev9`（自我 re-remediation 處置）。但 task.compute_job_id 從未 reset → 每條重派路徑 by-design 拒絕：enqueue-agent binding gate 報 not-legally-bindable；requeue 報 disposition owned by followup。task 因此卡 pending 112h（dispatcher starvation lockout 唯一可選）。\n\n處置（contained 止血）：以 annotate（sanctioned locked-write；compute_job_id 不在 protected 清單）清除指向死 job 的 stale pointer → 走 sanctioned enqueue-agent 重綁乾淨 job `agent-brief_k1731_rev9-c47c03`（cwd=現行 k1731 worktree，禁 merge/禁重跑估計，brief 依 Codex round-8 verdict 逐條：修 ARM_A_ENGINE_ISSUES[0].why_it_matters 的 unsupported OOS-null 措辭、finalizer 重生三份 JSON、擴 armB_verification+drift_check 加 negative control、跑 108-test ratchet+3834-leaf regression、送 Codex round 9）。task 現為 awaiting_agent_job（compute-queue 長 agent 正確狀態，由後續 PHASE A 收）。\n\n副作用註記：本 fire 過程曾先建一個未綁定的重複 job `agent-brief_k1731_rev9-87d87e`（source_task_link=error）→ run-next 依 state!=linked 永久跳過，inert 不會執行；cancel 因 binding 不匹配無法移除，待 queue 維護 reaper GC。\n\n流程缺陷（待 root fix，非本 slot 權限）：terminal-failed compute job 若 followup_next_task_id==source_task_id，source task 的 compute_job_id 未被 reset，形成無法重派死鎖。已寫入 docs/error_log.md。此條標 contained，非 root_cause_fixed。"
   }
 ]
