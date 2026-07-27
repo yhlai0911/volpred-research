@@ -1384,6 +1384,7 @@ def _verify_non_superuser_migration_executor(dsn: str) -> None:
                   public.volpred_reconcile_primary_authority_demotion(
                     text, text, bigint
                   ),
+                  public.volpred_read_primary_authority_owner(),
                   public.volpred_read_notification_owner(),
                   public.volpred_read_owned_email_request(text),
                   public.volpred_transfer_notification_owner(

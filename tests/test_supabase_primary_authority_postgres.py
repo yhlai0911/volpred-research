@@ -19,6 +19,12 @@ LIFECYCLE_AUDIT_MIGRATION = (
     / "migrations"
     / "20260727080000_primary_authority_lifecycle_audit.sql"
 )
+OWNER_ATTESTATION_MIGRATION = (
+    Path(__file__).resolve().parents[1]
+    / "supabase"
+    / "migrations"
+    / "20260727121500_primary_authority_owner_attestation.sql"
+)
 
 
 @pytest.fixture(scope="module")
@@ -32,11 +38,71 @@ def primary_authority_rpc_dsn(
         for path in (
             PRIMARY_AUTHORITY_RPC_MIGRATION,
             LIFECYCLE_AUDIT_MIGRATION,
+            OWNER_ATTESTATION_MIGRATION,
         ):
             migration = path.read_text(encoding="utf-8")
             connection.execute(migration)
             connection.execute(migration)
     yield postgres_effect_dsn
+
+
+def test_primary_authority_owner_attestation_is_private_and_read_only(
+    primary_authority_rpc_dsn: str,
+) -> None:
+    with psycopg.connect(
+        primary_authority_rpc_dsn,
+        autocommit=True,
+    ) as connection:
+        row = connection.execute(
+            """
+            SELECT
+              procedure.prosecdef,
+              procedure.provolatile,
+              procedure.proconfig,
+              owner.rolname,
+              has_function_privilege(
+                'service_role', procedure.oid, 'EXECUTE'
+              ),
+              has_function_privilege('anon', procedure.oid, 'EXECUTE'),
+              has_function_privilege(
+                'authenticated', procedure.oid, 'EXECUTE'
+              ),
+              has_function_privilege('public', procedure.oid, 'EXECUTE')
+            FROM pg_proc AS procedure
+            JOIN pg_roles AS owner ON owner.oid = procedure.proowner
+            WHERE procedure.oid =
+              'public.volpred_read_primary_authority_owner()'::regprocedure
+            """
+        ).fetchone()
+        assert row == (
+            True,
+            "v",
+            ['search_path=""'],
+            "volpred_ops_definer",
+            True,
+            False,
+            False,
+            False,
+        )
+
+        connection.execute("SET ROLE service_role")
+        payload = connection.execute(
+            "SELECT public.volpred_read_primary_authority_owner()"
+        ).fetchone()[0]
+        assert payload == {
+            **payload,
+            "schema_version": "primary-authority-owner.v1",
+            "capability": "operations-core-primary",
+            "authority_key": "operations-core-primary",
+            "owner": "operations_core",
+            "generation": 1,
+            "contract_ref": "primary-authority-contract.v1",
+        }
+        assert "attested_at" in payload
+        with pytest.raises(psycopg.errors.InsufficientPrivilege):
+            connection.execute(
+                "SELECT * FROM volpred_ops.primary_authority_ownership"
+            )
 
 
 def test_service_role_lifecycle_is_db_clock_fenced_and_token_redacted(

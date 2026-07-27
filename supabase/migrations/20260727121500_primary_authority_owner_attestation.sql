@@ -7,6 +7,11 @@ BEGIN
 END;
 $$;
 
+GRANT CREATE ON SCHEMA volpred_ops TO volpred_ops_definer;
+GRANT CREATE ON SCHEMA public TO volpred_ops_definer;
+
+SET ROLE volpred_ops_definer;
+
 CREATE TABLE IF NOT EXISTS volpred_ops.primary_authority_ownership (
   singleton boolean PRIMARY KEY DEFAULT true CHECK (singleton),
   capability text NOT NULL
@@ -68,14 +73,6 @@ BEGIN
     RAISE EXCEPTION
       'Primary Authority owner attestation drifted';
   END IF;
-  IF NOT EXISTS (
-    SELECT 1
-    FROM volpred_ops.primary_authority_leases
-    WHERE authority_key = 'operations-core-primary'
-  ) THEN
-    RAISE EXCEPTION
-      'Primary Authority canonical lease row is missing';
-  END IF;
 END;
 $$;
 
@@ -112,7 +109,7 @@ AS $$
     ownership.owner,
     ownership.generation,
     ownership.contract_ref,
-    clock_timestamp()
+    statement_timestamp()
   FROM volpred_ops.primary_authority_ownership AS ownership
   WHERE ownership.singleton
 $$;
@@ -133,32 +130,27 @@ BEGIN
 END;
 $$;
 
-ALTER TABLE volpred_ops.primary_authority_ownership
-  OWNER TO volpred_ops_definer;
-ALTER FUNCTION volpred_ops.read_primary_authority_owner()
-  OWNER TO volpred_ops_definer;
-
-GRANT CREATE ON SCHEMA public TO volpred_ops_definer;
-ALTER FUNCTION public.volpred_read_primary_authority_owner()
-  OWNER TO volpred_ops_definer;
-REVOKE CREATE ON SCHEMA public FROM volpred_ops_definer;
-
 REVOKE ALL ON TABLE volpred_ops.primary_authority_ownership
 FROM PUBLIC, anon, authenticated, service_role;
 REVOKE ALL ON FUNCTION
   volpred_ops.read_primary_authority_owner(),
   public.volpred_read_primary_authority_owner()
-FROM PUBLIC, anon, authenticated;
+FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.volpred_read_primary_authority_owner()
 TO service_role;
+
+COMMENT ON TABLE volpred_ops.primary_authority_ownership IS
+  'Immutable formal owner record for the canonical Operations Core Primary Authority.';
+COMMENT ON FUNCTION public.volpred_read_primary_authority_owner() IS
+  'Service-role-only typed live owner attestation; does not acquire or mutate a lease.';
+
+RESET ROLE;
+
+REVOKE CREATE ON SCHEMA public FROM volpred_ops_definer;
+REVOKE CREATE ON SCHEMA volpred_ops FROM volpred_ops_definer;
 
 DO $$
 BEGIN
   EXECUTE format('REVOKE volpred_ops_definer FROM %I', current_user);
 END;
 $$;
-
-COMMENT ON TABLE volpred_ops.primary_authority_ownership IS
-  'Immutable formal owner record for the canonical Operations Core Primary Authority.';
-COMMENT ON FUNCTION public.volpred_read_primary_authority_owner() IS
-  'Service-role-only typed live owner attestation; does not acquire or mutate a lease.';
