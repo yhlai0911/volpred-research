@@ -96,6 +96,9 @@ def test_untracked_directory_expands_to_sorted_exact_files(
 ) -> None:
     root = tmp_path / "ops" / "claude_user_backup" / "skills" / "ask-matt"
     (root / "references").mkdir(parents=True)
+    (root / "a").mkdir()
+    (root / "a" / "nested.md").write_text("nested", encoding="utf-8")
+    (root / "a.txt").write_text("sibling", encoding="utf-8")
     (root / "SKILL.md").write_text("router", encoding="utf-8")
     (root / "references" / "flow.json").write_text(
         json.dumps({"flow": "implement"}), encoding="utf-8"
@@ -108,6 +111,8 @@ def test_untracked_directory_expands_to_sorted_exact_files(
 
     assert committable == [
         "ops/claude_user_backup/skills/ask-matt/SKILL.md",
+        "ops/claude_user_backup/skills/ask-matt/a.txt",
+        "ops/claude_user_backup/skills/ask-matt/a/nested.md",
         "ops/claude_user_backup/skills/ask-matt/references/flow.json",
     ]
     assert deferred == []

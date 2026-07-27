@@ -26,12 +26,47 @@ gates answer "is it safe to adopt this now", not "is this mine".
 from __future__ import annotations
 
 import fcntl
+import hashlib
 import json
 import logging
 import os
+import stat
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Iterator
 
 LOG = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class MachineChurnIdentity:
+    """Content identity that the candidate Git index must reproduce."""
+
+    path: str
+    exists: bool
+    sha256: str | None = None
+    git_mode: str | None = None
+    st_dev: int | None = None
+    st_ino: int | None = None
+    st_size: int | None = None
+    st_mtime_ns: int | None = None
+
+
+@dataclass(frozen=True)
+class MachineChurnClassification:
+    """Three policy buckets plus evidence for the committable bucket."""
+
+    committable: list[str]
+    deferred: list[str]
+    corrupt: list[str]
+    identities: dict[str, MachineChurnIdentity]
+
+    def __iter__(self) -> Iterator[list[str]]:
+        # Preserve the long-standing three-value unpacking interface while
+        # letting transaction-aware callers consume the stronger evidence.
+        yield self.committable
+        yield self.deferred
+        yield self.corrupt
 
 
 def _expand_candidate(
@@ -140,7 +175,7 @@ def classify_machine_churn(
     candidates: list[str],
     *,
     label: str = "machine_churn",
-) -> tuple[list[str], list[str], list[str]]:
+) -> MachineChurnClassification:
     """Split declared machine-churn paths into (committable, deferred, corrupt).
 
     Adopting a daemon-written file is only safe when nobody is mid-write. The two
@@ -159,24 +194,24 @@ def classify_machine_churn(
     committable: list[str] = []
     deferred: list[str] = []
     corrupt: list[str] = []
-    expanded: list[str] = []
-    seen: set[str] = set()
+    expanded: set[str] = set()
     for candidate in candidates:
         exact_paths, rejected = _expand_candidate(
             repo_root, candidate, label=label
         )
         corrupt.extend(path for path in rejected if path not in corrupt)
-        for exact in exact_paths:
-            if exact not in seen:
-                seen.add(exact)
-                expanded.append(exact)
+        expanded.update(exact_paths)
 
-    for rel in expanded:
+    identities: dict[str, MachineChurnIdentity] = {}
+    for rel in sorted(expanded):
         if not (repo_root / rel).exists():
             committable.append(rel)
+            identities[rel] = MachineChurnIdentity(path=rel, exists=False)
             continue
         try:
-            with open(repo_root / rel, "r", encoding="utf-8") as fh:
+            flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+            fd = os.open(repo_root / rel, flags)
+            with os.fdopen(fd, "rb") as fh:
                 try:
                     fcntl.flock(fh.fileno(), fcntl.LOCK_SH | fcntl.LOCK_NB)
                 except OSError:
@@ -185,17 +220,61 @@ def classify_machine_churn(
                     deferred.append(rel)
                     continue
                 try:
+                    before = os.fstat(fh.fileno())
+                    if not stat.S_ISREG(before.st_mode):
+                        LOG.warning(
+                            "%s: %s is no longer a regular file — refusing it",
+                            label,
+                            rel,
+                        )
+                        corrupt.append(rel)
+                        continue
+                    raw = fh.read()
+                    after = os.fstat(fh.fileno())
+                    if (
+                        before.st_dev,
+                        before.st_ino,
+                        before.st_size,
+                        before.st_mtime_ns,
+                    ) != (
+                        after.st_dev,
+                        after.st_ino,
+                        after.st_size,
+                        after.st_mtime_ns,
+                    ):
+                        LOG.info(
+                            "%s: %s changed while being inspected — leaving it "
+                            "for the next fire",
+                            label,
+                            rel,
+                        )
+                        deferred.append(rel)
+                        continue
                     if rel.endswith(".json"):
-                        json.load(fh)
+                        json.loads(raw.decode("utf-8"))
                     elif rel.endswith(".jsonl"):
                         # The queue archive is appended to, not replaced by rename, so
                         # a writer killed mid-append leaves a truncated final line —
                         # the .json gate's exact failure mode in a file the gate did
                         # not cover. Parse every record; a bad one escalates instead
                         # of entering history.
-                        for line in fh:
+                        for line in raw.decode("utf-8").splitlines():
                             if line.strip():
                                 json.loads(line)
+                    identities[rel] = MachineChurnIdentity(
+                        path=rel,
+                        exists=True,
+                        sha256=hashlib.sha256(raw).hexdigest(),
+                        git_mode=(
+                            "100755"
+                            if before.st_mode & stat.S_IXUSR
+                            else "100644"
+                        ),
+                        st_dev=before.st_dev,
+                        st_ino=before.st_ino,
+                        st_size=before.st_size,
+                        st_mtime_ns=before.st_mtime_ns,
+                    )
                 except (json.JSONDecodeError, UnicodeDecodeError) as exc:
                     LOG.warning("%s: %s does not parse (%s) — refusing to commit it",
                                 label, rel, exc)
@@ -204,9 +283,72 @@ def classify_machine_churn(
                 finally:
                     fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
         except OSError as exc:
-            LOG.warning("%s: cannot read machine-churn path %s (%s) — leaving it dirty",
-                        label, rel, exc)
-            deferred.append(rel)
+            LOG.warning(
+                "%s: machine-churn path %s changed type or cannot be read (%s) "
+                "— refusing it",
+                label,
+                rel,
+                exc,
+            )
+            corrupt.append(rel)
             continue
         committable.append(rel)
-    return committable, deferred, corrupt
+    return MachineChurnClassification(
+        committable=sorted(set(committable)),
+        deferred=sorted(set(deferred)),
+        corrupt=sorted(set(corrupt)),
+        identities=identities,
+    )
+
+
+def machine_churn_identity_matches(
+    repo_root: Path,
+    identity: MachineChurnIdentity,
+) -> bool:
+    """Revalidate a classified pathname without following a replacement link."""
+    path = repo_root / identity.path
+    if not identity.exists:
+        return not path.exists() and not path.is_symlink()
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(path, flags)
+        with os.fdopen(fd, "rb") as fh:
+            before = os.fstat(fh.fileno())
+            if not stat.S_ISREG(before.st_mode):
+                return False
+            raw = fh.read()
+            after = os.fstat(fh.fileno())
+    except OSError as exc:
+        LOG.warning(
+            "machine_churn: identity revalidation failed for %s (%s)",
+            identity.path,
+            exc,
+        )
+        return False
+    observed = (
+        before.st_dev,
+        before.st_ino,
+        before.st_size,
+        before.st_mtime_ns,
+        hashlib.sha256(raw).hexdigest(),
+        "100755" if before.st_mode & stat.S_IXUSR else "100644",
+    )
+    expected = (
+        identity.st_dev,
+        identity.st_ino,
+        identity.st_size,
+        identity.st_mtime_ns,
+        identity.sha256,
+        identity.git_mode,
+    )
+    return observed == expected and (
+        before.st_dev,
+        before.st_ino,
+        before.st_size,
+        before.st_mtime_ns,
+    ) == (
+        after.st_dev,
+        after.st_ino,
+        after.st_size,
+        after.st_mtime_ns,
+    )

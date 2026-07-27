@@ -13,6 +13,7 @@ semantics, not in Python. A fake `git` would have happily agreed with the bug.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -809,6 +810,71 @@ def test_machine_churn_is_adopted_not_alerted(repo: Path) -> None:
     assert alerts == [], "this is the hourly alert the boss told us to kill"
 
 
+def test_machine_churn_atomic_replacement_is_not_committed(repo: Path) -> None:
+    """The parsed inode and the candidate-index blob must be the same bytes."""
+    _seed_churn(repo)
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    replaced = False
+
+    def racing_runner(cmd, **kwargs):
+        nonlocal replaced
+        if not replaced and "add" in cmd and any(
+            "--pathspec-from-file=" in arg for arg in cmd
+        ):
+            replacement = repo / "storage" / "replacement.json"
+            replacement.write_text('{"truncated":', encoding="utf-8")
+            os.replace(replacement, repo / CHURN)
+            replaced = True
+        return subprocess.run(cmd, **kwargs)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=racing_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_k: {},
+    )
+
+    assert replaced is True
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "candidate_churn_identity_error"
+    assert outcome["identity_mismatches"] == [CHURN]
+    assert _git(repo, "show", f"HEAD:{CHURN}").stdout == "[]\n"
+
+
+def test_machine_churn_regular_file_replaced_by_symlink_is_not_committed(
+    repo: Path,
+) -> None:
+    _seed_churn(repo)
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    replaced = False
+
+    def racing_runner(cmd, **kwargs):
+        nonlocal replaced
+        if not replaced and "add" in cmd and any(
+            "--pathspec-from-file=" in arg for arg in cmd
+        ):
+            outside = repo / "outside.txt"
+            outside.write_text("not queue state", encoding="utf-8")
+            (repo / CHURN).unlink()
+            (repo / CHURN).symlink_to(outside)
+            replaced = True
+        return subprocess.run(cmd, **kwargs)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=racing_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_k: {},
+    )
+
+    assert replaced is True
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "candidate_churn_identity_error"
+    assert outcome["identity_mismatches"] == [CHURN]
+
+
 def test_machine_churn_commits_even_when_the_fire_produced_nothing(repo: Path) -> None:
     """The alerting case at 12:37 was exactly this: no output of its own, so the
     old code returned `nothing_owned` and left the churn dirty for the next fire
@@ -939,6 +1005,45 @@ def test_garbage_collected_state_is_committed_not_deferred_forever(repo: Path) -
     assert ledger in _head_files(repo), "the deletion must land, not cycle"
     assert ledger not in _dirty(repo)
     assert alerts == []
+
+
+def test_missing_machine_file_reappearing_as_directory_is_not_broad_staged(
+    repo: Path,
+) -> None:
+    ledger = "storage/ops/event_ledger/deadbeef.json"
+    _write(repo, ledger, '{"gc_after": "2026-07-01"}\n')
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-qm", "seed ledger")
+    (repo / ledger).unlink()
+    phase_z.run_pre_fire_guard(repo_root=repo)
+    replaced = False
+
+    def racing_runner(cmd, **kwargs):
+        nonlocal replaced
+        if not replaced and "add" in cmd and any(
+            "--pathspec-from-file=" in arg for arg in cmd
+        ):
+            directory = repo / ledger
+            directory.mkdir()
+            (directory / "uninspected.json").write_text(
+                '{"should_not": "land"}\n', encoding="utf-8"
+            )
+            replaced = True
+        return subprocess.run(cmd, **kwargs)
+
+    outcome = phase_z.run_phase_z(
+        repo_root=repo,
+        now_hhmm="03:00",
+        runner=racing_runner,
+        test_runner=_no_tests,
+        alert_fn=lambda **_k: {},
+    )
+
+    assert replaced is True
+    assert outcome["committed"] is False
+    assert outcome["reason"] == "candidate_churn_identity_error"
+    assert outcome["identity_mismatches"] == [ledger]
+    assert "uninspected" not in _git(repo, "show", "HEAD").stdout
 
 
 def test_code_left_behind_is_still_foreign(repo: Path) -> None:

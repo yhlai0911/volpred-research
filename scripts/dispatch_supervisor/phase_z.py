@@ -73,7 +73,12 @@ from volpred.ops.foreign_incident import (
     reconcile_incidents,
     upsert_incident,
 )
-from volpred.ops.machine_churn import classify_machine_churn
+from volpred.ops.machine_churn import (
+    MachineChurnClassification,
+    MachineChurnIdentity,
+    classify_machine_churn,
+    machine_churn_identity_matches,
+)
 from volpred.ops.issue_tracker_sync import (
     pending_issue_task_ids_for_owners,
     settle_completed_task_issues,
@@ -1091,7 +1096,10 @@ def _bump_foreign_streaks(repo_root: Path, runner, foreign: list[str]) -> dict[s
     return current
 
 
-def _classify_machine_churn(repo_root: Path, candidates: list[str]) -> tuple[list[str], list[str], list[str]]:
+def _classify_machine_churn(
+    repo_root: Path,
+    candidates: list[str],
+) -> MachineChurnClassification:
     """Split declared machine-churn paths into (committable, deferred, corrupt).
 
     The lock/parse gates moved to ``volpred.ops.machine_churn`` on 2026-07-16 so the
@@ -1549,6 +1557,85 @@ def _git(
     }
     kwargs.update(git_writer_subprocess_kwargs(env))
     return runner(["git", "-C", str(repo_root), *args], **kwargs)
+
+
+def _git_bytes(
+    repo_root: Path,
+    *args: str,
+    timeout_s: int,
+    runner=subprocess.run,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess:
+    """Binary-output counterpart of :func:`_git` for candidate blob checks."""
+    kwargs = {
+        "capture_output": True,
+        "text": False,
+        "timeout": timeout_s,
+        "check": False,
+    }
+    kwargs.update(git_writer_subprocess_kwargs(env))
+    return runner(["git", "-C", str(repo_root), *args], **kwargs)
+
+
+def _verify_machine_churn_candidate(
+    repo_root: Path,
+    identities: dict[str, MachineChurnIdentity],
+    *,
+    runner,
+    env: dict[str, str],
+) -> list[str]:
+    """Bind classification evidence to both the worktree and candidate index.
+
+    A pathname is not an identity: a writer can atomically replace it after the
+    lock/parse gate.  The index blob must contain the exact bytes that passed
+    that gate, and the worktree inode must still be the one classified.  Any
+    mismatch discards the entire alternate-index transaction.
+    """
+    mismatches: list[str] = []
+    for rel, identity in sorted(identities.items()):
+        staged = _git(
+            repo_root,
+            "ls-files",
+            "--stage",
+            "-z",
+            "--",
+            rel,
+            timeout_s=_SHORT_TIMEOUT_S,
+            runner=runner,
+            env=env,
+        )
+        if staged.returncode != 0:
+            mismatches.append(rel)
+            continue
+        entries = _parse_stage_entries(staged.stdout or "")
+        if not identity.exists:
+            if entries or not machine_churn_identity_matches(repo_root, identity):
+                mismatches.append(rel)
+            continue
+        records = entries.get(rel, ())
+        if set(entries) != {rel} or len(records) != 1:
+            mismatches.append(rel)
+            continue
+        fields = records[0].split()
+        if len(fields) != 3 or fields[0] != identity.git_mode:
+            mismatches.append(rel)
+            continue
+        blob = _git_bytes(
+            repo_root,
+            "cat-file",
+            "blob",
+            fields[1],
+            timeout_s=_SHORT_TIMEOUT_S,
+            runner=runner,
+            env=env,
+        )
+        if (
+            blob.returncode != 0
+            or hashlib.sha256(blob.stdout or b"").hexdigest() != identity.sha256
+            or not machine_churn_identity_matches(repo_root, identity)
+        ):
+            mismatches.append(rel)
+    return mismatches
 
 
 def _parse_stage_entries(raw: str, *, tree: bool = False) -> dict[str, tuple[str, ...]]:
@@ -2903,13 +2990,14 @@ def run_phase_z(
     # this fire.  Classify both sets through the lock+parse gate.  Previously the
     # during-fire half bypassed this classifier as ``owned``; besides inventing
     # an agent attribution, that also skipped the corruption/live-writer checks.
-    churn, churn_deferred, churn_corrupt = _classify_machine_churn(
+    churn_classification = _classify_machine_churn(
         repo_root,
         sorted(
             set(newly_dirty_machine)
             | {p for p in dirty_before if _is_machine_state(p)}
         ),
     )
+    churn, churn_deferred, churn_corrupt = churn_classification
     foreign = sorted(
         set(p for p in dirty_before if not _is_machine_state(p))
         | set(isolation_residue)
@@ -3255,6 +3343,29 @@ def run_phase_z(
                                 add.returncode, (add.stderr or "")[-300:])
                     return {"committed": False, "reason": "add_error", "untracked": untracked,
                             "rolled_back": True}
+
+            staged_churn_identities = {
+                path: identity
+                for path, identity in churn_classification.identities.items()
+                if path in to_stage
+            }
+            churn_identity_mismatches = _verify_machine_churn_candidate(
+                repo_root,
+                staged_churn_identities,
+                runner=runner,
+                env=candidate_env,
+            )
+            if churn_identity_mismatches:
+                LOG.warning(
+                    "phase_z: machine-churn identity changed before staging: %s",
+                    churn_identity_mismatches,
+                )
+                return {
+                    "committed": False,
+                    "reason": "candidate_churn_identity_error",
+                    "rolled_back": True,
+                    "identity_mismatches": churn_identity_mismatches,
+                }
 
             staged = _git(
                 repo_root, "diff", "--cached", "--name-only", "-z", base_sha,
