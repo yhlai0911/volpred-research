@@ -578,6 +578,7 @@ def run_audit(
     readers: Mapping[str, Callable[[], object]] | None = None,
     schedule_audit: Mapping[str, Any] | None = None,
     discovered_effect_families: frozenset[str] | None = None,
+    owner_validation_clock: Callable[[], str] | None = None,
 ) -> dict[str, Any]:
     now = observed_at or datetime.now(UTC).isoformat()
     inventory = _load_object(inventory_path)
@@ -640,10 +641,18 @@ def run_audit(
             )
             claim_observed_at = now
             if resolver == "primary_authority_owner_rpc":
+                validation_clock = (
+                    owner_validation_clock()
+                    if owner_validation_clock is not None
+                    else (
+                        observed_at
+                        or datetime.now(UTC).isoformat()
+                    )
+                )
                 claim_observed_at = _primary_authority_claim_observed_at(
                     owner_view=owner_view,
                     source_ref=spec.source_ref,
-                    audit_clock=now,
+                    audit_clock=validation_clock,
                 )
         except Exception as exc:  # noqa: BLE001 - any probe failure blocks.
             warn(

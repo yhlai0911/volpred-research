@@ -286,6 +286,40 @@ def test_primary_authority_evidence_identity_and_time_fail_closed(
     assert message in report["probe_errors"][0]["error"]
 
 
+def test_primary_authority_uses_post_read_validation_clock(
+    tmp_path: Path,
+) -> None:
+    inventory = tmp_path / "inventory.json"
+    schedules = tmp_path / "runtime.json"
+    _inventory(inventory)
+    _schedules(schedules)
+
+    report = run_audit(
+        inventory_path=inventory,
+        schedule_path=schedules,
+        observed_at="2026-07-27T09:00:00+00:00",
+        owner_validation_clock=(
+            lambda: "2026-07-27T09:00:11+00:00"
+        ),
+        readers={
+            **_readers(),
+            "primary_authority_owner_rpc": lambda: _PrimaryOwner(
+                attested_at="2026-07-27T09:00:10+00:00"
+            ),
+        },
+        schedule_audit=_schedule_audit(),
+        discovered_effect_families=_EFFECT_FAMILIES,
+    )
+
+    row = next(
+        item
+        for item in report["capabilities"]
+        if item["capability"] == "operations-core-primary"
+    )
+    assert row["status"] == "unique_owner"
+    assert row["claims"][0]["observed_at"] == "2026-07-27T09:00:10Z"
+
+
 def test_probe_failure_is_visible_and_fails_closed(tmp_path: Path) -> None:
     inventory = tmp_path / "inventory.json"
     schedules = tmp_path / "runtime.json"
