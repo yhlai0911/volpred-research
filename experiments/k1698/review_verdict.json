@@ -1,0 +1,18 @@
+{
+  "kid": "k1698",
+  "verdict": "PASS",
+  "reviewer": "codex / high (primary-path README honesty re-certification, rev6)",
+  "reviewed_at": "2026-07-27T14:10:00Z",
+  "reviewed_commit": "rev6 freeze storage/ops/codex_reviews/k1698_rev6_freeze.txt (sha256 pinned below; rev6 changed only README.md vs rev5)",
+  "review_artifact": "storage/ops/codex_reviews/k1698_rev6_verdict.md",
+  "blocking_defects": [],
+  "reviewed_sha256": {
+    "README.md": "b8c82d584d81c55644ce8bc510b95740b2d427deba1c227634f49f0a8b6d6a7a",
+    "fig1_implied_scale_bootstrap.png": "355ecefa92cb22df71f61579cbb0160970a43ba97f0639ca67f3e66ec802f119",
+    "fig2_trinity_before_after.png": "08c2f28b416a59c9fd11ef42423bcde312cc439fc70d15c225c836c6dc96147c",
+    "fig3_scale_factors.png": "7d206151a15461a2caba20ee1d80cf955f7f58dee65b42d27cb6cf8034609093",
+    "k1698.py": "8900bc947c5293a93366b4ab35c37c400c41682012699b47b6ac95d3eac88007",
+    "k1698_results.json": "a13563952bdb7238e0f3059bf4a7b4f2deca18a3f34fe67da7d3e9ea6b87f54f"
+  },
+  "note": "rev5 FAIL had 4 README overclaim/untraced blockers; rev6 README fix (完全復現->11/14 78.57%; removed t-5.6/-5.13/154CI; 2192->n_days2191+files40; removed +1min first-build claim). Codex rev6 primary-path review: all 4 blockers RESOLVED, CRITICAL none, freeze 7-file sha match confirmed. 3-strike round 6 cleared."
+}
