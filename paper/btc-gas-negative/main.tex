@@ -1,0 +1,75 @@
+% =====================================================================
+%  main.tex — BTC GAS-t negative-result methodology paper
+%  Elsevier elsarticle wrapper (JBF / IJF submission style, review option).
+%  Body prose in body.tex; formal tables in tables_main.tex (input from
+%  within body.tex Section 4); references in references.bib (BibTeX/apalike).
+%  Build: xelatex main -> bibtex main -> xelatex main -> xelatex main
+% =====================================================================
+
+\documentclass[review,authoryear,12pt]{elsarticle}
+
+\journal{Journal of Banking and Finance}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{threeparttable}
+\usepackage{makecell}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{frontmatter}
+
+% ─── Title ───────────────────────────────────────────────────
+\title{Why GAS-t Fails on Pre-Institutional Bitcoin: Student-t Innovation, Not Score-Driven Dynamics, Is the Culprit (and Regime-Switching Rescues to Parity, Not Superiority)}
+
+% ─── Author (single author; no co-authors) ───────────────────
+\author{Yi-Hao Lai}
+\address{Department of Finance, Da-Yeh University, Changhua, Taiwan}
+\ead{yhlai@mail.dyu.edu.tw}
+
+% ─── Abstract ────────────────────────────────────────────────
+\begin{abstract}
+\noindent
+We document a previously unreported reversal in Generalized Autoregressive
+Score (GAS) volatility models with Student-t innovations applied to Bitcoin:
+over the pre-institutional period (January 2017 to December 2020, $n=1{,}441$
+out-of-sample days), GAS-t produces 9.92\% worse QLIKE than the GJR-Normal
+benchmark (Diebold-Mariano-HLN $t = -4.67$, $p < 10^{-5}$). Two natural
+hypotheses---that score-driven GAS dynamics fail, or that Student-t
+innovations fail---are typically conflated in the GAS literature. We resolve
+this via a factorial five-model decomposition (GJR-N, GJR-t, GAS-N, GAS-t,
+GJR-N-standardized) which shows that GAS-Normal \emph{recovers} to statistical
+parity with GJR-Normal (DM-HLN $= -1.90$, $p = 0.058$) while GAS-t and GJR-t
+both reverse, isolating Student-t innovation---not GAS dynamics---as the
+proximate cause. A Markov-Switching GAS-t extension rescues GAS-t to
+statistical parity with GJR-Normal (DM-HLN $= +5.97$ vs single-state GAS-t;
+vs GJR-Normal the point estimate is marginally favourable but indistinguishable,
+DM-HLN $= +0.28$), at a substantial parameter cost---parity, not superiority.
+The reversal disappears in the FTX-Luna (2021--2023) and spot-ETF (2024+) eras,
+suggesting institutional flows fundamentally altered Bitcoin's return
+distribution. We provide practitioner guidance on when GAS-t is and is not
+appropriate for crypto volatility forecasting.
+\end{abstract}
+
+\begin{keyword}
+Bitcoin \sep GAS models \sep Student-t innovation \sep volatility forecasting \sep negative result \sep Markov-switching \sep regime change
+\JEL C22 \sep C53 \sep C58 \sep G17
+\end{keyword}
+
+\end{frontmatter}
+
+% ─── Body (Sections 1--9; inputs tables_main.tex in Section 4) ──
+\input{body}
+
+% ─── References (author-date; BibTeX) ────────────────────────
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}
