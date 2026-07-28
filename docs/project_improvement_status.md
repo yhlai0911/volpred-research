@@ -2790,12 +2790,13 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   no-login/non-bypass worker持有、`SECURITY DEFINER`、空`search_path`且只給
   service role。PG17 managed owner transfer與重跑契約已機械化。
 - ✅ Parent commits=`ff46f9fbe`,`dc43c4b1e`,`c2bbcbf61`；nested frontend=
-  `a15bc14`。PostgreSQL integration **8 passed**、frontend full check／production
-  build與Matt Spec／Standards雙PASS。
+  `a15bc14`,`b264eb5`。PostgreSQL integration **8 passed**，member gate
+  **19 passed**且已納入canonical `npm run check`；frontend full check／89-page
+  production build與Matt Spec／Standards雙PASS。
 - ✅ Production migration receipts=`20260728190500`,`20260728191149`；
   service-role transaction live E2E完成save/follow/reminder/question/read、
   exact replay、identity merge及雙delete後rollback。
-- ✅ Zeabur deployment `6a69115ceac99cc636f259f9`為RUNNING；原版／v3首頁、
+- ✅ Zeabur deployment `6a6913edeac99cc636f25a5d`為RUNNING；原版／v3首頁、
   文章、questions、member頁皆200，continuity GET／POST／DELETE匿名皆401。部署只含
   candidate commit，未收active checkout的package／PDF／question-test WIP。
 
