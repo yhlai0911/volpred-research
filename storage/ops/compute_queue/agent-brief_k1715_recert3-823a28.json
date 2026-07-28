@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1715_recert3-823a28",
+  "title": "K1715 recert round 3: certify HEAD after all four round-2 defects closed",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1715_recert3-823a28.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "max",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1715_recert3-823a28.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T20:16:54Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1715_recert3-823a28.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1715_recert3-823a28.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1715_recert3-823a28.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b",
+  "claude_followup": {
+    "brief": "Read experiments/K1715/review_verdict.json. If verdict=PASS: confirm the worktree was merged via merge_worktree.sh and that K1715's NULL finding reached knowledge.json through the CLI; then complete task K1715 succeeded. If verdict=FAIL: record the blocking defects, leave the worktree unmerged, and do NOT re-dispatch the same way (model_router --attempt 2 reports exhausted=true) — escalate to the owner instead.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1715",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T20:16:54Z",
+    "linked_at": "2026-07-28T20:16:54Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1715_recert3.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1715_recert3-823a28.md"
+}
