@@ -1,5 +1,98 @@
 # 換機安裝手冊（新主機從零重建 VolPred）
 
+## 新架構正式入口：manifest-driven guided migration（Issue #17）
+
+2026-07-28 起，新架構換機／standby 準備一律先走 signed 三段式 gate。先由
+operator 建立同一組 `MIGRATION_ID` 與至少 32 字元的高熵 `CHALLENGE`，並準備：
+
+- source／target 各自主機上的 mode-0600 Ed25519 private key；
+- 與本次 challenge 綁定的 source／target permission-attestations JSON；
+- 最長一小時的 trust policy，恰含 `source`、`target`、`verifier`、
+  `continuity_verifier` 四個角色，且四把 public key fingerprint 不得重複；
+- verifier 與 continuity-verifier 的 mode-0600 private key。
+
+以下命令列出 parser 的所有必填參數；檔名可改，identity 與 trust policy 必須一致：
+
+```bash
+# 共用值（兩台主機必須完全相同）
+export MIGRATION_ID="issue17-migration-20260728"
+export CHALLENGE="填入至少32字元的一次性高熵nonce"
+
+# 1a. Mac Studio source capture
+uv run python scripts/guided_host_migration.py capture \
+  --spec config/host_migration_manifest.json \
+  --repo-root "$PWD" \
+  --migration-id "$MIGRATION_ID" \
+  --challenge "$CHALLENGE" \
+  --signing-key "$HOME/.volpred/host_attestation_ed25519" \
+  --signer-identity "mac-studio-source" \
+  --signer-role source \
+  --attestations source-attestations.json \
+  --output host-source.json
+
+# 1b. MacBook Pro target capture（在候選 Mac 的 repo 內執行）
+uv run python scripts/guided_host_migration.py capture \
+  --spec config/host_migration_manifest.json \
+  --repo-root "$PWD" \
+  --migration-id "$MIGRATION_ID" \
+  --challenge "$CHALLENGE" \
+  --signing-key "$HOME/.volpred/host_attestation_ed25519" \
+  --signer-identity "macbook-pro-target" \
+  --signer-role target \
+  --attestations target-attestations.json \
+  --output host-target.json
+
+# 2. 在 verifier host 對帳
+uv run python scripts/guided_host_migration.py compare \
+  --spec config/host_migration_manifest.json \
+  --source host-source.json \
+  --target host-target.json \
+  --continuity-receipt formal-host-continuity.json \
+  --trust-policy host-migration-trust.json \
+  --signing-key "$HOME/.volpred/migration_verifier_ed25519" \
+  --signer-identity "migration-verifier" \
+  --output host-parity-report.json
+
+# 3. 產生並持久化 dry-run plan
+uv run python scripts/guided_host_migration.py plan \
+  --spec config/host_migration_manifest.json \
+  --report host-parity-report.json \
+  --trust-policy host-migration-trust.json \
+  --signing-key "$HOME/.volpred/migration_verifier_ed25519" \
+  --signer-identity "migration-verifier" \
+  --output host-migration-plan.json
+```
+
+Canonical spec 是 `config/host_migration_manifest.json`。Capture 涵蓋 code、config、
+schedules、skills、runtime artifacts、tools、secret **references** 與 permissions；
+輸出只記「哪些 reference name 已配置」及檔案 mode，永不輸出 secret 值或其 hash。
+macOS／subscription permission 只能由
+`volpred.host-attestations.v1` 的非秘密 evidence reference 證明；缺證據一律
+fail closed。
+
+`compare` 只有在 source **與 target** 宣告路徑各自屬單一、前後未漂移的乾淨
+immutable Git HEAD、兩端 artifact 與 executable identity parity 相同、
+permissions／subscription reauthorization 全過，且 formal-effect 演練同時證明
+RTO ≤ 300 秒、遺失 receipt = 0 時，才會輸出 `promotion_eligible=true`。候選 Mac
+在此以前只能 shadow；不得安裝舊 per-job LaunchAgent／host cron，也不得取得
+Primary Authority lease。
+
+Tool capture 不會執行 `PATH` 中的任何程式；它只從同一個 `O_NOFOLLOW` fd 取得
+owner、mode 與 SHA。Python／Git／uv／Node 功能、GitHub login、Claude／Codex／agy
+訂閱狀態分別由 `runtime_toolchain_functional`、`github_session`、
+`subscription_sessions` 的 signed permission receipt 證明，並與該次 snapshot
+一起簽署。兩端 executable SHA 不完全相同就只能列入 remediation plan。
+
+`plan` 不接受 caller 自選 nonce ledger。它會先把 signed plan 持久化到固定的
+`~/.volpred/host_migration/plans/<challenge-id>.json`，再在同一 host-local
+critical section 寫入 canonical challenge ledger。即使 `--output` 寫檔失敗，
+canonical plan 仍可回讀；ledger 被刪除但 plan 尚在時會 fail closed，不會把同一
+challenge 當成新的。每次 recapture／重跑 plan 都要建立新 challenge 與 trust policy。
+
+下方人工 bootstrap 保留為 rollback/歷史參考；它會安裝 legacy scheduler、含單一
+使用者假設，且舊文曾建議直接複製 env/session，因此**不得再作為新架構 promotion
+證據**。待 Issue #17 與其 blocking edge 正式結案後，再另票退役。
+
 > **狀態說明（2026-07-23）**：本手冊仍是目前可用的人工 bootstrap，但只能視為
 > `contained` 的換機方式，尚未達成功能等價、RPO=0、warm standby、租約防雙主與
 > zero-paid provider continuity。正式目標與接管 gate 見

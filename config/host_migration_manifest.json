@@ -1,0 +1,346 @@
+{
+  "schema_version": "volpred.host-migration-spec.v2",
+  "snapshot_max_age_seconds": 900,
+  "artifact_groups": [
+    {
+      "id": "operations_code",
+      "paths": [
+        "src/volpred",
+        "scripts",
+        "server.py",
+        "Dockerfile.api",
+        "zbpack.json",
+        "pyproject.toml",
+        "uv.lock",
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "required": true,
+      "parity": "sha256",
+      "git_root": ".",
+      "git_paths": [
+        "src/volpred",
+        "scripts",
+        "server.py",
+        "Dockerfile.api",
+        "zbpack.json",
+        "pyproject.toml",
+        "uv.lock",
+        "AGENTS.md",
+        "CLAUDE.md"
+      ],
+      "required_json_schema": null
+    },
+    {
+      "id": "config",
+      "paths": [
+        "config"
+      ],
+      "required": true,
+      "parity": "sha256",
+      "git_root": ".",
+      "git_paths": [
+        "config"
+      ],
+      "required_json_schema": null
+    },
+    {
+      "id": "schedules",
+      "paths": [
+        "config/runtime_schedules.json",
+        "config/scheduled_writer_ownership.json"
+      ],
+      "required": true,
+      "parity": "sha256",
+      "git_root": ".",
+      "git_paths": [
+        "config/runtime_schedules.json",
+        "config/scheduled_writer_ownership.json"
+      ],
+      "required_json_schema": null
+    },
+    {
+      "id": "skills",
+      "paths": [
+        ".claude/skills"
+      ],
+      "required": true,
+      "parity": "sha256",
+      "git_root": ".",
+      "git_paths": [
+        ".claude/skills"
+      ],
+      "required_json_schema": null
+    },
+    {
+      "id": "frontend",
+      "paths": [
+        "frontend-v2-fix"
+      ],
+      "required": true,
+      "parity": "sha256",
+      "git_root": "frontend-v2-fix",
+      "git_paths": [
+        "."
+      ],
+      "required_json_schema": null
+    },
+    {
+      "id": "supabase_deploy",
+      "paths": [
+        "supabase"
+      ],
+      "required": true,
+      "parity": "sha256",
+      "git_root": ".",
+      "git_paths": [
+        "supabase"
+      ],
+      "required_json_schema": null
+    },
+    {
+      "id": "runtime_continuity_artifact",
+      "paths": [
+        "storage/ops/primary_authority_outage_cross_host_latest.json"
+      ],
+      "required": true,
+      "parity": "validated_json",
+      "git_root": null,
+      "git_paths": [],
+      "required_json_schema": "primary-authority-outage-cross-host.v4"
+    }
+  ],
+  "ignored_path_names": [
+    ".DS_Store",
+    ".git",
+    ".mypy_cache",
+    ".next",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".temp",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules"
+  ],
+  "tools": [
+    {
+      "id": "python",
+      "commands": [
+        "python3"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "homebrew",
+        "repo",
+        "system"
+      ],
+      "functional_permission_id": "runtime_toolchain_functional"
+    },
+    {
+      "id": "git",
+      "commands": [
+        "git"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "homebrew",
+        "system"
+      ],
+      "functional_permission_id": "runtime_toolchain_functional"
+    },
+    {
+      "id": "uv",
+      "commands": [
+        "uv"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "home",
+        "homebrew"
+      ],
+      "functional_permission_id": "runtime_toolchain_functional"
+    },
+    {
+      "id": "node",
+      "commands": [
+        "node"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "home",
+        "homebrew"
+      ],
+      "functional_permission_id": "runtime_toolchain_functional"
+    },
+    {
+      "id": "github_cli",
+      "commands": [
+        "gh"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "homebrew",
+        "system"
+      ],
+      "functional_permission_id": "github_session"
+    },
+    {
+      "id": "claude_subscription_cli",
+      "commands": [
+        "claude"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "application",
+        "home",
+        "homebrew"
+      ],
+      "functional_permission_id": "subscription_sessions"
+    },
+    {
+      "id": "codex_subscription_cli",
+      "commands": [
+        "codex"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "application",
+        "home",
+        "homebrew"
+      ],
+      "functional_permission_id": "subscription_sessions"
+    },
+    {
+      "id": "agy_subscription_cli",
+      "commands": [
+        "agy"
+      ],
+      "required": true,
+      "parity": "exact_sha256",
+      "allowed_install_origins": [
+        "application",
+        "home",
+        "homebrew"
+      ],
+      "functional_permission_id": "subscription_sessions"
+    }
+  ],
+  "secret_references": [
+    {
+      "id": "supabase_runtime",
+      "names": [
+        "SUPABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ],
+      "locations": [
+        ".env.local"
+      ],
+      "required": true,
+      "reauthorization_permission_id": "supabase_reauthorization"
+    },
+    {
+      "id": "notification_email",
+      "names": [
+        "SMTP_HOST",
+        "SMTP_USERNAME",
+        "SMTP_PASSWORD"
+      ],
+      "locations": [
+        ".env"
+      ],
+      "required": true,
+      "reauthorization_permission_id": "email_reauthorization"
+    },
+    {
+      "id": "telegram_manager",
+      "names": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "locations": [
+        ".env"
+      ],
+      "required": true,
+      "reauthorization_permission_id": "telegram_reauthorization"
+    },
+    {
+      "id": "telegram_destination",
+      "names": [
+        "chat_id"
+      ],
+      "locations": [
+        "storage/ops/telegram_state.json"
+      ],
+      "required": true,
+      "reauthorization_permission_id": "telegram_reauthorization"
+    }
+  ],
+  "forbidden_agentic_auth_names": [
+    "ANTHROPIC_API_KEY",
+    "GOOGLE_API_KEY",
+    "OPENAI_API_KEY"
+  ],
+  "permissions": [
+    {
+      "id": "remote_login",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "runtime_toolchain_functional",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "github_session",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "subscription_sessions",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "supabase_reauthorization",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "email_reauthorization",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "telegram_reauthorization",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    },
+    {
+      "id": "tcc_runtime_scope",
+      "required": true,
+      "probe": "signed_manual_attestation"
+    }
+  ],
+  "continuity": {
+    "receipt_max_age_seconds": 3600,
+    "rto_seconds_max": 300,
+    "rpo_receipts_max": 0,
+    "formal_effect_count_min": 1,
+    "rollback_steps": [
+      "close the target local enable gate",
+      "release or let the target primary lease expire",
+      "reacquire the exact-next epoch on the previous primary",
+      "replay unsettled formal receipts by idempotency key",
+      "verify zero duplicate provider, publish, sync, and commit effects"
+    ]
+  }
+}

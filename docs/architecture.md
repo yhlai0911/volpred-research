@@ -912,6 +912,39 @@ opt-out／clear／delete 邊界見 `docs/analytics-privacy-contract.md`；Admin 
 
 **核心原則重申**：同一套 `ops` CLI，真人與主線程 agent 共用；v12 下真人 UI 是監看層，主線程才是正式執行者，不再有第二個平行 Claude / Codex session 持續消化 queue。
 
+### Guided host migration／standby parity gate（2026-07-28）
+
+換機與 warm standby 不再以 `bootstrap_new_host.sh` 跑完或兩台機器「看起來都有
+檔案」作完成證據。Canonical spec=`config/host_migration_manifest.json`，
+read-only engine=`src/volpred/ops/host_migration.py`，operator CLI=
+`scripts/guided_host_migration.py`。它依序產生：
+
+1. 兩端 machine-readable snapshot（artifact tree、tool capability、secret reference
+   presence/mode、permission attestations）；
+2. identity-bound parity report；
+3. `mode=dry_run`、`performed_mutations=[]` 的 guided plan 與 rollback contract。
+
+Source 與 target 的 code/config/schedules/skills 都必須各自來自單一、capture 前後
+未漂移的乾淨 Git HEAD；共享 checkout 若含另一 session 的 WIP，promotion 直接拒絕。
+Artifact identity 同時納入 bytes、symlink kind 與 executable mode；required tools
+必須來自 allowlisted install origin／合法 owner，且兩端由同一 fd 捕獲的 executable
+SHA 必須完全一致。Scanner 不執行 PATH 中的 code；runtime toolchain、GitHub login 與
+subscription capability 由綁在同一 signed snapshot 的 permission receipt 證明，
+避免 executable path ABA 讓 probe 結果與被簽 bytes 分離。Target 不複製 source secret、瀏覽器或 desktop
+subscription session，只接受在 target 重新授權後留下的非秘密 reference。
+候選主機在 parity、TCC/runtime capability 與 formal-effect RPO/RTO receipt 全過前
+只能 shadow，不能啟動 business scheduler 或取得 Primary Authority。
+
+Snapshot、continuity receipt、parity report 與 plan 分別由四把不可重用的 host-local
+Ed25519 key 簽署；trust policy 最長一小時。Plan 固定
+`authorizes_primary_lease=false`，並在回傳前持久化到
+`~/.volpred/host_migration/plans/`，由同目錄 canonical ledger 原子消耗 challenge。
+CLI 不提供 ledger 路徑 override；ledger 遺失而 canonical plan 尚在時 fail closed。
+
+既有 `primary-authority-outage-cross-host.v4` 若 `effect_requests=0`，只能證明
+exact-next epoch 與 RTO；即使 handoff < 5 分鐘，也不能證明 formal receipt 的
+RPO=0。完整操作與舊 bootstrap 的 rollback 邊界見 `docs/host-migration.md`。
+
 ### Operations Core scheduler（2026-07-26，取代上方 v12 時鐘描述）
 
 `config/runtime_schedules.json.schedule_materialization.mode=active` 是目前正式時鐘。
