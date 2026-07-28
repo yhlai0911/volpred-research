@@ -339,7 +339,7 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
         n_traders=("traders_tot_all", "mean"),
         nweeks=("nonrep_share", "size"),
     ).reset_index()
-    agg["month_end"] = agg["month"].dt.to_timestamp(how="end").normalize()
+    agg["month_end"] = agg["month"].dt.to_timestamp(how="end").dt.normalize()
 
     # --- realized vol monthly ---
     rvm = rv.copy()
@@ -440,7 +440,10 @@ def panel_regression(panel: pd.DataFrame) -> dict:
     df["t"] = df["t"] - df["t"].min()
     nmonths = df["month"].nunique()
 
-    df = df.set_index(["commodity", "month"])
+    # linearmodels requires the time index to be numeric or date-like; a pandas
+    # Period index is rejected outright, so carry the month as a timestamp.
+    df["month_ts"] = df["month"].dt.to_timestamp()
+    df = df.set_index(["commodity", "month_ts"])
 
     def run(rhs: list[str], label: str, dk_lag: int):
         y = df["d_nonrep"]
@@ -520,6 +523,9 @@ def bootstrap_interaction(panel: pd.DataFrame, n_boot: int = 2000) -> dict:
     months = df["month"].unique()
     # precompute point estimate
     def fit(dd):
+        m = dd["month"]
+        if isinstance(m.dtype, pd.PeriodDtype):
+            dd = dd.assign(month=m.dt.to_timestamp())
         dd = dd.set_index(["commodity", "month"])
         try:
             r = PanelOLS(dd["d_nonrep"], dd[rhs].astype(float), entity_effects=True).fit(
@@ -535,8 +541,10 @@ def bootstrap_interaction(panel: pd.DataFrame, n_boot: int = 2000) -> dict:
         parts = []
         for k, idx in enumerate(pick):
             sub = df[df["month"] == mlist[idx]].copy()
-            # relabel month to keep clusters distinct (avoid duplicate index)
-            sub["month"] = f"B{k}"
+            # relabel month to keep clusters distinct (avoid duplicate index).
+            # Must stay numeric: a string label makes linearmodels reject the
+            # time index, which silently turned every replicate into NaN.
+            sub["month"] = k
             parts.append(sub)
         bd = pd.concat(parts, ignore_index=True)
         b = fit(bd)

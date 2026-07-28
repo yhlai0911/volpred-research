@@ -1,0 +1,373 @@
+{
+  "experiment_id": "K1694",
+  "title": "FCM clearing concentration and high-volatility crowding-out of small commodity traders",
+  "seed": 1694,
+  "generated_utc": "2026-07-28T18:16:37.694928Z",
+  "verdict": "NULL",
+  "data_provenance": {
+    "fcm_source": "CFTC Financial Data for FCMs (monthly xlsx)",
+    "fcm_publication_lag_days_assumed": 45,
+    "fcm_asof_merge": "backward as-of on month_end >= FCM avail_date (month_end+45d)",
+    "dcot_source": "CFTC DCOT futures-only 72hh-3qpy (weekly; as-of Tue, published Fri)",
+    "dcot_small_trader_proxy": "non-reportable positions (long+short)/(2*OI)",
+    "vol_source": "yfinance daily futures; monthly realized vol = std(daily logret)*sqrt(252)",
+    "commodities": [
+      "WTI-PHYSICAL",
+      "NAT GAS NYME",
+      "GOLD",
+      "SILVER",
+      "PLATINUM",
+      "PALLADIUM",
+      "COPPER- #1",
+      "CORN",
+      "SOYBEANS",
+      "SOYBEAN OIL",
+      "SOYBEAN MEAL",
+      "WHEAT-SRW",
+      "WHEAT-HRW",
+      "SUGAR NO. 11",
+      "COFFEE C",
+      "COCOA",
+      "COTTON NO. 2",
+      "LIVE CATTLE",
+      "LEAN HOGS",
+      "FEEDER CATTLE",
+      "NY HARBOR ULSD",
+      "GASOLINE RBOB"
+    ]
+  },
+  "sample": {
+    "fcm_months": 150,
+    "fcm_span": [
+      "2013-12-31",
+      "2026-05-31"
+    ],
+    "panel_rows_usable": 3293,
+    "panel_commodities": 22,
+    "panel_span": [
+      "2014-02",
+      "2026-07"
+    ]
+  },
+  "descriptives": {
+    "fcm_hhi_stats": {
+      "n_months": 150,
+      "span": [
+        "2013-12-31",
+        "2026-05-31"
+      ],
+      "hhi_seg_mean": 0.07473016537603622,
+      "hhi_seg_min": 0.0624620269466387,
+      "hhi_seg_max": 0.0904290545482706,
+      "cr4_seg_mean": 0.4608268859627079,
+      "n_fcm_mean": 55.98,
+      "n_fcm_last": 56,
+      "hhi_seg_trend_perYr": 0.0014416368659236844
+    },
+    "regime_2x2_d_nonrep": {
+      "fcm0_vol0": {
+        "mean": -0.000141935128798859,
+        "std": 0.00549006496055161,
+        "n": 1093
+      },
+      "fcm0_vol1": {
+        "mean": -0.0004407544981362741,
+        "std": 0.006878480912045478,
+        "n": 821
+      },
+      "fcm1_vol0": {
+        "mean": -0.0004373216710938773,
+        "std": 0.00489271240074137,
+        "n": 626
+      },
+      "fcm1_vol1": {
+        "mean": 0.0001884579706621271,
+        "std": 0.005704235987229323,
+        "n": 760
+      }
+    },
+    "corr_d_nonrep": {
+      "d_nonrep": 1.0,
+      "hhi_seg_z": 0.03918844495661137,
+      "rv_z": 0.051098394850392505,
+      "highvol": 0.00955536501593022,
+      "conc4_z": 0.00595101265673573,
+      "dlog_oi": -0.4439958640676276
+    }
+  },
+  "panel_regressions": {
+    "spec1_fcm_highvol": {
+      "n_obs": 3293,
+      "n_commodities": 22,
+      "n_months": 150,
+      "rhs": [
+        "hhi_seg_z",
+        "highvol",
+        "fcm_x_highvol",
+        "nonrep_lag",
+        "d_nonrep_lag",
+        "dlog_oi",
+        "t"
+      ],
+      "driscoll_kraay": {
+        "coef": {
+          "hhi_seg_z": 2.1640372760662834e-05,
+          "highvol": -0.0005122424369623835,
+          "fcm_x_highvol": 0.000314636170181876,
+          "nonrep_lag": -0.05105503028049181,
+          "d_nonrep_lag": -0.011658971143193492,
+          "dlog_oi": -0.03480665275424167,
+          "t": -4.163893826670232e-06
+        },
+        "tstat": {
+          "hhi_seg_z": 0.12494009189093595,
+          "highvol": -2.5187524712014877,
+          "fcm_x_highvol": 1.553883806440329,
+          "nonrep_lag": -6.201365030151975,
+          "d_nonrep_lag": -0.5387264989353929,
+          "dlog_oi": -18.491404627455765,
+          "t": -1.310294005432886
+        },
+        "pval": {
+          "hhi_seg_z": 0.9005786722927929,
+          "highvol": 0.011824564506250024,
+          "fcm_x_highvol": 0.12030908477699165,
+          "nonrep_lag": 6.299794019781757e-10,
+          "d_nonrep_lag": 0.5901123248901465,
+          "dlog_oi": 0.0,
+          "t": 0.19018859211293382
+        },
+        "bandwidth": 6
+      },
+      "cluster_by_month": {
+        "coef": {
+          "hhi_seg_z": 2.1640372760662834e-05,
+          "highvol": -0.0005122424369623835,
+          "fcm_x_highvol": 0.000314636170181876,
+          "nonrep_lag": -0.05105503028049181,
+          "d_nonrep_lag": -0.011658971143193492,
+          "dlog_oi": -0.03480665275424167,
+          "t": -4.163893826670232e-06
+        },
+        "tstat": {
+          "hhi_seg_z": 0.11837583572422253,
+          "highvol": -2.433209843441625,
+          "fcm_x_highvol": 1.5894677755226168,
+          "nonrep_lag": -5.540190908800915,
+          "d_nonrep_lag": -0.4940626717177697,
+          "dlog_oi": -26.487200778372593,
+          "t": -1.0872549358641208
+        },
+        "pval": {
+          "hhi_seg_z": 0.9057771555555965,
+          "highvol": 0.015018970691838884,
+          "fcm_x_highvol": 0.11205167218797318,
+          "nonrep_lag": 3.26107196801928e-08,
+          "d_nonrep_lag": 0.6212951654152792,
+          "dlog_oi": 0.0,
+          "t": 0.2770044390015738
+        }
+      },
+      "rsq_within": 0.2249686674169804
+    },
+    "spec2_fcm_rvz_continuous": {
+      "n_obs": 3293,
+      "n_commodities": 22,
+      "n_months": 150,
+      "rhs": [
+        "hhi_seg_z",
+        "rv_z",
+        "fcm_x_rvz",
+        "nonrep_lag",
+        "d_nonrep_lag",
+        "dlog_oi",
+        "t"
+      ],
+      "driscoll_kraay": {
+        "coef": {
+          "hhi_seg_z": 0.00017575610050876969,
+          "rv_z": -0.00017148984905647377,
+          "fcm_x_rvz": 0.00028939261571882854,
+          "nonrep_lag": -0.05262101885786439,
+          "d_nonrep_lag": -0.01181985984934379,
+          "dlog_oi": -0.03457779907873712,
+          "t": -4.475939833671657e-06
+        },
+        "tstat": {
+          "hhi_seg_z": 1.2593497362791481,
+          "rv_z": -1.0324211697327037,
+          "fcm_x_rvz": 2.501602773341872,
+          "nonrep_lag": -6.142013955220423,
+          "d_nonrep_lag": -0.5370878739041218,
+          "dlog_oi": -18.328995448508447,
+          "t": -1.395914411778111
+        },
+        "pval": {
+          "hhi_seg_z": 0.20799408432108524,
+          "rv_z": 0.30195134902411236,
+          "fcm_x_rvz": 0.01241184911431814,
+          "nonrep_lag": 9.130722844474803e-10,
+          "d_nonrep_lag": 0.5912435254251975,
+          "dlog_oi": 0.0,
+          "t": 0.16283520839815258
+        },
+        "bandwidth": 6
+      },
+      "cluster_by_month": {
+        "coef": {
+          "hhi_seg_z": 0.00017575610050876969,
+          "rv_z": -0.00017148984905647377,
+          "fcm_x_rvz": 0.00028939261571882854,
+          "nonrep_lag": -0.05262101885786439,
+          "d_nonrep_lag": -0.01181985984934379,
+          "dlog_oi": -0.03457779907873712,
+          "t": -4.475939833671657e-06
+        },
+        "tstat": {
+          "hhi_seg_z": 1.1393717654573385,
+          "rv_z": -1.1671723786168124,
+          "fcm_x_rvz": 2.5431200510669227,
+          "nonrep_lag": -5.6231216923837355,
+          "d_nonrep_lag": -0.5005207347272068,
+          "dlog_oi": -26.159572500292466,
+          "t": -1.1514426388182728
+        },
+        "pval": {
+          "hhi_seg_z": 0.254631735190189,
+          "rv_z": 0.24322602302459484,
+          "fcm_x_rvz": 0.011032523282891171,
+          "nonrep_lag": 2.033284829394688e-08,
+          "d_nonrep_lag": 0.6167422059253198,
+          "dlog_oi": 0.0,
+          "t": 0.249634517083424
+        }
+      },
+      "rsq_within": 0.22509292446439932
+    },
+    "spec3_trader_conc4_highvol": {
+      "n_obs": 3293,
+      "n_commodities": 22,
+      "n_months": 150,
+      "rhs": [
+        "conc4_z",
+        "highvol",
+        "conc4_x_highvol",
+        "nonrep_lag",
+        "d_nonrep_lag",
+        "dlog_oi",
+        "t"
+      ],
+      "driscoll_kraay": {
+        "coef": {
+          "conc4_z": -0.0003945599591657676,
+          "highvol": -0.0005225954263510307,
+          "conc4_x_highvol": -0.00015048642417113848,
+          "nonrep_lag": -0.054201286344342015,
+          "d_nonrep_lag": -0.00978546073062042,
+          "dlog_oi": -0.03517560226535377,
+          "t": -2.834373333097008e-06
+        },
+        "tstat": {
+          "conc4_z": -2.31857863589937,
+          "highvol": -2.153335957103278,
+          "conc4_x_highvol": -0.5827486242626422,
+          "nonrep_lag": -6.4929637133712435,
+          "d_nonrep_lag": -0.4447136600332977,
+          "dlog_oi": -18.752739028731398,
+          "t": -1.2185431290605564
+        },
+        "pval": {
+          "conc4_z": 0.020479376686951767,
+          "highvol": 0.03136531770564521,
+          "conc4_x_highvol": 0.560102789921304,
+          "nonrep_lag": 9.693978952896032e-11,
+          "d_nonrep_lag": 0.6565561825637665,
+          "dlog_oi": 0.0,
+          "t": 0.22310571081987995
+        },
+        "bandwidth": 6
+      },
+      "cluster_by_month": {
+        "coef": {
+          "conc4_z": -0.0003945599591657676,
+          "highvol": -0.0005225954263510307,
+          "conc4_x_highvol": -0.00015048642417113848,
+          "nonrep_lag": -0.054201286344342015,
+          "d_nonrep_lag": -0.00978546073062042,
+          "dlog_oi": -0.03517560226535377,
+          "t": -2.834373333097008e-06
+        },
+        "tstat": {
+          "conc4_z": -2.304484690543441,
+          "highvol": -2.125119536039755,
+          "conc4_x_highvol": -0.5826679923572496,
+          "nonrep_lag": -5.880012821283432,
+          "d_nonrep_lag": -0.4128350831965388,
+          "dlog_oi": -26.72576562399375,
+          "t": -0.9982327791556647
+        },
+        "pval": {
+          "conc4_z": 0.021257936381364972,
+          "highvol": 0.03365155860320668,
+          "conc4_x_highvol": 0.5601570727966494,
+          "nonrep_lag": 4.516257146036651e-09,
+          "d_nonrep_lag": 0.6797545614680347,
+          "dlog_oi": 0.0,
+          "t": 0.3182404913709014
+        }
+      },
+      "rsq_within": 0.2266467330184806
+    },
+    "_hac_bandwidth": 6
+  },
+  "timeseries_regression": {
+    "n_months": 150,
+    "hac_lag": 6,
+    "resid_acf1": -0.04159218490346735,
+    "coef": {
+      "const": -0.001019692295444828,
+      "hhi_z": 0.00011961666825545408,
+      "highvol_frac": 0.001645038911193178,
+      "hhi_x_volfrac": 0.0005635547892659614
+    },
+    "tstat": {
+      "const": -1.6058686746809991,
+      "hhi_z": 0.8348681652012924,
+      "highvol_frac": 1.215145365060096,
+      "hhi_x_volfrac": 0.5416364253263832
+    },
+    "pval": {
+      "const": 0.10830276756491213,
+      "hhi_z": 0.4037919407887661,
+      "highvol_frac": 0.22431065389239824,
+      "hhi_x_volfrac": 0.5880689935941328
+    }
+  },
+  "bootstrap_interaction_spec1": {
+    "point": 0.0003509280098789428,
+    "n_boot": 2000,
+    "ci95": [
+      -2.720344527384806e-05,
+      0.0007471406979583968
+    ],
+    "p_two_sided": 0.074,
+    "mean": 0.0003601162026486811,
+    "std": 0.0001979990012368352
+  },
+  "primary_interaction": {
+    "term": "fcm_x_highvol",
+    "coef": 0.000314636170181876,
+    "t_driscoll_kraay": 1.553883806440329,
+    "t_cluster_month": 1.5894677755226168,
+    "bootstrap_ci95": [
+      -2.720344527384806e-05,
+      0.0007471406979583968
+    ]
+  },
+  "limitations": [
+    "FCM concentration is a single system-wide monthly series (high autocorrelation, low effective d.o.f.); its main effect is a common time factor.",
+    "Volatility regime is contemporaneous with the outcome -> association, not causal; reverse causality (small-trader exit affecting vol) cannot be excluded.",
+    "FCM seg funds are dominated by financial futures; crowding-out mapped onto physical-commodity small traders is an indirect linkage.",
+    "yfinance continuous-futures realized vol is a proxy for each commodity's true vol."
+  ]
+}
