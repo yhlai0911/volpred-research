@@ -258,12 +258,6 @@ _PASSTHROUGH_ENV = frozenset({
     "PATH", "LANG", "LANGUAGE", "LC_ALL", "LC_CTYPE", "TERM", "SHELL",
     "USER", "LOGNAME", "SSL_CERT_FILE", "SSL_CERT_DIR", "NODE_EXTRA_CA_CERTS",
     "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
-    # The production provider registry permits only subscription/OAuth auth.
-    # API keys are metered authority, so the isolation boundary must remove
-    # them before the registry validates the final child environment. Keeping
-    # them here made the two layers contradict each other and every hourly fire
-    # fail closed whenever an ambient API key existed on the host.
-    "CLAUDE_CODE_OAUTH_TOKEN",
     # Exact non-secret dispatch identity/configuration required by the worker
     # and fire-manifest contracts. These carry attribution, not authority.
     "VOLPRED_ACTOR", "VOLPRED_TASK_CLAIM_OWNER", "VOLPRED_DISPATCH_JOB_ID",
@@ -274,21 +268,41 @@ _PASSTHROUGH_ENV = frozenset({
     "VOLPRED_DISPATCH_SIDECAR_STARTUP_WINDOW_S",
 })
 
+_PROVIDER_AUTH_ENV: dict[str, frozenset[str]] = {
+    # Claude Code's subscription token is model authority and must be scoped to
+    # the Claude launch contract. In particular, never hand this bearer to a
+    # Codex/AGY child merely because all providers share one parent daemon.
+    "claude-cli": frozenset({"CLAUDE_CODE_OAUTH_TOKEN"}),
+    # Codex desktop and AGY subscription authentication are intentionally not
+    # represented by a transferable environment bearer.
+    "codex-cli": frozenset(),
+    "agy-cli": frozenset(),
+}
+
 
 def isolated_environment(
     base: dict[str, str],
     prepared: PreparedIsolation | dict[str, Any],
+    *,
+    provider_id: str,
 ) -> dict[str, str]:
-    """Return the child env with non-model external credentials removed."""
+    """Return one provider-scoped child env with external credentials removed."""
+    try:
+        provider_auth = _PROVIDER_AUTH_ENV[provider_id]
+    except KeyError as exc:
+        raise IsolationUnavailable(
+            f"unsupported isolated provider identity: {provider_id!r}"
+        ) from exc
     raw = (
         prepared.to_dict()
         if isinstance(prepared, PreparedIsolation)
         else {str(k): str(v) for k, v in prepared.items()}
     )
+    allowed = _PASSTHROUGH_ENV | provider_auth
     env = {
         key: value
         for key, value in base.items()
-        if key in _PASSTHROUGH_ENV or key.startswith("LC_")
+        if key in allowed or key.startswith("LC_")
     }
     env.update({
         "HOME": raw["synthetic_home"],

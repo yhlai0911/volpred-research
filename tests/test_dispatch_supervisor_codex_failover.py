@@ -204,6 +204,72 @@ def test_api_key_environment_prevents_all_codex_subprocesses(
     assert result.exit_code == codex_failover.RC_POLICY_DENIED
 
 
+def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    workdir = tmp_path / "workspace"
+    run_dir = tmp_path / "run"
+    for path in (workdir, run_dir / "home", run_dir / "tmp", run_dir / "pycache"):
+        path.mkdir(parents=True)
+    profile = run_dir / "sandbox.sb"
+    profile.write_text("(version 1)\n", encoding="utf-8")
+    isolated_workspace = {
+        "path": str(workdir),
+        "isolation_profile_path": str(profile),
+        "isolation_run_dir": str(run_dir),
+        "isolation_synthetic_home": str(run_dir / "home"),
+        "isolation_tmp_dir": str(run_dir / "tmp"),
+        "isolation_pycache_dir": str(run_dir / "pycache"),
+        "isolation_workspace": str(workdir),
+        "isolation_canonical_root": str(tmp_path / "repo"),
+    }
+    for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
+        monkeypatch.setenv(key, "metered-secret")
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "claude-only")
+    authorized: list[dict[str, str]] = []
+    spawned: list[dict[str, str]] = []
+
+    def authorize(codex_bin, environment):
+        authorized.append(dict(environment))
+        return SimpleNamespace(
+            resolved_executable=codex_bin,
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "codex-cli",
+                "VOLPRED_PROVIDER_MODEL_ID": codex_failover.CODEX_MODEL,
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        )
+
+    def run(argv, **kwargs):
+        spawned.append(dict(kwargs["env"]))
+        if argv[-1] == "--version":
+            return SimpleNamespace(returncode=0, stdout="codex-cli", stderr="")
+        if _is_work_call(argv):
+            return SimpleNamespace(returncode=0, stdout="done", stderr="")
+        return _PROBE_OK
+
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover, "_authorize_codex", authorize)
+    monkeypatch.setattr(codex_failover.subprocess, "run", run)
+
+    result = codex_failover.run_codex_failover(
+        reason="quota",
+        enabled=True,
+        workdir=workdir,
+        isolated_workspace=isolated_workspace,
+        slot_id="slot-1",
+        job_id="abcdef123456",
+    )
+
+    assert result.recovered is True
+    assert len(authorized) == len(spawned) == 3
+    for env in (*authorized, *spawned):
+        assert "CLAUDE_CODE_OAUTH_TOKEN" not in env
+        for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
+            assert key not in env
+
+
 def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
     monkeypatch.setattr(codex_failover, "preflight", lambda *_a, **_k: (True, 0, "codex"))

@@ -156,10 +156,15 @@ def resolve_codex_bin() -> str | None:
     return None
 
 
-def preflight(codex_bin: str, *, timeout_s: int = PREFLIGHT_TIMEOUT_S) -> tuple[bool, int, str]:
+def preflight(
+    codex_bin: str,
+    *,
+    timeout_s: int = PREFLIGHT_TIMEOUT_S,
+    environment: dict[str, str] | None = None,
+) -> tuple[bool, int, str]:
     """`codex --version`. Returns (ok, rc, detail)."""
     try:
-        child_env = dict(os.environ)
+        child_env = dict(environment if environment is not None else os.environ)
         receipt = _authorize_codex(codex_bin, child_env)
         child_env.update(receipt.environment())
         verify_spawn_receipt(receipt)
@@ -184,7 +189,12 @@ def preflight(codex_bin: str, *, timeout_s: int = PREFLIGHT_TIMEOUT_S) -> tuple[
     return True, 0, (result.stdout or "").strip()
 
 
-def check_reachable(codex_bin: str, *, timeout_s: int = REACHABILITY_TIMEOUT_S) -> tuple[bool, int, str]:
+def check_reachable(
+    codex_bin: str,
+    *,
+    timeout_s: int = REACHABILITY_TIMEOUT_S,
+    environment: dict[str, str] | None = None,
+) -> tuple[bool, int, str]:
     """Can we get an answer out of ChatGPT? Returns (ok, rc, detail).
 
     `codex --version` never leaves the host, so nothing in the old preflight could
@@ -193,7 +203,7 @@ def check_reachable(codex_bin: str, *, timeout_s: int = REACHABILITY_TIMEOUT_S) 
     in seconds, whose failure is real evidence the API is unavailable.
     """
     try:
-        child_env = dict(os.environ)
+        child_env = dict(environment if environment is not None else os.environ)
         receipt = _authorize_codex(codex_bin, child_env)
         child_env.update(receipt.environment())
         verify_spawn_receipt(receipt)
@@ -271,7 +281,44 @@ def run_codex_failover(
         LOG.warning("codex binary not found — cannot failover")
         return FailoverResult(False, False, RC_BINARY_MISSING, "找不到可執行的 codex binary")
 
-    ok, rc, detail = preflight(codex_bin, timeout_s=preflight_timeout_s)
+    launch_cwd = (workdir or ROOT).resolve()
+    child_env = dict(os.environ)
+    isolation_receipt: dict[str, str] | None = None
+    if isolated_workspace is not None:
+        expected_workspace = Path(
+            str(isolated_workspace.get("path") or "")
+        ).resolve()
+        if workdir is None or launch_cwd != expected_workspace or not job_id:
+            return FailoverResult(
+                True,
+                False,
+                RC_DISABLED,
+                "Codex failover isolation identity mismatch; refusing unisolated execution",
+            )
+        isolation_receipt = {
+            key.removeprefix("isolation_"): value
+            for key, value in isolated_workspace.items()
+            if key.startswith("isolation_")
+        }
+        try:
+            child_env = isolation.isolated_environment(
+                child_env,
+                isolation_receipt,
+                provider_id="codex-cli",
+            )
+        except isolation.IsolationUnavailable as exc:
+            return FailoverResult(
+                True,
+                False,
+                RC_DISABLED,
+                f"Codex failover isolation unavailable: {exc}",
+            )
+
+    ok, rc, detail = preflight(
+        codex_bin,
+        timeout_s=preflight_timeout_s,
+        environment=child_env,
+    )
     if not ok:
         LOG.warning("codex preflight failed rc=%d: %s", rc, detail)
         return FailoverResult(False, False, rc, detail)
@@ -279,7 +326,11 @@ def run_codex_failover(
 
     # Ask ChatGPT whether it is there, before betting the slot on it. `attempted=False`:
     # no task was claimed, so this is a skipped slot, not a failed handover.
-    reachable, rc, detail = check_reachable(codex_bin, timeout_s=reachability_timeout_s)
+    reachable, rc, detail = check_reachable(
+        codex_bin,
+        timeout_s=reachability_timeout_s,
+        environment=child_env,
+    )
     if not reachable:
         LOG.warning("codex unreachable rc=%d: %s", rc, detail)
         return FailoverResult(False, False, rc, detail)
@@ -287,7 +338,6 @@ def run_codex_failover(
     LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, version)
     started = time.time()
     prompt = _read_prompt(prompt_path)
-    launch_cwd = (workdir or ROOT).resolve()
     if slot_id and job_id:
         prefix = f"dispatch-{slot_id}-{job_id[:8]}"
         prompt = (
@@ -311,7 +361,15 @@ def run_codex_failover(
         "danger-full-access",
         prompt,
     ]
-    child_env = dict(os.environ)
+    if slot_id and job_id:
+        child_env.update({
+            "VOLPRED_ACTOR": f"codex-failover:{slot_id}:{job_id[:8]}",
+            "VOLPRED_DISPATCH_SLOT": slot_id,
+            "VOLPRED_DISPATCH_JOB_ID": job_id,
+            "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
+                role="codex-failover", slot_id=slot_id, job_id=job_id,
+            ),
+        })
     try:
         # The version and reachability calls were independently authorized;
         # reload once more for the process that can claim and mutate work.
@@ -326,33 +384,9 @@ def run_codex_failover(
         )
     child_env = {**child_env, **provider_receipt.environment()}
     argv[0] = provider_receipt.resolved_executable
-    if slot_id and job_id:
-        child_env.update({
-            "VOLPRED_ACTOR": f"codex-failover:{slot_id}:{job_id[:8]}",
-            "VOLPRED_DISPATCH_SLOT": slot_id,
-            "VOLPRED_DISPATCH_JOB_ID": job_id,
-            "VOLPRED_TASK_CLAIM_OWNER": identity.task_claim_owner(
-                role="codex-failover", slot_id=slot_id, job_id=job_id,
-            ),
-        })
     if isolated_workspace is not None:
-        expected_workspace = Path(
-            str(isolated_workspace.get("path") or "")
-        ).resolve()
-        if workdir is None or launch_cwd != expected_workspace or not job_id:
-            return FailoverResult(
-                True,
-                False,
-                RC_DISABLED,
-                "Codex failover isolation identity mismatch; refusing unisolated execution",
-            )
-        isolation_receipt = {
-            key.removeprefix("isolation_"): value
-            for key, value in isolated_workspace.items()
-            if key.startswith("isolation_")
-        }
         try:
-            if not isinstance(isolation_receipt, dict):
+            if isolation_receipt is None:
                 raise isolation.IsolationUnavailable(
                     "Codex failover isolation was not prepared during admission"
                 )
@@ -364,7 +398,6 @@ def run_codex_failover(
                 RC_DISABLED,
                 f"Codex failover isolation unavailable: {exc}",
             )
-        child_env = isolation.isolated_environment(child_env, isolation_receipt)
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:

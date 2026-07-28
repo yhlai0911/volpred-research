@@ -6045,7 +6045,7 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
         assert not volpred_copied.exists() or volpred_copied.read_bytes() == b""
 
 
-def test_isolated_environment_keeps_only_subscription_oauth_model_auth(
+def test_isolated_environment_scopes_subscription_auth_to_provider(
     tmp_path: Path,
 ) -> None:
     prepared = isolation.PreparedIsolation(
@@ -6057,45 +6057,131 @@ def test_isolated_environment_keeps_only_subscription_oauth_model_auth(
         workspace=str(tmp_path / "workspace"),
         canonical_root=str(tmp_path / "repo"),
     )
-    env = isolation.isolated_environment(
-        {
-            "PATH": "/usr/bin",
-            "LANG": "en_US.UTF-8",
-            "CLAUDE_CODE_OAUTH_TOKEN": "model-only",
-            "ANTHROPIC_API_KEY": "metered-anthropic",
-            "OPENAI_API_KEY": "metered-openai",
-            "CODEX_API_KEY": "metered-codex",
-            "OPENAI_ORG_ID": "must-not-pass",
-            "SSH_AUTH_SOCK": "/tmp/agent.sock",
-            "GIT_ASKPASS": "/tmp/askpass",
-            "GOOGLE_APPLICATION_CREDENTIALS": "/tmp/gcp.json",
-            "TELEGRAM_BOT_TOKEN": "external-effect",
-            "VOLPRED_ACTOR": "dispatch-supervisor",
-            "VOLPRED_TASK_CLAIM_OWNER": "dispatch-eff32f3b",
-            "VOLPRED_DISPATCH_JOB_ID": "eff32f3b",
-            "VOLPRED_FIRE_ID": "fire-43",
-        },
+    base = {
+        "PATH": "/usr/bin",
+        "LANG": "en_US.UTF-8",
+        "CLAUDE_CODE_OAUTH_TOKEN": "model-only",
+        "ANTHROPIC_API_KEY": "metered-anthropic",
+        "OPENAI_API_KEY": "metered-openai",
+        "CODEX_API_KEY": "metered-codex",
+        "OPENAI_ORG_ID": "must-not-pass",
+        "SSH_AUTH_SOCK": "/tmp/agent.sock",
+        "GIT_ASKPASS": "/tmp/askpass",
+        "GOOGLE_APPLICATION_CREDENTIALS": "/tmp/gcp.json",
+        "TELEGRAM_BOT_TOKEN": "external-effect",
+        "VOLPRED_ACTOR": "dispatch-supervisor",
+        "VOLPRED_TASK_CLAIM_OWNER": "dispatch-eff32f3b",
+        "VOLPRED_DISPATCH_JOB_ID": "eff32f3b",
+        "VOLPRED_FIRE_ID": "fire-43",
+    }
+    claude_env = isolation.isolated_environment(
+        base,
         prepared,
+        provider_id="claude-cli",
+    )
+    codex_env = isolation.isolated_environment(
+        base,
+        prepared,
+        provider_id="codex-cli",
     )
 
-    assert env["PATH"] == "/usr/bin"
-    assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "model-only"
-    assert env["HOME"] == str(tmp_path / "home")
-    assert env["VOLPRED_ACTOR"] == "dispatch-supervisor"
-    assert env["VOLPRED_TASK_CLAIM_OWNER"] == "dispatch-eff32f3b"
-    assert env["VOLPRED_DISPATCH_JOB_ID"] == "eff32f3b"
-    assert env["VOLPRED_FIRE_ID"] == "fire-43"
-    for denied in (
-        "ANTHROPIC_API_KEY",
-        "OPENAI_API_KEY",
-        "CODEX_API_KEY",
-        "OPENAI_ORG_ID",
-        "SSH_AUTH_SOCK",
-        "GIT_ASKPASS",
-        "GOOGLE_APPLICATION_CREDENTIALS",
-        "TELEGRAM_BOT_TOKEN",
-    ):
-        assert denied not in env
+    assert claude_env["PATH"] == "/usr/bin"
+    assert claude_env["CLAUDE_CODE_OAUTH_TOKEN"] == "model-only"
+    assert "CLAUDE_CODE_OAUTH_TOKEN" not in codex_env
+    assert claude_env["HOME"] == str(tmp_path / "home")
+    assert claude_env["VOLPRED_ACTOR"] == "dispatch-supervisor"
+    assert claude_env["VOLPRED_TASK_CLAIM_OWNER"] == "dispatch-eff32f3b"
+    assert claude_env["VOLPRED_DISPATCH_JOB_ID"] == "eff32f3b"
+    assert claude_env["VOLPRED_FIRE_ID"] == "fire-43"
+    for env in (claude_env, codex_env):
+        for denied in (
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+            "CODEX_API_KEY",
+            "OPENAI_ORG_ID",
+            "SSH_AUTH_SOCK",
+            "GIT_ASKPASS",
+            "GOOGLE_APPLICATION_CREDENTIALS",
+            "TELEGRAM_BOT_TOKEN",
+        ):
+            assert denied not in env
+
+
+def test_isolated_claude_scrubs_before_authorize_and_spawn(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    workdir = tmp_path / "workspace"
+    run_dir = tmp_path / "run"
+    for path in (workdir, run_dir / "home", run_dir / "tmp", run_dir / "pycache"):
+        path.mkdir(parents=True)
+    profile = run_dir / "sandbox.sb"
+    profile.write_text("(version 1)\n", encoding="utf-8")
+    isolated_workspace = {
+        "path": str(workdir),
+        "isolation_profile_path": str(profile),
+        "isolation_run_dir": str(run_dir),
+        "isolation_synthetic_home": str(run_dir / "home"),
+        "isolation_tmp_dir": str(run_dir / "tmp"),
+        "isolation_pycache_dir": str(run_dir / "pycache"),
+        "isolation_workspace": str(workdir),
+        "isolation_canonical_root": str(tmp_path / "repo"),
+    }
+    for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
+        monkeypatch.setenv(key, "metered-secret")
+    monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "subscription-oauth")
+    authorized: list[dict[str, str]] = []
+    spawned: list[dict[str, str]] = []
+
+    def authorize(**kwargs):
+        authorized.append(dict(kwargs["environment"]))
+        return SimpleNamespace(
+            resolved_executable=kwargs["executable_path"],
+            settings_path="/tmp/pinned-claude-settings.json",
+            environment=lambda: {
+                "VOLPRED_PROVIDER_ID": "claude-cli",
+                "VOLPRED_PROVIDER_REGISTRY_SHA256": "a" * 64,
+            },
+        )
+
+    class ExitedProc:
+        pid = 123
+
+    monkeypatch.setattr(worker, "authorize_provider_spawn", authorize)
+    monkeypatch.setattr(worker, "verify_spawn_receipt", lambda _receipt: None)
+    monkeypatch.setattr(
+        worker,
+        "_spawn",
+        lambda **kwargs: spawned.append(dict(kwargs["env"])) or ExitedProc(),
+    )
+    monkeypatch.setattr(worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", 0))
+    monkeypatch.setattr(worker.os, "getpgid", lambda _pid: 123)
+    monkeypatch.setattr(worker.state, "begin_attempt", lambda **_kw: object())
+    monkeypatch.setattr(worker.state, "attach_process", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "update_started_wall", lambda **_kw: None)
+    monkeypatch.setattr(worker.state, "mark_job_phase", lambda **_kw: True)
+    monkeypatch.setattr(worker.procutil, "get_process_start_wall", lambda _pid: "start")
+    monkeypatch.setattr(worker.fire_manifest, "open_manifest", lambda *_a, **_kw: None)
+
+    worker._run_one_attempt(
+        prompt_text="prompt",
+        model=worker.OPUS_MODEL,
+        timeout_s=10,
+        log_path=tmp_path / "worker.log",
+        attempt=1,
+        schedule_id="hourly_dispatch",
+        state_path=tmp_path / "state.json",
+        job_id="job-provider-order",
+        slot_id="slot-1",
+        workdir=workdir,
+        isolated_workspace=isolated_workspace,
+    )
+
+    assert len(authorized) == len(spawned) == 1
+    for env in (authorized[0], spawned[0]):
+        assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "subscription-oauth"
+        for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
+            assert key not in env
 
 
 def test_workspace_merge_gate_rejects_canonical_only_paths(tmp_path: Path) -> None:

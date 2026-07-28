@@ -576,7 +576,11 @@ def _run_one_attempt(
                 "worker isolation was not prepared during admission"
             )
         argv = isolation.wrap_prepared(argv, isolation_receipt)
-        child_env = isolation.isolated_environment(child_env, isolation_receipt)
+        child_env = isolation.isolated_environment(
+            child_env,
+            isolation_receipt,
+            provider_id="claude-cli",
+        )
     # Stage 2 of declared commit ownership: create the change-set before the
     # producer can write.  This remains observability-only; PHASE-Z still uses
     # its fire-start baseline until the seven-day shadow gate passes.
