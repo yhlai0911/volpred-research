@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T09:00:41.357026+00:00",
+  "generated_at": "2026-07-28T10:00:17.040603+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 4.5
+      "age_hours": 5.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 4.3
+      "age_hours": 5.3
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 163.6
+      "age_hours": 164.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 15.6
+      "age_hours": 16.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -39,14 +39,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 23.7
+      "age_hours": 24.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
-    "registered": 63,
-    "grace": 2,
+    "registered": 65,
+    "grace": 1,
     "inflight": 0
   },
   "orphan_count": 5,
@@ -70,29 +70,54 @@
     "drafts": {
       "collectable": [
         {
-          "path": "storage/drafts/K1493_general_draft.md",
+          "path": "storage/drafts/K1366_general_draft.md",
           "kind": "md",
           "reason": "untracked"
         },
         {
-          "path": "storage/drafts/assets/k1493_risk_reward.png",
-          "kind": "png",
+          "path": "storage/drafts/K1406_general_draft.md",
+          "kind": "md",
           "reason": "untracked"
         },
         {
-          "path": "storage/drafts/assets/k1493_svxy_path.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/make_k1493_charts.py",
+          "path": "storage/drafts/assets/gen_k1366_general_figs.py",
           "kind": "py",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1366_general_correlation_response.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1366_general_variance_response.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1406_general_dip_cost.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1406_general_figs.py",
+          "kind": "py",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png",
+          "kind": "png",
           "reason": "untracked"
         }
       ],
       "held": [],
       "skipped": {
-        "grace": 9,
+        "grace": 4,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -100,13 +125,18 @@
         {
           "namespace": "drafts",
           "paths": [
-            "storage/drafts/K1493_general_draft.md",
-            "storage/drafts/assets/k1493_risk_reward.png",
-            "storage/drafts/assets/k1493_svxy_path.png",
-            "storage/drafts/assets/make_k1493_charts.py"
+            "storage/drafts/K1366_general_draft.md",
+            "storage/drafts/K1406_general_draft.md",
+            "storage/drafts/assets/gen_k1366_general_figs.py",
+            "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
+            "storage/drafts/assets/k1366_general_correlation_response.png",
+            "storage/drafts/assets/k1366_general_variance_response.png",
+            "storage/drafts/assets/k1406_general_dip_cost.png",
+            "storage/drafts/assets/k1406_general_figs.py",
+            "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png"
           ],
           "committed": true,
-          "detail": "[main abbc4c069] chore(draft-reap): collect orphaned draft artifacts (4 files)\n 4 files changed, 228 insertions(+)\n create mode 100644 storage/drafts/"
+          "detail": "[main 469513c3e] chore(draft-reap): collect orphaned draft artifacts (9 files)\n 9 files changed, 456 insertions(+)\n create mode 100644 storage/drafts/"
         }
       ]
     },
@@ -121,14 +151,41 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/snapaudit_unmeasured_20260728/README.md",
+          "kind": "md",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure.py",
+          "kind": "py",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json",
+          "kind": "json",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 3,
+        "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/snapaudit_unmeasured_20260728/README.md",
+            "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure.py",
+            "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json"
+          ],
+          "committed": true,
+          "detail": "[main 592ae4cec] chore(experiment-reap): collect orphaned experiment artifacts (3 files)\n 3 files changed, 432 insertions(+)\n create mode 100644 exper"
+        }
+      ]
     }
   },
   "held_escalations": [],
