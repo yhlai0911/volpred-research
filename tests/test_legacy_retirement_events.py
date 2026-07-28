@@ -640,13 +640,28 @@ def test_operations_core_schedule_owns_signal_materialization() -> None:
     assert item["wrapper_script"].endswith(
         "/cron_legacy_retirement_signal_materialize.sh"
     )
-    assert "materialize_orphan_work_signal.py" in item["matchers"]
+    assert "materialize_legacy_retirement_signal_batch.py" in item["matchers"]
     wrapper = (
         root / "scripts" / "cron_legacy_retirement_signal_materialize.sh"
     ).read_text(encoding="utf-8")
-    assert wrapper.index("materialize_duplicate_effect_signal.py") < wrapper.index(
-        "materialize_orphan_work_signal.py"
-    )
+    assert wrapper.count("materialize_legacy_retirement_signal_batch.py") == 1
+    assert "materialize_duplicate_effect_signal.py" not in wrapper
+    batch = (
+        root / "scripts" / "materialize_legacy_retirement_signal_batch.py"
+    ).read_text(encoding="utf-8")
+    lock = batch.index("with retirement_signal_batch_lock(repo_root)")
+    assert lock < batch.index("materialize_legacy_business_fire_signal(repo_root)")
+    assert lock < batch.index("materialize_duplicate_effect_signal(repo_root)")
+    assert lock < batch.index("materialize_orphan_work_signal(repo_root)")
+    assert lock < batch.index("materialize_silent_loss_signal(repo_root)")
+    for script_name in (
+        "materialize_legacy_business_fire_signal.py",
+        "materialize_duplicate_effect_signal.py",
+        "materialize_orphan_work_signal.py",
+        "materialize_silent_loss_signal.py",
+    ):
+        direct = (root / "scripts" / script_name).read_text(encoding="utf-8")
+        assert "with retirement_signal_batch_lock(ROOT)" in direct
 
 
 def test_duplicate_effect_signal_uses_exact_database_sequence_delta(

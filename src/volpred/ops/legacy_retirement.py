@@ -14,7 +14,8 @@ import os
 import re
 import shutil
 import stat
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -319,6 +320,88 @@ def _read_regular_nofollow(path: Path) -> bytes:
             return handle.read()
     finally:
         os.close(descriptor)
+
+
+@contextmanager
+def retirement_signal_batch_lock(root: Path) -> Iterator[None]:
+    """Serialize a complete four-signal refresh against observation snapshots."""
+
+    repo_root = Path(root)
+    signal_dir = repo_root / "storage" / "ops" / "legacy_retirement_signals"
+    _reject_symlink_components(repo_root, signal_dir)
+    directory_existed = signal_dir.exists()
+    signal_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(signal_dir, 0o700)
+    _reject_symlink_components(repo_root, signal_dir)
+    if not directory_existed:
+        _fsync_directory(signal_dir.parent)
+    lock_path = signal_dir / ".batch.lock"
+    flags = os.O_CREAT | os.O_RDWR
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(lock_path, flags, 0o600)
+    except OSError as error:
+        raise LegacyRetirementInputError(
+            "legacy retirement signal batch lock is unsafe"
+        ) from error
+    with os.fdopen(descriptor, "a+b") as lock:
+        os.fchmod(lock.fileno(), 0o600)
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        yield
+
+
+def append_current_retirement_observation(
+    *,
+    root: Path,
+    owner_report: Mapping[str, object],
+    observed_at: datetime,
+    batch_not_before: datetime,
+    source_max_age: timedelta = timedelta(minutes=10),
+) -> Path:
+    """Append only from one complete, current materialization batch.
+
+    The materializer holds the same batch lock while refreshing all four
+    signals.  A recorder that wins the lock before the current scheduled batch
+    fails the ``batch_not_before`` fence instead of accepting a fresh-looking
+    mixture from two different runs.
+    """
+
+    repo_root = Path(root)
+    now = _utc(observed_at, field="observed_at")
+    boundary = _utc(batch_not_before, field="batch_not_before")
+    if boundary > now:
+        raise LegacyRetirementInputError(
+            "legacy retirement batch boundary is in the future"
+        )
+    allowed_age = _positive_duration(
+        source_max_age,
+        field="source_max_age",
+    )
+    signal_dir = repo_root / "storage" / "ops" / "legacy_retirement_signals"
+    expected_signals = set(_VIOLATION_KEYS) - {"unknown_ownership"}
+    with retirement_signal_batch_lock(repo_root):
+        for dimension in sorted(expected_signals):
+            signal = _signal_payload(
+                _read_regular_nofollow(signal_dir / f"{dimension}.json"),
+                dimension=dimension,
+                observed_at=now,
+                max_age=allowed_age,
+            )
+            source_time = _timestamp(
+                signal.get("observed_at"),
+                field=f"{dimension} source observed_at",
+            )
+            if source_time < boundary:
+                raise LegacyRetirementInputError(
+                    f"{dimension} source precedes required materialization boundary"
+                )
+        return append_retirement_observation(
+            root=repo_root,
+            owner_report=owner_report,
+            observed_at=now,
+            source_max_age=allowed_age,
+        )
 
 
 def append_retirement_observation(

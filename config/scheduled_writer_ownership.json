@@ -363,6 +363,12 @@
       "tracked_outputs": [],
       "reason": "Operations Core refreshes four ignored typed signals from the immutable legacy-fire ledger, private duplicate-effect ledger, dispatch orphan-work ledger, and DB-clock formal WorkItem silent-loss reconciliation; it never writes authored repository state or records a retirement observation."
     },
+    "legacy_retirement_observe": {
+      "entrypoint": "scripts/cron_legacy_retirement_observe.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Operations Core appends immutable retirement observation bundles under an ignored runtime-evidence directory. Each bundle snapshots the fail-closed formal owner census and four typed sources; it never mutates authored repository state or executes legacy work."
+    },
     "liveness_reconcile": {
       "entrypoint": "scripts/liveness_reconcile.py",
       "policy": "phase_z_machine_state",

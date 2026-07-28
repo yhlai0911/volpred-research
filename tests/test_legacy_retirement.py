@@ -9,6 +9,7 @@ import pytest
 
 from volpred.ops.legacy_retirement import (
     LegacyRetirementInputError,
+    append_current_retirement_observation,
     append_retirement_observation,
     assess_hourly_dispatch_retirement,
     assess_sustained_clean_receipts,
@@ -201,6 +202,135 @@ def test_append_only_bundle_rehashes_typed_source_bytes(tmp_path: Path) -> None:
         "unknown_ownership": 0,
         "legacy_business_fire": 0,
     }
+
+
+def test_owner_blockers_are_recorded_without_starting_a_clean_suffix(
+    tmp_path: Path,
+) -> None:
+    _write_signals(tmp_path, NOW)
+
+    append_current_retirement_observation(
+        root=tmp_path,
+        owner_report=_owner_report(ok=False),
+        observed_at=NOW,
+        batch_not_before=NOW.replace(minute=0, second=0, microsecond=0),
+    )
+
+    verified = load_verified_retirement_observations(tmp_path)
+    assert verified[0]["formal_owner_census"]["ok"] is False
+    assert verified[0]["violations"]["unknown_ownership"] == 1
+    assessment = assess_sustained_clean_receipts(
+        verified,
+        assessed_at=NOW,
+    )
+    assert assessment.ready is False
+    assert assessment.observation_count == 0
+    assert "clean_window_incomplete" in assessment.reason_codes
+
+
+def test_fresh_mixed_hour_signal_batch_is_rejected_before_append(
+    tmp_path: Path,
+) -> None:
+    observed_at = NOW.replace(minute=2)
+    hour_start = observed_at.replace(minute=0, second=0, microsecond=0)
+    _write_signals(tmp_path, observed_at)
+    stale_dimension = (
+        tmp_path
+        / "storage"
+        / "ops"
+        / "legacy_retirement_signals"
+        / "duplicate_effect.json"
+    )
+    payload = json.loads(stale_dimension.read_text(encoding="utf-8"))
+    previous_batch_at = hour_start - timedelta(minutes=1)
+    payload["observed_at"] = previous_batch_at.isoformat()
+    payload["window_to"] = previous_batch_at.isoformat()
+    payload["window_from"] = (previous_batch_at - timedelta(hours=1)).isoformat()
+    stale_dimension.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(
+        LegacyRetirementInputError,
+        match="precedes required materialization boundary",
+    ):
+        append_current_retirement_observation(
+            root=tmp_path,
+            owner_report=_owner_report(audited_at=observed_at),
+            observed_at=observed_at,
+            batch_not_before=hour_start,
+        )
+
+    observations = (
+        tmp_path / "storage" / "ops" / "legacy_retirement_observations"
+    )
+    assert not observations.exists()
+
+
+def test_operations_core_owns_hourly_retirement_observation_recording() -> None:
+    root = Path(__file__).resolve().parents[1]
+    runtime = json.loads(
+        (root / "config" / "runtime_schedules.json").read_text(encoding="utf-8")
+    )
+    observer = next(
+        item
+        for item in runtime["system_crontab"]["items"]
+        if item["id"] == "legacy_retirement_observe"
+    )
+    materializer = next(
+        item
+        for item in runtime["system_crontab"]["items"]
+        if item["id"] == "legacy_retirement_signal_materialize"
+    )
+
+    assert runtime["schedule_materialization"]["mode"] == "active"
+    assert "legacy_retirement_observe" in (
+        runtime["schedule_materialization"]["active_jobs"]
+    )
+    assert observer["cron"] == "2 * * * *"
+    assert materializer["cron"] == "*/5 * * * *"
+    assert observer["host_crontab_managed"] is False
+    assert observer["piggy_back_enabled"] is False
+    assert observer["staleness_expected_minutes"] == 75
+    assert observer["wrapper_script"].endswith(
+        "/cron_legacy_retirement_observe.sh"
+    )
+    assert "record_legacy_retirement_observation.py" in observer["matchers"]
+    assert "materialize_legacy_retirement_signal_batch.py" in (
+        materializer["matchers"]
+    )
+
+    override = runtime["schedule_materialization"]["job_overrides"][
+        "legacy_retirement_observe"
+    ]
+    assert override == {
+        "catch_up": "skip",
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "timeout_seconds": 300,
+    }
+
+    ownership = json.loads(
+        (root / "config" / "scheduled_writer_ownership.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    owner = ownership["jobs"]["legacy_retirement_observe"]
+    assert owner["entrypoint"] == "scripts/cron_legacy_retirement_observe.sh"
+    assert owner["policy"] == "no_repo_tracked_output"
+    assert owner["tracked_outputs"] == []
+
+    wrapper = (
+        root / "scripts" / "cron_legacy_retirement_observe.sh"
+    ).read_text(encoding="utf-8")
+    assert wrapper.count("scripts/record_legacy_retirement_observation.py") == 1
+    assert "materialize_" not in wrapper
+    assert "source scripts/cron_lib.sh || exit 1" in wrapper
+    assert 'cron_emit_start "legacy_retirement_observe" || exit 1' in wrapper
+    assert 'cron_emit_start "legacy_retirement_observe"' in wrapper
+    assert 'cron_emit_exit "legacy_retirement_observe"' in wrapper
+    assert "exit \"$_ec\"" in wrapper
+
+    gitignore = (root / ".gitignore").read_text(encoding="utf-8").splitlines()
+    assert "storage/ops/legacy_retirement_observations/" in gitignore
 
 
 def test_observation_rejects_stale_owner_or_noncanonical_signal_paths(

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,7 +14,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.audit_formal_owners import run_audit as run_formal_owner_audit
 from volpred.ops.legacy_retirement import (
-    append_retirement_observation,
+    append_current_retirement_observation,
     load_verified_retirement_observations,
 )
 
@@ -23,9 +24,13 @@ def record() -> dict[str, object]:
         inventory_path=ROOT / "config" / "formal_capability_inventory.json",
         schedule_path=ROOT / "config" / "runtime_schedules.json",
     )
-    path = append_retirement_observation(
+    observed_at = datetime.now(UTC)
+    hour_start = observed_at.replace(minute=0, second=0, microsecond=0)
+    path = append_current_retirement_observation(
         root=ROOT,
         owner_report=owner_report,
+        observed_at=observed_at,
+        batch_not_before=hour_start,
     )
     verified = load_verified_retirement_observations(ROOT)
     receipt = verified[-1]

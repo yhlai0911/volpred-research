@@ -7,26 +7,11 @@ source scripts/cron_lib.sh
 
 _start=$SECONDS
 cron_emit_start "legacy_retirement_signal_materialize"
-/usr/bin/perl -e 'alarm shift; exec @ARGV' 60 \
-  /opt/homebrew/bin/uv run python scripts/materialize_legacy_business_fire_signal.py
+/usr/bin/perl -e 'alarm shift; exec @ARGV' 240 \
+  /opt/homebrew/bin/uv run python scripts/materialize_legacy_retirement_signal_batch.py
 _ec=$?
-if [ "$_ec" -eq 0 ]; then
-  /usr/bin/perl -e 'alarm shift; exec @ARGV' 60 \
-    /opt/homebrew/bin/uv run python scripts/materialize_duplicate_effect_signal.py
-  _ec=$?
-fi
-if [ "$_ec" -eq 0 ]; then
-  /usr/bin/perl -e 'alarm shift; exec @ARGV' 60 \
-    /opt/homebrew/bin/uv run python scripts/materialize_orphan_work_signal.py
-  _ec=$?
-fi
-if [ "$_ec" -eq 0 ]; then
-  /usr/bin/perl -e 'alarm shift; exec @ARGV' 60 \
-    /opt/homebrew/bin/uv run python scripts/materialize_silent_loss_signal.py
-  _ec=$?
-fi
 if [ "$_ec" -eq 142 ]; then
-  echo "[HANG-KILLED] legacy retirement signal materializer exceeded 60s"
+  echo "[HANG-KILLED] legacy retirement signal materializer exceeded 240s"
 fi
 cron_emit_exit "legacy_retirement_signal_materialize" "$_ec" "$_start"
 exit "$_ec"
