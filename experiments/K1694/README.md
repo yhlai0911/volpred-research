@@ -1,10 +1,11 @@
 # K1694 — FCM 清算集中度與商品小型交易人的高波動排擠
 
-## 狀態：round 3 審查中（重跑於 2026-07-29）
+## 狀態：round 4 審查中（重跑於 2026-07-29）
 
-- Codex primary-path review **round 1 → FAIL**（`storage/ops/codex_reviews/k1694_verdict.md`）
-- 依裁決修完 8 項缺陷、重跑 → **round 2 → FAIL**（`storage/ops/codex_reviews/k1694_verdict_round2.md`）
-- round 2 的 4 項要求已全部修完並再次重跑，等 round 3 裁決
+- **round 1 → FAIL**（`storage/ops/codex_reviews/k1694_verdict.md`）：8 項缺陷
+- **round 2 → FAIL**（`k1694_verdict_round2.md`）：4 項要求
+- **round 3 → FAIL**（`k1694_verdict_round3.md`）：3 項缺陷，其中一項是**具體反例**
+- round 3 的 3 項缺陷已全部修完並再次重跑，等 round 4 裁決
 
 **在 `review_verdict.json` 出現 PASS 之前**：不得寫進 `storage/memory/knowledge.json`、不得據此
 寫文章或論文段落。下面的數字是重跑後的真實輸出，但**認證未完成**。
@@ -19,29 +20,30 @@
 
 | spec | 交互項 | n | coef | t_DK | t_cluster |
 |---|---|---|---|---|---|
-| spec1（主）FCM HHI × high-vol（二元） | `fcm_x_highvol` | 3276 | **+3.055e-04** | +1.51 | +1.55 |
-| spec2 FCM HHI × rv_z（連續） | `fcm_x_rvz` | 3276 | **+2.875e-04** | **+2.54** | **+2.56** |
-| spec3 trader conc4 × high-vol | `conc4_x_highvol` | 3276 | −1.912e-04 | −0.76 | −0.75 |
-| spec4 時序收緊的落後規格 | `fcm_pre_x_highvol_lag` | 2749 | +6.674e-05 | +0.27 | +0.34 |
+| spec1（主）FCM HHI × high-vol（二元） | `fcm_x_highvol` | 3275 | **+3.103e-04** | +1.53 | +1.57 |
+| spec2 FCM HHI × rv_z（連續） | `fcm_x_rvz` | 3275 | **+2.880e-04** | **+2.55** | **+2.56** |
+| spec3 trader conc4 × high-vol | `conc4_x_highvol` | 3275 | −1.934e-04 | −0.77 | −0.76 |
+| spec4 時序收緊的落後規格 | `fcm_pre_x_highvol_lag` | 2748 | +6.752e-05 | +0.28 | +0.34 |
 
-- 主 spec 的點估計**是正的**（排擠假說預測為負），且不顯著（p_DK = 0.130）。
+- 主 spec 的點估計**是正的**（排擠假說預測為負），且不顯著（p_DK = 0.126）。
 - 連續型 spec2 **正向且顯著**（p_DK = 0.011）——方向與排擠假說**相反**。所以正確的敘述是
   「沒有證據支持排擠；若有訊號，方向是小型交易人在高集中度高波動月份**佔比上升**」。
 - 描述統計同一方向：high-HHI × high-vol 格的 Δ 非報告部位佔比平均 **+2.76 bp**，
-  其餘三格皆為負（−1.92 / −4.83 / −3.06 bp）。
-- spec4 幾乎是零（t = 0.27）。這句話只能讀成「**這個時序安排下沒有關聯**」，
-  **不能**讀成「沒有可預測性」—— 理由見下方「spec4 能講什麼、不能講什麼」。
+  其餘三格皆為負（−1.89 / −4.89 / −3.06 bp）。
+- spec4 幾乎是零（t = 0.28）。這句話只能讀成「**此時序安排下未獲得關聯的支持**」，
+  **不能**讀成「這個時序安排下沒有關聯」，更不能讀成「沒有可預測性」——
+  理由見下方「spec4 能講什麼、不能講什麼」。
 
 | 檢定 | 值 |
 |---|---|
-| stationary block bootstrap（by month, 平均 block 6 個月, 2000 reps） | 95% CI [−7.42e-05, 7.68e-04], p = 0.126 |
-| IID month-cluster bootstrap（對照, 2000 reps） | 95% CI [−7.46e-05, 7.01e-04], p = 0.126 |
-| DK bandwidth 1..24 敏感度 | \|t\| ∈ [1.51, 1.64]，**無一點達 1.96** |
-| 時間序列 aggregate `hhi_x_volfrac` | t 0.34, p 0.733（HAC lag 6, resid acf1 −0.039, 149 個月） |
-| FCM 發布 lag 30/45/60/75/90 天 | t_DK ∈ [1.24, 1.51]，**無一點達 1.96**（`K1694_lag_sensitivity.json`） |
+| stationary block bootstrap（by month, 平均 block 6 個月, 2000 reps） | 95% CI [−7.49e-05, 7.75e-04], p = 0.120 |
+| IID month-cluster bootstrap（對照, 2000 reps） | 95% CI [−7.21e-05, 7.09e-04], p = 0.122 |
+| DK bandwidth 1..24 敏感度 | \|t\| ∈ [1.53, 1.66]，**無一點達 1.96** |
+| 時間序列 aggregate `hhi_x_volfrac` | t 0.33, p 0.739（HAC lag 6, resid acf1 −0.039, 149 個月） |
+| FCM 發布 lag 30/45/60/75/90 天 | t_DK ∈ [1.25, 1.53]，**無一點達 1.96**（`K1694_lag_sensitivity.json`） |
 
-樣本：**3276 列 / 22 商品 / 2014-02..2026-06**（149 個日曆月），皆為完整月份。
-spec4 另有自己的樣本 2749 列。
+樣本：**3275 列 / 22 商品 / 2014-02..2026-06**（149 個日曆月），皆為完整月份。
+spec4 另有自己的樣本 2748 列。
 
 ### 有效時間自由度：149 個月**不是** 149 個獨立觀察
 
@@ -51,7 +53,7 @@ FCM HHI 是**單一系統層月度序列**，持續性極高：
 |---|---|---|---|
 | 0.964 | 0.918 | 0.817 | 0.584 |
 
-所以「3276 列」的樣本量對主效果沒有意義，能用的時間資訊遠少於 149 個月。本實驗**沒有**量化
+所以「3275 列」的樣本量對主效果沒有意義，能用的時間資訊遠少於 149 個月。本實驗**沒有**量化
 到底少到多少 —— 這是誠實邊界，不是已解決的問題。DK / month-cluster / block bootstrap 是防護，
 不是證明。
 
@@ -69,7 +71,21 @@ spec4 把時序收緊到：
 
 它**不能**講 predictive，因為 `FCM_LAG_DAYS = 45` 是**合成常數**：真實 CFTC 發布日一天都沒查過。
 若真實落後大於 45 天，spec4 當成「月初已可得」的那份報表其實還沒出。所以 spec4 的 ex-ante 身分
-是**條件式**的，它的零結果只能講「這個時序安排下沒有關聯」。
+是**條件式**的，它的零結果只能講「**此時序安排下未獲得關聯的支持**」——
+不是「沒有關聯」，那會是一個這些估計式證明不了的存在性宣稱。
+
+## Codex round 3 的 3 項缺陷，逐項修復對照
+
+| # | round 3 缺陷 | 修復 | 可驗證證據 |
+|---|---|---|---|
+| I | **head completeness 有具體反例**：GOLD 2024-10 週報落在 1/8/15/22/29，刪掉 10/1 後 head gap 只有 7 天仍判 complete。根因是 head gap 從**月初**量起，而月初到第一個週二本來就可能是 0 天 | 不從月初量，改從**上一份週報**量（跨月界連續）。週報序列本來就全域連續，用全域連續性證明覆蓋，月界就不再是盲區。同一個反例現在的 gap 是 **14 天**。序列的第一個月沒有 entry gap → 永遠不可認證，直接剔除 | `test_completeness_rule_catches_a_skipped_week` 用 **5 個參數化案例**（含 Codex 的 GOLD 2024-10 原案）逐一刪掉第一週／中間週／最後一週；全域相鄰週報間隔實測只有 6/7/8 天三種值 |
+| II | **RV 規則證明不了下載跑到月頭月尾**：全體商品共同短少 1–5 天時，business-day 缺口 ≤5、cross-sectional 缺口 = 0，照樣判 complete | 兩件事一起做：(a) `build_vol()` 現在會記錄每月**實際首末交易日**，任何重新產生的快取都會自動升級成真正的 endpoint 檢查；(b) 對只存計數的現有快取，加上**月層級的假日調整日曆 anchor**（美國聯邦假日 + Good Friday），抓得到「共同短少 ≥2 天」；(c) **抓不到的部分照實揭露**，不用規則假裝它不存在 | `test_completeness_rule_catches_a_truncation_common_to_every_commodity`（先斷言 cross-sectional 檢查在此情境確實失明，再斷言月層級 anchor 擋下）、`test_rv_endpoint_test_is_declared_unavailable_when_the_cache_lacks_dates`；`rule.rv_endpoint_test = "UNAVAILABLE for this cache..."`、`rule.rv_residual_blind_spot` |
+| III | **仍有直接的 absence wording**：「這個時序安排下沒有關聯」/ "no association survives this timing"，與同一份 artifact 說的「estimators cannot establish absence」矛盾；另外 `fcm_avail_inside_outcome_month_rows` 算的是 `panel` 不是 `frame`，與 README 的 N/N 對不上 | 全部改成「此時序安排下**未獲得**關聯的支持」/ "an association is NOT SUPPORTED under this timing arrangement"；欄位改名 `..._in_estimation_sample` 並從 `frame` 計算，另附 `estimation_sample_rows` | `test_nothing_claims_absence_of_association`（掃 results 與 README 的宣稱段，且要求每個「沒有關聯」都在否定句裡）、`test_within_month_overlap_count_is_scoped_to_the_estimation_sample`（含 README 的 N/N 一致性） |
+
+第 II 項的殘留盲區要講清楚：**全體商品共同短少「剛好 1 天」在只有計數的快取裡無法與計畫外
+休市區分**。樣本內就有兩次真的計畫外休市（2012-10 桑迪颶風、2018-12 老布希國殤日），規則正確地
+留下了它們。所以本實驗**不宣稱**「每筆下載都跑到該月頭尾」，只宣稱「日數與假日調整後的日曆
+一致到 1 天以內」。
 
 ## Codex round 2 的 4 項要求，逐項修復對照
 
@@ -88,7 +104,7 @@ RV 正常月缺口 0–2 天（假日重的月份最多 5），被截斷的月�
 
 | # | round 1 缺陷 | 修復 | 可驗證證據 |
 |---|---|---|---|
-| 1 | bootstrap 估的不是 spec1（RHS 少 `t`、樣本 3300 vs 3293、`highvol` 錯標） | `build_spec_frame()` 當**估計樣本的唯一 owner**，`SPEC1_RHS` 為模組常數，panel 迴歸與兩個 bootstrap 都吃同一份；bootstrap 內用 `_within_ols()`，抽樣前先斷言它等於 PanelOLS 的 spec1 係數 | `primary_interaction.bootstrap_matches_spec1_sample_and_rhs = true`；bootstrap `n_rows` = spec1 `n_obs` = 3276；identity check 差 4.9e-19 |
+| 1 | bootstrap 估的不是 spec1（RHS 少 `t`、樣本 3300 vs 3293、`highvol` 錯標） | `build_spec_frame()` 當**估計樣本的唯一 owner**，`SPEC1_RHS` 為模組常數，panel 迴歸與兩個 bootstrap 都吃同一份；bootstrap 內用 `_within_ols()`，抽樣前先斷言它等於 PanelOLS 的 spec1 係數 | `primary_interaction.bootstrap_matches_spec1_sample_and_rhs = true`；bootstrap `n_rows` = spec1 `n_obs` = 3275；identity check 差 7.1e-19 |
 | 2 | `(s > s.median())` 讓缺 RV 的列 `highvol` 錯標成 0 | 改 `s.gt(s.median()).astype(float).where(s.notna())` | `rv` 缺值列數 = `highvol` 缺值列數，交集錯標 0 列 |
 | 3 | 現行是 IID month-cluster，卻叫 block bootstrap | **兩個都做、都誠實命名**：headline = **stationary block bootstrap**（Politis–Romano）；IID 版保留為對照，label 明寫 "NOT a block bootstrap" | `bootstrap_spec1.headline`；`preserves_serial_correlation` 分別 true/false |
 | 4 | partial month 2026-07 未排除也未揭露 | `monthly_coverage()` 是完整性規則的唯一 owner，**不寫死日期**（round 2 又再收緊，見上表 D）；另加相鄰性檢查，跨被剔除月份的差分一律作廢 | `sample.completeness`（規則 + 被剔除月份 + `date_hardcoded: false`）；剔除 2026-07 與 2006-06 |
@@ -98,7 +114,7 @@ RV 正常月缺口 0–2 天（假日重的月份最多 5），被截斷的月�
 | 7 | NULL 口徑過寬 | `verdict_scope` + `secondary_findings` 帶出 spec2 的正向顯著結果 | `test_null_is_scoped_and_names_the_positive_continuous_result` |
 | 8 | 缺 run-time `reproduce_spec.json` | 收尾改用 `finalize_experiment()`，results 與 spec 同一次 `trace_file()` | spec `entrypoint.sha256` = results `code_trace.sha256` = 磁碟 sha |
 
-`uv run --active python -m pytest experiments/K1694/test_K1694.py -q` → **31 passed**。
+`uv run --active python -m pytest experiments/K1694/test_K1694.py -q` → **39 passed**。
 
 ## timing：為什麼 spec1–3 只能講 association
 
@@ -107,29 +123,29 @@ RV 正常月缺口 0–2 天（假日重的月份最多 5），被截斷的月�
 
 - `FCM_LAG_DAYS = 45` 是合成常數，不是查證過的 CFTC 發布日；離線快取沒有發布日欄位。
 - outcome `d_nonrep` 是整月 DCOT 平均相對前月的變化，而 FCM 的假設可得日通常落在 outcome
-  **月中** —— 估計樣本 **3276 / 3276 列**都是這種情形
+  **月中** —— 估計樣本 **3275/3275 列**都是這種情形
   （`data_provenance.fcm_avail_inside_outcome_month_rows`）。
 - 30–90 天的 lag 網格只證明結果對不同**合成** vintage 位移不敏感，不等於核對過真實發布日。
 
 ## 這次重跑相對前兩輪的數字變化
 
-| | round 1（FAIL） | round 2（FAIL） | 本次 |
-|---|---|---|---|
-| spec1 樣本 | 3293 | 3278 | 3276 |
-| spec1 coef | 3.146e-04 | 3.158e-04 | 3.055e-04 |
-| spec1 t_DK | 1.55 | 1.56 | 1.51 |
-| headline CI 出處 | 另一個規格 | spec1 本身 | spec1 本身 |
+| | round 1（FAIL） | round 2（FAIL） | round 3（FAIL） | 本次 |
+|---|---|---|---|---|
+| spec1 樣本 | 3293 | 3278 | 3276 | 3275 |
+| spec1 coef | 3.146e-04 | 3.158e-04 | 3.055e-04 | 3.103e-04 |
+| spec1 t_DK | 1.55 | 1.56 | 1.51 | 1.53 |
+| headline CI 出處 | 另一個規格 | spec1 本身 | spec1 本身 | spec1 本身 |
 
-樣本兩次各掉一點：round 2 掉 15 列是剔除 partial month 2026-07；本次再掉 2 列是新的 RV
-截斷偵測抓到 2014-04 與 2016-03 兩個被獨立截斷的下載。**結論三輪都沒動** —— 這正是重點：
-前兩次 FAIL 都不是因為結論錯，是因為**宣稱的東西超過程式估的東西**。
+樣本每輪掉一點，全都是完整性規則變嚴的結果：−15 是 partial month 2026-07，−2 是被獨立截斷的
+RV 下載（2014-04 / 2016-03），−1 是假日調整後日曆抓到的又一個短少月。**結論四輪都沒動** ——
+這正是重點：三次 FAIL 沒有一次是因為結論錯，全都是因為**宣稱的東西超過程式證得的東西**。
 
 ## 檔案
 
 | 檔案 | 說明 |
 |---|---|
 | `K1694.py` | 分析腳本（唯一 compute path） |
-| `test_K1694.py` | round 1 + round 2 全部缺陷的機械 gate（31 tests） |
+| `test_K1694.py` | round 1 + 2 + 3 全部缺陷的機械 gate（39 tests） |
 | `lag_sensitivity.py` | FCM 發布 lag 敏感度 |
 | `K1694_results.json` | 主結果 |
 | `reproduce_spec.json` | **run-time 產出**，與 results 同一次 `trace_file()` |

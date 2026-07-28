@@ -153,33 +153,52 @@ def test_partial_months_are_excluded_by_rule(results: dict, panel: pd.DataFrame)
 
 def test_completeness_rule_holds_on_every_retained_row(panel: pd.DataFrame) -> None:
     assert (panel["nweeks"] >= K1694.MIN_DCOT_WEEKS).all()
-    assert (panel["dcot_head_gap_days"] <= K1694.MAX_DCOT_HEAD_GAP_DAYS).all()
+    assert (panel["dcot_entry_gap_days"] <= K1694.MAX_DCOT_GAP_DAYS).all()
+    assert (panel["dcot_interior_gap_days"].fillna(0) <= K1694.MAX_DCOT_GAP_DAYS).all()
     assert (panel["dcot_tail_gap_days"] <= K1694.MAX_DCOT_TAIL_GAP_DAYS).all()
-    assert (panel["dcot_interior_gap_days"].fillna(0)
-            <= K1694.MAX_DCOT_INTERIOR_GAP_DAYS).all()
     have_rv = panel["rv"].notna()
     assert (panel.loc[have_rv, "rv_ndays"] >= K1694.MIN_RV_DAYS).all()
-    assert (panel.loc[have_rv, "rv_missing_bdays"] <= K1694.MAX_RV_MISSING_BDAYS).all()
+    assert (panel.loc[have_rv, "rv_shortfall_vs_calendar"]
+            <= K1694.MAX_RV_SHORTFALL_VS_CALENDAR).all()
     assert (panel.loc[have_rv, "rv_cross_shortfall"]
             <= K1694.MAX_RV_CROSS_SHORTFALL).all()
+    assert (panel.loc[have_rv, "rv_month_shortfall"]
+            <= K1694.MAX_RV_MONTH_SHORTFALL).all()
 
 
-def test_completeness_rule_catches_an_interior_weekly_gap() -> None:
-    """Codex round 2: '>=4 reports + a recent last one' accepts a month with a hole
-    in the middle. Delete one interior week and the month must be rejected."""
-    dcot = K1694.build_dcot()
-    rv = K1694.build_vol()
-    base = K1694.monthly_coverage(dcot, rv)
-    victim = ("GOLD", pd.Period("2020-06", "M"))
-    assert bool(base.loc[(base.commodity == victim[0])
-                         & (base.month == victim[1]), "dcot_complete"].iloc[0])
-    month = dcot["report_date"].dt.to_period("M")
-    in_month = (dcot["commodity"] == victim[0]) & (month == victim[1])
-    interior = dcot.loc[in_month].sort_values("report_date").index[2]  # a middle week
-    holed = K1694.monthly_coverage(dcot.drop(index=interior), rv)
-    row = holed.loc[(holed.commodity == victim[0]) & (holed.month == victim[1])]
-    assert not bool(row["dcot_complete"].iloc[0]), (
-        "a missing interior weekly report was accepted as a complete month")
+def _drop_one_report(dcot: pd.DataFrame, commodity: str, month: str, which: int):
+    m = dcot["report_date"].dt.to_period("M")
+    in_month = (dcot["commodity"] == commodity) & (m == pd.Period(month, "M"))
+    idx = dcot.loc[in_month].sort_values("report_date").index[which]
+    return dcot.drop(index=idx)
+
+
+def _is_complete(cov: pd.DataFrame, commodity: str, month: str) -> bool:
+    row = cov.loc[(cov.commodity == commodity) & (cov.month == pd.Period(month, "M"))]
+    assert len(row) == 1
+    return bool(row["dcot_complete"].iloc[0])
+
+
+@pytest.mark.parametrize(
+    "commodity,month,which,label",
+    [("GOLD", "2024-10", 0, "first week -- Codex round-3 counterexample"),
+     ("GOLD", "2020-06", 2, "an interior week"),
+     ("GOLD", "2020-06", -1, "the last week"),
+     ("CORN", "2019-05", 0, "first week, different commodity"),
+     ("CORN", "2019-05", 1, "second week")])
+def test_completeness_rule_catches_a_skipped_week(commodity, month, which, label) -> None:
+    """Deleting ANY single weekly report must make the month incomplete.
+
+    ``GOLD 2024-10`` is Codex's round-3 counterexample verbatim: its reports fall on
+    the 1st, 8th, 15th, 22nd and 29th, so deleting the 1st left a month-start-anchored
+    head gap of only 7 days and the month passed. Continuity is now measured against
+    the previous report, across the month boundary, where the same deletion reads 14.
+    """
+    dcot, rv = K1694.build_dcot(), K1694.build_vol()
+    assert _is_complete(K1694.monthly_coverage(dcot, rv), commodity, month)
+    holed = K1694.monthly_coverage(_drop_one_report(dcot, commodity, month, which), rv)
+    assert not _is_complete(holed, commodity, month), (
+        f"a missing weekly report ({label}) was accepted as a complete month")
 
 
 def test_completeness_rule_catches_an_independently_truncated_rv_month() -> None:
@@ -187,14 +206,51 @@ def test_completeness_rule_catches_an_independently_truncated_rv_month() -> None
     own download truncated, even if it clears the absolute MIN_RV_DAYS floor."""
     dcot = K1694.build_dcot()
     rv = K1694.build_vol().copy()
-    victim = (rv["commodity"] == "GOLD") & (rv["month_end"].dt.to_period("M")
-                                            == pd.Period("2020-06", "M"))
+    key = ("GOLD", pd.Period("2020-06", "M"))
+    victim = (rv["commodity"] == "GOLD") & (rv["month_end"].dt.to_period("M") == key[1])
     assert victim.sum() == 1
-    assert bool(K1694.monthly_coverage(dcot, rv).set_index(
-        ["commodity", "month"]).loc[("GOLD", pd.Period("2020-06", "M")), "rv_complete"])
+    assert bool(K1694.monthly_coverage(dcot, rv)
+                .set_index(["commodity", "month"]).loc[key, "rv_complete"])
     rv.loc[victim, "ndays"] = 16  # still above MIN_RV_DAYS, but short of its peers
     cov = K1694.monthly_coverage(dcot, rv).set_index(["commodity", "month"])
-    assert not bool(cov.loc[("GOLD", pd.Period("2020-06", "M")), "rv_complete"])
+    assert not bool(cov.loc[key, "rv_complete"])
+
+
+def test_completeness_rule_catches_a_truncation_common_to_every_commodity() -> None:
+    """Codex round 3: a cross-sectional check is blind when EVERY commodity loses the
+    same days, because the cross-sectional maximum is truncated too. The month-level
+    calendar anchor is what catches it."""
+    dcot = K1694.build_dcot()
+    rv = K1694.build_vol().copy()
+    month = pd.Period("2020-06", "M")
+    rows = rv["month_end"].dt.to_period("M") == month
+    assert rows.sum() > 1
+    base = K1694.monthly_coverage(dcot, rv)
+    assert base.loc[base.month == month, "rv_complete"].all()
+    rv.loc[rows, "ndays"] = rv.loc[rows, "ndays"] - 2  # everyone loses two days
+    cov = K1694.monthly_coverage(dcot, rv)
+    hit = cov.loc[cov.month == month]
+    assert hit["rv_cross_shortfall"].max() == 0, "cross-sectional check is blind here"
+    assert not hit["rv_complete"].any(), (
+        "a truncation common to every commodity was accepted as a complete month")
+
+
+def test_rv_endpoint_test_is_declared_unavailable_when_the_cache_lacks_dates(
+        results: dict) -> None:
+    """The frozen cache stores counts only. Say so; do not claim an endpoint test."""
+    rule = results["sample"]["completeness"]["rule"]
+    rv_cache_has_dates = {"first_day", "last_day"} <= set(K1694.build_vol().columns)
+    if rv_cache_has_dates:
+        assert rule["rv_endpoint_test"] == "applied"
+    else:
+        assert rule["rv_endpoint_test"].startswith("UNAVAILABLE")
+        assert "does NOT prove" in rule["rv_residual_blind_spot"]
+        assert "2012-10" in rule["rv_residual_blind_spot"]
+    # The claim must not appear in the rule's POSITIVE descriptions; the blind-spot
+    # field exists precisely to deny it, so it is excluded from the scan.
+    positive = json.dumps({k: v for k, v in rule.items()
+                           if k != "rv_residual_blind_spot"})
+    assert "reached both ends" not in positive
 
 
 def test_log_oi_has_a_positivity_guard(panel: pd.DataFrame) -> None:
@@ -296,6 +352,49 @@ def test_nothing_claims_absence_of_predictability(results: dict) -> None:
         "spec4_lagged_timing_hardened"]["reading"].lower()
     assert "not" in reading and "no predictability" in reading
     assert "no predictability" in results["claim_language_rule"].lower()
+
+
+def test_nothing_claims_absence_of_association(results: dict) -> None:
+    """Codex round 3: 'no association survives this timing' is still an absence
+    claim, and it contradicts the artifact's own 'cannot establish absence'."""
+    searchable = json.dumps({k: v for k, v in results.items()
+                             if k != "claim_language_rule"}).lower()
+    assert "no association survives" not in searchable
+    # "there is no association" may appear only where the text forbids it
+    start = 0
+    while (hit := searchable.find("there is no association", start)) != -1:
+        context = searchable[max(0, hit - 30):hit]
+        assert "never" in context or "not " in context, (
+            f"absence claim asserted at offset {hit}: "
+            f"...{searchable[max(0, hit - 60):hit + 30]}...")
+        start = hit + 1
+    reading = results["secondary_findings"][
+        "spec4_lagged_timing_hardened"]["reading"]
+    assert "NOT SUPPORTED under this timing" in reading
+    # In the README's claim section the phrase may appear ONLY inside a denial
+    # ("it is not 'no association'"). A blacklist cannot tell an assertion from its
+    # retraction, so require every occurrence to sit next to a negation marker.
+    claims = (HERE / "README.md").read_text().split("## Codex round")[0]
+    for phrase in ("沒有關聯", "不存在關聯"):
+        start = 0
+        while (hit := claims.find(phrase, start)) != -1:
+            context = claims[max(0, hit - 24):hit]
+            assert any(neg in context for neg in ("不是", "不能", "非")), (
+                f"README claim section asserts {phrase!r} at offset {hit}: "
+                f"...{claims[max(0, hit - 40):hit + 20]}...")
+            start = hit + len(phrase)
+
+
+def test_within_month_overlap_count_is_scoped_to_the_estimation_sample(
+        results: dict, frame: pd.DataFrame) -> None:
+    """Codex round 3: the README quoted N/N estimation rows while the JSON field was
+    computed over the whole panel."""
+    prov = results["data_provenance"]
+    assert "fcm_avail_inside_outcome_month_rows" not in prov, "ambiguous key is back"
+    n = prov["fcm_avail_inside_outcome_month_rows_in_estimation_sample"]
+    assert prov["estimation_sample_rows"] == len(frame)
+    assert n <= len(frame)
+    assert f"{n}/{len(frame)}" in (HERE / "README.md").read_text()
 
 
 def test_null_is_worded_as_not_supported_not_as_disproved(results: dict) -> None:

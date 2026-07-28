@@ -1,88 +1,71 @@
-# K1694 primary-path review — ROUND 4 (re-review after the round-3 FAIL was repaired)
+# K1694 primary-path review — ROUND 3 (re-review after the round-2 FAIL was repaired)
 
-You have reviewed this experiment three times, each time **VERDICT: FAIL**:
+You have reviewed this experiment twice, both times **VERDICT: FAIL**:
 
-- round 1 -> `storage/ops/codex_reviews/k1694_verdict.md` (8 defects)
-- round 2 -> `storage/ops/codex_reviews/k1694_verdict_round2.md` (4 requirements)
-- round 3 -> `storage/ops/codex_reviews/k1694_verdict_round3.md` (3 blocking defects)
+- round 1 → `storage/ops/codex_reviews/k1694_verdict.md` (prompt: `k1694_prompt_round1.md`)
+- round 2 → `storage/ops/codex_reviews/k1694_verdict_round2.md`
 
-**Read the round-3 verdict first** — its three blocking defects are the primary checklist.
-Rounds 1 and 2 are the secondary checklist: confirm nothing they fixed has regressed. In
-round 3 you explicitly certified the estimator, provenance and NULL-not-manufactured
-findings; spot-check those rather than re-deriving them. Write this round's verdict to
-stdout only.
+**Read the round-2 verdict first** — its four "Required before PASS" items are the primary
+checklist for this round. The round-1 verdict is the secondary checklist: confirm nothing
+it fixed has regressed. Write this round's verdict to stdout only.
 
-## What round 3 blocked on, and what was done — verify each
+The experiment has been repaired again and **re-run**. Your job is the primary path: does
+the code actually estimate what the write-up claims, is each round-2 requirement really met
+(not merely relabelled), and is the NULL trustworthy?
 
-**R3-1 — DCOT head completeness had a concrete counterexample.** You showed GOLD 2024-10
-(reports on the 1st, 8th, 15th, 22nd, 29th) passing as complete after deleting the 1st,
-because the head gap was measured from MONTH START and a month can begin on a Tuesday.
-- Fixed by removing the month-start anchor entirely. Continuity is now measured against
-  the **previous report, across the month boundary**: `dcot_entry_gap_days` is the gap
-  from the last report of the previous month to the first of this one, and it faces the
-  same `MAX_DCOT_GAP_DAYS = 9` threshold as the interior gaps. Your counterexample now
-  reads 14 days. The tail rule (<= 6 days to month end) is unchanged, since the series
-  has no "next report" to be continuous with when it simply stops.
-- The first month of the whole series has no entry gap and is now **never certifiable**.
-- `test_completeness_rule_catches_a_skipped_week` is parameterised over five deletions,
-  including your GOLD 2024-10 case verbatim, and covers first / interior / last week.
-- **Check**: is there any remaining position in a month where deleting a report leaves
-  every gap under 9 days? Does the entry gap behave correctly when the previous month was
-  itself dropped? Is `MAX_DCOT_GAP_DAYS = 9` calibrated (observed global gaps are only
-  6, 7, 8) or fitted?
+## What round 2 required, and what was done — verify each
 
-**R3-2 — the RV rule could not prove a download reached both ends.** You showed that a
-truncation common to every commodity defeats the cross-sectional check, because the
-cross-sectional maximum is truncated too.
-- Three responses, in decreasing order of strength:
-  (a) `build_vol()` now records `first_day` / `last_day` per commodity-month, and
-      `monthly_coverage()` applies a real endpoint test whenever those columns exist. The
-      frozen cache behind the reported run predates them.
-  (b) For a count-only cache, a **month-level** anchor was added:
-      `expected_trading_days - max(ndays that month) <= 1`, where expected = weekdays
-      minus U.S. federal holidays and Good Friday. In sample this flags only 2026-07
-      (gap 12) and leaves 2012-10 (Hurricane Sandy, gap 1) and 2018-12 (national day of
-      mourning, gap 1) — two genuine unscheduled closures — in place.
-  (c) The **residual blind spot is disclosed rather than closed**: a truncation of exactly
-      ONE day common to every commodity is indistinguishable from an unscheduled closure
-      in a count-only cache. `rule.rv_endpoint_test` reads "UNAVAILABLE for this cache",
-      and the artifact no longer claims the downloads "reached both ends" — only that the
-      day count is consistent with a holiday-adjusted calendar to within one day.
-- **Check**: is the holiday calendar the right one (it omits Columbus Day and Veterans
-  Day, on which futures DO trade — argued to be safe because it can only make the rule
-  more permissive; verify that direction)? Is the one-day blind spot honestly scoped, or
-  does it undermine the "complete months only" claim that `panel_span` still makes? Is
-  the endpoint code path correct for a cache that does carry the dates?
+Round 2 confirmed the estimator repairs were sound and that the NULL does not appear
+manufactured, then failed the artifact on four items. Treat every claim below as unproven.
 
-**R3-3 — absence wording and a scope mismatch.**
-- Every "no association survives this timing" is now "an association is NOT SUPPORTED
-  under this timing arrangement", in the code docstring, the results JSON and the README.
-- `fcm_avail_inside_outcome_month_rows` was computed over `panel` (3278) while the README
-  quoted it as N-of-N estimation rows. The field is renamed
-  `fcm_avail_inside_outcome_month_rows_in_estimation_sample`, computed from `frame`, and
-  `estimation_sample_rows` is recorded beside it; a test asserts the README's "N/N" string
-  matches.
-- **Check**: any remaining assertion of absence anywhere — including the README's
-  conclusion section and the figure titles. Any other count in the README or JSON whose
-  population does not match how it is quoted.
+**R2-A — "either build a genuinely ex-ante spec4 ... or remove all predictive/
+no-predictability claims".** Both halves were done, minus the impossible one:
+- Controls moved from t-1 to **t-2** DCOT aggregates (`nonrep_lag2`, `d_nonrep_lag2`,
+  `dlog_oi_lag2`), because a t-1 monthly aggregate is not fully published before month t
+  begins. The point-in-time regime label stays at t-1 on the argument that realized vol is
+  computed from same-day public closes and carries no publication lag — **check that
+  argument**.
+- New `build_lagged_frame()` selects spec4's sample from spec4's own regressors, so it is
+  no longer conditioned on the contemporaneous `rv_z` it never uses.
+- The spec is renamed `spec4_lagged_timing_hardened` and **all** predictive /
+  "no predictability" claims are removed; its null now reads "no association survives this
+  timing", explicitly conditional on the synthetic availability constant.
+- **Check**: is any predictive or ex-ante claim left anywhere — README, results JSON, code
+  docstrings? Does t-2 actually clear the publication overlap, or is there a case where a
+  t-2 aggregate is still not public before month t? Is the t-1 PIT vol label really free of
+  a publication lag?
 
-## Reported result (re-run, 2026-07-29, round-4 artifacts)
+**R2-B — "replace 不成立 with 未獲支持 everywhere and describe the temporal effective
+sample accurately".** Null wording is now "未獲支持 / NOT SUPPORTED" throughout, with an
+explicit statement that the estimators cannot establish absence. `sample.
+effective_temporal_dof` now reports the FCM z-score ACF (1/3/6/12 = 0.964 / 0.918 / 0.817 /
+0.584) and states the effective d.o.f. are below the calendar-month count, without claiming
+to quantify how far below.
+- **Check**: any remaining place that asserts independence or overstates the null. Is
+  "we do not quantify it" an adequate disclosure, or does it need a number?
 
-- Verdict: **NULL**, worded as NOT SUPPORTED, scoped to the negative binary high-vol
-  crowding-out hypothesis
-- Sample: 3275 rows, 22 commodities, 149 calendar months, 2014-02..2026-06; spec4 has its
-  own 2748-row sample
-- spec1 `fcm_x_highvol`: coef +3.1026e-04, t_DK +1.53, t_cluster +1.57, p_DK 0.126
-- spec2 `fcm_x_rvz`: coef +2.8798e-04, t_DK +2.55, t_cluster +2.56 (POSITIVE, p 0.011)
-- spec3 `conc4_x_highvol`: coef -1.9338e-04, t_DK -0.77
-- spec4 `fcm_pre_x_highvol_lag`: coef +6.7519e-05, t_DK +0.28, t_cluster +0.34, n 2748
-- Stationary block bootstrap (mean block 6, 2000 reps): 95% CI [-7.487e-05, 7.747e-04],
-  p 0.120; IID month-cluster: [-7.207e-05, 7.086e-04], p 0.122
-- DK bandwidth 1..24: |t| in [1.53, 1.66]; lag grid 30-90d: t_DK in [1.25, 1.53]
-- Aggregate time-series `hhi_x_volfrac`: t 0.33, p 0.739
-- `test_K1694.py`: 39 mechanical gates, all passing
-- The sample fell 3276 -> 3275 because the holiday-adjusted calendar caught one more
-  short commodity-month inside the estimation window
+**R2-C — "guard non-positive/non-finite OI explicitly".** `oi` is masked to NaN unless
+finite and strictly positive before `np.log`, and any non-finite `dlog_oi` is cleared
+afterwards; `sample.oi_invalid_rows_guarded` records the count (0 on this cache).
+- **Check**: is the guard actually on the path that feeds the regression, and is the
+  after-the-fact non-finite sweep redundant or load-bearing?
+
+**R2-D — "strengthen completeness checks so they detect interior weekly gaps and
+independently truncated RV months".**
+- DCOT is now a three-part continuity test: first report within 8 days of month start,
+  no gap between consecutive reports over 9 days, last report within 6 days of month end.
+  A skipped week at head, middle or tail stretches one gap to ~14 days.
+- RV now needs three things: >= 15 trading days, no more than 5 short of the month's
+  business-day count, and no more than 3 short of the best-covered commodity that month
+  (shared U.S. calendar, so a lone shortfall is that commodity's own truncated download).
+- Thresholds were calibrated on the cache: observed maximum interior gap 8 days and head
+  gap 7 days (holiday shifts), RV shortfall 0-2 days normally and 10/11/13 when truncated.
+- This dropped 2 more rows (3278 -> 3276): 2014-04 and 2016-03 were independently
+  truncated RV months.
+- **Check**: are those thresholds calibrated or fitted? Could a real gap hide under 9 days?
+  Is `MAX_RV_CROSS_SHORTFALL` circular when a whole month is truncated for every commodity
+  (the cross-sectional max is then also truncated)? Does the business-day anchor handle
+  holiday-heavy months without dropping legitimate ones?
 
 **Working tree**: you are inside a git worktree at the repo root of this checkout. Every
 path below is relative to it. The canonical checkout at `~/volpred-research` still holds
@@ -134,14 +117,14 @@ that they still hold after this round's edits rather than re-deriving them.
    T = 149 months given the FCM series' autocorrelation? Does the headline CI use it?
 
 4. **Partial months.** `monthly_coverage()` is the single owner of a date-free
-   completeness rule. **It has been rewritten twice since round 1 — judge the current rule
-   under R3-1 and R3-2 above, not this bullet.** Unchanged throughout: DCOT-incomplete rows
-   are dropped entirely; RV-incomplete months keep their DCOT row but have `rv` masked to
-   NaN; an adjacency check voids any first difference whose previous retained row is not
-   the immediately preceding calendar month.
+   completeness rule. **Its content was replaced this round — judge the current rule under
+   R2-D above, not this bullet.** Unchanged from round 2: DCOT-incomplete rows are dropped
+   entirely; RV-incomplete months keep their DCOT row but have `rv` masked to NaN; an
+   adjacency check voids any first difference whose previous retained row is not the
+   immediately preceding calendar month.
    **Check**: does masking `rv` (rather than dropping the row) change the within-commodity
-   moments in a way that biases the regime labels? Is the adjacency guard complete,
-   including the t-2 lags spec4 added?
+   moments in a way that biases the regime labels? Is the adjacency guard complete — is
+   there any difference or lag that escapes it, including the new t-2 lags?
 
 5. **Methodology description vs code.**
    (a) `_acf_bandwidth()` is gone; `_hac_bandwidth_rule(nmonths)` returns
@@ -153,7 +136,7 @@ that they still hold after this round's edits rather than re-deriving them.
    outcome month's start; the regime label uses point-in-time expanding moments at t-1.
    **Check**: the expanding moments include month t itself when labelling month t — is
    that legitimate given the label is then lagged one month? Is `PIT_MIN_MONTHS = 24`
-   doing anything suspicious to the sample (n 3275 -> 2748)?
+   doing anything suspicious to the sample (n 3276 -> 2749)?
 
 6. **Results JSON overstatement.** `bootstrap_interaction_spec1` and
    `primary_interaction.bootstrap_ci95` are removed; CIs are now under explicit names.
@@ -161,7 +144,7 @@ that they still hold after this round's edits rather than re-deriving them.
    the excluded months. `claim_type: ex_post_association` plus a `claim_language_rule`
    forbid predictive/causal/known-before-outcome language for spec1-3. `limitations` now
    lists synthetic publication dates, the within-month timing overlap (disclosed as
-   affecting 3275/3275 estimation rows), full-sample regime labels, and the IID
+   affecting 3276/3276 estimation rows), full-sample regime labels, and the IID
    bootstrap's failure to preserve serial correlation.
    **Check**: read `README.md` as the surface through which an overclaim reaches a human.
    Does anything in the README or the JSON still assert more than the code estimates?
@@ -178,6 +161,24 @@ that they still hold after this round's edits rather than re-deriving them.
    sha of `K1694.py` on disk all agree? Does `canonical_result_identity` match the result
    bytes? Could this spec have been written after the fact?
 
+## Reported result (re-run, 2026-07-29, round-3 artifacts)
+
+- Verdict: **NULL**, worded as NOT SUPPORTED, scoped to the negative binary high-vol
+  crowding-out hypothesis
+- Sample: 3276 rows, 22 commodities, 149 calendar months, 2014-02..2026-06 (complete
+  months only); spec4 has its own 2749-row sample
+- spec1 `fcm_x_highvol`: coef +3.0553e-04, t_DK +1.51, t_cluster_month +1.55, p_DK 0.130
+- spec2 `fcm_x_rvz`: coef +2.8750e-04, t_DK +2.54, t_cluster_month +2.56 (POSITIVE, p 0.011)
+- spec3 `conc4_x_highvol`: coef -1.9119e-04, t_DK -0.76
+- spec4 `fcm_pre_x_highvol_lag`: coef +6.6741e-05, t_DK +0.27, t_cluster +0.34, n 2749
+- Stationary block bootstrap (mean block 6 months, 2000 reps): 95% CI
+  [-7.418e-05, 7.684e-04], p 0.126
+- IID month-cluster bootstrap (2000 reps): 95% CI [-7.458e-05, 7.014e-04], p 0.126
+- DK bandwidth 1..24: |t| in [1.51, 1.64], none reaches 1.96
+- Aggregate time-series `hhi_x_volfrac`: t 0.34, p 0.733 (HAC lag 6, resid acf1 -0.039)
+- Lag grid 30/45/60/75/90d: t_DK in [1.24, 1.51], none reaches 1.96
+- `test_K1694.py`: 31 mechanical gates, all passing
+
 ## Questions that carry over from round 1 and are NOT closed by the above
 
 - **Is the NULL manufactured?** The point estimate is *positive* while the hypothesis
@@ -187,7 +188,7 @@ that they still hold after this round's edits rather than re-deriving them.
   common-factor structure of FCM HHI, `dlog_oi` being a bad control)? Note the author did
   NOT address dynamic-panel bias — judge whether it matters for the interaction term.
 - **Effective degrees of freedom.** FCM HHI is one system-wide monthly series: 149 months,
-  not 3275 independent observations. Are DK + month clustering + the block bootstrap
+  not 3278 independent observations. Are DK + month clustering + the block bootstrap
   enough, and is the limitation stated at the right strength?
 - **Publication dates are still synthetic.** Nothing this round verified a real CFTC
   release date. Is the disclosure adequate, or should that block any claim at all?

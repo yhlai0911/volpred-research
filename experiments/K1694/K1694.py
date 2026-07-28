@@ -20,7 +20,8 @@ FCM 清算集中度在高波動期是否排擠小型交易者、放大商品流�
      predictive / causal / known-before-outcome。
    - **spec4 也不能宣稱 predictive**：它把時序收緊到「訊號都在 outcome 月開始前」，但那個
      「前」是相對於**合成**的 avail_date。真實發布日未經核對之前，spec4 的 ex-ante 身分是
-     **條件式**的，所以它的零結果只能講「這個時序安排下沒有關聯」，**不能**講「沒有可預測性」。
+     **條件式**的，所以它的零結果只能講「此時序安排下**未獲得**關聯的支持」，**不能**講
+     「這個時序安排下沒有關聯」，更不能講「沒有可預測性」。
 2. CFTC DCOT（Disaggregated COT, futures-only, 72hh-3qpy）週頻：
    - nonrept_positions_long/short_all（小型交易者部位）→ 排擠結果
    - conc_gross_le_4/8_tdr（trader-level 集中度）→ 第二個集中度視角（部位層 vs 清算層）
@@ -96,22 +97,35 @@ _UA = {"User-Agent": "Mozilla/5.0 (research; volpred K1694)"}
 FCM_LAG_DAYS = 45  # 合成常數，非真實發布日：CFTC FCM 月報 ≈ 月底 + 1 個月，再加緩衝
 
 # --- 完整性規則（reproducible，不寫死任何日期）--------------------------------
-# Codex round 2：光靠「≥4 份週報 + 最後一份夠新」證明不了全月覆蓋 —— 5 份報表的月份仍可能
-# 中間漏一週。所以 DCOT 端改成三段式**連續性**檢查（頭、中、尾），任何被跳過的一週都會讓
-# 對應的 gap 撐到約 14 天而被擋下；假日造成的 1-2 天位移（本樣本最大 interior gap = 8 天、
-# 最大 head gap = 7 天）則放行。
+# 演進史，因為每一版都是被反例打掉的：
+#   round 1：沒有規則，partial month 2026-07 直接進 panel。
+#   round 2：「≥4 份週報 + 最後一份夠新」—— Codex 指出 5 份報表的月份仍可能中間漏一週。
+#   round 3：加了「首份距月初 ≤8 天」，Codex 給出**具體反例**：GOLD 2024-10 的週報落在
+#            1/8/15/22/29，刪掉 10/1 之後 head gap 只有 7 天，照樣判 complete。根因是
+#            head gap 從**月初**量起，而月初到第一個週二本來就可能是 0 天，所以刪掉第一份
+#            的懲罰被月初這個原點吃掉了。
+#   現在：不從月初量，改從**上一份週報**量（跨月界連續）。週報序列本來就是全域連續的，
+#         用全域連續性去證明覆蓋，月界就不再是盲區 —— 同一個反例現在的 gap 是 14 天。
+#         本快取實測：全域相鄰週報間隔只有 6/7/8 天三種值，所以門檻 9 有 1 天餘裕。
 MIN_DCOT_WEEKS = 4
-MAX_DCOT_HEAD_GAP_DAYS = 8      # 首份週報距月初；漏掉第一週 -> >= 13
-MAX_DCOT_INTERIOR_GAP_DAYS = 9  # 相鄰週報最大間隔；漏掉中間一週 -> 14
-MAX_DCOT_TAIL_GAP_DAYS = 6      # 末份週報距月底；漏掉最後一週 -> >= 13
+MAX_DCOT_GAP_DAYS = 9       # 相鄰週報間隔（含跨月界那一段）；漏掉任何一週 -> 14
+MAX_DCOT_TAIL_GAP_DAYS = 6  # 末份週報距月底；序列在此中斷時沒有「下一份」可比，故仍需這條
 
-# RV 端同理：ndays 門檻本身證明不了「這個月的下載跑到月底」。三個條件一起看 ——
-# 絕對門檻、相對於該月**營業日數**的缺口、以及相對於**同月其他商品**的缺口（同一個美國
-# 交易日曆，所以某商品獨自短少就是它自己的下載被截斷）。本樣本正常月缺口 0-2 天、假日重的
-# 月份最多 5 天；被截斷的月份是 10/11/13 天，分得很開。
+# RV 端：ndays 是**計數**，計數證明不了下載跑到月底。能從只存計數的快取做到的最強檢查，是
+# 拿它跟**假日調整後的預期交易日數**比（美國聯邦假日 + Good Friday，CME 的休市日集合）。
+#   - 個別商品短少 -> 它自己的下載被截斷（另外再跟同月其他商品比一次）。
+#   - **整月所有商品一起短少** -> 月層級的 anchor 才抓得到；這正是 Codex round 3 指出
+#     cross-sectional max 會失效的情形。
+# 實測（月層級 expected - max(ndays)）：209 個月是 0、47 個月是負的（CME 在 Columbus Day /
+# Veterans Day 照常交易，所以實際交易日多於聯邦日曆），只有 3 個月是正的：2012-10（+1，
+# Sandy 颶風休市）、2018-12（+1，老布希國殤日休市）、2026-07（+12，被截斷）。
+# 因此門檻 1 抓得到「共同短少 ≥2 天」，抓不到「共同短少剛好 1 天」—— 那和一次計畫外休市
+# 在只有計數的快取裡無法區分。**這個盲區照實揭露，不用規則假裝它不存在**（見
+# results.sample.completeness.rule.rv_residual_blind_spot）。
 MIN_RV_DAYS = 15
-MAX_RV_MISSING_BDAYS = 5        # bdays(month) - ndays
-MAX_RV_CROSS_SHORTFALL = 3      # max(ndays of that month across commodities) - ndays
+MAX_RV_SHORTFALL_VS_CALENDAR = 2   # per commodity: expected_trading_days - ndays
+MAX_RV_CROSS_SHORTFALL = 2         # per commodity: max(ndays that month) - ndays
+MAX_RV_MONTH_SHORTFALL = 1         # per month:  expected_trading_days - max(ndays)
 
 # spec4 的 point-in-time regime label 需要的最短暖身期
 PIT_MIN_MONTHS = 24
@@ -364,7 +378,16 @@ def build_vol(start="2005-01-01") -> pd.DataFrame:
         g = ret.groupby(ret.index.to_period("M"))
         rv = g.std() * np.sqrt(252)
         cnt = g.count()
-        m = pd.DataFrame({"rv": rv, "ndays": cnt})
+        # first/last observed trading day per month: a day COUNT cannot show that a
+        # download reached both ends of the month, and if every commodity is short
+        # by the same day or two, no cross-sectional check can either (Codex round
+        # 3). Storing the endpoints turns monthly_coverage()'s count test into a
+        # real endpoint test -- for any cache regenerated from here on. The frozen
+        # cache behind the reported run predates these columns and is disclosed as
+        # count-only.
+        obs = pd.Series(ret.index, index=ret.index).groupby(ret.index.to_period("M"))
+        m = pd.DataFrame({"rv": rv, "ndays": cnt,
+                          "first_day": obs.min(), "last_day": obs.max()})
         m = m[m["ndays"] >= 10]  # require enough trading days
         m["commodity"] = name
         m["month_end"] = m.index.to_timestamp(how="end").normalize()
@@ -390,59 +413,113 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
     flags:
 
     ``dcot_complete``
-        the weekly series is CONTINUOUS across the whole month: at least
-        ``MIN_DCOT_WEEKS`` reports, the first within ``MAX_DCOT_HEAD_GAP_DAYS`` of
-        month start, the last within ``MAX_DCOT_TAIL_GAP_DAYS`` of month end, and
-        no gap between consecutive reports longer than
-        ``MAX_DCOT_INTERIOR_GAP_DAYS``. A skipped week -- at the head, in the
-        middle or at the tail -- stretches one of those three gaps to roughly 14
-        days and is caught; a holiday shifting an as-of date by a day or two is
-        not. Incomplete months are dropped outright: they can be neither an
-        outcome nor the lag of one.
+        the weekly series is CONTINUOUS through the month, measured against the
+        PREVIOUS report rather than against the month boundary: at least
+        ``MIN_DCOT_WEEKS`` reports, no gap over ``MAX_DCOT_GAP_DAYS`` between
+        consecutive reports (the entry gap from the last report of the previous
+        month included), and the last report within ``MAX_DCOT_TAIL_GAP_DAYS`` of
+        month end. A week skipped anywhere -- including the first week of the
+        month, which the round-3 head-gap rule missed -- stretches one gap to
+        about 14 days. The first month of the whole series has no entry gap and is
+        therefore never certifiable. Incomplete months are dropped outright: they
+        can be neither an outcome nor the lag of one.
     ``rv_complete``
-        the month's daily download reached both ends: at least ``MIN_RV_DAYS``
-        trading days, no more than ``MAX_RV_MISSING_BDAYS`` short of the calendar
-        month's business-day count, and no more than
-        ``MAX_RV_CROSS_SHORTFALL`` short of the best-covered commodity that month
-        (all these contracts share one U.S. trading calendar, so a commodity that
-        is short on its own has an independently truncated download). Incomplete
-        months keep their DCOT row (so the difference chain is not broken) but
-        their ``rv`` is masked to NaN, because a partial month cannot label a
-        volatility regime.
+        the month's day COUNT is consistent with a holiday-adjusted trading
+        calendar, per commodity and for the month as a whole. This is a count
+        test, not an endpoint test -- see ``rv_endpoint_test`` below and the
+        blind spot recorded in :func:`coverage_report`. Incomplete months keep
+        their DCOT row (so the difference chain is not broken) but their ``rv`` is
+        masked to NaN, because a partial month cannot label a volatility regime.
     """
-    d = dcot.sort_values("report_date").copy()
+    d = dcot.sort_values(["commodity", "report_date"]).copy()
     d["month"] = d["report_date"].dt.to_period("M")
+    # Gap from the previous report for this commodity, ACROSS month boundaries. The
+    # weekly series is globally continuous, so proving coverage globally leaves the
+    # month boundary no blind spot (Codex round 3: GOLD 2024-10 with 10/01 deleted
+    # cleared a month-start-anchored head gap; here the same deletion reads 14 days).
+    d["prev_gap"] = d.groupby("commodity")["report_date"].diff().dt.days
+    is_first = d.groupby(["commodity", "month"]).cumcount() == 0
+    entry = (d.loc[is_first, ["commodity", "month", "prev_gap"]]
+             .rename(columns={"prev_gap": "dcot_entry_gap_days"}))
     grp = d.groupby(["commodity", "month"])["report_date"]
     cov = grp.agg(nweeks="size", first_report="min", last_report="max").reset_index()
-    interior = grp.apply(lambda s: s.diff().dt.days.max()).rename("dcot_interior_gap_days")
+    interior = (d.loc[~is_first].groupby(["commodity", "month"])["prev_gap"].max()
+                .rename("dcot_interior_gap_days"))
     cov = cov.merge(interior.reset_index(), on=["commodity", "month"], how="left")
+    cov = cov.merge(entry, on=["commodity", "month"], how="left")
     cov["month_start"] = cov["month"].dt.to_timestamp(how="start").dt.normalize()
     cov["month_end"] = cov["month"].dt.to_timestamp(how="end").dt.normalize()
-    cov["dcot_head_gap_days"] = (cov["first_report"] - cov["month_start"]).dt.days
     cov["dcot_tail_gap_days"] = (cov["month_end"] - cov["last_report"]).dt.days
+    # NaN entry gap = no earlier report exists, i.e. the first month of the series:
+    # coverage of its opening weeks is unprovable, so it is not complete.
+    entry_ok = cov["dcot_entry_gap_days"].le(MAX_DCOT_GAP_DAYS).fillna(False)
     # a single-report month has no interior gap to measure; MIN_DCOT_WEEKS rejects it
-    interior_ok = (cov["dcot_interior_gap_days"].fillna(0)
-                   <= MAX_DCOT_INTERIOR_GAP_DAYS)
+    interior_ok = cov["dcot_interior_gap_days"].fillna(0) <= MAX_DCOT_GAP_DAYS
     cov["dcot_complete"] = ((cov["nweeks"] >= MIN_DCOT_WEEKS)
-                            & (cov["dcot_head_gap_days"] <= MAX_DCOT_HEAD_GAP_DAYS)
-                            & (cov["dcot_tail_gap_days"] <= MAX_DCOT_TAIL_GAP_DAYS)
-                            & interior_ok)
+                            & entry_ok
+                            & interior_ok
+                            & (cov["dcot_tail_gap_days"] <= MAX_DCOT_TAIL_GAP_DAYS))
 
     rvm = rv.copy()
     rvm["month"] = rvm["month_end"].dt.to_period("M")
-    cov = cov.merge(rvm[["commodity", "month", "rv", "ndays"]],
+    endpoint_cols = [c for c in ("first_day", "last_day") if c in rvm.columns]
+    cov = cov.merge(rvm[["commodity", "month", "rv", "ndays"] + endpoint_cols],
                     on=["commodity", "month"], how="left")
     cov = cov.rename(columns={"ndays": "rv_ndays"})
-    cov["rv_bdays_in_month"] = [
-        len(pd.bdate_range(m.to_timestamp(how="start"), m.to_timestamp(how="end")))
-        for m in cov["month"]]
-    cov["rv_missing_bdays"] = cov["rv_bdays_in_month"] - cov["rv_ndays"]
+    cov["rv_expected_trading_days"] = cov["month"].map(_expected_trading_days())
+    cov["rv_shortfall_vs_calendar"] = (cov["rv_expected_trading_days"]
+                                       - cov["rv_ndays"])
     best = cov.groupby("month")["rv_ndays"].transform("max")
     cov["rv_cross_shortfall"] = best - cov["rv_ndays"]
-    cov["rv_complete"] = ((cov["rv_ndays"] >= MIN_RV_DAYS)
-                          & (cov["rv_missing_bdays"] <= MAX_RV_MISSING_BDAYS)
-                          & (cov["rv_cross_shortfall"] <= MAX_RV_CROSS_SHORTFALL))
+    cov["rv_month_shortfall"] = cov["rv_expected_trading_days"] - best
+    cov["rv_complete"] = (
+        (cov["rv_ndays"] >= MIN_RV_DAYS)
+        & (cov["rv_shortfall_vs_calendar"] <= MAX_RV_SHORTFALL_VS_CALENDAR)
+        & (cov["rv_cross_shortfall"] <= MAX_RV_CROSS_SHORTFALL)
+        & (cov["rv_month_shortfall"] <= MAX_RV_MONTH_SHORTFALL))
+    if endpoint_cols:
+        # A cache that carries the actual first/last observation dates upgrades the
+        # count test to a real endpoint test. The frozen cache used for the reported
+        # run does not; see coverage_report()["rule"]["rv_endpoint_test"].
+        first = pd.to_datetime(cov["first_day"], errors="coerce")
+        last = pd.to_datetime(cov["last_day"], errors="coerce")
+        cov["rv_head_gap_days"] = _weekdays_between(cov["month_start"], first)
+        cov["rv_tail_gap_days"] = _weekdays_between(last, cov["month_end"])
+        cov["rv_complete"] &= (cov["rv_head_gap_days"].le(3).fillna(False)
+                               & cov["rv_tail_gap_days"].le(3).fillna(False))
     return cov
+
+
+def _expected_trading_days() -> dict:
+    """Weekdays minus U.S. federal holidays and Good Friday, per calendar month.
+
+    The set CME observes; Columbus Day and Veterans Day are federal holidays on
+    which futures do trade, so this UNDERSTATES the true trading-day count by up to
+    two days a year. That direction is safe here: the rule flags months that are
+    SHORT of it, so understating it can only make the rule more permissive, never
+    make it drop a legitimate month.
+    """
+    from pandas.tseries.holiday import (AbstractHolidayCalendar, GoodFriday,
+                                        USFederalHolidayCalendar)
+
+    class _CMECalendar(AbstractHolidayCalendar):
+        rules = [*USFederalHolidayCalendar.rules, GoodFriday]
+
+    hol = _CMECalendar().holidays(start="1990-01-01", end="2035-12-31")
+    hol = pd.DatetimeIndex([h for h in hol if h.dayofweek < 5])
+    out = {}
+    for m in pd.period_range("2000-01", "2035-12", freq="M"):
+        ms, me = m.to_timestamp(how="start"), m.to_timestamp(how="end")
+        out[m] = len(pd.bdate_range(ms, me)) - int(((hol >= ms) & (hol <= me)).sum())
+    return out
+
+
+def _weekdays_between(a: pd.Series, b: pd.Series) -> pd.Series:
+    """Weekday count strictly between two dates, NaN-safe, for endpoint checks."""
+    return pd.Series(
+        [np.nan if pd.isna(x) or pd.isna(y)
+         else max(0, len(pd.bdate_range(x, y)) - 1)
+         for x, y in zip(a, b)], index=a.index, dtype=float)
 
 
 def coverage_report(cov: pd.DataFrame) -> dict:
@@ -456,10 +533,11 @@ def coverage_report(cov: pd.DataFrame) -> dict:
         out = frame.groupby("month").agg(
             n_commodities=("commodity", "nunique"),
             min_nweeks=("nweeks", "min"),
-            max_head_gap_days=("dcot_head_gap_days", "max"),
+            max_entry_gap_days=("dcot_entry_gap_days", "max"),
             max_interior_gap_days=("dcot_interior_gap_days", "max"),
             max_tail_gap_days=("dcot_tail_gap_days", "max"),
             min_rv_days=("rv_ndays", "min"),
+            max_rv_shortfall=("rv_shortfall_vs_calendar", "max"),
         ).reset_index()
 
         def _i(v):
@@ -468,32 +546,55 @@ def coverage_report(cov: pd.DataFrame) -> dict:
         return [{"month": str(r["month"]),
                  "n_commodity_rows_dropped": int(r["n_commodities"]),
                  "min_dcot_weeks": int(r["min_nweeks"]),
-                 "max_dcot_head_gap_days": _i(r["max_head_gap_days"]),
+                 "max_dcot_entry_gap_days": _i(r["max_entry_gap_days"]),
                  "max_dcot_interior_gap_days": _i(r["max_interior_gap_days"]),
                  "max_dcot_tail_gap_days": _i(r["max_tail_gap_days"]),
-                 "min_rv_trading_days": _i(r["min_rv_days"])}
+                 "min_rv_trading_days": _i(r["min_rv_days"]),
+                 "max_rv_shortfall_vs_calendar": _i(r["max_rv_shortfall"])}
                 for _, r in out.iterrows()]
 
+    endpoint_test = "first_day" in cov.columns and "last_day" in cov.columns
     return {
         "rule": {
             "dcot_month_complete": (
-                f"nweeks >= {MIN_DCOT_WEEKS} AND first_report - month_start <= "
-                f"{MAX_DCOT_HEAD_GAP_DAYS}d AND month_end - last_report <= "
-                f"{MAX_DCOT_TAIL_GAP_DAYS}d AND max gap between consecutive reports "
-                f"<= {MAX_DCOT_INTERIOR_GAP_DAYS}d"),
+                f"nweeks >= {MIN_DCOT_WEEKS} AND every gap between consecutive "
+                f"reports <= {MAX_DCOT_GAP_DAYS}d, INCLUDING the entry gap from the "
+                f"previous month's last report AND month_end - last_report <= "
+                f"{MAX_DCOT_TAIL_GAP_DAYS}d"),
             "dcot_rule_detects": (
-                "a skipped week anywhere in the month -- head, interior or tail -- "
-                "because any of the three gaps stretches to about 14 days; holiday "
-                "shifts of one or two days pass (observed maxima in this cache: "
-                "interior 8d, head 7d, tail 6d)"),
+                "a skipped week anywhere, first week included, because continuity is "
+                "measured against the previous report rather than against the month "
+                "boundary: deleting any single report makes one gap about 14 days "
+                "(observed gaps in this cache are only 6, 7 or 8 days). A month with "
+                "no earlier report at all -- the first month of the series -- can "
+                "never be certified and is dropped."),
             "rv_month_complete": (
-                f"trading days >= {MIN_RV_DAYS} AND business_days(month) - trading "
-                f"days <= {MAX_RV_MISSING_BDAYS} AND max(trading days across "
-                f"commodities that month) - trading days <= {MAX_RV_CROSS_SHORTFALL}"),
+                f"trading days >= {MIN_RV_DAYS} AND expected_trading_days - trading "
+                f"days <= {MAX_RV_SHORTFALL_VS_CALENDAR} AND max(trading days across "
+                f"commodities that month) - trading days <= {MAX_RV_CROSS_SHORTFALL} "
+                f"AND expected_trading_days - max(trading days that month) <= "
+                f"{MAX_RV_MONTH_SHORTFALL}"),
+            "rv_expected_trading_days_definition": (
+                "weekdays minus U.S. federal holidays and Good Friday; understates "
+                "the true count on Columbus Day / Veterans Day, which only makes the "
+                "rule more permissive"),
             "rv_rule_detects": (
-                "an independently truncated download: these contracts share one U.S. "
-                "trading calendar, so a commodity short relative to both the calendar "
-                "and its peers did not reach month end"),
+                "an independently truncated download (a commodity short of both the "
+                "calendar and its peers) AND a truncation common to every commodity "
+                "of 2 or more days, which no cross-sectional check can see"),
+            "rv_endpoint_test": ("applied" if endpoint_test else
+                                 "UNAVAILABLE for this cache: rv_monthly.csv stores "
+                                 "day counts only, no first/last observation dates. "
+                                 "build_vol() now records them, so any regenerated "
+                                 "cache upgrades this to a true endpoint test."),
+            "rv_residual_blind_spot": (
+                "a truncation of exactly ONE day common to every commodity is "
+                "indistinguishable, in a count-only cache, from an unscheduled "
+                "market closure. Two such closures are in sample and are correctly "
+                "kept: 2012-10 (Hurricane Sandy) and 2018-12 (national day of "
+                "mourning). This rule therefore does NOT prove each download reached "
+                "both ends of its month; it proves the day count is consistent with "
+                "a holiday-adjusted calendar to within one day."),
             "date_hardcoded": False,
             "effect_of_dcot_incomplete": "row dropped from the panel entirely",
             "effect_of_rv_incomplete": "rv masked to NaN; DCOT row retained",
@@ -529,10 +630,11 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
 
     # --- completeness rule: drop partial DCOT months, mask partial RV months ---
     cov = monthly_coverage(dcot, rv)
-    agg = agg.merge(cov[["commodity", "month", "last_report", "dcot_head_gap_days",
+    agg = agg.merge(cov[["commodity", "month", "last_report", "dcot_entry_gap_days",
                          "dcot_interior_gap_days", "dcot_tail_gap_days",
-                         "rv", "rv_ndays", "rv_missing_bdays", "rv_cross_shortfall",
-                         "dcot_complete", "rv_complete"]],
+                         "rv", "rv_ndays", "rv_expected_trading_days",
+                         "rv_shortfall_vs_calendar", "rv_cross_shortfall",
+                         "rv_month_shortfall", "dcot_complete", "rv_complete"]],
                     on=["commodity", "month"], how="left")
     agg = agg[agg["dcot_complete"].fillna(False)].copy()
     agg.loc[~agg["rv_complete"].fillna(False), "rv"] = np.nan
@@ -791,7 +893,8 @@ def panel_regression(frame: pd.DataFrame,
     # the sample is selected by spec4's own regressors. What it is NOT: proof of
     # ex-ante availability -- the FCM leg still rests on the SYNTHETIC 45-day lag, so
     # its ex-ante status is conditional on that constant. It therefore cannot
-    # establish "no predictability", only "no association survives this timing".
+    # establish "no predictability", nor even "no association under this timing" --
+    # only "an association is NOT SUPPORTED under this timing".
     if lagged_frame is not None:
         run(SPEC4_RHS, "spec4_lagged_timing_hardened", dk,
             note=("lagged design, ex-ante ONLY CONDITIONAL on the synthetic FCM "
@@ -1147,9 +1250,10 @@ def main():
             "whole-month average change. spec4 hardens the timing (month-start "
             "as-of merge, point-in-time regime label at t-1, t-2 DCOT controls, its "
             "own sample) but its ex-ante status is CONDITIONAL on the synthetic "
-            "availability constant, so its null is 'no association survives this "
-            "timing', not 'no predictability'. Null results are stated as NOT "
-            "SUPPORTED, never as disproved."),
+            "availability constant, so its null reads 'an association is NOT "
+            "SUPPORTED under this timing arrangement' -- not 'no association', and "
+            "not 'no predictability'. Every null here is stated as NOT SUPPORTED, "
+            "never as an absence and never as disproved."),
         "data_provenance": {
             "fcm_source": "CFTC Financial Data for FCMs (monthly xlsx)",
             "fcm_publication_lag_days_assumed": FCM_LAG_DAYS,
@@ -1167,8 +1271,12 @@ def main():
                 "backward as-of on the outcome month's START, so the report's "
                 "ASSUMED availability precedes the whole outcome window. Assumed, "
                 "not verified -- see fcm_publication_lag_is_synthetic."),
-            "fcm_avail_inside_outcome_month_rows": int(
-                panel["fcm_avail_within_outcome_month"].fillna(False).sum()),
+            # Scoped to the ESTIMATION sample, not the whole panel: the README quotes
+            # this as "N of N estimation rows", and Codex round 3 caught the two
+            # numbers disagreeing because this was computed on `panel`.
+            "fcm_avail_inside_outcome_month_rows_in_estimation_sample": int(
+                frame["fcm_avail_within_outcome_month"].fillna(False).sum()),
+            "estimation_sample_rows": int(len(frame)),
             "dcot_source": "CFTC DCOT futures-only 72hh-3qpy (weekly; as-of Tue, published Fri)",
             "dcot_small_trader_proxy": "non-reportable positions (long+short)/(2*OI)",
             "vol_source": "yfinance daily futures; monthly realized vol = std(daily logret)*sqrt(252)",
@@ -1236,10 +1344,11 @@ def main():
                 "coef": p4["driscoll_kraay"]["coef"]["fcm_pre_x_highvol_lag"],
                 "t_driscoll_kraay": p4["driscoll_kraay"]["tstat"]["fcm_pre_x_highvol_lag"],
                 "t_cluster_month": p4["cluster_by_month"]["tstat"]["fcm_pre_x_highvol_lag"],
-                "reading": ("no association survives this timing arrangement. This is "
-                            "NOT evidence of 'no predictability': the FCM leg's "
-                            "ex-ante status is conditional on the synthetic "
-                            "availability constant, which was never verified."),
+                "reading": ("an association is NOT SUPPORTED under this timing "
+                            "arrangement. That is not the same as showing there is "
+                            "none, and it is not evidence of 'no predictability': "
+                            "the FCM leg's ex-ante status is conditional on the "
+                            "synthetic availability constant, never verified."),
             },
         },
         "limitations": [
@@ -1263,8 +1372,9 @@ def main():
             "spec4 is a timing-hardened lagged design, NOT a verified ex-ante test. Its FCM "
             "leg is dated by the synthetic availability constant, so if the true CFTC "
             "release lag exceeds 45 days the report it treats as available at month start "
-            "was not. Its null therefore reads 'no association survives this timing', never "
-            "'there is no predictability'.",
+            "was not. Its null therefore reads 'an association is not supported under this "
+            "timing arrangement', never 'there is no association' and never 'there is no "
+            "predictability'.",
             "The month-cluster IID bootstrap preserves the within-month cross-section but "
             "does NOT preserve month-to-month serial correlation; it is reported only "
             "alongside the stationary block bootstrap, which does.",
