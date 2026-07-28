@@ -1,0 +1,979 @@
+{
+  "experiment_id": "k1812",
+  "pool_task_label": "K1726",
+  "title": "Betting-Against-Beta conditioned on prior-month realized volatility",
+  "source": "JFE 2025 — The volatility puzzle of the beta anomaly; Frazzini & Pedersen (2014) JFE",
+  "generated_at_utc": "2026-07-28T13:58:33.333607+00:00",
+  "seed": 42,
+  "config": {
+    "start_date": "2004-01-01",
+    "beta_window_months": 12,
+    "min_beta_obs": 200,
+    "min_ret_obs": 15,
+    "min_stocks_per_month": 20,
+    "bootstrap_reps": 10000,
+    "permutation_reps": 10000,
+    "significance_test": "circular block permutation of the regime label series (preserves regime persistence); exhaustive circular shift as exact corroboration; i.i.d. label permutation retained for comparison only",
+    "beta_method": "OLS rolling 12M daily excess returns (cov/var), then FP eq.15 shrinkage 0.6*beta+0.4*1",
+    "shrinkage_w": 0.6,
+    "portfolio": "Frazzini-Pedersen rank-weighted, each leg rescaled to beta=1 (ex-ante market neutral)",
+    "regime_split": "full-sample median of market monthly RV (primary); expanding-median (robustness); tercile (robustness)",
+    "market_ticker": "^GSPC",
+    "riskfree": "yfinance ^IRX (13-week T-bill yield; FRED DGS3MO intended but stlouisfed.org unreachable in compute env)"
+  },
+  "universe": {
+    "n_tickers_requested": 83,
+    "n_tickers_included": 80,
+    "n_tickers_excluded": 3,
+    "requested_tickers": [
+      "AAPL",
+      "MSFT",
+      "INTC",
+      "CSCO",
+      "ORCL",
+      "IBM",
+      "TXN",
+      "QCOM",
+      "HPQ",
+      "ADBE",
+      "T",
+      "VZ",
+      "JPM",
+      "BAC",
+      "WFC",
+      "C",
+      "GS",
+      "MS",
+      "AXP",
+      "USB",
+      "PNC",
+      "BK",
+      "JNJ",
+      "PFE",
+      "MRK",
+      "ABT",
+      "BMY",
+      "LLY",
+      "AMGN",
+      "MDT",
+      "UNH",
+      "GILD",
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "CL",
+      "MO",
+      "KMB",
+      "GIS",
+      "K",
+      "SYY",
+      "MCD",
+      "HD",
+      "NKE",
+      "SBUX",
+      "TGT",
+      "LOW",
+      "DIS",
+      "TJX",
+      "YUM",
+      "GE",
+      "HON",
+      "MMM",
+      "CAT",
+      "BA",
+      "UPS",
+      "UNP",
+      "EMR",
+      "ITW",
+      "DE",
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "OXY",
+      "HAL",
+      "EOG",
+      "MRO",
+      "DUK",
+      "SO",
+      "NEE",
+      "D",
+      "AEP",
+      "EXC",
+      "XEL",
+      "PEG",
+      "APD",
+      "SHW",
+      "ECL",
+      "NEM",
+      "FCX",
+      "PPG"
+    ],
+    "included_tickers": [
+      "AAPL",
+      "MSFT",
+      "INTC",
+      "CSCO",
+      "ORCL",
+      "IBM",
+      "TXN",
+      "QCOM",
+      "HPQ",
+      "ADBE",
+      "T",
+      "VZ",
+      "JPM",
+      "BAC",
+      "WFC",
+      "C",
+      "GS",
+      "MS",
+      "AXP",
+      "USB",
+      "PNC",
+      "JNJ",
+      "PFE",
+      "MRK",
+      "ABT",
+      "BMY",
+      "LLY",
+      "AMGN",
+      "MDT",
+      "UNH",
+      "GILD",
+      "PG",
+      "KO",
+      "PEP",
+      "WMT",
+      "CL",
+      "MO",
+      "KMB",
+      "GIS",
+      "SYY",
+      "MCD",
+      "HD",
+      "NKE",
+      "SBUX",
+      "TGT",
+      "LOW",
+      "DIS",
+      "TJX",
+      "YUM",
+      "GE",
+      "HON",
+      "MMM",
+      "CAT",
+      "BA",
+      "UPS",
+      "UNP",
+      "EMR",
+      "ITW",
+      "DE",
+      "XOM",
+      "CVX",
+      "COP",
+      "SLB",
+      "OXY",
+      "HAL",
+      "EOG",
+      "DUK",
+      "SO",
+      "NEE",
+      "D",
+      "AEP",
+      "EXC",
+      "XEL",
+      "PEG",
+      "APD",
+      "SHW",
+      "ECL",
+      "NEM",
+      "FCX",
+      "PPG"
+    ],
+    "excluded_tickers": [
+      "BK",
+      "K",
+      "MRO"
+    ],
+    "excluded_reason": "yfinance download failed/timed out or delisted (see per-run logs)"
+  },
+  "sample": {
+    "daily_start": "2004-01-02",
+    "daily_end": "2026-07-24",
+    "last_complete_month": "2026-06-30",
+    "incomplete_months_excluded": "final partial month dropped if data < business month-end",
+    "n_bab_months": 257,
+    "bab_first_month": "2005-02-28",
+    "bab_last_month": "2026-06-30",
+    "median_stocks_per_month": 80.0,
+    "min_stocks_per_month_realized": 80,
+    "delisting_drops_total": 0
+  },
+  "invariants": {
+    "exante_bab_beta_max_abs": 1.1102230246251565e-16,
+    "note": "ex-ante BAB beta = (1/beta_L)*beta_L - (1/beta_H)*beta_H should be ~0 (market neutral by construction)",
+    "regime_alignment_check_months": 257,
+    "regime_alignment_mismatches": 0,
+    "regime_alignment_note": "REGIME-ALIGNMENT invariant only: verifies shift(1) low-vol signal == formation-month regime for every checked month. It does NOT by itself verify the beta-window upper bound, form/hold non-overlap, universe selection, or rf timing — those are enforced separately (estimate_betas window mask, build_bab formation-time universe, formation-month rf)."
+  },
+  "leverage_diagnostics": {
+    "purpose": "why FP eq.15 shrinkage is a required component, in numbers from THIS run",
+    "beta_L_shrunk_min": 0.3558042910629808,
+    "beta_L_shrunk_max": 0.8523934072347137,
+    "beta_H_shrunk_min": 1.0378247935188114,
+    "beta_H_shrunk_max": 1.4626064507679448,
+    "beta_L_raw_min": -0.07365951489503206,
+    "beta_L_raw_min_month": "2026-06-30",
+    "n_months_beta_L_raw_nonpositive": 1,
+    "implied_leverage_without_shrinkage_max": 11367.234755036,
+    "implied_leverage_without_shrinkage_max_month": "2026-05-31",
+    "leverage_with_shrinkage_max": 2.810533838736055,
+    "bab_abs_max_monthly": 0.17849400603674753,
+    "bab_abs_max_month": "2026-05-31"
+  },
+  "baseline_unconditional_bab": {
+    "mean": -0.0010830846974672701,
+    "t_stat": -0.3705880727088025,
+    "p_value": 0.710944367092198,
+    "hac_lags": 4,
+    "n": 257,
+    "sharpe_annual": -0.07384615664286451,
+    "sharpe_monthly": -0.021317549208188548
+  },
+  "conditional_median_split": {
+    "median_rv": 0.03649106200677517,
+    "n_months": 257,
+    "after_low_vol": {
+      "n": 125,
+      "mean_monthly": 0.004022574385074931,
+      "sharpe_annual": 0.32834859400751226,
+      "hac_mean": 0.004022574385074931,
+      "hac_t_stat": 1.279471992320443,
+      "hac_p_value": 0.20073089625348706,
+      "hac_hac_lags": 4,
+      "hac_n": 125
+    },
+    "after_high_vol": {
+      "n": 132,
+      "mean_monthly": -0.00591798913169284,
+      "sharpe_annual": -0.35733970241136315,
+      "hac_mean": -0.00591798913169284,
+      "hac_t_stat": -1.192227585212603,
+      "hac_p_value": 0.23317201987177694,
+      "hac_hac_lags": 4,
+      "hac_n": 132
+    },
+    "primary_significance_test": "sharpe_difference_block_permutation",
+    "primary_effect_size_ci": "sharpe_difference_stationary_bootstrap",
+    "sharpe_difference_block_permutation": {
+      "test": "circular_block_permutation",
+      "role": "PRIMARY significance test (preserves regime persistence)",
+      "null_hypothesis": "the prior-vol regime label process is independent of the BAB return process",
+      "preserves_time_dependence": true,
+      "block_len_months": 7,
+      "block_len_rule": "max(ceil(n^(1/3)), ceil(mean regime run length))",
+      "n_blocks": 37,
+      "diff_observed": 0.6856882964188754,
+      "p_value_two_sided": 0.11378862113788621,
+      "null_mean": -0.0010600173472554869,
+      "null_sd": 0.43764370930676183,
+      "null_ci95_low": -0.8530746215725028,
+      "null_ci95_high": 0.8471533696227211,
+      "reps": 10000,
+      "n_low": 125,
+      "n_high": 132,
+      "seed": 42
+    },
+    "sharpe_difference_circular_shift_exact": {
+      "test": "exhaustive_circular_shift",
+      "role": "exact corroboration of the primary test (no tuning parameter)",
+      "preserves_time_dependence": true,
+      "diff_observed": 0.6856882964188754,
+      "p_value_two_sided": 0.10505836575875487,
+      "null_mean": -0.0025258051917172557,
+      "null_sd": 0.4134715088656678,
+      "null_ci95_low": -0.7779414907737152,
+      "null_ci95_high": 0.8325904600253412,
+      "n_shifts": 256,
+      "p_resolution_floor": 0.0038910505836575876,
+      "n_low": 125,
+      "n_high": 132
+    },
+    "sharpe_difference_block_length_sensitivity": [
+      {
+        "block_len_months": 3,
+        "n_blocks": 86,
+        "p_value_two_sided": 0.1282871712828717,
+        "null_sd": 0.44834018911214146,
+        "reps": 10000
+      },
+      {
+        "block_len_months": 6,
+        "n_blocks": 43,
+        "p_value_two_sided": 0.10898910108989102,
+        "null_sd": 0.4265952099203336,
+        "reps": 10000
+      },
+      {
+        "block_len_months": 12,
+        "n_blocks": 22,
+        "p_value_two_sided": 0.1141885811418858,
+        "null_sd": 0.4324031642459535,
+        "reps": 10000
+      },
+      {
+        "block_len_months": 24,
+        "n_blocks": 11,
+        "p_value_two_sided": 0.11828817118288171,
+        "null_sd": 0.43541855219131403,
+        "reps": 10000
+      }
+    ],
+    "regime_block_length_rule": {
+      "block_len_months": 7,
+      "rule": "max(ceil(n^(1/3)), ceil(mean regime run length))",
+      "n_months": 257,
+      "cube_root_term": 7,
+      "mean_run_length": 2.954022988505747,
+      "median_run_length": 2.0,
+      "max_run_length": 30,
+      "n_runs": 87
+    },
+    "sharpe_difference_stationary_bootstrap": {
+      "test": "stationary_bootstrap",
+      "role": "PRIMARY effect-size CI (preserves time dependence); NOT a null-imposed test",
+      "preserves_time_dependence": true,
+      "mean_block_months": 7,
+      "diff_observed": 0.6856882964188754,
+      "diff_boot_mean": 0.6816721420056658,
+      "ci95_low": -0.13536427209965232,
+      "ci95_high": 1.4624714152543212,
+      "p_value_ci_based": 0.0994,
+      "note": "p_value_ci_based is a CI-coverage p, NOT a null-imposed test; significance = block-permutation p",
+      "reps": 10000,
+      "seed": 42
+    },
+    "sharpe_difference_iid_permutation": {
+      "test": "iid_label_permutation",
+      "role": "COMPARISON ONLY (destroys regime persistence); primary = circular_block_permutation",
+      "preserves_time_dependence": false,
+      "diff_observed": 0.6856882964188754,
+      "p_value_two_sided": 0.11528847115288471,
+      "null_mean": 0.004044121499870416,
+      "null_sd": 0.4389407690326765,
+      "null_ci95_low": -0.859560019480758,
+      "null_ci95_high": 0.8502320350422731,
+      "reps": 10000,
+      "n_low": 125,
+      "n_high": 132,
+      "seed": 42
+    },
+    "sharpe_difference_iid_bootstrap": {
+      "sharpe_low": 0.32834859400751226,
+      "sharpe_high": -0.35733970241136315,
+      "diff_observed": 0.6856882964188754,
+      "diff_boot_mean": 0.6764455920503573,
+      "ci95_low": -0.16335537188846005,
+      "ci95_high": 1.5078774049837587,
+      "test": "iid_bootstrap",
+      "role": "COMPARISON ONLY (i.i.d. resampling; ignores regime persistence)",
+      "preserves_time_dependence": false,
+      "p_value_ci_based": 0.1166,
+      "note": "p_value_ci_based is a CI-coverage p, NOT a null-imposed test; primary CI = stationary bootstrap",
+      "reps": 10000,
+      "n_low": 125,
+      "n_high": 132,
+      "seed": 42
+    },
+    "serial_dependence_check": {
+      "purpose": "verify the primary null preserves regime persistence and the i.i.d. null does not",
+      "block_len_months": 7,
+      "reps": 2000,
+      "observed": {
+        "label_acf1": 0.3261334748260818,
+        "mean_run_length": 2.954022988505747,
+        "label_acf": [
+          0.3261334748260818,
+          0.2054184648036788,
+          0.16258224266006366,
+          0.1820490508194788,
+          0.16236434382737883,
+          0.15825539441103642
+        ],
+        "bab_return_acf": [
+          0.06998547160251013,
+          -0.1411253298086083,
+          -0.08091632514212314,
+          -0.06042096617452866,
+          0.00023030696729286741,
+          0.06844599433462235
+        ]
+      },
+      "under_block_permutation_null": {
+        "label_acf1": 0.28069502028062726,
+        "mean_run_length": 2.7720901548104413
+      },
+      "under_circular_shift_null": {
+        "label_acf1": 0.32896846535638485,
+        "mean_run_length": 2.9655621408045985
+      },
+      "under_iid_permutation_null": {
+        "label_acf1": -0.004528343355736365,
+        "mean_run_length": 1.9923689374274063
+      },
+      "interpretation": "block/shift nulls retain most of the observed label acf(1) and run length; the i.i.d. null drives acf(1) to ~0 and run length to ~2. BAB returns are themselves nearly serially uncorrelated, so both nulls yield a similar spread for the Sharpe difference — which is why correcting the test moves the p-value only slightly in THIS sample. That equivalence is a measured outcome, not an assumption."
+    },
+    "regime_regression": {
+      "alpha": -0.005917989131692834,
+      "beta_low_vol": 0.009940563516767779,
+      "alpha_t": -1.1798402419818932,
+      "beta_low_vol_t": 1.5918511154169075,
+      "beta_low_vol_p": 0.11141816173675,
+      "hac_lags": 4,
+      "n": 257
+    }
+  },
+  "robustness_tercile": {
+    "low": {
+      "n": 86,
+      "mean_monthly": 0.0031352024006514496,
+      "sharpe_annual": 0.2601304925827513
+    },
+    "mid": {
+      "n": 85,
+      "mean_monthly": 4.5523830749334935e-05,
+      "sharpe_annual": 0.003157626071690599
+    },
+    "high": {
+      "n": 86,
+      "mean_monthly": -0.006416856968823331,
+      "sharpe_annual": -0.37474907606044894
+    }
+  },
+  "robustness_expanding_median": {
+    "description": "real-time expanding-median split (min 24 obs) to avoid in-sample median classification",
+    "primary_significance_test": "sharpe_difference_block_permutation",
+    "sharpe_difference_block_permutation": {
+      "test": "circular_block_permutation",
+      "role": "PRIMARY significance test (preserves regime persistence)",
+      "null_hypothesis": "the prior-vol regime label process is independent of the BAB return process",
+      "preserves_time_dependence": true,
+      "block_len_months": 7,
+      "block_len_rule": "max(ceil(n^(1/3)), ceil(mean regime run length))",
+      "n_blocks": 36,
+      "diff_observed": 0.6267250008045951,
+      "p_value_two_sided": 0.1638836116388361,
+      "null_mean": 0.0034187416208874295,
+      "null_sd": 0.4475433201454636,
+      "null_ci95_low": -0.8778725740398274,
+      "null_ci95_high": 0.8776296275192559,
+      "reps": 10000,
+      "n_low": 119,
+      "n_high": 127,
+      "seed": 42
+    },
+    "sharpe_difference_circular_shift_exact": {
+      "test": "exhaustive_circular_shift",
+      "role": "exact corroboration of the primary test (no tuning parameter)",
+      "preserves_time_dependence": true,
+      "diff_observed": 0.6267250008045951,
+      "p_value_two_sided": 0.10569105691056911,
+      "null_mean": -0.0023832258306758234,
+      "null_sd": 0.3890074612203063,
+      "null_ci95_low": -0.6997907264044916,
+      "null_ci95_high": 0.7441110819634456,
+      "n_shifts": 245,
+      "p_resolution_floor": 0.0040650406504065045,
+      "n_low": 119,
+      "n_high": 127
+    },
+    "sharpe_difference_stationary_bootstrap": {
+      "test": "stationary_bootstrap",
+      "role": "PRIMARY effect-size CI (preserves time dependence); NOT a null-imposed test",
+      "preserves_time_dependence": true,
+      "mean_block_months": 7,
+      "diff_observed": 0.6267250008045951,
+      "diff_boot_mean": 0.6220332811388614,
+      "ci95_low": -0.2106783370517937,
+      "ci95_high": 1.4265336312800085,
+      "p_value_ci_based": 0.141,
+      "note": "p_value_ci_based is a CI-coverage p, NOT a null-imposed test; significance = block-permutation p",
+      "reps": 10000,
+      "seed": 42
+    },
+    "sharpe_difference_iid_permutation": {
+      "test": "iid_label_permutation",
+      "role": "COMPARISON ONLY (destroys regime persistence); primary = circular_block_permutation",
+      "preserves_time_dependence": false,
+      "diff_observed": 0.6267250008045951,
+      "p_value_two_sided": 0.15778422157784222,
+      "null_mean": -0.0010112249114780098,
+      "null_sd": 0.44574482396932613,
+      "null_ci95_low": -0.8680819800355771,
+      "null_ci95_high": 0.8641796076782494,
+      "reps": 10000,
+      "n_low": 119,
+      "n_high": 127,
+      "seed": 42
+    },
+    "sharpe_difference_iid_bootstrap": {
+      "sharpe_low": 0.31510317835172874,
+      "sharpe_high": -0.3116218224528664,
+      "diff_observed": 0.6267250008045951,
+      "diff_boot_mean": 0.6193637520110268,
+      "ci95_low": -0.23389886775472993,
+      "ci95_high": 1.4777023181299647,
+      "test": "iid_bootstrap",
+      "role": "COMPARISON ONLY (i.i.d. resampling; ignores regime persistence)",
+      "preserves_time_dependence": false,
+      "p_value_ci_based": 0.1576,
+      "note": "p_value_ci_based is a CI-coverage p, NOT a null-imposed test; primary CI = stationary bootstrap",
+      "reps": 10000,
+      "n_low": 119,
+      "n_high": 127,
+      "seed": 42
+    }
+  },
+  "figures": [
+    "fig1_market_rv_regime.png",
+    "fig2_conditional_bab_cumret.png",
+    "fig3_sharpe_by_regime.png"
+  ],
+  "per_ticker_coverage": {
+    "AAPL": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MSFT": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "INTC": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "CSCO": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "ORCL": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "IBM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "TXN": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "QCOM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "HPQ": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "ADBE": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "T": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "VZ": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "JPM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "BAC": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "WFC": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "C": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "GS": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MS": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "AXP": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "USB": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "PNC": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "JNJ": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "PFE": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MRK": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "ABT": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "BMY": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "LLY": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "AMGN": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MDT": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "UNH": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "GILD": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "PG": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "KO": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "PEP": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "WMT": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "CL": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MO": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "KMB": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "GIS": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "SYY": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MCD": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "HD": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "NKE": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "SBUX": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "TGT": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "LOW": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "DIS": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "TJX": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "YUM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "GE": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "HON": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "MMM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "CAT": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "BA": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "UPS": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "UNP": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "EMR": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "ITW": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "DE": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "XOM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "CVX": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "COP": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "SLB": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "OXY": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "HAL": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "EOG": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "DUK": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "SO": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "NEE": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "D": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "AEP": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "EXC": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "XEL": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "PEG": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "APD": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "SHW": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "ECL": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "NEM": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "FCX": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    },
+    "PPG": {
+      "start": "2004-01-02",
+      "end": "2026-07-24",
+      "n_days": 5675
+    }
+  },
+  "caveats": [
+    "SURVIVORSHIP BIAS: yfinance 只回傳現存 ticker，universe 為固定的存活大型股清單 → 天生倖存者偏誤，不可宣稱『無偏誤大樣本』。存活的低 beta 股可能系統性有較高實現報酬，會同向膨脹 BAB 報酬；與 vol regime 的交互作用方向不確定。結論強度須相應下修，視為 illustrative replication 而非 population estimate。",
+    "Universe 僅 80 檔大型股（實際納入），遠小於 Frazzini-Pedersen 全 CRSP universe；beta 離散度與 BAB 量級不可與原文直接比較。",
+    "Beta = OLS rolling 12M + FP eq.15 收縮（0.6·β+0.4）；未用 FP 原文兩段式（5yr 3-day 重疊相關估相關 + 1yr vol 估波動）。已註記差異。",
+    "月度已實現波動用月內日報酬 sqrt(Σr²)；未用日內高頻資料。",
+    "rf 換算 ^IRX 年化% → 日 (/252) / 月 (/12) 為近似（未精確處理 T-bill discount/quote convention）；對結果影響很小。",
+    "完成月 gate：未涵蓋到 business month-end 的最後 partial 月已排除（Codex review HIGH 修正），避免 partial-month 污染統計。判準用 pandas BMonthEnd（非美股交易所日曆）；月底逢交易所假日理論上可能保守誤刪一個完整月，但本樣本結果為正確排除 2026-07、保留 2026-06。",
+    "組合 universe 與權重完全由形成月資訊決定；持有月缺報酬一律 fail-loud（不靜默剔除），因此本樣本 delisting_drops=0。真正下市需明訂 delisting-return 規則後才可納入。",
+    "缺值處理：beta 視窗要求完整 12M（window_start ≥ 資料起點）且 ≥200 交易日、報酬月要求 ≥15 交易日、每月要求 ≥20 檔股票才形成組合。",
+    "full-sample median 分類使用了全樣本 vol 分佈（非未來報酬）；已另報 expanding-median real-time 版做 robustness。",
+    "顯著性主檢定 = circular block permutation（保留 regime 連續段）；i.i.d. label permutation 只作對照，因為它會把 regime 持續性打散（見 conditional_median_split.serial_dependence_check：label acf(1) 由觀察值降到 ~0、平均段長 3→2）。本樣本兩者 p 幾乎相同，原因是 BAB 月報酬自身近乎無序列相關，label clustering 對檢定統計量的 null 離散度影響有限 —— 這是量測結果，不是事前假設。",
+    "block permutation 的 block 長度由固定規則 max(ceil(n^(1/3)), ceil(平均 regime 段長)) 決定（非依 p 值挑選），並在 block 長度格點上報敏感度；另附零調參的窮舉 circular-shift exact 檢定。circular 重排隱含把序列頭尾接起來（wrap 接縫）與月份索引連續（程式 fail-loud 檢查），此為 block/circular 方法的已知近似。"
+  ],
+  "code_trace": {
+    "path": "experiments/k1812/k1812.py",
+    "sha256": "bf615c2fab44dc166324e1ae2208f66a6cb12da33b580d7155139ae58cee1102",
+    "size_bytes": 63817
+  },
+  "runtime_seconds": 94.189,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  }
+}

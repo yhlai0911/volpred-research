@@ -1,0 +1,478 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "k1812.py",
+    "args": [],
+    "sha256": "bf615c2fab44dc166324e1ae2208f66a6cb12da33b580d7155139ae58cee1102",
+    "size_bytes": 63817
+  },
+  "canonical_result": "k1812_results.json",
+  "inputs": [
+    {
+      "path": "experiments/k1812/data/tickers/AAPL.csv",
+      "sha256": "b4d45e5ce29b9b2e98f474667aa2faf89cf38a53be2b58ae56119b7a9a6f6a23",
+      "size_bytes": 167272
+    },
+    {
+      "path": "experiments/k1812/data/tickers/ABT.csv",
+      "sha256": "c65f691cffaf967c92b72c3a3324c11db43b5f9cfa5f3736126fccd1c072064d",
+      "size_bytes": 167013
+    },
+    {
+      "path": "experiments/k1812/data/tickers/ADBE.csv",
+      "sha256": "d3bb565dac8dfc3aa293e259047ae66573c9330d171500158a7625b8771f7a9b",
+      "size_bytes": 163275
+    },
+    {
+      "path": "experiments/k1812/data/tickers/AEP.csv",
+      "sha256": "5c442f25c8d78d4684a61852e9c1c17b11a330ec35c7557fd25866ba88d27112",
+      "size_bytes": 166190
+    },
+    {
+      "path": "experiments/k1812/data/tickers/AMGN.csv",
+      "sha256": "6bbee03e23eea712a9c1550d05ad9beb0b6bf2fef265f08fb9341e54122318af",
+      "size_bytes": 166256
+    },
+    {
+      "path": "experiments/k1812/data/tickers/APD.csv",
+      "sha256": "c14dff890ce5040a0177272146666859a70f706f7b1fafa5d827b4a7bfab3c03",
+      "size_bytes": 166110
+    },
+    {
+      "path": "experiments/k1812/data/tickers/AXP.csv",
+      "sha256": "d56196db7db75c76ed7b3a1d911fceda76cd2a78bb2c9b7f6739c1f8b2ca1a8f",
+      "size_bytes": 165782
+    },
+    {
+      "path": "experiments/k1812/data/tickers/BA.csv",
+      "sha256": "15dd6769b46f6ba19c474a3486d071e70a00114e652380d3deb8730300e5aa64",
+      "size_bytes": 165465
+    },
+    {
+      "path": "experiments/k1812/data/tickers/BAC.csv",
+      "sha256": "35be89598ba92d1c087fd5886979ce8b689034a4dde6f270fd8b830479e2d55d",
+      "size_bytes": 167167
+    },
+    {
+      "path": "experiments/k1812/data/tickers/BMY.csv",
+      "sha256": "28236b6f88fa598a5e891d5198c0ba1199a42fc7aed6ed6888ff067ffd0f5840",
+      "size_bytes": 166894
+    },
+    {
+      "path": "experiments/k1812/data/tickers/C.csv",
+      "sha256": "b0af4071fa99e85191b95f62490d396adb09df576b8e3f6cbaf561f945d9b77e",
+      "size_bytes": 165822
+    },
+    {
+      "path": "experiments/k1812/data/tickers/CAT.csv",
+      "sha256": "9c2ba90a4d509bb0d5fc2c7f0f60f32af22a886be84ad897655413125b950480",
+      "size_bytes": 165848
+    },
+    {
+      "path": "experiments/k1812/data/tickers/CL.csv",
+      "sha256": "ea9436e7965af62978319c7894daab78700e2dcc1c4cbec4cba88be1df88fcb9",
+      "size_bytes": 165895
+    },
+    {
+      "path": "experiments/k1812/data/tickers/COP.csv",
+      "sha256": "16dd94f27cd4241ffe8280fe07362041b5270c6922e3188374106325ea8af9c4",
+      "size_bytes": 166409
+    },
+    {
+      "path": "experiments/k1812/data/tickers/CSCO.csv",
+      "sha256": "68ee98265f36b75cc23a7f1d4caed6b728cfc82c692b1fbce45586de0ada0b07",
+      "size_bytes": 167404
+    },
+    {
+      "path": "experiments/k1812/data/tickers/CVX.csv",
+      "sha256": "d2b4523dca540c47f542f03c7a91162815e2b981ce6a1f1b98f400fc9c40dc74",
+      "size_bytes": 165469
+    },
+    {
+      "path": "experiments/k1812/data/tickers/D.csv",
+      "sha256": "01322a81242b95864ed5ea4ccf13f62fe1727ba3a04c76661256c78d97d060d6",
+      "size_bytes": 166557
+    },
+    {
+      "path": "experiments/k1812/data/tickers/DE.csv",
+      "sha256": "cbeadb2f13aa656a071db5c51b4d933f7cbe113deff7fa4cec35e2e103cb7200",
+      "size_bytes": 165474
+    },
+    {
+      "path": "experiments/k1812/data/tickers/DIS.csv",
+      "sha256": "7424635712636e5893516fae5c626d45ef6247746b69a7b135bbba6a845b6487",
+      "size_bytes": 166539
+    },
+    {
+      "path": "experiments/k1812/data/tickers/DUK.csv",
+      "sha256": "55e79e582f7f6528b0c6b2c2258b23e84893513978241482bdc23315e2f57bbd",
+      "size_bytes": 166193
+    },
+    {
+      "path": "experiments/k1812/data/tickers/ECL.csv",
+      "sha256": "d5f58fdd486644e48472c5fbc857c6800412f1877fa96d78eba1fdab2442dbb6",
+      "size_bytes": 166661
+    },
+    {
+      "path": "experiments/k1812/data/tickers/EMR.csv",
+      "sha256": "1a2a1cd322a0c28758c41e7c8bf7bb58b5aaf835285e043550c4a5c7314d53f0",
+      "size_bytes": 166203
+    },
+    {
+      "path": "experiments/k1812/data/tickers/EOG.csv",
+      "sha256": "6531f53344cc8fbd2b4aac147cd003c7aa85d6b963977ef9b96386e8dd11793b",
+      "size_bytes": 166148
+    },
+    {
+      "path": "experiments/k1812/data/tickers/EXC.csv",
+      "sha256": "d2f3ea6eaa0c2cf53d9b9cb91223acd82e82a144aeb6cff2f866f5b8b22c10d0",
+      "size_bytes": 167634
+    },
+    {
+      "path": "experiments/k1812/data/tickers/FCX.csv",
+      "sha256": "8750a5a672dced2ca8f8378e8852b7574d8b5d6621684e05192fd8e385693698",
+      "size_bytes": 167172
+    },
+    {
+      "path": "experiments/k1812/data/tickers/GE.csv",
+      "sha256": "052beafc2c85e3226cea2b15914520174bcb64a5c8e46fa24be4634fcbb30a2d",
+      "size_bytes": 166060
+    },
+    {
+      "path": "experiments/k1812/data/tickers/GILD.csv",
+      "sha256": "7b65cb867636375a3a0165b4636b52bab79d8745c914b7939df4a4f3f6b809f3",
+      "size_bytes": 166152
+    },
+    {
+      "path": "experiments/k1812/data/tickers/GIS.csv",
+      "sha256": "b64bbc056fc4998ac5edfd3572af70b50bd6edbece515508d446c94130a5a3ec",
+      "size_bytes": 166849
+    },
+    {
+      "path": "experiments/k1812/data/tickers/GS.csv",
+      "sha256": "571b4cfa584cfd5c1ac05bfb246d62f1f7d6da067cbd4bcbe824f40f38ef2d77",
+      "size_bytes": 166086
+    },
+    {
+      "path": "experiments/k1812/data/tickers/HAL.csv",
+      "sha256": "9724606bc18c50fb68bbb44bb73c5095c384564e3c558951d1f58d01e4d5ac04",
+      "size_bytes": 167184
+    },
+    {
+      "path": "experiments/k1812/data/tickers/HD.csv",
+      "sha256": "a34fa189fa028832ae8cb16b0bdf4f85f05036a10b2071f96b728e18d8df3c88",
+      "size_bytes": 166509
+    },
+    {
+      "path": "experiments/k1812/data/tickers/HON.csv",
+      "sha256": "e5fe014c08dc969275a9c7c9ee3699ad8b5b72d0980e33781abb0577aafe0768",
+      "size_bytes": 166682
+    },
+    {
+      "path": "experiments/k1812/data/tickers/HPQ.csv",
+      "sha256": "6635aacd2c51a8233b283890be75d5fb8cb5de4aaea9987abc37fd08094444a4",
+      "size_bytes": 167059
+    },
+    {
+      "path": "experiments/k1812/data/tickers/IBM.csv",
+      "sha256": "e75fee5318611ce6e1dd82ce302558c8c3403749f1e63d35c71edd0012b86297",
+      "size_bytes": 166018
+    },
+    {
+      "path": "experiments/k1812/data/tickers/INTC.csv",
+      "sha256": "8dc67396ad44225fd3eb020865b28c1a44bf259f56a82104535813fe61f42f21",
+      "size_bytes": 167301
+    },
+    {
+      "path": "experiments/k1812/data/tickers/ITW.csv",
+      "sha256": "f532af9fd6dee5e00de18ff69e301f83e11776a2d1bd769eb0d0ca930e7097b4",
+      "size_bytes": 166633
+    },
+    {
+      "path": "experiments/k1812/data/tickers/JNJ.csv",
+      "sha256": "2a7b2cba2dd5e2c4c65c66ccd1b76d294650dde1dfbd753b07a3684bc4b493ce",
+      "size_bytes": 166327
+    },
+    {
+      "path": "experiments/k1812/data/tickers/JPM.csv",
+      "sha256": "fa3e70d21b686988801035afaff8a1954e682250f10a8c3bc863be48b2c067f9",
+      "size_bytes": 166585
+    },
+    {
+      "path": "experiments/k1812/data/tickers/KMB.csv",
+      "sha256": "06da476f5f6095e88009518e049b40f44046056ea391617503a6d4dbd6525698",
+      "size_bytes": 166272
+    },
+    {
+      "path": "experiments/k1812/data/tickers/KO.csv",
+      "sha256": "18566d735fd875c3561e053a106fd594c2ba5afc3e971a19240d8e410e54f73c",
+      "size_bytes": 167012
+    },
+    {
+      "path": "experiments/k1812/data/tickers/LLY.csv",
+      "sha256": "6f4c6d11329b483fcc8f7d6e33c6d6aeb23c4d4027663825f3cef1a00cedc4d1",
+      "size_bytes": 165806
+    },
+    {
+      "path": "experiments/k1812/data/tickers/LOW.csv",
+      "sha256": "484ef3b69c51142564cfc5745ae961a5642978646576dd87ff1f869fd9e631e8",
+      "size_bytes": 166775
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MCD.csv",
+      "sha256": "63535e1e3d4aae4780909210b82e2858261a6c1a04bab9041a476e6566b18593",
+      "size_bytes": 165944
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MDT.csv",
+      "sha256": "f786815b22cb1742efaa2c21602b2dad6facce17332349695bfdc18525e333c5",
+      "size_bytes": 165481
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MMM.csv",
+      "sha256": "2b3a6a6d50b03c9d44eb4ecc0c928ac01113ff8a86c41a763481a5bfc8034824",
+      "size_bytes": 166184
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MO.csv",
+      "sha256": "eeaa2aedc7cb4c579af2b57beae4435f84b9c67b12ef2bf0f8f4705861f32f29",
+      "size_bytes": 166336
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MRK.csv",
+      "sha256": "903ff2b0760dbea62ab330aeb2b2d5d94a143934d5b94d726509b4d6688e5721",
+      "size_bytes": 166540
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MS.csv",
+      "sha256": "37de3931368648e4ddb9c4366fcaaacba53d8bf578961d7b428d8b247ec2b8cf",
+      "size_bytes": 166569
+    },
+    {
+      "path": "experiments/k1812/data/tickers/MSFT.csv",
+      "sha256": "9fd33597cf0776a7c8f61db7ace0dabdad2e406493771bd962b884dbdd865915",
+      "size_bytes": 166614
+    },
+    {
+      "path": "experiments/k1812/data/tickers/NEE.csv",
+      "sha256": "798369cd66c9aea0dd5e22fae06bc6677a9bac9925bd6dfb6a5263d9024d61a3",
+      "size_bytes": 165309
+    },
+    {
+      "path": "experiments/k1812/data/tickers/NEM.csv",
+      "sha256": "1f2515cedec83192ca6ef91708892cfba252aa0627ff9ab5adcfe45c42f1f983",
+      "size_bytes": 166761
+    },
+    {
+      "path": "experiments/k1812/data/tickers/NKE.csv",
+      "sha256": "feabe93eabe496e35c47f45f002f09600af296cf9fb6d54cf3ca9486e7a91456",
+      "size_bytes": 166060
+    },
+    {
+      "path": "experiments/k1812/data/tickers/ORCL.csv",
+      "sha256": "9c11ac5eab21350af16cefa2109d62379411fdd182b45d428f0236846ad65fe9",
+      "size_bytes": 166776
+    },
+    {
+      "path": "experiments/k1812/data/tickers/OXY.csv",
+      "sha256": "de070aeae7a9947bc46cea7995b3e24b5148856f0d493634d0977fd186b7b274",
+      "size_bytes": 166003
+    },
+    {
+      "path": "experiments/k1812/data/tickers/PEG.csv",
+      "sha256": "aedd07905969b5480c2b1c7405fff9bb1418a54a6e711c3532ac61d326e683d9",
+      "size_bytes": 166704
+    },
+    {
+      "path": "experiments/k1812/data/tickers/PEP.csv",
+      "sha256": "72d58871486ac5da5ed25c07c16bfd1225b1b2eaf9a360b646172e5409c3e61a",
+      "size_bytes": 166030
+    },
+    {
+      "path": "experiments/k1812/data/tickers/PFE.csv",
+      "sha256": "187bcfbc68cb974023c8536d239eda909c179c4e487088fb43d5922c540f0f5a",
+      "size_bytes": 167142
+    },
+    {
+      "path": "experiments/k1812/data/tickers/PG.csv",
+      "sha256": "d7ef7f5beccba88b29e144dbb6977334e77c2e404214ca8bb3f906d0f4bee9ca",
+      "size_bytes": 166191
+    },
+    {
+      "path": "experiments/k1812/data/tickers/PNC.csv",
+      "sha256": "985af48880623d89819a828aa92a6e14c1cb0e7cee228ef852540ce289966a68",
+      "size_bytes": 166396
+    },
+    {
+      "path": "experiments/k1812/data/tickers/PPG.csv",
+      "sha256": "60382c6f05b6519dd159e1bc43c5dd85cd84b61443f2c6ca78493fa78dd4f0d6",
+      "size_bytes": 166568
+    },
+    {
+      "path": "experiments/k1812/data/tickers/QCOM.csv",
+      "sha256": "06a6ace9ef46e6c005197f0e2cc71700518d85109103302ded730c2b51fec2f4",
+      "size_bytes": 166745
+    },
+    {
+      "path": "experiments/k1812/data/tickers/SBUX.csv",
+      "sha256": "50aeb4a33b4cb1936d63938d2b98d75942248ff72693c6e4b4d8b4ccbaf8381f",
+      "size_bytes": 165553
+    },
+    {
+      "path": "experiments/k1812/data/tickers/SHW.csv",
+      "sha256": "21545128a3de374ff702384d99190bec7eb0001c149da4b688a1ef873ea5def2",
+      "size_bytes": 166663
+    },
+    {
+      "path": "experiments/k1812/data/tickers/SLB.csv",
+      "sha256": "066feea41c8cf9503e801e09fae517b72a2c445dbd15b409c3492e2cd1fb3201",
+      "size_bytes": 165885
+    },
+    {
+      "path": "experiments/k1812/data/tickers/SO.csv",
+      "sha256": "038822eb2ca9d37bd1406357a413ce80d7453aacad54bbf77b8768dcad9d80f2",
+      "size_bytes": 166813
+    },
+    {
+      "path": "experiments/k1812/data/tickers/SYY.csv",
+      "sha256": "3cf45a9e74e57b28496469b91ef5023441c2ed3fb1cb0be1d106951497e98312",
+      "size_bytes": 166414
+    },
+    {
+      "path": "experiments/k1812/data/tickers/T.csv",
+      "sha256": "233d2d3b0b9f4eac39db725884288774282f2dadf1127505fb175c2bfaa1349c",
+      "size_bytes": 167222
+    },
+    {
+      "path": "experiments/k1812/data/tickers/TGT.csv",
+      "sha256": "970fbce96cf29f23bdd8eeab2ca29d501957bc7881e3a38281e3996f171373e5",
+      "size_bytes": 166336
+    },
+    {
+      "path": "experiments/k1812/data/tickers/TJX.csv",
+      "sha256": "974fd3b58a19b6be08d935795dfb7fc41351904e8e8761bbbd11bbd712ba1598",
+      "size_bytes": 165896
+    },
+    {
+      "path": "experiments/k1812/data/tickers/TXN.csv",
+      "sha256": "06ffb1f071b5566b50ac0a5d5bb99c48fe89bb76a5acbab104987f7ccaac8069",
+      "size_bytes": 166985
+    },
+    {
+      "path": "experiments/k1812/data/tickers/UNH.csv",
+      "sha256": "2a98720daa05a81eb57335117d2777eefec6a8c96c2bf1ce96de96ed36ff8728",
+      "size_bytes": 165891
+    },
+    {
+      "path": "experiments/k1812/data/tickers/UNP.csv",
+      "sha256": "f861e1d4f41875711b3b69ded92fd94adea9cb869e1fb5d22a9f24722690558a",
+      "size_bytes": 166641
+    },
+    {
+      "path": "experiments/k1812/data/tickers/UPS.csv",
+      "sha256": "99bc707ba28c25ce1ee4b41ff79fe5945b0b3d0361079a002410d5c25cf8563e",
+      "size_bytes": 165454
+    },
+    {
+      "path": "experiments/k1812/data/tickers/USB.csv",
+      "sha256": "0009ceb2f360c19857a1be4712bb4827bfb47fec543b8ad05a18c21f485c577e",
+      "size_bytes": 167229
+    },
+    {
+      "path": "experiments/k1812/data/tickers/VZ.csv",
+      "sha256": "be24c62c770328e03a3e65a2f70a98282bba7ce5ccd249bf2a0f3c734273ed60",
+      "size_bytes": 167355
+    },
+    {
+      "path": "experiments/k1812/data/tickers/WFC.csv",
+      "sha256": "a9b63a1e65e596e59806dad6742671ba2834ba3b27f9a20b935fb45e4c7720e2",
+      "size_bytes": 166627
+    },
+    {
+      "path": "experiments/k1812/data/tickers/WMT.csv",
+      "sha256": "17dd89fe198df0294e415d3dd930c91fd8ae12c6d26822a9c7793d56dba764e2",
+      "size_bytes": 167539
+    },
+    {
+      "path": "experiments/k1812/data/tickers/XEL.csv",
+      "sha256": "087238e3fafd22428ccf44485f9ec512a3aea2d1e326bbd79ca853ca6dc61e39",
+      "size_bytes": 166448
+    },
+    {
+      "path": "experiments/k1812/data/tickers/XOM.csv",
+      "sha256": "2f0eefbb63a8ec063f38831a570608e360e53653b95fc175510adac9eac06804",
+      "size_bytes": 166048
+    },
+    {
+      "path": "experiments/k1812/data/tickers/YUM.csv",
+      "sha256": "47a7be823dbb31a7a8eab891c86de3f713cee5114dfd9cfeae406519112561af",
+      "size_bytes": 166739
+    },
+    {
+      "path": "experiments/k1812/data/tickers/_idx_GSPC.csv",
+      "sha256": "64becdd25b575f2a191282c4338961497308d2b335d2067cce92706ca586210c",
+      "size_bytes": 159272
+    },
+    {
+      "path": "experiments/k1812/data/tickers/_idx_IRX.csv",
+      "sha256": "05687cf5d175e198b7a47133440a35b658372cbdd2b9428685a9635a260b2ed6",
+      "size_bytes": 169730
+    }
+  ],
+  "outputs": [
+    "data/market_price.csv",
+    "data/riskfree_irx.csv",
+    "data/stock_prices.csv",
+    "figures/fig1_market_rv_regime.png",
+    "figures/fig2_conditional_bab_cumret.png",
+    "figures/fig3_sharpe_by_regime.png",
+    "k1812_results.json"
+  ],
+  "timeout_seconds": 342,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 94.189,
+    "recorded_at": "2026-07-28T13:58:33Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 42
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  }
+}
