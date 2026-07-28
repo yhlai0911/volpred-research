@@ -4266,3 +4266,35 @@ dry-run不進lock區塊，因此會呈現「預檢健康、正式merge才全死�
 `merge_worktree.sh`以不存在target完成完整bootstrap/lock preflight且未移動任何ref；
 writer-lock測試55 passed。此「正式merge入口在import階段全滅」bug class為
 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-29 — Dry-run parity plan 不能冒充可重複的 cold restore
+
+**證據化症狀**：Issue #21 acceptance要求保留且可重複演練cold restore；既有
+`guided_host_migration.py`只有capture／compare／plan，module docstring亦明定沒有
+deploy actuator。舊`bootstrap_new_host.sh`會安裝legacy per-job schedules，歷史手冊
+又曾允許複製env/session，因此只能止血，不能作新架構restore證據。
+
+**根因層級（host recovery execution contract）**：系統已能證明source與target
+parity，卻沒有一條把「已簽章clean immutable Git identity」安全物化到blank target的
+正式邊界；人工copy會重新引入working-tree WIP、secret外洩、path traversal、半套落地
+與意外啟用scheduler／lease的舊問題。
+
+**底層修復與制度化**：task `assign_b4d6ff44`新增signed cold-bundle／cold-restore
+contract。Bundle只從source snapshot綁定的exact Git objects建包，逐group回比
+path／kind／mode／size／SHA，排除validated runtime state、`.env*`、Telegram state、
+private key與`.volpred` host state。Restore不使用`extractall`，驗verifier簽章、
+trust window、canonical member set、hierarchy與逐檔identity；只允許不存在的target，
+在mode-0700 staging逐檔fsync＋O_NOFOLLOW回讀，最後以macOS
+`renameatx_np(RENAME_EXCL)`／Linux `renameat2(RENAME_NOREPLACE)`原子no-clobber落地。
+Target-signed mode-0600 receipt固定記錄`copied_secrets=[]`、
+`installed_schedules=[]`、`performed_external_effects=[]`與
+`authorizes_primary_lease=false`。
+
+**回歸與live read-back**：43個host-migration tests全綠，負向案例涵蓋payload竄改、
+已簽章path traversal、既存target與publish race；Ruff、py_compile、diff-check全綠。
+正式CLI以當下四把Ed25519 key建包後，同一bundle在兩個全新temp target重演，兩端
+payload tree SHA均為`6064cb7ac218186a4c6efdc7c7357c8ecf9c6b84331965a8298459bd441a8b4b`，
+receipt mode均0600，secret／schedule／effect為空且lease=false。此「沒有安全可重複
+cold-restore actuator」slice為 **`root_cause_fixed_and_verified`**；MacBook fresh
+parity、formal-effect RPO=0與持續warm process仍受#9→#12→#16/#17阻塞，所以#21整體
+維持OPEN／`contained`。

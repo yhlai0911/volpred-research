@@ -1246,6 +1246,35 @@ def _verify_snapshot(
         _raise_attestation(exc)
 
 
+def verify_host_snapshot(
+    *,
+    spec: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    trust_policy: TrustPolicy,
+    expected_role: str,
+    verified_at: datetime | None = None,
+) -> Any:
+    """Verify one signed host snapshot against the canonical migration contract.
+
+    This is the public verification seam used by cold-restore packaging.  It
+    deliberately returns only the trusted signer identity; callers never gain
+    a deploy, schedule, secret-copy, or lease capability from snapshot proof.
+    """
+    validate_spec(spec)
+    now = (verified_at or datetime.now(UTC)).astimezone(UTC)
+    try:
+        ensure_trust_policy_current(trust_policy, now=now)
+    except HostAttestationError as exc:
+        _raise_attestation(exc)
+    return _verify_snapshot(
+        snapshot,
+        spec=spec,
+        trust_policy=trust_policy,
+        expected_role=expected_role,
+        now=now,
+    )
+
+
 def _exact_nonnegative_int(value: Any, *, field: str) -> int:
     if type(value) is not int or value < 0:
         raise HostMigrationError(f"{field} must be a non-negative integer")

@@ -63,6 +63,55 @@ uv run python scripts/guided_host_migration.py plan \
   --output host-migration-plan.json
 ```
 
+### Cold restore：只還原簽章 Git payload，不啟用主機
+
+`cold-bundle` 只從 source snapshot 已證明的 clean immutable Git object 建包；
+不讀 working tree WIP，也不收 `validated_json` runtime state、`.env*`、Telegram
+state、private key 或 desktop/browser session。同一份 source snapshot、時間與
+verifier key 會產生 byte-for-byte 相同的 tar：
+
+```bash
+# 在 source／verifier 可回讀 immutable Git objects 的主機執行
+uv run python scripts/guided_host_migration.py cold-bundle \
+  --spec config/host_migration_manifest.json \
+  --source host-source.json \
+  --trust-policy host-migration-trust.json \
+  --repo-root "$PWD" \
+  --signing-key "$HOME/.volpred/migration_verifier_ed25519" \
+  --signer-identity "migration-verifier" \
+  --output volpred-cold-restore.tar
+```
+
+把 bundle 與**只含 public keys** 的 trust policy 傳到 target；不得傳 source／
+verifier private key。Target 必須使用自己已重新建立、mode-0600 且列入該次 trust
+policy 的 target key，並指定一個**尚不存在**的路徑：
+
+```bash
+uv run python scripts/guided_host_migration.py cold-restore \
+  --bundle volpred-cold-restore.tar \
+  --target-root "$HOME/volpred-restored" \
+  --trust-policy host-migration-trust.json \
+  --signing-key "$HOME/.volpred/host_attestation_ed25519" \
+  --signer-identity "macbook-pro-target"
+```
+
+Restore 不使用 `extractall`：先驗 verifier 簽章、trust window、member set、
+repo-relative path、node kind、mode、size 與逐檔 SHA；任何 path traversal、
+symlink hierarchy、額外 member、payload 竄改或既存 target 都 fail closed。
+通過後只在 target parent 內建立 mode-0700 staging，逐檔回讀一致才以單一 rename
+讓 target 出現。Canonical target-signed receipt 位於
+`<target>/.volpred/cold-restore-receipt.json`，且固定記錄：
+
+- `copied_secrets=[]`
+- `installed_schedules=[]`
+- `performed_external_effects=[]`
+- `authorizes_primary_lease=false`
+
+所以這一步只恢復 tracked runtime payload；它不代表 parity、dependency／permission
+已通過，也不會安裝 LaunchAgent、啟動 Operations Core 或取得 primary lease。
+還原後仍須以 fresh challenge 執行 capture → compare → formal-effect continuity，
+全部 gate 通過才可進 promotion。
+
 Canonical spec 是 `config/host_migration_manifest.json`。Capture 涵蓋 code、config、
 schedules、skills、runtime artifacts、tools、secret **references** 與 permissions；
 輸出只記「哪些 reference name 已配置」及檔案 mode，永不輸出 secret 值或其 hash。

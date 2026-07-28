@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 import subprocess
+import tarfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -13,7 +15,11 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 from scripts.guided_host_migration import build_parser
-from volpred.ops import host_migration
+from volpred.ops import cold_restore, host_migration
+from volpred.ops.cold_restore import (
+    build_cold_restore_bundle,
+    restore_cold_bundle,
+)
 from volpred.ops.host_attestation import (
     HostAttestationError,
     load_trust_policy,
@@ -1432,11 +1438,43 @@ def test_operator_cli_accepts_documented_required_arguments() -> None:
             "plan.json",
         ]
     )
+    cold_bundle = parser.parse_args(
+        [
+            "cold-bundle",
+            "--source",
+            "source.json",
+            "--trust-policy",
+            "trust.json",
+            "--signing-key",
+            "verifier-key",
+            "--signer-identity",
+            "migration-verifier",
+            "--output",
+            "cold-restore.tar",
+        ]
+    )
+    cold_restore_args = parser.parse_args(
+        [
+            "cold-restore",
+            "--bundle",
+            "cold-restore.tar",
+            "--target-root",
+            "blank-target",
+            "--trust-policy",
+            "trust.json",
+            "--signing-key",
+            "target-key",
+            "--signer-identity",
+            "target-host",
+        ]
+    )
     assert (
         capture.handler.__name__,
         compare.handler.__name__,
         plan.handler.__name__,
-    ) == ("_capture", "_compare", "_plan")
+        cold_bundle.handler.__name__,
+        cold_restore_args.handler.__name__,
+    ) == ("_capture", "_compare", "_plan", "_cold_bundle", "_cold_restore")
     with pytest.raises(SystemExit):
         parser.parse_args(
             [
@@ -1493,3 +1531,231 @@ def test_capture_does_not_mutate_repo_or_process_environment(tmp_path: Path) -> 
     assert before == after
     assert dict(os.environ) == old_environment
     assert snapshot["schema_version"] == "volpred.host-migration-snapshot.v2"
+
+
+def test_signed_cold_restore_bundle_is_repeatable_and_never_activates(
+    tmp_path: Path,
+) -> None:
+    keys, source, _target, trust = _pair(tmp_path)
+    first_bundle = tmp_path / "cold-restore-a.tar"
+    second_bundle = tmp_path / "cold-restore-b.tar"
+
+    first_manifest = build_cold_restore_bundle(
+        spec=_spec(),
+        source_snapshot=source,
+        trust_policy=trust,
+        repo_root=tmp_path / "source",
+        output_path=first_bundle,
+        signing_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        built_at=NOW,
+    )
+    second_manifest = build_cold_restore_bundle(
+        spec=_spec(),
+        source_snapshot=source,
+        trust_policy=trust,
+        repo_root=tmp_path / "source",
+        output_path=second_bundle,
+        signing_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        built_at=NOW,
+    )
+
+    assert first_bundle.read_bytes() == second_bundle.read_bytes()
+    assert first_manifest == second_manifest
+    assert first_manifest["includes_secrets"] is False
+    assert first_manifest["installs_schedules"] is False
+    assert first_manifest["authorizes_primary_lease"] is False
+
+    receipts = []
+    for suffix in ("a", "b"):
+        target = tmp_path / f"restored-{suffix}"
+        receipt = restore_cold_bundle(
+            bundle_path=first_bundle,
+            target_root=target,
+            trust_policy=trust,
+            target_signing_key_path=keys.target,
+            target_signer_identity="target-host",
+            restored_at=NOW,
+        )
+        receipts.append(receipt)
+        assert (target / "src" / "module.py").read_text(encoding="utf-8") == "same"
+        assert not (target / ".env.local").exists()
+        assert receipt["authorizes_primary_lease"] is False
+        assert receipt["installed_schedules"] == []
+        assert receipt["copied_secrets"] == []
+        assert receipt["restored_tree_sha256"] == first_manifest["payload_sha256"]
+
+    assert receipts[0]["restored_tree_sha256"] == receipts[1][
+        "restored_tree_sha256"
+    ]
+
+
+def test_cold_restore_rejects_tampering_without_partial_target(
+    tmp_path: Path,
+) -> None:
+    keys, source, _target, trust = _pair(tmp_path)
+    bundle = tmp_path / "cold-restore.tar"
+    build_cold_restore_bundle(
+        spec=_spec(),
+        source_snapshot=source,
+        trust_policy=trust,
+        repo_root=tmp_path / "source",
+        output_path=bundle,
+        signing_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        built_at=NOW,
+    )
+    raw = bundle.read_bytes()
+    assert raw.count(b"same") == 1
+    bundle.write_bytes(raw.replace(b"same", b"evil"))
+    target = tmp_path / "must-not-exist"
+
+    with pytest.raises(HostMigrationError, match="payload identity mismatch"):
+        restore_cold_bundle(
+            bundle_path=bundle,
+            target_root=target,
+            trust_policy=trust,
+            target_signing_key_path=keys.target,
+            target_signer_identity="target-host",
+            restored_at=NOW,
+        )
+
+    assert not target.exists()
+    assert not list(tmp_path.glob(".must-not-exist.cold-restore.*"))
+
+
+def test_cold_restore_refuses_existing_target_without_touching_it(
+    tmp_path: Path,
+) -> None:
+    keys, source, _target, trust = _pair(tmp_path)
+    bundle = tmp_path / "cold-restore.tar"
+    build_cold_restore_bundle(
+        spec=_spec(),
+        source_snapshot=source,
+        trust_policy=trust,
+        repo_root=tmp_path / "source",
+        output_path=bundle,
+        signing_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        built_at=NOW,
+    )
+    target = tmp_path / "existing"
+    target.mkdir()
+    marker = target / "owner-data"
+    marker.write_text("untouched", encoding="utf-8")
+
+    with pytest.raises(HostMigrationError, match="target root must not exist"):
+        restore_cold_bundle(
+            bundle_path=bundle,
+            target_root=target,
+            trust_policy=trust,
+            target_signing_key_path=keys.target,
+            target_signer_identity="target-host",
+            restored_at=NOW,
+        )
+
+    assert marker.read_text(encoding="utf-8") == "untouched"
+
+
+def test_cold_restore_rejects_even_signed_path_traversal(
+    tmp_path: Path,
+) -> None:
+    keys, source, _target, trust = _pair(tmp_path)
+    valid = tmp_path / "valid.tar"
+    manifest = build_cold_restore_bundle(
+        spec=_spec(),
+        source_snapshot=source,
+        trust_policy=trust,
+        repo_root=tmp_path / "source",
+        output_path=valid,
+        signing_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        built_at=NOW,
+    )
+    with tarfile.open(valid, "r:") as archive:
+        member = archive.getmember("payload/src/module.py")
+        extracted = archive.extractfile(member)
+        assert extracted is not None
+        payload = extracted.read()
+
+    malicious = json.loads(json.dumps(manifest))
+    malicious.pop("attestation")
+    malicious.pop("manifest_sha256")
+    malicious["files"][0]["path"] = "../escape"
+    malicious["payload_sha256"] = sha256_json(malicious["files"])
+    malicious["manifest_sha256"] = sha256_json(malicious)
+    malicious["attestation"] = sign_mapping(
+        malicious,
+        private_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        signer_role="verifier",
+    )
+    bundle = tmp_path / "path-traversal.tar"
+    with tarfile.open(bundle, "w", format=tarfile.PAX_FORMAT) as archive:
+        manifest_bytes = (
+            json.dumps(malicious, sort_keys=True, separators=(",", ":")).encode()
+            + b"\n"
+        )
+        manifest_info = tarfile.TarInfo("manifest.json")
+        manifest_info.size = len(manifest_bytes)
+        archive.addfile(manifest_info, io.BytesIO(manifest_bytes))
+        payload_info = tarfile.TarInfo("payload/../escape")
+        payload_info.size = len(payload)
+        archive.addfile(payload_info, io.BytesIO(payload))
+    target = tmp_path / "must-not-exist"
+
+    with pytest.raises(HostMigrationError, match="relative POSIX path"):
+        restore_cold_bundle(
+            bundle_path=bundle,
+            target_root=target,
+            trust_policy=trust,
+            target_signing_key_path=keys.target,
+            target_signer_identity="target-host",
+            restored_at=NOW,
+        )
+
+    assert not target.exists()
+
+
+def test_cold_restore_no_clobber_publish_wins_target_race(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    keys, source, _target, trust = _pair(tmp_path)
+    bundle = tmp_path / "cold-restore.tar"
+    build_cold_restore_bundle(
+        spec=_spec(),
+        source_snapshot=source,
+        trust_policy=trust,
+        repo_root=tmp_path / "source",
+        output_path=bundle,
+        signing_key_path=keys.verifier,
+        signer_identity="migration-verifier",
+        built_at=NOW,
+    )
+    target = tmp_path / "raced-target"
+    native_noreplace = cold_restore._rename_directory_noreplace
+
+    def race_then_publish(staging: Path, destination: Path) -> None:
+        destination.mkdir()
+        native_noreplace(staging, destination)
+
+    monkeypatch.setattr(
+        cold_restore,
+        "_rename_directory_noreplace",
+        race_then_publish,
+    )
+    with pytest.raises(HostMigrationError, match="target appeared"):
+        restore_cold_bundle(
+            bundle_path=bundle,
+            target_root=target,
+            trust_policy=trust,
+            target_signing_key_path=keys.target,
+            target_signer_identity="target-host",
+            restored_at=NOW,
+        )
+
+    assert target.is_dir()
+    assert list(target.iterdir()) == []
+    assert not list(tmp_path.glob(".raced-target.cold-restore.*"))

@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Capture, compare, and plan a VolPred host migration without applying it."""
+"""Assess host parity and perform a fenced, secret-free cold restore."""
 
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 
+from volpred.ops.cold_restore import (
+    build_cold_restore_bundle,
+    restore_cold_bundle,
+)
 from volpred.ops.host_attestation import load_trust_policy
 from volpred.ops.host_migration import (
     build_guided_plan,
@@ -78,11 +82,53 @@ def _plan(args: argparse.Namespace) -> int:
     return 0 if plan["promotion_eligible"] else 2
 
 
+def _cold_bundle(args: argparse.Namespace) -> int:
+    spec = load_spec(Path(args.spec))
+    source = load_json_object(Path(args.source))
+    trust_policy = load_trust_policy(Path(args.trust_policy))
+    manifest = build_cold_restore_bundle(
+        spec=spec,
+        source_snapshot=source,
+        trust_policy=trust_policy,
+        repo_root=Path(args.repo_root),
+        output_path=Path(args.output),
+        signing_key_path=Path(args.signing_key),
+        signer_identity=args.signer_identity,
+    )
+    write_json(
+        None,
+        {
+            "schema_version": manifest["schema_version"],
+            "bundle": str(Path(args.output)),
+            "manifest_sha256": manifest["manifest_sha256"],
+            "payload_sha256": manifest["payload_sha256"],
+            "file_count": manifest["file_count"],
+            "byte_count": manifest["byte_count"],
+            "authorizes_primary_lease": False,
+        },
+    )
+    return 0
+
+
+def _cold_restore(args: argparse.Namespace) -> int:
+    trust_policy = load_trust_policy(Path(args.trust_policy))
+    receipt = restore_cold_bundle(
+        bundle_path=Path(args.bundle),
+        target_root=Path(args.target_root),
+        trust_policy=trust_policy,
+        target_signing_key_path=Path(args.signing_key),
+        target_signer_identity=args.signer_identity,
+    )
+    write_json(None, receipt)
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Manifest-driven host migration assessment. Capture/compare/plan "
-            "never copies files, secrets, schedules, or leases."
+            "Manifest-driven host migration. Capture/compare/plan never mutate; "
+            "cold restore materializes only a signed Git payload and never "
+            "copies secrets, installs schedules, or authorizes a lease."
         )
     )
     subparsers = parser.add_subparsers(required=True)
@@ -117,6 +163,24 @@ def build_parser() -> argparse.ArgumentParser:
     plan.add_argument("--signer-identity", required=True)
     plan.add_argument("--output", required=True, help="path or - for stdout")
     plan.set_defaults(handler=_plan)
+
+    cold_bundle = subparsers.add_parser("cold-bundle")
+    cold_bundle.add_argument("--spec", default=str(DEFAULT_SPEC))
+    cold_bundle.add_argument("--source", required=True)
+    cold_bundle.add_argument("--trust-policy", required=True)
+    cold_bundle.add_argument("--repo-root", default=str(ROOT))
+    cold_bundle.add_argument("--signing-key", required=True)
+    cold_bundle.add_argument("--signer-identity", required=True)
+    cold_bundle.add_argument("--output", required=True)
+    cold_bundle.set_defaults(handler=_cold_bundle)
+
+    cold_restore = subparsers.add_parser("cold-restore")
+    cold_restore.add_argument("--bundle", required=True)
+    cold_restore.add_argument("--target-root", required=True)
+    cold_restore.add_argument("--trust-policy", required=True)
+    cold_restore.add_argument("--signing-key", required=True)
+    cold_restore.add_argument("--signer-identity", required=True)
+    cold_restore.set_defaults(handler=_cold_restore)
     return parser
 
 
