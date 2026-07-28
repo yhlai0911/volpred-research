@@ -12,6 +12,7 @@ Examples:
       --actor machine-state-migration --expected-head <full-object-id> \
       --message 'retire runtime state from Git' -- storage/runtime.json
 """
+
 from __future__ import annotations
 
 import argparse
@@ -26,7 +27,6 @@ import subprocess
 import sys
 import tempfile
 import uuid
-from contextlib import contextmanager
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -55,7 +55,7 @@ git_common_dir = _OWNER.git_common_dir
 require_canonical_main_checkout = _OWNER.require_canonical_main_checkout
 is_registered_linked_worktree = _OWNER.is_registered_linked_worktree
 _inherited_lease = _OWNER._inherited_lease
-UNTRACK_RECOVERY_ENV = _OWNER.UNTRACK_RECOVERY_ENV
+recover_runtime_untrack = _OWNER.recover_runtime_untrack
 UNTRACK_ACTIVE_RELATIVE = _OWNER.UNTRACK_ACTIVE_RELATIVE
 
 EX_TEMPFAIL = 75
@@ -138,15 +138,11 @@ def _expected_content_hashes(
     expected: dict[str, str] = {}
     for raw in raw_values:
         if "=" not in raw:
-            raise ValueError(
-                "expected-content-hash must use PATH=SHA256 syntax"
-            )
+            raise ValueError("expected-content-hash must use PATH=SHA256 syntax")
         raw_path, sha256 = raw.rsplit("=", 1)
         paths = _normalize_paths(repo, [raw_path])
         if len(paths) != 1:
-            raise ValueError(
-                "expected-content-hash must name exactly one file"
-            )
+            raise ValueError("expected-content-hash must name exactly one file")
         path = paths[0]
         if path in expected:
             raise ValueError(f"duplicate expected content hash path: {path}")
@@ -199,7 +195,9 @@ def _workspace_dirty_paths(workspace: Path) -> tuple[str, ...]:
         if "R" in state or "C" in state:
             if index < len(entries):
                 index += 1
-            raise ValueError("source-workspace rename/copy materialization is unsupported")
+            raise ValueError(
+                "source-workspace rename/copy materialization is unsupported"
+            )
         if state[0] not in {" ", "?"}:
             raise ValueError("source-workspace index must be clean")
         if "D" in state:
@@ -346,7 +344,9 @@ def _materialize_candidate_workspace(
         try:
             candidate_stat = candidate.stat()
         except OSError as exc:
-            raise ValueError(f"cannot inspect source-workspace path {path}: {exc}") from exc
+            raise ValueError(
+                f"cannot inspect source-workspace path {path}: {exc}"
+            ) from exc
         if not stat.S_ISREG(candidate_stat.st_mode):
             raise ValueError(f"source-workspace path is not a regular file: {path}")
         base_mode = _git_blob_mode(repo, expected_head, path)
@@ -356,13 +356,14 @@ def _materialize_candidate_workspace(
         candidate_mode = _regular_file_git_mode(candidate_stat.st_mode)
         if candidate_mode != expected_mode:
             raise ValueError(
-                "Git file mode changes are outside ChangeSet content identity: "
-                f"{path}"
+                f"Git file mode changes are outside ChangeSet content identity: {path}"
             )
         try:
             payload = candidate.read_bytes()
         except OSError as exc:
-            raise ValueError(f"cannot read source-workspace path {path}: {exc}") from exc
+            raise ValueError(
+                f"cannot read source-workspace path {path}: {exc}"
+            ) from exc
         observed_hash = hashlib.sha256(payload).hexdigest()
         if observed_hash != expected_content_hashes[path]:
             raise ValueError(
@@ -379,18 +380,16 @@ def _materialize_candidate_workspace(
                 target_stat = target.stat()
                 current = target.read_bytes()
             except OSError as exc:
-                raise ValueError(f"cannot inspect canonical target {path}: {exc}") from exc
+                raise ValueError(
+                    f"cannot inspect canonical target {path}: {exc}"
+                ) from exc
             if not stat.S_ISREG(target_stat.st_mode):
                 raise ValueError(f"canonical target is not a regular file: {path}")
             if _regular_file_git_mode(target_stat.st_mode) != expected_mode:
-                raise ValueError(
-                    f"canonical target has foreign Git file mode: {path}"
-                )
+                raise ValueError(f"canonical target has foreign Git file mode: {path}")
             base = _git_blob(repo, expected_head, path)
             if current not in {payload, base}:
-                raise ValueError(
-                    f"canonical target has foreign working bytes: {path}"
-                )
+                raise ValueError(f"canonical target has foreign working bytes: {path}")
             originals[path] = (
                 True,
                 current,
@@ -398,9 +397,7 @@ def _materialize_candidate_workspace(
             )
         else:
             if _git_blob(repo, expected_head, path) is not None:
-                raise ValueError(
-                    f"canonical target has an unowned deletion: {path}"
-                )
+                raise ValueError(f"canonical target has an unowned deletion: {path}")
             originals[path] = (False, b"", 0)
 
     # Catch source residue added while candidate files were being read.
@@ -577,9 +574,7 @@ def _assert_no_symlink_components(repo: Path, target: Path) -> None:
     for component in relative.parts:
         candidate /= component
         if candidate.is_symlink():
-            raise ValueError(
-                f"runtime path may not traverse symlink: {target}"
-            )
+            raise ValueError(f"runtime path may not traverse symlink: {target}")
 
 
 def _working_identities(
@@ -645,7 +640,9 @@ def _committed_ignore_source(
         try:
             _assert_no_symlink_components(repo, candidate)
             current = _read_regular_working_identity(candidate)[0]
-        except ValueError:  # silent-ok: unsafe ignore sources cannot authorize migration.
+        except (  # silent-ok: unsafe ignore sources cannot authorize migration.
+            ValueError
+        ):
             return None
         committed = _git_blob(repo, revision, relative)
         if committed is not None and current == committed:
@@ -698,15 +695,84 @@ def _fsync_directory(path: Path) -> None:
         os.close(descriptor)
 
 
-def _ensure_private_directory(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True, mode=0o700)
-    os.chmod(path, 0o700)
+def _ensure_private_directory(path: Path) -> bool:
+    try:
+        os.mkdir(path, 0o700)
+        created = True
+    except FileExistsError:
+        created = False
+    flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        raise ValueError(
+            f"durable transaction directory is unsafe: {path}"
+        ) from exc
+    try:
+        directory_stat = os.fstat(descriptor)
+        if not stat.S_ISDIR(directory_stat.st_mode):
+            raise ValueError(
+                f"durable transaction path is not a directory: {path}"
+            )
+        os.fchmod(descriptor, 0o700)
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    if created:
+        _fsync_directory(path.parent)
+    return created
 
 
 def _durable_replace(path: Path, payload: bytes, mode: int = 0o600) -> None:
     _ensure_private_directory(path.parent)
     _replace_file(path, payload, mode)
     _fsync_directory(path.parent)
+
+
+def _durable_replace_at(
+    directory_fd: int,
+    name: str,
+    payload: bytes,
+    mode: int = 0o600,
+) -> None:
+    """Atomically replace one regular file relative to a verified directory."""
+
+    temporary = f".{name}.{uuid.uuid4().hex}.tmp"
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    descriptor = os.open(
+        temporary,
+        flags,
+        mode,
+        dir_fd=directory_fd,
+    )
+    try:
+        os.fchmod(descriptor, mode)
+        view = memoryview(payload)
+        while view:
+            written = os.write(descriptor, view)
+            view = view[written:]
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+    try:
+        os.replace(
+            temporary,
+            name,
+            src_dir_fd=directory_fd,
+            dst_dir_fd=directory_fd,
+        )
+        os.fsync(directory_fd)
+    finally:
+        try:
+            os.unlink(temporary, dir_fd=directory_fd)
+        except FileNotFoundError:  # silent-ok: successful replace consumes the temporary file.
+            pass
 
 
 def _canonical_json(payload: dict[str, object]) -> bytes:
@@ -735,19 +801,6 @@ def _active_untrack_directory(repo: Path) -> Path:
 
 def _active_untrack_intent(repo: Path) -> Path:
     return _active_untrack_directory(repo) / "intent.json"
-
-
-@contextmanager
-def _untrack_recovery_authority() -> object:
-    previous = os.environ.get(UNTRACK_RECOVERY_ENV)
-    os.environ[UNTRACK_RECOVERY_ENV] = "1"
-    try:
-        yield
-    finally:
-        if previous is None:
-            os.environ.pop(UNTRACK_RECOVERY_ENV, None)
-        else:
-            os.environ[UNTRACK_RECOVERY_ENV] = previous
 
 
 def _maybe_inject_untrack_crash(phase: str) -> None:
@@ -906,70 +959,15 @@ def _remove_index_targets(
     return index_path.read_bytes()
 
 
-def _hook_path(
-    repo: Path,
-    name: str,
-    *,
-    env: dict[str, str],
-    pass_fds: tuple[int, ...],
-) -> Path | None:
-    resolved = subprocess.run(
-        _git("rev-parse", "--path-format=absolute", "--git-path", f"hooks/{name}"),
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        env=env,
-        check=False,
-        pass_fds=pass_fds,
-    )
-    if resolved.returncode != 0 or not resolved.stdout.strip():
-        raise ValueError(f"cannot resolve {name} hook path")
-    hook = Path(resolved.stdout.strip())
-    return hook if hook.is_file() and os.access(hook, os.X_OK) else None
-
-
-def _run_hook(
-    repo: Path,
-    name: str,
-    hook_args: list[str],
-    *,
-    env: dict[str, str],
-    pass_fds: tuple[int, ...],
-) -> None:
-    if _hook_path(repo, name, env=env, pass_fds=pass_fds) is None:
-        return
-    completed = subprocess.run(
-        _git("hook", "run", name, "--", *hook_args),
-        cwd=repo,
-        env=env,
-        text=True,
-        check=False,
-        pass_fds=pass_fds,
-    )
-    if completed.returncode != 0:
-        raise ValueError(f"{name} hook rejected runtime untrack transaction")
-
-
-def _restore_working_snapshots(
-    repo: Path,
-    snapshots: dict[str, tuple[bytes, int]],
-) -> None:
-    for path, (payload, mode) in snapshots.items():
-        target = repo / path
-        _assert_no_symlink_components(repo, target.parent)
-        if target.is_symlink():
-            target.unlink()
-        _replace_file(target, payload, mode)
-        _fsync_directory(target.parent)
-
-
 def _working_snapshots_equal(
     repo: Path,
     snapshots: dict[str, tuple[bytes, int]],
 ) -> bool:
     try:
         return _working_identities(repo, list(snapshots)) == snapshots
-    except ValueError:  # silent-ok: unsafe/missing runtime identity is a fail-closed mismatch.
+    except (  # silent-ok: unsafe or missing runtime identity is a fail-closed mismatch.
+        ValueError
+    ):
         return False
 
 
@@ -992,10 +990,16 @@ def _build_untrack_commit(
     original_head: str,
     paths: list[str],
     message: bytes,
-    snapshots: dict[str, tuple[bytes, int]],
     env: dict[str, str],
     pass_fds: tuple[int, ...],
 ) -> str:
+    """Build an exact plumbing commit without worktree-mutating hooks.
+
+    This specialized transaction validates its own exact scope. Repository
+    hooks are deliberately excluded because they can mutate machine-state
+    targets outside the temporary index and make crash recovery ambiguous.
+    """
+
     common = git_common_dir(repo)
     commit_index = _temporary_index(common)
     message_path = common / f"volpred-untrack-message-{uuid.uuid4().hex}"
@@ -1020,37 +1024,6 @@ def _build_untrack_commit(
             pass_fds=pass_fds,
         )
         _durable_replace(message_path, message)
-        try:
-            _run_hook(
-                repo,
-                "pre-commit",
-                [],
-                env=commit_env,
-                pass_fds=pass_fds,
-            )
-            _run_hook(
-                repo,
-                "prepare-commit-msg",
-                [str(message_path), "message"],
-                env=commit_env,
-                pass_fds=pass_fds,
-            )
-            _run_hook(
-                repo,
-                "commit-msg",
-                [str(message_path)],
-                env=commit_env,
-                pass_fds=pass_fds,
-            )
-        except ValueError:
-            if not _working_snapshots_equal(repo, snapshots):
-                _restore_working_snapshots(repo, snapshots)
-            raise
-        if not _working_snapshots_equal(repo, snapshots):
-            _restore_working_snapshots(repo, snapshots)
-            raise ValueError(
-                "commit hook changed runtime bytes or modes; restored snapshot"
-            )
         tree = subprocess.run(
             _git("write-tree"),
             cwd=repo,
@@ -1090,7 +1063,9 @@ def _build_untrack_commit(
         for temporary in (commit_index, message_path):
             try:
                 temporary.unlink()
-            except FileNotFoundError:  # silent-ok: cleanup follows successful temp consumption.
+            except (  # silent-ok: cleanup follows successful temporary-file consumption.
+                FileNotFoundError
+            ):
                 pass
 
 
@@ -1101,18 +1076,108 @@ def _publish_untrack_intent(
     before_index: bytes,
     after_index: bytes,
 ) -> None:
-    root = _untrack_root(repo)
-    _ensure_private_directory(root)
-    active = _active_untrack_directory(repo)
-    if active.exists():
-        raise ValueError("another durable runtime-untrack intent is active")
-    preparing = root / f"prepare-{uuid.uuid4().hex}"
-    _ensure_private_directory(preparing)
-    _durable_replace(preparing / "index.before", before_index, 0o600)
-    _durable_replace(preparing / "index.after", after_index, 0o600)
-    _durable_replace(preparing / "intent.json", _canonical_json(intent))
-    os.replace(preparing, active)
-    _fsync_directory(root)
+    common = git_common_dir(repo)
+    directory_flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        directory_flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        directory_flags |= os.O_NOFOLLOW
+    common_fd = os.open(common, directory_flags)
+    root_fd: int | None = None
+    preparing_fd: int | None = None
+    preparing_name = f"prepare-{uuid.uuid4().hex}"
+    try:
+        try:
+            os.mkdir(_UNTRACK_ROOT_NAME, 0o700, dir_fd=common_fd)
+            root_created = True
+        except FileExistsError:
+            root_created = False
+        try:
+            root_fd = os.open(
+                _UNTRACK_ROOT_NAME,
+                directory_flags,
+                dir_fd=common_fd,
+            )
+        except OSError as exc:
+            raise ValueError(
+                "durable transaction directory is unsafe: "
+                f"{common / _UNTRACK_ROOT_NAME}"
+            ) from exc
+        os.fchmod(root_fd, 0o700)
+        root_identity = os.fstat(root_fd)
+        linked_identity = os.stat(
+            _UNTRACK_ROOT_NAME,
+            dir_fd=common_fd,
+            follow_symlinks=False,
+        )
+        if not stat.S_ISDIR(linked_identity.st_mode) or (
+            root_identity.st_dev,
+            root_identity.st_ino,
+        ) != (linked_identity.st_dev, linked_identity.st_ino):
+            raise ValueError("durable transaction root identity drifted")
+        if root_created:
+            os.fsync(common_fd)
+        try:
+            os.stat(
+                "active",
+                dir_fd=root_fd,
+                follow_symlinks=False,
+            )
+        except FileNotFoundError:  # silent-ok: absence is the expected no-active-intent state.
+            pass
+        else:
+            raise ValueError("another durable runtime-untrack intent is active")
+        os.mkdir(preparing_name, 0o700, dir_fd=root_fd)
+        preparing_fd = os.open(
+            preparing_name,
+            directory_flags,
+            dir_fd=root_fd,
+        )
+        os.fchmod(preparing_fd, 0o700)
+        os.fsync(root_fd)
+        _durable_replace_at(
+            preparing_fd,
+            "index.before",
+            before_index,
+            0o600,
+        )
+        _durable_replace_at(
+            preparing_fd,
+            "index.after",
+            after_index,
+            0o600,
+        )
+        _durable_replace_at(
+            preparing_fd,
+            "intent.json",
+            _canonical_json(intent),
+        )
+        linked_identity = os.stat(
+            _UNTRACK_ROOT_NAME,
+            dir_fd=common_fd,
+            follow_symlinks=False,
+        )
+        if (
+            root_identity.st_dev,
+            root_identity.st_ino,
+        ) != (linked_identity.st_dev, linked_identity.st_ino):
+            raise ValueError(
+                "durable transaction root was substituted before publication"
+            )
+        os.rename(
+            preparing_name,
+            "active",
+            src_dir_fd=root_fd,
+            dst_dir_fd=root_fd,
+        )
+        os.fsync(root_fd)
+        os.fsync(common_fd)
+    finally:
+        if preparing_fd is not None:
+            os.close(preparing_fd)
+        if root_fd is not None:
+            os.close(root_fd)
+        os.close(common_fd)
 
 
 def _read_untrack_intent(repo: Path) -> dict[str, object] | None:
@@ -1124,7 +1189,10 @@ def _read_untrack_intent(repo: Path) -> dict[str, object] | None:
         payload = json.loads(raw)
     except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
         raise ValueError("durable runtime-untrack intent is unreadable") from exc
-    if not isinstance(payload, dict) or payload.get("schema_version") != _UNTRACK_SCHEMA:
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") != _UNTRACK_SCHEMA
+    ):
         raise ValueError("durable runtime-untrack intent schema is invalid")
     return payload
 
@@ -1173,6 +1241,27 @@ def _archive_untrack_intent(
     _fsync_directory(_untrack_root(repo))
 
 
+def _archive_aborted_untrack_intent(
+    repo: Path,
+    intent: dict[str, object],
+) -> None:
+    active = _active_untrack_directory(repo)
+    completed = dict(intent)
+    completed["phase"] = "aborted_after_commit_preparation"
+    _durable_replace(active / "completed.json", _canonical_json(completed))
+    receipts = _untrack_root(repo) / "receipts"
+    _ensure_private_directory(receipts)
+    transaction_id = intent.get("transaction_id")
+    if not isinstance(transaction_id, str) or not transaction_id:
+        raise ValueError("runtime-untrack abort transaction ID is invalid")
+    destination = receipts / f"aborted-{transaction_id}"
+    if destination.exists():
+        raise ValueError("runtime-untrack abort receipt already exists")
+    os.replace(active, destination)
+    _fsync_directory(receipts)
+    _fsync_directory(_untrack_root(repo))
+
+
 def _settle_commit_tasks(
     *,
     repo: Path,
@@ -1211,13 +1300,7 @@ def _recover_untrack_intent(
     intent = _read_untrack_intent(repo)
     if intent is None:
         return None
-    required_strings = (
-        "actor",
-        "original_head",
-        "intended_head",
-        "before_index_sha256",
-        "after_index_sha256",
-    )
+    required_strings = ("actor", "original_head", "before_index_sha256")
     if any(
         not isinstance(intent.get(key), str) or not str(intent[key])
         for key in required_strings
@@ -1230,43 +1313,21 @@ def _recover_untrack_intent(
     if paths != raw_paths:
         raise ValueError("durable runtime-untrack intent path identity drifted")
     original_head = _expected_head(str(intent["original_head"]))
-    intended_head = _expected_head(str(intent["intended_head"]))
-    if original_head is None or intended_head is None:
-        raise ValueError("durable runtime-untrack commit identity is invalid")
-    scope = _committed_scope(
-        repo,
-        base_head=original_head,
-        commit_head=intended_head,
-        env=env,
-        pass_fds=pass_fds,
-    )
-    if scope is None or set(scope) != set(paths):
-        raise ValueError("durable runtime-untrack commit scope is invalid")
-    if any(_git_blob(repo, intended_head, path) is not None for path in paths):
-        raise ValueError("durable runtime-untrack commit retained a target")
+    if original_head is None:
+        raise ValueError("durable runtime-untrack base identity is invalid")
 
     active = _active_untrack_directory(repo)
     before_index = _read_regular_working_identity(active / "index.before")[0]
-    after_index = _read_regular_working_identity(active / "index.after")[0]
     if _sha256(before_index) != intent["before_index_sha256"]:
         raise ValueError("durable before-index backup hash drifted")
-    if _sha256(after_index) != intent["after_index_sha256"]:
-        raise ValueError("durable after-index backup hash drifted")
     mode = intent.get("index_mode")
-    if (
-        isinstance(mode, bool)
-        or not isinstance(mode, int)
-        or mode < 0
-        or mode > 0o777
-    ):
+    if isinstance(mode, bool) or not isinstance(mode, int) or mode < 0 or mode > 0o777:
         raise ValueError("durable runtime-untrack index mode is invalid")
     task_ids = intent.get("task_ids")
-    if (
-        not isinstance(task_ids, list)
-        or any(not isinstance(task_id, str) for task_id in task_ids)
+    if not isinstance(task_ids, list) or any(
+        not isinstance(task_id, str) for task_id in task_ids
     ):
         raise ValueError("durable runtime-untrack task IDs are invalid")
-
     head = subprocess.run(
         _git("rev-parse", "--verify", "HEAD^{commit}"),
         cwd=repo,
@@ -1283,6 +1344,42 @@ def _recover_untrack_intent(
     current_index = _index_bytes_and_mode(index_path)[0]
     current_index_sha = _sha256(current_index)
     before_sha = str(intent["before_index_sha256"])
+
+    if intent.get("phase") == "commit_prepared":
+        if current_head != original_head:
+            raise ValueError(
+                "commit-prepared recovery found an advanced canonical HEAD"
+            )
+        if current_index_sha != before_sha:
+            raise ValueError(
+                "commit-prepared recovery found a foreign real-index change"
+            )
+        intent["outcome"] = "commit_recovered_aborted"
+        _archive_aborted_untrack_intent(repo, intent)
+        return intent
+
+    intended_raw = intent.get("intended_head")
+    after_sha_raw = intent.get("after_index_sha256")
+    if not isinstance(intended_raw, str) or not isinstance(after_sha_raw, str):
+        raise TypeError("durable runtime-untrack completion fields are invalid")
+    intended_head = _expected_head(intended_raw)
+    if intended_head is None:
+        raise ValueError("durable runtime-untrack commit identity is invalid")
+    scope = _committed_scope(
+        repo,
+        base_head=original_head,
+        commit_head=intended_head,
+        env=env,
+        pass_fds=pass_fds,
+    )
+    if scope is None or set(scope) != set(paths):
+        raise ValueError("durable runtime-untrack commit scope is invalid")
+    if any(_git_blob(repo, intended_head, path) is not None for path in paths):
+        raise ValueError("durable runtime-untrack commit retained a target")
+
+    after_index = _read_regular_working_identity(active / "index.after")[0]
+    if _sha256(after_index) != intent["after_index_sha256"]:
+        raise ValueError("durable after-index backup hash drifted")
     after_sha = str(intent["after_index_sha256"])
     snapshots = _working_identities(repo, paths)
     ignore_ok = all(
@@ -1374,6 +1471,24 @@ def cmd_run(args: argparse.Namespace) -> int:
     return int(proc.returncode)
 
 
+def _recover_pending_untrack(
+    repo: Path,
+    *,
+    actor: str,
+    timeout_s: float,
+) -> dict[str, object] | None:
+    """Invoke the owner module's fixed recovery operation."""
+
+    active = _active_untrack_intent(repo)
+    if not active.exists():
+        return None
+    return recover_runtime_untrack(
+        repo,
+        actor=actor,
+        timeout_s=timeout_s,
+    )
+
+
 def cmd_untrack_preserve(args: argparse.Namespace) -> int:
     """Durably commit exact deletions without changing live runtime files."""
 
@@ -1387,147 +1502,173 @@ def cmd_untrack_preserve(args: argparse.Namespace) -> int:
         )
         return 2
 
-    with _untrack_recovery_authority():
-        with git_writer_lock(
+    recovered = _recover_pending_untrack(
+        repo,
+        actor=args.actor,
+        timeout_s=args.timeout,
+    )
+    with git_writer_lock(
+        repo,
+        actor=args.actor,
+        timeout_s=args.timeout,
+    ) as lease:
+        require_canonical_main_checkout(repo)
+        env = lease.child_env()
+        pass_fds = lease.child_pass_fds()
+        paths = _normalize_paths(repo, paths)
+        head = subprocess.run(
+            _git("rev-parse", "--verify", "HEAD^{commit}"),
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+            pass_fds=pass_fds,
+        )
+        if head.returncode != 0:
+            raise ValueError("cannot resolve current HEAD")
+        original_head = head.stdout.strip()
+
+        head_presence = {
+            path: _git_blob(repo, original_head, path) is not None for path in paths
+        }
+        index_entries = _index_entries(
             repo,
-            actor=args.actor,
-            timeout_s=args.timeout,
-        ) as lease:
-            require_canonical_main_checkout(repo)
-            env = lease.child_env()
-            pass_fds = lease.child_pass_fds()
-            recovered = _recover_untrack_intent(
-                repo,
-                env=env,
-                pass_fds=pass_fds,
-            )
-            paths = _normalize_paths(repo, paths)
-            head = subprocess.run(
-                _git("rev-parse", "--verify", "HEAD^{commit}"),
-                cwd=repo,
-                capture_output=True,
-                text=True,
-                env=env,
-                check=False,
-                pass_fds=pass_fds,
-            )
-            if head.returncode != 0:
-                raise ValueError("cannot resolve current HEAD")
-            original_head = head.stdout.strip()
-
-            head_presence = {
-                path: _git_blob(repo, original_head, path) is not None
-                for path in paths
-            }
-            index_entries = _index_entries(
-                repo,
-                paths,
-                env=env,
-                pass_fds=pass_fds,
-            )
-            if not any(head_presence.values()) and not index_entries:
-                snapshots = _working_identities(repo, paths)
-                ignore_ok = all(
-                    _committed_ignore_source(
-                        repo,
-                        revision=original_head,
-                        path=path,
-                        env=env,
-                        pass_fds=pass_fds,
-                    )
-                    is not None
-                    for path in paths
-                )
-                if not ignore_ok:
-                    raise ValueError(
-                        "already-untracked runtime path lacks committed "
-                        "ignore rule"
-                    )
-                label = "recovered" if recovered is not None else "already"
-                print(
-                    f"[git-writer-lock] {label} untracked runtime paths: "
-                    + ", ".join(paths)
-                )
-                return 0
-            if not all(head_presence.values()):
-                raise ValueError(
-                    "runtime-untrack targets have mixed HEAD ownership"
-                )
-            if expected_head is not None and original_head != expected_head:
-                raise ValueError(
-                    "expected HEAD fence failed: "
-                    f"expected {expected_head}, observed {original_head}"
-                )
-
+            paths,
+            env=env,
+            pass_fds=pass_fds,
+        )
+        if not any(head_presence.values()) and not index_entries:
             snapshots = _working_identities(repo, paths)
-            for path in paths:
-                if (
-                    _committed_ignore_source(
-                        repo,
-                        revision=original_head,
-                        path=path,
-                        env=env,
-                        pass_fds=pass_fds,
-                    )
-                    is None
-                ):
-                    raise ValueError(
-                        f"runtime path lacks a committed ignore rule: {path}"
-                    )
-            target_index_entries = _index_entries(
-                repo,
-                paths,
-                env=env,
-                pass_fds=pass_fds,
-            )
-            target_index_clean = _target_index_matches_head(
-                repo,
-                revision=original_head,
-                paths=paths,
-                env=env,
-                pass_fds=pass_fds,
-            )
-            if not target_index_clean and not args.allow_staged_target:
-                raise ValueError(
-                    "target index differs from HEAD; refusing to discard "
-                    "ambiguous staged target"
-                )
-
-            index_path = _real_index_path(
-                repo,
-                env=env,
-                pass_fds=pass_fds,
-            )
-            before_index, index_mode = _index_bytes_and_mode(index_path)
-            common = git_common_dir(repo)
-            final_index_path = _temporary_index(
-                common,
-                before_index,
-                mode=index_mode,
-            )
-            try:
-                after_index = _remove_index_targets(
+            ignore_ok = all(
+                _committed_ignore_source(
                     repo,
-                    index_path=final_index_path,
-                    paths=paths,
-                    base_env=env,
+                    revision=original_head,
+                    path=path,
+                    env=env,
                     pass_fds=pass_fds,
                 )
-            finally:
-                try:
-                    final_index_path.unlink()
-                except FileNotFoundError:  # silent-ok: temp may be consumed by a failed Git update.
-                    pass
+                is not None
+                for path in paths
+            )
+            if not ignore_ok:
+                raise ValueError(
+                    "already-untracked runtime path lacks committed ignore rule"
+                )
+            label = "recovered" if recovered is not None else "already"
+            print(
+                f"[git-writer-lock] {label} untracked runtime paths: "
+                + ", ".join(paths)
+            )
+            return 0
+        if not all(head_presence.values()):
+            raise ValueError("runtime-untrack targets have mixed HEAD ownership")
+        if expected_head is not None and original_head != expected_head:
+            raise ValueError(
+                "expected HEAD fence failed: "
+                f"expected {expected_head}, observed {original_head}"
+            )
 
+        snapshots = _working_identities(repo, paths)
+        for path in paths:
+            if (
+                _committed_ignore_source(
+                    repo,
+                    revision=original_head,
+                    path=path,
+                    env=env,
+                    pass_fds=pass_fds,
+                )
+                is None
+            ):
+                raise ValueError(f"runtime path lacks a committed ignore rule: {path}")
+        target_index_entries = _index_entries(
+            repo,
+            paths,
+            env=env,
+            pass_fds=pass_fds,
+        )
+        target_index_clean = _target_index_matches_head(
+            repo,
+            revision=original_head,
+            paths=paths,
+            env=env,
+            pass_fds=pass_fds,
+        )
+        if not target_index_clean and not args.allow_staged_target:
+            raise ValueError(
+                "target index differs from HEAD; refusing to discard "
+                "ambiguous staged target"
+            )
+
+        index_path = _real_index_path(
+            repo,
+            env=env,
+            pass_fds=pass_fds,
+        )
+        before_index, index_mode = _index_bytes_and_mode(index_path)
+        common = git_common_dir(repo)
+        final_index_path = _temporary_index(
+            common,
+            before_index,
+            mode=index_mode,
+        )
+        try:
+            after_index = _remove_index_targets(
+                repo,
+                index_path=final_index_path,
+                paths=paths,
+                base_env=env,
+                pass_fds=pass_fds,
+            )
+        finally:
+            try:
+                final_index_path.unlink()
+            except (  # silent-ok: temporary index may be consumed by a failed Git update.
+                FileNotFoundError
+            ):
+                pass
+
+        intent: dict[str, object] = {
+            "schema_version": _UNTRACK_SCHEMA,
+            "phase": "commit_prepared",
+            "transaction_id": uuid.uuid4().hex,
+            "actor": args.actor,
+            "task_ids": sorted(set(args.task_id)),
+            "original_head": original_head,
+            "paths": paths,
+            "index_mode": index_mode,
+            "before_index_sha256": _sha256(before_index),
+            "after_index_sha256": _sha256(after_index),
+            "target_index_entries_b64": base64.b64encode(target_index_entries).decode(
+                "ascii"
+            ),
+            "target_index_was_head_clean": target_index_clean,
+            "runtime_identities": {
+                path: {
+                    "sha256": _sha256(payload),
+                    "size": len(payload),
+                    "mode": mode,
+                }
+                for path, (payload, mode) in snapshots.items()
+            },
+        }
+        _publish_untrack_intent(
+            repo,
+            intent=intent,
+            before_index=before_index,
+            after_index=after_index,
+        )
+        try:
             intended_head = _build_untrack_commit(
                 repo,
                 original_head=original_head,
                 paths=paths,
                 message=_commit_message_bytes(args),
-                snapshots=snapshots,
                 env=env,
                 pass_fds=pass_fds,
             )
+            _maybe_inject_untrack_crash("commit_object_built")
             if any(
                 _committed_ignore_source(
                     repo,
@@ -1550,73 +1691,64 @@ def cmd_untrack_preserve(args: argparse.Namespace) -> int:
                 raise ValueError(
                     "runtime bytes or modes changed while preparing intent"
                 )
-
-            intent: dict[str, object] = {
-                "schema_version": _UNTRACK_SCHEMA,
-                "phase": "prepared",
-                "actor": args.actor,
-                "task_ids": sorted(set(args.task_id)),
-                "original_head": original_head,
-                "intended_head": intended_head,
-                "paths": paths,
-                "index_mode": index_mode,
-                "before_index_sha256": _sha256(before_index),
-                "after_index_sha256": _sha256(after_index),
-                "target_index_entries_b64": base64.b64encode(
-                    target_index_entries
-                ).decode("ascii"),
-                "target_index_was_head_clean": target_index_clean,
-                "runtime_identities": {
-                    path: {
-                        "sha256": _sha256(payload),
-                        "size": len(payload),
-                        "mode": mode,
-                    }
-                    for path, (payload, mode) in snapshots.items()
-                },
-            }
-            _publish_untrack_intent(
-                repo,
-                intent=intent,
-                before_index=before_index,
-                after_index=after_index,
-            )
-            _maybe_inject_untrack_crash("intent_published")
-            completed = _recover_untrack_intent(
+            intent["intended_head"] = intended_head
+            _update_untrack_intent(repo, intent, phase="prepared")
+        except Exception:
+            _recover_untrack_intent(
                 repo,
                 env=env,
                 pass_fds=pass_fds,
             )
-            if completed is None:
-                raise ValueError("runtime-untrack intent vanished before commit")
-            print(
-                "[git-writer-lock] untracked and preserved: "
-                + ", ".join(paths)
-            )
-            return 0
+            raise
+        _maybe_inject_untrack_crash("intent_published")
+        completed = _recover_untrack_intent(
+            repo,
+            env=env,
+            pass_fds=pass_fds,
+        )
+        if completed is None:
+            raise ValueError("runtime-untrack intent vanished before commit")
+        print("[git-writer-lock] untracked and preserved: " + ", ".join(paths))
+        return 0
 
 
 def cmd_recover_untrack(args: argparse.Namespace) -> int:
     repo = _repo(args.repo)
-    with _untrack_recovery_authority():
-        with git_writer_lock(
-            repo,
-            actor=args.actor,
-            timeout_s=args.timeout,
-        ) as lease:
-            require_canonical_main_checkout(repo)
-            recovered = _recover_untrack_intent(
-                repo,
-                env=lease.child_env(),
-                pass_fds=lease.child_pass_fds(),
-            )
+    recovered = _recover_pending_untrack(
+        repo,
+        actor=args.actor,
+        timeout_s=args.timeout,
+    )
     if recovered is None:
         print("[git-writer-lock] no runtime-untrack recovery needed")
+    elif recovered.get("outcome") == "commit_recovered_aborted":
+        print("[git-writer-lock] recovered aborted runtime-untrack commit phase")
     else:
         print(
             "[git-writer-lock] recovered runtime-untrack commit "
             f"{recovered['intended_head']}"
         )
+    return 0
+
+
+def cmd_recover_untrack_held(args: argparse.Namespace) -> int:
+    """Hidden worker: recover only under an inherited validated kernel lease."""
+
+    repo = _repo(args.repo)
+    with git_writer_lock(
+        repo,
+        actor=args.actor,
+        timeout_s=args.timeout,
+    ) as lease:
+        require_canonical_main_checkout(repo)
+        recovered = _recover_untrack_intent(
+            repo,
+            env=lease.child_env(),
+            pass_fds=lease.child_pass_fds(),
+        )
+    if recovered is None:
+        raise ValueError("inherited recovery worker found no active intent")
+    print(json.dumps(recovered, ensure_ascii=False, sort_keys=True))
     return 0
 
 
@@ -1633,16 +1765,18 @@ def cmd_commit(args: argparse.Namespace) -> int:
         print("[git-writer-lock] commit needs explicit file paths", file=sys.stderr)
         return 2
     if expected_content_hashes and set(expected_content_hashes) != set(paths):
-        raise ValueError(
-            "expected-content-hash paths must exactly match commit paths"
-        )
+        raise ValueError("expected-content-hash paths must exactly match commit paths")
 
     with git_writer_lock(repo, actor=args.actor, timeout_s=args.timeout) as lease:
         require_canonical_main_checkout(repo)
         paths = _normalize_paths(repo, paths)
         env = lease.child_env()
-        popen = {"env": env, "text": True, "check": False,
-                 "pass_fds": lease.child_pass_fds()}
+        popen = {
+            "env": env,
+            "text": True,
+            "check": False,
+            "pass_fds": lease.child_pass_fds(),
+        }
         head = subprocess.run(
             _git("rev-parse", "--verify", "HEAD^{commit}"),
             cwd=repo,
@@ -1684,9 +1818,13 @@ def cmd_commit(args: argparse.Namespace) -> int:
         # the transaction still reported success — the caller believed the file
         # was committed. Naming an ignored path is a caller error; fail loud.
         ignored = [
-            p for p in paths
+            p
+            for p in paths
             # plain `git` here: check-ignore rejects --literal-pathspecs magic
-            if subprocess.run(["git", "check-ignore", "-q", "--", p], cwd=repo, **popen).returncode == 0
+            if subprocess.run(
+                ["git", "check-ignore", "-q", "--", p], cwd=repo, **popen
+            ).returncode
+            == 0
         ]
         if ignored:
             print(
@@ -1722,9 +1860,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     expected_content_hashes=expected_content_hashes,
                 )
             index_touched = True
-            add = subprocess.run(
-                _git("add", "-A", "--", *paths), cwd=repo, **popen
-            )
+            add = subprocess.run(_git("add", "-A", "--", *paths), cwd=repo, **popen)
             if add.returncode != 0:
                 return int(add.returncode)
 
@@ -1812,16 +1948,10 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     if commit_scope is not None
                     else []
                 )
-                content_mismatches: list[
-                    tuple[str, str, str | None]
-                ] = []
-                mode_mismatches: list[
-                    tuple[str, str, str | None]
-                ] = []
+                content_mismatches: list[tuple[str, str, str | None]] = []
+                mode_mismatches: list[tuple[str, str, str | None]] = []
                 if commit_scope is not None:
-                    for path, expected_sha256 in (
-                        expected_content_hashes.items()
-                    ):
+                    for path, expected_sha256 in expected_content_hashes.items():
                         identity = _committed_blob_identity(
                             repo,
                             commit_head=committed_head_id,
@@ -1838,9 +1968,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                             )
                         expected_mode = expected_git_modes[path]
                         if observed_mode != expected_mode:
-                            mode_mismatches.append(
-                                (path, expected_mode, observed_mode)
-                            )
+                            mode_mismatches.append((path, expected_mode, observed_mode))
                 if (
                     commit_scope is None
                     or unexpected
@@ -1848,9 +1976,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                     or mode_mismatches
                 ):
                     new_head = (
-                        committed_head_id
-                        if committed_head.returncode == 0
-                        else ""
+                        committed_head_id if committed_head.returncode == 0 else ""
                     )
                     rollback = subprocess.run(
                         _git("update-ref", "HEAD", original_head, new_head),
@@ -1886,9 +2012,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                             + ", ".join(
                                 f"{path} (expected {expected}, observed "
                                 f"{observed or 'missing'})"
-                                for path, expected, observed in (
-                                    content_mismatches
-                                )
+                                for path, expected, observed in (content_mismatches)
                             )
                             if content_mismatches
                             else (
@@ -1896,9 +2020,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
                                 + ", ".join(
                                     f"{path} (expected {expected}, observed "
                                     f"{observed or 'missing'})"
-                                    for path, expected, observed in (
-                                        mode_mismatches
-                                    )
+                                    for path, expected, observed in (mode_mismatches)
                                 )
                                 if mode_mismatches
                                 else "result was not one direct child commit"
@@ -1955,18 +2077,24 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command_name", required=True)
 
-    run = sub.add_parser("run", help="run one complete external transaction under the lock")
+    run = sub.add_parser(
+        "run", help="run one complete external transaction under the lock"
+    )
     run.add_argument("--repo", default=str(ROOT))
     run.add_argument("--actor", required=True)
     run.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_S)
     run.add_argument(
-        "--command-timeout", type=float, default=DEFAULT_COMMAND_TIMEOUT_S,
+        "--command-timeout",
+        type=float,
+        default=DEFAULT_COMMAND_TIMEOUT_S,
         help="maximum foreground command-tree runtime in seconds",
     )
     run.add_argument("command", nargs=argparse.REMAINDER)
     run.set_defaults(func=cmd_run)
 
-    commit = sub.add_parser("commit", help="stage and commit exact paths under one lease")
+    commit = sub.add_parser(
+        "commit", help="stage and commit exact paths under one lease"
+    )
     commit.add_argument("--repo", default=str(ROOT))
     commit.add_argument("--actor", required=True)
     commit.add_argument(
@@ -2059,6 +2187,19 @@ def build_parser() -> argparse.ArgumentParser:
     )
     recover_untrack.set_defaults(func=cmd_recover_untrack)
 
+    recover_held = sub.add_parser(
+        "_recover-untrack-held",
+        help=argparse.SUPPRESS,
+    )
+    recover_held.add_argument("--repo", default=str(ROOT))
+    recover_held.add_argument("--actor", required=True)
+    recover_held.add_argument(
+        "--timeout",
+        type=float,
+        default=DEFAULT_TIMEOUT_S,
+    )
+    recover_held.set_defaults(func=cmd_recover_untrack_held)
+
     validate = sub.add_parser(
         "validate-inherited", help="validate an inherited outer transaction lease"
     )
@@ -2078,7 +2219,7 @@ def main() -> int:
     except GitWriterLockError as exc:
         print(f"[git-writer-lock] BLOCKED: {exc}", file=sys.stderr)
         return 2
-    except ValueError as exc:
+    except (TypeError, ValueError) as exc:
         print(f"[git-writer-lock] BLOCKED: {exc}", file=sys.stderr)
         return 2
 

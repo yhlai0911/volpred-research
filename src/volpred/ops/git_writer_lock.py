@@ -23,24 +23,24 @@ import math
 import os
 import select
 import signal
+import stat
 import subprocess
 import sys
 import threading
 import time
 import uuid
+from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Iterator, Sequence
 
 LOCK_BASENAME = "volpred-git-writer.lock"
 LOCK_TOKEN_ENV = "VOLPRED_GIT_WRITER_LOCK_TOKEN"
 LOCK_PATH_ENV = "VOLPRED_GIT_WRITER_LOCK_PATH"
 LOCK_FD_ENV = "VOLPRED_GIT_WRITER_LOCK_FD"
 LOCK_CAP_FD_ENV = "VOLPRED_GIT_WRITER_CAP_FD"
-UNTRACK_RECOVERY_ENV = "VOLPRED_GIT_UNTRACK_RECOVERY"
 UNTRACK_ACTIVE_RELATIVE = Path(
     "volpred-untrack", "active", "intent.json"
 )
@@ -364,10 +364,7 @@ def git_writer_lock(
         if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
             raise GitWriterLockError(f"git writer lockfile was replaced: {path}")
         active_untrack = path.parent / UNTRACK_ACTIVE_RELATIVE
-        if (
-            active_untrack.is_file()
-            and os.environ.get(UNTRACK_RECOVERY_ENV) != "1"
-        ):
+        if active_untrack.is_file():
             raise GitWriterLockError(
                 "durable runtime-untrack transaction requires recovery before "
                 f"any other Git writer may proceed: {active_untrack}"
@@ -386,7 +383,7 @@ def git_writer_lock(
             "token": token,
             "capability_dev": capability.st_dev,
             "capability_ino": capability.st_ino,
-            "acquired_at": datetime.now(timezone.utc).isoformat(),
+            "acquired_at": datetime.now(UTC).isoformat(),
         }
         handle.seek(0)
         handle.truncate()
@@ -419,7 +416,7 @@ def git_writer_lock(
                         "state": "released",
                         "actor": actor,
                         "pid": os.getpid(),
-                        "released_at": datetime.now(timezone.utc).isoformat(),
+                        "released_at": datetime.now(UTC).isoformat(),
                     },
                     handle,
                     ensure_ascii=False,
@@ -439,6 +436,251 @@ def git_writer_lock(
                     os.close(capability_fd)
                 except OSError:  # silent-ok: process teardown will close an already-invalid capability descriptor.
                     pass
+
+
+def _validate_runtime_untrack_recovery_request(
+    repo_root: Path,
+    *,
+    actor: str,
+) -> None:
+    """Validate the fixed recovery operation before bypassing the active gate."""
+
+    common = git_common_dir(repo_root)
+    directory_flags = os.O_RDONLY
+    if hasattr(os, "O_DIRECTORY"):
+        directory_flags |= os.O_DIRECTORY
+    if hasattr(os, "O_NOFOLLOW"):
+        directory_flags |= os.O_NOFOLLOW
+    common_fd: int | None = None
+    root_fd: int | None = None
+    active_fd: int | None = None
+    intent_fd: int | None = None
+    try:
+        common_fd = os.open(common, directory_flags)
+        root_fd = os.open(
+            UNTRACK_ACTIVE_RELATIVE.parts[0],
+            directory_flags,
+            dir_fd=common_fd,
+        )
+        active_fd = os.open(
+            UNTRACK_ACTIVE_RELATIVE.parts[1],
+            directory_flags,
+            dir_fd=root_fd,
+        )
+        file_flags = os.O_RDONLY
+        if hasattr(os, "O_NOFOLLOW"):
+            file_flags |= os.O_NOFOLLOW
+        intent_fd = os.open(
+            UNTRACK_ACTIVE_RELATIVE.parts[2],
+            file_flags,
+            dir_fd=active_fd,
+        )
+        intent_stat = os.fstat(intent_fd)
+        if not stat.S_ISREG(intent_stat.st_mode):
+            raise GitWriterLockError(
+                "runtime-untrack recovery intent is not a regular file"
+            )
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(intent_fd, 65536)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        payload = json.loads(b"".join(chunks).decode("utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise GitWriterLockError(
+            "runtime-untrack recovery intent is unreadable or unsafe"
+        ) from exc
+    finally:
+        for descriptor in (intent_fd, active_fd, root_fd, common_fd):
+            if descriptor is not None:
+                os.close(descriptor)
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version")
+        != "git-untrack-preserve-transaction.v1"
+        or payload.get("actor") != actor
+    ):
+        raise GitWriterLockError(
+            "runtime-untrack recovery request is not bound to the active intent"
+        )
+
+
+def recover_runtime_untrack(
+    repo_root: Path,
+    *,
+    actor: str,
+    timeout_s: float = DEFAULT_TIMEOUT_S,
+    poll_s: float = DEFAULT_POLL_S,
+) -> dict[str, object]:
+    """Run the fixed runtime-untrack recovery without yielding a writer lease.
+
+    Recovery authority is bound to the validated active intent and the child
+    receives only an inherited kernel lease for the hidden fixed-state-machine
+    command. Callers never receive a general lease or arbitrary command hook.
+    """
+
+    repo = Path(repo_root).resolve()
+    _validate_runtime_untrack_recovery_request(repo, actor=actor)
+    worker = (
+        Path(__file__).resolve().parents[3]
+        / "scripts"
+        / "git_writer_lock.py"
+    )
+    if worker.is_symlink() or not worker.is_file():
+        raise GitWriterLockError(
+            f"runtime-untrack recovery worker is unavailable: {worker}"
+        )
+    if not str(actor).strip():
+        raise ValueError("git writer actor must be non-empty")
+    if not math.isfinite(timeout_s) or timeout_s < 0:
+        raise ValueError("timeout_s must be finite and non-negative")
+    if not math.isfinite(poll_s) or poll_s <= 0:
+        raise ValueError("poll_s must be finite and positive")
+
+    path = git_writer_lock_path(repo)
+    descriptor: int | None = None
+    capability_fd: int | None = None
+    handle = None
+    acquired = False
+    holder_pid = os.getpid()
+    try:
+        try:
+            descriptor = os.open(path, os.O_RDWR | os.O_CREAT, 0o600)
+            os.fchmod(descriptor, 0o600)
+            handle = os.fdopen(descriptor, "r+", encoding="utf-8")
+        except OSError as exc:
+            if descriptor is not None:
+                try:
+                    os.close(descriptor)
+                except OSError:  # silent-ok: best-effort cleanup preserves the sentinel-open error.
+                    pass
+            raise GitWriterLockError(
+                f"cannot open Git writer sentinel {path}: {exc}"
+            ) from exc
+
+        deadline = time.monotonic() + timeout_s
+        while True:
+            try:
+                fcntl.flock(
+                    handle.fileno(),
+                    fcntl.LOCK_EX | fcntl.LOCK_NB,
+                )
+                acquired = True
+                break
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    owner = _read_metadata(path)
+                    raise GitWriterLockTimeout(
+                        f"git writer lock busy after {timeout_s:.2f}s; "
+                        f"owner={owner.get('actor', '<unknown>')} "
+                        f"pid={owner.get('pid', '<unknown>')}"
+                    )
+                time.sleep(max(poll_s, 0.001))
+
+        opened = os.fstat(handle.fileno())
+        current = path.stat()
+        if (opened.st_dev, opened.st_ino) != (
+            current.st_dev,
+            current.st_ino,
+        ):
+            raise GitWriterLockError(
+                f"git writer lockfile was replaced: {path}"
+            )
+        _validate_runtime_untrack_recovery_request(repo, actor=actor)
+
+        token = uuid.uuid4().hex
+        capability_fd, capability_write_fd = os.pipe()
+        os.close(capability_write_fd)
+        os.set_inheritable(capability_fd, True)
+        capability = os.fstat(capability_fd)
+        metadata = {
+            "version": 2,
+            "state": "held",
+            "actor": actor,
+            "pid": os.getpid(),
+            "token": token,
+            "capability_dev": capability.st_dev,
+            "capability_ino": capability.st_ino,
+            "acquired_at": datetime.now(UTC).isoformat(),
+        }
+        handle.seek(0)
+        handle.truncate()
+        json.dump(metadata, handle, ensure_ascii=False, sort_keys=True)
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+        lease = GitWriterLease(
+            path=path,
+            actor=actor,
+            token=token,
+            fd=handle.fileno(),
+            capability_fd=capability_fd,
+            holder_pid=holder_pid,
+        )
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(worker),
+                "_recover-untrack-held",
+                "--repo",
+                str(repo),
+                "--actor",
+                actor,
+                "--timeout",
+                str(timeout_s),
+            ],
+            cwd=repo,
+            env=lease.child_env(),
+            pass_fds=lease.child_pass_fds(),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    finally:
+        if handle is not None:
+            try:
+                if acquired and os.getpid() == holder_pid:
+                    handle.seek(0)
+                    handle.truncate()
+                    json.dump(
+                        {
+                            "version": 1,
+                            "state": "released",
+                            "actor": actor,
+                            "pid": os.getpid(),
+                            "released_at": datetime.now(UTC).isoformat(),
+                        },
+                        handle,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                    )
+                    handle.write("\n")
+                    handle.flush()
+                    os.fsync(handle.fileno())
+            finally:
+                handle.close()
+        if capability_fd is not None:
+            try:
+                os.close(capability_fd)
+            except OSError:  # silent-ok: process teardown closes an already-invalid capability descriptor.
+                pass
+    if completed.returncode != 0:
+        detail = completed.stderr.strip() or completed.stdout.strip()
+        raise GitWriterLockError(
+            f"fixed runtime-untrack recovery failed: {detail[:500]}"
+        )
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise GitWriterLockError(
+            "fixed runtime-untrack recovery returned an invalid receipt"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise GitWriterLockError(
+            "fixed runtime-untrack recovery returned a non-object receipt"
+        )
+    return payload
 
 
 def run_locked(

@@ -18,6 +18,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
+from scripts import git_writer_lock as git_writer_cli  # noqa: E402
 from volpred.ops import termination  # noqa: E402
 
 
@@ -741,7 +742,84 @@ def test_untrack_preserve_rejects_symlinked_runtime_parent(tmp_path: Path) -> No
     )
 
 
-def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
+def test_untrack_intent_creation_fsyncs_git_common_dir_first(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = _repo(tmp_path)
+    common = git_writer_lock_path(repo).parent
+    common_stat = common.stat()
+    observed: list[tuple[int, int]] = []
+    original_fsync = git_writer_cli.os.fsync
+
+    def record_fsync(descriptor: int) -> None:
+        descriptor_stat = os.fstat(descriptor)
+        observed.append((descriptor_stat.st_dev, descriptor_stat.st_ino))
+        original_fsync(descriptor)
+
+    monkeypatch.setattr(git_writer_cli.os, "fsync", record_fsync)
+    git_writer_cli._publish_untrack_intent(
+        repo,
+        intent={
+            "schema_version": git_writer_cli._UNTRACK_SCHEMA,
+            "phase": "commit_prepared",
+            "transaction_id": "fsync-order",
+        },
+        before_index=b"before",
+        after_index=b"after",
+    )
+
+    assert observed
+    assert observed[0] == (common_stat.st_dev, common_stat.st_ino)
+
+
+def test_untrack_preserve_rejects_symlinked_journal_root(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("live\n", encoding="utf-8")
+    external = tmp_path / "external-journal"
+    external.mkdir()
+    (repo / ".git" / "volpred-untrack").symlink_to(
+        external,
+        target_is_directory=True,
+    )
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must reject symlinked journal root",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "transaction directory is unsafe" in blocked.stderr
+    assert list(external.iterdir()) == []
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == (
+        "runtime/state.json\n"
+    )
+    assert runtime.read_text(encoding="utf-8") == "live\n"
+
+
+def test_untrack_preserve_does_not_execute_worktree_mutating_hooks(
     tmp_path: Path,
 ) -> None:
     repo = _repo(tmp_path)
@@ -771,7 +849,7 @@ def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
     )
     hook.chmod(0o755)
 
-    blocked = _cli(
+    completed = _cli(
         repo,
         "untrack-preserve",
         "--repo",
@@ -781,20 +859,18 @@ def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
         "--expected-head",
         expected_head,
         "--message",
-        "must reject hook scope drift",
+        "internal exact-scope runtime migration",
         "--",
         "runtime/state.json",
     )
 
-    assert blocked.returncode == 2
-    assert "scope drifted" in blocked.stderr
-    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
-    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == (
-        "runtime/state.json\n"
-    )
+    assert completed.returncode == 0, completed.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() != expected_head
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == ""
     assert runtime.read_text(encoding="utf-8") == "live\n"
     assert _run(repo, "git", "show", ":foreign.txt").stdout == staged_blob
     assert foreign.read_text(encoding="utf-8") == "foreign working\n"
+    assert not (repo / "hook-injected.txt").exists()
 
 
 @pytest.mark.parametrize("crash_phase", ["index_installed", "head_advanced"])
@@ -869,6 +945,37 @@ def test_untrack_preserve_recovers_durable_two_phase_crash(
     )
     assert foreign_writer.returncode == 2
     assert "requires recovery" in foreign_writer.stderr
+    assert not hasattr(
+        git_writer_cli._OWNER,
+        "_RECOVERY_LEASE_REQUESTED",
+    )
+    forged_recovery_env = os.environ.copy()
+    forged_recovery_env["VOLPRED_GIT_UNTRACK_RECOVERY"] = "1"
+    forged_writer = _cli_with_env(
+        repo,
+        forged_recovery_env,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "forged-recovery-writer",
+        "--message",
+        "ambient recovery authority must not work",
+        "--",
+        "foreign-writer.txt",
+    )
+    assert forged_writer.returncode == 2
+    assert "requires recovery" in forged_writer.stderr
+    forged_worker = _cli(
+        repo,
+        "_recover-untrack-held",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+    )
+    assert forged_worker.returncode == 2
+    assert "requires recovery" in forged_worker.stderr
 
     recovered = _cli(
         repo,
@@ -895,6 +1002,87 @@ def test_untrack_preserve_recovers_durable_two_phase_crash(
         / "receipts"
     )
     assert any(receipts.glob("*/completed.json"))
+
+
+def test_commit_preparation_recovery_preserves_newer_runtime_state(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("live before crash\n", encoding="utf-8")
+    runtime.chmod(0o600)
+    before_index = (repo / ".git" / "index").read_bytes()
+    crash_env = os.environ.copy()
+    crash_env["VOLPRED_ENABLE_FAILURE_INJECTION"] = "1"
+    crash_env["VOLPRED_TEST_UNTRACK_CRASH_PHASE"] = "commit_object_built"
+
+    crashed = _cli_with_env(
+        repo,
+        crash_env,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "retire with commit preparation crash recovery",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert crashed.returncode == 86
+    active = (
+        git_writer_lock_path(repo).parent
+        / "volpred-untrack"
+        / "active"
+        / "intent.json"
+    )
+    assert active.is_file()
+    assert runtime.read_bytes() == b"live before crash\n"
+    assert (repo / ".git" / "index").read_bytes() == before_index
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+
+    runtime.write_text("newer materializer state\n", encoding="utf-8")
+    runtime.chmod(0o640)
+    recovered = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "retire with commit preparation crash recovery",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert recovered.returncode == 0, recovered.stderr
+    assert runtime.read_bytes() == b"newer materializer state\n"
+    assert stat.S_IMODE(runtime.stat().st_mode) == 0o640
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == ""
+    receipts = (
+        git_writer_lock_path(repo).parent
+        / "volpred-untrack"
+        / "receipts"
+    )
+    assert any(receipts.glob("aborted-*/completed.json"))
+    assert any(
+        receipt.parent.name and not receipt.parent.name.startswith("aborted-")
+        for receipt in receipts.glob("*/completed.json")
+    )
 
 
 def test_untrack_preserve_rejects_ambiguous_staged_target(tmp_path: Path) -> None:
@@ -1020,7 +1208,9 @@ def test_untrack_preserve_keeps_unrelated_index_flags(tmp_path: Path) -> None:
     )
 
 
-def test_untrack_preserve_restores_runtime_deleted_by_hook(tmp_path: Path) -> None:
+def test_untrack_preserve_does_not_run_hook_that_deletes_runtime(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     runtime = repo / "runtime" / "state.json"
     runtime.parent.mkdir()
@@ -1042,7 +1232,7 @@ def test_untrack_preserve_restores_runtime_deleted_by_hook(tmp_path: Path) -> No
     )
     hook.chmod(0o755)
 
-    blocked = _cli(
+    completed = _cli(
         repo,
         "untrack-preserve",
         "--repo",
@@ -1050,17 +1240,14 @@ def test_untrack_preserve_restores_runtime_deleted_by_hook(tmp_path: Path) -> No
         "--actor",
         "runtime-migration",
         "--message",
-        "must restore hook-deleted runtime",
+        "must not run worktree-mutating hook",
         "--",
         "runtime/state.json",
     )
 
-    assert blocked.returncode == 2
-    assert "changed runtime bytes or modes" in blocked.stderr
-    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
-    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == (
-        "runtime/state.json\n"
-    )
+    assert completed.returncode == 0, completed.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() != expected_head
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == ""
     assert runtime.read_text(encoding="utf-8") == "live\n"
     assert stat.S_IMODE(runtime.stat().st_mode) == 0o600
 
