@@ -2152,6 +2152,13 @@ def isolated_environment(
     env.update({
         "HOME": raw["synthetic_home"],
         "TMPDIR": raw["tmp_dir"],
+        # Claude Code otherwise ignores TMPDIR for its Bash-tool staging
+        # directory and falls back to /private/tmp/claude-<uid>. That path is
+        # intentionally outside this job's sandbox write roots, so the model
+        # can connect but every Bash tool call fails with EPERM. Keep both
+        # documented/current override names pointed at the job-private root.
+        "CLAUDE_CODE_TMPDIR": raw["tmp_dir"],
+        "CLAUDE_TMPDIR": raw["tmp_dir"],
         "XDG_CACHE_HOME": str(Path(raw["run_dir"]) / "cache"),
         "XDG_CONFIG_HOME": str(Path(raw["run_dir"]) / "config"),
         "PYTHONPYCACHEPREFIX": raw["pycache_dir"],
