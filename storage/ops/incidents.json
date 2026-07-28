@@ -304,6 +304,50 @@
     "last_at": null
    }
   },
+  "inc_2d91876756d2": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "current_task_id": "ci-red-30330338914",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-28T05:20:33.924132+00:00",
+   "escalation": null,
+   "fingerprint": "2d91876756d2403d724bc1f2953792d57c93e523de19a1905a9b75c5a3e8d834",
+   "fingerprint_parts": [
+    "ci-red-30330338914"
+   ],
+   "first_seen_at": "2026-07-28T05:20:33.924132+00:00",
+   "incident_id": "inc_2d91876756d2",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T05:20:33.924132+00:00",
+     "key": "30330338914:1",
+     "last_seen_at": "2026-07-28T05:20:33.924132+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-28T05:16:20.1446700Z E AssertionError: raw termination bypasses: ['scripts/dispatch_supervisor/isolation.py:1009', 'scripts/dispatch_supervisor/isolation.py:1018']",
+   "last_seen_at": "2026-07-28T05:20:33.924132+00:00",
+   "notified_at": null,
+   "occurrence_count": 1,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-28T05:20:34.058972+00:00",
+     "task_id": "ci-red-30330338914"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_407e6c77f250": {
    "class": "machine_self",
    "clean_observations": [],
@@ -525,9 +569,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T17:29:21.647243+00:00"
-    },
-    {
      "at": "2026-07-27T18:16:05.138281+00:00"
     },
     {
@@ -559,6 +600,9 @@
     },
     {
      "at": "2026-07-28T04:45:15.155237+00:00"
+    },
+    {
+     "at": "2026-07-28T05:36:12.195788+00:00"
     }
    ],
    "current_task_id": null,
@@ -1903,6 +1947,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T04:45:15.157048+00:00",
+ "updated_at": "2026-07-28T05:36:12.197704+00:00",
  "version": 1
 }
