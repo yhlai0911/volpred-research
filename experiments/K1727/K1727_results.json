@@ -1,0 +1,414 @@
+{
+  "experiment_id": "K1727",
+  "title": "Volatility targeting efficacy: risk assets vs non-risk assets (cross-asset re-validation)",
+  "hypothesis": "VT improves risk-adjusted returns for risky assets (equities, credit) but is near-useless for bonds, FX, commodities.",
+  "source": "JPM 'The Impact of Volatility Targeting' (Harvey et al. 2018) + Man Group 2025",
+  "run_timestamp": "2026-07-27T19:36:36.183381+00:00",
+  "seed": 42,
+  "data": {
+    "source": "yfinance auto-adjusted close",
+    "download_start": "2003-01-01",
+    "download_end": "2026-07-27",
+    "risk_free": "^IRX 13-week T-bill (annualized %/100/252, ffill)",
+    "cached_prices": "experiments/K1727/data/prices.csv",
+    "note": "each asset uses its own longest available history"
+  },
+  "method": {
+    "realized_vol": "trailing 20-day std of daily simple returns, annualized x sqrt(252)",
+    "vol_window_days": 20,
+    "vol_window_robustness_days": 60,
+    "target_ann_vol": 0.1,
+    "leverage_cap": 2.0,
+    "lookahead_policy": "position = (target_vol / realized_vol).clip(0, cap).shift(1); position on day t uses info through t-1 only.",
+    "portfolios": {
+      "fixed_notional": "constant unit exposure to the asset excess return",
+      "vol_targeted": "position(shifted) * excess return"
+    },
+    "sharpe": "mean(excess)/std(excess, ddof=1) * sqrt(252), scale-invariant",
+    "mdd": "volpred.stats.drawdown.compare_max_drawdown (raw + exposure-matched gap)",
+    "left_tail": "standardized by own sigma (scale-invariant)",
+    "bootstrap": {
+      "type": "paired moving-block bootstrap on Sharpe gain",
+      "reps": 1000,
+      "block_length": 21,
+      "seed": 42
+    }
+  },
+  "per_asset": [
+    {
+      "ticker": "SPY",
+      "bucket": "equities",
+      "group": "risky",
+      "sample_start": "2003-02-03",
+      "sample_end": "2026-07-27",
+      "n_obs": 5907,
+      "sharpe_fixed": 0.5946265987691121,
+      "sharpe_vt": 0.6753519477976903,
+      "sharpe_gain": 0.0807253490285782,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": 0.07561026938207918,
+        "ci95": [
+          -0.1370387504017977,
+          0.29999553156592607
+        ],
+        "p_gain_gt_0": 0.759
+      },
+      "realized_vol_fixed": 0.18550466529995321,
+      "realized_vol_vt": 0.11163770857127282,
+      "mean_position": 0.8389867590390702,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.009141696292534281,
+        "freq_below_neg3sigma_vt": 0.008125952260030472,
+        "es_1pct_in_sigma_fixed": -4.228696860062908,
+        "es_1pct_in_sigma_vt": -3.83999445047924
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.5613460805253193,
+        "raw_vt": -0.27207529654092066,
+        "vol_ratio_vt_over_fixed": 0.6018053960570714,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": 0.1037346565284617,
+        "matched_lambda": 0.6018053960570714,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 40% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": 0.008516996065809869
+    },
+    {
+      "ticker": "QQQ",
+      "bucket": "equities_tech",
+      "group": "risky",
+      "sample_start": "2003-02-03",
+      "sample_end": "2026-07-27",
+      "n_obs": 5907,
+      "sharpe_fixed": 0.7225418582895007,
+      "sharpe_vt": 0.8223605026014251,
+      "sharpe_gain": 0.09981864431192444,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": 0.09504857590737581,
+        "ci95": [
+          -0.07615015555682066,
+          0.28688484098483186
+        ],
+        "p_gain_gt_0": 0.858
+      },
+      "realized_vol_fixed": 0.21544697118710346,
+      "realized_vol_vt": 0.11040259645789977,
+      "mean_position": 0.6409738451223371,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.008464533604198408,
+        "freq_below_neg3sigma_vt": 0.007110208227526663,
+        "es_1pct_in_sigma_fixed": -3.685613510226388,
+        "es_1pct_in_sigma_vt": -3.559647841513376
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.5425700090779983,
+        "raw_vt": -0.21955990329033037,
+        "vol_ratio_vt_over_fixed": 0.5124351289302711,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": 0.09825530098901392,
+        "matched_lambda": 0.5124351289302711,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 49% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": 0.007468180031603388
+    },
+    {
+      "ticker": "HYG",
+      "bucket": "credit_high_yield",
+      "group": "risky",
+      "sample_start": "2007-05-10",
+      "sample_end": "2026-07-27",
+      "n_obs": 4833,
+      "sharpe_fixed": 0.35632796165861486,
+      "sharpe_vt": 0.3125961694996849,
+      "sharpe_gain": -0.04373179215892997,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": -0.04979943046275389,
+        "ci95": [
+          -0.33617154215619227,
+          0.24936845400175794
+        ],
+        "p_gain_gt_0": 0.358
+      },
+      "realized_vol_fixed": 0.10891550817074543,
+      "realized_vol_vt": 0.09958173151439455,
+      "mean_position": 1.5356847552403525,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.009724808607490172,
+        "freq_below_neg3sigma_vt": 0.009724808607490172,
+        "es_1pct_in_sigma_fixed": -4.757933619587146,
+        "es_1pct_in_sigma_vt": -3.967174939686048
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.35741858570302265,
+        "raw_vt": -0.2950009286831259,
+        "vol_ratio_vt_over_fixed": 0.914302592779364,
+        "exposure_mismatch": false,
+        "exposure_matched_gap": 0.03583870668428102,
+        "matched_lambda": 0.914302592779364,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": []
+      },
+      "vol_return_corr_lag1": 0.008753997631378662
+    },
+    {
+      "ticker": "LQD",
+      "bucket": "credit_investment_grade",
+      "group": "risky",
+      "sample_start": "2003-02-03",
+      "sample_end": "2026-07-27",
+      "n_obs": 5907,
+      "sharpe_fixed": 0.33489843026826055,
+      "sharpe_vt": 0.4108896246884131,
+      "sharpe_gain": 0.07599119442015256,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": 0.07243529476015774,
+        "ci95": [
+          -0.09885174306167066,
+          0.25612587060148295
+        ],
+        "p_gain_gt_0": 0.779
+      },
+      "realized_vol_fixed": 0.08353756883384518,
+      "realized_vol_vt": 0.10059710718815013,
+      "mean_position": 1.6428828235977198,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.003893685457931268,
+        "freq_below_neg3sigma_vt": 0.004909429490435077,
+        "es_1pct_in_sigma_fixed": -4.052498743690529,
+        "es_1pct_in_sigma_vt": -3.4673438002498207
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.2713177805905138,
+        "raw_vt": -0.32409573037864436,
+        "vol_ratio_vt_over_fixed": 1.2042139673496612,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": -0.005202452366250387,
+        "matched_lambda": 1.2042139673496612,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 20% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": 0.03540311986161032
+    },
+    {
+      "ticker": "TLT",
+      "bucket": "rates_long_ust",
+      "group": "non_risky",
+      "sample_start": "2003-02-03",
+      "sample_end": "2026-07-27",
+      "n_obs": 5907,
+      "sharpe_fixed": 0.17650360998077508,
+      "sharpe_vt": 0.22867830094319266,
+      "sharpe_gain": 0.052174690962417586,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": 0.050057060711434356,
+        "ci95": [
+          -0.09719878586858285,
+          0.20171329309120034
+        ],
+        "p_gain_gt_0": 0.746
+      },
+      "realized_vol_fixed": 0.14315468838187836,
+      "realized_vol_vt": 0.10693180945088455,
+      "mean_position": 0.8563009224943631,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.003893685457931268,
+        "freq_below_neg3sigma_vt": 0.002877941425427459,
+        "es_1pct_in_sigma_fixed": -3.1798907967263825,
+        "es_1pct_in_sigma_vt": -2.965198055138318
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.514808215653997,
+        "raw_vt": -0.41660566490612505,
+        "vol_ratio_vt_over_fixed": 0.7469668696119408,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": -0.005234910312297947,
+        "matched_lambda": 0.7469668696119408,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 25% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": 0.01258492565521874
+    },
+    {
+      "ticker": "UUP",
+      "bucket": "fx_usd_index",
+      "group": "non_risky",
+      "sample_start": "2007-03-30",
+      "sample_end": "2026-07-27",
+      "n_obs": 4861,
+      "sharpe_fixed": 0.07206162457164117,
+      "sharpe_vt": 0.11066297960745937,
+      "sharpe_gain": 0.0386013550358182,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": 0.04154335837199688,
+        "ci95": [
+          -0.10220884885111237,
+          0.17360592846587258
+        ],
+        "p_gain_gt_0": 0.723
+      },
+      "realized_vol_fixed": 0.08082864633892835,
+      "realized_vol_vt": 0.10571429910014786,
+      "mean_position": 1.461174284575359,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.0067887265994651304,
+        "freq_below_neg3sigma_vt": 0.004731536720839333,
+        "es_1pct_in_sigma_fixed": -3.5857648960025683,
+        "es_1pct_in_sigma_vt": -3.2989880488548957
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.22430486799434568,
+        "raw_vt": -0.28461848771458853,
+        "vol_ratio_vt_over_fixed": 1.3078815975325098,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": 0.0024497624218462466,
+        "matched_lambda": 1.3078815975325098,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 31% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": -0.0026471347042635236
+    },
+    {
+      "ticker": "DBC",
+      "bucket": "commodities_broad",
+      "group": "non_risky",
+      "sample_start": "2006-03-08",
+      "sample_end": "2026-07-27",
+      "n_obs": 5128,
+      "sharpe_fixed": 0.12888435407899743,
+      "sharpe_vt": 0.03826080945346395,
+      "sharpe_gain": -0.09062354462553349,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": -0.09274888311394063,
+        "ci95": [
+          -0.28707666588989006,
+          0.09950412890242431
+        ],
+        "p_gain_gt_0": 0.16
+      },
+      "realized_vol_fixed": 0.192758956069443,
+      "realized_vol_vt": 0.11004222917327987,
+      "mean_position": 0.6676796747536411,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.008970358814352574,
+        "freq_below_neg3sigma_vt": 0.006630265210608425,
+        "es_1pct_in_sigma_fixed": -3.7718508903976122,
+        "es_1pct_in_sigma_vt": -3.5723834165121438
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.7782222957063666,
+        "raw_vt": -0.5888385655012848,
+        "vol_ratio_vt_over_fixed": 0.5708799809729009,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": -0.03544402473794506,
+        "matched_lambda": 0.5708799809729009,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 43% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": -0.0005237724572624707
+    },
+    {
+      "ticker": "GLD",
+      "bucket": "commodities_gold",
+      "group": "non_risky",
+      "sample_start": "2004-12-20",
+      "sample_end": "2026-07-27",
+      "n_obs": 5433,
+      "sharpe_fixed": 0.5403278035852336,
+      "sharpe_vt": 0.5802399788545795,
+      "sharpe_gain": 0.03991217526934587,
+      "sharpe_gain_bootstrap": {
+        "reps": 1000,
+        "mean": 0.04193524238117038,
+        "ci95": [
+          -0.13972616059669296,
+          0.2175069928000766
+        ],
+        "p_gain_gt_0": 0.676
+      },
+      "realized_vol_fixed": 0.1820283603170407,
+      "realized_vol_vt": 0.11091219403423193,
+      "mean_position": 0.7106457430051603,
+      "left_tail": {
+        "freq_below_neg3sigma_fixed": 0.009018958218295601,
+        "freq_below_neg3sigma_vt": 0.007546475243879993,
+        "es_1pct_in_sigma_fixed": -3.8746559550316277,
+        "es_1pct_in_sigma_vt": -3.6412185491083675
+      },
+      "max_drawdown": {
+        "raw_fixed": -0.45656886458464785,
+        "raw_vt": -0.40352065745236987,
+        "vol_ratio_vt_over_fixed": 0.6093127128160414,
+        "exposure_mismatch": true,
+        "exposure_matched_gap": -0.10461670435923143,
+        "matched_lambda": 0.6093127128160414,
+        "note": "raw MDD not comparable alone across different exposure; see exposure_matched_gap (>0 = shallower than same-risk constant-leverage). Positive gap is necessary-not-sufficient for timing skill (repo rule).",
+        "warnings": [
+          "realized volatilities differ by 39% (> 20%): raw max drawdown is NOT comparable on its own. Report exposure_matched_gap, and do not describe the raw MDD difference as evidence of risk-management skill."
+        ]
+      },
+      "vol_return_corr_lag1": 0.007090771964665022
+    }
+  ],
+  "group_contrast_sharpe_gain": {
+    "risky_tickers": [
+      "SPY",
+      "QQQ",
+      "HYG",
+      "LQD"
+    ],
+    "non_risky_tickers": [
+      "TLT",
+      "UUP",
+      "DBC",
+      "GLD"
+    ],
+    "risky_mean": 0.05320084890043131,
+    "non_risky_mean": 0.010016169160512043,
+    "risky_values": [
+      0.0807253490285782,
+      0.09981864431192444,
+      -0.04373179215892997,
+      0.07599119442015256
+    ],
+    "non_risky_values": [
+      0.052174690962417586,
+      0.0386013550358182,
+      -0.09062354462553349,
+      0.03991217526934587
+    ],
+    "difference_risky_minus_non_risky": 0.04318467973991927,
+    "note": "Descriptive contrast only (n=4 per group). No asset-day pooling (K1355 rule): each value is one asset's scalar, per-asset time-series inference is in sharpe_gain_bootstrap."
+  },
+  "robustness_sharpe_gain_vol60": {
+    "SPY": 0.0677465573135585,
+    "QQQ": 0.035296912294181526,
+    "HYG": -0.06722585261106306,
+    "LQD": 0.011934677567762841,
+    "TLT": 0.05883215471237643,
+    "UUP": 0.10129793681311668,
+    "DBC": -0.12776737091387944,
+    "GLD": 0.09256822395754127
+  },
+  "figure": "experiments/K1727/K1727_sharpe_gain.png"
+}
