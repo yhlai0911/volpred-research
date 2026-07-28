@@ -594,11 +594,11 @@
       "authoritative_data_owner_refs": {
         "original": [
           "$surface",
-          "frontend-v2-fix/src/lib/data-server.ts"
+          "frontend-v2-fix/src/lib/frontend-core/server.ts"
         ],
         "v3": [
           "$surface",
-          "frontend-v2-fix/src/lib/research-mirror.ts"
+          "frontend-v2-fix/src/lib/frontend-core/server.ts"
         ]
       }
     },
@@ -766,7 +766,7 @@
         {
           "path": "frontend-v2-fix/src/app/page.tsx",
           "contains": [
-            "getFeed",
+            "getV3HomeSnapshot",
             "initialFeed"
           ]
         },
