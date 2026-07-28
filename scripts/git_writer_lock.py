@@ -8,6 +8,9 @@ Examples:
       --message '[codex] describe change' -- path/to/a.py path/to/test.py
   uv run python scripts/git_writer_lock.py commit --actor change-delivery \
       --expected-head <full-object-id> --message 'land proposal' -- owned.py
+  uv run python scripts/git_writer_lock.py untrack-preserve \
+      --actor machine-state-migration --expected-head <full-object-id> \
+      --message 'retire runtime state from Git' -- storage/runtime.json
 """
 from __future__ import annotations
 
@@ -533,6 +536,135 @@ def _committed_blob_identity(
     )
 
 
+def _read_regular_working_identity(path: Path) -> tuple[bytes, int]:
+    """Read one regular file without following a final-component symlink."""
+
+    flags = os.O_RDONLY
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        raise ValueError(f"cannot open runtime path without symlink: {path}") from exc
+    try:
+        file_stat = os.fstat(descriptor)
+        if not stat.S_ISREG(file_stat.st_mode):
+            raise ValueError(f"runtime path is not a regular file: {path}")
+        with os.fdopen(descriptor, "rb", closefd=False) as handle:
+            payload = handle.read()
+        return payload, stat.S_IMODE(file_stat.st_mode)
+    finally:
+        os.close(descriptor)
+
+
+def _working_identities(
+    repo: Path,
+    paths: list[str],
+) -> dict[str, tuple[bytes, int]]:
+    identities: dict[str, tuple[bytes, int]] = {}
+    for path in paths:
+        target = repo / path
+        if target.is_symlink():
+            raise ValueError(f"runtime path may not be a symlink: {path}")
+        identities[path] = _read_regular_working_identity(target)
+    return identities
+
+
+def _committed_ignore_source(
+    repo: Path,
+    *,
+    revision: str,
+    path: str,
+    env: dict[str, str],
+    pass_fds: tuple[int, ...],
+) -> str | None:
+    """Return the committed ignore file proving ``path`` is machine-local.
+
+    ``git check-ignore`` normally suppresses tracked paths, so ``--no-index`` is
+    required during the ownership migration.  The winning ignore source must
+    itself be a repository file whose working bytes equal ``revision``; a local
+    global exclude, ``.git/info/exclude``, or an uncommitted rule cannot
+    authorize removing a canonical path from Git.
+    """
+
+    checked = subprocess.run(
+        ["git", "check-ignore", "--no-index", "-v", "-z", "--stdin"],
+        cwd=repo,
+        input=(path + "\0").encode("utf-8", errors="surrogateescape"),
+        capture_output=True,
+        env=env,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    if checked.returncode != 0:
+        return None
+    fields = checked.stdout.split(b"\0")
+    if fields and fields[-1] == b"":
+        fields.pop()
+    if len(fields) != 4:
+        return None
+    raw_source, raw_line, _raw_pattern, raw_path = fields
+    if (
+        not raw_source
+        or not raw_line.isdigit()
+        or raw_path.decode("utf-8", errors="surrogateescape") != path
+    ):
+        return None
+    source = Path(raw_source.decode("utf-8", errors="surrogateescape"))
+    candidate = source if source.is_absolute() else repo / source
+    candidate = Path(os.path.abspath(os.path.normpath(candidate)))
+    try:
+        relative = candidate.relative_to(repo).as_posix()
+    except ValueError:  # silent-ok: external ignore sources are rejected below.
+        return None
+    if relative == ".gitignore" or relative.endswith("/.gitignore"):
+        try:
+            current = _read_regular_working_identity(candidate)[0]
+        except ValueError:  # silent-ok: unsafe ignore sources cannot authorize migration.
+            return None
+        committed = _git_blob(repo, revision, relative)
+        if committed is not None and current == committed:
+            return relative
+    return None
+
+
+def _restore_index_tree(
+    repo: Path,
+    tree: str,
+    *,
+    env: dict[str, str],
+    pass_fds: tuple[int, ...],
+) -> bool:
+    restored = subprocess.run(
+        _git("read-tree", tree),
+        cwd=repo,
+        env=env,
+        text=True,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    return restored.returncode == 0
+
+
+def _rollback_head(
+    repo: Path,
+    *,
+    original_head: str,
+    current_head: str,
+    env: dict[str, str],
+    pass_fds: tuple[int, ...],
+) -> bool:
+    rolled_back = subprocess.run(
+        _git("update-ref", "HEAD", original_head, current_head),
+        cwd=repo,
+        env=env,
+        text=True,
+        check=False,
+        pass_fds=pass_fds,
+    )
+    return rolled_back.returncode == 0
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     command = _strip_separator(args.command)
     if not command:
@@ -546,6 +678,275 @@ def cmd_run(args: argparse.Namespace) -> int:
         command_timeout_s=args.command_timeout,
     )
     return int(proc.returncode)
+
+
+def cmd_untrack_preserve(args: argparse.Namespace) -> int:
+    """Commit exact tracked deletions while preserving live working files.
+
+    A temporary index derived from HEAD keeps pre-existing staged work out of
+    the commit.  Only after the resulting commit has been scope-verified do we
+    remove the same exact entries from the caller's real index.  Runtime bytes
+    and modes are read before and after the transaction but never written.
+    """
+
+    repo = _repo(args.repo)
+    expected_head = _expected_head(args.expected_head)
+    paths = _normalize_paths(repo, _strip_separator(args.paths))
+    if not paths:
+        print(
+            "[git-writer-lock] untrack-preserve needs explicit file paths",
+            file=sys.stderr,
+        )
+        return 2
+
+    with git_writer_lock(repo, actor=args.actor, timeout_s=args.timeout) as lease:
+        require_canonical_main_checkout(repo)
+        paths = _normalize_paths(repo, paths)
+        env = lease.child_env()
+        pass_fds = lease.child_pass_fds()
+        text_popen = {
+            "env": env,
+            "text": True,
+            "pass_fds": pass_fds,
+        }
+        head = subprocess.run(
+            _git("rev-parse", "--verify", "HEAD^{commit}"),
+            cwd=repo,
+            capture_output=True,
+            check=False,
+            **text_popen,
+        )
+        if head.returncode != 0:
+            print(
+                "[git-writer-lock] BLOCKED: cannot resolve current HEAD",
+                file=sys.stderr,
+            )
+            return 2
+        original_head = head.stdout.strip()
+        if expected_head is not None and original_head != expected_head:
+            print(
+                "[git-writer-lock] BLOCKED: expected HEAD fence failed: "
+                f"expected {expected_head}, observed {original_head}",
+                file=sys.stderr,
+            )
+            return 2
+
+        original_index = subprocess.run(
+            _git("write-tree"),
+            cwd=repo,
+            capture_output=True,
+            check=False,
+            **text_popen,
+        )
+        if original_index.returncode != 0:
+            print(
+                "[git-writer-lock] BLOCKED: cannot snapshot current index",
+                file=sys.stderr,
+            )
+            return int(original_index.returncode)
+        original_index_tree = original_index.stdout.strip()
+
+        snapshots = _working_identities(repo, paths)
+        for path in paths:
+            if _git_blob(repo, original_head, path) is None:
+                raise ValueError(f"runtime path is not tracked at HEAD: {path}")
+            ignore_source = _committed_ignore_source(
+                repo,
+                revision=original_head,
+                path=path,
+                env=env,
+                pass_fds=pass_fds,
+            )
+            if ignore_source is None:
+                raise ValueError(
+                    "runtime path lacks a committed ignore rule: "
+                    f"{path}"
+                )
+
+        common_dir = git_common_dir(repo)
+        with tempfile.TemporaryDirectory(
+            prefix="volpred-untrack-index-",
+            dir=common_dir,
+        ) as raw_temp_dir:
+            alternate_env = env.copy()
+            alternate_env["GIT_INDEX_FILE"] = str(
+                Path(raw_temp_dir) / "index"
+            )
+            alternate_popen = {
+                "env": alternate_env,
+                "text": True,
+                "pass_fds": pass_fds,
+            }
+            seeded = subprocess.run(
+                _git("read-tree", original_head),
+                cwd=repo,
+                check=False,
+                **alternate_popen,
+            )
+            if seeded.returncode != 0:
+                return int(seeded.returncode)
+            removed = subprocess.run(
+                _git("update-index", "--force-remove", "--", *paths),
+                cwd=repo,
+                check=False,
+                **alternate_popen,
+            )
+            if removed.returncode != 0:
+                return int(removed.returncode)
+            remaining = subprocess.run(
+                _git("ls-files", "-z", "--", *paths),
+                cwd=repo,
+                capture_output=True,
+                env=alternate_env,
+                check=False,
+                pass_fds=pass_fds,
+            )
+            if remaining.returncode != 0 or remaining.stdout:
+                print(
+                    "[git-writer-lock] BLOCKED: temporary index retained "
+                    "an untrack target",
+                    file=sys.stderr,
+                )
+                return 2
+
+            commit_cmd = _git("commit")
+            if args.message_file:
+                commit_cmd += ["-F", args.message_file]
+            else:
+                commit_cmd += ["-m", args.message]
+            commit = subprocess.run(
+                commit_cmd,
+                cwd=repo,
+                check=False,
+                **alternate_popen,
+            )
+            if commit.returncode != 0:
+                return int(commit.returncode)
+
+            committed_head = subprocess.run(
+                _git("rev-parse", "--verify", "HEAD^{commit}"),
+                cwd=repo,
+                capture_output=True,
+                check=False,
+                **alternate_popen,
+            )
+            if committed_head.returncode != 0:
+                print(
+                    "[git-writer-lock] ERROR: commit succeeded but HEAD "
+                    "cannot be resolved",
+                    file=sys.stderr,
+                )
+                return 1
+            new_head = committed_head.stdout.strip()
+            scope = _committed_scope(
+                repo,
+                base_head=original_head,
+                commit_head=new_head,
+                env=alternate_env,
+                pass_fds=pass_fds,
+            )
+            deleted = all(
+                _git_blob(repo, new_head, path) is None for path in paths
+            )
+            current_snapshots = _working_identities(repo, paths)
+            current_index = subprocess.run(
+                _git("write-tree"),
+                cwd=repo,
+                capture_output=True,
+                check=False,
+                **text_popen,
+            )
+            real_index_unchanged = (
+                current_index.returncode == 0
+                and current_index.stdout.strip() == original_index_tree
+            )
+            if (
+                scope is None
+                or set(scope) != set(paths)
+                or not deleted
+                or current_snapshots != snapshots
+                or not real_index_unchanged
+            ):
+                rolled_back = _rollback_head(
+                    repo,
+                    original_head=original_head,
+                    current_head=new_head,
+                    env=env,
+                    pass_fds=pass_fds,
+                )
+                restored = _restore_index_tree(
+                    repo,
+                    original_index_tree,
+                    env=env,
+                    pass_fds=pass_fds,
+                )
+                if not rolled_back or not restored:
+                    print(
+                        "[git-writer-lock] ERROR: untrack verification failed "
+                        "and rollback was incomplete",
+                        file=sys.stderr,
+                    )
+                    return 1
+                print(
+                    "[git-writer-lock] BLOCKED: untrack commit failed exact "
+                    "scope, deletion, runtime identity, or index verification",
+                    file=sys.stderr,
+                )
+                return 2
+
+            real_remove = subprocess.run(
+                _git("update-index", "--force-remove", "--", *paths),
+                cwd=repo,
+                check=False,
+                **text_popen,
+            )
+            final_remaining = subprocess.run(
+                _git("ls-files", "-z", "--", *paths),
+                cwd=repo,
+                capture_output=True,
+                env=env,
+                check=False,
+                pass_fds=pass_fds,
+            )
+            final_snapshots = _working_identities(repo, paths)
+            if (
+                real_remove.returncode != 0
+                or final_remaining.returncode != 0
+                or final_remaining.stdout
+                or final_snapshots != snapshots
+            ):
+                rolled_back = _rollback_head(
+                    repo,
+                    original_head=original_head,
+                    current_head=new_head,
+                    env=env,
+                    pass_fds=pass_fds,
+                )
+                restored = _restore_index_tree(
+                    repo,
+                    original_index_tree,
+                    env=env,
+                    pass_fds=pass_fds,
+                )
+                if not rolled_back or not restored:
+                    print(
+                        "[git-writer-lock] ERROR: real-index finalization "
+                        "failed and rollback was incomplete",
+                        file=sys.stderr,
+                    )
+                    return 1
+                print(
+                    "[git-writer-lock] BLOCKED: real-index or runtime "
+                    "identity finalization failed",
+                    file=sys.stderr,
+                )
+                return 2
+
+            print(
+                "[git-writer-lock] untracked and preserved: "
+                + ", ".join(paths)
+            )
+            return 0
 
 
 def cmd_commit(args: argparse.Namespace) -> int:
@@ -961,6 +1362,26 @@ def build_parser() -> argparse.ArgumentParser:
     message.add_argument("--message-file")
     commit.add_argument("paths", nargs=argparse.REMAINDER)
     commit.set_defaults(func=cmd_commit)
+
+    untrack = sub.add_parser(
+        "untrack-preserve",
+        help="commit exact tracked deletions while preserving ignored runtime files",
+    )
+    untrack.add_argument("--repo", default=str(ROOT))
+    untrack.add_argument("--actor", required=True)
+    untrack.add_argument("--timeout", type=float, default=DEFAULT_TIMEOUT_S)
+    untrack.add_argument(
+        "--expected-head",
+        help=(
+            "full object ID observed by the caller; fail inside the writer "
+            "lease before building the deletion commit"
+        ),
+    )
+    untrack_message = untrack.add_mutually_exclusive_group(required=True)
+    untrack_message.add_argument("--message")
+    untrack_message.add_argument("--message-file")
+    untrack.add_argument("paths", nargs=argparse.REMAINDER)
+    untrack.set_defaults(func=cmd_untrack_preserve)
 
     validate = sub.add_parser(
         "validate-inherited", help="validate an inherited outer transaction lease"

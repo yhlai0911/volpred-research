@@ -71,7 +71,10 @@ storage/ops/executions/
 storage/ops/approvals/
 storage/ops/rollback_points/
 storage/ops/legacy_retirement_observations/
-storage/ops/legacy_retirement_signals/.batch.lock
+# Operations Core retirement signals and their coordination locks are live
+# machine state. They are consumed under the batch lock and preserved on disk,
+# but must never become PHASE-Z/Git ownership candidates.
+storage/ops/legacy_retirement_signals/
 storage/ops/*.lock
 storage/ops/compute_queue/*.lock
 storage/ops/locks/

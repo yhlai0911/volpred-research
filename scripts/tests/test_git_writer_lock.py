@@ -529,6 +529,216 @@ def test_exact_path_commit_preserves_foreign_index_and_worktree(tmp_path: Path) 
     assert foreign.read_text() == "foreign working\n"
 
 
+def test_untrack_preserve_commits_only_deletions_without_touching_runtime_or_foreign_index(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_bytes(b"tracked seed\n")
+    foreign = repo / "foreign.txt"
+    foreign.write_text("foreign base\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json", "foreign.txt")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+
+    live_payload = b'{"live":true}\n'
+    runtime.write_bytes(live_payload)
+    runtime.chmod(0o600)
+    foreign.write_text("foreign staged\n", encoding="utf-8")
+    _run(repo, "git", "add", "foreign.txt")
+    staged_blob = _run(repo, "git", "show", ":foreign.txt").stdout
+    foreign.write_text("foreign working\n", encoding="utf-8")
+
+    committed = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "retire runtime state from Git",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert committed.returncode == 0, committed.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD^").stdout.strip() == expected_head
+    assert _run(
+        repo,
+        "git",
+        "show",
+        "--format=",
+        "--name-status",
+        "HEAD",
+    ).stdout == "D\truntime/state.json\n"
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == ""
+    assert runtime.read_bytes() == live_payload
+    assert stat.S_IMODE(runtime.stat().st_mode) == 0o600
+    assert _run(
+        repo,
+        "git",
+        "check-ignore",
+        "-q",
+        "--",
+        "runtime/state.json",
+    ).returncode == 0
+    assert _run(repo, "git", "show", ":foreign.txt").stdout == staged_blob
+    assert foreign.read_text(encoding="utf-8") == "foreign working\n"
+    assert _run(
+        repo,
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+    ).stdout == "MM foreign.txt\n"
+
+
+def test_untrack_preserve_requires_ignore_rule_in_committed_head(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("live\n", encoding="utf-8")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    before_status = _run(
+        repo,
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+    ).stdout
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must not retire without committed policy",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "committed ignore rule" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(
+        repo,
+        "git",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all",
+    ).stdout == before_status
+    assert runtime.read_text(encoding="utf-8") == "live\n"
+
+
+def test_untrack_preserve_rejects_nonregular_runtime_path(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.unlink()
+    runtime.symlink_to(repo / "seed.txt")
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must not follow runtime symlink",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "symlink" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert runtime.is_symlink()
+
+
+def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    foreign = repo / "foreign.txt"
+    foreign.write_text("foreign base\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json", "foreign.txt")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("live\n", encoding="utf-8")
+    foreign.write_text("foreign staged\n", encoding="utf-8")
+    _run(repo, "git", "add", "foreign.txt")
+    staged_blob = _run(repo, "git", "show", ":foreign.txt").stdout
+    foreign.write_text("foreign working\n", encoding="utf-8")
+
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "printf 'hook injected\\n' > hook-injected.txt\n"
+        "git add -- hook-injected.txt\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must reject hook scope drift",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "exact scope" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == (
+        "runtime/state.json\n"
+    )
+    assert runtime.read_text(encoding="utf-8") == "live\n"
+    assert _run(repo, "git", "show", ":foreign.txt").stdout == staged_blob
+    assert foreign.read_text(encoding="utf-8") == "foreign working\n"
+
+
 def test_exact_path_commit_rejects_hook_injected_foreign_path(tmp_path: Path) -> None:
     repo = _repo(tmp_path)
     foreign = repo / "foreign.txt"
