@@ -5958,6 +5958,11 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
             profile_root=root / "profiles",
         )
         profile = Path(prepared.profile_path)
+        codex_auth_lease = isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+        )
+        assert codex_auth_lease is not None
 
         denied = subprocess.run(
             [
@@ -6008,6 +6013,23 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
             ],
             capture_output=True, text=True, check=False,
         )
+        codex_host_auth_probe = subprocess.run(
+            [
+                str(isolation.SANDBOX_EXEC), "-f", str(profile), "/bin/sh",
+                "-c",
+                f"/bin/cat {Path.home() / '.codex' / 'auth.json'} "
+                f"> {wt / 'codex-auth-copy'}",
+            ],
+            capture_output=True, text=True, check=False,
+        )
+        codex_synthetic_auth_probe = subprocess.run(
+            [
+                str(isolation.SANDBOX_EXEC), "-f", str(profile), "/bin/sh",
+                "-c",
+                f"/bin/cat {codex_auth_lease.destination_path} > /dev/null",
+            ],
+            capture_output=True, text=True, check=False,
+        )
         log_dir = Path.home() / ".volpred" / "logs"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_path = log_dir / "sandbox-inherited-fd-test.log"
@@ -6035,6 +6057,8 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
         assert git_mutation.returncode != 0
         assert credential_probe.returncode != 0
         assert volpred_secret_probe.returncode != 0
+        assert codex_host_auth_probe.returncode != 0
+        assert codex_synthetic_auth_probe.returncode == 0
         assert inherited_log_fd.returncode == 0
         assert inherited_log_size == 2
         # The shell may create the redirection target before the denied
@@ -6043,6 +6067,14 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
         assert not copied.exists() or copied.read_bytes() == b""
         volpred_copied = wt / "volpred-secret-copy"
         assert not volpred_copied.exists() or volpred_copied.read_bytes() == b""
+        codex_auth_copied = wt / "codex-auth-copy"
+        assert (
+            not codex_auth_copied.exists()
+            or codex_auth_copied.read_bytes() == b""
+        )
+        close_receipt = codex_auth_lease.close()
+        assert close_receipt.ok is True
+        assert close_receipt.cleaned is True
 
 
 def test_isolated_environment_scopes_subscription_auth_to_provider(
@@ -6127,6 +6159,7 @@ def test_codex_subscription_auth_is_materialized_into_synthetic_home(
         encoding="utf-8",
     )
     source.chmod(0o600)
+    (tmp_path / "run" / "home").mkdir(parents=True, mode=0o700)
     prepared = isolation.PreparedIsolation(
         profile_path=str(tmp_path / "sandbox.sb"),
         run_dir=str(tmp_path / "run"),
@@ -6137,16 +6170,123 @@ def test_codex_subscription_auth_is_materialized_into_synthetic_home(
         canonical_root=str(tmp_path / "repo"),
     )
 
-    destination = isolation.materialize_provider_auth(
+    lease = isolation.materialize_provider_auth(
         prepared,
         provider_id="codex-cli",
         credential_home=source_home,
     )
+    assert lease is not None
+    destination = Path(lease.destination_path)
 
     assert destination == Path(prepared.synthetic_home) / ".codex" / "auth.json"
     assert destination.read_bytes() == source.read_bytes()
     assert destination.stat().st_mode & 0o777 == 0o600
     assert destination.parent.stat().st_mode & 0o777 == 0o700
+    receipt = lease.close()
+    assert receipt.ok is True
+    assert receipt.cleaned is True
+    assert not destination.exists()
+
+
+def test_codex_auth_lease_reconciles_rotation_then_cleans(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source_payload = {
+        "OPENAI_API_KEY": None,
+        "tokens": {
+            "access_token": "access-a",
+            "refresh_token": "refresh-a",
+            "id_token": "id-a",
+            "account_id": "account",
+        },
+    }
+    source.write_text(json.dumps(source_payload), encoding="utf-8")
+    source.chmod(0o600)
+    run_dir = tmp_path / "run"
+    for path in (run_dir, run_dir / "home"):
+        path.mkdir(mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert lease is not None
+    destination = Path(lease.destination_path)
+    rotated = {
+        **source_payload,
+        "tokens": {
+            **source_payload["tokens"],
+            "access_token": "access-b",
+            "refresh_token": "refresh-b",
+            "id_token": "id-b",
+        },
+    }
+    destination.write_text(json.dumps(rotated), encoding="utf-8")
+    destination.chmod(0o600)
+
+    receipt = lease.close()
+
+    assert receipt.ok is True
+    assert receipt.reconciled is True
+    assert json.loads(source.read_text(encoding="utf-8")) == rotated
+    assert not destination.exists()
+
+
+def test_codex_auth_materialization_rejects_symlink_destination(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": None,
+            "tokens": {
+                "access_token": "access",
+                "refresh_token": "refresh",
+                "id_token": "id",
+                "account_id": "account",
+            },
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    run_dir = tmp_path / "run"
+    synthetic_home = run_dir / "home"
+    target = tmp_path / "credential-leak-target"
+    for path in (run_dir, synthetic_home, target):
+        path.mkdir(mode=0o700)
+    (synthetic_home / ".codex").symlink_to(target, target_is_directory=True)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(synthetic_home),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+
+    with pytest.raises(isolation.IsolationUnavailable, match="symlink"):
+        isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+            credential_home=source_home,
+        )
+
+    assert not (target / "auth.json").exists()
 
 
 def test_codex_auth_materialization_rejects_api_key_and_partial_receipt(

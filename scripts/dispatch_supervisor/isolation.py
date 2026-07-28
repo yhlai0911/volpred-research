@@ -17,8 +17,10 @@ interfaces with a shell redirect.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import platform
+import secrets
 import stat
 import subprocess
 from dataclasses import asdict, dataclass
@@ -167,6 +169,7 @@ def sandbox_profile(
         home / ".config" / "gh",
         home / ".config" / "gcloud",
         home / ".config" / "supabase",
+        home / ".codex",
         home / ".volpred" / "secrets",
         home / "Library" / "Keychains",
     )
@@ -315,13 +318,60 @@ def _credential_home() -> Path:
     return Path.home()
 
 
-def _read_private_file(path: Path) -> bytes:
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+_MAX_PROVIDER_AUTH_BYTES = 1024 * 1024
+
+
+def _open_directory(path: Path) -> int:
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
     try:
-        fd = os.open(path, flags)
+        return os.open(path, flags)
     except OSError as exc:
         raise IsolationUnavailable(
-            f"subscription credential is unavailable: {path}"
+            f"provider auth directory is unavailable or unsafe: {path}"
+        ) from exc
+
+
+def _open_child_directory(
+    parent_fd: int,
+    name: str,
+    *,
+    create: bool = False,
+) -> int:
+    if create:
+        try:
+            os.mkdir(name, 0o700, dir_fd=parent_fd)
+        except FileExistsError:
+            # The next O_NOFOLLOW directory open verifies the existing node.
+            pass  # silent-ok: race-safe create followed by exact validation
+        except OSError as exc:
+            raise IsolationUnavailable(
+                f"cannot create private provider auth directory: {name}"
+            ) from exc
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(name, flags, dir_fd=parent_fd)
+    except OSError as exc:
+        raise IsolationUnavailable(
+            f"provider auth directory is missing, foreign, or a symlink: {name}"
+        ) from exc
+    metadata = os.fstat(fd)
+    if metadata.st_uid != os.getuid():
+        os.close(fd)
+        raise IsolationUnavailable(
+            f"provider auth directory has foreign owner: {name}"
+        )
+    return fd
+
+
+def _read_private_at(directory_fd: int, name: str) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(name, flags, dir_fd=directory_fd)
+    except OSError as exc:
+        raise IsolationUnavailable(
+            f"subscription credential is unavailable: {name}"
         ) from exc
     try:
         metadata = os.fstat(fd)
@@ -329,28 +379,41 @@ def _read_private_file(path: Path) -> bytes:
             raise IsolationUnavailable(
                 "subscription credential must be a regular file"
             )
+        if metadata.st_uid != os.getuid():
+            raise IsolationUnavailable(
+                "subscription credential must be owned by the current user"
+            )
         if stat.S_IMODE(metadata.st_mode) & 0o077:
             raise IsolationUnavailable(
                 "subscription credential permissions must be owner-only"
             )
+        if metadata.st_size > _MAX_PROVIDER_AUTH_BYTES:
+            raise IsolationUnavailable(
+                "subscription credential exceeds the maximum safe size"
+            )
         chunks: list[bytes] = []
+        total = 0
         while True:
             chunk = os.read(fd, 64 * 1024)
             if not chunk:
                 break
+            total += len(chunk)
+            if total > _MAX_PROVIDER_AUTH_BYTES:
+                raise IsolationUnavailable(
+                    "subscription credential grew beyond the maximum safe size"
+                )
             chunks.append(chunk)
         return b"".join(chunks)
     finally:
         os.close(fd)
 
 
-def _write_private_file(path: Path, payload: bytes) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    os.chmod(path.parent, 0o700)
-    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+def _write_private_at(directory_fd: int, name: str, payload: bytes) -> None:
+    temporary = f".{name}.tmp-{os.getpid()}-{secrets.token_hex(6)}"
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    flags |= getattr(os, "O_NOFOLLOW", 0)
     try:
-        fd = os.open(temporary, flags, 0o600)
+        fd = os.open(temporary, flags, 0o600, dir_fd=directory_fd)
         try:
             view = memoryview(payload)
             while view:
@@ -359,48 +422,25 @@ def _write_private_file(path: Path, payload: bytes) -> None:
             os.fsync(fd)
         finally:
             os.close(fd)
-        os.replace(temporary, path)
-        os.chmod(path, 0o600)
-        directory_fd = os.open(path.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory_fd)
-        finally:
-            os.close(directory_fd)
+        os.replace(
+            temporary,
+            name,
+            src_dir_fd=directory_fd,
+            dst_dir_fd=directory_fd,
+        )
+        os.chmod(name, 0o600, dir_fd=directory_fd, follow_symlinks=False)
+        os.fsync(directory_fd)
     except OSError as exc:
-        temporary.unlink(missing_ok=True)
+        try:
+            os.unlink(temporary, dir_fd=directory_fd)
+        except FileNotFoundError:
+            pass  # silent-ok: failed atomic write may leave no temp to clean
         raise IsolationUnavailable(
             "cannot materialize provider subscription credential"
         ) from exc
 
 
-def materialize_provider_auth(
-    prepared: PreparedIsolation | dict[str, Any],
-    *,
-    provider_id: str,
-    credential_home: Path | None = None,
-) -> Path | None:
-    """Materialize only the selected provider's subscription credential.
-
-    Codex desktop auth is a rotating OAuth JSON file, not a transferable env
-    bearer. Copying only that mode-600 file into the per-fire synthetic HOME
-    keeps the CLI logged in without exposing host user config or permitting
-    ``CODEX_HOME``/API-key overrides.
-    """
-    raw = _prepared_payload(prepared)
-    if provider_id in {"claude-cli", "agy-cli"}:
-        return None
-    if provider_id != "codex-cli":
-        raise IsolationUnavailable(
-            f"unsupported isolated provider identity: {provider_id!r}"
-        )
-    run_dir = Path(raw["run_dir"]).resolve()
-    synthetic_home = Path(raw["synthetic_home"]).resolve()
-    if synthetic_home != run_dir / "home":
-        raise IsolationUnavailable(
-            "synthetic HOME is outside the exact isolation run directory"
-        )
-    source = (credential_home or _credential_home()) / ".codex" / "auth.json"
-    payload = _read_private_file(source)
+def _validate_codex_auth(payload: bytes) -> None:
     try:
         decoded = json.loads(payload)
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -424,9 +464,187 @@ def materialize_provider_auth(
         raise IsolationUnavailable(
             "Codex subscription credential is missing OAuth token fields"
         )
+
+
+@dataclass(frozen=True)
+class ProviderAuthCloseReceipt:
+    ok: bool
+    reconciled: bool
+    source_advanced: bool
+    cleaned: bool
+    reason: str
+
+
+@dataclass
+class ProviderAuthLease:
+    """One per-fire Codex OAuth copy with rotation handback and cleanup."""
+
+    source_home: str
+    run_dir: str
+    destination_path: str
+    baseline_sha256: str
+    _closed: bool = False
+
+    def close(self) -> ProviderAuthCloseReceipt:
+        if self._closed:
+            return ProviderAuthCloseReceipt(
+                True, False, False, True, "already_closed",
+            )
+        self._closed = True
+        reconciled = False
+        source_advanced = False
+        cleaned = False
+        reason = "closed"
+        destination_payload: bytes | None = None
+        destination_dir_fd: int | None = None
+        destination_home_fd: int | None = None
+        destination_run_fd: int | None = None
+        try:
+            destination_run_fd = _open_directory(Path(self.run_dir))
+            destination_home_fd = _open_child_directory(
+                destination_run_fd, "home",
+            )
+            destination_dir_fd = _open_child_directory(
+                destination_home_fd, ".codex",
+            )
+            destination_payload = _read_private_at(
+                destination_dir_fd, "auth.json",
+            )
+            _validate_codex_auth(destination_payload)
+            destination_sha = hashlib.sha256(destination_payload).hexdigest()
+            if destination_sha != self.baseline_sha256:
+                source_home_fd = _open_directory(Path(self.source_home))
+                try:
+                    source_dir_fd = _open_child_directory(
+                        source_home_fd, ".codex",
+                    )
+                    try:
+                        source_payload = _read_private_at(
+                            source_dir_fd, "auth.json",
+                        )
+                        _validate_codex_auth(source_payload)
+                        source_sha = hashlib.sha256(source_payload).hexdigest()
+                        if source_sha == self.baseline_sha256:
+                            _write_private_at(
+                                source_dir_fd,
+                                "auth.json",
+                                destination_payload,
+                            )
+                            verified = _read_private_at(
+                                source_dir_fd, "auth.json",
+                            )
+                            if hashlib.sha256(verified).hexdigest() != destination_sha:
+                                raise IsolationUnavailable(
+                                    "Codex auth rotation handback verification failed"
+                                )
+                            reconciled = True
+                        else:
+                            # Another trusted login advanced the authoritative
+                            # file. Never overwrite a newer credential.
+                            source_advanced = True
+                            reason = "authoritative_source_advanced"
+                    finally:
+                        os.close(source_dir_fd)
+                finally:
+                    os.close(source_home_fd)
+        except (IsolationUnavailable, OSError) as exc:
+            reason = str(exc)
+        finally:
+            if destination_dir_fd is not None:
+                try:
+                    os.unlink("auth.json", dir_fd=destination_dir_fd)
+                    os.fsync(destination_dir_fd)
+                    cleaned = True
+                except OSError as exc:
+                    reason = f"{reason}; cleanup failed: {exc}"
+                os.close(destination_dir_fd)
+            if destination_home_fd is not None:
+                try:
+                    os.rmdir(".codex", dir_fd=destination_home_fd)
+                    os.fsync(destination_home_fd)
+                except OSError:
+                    # auth.json is already unlinked+fsynced; retaining an
+                    # empty/non-empty directory does not retain our secret.
+                    pass  # silent-ok: best-effort empty-directory cleanup
+                os.close(destination_home_fd)
+            if destination_run_fd is not None:
+                os.close(destination_run_fd)
+        return ProviderAuthCloseReceipt(
+            ok=cleaned and not reason.startswith(
+                (
+                    "provider auth",
+                    "subscription credential",
+                    "Codex ",
+                    "cannot ",
+                )
+            ),
+            reconciled=reconciled,
+            source_advanced=source_advanced,
+            cleaned=cleaned,
+            reason=reason,
+        )
+
+
+def materialize_provider_auth(
+    prepared: PreparedIsolation | dict[str, Any],
+    *,
+    provider_id: str,
+    credential_home: Path | None = None,
+) -> ProviderAuthLease | None:
+    """Materialize only the selected provider's subscription credential.
+
+    Codex desktop auth is a rotating OAuth JSON file, not a transferable env
+    bearer. Copying only that mode-600 file into the per-fire synthetic HOME
+    keeps the CLI logged in without exposing host user config or permitting
+    ``CODEX_HOME``/API-key overrides.
+    """
+    raw = _prepared_payload(prepared)
+    if provider_id in {"claude-cli", "agy-cli"}:
+        return None
+    if provider_id != "codex-cli":
+        raise IsolationUnavailable(
+            f"unsupported isolated provider identity: {provider_id!r}"
+        )
+    run_dir = Path(raw["run_dir"]).resolve()
+    synthetic_home = Path(raw["synthetic_home"]).resolve()
+    if synthetic_home != run_dir / "home":
+        raise IsolationUnavailable(
+            "synthetic HOME is outside the exact isolation run directory"
+        )
+    source_home = credential_home or _credential_home()
+    source_home_fd = _open_directory(source_home)
+    try:
+        source_dir_fd = _open_child_directory(source_home_fd, ".codex")
+        try:
+            payload = _read_private_at(source_dir_fd, "auth.json")
+        finally:
+            os.close(source_dir_fd)
+    finally:
+        os.close(source_home_fd)
+    _validate_codex_auth(payload)
+
+    run_dir_fd = _open_directory(run_dir)
+    try:
+        home_fd = _open_child_directory(run_dir_fd, "home")
+        try:
+            destination_dir_fd = _open_child_directory(
+                home_fd, ".codex", create=True,
+            )
+            try:
+                _write_private_at(destination_dir_fd, "auth.json", payload)
+            finally:
+                os.close(destination_dir_fd)
+        finally:
+            os.close(home_fd)
+    finally:
+        os.close(run_dir_fd)
     destination = synthetic_home / ".codex" / "auth.json"
-    _write_private_file(destination, payload)
-    return destination
+    return ProviderAuthLease(
+        source_home=str(source_home),
+        run_dir=str(run_dir),
+        destination_path=str(destination),
+        baseline_sha256=hashlib.sha256(payload).hexdigest(),
+    )
 
 
 def isolated_environment(
@@ -495,6 +713,8 @@ def wrap_command(
 __all__ = [
     "IsolationUnavailable",
     "PreparedIsolation",
+    "ProviderAuthCloseReceipt",
+    "ProviderAuthLease",
     "SANDBOX_EXEC",
     "isolated_environment",
     "materialize_provider_auth",

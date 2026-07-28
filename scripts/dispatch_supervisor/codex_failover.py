@@ -284,6 +284,29 @@ def run_codex_failover(
     launch_cwd = (workdir or ROOT).resolve()
     child_env = dict(os.environ)
     isolation_receipt: dict[str, str] | None = None
+    auth_lease: isolation.ProviderAuthLease | None = None
+
+    def _finish(result: FailoverResult) -> FailoverResult:
+        nonlocal auth_lease
+        if auth_lease is None:
+            return result
+        close_receipt = auth_lease.close()
+        auth_lease = None
+        if close_receipt.ok:
+            return result
+        return FailoverResult(
+            attempted=result.attempted,
+            recovered=False,
+            exit_code=RC_DISABLED,
+            detail=(
+                "Codex subscription credential lease did not close safely: "
+                f"{close_receipt.reason}"
+            ),
+            duration_s=result.duration_s,
+            output_tail=result.output_tail,
+            process_active=result.process_active,
+        )
+
     if isolated_workspace is not None:
         expected_workspace = Path(
             str(isolated_workspace.get("path") or "")
@@ -301,7 +324,7 @@ def run_codex_failover(
             if key.startswith("isolation_")
         }
         try:
-            isolation.materialize_provider_auth(
+            auth_lease = isolation.materialize_provider_auth(
                 isolation_receipt,
                 provider_id="codex-cli",
             )
@@ -311,12 +334,12 @@ def run_codex_failover(
                 provider_id="codex-cli",
             )
         except isolation.IsolationUnavailable as exc:
-            return FailoverResult(
+            return _finish(FailoverResult(
                 True,
                 False,
                 RC_DISABLED,
                 f"Codex failover isolation unavailable: {exc}",
-            )
+            ))
 
     ok, rc, detail = preflight(
         codex_bin,
@@ -325,7 +348,7 @@ def run_codex_failover(
     )
     if not ok:
         LOG.warning("codex preflight failed rc=%d: %s", rc, detail)
-        return FailoverResult(False, False, rc, detail)
+        return _finish(FailoverResult(False, False, rc, detail))
     version = detail
 
     # Ask ChatGPT whether it is there, before betting the slot on it. `attempted=False`:
@@ -337,7 +360,7 @@ def run_codex_failover(
     )
     if not reachable:
         LOG.warning("codex unreachable rc=%d: %s", rc, detail)
-        return FailoverResult(False, False, rc, detail)
+        return _finish(FailoverResult(False, False, rc, detail))
 
     LOG.info("codex failover start reason=%s cap=%ds version=%s", reason, cap_s, version)
     started = time.time()
@@ -380,12 +403,12 @@ def run_codex_failover(
         provider_receipt = _authorize_codex(codex_bin, child_env)
         verify_spawn_receipt(provider_receipt)
     except ProviderRegistryError as exc:
-        return FailoverResult(
+        return _finish(FailoverResult(
             False,
             False,
             RC_POLICY_DENIED,
             f"provider policy denied Codex work spawn: {exc}",
-        )
+        ))
     child_env = {**child_env, **provider_receipt.environment()}
     argv[0] = provider_receipt.resolved_executable
     if isolated_workspace is not None:
@@ -396,12 +419,12 @@ def run_codex_failover(
                 )
             argv = isolation.wrap_prepared(argv, isolation_receipt)
         except isolation.IsolationUnavailable as exc:
-            return FailoverResult(
+            return _finish(FailoverResult(
                 True,
                 False,
                 RC_DISABLED,
                 f"Codex failover isolation unavailable: {exc}",
-            )
+            ))
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:
@@ -461,19 +484,19 @@ def run_codex_failover(
         # ChatGPT answered the probe minutes ago, so this is NOT an outage — it is a
         # task that ran past its ceiling. Saying otherwise is what sent the owner
         # hunting a CLI regression that did not exist (2026-07-12).
-        return FailoverResult(
+        return _finish(FailoverResult(
             True, False, RC_WORK_TIMEOUT,
             f"Codex 接手了，但任務沒在 {cap_s // 60} 分鐘內做完（ChatGPT 本身是通的——"
             "接手前已測過）。任務可能太大，需要切小或改走 compute queue",
             duration, tail,
             process_active=tracked_pid is not None and not process_confirmed_finished,
-        )
+        ))
     except OSError as exc:
         duration = time.time() - started
-        return FailoverResult(
+        return _finish(FailoverResult(
             True, False, RC_BINARY_MISSING, f"`codex exec` 無法啟動：{exc}", duration,
             process_active=tracked_pid is not None and not process_confirmed_finished,
-        )
+        ))
     finally:
         if tracked_pid is not None and process_confirmed_finished and on_process_finished is not None:
             try:
@@ -484,16 +507,16 @@ def run_codex_failover(
     duration = time.time() - started
     combined = ((result.stdout or "") + (result.stderr or ""))[-2000:]
     if tracked_pid is not None and not process_confirmed_finished:
-        return FailoverResult(
+        return _finish(FailoverResult(
             True, False, RC_WORK_TIMEOUT,
             "Codex parent 已退出，但同一 process group 仍有程序或無法確認已清空；"
             "保留 PID 並隔離此 slot，禁止 PHASE-Z。",
             duration, combined, process_active=True,
-        )
+        ))
     recovered = result.returncode == 0
     LOG.info("codex failover rc=%d recovered=%s duration=%.1fs", result.returncode, recovered, duration)
-    return FailoverResult(
+    return _finish(FailoverResult(
         True, recovered, result.returncode,
         "Codex 接手成功" if recovered else f"`codex exec` rc={result.returncode}",
         duration, combined,
-    )
+    ))

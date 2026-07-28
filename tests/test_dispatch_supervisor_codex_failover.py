@@ -306,6 +306,7 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         assert "CLAUDE_CODE_OAUTH_TOKEN" not in env
         for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
             assert key not in env
+    assert not (run_dir / "home" / ".codex" / "auth.json").exists()
 
 
 def test_isolated_codex_partial_receipt_returns_typed_failure(
