@@ -36,6 +36,23 @@ ANALYTICS_SECRET = b"member-continuity-analytics-secret-32b"
 ANALYTICS_DIGEST_KEY_ID = "member-continuity-test-key-v1"
 
 
+def test_managed_postgres_owner_transfer_is_bounded() -> None:
+    migrations = (
+        *ANALYTICS_MIGRATIONS[-1:],
+        *MIGRATIONS,
+    )
+
+    for migration in migrations:
+        source = migration.read_text(encoding="utf-8")
+        assert "CURRENT_USER = 'postgres'" in source
+        assert "WITH INHERIT FALSE" in source
+        assert "WITH SET TRUE" in source
+        assert "GRANTED BY CURRENT_USER" in source
+        assert "SET LOCAL ROLE" in source
+        assert "RESET ROLE" in source
+        assert "$reacquire_" not in source
+
+
 def _postgres_bin_dir() -> Path | None:
     homebrew = Path("/opt/homebrew/opt/postgresql@17/bin")
     if (homebrew / "postgres").exists():

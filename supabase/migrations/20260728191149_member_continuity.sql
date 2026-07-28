@@ -40,7 +40,19 @@ $validate_member_worker$;
 
 DO $grant_worker_to_migration_role$
 BEGIN
-  IF CURRENT_USER <> 'postgres' THEN
+  IF CURRENT_USER = 'postgres' THEN
+    -- Supabase PostgreSQL 17 creates this bootstrap membership with
+    -- ADMIN TRUE / INHERIT FALSE / SET FALSE.  Enable only SET for the
+    -- ownership-transfer window; the matching block below restores it.
+    EXECUTE pg_catalog.format(
+      'GRANT volpred_member_worker TO %I WITH INHERIT FALSE',
+      CURRENT_USER
+    );
+    EXECUTE pg_catalog.format(
+      'GRANT volpred_member_worker TO %I WITH SET TRUE',
+      CURRENT_USER
+    );
+  ELSE
     EXECUTE pg_catalog.format(
       'GRANT volpred_member_worker TO %I',
       CURRENT_USER
@@ -49,39 +61,6 @@ BEGIN
 END;
 $grant_worker_to_migration_role$;
 GRANT CREATE ON SCHEMA public TO volpred_member_worker;
-
-DO $reacquire_member_functions$
-BEGIN
-  IF pg_catalog.to_regprocedure(
-    'public.apply_volpred_member_intent('
-    'uuid,text,text,jsonb,bytea,bytea)'
-  ) IS NOT NULL THEN
-    EXECUTE pg_catalog.format(
-      'ALTER FUNCTION public.apply_volpred_member_intent('
-      'uuid,text,text,jsonb,bytea,bytea) OWNER TO %I',
-      CURRENT_USER
-    );
-  END IF;
-  IF pg_catalog.to_regprocedure(
-    'public.read_volpred_member_continuity(uuid)'
-  ) IS NOT NULL THEN
-    EXECUTE pg_catalog.format(
-      'ALTER FUNCTION public.read_volpred_member_continuity(uuid) '
-      'OWNER TO %I',
-      CURRENT_USER
-    );
-  END IF;
-  IF pg_catalog.to_regprocedure(
-    'public.delete_volpred_member_continuity(uuid,text,bytea)'
-  ) IS NOT NULL THEN
-    EXECUTE pg_catalog.format(
-      'ALTER FUNCTION public.delete_volpred_member_continuity('
-      'uuid,text,bytea) OWNER TO %I',
-      CURRENT_USER
-    );
-  END IF;
-END;
-$reacquire_member_functions$;
 
 CREATE TABLE IF NOT EXISTS volpred_member.follows (
   user_id uuid NOT NULL
@@ -303,6 +282,8 @@ BEGIN
   END LOOP;
 END;
 $revoke_data_api_roles$;
+
+SET LOCAL ROLE volpred_member_worker;
 
 CREATE OR REPLACE FUNCTION public.apply_volpred_member_intent(
   p_user_id uuid,
@@ -779,19 +760,18 @@ BEGIN
 END;
 $grant_service_role$;
 
-ALTER FUNCTION public.apply_volpred_member_intent(
-  uuid, text, text, jsonb, bytea, bytea
-) OWNER TO volpred_member_worker;
-ALTER FUNCTION public.read_volpred_member_continuity(uuid)
-  OWNER TO volpred_member_worker;
-ALTER FUNCTION public.delete_volpred_member_continuity(
-  uuid, text, bytea
-) OWNER TO volpred_member_worker;
+RESET ROLE;
 
 REVOKE CREATE ON SCHEMA public FROM volpred_member_worker;
 DO $revoke_worker_from_migration_role$
 BEGIN
-  IF CURRENT_USER <> 'postgres' THEN
+  IF CURRENT_USER = 'postgres' THEN
+    EXECUTE pg_catalog.format(
+      'REVOKE volpred_member_worker FROM %I '
+      'GRANTED BY CURRENT_USER',
+      CURRENT_USER
+    );
+  ELSE
     EXECUTE pg_catalog.format(
       'REVOKE volpred_member_worker FROM %I',
       CURRENT_USER

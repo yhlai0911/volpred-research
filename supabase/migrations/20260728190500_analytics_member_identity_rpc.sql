@@ -7,7 +7,19 @@
 
 DO $grant_worker_to_migration_role$
 BEGIN
-  IF CURRENT_USER <> 'postgres' THEN
+  IF CURRENT_USER = 'postgres' THEN
+    -- Supabase PostgreSQL 17 creates this bootstrap membership with
+    -- ADMIN TRUE / INHERIT FALSE / SET FALSE.  Enable only SET for the
+    -- ownership-transfer window; the matching block below restores it.
+    EXECUTE pg_catalog.format(
+      'GRANT volpred_analytics_worker TO %I WITH INHERIT FALSE',
+      CURRENT_USER
+    );
+    EXECUTE pg_catalog.format(
+      'GRANT volpred_analytics_worker TO %I WITH SET TRUE',
+      CURRENT_USER
+    );
+  ELSE
     EXECUTE pg_catalog.format(
       'GRANT volpred_analytics_worker TO %I',
       CURRENT_USER
@@ -17,31 +29,6 @@ END;
 $grant_worker_to_migration_role$;
 GRANT USAGE ON SCHEMA public TO volpred_analytics_worker;
 GRANT CREATE ON SCHEMA public TO volpred_analytics_worker;
-
-DO $reacquire_identity_functions$
-BEGIN
-  IF pg_catalog.to_regprocedure(
-    'public.merge_volpred_analytics_identity('
-    'text,text,text,timestamp with time zone,bytea,bytea)'
-  ) IS NOT NULL THEN
-    EXECUTE pg_catalog.format(
-      'ALTER FUNCTION public.merge_volpred_analytics_identity('
-      'text,text,text,timestamptz,bytea,bytea) OWNER TO %I',
-      CURRENT_USER
-    );
-  END IF;
-  IF pg_catalog.to_regprocedure(
-    'public.delete_volpred_analytics_identity('
-    'text,text,timestamp with time zone,bytea)'
-  ) IS NOT NULL THEN
-    EXECUTE pg_catalog.format(
-      'ALTER FUNCTION public.delete_volpred_analytics_identity('
-      'text,text,timestamptz,bytea) OWNER TO %I',
-      CURRENT_USER
-    );
-  END IF;
-END;
-$reacquire_identity_functions$;
 
 ALTER TABLE volpred_analytics.identity_links
   ADD COLUMN IF NOT EXISTS anonymous_subject_digest bytea,
@@ -109,6 +96,8 @@ BEGIN
   END IF;
 END;
 $digest_constraints$;
+
+SET LOCAL ROLE volpred_analytics_worker;
 
 CREATE OR REPLACE FUNCTION public.merge_volpred_analytics_identity(
   p_idempotency_key text,
@@ -457,6 +446,8 @@ BEGIN
 END;
 $delete_identity$;
 
+RESET ROLE;
+
 GRANT UPDATE (
   merged_at,
   anonymous_subject_digest,
@@ -469,6 +460,8 @@ CREATE POLICY analytics_worker_update
   ON volpred_analytics.identity_links
   FOR UPDATE TO volpred_analytics_worker
   USING (true) WITH CHECK (true);
+
+SET LOCAL ROLE volpred_analytics_worker;
 
 REVOKE ALL ON FUNCTION public.merge_volpred_analytics_identity(
   text, text, text, timestamptz, bytea, bytea
@@ -501,17 +494,18 @@ BEGIN
 END;
 $grant_service_role$;
 
-ALTER FUNCTION public.merge_volpred_analytics_identity(
-  text, text, text, timestamptz, bytea, bytea
-) OWNER TO volpred_analytics_worker;
-ALTER FUNCTION public.delete_volpred_analytics_identity(
-  text, text, timestamptz, bytea
-) OWNER TO volpred_analytics_worker;
+RESET ROLE;
 
 REVOKE CREATE ON SCHEMA public FROM volpred_analytics_worker;
 DO $revoke_worker_from_migration_role$
 BEGIN
-  IF CURRENT_USER <> 'postgres' THEN
+  IF CURRENT_USER = 'postgres' THEN
+    EXECUTE pg_catalog.format(
+      'REVOKE volpred_analytics_worker FROM %I '
+      'GRANTED BY CURRENT_USER',
+      CURRENT_USER
+    );
+  ELSE
     EXECUTE pg_catalog.format(
       'REVOKE volpred_analytics_worker FROM %I',
       CURRENT_USER
