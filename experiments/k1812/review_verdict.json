@@ -1,0 +1,61 @@
+{
+  "kid": "k1812",
+  "verdict": "PASS",
+  "reviewer": "codex-cli 0.145.0 (GPT-5.1-Codex-Max, xhigh) — primary-path review round-3",
+  "reviewed_at": "2026-07-28T14:05:53Z",
+  "reviewed_commit": "db804d760a1a9f73e1f4f3e3c033effc9e792311",
+  "review_artifact": "experiments/k1812/codex_review_round3.md",
+  "blocking_defects": [],
+  "review_history": [
+    {
+      "round": 1,
+      "verdict": "FAIL",
+      "blocking_defects": [
+        "(B) primary significance test for the conditional Sharpe difference was an i.i.d. label permutation, which destroys regime persistence; the HAC regression tests the mean difference, not the Sharpe difference, so it cannot substitute",
+        "(C) README claimed multiple rounds of Codex review that had not happened, and cited diagnostic numbers not stored in k1812_results.json"
+      ]
+    },
+    {
+      "round": 2,
+      "verdict": "FAIL",
+      "artifact": "experiments/k1812/codex_review_round2.md",
+      "resolved": "(B) judged correctly landed",
+      "blocking_defects": [
+        "(C) README baseline row cited an external benchmark ('FP 全 CRSP 的 ~0.78') not reconcilable with any artifact",
+        "(C) README §8 asserted the merge checks had already passed, which was false for the bytes under review (21 passed / 1 failed)"
+      ],
+      "non_blocking": [
+        "reproduce_spec.json listed the three assembled CSVs as inputs, but load_data() reads data/tickers/*.csv and writes the assembled CSVs — provenance pinned in the wrong direction"
+      ]
+    },
+    {
+      "round": 3,
+      "verdict": "PASS",
+      "artifact": "experiments/k1812/codex_review_round3.md",
+      "blocking_defects": []
+    }
+  ],
+  "fixes_verified_this_round": [
+    "primary significance test is circular block permutation of the regime label series (b=7 months by the pre-stated rule max(ceil(n^(1/3)), ceil(mean regime run length)), 10000 reps, seed=42), with returns held fixed and the label multiset and sequence length preserved; exhaustive circular shift reported as a tuning-free exact corroboration and stationary bootstrap as the effect-size CI",
+    "i.i.d. label permutation and i.i.d. bootstrap demoted to COMPARISON ONLY in both results.json and README; no headline number depends on them",
+    "serial_dependence_check records that the primary null retains the observed regime persistence (label acf(1) 0.326 -> 0.281) while the i.i.d. null destroys it (-0.005), making the correctness of the fix machine-checkable",
+    "README review narrative rewritten to record round-1 FAIL and round-2 FAIL truthfully and to defer the current verdict to this file; all unreconcilable historical numbers removed",
+    "every key README number reconciles with the current k1812_results.json, enforced mechanically by test_readme_numbers_match_results",
+    "reproduce_spec.json inputs now pin the 82 per-ticker CSVs the run actually reads; assembled CSVs moved to outputs; disk / spec / results code_trace sha256 are three-way consistent"
+  ],
+  "conclusion_check": "Direction is consistent with JFE 2025 (Sharpe 0.328 after low-vol months vs -0.357 after high-vol months, monotone across vol terciles) but the result is NOT significant at 5%: primary block-permutation p = 0.114, effect-size 95% CI [-0.135, 1.462] covers zero. Reviewer confirmed no overclaiming. Correcting the test moved p only 0.115 -> 0.114; README states this is a measured outcome caused by near-zero BAB return autocorrelation (acf(1) = 0.070), not evidence that the i.i.d. method was valid.",
+  "notes": [
+    "review_verdict.json is written after the review round it records, so it is absent at review time by design; test_readme_does_not_claim_unrecorded_review_rounds asserts that precondition and is the reason the suite reports one failure until this file exists.",
+    "reviewed_sha256 below are the bytes round-3 read. This file itself is not covered (it did not exist yet).",
+    "Remaining artifact-gate item is the knowledge.json entry, which is MAIN THREAD ONLY (K1259) and out of scope for the worktree agent."
+  ],
+  "reviewed_sha256": {
+    "README.md": "a561558f79f71f52030654163ae29f83cb26f4d7d1fd416639dae50aee6bf58c",
+    "figures/fig1_market_rv_regime.png": "bc7b2d257fecf0ca5dc033730226a12ad29d76f580de69631b790de63cbede33",
+    "figures/fig2_conditional_bab_cumret.png": "560efc27fae6d33eb9f0ca285aaea3b8dc71fd5e3f407f75ca5589dd31ca6fc8",
+    "figures/fig3_sharpe_by_regime.png": "4be622433986688b9dba0d1edb6dcd4d73d06e6b1d6508a5c4afad0e42a920b4",
+    "k1812.py": "bf615c2fab44dc166324e1ae2208f66a6cb12da33b580d7155139ae58cee1102",
+    "k1812_results.json": "ab1d555e03f6d59c0ff648baa18b59c734900a65c5abad50c7a7790f4961cb0a",
+    "test_k1812.py": "c91de72839c337018442790099f66c18c450ca59c719a57e01c8676e976c65d5"
+  }
+}
