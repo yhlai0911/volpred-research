@@ -620,9 +620,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T08:45:56.673809+00:00"
-    },
-    {
      "at": "2026-07-28T09:12:07.292293+00:00"
     },
     {
@@ -654,6 +651,9 @@
     },
     {
      "at": "2026-07-28T17:00:46.615210+00:00"
+    },
+    {
+     "at": "2026-07-28T17:25:38.681120+00:00"
     }
    ],
    "current_task_id": null,
@@ -1313,7 +1313,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T17:01:39.206048+00:00"
+     "last_seen_at": "2026-07-28T17:26:27.380686+00:00"
     },
     {
      "cleared_at": null,
@@ -1327,7 +1327,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T17:01:38.222620+00:00"
+     "last_seen_at": "2026-07-28T17:26:26.334544+00:00"
     },
     {
      "cleared_at": null,
@@ -1360,9 +1360,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-28T17:01:39.206048+00:00",
+   "last_seen_at": "2026-07-28T17:26:27.380686+00:00",
    "notified_at": null,
-   "occurrence_count": 1980,
+   "occurrence_count": 2030,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1606,13 +1606,19 @@
      "first_seen_at": "2026-07-28T16:45:19.888865+00:00",
      "key": "30378186776:1",
      "last_seen_at": "2026-07-28T16:45:19.888865+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T17:05:28.880885+00:00",
+     "key": "30379746686:1",
+     "last_seen_at": "2026-07-28T17:05:28.880885+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-28T16:41:42.8667916Z E AssertionError: residue (0, 2) after migration (before (0, 2)); needs_review=[{'id': 'ci-red-30339013855', 'field': 'blocked_reason', 'value': 'worker=success; workspace",
-   "last_seen_at": "2026-07-28T16:45:19.888865+00:00",
+   "last_breach_detail": "2026-07-28T17:02:13.3560711Z E AssertionError: residue (0, 2) after migration (before (0, 2)); needs_review=[{'id': 'ci-red-30339013855', 'field': 'blocked_reason', 'value': 'worker=success; workspace",
+   "last_seen_at": "2026-07-28T17:05:28.880885+00:00",
    "notified_at": null,
-   "occurrence_count": 7,
+   "occurrence_count": 8,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2172,6 +2178,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T17:01:39.225774+00:00",
+ "updated_at": "2026-07-28T17:26:27.397499+00:00",
  "version": 1
 }

@@ -30,7 +30,7 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1708_gatecert_s14_rerun",
   "source_task_link": {
     "state": "linked",
@@ -54,5 +54,14 @@
     "storage/ops/codex_reviews/k1708_r4_verdict.md"
   ],
   "delivered_at": "2026-07-28T11:00:38.265879+00:00",
-  "delivery_source": "reap_orphan_deliverables"
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-28T17:12:21Z",
+  "followup_next_task_id": "assign_17a788b3",
+  "source_task_settlement": {
+    "task_id": "K1708_gatecert_s14_rerun",
+    "reason": "terminal_source_task_settled",
+    "source_task_status": "failed",
+    "state": "settled",
+    "settled_at": "2026-07-28T17:12:21Z"
+  }
 }

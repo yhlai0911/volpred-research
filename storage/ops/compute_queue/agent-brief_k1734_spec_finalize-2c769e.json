@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "assign_04212462",
   "source_task_link": {
     "state": "linked",
@@ -53,13 +53,16 @@
   "claimed_by_pid": 71559,
   "claimed_by_pid_start_wall": "Tue Jul 28 21:30:00 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "assign_04212462",
-    "settled_at": "2026-07-28T13:55:58Z",
-    "error": null
+    "reason": "terminal_source_task_settled",
+    "source_task_status": "succeeded",
+    "state": "settled",
+    "settled_at": "2026-07-28T17:12:21Z"
   },
   "experiment_gate": {
     "status": "passed",
     "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734"
-  }
+  },
+  "followup_dispatched_at": "2026-07-28T17:12:21Z",
+  "followup_next_task_id": "assign_12a2f9ba"
 }

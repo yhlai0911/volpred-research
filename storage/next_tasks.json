@@ -44683,12 +44683,8 @@
       }
     ],
     "result": "dispatched to compute job agent-brief_k1708_s14-3ca4dd; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876; awaiting PHASE A collection\n\nCodex round-4 VERDICT: FAIL. NULL 算術經程式化回讀確認可信（CW t=1.236372/1.968775/1.839232 全 <3.0 bar；Holm p=0.108160/0.024489/0.032941 對門檻 0.05/0.016667/0.025 全不拒絕；TAIFEX_TX 2276 OOS origins, seed 42, quick_mode=false, K1708.py sha 4a8236ff）。但 gate 不可結案：BLOCKER-3 provenance 過度宣稱（只檢查 code SHA，改數值不會被偵測）、BLOCKER-4 pre-fix Anchor A 被削弱、reproduce_spec.json 缺席（已回讀確認不存在）→ artifact gate BLOCKED、README stale。更根本：results 自帶 supported_unreachable=true（SPY/QQQ 皆 FAIL_NO_DATA，只剩 1 市場，但 SUPPORTED 要求 >=2）→ 此 gate 在現有資料上本就不可證。依 brief FAIL 分支 = 3-strike ceiling：未 merge、未寫 knowledge、未同法重試；已寄 critical --needs-reply escalation email（notification effect_owned_email_833340f613058cd737078c7aa3936ba2, Telegram msg 1547）請老闆在 補資料/改 pre-registration/收 NULL 三選一裁決。",
-    "compute_released_at": "2026-07-28T10:45:02Z",
-    "compute_release_reason": "terminal_receipt_collected",
-    "compute_job_id": "compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876",
-    "blocked_reason": "external_compute_receipt_pending_collection",
-    "compute_started_at": "2026-07-28T10:45:04Z",
-    "compute_finished_at": "2026-07-28T10:50:50Z",
+    "compute_released_at": "2026-07-28T17:12:21Z",
+    "compute_release_reason": "terminal_source_task_settled",
     "completed_at": "2026-07-28T13:12:31.749938+00:00"
   },
   {
@@ -50591,9 +50587,7 @@
       "last_seen_at": "2026-07-27T16:53:26.599186+00:00",
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
-      "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留"
-      ]
+      "deferred": []
     },
     "priority_capped_from": 1,
     "updated_at": "2026-07-27T16:53:26.599186+00:00"
@@ -51668,12 +51662,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52259,12 +52252,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52329,12 +52321,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52477,12 +52468,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52798,12 +52788,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52968,12 +52957,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53083,7 +53071,7 @@
     "title": "K1680: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1680 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: k1680 [NULL]（RETROSPECTIVE_NULL，Codex verdict=PASS_RETROSPECTIVE_NULL）：測試HQ州相對全美Google Trends attention（local_excess）能否領先預測次週RV/gap/Corwin-Schultz spread/national attention。六檔固定股票（AAPL/AMZN/BAC/CVX/AIG/ABBV），Google Trends週頻2021-06-27至2026-06-28。因Google Trends是當次一次性回溯下載（current vi Canonical evidence: experiments/k1680/K1680_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -53098,7 +53086,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-28T10:27:09+00:00"
+    "created_at": "2026-07-28T10:27:09+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:17:39.660757+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:17:39.940417+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:18:22.080545+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      }
+    ],
+    "started_at": "2026-07-28T17:17:39.940399+00:00",
+    "completed_at": "2026-07-28T17:18:22.080515+00:00",
+    "result": "not_written; reason=arc_covered_no_new_angle（刻意不產出，非執行失敗）。層 1 check_arc_dedup 回 clean，但層 2 feed grep 命中 mile_5f3f1589（2026-07-18『Wikipedia 熱度暴增，隔天更容易崩盤嗎？525 組配對，八格都沒過』）三重同構：資產=美股大型股橫斷面、結論=事前登記多格檢定全落空、框架=網路關注度代理當波動/崩盤領先指標。K1680 程式化回讀：6 檔美股總部州相對全美 Google Trends 超額關注，週頻 2021-12-31~2026-07-03（evaluation_rows 80），verdict=RETROSPECTIVE_NULL、passed_targets=[]、0/4 通過 Clark-West+Holm+Harvey t>=3；Holm p = rv 0.1202 / national_attention 0.1428 / corwin_schultz 0.3955 / gap 0.9062。唯一差異化鉤子『地理性』被自身 limitations 打掉（全國 Trends 已含總部州，local-minus-national 非乾淨 nonlocal 度量）。另 evidence package 不達發佈門檻：N=6 低於 N>=7、作者自認 pilot、Google Trends 為一次性回溯下載非 point-in-time，verdict 自述非 real-time OOS 亦非因果。與 K781_article_general_v4 同屬 refill K-coverage 只驗『該 K 有無文章』不驗 narrative arc 所產生的 arc-dup 任務。"
   },
   {
     "id": "assign_bbf3793b",
@@ -53141,12 +53152,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53194,12 +53204,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53253,12 +53262,11 @@
       "derates": true,
       "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53498,7 +53506,7 @@
     "description": "症狀（已證據化）：compute job compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876 status=completed、followup_dispatched 仍為 false，且再也無法用 CLI 標記。重跑 mark-followup-dispatched 一律回 'error: cannot dispatch followup — source task settlement failed.'\n\n【重現步驟】PHASE A 收 collect_completed followup 時，若先照 followup brief 的指示把 source task 標終局（本例 brief 明寫 'FAIL -> mark the pool task failed'），再跑 mark-followup-dispatched，就會鎖死。\n\n【根因（程式層）】scripts/compute_queue.py::_release_collected_source_task 要求 task['status'] == 'awaiting_agent_job' 才回 True；mark_under_receipt_lock 在 not released and not already_committed 時直接 return 2，因此 followup_dispatched 永遠寫不進去。也就是說機械契約隱含『先 mark-followup-dispatched（把 source task 由 awaiting_agent_job 釋放回 pending），再結算』的順序，但 followup brief 的散文指示是相反順序 —— 兩個 owner 對同一件事給了衝突的順序，prompt 沒有任何地方寫明這個順序依賴。\n\n【後果】1) 該 followup 會永遠留在 compute_queue.py list --pending-followup，每一班 fire 都會重新收一次同一個 K1708（重讀 verdict、重寄 escalation、重試結算），白燒 slot；2) source task K1708_gatecert_s14_rerun 現在 status=failed 卻仍帶 compute_job_id 與 blocked_reason=external_compute_receipt_pending_collection —— 正是 2026-07-28 才結案的 assign_1c16f316『source task 終局後未解綁 → job 永久不可執行』同一類殘留狀態。\n\n【既有工具不覆蓋此情境（已實測）】scripts/audit_compute_queue_bindings.py 回 queued=0 startable=0 stranded=0；compute_queue.py reconcile-bindings 回 {blocked:0, queued_before:0, terminalized:0}。兩者都只掃 queued job，對『completed job + 已終局 source task』無感。\n\n【建議修法（擇一，需 supervisor 綁定後執行）】\n(a) 讓 _release_collected_source_task 承認終局結算：source task 已是 succeeded/failed 且 compute_job_id 等於本 job 時，視為 released（僅解綁 compute_job_id / blocked_reason / compute_* 欄位，不要把終局狀態翻回 pending）。終局結算比 release-to-pending 更強，不該因此被拒。\n(b) 擴大 reconcile-bindings 掃描面到 completed/failed job，terminalize 這類殘留綁定，並讓 audit_compute_queue_bindings.py 也報這種 stranded 型態。\n(c) 順手修正 followup brief 產生器的措辭，明講『先 mark-followup-dispatched 再結算 source task』，消除兩個 owner 的順序衝突。\n\n建議 (a)+(c) 一起做：(a) 治根因、(c) 讓契約自我描述。\n\n【本班已完成、不需重做的部分】K1708 的 collection 本身已做完並已對外交代：Codex round-4 判 FAIL、3-strike 天花板、已寄 critical --needs-reply escalation email（effect_owned_email_833340f613058cd737078c7aa3936ba2、Telegram msg 1547）、pool task 已標 failed。修好本 bug 後只需把該 job 標 followup_dispatched，不要重寄信、不要重跑 K1708。\n\n【本班為何不自己修】supervisor gate 對 platform_ops 回 supervisor_preassignment_required（mutating dispatch work 須由 supervisor 綁定後才可派），且本 cohort 尚有其他 slot 在跑，不宜在班中改共用 dispatch 機制。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-28T13:16:18.157444+00:00",
     "created_by": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
@@ -53519,7 +53527,30 @@
     "related_frozen_model_id_defect": "本班另外實測到的相鄰缺陷（歸屬 assign_280ec9c5，非本單，記此供交叉參照）：storage/ops/agent_jobs/ 下 5 份 receipt 全帶退役 frozen model id 'claude-opus-4-8' — agent-brief_k1734_remediation-763606 與 agent-brief_k1812_fix-a18b38 為 failure_class=policy_denial（provider_policy_denial: model 'claude-opus-4-8' is not registered for 'claude-cli'，started_at 與 finished_at 相距 0.4 毫秒，agent 完全沒執行）；agent-brief_k1708_stage2-e9aa0b、agent-brief_k1714-cd4315、agent-k1731-armb-rev9-remediation 為 failure_class=quota。canonical model_router 對 experiment 回 cli_flag=claude-opus-5。這批 job 被歸類為 triage_failed 具誤導性：它們不是研究失敗，而是 admission 層幽靈失敗，worktree 內既有產物完全未受影響、仍然有效。修復時要注意：單純 requeue 而不改 model id 會再被拒一次。",
     "second_instance_20260728": "[第二次實例 — 2026-07-28 22:20 CST, hourly-slot-1-ddc2ab2b 現場重現]\n\njob=agent-brief_k1734_spec_finalize-2c769e (completed, exit 0), source_task=assign_04212462。\n主線程先跑 complete --status succeeded（source task 進終局），再跑 mark-followup-dispatched\n→ 回 \"error: cannot dispatch followup ... source task settlement failed.\"，followup_dispatched\n永久停在 false，該 job 會每班重複出現在 --pending-followup。\n\n精確機制（本次讀碼確認，非推測）：\n- scripts/compute_queue.py:3033-3058 mark_under_receipt_lock：job 帶 source_task_id 時，\n  必須 _release_collected_source_task 回 True（或已 pending_queue_commit）才肯寫\n  followup_dispatched。\n- scripts/compute_queue.py:2951-2962 _release_collected_source_task 的前置條件包含\n  task.status == \"awaiting_agent_job\" 且 compute_job_id == job.id 且 blocked_reason 在\n  {external_compute_receipt_pending_collection, external_compute_job_running}。\n- complete 把 status 改成 succeeded 並清掉 compute_job_id/blocked_reason → 上述條件永久\n  不可能再成立。沒有任何 idempotent 補救路徑：mark-followup-dispatched 只認 release 成功。\n\n也就是說這不是「順序建議」而是**單向不可逆閘**：正確順序（先 mark-followup-dispatched\n讓 release 把 task 放回 pending，再 complete）沒有寫在任何 CLI help、錯誤訊息或 PHASE A\nprompt 裡，錯一次就不可回復。\n\n現有的唯一修復入口 reconcile-bindings 在 worker 持鎖時直接拒絕\n（\"worker already running (lock held); cannot reconcile safely\"），本班無法執行。\n\n建議根因方向（供修復者裁決，本班未動 compute_queue.py — platform_ops 需 supervisor 預派）：\n1. mark-followup-dispatched 對「source task 已終局且 followup 未 dispatch」應可接受為合法\n   收尾（terminal source task 本來就代表 collection 已完成），而非硬失敗；\n2. 或 complete 端在 task 仍綁未 dispatch 的 followup job 時先行 release / 擋下並提示順序；\n3. 錯誤訊息至少要印出正確順序與 reconcile-bindings 補救指令。",
     "third_instance_20260728": "[第三次實例 — 同班 2026-07-28 22:30 CST]\njob=compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876\n(completed)，source_task=K1708_gatecert_s14_rerun 已為 failed（終局）→\nmark-followup-dispatched 同樣回 \"source task settlement failed\"，Codex round-4 的\nVERDICT: FAIL 裁決無法經正規通道帶出。本班改以新開任務保存該裁決內容\n（K1708 provenance 測試只驗 code SHA 一案），但這正說明缺口的實際代價：\n**一份已經產出的審查結論，因為 source task 早一步被結算，就失去了它的派工通道。**\n\n[反向驗證 — 正確順序確實可行]\n同班在 assign_99f4b3bf 與 assign_d696156d 上先跑 mark-followup-dispatched 再處理 source\ntask，兩次都成功（task 由 awaiting_agent_job 釋回 pending，再由新 job 重新綁定）。\n故根因確認為「操作順序不可逆」而非 CLI 損壞：先 release 一切正常，先 complete 永久卡死。\n建議修復時把這條順序寫進 CLI help、錯誤訊息與 PHASE A prompt，並讓 complete 端在 task\n仍綁著未 dispatch 的 followup job 時主動擋下或先行 release。",
-    "evidence_20260729_slot1": "本班（2026-07-29 00:07 CST）收件時取得 4 筆新實例：7 筆 pending followup 有 4 筆 mark-followup-dispatched 回 \"source task settlement failed\"。(1) agent-brief_k1715_recert2-e2b9fd src=K1715 source_task_settlement=null（從未寫入）；(2) agent-brief_k1731_rev9-87d87e src=assign_k1731_rev9 已 failed；(3) compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876 src=K1708_gatecert_s14_rerun 已 failed；(4) agent-brief_k1734_spec_finalize-2c769e src=assign_04212462 已 succeeded 且 settlement 停在 pending_collection。三筆 source 已終局、一筆 settlement 從未寫入，兩種路徑都導致 followup 永久不可 dispatch。內容已分別記入對應 task result，不會遺失。"
+    "evidence_20260729_slot1": "本班（2026-07-29 00:07 CST）收件時取得 4 筆新實例：7 筆 pending followup 有 4 筆 mark-followup-dispatched 回 \"source task settlement failed\"。(1) agent-brief_k1715_recert2-e2b9fd src=K1715 source_task_settlement=null（從未寫入）；(2) agent-brief_k1731_rev9-87d87e src=assign_k1731_rev9 已 failed；(3) compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876 src=K1708_gatecert_s14_rerun 已 failed；(4) agent-brief_k1734_spec_finalize-2c769e src=assign_04212462 已 succeeded 且 settlement 停在 pending_collection。三筆 source 已終局、一筆 settlement 從未寫入，兩種路徑都導致 followup 永久不可 dispatch。內容已分別記入對應 task result，不會遺失。",
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:08:30.684585+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:08:31.006864+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:14:48.664701+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T17:08:31.006849+00:00",
+    "completed_at": "2026-07-28T17:14:48.664683+00:00",
+    "result": "contained pending remote CI: commit e47f8b755 makes mark-followup-dispatched order-independent across current owner, terminal source, already-pending source, and newer owner while missing/invalid source remains fail-closed. 93 adjacent tests + critical lint/compile/diff-check passed. Live repaired 4 stranded receipts (K1715/K1731/K1734/K1708); pending-followup count read back 0; no research rerun or duplicate notification."
   },
   {
     "id": "assign_17d6da38",
@@ -53725,8 +53756,6 @@
     "created_at": "2026-07-28T13:23:39.649139+00:00",
     "parent_task_id": "assign_17d6da38",
     "created_by": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
-    "compute_job_id": "agent-brief_k1734_spec_finalize-2c769e",
-    "blocked_reason": "external_compute_receipt_pending_collection",
     "status_history": [
       {
         "ts": "2026-07-28T13:24:35.363414+00:00",
@@ -53743,9 +53772,9 @@
       }
     ],
     "result": "dispatched to compute job agent-brief_k1734_spec_finalize-2c769e; awaiting PHASE A collection\n\nPHASE A collect_completed 驗收通過（job agent-brief_k1734_spec_finalize-2c769e, exit 0）。三方 sha 一致：reproduce_spec.entrypoint = K1734_results.code_trace = disk k1734.py = cc8045ac3f33ce38265f351310ddbd84c9588af653afeda8cad76e15b37c635f / 44339 bytes（K1708 spec-drift 類缺陷在此案不存在）。README 已寫 §p 值口徑（8 個 BH-FDR p 值逐一標單尾/雙尾 + CW p 加倍保守重跑，H3_oos_cw_mse 調整後 p=0.0401<0.05 仍拒斥）。check_experiment_artifacts.py 現僅剩 knowledge 條目未寫 — 依 gate 任務 assign_12a2f9ba 設計，knowledge 必須等 primary-path Codex 複審 PASS + merge 後由主線程寫，非本任務 scope。",
-    "compute_started_at": "2026-07-28T13:49:46Z",
-    "compute_finished_at": "2026-07-28T13:55:58Z",
-    "completed_at": "2026-07-28T14:11:25.886631+00:00"
+    "completed_at": "2026-07-28T14:11:25.886631+00:00",
+    "compute_released_at": "2026-07-28T17:12:21Z",
+    "compute_release_reason": "terminal_source_task_settled"
   },
   {
     "id": "assign_280ec9c5",
@@ -53753,11 +53782,30 @@
     "description": "證據（2026-07-28 10:45:02-03Z，四個 job 於 worker 撿起後 1 秒內死亡）：\n- agent-brief_k1812_fix-a18b38 stderr: \"[run_agent_job] provider policy denied spawn: model 'claude-opus-4-8' is not registered for 'claude-cli'\"，exit=1\n- agent-brief_k1734_remediation-763606: 同上，exit=1\n- agent-brief_k1715_recert2-e2b9fd / agent-brief_k1731_rev9-87d87e: exit=-2（SIGINT），args 同樣凍結 --model claude-opus-4-8\n- 四個 job 分別 queued 於 2026-07-27T00:08 / 02:46 / 14:17 / 16:17Z，等於 K1715 re-cert、K1731 rev9、K1734 nested-DM 修正、K1812 block-permutation 修正四份研究工作靜默停擺 24-34 小時。\n- 統計：storage/ops/compute_queue/ 內 73 個 job 曾以 claude-opus-4-8 成功完成 → 該 model id 是在這批 job 入列後才從 provider registry 退役；job spec 凍結了一個之後失效的 model。\n\n根因層級 = 流程契約：enqueue 端把 model id 凍進 job spec，spawn 端才驗證註冊狀態，中間沒有任何 revalidation 或 remap；失敗後 requeue 又以 failure_class=policy_denial 拒絕（該 gate 本身是對的 — 它無法證明 agent 沒啟動），於是唯一出路是人工 triage，實務上就是無限期擱置。\n\n要求的根治（不是重跑）：\n1. enqueue-agent 時對 --model 做 registry 驗證，未註冊直接拒絕入列（fail fast，不要讓錯誤活到 24h 後）。\n2. spawn 前若發現凍結 model 已退役，走 canonical remap（例如 model_router 的當前 cli_flag）並在 job record 留 remap receipt，而不是直接 policy_denial 廢掉。\n3. policy_denial 的 failure_class 加一個可證明「agent 從未 spawn」的子類（stdout 只有 start/denied 兩行、無 job_metadata、artifact 未動），讓 requeue 對這一類安全放行。\n4. 加測試覆蓋：queued job 帶已退役 model id → 不得靜默 fail。\n\n本班（hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45）已止血（contained，非 root_cause_fixed）：三個 job 以現行 claude-opus-5 重新 enqueue（agent-rebrief_*-759bec / -3dd25a / -dc91a5，沿用原 worktree、原 brief snapshot、原 result-artifact 契約），source task K1715 / K1734 / K1726 已重新綁定 awaiting_agent_job；K1731 rev9 不重派（已被 slot-3 的 rev11 job agent-brief_k1731_rev11_freeze_integrity-1fc0fd 取代）。\n\n殘留待本任務一併處理：agent-brief_k1715_recert2-e2b9fd 與 agent-brief_k1731_rev9-87d87e 兩筆舊 receipt 仍留在 compute_queue --pending-followup（followup_dispatched=false）。mark-followup-dispatched 會 fail，因為 source task 已被新 job 合法接手、舊 job 無法再 settle 它。這是 receipt 生命週期缺口：source task 已轉手時，舊 receipt 應可標為 superseded 而非永久 pending，否則每一班 PHASE A 都會重新 triage 同兩筆。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-28T13:23:58.943475+00:00",
     "created_by": "hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45",
-    "collision_gate_gap": "第二個 root-cause 發現（2026-07-28 21:24 本班實測）：enqueue-agent 的 collision gate 只以 source_task_id 為 key，不看 --cwd。本班 agent-rebrief_..._k1734...-3dd25a（src=K1734）與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e（src=assign_04212462）兩個 job 同時排入同一個 worktree /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734，gate 全程沒擋。若 worker 平行撿起兩者，兩個 agent 會同時改寫 experiments/k1734/ → 產物污染且無法歸因。本班已 cancel 自己那筆（保留 slot-1 的），K1734 已釋回 pending，但 gate 必須改成同時對 (source_task_id, cwd) 兩個 key 判重。"
+    "collision_gate_gap": "第二個 root-cause 發現（2026-07-28 21:24 本班實測）：enqueue-agent 的 collision gate 只以 source_task_id 為 key，不看 --cwd。本班 agent-rebrief_..._k1734...-3dd25a（src=K1734）與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e（src=assign_04212462）兩個 job 同時排入同一個 worktree /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734，gate 全程沒擋。若 worker 平行撿起兩者，兩個 agent 會同時改寫 experiments/k1734/ → 產物污染且無法歸因。本班已 cancel 自己那筆（保留 slot-1 的），K1734 已釋回 pending，但 gate 必須改成同時對 (source_task_id, cwd) 兩個 key 判重。",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T17:16:01.657283+00:00",
+    "claim_expires_at": "2026-07-28T19:16:01.657283+00:00",
+    "claim_session_id": "a9223a4a45df",
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:16:01.657301+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:16:01.953687+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T17:16:01.953672+00:00"
   },
   {
     "id": "assign_12a2f9ba",
@@ -53850,7 +53898,7 @@
     "title": "K781: write general-audience article [retry-v4] (auto-discovered uncovered K)",
     "description": "K K781 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K781 [NULL]：Multiplicative Volatility Factor(MVF,5參數:σ²=exp(f_t)×g_t)在SPY日頻r²(Patton 2011 proxy-robust)上是否優於GJR-GARCH。README為空白樣板，結論取自k781_mvf_results.json。資料yfinance，2007-01-04~2026-03-31，OOS 2009-12-24~2026-03-31(N_oos=4090,N_total=4840)。QLIKE排名：GJR-GARCH=1.536481(第1)、MVF=1.549 Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 3,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -53866,14 +53914,37 @@
       "retry-v4"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-28T13:24:54+00:00"
+    "created_at": "2026-07-28T13:24:54+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:13:02.976184+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:13:07.787751+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:14:56.641452+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      }
+    ],
+    "started_at": "2026-07-28T17:13:07.787734+00:00",
+    "completed_at": "2026-07-28T17:14:56.641419+00:00",
+    "result": "not_written; reason=arc_covered_no_new_angle（刻意不產出，非執行失敗）。第 4 次獨立複驗仍成立。證據：check_arc_dedup.py --k-id k781 --audience general 回 clean（對本案持續 false negative）；K781 程式化回讀 = SPY r²(Patton 2011)、OOS 2009-12-24~2026-03-31、N_oos=4090、QLIKE GJR-GARCH 1.536481(#1) vs MVF 1.549047(#2)、Harvey t=0.6941 FAIL → arc「頂刊新模型沒打贏老模型、統計上打平」；層 2 feed grep(1898 篇, general+published) 命中同構 mile_a8006dd2(07-27) / mile_496e7dce(07-27) / mile_d9ff126f(07-21)，備選角度亦被 mile_16c9f784 / mile_928eade8 覆蓋。系統性缺陷（未修、無 open 追蹤任務）：refill_task_pool.py K-coverage 發掘只驗『該 K 有無文章』不驗 narrative arc → 對 arc-covered 的 K 無限重生（K781 v1-v4、K672 v4、K1327 同病）；且 check_arc_dedup.py 對本案 false negative + publish 端 arc-dedup 自 2026-06-23 warn-only = 此 arc 目前無機械防線。兩者皆 platform_ops，本 slot 受 supervisor_preassignment_required 擋下，未繞過。"
   },
   {
     "id": "K1477_article_general_v2",
     "title": "K1477: write general-audience article [retry-v2] (auto-discovered uncovered K)",
     "description": "K K1477 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1477 [CONDITIONAL_PASS]: SPY 0DTE時代波動結構轉變檢驗，yfinance 2018-01-03至2026-06-10(n=2120)，外生breakpoint=2022-05-02。隔夜平方報酬均值7.95e-05→4.31e-05(約-45.8%)，日內平方報酬8.67e-05→7.95e-05(約-8.3%)，Parkinson range variance 9.84e-05→7.23e-05(約-26.5%)：兩者皆降但隔夜降更快。intraday_share_oc從0.553升至0.584(Welch p=0.0 Canonical evidence: experiments/k1477/k1477_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -53889,14 +53960,37 @@
       "retry-v2"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-28T13:24:56+00:00"
+    "created_at": "2026-07-28T13:24:56+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:22:56.217651+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:22:56.497430+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:23:51.055193+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      }
+    ],
+    "started_at": "2026-07-28T17:22:56.497412+00:00",
+    "completed_at": "2026-07-28T17:23:51.055169+00:00",
+    "result": "not_written; reason=arc_covered（依 check_arc_dedup hard-block，未用 dup_waiver 繞過）。gate 回 verdict=block_arc_dup，arc_duplicates[0]=mile_74b80c0d（2026-07-08『VIX 剩十幾點，賣波動收保費最誘人：當波動保險公司前，先過四道生存體檢』）match_level=duplicate / match_reason=descriptive_strict，另 3 筆 near_miss（mile_abe9e68f / mile_dba21f7a / mile_d3993bd1）。誠實併記疑似誤擋（不作改判依據，供 owner 裁決）：K1477 主題為 SPY 0DTE 時代波動結構轉變（n=2120、breakpoint 2022-05-02、隔夜平方報酬 7.95e-05→4.31e-05 約 -45.8%、日內 8.67e-05→7.95e-05 約 -8.3%、Parkinson 9.84e-05→7.23e-05 約 -26.5%、intraday_share_oc 0.553→0.584），與既有那篇『賣波動策略生存體檢清單』讀者故事不同；gate 自吐欄位顯示 narrative_axis 其實不一致（K1477=methodology_robustness vs 既有=regime_signal），是靠 descriptive+intraday+單一共同 mechanism(vol_term_structure) 的粗簽章判 duplicate，屬 2026-06-23 把 publish 端降 warn-only 的那類 false positive。若 owner 認為值得出稿，正規路徑是後續班次於 publish 端以 details['dup_waiver'] 明示豁免。本班 4 張 daily_article 全數不可產出：K781v4/K1680/K1698 gate 回 clean 卻被層 2 grep 判 arc 已覆蓋（false negative x3），本張 hard-block 疑似 false positive x1 —— 同一支 gate 兩個方向都出錯，而 publish 端已 warn-only。"
   },
   {
     "id": "K1698_article_general",
     "title": "K1698: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1698 has verdict signal (score=1, reasons=['robust inference']) but no general article in feed.json.  Verdict preview: K1698 [FAIL/H2_REJECTED]：K1684 因方法論缺陷被 BLOCK 後的合規重跑，測 K850/K854『HAR QLIKE大勝 GJR + VaR大敗』敘事是否成立，用重建的 gap-complete aligned RV（單一active合約、13:30(D-1)→13:30(D)視窗、108個roll日、0個anchor缺失）。事前寫死gate：腿1要求 aligned target(0050 r²) 上 HAR vs robust GJR(120-start multistart) QLIKE DM t<-3。實際結果：HA Canonical evidence: experiments/k1698/k1698_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 4,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -53911,7 +54005,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-28T13:25:05+00:00"
+    "created_at": "2026-07-28T13:25:05+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:20:33.254852+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:20:33.533707+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      },
+      {
+        "ts": "2026-07-28T17:21:26.302362+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-1d0633af00cd42bda9e7c846a8f53152"
+      }
+    ],
+    "started_at": "2026-07-28T17:20:33.533690+00:00",
+    "completed_at": "2026-07-28T17:21:26.302336+00:00",
+    "result": "not_written; reason=arc_covered_no_new_angle（刻意不產出，非執行失敗）。層 1 check_arc_dedup 回 clean（本班第 3 次同案漏判）。K1698 程式化回讀：0050.TW、OOS 2023-03-01~2024-12-31、n_oos=450、GJR/RGL 改 120 起點 multistart robust 估計後 GATE_VERDICT=H2_REJECTED —— 事前登記腿 1 要求 HAR vs robust GJR 的 QLIKE DM t<-3，實測 t=1.4694，K850/K854 的『HAR 大勝』分歧被判為 construction artifact；k854_replication_bridge 14 格 11 格吻合，3 個不吻合全在 1% alpha 的 GJR 系，正是『GJR 被好好估計』所致。層 2 feed grep 判定 arc=『自家舊發現換一個方法學旋鈕重做就不成立』11 天內已發 5 篇：mile_add5ea20（結構孿生，改預測時點就沒了）、mile_be7666e2、mile_16c9f784、mile_badbc47b、mile_fa098fc8。原以為『多起點最佳化/GARCH MLE 局部極值』可撐新角度，實為同一故事殼內的技術細節，依 publishing.md『標題不同、方向相反也算』不構成新 arc。另 GATE_ROUTE 自述定位為 FRL/Journal of Forecasting SHORT NOTE、『the diagnostic is the contribution』= research-audience 方法學診斷，本就不是 general 版題材，較適合 research 版或論文短註。與 K781_article_general_v4 / K1680_article_general 同屬 refill K-coverage 只驗『該 K 有無文章』不驗 narrative arc 所產生的 arc-dup 任務（本班第 3 例）。"
   },
   {
     "id": "assign_8f1165f3",
@@ -54077,7 +54194,7 @@
     "description": "Root cause of ci-red-30339013855 / ci-red-30361505394. dispatch-settle --disposition remediation copies free-form workspace diagnostics into blocked_reason, violating the frozen canonical vocabulary and causing Test Suite + Data Baseline gates to fail. Implement via existing Matt flow: public seam first; RED regression; producer fix; class sweep of all dispatch-settle dispositions; auditable one-time migration preserving original values; validate real queue residue=0; Standards/Spec review; local/live read-back. Declared implementation paths: scripts/task_pool_claim.py, scripts/migrate_status_vocab.py, tests/test_task_pool_claim.py, tests/test_migrate_status_vocab.py. Do not close #46; status remains contained until GitHub main CI reads green.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-28T16:48:49.178260+00:00",
     "payload": {
@@ -54093,10 +54210,6 @@
     "parent_task_id": "ci-red-30361505394",
     "created_by": "codex-vscode",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T16:48:54.818098+00:00",
-    "claim_expires_at": "2026-07-28T18:48:54.818098+00:00",
-    "claim_session_id": "1f5b73ae4571",
     "status_history": [
       {
         "ts": "2026-07-28T16:48:54.818117+00:00",
@@ -54109,14 +54222,23 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:06:00.767137+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-28T16:48:58.160302+00:00"
+    "started_at": "2026-07-28T16:48:58.160302+00:00",
+    "completed_at": "2026-07-28T17:06:00.767117+00:00",
+    "result": "contained: root cause fixed in b9e09f624 — dispatch remediation now stores canonical awaiting_prerequisite_fix, preserves diagnostic in result/blocked_note, and applies bounded expiry. Exact two-row migration is auditable. Local 142 tests passed; live queue validator status=0/3530 and blocked_reason=0/3530. GitHub main CI read-back pending; issue #46 remains open.",
+    "issue_disposition": "contained"
   },
   {
     "id": "assign_aaf9449f",
     "title": "PHASE-Z 卡住檔案 incident（6a389c70714eae38）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 34 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 34 班\n- scripts/tests/test_git_writer_lock.py — 3 班\n- src/volpred/ops/next_tasks.py — 34 班\n- storage/logs/trending_primary_source_verification.jsonl — 25 班\n- storage/memory/knowledge.json — 32 班\n- storage/reports/INDEX.md — 23 班\n- storage/reports/index.json — 23 班\n- storage/strategy_metrics.json — 23 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T170122631379Z:<路徑>`",
+    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 35 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 35 班\n- scripts/tests/test_git_writer_lock.py — 4 班\n- src/volpred/ops/next_tasks.py — 35 班\n- storage/logs/trending_primary_source_verification.jsonl — 26 班\n- storage/memory/knowledge.json — 33 班\n- storage/reports/INDEX.md — 24 班\n- storage/reports/index.json — 24 班\n- storage/strategy_metrics.json — 24 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T170122631379Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T172557846534Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -54136,22 +54258,34 @@
         "storage/strategy_metrics.json"
       ],
       "streaks": {
-        "docs/error_log.md": 34,
-        "scripts/tests/test_git_writer_lock.py": 3,
-        "src/volpred/ops/next_tasks.py": 34,
-        "storage/logs/trending_primary_source_verification.jsonl": 25,
-        "storage/memory/knowledge.json": 32,
-        "storage/reports/INDEX.md": 23,
-        "storage/reports/index.json": 23,
-        "storage/strategy_metrics.json": 23
+        "docs/error_log.md": 35,
+        "scripts/tests/test_git_writer_lock.py": 4,
+        "src/volpred/ops/next_tasks.py": 35,
+        "storage/logs/trending_primary_source_verification.jsonl": 26,
+        "storage/memory/knowledge.json": 33,
+        "storage/reports/INDEX.md": 24,
+        "storage/reports/index.json": 24,
+        "storage/strategy_metrics.json": 24
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260728T170122631379Z"
+        "refs/volpred/quarantine/20260728T170122631379Z",
+        "refs/volpred/quarantine/20260728T172557846534Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-28T17:02:13.254079+00:00",
-      "last_seen_at": "2026-07-28T17:02:13.254079+00:00"
+      "last_seen_at": "2026-07-28T17:26:38.290787+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T17:25:57.918347+00:00",
+      "deferred": [
+        "scripts/tests/test_git_writer_lock.py: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-28T17:26:38.290787+00:00"
   }
 ]
