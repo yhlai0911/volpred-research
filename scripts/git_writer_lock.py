@@ -1120,8 +1120,9 @@ def _read_untrack_intent(repo: Path) -> dict[str, object] | None:
     if not path.exists():
         return None
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        raw = _read_regular_working_identity(path)[0]
+        payload = json.loads(raw)
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
         raise ValueError("durable runtime-untrack intent is unreadable") from exc
     if not isinstance(payload, dict) or payload.get("schema_version") != _UNTRACK_SCHEMA:
         raise ValueError("durable runtime-untrack intent schema is invalid")
@@ -1252,7 +1253,12 @@ def _recover_untrack_intent(
     if _sha256(after_index) != intent["after_index_sha256"]:
         raise ValueError("durable after-index backup hash drifted")
     mode = intent.get("index_mode")
-    if isinstance(mode, bool) or not isinstance(mode, int):
+    if (
+        isinstance(mode, bool)
+        or not isinstance(mode, int)
+        or mode < 0
+        or mode > 0o777
+    ):
         raise ValueError("durable runtime-untrack index mode is invalid")
     task_ids = intent.get("task_ids")
     if (
@@ -1334,13 +1340,21 @@ def _recover_untrack_intent(
     )
     if remaining:
         raise ValueError("runtime targets remain in real index after recovery")
-    _settle_commit_tasks(
-        repo=repo,
-        actor=str(intent["actor"]),
-        task_ids=set(task_ids),
-        commit_sha=intended_head,
-        commit_parent_sha=original_head,
-    )
+    try:
+        _settle_commit_tasks(
+            repo=repo,
+            actor=str(intent["actor"]),
+            task_ids=set(task_ids),
+            commit_sha=intended_head,
+            commit_parent_sha=original_head,
+        )
+    except Exception as exc:  # noqa: BLE001 — Git state is durable; the task receipt can be retried independently.
+        intent["settlement_error"] = f"{type(exc).__name__}: {exc}"
+        print(
+            "[git-writer-lock] warning: runtime-untrack task settlement "
+            f"failed after durable commit: {exc}",
+            file=sys.stderr,
+        )
     _archive_untrack_intent(repo, intent)
     return intent
 
