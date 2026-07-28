@@ -235,6 +235,33 @@ def test_claim_job_is_atomic_second_claimer_refused(tmp_path: Path, monkeypatch)
     assert module._claim_job(path, context="test-claim") is None
 
 
+def test_claim_receipt_captures_operations_core_dispatch_identity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The downstream job receipt must prove which Core fire dispatched it."""
+    queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
+    queue_dir.mkdir(parents=True)
+    path = _queued_stub_job(queue_dir, module.LOG_DIR, "core-dispatched")
+    monkeypatch.setenv("VOLPRED_SCHEDULE_OWNER", "operations_core")
+    monkeypatch.setenv("VOLPRED_SCHEDULE_JOB_ID", "volpred-compute-worker")
+    monkeypatch.setenv("VOLPRED_SCHEDULE_FIRE_KEY", "g1:volpred-compute-worker:abc")
+    monkeypatch.setenv("VOLPRED_SCHEDULED_FOR", "2026-07-28T23:45:00Z")
+
+    claimed = module._claim_job(path, context="test-core-dispatch")
+
+    assert claimed is not None
+    assert claimed["schedule_dispatch"] == {
+        "owner": "operations_core",
+        "job_id": "volpred-compute-worker",
+        "fire_key": "g1:volpred-compute-worker:abc",
+        "scheduled_for": "2026-07-28T23:45:00Z",
+    }
+    assert json.loads(path.read_text())["schedule_dispatch"] == claimed[
+        "schedule_dispatch"
+    ]
+
+
 def test_resolve_max_parallel_prefers_cli_then_config_then_default(
     tmp_path: Path,
     monkeypatch,
@@ -244,13 +271,29 @@ def test_resolve_max_parallel_prefers_cli_then_config_then_default(
     cfg_dir.mkdir()
     cfg = cfg_dir / "runtime_schedules.json"
     cfg.write_text(json.dumps(
-        {"cron_jobs": [{"id": "volpred-compute-worker", "max_parallel": 2}]}
+        {
+            "system_crontab": {
+                "items": [
+                    {"id": "volpred-compute-worker", "max_parallel": 2},
+                ]
+            },
+            "cron_jobs": [
+                {
+                    "id": "volpred-compute-worker",
+                    "max_parallel": 9,
+                    "status": "retired",
+                }
+            ],
+        }
     ), encoding="utf-8")
 
     assert module._resolve_max_parallel(5) == 5  # CLI beats config
-    assert module._resolve_max_parallel(None) == 2  # config beats default
+    assert module._resolve_max_parallel(None) == 2  # active Core job beats retired row
 
-    cfg.write_text(json.dumps({"cron_jobs": []}), encoding="utf-8")
+    cfg.write_text(
+        json.dumps({"system_crontab": {"items": []}, "cron_jobs": []}),
+        encoding="utf-8",
+    )
     assert module._resolve_max_parallel(None) == module.DRAIN_MAX_PARALLEL_DEFAULT
 
 

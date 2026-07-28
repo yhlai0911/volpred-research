@@ -4,9 +4,39 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from scripts.operations_core_scheduler import build_shadow_report, legacy_success_evidence
+from scripts.operations_core_scheduler import (
+    DEFAULT_CONFIG,
+    build_shadow_report,
+    legacy_success_evidence,
+)
+from volpred.ops.schedule_materialization import (
+    load_schedule_jobs,
+    load_schedule_policy,
+)
 
 UTC = timezone.utc
+
+
+def test_compute_worker_clock_is_owned_by_operations_core() -> None:
+    """The active queue executor must not live only in the legacy cron registry."""
+    config = json.loads(DEFAULT_CONFIG.read_text(encoding="utf-8"))
+    jobs = {job.id: job for job in load_schedule_jobs(config)}
+    policy = load_schedule_policy(config)
+    legacy = {
+        row["id"]: row
+        for row in config["cron_jobs"]
+        if isinstance(row, dict) and row.get("id")
+    }
+
+    assert jobs["volpred-compute-worker"].command.endswith(
+        "/cron_compute_worker.sh"
+    )
+    assert policy.owner_for("volpred-compute-worker") == "operations_core"
+    assert policy.activation_for("volpred-compute-worker") == datetime(
+        2026, 7, 28, 23, 45, tzinfo=UTC
+    )
+    assert jobs["volpred-compute-worker"].timeout_seconds <= 60
+    assert legacy["volpred-compute-worker"]["status"] == "retired"
 
 
 def test_shadow_legacy_evidence_uses_log_banner_not_only_marker(

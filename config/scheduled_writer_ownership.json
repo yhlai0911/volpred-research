@@ -500,7 +500,12 @@
     "com.volpred.check-alerts": {"job_id": "check_alerts", "status": "active"},
     "com.volpred.collect-tw-data": {"job_id": "collect_tw_data", "status": "active"},
     "com.volpred.collect-us-data": {"job_id": "collect_us_data", "status": "active"},
-    "com.volpred.compute-worker": {"job_id": "volpred-compute-worker", "status": "active"},
+    "com.volpred.compute-worker": {
+      "job_id": "volpred-compute-worker",
+      "status": "retired",
+      "retired_at": "2026-07-28T23:45:00Z",
+      "reason": "Issue #46 transfers the only clock to Operations Core; the queue executor and its exact output-path delivery contract remain active."
+    },
     "com.volpred.daily-checkup": {"job_id": "daily_checkup", "status": "active"},
     "com.volpred.daily-update": {"job_id": "daily_update", "status": "active"},
     "com.volpred.daily-update-intraday": {"job_id": "daily_update_intraday", "status": "active"},

@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-29T06:45:00+08:00",
+    "updated_at": "2026-07-29T07:05:00+08:00",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。 【2026-07-27 shadow 觀察結論（scripts/crosscheck_pregate_outcomes.py --invoker supervisor --since 2026-07-20，即 capacity+novelty rewire 上線後）】新 gate 於 162 班中僅 would_skip 2 班（1.2% skip 率），且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2＝100% 誤判，反例：2026-07-21T07:08 / 08:08 UTC）。雙重不合格：skip 率過低不足以省 token；skip 時全為誤判，遠超 flip 門檻 strict_mismatch_rate≤0.10。判定：維持 shadow，不翻 enforce；live A/B（60min vs 15min）因 enforce 未上線暫緩。後續：gate 需補訊號提高 skip precision/recall 後再評，估算值（15min≈1.84x）尚未由 live A/B 實測取代。"
   },
   "schedule_materialization": {
@@ -48,6 +48,9 @@
       },
       "growth_experiment_lifecycle": {
         "activated_at": "2026-07-28T22:45:00Z"
+      },
+      "volpred-compute-worker": {
+        "activated_at": "2026-07-28T23:45:00Z"
       }
     },
     "job_defaults": {
@@ -83,6 +86,13 @@
         "retry_delay_seconds": 60,
         "lease_seconds": 180,
         "timeout_seconds": 120
+      },
+      "volpred-compute-worker": {
+        "catch_up": "skip",
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "lease_seconds": 120,
+        "timeout_seconds": 60
       },
       "boss_report_4h": {
         "catch_up": "skip",
@@ -715,6 +725,30 @@
           "cron_agent_dispatch_tick.sh",
           "scripts.dispatch_supervisor.trigger",
           "dispatch-trigger.sock"
+        ]
+      },
+      {
+        "id": "volpred-compute-worker",
+        "label": "Operations Core compute queue drain/restart insurance",
+        "cron": "*/15 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_compute_worker.sh",
+        "log_path": "storage/logs/cron/compute_worker.log",
+        "description": "Issue #46 canonical compute executor trigger. Operations Core is the only clock and dispatches a detached work-conserving compute queue drain every 15 minutes as restart insurance; the wrapper itself returns within the 60-second scheduler timeout. The queue-wide flock preserves one drain loop, while each queued job keeps its own timeout, provider guard, immutable receipt, schedule fire identity and output contract. The legacy com.volpred.compute-worker LaunchAgent is retired after a natural Operations Core receipt and queue execution read-back.",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "mechanism": "launchd",
+        "launchagent_label": "com.volpred.compute-worker",
+        "max_parallel": 3,
+        "staleness_expected_minutes": 30,
+        "legacy_retirement_gate": {
+          "type": "schedule_and_compute_receipt",
+          "schedule_receipts_path": "storage/ops/schedule_receipts.json",
+          "proof_receipt_path": "storage/ops/compute_queue/issue46-operations-core-compute-smoke.json"
+        },
+        "matchers": [
+          "cron_compute_worker.sh",
+          "compute_queue.py run-loop",
+          "compute_worker.log"
         ]
       },
       {
@@ -1760,7 +1794,10 @@
       "canonical_script": "scripts/cron_compute_worker.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_compute_worker.sh",
       "installed_at": "2026-05-12T06:41:51Z",
-      "updated_at": "2026-07-20T05:10:00Z"
+      "updated_at": "2026-07-20T05:10:00Z",
+      "status": "retired",
+      "retired_at": "2026-07-28T23:45:00Z",
+      "reason": "Issue #46 moves the clock into Operations Core; this row remains only as a rollback/audit receipt and is rejected as an active policy source."
     }
   ],
   "daemons": [
@@ -1787,6 +1824,27 @@
       },
       "since": "2026-07-04T16:36:00+08:00",
       "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, max_slots worker pool, retry/failover ladder and cohort-drained PHASE-Z safety commit. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
+    },
+    {
+      "id": "telegram-poll",
+      "type": "launchd_keepalive_daemon",
+      "label": "com.volpred.telegram-poll",
+      "plist": "ops/launchd/com.volpred.telegram-poll.plist",
+      "entrypoint": "~/.volpred/bin/cron_telegram_poll.sh",
+      "state_file": "storage/ops/telegram_state.json",
+      "log": "~/.volpred/logs/telegram_poll_launchd.log",
+      "since": "2026-07-02T00:00:00+08:00",
+      "description": "Canonical always-on Telegram ingress daemon. It has no periodic schedule clock and remains an explicit control-plane dependency during Operations Core schedule retirement."
+    },
+    {
+      "id": "work-dashboard",
+      "type": "launchd_keepalive_daemon",
+      "label": "com.volpred.work-dashboard",
+      "plist": "ops/launchd/com.volpred.work-dashboard.plist",
+      "entrypoint": "uv run python scripts/work_dashboard_server.py",
+      "log": "~/.volpred/logs/work_dashboard.log",
+      "since": "2026-07-02T00:00:00+08:00",
+      "description": "Canonical host-only interactive dashboard daemon. It has no periodic schedule clock; repository writes are delegated to the canonical task writer."
     }
   ]
 }
