@@ -18,6 +18,7 @@ SCRIPTS = ROOT / "scripts"
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
+import check_model_roster as roster  # noqa: E402
 import model_router as mr  # noqa: E402
 
 
@@ -102,3 +103,55 @@ def test_active_claude_routes_use_generation_5_models() -> None:
         "claude-opus-5",
         "claude-sonnet-5",
     ]
+
+
+def test_roster_scanner_catches_typed_tuple_and_role_swap_pins(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    root = tmp_path / "repo"
+    config = root / "config" / "models.json"
+    script = root / "scripts" / "live.py"
+    config.parent.mkdir(parents=True)
+    script.parent.mkdir(parents=True)
+    config.write_text("{}\n", encoding="utf-8")
+    script.write_text(
+        """\
+ROUTES = (("opus", "claude-opus-4-8"),)
+def dispatch(model: str = "claude-opus-4-8"):
+    return model
+OPUS_MODEL = "claude-sonnet-5"
+""",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(roster, "CONFIG", config)
+
+    findings = roster.scan_code_pins(
+        {"claude-opus-5", "claude-sonnet-5"},
+        {
+            "opus": "claude-opus-5",
+            "sonnet": "claude-sonnet-5",
+        },
+    )
+
+    assert any(
+        item["line"] == 1
+        and item["role"] == "opus"
+        and item["stale_id"] == "claude-opus-4-8"
+        and item["reason"] == "role_mismatch"
+        for item in findings
+    )
+    assert any(
+        item["line"] == 2
+        and item["stale_id"] == "claude-opus-4-8"
+        and item["reason"] == "stale_id"
+        for item in findings
+    )
+    assert any(
+        item["line"] == 4
+        and item["role"] == "opus"
+        and item["stale_id"] == "claude-sonnet-5"
+        and item["expected_id"] == "claude-opus-5"
+        and item["reason"] == "role_mismatch"
+        for item in findings
+    )

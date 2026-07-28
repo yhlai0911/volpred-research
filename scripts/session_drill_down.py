@@ -33,7 +33,7 @@ PROJECT_DIR_SLUG = CLAUDE_PROJECTS_DIR.name  # 實際使用中的目錄名稱（
 PRICING = {
     "claude-opus-5": {"input": 5.0, "output": 25.0, "cw": 10.0, "cr": 0.50},
     "claude-sonnet-5": {"input": 3.0, "output": 15.0, "cw": 6.0, "cr": 0.30},
-    "claude-opus-4-8": {"input": 5.0, "output": 25.0, "cw": 10.0, "cr": 0.50},
+    "claude-opus-4-8": {"input": 15.0, "output": 75.0, "cw": 18.75, "cr": 1.50},
     "claude-opus-4-7": {"input": 15.0, "output": 75.0, "cw": 18.75, "cr": 1.50},
     "claude-opus-4-6": {"input": 15.0, "output": 75.0, "cw": 18.75, "cr": 1.50},
     "claude-sonnet-4-6": {"input": 3.0, "output": 15.0, "cw": 3.75, "cr": 0.30},

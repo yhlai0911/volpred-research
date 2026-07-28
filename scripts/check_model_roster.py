@@ -38,10 +38,27 @@ CONFIG = Path(__file__).resolve().parent.parent / "config" / "models.json"
 _PIN_PATTERNS = [
     re.compile(r'--model\s+["\']?(claude-[\w.\-]+)'),
     re.compile(r'\b[A-Z_]*MODEL[A-Z_]*\s*=\s*["\'](claude-[\w.\-]+)["\']'),
-    re.compile(r'["\'](?:opus|sonnet|haiku|fable)["\']\s*:\s*["\'](claude-[\w.\-]+)["\']'),
     re.compile(r'\bdefault\s*=\s*["\'](claude-[\w.\-]+)["\']'),
+    re.compile(
+        r'\bmodel(?:\s*:\s*[\w\[\]|.]+)?\s*=\s*'
+        r'["\'](claude-[\w.\-]+)["\']'
+    ),
     re.compile(r'\breturn\s+["\'](claude-[\w.\-]+)["\']'),
     re.compile(r'\$\{[A-Z_]*MODEL[A-Z_]*:-?(claude-[\w.\-]+)\}'),
+]
+_ROLE_PIN_PATTERNS = [
+    re.compile(
+        r'["\'](opus|sonnet|haiku|fable)["\']\s*:\s*'
+        r'["\'](claude-[\w.\-]+)["\']'
+    ),
+    re.compile(
+        r'["\'](opus|sonnet|haiku|fable)["\']\s*,\s*'
+        r'["\'](claude-[\w.\-]+)["\']'
+    ),
+    re.compile(
+        r'\b(OPUS|SONNET|HAIKU|FABLE)[A-Z_]*MODEL[A-Z_]*\s*=\s*'
+        r'["\'](claude-[\w.\-]+)["\']'
+    ),
 ]
 _SCAN_DIRS = ("scripts", "config", "src", ".claude")
 _SCAN_SKIP = (
@@ -64,7 +81,10 @@ _SCAN_SKIP_DIRS = {
 _SCAN_EXT = (".py", ".sh", ".json", ".md", ".ts", ".js", ".tsx")
 
 
-def scan_code_pins(current_ids: set[str]) -> list[dict]:
+def scan_code_pins(
+    current_ids: set[str],
+    expected_by_role: dict[str, str] | None = None,
+) -> list[dict]:
     """Grep the codebase for hardcoded model-CHOICE IDs that are no longer current.
 
     Closes the gap the 2026-07-01 token report exposed: config/models.json's
@@ -72,6 +92,7 @@ def scan_code_pins(current_ids: set[str]) -> list[dict]:
     model_router for stale pins (hourly-dispatch was hardcoded to opus-4-7)."""
     root = CONFIG.resolve().parent.parent
     findings = []
+    seen: set[tuple[str, int, str, str]] = set()
     for d in _SCAN_DIRS:
         base = root / d
         if not base.exists():
@@ -104,12 +125,46 @@ def scan_code_pins(current_ids: set[str]) -> list[dict]:
                     for pat in _PIN_PATTERNS:
                         for mid in pat.findall(line):
                             if mid not in current_ids:
+                                key = (
+                                    str(p.relative_to(root)),
+                                    i,
+                                    mid,
+                                    "stale_id",
+                                )
+                                if key in seen:
+                                    continue
+                                seen.add(key)
                                 findings.append({
                                     "file": str(p.relative_to(root)),
                                     "line": i,
                                     "stale_id": mid,
+                                    "reason": "stale_id",
                                     "text": line.strip()[:90],
                                 })
+                    for pat in _ROLE_PIN_PATTERNS:
+                        for role, mid in pat.findall(line):
+                            role = role.lower()
+                            expected = (expected_by_role or {}).get(role)
+                            if expected is None or mid == expected:
+                                continue
+                            key = (
+                                str(p.relative_to(root)),
+                                i,
+                                mid,
+                                f"role_mismatch:{role}",
+                            )
+                            if key in seen:
+                                continue
+                            seen.add(key)
+                            findings.append({
+                                "file": str(p.relative_to(root)),
+                                "line": i,
+                                "stale_id": mid,
+                                "reason": "role_mismatch",
+                                "role": role,
+                                "expected_id": expected,
+                                "text": line.strip()[:90],
+                            })
     return findings
 
 
@@ -161,7 +216,12 @@ def main(argv: list[str]) -> int:
 
     current_ids = {v.get("id") for v in cfg.get("models", {}).values()
                    if isinstance(v, dict) and v.get("id")}
-    pins = scan_code_pins(current_ids)
+    expected_by_role = {
+        role: item["id"]
+        for role, item in cfg.get("models", {}).items()
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
+    pins = scan_code_pins(current_ids, expected_by_role)
     report["stale_code_pins"] = pins
 
     if args.json:

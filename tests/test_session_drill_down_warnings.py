@@ -69,3 +69,20 @@ def test_scan_jsonl_warns_on_unreadable_path(tmp_path: Path, capsys) -> None:
     assert "[session_drill_down] WARN JSONL file read failed; returning empty session" in err
     assert "missing.jsonl" in err
     assert "FileNotFoundError" in err
+
+
+def test_pricing_preserves_historical_opus_and_adds_generation_5() -> None:
+    mod = _load_session_drill_down_module()
+
+    assert mod.PRICING["claude-opus-4-8"] == {
+        "input": 15.0,
+        "output": 75.0,
+        "cw": 18.75,
+        "cr": 1.50,
+    }
+    assert mod.PRICING["claude-opus-5"] == {
+        "input": 5.0,
+        "output": 25.0,
+        "cw": 10.0,
+        "cr": 0.50,
+    }
