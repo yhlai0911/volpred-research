@@ -2801,3 +2801,26 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   candidate commit，未收active checkout的package／PDF／question-test WIP。
 
 Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
+
+## 2026-07-29 — T40 compute-worker clock 漏網修復（Issue #46）
+
+- 🔄 Owner audit 發現 `volpred-compute-worker` 仍只存在舊 `cron_jobs` registry，並由
+  `com.volpred.compute-worker` LaunchAgent 每 15 分直接喚醒；因此先前
+  `system_crontab` 54/54、legacy owner 0 的結論沒有涵蓋這條正式 executor clock。
+- ✅ Reconciler 現對任何非 `retired` 的 `cron_jobs` row fail closed，避免第二個
+  schedule registry 再逃出唯一 owner audit。
+- ✅ Compute worker cadence／`max_parallel` 已移入 canonical
+  `system_crontab[id=volpred-compute-worker]`；runtime resolver不再從 retired row
+  讀 active policy。
+- ✅ 07:45 natural fire
+  `operations-core-v1:volpred-compute-worker:133ccb319bd393968dde017b`
+  attempt 1／exit 0；priority-0 smoke同秒完成，receipt內的owner／job／fire key與
+  scheduler exact match，validator回讀55/55 Core、legacy 0。
+- ✅ Receipt-gated reconcile隨後bootout exact
+  `com.volpred.compute-worker`；`launchctl print`回113/not found，targeted owner audit
+  `conflicts=[]`、`dormant_legacy_surfaces=[]`。Detached Core executor與其K781
+  lazypack child在bootout後仍持續運行，證明退役的是clock而非工作。
+- ✅ 交接期間另抓到nested receipt-lock自鎖；底層改為same-thread reentrant且保留
+  cross-thread/process排他，144 tests與Matt雙review PASS。此compute clock漏網與
+  nested-lock slice為 **`root_cause_fixed_and_verified`**；Issue #46 umbrella仍需
+  其他capability與14-day clean，不在本slice冒稱關閉。

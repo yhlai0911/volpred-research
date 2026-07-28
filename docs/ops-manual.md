@@ -13,7 +13,7 @@
 | 機制 | 節奏 | 做什麼 |
 |---|---|---|
 | **dispatch-supervisor**（daemon） | 每 ≤60 秒評估 | 唯一派工引擎：挑任務、開 agent、看管執行、收屍。派工裁決集中在單一純函數（2026-07-20 H4），dry-run 預覽與真實派工**保證同一套判斷** |
-| **compute-worker** | **連續運轉**（2026-07-20 D6） | 重算力工作（回測/GARCH/bootstrap）不耗 token — 佇列有工就連續消化到空、最多 3 個平行；15 分 tick 只是「掛了自動重啟」的保險 |
+| **compute-worker** | **Operations Core 每 15 分喚醒，單次連續排空** | 重算力工作（回測/GARCH/bootstrap）不耗 token — 佇列有工就連續消化到空、最多 3 個平行；queue flock 防止重疊 drain。`cron_compute_worker.sh` 只是 executor wrapper，不是時鐘；舊 `com.volpred.compute-worker` LaunchAgent 已退役 |
 | **check-alerts** | 每小時整點 | 唯一可靠的鬧鐘：先跑到期排程（piggyback），再檢查告警條件 |
 | **dreaming + loop-health** | 每日 05:25 / 每小時 | 慢迴圈找反覆出事的模式、快迴圈量測「系統有沒有在變好」。2026-07-20 F3F5 補上兩個盲點：**每個 alert 自動留立案候選**（同類事故第二次出現時系統「記得」它是老問題，不再靠人記）；**觀察期帳本**（任何 shadow／待退役狀態逾期未決策自動升 breach，不再無限掛著） |
 

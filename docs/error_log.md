@@ -4322,3 +4322,60 @@ continuity suite **8 passed**。Production兩檔也連續重跑成功，catalog�
 owner／ACL／空search_path全符，service-role transaction E2E通過後rollback。此類
 managed owner-transfer與migration重跑失敗為
 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-29 — macOS `flock` 不會替同程序的第二個 FD 自動重入
+
+**證據化症狀**：`lazypack_async_render.py enqueue` 先取得
+`compute_queue._receipt_lock()`，再呼叫同一模組的 canonical `enqueue()`；後者以第二個
+FD 對同一 `.receipts.lock` 再做 `LOCK_EX`。macOS 會讓它等待自己而不是重入。Live
+PID 13404 因此卡在第二次 `flock`，同時阻塞已於 07:28:04 完成的 K1694 worker
+settlement；process sampling與`lsof`都顯示兩條執行緒停在同一把 receipt lock。
+
+**根因層級（跨程序 transaction contract）**：既有 `threading.RLock` 只保護 Python
+執行緒，巢狀 context仍會另開 kernel FD；程式把 process-local reentrancy與
+cross-process exclusion誤當成一個原語已同時提供。
+
+**底層修復與制度化**：receipt lock仍由 process-wide `RLock`序列化各執行緒、由
+`flock`排除其他程序；另以 thread-local depth讓同一執行緒的巢狀 transaction重用
+外層kernel lease，不再開第二個FD。最外層的所有例外路徑都會清depth並unlock。
+Regression以daemon thread實際巢狀取得兩次；舊碼在1秒後仍死鎖（RED），修正後立即
+完成，完整compute／owner／scheduler相鄰範圍 **144 passed**，Matt Spec／Standards
+雙PASS。
+
+**Live read-back**：以正式termination intent
+`435b6b8daa3f4a56aa7c38af2fc4eeb8`只終止已證實自鎖的exact PID 13404；lock由kernel
+釋放後，K1694立即寫出terminal failed receipt與source-task settlement，舊worker自然
+退出。原K781 lazypack enqueue隨後在新contract下收斂為唯一queued receipt
+`lazypack-mile_35863986`，重播只回`already queued`且沒有第二份job。此
+same-process nested-flock自鎖類根因為 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-29 — `cron_jobs` 逃出 Operations Core inventory 會製造假「legacy=0」
+
+**證據化症狀**：正式owner report宣稱全部`system_crontab` jobs已由Operations Core
+持有、legacy LaunchAgent為0，但live仍有`com.volpred.compute-worker`每15分鐘觸發。
+根因不是cutover後復活，而是compute clock只存在另一個top-level `cron_jobs` registry；
+loader與owner audit根本沒有枚舉它。
+
+**底層修復**：compute cadence、wrapper、parallelism與activation全部移入canonical
+`system_crontab`；舊row只保留`status=retired`的rollback receipt，任何active
+`cron_jobs` row都讓owner plan fail closed。Owner census另對所有loaded
+`com.volpred.*`做canonical set difference，Telegram、dispatch與host dashboard三個
+KeepAlive control daemons則顯式納入registry。Wrapper在業務動作前執行owner gate；
+Core只做60秒內detached dispatch，長job timeout與terminal receipt仍由compute executor
+擁有。
+
+**因果退役gate**：physical bootout前不只要求scheduler成功；還必須找到activation後
+的natural Core fire，並讓指定downstream compute smoke以
+`schedule_dispatch.fire_key`回指同一份success receipt。任何一邊缺失、失敗或key不同，
+`reconcile_schedule_owners --apply`都會在live mutation前拒絕。
+
+**回歸與live read-back**：compute／owner／scheduler相鄰範圍 **144 passed**，
+Matt Spec／Standards雙PASS。07:45 natural fire
+`operations-core-v1:volpred-compute-worker:133ccb319bd393968dde017b`
+attempt 1／exit 0；priority-0 smoke同秒completed／exit 0，回讀55/55 Core、legacy 0且
+fire key exact match。Gate放行後只bootout `com.volpred.compute-worker`；
+`launchctl print`回113/not found，targeted audit
+`conflicts=[]`、`dormant_legacy_surfaces=[]`，同時detached Core executor仍持續跑K781，
+證明工作未被誤停。此漏網clock類根因為
+**`root_cause_fixed_and_verified`**；Issue #46其他capability與14-day sustained-clean
+仍保持OPEN／contained。
