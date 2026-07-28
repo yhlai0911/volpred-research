@@ -7182,6 +7182,65 @@ def test_provider_auth_forged_cleaned_receipt_fails_closed(
     assert result == {"recovered": 0, "active": 0, "invalid": 1}
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("leader_started_wall", None),
+        ("reaper_started_wall", None),
+        ("handoff_parent_started_wall", None),
+    ],
+)
+def test_provider_auth_quarantine_receipt_rejects_null_process_identity(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "old-run"
+    destination = run_dir / "home" / ".codex" / "auth.json"
+    destination.parent.mkdir(parents=True, mode=0o700)
+    destination.write_bytes(auth.read_bytes())
+    destination.chmod(0o600)
+    receipts = tmp_path / "receipts"
+    receipts.mkdir()
+    payload = {
+        "schema_version": "provider-auth-reaper.v2",
+        "state": "quarantined",
+        "lease_id": "old-lease",
+        "source_home": str(authority),
+        "run_dir": str(run_dir),
+        "destination_path": str(destination),
+        "baseline_sha256": hashlib.sha256(auth.read_bytes()).hexdigest(),
+        "pgid": 888,
+        "leader_pid": 888,
+        "leader_started_wall": "Mon Jul 28 12:00:00 2026",
+        "reaper_pid": 999,
+        "reaper_started_wall": "Mon Jul 28 12:00:01 2026",
+        "handoff_parent_pid": 777,
+        "handoff_parent_started_wall": "Mon Jul 28 11:59:59 2026",
+    }
+    payload[field] = value
+    (receipts / "quarantined.json").write_text(
+        json.dumps(payload),
+        encoding="utf-8",
+    )
+
+    result = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipts,
+    )
+
+    assert result == {"recovered": 0, "active": 0, "invalid": 1}
+
+
 def test_codex_auth_materialization_rejects_symlink_destination(
     tmp_path: Path,
 ) -> None:

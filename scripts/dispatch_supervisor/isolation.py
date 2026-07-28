@@ -1505,7 +1505,13 @@ def _load_recoverable_provider_auth_receipts(
             ).resolve()
             pgid = int(payload["pgid"])
             leader_pid = int(payload["leader_pid"])
-            leader_started_wall = str(payload["leader_started_wall"])
+            leader_started_wall_raw = payload["leader_started_wall"]
+            if (
+                not isinstance(leader_started_wall_raw, str)
+                or not leader_started_wall_raw
+            ):
+                raise ValueError("leader_started_wall must be a non-empty string")
+            leader_started_wall = leader_started_wall_raw
             baseline = str(payload["baseline_sha256"])
             lease_id = str(payload["lease_id"])
         except (
@@ -1537,9 +1543,25 @@ def _load_recoverable_provider_auth_receipts(
         if state == "quarantined":
             try:
                 quarantine_pid = int(payload["reaper_pid"])
-                quarantine_started = str(payload["reaper_started_wall"])
+                quarantine_started_raw = payload["reaper_started_wall"]
+                if (
+                    not isinstance(quarantine_started_raw, str)
+                    or not quarantine_started_raw
+                ):
+                    raise ValueError(
+                        "reaper_started_wall must be a non-empty string"
+                    )
+                quarantine_started = quarantine_started_raw
                 parent_pid = int(payload["handoff_parent_pid"])
-                parent_started = str(payload["handoff_parent_started_wall"])
+                parent_started_raw = payload["handoff_parent_started_wall"]
+                if (
+                    not isinstance(parent_started_raw, str)
+                    or not parent_started_raw
+                ):
+                    raise ValueError(
+                        "handoff_parent_started_wall must be a non-empty string"
+                    )
+                parent_started = parent_started_raw
             except (KeyError, TypeError, ValueError) as exc:
                 warn(
                     "provider-auth-recovery",
