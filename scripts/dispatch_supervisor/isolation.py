@@ -258,10 +258,12 @@ _PASSTHROUGH_ENV = frozenset({
     "PATH", "LANG", "LANGUAGE", "LC_ALL", "LC_CTYPE", "TERM", "SHELL",
     "USER", "LOGNAME", "SSL_CERT_FILE", "SSL_CERT_DIR", "NODE_EXTRA_CA_CERTS",
     "HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
-    # Exact model-provider credentials only. Broad OPENAI_*/CODEX_* prefixes
-    # also contain remote-effect configuration and are intentionally rejected.
-    "ANTHROPIC_API_KEY", "CLAUDE_CODE_OAUTH_TOKEN", "OPENAI_API_KEY",
-    "CODEX_API_KEY",
+    # The production provider registry permits only subscription/OAuth auth.
+    # API keys are metered authority, so the isolation boundary must remove
+    # them before the registry validates the final child environment. Keeping
+    # them here made the two layers contradict each other and every hourly fire
+    # fail closed whenever an ambient API key existed on the host.
+    "CLAUDE_CODE_OAUTH_TOKEN",
     # Exact non-secret dispatch identity/configuration required by the worker
     # and fire-manifest contracts. These carry attribution, not authority.
     "VOLPRED_ACTOR", "VOLPRED_TASK_CLAIM_OWNER", "VOLPRED_DISPATCH_JOB_ID",

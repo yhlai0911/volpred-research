@@ -6045,7 +6045,9 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
         assert not volpred_copied.exists() or volpred_copied.read_bytes() == b""
 
 
-def test_isolated_environment_is_allowlist_not_secret_denylist(tmp_path: Path) -> None:
+def test_isolated_environment_keeps_only_subscription_oauth_model_auth(
+    tmp_path: Path,
+) -> None:
     prepared = isolation.PreparedIsolation(
         profile_path=str(tmp_path / "sandbox.sb"),
         run_dir=str(tmp_path / "run"),
@@ -6060,7 +6062,9 @@ def test_isolated_environment_is_allowlist_not_secret_denylist(tmp_path: Path) -
             "PATH": "/usr/bin",
             "LANG": "en_US.UTF-8",
             "CLAUDE_CODE_OAUTH_TOKEN": "model-only",
-            "ANTHROPIC_API_KEY": "model-api",
+            "ANTHROPIC_API_KEY": "metered-anthropic",
+            "OPENAI_API_KEY": "metered-openai",
+            "CODEX_API_KEY": "metered-codex",
             "OPENAI_ORG_ID": "must-not-pass",
             "SSH_AUTH_SOCK": "/tmp/agent.sock",
             "GIT_ASKPASS": "/tmp/askpass",
@@ -6076,13 +6080,15 @@ def test_isolated_environment_is_allowlist_not_secret_denylist(tmp_path: Path) -
 
     assert env["PATH"] == "/usr/bin"
     assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "model-only"
-    assert env["ANTHROPIC_API_KEY"] == "model-api"
     assert env["HOME"] == str(tmp_path / "home")
     assert env["VOLPRED_ACTOR"] == "dispatch-supervisor"
     assert env["VOLPRED_TASK_CLAIM_OWNER"] == "dispatch-eff32f3b"
     assert env["VOLPRED_DISPATCH_JOB_ID"] == "eff32f3b"
     assert env["VOLPRED_FIRE_ID"] == "fire-43"
     for denied in (
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "CODEX_API_KEY",
         "OPENAI_ORG_ID",
         "SSH_AUTH_SOCK",
         "GIT_ASKPASS",
