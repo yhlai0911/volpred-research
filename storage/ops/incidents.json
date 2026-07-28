@@ -330,13 +330,25 @@
      "first_seen_at": "2026-07-28T05:45:22.728228+00:00",
      "key": "30331603769:1",
      "last_seen_at": "2026-07-28T05:45:22.728228+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T06:20:19.751737+00:00",
+     "key": "30333394330:1",
+     "last_seen_at": "2026-07-28T06:20:19.751737+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T06:40:36.890031+00:00",
+     "key": "30334481908:1",
+     "last_seen_at": "2026-07-28T06:40:36.890031+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-28T05:41:58.1767110Z E AssertionError: raw termination bypasses: ['scripts/dispatch_supervisor/isolation.py:1450', 'scripts/dispatch_supervisor/isolation.py:1738', 'scripts/dispatch_supervisor",
-   "last_seen_at": "2026-07-28T05:45:22.728228+00:00",
+   "last_breach_detail": "2026-07-28T06:37:09.6239619Z E AssertionError: cron wrapper manifest is out of date — the copy launchd execs in ~/.volpred/bin will NOT have your edit.",
+   "last_seen_at": "2026-07-28T06:40:36.890031+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
+   "occurrence_count": 4,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -575,9 +587,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T21:07:38.580929+00:00"
-    },
-    {
      "at": "2026-07-27T22:07:20.626773+00:00"
     },
     {
@@ -609,6 +618,9 @@
     },
     {
      "at": "2026-07-28T06:02:04.929190+00:00"
+    },
+    {
+     "at": "2026-07-28T06:49:30.462835+00:00"
     }
    ],
    "current_task_id": null,
@@ -1217,13 +1229,27 @@
      "first_seen_at": "2026-07-23T12:07:25.631027+00:00",
      "key": "dispatch-slot-1-f990a227-k1623",
      "last_seen_at": "2026-07-23T12:07:25.631027+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "427a7fc48b1af80ef924a3737da1a27ecf51f7d2",
+      "branch": "worktree-dispatch-slot-1-53710e41",
+      "checkpoint_commit": "",
+      "detail_tail": "['tests/test_dispatch_supervisor.py']",
+      "reason": "undeclared_output_path",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-53710e41"
+     },
+     "first_seen_at": "2026-07-28T06:49:30.014977+00:00",
+     "key": "dispatch-slot-1-53710e41",
+     "last_seen_at": "2026-07-28T06:49:30.014977+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-3-3896dcaa-k1714 unmergeable (worker_orphaned)",
-   "last_seen_at": "2026-07-26T18:08:32.865920+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-53710e41 unmergeable (undeclared_output_path)",
+   "last_seen_at": "2026-07-28T06:49:30.014977+00:00",
    "notified_at": null,
-   "occurrence_count": 942,
+   "occurrence_count": 943,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1953,6 +1979,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T06:02:04.930421+00:00",
+ "updated_at": "2026-07-28T06:49:30.463552+00:00",
  "version": 1
 }

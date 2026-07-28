@@ -50273,8 +50273,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 13.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -50329,7 +50329,7 @@
     "title": "K781: write general-audience article (auto-discovered uncovered K)",
     "description": "K K781 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K781 [NULL]：Multiplicative Volatility Factor(MVF,5參數:σ²=exp(f_t)×g_t)在SPY日頻r²(Patton 2011 proxy-robust)上是否優於GJR-GARCH。README為空白樣板，結論取自k781_mvf_results.json。資料yfinance，2007-01-04~2026-03-31，OOS 2009-12-24~2026-03-31(N_oos=4090,N_total=4840)。QLIKE排名：GJR-GARCH=1.536481(第1)、MVF=1.549 Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "failed",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -50345,7 +50345,32 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-27T18:12:36+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-28T06:24:16.004171+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-474ba32ebee14fa88c8cf70569553675"
+      },
+      {
+        "ts": "2026-07-28T06:24:16.304344+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-474ba32ebee14fa88c8cf70569553675"
+      },
+      {
+        "ts": "2026-07-28T06:26:29.455834+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-2-474ba32ebee14fa88c8cf70569553675"
+      }
+    ],
+    "started_at": "2026-07-28T06:24:16.304329+00:00",
+    "arc_coverage_finding": "layer-2 feed grep（publishing.md 選題三層查重）發現 narrative arc「新/複雜模型未能打敗既有老模型，統計上打平」已由多篇 general 文章覆蓋：mile 2026-07-27「AI 圈的時序基礎模型搬進波動率擂台：老公式 HAR 沒被打下來」、2026-07-27「我們認真做了一個更聰明的風險模型，結果它比笨方法更常失手」、2026-07-17「市場走得很毛躁，不代表複雜模型比較準」、2026-07-15「冠軍換了十六次，統計上一個都沒贏」、2026-07-08「頂尖期刊的模型，搬回家就靈嗎？」。K781 結論（MVF 兩層相乘分解 QLIKE 1.549047 排第 2，輸給 GJR-GARCH 1.536481，Harvey t=0.69 FAIL 不顯著）與上述資產×結論同構。備選角度「子期間名次不穩」（MVF 在 2015-2020 掉到第 4）亦已被 2026-07-15「冠軍換了十六次」與 2026-06-30「五個市場階段的穩定性測試」覆蓋。",
+    "dedup_gate_note": "check_arc_dedup --k-id K781 --audience general 回 verdict=clean（K-coverage 與 arc 皆無命中），但機械 gate 只比對已登錄 arc signature，未攔到此語意同構；符合 2026-07-11 教訓：gate 說可寫 != 主線程免做 3-layer 查重。",
+    "completed_at": "2026-07-28T06:26:29.455808+00:00",
+    "result": "not_written; reason=arc_covered_no_new_angle。未產出文章（刻意，非執行失敗）。publishing.md 層 2 feed grep 顯示 narrative arc「新/複雜模型未打敗老模型、統計上打平」已由 2026-07-27 / 07-17 / 07-15 / 07-08 共 5 篇 general 文章覆蓋；K781 主結論與備選『子期間名次不穩』角度皆同構。詳見 task 欄位 arc_coverage_finding / dedup_gate_note。建議：K-coverage 自動發掘只驗 K 是否有文章，未驗 narrative arc，會持續產出這類 arc-dup 任務。"
   },
   {
     "id": "K1357_article_general",
@@ -50437,7 +50462,8 @@
       }
     ],
     "arc_dedup_note": "WRITE-GATE BLOCKED as arc-dup of mile_f5813dec, but that is a FALSE POSITIVE: mile_f5813dec is \"同一個神經網路，換個對手...\" (neural-net opponent-robustness), a different subject from K1366 (EWMA cross-asset variance-response templates after macro shocks). Match is only on the coarse methodology_robustness axis signature + entity overlap, not the actual story. Needs either dup_waiver at publish OR arc-dedup signature refinement (methodology_robustness axis too coarse). Not written this fire — did not override the sole write-side safety gate under time pressure. Feed grep K1366 = 0 (no real duplicate).",
-    "last_released_at": "2026-07-28T04:36:57.622588+00:00"
+    "last_released_at": "2026-07-28T04:36:57.622588+00:00",
+    "dedup_gate_note": "2026-07-28 hourly-slot-2 選題時跑 check_arc_dedup --audience general → verdict=block_arc_dup（dup: mile_f5813dec「同一個神經網路，換個對手就從贏 28% 變成輸 6%」，narrative_axis=methodology_robustness 雙邊一致，conclusion_class=null_no_info）。依 publishing.md 未撰寫。狀態保持 pending 未動：是否 retire、改角度重寫、或 publish 時帶 dup_waiver，屬內容策略決定，留給 owner。"
   },
   {
     "id": "K1419_article_general",
@@ -51303,13 +51329,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 13.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51336,15 +51362,11 @@
     "description": "Owner-directed production upgrade. Replace every active Opus model route with claude-opus-5 (native 1M) and every active Sonnet route with claude-sonnet-5 (1M entitlement), starting from canonical provider registry/model router and ratcheting all live launcher fallbacks. TDD model census, zero-paid subscription guard, live Claude CLI model read-back, Matt dual review, safe supervisor reload. Do not enable API billing/usage credits, bypass #9, transfer provider.execution, or close Issue #12.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "issue_ref": "#12",
     "topology": "inline",
     "created_at": "2026-07-28T04:09:28.143964+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T05:29:01.038642+00:00",
-    "claim_expires_at": "2026-07-28T07:29:01.038642+00:00",
-    "claim_session_id": "cd3373b4fe95",
     "status_history": [
       {
         "ts": "2026-07-28T05:29:01.038656+00:00",
@@ -51356,6 +51378,12 @@
         "ts": "2026-07-28T05:29:04.499957+00:00",
         "from": "claimed",
         "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T06:38:04.821628+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
         "by": "codex-vscode"
       }
     ],
@@ -51392,7 +51420,10 @@
       "tests/test_session_drill_down_warnings.py",
       "tests/test_token_usage_report.py",
       "tests/test_worker_actor_env.py"
-    ]
+    ],
+    "completed_at": "2026-07-28T06:38:04.821608+00:00",
+    "result": "root_cause_fixed_and_verified for Claude generation-5 routing slice: active Opus routes now claude-opus-5 and Sonnet routes claude-sonnet-5 with 1,000,000 context; firstParty/subscription-only guards and static roster scanner reject API-key/paygo fallback; private per-job Claude temp restores Bash under sandbox without widening isolation. Evidence: targeted tests/lint/scanner green; independent Matt spec+standards reviews PASS; direct firstParty probes returned exact models/context; post-reload Operations Core job 474ba32e ran claude-opus-5 and produced outcome=success after 1112s. GitHub Issue #12 remains open because this task is the model-upgrade slice, not all provider-registry acceptance.",
+    "issue_disposition": "contained"
   },
   {
     "id": "K1406_article_general",
@@ -51415,14 +51446,15 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-28T04:25:40+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "dedup_gate_note": "2026-07-28 hourly-slot-2 選題時跑 check_arc_dedup --audience general → verdict=block_arc_dup（dups: mile_f8af30d0、mile_26d8616d）。注意此判定疑似 false positive：兩筆的 existing_narrative_axis（methodology_robustness / market_structure）與本題 narrative_axis（regime_signal）不一致，shared_entities 僅 US_EQUITY/TW_EQUITY 這類寬泛標籤，而 K1406 主題（單筆投入 vs 分批、等回檔的機會成本）與兩篇既有文章（新資產波動率方法可移植性、類股輪動＋波動目標再平衡）題材不同。依 publishing.md 本班未強推撰寫；建議 owner 判斷是否以 dup_waiver 放行或調校 gate 的 cross-axis 比對。"
   },
   {
     "id": "K1493_article_general",
     "title": "K1493: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1493 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: K1493 [CONDITIONAL_PASS — 混合結果，results.json verdict=MIXED_EDGE_EROSION]: 檢驗 VRP（變異數風險溢酬）下降論述是否對應到短波策略經濟優勢消失。資料源 yfinance adjusted close（SPY, ^VIX, SVXY, VIXY, VXX, BIL），VRP proxy 樣本 2006-01-03至2026（pre: 2006-2017 n=3,020；post: 2018-2026 n=2,088，forward RV21 需完整視窗）。VRP_t = (VIX_t/ Canonical evidence: experiments/k1493/k1493_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -51438,7 +51470,30 @@
     ],
     "topic_cluster": null,
     "created_at": "2026-07-28T04:25:57+00:00",
-    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-28T06:13:41.137644+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-474ba32ebee14fa88c8cf70569553675"
+      },
+      {
+        "ts": "2026-07-28T06:14:00.149856+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-474ba32ebee14fa88c8cf70569553675"
+      },
+      {
+        "ts": "2026-07-28T06:22:48.525822+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-474ba32ebee14fa88c8cf70569553675"
+      }
+    ],
+    "started_at": "2026-07-28T06:14:00.149842+00:00",
+    "completed_at": "2026-07-28T06:22:48.525796+00:00",
+    "result": "已發佈 general 草稿 mile_62fa3fbc（storage/drafts/K1493_general_draft.md，1543 繁中字 + 2 張 PNG）。arc-dedup clean、anti_ai_gate PASS、_infer_audience=general（0 academic hits）、publish audit PASS（12 claims vs 201 source values）。懶人包已 enqueue lazypack-mile_62fa3fbc，release_pool 待圖組落地後 flip。同批 K1366/K1406 經 dedup gate 判 arc dup 未寫。"
   },
   {
     "id": "assign_e7df86d1",
@@ -51523,7 +51578,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "pending",
+    "status": "in_progress",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "incident_id": "ci-red-30330338914",
@@ -51616,11 +51671,41 @@
         "to": "pending",
         "by": "hourly-slot-1-f60b1cda222b4608a08ae179db936046",
         "note": "supervisor_settle_empty"
+      },
+      {
+        "ts": "2026-07-28T06:03:34.365054+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-53710e41ad9b49e2bb364efeeada967a",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-28T06:03:34.365057+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-53710e41ad9b49e2bb364efeeada967a",
+        "note": "workspace_admission"
       }
     ],
     "dispatch_settled_session_id": "dispatch-f60b1cda-34304371",
     "last_released_at": "2026-07-28T06:01:46.558554+00:00",
-    "last_release_reason": "workspace_empty"
+    "last_release_reason": "workspace_empty",
+    "claimed_by": "hourly-slot-1-53710e41ad9b49e2bb364efeeada967a",
+    "claimed_at": "2026-07-28T06:03:34.365034+00:00",
+    "claim_expires_at": "2026-07-28T08:49:26.947967+00:00",
+    "claim_session_id": "dispatch-53710e41-9ad23622",
+    "started_at": "2026-07-28T06:03:34.365034+00:00",
+    "dispatch_managed": true,
+    "dispatch_managed_owner": "hourly-slot-1-53710e41ad9b49e2bb364efeeada967a",
+    "dispatch_job_id": "53710e41ad9b49e2bb364efeeada967a",
+    "dispatch_settlement_pending": {
+      "job_id": "53710e41ad9b49e2bb364efeeada967a",
+      "task_id": "ci-red-30330338914",
+      "claim_session_id": "dispatch-53710e41-9ad23622",
+      "phase": "admission",
+      "default_disposition": "retry",
+      "created_at": "2026-07-28T06:03:34.365034+00:00"
+    }
   },
   {
     "id": "assign_69ef34bb",
@@ -51796,23 +51881,23 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:02:19.746183+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 13.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 15.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1357_general_draft.md: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1419_general_draft.md: 已保存，且 1.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/K1357_spread_asymmetry.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1419_0050tw_pinball.png: 已保存，且 1.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1492_cross_asset_qlike.png: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1492_peg_vs_flow.png: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/K1357_general_draft.md: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/K1419_general_draft.md: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/K1357_spread_asymmetry.png: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1419_0050tw_pinball.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1492_peg_vs_flow.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -51820,7 +51905,7 @@
   {
     "id": "assign_bfd18c51",
     "title": "PHASE-Z 卡住檔案 incident（b7be38c3f18ae7ee）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n17 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 20 班\n- src/volpred/ops/next_tasks.py — 20 班\n- storage/drafts/K1357_general_draft.md — 5 班\n- storage/drafts/K1419_general_draft.md — 5 班\n- storage/drafts/assets/K1357_spread_asymmetry.png — 5 班\n- storage/drafts/assets/k1419_0050tw_pinball.png — 5 班\n- storage/drafts/assets/k1492_cross_asset_qlike.png — 4 班\n- storage/drafts/assets/k1492_peg_vs_flow.png — 4 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_answer.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_model.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_today.png — 5 班\n- storage/logs/trending_primary_source_verification.jsonl — 11 班\n- storage/memory/knowledge.json — 18 班\n- storage/reports/INDEX.md — 9 班\n- storage/reports/index.json — 9 班\n- storage/strategy_metrics.json — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T060219670980Z:<路徑>`",
+    "description": "## 發生什麼\n17 個未提交檔案不是任何一班 fire 產出的，最長已連續 21 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 21 班\n- src/volpred/ops/next_tasks.py — 21 班\n- storage/drafts/K1357_general_draft.md — 6 班\n- storage/drafts/K1419_general_draft.md — 6 班\n- storage/drafts/assets/K1357_spread_asymmetry.png — 6 班\n- storage/drafts/assets/k1419_0050tw_pinball.png — 6 班\n- storage/drafts/assets/k1492_cross_asset_qlike.png — 5 班\n- storage/drafts/assets/k1492_peg_vs_flow.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_answer.png — 6 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png — 6 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_model.png — 6 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_today.png — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 12 班\n- storage/memory/knowledge.json — 19 班\n- storage/reports/INDEX.md — 10 班\n- storage/reports/index.json — 10 班\n- storage/strategy_metrics.json — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T060219670980Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T065000644513Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -51849,31 +51934,84 @@
         "storage/strategy_metrics.json"
       ],
       "streaks": {
-        "docs/error_log.md": 20,
-        "src/volpred/ops/next_tasks.py": 20,
-        "storage/drafts/K1357_general_draft.md": 5,
-        "storage/drafts/K1419_general_draft.md": 5,
-        "storage/drafts/assets/K1357_spread_asymmetry.png": 5,
-        "storage/drafts/assets/k1419_0050tw_pinball.png": 5,
-        "storage/drafts/assets/k1492_cross_asset_qlike.png": 4,
-        "storage/drafts/assets/k1492_peg_vs_flow.png": 4,
-        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png": 5,
-        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png": 5,
-        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png": 5,
-        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png": 5,
-        "storage/logs/trending_primary_source_verification.jsonl": 11,
-        "storage/memory/knowledge.json": 18,
-        "storage/reports/INDEX.md": 9,
-        "storage/reports/index.json": 9,
-        "storage/strategy_metrics.json": 9
+        "docs/error_log.md": 21,
+        "src/volpred/ops/next_tasks.py": 21,
+        "storage/drafts/K1357_general_draft.md": 6,
+        "storage/drafts/K1419_general_draft.md": 6,
+        "storage/drafts/assets/K1357_spread_asymmetry.png": 6,
+        "storage/drafts/assets/k1419_0050tw_pinball.png": 6,
+        "storage/drafts/assets/k1492_cross_asset_qlike.png": 5,
+        "storage/drafts/assets/k1492_peg_vs_flow.png": 5,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png": 6,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png": 6,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png": 6,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png": 6,
+        "storage/logs/trending_primary_source_verification.jsonl": 12,
+        "storage/memory/knowledge.json": 19,
+        "storage/reports/INDEX.md": 10,
+        "storage/reports/index.json": 10,
+        "storage/strategy_metrics.json": 10
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260728T060219670980Z"
+        "refs/volpred/quarantine/20260728T060219670980Z",
+        "refs/volpred/quarantine/20260728T065000644513Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-28T06:02:30.310580+00:00",
-      "last_seen_at": "2026-07-28T06:02:30.310580+00:00"
+      "last_seen_at": "2026-07-28T06:50:16.377112+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T06:50:00.725419+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/K1357_general_draft.md: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/K1419_general_draft.md: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/K1357_spread_asymmetry.png: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1419_0050tw_pinball.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1492_peg_vs_flow.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-28T06:50:16.377112+00:00"
+  },
+  {
+    "id": "assign_7217b886",
+    "title": "[live gate] compute_queue PID fingerprint probe self-deadlocks receipt lock",
+    "description": "Live post-reload full-suite gate deterministically hangs tests/test_compute_queue.py::test_worker_preserves_child_output_writeback_on_nonzero_exit. Root evidence: _claim_job holds _receipt_lock then _own_start_wall calls procutil.get_process_start_wall; test monkeypatch of scripts.compute_queue.subprocess.run mutates shared subprocess module, re-enters record_output_paths and blocks on the same flock. Fix root contract so PID fingerprint probing is outside receipt critical section or uses a narrow injectable seam; add regression proving no lock re-entry/hang and run focused + relevant suite. Discovered while validating Issue #12 Opus5 worker 53710e41; independent reproduction stack captured.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-28T06:40:32.037445+00:00",
+    "created_by": "codex-vscode",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T06:40:54.087350+00:00",
+    "claim_expires_at": "2026-07-28T08:40:54.087350+00:00",
+    "claim_session_id": "189227fce6b4",
+    "status_history": [
+      {
+        "ts": "2026-07-28T06:40:54.087368+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T06:40:54.379842+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T06:40:54.379829+00:00"
   }
 ]
