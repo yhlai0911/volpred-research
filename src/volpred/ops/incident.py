@@ -263,6 +263,7 @@ def _new_row(kind: str, parts: Iterable[Any], now: datetime) -> dict[str, Any]:
         "episode_failures": [],
         "instances": [],
         "clean_observations": [],
+        "clean_streak_started_at": None,
         "resolution": None,
         "resolutions": [],
         "suppressed_until": None,
@@ -362,6 +363,7 @@ def _resolve(row: dict[str, Any], *, criterion: str, by: str, now: datetime) -> 
     del history[:-_EPISODE_FAILURE_LIMIT]
     row["current_task_id"] = None
     row["clean_observations"] = []
+    row["clean_streak_started_at"] = None
 
 
 # ── breach routing (the state machine, plan §3.4) ────────────────────────────
@@ -420,6 +422,7 @@ def route_breach(
                 _upsert_instance(row, text, current, None)
         # A breach breaks any clean streak — one clean is never enough (G7).
         row["clean_observations"] = []
+        row["clean_streak_started_at"] = None
 
         _sync_escalation(row, task_status_probe, current)
         outcome = _decide_breach(row, task_status_probe, current)
@@ -586,6 +589,7 @@ def observe_clean(
                     "state": row["state"], "closable_task_id": closable}
 
         observations = row.setdefault("clean_observations", [])
+        _ensure_clean_streak_started_at(row, observations, current)
         last = _parse_iso(observations[-1]["at"]) if observations else None
         if last is None or current > last:
             observations.append({"at": current.isoformat()})
@@ -611,13 +615,39 @@ def _criterion_name(row: dict[str, Any]) -> str:
     )
 
 
+def _ensure_clean_streak_started_at(
+    row: dict[str, Any],
+    observations: list[dict[str, Any]],
+    current: datetime,
+) -> datetime:
+    """Return the durable streak origin, lazily migrating pre-field rows.
+
+    ``clean_observations`` is a bounded diagnostic ring buffer, not durable
+    lifecycle state.  Old rows therefore migrate from the oldest observation
+    still available.  That is conservative: the true streak may have begun
+    earlier, but never later, so migration cannot resolve an incident early.
+    """
+    if not observations:
+        started = current
+    else:
+        started = _parse_iso(row.get("clean_streak_started_at"))
+        if started is None:
+            started = _parse_iso(observations[0].get("at")) or current
+    row["clean_streak_started_at"] = started.isoformat()
+    return started
+
+
 def _clean_criterion_met(row: dict[str, Any], now: datetime) -> bool:
     if str(row.get("task_mode")) == TASK_MODE_ADJUDICATION:
         return _instances_quiet(row, now)
     observations = row.get("clean_observations") or []
     if len(observations) < RESOLVE_MIN_CLEAN_OBSERVATIONS:
         return False
-    first = _parse_iso(observations[0].get("at"))
+    first = _parse_iso(row.get("clean_streak_started_at"))
+    if first is None:
+        # Read-only compatibility for callers that inspect an old row without
+        # passing through observe_clean's lazy migration first.
+        first = _parse_iso(observations[0].get("at"))
     last = _parse_iso(observations[-1].get("at"))
     if first is None or last is None:
         return False

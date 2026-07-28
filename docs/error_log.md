@@ -4222,3 +4222,25 @@ repo-wide class sweep只找到未合併K1708 worktree一處錯誤宣稱；K1708�
 `reproduce_spec.json`仍由真實artifact gate擋住，未補造spec、未merge、未寫knowledge。
 此「code-only provenance對result tamper失明」bug class狀態為
 **`root_cause_fixed_and_verified`**；K1708實驗本身仍是blocked。
+
+### 2026-07-29 — sustained-clean gate 不可用 bounded observation ring 判跨度
+
+**證據化症狀**：`inc_537a3ff3304f`在最後一次breach後持續收到clean observation，
+但`clean_observations`只留12筆；偵測頻率高於每2小時11分時，保留窗永遠涵蓋不到24小時，
+因此`RESOLVE_MIN_CLEAN_SPAN=24h`在數學上永久不可達。RED regression以每小時一筆持續
+25小時，舊碼仍回傳`resolved=False`。
+
+**根因層級（incident state contract）**：診斷用ring buffer與生命週期需要的持久streak
+起點被錯當成同一份狀態。`_clean_criterion_met`用會被修剪的
+`clean_observations[0]`當起點，造成判定能力隨觀測頻率改變。
+
+**底層修復與migration**：incident row新增`clean_streak_started_at`；首次clean寫入，
+後續ring修剪不動它，breach與resolution則與observations一起重置。舊row在下一次
+`observe_clean`時從「當時仍保留的最早一筆」保守回填，不手改`incidents.json`、不提前
+放行gate；真正streak只可能更早，因此最壞情況是延後resolution。
+
+**回歸與制度化**：新增高頻25小時仍可resolve、舊row lazy migration、breach重置三道
+regression；incident lifecycle與alert／PHASE-Z／Supabase ownership相鄰範圍共
+105 passed，scoped Ruff與diff-check全綠。此ring-buffer造成永久不可達的bug class為
+**`root_cause_fixed_and_verified`**；個別incident仍須由正式detector在滿24小時後
+寫入clean observation，才可依五步Gate轉resolved。

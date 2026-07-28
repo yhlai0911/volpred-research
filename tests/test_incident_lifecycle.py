@@ -446,6 +446,58 @@ def test_g7_breach_resets_the_clean_streak(store, queue) -> None:
     _drive_breach(store, queue, kind=kind, now=T0 + timedelta(hours=14))  # streak 歸零
     out = incident.observe_clean(store, kind=kind, now=T0 + timedelta(hours=26))
     assert out["resolved"] is False  # 舊 streak 不得跨過 breach 累積
+    assert _incident_row(store, kind)["clean_streak_started_at"] == (
+        T0 + timedelta(hours=26)
+    ).isoformat()
+
+
+def test_g7_high_frequency_observations_can_outlive_the_ring_buffer(store, queue) -> None:
+    """A 24h streak must resolve even when its first sample has been trimmed."""
+    kind = "synthetic_gate_red"
+    _drive_breach(store, queue, kind=kind, now=T0)
+
+    out = None
+    for hour in range(1, 26):
+        out = incident.observe_clean(
+            store,
+            kind=kind,
+            now=T0 + timedelta(hours=hour),
+        )
+
+    assert out is not None
+    assert out["resolved"] is True
+    row = _incident_row(store, kind)
+    assert row["state"] == incident.STATE_RESOLVED
+    assert row["resolution"]["criterion"] == "clean_streak_k3_24h"
+
+
+def test_g7_old_rows_lazily_migrate_from_the_oldest_retained_observation(
+    store,
+    queue,
+) -> None:
+    """Migration must be conservative and must not require store surgery."""
+    kind = "synthetic_gate_red"
+    _drive_breach(store, queue, kind=kind, now=T0)
+    for hour in range(1, 13):
+        incident.observe_clean(
+            store,
+            kind=kind,
+            now=T0 + timedelta(hours=hour),
+        )
+
+    payload = json.loads(store.read_text(encoding="utf-8"))
+    row = payload["incidents"][incident.incident_id_for(kind)]
+    row.pop("clean_streak_started_at")
+    store.write_text(json.dumps(payload), encoding="utf-8")
+
+    out = incident.observe_clean(
+        store,
+        kind=kind,
+        now=T0 + timedelta(hours=25),
+    )
+
+    assert out["resolved"] is True
+    assert _incident_row(store, kind)["state"] == incident.STATE_RESOLVED
 
 
 # ── plan 附註: dispatch contradiction ────────────────────────────────────────
