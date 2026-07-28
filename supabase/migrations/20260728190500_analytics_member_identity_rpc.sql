@@ -5,7 +5,16 @@
 -- continuity API can merge an anonymous browser identity after login and
 -- delete every linked raw event without receiving table access.
 
-GRANT volpred_analytics_worker TO CURRENT_USER;
+DO $grant_worker_to_migration_role$
+BEGIN
+  IF CURRENT_USER <> 'postgres' THEN
+    EXECUTE pg_catalog.format(
+      'GRANT volpred_analytics_worker TO %I',
+      CURRENT_USER
+    );
+  END IF;
+END;
+$grant_worker_to_migration_role$;
 GRANT USAGE ON SCHEMA public TO volpred_analytics_worker;
 GRANT CREATE ON SCHEMA public TO volpred_analytics_worker;
 
@@ -500,4 +509,13 @@ ALTER FUNCTION public.delete_volpred_analytics_identity(
 ) OWNER TO volpred_analytics_worker;
 
 REVOKE CREATE ON SCHEMA public FROM volpred_analytics_worker;
-REVOKE volpred_analytics_worker FROM CURRENT_USER;
+DO $revoke_worker_from_migration_role$
+BEGIN
+  IF CURRENT_USER <> 'postgres' THEN
+    EXECUTE pg_catalog.format(
+      'REVOKE volpred_analytics_worker FROM %I',
+      CURRENT_USER
+    );
+  END IF;
+END;
+$revoke_worker_from_migration_role$;

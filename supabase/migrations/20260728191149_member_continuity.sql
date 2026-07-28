@@ -38,7 +38,16 @@ BEGIN
 END;
 $validate_member_worker$;
 
-GRANT volpred_member_worker TO CURRENT_USER;
+DO $grant_worker_to_migration_role$
+BEGIN
+  IF CURRENT_USER <> 'postgres' THEN
+    EXECUTE pg_catalog.format(
+      'GRANT volpred_member_worker TO %I',
+      CURRENT_USER
+    );
+  END IF;
+END;
+$grant_worker_to_migration_role$;
 GRANT CREATE ON SCHEMA public TO volpred_member_worker;
 
 DO $reacquire_member_functions$
@@ -780,4 +789,13 @@ ALTER FUNCTION public.delete_volpred_member_continuity(
 ) OWNER TO volpred_member_worker;
 
 REVOKE CREATE ON SCHEMA public FROM volpred_member_worker;
-REVOKE volpred_member_worker FROM CURRENT_USER;
+DO $revoke_worker_from_migration_role$
+BEGIN
+  IF CURRENT_USER <> 'postgres' THEN
+    EXECUTE pg_catalog.format(
+      'REVOKE volpred_member_worker FROM %I',
+      CURRENT_USER
+    );
+  END IF;
+END;
+$revoke_worker_from_migration_role$;
