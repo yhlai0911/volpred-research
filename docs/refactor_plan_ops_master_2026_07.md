@@ -253,7 +253,7 @@
 | **Session Cron retirement** | ✅ 2026-07-26 | `session_crons.items=[]`、歷史 spec 保存在 `retired_items`；`run_due_jobs` 不再新增 pending session intents。knowledge index 補成 executable core job，其餘舊 prompt 有 explicit replacement mapping。 |
 | **T19 Frontend Route／Scenario Parity Checker（GitHub #6）** | ✅ root_cause_fixed_and_verified 2026-07-27 | Active frontend由`project_targets.json`唯一決定；versioned contract逐mode／surface綁authoritative owner、capability、advantage與known gap，`route.ts`逐source／HTTP method雙向exact驗access。Source resolve boundary、nested Git pre/post tree CAS、route／redirect／href／router symbol scanner皆fail closed；comment/string、symlink swap、method union、router/import/re-export alias等adversarial escape有regression。最終**27 passed**，Matt Spec／Standards雙軸PASS；live read-back為133 route-method rows、25 rules、7 required scenarios、4 explicit gaps、32個下游內容blocker，source stable=true，兩次report digest均`0e3b7085…e989a`。#6完成的是可信checker；32個內容缺口與四個single-mode gap由#8/T20消化，不得誤報frontend parity已完成。 |
 | **T20 Original／v3 First-paint 與 Beacon（GitHub #8）** | ✅ root_cause_fixed_and_verified 2026-07-27 | 原版與v3首頁共用`getV3HomeSnapshot`／`V3HomeSnapshot`，移除v3 mock與假VIX曲線；原版SSR、client fallback與`/api/research/stats`統一使用真正`n_experiments=115`，不再由knowledge筆數`3,198`在hydration後覆寫。五事件typed contract、browser outbox/idempotency、server-only ingress與private forced-RLS PostgreSQL seam已上線；production migrations receipts=`20260727100227`,`20260727100422`。Zeabur部署`6a6736c7225290ec74322de0`為RUNNING；Keychain HMAC材料只經外部temp env送variable API，upload tree/container回讀`.env.production`不存在且兩個analytics vars存在。Desktop/mobile browser實測原版/v3首屏與navigation；production回讀impression=4、click=6、depth=4、qualified=1，15/15 distinct keys，重播live canary回`duplicate=true`。Nested frontend commits `01913b6..c8832bf`；production build 88 routes成功。 |
-| **T40 Legacy Execution Retirement（GitHub #46）** | 🟡 contained 2026-07-27 | Formal owner census與atomic retirement preflight已開始落地。CI-remediation contract已從完整failed log抽取bounded literal repo paths並綁exact repo-patch contract；paths與failure run key持久化，restart不失憶且新run不得沿用舊授權。直接ImportError修復commit=`c0a62a612`已由GitHub Test Suite run `30260596460`全綠回讀，該incident slice為`root_cause_fixed_and_verified`。Retirement evidence的四個canonical producer均已live：(1) rollback-only legacy entry的本機hash-chain business-fire tripwire；(2) PostgreSQL Effect Delivery settlement邊界的duplicate-effect ledger（commit `3b81db0f9`）；(3) dispatch supervisor orphan裁決邊界的本機hash-chain orphan-work ledger（commits `b30b3bd8a`,`d72311c86`,`3959bdfe6`,`b586aa48c`）；(4) PostgreSQL Work Coordinator上version-exact lifecycle與bidirectional terminal-receipt reconciliation的silent-loss ledger（commit `f99249718`）。duplicate-effect與silent-loss兩個PostgreSQL ledger使用transactional dense cursor、private FORCE RLS與service-role-only RPC；兩個本機ledger使用獨立durable head與hash chain防截斷。orphan ledger另以pending intent、fsynced temp與no-clobber install承受event/head中途crash；`unresolved → actual`只允許單調解析，loader獨立驗跨事件語意，on-disk v1 bytes保持rollback可讀。Operations Core `*/5` wrapper fail-fast依序刷新四個typed signal。20:10自然fire `…:1302e10729ea1f2566623753` attempt 1／exit 0，orphan signal mode 600、`count=0/high_watermark=0`、pending intent不存在，canonical／installed wrapper SHA均為`c9a9c6d9…9037ac`；orphan相鄰回歸24+11 passed、Matt Spec／Standards最終雙PASS。observation recorder仍未排程：Issue #46目前仍OPEN的direct blocking edges為#9、#13、#21、#24、#28、#44、#45；全部通過前不得啟動14日窗。physical retirement亦未完成，故umbrella維持contained。 |
+| **T40 Legacy Execution Retirement（GitHub #46）** | 🟡 contained 2026-07-28 | Formal owner census與atomic retirement preflight已開始落地。CI-remediation contract已從完整failed log抽取bounded literal repo paths並綁exact repo-patch contract；paths與failure run key持久化，restart不失憶且新run不得沿用舊授權。直接ImportError修復commit=`c0a62a612`已由GitHub Test Suite run `30260596460`全綠回讀，該incident slice為`root_cause_fixed_and_verified`。Retirement evidence的四個canonical producer均已live：(1) rollback-only legacy entry的本機hash-chain business-fire tripwire；(2) PostgreSQL Effect Delivery settlement邊界的duplicate-effect ledger（commit `3b81db0f9`）；(3) dispatch supervisor orphan裁決邊界的本機hash-chain orphan-work ledger（commits `b30b3bd8a`,`d72311c86`,`3959bdfe6`,`b586aa48c`）；(4) PostgreSQL Work Coordinator上version-exact lifecycle與bidirectional terminal-receipt reconciliation的silent-loss ledger（commit `f99249718`）。duplicate-effect與silent-loss兩個PostgreSQL ledger使用transactional dense cursor、private FORCE RLS與service-role-only RPC；兩個本機ledger使用獨立durable head與hash chain防截斷。orphan ledger另以pending intent、fsynced temp與no-clobber install承受event/head中途crash；`unresolved → actual`只允許單調解析，loader獨立驗跨事件語意，on-disk v1 bytes保持rollback可讀。Operations Core `*/5` wrapper fail-fast依序刷新四個typed signal，hourly recorder亦已排程，但只記錄 production reality：有任一 owner／violation blocker時clean suffix必為0，不能把「recorder已啟動」冒充「14日clean window已開始」。Issue #46目前仍OPEN的direct blocking edges為#9、#13、#21、#24、#28、#44、#45；physical retirement亦未完成，故umbrella維持contained。 |
 | 其餘 | ⏳ 依 §5，Phase N 收尾時登記 GitHub Issue（direct execution 期間禁止新增 legacy next_tasks identity） | — |
 
 **T40 formal-owner census 增量（2026-07-27）**：commits `db804d760`、
@@ -266,7 +266,8 @@ fields，避免前置probe延遲造成假性future。Production回讀為
 `operations_core`／generation `1`／row count `1`、ACL與owner全符，fresh census
 該capability=`unique_owner`且probe errors為0，總blockers由6降為5。其餘五個
 blocker仍由#9／#12／#13及formal cutover gates持有，故T40 umbrella仍為
-**`contained`**，不得啟動14日recorder或實體retirement。
+**`contained`**；recorder只能留下blocker receipt且clean suffix必為0，不得把觀察
+誤稱為14日clean window已開始，也不得做實體retirement。
 
 **T40 Work Coordinator owner attestation 增量（2026-07-27）**：commits
 `64e10c933`,`0bcdcc8dd`,`e27ae2cd4`把`work.coordinate`從硬編碼
@@ -320,8 +321,35 @@ effect contract **62 passed**，ruff與diff-check全綠，Matt Spec／Standards�
 雙PASS；
 fresh census回讀`legacy/generation 1/wrong_owner`且`probe_errors=[]`。此
 unknown-observability slice為 **`root_cause_fixed_and_verified`**；#9→#12尚未完成
-前不切owner、不啟動14日recorder或physical retirement，T40 umbrella仍為
+前不切owner；recorder只記錄blocker且不得讓14日clean window開始，也不做physical
+retirement，T40 umbrella仍為
 **`contained`**。
+
+**T40 canonical observation recorder 增量（2026-07-28）**：commits
+`9ae555a47`,`84adc3d84`把 `legacy_retirement_signal_materialize`（`*/5`）與
+`legacy_retirement_observe`（每小時 `:02`）納入 Operations Core；兩者皆
+`host_crontab_managed=false`、`piggy_back_enabled=false`，live host cron／legacy
+LaunchAgent match均為0，scheduler validation為active、53/53
+`operations_core`、legacy owner 0。17:00 materializer自然fire成功；17:02 recorder
+由fenced schedule receipt
+`operations-core-v1:legacy_retirement_observe:35ddb153e8837dc8ff8e502e`
+以attempt 1／exit 0寫出第一筆hash-chain bundle
+`00000001-20260728T090209350893Z-f27970ce4235`（receipt SHA-256
+`32abff9b…cea85`）。Loader回讀四個signal snapshot SHA與canonical source逐一相符；
+directory／bundle mode 0700、receipt／五個source mode 0600。Live violations為
+`orphan_work=1`、`unknown_ownership=5`，其餘三維0；assessment因此
+`ready=false`、clean observation count 0，證明blocker不會被誤算為clean window。
+
+部署過程另暴露並根治一個排序事故：早期從尚未merge的worktree執行舊`--apply`，
+16:00／16:05曾讓live wrapper引用main尚不存在的batch script；main於16:06落地後
+16:10自然恢復。commit `fca3c8c5e`把authoring與production effect拆成
+`--render-manifest`／canonical-main-only `--apply`，部署固定immutable HEAD、
+repo-wide序列化、完整population/hash/type/0755回讀；合法刪除走durable 0700
+quarantine與prepared/retired receipt recovery，斷電順序、artifact腐化及host drift
+皆fail closed。正式apply回讀repo/live 57/57、aggregate SHA-256
+`d1914016…0ea5`、全0755；相關121 tests與Matt Spec／Standards最終雙PASS。此
+recorder/deployment slice為 **`root_cause_fixed_and_verified`**；T40 umbrella仍是
+**`contained`**，不得close Issue #46或聲稱14日clean window已開始。
 
 **T10 Zero-paid Provider Registry live-launcher增量（2026-07-27）**：
 commits `7e46f10e8`,`dc902d4be`建立strict `provider-registry.v1`，並把
