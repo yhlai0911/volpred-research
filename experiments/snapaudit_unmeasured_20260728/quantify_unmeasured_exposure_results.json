@@ -1,0 +1,130 @@
+{
+  "audit_id": "snapaudit_unmeasured_20260728",
+  "seed": 42,
+  "purpose": "close the two unresolved classes of audit_snapshot_dup_20260721",
+  "incident_ref": {
+    "duplicate_dates": [
+      "2026-05-04",
+      "2026-05-05",
+      "2026-05-06",
+      "2026-05-07",
+      "2026-05-08",
+      "2026-05-11",
+      "2026-05-12",
+      "2026-05-13",
+      "2026-05-14",
+      "2026-05-15"
+    ],
+    "n_duplicate_trading_days": 10,
+    "polluted_revision": "d36a418cb",
+    "fix_revision": "00b07f07f"
+  },
+  "row_level_exposure": {
+    "k1497": {
+      "n_rows_polluted": 1146,
+      "n_dup_dated_rows_polluted": 20,
+      "n_rows_clean": 1136,
+      "n_dup_dated_rows_clean": 10,
+      "extra_rows": 10,
+      "pct_of_clean_sample": 0.8803,
+      "csv": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "window": {
+        "start": "2022-01-03",
+        "end": null,
+        "note": "open-ended OOS from 2022-01-03 (audit C evidence)"
+      }
+    },
+    "k1498": {
+      "n_rows_polluted": 6682,
+      "n_dup_dated_rows_polluted": 20,
+      "n_rows_clean": 6672,
+      "n_dup_dated_rows_clean": 10,
+      "extra_rows": 10,
+      "pct_of_clean_sample": 0.1499,
+      "csv": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "window": {
+        "start": null,
+        "end": null,
+        "note": "no upper date bound; test set runs to file end"
+      }
+    },
+    "k1585": {
+      "n_rows_polluted": 6672,
+      "n_dup_dated_rows_polluted": 20,
+      "n_rows_clean": 6662,
+      "n_dup_dated_rows_clean": 10,
+      "extra_rows": 10,
+      "pct_of_clean_sample": 0.1501,
+      "csv": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "window": {
+        "start": null,
+        "end": "2026-06-26",
+        "note": "no date filter; data.daily_date_end 2026-06-26"
+      }
+    },
+    "k1380": {
+      "n_rows_polluted": 6682,
+      "n_dup_dated_rows_polluted": 20,
+      "n_rows_clean": 6672,
+      "n_dup_dated_rows_clean": 10,
+      "extra_rows": 10,
+      "pct_of_clean_sample": 0.1499,
+      "csv": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "window": {
+        "start": null,
+        "end": null,
+        "note": "daily panel feeding all 17 specs + SPA bootstrap; no dedup"
+      }
+    },
+    "k1391": {
+      "n_rows_polluted": 6645,
+      "n_dup_dated_rows_polluted": 20,
+      "n_rows_clean": 6635,
+      "n_dup_dated_rows_clean": 10,
+      "extra_rows": 10,
+      "pct_of_clean_sample": 0.1507,
+      "csv": "paper/garch-x-vix/data/spy_vix_qqq_eem_fez_2000-2026.csv",
+      "window": {
+        "start": null,
+        "end": "2026-05-20",
+        "note": "OOS through 2026-05-20 (run 2026-05-22); stored n_full_oos=1866"
+      }
+    }
+  },
+  "k1308_reconstruction": {
+    "vixtwn_path": "data/vixtwn/vixtwn_daily.csv",
+    "vixtwn_path_is_repo_relative": true,
+    "vixtwn_rows_after_dedup": 156,
+    "vixtwn_span": [
+      "2025-12-01",
+      "2026-07-27"
+    ],
+    "vixtwn_duplicate_dates_in_file": 0,
+    "n_polluted": 153,
+    "n_clean": 143,
+    "extra_rows": 10,
+    "vintage_pin": {
+      "stored_n": 119,
+      "run_date": "2026-05-22",
+      "period_end": "2026-05-20",
+      "n_at_period_end": {
+        "polluted": 119,
+        "clean": 109
+      },
+      "vintage_reproducing_stored_n": [
+        "polluted"
+      ],
+      "pollution_window": [
+        "2026-05-15",
+        "2026-07-17"
+      ],
+      "run_inside_pollution_window": true,
+      "verdict": "CONTAMINATED_VERIFIED",
+      "duplicated_rows_in_sample": 10,
+      "pct_of_clean_sample": 9.17,
+      "supersedes": "audit_snapshot_dup_20260721 verdict UNVERIFIABLE_MISSING_INPUT",
+      "why_the_earlier_verdict_was_wrong": "Audit C read the absolute path recorded in k1308_results.json.data_sources ('/Users/yhlai0911/Desktop/volpred-research/...'), which is where the repo lived at run time in May 2026, found it absent, and concluded the comparator was unavailable. But k1308.py:13-14 resolves ROOT repo-relatively, and data/vixtwn/vixtwn_daily.csv has been git-tracked since 2026-03-22 (b9c673cba) - i.e. it was present in the repo when audit C ran on 2026-07-21. The input was never missing; the detector followed a stale provenance string instead of the path the code actually resolves."
+    }
+  },
+  "scope_limit": "Row-level exposure only. The change in each experiment's reported statistics (DM/SPA/GARCH) is NOT measured here and still requires a per-experiment re-run."
+}
