@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-28T15:36:19Z",
   "started_at": "2026-07-28T15:42:24Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-28T15:49:29Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1715_recert3_verdict.md",
@@ -30,7 +30,7 @@
     "task_type": "experiment",
     "priority": 1
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "assign_8f1165f3",
   "source_task_link": {
     "state": "linked",
@@ -42,5 +42,23 @@
   "brief_source": null,
   "brief_snapshot": null,
   "claimed_by_pid": 8469,
-  "claimed_by_pid_start_wall": "Tue Jul 28 23:30:00 2026"
+  "claimed_by_pid_start_wall": "Tue Jul 28 23:30:00 2026",
+  "source_task_settlement": {
+    "state": "settled",
+    "task_id": "assign_8f1165f3",
+    "settled_at": "2026-07-28T16:11:32Z"
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "f2206f46055520f6b70d39477ddc72bb04d47387",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1715_recert3_verdict.md"
+  ],
+  "delivered_at": "2026-07-28T16:00:42.114954+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-28T16:11:32Z",
+  "followup_next_task_id": "assign_8f1165f3"
 }
