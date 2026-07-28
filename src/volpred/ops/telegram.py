@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -37,7 +38,7 @@ def _warn(msg: str, **ctx: Any) -> None:
         from volpred.ops.diagnostics import warn
 
         warn("telegram", msg, **ctx)
-    except Exception:
+    except Exception:  # noqa: BLE001 — diagnostics must remain fail-open
         print(f"  [telegram] {msg} {ctx}")
 
 
@@ -81,13 +82,40 @@ def load_state(storage_dir: str | Path = "storage") -> dict[str, Any]:
         return {}
 
 
+def _fsync_directory(path: Path) -> None:
+    descriptor = os.open(
+        path,
+        os.O_RDONLY | getattr(os, "O_DIRECTORY", 0),
+    )
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def save_state(state: dict[str, Any], storage_dir: str | Path = "storage") -> None:
     p = state_path(storage_dir)
     guard_canonical_write(p)
     p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_suffix(".tmp")
-    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1), encoding="utf-8")
-    tmp.replace(p)
+    descriptor, tmp_name = tempfile.mkstemp(
+        prefix=f".{p.name}.",
+        suffix=".tmp",
+        dir=p.parent,
+    )
+    tmp = Path(tmp_name)
+    try:
+        os.fchmod(descriptor, 0o600)
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            descriptor = -1
+            json.dump(state, handle, ensure_ascii=False, indent=1)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, p)
+        _fsync_directory(p.parent)
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+        tmp.unlink(missing_ok=True)
 
 
 def get_chat_id(storage_dir: str | Path = "storage") -> str | None:

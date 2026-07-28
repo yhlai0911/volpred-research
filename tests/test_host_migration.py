@@ -1300,6 +1300,75 @@ def test_script_module_and_spec_do_not_hardcode_user_home() -> None:
         assert "$HOME" not in text
 
 
+def test_canonical_manifest_accepts_uv_python_and_forbids_paid_agentic_keys() -> None:
+    spec = load_spec(SPEC_PATH)
+    python_tool = next(item for item in spec["tools"] if item["id"] == "python")
+
+    assert "home" in python_tool["allowed_install_origins"]
+    assert {
+        "ANTHROPIC_API_KEY",
+        "GEMINI_API_KEY",
+        "GOOGLE_API_KEY",
+        "GOOGLE_CLOUD_API_KEY",
+        "OPENAI_API_KEY",
+    } <= set(spec["forbidden_agentic_auth_names"])
+
+
+def test_home_origin_tool_still_requires_safe_owner_mode_and_exact_sha(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    executable = tmp_path / "python3"
+    executable.write_bytes(b"trusted uv python bytes")
+    executable.chmod(0o755)
+    tool = {
+        "id": "python",
+        "commands": ["python3"],
+        "required": True,
+        "parity": "exact_sha256",
+        "allowed_install_origins": ["home"],
+        "functional_permission_id": "runtime_toolchain_functional",
+    }
+    monkeypatch.setattr(host_migration, "_resolve_command", lambda _tool: executable)
+    monkeypatch.setattr(
+        host_migration,
+        "_install_origin",
+        lambda _path, *, repo_root: "home",
+    )
+
+    safe = host_migration._capture_tool(tool, repo_root=tmp_path)
+    assert safe["ready"] is True
+    assert safe["owner_class"] == "current_user"
+    assert safe["executable_sha256"] == hashlib.sha256(
+        executable.read_bytes()
+    ).hexdigest()
+
+    executable.chmod(0o775)
+    writable = host_migration._capture_tool(tool, repo_root=tmp_path)
+    assert writable["ready"] is False
+    assert writable["executable_sha256"] is None
+
+    executable.chmod(0o755)
+    captured = host_migration._executable_identity(executable)
+    monkeypatch.setattr(
+        host_migration,
+        "_executable_identity",
+        lambda _path: {**captured, "uid": os.getuid() + 1},
+    )
+    other_owner = host_migration._capture_tool(tool, repo_root=tmp_path)
+    assert other_owner["ready"] is False
+    assert other_owner["owner_class"] == "other"
+    assert other_owner["executable_sha256"] is None
+
+    assert (
+        host_migration._tool_matches(
+            safe,
+            {**safe, "executable_sha256": "0" * 64},
+        )
+        is False
+    )
+
+
 def test_operator_cli_accepts_documented_required_arguments() -> None:
     parser = build_parser()
     capture = parser.parse_args(

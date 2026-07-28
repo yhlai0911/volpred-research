@@ -8,6 +8,8 @@ when a test redirects its state to ``tmp_path``.
 from __future__ import annotations
 
 import importlib
+import os
+import stat
 from pathlib import Path
 
 import pytest
@@ -75,3 +77,63 @@ def test_direct_writer_allows_redirected_storage(writer, monkeypatch, tmp_path):
     target = _invoke(writer, storage_root)
 
     assert target.is_file()
+    if writer == "telegram_state":
+        assert stat.S_IMODE(target.stat().st_mode) == 0o600
+
+
+def test_telegram_state_fsyncs_file_before_replace_and_parent_after(
+    monkeypatch,
+    tmp_path,
+):
+    module = importlib.import_module("volpred.ops.telegram")
+    events: list[str] = []
+    original_fsync = module.os.fsync
+    original_replace = module.os.replace
+
+    def tracked_fsync(descriptor: int) -> None:
+        kind = "directory_fsync" if stat.S_ISDIR(os.fstat(descriptor).st_mode) else "file_fsync"
+        events.append(kind)
+        original_fsync(descriptor)
+
+    def tracked_replace(source, target) -> None:
+        events.append("replace")
+        original_replace(source, target)
+
+    monkeypatch.setattr(module.os, "fsync", tracked_fsync)
+    monkeypatch.setattr(module.os, "replace", tracked_replace)
+
+    module.save_state({"chat_id": 123}, storage_dir=tmp_path / "storage")
+
+    assert events == ["file_fsync", "replace", "directory_fsync"]
+
+
+@pytest.mark.parametrize("failure", ["serialize", "replace"])
+def test_telegram_state_write_failure_cleans_temporary_file(
+    failure,
+    monkeypatch,
+    tmp_path,
+):
+    module = importlib.import_module("volpred.ops.telegram")
+    storage_root = tmp_path / "storage"
+    target = storage_root / "ops" / "telegram_state.json"
+    target.parent.mkdir(parents=True)
+    target.write_text('{"chat_id":1}', encoding="utf-8")
+    target.chmod(0o600)
+
+    if failure == "serialize":
+        state = {"invalid": object()}
+        expected = TypeError
+    else:
+        state = {"chat_id": 2}
+        expected = OSError
+        monkeypatch.setattr(
+            module.os,
+            "replace",
+            lambda *_args: (_ for _ in ()).throw(OSError("replace failed")),
+        )
+
+    with pytest.raises(expected):
+        module.save_state(state, storage_dir=storage_root)
+
+    assert target.read_text(encoding="utf-8") == '{"chat_id":1}'
+    assert not list(target.parent.glob(".telegram_state.json.*.tmp"))

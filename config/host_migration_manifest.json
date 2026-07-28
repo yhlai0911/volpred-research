@@ -133,6 +133,7 @@
       "required": true,
       "parity": "exact_sha256",
       "allowed_install_origins": [
+        "home",
         "homebrew",
         "repo",
         "system"
@@ -285,7 +286,9 @@
   ],
   "forbidden_agentic_auth_names": [
     "ANTHROPIC_API_KEY",
+    "GEMINI_API_KEY",
     "GOOGLE_API_KEY",
+    "GOOGLE_CLOUD_API_KEY",
     "OPENAI_API_KEY"
   ],
   "permissions": [
