@@ -2753,3 +2753,30 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   再於 2026-07-28 00:01 台北時間明確回報載入 `phase_z.py`，daemon 從 PID 39318
   換為 PID 85797；新進程 heartbeat 正常、`auth_blocked=false`，全程沒有用 signal
   終止 worker 或回滾 claim。
+
+## 2026-07-29 — T12 Guided Migration live gate hardening（Issue #17）
+
+- ✅ Commits `15fcd6c85`,`0586e114c`建立machine-readable parity manifest、四角色
+  獨立Ed25519信任、one-time challenge、source/target immutable Git、exact executable
+  SHA、signed permission、secret-reference與formal RPO/RTO contract；所有輸出皆為
+  dry-run，且永不授權Primary Lease。
+- ✅ Live capture證明`uv run`實際Python位於使用者家目錄；manifest現允許此origin，
+  但仍強制合法owner、不可group/world-write、execute bit、single-fd SHA與兩端exact
+  parity。安全矩陣涵蓋0775、other owner與SHA mismatch拒絕。
+- ✅ Telegram state原writer以預設0644重建檔案，令手動chmod每次都失效。Canonical
+  writer已改為0600同目錄temp→file fsync→atomic replace→parent directory fsync；
+  live同內容寫回前後SHA一致、mode=0600，四組secret reference preflight全綠。
+- ✅ Migration forbidden aliases已包含Anthropic、OpenAI與Google/Gemini各API-key
+  名稱；舊bootstrap文件移除所有secret env/session複製指示，target只能由密碼管理器、
+  服務後台或subscription OAuth重新授權。
+- ✅ 相鄰範圍104 tests、post-commit CI-parity 51 tests、ruff、py_compile與diff-check
+  全綠；Matt Spec／Standards最終雙PASS，P1/P2皆0。
+- ✅ 已產生只含manifest-declared artifacts、runtime continuity receipt與獨立frontend
+  checkout的clean target bundle：21,693,118 bytes，SHA-256
+  `89b044640c61c71b8834be872ea77a31d9ccc23e1965a55c9404343c492779b2`；
+  declared Git paths與frontend均clean，掃描0個`.env*`／Ed25519私鑰。
+- 🟡 Studio live snapshot正確回報仍有`GOOGLE_CLOUD_API_KEY`與`OPENAI_API_KEY`，
+  且共享checkout有別項WIP；MacBook Tailscale目前offline，不能取得fresh target
+  signature。API-key正式退役須由#12 subscription replacement接管，#12又等待#9
+  七日ownership gate；formal-effect RPO=0 pair亦尚未產生。因此#17維持
+  **`contained`／OPEN**，不得宣稱完成或promotion eligible。
