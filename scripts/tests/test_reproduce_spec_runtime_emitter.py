@@ -15,6 +15,7 @@ what a post-hoc writer would get wrong.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -24,8 +25,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from volpred.research import reproduce_spec as rs  # noqa: E402
-import reproduce_check as rc  # noqa: E402
+import reproduce_check as rc
+
+from volpred.research import reproduce_spec as rs
 
 
 def _experiment(tmp_path: Path, name: str = "k9100") -> tuple[Path, Path]:
@@ -63,6 +65,63 @@ def test_finalize_writes_results_and_spec_that_pin_identical_bytes(tmp_path: Pat
     assert payload["code_trace"]["size_bytes"] == spec["entrypoint"]["size_bytes"]
     assert spec["entrypoint"]["size_bytes"] == len(entry.read_bytes())
     assert payload["qlike"] == 0.42
+
+
+def test_finalize_pins_the_complete_canonical_result_bytes(tmp_path: Path) -> None:
+    """A results-only number edit must break an independent runtime commitment."""
+    exp, entry = _experiment(tmp_path)
+    results_path, spec = rs.finalize_experiment(
+        results={
+            "cw": {"t_stat": 1.968775},
+            "qlike": 0.42,
+            "verdict": {"label": "NULL"},
+        },
+        entrypoint=entry,
+        canonical_result="k9100_results.json",
+        exp_dir=exp,
+    )
+
+    result_bytes = results_path.read_bytes()
+    assert spec["canonical_result_identity"] == {
+        "path": "k9100_results.json",
+        "sha256": hashlib.sha256(result_bytes).hexdigest(),
+        "size_bytes": len(result_bytes),
+    }
+
+
+def test_writer_pins_an_existing_canonical_result(tmp_path: Path) -> None:
+    """The lower-level public writer must enforce the same result identity."""
+    exp, entry = _experiment(tmp_path)
+    results_path = exp / "k9100_results.json"
+    result_bytes = b'{"cw":{"t_stat":1.968775},"verdict":"NULL"}\n'
+    results_path.write_bytes(result_bytes)
+
+    spec = rs.write_reproduce_spec(
+        exp_dir=exp,
+        entrypoint=entry,
+        canonical_result=results_path.name,
+    )
+
+    assert spec["canonical_result_identity"] == {
+        "path": results_path.name,
+        "sha256": hashlib.sha256(result_bytes).hexdigest(),
+        "size_bytes": len(result_bytes),
+    }
+
+
+def test_result_identity_rejects_a_non_hex_digest(tmp_path: Path) -> None:
+    exp, entry = _experiment(tmp_path)
+    with pytest.raises(ValueError, match="canonical_result_trace"):
+        rs.build_reproduce_spec(
+            exp_dir=exp,
+            entrypoint=entry,
+            canonical_result="k9100_results.json",
+            canonical_result_trace={
+                "path": "k9100_results.json",
+                "sha256": "z" * 64,
+                "size_bytes": 42,
+            },
+        )
 
 
 def test_the_k1708_divergence_cannot_be_reproduced_through_this_helper(

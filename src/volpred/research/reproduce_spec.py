@@ -39,6 +39,11 @@ the K1708 identity divergence is not merely discouraged, it is unrepresentable.
 Their ``path`` fields intentionally use different schemas: repo-relative in the
 result trace, experiment-relative in the runnable spec.
 
+The spec also records ``canonical_result_identity`` from the exact result bytes
+written by the run.  This is independent of the code trace: changing a CW,
+QLIKE, verdict, or any other result value without rerunning makes the artifact
+gate fail even when the entrypoint itself is unchanged.
+
 If a script must keep its own results writer, use :func:`write_reproduce_spec`
 and take ``code_trace`` from its return value -- never recompute the hash.
 
@@ -94,31 +99,38 @@ def _repo_root() -> Path:
     return Path(__file__).resolve().parents[3]
 
 
-def trace_file(path: str | os.PathLike[str], *, root: Path | None = None) -> dict[str, Any]:
-    """``{path, sha256, size_bytes}`` for one file, repo-relative where possible.
-
-    THE one place a file identity is computed. ``code_trace`` in results and
-    ``entrypoint`` in the spec both come from here, called once, so they cannot
-    describe different bytes -- the K1708 failure.
-
-    ``size_bytes`` is taken from the bytes that were hashed, not from ``stat()``:
-    a stat() taken separately can observe a different revision of a file being
-    rewritten underneath us, and then the pair silently disagrees.
-    """
+def _trace_bytes(
+    path: str | os.PathLike[str],
+    data: bytes,
+    *,
+    root: Path,
+) -> dict[str, Any]:
+    """Build one identity from the exact bytes a caller read or will write."""
     target = Path(path).resolve()
-    data = target.read_bytes()
-    root = (root or _repo_root()).resolve()
+    root = root.resolve()
     try:
         rel = target.relative_to(root).as_posix()
     except ValueError:
-        # Outside the checkout (a scratch copy, /tmp probe). Honest absolute path
-        # beats a fabricated relative one -- the reader must see it is off-tree.
         rel = target.as_posix()
     return {
         "path": rel,
         "sha256": hashlib.sha256(data).hexdigest(),
         "size_bytes": len(data),
     }
+
+
+def trace_file(path: str | os.PathLike[str], *, root: Path | None = None) -> dict[str, Any]:
+    """``{path, sha256, size_bytes}`` for one file, repo-relative where possible.
+
+    ``code_trace`` in results and ``entrypoint`` in the spec both come from one
+    call, so they cannot describe different bytes -- the K1708 failure.
+    ``size_bytes`` is taken from the bytes that were hashed, not from ``stat()``:
+    a stat() taken separately can observe a different revision of a file being
+    rewritten underneath us, and then the pair silently disagrees.
+    """
+    target = Path(path).resolve()
+    data = target.read_bytes()
+    return _trace_bytes(target, data, root=root or _repo_root())
 
 
 def _version(module_name: str) -> str | None:
@@ -177,6 +189,7 @@ def build_reproduce_spec(
     network: str = "deny",
     comparison: Mapping[str, Any] | None = None,
     entrypoint_trace: Mapping[str, Any] | None = None,
+    canonical_result_trace: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Assemble the spec dict. Pure; :func:`write_reproduce_spec` persists it.
 
@@ -229,7 +242,7 @@ def build_reproduce_spec(
 
     input_traces = [trace_file(p, root=root) for p in inputs]
 
-    return {
+    spec = {
         "schema_version": SPEC_SCHEMA,
         "generated_by": "volpred.research.reproduce_spec",
         "generated_at_runtime": True,
@@ -254,6 +267,32 @@ def build_reproduce_spec(
         "environment": runtime_environment(seeds),
         "comparison": cmp_block,
     }
+    if canonical_result_trace is not None:
+        result_trace = dict(canonical_result_trace)
+        if result_trace.get("path") != canonical_result:
+            raise ValueError(
+                "canonical_result_trace.path must equal canonical_result; "
+                f"got {result_trace.get('path')!r} != {canonical_result!r}"
+            )
+        digest = result_trace.get("sha256")
+        size = result_trace.get("size_bytes")
+        if (
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(ch not in "0123456789abcdef" for ch in digest)
+            or not isinstance(size, int)
+            or isinstance(size, bool)
+            or size < 0
+        ):
+            raise ValueError(
+                "canonical_result_trace needs a sha256 string and non-negative size_bytes"
+            )
+        spec["canonical_result_identity"] = {
+            "path": canonical_result,
+            "sha256": digest,
+            "size_bytes": size,
+        }
+    return spec
 
 
 def write_reproduce_spec(
@@ -270,10 +309,12 @@ def write_reproduce_spec(
     """
     entry = Path(entrypoint).resolve()
     exp_path = Path(exp_dir).resolve() if exp_dir is not None else entry.parent
+    result_trace = trace_file(exp_path / canonical_result, root=exp_path)
     spec = build_reproduce_spec(
         exp_dir=exp_path,
         entrypoint=entry,
         canonical_result=canonical_result,
+        canonical_result_trace=result_trace,
         **kwargs,
     )
     out = exp_path / SPEC_NAME
@@ -321,10 +362,15 @@ def finalize_experiment(
 
     exp_path.mkdir(parents=True, exist_ok=True)
     results_path = exp_path / canonical_result
-    results_path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False, default=str) + "\n",
-        encoding="utf-8",
+    result_bytes = (
+        json.dumps(payload, indent=2, ensure_ascii=False, default=str) + "\n"
+    ).encode("utf-8")
+    result_trace = _trace_bytes(
+        results_path,
+        result_bytes,
+        root=exp_path,
     )
+    results_path.write_bytes(result_bytes)
 
     spec = build_reproduce_spec(
         exp_dir=exp_path,
@@ -335,6 +381,7 @@ def finalize_experiment(
         seeds=seeds,
         runtime_seconds=elapsed,
         entrypoint_trace=trace,
+        canonical_result_trace=result_trace,
         **spec_kwargs,
     )
     (exp_path / SPEC_NAME).write_text(

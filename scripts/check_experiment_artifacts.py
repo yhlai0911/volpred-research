@@ -277,6 +277,66 @@ def _entrypoint_drift_violation(exp_dir: Path) -> tuple[str | None, str]:
     )
 
 
+def _canonical_result_identity_violation(
+    exp_dir: Path,
+) -> tuple[str | None, str]:
+    """Verify the independent runtime commitment to the complete result bytes.
+
+    This is a forward ratchet.  Specs created before
+    ``canonical_result_identity`` existed remain valid, while every result
+    finalized by the current runtime emitter is value-bound.  The distinction
+    from ``entrypoint.sha256`` is deliberate: code identity cannot detect a
+    hand-edited CW statistic, QLIKE value, or verdict.
+    """
+    path = exp_dir / SPEC_NAME
+    try:
+        spec = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None, "skipped-unreadable"
+    if not isinstance(spec, dict):
+        return None, "skipped-unreadable"
+
+    identity = spec.get("canonical_result_identity")
+    if identity is None:
+        return None, "skipped-no-result-identity"
+    if not isinstance(identity, dict):
+        return "canonical result identity must be an object", "invalid"
+
+    canonical = spec.get("canonical_result")
+    rel = identity.get("path")
+    digest = identity.get("sha256")
+    size = identity.get("size_bytes")
+    if (
+        not isinstance(canonical, str)
+        or rel != canonical
+        or not isinstance(digest, str)
+        or not re.fullmatch(r"[0-9a-f]{64}", digest)
+        or not isinstance(size, int)
+        or isinstance(size, bool)
+        or size < 0
+    ):
+        return (
+            "canonical result identity is malformed or does not bind canonical_result",
+            "invalid",
+        )
+
+    try:
+        data = (exp_dir / canonical).read_bytes()
+    except OSError as exc:
+        return f"canonical result identity target is unreadable: {exc}", "unreadable"
+    actual_digest = hashlib.sha256(data).hexdigest()
+    if actual_digest != digest or len(data) != size:
+        return (
+            (
+                "canonical result identity mismatch: the archived result bytes changed "
+                f"after runtime finalization (spec {digest[:12]}/{size}, "
+                f"disk {actual_digest[:12]}/{len(data)})"
+            ),
+            "mismatch",
+        )
+    return None, "clean"
+
+
 def _preserved_shas_fallback(exp_dir: Path) -> set[str]:
     """``preserve_gate_blob.preserved_shas`` inlined for the bare-python3 merge path.
 
@@ -329,6 +389,7 @@ def audit_experiment(
         "violations": [],
         "spec_check_mode": None,
         "entrypoint_drift": None,
+        "canonical_result_identity": None,
     }
 
     if kid and kid in exclusions:
@@ -379,6 +440,10 @@ def audit_experiment(
         record["entrypoint_drift"] = drift_status
         if drift_violation:
             record["violations"].append(drift_violation)
+        result_violation, result_status = _canonical_result_identity_violation(exp_dir)
+        record["canonical_result_identity"] = result_status
+        if result_violation:
+            record["violations"].append(result_violation)
 
     return record
 
@@ -419,6 +484,13 @@ def _remedy(record: dict[str, Any]) -> list[str]:
             "  #     If instead the script legitimately changed AND was re-run, regenerate",
             "  #     results + spec together via volpred.research.reproduce_spec.finalize_experiment",
             "  #     so the pinned sha describes the run that actually produced them.",
+        ]
+    if "canonical result identity" in joined:
+        lines += [
+            f"  # 2c. experiments/{name}'s archived result bytes changed after the run.",
+            "  #     Do not refresh the checksum around edited numbers. Restore the runtime",
+            "  #     output, or rerun the experiment and let finalize_experiment regenerate",
+            "  #     both the results and reproduce_spec.json from that execution.",
         ]
     lines += [
         "  # 3. If this experiment is genuinely exempt (archived legacy work, no",
@@ -521,7 +593,8 @@ def cmd_check(args: argparse.Namespace) -> int:
             # of quiet overclaim that makes people trust a gate past its scope.
             knowledge = "knowledge entry" if r["k_id"] else "no K-id (knowledge check n/a)"
             print(f"[artifacts] PASS — {r['path']} ({knowledge} + {SPEC_NAME}, "
-                  f"spec check: {r['spec_check_mode']})")
+                  f"spec check: {r['spec_check_mode']}, result identity: "
+                  f"{r['canonical_result_identity']})")
 
     if not failed:
         return 0

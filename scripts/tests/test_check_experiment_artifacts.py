@@ -21,8 +21,11 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
-import check_experiment_artifacts as gate  # noqa: E402
+import check_experiment_artifacts as gate
+
+from volpred.research import reproduce_spec as rs
 
 
 def _experiment(root: Path, name: str, *, results: bool = True, spec: bool = True) -> Path:
@@ -71,6 +74,49 @@ def test_complete_experiment_passes(tmp_path: Path) -> None:
     record = gate.audit_experiment(exp, knowledge_ids={"k9003"}, exclusions={})
     assert record["gated"] is True
     assert record["violations"] == []
+
+
+def test_runtime_result_number_tamper_is_blocked(tmp_path: Path) -> None:
+    """K1708-class edits must fail even when the producing code is unchanged."""
+    exp = tmp_path / "experiments" / "k9010"
+    exp.mkdir(parents=True)
+    entry = exp / "k9010.py"
+    entry.write_text("print('science')\n", encoding="utf-8")
+    results_path, _spec = rs.finalize_experiment(
+        results={
+            "cw": {"t_stat": 1.968775},
+            "qlike": 0.42,
+            "verdict": {"label": "NULL"},
+        },
+        entrypoint=entry,
+        canonical_result="k9010_results.json",
+        exp_dir=exp,
+    )
+    before = gate.audit_experiment(
+        exp,
+        knowledge_ids={"k9010"},
+        exclusions={},
+    )
+    assert before["violations"] == []
+    assert before["canonical_result_identity"] == "clean"
+
+    tampered = json.loads(results_path.read_text(encoding="utf-8"))
+    tampered["cw"]["t_stat"] = 3.5
+    results_path.write_text(
+        json.dumps(tampered, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+    record = gate.audit_experiment(
+        exp,
+        knowledge_ids={"k9010"},
+        exclusions={},
+    )
+
+    assert any(
+        "canonical result identity" in violation
+        for violation in record["violations"]
+    )
 
 
 def test_directory_with_no_results_is_not_gated(tmp_path: Path) -> None:

@@ -4196,3 +4196,29 @@ live以注入`OPENAI_API_KEY=sentinel`回讀bounded Codex、Telegram exec與agy 
 provider I/O前exit 126／policy_denied，未呼叫模型。此旁路類根因狀態為
 **`root_cause_fixed_and_verified`**；真正owner cutover仍等#9，Issue #12維持
 `contained`。
+
+### 2026-07-29 — code SHA 不能證明 results 數值未被事後修改
+
+**證據化症狀**：K1708 round-4 review指出
+`test_stored_numbers_are_the_output_of_the_pinned_code`只比對
+`K1708.py` SHA、seed、quick mode與樣本數；只改results內的CW、QLIKE或verdict不會
+改動程式SHA，測試仍會通過。實際negative test把CW t-stat由`1.968775`改成`3.5`，
+舊artifact gate沒有任何violation。
+
+**根因層級（provenance contract）**：run-time spec只承諾entrypoint bytes，沒有獨立
+承諾canonical result bytes；「相同程式可重跑」被錯當成「目前results就是該次run的
+原始輸出」。兩者不等價。
+
+**底層修復與制度化**：`finalize_experiment`現在從即將寫出的exact result bytes建立
+`canonical_result_identity`（path／SHA-256／size），與runtime spec一同落地；
+`check_experiment_artifacts.py`在merge與CI fail-closed比對完整results bytes。
+舊spec無此欄位維持forward-compatible；新欄位若malformed、指向非canonical result，
+或任一數值被改即BLOCKED。修復指引禁止「順手刷新checksum」，只能還原runtime輸出或
+正式重跑。
+
+**回歸與live read-back**：兩條精確測試先RED（缺identity、竄改未被擋）後GREEN；
+reproduce／artifact／gate-history相鄰範圍共66 passed，Ruff scoped與diff-check全綠。
+repo-wide class sweep只找到未合併K1708 worktree一處錯誤宣稱；K1708因缺少run-time
+`reproduce_spec.json`仍由真實artifact gate擋住，未補造spec、未merge、未寫knowledge。
+此「code-only provenance對result tamper失明」bug class狀態為
+**`root_cause_fixed_and_verified`**；K1708實驗本身仍是blocked。
