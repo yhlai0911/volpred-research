@@ -1,0 +1,56 @@
+{
+  "id": "compute-k1734-primary-path-codex-certification-review-1785248077",
+  "title": "K1734 primary-path Codex certification review",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1734_primary_path_prompt.md",
+    "storage/ops/codex_reviews/k1734_primary_path_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 1,
+  "queued_at": "2026-07-28T14:14:37Z",
+  "started_at": "2026-07-28T14:15:02Z",
+  "completed_at": "2026-07-28T14:20:38Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1734-primary-path-codex-certification-review-1785248077.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1734-primary-path-codex-certification-review-1785248077.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1734_primary_path_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1734_primary_path_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1734 primary-path 複審收件（gate 任務 assign_12a2f9ba）。讀 storage/ops/codex_reviews/k1734_primary_path_verdict.md，第一個非空行 = VERDICT。\n\n【收件順序（硬性，2026-07-28 事故）】先跑 compute_queue.py mark-followup-dispatched --id <this job> --next-task-id assign_12a2f9ba，**再** complete source task。順序顛倒會使 _release_collected_source_task 的 status==awaiting_agent_job 前置條件失效、followup 永久不可 dispatch（本班已中招一次，見 assign_617bf749）。\n\n【VERDICT: PASS】1) 把 primary-path 結果寫回 .claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/K1734/review_verdict.json：primary_path_status.status 由 UNAVAILABLE 改為 COMPLETED（記 reviewer=codex、verdict、時間），並把本次 review 追加進 reviews[]；consolidated_verdict 由 CONDITIONAL_PASS 升為 PASS。2) 主線程寫 knowledge.json（K1259：數字一律用程式從 experiments/K1734/K1734_results.json 取，禁從 README 或任何 agent 摘要轉抄；重點 = H1 左尾不對稱成立、H2 yen-funding 觸發被拒（且 FXY-carry 同期相關為正號、反駁 H2 方向）、H3 OOS 領先成立但量級小且依 RV estimator，squared-return RV 下 CW p=0.75 消失）。3) 跑 python3 scripts/check_experiment_artifacts.py check --path experiments/K1734 確認 knowledge + reproduce_spec 兩半都過。4) 用 canonical git_writer_lock.py run 跑 scripts/merge_worktree.sh dispatch-slot-1-1e5922b4-k1734 正式合併。5) complete assign_12a2f9ba succeeded。\n\n【VERDICT: FAIL】不得合併、不得寫 knowledge。依 model_router experiment ladder 檢查是否 exhausted/at_ceiling；已到頂則走 3-strike terminal：記 defect、寄 escalate email 給老闆（send-alert --needs-reply，標題以 [新架構派發] 開頭，引用 verdict 裡的具體 BLOCKING 項目），complete assign_12a2f9ba failed，禁止同法 loop 重派。\n\n【job 本身失敗 / verdict 檔沒產出】最可能是 Codex 額度仍未恢復（本班 unblock 探針回報 available，但 reachability != quota restored）。此時不得把 K1734 當已複審：確認 stderr 是否為 usage-limit，是則把 assign_12a2f9ba 重新 blocked（blocked_reason=codex_quota_reset_pending, blocked_until=2026-08-02T09:00:00+08:00），不要改用 fallback reviewer 收尾 —— 那正是本 gate 存在的原因。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "source_task_id": "assign_12a2f9ba",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T14:14:37Z",
+    "linked_at": "2026-07-28T14:14:37Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 61418,
+  "claimed_by_pid_start_wall": "Tue Jul 28 22:15:02 2026",
+  "source_task_settlement": {
+    "state": "settled",
+    "task_id": "assign_12a2f9ba",
+    "settled_at": "2026-07-28T14:28:25Z"
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "followup_dispatched_at": "2026-07-28T14:28:25Z",
+  "followup_next_task_id": "assign_12a2f9ba"
+}

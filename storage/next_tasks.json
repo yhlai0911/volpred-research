@@ -32910,7 +32910,7 @@
     "title": "K1715: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Chri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 509). Original: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1715.py with signal.shift(1) + seed=42, (c) K1715_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "pending",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -32979,6 +32979,13 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:36:40.528810+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec",
+        "note": "terminal receipt collected; followup=K1715"
       }
     ],
     "status_original": "in_progress",
@@ -32996,12 +33003,9 @@
         "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1715_adjudicate-27247d.json#id"
       }
     },
-    "compute_released_at": "2026-07-28T10:50:18.105083+00:00",
-    "compute_release_reason": "external_compute_job_failed",
-    "compute_job_id": "agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec",
-    "blocked_reason": "external_compute_receipt_pending_collection",
-    "compute_started_at": "2026-07-28T13:30:00Z",
-    "compute_finished_at": "2026-07-28T13:48:33Z"
+    "compute_released_at": "2026-07-28T14:36:40Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "recert2_collected_20260728": "[recert2 收件 — 2026-07-28 22:40 CST, hourly-slot-1-ddc2ab2b]\nrebrief job agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec (exit 0) 已產出**新的**\nreview_verdict.json（6,348 B, mtime 07-28 21:47, reviewed_at 2026-07-28T13:42:00Z,\nreviewer=Codex gpt-5.6-sol/xhigh），取代前班指出的那份 stale 2,108 B 檔。**VERDICT: FAIL**。\n\n【已解決】recert round 1 的 lossy %.10f snapshot serialization 缺陷，Codex 判 RESOLVED：\noption-B 修正（commit fdf4ab297, K1715.py 379a67cd…）為 doc/format-only，\nfloat_format %.10f→%.17g 只動 WRITE path、`if SNAPSHOT.is_file():` read path 未動、\npinned snapshot 檔 byte 未變，無 model/estimation/evaluation/seed/lag 變更、無 lookahead。\n\n【新 blocking defect — estimator lineage mismatch】審查當下 K1715.py 是 cb06895a…，\n**不是**本輪受命認證的 option-B bytes 379a67cd…。fdf4ab297 之後的兩個 commit\n（9926bca90, c9d75cf1d）加了 BFGS min-NLL guard：\n`res = res_bfgs if isfinite(res_bfgs.fun) and res_bfgs.fun <= res_nm.fun else res_nm`，\n先前 res 無條件取 BFGS 結果。這**改變了選中哪一組參數向量**，屬實質估計選擇邏輯，\n不是 doc/format 變更 → 認證對象與實際位元組不符，不可放行。\n\n【本班補充觀察 — 位元組又漂了一次】現在磁碟上的 K1715.py 已是 **133c6f81…**（64,544 B），\n係 agent-brief_k1715_spec_reprocheck-6ff96b 再次改動所致。即 K1715 已連續三代\n（379a67cd → cb06895a → 133c6f81）在認證流程進行中被換掉，每一輪審查的都是隨即過期的位元組。\n這是流程層問題，不是單次疏失。\n\n【與 snapshot 重現結果的交互作用，必須寫明不可略過】snapshot_repro_report.md 宣稱以\n133c6f81… 重跑對 archived results（929cb150…，正是 recert2 reviewed_sha256 記載的同一份）\n達成 max abs dev = 0.0。若估計選擇邏輯真的改變，bit-identical 通常不會發生 ——\n合理解釋是該 guard 在本資料上從未 binding（BFGS 恆優於 NM）。這是**有利但未經證實**的推論：\n下一輪必須**明確檢定該 guard 在全樣本是否曾 binding**（統計 res_bfgs.fun > res_nm.fun 的\n次數）並寫進報告。若曾 binding 而數值仍完全相同，那反而代表比較器沒看到該路徑，要追查。\n不得以「重現是 0.0 所以 lineage 不重要」收尾 —— 那是用結果反推程序正當性。\n\n【狀態】K1715 仍不可 merge、不可寫 knowledge。後續已有 assign_8f1165f3 線上的\nagent-agent-brief_k1715_comparator_closeout-5e83ee 在跑（補 only_archived 差集與\nfail-closed）。下一輪 recert 必須：先凍結一份確定的位元組、再送審、審完前禁止任何人改該檔。\n\n【備註】同綁 source_task=K1715 的另一 job agent-brief_k1715_recert2-e2b9fd（SIGKILL, failed）\n已被本 rebrief 取代，其 followup 因單一 source task 只能被 release 一次而維持 stranded，\n非遺漏（見 assign_617bf749）。"
   },
   {
     "id": "K1716",
@@ -35175,8 +35179,9 @@
     "compute_released_at": "2026-07-28T13:21:21Z",
     "compute_release_reason": "terminal_receipt_collected",
     "compute_job_id": "agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5",
-    "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-28T13:30:00Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-28T13:30:00Z",
+    "compute_finished_at": "2026-07-28T14:07:42Z"
   },
   {
     "id": "K1727",
@@ -53255,13 +53260,43 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1720_rev2-2f566a",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:19:59.646921+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-brief_k1720_rev2-2f566a",
+        "note": "terminal receipt collected; followup=assign_99f4b3bf"
+      },
+      {
+        "ts": "2026-07-28T14:21:05.453404+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1720-rev2-codex-round-2-review-1785248465",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:37:35.836082+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:compute-k1720-rev2-codex-round-2-review-1785248465",
+        "note": "terminal receipt collected; followup=assign_99f4b3bf"
+      },
+      {
+        "ts": "2026-07-28T14:38:49.311816+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1720_rev3-836a88",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "compute_job_id": "agent-brief_k1720_rev2-2f566a",
-    "blocked_reason": "external_compute_receipt_pending_collection",
-    "result": "dispatched to compute job agent-brief_k1720_rev2-2f566a; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-28T13:30:00Z",
-    "compute_finished_at": "2026-07-28T13:49:46Z"
+    "result": "dispatched to compute job agent-brief_k1720_rev2-2f566a; awaiting PHASE A collection\n\ndispatched to compute job compute-k1720-rev2-codex-round-2-review-1785248465; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720_rev3-836a88; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T14:37:35Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "round2_verdict_20260728": "Codex round 2 = FAIL。R2/R3/R4 RESOLVED，lookahead / rev1-rev2 數值變動 / NULL 決策樹全過。僅 R1（11:30 whitelist 未對照官方 early-close 清單，正常交易日 11:30 後斷檔仍可冒充收盤，K1720.py:120-126,193-208；但 Codex 明言目前固定資料下那 8 日期是完整的 → 穩健性缺陷非結果缺陷）與 R5（K1720.py:687-688 仍硬編 '~3 years'，而 sample_provenance.span_years=2.9，主線程已實測確認）未解。派 agent-brief_k1720_rev3 定向修正。",
+    "escalation_attempts": 1,
+    "compute_job_id": "agent-agent-brief_k1720_rev3-836a88",
+    "blocked_reason": "external_compute_job_active"
   },
   {
     "id": "assign_d696156d",
@@ -53292,12 +53327,28 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1731_rev11_freeze_integrity-1fc0fd",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:23:31.824215+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-brief_k1731_rev11_freeze_integrity-1fc0fd",
+        "note": "terminal receipt collected; followup=assign_d696156d"
+      },
+      {
+        "ts": "2026-07-28T14:24:50.634033+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1731_rev12_gatefix-e397a8",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "compute_job_id": "agent-brief_k1731_rev11_freeze_integrity-1fc0fd",
+    "result": "dispatched to compute job agent-brief_k1731_rev11_freeze_integrity-1fc0fd; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1731_rev12_gatefix-e397a8; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T14:23:31Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "compute_job_id": "agent-agent-brief_k1731_rev12_gatefix-e397a8",
     "blocked_reason": "external_compute_job_running",
-    "result": "dispatched to compute job agent-brief_k1731_rev11_freeze_integrity-1fc0fd; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-28T13:48:34Z"
+    "compute_started_at": "2026-07-28T14:30:05Z"
   },
   {
     "id": "assign_617bf749",
@@ -53323,7 +53374,9 @@
       "assign_99f4b3bf"
     ],
     "second_instance_evidence": "[2026-07-28 21:54 CST, hourly-slot-3-c096399003fc4851b757097df5785260] 第二個實例已現場複驗，blast radius 不只 K1708：job `agent-brief_k1731_rev9-87d87e`（status=failed, followup_mode=triage_failed, source_task_id=assign_k1731_rev9，該 task 已被 slot-1 於 21:17 標 failed）今日 21:54 執行 `mark-followup-dispatched --id agent-brief_k1731_rev9-87d87e --next-task-id assign_d696156d`，回覆與 K1708 完全相同的 `error: cannot dispatch followup for ... — source task settlement failed.`，followup_dispatched 仍為 false。目前 `compute_queue.py list --pending-followup` 共 3 條，其中 2 條（K1708 + 本條）已確認因此 bug 永久不可 dispatch，每班 fire 都會重收一次。此觀察支持 description 的建議 (a)+(c)：_release_collected_source_task 應承認終局結算（source task 已 succeeded/failed 且 compute_job_id 等於本 job 時視為 released，只解綁不翻回 pending）。本 slot 未自行修改，因 platform_ops 受 supervisor_preassignment_required 機械阻擋，未繞過。",
-    "related_frozen_model_id_defect": "本班另外實測到的相鄰缺陷（歸屬 assign_280ec9c5，非本單，記此供交叉參照）：storage/ops/agent_jobs/ 下 5 份 receipt 全帶退役 frozen model id 'claude-opus-4-8' — agent-brief_k1734_remediation-763606 與 agent-brief_k1812_fix-a18b38 為 failure_class=policy_denial（provider_policy_denial: model 'claude-opus-4-8' is not registered for 'claude-cli'，started_at 與 finished_at 相距 0.4 毫秒，agent 完全沒執行）；agent-brief_k1708_stage2-e9aa0b、agent-brief_k1714-cd4315、agent-k1731-armb-rev9-remediation 為 failure_class=quota。canonical model_router 對 experiment 回 cli_flag=claude-opus-5。這批 job 被歸類為 triage_failed 具誤導性：它們不是研究失敗，而是 admission 層幽靈失敗，worktree 內既有產物完全未受影響、仍然有效。修復時要注意：單純 requeue 而不改 model id 會再被拒一次。"
+    "related_frozen_model_id_defect": "本班另外實測到的相鄰缺陷（歸屬 assign_280ec9c5，非本單，記此供交叉參照）：storage/ops/agent_jobs/ 下 5 份 receipt 全帶退役 frozen model id 'claude-opus-4-8' — agent-brief_k1734_remediation-763606 與 agent-brief_k1812_fix-a18b38 為 failure_class=policy_denial（provider_policy_denial: model 'claude-opus-4-8' is not registered for 'claude-cli'，started_at 與 finished_at 相距 0.4 毫秒，agent 完全沒執行）；agent-brief_k1708_stage2-e9aa0b、agent-brief_k1714-cd4315、agent-k1731-armb-rev9-remediation 為 failure_class=quota。canonical model_router 對 experiment 回 cli_flag=claude-opus-5。這批 job 被歸類為 triage_failed 具誤導性：它們不是研究失敗，而是 admission 層幽靈失敗，worktree 內既有產物完全未受影響、仍然有效。修復時要注意：單純 requeue 而不改 model id 會再被拒一次。",
+    "second_instance_20260728": "[第二次實例 — 2026-07-28 22:20 CST, hourly-slot-1-ddc2ab2b 現場重現]\n\njob=agent-brief_k1734_spec_finalize-2c769e (completed, exit 0), source_task=assign_04212462。\n主線程先跑 complete --status succeeded（source task 進終局），再跑 mark-followup-dispatched\n→ 回 \"error: cannot dispatch followup ... source task settlement failed.\"，followup_dispatched\n永久停在 false，該 job 會每班重複出現在 --pending-followup。\n\n精確機制（本次讀碼確認，非推測）：\n- scripts/compute_queue.py:3033-3058 mark_under_receipt_lock：job 帶 source_task_id 時，\n  必須 _release_collected_source_task 回 True（或已 pending_queue_commit）才肯寫\n  followup_dispatched。\n- scripts/compute_queue.py:2951-2962 _release_collected_source_task 的前置條件包含\n  task.status == \"awaiting_agent_job\" 且 compute_job_id == job.id 且 blocked_reason 在\n  {external_compute_receipt_pending_collection, external_compute_job_running}。\n- complete 把 status 改成 succeeded 並清掉 compute_job_id/blocked_reason → 上述條件永久\n  不可能再成立。沒有任何 idempotent 補救路徑：mark-followup-dispatched 只認 release 成功。\n\n也就是說這不是「順序建議」而是**單向不可逆閘**：正確順序（先 mark-followup-dispatched\n讓 release 把 task 放回 pending，再 complete）沒有寫在任何 CLI help、錯誤訊息或 PHASE A\nprompt 裡，錯一次就不可回復。\n\n現有的唯一修復入口 reconcile-bindings 在 worker 持鎖時直接拒絕\n（\"worker already running (lock held); cannot reconcile safely\"），本班無法執行。\n\n建議根因方向（供修復者裁決，本班未動 compute_queue.py — platform_ops 需 supervisor 預派）：\n1. mark-followup-dispatched 對「source task 已終局且 followup 未 dispatch」應可接受為合法\n   收尾（terminal source task 本來就代表 collection 已完成），而非硬失敗；\n2. 或 complete 端在 task 仍綁未 dispatch 的 followup job 時先行 release / 擋下並提示順序；\n3. 錯誤訊息至少要印出正確順序與 reconcile-bindings 補救指令。",
+    "third_instance_20260728": "[第三次實例 — 同班 2026-07-28 22:30 CST]\njob=compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876\n(completed)，source_task=K1708_gatecert_s14_rerun 已為 failed（終局）→\nmark-followup-dispatched 同樣回 \"source task settlement failed\"，Codex round-4 的\nVERDICT: FAIL 裁決無法經正規通道帶出。本班改以新開任務保存該裁決內容\n（K1708 provenance 測試只驗 code SHA 一案），但這正說明缺口的實際代價：\n**一份已經產出的審查結論，因為 source task 早一步被結算，就失去了它的派工通道。**\n\n[反向驗證 — 正確順序確實可行]\n同班在 assign_99f4b3bf 與 assign_d696156d 上先跑 mark-followup-dispatched 再處理 source\ntask，兩次都成功（task 由 awaiting_agent_job 釋回 pending，再由新 job 重新綁定）。\n故根因確認為「操作順序不可逆」而非 CLI 損壞：先 release 一切正常，先 complete 永久卡死。\n建議修復時把這條順序寫進 CLI help、錯誤訊息與 PHASE A prompt，並讓 complete 端在 task\n仍綁著未 dispatch 的 followup job 時主動擋下或先行 release。"
   },
   {
     "id": "assign_17d6da38",
@@ -53426,12 +53479,20 @@
         "to": "blocked",
         "by": "hourly-slot-1-24c9dbdcad994bb0a09a2670fc331dbc",
         "note": "workspace_adjudication"
+      },
+      {
+        "at": "2026-07-28T14:07:52.101869+00:00",
+        "from": "blocked",
+        "to": "blocked",
+        "reason": "missing_blocked_until_backfilled (2026-08-11T14:07:52+00:00); needs_adjudication"
       }
     ],
     "completed_at": "2026-07-28T14:05:13.629505+00:00",
     "blocked_reason": "worker=success; workspace=remediation_opened; main_sha=",
     "result": "worker=success; workspace=remediation_opened; main_sha=",
-    "dispatch_settled_session_id": "dispatch-24c9dbdc-c448b43e"
+    "dispatch_settled_session_id": "dispatch-24c9dbdc-c448b43e",
+    "blocked_until": "2026-08-11T14:07:52+00:00",
+    "needs_adjudication": true
   },
   {
     "id": "assign_33426a3d",
@@ -53512,7 +53573,7 @@
     "description": "來自 triage assign_17d6da38。K1734 已有 CONDITIONAL_PASS（兩個獨立 review 皆 PASS），但 experiments/k1734/reproduce_spec.json 不存在，check_experiment_artifacts.py 會擋 merge。依 2026-07-22 規則 spec 必須由 finalize_experiment() 在 run-time 與 results 同一次 trace 產出，禁止事後補寫。本任務 = 於既有 worktree .claude/worktrees/dispatch-slot-1-1e5922b4-k1734 內修 k1734.py 收尾呼叫 + 重跑（data/raw 已快取、seed=42、BOOT_REPS=5000，離線可重現）+ 驗證數值與已受審版本一致 + README 補 one-sided CW p 與 two-sided p 混入同一 BH-FDR family 的口徑說明。不合併 —— 合併需等 primary-path Codex 複審（另一張 gate 任務）。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-28T13:23:39.649139+00:00",
     "parent_task_id": "assign_17d6da38",
@@ -53526,11 +53587,18 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1734_spec_finalize-2c769e",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:11:25.886664+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1734_spec_finalize-2c769e; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_k1734_spec_finalize-2c769e; awaiting PHASE A collection\n\nPHASE A collect_completed 驗收通過（job agent-brief_k1734_spec_finalize-2c769e, exit 0）。三方 sha 一致：reproduce_spec.entrypoint = K1734_results.code_trace = disk k1734.py = cc8045ac3f33ce38265f351310ddbd84c9588af653afeda8cad76e15b37c635f / 44339 bytes（K1708 spec-drift 類缺陷在此案不存在）。README 已寫 §p 值口徑（8 個 BH-FDR p 值逐一標單尾/雙尾 + CW p 加倍保守重跑，H3_oos_cw_mse 調整後 p=0.0401<0.05 仍拒斥）。check_experiment_artifacts.py 現僅剩 knowledge 條目未寫 — 依 gate 任務 assign_12a2f9ba 設計，knowledge 必須等 primary-path Codex 複審 PASS + merge 後由主線程寫，非本任務 scope。",
     "compute_started_at": "2026-07-28T13:49:46Z",
-    "compute_finished_at": "2026-07-28T13:55:58Z"
+    "compute_finished_at": "2026-07-28T13:55:58Z",
+    "completed_at": "2026-07-28T14:11:25.886631+00:00"
   },
   {
     "id": "assign_280ec9c5",
@@ -53550,15 +53618,60 @@
     "description": "來自 triage assign_17d6da38。K1734 目前 consolidated_verdict=CONDITIONAL_PASS，兩個獨立 review 皆 PASS，但 review_verdict.json 的 primary_path_status.status=UNAVAILABLE：intended_reviewer=codex 撞 usage limit（'You've hit your usage limit'）至 2026-08-02，第二審是依 two-strikes / switch-model gate 改派的 fallback reviewer（gemini-agy）。\\n\\n【triage 裁決】certification gate 不以 fallback reviewer 的 PASS 收尾 —— 等 Codex 額度恢復後補跑 primary-path 複審，PASS 才 merge。\\n\\n【開工前置】assign_04212462（run-time reproduce_spec 補齊）必須先 succeeded；否則 check_experiment_artifacts.py 仍會擋 merge_worktree.sh。\\n\\n【本任務工作項】1) 確認 Codex CLI 額度已恢復；2) 於 worktree .claude/worktrees/dispatch-slot-1-1e5922b4-k1734 跑 primary-path Codex 複審（read-only audit：lookahead / leakage / statistics / honesty / verdict_supported）；3) 複審結果寫回 review_verdict.json 的 primary_path_status 與 reviews；4) PASS 才跑 scripts/merge_worktree.sh 正式合併；5) 合併後由主線程寫 knowledge.json（K1259：數字一律從 K1734_results.json 程式化取得，禁從 README 或 agent 摘要轉抄）。\\n\\n【禁止】以 CONDITIONAL_PASS 直接合併；以 fallback reviewer 的 PASS 取代 primary-path 複審。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "blocked",
+    "status": "awaiting_agent_job",
     "source": "user",
     "created_at": "2026-07-28T13:24:54.508524+00:00",
     "parent_task_id": "assign_17d6da38",
     "created_by": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
-    "blocked_until": "2026-08-02T09:00:00+08:00",
-    "blocked_reason": "codex_quota_reset_pending",
-    "blocked_at": "2026-07-28T13:25:05+00:00",
-    "blocked_note": "K1734 primary-path reviewer=codex 撞 usage limit 至 2026-08-02（證據：worktree dispatch-slot-1-1e5922b4-k1734 的 review_verdict.json primary_path_status）。另需前置 assign_04212462（run-time reproduce_spec）succeeded 才可 merge。"
+    "status_history": [
+      {
+        "at": "2026-07-28T14:07:52.101603+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "codex_reachability_probe_succeeded"
+      },
+      {
+        "ts": "2026-07-28T14:09:55.693962+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-ddc2ab2b508a47ee8345a6db652d04f4"
+      },
+      {
+        "ts": "2026-07-28T14:11:25.547615+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-ddc2ab2b508a47ee8345a6db652d04f4"
+      },
+      {
+        "ts": "2026-07-28T14:14:37.373967+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1734-primary-path-codex-certification-review-1785248077",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:28:25.849014+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:compute-k1734-primary-path-codex-certification-review-1785248077",
+        "note": "terminal receipt collected; followup=assign_12a2f9ba"
+      },
+      {
+        "ts": "2026-07-28T14:30:07.783705+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1734_h1_gate_fix-05b08f",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "result": "dispatched to compute job compute-k1734-primary-path-codex-certification-review-1785248077; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1734_h1_gate_fix-05b08f; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T14:28:25Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "primary_path_verdict_20260728": "Codex primary-path VERDICT: FAIL — H1 accept gate (k1734.py:354-356) 只測 skew + semivariance，未測 H1 宣稱的第二條腿（壓力期放大更快）；README 以未檢定的點估計 1.3520 vs 1.3020 支撐該宣稱。主線程已獨立複驗屬實。派 agent-brief_k1734_h1_gate_fix 定向修正（route A 補檢定 / route B 收窄宣稱）。注意該 verdict 因 workspace read-only 只報了這一項就停，其餘四個 audit 維度未覆蓋，修完需完整重審。",
+    "escalation_attempts": 1,
+    "compute_job_id": "agent-agent-brief_k1734_h1_gate_fix-05b08f",
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-28T14:36:20Z"
   },
   {
     "id": "K781_article_general_v4",
@@ -53639,8 +53752,6 @@
     "created_at": "2026-07-28T13:27:58.555505+00:00",
     "parent_task_id": "assign_c3b0743a",
     "created_by": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
-    "compute_job_id": "agent-brief_k1715_spec_reprocheck-6ff96b",
-    "blocked_reason": "external_compute_job_running",
     "status_history": [
       {
         "ts": "2026-07-28T13:28:08.411749+00:00",
@@ -53648,15 +53759,33 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1715_spec_reprocheck-6ff96b",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T14:32:13.425316+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-brief_k1715_spec_reprocheck-6ff96b",
+        "note": "terminal receipt collected; followup=assign_8f1165f3"
+      },
+      {
+        "ts": "2026-07-28T14:33:07.686044+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-agent-brief_k1715_comparator_closeout-5e83ee",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1715_spec_reprocheck-6ff96b; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-28T13:55:59Z"
+    "result": "dispatched to compute job agent-brief_k1715_spec_reprocheck-6ff96b; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1715_comparator_closeout-5e83ee; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T14:32:13Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "compute_job_id": "agent-agent-brief_k1715_comparator_closeout-5e83ee",
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-28T14:36:20Z"
   },
   {
     "id": "assign_b84ca91b",
     "title": "PHASE-Z 卡住檔案 incident（65f674cce6ce5a1c）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 30 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 30 班\n- src/volpred/ops/next_tasks.py — 30 班\n- storage/logs/trending_primary_source_verification.jsonl — 21 班\n- storage/memory/knowledge.json — 28 班\n- storage/reports/INDEX.md — 19 班\n- storage/reports/index.json — 19 班\n- storage/strategy_metrics.json — 19 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T133134702224Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T140531070912Z:<路徑>`",
+    "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 31 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- docs/error_log.md — 31 班\n- src/volpred/ops/next_tasks.py — 31 班\n- storage/logs/trending_primary_source_verification.jsonl — 22 班\n- storage/memory/knowledge.json — 29 班\n- storage/reports/INDEX.md — 20 班\n- storage/reports/index.json — 20 班\n- storage/strategy_metrics.json — 20 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T133134702224Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T140531070912Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T144205296293Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -53675,21 +53804,22 @@
         "storage/strategy_metrics.json"
       ],
       "streaks": {
-        "docs/error_log.md": 30,
-        "src/volpred/ops/next_tasks.py": 30,
-        "storage/logs/trending_primary_source_verification.jsonl": 21,
-        "storage/memory/knowledge.json": 28,
-        "storage/reports/INDEX.md": 19,
-        "storage/reports/index.json": 19,
-        "storage/strategy_metrics.json": 19
+        "docs/error_log.md": 31,
+        "src/volpred/ops/next_tasks.py": 31,
+        "storage/logs/trending_primary_source_verification.jsonl": 22,
+        "storage/memory/knowledge.json": 29,
+        "storage/reports/INDEX.md": 20,
+        "storage/reports/index.json": 20,
+        "storage/strategy_metrics.json": 20
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260728T133134702224Z",
-        "refs/volpred/quarantine/20260728T140531070912Z"
+        "refs/volpred/quarantine/20260728T140531070912Z",
+        "refs/volpred/quarantine/20260728T144205296293Z"
       ],
-      "fires": 2,
+      "fires": 3,
       "first_seen_at": "2026-07-28T13:32:11.494539+00:00",
-      "last_seen_at": "2026-07-28T14:06:24.071096+00:00",
+      "last_seen_at": "2026-07-28T14:42:47.339517+00:00",
       "derates": false,
       "derates_updated_at": "2026-07-28T14:05:31.163335+00:00",
       "deferred": [
@@ -53703,6 +53833,28 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T14:06:24.071096+00:00"
+    "updated_at": "2026-07-28T14:42:47.339517+00:00"
+  },
+  {
+    "id": "assign_965086b2",
+    "title": "[P1] incident sustained-clean gate 因 ring-buffer 修剪而永久不可達（inc_537a3ff3304f 卡住 issue42）",
+    "description": "【症狀（證據化）】incident inc_537a3ff3304f（kind=phase_z_baseline_missing）state=open，最後一次\nbreach 是 2026-07-26T18:30:45Z，此後累積 12 筆 clean observation（2026-07-28T05:40:03Z →\n2026-07-28T14:05:14Z），但 sustained-clean gate 永遠不會滿足，incident 永久開著，其 gate 任務\nissue42_persistent_fire_lifecycle_20260727（P1）因此每班都卡在 A0 urgent lane。\n\n【根因（讀碼確認，非推測）】src/volpred/ops/incident.py\n- L96-97：RESOLVE_MIN_CLEAN_OBSERVATIONS=3、RESOLVE_MIN_CLEAN_SPAN=24h\n- L108：_CLEAN_OBS_LIMIT = 12\n- L592：del observations[:-_CLEAN_OBS_LIMIT] —— clean_observations 是**只留最後 12 筆的 ring\n  buffer**，會把最早的觀測從頭砍掉。\n- L617-624 _clean_criterion_met：first = observations[0]、last = observations[-1]，用\n  (last - first) >= 24h 判斷。\n\nfirst 取的是「**保留窗內**的最早一筆」，不是這段 clean streak 真正的起點。於是\n(last - first) 被 ring buffer 上限鎖死在「最近 12 筆的跨度」。\n\n【可證偽的量化推論】要用 12 筆撐出 24h 跨度，觀測間隔必須 >= 24h/11 ≈ 2h11m。任何偵測器\n只要 clean 觀測比每 2h11m 更頻繁，該 incident 就**在數學上永遠無法 resolve**。\ninc_537a3ff3304f 實測間隔約 46 分鐘（12 筆 / 8.42h）→ 跨度穩定停在 ~8.4h，24h 門檻不可達。\nphase_z_baseline_missing 每班 fire 觀測一次、且多 slot 並行，結構上必然踩中。\n\n【現況掃描】storage/ops/incidents.json 共 21 筆，目前只有 inc_537a3ff3304f 已達 12 筆上限\n（另 inc_c67bec28dd29 n=2、間隔 2.21h 尚未觸頂）。所以這是**一顆低發生率但一旦踩到就永久卡死**\n的地雷，不是已經全面爆炸 —— 但它正在讓一張 P1 永久堵住 urgent lane。\n\n【修復方向（建議，交由修復者裁決）】\n1. 另存 streak 起點（例如 clean_streak_started_at），在 breach 重置 clean_observations 的同\n   兩處（L364、L422）一併清掉；_clean_criterion_met 改用 (last - streak_started_at) 判跨度，\n   與 ring buffer 修剪解耦。\n2. 既有資料 migration：對已存在的 row 用 observations[0].at 保守回填 streak 起點（真實起點\n   只會更早，不會更晚，因此不會提前放行 gate）。對 inc_537a3ff3304f 而言 gate 會在\n   2026-07-29T05:40Z 之後可達，而不是永遠不可達。\n3. 迴歸測試：tests/test_incident_lifecycle.py 補一條「觀測頻率高於 24h/(limit-1) 時仍能\n   resolve」的案例 —— 這正是現行測試沒有覆蓋到的區間。\n\n【重要 — 不要用資料手術收尾】不得手改 incidents.json 讓 incident 直接 resolved：那會把\n「gate 從未真正通過」寫成「已通過」。修的是判定邏輯，gate 本身仍必須誠實地等滿 24h。\n\n【本班為何沒修】platform_ops 屬 mutating work，task CLI 以 supervisor_preassignment_required\n機械拒絕本 slot 的 claim（已實測），依規定不繞過，改以本任務移交。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-28T14:15:54.252980+00:00",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_17a788b3",
+    "title": "[P1] K1708 provenance 測試只驗 code SHA、對 results 數值竄改盲目（Codex round-4 FAIL 點名的測試強度倒退）",
+    "description": "【來源】Codex round-4 primary-path review 的 VERDICT: FAIL\n（storage/ops/codex_reviews/k1708_r4_verdict.md，job\ncompute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876）。\nK1708 本身的 gate-cert 任務 K1708_gatecert_s14_rerun 已標 failed 收束，但該裁決裡點名的\n**測試強度倒退**不會隨任務關閉而消失，且會沿用到後續任何以 K1708 為模板的實驗，故另開單。\n\n【核心發現（Codex 原話重點）】K1708 的 provenance 測試被改成「只檢查 code SHA、seed、\nquick mode、origin count」（test_k1708.py:1176）。Codex 指出：**編輯任何 CW / QLIKE /\nverdict 數值都不會改變 code SHA**，因此「任何數字被改動都會使等式不成立」這個宣稱是**假的**。\n原本用來獨立佐證輸出值的六欄位 pre-fix Anchor A 在 reconciliation 時被移除\n（K1708.py:2463 / test_k1708.py:684），換成只驗程式碼雜湊 —— Codex 明確稱之為\n\"an actual weakening\"，不是等價重構。\n\n【為什麼這是研究誠實問題而非普通測試債】AGENTS.md 研究誠實原則第 1、13 條的機械防線之一\n就是「結果檔不能被事後手改而不被發現」。一個只認 code SHA 的 provenance 測試，對\n「程式沒動、results.json 的數字被改」這個**最危險的造假路徑完全盲目**。K1708 目前的 verdict\n是 NULL（誠實的失敗結果），所以此刻沒有造假動機；但這個防線的缺口會被後續實驗沿用。\n\n【本班獨立佐證（非轉抄 Codex）】主線程實測\n.claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/reproduce_spec.json\n**不存在**，與 Codex 所稱「canonical artifact check returns BLOCKED — missing\nreproduce_spec.json，因此不可 merge」一致。K1708 未合併、未寫 knowledge，狀態正確。\n\n【工作項】\n1. 讓 provenance 測試真正綁定**輸出值**而非只綁程式碼：恢復或重建對 results.json 關鍵欄位\n   的獨立雜湊/對帳（六欄位 Anchor A 或等效設計），使「程式不動、數字被改」必然測試失敗。\n2. 檢查此弱化是否已被複製到其他實驗的 test_*.py（K1708 常被當模板），列出受影響清單。\n3. 若判定 Anchor A 的移除有正當理由，必須在測試檔與 reproduce_spec 寫明**替代防線是什麼**，\n   不得只留一句「已 reconcile」。\n4. 回歸測試：加一條「竄改 results.json 中一個統計量 → 測試必須紅」的 negative test。\n\n【禁止】把測試改成通過來收尾；以「K1708 反正是 NULL、沒人會改」為由跳過；在未補\nreproduce_spec.json 前合併 K1708。\n\n【備註】此 job 的 followup 因 source task 已終局而永久不可 dispatch（已知 P1\nassign_617bf749，本班第三次實例），故本裁決以本任務保存，不依賴該 followup 通道。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-28T14:26:31.268279+00:00",
+    "priority_capped_from": 1
   }
 ]

@@ -1,0 +1,53 @@
+{
+  "id": "agent-agent-brief_k1720_rev3-836a88",
+  "title": "agent: agent-brief_k1720_rev3",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1720_rev3-836a88.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "max",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-87c7269d-k1720",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-87c7269d-k1720/experiments/K1720/k1720_rev3_report.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-agent-brief_k1720_rev3-836a88.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T14:38:49Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1720_rev3-836a88.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-agent-brief_k1720_rev3-836a88.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-87c7269d-k1720/experiments/K1720/k1720_rev3_report.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-agent-brief_k1720_rev3-836a88.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-3-87c7269d-k1720",
+  "claude_followup": {
+    "brief": "K1720 rev3 收件（source task assign_99f4b3bf）。讀 .claude/worktrees/dispatch-slot-3-87c7269d-k1720/experiments/K1720/k1720_rev3_report.json。\n\n【收件順序（硬性）】先 mark-followup-dispatched --next-task-id assign_99f4b3bf，再 complete source task（P1 assign_617bf749）。\n\n【status=READY_FOR_CODEX_ROUND_3】1) 自驗 R1：early-close 集合有來源註解、11:30 收盤只在該日確為官方半日時成立、非半日的 11:30 斷檔已被排除；若 report 宣稱 8 個 prev_close_changed_days 與 sample_provenance 不變，抽驗至少 2 個日期確認。2) 自驗 R5：grep K1720.py 與 README.md 確認再無硬編樣本敘述（~3 years / ~2 years / ~500 sessions / 任何年數或 session 數寫法），且 verdict rationale 已 run-time 格式化。3) 驗 reproduce_spec.entrypoint / results.code_trace / 磁碟 K1720.py 三方 sha 與 size 一致。4) 若 R1 修正改變了 session 數或任何統計量，README 全部數字需重新逐項核對 JSON 路徑。三項全過才 enqueue Codex round 3，prompt 需說明 round 2 已判 R2/R3/R4 RESOLVED、本輪聚焦 R1/R5 與任何因修正而移動的數字，但仍要求對 lookahead 與 verdict_supported 做確認性複查。\n\n【VERDICT PASS 後】主線程寫 knowledge.json（K1259，數字程式化取自 K1720_results.json）。要點誠實記為 NULL：尾盤波動在大漲跌日確有放大（QQQ HAC +0.407 t=4.93 p=8.2e-07；SPX +0.484 t=4.60 p=4.3e-06），但控制同日其餘時段波動後無尾盤專屬超額（H1b p=0.104/0.113），且無方向性延續（H2 p=0.561/0.514）；12 個 time-of-day 檢定經 Holm 後 0 個存活（最小 nominal p=0.0044 → Holm 0.0527）。此為 failure to detect 非 refutation；QQQ/SPX 非獨立複現。接著 canonical git_writer_lock.py run 跑 merge_worktree.sh dispatch-slot-3-87c7269d-k1720，complete assign_99f4b3bf succeeded。\n\n【status=BLOCKED 或 round 3 再 FAIL】escalation_attempts 已為 1；router experiment ladder 在 attempt 2 即 exhausted=true → 不得同法再派第四輪。改走 3-strike terminal：send-alert --needs-reply 寄老闆（標題以 [新架構派發] 開頭）說明 K1720 在三輪定向修正後仍未通過 primary-path 認證、列出殘留項，complete assign_99f4b3bf failed。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_99f4b3bf",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T14:38:49Z",
+    "linked_at": "2026-07-28T14:38:49Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1720_rev3.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-agent-brief_k1720_rev3-836a88.md"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "compute-k1720-rev2-codex-round-2-review-1785248465",
+  "title": "K1720 rev2 Codex round-2 review",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1720_r2_prompt.md",
+    "storage/ops/codex_reviews/k1720_r2_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 1,
+  "queued_at": "2026-07-28T14:21:05Z",
+  "started_at": "2026-07-28T14:30:05Z",
+  "completed_at": "2026-07-28T14:36:20Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1720-rev2-codex-round-2-review-1785248465.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1720-rev2-codex-round-2-review-1785248465.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1720_r2_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1720_r2_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1720 Codex round-2 收件（source task assign_99f4b3bf）。讀 storage/ops/codex_reviews/k1720_r2_verdict.md，第一個非空行 = VERDICT。\n\n【收件順序（硬性）】先 compute_queue.py mark-followup-dispatched --id <this job> --next-task-id assign_99f4b3bf，**再** complete source task。順序顛倒 → followup 永久不可 dispatch（已知 P1 assign_617bf749，2026-07-28 已有兩次實例）。\n\n【VERDICT: PASS】1) 主線程寫 knowledge.json（K1259：數字一律程式化取自 .claude/worktrees/dispatch-slot-3-87c7269d-k1720/experiments/K1720/K1720_results.json，禁從 README 或 agent 摘要轉抄）。要點必須誠實記為 NULL：1 小時解析度、~3 年、兩個最深指數 LETF 複合體下，尾盤波動在大漲跌日確有放大（QQQ HAC event-dummy +0.407, t=4.93, p=8.2e-07；SPX +0.484, t=4.60, p=4.3e-06），但 (a) 控制同日其餘時段波動後無可偵測的尾盤專屬超額（H1b p=0.104 / 0.113），(b) 無方向性延續（H2 全樣本 p=0.561 / 0.514）。12 個 time-of-day 檢定經 Holm 後 0 個存活（最小 nominal p=0.0044 → Holm 0.0527）。這是 failure to detect 而非 refutation；QQQ/SPX 非獨立複現（replication_status 已撤回該措辭）。2) python3 scripts/check_experiment_artifacts.py check --path experiments/K1720。3) canonical git_writer_lock.py run 跑 scripts/merge_worktree.sh dispatch-slot-3-87c7269d-k1720。4) complete assign_99f4b3bf succeeded。\n\n【VERDICT: FAIL】不得合併、不得寫 knowledge。這已是 round 2：先查 model_router experiment ladder 的 attempt/exhausted/at_ceiling 再決定是否還能派第三輪定向修正；已到頂則走 3-strike terminal（記 defect、send-alert --needs-reply 寄老闆、標題以 [新架構派發] 開頭、引用 verdict 的具體 NOT_RESOLVED 項），complete assign_99f4b3bf failed，禁止同法 loop。\n\n【job 失敗 / verdict 未產出】確認 stderr 是否為 Codex usage limit。是則把 assign_99f4b3bf 標 blocked（blocked_reason=codex_quota_reset_pending 並填 blocked_until），不得改用 fallback reviewer 當作 round 2 通過 —— round 1 是 Codex 判的 FAIL，round 2 必須同一 primary path 才有可比性。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "source_task_id": "assign_99f4b3bf",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T14:21:05Z",
+    "linked_at": "2026-07-28T14:21:05Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 33716,
+  "claimed_by_pid_start_wall": "Tue Jul 28 22:30:04 2026",
+  "source_task_settlement": {
+    "state": "settled",
+    "task_id": "assign_99f4b3bf",
+    "settled_at": "2026-07-28T14:37:35Z"
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "followup_dispatched_at": "2026-07-28T14:37:35Z",
+  "followup_next_task_id": "assign_99f4b3bf"
+}
