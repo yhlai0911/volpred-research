@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Mechanical gates for the eight defects Codex round 1 blocked K1694 on.
+"""Mechanical gates for every defect Codex blocked K1694 on (rounds 1 and 2).
 
 Each test names the defect it guards. They read the committed artifacts and, where
 a claim is about the estimator rather than the output, rebuild the panel from the
 cached CSVs -- so a future edit that reintroduces a defect fails here rather than
-in round 3 of a review.
+in the next round of a review.
 
 Run: uv run --active python -m pytest experiments/K1694/test_K1694.py -q
 """
@@ -45,6 +45,11 @@ def frame(panel: pd.DataFrame) -> pd.DataFrame:
     return K1694.build_spec_frame(panel)
 
 
+@pytest.fixture(scope="module")
+def coverage() -> pd.DataFrame:
+    return K1694.monthly_coverage(K1694.build_dcot(), K1694.build_vol())
+
+
 # --- defect 1: bootstrap must estimate spec1, not a neighbouring specification ---
 
 def test_bootstrap_shares_spec1_design_matrix(results: dict) -> None:
@@ -82,12 +87,26 @@ def test_within_ols_equals_panel_ols(frame: pd.DataFrame) -> None:
 
 
 def test_single_estimation_sample_owner(frame: pd.DataFrame, results: dict) -> None:
-    """Every spec's sample is a subset of the one frame; spec1/2 are exactly it."""
+    """spec1-3 come from build_spec_frame(); spec4 declares its own frame."""
     for label in ("spec1_fcm_highvol", "spec2_fcm_rvz_continuous"):
-        assert results["panel_regressions"][label]["n_obs"] == len(frame)
-    for label, block in results["panel_regressions"].items():
-        if isinstance(block, dict) and "n_obs" in block:
-            assert block["n_obs"] <= len(frame)
+        blk = results["panel_regressions"][label]
+        assert blk["n_obs"] == len(frame)
+        assert blk["frame"] == "build_spec_frame()"
+    assert results["panel_regressions"]["spec3_trader_conc4_highvol"]["n_obs"] <= len(frame)
+    assert results["panel_regressions"][
+        "spec4_lagged_timing_hardened"]["frame"] == "build_lagged_frame()"
+
+
+def test_lagged_frame_is_not_conditioned_on_a_regressor_it_does_not_use(
+        panel: pd.DataFrame) -> None:
+    """Codex round 2: selecting spec4's sample on contemporaneous rv_z would make a
+    lagged design depend on a contemporaneous variable."""
+    lagged = K1694.build_lagged_frame(panel)
+    assert "rv_z" not in K1694.SPEC4_RHS
+    assert lagged["rv_z"].isna().any(), (
+        "every retained row happens to have rv_z, so this gate proved nothing; "
+        "check build_lagged_frame still drops only on SPEC4_RHS")
+    assert lagged[[c for c in K1694.SPEC4_RHS if c != "t"]].isna().sum().sum() == 0
 
 
 # --- defect 2: a missing RV must not be silently labelled low-volatility ---
@@ -134,9 +153,61 @@ def test_partial_months_are_excluded_by_rule(results: dict, panel: pd.DataFrame)
 
 def test_completeness_rule_holds_on_every_retained_row(panel: pd.DataFrame) -> None:
     assert (panel["nweeks"] >= K1694.MIN_DCOT_WEEKS).all()
+    assert (panel["dcot_head_gap_days"] <= K1694.MAX_DCOT_HEAD_GAP_DAYS).all()
     assert (panel["dcot_tail_gap_days"] <= K1694.MAX_DCOT_TAIL_GAP_DAYS).all()
+    assert (panel["dcot_interior_gap_days"].fillna(0)
+            <= K1694.MAX_DCOT_INTERIOR_GAP_DAYS).all()
     have_rv = panel["rv"].notna()
     assert (panel.loc[have_rv, "rv_ndays"] >= K1694.MIN_RV_DAYS).all()
+    assert (panel.loc[have_rv, "rv_missing_bdays"] <= K1694.MAX_RV_MISSING_BDAYS).all()
+    assert (panel.loc[have_rv, "rv_cross_shortfall"]
+            <= K1694.MAX_RV_CROSS_SHORTFALL).all()
+
+
+def test_completeness_rule_catches_an_interior_weekly_gap() -> None:
+    """Codex round 2: '>=4 reports + a recent last one' accepts a month with a hole
+    in the middle. Delete one interior week and the month must be rejected."""
+    dcot = K1694.build_dcot()
+    rv = K1694.build_vol()
+    base = K1694.monthly_coverage(dcot, rv)
+    victim = ("GOLD", pd.Period("2020-06", "M"))
+    assert bool(base.loc[(base.commodity == victim[0])
+                         & (base.month == victim[1]), "dcot_complete"].iloc[0])
+    month = dcot["report_date"].dt.to_period("M")
+    in_month = (dcot["commodity"] == victim[0]) & (month == victim[1])
+    interior = dcot.loc[in_month].sort_values("report_date").index[2]  # a middle week
+    holed = K1694.monthly_coverage(dcot.drop(index=interior), rv)
+    row = holed.loc[(holed.commodity == victim[0]) & (holed.month == victim[1])]
+    assert not bool(row["dcot_complete"].iloc[0]), (
+        "a missing interior weekly report was accepted as a complete month")
+
+
+def test_completeness_rule_catches_an_independently_truncated_rv_month() -> None:
+    """A commodity short of days relative to both the calendar and its peers had its
+    own download truncated, even if it clears the absolute MIN_RV_DAYS floor."""
+    dcot = K1694.build_dcot()
+    rv = K1694.build_vol().copy()
+    victim = (rv["commodity"] == "GOLD") & (rv["month_end"].dt.to_period("M")
+                                            == pd.Period("2020-06", "M"))
+    assert victim.sum() == 1
+    assert bool(K1694.monthly_coverage(dcot, rv).set_index(
+        ["commodity", "month"]).loc[("GOLD", pd.Period("2020-06", "M")), "rv_complete"])
+    rv.loc[victim, "ndays"] = 16  # still above MIN_RV_DAYS, but short of its peers
+    cov = K1694.monthly_coverage(dcot, rv).set_index(["commodity", "month"])
+    assert not bool(cov.loc[("GOLD", pd.Period("2020-06", "M")), "rv_complete"])
+
+
+def test_log_oi_has_a_positivity_guard(panel: pd.DataFrame) -> None:
+    """Codex round 2: np.log(oi).diff() had no oi>0/finite guard, so an inf would
+    survive dropna() into the design matrix."""
+    assert int(panel["oi_invalid"].sum()) == 0, "cached OI is expected to be valid"
+    assert np.isfinite(panel["dlog_oi"].dropna().to_numpy(dtype=float)).all()
+    poisoned = panel.copy()
+    poisoned.loc[poisoned.index[:5], "oi"] = 0.0
+    poisoned.loc[poisoned.index[5:8], "oi"] = -1.0
+    oi_ok = poisoned["oi"].where(np.isfinite(poisoned["oi"]) & (poisoned["oi"] > 0))
+    assert oi_ok.iloc[:8].isna().all()
+    assert np.isfinite(np.log(oi_ok.dropna().to_numpy(dtype=float))).all()
 
 
 def test_differences_never_span_a_dropped_month(panel: pd.DataFrame) -> None:
@@ -164,12 +235,26 @@ def test_bandwidth_choice_is_backed_by_a_sensitivity_grid(results: dict) -> None
     assert sens["term"] == "fcm_x_highvol"
 
 
-def test_promised_predictive_spec_exists(results: dict) -> None:
-    spec4 = results["panel_regressions"]["spec4_predictive_fully_lagged"]
+def test_promised_lagged_spec_exists_and_is_timed_correctly(results: dict) -> None:
+    spec4 = results["panel_regressions"]["spec4_lagged_timing_hardened"]
     assert "fcm_pre_x_highvol_lag" in spec4["rhs"]
-    assert "dlog_oi_lag" in spec4["rhs"], "spec4 must not use a contemporaneous control"
     assert "highvol" not in spec4["rhs"], "spec4 must not use the full-sample regime label"
+    # Codex round 2: a t-1 DCOT aggregate is not fully published before month t begins
+    for banned in ("dlog_oi", "dlog_oi_lag", "nonrep_lag", "d_nonrep_lag"):
+        assert banned not in spec4["rhs"], f"spec4 uses {banned}, published too late"
+    for needed in ("nonrep_lag2", "d_nonrep_lag2", "dlog_oi_lag2"):
+        assert needed in spec4["rhs"]
     assert spec4["n_obs"] > 0
+
+
+def test_lagged_controls_really_are_two_months_back(panel: pd.DataFrame) -> None:
+    p = panel.sort_values(["commodity", "month"]).reset_index(drop=True)
+    g = p.groupby("commodity", group_keys=False)
+    expect = g["nonrep_share"].shift(2).where(p["adjacent_prev2_months"])
+    got = p["nonrep_lag2"]
+    assert got.notna().sum() > 0
+    assert ((got - expect).abs().fillna(0) < 1e-15).all()
+    assert (p.loc[~p["adjacent_prev2_months"], "nonrep_lag2"].notna().sum()) == 0
 
 
 def test_predictive_spec_signal_precedes_the_outcome_window(panel: pd.DataFrame) -> None:
@@ -184,10 +269,11 @@ def test_primary_merge_is_backward_only(panel: pd.DataFrame) -> None:
 
 # --- defect 6 / 7: the JSON must not overstate, and NULL must be scoped ---
 
-def test_results_do_not_claim_prediction_for_the_association_specs(results: dict) -> None:
-    """The claim-bearing surface -- title, primary_interaction, spec1-3 notes -- must
-    read as association. Prose that *denies* prediction (data_provenance,
-    claim_language_rule, limitations) is the point, so it is not searched."""
+def test_no_spec_claims_prediction(results: dict) -> None:
+    """Codex round 2: no spec here can carry a predictive claim -- spec1-3 because of
+    the within-month timing overlap, spec4 because its ex-ante status rests on a
+    synthetic availability constant. Prose that *denies* prediction is the point, so
+    only the claim-bearing surface is searched."""
     assert results["claim_type"] == "ex_post_association"
     assert results["primary_interaction"]["claim_type"] == "ex_post_association"
     banned = ("predictive", "causal", "known-before-outcome", "forecast")
@@ -200,8 +286,50 @@ def test_results_do_not_claim_prediction_for_the_association_specs(results: dict
         note = specs[label]["note"].lower()
         assert note.startswith("ex-post association"), label
         assert "predictive" not in note, label
-    assert specs["spec4_predictive_fully_lagged"]["note"].startswith("predictive"), (
-        "spec4 is the only spec allowed to be described as predictive")
+    note4 = specs["spec4_lagged_timing_hardened"]["note"].lower()
+    assert "conditional" in note4 and "not a verified predictive test" in note4
+    assert not note4.startswith("predictive")
+
+
+def test_nothing_claims_absence_of_predictability(results: dict) -> None:
+    reading = results["secondary_findings"][
+        "spec4_lagged_timing_hardened"]["reading"].lower()
+    assert "not" in reading and "no predictability" in reading
+    assert "no predictability" in results["claim_language_rule"].lower()
+
+
+def test_null_is_worded_as_not_supported_not_as_disproved(results: dict) -> None:
+    """Codex round 2: the estimators establish 未獲支持, never 不成立."""
+    scope = results["verdict_scope"]
+    assert "NOT SUPPORTED" in scope
+    assert "cannot establish that the effect is absent" in scope
+    # Scope the scan to the README's CLAIM sections. Everything from the first
+    # "## Codex round" heading down is a repair log that necessarily quotes the
+    # banned wording in order to record that it was removed; a flat word blacklist
+    # cannot tell a claim from its own retraction.
+    readme = (HERE / "README.md").read_text()
+    claims = readme.split("## Codex round")[0]
+    assert "## Codex round" in readme, "repair-log boundary moved; re-scope this gate"
+    assert "不成立" not in claims, "README still says the hypothesis is disproved"
+    assert "未獲支持" in claims
+    # Same exclusion as above: claim_language_rule is the rule that forbids the word,
+    # so it necessarily contains it.
+    searchable = json.dumps({k: v for k, v in results.items()
+                             if k != "claim_language_rule"}).lower()
+    for word in ("disproved", "ruled out", "no effect exists"):
+        assert word not in searchable
+    assert "never as disproved" in results["claim_language_rule"].lower()
+
+
+def test_effective_temporal_dof_is_disclosed_not_asserted_independent(
+        results: dict) -> None:
+    dof = results["sample"]["effective_temporal_dof"]
+    acf = dof["hhi_seg_z_autocorrelation"]
+    assert acf["acf1"] > 0.9 and acf["acf6"] > 0.5
+    assert "below" in dof["reading"].lower()
+    blob = json.dumps(results).lower()
+    assert "independent fcm variation" not in blob
+    assert "months of independent" not in blob
 
 
 def test_limitations_cover_every_disclosure_codex_named(results: dict) -> None:
@@ -212,9 +340,9 @@ def test_limitations_cover_every_disclosure_codex_named(results: dict) -> None:
 
 def test_null_is_scoped_and_names_the_positive_continuous_result(results: dict) -> None:
     assert results["verdict"] == "NULL"
-    scope = results["verdict_scope"]
-    assert "NEGATIVE" in scope and "BINARY" in scope
-    assert "no association" in scope.lower()
+    scope = results["verdict_scope"].lower()
+    assert "negative" in scope and "binary" in scope
+    assert "no association" in scope
     sec = results["secondary_findings"][
         "spec2_continuous_interaction_is_positive_and_significant"]
     assert sec["coef"] > 0

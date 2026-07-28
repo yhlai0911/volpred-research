@@ -18,7 +18,9 @@ FCM 清算集中度在高波動期是否排擠小型交易者、放大商品流�
      嚴格早於 outcome**：availability 通常落在 outcome 月中，而 outcome `d_nonrep` 是整月
      DCOT 平均相對前月的變化。因此主 spec 只能宣稱 **ex-post association**，不可宣稱
      predictive / causal / known-before-outcome。
-   - 想講「訊號在 outcome 開始前就已可得」必須看 spec4（見下）。
+   - **spec4 也不能宣稱 predictive**：它把時序收緊到「訊號都在 outcome 月開始前」，但那個
+     「前」是相對於**合成**的 avail_date。真實發布日未經核對之前，spec4 的 ex-ante 身分是
+     **條件式**的，所以它的零結果只能講「這個時序安排下沒有關聯」，**不能**講「沒有可預測性」。
 2. CFTC DCOT（Disaggregated COT, futures-only, 72hh-3qpy）週頻：
    - nonrept_positions_long/short_all（小型交易者部位）→ 排擠結果
    - conc_gross_le_4/8_tdr（trader-level 集中度）→ 第二個集中度視角（部位層 vs 清算層）
@@ -29,12 +31,13 @@ FCM 清算集中度在高波動期是否排擠小型交易者、放大商品流�
 ------------------
 - 觀察先於計算：HHI 時序、regime 描述統計、相關表。
 - 排擠假說：high-vol × 高 FCM 集中度 → 小型交易者部位/佔比下降（交互項 β<0）。
-- **估計樣本只有一個 owner**：`build_spec_frame()`。panel 迴歸與 bootstrap 都吃同一份
-  frame、同一份 `SPEC1_RHS`（含時間趨勢 `t`），所以「bootstrap 估的就是 spec1」由結構
-  保證，不靠人工對齊兩份清單。
-- **完整性規則**（`monthly_coverage()`，可重複、不寫死日期）：DCOT 月需 ≥4 份週報且最後
-  一份 as-of 落在月底 6 天內；RV 月需 ≥15 個交易日，否則該月 rv 視為缺值。跨不相鄰月份
-  的差分一律作廢。
+- **估計樣本只有一個 owner**：spec1-3 是 `build_spec_frame()`、spec4 是
+  `build_lagged_frame()`（用它自己的 regressors 決定樣本，不被 spec4 沒用到的同期
+  `rv_z` 篩選）。panel 迴歸與 bootstrap 都吃同一份 frame、同一份 `SPEC1_RHS`（含時間趨勢
+  `t`），所以「bootstrap 估的就是 spec1」由結構保證，不靠人工對齊兩份清單。
+- **完整性規則**（`monthly_coverage()`，可重複、不寫死日期）：DCOT 月要通過頭/中/尾三段
+  連續性檢查（漏掉任何一週都會被擋），RV 月要同時通過絕對交易日門檻、相對營業日缺口、
+  以及相對同月其他商品的缺口，否則該月 rv 視為缺值。跨不相鄰月份的差分一律作廢。
 - Panel（commodity × month）FE + Driscoll-Kraay / cluster-by-month SE（K1355：不可把
   asset-month 當 iid；同月跨商品有共同 shock）。DK bandwidth 用**固定規則**
   `max(ceil(T^(1/3)), 4)`（見 `_hac_bandwidth_rule`），**不是**由 residual ACF 決定；
@@ -49,11 +52,13 @@ FCM 清算集中度在高波動期是否排擠小型交易者、放大商品流�
 
 誠實邊界
 --------
-FCM 集中度是單一月度系統序列（高自相關、有效自由度低）；結論強度須節制。
+FCM 集中度是單一月度系統序列（自相關極高：ACF(1)≈0.96、ACF(6)≈0.82），149 個月的**有效**
+時間自由度遠低於 149；結論強度須節制。
 spec1-3 的波動 regime 與結果同期，且 regime label（`rv_z`/`highvol`）用**全樣本**動差 →
-只能講 association。**spec4 是唯一可以講 predictive 的規格**：FCM 報表在 outcome 月開始
-「前」就已可得（以月初而非月底做 as-of 合併），regime label 改用 point-in-time expanding
-動差，所有控制變數落後一期。
+只能講 association。spec4 把時序收緊（月初 as-of 合併、PIT regime label、t-2 的 DCOT 控制
+變數、自己的樣本），但它的 ex-ante 身分**條件於合成的 availability 常數**，所以整份實驗
+**沒有任何 predictive / causal / 「沒有可預測性」的宣稱**。
+零結果一律寫「未獲支持」，不寫「不成立」。
 """
 from __future__ import annotations
 
@@ -91,14 +96,24 @@ _UA = {"User-Agent": "Mozilla/5.0 (research; volpred K1694)"}
 FCM_LAG_DAYS = 45  # 合成常數，非真實發布日：CFTC FCM 月報 ≈ 月底 + 1 個月，再加緩衝
 
 # --- 完整性規則（reproducible，不寫死任何日期）--------------------------------
-# 任何日曆月至少含 4 個週二，故一個「完整」的月度 DCOT 聚合至少要有 4 份週報；且最後一份
-# 週報的 as-of 日必須落在月底 6 天內（月內最後一個週二距月底最多 6 天），否則該月的週資料
-# 沒有覆蓋到月底。RV 端：完整月的交易日數在本樣本是 19-23，門檻取 15。
+# Codex round 2：光靠「≥4 份週報 + 最後一份夠新」證明不了全月覆蓋 —— 5 份報表的月份仍可能
+# 中間漏一週。所以 DCOT 端改成三段式**連續性**檢查（頭、中、尾），任何被跳過的一週都會讓
+# 對應的 gap 撐到約 14 天而被擋下；假日造成的 1-2 天位移（本樣本最大 interior gap = 8 天、
+# 最大 head gap = 7 天）則放行。
 MIN_DCOT_WEEKS = 4
-MAX_DCOT_TAIL_GAP_DAYS = 6
-MIN_RV_DAYS = 15
+MAX_DCOT_HEAD_GAP_DAYS = 8      # 首份週報距月初；漏掉第一週 -> >= 13
+MAX_DCOT_INTERIOR_GAP_DAYS = 9  # 相鄰週報最大間隔；漏掉中間一週 -> 14
+MAX_DCOT_TAIL_GAP_DAYS = 6      # 末份週報距月底；漏掉最後一週 -> >= 13
 
-# spec4（predictive）的 point-in-time regime label 需要的最短暖身期
+# RV 端同理：ndays 門檻本身證明不了「這個月的下載跑到月底」。三個條件一起看 ——
+# 絕對門檻、相對於該月**營業日數**的缺口、以及相對於**同月其他商品**的缺口（同一個美國
+# 交易日曆，所以某商品獨自短少就是它自己的下載被截斷）。本樣本正常月缺口 0-2 天、假日重的
+# 月份最多 5 天；被截斷的月份是 10/11/13 天，分得很開。
+MIN_RV_DAYS = 15
+MAX_RV_MISSING_BDAYS = 5        # bdays(month) - ndays
+MAX_RV_CROSS_SHORTFALL = 3      # max(ndays of that month across commodities) - ndays
+
+# spec4 的 point-in-time regime label 需要的最短暖身期
 PIT_MIN_MONTHS = 24
 
 # 估計樣本與 RHS 的唯一 owner。bootstrap 與 spec1 共用這兩個常數 → 規格一致由結構保證。
@@ -375,32 +390,58 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
     flags:
 
     ``dcot_complete``
-        the monthly DCOT aggregate covers the whole month -- at least
-        ``MIN_DCOT_WEEKS`` weekly reports AND the last report's as-of date within
-        ``MAX_DCOT_TAIL_GAP_DAYS`` of month end. Incomplete months are dropped
-        outright: they can be neither an outcome nor the lag of one.
+        the weekly series is CONTINUOUS across the whole month: at least
+        ``MIN_DCOT_WEEKS`` reports, the first within ``MAX_DCOT_HEAD_GAP_DAYS`` of
+        month start, the last within ``MAX_DCOT_TAIL_GAP_DAYS`` of month end, and
+        no gap between consecutive reports longer than
+        ``MAX_DCOT_INTERIOR_GAP_DAYS``. A skipped week -- at the head, in the
+        middle or at the tail -- stretches one of those three gaps to roughly 14
+        days and is caught; a holiday shifting an as-of date by a day or two is
+        not. Incomplete months are dropped outright: they can be neither an
+        outcome nor the lag of one.
     ``rv_complete``
-        at least ``MIN_RV_DAYS`` trading days. Incomplete months keep their DCOT
-        row (so the difference chain is not broken) but their ``rv`` is masked to
-        NaN, because a partial month cannot label a volatility regime.
+        the month's daily download reached both ends: at least ``MIN_RV_DAYS``
+        trading days, no more than ``MAX_RV_MISSING_BDAYS`` short of the calendar
+        month's business-day count, and no more than
+        ``MAX_RV_CROSS_SHORTFALL`` short of the best-covered commodity that month
+        (all these contracts share one U.S. trading calendar, so a commodity that
+        is short on its own has an independently truncated download). Incomplete
+        months keep their DCOT row (so the difference chain is not broken) but
+        their ``rv`` is masked to NaN, because a partial month cannot label a
+        volatility regime.
     """
-    d = dcot.copy()
+    d = dcot.sort_values("report_date").copy()
     d["month"] = d["report_date"].dt.to_period("M")
-    cov = d.groupby(["commodity", "month"]).agg(
-        nweeks=("report_date", "size"),
-        last_report=("report_date", "max"),
-    ).reset_index()
+    grp = d.groupby(["commodity", "month"])["report_date"]
+    cov = grp.agg(nweeks="size", first_report="min", last_report="max").reset_index()
+    interior = grp.apply(lambda s: s.diff().dt.days.max()).rename("dcot_interior_gap_days")
+    cov = cov.merge(interior.reset_index(), on=["commodity", "month"], how="left")
+    cov["month_start"] = cov["month"].dt.to_timestamp(how="start").dt.normalize()
     cov["month_end"] = cov["month"].dt.to_timestamp(how="end").dt.normalize()
+    cov["dcot_head_gap_days"] = (cov["first_report"] - cov["month_start"]).dt.days
     cov["dcot_tail_gap_days"] = (cov["month_end"] - cov["last_report"]).dt.days
+    # a single-report month has no interior gap to measure; MIN_DCOT_WEEKS rejects it
+    interior_ok = (cov["dcot_interior_gap_days"].fillna(0)
+                   <= MAX_DCOT_INTERIOR_GAP_DAYS)
     cov["dcot_complete"] = ((cov["nweeks"] >= MIN_DCOT_WEEKS)
-                            & (cov["dcot_tail_gap_days"] <= MAX_DCOT_TAIL_GAP_DAYS))
+                            & (cov["dcot_head_gap_days"] <= MAX_DCOT_HEAD_GAP_DAYS)
+                            & (cov["dcot_tail_gap_days"] <= MAX_DCOT_TAIL_GAP_DAYS)
+                            & interior_ok)
 
     rvm = rv.copy()
     rvm["month"] = rvm["month_end"].dt.to_period("M")
     cov = cov.merge(rvm[["commodity", "month", "rv", "ndays"]],
                     on=["commodity", "month"], how="left")
     cov = cov.rename(columns={"ndays": "rv_ndays"})
-    cov["rv_complete"] = cov["rv_ndays"] >= MIN_RV_DAYS
+    cov["rv_bdays_in_month"] = [
+        len(pd.bdate_range(m.to_timestamp(how="start"), m.to_timestamp(how="end")))
+        for m in cov["month"]]
+    cov["rv_missing_bdays"] = cov["rv_bdays_in_month"] - cov["rv_ndays"]
+    best = cov.groupby("month")["rv_ndays"].transform("max")
+    cov["rv_cross_shortfall"] = best - cov["rv_ndays"]
+    cov["rv_complete"] = ((cov["rv_ndays"] >= MIN_RV_DAYS)
+                          & (cov["rv_missing_bdays"] <= MAX_RV_MISSING_BDAYS)
+                          & (cov["rv_cross_shortfall"] <= MAX_RV_CROSS_SHORTFALL))
     return cov
 
 
@@ -415,23 +456,44 @@ def coverage_report(cov: pd.DataFrame) -> dict:
         out = frame.groupby("month").agg(
             n_commodities=("commodity", "nunique"),
             min_nweeks=("nweeks", "min"),
+            max_head_gap_days=("dcot_head_gap_days", "max"),
+            max_interior_gap_days=("dcot_interior_gap_days", "max"),
             max_tail_gap_days=("dcot_tail_gap_days", "max"),
             min_rv_days=("rv_ndays", "min"),
         ).reset_index()
+
+        def _i(v):
+            return None if pd.isna(v) else int(v)
+
         return [{"month": str(r["month"]),
                  "n_commodity_rows_dropped": int(r["n_commodities"]),
                  "min_dcot_weeks": int(r["min_nweeks"]),
-                 "max_dcot_tail_gap_days": int(r["max_tail_gap_days"]),
-                 "min_rv_trading_days": (None if pd.isna(r["min_rv_days"])
-                                         else int(r["min_rv_days"]))}
+                 "max_dcot_head_gap_days": _i(r["max_head_gap_days"]),
+                 "max_dcot_interior_gap_days": _i(r["max_interior_gap_days"]),
+                 "max_dcot_tail_gap_days": _i(r["max_tail_gap_days"]),
+                 "min_rv_trading_days": _i(r["min_rv_days"])}
                 for _, r in out.iterrows()]
 
     return {
         "rule": {
             "dcot_month_complete": (
-                f"nweeks >= {MIN_DCOT_WEEKS} AND month_end - max(report_date) <= "
-                f"{MAX_DCOT_TAIL_GAP_DAYS} days"),
-            "rv_month_complete": f"trading days >= {MIN_RV_DAYS}",
+                f"nweeks >= {MIN_DCOT_WEEKS} AND first_report - month_start <= "
+                f"{MAX_DCOT_HEAD_GAP_DAYS}d AND month_end - last_report <= "
+                f"{MAX_DCOT_TAIL_GAP_DAYS}d AND max gap between consecutive reports "
+                f"<= {MAX_DCOT_INTERIOR_GAP_DAYS}d"),
+            "dcot_rule_detects": (
+                "a skipped week anywhere in the month -- head, interior or tail -- "
+                "because any of the three gaps stretches to about 14 days; holiday "
+                "shifts of one or two days pass (observed maxima in this cache: "
+                "interior 8d, head 7d, tail 6d)"),
+            "rv_month_complete": (
+                f"trading days >= {MIN_RV_DAYS} AND business_days(month) - trading "
+                f"days <= {MAX_RV_MISSING_BDAYS} AND max(trading days across "
+                f"commodities that month) - trading days <= {MAX_RV_CROSS_SHORTFALL}"),
+            "rv_rule_detects": (
+                "an independently truncated download: these contracts share one U.S. "
+                "trading calendar, so a commodity short relative to both the calendar "
+                "and its peers did not reach month end"),
             "date_hardcoded": False,
             "effect_of_dcot_incomplete": "row dropped from the panel entirely",
             "effect_of_rv_incomplete": "rv masked to NaN; DCOT row retained",
@@ -467,8 +529,10 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
 
     # --- completeness rule: drop partial DCOT months, mask partial RV months ---
     cov = monthly_coverage(dcot, rv)
-    agg = agg.merge(cov[["commodity", "month", "last_report", "dcot_tail_gap_days",
-                         "rv", "rv_ndays", "dcot_complete", "rv_complete"]],
+    agg = agg.merge(cov[["commodity", "month", "last_report", "dcot_head_gap_days",
+                         "dcot_interior_gap_days", "dcot_tail_gap_days",
+                         "rv", "rv_ndays", "rv_missing_bdays", "rv_cross_shortfall",
+                         "dcot_complete", "rv_complete"]],
                     on=["commodity", "month"], how="left")
     agg = agg[agg["dcot_complete"].fillna(False)].copy()
     agg.loc[~agg["rv_complete"].fillna(False), "rv"] = np.nan
@@ -477,8 +541,10 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
     # (a) primary: latest FCM report available by the outcome month's END. This is
     #     NOT "strictly before the outcome": availability can fall mid-month, and the
     #     outcome is a whole-month average change. Ex-post association only.
-    # (b) predictive (spec4): latest report available before the outcome month even
-    #     BEGINS, so the signal is known before any of the outcome window.
+    # (b) spec4: latest report whose ASSUMED availability precedes the outcome month
+    #     even beginning. "Assumed" is load-bearing -- avail_date is the synthetic
+    #     month_end + FCM_LAG_DAYS, never a verified CFTC release date, so spec4 is
+    #     ex ante only CONDITIONAL on that constant being right.
     fcm_sorted = fcm.sort_values("avail_date").reset_index(drop=True)
     fcm_sorted["hhi_seg_pit_z"] = _expanding_z(fcm_sorted["hhi_seg"], PIT_MIN_MONTHS)
     agg = agg.sort_values("month_end").reset_index(drop=True)
@@ -511,10 +577,26 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
     merged["adjacent_prev_month"] = adj
     merged["d_nonrep"] = g["nonrep_share"].diff().where(adj)
     merged["nonrep_lag"] = g["nonrep_share"].shift(1).where(adj)
-    merged["dlog_oi"] = g["oi"].apply(lambda s: np.log(s).diff()).where(adj)
+    # log(OI) needs a positive, finite argument. The cached OI is strictly positive,
+    # but "it happens to be positive today" is not a guard: without one, a zero or a
+    # negative would become -inf / NaN-that-is-really-an-error and an inf would sail
+    # straight through dropna() into the design matrix (Codex round 2).
+    oi_ok = merged["oi"].where(np.isfinite(merged["oi"]) & (merged["oi"] > 0))
+    merged["oi_invalid"] = merged["oi"].notna() & oi_ok.isna()
+    merged["dlog_oi"] = (merged.assign(_oi=oi_ok).groupby("commodity", group_keys=False)["_oi"]
+                         .apply(lambda s: np.log(s).diff()).where(adj))
+    merged.loc[~np.isfinite(merged["dlog_oi"].astype(float)), "dlog_oi"] = np.nan
     g = merged.groupby("commodity", group_keys=False)  # regroup: new columns above
     merged["d_nonrep_lag"] = g["d_nonrep"].shift(1).where(adj)
-    merged["dlog_oi_lag"] = g["dlog_oi"].shift(1).where(adj)
+    # t-2 versions for the lagged spec: the LAST weekly DCOT report of month t-1 is
+    # published a few days after its Tuesday as-of date, which can land inside month
+    # t, so a t-1 monthly aggregate is not fully public before month t begins. A t-2
+    # aggregate is (Codex round 2).
+    adj2 = adj & (g["m_ord"].shift(1) - g["m_ord"].shift(2) == 1)
+    merged["adjacent_prev2_months"] = adj2
+    merged["nonrep_lag2"] = g["nonrep_share"].shift(2).where(adj2)
+    merged["d_nonrep_lag2"] = g["d_nonrep"].shift(2).where(adj2)
+    merged["dlog_oi_lag2"] = g["dlog_oi"].shift(2).where(adj2)
     # vol z-score within commodity; highvol = above commodity-specific median.
     # NaN-safe: a missing rv must stay missing, not silently become highvol=0
     # (Codex round 1: `NaN > median` is False, which mislabelled 7 rows and made the
@@ -523,16 +605,16 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
     merged["highvol"] = g["rv"].transform(
         lambda s: s.gt(s.median()).astype(float).where(s.notna()))
     merged["conc4_z"] = g["conc4"].transform(lambda s: (s - s.mean()) / s.std(ddof=0))
-    # point-in-time regime labels for the predictive spec: expanding moments through
-    # the labelling month only -- no future information in the label.
-    merged["rv_z_pit"] = g["rv"].transform(lambda s: _expanding_z(s, PIT_MIN_MONTHS))
+    # Point-in-time regime label for spec4: expanding moments through the labelling
+    # month only. Unlike the DCOT aggregates, realized vol needs no publication
+    # allowance -- it is computed from daily futures closes, public the same day --
+    # so the label at t-1 really is known before month t begins.
     merged["highvol_pit"] = g["rv"].transform(
         lambda s: s.gt(s.expanding(min_periods=PIT_MIN_MONTHS).median())
                    .astype(float).where(s.notna() & (s.expanding(
                        min_periods=PIT_MIN_MONTHS).median().notna())))
     g = merged.groupby("commodity", group_keys=False)
     merged["highvol_pit_lag"] = g["highvol_pit"].shift(1).where(adj)
-    merged["rv_z_pit_lag"] = g["rv_z_pit"].shift(1).where(adj)
 
     # FCM concentration z-scores (time series, common across commodities)
     fcm_ts = merged.dropna(subset=["hhi_seg"]).drop_duplicates("month")[["month", "hhi_seg", "cr4_seg", "hhi_total"]]
@@ -544,7 +626,8 @@ def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.D
     merged["fcm_x_highvol"] = merged["hhi_seg_z"] * merged["highvol"]
     merged["fcm_x_rvz"] = merged["hhi_seg_z"] * merged["rv_z"]
     merged["conc4_x_highvol"] = merged["conc4_z"] * merged["highvol"]
-    # spec4: both legs known before the outcome month starts
+    # spec4: both legs dated before the outcome month starts (the FCM leg only under
+    # the assumed availability lag; see fcm_publication_lag_is_synthetic)
     merged["fcm_pre_x_highvol_lag"] = merged["hhi_seg_pit_z"] * merged["highvol_pit_lag"]
 
     merged["month_id"] = merged["month"].astype(str)
@@ -569,7 +652,22 @@ def build_spec_frame(panel: pd.DataFrame) -> pd.DataFrame:
     Sharing one frame and one ``SPEC1_RHS`` makes that class of mismatch
     unrepresentable rather than merely discouraged.
     """
-    df = panel.dropna(subset=SPEC_FRAME_REQUIRED).copy()
+    return _frame(panel, SPEC_FRAME_REQUIRED)
+
+
+def build_lagged_frame(panel: pd.DataFrame) -> pd.DataFrame:
+    """Owner of spec4's estimation sample -- defined by spec4's OWN regressors.
+
+    Codex round 2: spec4 was being evaluated on ``build_spec_frame()``, which
+    conditions on the contemporaneous ``rv_z`` that spec4 never uses. A lagged
+    specification whose sample is selected by a contemporaneous variable is not a
+    clean lagged design, however lagged its RHS is.
+    """
+    return _frame(panel, ["d_nonrep"] + [c for c in SPEC4_RHS if c != "t"])
+
+
+def _frame(panel: pd.DataFrame, required: list[str]) -> pd.DataFrame:
+    df = panel.dropna(subset=required).copy()
     df["t"] = df["month"].astype("period[M]").astype(int)
     df["t"] = df["t"] - df["t"].min()
     # linearmodels requires the time index to be numeric or date-like; a pandas
@@ -630,19 +728,22 @@ def _hac_bandwidth_rule(nmonths: int) -> int:
 SPEC2_RHS = ["hhi_seg_z", "rv_z", "fcm_x_rvz", "nonrep_lag", "d_nonrep_lag", "dlog_oi", "t"]
 SPEC3_RHS = ["conc4_z", "highvol", "conc4_x_highvol", "nonrep_lag", "d_nonrep_lag", "dlog_oi", "t"]
 SPEC4_RHS = ["hhi_seg_pit_z", "highvol_pit_lag", "fcm_pre_x_highvol_lag",
-             "nonrep_lag", "d_nonrep_lag", "dlog_oi_lag", "t"]
+             "nonrep_lag2", "d_nonrep_lag2", "dlog_oi_lag2", "t"]
 
 
-def panel_regression(frame: pd.DataFrame) -> dict:
-    """Estimate the specs on the frame produced by :func:`build_spec_frame`."""
+def panel_regression(frame: pd.DataFrame,
+                     lagged_frame: pd.DataFrame | None = None) -> dict:
+    """Estimate the specs. spec1-3 use ``frame``; spec4 uses its own ``lagged_frame``."""
     from linearmodels.panel import PanelOLS
 
     results = {}
     nmonths = frame["month"].nunique()
 
-    def run(rhs: list[str], label: str, dk_lag: int, note: str = ""):
+    def run(rhs: list[str], label: str, dk_lag: int, note: str = "",
+            src: pd.DataFrame | None = None):
+        src = frame if src is None else src
         cols = ["d_nonrep"] + rhs
-        df = frame.dropna(subset=cols).set_index(["commodity", "month_ts"])
+        df = src.dropna(subset=cols).set_index(["commodity", "month_ts"])
         y = df["d_nonrep"]
         X = df[rhs].astype(float)
         mod = PanelOLS(y, X, entity_effects=True)
@@ -657,7 +758,9 @@ def panel_regression(frame: pd.DataFrame) -> dict:
             "n_obs": int(res_dk.nobs),
             "n_commodities": int(df.index.get_level_values(0).nunique()),
             "n_months": int(df.index.get_level_values(1).nunique()),
-            "n_rows_dropped_vs_spec_frame": int(len(frame) - len(df)),
+            "n_rows_dropped_vs_own_frame": int(len(src) - len(df)),
+            "frame": ("build_lagged_frame()" if src is not frame
+                      else "build_spec_frame()"),
             "rhs": rhs,
             "driscoll_kraay": key(res_dk) | {"bandwidth": dk_lag,
                                              "bandwidth_rule": "max(ceil(T^(1/3)), 4)"},
@@ -679,14 +782,21 @@ def panel_regression(frame: pd.DataFrame) -> dict:
     # Spec 3: trader-concentration lens (within-commodity conc4)
     run(SPEC3_RHS, "spec3_trader_conc4_highvol", dk,
         note="ex-post association; sample is smaller wherever conc4 is missing")
-    # Spec 4: fully lagged predictive spec. The module docstring promised one and
-    # Codex round 1 found it missing. Every regressor is known before the outcome
-    # month begins: the FCM report is merged as-of month START, the volatility
-    # regime label uses point-in-time expanding moments at t-1, and every control
-    # is a t-1 quantity.
-    run(SPEC4_RHS, "spec4_predictive_fully_lagged", dk,
-        note=("predictive: FCM report available before the outcome month starts, "
-              "point-in-time regime label at t-1, all controls lagged"))
+    # Spec 4: timing-hardened lagged spec. Round 1 found the docstring promising a
+    # fully lagged spec that did not exist; round 2 found the version that appeared
+    # still claiming more than it could deliver. What it IS: the FCM report is merged
+    # as-of month START, the regime label is a point-in-time expanding label at t-1
+    # (realized vol is public the day it happens), the DCOT controls are t-2
+    # aggregates (a t-1 aggregate is not fully published before month t begins), and
+    # the sample is selected by spec4's own regressors. What it is NOT: proof of
+    # ex-ante availability -- the FCM leg still rests on the SYNTHETIC 45-day lag, so
+    # its ex-ante status is conditional on that constant. It therefore cannot
+    # establish "no predictability", only "no association survives this timing".
+    if lagged_frame is not None:
+        run(SPEC4_RHS, "spec4_lagged_timing_hardened", dk,
+            note=("lagged design, ex-ante ONLY CONDITIONAL on the synthetic FCM "
+                  "availability constant; not a verified predictive test"),
+            src=lagged_frame)
     results["_hac_bandwidth"] = dk
     results["_hac_bandwidth_rule"] = "max(ceil(T^(1/3)), 4); fixed rule, not ACF-derived"
     return results
@@ -934,8 +1044,8 @@ def make_figures(fcm: pd.DataFrame, panel: pd.DataFrame, panel_res: dict, boot: 
         "spec1_fcm_highvol": ("FCM HHI × highvol\n(DK)", "fcm_x_highvol"),
         "spec2_fcm_rvz_continuous": ("FCM HHI × rv_z\n(DK)", "fcm_x_rvz"),
         "spec3_trader_conc4_highvol": ("Trader conc4 × highvol\n(DK)", "conc4_x_highvol"),
-        "spec4_predictive_fully_lagged": ("FCM HHI × highvol, lagged\n(DK, predictive)",
-                                          "fcm_pre_x_highvol_lag"),
+        "spec4_lagged_timing_hardened": ("FCM HHI × highvol, lagged\n(DK, timing-hardened)",
+                                         "fcm_pre_x_highvol_lag"),
     }
     for sp, (lab, term) in spec_map.items():
         r = panel_res[sp]["driscoll_kraay"]
@@ -974,9 +1084,12 @@ def main():
     panel = build_panel(fcm, dcot, rv)
     panel.to_csv(DATA / "panel.csv", index=False)
 
-    # ONE owner of the estimation sample; every estimator below reads this frame.
+    # ONE owner per design: spec1-3 (and both bootstraps) read `frame`; the lagged
+    # spec reads a frame selected by its own regressors.
     frame = build_spec_frame(panel)
+    lagged_frame = build_lagged_frame(panel)
     print(f"[PANEL] {len(panel)} retained rows; estimation sample {len(frame)}; "
+          f"lagged-spec sample {len(lagged_frame)}; "
           f"{frame['commodity'].nunique()} commodities; "
           f"span {frame['month'].min()}..{frame['month'].max()}")
     for m in cov_report["dropped_partial_dcot_months"]:
@@ -985,8 +1098,14 @@ def main():
               f"max tail gap={m['max_dcot_tail_gap_days']}d")
 
     desc = descriptives(panel, fcm)
-    panel_res = panel_regression(frame)
+    panel_res = panel_regression(frame, lagged_frame)
     ts_res = timeseries_regression(frame)
+    # Effective temporal d.o.f.: 149 calendar months is NOT 149 independent draws of
+    # the FCM factor. Report the autocorrelation instead of asserting independence.
+    hhi_series = (frame.drop_duplicates("month").sort_values("month")["hhi_seg_z"]
+                  .to_numpy(dtype=float))
+    hhi_acf = {f"acf{k}": float(np.corrcoef(hhi_series[:-k], hhi_series[k:])[0, 1])
+               for k in (1, 3, 6, 12)}
     dk_sens = dk_bandwidth_sensitivity(frame, SPEC1_RHS, "fcm_x_highvol")
     boot = bootstrap_spec1(frame, kind="stationary_block", n_boot=2000)
     boot_iid = bootstrap_spec1(frame, kind="month_cluster_iid", n_boot=2000)
@@ -1001,7 +1120,7 @@ def main():
                    (boot["ci95"][1] < 0)
     verdict = "CROWDING_OUT_SUPPORTED" if crowding_out else "NULL"
     p2 = panel_res["spec2_fcm_rvz_continuous"]
-    p4 = panel_res["spec4_predictive_fully_lagged"]
+    p4 = panel_res["spec4_lagged_timing_hardened"]
 
     results = {
         "experiment_id": "K1694",
@@ -1010,22 +1129,27 @@ def main():
         "run_utc": datetime.now(timezone.utc).isoformat(),
         "verdict": verdict,
         "verdict_scope": (
-            "NULL is scoped to ONE hypothesis: the NEGATIVE, BINARY high-vol "
-            "crowding-out interaction (spec1 fcm_x_highvol < 0). It does NOT mean "
-            "'no association'. The continuous analogue (spec2 fcm_x_rvz) is "
-            f"POSITIVE and significant: coef "
+            "NULL means the negative, binary high-vol crowding-out hypothesis (spec1 "
+            "fcm_x_highvol < 0) is NOT SUPPORTED. 'Not supported' is the whole claim: "
+            "these estimators cannot establish that the effect is absent, and NULL "
+            "does NOT mean 'no association'. The continuous analogue (spec2 "
+            f"fcm_x_rvz) is POSITIVE and significant: coef "
             f"{p2['driscoll_kraay']['coef']['fcm_x_rvz']:.4e}, "
             f"t_DK {p2['driscoll_kraay']['tstat']['fcm_x_rvz']:.2f}, "
             f"t_cluster_month {p2['cluster_by_month']['tstat']['fcm_x_rvz']:.2f} -- "
             "i.e. in the direction opposite to crowding-out."),
         "claim_type": "ex_post_association",
         "claim_language_rule": (
-            "spec1-3 may only be described as ex-post association. The words "
-            "predictive, causal, forecast and known-before-outcome are forbidden for "
-            "them because the FCM report can become available mid-outcome-month and "
-            "the outcome is a whole-month average change. Only spec4 "
-            "(spec4_predictive_fully_lagged) is timed so every regressor is known "
-            "before the outcome month begins."),
+            "NO specification here supports a predictive, causal, forecast or "
+            "known-before-outcome claim, and none supports 'there is no "
+            "predictability'. spec1-3 are ex-post association because the FCM report "
+            "can become available mid-outcome-month while the outcome is a "
+            "whole-month average change. spec4 hardens the timing (month-start "
+            "as-of merge, point-in-time regime label at t-1, t-2 DCOT controls, its "
+            "own sample) but its ex-ante status is CONDITIONAL on the synthetic "
+            "availability constant, so its null is 'no association survives this "
+            "timing', not 'no predictability'. Null results are stated as NOT "
+            "SUPPORTED, never as disproved."),
         "data_provenance": {
             "fcm_source": "CFTC Financial Data for FCMs (monthly xlsx)",
             "fcm_publication_lag_days_assumed": FCM_LAG_DAYS,
@@ -1039,9 +1163,10 @@ def main():
                 "backward as-of: latest FCM report whose synthetic avail_date <= the "
                 "outcome month_end. Availability may therefore fall INSIDE the outcome "
                 "month -- association timing, not predictive timing."),
-            "fcm_asof_merge_predictive_spec4": (
-                "backward as-of on the outcome month's START, so the report is "
-                "available before any of the outcome window."),
+            "fcm_asof_merge_spec4": (
+                "backward as-of on the outcome month's START, so the report's "
+                "ASSUMED availability precedes the whole outcome window. Assumed, "
+                "not verified -- see fcm_publication_lag_is_synthetic."),
             "fcm_avail_inside_outcome_month_rows": int(
                 panel["fcm_avail_within_outcome_month"].fillna(False).sum()),
             "dcot_source": "CFTC DCOT futures-only 72hh-3qpy (weekly; as-of Tue, published Fri)",
@@ -1052,11 +1177,23 @@ def main():
         "sample": {
             "fcm_months": desc["fcm_hhi_stats"]["n_months"],
             "fcm_span": desc["fcm_hhi_stats"]["span"],
-            "estimation_sample_owner": "build_spec_frame(); shared by every estimator",
+            "estimation_sample_owner": (
+                "build_spec_frame() for spec1-3 and both bootstraps; "
+                "build_lagged_frame() for spec4, selected by spec4's own regressors"),
             "panel_rows_usable": int(len(frame)),
             "panel_commodities": int(frame["commodity"].nunique()),
             "panel_span": [str(frame["month"].min()), str(frame["month"].max())],
             "panel_span_is_complete_months_only": True,
+            "lagged_frame_rows": int(len(lagged_frame)),
+            "effective_temporal_dof": {
+                "calendar_months": int(panel_res["spec1_fcm_highvol"]["n_months"]),
+                "hhi_seg_z_autocorrelation": hhi_acf,
+                "reading": ("the FCM factor is one system-wide monthly series and is "
+                            "highly persistent, so the effective temporal degrees of "
+                            "freedom are well BELOW the calendar-month count; the "
+                            "months must not be called independent"),
+            },
+            "oi_invalid_rows_guarded": int(panel["oi_invalid"].sum()),
             "completeness": cov_report,
         },
         "descriptives": desc,
@@ -1093,19 +1230,26 @@ def main():
                 "reading": ("opposite sign to the crowding-out hypothesis; it is why "
                             "the NULL must not be stated as 'no association'"),
             },
-            "spec4_predictive": {
+            "spec4_lagged_timing_hardened": {
                 "term": "fcm_pre_x_highvol_lag",
                 "n_obs": p4["n_obs"],
                 "coef": p4["driscoll_kraay"]["coef"]["fcm_pre_x_highvol_lag"],
                 "t_driscoll_kraay": p4["driscoll_kraay"]["tstat"]["fcm_pre_x_highvol_lag"],
                 "t_cluster_month": p4["cluster_by_month"]["tstat"]["fcm_pre_x_highvol_lag"],
+                "reading": ("no association survives this timing arrangement. This is "
+                            "NOT evidence of 'no predictability': the FCM leg's "
+                            "ex-ante status is conditional on the synthetic "
+                            "availability constant, which was never verified."),
             },
         },
         "limitations": [
-            "FCM concentration is a single system-wide monthly series (high autocorrelation, "
-            "low effective d.o.f.); its main effect is a common time factor. The panel has "
-            f"{panel_res['spec1_fcm_highvol']['n_obs']} rows but only "
-            f"{panel_res['spec1_fcm_highvol']['n_months']} months of independent FCM variation.",
+            "FCM concentration is a single system-wide monthly series; its main effect is a "
+            f"common time factor. The panel has {panel_res['spec1_fcm_highvol']['n_obs']} "
+            f"rows spanning {panel_res['spec1_fcm_highvol']['n_months']} calendar months, and "
+            f"those months are NOT independent: the FCM z-score has ACF(1) "
+            f"{hhi_acf['acf1']:.3f}, ACF(6) {hhi_acf['acf6']:.3f}, ACF(12) "
+            f"{hhi_acf['acf12']:.3f}. Effective temporal degrees of freedom are well below "
+            "the calendar-month count and no test here quantifies how far below.",
             "FCM publication dates are SYNTHETIC (month_end + 45d), never checked against "
             "actual CFTC release dates; the lag grid in K1694_lag_sensitivity.json shows "
             "insensitivity to the assumed vintage but is not a verification of it.",
@@ -1115,14 +1259,19 @@ def main():
             "Ex-post association only.",
             "Regime labels rv_z and highvol in spec1-3 use FULL-SAMPLE within-commodity "
             "moments, i.e. the labelling itself looks ahead. Acceptable for a retrospective "
-            "association, not for a predictive claim; spec4 uses point-in-time expanding "
-            "moments instead.",
+            "association; spec4 uses point-in-time expanding moments instead.",
+            "spec4 is a timing-hardened lagged design, NOT a verified ex-ante test. Its FCM "
+            "leg is dated by the synthetic availability constant, so if the true CFTC "
+            "release lag exceeds 45 days the report it treats as available at month start "
+            "was not. Its null therefore reads 'no association survives this timing', never "
+            "'there is no predictability'.",
             "The month-cluster IID bootstrap preserves the within-month cross-section but "
             "does NOT preserve month-to-month serial correlation; it is reported only "
             "alongside the stationary block bootstrap, which does.",
             "The last weekly DCOT report of month t-1 is published within ~3 days of its "
-            "Tuesday as-of date, so the t-1 controls in spec4 can be public a few days into "
-            "month t; a residual publication overlap of at most a few business days remains.",
+            "Tuesday as-of date, which can land inside month t. spec1-3 keep t-1 controls "
+            "(they are ex-post specs anyway); spec4 uses t-2 DCOT aggregates so its controls "
+            "are fully published before the outcome month begins.",
             "Volatility regime is contemporaneous with the outcome in spec1-3 -> association, "
             "not causal; reverse causality (small-trader exit affecting vol) cannot be excluded.",
             "FCM seg funds are dominated by financial futures; crowding-out mapped onto "
@@ -1156,8 +1305,9 @@ def main():
     print(f"spec2 FCM×rv_z coef={p2['driscoll_kraay']['coef']['fcm_x_rvz']:.3e} "
           f"t_DK={p2['driscoll_kraay']['tstat']['fcm_x_rvz']:.2f} "
           f"t_cluster={p2['cluster_by_month']['tstat']['fcm_x_rvz']:.2f}  <- positive")
-    print(f"spec4 predictive coef={p4['driscoll_kraay']['coef']['fcm_pre_x_highvol_lag']:.3e} "
+    print(f"spec4 lagged coef={p4['driscoll_kraay']['coef']['fcm_pre_x_highvol_lag']:.3e} "
           f"t_DK={p4['driscoll_kraay']['tstat']['fcm_pre_x_highvol_lag']:.2f} n={p4['n_obs']}")
+    print("FCM z ACF: " + ", ".join(f"{k}={v:.3f}" for k, v in hhi_acf.items()))
     print(f"DK bandwidth 1..24 |t| range "
           f"[{dk_sens['abs_t_min']:.2f}, {dk_sens['abs_t_max']:.2f}]")
     print(f"timeseries hhi_x_volfrac t={ts_res['tstat']['hhi_x_volfrac']:.2f} "

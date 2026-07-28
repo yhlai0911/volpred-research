@@ -1,14 +1,71 @@
-# K1694 primary-path review — ROUND 2 (re-review after the round-1 FAIL was repaired)
+# K1694 primary-path review — ROUND 3 (re-review after the round-2 FAIL was repaired)
 
-You reviewed this experiment on 2026-07-29 and returned **VERDICT: FAIL**. Your round-1
-verdict is at `storage/ops/codex_reviews/k1694_verdict.md` and the round-1 commissioning
-prompt at `storage/ops/codex_reviews/k1694_prompt_round1.md`. Read the verdict first; it is
-the checklist this round must be judged against. Write this round's verdict to stdout only
-(the harness captures it to `k1694_verdict_round2.md`).
+You have reviewed this experiment twice, both times **VERDICT: FAIL**:
 
-The experiment has been repaired and **re-run**. Your job is the primary path again: does
-the code actually estimate what the write-up claims, is each round-1 defect really fixed
+- round 1 → `storage/ops/codex_reviews/k1694_verdict.md` (prompt: `k1694_prompt_round1.md`)
+- round 2 → `storage/ops/codex_reviews/k1694_verdict_round2.md`
+
+**Read the round-2 verdict first** — its four "Required before PASS" items are the primary
+checklist for this round. The round-1 verdict is the secondary checklist: confirm nothing
+it fixed has regressed. Write this round's verdict to stdout only.
+
+The experiment has been repaired again and **re-run**. Your job is the primary path: does
+the code actually estimate what the write-up claims, is each round-2 requirement really met
 (not merely relabelled), and is the NULL trustworthy?
+
+## What round 2 required, and what was done — verify each
+
+Round 2 confirmed the estimator repairs were sound and that the NULL does not appear
+manufactured, then failed the artifact on four items. Treat every claim below as unproven.
+
+**R2-A — "either build a genuinely ex-ante spec4 ... or remove all predictive/
+no-predictability claims".** Both halves were done, minus the impossible one:
+- Controls moved from t-1 to **t-2** DCOT aggregates (`nonrep_lag2`, `d_nonrep_lag2`,
+  `dlog_oi_lag2`), because a t-1 monthly aggregate is not fully published before month t
+  begins. The point-in-time regime label stays at t-1 on the argument that realized vol is
+  computed from same-day public closes and carries no publication lag — **check that
+  argument**.
+- New `build_lagged_frame()` selects spec4's sample from spec4's own regressors, so it is
+  no longer conditioned on the contemporaneous `rv_z` it never uses.
+- The spec is renamed `spec4_lagged_timing_hardened` and **all** predictive /
+  "no predictability" claims are removed; its null now reads "no association survives this
+  timing", explicitly conditional on the synthetic availability constant.
+- **Check**: is any predictive or ex-ante claim left anywhere — README, results JSON, code
+  docstrings? Does t-2 actually clear the publication overlap, or is there a case where a
+  t-2 aggregate is still not public before month t? Is the t-1 PIT vol label really free of
+  a publication lag?
+
+**R2-B — "replace 不成立 with 未獲支持 everywhere and describe the temporal effective
+sample accurately".** Null wording is now "未獲支持 / NOT SUPPORTED" throughout, with an
+explicit statement that the estimators cannot establish absence. `sample.
+effective_temporal_dof` now reports the FCM z-score ACF (1/3/6/12 = 0.964 / 0.918 / 0.817 /
+0.584) and states the effective d.o.f. are below the calendar-month count, without claiming
+to quantify how far below.
+- **Check**: any remaining place that asserts independence or overstates the null. Is
+  "we do not quantify it" an adequate disclosure, or does it need a number?
+
+**R2-C — "guard non-positive/non-finite OI explicitly".** `oi` is masked to NaN unless
+finite and strictly positive before `np.log`, and any non-finite `dlog_oi` is cleared
+afterwards; `sample.oi_invalid_rows_guarded` records the count (0 on this cache).
+- **Check**: is the guard actually on the path that feeds the regression, and is the
+  after-the-fact non-finite sweep redundant or load-bearing?
+
+**R2-D — "strengthen completeness checks so they detect interior weekly gaps and
+independently truncated RV months".**
+- DCOT is now a three-part continuity test: first report within 8 days of month start,
+  no gap between consecutive reports over 9 days, last report within 6 days of month end.
+  A skipped week at head, middle or tail stretches one gap to ~14 days.
+- RV now needs three things: >= 15 trading days, no more than 5 short of the month's
+  business-day count, and no more than 3 short of the best-covered commodity that month
+  (shared U.S. calendar, so a lone shortfall is that commodity's own truncated download).
+- Thresholds were calibrated on the cache: observed maximum interior gap 8 days and head
+  gap 7 days (holiday shifts), RV shortfall 0-2 days normally and 10/11/13 when truncated.
+- This dropped 2 more rows (3278 -> 3276): 2014-04 and 2016-03 were independently
+  truncated RV months.
+- **Check**: are those thresholds calibrated or fitted? Could a real gap hide under 9 days?
+  Is `MAX_RV_CROSS_SHORTFALL` circular when a whole month is truncated for every commodity
+  (the cross-sectional max is then also truncated)? Does the business-day anchor handle
+  holiday-heavy months without dropping legitimate ones?
 
 **Working tree**: you are inside a git worktree at the repo root of this checkout. Every
 path below is relative to it. The canonical checkout at `~/volpred-research` still holds
@@ -17,7 +74,7 @@ the OLD round-1 bytes — do not read it; review the files in *this* tree.
 ## Files
 
 - `experiments/K1694/K1694.py` — analysis script (the only compute path)
-- `experiments/K1694/test_K1694.py` — the author's mechanical gates for the 8 defects
+- `experiments/K1694/test_K1694.py` — the author's mechanical gates, one per defect from rounds 1 and 2
 - `experiments/K1694/lag_sensitivity.py` — publication-lag robustness check
 - `experiments/K1694/K1694_results.json` — main result
 - `experiments/K1694/reproduce_spec.json` — run-time provenance spec
@@ -25,9 +82,10 @@ the OLD round-1 bytes — do not read it; review the files in *this* tree.
 - `experiments/K1694/README.md` — status and the defect-by-defect repair table
 - `experiments/K1694/data/*.csv` — cached inputs (FCM monthly, DCOT weekly, RV monthly)
 
-## What was changed this round, and where to look
+## The round-1 repairs, unchanged since round 2 — confirm no regression
 
-Each item is claimed to close one of your round-1 findings. Treat every claim as unproven.
+You already verified these in round 2 ("The main estimator repairs are sound"). Spot-check
+that they still hold after this round's edits rather than re-deriving them.
 
 1. **Bootstrap / spec1 mismatch (your blocking defect).**
    `build_spec_frame()` (K1694.py) is now the single owner of the estimation sample, and
@@ -59,31 +117,26 @@ Each item is claimed to close one of your round-1 findings. Treat every claim as
    T = 149 months given the FCM series' autocorrelation? Does the headline CI use it?
 
 4. **Partial months.** `monthly_coverage()` is the single owner of a date-free
-   completeness rule: a DCOT month needs >= 4 weekly reports AND its last as-of date
-   within 6 days of month end; an RV month needs >= 15 trading days. DCOT-incomplete rows
-   are dropped; RV-incomplete months keep their DCOT row but have `rv` masked to NaN. An
+   completeness rule. **Its content was replaced this round — judge the current rule under
+   R2-D above, not this bullet.** Unchanged from round 2: DCOT-incomplete rows are dropped
+   entirely; RV-incomplete months keep their DCOT row but have `rv` masked to NaN; an
    adjacency check voids any first difference whose previous retained row is not the
    immediately preceding calendar month.
-   **Check**: is the rule genuinely reproducible and free of hidden date knowledge? Does
-   it drop only what it should (2026-07 and 2006-06 here) and would it generalise? Does
-   masking `rv` (rather than dropping the row) change the within-commodity moments in a
-   way that biases the regime labels? Is the adjacency guard complete — is there any
-   difference or lag that escapes it?
+   **Check**: does masking `rv` (rather than dropping the row) change the within-commodity
+   moments in a way that biases the regime labels? Is the adjacency guard complete — is
+   there any difference or lag that escapes it, including the new t-2 lags?
 
 5. **Methodology description vs code.**
    (a) `_acf_bandwidth()` is gone; `_hac_bandwidth_rule(nmonths)` returns
    `max(ceil(T^(1/3)), 4)` and the docstring/results say explicitly it is a fixed rule,
-   NOT ACF-derived. A Driscoll-Kraay bandwidth grid 1..24 is now a recorded result
+   NOT ACF-derived. A Driscoll-Kraay bandwidth grid 1..24 is a recorded result
    (`dk_bandwidth_sensitivity_spec1`).
-   (b) The docstring's promised fully-lagged predictive spec now exists as
-   `spec4_predictive_fully_lagged`: the FCM report is as-of merged on the outcome month's
-   **start**, the volatility regime label uses point-in-time expanding moments at t-1, and
-   every control is a t-1 quantity.
-   **Check**: is spec4 actually free of the look-ahead you flagged? The expanding
-   moments include month t itself when labelling month t — is that legitimate given the
-   label is then lagged one month? Does the month-start as-of merge really guarantee the
-   signal predates the whole outcome window? Is `PIT_MIN_MONTHS = 24` doing anything
-   suspicious to the sample (n falls 3278 -> 2750)?
+   (b) The docstring's promised fully-lagged spec exists; **its timing and sample were
+   rebuilt this round — judge it under R2-A above.** The FCM report is as-of merged on the
+   outcome month's start; the regime label uses point-in-time expanding moments at t-1.
+   **Check**: the expanding moments include month t itself when labelling month t — is
+   that legitimate given the label is then lagged one month? Is `PIT_MIN_MONTHS = 24`
+   doing anything suspicious to the sample (n 3276 -> 2749)?
 
 6. **Results JSON overstatement.** `bootstrap_interaction_spec1` and
    `primary_interaction.bootstrap_ci95` are removed; CIs are now under explicit names.
@@ -91,7 +144,7 @@ Each item is claimed to close one of your round-1 findings. Treat every claim as
    the excluded months. `claim_type: ex_post_association` plus a `claim_language_rule`
    forbid predictive/causal/known-before-outcome language for spec1-3. `limitations` now
    lists synthetic publication dates, the within-month timing overlap (disclosed as
-   affecting 3278/3278 estimation rows), full-sample regime labels, and the IID
+   affecting 3276/3276 estimation rows), full-sample regime labels, and the IID
    bootstrap's failure to preserve serial correlation.
    **Check**: read `README.md` as the surface through which an overclaim reaches a human.
    Does anything in the README or the JSON still assert more than the code estimates?
@@ -108,20 +161,23 @@ Each item is claimed to close one of your round-1 findings. Treat every claim as
    sha of `K1694.py` on disk all agree? Does `canonical_result_identity` match the result
    bytes? Could this spec have been written after the fact?
 
-## Reported result (re-run, 2026-07-29)
+## Reported result (re-run, 2026-07-29, round-3 artifacts)
 
-- Verdict: **NULL**, scoped to the negative binary high-vol crowding-out hypothesis
-- Sample: 3278 rows, 22 commodities, 149 months, 2014-02..2026-06 (complete months only)
-- spec1 `fcm_x_highvol`: coef +3.1575e-04, t_DK +1.56, t_cluster_month +1.60
-- spec2 `fcm_x_rvz`: coef +2.9624e-04, t_DK +2.59, t_cluster_month +2.61 (POSITIVE)
-- spec3 `conc4_x_highvol`: coef -1.7016e-04, t_DK -0.67
-- spec4 `fcm_pre_x_highvol_lag` (predictive): coef +4.4153e-05, t_DK +0.18, n 2750
-- Stationary block bootstrap (mean block 6 months, 2000 reps): point 3.1575e-04,
-  95% CI [-7.076e-05, 7.793e-04], p 0.117
-- IID month-cluster bootstrap (2000 reps): 95% CI [-6.773e-05, 7.106e-04], p 0.119
-- DK bandwidth 1..24: |t| in [1.56, 1.71], none reaches 1.96
-- Aggregate time-series `hhi_x_volfrac`: t 0.41 (HAC lag 6, resid acf1 -0.045)
-- Lag grid 30/45/60/75/90d: t_DK in [1.28, 1.56], none reaches 1.96
+- Verdict: **NULL**, worded as NOT SUPPORTED, scoped to the negative binary high-vol
+  crowding-out hypothesis
+- Sample: 3276 rows, 22 commodities, 149 calendar months, 2014-02..2026-06 (complete
+  months only); spec4 has its own 2749-row sample
+- spec1 `fcm_x_highvol`: coef +3.0553e-04, t_DK +1.51, t_cluster_month +1.55, p_DK 0.130
+- spec2 `fcm_x_rvz`: coef +2.8750e-04, t_DK +2.54, t_cluster_month +2.56 (POSITIVE, p 0.011)
+- spec3 `conc4_x_highvol`: coef -1.9119e-04, t_DK -0.76
+- spec4 `fcm_pre_x_highvol_lag`: coef +6.6741e-05, t_DK +0.27, t_cluster +0.34, n 2749
+- Stationary block bootstrap (mean block 6 months, 2000 reps): 95% CI
+  [-7.418e-05, 7.684e-04], p 0.126
+- IID month-cluster bootstrap (2000 reps): 95% CI [-7.458e-05, 7.014e-04], p 0.126
+- DK bandwidth 1..24: |t| in [1.51, 1.64], none reaches 1.96
+- Aggregate time-series `hhi_x_volfrac`: t 0.34, p 0.733 (HAC lag 6, resid acf1 -0.039)
+- Lag grid 30/45/60/75/90d: t_DK in [1.24, 1.51], none reaches 1.96
+- `test_K1694.py`: 31 mechanical gates, all passing
 
 ## Questions that carry over from round 1 and are NOT closed by the above
 
