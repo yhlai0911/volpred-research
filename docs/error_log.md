@@ -4298,3 +4298,27 @@ receipt mode均0600，secret／schedule／effect為空且lease=false。此「沒
 cold-restore actuator」slice為 **`root_cause_fixed_and_verified`**；MacBook fresh
 parity、formal-effect RPO=0與持續warm process仍受#9→#12→#16/#17阻塞，所以#21整體
 維持OPEN／`contained`。
+
+### 2026-07-29 — Supabase PG17 bootstrap membership 不能當一般 GRANT／REVOKE
+
+**證據化症狀**：Issue #23 migrations在ephemeral PostgreSQL與測試通過，但production
+`ALTER FUNCTION ... OWNER TO volpred_*_worker`回
+`must be able to SET ROLE`。Catalog顯示managed `postgres`確實是worker member，
+但membership為`ADMIN TRUE / INHERIT FALSE / SET FALSE`；有membership不等於能轉owner。
+
+**根因層級（managed role ownership contract）**：PostgreSQL 16+讓non-superuser
+`CREATEROLE` creator取得一筆由Supabase管理的bootstrap membership。跳過
+`postgres` grant會缺SET authority；一般`GRANT`後只撤`SET OPTION`則會留下migration
+runner自己授予的第二筆membership；全撤又會碰到不屬於自己的bootstrap grant。
+
+**底層修復與制度化**：managed runner建立grantor-owned、
+`INHERIT FALSE / SET TRUE` bounded self-grant，使用`SET LOCAL ROLE`直接以最小worker
+owner建立／重建函式；最後以`REVOKE ... GRANTED BY CURRENT_USER`只撤自己的grant。
+Supabase原生`supabase_admin` grant保持原樣，worker仍NOLOGIN／NOSUPER／NOBYPASSRLS。
+
+**回歸與live read-back**：migration-shape regression與PG17連續套用兩次皆過，member
+continuity suite **8 passed**。Production兩檔也連續重跑成功，catalog只剩每個worker
+各一筆`supabase_admin` bootstrap grant（SET/INHERIT皆false）；五RPC
+owner／ACL／空search_path全符，service-role transaction E2E通過後rollback。此類
+managed owner-transfer與migration重跑失敗為
+**`root_cause_fixed_and_verified`**。

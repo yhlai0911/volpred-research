@@ -2780,3 +2780,23 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   signature。API-key正式退役須由#12 subscription replacement接管，#12又等待#9
   七日ownership gate；formal-effect RPO=0 pair亦尚未產生。因此#17維持
   **`contained`／OPEN**，不得宣稱完成或promotion eligible。
+
+## 2026-07-29 — T23 Member Continuity／Privacy（Issue #23）
+
+- ✅ 原版／v3共用browser anonymous identity、登入後receipt-backed merge，以及
+  收藏／追蹤／提醒／提問／read／delete seam；未送出的提問草稿只留browser，介面明示
+  研究內容不是個人化投資建議。
+- ✅ Private member／analytics tables全部FORCE RLS；五個public RPC由
+  no-login/non-bypass worker持有、`SECURITY DEFINER`、空`search_path`且只給
+  service role。PG17 managed owner transfer與重跑契約已機械化。
+- ✅ Parent commits=`ff46f9fbe`,`dc43c4b1e`,`c2bbcbf61`；nested frontend=
+  `a15bc14`。PostgreSQL integration **8 passed**、frontend full check／production
+  build與Matt Spec／Standards雙PASS。
+- ✅ Production migration receipts=`20260728190500`,`20260728191149`；
+  service-role transaction live E2E完成save/follow/reminder/question/read、
+  exact replay、identity merge及雙delete後rollback。
+- ✅ Zeabur deployment `6a69115ceac99cc636f259f9`為RUNNING；原版／v3首頁、
+  文章、questions、member頁皆200，continuity GET／POST／DELETE匿名皆401。部署只含
+  candidate commit，未收active checkout的package／PDF／question-test WIP。
+
+Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
