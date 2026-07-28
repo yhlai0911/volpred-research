@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T20:00:29.087013+00:00",
+  "generated_at": "2026-07-28T21:00:47.107984+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 15.4
+      "age_hours": 16.5
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 15.3
+      "age_hours": 16.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 10.6
+      "age_hours": 11.7
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 9.7
+      "age_hours": 10.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 174.6
+      "age_hours": 175.6
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 9.6
+      "age_hours": 10.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 26.6
+      "age_hours": 27.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -63,7 +63,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 34.7
+      "age_hours": 35.7
     }
   ],
   "held": [],
@@ -112,14 +112,71 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "experiments/K1694/K1694.py",
+          "kind": "py",
+          "reason": "modified"
+        },
+        {
+          "path": "experiments/K1694/K1694_lag_sensitivity.json",
+          "kind": "json",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1694/K1694_results.json",
+          "kind": "json",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1694/data/panel.csv",
+          "kind": "csv",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1694/figures/fig1_fcm_hhi_timeseries.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1694/figures/fig2_regime_2x2.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1694/figures/fig3_interaction_coef.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "experiments/K1694/lag_sensitivity.py",
+          "kind": "py",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 9,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "experiments",
+          "paths": [
+            "experiments/K1694/K1694.py",
+            "experiments/K1694/K1694_lag_sensitivity.json",
+            "experiments/K1694/K1694_results.json",
+            "experiments/K1694/data/panel.csv",
+            "experiments/K1694/figures/fig1_fcm_hhi_timeseries.png",
+            "experiments/K1694/figures/fig2_regime_2x2.png",
+            "experiments/K1694/figures/fig3_interaction_coef.png",
+            "experiments/K1694/lag_sensitivity.py"
+          ],
+          "committed": true,
+          "detail": "[main 84e9ff536] chore(experiment-reap): collect orphaned experiment artifacts (8 files)\n 8 files changed, 5842 insertions(+), 4 deletions(-)\n create "
+        }
+      ]
     }
   },
   "held_escalations": [],

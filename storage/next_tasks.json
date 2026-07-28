@@ -33026,8 +33026,9 @@
     "compute_release_reason": "terminal_receipt_collected",
     "recert2_collected_20260728": "[recert2 收件 — 2026-07-28 22:40 CST, hourly-slot-1-ddc2ab2b]\nrebrief job agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec (exit 0) 已產出**新的**\nreview_verdict.json（6,348 B, mtime 07-28 21:47, reviewed_at 2026-07-28T13:42:00Z,\nreviewer=Codex gpt-5.6-sol/xhigh），取代前班指出的那份 stale 2,108 B 檔。**VERDICT: FAIL**。\n\n【已解決】recert round 1 的 lossy %.10f snapshot serialization 缺陷，Codex 判 RESOLVED：\noption-B 修正（commit fdf4ab297, K1715.py 379a67cd…）為 doc/format-only，\nfloat_format %.10f→%.17g 只動 WRITE path、`if SNAPSHOT.is_file():` read path 未動、\npinned snapshot 檔 byte 未變，無 model/estimation/evaluation/seed/lag 變更、無 lookahead。\n\n【新 blocking defect — estimator lineage mismatch】審查當下 K1715.py 是 cb06895a…，\n**不是**本輪受命認證的 option-B bytes 379a67cd…。fdf4ab297 之後的兩個 commit\n（9926bca90, c9d75cf1d）加了 BFGS min-NLL guard：\n`res = res_bfgs if isfinite(res_bfgs.fun) and res_bfgs.fun <= res_nm.fun else res_nm`，\n先前 res 無條件取 BFGS 結果。這**改變了選中哪一組參數向量**，屬實質估計選擇邏輯，\n不是 doc/format 變更 → 認證對象與實際位元組不符，不可放行。\n\n【本班補充觀察 — 位元組又漂了一次】現在磁碟上的 K1715.py 已是 **133c6f81…**（64,544 B），\n係 agent-brief_k1715_spec_reprocheck-6ff96b 再次改動所致。即 K1715 已連續三代\n（379a67cd → cb06895a → 133c6f81）在認證流程進行中被換掉，每一輪審查的都是隨即過期的位元組。\n這是流程層問題，不是單次疏失。\n\n【與 snapshot 重現結果的交互作用，必須寫明不可略過】snapshot_repro_report.md 宣稱以\n133c6f81… 重跑對 archived results（929cb150…，正是 recert2 reviewed_sha256 記載的同一份）\n達成 max abs dev = 0.0。若估計選擇邏輯真的改變，bit-identical 通常不會發生 ——\n合理解釋是該 guard 在本資料上從未 binding（BFGS 恆優於 NM）。這是**有利但未經證實**的推論：\n下一輪必須**明確檢定該 guard 在全樣本是否曾 binding**（統計 res_bfgs.fun > res_nm.fun 的\n次數）並寫進報告。若曾 binding 而數值仍完全相同，那反而代表比較器沒看到該路徑，要追查。\n不得以「重現是 0.0 所以 lineage 不重要」收尾 —— 那是用結果反推程序正當性。\n\n【狀態】K1715 仍不可 merge、不可寫 knowledge。後續已有 assign_8f1165f3 線上的\nagent-agent-brief_k1715_comparator_closeout-5e83ee 在跑（補 only_archived 差集與\nfail-closed）。下一輪 recert 必須：先凍結一份確定的位元組、再送審、審完前禁止任何人改該檔。\n\n【備註】同綁 source_task=K1715 的另一 job agent-brief_k1715_recert2-e2b9fd（SIGKILL, failed）\n已被本 rebrief 取代，其 followup 因單一 source task 只能被 release 一次而維持 stranded，\n非遺漏（見 assign_617bf749）。",
     "compute_job_id": "agent-brief_k1715_recert3-823a28",
-    "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-28T20:30:04Z"
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-28T20:30:04Z",
+    "compute_finished_at": "2026-07-28T20:56:59Z"
   },
   {
     "id": "K1716",
@@ -51822,11 +51823,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52412,11 +52413,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52481,11 +52482,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52628,11 +52629,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52948,11 +52949,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53117,11 +53118,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53312,11 +53313,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53364,11 +53365,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53422,11 +53423,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54512,11 +54513,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54673,11 +54674,11 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T19:17:14.394086+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 22.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -54796,14 +54797,8 @@
     "completed_at": "2026-07-28T20:48:19.502054+00:00",
     "result": "Issue #23 root_cause_fixed_and_verified：save/follow/question/reminder、anonymous merge、privacy read/delete 已通過 PG17 integration、canonical frontend gate 與 Matt Spec/Standards 雙 PASS。Production migrations 20260728190500/20260728191149、service-role rollback E2E 與 Zeabur deployment 6a6913edeac99cc636f25a5d 已回讀。",
     "issue_disposition": "close",
-    "issue_close_pending": {
-      "issue_disposition": "close",
-      "issue_ref": "#23",
-      "task_id": "assign_83824942",
-      "completion_owner": "codex-vscode",
-      "completed_at": "2026-07-28T20:48:19.502054+00:00",
-      "completion_base_commit": "2776a3d21a091a6d3710fcb7a64fddafc19e3c7f"
-    }
+    "issue_closed_at": "2026-07-28T20:48:37.870515+00:00",
+    "issue_closed_commit": "159302031ad6b1234e172f0f6201b7d2001e2615"
   },
   {
     "id": "k1694_codex_fail_repair_20260729",
@@ -54930,7 +54925,110 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-28T20:20:48.750712+00:00",
-      "last_seen_at": "2026-07-28T20:20:48.750712+00:00"
+      "last_seen_at": "2026-07-28T20:20:48.750712+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T21:07:58.783639+00:00",
+      "deferred": [
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "issue27_natural_growth_registry_20260729",
+    "title": "[Issue #27] 建立 Natural Growth Experiment Registry 與首個可逆實驗",
+    "description": "依既有 Matt spec 實作預先登記 hypothesis/primary metric/guardrail/window/stop rule 的自然成長 registry，接 first-party qualified conversion/return attribution，完成第一個可逆且可稽核的 production experiment；禁止 paid ads、dark patterns 與研究事實改寫，null result 如實保存。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "in_progress",
+    "source": "user",
+    "issue_ref": "#27",
+    "created_by": "codex-vscode",
+    "created_at": "2026-07-28T20:50:58.626185+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T20:51:04.334145+00:00",
+    "claim_expires_at": "2026-07-28T22:51:04.334145+00:00",
+    "claim_session_id": "38f8d2ff09d7",
+    "status_history": [
+      {
+        "ts": "2026-07-28T20:51:04.334164+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T20:51:07.969680+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T20:51:07.969664+00:00"
+  },
+  {
+    "id": "assign_d7139eb8",
+    "title": "K1715 recert round 4: certify the post-round-3 tree, and rule on the frozen-note vs sha-invariant conflict",
+    "description": "K1715 recert round 3 returned FAIL (experiments/K1715/review_verdict.json, reviewed_commit 3cb574937d458a8c9375e03945018216b25e1de6; raw review in experiments/K1715/codex_recert3.md). Branch worktree-k1715-204d556b is UNMERGED at 5d5ad994d76617ec64eedfa9209c85dcb9bc8f2f.\n\nWHAT IS ALREADY SETTLED - do not redo:\n- Round-2 defects D1/D2/D3 are closed and were independently verified by Codex, including running build_readme against the committed results and reproducing README.md byte-identical (91cf8d3c...).\n- The load-bearing scientific question is ANSWERED YES. Codex reconstructed the selection proof independently: with old sort key b_i (BFGS NLL) and guarded key g_i = min(b_i, n_i) <= b_i, a guarded winner accepting BFGS also minimises the old BFGS-only key; any start that could change the outcome would have to surface as an NM winner, contradicting accepted_method == BFGS in 268/268 refits. It added the warm-start induction across all 67 refits x 4 models. Old (unconditional-BFGS) and new (guarded) code select the identical parameter vector on this data, so the prior science PASS carries across the guard commit on measured evidence.\n- verify_recert2_defects.py exits 0 with all four PASS at the current sha.\n\nWHY IT STILL FAILED: the sole blocking defect was procedural and self-inflicted - round 3 wrote its own commissioning prompt and transcript into the worktree it was certifying, so git status was not empty when the reviewer read it back. Those files are now committed. ROUND 4 MUST STAGE ITS REVIEW ARTIFACTS OUTSIDE THE WORKTREE (or commit them before read-back) or it will reproduce this exact failure.\n\nTHE DECISION THAT NEEDS A DELIBERATE CALL (round-3 non-blocking finding 2): the convergence_summary note inside K1715.py says a low bfgs_success_rate means the guard 'then falls back to Nelder-Mead'. In this run it never fell back (268/268 BFGS), so the sentence describes behaviour that did not occur. It cannot be corrected in place: editing K1715.py changes sha256(K1715.py) and breaks the invariant spec.entrypoint.sha256 == results.code_trace.sha256 == sha256(K1715.py) == 133c6f81..., and restoring that invariant means re-running the estimator, which mints a new artifact and destroys the lineage just certified. STANDING OWNER DECISION (knowledge f745bff0, 2026-07-27, owner delegated 'you decide') ALREADY RULED THIS: K1715's disposition is ARCHIVE-UNMERGED (Option 3) - do not merge worktree k1715-204d556b, keep the science in knowledge item 5e41886b, and explicitly BAR both a further Claude transcription loop and any estimator re-run done for optimiser-diagnostic meta fields, on ROI grounds. So option (ii) 're-run and re-certify' is BARRED. The live choice is (i) accept the imprecise note on a frozen, archived artifact and record the acceptance - which is also the standing default. Round 3 does not disturb that ruling; it strengthens it, because the guard is now independently shown to be scientifically inert, so the unmerged branch withholds nothing from main. Round 4 should most likely CLOSE this as archive-unmerged rather than open another certification round.\n\nROUTING: model_router --task-type experiment --attempt 2 reports exhausted=true (at_ceiling=true, fallback=false), so round 4 must NOT be another same-method bounded Codex pass at the same tier. Re-route or escalate the routing decision first.\n\nHONESTY CONSTRAINT: K1715 is a NULL result (score-driven GAS/DCS does not beat the GARCH family at joint VaR+ES). It is NOT yet written to storage/memory/knowledge.json and must not be until certification actually passes.",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-28T20:54:46.812296+00:00",
+    "payload": {
+      "kid": "K1715",
+      "branch": "worktree-k1715-204d556b",
+      "head": "5d5ad994d76617ec64eedfa9209c85dcb9bc8f2f",
+      "round3_verdict": "FAIL",
+      "round3_reviewed_commit": "3cb574937d458a8c9375e03945018216b25e1de6",
+      "round3_artifact": "experiments/K1715/codex_recert3.md",
+      "blocking_defect_class": "procedural_dirty_tree_caused_by_review_harness",
+      "science_question_b": "PASS - guard proven empirically inert, 268/268 accepted_method==BFGS",
+      "model_router_exhausted": true,
+      "decision_required": "confirm archive-unmerged closure; re-run option is barred by owner",
+      "standing_owner_decision": "archive-unmerged (knowledge f745bff0, 2026-07-27); re-run for meta fields BARRED",
+      "science_already_recorded": "knowledge item 5e41886b (verdict=NULL, Codex science PASS)"
+    },
+    "parent_task_id": "K1715",
+    "created_by": "k1715-recert3"
+  },
+  {
+    "id": "assign_4a53df16",
+    "title": "PHASE-Z 卡住檔案 incident（f2a480078f17a9e8）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n6 個未提交檔案不是任何一班 fire 產出的，最長已連續 37 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/K1694/README.md — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 30 班\n- storage/memory/knowledge.json — 37 班\n- storage/reports/INDEX.md — 28 班\n- storage/reports/index.json — 28 班\n- storage/strategy_metrics.json — 28 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T210758708224Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T21:08:48.506986+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "f2a480078f17a9e8",
+      "paths": [
+        "experiments/K1694/README.md",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "experiments/K1694/README.md": 3,
+        "storage/logs/trending_primary_source_verification.jsonl": 30,
+        "storage/memory/knowledge.json": 37,
+        "storage/reports/INDEX.md": 28,
+        "storage/reports/index.json": 28,
+        "storage/strategy_metrics.json": 28
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T210758708224Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T21:08:48.492273+00:00",
+      "last_seen_at": "2026-07-28T21:08:48.492273+00:00"
     },
     "priority_capped_from": 1
   }
