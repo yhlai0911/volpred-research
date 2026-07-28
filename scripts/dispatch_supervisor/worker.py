@@ -575,7 +575,6 @@ def _run_one_attempt(
             raise isolation.IsolationUnavailable(
                 "worker isolation was not prepared during admission"
             )
-        argv = isolation.wrap_prepared(argv, isolation_receipt)
         child_env = isolation.isolated_environment(
             child_env,
             isolation_receipt,
@@ -613,6 +612,14 @@ def _run_one_attempt(
             )
         argv[argv.index("--settings") + 1] = provider_receipt.settings_path
         verify_spawn_receipt(provider_receipt)
+        # Provider authorization replaces argv[0] with the hash-pinned Claude
+        # executable.  Wrap only after that replacement; wrapping first would
+        # turn ``sandbox-exec -f profile claude ...`` into
+        # ``claude -f profile claude ...`` and every isolated fire would
+        # terminate immediately with "unknown option '-f'".
+        if isolated_workspace is not None:
+            assert isinstance(isolation_receipt, dict)
+            argv = isolation.wrap_prepared(argv, isolation_receipt)
         proc = _spawn(argv=argv, log_path=log_path, env=child_env, cwd=workdir)
     except OSError:
         # Spawn itself failed (e.g. claude_bin missing) — free the slot we

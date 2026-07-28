@@ -7501,7 +7501,10 @@ def test_isolated_claude_scrubs_before_authorize_and_spawn(
     monkeypatch.setattr(
         worker,
         "_spawn",
-        lambda **kwargs: spawned.append(dict(kwargs["env"])) or ExitedProc(),
+        lambda **kwargs: spawned.append({
+            "env": dict(kwargs["env"]),
+            "argv": list(kwargs["argv"]),
+        }) or ExitedProc(),
     )
     monkeypatch.setattr(worker, "_wait_with_fatal_probe", lambda *_a, **_kw: ("exited", 0))
     monkeypatch.setattr(worker.os, "getpgid", lambda _pid: 123)
@@ -7527,10 +7530,16 @@ def test_isolated_claude_scrubs_before_authorize_and_spawn(
     )
 
     assert len(authorized) == len(spawned) == 1
-    for env in (authorized[0], spawned[0]):
+    for env in (authorized[0], spawned[0]["env"]):
         assert env["CLAUDE_CODE_OAUTH_TOKEN"] == "subscription-oauth"
         for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
             assert key not in env
+    assert spawned[0]["argv"][:4] == [
+        str(isolation.SANDBOX_EXEC),
+        "-f",
+        str(profile),
+        worker.CLAUDE_BIN,
+    ]
 
 
 def test_workspace_merge_gate_rejects_canonical_only_paths(tmp_path: Path) -> None:
