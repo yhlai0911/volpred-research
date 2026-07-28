@@ -35116,7 +35116,7 @@
     "title": "K1726: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 586). Original: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1726.py with signal.shift(1) + seed=42, (c) K1726_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "blocked",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35173,15 +35173,49 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T15:13:13.685448+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5",
+        "note": "terminal receipt collected; followup=K1726"
+      },
+      {
+        "ts": "2026-07-28T15:13:18.578152+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:13:18.866208+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:23:15.928112+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24",
+        "note": "manual_release"
       }
     ],
     "result": "dispatched to compute job agent-brief_k1812_bab_vol-f55e3c; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1812_fix-a18b38; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5; awaiting PHASE A collection",
-    "compute_released_at": "2026-07-28T13:21:21Z",
+    "compute_released_at": "2026-07-28T15:13:13Z",
     "compute_release_reason": "terminal_receipt_collected",
-    "compute_job_id": "agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5",
-    "blocked_reason": "external_compute_receipt_pending_collection",
-    "compute_started_at": "2026-07-28T13:30:00Z",
-    "compute_finished_at": "2026-07-28T14:07:42Z"
+    "collection_verified_at": "2026-07-28T15:22:00+00:00",
+    "collection_verified_by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24",
+    "k1812_branch": "wt/dispatch-slot-2-dc4437b8-k1812",
+    "k1812_branch_commit": "a0db4f038",
+    "knowledge_item_id": "f56bd213",
+    "remaining_step": "ONLY: bash scripts/merge_worktree.sh dispatch-slot-2-dc4437b8-k1812 under git_writer_lock. Verification already done and recorded: reviewed_sha256 of all 7 files match disk bytes; pytest 22 passed; check_experiment_artifacts PASS (strict); defects B and C confirmed fixed; knowledge f56bd213 written. Do NOT re-verify or re-review.",
+    "merge_blocked_by": "main checkout index has 89 staged paths from a concurrent supervisor finalize (dispatch-slot-2-58249487, producer_commit ok=false reason=undeclared_output_path config/cron_wrapper_manifest.json; retries ~every 3min and restages). merge_worktree.sh:715 aborts unconditionally on any foreign staged path by design; not bypassed.",
+    "last_released_at": "2026-07-28T15:23:15.928094+00:00",
+    "blocked_until": "2026-07-29T00:00:00+08:00",
+    "blocked_reason": "awaiting_prerequisite_fix",
+    "blocked_at": "2026-07-28T15:23:27+00:00",
+    "blocked_note": "K1812 collection fully verified (see task annotations: reviewed_sha256 match disk bytes, 22 tests pass, artifacts gate PASS strict, knowledge f56bd213 written). Work is safe on branch wt/dispatch-slot-2-dc4437b8-k1812 @ a0db4f038. ONLY remaining step is the merge; blocked by 89 foreign staged paths in the shared main index from the stuck dispatch-slot-2-58249487 finalize loop (undeclared_output_path config/cron_wrapper_manifest.json). Unblocks for the 00:07 fire."
   },
   {
     "id": "K1727",
@@ -50530,11 +50564,10 @@
       "fires": 2,
       "first_seen_at": "2026-07-27T16:42:45.364821+00:00",
       "last_seen_at": "2026-07-27T16:53:26.599186+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51607,16 +51640,15 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T02:07:40.364020+00:00",
       "last_seen_at": "2026-07-28T03:08:05.879047+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52199,16 +52231,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T05:40:29.847399+00:00",
       "last_seen_at": "2026-07-28T05:40:29.847399+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T06:02:19.746183+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52270,16 +52301,15 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T06:02:30.310580+00:00",
       "last_seen_at": "2026-07-28T06:50:16.377112+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T06:50:00.725419+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52419,16 +52449,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T07:39:30.916875+00:00",
       "last_seen_at": "2026-07-28T07:39:30.916875+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T08:46:12.952187+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52737,16 +52766,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T08:46:30.831370+00:00",
       "last_seen_at": "2026-07-28T08:46:30.831370+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T09:12:26.510510+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52908,16 +52936,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T09:25:26.615406+00:00",
       "last_seen_at": "2026-07-28T09:25:26.615406+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T10:32:51.928041+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53082,16 +53109,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T10:33:17.553339+00:00",
       "last_seen_at": "2026-07-28T10:33:17.553339+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T11:22:54.499828+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53136,16 +53162,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T11:23:24.711888+00:00",
       "last_seen_at": "2026-07-28T11:23:24.711888+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T12:46:48.552646+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53196,16 +53221,15 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T12:47:26.077945+00:00",
       "last_seen_at": "2026-07-28T12:47:26.077945+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T13:31:34.795090+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53237,7 +53261,7 @@
     "description": "來源：Codex 審查 storage/ops/codex_reviews/k1720_verdict.md，VERDICT: FAIL（不得 merge、不得寫 knowledge.json）。Worktree: .claude/worktrees/dispatch-slot-3-87c7269d-k1720。\n\n【必修 1｜阻斷性，需重跑全部結果】prev_close 定義錯誤。K1720.py:127 先排除非 7-bar sessions，才在 K1720.py:153 做 day_close.shift(1)。半日市之後至少 8 個完整交易日拿到的是更早交易日的收盤，不是真正 prior-session close；r_intra 因此跨越多個 sessions，並污染後續 expanding event thresholds。非 lookahead，但 predictor 與所有下游數值錯誤。修法：在排除 7-bar sessions 之前先於完整 session 日曆上取 prior-session close，再做過濾。\n\n【必修 2】H1 序列相關處理不足。K1720.py:169 的 percentile bootstrap 與 K1720.py:204 的 Welch test 未處理日資料 volatility clustering。要稱 H1 robust 就補 HAC event-dummy inference + block/stationary bootstrap；否則把 H1 降格為純描述統計。H1b/H2 的 HAC 規格本身合理，不用動。\n\n【必修 3】NULL 過度解讀。H1b 係數仍為正，QQQ/SPX 的 HAC p 約 0.135/0.126。README.md:138 的『~fully explained』與 K1720.py:361／results rationale 的『is absorbed』都超出證據。改為『在此解析度與規格下未檢出 sharp joint mechanism』；不得表述為機制已被否證或流量已證明被吸收。\n\n【必修 4】Multiple testing 與 replication 聲明不當。README.md:116 稱 QQQ/SPY 為 independent replication，但同期間且高度共享市場因子 → 改口徑。README.md:129 對 6 bars × 2 complexes 的 nominal p 未做 multiplicity adjustment → 補調整或明標 exploratory；14:30 結果只能標 exploratory，不得宣稱可靠 peak 或 'opposite of prediction'。\n\n【必修 5】樣本 provenance 不一致。實際是 2023-08-29 至 2026-07-24、719 sessions；README.md:51、README.md:169、K1720_results.json:323 寫『約 2 年／約 500 sessions』錯誤 → 全部更正為近 3 年／719 sessions，並重新表述 power limitation。\n\n【已通過，不要動】15:30 predictor 與 15:30-16:00 outcome 區間不重疊；event threshold 的 shift(1) 正確；AUM 僅作 static cross-sectional constant；seed=42。經濟量級複算一致：係數 TQQQ=6 / SQQQ=12 / SSO=2；QQQ $5.0667B／199.58%，SPX $221.96M／3.6855%。\n\n【收尾契約】重跑後用 volpred.research.reproduce_spec.finalize_experiment() 在 run-time 同時產出 results 與 reproduce_spec.json（不得事後補，見 K1708 教訓）。完成後再送 Codex round 2；PASS 才可 merge_worktree.sh + 主線程寫 knowledge.json（K1259）。修正後 NULL 可保留。",
     "task_type": "experiment",
     "priority": 1,
-    "status": "awaiting_agent_job",
+    "status": "failed",
     "source": "user",
     "created_at": "2026-07-28T13:14:34.140520+00:00",
     "created_by": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
@@ -53288,15 +53312,67 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1720_rev3-836a88",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T15:26:07.686972+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-agent-brief_k1720_rev3-836a88",
+        "note": "terminal receipt collected; followup=assign_99f4b3bf"
+      },
+      {
+        "ts": "2026-07-28T15:26:07.978939+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:26:08.266237+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:27:26.511175+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1720-rev3-codex-round-3-review-r1-r5-remediation-1785252446",
+        "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T15:42:43.455818+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:compute-k1720-rev3-codex-round-3-review-r1-r5-remediation-1785252446",
+        "note": "terminal receipt collected; followup=assign_99f4b3bf"
+      },
+      {
+        "ts": "2026-07-28T15:43:52.906975+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:44:06.130907+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:44:06.429834+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1720_rev2-2f566a; awaiting PHASE A collection\n\ndispatched to compute job compute-k1720-rev2-codex-round-2-review-1785248465; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720_rev3-836a88; awaiting PHASE A collection",
-    "compute_released_at": "2026-07-28T14:37:35Z",
+    "result": "dispatched to compute job agent-brief_k1720_rev2-2f566a; awaiting PHASE A collection\n\ndispatched to compute job compute-k1720-rev2-codex-round-2-review-1785248465; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1720_rev3-836a88; awaiting PHASE A collection\n\ndispatched to compute job compute-k1720-rev3-codex-round-3-review-r1-r5-remediation-1785252446; awaiting PHASE A collection\n\nCodex round 3 FAIL. R1 / scope / lookahead / verdict_supported 全部 RESOLVED；唯一 blocking 是 R5：README.md 6 處 + k1720_rev3_report.json 3 處仍把 2.90 年 / 719 sessions 寫成字面值，繞過 format_sample_scale()（Codex 判準：引用 JSON pointer 不構成 single-producer）。程式碼那一半已修好。主線程自承低報 — 派工前的 grep regex 只涵蓋「約 N 年」形式，漏掉「**2.90 年**」這種去掉約的中文寫法。experiment ladder attempt 2 已 exhausted/at_ceiling，依 3-strike 不派第四輪，改寄 needs-reply escalate email 給老闆（Telegram msg 1550）請其在「doc-only round 4 / 接受 R5 為 NON_BLOCKING 並 merge / 就此停住」三者間裁決。escalation_attempts=2。數字三輪未動（numeric_leaves_changed=0），NULL 結論穩定。",
+    "compute_released_at": "2026-07-28T15:42:43Z",
     "compute_release_reason": "terminal_receipt_collected",
     "round2_verdict_20260728": "Codex round 2 = FAIL。R2/R3/R4 RESOLVED，lookahead / rev1-rev2 數值變動 / NULL 決策樹全過。僅 R1（11:30 whitelist 未對照官方 early-close 清單，正常交易日 11:30 後斷檔仍可冒充收盤，K1720.py:120-126,193-208；但 Codex 明言目前固定資料下那 8 日期是完整的 → 穩健性缺陷非結果缺陷）與 R5（K1720.py:687-688 仍硬編 '~3 years'，而 sample_provenance.span_years=2.9，主線程已實測確認）未解。派 agent-brief_k1720_rev3 定向修正。",
-    "escalation_attempts": 1,
-    "compute_job_id": "agent-agent-brief_k1720_rev3-836a88",
-    "blocked_reason": "external_compute_job_active"
+    "escalation_attempts": 2,
+    "round3_verdict": "FAIL — R1/scope/lookahead/verdict_supported all RESOLVED; only R5 NOT_RESOLVED (README.md:58-59,216-217,237,331-332,396-397,408 and k1720_rev3_report.json:175,185,205 still hard-code the sample scale, bypassing format_sample_scale). Required fix is mechanical: render from verdict.sample_scale + add a mechanical check. Escalated to boss (needs-reply) per 3-strike; awaiting decision between doc-only round 4 / accept as NON_BLOCKING and merge / stop.",
+    "started_at": "2026-07-28T15:44:06.130891+00:00",
+    "completed_at": "2026-07-28T15:44:06.429813+00:00"
   },
   {
     "id": "assign_d696156d",
@@ -53341,14 +53417,41 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1731_rev12_gatefix-e397a8",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T15:30:29.693260+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-agent-brief_k1731_rev12_gatefix-e397a8",
+        "note": "terminal receipt collected; followup=assign_d696156d"
+      },
+      {
+        "ts": "2026-07-28T15:30:30.016223+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:30:30.304819+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:33:07.580809+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1731-armb-codex-round-11-review-first-substantive-claim-sur-1785252787",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1731_rev11_freeze_integrity-1fc0fd; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1731_rev12_gatefix-e397a8; awaiting PHASE A collection",
-    "compute_released_at": "2026-07-28T14:23:31Z",
+    "result": "dispatched to compute job agent-brief_k1731_rev11_freeze_integrity-1fc0fd; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1731_rev12_gatefix-e397a8; awaiting PHASE A collection\n\ndispatched to compute job compute-k1731-armb-codex-round-11-review-first-substantive-claim-sur-1785252787; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T15:30:29Z",
     "compute_release_reason": "terminal_receipt_collected",
-    "compute_job_id": "agent-agent-brief_k1731_rev12_gatefix-e397a8",
-    "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-28T14:30:05Z"
+    "compute_job_id": "compute-k1731-armb-codex-round-11-review-first-substantive-claim-sur-1785252787",
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-28T15:35:01Z",
+    "compute_finished_at": "2026-07-28T15:42:24Z"
   },
   {
     "id": "assign_617bf749",
@@ -53662,16 +53765,31 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1734_h1_gate_fix-05b08f",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T15:40:35.493679+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-agent-brief_k1734_h1_gate_fix-05b08f",
+        "note": "terminal receipt collected; followup=assign_12a2f9ba"
+      },
+      {
+        "ts": "2026-07-28T15:40:35.836519+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1734-primary-path-re-review-all-five-dimensions-1785253235",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job compute-k1734-primary-path-codex-certification-review-1785248077; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1734_h1_gate_fix-05b08f; awaiting PHASE A collection",
-    "compute_released_at": "2026-07-28T14:28:25Z",
+    "result": "dispatched to compute job compute-k1734-primary-path-codex-certification-review-1785248077; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1734_h1_gate_fix-05b08f; awaiting PHASE A collection\n\ndispatched to compute job compute-k1734-primary-path-re-review-all-five-dimensions-1785253235; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T15:40:35Z",
     "compute_release_reason": "terminal_receipt_collected",
     "primary_path_verdict_20260728": "Codex primary-path VERDICT: FAIL — H1 accept gate (k1734.py:354-356) 只測 skew + semivariance，未測 H1 宣稱的第二條腿（壓力期放大更快）；README 以未檢定的點估計 1.3520 vs 1.3020 支撐該宣稱。主線程已獨立複驗屬實。派 agent-brief_k1734_h1_gate_fix 定向修正（route A 補檢定 / route B 收窄宣稱）。注意該 verdict 因 workspace read-only 只報了這一項就停，其餘四個 audit 維度未覆蓋，修完需完整重審。",
     "escalation_attempts": 1,
-    "compute_job_id": "agent-agent-brief_k1734_h1_gate_fix-05b08f",
-    "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-28T14:36:20Z"
+    "compute_job_id": "compute-k1734-primary-path-re-review-all-five-dimensions-1785253235",
+    "blocked_reason": "external_compute_receipt_pending_collection",
+    "compute_started_at": "2026-07-28T15:42:24Z",
+    "compute_finished_at": "2026-07-28T15:47:01Z"
   },
   {
     "id": "K781_article_general_v4",
@@ -53773,19 +53891,45 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-agent-brief_k1715_comparator_closeout-5e83ee",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T15:34:49.496624+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-agent-brief_k1715_comparator_closeout-5e83ee",
+        "note": "terminal receipt collected; followup=assign_8f1165f3"
+      },
+      {
+        "ts": "2026-07-28T15:34:49.791653+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:34:50.075882+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-fb9780d9fc90405cb536b6960905fb24"
+      },
+      {
+        "ts": "2026-07-28T15:36:19.146743+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979",
+        "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1715_spec_reprocheck-6ff96b; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1715_comparator_closeout-5e83ee; awaiting PHASE A collection",
-    "compute_released_at": "2026-07-28T14:32:13Z",
+    "result": "dispatched to compute job agent-brief_k1715_spec_reprocheck-6ff96b; awaiting PHASE A collection\n\ndispatched to compute job agent-agent-brief_k1715_comparator_closeout-5e83ee; awaiting PHASE A collection\n\ndispatched to compute job compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979; awaiting PHASE A collection",
+    "compute_released_at": "2026-07-28T15:34:49Z",
     "compute_release_reason": "terminal_receipt_collected",
-    "compute_job_id": "agent-agent-brief_k1715_comparator_closeout-5e83ee",
+    "compute_job_id": "compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979",
     "blocked_reason": "external_compute_job_running",
-    "compute_started_at": "2026-07-28T14:36:20Z"
+    "compute_started_at": "2026-07-28T15:42:24Z"
   },
   {
     "id": "assign_b84ca91b",
     "title": "PHASE-Z 卡住檔案 incident（65f674cce6ce5a1c）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 31 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 3 次觀察到這組）\n- docs/error_log.md — 31 班\n- src/volpred/ops/next_tasks.py — 31 班\n- storage/logs/trending_primary_source_verification.jsonl — 22 班\n- storage/memory/knowledge.json — 29 班\n- storage/reports/INDEX.md — 20 班\n- storage/reports/index.json — 20 班\n- storage/strategy_metrics.json — 20 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T133134702224Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T140531070912Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T144205296293Z:<路徑>`",
+    "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 32 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- docs/error_log.md — 32 班\n- src/volpred/ops/next_tasks.py — 32 班\n- storage/logs/trending_primary_source_verification.jsonl — 23 班\n- storage/memory/knowledge.json — 30 班\n- storage/reports/INDEX.md — 21 班\n- storage/reports/index.json — 21 班\n- storage/strategy_metrics.json — 21 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T133134702224Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T140531070912Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T144205296293Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T154621219497Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -53804,36 +53948,36 @@
         "storage/strategy_metrics.json"
       ],
       "streaks": {
-        "docs/error_log.md": 31,
-        "src/volpred/ops/next_tasks.py": 31,
-        "storage/logs/trending_primary_source_verification.jsonl": 22,
-        "storage/memory/knowledge.json": 29,
-        "storage/reports/INDEX.md": 20,
-        "storage/reports/index.json": 20,
-        "storage/strategy_metrics.json": 20
+        "docs/error_log.md": 32,
+        "src/volpred/ops/next_tasks.py": 32,
+        "storage/logs/trending_primary_source_verification.jsonl": 23,
+        "storage/memory/knowledge.json": 30,
+        "storage/reports/INDEX.md": 21,
+        "storage/reports/index.json": 21,
+        "storage/strategy_metrics.json": 21
       },
       "quarantine_refs": [
         "refs/volpred/quarantine/20260728T133134702224Z",
         "refs/volpred/quarantine/20260728T140531070912Z",
-        "refs/volpred/quarantine/20260728T144205296293Z"
+        "refs/volpred/quarantine/20260728T144205296293Z",
+        "refs/volpred/quarantine/20260728T154621219497Z"
       ],
-      "fires": 3,
+      "fires": 4,
       "first_seen_at": "2026-07-28T13:32:11.494539+00:00",
-      "last_seen_at": "2026-07-28T14:42:47.339517+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T14:05:31.163335+00:00",
+      "last_seen_at": "2026-07-28T15:47:01.568753+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 21.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 23.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 17.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 0.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T14:42:47.339517+00:00"
+    "updated_at": "2026-07-28T15:47:01.568753+00:00"
   },
   {
     "id": "assign_965086b2",

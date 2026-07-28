@@ -1,0 +1,56 @@
+{
+  "id": "compute-k1720-rev3-codex-round-3-review-r1-r5-remediation-1785252446",
+  "title": "K1720 rev3 Codex round 3 review (R1/R5 remediation)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1720_r3_prompt.md",
+    "storage/ops/codex_reviews/k1720_r3_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T15:27:26Z",
+  "started_at": "2026-07-28T15:30:00Z",
+  "completed_at": "2026-07-28T15:35:00Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1720-rev3-codex-round-3-review-r1-r5-remediation-1785252446.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1720-rev3-codex-round-3-review-r1-r5-remediation-1785252446.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1720_r3_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1720_r3_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1720 rev3 Codex round-3 收件（source task assign_99f4b3bf）。讀 storage/ops/codex_reviews/k1720_r3_verdict.md（第一行非空 = VERDICT）。\n\n【收件順序（硬性）】先 compute_queue.py mark-followup-dispatched --id <this job> --next-task-id assign_99f4b3bf，**再**動 source task。已知 P1 assign_617bf749：先 complete source task 就永久不可 dispatch，2026-07-28 已三次實例。\n\n【VERDICT: PASS】主線程寫 knowledge.json（K1259，數字程式化取自 .claude/worktrees/dispatch-slot-3-87c7269d-k1720/experiments/K1720/K1720_results.json，禁手抄 README 或本 brief），結論為 NULL（1h 解析度下兩個 index-LETF complex 未偵測到 sharp joint mechanism；sample 2.90 years / 719 analysis sessions per complex）。接著 canonical `git_writer_lock.py run -- bash scripts/merge_worktree.sh dispatch-slot-3-87c7269d-k1720`，最後 complete assign_99f4b3bf succeeded。\n\n⚠️ **merge 前必查 shared main index**：2026-07-28 23:15 起 dispatch-slot-2-58249487 的 finalize loop 每 ~3 分鐘把 89 個檔重新 staged（producer_commit ok=false / undeclared_output_path: config/cron_wrapper_manifest.json），而 merge_worktree.sh:715 對任何 foreign staged path 無條件 ABORT。K1726/K1812 已因此卡住（見該 task annotations）。若 `git diff --cached --name-only` 非空，**不要繞過、不要 reset**，改把本 task 標 blocked（awaiting_prerequisite_fix）並在 note 記下成果所在 branch 與 commit。\n\n【VERDICT: FAIL】escalation_attempts 目前為 1（round-2 FAIL 時記的），本輪失敗即 attempt 2。先查 `model_router.py --task-type experiment --attempt 2`：先前已知 experiment ladder 在 attempt 2 即 `exhausted=true` / `at_ceiling=true` → **禁止同法再派第四輪**，改走 3-strike terminal：記 defect、寄 escalate email 給老闆（`send-alert --needs-reply`，標題以 `[新架構派發]` 開頭，說明 R1/R5 兩項在三輪後仍未收斂、需人工裁決），complete assign_99f4b3bf failed，不得 loop。\n\n【本輪主線程已驗、無需重花預算（但 Codex 若不同意仍應推翻）】三方 sha 1f614c1a…/75,440 B 一致；R5 單一 run-time producer `format_sample_scale` 已接進 verdict rationale，殘留字樣皆為引述脈絡；R1 規則已改為依 exchange_calendars XNYS 4.13.2 逐日查官方收盤，7 個官方半日全部驗過，rev2/rev3 兩個 disagreement set 皆空（robustness fix，本 cache 上不動任何數字，且作者有明寫不是默默通過）；sample 對帳 730 − 10 − 0 − 1 = 719 成立；full-depth diff numeric_leaves_changed=0。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": true,
+  "source_task_id": "assign_99f4b3bf",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T15:27:26Z",
+    "linked_at": "2026-07-28T15:27:26Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 8469,
+  "claimed_by_pid_start_wall": "Tue Jul 28 23:30:00 2026",
+  "source_task_settlement": {
+    "state": "settled",
+    "task_id": "assign_99f4b3bf",
+    "settled_at": "2026-07-28T15:42:43Z"
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "followup_dispatched_at": "2026-07-28T15:42:43Z",
+  "followup_next_task_id": "assign_99f4b3bf"
+}

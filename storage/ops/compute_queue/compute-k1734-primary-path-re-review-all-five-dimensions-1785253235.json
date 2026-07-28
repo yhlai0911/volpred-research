@@ -1,0 +1,55 @@
+{
+  "id": "compute-k1734-primary-path-re-review-all-five-dimensions-1785253235",
+  "title": "K1734 primary-path re-review, all five dimensions",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1734_rereview_prompt.md",
+    "storage/ops/codex_reviews/k1734_rereview_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T15:40:35Z",
+  "started_at": "2026-07-28T15:42:24Z",
+  "completed_at": "2026-07-28T15:47:01Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1734-primary-path-re-review-all-five-dimensions-1785253235.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1734-primary-path-re-review-all-five-dimensions-1785253235.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1734_rereview_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1734_rereview_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1734 primary-path re-review (all five dimensions) collect. Source task assign_12a2f9ba.\nRead storage/ops/codex_reviews/k1734_rereview_verdict.md (first non-empty line = VERDICT).\n\nORDER (hard): run compute_queue.py mark-followup-dispatched --id <this job> --next-task-id assign_12a2f9ba BEFORE touching the source task. Known P1 assign_617bf749: completing the source task first makes the followup permanently undispatchable (four instances on 2026-07-28).\n\nFIRST ACTION: check the verdict's reviewed_sha256 for k1734.py against disk. Bytes under review were ff7e5a65702a24ab56222b5315cf6be5551a75c5c4b2eb4a9dde383ba070af39 (52,830 B). If they differ, the verdict is not about these bytes; do not accept it.\n\nALSO CHECK: the prompt required all five dimensions (lookahead / leakage / statistics / honesty / verdict_supported) to be reported explicitly, because the previous verdict silently covered only one. If any dimension is missing from the verdict, that is NOT a pass - re-enqueue asking for the uncovered dimensions rather than accepting partial coverage.\n\nVERDICT PASS: (1) main thread writes knowledge.json (K1259; numbers read programmatically from k1734_results.json, never retyped from README or this brief). The finding is a SPLIT result, record it as such: H1a static left-tail asymmetry CONFIRMED, H1b stress-amplification NULL (gap +0.050, CI [-0.165,+0.264], p 0.692), overall STATIC_LEFT_TAIL_ASYMMETRY_CONFIRMED_STRESS_AMPLIFICATION_NULL_PLUS_SMALL_OOS_LEAD_YEN_TRIGGER_REJECTED. Also record the thin margin honestly: under the most conservative combination (CW doubled AND m=9) the H3 adjusted p is 0.0451 vs 0.05. (2) git_writer_lock.py run -- bash scripts/merge_worktree.sh dispatch-slot-1-1e5922b4-k1734. (3) complete assign_12a2f9ba succeeded.\n\nBEFORE MERGING, CHECK THE SHARED MAIN INDEX. Since 2026-07-28 23:15 the dispatch-slot-2-58249487 finalize loop re-stages 89 files every ~3 minutes (producer_commit ok=false, undeclared_output_path: config/cron_wrapper_manifest.json), and merge_worktree.sh:715 aborts unconditionally on any foreign staged path. K1726/K1812 is already parked for exactly this. If `git diff --cached --name-only` is non-empty, do NOT bypass and do NOT reset - mark the task blocked (awaiting_prerequisite_fix) with the branch and commit in the note.\n\nVERDICT FAIL: check model_router.py --task-type experiment --attempt <N> first. The experiment ladder is known to report exhausted=true / at_ceiling=true at attempt 2, so do NOT re-dispatch the same method; go 3-strike terminal - record the defect, send an escalate email to the boss (send-alert --needs-reply, subject starting \"[新架構派發]\"), complete assign_12a2f9ba failed, do not loop. Distinguish: a FAIL naming statistical content is a normal research outcome from four dimensions that had never been reviewed before, and should be recorded as such.\n\nALREADY VERIFIED BY THE MAIN THREAD (do not re-spend budget, but Codex may still overturn): three-way sha ff7e5a65.../52,830 B consistent across disk, results.code_trace and reproduce_spec.entrypoint; route A was taken (the second limb was tested, not deleted) reusing the file's existing bootstrap design unchanged (seed 42, 5,000 reps, circular block 21, VIX_STRESS 20.0 on vix_lag1, changed_for_this_fix=false, paired row resampling only); the NULL is honestly reflected - H1_accept flipped true to false, limb-specific fields added, and the overall string was made limb-aware instead of collapsing to a blanket NULL that would have been wrong in the other direction; BH-FDR family grew 8 to 9, new member adj p 0.77895 does not reject, all previously surviving members still survive, conservative doubled-CW margin 0.0451 vs 0.05 recorded in README rather than omitted; README carries every one of these numbers.",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_12a2f9ba",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T15:40:35Z",
+    "linked_at": "2026-07-28T15:40:35Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 8469,
+  "claimed_by_pid_start_wall": "Tue Jul 28 23:30:00 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "assign_12a2f9ba",
+    "settled_at": "2026-07-28T15:47:01Z",
+    "error": null
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

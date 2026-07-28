@@ -1,0 +1,46 @@
+{
+  "id": "compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979",
+  "title": "K1715 recert round 3 (first valid review of the current bytes)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1715_recert3_prompt.md",
+    "storage/ops/codex_reviews/k1715_recert3_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T15:36:19Z",
+  "started_at": "2026-07-28T15:42:24Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1715-recert-round-3-first-valid-review-of-the-current-bytes-1785252979.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1715_recert3_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1715_recert3_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1715 recert round-3 收件（source task assign_8f1165f3）。讀 storage/ops/codex_reviews/k1715_recert3_verdict.md（第一行非空 = VERDICT）。\n\n【收件順序（硬性）】先 compute_queue.py mark-followup-dispatched --id <this job> --next-task-id assign_8f1165f3，**再**動 source task。已知 P1 assign_617bf749：先 complete source task 就永久不可 dispatch。\n\n【先做這件事：核 verdict 的 reviewed_sha256】prompt 要求 Codex 在 verdict 內列出它實際讀到的 K1715.py / K1715_results.json / reproduce_spec.json 三個 sha256。收件時**必須**拿磁碟重算比對。本次送審的位元組是：\n  K1715.py            133c6f81bc966241f801e387af75a7fb246d2c5836affb748ab769c3e608a9a3 (64,544 B)\n  K1715_results.json  d622e1eba1cd7cb907cb73a51120747eb4af89fc0f796e3f29266947dc0dec17 (498,813 B)\n  reproduce_spec.json 6e583d5989028c686b668f35e0a739956bdf250ba3bd1946d7d5f0b5321aeb2e (3,444 B)\n對不上就**不是**對這批位元組的裁決 —— 這正是 2026-07-26 那份 stale review_verdict.json 的踩雷方式（裁決早於程式碼 21 小時），不得重蹈。\n\n【VERDICT: PASS】1) 主線程寫 knowledge.json（K1259，數字程式化取自 K1715_results.json，禁手抄）—— NULL：score-driven GAS/DCS 與 GARCH-family joint VaR+ES 統計打平（knowledge item 5e41886b 已存在，確認是補充還是取代，不要重複建）。2) canonical `git_writer_lock.py run -- bash scripts/merge_worktree.sh k1715-204d556b`。3) complete assign_8f1165f3 succeeded，並回頭處理 K1715 pool task。\n\n⚠️ **merge 前必查 shared main index**：2026-07-28 23:15 起 dispatch-slot-2-58249487 的 finalize loop 每 ~3 分鐘把 89 個檔重新 staged（producer_commit ok=false / undeclared_output_path: config/cron_wrapper_manifest.json），merge_worktree.sh:715 對任何 foreign staged path 無條件 ABORT。K1726/K1812 已因此卡住。若 `git diff --cached --name-only` 非空，**不要繞過、不要 reset**，改標 blocked（awaiting_prerequisite_fix）並在 note 記下 branch 與 commit。\n\n⚠️ **archived baseline 是未進 git 的檔**：`K1715_results_archived_929cb150.json`（sha 929cb150…）從未 commit、也不在 git history，是從 /tmp 救回的。merge 時務必確認它有一起進版控，否則下一次比對又會無 baseline 可用。\n\n【VERDICT: FAIL】model_router experiment ladder 已實測 `attempt 2 → at_ceiling=true / exhausted=true`。**禁止同法再派 fix-attempt**，走 3-strike terminal：記 defect、寄 escalate email 給老闆（`send-alert --needs-reply`，標題以 `[新架構派發]` 開頭，說明 K1715 在 recert round 3 後仍未通過、引用 verdict 點名的 blocking defect、需人工裁決），complete assign_8f1165f3 failed，不得 loop。\n注意分辨：若 FAIL 點名的是**統計內容**，那是這批位元組**第一次**被有效審查所發現的問題（先前兩輪一輪審的是舊 commit、一輪被 SIGKILL），屬正常研究結果、照實記錄；若點名的是流程/證據鏈，才走上述 terminal。\n\n【本輪主線程已驗、無需重花預算（但 Codex 若不同意仍應推翻）】comparator closeout report status=CLOSED、category_c_found=false、category_c_pointers=[]；leaf 對帳自算成立（9,456 − 9,176 = 280；10,532 − 9,176 = 1,356）；1,636 個單邊 leaf 全部歸類 b（deliberate schema change），science 類 0；280 個 archived-only pointer 以 nm_to_bfgs_improve → guarded_polish_gain 代換後 280/280 值位元相同；comparator 的 fail-open 缺陷（exit 只看兩邊都有的 pointer，對「數字不見了」全盲）已修為 dropped_science 亦 fail，negative control 實測 exit 0→1（刪 /summary/verdict）且刪 diagnostic leaf 維持綠。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_8f1165f3",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T15:36:19Z",
+    "linked_at": "2026-07-28T15:36:19Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 8469,
+  "claimed_by_pid_start_wall": "Tue Jul 28 23:30:00 2026"
+}

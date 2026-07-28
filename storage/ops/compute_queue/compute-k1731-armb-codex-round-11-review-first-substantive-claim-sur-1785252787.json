@@ -1,0 +1,55 @@
+{
+  "id": "compute-k1731-armb-codex-round-11-review-first-substantive-claim-sur-1785252787",
+  "title": "K1731 armB Codex round 11 review (first substantive claim-surface review)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1731_r11_prompt.md",
+    "storage/ops/codex_reviews/k1731_r11_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T15:33:07Z",
+  "started_at": "2026-07-28T15:35:01Z",
+  "completed_at": "2026-07-28T15:42:24Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1731-armb-codex-round-11-review-first-substantive-claim-sur-1785252787.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1731-armb-codex-round-11-review-first-substantive-claim-sur-1785252787.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1731_r11_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1731_r11_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "K1731 armB Codex round-11 收件（source task assign_d696156d）。讀 storage/ops/codex_reviews/k1731_r11_verdict.md（第一行非空 = VERDICT）。\n\n【收件順序（硬性）】先 compute_queue.py mark-followup-dispatched --id <this job> --next-task-id assign_d696156d，**再**動 source task。已知 P1 assign_617bf749：先 complete source task 就永久不可 dispatch，2026-07-28 已多次實例。\n\n【VERDICT: PASS】1) 主線程寫 knowledge.json（K1259，數字程式化取自 frozen results JSON，禁手抄 README / report / 本 brief）。2) canonical `git_writer_lock.py run -- bash scripts/merge_worktree.sh dispatch-slot-1-bd00f90a-k1731`。3) unblock `assign_67f56b79` 與 `k1731_k1730_merge_after_codex_round8_20260725`。4) complete assign_d696156d succeeded。\n\n⚠️ **merge 前必查 shared main index**：2026-07-28 23:15 起 dispatch-slot-2-58249487 的 finalize loop 每 ~3 分鐘把 89 個檔重新 staged（producer_commit ok=false / undeclared_output_path: config/cron_wrapper_manifest.json），而 merge_worktree.sh:715 對任何 foreign staged path 無條件 ABORT。K1726/K1812 已因此卡住（見該 task annotations）。若 `git diff --cached --name-only` 非空，**不要繞過、不要 reset**，改把本 task 標 blocked（awaiting_prerequisite_fix）並在 note 記下成果所在 branch 與 commit。\n\n⚠️ **merge 前另一件事**：本 worktree base 落後 main 1,143 commits（merge-base a2bcd7e14, 2026-07-18）。merge_worktree.sh 有 STALE-BASE 檢查，若雙方改到相交路徑會 ABORT；屆時依其提示解衝突、重跑該 task 測試再 commit，**不得**用 force 或跳過測試。\n\n【VERDICT: FAIL】3-strike active（本 arm 已走到 round 11）。先查 `model_router.py --task-type experiment --attempt <N>`；若 `exhausted=true` / `at_ceiling=true` → **禁止同法再派**，改走 terminal：記 defect、寄 escalate email 給老闆（`send-alert --needs-reply`，標題以 `[新架構派發]` 開頭），complete assign_d696156d failed，不得 loop。若 FAIL 點名的是**統計內容**（非 gate/流程），那是 round 10 從未審到的表面首次被審出問題，屬正常研究結果，照實記錄不要當成流程失敗。\n\n【本輪主線程已獨立驗過、無需重花預算（但 Codex 若不同意仍應推翻）】freeze manifest 43 entries，隨機抽 5 筆自行重算 sha256 全中；`experiment_gates.py run --path experiments/k1731` 主線程重跑 exit 0 / 14 files / 4 gates / 0 violations；pytest 那 3 個 fail 已證實是 stale-base artifact（三個都只 assert scripts/compute_queue.py，本 branch 從未動過該檔，且主線程在 canonical main 上跑同樣三個測試 **全過**），round 11 自己的 12 個測試在 worktree 內全綠；`reproduce_spec.entrypoint` = run_corrected_rev5_production.py，磁碟 sha 35f74d4c… 與 freeze manifest 第 55 行完全一致；artifact gate PASS（strict）。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_d696156d",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T15:33:07Z",
+    "linked_at": "2026-07-28T15:33:07Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 8469,
+  "claimed_by_pid_start_wall": "Tue Jul 28 23:30:00 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "assign_d696156d",
+    "settled_at": "2026-07-28T15:42:24Z",
+    "error": null
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}
