@@ -342,13 +342,19 @@
      "first_seen_at": "2026-07-28T06:40:36.890031+00:00",
      "key": "30334481908:1",
      "last_seen_at": "2026-07-28T06:40:36.890031+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T07:25:20.160739+00:00",
+     "key": "30337096311:1",
+     "last_seen_at": "2026-07-28T07:25:20.160739+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-28T06:37:09.6239619Z E AssertionError: cron wrapper manifest is out of date — the copy launchd execs in ~/.volpred/bin will NOT have your edit.",
-   "last_seen_at": "2026-07-28T06:40:36.890031+00:00",
+   "last_breach_detail": "2026-07-28T07:21:46.8095879Z E AssertionError: cron wrapper manifest is out of date — the copy launchd execs in ~/.volpred/bin will NOT have your edit.",
+   "last_seen_at": "2026-07-28T07:25:20.160739+00:00",
    "notified_at": null,
-   "occurrence_count": 4,
+   "occurrence_count": 5,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -587,9 +593,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T22:07:20.626773+00:00"
-    },
-    {
      "at": "2026-07-27T23:07:21.436217+00:00"
     },
     {
@@ -621,6 +624,9 @@
     },
     {
      "at": "2026-07-28T06:49:30.462835+00:00"
+    },
+    {
+     "at": "2026-07-28T07:39:01.674621+00:00"
     }
    ],
    "current_task_id": null,
@@ -1231,25 +1237,25 @@
      "last_seen_at": "2026-07-23T12:07:25.631027+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-28T07:32:56.384930+00:00",
      "detail": {
       "base_sha": "427a7fc48b1af80ef924a3737da1a27ecf51f7d2",
       "branch": "worktree-dispatch-slot-1-53710e41",
       "checkpoint_commit": "",
-      "detail_tail": "['tests/test_dispatch_supervisor.py']",
+      "detail_tail": "merge gate rc=None targets=[]\ncandidate changed path(s) outside its task contract: scripts/dispatch_supervisor/codex_failover.py, tests/test_dispatch_supervisor.py, tests/test_dispatch_supervisor_codex_failover.py",
       "reason": "undeclared_output_path",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-53710e41"
      },
      "first_seen_at": "2026-07-28T06:49:30.014977+00:00",
      "key": "dispatch-slot-1-53710e41",
-     "last_seen_at": "2026-07-28T06:49:30.014977+00:00"
+     "last_seen_at": "2026-07-28T07:31:27.359849+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-1-53710e41 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-28T06:49:30.014977+00:00",
+   "last_seen_at": "2026-07-28T07:31:27.359849+00:00",
    "notified_at": null,
-   "occurrence_count": 943,
+   "occurrence_count": 985,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1979,6 +1985,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T06:49:30.463552+00:00",
+ "updated_at": "2026-07-28T07:39:01.675328+00:00",
  "version": 1
 }
