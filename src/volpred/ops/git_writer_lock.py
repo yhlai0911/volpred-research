@@ -33,8 +33,14 @@ from collections.abc import Iterator, Sequence
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from pathlib import Path
+
+try:  # Python >= 3.11
+    from datetime import UTC, datetime
+except ImportError:  # macOS /usr/bin/python3 is 3.9; merge_worktree.sh runs us there
+    from datetime import datetime, timezone
+
+    UTC = timezone.utc
 
 LOCK_BASENAME = "volpred-git-writer.lock"
 LOCK_TOKEN_ENV = "VOLPRED_GIT_WRITER_LOCK_TOKEN"

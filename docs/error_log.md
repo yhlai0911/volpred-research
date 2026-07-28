@@ -4244,3 +4244,25 @@ regression；incident lifecycle與alert／PHASE-Z／Supabase ownership相鄰範�
 105 passed，scoped Ruff與diff-check全綠。此ring-buffer造成永久不可達的bug class為
 **`root_cause_fixed_and_verified`**；個別incident仍須由正式detector在滿24小時後
 寫入clean observation，才可依五步Gate轉resolved。
+
+### 2026-07-29 — Git writer lock 的實際 bootstrap interpreter 是 macOS Python 3.9
+
+**證據化症狀**：`merge_worktree.sh`在任何non-dry整合開始前固定以
+`/usr/bin/python3 scripts/git_writer_lock.py`取得全域Git writer lease。committed
+`git_writer_lock.py`卻直接`from datetime import UTC`；本機實際system Python為3.9，
+以committed bytes重播得到`ImportError: cannot import name 'UTC' from 'datetime'`。
+dry-run不進lock區塊，因此會呈現「預檢健康、正式merge才全死」。
+
+**根因層級（bootstrap runtime contract）**：lock owner本身是`uv`啟動前的bootstrap，
+卻使用Python 3.11才提供的stdlib API；測試只在專案venv執行，沒有覆蓋真正的
+`/usr/bin/python3`入口。
+
+**底層修復與制度化**：優先import`datetime.UTC`，Python 3.10以下則以
+`timezone.utc`提供同一語意；新增 regression 直接執行system Python CLI `--help`，
+把部署契約變成測試，而不是文件假設。
+
+**回歸與live read-back**：`/usr/bin/python3 scripts/git_writer_lock.py --help`通過；
+同一interpreter實際執行`git_writer_lock.py run`取得並釋放lease成功；non-dry
+`merge_worktree.sh`以不存在target完成完整bootstrap/lock preflight且未移動任何ref；
+writer-lock測試55 passed。此「正式merge入口在import階段全滅」bug class為
+**`root_cause_fixed_and_verified`**。

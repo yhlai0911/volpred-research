@@ -2184,3 +2184,26 @@ def test_commit_blocks_explicitly_named_gitignored_path(tmp_path: Path) -> None:
     )
     assert proc.returncode == 2, proc.stderr
     assert "gitignored" in proc.stderr
+
+
+def test_cli_loads_under_the_system_python_merge_worktree_invokes() -> None:
+    """2026-07-28: `merge_worktree.sh` calls this CLI as `/usr/bin/python3` on
+    purpose -- the lock has to be takeable before `uv` is on PATH, and the module
+    docstring states that contract. But the owner imported `datetime.UTC`, which
+    only exists on 3.11+, while macOS ships 3.9. Every non-dry worktree merge
+    therefore died with ImportError at the moment it reached for the lock, and
+    only there: `--dry-run` skips the lock block, so the dry run looked healthy.
+    Pin the contract to the interpreter that actually enforces it."""
+    system_python = Path("/usr/bin/python3")
+    if not system_python.exists():
+        pytest.skip("no /usr/bin/python3 on this host")
+    proc = subprocess.run(
+        [str(system_python), str(ROOT / "scripts" / "git_writer_lock.py"), "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert proc.returncode == 0, (
+        f"the Git-writer lock CLI must import under {system_python} "
+        f"(merge_worktree.sh invokes it there):\n{proc.stderr}"
+    )
