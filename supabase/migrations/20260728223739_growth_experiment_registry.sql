@@ -1,4 +1,5 @@
 -- Receipt-backed natural-growth experiment registry.
+-- Production migration receipt: 20260728223739_growth_experiment_registry.
 --
 -- The registry is private and service-role-only.  It stores immutable
 -- preregistration, lifecycle receipts, and the frozen closeout result.

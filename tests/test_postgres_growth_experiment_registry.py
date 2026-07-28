@@ -26,7 +26,7 @@ GROWTH_MIGRATION = (
     REPO_ROOT
     / "supabase"
     / "migrations"
-    / "20260729052000_growth_experiment_registry.sql"
+    / "20260728223739_growth_experiment_registry.sql"
 )
 EXPERIMENT_ID = "article-share-cta-copy-v1"
 
