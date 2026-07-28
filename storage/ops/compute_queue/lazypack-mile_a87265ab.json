@@ -21,12 +21,12 @@
     "K1406"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 1,
   "queued_at": "2026-07-28T07:36:16Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-28T07:45:02Z",
+  "completed_at": "2026-07-28T07:48:48Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_a87265ab.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_a87265ab.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels",
@@ -34,9 +34,10 @@
     "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/plan.json",
     "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_question.png",
     "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_two_yardsticks.png",
-    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_takeaway.png"
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_takeaway.png",
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/render_lazypack.py"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-28T07:48:39Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -46,5 +47,22 @@
   "source_task_link": null,
   "timeout_seconds": 1800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 38409,
+  "claimed_by_pid_start_wall": "Tue Jul 28 15:45:02 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "65ed78328cfa3d1677375d50977602e62ea92ef2",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_question.png",
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_takeaway.png",
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/panel_two_yardsticks.png",
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/panels/render_lazypack.py",
+    "storage/lazypack_jobs/mile_a87265ab/runs/lazypack-mile_a87265ab/plan.json"
+  ],
+  "delivered_at": "2026-07-28T08:01:26.183638+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

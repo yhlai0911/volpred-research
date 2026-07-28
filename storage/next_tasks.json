@@ -42743,7 +42743,7 @@
     "title": "snapaudit 未測量級：k1391/k1591/k1497/k1498/k1585/k1380 量化 + k1308 資料可得性裁決",
     "priority": 3,
     "task_type": "experiment",
-    "status": "pending",
+    "status": "succeeded",
     "source": "hourly_dispatch_snapaudit_reconciliation",
     "tags": [
       "experiment",
@@ -42751,7 +42751,30 @@
       "data-contamination"
     ],
     "created_at": "2026-07-21T16:25:00Z",
-    "description": "裁決依據：storage/ops/snapaudit_reconciliation_20260722.md §4（audit C 自陳的 unresolved）。\n\n兩類未關閉項目：\nA. **證明污染但量級未測**：k1391（stored n_full_oos=1866 為重複列計數）、k1591（stored data.n_obs=4091；因需連網抓 macro series 未重跑）。暴露已確立，只差重跑量化。\nB. **暴露已從源頭確立但無 stored count 可釘 vintage**：k1497 / k1498 / k1585 / k1380 —— 都讀 canonical CSV、無 dedup、窗口開放。k1380 的 SPA bootstrap 昂貴，是它沒被重跑的原因。\nC. **k1308 無法用現有資料關閉**：n=119 來自對 VIXTWN CSV 的 inner merge，路徑 ~/Desktop/volpred-research/data/vixtwn/vixtwn_daily.csv 在本機不存在 → 既無 count 證明也無法重跑。需裁決：取得該資料 / 標記為永久 unverifiable / 除籍。\n\n注意 audit C 的方法學警告：執行時間歸因用實驗目錄的 git commit 日期當 proxy，污染窗口內執行但較晚 commit 者會被誤判。**有 stored count 者以 count 為主證**，不要讓 proxy 推翻算術。\n\n重跑走 compute_queue。"
+    "description": "裁決依據：storage/ops/snapaudit_reconciliation_20260722.md §4（audit C 自陳的 unresolved）。\n\n兩類未關閉項目：\nA. **證明污染但量級未測**：k1391（stored n_full_oos=1866 為重複列計數）、k1591（stored data.n_obs=4091；因需連網抓 macro series 未重跑）。暴露已確立，只差重跑量化。\nB. **暴露已從源頭確立但無 stored count 可釘 vintage**：k1497 / k1498 / k1585 / k1380 —— 都讀 canonical CSV、無 dedup、窗口開放。k1380 的 SPA bootstrap 昂貴，是它沒被重跑的原因。\nC. **k1308 無法用現有資料關閉**：n=119 來自對 VIXTWN CSV 的 inner merge，路徑 ~/Desktop/volpred-research/data/vixtwn/vixtwn_daily.csv 在本機不存在 → 既無 count 證明也無法重跑。需裁決：取得該資料 / 標記為永久 unverifiable / 除籍。\n\n注意 audit C 的方法學警告：執行時間歸因用實驗目錄的 git commit 日期當 proxy，污染窗口內執行但較晚 commit 者會被誤判。**有 stored count 者以 count 為主證**，不要讓 proxy 推翻算術。\n\n重跑走 compute_queue。",
+    "status_history": [
+      {
+        "ts": "2026-07-28T07:52:21.061165+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-4e1ceb1f5846464284e3608678b55304"
+      },
+      {
+        "ts": "2026-07-28T07:52:27.096510+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-4e1ceb1f5846464284e3608678b55304"
+      },
+      {
+        "ts": "2026-07-28T07:58:35.953722+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-4e1ceb1f5846464284e3608678b55304"
+      }
+    ],
+    "started_at": "2026-07-28T07:52:27.096494+00:00",
+    "completed_at": "2026-07-28T07:58:35.953696+00:00",
+    "result": "量級測定完成：k1497/k1498/k1585/k1380/k1391 全部恰好 +10 重複列（佔乾淨樣本 0.15%-0.88%）。k1308 裁決推翻 audit C 的 UNVERIFIABLE_MISSING_INPUT → 改判 CONTAMINATED_VERIFIED：輸入從未缺失（repo-relative 路徑 + 檔案自 2026-03-22 在 git），audit C 誤信 results.json 內的 stale 絕對路徑；釘 vintage 得 polluted=119 完全對上 stored n，clean=109 → 暴露 9.17%，本事件最大。產出 experiments/snapaudit_unmeasured_20260728/ 三件套。未竟：統計量變化重跑 brief 已寫好但 enqueue-agent 需 registered worktree 而 free_slots=0（assign_1aa8f31a 未關），未入列。"
   },
   {
     "id": "snapaudit_paper_leverage_direction_k1591_k1592_contaminated",
@@ -50312,8 +50335,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51389,13 +51412,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51958,23 +51981,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:02:19.746183+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1357_general_draft.md: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1419_general_draft.md: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/K1357_spread_asymmetry.png: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1419_0050tw_pinball.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1492_cross_asset_qlike.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1492_peg_vs_flow.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52039,23 +52052,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:50:00.725419+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 14.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1357_general_draft.md: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1419_general_draft.md: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/K1357_spread_asymmetry.png: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1419_0050tw_pinball.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1492_cross_asset_qlike.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1492_peg_vs_flow.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52168,7 +52171,214 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-28T07:39:30.916875+00:00",
-      "last_seen_at": "2026-07-28T07:39:30.916875+00:00"
+      "last_seen_at": "2026-07-28T07:39:30.916875+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T08:46:12.952187+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_86dbf680",
+    "title": "[Issue #46] Schedule canonical legacy-retirement observation recorder",
+    "description": "Implement the next unblocked T40 slice without replanning. Register scripts/record_legacy_retirement_observation.py as an Operations Core-only hourly job after the */5 signal materializer, with no host-cron or piggy-back owner. The recorder must append immutable canonical bundles even while formal owner blockers remain, so blockers are recorded honestly and only the first zero-violation observation can begin the 14-day clean suffix. Add a fail-fast wrapper, writer ownership, runtime/active-job registration, cadence/freshness/ordering regressions, manifest/live wrapper sync, Matt Spec+Standards review, natural fire and observation read-back. Do not retire legacy artifacts, bypass #9/#13/#21/#24/#28/#44/#45, or claim the 14-day window is clean.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-28T07:45:37.689224+00:00",
+    "payload": {
+      "task_type": "platform_ops",
+      "dispatch_lane": "main_thread",
+      "acceptance": "implement_tdd_dual_review_live_readback_contained",
+      "governance_area": "schedule"
+    },
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T07:45:46.964737+00:00",
+    "claim_expires_at": "2026-07-28T09:45:46.964737+00:00",
+    "claim_session_id": "404aaea6cbab",
+    "status_history": [
+      {
+        "ts": "2026-07-28T07:45:46.964760+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T07:45:50.206054+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T07:45:50.206040+00:00"
+  },
+  {
+    "id": "K1589_article_general",
+    "title": "K1589: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1589 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1589 [DOCUMENTED_NEGATIVE]: 再保險/cat-bond相關股(RNR/EG/ACGL/AXS)對Atlantic颶風登陸類別(Saffir-Simpson)的波動dose-response檢定，NOAA HURDAT2+yfinance，2010-2024年42次Cat1+登陸事件(Cat1:24,Cat2:5,Cat3:4,Cat4:6,Cat5:3)。個股層級β：RNR+0.0142(t=1.30,Holm p=0.195)、EG+0.0275(t=1.92,Holm p=0.137)、ACGL+0.0323(t=3.45 Canonical evidence: experiments/k1589/k1589_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1589",
+    "evidence_source_paths": [
+      "experiments/k1589/k1589_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1589/k1589_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T07:49:07+00:00"
+  },
+  {
+    "id": "ci-red-30339013855",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "in_progress",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "incident_id": "ci-red-30330338914",
+    "ci_incident_id": "ci-red-30330338914",
+    "ci_run_key": "30339013855:1",
+    "created_at": "2026-07-28T07:55:07.514714+00:00",
+    "title": "CI 紅燈修復（run 30339013855, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30339013855\nattempt: 1\nhead_sha: a9332aa88\n偵測摘要（仍須讀完整 failed log）：2026-07-28T07:52:09.9186611Z E AssertionError: cron wrapper manifest is out of date — the copy launchd execs in ~/.volpred/bin will NOT have your edit.\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30339013855 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "scripts/lazypack_layout_guard.py",
+      "scripts/sync_cron_wrappers.py",
+      "scripts/tests/test_cron_wrapper_manifest.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_shared_lock.py"
+    ],
+    "post_merge_actions": [],
+    "priority_capped_from": 1,
+    "claimed_by": "hourly-slot-2-5824948722ab4de0bcd79e6f07342723",
+    "claimed_at": "2026-07-28T07:56:06.618126+00:00",
+    "claim_expires_at": "2026-07-28T10:45:50.895376+00:00",
+    "claim_session_id": "dispatch-58249487-bac0b093",
+    "started_at": "2026-07-28T07:56:06.618126+00:00",
+    "dispatch_managed": true,
+    "dispatch_managed_owner": "hourly-slot-2-5824948722ab4de0bcd79e6f07342723",
+    "dispatch_job_id": "5824948722ab4de0bcd79e6f07342723",
+    "dispatch_settlement_pending": {
+      "job_id": "5824948722ab4de0bcd79e6f07342723",
+      "task_id": "ci-red-30339013855",
+      "claim_session_id": "dispatch-58249487-bac0b093",
+      "phase": "admission",
+      "default_disposition": "retry",
+      "created_at": "2026-07-28T07:56:06.618126+00:00"
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-28T07:56:06.618144+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-5824948722ab4de0bcd79e6f07342723",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-28T07:56:06.618147+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-5824948722ab4de0bcd79e6f07342723",
+        "note": "workspace_admission"
+      }
+    ]
+  },
+  {
+    "id": "alert_host_cron_fail_20260728",
+    "title": "[alert] Host cron failure detected",
+    "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/legacy_retirement_signal_materialize.log exit=2 at unknown recency=unknown_exited_at\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-28T08:01:42.010472+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "host_cron_fail"
+    ]
+  },
+  {
+    "id": "assign_8abf3200",
+    "title": "[Issue #41] Retire tracked legacy-retirement machine-state signals from Git ownership",
+    "description": "Root-cause slice discovered during Issue #46 live rollout: Operations Core job legacy_retirement_signal_materialize is declared no_repo_tracked_output, but four signal JSON files plus transaction locks remain Git-tracked and every materialization produces MM churn that PHASE-Z can misattribute. Implement test-first through a canonical migration/projection seam: preserve runtime bytes, permissions, hash-chain/read-back semantics and observer availability; remove these machine-state paths from Git dirty ownership and scheduled-writer candidate sets; do not hand-edit signal JSON or fake clean state. Acceptance requires RED→GREEN regression, Matt Standards+Spec review, production materializer/observer live read-back, git status proof, and Issue #41 remains open unless its full acceptance closes.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "created_at": "2026-07-28T08:08:56.701826+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#41",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_db1a7fe9",
+    "title": "PHASE-Z 卡住檔案 incident（a63c8f07497db008）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n9 個未提交檔案不是任何一班 fire 產出的，最長已連續 23 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 23 班\n- src/volpred/ops/next_tasks.py — 23 班\n- storage/drafts/assets/k1493_risk_reward.png — 3 班\n- storage/drafts/assets/k1493_svxy_path.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 14 班\n- storage/memory/knowledge.json — 21 班\n- storage/reports/INDEX.md — 12 班\n- storage/reports/index.json — 12 班\n- storage/strategy_metrics.json — 12 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T084612876204Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T08:46:30.845696+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "a63c8f07497db008",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1493_risk_reward.png",
+        "storage/drafts/assets/k1493_svxy_path.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 23,
+        "src/volpred/ops/next_tasks.py": 23,
+        "storage/drafts/assets/k1493_risk_reward.png": 3,
+        "storage/drafts/assets/k1493_svxy_path.png": 3,
+        "storage/logs/trending_primary_source_verification.jsonl": 14,
+        "storage/memory/knowledge.json": 21,
+        "storage/reports/INDEX.md": 12,
+        "storage/reports/index.json": 12,
+        "storage/strategy_metrics.json": 12
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T084612876204Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T08:46:30.831370+00:00",
+      "last_seen_at": "2026-07-28T08:46:30.831370+00:00"
     },
     "priority_capped_from": 1
   }
