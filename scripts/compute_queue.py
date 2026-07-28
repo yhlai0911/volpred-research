@@ -2946,42 +2946,113 @@ def _release_collected_source_task(
     *,
     next_task_id: str | None,
     tpc: Any,
-) -> bool:
-    """Release the canonical owner after PHASE A accepted a terminal receipt."""
+) -> dict[str, Any] | None:
+    """Settle a terminal receipt without depending on PHASE A call ordering.
+
+    The source task may still be owned by this job, may already be terminal or
+    pending, or may have moved on to a newer compute owner.  Only the first case
+    releases the task back to pending.  The other valid cases acknowledge the
+    old receipt without weakening the stronger/newer canonical state.
+    """
     if (
         str(task.get("id") or "") != str(job.get("source_task_id") or "")
-        or task.get("status") != "awaiting_agent_job"
-        or str(task.get("compute_job_id") or "") != str(job.get("id") or "")
-        or task.get("blocked_reason")
-        not in {
+        or job.get("status") not in {"completed", "failed"}
+    ):
+        return None
+
+    task_id = str(task["id"])
+    job_id = str(job["id"])
+    task_status = str(task.get("status") or "")
+    bound_job_id = str(task.get("compute_job_id") or "")
+    released_at = utc_now()
+    if (
+        task_status == "awaiting_agent_job"
+        and bound_job_id == job_id
+        and task.get("blocked_reason")
+        in {
             "external_compute_receipt_pending_collection",
             "external_compute_job_running",
         }
-        or job.get("status") not in {"completed", "failed"}
     ):
-        return False
+        task["status"] = "pending"
+        followup_id = str(next_task_id or "(unspecified)")
+        tpc._record_status_history(
+            task,
+            frm="awaiting_agent_job",
+            to="pending",
+            by=f"compute-followup:{job_id}",
+            note=f"terminal receipt collected; followup={followup_id}",
+        )
+        task["compute_released_at"] = released_at
+        task["compute_release_reason"] = "terminal_receipt_collected"
+        for field in (
+            "blocked_reason",
+            "compute_job_id",
+            "compute_started_at",
+            "compute_finished_at",
+            "external_execution_ref",
+        ):
+            task.pop(field, None)
+        return {
+            "state": "pending_queue_commit",
+            "task_id": task_id,
+            "reason": "terminal_receipt_collected",
+            "attempted_at": released_at,
+        }
 
-    released_at = utc_now()
-    task["status"] = "pending"
-    followup_id = str(next_task_id or "(unspecified)")
-    tpc._record_status_history(
-        task,
-        frm="awaiting_agent_job",
-        to="pending",
-        by=f"compute-followup:{job.get('id')}",
-        note=f"terminal receipt collected; followup={followup_id}",
-    )
-    task["compute_released_at"] = released_at
-    task["compute_release_reason"] = "terminal_receipt_collected"
-    for field in (
-        "blocked_reason",
-        "compute_job_id",
-        "compute_started_at",
-        "compute_finished_at",
-        "external_execution_ref",
+    if task_status in tpc.TERMINAL_STATUSES:
+        if bound_job_id == job_id:
+            task["compute_released_at"] = released_at
+            task["compute_release_reason"] = "terminal_source_task_settled"
+            for field in (
+                "compute_job_id",
+                "compute_started_at",
+                "compute_finished_at",
+                "external_execution_ref",
+            ):
+                task.pop(field, None)
+            if task.get("blocked_reason") in {
+                "external_compute_receipt_pending_collection",
+                "external_compute_job_running",
+                "external_compute_job_active",
+            }:
+                task.pop("blocked_reason", None)
+            state = "pending_queue_commit"
+        else:
+            state = "settled"
+        settlement = {
+            "state": state,
+            "task_id": task_id,
+            "reason": "terminal_source_task_settled",
+            "source_task_status": task_status,
+        }
+        settlement[
+            "attempted_at" if state == "pending_queue_commit" else "settled_at"
+        ] = released_at
+        return settlement
+
+    if task_status == "pending" and not bound_job_id:
+        return {
+            "state": "settled",
+            "task_id": task_id,
+            "reason": "source_task_already_released",
+            "settled_at": released_at,
+        }
+
+    if (
+        task_status == "awaiting_agent_job"
+        and bound_job_id
+        and bound_job_id != job_id
     ):
-        task.pop(field, None)
-    return True
+        return {
+            "state": "settled",
+            "task_id": task_id,
+            "reason": "newer_compute_owner_preserved",
+            "owner_job_id": bound_job_id,
+            "settled_at": released_at,
+        }
+
+    return None
 
 
 def _ack_followup_source_task_settlement(path: Path) -> None:
@@ -2995,8 +3066,11 @@ def _ack_followup_source_task_settlement(path: Path) -> None:
         ):
             return
         current["source_task_settlement"] = {
+            key: value
+            for key, value in settlement.items()
+            if key not in {"state", "attempted_at"}
+        } | {
             "state": "settled",
-            "task_id": settlement["task_id"],
             "settled_at": utc_now(),
         }
         _write_job_file(path, current)
@@ -3031,7 +3105,7 @@ def mark_followup_dispatched(args) -> int:
             )
             return 2
         if j.get("source_task_id"):
-            released = (
+            settlement_result = (
                 source_task is not None
                 and _release_collected_source_task(
                     source_task,
@@ -3049,25 +3123,22 @@ def mark_followup_dispatched(args) -> int:
                 and source_task.get("status") == "pending"
                 and not source_task.get("compute_job_id")
             )
-            if not released and not already_committed:
+            if not settlement_result and not already_committed:
                 print(
                     f"error: cannot dispatch followup for {args.id} — "
-                    "source task settlement failed.",
+                    "source task settlement failed; canonical source is "
+                    "missing or has an invalid ownership state.",
                     file=sys.stderr,
                 )
                 return 2
         else:
-            released = False
+            settlement_result = None
         j["followup_dispatched"] = True
         j["followup_dispatched_at"] = utc_now()
         if args.next_task_id:
             j["followup_next_task_id"] = args.next_task_id
-        if released:
-            j["source_task_settlement"] = {
-                "state": "pending_queue_commit",
-                "task_id": str(j["source_task_id"]),
-                "attempted_at": utc_now(),
-            }
+        if settlement_result:
+            j["source_task_settlement"] = settlement_result
         _write_job_file(p, j)
         return 0
 
@@ -3675,7 +3746,19 @@ def main():
     )
     rl.set_defaults(func=run_loop)
 
-    m = sub.add_parser("mark-followup-dispatched")
+    m = sub.add_parser(
+        "mark-followup-dispatched",
+        help=(
+            "Acknowledge a terminal receipt after its followup is durable. "
+            "Order-independent with source task completion; preserves terminal "
+            "state and any newer compute owner."
+        ),
+        description=(
+            "Acknowledge a terminal receipt after its followup is durable. "
+            "This operation is order-independent with source task completion: "
+            "it preserves terminal state and any newer compute owner."
+        ),
+    )
     m.add_argument("--id", required=True)
     m.add_argument("--next-task-id")
     m.set_defaults(func=mark_followup_dispatched)

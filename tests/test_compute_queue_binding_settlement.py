@@ -486,12 +486,11 @@ def test_execution_settlement_failure_is_durable_and_collection_recovers(
     assert receipt["source_task_settlement"]["state"] == "settled"
 
 
-def test_followup_refuses_to_ack_when_source_binding_cannot_settle(
+def test_followup_ack_preserves_newer_source_binding(
     tmp_path: Path,
     monkeypatch,
-    capsys,
 ) -> None:
-    """PHASE A cannot claim ownership transfer when the canonical CAS failed."""
+    """An older receipt may settle without stealing a newer job's ownership."""
     queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
     pool_path.write_text(
         json.dumps(
@@ -511,6 +510,185 @@ def test_followup_refuses_to_ack_when_source_binding_cannot_settle(
         "id": "job-a",
         "status": "completed",
         "source_task_id": "task-a",
+        "followup_dispatched": False,
+    }
+    receipt_path.write_text(json.dumps(original), encoding="utf-8")
+
+    rc = compute_queue.mark_followup_dispatched(
+        SimpleNamespace(id="job-a", next_task_id="task-a-followup")
+    )
+
+    assert rc == 0
+    assert json.loads(pool_path.read_text(encoding="utf-8"))[0] == {
+        "id": "task-a",
+        "status": "awaiting_agent_job",
+        "compute_job_id": "some-other-job",
+        "blocked_reason": "external_compute_job_running",
+        "priority": 3,
+    }
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["followup_dispatched"] is True
+    assert receipt["source_task_settlement"] == {
+        "state": "settled",
+        "task_id": "task-a",
+        "reason": "newer_compute_owner_preserved",
+        "owner_job_id": "some-other-job",
+        "settled_at": receipt["source_task_settlement"]["settled_at"],
+    }
+
+
+def test_followup_ack_preserves_terminal_source_and_clears_own_stale_binding(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Terminal settlement is stronger than release-to-pending."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "task-a",
+                    "status": "failed",
+                    "compute_job_id": "job-a",
+                    "blocked_reason": "external_compute_receipt_pending_collection",
+                    "compute_finished_at": "2026-07-28T01:00:00Z",
+                    "result": "review failed",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    receipt_path = queue_dir / "job-a.json"
+    receipt_path.write_text(
+        json.dumps(
+            {
+                "id": "job-a",
+                "status": "completed",
+                "source_task_id": "task-a",
+                "followup_dispatched": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = compute_queue.mark_followup_dispatched(
+        SimpleNamespace(id="job-a", next_task_id="task-a-followup")
+    )
+
+    assert rc == 0
+    task = json.loads(pool_path.read_text(encoding="utf-8"))[0]
+    assert task == {
+        "id": "task-a",
+        "status": "failed",
+        "result": "review failed",
+        "priority": 3,
+        "compute_released_at": task["compute_released_at"],
+        "compute_release_reason": "terminal_source_task_settled",
+    }
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["followup_dispatched"] is True
+    assert receipt["source_task_settlement"] == {
+        "state": "settled",
+        "task_id": "task-a",
+        "reason": "terminal_source_task_settled",
+        "source_task_status": "failed",
+        "settled_at": receipt["source_task_settlement"]["settled_at"],
+    }
+
+
+def test_followup_ack_accepts_source_task_already_released_to_pending(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """A prior release must make acknowledgement idempotent."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    original_task = {"id": "task-a", "status": "pending", "priority": 2}
+    pool_path.write_text(json.dumps([original_task]), encoding="utf-8")
+    receipt_path = queue_dir / "job-a.json"
+    receipt_path.write_text(
+        json.dumps(
+            {
+                "id": "job-a",
+                "status": "failed",
+                "source_task_id": "task-a",
+                "followup_dispatched": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = compute_queue.mark_followup_dispatched(
+        SimpleNamespace(id="job-a", next_task_id="task-a-followup")
+    )
+
+    assert rc == 0
+    assert json.loads(pool_path.read_text(encoding="utf-8")) == [original_task]
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert receipt["source_task_settlement"] == {
+        "state": "settled",
+        "task_id": "task-a",
+        "reason": "source_task_already_released",
+        "settled_at": receipt["source_task_settlement"]["settled_at"],
+    }
+
+
+def test_followup_ack_preserves_non_compute_terminal_block_reason(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Clearing a stale compute binding must not erase a business blocker."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "task-a",
+                    "status": "blocked",
+                    "compute_job_id": "job-a",
+                    "blocked_reason": "awaiting_prerequisite_fix",
+                    "blocked_until": "2026-08-01T00:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (queue_dir / "job-a.json").write_text(
+        json.dumps(
+            {
+                "id": "job-a",
+                "status": "completed",
+                "source_task_id": "task-a",
+                "followup_dispatched": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    rc = compute_queue.mark_followup_dispatched(
+        SimpleNamespace(id="job-a", next_task_id="task-a-followup")
+    )
+
+    assert rc == 0
+    task = json.loads(pool_path.read_text(encoding="utf-8"))[0]
+    assert task["status"] == "blocked"
+    assert task["blocked_reason"] == "awaiting_prerequisite_fix"
+    assert task["blocked_until"] == "2026-08-01T00:00:00+00:00"
+    assert "compute_job_id" not in task
+
+
+def test_followup_still_refuses_missing_source_task(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    """A missing canonical source is not evidence of prior settlement."""
+    queue_dir, pool_path = _patch_state(tmp_path, monkeypatch)
+    pool_path.write_text("[]", encoding="utf-8")
+    receipt_path = queue_dir / "job-a.json"
+    original = {
+        "id": "job-a",
+        "status": "completed",
+        "source_task_id": "task-missing",
         "followup_dispatched": False,
     }
     receipt_path.write_text(json.dumps(original), encoding="utf-8")

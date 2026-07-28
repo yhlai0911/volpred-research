@@ -112,7 +112,7 @@ PHASE A — 檢查 compute queue 有無 completed collection / failed-agent tria
    - `split_required`：job 已 timeout；先盤點 partial outputs，禁止原樣重派。依 `split_contract` materialize 至少 2 個 bounded child stages；每段都要有 parent id、不同 stage、單一 artifact、success criterion，且 timeout 短於 parent。compute child 用 `--timeout-parent-job-id <parent>` + `--split-stage <name>` 留 receipt。
    - `artifact_contract_mismatch`：agent 本身已成功，只有宣告的 exact artifact path 不存在；依 `job_metadata.result_artifact_near_misses` 驗證並收取既有產物，修正 path contract，**禁止 fresh-worktree re-enqueue**。
    - `triage_failed`：job **沒有成功**；派 platform_ops triage，照衍生的 `claude_followup.brief` 檢查 worktree/cwd 裡究竟有無可保留的腳本、partial result 或完整但未驗證的結果，再決定續跑 / fresh-worktree re-enqueue / 記錄無可救援。**不得把 failed job 或殘留 artifact 當成功結果，亦不得 force-remove worktree**。
-   四種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。處理完本條 followup 後依 **Batch-drain 原則**：預算 ≥12 分鐘就回 A0 重新判斷、繼續下一張 — **不是本小時收工**。
+   四種 mode 都在成功建出 next task 後跑 `uv run python scripts/compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>` 防重派。這個 settlement 與 source task 的 `complete/failed` 結算**順序無關且可重試**：source 已終局時保留終局，已由新 job 接手時保留新 owner；不可因 source 已先結算就跳過本命令。處理完本條 followup 後依 **Batch-drain 原則**：預算 ≥12 分鐘就回 A0 重新判斷、繼續下一張 — **不是本小時收工**。
 3. 若無待 followup → 進 PHASE B。
 
 PHASE B-PARALLEL — 草稿池低水位並行補寫（boss msg143 2026-07-04 硬性要求；2026-07-05 落地）:
