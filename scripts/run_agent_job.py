@@ -373,6 +373,7 @@ def main() -> int:
 
     deadline = time.monotonic() + args.timeout
     attempts = 0
+    agent_spawn_attempts = 0
     failure = None
     provider_receipt = None
     provider_policy_denial = None
@@ -398,7 +399,7 @@ def main() -> int:
                 flush=True,
             )
             exit_code, timed_out, output = 2, False, str(exc)
-            failure = "policy_denial"
+            failure = "policy_denial_pre_spawn"
             provider_policy_denial = str(exc)
             break
         attempt_env = {**env, **provider_receipt.environment()}
@@ -408,12 +409,13 @@ def main() -> int:
                 "Claude launch contract requires pinned settings"
             )
             exit_code, timed_out = 2, False
-            failure = "policy_denial"
+            failure = "policy_denial_pre_spawn"
             provider_receipt = None
             break
         attempt_argv[attempt_argv.index("--settings") + 1] = (
             provider_receipt.settings_path
         )
+        agent_spawn_attempts += 1
         exit_code, timed_out, output = _run_attempt(
             attempt_argv, workdir, attempt_env, remaining
         )
@@ -458,6 +460,8 @@ def main() -> int:
         # worth triaging.
         "failure_class": failure,
         "attempts": attempts,
+        "agent_spawned": agent_spawn_attempts > 0,
+        "agent_spawn_attempts": agent_spawn_attempts,
         "provider_id": (
             provider_receipt.provider_id if provider_receipt is not None else None
         ),

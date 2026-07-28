@@ -152,6 +152,7 @@ SOURCE_TASK_CREATION_GRACE = timedelta(minutes=5)
 # reliably. Keep the process-local half explicit so one worker never reads the
 # canonical task file while a sibling thread is truncating and rewriting it.
 _SOURCE_TASK_QUEUE_THREAD_LOCK = threading.RLock()
+_RECEIPT_THREAD_LOCK = threading.RLock()
 
 
 @dataclass(frozen=True)
@@ -331,10 +332,13 @@ def _write_job_file(path: Path, payload: dict[str, Any]) -> None:
 
 @contextmanager
 def _receipt_lock():
-    """Serialize receipt read/merge/write operations across worker processes."""
+    """Serialize receipt read/merge/write operations across threads/processes."""
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
     lock_path = QUEUE_DIR / ".receipts.lock"
-    with lock_path.open("a+", encoding="utf-8") as handle:
+    with _RECEIPT_THREAD_LOCK, lock_path.open(
+        "a+",
+        encoding="utf-8",
+    ) as handle:
         fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
         try:
             yield
@@ -795,7 +799,33 @@ def enqueue(args) -> int:
     if split_error:
         print(f"error: {split_error}", file=sys.stderr)
         return 2
-    _write_job_file(job_path, entry)
+    with _receipt_lock():
+        if job_path.exists():
+            print(f"error: {job_id} already exists", file=sys.stderr)
+            return 2
+        if entry.get("kind") == "agent" and entry.get("cwd"):
+            try:
+                worktree_collision = _find_live_agent_workdir_collision(
+                    Path(str(entry["cwd"])),
+                    exclude_job_id=job_id,
+                )
+            except RuntimeError as exc:
+                print(
+                    f"error: worktree collision scan failed closed: {exc}",
+                    file=sys.stderr,
+                )
+                return 2
+            if worktree_collision is not None:
+                print(
+                    "error: worktree collision; refusing duplicate agent "
+                    f"dispatch: worktree={worktree_collision['worktree']} "
+                    f"existing_job={worktree_collision['job_id']} "
+                    f"status={worktree_collision['status']} "
+                    f"source_task={worktree_collision['source_task_id']}",
+                    file=sys.stderr,
+                )
+                return 2
+        _write_job_file(job_path, entry)
     print(f"enqueued: {job_id}")
     link_receipt = _link_source_task(job_id, entry.get("source_task_id"))
     if link_receipt is not None:
@@ -1303,6 +1333,114 @@ def _find_task_dispatch_collision(
     return None
 
 
+def _find_live_agent_workdir_collision(
+    target_workdir: Path,
+    *,
+    exclude_job_id: str | None = None,
+) -> dict[str, str] | None:
+    """Return the live compute receipt that already owns one worktree."""
+    target = target_workdir.resolve(strict=False)
+    for path in sorted(QUEUE_DIR.glob("*.json")):
+        job = _read_job_file(path, context="agent-worktree-collision")
+        if job is None:
+            raise RuntimeError(
+                f"cannot verify agent worktree ownership from {path}"
+            )
+        if (
+            str(job.get("id") or path.stem) == str(exclude_job_id or "")
+            or job.get("kind") != "agent"
+            or job.get("status") not in {"queued", "running", "claimed"}
+        ):
+            continue
+        raw_workdir = job.get("cwd") or _arg_value(
+            job.get("args") or [],
+            "--cwd",
+        )
+        if not raw_workdir:
+            continue
+        candidate = Path(str(raw_workdir))
+        if not candidate.is_absolute():
+            candidate = ROOT / candidate
+        if candidate.resolve(strict=False) != target:
+            continue
+        return {
+            "job_id": str(job.get("id") or path.stem),
+            "status": str(job.get("status")),
+            "source_task_id": str(job.get("source_task_id") or ""),
+            "worktree": str(target),
+        }
+    return None
+
+
+def _agent_model_policy(task_type: str | None) -> dict[str, Any]:
+    """Resolve the current router choice against the reload-on-use registry."""
+    from scripts import model_router
+    from volpred.ops.execution.registry import load_provider_registry
+
+    registry = load_provider_registry()
+    routed_models = frozenset(model_router.MODEL_TO_CLI_FLAG.values())
+    registered_models = frozenset(
+        model_id
+        for provider in registry.providers
+        if provider.enabled
+        for model_id in provider.model_ids
+    )
+    allowed_models = routed_models & registered_models
+    model_short, _effort = model_router.pick_model(task_type)
+    canonical_model = model_router.MODEL_TO_CLI_FLAG.get(model_short)
+    if canonical_model is None or canonical_model not in allowed_models:
+        raise RuntimeError(
+            "canonical model router choice is absent from provider registry: "
+            f"task_type={task_type!r} model={canonical_model!r}"
+        )
+    return {
+        "allowed_models": allowed_models,
+        "canonical_model": canonical_model,
+        "registry_sha256": registry.sha256,
+        "task_type": task_type,
+    }
+
+
+def _remap_retired_agent_model(
+    job: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Replace a queued legacy model immediately before its first spawn."""
+    if (
+        job.get("kind") != "agent"
+        or job.get("script_path") != "scripts/run_agent_job.py"
+    ):
+        return None
+    args = list(job.get("args") or [])
+    current_model = _arg_value(args, "--model")
+    followup = job.get("claude_followup")
+    task_type = (
+        str(followup.get("task_type"))
+        if isinstance(followup, dict) and followup.get("task_type")
+        else None
+    )
+    policy = _agent_model_policy(task_type)
+    if current_model in policy["allowed_models"]:
+        return None
+    if current_model is None or "--model" not in args:
+        raise RuntimeError(
+            f"agent job {job.get('id')} has no replaceable --model argument"
+        )
+    model_index = args.index("--model") + 1
+    replacement = str(policy["canonical_model"])
+    args[model_index] = replacement
+    job["args"] = args
+    receipt = {
+        "from_model": current_model,
+        "to_model": replacement,
+        "reason": "frozen_model_retired_before_spawn",
+        "task_type": task_type,
+        "registry_sha256": str(policy["registry_sha256"]),
+        "remapped_at": utc_now(),
+    }
+    job.setdefault("model_remap_receipts", []).append(receipt)
+    return receipt
+
+
 def enqueue_agent(args) -> int:
     """Queue a long-lived `claude -p` agent instead of running it inside a fire.
 
@@ -1349,6 +1487,42 @@ def enqueue_agent(args) -> int:
         print(
             "error: enqueue-agent requires --source-task-id so duplicate worktree "
             "dispatches can be rejected mechanically",
+            file=sys.stderr,
+        )
+        return 2
+    task_type = str(getattr(args, "followup_task_type", "") or "") or None
+    try:
+        model_policy = _agent_model_policy(task_type)
+    except Exception as exc:  # noqa: BLE001 — model admission is fail-closed
+        print(
+            "error: canonical model router/provider registry unavailable: "
+            f"{type(exc).__name__}: {exc}",
+            file=sys.stderr,
+        )
+        return 2
+    if str(args.model) not in model_policy["allowed_models"]:
+        print(
+            f"error: model {args.model!r} is not allowed by the "
+            "canonical model router/provider registry",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        with _receipt_lock():
+            worktree_collision = _find_live_agent_workdir_collision(workdir)
+    except RuntimeError as exc:
+        print(
+            f"error: worktree collision scan failed closed: {exc}",
+            file=sys.stderr,
+        )
+        return 2
+    if worktree_collision is not None:
+        print(
+            "error: worktree collision; refusing duplicate agent dispatch: "
+            f"worktree={worktree_collision['worktree']} "
+            f"existing_job={worktree_collision['job_id']} "
+            f"status={worktree_collision['status']} "
+            f"source_task={worktree_collision['source_task_id']}",
             file=sys.stderr,
         )
         return 2
@@ -1455,7 +1629,10 @@ def enqueue_agent(args) -> int:
         split_stage=getattr(args, "split_stage", None),
         source_task_id=getattr(args, "source_task_id", None),
     )
-    return enqueue(inner)
+    rc = enqueue(inner)
+    if rc != 0:
+        frozen_brief.unlink(missing_ok=True)
+    return rc
 
 
 def _arg_value(args: Any, flag: str) -> str | None:
@@ -1534,6 +1711,32 @@ def _runner_failure_class(job: dict[str, Any]) -> str | None:
         return None
     value = meta.get("failure_class")
     return value if isinstance(value, str) else None
+
+
+def _runner_proves_no_agent_spawn(job: dict[str, Any]) -> bool:
+    """Return true only for a typed runner receipt proving zero Popen attempts."""
+    meta_path = job.get("job_metadata")
+    if not meta_path:
+        return False
+    path = Path(str(meta_path))
+    if not path.is_absolute():
+        path = ROOT / path
+    try:
+        meta = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        warn(
+            "compute_queue",
+            "job_metadata unreadable; cannot prove zero agent spawns",
+            job=job.get("id"),
+            path=str(path),
+            err=str(exc),
+        )
+        return False
+    return (
+        meta.get("failure_class") == "policy_denial_pre_spawn"
+        and meta.get("agent_spawned") is False
+        and meta.get("agent_spawn_attempts") == 0
+    )
 
 
 def _codex_quota_reset_at(job: dict[str, Any]) -> datetime | None:
@@ -2697,8 +2900,6 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
     per-job receipt) is owned by this job, and receipt writes go through the
     receipt flock, so bounded-parallel drain slots cannot trample each other.
     """
-    # Build command
-    cmd_parts = shlex.split(job["interpreter"]) + [job["script_path"]] + (job.get("args") or [])
     env = os.environ.copy()
     env.update(job.get("env") or {})
     env["VOLPRED_COMPUTE_JOB_ID"] = str(job["id"])
@@ -2706,6 +2907,8 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
     stderr_p = Path(job["stderr_file"])
     stdout_p.parent.mkdir(parents=True, exist_ok=True)
 
+    preflight_error: str | None = None
+    proc: subprocess.CompletedProcess | None = None
     try:
         with stdout_p.open("w") as so, stderr_p.open("w") as se:
             # A task-local fence protects only this source record from the last
@@ -2713,14 +2916,43 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
             # writable, and a child may safely materialize unrelated work.
             with _source_task_execution_fence(job) as binding_valid:
                 if binding_valid:
-                    proc = _run_job_subprocess(
-                        cmd_parts,
-                        cwd=str(ROOT),
-                        env=env,
-                        stdout=so,
-                        stderr=se,
-                        timeout=job.get("timeout_seconds", 3600),
-                    )
+                    try:
+                        remap_receipt = _remap_retired_agent_model(job)
+                        if remap_receipt is not None:
+                            with _receipt_lock():
+                                _write_job_file(job_path, job)
+                            print(
+                                "model-remapped: "
+                                f"{job['id']} "
+                                f"{remap_receipt['from_model']}→"
+                                f"{remap_receipt['to_model']}",
+                                file=so,
+                                flush=True,
+                            )
+                    except Exception as exc:  # noqa: BLE001 — fail closed before Popen
+                        preflight_error = (
+                            f"{type(exc).__name__}: {exc}"
+                        )
+                        print(
+                            "[AGENT_MODEL_PREFLIGHT_DENIED] "
+                            f"{preflight_error}",
+                            file=se,
+                            flush=True,
+                        )
+                    if preflight_error is None:
+                        cmd_parts = (
+                            shlex.split(job["interpreter"])
+                            + [job["script_path"]]
+                            + (job.get("args") or [])
+                        )
+                        proc = _run_job_subprocess(
+                            cmd_parts,
+                            cwd=str(ROOT),
+                            env=env,
+                            stdout=so,
+                            stderr=se,
+                            timeout=job.get("timeout_seconds", 3600),
+                        )
         if not binding_valid:
             job["status"] = "cancelled"
             job["exit_code"] = None
@@ -2731,9 +2963,20 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
                 job=job.get("id"),
                 source_task_id=job.get("source_task_id"),
             )
+        elif preflight_error is not None:
+            job["status"] = "failed"
+            job["exit_code"] = 2
+            job["failure_reason"] = "agent_model_preflight_denied"
+            job["model_preflight_error"] = preflight_error
         else:
+            assert proc is not None
             job["exit_code"] = proc.returncode
-        if binding_valid and proc.returncode != 0:
+        if (
+            binding_valid
+            and preflight_error is None
+            and proc is not None
+            and proc.returncode != 0
+        ):
             job["status"] = "failed"
             if _runner_timed_out(job):
                 _mark_timeout(job)
@@ -2745,7 +2988,7 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
                 # Non-quota terminal failure: lazypack jobs escalate to a real
                 # P1 repair task instead of a receipt nobody owns (D3).
                 _maybe_open_lazypack_repair_task(job)
-        elif binding_valid:
+        elif binding_valid and preflight_error is None and proc is not None:
             artifact_path = _declared_result_artifact(job)
             if artifact_path is not None and not artifact_path.exists():
                 # A successful process without its declared output is not a
@@ -3211,17 +3454,8 @@ def amend(args) -> int:
 
     if requested_model is not None:
         try:
-            from scripts import model_router
-            from volpred.ops.execution.registry import load_provider_registry
-
-            routed_models = set(model_router.MODEL_TO_CLI_FLAG.values())
-            registered_models = {
-                model_id
-                for provider in load_provider_registry().providers
-                if provider.enabled
-                for model_id in provider.model_ids
-            }
-            allowed_models = routed_models & registered_models
+            task_type = getattr(args, "followup_task_type", None)
+            allowed_models = _agent_model_policy(task_type)["allowed_models"]
         except Exception as exc:  # noqa: BLE001 — model policy is fail-closed
             print(
                 "error: canonical model router/provider registry unavailable: "
@@ -3522,17 +3756,31 @@ def requeue(args) -> int:
             return 2, None
         failure = _runner_failure_class(job)
         worker_killed = job.get("failure_reason") == "worker_killed"
-        if failure not in ("auth", "quota") and not worker_killed:
+        safe_policy_denial = (
+            failure == "policy_denial_pre_spawn"
+            and _runner_proves_no_agent_spawn(job)
+        )
+        if (
+            failure not in ("auth", "quota")
+            and not safe_policy_denial
+            and not worker_killed
+        ):
             print(
-                f"error: cannot requeue {args.id} — failure_class={failure}. Only auth/quota "
-                f"deaths and reaper-stamped worker_killed jobs are safe to re-run: auth/quota "
-                f"guarantee the agent never started, worker_killed means the worker (not the "
-                f"job) died. Triage this one's worktree instead.",
+                f"error: cannot requeue {args.id} — failure_class={failure}. "
+                "Only auth/quota deaths, typed policy_denial_pre_spawn receipts "
+                "with agent_spawned=false, and reaper-stamped worker_killed "
+                "jobs are safe to re-run. Triage this one's worktree instead.",
                 file=sys.stderr,
             )
             return 2, None
         blocked_kind = (
-            failure if failure in ("auth", "quota") else "worker_killed"
+            failure
+            if failure in {
+                "auth",
+                "quota",
+                "policy_denial_pre_spawn",
+            }
+            else "worker_killed"
         )
         if job.get("source_task_id"):
             if source_task is None:

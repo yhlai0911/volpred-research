@@ -190,6 +190,32 @@ def test_requeue_cli_accepts_a_job_that_never_ran(queue, tmp_path, failure_class
     assert job["requeue_history"][0]["reason"] == f"manual:{failure_class}"
 
 
+def test_requeue_cli_accepts_pre_spawn_policy_denial(
+    queue,
+    tmp_path,
+) -> None:
+    """Provider policy evidence proves the worktree was never touched."""
+    path = _agent_job(
+        queue,
+        tmp_path,
+        "retired-model",
+        "policy_denial_pre_spawn",
+    )
+    metadata_path = Path(json.loads(path.read_text())["job_metadata"])
+    metadata = json.loads(metadata_path.read_text())
+    metadata["agent_spawned"] = False
+    metadata["agent_spawn_attempts"] = 0
+    metadata_path.write_text(json.dumps(metadata))
+
+    assert compute_queue.requeue(argparse.Namespace(id="retired-model")) == 0
+
+    job = json.loads(path.read_text())
+    assert job["status"] == "queued"
+    assert job["requeue_history"][0]["reason"] == (
+        "manual:policy_denial_pre_spawn"
+    )
+
+
 def test_requeue_cli_refuses_a_job_with_a_worktree_to_triage(queue, tmp_path, capsys):
     _agent_job(queue, tmp_path, "k1709", None)
     assert compute_queue.requeue(argparse.Namespace(id="k1709")) == 2

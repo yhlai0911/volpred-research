@@ -154,7 +154,8 @@ def test_registry_denial_prevents_agent_attempt(monkeypatch, tmp_path):
 
     assert rc == 1
     assert fake.calls == 0
-    assert meta["failure_class"] == "policy_denial"
+    assert meta["failure_class"] == "policy_denial_pre_spawn"
+    assert meta["agent_spawned"] is False
     assert meta["provider_registry_sha256"] is None
 
 
@@ -167,7 +168,8 @@ def test_api_key_environment_prevents_compute_agent_spawn(
 
     assert rc == 1
     assert fake.calls == 0
-    assert meta["failure_class"] == "policy_denial"
+    assert meta["failure_class"] == "policy_denial_pre_spawn"
+    assert meta["agent_spawned"] is False
 
 
 def test_retry_denial_does_not_reuse_previous_receipt(
@@ -197,7 +199,8 @@ def test_retry_denial_does_not_reuse_previous_receipt(
 
     assert rc == 1
     assert fake.calls == 1
-    assert meta["failure_class"] == "policy_denial"
+    assert meta["failure_class"] == "policy_denial_pre_spawn"
+    assert meta["agent_spawned"] is True
     assert meta["provider_id"] is None
     assert meta["provider_registry_sha256"] is None
     assert meta["provider_policy_denial"] == "registry changed"
