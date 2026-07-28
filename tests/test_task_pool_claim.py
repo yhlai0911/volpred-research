@@ -2566,6 +2566,50 @@ def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(
     assert replay["already_settled"] is True
 
 
+def test_dispatch_remediation_settlement_uses_canonical_block_contract(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "storage" / "next_tasks.json"
+    next_tasks.parent.mkdir(parents=True)
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "remediation-bound",
+                    "status": "in_progress",
+                    "task_type": "platform_ops",
+                    "claimed_by": "dispatch-supervisor",
+                    "claim_session_id": "remediation-session",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(task_pool_claim, "NEXT_TASKS", next_tasks)
+
+    diagnostic = "worker=success; workspace=remediation_opened; main_sha="
+    settled = task_pool_claim.cmd_dispatch_settle(
+        argparse.Namespace(
+            id="remediation-bound",
+            session="remediation-session",
+            disposition="remediation",
+            result=diagnostic,
+        )
+    )
+
+    assert settled["ok"] is True
+    assert settled["status"] == "blocked"
+    row = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert row["blocked_reason"] == "awaiting_prerequisite_fix"
+    assert row["blocked_note"] == diagnostic
+    assert row["result"] == diagnostic
+    assert datetime.fromisoformat(row["blocked_at"]).tzinfo is not None
+    assert (
+        datetime.fromisoformat(row["blocked_until"])
+        > datetime.fromisoformat(row["blocked_at"])
+    )
+
+
 def test_dispatch_retry_settlement_is_idempotent_after_response_loss(
     tmp_path, monkeypatch
 ) -> None:

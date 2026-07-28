@@ -57,9 +57,11 @@ if str(_REPO_ROOT / "src") not in sys.path:
 
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops.next_tasks import (  # noqa: E402
+    enforce_blocked_until,
     normalize_priority,
     normalize_task_priority,
     normalize_task_priorities,
+    validate_blocked_reason,
     write_tasks_to_handle,
 )
 from volpred.ops.issue_tracker_sync import (  # noqa: E402
@@ -907,10 +909,19 @@ def cmd_dispatch_settle(args: argparse.Namespace) -> dict[str, Any]:
                 note="supervisor_post_merge_settlement",
             )
         elif args.disposition == "remediation":
+            diagnostic = args.result or "workspace remediation opened"
+            blocked_at = _now()
             task["status"] = "blocked"
-            task["completed_at"] = _now()
-            task["blocked_reason"] = args.result or "workspace remediation opened"
-            task["result"] = args.result or "workspace remediation opened"
+            task["completed_at"] = blocked_at
+            task["blocked_at"] = blocked_at
+            task["blocked_reason"] = validate_blocked_reason(
+                "awaiting_prerequisite_fix"
+            )
+            task["blocked_note"] = diagnostic
+            task["result"] = diagnostic
+            enforce_blocked_until(
+                task, now=datetime.fromisoformat(blocked_at)
+            )
             _record_status_history(
                 task, frm=current, to="blocked", by=owner,
                 note="workspace_adjudication",

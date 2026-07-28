@@ -108,6 +108,34 @@ def test_blocked_reason_row_map_preserves_original_and_backfills_note():
         assert nt.is_valid_blocked_reason(t["blocked_reason"])
 
 
+def test_dispatch_remediation_pollution_rows_converge_with_provenance():
+    free_text = "worker=success; workspace=remediation_opened; main_sha="
+    tasks = [
+        {
+            "id": task_id,
+            "status": "blocked",
+            "blocked_reason": free_text,
+            "blocked_until": "2026-08-11T13:07:51+00:00",
+            "result": free_text,
+        }
+        for task_id in ("ci-red-30339013855", "ci-red-30361505394")
+    ]
+
+    report = migrate.migrate_tasks(
+        tasks, now_iso="2026-07-29T00:00:00+00:00"
+    )
+
+    assert report["n_blocked_reason_mapped"] == 2
+    assert report["needs_review"] == []
+    for task in tasks:
+        assert task["blocked_reason"] == "awaiting_prerequisite_fix"
+        assert task["blocked_reason_original"] == free_text
+        assert task["blocked_note"] == free_text
+        assert task["result"] == free_text
+        assert task["blocked_until"] == "2026-08-11T13:07:51+00:00"
+        assert task["vocab_migrated_at"] == "2026-07-29T00:00:00+00:00"
+
+
 def test_in_vocab_blocked_reason_is_untouched():
     tasks = [{"id": "K1330", "status": "succeeded", "blocked_reason": "awaiting_codex_review"}]
     report = migrate.migrate_tasks(tasks)
