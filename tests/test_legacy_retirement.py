@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -317,6 +318,11 @@ def test_operations_core_owns_hourly_retirement_observation_recording() -> None:
     assert owner["entrypoint"] == "scripts/cron_legacy_retirement_observe.sh"
     assert owner["policy"] == "no_repo_tracked_output"
     assert owner["tracked_outputs"] == []
+    materializer_owner = ownership["jobs"][
+        "legacy_retirement_signal_materialize"
+    ]
+    assert materializer_owner["policy"] == "no_repo_tracked_output"
+    assert materializer_owner["tracked_outputs"] == []
 
     wrapper = (
         root / "scripts" / "cron_legacy_retirement_observe.sh"
@@ -331,6 +337,36 @@ def test_operations_core_owns_hourly_retirement_observation_recording() -> None:
 
     gitignore = (root / ".gitignore").read_text(encoding="utf-8").splitlines()
     assert "storage/ops/legacy_retirement_observations/" in gitignore
+    assert "storage/ops/legacy_retirement_signals/" in gitignore
+    signal_directory = "storage/ops/legacy_retirement_signals"
+    tracked_signals = subprocess.run(
+        ["git", "ls-files", "-z", "--", signal_directory],
+        cwd=root,
+        capture_output=True,
+        check=True,
+    )
+    assert tracked_signals.stdout == b""
+    for name in (
+        ".batch.lock",
+        ".materialize.lock",
+        "duplicate_effect.json",
+        "legacy_business_fire.json",
+        "orphan_work.json",
+        "silent_loss.json",
+    ):
+        ignored = subprocess.run(
+            [
+                "git",
+                "check-ignore",
+                "--no-index",
+                "-q",
+                "--",
+                f"{signal_directory}/{name}",
+            ],
+            cwd=root,
+            check=False,
+        )
+        assert ignored.returncode == 0, name
 
 
 def test_observation_rejects_stale_owner_or_noncanonical_signal_paths(
