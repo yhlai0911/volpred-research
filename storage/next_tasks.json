@@ -37893,11 +37893,35 @@
     "title": "K1694 重跑：FCM 清算集中度 HHI 與商品流動性風險（搶救回的半成品，零結果）",
     "task_type": "experiment",
     "priority": 3,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "created_at": "2026-07-19T13:54:38.850847+08:00",
     "source": "worktree_harvest_wave2_dirty_stale_20260719",
     "topology": "compute_queue",
-    "description": "K1694 的腳本與資料已於 2026-07-19 從 stale worktree dispatch-slot-1-f53bca44-k1694 搶救進 canonical（commit d8e777d19），但**沒有任何結果產出** —— 見 experiments/K1694/README.md 的 INCOMPLETE 標記。\n\n背景陷阱：task pool 裡 id=K1694 的 status 是 succeeded，但 result=null；那個 succeeded 指的是「派工成功」不是「實驗成功」。不要因為看到 succeeded 就跳過。\n\n要做的：\n1. 跑通 experiments/K1694/K1694.py，產出 K1694_results.json + 圖\n2. 重點驗證 CFTC 發布日 lag 是否按**實際發布日**對齊（原 brief 核心設計，從未驗證）\n3. Codex primary-path review → review_verdict.json\n4. PASS 才寫 knowledge entry；FAIL 就記錄並收掉，不要留著再占 slot\n\n資料已在版控（fcm_monthly 151 列 / dcot_weekly 23,057 列 / rv_monthly 5,644 列），不需重抓。"
+    "description": "K1694 的腳本與資料已於 2026-07-19 從 stale worktree dispatch-slot-1-f53bca44-k1694 搶救進 canonical（commit d8e777d19），但**沒有任何結果產出** —— 見 experiments/K1694/README.md 的 INCOMPLETE 標記。\n\n背景陷阱：task pool 裡 id=K1694 的 status 是 succeeded，但 result=null；那個 succeeded 指的是「派工成功」不是「實驗成功」。不要因為看到 succeeded 就跳過。\n\n要做的：\n1. 跑通 experiments/K1694/K1694.py，產出 K1694_results.json + 圖\n2. 重點驗證 CFTC 發布日 lag 是否按**實際發布日**對齊（原 brief 核心設計，從未驗證）\n3. Codex primary-path review → review_verdict.json\n4. PASS 才寫 knowledge entry；FAIL 就記錄並收掉，不要留著再占 slot\n\n資料已在版控（fcm_monthly 151 列 / dcot_weekly 23,057 列 / rv_monthly 5,644 列），不需重抓。",
+    "status_history": [
+      {
+        "ts": "2026-07-28T18:11:07.213675+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3657814ed7d1471fa5f8306a3827ec98"
+      },
+      {
+        "ts": "2026-07-28T18:11:15.734428+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3657814ed7d1471fa5f8306a3827ec98"
+      },
+      {
+        "ts": "2026-07-28T18:18:36.037437+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715",
+    "blocked_reason": "external_compute_job_active",
+    "result": "dispatched to compute job compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715; awaiting PHASE A collection"
   },
   {
     "id": "merge_worktree_k1262v4_overtrigger_20260719",
@@ -45431,7 +45455,7 @@
     "description": "依 GitHub Issue #42 與既有 Matt spec 實作 durable fire generation、baseline receipt、restart closeout matching 與 failure-injection tests；完成 production planned reload read-back 與 sustained-clean gate。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "blocked",
     "dispatch_lane": "agent",
     "source": "user_issue42_implementation",
     "issue_ref": "#42",
@@ -45475,11 +45499,34 @@
         "to": "pending",
         "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8",
         "note": "normalize_pending_claim_residue"
+      },
+      {
+        "ts": "2026-07-28T17:34:18.341900+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:34:22.496436+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:35:37.202164+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "codex-vscode",
+        "note": "manual_release"
       }
     ],
     "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.",
-    "last_released_at": "2026-07-28T03:50:22.311188+00:00",
-    "last_release_reason": "normalize_pending_claim_residue"
+    "last_released_at": "2026-07-28T17:35:37.202145+00:00",
+    "last_release_reason": "normalize_pending_claim_residue",
+    "blocked_until": "2026-07-29T09:15:00+00:00",
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-28T17:35:47+00:00",
+    "blocked_note": "Issue #42 code/live acceptance verified; incident inc_537a3ff3304f has 12 clean observations but span is only 8.2h. Re-audit >=3 observations spanning >=24h after earliest eligible time; GitHub issue reopened until acceptance passes."
   },
   {
     "id": "issue42_production_fire_lifecycle_acceptance_20260727",
@@ -50562,7 +50609,7 @@
     "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 5 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 4 班\n- experiments/k1698/review_verdict.json — 5 班\n- src/volpred/ops/next_tasks.py — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T164242405578Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T165321107294Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-27T16:42:45.376470+00:00",
     "payload": {
@@ -50590,7 +50637,61 @@
       "deferred": []
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T16:53:26.599186+00:00"
+    "updated_at": "2026-07-27T16:53:26.599186+00:00",
+    "completed_at": "2026-07-28T17:52:24.001478+00:00",
+    "result": "關閉條件機械滿足：3 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/k1698/review_verdict.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-2-58249487",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "experiments/k1698/review_verdict.json",
+        "src/volpred/ops/next_tasks.py"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_c1bf7075",
@@ -51471,13 +51572,36 @@
     "description": "由 alert `dedup_gate_health` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- [warn] 2 個 narrative arc 擋下 ≥3 個不同候選（最多 mile_de666838：6 候選／10 raw blocks）— review 是否人工 unlock\n\n## 影響\ndedup/publish gate 是 feed 的總閘門（Mission #1/#4/#5 上游）。2026-06-23 同款故障曾讓平台 8 天零新文，靠老闆肉眼才發現；這則警報就是那次事故承諾的機械偵測器。\n\n## 觀察\n- 近 7 天決策：536 放行 / 52 block / 0 其他（hold/skip）\n- 最近一次放行：2026-07-28T00:00:31.753886+00:00\n- block 最多的 gate：{'legacy:block_arc_dup': 35, 'task_generation': 15, 'legacy:block_k_coverage': 2}\n\n## 修復入口\n完整裁決：`uv run python scripts/audit_dedup_gate_decisions.py`；black hole → 檢查 `src/volpred/publisher/publisher.py` 與 `volpred.ops.content` 的 gate 是否違反 fail-open（rule §3）；同 arc 重複 block → review 是否人工 unlock 該 arc。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-28T00:00:57.682165+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "dedup_gate_health"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:36:05.211846+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:36:05.508523+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:40:22.656825+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T17:36:05.508505+00:00",
+    "completed_at": "2026-07-28T17:40:22.656794+00:00",
+    "result": "根因修正：dedup audit 不再把可變標題/TBD 當 stable candidate identity；只有 candidate_id/target_id 能證明不同候選，identityless legacy blocks 仍計入 raw block rate 並以 unidentified_blocks 顯示。check_arc_dedup 現在把 normalized K-id 寫入 durable decision receipt。43 focused tests passed；擴大套件 194 assertions passed（另有既有 .env CI-parity 警告）；live 原 detector healthy=true、repeat_arcs=[]、679 allow/71 block。"
   },
   {
     "id": "assign_f12b70f1",
@@ -51659,14 +51783,14 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T02:07:40.364020+00:00",
       "last_seen_at": "2026-07-28T03:08:05.879047+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52249,14 +52373,14 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T05:40:29.847399+00:00",
       "last_seen_at": "2026-07-28T05:40:29.847399+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52318,14 +52442,14 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T06:02:30.310580+00:00",
       "last_seen_at": "2026-07-28T06:50:16.377112+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52465,14 +52589,14 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T07:39:30.916875+00:00",
       "last_seen_at": "2026-07-28T07:39:30.916875+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52785,14 +52909,14 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T08:46:30.831370+00:00",
       "last_seen_at": "2026-07-28T08:46:30.831370+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52954,14 +53078,14 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T09:25:26.615406+00:00",
       "last_seen_at": "2026-07-28T09:25:26.615406+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53149,14 +53273,14 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T10:33:17.553339+00:00",
       "last_seen_at": "2026-07-28T10:33:17.553339+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53201,14 +53325,14 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T11:23:24.711888+00:00",
       "last_seen_at": "2026-07-28T11:23:24.711888+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53219,7 +53343,7 @@
     "description": "## 發生什麼\n12 個未提交檔案不是任何一班 fire 產出的，最長已連續 28 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 28 班\n- src/volpred/ops/next_tasks.py — 28 班\n- storage/drafts/K1658_general_draft.md — 3 班\n- storage/drafts/assets/k1589_general_before_after.png — 3 班\n- storage/drafts/assets/k1589_general_dose_response.png — 3 班\n- storage/drafts/assets/k1658_general_figs.py — 3 班\n- storage/drafts/assets/k1658_general_raw_vs_holm.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 19 班\n- storage/memory/knowledge.json — 26 班\n- storage/reports/INDEX.md — 17 班\n- storage/reports/index.json — 17 班\n- storage/strategy_metrics.json — 17 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T124648470647Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "blocked",
     "source": "phase_z",
     "created_at": "2026-07-28T12:47:26.091819+00:00",
     "payload": {
@@ -53259,17 +53383,42 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T12:47:26.077945+00:00",
       "last_seen_at": "2026-07-28T12:47:26.077945+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T15:46:21.292159+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:41:59.614992+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:41:59.906497+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "block_transition_previous": {
+      "claimed_by": "codex-vscode",
+      "claimed_at": "2026-07-28T17:41:59.614977+00:00",
+      "claim_expires_at": "2026-07-28T19:41:59.614977+00:00",
+      "claim_session_id": "47e783da6dd0",
+      "started_at": "2026-07-28T17:41:59.906483+00:00"
+    },
+    "blocked_until": "2026-07-29T15:30:00+00:00",
+    "blocked_reason": "awaiting_event_window",
+    "blocked_at": "2026-07-28T17:53:04+00:00",
+    "blocked_note": "Canonical code blockers removed and fence lock-order regression committed as e9691f394; remaining five paths are quarantine-covered live storage authoring, foreign_incident reconcile reports derates=false. Recheck after 24h authoring grace or earlier if paths become clean."
   },
   {
     "id": "platform_ops_release_audit_fix_mile_3c83e665",
@@ -53782,15 +53931,11 @@
     "description": "證據（2026-07-28 10:45:02-03Z，四個 job 於 worker 撿起後 1 秒內死亡）：\n- agent-brief_k1812_fix-a18b38 stderr: \"[run_agent_job] provider policy denied spawn: model 'claude-opus-4-8' is not registered for 'claude-cli'\"，exit=1\n- agent-brief_k1734_remediation-763606: 同上，exit=1\n- agent-brief_k1715_recert2-e2b9fd / agent-brief_k1731_rev9-87d87e: exit=-2（SIGINT），args 同樣凍結 --model claude-opus-4-8\n- 四個 job 分別 queued 於 2026-07-27T00:08 / 02:46 / 14:17 / 16:17Z，等於 K1715 re-cert、K1731 rev9、K1734 nested-DM 修正、K1812 block-permutation 修正四份研究工作靜默停擺 24-34 小時。\n- 統計：storage/ops/compute_queue/ 內 73 個 job 曾以 claude-opus-4-8 成功完成 → 該 model id 是在這批 job 入列後才從 provider registry 退役；job spec 凍結了一個之後失效的 model。\n\n根因層級 = 流程契約：enqueue 端把 model id 凍進 job spec，spawn 端才驗證註冊狀態，中間沒有任何 revalidation 或 remap；失敗後 requeue 又以 failure_class=policy_denial 拒絕（該 gate 本身是對的 — 它無法證明 agent 沒啟動），於是唯一出路是人工 triage，實務上就是無限期擱置。\n\n要求的根治（不是重跑）：\n1. enqueue-agent 時對 --model 做 registry 驗證，未註冊直接拒絕入列（fail fast，不要讓錯誤活到 24h 後）。\n2. spawn 前若發現凍結 model 已退役，走 canonical remap（例如 model_router 的當前 cli_flag）並在 job record 留 remap receipt，而不是直接 policy_denial 廢掉。\n3. policy_denial 的 failure_class 加一個可證明「agent 從未 spawn」的子類（stdout 只有 start/denied 兩行、無 job_metadata、artifact 未動），讓 requeue 對這一類安全放行。\n4. 加測試覆蓋：queued job 帶已退役 model id → 不得靜默 fail。\n\n本班（hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45）已止血（contained，非 root_cause_fixed）：三個 job 以現行 claude-opus-5 重新 enqueue（agent-rebrief_*-759bec / -3dd25a / -dc91a5，沿用原 worktree、原 brief snapshot、原 result-artifact 契約），source task K1715 / K1734 / K1726 已重新綁定 awaiting_agent_job；K1731 rev9 不重派（已被 slot-3 的 rev11 job agent-brief_k1731_rev11_freeze_integrity-1fc0fd 取代）。\n\n殘留待本任務一併處理：agent-brief_k1715_recert2-e2b9fd 與 agent-brief_k1731_rev9-87d87e 兩筆舊 receipt 仍留在 compute_queue --pending-followup（followup_dispatched=false）。mark-followup-dispatched 會 fail，因為 source task 已被新 job 合法接手、舊 job 無法再 settle 它。這是 receipt 生命週期缺口：source task 已轉手時，舊 receipt 應可標為 superseded 而非永久 pending，否則每一班 PHASE A 都會重新 triage 同兩筆。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-28T13:23:58.943475+00:00",
     "created_by": "hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45",
     "collision_gate_gap": "第二個 root-cause 發現（2026-07-28 21:24 本班實測）：enqueue-agent 的 collision gate 只以 source_task_id 為 key，不看 --cwd。本班 agent-rebrief_..._k1734...-3dd25a（src=K1734）與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e（src=assign_04212462）兩個 job 同時排入同一個 worktree /Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734，gate 全程沒擋。若 worker 平行撿起兩者，兩個 agent 會同時改寫 experiments/k1734/ → 產物污染且無法歸因。本班已 cancel 自己那筆（保留 slot-1 的），K1734 已釋回 pending，但 gate 必須改成同時對 (source_task_id, cwd) 兩個 key 判重。",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T17:16:01.657283+00:00",
-    "claim_expires_at": "2026-07-28T19:16:01.657283+00:00",
-    "claim_session_id": "a9223a4a45df",
     "status_history": [
       {
         "ts": "2026-07-28T17:16:01.657301+00:00",
@@ -53803,9 +53948,17 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:32:01.709575+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-28T17:16:01.953672+00:00"
+    "started_at": "2026-07-28T17:16:01.953672+00:00",
+    "completed_at": "2026-07-28T17:32:01.709554+00:00",
+    "result": "根因修正：enqueue/worker spawn 以 canonical router+provider registry 驗證與 remap 退役模型，receipt 留 durable remap audit；typed policy_denial_pre_spawn 只在 agent_spawn_attempts=0 時允許安全 requeue。worktree ownership 以 thread/process atomic receipt lock 防雙派，損壞 receipt fail closed。回歸 123 passed；live retired-model admission rc=2 且無 queue/brief artifact，active queued agent=0、pending followup=0。"
   },
   {
     "id": "assign_12a2f9ba",
@@ -54172,10 +54325,29 @@
     "description": "【症狀（證據化）】incident inc_537a3ff3304f（kind=phase_z_baseline_missing）state=open，最後一次\nbreach 是 2026-07-26T18:30:45Z，此後累積 12 筆 clean observation（2026-07-28T05:40:03Z →\n2026-07-28T14:05:14Z），但 sustained-clean gate 永遠不會滿足，incident 永久開著，其 gate 任務\nissue42_persistent_fire_lifecycle_20260727（P1）因此每班都卡在 A0 urgent lane。\n\n【根因（讀碼確認，非推測）】src/volpred/ops/incident.py\n- L96-97：RESOLVE_MIN_CLEAN_OBSERVATIONS=3、RESOLVE_MIN_CLEAN_SPAN=24h\n- L108：_CLEAN_OBS_LIMIT = 12\n- L592：del observations[:-_CLEAN_OBS_LIMIT] —— clean_observations 是**只留最後 12 筆的 ring\n  buffer**，會把最早的觀測從頭砍掉。\n- L617-624 _clean_criterion_met：first = observations[0]、last = observations[-1]，用\n  (last - first) >= 24h 判斷。\n\nfirst 取的是「**保留窗內**的最早一筆」，不是這段 clean streak 真正的起點。於是\n(last - first) 被 ring buffer 上限鎖死在「最近 12 筆的跨度」。\n\n【可證偽的量化推論】要用 12 筆撐出 24h 跨度，觀測間隔必須 >= 24h/11 ≈ 2h11m。任何偵測器\n只要 clean 觀測比每 2h11m 更頻繁，該 incident 就**在數學上永遠無法 resolve**。\ninc_537a3ff3304f 實測間隔約 46 分鐘（12 筆 / 8.42h）→ 跨度穩定停在 ~8.4h，24h 門檻不可達。\nphase_z_baseline_missing 每班 fire 觀測一次、且多 slot 並行，結構上必然踩中。\n\n【現況掃描】storage/ops/incidents.json 共 21 筆，目前只有 inc_537a3ff3304f 已達 12 筆上限\n（另 inc_c67bec28dd29 n=2、間隔 2.21h 尚未觸頂）。所以這是**一顆低發生率但一旦踩到就永久卡死**\n的地雷，不是已經全面爆炸 —— 但它正在讓一張 P1 永久堵住 urgent lane。\n\n【修復方向（建議，交由修復者裁決）】\n1. 另存 streak 起點（例如 clean_streak_started_at），在 breach 重置 clean_observations 的同\n   兩處（L364、L422）一併清掉；_clean_criterion_met 改用 (last - streak_started_at) 判跨度，\n   與 ring buffer 修剪解耦。\n2. 既有資料 migration：對已存在的 row 用 observations[0].at 保守回填 streak 起點（真實起點\n   只會更早，不會更晚，因此不會提前放行 gate）。對 inc_537a3ff3304f 而言 gate 會在\n   2026-07-29T05:40Z 之後可達，而不是永遠不可達。\n3. 迴歸測試：tests/test_incident_lifecycle.py 補一條「觀測頻率高於 24h/(limit-1) 時仍能\n   resolve」的案例 —— 這正是現行測試沒有覆蓋到的區間。\n\n【重要 — 不要用資料手術收尾】不得手改 incidents.json 讓 incident 直接 resolved：那會把\n「gate 從未真正通過」寫成「已通過」。修的是判定邏輯，gate 本身仍必須誠實地等滿 24h。\n\n【本班為何沒修】platform_ops 屬 mutating work，task CLI 以 supervisor_preassignment_required\n機械拒絕本 slot 的 claim（已實測），依規定不繞過，改以本任務移交。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-28T14:15:54.252980+00:00",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T18:05:59.595345+00:00",
+    "claim_expires_at": "2026-07-28T20:05:59.595345+00:00",
+    "claim_session_id": "0e4110a14528",
+    "status_history": [
+      {
+        "ts": "2026-07-28T18:05:59.595365+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T18:05:59.883718+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T18:05:59.883701+00:00"
   },
   {
     "id": "assign_17a788b3",
@@ -54183,10 +54355,33 @@
     "description": "【來源】Codex round-4 primary-path review 的 VERDICT: FAIL\n（storage/ops/codex_reviews/k1708_r4_verdict.md，job\ncompute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876）。\nK1708 本身的 gate-cert 任務 K1708_gatecert_s14_rerun 已標 failed 收束，但該裁決裡點名的\n**測試強度倒退**不會隨任務關閉而消失，且會沿用到後續任何以 K1708 為模板的實驗，故另開單。\n\n【核心發現（Codex 原話重點）】K1708 的 provenance 測試被改成「只檢查 code SHA、seed、\nquick mode、origin count」（test_k1708.py:1176）。Codex 指出：**編輯任何 CW / QLIKE /\nverdict 數值都不會改變 code SHA**，因此「任何數字被改動都會使等式不成立」這個宣稱是**假的**。\n原本用來獨立佐證輸出值的六欄位 pre-fix Anchor A 在 reconciliation 時被移除\n（K1708.py:2463 / test_k1708.py:684），換成只驗程式碼雜湊 —— Codex 明確稱之為\n\"an actual weakening\"，不是等價重構。\n\n【為什麼這是研究誠實問題而非普通測試債】AGENTS.md 研究誠實原則第 1、13 條的機械防線之一\n就是「結果檔不能被事後手改而不被發現」。一個只認 code SHA 的 provenance 測試，對\n「程式沒動、results.json 的數字被改」這個**最危險的造假路徑完全盲目**。K1708 目前的 verdict\n是 NULL（誠實的失敗結果），所以此刻沒有造假動機；但這個防線的缺口會被後續實驗沿用。\n\n【本班獨立佐證（非轉抄 Codex）】主線程實測\n.claude/worktrees/dispatch-slot-1-457427c2-k1708/experiments/k1708/reproduce_spec.json\n**不存在**，與 Codex 所稱「canonical artifact check returns BLOCKED — missing\nreproduce_spec.json，因此不可 merge」一致。K1708 未合併、未寫 knowledge，狀態正確。\n\n【工作項】\n1. 讓 provenance 測試真正綁定**輸出值**而非只綁程式碼：恢復或重建對 results.json 關鍵欄位\n   的獨立雜湊/對帳（六欄位 Anchor A 或等效設計），使「程式不動、數字被改」必然測試失敗。\n2. 檢查此弱化是否已被複製到其他實驗的 test_*.py（K1708 常被當模板），列出受影響清單。\n3. 若判定 Anchor A 的移除有正當理由，必須在測試檔與 reproduce_spec 寫明**替代防線是什麼**，\n   不得只留一句「已 reconcile」。\n4. 回歸測試：加一條「竄改 results.json 中一個統計量 → 測試必須紅」的 negative test。\n\n【禁止】把測試改成通過來收尾；以「K1708 反正是 NULL、沒人會改」為由跳過；在未補\nreproduce_spec.json 前合併 K1708。\n\n【備註】此 job 的 followup 因 source task 已終局而永久不可 dispatch（已知 P1\nassign_617bf749，本班第三次實例），故本裁決以本任務保存，不依賴該 followup 通道。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-28T14:26:31.268279+00:00",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-28T17:57:08.097805+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T17:57:08.391837+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T18:05:33.254401+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T17:57:08.391823+00:00",
+    "completed_at": "2026-07-28T18:05:33.254377+00:00",
+    "result": "root_cause_fixed_and_verified: runtime reproduce_spec now binds exact canonical result bytes (path/SHA-256/size), and artifact gate blocks CW/QLIKE/verdict result-only tampering. Commit 6cca60f80; 66 scoped tests passed post-commit; Ruff and diff-check passed. Repo-wide class sweep found only the unmerged K1708 worktree claim. K1708 itself remains correctly BLOCKED because its run-time reproduce_spec.json is missing; no post-hoc spec, merge, or knowledge write was performed."
   },
   {
     "id": "assign_8516ec4a",
@@ -54274,18 +54469,169 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T17:02:13.254079+00:00",
       "last_seen_at": "2026-07-28T17:26:38.290787+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-28T17:25:57.918347+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
       "deferred": [
-        "scripts/tests/test_git_writer_lock.py: 已保存，且 2.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.4 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 11.3 小時內還在改 — 活躍碼，不算無主殘留"
+        "scripts/tests/test_git_writer_lock.py: 已保存，且 2.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 11.8 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
     "updated_at": "2026-07-28T17:26:38.290787+00:00"
+  },
+  {
+    "id": "K781_article_general_v5",
+    "title": "K781: write general-audience article [retry-v5] (auto-discovered uncovered K)",
+    "description": "K K781 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K781 [NULL]：Multiplicative Volatility Factor(MVF,5參數:σ²=exp(f_t)×g_t)在SPY日頻r²(Patton 2011 proxy-robust)上是否優於GJR-GARCH。README為空白樣板，結論取自k781_mvf_results.json。資料yfinance，2007-01-04~2026-03-31，OOS 2009-12-24~2026-03-31(N_oos=4090,N_total=4840)。QLIKE排名：GJR-GARCH=1.536481(第1)、MVF=1.549 Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K781",
+    "evidence_source_paths": [
+      "experiments/k781/k781_mvf_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v5"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T18:08:55+00:00"
+  },
+  {
+    "id": "K1477_article_general_v3",
+    "title": "K1477: write general-audience article [retry-v3] (auto-discovered uncovered K)",
+    "description": "K K1477 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: K1477 [CONDITIONAL_PASS]: SPY 0DTE時代波動結構轉變檢驗，yfinance 2018-01-03至2026-06-10(n=2120)，外生breakpoint=2022-05-02。隔夜平方報酬均值7.95e-05→4.31e-05(約-45.8%)，日內平方報酬8.67e-05→7.95e-05(約-8.3%)，Parkinson range variance 9.84e-05→7.23e-05(約-26.5%)：兩者皆降但隔夜降更快。intraday_share_oc從0.553升至0.584(Welch p=0.0 Canonical evidence: experiments/k1477/k1477_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "failed",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1477",
+    "evidence_source_paths": [
+      "experiments/k1477/k1477_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1477/k1477_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v3"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T18:08:57+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T18:21:13.605720+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-3657814ed7d1471fa5f8306a3827ec98"
+      },
+      {
+        "ts": "2026-07-28T18:21:21.484448+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-3657814ed7d1471fa5f8306a3827ec98"
+      },
+      {
+        "ts": "2026-07-28T18:21:44.162608+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-3657814ed7d1471fa5f8306a3827ec98"
+      }
+    ],
+    "started_at": "2026-07-28T18:21:21.484435+00:00",
+    "completed_at": "2026-07-28T18:21:44.162579+00:00",
+    "result": "not_written; reason=arc_covered（第三次重複入池）。check_arc_dedup --k-id k1477 --audience general 回 verdict=block_arc_dup，arc_duplicates[0] 為 2026-07-08 已發佈的『VIX 剩十幾點，賣波動收保費最誘人：當波動保險公司前，先過四道生存體檢』，match_level=duplicate / match_reason=descriptive_strict —— 與今日 01:23 fire 判 K1477_article_general_v2 時完全同一篇。未用 dup_waiver 繞過。註：K1477 general 已被裁決三次（原始 closed_no_action → v2 failed/arc_covered 01:23 → v3 failed/arc_covered 02:36），draft-pool forced refill 未把已裁決 arc_covered 的 K 排除，會持續重建同一張任務。"
+  },
+  {
+    "id": "K1585_article_general",
+    "title": "K1585: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1585 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1585 [NULL/WEAK_RAW_ONLY]：測試 SPF disagreement（Philadelphia Fed D2 workbook, 226 季 1968Q4-2026Q2）能否在 VIX 之外增量改善 SPY forward RV 預測與 tail risk。SPY/VIX 日頻 panel 6,670 天（2000-01-03～2026-06-26）。原始 regime 對比：高VIX/低SPF-disagreement 組 21日forward RV均值 0.007739（年化30.47%）vs 高VIX/高disagreeme Canonical evidence: experiments/k1585/k1585_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1585",
+    "evidence_source_paths": [
+      "experiments/k1585/k1585_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1585/k1585_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T18:08:59+00:00"
+  },
+  {
+    "id": "K1680_article_general_v2",
+    "title": "K1680: write general-audience article [retry-v2] (auto-discovered uncovered K)",
+    "description": "K K1680 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json. Prior task terminal but feed lacks coverage — retry. Verdict preview: k1680 [NULL]（RETROSPECTIVE_NULL，Codex verdict=PASS_RETROSPECTIVE_NULL）：測試HQ州相對全美Google Trends attention（local_excess）能否領先預測次週RV/gap/Corwin-Schultz spread/national attention。六檔固定股票（AAPL/AMZN/BAC/CVX/AIG/ABBV），Google Trends週頻2021-06-27至2026-06-28。因Google Trends是當次一次性回溯下載（current vi Canonical evidence: experiments/k1680/K1680_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1680",
+    "evidence_source_paths": [
+      "experiments/k1680/K1680_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1680/K1680_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general",
+      "retry-v2"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T18:09:02+00:00"
+  },
+  {
+    "id": "assign_e52b6986",
+    "title": "PHASE-Z 卡住檔案 incident（483aa8776e671da1）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n6 個未提交檔案不是任何一班 fire 產出的，最長已連續 34 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- scripts/tests/test_git_writer_lock.py — 5 班\n- storage/logs/trending_primary_source_verification.jsonl — 27 班\n- storage/memory/knowledge.json — 34 班\n- storage/reports/INDEX.md — 25 班\n- storage/reports/index.json — 25 班\n- storage/strategy_metrics.json — 25 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T182342307603Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T18:24:18.040104+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "483aa8776e671da1",
+      "paths": [
+        "scripts/tests/test_git_writer_lock.py",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "scripts/tests/test_git_writer_lock.py": 5,
+        "storage/logs/trending_primary_source_verification.jsonl": 27,
+        "storage/memory/knowledge.json": 34,
+        "storage/reports/INDEX.md": 25,
+        "storage/reports/index.json": 25,
+        "storage/strategy_metrics.json": 25
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T182342307603Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T18:24:18.025691+00:00",
+      "last_seen_at": "2026-07-28T18:24:18.025691+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]

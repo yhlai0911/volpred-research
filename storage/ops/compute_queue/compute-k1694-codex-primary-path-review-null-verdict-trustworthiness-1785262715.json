@@ -1,0 +1,44 @@
+{
+  "id": "compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715",
+  "title": "K1694 Codex primary-path review (NULL verdict trustworthiness)",
+  "script_path": "scripts/codex_review_job.sh",
+  "interpreter": "bash",
+  "args": [
+    "storage/ops/codex_reviews/k1694_prompt.md",
+    "storage/ops/codex_reviews/k1694_verdict.md",
+    "2400"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T18:18:35Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715.stderr",
+  "result_artifact": "storage/ops/codex_reviews/k1694_verdict.md",
+  "output_paths": [
+    "storage/ops/codex_reviews/k1694_verdict.md"
+  ],
+  "output_paths_updated_at": null,
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": {
+    "brief": "Read storage/ops/codex_reviews/k1694_verdict.md. If VERDICT: PASS -> write the K1694 knowledge.json entry (NULL result: FCM clearing concentration x high-vol interaction on commodity small-trader share, coef 3.15e-04, t_DK 1.55, bootstrap 95% CI [-2.7e-05, 7.5e-04], NULL invariant to assumed CFTC publication lag 30-90d) and flip experiments/K1694/README.md off its INCOMPLETE marker. If VERDICT: FAIL -> fix only the named defects, rerun K1694.py + lag_sensitivity.py, and re-review; do not write knowledge on a FAIL. Either way update experiments/K1694/README.md to the true state.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "k1694_rerun_after_salvage_20260719",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T18:18:36Z",
+    "linked_at": "2026-07-28T18:18:36Z",
+    "error": null
+  },
+  "timeout_seconds": 2700,
+  "brief_source": null,
+  "brief_snapshot": null
+}

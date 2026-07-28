@@ -620,9 +620,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T09:12:07.292293+00:00"
-    },
-    {
      "at": "2026-07-28T09:24:21.846131+00:00"
     },
     {
@@ -654,6 +651,9 @@
     },
     {
      "at": "2026-07-28T17:25:38.681120+00:00"
+    },
+    {
+     "at": "2026-07-28T18:23:42.002507+00:00"
     }
    ],
    "current_task_id": null,
@@ -1313,7 +1313,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T17:26:27.380686+00:00"
+     "last_seen_at": "2026-07-28T18:23:27.619647+00:00"
     },
     {
      "cleared_at": null,
@@ -1327,7 +1327,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T17:26:26.334544+00:00"
+     "last_seen_at": "2026-07-28T18:23:26.833376+00:00"
     },
     {
      "cleared_at": null,
@@ -1360,9 +1360,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-28T17:26:27.380686+00:00",
+   "last_seen_at": "2026-07-28T18:23:27.619647+00:00",
    "notified_at": null,
-   "occurrence_count": 2030,
+   "occurrence_count": 2144,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1553,7 +1553,7 @@
   "inc_9a7cd81a5f29": {
    "class": "ordinary",
    "clean_observations": [],
-   "current_task_id": "ci-red-30361505394",
+   "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
    "episode_opened_at": "2026-07-28T13:20:33.616365+00:00",
@@ -1619,9 +1619,19 @@
    "last_seen_at": "2026-07-28T17:05:28.880885+00:00",
    "notified_at": null,
    "occurrence_count": 8,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-28T17:35:18.626363+00:00",
+    "by": "ci-red-30361505394",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-28T17:35:18.626363+00:00",
+     "by": "ci-red-30361505394",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [
     {
@@ -2178,6 +2188,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T17:26:27.397499+00:00",
+ "updated_at": "2026-07-28T18:23:42.004075+00:00",
  "version": 1
 }
