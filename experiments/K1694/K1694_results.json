@@ -2,12 +2,19 @@
   "experiment_id": "K1694",
   "title": "FCM clearing concentration and high-volatility crowding-out of small commodity traders",
   "seed": 1694,
-  "generated_utc": "2026-07-28T18:16:37.694928Z",
+  "run_utc": "2026-07-28T22:42:54.307891+00:00",
   "verdict": "NULL",
+  "verdict_scope": "NULL is scoped to ONE hypothesis: the NEGATIVE, BINARY high-vol crowding-out interaction (spec1 fcm_x_highvol < 0). It does NOT mean 'no association'. The continuous analogue (spec2 fcm_x_rvz) is POSITIVE and significant: coef 2.9624e-04, t_DK 2.59, t_cluster_month 2.61 -- i.e. in the direction opposite to crowding-out.",
+  "claim_type": "ex_post_association",
+  "claim_language_rule": "spec1-3 may only be described as ex-post association. The words predictive, causal, forecast and known-before-outcome are forbidden for them because the FCM report can become available mid-outcome-month and the outcome is a whole-month average change. Only spec4 (spec4_predictive_fully_lagged) is timed so every regressor is known before the outcome month begins.",
   "data_provenance": {
     "fcm_source": "CFTC Financial Data for FCMs (monthly xlsx)",
     "fcm_publication_lag_days_assumed": 45,
-    "fcm_asof_merge": "backward as-of on month_end >= FCM avail_date (month_end+45d)",
+    "fcm_publication_dates_verified": false,
+    "fcm_publication_lag_is_synthetic": "avail_date = month_end + 45d is a constant chosen by this script, not an observed CFTC release date; the offline cache carries no release date column. Sensitivity over 30/45/60/75/90d lives in K1694_lag_sensitivity.json.",
+    "fcm_asof_merge_primary": "backward as-of: latest FCM report whose synthetic avail_date <= the outcome month_end. Availability may therefore fall INSIDE the outcome month -- association timing, not predictive timing.",
+    "fcm_asof_merge_predictive_spec4": "backward as-of on the outcome month's START, so the report is available before any of the outcome window.",
+    "fcm_avail_inside_outcome_month_rows": 3278,
     "dcot_source": "CFTC DCOT futures-only 72hh-3qpy (weekly; as-of Tue, published Fri)",
     "dcot_small_trader_proxy": "non-reportable positions (long+short)/(2*OI)",
     "vol_source": "yfinance daily futures; monthly realized vol = std(daily logret)*sqrt(252)",
@@ -42,12 +49,46 @@
       "2013-12-31",
       "2026-05-31"
     ],
-    "panel_rows_usable": 3293,
+    "estimation_sample_owner": "build_spec_frame(); shared by every estimator",
+    "panel_rows_usable": 3278,
     "panel_commodities": 22,
     "panel_span": [
       "2014-02",
-      "2026-07"
-    ]
+      "2026-06"
+    ],
+    "panel_span_is_complete_months_only": true,
+    "completeness": {
+      "rule": {
+        "dcot_month_complete": "nweeks >= 4 AND month_end - max(report_date) <= 6 days",
+        "rv_month_complete": "trading days >= 15",
+        "date_hardcoded": false,
+        "effect_of_dcot_incomplete": "row dropped from the panel entirely",
+        "effect_of_rv_incomplete": "rv masked to NaN; DCOT row retained",
+        "adjacency": "first differences and their lags are voided whenever the previous retained month is not the immediately preceding calendar month, so dropping a month cannot silently create a two-month difference"
+      },
+      "dropped_partial_dcot_months": [
+        {
+          "month": "2006-06",
+          "n_commodity_rows_dropped": 22,
+          "min_dcot_weeks": 3,
+          "max_dcot_tail_gap_days": 3,
+          "min_rv_trading_days": 20
+        },
+        {
+          "month": "2026-07",
+          "n_commodity_rows_dropped": 22,
+          "min_dcot_weeks": 1,
+          "max_dcot_tail_gap_days": 24,
+          "min_rv_trading_days": 10
+        }
+      ],
+      "rv_masked_partial_months": 17,
+      "rv_masked_month_examples": [
+        "2008-10",
+        "2009-02",
+        "2026-07"
+      ]
+    }
   },
   "descriptives": {
     "fcm_hhi_stats": {
@@ -66,40 +107,41 @@
     },
     "regime_2x2_d_nonrep": {
       "fcm0_vol0": {
-        "mean": -0.000141935128798859,
-        "std": 0.00549006496055161,
-        "n": 1093
+        "mean": -0.0001737765374246786,
+        "std": 0.005481231826172511,
+        "n": 1085
       },
       "fcm0_vol1": {
-        "mean": -0.0004407544981362741,
-        "std": 0.006878480912045478,
-        "n": 821
+        "mean": -0.00048273013643512167,
+        "std": 0.0068740331340642466,
+        "n": 807
       },
       "fcm1_vol0": {
-        "mean": -0.0004373216710938773,
-        "std": 0.00489271240074137,
-        "n": 626
+        "mean": -0.0003057730399859274,
+        "std": 0.004908259803957089,
+        "n": 616
       },
       "fcm1_vol1": {
-        "mean": 0.0001884579706621271,
-        "std": 0.005704235987229323,
-        "n": 760
+        "mean": 0.000275923713094953,
+        "std": 0.005706473112444853,
+        "n": 770
       }
     },
     "corr_d_nonrep": {
       "d_nonrep": 1.0,
-      "hhi_seg_z": 0.03918844495661137,
-      "rv_z": 0.051098394850392505,
-      "highvol": 0.00955536501593022,
-      "conc4_z": 0.00595101265673573,
-      "dlog_oi": -0.4439958640676276
+      "hhi_seg_z": 0.042832442025145544,
+      "rv_z": 0.054794209312739366,
+      "highvol": 0.009392979933287398,
+      "conc4_z": 0.0034491032937483098,
+      "dlog_oi": -0.44605120656926817
     }
   },
   "panel_regressions": {
     "spec1_fcm_highvol": {
-      "n_obs": 3293,
+      "n_obs": 3278,
       "n_commodities": 22,
-      "n_months": 150,
+      "n_months": 149,
+      "n_rows_dropped_vs_spec_frame": 0,
       "rhs": [
         "hhi_seg_z",
         "highvol",
@@ -111,69 +153,72 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "hhi_seg_z": 2.1640372760662834e-05,
-          "highvol": -0.0005122424369623835,
-          "fcm_x_highvol": 0.000314636170181876,
-          "nonrep_lag": -0.05105503028049181,
-          "d_nonrep_lag": -0.011658971143193492,
-          "dlog_oi": -0.03480665275424167,
-          "t": -4.163893826670232e-06
+          "hhi_seg_z": -7.975836158575316e-07,
+          "highvol": -0.0005116005089499559,
+          "fcm_x_highvol": 0.00031574662058230266,
+          "nonrep_lag": -0.05010249553095013,
+          "d_nonrep_lag": -0.012753303700858495,
+          "dlog_oi": -0.03492487585278112,
+          "t": -2.9233245645338376e-06
         },
         "tstat": {
-          "hhi_seg_z": 0.12494009189093595,
-          "highvol": -2.5187524712014877,
-          "fcm_x_highvol": 1.553883806440329,
-          "nonrep_lag": -6.201365030151975,
-          "d_nonrep_lag": -0.5387264989353929,
-          "dlog_oi": -18.491404627455765,
-          "t": -1.310294005432886
+          "hhi_seg_z": -0.004665382522319628,
+          "highvol": -2.484412763699776,
+          "fcm_x_highvol": 1.56065427623522,
+          "nonrep_lag": -5.944195558488339,
+          "d_nonrep_lag": -0.5914978971926095,
+          "dlog_oi": -18.57866402348164,
+          "t": -0.9471793840005724
         },
         "pval": {
-          "hhi_seg_z": 0.9005786722927929,
-          "highvol": 0.011824564506250024,
-          "fcm_x_highvol": 0.12030908477699165,
-          "nonrep_lag": 6.299794019781757e-10,
-          "d_nonrep_lag": 0.5901123248901465,
+          "hhi_seg_z": 0.9962778632402975,
+          "highvol": 0.013026536459612936,
+          "fcm_x_highvol": 0.11870273865110015,
+          "nonrep_lag": 3.0725701982703413e-09,
+          "d_nonrep_lag": 0.5542280146016356,
           "dlog_oi": 0.0,
-          "t": 0.19018859211293382
+          "t": 0.34361781856029694
         },
-        "bandwidth": 6
+        "bandwidth": 6,
+        "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "hhi_seg_z": 2.1640372760662834e-05,
-          "highvol": -0.0005122424369623835,
-          "fcm_x_highvol": 0.000314636170181876,
-          "nonrep_lag": -0.05105503028049181,
-          "d_nonrep_lag": -0.011658971143193492,
-          "dlog_oi": -0.03480665275424167,
-          "t": -4.163893826670232e-06
+          "hhi_seg_z": -7.975836158575316e-07,
+          "highvol": -0.0005116005089499559,
+          "fcm_x_highvol": 0.00031574662058230266,
+          "nonrep_lag": -0.05010249553095013,
+          "d_nonrep_lag": -0.012753303700858495,
+          "dlog_oi": -0.03492487585278112,
+          "t": -2.9233245645338376e-06
         },
         "tstat": {
-          "hhi_seg_z": 0.11837583572422253,
-          "highvol": -2.433209843441625,
-          "fcm_x_highvol": 1.5894677755226168,
-          "nonrep_lag": -5.540190908800915,
-          "d_nonrep_lag": -0.4940626717177697,
-          "dlog_oi": -26.487200778372593,
-          "t": -1.0872549358641208
+          "hhi_seg_z": -0.004371721153892141,
+          "highvol": -2.423587240685012,
+          "fcm_x_highvol": 1.5959859229257494,
+          "nonrep_lag": -5.4070026478991835,
+          "d_nonrep_lag": -0.5391603005104424,
+          "dlog_oi": -26.626458598345383,
+          "t": -0.7928180534600641
         },
         "pval": {
-          "hhi_seg_z": 0.9057771555555965,
-          "highvol": 0.015018970691838884,
-          "fcm_x_highvol": 0.11205167218797318,
-          "nonrep_lag": 3.26107196801928e-08,
-          "d_nonrep_lag": 0.6212951654152792,
+          "hhi_seg_z": 0.9965121506903838,
+          "highvol": 0.015422334132209059,
+          "fcm_x_highvol": 0.11058919133919964,
+          "nonrep_lag": 6.872103996968804e-08,
+          "d_nonrep_lag": 0.5898131932064521,
           "dlog_oi": 0.0,
-          "t": 0.2770044390015738
+          "t": 0.4279417247242143
         }
       },
-      "rsq_within": 0.2249686674169804
+      "rsq_within": 0.22530412311531178,
+      "note": "ex-post association: the FCM report may become available mid-outcome-month and the outcome is a whole-month average change"
     },
     "spec2_fcm_rvz_continuous": {
-      "n_obs": 3293,
+      "n_obs": 3278,
       "n_commodities": 22,
-      "n_months": 150,
+      "n_months": 149,
+      "n_rows_dropped_vs_spec_frame": 0,
       "rhs": [
         "hhi_seg_z",
         "rv_z",
@@ -185,69 +230,72 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "hhi_seg_z": 0.00017575610050876969,
-          "rv_z": -0.00017148984905647377,
-          "fcm_x_rvz": 0.00028939261571882854,
-          "nonrep_lag": -0.05262101885786439,
-          "d_nonrep_lag": -0.01181985984934379,
-          "dlog_oi": -0.03457779907873712,
-          "t": -4.475939833671657e-06
+          "hhi_seg_z": 0.00015251071979778002,
+          "rv_z": -0.00016710615105134028,
+          "fcm_x_rvz": 0.0002962428372402887,
+          "nonrep_lag": -0.051744385866609545,
+          "d_nonrep_lag": -0.012937182740458943,
+          "dlog_oi": -0.034677520273956076,
+          "t": -3.2455109932310846e-06
         },
         "tstat": {
-          "hhi_seg_z": 1.2593497362791481,
-          "rv_z": -1.0324211697327037,
-          "fcm_x_rvz": 2.501602773341872,
-          "nonrep_lag": -6.142013955220423,
-          "d_nonrep_lag": -0.5370878739041218,
-          "dlog_oi": -18.328995448508447,
-          "t": -1.395914411778111
+          "hhi_seg_z": 1.129078733435325,
+          "rv_z": -1.0070140623318047,
+          "fcm_x_rvz": 2.5911620677098557,
+          "nonrep_lag": -5.927360259137037,
+          "d_nonrep_lag": -0.5882437501758685,
+          "dlog_oi": -18.37618002653238,
+          "t": -1.0542319424193949
         },
         "pval": {
-          "hhi_seg_z": 0.20799408432108524,
-          "rv_z": 0.30195134902411236,
-          "fcm_x_rvz": 0.01241184911431814,
-          "nonrep_lag": 9.130722844474803e-10,
-          "d_nonrep_lag": 0.5912435254251975,
+          "hhi_seg_z": 0.25894797873197817,
+          "rv_z": 0.3140030067024915,
+          "fcm_x_rvz": 0.009608035014152083,
+          "nonrep_lag": 3.4008891258707763e-09,
+          "d_nonrep_lag": 0.5564095819330135,
           "dlog_oi": 0.0,
-          "t": 0.16283520839815258
+          "t": 0.291855129854911
         },
-        "bandwidth": 6
+        "bandwidth": 6,
+        "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "hhi_seg_z": 0.00017575610050876969,
-          "rv_z": -0.00017148984905647377,
-          "fcm_x_rvz": 0.00028939261571882854,
-          "nonrep_lag": -0.05262101885786439,
-          "d_nonrep_lag": -0.01181985984934379,
-          "dlog_oi": -0.03457779907873712,
-          "t": -4.475939833671657e-06
+          "hhi_seg_z": 0.00015251071979778002,
+          "rv_z": -0.00016710615105134028,
+          "fcm_x_rvz": 0.0002962428372402887,
+          "nonrep_lag": -0.051744385866609545,
+          "d_nonrep_lag": -0.012937182740458943,
+          "dlog_oi": -0.034677520273956076,
+          "t": -3.2455109932310846e-06
         },
         "tstat": {
-          "hhi_seg_z": 1.1393717654573385,
-          "rv_z": -1.1671723786168124,
-          "fcm_x_rvz": 2.5431200510669227,
-          "nonrep_lag": -5.6231216923837355,
-          "d_nonrep_lag": -0.5005207347272068,
-          "dlog_oi": -26.159572500292466,
-          "t": -1.1514426388182728
+          "hhi_seg_z": 0.9954310555275493,
+          "rv_z": -1.1380471778420589,
+          "fcm_x_rvz": 2.6078758247592893,
+          "nonrep_lag": -5.505826666495731,
+          "d_nonrep_lag": -0.5464472938651436,
+          "dlog_oi": -26.22823245824325,
+          "t": -0.8657734538583043
         },
         "pval": {
-          "hhi_seg_z": 0.254631735190189,
-          "rv_z": 0.24322602302459484,
-          "fcm_x_rvz": 0.011032523282891171,
-          "nonrep_lag": 2.033284829394688e-08,
-          "d_nonrep_lag": 0.6167422059253198,
+          "hhi_seg_z": 0.319600789366284,
+          "rv_z": 0.25518469572275637,
+          "fcm_x_rvz": 0.009152302282050329,
+          "nonrep_lag": 3.9600062118339e-08,
+          "d_nonrep_lag": 0.5847960307575066,
           "dlog_oi": 0.0,
-          "t": 0.249634517083424
+          "t": 0.38667833421763764
         }
       },
-      "rsq_within": 0.22509292446439932
+      "rsq_within": 0.22550952765108256,
+      "note": "ex-post association; same timing caveat as spec1"
     },
     "spec3_trader_conc4_highvol": {
-      "n_obs": 3293,
+      "n_obs": 3278,
       "n_commodities": 22,
-      "n_months": 150,
+      "n_months": 149,
+      "n_rows_dropped_vs_spec_frame": 0,
       "rhs": [
         "conc4_z",
         "highvol",
@@ -259,115 +307,432 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "conc4_z": -0.0003945599591657676,
-          "highvol": -0.0005225954263510307,
-          "conc4_x_highvol": -0.00015048642417113848,
-          "nonrep_lag": -0.054201286344342015,
-          "d_nonrep_lag": -0.00978546073062042,
-          "dlog_oi": -0.03517560226535377,
-          "t": -2.834373333097008e-06
+          "conc4_z": -0.0003821677136805102,
+          "highvol": -0.0005313204092404489,
+          "conc4_x_highvol": -0.00017016230578736357,
+          "nonrep_lag": -0.053181705274099066,
+          "d_nonrep_lag": -0.010951835752339252,
+          "dlog_oi": -0.035298755434342306,
+          "t": -1.9392953511496817e-06
         },
         "tstat": {
-          "conc4_z": -2.31857863589937,
-          "highvol": -2.153335957103278,
-          "conc4_x_highvol": -0.5827486242626422,
-          "nonrep_lag": -6.4929637133712435,
-          "d_nonrep_lag": -0.4447136600332977,
-          "dlog_oi": -18.752739028731398,
-          "t": -1.2185431290605564
+          "conc4_z": -2.258171714667404,
+          "highvol": -2.179979768401435,
+          "conc4_x_highvol": -0.6667753754887144,
+          "nonrep_lag": -6.194925734571157,
+          "d_nonrep_lag": -0.4990691518660219,
+          "dlog_oi": -18.844271061657647,
+          "t": -0.8022060180696223
         },
         "pval": {
-          "conc4_z": 0.020479376686951767,
-          "highvol": 0.03136531770564521,
-          "conc4_x_highvol": 0.560102789921304,
-          "nonrep_lag": 9.693978952896032e-11,
-          "d_nonrep_lag": 0.6565561825637665,
+          "conc4_z": 0.0240010304118079,
+          "highvol": 0.029330510749442595,
+          "conc4_x_highvol": 0.5049629705469707,
+          "nonrep_lag": 6.563225518618765e-10,
+          "d_nonrep_lag": 0.6177644573807632,
           "dlog_oi": 0.0,
-          "t": 0.22310571081987995
+          "t": 0.42249246699646203
         },
-        "bandwidth": 6
+        "bandwidth": 6,
+        "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "conc4_z": -0.0003945599591657676,
-          "highvol": -0.0005225954263510307,
-          "conc4_x_highvol": -0.00015048642417113848,
-          "nonrep_lag": -0.054201286344342015,
-          "d_nonrep_lag": -0.00978546073062042,
-          "dlog_oi": -0.03517560226535377,
-          "t": -2.834373333097008e-06
+          "conc4_z": -0.0003821677136805102,
+          "highvol": -0.0005313204092404489,
+          "conc4_x_highvol": -0.00017016230578736357,
+          "nonrep_lag": -0.053181705274099066,
+          "d_nonrep_lag": -0.010951835752339252,
+          "dlog_oi": -0.035298755434342306,
+          "t": -1.9392953511496817e-06
         },
         "tstat": {
-          "conc4_z": -2.304484690543441,
-          "highvol": -2.125119536039755,
-          "conc4_x_highvol": -0.5826679923572496,
-          "nonrep_lag": -5.880012821283432,
-          "d_nonrep_lag": -0.4128350831965388,
-          "dlog_oi": -26.72576562399375,
-          "t": -0.9982327791556647
+          "conc4_z": -2.258113803082162,
+          "highvol": -2.157677316211842,
+          "conc4_x_highvol": -0.6657710970487213,
+          "nonrep_lag": -5.734529584377611,
+          "d_nonrep_lag": -0.46108791693220996,
+          "dlog_oi": -26.88501716476905,
+          "t": -0.7036482503519239
         },
         "pval": {
-          "conc4_z": 0.021257936381364972,
-          "highvol": 0.03365155860320668,
-          "conc4_x_highvol": 0.5601570727966494,
-          "nonrep_lag": 4.516257146036651e-09,
-          "d_nonrep_lag": 0.6797545614680347,
+          "conc4_z": 0.024004643848636986,
+          "highvol": 0.031026004242088234,
+          "conc4_x_highvol": 0.5056046847945794,
+          "nonrep_lag": 1.067384891584311e-08,
+          "d_nonrep_lag": 0.6447663939587609,
           "dlog_oi": 0.0,
-          "t": 0.3182404913709014
+          "t": 0.4817022774881665
         }
       },
-      "rsq_within": 0.2266467330184806
+      "rsq_within": 0.22709085869538914,
+      "note": "ex-post association; sample is smaller wherever conc4 is missing"
     },
-    "_hac_bandwidth": 6
+    "spec4_predictive_fully_lagged": {
+      "n_obs": 2750,
+      "n_commodities": 22,
+      "n_months": 125,
+      "n_rows_dropped_vs_spec_frame": 528,
+      "rhs": [
+        "hhi_seg_pit_z",
+        "highvol_pit_lag",
+        "fcm_pre_x_highvol_lag",
+        "nonrep_lag",
+        "d_nonrep_lag",
+        "dlog_oi_lag",
+        "t"
+      ],
+      "driscoll_kraay": {
+        "coef": {
+          "hhi_seg_pit_z": -9.005034279292908e-06,
+          "highvol_pit_lag": 0.0013332559463037367,
+          "fcm_pre_x_highvol_lag": 4.4153365164154166e-05,
+          "nonrep_lag": -0.09718301431138754,
+          "d_nonrep_lag": 0.01652431620079979,
+          "dlog_oi_lag": -0.0033370116938488065,
+          "t": -2.6652152631060374e-06
+        },
+        "tstat": {
+          "hhi_seg_pit_z": -0.04202082143401377,
+          "highvol_pit_lag": 2.946433572984545,
+          "fcm_pre_x_highvol_lag": 0.17663853858761305,
+          "nonrep_lag": -7.155176083892997,
+          "d_nonrep_lag": 0.555029113880627,
+          "dlog_oi_lag": -1.447907059592295,
+          "t": -0.724894007803489
+        },
+        "pval": {
+          "hhi_seg_pit_z": 0.9664851827089769,
+          "highvol_pit_lag": 0.0032419159638306105,
+          "fcm_pre_x_highvol_lag": 0.8598054663535906,
+          "nonrep_lag": 1.0698109065288008e-12,
+          "d_nonrep_lag": 0.5789203688330347,
+          "dlog_oi_lag": 0.14775825324001923,
+          "t": 0.46857938686541556
+        },
+        "bandwidth": 6,
+        "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
+      },
+      "cluster_by_month": {
+        "coef": {
+          "hhi_seg_pit_z": -9.005034279292908e-06,
+          "highvol_pit_lag": 0.0013332559463037367,
+          "fcm_pre_x_highvol_lag": 4.4153365164154166e-05,
+          "nonrep_lag": -0.09718301431138754,
+          "d_nonrep_lag": 0.01652431620079979,
+          "dlog_oi_lag": -0.0033370116938488065,
+          "t": -2.6652152631060374e-06
+        },
+        "tstat": {
+          "hhi_seg_pit_z": -0.051626861949547236,
+          "highvol_pit_lag": 3.708453534015164,
+          "fcm_pre_x_highvol_lag": 0.22113613020743497,
+          "nonrep_lag": -7.447105664910013,
+          "d_nonrep_lag": 0.5137559207464933,
+          "dlog_oi_lag": -1.394407479727581,
+          "t": -0.676649800032377
+        },
+        "pval": {
+          "hhi_seg_pit_z": 0.9588298046580941,
+          "highvol_pit_lag": 0.0002126952406569238,
+          "fcm_pre_x_highvol_lag": 0.8250030310101877,
+          "nonrep_lag": 1.2745360322696797e-13,
+          "d_nonrep_lag": 0.6074643649051961,
+          "dlog_oi_lag": 0.16330842683384894,
+          "t": 0.4986856888025861
+        }
+      },
+      "rsq_within": 0.05985206127231579,
+      "note": "predictive: FCM report available before the outcome month starts, point-in-time regime label at t-1, all controls lagged"
+    },
+    "_hac_bandwidth": 6,
+    "_hac_bandwidth_rule": "max(ceil(T^(1/3)), 4); fixed rule, not ACF-derived"
+  },
+  "dk_bandwidth_sensitivity_spec1": {
+    "term": "fcm_x_highvol",
+    "grid": [
+      {
+        "bandwidth": 1,
+        "tstat": 1.6476954702183442,
+        "pval": 0.09951187419283603
+      },
+      {
+        "bandwidth": 2,
+        "tstat": 1.6052421103217949,
+        "pval": 0.10853771937131329
+      },
+      {
+        "bandwidth": 3,
+        "tstat": 1.5770627334920688,
+        "pval": 0.1148784451213738
+      },
+      {
+        "bandwidth": 4,
+        "tstat": 1.5849880113798889,
+        "pval": 0.11306637773429795
+      },
+      {
+        "bandwidth": 5,
+        "tstat": 1.5618648323033326,
+        "pval": 0.11841722690813716
+      },
+      {
+        "bandwidth": 6,
+        "tstat": 1.56065427623522,
+        "pval": 0.11870273865110015
+      },
+      {
+        "bandwidth": 7,
+        "tstat": 1.5605679980810967,
+        "pval": 0.1187231080983826
+      },
+      {
+        "bandwidth": 8,
+        "tstat": 1.5738425475023248,
+        "pval": 0.11562122013935694
+      },
+      {
+        "bandwidth": 9,
+        "tstat": 1.589256751293076,
+        "pval": 0.1120997353835873
+      },
+      {
+        "bandwidth": 10,
+        "tstat": 1.5944988533051874,
+        "pval": 0.11092161227397912
+      },
+      {
+        "bandwidth": 11,
+        "tstat": 1.6015611299917436,
+        "pval": 0.1093499070327093
+      },
+      {
+        "bandwidth": 12,
+        "tstat": 1.5976399351535382,
+        "pval": 0.11022037708334476
+      },
+      {
+        "bandwidth": 13,
+        "tstat": 1.5856809939924665,
+        "pval": 0.11290900878250154
+      },
+      {
+        "bandwidth": 14,
+        "tstat": 1.5813977079925248,
+        "pval": 0.11388446766337612
+      },
+      {
+        "bandwidth": 15,
+        "tstat": 1.5794371705244648,
+        "pval": 0.11433316195525967
+      },
+      {
+        "bandwidth": 16,
+        "tstat": 1.5862013923685987,
+        "pval": 0.1127909454471594
+      },
+      {
+        "bandwidth": 17,
+        "tstat": 1.5966682721231187,
+        "pval": 0.11043692205323863
+      },
+      {
+        "bandwidth": 18,
+        "tstat": 1.6084521501589708,
+        "pval": 0.10783334664160704
+      },
+      {
+        "bandwidth": 19,
+        "tstat": 1.6248734626874457,
+        "pval": 0.10428651813748502
+      },
+      {
+        "bandwidth": 20,
+        "tstat": 1.645332744624654,
+        "pval": 0.09999794148133412
+      },
+      {
+        "bandwidth": 21,
+        "tstat": 1.6665740904224098,
+        "pval": 0.0956955131634476
+      },
+      {
+        "bandwidth": 22,
+        "tstat": 1.6869825843422581,
+        "pval": 0.0917026964415546
+      },
+      {
+        "bandwidth": 23,
+        "tstat": 1.7012938828838724,
+        "pval": 0.08898349897550983
+      },
+      {
+        "bandwidth": 24,
+        "tstat": 1.712454529188196,
+        "pval": 0.0869083555014869
+      }
+    ],
+    "abs_t_min": 1.5605679980810967,
+    "abs_t_max": 1.712454529188196,
+    "any_abs_t_ge_1_96": false
   },
   "timeseries_regression": {
-    "n_months": 150,
+    "n_months": 149,
     "hac_lag": 6,
-    "resid_acf1": -0.04159218490346735,
+    "hac_lag_rule": "max(ceil(T^(1/3)), 4); fixed rule, not ACF-derived",
+    "resid_acf1": -0.045112322578968946,
     "coef": {
-      "const": -0.001019692295444828,
-      "hhi_z": 0.00011961666825545408,
-      "highvol_frac": 0.001645038911193178,
-      "hhi_x_volfrac": 0.0005635547892659614
+      "const": -0.0009486926334017246,
+      "hhi_z": 0.0001441199316317414,
+      "highvol_frac": 0.001562601415167156,
+      "hhi_x_volfrac": 0.00043440448958396245
     },
     "tstat": {
-      "const": -1.6058686746809991,
-      "hhi_z": 0.8348681652012924,
-      "highvol_frac": 1.215145365060096,
-      "hhi_x_volfrac": 0.5416364253263832
+      "const": -1.5047261790742215,
+      "hhi_z": 0.9922292306615904,
+      "highvol_frac": 1.1661675522781414,
+      "hhi_x_volfrac": 0.40692836513840985
     },
     "pval": {
-      "const": 0.10830276756491213,
-      "hhi_z": 0.4037919407887661,
-      "highvol_frac": 0.22431065389239824,
-      "hhi_x_volfrac": 0.5880689935941328
+      "const": 0.13239448964075648,
+      "hhi_z": 0.32108571645679096,
+      "highvol_frac": 0.24354670876039064,
+      "hhi_x_volfrac": 0.6840606021067039
     }
   },
-  "bootstrap_interaction_spec1": {
-    "point": 0.0003509280098789428,
-    "n_boot": 2000,
-    "ci95": [
-      -2.720344527384806e-05,
-      0.0007471406979583968
-    ],
-    "p_two_sided": 0.074,
-    "mean": 0.0003601162026486811,
-    "std": 0.0001979990012368352
+  "bootstrap_spec1": {
+    "headline": "stationary_block_by_month",
+    "stationary_block_by_month": {
+      "kind": "stationary_block",
+      "label": "stationary block bootstrap by month (Politis-Romano)",
+      "preserves_serial_correlation": true,
+      "mean_block_months": 6,
+      "rhs": [
+        "hhi_seg_z",
+        "highvol",
+        "fcm_x_highvol",
+        "nonrep_lag",
+        "d_nonrep_lag",
+        "dlog_oi",
+        "t"
+      ],
+      "shares_spec1_design_matrix": true,
+      "n_rows": 3278,
+      "n_months": 149,
+      "point": 0.00031574662058230266,
+      "point_estimator_identity_check": {
+        "panel_ols": 0.00031574662058230266,
+        "within_ols": 0.00031574662058230315,
+        "max_abs_diff": 4.87890977618477e-19
+      },
+      "n_boot": 2000,
+      "n_failed": 0,
+      "ci95": [
+        -7.07623484056501e-05,
+        0.0007792887212367153
+      ],
+      "p_two_sided": 0.117,
+      "mean": 0.0003237101175251861,
+      "std": 0.00021430006804052057
+    },
+    "month_cluster_iid": {
+      "kind": "month_cluster_iid",
+      "label": "IID month-cluster bootstrap (NOT a block bootstrap; preserves the within-month cross-section but destroys month-to-month serial correlation)",
+      "preserves_serial_correlation": false,
+      "mean_block_months": null,
+      "rhs": [
+        "hhi_seg_z",
+        "highvol",
+        "fcm_x_highvol",
+        "nonrep_lag",
+        "d_nonrep_lag",
+        "dlog_oi",
+        "t"
+      ],
+      "shares_spec1_design_matrix": true,
+      "n_rows": 3278,
+      "n_months": 149,
+      "point": 0.00031574662058230266,
+      "point_estimator_identity_check": {
+        "panel_ols": 0.00031574662058230266,
+        "within_ols": 0.00031574662058230315,
+        "max_abs_diff": 4.87890977618477e-19
+      },
+      "n_boot": 2000,
+      "n_failed": 0,
+      "ci95": [
+        -6.772918521449675e-05,
+        0.0007105822783957487
+      ],
+      "p_two_sided": 0.119,
+      "mean": 0.0003173323072503935,
+      "std": 0.00019989769401426206
+    },
+    "design_matrix_note": "Both bootstraps resample months of the SAME build_spec_frame() rows and refit the SAME SPEC1_RHS (time trend `t` included), so the CI is the CI of the reported spec1 coefficient."
   },
   "primary_interaction": {
     "term": "fcm_x_highvol",
-    "coef": 0.000314636170181876,
-    "t_driscoll_kraay": 1.553883806440329,
-    "t_cluster_month": 1.5894677755226168,
-    "bootstrap_ci95": [
-      -2.720344527384806e-05,
-      0.0007471406979583968
-    ]
+    "spec": "spec1_fcm_highvol",
+    "coef": 0.00031574662058230266,
+    "t_driscoll_kraay": 1.56065427623522,
+    "t_cluster_month": 1.5959859229257494,
+    "stationary_block_bootstrap_ci95": [
+      -7.07623484056501e-05,
+      0.0007792887212367153
+    ],
+    "stationary_block_bootstrap_p_two_sided": 0.117,
+    "month_cluster_iid_bootstrap_ci95": [
+      -6.772918521449675e-05,
+      0.0007105822783957487
+    ],
+    "bootstrap_matches_spec1_sample_and_rhs": true,
+    "claim_type": "ex_post_association"
+  },
+  "secondary_findings": {
+    "spec2_continuous_interaction_is_positive_and_significant": {
+      "term": "fcm_x_rvz",
+      "coef": 0.0002962428372402887,
+      "t_driscoll_kraay": 2.5911620677098557,
+      "t_cluster_month": 2.6078758247592893,
+      "reading": "opposite sign to the crowding-out hypothesis; it is why the NULL must not be stated as 'no association'"
+    },
+    "spec4_predictive": {
+      "term": "fcm_pre_x_highvol_lag",
+      "n_obs": 2750,
+      "coef": 4.4153365164154166e-05,
+      "t_driscoll_kraay": 0.17663853858761305,
+      "t_cluster_month": 0.22113613020743497
+    }
   },
   "limitations": [
-    "FCM concentration is a single system-wide monthly series (high autocorrelation, low effective d.o.f.); its main effect is a common time factor.",
-    "Volatility regime is contemporaneous with the outcome -> association, not causal; reverse causality (small-trader exit affecting vol) cannot be excluded.",
+    "FCM concentration is a single system-wide monthly series (high autocorrelation, low effective d.o.f.); its main effect is a common time factor. The panel has 3278 rows but only 149 months of independent FCM variation.",
+    "FCM publication dates are SYNTHETIC (month_end + 45d), never checked against actual CFTC release dates; the lag grid in K1694_lag_sensitivity.json shows insensitivity to the assumed vintage but is not a verification of it.",
+    "Within-month timing overlap: in spec1-3 the FCM report's assumed availability can fall inside the outcome month, and the outcome d_nonrep is the change in a whole-month average, so part of the outcome window predates the signal. Ex-post association only.",
+    "Regime labels rv_z and highvol in spec1-3 use FULL-SAMPLE within-commodity moments, i.e. the labelling itself looks ahead. Acceptable for a retrospective association, not for a predictive claim; spec4 uses point-in-time expanding moments instead.",
+    "The month-cluster IID bootstrap preserves the within-month cross-section but does NOT preserve month-to-month serial correlation; it is reported only alongside the stationary block bootstrap, which does.",
+    "The last weekly DCOT report of month t-1 is published within ~3 days of its Tuesday as-of date, so the t-1 controls in spec4 can be public a few days into month t; a residual publication overlap of at most a few business days remains.",
+    "Volatility regime is contemporaneous with the outcome in spec1-3 -> association, not causal; reverse causality (small-trader exit affecting vol) cannot be excluded.",
     "FCM seg funds are dominated by financial futures; crowding-out mapped onto physical-commodity small traders is an indirect linkage.",
     "yfinance continuous-futures realized vol is a proxy for each commodity's true vol."
-  ]
+  ],
+  "code_trace": {
+    "path": "experiments/K1694/K1694.py",
+    "sha256": "c4dbb956f4f3e7e6aaa9442e48d2b56d754dfcb93195b82a61921894f2387bb2",
+    "size_bytes": 58868
+  },
+  "runtime_seconds": 4.914,
+  "runtime_env": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1694
+      }
+    ]
+  }
 }

@@ -33,7 +33,9 @@ def main() -> None:
         f = fcm.copy()
         f["avail_date"] = f["month_end"] + pd.Timedelta(days=lag)
         panel = K1694.build_panel(f, dcot, rv)
-        res = K1694.panel_regression(panel)
+        # same estimation-sample owner as the main script, so the grid is
+        # comparable to the headline spec1 row by construction
+        res = K1694.panel_regression(K1694.build_spec_frame(panel))
         s1 = res["spec1_fcm_highvol"]
         rows.append({
             "assumed_lag_days": lag,

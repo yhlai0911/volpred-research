@@ -1,0 +1,86 @@
+{
+  "schema_version": "volpred.reproduce_spec.v1",
+  "generated_by": "volpred.research.reproduce_spec",
+  "generated_at_runtime": true,
+  "entrypoint": {
+    "path": "K1694.py",
+    "args": [],
+    "sha256": "c4dbb956f4f3e7e6aaa9442e48d2b56d754dfcb93195b82a61921894f2387bb2",
+    "size_bytes": 58868
+  },
+  "canonical_result": "K1694_results.json",
+  "inputs": [
+    {
+      "path": "experiments/K1694/data/fcm_monthly.csv",
+      "sha256": "bd642fd87b730dc93170462150743776a8cbf0fe013eb3e9778535938ac408ff",
+      "size_bytes": 20846
+    },
+    {
+      "path": "experiments/K1694/data/dcot_weekly.csv",
+      "sha256": "9b95569055a7f7b20f4f98718c741c88c841a30c299af3e418f49bb637287116",
+      "size_bytes": 2480694
+    },
+    {
+      "path": "experiments/K1694/data/rv_monthly.csv",
+      "sha256": "fe3ce3f2a7e7494279f6fa87c39f200a8bc081e2ba8d0cfb3f1ea69b3c24d182",
+      "size_bytes": 248845
+    }
+  ],
+  "outputs": [
+    "K1694_results.json",
+    "data/panel.csv",
+    "figures/fig1_fcm_hhi_timeseries.png",
+    "figures/fig2_regime_2x2.png",
+    "figures/fig3_interaction_coef.png"
+  ],
+  "timeout_seconds": 1800,
+  "network": "deny",
+  "randomness": {
+    "status": "declared",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1694
+      }
+    ]
+  },
+  "runtime": {
+    "runtime_seconds": 4.914,
+    "recorded_at": "2026-07-28T22:42:54Z"
+  },
+  "environment": {
+    "python": "3.12.10",
+    "implementation": "CPython",
+    "platform": "macOS-26.5.2-arm64-arm-64bit",
+    "numpy": "2.4.3",
+    "pandas": "3.0.1",
+    "scipy": "1.17.1",
+    "seeds": [
+      {
+        "library": "numpy",
+        "value": 1694
+      }
+    ]
+  },
+  "comparison": {
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "ignore_pointers": [
+      "/created_at",
+      "/runtime_seconds",
+      "/run_utc",
+      "/runtime_env"
+    ],
+    "ignore_reasons": {
+      "/created_at": "Execution timestamp; written after every scientific value is computed.",
+      "/runtime_seconds": "Wall-clock performance metadata; not an input to any estimate or verdict.",
+      "/run_utc": "Execution timestamp; not an input to any estimate or verdict.",
+      "/runtime_env": "Interpreter and library versions of the recording host; machine-dependent by construction."
+    }
+  },
+  "canonical_result_identity": {
+    "path": "K1694_results.json",
+    "sha256": "858cfbcfcac9742476986d181f5b6abd752b426ffe9ca10dd71ae1444a93e8f4",
+    "size_bytes": 25404
+  }
+}
