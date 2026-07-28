@@ -14,6 +14,8 @@ import psycopg
 import pytest
 from psycopg.types.json import Jsonb
 
+from volpred.ops.growth_experiments import GrowthExperimentRegistry
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 ANALYTICS_MIGRATIONS = tuple(
     REPO_ROOT / "supabase" / "migrations" / name
@@ -248,6 +250,35 @@ def _command(
     ).fetchone()[0]
 
 
+class _PostgresGrowthRpc:
+    def __init__(self, connection: psycopg.Connection) -> None:
+        self.connection = connection
+
+    def call(self, function: str, payload: dict[str, object]) -> object:
+        if function == "read_volpred_growth_experiment":
+            return self.connection.execute(
+                "SELECT public.read_volpred_growth_experiment(%s)",
+                (payload["p_experiment_id"],),
+            ).fetchone()[0]
+        if function == "command_volpred_growth_experiment":
+            digest = str(payload["p_request_digest"])
+            return self.connection.execute(
+                """
+                SELECT public.command_volpred_growth_experiment(
+                  %s, %s, %s, %s, %s
+                )
+                """,
+                (
+                    payload["p_command_id"],
+                    payload["p_action"],
+                    Jsonb(payload["p_payload"]),
+                    bytes.fromhex(digest.removeprefix("\\x")),
+                    payload["p_now"],
+                ),
+            ).fetchone()[0]
+        raise AssertionError(f"unexpected growth RPC: {function}")
+
+
 def _preregister_and_activate(
     connection: psycopg.Connection,
 ) -> dict:
@@ -442,6 +473,76 @@ def test_preregistration_rejects_a_lifecycle_shorter_than_attribution(
             payload=spec,
             now=spec["preregistered_at"],
         )
+
+
+def test_python_reconcile_matches_postgres_stop_condition(
+    growth_postgres_dsn: str,
+) -> None:
+    now = datetime.now(UTC)
+    spec = _spec(now - timedelta(hours=4))
+    starts_at = now - timedelta(hours=1)
+    ends_at = now + timedelta(hours=1)
+    spec["window"] = {
+        "starts_at": _iso(starts_at),
+        "ends_at": _iso(ends_at),
+    }
+    definition = dict(spec)
+    definition.pop("status")
+
+    with psycopg.connect(growth_postgres_dsn) as connection:
+        connection.execute(
+            "SELECT volpred_growth.validate_spec(%s)",
+            (Jsonb(spec),),
+        )
+        connection.execute(
+            """
+            INSERT INTO volpred_growth.experiments (
+              experiment_id,
+              definition,
+              definition_digest,
+              status,
+              preregistered_at,
+              starts_at,
+              ends_at,
+              activated_at
+            )
+            VALUES (%s, %s, %s, 'active', %s, %s, %s, %s)
+            """,
+            (
+                EXPERIMENT_ID,
+                Jsonb(definition),
+                _digest(spec),
+                spec["preregistered_at"],
+                spec["window"]["starts_at"],
+                spec["window"]["ends_at"],
+                _iso(starts_at),
+            ),
+        )
+        connection.execute("SET ROLE service_role")
+        result = GrowthExperimentRegistry(
+            rpc=_PostgresGrowthRpc(connection),
+            clock=lambda: now,
+        ).reconcile(EXPERIMENT_ID)
+
+        assert result["action"] == "noop"
+        assert result["reason"] == "exposure_window_open"
+        with (
+            pytest.raises(
+                psycopg.errors.RaiseException,
+                match="stop reason does not match",
+            ),
+            connection.transaction(),
+        ):
+            _command(
+                connection,
+                command_id="growth-stop-time-only",
+                action="stop",
+                payload={
+                    "experiment_id": EXPERIMENT_ID,
+                    "reason": "stop_rule_reached",
+                },
+                now=_iso(now),
+            )
 
 
 def test_registry_is_receipt_backed_private_and_assignment_is_stable(

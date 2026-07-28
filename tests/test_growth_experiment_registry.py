@@ -64,6 +64,40 @@ class FakeRpc:
         return receipt
 
 
+class StatefulGrowthRpc(FakeRpc):
+    def __init__(self, snapshot: dict[str, object]) -> None:
+        super().__init__()
+        self.snapshot = snapshot
+
+    def call(
+        self,
+        function: str,
+        payload: dict[str, object],
+    ) -> object:
+        if function == "read_volpred_growth_experiment":
+            self.calls.append((function, payload))
+            return dict(self.snapshot)
+        result = super().call(function, payload)
+        if function != "command_volpred_growth_experiment":
+            return result
+        action = str(payload["p_action"])
+        if action == "activate":
+            self.snapshot["status"] = "active"
+            self.snapshot["activated_at"] = payload["p_now"]
+        elif action == "stop":
+            request = payload["p_payload"]
+            assert isinstance(request, dict)
+            self.snapshot["status"] = "observing"
+            self.snapshot["stop_reason"] = request["reason"]
+            self.snapshot["observation_ends_at"] = (
+                "2026-08-07T01:00:00+00:00"
+            )
+        elif action == "close":
+            self.snapshot["status"] = "closed"
+            self.snapshot["closed_at"] = payload["p_now"]
+        return result
+
+
 def _registry(
     *,
     now: datetime | None = None,
@@ -77,6 +111,184 @@ def _registry(
             else (lambda: datetime.now(UTC))
         ),
     ), rpc
+
+
+def _lifecycle_snapshot(
+    *,
+    status: str,
+) -> dict[str, object]:
+    return {
+        "contract": "growth-experiment-read.v1",
+        "experiment_id": "article-share-cta-copy-v1",
+        "status": status,
+        "preregistered_at": "2026-07-28T22:39:40+00:00",
+        "activated_at": (
+            "2026-07-30T00:00:00+00:00"
+            if status != "preregistered"
+            else None
+        ),
+        "stop_reason": (
+            "window_ended"
+            if status in {"observing", "closed"}
+            else None
+        ),
+        "observation_ends_at": (
+            "2026-08-07T01:00:00+00:00"
+            if status in {"observing", "closed"}
+            else None
+        ),
+        "measurement": {
+            "control": {"exposures": 10},
+            "treatment": {"exposures": 11},
+        },
+        "spec": {
+            "schema_version": "growth-experiment.v1",
+            "experiment_id": "article-share-cta-copy-v1",
+            "status": "preregistered",
+            "window": {
+                "starts_at": "2026-07-30T00:00:00+00:00",
+                "ends_at": "2026-08-06T00:00:00+00:00",
+            },
+            "stop_rule": {
+                "maximum_exposure_hours": 168,
+                "maximum_exposures_total": 5000,
+                "maximum_lifecycle_hours": 193,
+            },
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    ("now", "status", "expected_action", "expected_reason"),
+    [
+        (
+            datetime(2026, 7, 29, 23, 59, tzinfo=UTC),
+            "preregistered",
+            "noop",
+            "awaiting_window",
+        ),
+        (
+            datetime(2026, 7, 30, 0, 0, tzinfo=UTC),
+            "preregistered",
+            "activate",
+            "window_open",
+        ),
+        (
+            datetime(2026, 8, 6, 0, 0, tzinfo=UTC),
+            "active",
+            "stop",
+            "window_ended",
+        ),
+        (
+            datetime(2026, 8, 7, 0, 59, tzinfo=UTC),
+            "observing",
+            "noop",
+            "awaiting_attribution",
+        ),
+        (
+            datetime(2026, 8, 7, 1, 0, tzinfo=UTC),
+            "observing",
+            "close",
+            "window_ended",
+        ),
+        (
+            datetime(2026, 8, 8, 0, 0, tzinfo=UTC),
+            "closed",
+            "noop",
+            "already_closed",
+        ),
+    ],
+)
+def test_reconcile_advances_only_mature_lifecycle_edges(
+    now: datetime,
+    status: str,
+    expected_action: str,
+    expected_reason: str,
+) -> None:
+    rpc = StatefulGrowthRpc(_lifecycle_snapshot(status=status))
+    registry = GrowthExperimentRegistry(rpc=rpc, clock=lambda: now)
+
+    result = registry.reconcile("article-share-cta-copy-v1")
+
+    assert result["contract"] == "growth-lifecycle-reconcile.v1"
+    assert result["action"] == expected_action
+    assert result["reason"] == expected_reason
+    command_calls = [
+        call
+        for call in rpc.calls
+        if call[0] == "command_volpred_growth_experiment"
+    ]
+    assert len(command_calls) == (0 if expected_action == "noop" else 1)
+    if command_calls:
+        assert command_calls[0][1]["p_command_id"] == (
+            f"growth-lifecycle:article-share-cta-copy-v1:"
+            f"{expected_action}:v1"
+        )
+        assert result["snapshot"]["status"] == {
+            "activate": "active",
+            "stop": "observing",
+            "close": "closed",
+        }[expected_action]
+
+
+def test_reconcile_stops_on_exposure_cap_and_rejects_missed_window() -> None:
+    capped = _lifecycle_snapshot(status="active")
+    measurement = capped["measurement"]
+    assert isinstance(measurement, dict)
+    measurement["control"] = {"exposures": 2500}
+    measurement["treatment"] = {"exposures": 2500}
+    rpc = StatefulGrowthRpc(capped)
+    result = GrowthExperimentRegistry(
+        rpc=rpc,
+        clock=lambda: datetime(2026, 8, 1, tzinfo=UTC),
+    ).reconcile("article-share-cta-copy-v1")
+    assert result["action"] == "stop"
+    assert result["reason"] == "stop_rule_reached"
+
+    missed = StatefulGrowthRpc(
+        _lifecycle_snapshot(status="preregistered")
+    )
+    with pytest.raises(RuntimeError, match="activation window was missed"):
+        GrowthExperimentRegistry(
+            rpc=missed,
+            clock=lambda: datetime(2026, 8, 6, tzinfo=UTC),
+        ).reconcile("article-share-cta-copy-v1")
+
+
+def test_reconcile_template_drift_fails_before_any_command() -> None:
+    snapshot = _lifecycle_snapshot(status="active")
+    spec = snapshot["spec"]
+    assert isinstance(spec, dict)
+    expected = dict(spec)
+    rpc = StatefulGrowthRpc(snapshot)
+    registry = GrowthExperimentRegistry(
+        rpc=rpc,
+        clock=lambda: datetime(2026, 8, 1, tzinfo=UTC),
+    )
+
+    accepted = registry.reconcile(
+        "article-share-cta-copy-v1",
+        expected_template=expected,
+    )
+    assert accepted["action"] == "noop"
+    drifted = {
+        **expected,
+        "hypothesis": "silently changed local hypothesis",
+    }
+    with pytest.raises(
+        RuntimeError,
+        match="template mismatched live definition",
+    ):
+        registry.reconcile(
+            "article-share-cta-copy-v1",
+            expected_template=drifted,
+        )
+
+    assert not [
+        call
+        for call in rpc.calls
+        if call[0] == "command_volpred_growth_experiment"
+    ]
 
 
 def test_preregister_uses_canonical_digest_and_receipt_contract() -> None:
@@ -348,7 +560,6 @@ def test_ops_cli_preregister_template_uses_runtime_clock(
         / "growth_experiments"
         / "article-share-cta-copy-v1.template.json"
     )
-
     result = CliRunner().invoke(
         cli,
         [
@@ -369,3 +580,63 @@ def test_ops_cli_preregister_template_uses_runtime_clock(
     assert materialized["hypothesis"]
     assert materialized["primary_metric"]["action"] == "share"
     assert materialized["policy"]["paid_ads"] is False
+
+
+def test_ops_cli_reconcile_template_and_operations_core_schedule(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    now = datetime(2026, 7, 29, 23, 59, tzinfo=UTC)
+    rpc = StatefulGrowthRpc(
+        _lifecycle_snapshot(status="preregistered")
+    )
+    registry = GrowthExperimentRegistry(rpc=rpc, clock=lambda: now)
+    monkeypatch.setattr(cli_module, "_growth_registry", lambda: registry)
+    root = Path(__file__).parents[1]
+    template_path = (
+        root
+        / "config"
+        / "growth_experiments"
+        / "article-share-cta-copy-v1.template.json"
+    )
+    template = json.loads(template_path.read_text())
+    snapshot = _lifecycle_snapshot(status="preregistered")
+    snapshot["spec"] = {
+        **template,
+        "preregistered_at": "2026-07-28T22:39:40+00:00",
+    }
+    rpc.snapshot = snapshot
+
+    result = CliRunner().invoke(
+        cli,
+        [
+            "ops",
+            "growth-experiment",
+            "reconcile-template",
+            "--template-json",
+            str(template_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["contract"] == "growth-lifecycle-reconcile.v1"
+    assert payload["action"] == "noop"
+    schedules = json.loads(
+        (root / "config" / "runtime_schedules.json").read_text()
+    )
+    items = {
+        item["id"]: item
+        for item in schedules["system_crontab"]["items"]
+    }
+    job = items["growth_experiment_lifecycle"]
+    assert job["cron"] == "*/5 * * * *"
+    assert job["host_crontab_managed"] is False
+    assert job["piggy_back_enabled"] is False
+    assert (
+        "growth_experiment_lifecycle"
+        in schedules["schedule_materialization"]["active_jobs"]
+    )
+    wrapper = (
+        root / "scripts" / "cron_growth_experiment_lifecycle.sh"
+    ).read_text()
+    assert "growth-experiment reconcile-template" in wrapper

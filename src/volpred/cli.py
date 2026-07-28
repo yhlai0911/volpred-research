@@ -642,6 +642,44 @@ def ops_growth_preregister_template(
         raise click.ClickException(str(exc)) from exc
 
 
+@ops_growth_experiment.command("reconcile-template")
+@click.option(
+    "--template-json",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+def ops_growth_reconcile_template(
+    template_json: Path,
+) -> None:
+    """Advance one due lifecycle edge from a committed template."""
+
+    try:
+        template = json.loads(template_json.read_text(encoding="utf-8"))
+        if not isinstance(template, dict):
+            raise TypeError(
+                "growth preregistration template must be a JSON object"
+            )
+        experiment_id = template.get("experiment_id")
+        if not isinstance(experiment_id, str):
+            raise TypeError(
+                "growth preregistration template omitted experiment_id"
+            )
+        _growth_echo(
+            _growth_registry().reconcile(
+                experiment_id,
+                expected_template=template,
+            )
+        )
+    except (
+        OSError,
+        TypeError,
+        ValueError,
+        RuntimeError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
 @ops_growth_experiment.command("activate")
 @click.option("--experiment-id", required=True)
 @click.option("--command-id", required=True)

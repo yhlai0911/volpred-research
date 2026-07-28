@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-28T15:47:00+08:00",
+    "updated_at": "2026-07-29T06:45:00+08:00",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。 【2026-07-27 shadow 觀察結論（scripts/crosscheck_pregate_outcomes.py --invoker supervisor --since 2026-07-20，即 capacity+novelty rewire 上線後）】新 gate 於 162 班中僅 would_skip 2 班（1.2% skip 率），且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2＝100% 誤判，反例：2026-07-21T07:08 / 08:08 UTC）。雙重不合格：skip 率過低不足以省 token；skip 時全為誤判，遠超 flip 門檻 strict_mismatch_rate≤0.10。判定：維持 shadow，不翻 enforce；live A/B（60min vs 15min）因 enforce 未上線暫緩。後續：gate 需補訊號提高 skip precision/recall 後再評，估算值（15min≈1.84x）尚未由 live A/B 實測取代。"
   },
   "schedule_materialization": {
@@ -45,6 +45,9 @@
       },
       "agent_dispatch_tick": {
         "activated_at": "2026-07-26T11:42:00Z"
+      },
+      "growth_experiment_lifecycle": {
+        "activated_at": "2026-07-28T22:45:00Z"
       }
     },
     "job_defaults": {
@@ -74,6 +77,12 @@
         "retry_delay_seconds": 10,
         "lease_seconds": 45,
         "timeout_seconds": 30
+      },
+      "growth_experiment_lifecycle": {
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "lease_seconds": 180,
+        "timeout_seconds": 120
       },
       "boss_report_4h": {
         "catch_up": "skip",
@@ -706,6 +715,22 @@
           "cron_agent_dispatch_tick.sh",
           "scripts.dispatch_supervisor.trigger",
           "dispatch-trigger.sock"
+        ]
+      },
+      {
+        "id": "growth_experiment_lifecycle",
+        "label": "Receipt-backed natural-growth experiment lifecycle",
+        "cron": "*/5 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_growth_experiment_lifecycle.sh",
+        "log_path": "storage/logs/cron/growth_experiment_lifecycle.log",
+        "description": "Issue #27 canonical lifecycle owner. Every five minutes Operations Core reads the durable experiment registry and idempotently advances the committed article-share CTA experiment through activate, exposure stop, attribution maturation, and frozen closeout. Stable command receipts make retries and restart catch-up safe; the job never rewrites research facts, buys traffic, or requires Claude/Codex Desktop to stay open.",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "staleness_expected_minutes": 15,
+        "matchers": [
+          "cron_growth_experiment_lifecycle.sh",
+          "growth-experiment reconcile-template",
+          "growth_experiment_lifecycle.log"
         ]
       },
       {

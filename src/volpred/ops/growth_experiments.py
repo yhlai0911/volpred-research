@@ -42,6 +42,11 @@ def _timestamp(value: object, field: str) -> str:
     return value
 
 
+def _datetime(value: object, field: str) -> datetime:
+    raw = _timestamp(value, field)
+    return datetime.fromisoformat(raw).astimezone(UTC)
+
+
 def _identifier(value: str, field: str) -> str:
     normalized = value.strip()
     if not _ID.fullmatch(normalized):
@@ -96,6 +101,19 @@ class GrowthExperimentRegistry:
     ) -> object:
         caller = getattr(self._rpc, "call", self._rpc)
         return caller(function, payload)
+
+    def _observed_now(self) -> tuple[datetime, str]:
+        now = self._clock()
+        if now.tzinfo is None or now.utcoffset() is None:
+            raise ValueError("growth registry clock must include a timezone")
+        normalized = now.astimezone(UTC)
+        observed_at = (
+            normalized.isoformat(timespec="microseconds")
+            .replace("+00:00", "Z")
+        )
+        if observed_at.endswith(".000000Z"):
+            observed_at = observed_at.replace(".000000Z", "Z")
+        return normalized, observed_at
 
     @staticmethod
     def _receipt(
@@ -222,16 +240,7 @@ class GrowthExperimentRegistry:
             )
             recovered["duplicate"] = True
             return recovered
-        now = self._clock()
-        if now.tzinfo is None:
-            raise ValueError("growth registry clock must include a timezone")
-        observed_at = (
-            now.astimezone(UTC)
-            .isoformat(timespec="microseconds")
-            .replace("+00:00", "Z")
-        )
-        if observed_at.endswith(".000000Z"):
-            observed_at = observed_at.replace(".000000Z", "Z")
+        _, observed_at = self._observed_now()
         materialized = dict(template)
         materialized["preregistered_at"] = observed_at
         return self.preregister(
@@ -337,6 +346,209 @@ class GrowthExperimentRegistry:
         ):
             raise RuntimeError("growth registry returned an invalid snapshot")
         return dict(result)
+
+    @staticmethod
+    def _reconcile_result(
+        *,
+        action: str,
+        reason: str,
+        snapshot: Mapping[str, object],
+        command_receipt: Mapping[str, object] | None = None,
+    ) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "contract": "growth-lifecycle-reconcile.v1",
+            "experiment_id": snapshot["experiment_id"],
+            "action": action,
+            "reason": reason,
+            "snapshot": dict(snapshot),
+        }
+        if command_receipt is not None:
+            payload["command_receipt"] = dict(command_receipt)
+        return payload
+
+    @staticmethod
+    def _mapping(
+        value: object,
+        field: str,
+    ) -> Mapping[str, object]:
+        if not isinstance(value, Mapping):
+            raise TypeError(f"growth snapshot omitted {field}")
+        return value
+
+    @staticmethod
+    def _positive_int(
+        value: object,
+        field: str,
+    ) -> int:
+        if (
+            not isinstance(value, int)
+            or isinstance(value, bool)
+            or value <= 0
+        ):
+            raise RuntimeError(f"growth snapshot has invalid {field}")
+        return value
+
+    def reconcile(
+        self,
+        experiment_id: str,
+        *,
+        expected_template: Mapping[str, object] | None = None,
+    ) -> dict[str, Any]:
+        """Advance one durable lifecycle edge and read it back.
+
+        A stable command id makes ambiguous retries converge at the database
+        receipt. One invocation advances at most one edge so each scheduler
+        fire remains independently auditable.
+        """
+
+        normalized = _identifier(experiment_id, "experiment_id")
+        now, observed_at = self._observed_now()
+        snapshot = self.read(normalized)
+        status = str(snapshot["status"])
+        spec = self._mapping(snapshot.get("spec"), "spec")
+        if expected_template is not None:
+            expected = dict(expected_template)
+            if expected.get("experiment_id") != normalized:
+                raise RuntimeError(
+                    "growth committed template experiment_id mismatched"
+                )
+            if "preregistered_at" in expected:
+                raise RuntimeError(
+                    "growth committed template contains runtime fields"
+                )
+            live_definition = dict(spec)
+            for runtime_field in ("preregistered_at", "status"):
+                live_definition.pop(runtime_field, None)
+                expected.pop(runtime_field, None)
+            if live_definition != expected:
+                raise RuntimeError(
+                    "growth committed template mismatched live definition"
+                )
+        window = self._mapping(spec.get("window"), "spec.window")
+        starts_at = _datetime(
+            window.get("starts_at"),
+            "spec.window.starts_at",
+        )
+        ends_at = _datetime(
+            window.get("ends_at"),
+            "spec.window.ends_at",
+        )
+
+        if status == "closed":
+            return self._reconcile_result(
+                action="noop",
+                reason="already_closed",
+                snapshot=snapshot,
+            )
+
+        if status == "preregistered":
+            if now < starts_at:
+                return self._reconcile_result(
+                    action="noop",
+                    reason="awaiting_window",
+                    snapshot=snapshot,
+                )
+            if now >= ends_at:
+                raise RuntimeError(
+                    "growth experiment activation window was missed"
+                )
+            action = "activate"
+            reason = "window_open"
+            command_receipt = self.activate(
+                command_id=(
+                    f"growth-lifecycle:{normalized}:activate:v1"
+                ),
+                experiment_id=normalized,
+                observed_at=observed_at,
+            )
+            expected_status = "active"
+        elif status == "active":
+            stop_rule = self._mapping(
+                spec.get("stop_rule"),
+                "spec.stop_rule",
+            )
+            measurement = self._mapping(
+                snapshot.get("measurement"),
+                "measurement",
+            )
+            total_exposures = 0
+            for variant_id in ("control", "treatment"):
+                variant = self._mapping(
+                    measurement.get(variant_id),
+                    f"measurement.{variant_id}",
+                )
+                exposures = variant.get("exposures")
+                if (
+                    not isinstance(exposures, int)
+                    or isinstance(exposures, bool)
+                    or exposures < 0
+                ):
+                    raise RuntimeError(
+                        "growth snapshot has invalid exposure count"
+                    )
+                total_exposures += exposures
+
+            stop_reason: str | None = None
+            if now >= ends_at:
+                stop_reason = "window_ended"
+            elif total_exposures >= self._positive_int(
+                stop_rule.get("maximum_exposures_total"),
+                "maximum_exposures_total",
+            ):
+                stop_reason = "stop_rule_reached"
+
+            if stop_reason is None:
+                return self._reconcile_result(
+                    action="noop",
+                    reason="exposure_window_open",
+                    snapshot=snapshot,
+                )
+            action = "stop"
+            reason = stop_reason
+            command_receipt = self.stop(
+                command_id=f"growth-lifecycle:{normalized}:stop:v1",
+                experiment_id=normalized,
+                reason=reason,
+                observed_at=observed_at,
+            )
+            expected_status = "observing"
+        else:
+            observation_ends_at = _datetime(
+                snapshot.get("observation_ends_at"),
+                "observation_ends_at",
+            )
+            stop_reason = snapshot.get("stop_reason")
+            if stop_reason not in _CLOSE_REASONS:
+                raise RuntimeError(
+                    "growth observing snapshot has invalid stop_reason"
+                )
+            if now < observation_ends_at:
+                return self._reconcile_result(
+                    action="noop",
+                    reason="awaiting_attribution",
+                    snapshot=snapshot,
+                )
+            action = "close"
+            reason = str(stop_reason)
+            command_receipt = self.close(
+                command_id=f"growth-lifecycle:{normalized}:close:v1",
+                experiment_id=normalized,
+                reason=reason,
+                observed_at=observed_at,
+            )
+            expected_status = "closed"
+
+        readback = self.read(normalized)
+        if readback.get("status") != expected_status:
+            raise RuntimeError(
+                "growth lifecycle command did not reach expected status"
+            )
+        return self._reconcile_result(
+            action=action,
+            reason=reason,
+            snapshot=readback,
+            command_receipt=command_receipt,
+        )
 
 
 __all__ = ["GrowthExperimentRegistry"]
