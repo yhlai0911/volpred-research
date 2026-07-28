@@ -50,6 +50,8 @@ Usage:
     cancel:    uv run python scripts/compute_queue.py cancel --id ID --reason WHY
     requeue:   uv run python scripts/compute_queue.py requeue --id ID
                (auth/quota/worker_killed failures only)
+    reconcile-bindings:
+               repair source-task ownership without executing payloads
     mark-followup-dispatched: ... --id <id>
 """
 from __future__ import annotations
@@ -63,10 +65,13 @@ import re
 import shlex
 import subprocess
 import sys
+import threading
 import time
 import uuid
+from collections import Counter
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -138,6 +143,39 @@ DEFAULT_QUEUE_PRIORITY = 5
 RELEASE_BLOCKING_PRIORITY = 1
 # Job-id prefixes whose completion unblocks a reader-facing release gate.
 RELEASE_BLOCKING_JOB_PREFIXES = ("lazypack-",)
+# Enqueue writes the durable job before linking the canonical task, so a
+# missing task can be a short-lived cross-file split. It is not allowed to
+# masquerade as a healthy queued job indefinitely.
+SOURCE_TASK_CREATION_GRACE = timedelta(minutes=5)
+# ``flock`` is the cross-process owner, but on macOS locks held by separate
+# descriptors in one process do not serialize our ThreadPoolExecutor workers
+# reliably. Keep the process-local half explicit so one worker never reads the
+# canonical task file while a sibling thread is truncating and rewriting it.
+_SOURCE_TASK_QUEUE_THREAD_LOCK = threading.RLock()
+
+
+@dataclass(frozen=True)
+class QueueReadiness:
+    ready: tuple[tuple[int, str, Path], ...]
+    sleeping: int
+    blocked: tuple[tuple[str, str], ...]
+    terminalized: tuple[tuple[str, str], ...]
+
+
+@contextmanager
+def _task_pool_locked_load(tpc: Any):
+    """Serialize this process before taking the canonical cross-process lock."""
+    with _SOURCE_TASK_QUEUE_THREAD_LOCK:
+        with tpc._locked_load() as locked:
+            yield locked
+
+
+@contextmanager
+def _task_pool_locked_readonly(tpc: Any):
+    """Read the task pool under the same local→cross-process lock order."""
+    with _SOURCE_TASK_QUEUE_THREAD_LOCK:
+        with tpc._locked_readonly() as tasks:
+            yield tasks
 
 
 def _default_queue_priority(job_id: str) -> int:
@@ -803,20 +841,22 @@ def _link_source_task(
             sys.path.insert(0, repo_root)
         from scripts import task_pool_claim as tpc
 
-        with tpc._locked_load() as (_fh, tasks):
-            _link_source_task_record(
+        with _task_pool_locked_load(tpc) as (_fh, tasks):
+            link_result = _link_source_task_record(
                 tpc=tpc,
                 tasks=tasks,
                 job_id=job_id,
                 task_id=task_id,
             )
         print(f"linked source task: {task_id} -> awaiting_agent_job")
-        return {
+        receipt = {
             "state": "linked",
             "attempted_at": attempted_at,
             "linked_at": utc_now(),
             "error": None,
         }
+        receipt.update(link_result)
+        return receipt
     except (Exception, SystemExit) as exc:  # noqa: BLE001 — durable retry receipt below
         print(f"warning: could not link source task {task_id}: {exc}", file=sys.stderr)
         return {
@@ -834,10 +874,48 @@ def _link_source_task_record(
     job_id: str,
     task_id: str,
     allow_running_requeue_recovery: bool = False,
-) -> None:
+) -> dict[str, str]:
     task = tpc._find(tasks, task_id)
     status = str(task.get("status") or "pending")
     bound_job_id = task.get("compute_job_id")
+    recovered_from_job_id: str | None = None
+
+    # Before source-task settlement existed, PHASE A could durably mark the
+    # terminal receipt collected yet leave the canonical task pinned to it.
+    # The receipt is the proof that the old owner is finished *and* handed off;
+    # only that exact evidence permits an atomic transfer to this successor.
+    if (
+        status == "awaiting_agent_job"
+        and bound_job_id
+        and str(bound_job_id) != job_id
+        and task.get("blocked_reason")
+        in {
+            "external_compute_receipt_pending_collection",
+            "external_compute_job_running",
+        }
+    ):
+        prior_path = QUEUE_DIR / f"{bound_job_id}.json"
+        prior = _read_job_file(
+            prior_path,
+            context="source-task-binding-prior-owner",
+        )
+        if (
+            prior is not None
+            and str(prior.get("id") or "") == str(bound_job_id)
+            and str(prior.get("source_task_id") or "") == task_id
+            and prior.get("status") in {"completed", "failed"}
+            and prior.get("followup_dispatched") is True
+            and _release_collected_source_task(
+                task,
+                prior,
+                next_task_id=prior.get("followup_next_task_id"),
+                tpc=tpc,
+            )
+        ):
+            recovered_from_job_id = str(bound_job_id)
+            status = "pending"
+            bound_job_id = None
+
     is_idempotent = (
         status == "awaiting_agent_job"
         and str(bound_job_id or "") == job_id
@@ -896,6 +974,35 @@ def _link_source_task_record(
     note = f"dispatched to compute job {job_id}; awaiting PHASE A collection"
     if job_id not in str(task.get("result") or ""):
         task["result"] = tpc._append_note(task.get("result"), note)
+    return (
+        {"recovered_from_job_id": recovered_from_job_id}
+        if recovered_from_job_id
+        else {}
+    )
+
+
+def _source_task_binding_issues(
+    tasks: list[dict[str, Any]],
+    *,
+    task_id: str,
+    job_id: str,
+) -> tuple[str, ...]:
+    """Return canonical, human-readable ownership predicate failures."""
+    task = next(
+        (item for item in tasks if str(item.get("id") or "") == task_id),
+        None,
+    )
+    if task is None:
+        return ("source_task_missing_from_pool",)
+    issues: list[str] = []
+    if task.get("status") != "awaiting_agent_job":
+        issues.append(f"task_status={task.get('status')!r}")
+    bound = str(task.get("compute_job_id") or "")
+    if bound != job_id:
+        issues.append(f"task_bound_to={bound or None!r}")
+    if task.get("blocked_reason") != "external_compute_job_active":
+        issues.append(f"blocked_reason={task.get('blocked_reason')!r}")
+    return tuple(issues)
 
 
 def _source_task_binding_is_valid(
@@ -905,24 +1012,10 @@ def _source_task_binding_is_valid(
     job_id: str,
 ) -> bool:
     """Validate the canonical half of the task↔compute-job ownership pair."""
-    try:
-        from scripts import task_pool_claim as tpc
-
-        task = tpc._find(tasks, task_id)
-    except SystemExit as exc:
-        warn(
-            "compute_queue",
-            "canonical source task binding validation failed",
-            task_id=task_id,
-            job_id=job_id,
-            err=f"{type(exc).__name__}: {exc}",
-        )
-        return False
-    return (
-        task.get("status") == "awaiting_agent_job"
-        and str(task.get("compute_job_id") or "") == job_id
-        and task.get("blocked_reason")
-        == "external_compute_job_active"
+    return not _source_task_binding_issues(
+        tasks,
+        task_id=task_id,
+        job_id=job_id,
     )
 
 
@@ -933,7 +1026,7 @@ def _canonical_source_task_binding_is_valid(
 ) -> bool:
     from scripts import task_pool_claim as tpc
 
-    with tpc._locked_readonly() as tasks:
+    with _task_pool_locked_readonly(tpc) as tasks:
         return _source_task_binding_is_valid(
             tasks,
             task_id=task_id,
@@ -961,11 +1054,130 @@ def _reconcile_job_source_task_link(
     from scripts import task_pool_claim as tpc
 
     attempted_at = utc_now()
-    with tpc._locked_load() as (_fh, tasks):
+    with _task_pool_locked_load(tpc) as (_fh, tasks):
         with _receipt_lock():
             latest = _read_job_file(job_path, context="source-task-link")
             if latest is None or latest.get("status") != "queued":
                 return False
+            try:
+                source_task = tpc._find(
+                    tasks,
+                    str(latest["source_task_id"]),
+                )
+            except SystemExit:
+                source_task = None
+            source_status = (
+                str(source_task.get("status") or "pending").lower()
+                if source_task is not None
+                else None
+            )
+            if source_task is None:
+                queued_at = parse_iso_warn(
+                    latest.get("queued_at"),
+                    tag="compute_queue",
+                    field_name="queued_at",
+                    fallback=None,
+                    job_id=latest.get("id"),
+                )
+                if (
+                    queued_at is not None
+                    and datetime.now(timezone.utc) - queued_at
+                    >= SOURCE_TASK_CREATION_GRACE
+                ):
+                    cancelled_at = utc_now()
+                    latest["status"] = "cancelled"
+                    latest["cancel_reason"] = (
+                        "source_task_missing_after_grace"
+                    )
+                    latest["cancellation_kind"] = (
+                        "automatic_invalid_source_binding"
+                    )
+                    latest["cancelled_at"] = cancelled_at
+                    latest["completed_at"] = cancelled_at
+                    latest["followup_dispatched"] = True
+                    latest["source_task_settlement"] = {
+                        "state": "not_required",
+                        "reason": "source_task_missing_after_grace",
+                    }
+                    latest["source_task_link"] = {
+                        "state": "terminal",
+                        "reason": "source_task_missing_after_grace",
+                    }
+                    _write_job_file(job_path, latest)
+                    return False
+                latest["source_task_link"] = {
+                    "state": "blocked",
+                    "reason": "source_task_creation_grace",
+                    "attempted_at": attempted_at,
+                }
+                _write_job_file(job_path, latest)
+                return False
+            if source_status in tpc.TERMINAL_STATUSES:
+                cancelled_at = utc_now()
+                latest["status"] = "cancelled"
+                latest["cancel_reason"] = (
+                    f"source_task_terminal:{source_status}"
+                )
+                latest["cancellation_kind"] = (
+                    "automatic_invalid_source_binding"
+                )
+                latest["cancelled_at"] = cancelled_at
+                latest["completed_at"] = cancelled_at
+                latest["followup_dispatched"] = True
+                latest["source_task_settlement"] = {
+                    "state": "not_required",
+                    "reason": f"source_task_terminal:{source_status}",
+                }
+                latest["source_task_link"] = {
+                    "state": "terminal",
+                    "reason": "source_task_terminal",
+                    "source_task_status": source_status,
+                }
+                _write_job_file(job_path, latest)
+                return False
+            bound_job_id = str(source_task.get("compute_job_id") or "")
+            if (
+                source_status == "awaiting_agent_job"
+                and bound_job_id
+                and bound_job_id != str(latest["id"])
+            ):
+                owner = _read_job_file(
+                    QUEUE_DIR / f"{bound_job_id}.json",
+                    context="source-task-binding-owner",
+                )
+                owner_status = (
+                    str(owner.get("status") or "").lower()
+                    if owner is not None
+                    else ""
+                )
+                owner_collected = bool(
+                    owner is not None
+                    and owner_status in {"completed", "failed"}
+                    and owner.get("followup_dispatched") is True
+                )
+                if not owner_collected:
+                    if owner is None:
+                        reason = "source_task_owner_receipt_missing"
+                    elif owner_status in {
+                        "pending",
+                        "queued",
+                        "running",
+                        "claimed",
+                    }:
+                        reason = "source_task_owned_by_live_job"
+                    elif owner_status in {"completed", "failed"}:
+                        reason = "prior_receipt_pending_collection"
+                    else:
+                        reason = "source_task_binding_conflict"
+                    latest["source_task_link"] = {
+                        "state": "blocked",
+                        "reason": reason,
+                        "attempted_at": attempted_at,
+                        "bound_job_id": bound_job_id,
+                        "bound_job_status": owner_status or None,
+                    }
+                    _write_job_file(job_path, latest)
+                    return False
             try:
                 history = latest.get("requeue_history")
                 last_requeue_reason = (
@@ -975,7 +1187,7 @@ def _reconcile_job_source_task_link(
                     and isinstance(history[-1], dict)
                     else None
                 )
-                _link_source_task_record(
+                link_result = _link_source_task_record(
                     tpc=tpc,
                     tasks=tasks,
                     job_id=str(latest["id"]),
@@ -990,9 +1202,11 @@ def _reconcile_job_source_task_link(
                     "linked_at": utc_now(),
                     "error": None,
                 }
+                receipt.update(link_result)
             except (Exception, SystemExit) as exc:
                 receipt = {
                     "state": "error",
+                    "reason": "source_task_link_error",
                     "attempted_at": attempted_at,
                     "linked_at": None,
                     "error": f"{type(exc).__name__}: {exc}",
@@ -2038,7 +2252,7 @@ def _transition_source_task_after_worker_exit(
     try:
         from scripts import task_pool_claim as tpc
 
-        with tpc._locked_load() as (_fh, tasks):
+        with _task_pool_locked_load(tpc) as (_fh, tasks):
             task = tpc._find(tasks, str(task_id))
             if (
                 task.get("status") != "awaiting_agent_job"
@@ -2079,18 +2293,21 @@ def _transition_source_task_after_worker_exit(
         }
 
 
-def _ready_queued_jobs(context: str) -> tuple[list[tuple[int, str, Path]], int]:
+def _scan_queue_readiness(context: str) -> QueueReadiness:
     """Queued jobs allowed to start now, priority-then-arrival ordered.
 
-    Returns (ready, sleeping): `ready` as (priority, queued_at, path) tuples —
+    `ready` contains (priority, queued_at, path) tuples —
     priority first, arrival order within a priority, so a release-blocking
     render never waits out a 90-minute agent that arrived first — and
     `sleeping` counting jobs waiting out a `not_before` quota window (starting
     one of those now would just burn the same five seconds against the same
-    wall).
+    wall). `blocked` names every queued job whose ownership cannot currently
+    reconcile, so callers cannot mistake a dead queue for an empty one.
     """
     ready: list[tuple[int, str, Path]] = []
     sleeping = 0
+    blocked: list[tuple[str, str]] = []
+    terminalized: list[tuple[str, str]] = []
     for p in sorted(QUEUE_DIR.glob("*.json")):
         j = _read_job_file(p, context=context)
         if j is None:
@@ -2101,13 +2318,86 @@ def _ready_queued_jobs(context: str) -> tuple[list[tuple[int, str, Path]], int]:
         if j.get("status") != "queued":
             continue
         if not _reconcile_job_source_task_link(p, j):
+            latest = _read_job_file(
+                p,
+                context=f"{context}-blocked-readback",
+            )
+            if latest is not None and latest.get("status") == "queued":
+                link = latest.get("source_task_link")
+                reason = (
+                    str(link.get("reason") or "source_task_link_error")
+                    if isinstance(link, dict)
+                    else "source_task_link_error"
+                )
+                blocked.append((str(latest.get("id") or p.stem), reason))
+            elif (
+                latest is not None
+                and latest.get("status") == "cancelled"
+                and latest.get("cancellation_kind")
+                == "automatic_invalid_source_binding"
+            ):
+                link = latest.get("source_task_link")
+                reason = (
+                    str(link.get("reason") or "invalid_source_binding")
+                    if isinstance(link, dict)
+                    else "invalid_source_binding"
+                )
+                terminalized.append(
+                    (str(latest.get("id") or p.stem), reason)
+                )
             continue
         if _sleeping_until(j) is not None:
             sleeping += 1
             continue
         ready.append((_scheduling_priority(j), j.get("queued_at", ""), p))
     ready.sort(key=lambda item: (item[0], item[1], str(item[2])))
-    return ready, sleeping
+    return QueueReadiness(
+        ready=tuple(ready),
+        sleeping=sleeping,
+        blocked=tuple(blocked),
+        terminalized=tuple(terminalized),
+    )
+
+
+def _ready_queued_jobs(context: str) -> tuple[list[tuple[int, str, Path]], int]:
+    """Compatibility view for callers that only consume ready/sleeping."""
+    scan = _scan_queue_readiness(context)
+    return list(scan.ready), scan.sleeping
+
+
+def reconcile_bindings(args) -> int:
+    """Repair source ownership without claiming or executing any payload."""
+    ensure_dirs()
+    if not _acquire_lock():
+        print("worker already running (lock held); cannot reconcile safely")
+        return 4
+    try:
+        queued_before: set[str] = set()
+        for path in sorted(QUEUE_DIR.glob("*.json")):
+            job = _read_job_file(path, context="reconcile-bindings-before")
+            if job is not None and job.get("status") == "queued":
+                queued_before.add(str(job.get("id") or path.stem))
+
+        scan = _scan_queue_readiness("reconcile-bindings")
+        reason_counts = Counter(reason for _job_id, reason in scan.blocked)
+        report = {
+            "queued_before": len(queued_before),
+            "ready": len(scan.ready),
+            "sleeping": scan.sleeping,
+            "blocked": len(scan.blocked),
+            "terminalized": len(scan.terminalized),
+            "blocked_reasons": dict(sorted(reason_counts.items())),
+        }
+        if getattr(args, "json", False):
+            print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        else:
+            print(
+                "reconcile-bindings: "
+                + " ".join(f"{key}={value}" for key, value in report.items())
+            )
+        return 3 if scan.blocked else 0
+    finally:
+        _release_lock()
 
 
 def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
@@ -2180,7 +2470,7 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
     # validation and publishing `running`.
     from scripts import task_pool_claim as tpc
 
-    with tpc._locked_readonly() as tasks:
+    with _task_pool_locked_readonly(tpc) as tasks:
         if not _source_task_binding_is_valid(
             tasks,
             task_id=str(task_id),
@@ -2211,10 +2501,17 @@ def _source_task_execution_fence(job: dict[str, Any]):
     )
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("a+", encoding="utf-8") as fence_handle:
-        fcntl.flock(fence_handle.fileno(), fcntl.LOCK_EX)
         activated = False
+        fence_locked = False
+        binding_valid = False
         try:
-            with tpc._locked_load() as (_fh, tasks):
+            # Lock order is canonical queue EX -> task fence EX. Taking the
+            # task fence first exposed stale metadata from its previous use
+            # while this thread waited for the queue lock; parallel jobs then
+            # rejected one another as if an unrelated task had changed.
+            with _task_pool_locked_load(tpc) as (_fh, tasks):
+                fcntl.flock(fence_handle.fileno(), fcntl.LOCK_EX)
+                fence_locked = True
                 if not _source_task_binding_is_valid(
                     tasks,
                     task_id=str(task_id),
@@ -2231,39 +2528,59 @@ def _source_task_execution_fence(job: dict[str, Any]):
                             "activated_at": None,
                         },
                     )
-                    yield False
-                    return
-                task = tpc._find(tasks, str(task_id))
-                task["blocked_reason"] = "external_compute_job_running"
-                task["compute_started_at"] = utc_now()
-                normalize_task_priority(task)
-                activated = True
-                _write_job_file(
-                    metadata_path,
-                    {
-                        "task_id": str(task_id),
-                        "job_id": str(job["id"]),
-                        "record_sha256": task_record_sha256(task),
-                        "activated_at": utc_now(),
-                    },
-                )
-            yield True
+                else:
+                    task = tpc._find(tasks, str(task_id))
+                    task["blocked_reason"] = "external_compute_job_running"
+                    task["compute_started_at"] = utc_now()
+                    normalize_task_priority(task)
+                    activated = True
+                    binding_valid = True
+                    _write_job_file(
+                        metadata_path,
+                        {
+                            "task_id": str(task_id),
+                            "job_id": str(job["id"]),
+                            "record_sha256": task_record_sha256(task),
+                            "activated_at": utc_now(),
+                        },
+                    )
+            yield binding_valid
         finally:
-            fcntl.flock(fence_handle.fileno(), fcntl.LOCK_UN)
+            if fence_locked:
+                fcntl.flock(fence_handle.fileno(), fcntl.LOCK_UN)
             if activated:
                 try:
-                    with tpc._locked_load() as (_fh, tasks):
+                    settled_at = utc_now()
+                    with _task_pool_locked_load(tpc) as (_fh, tasks):
                         task = tpc._find(tasks, str(task_id))
                         if (
-                            str(task.get("compute_job_id") or "") == str(job["id"])
+                            str(task.get("compute_job_id") or "")
+                            == str(job["id"])
                             and task.get("blocked_reason")
                             == "external_compute_job_running"
                         ):
                             task["blocked_reason"] = (
                                 "external_compute_receipt_pending_collection"
                             )
-                            task["compute_finished_at"] = utc_now()
+                            task["compute_finished_at"] = settled_at
+                        else:
+                            raise RuntimeError(
+                                "source task ownership changed before "
+                                "execution settlement"
+                            )
+                    job["source_task_settlement"] = {
+                        "state": "pending_collection",
+                        "task_id": str(task_id),
+                        "settled_at": settled_at,
+                        "error": None,
+                    }
                 except (Exception, SystemExit) as exc:
+                    job["source_task_settlement"] = {
+                        "state": "error",
+                        "task_id": str(task_id),
+                        "settled_at": None,
+                        "error": f"{type(exc).__name__}: {exc}",
+                    }
                     warn(
                         "compute_queue",
                         "could not settle source task execution fence",
@@ -2310,16 +2627,64 @@ def run_next(args) -> int:
 
     try:
         _reap_stale_running("run-next")
-        ready, sleeping = _ready_queued_jobs("run-next")
-        for _prio, _queued_at, job_path in ready:
+        scan = _scan_queue_readiness("run-next")
+        if scan.terminalized:
+            terminal_reason_counts = Counter(
+                reason for _job_id, reason in scan.terminalized
+            )
+            terminal_reason_summary = ",".join(
+                f"{reason}={count}"
+                for reason, count in sorted(terminal_reason_counts.items())
+            )
+            print(
+                "binding-reconcile: "
+                f"binding_terminalized={len(scan.terminalized)} "
+                f"terminalized_reasons={terminal_reason_summary}"
+            )
+        for _prio, _queued_at, job_path in scan.ready:
             job = _claim_job(job_path, context="run-next")
             if job is None:
                 continue  # lost the claim race; take the next candidate
             print(f"running: {job['id']} ({job['script_path']})")
             _run_claimed(job_path, job)
             return 0
-        print(f"no queued jobs ready ({sleeping} waiting on not_before)"
-              if sleeping else "no queued jobs")
+        if scan.blocked:
+            reason_counts = Counter(reason for _job_id, reason in scan.blocked)
+            reason_summary = ",".join(
+                f"{reason}={count}"
+                for reason, count in sorted(reason_counts.items())
+            )
+            print(
+                "no queued jobs ready "
+                f"(binding_blocked={len(scan.blocked)} "
+                f"reasons={reason_summary}"
+                + (
+                    f" binding_terminalized={len(scan.terminalized)}"
+                    if scan.terminalized
+                    else ""
+                )
+                + ")"
+            )
+            return 3
+        if scan.terminalized:
+            reason_counts = Counter(
+                reason for _job_id, reason in scan.terminalized
+            )
+            reason_summary = ",".join(
+                f"{reason}={count}"
+                for reason, count in sorted(reason_counts.items())
+            )
+            print(
+                "no queued jobs ready "
+                f"(binding_terminalized={len(scan.terminalized)} "
+                f"terminalized_reasons={reason_summary})"
+            )
+            return 0
+        print(
+            f"no queued jobs ready ({scan.sleeping} waiting on not_before)"
+            if scan.sleeping
+            else "no queued jobs"
+        )
         return 0
     finally:
         _release_lock()
@@ -2511,11 +2876,13 @@ def run_loop(args) -> int:
         limit = _resolve_max_parallel(getattr(args, "max_parallel", None))
         print(f"drain-loop: start pid={os.getpid()} max_parallel={limit}")
         jobs_run = 0
+        terminalized_seen: dict[str, str] = {}
         with ThreadPoolExecutor(max_workers=limit, thread_name_prefix="compute-job") as pool:
             in_flight: dict[Future, str] = {}
             while True:
-                ready, _sleeping = _ready_queued_jobs("run-loop")
-                for _prio, _queued_at, job_path in ready:
+                scan = _scan_queue_readiness("run-loop")
+                terminalized_seen.update(scan.terminalized)
+                for _prio, _queued_at, job_path in scan.ready:
                     if len(in_flight) >= limit:
                         break
                     job = _claim_job(job_path, context="run-loop")
@@ -2540,12 +2907,99 @@ def run_loop(args) -> int:
                             job=job_id,
                             err=f"{type(exc).__name__}: {exc}",
                         )
-        _ready, sleeping = _ready_queued_jobs("run-loop")
-        suffix = f" ({sleeping} left waiting on not_before)" if sleeping else ""
+        final_scan = _scan_queue_readiness("run-loop")
+        terminalized_seen.update(final_scan.terminalized)
+        suffix = (
+            f" sleeping={final_scan.sleeping}"
+            if final_scan.sleeping
+            else ""
+        )
+        if final_scan.blocked:
+            reason_counts = Counter(reason for _job_id, reason in final_scan.blocked)
+            reason_summary = ",".join(
+                f"{reason}={count}"
+                for reason, count in sorted(reason_counts.items())
+            )
+            suffix += (
+                f" binding_blocked={len(final_scan.blocked)}"
+                f" reasons={reason_summary}"
+            )
+        if terminalized_seen:
+            terminal_reason_counts = Counter(terminalized_seen.values())
+            terminal_reason_summary = ",".join(
+                f"{reason}={count}"
+                for reason, count in sorted(terminal_reason_counts.items())
+            )
+            suffix += (
+                f" binding_terminalized={len(terminalized_seen)}"
+                f" terminalized_reasons={terminal_reason_summary}"
+            )
         print(f"drain-loop: exit pid={os.getpid()} jobs_run={jobs_run}{suffix}")
-        return 0
+        return 3 if final_scan.blocked else 0
     finally:
         _release_lock()
+
+
+def _release_collected_source_task(
+    task: dict[str, Any],
+    job: dict[str, Any],
+    *,
+    next_task_id: str | None,
+    tpc: Any,
+) -> bool:
+    """Release the canonical owner after PHASE A accepted a terminal receipt."""
+    if (
+        str(task.get("id") or "") != str(job.get("source_task_id") or "")
+        or task.get("status") != "awaiting_agent_job"
+        or str(task.get("compute_job_id") or "") != str(job.get("id") or "")
+        or task.get("blocked_reason")
+        not in {
+            "external_compute_receipt_pending_collection",
+            "external_compute_job_running",
+        }
+        or job.get("status") not in {"completed", "failed"}
+    ):
+        return False
+
+    released_at = utc_now()
+    task["status"] = "pending"
+    followup_id = str(next_task_id or "(unspecified)")
+    tpc._record_status_history(
+        task,
+        frm="awaiting_agent_job",
+        to="pending",
+        by=f"compute-followup:{job.get('id')}",
+        note=f"terminal receipt collected; followup={followup_id}",
+    )
+    task["compute_released_at"] = released_at
+    task["compute_release_reason"] = "terminal_receipt_collected"
+    for field in (
+        "blocked_reason",
+        "compute_job_id",
+        "compute_started_at",
+        "compute_finished_at",
+        "external_execution_ref",
+    ):
+        task.pop(field, None)
+    return True
+
+
+def _ack_followup_source_task_settlement(path: Path) -> None:
+    with _receipt_lock():
+        current = _read_job_file(path, context="followup-settlement-ack")
+        settlement = current.get("source_task_settlement") if current else None
+        if (
+            current is None
+            or not isinstance(settlement, dict)
+            or settlement.get("state") != "pending_queue_commit"
+        ):
+            return
+        current["source_task_settlement"] = {
+            "state": "settled",
+            "task_id": settlement["task_id"],
+            "settled_at": utc_now(),
+        }
+        _write_job_file(path, current)
 
 
 def mark_followup_dispatched(args) -> int:
@@ -2553,15 +3007,22 @@ def mark_followup_dispatched(args) -> int:
     if not p.exists():
         print(f"error: not found {args.id}", file=sys.stderr)
         return 2
-    with _receipt_lock():
+
+    preview = _read_job_file(p, context="mark-followup-preview")
+    if preview is None:
+        return 2
+    source_task_id = preview.get("source_task_id")
+
+    def mark_under_receipt_lock(
+        source_task: dict[str, Any] | None = None,
+    ) -> int:
         j = _read_job_file(p, context="mark-followup-dispatched")
         if j is None:
             return 2
         # This check and requeue()'s followup check use the same receipt lock.
         # Whichever transition wins makes the other refuse: a queued/running
         # worker and a triage followup can therefore never own the same job at
-        # once.  Before this gate, requeue-first followed by mark-followup could
-        # leave a queued job carrying an active triage task.
+        # once.
         if j.get("status") not in {"completed", "failed"}:
             print(
                 f"error: cannot dispatch followup for {args.id} — "
@@ -2569,11 +3030,66 @@ def mark_followup_dispatched(args) -> int:
                 file=sys.stderr,
             )
             return 2
+        if j.get("source_task_id"):
+            released = (
+                source_task is not None
+                and _release_collected_source_task(
+                    source_task,
+                    j,
+                    next_task_id=args.next_task_id,
+                    tpc=tpc,
+                )
+            )
+            settlement = j.get("source_task_settlement")
+            already_committed = (
+                j.get("followup_dispatched") is True
+                and isinstance(settlement, dict)
+                and settlement.get("state") == "pending_queue_commit"
+                and source_task is not None
+                and source_task.get("status") == "pending"
+                and not source_task.get("compute_job_id")
+            )
+            if not released and not already_committed:
+                print(
+                    f"error: cannot dispatch followup for {args.id} — "
+                    "source task settlement failed.",
+                    file=sys.stderr,
+                )
+                return 2
+        else:
+            released = False
         j["followup_dispatched"] = True
         j["followup_dispatched_at"] = utc_now()
         if args.next_task_id:
             j["followup_next_task_id"] = args.next_task_id
+        if released:
+            j["source_task_settlement"] = {
+                "state": "pending_queue_commit",
+                "task_id": str(j["source_task_id"]),
+                "attempted_at": utc_now(),
+            }
         _write_job_file(p, j)
+        return 0
+
+    if source_task_id:
+        from scripts import task_pool_claim as tpc
+
+        with _task_pool_locked_load(tpc) as (_fh, tasks):
+            try:
+                source_task = tpc._find(tasks, str(source_task_id))
+            except SystemExit:
+                source_task = None
+            with _receipt_lock():
+                rc = mark_under_receipt_lock(source_task)
+        if rc == 0:
+            _ack_followup_source_task_settlement(p)
+    else:
+        tpc = None
+        with _receipt_lock():
+            rc = mark_under_receipt_lock()
+
+    if rc != 0:
+        return rc
     print(f"marked: {args.id} followup_dispatched=true")
     return 0
 
@@ -2609,16 +3125,46 @@ def _load_queued_job(job_id: str, verb: str) -> tuple[Path, dict[str, Any]] | No
 
 def amend(args) -> int:
     """Correct a queued job's spec — the sanctioned alternative to editing its JSON."""
+    requested_model = getattr(args, "model", None)
     fields = {
         "followup_brief": args.followup_brief,
         "followup_task_type": args.followup_task_type,
         "followup_priority": args.followup_priority,
         "timeout": args.timeout,
         "brief_file": args.brief_file,
+        "model": requested_model,
     }
     if not any(v is not None for v in fields.values()):
         print("error: amend needs at least one field to change", file=sys.stderr)
         return 2
+
+    if requested_model is not None:
+        try:
+            from scripts import model_router
+            from volpred.ops.execution.registry import load_provider_registry
+
+            routed_models = set(model_router.MODEL_TO_CLI_FLAG.values())
+            registered_models = {
+                model_id
+                for provider in load_provider_registry().providers
+                if provider.enabled
+                for model_id in provider.model_ids
+            }
+            allowed_models = routed_models & registered_models
+        except Exception as exc:  # noqa: BLE001 — model policy is fail-closed
+            print(
+                "error: canonical model router/provider registry unavailable: "
+                f"{type(exc).__name__}: {exc}",
+                file=sys.stderr,
+            )
+            return 2
+        if str(requested_model) not in allowed_models:
+            print(
+                f"error: model {requested_model!r} is not allowed by the "
+                "canonical model router/provider registry",
+                file=sys.stderr,
+            )
+            return 2
 
     with _receipt_lock():
         loaded = _load_queued_job(args.id, "amend")
@@ -2649,6 +3195,28 @@ def amend(args) -> int:
             Path(snapshot).write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
             job["brief_source"] = str(src)
             changed.append("brief")
+
+        if requested_model is not None:
+            if job.get("kind") != "agent":
+                print(
+                    f"error: --model only applies to agent jobs "
+                    f"(kind={job.get('kind')})",
+                    file=sys.stderr,
+                )
+                return 2
+            argv = list(job.get("args") or [])
+            try:
+                model_index = argv.index("--model") + 1
+                argv[model_index]
+            except (ValueError, IndexError):
+                print(
+                    f"error: {args.id} agent job has no replaceable --model argument",
+                    file=sys.stderr,
+                )
+                return 2
+            argv[model_index] = str(requested_model)
+            job["args"] = argv
+            changed.append("model")
 
         followup = job.get("claude_followup") or {}
         for key, arg in (
@@ -2726,7 +3294,7 @@ def cancel(args) -> int:
     if preview.get("source_task_id"):
         from scripts import task_pool_claim as tpc
 
-        with tpc._locked_load() as (_fh, tasks):
+        with _task_pool_locked_load(tpc) as (_fh, tasks):
             source_task = tpc._find(tasks, str(preview["source_task_id"]))
             with _receipt_lock():
                 rc, cancelled_job = cancel_under_receipt_lock(source_task)
@@ -2807,13 +3375,13 @@ def _reconcile_cancelled_source_task(path: Path, job: dict[str, Any]) -> None:
         or not job.get("source_task_id")
         or (
             isinstance(settlement, dict)
-            and settlement.get("state") == "settled"
+            and settlement.get("state") in {"settled", "not_required"}
         )
     ):
         return
     from scripts import task_pool_claim as tpc
 
-    with tpc._locked_load() as (_fh, tasks):
+    with _task_pool_locked_load(tpc) as (_fh, tasks):
         task = tpc._find(tasks, str(job["source_task_id"]))
         if task.get("status") == "pending" and not task.get("compute_job_id"):
             pass
@@ -2953,7 +3521,7 @@ def requeue(args) -> int:
     if source_task_id:
         from scripts import task_pool_claim as tpc
 
-        with tpc._locked_load() as (_fh, tasks):
+        with _task_pool_locked_load(tpc) as (_fh, tasks):
             source_task = tpc._find(tasks, str(source_task_id))
             with _receipt_lock():
                 rc, blocked_kind = requeue_under_receipt_lock(source_task)
@@ -3049,6 +3617,10 @@ def main():
     am.add_argument("--followup-task-type")
     am.add_argument("--followup-priority", type=int)
     am.add_argument("--timeout", type=int)
+    am.add_argument(
+        "--model",
+        help="Replace a queued agent job's frozen provider model.",
+    )
     am.set_defaults(func=amend)
 
     cx = sub.add_parser("cancel", help="Drop a QUEUED job before the worker picks it up.")
@@ -3081,6 +3653,13 @@ def main():
 
     r = sub.add_parser("run-next", help="Consume at most ONE queued job (legacy single-shot).")
     r.set_defaults(func=run_next)
+
+    rb = sub.add_parser(
+        "reconcile-bindings",
+        help="Repair/terminalize queued source-task bindings without executing payloads.",
+    )
+    rb.add_argument("--json", action="store_true")
+    rb.set_defaults(func=reconcile_bindings)
 
     rl = sub.add_parser(
         "run-loop",
