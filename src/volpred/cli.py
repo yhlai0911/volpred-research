@@ -552,6 +552,202 @@ def ops() -> None:
     pass
 
 
+@ops.group("growth-experiment")
+def ops_growth_experiment() -> None:
+    """Control receipt-backed organic growth experiments."""
+
+
+def _growth_registry():
+    from volpred.ops.growth_experiments import GrowthExperimentRegistry
+
+    return GrowthExperimentRegistry.from_environment()
+
+
+def _growth_echo(payload: object) -> None:
+    click.echo(
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    )
+
+
+@ops_growth_experiment.command("preregister")
+@click.option(
+    "--spec-json",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option("--command-id", required=True)
+def ops_growth_preregister(
+    spec_json: Path,
+    command_id: str,
+) -> None:
+    """Immutably preregister one experiment before its exposure window."""
+
+    try:
+        spec = json.loads(spec_json.read_text(encoding="utf-8"))
+        if not isinstance(spec, dict):
+            raise TypeError("growth spec must be a JSON object")
+        _growth_echo(
+            _growth_registry().preregister(
+                command_id=command_id,
+                spec=spec,
+            )
+        )
+    except (
+        OSError,
+        TypeError,
+        ValueError,
+        RuntimeError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@ops_growth_experiment.command("preregister-template")
+@click.option(
+    "--template-json",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    required=True,
+)
+@click.option("--command-id", required=True)
+def ops_growth_preregister_template(
+    template_json: Path,
+    command_id: str,
+) -> None:
+    """Materialize command time and preregister a versioned template."""
+
+    try:
+        template = json.loads(template_json.read_text(encoding="utf-8"))
+        if not isinstance(template, dict):
+            raise TypeError(
+                "growth preregistration template must be a JSON object"
+            )
+        _growth_echo(
+            _growth_registry().preregister_template(
+                command_id=command_id,
+                template=template,
+            )
+        )
+    except (
+        OSError,
+        TypeError,
+        ValueError,
+        RuntimeError,
+        json.JSONDecodeError,
+    ) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@ops_growth_experiment.command("activate")
+@click.option("--experiment-id", required=True)
+@click.option("--command-id", required=True)
+@click.option("--observed-at", required=True)
+def ops_growth_activate(
+    experiment_id: str,
+    command_id: str,
+    observed_at: str,
+) -> None:
+    """Activate a preregistered experiment inside its declared window."""
+
+    try:
+        _growth_echo(
+            _growth_registry().activate(
+                command_id=command_id,
+                experiment_id=experiment_id,
+                observed_at=observed_at,
+            )
+        )
+    except (TypeError, ValueError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@ops_growth_experiment.command("close")
+@click.option("--experiment-id", required=True)
+@click.option("--command-id", required=True)
+@click.option(
+    "--reason",
+    required=True,
+    type=click.Choice(
+        [
+            "window_ended",
+            "stop_rule_reached",
+            "manual_safety_stop",
+        ]
+    ),
+)
+@click.option("--observed-at", required=True)
+def ops_growth_close(
+    experiment_id: str,
+    command_id: str,
+    reason: str,
+    observed_at: str,
+) -> None:
+    """Freeze the preregistered measurement and retained result."""
+
+    try:
+        _growth_echo(
+            _growth_registry().close(
+                command_id=command_id,
+                experiment_id=experiment_id,
+                reason=reason,
+                observed_at=observed_at,
+            )
+        )
+    except (TypeError, ValueError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@ops_growth_experiment.command("stop")
+@click.option("--experiment-id", required=True)
+@click.option("--command-id", required=True)
+@click.option(
+    "--reason",
+    required=True,
+    type=click.Choice(
+        [
+            "window_ended",
+            "stop_rule_reached",
+            "manual_safety_stop",
+        ]
+    ),
+)
+@click.option("--observed-at", required=True)
+def ops_growth_stop(
+    experiment_id: str,
+    command_id: str,
+    reason: str,
+    observed_at: str,
+) -> None:
+    """Stop new exposure and retain the attribution maturation window."""
+
+    try:
+        _growth_echo(
+            _growth_registry().stop(
+                command_id=command_id,
+                experiment_id=experiment_id,
+                reason=reason,
+                observed_at=observed_at,
+            )
+        )
+    except (TypeError, ValueError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+@ops_growth_experiment.command("read")
+@click.option("--experiment-id", required=True)
+def ops_growth_read(experiment_id: str) -> None:
+    """Read the durable registry snapshot and current measurement."""
+
+    try:
+        _growth_echo(_growth_registry().read(experiment_id))
+    except (TypeError, ValueError, RuntimeError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
 @ops.command("work-import-legacy")
 @click.option(
     "--dry-run",

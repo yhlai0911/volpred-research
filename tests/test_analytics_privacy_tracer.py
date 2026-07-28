@@ -26,7 +26,9 @@ def test_event_dictionary_declares_privacy_and_dedupe_contract() -> None:
 
     assert impression.purpose == "measure first-party content reach"
     assert impression.required_fields == frozenset({"content_id", "surface"})
-    assert impression.optional_fields == frozenset({"referrer_class"})
+    assert impression.optional_fields == frozenset(
+        {"referrer_class", "experiment_id", "variant_id"}
+    )
     assert impression.raw_retention_days == 30
     assert impression.identity_contract == "anonymous_or_authenticated"
     assert impression.dedupe_contract == "idempotency_key"
@@ -100,6 +102,87 @@ def test_record_rejects_nested_or_profile_values_hidden_in_allowed_fields() -> N
                 properties={
                     "content_id": "article-1",
                     "action": "portfolio_position=long",
+                },
+            )
+        )
+
+
+def test_experiment_attribution_is_paired_and_qualified() -> None:
+    experiment_fields = {
+        "experiment_id": "article-share-cta-copy-v1",
+        "variant_id": "treatment",
+    }
+    for index, (kind, properties) in enumerate(
+        (
+            (
+                "content_impression",
+                {"content_id": "article-1", "surface": "article"},
+            ),
+            (
+                "read_depth",
+                {
+                    "content_id": "article-1",
+                    "depth_bucket": "75",
+                    "surface": "article",
+                },
+            ),
+            (
+                "qualified_action",
+                {
+                    "content_id": "article-1",
+                    "action": "share",
+                    "surface": "article",
+                },
+            ),
+        )
+    ):
+        receipt = _tracer().record(
+            AnalyticsEvent(
+                idempotency_key=f"experiment:{kind}:{index}",
+                kind=kind,
+                occurred_at="2026-07-26T15:40:00+00:00",
+                anonymous_id="anon-1",
+                user_id=None,
+                properties={**properties, **experiment_fields},
+            )
+        )
+        assert receipt.accepted is True
+
+    with pytest.raises(
+        ValueError,
+        match="experiment_id and variant_id must be paired",
+    ):
+        _tracer().record(
+            AnalyticsEvent(
+                idempotency_key="experiment:unpaired",
+                kind="content_impression",
+                occurred_at="2026-07-26T15:40:00+00:00",
+                anonymous_id="anon-1",
+                user_id=None,
+                properties={
+                    "content_id": "article-1",
+                    "surface": "article",
+                    "experiment_id": "article-share-cta-copy-v1",
+                },
+            )
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="experiment qualified action must be share",
+    ):
+        _tracer().record(
+            AnalyticsEvent(
+                idempotency_key="experiment:save",
+                kind="qualified_action",
+                occurred_at="2026-07-26T15:40:00+00:00",
+                anonymous_id="anon-1",
+                user_id=None,
+                properties={
+                    "content_id": "article-1",
+                    "action": "save",
+                    "surface": "article",
+                    **experiment_fields,
                 },
             )
         )
