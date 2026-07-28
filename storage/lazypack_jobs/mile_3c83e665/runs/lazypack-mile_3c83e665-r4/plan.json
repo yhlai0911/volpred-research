@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "title": "K1436 懶人包：資金費率預測比特幣波動？方向沒訊號，強度也只是擦邊",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1436/k1436_results.json",
+      "sha256": "bdcdc5a7e7ca920bf62ba65f13a4ff4fd0367c266db8d98db042b953af9a4c70",
+      "label": "experiment K1436 results (BTC perpetual funding rate as HAR-RV covariate)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "資金費率能預告比特幣波動嗎",
+      "alt": "永續合約玩家常把資金費率當持倉擁擠溫度計，本研究檢定它能否預測次日已實現波動",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "熱門主張",
+          "body": [
+            "費率飆高＝多單太擠＝要變盤。這套說法把資金費率當成聰明錢的溫度計。",
+            "合理歸合理，能不能真的預測波動，得拿沒看過的日子驗。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "費率為正的比例（多方在付錢）",
+          "value": {
+            "source": "results",
+            "path": "/funding_construction/pct_positive_8h",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "建構的每日波動樣本",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_days_total",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_method",
+      "info": "method",
+      "style": "scientific",
+      "title": "怎麼公平地測",
+      "alt": "以 HAR 型波動模型為基準，滾動窗口每日重估，只用模型沒見過的未來日子評分",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "比法",
+          "body": [
+            "基準模型只看過去的波動；對照組多加一個資金費率項。",
+            "只拿模型沒見過的未來日子評分，全程只用前一天以前的資訊。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "模型外實測日數",
+          "value": {
+            "source": "results",
+            "path": "/sample/n_obs_oos",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "滾動估計窗口",
+          "value": {
+            "source": "results",
+            "path": "/sample/rolling_window",
+            "format": {
+              "kind": "integer",
+              "suffix": " 天"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "兩條線幾乎疊在一起",
+      "alt": "加了資金費率後預測誤差幾乎不動，方向的顯著度過不了門檻，強度僅勉強擦邊",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "基準預測誤差（越低越好）",
+          "value": {
+            "source": "results",
+            "path": "/baseline/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "加資金費率後的誤差",
+          "value": {
+            "source": "results",
+            "path": "/with_funding/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "看方向：顯著度 p 值（過不了門檻）",
+          "value": {
+            "source": "results",
+            "path": "/clark_west/cw_pvalue_one_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "看強度：顯著度 p 值（勉強擦邊）",
+          "value": {
+            "source": "results",
+            "path": "/clark_west_abs_funding/cw_pvalue_one_sided",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "editorial",
+      "title": "訊號早被更基本的東西吃掉了",
+      "alt": "費率方向對波動無增量資訊，強度僅微弱且經濟上約等於零，昨日波動已解釋大部分",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "結論",
+          "body": [
+            "方向：對次日波動沒有可靠的額外資訊。",
+            "強度：勉強顯著，但誤差改善微乎其微，經濟上約等於零。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "為什麼",
+          "body": [
+            "費率飆高時波動通常本來就在高檔，而昨天的波動基準模型早看到了。",
+            "資金費率對套利成本很實在，但拿來預判波動這條路走不通。"
+          ]
+        }
+      ]
+    }
+  ]
+}
