@@ -495,6 +495,7 @@ class ProviderAuthLease:
         source_advanced = False
         cleaned = False
         reason = "closed"
+        error: str | None = None
         destination_payload: bytes | None = None
         destination_dir_fd: int | None = None
         destination_home_fd: int | None = None
@@ -548,7 +549,8 @@ class ProviderAuthLease:
                 finally:
                     os.close(source_home_fd)
         except (IsolationUnavailable, OSError) as exc:
-            reason = str(exc)
+            error = str(exc)
+            reason = error
         finally:
             if destination_dir_fd is not None:
                 try:
@@ -556,7 +558,13 @@ class ProviderAuthLease:
                     os.fsync(destination_dir_fd)
                     cleaned = True
                 except OSError as exc:
-                    reason = f"{reason}; cleanup failed: {exc}"
+                    cleanup_error = f"cleanup failed: {exc}"
+                    error = (
+                        f"{error}; {cleanup_error}"
+                        if error is not None
+                        else cleanup_error
+                    )
+                    reason = error
                 os.close(destination_dir_fd)
             if destination_home_fd is not None:
                 try:
@@ -570,14 +578,7 @@ class ProviderAuthLease:
             if destination_run_fd is not None:
                 os.close(destination_run_fd)
         return ProviderAuthCloseReceipt(
-            ok=cleaned and not reason.startswith(
-                (
-                    "provider auth",
-                    "subscription credential",
-                    "Codex ",
-                    "cannot ",
-                )
-            ),
+            ok=cleaned and error is None,
             reconciled=reconciled,
             source_advanced=source_advanced,
             cleaned=cleaned,
