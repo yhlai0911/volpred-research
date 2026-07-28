@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-28T18:18:35Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-28T18:30:04Z",
+  "completed_at": "2026-07-28T18:37:39Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1694_verdict.md",
@@ -30,7 +30,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "k1694_rerun_after_salvage_20260719",
   "source_task_link": {
     "state": "linked",
@@ -40,5 +40,26 @@
   },
   "timeout_seconds": 2700,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 42775,
+  "claimed_by_pid_start_wall": "Wed Jul 29 02:30:04 2026",
+  "source_task_settlement": {
+    "task_id": "k1694_rerun_after_salvage_20260719",
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-07-28T19:14:40Z"
+  },
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "d786aa4e6b38b17c466a4143a7b619a7fd32217e",
+  "delivered_paths": [
+    "storage/ops/codex_reviews/k1694_verdict.md"
+  ],
+  "delivered_at": "2026-07-28T19:00:31.033419+00:00",
+  "delivery_source": "reap_orphan_deliverables",
+  "followup_dispatched_at": "2026-07-28T19:14:40Z",
+  "followup_next_task_id": "k1694_codex_fail_repair_20260729"
 }
