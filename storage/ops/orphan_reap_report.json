@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T11:00:22.983259+00:00",
+  "generated_at": "2026-07-28T12:00:24.561118+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 6.4
+      "age_hours": 7.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,15 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 6.3
+      "age_hours": 7.3
+    },
+    {
+      "path": "storage/drafts/K1536_general_draft.md",
+      "title": "「破壞生態的商品比較危險」聽起來很對，資料把它擋了回來",
+      "audience": "general",
+      "status": "draft",
+      "body_chars": 2399,
+      "age_hours": 2.6
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -23,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 165.6
+      "age_hours": 166.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -31,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 17.6
+      "age_hours": 18.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -39,17 +47,17 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 25.7
+      "age_hours": 26.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 65,
-    "grace": 3,
+    "grace": 2,
     "inflight": 0
   },
-  "orphan_count": 5,
+  "orphan_count": 6,
   "adopted": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -63,67 +71,52 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [
-    {
-      "job_id": "compute-codex-review-k1720-letf-rebalance-eod-vol-pre-merge-k1259-ga-1785172252",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-review-k1720-letf-rebalance-eod-vol-pre-merge-k1259-ga-1785172252.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/ops/codex_reviews/k1720_verdict.md"
-      ],
-      "existing_paths": [
-        "storage/ops/codex_reviews/k1720_verdict.md"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    },
-    {
-      "job_id": "compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876",
-      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876.json",
-      "execution_status": "completed",
-      "paths": [
-        "storage/ops/codex_reviews/k1708_r4_verdict.md"
-      ],
-      "existing_paths": [
-        "storage/ops/codex_reviews/k1708_r4_verdict.md"
-      ],
-      "previously_delivered_paths": [],
-      "rejected": []
-    }
-  ],
+  "job_deliverable_candidates": [],
   "job_deliverable_held": [],
-  "job_deliveries": [
-    {
-      "job_id": "compute-codex-review-k1720-letf-rebalance-eod-vol-pre-merge-k1259-ga-1785172252",
-      "paths": [
-        "storage/ops/codex_reviews/k1720_verdict.md"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "6482e66f32d1d74acb3d27cabba44c3f24c33591",
-      "reason": "committed"
-    },
-    {
-      "job_id": "compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876",
-      "paths": [
-        "storage/ops/codex_reviews/k1708_r4_verdict.md"
-      ],
-      "delivered": true,
-      "delivery_status": "delivered",
-      "delivery_commit": "0f9362948ec02a3bafd34836817ec3f0cfba9be3",
-      "reason": "committed"
-    }
-  ],
+  "job_deliveries": [],
   "namespaces": {
     "drafts": {
-      "collectable": [],
+      "collectable": [
+        {
+          "path": "storage/drafts/K1536_general_draft.md",
+          "kind": "md",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1536_general_event_windows.png",
+          "kind": "png",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1536_general_figs.py",
+          "kind": "py",
+          "reason": "untracked"
+        },
+        {
+          "path": "storage/drafts/assets/k1536_general_unconditional_gap.png",
+          "kind": "png",
+          "reason": "untracked"
+        }
+      ],
       "held": [],
       "skipped": {
-        "grace": 11,
+        "grace": 7,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": []
+      "collections": [
+        {
+          "namespace": "drafts",
+          "paths": [
+            "storage/drafts/K1536_general_draft.md",
+            "storage/drafts/assets/k1536_general_event_windows.png",
+            "storage/drafts/assets/k1536_general_figs.py",
+            "storage/drafts/assets/k1536_general_unconditional_gap.png"
+          ],
+          "committed": true,
+          "detail": "[main 667089ea9] chore(draft-reap): collect orphaned draft artifacts (4 files)\n 4 files changed, 227 insertions(+)\n create mode 100644 storage/drafts/"
+        }
+      ]
     },
     "paper": {
       "collectable": [],

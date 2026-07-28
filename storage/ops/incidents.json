@@ -620,9 +620,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T04:45:15.155237+00:00"
-    },
-    {
      "at": "2026-07-28T05:36:12.195788+00:00"
     },
     {
@@ -654,6 +651,9 @@
     },
     {
      "at": "2026-07-28T11:22:35.587800+00:00"
+    },
+    {
+     "at": "2026-07-28T12:46:29.307705+00:00"
     }
    ],
    "current_task_id": null,
@@ -1301,7 +1301,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T11:22:34.943346+00:00"
+     "last_seen_at": "2026-07-28T12:46:28.407756+00:00"
     },
     {
      "cleared_at": null,
@@ -1315,14 +1315,28 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T11:22:33.944783+00:00"
+     "last_seen_at": "2026-07-28T12:46:26.700758+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "667089ea95144a32f1c7d11f9a0ad5576d68db6d",
+      "branch": "worktree-dispatch-slot-1-50bb61e4",
+      "checkpoint_commit": "0c9091f259163ec1c89ff0e957b67fa4db0f0ed7",
+      "detail_tail": "module\n  File \"<frozen importlib._bootstrap>\", line 228, in _call_with_frames_removed\n  File \"/Users/yhlai0911/volpred-research/src/volpred/ops/git_writer_lock.py\", line 36, in <module>\n    from datetime import UTC, datetime\nImportError: cannot import name 'UTC' from 'datetime' (/Applications/Xcode.app/Contents/Developer/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/datetime.py)\n",
+      "reason": "merge_failed",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-50bb61e4"
+     },
+     "first_seen_at": "2026-07-28T12:46:24.108743+00:00",
+     "key": "dispatch-slot-1-50bb61e4",
+     "last_seen_at": "2026-07-28T12:46:24.108743+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-28T11:22:34.943346+00:00",
+   "last_seen_at": "2026-07-28T12:46:28.407756+00:00",
    "notified_at": null,
-   "occurrence_count": 1300,
+   "occurrence_count": 1470,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2052,6 +2066,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T11:22:35.589335+00:00",
+ "updated_at": "2026-07-28T12:46:29.308361+00:00",
  "version": 1
 }
