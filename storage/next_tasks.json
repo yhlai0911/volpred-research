@@ -35160,7 +35160,7 @@
         "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1727-f47651; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_K1727_v2-da5fc1; awaiting PHASE A collection",
+    "result": "COLLECTED (hourly-slot-2 a769cca8): compute job agent-brief_K1727_v2-da5fc1 exit0; adversarial subagent review + main-thread re-verify → certify PASS (bytes-pinned review_verdict.json), reproduce_spec.json written, README overclaim softened to underpowered/directional, knowledge item 2ef0d80e written (null_result). MERGE DEFERRED: shared main index held by foreign staged content (PHASE-Z stuck-files incident assign_34f33e28); worktree dispatch-slot-4-6ba995a0-k1727 clean+certified @aea6b1ed, handed to worktree_unmerged reaper.",
     "last_released_at": "2026-07-27T15:03:43.024403+00:00",
     "last_release_reason": "external_compute_job_failed",
     "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
@@ -41830,7 +41830,7 @@
     "title": "K1731 F1 三方循環相依：shard 要 merge、merge 要 knowledge、knowledge 要 shard 結果",
     "task_type": "experiment",
     "priority": 2,
-    "status": "blocked",
+    "status": "pending",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:35:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
@@ -41865,6 +41865,31 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af"
+      },
+      {
+        "at": "2026-07-28T03:46:21.017215+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-28)"
+      },
+      {
+        "ts": "2026-07-28T04:26:13.327935+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e"
+      },
+      {
+        "ts": "2026-07-28T04:26:18.714083+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e"
+      },
+      {
+        "ts": "2026-07-28T04:35:24.843227+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e",
+        "note": "manual_release"
       }
     ],
     "block_transition_previous": {
@@ -41874,10 +41899,9 @@
       "claim_session_id": "ae58a16e1ff1",
       "started_at": "2026-07-27T07:14:34.664977+00:00"
     },
-    "blocked_until": "2026-07-28",
-    "blocked_reason": "external_compute_job_active",
-    "blocked_at": "2026-07-27T07:21:06+00:00",
-    "blocked_note": "Exit A（寫 arm B knowledge 解 merge 鎖）已被 in-flight codex round-10 review 取代：arm B verification=needs_fix（B1 SSVS ES 用 component-wise 非 mixture ES，影響 §3.1 ES p=0.0145；B3 review_verdict 在 B1 修好前不能誠實 PASS），且 compute-k1731-armb-codex-review-round-10 仍 queued（04:42Z 起，worker 尚未跑到）。merge 由該 pipeline 擁有（followup: PASS→merge_worktree dispatch-slot-1-bd00f90a-k1731 + reproduce_spec.json gate）。強寫 knowledge/force-merge = 提交未修 ES 缺陷，違研究誠實。UNBLOCK 條件=arm B merged 後 requeue k1731-f1-boot-c0-parametric + k1731-f1-boot-c0-block（README §11.6；round-10 followup 未涵蓋 shard requeue，本 task 是唯一 home）。"
+    "exit_a_status": "arm_B_knowledge_written item_id=5a604fb2 (canonical, provenance-valid); deadlock edge#2 (missing k1731 knowledge) RESOLVED",
+    "remaining_blockers": "(a) Codex round-10 cert still queued (Codex credit-limited until 2026-08-02, K1728) — needs subagent-fallback review_verdict.json bound to rev10 bytes; (b) shared main staged index blocks merge_worktree; then requeue k1731-f1-boot-c0-parametric + k1731-f1-boot-c0-block per README 11.6",
+    "last_released_at": "2026-07-28T04:35:24.843215+00:00"
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -45115,7 +45139,7 @@
     "description": "依 GitHub Issue #42 與既有 Matt spec 實作 durable fire generation、baseline receipt、restart closeout matching 與 failure-injection tests；完成 production planned reload read-back 與 sustained-clean gate。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "blocked",
+    "status": "pending",
     "dispatch_lane": "agent",
     "source": "user_issue42_implementation",
     "issue_ref": "#42",
@@ -45146,18 +45170,24 @@
         "from": "pending",
         "to": "claimed",
         "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8"
+      },
+      {
+        "at": "2026-07-28T03:46:21.017238+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-28)"
+      },
+      {
+        "ts": "2026-07-28T03:50:22.311197+00:00",
+        "from": "pending",
+        "to": "pending",
+        "by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8",
+        "note": "normalize_pending_claim_residue"
       }
     ],
     "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.",
-    "last_released_at": "2026-07-26T20:50:01.181065+00:00",
-    "last_release_reason": "auto_release_stale_2h",
-    "claimed_by": "hourly-slot-2-42b3e90262554c578bfb0a1de3ad55a8",
-    "claimed_at": "2026-07-26T21:02:17.320009+00:00",
-    "claim_session_id": "028f2d4ccce3",
-    "blocked_until": "2026-07-28",
-    "blocked_reason": "awaiting_event_window",
-    "blocked_at": "2026-07-26T21:04:30+00:00",
-    "blocked_note": "Code 已完成並 merge main(74735c9f2, de63029c0/dec1f8057/98f407daf)。剩餘僅 sustained-clean gate：incident inc_537a3ff3304f 需 ≥3 clean obs 跨 ≥24h；現 3 obs 僅跨 ~1.6h(07-26T18:51→20:27 UTC)。等 clean obs 累積至 span≥24h(~07-27T18:51 UTC 後) unblock 重審並 resolve incident。被動觀察窗，hourly fire 無可執行工作。"
+    "last_released_at": "2026-07-28T03:50:22.311188+00:00",
+    "last_release_reason": "normalize_pending_claim_residue"
   },
   {
     "id": "issue42_production_fire_lifecycle_acceptance_20260727",
@@ -49813,7 +49843,7 @@
     "description": "Bounded T11 pre-cutover slice after provider-registry launchers are root-fixed. Implement one durable capability probe engine driven only by config/provider_registry.json probe_policy: typed quota/auth/unavailable/policy-denied outcomes, minimum interval, exponential backoff capped by maximum_backoff_seconds, rolling max_probe_cost_units budget, provider/model/executable/registry-SHA receipts, and crash-safe atomic ledger. Probe must be diagnostic/no-business-effect and fail closed; no busy polling, no hard-coded reset time, no provider reroute, no task resume, no owner transfer, no #9/#12 bypass, and do not close #16. TDD, Matt Spec/Standards review, live no-provider-I/O policy/budget read-back, docs required.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "in_progress",
     "source": "user",
     "created_at": "2026-07-27T14:39:20.092761+00:00",
     "payload": {
@@ -49849,6 +49879,18 @@
         "to": "pending",
         "by": "codex-vscode",
         "note": "auto_release_claim_expired"
+      },
+      {
+        "ts": "2026-07-28T03:36:50.244915+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T03:36:54.170676+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
       }
     ],
     "declared_paths": [
@@ -49857,15 +49899,27 @@
       "src/volpred/ops/execution/probe_policy.py",
       "src/volpred/ops/execution/registry.py",
       "src/volpred/ops/execution/__init__.py",
+      "scripts/dispatch_supervisor/isolation.py",
+      "scripts/dispatch_supervisor/worker.py",
+      "scripts/dispatch_supervisor/codex_failover.py",
+      "scripts/dispatch_supervisor/auth_lease_reaper.py",
+      "scripts/dispatch_supervisor/supervisor.py",
+      "scripts/bootstrap_codex_auth_authority.py",
+      "tests/test_dispatch_supervisor.py",
+      "tests/test_dispatch_supervisor_codex_failover.py",
       "tests/test_provider_probe.py",
       "tests/test_provider_execution.py",
-      "tests/test_dispatch_supervisor.py",
       "docs/error_log.md",
       "docs/project_improvement_status.md",
       "docs/refactor_plan_ops_master_2026_07.md"
     ],
     "last_released_at": "2026-07-27T16:50:05.947541+00:00",
-    "last_release_reason": "auto_release_claim_expired"
+    "last_release_reason": "auto_release_claim_expired",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T03:36:50.244903+00:00",
+    "claim_expires_at": "2026-07-28T05:36:50.244903+00:00",
+    "claim_session_id": "52b017d4bb66",
+    "started_at": "2026-07-28T03:36:54.170662+00:00"
   },
   {
     "id": "ci-root-30277897265",
@@ -50268,7 +50322,7 @@
     "id": "K781_article_general",
     "title": "K781: write general-audience article (auto-discovered uncovered K)",
     "description": "K K781 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K781 [NULL]：Multiplicative Volatility Factor(MVF,5參數:σ²=exp(f_t)×g_t)在SPY日頻r²(Patton 2011 proxy-robust)上是否優於GJR-GARCH。README為空白樣板，結論取自k781_mvf_results.json。資料yfinance，2007-01-04~2026-03-31，OOS 2009-12-24~2026-03-31(N_oos=4090,N_total=4840)。QLIKE排名：GJR-GARCH=1.536481(第1)、MVF=1.549 Canonical evidence: experiments/k781/k781_mvf_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -50284,14 +50338,15 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T18:12:36+00:00"
+    "created_at": "2026-07-27T18:12:36+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "K1357_article_general",
     "title": "K1357: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1357 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1357 EVENT_ONLY_WEAK：檢驗市場做市成本衝擊後的價差不對稱footprint（RLMM微觀結構代理，SPY/QQQ/IWM+7大型股，2012年起，OOS 2020起）。事件研究：負向市場衝擊日後次日Corwin-Schultz價差變化，比正向衝擊日高+0.0457（bootstrap 95% CI [0.0006, 0.0896]，908個負向 vs 1,062個正向衝擊日），CI不含零，通過事件不對稱門檻。但預測面失敗：HAR+VIX+量+價差不對稱模型 vs baseline，pooled DM t=+0.626 (p=0.53 Canonical evidence: experiments/k1357/K1357_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 3,
-    "status": "pending",
+    "priority": 1,
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -50306,13 +50361,37 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T18:12:38+00:00"
+    "created_at": "2026-07-27T18:12:38+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-28T04:27:27.332156+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      },
+      {
+        "ts": "2026-07-28T04:27:37.807169+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      },
+      {
+        "ts": "2026-07-28T04:34:37.703740+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      }
+    ],
+    "started_at": "2026-07-28T04:27:37.807158+00:00",
+    "completed_at": "2026-07-28T04:34:37.703711+00:00",
+    "result": "Draft written to storage/drafts/K1357_general_draft.md (general-audience, 繁中), anti_ai_gate PASS (exit0, warn1/3). Honest EVENT_ONLY_WEAK story: asymmetric liquidity footprint real (+0.0457, CI[0.0006,0.0896], 908 neg vs 1062 pos shock days) but does NOT forecast vol (pooled DM t=0.63 p=0.53, 3/10 assets). Dedup gate + feed grep clear (no prior K1357 coverage). Numbers traced to K1357_results.json. Draft pool → release cron publishes."
   },
   {
     "id": "K1366_article_general",
     "title": "K1366: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1366 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1366 [CONDITIONAL_PASS]：用 EWMA(λ=0.94) 條件共變異數建構 SPY/TLT/UUP/GLD/HYG 歷史衝擊後 variance response template pilot（非結構性 BEKK/DCC）。樣本 2016-01-05至2026-06-22，2630 個日頻報酬列，1000 次 placebo 事件抽樣（seed=42）。4 個歷史事件中 2 個通過 total-variance placebo gate：2018Q4 equity/credit selloff（2018-10-10）peak lif Canonical evidence: experiments/k1366/K1366_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 3,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -50328,14 +50407,38 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T18:12:38+00:00"
+    "created_at": "2026-07-27T18:12:38+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-28T04:35:07.114901+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      },
+      {
+        "ts": "2026-07-28T04:35:21.961906+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      },
+      {
+        "ts": "2026-07-28T04:36:57.622607+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+        "note": "manual_release"
+      }
+    ],
+    "arc_dedup_note": "WRITE-GATE BLOCKED as arc-dup of mile_f5813dec, but that is a FALSE POSITIVE: mile_f5813dec is \"同一個神經網路，換個對手...\" (neural-net opponent-robustness), a different subject from K1366 (EWMA cross-asset variance-response templates after macro shocks). Match is only on the coarse methodology_robustness axis signature + entity overlap, not the actual story. Needs either dup_waiver at publish OR arc-dedup signature refinement (methodology_robustness axis too coarse). Not written this fire — did not override the sole write-side safety gate under time pressure. Feed grep K1366 = 0 (no real duplicate).",
+    "last_released_at": "2026-07-28T04:36:57.622588+00:00"
   },
   {
     "id": "K1419_article_general",
     "title": "K1419: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1419 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1419 pilot_offline_first_pass：因SPY/QQQ/0050本地5分鐘RV歷史過短或缺失（SPY僅99筆、0050僅72筆、QQQ無檔），改用Parkinson range-based log變異數為共同target，比較HAR點預測+高斯/經驗殘差分位數 vs 直接分位數HAR（qHAR），SPY/QQQ/0050.TW樣本2023-01-03起、OOS 2025-01-02起、每21日refit，τ∈{0.05,0.25,0.5,0.75,0.95}。結果：SPY全部分位數由高斯baseline勝出，無訊號；QQQ的qHA Canonical evidence: experiments/k1419/k1419_probabilistic_rv_quantile_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 4,
-    "status": "pending",
+    "priority": 1,
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -50350,13 +50453,37 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T18:12:41+00:00"
+    "created_at": "2026-07-27T18:12:41+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)",
+    "status_history": [
+      {
+        "ts": "2026-07-28T04:36:57.902770+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      },
+      {
+        "ts": "2026-07-28T04:37:27.570102+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      },
+      {
+        "ts": "2026-07-28T04:43:20.090147+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-2-a769cca86195446fb4b520099ea9254d"
+      }
+    ],
+    "started_at": "2026-07-28T04:37:27.570087+00:00",
+    "completed_at": "2026-07-28T04:43:20.090125+00:00",
+    "result": "Draft storage/drafts/K1419_general_draft.md (+chart assets/k1419_0050tw_pinball.png), anti_ai_gate PASS exit0. Dedup gate exit0 + feed grep 0 (uncovered). Honest thin-data pilot: US ETFs no edge (SPY Gaussian wins, QQQ no Harvey pass); only Taiwan 0050.TW qHAR beats Gaussian at tail quantiles (tau=0.05 DM t=-4.84 pinball 0.331 vs 0.420; tau=0.25 t=-7.31). Parkinson proxy caveat up front, no overgeneralization. Numbers traced to results.json. Draft pool → release cron."
   },
   {
     "id": "K1492_article_general",
     "title": "K1492: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1492 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1492 [CONDITIONAL_PASS]: Stablecoin(USDT/USDC) redemption pressure與peg deviation對crypto/Treasury波動預測力測試，DefiLlama供給資料+yfinance，OOS起自2024-01-01。四資產結果分歧：BTC-USD(n=895) QLIKE改善+0.00535，DM-HLN p=0.0000004，通過；ETH-USD(n=895)改善-0.00207,p=0.463；SHY(n=614)改善-0.13576,p=0.079；TLT(n=614)改善- Canonical evidence: experiments/k1492/k1492_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
-    "priority": 4,
+    "priority": 1,
     "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
@@ -50372,7 +50499,8 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-27T18:12:45+00:00"
+    "created_at": "2026-07-27T18:12:45+00:00",
+    "priority_note": "auto-promoted to P1 by _promote_starved_article_tasks: releasable drafts=0 while this task sat below dispatch reach (owner rule 2026-07-15: fill to floor in one batch)"
   },
   {
     "id": "assign_74451e79",
@@ -50896,7 +51024,7 @@
     "description": "評估美股巨頭財報季中 AI 資本支出對財務結構與企業估值的衝擊。透過科技類股選擇權隱含波動率 skew 與跨月價差，驗證市場對高估值修正與尾部風險的定價變化。",
     "task_type": "trending_repost",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-27T22:00:43+00:00",
     "source": "reader_facing_refill",
     "tags": [
@@ -50924,7 +51052,30 @@
       ],
       "near_misses": [],
       "screened_at": "2026-07-27T22:00:45+00:00"
-    }
+    },
+    "status_history": [
+      {
+        "ts": "2026-07-28T03:47:00.013735+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c"
+      },
+      {
+        "ts": "2026-07-28T03:47:05.028723+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c"
+      },
+      {
+        "ts": "2026-07-28T04:00:48.181614+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c"
+      }
+    ],
+    "started_at": "2026-07-28T03:47:05.028706+00:00",
+    "completed_at": "2026-07-28T04:00:48.181594+00:00",
+    "result": "已發佈 mile_08b69f7c（published/general）：AI 六巨頭 vs S&P500 選擇權 IV skew 橫截面。核心發現：個股 skew≈0(對稱財報擲硬幣，RR+1.4pt) vs 指數 skew+8.0pt(系統性崩盤險)，恐懼買在指數不在個股。全 gate 過(arc-dedup/anti_ai/2 charts/4 lazypack panels)。FB 稿 fb_mile_08b69f7c.md 已產出，Chrome headless 不可用→fb pending 待 retry。"
   },
   {
     "id": "alert_dedup_gate_health_20260728",
@@ -50996,7 +51147,7 @@
     "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
     "task_type": "daily_digest",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "created_at": "2026-07-28T09:00:19.847150+08:00",
     "source": "scheduled",
@@ -51004,7 +51155,30 @@
       "daily_digest",
       "reader_facing",
       "精選導讀"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-28T04:01:10.857141+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c"
+      },
+      {
+        "ts": "2026-07-28T04:02:00.496133+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c"
+      },
+      {
+        "ts": "2026-07-28T04:18:06.597231+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c"
+      }
+    ],
+    "started_at": "2026-07-28T04:02:00.496121+00:00",
+    "completed_at": "2026-07-28T04:18:06.597209+00:00",
+    "result": "已發佈 mile_ac1390e7（daily_digest/published/general，4254漢字）：時事驅動跨archive策展『科技股恐懼寄到哪個地址』，具名框架『風險的郵遞區號』+『財報季風險四問』骨幹，8篇archive來源跨17天過span gate，metadata(content_type/digest_articles/精選導讀)回讀確認落地，anti_ai/image/archive-span gate全過，URL HTTP200。"
   },
   {
     "id": "release_deadlock_repair_20260728_02",
@@ -51103,6 +51277,101 @@
       "mile_3c83e665"
     ],
     "trigger": "release_pool_content_gate_deadlock",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "issue12_claude5_1m_upgrade_20260728",
+    "title": "[Issue #12] Upgrade all Claude routing to Opus 5 / Sonnet 5 1M",
+    "description": "Owner-directed production upgrade. Replace every active Opus model route with claude-opus-5 (native 1M) and every active Sonnet route with claude-sonnet-5 (1M entitlement), starting from canonical provider registry/model router and ratcheting all live launcher fallbacks. TDD model census, zero-paid subscription guard, live Claude CLI model read-back, Matt dual review, safe supervisor reload. Do not enable API billing/usage credits, bypass #9, transfer provider.execution, or close Issue #12.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "issue_ref": "#12",
+    "topology": "inline",
+    "created_at": "2026-07-28T04:09:28.143964+00:00"
+  },
+  {
+    "id": "K1406_article_general",
+    "title": "K1406: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1406 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1406 [CONDITIONAL_PASS]：以conditional block bootstrap（block=20日,circular,seed=20260530）驗證兩投資時機命題。資料：SPY(2005-01-03~2026-05-29)、0050.TW(2009-01-02~2026-05-28)，yfinance。命題A（Lump Sum總報酬勝、IRR資金效率近似相等）：confirmed，Lump Sum整體終值勝率SPY 1y/3y及0050 1y/3y分別74.1%/73.4%/74.1%/74.7%；四cell IRR年化中位 Canonical evidence: experiments/k1406/k1406_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 3,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1406",
+    "evidence_source_paths": [
+      "experiments/k1406/k1406_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1406/k1406_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T04:25:40+00:00"
+  },
+  {
+    "id": "K1493_article_general",
+    "title": "K1493: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1493 has verdict signal (score=2, reasons=['PASS/Harvey-significant', 'mixed/non-novel']) but no general article in feed.json.  Verdict preview: K1493 [CONDITIONAL_PASS — 混合結果，results.json verdict=MIXED_EDGE_EROSION]: 檢驗 VRP（變異數風險溢酬）下降論述是否對應到短波策略經濟優勢消失。資料源 yfinance adjusted close（SPY, ^VIX, SVXY, VIXY, VXX, BIL），VRP proxy 樣本 2006-01-03至2026（pre: 2006-2017 n=3,020；post: 2018-2026 n=2,088，forward RV21 需完整視窗）。VRP_t = (VIX_t/ Canonical evidence: experiments/k1493/k1493_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1493",
+    "evidence_source_paths": [
+      "experiments/k1493/k1493_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1493/k1493_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T04:25:57+00:00"
+  },
+  {
+    "id": "assign_e7df86d1",
+    "title": "PHASE-Z 卡住檔案 incident（65f674cce6ce5a1c）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 16 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 16 班\n- src/volpred/ops/next_tasks.py — 16 班\n- storage/logs/trending_primary_source_verification.jsonl — 7 班\n- storage/memory/knowledge.json — 14 班\n- storage/reports/INDEX.md — 5 班\n- storage/reports/index.json — 5 班\n- storage/strategy_metrics.json — 5 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T044947368601Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T04:49:56.035881+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "65f674cce6ce5a1c",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 16,
+        "src/volpred/ops/next_tasks.py": 16,
+        "storage/logs/trending_primary_source_verification.jsonl": 7,
+        "storage/memory/knowledge.json": 14,
+        "storage/reports/INDEX.md": 5,
+        "storage/reports/index.json": 5,
+        "storage/strategy_metrics.json": 5
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T044947368601Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T04:49:56.022922+00:00",
+      "last_seen_at": "2026-07-28T04:49:56.022922+00:00"
+    },
     "priority_capped_from": 1
   }
 ]

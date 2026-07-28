@@ -28349,5 +28349,75 @@
     "owner": "hourly-slot-1-2333e549592c42c58e670bc6c1753a4e",
     "commit": null,
     "summary": "K1727 跨資產波動率目標再驗證（VT 對風險性資產有效、對債/匯/商品近乎無效）— 重新派發。前一次 dispatch（agent-brief_k1727-f47651）external_compute_job_failed 且 worktree 產出為 0（0 unmerged / 0 dirty），本班以乾淨 worktree 重派 compute-agent job `agent-brief_K1727_v2-da5fc1`（opus/xhigh，result-artifact=experiments/K1727/K1727_results.json，followup-task-type=experiment）。此 job 指向乾淨 cwd，不受當前 worktree-unmerged 死鎖影響，可於下個 */15 tick 執行。收件由後續 fire PHASE A 負責（驗 shift(1)+seed、Codex/subagent 審、merge_worktree、寫 knowledge）。outcome=dispatched（非 completed — 非同步 agent 尚未執行）。"
+  },
+  {
+    "timestamp": "2026-07-28T12:00:37+08:00",
+    "task_type": "trending_repost",
+    "task_id": "trending_repost_2026_07_28_ai資本支出",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c",
+    "owner": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c",
+    "commit": null,
+    "summary": "trending_repost「AI巨頭資本支出擴張，科技股選擇權隱含波動率Skew分析」發佈 mile_08b69f7c（status=published，general）。證據包 100% 即時可驗證：2026-07-28 拉 NVDA/MSFT/GOOGL/META/AMZN/AAPL/SPY 選擇權鏈（yfinance），算 ~30 天到期 ATM IV / 下檔偏斜(put90−ATM) / 風險逆轉(put90−call110) / 期限結構。核心發現（差異化 VolPred angle）：AI 六巨頭 skew 幾乎為零（平均 RR +1.4pt、put-skew ≈0，MSFT/META/AMZN 甚至輕微負偏），被定價成兩面對稱的財報擲硬幣；而 S&P500 帶典型陡峭崩盤險（RR +11.8pt、put-skew +8.0pt）。詮釋：capex 把六巨頭綁成共同曝險包→系統性尾部避險需求上移到指數層次，恐懼買在指數不在個股。佐證：七標的一致近月逆價差(−0.3~−3.9pt)。Gate 全過：arc-dedup clean、anti_ai_gate PASS(warn2/3)、image gate 2 charts、lazypack gate 4 data-bound panels(sha256 綁定)。表格 21 數字逐一對回 evidence JSON 核實。FB-native 稿已寫(fb_mile_08b69f7c.md, anti_ai PASS)，Chrome 於 headless fire 不可用→fb_post_status=pending 記 log 待下班 retry；feed URL 已 curl 驗 HTTP 200。"
+  },
+  {
+    "timestamp": "2026-07-28T12:18:06+08:00",
+    "task_type": "daily_digest",
+    "task_id": "daily_digest_20260728",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c",
+    "owner": "hourly-slot-1-0b1fdde41c13451e901aaa51793a4b3c",
+    "commit": null,
+    "summary": "daily_digest「四大雲端交財報，科技股的恐懼寄到哪個地址？」發佈 mile_ac1390e7（status=published, general, 8199 body_chars/essay 4254 漢字）。這是時事驅動的跨 archive 主題策展，非本週 recap：主題=「AI 資本支出爆增、四大雲端本週(7/29-31)交財報，科技股風險該不該擔心」。具名心智模型「風險的郵遞區號」+ 具名可操作清單「財報季風險四問（多大/偏哪/哪一層/撐多久）」放最顯眼處當骨幹，四問各一節、每節用 2 篇 archive 深度回答並 inline 標連結。8 篇來源跨 07-09→07-26=17 天（過 archive-span ≥14d 硬 gate）：mile_e71ea353(費半75.9%/97.4pct)、mile_822317c3(VXN/VIX重算)、mile_cf007769(七巨頭隱波偏斜)、mile_903fd2cf(股油skew差23點)、mile_aff342df(五檔27.8%權重/12.59vs36.12)、mile_66c3fc3b(股怕債沒怕QQQ30.95vsHYG3.31)、mile_b7e98682(財報日3.8倍兩天散)、mile_9d74fd06(對房子四問)。開場錨定今日即時選擇權帳單(個股RR+1.4/skew≈0 vs SPY RR+11.8/skew+8.0，來自已驗證 ai_capex_skew_20260728.json)並 inline 放 skew 圖。POV答案：別被單一嚇人數字綁架，恐懼多寄在「大」和「系統層」，該防的是六巨頭共同曝險一起被重估→對沖在指數/用價差/抓時機(近月逆價差鬆掉=警報)。Gate 全過：anti_ai_gate --no-fb-mode PASS(warn 0/3，修掉 MUST 3.0「今天市場」+MUST 1.1「不是..而是」)、image gate 5 圖、archive-span 17d 過硬 gate。metadata 回讀確認：content_type=daily_digest + digest_articles 8 篇 + tags 含精選導讀 全部落地 feed。懶人包圖組=另生 4-panel 框架 poster(lazypack data-bound，非內文證據圖)。寫作走 router topology=subagent(opus)，主線程串行發佈。URL curl HTTP 200。"
+  },
+  {
+    "timestamp": "2026-07-28T12:24:06+08:00",
+    "task_type": "experiment",
+    "task_id": "K1727",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+    "owner": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+    "commit": null,
+    "summary": "K1727 collect_completed (compute job agent-brief_K1727_v2-da5fc1, exit0). Cross-asset VT re-validation of JPM/Man prior across 8 daily ETFs (SPY/QQQ/HYG/LQD risky; TLT/UUP/DBC/GLD non-risk), seed=42, lookahead-guarded (position=raw_scale.shift(1)).\n\nActions this fire:\n- Adversarial subagent review (Codex-fallback; Codex credit-limited until 2026-08-02 per K1728) + main-thread independent re-verification of frozen bytes → certify PASS, bytes-pinned review_verdict.json.\n- Wrote reproduce_spec.json (network=allow live yfinance; numpy seed 42; input trace on volpred.stats.drawdown).\n- Kept a collection-helper README honesty edit (softened overclaim \"statistically absent true null\" → \"underpowered/directional; all 8 bootstrap CIs straddle zero\"); documentation-only, no number/code change, independently re-verified. Corrected a false attribution in review_notes.md.\n- Wrote knowledge.json entry item_id=2ef0d80e (category=null_result), numbers pulled programmatically from K1727_results.json.\n\nResult: CONDITIONAL_PASS / null — does NOT reproduce the \"VT lifts Sharpe for risky assets only\" claim at daily ETF frequency (every per-asset bootstrap 95% CI straddles 0; risky mean gain +0.053 vs non-risk +0.010, diff +0.043 descriptive-only n=4/group, reverses at 60d window; risky/non-risk split appears only in exposure-matched MDD gap, necessary-not-sufficient for timing skill).\n\nMERGE DEFERRED: shared main index held by foreign staged content (58 files; PHASE-Z stuck-files incident assign_34f33e28). merge_worktree correctly refused. Worktree dispatch-slot-4-6ba995a0-k1727 clean+certified @aea6b1ed; unmerged-worktree reaper (inc_776caf84f125) owns the retry. Did NOT touch the foreign index."
+  },
+  {
+    "timestamp": "2026-07-28T12:34:37+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1357_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+    "owner": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+    "commit": null,
+    "summary": "K1357_article_general (daily_article, general audience). Wrote reader-facing 繁中 draft to storage/drafts/K1357_general_draft.md for uncovered experiment K1357 (RLMM spread-asymmetry fingerprint).\n\nPre-write gates (main thread): check_arc_dedup --k-id K1357 --audience general → exit0 (no K-coverage, no arc dup); feed grep K1357 → 0 hits; no existing draft. Truly uncovered.\n\nDispatched opus draft-writer subagent (router: daily_article→opus/medium/subagent) with full reader-facing brief (3 canonical paths, evidence-package-before-prose, anti-AI style, self-gate). Writer self-ran anti_ai_gate → exit0 round 1 (warn 1/3, non-blocking). Main-thread re-verified: gate exit0, key numbers match K1357_results.json (asymmetry +0.0457 CI[0.0006,0.0896], 908/1062 shock days, DM t=0.63 p=0.53), figure embedded.\n\nHonest angle preserved: EVENT_ONLY_WEAK — asymmetric liquidity footprint is real (event study passes) but does NOT translate to robust OOS RV forecast (forecast gate fails, 3/10 assets); free daily-OHLCV proxy only, no quote-level claim. No overclaim. Draft pool only; release cron publishes. No git run."
+  },
+  {
+    "timestamp": "2026-07-28T12:35:12+08:00",
+    "task_type": "experiment",
+    "task_id": "K1727",
+    "outcome": "partial",
+    "actor": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e",
+    "owner": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e",
+    "commit": null,
+    "summary": "K1727 收件收尾（承 slot-2 之 collect_completed）：本 fire 主線程做獨立 re-certification + artifact 補洞，使 worktree 具備 merge 條件。\n1) 讀 K1727.py 驗證 lookahead (position=raw_scale.shift(1), line 144) + seed=42 + bootstrap default_rng(42)；excess returns 兩腿一致。\n2) 獨立審查（subagent, opus）判 CONDITIONAL_PASS：headline「statistically absent for every asset」為 overclaim → 主線程把 README ## Result 標題改為忠實的「not statistically distinguishable / underpowered rather than proof of a null」，方向性 +0.043（risky 0.053 vs non-risky 0.010）如實標為 tiny/underpowered/60d 反轉/內部不一致。\n3) README bytes 變更打破舊 byte-bound 憑證 → 重生 verdict-template（現 README sha f3ecc084）＋ 派獨立 subagent 對 FROZEN post-edit bytes 重審 → PASS、寫回 review_verdict.json（Codex 額度受限至 2026-08-02，用 sanctioned subagent-fallback，見 K1728）。\n4) 修正無效 reproduce_spec.json：inputs[0].path 由絕對路徑改為 repo-relative src/volpred/stats/drawdown.py（artifacts gate 從 BLOCK→PASS）。\nCERT PASS + artifacts PASS。唯 merge-to-main 落地被 shared main index（並行 fire 之 staged 內容，merge_worktree.sh 依設計拒絕捲入他人 index）阻擋；worktree 已 commit、乾淨、merge-ready，將由 reclaim_stale_worktrees（每6h）於 index 清空後落地。已 mark-followup-dispatched(agent-brief_K1727_v2-da5fc1 → K1727)。"
+  },
+  {
+    "timestamp": "2026-07-28T12:35:12+08:00",
+    "task_type": "experiment",
+    "task_id": "k1731_f1_bootstrap_merge_deadlock",
+    "outcome": "partial",
+    "actor": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e",
+    "owner": "hourly-slot-3-0913293cc5b64ccaa73c953195fac25e",
+    "commit": null,
+    "summary": "k1731_f1_bootstrap_merge_deadlock — 執行 Exit A（task 建議路徑）：主線程寫入 arm B 本就欠的 knowledge 條目以解三方環之 edge #2（canonical knowledge 原 k1731 條目數=0，已驗）。\n新增 knowledge item_id=5a604fb2（category=experiment_finding, confidence=0.7），忠實鏡射 round-10 修正後之 headline_verdict：「對 macro 效果沒有支持，也沒有證明出 null」——in-sample macro 弱選擇（SSVS PIP 遠低於 0.5 prior：CPI 0.131/UNRATE 0.192/VIX 0.178/TERM 0.086，此臂 VIX 僅 0.06-0.09）；OOS 未觀察到改善、對 nested no-macro GEV 偏 macro 更差（DM t=+1.39）；明確不支持 OOS null（PIP 為 in-sample 統計、nested-restriction raw DM 在 expanding window 非漸近常態 West1996/Clark&McCracken2001、偏誤 Clark&West2007）。Cross-arm：arm A 全 19 refit 選 VIX(0.865) 對比 arm B 不選。射程嚴格只及 arm B，未替 F1 預寫任何結論（task 明令禁止）。\nprovenance 驗證 0 hard violations；knowledge index 已重建（exit 0）。\n未竟（外部阻擋，非本 fire 可安全解）：worktree 合併尚需 (a) Codex round-10 憑證（round-10 review 仍 queued，Codex 額度受限至 2026-08-02，K1728）(b) shared staged index 清空。故 F1 shard requeue（README §11.6 預定回收路徑）延後至 merge 落地後。任務未完全收束，釋回 pending 供後續 fire 承接 cert+merge+requeue。"
+  },
+  {
+    "timestamp": "2026-07-28T12:43:41+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1419_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+    "owner": "hourly-slot-2-a769cca86195446fb4b520099ea9254d",
+    "commit": null,
+    "summary": "K1419_article_general (daily_article, general audience). Wrote reader-facing 繁中 draft storage/drafts/K1419_general_draft.md (+ chart assets/k1419_0050tw_pinball.png) for uncovered experiment K1419 (probabilistic/quantile RV forecasting pilot).\n\nPre-write gates (main thread): check_arc_dedup --k-id K1419 --audience general → exit0; feed grep 0 hits; no existing draft. Uncovered.\n\nDispatched opus draft-writer (router: daily_article→opus/medium). Writer self-ran anti_ai_gate → exit0 round 1 (1 non-blocking WARN). Main-thread re-verified: gate exit0, numbers match results.json (0050.TW tau=0.05 DM t=-4.84 pinball 0.331 vs 0.420; tau=0.25 t=-7.31; SPY daily_rv_non_null=99), chart generated from JSON, pilot/Parkinson-proxy caveat placed up front.\n\nHonest angle: thin-data first-pass pilot. US ETFs no edge (SPY Gaussian baseline wins all quantiles, QQQ fails Harvey gate); ONLY Taiwan 0050.TW quantile-HAR clears Harvey at low/tail quantiles (assets_with_any_harvey_pass=1). Framed as one unverified lead worth chasing with real 5-min RV, NOT a verdict. No overgeneralization. Draft pool only; release cron publishes. No git run."
   }
 ]

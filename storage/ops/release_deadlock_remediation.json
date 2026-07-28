@@ -1,25 +1,7 @@
 {
-  "attempted": true,
-  "ran_at": "2026-07-28T03:00:31.526465+00:00",
-  "kind": "content_gate_deadlock",
+  "attempted": false,
+  "ran_at": "2026-07-28T04:00:24.856643+00:00",
+  "reason": "not_deadlocked",
   "draft": 1,
-  "eligible": 0,
-  "content_gate_blocked": [
-    {
-      "id": "mile_3c83e665",
-      "title": "資金費率能預測比特幣波動嗎？我認真拿六年數據測了這個「聰明錢訊號」",
-      "audience": "general",
-      "issues": [
-        "missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue"
-      ],
-      "skip_count": 2
-    }
-  ],
-  "blocked_clusters": [],
-  "required_clusters": [
-    "taiwan",
-    "garch",
-    "risk_mgmt"
-  ],
-  "task_id": "release_deadlock_repair_20260728_03"
+  "eligible": 0
 }

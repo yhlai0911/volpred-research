@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T03:00:33.025004+00:00",
+  "generated_at": "2026-07-28T04:00:26.352902+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 157.6
+      "age_hours": 158.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 9.6
+      "age_hours": 10.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -23,14 +23,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 17.7
+      "age_hours": 18.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 58,
-    "grace": 0,
+    "grace": 2,
     "inflight": 0
   },
   "orphan_count": 3,
@@ -71,7 +71,7 @@
       ],
       "held": [],
       "skipped": {
-        "grace": 0,
+        "grace": 9,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -83,8 +83,8 @@
             "storage/drafts/assets/k1710_overnight_edge.png",
             "storage/drafts/assets/make_k1710_chart.py"
           ],
-          "committed": false,
-          "err": "致命錯誤: 無法建立 '/Users/yhlai0911/volpred-research/.git/index.lock'：File exists。\n\n這個版本庫似乎有另一個 git 處理程序在執行，\n例如「git commit」命令開啟的編輯器。\n請確認所有處理程序都已經終止後再重試一次。如果錯"
+          "committed": true,
+          "detail": "[main 4adffc6aa] chore(draft-reap): collect orphaned draft artifacts (3 files)\n 3 files changed, 185 insertions(+)\n create mode 100644 storage/drafts/"
         }
       ]
     },

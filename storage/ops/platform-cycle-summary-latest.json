@@ -1,6 +1,6 @@
 {
   "workflow_name": "platform_cycle_summary",
-  "generated_at": "2026-07-04T11:09:33.551776+00:00",
+  "generated_at": "2026-07-28T04:12:47.243500+00:00",
   "release_preview": {
     "mode": "auto",
     "settings": {
@@ -10,44 +10,56 @@
       "due_only": true,
       "include_drafts": true,
       "preferred_audiences": [],
-      "last_released_at": "2026-07-04T06:00:29.767748+00:00",
-      "updated_at": "2026-07-04T06:00:38.251396+00:00"
+      "last_released_at": "2026-07-28T03:58:49.881227+00:00",
+      "updated_at": "2026-07-28T04:00:24.507637+00:00"
     },
-    "due_now": true,
-    "next_release_at": "2026-07-04T10:00:00+00:00",
+    "due_now": false,
+    "next_release_at": "2026-07-28T07:58:00+00:00",
     "pool_counts": {
-      "draft": 6,
+      "draft": 1,
       "scheduled": 0,
-      "eligible_before_dedup": 6,
-      "dedup_flagged": 6,
+      "eligible_before_dedup": 1,
+      "dedup_flagged": 0,
+      "narrative_cluster_filtered": 0,
+      "content_gate_blocked": 1,
       "eligible": 0
     },
     "narrative_cluster_pressure": {
       "window": 3,
       "threshold": 2,
       "clusters": [
-        "forecast_method",
-        "vix",
-        "vix"
+        "hedging",
+        "taiwan",
+        "garch"
       ],
       "counts": {
-        "forecast_method": 1,
-        "vix": 2
+        "hedging": 1,
+        "taiwan": 1,
+        "garch": 1
       },
-      "blocked_clusters": [
-        "vix"
-      ],
+      "blocked_clusters": [],
       "recent_ids": [
-        "mile_a656a042",
-        "mile_167ed77b",
-        "mile_64c33170"
+        "mile_08b69f7c",
+        "mile_a8006dd2",
+        "mile_ea920f7f"
       ]
     },
     "narrative_cluster_filtered": [],
+    "content_gate_blocked": [
+      {
+        "id": "mile_3c83e665",
+        "title": "資金費率能預測比特幣波動嗎？我認真拿六年數據測了這個「聰明錢訊號」",
+        "audience": "general",
+        "issues": [
+          "missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue"
+        ],
+        "skip_count": 2
+      }
+    ],
     "next_candidates": []
   },
   "question_ranking": {
-    "generated_at": "2026-07-04T11:09:33.551776+00:00",
+    "generated_at": "2026-07-28T04:12:47.243500+00:00",
     "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
     "table_columns": [
       "排名",
@@ -60,14 +72,142 @@
       "active_ranked": 0,
       "pending_evaluation": 0,
       "researching": 0,
-      "answered": 16,
-      "scored_questions": 17,
+      "answered": 18,
+      "scored_questions": 18,
       "candidate_pool": 0,
-      "latest_member_question_at": "2026-06-18T01:30:03.846431+00:00",
-      "latest_answered_at": "2026-06-19T11:31:13.870613+00:00"
+      "latest_member_question_at": "2026-07-18T06:19:41.880497+00:00",
+      "latest_answered_at": "2026-07-19T05:40:08.266327+00:00"
     },
     "ranked_table": [],
     "pending_questions": [],
+    "answered_history": [
+      {
+        "question_id": "fa0e28b4-1a50-437b-8f11-bf596be04786",
+        "question": "BTC 的波動率預測能不能用傳統 GARCH？有什麼要注意的？",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "f1f69c99-ca90-4942-af19-4d73766251cb",
+        "question": "請問 VIX 和台灣加權指數的相關性有多高？",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "64ba7ef2-0d26-4368-af19-6b4c7c1a131e",
+        "question": "Realized Volatility 用 5 分鐘還是 15 分鐘資料比較好？",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "79077d59-9647-4119-90dc-d86cfb230bdb",
+        "question": "深入瞭解酒店消費娛樂業是民生消費市場的火車頭，幫我文獻回顧娛樂產業特別是酒店與股市的相關性，並且歸納出產業指標項目，摘要3000字",
+        "status": "answered",
+        "answered_at": "2026-06-11T11:21:33.415944+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "9ab8d3a7-a590-4f71-b728-435169fbbdfb",
+        "question": "假設三個月後台股到達60,000點，你認為目前有哪些股票是還沒有達到他應該有的價值並且哪些產業是值得投資在60,000點的時候需要做哪些預先的投資準備幫我模擬並產生摘要3000字",
+        "status": "answered",
+        "answered_at": "2026-06-19T11:31:13.870613+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "873fba68-4924-42cd-8ce7-f6338bf15368",
+        "question": "為什麼 12/VIX 策略在 2020 年 COVID 期間回撤這麼大？",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "b2c9db2a-786b-4f83-9b6f-fb92d0973819",
+        "question": "copula在股匯市關係上如何應用與詮釋",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "d4fbc794-e90e-4c67-989b-b16e52472304",
+        "question": "GJR-GARCH 和 EGARCH 在台股的表現差異？實務上該用哪個？",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "6f2aa55d-b41e-4b7a-89cc-346279e0c3e5",
+        "question": "BTC和VIX或VRP間有什麼關聯",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 0
+      },
+      {
+        "question_id": "211e8eb8-a628-4154-82d2-aae6f0c67419",
+        "question": "50/50 SPY/GLD 策略在升息環境下是否需要調整比例？",
+        "status": "answered",
+        "answered_at": null,
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "e79a7097-714f-4be4-b115-402f02f2d748",
+        "question": "如果我要接下來30年我的資金穩定每年成長15%, 我該問什麼問題, 我必須掌握投資的15個問題",
+        "status": "answered",
+        "answered_at": "2026-07-12T15:38:17.536594+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "3e258ba2-6a9d-4807-953d-a1671cce3b82",
+        "question": "如果我要接下來30年我的資金穩定每年成長7%, 我該問什麼問題, 我必須掌握投資的15個問題",
+        "status": "answered",
+        "answered_at": "2026-07-19T05:40:08.266327+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "df669347-41e9-4622-8c6d-2e6758674d04",
+        "question": "應用這20年的社會經濟背景與股價的反應預估接下來五年台灣社會經濟社會走向, 與分析 可投資的產業 與 建構 模型 , 並生成圖表 , 2000字",
+        "status": "answered",
+        "answered_at": "2026-03-31T17:27:10.229077+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "7f6c50d9-d723-47e6-9534-8578fca24edb",
+        "question": "如果看美國國會議員比較大的持股項目和變化 雖然公告時間落後 但是否還是具有一定的獲利性？\n另外 不是看單一人 而是看整體呢？ 例如看到目前為止 所有國會議員持股最大（或持股變化最大）的公司 然後追蹤後續的績效 這樣可以嗎？",
+        "status": "answered",
+        "answered_at": "2026-04-05T08:03:04.581129+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "20dcd7d5-bb86-4620-b6c0-abb1ee8fd1b5",
+        "question": "如果把美國過會議員比較大的持股項目和變化 在公告後 逆向操作呢？ 賣出買入最多（或增加買入最多）的 同時買入賣出最多（或增加賣出最多）的個股 這樣有可能獲利嗎？",
+        "status": "answered",
+        "answered_at": "2026-04-05T16:03:03.793975+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "793029cc-b3db-4c69-8f44-d9eecfb9d13f",
+        "question": "接下來5年台灣營造業股票會大漲的10個理由，幫我分析與歸納，2000個字。",
+        "status": "answered",
+        "answered_at": "2026-04-11T10:03:04.898783+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "29cbeb5c-0ec7-44d0-995a-5d34ca7b7ce4",
+        "question": "依照波浪理論的理論走勢, 與分型理論, GRI 205 企業反貪腐強度是否與股價波動有相關性, 2000字 講解並舉例",
+        "status": "answered",
+        "answered_at": "2026-04-26T10:04:18.04592+00:00",
+        "linked_articles_count": 1
+      },
+      {
+        "question_id": "44b3cfcd-4bfe-4904-80a0-70274ff7ba62",
+        "question": "看到台灣路上進口車比例越來越高，這跟台灣經濟變遷有關，請幫我整合此資訊，推薦可以買的股票並說明投資理由2000字 並生成圖表",
+        "status": "answered",
+        "answered_at": "2026-05-26T10:05:13.613127+00:00",
+        "linked_articles_count": 1
+      }
+    ],
     "candidate_pool": [],
     "suggestions": [
       "目前會員問題排行健康，可維持既有 6 小時評分節奏。"
@@ -85,7 +225,5 @@
     },
     "snapshot_path": "storage/ops/question-ranking-workflow-latest.json"
   },
-  "suggestions": [
-    "內容池已到節奏釋出時間，可評估執行 release-pool-by-settings。"
-  ]
+  "suggestions": []
 }
