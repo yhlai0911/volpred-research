@@ -51,12 +51,15 @@ def reap(args: argparse.Namespace) -> int:
             args, "destination_unlinked", False,
         ),
     )
-    initial_receipt = isolation._transition_provider_auth_reaper_receipt(
+    isolation._transition_provider_auth_reaper_receipt(
         receipt_path,
         {
             "schema_version": "provider-auth-reaper.v2",
             "state": "waiting_for_process_group",
             "reaper_pid": os.getpid(),
+            "reaper_started_wall": procutil.get_process_start_wall(
+                os.getpid()
+            ),
         },
     )
     ack_fd = getattr(args, "ack_fd", None)
@@ -68,25 +71,28 @@ def reap(args: argparse.Namespace) -> int:
         leader_pid=getattr(args, "leader_pid", None),
         leader_started_wall=getattr(args, "leader_started_wall", None),
     )
-    attempts = int((initial_receipt or {}).get("attempts") or 0)
     while True:
-        attempts += 1
-        isolation._transition_provider_auth_reaper_receipt(
+        terminal = isolation._reconcile_lease_from_provider_auth_receipt(
+            lease,
             receipt_path,
-            {
-                "schema_version": "provider-auth-reaper.v2",
-                "state": "cleanup_started",
-                "attempts": attempts,
-            },
         )
+        if terminal is not None:
+            return 0
+        attempts, claimed = isolation._begin_provider_auth_cleanup_attempt(
+            receipt_path,
+            owner=f"reaper:{os.getpid()}",
+        )
+        if claimed.get("state") == "cleaned":
+            continue
         receipt = lease.close(
             checkpoint=lambda phase: (
                 isolation._transition_provider_auth_reaper_receipt(
                     receipt_path,
                     {
-                        "schema_version": "provider-auth-reaper.v2",
-                        "state": "cleanup_started",
-                        "close_phase": phase,
+                            "schema_version": "provider-auth-reaper.v2",
+                            "state": "cleanup_started",
+                            "attempts": attempts,
+                            "close_phase": phase,
                     },
                 )
             ),

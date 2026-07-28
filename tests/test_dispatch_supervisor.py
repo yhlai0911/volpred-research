@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import contextlib
+import fcntl
 import hashlib
 import json
 import logging
@@ -6359,6 +6360,63 @@ def test_codex_auth_authority_allows_only_one_live_lease(
     assert second.close().ok is True
 
 
+def test_child_lease_close_does_not_unlock_parent_quarantine_descriptor(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    parent = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert parent is not None and parent._authority_lock_fd is not None
+    child_fd = os.dup(parent._authority_lock_fd)
+    child = isolation.ProviderAuthLease(
+        source_home=parent.source_home,
+        run_dir=parent.run_dir,
+        destination_path=parent.destination_path,
+        baseline_sha256=parent.baseline_sha256,
+        lease_id=parent.lease_id,
+        _authority_lock_fd=child_fd,
+    )
+
+    assert child.close().ok is True
+
+    contender_fd = os.open(
+        source.parent / isolation._PROVIDER_AUTH_LOCK_NAME,
+        os.O_RDWR,
+    )
+    try:
+        with pytest.raises(BlockingIOError):
+            fcntl.flock(
+                contender_fd,
+                fcntl.LOCK_EX | fcntl.LOCK_NB,
+            )
+    finally:
+        os.close(contender_fd)
+        isolation._release_provider_auth_lock(parent._authority_lock_fd)
+        parent._authority_lock_fd = None
+
+
 def test_codex_auth_close_failure_remains_retryable(
     tmp_path: Path,
     monkeypatch,
@@ -6694,6 +6752,24 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
         "_transition_provider_auth_reaper_receipt",
         lambda _path, payload: written.append(payload),
     )
+    attempt_numbers = iter([1, 2])
+
+    def begin_attempt(*_args, **_kwargs):
+        attempt = next(attempt_numbers)
+        payload = {"state": "cleanup_started", "attempts": attempt}
+        written.append(payload)
+        return attempt, payload
+
+    monkeypatch.setattr(
+        auth_lease_reaper.isolation,
+        "_reconcile_lease_from_provider_auth_receipt",
+        lambda *_a, **_k: None,
+    )
+    monkeypatch.setattr(
+        auth_lease_reaper.isolation,
+        "_begin_provider_auth_cleanup_attempt",
+        begin_attempt,
+    )
     monkeypatch.setattr(auth_lease_reaper.time, "sleep", lambda _seconds: None)
     args = SimpleNamespace(
         receipt_path=str(tmp_path / "receipt.json"),
@@ -6818,6 +6894,19 @@ def test_health_reaps_quarantined_auth_after_child_and_group_are_gone(
         isolation,
         "_transition_provider_auth_reaper_receipt",
         lambda _path, payload: payload,
+    )
+    monkeypatch.setattr(
+        isolation,
+        "_reconcile_lease_from_provider_auth_receipt",
+        lambda *_a, **_k: None,
+    )
+    monkeypatch.setattr(
+        isolation,
+        "_begin_provider_auth_cleanup_attempt",
+        lambda *_a, **_k: (
+            1,
+            {"state": "cleanup_started", "attempts": 1},
+        ),
     )
     isolation.quarantine_provider_auth_lease(
         FakeLease(),
