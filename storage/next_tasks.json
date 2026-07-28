@@ -50946,7 +50946,7 @@
     "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 13 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 13 班\n- src/volpred/ops/next_tasks.py — 13 班\n- storage/drafts/assets/k1710_overnight_edge.png — 9 班\n- storage/logs/trending_primary_source_verification.jsonl — 4 班\n- storage/memory/knowledge.json — 11 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T000922430910Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T010745495780Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-28T00:09:29.515681+00:00",
     "payload": {
@@ -50984,7 +50984,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T01:07:52.291120+00:00"
+    "updated_at": "2026-07-28T01:07:52.291120+00:00",
+    "superseded_at": "2026-07-28T02:07:40.364020+00:00",
+    "superseded_by": "assign_b48f6bac",
+    "completed_at": "2026-07-28T02:07:40.364020+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "daily_digest_20260728",
@@ -51001,5 +51005,75 @@
       "reader_facing",
       "精選導讀"
     ]
+  },
+  {
+    "id": "release_deadlock_repair_20260728_02",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 1 篇、eligible=0（due_now=true），其中 1 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_3c83e665` (general, 已被擋 1 次) [lazypack_missing] 資金費率能預測比特幣波動嗎？我認真拿六年數據測了這個「聰明錢訊號」\n    missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-28T02:00:25.252240+00:00",
+    "blocked_article_ids": [
+      "mile_3c83e665"
+    ],
+    "trigger": "release_pool_content_gate_deadlock",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "alert_release_pool_deadlock_20260728",
+    "title": "[alert] Release pool deadlocked — 1 drafts, 0 eligible (due now)",
+    "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 1 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 1\n- eligible_before_dedup: 1\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 1\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_3c83e665` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260728_02`，指定只補仍可放行的 cluster：taiwan, garch, risk_mgmt。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "created_at": "2026-07-28T02:00:52.190764+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "release_pool_deadlock"
+    ]
+  },
+  {
+    "id": "assign_b48f6bac",
+    "title": "PHASE-Z 卡住檔案 incident（f940335a9db363ed）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 14 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 14 班\n- src/volpred/ops/next_tasks.py — 14 班\n- storage/drafts/assets/k1710_overnight_edge.png — 10 班\n- storage/logs/trending_primary_source_verification.jsonl — 5 班\n- storage/memory/knowledge.json — 12 班\n- storage/reports/INDEX.md — 3 班\n- storage/reports/index.json — 3 班\n- storage/strategy_metrics.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T020733505311Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T02:07:40.376334+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "f940335a9db363ed",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1710_overnight_edge.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 14,
+        "src/volpred/ops/next_tasks.py": 14,
+        "storage/drafts/assets/k1710_overnight_edge.png": 10,
+        "storage/logs/trending_primary_source_verification.jsonl": 5,
+        "storage/memory/knowledge.json": 12,
+        "storage/reports/INDEX.md": 3,
+        "storage/reports/index.json": 3,
+        "storage/strategy_metrics.json": 3
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T020733505311Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T02:07:40.364020+00:00",
+      "last_seen_at": "2026-07-28T02:07:40.364020+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
