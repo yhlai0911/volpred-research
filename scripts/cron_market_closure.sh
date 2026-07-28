@@ -5,7 +5,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/market_closure.log 2
 # Canonical source for the market-closure detector wrapper.
 # Launched by LaunchAgent com.volpred.market-closure-detect (hourly), which execs
 # the copy at ~/.volpred/bin/cron_market_closure.sh. After editing this file, sync:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Why (2026-07-10): exchange_calendars is blind to same-day typhoon closures.
 # This reads the NCDR/DGPA 停班停課 feed hourly; if 臺北市 is fully suspended it

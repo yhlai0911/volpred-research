@@ -3,7 +3,8 @@
 # Canonical source. Runtime copy:
 #   ~/.volpred/bin/cron_ndc_indicator_refresh.sh
 # Install after edits:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/ndc_indicator_refresh.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1
 source scripts/cron_lib.sh

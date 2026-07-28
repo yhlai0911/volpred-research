@@ -6,7 +6,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/memory_health.log 2>
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_memory_health.sh. After editing this file,
-# sync with:   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Runs memory-health-summary daily; if status != ok, fire send-alert (24h dedup
 # auto-handled by send-alert CLI). Prevents the 2026-04-10 knowledge.json bloat

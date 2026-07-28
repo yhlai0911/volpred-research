@@ -4,7 +4,8 @@
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/populate_events.log 2>&1
 # Canonical source for the host-cron wrapper. cron-exec target at
 # ~/.volpred/bin/cron_populate_events.sh. After editing this file:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research
 echo "=== populate-upcoming-events $(date '+%Y-%m-%d %H:%M:%S') ==="
 source /Users/yhlai0911/volpred-research/scripts/cron_lib.sh

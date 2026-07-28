@@ -3,7 +3,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/enqueue_daily_digest
 # Canonical source. cron-exec target at ~/.volpred/bin/cron_enqueue_daily_digest.sh
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC blocks the
 # cron daemon). After editing this file, sync with:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # 目的（boss directive 2026-06-22「每日精選導讀是例行任務」）：每天 09:00 台北把一個
 # daily_digest P1 任務冪等地排進 next_tasks，讓 hourly dispatch 接手寫作+發佈。

@@ -2,7 +2,8 @@
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/reader_facing_refill.log 2>&1
 # Canonical source. cron-exec target at ~/.volpred/bin/cron_reader_facing_refill.sh
 # After editing this file, sync with:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research
 echo "=== reader-facing-refill $(date '+%Y-%m-%d %H:%M:%S') ==="
 source /Users/yhlai0911/volpred-research/scripts/cron_lib.sh

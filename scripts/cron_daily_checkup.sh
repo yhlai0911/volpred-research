@@ -1,7 +1,8 @@
 #!/bin/bash
 # 每日大體檢 LaunchAgent wrapper（canonical source）。
 # Runtime copy: ~/.volpred/bin/cron_daily_checkup.sh；修改後執行：
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/daily_checkup.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1

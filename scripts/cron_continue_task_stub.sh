@@ -17,7 +17,8 @@
 # IMPORTANT: macOS TCC (FDA) blocks daemons from exec'ing .sh under Desktop/.
 # The cron-exec target is ~/.volpred/bin/cron_continue_task_stub.sh.
 # After editing this file run:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/continue_task_stub.log 2>&1
 cd /Users/yhlai0911/volpred-research || exit 1

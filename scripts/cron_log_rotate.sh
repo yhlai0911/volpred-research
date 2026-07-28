@@ -6,7 +6,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/log_rotate.log 2>&1
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_log_rotate.sh.
 # After editing this file, sync with:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # 目的：volpred 各 cron/LaunchAgent log 無 rotation 機制，codex_loop.log 曾達 46MB。
 # 此 job 每日把超過 MAX_BYTES 的 log 截斷為最後 KEEP_LINES 行（原子替換，保留近期可觀測性）。

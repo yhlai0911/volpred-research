@@ -1,6 +1,7 @@
 #!/bin/bash
 # Daily token-usage job — the SOLE token cadence (one owner, one email/day; WS-H2).
-# Canonical source; install via scripts/sync_cron_wrappers.py --apply.
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Step 1: token-usage-maintain persists the daily/weekly report JSON under
 #         storage/reports/token_usage/ (moved here 2026-07-20 WS-H2 from the

@@ -6,7 +6,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/arxiv_scan.log 2>&1
 # IMPORTANT: host cron does NOT exec files under Desktop/ (macOS TCC/FDA blocks
 # the cron daemon). The cron-exec target lives at ~/.volpred/bin/cron_arxiv_scan.sh.
 # After editing this file, sync with:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # 目的（Phase 2，2026-05-29 老闆「你決定就好」授權）：每週掃 arXiv q-fin 前沿，
 # 把命中研究軸的新論文 seed 到 staging 候選池 storage/research/arxiv_candidates.json，

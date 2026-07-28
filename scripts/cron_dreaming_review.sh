@@ -7,7 +7,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/dreaming_review.log 
 # IMPORTANT: host cron does NOT exec this file — macOS TCC (FDA) blocks the cron
 # daemon from exec'ing .sh files under Desktop/. The cron-exec target lives at
 # ~/.volpred/bin/cron_dreaming_review.sh. After editing this file, sync with:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Loop-engineering slow loop (2026-06-29): daily cross-session failure-pattern
 # review. dreaming_review.py writes storage/ops/dreaming/<date>.json, emails the

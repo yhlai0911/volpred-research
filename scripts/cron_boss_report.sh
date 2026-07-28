@@ -1,6 +1,7 @@
 #!/bin/bash
 # Boss report wrapper — the SOLE periodic operations email cadence (WS-H2).
-# Canonical source; install via scripts/sync_cron_wrappers.py --apply.
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 #
 # Editions by Taiwan-time fire hour (config boss_report_4h: 10 8,14,20 * * *):
 #   08:10 -> --window-hours 12  (covers overnight since the 20:10 close)

@@ -6,7 +6,8 @@
 # table usage guidance.
 # TCC: cron daemon can't exec .sh under the repo path directly — the exec target
 # is ~/.volpred/bin/cron_reader_preferences.sh. After editing this canonical
-# source: uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/reader_preferences.log 2>&1
 echo "[wrapper $(date '+%Y-%m-%d %H:%M:%S %Z')] STARTED reader_preferences pid=$$"
 cd /Users/yhlai0911/volpred-research

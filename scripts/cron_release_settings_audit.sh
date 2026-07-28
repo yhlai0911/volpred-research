@@ -7,7 +7,8 @@ exec >> /Users/yhlai0911/volpred-research/storage/logs/cron/release_settings_aud
 # cron daemon from exec'ing .sh files under Desktop/. The cron-exec target
 # lives at ~/.volpred/bin/cron_release_settings_audit.sh. After editing
 # this file, sync with:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research
 source /Users/yhlai0911/volpred-research/scripts/cron_lib.sh
 _start=$SECONDS

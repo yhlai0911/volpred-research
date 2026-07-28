@@ -6,7 +6,8 @@
 #
 # Canonical script — runtime copy at ~/.volpred/bin/cron_fb_ttl_expire.sh
 # (macOS TCC requires wrappers under HOME, not Desktop). Sync after edit:
-#   uv run python scripts/sync_cron_wrappers.py --apply
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 cd /Users/yhlai0911/volpred-research
 echo "=== [fb_ttl_expire] start at $(date -u +%Y-%m-%dT%H:%M:%SZ) ==="
 /opt/homebrew/bin/uv run python scripts/mark_fb_post_status.py --auto-expire 14 2>&1

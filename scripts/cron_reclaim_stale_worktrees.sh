@@ -7,7 +7,8 @@
 # destructive kill/remove path stays a manual, main-thread decision.
 # Canonical source: scripts/reclaim_stale_worktrees.py
 # Schedule: 25 */6 * * * via run_due_jobs piggy-back (config/runtime_schedules.json).
-# TCC copy: ~/.volpred/bin/cron_reclaim_stale_worktrees.sh (sync_cron_wrappers.py --apply)
+# After editing: uv run python scripts/sync_cron_wrappers.py --render-manifest
+# After commit/merge on main: uv run python scripts/sync_cron_wrappers.py --apply
 
 cd /Users/yhlai0911/volpred-research || exit 1
 
