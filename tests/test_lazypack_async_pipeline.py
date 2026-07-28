@@ -706,10 +706,27 @@ def test_release_gate_reads_content_not_seo_description(tmp_path, monkeypatch):
 
 # ------------------------------------------------- requeue-stranded (D4a) ----
 
-def _failed_job(qdir: Path, job_id: str, article_id: str, *,
-                completed_at: str = "2026-07-20T02:00:00+00:00") -> Path:
+def _failed_job(
+    qdir: Path,
+    job_id: str,
+    article_id: str,
+    *,
+    completed_at: str = "2026-07-20T02:00:00+00:00",
+    persist_plan: bool = True,
+) -> Path:
     qdir.mkdir(parents=True, exist_ok=True)
     path = qdir / f"{job_id}.json"
+    plan_path = (
+        qdir.parent / "storage" / "lazypack_jobs" / article_id
+        / "runs" / job_id / "plan.json"
+    )
+    panels_dir = plan_path.parent / "panels"
+    if persist_plan:
+        plan_path.parent.mkdir(parents=True, exist_ok=True)
+        plan_path.write_text(
+            json.dumps(_make_plan(qdir.parent), ensure_ascii=False),
+            encoding="utf-8",
+        )
     path.write_text(json.dumps({
         "id": job_id,
         "title": f"lazypack render {article_id}",
@@ -720,10 +737,10 @@ def _failed_job(qdir: Path, job_id: str, article_id: str, *,
         "script_path": "scripts/lazypack_async_render.py",
         "interpreter": "uv run python",
         "args": ["run", "--job-id", job_id, "--article-id", article_id,
-                 "--plan", "storage/lazypack_jobs/x/plan.json",
-                 "--out-dir", "storage/lazypack_jobs/x/panels"],
-        "result_artifact": "storage/lazypack_jobs/x/panels",
-        "output_paths": ["storage/lazypack_jobs/x/plan.json"],
+                 "--plan", str(plan_path),
+                 "--out-dir", str(panels_dir)],
+        "result_artifact": str(panels_dir),
+        "output_paths": [str(plan_path)],
         "timeout_seconds": 1800,
     }, ensure_ascii=False), encoding="utf-8")
     return path
@@ -742,6 +759,22 @@ def test_requeue_stranded_is_idempotent_and_attempt_capped(
     assert retry["status"] == "queued"
     job_id_flag = retry["args"].index("--job-id")
     assert retry["args"][job_id_flag + 1] == "lazypack-mile_lz1-r2"
+    plan_flag = retry["args"].index("--plan")
+    retry_plan = Path(retry["args"][plan_flag + 1])
+    assert retry_plan.is_file()
+    assert retry_plan != Path(
+        json.loads(original.read_text(encoding="utf-8"))["args"][plan_flag + 1]
+    )
+    assert retry_plan.parent.name == "lazypack-mile_lz1-r2"
+    out_dir_flag = retry["args"].index("--out-dir")
+    retry_out_dir = Path(retry["args"][out_dir_flag + 1])
+    assert retry_out_dir.parent == retry_plan.parent
+    assert retry["result_artifact"] == str(retry_out_dir)
+    assert retry["output_paths"] == [
+        str(retry_plan),
+        str(retry_out_dir / "1_framework.png"),
+        str(retry_out_dir / "2_results.png"),
+    ]
     assert json.loads(original.read_text(encoding="utf-8"))["alert_requeued_as"] == (
         "lazypack-mile_lz1-r2"
     )
@@ -768,6 +801,32 @@ def test_requeue_stranded_is_idempotent_and_attempt_capped(
     summary = lar.requeue_stranded(storage_dir=str(storage))
     assert summary["requeued"] == []
     assert any(s["reason"] == "attempt_ceiling" for s in summary["skipped"])
+
+
+def test_requeue_stranded_missing_plan_fails_closed(
+    storage, tmp_path, monkeypatch
+):
+    """A retry without its frozen input is not self-healing; never enqueue it."""
+    qdir = _patch_queue(monkeypatch, tmp_path)
+    original = _failed_job(
+        qdir,
+        "lazypack-mile_lz1",
+        "mile_lz1",
+        persist_plan=False,
+    )
+
+    summary = lar.requeue_stranded(storage_dir=str(storage))
+
+    assert summary["requeued"] == []
+    assert summary["skipped"] == [{
+        "article_id": "mile_lz1",
+        "job_id": "lazypack-mile_lz1",
+        "reason": "plan_missing",
+    }]
+    assert not (qdir / "lazypack-mile_lz1-r2.json").exists()
+    assert "alert_requeued_as" not in json.loads(
+        original.read_text(encoding="utf-8")
+    )
 
 
 def test_requeue_stranded_skips_article_that_got_its_section(

@@ -3290,6 +3290,7 @@ def _parse_lazypack_render_state(storage_dir: str, now: datetime) -> dict[str, A
         if j.get("status") in {"completed", "queued", "running"}
     }
 
+    failures_by_article: dict[str, list[dict[str, Any]]] = {}
     for job in jobs:
         if job.get("status") != "failed":
             continue
@@ -3298,21 +3299,39 @@ def _parse_lazypack_render_state(storage_dir: str, now: datetime) -> dict[str, A
             continue  # a later run already carries this article
         if _article_has_lazypack_section(storage_dir, article_id):
             continue  # section landed some other way — nothing is stranded
+        failures_by_article.setdefault(article_id, []).append(job)
 
-        finished = _parse_iso_datetime(job.get("completed_at"))
-        age_h = (now - finished).total_seconds() / 3600.0 if finished else 0.0
+    for article_id, failures in sorted(failures_by_article.items()):
+        dated = [
+            (finished, job)
+            for job in failures
+            if (finished := _parse_iso_datetime(job.get("completed_at"))) is not None
+        ]
+        oldest_finished = min((finished for finished, _ in dated), default=None)
+        latest_job = (
+            max(dated, key=lambda pair: pair[0])[1]
+            if dated
+            else failures[-1]
+        )
+        age_h = (
+            (now - oldest_finished).total_seconds() / 3600.0
+            if oldest_finished
+            else 0.0
+        )
         oldest_age_h = max(oldest_age_h, age_h)
         stranded.append({
-            "job_id": job.get("id"),
+            "job_id": latest_job.get("id"),
             "article_id": article_id,
             "age_hours": round(age_h, 1),
-            "exit_code": job.get("exit_code"),
+            "exit_code": latest_job.get("exit_code"),
+            "failed_attempts": len(failures),
         })
 
     breached = bool(stranded)
     level = "critical" if oldest_age_h >= LAZYPACK_STUCK_CRITICAL_HOURS else "warn"
     listing = "\n".join(
-        f"- {s['article_id']}（job {s['job_id']}，失敗 {s['age_hours']}h 前，exit {s['exit_code']}）"
+        f"- {s['article_id']}（{s['failed_attempts']} 次 render 皆失敗；"
+        f"最新 job {s['job_id']}，卡住 {s['age_hours']}h，exit {s['exit_code']}）"
         for s in stranded
     )
     body = "\n".join([
@@ -3325,8 +3344,9 @@ def _parse_lazypack_render_state(storage_dir: str, now: datetime) -> dict[str, A
         "誰都不會發現 —— 發文節奏會靜靜地開一個洞。",
         "",
         "## 系統已自動執行",
-        "每小時的巡檢會自動把失敗的 render 重排一次（重跑是安全的：已經生好的圖不會重生）。"
-        "這則通知代表**自動重試也沒救回來**，需要人看一眼失敗原因："
+        "每小時巡檢只會在 frozen plan 仍可驗證、且未達嘗試上限時重排；"
+        "每次 retry 都使用隔離的 plan 與輸出目錄。"
+        "這則通知代表**目前沒有 active 或成功的 render**，需要人檢查失敗原因："
         "`storage/logs/compute/<job_id>.stderr`。",
     ])
     return {

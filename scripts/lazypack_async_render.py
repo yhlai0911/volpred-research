@@ -29,8 +29,8 @@ Usage:
   # compute worker executes (enqueued automatically as the job command):
   uv run python scripts/lazypack_async_render.py run \
     --article-id mile_31b2b0bb --experiment K1576 \
-    --plan storage/lazypack_jobs/mile_31b2b0bb/plan.json \
-    --out-dir storage/lazypack_jobs/mile_31b2b0bb/panels
+    --plan storage/lazypack_jobs/mile_31b2b0bb/runs/<job-id>/plan.json \
+    --out-dir storage/lazypack_jobs/mile_31b2b0bb/runs/<job-id>/panels
 
 Renderer chain (assign_5195e5ae D2): codex bespoke (gen_lazypack_codex.py) →
 agy bespoke (gen_lazypack_agy.py, free Antigravity CLI) → deterministic
@@ -79,6 +79,48 @@ def _load_plan(plan_path: Path) -> dict:
 
     document, _evidence = load_plan(plan_path)
     return document
+
+
+def _atomic_write_json(path: Path, payload: dict) -> None:
+    """Durably publish one immutable run input before its queue receipt."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, raw_tmp = tempfile.mkstemp(
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        dir=path.parent,
+    )
+    tmp = Path(raw_tmp)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp, path)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    finally:
+        tmp.unlink(missing_ok=True)
+
+
+def _arg_value(args: list[str], flag: str) -> str | None:
+    try:
+        index = args.index(flag)
+    except ValueError:
+        return None  # silent-ok: callers explicitly handle an absent optional flag
+    return str(args[index + 1]) if index + 1 < len(args) else None
+
+
+def _set_arg(args: list[str], flag: str, value: str) -> None:
+    if flag in args:
+        index = args.index(flag)
+        if index + 1 < len(args):
+            args[index + 1] = value
+            return
+    args.extend([flag, value])
 
 
 def _panel_specs(panels: list[dict]) -> list[tuple[str, str]]:
@@ -131,11 +173,9 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         except ValueError:
             return str(p)
 
-    # The plan and output directory are shared by sequential retries for one
-    # article. Serialize check → persist → receipt creation so a duplicate fire
-    # cannot overwrite the plan underneath an already queued/running worker.
-    # Concurrent --force used to create two jobs racing on those same paths; it
-    # now fails explicitly instead of pretending isolation exists.
+    # Every attempt owns a separate run directory. Serialize check → persist →
+    # receipt creation so a duplicate fire cannot create two active attempts
+    # for the same article. Concurrent --force is refused explicitly.
     with cq._receipt_lock():
         existing = (
             sorted(cq.QUEUE_DIR.glob(f"{base_id}*.json"))
@@ -178,10 +218,7 @@ def cmd_enqueue(a: argparse.Namespace) -> int:
         panels_dir = run_dir / "panels"
         run_dir.mkdir(parents=True, exist_ok=True)
         stored_plan = run_dir / "plan.json"
-        stored_plan.write_text(
-            json.dumps(document, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
+        _atomic_write_json(stored_plan, document)
         script_args = [
             "run",
             "--job-id", job_id,
@@ -248,6 +285,10 @@ def requeue_stranded(storage_dir: str | Path = "storage") -> dict:
     the full panel set from the hash-pinned plan.  Idempotency: the failed job
     is stamped `alert_requeued_as=<new id>` under the receipt lock, so one
     failed job can never mint two retries.
+
+    Each retry gets a new run directory and a newly persisted copy of the
+    failed run's fully validated frozen plan.  A missing/invalid prerequisite
+    fails closed instead of enqueueing a job that is guaranteed to fail.
     """
     import compute_queue as cq
 
@@ -320,10 +361,63 @@ def requeue_stranded(storage_dir: str | Path = "storage") -> dict:
                 n += 1
 
             script_args = list(job.get("args") or [])
+            failed_plan_raw = _arg_value(script_args, "--plan")
+            failed_plan = _resolve(failed_plan_raw) if failed_plan_raw else None
+            if failed_plan is None or not failed_plan.is_file():
+                warn(
+                    "lazypack_requeue",
+                    "frozen plan missing; refusing guaranteed-dead retry",
+                    article_id=article,
+                    job_id=job.get("id"),
+                    plan=failed_plan_raw,
+                )
+                summary["skipped"].append(
+                    {
+                        "article_id": article,
+                        "job_id": job.get("id"),
+                        "reason": "plan_missing",
+                    }
+                )
+                continue
+            try:
+                document = _load_plan(failed_plan)
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                warn(
+                    "lazypack_requeue",
+                    "frozen plan invalid; refusing guaranteed-dead retry",
+                    article_id=article,
+                    job_id=job.get("id"),
+                    plan=str(failed_plan),
+                    error=f"{type(exc).__name__}: {exc}",
+                )
+                summary["skipped"].append(
+                    {
+                        "article_id": article,
+                        "job_id": job.get("id"),
+                        "reason": "plan_invalid",
+                    }
+                )
+                continue
+
+            run_dir = (
+                storage_root / "lazypack_jobs" / article / "runs" / new_id
+            )
+            stored_plan = run_dir / "plan.json"
+            panels_dir = run_dir / "panels"
+            _atomic_write_json(stored_plan, document)
+
+            def _rel(path_value: Path) -> str:
+                try:
+                    return str(path_value.relative_to(ROOT))
+                except ValueError:
+                    return str(path_value)
+
             if "--job-id" in script_args:
                 script_args[script_args.index("--job-id") + 1] = new_id
             else:
                 script_args += ["--job-id", new_id]
+            _set_arg(script_args, "--plan", _rel(stored_plan))
+            _set_arg(script_args, "--out-dir", _rel(panels_dir))
 
             ns = argparse.Namespace(
                 id=new_id,
@@ -332,8 +426,14 @@ def requeue_stranded(storage_dir: str | Path = "storage") -> dict:
                 interpreter=job.get("interpreter") or "uv run python",
                 script_args=script_args,
                 env=None,
-                result_artifact=job.get("result_artifact"),
-                output_paths=list(job.get("output_paths") or []),
+                result_artifact=_rel(panels_dir),
+                output_paths=[
+                    _rel(stored_plan),
+                    *(
+                        _rel(panels_dir / f"{stem}.png")
+                        for stem, _ in _panel_specs(document["panels"])
+                    ),
+                ],
                 followup_brief=None,
                 followup_task_type=None,
                 followup_priority=None,

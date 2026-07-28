@@ -100,6 +100,32 @@ def test_escalates_to_critical_after_a_day(tmp_path):
     assert _parse_lazypack_render_state(storage, NOW)["level"] == "critical"
 
 
+def test_multiple_failed_attempts_count_as_one_stranded_article(tmp_path):
+    """The owner-facing count is articles, not retry receipts."""
+    storage = _storage(
+        tmp_path,
+        jobs=[
+            _job(f"lazypack-{ARTICLE}", "failed", hours_ago=25.0),
+            _job(f"lazypack-{ARTICLE}-r2", "failed", hours_ago=24.0),
+            _job(f"lazypack-{ARTICLE}-r3", "failed", hours_ago=23.0),
+        ],
+        article_content="",
+    )
+
+    result = _parse_lazypack_render_state(storage, NOW)
+
+    assert result["title"].startswith("1 篇文章")
+    assert len(result["details"]["stranded"]) == 1
+    assert result["details"]["stranded"][0] == {
+        "job_id": f"lazypack-{ARTICLE}-r3",
+        "article_id": ARTICLE,
+        "age_hours": 25.0,
+        "exit_code": 2,
+        "failed_attempts": 3,
+    }
+    assert f"{ARTICLE}（3 次 render 皆失敗" in result["body"]
+
+
 def test_a_completed_retry_clears_it(tmp_path):
     """The `-r2` rescue is what a human did by hand, twice. Honour it."""
     storage = _storage(
