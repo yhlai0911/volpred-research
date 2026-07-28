@@ -6384,6 +6384,64 @@ def test_codex_auth_close_failure_remains_retryable(
     assert lease.close() == second
 
 
+def test_codex_auth_close_retries_after_unlink_fsync_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": None,
+            "tokens": {
+                "access_token": "access",
+                "refresh_token": "refresh",
+                "id_token": "id",
+                "account_id": "account",
+            },
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert lease is not None
+    real_fsync = isolation.os.fsync
+    fail_next = True
+
+    def fail_once(fd: int) -> None:
+        nonlocal fail_next
+        if fail_next:
+            fail_next = False
+            raise OSError("injected post-unlink fsync failure")
+        real_fsync(fd)
+
+    monkeypatch.setattr(isolation.os, "fsync", fail_once)
+    first = lease.close()
+    assert first.ok is False
+    assert not Path(lease.destination_path).exists()
+    assert Path(lease.destination_path).parent.is_dir()
+
+    second = lease.close()
+    assert second.ok is True
+    assert second.cleaned is True
+
+
 def test_default_codex_authority_is_not_the_interactive_codex_home(
     tmp_path: Path,
     monkeypatch,
@@ -6447,6 +6505,43 @@ def test_codex_authority_bootstrap_is_verified_and_never_overwrites(
         )
 
 
+def test_codex_authority_bootstrap_holds_authority_lock(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    interactive_home = tmp_path / "interactive"
+    authority_home = tmp_path / "authority"
+    source = interactive_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    events: list[str] = []
+    real_acquire = isolation._acquire_provider_auth_lock
+    real_release = isolation._release_provider_auth_lock
+
+    def acquire(directory_fd: int) -> int:
+        events.append("acquire")
+        return real_acquire(directory_fd)
+
+    def release(fd: int | None) -> None:
+        events.append("release")
+        real_release(fd)
+
+    monkeypatch.setattr(isolation, "_acquire_provider_auth_lock", acquire)
+    monkeypatch.setattr(isolation, "_release_provider_auth_lock", release)
+
+    isolation.bootstrap_codex_auth_authority(
+        interactive_home=interactive_home,
+        authority_home=authority_home,
+    )
+
+    assert events == ["acquire", "release"]
+
+
 def test_auth_lease_reaper_requires_two_consecutive_empty_group_reads(
     monkeypatch,
 ) -> None:
@@ -6492,7 +6587,7 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
     monkeypatch.setattr(
         auth_lease_reaper,
         "wait_until_process_group_drained",
-        lambda _pgid: None,
+        lambda _pgid, **_kwargs: None,
     )
     monkeypatch.setattr(
         auth_lease_reaper.isolation,
@@ -6501,7 +6596,7 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
     )
     monkeypatch.setattr(
         auth_lease_reaper.isolation,
-        "_write_provider_auth_reaper_receipt",
+        "_transition_provider_auth_reaper_receipt",
         lambda _path, payload: written.append(payload),
     )
     monkeypatch.setattr(auth_lease_reaper.time, "sleep", lambda _seconds: None)
@@ -6513,11 +6608,94 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
         destination_path=str(tmp_path / "run" / "home" / ".codex" / "auth.json"),
         baseline_sha256="a" * 64,
         lock_fd=99,
+        lease_id="lease-test",
+        ack_fd=None,
+        leader_pid=888,
+        leader_started_wall="start",
     )
 
     assert auth_lease_reaper.reap(args) == 0
-    assert [item["state"] for item in written] == ["cleanup_retry", "cleaned"]
+    assert [item["state"] for item in written] == [
+        "waiting_for_process_group",
+        "cleanup_retry",
+        "cleaned",
+    ]
     assert written[-1]["attempts"] == 2
+
+
+def test_provider_auth_recovery_reclaims_nonterminal_intent(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    authority = tmp_path / "authority"
+    codex_dir = authority / ".codex"
+    codex_dir.mkdir(parents=True, mode=0o700)
+    auth = codex_dir / "auth.json"
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    receipts = tmp_path / "receipts"
+    receipts.mkdir()
+    receipt_path = receipts / "lease.json"
+    receipt_path.write_text(
+        json.dumps({
+            "schema_version": "provider-auth-reaper.v2",
+            "state": "handoff_failed",
+            "lease_id": "lease-id",
+            "source_home": str(authority),
+            "run_dir": str(tmp_path / "run"),
+            "destination_path": str(
+                tmp_path / "run" / "home" / ".codex" / "auth.json"
+            ),
+            "baseline_sha256": "a" * 64,
+            "pgid": 888,
+            "leader_pid": 777,
+            "leader_started_wall": "Mon Jul 28 12:00:00 2026",
+        }),
+        encoding="utf-8",
+    )
+    deferred: list[tuple[str, int, int, str, Path]] = []
+
+    def defer(
+        lease,
+        *,
+        pgid,
+        leader_pid,
+        leader_started_wall,
+        receipt_path,
+    ):
+        deferred.append(
+            (
+                lease.lease_id,
+                pgid,
+                leader_pid,
+                leader_started_wall,
+                receipt_path,
+            )
+        )
+        isolation._release_provider_auth_lock(lease._authority_lock_fd)
+        lease._authority_lock_fd = None
+
+    monkeypatch.setattr(isolation, "defer_provider_auth_cleanup", defer)
+
+    result = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipts,
+    )
+
+    assert result == {"recovered": 1, "active": 0, "invalid": 0}
+    assert deferred == [
+        (
+            "lease-id",
+            888,
+            777,
+            "Mon Jul 28 12:00:00 2026",
+            receipt_path,
+        ),
+    ]
 
 
 def test_codex_auth_materialization_rejects_symlink_destination(

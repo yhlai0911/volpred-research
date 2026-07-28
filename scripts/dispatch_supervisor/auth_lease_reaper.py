@@ -13,36 +13,66 @@ _POLL_SECONDS = 1.0
 _CLOSE_RETRY_SECONDS = 5.0
 
 
-def wait_until_process_group_drained(pgid: int) -> None:
+def wait_until_process_group_drained(
+    pgid: int,
+    *,
+    leader_pid: int | None = None,
+    leader_started_wall: str | None = None,
+) -> None:
     """Require two consecutive authoritative empty process-group reads."""
-    empty_reads = 0
-    while empty_reads < 2:
-        members = procutil.pgid_members_checked(pgid)
-        if members == []:
-            empty_reads += 1
-        else:
-            empty_reads = 0
-        time.sleep(_POLL_SECONDS)
+    if leader_pid is None or leader_started_wall is None:
+        empty_reads = 0
+        while empty_reads < 2:
+            members = procutil.pgid_members_checked(pgid)
+            if members == []:
+                empty_reads += 1
+            else:
+                empty_reads = 0
+            time.sleep(_POLL_SECONDS)
+        return
+    isolation.wait_for_process_group_generation_drained(
+        pgid=pgid,
+        leader_pid=leader_pid or pgid,
+        leader_started_wall=leader_started_wall or "legacy-unverified",
+        poll_seconds=_POLL_SECONDS,
+    )
 
 
 def reap(args: argparse.Namespace) -> int:
     receipt_path = Path(args.receipt_path).resolve()
-    wait_until_process_group_drained(args.pgid)
     lease = isolation.ProviderAuthLease(
         source_home=args.source_home,
         run_dir=args.run_dir,
         destination_path=args.destination_path,
         baseline_sha256=args.baseline_sha256,
+        lease_id=getattr(args, "lease_id", "legacy-test-lease"),
         _authority_lock_fd=args.lock_fd,
+    )
+    isolation._transition_provider_auth_reaper_receipt(
+        receipt_path,
+        {
+            "schema_version": "provider-auth-reaper.v2",
+            "state": "waiting_for_process_group",
+            "reaper_pid": os.getpid(),
+        },
+    )
+    ack_fd = getattr(args, "ack_fd", None)
+    if ack_fd is not None:
+        os.write(ack_fd, b"READY\n")
+        os.close(ack_fd)
+    wait_until_process_group_drained(
+        args.pgid,
+        leader_pid=getattr(args, "leader_pid", None),
+        leader_started_wall=getattr(args, "leader_started_wall", None),
     )
     attempts = 0
     while True:
         attempts += 1
         receipt = lease.close()
-        isolation._write_provider_auth_reaper_receipt(
+        isolation._transition_provider_auth_reaper_receipt(
             receipt_path,
             {
-                "schema_version": "provider-auth-reaper.v1",
+                "schema_version": "provider-auth-reaper.v2",
                 "state": "cleaned" if receipt.ok else "cleanup_retry",
                 "reaper_pid": os.getpid(),
                 "pgid": args.pgid,
@@ -65,11 +95,15 @@ def reap(args: argparse.Namespace) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--pgid", type=int, required=True)
+    parser.add_argument("--leader-pid", type=int, required=True)
+    parser.add_argument("--leader-started-wall", required=True)
     parser.add_argument("--source-home", required=True)
     parser.add_argument("--run-dir", required=True)
     parser.add_argument("--destination-path", required=True)
     parser.add_argument("--baseline-sha256", required=True)
+    parser.add_argument("--lease-id", required=True)
     parser.add_argument("--lock-fd", type=int, required=True)
+    parser.add_argument("--ack-fd", type=int, required=True)
     parser.add_argument("--receipt-path", required=True)
     return parser.parse_args()
 

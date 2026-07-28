@@ -44,16 +44,17 @@ from pathlib import Path
 from volpred.ops.execution.registry import load_provider_registry
 
 from . import (
+    __version__,
     alerts,
     health,
+    isolation,
     procutil,
     scheduler,
     state,
     trigger,
     worker,
-    workspace as workspace_mod,
-    __version__,
 )
+from . import workspace as workspace_mod
 
 ROOT = Path(__file__).resolve().parents[2]
 LOG_DIR = Path(os.environ.get("VOLPRED_HOME_DIR", str(Path.home() / ".volpred"))) / "logs"
@@ -430,6 +431,9 @@ def main(argv: list[str] | None = None) -> int:
     # Startup half of the zero-paid guard. Worker attempts reload the same
     # canonical bytes immediately before each provider Popen.
     load_provider_registry()
+    recovery = isolation.recover_provider_auth_reapers()
+    if any(recovery.values()):
+        logging.info("provider auth reaper recovery=%s", recovery)
     # NOTE: resolve `state.STATE_PATH` here and pass it down explicitly — the
     # same definition-time default-binding trap `_handle_restart_orphan()`
     # documents. These two calls used to rely on `mark_supervisor_started`'s own

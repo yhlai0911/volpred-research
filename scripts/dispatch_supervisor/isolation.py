@@ -22,9 +22,11 @@ import json
 import os
 import platform
 import secrets
+import select
 import stat
 import subprocess
 import sys
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
@@ -34,6 +36,14 @@ SANDBOX_EXEC = Path("/usr/bin/sandbox-exec")
 
 class IsolationUnavailable(RuntimeError):
     """The machine cannot prove the requested workspace boundary."""
+
+
+class ProviderAuthHandoffError(IsolationUnavailable):
+    """Detached cleanup did not acknowledge custody of a durable intent."""
+
+    def __init__(self, message: str, *, receipt_path: Path):
+        super().__init__(message)
+        self.receipt_path = receipt_path
 
 
 @dataclass(frozen=True)
@@ -108,8 +118,6 @@ def _workspace_write_roots(
     branch_ref = (branch.stdout or "").strip()
     if branch.returncode != 0 or not branch_ref.startswith("refs/heads/"):
         raise IsolationUnavailable("isolated workspace branch must be attached")
-    branch_rel = Path(branch_ref.removeprefix("refs/heads/"))
-
     # Producer tools edit working-tree bytes only. Git index/object/ref
     # mutations are supervisor-finalizer responsibilities, so the shared
     # common object database and branch refs are intentionally read-only.
@@ -552,6 +560,7 @@ class ProviderAuthLease:
     run_dir: str
     destination_path: str
     baseline_sha256: str
+    lease_id: str = field(default_factory=lambda: secrets.token_hex(16))
     _authority_lock_fd: int | None = field(default=None, repr=False)
     _reconciled: bool = field(default=False, repr=False)
     _source_advanced: bool = field(default=False, repr=False)
@@ -583,6 +592,7 @@ class ProviderAuthLease:
         destination_dir_fd: int | None = None
         destination_home_fd: int | None = None
         destination_run_fd: int | None = None
+        destination_dir_fsynced = False
         try:
             destination_run_fd = _open_directory(Path(self.run_dir))
             destination_home_fd = _open_child_directory(
@@ -649,6 +659,7 @@ class ProviderAuthLease:
                 os.unlink("auth.json", dir_fd=destination_dir_fd)
                 self._destination_unlinked = True
             os.fsync(destination_dir_fd)
+            destination_dir_fsynced = True
         except (IsolationUnavailable, OSError) as exc:
             return ProviderAuthCloseReceipt(
                 ok=False,
@@ -662,8 +673,9 @@ class ProviderAuthLease:
                 os.close(destination_dir_fd)
             if destination_home_fd is not None:
                 try:
-                    os.rmdir(".codex", dir_fd=destination_home_fd)
-                    os.fsync(destination_home_fd)
+                    if destination_dir_fsynced:
+                        os.rmdir(".codex", dir_fd=destination_home_fd)
+                        os.fsync(destination_home_fd)
                 except OSError:
                     # auth.json is already unlinked+fsynced; retaining an
                     # empty/non-empty directory does not retain our secret.
@@ -710,10 +722,111 @@ def _write_provider_auth_reaper_receipt(
         os.close(directory_fd)
 
 
+_REAPER_STATE_ORDER = {
+    "handoff_intent": 10,
+    "waiting_for_process_group": 20,
+    "handoff_failed": 21,
+    "recovery_started": 22,
+    "cleanup_retry": 30,
+    "cleaned": 40,
+}
+
+
+def _transition_provider_auth_reaper_receipt(
+    path: Path,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
+    """Persist a monotonic reaper transition under a receipt-local flock."""
+    path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    lock_path = path.with_suffix(path.suffix + ".lock")
+    lock_fd = os.open(
+        lock_path,
+        os.O_RDWR | os.O_CREAT | getattr(os, "O_NOFOLLOW", 0),
+        0o600,
+    )
+    try:
+        fcntl.flock(lock_fd, fcntl.LOCK_EX)
+        current: dict[str, Any] = {}
+        try:
+            current = json.loads(path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            pass  # silent-ok: first monotonic transition creates the receipt
+        except (OSError, json.JSONDecodeError) as exc:
+            raise IsolationUnavailable(
+                "provider auth reaper receipt is unreadable"
+            ) from exc
+        current_state = str(current.get("state") or "")
+        next_state = str(payload.get("state") or "")
+        if _REAPER_STATE_ORDER.get(next_state, -1) < _REAPER_STATE_ORDER.get(
+            current_state, -1
+        ):
+            return current
+        merged = {**current, **payload}
+        _write_provider_auth_reaper_receipt(path, merged)
+        return merged
+    finally:
+        fcntl.flock(lock_fd, fcntl.LOCK_UN)
+        os.close(lock_fd)
+
+
+def wait_for_process_group_generation_drained(
+    *,
+    pgid: int,
+    leader_pid: int,
+    leader_started_wall: str | None,
+    poll_seconds: float = 1.0,
+) -> None:
+    """Wait for one exact process-group generation, not a recycled PGID."""
+    from . import procutil
+
+    empty_reads = 0
+    while empty_reads < 2:
+        identity = (
+            procutil.check_identity(leader_pid, leader_started_wall)
+            if leader_started_wall
+            else procutil.IDENTITY_UNVERIFIED
+        )
+        if identity == procutil.IDENTITY_MISMATCH:
+            # A PID can only be reused after the old process, and therefore
+            # its old session-leader identity, has gone away.
+            return
+        members = procutil.pgid_members_checked(pgid)
+        if members == []:
+            empty_reads += 1
+        else:
+            empty_reads = 0
+        time.sleep(poll_seconds)
+
+
+def reap_provider_auth_lease_in_process(
+    lease: ProviderAuthLease,
+    *,
+    pgid: int,
+    leader_pid: int,
+    leader_started_wall: str | None,
+    close_retry_seconds: float = 5.0,
+) -> ProviderAuthCloseReceipt:
+    """Fail-safe custody fallback when detached reaper handoff cannot start."""
+    wait_for_process_group_generation_drained(
+        pgid=pgid,
+        leader_pid=leader_pid,
+        leader_started_wall=leader_started_wall,
+    )
+    while True:
+        receipt = lease.close()
+        if receipt.ok:
+            return receipt
+        time.sleep(close_retry_seconds)
+
+
 def defer_provider_auth_cleanup(
     lease: ProviderAuthLease,
     *,
     pgid: int,
+    leader_pid: int,
+    leader_started_wall: str,
+    receipt_path: Path | None = None,
 ) -> ProviderAuthHandoffReceipt:
     """Transfer a live descendant's lease to a detached cleanup owner.
 
@@ -721,7 +834,7 @@ def defer_provider_auth_cleanup(
     there is no unlock/relock window.  It waits for two independently empty
     process-group reads before reconciling or deleting any credential bytes.
     """
-    if pgid <= 1:
+    if pgid <= 1 or leader_pid <= 1 or not leader_started_wall:
         raise IsolationUnavailable("provider auth reaper requires a valid PGID")
     lock_fd = lease._authority_lock_fd
     if lock_fd is None:
@@ -729,20 +842,37 @@ def defer_provider_auth_cleanup(
             "provider auth lease has no authority lock to transfer"
         )
     token = secrets.token_hex(12)
-    receipt_path = (
-        Path.home()
-        / ".volpred"
-        / "logs"
-        / "provider-auth-reapers"
+    receipt_path = receipt_path or (
+        Path.home() / ".volpred" / "logs" / "provider-auth-reapers"
         / f"{token}.json"
     )
     log_path = receipt_path.with_suffix(".log")
+    intent = {
+        "schema_version": "provider-auth-reaper.v2",
+        "state": "handoff_intent",
+        "lease_id": lease.lease_id,
+        "source_home": lease.source_home,
+        "run_dir": lease.run_dir,
+        "destination_path": lease.destination_path,
+        "baseline_sha256": lease.baseline_sha256,
+        "pgid": pgid,
+        "leader_pid": leader_pid,
+        "leader_started_wall": leader_started_wall,
+    }
+    _transition_provider_auth_reaper_receipt(receipt_path, intent)
+    log_path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    os.chmod(log_path.parent, 0o700)
+    ack_read_fd, ack_write_fd = os.pipe()
     argv = [
         sys.executable,
         "-m",
         "scripts.dispatch_supervisor.auth_lease_reaper",
         "--pgid",
         str(pgid),
+        "--leader-pid",
+        str(leader_pid),
+        "--leader-started-wall",
+        leader_started_wall,
         "--source-home",
         lease.source_home,
         "--run-dir",
@@ -751,15 +881,17 @@ def defer_provider_auth_cleanup(
         lease.destination_path,
         "--baseline-sha256",
         lease.baseline_sha256,
+        "--lease-id",
+        lease.lease_id,
         "--lock-fd",
         str(lock_fd),
+        "--ack-fd",
+        str(ack_write_fd),
         "--receipt-path",
         str(receipt_path),
     ]
-    log_path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
-    os.chmod(log_path.parent, 0o700)
-    with log_path.open("ab", buffering=0) as log_handle:
-        try:
+    try:
+        with log_path.open("ab", buffering=0) as log_handle:
             proc = subprocess.Popen(
                 argv,
                 cwd=str(Path(__file__).resolve().parents[2]),
@@ -771,24 +903,58 @@ def defer_provider_auth_cleanup(
                     "PYTHONPATH": str(Path(__file__).resolve().parents[2]),
                     "PYTHONUNBUFFERED": "1",
                 },
-                pass_fds=(lock_fd,),
+                pass_fds=(lock_fd, ack_write_fd),
                 start_new_session=True,
                 close_fds=True,
             )
-        except OSError as exc:
-            raise IsolationUnavailable(
-                "cannot start provider auth lease reaper"
-            ) from exc
-    _write_provider_auth_reaper_receipt(
-        receipt_path,
-        {
-            "schema_version": "provider-auth-reaper.v1",
-            "state": "waiting_for_process_group",
-            "reaper_pid": proc.pid,
-            "pgid": pgid,
-            "run_dir": lease.run_dir,
-        },
-    )
+    except Exception as exc:
+        os.close(ack_read_fd)
+        os.close(ack_write_fd)
+        _transition_provider_auth_reaper_receipt(
+            receipt_path,
+            {**intent, "state": "handoff_failed", "reason": str(exc)},
+        )
+        raise ProviderAuthHandoffError(
+            "cannot start provider auth lease reaper",
+            receipt_path=receipt_path,
+        ) from exc
+    os.close(ack_write_fd)
+    acknowledged = b""
+    try:
+        try:
+            ready, _, _ = select.select([ack_read_fd], [], [], 10.0)
+            if ready:
+                acknowledged = os.read(ack_read_fd, 64)
+        except OSError:
+            acknowledged = b""
+    finally:
+        os.close(ack_read_fd)
+    if acknowledged != b"READY\n":
+        try:
+            proc.terminate()
+        except ProcessLookupError:
+            pass  # silent-ok: missing reaper already relinquished child custody
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            try:
+                proc.kill()
+            except ProcessLookupError:
+                pass  # silent-ok: reaper exited during TERM-to-KILL race
+            proc.wait(timeout=5)
+        _transition_provider_auth_reaper_receipt(
+            receipt_path,
+            {
+                **intent,
+                "state": "handoff_failed",
+                "reaper_pid": proc.pid,
+                "reason": "reaper did not acknowledge durable custody",
+            },
+        )
+        raise ProviderAuthHandoffError(
+            "provider auth lease reaper did not acknowledge custody",
+            receipt_path=receipt_path,
+        )
     # The child inherited the same open file description and therefore keeps
     # the flock continuously.  Drop only this process's descriptor.
     os.close(lock_fd)
@@ -798,6 +964,83 @@ def defer_provider_auth_cleanup(
         pgid=pgid,
         receipt_path=str(receipt_path),
     )
+
+
+def recover_provider_auth_reapers(
+    *,
+    authority_home: Path | None = None,
+    receipt_root: Path | None = None,
+) -> dict[str, int]:
+    """Recover nonterminal cleanup intents after a supervisor/reaper crash."""
+    source_home = (authority_home or _credential_home()).resolve()
+    root = receipt_root or (
+        Path.home() / ".volpred" / "logs" / "provider-auth-reapers"
+    )
+    if (
+        authority_home is None
+        and receipt_root is None
+        and os.environ.get("PYTEST_CURRENT_TEST")
+    ):
+        return {"recovered": 0, "active": 0, "invalid": 0}
+    recovered = 0
+    active = 0
+    invalid = 0
+    if not root.is_dir():
+        return {"recovered": 0, "active": 0, "invalid": 0}
+    for path in sorted(root.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            if (
+                payload.get("schema_version") != "provider-auth-reaper.v2"
+                or payload.get("state") == "cleaned"
+                or Path(str(payload["source_home"])).resolve() != source_home
+            ):
+                continue
+            source_home_fd = _open_directory(source_home)
+            try:
+                source_dir_fd = _open_child_directory(
+                    source_home_fd, ".codex",
+                )
+                try:
+                    try:
+                        lock_fd = _acquire_provider_auth_lock(source_dir_fd)
+                    except IsolationUnavailable as exc:
+                        if "already leased" in str(exc):
+                            active += 1
+                            continue
+                        raise
+                finally:
+                    os.close(source_dir_fd)
+            finally:
+                os.close(source_home_fd)
+            lease = ProviderAuthLease(
+                source_home=str(source_home),
+                run_dir=str(payload["run_dir"]),
+                destination_path=str(payload["destination_path"]),
+                baseline_sha256=str(payload["baseline_sha256"]),
+                lease_id=str(payload["lease_id"]),
+                _authority_lock_fd=lock_fd,
+            )
+            try:
+                _transition_provider_auth_reaper_receipt(
+                    path,
+                    {"state": "recovery_started"},
+                )
+                defer_provider_auth_cleanup(
+                    lease,
+                    pgid=int(payload["pgid"]),
+                    leader_pid=int(payload["leader_pid"]),
+                    leader_started_wall=str(payload["leader_started_wall"]),
+                    receipt_path=path,
+                )
+                recovered += 1
+            except Exception:
+                _release_provider_auth_lock(lease._authority_lock_fd)
+                lease._authority_lock_fd = None
+                raise
+        except (KeyError, TypeError, ValueError, OSError, IsolationUnavailable):
+            invalid += 1
+    return {"recovered": recovered, "active": active, "invalid": invalid}
 
 
 def bootstrap_codex_auth_authority(
@@ -842,7 +1085,9 @@ def bootstrap_codex_auth_authority(
             ".codex",
             create=True,
         )
+        authority_lock_fd: int | None = None
         try:
+            authority_lock_fd = _acquire_provider_auth_lock(target_dir_fd)
             try:
                 os.stat(
                     "auth.json",
@@ -873,6 +1118,7 @@ def bootstrap_codex_auth_authority(
                     "Codex credential authority enrollment verification failed"
                 )
         finally:
+            _release_provider_auth_lock(authority_lock_fd)
             os.close(target_dir_fd)
     finally:
         os.close(target_home_fd)
@@ -1031,6 +1277,8 @@ __all__ = [
     "isolated_environment",
     "materialize_provider_auth",
     "prepare",
+    "reap_provider_auth_lease_in_process",
+    "recover_provider_auth_reapers",
     "sandbox_profile",
     "wrap_command",
     "wrap_prepared",

@@ -286,6 +286,11 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
     monkeypatch.setattr(codex_failover.os, "getpgid", lambda _pid: 777)
     monkeypatch.setattr(
         codex_failover.procutil,
+        "get_process_start_wall",
+        lambda _pid: "Mon Jul 28 12:00:00 2026",
+    )
+    monkeypatch.setattr(
+        codex_failover.procutil,
         "pgid_members_checked",
         lambda _pgid: [],
     )
@@ -401,7 +406,7 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
         "isolation_canonical_root": str(tmp_path / "repo"),
     }
     closed: list[bool] = []
-    deferred: list[tuple[object, int]] = []
+    deferred: list[tuple[object, int, int, str]] = []
 
     class FakeLease:
         def close(self):
@@ -458,6 +463,11 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
     monkeypatch.setattr(codex_failover.os, "getpgid", lambda _pid: 888)
     monkeypatch.setattr(
         codex_failover.procutil,
+        "get_process_start_wall",
+        lambda _pid: "Mon Jul 28 12:00:00 2026",
+    )
+    monkeypatch.setattr(
+        codex_failover.procutil,
         "kill_pgid",
         lambda _pgid, **_kwargs: False,
     )
@@ -469,7 +479,11 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
     monkeypatch.setattr(
         codex_failover.isolation,
         "defer_provider_auth_cleanup",
-        lambda auth_lease, *, pgid: deferred.append((auth_lease, pgid)),
+        lambda auth_lease, *, pgid, leader_pid, leader_started_wall: (
+            deferred.append(
+                (auth_lease, pgid, leader_pid, leader_started_wall)
+            )
+        ),
         raising=False,
     )
 
@@ -486,7 +500,172 @@ def test_active_descendant_hands_auth_lease_to_reaper_before_return(
 
     assert result.process_active is True
     assert closed == []
-    assert deferred == [(lease, 888)]
+    assert deferred == [
+        (lease, 888, 777, "Mon Jul 28 12:00:00 2026"),
+    ]
+
+
+def test_reaper_handoff_failure_retains_parent_custody_until_cleanup(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    close_receipt = codex_failover.isolation.ProviderAuthCloseReceipt(
+        True, False, False, True, "closed",
+    )
+
+    class FakeLease:
+        pass
+
+    lease = FakeLease()
+    guard = codex_failover._ProviderAuthLeaseGuard()
+    guard.bind(lease)
+    guard.mark_process_started(
+        pid=777,
+        pgid=888,
+        started_wall="Mon Jul 28 12:00:00 2026",
+    )
+    receipt_path = tmp_path / "reaper.json"
+    custody: list[tuple[object, int, int, str]] = []
+    transitions: list[dict] = []
+
+    def fail_handoff(*_args, **_kwargs):
+        raise codex_failover.isolation.ProviderAuthHandoffError(
+            "injected handoff failure",
+            receipt_path=receipt_path,
+        )
+
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "defer_provider_auth_cleanup",
+        fail_handoff,
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "reap_provider_auth_lease_in_process",
+        lambda auth_lease, *, pgid, leader_pid, leader_started_wall: (
+            custody.append(
+                (auth_lease, pgid, leader_pid, leader_started_wall)
+            )
+            or close_receipt
+        ),
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "_transition_provider_auth_reaper_receipt",
+        lambda _path, payload: transitions.append(payload),
+    )
+
+    result = guard.finish(
+        codex_failover.FailoverResult(
+            True,
+            False,
+            codex_failover.RC_WORK_TIMEOUT,
+            "timeout",
+            process_active=True,
+        ),
+    )
+
+    assert custody == [
+        (lease, 888, 777, "Mon Jul 28 12:00:00 2026"),
+    ]
+    assert result.process_active is False
+    assert guard.lease is None
+    assert transitions[-1]["state"] == "cleaned"
+
+
+def test_spawn_post_popen_probe_error_never_closes_live_auth_early(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    workdir = tmp_path / "workspace"
+    run_dir = tmp_path / "run"
+    for path in (workdir, run_dir / "home", run_dir / "tmp", run_dir / "pycache"):
+        path.mkdir(parents=True)
+    profile = run_dir / "sandbox.sb"
+    profile.write_text("(version 1)\n", encoding="utf-8")
+    isolated_workspace = {
+        "path": str(workdir),
+        "isolation_profile_path": str(profile),
+        "isolation_run_dir": str(run_dir),
+        "isolation_synthetic_home": str(run_dir / "home"),
+        "isolation_tmp_dir": str(run_dir / "tmp"),
+        "isolation_pycache_dir": str(run_dir / "pycache"),
+        "isolation_workspace": str(workdir),
+        "isolation_canonical_root": str(tmp_path / "repo"),
+    }
+    early_close: list[bool] = []
+    custody: list[tuple[int, int, str | None]] = []
+
+    class FakeLease:
+        def close(self):
+            early_close.append(True)
+            return codex_failover.isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+
+    class FakeProc:
+        pid = 777
+
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "materialize_provider_auth",
+        lambda *_a, **_k: FakeLease(),
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "isolated_environment",
+        lambda env, *_a, **_k: dict(env),
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "wrap_prepared",
+        lambda argv, _receipt: list(argv),
+    )
+    monkeypatch.setattr(
+        codex_failover,
+        "preflight",
+        lambda *_a, **_k: (True, 0, "codex"),
+    )
+    monkeypatch.setattr(
+        codex_failover,
+        "check_reachable",
+        lambda *_a, **_k: (True, 0, "ok"),
+    )
+    monkeypatch.setattr(
+        codex_failover.subprocess,
+        "Popen",
+        lambda *_a, **_k: FakeProc(),
+    )
+    monkeypatch.setattr(
+        codex_failover.os,
+        "getpgid",
+        lambda _pid: (_ for _ in ()).throw(OSError("injected PGID probe")),
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "reap_provider_auth_lease_in_process",
+        lambda _lease, *, pgid, leader_pid, leader_started_wall: (
+            custody.append((pgid, leader_pid, leader_started_wall))
+            or codex_failover.isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+        ),
+    )
+
+    result = codex_failover.run_codex_failover(
+        reason="quota",
+        enabled=True,
+        workdir=workdir,
+        isolated_workspace=isolated_workspace,
+        slot_id="slot-1",
+        job_id="abcdef123456",
+        on_process_started=lambda _pid, _pgid: True,
+    )
+
+    assert result.exit_code == codex_failover.RC_DISABLED
+    assert early_close == []
+    assert custody == [(777, 777, None)]
 
 
 def test_isolated_codex_partial_receipt_returns_typed_failure(

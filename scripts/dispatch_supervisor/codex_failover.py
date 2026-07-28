@@ -256,11 +256,29 @@ class _ProviderAuthLeaseGuard:
 
     lease: isolation.ProviderAuthLease | None = None
     active_pgid: int | None = None
+    leader_pid: int | None = None
+    leader_started_wall: str | None = None
 
     def bind(self, lease: isolation.ProviderAuthLease | None) -> None:
         if self.lease is not None:
             raise RuntimeError("provider auth lease guard is already bound")
         self.lease = lease
+
+    def mark_process_started(
+        self,
+        *,
+        pid: int,
+        pgid: int,
+        started_wall: str | None,
+    ) -> None:
+        self.active_pgid = pgid
+        self.leader_pid = pid
+        self.leader_started_wall = started_wall
+
+    def mark_process_group_drained(self) -> None:
+        self.active_pgid = None
+        self.leader_pid = None
+        self.leader_started_wall = None
 
     def finish(
         self,
@@ -270,22 +288,9 @@ class _ProviderAuthLeaseGuard:
     ) -> FailoverResult:
         if self.lease is None:
             return result
-        if self.active_pgid is not None and not result.process_active:
-            return FailoverResult(
-                attempted=result.attempted,
-                recovered=False,
-                exit_code=RC_DISABLED,
-                detail=(
-                    "Codex credential cleanup handoff failed while a process "
-                    "group may still be active; lease remains quarantined"
-                ),
-                duration_s=result.duration_s,
-                output_tail=result.output_tail,
-                process_active=True,
-            )
-        if result.process_active:
-            if pgid is None:
-                self.active_pgid = -1
+        if result.process_active or self.active_pgid is not None:
+            active_pgid = self.active_pgid or pgid
+            if active_pgid is None or self.leader_pid is None:
                 return FailoverResult(
                     attempted=result.attempted,
                     recovered=False,
@@ -298,11 +303,83 @@ class _ProviderAuthLeaseGuard:
                     output_tail=result.output_tail,
                     process_active=True,
                 )
-            self.active_pgid = pgid
-            isolation.defer_provider_auth_cleanup(self.lease, pgid=pgid)
+            if not self.leader_started_wall:
+                receipt = isolation.reap_provider_auth_lease_in_process(
+                    self.lease,
+                    pgid=active_pgid,
+                    leader_pid=self.leader_pid,
+                    leader_started_wall=None,
+                )
+                if receipt.ok:
+                    self.lease = None
+                    self.mark_process_group_drained()
+                return FailoverResult(
+                    attempted=result.attempted,
+                    recovered=False,
+                    exit_code=RC_DISABLED,
+                    detail=(
+                        "Codex process generation could not be fingerprinted; "
+                        "kept credential custody synchronously until the "
+                        "process group drained"
+                    ),
+                    duration_s=result.duration_s,
+                    output_tail=result.output_tail,
+                    process_active=False,
+                )
+            handed_off = False
+            failed_receipt_path: Path | None = None
+            try:
+                isolation.defer_provider_auth_cleanup(
+                    self.lease,
+                    pgid=active_pgid,
+                    leader_pid=self.leader_pid,
+                    leader_started_wall=self.leader_started_wall,
+                )
+                handed_off = True
+            except isolation.IsolationUnavailable as exc:
+                failed_receipt_path = getattr(exc, "receipt_path", None)
+                LOG.error(
+                    "Codex auth reaper handoff failed; retaining synchronous "
+                    "custody until group drains: %s",
+                    exc,
+                )
+                receipt = isolation.reap_provider_auth_lease_in_process(
+                    self.lease,
+                    pgid=active_pgid,
+                    leader_pid=self.leader_pid,
+                    leader_started_wall=self.leader_started_wall,
+                )
+                if not receipt.ok:
+                    raise RuntimeError(
+                        "synchronous provider auth custody ended without cleanup"
+                    )
+                if failed_receipt_path is not None:
+                    isolation._transition_provider_auth_reaper_receipt(
+                        failed_receipt_path,
+                        {
+                            "schema_version": "provider-auth-reaper.v2",
+                            "state": "cleaned",
+                            "recovery": "synchronous_parent_custody",
+                            "close": {
+                                "ok": receipt.ok,
+                                "reconciled": receipt.reconciled,
+                                "source_advanced": receipt.source_advanced,
+                                "cleaned": receipt.cleaned,
+                                "reason": receipt.reason,
+                            },
+                        },
+                    )
             self.lease = None
-            self.active_pgid = None
-            return result
+            self.mark_process_group_drained()
+            return FailoverResult(
+                attempted=result.attempted,
+                recovered=result.recovered,
+                exit_code=result.exit_code,
+                detail=result.detail,
+                duration_s=result.duration_s,
+                output_tail=result.output_tail,
+                process_active=handed_off,
+            )
 
         close_receipt = self.lease.close()
         if close_receipt.ok:
@@ -543,7 +620,7 @@ def _run_codex_failover_impl(
     tracked_pid: int | None = None
     process_confirmed_finished = False
     try:
-        if on_process_started is None:
+        if on_process_started is None and lease_guard.lease is None:
             result = subprocess.run(
                 argv, cwd=str(launch_cwd), capture_output=True, text=True,
                 timeout=cap_s, env=child_env,
@@ -554,9 +631,31 @@ def _run_codex_failover_impl(
                 stdin=subprocess.DEVNULL, text=True, start_new_session=True, env=child_env,
             )
             tracked_pid = proc.pid
+            if lease_guard.lease is not None:
+                # Record provisional custody before even the PGID probe; if it
+                # raises, unwind still knows a live child may own the secret.
+                lease_guard.mark_process_started(
+                    pid=proc.pid,
+                    pgid=proc.pid,
+                    started_wall=None,
+                )
             pgid = os.getpgid(proc.pid)
             tracked_pgid = pgid
-            if not on_process_started(proc.pid, pgid):
+            if lease_guard.lease is not None:
+                started_wall = procutil.get_process_start_wall(proc.pid)
+                if not started_wall:
+                    raise OSError(
+                        "cannot capture Codex process generation identity"
+                    )
+                lease_guard.mark_process_started(
+                    pid=proc.pid,
+                    pgid=pgid,
+                    started_wall=str(started_wall),
+                )
+            if (
+                on_process_started is not None
+                and not on_process_started(proc.pid, pgid)
+            ):
                 ledger_path = termination.ledger_for_state(state_path)
                 intent = termination.arm(
                     target_kind="pgid", target_id=pgid,
@@ -570,6 +669,8 @@ def _run_codex_failover_impl(
                 )
                 stdout, _ = proc.communicate(timeout=10)
                 process_confirmed_finished = group_drained
+                if group_drained:
+                    lease_guard.mark_process_group_drained()
                 result = subprocess.CompletedProcess(argv, proc.returncode or 1, stdout, "")
             else:
                 try:
@@ -588,11 +689,15 @@ def _run_codex_failover_impl(
                     )
                     stdout, _ = proc.communicate(timeout=15)
                     process_confirmed_finished = group_drained
+                    if group_drained:
+                        lease_guard.mark_process_group_drained()
                     raise subprocess.TimeoutExpired(
                         cmd=exc.cmd, timeout=cap_s, output=stdout,
                     ) from exc
                 result = subprocess.CompletedProcess(argv, proc.returncode, stdout, "")
                 process_confirmed_finished = procutil.pgid_members_checked(pgid) == []
+                if process_confirmed_finished:
+                    lease_guard.mark_process_group_drained()
     except subprocess.TimeoutExpired as exc:
         duration = time.time() - started
         tail = (exc.output or "")[-2000:] if isinstance(exc.output, str) else ""
