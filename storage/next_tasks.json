@@ -32910,7 +32910,7 @@
     "title": "K1715: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Chri",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 509). Original: Score-driven（GAS / DCS）動態參數模型直接估 VaR+ES — scipy MLE 估 Creal-Koopman-Lucas/Harvey score-driven 波動，聯合 VaR/ES + Kupiec/Christoffersen/e-backtest；平台無 score-driven 類（來源：J. Econometrics 2026 Catania 等 + IJASEIT 2025 GAS-1F）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1715.py with signal.shift(1) + seed=42, (c) K1715_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -32920,7 +32920,7 @@
       "autonomous-research"
     ],
     "created_at": "2026-07-15T00:00:01Z",
-    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_fix_attempt1-ba80b2; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_adjudicate-27247d; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert-5cabc2; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert2-e2b9fd; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert3-823a28; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-agent-brief_k1715_204d556b-e2cc16; awaiting PHASE A collection\n\ndispatched to compute job compute-codex-primary-path-review-k1715-score-driven-var-es-null-1785096622; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_fix_attempt1-ba80b2; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_adjudicate-27247d; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert-5cabc2; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert2-e2b9fd; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1715_recert3-823a28; awaiting PHASE A collection\n\nPHASE A 收件 agent-brief_k1715_recert3-823a28（exit 0）。Codex recert round 3 verdict=FAIL，但唯一 blocking defect 是程序性：該回合把自己的 prompt/transcript 寫進被審 worktree，導致 read-back 時 git status 非空。round-2 三缺陷全關且經主線程獨立回驗（sha256(K1715.py)=133c6f81 == results.code_trace == reproduce_spec.entrypoint；accepted_method x536、nm_to_bfgs_improve x0；build_readme 重跑與 README byte-identical）。guard 等價性獲獨立重建證明：268/268 refits accepted_method=BFGS，min-NLL guard 在本資料 empirically inert。科學結論 verdict=NULL 早已在 knowledge 5e41886b（Codex science PASS）。依 owner 既有裁決 f745bff0（2026-07-27）維持 ARCHIVE-UNMERGED：不 merge；worktree checkout 已依 reclaim option 3 移除、branch worktree-k1715-204d556b（22 commits）完整保留、incident inc_776caf84f125 對應 instance 已 clear。round-4 決策收斂為選項(i) 接受凍結 artifact 上的不精確 convergence 註解（選項(ii) 重跑已被 f745bff0 明文禁止）。收件紀錄=knowledge b6fbb010；程序教訓已寫入 .claude/rules/experiments.md §審查認證。",
     "fail_reason": "Codex FAIL @87f2fec59: README/JSON number mismatches, optimizer_success_rate=0 (no convergence diagnostics retained), false arch 3-4sigfig agreement claim, unidentified causal attribution. Re-dispatched fix attempt1 (max effort) job agent-brief_k1715_fix_attempt1-ba80b2.",
     "escalation_attempts": 1,
     "last_released_at": "2026-07-28T10:50:18.105488+00:00",
@@ -33005,6 +33005,12 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1715_recert3-823a28",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T22:14:48.676467+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
     "status_original": "in_progress",
@@ -33022,13 +33028,10 @@
         "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1715_adjudicate-27247d.json#id"
       }
     },
-    "compute_released_at": "2026-07-28T14:36:40Z",
-    "compute_release_reason": "terminal_receipt_collected",
+    "compute_released_at": "2026-07-28T22:14:52Z",
+    "compute_release_reason": "terminal_source_task_settled",
     "recert2_collected_20260728": "[recert2 收件 — 2026-07-28 22:40 CST, hourly-slot-1-ddc2ab2b]\nrebrief job agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec (exit 0) 已產出**新的**\nreview_verdict.json（6,348 B, mtime 07-28 21:47, reviewed_at 2026-07-28T13:42:00Z,\nreviewer=Codex gpt-5.6-sol/xhigh），取代前班指出的那份 stale 2,108 B 檔。**VERDICT: FAIL**。\n\n【已解決】recert round 1 的 lossy %.10f snapshot serialization 缺陷，Codex 判 RESOLVED：\noption-B 修正（commit fdf4ab297, K1715.py 379a67cd…）為 doc/format-only，\nfloat_format %.10f→%.17g 只動 WRITE path、`if SNAPSHOT.is_file():` read path 未動、\npinned snapshot 檔 byte 未變，無 model/estimation/evaluation/seed/lag 變更、無 lookahead。\n\n【新 blocking defect — estimator lineage mismatch】審查當下 K1715.py 是 cb06895a…，\n**不是**本輪受命認證的 option-B bytes 379a67cd…。fdf4ab297 之後的兩個 commit\n（9926bca90, c9d75cf1d）加了 BFGS min-NLL guard：\n`res = res_bfgs if isfinite(res_bfgs.fun) and res_bfgs.fun <= res_nm.fun else res_nm`，\n先前 res 無條件取 BFGS 結果。這**改變了選中哪一組參數向量**，屬實質估計選擇邏輯，\n不是 doc/format 變更 → 認證對象與實際位元組不符，不可放行。\n\n【本班補充觀察 — 位元組又漂了一次】現在磁碟上的 K1715.py 已是 **133c6f81…**（64,544 B），\n係 agent-brief_k1715_spec_reprocheck-6ff96b 再次改動所致。即 K1715 已連續三代\n（379a67cd → cb06895a → 133c6f81）在認證流程進行中被換掉，每一輪審查的都是隨即過期的位元組。\n這是流程層問題，不是單次疏失。\n\n【與 snapshot 重現結果的交互作用，必須寫明不可略過】snapshot_repro_report.md 宣稱以\n133c6f81… 重跑對 archived results（929cb150…，正是 recert2 reviewed_sha256 記載的同一份）\n達成 max abs dev = 0.0。若估計選擇邏輯真的改變，bit-identical 通常不會發生 ——\n合理解釋是該 guard 在本資料上從未 binding（BFGS 恆優於 NM）。這是**有利但未經證實**的推論：\n下一輪必須**明確檢定該 guard 在全樣本是否曾 binding**（統計 res_bfgs.fun > res_nm.fun 的\n次數）並寫進報告。若曾 binding 而數值仍完全相同，那反而代表比較器沒看到該路徑，要追查。\n不得以「重現是 0.0 所以 lineage 不重要」收尾 —— 那是用結果反推程序正當性。\n\n【狀態】K1715 仍不可 merge、不可寫 knowledge。後續已有 assign_8f1165f3 線上的\nagent-agent-brief_k1715_comparator_closeout-5e83ee 在跑（補 only_archived 差集與\nfail-closed）。下一輪 recert 必須：先凍結一份確定的位元組、再送審、審完前禁止任何人改該檔。\n\n【備註】同綁 source_task=K1715 的另一 job agent-brief_k1715_recert2-e2b9fd（SIGKILL, failed）\n已被本 rebrief 取代，其 followup 因單一 source task 只能被 release 一次而維持 stranded，\n非遺漏（見 assign_617bf749）。",
-    "compute_job_id": "agent-brief_k1715_recert3-823a28",
-    "blocked_reason": "external_compute_receipt_pending_collection",
-    "compute_started_at": "2026-07-28T20:30:04Z",
-    "compute_finished_at": "2026-07-28T20:56:59Z"
+    "completed_at": "2026-07-28T22:14:48.676441+00:00"
   },
   {
     "id": "K1716",
@@ -35139,7 +35142,7 @@
     "title": "K1726: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 586). Original: BAB 報酬條件於前期已實現波動的「beta anomaly 波動之謎」 — yfinance 美股大樣本月度 RV 分高/低 vol 月重做 betting-against-beta，檢定低 vol 月後 BAB Sharpe 是否升（來源：JFE 2025 The volatility puzzle of the beta anomaly）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1726.py with signal.shift(1) + seed=42, (c) K1726_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35228,9 +35231,27 @@
         "from": "blocked",
         "to": "pending",
         "reason": "blocked_until_expired (2026-07-29T00:00:00+08:00)"
+      },
+      {
+        "ts": "2026-07-28T22:17:25.077222+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      },
+      {
+        "ts": "2026-07-28T22:17:33.470921+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      },
+      {
+        "ts": "2026-07-28T22:18:22.824223+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1812_bab_vol-f55e3c; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1812_fix-a18b38; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5; awaiting PHASE A collection",
+    "result": "dispatched to compute job agent-brief_k1812_bab_vol-f55e3c; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1812_fix-a18b38; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1812_fix-a18b38-dc91a5; awaiting PHASE A collection\n\nK1726/k1812 收尾完成：唯一 remaining_step（merge_worktree.sh dispatch-slot-2-dc4437b8-k1812）已在 git_writer_lock 下執行成功。前置 blocker（main index 89 個來自併發 supervisor finalize 的 foreign staged paths，導致 merge_worktree.sh:715 依設計 abort）本班開工時已自然消解 — 回讀 git diff --cached 為 0 筆，未做任何繞過。merge 後回驗：merge commit 39830de18 在 main；experiments/k1812/ 全部 artifacts 落地（k1812.py / k1812_results.json / reproduce_spec.json / review_verdict.json / test_k1812.py / figures / data）；review_verdict.json verdict=PASS、blocking_defects=[]（codex-cli 0.145.0 GPT-5.1-Codex-Max xhigh round-3）；check_experiment_artifacts strict PASS；worktree 與 branch wt/dispatch-slot-2-dc4437b8-k1812 已由 script 正規清除，無殘留。科學結論 NULL 已記於 knowledge f56bd213（BAB 條件於前期 RV 的方向與 JFE 2025 一致但未達 5% 顯著：低 vol 月後 Sharpe 0.3283 vs 高 vol 月後 -0.3573，差 0.6857，block-permutation p=0.11379，bootstrap 95% CI [-0.1354, 1.4625] 涵蓋 0；n=257 月、universe 80 檔、seed 42）。依既有指示未重驗未重審。",
     "compute_released_at": "2026-07-28T15:13:13Z",
     "compute_release_reason": "terminal_receipt_collected",
     "collection_verified_at": "2026-07-28T15:22:00+00:00",
@@ -35240,14 +35261,16 @@
     "knowledge_item_id": "f56bd213",
     "remaining_step": "ONLY: bash scripts/merge_worktree.sh dispatch-slot-2-dc4437b8-k1812 under git_writer_lock. Verification already done and recorded: reviewed_sha256 of all 7 files match disk bytes; pytest 22 passed; check_experiment_artifacts PASS (strict); defects B and C confirmed fixed; knowledge f56bd213 written. Do NOT re-verify or re-review.",
     "merge_blocked_by": "main checkout index has 89 staged paths from a concurrent supervisor finalize (dispatch-slot-2-58249487, producer_commit ok=false reason=undeclared_output_path config/cron_wrapper_manifest.json; retries ~every 3min and restages). merge_worktree.sh:715 aborts unconditionally on any foreign staged path by design; not bypassed.",
-    "last_released_at": "2026-07-28T15:23:15.928094+00:00"
+    "last_released_at": "2026-07-28T15:23:15.928094+00:00",
+    "started_at": "2026-07-28T22:17:33.470906+00:00",
+    "completed_at": "2026-07-28T22:18:22.824198+00:00"
   },
   {
     "id": "K1727",
     "title": "K1727: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JP",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 587). Original: 波動率目標只對風險性資產有效、對債/匯/商品近乎無效的跨資產再驗證 — yfinance 股/credit ETF/TLT/UUP/商品 ETF 各自 VT vs 固定 notional，比 Sharpe 增益 + 左尾極端頻率（來源：JPM The Impact of Volatility Targeting + Man Group 2025）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1727.py with signal.shift(1) + seed=42, (c) K1727_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "awaiting_agent_job",
+    "status": "succeeded",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -35302,9 +35325,15 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_K1727_v2-da5fc1",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-28T22:25:50.002639+00:00",
+        "from": "awaiting_agent_job",
+        "to": "succeeded",
+        "by": "complete"
       }
     ],
-    "result": "COLLECTED (hourly-slot-2 a769cca8): compute job agent-brief_K1727_v2-da5fc1 exit0; adversarial subagent review + main-thread re-verify → certify PASS (bytes-pinned review_verdict.json), reproduce_spec.json written, README overclaim softened to underpowered/directional, knowledge item 2ef0d80e written (null_result). MERGE DEFERRED: shared main index held by foreign staged content (PHASE-Z stuck-files incident assign_34f33e28); worktree dispatch-slot-4-6ba995a0-k1727 clean+certified @aea6b1ed, handed to worktree_unmerged reaper.",
+    "result": "COLLECTED (hourly-slot-2 a769cca8): compute job agent-brief_K1727_v2-da5fc1 exit0; adversarial subagent review + main-thread re-verify → certify PASS (bytes-pinned review_verdict.json), reproduce_spec.json written, README overclaim softened to underpowered/directional, knowledge item 2ef0d80e written (null_result). MERGE DEFERRED: shared main index held by foreign staged content (PHASE-Z stuck-files incident assign_34f33e28); worktree dispatch-slot-4-6ba995a0-k1727 clean+certified @aea6b1ed, handed to worktree_unmerged reaper.\n\nK1727 唯一剩餘步驟 merge 完成。前置 blocker（shared main index 被 PHASE-Z stuck-files incident assign_34f33e28 的 foreign staged content 占住，導致 merge_worktree.sh 依設計 abort）本班回讀 git diff --cached = 0 筆已自然消解，未做任何繞過。merge commit ad4a9b4b9 在 main（4 commits）；experiments/K1727/ artifacts 全數落地；review_verdict.json verdict=PASS blocking_defects=0；check_experiment_artifacts strict PASS；merge script 回報「所有 experiments/ modified files 都採 worktree 版本（無 silent drop）」；worktree 與 branch wt/dispatch-slot-4-6ba995a0-k1727 已正規清除。科學結論（null_result）先前已記於 knowledge 2ef0d80e，README overclaim 亦已在收件班降級為 underpowered/directional。依既有收件紀錄未重驗未重審。",
     "last_released_at": "2026-07-27T15:03:43.024403+00:00",
     "last_release_reason": "external_compute_job_failed",
     "compute_released_at": "2026-07-27T15:03:43.023761+00:00",
@@ -35312,7 +35341,8 @@
     "compute_job_id": "agent-brief_K1727_v2-da5fc1",
     "blocked_reason": "external_compute_receipt_pending_collection",
     "compute_started_at": "2026-07-27T19:30:04Z",
-    "compute_finished_at": "2026-07-27T19:44:13Z"
+    "compute_finished_at": "2026-07-27T19:44:13Z",
+    "completed_at": "2026-07-28T22:25:50.002614+00:00"
   },
   {
     "id": "K1728",
@@ -36316,7 +36346,9 @@
     "result": "dispatched to compute job agent-agent-brief_k1734-205644; awaiting PHASE A collection\n\ndispatched to compute job agent-brief_k1734_remediation-763606; awaiting PHASE A collection\n\ndispatched to compute job agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a; awaiting PHASE A collection",
     "compute_released_at": "2026-07-28T13:25:31Z",
     "compute_release_reason": "worktree collision: slot-1 queued agent-brief_k1734_spec_finalize-2c769e into the same cwd 2min later; two concurrent agents rewriting experiments/k1734 would corrupt it. Nested-DM Clark-West remediation must be re-dispatched after that job settles.",
-    "followon_required": "nested-DM misuse gate（primary_raw_dm → Clark-West）remediation 尚未執行：本班已備妥 brief /tmp/rebrief_agent-brief_k1734_remediation-763606.md（原 agent-brief_k1734_remediation-763606 snapshot，model 已改 claude-opus-5），因與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e 撞同一 worktree 而 cancel。待該 job 收件後再以 enqueue-agent 重派，勿新建 worktree、勿重做整個實驗。"
+    "followon_required": "nested-DM misuse gate（primary_raw_dm → Clark-West）remediation 尚未執行：本班已備妥 brief /tmp/rebrief_agent-brief_k1734_remediation-763606.md（原 agent-brief_k1734_remediation-763606 snapshot，model 已改 claude-opus-5），因與 slot-1 的 agent-brief_k1734_spec_finalize-2c769e 撞同一 worktree 而 cancel。待該 job 收件後再以 enqueue-agent 重派，勿新建 worktree、勿重做整個實驗。",
+    "triage_20260729_slot1": "本班（hourly-slot-1-e98b43fc）盤點 stale worktree 時查證，未 claim 未執行，僅留證供下班接手。事實：(1) branch wt/dispatch-slot-1-1e5922b4-k1734 有 4 個 commits、落後 main 142 個 commits；(2) experiments/k1734/review_verdict.json 的 verdict 欄位是 null（非 PASS 也非 FAIL）—— 未認證，merge_worktree.sh 的 certify gate 必擋；(3) 該 verdict 的 unresolved 自陳「Codex primary-path RE-review of the remediated artifact has not run。rev2 returned FAIL 且自承因 read-only workspace 只覆蓋了一個 blocking defect 就停止，其餘四個維度仍未涵蓋；certification 不能建立在 rev1 的 fallback PASS 上，因為 rev1 漏掉了這個 defect」；(4) 另記 H1b 是 NULL 而非等價性證明（stress-regime 尾部約 68 obs，amplification gap bootstrap SD 約 0.108，power check 顯示檢定有 power，觀察值距 0 約 0.46 SD），以及 H3_oos_cw_mse 在最保守組合下 BH-adjusted p=0.0451 屬薄邊際。",
+    "triage_20260729_slot1_next": "下一步不是「再跑一次同樣的 Claude 審查」：model_router --task-type experiment --attempt 2 回 at_ceiling=true、exhausted=true。但 rev2 的失敗原因是 read-only workspace 這個環境缺陷、不是模型能力不足，兩者要分開判。建議下班先確認 rev2 當時的 workspace 權限問題是否已排除，再依 3-strike 分支擇一：派 Codex primary-path 二審（覆蓋剩餘四個維度）／拆解成 bounded stages／escalate 老闆。無論走哪條，審查回合的 prompt 與 raw transcript 不可留在被審 worktree 內未 commit（.claude/rules/experiments.md §審查認證，K1715 round-3 教訓）。"
   },
   {
     "id": "daily_digest_20260718",
@@ -41959,7 +41991,8 @@
         "evidence_ref": "file:storage/ops/compute_queue/agent-brief_k1380_stage-68dea3.json#followup_next_task_id"
       }
     },
-    "upstream_receipt_ref": "storage/ops/compute_queue/agent-brief_k1380_stage-68dea3.json"
+    "upstream_receipt_ref": "storage/ops/compute_queue/agent-brief_k1380_stage-68dea3.json",
+    "adjudication_20260729_slot1": "[2026-07-29 slot-1 e98b43fc 裁決：本單 SUPERSEDED，但查證過程發現一個影響 canonical 結果的缺陷，見下]\n\n**一、本單前提已證偽，判定 superseded（承接 D5 §5 未代為結案的那條）**\n本單標題與描述的核心前提是「compute 尚未跑、目前沒有任何 SPA/RC 數字存在、禁寫 Paper 9」。已回讀證偽：\nexperiments/K1380_v4/k1380_v4_results.json 在 main 上，metadata.timestamp=2026-07-05T09:58:26，\nSPA stat=4.2047 / pval=0.2886 / n_specs_tested=15 / reject_h0_p10=false，\nRC spec=A4f / t_stat=4.1335 / pval=0.000 / reject_h0_p10=true，\n且 qlike_formula 為 canonical 方向（actual/forecast - log(actual/forecast) - 1）、lookahead_free 標明 signal.shift(1)、\nduplicate_snapshot_rows_dropped=10（snapshot-dup 已修）、bootstrap_seed=42。\n產出時間早於本單建立（2026-07-21）。\n\n再者 D5（docs/governance/2026-07/d5_k1380_file_adjudication.md §3）已裁決\nexperiments/k1380/k1380.py「留 main，標記 superseded ... 整條 lineage 已被 K1380_v4/k1380_v4.py 取代\n（後者另修 joint-mask 與 np.roll 兩個 v1-v3 致命 bug），不得再拿來跑」。\n本單要驗收的 --stage 三段重構，重構的正是那份被判 superseded、且明文「不得再拿來跑」的腳本；\n其三個 child stage 的目的是產出 SPA/RC 數字，而那些數字已由 v4 以更正確的實作產出。\n→ 驗收項 1-5（stage 落地、存 forecast 非 loss、qlike_pointwise import、13 個回歸測試、child stage enqueue）\n  全部服務於一條已被裁決不得再跑的 lineage，**執行它們不會改變任何 canonical 結論**。\n→ worktree wt/dispatch-slot-1-375ba0e3-k1380 建議走 path-scoped salvage 而非整包 merge\n  （落後 main 908 個 commit，整包 merge 必踩 stale-base overlap gate），已在\n  inc_776caf84f125_e1 的 triage 表留證。\n\n**二、驗收項 6 不是 superseded，而且查出一個影響 canonical 結果的缺陷（本單唯一有活性的產出）**\n本單第 6 項要求逐條看 stage refactor report 的 defects_found_beyond_the_known_reversed_qlike。照做了。\n其中 defect id=2（severity=invalidating）指出舊 lineage 的問題是：\n「The reported 'White RC' carried no multiple-testing correction at all ...\n 'SPA' maxed over 16 specs while 'RC' looked at A4f alone. A single-model bootstrap t-test is not a Reality Check.」\n\n**回讀 K1380_v4 原始碼後確認：同一個缺陷在 v4 仍然存在。**\nexperiments/K1380_v4/k1380_v4.py:771-782 —\n  rc_stat_obs = float(t_obs[a4f_elig_idx])           # 只取 A4f 一支的 t\n  bootstrap_rc_stats[b_idx] = max(0.0, t_b_a4f)      # bootstrap 也只重抽 A4f 自己\n  rc_pval = (bootstrap_rc_stats >= rc_stat_obs).mean()\n也就是 v4 的 white_rc_test 依構造是**單一 spec（A4f）的 bootstrap t 檢定**，\n沒有跨候選集合取 max，因此不帶任何 data-snooping 修正。\n但 results JSON 的 interpretation 寫的是\n「A4f significantly beats GJR **after RC correction** (p=0.000)」，\n且此值直接參與 c3_verdict 的判定。**標籤宣稱的統計性質與實際計算不一致。**\n\n對照之下 v4 的 SPA 是正確的 max 型檢定（k1380_v4.py:788 明寫 max_i over n_elig eligible specs，n=15），\n而它 **p=0.2886，不拒絕 H0**。\n→ 誠實的讀法是：真正做了多重檢定修正的 SPA 沒有拒絕；\n  「顯著」只出現在那個沒有做修正、卻被標成 RC 的單一 spec 檢定上。\n→ 這正是 D5 §6 指給 Paper 9 C3 當 canonical 指標的那個數字，\n  **在修正標籤或改成真正的 RC 之前，不得以「通過 RC 多重檢定修正」的口徑寫進 Paper 9。**\n\n本班只做到「證據化症狀 + 定位根因層級（統計方法實作與標籤不一致）」，**未修 v4 程式、未重跑、未改 Paper 9**，\n故狀態為 **contained**，不是 root_cause_fixed_and_verified。修法二選一由後續任務裁決：\n(a) 改成 Hansen 三重 recentering 的 max 型統計量（u/c/l，p_l<=p_c<=p_u）並重跑；\n(b) 保留單 spec 檢定但把標籤與 interpretation 誠實改成「A4f 個別 DM 檢定，未做 snooping 修正」，\n    並在 c3_verdict 移除其作為 RC 證據的角色。\n無論走哪條，都要回頭檢查已寫入的 knowledge 與任何引用該 RC 數字的產物。"
   },
   {
     "id": "ci-red-29808977711",
@@ -43639,7 +43672,8 @@
     "created_by": "reclaim_stale_worktrees",
     "title": "worktree 產物批次裁決（worktree_unmerged，episode 1）",
     "description": "一個或多個 stale worktree 持有未落地成果，reclaim 依 fail-closed 規則不動它們。全部未清實例見 `storage/ops/incidents.json` 的 `inc_776caf84f125` row（instances[] 中 cleared_at 為空者）。這單是批次裁決出口，逐實例三選一，不准放著：\n1. merge：成果完整（實驗須有 review_verdict.json PASS）→ 主線程 cd 回主 repo 後 `bash scripts/merge_worktree.sh <name>`；\n2. salvage：branch 不能整包進（審查 FAIL / 混入雜物）但有可救檔 → path-scoped 抽取需要的檔（memory feedback_worktree_stale_base_extract_by_path），抽完按 3 收尾；\n3. discard：判定無可救援（寫明理由）→ commit/丟棄 dirty 檔後走 `git worktree remove`（禁 --force）+ 保留 branch。\n裁決寫進本 task 的 result；worktree 消失後下次 reclaim 會自動 clear 對應 instance。來源：scripts/reclaim_stale_worktrees.py --open-tasks（WS-I / incident-lifecycle P3）。",
-    "triage_note": "2026-07-27 23:30 hourly-slot-2 pre-scan (not claimed; deferred, needs full-budget fire). 9 open instances. NOT-on-main + verdict=PASS + unmerged commits (real merge/salvage, silent-loss risk): k1731(21 commits,clean), k1715(8,clean), k1708(5,worktree-dir GONE branch wt/dispatch-slot-2-8dda242d-k1708 only), a4fe4570(2,clean). Likely-redundant (exp already on main): k1380(4,dirty), k1095v2(3,clean), k1714(0 commits,dirty=scratch->discard). snapdup(1,dirty,verdict PASS - check vs main snapdup work). agent-a148e8a9(0 commits,dirty=scratch->discard). Each merge triggers artifact-gate knowledge check; budget a full fire."
+    "triage_note": "2026-07-27 23:30 hourly-slot-2 pre-scan (not claimed; deferred, needs full-budget fire). 9 open instances. NOT-on-main + verdict=PASS + unmerged commits (real merge/salvage, silent-loss risk): k1731(21 commits,clean), k1715(8,clean), k1708(5,worktree-dir GONE branch wt/dispatch-slot-2-8dda242d-k1708 only), a4fe4570(2,clean). Likely-redundant (exp already on main): k1380(4,dirty), k1095v2(3,clean), k1714(0 commits,dirty=scratch->discard). snapdup(1,dirty,verdict PASS - check vs main snapdup work). agent-a148e8a9(0 commits,dirty=scratch->discard). Each merge triggers artifact-gate knowledge check; budget a full fire.",
+    "triage_20260729_slot1": "[2026-07-29 slot-1 e98b43fc 預先查證，未 claim 本單（platform_ops 被 supervisor_preassignment_required 機械拒絕），僅留證降低本單執行成本]\n\n本班為了找「可直接 merge 的已認證實驗」而逐一查證了全部 held worktree，順手把結果留下。本單的成本幾乎全在逐實例調查，以下是已驗證的事實表，執行者可直接據以裁決。\n\n**先講一個會害人誤判的陷阱**：不要用 `ls <worktree>/experiments/*/review_verdict.json` 判斷認證狀態。worktree 是 main 的 checkout，glob 會取到字母序第一個、屬於 main 既有已合併實驗的裁決檔，回你一個假的 PASS。本班用這招掃 5 個 worktree 全回 PASS/0-blocking，逐一用 `git show <branch>:<path>` 複驗後有 4 個是錯的。**必須讀 branch 上的檔**。\n\n**已由本班處理掉的兩個（不必再看）**：\n- `dispatch-slot-2-dc4437b8-k1812`（K1726）→ 已 merge，commit 39830de18\n- `dispatch-slot-4-6ba995a0-k1727`（K1727）→ 已 merge，commit ad4a9b4b9\n兩者都是「已認證、knowledge 已寫，只差 merge」，當初都因 shared main index 被別人的 staged content 暫時占住而被 merge_worktree.sh 正確 fail-closed，然後無人重試。本班開工時 index 已清（`git diff --cached` = 0），直接 merge 成功。**這是本單最該注意的 pattern：有些實例不需要裁決，只需要有人回來重試。**\n\n**其餘 held worktree 事實表**（ahead = 相對 main 的自有 commits；behind = 落後 main）：\n\n| worktree | branch | ahead | behind | dirty | 已查證的狀態 |\n|---|---|---|---|---|---|\n| agent-a148e8a94105f7935 | worktree-agent-a148e8a94105f7935 | 0 | 848 | 1 | **無自有 commits**，只有 1 個 dirty 檔。看完該檔即可 discard。 |\n| dispatch-slot-1-1e5922b4-k1733 | wt/…-k1733 | 0 | — | 0 | **ahead=0 且 clean → 沒有任何持有物**，可直接正規 remove。 |\n| dispatch-slot-1-1e5922b4-k1734 | wt/…-k1734 | 4 | 142 | 0 | **未認證**：review_verdict.json 的 verdict 欄位是 `null`。其 unresolved 自陳 Codex primary-path 再審從未跑、rev2 因 read-only workspace 只覆蓋一個維度就停。詳情已 annotate 在 task K1734。**merge gate 必擋，不要試。** |\n| dispatch-slot-1-20b291d5-snapdup | wt/…-snapdup | 1 | 918 | 3 | 內容是 audit：「9 個 consumer 確認吃進重複列，2 個顯著性判定被翻轉」。**聽起來是實質發現且可能影響既有結論**，建議 path-scoped salvage 而非 discard。落後 918 個 commit，整包 merge 會踩 stale-base overlap gate。 |\n| dispatch-slot-1-375ba0e3-k1380 | wt/…-k1380 | 4 | 908 | 3 | k1380 GARCH warmup 修正。**這正是 WS-I 當初點名的案例**（k1380 有效 results 困在未提交 worktree、main 只有 INVALID 版），優先度應高。落後 908，走 path-scoped salvage。 |\n| dispatch-slot-1-457427c2-k1708 | wt/**dispatch-slot-2-8dda242d**-k1708 | 6 | 1285 | 0 | k1708 stage2 測試。**注意 worktree 名與 branch 名不一致**（slot-1 目錄掛 slot-2 branch），裁決時別按目錄名找 branch。落後 1285。 |\n| dispatch-slot-1-a4fe4570 | worktree-…-a4fe4570 | 2 | 372 | 0 | 內容是 next_tasks 的 lane-safety gate（平台碼，非實驗）。 |\n| dispatch-slot-1-bd00f90a-k1731 | wt/…-k1731 | 29 | 1186 | 0 | 卡在 armB round 12 ratchet，歷史含 round-10 FAIL。29 個 commits / 落後 1186。**未認證，且是最大的一包**，建議單獨開單而非塞進批次。 |\n| dispatch-slot-1-f5a22a5f-k1095v2 | wt/…-k1095v2 | 3 | 862 | 0 | **Codex 對抗式審查判 FAIL、4 個 blocking defect、明寫「不得合併」**。後繼任務 `k1095_v3_remediation` 已在 pool 且 pending → 系統路由正常。本 worktree 可在確認 v3 不需要它的檔後 discard。 |\n| dispatch-slot-2-58249487 | worktree-…-58249487 | 0 | 74 | 1 | **無自有 commits**，1 個 dirty 檔。注意：這個 worktree 就是 K1726/K1727 當初 merge 被擋的元兇（producer_commit ok=false / undeclared_output_path config/cron_wrapper_manifest.json，每約 3 分鐘 restage 一次）。**裁決它可能同時解掉 PHASE-Z 卡住檔案 incident 的一部分。** |\n| dispatch-slot-2-7087efc0-signfc | wt/…-signfc | 1 | 273 | 1 | direction_predictability_signforecast 實驗，commit 訊息自述 honest…（NULL 類）。 |\n| dispatch-slot-3-87c7269d-k1720 | dispatch-slot-3-87c7269d-k1720 | 4 | 329 | 0 | 進行中的 remediation（「close the two Codex round-2 NOT_RESOLVED items」），**自有 commits 內沒有 review_verdict.json → 未認證**，merge gate 會擋。 |\n| dispatch-slot-3-87c7269d-k1721 | dispatch-slot-3-87c7269d-k1721 | 0 | 329 | 1 | **無自有 commits**，1 個 dirty 檔。 |\n\n**可立即降低本單規模的觀察**：13 個實例裡有 4 個（a148e8a9、k1733、58249487、k1721）**ahead=0**，也就是根本沒有未合併成果，只有 0-1 個 dirty 檔；這 4 個不需要 merge/salvage 裁決，看完 dirty 檔就能收。真正需要研究裁決的只有 k1380 / snapdup / k1731 / k1708 / k1734 / k1720 / signfc / k1095v2 這 8 個，其中 k1095v2 已有 v3 後繼、k1734 與 k1720 未認證（要的是補審不是 merge）。\n\n**另注意**：`dispatch-slot-1-e98b43fc-k1694` 是本班剛派出的 compute job 的工作區（job `agent-brief_k1694_repair_e98b43fc-ea643c`），**依 compute_queue 契約刻意存活中，不是 stale**，請勿裁決或移除。\n"
   },
   {
     "id": "assign_db64b82b",
@@ -51207,7 +51241,7 @@
     "title": "[dreaming] missing_retry_strategy:trending_repost_2026_07_23_美聯儲降息",
     "description": "Failed task trending_repost_2026_07_23_美聯儲降息 has no retry/follow-up and is not parked. Either retry with a clearer brief or mark it blocked with a controlled reason.\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：task trending_repost_2026_07_23_美聯儲降息 (k_id=-) status='failed'; no controlled blocked_reason, no follow-up sibling\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-27T21:25:04.703274+00:00",
@@ -51217,7 +51251,8 @@
       "occurrences": 2,
       "governance_target": null
     },
-    "follows_up_on": "trending_repost_2026_07_23_美聯儲降息"
+    "follows_up_on": "trending_repost_2026_07_23_美聯儲降息",
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-28 (was P3)"
   },
   {
     "id": "dreaming_missing_retry_strategy_k1715",
@@ -51389,7 +51424,7 @@
     "title": "[dreaming] persistent_alert:ce0fdba9f1a00af6",
     "description": "Alert `PHASE-Z 無主或過期檔案達處置門檻` fired 5× over 4.8d — the same alert condition recurred. The key alone does not prove one root cause: inspect per-fire evidence, then fix the responsible source rather than the symptom. If the same cause is sustained across 3 dreaming runs, open docs/refactor_plan_<topic>.md (Three-Strike).\n\n— dreaming 連續 2 晚偵測到此模式（首見 2026-07-26T21:25:02.047553+00:00）。\n證據：alert_key=ce0fdba9f1a00af6 title='PHASE-Z 無主或過期檔案達處置門檻' send_count=5 span=4.8d (first 2026-07-23T00:13:40.646097+00:00 → last 2026-07-27T19:18:10.501417+00:00) — no fire in 2.1h (auto-clears at 48h if it stays clean)\n治理檔（error_log / rules / knowledge.json）仍是 propose-only：接手的 agent 判斷後決定是否改，dreaming 不自動改。\n\n⚠️ 執行前必須用原 detector 重新驗證此條件「現在」仍成立。dreaming 任務是某一晚的快照，條件可能已被別的 actor 自然解除（例：orphaned_experiment 的 knowledge.json 條目已由 backfill 補上）。已解除 → 只記錄 fresh no-op 後 complete succeeded，不得照舊快照執行。若條件已解除是因為存在「未經 review」的自動補寫條目，請走 scripts/revise_knowledge_entry.py 修訂既有條目，不要用 add_knowledge 另寫一筆（會產生重複）。",
     "task_type": "platform_ops",
-    "priority": 3,
+    "priority": 2,
     "status": "pending",
     "source": "dreaming",
     "created_at": "2026-07-27T21:25:04.703274+00:00",
@@ -51398,7 +51433,8 @@
       "pattern_type": "persistent_alert",
       "occurrences": 2,
       "governance_target": "docs/error_log.md"
-    }
+    },
+    "priority_note": "dreaming: severity escalated to critical on 2026-07-28 (was P3)"
   },
   {
     "id": "dreaming_unfiled_incident_class_8b681480cd8b6ca2",
@@ -51820,14 +51856,13 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T02:07:40.364020+00:00",
       "last_seen_at": "2026-07-28T03:08:05.879047+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52410,14 +52445,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T05:40:29.847399+00:00",
       "last_seen_at": "2026-07-28T05:40:29.847399+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52479,14 +52513,13 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T06:02:30.310580+00:00",
       "last_seen_at": "2026-07-28T06:50:16.377112+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52626,14 +52659,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T07:39:30.916875+00:00",
       "last_seen_at": "2026-07-28T07:39:30.916875+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52946,14 +52978,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T08:46:30.831370+00:00",
       "last_seen_at": "2026-07-28T08:46:30.831370+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53115,14 +53146,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T09:25:26.615406+00:00",
       "last_seen_at": "2026-07-28T09:25:26.615406+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53310,14 +53340,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T10:33:17.553339+00:00",
       "last_seen_at": "2026-07-28T10:33:17.553339+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53362,14 +53391,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T11:23:24.711888+00:00",
       "last_seen_at": "2026-07-28T11:23:24.711888+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -53420,14 +53448,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T12:47:26.077945+00:00",
       "last_seen_at": "2026-07-28T12:47:26.077945+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54510,14 +54537,13 @@
       "fires": 2,
       "first_seen_at": "2026-07-28T17:02:13.254079+00:00",
       "last_seen_at": "2026-07-28T17:26:38.290787+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T17:52:24.001478+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -54671,14 +54697,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T18:24:18.025691+00:00",
       "last_seen_at": "2026-07-28T18:24:18.025691+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T19:17:14.394086+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -54805,11 +54830,36 @@
     "title": "K1694 Codex round 1 FAIL 修復：bootstrap 與 spec1 對齊 + partial month + 方法論描述 + 重跑重審",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "awaiting_agent_job",
     "source": "compute_queue_followup",
     "topology": "compute_queue",
     "description": "Codex primary-path review round 1 對 K1694 回 **VERDICT: FAIL**（全文 storage/ops/codex_reviews/k1694_verdict.md，缺陷已整理進 experiments/K1694/README.md「Codex round 1 裁決」節）。\n\n本任務 = 依 Codex 的「最低修復要求」修好並重跑重審。**不是重新設計實驗**，範圍就是下列 8 項：\n\n1. bootstrap 規格錯配（阻擋 PASS 的主因）：bootstrap 必須與 spec1 共用**完全相同**的 design matrix / sample / 時間趨勢 t。現況 spec1 RHS 含 t（K1694.py:472）而 bootstrap 沒有（K1694.py:521）；主模型 3293 列 vs bootstrap 3300 列。建議治本作法：抽出單一 build_spec_frame(panel) 當估計樣本的唯一 owner，panel_regression 與 bootstrap_interaction 都吃它，讓「兩邊一致」由結構保證而非靠對齊兩份清單。\n2. K1694.py:368 highvol = (s > s.median()).astype(float)：rv 缺值時 NaN > median 回 False，highvol 被錯標成 0。要 mask 成 NaN。\n3. bootstrap 命名：現行是 IID month-cluster（保留同月橫截面、破壞月間序列相關）。改成 consecutive moving/stationary block，或誠實改名 month-cluster bootstrap（README / results / 檔頭三處一起改）。\n4. 排除 partial month：2026-07 只有一週 DCOT、10 個交易日 RV、15 個商品。用可重複的完整性規則排除（不要寫死日期），並在 results.sample 揭露。\n5. 方法論描述對齊程式：(a) _acf_bandwidth() 根本沒讀 resid（K1694.py:421），永遠回 max(ceil(T**(1/3)),4) —— 規則可留，但不得宣稱由 residual ACF 決定；(b) 檔頭 K1694.py:36 宣稱「另附全落後 predictive spec」而實際沒有，要嘛補 spec 要嘛刪宣稱。\n6. results JSON 過度陳述：primary_interaction.bootstrap_ci95 / bootstrap_interaction_spec1 不得冒充 spec1 的 CI；panel_span 要揭露 partial；limitations 補上 synthetic publication dates、月內 timing overlap、full-sample regime labels、bootstrap 不保留序列相關；timing 只能寫 ex-post association，禁止 predictive / causal / known-before-outcome。\n7. NULL 口徑：只能寫「負向 binary high-vol crowding-out 假說未獲支持」。連續型 fcm_x_rvz 是正向且顯著（t_DK=2.50, month-cluster t=2.54），不得寫成「完全沒有關聯」。\n8. 用 volpred.research.reproduce_spec.finalize_experiment() 在 run-time 產出 reproduce_spec.json（K1708 教訓：禁止事後補寫）。\n\n執行注意：\n- experiments/K1694/ 目前**在 canonical working tree 未 commit**（results / figures / lag_sensitivity.py 都是 untracked），artifact gate 因缺 knowledge + reproduce_spec 而擋。FAIL 期間本來就不該寫 knowledge，所以先把 reproduce_spec 補上；worktree 開工前要先把這批未 commit 狀態帶進去，否則 worktree 只會看到 d8e777d19 的 salvage 版腳本。\n- 重跑是 heavy（網路抓 CFTC / yfinance + 2000 次 PanelOLS）→ 走 compute_queue enqueue，不要塞進 hourly fire。data/ 下已有快取 csv，優先走快取。\n- 重跑完再送 Codex round 2（scripts/codex_review_job.sh，prompt 沿用 storage/ops/codex_reviews/k1694_prompt.md 並補上本輪修了什麼）。\n- **round 2 PASS 之前不得寫 knowledge.json**（K1259 + 本任務前身的教訓）。\n- 若修完重跑結論仍是 NULL，那就如實報 NULL —— null result 是結果，不是失敗。\n\nparent_compute_job: compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715\nparent_task: k1694_rerun_after_salvage_20260719",
-    "created_at": "2026-07-28T19:14:35.559349+00:00"
+    "created_at": "2026-07-28T19:14:35.559349+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T22:21:34.039401+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      },
+      {
+        "ts": "2026-07-28T22:21:34.380124+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      },
+      {
+        "ts": "2026-07-28T22:23:03.269563+00:00",
+        "from": "in_progress",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1694_repair_e98b43fc-ea643c",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "compute_job_id": "agent-brief_k1694_repair_e98b43fc-ea643c",
+    "blocked_reason": "external_compute_job_running",
+    "result": "dispatched to compute job agent-brief_k1694_repair_e98b43fc-ea643c; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-28T22:30:03Z"
   },
   {
     "id": "assign_524392f9",
@@ -54926,14 +54976,13 @@
       "fires": 1,
       "first_seen_at": "2026-07-28T20:20:48.750712+00:00",
       "last_seen_at": "2026-07-28T20:20:48.750712+00:00",
-      "derates": false,
-      "derates_updated_at": "2026-07-28T21:07:58.783639+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
       "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 23.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 5.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 15.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -54975,7 +55024,7 @@
     "description": "K1715 recert round 3 returned FAIL (experiments/K1715/review_verdict.json, reviewed_commit 3cb574937d458a8c9375e03945018216b25e1de6; raw review in experiments/K1715/codex_recert3.md). Branch worktree-k1715-204d556b is UNMERGED at 5d5ad994d76617ec64eedfa9209c85dcb9bc8f2f.\n\nWHAT IS ALREADY SETTLED - do not redo:\n- Round-2 defects D1/D2/D3 are closed and were independently verified by Codex, including running build_readme against the committed results and reproducing README.md byte-identical (91cf8d3c...).\n- The load-bearing scientific question is ANSWERED YES. Codex reconstructed the selection proof independently: with old sort key b_i (BFGS NLL) and guarded key g_i = min(b_i, n_i) <= b_i, a guarded winner accepting BFGS also minimises the old BFGS-only key; any start that could change the outcome would have to surface as an NM winner, contradicting accepted_method == BFGS in 268/268 refits. It added the warm-start induction across all 67 refits x 4 models. Old (unconditional-BFGS) and new (guarded) code select the identical parameter vector on this data, so the prior science PASS carries across the guard commit on measured evidence.\n- verify_recert2_defects.py exits 0 with all four PASS at the current sha.\n\nWHY IT STILL FAILED: the sole blocking defect was procedural and self-inflicted - round 3 wrote its own commissioning prompt and transcript into the worktree it was certifying, so git status was not empty when the reviewer read it back. Those files are now committed. ROUND 4 MUST STAGE ITS REVIEW ARTIFACTS OUTSIDE THE WORKTREE (or commit them before read-back) or it will reproduce this exact failure.\n\nTHE DECISION THAT NEEDS A DELIBERATE CALL (round-3 non-blocking finding 2): the convergence_summary note inside K1715.py says a low bfgs_success_rate means the guard 'then falls back to Nelder-Mead'. In this run it never fell back (268/268 BFGS), so the sentence describes behaviour that did not occur. It cannot be corrected in place: editing K1715.py changes sha256(K1715.py) and breaks the invariant spec.entrypoint.sha256 == results.code_trace.sha256 == sha256(K1715.py) == 133c6f81..., and restoring that invariant means re-running the estimator, which mints a new artifact and destroys the lineage just certified. STANDING OWNER DECISION (knowledge f745bff0, 2026-07-27, owner delegated 'you decide') ALREADY RULED THIS: K1715's disposition is ARCHIVE-UNMERGED (Option 3) - do not merge worktree k1715-204d556b, keep the science in knowledge item 5e41886b, and explicitly BAR both a further Claude transcription loop and any estimator re-run done for optimiser-diagnostic meta fields, on ROI grounds. So option (ii) 're-run and re-certify' is BARRED. The live choice is (i) accept the imprecise note on a frozen, archived artifact and record the acceptance - which is also the standing default. Round 3 does not disturb that ruling; it strengthens it, because the guard is now independently shown to be scientifically inert, so the unmerged branch withholds nothing from main. Round 4 should most likely CLOSE this as archive-unmerged rather than open another certification round.\n\nROUTING: model_router --task-type experiment --attempt 2 reports exhausted=true (at_ceiling=true, fallback=false), so round 4 must NOT be another same-method bounded Codex pass at the same tier. Re-route or escalate the routing decision first.\n\nHONESTY CONSTRAINT: K1715 is a NULL result (score-driven GAS/DCS does not beat the GARCH family at joint VaR+ES). It is NOT yet written to storage/memory/knowledge.json and must not be until certification actually passes.",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-28T20:54:46.812296+00:00",
     "payload": {
@@ -54993,7 +55042,30 @@
       "science_already_recorded": "knowledge item 5e41886b (verdict=NULL, Codex science PASS)"
     },
     "parent_task_id": "K1715",
-    "created_by": "k1715-recert3"
+    "created_by": "k1715-recert3",
+    "status_history": [
+      {
+        "ts": "2026-07-28T22:20:16.757959+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      },
+      {
+        "ts": "2026-07-28T22:20:17.048333+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      },
+      {
+        "ts": "2026-07-28T22:20:33.097883+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936"
+      }
+    ],
+    "started_at": "2026-07-28T22:20:17.048319+00:00",
+    "completed_at": "2026-07-28T22:20:33.097858+00:00",
+    "result": "本班（PHASE A 收 K1715 recert round 3）已完整discharge 本單，且結論是「不開 round 4」。本單 payload 自陳 decision_required='confirm archive-unmerged closure; re-run option is barred by owner'、model_router_exhausted=true、standing_owner_decision='archive-unmerged (knowledge f745bff0)' —— 標題寫 round 4，實質要的是裁決確認而非再開一輪審查。已回讀驗證 f745bff0 確實存在且為 owner Yi-Hao Lai 2026-07-27 delegated 裁決（明文禁止再開 Claude transcription 迴圈與為 meta 欄位重跑 estimator）。裁決確認如下：(1) 維持 ARCHIVE-UNMERGED，不 merge worktree k1715-204d556b；(2) round-3 的 FAIL 為程序性（審查把自己的 prompt/transcript 寫進被審樹），非科學缺陷，且 guard 已被獨立證明 empirically inert（268/268 refits accepted_method=BFGS），故未合併 branch 對 main 未隱瞞任何科學內容；(3) frozen-note vs sha-invariant 衝突取選項 (i) —— 接受 K1715.py convergence_summary 那句不精確字串留在凍結的 archived artifact 上，因選項 (ii) 重跑 estimator 已被 f745bff0 明文禁止且會摧毀剛認證完的 sha lineage；該字串只存在於未合併 branch，永不抵達 main。落地：worktree checkout 已經 git_writer_lock 正規 remove（branch 22 commits 保留）、incident inc_776caf84f125 對應 instance 已 clear、knowledge b6fbb010 記錄全貌、程序教訓寫入 .claude/rules/experiments.md §審查認證、task K1715 已標 succeeded。不再派 round 4。"
   },
   {
     "id": "assign_4a53df16",
@@ -55028,7 +55100,86 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-28T21:08:48.492273+00:00",
-      "last_seen_at": "2026-07-28T21:08:48.492273+00:00"
+      "last_seen_at": "2026-07-28T21:08:48.492273+00:00",
+      "derates": true,
+      "derates_updated_at": "2026-07-28T22:39:39.484501+00:00",
+      "deferred": [
+        "storage/memory/knowledge.json: 已保存，且 0.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 16.6 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "K1705_article_general",
+    "title": "K1705: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1705 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1705 [CORRECTION, independently reviewed]: The archived K1100c Joe-superiority claim is not supported. K1100c defined the loss differential as Joe minus DCC, so its positive stored differentials mean Joe had the higher (worse) loss; its archived Joe density also fails the requir Canonical evidence: experiments/k1705/k1705_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1705",
+    "evidence_source_paths": [
+      "experiments/k1705/k1705_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1705/k1705_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-28T22:16:39+00:00"
+  },
+  {
+    "id": "k1380_v4_white_rc_snooping_correction_20260729",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "pending",
+    "source": "agent",
+    "dispatch_lane": "agent",
+    "topology": "compute_queue",
+    "created_at": "2026-07-28T22:37:10.717621+00:00",
+    "created_by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936",
+    "parent_task_id": "k1380_stage_refactor_collect",
+    "title": "K1380_v4 的 white_rc_test 名為 Reality Check 實為單 spec 檢定，未做 snooping 修正（Paper 9 C3 canonical 指標受影響）",
+    "description": "**來源**：2026-07-29 hourly slot-1（e98b43fc）在裁決 `k1380_stage_refactor_collect` 時，逐條檢查 stage-refactor report 的 `defects_found_beyond_the_known_reversed_qlike`（該單驗收項第 6 條）後，回讀 K1380_v4 原始碼發現。**不是報告自述，是讀 code 確認的。**\n\n## 問題\n\n`experiments/K1380_v4/k1380_v4_results.json` 的 `white_rc_test` **依構造沒有做任何 data-snooping 修正**，但 `interpretation` 寫「A4f significantly beats GJR **after RC correction** (p=0.000)」，且該值直接參與 `c3_verdict` 判定。這份 results 正是 D5（`docs/governance/2026-07/d5_k1380_file_adjudication.md` §6）指給 **Paper 9 C3** 當 canonical 指標的那份。\n\n**證據** — `experiments/K1380_v4/k1380_v4.py:771-782`：\n```python\nrc_stat_obs = float(t_obs[a4f_elig_idx])        # 只取 A4f 一支的 t\nbootstrap_rc_stats[b_idx] = max(0.0, t_b_a4f)   # bootstrap 也只重抽 A4f 自己\nrc_pval = (bootstrap_rc_stats >= rc_stat_obs).mean()\n```\n沒有跨候選集合取 max。White 的 Reality Check 定義上就是 max 型統計量；單一 spec 的 bootstrap t 檢定不是 RC。\n\n這與 stage-refactor report 對**舊** lineage 點名的 defect id=2（severity=**invalidating**，原文「A single-model bootstrap t-test is not a Reality Check」）是同一個缺陷 —— 新資訊是：**它在 v4 並沒有被修掉**。\n\n## 為什麼有份量\n\nv4 的 SPA 是正確的 max 型檢定（`k1380_v4.py:788` 明寫 `max_i over n_elig eligible specs`，n=15），而它 **p=0.2886、不拒絕 H0**。所以誠實的讀法是：**真正做了多重檢定修正的檢定沒有拒絕；「顯著」只出現在那個沒做修正、卻被標成 RC 的單一 spec 檢定上。**\n\n## 要做什麼（二選一，先做裁決再動手）\n\n**(a) 做成真正的 RC**：改成 Hansen 三重 recentering 的 max 型統計量 —— u（least-favourable，即 White RC）、c（consistent，報 primary）、l（lower bound），滿足 `p_l <= p_c <= p_u`；per-spec t 保留但明確標註 not snooping-adjusted，另加 Holm step-down。需重跑（heavy → `compute_queue`，禁塞進 hourly fire）。\n\n**(b) 誠實改標籤**：保留單 spec 檢定，但把欄位名、`interpretation`、`c3_verdict` 一起改成「A4f 個別 DM 檢定，未做 snooping 修正」，並移除其作為 RC 證據的角色。**注意 (b) 仍需改 code 後重跑產出 results，禁止手改 results JSON 收尾**（AGENTS.md「永遠修流程，不修資料」）。\n\n## 硬性約束\n\n- **在本單收斂前，不得以「通過 RC 多重檢定修正」的口徑寫進 Paper 9 C3。**\n- 修完要回頭檢查**已寫入的 knowledge 與任何引用該 RC 數字的產物**，若結論被推翻，依 AGENTS.md 第 13 條回溯更正並寫 `docs/error_log.md`。\n- knowledge 只能主線程寫（K1259），數字一律從 results JSON 程式化取得。\n- 前班狀態為 **`contained`**（只證據化症狀＋定位根因層級），**未修程式、未重跑、未動 Paper 9、未改 knowledge**。本單完成才可能標 `root_cause_fixed_and_verified`。\n\n## 相關\n\n- `k1380_stage_refactor_collect` 欄位 `adjudication_20260729_slot1`（完整裁決與證據；該單驗收項 1-5 已 superseded，第 6 項就是本發現，故刻意留 pending 未關）\n- D5 裁決：`docs/governance/2026-07/d5_k1380_file_adjudication.md`\n- v4 canonical：SPA stat=4.2047 / p=0.2886 / n=15 / reject=false；RC spec=A4f / t=4.1335 / p=0.000 / reject=true；timestamp 2026-07-05T09:58:26\n"
+  },
+  {
+    "id": "assign_0c1eca40",
+    "title": "PHASE-Z 卡住檔案 incident（03116c90280480e9）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 38 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 31 班\n- storage/memory/knowledge.json — 38 班\n- storage/reports/INDEX.md — 29 班\n- storage/reports/index.json — 29 班\n- storage/strategy_metrics.json — 29 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T223939382286Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T22:40:28.095399+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "03116c90280480e9",
+      "paths": [
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "storage/logs/trending_primary_source_verification.jsonl": 31,
+        "storage/memory/knowledge.json": 38,
+        "storage/reports/INDEX.md": 29,
+        "storage/reports/index.json": 29,
+        "storage/strategy_metrics.json": 29
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T223939382286Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T22:40:28.080875+00:00",
+      "last_seen_at": "2026-07-28T22:40:28.080875+00:00"
     },
     "priority_capped_from": 1
   }

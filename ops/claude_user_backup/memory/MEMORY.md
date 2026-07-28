@@ -97,7 +97,7 @@
 - 動手前先查：[重構前通盤查證權威來源](feedback_verify_before_restructure.md)｜[建新機制前查同 concern 是否已存在](feedback_check_existing_mechanism_before_building.md)
 - 前端：[改動要 build + 測所有 tab](feedback_test_before_deploy.md)｜[原版=數據 v3=呈現，不能脫鉤](feedback_v3_presentation_layer_only.md)｜[讀者頁瀏覽數等展示指標只能有唯一版本](feedback_single_source_displayed_metrics.md)
 - git 紀律：[驅動 git 的測試須隔離](feedback_hermetic_git_in_tests.md)｜[git add -A 毀掉 before/after 對照](feedback_autocommit_poisons_before_after.md)
-- worktree：[無 claim 致平行實作、liveness 用 lsof](feedback_parallel_impl_and_worktree_liveness.md)｜[merge 前勿 cd 進去](feedback_no_cd_into_worktree_before_merge.md)｜[stale base 走 path-scoped 抽取](feedback_worktree_stale_base_extract_by_path.md)
+- worktree：[無 claim 致平行實作、liveness 用 lsof](feedback_parallel_impl_and_worktree_liveness.md)｜[merge 前勿 cd 進去](feedback_no_cd_into_worktree_before_merge.md)｜[stale base 走 path-scoped 抽取](feedback_worktree_stale_base_extract_by_path.md)｜[審查產物別寫進被審的樹，會撞自己的 clean-tree gate](feedback_review_artifacts_outside_worktree.md)
 - [feedback_no_research_artifact_loss.md](feedback_no_research_artifact_loss.md) — 已完成研究產物一件都不能漏，復現靠它
 - agent 操作：[background Codex + polling 易留孤兒，改 foreground](feedback_agent_background_codex_polling_unreliable.md)｜[output 用 JSON parser 不用 regex](feedback_agent_output_extraction.md)
 - [feedback_knowledge_index_update.md](feedback_knowledge_index_update.md) — 知識索引用 update 不用 build
