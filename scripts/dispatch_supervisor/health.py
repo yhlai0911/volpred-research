@@ -35,8 +35,16 @@ from pathlib import Path
 
 from volpred.ops import termination
 
-from . import alerts, claim_release, procutil, selfreload, state
-from . import identity  # noqa: F401 — re-exported for callers/tests of health.identity
+from . import (
+    alerts,
+    claim_release,
+    identity,  # noqa: F401 — re-exported for callers/tests of health.identity
+    isolation,
+    procutil,
+    selfreload,
+    state,
+)
+
 # Re-exported: the by-path task_pool_claim loader moved to claim_release when
 # worker.py became a second caller (WS-A2c). Kept importable from here so the
 # module object stays a single cached instance across both call sites.
@@ -335,6 +343,14 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             state.heartbeat(path=state_path)
             check_once(state_path=state_path)
             _renew_live_dispatch_claims(state_path=state_path)
+            auth_recovery = await asyncio.to_thread(
+                isolation.recover_provider_auth_reapers
+            )
+            if auth_recovery["invalid"]:
+                raise isolation.IsolationUnavailable(
+                    "provider auth runtime recovery has invalid receipts: "
+                    f"{auth_recovery}"
+                )
             # Last: a reload SIGTERMs this process, so anything after it in the
             # tick would not run. The heartbeat and the hang check are what keep
             # the platform safe; deploying a fix is what keeps it improving.

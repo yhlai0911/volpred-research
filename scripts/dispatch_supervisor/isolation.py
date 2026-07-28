@@ -29,7 +29,9 @@ import sys
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
+
+from volpred.ops.diagnostics import warn
 
 SANDBOX_EXEC = Path("/usr/bin/sandbox-exec")
 
@@ -570,7 +572,11 @@ class ProviderAuthLease:
         repr=False,
     )
 
-    def close(self) -> ProviderAuthCloseReceipt:
+    def close(
+        self,
+        *,
+        checkpoint: Callable[[str], None] | None = None,
+    ) -> ProviderAuthCloseReceipt:
         """Reconcile and remove the synthetic credential.
 
         A failed close remains retryable and retains the authority lock.  Only
@@ -598,10 +604,31 @@ class ProviderAuthLease:
             destination_home_fd = _open_child_directory(
                 destination_run_fd, "home",
             )
-            destination_dir_fd = _open_child_directory(
-                destination_home_fd, ".codex",
-            )
+            try:
+                destination_dir_fd = _open_child_directory(
+                    destination_home_fd, ".codex",
+                )
+            except IsolationUnavailable:
+                if not self._destination_unlinked:
+                    raise
+                try:
+                    os.stat(
+                        ".codex",
+                        dir_fd=destination_home_fd,
+                        follow_symlinks=False,
+                    )
+                except FileNotFoundError:
+                    pass  # silent-ok: durable close phase permits absent dir
+                else:
+                    # Existing-but-unsafe is not equivalent to already clean.
+                    raise
+                # A prior process durably unlinked+fsynced auth.json and then
+                # removed the empty directory before its terminal receipt.
+                # Fsyncing HOME makes that already-clean state retryable.
+                os.fsync(destination_home_fd)
+                destination_dir_fsynced = True
             if not self._destination_unlinked:
+                assert destination_dir_fd is not None
                 destination_payload = _read_private_at(
                     destination_dir_fd, "auth.json",
                 )
@@ -656,10 +683,15 @@ class ProviderAuthLease:
                             os.close(source_dir_fd)
                     finally:
                         os.close(source_home_fd)
+                if checkpoint is not None:
+                    checkpoint("unlink_intent")
                 os.unlink("auth.json", dir_fd=destination_dir_fd)
                 self._destination_unlinked = True
-            os.fsync(destination_dir_fd)
-            destination_dir_fsynced = True
+            if destination_dir_fd is not None:
+                os.fsync(destination_dir_fd)
+                destination_dir_fsynced = True
+                if checkpoint is not None:
+                    checkpoint("destination_unlinked")
         except (IsolationUnavailable, OSError) as exc:
             return ProviderAuthCloseReceipt(
                 ok=False,
@@ -727,6 +759,7 @@ _REAPER_STATE_ORDER = {
     "waiting_for_process_group": 20,
     "handoff_failed": 21,
     "recovery_started": 22,
+    "cleanup_started": 25,
     "cleanup_retry": 30,
     "cleaned": 40,
 }
@@ -787,10 +820,13 @@ def wait_for_process_group_generation_drained(
             if leader_started_wall
             else procutil.IDENTITY_UNVERIFIED
         )
-        if identity == procutil.IDENTITY_MISMATCH:
-            # A PID can only be reused after the old process, and therefore
-            # its old session-leader identity, has gone away.
-            return
+        if identity == procutil.IDENTITY_UNVERIFIED:
+            empty_reads = 0
+            time.sleep(poll_seconds)
+            continue
+        # MISMATCH proves the original leader is gone, but a corrupt receipt
+        # must never turn that into permission to clean early. The exact PGID
+        # still needs two authoritative empty reads.
         members = procutil.pgid_members_checked(pgid)
         if members == []:
             empty_reads += 1
@@ -805,6 +841,7 @@ def reap_provider_auth_lease_in_process(
     pgid: int,
     leader_pid: int,
     leader_started_wall: str | None,
+    receipt_path: Path | None = None,
     close_retry_seconds: float = 5.0,
 ) -> ProviderAuthCloseReceipt:
     """Fail-safe custody fallback when detached reaper handoff cannot start."""
@@ -813,10 +850,41 @@ def reap_provider_auth_lease_in_process(
         leader_pid=leader_pid,
         leader_started_wall=leader_started_wall,
     )
+    attempts = 0
     while True:
-        receipt = lease.close()
+        attempts += 1
+        if receipt_path is not None:
+            _transition_provider_auth_reaper_receipt(
+                receipt_path,
+                {"state": "cleanup_started", "attempts": attempts},
+            )
+        receipt = lease.close(
+            checkpoint=(
+                None
+                if receipt_path is None
+                else lambda phase: _transition_provider_auth_reaper_receipt(
+                    receipt_path,
+                    {
+                        "state": "cleanup_started",
+                        "close_phase": phase,
+                    },
+                )
+            ),
+        )
         if receipt.ok:
             return receipt
+        if receipt_path is not None:
+            _transition_provider_auth_reaper_receipt(
+                receipt_path,
+                {
+                    "state": "cleanup_retry",
+                    "attempts": attempts,
+                    "close": {
+                        "ok": receipt.ok,
+                        "reason": receipt.reason,
+                    },
+                },
+            )
         time.sleep(close_retry_seconds)
 
 
@@ -834,7 +902,12 @@ def defer_provider_auth_cleanup(
     there is no unlock/relock window.  It waits for two independently empty
     process-group reads before reconciling or deleting any credential bytes.
     """
-    if pgid <= 1 or leader_pid <= 1 or not leader_started_wall:
+    if (
+        pgid <= 1
+        or leader_pid <= 1
+        or pgid != leader_pid
+        or not leader_started_wall
+    ):
         raise IsolationUnavailable("provider auth reaper requires a valid PGID")
     lock_fd = lease._authority_lock_fd
     if lock_fd is None:
@@ -890,6 +963,8 @@ def defer_provider_auth_cleanup(
         "--receipt-path",
         str(receipt_path),
     ]
+    if lease._destination_unlinked:
+        argv.append("--destination-unlinked")
     try:
         with log_path.open("ab", buffering=0) as log_handle:
             proc = subprocess.Popen(
@@ -934,14 +1009,17 @@ def defer_provider_auth_cleanup(
             proc.terminate()
         except ProcessLookupError:
             pass  # silent-ok: missing reaper already relinquished child custody
-        try:
-            proc.wait(timeout=5)
-        except subprocess.TimeoutExpired:
+        while True:
             try:
-                proc.kill()
+                proc.wait(timeout=5)
+                break
+            except subprocess.TimeoutExpired:
+                try:
+                    proc.kill()
+                except ProcessLookupError:
+                    pass  # silent-ok: reaper exited during wait-to-KILL race
             except ProcessLookupError:
-                pass  # silent-ok: reaper exited during TERM-to-KILL race
-            proc.wait(timeout=5)
+                break  # silent-ok: wait raced with an already-reaped child
         _transition_provider_auth_reaper_receipt(
             receipt_path,
             {
@@ -966,6 +1044,150 @@ def defer_provider_auth_cleanup(
     )
 
 
+def _provider_auth_reaper_root() -> Path:
+    return Path.home() / ".volpred" / "logs" / "provider-auth-reapers"
+
+
+def _load_recoverable_provider_auth_receipts(
+    *,
+    source_home: Path,
+    receipt_root: Path,
+) -> tuple[list[tuple[Path, dict[str, Any], bool]], int]:
+    recoverable: list[tuple[Path, dict[str, Any], bool]] = []
+    invalid = 0
+    if not receipt_root.is_dir():
+        return recoverable, invalid
+    for path in sorted(receipt_root.glob("*.json")):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            warn(
+                "provider-auth-recovery",
+                "receipt unreadable; admission will fail closed",
+                path=str(path),
+                err=str(exc),
+            )
+            invalid += 1
+            continue
+        schema = payload.get("schema_version")
+        state = payload.get("state")
+        if state == "cleaned":
+            continue
+        if schema != "provider-auth-reaper.v2":
+            # A nonterminal receipt from an unknown/legacy contract may still
+            # represent a live secret. Admission must stop rather than guess.
+            invalid += 1
+            continue
+        try:
+            receipt_source = Path(str(payload["source_home"])).resolve()
+        except (KeyError, OSError, RuntimeError) as exc:
+            warn(
+                "provider-auth-recovery",
+                "receipt source identity invalid; admission will fail closed",
+                path=str(path),
+                err=str(exc),
+            )
+            invalid += 1
+            continue
+        if receipt_source != source_home.resolve():
+            continue
+        try:
+            run_dir = Path(str(payload["run_dir"])).resolve()
+            destination = Path(str(payload["destination_path"])).resolve()
+            expected_destination = (
+                run_dir / "home" / ".codex" / "auth.json"
+            ).resolve()
+            pgid = int(payload["pgid"])
+            leader_pid = int(payload["leader_pid"])
+            leader_started_wall = str(payload["leader_started_wall"])
+            baseline = str(payload["baseline_sha256"])
+            lease_id = str(payload["lease_id"])
+        except (
+            KeyError,
+            TypeError,
+            ValueError,
+            OSError,
+            RuntimeError,
+        ) as exc:
+            warn(
+                "provider-auth-recovery",
+                "receipt lease identity invalid; admission will fail closed",
+                path=str(path),
+                err=str(exc),
+            )
+            invalid += 1
+            continue
+        if (
+            destination != expected_destination
+            or pgid <= 1
+            or leader_pid != pgid
+            or not leader_started_wall
+            or len(baseline) != 64
+            or any(char not in "0123456789abcdef" for char in baseline.lower())
+            or not lease_id
+        ):
+            invalid += 1
+            continue
+        close_phase = payload.get("close_phase")
+        destination_missing = not destination.exists()
+        if close_phase == "destination_unlinked" and not destination_missing:
+            invalid += 1
+            continue
+        destination_unlinked = close_phase == "destination_unlinked" or (
+            close_phase == "unlink_intent" and destination_missing
+        )
+        if destination_missing and not destination_unlinked:
+            invalid += 1
+            continue
+        recoverable.append((path, payload, destination_unlinked))
+    return recoverable, invalid
+
+
+def _recover_provider_auth_with_held_lock(
+    *,
+    source_home: Path,
+    authority_lock_fd: int,
+    receipt_root: Path | None = None,
+) -> bool:
+    """Fence one admission and transfer its held lock to stale cleanup."""
+    recoverable, invalid = _load_recoverable_provider_auth_receipts(
+        source_home=source_home,
+        receipt_root=receipt_root or _provider_auth_reaper_root(),
+    )
+    if invalid:
+        raise IsolationUnavailable(
+            f"provider auth recovery has {invalid} invalid nonterminal receipt(s)"
+        )
+    if len(recoverable) > 1:
+        raise IsolationUnavailable(
+            "provider auth recovery found multiple nonterminal leases"
+        )
+    if not recoverable:
+        return False
+    path, payload, destination_unlinked = recoverable[0]
+    lease = ProviderAuthLease(
+        source_home=str(source_home),
+        run_dir=str(payload["run_dir"]),
+        destination_path=str(payload["destination_path"]),
+        baseline_sha256=str(payload["baseline_sha256"]),
+        lease_id=str(payload["lease_id"]),
+        _authority_lock_fd=authority_lock_fd,
+        _destination_unlinked=destination_unlinked,
+    )
+    _transition_provider_auth_reaper_receipt(
+        path,
+        {"state": "recovery_started"},
+    )
+    defer_provider_auth_cleanup(
+        lease,
+        pgid=int(payload["pgid"]),
+        leader_pid=int(payload["leader_pid"]),
+        leader_started_wall=str(payload["leader_started_wall"]),
+        receipt_path=path,
+    )
+    return True
+
+
 def recover_provider_auth_reapers(
     *,
     authority_home: Path | None = None,
@@ -973,9 +1195,7 @@ def recover_provider_auth_reapers(
 ) -> dict[str, int]:
     """Recover nonterminal cleanup intents after a supervisor/reaper crash."""
     source_home = (authority_home or _credential_home()).resolve()
-    root = receipt_root or (
-        Path.home() / ".volpred" / "logs" / "provider-auth-reapers"
-    )
+    root = receipt_root or _provider_auth_reaper_root()
     if (
         authority_home is None
         and receipt_root is None
@@ -985,17 +1205,18 @@ def recover_provider_auth_reapers(
     recovered = 0
     active = 0
     invalid = 0
-    if not root.is_dir():
-        return {"recovered": 0, "active": 0, "invalid": 0}
-    for path in sorted(root.glob("*.json")):
+    recoverable, invalid = _load_recoverable_provider_auth_receipts(
+        source_home=source_home,
+        receipt_root=root,
+    )
+    if invalid or len(recoverable) > 1:
+        return {
+            "recovered": 0,
+            "active": 0,
+            "invalid": invalid + max(0, len(recoverable) - 1),
+        }
+    for path, payload, destination_unlinked in recoverable:
         try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            if (
-                payload.get("schema_version") != "provider-auth-reaper.v2"
-                or payload.get("state") == "cleaned"
-                or Path(str(payload["source_home"])).resolve() != source_home
-            ):
-                continue
             source_home_fd = _open_directory(source_home)
             try:
                 source_dir_fd = _open_child_directory(
@@ -1020,6 +1241,7 @@ def recover_provider_auth_reapers(
                 baseline_sha256=str(payload["baseline_sha256"]),
                 lease_id=str(payload["lease_id"]),
                 _authority_lock_fd=lock_fd,
+                _destination_unlinked=destination_unlinked,
             )
             try:
                 _transition_provider_auth_reaper_receipt(
@@ -1163,6 +1385,14 @@ def materialize_provider_auth(
             source_dir_fd = _open_child_directory(source_home_fd, ".codex")
             try:
                 authority_lock_fd = _acquire_provider_auth_lock(source_dir_fd)
+                if _recover_provider_auth_with_held_lock(
+                    source_home=Path(source_home),
+                    authority_lock_fd=authority_lock_fd,
+                ):
+                    authority_lock_fd = None
+                    raise IsolationUnavailable(
+                        "previous provider auth lease recovery is in progress"
+                    )
                 payload = _read_private_at(source_dir_fd, "auth.json")
             finally:
                 os.close(source_dir_fd)

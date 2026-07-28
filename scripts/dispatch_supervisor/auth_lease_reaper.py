@@ -47,6 +47,9 @@ def reap(args: argparse.Namespace) -> int:
         baseline_sha256=args.baseline_sha256,
         lease_id=getattr(args, "lease_id", "legacy-test-lease"),
         _authority_lock_fd=args.lock_fd,
+        _destination_unlinked=getattr(
+            args, "destination_unlinked", False,
+        ),
     )
     isolation._transition_provider_auth_reaper_receipt(
         receipt_path,
@@ -68,7 +71,26 @@ def reap(args: argparse.Namespace) -> int:
     attempts = 0
     while True:
         attempts += 1
-        receipt = lease.close()
+        isolation._transition_provider_auth_reaper_receipt(
+            receipt_path,
+            {
+                "schema_version": "provider-auth-reaper.v2",
+                "state": "cleanup_started",
+                "attempts": attempts,
+            },
+        )
+        receipt = lease.close(
+            checkpoint=lambda phase: (
+                isolation._transition_provider_auth_reaper_receipt(
+                    receipt_path,
+                    {
+                        "schema_version": "provider-auth-reaper.v2",
+                        "state": "cleanup_started",
+                        "close_phase": phase,
+                    },
+                )
+            ),
+        )
         isolation._transition_provider_auth_reaper_receipt(
             receipt_path,
             {
@@ -105,6 +127,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--lock-fd", type=int, required=True)
     parser.add_argument("--ack-fd", type=int, required=True)
     parser.add_argument("--receipt-path", required=True)
+    parser.add_argument("--destination-unlinked", action="store_true")
     return parser.parse_args()
 
 

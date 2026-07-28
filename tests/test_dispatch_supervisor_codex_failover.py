@@ -524,15 +524,10 @@ def test_reaper_handoff_failure_retains_parent_custody_until_cleanup(
         pgid=888,
         started_wall="Mon Jul 28 12:00:00 2026",
     )
-    receipt_path = tmp_path / "reaper.json"
     custody: list[tuple[object, int, int, str]] = []
-    transitions: list[dict] = []
 
     def fail_handoff(*_args, **_kwargs):
-        raise codex_failover.isolation.ProviderAuthHandoffError(
-            "injected handoff failure",
-            receipt_path=receipt_path,
-        )
+        raise OSError("injected raw handoff failure")
 
     monkeypatch.setattr(
         codex_failover.isolation,
@@ -542,17 +537,13 @@ def test_reaper_handoff_failure_retains_parent_custody_until_cleanup(
     monkeypatch.setattr(
         codex_failover.isolation,
         "reap_provider_auth_lease_in_process",
-        lambda auth_lease, *, pgid, leader_pid, leader_started_wall: (
+        lambda auth_lease, *, pgid, leader_pid, leader_started_wall,
+        receipt_path=None: (
             custody.append(
                 (auth_lease, pgid, leader_pid, leader_started_wall)
             )
             or close_receipt
         ),
-    )
-    monkeypatch.setattr(
-        codex_failover.isolation,
-        "_transition_provider_auth_reaper_receipt",
-        lambda _path, payload: transitions.append(payload),
     )
 
     result = guard.finish(
@@ -570,7 +561,6 @@ def test_reaper_handoff_failure_retains_parent_custody_until_cleanup(
     ]
     assert result.process_active is False
     assert guard.lease is None
-    assert transitions[-1]["state"] == "cleaned"
 
 
 def test_spawn_post_popen_probe_error_never_closes_live_auth_early(

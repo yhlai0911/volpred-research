@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import contextlib
+import hashlib
 import json
 import logging
 import os
@@ -2771,6 +2772,7 @@ def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -
         data["supervisor_pid"] = 999_999
 
     beats: list[dict] = []
+    recoveries: list[bool] = []
 
     async def fake_sleep(_secs):
         return None
@@ -2787,11 +2789,20 @@ def test_health_loop_heartbeats_before_each_check(tmp_path: Path, monkeypatch) -
         "_renew_live_dispatch_claims",
         lambda **_kwargs: {"ok": True, "renewed": [], "count": 0},
     )
+    monkeypatch.setattr(
+        health.isolation,
+        "recover_provider_auth_reapers",
+        lambda: (
+            recoveries.append(True)
+            or {"recovered": 0, "active": 0, "invalid": 0}
+        ),
+    )
 
     with pytest.raises(asyncio.CancelledError):
         asyncio.run(health.health_loop(state_path=state_path))
 
     assert len(beats) == 2
+    assert recoveries == [True]
     assert all(b["last_heartbeat_at"] > "2001" for b in beats), "no beat before check_once"
     assert beats[1]["last_heartbeat_at"] > beats[0]["last_heartbeat_at"], "beat did not advance"
     assert beats[0]["supervisor_pid"] == os.getpid(), "stale pid not re-stamped"
@@ -3007,6 +3018,32 @@ def test_supervisor_startup_registry_denial_precedes_state_and_provider_io(
     )
 
     with pytest.raises(worker.ProviderRegistryError, match="credits"):
+        supervisor.main([])
+
+
+def test_supervisor_startup_invalid_auth_recovery_fails_before_state_mutation(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(supervisor, "_setup_logging", lambda _level: None)
+    monkeypatch.setattr(supervisor, "_set_runtime_env", lambda: None)
+    monkeypatch.setattr(supervisor, "load_provider_registry", lambda: None)
+    monkeypatch.setattr(
+        supervisor.isolation,
+        "recover_provider_auth_reapers",
+        lambda: {"recovered": 0, "active": 0, "invalid": 1},
+    )
+    monkeypatch.setattr(
+        supervisor.state,
+        "read_state",
+        lambda *_a, **_k: pytest.fail(
+            "invalid auth recovery must precede state mutation"
+        ),
+    )
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="startup recovery failed closed",
+    ):
         supervisor.main([])
 
 
@@ -6581,7 +6618,7 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
         def __init__(self, **_kwargs):
             pass
 
-        def close(self):
+        def close(self, **_kwargs):
             return next(close_attempts)
 
     monkeypatch.setattr(
@@ -6617,7 +6654,9 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
     assert auth_lease_reaper.reap(args) == 0
     assert [item["state"] for item in written] == [
         "waiting_for_process_group",
+        "cleanup_started",
         "cleanup_retry",
+        "cleanup_started",
         "cleaned",
     ]
     assert written[-1]["attempts"] == 2
@@ -6639,6 +6678,10 @@ def test_provider_auth_recovery_reclaims_nonterminal_intent(
     auth.chmod(0o600)
     receipts = tmp_path / "receipts"
     receipts.mkdir()
+    destination = tmp_path / "run" / "home" / ".codex" / "auth.json"
+    destination.parent.mkdir(parents=True, mode=0o700)
+    destination.write_bytes(auth.read_bytes())
+    destination.chmod(0o600)
     receipt_path = receipts / "lease.json"
     receipt_path.write_text(
         json.dumps({
@@ -6648,11 +6691,11 @@ def test_provider_auth_recovery_reclaims_nonterminal_intent(
             "source_home": str(authority),
             "run_dir": str(tmp_path / "run"),
             "destination_path": str(
-                tmp_path / "run" / "home" / ".codex" / "auth.json"
+                destination
             ),
             "baseline_sha256": "a" * 64,
             "pgid": 888,
-            "leader_pid": 777,
+            "leader_pid": 888,
             "leader_started_wall": "Mon Jul 28 12:00:00 2026",
         }),
         encoding="utf-8",
@@ -6691,11 +6734,162 @@ def test_provider_auth_recovery_reclaims_nonterminal_intent(
         (
             "lease-id",
             888,
-            777,
+            888,
             "Mon Jul 28 12:00:00 2026",
             receipt_path,
         ),
     ]
+
+
+def test_provider_auth_recovery_is_idempotent_after_unlink_crash(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=authority,
+    )
+    assert lease is not None
+    phases: list[str] = []
+
+    def crash_before_phase_commit(phase: str) -> None:
+        if phase == "destination_unlinked":
+            raise OSError("reaper crashed before phase receipt")
+        phases.append(phase)
+
+    first = lease.close(checkpoint=crash_before_phase_commit)
+    assert first.ok is False
+    assert phases == ["unlink_intent"]
+    assert not Path(lease.destination_path).exists()
+    isolation._release_provider_auth_lock(lease._authority_lock_fd)
+    lease._authority_lock_fd = None
+
+    receipts = tmp_path / "receipts"
+    receipts.mkdir()
+    receipt_path = receipts / "crashed.json"
+    receipt_path.write_text(
+        json.dumps({
+            "schema_version": "provider-auth-reaper.v2",
+            "state": "cleanup_started",
+            "close_phase": "unlink_intent",
+            "lease_id": lease.lease_id,
+            "source_home": str(authority),
+            "run_dir": str(run_dir),
+            "destination_path": lease.destination_path,
+            "baseline_sha256": lease.baseline_sha256,
+            "pgid": 888,
+            "leader_pid": 888,
+            "leader_started_wall": "Mon Jul 28 12:00:00 2026",
+        }),
+        encoding="utf-8",
+    )
+    recovered_close: list[isolation.ProviderAuthCloseReceipt] = []
+
+    def defer(recovered_lease, **_kwargs):
+        recovered_close.append(recovered_lease.close())
+
+    monkeypatch.setattr(isolation, "defer_provider_auth_cleanup", defer)
+
+    recovery = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipts,
+    )
+
+    assert recovery == {"recovered": 1, "active": 0, "invalid": 0}
+    assert recovered_close[0].ok is True
+    assert recovered_close[0].cleaned is True
+
+
+def test_provider_auth_admission_fences_nonterminal_crashed_lease(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    old_run = tmp_path / "old-run"
+    old_destination = old_run / "home" / ".codex" / "auth.json"
+    old_destination.parent.mkdir(parents=True, mode=0o700)
+    old_destination.write_bytes(auth.read_bytes())
+    old_destination.chmod(0o600)
+    receipts = tmp_path / "receipts"
+    receipts.mkdir()
+    receipt_path = receipts / "waiting.json"
+    receipt_path.write_text(
+        json.dumps({
+            "schema_version": "provider-auth-reaper.v2",
+            "state": "waiting_for_process_group",
+            "lease_id": "old-lease",
+            "source_home": str(authority),
+            "run_dir": str(old_run),
+            "destination_path": str(old_destination),
+            "baseline_sha256": hashlib.sha256(auth.read_bytes()).hexdigest(),
+            "pgid": 888,
+            "leader_pid": 888,
+            "leader_started_wall": "Mon Jul 28 12:00:00 2026",
+        }),
+        encoding="utf-8",
+    )
+    new_run = tmp_path / "new-run"
+    (new_run / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(new_run / "sandbox.sb"),
+        run_dir=str(new_run),
+        synthetic_home=str(new_run / "home"),
+        tmp_dir=str(new_run / "tmp"),
+        pycache_dir=str(new_run / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    recovery_handoffs: list[str] = []
+
+    def defer(lease, **_kwargs):
+        recovery_handoffs.append(lease.lease_id)
+        isolation._release_provider_auth_lock(lease._authority_lock_fd)
+        lease._authority_lock_fd = None
+
+    monkeypatch.setattr(isolation, "_provider_auth_reaper_root", lambda: receipts)
+    monkeypatch.setattr(isolation, "defer_provider_auth_cleanup", defer)
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="previous provider auth lease recovery is in progress",
+    ):
+        isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+            credential_home=authority,
+        )
+
+    assert recovery_handoffs == ["old-lease"]
+    assert not (new_run / "home" / ".codex" / "auth.json").exists()
 
 
 def test_codex_auth_materialization_rejects_symlink_destination(

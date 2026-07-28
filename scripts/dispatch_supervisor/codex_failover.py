@@ -336,7 +336,7 @@ class _ProviderAuthLeaseGuard:
                     leader_started_wall=self.leader_started_wall,
                 )
                 handed_off = True
-            except isolation.IsolationUnavailable as exc:
+            except Exception as exc:  # custody fallback must catch raw OS errors
                 failed_receipt_path = getattr(exc, "receipt_path", None)
                 LOG.error(
                     "Codex auth reaper handoff failed; retaining synchronous "
@@ -348,29 +348,40 @@ class _ProviderAuthLeaseGuard:
                     pgid=active_pgid,
                     leader_pid=self.leader_pid,
                     leader_started_wall=self.leader_started_wall,
+                    receipt_path=failed_receipt_path,
                 )
                 if not receipt.ok:
                     raise RuntimeError(
                         "synchronous provider auth custody ended without cleanup"
                     )
+                self.lease = None
+                self.mark_process_group_drained()
                 if failed_receipt_path is not None:
-                    isolation._transition_provider_auth_reaper_receipt(
-                        failed_receipt_path,
-                        {
-                            "schema_version": "provider-auth-reaper.v2",
-                            "state": "cleaned",
-                            "recovery": "synchronous_parent_custody",
-                            "close": {
-                                "ok": receipt.ok,
-                                "reconciled": receipt.reconciled,
-                                "source_advanced": receipt.source_advanced,
-                                "cleaned": receipt.cleaned,
-                                "reason": receipt.reason,
+                    try:
+                        isolation._transition_provider_auth_reaper_receipt(
+                            failed_receipt_path,
+                            {
+                                "schema_version": "provider-auth-reaper.v2",
+                                "state": "cleaned",
+                                "recovery": "synchronous_parent_custody",
+                                "close": {
+                                    "ok": receipt.ok,
+                                    "reconciled": receipt.reconciled,
+                                    "source_advanced": receipt.source_advanced,
+                                    "cleaned": receipt.cleaned,
+                                    "reason": receipt.reason,
+                                },
                             },
-                        },
-                    )
-            self.lease = None
-            self.mark_process_group_drained()
+                        )
+                    except Exception as receipt_exc:  # noqa: BLE001
+                        LOG.error(
+                            "provider auth was cleaned but terminal receipt "
+                            "write failed: %s",
+                            receipt_exc,
+                        )
+            if self.lease is not None:
+                self.lease = None
+                self.mark_process_group_drained()
             return FailoverResult(
                 attempted=result.attempted,
                 recovered=result.recovered,

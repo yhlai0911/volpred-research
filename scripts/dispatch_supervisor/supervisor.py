@@ -432,6 +432,10 @@ def main(argv: list[str] | None = None) -> int:
     # canonical bytes immediately before each provider Popen.
     load_provider_registry()
     recovery = isolation.recover_provider_auth_reapers()
+    if recovery["invalid"]:
+        raise isolation.IsolationUnavailable(
+            f"provider auth startup recovery failed closed: {recovery}"
+        )
     if any(recovery.values()):
         logging.info("provider auth reaper recovery=%s", recovery)
     # NOTE: resolve `state.STATE_PATH` here and pass it down explicitly — the
