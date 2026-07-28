@@ -94,11 +94,15 @@ results JSON). Prices cached to `data/prices.csv`.
   with the direction reported honestly even if it contradicts the hypothesis.
 - A NULL or contradicting result is a valid outcome. No fabricated numbers.
 
-## Result — NULL / does not cleanly reproduce at daily ETF frequency
+## Result — weak / directional, does not cleanly reproduce at daily ETF frequency
 
 **Verdict: the daily-ETF re-validation does NOT reproduce the JPM "VT improves
-Sharpe for risky assets only" claim. The Sharpe-improvement channel is
-statistically absent for every asset in both groups.**
+Sharpe for risky assets only" claim at significance. The Sharpe-improvement
+channel is not statistically distinguishable from zero for any asset in either
+group — every bootstrap CI straddles zero, so the study is underpowered rather
+than proof of a true null; the risky-minus-non-risky mean gap (+0.043) is in the
+hypothesized direction but tiny, not robust to the vol window, and internally
+inconsistent (see below).**
 
 ### Sharpe gain (VT − fixed), 20-day vol window
 
