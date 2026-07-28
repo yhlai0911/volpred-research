@@ -28562,5 +28562,104 @@
     "owner": "hourly-slot-1-551337c1933f4973be452cdc15293f6b",
     "commit": null,
     "summary": "兩張 arc-covered 文章任務以 canonical `mark_task_blocked.py --reason deprecated` 終結（沿用 `mark_covered_article_tasks.py` 既有先例：deprecated = terminal、不回檢）。\n\n## K781_article_general_v3 — 迴圈在本班內實證重現\n本班稍早收掉 v2 並預測「必再生 v3」；同一班的 refill 就產出了 v3，預測成立。\n`refill_task_pool.py:1841-1849` 抑制條件 kid ∈ any_feed_kids AND succeeded_general_kids，而『feed 無此 K 文章』正是任務成立前提 → 抑制永不成立，`_next_retry_suffix` 會一路產到 v20。\n**注意：封掉 v3 只是遏制，不是修復** —— v3 記錄仍在 ids 中，下輪 `_next_retry_suffix` 會回 v4。真正的產生器未動。\n\n## K1477_article_general — 同根因的第三種表現（K-COVERAGE metadata gap）\nmile_74d12ac6（2026-06-13, general, published）『0DTE 真的把 SPY 的波動搬進日內了嗎？2022 斷點檢定只答對一半』已完整覆蓋 K1477：同資產 SPY、同 2022 斷點、同隔夜/日內拆解、同「只答對一半」結論（K1477 verdict=CONDITIONAL_PASS）。\n但該文 `details.experiment_refs=[]`（走 trending_repost 路徑發佈時未回填 K-id），導致 `_kids_with_audience_article` 與 `mark_covered_article_tasks.py` 都判 K1477 為 uncovered。\n根因類別統一為：**覆蓋率以 K-id metadata 為鍵；文章漏填 metadata，該 K 就永遠算沒覆蓋**。\n另註：同一支 refill 在 research-direction 路徑早已印出 `[refill] skip K1477: narrative-arc duplicate`，但 article-candidate 路徑沒有這道檢查 → 同一支腳本內兩條路徑對同一個 K 給出相反判斷。\n\n三項修復（arc gate 漏判 / retry 抑制條件 / experiment_refs 回填）皆屬 platform_ops，本 slot claim 受 supervisor_preassignment_required 機械攔阻，未自行修改，已於 fire receipt 升級。"
+  },
+  {
+    "timestamp": "2026-07-28T21:17:21+08:00",
+    "task_type": "experiment",
+    "task_id": "K1708_gatecert_s14_rerun",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "owner": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "commit": null,
+    "summary": "PHASE A collect_completed：K1708 §14 round-4 Codex verdict = FAIL，走 3-strike 天花板分支。NULL 算術經程式化回讀 K1708_results.json 確認可信（CW t=1.236372/1.968775/1.839232 全低於 pre-registered t>=3.0；Holm p=0.108160/0.024489/0.032941 對門檻 0.05/0.016667/0.025 全不拒絕；TAIFEX_TX 2276 OOS origins、seed 42、quick_mode=false、K1708.py sha256 4a8236ff 126998 bytes）。不可結案之處：BLOCKER-3 provenance 過度宣稱（provenance test 只驗 code SHA，改任何 CW/QLIKE/verdict 數值都不會被偵測）、BLOCKER-4 pre-fix Anchor A 六欄位被 reconciliation 移除、reproduce_spec.json 缺席（已回讀確認檔案不存在）致 artifact gate BLOCKED、README stale。另獨立發現結構性事實：results 自帶 supported_unreachable=true，SPY/QQQ 皆 FAIL_NO_DATA，僅 TAIFEX_TX 有可用 RV 資料，而 SUPPORTED 要求 >=2 市場全條件通過 —— 此 gate 在現有資料上本就不可證，與模型優劣無關，再開第五輪 review 不會改變任何事。處置：未 merge、未寫 knowledge.json、未同法重試；已寄 critical --needs-reply escalation email 請老闆在 補資料 / 改 pre-registration / 收在 NULL 三選一（effect_owned_email_833340f613058cd737078c7aa3936ba2、Telegram msg 1547）；pool task K1708_gatecert_s14_rerun 標 failed。副作用：因先結算 source task 再跑 mark-followup-dispatched，觸發順序依賴缺陷，該 followup 目前無法標記 dispatched，已另開 P1 assign_617bf749 記錄根因與修法。"
+  },
+  {
+    "timestamp": "2026-07-28T21:17:21+08:00",
+    "task_type": "experiment",
+    "task_id": "K1720",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "owner": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "commit": null,
+    "summary": "PHASE A collect_completed：K1720（槓桿 ETF 機械再平衡與尾盤波動放大）Codex verdict = FAIL，依 brief FAIL 分支不 merge、不寫 knowledge.json，改建 bounded remediation assign_99f4b3bf。五項必修：(1) 阻斷性 —— prev_close 定義錯誤，K1720.py:127 先排除非 7-bar sessions 才在 :153 做 day_close.shift(1)，導致半日市後至少 8 個完整交易日取到更早交易日收盤，r_intra 跨多 sessions 並污染 expanding event thresholds（非 lookahead，但 predictor 與全部下游數值錯誤，須修正後重跑）；(2) H1 序列相關處理不足，percentile bootstrap（:169）與 Welch test（:204）未處理 volatility clustering，要稱 robust 就補 HAC event-dummy + block/stationary bootstrap，否則降格為描述統計；(3) NULL 過度解讀，H1b 係數仍為正、QQQ/SPX HAC p 約 0.135/0.126，README:138 的 'fully explained' 與 K1720.py:361 的 'is absorbed' 超出證據，須改為『此解析度與規格下未檢出 sharp joint mechanism』；(4) README:116 稱 QQQ/SPY 為 independent replication 但同期間高度共享市場因子，且 :129 對 6 bars x 2 complexes 的 nominal p 未做 multiplicity 調整，14:30 結果只能標 exploratory；(5) provenance 不一致，實際為 2023-08-29 至 2026-07-24 共 719 sessions，README:51/:169 與 results:323 誤寫『約 2 年／約 500 sessions』。Codex 通過項（不要動）：15:30 predictor 與 15:30-16:00 outcome 區間不重疊、event threshold shift(1) 正確、AUM 僅 static cross-sectional constant、seed 42；經濟量級複算一致（TQQQ=6/SQQQ=12/SSO=2，QQQ 5.0667B 199.58%，SPX 221.96M 3.6855%）。修正後 NULL 可保留。remediation 加註收尾契約：重跑須用 finalize_experiment() 在 run-time 同時產出 results 與 reproduce_spec.json。"
+  },
+  {
+    "timestamp": "2026-07-28T21:17:21+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_k1731_rev9",
+    "outcome": "failed",
+    "actor": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "owner": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "commit": null,
+    "summary": "PHASE A collect_completed：K1731 armB round 10 Codex verdict = FAIL，且是卡在 freeze verification、根本沒進入實質審查。k1731_armB_rev10_freeze.txt 35 條全檢，3 條 byte-identity 不符：README.md（expected 2f9efd / actual 38bedc）、k1731_armB_traceability_rows.json（bb08cf / 234f56）、k1731_armB_verification.py（6ee4fa / e301ed）。Codex 明言 'No substantive round-10 verdict is valid against the current moved bytes'，即 round 10 等於白跑一輪。判性質：不是 brief 預想的 claim-surface whack-a-mole，而是 freeze 清單與被審位元組來自不同時點（freeze 後又動檔，或 freeze 為人手維護），與 2026-07-22 K1708『spec 事後補寫、描述的不是產生結果的那份程式』屬同一類。因此 remediation 不重派 round 11 純 review，而是結構收斂：freeze 由 verification run 在 run-time 程式化產出並與被凍檔案同一次 trace snapshot、freeze 後到送審前禁止任何寫入且先自驗 35/35 才 enqueue Codex、把『freeze verification 必須先於讀 claims』寫進 verification gate ratchet 讓同類失敗在本地就被擋、補 run-time 產出的 reproduce_spec.json 以通過 merge 端 check_experiment_artifacts.py。處置：未 merge worktree dispatch-slot-1-bd00f90a-k1731、未 unblock 下游 assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725、未寫 knowledge.json；assign_k1731_rev9 標 failed，已建 assign_d696156d 承接。"
+  },
+  {
+    "timestamp": "2026-07-28T21:23:00+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_617bf749",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "owner": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "commit": null,
+    "summary": "PHASE A 第二批：清 4 筆 triage_failed followup，全部先實地盤點 worktree 再決定去留，無一採 fresh-worktree 重派。K1734（agent-brief_k1734_remediation-763606, exit 1）：worktree 內 K1734_results.json 28,000 bytes 與 review_verdict.json 皆在，consolidated_verdict=CONDITIONAL_PASS、兩個獨立 review 皆 PASS，屬「有可保留成果」；真正的阻斷是 primary_path_status=UNAVAILABLE（Codex CLI 撞 usage limit 至 2026-08-02，改用 fallback reviewer）與 reproduce_spec.json 實測不存在致 merge gate 會擋，另有 one-sided CW p 與 two-sided p 混入同一 BH-FDR family 之非阻斷保留項（保守加倍後 H3 仍存活，adjusted p=0.0401）→ 建 assign_17d6da38。K1812（agent-brief_k1812_fix-a18b38, exit 1, source_task=K1726）：宣告 artifact review_verdict.json 實測不存在，但 k1812_results.json 18,569 bytes 與 reproduce_spec.json 2,248 bytes 同在 07-27 22:15 寫出（run-time 一起產出，符合規範），性質接近 artifact contract mismatch 而非全盤失敗；另發現 source_task=K1726 與 worktree/實驗 k1812 綁定不符需一併釐清 → 建 assign_33426a3d。K1715（agent-brief_k1715_recert2-e2b9fd, exit -2 被 kill）：最關鍵發現是磁碟上的 review_verdict.json 為修正前舊裁決（reviewed_at 2026-07-26T23:39、commit 70923136、verdict FAIL），而 K1715_results.json 07-27 20:46、K1715.py 07-27 21:27 都晚於它約 21 小時 —— 舊 verdict 絕不可當 recert2 結果收取；舊 blocking defect 為 lossy snapshot serialization（float_format %.10f 丟 float64 mantissa，max |delta_close| 5.00e-11），且 reproduce_spec 07-27 08:04 早於 results 同屬 spec 漂移 → 建 assign_c3b0743a。k1731_rev9（agent-brief_k1731_rev9-87d87e, exit -2）：宣告 artifact K1731_ARMB_REV9_COLLECTION.md 實際存在 15,666 bytes，rev9 collection 已交付且工作已推進到 round 10，判定 superseded，不另建單，由 assign_d696156d 承接。dispatch 結果：K1734 與 K1726 兩筆綁定完整者成功標記 followup_dispatched 且綁定乾淨解除；K1715 與 k1731_rev9 兩筆遭 stranded 缺陷擋下（K1715 為本班未觸碰之既存 stranded，證明缺陷非本班單一操作失誤；k1731_rev9 則暴露第二個獨立子案例：同一 source task 被兩個 job 綁定時，先 dispatch 者釋放後其餘永久不可 dispatch）。pending followup 由 7 降為 3，剩餘 3 筆全數為同一缺陷所致，已連同重現步驟與修法建議 annotate 進 P1 assign_617bf749。橫跨本班的共通觀察：K1708 / K1715 / K1731 三個實驗的失敗都收斂到同一個模式 —— 宣稱的 freeze/spec 並非產生該結果的那次執行的忠實快照。"
+  },
+  {
+    "timestamp": "2026-07-28T21:23:35+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_d696156d",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-3-c096399003fc4851b757097df5785260",
+    "owner": "hourly-slot-3-c096399003fc4851b757097df5785260",
+    "commit": null,
+    "summary": "PHASE A0 急件 lane：claim P1 `assign_d696156d`（K1731 armB rev10 freeze-integrity remediation），完成獨立證據化 + bounded 派工，source task 已綁 agent job `agent-brief_k1731_rev11_freeze_integrity-1fc0fd`（status=awaiting_agent_job）。\n\n## 1. 選工經過（A0 lane 三張，只有一張可派）\n`task_urgency` 回 count=3 / urgent=3。依序 claim：\n- `issue42_persistent_fire_lifecycle_20260727`（platform_ops）→ CLI 機械拒絕 `supervisor_preassignment_required`，未繞過。\n- `assign_d696156d`（experiment）→ claim OK，本班主產出。\n- `assign_617bf749`（platform_ops）→ 同 issue42，屬 supervisor 綁定範圍，未動。\nlane 殘留的兩張都是 mutating dispatch work，非本 slot 可派；因此本班未進 PHASE A followup。\n\n## 2. 獨立複驗（不是轉述上游 verdict）\n主線程自行重算 `k1731_armB_rev10_freeze.txt` 全部 35 條 sha256：**mismatches 3/35**，與 Codex verdict 完全一致，且 18:51 verdict 之後未再新增漂移：\n- `README.md` 2f9efd -> 38bedc（mtime 2026-07-28 15:04:50）\n- `k1731_armB_traceability_rows.json` bb08cf -> 234f56（mtime 2026-07-28 16:59:53）\n- `k1731_armB_verification.py` 6ee4fa -> e301ed（mtime 2026-07-28 15:04:36）\n\n**根因時間軸實證**：freeze manifest mtime = 2026-07-27 12:39，檔頭自述由 hourly-slot-1 人手凍結；三個檔的寫入發生在凍結後約 27 小時；Codex 於 2026-07-28 18:51 才讀 bytes。即「凍結清單與被審位元組來自不同時點」，與 2026-07-22 K1708『spec 事後補寫』同類，非 claim-surface whack-a-mole。\n\n**方向判定**：07-28 那批寫入是合理變更（work_log 15:06:37 記同 worktree 補 merge 側 artifact gate、commit cd25c295a，`reproduce_spec.json` 已存在），因此正解是**程式化重新凍結目前完整 claim surface**，而非把三個檔還原成舊 bytes。\n\n## 3. 派工內容（bounded，禁止原樣重派 round 11 純 review）\nbrief `/tmp/brief_k1731_rev11_freeze_integrity.md`（opus / xhigh per model_router，topology=worktree；長 agent 依規走 compute_queue 不在 fire 內 spawn）。四項成功標準：\n1. `scripts/experiment_gates.py` 新增 `freeze` / `verify-freeze`，claim surface 一律取自既有單一 owner `scripts/experiment_claim_surface.py::is_experiment_claim_surface_file`（禁複製述詞）；manifest 改放 `experiments/k1731/k1731_armB_rev11_freeze.txt` 隨實驗版本化。\n2. 順序契約：重跑 gates → 立刻 freeze → 立刻全量 verify → 才送審；freeze 與 verify 之間禁任何寫入。\n3. **ratchet**：manifest 存在時，certification 路徑必須先過 verify-freeze，FAIL 即中止且不進入 claim 檢查 —— 把 Codex 這輪的行為從外部自律變成本地機械閘，同類失敗不再燒掉整輪 Codex quota。三個新測試（happy path / 動一 byte 必 exit non-zero / ratchet 短路斷言）。\n4. `reproduce_spec.json` 須驗為 `finalize_experiment()` run-time 產出（entrypoint sha/size 與 disk 一致），否則重新產出，不得手補。\nResult artifact：`experiments/k1731/k1731_armB_rev11_freeze_selfcheck.json`。Codex round 11 由 followup 收件時才 enqueue，agent 不得自送。\n\n## 4. 順帶查獲的 ops 缺陷（未修，僅記錄；證據充分）\n`compute_queue.py enqueue-agent` 首次呼叫以 `UnicodeEncodeError: surrogates not allowed`（`\\udc94`）中止於 `_write_job_file`，但**失敗前已寫出 frozen brief**，留下孤兒 `storage/ops/agent_briefs/agent-brief_k1731_rev11_freeze_integrity-e5c622.md`（無任何 job 引用，本班已清除）。改以檔案讀入 `--followup-brief` 後同一指令成功。`append_work_log.py` 的 docstring 早已載明「summary 是中文散文、經 shell 傳遞常被 mangle，故只收 `--summary-file`」—— `enqueue-agent` 的 `--followup-brief` 是同一風險面但只接受字串，且失敗點在 brief 落地之後。屬 contained 觀察，非本 task scope，未自行擴權修改共用 dispatch 機制。"
+  },
+  {
+    "timestamp": "2026-07-28T21:24:22+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_99f4b3bf",
+    "actor": "hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45",
+    "owner": "hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45",
+    "summary": "K1720 rev2 bounded remediation 派工：確認 Codex 必修 1 屬實（K1720.py:129 先過濾非 7-bar session，K1720.py:153 才 shift(1) → 半日市後 prev_close 取到更早交易日，r_intra 與 expanding event threshold 全被污染）。寫 brief 後 enqueue-agent job agent-brief_k1720_rev2-2f566a（opus/xhigh, worktree dispatch-slot-3-87c7269d-k1720, result-artifact experiments/K1720/reproduce_spec.json 以強制 run-time finalize_experiment），source task 綁 awaiting_agent_job，收件 followup 走 Codex round 2。",
+    "topology": "compute_queue",
+    "topology_override": "worktree->compute_queue (xhigh 長 agent 依 HARD RULE 不得在 fire 內 spawn)"
+  },
+  {
+    "timestamp": "2026-07-28T21:24:22+08:00",
+    "task_type": "platform_ops",
+    "task_id": "assign_280ec9c5",
+    "actor": "hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45",
+    "owner": "hourly-slot-2-cc1111db5cfd423f9f8285e5a57b9d45",
+    "summary": "PHASE A triage_failed x4：四個 agent job 於 2026-07-28T10:45:02-03Z 一秒內死亡，根因為 job spec 凍結的 claude-opus-4-8 已從 claude-cli provider registry 退役（stderr: provider policy denied spawn）；同 model 先前有 73 個 job 成功完成，證明是入列後才退役。止血=三個 job 以 claude-opus-5 重新 enqueue（agent-rebrief_*-759bec/K1715 recert2、-3dd25a/K1734 nested-DM〔隨後 cancel：slot-1 兩分鐘後把 agent-brief_k1734_spec_finalize-2c769e 排進同一 worktree，collision gate 只認 source_task_id 不認 cwd；K1734 已釋回 pending 並 annotate follow-on〕、-dc91a5/K1812 block-permutation），沿用原 worktree 與原 brief snapshot，K1715/K1734/K1726 已重新綁定；K1731 rev9 不重派（已被 slot-3 rev11 job 取代）。requeue 被 failure_class=policy_denial 正確拒絕，未繞過。根治（enqueue 端 model registry 驗證 / spawn 端 remap / policy_denial 可證未 spawn 子類 / 舊 receipt superseded 狀態）已開 assign_280ec9c5，本班僅 contained。",
+    "topology": "inline"
+  },
+  {
+    "timestamp": "2026-07-28T21:25:46+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_17d6da38",
+    "outcome": "completed",
+    "actor": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
+    "owner": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
+    "commit": null,
+    "summary": "K1734 triage（assign_17d6da38，P1 urgent lane）：實測盤點 worktree\n`.claude/worktrees/dispatch-slot-1-1e5922b4-k1734`，確認為「有可保留成果」，不重跑、不丟棄。\n\n**證據（本班回讀 live source，非沿用上一輪敘述）**\n- `K1734_results.json` 28,000 B、`review_verdict.json` 6,242 B、`k1734.py` 43,131 B、\n  `README.md` 15,002 B、`data/analysis_panel.csv` 1.66 MB、figures/ 4 張，皆在。\n- `review_verdict.json`：`consolidated_verdict=CONDITIONAL_PASS`；兩個獨立 review\n  （gemini-agy fallback、claude-subagent adversarial）都是 PASS，`blocking_issues` 皆空。\n- `primary_path_status.status=UNAVAILABLE` — intended_reviewer=codex 撞 usage limit 至 2026-08-02。\n- `grep finalize_experiment|reproduce_spec|trace_file k1734.py` → **零命中**：spec 從未在 run-time\n  產生，`experiments/k1734/reproduce_spec.json` 確實不存在（merge 會被\n  `check_experiment_artifacts.py` 擋）。\n- worktree 狀態：2 unmerged commits + 4 dirty files（results / README / k1734.py / review_verdict.json\n  是上一輪已完成但未 commit 的成果）。\n- 重現條件齊備：`SEED=42`、`BOOT_REPS=5000`、`_download()` 有 `path.exists()` 短路 +\n  `data/raw/*.csv` 已快取 → 離線可重跑、可驗數值不變。\n\n**裁決**：不合併。certification gate 不以 fallback reviewer 的 PASS 收尾；缺 spec 也不以事後補寫\n了事（AGENTS.md 2026-07-22 K1708 教訓：spec 必須與 results 同一次 trace 產出）。拆成兩段可獨立收尾的\n後續，兩段都不在本班硬塞：\n\n1. `assign_04212462`（P1 experiment）— run-time reproduce_spec 補齊 + BH-FDR p 值口徑寫入 README。\n   已 enqueue agent job `agent-brief_k1734_spec_finalize-2c769e`（opus/xhigh per model_router，\n   cwd=既有 worktree，result_artifact=experiments/k1734/reproduce_spec.json，timeout 3600）；\n   brief 硬性要求重跑後逐欄比對受審版本數值，漂移即停並產 diff report，不准改口徑掩蓋。\n   task 狀態 `awaiting_agent_job`（刻意不終局結算，避免踩 assign_617bf749 那條\n   「source task 先終局 → followup 永久不可 dispatch」的已知 P1）。\n2. `assign_12a2f9ba`（experiment）— 合併 gate：Codex 額度恢復後跑 primary-path 複審，PASS 才\n   merge + 主線程寫 knowledge（K1259）。已標 `blocked` / `codex_quota_reset_pending` /\n   until 2026-08-02T09:00+08:00。\n\n依五步 gate 定位：本任務交付的是**分流裁決 + 兩段可執行後續**，K1734 本身仍是 `contained`\n（未 merge、未寫 knowledge），root cause（spec 未 run-time 產出、primary-path 複審缺席）的\n修復由上述兩張任務收尾。"
+  },
+  {
+    "timestamp": "2026-07-28T21:28:17+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_33426a3d",
+    "outcome": "succeeded",
+    "actor": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "owner": "hourly-slot-1-f7b19a07942d4b57816018bdfcd10ae6",
+    "commit": null,
+    "summary": "assign_33426a3d（K1812 triage）完成：判定為 admission 層幽靈失敗，worktree 無需搶救、無需重跑實驗。根因取自 storage/ops/agent_jobs/agent-brief_k1812_fix-a18b38.json：failure_class=policy_denial、provider_policy_denial='model claude-opus-4-8 is not registered for claude-cli'、exit_code=2 / runner_exit_code=1，started_at 與 finished_at 相距 0.4 毫秒，agent 從未執行；review 步驟沒跑，故宣告的 review_verdict.json 不存在，並非 artifact contract 寫錯。既有產物經程式化驗證完整可信：k1812_results.json 的 code_trace sha256=4b2f8bf3b77a22cd… / 43,573 bytes 與磁碟 k1812.py 完全相符（CODE_TRACE_MATCH=True），reproduce_spec.json 帶 generated_at_runtime=true 且 entrypoint sha 一致，符合 2026-07-22 run-time 產出規範。研究內容為 BAB / beta anomaly 波動率之謎複製（JFE 2025 + Frazzini-Pedersen 2014），257 個 BAB 月、2005-02 至 2026-06、seed 42、runtime 76.6s，ex-ante BAB beta ~1.11e-16 市場中性不變量成立、regime alignment 257/257 無失配，caveats 誠實載明倖存者偏誤與 80 檔 universe 限制。建單時的兩個疑點查證後皆不成立並已更正：pool_task_label 自帶 'K1726' 證明 source_task 綁定刻意且正確（實驗 id 與 pool task id 本就不同名）；agent 並非「跑完未產 verdick」而是根本沒跑。延伸發現：掃 storage/ops/agent_jobs/ 後 5 份 receipt 全帶退役 frozen model id claude-opus-4-8 —— k1734 與 k1812 為 policy_denial（完全沒跑），k1708_stage2 / k1714 / k1731-armb-rev9 為 quota；canonical model_router 對 experiment 現行回 cli_flag=claude-opus-5。此批 job 被標為 triage_failed 具誤導性：非研究失敗，worktree 產物均未受影響。系統修復歸既有 P1 assign_280ec9c5，未重複開單；證據已 annotate 至 assign_617bf749 與 assign_17d6da38（後者為建單前提錯誤之更正：K1734 的 CONDITIONAL_PASS 來自更早一次正常執行，artifacts 07-28 00:32/00:35 比 job 執行時間 18:45 早約 18 小時，該次 remediation job 同為 policy_denial 幽靈失敗）。"
+  },
+  {
+    "timestamp": "2026-07-28T21:28:47+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_c3b0743a",
+    "outcome": "completed",
+    "actor": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
+    "owner": "hourly-slot-4-176ec4989d9e4e20b5a962a1b6117e60",
+    "commit": null,
+    "summary": "K1715 triage（assign_c3b0743a，P1 urgent lane）：實測盤點 worktree\n`.claude/worktrees/k1715-204d556b/experiments/K1715`，確認成果要保留、舊裁決不可採信。\n\n**證據（本班回讀 live source 與 mtime，非沿用上一輪敘述）**\n- `review_verdict.json` 2,108 B / mtime 07-27 07:40，自述 `reviewed_at=2026-07-26T23:39:43Z`、\n  `reviewed_commit=70923136…`、`verdict=FAIL`。`K1715_results.json` 07-27 20:46、\n  `K1715.py` 07-27 21:27 —— **verdict 早於它要審的位元組**，描述的是修正前的 commit。\n  上一個 recert2 job `agent-brief_k1715_recert2-e2b9fd` exit_code=-2（SIGKILL，非正常失敗），\n  所以新位元組**從未被有效審查過**。既不可當「已通過」，也不可當「已失敗」丟棄。\n- 舊 blocking defect（lossy snapshot serialization）的處置方式查明了：**是揭露 + 契約，\n  不是 bit-identical 重凍結**。`K1715.py:119` writer 已改 `float_format=\"%.17g\"`，\n  但該分支只在 `SNAPSHOT.is_file()` 為否時才走；磁碟上的\n  `K1715_source_snapshot.csv`（mtime 07-27 07:13）仍是舊的 `%.10f` 十位小數版\n  （首列 `2000-01-03,91.1327362061` 實測確認）。`load_returns()` docstring 與\n  `reproduce_spec.json.comparison.reason` 都已明寫這是 TOLERANCE-LEVEL freeze，\n  並量化 `max|delta_close|~5.0e-11`、`max|delta_return|~1.6e-10`，遠小於宣告的\n  `rtol=1e-6 / atol=1e-8`。\n- **這個口徑本身可接受**（如實揭露、未過度宣稱、rtol/atol 的近積分似然 ridge 理由正當），\n  但留下一個未驗證缺口：docstring 自述 archived results 由 **live download** 產生，\n  而任何人重現走的是 **snapshot** 路徑，**該路徑從未被實跑驗證**能在宣告 tolerance 內\n  重現 archived 的 reported verdicts。這是本次交付要求補上的實測。\n- `reproduce_spec.json` mtime 07-27 08:04 早於 results（20:46）與程式（21:27）；\n  `grep -c finalize_experiment K1715.py` = **0**；spec 的 `entrypoint` 只有 path、無 sha／byte\n  size → 非 run-time 產出、連漂移都無從檢查。與 AGENTS.md 2026-07-22（K1708 教訓）直接衝突。\n\n**裁決**：不 recert、不合併。先把「spec 由 run-time 產出」與「snapshot 路徑實測可重現」兩件事\n做乾淨，recert 才是對新位元組的第一次有效審查（否則又是審一批沒人驗過的位元組）。\n已建 `assign_8f1165f3`（P1 experiment）並 enqueue agent job\n`agent-brief_k1715_spec_reprocheck-6ff96b`（opus/xhigh per model_router，cwd=既有 worktree，\nresult_artifact=`experiments/K1715/snapshot_repro_report.md`，timeout 3600）。\nbrief 硬性要求：以宣告 tolerance 逐一驗 DM 統計量／Harvey |t| 門檻／VaR-ES coverage counts／\nPIT 結論不翻轉；**任一 verdict 翻轉即停手升級，禁止放寬 tolerance 或改口徑求過**；\n舊 verdict 改名為 stale 保留不刪；不 merge、不寫 knowledge（K1259）。\ntask 狀態 `awaiting_agent_job`（刻意不終局結算，避開 assign_617bf749 那條已知 P1）。\n\n**未處理且刻意不繞過**：原 job `agent-brief_k1715_recert2-e2b9fd` 的 followup 仍 stranded\n（source task 已解除綁定，`mark-followup-dispatched` 會被拒），根因是 P1 `assign_617bf749`；\n本班為 platform_ops preassignment gate 所擋、不可自行修，維持原樣不強推。\n\n依五步 gate：本任務交付**分流裁決 + 一段可執行後續**，K1715 本身仍是 `contained`。"
   }
 ]

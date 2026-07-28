@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1734_spec_finalize-2c769e",
+  "title": "K1734 run-time reproduce_spec finalize + rerun-invariance verify",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1734_spec_finalize-2c769e.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/reproduce_spec.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1734_spec_finalize-2c769e.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T13:24:35Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1734_spec_finalize-2c769e.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1734_spec_finalize-2c769e.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/reproduce_spec.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1734_spec_finalize-2c769e.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+  "claude_followup": {
+    "brief": "收 K1734 spec 補齊結果：驗 reproduce_spec.json 與 K1734_results.json 的 code_trace sha/byte 一致、重跑數值與受審版本逐欄相同（若有 diff report 先讀）、README p 值口徑段落已寫。通過後【仍不可 merge】—— K1734 合併 gate 是 primary-path Codex 複審（Codex usage limit 到 2026-08-02），見 gate 任務。此 followup 只做驗收，不寫 knowledge、不 merge。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_04212462",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T13:24:35Z",
+    "linked_at": "2026-07-28T13:24:35Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1734_spec_finalize.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1734_spec_finalize-2c769e.md"
+}

@@ -1,0 +1,60 @@
+{
+  "id": "agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a",
+  "title": "agent: brief_k1734_remediation (rev: model re-registered)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/K1734_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a.json",
+    "--timeout",
+    "5160"
+  ],
+  "env": {},
+  "status": "cancelled",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T13:22:24Z",
+  "started_at": null,
+  "completed_at": "2026-07-28T13:25:31Z",
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734/experiments/k1734/K1734_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1734",
+  "claude_followup": {
+    "brief": "Collect K1734: confirm nested-dm ratchet PASS + verify numbers real (seed=42, no lookahead), then write knowledge + merge worktree. H3 primary must remain Clark-West.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": "K1734",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T13:22:24Z",
+    "linked_at": "2026-07-28T13:22:24Z",
+    "error": null
+  },
+  "timeout_seconds": 5280,
+  "brief_source": "/tmp/rebrief_agent-brief_k1734_remediation-763606.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-rebrief_agent-brief_k1734_remediation-763606-3dd25a.md",
+  "cancel_reason": "worktree collision: slot-1 queued agent-brief_k1734_spec_finalize-2c769e into the same cwd 2min later; two concurrent agents rewriting experiments/k1734 would corrupt it. Nested-DM Clark-West remediation must be re-dispatched after that job settles.",
+  "cancelled_at": "2026-07-28T13:25:31Z",
+  "source_task_settlement": {
+    "state": "settled",
+    "task_id": "K1734",
+    "settled_at": "2026-07-28T13:25:31Z"
+  }
+}

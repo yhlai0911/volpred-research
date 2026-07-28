@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1731_rev11_freeze_integrity-1fc0fd",
+  "title": "K1731 armB rev11: freeze-integrity root fix (run-time freeze + verify ratchet)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1731_rev11_freeze_integrity-1fc0fd.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_rev11_freeze_selfcheck.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1731_rev11_freeze_integrity-1fc0fd.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T13:22:30Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1731_rev11_freeze_integrity-1fc0fd.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1731_rev11_freeze_integrity-1fc0fd.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_armB_rev11_freeze_selfcheck.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1731_rev11_freeze_integrity-1fc0fd.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+  "claude_followup": {
+    "brief": "K1731 armB rev11 freeze-integrity 收件：(1) 獨立重算 experiments/k1731/k1731_armB_rev11_freeze.txt 全部 entry 的 sha256，確認 selfcheck.json 的 entries_matched == entries_total，並比對 manifest mtime vs 各檔 mtime 確認凍結後無寫入；(2) 跑 uv run pytest scripts/tests/test_experiment_gates.py -q，確認三個新測試綠且無回歸；(3) 跑 python3 scripts/check_experiment_artifacts.py check --path experiments/k1731，並驗 reproduce_spec.json 的 entrypoint sha/size 與 disk 一致；(4) 三項全過才 enqueue Codex round 11（此輪才是首次實質審查 armB rev10 claim surface）。Codex PASS 後：用正式 scripts/merge_worktree.sh 合併 dispatch-slot-1-bd00f90a-k1731、unblock assign_67f56b79 與 k1731_k1730_merge_after_codex_round8_20260725、主線程寫 knowledge.json（K1259，數字從 results.json 程式化取得）。任一項不過則回報 contained 並開 bounded followup，禁止原樣重派 round 11 純 review。",
+    "task_type": "experiment",
+    "priority": 1
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_d696156d",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T13:22:30Z",
+    "linked_at": "2026-07-28T13:22:30Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1731_rev11_freeze_integrity.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1731_rev11_freeze_integrity-1fc0fd.md"
+}

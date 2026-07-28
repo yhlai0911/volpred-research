@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1715_spec_reprocheck-6ff96b",
+  "title": "K1715 run-time reproduce_spec + snapshot-path reproduction verification",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1715_spec_reprocheck-6ff96b.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715/snapshot_repro_report.md",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1715_spec_reprocheck-6ff96b.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-28T13:28:08Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1715_spec_reprocheck-6ff96b.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1715_spec_reprocheck-6ff96b.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715/snapshot_repro_report.md",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1715_spec_reprocheck-6ff96b.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b",
+  "claude_followup": {
+    "brief": "收 K1715 spec+重現驗證結果：確認 reproduce_spec.json 由 run-time finalize_experiment 產出且 entrypoint 帶 sha、snapshot_repro_report.md 明確回答 snapshot 路徑能否在 rtol=1e-6/atol=1e-8 內重現所有 archived reported verdict（DM/Harvey|t|/coverage/PIT）、舊 review_verdict.json 已標 stale。若有 verdict 翻轉 → 不可繼續，升級回報。全部乾淨才 enqueue recert（對新位元組的第一次有效獨立審查）；本 followup 不 merge、不寫 knowledge。",
+    "task_type": "experiment",
+    "priority": 2
+  },
+  "followup_dispatched": false,
+  "source_task_id": "assign_8f1165f3",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-28T13:28:08Z",
+    "linked_at": "2026-07-28T13:28:08Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/tmp/brief_k1715_spec_reprocheck.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1715_spec_reprocheck-6ff96b.md"
+}
