@@ -86,7 +86,7 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
 
     worker._run_one_attempt(
         prompt_text="x",
-        model="claude-opus-4-8",
+        model="claude-opus-5",
         timeout_s=10,
         log_path=tmp_path / "worker.log",
         attempt=1,

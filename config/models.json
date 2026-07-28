@@ -2,10 +2,10 @@
   "_meta": {
     "purpose": "Single source of truth for Claude model roster + task-tier -> model mapping used when dispatching subagents. agent-delegation.md's model table points here.",
     "authoritative_availability_source": "A LIVE DISPATCH PROBE is the ground truth: spawn a throwaway subagent with the alias (Agent tool `model` param, or `claude -p --model <id>`) and see whether it answers. That is a direct availability signal and costs seconds. The Agent/Workflow tool `model` enum on its own is NOT a live signal — it lists aliases the harness will accept, not models the backend will serve. The Claude Desktop model selector (bottom-right, incl. its 'More models >' submenu) remains the best way to ENUMERATE the roster (the probe can only confirm an alias you already know about), but do not use it as the availability field's only evidence when a probe is one call away.",
-    "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-01: keep main loop on opus. Owner directive 2026-07-05: ALL SUBAGENTS also use opus (4.8) — the per-task sonnet<->opus pick is retired; only `effort` still varies by task difficulty, across the full 5-tier `claude --effort` scale low<medium<high<xhigh<max (max = ceiling). effort is now actually applied via `--effort` on the spawned `claude -p` (it was inert before 2026-07-05).",
+    "main_loop_policy": "Main-thread (interactive) model is fixed by the session and CANNOT be hot-swapped per task. Owner directive 2026-07-28: all active Opus routes use Opus 5 with native 1M context; all active Sonnet routes use Sonnet 5 with 1M entitlement. The default subagent policy remains all-opus; only `effort` varies by task difficulty across low<medium<high<xhigh<max.",
     "availability_vs_routing": "AVAILABLE and ROUTED are orthogonal and must never be conflated again. `models.<alias>.available` = can the backend serve it (evidence: live probe). `dispatchable_now` = the alias is servable. The default subagent rotation is a separate POLICY (subagent_policy: all-opus, owner directive 2026-07-05) — sonnet, haiku and fable are all available and all OFF the default rotation. 2026-07-14: this file contradicted itself in four places because 'not routed by default' had been written down as 'unavailable'.",
-    "last_reconciled": "2026-07-14",
-    "reconciled_via": "live dispatch probe 2026-07-14 (Agent tool, model=fable, trivial prompt → returned in 3.3s) resolving a 4-way self-contradiction about fable. Prior: owner /model switch + headless `claude -p --model claude-fable-5` smoke test, both succeeded 2026-07-02.",
+    "last_reconciled": "2026-07-28",
+    "reconciled_via": "Subscription-only Claude Code 2.1.220 live probes on 2026-07-28: claude-opus-5 and claude-sonnet-5 both returned provider=firstParty, contextWindow=1000000, with API-key variables removed.",
     "known_gaps": "The desktop selector shows a 'More models >' submenu that has not been enumerated — the roster below may be incomplete. Expand it (owner screenshot, since main thread cannot drive the native desktop UI) to complete."
   },
   "dispatchable_now": [
@@ -17,18 +17,22 @@
   "known_but_unavailable": [],
   "models": {
     "opus": {
-      "display": "Opus 4.8",
-      "id": "claude-opus-4-8",
+      "display": "Opus 5 (1M)",
+      "id": "claude-opus-5",
+      "context_window_tokens": 1000000,
+      "verified_provider": "firstParty",
       "available": true,
       "shortcut": 1,
-      "note": "Currently selected main loop."
+      "note": "Canonical active Opus route; native 1M context."
     },
     "sonnet": {
-      "display": "Sonnet 5",
+      "display": "Sonnet 5 (1M)",
       "id": "claude-sonnet-5",
+      "context_window_tokens": 1000000,
+      "verified_provider": "firstParty",
       "available": true,
       "shortcut": 2,
-      "note": "Exact API id to confirm; alias 'sonnet' dispatches to this."
+      "note": "Canonical active Sonnet route with 1M entitlement."
     },
     "haiku": {
       "display": "Haiku 4.5",
@@ -44,7 +48,7 @@
     }
   },
   "subagent_policy": {
-    "_owner_directive_2026_07_05": "ALL subagents use opus (4.8). Supersedes the 2026-07-01 sonnet<->opus two-way pick — there is no longer a model choice; every subagent is opus. Only `effort` varies by task difficulty, across the FULL 5-tier `claude --effort` scale: low < medium < high < xhigh < max (max = ceiling). opus/low on a checklist stays far cheaper than opus/max on research. sonnet/haiku remain valid roster aliases but are OFF the default subagent rotation.",
+    "_owner_directive_2026_07_05": "ALL subagents use opus; the 2026-07-28 generation upgrade makes that Opus 5 (1M). There is no longer a default sonnet<->opus choice. Only `effort` varies across low < medium < high < xhigh < max.",
     "_effort_wiring_2026_07_05": "effort is APPLIED via the `claude --effort <level>` flag on the spawned `claude -p` — wired into dispatch_supervisor/worker.py (DISPATCH_EFFORT, default high, VOLPRED_DISPATCH_EFFORT env) + telegram_responder.sh (RESPONDER_EFFORT, default high) + legacy cron. BEFORE 2026-07-05 the per-task effort tier was computed by model_router but NEVER passed to any dispatch — it was inert metadata. The CLI fail-opens on unknown values (warns + uses default), so wiring is safe. NOTE gap: the Agent/Task tool has no effort knob, so a heavy research SUBAGENT the hourly orchestrator spawns still needs to be launched via its own `claude -p --effort xhigh|max` to actually receive the higher tier.",
     "_superseded_2026_07_01": "Prior policy: main loop = opus, subagents chose between sonnet and opus by difficulty. Retired 2026-07-05.",
     "opus": {

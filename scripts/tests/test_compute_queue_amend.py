@@ -55,7 +55,7 @@ def queue(tmp_path, monkeypatch):
 
 def _enqueue_agent(brief: Path, job_id: str = "j1", **over) -> int:
     args = argparse.Namespace(
-        id=job_id, title=None, brief_file=str(brief), model="claude-opus-4-8",
+        id=job_id, title=None, brief_file=str(brief), model="claude-opus-5",
         effort="xhigh", cwd=str(brief.parent), result_artifact=None,
         followup_brief=over.get("followup_brief", "collect it"),
         followup_task_type="experiment", followup_priority=1, timeout=600,

@@ -117,7 +117,7 @@ def test_authorization_reloads_and_fails_closed_after_config_change(
     )
     first = authorize_provider_spawn(
         contract_id="compute-agent.claude",
-        model_id="claude-opus-4-8",
+        model_id="claude-opus-5",
         executable_path=str(executable),
         environment={},
         path=path,
@@ -129,7 +129,7 @@ def test_authorization_reloads_and_fails_closed_after_config_change(
     with pytest.raises(ProviderRegistryError, match="paid overflow"):
         authorize_provider_spawn(
             contract_id="compute-agent.claude",
-            model_id="claude-opus-4-8",
+            model_id="claude-opus-5",
             executable_path=str(executable),
             environment={},
             path=path,
@@ -176,14 +176,14 @@ def test_launcher_contract_cannot_be_downgraded_by_caller(
     )
     compute = authorize_provider_spawn(
         contract_id="compute-agent.claude",
-        model_id="claude-opus-4-8",
+        model_id="claude-opus-5",
         executable_path=str(executable),
         environment={},
         path=path,
     )
     orchestrator = authorize_provider_spawn(
         contract_id="dispatch-supervisor.claude",
-        model_id="claude-opus-4-8",
+        model_id="claude-opus-5",
         executable_path=str(executable),
         environment={},
         path=path,
@@ -201,7 +201,7 @@ def test_launcher_contract_cannot_be_downgraded_by_caller(
     with pytest.raises(ProviderRegistryError, match="unknown.*contract"):
         authorize_provider_spawn(
             contract_id="caller-invented-formal-review",
-            model_id="claude-opus-4-8",
+            model_id="claude-opus-5",
             executable_path=str(executable),
             environment={},
             path=path,
@@ -232,7 +232,7 @@ def test_nonempty_api_key_environment_is_denied_before_spawn(
     with pytest.raises(ProviderRegistryError, match="forbidden.*variables"):
         authorize_provider_spawn(
             contract_id="compute-agent.claude",
-            model_id="claude-opus-4-8",
+            model_id="claude-opus-5",
             executable_path=str(executable),
             environment={key: "secret"},
             path=path,
@@ -303,7 +303,7 @@ def test_api_key_helper_settings_surface_is_denied(
     with pytest.raises(ProviderRegistryError, match="apiKeyHelper"):
         authorize_provider_spawn(
             contract_id="compute-agent.claude",
-            model_id="claude-opus-4-8",
+            model_id="claude-opus-5",
             executable_path=str(executable),
             environment={},
             path=path,

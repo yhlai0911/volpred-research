@@ -245,7 +245,7 @@ def dispatch_state_file(tmp_path: Path) -> Path:
             "exit_code": 0,
             "outcome": "success",
             "duration_s": 100.0 + i,
-            "final_model": "claude-opus-4-8",
+            "final_model": "claude-opus-5",
             "noise_field": "Z" * 300,  # must NOT leak into output
         }
         for i in range(8)

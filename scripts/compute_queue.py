@@ -3000,7 +3000,7 @@ def main():
     ea.add_argument("--id")
     ea.add_argument("--title")
     ea.add_argument("--brief-file", required=True, help="Agent brief markdown (write it with the Write tool first).")
-    ea.add_argument("--model", default="claude-opus-4-8")
+    ea.add_argument("--model", default="claude-opus-5")
     ea.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     ea.add_argument(
         "--cwd",

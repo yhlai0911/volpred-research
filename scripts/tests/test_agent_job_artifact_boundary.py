@@ -185,7 +185,7 @@ def _enqueue_args(
         id=job_id,
         title="agent artifact boundary",
         brief_file=str(brief),
-        model="claude-opus-4-8",
+        model="claude-opus-5",
         effort="xhigh",
         cwd=cwd,
         result_artifact=result_artifact,

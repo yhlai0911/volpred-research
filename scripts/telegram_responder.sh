@@ -36,7 +36,7 @@ CODEX_FAILOVER_ENABLED="${TELEGRAM_RESPONDER_CODEX_FAILOVER:-1}"
 # Model 政策（config/models.json single source of truth）：這是 boss-facing 通道，
 # 回答品質優先於 token — 與 hourly-dispatch 同款 opus primary；owner 若要降速換快，
 # 改 TELEGRAM_RESPONDER_MODEL env 或此 default。
-RESPONDER_MODEL="${TELEGRAM_RESPONDER_MODEL:-claude-opus-4-8}"
+RESPONDER_MODEL="${TELEGRAM_RESPONDER_MODEL:-claude-opus-5}"
 # 2026-07-05: effort now actually wired via `--effort` (was inert everywhere).
 # boss-facing 通道，品質優先 → high 底線；owner 可用 TELEGRAM_RESPONDER_EFFORT env
 # 調 low|medium|high|xhigh|max（CLI fail-opens 亂值 → 警告後用 default，安全）。

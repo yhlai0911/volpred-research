@@ -9,6 +9,7 @@ Run::
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -83,3 +84,21 @@ def test_dispatch_report_carries_topology() -> None:
 
     task = {"id": "x", "task_type": "experiment", "priority": 2}
     assert mr.pick_topology(task.get("task_type"), task)["topology"] == "worktree"
+
+
+def test_active_claude_routes_use_generation_5_models() -> None:
+    models = json.loads((ROOT / "config" / "models.json").read_text())
+    provider = json.loads(
+        (ROOT / "config" / "provider_registry.json").read_text()
+    )["providers"][0]
+
+    assert mr.MODEL_TO_CLI_FLAG["opus"] == "claude-opus-5"
+    assert mr.MODEL_TO_CLI_FLAG["sonnet"] == "claude-sonnet-5"
+    assert models["models"]["opus"]["id"] == "claude-opus-5"
+    assert models["models"]["sonnet"]["id"] == "claude-sonnet-5"
+    assert models["models"]["opus"]["context_window_tokens"] == 1_000_000
+    assert models["models"]["sonnet"]["context_window_tokens"] == 1_000_000
+    assert provider["model_ids"] == [
+        "claude-opus-5",
+        "claude-sonnet-5",
+    ]

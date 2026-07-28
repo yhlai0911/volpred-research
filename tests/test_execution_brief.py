@@ -55,7 +55,7 @@ def test_agentic_runner_denies_before_provider_io(monkeypatch, tmp_path: Path) -
             cwd=tmp_path,
             timeout=10,
             contract_id="execution-brief.claude",
-            model_id="claude-opus-4-8",
+            model_id="claude-opus-5",
         )
 
 

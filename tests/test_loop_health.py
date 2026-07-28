@@ -341,7 +341,7 @@ def _dispatch_completion(days_ago: float, outcome: str, exit_code: int = 1) -> d
         "exit_code": exit_code,
         "duration_s": 5.0,
         "attempts": 1,
-        "final_model": "claude-opus-4-8",
+        "final_model": "claude-opus-5",
         "outcome": outcome,
     }
 

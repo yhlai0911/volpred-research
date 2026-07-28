@@ -21,9 +21,11 @@ Exit code: 0 = fresh; 1 = reconcile due (age > threshold) — lets a cron alert.
 Usage: uv run python scripts/check_model_roster.py [--max-age-days 30] [--json]
 """
 from __future__ import annotations
+
 import argparse
 import json
 import logging
+import os
 import re
 import sys
 from datetime import date
@@ -37,9 +39,28 @@ _PIN_PATTERNS = [
     re.compile(r'--model\s+["\']?(claude-[\w.\-]+)'),
     re.compile(r'\b[A-Z_]*MODEL[A-Z_]*\s*=\s*["\'](claude-[\w.\-]+)["\']'),
     re.compile(r'["\'](?:opus|sonnet|haiku|fable)["\']\s*:\s*["\'](claude-[\w.\-]+)["\']'),
+    re.compile(r'\bdefault\s*=\s*["\'](claude-[\w.\-]+)["\']'),
+    re.compile(r'\breturn\s+["\'](claude-[\w.\-]+)["\']'),
+    re.compile(r'\$\{[A-Z_]*MODEL[A-Z_]*:-?(claude-[\w.\-]+)\}'),
 ]
 _SCAN_DIRS = ("scripts", "config", "src", ".claude")
-_SCAN_SKIP = ("_legacy", "__pycache__", ".git", "node_modules", "check_model_roster.py", "models.json")
+_SCAN_SKIP = (
+    "_legacy",
+    "__pycache__",
+    ".git",
+    "backups",
+    "node_modules",
+    "check_model_roster.py",
+    "models.json",
+    "settings.local.json",
+)
+_SCAN_SKIP_DIRS = {
+    "__pycache__",
+    ".git",
+    "node_modules",
+    "tests",
+    "worktrees",
+}
 _SCAN_EXT = (".py", ".sh", ".json", ".md", ".ts", ".js", ".tsx")
 
 
@@ -55,22 +76,40 @@ def scan_code_pins(current_ids: set[str]) -> list[dict]:
         base = root / d
         if not base.exists():
             continue
-        for p in base.rglob("*"):
-            if not p.is_file() or p.suffix not in _SCAN_EXT:
-                continue
-            if any(skip in str(p) for skip in _SCAN_SKIP):
-                continue
-            try:
-                lines = p.read_text(encoding="utf-8", errors="ignore").splitlines()
-            except Exception as exc:
-                logging.debug("check_model_roster: failed reading %s: %s", p, exc)
-                continue
-            for i, line in enumerate(lines, 1):
-                for pat in _PIN_PATTERNS:
-                    for mid in pat.findall(line):
-                        if mid not in current_ids:
-                            findings.append({"file": str(p.relative_to(root)), "line": i,
-                                             "stale_id": mid, "text": line.strip()[:90]})
+        for current, directories, files in os.walk(base):
+            directories[:] = [
+                name
+                for name in directories
+                if name not in _SCAN_SKIP_DIRS
+            ]
+            for name in files:
+                p = Path(current) / name
+                if p.suffix not in _SCAN_EXT:
+                    continue
+                if any(skip in str(p) for skip in _SCAN_SKIP):
+                    continue
+                try:
+                    lines = p.read_text(
+                        encoding="utf-8",
+                        errors="ignore",
+                    ).splitlines()
+                except Exception as exc:
+                    logging.debug(
+                        "check_model_roster: failed reading %s: %s",
+                        p,
+                        exc,
+                    )
+                    continue
+                for i, line in enumerate(lines, 1):
+                    for pat in _PIN_PATTERNS:
+                        for mid in pat.findall(line):
+                            if mid not in current_ids:
+                                findings.append({
+                                    "file": str(p.relative_to(root)),
+                                    "line": i,
+                                    "stale_id": mid,
+                                    "text": line.strip()[:90],
+                                })
     return findings
 
 
@@ -112,7 +151,12 @@ def main(argv: list[str]) -> int:
         "age_days": age_days,
         "max_age_days": args.max_age_days,
         "reconcile_due": stale,
-        "how": "Authoritative availability = Claude Desktop model selector (owner screenshot). Compare vs config/models.json; update config + agent-delegation.md on drift; WebSearch a new model before assigning a tier; route around available=false.",
+        "how": (
+            "Authoritative availability = subscription-only Claude Code live "
+            "probe of each exact model id; selector is enumeration-only. "
+            "Compare canonicalModel/contextWindow/provider against "
+            "config/models.json and keep API-key variables absent."
+        ),
     }
 
     current_ids = {v.get("id") for v in cfg.get("models", {}).values()

@@ -17,10 +17,9 @@ Session Drill-Down — token_usage_report.py 的補強
 
 import argparse
 import json
-import re
 import sys
-from collections import Counter, defaultdict
-from datetime import datetime, timedelta, timezone
+from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -32,6 +31,9 @@ CLAUDE_PROJECTS_DIR = _detect_claude_projects_dir()
 PROJECT_DIR_SLUG = CLAUDE_PROJECTS_DIR.name  # 實際使用中的目錄名稱（可能是 fallback，非推導 slug）
 
 PRICING = {
+    "claude-opus-5": {"input": 5.0, "output": 25.0, "cw": 10.0, "cr": 0.50},
+    "claude-sonnet-5": {"input": 3.0, "output": 15.0, "cw": 6.0, "cr": 0.30},
+    "claude-opus-4-8": {"input": 5.0, "output": 25.0, "cw": 10.0, "cr": 0.50},
     "claude-opus-4-7": {"input": 15.0, "output": 75.0, "cw": 18.75, "cr": 1.50},
     "claude-opus-4-6": {"input": 15.0, "output": 75.0, "cw": 18.75, "cr": 1.50},
     "claude-sonnet-4-6": {"input": 3.0, "output": 15.0, "cw": 3.75, "cr": 0.30},
@@ -40,7 +42,7 @@ PRICING = {
 
 
 def cost_of(usage, model):
-    p = PRICING.get(model, PRICING["claude-opus-4-7"])
+    p = PRICING.get(model, PRICING["claude-opus-5"])
     return (
         usage.get("input_tokens", 0) / 1e6 * p["input"]
         + usage.get("output_tokens", 0) / 1e6 * p["output"]

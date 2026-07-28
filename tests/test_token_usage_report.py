@@ -216,7 +216,7 @@ def _bash_record(msg_id, session_id, ts, usage, commands, category="bash_other")
         "timestamp": ts,
         "date": ts.date(),
         "session_id": session_id,
-        "model": "claude-opus-4-8",
+        "model": "claude-opus-5",
         "usage": usage,
         "category": category,
         "is_subagent": False,

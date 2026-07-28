@@ -59,7 +59,7 @@ GRACE_PERIOD_S = 10        # SIGTERM grace before SIGKILL
 RETRY_BACKOFF_S = 90        # between transient-failure attempts
 MAX_ATTEMPTS = 3
 
-OPUS_MODEL = "claude-opus-4-8"
+OPUS_MODEL = "claude-opus-5"
 # Retired 2026-07-05 (owner all-opus directive): the retry ladder no longer
 # drops to sonnet on the final attempt. Kept defined as a valid roster alias so
 # any external reference still resolves, but no dispatch path selects it.

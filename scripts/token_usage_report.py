@@ -15,12 +15,12 @@ Token Usage Report — 從 Claude Code 實際 JSONL session 記錄讀取真實 t
 """
 
 import json
-import subprocess
 import re
+import subprocess
 import sys
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from collections import Counter, defaultdict
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _claude_project_dir import (  # noqa: E402
@@ -173,7 +173,13 @@ def classify_message(content):
 
 # Anthropic pricing (Opus 4.x as of 2026-04，USD per million tokens)
 PRICING = {
-    "claude-opus-4-8": {  # current opus (2026-07-01)
+    "claude-opus-5": {  # current Opus 5; 1h cache write observed by CLI
+        "input": 5.00,
+        "output": 25.00,
+        "cache_write": 10.00,
+        "cache_read": 0.50,
+    },
+    "claude-opus-4-8": {  # prior opus (still in historical data)
         "input": 15.00,
         "output": 75.00,
         "cache_write": 18.75,
@@ -1165,7 +1171,7 @@ def format_report_text(report):
         lines.append(f"# Token 用量日報 — {report['date']}（Claude Code 真實記錄）")
         lines.append(f"**週期**: {report['week_range']}")
     else:
-        lines.append(f"# Token 用量週報（Claude Code 真實記錄）")
+        lines.append("# Token 用量週報（Claude Code 真實記錄）")
         lines.append(f"**週期**: {report['week_range']}")
 
     lines.append(f"**數據源**: {report['source']}")

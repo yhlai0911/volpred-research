@@ -27,7 +27,8 @@ import sys
 #   model_short: "opus" | "sonnet" | "haiku"
 #   effort:       "low" | "medium" | "high" | "xhigh" | "max"  (max = ceiling)
 
-# 2026-07-05 owner directive: ALL subagents use opus (4.8), superseding the
+# 2026-07-05 owner directive: ALL subagents use opus; the 2026-07-28
+# generation upgrade makes every active Opus route Opus 5 (native 1M).
 # 2026-07-01 sonnet<->opus two-way pick. Model is now uniformly `opus`; only
 # `effort` still varies by task difficulty (orthogonal to model — a trivial
 # lookup on opus/low is cheaper than opus/max, no need to burn max reasoning
@@ -129,7 +130,7 @@ def pick_topology(task_type: str | None, task: dict | None = None) -> dict:
 
 # Map to CLI flag (`claude -p --model <X>`)
 MODEL_TO_CLI_FLAG: dict[str, str] = {
-    "opus":   "claude-opus-4-8",
+    "opus":   "claude-opus-5",
     "sonnet": "claude-sonnet-5",
     "haiku":  "claude-haiku-4-5-20251001",
 }

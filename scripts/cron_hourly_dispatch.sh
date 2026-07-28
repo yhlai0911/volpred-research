@@ -38,7 +38,7 @@ ZSHRC_PATH="${ZSHRC_PATH:-$HOME/.zshrc}"
 AUTH_PREFLIGHT_TIMEOUT_SEC="${AUTH_PREFLIGHT_TIMEOUT_SEC:-120}"
 # 2026-07-05 all-opus directive: preflight also on opus. This legacy wrapper is
 # launchctl-disabled (rollback-only artifact), but kept directive-compliant.
-AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-opus-4-8}"
+AUTH_PREFLIGHT_MODEL="${AUTH_PREFLIGHT_MODEL:-claude-opus-5}"
 # Backoff before a 3rd preflight attempt — the first 2 attempts fire within
 # seconds (launchd-env + zshrc-source), so a transient Claude API blip
 # ("An unknown error occurred (Unexpected)") defeats both. ~8% of runs hit
@@ -217,7 +217,7 @@ trap cleanup EXIT TERM INT HUP
 # next hang triggers worker-daemon refactor per CLAUDE.md three-strike rule.
 HOURLY_CAP_SEC=3000
 
-# Orchestrator model = opus-4-8 (current; 2026-07-01 un-pinned from stale opus-4-7; high-risk
+# Orchestrator model = Opus 5 1M (owner cutover 2026-07-28; high-risk
 # decision tier for triage / claim / brief 撰寫 / routing). Subagents spawned
 # per-task get task-type-specific model via scripts/model_router.py.
 #
@@ -675,7 +675,7 @@ EXIT_CODE=1
 while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
   # 2026-07-05 all-opus directive: every attempt on opus (retired the sonnet
   # downgrade on attempt 3). Legacy wrapper is launchctl-disabled/rollback-only.
-  DISPATCH_MODEL=claude-opus-4-8
+  DISPATCH_MODEL=claude-opus-5
   echo "=== attempt $ATTEMPT/$MAX_ATTEMPTS model=$DISPATCH_MODEL at $(date '+%H:%M:%S') ==="
 
   run_one_attempt "$DISPATCH_MODEL"

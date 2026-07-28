@@ -29,7 +29,7 @@ def test_policy_denial_precedes_execve(
             "--contract",
             "telegram-responder.claude",
             "--model",
-            "claude-opus-4-8",
+            "claude-opus-5",
             "--executable",
             "/usr/local/bin/claude",
             "--",

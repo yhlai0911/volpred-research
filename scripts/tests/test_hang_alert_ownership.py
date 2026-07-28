@@ -250,7 +250,7 @@ def test_alert_body_carries_the_diagnostics(monkeypatch: pytest.MonkeyPatch) -> 
 
     alerts.send_hang_alert(
         job={"pid": 80516, "pgid": 80516, "started_at": "2026-07-12T00:07:03+08:00",
-             "attempt": 1, "model": "claude-opus-4-8",
+             "attempt": 1, "model": "claude-opus-5",
              "log_path": "/tmp/worker.log", "survivors": []},
         log_tail="Traceback: the agent wedged here",
     )
@@ -286,7 +286,7 @@ def test_work_cap_timeout_is_not_reported_as_a_hang(
             "pgid": 45848,
             "started_at": "2026-07-22T01:57:08+00:00",
             "attempt": 1,
-            "model": "claude-opus-4-8",
+            "model": "claude-opus-5",
             "log_path": "/tmp/worker.log",
             "survivors": [],
             "timeout_kind": "work_cap",

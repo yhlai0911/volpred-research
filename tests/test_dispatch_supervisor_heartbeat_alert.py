@@ -66,7 +66,7 @@ def test_heartbeat_stays_fresh_during_a_long_dispatch(tmp_path: Path) -> None:
     now = datetime(2026, 7, 10, 6, 0, tzinfo=timezone.utc)
     _write_state(
         tmp_path, now, age_minutes=0.4,
-        current_job={"pid": 92746, "attempt": 1, "model": "claude-opus-4-8"},
+        current_job={"pid": 92746, "attempt": 1, "model": "claude-opus-5"},
     )
 
     state = _parse_dispatch_supervisor_heartbeat_state(str(tmp_path), now)
@@ -91,7 +91,7 @@ def test_wedged_daemon_with_job_in_flight_breaches_critical(tmp_path: Path) -> N
     _write_state(
         tmp_path, now,
         age_minutes=DISPATCH_SUPERVISOR_HEARTBEAT_CRITICAL_MINUTES + 5.0,
-        current_job={"pid": 92746, "attempt": 1, "model": "claude-opus-4-8"},
+        current_job={"pid": 92746, "attempt": 1, "model": "claude-opus-5"},
     )
 
     state = _parse_dispatch_supervisor_heartbeat_state(str(tmp_path), now)

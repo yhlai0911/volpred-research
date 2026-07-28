@@ -172,7 +172,7 @@ PHASE B — 派新工:
      # 2) enqueue → 秒回，不阻塞本班
      uv run python scripts/compute_queue.py enqueue-agent \
        --brief-file /tmp/brief_kXXXX.md \
-       --model claude-opus-4-8 --effort xhigh \
+       --model claude-opus-5 --effort xhigh \
        --source-task-id <task_id> \
        --cwd .claude/worktrees/<worktree> \
        --result-artifact experiments/kXXXX/kXXXX_results.json \

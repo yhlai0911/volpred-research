@@ -249,7 +249,7 @@ def _kill_agent_tree(proc: subprocess.Popen) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Run a long-lived claude -p agent under the compute worker.")
     ap.add_argument("--brief-file", required=True, help="Path to the agent brief (markdown).")
-    ap.add_argument("--model", default="claude-opus-4-8")
+    ap.add_argument("--model", default="claude-opus-5")
     ap.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     ap.add_argument(
         "--cwd",

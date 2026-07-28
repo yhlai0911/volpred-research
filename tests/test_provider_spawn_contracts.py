@@ -14,7 +14,7 @@ from volpred.ops.execution.registry import (
 
 
 CONTRACT_CASES = (
-    ("execution-brief.claude", "claude-opus-4-8", "claude-cli"),
+    ("execution-brief.claude", "claude-opus-5", "claude-cli"),
     ("execution-brief.codex", "gpt-5.6-sol", "codex-cli"),
     ("lazypack.codex", "gpt-5.6-sol", "codex-cli"),
     ("lazypack.agy", "gemini-3.6-flash-high", "agy-cli"),
@@ -22,7 +22,7 @@ CONTRACT_CASES = (
     ("member-qa-adjudicator.agy", "gemini-3.6-flash-high", "agy-cli"),
     ("prepublish-audit.agy", "gemini-3.6-flash-high", "agy-cli"),
     ("bounded-codex.agentic", "gpt-5.6-sol", "codex-cli"),
-    ("telegram-responder.claude", "claude-opus-4-8", "claude-cli"),
+    ("telegram-responder.claude", "claude-opus-5", "claude-cli"),
     ("telegram-responder.codex", "gpt-5.6-sol", "codex-cli"),
 )
 

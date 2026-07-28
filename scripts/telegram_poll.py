@@ -182,15 +182,15 @@ def _pick_model(text: str) -> str:
     「在 telegram 要求該次派工用 fable 可行嗎」→ 可；fable headless 已實測）。
     """
     tl = text.strip().lower()
-    explicit = (("fable", "claude-fable-5"), ("opus", "claude-opus-4-8"),
+    explicit = (("fable", "claude-fable-5"), ("opus", "claude-opus-5"),
                 ("sonnet", "claude-sonnet-5"), ("haiku", "claude-haiku-4-5-20251001"))
     for kw, model in explicit:
         if kw in tl:
             return model
-    return "claude-opus-4-8"  # all-opus default（2026-07-05 directive）
+    return "claude-opus-5"  # all-opus default（2026-07-28 generation upgrade）
 
 
-def _spawn_responder(model: str = "claude-opus-4-8") -> bool:
+def _spawn_responder(model: str = "claude-opus-5") -> bool:
     """即時 spawn headless responder 處理剛進池的 telegram_reply 任務。
 
     單飛鎖在 responder script 內（同時多訊息 → 一個 responder drain 全部）。
