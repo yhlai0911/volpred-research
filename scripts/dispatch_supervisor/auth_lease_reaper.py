@@ -41,6 +41,7 @@ def wait_until_process_group_drained(
 def reap(args: argparse.Namespace) -> int:
     receipt_path = Path(args.receipt_path).resolve()
     handoff_attempt = getattr(args, "attempt", 1)
+    custody_generation = getattr(args, "custody_generation", 1)
     lease = isolation.ProviderAuthLease(
         source_home=args.source_home,
         run_dir=args.run_dir,
@@ -60,6 +61,8 @@ def reap(args: argparse.Namespace) -> int:
             "attempts": handoff_attempt,
             "cleanup_owner": f"reaper:{os.getpid()}",
             "custody_state": "reaper",
+            "custody_generation": custody_generation,
+            "custody_owner": f"reaper:{os.getpid()}",
             "reaper_pid": os.getpid(),
             "reaper_started_wall": procutil.get_process_start_wall(
                 os.getpid()
@@ -122,6 +125,8 @@ def reap(args: argparse.Namespace) -> int:
                 "schema_version": "provider-auth-reaper.v2",
                 "state": "cleaned" if receipt.ok else "cleanup_retry",
                 "custody_state": "released" if receipt.ok else "reaper",
+                "custody_generation": custody_generation,
+                "custody_owner": f"reaper:{os.getpid()}",
                 "reaper_pid": os.getpid(),
                 "pgid": args.pgid,
                 "run_dir": args.run_dir,
@@ -154,6 +159,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ack-fd", type=int, required=True)
     parser.add_argument("--receipt-path", required=True)
     parser.add_argument("--attempt", type=int, required=True)
+    parser.add_argument("--custody-generation", type=int, required=True)
     parser.add_argument("--destination-unlinked", action="store_true")
     return parser.parse_args()
 

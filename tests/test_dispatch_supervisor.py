@@ -6838,21 +6838,36 @@ def test_reaper_quarantine_custody_survives_later_cleanup_phase(
             "schema_version": "provider-auth-reaper.v2",
             "state": "cleanup_retry",
             "attempts": 2,
+            "custody_state": "reaper",
+            "custody_generation": 5,
+            "custody_owner": "reaper:999",
         },
     )
 
     isolation._mark_provider_auth_quarantine(
         path,
-        attempt=2,
+        attempt=1,
         reaper_pid=999,
         reaper_started_wall="Mon Jul 28 12:00:01 2026",
         reason="injected no-ACK child",
+    )
+    isolation._transition_provider_auth_reaper_receipt(
+        path,
+        {
+            "state": "cleanup_retry",
+            "attempts": 2,
+            "custody_state": "reaper",
+            "custody_generation": 5,
+            "custody_owner": "reaper:999",
+        },
     )
 
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert payload["state"] == "cleanup_retry"
     assert payload["attempts"] == 2
     assert payload["custody_state"] == "quarantined"
+    assert payload["custody_generation"] == 6
+    assert payload["custody_owner"].startswith("quarantine-parent:")
     assert payload["reaper_pid"] == 999
 
 

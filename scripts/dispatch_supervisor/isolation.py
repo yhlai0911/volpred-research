@@ -951,8 +951,6 @@ def _transition_provider_auth_reaper_receipt(
     payload: dict[str, Any],
 ) -> dict[str, Any]:
     """Persist a monotonic reaper transition under a receipt-local flock."""
-    if payload.get("state") == "cleaned":
-        payload = {**payload, "custody_state": "released"}
     path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
     os.chmod(path.parent, 0o700)
     lock_path = path.with_suffix(path.suffix + ".lock")
@@ -989,6 +987,39 @@ def _transition_provider_auth_reaper_receipt(
             < _REAPER_STATE_ORDER.get(current_state, -1)
         ):
             return current
+        current_custody_generation = int(
+            current.get("custody_generation") or 0
+        )
+        if next_state == "cleaned":
+            payload = {
+                **payload,
+                "custody_state": "released",
+                "custody_generation": current_custody_generation + 1,
+            }
+        elif "custody_state" in payload:
+            next_custody_generation = int(
+                payload.get("custody_generation")
+                or current_custody_generation
+            )
+            stale_custody = (
+                next_custody_generation < current_custody_generation
+                or (
+                    next_custody_generation == current_custody_generation
+                    and current.get("custody_state") == "quarantined"
+                    and payload.get("custody_state") != "quarantined"
+                )
+            )
+            if stale_custody:
+                payload = {
+                    key: value
+                    for key, value in payload.items()
+                    if key
+                    not in {
+                        "custody_state",
+                        "custody_generation",
+                        "custody_owner",
+                    }
+                }
         merged = {**current, **payload}
         _write_provider_auth_reaper_receipt(path, merged)
         return merged
@@ -1033,6 +1064,11 @@ def _begin_provider_auth_cleanup_attempt(
             "attempts": attempt,
             "cleanup_owner": owner,
         }
+        if (payload or {}).get("custody_state") == "handoff":
+            merged["custody_generation"] = (
+                int(current.get("custody_generation") or 0) + 1
+            )
+            merged["custody_owner"] = owner
         _write_provider_auth_reaper_receipt(path, merged)
         return attempt, merged
     finally:
@@ -1066,12 +1102,15 @@ def _mark_provider_auth_quarantine(
                 "provider auth quarantine receipt is unreadable"
             ) from exc
         current_attempt = int(current.get("attempts") or 0)
-        if attempt < current_attempt:
-            return current
+        custody_generation = int(
+            current.get("custody_generation") or 0
+        ) + 1
         merged = {
             **current,
-            "attempts": attempt,
+            "attempts": max(attempt, current_attempt),
             "custody_state": "quarantined",
+            "custody_generation": custody_generation,
+            "custody_owner": f"quarantine-parent:{os.getpid()}",
             "reaper_pid": reaper_pid,
             "reaper_started_wall": reaper_started_wall,
             "reason": reason,
@@ -1344,6 +1383,10 @@ def defer_provider_auth_cleanup(
         )
     intent["attempts"] = handoff_attempt
     intent["cleanup_owner"] = f"handoff-parent:{os.getpid()}"
+    intent["custody_generation"] = int(
+        claimed["custody_generation"]
+    )
+    intent["custody_owner"] = f"handoff-parent:{os.getpid()}"
     log_path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
     os.chmod(log_path.parent, 0o700)
     ack_read_fd, ack_write_fd = os.pipe()
@@ -1375,6 +1418,8 @@ def defer_provider_auth_cleanup(
         str(receipt_path),
         "--attempt",
         str(handoff_attempt),
+        "--custody-generation",
+        str(intent["custody_generation"]),
     ]
     if lease._destination_unlinked:
         argv.append("--destination-unlinked")
