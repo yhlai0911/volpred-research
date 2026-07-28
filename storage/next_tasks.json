@@ -50403,7 +50403,7 @@
     "description": "## 發生什麼\n4 個未提交檔案不是任何一班 fire 產出的，最長已連續 11 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- docs/error_log.md — 11 班\n- src/volpred/ops/next_tasks.py — 11 班\n- storage/drafts/assets/k1710_overnight_edge.png — 7 班\n- storage/memory/knowledge.json — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260727T191804307871Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T200734550380Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T210753714072Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T220736129013Z:<路徑>`\n- `git show refs/volpred/quarantine/20260727T230736676523Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-27T19:18:10.368972+00:00",
     "payload": {
@@ -50441,7 +50441,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-27T23:07:43.486626+00:00"
+    "updated_at": "2026-07-27T23:07:43.486626+00:00",
+    "superseded_at": "2026-07-28T00:09:29.503477+00:00",
+    "superseded_by": "assign_f12b70f1",
+    "completed_at": "2026-07-28T00:09:29.503477+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "dreaming_repeated_tool_failure_dispatch_supervisor_failure_exit1",
@@ -50921,5 +50925,54 @@
       "near_misses": [],
       "screened_at": "2026-07-27T22:00:45+00:00"
     }
+  },
+  {
+    "id": "alert_dedup_gate_health_20260728",
+    "title": "[alert] dedup gate 健康異常：2 個 narrative arc 擋下 ≥3 個不同候選（最多 mile_de666838：6 候選／10 raw b",
+    "description": "由 alert `dedup_gate_health` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n- [warn] 2 個 narrative arc 擋下 ≥3 個不同候選（最多 mile_de666838：6 候選／10 raw blocks）— review 是否人工 unlock\n\n## 影響\ndedup/publish gate 是 feed 的總閘門（Mission #1/#4/#5 上游）。2026-06-23 同款故障曾讓平台 8 天零新文，靠老闆肉眼才發現；這則警報就是那次事故承諾的機械偵測器。\n\n## 觀察\n- 近 7 天決策：536 放行 / 52 block / 0 其他（hold/skip）\n- 最近一次放行：2026-07-28T00:00:31.753886+00:00\n- block 最多的 gate：{'legacy:block_arc_dup': 35, 'task_generation': 15, 'legacy:block_k_coverage': 2}\n\n## 修復入口\n完整裁決：`uv run python scripts/audit_dedup_gate_decisions.py`；black hole → 檢查 `src/volpred/publisher/publisher.py` 與 `volpred.ops.content` 的 gate 是否違反 fail-open（rule §3）；同 arc 重複 block → review 是否人工 unlock 該 arc。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-28T00:00:57.682165+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "dedup_gate_health"
+    ]
+  },
+  {
+    "id": "assign_f12b70f1",
+    "title": "PHASE-Z 卡住檔案 incident（46bdb61ad50b5b69）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 12 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 12 班\n- src/volpred/ops/next_tasks.py — 12 班\n- storage/drafts/assets/k1710_overnight_edge.png — 8 班\n- storage/logs/trending_primary_source_verification.jsonl — 3 班\n- storage/memory/knowledge.json — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T000922430910Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T00:09:29.515681+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "46bdb61ad50b5b69",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1710_overnight_edge.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 12,
+        "src/volpred/ops/next_tasks.py": 12,
+        "storage/drafts/assets/k1710_overnight_edge.png": 8,
+        "storage/logs/trending_primary_source_verification.jsonl": 3,
+        "storage/memory/knowledge.json": 10
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T000922430910Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T00:09:29.503477+00:00",
+      "last_seen_at": "2026-07-28T00:09:29.503477+00:00"
+    },
+    "priority_capped_from": 1
   }
 ]
