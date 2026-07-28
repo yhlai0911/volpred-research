@@ -101,8 +101,15 @@ def _dup_body_similarity(a_title: str, a_body: str | None,
     return len(pa & pb) / len(pa | pb)
 
 
-def _log_dedup_decision(storage_dir: str, action: str, new_title: str | None,
-                        matched_id: str | None, reason: str) -> None:
+def _log_dedup_decision(
+    storage_dir: str,
+    action: str,
+    new_title: str | None,
+    matched_id: str | None,
+    reason: str,
+    *,
+    candidate_id: str | None = None,
+) -> None:
     """Append a structured dedup decision so a BLOCK is never silent.
 
     action ∈ {block_same_ref_recycle, allow_same_ref_companion, warn_near_dup,
@@ -121,6 +128,8 @@ def _log_dedup_decision(storage_dir: str, action: str, new_title: str | None,
             "matched_id": matched_id,
             "reason": reason,
         }
+        if candidate_id:
+            rec["candidate_id"] = str(candidate_id)
         with open(path, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
     except Exception:

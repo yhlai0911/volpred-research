@@ -122,20 +122,18 @@ def _log_path(storage_dir: str) -> Path:
     return project_path(storage_dir, "logs", "dedup_decisions.jsonl")
 
 
-def _candidate_identity(entry: dict[str, Any], *, fallback: str) -> str:
-    """Return the stable candidate identity available in each trail schema."""
-    for key in ("target_id", "candidate_id"):
+def _candidate_identity(entry: dict[str, Any]) -> str | None:
+    """Return a durable id, never a mutable authoring title.
+
+    One K can legitimately move through ``TBD``, ``K1366 article``, and its
+    final headline while the gate is retried. Titles therefore cannot prove
+    that separate candidates were blocked.
+    """
+    for key in ("candidate_id", "target_id"):
         value = entry.get(key)
         if isinstance(value, str) and value.strip():
             return f"id:{value.strip()}"
-    for key in ("new_title", "title"):
-        value = entry.get(key)
-        if isinstance(value, str) and value.strip():
-            normalized = " ".join(value.casefold().split())
-            return f"title:{normalized}"
-    # Old rows without a target or title cannot be safely collapsed. Preserve
-    # their historical one-row-one-candidate semantics instead of guessing.
-    return fallback
+    return None
 
 
 def audit_dedup_decisions(
@@ -171,6 +169,7 @@ def audit_dedup_decisions(
     earliest_ts: datetime | None = None
     blocking_gates: dict[str, int] = {}
     arc_blocks: dict[str, dict[str, Any]] = {}
+    unidentified_arc_blocks = 0
 
     log_exists = path.exists()
     if log_exists:
@@ -218,10 +217,7 @@ def audit_dedup_decisions(
                     recent_blocks += 1
                 blocking_gates[gate] = blocking_gates.get(gate, 0) + 1
                 if arc_id:
-                    candidate = _candidate_identity(
-                        entry,
-                        fallback=f"row:{scanned}:{ts.isoformat()}",
-                    )
+                    candidate = _candidate_identity(entry)
                     bucket = arc_blocks.setdefault(
                         arc_id,
                         {
@@ -232,7 +228,10 @@ def audit_dedup_decisions(
                             "last_ts": ts,
                         },
                     )
-                    bucket["candidates"].add(candidate)
+                    if candidate is None:
+                        unidentified_arc_blocks += 1
+                    else:
+                        bucket["candidates"].add(candidate)
                     bucket["raw_blocks"] += 1
                     bucket["gates"].add(gate)
                     if ts > bucket["last_ts"]:
@@ -343,6 +342,7 @@ def audit_dedup_decisions(
             "arc_repeat_block": {
                 "breached": arc_breached,
                 "threshold": arc_block_threshold,
+                "unidentified_blocks": unidentified_arc_blocks,
                 "repeat_arcs": repeat_arcs[:10],
             },
         },

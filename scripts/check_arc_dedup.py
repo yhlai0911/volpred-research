@@ -107,6 +107,7 @@ def main() -> int:
 
     feed = json.loads((ROOT / "storage" / "reports" / "feed.json").read_text(encoding="utf-8"))
     storage_dir = str(ROOT / "storage")
+    candidate_id = _normalize_ref(args.k_id) if args.k_id else None
     signature = arc_signature(args.title, text)
     report = {
         "entities": signature["entities"],
@@ -176,6 +177,7 @@ def main() -> int:
                 storage_dir, "block_k_coverage", args.title, hit["id"],
                 f"{args.k_id} already covered for audience={hit['audience']} "
                 f"(status={hit['status']})",
+                candidate_id=candidate_id,
             )
         listed = "\n".join(
             f"    - {h['id']} [{h['status']}/{h['audience']}] {h['published_at']} {h['title']}"
@@ -194,6 +196,7 @@ def main() -> int:
             _log_dedup_decision(
                 storage_dir, "block_arc_dup", args.title, hit.get("id"),
                 f"arc match: {hit.get('match_reason', '?')}",
+                candidate_id=candidate_id,
             )
         print(
             f"\n🚫 ARC DUPLICATE — {len(dups)} existing article(s) tell the same "
@@ -211,6 +214,7 @@ def main() -> int:
                 args.title,
                 hit.get("id"),
                 f"advisory arc match: {hit.get('match_reason', '?')}",
+                candidate_id=candidate_id,
             )
         listed = "\n".join(
             f"    - {h.get('id')} {h.get('title')}"
@@ -229,6 +233,7 @@ def main() -> int:
             storage_dir, "warn_thin_signature", args.title, None,
             f"no entities and no refs -> arc gate cannot judge; "
             f"{len(hints)} lexical hint(s); audience={args.audience or 'any'}",
+            candidate_id=candidate_id,
         )
         listed = "\n".join(
             f"    - {h['id']} [{h['status']}/{h['audience']}] {h['published_at']} "
@@ -250,6 +255,7 @@ def main() -> int:
     _log_dedup_decision(
         storage_dir, "pass_prewrite", args.title, None,
         f"k_id={args.k_id} audience={args.audience or 'any'} days={args.days}",
+        candidate_id=candidate_id,
     )
     print("\n✅ no K coverage and no arc duplicate in window", file=sys.stderr)
     return 0

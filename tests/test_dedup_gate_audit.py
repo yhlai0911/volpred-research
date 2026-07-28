@@ -25,6 +25,7 @@ from pathlib import Path
 
 from volpred.ops.alerts import _parse_dedup_gate_health_state
 from volpred.ops.dedup_gate_audit import audit_dedup_decisions
+from volpred.publisher.publisher import _log_dedup_decision
 
 NOW = datetime(2026, 7, 20, 4, 0, tzinfo=timezone.utc)
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -154,7 +155,10 @@ def test_block_rate_needs_min_sample(tmp_path: Path) -> None:
 
 def test_same_arc_blocked_three_times_breaches(tmp_path: Path) -> None:
     entries = [
-        _action(10.0, "block_arc_dup", "mile_arc_hot"),
+        {
+            **_action(10.0, "block_arc_dup", "mile_arc_hot"),
+            "candidate_id": "candidate-action",
+        },
         _gate(20.0, "release_pool_arc_dedup", "block", "mile_n2", "mile_arc_hot"),
         _taskgen(40.0, True, ["mile_arc_hot"]),
     ]
@@ -243,7 +247,7 @@ def test_candidate_identity_is_stable_across_supported_schemas(
     assert verdict["healthy"] is True
 
 
-def test_identityless_legacy_blocks_remain_conservatively_distinct(
+def test_identityless_legacy_blocks_cannot_prove_distinct_candidates(
     tmp_path: Path,
 ) -> None:
     entries = [
@@ -263,10 +267,29 @@ def test_identityless_legacy_blocks_remain_conservatively_distinct(
 
     verdict = audit_dedup_decisions(storage_dir=str(tmp_path), now=NOW)
 
-    repeat = verdict["conditions"]["arc_repeat_block"]["repeat_arcs"][0]
-    assert repeat["blocks"] == 3
-    assert repeat["distinct_candidates"] == 3
-    assert verdict["conditions"]["arc_repeat_block"]["breached"] is True
+    repeat = verdict["conditions"]["arc_repeat_block"]
+    assert repeat["repeat_arcs"] == []
+    assert repeat["unidentified_blocks"] == 3
+    assert repeat["breached"] is False
+    assert verdict["healthy"] is True
+
+
+def test_decision_logger_persists_stable_candidate_identity(
+    tmp_path: Path,
+) -> None:
+    _log_dedup_decision(
+        str(tmp_path),
+        "block_arc_dup",
+        "title changes between retries",
+        "mile_arc_hot",
+        "arc match",
+        candidate_id="K1366",
+    )
+
+    row = json.loads(
+        (tmp_path / "logs" / "dedup_decisions.jsonl").read_text()
+    )
+    assert row["candidate_id"] == "K1366"
 
 
 # ---------------------------------------------------------------- healthy / edges

@@ -14,6 +14,7 @@ itself across two documents. Coverage is now an exact-match gate that runs first
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -22,6 +23,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+import check_arc_dedup as cli  # noqa: E402
 from check_arc_dedup import find_k_coverage  # noqa: E402
 
 
@@ -106,3 +108,54 @@ def test_k_id_matched_from_body_when_refs_missing():
         "published_at": "2026-01-01T00:00:00+00:00",
     }]
     assert [h["id"] for h in find_k_coverage("K1234", legacy, "general")] == ["mile_legacy"]
+
+
+def test_cli_logs_normalized_k_as_stable_candidate_id(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Headline edits must not turn retries of one K into separate candidates."""
+    (tmp_path / "storage" / "reports").mkdir(parents=True)
+    (tmp_path / "storage" / "reports" / "feed.json").write_text(
+        json.dumps([]),
+        encoding="utf-8",
+    )
+    experiment = tmp_path / "experiments" / "k1366"
+    experiment.mkdir(parents=True)
+    (experiment / "README.md").write_text("VIX result", encoding="utf-8")
+    logged: list[dict] = []
+    monkeypatch.setattr(cli, "ROOT", tmp_path)
+    monkeypatch.setattr(
+        cli,
+        "find_k_coverage",
+        lambda *_a, **_k: [
+            {
+                "id": "mile_prior",
+                "audience": "general",
+                "status": "published",
+                "published_at": "2026-07-01",
+                "title": "prior",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        cli,
+        "_log_dedup_decision",
+        lambda *_a, **kwargs: logged.append(kwargs),
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "check_arc_dedup.py",
+            "--k-id",
+            "k1366",
+            "--audience",
+            "general",
+            "--title",
+            "TBD",
+        ],
+    )
+
+    assert cli.main() == 1
+    assert logged == [{"candidate_id": "K1366"}]
