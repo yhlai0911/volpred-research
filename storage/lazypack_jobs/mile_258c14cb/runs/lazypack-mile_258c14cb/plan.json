@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "title": "K1366 懶人包：波動放大測得出來，「一起垮」測不出來",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1366/K1366_results.json",
+      "sha256": "0477463dd0cac1f7370b9bca51dd7286ba97d6e752aa01e89fb9e53aadcd4a54",
+      "label": "experiment K1366 results (cross-asset EWMA post-shock variance and correlation response templates, placebo-gated)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "危機來的時候，手上的東西會不會一起垮",
+      "alt": "資產配置課的核心假設是危機時相關性會飆高；本研究用五檔指數股票型基金十年半的日報酬，對四場歷史衝擊後的同一段期間做隨機抽樣檢定，把「波動會變大」與「資產會一起垮」拆成兩題分別驗證",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "拆成兩題來問",
+          "body": [
+            "美股、長天期公債、美元、黃金、高收益債，五檔指數股票型基金的調整後收盤價，樣本收在去年年中。",
+            "第一題：大事件之後，總波動是不是真的異常放大。第二題：資產之間是不是真的變得更同步。兩題要分開量。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "樣本日報酬筆數",
+          "value": {
+            "source": "results",
+            "path": "/data/n_daily_returns",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對照用的隨機假事件次數",
+          "value": {
+            "source": "results",
+            "path": "/method/placebo_reps",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每場事件追蹤的交易日數",
+          "value": {
+            "source": "results",
+            "path": "/method/horizon_trading_days",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_variance",
+      "info": "results",
+      "style": "professional",
+      "title": "波動這關：四場過兩場",
+      "alt": "關稅衝擊與股債信用賣壓兩場通過總變異數的隨機抽樣檢定，疫情流動性崩盤與利率通膨重定價兩場沒過；跌最重的那一天反而沒過，因為事發前市場已經泡在極端波動裡，分母已經夠大",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "跌最兇的那天反而沒過",
+          "body": [
+            "關稅衝擊那場最乾淨，總波動在事後不到一週衝到高點，隨機抽樣裡幾乎沒有能追上的。",
+            "疫情流動性崩盤的單日跌幅最重，檢定卻沒過：到那一天為止，市場早就泡在極端波動裡。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "關稅衝擊：總波動最高多出",
+          "value": {
+            "source": "results",
+            "path": "/events/3/peak_total_variance_lift",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "股債信用賣壓：總波動最高多出",
+          "value": {
+            "source": "results",
+            "path": "/events/0/peak_total_variance_lift",
+            "format": {
+              "kind": "percent",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "疫情崩盤：隨機日子比它更大的比例",
+          "value": {
+            "source": "results",
+            "path": "/events/1/p_peak_vs_placebo",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "相關性這關：四場全軍覆沒",
+      "alt": "四場衝擊的相關性平均變動最高值全部落在平常日子的常見範圍內，沒有一場通過隨機抽樣檢定；這是統計上測不出來，不等於相關性沒有上升，人工指定的少數事件日檢定力本來就很低",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "測不出來，不等於沒發生",
+          "body": [
+            "連波動檢定過關的那兩場，相關性都沒過。隨便挑一天平常日子，相關性跑得比危機那天更兇的機率並不低。",
+            "但事件日是人工指定的，數量很少，這個檢定本來就沒什麼力氣。合理的讀法是：別把「危機時分散失效」當成可以直接下注的前提，而不是證明它不存在。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "股債信用賣壓：隨機日子相關性動更大的比例",
+          "value": {
+            "source": "results",
+            "path": "/events/0/p_peak_corr_vs_placebo",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "利率通膨重定價：隨機日子相關性動更大的比例",
+          "value": {
+            "source": "results",
+            "path": "/events/2/p_peak_corr_vs_placebo",
+            "format": {
+              "kind": "percent",
+              "digits": 1
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "關稅衝擊：相關性平均變動最高值",
+          "value": {
+            "source": "results",
+            "path": "/events/3/peak_avg_abs_corr_delta",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
