@@ -51,7 +51,7 @@ def reap(args: argparse.Namespace) -> int:
             args, "destination_unlinked", False,
         ),
     )
-    isolation._transition_provider_auth_reaper_receipt(
+    initial_receipt = isolation._transition_provider_auth_reaper_receipt(
         receipt_path,
         {
             "schema_version": "provider-auth-reaper.v2",
@@ -68,7 +68,7 @@ def reap(args: argparse.Namespace) -> int:
         leader_pid=getattr(args, "leader_pid", None),
         leader_started_wall=getattr(args, "leader_started_wall", None),
     )
-    attempts = 0
+    attempts = int((initial_receipt or {}).get("attempts") or 0)
     while True:
         attempts += 1
         isolation._transition_provider_auth_reaper_receipt(

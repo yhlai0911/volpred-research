@@ -6479,6 +6479,64 @@ def test_codex_auth_close_retries_after_unlink_fsync_failure(
     assert second.cleaned is True
 
 
+def test_codex_auth_close_revalidates_secret_recreated_after_recovery_snapshot(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    baseline = {
+        "OPENAI_API_KEY": None,
+        "tokens": {
+            "access_token": "access-a",
+            "refresh_token": "refresh-a",
+            "id_token": "id-a",
+            "account_id": "account",
+        },
+    }
+    source.write_text(json.dumps(baseline), encoding="utf-8")
+    source.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert lease is not None
+    rotated = {
+        **baseline,
+        "tokens": {
+            **baseline["tokens"],
+            "access_token": "access-b",
+            "refresh_token": "refresh-b",
+            "id_token": "id-b",
+        },
+    }
+    destination = Path(lease.destination_path)
+    destination.write_text(json.dumps(rotated), encoding="utf-8")
+    destination.chmod(0o600)
+    # Recovery's earlier snapshot saw the file absent; a descendant recreated
+    # it before the process group drained.
+    lease._destination_unlinked = True
+
+    receipt = lease.close()
+
+    assert receipt.ok is True
+    assert receipt.reconciled is True
+    assert json.loads(source.read_text(encoding="utf-8")) == rotated
+    assert not destination.exists()
+
+
 def test_default_codex_authority_is_not_the_interactive_codex_home(
     tmp_path: Path,
     monkeypatch,
@@ -6660,6 +6718,122 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
         "cleaned",
     ]
     assert written[-1]["attempts"] == 2
+
+
+def test_reaper_receipt_allows_new_attempt_phase_after_cleanup_retry(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "receipt.json"
+    isolation._transition_provider_auth_reaper_receipt(
+        path,
+        {
+            "schema_version": "provider-auth-reaper.v2",
+            "state": "cleanup_retry",
+            "attempts": 1,
+        },
+    )
+
+    isolation._transition_provider_auth_reaper_receipt(
+        path,
+        {
+            "state": "cleanup_started",
+            "attempts": 2,
+            "close_phase": "unlink_intent",
+        },
+    )
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["state"] == "cleanup_started"
+    assert payload["attempts"] == 2
+    assert payload["close_phase"] == "unlink_intent"
+
+
+def test_synchronous_auth_custody_ignores_receipt_io_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    close_calls: list[bool] = []
+
+    class FakeLease:
+        def close(self, *, checkpoint=None):
+            assert checkpoint is not None
+            checkpoint("unlink_intent")
+            close_calls.append(True)
+            return isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+
+    monkeypatch.setattr(
+        isolation,
+        "wait_for_process_group_generation_drained",
+        lambda **_kwargs: None,
+    )
+    monkeypatch.setattr(
+        isolation,
+        "_transition_provider_auth_reaper_receipt",
+        lambda *_a, **_k: (_ for _ in ()).throw(
+            OSError("receipt filesystem unavailable")
+        ),
+    )
+
+    receipt = isolation.reap_provider_auth_lease_in_process(
+        FakeLease(),
+        pgid=888,
+        leader_pid=888,
+        leader_started_wall="Mon Jul 28 12:00:00 2026",
+        receipt_path=tmp_path / "receipt.json",
+    )
+
+    assert receipt.ok is True
+    assert close_calls == [True]
+
+
+def test_health_reaps_quarantined_auth_after_child_and_group_are_gone(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    close_calls: list[bool] = []
+
+    class FakeLease:
+        lease_id = "quarantine-health-test"
+
+        def close(self, *, checkpoint=None):
+            assert checkpoint is not None
+            checkpoint("destination_unlinked")
+            close_calls.append(True)
+            return isolation.ProviderAuthCloseReceipt(
+                True, False, False, True, "closed",
+            )
+
+    class DeadReaper:
+        def poll(self):
+            return 1
+
+    monkeypatch.setattr(
+        procutil,
+        "pgid_members_checked",
+        lambda _pgid: [],
+    )
+    monkeypatch.setattr(
+        isolation,
+        "_transition_provider_auth_reaper_receipt",
+        lambda _path, payload: payload,
+    )
+    isolation.quarantine_provider_auth_lease(
+        FakeLease(),
+        pgid=888,
+        leader_pid=888,
+        leader_started_wall="Mon Jul 28 12:00:00 2026",
+        receipt_path=tmp_path / "receipt.json",
+        reaper_process=DeadReaper(),
+    )
+
+    first = isolation.reap_quarantined_provider_auth_leases()
+    second = isolation.reap_quarantined_provider_auth_leases()
+
+    assert first == {"pending": 1, "cleaned": 0}
+    assert second == {"pending": 0, "cleaned": 1}
+    assert close_calls == [True]
 
 
 def test_provider_auth_recovery_reclaims_nonterminal_intent(
@@ -6890,6 +7064,33 @@ def test_provider_auth_admission_fences_nonterminal_crashed_lease(
 
     assert recovery_handoffs == ["old-lease"]
     assert not (new_run / "home" / ".codex" / "auth.json").exists()
+
+
+def test_provider_auth_forged_cleaned_receipt_fails_closed(
+    tmp_path: Path,
+) -> None:
+    authority = tmp_path / "authority"
+    auth = authority / ".codex" / "auth.json"
+    auth.parent.mkdir(parents=True, mode=0o700)
+    auth.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"a",'
+        '"refresh_token":"r","id_token":"i","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth.chmod(0o600)
+    receipts = tmp_path / "receipts"
+    receipts.mkdir()
+    (receipts / "forged.json").write_text(
+        '{"state":"cleaned"}',
+        encoding="utf-8",
+    )
+
+    result = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipts,
+    )
+
+    assert result == {"recovered": 0, "active": 0, "invalid": 1}
 
 
 def test_codex_auth_materialization_rejects_symlink_destination(

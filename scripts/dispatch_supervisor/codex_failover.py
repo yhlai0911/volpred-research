@@ -336,6 +336,30 @@ class _ProviderAuthLeaseGuard:
                     leader_started_wall=self.leader_started_wall,
                 )
                 handed_off = True
+            except isolation.ProviderAuthHandoffQuarantined as exc:
+                isolation.quarantine_provider_auth_lease(
+                    self.lease,
+                    pgid=active_pgid,
+                    leader_pid=self.leader_pid,
+                    leader_started_wall=self.leader_started_wall,
+                    receipt_path=exc.receipt_path,
+                    reaper_process=exc.reaper_process,
+                )
+                self.lease = None
+                self.mark_process_group_drained()
+                return FailoverResult(
+                    attempted=result.attempted,
+                    recovered=False,
+                    exit_code=RC_DISABLED,
+                    detail=(
+                        "Codex auth cleanup child could not be reaped; "
+                        "supervisor retained authority-lock custody and "
+                        "quarantined the slot"
+                    ),
+                    duration_s=result.duration_s,
+                    output_tail=result.output_tail,
+                    process_active=True,
+                )
             except Exception as exc:  # custody fallback must catch raw OS errors
                 failed_receipt_path = getattr(exc, "receipt_path", None)
                 LOG.error(

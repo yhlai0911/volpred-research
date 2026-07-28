@@ -26,6 +26,7 @@ import select
 import stat
 import subprocess
 import sys
+import threading
 import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -46,6 +47,20 @@ class ProviderAuthHandoffError(IsolationUnavailable):
     def __init__(self, message: str, *, receipt_path: Path):
         super().__init__(message)
         self.receipt_path = receipt_path
+
+
+class ProviderAuthHandoffQuarantined(ProviderAuthHandoffError):
+    """Reaper could not be acknowledged or reaped; parent retains custody."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        receipt_path: Path,
+        reaper_process: Any,
+    ):
+        super().__init__(message, receipt_path=receipt_path)
+        self.reaper_process = reaper_process
 
 
 @dataclass(frozen=True)
@@ -627,6 +642,19 @@ class ProviderAuthLease:
                 # Fsyncing HOME makes that already-clean state retryable.
                 os.fsync(destination_home_fd)
                 destination_dir_fsynced = True
+            if self._destination_unlinked and destination_dir_fd is not None:
+                try:
+                    os.stat(
+                        "auth.json",
+                        dir_fd=destination_dir_fd,
+                        follow_symlinks=False,
+                    )
+                except FileNotFoundError:
+                    pass  # silent-ok: authoritative post-drain re-read is empty
+                else:
+                    # A still-running descendant may have recreated/rotated
+                    # auth after the recovery scanner's earlier snapshot.
+                    self._destination_unlinked = False
             if not self._destination_unlinked:
                 assert destination_dir_fd is not None
                 destination_payload = _read_private_at(
@@ -737,6 +765,120 @@ class ProviderAuthLease:
         return self._terminal_receipt
 
 
+@dataclass
+class _QuarantinedProviderAuthLease:
+    lease: ProviderAuthLease
+    pgid: int
+    leader_pid: int
+    leader_started_wall: str
+    receipt_path: Path
+    reaper_process: Any
+    empty_group_reads: int = 0
+
+
+_QUARANTINED_PROVIDER_AUTH_LEASES: dict[
+    str, _QuarantinedProviderAuthLease
+] = {}
+_QUARANTINED_PROVIDER_AUTH_LOCK = threading.Lock()
+
+
+def quarantine_provider_auth_lease(
+    lease: ProviderAuthLease,
+    *,
+    pgid: int,
+    leader_pid: int,
+    leader_started_wall: str,
+    receipt_path: Path,
+    reaper_process: Any,
+) -> None:
+    """Keep the parent FD reachable until health proves cleanup is safe."""
+    with _QUARANTINED_PROVIDER_AUTH_LOCK:
+        _QUARANTINED_PROVIDER_AUTH_LEASES[lease.lease_id] = (
+            _QuarantinedProviderAuthLease(
+                lease=lease,
+                pgid=pgid,
+                leader_pid=leader_pid,
+                leader_started_wall=leader_started_wall,
+                receipt_path=receipt_path,
+                reaper_process=reaper_process,
+            )
+        )
+
+
+def reap_quarantined_provider_auth_leases() -> dict[str, int]:
+    """Nonblocking health-tick reconciler for no-ACK cleanup children."""
+    from . import procutil
+
+    pending = 0
+    cleaned = 0
+    with _QUARANTINED_PROVIDER_AUTH_LOCK:
+        records = list(_QUARANTINED_PROVIDER_AUTH_LEASES.items())
+    for lease_id, record in records:
+        try:
+            child_rc = record.reaper_process.poll()
+        except Exception as exc:  # noqa: BLE001
+            warn(
+                "provider-auth-recovery",
+                "quarantined reaper liveness probe failed",
+                lease_id=lease_id,
+                err=str(exc),
+            )
+            pending += 1
+            continue
+        if child_rc is None:
+            try:
+                record.reaper_process.kill()
+            except (OSError, ProcessLookupError) as exc:
+                warn(
+                    "provider-auth-recovery",
+                    "quarantined reaper kill retry failed",
+                    lease_id=lease_id,
+                    err=str(exc),
+                )
+            pending += 1
+            continue
+        members = procutil.pgid_members_checked(record.pgid)
+        if members == []:
+            record.empty_group_reads += 1
+        else:
+            record.empty_group_reads = 0
+        if record.empty_group_reads < 2:
+            pending += 1
+            continue
+        receipt = record.lease.close(
+            checkpoint=lambda phase: _transition_provider_auth_reaper_receipt(
+                record.receipt_path,
+                {
+                    "state": "cleanup_started",
+                    "close_phase": phase,
+                },
+            ),
+        )
+        if not receipt.ok:
+            pending += 1
+            continue
+        try:
+            _transition_provider_auth_reaper_receipt(
+                record.receipt_path,
+                {
+                    "state": "cleaned",
+                    "recovery": "health_quarantine_owner",
+                    "close": asdict(receipt),
+                },
+            )
+        except Exception as exc:  # terminal bytes are already clean
+            warn(
+                "provider-auth-recovery",
+                "quarantine cleaned but terminal receipt failed",
+                lease_id=lease_id,
+                err=str(exc),
+            )
+        with _QUARANTINED_PROVIDER_AUTH_LOCK:
+            _QUARANTINED_PROVIDER_AUTH_LEASES.pop(lease_id, None)
+        cleaned += 1
+    return {"pending": pending, "cleaned": cleaned}
+
+
 def _write_provider_auth_reaper_receipt(
     path: Path,
     payload: dict[str, Any],
@@ -791,8 +933,19 @@ def _transition_provider_auth_reaper_receipt(
             ) from exc
         current_state = str(current.get("state") or "")
         next_state = str(payload.get("state") or "")
-        if _REAPER_STATE_ORDER.get(next_state, -1) < _REAPER_STATE_ORDER.get(
-            current_state, -1
+        try:
+            current_attempt = int(current.get("attempts") or 0)
+            next_attempt = int(payload.get("attempts") or current_attempt)
+        except (TypeError, ValueError):
+            current_attempt = next_attempt = 0
+        if current_state == "cleaned" and next_state != "cleaned":
+            return current
+        if next_attempt < current_attempt:
+            return current
+        if (
+            next_attempt == current_attempt
+            and _REAPER_STATE_ORDER.get(next_state, -1)
+            < _REAPER_STATE_ORDER.get(current_state, -1)
         ):
             return current
         merged = {**current, **payload}
@@ -845,6 +998,22 @@ def reap_provider_auth_lease_in_process(
     close_retry_seconds: float = 5.0,
 ) -> ProviderAuthCloseReceipt:
     """Fail-safe custody fallback when detached reaper handoff cannot start."""
+    def checkpoint_receipt(payload: dict[str, Any]) -> None:
+        if receipt_path is None:
+            return
+        try:
+            _transition_provider_auth_reaper_receipt(
+                receipt_path,
+                payload,
+            )
+        except Exception as exc:  # receipt loss must not release live custody
+            warn(
+                "provider-auth-recovery",
+                "synchronous custody receipt failed; cleanup continues held",
+                path=str(receipt_path),
+                err=str(exc),
+            )
+
     wait_for_process_group_generation_drained(
         pgid=pgid,
         leader_pid=leader_pid,
@@ -854,16 +1023,14 @@ def reap_provider_auth_lease_in_process(
     while True:
         attempts += 1
         if receipt_path is not None:
-            _transition_provider_auth_reaper_receipt(
-                receipt_path,
-                {"state": "cleanup_started", "attempts": attempts},
+            checkpoint_receipt(
+                {"state": "cleanup_started", "attempts": attempts}
             )
         receipt = lease.close(
             checkpoint=(
                 None
                 if receipt_path is None
-                else lambda phase: _transition_provider_auth_reaper_receipt(
-                    receipt_path,
+                else lambda phase: checkpoint_receipt(
                     {
                         "state": "cleanup_started",
                         "close_phase": phase,
@@ -874,8 +1041,7 @@ def reap_provider_auth_lease_in_process(
         if receipt.ok:
             return receipt
         if receipt_path is not None:
-            _transition_provider_auth_reaper_receipt(
-                receipt_path,
+            checkpoint_receipt(
                 {
                     "state": "cleanup_retry",
                     "attempts": attempts,
@@ -1007,28 +1173,61 @@ def defer_provider_auth_cleanup(
     if acknowledged != b"READY\n":
         try:
             proc.terminate()
-        except ProcessLookupError:
-            pass  # silent-ok: missing reaper already relinquished child custody
-        while True:
+        except (OSError, ProcessLookupError) as exc:
+            warn(
+                "provider-auth-recovery",
+                "no-ACK reaper TERM failed; retaining parent custody",
+                reaper_pid=proc.pid,
+                err=str(exc),
+            )
+        reaped = False
+        for _attempt in range(2):
             try:
                 proc.wait(timeout=5)
+                reaped = True
                 break
             except subprocess.TimeoutExpired:
                 try:
                     proc.kill()
-                except ProcessLookupError:
-                    pass  # silent-ok: reaper exited during wait-to-KILL race
-            except ProcessLookupError:
-                break  # silent-ok: wait raced with an already-reaped child
-        _transition_provider_auth_reaper_receipt(
-            receipt_path,
-            {
-                **intent,
-                "state": "handoff_failed",
-                "reaper_pid": proc.pid,
-                "reason": "reaper did not acknowledge durable custody",
-            },
-        )
+                except (OSError, ProcessLookupError) as exc:
+                    warn(
+                        "provider-auth-recovery",
+                        "no-ACK reaper KILL failed; quarantining custody",
+                        reaper_pid=proc.pid,
+                        err=str(exc),
+                    )
+            except (OSError, ProcessLookupError) as exc:
+                warn(
+                    "provider-auth-recovery",
+                    "no-ACK reaper wait failed; quarantining custody",
+                    reaper_pid=proc.pid,
+                    err=str(exc),
+                )
+                break
+        try:
+            _transition_provider_auth_reaper_receipt(
+                receipt_path,
+                {
+                    **intent,
+                    "state": "handoff_failed",
+                    "reaper_pid": proc.pid,
+                    "reason": "reaper did not acknowledge durable custody",
+                },
+            )
+        except Exception as exc:  # custody decision cannot depend on receipt IO
+            warn(
+                "provider-auth-recovery",
+                "no-ACK handoff receipt failed; custody remains in parent",
+                reaper_pid=proc.pid,
+                err=str(exc),
+            )
+        if not reaped:
+            raise ProviderAuthHandoffQuarantined(
+                "provider auth reaper did not acknowledge and could not be "
+                "reaped; parent custody quarantined",
+                receipt_path=receipt_path,
+                reaper_process=proc,
+            )
         raise ProviderAuthHandoffError(
             "provider auth lease reaper did not acknowledge custody",
             receipt_path=receipt_path,
@@ -1071,11 +1270,30 @@ def _load_recoverable_provider_auth_receipts(
             continue
         schema = payload.get("schema_version")
         state = payload.get("state")
-        if state == "cleaned":
+        close = payload.get("close")
+        if schema == "provider-auth-reaper.v1":
+            legacy_run_raw = payload.get("run_dir")
+            if (
+                not isinstance(legacy_run_raw, str)
+                or not Path(legacy_run_raw).is_absolute()
+            ):
+                invalid += 1
+                continue
+            legacy_run = Path(legacy_run_raw).resolve()
+            legacy_destination = (
+                legacy_run / "home" / ".codex" / "auth.json"
+            )
+            if (
+                state == "cleaned"
+                and isinstance(close, dict)
+                and close.get("ok") is True
+                and close.get("cleaned") is True
+                and not legacy_destination.exists()
+            ):
+                continue
+            invalid += 1
             continue
         if schema != "provider-auth-reaper.v2":
-            # A nonterminal receipt from an unknown/legacy contract may still
-            # represent a live secret. Admission must stop rather than guess.
             invalid += 1
             continue
         try:
@@ -1130,6 +1348,15 @@ def _load_recoverable_provider_auth_receipts(
             continue
         close_phase = payload.get("close_phase")
         destination_missing = not destination.exists()
+        if state == "cleaned":
+            if (
+                not isinstance(close, dict)
+                or close.get("ok") is not True
+                or close.get("cleaned") is not True
+                or not destination_missing
+            ):
+                invalid += 1
+            continue
         if close_phase == "destination_unlinked" and not destination_missing:
             invalid += 1
             continue
@@ -1499,6 +1726,8 @@ __all__ = [
     "IsolationUnavailable",
     "PreparedIsolation",
     "ProviderAuthCloseReceipt",
+    "ProviderAuthHandoffError",
+    "ProviderAuthHandoffQuarantined",
     "ProviderAuthHandoffReceipt",
     "ProviderAuthLease",
     "SANDBOX_EXEC",
@@ -1507,6 +1736,8 @@ __all__ = [
     "isolated_environment",
     "materialize_provider_auth",
     "prepare",
+    "quarantine_provider_auth_lease",
+    "reap_quarantined_provider_auth_leases",
     "reap_provider_auth_lease_in_process",
     "recover_provider_auth_reapers",
     "sandbox_profile",

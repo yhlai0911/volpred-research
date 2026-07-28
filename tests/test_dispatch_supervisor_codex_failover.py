@@ -563,6 +563,63 @@ def test_reaper_handoff_failure_retains_parent_custody_until_cleanup(
     assert guard.lease is None
 
 
+def test_unreapable_no_ack_child_moves_lease_to_supervisor_quarantine(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    class FakeLease:
+        lease_id = "lease-quarantine"
+
+    class FakeProc:
+        pid = 999
+
+    lease = FakeLease()
+    proc = FakeProc()
+    guard = codex_failover._ProviderAuthLeaseGuard()
+    guard.bind(lease)
+    guard.mark_process_started(
+        pid=888,
+        pgid=888,
+        started_wall="Mon Jul 28 12:00:00 2026",
+    )
+    receipt_path = tmp_path / "receipt.json"
+    quarantined: list[tuple] = []
+
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "defer_provider_auth_cleanup",
+        lambda *_a, **_k: (_ for _ in ()).throw(
+            codex_failover.isolation.ProviderAuthHandoffQuarantined(
+                "injected no-ACK child",
+                receipt_path=receipt_path,
+                reaper_process=proc,
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "quarantine_provider_auth_lease",
+        lambda auth_lease, **kwargs: quarantined.append(
+            (auth_lease, kwargs)
+        ),
+    )
+
+    result = guard.finish(
+        codex_failover.FailoverResult(
+            True,
+            False,
+            codex_failover.RC_WORK_TIMEOUT,
+            "timeout",
+            process_active=True,
+        ),
+    )
+
+    assert result.process_active is True
+    assert guard.lease is None
+    assert quarantined[0][0] is lease
+    assert quarantined[0][1]["reaper_process"] is proc
+
+
 def test_spawn_post_popen_probe_error_never_closes_live_auth_early(
     monkeypatch,
     tmp_path: Path,

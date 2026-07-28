@@ -343,6 +343,14 @@ async def health_loop(*, state_path: Path = state.STATE_PATH, check_interval_s: 
             state.heartbeat(path=state_path)
             check_once(state_path=state_path)
             _renew_live_dispatch_claims(state_path=state_path)
+            quarantine_recovery = await asyncio.to_thread(
+                isolation.reap_quarantined_provider_auth_leases
+            )
+            if quarantine_recovery["cleaned"]:
+                LOG.info(
+                    "provider auth quarantine recovery=%s",
+                    quarantine_recovery,
+                )
             auth_recovery = await asyncio.to_thread(
                 isolation.recover_provider_auth_reapers
             )
