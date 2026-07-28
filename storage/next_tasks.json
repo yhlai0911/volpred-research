@@ -41830,7 +41830,7 @@
     "title": "K1731 F1 三方循環相依：shard 要 merge、merge 要 knowledge、knowledge 要 shard 結果",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "blocked",
     "source": "auto_discovered",
     "created_at": "2026-07-21T08:35:00+00:00",
     "created_by": "hourly-slot-1-2dbf4d3c27494935b4d7b18b3ab80e3c",
@@ -41909,19 +41909,31 @@
         "to": "pending",
         "by": "hourly-slot-1-8904dcde89454e22a90b8506e2d94d4e",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-28T08:57:03.925001+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-d5563e609fa645f5bf6cc2982f534424"
       }
     ],
     "block_transition_previous": {
-      "claimed_by": "hourly-slot-1-13b12f522aba4471828ab8e5d8cf28af",
-      "claimed_at": "2026-07-27T07:14:34.380210+00:00",
-      "claim_expires_at": "2026-07-27T09:14:34.380210+00:00",
-      "claim_session_id": "ae58a16e1ff1",
+      "claimed_by": "hourly-slot-2-d5563e609fa645f5bf6cc2982f534424",
+      "claimed_at": "2026-07-28T08:57:03.924984+00:00",
+      "claim_expires_at": "2026-07-28T10:57:03.924984+00:00",
+      "claim_session_id": "5a517f54302d",
       "started_at": "2026-07-27T07:14:34.664977+00:00"
     },
     "exit_a_status": "arm B knowledge written (item_id=5a604fb2); reproduce_spec.json added cd25c295a (check_experiment_artifacts PASS strict); round-10 fallback review FAIL 4f7c60a6a (freeze 35/35; A+C PASS, B+D FAIL on two README round-9 overclaims); denial-class ratchet + README sync 79621381e (verified 2 violations/exit1 on pre-fix bytes, 0/exit0 on fixed). Deadlock edges 2 and 3 RESOLVED; edge 1 (shards) still merge-gated.",
     "remaining_blockers": "ROUND 11, in order: (1) freeze CURRENT bytes -> k1731_armB_rev11_freeze.txt (they are newer than the round-10 review, so no existing verdict binds them); (2) review those bytes - Codex owes the primary-path verdict when credit returns 2026-08-02 (K1728), subagent fallback acceptable meanwhile but does NOT discharge it; reuse the round-10 fallback Method section, do NOT regress to a fixed-string grep (root cause of rounds 6-10); (3) only on PASS write experiments/k1731/review_verdict.json via experiment_gates.py verdict-template (JSON not .md; must pin CURRENT claim surface); (4) merge_worktree.sh - ABORTS while main index has staged content (L710-718, no stash/reset), so needs a fire with PHASE-Z baseline already committed; (5) only after merge, compute_queue requeue k1731-f1-boot-c0-parametric + k1731-f1-boot-c0-block (both failed/exit2 = README 11.6 predicted file-not-found; enqueue has no --cwd). Do NOT re-split shards, do NOT use experiment_artifact_exclusions.json, do NOT hand-edit a verdict.",
     "last_released_at": "2026-07-28T07:08:42.038520+00:00",
-    "merge_gate_reproduce_spec": "RESOLVED 2026-07-28 by hourly-slot-1-8904dcde: experiments/k1731/reproduce_spec.json committed cd25c295a on the worktree branch; check_experiment_artifacts check --path experiments/k1731 -> PASS (strict). entrypoint.sha256 intentionally omitted (pre-convention spec; skipped-no-sha) rather than synthesised."
+    "merge_gate_reproduce_spec": "RESOLVED 2026-07-28 by hourly-slot-1-8904dcde: experiments/k1731/reproduce_spec.json committed cd25c295a on the worktree branch; check_experiment_artifacts check --path experiments/k1731 -> PASS (strict). entrypoint.sha256 intentionally omitted (pre-convention spec; skipped-no-sha) rather than synthesised.",
+    "rediagnosis_20260728": "原 3-way cycle 前提已過期。實測（slot-2 d5563e60，2026-07-28 CST）：\n(1) knowledge 邊已解 — canonical storage/memory/knowledge.json 含 arm B 條目 5a604fb2（該筆 experiment_id=null，用 experiment_id 查會誤判為 0）。\n(2) artifact gate 已 PASS — check_experiment_artifacts.py check --path <worktree>/experiments/k1731 → PASS（knowledge entry + reproduce_spec.json, spec check: strict）。\n(3) claim surface 已乾淨 — k1731_armB_verification.py 實跑：README claim scan 0 violation、全部數字 traceable；round-10 的 B/D FAIL 已由上一班修好。\n(4) 殘留的唯一 merge 閘 = review-certification：experiments/k1731/review_verdict.json 不存在，experiment_gates.py certify → BLOCKED。\n(5) 該 verdict 產不出來，因為 compute-k1731-armb-codex-review-round-10-1785127371 永久卡在 queued。\n根因不在 k1731，在 compute_queue binding leak（upstream task assign_1c16f316）。\n偵測器：uv run python scripts/audit_compute_queue_bindings.py（本班新增）。\n註：main index 的 foreign staged 內容是併發 fire 的暫態，非本 task 的結構性阻塞。",
+    "blocked_on_task": "assign_1c16f316",
+    "blocked_until": "2026-07-29T09:00:00+08:00",
+    "blocked_reason": "awaiting_prerequisite_fix",
+    "blocked_at": "2026-07-28T09:04:10+00:00",
+    "blocked_note": "merge 僅剩 review-certification 一閘；其 round-10 review job 卡在 compute_queue binding leak（10/10 queued jobs stranded）。上游修復 = assign_1c16f316。偵測器 scripts/audit_compute_queue_bindings.py。knowledge/artifact/claim-surface 三邊本班已實測解除。"
   },
   {
     "id": "article_task_generator_evidence_pointer",
@@ -50335,8 +50347,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51412,13 +51424,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51981,13 +51993,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:02:19.746183+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52052,13 +52064,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:50:00.725419+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52175,13 +52187,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T08:46:12.952187+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 10.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 2.7 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52192,7 +52204,7 @@
     "description": "Implement the next unblocked T40 slice without replanning. Register scripts/record_legacy_retirement_observation.py as an Operations Core-only hourly job after the */5 signal materializer, with no host-cron or piggy-back owner. The recorder must append immutable canonical bundles even while formal owner blockers remain, so blockers are recorded honestly and only the first zero-violation observation can begin the 14-day clean suffix. Add a fail-fast wrapper, writer ownership, runtime/active-job registration, cadence/freshness/ordering regressions, manifest/live wrapper sync, Matt Spec+Standards review, natural fire and observation read-back. Do not retire legacy artifacts, bypass #9/#13/#21/#24/#28/#44/#45, or claim the 14-day window is clean.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "created_at": "2026-07-28T07:45:37.689224+00:00",
     "payload": {
@@ -52203,10 +52215,6 @@
     },
     "created_by": "codex-vscode",
     "issue_ref": "#46",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T07:45:46.964737+00:00",
-    "claim_expires_at": "2026-07-28T09:45:46.964737+00:00",
-    "claim_session_id": "404aaea6cbab",
     "status_history": [
       {
         "ts": "2026-07-28T07:45:46.964760+00:00",
@@ -52219,9 +52227,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T09:05:40.183484+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-28T07:45:50.206040+00:00"
+    "started_at": "2026-07-28T07:45:50.206040+00:00",
+    "completed_at": "2026-07-28T09:05:40.183459+00:00",
+    "result": "Operations Core natural 17:02 fire wrote verified observation bundle 00000001-20260728T090209350893Z-f27970ce4235; schedule receipt attempt 1 exit 0, hashes/modes/readback all verified. Live blockers were honestly recorded (orphan_work=1, unknown_ownership=5), so clean suffix remains 0 and Issue #46 stays OPEN/contained. Commits 9ae555a47, 84adc3d84, fca3c8c5e, 886d9d8d7; 121 related tests and final Matt Spec/Standards PASS.",
+    "issue_disposition": "contained"
   },
   {
     "id": "K1589_article_general",
@@ -52318,12 +52335,23 @@
     "description": "由 alert `host_cron_fail` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n偵測到 host cron 失敗（最新 exit code != 0）。severity=warn（max_consecutive_failures=1；non_hang_failure=False）。\n註：exit=142 = SIGALRM hang-kill，會由下一輪 hourly fire 自我恢復；exit=75 = Claude Max session-limit 額度窗口（排程自我重置，期間由 Codex failover 接手）；這兩類自我恢復碼不論連幾次都只升 warn，不升 critical（真正持續斷線由發文脫班／release_pool_gap 這類 outcome-level dead-man switch 抓）。只有非自我恢復的硬失敗（exit != {142,75}：權限／路徑／FDA／push 錯誤）才升 critical。若非零 exit 已超過下一個預定 fire + 0:10:00，視為 stale marker，不再每小時重判。反覆 142 結構根因見 docs/refactor_plan_hourly_dispatch.md。\n- failing_logs:\n  - storage/logs/cron/legacy_retirement_signal_materialize.log exit=2 at unknown recency=unknown_exited_at\n\n## 影響\n資料收集 / daily_update / release_pool 等 host cron 斷鏈 → 下游 metrics、前端顯示、\nSupabase mirror sync 可能顯示過期資料；若失敗的是 release_pool，會同步觸發\nrelease_pool_gap alert，發文節奏中斷。\n\n## 建議行動\n1. 查失敗 log： tail -20 <failing_log 路徑>\n2. 權限問題（exit=126）： chmod +x scripts/<script>.sh\n3. macOS Sequoia+ FDA（exit=1 + Operation not permitted）：\n   System Settings > Privacy & Security > Full Disk Access 加 script 路徑\n4. 手動跑 failed command 驗證修復： uv run <command>\n5. 比對 canonical schedule： crontab -l  vs config/runtime_schedules.json",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-28T08:01:42.010472+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "host_cron_fail"
+    ],
+    "completed_at": "2026-07-28T09:01:30.888579+00:00",
+    "result": "ordinary alert cleared before dispatch",
+    "status_history": [
+      {
+        "ts": "2026-07-28T09:01:30.888579+00:00",
+        "from": "pending",
+        "to": "succeeded",
+        "by": "alert_remediation_router",
+        "note": "condition_cleared_automatically"
+      }
     ]
   },
   {
@@ -52332,12 +52360,31 @@
     "description": "Root-cause slice discovered during Issue #46 live rollout: Operations Core job legacy_retirement_signal_materialize is declared no_repo_tracked_output, but four signal JSON files plus transaction locks remain Git-tracked and every materialization produces MM churn that PHASE-Z can misattribute. Implement test-first through a canonical migration/projection seam: preserve runtime bytes, permissions, hash-chain/read-back semantics and observer availability; remove these machine-state paths from Git dirty ownership and scheduled-writer candidate sets; do not hand-edit signal JSON or fake clean state. Acceptance requires RED→GREEN regression, Matt Standards+Spec review, production materializer/observer live read-back, git status proof, and Issue #41 remains open unless its full acceptance closes.",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "in_progress",
     "source": "agent",
     "created_at": "2026-07-28T08:08:56.701826+00:00",
     "created_by": "codex-vscode",
     "issue_ref": "#41",
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T09:06:33.913436+00:00",
+    "claim_expires_at": "2026-07-28T11:06:33.913436+00:00",
+    "claim_session_id": "87cfe8d50011",
+    "status_history": [
+      {
+        "ts": "2026-07-28T09:06:33.913451+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T09:06:37.346730+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T09:06:37.346714+00:00"
   },
   {
     "id": "assign_db1a7fe9",
@@ -52378,7 +52425,81 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-28T08:46:30.831370+00:00",
-      "last_seen_at": "2026-07-28T08:46:30.831370+00:00"
+      "last_seen_at": "2026-07-28T08:46:30.831370+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T09:12:26.510510+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_1c16f316",
+    "title": "[P1] compute_queue 靜默停擺：source task 終局後未解綁 → 所有帶 source_task_id 的 job 永久不可執行（10 筆卡 36h）",
+    "description": "# [新架構派發] compute queue：所有帶 source_task_id 的 job 已靜默停擺\n\n## 症狀（live source 讀取，2026-07-28 16:47–17:20 CST）\n\n`compute_queue` 目前 **10 個 job status=queued，0 個 running**。compute worker 本身活著、每 15 分鐘照常起來，但**一個都沒領**：\n\n```\n[wrapper 16:00:02] STARTED ... drain-loop: exit pid=52760 jobs_run=0\n[wrapper 16:15:05] STARTED ... drain-loop: exit pid=72764 jobs_run=0\n[wrapper 16:30:05] STARTED ... drain-loop: exit pid=8797  jobs_run=0\n[wrapper 16:45:05] STARTED ... drain-loop: exit pid=48152 jobs_run=0\n```\n\n四次 tick 全是 `jobs_run=0` 且 `rc=0`，**沒有** `(N left waiting on not_before)` 後綴 —— 也就是這 10 個 job 既不算 ready、也不算 sleeping，是被整個濾掉。從監控角度看起來完全健康。\n\n最舊一筆 `compute-k1731-armb-codex-review-round-10-1785127371` 的 `queued_at = 2026-07-27T04:42:51Z`，**已卡約 36 小時**。\n\n## 根因（已定位到程式層，非推測）\n\n三段連起來：\n\n1. `scripts/compute_queue.py:869` `_link_source_task_record()` 規定：source task 若已是\n   `status=awaiting_agent_job` 且 `compute_job_id` **不等於**本 job id，直接\n   `RuntimeError: source task is not legally bindable`。\n2. `_ready_queued_jobs()`（同檔 2082）在 `if not _reconcile_job_source_task_link(p, j): continue`\n   —— 綁定失敗的 job **既不進 ready、也不計入 sleeping**，靜默 skip。\n3. `run_loop()` 因此印 `jobs_run=0` 並 `return 0`。**失敗完全不可觀測。**\n\n觸發序列：task T 綁 job A → A 進入 terminal（completed / failed）**但沒有解除 T 的綁定**，T 永遠停在\n`awaiting_agent_job` + `compute_job_id=A` → 之後為 T 新 enqueue 的 job B 永遠綁不上 → B 永久不可執行。\n\n逐一回讀確認 **10/10 全中**，且每一個的前手 job 都已是 terminal：\n\n| source task | task status | 綁定的前手 job | 前手 job 狀態 |\n|---|---|---|---|\n| K1715 | awaiting_agent_job | agent-brief_k1715_recert-5cabc2 | **completed** |\n| K1734 | awaiting_agent_job | agent-agent-brief_k1734-205644 | **failed** |\n| K1726 | awaiting_agent_job | agent-brief_k1812_bab_vol-f55e3c | **failed** |\n| K1720 | awaiting_agent_job | agent-agent-brief_k1720-6c33b8-3674b6 | **completed** |\n| K1708_gatecert_s14_rerun | awaiting_agent_job | agent-brief_k1708_s14-3ca4dd | **completed** |\n| assign_k1731_rev9 | awaiting_agent_job | agent-brief_k1731_rev9-c47c03 | **completed** |\n\n另 4 筆同型（signforecast rev3 / snapdup audit / K1731 rev9 / K1731 round-10）；其中\n`agent-signforecast-rev2-remediation` 是變體：`SystemExit: task id not found: signforecast_rev2_remediation`。\n\n**沒有解綁路徑 = 每個 source task 這輩子只能成功跑一個 compute job。** 任何 retry / rev / 第二輪\nreview 都必然卡死。這解釋了為什麼 `--pending-followup` 回空、以及為什麼 K1731 round-9/round-10\n兩份 review 排了一天多都沒動。\n\n## 連帶影響\n\n- **重 compute 與長 agent 這條 lane 實質全停**（只有不帶 `source_task_id` 的 job，例如 lazypack render，還跑得動 —— 15:35 / 15:48 各成功一筆，所以 worker 是活的）。\n- hourly 架構規定所有 heavy compute 與 xhigh/max agent **一律走 queue**，等於這些工作全部進黑洞。\n- 26 個 worktree 中 14 個 idle 15–163 小時、`inc_776caf84f125_e1`（worktree_unmerged）已 aged 147.8h —— 它們的後續工作正是被 enqueue 之後永遠沒跑。\n\n## 狀態\n\n**`contained` 尚未達成 —— 目前僅為 `diagnosed`。** 本班 slot 對 `platform_ops` 一律被\n`supervisor_preassignment_required` 機械拒絕，無法自行改碼，故不繞過，改為升級。\n\n## 建議修法（給接手者）\n\n1. **解綁**：job 進 terminal 時，若 source task 仍 `awaiting_agent_job` 且綁的是本 job，就釋放\n   `compute_job_id` / `blocked_reason`（settlement 缺口，屬「永遠修流程不修資料」的流程層）。\n2. **禁止靜默**：`_ready_queued_jobs` 對 `link=error` 的 job 要計數並在 drain-loop 收尾行印出，\n   不可與 ready/sleeping 一起消失 —— 這次是「看起來健康」才拖了 36 小時。\n3. **回歸驗證**：修完回讀這 10 筆是否真的被領走，而非只看 exit code。\n\n\n來源：hourly dispatch slot-1 job 6cab19c5 於 2026-07-28 16:47-17:20 CST 診斷。本班 slot 對 platform_ops 被 supervisor_preassignment_required 拒絕，故升級不繞過。已寄 CRITICAL 告警（Telegram msg 1545）。",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "pending",
+    "source": "user",
+    "created_at": "2026-07-28T08:54:36.001176+00:00",
+    "created_by": "hourly-slot-1-6cab19c57fd44fb9a981dfde132182f3",
+    "evidence_from_slot2_20260728": "獨立複現（slot-2 d5563e60，2026-07-28 17:0x CST，未 claim 本 task —— platform_ops 對本 slot 機械拒絕，僅附證據）：\n\n**確認範圍：queued=10, startable=0, stranded=10 — 整條佇列 100% 死亡，非部分退化。**\n\n失效點定位到單一述詞：compute_queue._ready_queued_jobs 只放行通過 _source_task_binding_is_valid 的 job，\n該述詞同時要求三條：\n  task.status         == \"awaiting_agent_job\"\n  task.compute_job_id == <本 job id>\n  task.blocked_reason == \"external_compute_job_active\"\n\n主導型態 7/10：job 完成後 binding 未解除 —— source task 保持 status=awaiting_agent_job，但\nblocked_reason 翻成 external_compute_receipt_pending_collection，且 compute_job_id 續釘**已完成的舊 job**。\n於是任何新綁同一 source task 的 job 三條中錯兩條，永久不可啟動。實例：\n  assign_k1731_rev9 → compute_job_id 仍指 agent-brief_k1731_rev9-c47c03（completed），\n  導致 agent-brief_k1731_rev9-87d87e 與 compute-k1731-armb-codex-review-round-10-1785127371 兩筆皆 stranded。\n其餘型態：source task status=failed（2 筆）、source task 已不在池中（1 筆）。\n\n**靜默性才是真正的傷害**：worker 每 tick 印 `no queued jobs` 後 exit 0，與「佇列是空的」無法區分；\ncheck_alerts.py 亦無任何 compute-queue stall 條件 → 死 36h 無人被通知。\n\n偵測器（本班新增，唯讀、不寄信、import compute_queue 自己的述詞以免兩份判定漂移）：\n  uv run python scripts/audit_compute_queue_bindings.py     # exit 1 + 逐筆列出失敗的是哪一條述詞\n  scripts/tests/test_audit_compute_queue_bindings.py        # 7 passed\n\n建議修復後的回歸驗證：上面那行應回 stranded=0；並建議把 queue_dead 接進 check_alerts，\n否則下次靜默停擺仍然只能靠人偶然發現。\n\n下游受害實例：k1731_f1_bootstrap_merge_deadlock 已因此改標 blocked（awaiting_prerequisite_fix），\n其 merge 僅剩 review-certification 一閘，而該 verdict 的 review job 正卡在本缺陷中。"
+  },
+  {
+    "id": "assign_38e4d9b2",
+    "title": "PHASE-Z 卡住檔案 incident（65da4c8165690465）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n13 個未提交檔案不是任何一班 fire 產出的，最長已連續 24 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 24 班\n- src/volpred/ops/next_tasks.py — 24 班\n- storage/drafts/assets/gen_k1366_general_figs.py — 3 班\n- storage/drafts/assets/k1366_general_asset_vol_lifts.png — 3 班\n- storage/drafts/assets/k1366_general_correlation_response.png — 3 班\n- storage/drafts/assets/k1366_general_variance_response.png — 3 班\n- storage/drafts/assets/k1406_general_dip_cost.png — 3 班\n- storage/drafts/assets/k1406_general_winrate_two_yardsticks.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 15 班\n- storage/memory/knowledge.json — 22 班\n- storage/reports/INDEX.md — 13 班\n- storage/reports/index.json — 13 班\n- storage/strategy_metrics.json — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T091226423795Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T09:12:47.414874+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "65da4c8165690465",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/gen_k1366_general_figs.py",
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
+        "storage/drafts/assets/k1366_general_correlation_response.png",
+        "storage/drafts/assets/k1366_general_variance_response.png",
+        "storage/drafts/assets/k1406_general_dip_cost.png",
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 24,
+        "src/volpred/ops/next_tasks.py": 24,
+        "storage/drafts/assets/gen_k1366_general_figs.py": 3,
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png": 3,
+        "storage/drafts/assets/k1366_general_correlation_response.png": 3,
+        "storage/drafts/assets/k1366_general_variance_response.png": 3,
+        "storage/drafts/assets/k1406_general_dip_cost.png": 3,
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png": 3,
+        "storage/logs/trending_primary_source_verification.jsonl": 15,
+        "storage/memory/knowledge.json": 22,
+        "storage/reports/INDEX.md": 13,
+        "storage/reports/index.json": 13,
+        "storage/strategy_metrics.json": 13
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T091226423795Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T09:12:47.401226+00:00",
+      "last_seen_at": "2026-07-28T09:12:47.401226+00:00"
     },
     "priority_capped_from": 1
   }
