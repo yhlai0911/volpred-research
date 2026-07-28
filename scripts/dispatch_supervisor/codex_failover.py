@@ -42,8 +42,8 @@ from __future__ import annotations
 
 import logging
 import os
-import signal
 import shutil
+import signal
 import subprocess
 import time
 from dataclasses import dataclass
@@ -250,6 +250,91 @@ def _read_prompt(prompt_path: Path) -> str:
     return inject_external_report_contract(text)
 
 
+@dataclass
+class _ProviderAuthLeaseGuard:
+    """Own one lease until it is closed or durably handed to a reaper."""
+
+    lease: isolation.ProviderAuthLease | None = None
+    active_pgid: int | None = None
+
+    def bind(self, lease: isolation.ProviderAuthLease | None) -> None:
+        if self.lease is not None:
+            raise RuntimeError("provider auth lease guard is already bound")
+        self.lease = lease
+
+    def finish(
+        self,
+        result: FailoverResult,
+        *,
+        pgid: int | None = None,
+    ) -> FailoverResult:
+        if self.lease is None:
+            return result
+        if self.active_pgid is not None and not result.process_active:
+            return FailoverResult(
+                attempted=result.attempted,
+                recovered=False,
+                exit_code=RC_DISABLED,
+                detail=(
+                    "Codex credential cleanup handoff failed while a process "
+                    "group may still be active; lease remains quarantined"
+                ),
+                duration_s=result.duration_s,
+                output_tail=result.output_tail,
+                process_active=True,
+            )
+        if result.process_active:
+            if pgid is None:
+                self.active_pgid = -1
+                return FailoverResult(
+                    attempted=result.attempted,
+                    recovered=False,
+                    exit_code=RC_DISABLED,
+                    detail=(
+                        "Codex process is active but its process-group identity "
+                        "is unavailable; credential cleanup remains quarantined"
+                    ),
+                    duration_s=result.duration_s,
+                    output_tail=result.output_tail,
+                    process_active=True,
+                )
+            self.active_pgid = pgid
+            isolation.defer_provider_auth_cleanup(self.lease, pgid=pgid)
+            self.lease = None
+            self.active_pgid = None
+            return result
+
+        close_receipt = self.lease.close()
+        if close_receipt.ok:
+            self.lease = None
+            return result
+        return FailoverResult(
+            attempted=result.attempted,
+            recovered=False,
+            exit_code=RC_DISABLED,
+            detail=(
+                "Codex subscription credential lease did not close safely: "
+                f"{close_receipt.reason}"
+            ),
+            duration_s=result.duration_s,
+            output_tail=result.output_tail,
+            process_active=result.process_active,
+        )
+
+    def close_on_unwind(self) -> None:
+        """Exception-safe fallback for every non-descendant terminal path."""
+        if self.lease is None or self.active_pgid is not None:
+            return
+        receipt = self.lease.close()
+        if receipt.ok:
+            self.lease = None
+        else:
+            LOG.error(
+                "Codex auth lease cleanup failed during unwind: %s",
+                receipt.reason,
+            )
+
+
 def run_codex_failover(
     *,
     reason: str,
@@ -265,6 +350,54 @@ def run_codex_failover(
     workdir: Path | None = None,
     isolated_workspace: dict | None = None,
     state_path: Path = state.STATE_PATH,
+) -> FailoverResult:
+    """Try to let ``codex exec`` cover this hourly slot without leaking auth."""
+    lease_guard = _ProviderAuthLeaseGuard()
+    try:
+        return _run_codex_failover_impl(
+            reason=reason,
+            prompt_path=prompt_path,
+            cap_s=cap_s,
+            preflight_timeout_s=preflight_timeout_s,
+            reachability_timeout_s=reachability_timeout_s,
+            enabled=enabled,
+            slot_id=slot_id,
+            job_id=job_id,
+            on_process_started=on_process_started,
+            on_process_finished=on_process_finished,
+            workdir=workdir,
+            isolated_workspace=isolated_workspace,
+            state_path=state_path,
+            lease_guard=lease_guard,
+        )
+    except Exception as exc:  # noqa: BLE001 - public contract is typed, never raises
+        LOG.exception("unexpected Codex failover error")
+        return lease_guard.finish(FailoverResult(
+            attempted=False,
+            recovered=False,
+            exit_code=RC_DISABLED,
+            detail=f"Codex failover internal error: {exc}",
+        ))
+    finally:
+        lease_guard.close_on_unwind()
+
+
+def _run_codex_failover_impl(
+    *,
+    reason: str,
+    prompt_path: Path = PROMPT_PATH,
+    cap_s: int = FAILOVER_CAP_S,
+    preflight_timeout_s: int = PREFLIGHT_TIMEOUT_S,
+    reachability_timeout_s: int = REACHABILITY_TIMEOUT_S,
+    enabled: bool | None = None,
+    slot_id: str | None = None,
+    job_id: str | None = None,
+    on_process_started: Callable[[int, int], bool] | None = None,
+    on_process_finished: Callable[[int], None] | None = None,
+    workdir: Path | None = None,
+    isolated_workspace: dict | None = None,
+    state_path: Path = state.STATE_PATH,
+    lease_guard: _ProviderAuthLeaseGuard,
 ) -> FailoverResult:
     """Try to let `codex exec` cover this hourly slot. Never raises."""
     if enabled is None:
@@ -284,28 +417,10 @@ def run_codex_failover(
     launch_cwd = (workdir or ROOT).resolve()
     child_env = dict(os.environ)
     isolation_receipt: dict[str, str] | None = None
-    auth_lease: isolation.ProviderAuthLease | None = None
+    tracked_pgid: int | None = None
 
     def _finish(result: FailoverResult) -> FailoverResult:
-        nonlocal auth_lease
-        if auth_lease is None:
-            return result
-        close_receipt = auth_lease.close()
-        auth_lease = None
-        if close_receipt.ok:
-            return result
-        return FailoverResult(
-            attempted=result.attempted,
-            recovered=False,
-            exit_code=RC_DISABLED,
-            detail=(
-                "Codex subscription credential lease did not close safely: "
-                f"{close_receipt.reason}"
-            ),
-            duration_s=result.duration_s,
-            output_tail=result.output_tail,
-            process_active=result.process_active,
-        )
+        return lease_guard.finish(result, pgid=tracked_pgid)
 
     if isolated_workspace is not None:
         expected_workspace = Path(
@@ -324,10 +439,10 @@ def run_codex_failover(
             if key.startswith("isolation_")
         }
         try:
-            auth_lease = isolation.materialize_provider_auth(
+            lease_guard.bind(isolation.materialize_provider_auth(
                 isolation_receipt,
                 provider_id="codex-cli",
-            )
+            ))
             child_env = isolation.isolated_environment(
                 child_env,
                 isolation_receipt,
@@ -440,6 +555,7 @@ def run_codex_failover(
             )
             tracked_pid = proc.pid
             pgid = os.getpgid(proc.pid)
+            tracked_pgid = pgid
             if not on_process_started(proc.pid, pgid):
                 ledger_path = termination.ledger_for_state(state_path)
                 intent = termination.arm(

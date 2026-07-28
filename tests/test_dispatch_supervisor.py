@@ -22,6 +22,7 @@ import pytest
 
 from scripts import task_pool_claim
 from scripts.dispatch_supervisor import (
+    auth_lease_reaper,
     claim_release,
     health,
     isolation,
@@ -5958,9 +5959,26 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
             profile_root=root / "profiles",
         )
         profile = Path(prepared.profile_path)
+        authority_home = root / "authority"
+        authority_auth = authority_home / ".codex" / "auth.json"
+        authority_auth.parent.mkdir(parents=True)
+        authority_auth.write_text(
+            json.dumps({
+                "OPENAI_API_KEY": None,
+                "tokens": {
+                    "access_token": "sandbox-access",
+                    "refresh_token": "sandbox-refresh",
+                    "id_token": "sandbox-id",
+                    "account_id": "sandbox-account",
+                },
+            }),
+            encoding="utf-8",
+        )
+        authority_auth.chmod(0o600)
         codex_auth_lease = isolation.materialize_provider_auth(
             prepared,
             provider_id="codex-cli",
+            credential_home=authority_home,
         )
         assert codex_auth_lease is not None
 
@@ -6242,6 +6260,264 @@ def test_codex_auth_lease_reconciles_rotation_then_cleans(
     assert receipt.reconciled is True
     assert json.loads(source.read_text(encoding="utf-8")) == rotated
     assert not destination.exists()
+
+
+def test_codex_auth_authority_allows_only_one_live_lease(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": None,
+            "tokens": {
+                "access_token": "access",
+                "refresh_token": "refresh",
+                "id_token": "id",
+                "account_id": "account",
+            },
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+
+    def prepared(name: str) -> isolation.PreparedIsolation:
+        run_dir = tmp_path / name
+        (run_dir / "home").mkdir(parents=True, mode=0o700, exist_ok=True)
+        return isolation.PreparedIsolation(
+            profile_path=str(run_dir / "sandbox.sb"),
+            run_dir=str(run_dir),
+            synthetic_home=str(run_dir / "home"),
+            tmp_dir=str(run_dir / "tmp"),
+            pycache_dir=str(run_dir / "pycache"),
+            workspace=str(tmp_path / f"{name}-workspace"),
+            canonical_root=str(tmp_path / "repo"),
+        )
+
+    first = isolation.materialize_provider_auth(
+        prepared("run-a"),
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert first is not None
+
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="credential authority is already leased",
+    ):
+        isolation.materialize_provider_auth(
+            prepared("run-b"),
+            provider_id="codex-cli",
+            credential_home=source_home,
+        )
+
+    assert first.close().ok is True
+    second = isolation.materialize_provider_auth(
+        prepared("run-b"),
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert second is not None
+    assert second.close().ok is True
+
+
+def test_codex_auth_close_failure_remains_retryable(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": None,
+            "tokens": {
+                "access_token": "access",
+                "refresh_token": "refresh",
+                "id_token": "id",
+                "account_id": "account",
+            },
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    run_dir = tmp_path / "run"
+    (run_dir / "home").mkdir(parents=True, mode=0o700)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(run_dir / "sandbox.sb"),
+        run_dir=str(run_dir),
+        synthetic_home=str(run_dir / "home"),
+        tmp_dir=str(run_dir / "tmp"),
+        pycache_dir=str(run_dir / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    lease = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+    assert lease is not None
+    destination = Path(lease.destination_path)
+    real_unlink = isolation.os.unlink
+    attempts = 0
+
+    def fail_once(*args, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise OSError("injected cleanup failure")
+        return real_unlink(*args, **kwargs)
+
+    monkeypatch.setattr(isolation.os, "unlink", fail_once)
+
+    first = lease.close()
+    assert first.ok is False
+    assert first.cleaned is False
+    assert destination.exists()
+
+    second = lease.close()
+    assert second.ok is True
+    assert second.cleaned is True
+    assert not destination.exists()
+    assert lease.close() == second
+
+
+def test_default_codex_authority_is_not_the_interactive_codex_home(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(isolation.Path, "home", lambda: tmp_path)
+
+    authority = isolation._credential_home()
+
+    assert authority == (
+        tmp_path / ".volpred" / "secrets" / "provider-auth" / "codex-home"
+    )
+    assert authority != tmp_path
+
+
+def test_codex_authority_bootstrap_is_verified_and_never_overwrites(
+    tmp_path: Path,
+) -> None:
+    interactive_home = tmp_path / "interactive"
+    authority_home = tmp_path / "authority"
+    source = interactive_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": None,
+            "tokens": {
+                "access_token": "access-a",
+                "refresh_token": "refresh-a",
+                "id_token": "id-a",
+                "account_id": "account",
+            },
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+
+    first = isolation.bootstrap_codex_auth_authority(
+        interactive_home=interactive_home,
+        authority_home=authority_home,
+    )
+    target = authority_home / ".codex" / "auth.json"
+
+    assert first["action"] == "provisioned"
+    assert target.read_bytes() == source.read_bytes()
+    assert target.stat().st_mode & 0o777 == 0o600
+    assert isolation.bootstrap_codex_auth_authority(
+        interactive_home=interactive_home,
+        authority_home=authority_home,
+    )["action"] == "already_provisioned"
+
+    changed = json.loads(source.read_text(encoding="utf-8"))
+    changed["tokens"]["access_token"] = "access-b"
+    source.write_text(json.dumps(changed), encoding="utf-8")
+    source.chmod(0o600)
+    with pytest.raises(
+        isolation.IsolationUnavailable,
+        match="refusing to overwrite",
+    ):
+        isolation.bootstrap_codex_auth_authority(
+            interactive_home=interactive_home,
+            authority_home=authority_home,
+        )
+
+
+def test_auth_lease_reaper_requires_two_consecutive_empty_group_reads(
+    monkeypatch,
+) -> None:
+    observations = iter([[777], [], None, [], []])
+    sleeps: list[float] = []
+    monkeypatch.setattr(
+        auth_lease_reaper.procutil,
+        "pgid_members_checked",
+        lambda _pgid: next(observations),
+    )
+    monkeypatch.setattr(
+        auth_lease_reaper.time,
+        "sleep",
+        lambda seconds: sleeps.append(seconds),
+    )
+
+    auth_lease_reaper.wait_until_process_group_drained(888)
+
+    assert len(sleeps) == 5
+
+
+def test_auth_lease_reaper_retries_close_until_terminal_receipt(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    close_attempts = iter([
+        isolation.ProviderAuthCloseReceipt(
+            False, False, False, False, "injected cleanup failure",
+        ),
+        isolation.ProviderAuthCloseReceipt(
+            True, False, False, True, "closed",
+        ),
+    ])
+    written: list[dict] = []
+
+    class FakeLease:
+        def __init__(self, **_kwargs):
+            pass
+
+        def close(self):
+            return next(close_attempts)
+
+    monkeypatch.setattr(
+        auth_lease_reaper,
+        "wait_until_process_group_drained",
+        lambda _pgid: None,
+    )
+    monkeypatch.setattr(
+        auth_lease_reaper.isolation,
+        "ProviderAuthLease",
+        FakeLease,
+    )
+    monkeypatch.setattr(
+        auth_lease_reaper.isolation,
+        "_write_provider_auth_reaper_receipt",
+        lambda _path, payload: written.append(payload),
+    )
+    monkeypatch.setattr(auth_lease_reaper.time, "sleep", lambda _seconds: None)
+    args = SimpleNamespace(
+        receipt_path=str(tmp_path / "receipt.json"),
+        pgid=888,
+        source_home=str(tmp_path / "source"),
+        run_dir=str(tmp_path / "run"),
+        destination_path=str(tmp_path / "run" / "home" / ".codex" / "auth.json"),
+        baseline_sha256="a" * 64,
+        lock_fd=99,
+    )
+
+    assert auth_lease_reaper.reap(args) == 0
+    assert [item["state"] for item in written] == ["cleanup_retry", "cleaned"]
+    assert written[-1]["attempts"] == 2
 
 
 def test_codex_auth_materialization_rejects_symlink_destination(

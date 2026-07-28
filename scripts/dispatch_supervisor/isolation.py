@@ -16,14 +16,16 @@ interfaces with a shell redirect.
 
 from __future__ import annotations
 
-import json
+import fcntl
 import hashlib
+import json
 import os
 import platform
 import secrets
 import stat
 import subprocess
-from dataclasses import asdict, dataclass
+import sys
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -314,11 +316,26 @@ def _prepared_payload(
 
 
 def _credential_home() -> Path:
-    """Host credential root; a seam so tests never inspect the real account."""
-    return Path.home()
+    """Operations Core's single-owner Codex credential authority.
+
+    The interactive Codex app also rotates ``~/.codex/auth.json`` and does not
+    participate in our lock.  Treating that shared file as the authoritative
+    handback target made a baseline-hash check inherently racy.  Production
+    leases therefore originate from a dedicated, owner-only HOME which only
+    this broker may mutate.  Provisioning is explicit; a missing authority
+    fails closed instead of silently copying credentials during a fire.
+    """
+    return (
+        Path.home()
+        / ".volpred"
+        / "secrets"
+        / "provider-auth"
+        / "codex-home"
+    )
 
 
 _MAX_PROVIDER_AUTH_BYTES = 1024 * 1024
+_PROVIDER_AUTH_LOCK_NAME = ".volpred-provider-auth.lock"
 
 
 def _open_directory(path: Path) -> int:
@@ -408,6 +425,51 @@ def _read_private_at(directory_fd: int, name: str) -> bytes:
         os.close(fd)
 
 
+def _acquire_provider_auth_lock(directory_fd: int) -> int:
+    flags = os.O_RDWR | os.O_CREAT
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(
+            _PROVIDER_AUTH_LOCK_NAME,
+            flags,
+            0o600,
+            dir_fd=directory_fd,
+        )
+    except OSError as exc:
+        raise IsolationUnavailable(
+            "cannot open the provider credential authority lock"
+        ) from exc
+    try:
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode) or metadata.st_uid != os.getuid():
+            raise IsolationUnavailable(
+                "provider credential authority lock has unsafe identity"
+            )
+        if stat.S_IMODE(metadata.st_mode) & 0o077:
+            raise IsolationUnavailable(
+                "provider credential authority lock must be owner-only"
+            )
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise IsolationUnavailable(
+                "provider credential authority is already leased"
+            ) from exc
+        return fd
+    except Exception:
+        os.close(fd)
+        raise
+
+
+def _release_provider_auth_lock(fd: int | None) -> None:
+    if fd is None:
+        return
+    try:
+        fcntl.flock(fd, fcntl.LOCK_UN)
+    finally:
+        os.close(fd)
+
+
 def _write_private_at(directory_fd: int, name: str, payload: bytes) -> None:
     temporary = f".{name}.tmp-{os.getpid()}-{secrets.token_hex(6)}"
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -475,28 +537,49 @@ class ProviderAuthCloseReceipt:
     reason: str
 
 
+@dataclass(frozen=True)
+class ProviderAuthHandoffReceipt:
+    reaper_pid: int
+    pgid: int
+    receipt_path: str
+
+
 @dataclass
 class ProviderAuthLease:
-    """One per-fire Codex OAuth copy with rotation handback and cleanup."""
+    """One per-fire Codex OAuth copy held by a single credential authority."""
 
     source_home: str
     run_dir: str
     destination_path: str
     baseline_sha256: str
-    _closed: bool = False
+    _authority_lock_fd: int | None = field(default=None, repr=False)
+    _reconciled: bool = field(default=False, repr=False)
+    _source_advanced: bool = field(default=False, repr=False)
+    _destination_unlinked: bool = field(default=False, repr=False)
+    _terminal_receipt: ProviderAuthCloseReceipt | None = field(
+        default=None,
+        repr=False,
+    )
 
     def close(self) -> ProviderAuthCloseReceipt:
-        if self._closed:
+        """Reconcile and remove the synthetic credential.
+
+        A failed close remains retryable and retains the authority lock.  Only
+        a fully fsynced cleanup becomes terminal; repeated calls then return
+        the exact same receipt rather than inventing a successful
+        ``already_closed`` state.
+        """
+        if self._terminal_receipt is not None:
+            return self._terminal_receipt
+        if self._authority_lock_fd is None:
             return ProviderAuthCloseReceipt(
-                True, False, False, True, "already_closed",
+                False,
+                self._reconciled,
+                self._source_advanced,
+                self._destination_unlinked,
+                "provider credential authority lock is not held",
             )
-        self._closed = True
-        reconciled = False
-        source_advanced = False
-        cleaned = False
-        reason = "closed"
-        error: str | None = None
-        destination_payload: bytes | None = None
+
         destination_dir_fd: int | None = None
         destination_home_fd: int | None = None
         destination_run_fd: int | None = None
@@ -508,63 +591,74 @@ class ProviderAuthLease:
             destination_dir_fd = _open_child_directory(
                 destination_home_fd, ".codex",
             )
-            destination_payload = _read_private_at(
-                destination_dir_fd, "auth.json",
-            )
-            _validate_codex_auth(destination_payload)
-            destination_sha = hashlib.sha256(destination_payload).hexdigest()
-            if destination_sha != self.baseline_sha256:
-                source_home_fd = _open_directory(Path(self.source_home))
-                try:
-                    source_dir_fd = _open_child_directory(
-                        source_home_fd, ".codex",
-                    )
+            if not self._destination_unlinked:
+                destination_payload = _read_private_at(
+                    destination_dir_fd, "auth.json",
+                )
+                _validate_codex_auth(destination_payload)
+                destination_sha = hashlib.sha256(
+                    destination_payload
+                ).hexdigest()
+                if (
+                    destination_sha != self.baseline_sha256
+                    and not self._reconciled
+                    and not self._source_advanced
+                ):
+                    source_home_fd = _open_directory(Path(self.source_home))
                     try:
-                        source_payload = _read_private_at(
-                            source_dir_fd, "auth.json",
+                        source_dir_fd = _open_child_directory(
+                            source_home_fd, ".codex",
                         )
-                        _validate_codex_auth(source_payload)
-                        source_sha = hashlib.sha256(source_payload).hexdigest()
-                        if source_sha == self.baseline_sha256:
-                            _write_private_at(
-                                source_dir_fd,
-                                "auth.json",
-                                destination_payload,
-                            )
-                            verified = _read_private_at(
+                        try:
+                            source_payload = _read_private_at(
                                 source_dir_fd, "auth.json",
                             )
-                            if hashlib.sha256(verified).hexdigest() != destination_sha:
-                                raise IsolationUnavailable(
-                                    "Codex auth rotation handback verification failed"
+                            _validate_codex_auth(source_payload)
+                            source_sha = hashlib.sha256(
+                                source_payload
+                            ).hexdigest()
+                            if source_sha == self.baseline_sha256:
+                                # The lock is held for the complete lease, and
+                                # this source is the dedicated Operations Core
+                                # authority, not the interactive ~/.codex file.
+                                # Thus no other compliant writer can enter
+                                # between this comparison and replacement.
+                                _write_private_at(
+                                    source_dir_fd,
+                                    "auth.json",
+                                    destination_payload,
                                 )
-                            reconciled = True
-                        else:
-                            # Another trusted login advanced the authoritative
-                            # file. Never overwrite a newer credential.
-                            source_advanced = True
-                            reason = "authoritative_source_advanced"
+                                verified = _read_private_at(
+                                    source_dir_fd, "auth.json",
+                                )
+                                if (
+                                    hashlib.sha256(verified).hexdigest()
+                                    != destination_sha
+                                ):
+                                    raise IsolationUnavailable(
+                                        "Codex auth rotation handback "
+                                        "verification failed"
+                                    )
+                                self._reconciled = True
+                            else:
+                                self._source_advanced = True
+                        finally:
+                            os.close(source_dir_fd)
                     finally:
-                        os.close(source_dir_fd)
-                finally:
-                    os.close(source_home_fd)
+                        os.close(source_home_fd)
+                os.unlink("auth.json", dir_fd=destination_dir_fd)
+                self._destination_unlinked = True
+            os.fsync(destination_dir_fd)
         except (IsolationUnavailable, OSError) as exc:
-            error = str(exc)
-            reason = error
+            return ProviderAuthCloseReceipt(
+                ok=False,
+                reconciled=self._reconciled,
+                source_advanced=self._source_advanced,
+                cleaned=False,
+                reason=str(exc),
+            )
         finally:
             if destination_dir_fd is not None:
-                try:
-                    os.unlink("auth.json", dir_fd=destination_dir_fd)
-                    os.fsync(destination_dir_fd)
-                    cleaned = True
-                except OSError as exc:
-                    cleanup_error = f"cleanup failed: {exc}"
-                    error = (
-                        f"{error}; {cleanup_error}"
-                        if error is not None
-                        else cleanup_error
-                    )
-                    reason = error
                 os.close(destination_dir_fd)
             if destination_home_fd is not None:
                 try:
@@ -577,13 +671,216 @@ class ProviderAuthLease:
                 os.close(destination_home_fd)
             if destination_run_fd is not None:
                 os.close(destination_run_fd)
-        return ProviderAuthCloseReceipt(
-            ok=cleaned and error is None,
-            reconciled=reconciled,
-            source_advanced=source_advanced,
-            cleaned=cleaned,
+
+        reason = (
+            "rotation_reconciled"
+            if self._reconciled
+            else (
+                "authoritative_source_advanced"
+                if self._source_advanced
+                else "closed"
+            )
+        )
+        self._terminal_receipt = ProviderAuthCloseReceipt(
+            ok=True,
+            reconciled=self._reconciled,
+            source_advanced=self._source_advanced,
+            cleaned=True,
             reason=reason,
         )
+        _release_provider_auth_lock(self._authority_lock_fd)
+        self._authority_lock_fd = None
+        return self._terminal_receipt
+
+
+def _write_provider_auth_reaper_receipt(
+    path: Path,
+    payload: dict[str, Any],
+) -> None:
+    path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    directory_fd = _open_directory(path.parent)
+    try:
+        _write_private_at(
+            directory_fd,
+            path.name,
+            (json.dumps(payload, sort_keys=True) + "\n").encode("utf-8"),
+        )
+    finally:
+        os.close(directory_fd)
+
+
+def defer_provider_auth_cleanup(
+    lease: ProviderAuthLease,
+    *,
+    pgid: int,
+) -> ProviderAuthHandoffReceipt:
+    """Transfer a live descendant's lease to a detached cleanup owner.
+
+    The reaper inherits the already-held authority lock file descriptor, so
+    there is no unlock/relock window.  It waits for two independently empty
+    process-group reads before reconciling or deleting any credential bytes.
+    """
+    if pgid <= 1:
+        raise IsolationUnavailable("provider auth reaper requires a valid PGID")
+    lock_fd = lease._authority_lock_fd
+    if lock_fd is None:
+        raise IsolationUnavailable(
+            "provider auth lease has no authority lock to transfer"
+        )
+    token = secrets.token_hex(12)
+    receipt_path = (
+        Path.home()
+        / ".volpred"
+        / "logs"
+        / "provider-auth-reapers"
+        / f"{token}.json"
+    )
+    log_path = receipt_path.with_suffix(".log")
+    argv = [
+        sys.executable,
+        "-m",
+        "scripts.dispatch_supervisor.auth_lease_reaper",
+        "--pgid",
+        str(pgid),
+        "--source-home",
+        lease.source_home,
+        "--run-dir",
+        lease.run_dir,
+        "--destination-path",
+        lease.destination_path,
+        "--baseline-sha256",
+        lease.baseline_sha256,
+        "--lock-fd",
+        str(lock_fd),
+        "--receipt-path",
+        str(receipt_path),
+    ]
+    log_path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
+    os.chmod(log_path.parent, 0o700)
+    with log_path.open("ab", buffering=0) as log_handle:
+        try:
+            proc = subprocess.Popen(
+                argv,
+                cwd=str(Path(__file__).resolve().parents[2]),
+                stdin=subprocess.DEVNULL,
+                stdout=log_handle,
+                stderr=subprocess.STDOUT,
+                env={
+                    "PATH": os.defpath,
+                    "PYTHONPATH": str(Path(__file__).resolve().parents[2]),
+                    "PYTHONUNBUFFERED": "1",
+                },
+                pass_fds=(lock_fd,),
+                start_new_session=True,
+                close_fds=True,
+            )
+        except OSError as exc:
+            raise IsolationUnavailable(
+                "cannot start provider auth lease reaper"
+            ) from exc
+    _write_provider_auth_reaper_receipt(
+        receipt_path,
+        {
+            "schema_version": "provider-auth-reaper.v1",
+            "state": "waiting_for_process_group",
+            "reaper_pid": proc.pid,
+            "pgid": pgid,
+            "run_dir": lease.run_dir,
+        },
+    )
+    # The child inherited the same open file description and therefore keeps
+    # the flock continuously.  Drop only this process's descriptor.
+    os.close(lock_fd)
+    lease._authority_lock_fd = None
+    return ProviderAuthHandoffReceipt(
+        reaper_pid=proc.pid,
+        pgid=pgid,
+        receipt_path=str(receipt_path),
+    )
+
+
+def bootstrap_codex_auth_authority(
+    *,
+    interactive_home: Path | None = None,
+    authority_home: Path | None = None,
+) -> dict[str, Any]:
+    """Enroll same-host subscription OAuth into the single-owner authority.
+
+    This is intentionally an explicit deployment operation, not an automatic
+    fire fallback.  It never overwrites an existing authority and must be run
+    independently on each Mac after that host's own Codex subscription login.
+    """
+    source_home = (interactive_home or Path.home()).resolve()
+    target_home = (authority_home or _credential_home()).resolve()
+    if source_home == target_home:
+        raise IsolationUnavailable(
+            "interactive and authority credential homes must be distinct"
+        )
+
+    source_home_fd = _open_directory(source_home)
+    try:
+        source_dir_fd = _open_child_directory(source_home_fd, ".codex")
+        try:
+            payload = _read_private_at(source_dir_fd, "auth.json")
+        finally:
+            os.close(source_dir_fd)
+    finally:
+        os.close(source_home_fd)
+    _validate_codex_auth(payload)
+
+    target_home.mkdir(parents=True, mode=0o700, exist_ok=True)
+    if target_home.is_symlink() or target_home.stat().st_uid != os.getuid():
+        raise IsolationUnavailable(
+            "Codex credential authority HOME has unsafe identity"
+        )
+    os.chmod(target_home, 0o700)
+    target_home_fd = _open_directory(target_home)
+    try:
+        target_dir_fd = _open_child_directory(
+            target_home_fd,
+            ".codex",
+            create=True,
+        )
+        try:
+            try:
+                os.stat(
+                    "auth.json",
+                    dir_fd=target_dir_fd,
+                    follow_symlinks=False,
+                )
+            except FileNotFoundError:
+                has_existing = False
+            else:
+                has_existing = True
+            if has_existing:
+                existing = _read_private_at(target_dir_fd, "auth.json")
+                _validate_codex_auth(existing)
+                if existing != payload:
+                    raise IsolationUnavailable(
+                        "Codex credential authority already exists; refusing "
+                        "to overwrite or silently import a newer login"
+                    )
+                return {
+                    "ok": True,
+                    "action": "already_provisioned",
+                    "authority_home": str(target_home),
+                }
+            _write_private_at(target_dir_fd, "auth.json", payload)
+            verified = _read_private_at(target_dir_fd, "auth.json")
+            if verified != payload:
+                raise IsolationUnavailable(
+                    "Codex credential authority enrollment verification failed"
+                )
+        finally:
+            os.close(target_dir_fd)
+    finally:
+        os.close(target_home_fd)
+    return {
+        "ok": True,
+        "action": "provisioned",
+        "authority_home": str(target_home),
+    }
 
 
 def materialize_provider_auth(
@@ -613,38 +910,49 @@ def materialize_provider_auth(
             "synthetic HOME is outside the exact isolation run directory"
         )
     source_home = credential_home or _credential_home()
-    source_home_fd = _open_directory(source_home)
+    authority_lock_fd: int | None = None
     try:
-        source_dir_fd = _open_child_directory(source_home_fd, ".codex")
+        source_home_fd = _open_directory(source_home)
         try:
-            payload = _read_private_at(source_dir_fd, "auth.json")
-        finally:
-            os.close(source_dir_fd)
-    finally:
-        os.close(source_home_fd)
-    _validate_codex_auth(payload)
-
-    run_dir_fd = _open_directory(run_dir)
-    try:
-        home_fd = _open_child_directory(run_dir_fd, "home")
-        try:
-            destination_dir_fd = _open_child_directory(
-                home_fd, ".codex", create=True,
-            )
+            source_dir_fd = _open_child_directory(source_home_fd, ".codex")
             try:
-                _write_private_at(destination_dir_fd, "auth.json", payload)
+                authority_lock_fd = _acquire_provider_auth_lock(source_dir_fd)
+                payload = _read_private_at(source_dir_fd, "auth.json")
             finally:
-                os.close(destination_dir_fd)
+                os.close(source_dir_fd)
         finally:
-            os.close(home_fd)
-    finally:
-        os.close(run_dir_fd)
+            os.close(source_home_fd)
+        _validate_codex_auth(payload)
+    except Exception:
+        _release_provider_auth_lock(authority_lock_fd)
+        raise
+
+    try:
+        run_dir_fd = _open_directory(run_dir)
+        try:
+            home_fd = _open_child_directory(run_dir_fd, "home")
+            try:
+                destination_dir_fd = _open_child_directory(
+                    home_fd, ".codex", create=True,
+                )
+                try:
+                    _write_private_at(destination_dir_fd, "auth.json", payload)
+                finally:
+                    os.close(destination_dir_fd)
+            finally:
+                os.close(home_fd)
+        finally:
+            os.close(run_dir_fd)
+    except Exception:
+        _release_provider_auth_lock(authority_lock_fd)
+        raise
     destination = synthetic_home / ".codex" / "auth.json"
     return ProviderAuthLease(
         source_home=str(source_home),
         run_dir=str(run_dir),
         destination_path=str(destination),
         baseline_sha256=hashlib.sha256(payload).hexdigest(),
+        _authority_lock_fd=authority_lock_fd,
     )
 
 
@@ -715,8 +1023,11 @@ __all__ = [
     "IsolationUnavailable",
     "PreparedIsolation",
     "ProviderAuthCloseReceipt",
+    "ProviderAuthHandoffReceipt",
     "ProviderAuthLease",
     "SANDBOX_EXEC",
+    "bootstrap_codex_auth_authority",
+    "defer_provider_auth_cleanup",
     "isolated_environment",
     "materialize_provider_auth",
     "prepare",
