@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import ast
+import base64
 import hashlib
 import json
 import os
@@ -114,6 +115,21 @@ def _cli(repo: Path, *args: str, check: bool = False) -> subprocess.CompletedPro
         capture_output=True,
         text=True,
         check=check,
+    )
+
+
+def _cli_with_env(
+    repo: Path,
+    env: dict[str, str],
+    *args: str,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        [sys.executable, str(CLI), *args],
+        cwd=repo,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
     )
 
 
@@ -683,6 +699,48 @@ def test_untrack_preserve_rejects_nonregular_runtime_path(tmp_path: Path) -> Non
     assert runtime.is_symlink()
 
 
+def test_untrack_preserve_rejects_symlinked_runtime_parent(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+
+    external = tmp_path / "external-runtime"
+    external.mkdir()
+    (external / "state.json").write_text("external live\n", encoding="utf-8")
+    runtime.unlink()
+    runtime.parent.rmdir()
+    runtime.parent.symlink_to(external, target_is_directory=True)
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must not traverse runtime parent symlink",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "traverse symlink" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert (external / "state.json").read_text(encoding="utf-8") == (
+        "external live\n"
+    )
+
+
 def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
     tmp_path: Path,
 ) -> None:
@@ -729,7 +787,7 @@ def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
     )
 
     assert blocked.returncode == 2
-    assert "exact scope" in blocked.stderr
+    assert "scope drifted" in blocked.stderr
     assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
     assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == (
         "runtime/state.json\n"
@@ -737,6 +795,274 @@ def test_untrack_preserve_rolls_back_hook_injected_commit_scope(
     assert runtime.read_text(encoding="utf-8") == "live\n"
     assert _run(repo, "git", "show", ":foreign.txt").stdout == staged_blob
     assert foreign.read_text(encoding="utf-8") == "foreign working\n"
+
+
+@pytest.mark.parametrize("crash_phase", ["index_installed", "head_advanced"])
+def test_untrack_preserve_recovers_durable_two_phase_crash(
+    tmp_path: Path,
+    crash_phase: str,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("live\n", encoding="utf-8")
+    runtime.chmod(0o600)
+
+    crash_env = os.environ.copy()
+    crash_env["VOLPRED_ENABLE_FAILURE_INJECTION"] = "1"
+    crash_env["VOLPRED_TEST_UNTRACK_CRASH_PHASE"] = crash_phase
+    crashed = _cli_with_env(
+        repo,
+        crash_env,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "retire with crash recovery",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert crashed.returncode == 86
+    active = (
+        git_writer_lock_path(repo).parent
+        / "volpred-untrack"
+        / "active"
+        / "intent.json"
+    )
+    assert active.is_file()
+    if crash_phase == "index_installed":
+        assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == (
+            expected_head
+        )
+    else:
+        assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() != (
+            expected_head
+        )
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == ""
+    (repo / "foreign-writer.txt").write_text(
+        "must wait for recovery\n",
+        encoding="utf-8",
+    )
+    foreign_writer = _cli(
+        repo,
+        "commit",
+        "--repo",
+        str(repo),
+        "--actor",
+        "foreign-writer",
+        "--message",
+        "must not pass active recovery",
+        "--",
+        "foreign-writer.txt",
+    )
+    assert foreign_writer.returncode == 2
+    assert "requires recovery" in foreign_writer.stderr
+
+    recovered = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--message",
+        "retire with crash recovery",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert recovered.returncode == 0, recovered.stderr
+    assert not active.exists()
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() != expected_head
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == ""
+    assert runtime.read_text(encoding="utf-8") == "live\n"
+    assert stat.S_IMODE(runtime.stat().st_mode) == 0o600
+    receipts = (
+        git_writer_lock_path(repo).parent
+        / "volpred-untrack"
+        / "receipts"
+    )
+    assert any(receipts.glob("*/completed.json"))
+
+
+def test_untrack_preserve_rejects_ambiguous_staged_target(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("staged machine state\n", encoding="utf-8")
+    _run(repo, "git", "add", "-f", "runtime/state.json")
+    runtime.write_text("newer live state\n", encoding="utf-8")
+    before_index = (repo / ".git" / "index").read_bytes()
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--expected-head",
+        expected_head,
+        "--message",
+        "must not discard staged target",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "target index differs from HEAD" in blocked.stderr
+    assert (repo / ".git" / "index").read_bytes() == before_index
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "show", ":runtime/state.json").stdout == (
+        "staged machine state\n"
+    )
+    assert runtime.read_text(encoding="utf-8") == "newer live state\n"
+
+
+def test_untrack_preserve_explicit_staged_target_keeps_recovery_identity(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    runtime.write_text("staged machine state\n", encoding="utf-8")
+    _run(repo, "git", "add", "-f", "runtime/state.json")
+    staged_entry = subprocess.run(
+        ["git", "ls-files", "--stage", "-z", "--", "runtime/state.json"],
+        cwd=repo,
+        capture_output=True,
+        check=True,
+    ).stdout
+    runtime.write_text("newer live state\n", encoding="utf-8")
+
+    committed = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--allow-staged-target",
+        "--message",
+        "explicitly retire staged runtime state",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert committed.returncode == 0, committed.stderr
+    receipt_root = (
+        git_writer_lock_path(repo).parent
+        / "volpred-untrack"
+        / "receipts"
+    )
+    completed = next(receipt_root.glob("*/completed.json"))
+    receipt = json.loads(completed.read_text(encoding="utf-8"))
+    assert base64.b64decode(receipt["target_index_entries_b64"]) == staged_entry
+    assert receipt["target_index_was_head_clean"] is False
+    assert runtime.read_text(encoding="utf-8") == "newer live state\n"
+
+
+def test_untrack_preserve_keeps_unrelated_index_flags(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    foreign = repo / "foreign.txt"
+    foreign.write_text("foreign\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json", "foreign.txt")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    _run(repo, "git", "update-index", "--skip-worktree", "foreign.txt")
+
+    committed = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--message",
+        "retire without losing index flags",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert committed.returncode == 0, committed.stderr
+    assert _run(repo, "git", "ls-files", "-v", "--", "foreign.txt").stdout == (
+        "S foreign.txt\n"
+    )
+
+
+def test_untrack_preserve_restores_runtime_deleted_by_hook(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    runtime = repo / "runtime" / "state.json"
+    runtime.parent.mkdir()
+    runtime.write_text("tracked\n", encoding="utf-8")
+    _run(repo, "git", "add", "runtime/state.json")
+    _run(repo, "git", "commit", "-qm", "add runtime fixture")
+    (repo / ".gitignore").write_text("runtime/\n", encoding="utf-8")
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "ignore runtime fixture")
+    expected_head = _run(repo, "git", "rev-parse", "HEAD").stdout.strip()
+    runtime.write_text("live\n", encoding="utf-8")
+    runtime.chmod(0o600)
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "python3 -c \"from pathlib import Path; "
+        "Path('runtime/state.json').unlink()\"\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+
+    blocked = _cli(
+        repo,
+        "untrack-preserve",
+        "--repo",
+        str(repo),
+        "--actor",
+        "runtime-migration",
+        "--message",
+        "must restore hook-deleted runtime",
+        "--",
+        "runtime/state.json",
+    )
+
+    assert blocked.returncode == 2
+    assert "changed runtime bytes or modes" in blocked.stderr
+    assert _run(repo, "git", "rev-parse", "HEAD").stdout.strip() == expected_head
+    assert _run(repo, "git", "ls-files", "--", "runtime/state.json").stdout == (
+        "runtime/state.json\n"
+    )
+    assert runtime.read_text(encoding="utf-8") == "live\n"
+    assert stat.S_IMODE(runtime.stat().st_mode) == 0o600
 
 
 def test_exact_path_commit_rejects_hook_injected_foreign_path(tmp_path: Path) -> None:

@@ -40,6 +40,10 @@ LOCK_TOKEN_ENV = "VOLPRED_GIT_WRITER_LOCK_TOKEN"
 LOCK_PATH_ENV = "VOLPRED_GIT_WRITER_LOCK_PATH"
 LOCK_FD_ENV = "VOLPRED_GIT_WRITER_LOCK_FD"
 LOCK_CAP_FD_ENV = "VOLPRED_GIT_WRITER_CAP_FD"
+UNTRACK_RECOVERY_ENV = "VOLPRED_GIT_UNTRACK_RECOVERY"
+UNTRACK_ACTIVE_RELATIVE = Path(
+    "volpred-untrack", "active", "intent.json"
+)
 DEFAULT_TIMEOUT_S = 120.0
 DEFAULT_POLL_S = 0.05
 DEFAULT_COMMAND_TIMEOUT_S = 3600.0
@@ -359,6 +363,15 @@ def git_writer_lock(
         current = path.stat()
         if (opened.st_dev, opened.st_ino) != (current.st_dev, current.st_ino):
             raise GitWriterLockError(f"git writer lockfile was replaced: {path}")
+        active_untrack = path.parent / UNTRACK_ACTIVE_RELATIVE
+        if (
+            active_untrack.is_file()
+            and os.environ.get(UNTRACK_RECOVERY_ENV) != "1"
+        ):
+            raise GitWriterLockError(
+                "durable runtime-untrack transaction requires recovery before "
+                f"any other Git writer may proceed: {active_untrack}"
+            )
 
         token = uuid.uuid4().hex
         capability_fd, capability_write_fd = os.pipe()

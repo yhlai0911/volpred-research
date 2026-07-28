@@ -119,3 +119,68 @@ def test_migration_preserves_live_signals_and_is_restartable(tmp_path: Path) -> 
     repeated = json.loads(second.stdout)
     assert repeated["status"] == "already_migrated"
     assert repeated["head_before"] == repeated["head_after"]
+
+
+def test_already_migrated_requires_committed_ignore_policy(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run(repo, "git", "init", "-b", "main", "-q")
+    _run(repo, "git", "config", "user.name", "Migration Test")
+    _run(repo, "git", "config", "user.email", "migration@example.invalid")
+    (repo / "seed.txt").write_text("seed\n", encoding="utf-8")
+    _run(repo, "git", "add", "seed.txt")
+    _run(repo, "git", "commit", "-qm", "seed")
+    info_exclude = repo / ".git" / "info" / "exclude"
+    info_exclude.write_text(
+        "storage/ops/legacy_retirement_signals/\n",
+        encoding="utf-8",
+    )
+
+    blocked = _run(
+        repo,
+        sys.executable,
+        str(MIGRATION),
+        "--repo",
+        str(repo),
+        "--actor",
+        "migration-test",
+        check=False,
+    )
+
+    assert blocked.returncode == 2
+    assert "committed ignore" in blocked.stderr
+
+
+def test_clean_checkout_rerun_materializes_only_ignored_batch_lock(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _run(repo, "git", "init", "-b", "main", "-q")
+    _run(repo, "git", "config", "user.name", "Migration Test")
+    _run(repo, "git", "config", "user.email", "migration@example.invalid")
+    (repo / ".gitignore").write_text(
+        "storage/ops/legacy_retirement_signals/\n",
+        encoding="utf-8",
+    )
+    _run(repo, "git", "add", ".gitignore")
+    _run(repo, "git", "commit", "-qm", "declare signal runtime ownership")
+
+    completed = _run(
+        repo,
+        sys.executable,
+        str(MIGRATION),
+        "--repo",
+        str(repo),
+        "--actor",
+        "migration-test",
+    )
+
+    report = json.loads(completed.stdout)
+    assert report["status"] == "already_migrated"
+    assert report["tracked_before"] == []
+    assert (
+        repo / SIGNAL_DIR / ".batch.lock"
+    ).is_file()
