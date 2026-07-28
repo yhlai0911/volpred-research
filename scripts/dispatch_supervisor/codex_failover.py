@@ -344,6 +344,7 @@ class _ProviderAuthLeaseGuard:
                     leader_started_wall=self.leader_started_wall,
                     receipt_path=exc.receipt_path,
                     reaper_process=exc.reaper_process,
+                    reaper_started_wall=exc.reaper_started_wall,
                 )
                 self.lease = None
                 self.mark_process_group_drained()

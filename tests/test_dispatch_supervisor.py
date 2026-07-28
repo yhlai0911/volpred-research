@@ -6894,14 +6894,26 @@ def test_post_spawn_receipt_failure_quarantines_without_unlock(
         _authority_lock_fd=lock_fd,
     )
 
+    sent_signals: list[int] = []
+
     class UnreapableChild:
+        """A child that swallows every signal and never exits.
+
+        It stands in for ``subprocess.Popen``, so it has to answer the same
+        questions the no-ACK reap path asks of a real handle: ``poll()`` is how
+        that path proves the pid it is about to signal is still the child it
+        spawned, and ``send_signal`` is the syscall the durable-intent owner
+        delegates to. Stubbing only ``terminate``/``kill`` modelled the private
+        shortcut rather than the contract.
+        """
+
         pid = 999
 
-        def terminate(self):
+        def poll(self):
             return None
 
-        def kill(self):
-            return None
+        def send_signal(self, signum):
+            sent_signals.append(signum)
 
         def wait(self, timeout=None):
             raise subprocess.TimeoutExpired("reaper", timeout)
@@ -6946,6 +6958,35 @@ def test_post_spawn_receipt_failure_quarantines_without_unlock(
     assert payload["attempts"] == 1
     assert payload["custody_state"] == "quarantined"
     assert payload["reaper_pid"] == 999
+    assert sent_signals == [signal.SIGTERM, signal.SIGKILL, signal.SIGKILL]
+    termination_events = [
+        json.loads(line)
+        for line in (receipt_path.parent / "termination_intents.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line.strip()
+    ]
+    assert [
+        event["event"] for event in termination_events
+    ] == [
+        "intent_armed",
+        "signal_attempted",
+        "signal_result",
+    ] * 3
+    assert [
+        event["signum"]
+        for event in termination_events
+        if event["event"] == "signal_result"
+    ] == [signal.SIGTERM, signal.SIGKILL, signal.SIGKILL]
+    assert all(
+        event["status"] == "sent"
+        for event in termination_events
+        if event["event"] == "signal_result"
+    )
+    assert {
+        event["target_identity"]
+        for event in termination_events
+    } == {"Mon Jul 28 12:00:01 2026"}
     competing_fd = os.open(lock_path, os.O_RDWR)
     try:
         with pytest.raises(BlockingIOError):
@@ -7133,6 +7174,123 @@ def test_provider_auth_recovery_reclaims_nonterminal_intent(
             receipt_path,
         ),
     ]
+
+
+def test_provider_auth_recovery_preserves_quarantined_reaper_identity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    authority = tmp_path / "authority"
+    (authority / ".codex").mkdir(parents=True)
+    receipt_path = tmp_path / "receipts" / "lease.json"
+    receipt_path.parent.mkdir()
+    payload = {
+        "lease_id": "lease-id",
+        "run_dir": str(tmp_path / "run"),
+        "destination_path": str(tmp_path / "run" / "auth.json"),
+        "baseline_sha256": "a" * 64,
+        "pgid": 888,
+        "leader_pid": 888,
+        "leader_started_wall": "Mon Jul 28 12:00:00 2026",
+    }
+    reaper = object()
+    reaper_started_wall = "Mon Jul 28 12:00:01 2026"
+    quarantined: list[dict[str, object]] = []
+
+    monkeypatch.setattr(
+        isolation,
+        "_load_recoverable_provider_auth_receipts",
+        lambda **_kwargs: ([(receipt_path, payload, False)], 0),
+    )
+    monkeypatch.setattr(
+        isolation,
+        "defer_provider_auth_cleanup",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            isolation.ProviderAuthHandoffQuarantined(
+                "injected no-ACK child",
+                receipt_path=receipt_path,
+                reaper_process=reaper,
+                reaper_started_wall=reaper_started_wall,
+            )
+        ),
+    )
+
+    def capture_quarantine(lease, **kwargs):
+        quarantined.append(kwargs)
+        isolation._release_provider_auth_lock(lease._authority_lock_fd)
+        lease._authority_lock_fd = None
+
+    monkeypatch.setattr(
+        isolation,
+        "quarantine_provider_auth_lease",
+        capture_quarantine,
+    )
+
+    result = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_path.parent,
+    )
+
+    assert result == {"recovered": 0, "active": 1, "invalid": 0}
+    assert quarantined[0]["reaper_process"] is reaper
+    assert quarantined[0]["reaper_started_wall"] == reaper_started_wall
+
+
+def test_provider_auth_recovery_never_signals_reused_quarantine_pid(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    authority = tmp_path / "authority"
+    (authority / ".codex").mkdir(parents=True)
+    receipt_path = tmp_path / "receipts" / "lease.json"
+    receipt_path.parent.mkdir()
+    payload = {
+        "state": "quarantined",
+        "custody_state": "quarantined",
+        "lease_id": "lease-id",
+        "run_dir": str(tmp_path / "run"),
+        "destination_path": str(tmp_path / "run" / "auth.json"),
+        "baseline_sha256": "a" * 64,
+        "pgid": 888,
+        "leader_pid": 888,
+        "leader_started_wall": "Mon Jul 28 12:00:00 2026",
+        "reaper_pid": 999,
+        "reaper_started_wall": "Mon Jul 28 12:00:01 2026",
+    }
+    sent: list[tuple[int, int]] = []
+
+    monkeypatch.setattr(
+        isolation,
+        "_load_recoverable_provider_auth_receipts",
+        lambda **_kwargs: ([(receipt_path, payload, False)], 0),
+    )
+    monkeypatch.setattr(
+        isolation,
+        "_acquire_provider_auth_lock",
+        lambda _fd: (_ for _ in ()).throw(
+            isolation.IsolationUnavailable("provider auth is already leased")
+        ),
+    )
+    monkeypatch.setattr(
+        procutil,
+        "check_identity",
+        lambda _pid, _started_wall: procutil.IDENTITY_MISMATCH,
+    )
+    monkeypatch.setattr(
+        isolation.termination.os,
+        "kill",
+        lambda pid, signum: sent.append((pid, signum)),
+    )
+    monkeypatch.setattr(isolation.time, "sleep", lambda _seconds: None)
+
+    result = isolation.recover_provider_auth_reapers(
+        authority_home=authority,
+        receipt_root=receipt_path.parent,
+    )
+
+    assert result == {"recovered": 0, "active": 1, "invalid": 0}
+    assert sent == []
+    assert not (receipt_path.parent / "termination_intents.jsonl").exists()
 
 
 def test_provider_auth_recovery_is_idempotent_after_unlink_crash(

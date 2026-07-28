@@ -583,6 +583,7 @@ def test_unreapable_no_ack_child_moves_lease_to_supervisor_quarantine(
         started_wall="Mon Jul 28 12:00:00 2026",
     )
     receipt_path = tmp_path / "receipt.json"
+    reaper_started_wall = "Mon Jul 28 12:00:01 2026"
     quarantined: list[tuple] = []
 
     monkeypatch.setattr(
@@ -593,6 +594,7 @@ def test_unreapable_no_ack_child_moves_lease_to_supervisor_quarantine(
                 "injected no-ACK child",
                 receipt_path=receipt_path,
                 reaper_process=proc,
+                reaper_started_wall=reaper_started_wall,
             )
         ),
     )
@@ -618,6 +620,10 @@ def test_unreapable_no_ack_child_moves_lease_to_supervisor_quarantine(
     assert guard.lease is None
     assert quarantined[0][0] is lease
     assert quarantined[0][1]["reaper_process"] is proc
+    assert (
+        quarantined[0][1]["reaper_started_wall"]
+        == reaper_started_wall
+    )
 
 
 def test_spawn_post_popen_probe_error_never_closes_live_auth_early(

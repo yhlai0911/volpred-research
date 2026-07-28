@@ -33,6 +33,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
+from volpred.ops import termination
 from volpred.ops.diagnostics import warn
 
 SANDBOX_EXEC = Path("/usr/bin/sandbox-exec")
@@ -59,9 +60,11 @@ class ProviderAuthHandoffQuarantined(ProviderAuthHandoffError):
         *,
         receipt_path: Path,
         reaper_process: Any,
+        reaper_started_wall: str | None = None,
     ):
         super().__init__(message, receipt_path=receipt_path)
         self.reaper_process = reaper_process
+        self.reaper_started_wall = reaper_started_wall
 
 
 @dataclass(frozen=True)
@@ -776,6 +779,114 @@ class ProviderAuthLease:
         return self._terminal_receipt
 
 
+def _provider_auth_termination_ledger(receipt_path: Path | None) -> Path | None:
+    """Keep the signal evidence beside the custody receipt it explains."""
+    if receipt_path is None:
+        return None
+    return termination.ledger_for_state(receipt_path)
+
+
+def _arm_reaper_termination(
+    pid: int,
+    signum: int,
+    *,
+    reason: str,
+    actor: str,
+    started_wall: str | None,
+    receipt_path: Path | None,
+) -> termination.TerminationIntent:
+    """Arm the durable intent that authorises signalling a cleanup child.
+
+    Every terminating syscall in this module aims at a reaper child that holds
+    the provider-auth lock, so an unrecorded kill is a custody transfer no
+    post-crash reader can reconstruct — which is exactly why
+    ``volpred.ops.termination`` is the only permitted issuer
+    (``scripts/tests/test_termination_intent.py``).  ``started_wall`` is the
+    generation pin the caller vouches for, so a recycled pid cannot inherit an
+    intent armed against the process it replaced — see the two callers below
+    for the two things that can serve as that pin.  One intent per delivered
+    signal, so a retried escalation is a new, separately auditable decision
+    rather than a rejected duplicate attempt.
+    """
+    return termination.arm(
+        target_kind="pid",
+        target_id=int(pid),
+        reason=reason,
+        actor=actor,
+        signal_sequence=[int(signum)],
+        ledger_path=_provider_auth_termination_ledger(receipt_path),
+        target_identity=started_wall or None,
+    )
+
+
+def _signal_reaper_child(
+    pid: int,
+    signum: int,
+    *,
+    reason: str,
+    actor: str,
+    started_wall: str | None,
+    receipt_path: Path | None,
+) -> str:
+    """Signal a cleanup child we know only by the pid on its receipt.
+
+    Nothing here holds the child's handle — a supervisor restart is the reason
+    we are looking at a pid at all — so the start-time fingerprint recorded at
+    spawn is the only thing standing between this signal and a recycled pid.
+    ``send_pid`` re-verifies it immediately before the syscall.
+    """
+    intent = _arm_reaper_termination(
+        pid,
+        signum,
+        reason=reason,
+        actor=actor,
+        started_wall=started_wall,
+        receipt_path=receipt_path,
+    )
+    return termination.send_pid(
+        intent,
+        signum,
+        ledger_path=_provider_auth_termination_ledger(receipt_path),
+    )
+
+
+def _signal_reaper_process(
+    proc: Any,
+    signum: int,
+    *,
+    reason: str,
+    actor: str,
+    started_wall: str | None,
+    receipt_path: Path | None,
+) -> str:
+    """Signal a cleanup child we still hold an unreaped handle for.
+
+    The handle outranks a ``ps`` fingerprint as a generation pin: the kernel
+    cannot recycle a pid until its parent reaps it, and ``Popen.send_signal``
+    is itself a no-op once the child has been reaped.  So the intent is
+    verified against ``poll()`` — positive proof the child we spawned is still
+    the child we are signalling — and the syscall is delegated to the handle
+    that owns its lifecycle, keeping the returncode bookkeeping intact.
+    """
+    pid = int(proc.pid)
+    intent = _arm_reaper_termination(
+        pid,
+        signum,
+        reason=reason,
+        actor=actor,
+        started_wall=started_wall or f"unreaped-handle:pid:{pid}",
+        receipt_path=receipt_path,
+    )
+    return termination.send_member_pid(
+        intent,
+        pid,
+        signum,
+        ledger_path=_provider_auth_termination_ledger(receipt_path),
+        sender=lambda _pid, sent_signum: proc.send_signal(sent_signum),
+        identity_verifier=lambda _pid: proc.poll() is None,
+    )
+
+
 @dataclass
 class _QuarantinedProviderAuthLease:
     lease: ProviderAuthLease
@@ -784,6 +895,7 @@ class _QuarantinedProviderAuthLease:
     leader_started_wall: str
     receipt_path: Path
     reaper_process: Any
+    reaper_started_wall: str | None = None
     empty_group_reads: int = 0
 
 
@@ -801,6 +913,7 @@ def quarantine_provider_auth_lease(
     leader_started_wall: str,
     receipt_path: Path,
     reaper_process: Any,
+    reaper_started_wall: str | None = None,
 ) -> None:
     """Keep the parent FD reachable until health proves cleanup is safe."""
     with _QUARANTINED_PROVIDER_AUTH_LOCK:
@@ -812,6 +925,7 @@ def quarantine_provider_auth_lease(
                 leader_started_wall=leader_started_wall,
                 receipt_path=receipt_path,
                 reaper_process=reaper_process,
+                reaper_started_wall=reaper_started_wall,
             )
         )
 
@@ -838,8 +952,19 @@ def reap_quarantined_provider_auth_leases() -> dict[str, int]:
             continue
         if child_rc is None:
             try:
-                record.reaper_process.kill()
-            except (OSError, ProcessLookupError) as exc:
+                _signal_reaper_process(
+                    record.reaper_process,
+                    signal.SIGKILL,
+                    reason="quarantined reaper did not exit",
+                    actor=f"health:{os.getpid()}",
+                    started_wall=record.reaper_started_wall,
+                    receipt_path=record.receipt_path,
+                )
+            except (
+                termination.TerminationIntentError,
+                OSError,
+                ValueError,
+            ) as exc:
                 warn(
                     "provider-auth-recovery",
                     "quarantined reaper kill retry failed",
@@ -1491,9 +1616,25 @@ def defer_provider_auth_cleanup(
                 except OSError:
                     pass  # silent-ok: best-effort close of a known pipe fd
     if acknowledged != b"READY\n":
+        pinned_started_wall = (
+            str(reaper_started_wall) if reaper_started_wall else None
+        )
+        no_ack_reason = "reaper did not acknowledge durable custody"
+        no_ack_actor = f"handoff-parent:{os.getpid()}"
         try:
-            proc.terminate()
-        except (OSError, ProcessLookupError) as exc:
+            _signal_reaper_process(
+                proc,
+                signal.SIGTERM,
+                reason=no_ack_reason,
+                actor=no_ack_actor,
+                started_wall=pinned_started_wall,
+                receipt_path=receipt_path,
+            )
+        except (
+            termination.TerminationIntentError,
+            OSError,
+            ValueError,
+        ) as exc:
             warn(
                 "provider-auth-recovery",
                 "no-ACK reaper TERM failed; retaining parent custody",
@@ -1508,8 +1649,19 @@ def defer_provider_auth_cleanup(
                 break
             except subprocess.TimeoutExpired:
                 try:
-                    proc.kill()
-                except (OSError, ProcessLookupError) as exc:
+                    _signal_reaper_process(
+                        proc,
+                        signal.SIGKILL,
+                        reason=no_ack_reason,
+                        actor=no_ack_actor,
+                        started_wall=pinned_started_wall,
+                        receipt_path=receipt_path,
+                    )
+                except (
+                    termination.TerminationIntentError,
+                    OSError,
+                    ValueError,
+                ) as exc:
                     warn(
                         "provider-auth-recovery",
                         "no-ACK reaper KILL failed; quarantining custody",
@@ -1532,15 +1684,9 @@ def defer_provider_auth_cleanup(
                         **intent,
                         "state": "handoff_failed",
                         "reaper_pid": proc.pid,
-                        "reaper_started_wall": (
-                            str(reaper_started_wall)
-                            if reaper_started_wall
-                            else None
-                        ),
+                        "reaper_started_wall": pinned_started_wall,
                         "custody_state": "parent",
-                        "reason": (
-                            "reaper did not acknowledge durable custody"
-                        ),
+                        "reason": no_ack_reason,
                     },
                 )
             else:
@@ -1548,12 +1694,8 @@ def defer_provider_auth_cleanup(
                     receipt_path,
                     attempt=handoff_attempt,
                     reaper_pid=proc.pid,
-                    reaper_started_wall=(
-                        str(reaper_started_wall)
-                        if reaper_started_wall
-                        else None
-                    ),
-                    reason="reaper did not acknowledge durable custody",
+                    reaper_started_wall=pinned_started_wall,
+                    reason=no_ack_reason,
                 )
         except Exception as exc:  # custody decision cannot depend on receipt IO
             warn(
@@ -1568,6 +1710,7 @@ def defer_provider_auth_cleanup(
                 "reaped; parent custody quarantined",
                 receipt_path=receipt_path,
                 reaper_process=proc,
+                reaper_started_wall=pinned_started_wall,
             )
         raise ProviderAuthHandoffError(
             "provider auth lease reaper did not acknowledge custody",
@@ -1759,7 +1902,11 @@ def _load_recoverable_provider_auth_receipts(
     return recoverable, invalid
 
 
-def _terminate_durable_quarantine_owner(payload: dict[str, Any]) -> bool:
+def _terminate_durable_quarantine_owner(
+    payload: dict[str, Any],
+    *,
+    receipt_path: Path | None = None,
+) -> bool:
     """PID-generation-safe bounded reap of a no-ACK child after restart."""
     from . import procutil
 
@@ -1780,15 +1927,27 @@ def _terminate_durable_quarantine_owner(payload: dict[str, Any]) -> bool:
         if identity != procutil.IDENTITY_MATCH:
             return False
         try:
-            os.kill(pid, sig)
-        except ProcessLookupError:
-            warn(
-                "provider-auth-recovery",
-                "durable quarantine owner already exited",
-                pid=pid,
+            status = _signal_reaper_child(
+                pid,
+                sig,
+                reason="quarantined custody owner blocks provider auth recovery",
+                actor=f"recovery-parent:{os.getpid()}",
+                started_wall=started_wall,
+                receipt_path=receipt_path,
             )
-            return True
-        except OSError as exc:
+        except termination.TerminationIntentMismatch:
+            # The generation this intent was armed against is gone; the
+            # identity re-probe, not the signal path, decides custody.
+            identity = procutil.check_identity(pid, started_wall)
+            return identity in {
+                procutil.IDENTITY_DEAD,
+                procutil.IDENTITY_MISMATCH,
+            }
+        except (
+            termination.TerminationIntentError,
+            OSError,
+            ValueError,
+        ) as exc:
             warn(
                 "provider-auth-recovery",
                 "durable quarantine owner signal failed",
@@ -1797,6 +1956,13 @@ def _terminate_durable_quarantine_owner(payload: dict[str, Any]) -> bool:
                 err=str(exc),
             )
             return False
+        if status == "gone":
+            warn(
+                "provider-auth-recovery",
+                "durable quarantine owner already exited",
+                pid=pid,
+            )
+            return True
         deadline = time.monotonic() + 2.0
         while time.monotonic() < deadline:
             identity = procutil.check_identity(pid, started_wall)
@@ -1856,6 +2022,7 @@ def _recover_provider_auth_with_held_lock(
             leader_started_wall=str(payload["leader_started_wall"]),
             receipt_path=exc.receipt_path,
             reaper_process=exc.reaper_process,
+            reaper_started_wall=exc.reaper_started_wall,
         )
     return True
 
@@ -1900,7 +2067,9 @@ def recover_provider_auth_reapers(
                     except IsolationUnavailable as exc:
                         if "already leased" not in str(exc):
                             raise
-                        if _terminate_durable_quarantine_owner(payload):
+                        if _terminate_durable_quarantine_owner(
+                            payload, receipt_path=path,
+                        ):
                             lock_fd = None
                             for _retry in range(20):
                                 try:
@@ -1951,6 +2120,7 @@ def recover_provider_auth_reapers(
                         leader_started_wall=str(payload["leader_started_wall"]),
                         receipt_path=exc.receipt_path,
                         reaper_process=exc.reaper_process,
+                        reaper_started_wall=exc.reaper_started_wall,
                     )
                     active += 1
             except Exception:
