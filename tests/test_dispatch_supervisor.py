@@ -6107,6 +6107,92 @@ def test_isolated_environment_scopes_subscription_auth_to_provider(
             assert denied not in env
 
 
+def test_codex_subscription_auth_is_materialized_into_synthetic_home(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": None,
+            "tokens": {
+                "access_token": "subscription-access",
+                "refresh_token": "subscription-refresh",
+                "id_token": "subscription-id",
+                "account_id": "account",
+            },
+            "last_refresh": "2026-07-28T00:00:00Z",
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(tmp_path / "sandbox.sb"),
+        run_dir=str(tmp_path / "run"),
+        synthetic_home=str(tmp_path / "run" / "home"),
+        tmp_dir=str(tmp_path / "run" / "tmp"),
+        pycache_dir=str(tmp_path / "run" / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+
+    destination = isolation.materialize_provider_auth(
+        prepared,
+        provider_id="codex-cli",
+        credential_home=source_home,
+    )
+
+    assert destination == Path(prepared.synthetic_home) / ".codex" / "auth.json"
+    assert destination.read_bytes() == source.read_bytes()
+    assert destination.stat().st_mode & 0o777 == 0o600
+    assert destination.parent.stat().st_mode & 0o777 == 0o700
+
+
+def test_codex_auth_materialization_rejects_api_key_and_partial_receipt(
+    tmp_path: Path,
+) -> None:
+    source_home = tmp_path / "source-home"
+    source = source_home / ".codex" / "auth.json"
+    source.parent.mkdir(parents=True)
+    source.write_text(
+        json.dumps({
+            "OPENAI_API_KEY": "metered-key",
+            "tokens": {"access_token": "oauth"},
+        }),
+        encoding="utf-8",
+    )
+    source.chmod(0o600)
+    partial = {
+        "profile_path": str(tmp_path / "sandbox.sb"),
+        "run_dir": str(tmp_path / "run"),
+        "synthetic_home": str(tmp_path / "run" / "home"),
+    }
+
+    with pytest.raises(isolation.IsolationUnavailable, match="missing fields"):
+        isolation.materialize_provider_auth(
+            partial,
+            provider_id="codex-cli",
+            credential_home=source_home,
+        )
+
+    prepared = isolation.PreparedIsolation(
+        profile_path=str(tmp_path / "sandbox.sb"),
+        run_dir=str(tmp_path / "run"),
+        synthetic_home=str(tmp_path / "run" / "home"),
+        tmp_dir=str(tmp_path / "run" / "tmp"),
+        pycache_dir=str(tmp_path / "run" / "pycache"),
+        workspace=str(tmp_path / "workspace"),
+        canonical_root=str(tmp_path / "repo"),
+    )
+    with pytest.raises(isolation.IsolationUnavailable, match="API key"):
+        isolation.materialize_provider_auth(
+            prepared,
+            provider_id="codex-cli",
+            credential_home=source_home,
+        )
+
+
 def test_isolated_claude_scrubs_before_authorize_and_spawn(
     tmp_path: Path,
     monkeypatch,

@@ -16,8 +16,10 @@ interfaces with a shell redirect.
 
 from __future__ import annotations
 
+import json
 import os
 import platform
+import stat
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -279,6 +281,153 @@ _PROVIDER_AUTH_ENV: dict[str, frozenset[str]] = {
     "agy-cli": frozenset(),
 }
 
+_PREPARED_FIELDS = frozenset({
+    "profile_path",
+    "run_dir",
+    "synthetic_home",
+    "tmp_dir",
+    "pycache_dir",
+    "workspace",
+    "canonical_root",
+})
+
+
+def _prepared_payload(
+    prepared: PreparedIsolation | dict[str, Any],
+) -> dict[str, str]:
+    raw = (
+        prepared.to_dict()
+        if isinstance(prepared, PreparedIsolation)
+        else {str(k): str(v) for k, v in prepared.items()}
+    )
+    missing = sorted(
+        key for key in _PREPARED_FIELDS if not str(raw.get(key) or "").strip()
+    )
+    if missing:
+        raise IsolationUnavailable(
+            f"isolation receipt missing fields: {missing}"
+        )
+    return raw
+
+
+def _credential_home() -> Path:
+    """Host credential root; a seam so tests never inspect the real account."""
+    return Path.home()
+
+
+def _read_private_file(path: Path) -> bytes:
+    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+    try:
+        fd = os.open(path, flags)
+    except OSError as exc:
+        raise IsolationUnavailable(
+            f"subscription credential is unavailable: {path}"
+        ) from exc
+    try:
+        metadata = os.fstat(fd)
+        if not stat.S_ISREG(metadata.st_mode):
+            raise IsolationUnavailable(
+                "subscription credential must be a regular file"
+            )
+        if stat.S_IMODE(metadata.st_mode) & 0o077:
+            raise IsolationUnavailable(
+                "subscription credential permissions must be owner-only"
+            )
+        chunks: list[bytes] = []
+        while True:
+            chunk = os.read(fd, 64 * 1024)
+            if not chunk:
+                break
+            chunks.append(chunk)
+        return b"".join(chunks)
+    finally:
+        os.close(fd)
+
+
+def _write_private_file(path: Path, payload: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    os.chmod(path.parent, 0o700)
+    temporary = path.with_name(f".{path.name}.tmp-{os.getpid()}")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+    try:
+        fd = os.open(temporary, flags, 0o600)
+        try:
+            view = memoryview(payload)
+            while view:
+                written = os.write(fd, view)
+                view = view[written:]
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        os.replace(temporary, path)
+        os.chmod(path, 0o600)
+        directory_fd = os.open(path.parent, os.O_RDONLY)
+        try:
+            os.fsync(directory_fd)
+        finally:
+            os.close(directory_fd)
+    except OSError as exc:
+        temporary.unlink(missing_ok=True)
+        raise IsolationUnavailable(
+            "cannot materialize provider subscription credential"
+        ) from exc
+
+
+def materialize_provider_auth(
+    prepared: PreparedIsolation | dict[str, Any],
+    *,
+    provider_id: str,
+    credential_home: Path | None = None,
+) -> Path | None:
+    """Materialize only the selected provider's subscription credential.
+
+    Codex desktop auth is a rotating OAuth JSON file, not a transferable env
+    bearer. Copying only that mode-600 file into the per-fire synthetic HOME
+    keeps the CLI logged in without exposing host user config or permitting
+    ``CODEX_HOME``/API-key overrides.
+    """
+    raw = _prepared_payload(prepared)
+    if provider_id in {"claude-cli", "agy-cli"}:
+        return None
+    if provider_id != "codex-cli":
+        raise IsolationUnavailable(
+            f"unsupported isolated provider identity: {provider_id!r}"
+        )
+    run_dir = Path(raw["run_dir"]).resolve()
+    synthetic_home = Path(raw["synthetic_home"]).resolve()
+    if synthetic_home != run_dir / "home":
+        raise IsolationUnavailable(
+            "synthetic HOME is outside the exact isolation run directory"
+        )
+    source = (credential_home or _credential_home()) / ".codex" / "auth.json"
+    payload = _read_private_file(source)
+    try:
+        decoded = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise IsolationUnavailable(
+            "Codex subscription credential is not valid JSON"
+        ) from exc
+    if not isinstance(decoded, dict):
+        raise IsolationUnavailable(
+            "Codex subscription credential must be a JSON object"
+        )
+    if decoded.get("OPENAI_API_KEY"):
+        raise IsolationUnavailable(
+            "Codex credential contains an API key; subscription OAuth required"
+        )
+    tokens = decoded.get("tokens")
+    required_tokens = ("access_token", "refresh_token", "id_token", "account_id")
+    if not isinstance(tokens, dict) or any(
+        not isinstance(tokens.get(key), str) or not tokens[key]
+        for key in required_tokens
+    ):
+        raise IsolationUnavailable(
+            "Codex subscription credential is missing OAuth token fields"
+        )
+    destination = synthetic_home / ".codex" / "auth.json"
+    _write_private_file(destination, payload)
+    return destination
+
 
 def isolated_environment(
     base: dict[str, str],
@@ -293,11 +442,7 @@ def isolated_environment(
         raise IsolationUnavailable(
             f"unsupported isolated provider identity: {provider_id!r}"
         ) from exc
-    raw = (
-        prepared.to_dict()
-        if isinstance(prepared, PreparedIsolation)
-        else {str(k): str(v) for k, v in prepared.items()}
-    )
+    raw = _prepared_payload(prepared)
     allowed = _PASSTHROUGH_ENV | provider_auth
     env = {
         key: value
@@ -352,6 +497,7 @@ __all__ = [
     "PreparedIsolation",
     "SANDBOX_EXEC",
     "isolated_environment",
+    "materialize_provider_auth",
     "prepare",
     "sandbox_profile",
     "wrap_command",

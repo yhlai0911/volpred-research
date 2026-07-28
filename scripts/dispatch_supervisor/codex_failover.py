@@ -301,6 +301,10 @@ def run_codex_failover(
             if key.startswith("isolation_")
         }
         try:
+            isolation.materialize_provider_auth(
+                isolation_receipt,
+                provider_id="codex-cli",
+            )
             child_env = isolation.isolated_environment(
                 child_env,
                 isolation_receipt,

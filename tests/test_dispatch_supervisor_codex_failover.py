@@ -229,6 +229,20 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
     monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "claude-only")
     authorized: list[dict[str, str]] = []
     spawned: list[dict[str, str]] = []
+    source_home = tmp_path / "source-home"
+    auth_source = source_home / ".codex" / "auth.json"
+    auth_source.parent.mkdir(parents=True)
+    auth_source.write_text(
+        '{"OPENAI_API_KEY":null,"tokens":{"access_token":"subscription",'
+        '"refresh_token":"refresh","id_token":"id","account_id":"account"}}',
+        encoding="utf-8",
+    )
+    auth_source.chmod(0o600)
+    monkeypatch.setattr(
+        codex_failover.isolation,
+        "_credential_home",
+        lambda: source_home,
+    )
 
     def authorize(codex_bin, environment):
         authorized.append(dict(environment))
@@ -243,15 +257,38 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
 
     def run(argv, **kwargs):
         spawned.append(dict(kwargs["env"]))
+        assert (
+            Path(kwargs["env"]["HOME"]) / ".codex" / "auth.json"
+        ).is_file()
         if argv[-1] == "--version":
             return SimpleNamespace(returncode=0, stdout="codex-cli", stderr="")
-        if _is_work_call(argv):
-            return SimpleNamespace(returncode=0, stdout="done", stderr="")
         return _PROBE_OK
+
+    class FakeProc:
+        pid = 777
+        returncode = 0
+
+        def communicate(self, timeout=None):
+            return "done", None
+
+    def popen(argv, **kwargs):
+        spawned.append(dict(kwargs["env"]))
+        assert _is_work_call(argv)
+        assert (
+            Path(kwargs["env"]["HOME"]) / ".codex" / "auth.json"
+        ).is_file()
+        return FakeProc()
 
     monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
     monkeypatch.setattr(codex_failover, "_authorize_codex", authorize)
     monkeypatch.setattr(codex_failover.subprocess, "run", run)
+    monkeypatch.setattr(codex_failover.subprocess, "Popen", popen)
+    monkeypatch.setattr(codex_failover.os, "getpgid", lambda _pid: 777)
+    monkeypatch.setattr(
+        codex_failover.procutil,
+        "pgid_members_checked",
+        lambda _pgid: [],
+    )
 
     result = codex_failover.run_codex_failover(
         reason="quota",
@@ -260,6 +297,7 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         isolated_workspace=isolated_workspace,
         slot_id="slot-1",
         job_id="abcdef123456",
+        on_process_started=lambda _pid, _pgid: True,
     )
 
     assert result.recovered is True
@@ -268,6 +306,34 @@ def test_isolated_codex_scrubs_before_every_authorize_and_spawn(
         assert "CLAUDE_CODE_OAUTH_TOKEN" not in env
         for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CODEX_API_KEY"):
             assert key not in env
+
+
+def test_isolated_codex_partial_receipt_returns_typed_failure(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(
+        codex_failover.subprocess,
+        "run",
+        lambda *_a, **_k: pytest.fail("malformed receipt must fail before spawn"),
+    )
+
+    result = codex_failover.run_codex_failover(
+        reason="quota",
+        enabled=True,
+        workdir=tmp_path,
+        isolated_workspace={
+            "path": str(tmp_path),
+            "isolation_profile_path": str(tmp_path / "sandbox.sb"),
+            "isolation_run_dir": str(tmp_path / "run"),
+        },
+        slot_id="slot-1",
+        job_id="abcdef123456",
+    )
+
+    assert result.exit_code == codex_failover.RC_DISABLED
+    assert "missing fields" in result.detail
 
 
 def test_tracked_failover_reports_popen_lifecycle(monkeypatch) -> None:
