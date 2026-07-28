@@ -6747,12 +6747,16 @@ def test_auth_lease_reaper_retries_close_until_terminal_receipt(
         "ProviderAuthLease",
         FakeLease,
     )
+    def transition(_path, payload):
+        written.append(payload)
+        return payload
+
     monkeypatch.setattr(
         auth_lease_reaper.isolation,
         "_transition_provider_auth_reaper_receipt",
-        lambda _path, payload: written.append(payload),
+        transition,
     )
-    attempt_numbers = iter([1, 2])
+    attempt_numbers = iter([2])
 
     def begin_attempt(*_args, **_kwargs):
         attempt = next(attempt_numbers)
@@ -6822,6 +6826,113 @@ def test_reaper_receipt_allows_new_attempt_phase_after_cleanup_retry(
     assert payload["state"] == "cleanup_started"
     assert payload["attempts"] == 2
     assert payload["close_phase"] == "unlink_intent"
+
+
+def test_reaper_quarantine_custody_survives_later_cleanup_phase(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "receipt.json"
+    isolation._transition_provider_auth_reaper_receipt(
+        path,
+        {
+            "schema_version": "provider-auth-reaper.v2",
+            "state": "cleanup_retry",
+            "attempts": 2,
+        },
+    )
+
+    isolation._mark_provider_auth_quarantine(
+        path,
+        attempt=2,
+        reaper_pid=999,
+        reaper_started_wall="Mon Jul 28 12:00:01 2026",
+        reason="injected no-ACK child",
+    )
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    assert payload["state"] == "cleanup_retry"
+    assert payload["attempts"] == 2
+    assert payload["custody_state"] == "quarantined"
+    assert payload["reaper_pid"] == 999
+
+
+def test_post_spawn_receipt_failure_quarantines_without_unlock(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    lock_path = tmp_path / "authority.lock"
+    lock_fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
+    fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    lease = isolation.ProviderAuthLease(
+        source_home=str(tmp_path / "authority"),
+        run_dir=str(tmp_path / "run"),
+        destination_path=str(
+            tmp_path / "run" / "home" / ".codex" / "auth.json"
+        ),
+        baseline_sha256="a" * 64,
+        lease_id="post-spawn-failure",
+        _authority_lock_fd=lock_fd,
+    )
+
+    class UnreapableChild:
+        pid = 999
+
+        def terminate(self):
+            return None
+
+        def kill(self):
+            return None
+
+        def wait(self, timeout=None):
+            raise subprocess.TimeoutExpired("reaper", timeout)
+
+    monkeypatch.setattr(
+        isolation.subprocess,
+        "Popen",
+        lambda *_a, **_k: UnreapableChild(),
+    )
+    monkeypatch.setattr(
+        procutil,
+        "get_process_start_wall",
+        lambda _pid: "Mon Jul 28 12:00:01 2026",
+    )
+    transition = isolation._transition_provider_auth_reaper_receipt
+    transition_calls = 0
+
+    def fail_post_spawn_transition(path, payload):
+        nonlocal transition_calls
+        transition_calls += 1
+        if transition_calls == 1:
+            raise OSError("injected receipt failure after spawn")
+        return transition(path, payload)
+
+    monkeypatch.setattr(
+        isolation,
+        "_transition_provider_auth_reaper_receipt",
+        fail_post_spawn_transition,
+    )
+    receipt_path = tmp_path / "receipts" / "lease.json"
+
+    with pytest.raises(isolation.ProviderAuthHandoffQuarantined):
+        isolation.defer_provider_auth_cleanup(
+            lease,
+            pgid=888,
+            leader_pid=888,
+            leader_started_wall="Mon Jul 28 12:00:00 2026",
+            receipt_path=receipt_path,
+        )
+
+    payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+    assert payload["attempts"] == 1
+    assert payload["custody_state"] == "quarantined"
+    assert payload["reaper_pid"] == 999
+    competing_fd = os.open(lock_path, os.O_RDWR)
+    try:
+        with pytest.raises(BlockingIOError):
+            fcntl.flock(competing_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    finally:
+        os.close(competing_fd)
+        isolation._release_provider_auth_lock(lock_fd)
 
 
 def test_synchronous_auth_custody_ignores_receipt_io_failure(
