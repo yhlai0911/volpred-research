@@ -33026,7 +33026,8 @@
     "compute_release_reason": "terminal_receipt_collected",
     "recert2_collected_20260728": "[recert2 收件 — 2026-07-28 22:40 CST, hourly-slot-1-ddc2ab2b]\nrebrief job agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec (exit 0) 已產出**新的**\nreview_verdict.json（6,348 B, mtime 07-28 21:47, reviewed_at 2026-07-28T13:42:00Z,\nreviewer=Codex gpt-5.6-sol/xhigh），取代前班指出的那份 stale 2,108 B 檔。**VERDICT: FAIL**。\n\n【已解決】recert round 1 的 lossy %.10f snapshot serialization 缺陷，Codex 判 RESOLVED：\noption-B 修正（commit fdf4ab297, K1715.py 379a67cd…）為 doc/format-only，\nfloat_format %.10f→%.17g 只動 WRITE path、`if SNAPSHOT.is_file():` read path 未動、\npinned snapshot 檔 byte 未變，無 model/estimation/evaluation/seed/lag 變更、無 lookahead。\n\n【新 blocking defect — estimator lineage mismatch】審查當下 K1715.py 是 cb06895a…，\n**不是**本輪受命認證的 option-B bytes 379a67cd…。fdf4ab297 之後的兩個 commit\n（9926bca90, c9d75cf1d）加了 BFGS min-NLL guard：\n`res = res_bfgs if isfinite(res_bfgs.fun) and res_bfgs.fun <= res_nm.fun else res_nm`，\n先前 res 無條件取 BFGS 結果。這**改變了選中哪一組參數向量**，屬實質估計選擇邏輯，\n不是 doc/format 變更 → 認證對象與實際位元組不符，不可放行。\n\n【本班補充觀察 — 位元組又漂了一次】現在磁碟上的 K1715.py 已是 **133c6f81…**（64,544 B），\n係 agent-brief_k1715_spec_reprocheck-6ff96b 再次改動所致。即 K1715 已連續三代\n（379a67cd → cb06895a → 133c6f81）在認證流程進行中被換掉，每一輪審查的都是隨即過期的位元組。\n這是流程層問題，不是單次疏失。\n\n【與 snapshot 重現結果的交互作用，必須寫明不可略過】snapshot_repro_report.md 宣稱以\n133c6f81… 重跑對 archived results（929cb150…，正是 recert2 reviewed_sha256 記載的同一份）\n達成 max abs dev = 0.0。若估計選擇邏輯真的改變，bit-identical 通常不會發生 ——\n合理解釋是該 guard 在本資料上從未 binding（BFGS 恆優於 NM）。這是**有利但未經證實**的推論：\n下一輪必須**明確檢定該 guard 在全樣本是否曾 binding**（統計 res_bfgs.fun > res_nm.fun 的\n次數）並寫進報告。若曾 binding 而數值仍完全相同，那反而代表比較器沒看到該路徑，要追查。\n不得以「重現是 0.0 所以 lineage 不重要」收尾 —— 那是用結果反推程序正當性。\n\n【狀態】K1715 仍不可 merge、不可寫 knowledge。後續已有 assign_8f1165f3 線上的\nagent-agent-brief_k1715_comparator_closeout-5e83ee 在跑（補 only_archived 差集與\nfail-closed）。下一輪 recert 必須：先凍結一份確定的位元組、再送審、審完前禁止任何人改該檔。\n\n【備註】同綁 source_task=K1715 的另一 job agent-brief_k1715_recert2-e2b9fd（SIGKILL, failed）\n已被本 rebrief 取代，其 followup 因單一 source task 只能被 release 一次而維持 stranded，\n非遺漏（見 assign_617bf749）。",
     "compute_job_id": "agent-brief_k1715_recert3-823a28",
-    "blocked_reason": "external_compute_job_active"
+    "blocked_reason": "external_compute_job_running",
+    "compute_started_at": "2026-07-28T20:30:04Z"
   },
   {
     "id": "K1716",
@@ -54757,7 +54758,7 @@
     "description": "依既有 Matt spec 與 GitHub Issue #23，沿用 Shared Frontend Core 與 Analytics Privacy Tracer，不建立第二套 bookmark/question 真相。以 typed member continuity public seam 實作 save/follow/question/reminder 四條 E2E、anonymous-to-auth idempotent merge、privacy inspect/delete、非投資建議揭露與 v3 漸進導流；先完成 transaction contract、回歸測試與 live read-back，五項 acceptance 未全過不得 close issue。",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "agent",
     "created_at": "2026-07-28T19:06:49.250008+00:00",
     "payload": {
@@ -54771,10 +54772,6 @@
     },
     "created_by": "codex-vscode",
     "issue_ref": "#23",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T19:06:55.373905+00:00",
-    "claim_expires_at": "2026-07-28T21:06:55.373905+00:00",
-    "claim_session_id": "9bc7f09b85f5",
     "status_history": [
       {
         "ts": "2026-07-28T19:06:55.373920+00:00",
@@ -54787,9 +54784,26 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T20:48:19.502074+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-28T19:07:00.160674+00:00"
+    "started_at": "2026-07-28T19:07:00.160674+00:00",
+    "completed_at": "2026-07-28T20:48:19.502054+00:00",
+    "result": "Issue #23 root_cause_fixed_and_verified：save/follow/question/reminder、anonymous merge、privacy read/delete 已通過 PG17 integration、canonical frontend gate 與 Matt Spec/Standards 雙 PASS。Production migrations 20260728190500/20260728191149、service-role rollback E2E 與 Zeabur deployment 6a6913edeac99cc636f25a5d 已回讀。",
+    "issue_disposition": "close",
+    "issue_close_pending": {
+      "issue_disposition": "close",
+      "issue_ref": "#23",
+      "task_id": "assign_83824942",
+      "completion_owner": "codex-vscode",
+      "completed_at": "2026-07-28T20:48:19.502054+00:00",
+      "completion_base_commit": "2776a3d21a091a6d3710fcb7a64fddafc19e3c7f"
+    }
   },
   {
     "id": "k1694_codex_fail_repair_20260729",
