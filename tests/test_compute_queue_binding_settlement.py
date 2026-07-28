@@ -803,6 +803,54 @@ def test_parallel_source_task_fences_do_not_conflict_across_tasks(
     }
 
 
+def test_source_task_fence_takes_queue_lock_before_task_lock(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """The canonical lock order prevents an observable metadata-less fence."""
+    _queue_dir, _pool_path = _patch_state(tmp_path, monkeypatch)
+    tasks = [
+        {
+            "id": "task-a",
+            "status": "awaiting_agent_job",
+            "compute_job_id": "job-a",
+            "blocked_reason": "external_compute_job_active",
+        }
+    ]
+    queue_lock_held = False
+    events: list[str] = []
+
+    @contextmanager
+    def observed_queue_lock(_tpc):
+        nonlocal queue_lock_held
+        assert queue_lock_held is False
+        queue_lock_held = True
+        events.append("queue_enter")
+        try:
+            yield None, tasks
+        finally:
+            events.append("queue_exit")
+            queue_lock_held = False
+
+    real_flock = compute_queue.fcntl.flock
+
+    def observed_flock(fd: int, operation: int) -> None:
+        if operation & compute_queue.fcntl.LOCK_EX:
+            events.append("task_fence_ex")
+            assert queue_lock_held is True
+        real_flock(fd, operation)
+
+    monkeypatch.setattr(compute_queue, "_task_pool_locked_load", observed_queue_lock)
+    monkeypatch.setattr(compute_queue.fcntl, "flock", observed_flock)
+
+    with compute_queue._source_task_execution_fence(
+        {"id": "job-a", "source_task_id": "task-a"}
+    ) as valid:
+        assert valid is True
+
+    assert events[:3] == ["queue_enter", "task_fence_ex", "queue_exit"]
+
+
 def test_readiness_scan_and_worker_settlement_share_process_local_lock(
     tmp_path: Path,
     monkeypatch,
