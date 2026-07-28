@@ -1,45 +1,40 @@
 {
-  "last_seen_run_id": 30375333994,
-  "last_seen_conclusion": "cancelled",
+  "last_seen_run_id": 30378186776,
+  "last_seen_conclusion": "failure",
   "checked_at": "2026-07-14T04:00:45.600228+00:00",
   "last_task_id": "ci-red-30361505394",
   "last_push_remediation": {
-    "attempted": true,
-    "ahead": 2,
-    "head_sha": "15fcd6c8563f7713dfbb6dcc83672fc04b21995d",
-    "pushed": true,
-    "rc": 0,
-    "outcome": "pushed",
-    "ahead_after": 0
+    "attempted": false,
+    "reason": "nothing_unpushed"
   },
   "schema_version": 3,
   "latest_observed_run": {
-    "key": "30376569805:1",
-    "run_id": 30376569805,
+    "key": "30379746686:1",
+    "run_id": 30379746686,
     "attempt": 1,
     "status": "in_progress",
     "conclusion": "",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30376569805",
-    "head_sha": "15fcd6c8563f7713dfbb6dcc83672fc04b21995d",
-    "created_at": "2026-07-28T16:05:22Z",
-    "started_at": "2026-07-28T16:05:22Z",
-    "updated_at": "2026-07-28T16:05:53Z",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30379746686",
+    "head_sha": "7e3bcf47aafc2ee19f2cc9d8464c9356b888a145",
+    "created_at": "2026-07-28T16:45:29Z",
+    "started_at": "2026-07-28T16:45:29Z",
+    "updated_at": "2026-07-28T16:45:33Z",
     "attempt_history_complete": true
   },
   "last_processed_run": {
-    "key": "30375333994:1",
-    "run_id": 30375333994,
+    "key": "30378186776:1",
+    "run_id": 30378186776,
     "attempt": 1,
     "status": "completed",
-    "conclusion": "cancelled",
-    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30375333994",
-    "head_sha": "441c084ae21c3b7166d65459db564f31f4dda91e",
-    "created_at": "2026-07-28T15:50:28Z",
-    "started_at": "2026-07-28T15:50:28Z",
-    "updated_at": "2026-07-28T16:05:41Z",
+    "conclusion": "failure",
+    "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30378186776",
+    "head_sha": "5f7eaf3d85811a17834d80b651b59ca1af594916",
+    "created_at": "2026-07-28T16:25:35Z",
+    "started_at": "2026-07-28T16:25:35Z",
+    "updated_at": "2026-07-28T16:41:50Z",
     "attempt_history_complete": true
   },
-  "updated_at": "2026-07-28T16:15:15.864799+00:00",
+  "updated_at": "2026-07-28T17:00:23.373156+00:00",
   "processed_run_keys": [
     "29304886936:1",
     "29307406826:1",
@@ -407,7 +402,9 @@
     "30364193336:1",
     "30367058019:1",
     "30369937072:1",
-    "30375333994:1"
+    "30375333994:1",
+    "30376569805:1",
+    "30378186776:1"
   ],
   "processing_floor_started_at": "2026-07-14T04:00:43Z",
   "latest_completed_success": {
@@ -623,14 +620,16 @@
       "updated_at": "2026-07-28T13:17:16Z",
       "attempt_history_complete": true
     },
-    "root_cause": "2026-07-28T15:01:55.1379390Z E AssertionError: residue (0, 2) after migration (before (0, 2)); needs_review=[{'id': 'ci-red-30339013855', 'field': 'blocked_reason', 'value': 'worker=success; workspace=remediation_opened; main_sha=', 'reason': 'no mapping defined -- not force-conv",
+    "root_cause": "2026-07-28T16:41:42.8667916Z E AssertionError: residue (0, 2) after migration (before (0, 2)); needs_review=[{'id': 'ci-red-30339013855', 'field': 'blocked_reason', 'value': 'worker=success; workspace=remediation_opened; main_sha=', 'reason': 'no mapping defined -- not force-conv",
     "root_cause_status": "complete",
     "failure_run_keys": [
       "30361505394:1",
       "30363038990:1",
       "30364193336:1",
       "30367058019:1",
-      "30369937072:1"
+      "30369937072:1",
+      "30376569805:1",
+      "30378186776:1"
     ],
     "repair_task_ids": [
       "ci-red-30361505394"
@@ -667,7 +666,7 @@
         "sent_at": "2026-07-28T13:55:16.409865+00:00"
       }
     },
-    "root_cause_run_key": "30369937072:1",
+    "root_cause_run_key": "30378186776:1",
     "declared_output_paths": [
       "scripts/lazypack_layout_guard.py",
       "scripts/tests/test_git_writer_lock.py",
@@ -687,18 +686,18 @@
       "tests/test_shared_lock.py",
       "tests/test_task_status_vocab.py"
     ],
-    "declared_output_paths_run_key": "30369937072:1",
+    "declared_output_paths_run_key": "30378186776:1",
     "latest_failure": {
-      "key": "30369937072:1",
-      "run_id": 30369937072,
+      "key": "30378186776:1",
+      "run_id": 30378186776,
       "attempt": 1,
       "status": "completed",
       "conclusion": "failure",
-      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30369937072",
-      "head_sha": "52d1366fa1b81bd8121d0973c2bb8ce763be719b",
-      "created_at": "2026-07-28T14:45:22Z",
-      "started_at": "2026-07-28T14:45:22Z",
-      "updated_at": "2026-07-28T15:02:03Z",
+      "url": "https://github.com/yhlai0911/volpred-research/actions/runs/30378186776",
+      "head_sha": "5f7eaf3d85811a17834d80b651b59ca1af594916",
+      "created_at": "2026-07-28T16:25:35Z",
+      "started_at": "2026-07-28T16:25:35Z",
+      "updated_at": "2026-07-28T16:41:50Z",
       "attempt_history_complete": true
     },
     "failure_heads": [
@@ -706,9 +705,11 @@
       "c3d78a0e3adf725436a766dfc288e3c47443d4b6",
       "70177e25a020b985d049fb07addfda57c5d146be",
       "2d818f8ba6c6d2833729679095afeb74ee652416",
-      "52d1366fa1b81bd8121d0973c2bb8ce763be719b"
+      "52d1366fa1b81bd8121d0973c2bb8ce763be719b",
+      "15fcd6c8563f7713dfbb6dcc83672fc04b21995d",
+      "5f7eaf3d85811a17834d80b651b59ca1af594916"
     ],
-    "failure_cycles": 5,
+    "failure_cycles": 7,
     "repair_admission": {
       "status": "admitted",
       "task_id": "ci-red-30361505394",
@@ -720,28 +721,24 @@
     "dispatch_request_count": 3,
     "last_dispatch_request_at": "2026-07-28T13:30:32.484277+00:00",
     "push_intent": {
-      "head_sha": "15fcd6c8563f7713dfbb6dcc83672fc04b21995d",
-      "run_key": "30369937072:1",
-      "recorded_at": "2026-07-28T16:05:10.722225+00:00"
+      "head_sha": "7e3bcf47aafc2ee19f2cc9d8464c9356b888a145",
+      "run_key": "30378186776:1",
+      "recorded_at": "2026-07-28T16:45:18.524176+00:00"
     },
     "last_push_remediation": {
-      "attempted": true,
-      "ahead": 2,
-      "head_sha": "15fcd6c8563f7713dfbb6dcc83672fc04b21995d",
-      "pushed": true,
-      "rc": 0,
-      "outcome": "pushed",
-      "ahead_after": 0
+      "attempted": false,
+      "reason": "nothing_unpushed"
     },
-    "last_push_remediation_at": "2026-07-28T16:05:10.722225+00:00",
-    "last_verified_push_head": "15fcd6c8563f7713dfbb6dcc83672fc04b21995d",
+    "last_push_remediation_at": "2026-07-28T16:50:20.001970+00:00",
+    "last_verified_push_head": "7e3bcf47aafc2ee19f2cc9d8464c9356b888a145",
     "remediation_poll_keys": [
       "2026-07-28T13",
       "2026-07-28T14",
       "2026-07-28T15",
-      "2026-07-28T16"
+      "2026-07-28T16",
+      "2026-07-28T17"
     ],
-    "remediation_checks": 4,
+    "remediation_checks": 5,
     "escalation_reason": "repair_task_terminal_failure: ci-red-30361505394"
   }
 }

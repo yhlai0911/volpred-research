@@ -140,6 +140,20 @@ STATUS_NEEDS_REVIEW: dict[str, str] = {}
 # the sanctioned sync_next_tasks_status.py review-gate flow and is legitimized
 # by adding it to BLOCKED_REASONS (process fix, not data fix).
 BLOCKED_REASON_ROW_MAP: dict[str, tuple[str, str]] = {
+    "ci-red-30339013855": (
+        "awaiting_prerequisite_fix",
+        "dispatch-settle remediation copied a free-form workspace diagnostic "
+        "into the controlled blocked_reason field. Producer fixed to use "
+        "awaiting_prerequisite_fix; exact diagnostic preserved in "
+        "blocked_reason_original + blocked_note.",
+    ),
+    "ci-red-30361505394": (
+        "awaiting_prerequisite_fix",
+        "dispatch-settle remediation copied a free-form workspace diagnostic "
+        "into the controlled blocked_reason field. Producer fixed to use "
+        "awaiting_prerequisite_fix; exact diagnostic preserved in "
+        "blocked_reason_original + blocked_note.",
+    ),
     "experiment_scaffold_k400": (
         "deprecated",
         "Free-text explanation of why the task was invalid (K400 extracted "

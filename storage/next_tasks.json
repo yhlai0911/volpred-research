@@ -49600,7 +49600,7 @@
     "description": "compute job `lazypack-mile_3c83e665` 的懶人包 render 鏈（codex → agy → deterministic self-repair）全數失敗，文章 `mile_3c83e665` 因缺 `## 懶人包圖組` 被 release gate 擋住。\n\n先重新驗證：文章若已補上圖組（後續 job 救回），只記錄 no-op 後完成。\n仍缺圖時依序排查：\n1. 讀 stderr 找出 deterministic 層的具體 violation：/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_3c83e665.stderr\n2. plan 檔：storage/lazypack_jobs/mile_3c83e665/runs/lazypack-mile_3c83e665/plan.json — 三層都救不回通常代表 plan 的文案量超過版面（縮短 blocks 文字或拆面板），修 plan 後重新 enqueue。\n3. 若是 renderer bug，修 scripts/lazypack_render.py 並補 regression test。\n重新排隊：uv run python scripts/lazypack_async_render.py enqueue --article-id mile_3c83e665 --plan <fixed-plan>",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "compute_queue_lazypack_failure",
     "created_at": "2026-07-27T12:37:37.202792+00:00",
     "tags": [
@@ -49613,7 +49613,30 @@
       "exit_code": 1,
       "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_3c83e665.stderr"
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-28T16:39:42.315457+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T16:39:42.655522+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T16:40:13.593387+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T16:39:42.655508+00:00",
+    "completed_at": "2026-07-28T16:40:13.593359+00:00",
+    "result": "root_cause_fixed_and_verified: retry 現在驗證 frozen plan、以 durable atomic write 建立每次獨立 run 的 plan/panels，missing/invalid prerequisite fail-closed；告警按唯一 article 聚合。52 tests passed；live r4 completed，4 PNG 可解碼且公開 URL 200，local→Supabase projection SHA 完全一致，alert breached=false。"
   },
   {
     "id": "assign_0b262bdb",
@@ -52661,10 +52684,14 @@
     "dispatch_settled_session_id": "dispatch-50bb61e4-c92bb8d6",
     "started_at": "2026-07-28T12:07:39.051118+00:00",
     "completed_at": "2026-07-28T12:46:33.831807+00:00",
-    "blocked_reason": "worker=success; workspace=remediation_opened; main_sha=",
+    "blocked_reason": "awaiting_prerequisite_fix",
     "result": "worker=success; workspace=remediation_opened; main_sha=",
     "blocked_until": "2026-08-11T13:07:51+00:00",
-    "needs_adjudication": true
+    "needs_adjudication": true,
+    "blocked_reason_original": "worker=success; workspace=remediation_opened; main_sha=",
+    "blocked_note": "worker=success; workspace=remediation_opened; main_sha=",
+    "vocab_migrated_at": "2026-07-28T16:51:48+00:00",
+    "vocab_migration_rationale": "dispatch-settle remediation copied a free-form workspace diagnostic into the controlled blocked_reason field. Producer fixed to use awaiting_prerequisite_fix; exact diagnostic preserved in blocked_reason_original + blocked_note."
   },
   {
     "id": "alert_host_cron_fail_20260728",
@@ -53604,11 +53631,15 @@
       }
     ],
     "completed_at": "2026-07-28T14:05:13.629505+00:00",
-    "blocked_reason": "worker=success; workspace=remediation_opened; main_sha=",
+    "blocked_reason": "awaiting_prerequisite_fix",
     "result": "worker=success; workspace=remediation_opened; main_sha=",
     "dispatch_settled_session_id": "dispatch-24c9dbdc-c448b43e",
     "blocked_until": "2026-08-11T14:07:52+00:00",
-    "needs_adjudication": true
+    "needs_adjudication": true,
+    "blocked_reason_original": "worker=success; workspace=remediation_opened; main_sha=",
+    "blocked_note": "worker=success; workspace=remediation_opened; main_sha=",
+    "vocab_migrated_at": "2026-07-28T16:51:48+00:00",
+    "vocab_migration_rationale": "dispatch-settle remediation copied a free-form workspace diagnostic into the controlled blocked_reason field. Producer fixed to use awaiting_prerequisite_fix; exact diagnostic preserved in blocked_reason_original + blocked_note."
   },
   {
     "id": "assign_33426a3d",
@@ -53966,7 +53997,7 @@
     "description": "## 發生什麼\n7 個未提交檔案不是任何一班 fire 產出的，最長已連續 33 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 5 次觀察到這組）\n- docs/error_log.md — 33 班\n- src/volpred/ops/next_tasks.py — 33 班\n- storage/logs/trending_primary_source_verification.jsonl — 24 班\n- storage/memory/knowledge.json — 31 班\n- storage/reports/INDEX.md — 22 班\n- storage/reports/index.json — 22 班\n- storage/strategy_metrics.json — 22 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T133134702224Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T140531070912Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T144205296293Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T154621219497Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T161722144382Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-28T13:32:11.508365+00:00",
     "payload": {
@@ -54012,7 +54043,11 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T16:19:15.213007+00:00"
+    "updated_at": "2026-07-28T16:19:15.213007+00:00",
+    "superseded_at": "2026-07-28T17:02:13.254079+00:00",
+    "superseded_by": "assign_aaf9449f",
+    "completed_at": "2026-07-28T17:02:13.254079+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
   },
   {
     "id": "assign_965086b2",
@@ -54034,6 +54069,89 @@
     "status": "pending",
     "source": "agent",
     "created_at": "2026-07-28T14:26:31.268279+00:00",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_8516ec4a",
+    "title": "[P0] dispatch remediation settlement 污染 canonical blocked_reason，導致 main CI 永久紅燈",
+    "description": "Root cause of ci-red-30339013855 / ci-red-30361505394. dispatch-settle --disposition remediation copies free-form workspace diagnostics into blocked_reason, violating the frozen canonical vocabulary and causing Test Suite + Data Baseline gates to fail. Implement via existing Matt flow: public seam first; RED regression; producer fix; class sweep of all dispatch-settle dispositions; auditable one-time migration preserving original values; validate real queue residue=0; Standards/Spec review; local/live read-back. Declared implementation paths: scripts/task_pool_claim.py, scripts/migrate_status_vocab.py, tests/test_task_pool_claim.py, tests/test_migrate_status_vocab.py. Do not close #46; status remains contained until GitHub main CI reads green.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-28T16:48:49.178260+00:00",
+    "payload": {
+      "failure_class": "dispatch_settle_blocked_reason_vocab_pollution",
+      "write_intent": "repo_patch",
+      "declared_output_paths": [
+        "scripts/task_pool_claim.py",
+        "scripts/migrate_status_vocab.py",
+        "tests/test_task_pool_claim.py",
+        "tests/test_migrate_status_vocab.py"
+      ]
+    },
+    "parent_task_id": "ci-red-30361505394",
+    "created_by": "codex-vscode",
+    "issue_ref": "#46",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T16:48:54.818098+00:00",
+    "claim_expires_at": "2026-07-28T18:48:54.818098+00:00",
+    "claim_session_id": "1f5b73ae4571",
+    "status_history": [
+      {
+        "ts": "2026-07-28T16:48:54.818117+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T16:48:58.160315+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T16:48:58.160302+00:00"
+  },
+  {
+    "id": "assign_aaf9449f",
+    "title": "PHASE-Z 卡住檔案 incident（6a389c70714eae38）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 34 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 34 班\n- scripts/tests/test_git_writer_lock.py — 3 班\n- src/volpred/ops/next_tasks.py — 34 班\n- storage/logs/trending_primary_source_verification.jsonl — 25 班\n- storage/memory/knowledge.json — 32 班\n- storage/reports/INDEX.md — 23 班\n- storage/reports/index.json — 23 班\n- storage/strategy_metrics.json — 23 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T170122631379Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T17:02:13.268980+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "6a389c70714eae38",
+      "paths": [
+        "docs/error_log.md",
+        "scripts/tests/test_git_writer_lock.py",
+        "src/volpred/ops/next_tasks.py",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 34,
+        "scripts/tests/test_git_writer_lock.py": 3,
+        "src/volpred/ops/next_tasks.py": 34,
+        "storage/logs/trending_primary_source_verification.jsonl": 25,
+        "storage/memory/knowledge.json": 32,
+        "storage/reports/INDEX.md": 23,
+        "storage/reports/index.json": 23,
+        "storage/strategy_metrics.json": 23
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T170122631379Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T17:02:13.254079+00:00",
+      "last_seen_at": "2026-07-28T17:02:13.254079+00:00"
+    },
     "priority_capped_from": 1
   }
 ]
