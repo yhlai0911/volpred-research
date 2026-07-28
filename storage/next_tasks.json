@@ -50347,8 +50347,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51424,13 +51424,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51674,7 +51674,7 @@
     "title": "K1536: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1536 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: K1536 [NULL — results.json verdict=NULL_HIGHER_RV_REJECTED]: 高生物多樣性足跡商品 ETF/ETN 代理（CORN/SOYB/WEAT/CANE/JO/WOOD/DBA）相對控制組商品（GLD/SLV/CPER/USO/UNG/PDBC）的已實現波動率、下行半變異數與自然資本政策事件後定價反應檢驗，全樣本結果拒絕「高生物多樣性足跡商品波動較高」假說。資料源 yfinance adjusted close，2018-01-03至2026-06-22，2,128 個聯集交易日，seed=42。全樣本 Canonical evidence: experiments/k1536/k1536_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
     "priority": 3,
-    "status": "pending",
+    "status": "succeeded",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -51689,7 +51689,30 @@
       "audience-general"
     ],
     "topic_cluster": null,
-    "created_at": "2026-07-28T05:09:21+00:00"
+    "created_at": "2026-07-28T05:09:21+00:00",
+    "status_history": [
+      {
+        "ts": "2026-07-28T09:18:37.526263+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-bdb34d0678734d56bfb56673264da352"
+      },
+      {
+        "ts": "2026-07-28T09:18:41.782037+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-bdb34d0678734d56bfb56673264da352"
+      },
+      {
+        "ts": "2026-07-28T09:22:32.753825+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-bdb34d0678734d56bfb56673264da352"
+      }
+    ],
+    "started_at": "2026-07-28T09:18:41.782022+00:00",
+    "completed_at": "2026-07-28T09:22:32.753800+00:00",
+    "result": "K1536 general-audience 草稿完成：storage/drafts/K1536_general_draft.md + 2 圖（assets/k1536_general_figs.py 程式化產生）。Gates 全過：arc-dedup verdict=clean、layer-2 feed grep 0 命中、anti_ai_gate PASS(warn=1/3)。Evidence：全樣本 HAC(21) RV 差 -0.0754 (t=-7.51, p=5.8e-14)、下行半變異數 -0.0449 (t=-6.32)；6 事件拔靴 5,000 次 log RV ratio +0.2426 (p=0.283, CI 涵蓋 0) 如實寫為檢定力不足。所有數字回讀 k1536_results.json 核對。未發佈 feed（daily_article 進 draft pool，由 release cron 發）。"
   },
   {
     "id": "ci-red-30330338914",
@@ -51993,13 +52016,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:02:19.746183+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52064,13 +52087,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T06:50:00.725419+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -52187,13 +52210,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T08:46:12.952187+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52429,13 +52452,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T09:12:26.510510+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 16.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 18.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 4.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 3.1 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -52458,7 +52481,7 @@
     "description": "## 發生什麼\n13 個未提交檔案不是任何一班 fire 產出的，最長已連續 24 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 24 班\n- src/volpred/ops/next_tasks.py — 24 班\n- storage/drafts/assets/gen_k1366_general_figs.py — 3 班\n- storage/drafts/assets/k1366_general_asset_vol_lifts.png — 3 班\n- storage/drafts/assets/k1366_general_correlation_response.png — 3 班\n- storage/drafts/assets/k1366_general_variance_response.png — 3 班\n- storage/drafts/assets/k1406_general_dip_cost.png — 3 班\n- storage/drafts/assets/k1406_general_winrate_two_yardsticks.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 15 班\n- storage/memory/knowledge.json — 22 班\n- storage/reports/INDEX.md — 13 班\n- storage/reports/index.json — 13 班\n- storage/strategy_metrics.json — 13 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T091226423795Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "superseded",
     "source": "phase_z",
     "created_at": "2026-07-28T09:12:47.414874+00:00",
     "payload": {
@@ -52499,7 +52522,81 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-28T09:12:47.401226+00:00",
-      "last_seen_at": "2026-07-28T09:12:47.401226+00:00"
+      "last_seen_at": "2026-07-28T09:12:47.401226+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T09:25:00.503893+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 16.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 18.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/gen_k1366_general_figs.py: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1366_general_correlation_response.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1366_general_variance_response.png: 已保存，且 2.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1406_general_dip_cost.png: 已保存，且 1.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png: 已保存，且 1.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 11.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 4.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.3 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1,
+    "superseded_at": "2026-07-28T09:25:26.615406+00:00",
+    "superseded_by": "assign_44aca2a6",
+    "completed_at": "2026-07-28T09:25:26.615406+00:00",
+    "result": "subsumed_by_wider_stuck_path_set"
+  },
+  {
+    "id": "assign_44aca2a6",
+    "title": "PHASE-Z 卡住檔案 incident（28ab2dec74abda06）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n14 個未提交檔案不是任何一班 fire 產出的，最長已連續 25 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 25 班\n- experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json — 3 班\n- src/volpred/ops/next_tasks.py — 25 班\n- storage/drafts/assets/gen_k1366_general_figs.py — 4 班\n- storage/drafts/assets/k1366_general_asset_vol_lifts.png — 4 班\n- storage/drafts/assets/k1366_general_correlation_response.png — 4 班\n- storage/drafts/assets/k1366_general_variance_response.png — 4 班\n- storage/drafts/assets/k1406_general_dip_cost.png — 4 班\n- storage/drafts/assets/k1406_general_winrate_two_yardsticks.png — 4 班\n- storage/logs/trending_primary_source_verification.jsonl — 16 班\n- storage/memory/knowledge.json — 23 班\n- storage/reports/INDEX.md — 14 班\n- storage/reports/index.json — 14 班\n- storage/strategy_metrics.json — 14 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T092500426365Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T09:25:26.628484+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "28ab2dec74abda06",
+      "paths": [
+        "docs/error_log.md",
+        "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/gen_k1366_general_figs.py",
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
+        "storage/drafts/assets/k1366_general_correlation_response.png",
+        "storage/drafts/assets/k1366_general_variance_response.png",
+        "storage/drafts/assets/k1406_general_dip_cost.png",
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 25,
+        "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json": 3,
+        "src/volpred/ops/next_tasks.py": 25,
+        "storage/drafts/assets/gen_k1366_general_figs.py": 4,
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png": 4,
+        "storage/drafts/assets/k1366_general_correlation_response.png": 4,
+        "storage/drafts/assets/k1366_general_variance_response.png": 4,
+        "storage/drafts/assets/k1406_general_dip_cost.png": 4,
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png": 4,
+        "storage/logs/trending_primary_source_verification.jsonl": 16,
+        "storage/memory/knowledge.json": 23,
+        "storage/reports/INDEX.md": 14,
+        "storage/reports/index.json": 14,
+        "storage/strategy_metrics.json": 14
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T092500426365Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T09:25:26.615406+00:00",
+      "last_seen_at": "2026-07-28T09:25:26.615406+00:00"
     },
     "priority_capped_from": 1
   }
