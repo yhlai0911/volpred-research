@@ -50213,8 +50213,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 8.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 10.4 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 10.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 12.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51038,7 +51038,7 @@
   {
     "id": "assign_b48f6bac",
     "title": "PHASE-Z 卡住檔案 incident（f940335a9db363ed）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 14 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 14 班\n- src/volpred/ops/next_tasks.py — 14 班\n- storage/drafts/assets/k1710_overnight_edge.png — 10 班\n- storage/logs/trending_primary_source_verification.jsonl — 5 班\n- storage/memory/knowledge.json — 12 班\n- storage/reports/INDEX.md — 3 班\n- storage/reports/index.json — 3 班\n- storage/strategy_metrics.json — 3 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T020733505311Z:<路徑>`",
+    "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 15 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 15 班\n- src/volpred/ops/next_tasks.py — 15 班\n- storage/drafts/assets/k1710_overnight_edge.png — 11 班\n- storage/logs/trending_primary_source_verification.jsonl — 6 班\n- storage/memory/knowledge.json — 13 班\n- storage/reports/INDEX.md — 4 班\n- storage/reports/index.json — 4 班\n- storage/strategy_metrics.json — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T020733505311Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T030758815603Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
     "status": "pending",
@@ -51058,22 +51058,51 @@
         "storage/strategy_metrics.json"
       ],
       "streaks": {
-        "docs/error_log.md": 14,
-        "src/volpred/ops/next_tasks.py": 14,
-        "storage/drafts/assets/k1710_overnight_edge.png": 10,
-        "storage/logs/trending_primary_source_verification.jsonl": 5,
-        "storage/memory/knowledge.json": 12,
-        "storage/reports/INDEX.md": 3,
-        "storage/reports/index.json": 3,
-        "storage/strategy_metrics.json": 3
+        "docs/error_log.md": 15,
+        "src/volpred/ops/next_tasks.py": 15,
+        "storage/drafts/assets/k1710_overnight_edge.png": 11,
+        "storage/logs/trending_primary_source_verification.jsonl": 6,
+        "storage/memory/knowledge.json": 13,
+        "storage/reports/INDEX.md": 4,
+        "storage/reports/index.json": 4,
+        "storage/strategy_metrics.json": 4
       },
       "quarantine_refs": [
-        "refs/volpred/quarantine/20260728T020733505311Z"
+        "refs/volpred/quarantine/20260728T020733505311Z",
+        "refs/volpred/quarantine/20260728T030758815603Z"
       ],
-      "fires": 1,
+      "fires": 2,
       "first_seen_at": "2026-07-28T02:07:40.364020+00:00",
-      "last_seen_at": "2026-07-28T02:07:40.364020+00:00"
+      "last_seen_at": "2026-07-28T03:08:05.879047+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 10.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 12.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1710_overnight_edge.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 5.1 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 10.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 3.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 3.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 3.0 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
     },
+    "priority_capped_from": 1,
+    "updated_at": "2026-07-28T03:08:05.879047+00:00"
+  },
+  {
+    "id": "release_deadlock_repair_20260728_03",
+    "title": "【P1 自動補救】release 死鎖：修好被內容閘門擋住的草稿",
+    "description": "release_pool 死鎖：草稿池有 1 篇、eligible=0（due_now=true），其中 1 篇是被**內容品質閘門**擋住，不是缺稿。\n\n- `mile_3c83e665` (general, 已被擋 2 次) [lazypack_missing] 資金費率能預測比特幣波動嗎？我認真拿六年數據測了這個「聰明錢訊號」\n    missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n**不要再寫新稿**——寫新的不會解除這些擋點。逐篇修：\n- `lazypack_missing`：該篇從未進 compute_queue（storage/lazypack_jobs/<id>/ 不存在）。備好 plan JSON 後跑 `scripts/lazypack_async_render.py enqueue --article-id <id> --experiment <K> --plan <plan.json>`。\n- `anti_ai_style`：照 `.claude/skills/anti-ai-style/references/editor-sop.md` 改寫犯規句，**不得**放寬閘門。\n改完直接 `uv run volpred ops release-pool-by-settings --force` 驗證真的放得出去。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "auto_remediation",
+    "created_at": "2026-07-28T03:00:31.526465+00:00",
+    "blocked_article_ids": [
+      "mile_3c83e665"
+    ],
+    "trigger": "release_pool_content_gate_deadlock",
     "priority_capped_from": 1
   }
 ]
