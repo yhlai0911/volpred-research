@@ -6180,6 +6180,8 @@ def test_isolated_environment_scopes_subscription_auth_to_provider(
     assert claude_env["TMPDIR"] == str(tmp_path / "tmp")
     assert claude_env["CLAUDE_CODE_TMPDIR"] == str(tmp_path / "tmp")
     assert claude_env["CLAUDE_TMPDIR"] == str(tmp_path / "tmp")
+    assert "CLAUDE_CODE_TMPDIR" not in codex_env
+    assert "CLAUDE_TMPDIR" not in codex_env
     assert claude_env["VOLPRED_ACTOR"] == "dispatch-supervisor"
     assert claude_env["VOLPRED_TASK_CLAIM_OWNER"] == "dispatch-eff32f3b"
     assert claude_env["VOLPRED_DISPATCH_JOB_ID"] == "eff32f3b"
