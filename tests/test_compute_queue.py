@@ -87,6 +87,27 @@ def test_acquire_lock_warns_when_lock_cannot_be_written(
     assert "FileNotFoundError" in captured.err
 
 
+def test_receipt_lock_is_reentrant_within_one_thread(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    """Composite producers may call the queue writer while holding its lock."""
+    _patch_queue_paths(tmp_path, monkeypatch)
+    completed = threading.Event()
+
+    def nested_lock() -> None:
+        with module._receipt_lock():
+            with module._receipt_lock():
+                completed.set()
+
+    thread = threading.Thread(target=nested_lock, daemon=True)
+    thread.start()
+    thread.join(timeout=1)
+
+    assert completed.is_set(), "nested receipt lock deadlocked its own process"
+    assert not thread.is_alive()
+
+
 def _queued_stub_job(
     queue_dir: Path,
     log_dir: Path,

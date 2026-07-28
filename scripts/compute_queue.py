@@ -153,6 +153,7 @@ SOURCE_TASK_CREATION_GRACE = timedelta(minutes=5)
 # canonical task file while a sibling thread is truncating and rewriting it.
 _SOURCE_TASK_QUEUE_THREAD_LOCK = threading.RLock()
 _RECEIPT_THREAD_LOCK = threading.RLock()
+_RECEIPT_LOCK_LOCAL = threading.local()
 
 
 @dataclass(frozen=True)
@@ -332,18 +333,33 @@ def _write_job_file(path: Path, payload: dict[str, Any]) -> None:
 
 @contextmanager
 def _receipt_lock():
-    """Serialize receipt read/merge/write operations across threads/processes."""
+    """Serialize receipt writes and allow same-thread composite transactions.
+
+    ``flock`` is not reentrant when the same process opens a second file
+    descriptor on macOS. Composite producers such as lazypack intentionally
+    hold this transaction while calling the canonical queue writer, so a
+    same-thread nested acquisition must reuse the outer kernel lease.
+    """
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
     lock_path = QUEUE_DIR / ".receipts.lock"
-    with _RECEIPT_THREAD_LOCK, lock_path.open(
-        "a+",
-        encoding="utf-8",
-    ) as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        try:
-            yield
-        finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    with _RECEIPT_THREAD_LOCK:
+        depth = int(getattr(_RECEIPT_LOCK_LOCAL, "depth", 0))
+        if depth:
+            _RECEIPT_LOCK_LOCAL.depth = depth + 1
+            try:
+                yield
+            finally:
+                _RECEIPT_LOCK_LOCAL.depth = depth
+            return
+
+        with lock_path.open("a+", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            _RECEIPT_LOCK_LOCAL.depth = 1
+            try:
+                yield
+            finally:
+                _RECEIPT_LOCK_LOCAL.depth = 0
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def _normalize_output_path(raw: str | Path) -> str:
