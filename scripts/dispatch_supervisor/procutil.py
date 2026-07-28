@@ -23,6 +23,11 @@ from volpred.ops import termination
 
 LOG = logging.getLogger(__name__)
 
+# Keep OS process-table probes independent from payload runners that also use
+# the stdlib subprocess module. Binding the adapter once prevents a narrow
+# job-runner test double in another module from replacing `ps` transitively.
+_run_ps_probe = subprocess.run
+
 
 class _ProbeFailedType:
     """Sentinel: the `ps` subprocess call itself could not be completed
@@ -57,7 +62,7 @@ def get_process_start_wall(pid: int) -> str | None:
     if pid <= 0:
         return None
     try:
-        result = subprocess.run(
+        result = _run_ps_probe(
             ["ps", "-o", "lstart=", "-p", str(pid)],
             capture_output=True, text=True, timeout=5,
         )
@@ -133,7 +138,7 @@ def pgid_members_checked(pgid: int) -> list[int] | None:
     if pgid <= 0:
         return []
     try:
-        result = subprocess.run(
+        result = _run_ps_probe(
             ["ps", "-o", "pid=,stat=", "-g", str(pgid)],
             capture_output=True, text=True, timeout=5,
         )
@@ -279,7 +284,7 @@ def live_pids(pids: list[int]) -> list[int] | None:
     if not pids:
         return []
     try:
-        result = subprocess.run(
+        result = _run_ps_probe(
             ["ps", "-o", "pid=,stat=", "-p", ",".join(str(p) for p in pids)],
             capture_output=True, text=True, timeout=5,
         )
@@ -317,7 +322,7 @@ def descendants_of(root_pid: int) -> list[int] | None:
     if root_pid <= 0:
         return []
     try:
-        result = subprocess.run(
+        result = _run_ps_probe(
             ["ps", "-eo", "pid=,ppid="], capture_output=True, text=True, timeout=5,
         )
     except (OSError, subprocess.TimeoutExpired) as exc:

@@ -146,7 +146,7 @@ def test_run_loop_drains_queue_and_bounds_parallelism(tmp_path: Path, monkeypatc
             gauge["current"] -= 1
         return SimpleNamespace(returncode=0)
 
-    monkeypatch.setattr(module.subprocess, "run", fake_sleep_job)
+    monkeypatch.setattr(module, "_run_job_subprocess", fake_sleep_job)
 
     assert module.run_loop(SimpleNamespace(max_parallel=2)) == 0
 
@@ -715,7 +715,7 @@ def test_running_source_job_fences_only_its_task_record(
         assert release_child.wait(timeout=5)
         return SimpleNamespace(returncode=0)
 
-    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    monkeypatch.setattr(module, "_run_job_subprocess", fake_run)
     worker = threading.Thread(target=module._run_claimed, args=(job_path, claimed))
     worker.start()
     assert child_started.wait(timeout=5)
@@ -987,7 +987,7 @@ def test_run_next_fails_closed_when_declared_artifact_is_missing(
     queue_dir = _patch_queue_paths(tmp_path, monkeypatch)
     queue_dir.mkdir(parents=True)
     job_path = _queued_job(queue_dir, module.LOG_DIR, artifact=tmp_path / "missing.json")
-    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
+    monkeypatch.setattr(module, "_run_job_subprocess", lambda *args, **kwargs: SimpleNamespace(returncode=0))
 
     assert module.run_next(SimpleNamespace()) == 0
 
@@ -1006,7 +1006,7 @@ def test_run_next_completes_when_artifact_exists_or_is_not_declared(
     queue_dir.mkdir(parents=True)
     artifact = tmp_path / "result.json"
     artifact.write_text("{}")
-    monkeypatch.setattr(module.subprocess, "run", lambda *args, **kwargs: SimpleNamespace(returncode=0))
+    monkeypatch.setattr(module, "_run_job_subprocess", lambda *args, **kwargs: SimpleNamespace(returncode=0))
 
     existing_job = _queued_job(queue_dir, module.LOG_DIR, artifact=artifact)
     assert module.run_next(SimpleNamespace()) == 0
@@ -1029,7 +1029,7 @@ def test_run_next_marks_timeout_as_split_required(
     def time_out(*args, **kwargs):
         raise module.subprocess.TimeoutExpired(cmd=args[0], timeout=10)
 
-    monkeypatch.setattr(module.subprocess, "run", time_out)
+    monkeypatch.setattr(module, "_run_job_subprocess", time_out)
 
     assert module.run_next(SimpleNamespace()) == 0
     job = json.loads(job_path.read_text())
@@ -1056,7 +1056,7 @@ def test_worker_preserves_child_output_writeback_on_nonzero_exit(
         assert module.record_output_paths("artifact-postcondition", [panel]) is True
         return SimpleNamespace(returncode=9)
 
-    monkeypatch.setattr(module.subprocess, "run", failed_child)
+    monkeypatch.setattr(module, "_run_job_subprocess", failed_child)
 
     assert module.run_next(SimpleNamespace()) == 0
     job = json.loads(job_path.read_text())

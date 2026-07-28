@@ -37,14 +37,14 @@ def test_get_process_start_wall_returns_none_for_nonpositive_pid() -> None:
 
 def test_get_process_start_wall_parses_ps_output(monkeypatch) -> None:
     monkeypatch.setattr(
-        procutil.subprocess, "run",
+        procutil, "_run_ps_probe",
         lambda *a, **k: _FakeCompleted(0, "Wed Jul  2 00:57:15 2026\n"),
     )
     assert procutil.get_process_start_wall(123) == "Wed Jul  2 00:57:15 2026"
 
 
 def test_get_process_start_wall_returns_none_when_pid_missing(monkeypatch) -> None:
-    monkeypatch.setattr(procutil.subprocess, "run", lambda *a, **k: _FakeCompleted(1, ""))
+    monkeypatch.setattr(procutil, "_run_ps_probe", lambda *a, **k: _FakeCompleted(1, ""))
     assert procutil.get_process_start_wall(123) is None
 
 
@@ -57,7 +57,7 @@ def test_get_process_start_wall_returns_probe_failed_sentinel_on_ps_failure(monk
     def boom(*a, **k):
         raise subprocess.TimeoutExpired(cmd="ps", timeout=5)
 
-    monkeypatch.setattr(procutil.subprocess, "run", boom)
+    monkeypatch.setattr(procutil, "_run_ps_probe", boom)
     result = procutil.get_process_start_wall(123)
     assert result is procutil.PROBE_FAILED
     assert result is not None
@@ -144,7 +144,7 @@ def test_pgid_members_excludes_zombies(monkeypatch) -> None:
         assert cmd[:3] == ["ps", "-o", "pid=,stat="], "stat column is required to spot zombies"
         return subprocess.CompletedProcess(cmd, 0, stdout=ps_rows, stderr="")
 
-    monkeypatch.setattr(procutil.subprocess, "run", fake_run)
+    monkeypatch.setattr(procutil, "_run_ps_probe", fake_run)
     assert procutil.pgid_members(999) == [501, 503]
 
 

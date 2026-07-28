@@ -82,6 +82,12 @@ from volpred.ops.diagnostics import warn  # noqa: E402
 from volpred.ops.git_writer_lock import is_registered_linked_worktree  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
+# Payload execution is a distinct adapter from process-table probes and other
+# subprocess users in this module. Tests replace only this callable so a child
+# double cannot transitively alter PID identity or git/gate probes.
+_run_job_subprocess = subprocess.run
+
+
 def _canonical_root() -> Path:
     """Repo root that owns the queue, even when this copy of the script is in a worktree.
 
@@ -2116,6 +2122,7 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
     that only stayed safe because the worker mutex forbade a second worker.
     """
     def claim_under_receipt_lock(
+        claimed_by_pid_start_wall: str | None,
         canonical_tasks: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any] | None:
         job = _read_job_file(job_path, context=context)
@@ -2146,19 +2153,26 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
         job["started_at"] = utc_now()
         job["claimed_by_pid"] = os.getpid()
         # D6b: pid-reuse-safe fingerprint (same lstart scheme as the dispatch
-        # supervisor's procutil). None when the probe could not produce one —
-        # the reaper then falls back to the worker-flock invariant.
-        job["claimed_by_pid_start_wall"] = _own_start_wall()
+        # supervisor's procutil). The probe happens before the receipt critical
+        # section: it may execute `ps`, and no external subprocess belongs
+        # inside a queue-wide flock. None means the reaper falls back to the
+        # worker-flock invariant.
+        job["claimed_by_pid_start_wall"] = claimed_by_pid_start_wall
         _write_job_file(job_path, job)
         return job
 
     initial = _read_job_file(job_path, context=context)
     if initial is None or initial.get("status") != "queued":
         return None
+    # Probe before either the canonical-task or receipt lock. Besides keeping
+    # the receipt critical section bounded, this prevents a subprocess adapter
+    # that writes producer output receipts from recursively taking the same
+    # flock (tests exercise that real adapter shape).
+    claimed_by_pid_start_wall = _own_start_wall()
     task_id = initial.get("source_task_id")
     if not task_id:
         with _receipt_lock():
-            return claim_under_receipt_lock()
+            return claim_under_receipt_lock(claimed_by_pid_start_wall)
 
     # Lock order is canonical task SH -> compute receipt EX, matching the
     # writer's canonical task EX -> compute receipt EX order. Holding the task
@@ -2174,7 +2188,7 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
         ):
             return None
         with _receipt_lock():
-            return claim_under_receipt_lock(tasks)
+            return claim_under_receipt_lock(claimed_by_pid_start_wall, tasks)
 
 
 @contextmanager
@@ -2334,7 +2348,7 @@ def _execute_job(job_path: Path, job: dict[str, Any]) -> None:
             # writable, and a child may safely materialize unrelated work.
             with _source_task_execution_fence(job) as binding_valid:
                 if binding_valid:
-                    proc = subprocess.run(
+                    proc = _run_job_subprocess(
                         cmd_parts,
                         cwd=str(ROOT),
                         env=env,
