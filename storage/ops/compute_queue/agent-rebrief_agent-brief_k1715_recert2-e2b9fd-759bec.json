@@ -20,12 +20,12 @@
     "3480"
   ],
   "env": {},
-  "status": "running",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-28T13:22:22Z",
   "started_at": "2026-07-28T13:30:00Z",
-  "completed_at": null,
-  "exit_code": null,
+  "completed_at": "2026-07-28T13:48:34Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715/review_verdict.json",
@@ -51,5 +51,15 @@
   "brief_source": "/tmp/rebrief_agent-brief_k1715_recert2-e2b9fd.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-rebrief_agent-brief_k1715_recert2-e2b9fd-759bec.md",
   "claimed_by_pid": 71559,
-  "claimed_by_pid_start_wall": "Tue Jul 28 21:30:00 2026"
+  "claimed_by_pid_start_wall": "Tue Jul 28 21:30:00 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "K1715",
+    "settled_at": "2026-07-28T13:48:33Z",
+    "error": null
+  },
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/k1715-204d556b/experiments/K1715"
+  }
 }

@@ -620,9 +620,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T05:39:09.134771+00:00"
-    },
-    {
      "at": "2026-07-28T05:40:03.882519+00:00"
     },
     {
@@ -654,6 +651,9 @@
     },
     {
      "at": "2026-07-28T13:31:15.237137+00:00"
+    },
+    {
+     "at": "2026-07-28T14:05:14.111970+00:00"
     }
    ],
    "current_task_id": null,
@@ -1301,7 +1301,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T13:32:08.624074+00:00"
+     "last_seen_at": "2026-07-28T14:05:37.027794+00:00"
     },
     {
      "cleared_at": null,
@@ -1315,7 +1315,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T13:32:07.838539+00:00"
+     "last_seen_at": "2026-07-28T14:05:36.023590+00:00"
     },
     {
      "cleared_at": null,
@@ -1330,13 +1330,27 @@
      "first_seen_at": "2026-07-28T12:46:24.108743+00:00",
      "key": "dispatch-slot-1-50bb61e4",
      "last_seen_at": "2026-07-28T12:46:24.108743+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "70177e25a020b985d049fb07addfda57c5d146be",
+      "branch": "worktree-dispatch-slot-1-24c9dbdc",
+      "checkpoint_commit": "0daf56157df68457bf5665dc6192c769c5d17eda",
+      "detail_tail": "ask_status_vocab.py::test_validator_flags_one_injected_out_of_vocab_row\nFAILED tests/test_task_status_vocab.py::test_real_queue_blocked_reason_out_of_vocab_matches_frozen_baseline\n4 failed, 65 passed in 2.94s\nwarning: `VIRTUAL_ENV=/Users/yhlai0911/volpred-research/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead",
+      "reason": "gate_red",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-24c9dbdc"
+     },
+     "first_seen_at": "2026-07-28T14:05:06.679719+00:00",
+     "key": "dispatch-slot-1-24c9dbdc",
+     "last_seen_at": "2026-07-28T14:05:06.679719+00:00"
     }
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-28T13:32:08.624074+00:00",
+   "last_seen_at": "2026-07-28T14:05:37.027794+00:00",
    "notified_at": null,
-   "occurrence_count": 1562,
+   "occurrence_count": 1630,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1544,13 +1558,25 @@
      "first_seen_at": "2026-07-28T13:20:33.616365+00:00",
      "key": "30361505394:1",
      "last_seen_at": "2026-07-28T13:20:33.616365+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T13:35:13.287325+00:00",
+     "key": "30363038990:1",
+     "last_seen_at": "2026-07-28T13:35:13.287325+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T13:55:19.589215+00:00",
+     "key": "30364193336:1",
+     "last_seen_at": "2026-07-28T13:55:19.589215+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-28T13:17:08.2795976Z E AssertionError: residue (0, 1) after migration (before (0, 1)); needs_review=[{'id': 'ci-red-30339013855', 'field': 'blocked_reason', 'value': 'worker=success; workspace",
-   "last_seen_at": "2026-07-28T13:20:33.616365+00:00",
+   "last_breach_detail": "2026-07-28T13:52:01.1527373Z E AssertionError: residue (0, 1) after migration (before (0, 1)); needs_review=[{'id': 'ci-red-30339013855', 'field': 'blocked_reason', 'value': 'worker=success; workspace",
+   "last_seen_at": "2026-07-28T13:55:19.589215+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -2110,6 +2136,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T13:32:08.640079+00:00",
+ "updated_at": "2026-07-28T14:05:37.045734+00:00",
  "version": 1
 }
