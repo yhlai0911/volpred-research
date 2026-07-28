@@ -324,13 +324,19 @@
      "first_seen_at": "2026-07-28T05:20:33.924132+00:00",
      "key": "30330338914:1",
      "last_seen_at": "2026-07-28T05:20:33.924132+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-28T05:45:22.728228+00:00",
+     "key": "30331603769:1",
+     "last_seen_at": "2026-07-28T05:45:22.728228+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-28T05:16:20.1446700Z E AssertionError: raw termination bypasses: ['scripts/dispatch_supervisor/isolation.py:1009', 'scripts/dispatch_supervisor/isolation.py:1018']",
-   "last_seen_at": "2026-07-28T05:20:33.924132+00:00",
+   "last_breach_detail": "2026-07-28T05:41:58.1767110Z E AssertionError: raw termination bypasses: ['scripts/dispatch_supervisor/isolation.py:1450', 'scripts/dispatch_supervisor/isolation.py:1738', 'scripts/dispatch_supervisor",
+   "last_seen_at": "2026-07-28T05:45:22.728228+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 2,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -569,9 +575,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-27T20:07:18.842793+00:00"
-    },
-    {
      "at": "2026-07-27T21:07:38.580929+00:00"
     },
     {
@@ -603,6 +606,9 @@
     },
     {
      "at": "2026-07-28T05:40:03.882519+00:00"
+    },
+    {
+     "at": "2026-07-28T06:02:04.929190+00:00"
     }
    ],
    "current_task_id": null,
@@ -1947,6 +1953,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T05:40:03.883140+00:00",
+ "updated_at": "2026-07-28T06:02:04.930421+00:00",
  "version": 1
 }

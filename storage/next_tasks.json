@@ -50273,8 +50273,8 @@
       "derates": false,
       "derates_updated_at": "2026-07-27T16:53:21.178981+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 13.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 14.9 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 13.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 15.3 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51230,13 +51230,36 @@
     "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 1 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 1\n- eligible_before_dedup: 1\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 1\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_3c83e665` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260728_02`，指定只補仍可放行的 cluster：taiwan, garch, risk_mgmt。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "pending",
+    "status": "succeeded",
     "created_at": "2026-07-28T02:00:52.190764+00:00",
     "source": "alert_remediation_bridge",
     "tags": [
       "alert",
       "release_pool_deadlock"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-28T05:58:18.829569+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T05:58:19.196506+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T05:58:45.343305+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T05:58:19.196490+00:00",
+    "completed_at": "2026-07-28T05:58:45.343282+00:00",
+    "result": "fresh detector read-back: due_now=false, draft=2, eligible_after_all_gates=1; original deadlock naturally cleared. No release or external mutation executed. mile_3c83e665 remains independently content-gate-blocked by missing lazypack assets."
   },
   {
     "id": "assign_b48f6bac",
@@ -51280,13 +51303,13 @@
       "derates": false,
       "derates_updated_at": "2026-07-28T03:07:58.889125+00:00",
       "deferred": [
-        "docs/error_log.md: 已保存，且 13.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "src/volpred/ops/next_tasks.py: 已保存，且 14.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 7.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 1.1 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/INDEX.md: 已保存，且 5.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/reports/index.json: 已保存，且 5.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/strategy_metrics.json: 已保存，且 5.6 小時內還在改 — 活躍碼，不算無主殘留"
+        "docs/error_log.md: 已保存，且 13.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 15.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1,
@@ -51358,6 +51381,7 @@
       "scripts/token_usage_report.py",
       "src/volpred/ops/execution_brief.py",
       "tests/test_authorized_provider_exec.py",
+      "tests/test_dispatch_supervisor.py",
       "tests/test_dispatch_supervisor_heartbeat_alert.py",
       "tests/test_execution_brief.py",
       "tests/test_loop_health.py",
@@ -51365,6 +51389,7 @@
       "tests/test_ops_snapshot_queries.py",
       "tests/test_provider_registry.py",
       "tests/test_provider_spawn_contracts.py",
+      "tests/test_session_drill_down_warnings.py",
       "tests/test_token_usage_report.py",
       "tests/test_worker_actor_env.py"
     ]
@@ -51570,10 +51595,31 @@
         "to": "pending",
         "by": "hourly-slot-1-d587ee01f6da449095a5f02f255088a0",
         "note": "supervisor_settle_empty"
+      },
+      {
+        "ts": "2026-07-28T05:46:20.714359+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-f60b1cda222b4608a08ae179db936046",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-28T05:46:20.714361+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-f60b1cda222b4608a08ae179db936046",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-28T06:01:46.558570+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-1-f60b1cda222b4608a08ae179db936046",
+        "note": "supervisor_settle_empty"
       }
     ],
-    "dispatch_settled_session_id": "dispatch-d587ee01-46d21243",
-    "last_released_at": "2026-07-28T05:39:24.910094+00:00",
+    "dispatch_settled_session_id": "dispatch-f60b1cda-34304371",
+    "last_released_at": "2026-07-28T06:01:46.558554+00:00",
     "last_release_reason": "workspace_empty"
   },
   {
@@ -51746,7 +51792,87 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-28T05:40:29.847399+00:00",
-      "last_seen_at": "2026-07-28T05:40:29.847399+00:00"
+      "last_seen_at": "2026-07-28T05:40:29.847399+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-28T06:02:19.746183+00:00",
+      "deferred": [
+        "docs/error_log.md: 已保存，且 13.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "src/volpred/ops/next_tasks.py: 已保存，且 15.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/K1357_general_draft.md: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/K1419_general_draft.md: 已保存，且 1.3 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/K1357_spread_asymmetry.png: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1419_0050tw_pinball.png: 已保存，且 1.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/k1492_peg_vs_flow.png: 已保存，且 0.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png: 已保存，且 1.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/memory/knowledge.json: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/INDEX.md: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/reports/index.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/strategy_metrics.json: 已保存，且 6.0 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "assign_bfd18c51",
+    "title": "PHASE-Z 卡住檔案 incident（b7be38c3f18ae7ee）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n17 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 20 班\n- src/volpred/ops/next_tasks.py — 20 班\n- storage/drafts/K1357_general_draft.md — 5 班\n- storage/drafts/K1419_general_draft.md — 5 班\n- storage/drafts/assets/K1357_spread_asymmetry.png — 5 班\n- storage/drafts/assets/k1419_0050tw_pinball.png — 5 班\n- storage/drafts/assets/k1492_cross_asset_qlike.png — 4 班\n- storage/drafts/assets/k1492_peg_vs_flow.png — 4 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_answer.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_model.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_today.png — 5 班\n- storage/logs/trending_primary_source_verification.jsonl — 11 班\n- storage/memory/knowledge.json — 18 班\n- storage/reports/INDEX.md — 9 班\n- storage/reports/index.json — 9 班\n- storage/strategy_metrics.json — 9 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T060219670980Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-28T06:02:30.324069+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "b7be38c3f18ae7ee",
+      "paths": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/K1357_general_draft.md",
+        "storage/drafts/K1419_general_draft.md",
+        "storage/drafts/assets/K1357_spread_asymmetry.png",
+        "storage/drafts/assets/k1419_0050tw_pinball.png",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png",
+        "storage/drafts/assets/k1492_peg_vs_flow.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "streaks": {
+        "docs/error_log.md": 20,
+        "src/volpred/ops/next_tasks.py": 20,
+        "storage/drafts/K1357_general_draft.md": 5,
+        "storage/drafts/K1419_general_draft.md": 5,
+        "storage/drafts/assets/K1357_spread_asymmetry.png": 5,
+        "storage/drafts/assets/k1419_0050tw_pinball.png": 5,
+        "storage/drafts/assets/k1492_cross_asset_qlike.png": 4,
+        "storage/drafts/assets/k1492_peg_vs_flow.png": 4,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png": 5,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png": 5,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png": 5,
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png": 5,
+        "storage/logs/trending_primary_source_verification.jsonl": 11,
+        "storage/memory/knowledge.json": 18,
+        "storage/reports/INDEX.md": 9,
+        "storage/reports/index.json": 9,
+        "storage/strategy_metrics.json": 9
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260728T060219670980Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-28T06:02:30.310580+00:00",
+      "last_seen_at": "2026-07-28T06:02:30.310580+00:00"
     },
     "priority_capped_from": 1
   }
