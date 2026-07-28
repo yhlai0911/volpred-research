@@ -9,12 +9,12 @@
     "2400"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-27T04:42:51Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-28T10:50:50Z",
+  "completed_at": "2026-07-28T10:51:34Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1731-armb-codex-review-round-10-1785127371.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/compute-k1731-armb-codex-review-round-10-1785127371.stderr",
   "result_artifact": "storage/ops/codex_reviews/k1731_armB_rev10_verdict.md",
@@ -31,12 +31,17 @@
   "followup_dispatched": false,
   "source_task_id": "assign_k1731_rev9",
   "source_task_link": {
-    "state": "error",
-    "attempted_at": "2026-07-28T10:30:05Z",
-    "linked_at": null,
-    "error": "RuntimeError: source task is not legally bindable: task_id=assign_k1731_rev9 status=awaiting_agent_job compute_job_id='agent-brief_k1731_rev9-c47c03' requested_job_id=compute-k1731-armb-codex-review-round-10-1785127371"
+    "state": "linked",
+    "attempted_at": "2026-07-28T10:50:50Z",
+    "linked_at": "2026-07-28T10:50:50Z",
+    "error": null
   },
   "timeout_seconds": 2700,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 45105,
+  "claimed_by_pid_start_wall": "Tue Jul 28 18:45:02 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
 }

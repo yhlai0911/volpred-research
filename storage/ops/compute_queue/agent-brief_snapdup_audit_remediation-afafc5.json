@@ -20,11 +20,11 @@
     "3480"
   ],
   "env": {},
-  "status": "queued",
+  "status": "cancelled",
   "queue_priority": 5,
   "queued_at": "2026-07-27T07:14:28Z",
   "started_at": null,
-  "completed_at": null,
+  "completed_at": "2026-07-28T10:45:02Z",
   "exit_code": null,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapdup_audit_remediation-afafc5.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_snapdup_audit_remediation-afafc5.stderr",
@@ -39,15 +39,21 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "snapdup_cert_fallback_codex_usage_limit_20260721",
   "source_task_link": {
-    "state": "error",
-    "attempted_at": "2026-07-28T10:30:05Z",
-    "linked_at": null,
-    "error": "RuntimeError: source task is not legally bindable: task_id=snapdup_cert_fallback_codex_usage_limit_20260721 status=failed compute_job_id=None requested_job_id=agent-brief_snapdup_audit_remediation-afafc5"
+    "state": "terminal",
+    "reason": "source_task_terminal",
+    "source_task_status": "failed"
   },
   "timeout_seconds": 3600,
   "brief_source": "/tmp/brief_snapdup_audit_remediation.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapdup_audit_remediation-afafc5.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_snapdup_audit_remediation-afafc5.md",
+  "cancel_reason": "source_task_terminal:failed",
+  "cancellation_kind": "automatic_invalid_source_binding",
+  "cancelled_at": "2026-07-28T10:45:02Z",
+  "source_task_settlement": {
+    "state": "not_required",
+    "reason": "source_task_terminal:failed"
+  }
 }

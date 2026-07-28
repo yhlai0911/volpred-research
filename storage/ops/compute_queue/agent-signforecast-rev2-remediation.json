@@ -20,11 +20,11 @@
     "5280"
   ],
   "env": {},
-  "status": "queued",
+  "status": "cancelled",
   "queue_priority": 5,
   "queued_at": "2026-07-27T07:11:19Z",
   "started_at": null,
-  "completed_at": null,
+  "completed_at": "2026-07-28T10:45:02Z",
   "exit_code": null,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-signforecast-rev2-remediation.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-signforecast-rev2-remediation.stderr",
@@ -39,15 +39,20 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "signforecast_rev2_remediation",
   "source_task_link": {
-    "state": "error",
-    "attempted_at": "2026-07-28T10:30:05Z",
-    "linked_at": null,
-    "error": "SystemExit: task id not found: signforecast_rev2_remediation"
+    "state": "terminal",
+    "reason": "source_task_missing_after_grace"
   },
   "timeout_seconds": 5400,
   "brief_source": "/tmp/brief_signforecast_rev2.md",
-  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-signforecast-rev2-remediation.md"
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-signforecast-rev2-remediation.md",
+  "cancel_reason": "source_task_missing_after_grace",
+  "cancellation_kind": "automatic_invalid_source_binding",
+  "cancelled_at": "2026-07-28T10:45:02Z",
+  "source_task_settlement": {
+    "state": "not_required",
+    "reason": "source_task_missing_after_grace"
+  }
 }

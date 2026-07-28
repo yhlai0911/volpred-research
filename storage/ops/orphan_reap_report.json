@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T10:00:17.040603+00:00",
+  "generated_at": "2026-07-28T11:00:22.983259+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 5.4
+      "age_hours": 6.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 5.3
+      "age_hours": 6.3
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 164.6
+      "age_hours": 165.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 16.6
+      "age_hours": 17.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -39,14 +39,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 24.7
+      "age_hours": 25.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 65,
-    "grace": 1,
+    "grace": 3,
     "inflight": 0
   },
   "orphan_count": 5,
@@ -63,82 +63,67 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "compute-codex-review-k1720-letf-rebalance-eod-vol-pre-merge-k1259-ga-1785172252",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-review-k1720-letf-rebalance-eod-vol-pre-merge-k1259-ga-1785172252.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1720_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1720_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    },
+    {
+      "job_id": "compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/ops/codex_reviews/k1708_r4_verdict.md"
+      ],
+      "existing_paths": [
+        "storage/ops/codex_reviews/k1708_r4_verdict.md"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "compute-codex-review-k1720-letf-rebalance-eod-vol-pre-merge-k1259-ga-1785172252",
+      "paths": [
+        "storage/ops/codex_reviews/k1720_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "6482e66f32d1d74acb3d27cabba44c3f24c33591",
+      "reason": "committed"
+    },
+    {
+      "job_id": "compute-codex-round-4-primary-path-review-k1708-14-new-caliber-gate--1785175876",
+      "paths": [
+        "storage/ops/codex_reviews/k1708_r4_verdict.md"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "0f9362948ec02a3bafd34836817ec3f0cfba9be3",
+      "reason": "committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
-      "collectable": [
-        {
-          "path": "storage/drafts/K1366_general_draft.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/K1406_general_draft.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/gen_k1366_general_figs.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/k1366_general_correlation_response.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/k1366_general_variance_response.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/k1406_general_dip_cost.png",
-          "kind": "png",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/k1406_general_figs.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png",
-          "kind": "png",
-          "reason": "untracked"
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 4,
+        "grace": 11,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "drafts",
-          "paths": [
-            "storage/drafts/K1366_general_draft.md",
-            "storage/drafts/K1406_general_draft.md",
-            "storage/drafts/assets/gen_k1366_general_figs.py",
-            "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
-            "storage/drafts/assets/k1366_general_correlation_response.png",
-            "storage/drafts/assets/k1366_general_variance_response.png",
-            "storage/drafts/assets/k1406_general_dip_cost.png",
-            "storage/drafts/assets/k1406_general_figs.py",
-            "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png"
-          ],
-          "committed": true,
-          "detail": "[main 469513c3e] chore(draft-reap): collect orphaned draft artifacts (9 files)\n 9 files changed, 456 insertions(+)\n create mode 100644 storage/drafts/"
-        }
-      ]
+      "collections": []
     },
     "paper": {
       "collectable": [],
@@ -151,41 +136,14 @@
       "collections": []
     },
     "experiments": {
-      "collectable": [
-        {
-          "path": "experiments/snapaudit_unmeasured_20260728/README.md",
-          "kind": "md",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure.py",
-          "kind": "py",
-          "reason": "untracked"
-        },
-        {
-          "path": "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json",
-          "kind": "json",
-          "reason": "untracked"
-        }
-      ],
+      "collectable": [],
       "held": [],
       "skipped": {
         "grace": 0,
         "inflight": 0,
         "unclaimed": 0
       },
-      "collections": [
-        {
-          "namespace": "experiments",
-          "paths": [
-            "experiments/snapaudit_unmeasured_20260728/README.md",
-            "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure.py",
-            "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json"
-          ],
-          "committed": true,
-          "detail": "[main 592ae4cec] chore(experiment-reap): collect orphaned experiment artifacts (3 files)\n 3 files changed, 432 insertions(+)\n create mode 100644 exper"
-        }
-      ]
+      "collections": []
     }
   },
   "held_escalations": [],
