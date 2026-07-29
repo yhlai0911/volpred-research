@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -11,6 +12,26 @@ from scripts import install_dispatch_supervisor_release as installer
 from scripts.dispatch_supervisor import release_image
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_direct_file_entrypoint_loads_package_outside_repo_cwd(
+    tmp_path: Path,
+) -> None:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "install_dispatch_supervisor_release.py"),
+            "--help",
+        ],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert "immutable" in completed.stdout.lower()
 
 
 def _state(path: Path) -> None:
