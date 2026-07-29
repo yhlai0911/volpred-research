@@ -69,7 +69,10 @@ permissions:
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Checkout + the full suite normally need ~18 minutes. System dependency
+    # downloads are independently bounded below, so 30 minutes leaves retry
+    # headroom without allowing a mirror stall to run indefinitely.
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17-alpine
@@ -127,7 +130,9 @@ jobs:
         # The deterministic lazypack renderer deliberately refuses a missing
         # CJK font instead of silently drawing tofu. macOS production uses
         # Heiti TC; Ubuntu CI uses the metrically real Noto CJK glyphs.
-        run: sudo apt-get update && sudo apt-get install -y ripgrep fonts-noto-cjk
+        # Run the bounded supervisor itself as root. If only apt were sudo,
+        # the runner user could not SIGKILL a surviving root dpkg descendant.
+        run: sudo python3 scripts/ci_install_system_test_dependencies.py
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:

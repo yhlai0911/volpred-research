@@ -2053,6 +2053,43 @@ RLS／direct SELECT denial與 function rewrite markers全正確，publisher scop
 `legacy/1`、0 request、0 active attempt、0 lease。此 terminal-replay seam為
 **`root_cause_fixed_and_verified`**。
 
+---
+
+## 2026-07-30 — GitHub Test Suite 被 CJK font mirror stall 吃完整個 job timeout
+
+**證據化症狀**：GitHub Actions run `30490697153` 在 21:03:40Z 開始從
+`azure.archive.ubuntu.com` 下載 61.2MB `fonts-noto-cjk`，直到 21:21:09Z 仍未完成，
+最後被 20 分鐘 job timeout cancel；`uv`、Python 與 pytest 都尚未開始。前一個正式
+run `30486814276` 全綠，故這不是 test failure，也不能拿 cancelled run 當新 commits
+的驗收證據。
+
+**根因層級（CI dependency execution contract）**：workflow 以一條 raw
+`sudo apt-get update && apt-get install` 同時承擔 package index、runtime ripgrep 與
+61.2MB CJK font，沒有 connect/read timeout、沒有 outer process-group deadline，也
+沒有有限 retry；唯一界線是整個 pytest job 的 20 分鐘上限。單一 mirror stall 因而
+可在測試前耗盡所有驗證預算。
+
+**底層修復與制度化**：workflow 改委派可測的
+`ci_install_system_test_dependencies.py`。真實 `ripgrep` 與 `fonts-noto-cjk` 仍為
+必要 package，不以 skip、假 font 或降級測試繞過；bounded supervisor 本身由 workflow
+以 root 啟動，apt／dpkg 不再透過另一層 sudo，確保 TERM／SIGKILL 與 descendants
+同權限；非 root 直接執行會 fail loud。apt connect/read/lock 均 20 秒，
+update 每次 30 秒、install 每次 120 秒，各最多兩次。每次 command 在獨立 process
+group，outer timeout 先 TERM、5 秒後 KILL，避免只殺 `sudo` 留下 apt 子程序；attempt
+間保留 apt partial cache。cleanup 不信任已退出的 `sudo` leader，而是有界輪詢整個
+process group；SIGKILL 後亦不使用無 timeout 的 wait。TERM／KILL grace 全計入後，
+最壞 dependency budget 346 秒，job 上限改為 30 分鐘，既容納 retry，也不允許
+mirror 或 reap 無限卡住。若 SIGKILL 後 group 仍未消失則回專用 rc125 並立即
+fail closed，不啟動下一個會與殘存 apt／dpkg 競爭 lock 的 attempt。
+
+**回歸與 read-back**：deterministic RED 先證明 workflow 仍含 unbounded raw apt；
+修正後 bounded workflow／retry／fail-closed／真 dependency／surviving-descendant
+contract 11 tests，連同 checkout-history、Postgres workflow 與 enforcement-map 共
+**22 passed**；Ruff、py_compile、YAML consumer 與 diff check 通過；Matt
+Standards／Spec 最終複審均 PASS。此切片目前為 **`contained`**：仍待 formal push，
+及 fresh GitHub run 實際完成 dependency step 並跑完 pytest，才升級為
+**`root_cause_fixed_and_verified`**。
+
 ### 2026-07-27 — runtime task `succeeded` 誤關仍為 contained 的 GitHub umbrella issue
 
 **證據化症狀**：Issue #18 closure-audit slice 的 result 明寫

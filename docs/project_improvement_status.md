@@ -2990,3 +2990,21 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   `dispatch_supervisor:failure:exit1`，且未吞掉其他獨立 recurrence。
 - ✅ Matt Standards／Spec 雙軸複審 PASS。
 - ⏳ 狀態 **`contained`**：待正式 commit／push 與 GitHub CI read-back 後升級。
+
+## 2026-07-30 — GitHub CI system dependency timeout containment
+
+- ✅ run `30490697153` 的取消點已精確定位：Azure mirror 下載 61.2MB
+  `fonts-noto-cjk` 卡 17m29s，pytest 尚未開始；不是 code/test failure。
+- ✅ workflow 不再 raw apt 無界等待；index 30s、install 120s、各兩次，apt
+  connect/read/lock 20s，整個 process group 到期 TERM→KILL；不信任已退出的
+  `sudo` leader，SIGKILL 後也沒有無界 wait；group 未消失便立即 fail closed，
+  不再啟動重疊 apt。
+- ✅ bounded supervisor 由 workflow 以 root 啟動，apt/dpkg 不另包 sudo；kill
+  authority 與 descendants 同權限，非 root 誤用 fail loud。
+- ✅ 保留真實 ripgrep／Noto CJK 與 apt partial cache；不以 skip 或假 font 取巧。
+- ✅ TERM/KILL grace 全納入後 worst-case dependency budget 346s，job budget
+  30m；contract 與相鄰 workflow suites **22 passed**，Ruff／py_compile／diff
+  check 全綠。
+- ✅ Matt Standards／Spec 最終雙軸複審 PASS。
+- ⏳ 狀態 **`contained`**：待正式 push 與 fresh GitHub Test Suite 完整跑到 pytest
+  後升級。
