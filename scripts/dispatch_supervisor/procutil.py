@@ -716,8 +716,23 @@ def producer_custody_all_members_checked(
             return None
         if api.boot_session_uuid() != saved_boot_uuid:
             return []
-        return sorted(_coalition_identities(api, coalition_id))
     except _CUSTODY_PROBE_ERRORS as exc:
+        LOG.warning(
+            "complete producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    try:
+        return sorted(_coalition_identities(api, coalition_id))
+    except OSError as exc:
+        if exc.errno == errno.ESRCH:
+            return []
+        LOG.warning(
+            "complete producer custody probe failed closed: %s",
+            type(exc).__name__,
+        )
+        return None
+    except _DarwinCustodyProbeError as exc:
         LOG.warning(
             "complete producer custody probe failed closed: %s",
             type(exc).__name__,

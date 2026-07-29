@@ -189,6 +189,30 @@ def test_darwin_complete_custody_includes_trusted_legacy_processes(
     ) == [10, 11, 12]
 
 
+def test_complete_custody_treats_removed_pinned_coalition_as_drained(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api = _FakeDarwinCustodyAPI(pids=[])
+    _install_fake_darwin(monkeypatch, api)
+    monkeypatch.setattr(
+        api,
+        "coalition_pids",
+        lambda _coalition_id: (_ for _ in ()).throw(
+            ProcessLookupError(errno.ESRCH, "coalition removed")
+        ),
+    )
+
+    assert procutil.producer_custody_all_members_checked(
+        {
+            "version": 2,
+            "host_uuid": HOST_UUID,
+            "boot_session_uuid": BOOT_UUID,
+            "resource_coalition_id": 73,
+            "trusted_unique_ids": [100],
+        }
+    ) == []
+
+
 def test_empty_launchd_coalition_reference_survives_service_removal(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
