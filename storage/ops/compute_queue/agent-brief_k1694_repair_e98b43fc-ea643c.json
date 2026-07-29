@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 2
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "k1694_codex_fail_repair_20260729",
   "source_task_link": {
     "state": "linked",
@@ -53,12 +53,14 @@
   "claimed_by_pid": 53548,
   "claimed_by_pid_start_wall": "Wed Jul 29 06:30:03 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "k1694_codex_fail_repair_20260729",
-    "settled_at": "2026-07-28T23:28:04Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-07-29T00:02:46Z"
   },
   "failure_reason": "timeout",
   "split_required": true,
-  "timed_out_at": "2026-07-28T23:28:04Z"
+  "timed_out_at": "2026-07-28T23:28:04Z",
+  "followup_dispatched_at": "2026-07-29T00:02:46Z",
+  "followup_next_task_id": "assign_a88eed84"
 }

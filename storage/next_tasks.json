@@ -45616,10 +45616,12 @@
     "result": "Code + immediate production acceptance root fixed: de63029c0 durable lifecycle, dec1f8057 multi-slot generation gate, 98f407daf verified live evidence. Planned reload rejected two pre-deploy tokens into durable phase_z_rejections; post-reload cohort b978d748 carried generation 78987568 across 3 slots; canary workspace e08db4da3 merged to main 74735c9f2. Incident inc_537a3ff3304f remains open by policy until >=3 clean observations spanning >=24h; task intentionally remains in_progress/contained until that gate.",
     "last_released_at": "2026-07-28T17:35:37.202145+00:00",
     "last_release_reason": "normalize_pending_claim_residue",
-    "blocked_until": "2026-07-29T09:15:00+00:00",
+    "blocked_until": "2026-07-29T09:24:21.846131+00:00",
     "blocked_reason": "awaiting_event_window",
-    "blocked_at": "2026-07-28T17:35:47+00:00",
-    "blocked_note": "Issue #42 code/live acceptance verified; incident inc_537a3ff3304f has 12 clean observations but span is only 8.2h. Re-audit >=3 observations spanning >=24h after earliest eligible time; GitHub issue reopened until acceptance passes."
+    "blocked_at": "2026-07-29T00:08:40+00:00",
+    "blocked_note": "Issue #42 closure must wait for canonical incident sustained-clean resolution; timestamp alone is insufficient.",
+    "unblock_gate": "incident_sustained_clean_v1",
+    "unblock_incident_id": "inc_537a3ff3304f"
   },
   {
     "id": "issue42_production_fire_lifecycle_acceptance_20260727",
@@ -53522,7 +53524,7 @@
     "task_type": "platform_ops",
     "dispatch_lane": "agent",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "release_pool_audit_skip_materializer",
     "tags": [
       "release_pool",
@@ -53534,7 +53536,30 @@
     "release_audit_skipped_count": 3,
     "release_audit_issues": [
       "missing 懶人包圖組 section (render failed, job lazypack-mile_3c83e665-r3) — inspect: uv run python scripts/compute_queue.py show lazypack-mile_3c83e665-r3 ; re-enqueue via scripts/lazypack_async_render.py enqueue"
-    ]
+    ],
+    "status_history": [
+      {
+        "ts": "2026-07-28T23:51:18.822102+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T23:51:19.122062+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T23:52:24.478679+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T23:51:19.122049+00:00",
+    "completed_at": "2026-07-28T23:52:24.478656+00:00",
+    "result": "Fresh live read-back: r4 completed/delivered 4/4 panels, canonical feed now contains the lazypack section and article is published; detector returns lazypack_render_stuck ok and live gate issues=[]。附件為 r4 成功前舊快照；no shell/runtime stop required。Existing regression commit 4a289f2f5 groups retries by article and suppresses superseded failures。"
   },
   {
     "id": "assign_99f4b3bf",
@@ -54885,7 +54910,7 @@
     "title": "K1694 Codex round 1 FAIL 修復：bootstrap 與 spec1 對齊 + partial month + 方法論描述 + 重跑重審",
     "task_type": "experiment",
     "priority": 2,
-    "status": "awaiting_agent_job",
+    "status": "failed",
     "source": "compute_queue_followup",
     "topology": "compute_queue",
     "description": "Codex primary-path review round 1 對 K1694 回 **VERDICT: FAIL**（全文 storage/ops/codex_reviews/k1694_verdict.md，缺陷已整理進 experiments/K1694/README.md「Codex round 1 裁決」節）。\n\n本任務 = 依 Codex 的「最低修復要求」修好並重跑重審。**不是重新設計實驗**，範圍就是下列 8 項：\n\n1. bootstrap 規格錯配（阻擋 PASS 的主因）：bootstrap 必須與 spec1 共用**完全相同**的 design matrix / sample / 時間趨勢 t。現況 spec1 RHS 含 t（K1694.py:472）而 bootstrap 沒有（K1694.py:521）；主模型 3293 列 vs bootstrap 3300 列。建議治本作法：抽出單一 build_spec_frame(panel) 當估計樣本的唯一 owner，panel_regression 與 bootstrap_interaction 都吃它，讓「兩邊一致」由結構保證而非靠對齊兩份清單。\n2. K1694.py:368 highvol = (s > s.median()).astype(float)：rv 缺值時 NaN > median 回 False，highvol 被錯標成 0。要 mask 成 NaN。\n3. bootstrap 命名：現行是 IID month-cluster（保留同月橫截面、破壞月間序列相關）。改成 consecutive moving/stationary block，或誠實改名 month-cluster bootstrap（README / results / 檔頭三處一起改）。\n4. 排除 partial month：2026-07 只有一週 DCOT、10 個交易日 RV、15 個商品。用可重複的完整性規則排除（不要寫死日期），並在 results.sample 揭露。\n5. 方法論描述對齊程式：(a) _acf_bandwidth() 根本沒讀 resid（K1694.py:421），永遠回 max(ceil(T**(1/3)),4) —— 規則可留，但不得宣稱由 residual ACF 決定；(b) 檔頭 K1694.py:36 宣稱「另附全落後 predictive spec」而實際沒有，要嘛補 spec 要嘛刪宣稱。\n6. results JSON 過度陳述：primary_interaction.bootstrap_ci95 / bootstrap_interaction_spec1 不得冒充 spec1 的 CI；panel_span 要揭露 partial；limitations 補上 synthetic publication dates、月內 timing overlap、full-sample regime labels、bootstrap 不保留序列相關；timing 只能寫 ex-post association，禁止 predictive / causal / known-before-outcome。\n7. NULL 口徑：只能寫「負向 binary high-vol crowding-out 假說未獲支持」。連續型 fcm_x_rvz 是正向且顯著（t_DK=2.50, month-cluster t=2.54），不得寫成「完全沒有關聯」。\n8. 用 volpred.research.reproduce_spec.finalize_experiment() 在 run-time 產出 reproduce_spec.json（K1708 教訓：禁止事後補寫）。\n\n執行注意：\n- experiments/K1694/ 目前**在 canonical working tree 未 commit**（results / figures / lag_sensitivity.py 都是 untracked），artifact gate 因缺 knowledge + reproduce_spec 而擋。FAIL 期間本來就不該寫 knowledge，所以先把 reproduce_spec 補上；worktree 開工前要先把這批未 commit 狀態帶進去，否則 worktree 只會看到 d8e777d19 的 salvage 版腳本。\n- 重跑是 heavy（網路抓 CFTC / yfinance + 2000 次 PanelOLS）→ 走 compute_queue enqueue，不要塞進 hourly fire。data/ 下已有快取 csv，優先走快取。\n- 重跑完再送 Codex round 2（scripts/codex_review_job.sh，prompt 沿用 storage/ops/codex_reviews/k1694_prompt.md 並補上本輪修了什麼）。\n- **round 2 PASS 之前不得寫 knowledge.json**（K1259 + 本任務前身的教訓）。\n- 若修完重跑結論仍是 NULL，那就如實報 NULL —— null result 是結果，不是失敗。\n\nparent_compute_job: compute-k1694-codex-primary-path-review-null-verdict-trustworthiness-1785262715\nparent_task: k1694_rerun_after_salvage_20260719",
@@ -54909,15 +54934,40 @@
         "to": "awaiting_agent_job",
         "by": "compute-job:agent-brief_k1694_repair_e98b43fc-ea643c",
         "note": "durable_external_execution_receipt"
+      },
+      {
+        "ts": "2026-07-29T00:02:46.938104+00:00",
+        "from": "awaiting_agent_job",
+        "to": "pending",
+        "by": "compute-followup:agent-brief_k1694_repair_e98b43fc-ea643c",
+        "note": "terminal receipt collected; followup=assign_a88eed84"
+      },
+      {
+        "ts": "2026-07-29T00:04:19.669573+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-99b060f8a48945b5aeba3736a6541724"
+      },
+      {
+        "ts": "2026-07-29T00:04:20.031301+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-99b060f8a48945b5aeba3736a6541724"
+      },
+      {
+        "ts": "2026-07-29T00:04:28.922821+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-99b060f8a48945b5aeba3736a6541724"
       }
     ],
-    "compute_job_id": "agent-brief_k1694_repair_e98b43fc-ea643c",
-    "blocked_reason": "external_compute_receipt_pending_collection",
-    "result": "dispatched to compute job agent-brief_k1694_repair_e98b43fc-ea643c; awaiting PHASE A collection",
-    "compute_started_at": "2026-07-28T22:30:03Z",
-    "compute_finished_at": "2026-07-28T23:28:04Z",
+    "result": "dispatched to compute job agent-brief_k1694_repair_e98b43fc-ea643c; awaiting PHASE A collection\n\nCompute job agent-brief_k1694_repair_e98b43fc-ea643c timed out at 3480s (timed_out=true, exit_code=-1). Work was NOT lost: three repair rounds are committed in worktree dispatch-slot-1-e98b43fc-k1694 (8e96d1957 / 5392d2ae7 / 116c42ebc) and the Codex round-4 verdict (FAIL, two RV-completeness counterexamples) is preserved at storage/ops/codex_reviews/k1694_verdict_round4.md (commit aad5ce399). Only the contracted review_verdict.json was never reached. Marked failed because the original single-shot scope is unachievable in one job budget and split_contract forbids an identical retry (identical_retry_prohibited=true). Superseded by split children: assign_a88eed84 [split 1/2 rv-completeness-repair, compute job agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7, timeout 3300s] and assign_6a2adc68 [split 2/2 codex-round5-review, blocked until stage 1 delivers r4_repair_report.json]. DO NOT re-dispatch this original brief.",
     "split_inventory_20260729_slot1": "PHASE A split_required 盤點（hourly-slot-1-e81eaefa，2026-07-29 07:35 CST，未 claim 未開工，followup 仍留在 compute queue 給下一班 PHASE A）。\n\n事實（全部回讀 live source，非印象）：\n- parent job agent-brief_k1694_repair_e98b43fc-ea643c 於 22:30:03Z 起跑、23:28:04Z timed_out=true / exit_code=-1（parent --timeout 為 null，實測約 3480s）。\n- worktree .claude/worktrees/dispatch-slot-1-e98b43fc-k1694：git status --porcelain experiments/K1694 為空，即 partial output 全部已 commit，無裸躺檔案。\n- 已落地 3 個修復 commit：8e96d1957（round-1 八個 defect）、5392d2ae7（round-2 四項要求）、116c42ebc（round-3 三個 FAIL defect）。即 repair+rerun 這一段實際上做完了三輪，不是沒開始。\n- artifact 現況：K1694.py(77415B) / K1694_results.json / reproduce_spec.json / README.md / test_K1694.py / K1694_lag_sensitivity.json / figures/ 皆在，mtime 07:18-07:23（一路做到 timeout 前）。\n- run-time spec 一致性已通過（K1708 教訓那條）：results.code_trace.sha256=92b0b771… size=77415、reproduce_spec.entrypoint 同 sha 同 size、K1694.py on-disk 亦 77415B，三者一致。\n- 唯一缺件 = review_verdict.json（round-4 Codex 審的 verdict）。job_metadata 亦記 result_artifact_exists=false、near_miss 只有 K1694_results.json。\n\n判讀：這不是「job 沒做事」，是一個 repair+rerun+review 三合一 job 在最後的 review 段被 parent timeout 截斷。禁止原樣重派（會重跑已完成的三輪修復）。\n\n建議切分（≥2 bounded child stage，皆短於 parent 3480s，沿用同一 worktree 不新開）：\n- stage=artifact_integrity_verify，timeout 1800s，artifact experiments/K1694/repair_verification.json：獨立核實 8+4+3 個 defect 的修復證據（程式 diff × results JSON 欄位 × README 三者一致）、跑 check_experiment_artifacts strict、跑 test_K1694.py。\n- stage=codex_round4_review，timeout 2400s，artifact experiments/K1694/review_verdict.json：Codex primary-path round-4 審，只審現在這份 bytes。\n兩者都要帶 --timeout-parent-job-id agent-brief_k1694_repair_e98b43fc-ea643c 與 --split-stage 留 receipt；建出 next task 後跑 mark-followup-dispatched。\nPASS 後才由主線程從 K1694_results.json 程式化取數寫 knowledge（K1259）再 merge_worktree.sh。\n\n本班未動此 job、未建 child、未 mark-followup-dispatched —— 剩餘預算不足以完整收尾一張，依 batch-drain 停止條件 (b) 留給下一班，不做半套。",
-    "split_blocker_20260729_slot1": "更正本班的停止理由（原記「剩餘 13 分鐘不足」係時間估算失誤；實際 07:37 時尚餘約 20 分鐘）。真正的 blocker 不是時間，是缺少已驗證的 next_tasks 建單路徑：\n\nPHASE A 要求 split_required 在建出 next task 後跑 `compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>`。但 `task_pool_claim.py` 的 subcommand 只有 claim / dispatch-preassign / dispatch-pending / dispatch-settle / start / release / handoff-main-thread / complete / annotate / list / cleanup / normalize-priorities —— **沒有 create/add**；scripts/ 下亦無 add_task / create_task / new_task / enqueue_task。可推測建單是由 enqueue-agent 的 --followup-brief 在 job 完成時自動生成，但本班未能在不猜測的前提下確認。\n\n在剩餘時間內逕自寫入 next_tasks.json 會違反「永遠修流程，不修資料」與 annotate-only 的 canonical write 紀律，故停止。\n\n下一班 PHASE A 接手時請先確認建單 owner（建議看 compute_queue.py 內 followup task 的生成點），再依 split_inventory_20260729_slot1 的兩段切分執行。盤點結果本身已完成且可直接採用，無需重做。"
+    "split_blocker_20260729_slot1": "更正本班的停止理由（原記「剩餘 13 分鐘不足」係時間估算失誤；實際 07:37 時尚餘約 20 分鐘）。真正的 blocker 不是時間，是缺少已驗證的 next_tasks 建單路徑：\n\nPHASE A 要求 split_required 在建出 next task 後跑 `compute_queue.py mark-followup-dispatched --id <id> --next-task-id <task_id>`。但 `task_pool_claim.py` 的 subcommand 只有 claim / dispatch-preassign / dispatch-pending / dispatch-settle / start / release / handoff-main-thread / complete / annotate / list / cleanup / normalize-priorities —— **沒有 create/add**；scripts/ 下亦無 add_task / create_task / new_task / enqueue_task。可推測建單是由 enqueue-agent 的 --followup-brief 在 job 完成時自動生成，但本班未能在不猜測的前提下確認。\n\n在剩餘時間內逕自寫入 next_tasks.json 會違反「永遠修流程，不修資料」與 annotate-only 的 canonical write 紀律，故停止。\n\n下一班 PHASE A 接手時請先確認建單 owner（建議看 compute_queue.py 內 followup task 的生成點），再依 split_inventory_20260729_slot1 的兩段切分執行。盤點結果本身已完成且可直接採用，無需重做。",
+    "compute_released_at": "2026-07-29T00:02:46Z",
+    "compute_release_reason": "terminal_receipt_collected",
+    "started_at": "2026-07-29T00:04:20.031284+00:00",
+    "completed_at": "2026-07-29T00:04:28.922797+00:00"
   },
   {
     "id": "assign_524392f9",
@@ -55262,7 +55312,7 @@
     "description": "Tracer slice for T40. Make volpred-compute-worker a canonical Operations Core schedule job, ensure owner reconciliation/audit cannot omit active legacy cron_jobs LaunchAgents, obtain natural schedule receipt plus queue execution read-back, then bootout and retire only com.volpred.compute-worker. Preserve compute queue semantics and provider guards; do not transfer provider.execution or bypass #9/#12.",
     "task_type": "platform_ops",
     "priority": 1,
-    "status": "in_progress",
+    "status": "succeeded",
     "source": "user",
     "issue_ref": "#46",
     "dispatch_lane": "agent",
@@ -55284,10 +55334,6 @@
       "post_actions": []
     },
     "created_at": "2026-07-28T23:04:00.089331+00:00",
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-28T23:04:21.578450+00:00",
-    "claim_expires_at": "2026-07-29T01:04:21.578450+00:00",
-    "claim_session_id": "621797eadb5c",
     "status_history": [
       {
         "ts": "2026-07-28T23:04:21.578465+00:00",
@@ -55299,6 +55345,12 @@
         "ts": "2026-07-28T23:04:24.586905+00:00",
         "from": "claimed",
         "to": "in_progress",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T23:47:06.172955+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
         "by": "codex-vscode"
       }
     ],
@@ -55320,6 +55372,80 @@
       "docs/project_improvement_status.md",
       "docs/refactor_plan_ops_master_2026_07.md",
       "docs/error_log.md"
-    ]
+    ],
+    "completed_at": "2026-07-28T23:47:06.172933+00:00",
+    "result": "Moved compute-worker clock into canonical Operations Core inventory and fail-closed all active legacy cron_jobs/rogue LaunchAgents. Natural 07:45 Core fire and priority-0 compute smoke shared exact fire key; receipt-gated bootout removed com.volpred.compute-worker with clean owner audit. Also root-fixed a live nested receipt-lock self-deadlock; 144 targeted tests and Matt Spec/Standards reviews passed.",
+    "issue_disposition": "contained"
+  },
+  {
+    "id": "assign_2181b8f6",
+    "title": "[Issue #42] Add sustained-clean incident unblock gate",
+    "description": "Root closure control-plane slice: blocked Issue #42 parent currently lacks blocked_until and no allowlisted gate can read canonical incident state. Add incident_sustained_clean_v1 read-only unblock gate, TDD pending/retain behavior, bind parent to inc_537a3ff3304f and live read back. Do not mark Issue #42 complete until incident state=resolved after 24h.",
+    "task_type": "platform_ops",
+    "priority": 1,
+    "status": "in_progress",
+    "source": "user",
+    "created_at": "2026-07-28T23:56:46.216820+00:00",
+    "created_by": "codex-vscode",
+    "issue_ref": "#42",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-28T23:56:52.126659+00:00",
+    "claim_expires_at": "2026-07-29T01:56:52.126659+00:00",
+    "claim_session_id": "9c7f900c4824",
+    "status_history": [
+      {
+        "ts": "2026-07-28T23:56:52.126675+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-28T23:56:55.298964+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-28T23:56:55.298947+00:00"
+  },
+  {
+    "id": "assign_a88eed84",
+    "title": "[K1694 split 1/2] RV completeness certification repair (Codex round-4 FAIL D1+D2)",
+    "description": "Split child stage `rv-completeness-repair` of timed-out compute job agent-brief_k1694_repair_e98b43fc-ea643c.\nParent task: k1694_codex_fail_repair_20260729. Worktree: .claude/worktrees/dispatch-slot-1-e98b43fc-k1694.\nBrief: storage/ops/agent_briefs/brief_k1694_r4_rv_completeness_e98b43fc.md\nSingle artifact: experiments/K1694/r4_repair_report.json\nScope = exactly the two blocking defects in storage/ops/codex_reviews/k1694_verdict_round4.md: (D1) _expected_trading_days() subtracts Columbus/Veterans Day so a 2-day common truncation in 2020-10 leaves 22/22 rows rv_complete=True, falsifying rv_rule_detects / rv_residual_blind_spot / panel_span_is_complete_months_only / README '3275 complete months'; (D2) K1694.py:480-489 allows 3 head/tail weekday gaps, so dropping 2020-06-30 from every commodity leaves 22/22 complete - the date path is not the claimed true endpoint test. Resolution may be Path A (correct CME calendar + exact endpoint match + sourced closure whitelist, re-run) or Path B (withdraw the complete-months certification and reword the disclosure); both need the two counterexamples encoded as regression tests that provably fail pre-fix. Do NOT reopen the round-4 pass list (estimator, provenance, NULL scope, DCOT entry-gap). Agent must not write knowledge.json (K1259) and must not merge.",
+    "task_type": "experiment",
+    "priority": 2,
+    "status": "awaiting_agent_job",
+    "source": "dispatch",
+    "created_at": "2026-07-29T00:02:21.708557+00:00",
+    "parent_task_id": "k1694_codex_fail_repair_20260729",
+    "created_by": "hourly-slot-1-99b060f8a48945b5aeba3736a6541724",
+    "compute_job_id": "agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7",
+    "blocked_reason": "external_compute_job_active",
+    "status_history": [
+      {
+        "ts": "2026-07-29T00:02:36.295777+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "result": "dispatched to compute job agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7; awaiting PHASE A collection"
+  },
+  {
+    "id": "assign_6a2adc68",
+    "title": "[K1694 split 2/2] Codex round-5 review + verdict + merge decision (waits for stage 1 artifact)",
+    "description": "Split child stage `codex-round5-review` of timed-out compute job agent-brief_k1694_repair_e98b43fc-ea643c.\nBLOCKED until stage 1 (assign_a88eed84) delivers experiments/K1694/r4_repair_report.json in worktree .claude/worktrees/dispatch-slot-1-e98b43fc-k1694. Do not start before that file exists.\nSingle artifact: experiments/K1694/review_verdict.json (the artifact the parent job never reached).\nSteps: (1) Codex round-5 review of the stage-1 repair against k1694_verdict_round4.md - both counterexamples must be closed or honestly disclosed, and the round-4 pass list must not have regressed. (2) If PASS/CONDITIONAL_PASS: main thread verifies code diff + results JSON fields + README agree, checks reproduce_spec sha/bytes match results.code_trace and were produced at run time (not back-filled), runs check_experiment_artifacts strict, then writes knowledge.json programmatically from K1694_results.json (never transcribed from README or an agent summary - K1259), then merge_worktree.sh dispatch-slot-1-e98b43fc-k1694. (3) If FAIL: keep the worktree unmerged and trigger the 3-strike rule - model_router already reports exhausted=true at attempt 2, so do NOT re-dispatch the same shape again; decompose further, add literature context, or escalate to the boss by email. If the finding is still NULL, record it as NULL.",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "blocked",
+    "source": "dispatch",
+    "created_at": "2026-07-29T00:02:21.840416+00:00",
+    "parent_task_id": "k1694_codex_fail_repair_20260729",
+    "created_by": "hourly-slot-1-99b060f8a48945b5aeba3736a6541724",
+    "blocked_until": "2026-07-29T12:30:00+08:00",
+    "blocked_reason": "external_compute_job_running",
+    "blocked_at": "2026-07-29T00:02:52+00:00",
+    "blocked_note": "Waits for [K1694 split 1/2] assign_a88eed84 / compute job agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7 to deliver experiments/K1694/r4_repair_report.json in worktree dispatch-slot-1-e98b43fc-k1694. Do not start before that artifact exists."
   }
 ]

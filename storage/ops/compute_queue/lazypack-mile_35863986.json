@@ -21,12 +21,12 @@
     "K781"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 1,
   "queued_at": "2026-07-28T23:32:32Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-28T23:45:29Z",
+  "completed_at": "2026-07-28T23:52:47Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_35863986.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_35863986.stderr",
   "result_artifact": "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels",
@@ -35,9 +35,10 @@
     "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/1_concept.png",
     "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/2_method.png",
     "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/3_results.png",
-    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/4_takeaway.png"
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/4_takeaway.png",
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/render_lazypack.py"
   ],
-  "output_paths_updated_at": null,
+  "output_paths_updated_at": "2026-07-28T23:52:40Z",
   "job_metadata": null,
   "kind": "compute",
   "cwd": null,
@@ -47,5 +48,29 @@
   "source_task_link": null,
   "timeout_seconds": 1800,
   "brief_source": null,
-  "brief_snapshot": null
+  "brief_snapshot": null,
+  "claimed_by_pid": 34851,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:133ccb319bd393968dde017b",
+    "scheduled_for": "2026-07-28T23:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Jul 29 07:45:29 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  },
+  "delivery_status": "delivered",
+  "partial_delivered": false,
+  "delivery_commit": "d12c947f6bb711809c0da312905e650c4b96d870",
+  "delivered_paths": [
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/1_concept.png",
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/2_method.png",
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/3_results.png",
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/4_takeaway.png",
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/render_lazypack.py",
+    "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/plan.json"
+  ],
+  "delivered_at": "2026-07-29T00:01:07.248569+00:00",
+  "delivery_source": "reap_orphan_deliverables"
 }

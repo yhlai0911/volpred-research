@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-28T23:00:16.511990+00:00",
+  "generated_at": "2026-07-29T00:00:35.115144+00:00",
   "adoptable": [
     {
       "path": "storage/drafts/K1357_general_draft.md",
@@ -7,7 +7,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1824,
-      "age_hours": 18.4
+      "age_hours": 19.4
     },
     {
       "path": "storage/drafts/K1419_general_draft.md",
@@ -15,7 +15,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 1731,
-      "age_hours": 18.3
+      "age_hours": 19.3
     },
     {
       "path": "storage/drafts/K1536_general_draft.md",
@@ -23,7 +23,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2399,
-      "age_hours": 13.6
+      "age_hours": 14.6
     },
     {
       "path": "storage/drafts/K1589_general_draft.md",
@@ -31,7 +31,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2574,
-      "age_hours": 12.7
+      "age_hours": 13.7
     },
     {
       "path": "storage/drafts/K1597_general_draft.md",
@@ -39,7 +39,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3794,
-      "age_hours": 177.6
+      "age_hours": 178.6
     },
     {
       "path": "storage/drafts/K1658_general_draft.md",
@@ -47,7 +47,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2054,
-      "age_hours": 12.6
+      "age_hours": 13.6
     },
     {
       "path": "storage/drafts/K1710_general_draft.md",
@@ -55,7 +55,7 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 2497,
-      "age_hours": 29.6
+      "age_hours": 30.6
     },
     {
       "path": "storage/drafts/k1600_general_draft.md",
@@ -63,14 +63,14 @@
       "audience": "general",
       "status": "draft",
       "body_chars": 3108,
-      "age_hours": 37.7
+      "age_hours": 38.7
     }
   ],
   "held": [],
   "skipped": {
     "baseline": 519,
     "registered": 65,
-    "grace": 0,
+    "grace": 1,
     "inflight": 0
   },
   "orphan_count": 8,
@@ -87,15 +87,55 @@
     }
   ],
   "applied": true,
-  "job_deliverable_candidates": [],
+  "job_deliverable_candidates": [
+    {
+      "job_id": "lazypack-mile_35863986",
+      "job_path": "/Users/yhlai0911/volpred-research/storage/ops/compute_queue/lazypack-mile_35863986.json",
+      "execution_status": "completed",
+      "paths": [
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/plan.json",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/2_method.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/3_results.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/4_takeaway.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/render_lazypack.py"
+      ],
+      "existing_paths": [
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/plan.json",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/2_method.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/3_results.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/4_takeaway.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/render_lazypack.py"
+      ],
+      "previously_delivered_paths": [],
+      "rejected": []
+    }
+  ],
   "job_deliverable_held": [],
-  "job_deliveries": [],
+  "job_deliveries": [
+    {
+      "job_id": "lazypack-mile_35863986",
+      "paths": [
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/plan.json",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/1_concept.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/2_method.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/3_results.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/4_takeaway.png",
+        "storage/lazypack_jobs/mile_35863986/runs/lazypack-mile_35863986/panels/render_lazypack.py"
+      ],
+      "delivered": true,
+      "delivery_status": "delivered",
+      "delivery_commit": "d12c947f6bb711809c0da312905e650c4b96d870",
+      "reason": "committed"
+    }
+  ],
   "namespaces": {
     "drafts": {
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 0,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
@@ -115,7 +155,7 @@
       "collectable": [],
       "held": [],
       "skipped": {
-        "grace": 0,
+        "grace": 1,
         "inflight": 0,
         "unclaimed": 0
       },
