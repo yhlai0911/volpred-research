@@ -2,9 +2,9 @@
   "experiment_id": "K1694",
   "title": "FCM clearing concentration and high-volatility crowding-out of small commodity traders",
   "seed": 1694,
-  "run_utc": "2026-07-29T00:28:56.729382+00:00",
+  "run_utc": "2026-07-29T16:18:44.499560+00:00",
   "verdict": "NULL",
-  "verdict_scope": "NULL means the negative, binary high-vol crowding-out hypothesis (spec1 fcm_x_highvol < 0) is NOT SUPPORTED. 'Not supported' is the whole claim: these estimators cannot establish that the effect is absent, and NULL does NOT mean 'no association'. The continuous analogue (spec2 fcm_x_rvz) is POSITIVE and significant: coef 2.8747e-04, t_DK 2.54, t_cluster_month 2.56 -- i.e. in the direction opposite to crowding-out.",
+  "verdict_scope": "NULL means the negative, binary high-vol crowding-out hypothesis (spec1 fcm_x_highvol < 0) is NOT SUPPORTED. 'Not supported' is the whole claim: these estimators cannot establish that the effect is absent, and NULL does NOT mean 'no association'. The continuous analogue (spec2 fcm_x_rvz) is POSITIVE and significant: coef 2.8846e-04, t_DK 2.54, t_cluster_month 2.56 -- i.e. in the direction opposite to crowding-out.",
   "claim_type": "ex_post_association",
   "claim_language_rule": "NO specification here supports a predictive, causal, forecast or known-before-outcome claim, and none supports 'there is no predictability'. spec1-3 are ex-post association because the FCM report can become available mid-outcome-month while the outcome is a whole-month average change. spec4 hardens the timing (month-start as-of merge, point-in-time regime label at t-1, t-2 DCOT controls, its own sample) but its ex-ante status is CONDITIONAL on the synthetic availability constant, so its null reads 'an association is NOT SUPPORTED under this timing arrangement' -- not 'no association', and not 'no predictability'. Every null here is stated as NOT SUPPORTED, never as an absence and never as disproved.",
   "data_provenance": {
@@ -14,8 +14,8 @@
     "fcm_publication_lag_is_synthetic": "avail_date = month_end + 45d is a constant chosen by this script, not an observed CFTC release date; the offline cache carries no release date column. Sensitivity over 30/45/60/75/90d lives in K1694_lag_sensitivity.json.",
     "fcm_asof_merge_primary": "backward as-of: latest FCM report whose synthetic avail_date <= the outcome month_end. Availability may therefore fall INSIDE the outcome month -- association timing, not predictive timing.",
     "fcm_asof_merge_spec4": "backward as-of on the outcome month's START, so the report's ASSUMED availability precedes the whole outcome window. Assumed, not verified -- see fcm_publication_lag_is_synthetic.",
-    "fcm_avail_inside_outcome_month_rows_in_estimation_sample": 3276,
-    "estimation_sample_rows": 3276,
+    "fcm_avail_inside_outcome_month_rows_in_estimation_sample": 3275,
+    "estimation_sample_rows": 3275,
     "dcot_source": "CFTC DCOT futures-only 72hh-3qpy (weekly; as-of Tue, published Fri)",
     "dcot_small_trader_proxy": "non-reportable positions (long+short)/(2*OI)",
     "vol_source": "yfinance daily futures; monthly realized vol = std(daily logret)*sqrt(252)",
@@ -51,15 +51,15 @@
       "2026-05-31"
     ],
     "estimation_sample_owner": "build_spec_frame() for spec1-3 and both bootstraps; build_lagged_frame() for spec4, selected by spec4's own regressors",
-    "panel_rows_usable": 3276,
+    "panel_rows_usable": 3275,
     "panel_commodities": 22,
     "panel_span": [
       "2014-02",
       "2026-06"
     ],
     "panel_span_is_complete_months_only": false,
-    "panel_span_completeness_basis": "every retained row's DCOT month is CERTIFIED continuous -- at least 4 reports, no gap over 9 days between consecutive reports including the entry gap from the previous month, so a skipped week anywhere fails. Its RV month is only SCREENED: the day count must match the CME futures calendar to within one day, which cannot rule out a one-day truncation common to every commodity. No partial month such as 2026-07 survives either test, but 'complete months only' would overstate the RV side. See sample.completeness.rule.rv_residual_blind_spot.",
-    "lagged_frame_rows": 2749,
+    "panel_span_completeness_basis": "every retained row's DCOT month is CERTIFIED continuous -- at least 4 reports, no gap over 9 days between consecutive reports including the entry gap from the previous month, so a skipped week anywhere fails. Its RV month is only SCREENED: the day count must match the listing exchange's own trading calendar to within one day, which cannot rule out a one-day truncation common to every commodity of that exchange. The screen is demonstrably not a certificate -- round 6 removed an unsourced closure whitelist, and 2018-12 now passes the screen while CME's own notice says the market was open on a day for which no commodity has a bar. No partial month such as 2026-07 survives either test, but 'complete months only' would overstate the RV side. See sample.completeness.rule.rv_residual_blind_spot and sample.completeness.rule.rv_months_short_of_the_exchange_calendar.",
+    "lagged_frame_rows": 2748,
     "effective_temporal_dof": {
       "calendar_months": 149,
       "hhi_seg_z_autocorrelation": {
@@ -75,54 +75,268 @@
       "rule": {
         "dcot_month_complete": "nweeks >= 4 AND every gap between consecutive reports <= 9d, INCLUDING the entry gap from the previous month's last report AND month_end - last_report <= 6d",
         "dcot_rule_detects": "a skipped week anywhere, first week included, because continuity is measured against the previous report rather than against the month boundary: deleting any single report makes one gap about 14 days (observed gaps in this cache are only 6, 7 or 8 days). A month with no earlier report at all -- the first month of the series -- can never be certified and is dropped.",
-        "rv_month_complete": "trading days >= 15 AND expected_trading_days - trading days <= 2 AND max(trading days across commodities that month) - trading days <= 2 AND expected_trading_days - max(trading days that month) <= 1",
-        "rv_expected_trading_days_definition": "weekdays minus the CME futures holiday calendar -- New Year (not rolled back to 31 Dec when 1 Jan is a Saturday), MLK, Presidents' Day, Good Friday, Memorial Day, Juneteenth from 2022, Independence Day, Labor Day, Thanksgiving, Christmas -- minus the enumerated unscheduled closures in rv_unscheduled_closures. Columbus Day and Veterans Day are federal holidays on which CME futures TRADE and are deliberately not subtracted: subtracting them understated the count and refuted this rule's own detection claim (Codex round 4, 2020-10).",
-        "rv_unscheduled_closures": {
-          "2012-10-29": "Hurricane Sandy: U.S. markets closed (day 1 of 2)",
-          "2012-10-30": "Hurricane Sandy: U.S. markets closed (day 2 of 2)",
-          "2018-12-05": "national day of mourning for George H. W. Bush"
+        "rv_month_complete": "trading days >= 15 AND expected_trading_days - trading days <= 2 AND max(trading days across commodities on the SAME product schedule that month) - trading days <= 2 AND expected_trading_days - max(trading days on that schedule that month) <= 1. Every anchor is computed within a product schedule, never across all 22 commodities (Codex round 5).",
+        "rv_expected_trading_days_definition": "weekdays minus the holiday calendar OF THE EXCHANGE THAT LISTS THE PRODUCT -- New Year (not rolled back to 31 Dec when 1 Jan is a Saturday), MLK, Presidents' Day, Good Friday, Memorial Day, Juneteenth from 2022, Independence Day, Labor Day, Thanksgiving, Christmas -- minus that schedule's enumerated unscheduled closures. Columbus Day and Veterans Day are federal holidays on which BOTH venues TRADE and are deliberately not subtracted: subtracting them understated the count and refuted this rule's own detection claim (Codex round 4, 2020-10). Sources per ticker: calendar_sources.md; machine-readable fixtures the tests check against, without consulting this module: calendar_fixtures.json.",
+        "product_schedules": {
+          "CME_GLOBEX_COMMODITY": {
+            "exchange": "CME Group (NYMEX, COMEX, CBOT, KCBT, CME) -- physical-commodity futures on CME Globex; contains no U.S. equity-index and no U.S. interest-rate product, which are the two groups the three disputed-date notices actually closed",
+            "commodities": [
+              "COPPER- #1",
+              "CORN",
+              "FEEDER CATTLE",
+              "GASOLINE RBOB",
+              "GOLD",
+              "LEAN HOGS",
+              "LIVE CATTLE",
+              "NAT GAS NYME",
+              "NY HARBOR ULSD",
+              "PALLADIUM",
+              "PLATINUM",
+              "SILVER",
+              "SOYBEAN MEAL",
+              "SOYBEAN OIL",
+              "SOYBEANS",
+              "WHEAT-HRW",
+              "WHEAT-SRW",
+              "WTI-PHYSICAL"
+            ],
+            "closed_holidays": [
+              "New Year's Day",
+              "Martin Luther King Day",
+              "Presidents' Day",
+              "Good Friday",
+              "Memorial Day",
+              "Juneteenth (from 2022)",
+              "Independence Day",
+              "Labor Day",
+              "Thanksgiving",
+              "Christmas"
+            ],
+            "trades_on": [
+              "Columbus Day",
+              "Veterans Day"
+            ],
+            "sources": [
+              "CME Globex 2010 Holiday Calendar (11 per-product-group schedules)",
+              "CME Globex Columbus Day Holiday Schedule 2010",
+              "CME Group Holiday Calendar landing page",
+              "CME Clearing Juneteenth 2022 advisory"
+            ]
+          },
+          "ICEUS_SOFTS": {
+            "exchange": "ICE Futures U.S. -- Sugar No. 11, Coffee 'C', Cocoa, Cotton No. 2. ICE's Canola and its currency/stock-index/metal/energy groups keep DIFFERENT calendars; only the softs column is used here",
+            "commodities": [
+              "COCOA",
+              "COFFEE C",
+              "COTTON NO. 2",
+              "SUGAR NO. 11"
+            ],
+            "closed_holidays": [
+              "New Year's Day",
+              "Martin Luther King Day",
+              "Presidents' Day",
+              "Good Friday",
+              "Memorial Day",
+              "Juneteenth (from 2022)",
+              "Independence Day",
+              "Labor Day",
+              "Thanksgiving",
+              "Christmas"
+            ],
+            "trades_on": [
+              "Columbus Day",
+              "Veterans Day"
+            ],
+            "sources": [
+              "ICE Futures U.S. 2018 Holiday Calendar (notice 2017-07-06)",
+              "ICE Futures U.S. 2019 Holiday Calendar (notice 2018-06-22)",
+              "ICE Futures U.S. 2026 Trading Holiday Calendar (2025-06-09)"
+            ]
+          }
         },
-        "rv_rule_detects": "an independently truncated download (a commodity short of both the calendar and its peers) AND a truncation common to every commodity of 2 or more days, which no cross-sectional check can see -- except in the 6 months listed under rv_months_observed_beyond_the_cme_calendar, where some contract prints an abbreviated holiday session, so the threshold there is the per-month figure given in that list",
-        "rv_months_observed_beyond_the_cme_calendar": [
+        "rv_unscheduled_closures": {
+          "CME_GLOBEX_COMMODITY": {},
+          "ICEUS_SOFTS": {}
+        },
+        "rv_unscheduled_closures_note": "EMPTY, and empty is the finding, not an omission. Codex round 5 blocked on a universal whitelist that removed 2012-10-29, 2012-10-30 and 2018-12-05 for all 22 commodities. The exchanges' own notices say the opposite for every product here: CFTC submission 12-363 lists the Sandy emergency actions exhaustively (U.S. equity futures and the interest-rate complex) and states electronic trading remained available for ALL NYMEX and COMEX products on CME Globex; ICE's 2012-10-29 release keeps all ICE markets but Russell index futures and ICE Clear Credit on regular hours; CME's 2018-12-02 release and clearing advisory Chadv18-474 close U.S. equity and interest-rate products only and state all other Globex markets keep regular hours on Dec. 5. This panel holds no equity-index and no interest-rate product. An entry may only be added with a source_id and a quote; _validate_unscheduled_closures() refuses anything less.",
+        "rv_trading_status_not_verified": [
           {
+            "date": "2018-12-05",
+            "schedule": "ICEUS_SOFTS",
+            "searched": "an ICE Futures U.S. exchange notice or ICE press release covering the 2018 national day of mourning",
+            "outcome": "NOT FOUND -- ICE's own 2018 holiday calendar is dated 2017-07-06 and predates the event",
+            "treatment": "no closure asserted; the date is carried as a normal trading day",
+            "materiality": "quantified at run time in sample.completeness.unverified_status_insensitivity"
+          }
+        ],
+        "rv_rule_detects": "an independently truncated download (a commodity short of both its own exchange calendar and its same-schedule peers) AND a truncation common to every commodity of a schedule of 2 or more days, which no cross-sectional check can see -- except in the 8 schedule-months listed under rv_months_observed_beyond_the_exchange_calendar, where some contract prints an abbreviated holiday session, so the threshold there is the per-month figure given in that list",
+        "rv_months_observed_beyond_the_exchange_calendar": [
+          {
+            "schedule": "CME_GLOBEX_COMMODITY",
             "month": "2006-09",
-            "cme_calendar_days": 20,
+            "exchange_calendar_days": 20,
             "max_days_observed": 21,
             "common_truncation_days_needed_to_detect": 3
           },
           {
+            "schedule": "CME_GLOBEX_COMMODITY",
             "month": "2006-11",
-            "cme_calendar_days": 21,
+            "exchange_calendar_days": 21,
             "max_days_observed": 22,
             "common_truncation_days_needed_to_detect": 3
           },
           {
+            "schedule": "CME_GLOBEX_COMMODITY",
             "month": "2006-12",
-            "cme_calendar_days": 20,
+            "exchange_calendar_days": 20,
             "max_days_observed": 21,
             "common_truncation_days_needed_to_detect": 3
           },
           {
+            "schedule": "CME_GLOBEX_COMMODITY",
             "month": "2007-01",
-            "cme_calendar_days": 21,
+            "exchange_calendar_days": 21,
             "max_days_observed": 22,
             "common_truncation_days_needed_to_detect": 3
           },
           {
+            "schedule": "CME_GLOBEX_COMMODITY",
             "month": "2023-11",
-            "cme_calendar_days": 21,
+            "exchange_calendar_days": 21,
             "max_days_observed": 22,
             "common_truncation_days_needed_to_detect": 3
           },
           {
+            "schedule": "CME_GLOBEX_COMMODITY",
             "month": "2025-07",
-            "cme_calendar_days": 22,
+            "exchange_calendar_days": 22,
+            "max_days_observed": 23,
+            "common_truncation_days_needed_to_detect": 3
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2023-11",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 22,
+            "common_truncation_days_needed_to_detect": 3
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2025-07",
+            "exchange_calendar_days": 22,
             "max_days_observed": 23,
             "common_truncation_days_needed_to_detect": 3
           }
         ],
+        "rv_months_short_of_the_exchange_calendar": [
+          {
+            "schedule": "CME_GLOBEX_COMMODITY",
+            "month": "2012-10",
+            "exchange_calendar_days": 23,
+            "max_days_observed": 21,
+            "common_shortfall_days": 2,
+            "caught_by_the_rule": true
+          },
+          {
+            "schedule": "CME_GLOBEX_COMMODITY",
+            "month": "2016-10",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "CME_GLOBEX_COMMODITY",
+            "month": "2016-11",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "CME_GLOBEX_COMMODITY",
+            "month": "2018-12",
+            "exchange_calendar_days": 20,
+            "max_days_observed": 19,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "CME_GLOBEX_COMMODITY",
+            "month": "2026-07",
+            "exchange_calendar_days": 22,
+            "max_days_observed": 10,
+            "common_shortfall_days": 12,
+            "caught_by_the_rule": true
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2006-11",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2007-01",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2007-11",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2007-12",
+            "exchange_calendar_days": 20,
+            "max_days_observed": 19,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2012-10",
+            "exchange_calendar_days": 23,
+            "max_days_observed": 21,
+            "common_shortfall_days": 2,
+            "caught_by_the_rule": true
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2016-10",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2016-11",
+            "exchange_calendar_days": 21,
+            "max_days_observed": 20,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          },
+          {
+            "schedule": "ICEUS_SOFTS",
+            "month": "2018-12",
+            "exchange_calendar_days": 20,
+            "max_days_observed": 19,
+            "common_shortfall_days": 1,
+            "caught_by_the_rule": false
+          }
+        ],
+        "rv_months_short_note": "Every commodity of the named schedule is short of that exchange's own calendar in these months. With the unsourced whitelist gone nothing absorbs them, so they are either genuine download gaps or a provider artefact -- in both readings the data, not the exchange, is what is missing. Those with caught_by_the_rule=false are inside MAX_RV_MONTH_SHORTFALL and are the residual blind spot made concrete: 2018-12 is one of them, and for that month primary sources say the exchange WAS open (see rv_unscheduled_closures_note), so a month can pass this screen while provably missing a trading day.",
         "rv_endpoint_test": "UNAVAILABLE for this cache: rv_monthly.csv stores day counts only, no first/last observation dates. build_vol() now records them, so any regenerated cache upgrades this to a true endpoint test.",
-        "rv_residual_blind_spot": "a truncation of exactly ONE day common to every commodity is indistinguishable, in a count-only cache, from an unscheduled market closure -- and by the same token an entry in rv_unscheduled_closures rests on the external event that dated it, not on anything this cache can show. Two such closures are in sample and are subtracted by name: 2012-10 (Hurricane Sandy) and 2018-12 (national day of mourning). This rule therefore does NOT prove each download reached both ends of its month; it SCREENS the day count for consistency with the CME futures calendar to within one day, wider by the excess shown in rv_months_observed_beyond_the_cme_calendar. Months that pass are screened, NOT certified complete: certifying them from a count-only cache would need independent endpoint evidence, which this frozen rv_monthly.csv does not carry.",
+        "rv_residual_blind_spot": "a truncation of exactly ONE day common to every commodity of a schedule is inside MAX_RV_MONTH_SHORTFALL and is therefore not flagged. After round 6 this is no longer a hypothetical: the calendar carries no unsourced exemption, so the months listed in rv_months_short_of_the_exchange_calendar with caught_by_the_rule=false are months this screen passes while the download is short of the exchange's own calendar. 2018-12 is one of them and is the sharp case -- CME's own notice says the market was open on 2018-12-05, yet no commodity has a bar for it. This rule therefore does NOT prove each download reached both ends of its month; it SCREENS the day count for consistency with the listing exchange's calendar to within one day, wider by the excess shown in rv_months_observed_beyond_the_exchange_calendar. Months that pass are screened, NOT certified complete: certifying them from a count-only cache would need independent endpoint evidence, which this frozen rv_monthly.csv does not carry.",
         "date_hardcoded": false,
         "effect_of_dcot_incomplete": "row dropped from the panel entirely",
         "effect_of_rv_incomplete": "rv masked to NaN; DCOT row retained",
@@ -150,17 +364,33 @@
           "max_rv_shortfall_vs_calendar": 12
         }
       ],
-      "rv_masked_partial_months": 22,
+      "rv_masked_partial_months": 45,
       "rv_masked_month_examples": [
         "2006-10",
         "2007-01",
         "2008-10",
         "2009-01",
         "2009-02",
+        "2012-10",
         "2014-04",
         "2016-03",
+        "2018-12",
         "2026-07"
-      ]
+      ],
+      "unverified_status_insensitivity": {
+        "why": "each date in rv_trading_status_not_verified is carried as OPEN because no exchange notice was found; forcing it closed changes the rows listed below and nothing else",
+        "probes": [
+          {
+            "date": "2018-12-05",
+            "schedule": "ICEUS_SOFTS",
+            "counterfactual": "this date forced closed for that schedule",
+            "rv_complete_rows_reported": 5229,
+            "rv_complete_rows_if_closed": 5229,
+            "commodity_months_that_would_flip": [],
+            "estimation_sample_would_change": false
+          }
+        ]
+      }
     }
   },
   "descriptives": {
@@ -180,38 +410,38 @@
     },
     "regime_2x2_d_nonrep": {
       "fcm0_vol0": {
-        "mean": -0.0001886264371917257,
-        "std": 0.0054617127799851195,
-        "n": 1083
+        "mean": -0.00018445455140526947,
+        "std": 0.005461834872627365,
+        "n": 1084
       },
       "fcm0_vol1": {
-        "mean": -0.0004885284561020779,
-        "std": 0.006872535243188762,
-        "n": 807
+        "mean": -0.0004957713369417387,
+        "std": 0.0068778999394139215,
+        "n": 805
       },
       "fcm1_vol0": {
-        "mean": -0.0003057730399859274,
-        "std": 0.004908259803957089,
-        "n": 616
+        "mean": -0.00030634094418666125,
+        "std": 0.004898360136199309,
+        "n": 625
       },
       "fcm1_vol1": {
-        "mean": 0.000275923713094953,
-        "std": 0.005706473112444853,
-        "n": 770
+        "mean": 0.00028326958813199195,
+        "std": 0.005721824571147627,
+        "n": 761
       }
     },
     "corr_d_nonrep": {
       "d_nonrep": 1.0,
-      "hhi_seg_z": 0.044080923746279414,
-      "rv_z": 0.056024167839055276,
-      "highvol": 0.009967320761623209,
-      "conc4_z": 0.00454823403036495,
-      "dlog_oi": -0.44568934526705273
+      "hhi_seg_z": 0.044094805203216604,
+      "rv_z": 0.056098232488933565,
+      "highvol": 0.009619584850649095,
+      "conc4_z": 0.004520132817432308,
+      "dlog_oi": -0.4457400763758685
     }
   },
   "panel_regressions": {
     "spec1_fcm_highvol": {
-      "n_obs": 3276,
+      "n_obs": 3275,
       "n_commodities": 22,
       "n_months": 149,
       "n_rows_dropped_vs_own_frame": 0,
@@ -227,69 +457,69 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "hhi_seg_z": -4.322396248482301e-06,
-          "highvol": -0.0004851174384139361,
-          "fcm_x_highvol": 0.0003097380535187968,
-          "nonrep_lag": -0.05263901442425177,
-          "d_nonrep_lag": -0.009532608031589208,
-          "dlog_oi": -0.034747450002016816,
-          "t": -2.836087312958979e-06
+          "hhi_seg_z": -3.853511108871054e-08,
+          "highvol": -0.0005010716043711855,
+          "fcm_x_highvol": 0.0003033902252641436,
+          "nonrep_lag": -0.052569454603583025,
+          "d_nonrep_lag": -0.009487908324812474,
+          "dlog_oi": -0.03477810728793699,
+          "t": -2.8322308484333372e-06
         },
         "tstat": {
-          "hhi_seg_z": -0.024977439869580464,
-          "highvol": -2.3780419526572105,
-          "fcm_x_highvol": 1.5269538290582771,
-          "nonrep_lag": -6.251196878241048,
-          "d_nonrep_lag": -0.43316825157660027,
-          "dlog_oi": -18.621588564501998,
-          "t": -0.9084406529444031
+          "hhi_seg_z": -0.00022156246745239408,
+          "highvol": -2.435426186315005,
+          "fcm_x_highvol": 1.4833413189634188,
+          "nonrep_lag": -6.225703532806073,
+          "d_nonrep_lag": -0.43119525039036094,
+          "dlog_oi": -18.640405407305828,
+          "t": -0.9071784950223463
         },
         "pval": {
-          "hhi_seg_z": 0.9800744932145249,
-          "highvol": 0.017462392965520435,
-          "fcm_x_highvol": 0.12686989134250282,
-          "nonrep_lag": 4.6042658574663164e-10,
-          "d_nonrep_lag": 0.6649213140576757,
+          "hhi_seg_z": 0.9998232323442053,
+          "highvol": 0.014927744310017088,
+          "fcm_x_highvol": 0.13808083337683197,
+          "nonrep_lag": 5.408795633599084e-10,
+          "d_nonrep_lag": 0.6663550404043164,
           "dlog_oi": 0.0,
-          "t": 0.3637128749674352
+          "t": 0.3643797530159716
         },
         "bandwidth": 6,
         "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "hhi_seg_z": -4.322396248482301e-06,
-          "highvol": -0.0004851174384139361,
-          "fcm_x_highvol": 0.0003097380535187968,
-          "nonrep_lag": -0.05263901442425177,
-          "d_nonrep_lag": -0.009532608031589208,
-          "dlog_oi": -0.034747450002016816,
-          "t": -2.836087312958979e-06
+          "hhi_seg_z": -3.853511108871054e-08,
+          "highvol": -0.0005010716043711855,
+          "fcm_x_highvol": 0.0003033902252641436,
+          "nonrep_lag": -0.052569454603583025,
+          "d_nonrep_lag": -0.009487908324812474,
+          "dlog_oi": -0.03477810728793699,
+          "t": -2.8322308484333372e-06
         },
         "tstat": {
-          "hhi_seg_z": -0.023615954317456285,
-          "highvol": -2.32590028597698,
-          "fcm_x_highvol": 1.56728122592097,
-          "nonrep_lag": -5.852111444063965,
-          "d_nonrep_lag": -0.4026773815743128,
-          "dlog_oi": -26.47060759303256,
-          "t": -0.7682395292893749
+          "hhi_seg_z": -0.00020969430986300953,
+          "highvol": -2.3888548338845865,
+          "fcm_x_highvol": 1.5178208229730303,
+          "nonrep_lag": -5.848868151743232,
+          "d_nonrep_lag": -0.4008700713078368,
+          "dlog_oi": -26.509077575375244,
+          "t": -0.7674665740918132
         },
         "pval": {
-          "hhi_seg_z": 0.9811603971297158,
-          "highvol": 0.020085150524619566,
-          "fcm_x_highvol": 0.11714641451658236,
-          "nonrep_lag": 5.336669328670496e-09,
-          "d_nonrep_lag": 0.6872120839847189,
+          "hhi_seg_z": 0.9998327010344044,
+          "highvol": 0.016957771873489236,
+          "fcm_x_highvol": 0.12915695619263268,
+          "nonrep_lag": 5.44080891451415e-09,
+          "d_nonrep_lag": 0.6885421697607117,
           "dlog_oi": 0.0,
-          "t": 0.4424007603901303
+          "t": 0.4428599792839616
         }
       },
-      "rsq_within": 0.22668089711941608,
+      "rsq_within": 0.22680607325533786,
       "note": "ex-post association: the FCM report may become available mid-outcome-month and the outcome is a whole-month average change"
     },
     "spec2_fcm_rvz_continuous": {
-      "n_obs": 3276,
+      "n_obs": 3275,
       "n_commodities": 22,
       "n_months": 149,
       "n_rows_dropped_vs_own_frame": 0,
@@ -305,69 +535,69 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "hhi_seg_z": 0.00014590875987734658,
-          "rv_z": -0.0001491995133325954,
-          "fcm_x_rvz": 0.0002874686719902463,
-          "nonrep_lag": -0.05427901890239858,
-          "d_nonrep_lag": -0.009940690016432354,
-          "dlog_oi": -0.03448724156856829,
-          "t": -3.1807829423635663e-06
+          "hhi_seg_z": 0.0001462787850350989,
+          "rv_z": -0.0001504633476365597,
+          "fcm_x_rvz": 0.0002884599655089276,
+          "nonrep_lag": -0.05429681177061148,
+          "d_nonrep_lag": -0.009915705004088652,
+          "dlog_oi": -0.03450258455550179,
+          "t": -3.1826926496717496e-06
         },
         "tstat": {
-          "hhi_seg_z": 1.0714455001402599,
-          "rv_z": -0.9169455134574725,
-          "fcm_x_rvz": 2.5421165752659687,
-          "nonrep_lag": -6.268030089728188,
-          "d_nonrep_lag": -0.4445113136386909,
-          "dlog_oi": -18.464345754300123,
-          "t": -1.023952435507275
+          "hhi_seg_z": 1.07358755937124,
+          "rv_z": -0.9219916587803783,
+          "fcm_x_rvz": 2.544788465073753,
+          "nonrep_lag": -6.267683519032672,
+          "d_nonrep_lag": -0.4433594606481845,
+          "dlog_oi": -18.528157393535043,
+          "t": -1.024396255585191
         },
         "pval": {
-          "hhi_seg_z": 0.2840487945483754,
-          "rv_z": 0.35923929129043586,
-          "fcm_x_rvz": 0.011064425302739211,
-          "nonrep_lag": 4.13850731462162e-10,
-          "d_nonrep_lag": 0.6567025763550038,
+          "hhi_seg_z": 0.28308737785130256,
+          "rv_z": 0.3566014477244619,
+          "fcm_x_rvz": 0.010980312928035252,
+          "nonrep_lag": 4.1477732359851416e-10,
+          "d_nonrep_lag": 0.6575353010476139,
           "dlog_oi": 0.0,
-          "t": 0.30593401981306156
+          "t": 0.3057244838520723
         },
         "bandwidth": 6,
         "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "hhi_seg_z": 0.00014590875987734658,
-          "rv_z": -0.0001491995133325954,
-          "fcm_x_rvz": 0.0002874686719902463,
-          "nonrep_lag": -0.05427901890239858,
-          "d_nonrep_lag": -0.009940690016432354,
-          "dlog_oi": -0.03448724156856829,
-          "t": -3.1807829423635663e-06
+          "hhi_seg_z": 0.0001462787850350989,
+          "rv_z": -0.0001504633476365597,
+          "fcm_x_rvz": 0.0002884599655089276,
+          "nonrep_lag": -0.05429681177061148,
+          "d_nonrep_lag": -0.009915705004088652,
+          "dlog_oi": -0.03450258455550179,
+          "t": -3.1826926496717496e-06
         },
         "tstat": {
-          "hhi_seg_z": 0.9523632440899844,
-          "rv_z": -1.0395778744908561,
-          "fcm_x_rvz": 2.557817956027383,
-          "nonrep_lag": -5.958591692542008,
-          "d_nonrep_lag": -0.41969879390416315,
-          "dlog_oi": -26.171325738933117,
-          "t": -0.8478818013024954
+          "hhi_seg_z": 0.9546322557417448,
+          "rv_z": -1.0458406610673066,
+          "fcm_x_rvz": 2.561818422719159,
+          "nonrep_lag": -5.960307216697404,
+          "d_nonrep_lag": -0.4186529299100392,
+          "dlog_oi": -26.22135970234419,
+          "t": -0.8483939428408623
         },
         "pval": {
-          "hhi_seg_z": 0.34098368048708716,
-          "rv_z": 0.298613463873318,
-          "fcm_x_rvz": 0.0105781494171302,
-          "nonrep_lag": 2.8166580179345146e-09,
-          "d_nonrep_lag": 0.6747332732337683,
+          "hhi_seg_z": 0.33983478436153325,
+          "rv_z": 0.2957124768049013,
+          "fcm_x_rvz": 0.010457348206905914,
+          "nonrep_lag": 2.7876496666578987e-09,
+          "d_nonrep_lag": 0.6754974984319033,
           "dlog_oi": 0.0,
-          "t": 0.3965662958873366
+          "t": 0.3962811715753507
         }
       },
-      "rsq_within": 0.22686926577577737,
+      "rsq_within": 0.22693138235846244,
       "note": "ex-post association; same timing caveat as spec1"
     },
     "spec3_trader_conc4_highvol": {
-      "n_obs": 3276,
+      "n_obs": 3275,
       "n_commodities": 22,
       "n_months": 149,
       "n_rows_dropped_vs_own_frame": 0,
@@ -383,69 +613,69 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "conc4_z": -0.0003595794147218036,
-          "highvol": -0.0005159094168537635,
-          "conc4_x_highvol": -0.00019087717555590214,
-          "nonrep_lag": -0.055607793210414126,
-          "d_nonrep_lag": -0.007869616757890672,
-          "dlog_oi": -0.035117856058710754,
-          "t": -1.9045304004913472e-06
+          "conc4_z": -0.00036296911270144127,
+          "highvol": -0.0005333401742688235,
+          "conc4_x_highvol": -0.00018474193342386878,
+          "nonrep_lag": -0.05553000572160217,
+          "d_nonrep_lag": -0.007848156447782195,
+          "dlog_oi": -0.03515781962051967,
+          "t": -1.8806904047416027e-06
         },
         "tstat": {
-          "conc4_z": -2.1415529372107933,
-          "highvol": -2.122214593314623,
-          "conc4_x_highvol": -0.7568113187946577,
-          "nonrep_lag": -6.564544268292307,
-          "d_nonrep_lag": -0.35232096523964684,
-          "dlog_oi": -18.89659249101739,
-          "t": -0.7822712438669679
+          "conc4_z": -2.1506717737535483,
+          "highvol": -2.1462383569813284,
+          "conc4_x_highvol": -0.72426643118154,
+          "nonrep_lag": -6.543727311294224,
+          "d_nonrep_lag": -0.3515636029014897,
+          "dlog_oi": -18.93746006699698,
+          "t": -0.7688537647249697
         },
         "pval": {
-          "conc4_z": 0.032303685846347685,
-          "highvol": 0.03389522571304804,
-          "conc4_x_highvol": 0.4492178202209143,
-          "nonrep_lag": 6.053291201624234e-11,
-          "d_nonrep_lag": 0.7246204323538743,
+          "conc4_z": 0.03157573438022099,
+          "highvol": 0.03192788526943868,
+          "conc4_x_highvol": 0.4689543781174088,
+          "nonrep_lag": 6.9469763275265e-11,
+          "d_nonrep_lag": 0.7251883839612865,
           "dlog_oi": 0.0,
-          "t": 0.4341122249477296
+          "t": 0.4420360634702969
         },
         "bandwidth": 6,
         "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "conc4_z": -0.0003595794147218036,
-          "highvol": -0.0005159094168537635,
-          "conc4_x_highvol": -0.00019087717555590214,
-          "nonrep_lag": -0.055607793210414126,
-          "d_nonrep_lag": -0.007869616757890672,
-          "dlog_oi": -0.035117856058710754,
-          "t": -1.9045304004913472e-06
+          "conc4_z": -0.00036296911270144127,
+          "highvol": -0.0005333401742688235,
+          "conc4_x_highvol": -0.00018474193342386878,
+          "nonrep_lag": -0.05553000572160217,
+          "d_nonrep_lag": -0.007848156447782195,
+          "dlog_oi": -0.03515781962051967,
+          "t": -1.8806904047416027e-06
         },
         "tstat": {
-          "conc4_z": -2.1289427701061543,
-          "highvol": -2.105701493571818,
-          "conc4_x_highvol": -0.7498019307100124,
-          "nonrep_lag": -6.194453421723317,
-          "d_nonrep_lag": -0.3310976469652955,
-          "dlog_oi": -26.716117318850756,
-          "t": -0.6903707529989228
+          "conc4_z": -2.122641453961921,
+          "highvol": -2.1385085727220745,
+          "conc4_x_highvol": -0.7119111198223902,
+          "nonrep_lag": -6.189944098127049,
+          "d_nonrep_lag": -0.33023547871293407,
+          "dlog_oi": -26.77739600757088,
+          "t": -0.6817765397120894
         },
         "pval": {
-          "conc4_z": 0.0333340520746892,
-          "highvol": 0.035306882726946265,
-          "conc4_x_highvol": 0.45342832758006657,
-          "nonrep_lag": 6.583180667263377e-10,
-          "d_nonrep_lag": 0.7405920941589978,
+          "conc4_z": 0.03385940746194671,
+          "highvol": 0.03254992824840608,
+          "conc4_x_highvol": 0.4765709767807107,
+          "nonrep_lag": 6.772273852817534e-10,
+          "d_nonrep_lag": 0.7412433522644148,
           "dlog_oi": 0.0,
-          "t": 0.49001040731819945
+          "t": 0.49542890149078067
         }
       },
-      "rsq_within": 0.22840815817551197,
+      "rsq_within": 0.22855937150295547,
       "note": "ex-post association; sample is smaller wherever conc4 is missing"
     },
     "spec4_lagged_timing_hardened": {
-      "n_obs": 2749,
+      "n_obs": 2748,
       "n_commodities": 22,
       "n_months": 125,
       "n_rows_dropped_vs_own_frame": 0,
@@ -461,65 +691,65 @@
       ],
       "driscoll_kraay": {
         "coef": {
-          "hhi_seg_pit_z": 2.4698435544823497e-05,
-          "highvol_pit_lag": 0.0012913020497109626,
-          "fcm_pre_x_highvol_lag": 6.674084807116854e-05,
-          "nonrep_lag2": -0.07980099799358172,
-          "d_nonrep_lag2": -0.12275290020430085,
-          "dlog_oi_lag2": -0.004038631012529842,
-          "t": -2.298066751145552e-06
+          "hhi_seg_pit_z": 2.2895608370362178e-05,
+          "highvol_pit_lag": 0.0012876530996291553,
+          "fcm_pre_x_highvol_lag": 7.266153668258871e-05,
+          "nonrep_lag2": -0.0797464226753858,
+          "d_nonrep_lag2": -0.12288736866059807,
+          "dlog_oi_lag2": -0.004052989651941512,
+          "t": -2.2875930457101744e-06
         },
         "tstat": {
-          "hhi_seg_pit_z": 0.11613054813899928,
-          "highvol_pit_lag": 2.7114499634898688,
-          "fcm_pre_x_highvol_lag": 0.27203055438159834,
-          "nonrep_lag2": -5.437726722348542,
-          "d_nonrep_lag2": -3.5196130322387433,
-          "dlog_oi_lag2": -2.5037870565565004,
-          "t": -0.6405464471697161
+          "hhi_seg_pit_z": 0.10783288747597267,
+          "highvol_pit_lag": 2.693483637613998,
+          "fcm_pre_x_highvol_lag": 0.295527188326882,
+          "nonrep_lag2": -5.4400504425937,
+          "d_nonrep_lag2": -3.5241685938501077,
+          "dlog_oi_lag2": -2.511390263832141,
+          "t": -0.6397505126319744
         },
         "pval": {
-          "hhi_seg_pit_z": 0.9075576515695811,
-          "highvol_pit_lag": 0.006741082227424755,
-          "fcm_pre_x_highvol_lag": 0.7856191722679449,
-          "nonrep_lag2": 5.875908470898139e-08,
-          "d_nonrep_lag2": 0.00043926978115949034,
-          "dlog_oi_lag2": 0.012345337843148396,
-          "t": 0.5218713600019989
+          "hhi_seg_pit_z": 0.9141362106091382,
+          "highvol_pit_lag": 0.007114384338270829,
+          "fcm_pre_x_highvol_lag": 0.767613751577295,
+          "nonrep_lag2": 5.8007754821787216e-08,
+          "d_nonrep_lag2": 0.00043182250396522903,
+          "dlog_oi_lag2": 0.012083205994327217,
+          "t": 0.5223887086606886
         },
         "bandwidth": 6,
         "bandwidth_rule": "max(ceil(T^(1/3)), 4)"
       },
       "cluster_by_month": {
         "coef": {
-          "hhi_seg_pit_z": 2.4698435544823497e-05,
-          "highvol_pit_lag": 0.0012913020497109626,
-          "fcm_pre_x_highvol_lag": 6.674084807116854e-05,
-          "nonrep_lag2": -0.07980099799358172,
-          "d_nonrep_lag2": -0.12275290020430085,
-          "dlog_oi_lag2": -0.004038631012529842,
-          "t": -2.298066751145552e-06
+          "hhi_seg_pit_z": 2.2895608370362178e-05,
+          "highvol_pit_lag": 0.0012876530996291553,
+          "fcm_pre_x_highvol_lag": 7.266153668258871e-05,
+          "nonrep_lag2": -0.0797464226753858,
+          "d_nonrep_lag2": -0.12288736866059807,
+          "dlog_oi_lag2": -0.004052989651941512,
+          "t": -2.2875930457101744e-06
         },
         "tstat": {
-          "hhi_seg_pit_z": 0.1378229428446343,
-          "highvol_pit_lag": 3.5122331450672672,
-          "fcm_pre_x_highvol_lag": 0.3362656428716998,
-          "nonrep_lag2": -6.359578556661388,
-          "d_nonrep_lag2": -3.7239588549309506,
-          "dlog_oi_lag2": -2.2555062182552237,
-          "t": -0.5652800070187123
+          "hhi_seg_pit_z": 0.12751800176084083,
+          "highvol_pit_lag": 3.4845789639425306,
+          "fcm_pre_x_highvol_lag": 0.3650008745031815,
+          "nonrep_lag2": -6.3584846545528375,
+          "d_nonrep_lag2": -3.7301282438777594,
+          "dlog_oi_lag2": -2.2631127249953162,
+          "t": -0.5635309505950769
         },
         "pval": {
-          "hhi_seg_pit_z": 0.8903905530281948,
-          "highvol_pit_lag": 0.00045159360080715416,
-          "fcm_pre_x_highvol_lag": 0.7366964942850367,
-          "nonrep_lag2": 2.365037055085395e-10,
-          "d_nonrep_lag2": 0.0002001052268827408,
-          "dlog_oi_lag2": 0.024180729151981106,
-          "t": 0.5719299464820331
+          "hhi_seg_pit_z": 0.8985398558122291,
+          "highvol_pit_lag": 0.0005007065103255215,
+          "fcm_pre_x_highvol_lag": 0.7151391411024961,
+          "nonrep_lag2": 2.3818258476637766e-10,
+          "d_nonrep_lag2": 0.00019529428870179721,
+          "dlog_oi_lag2": 0.0237072823076101,
+          "t": 0.5731198609889518
         }
       },
-      "rsq_within": 0.06282803326414832,
+      "rsq_within": 0.06290559534671847,
       "note": "lagged design, ex-ante ONLY CONDITIONAL on the synthetic FCM availability constant; not a verified predictive test"
     },
     "_hac_bandwidth": 6,
@@ -530,151 +760,161 @@
     "grid": [
       {
         "bandwidth": 1,
-        "tstat": 1.6172285200646193,
-        "pval": 0.10592609816486953
+        "tstat": 1.5675302224940277,
+        "pval": 0.11708827994455118
       },
       {
         "bandwidth": 2,
-        "tstat": 1.5749801921952873,
-        "pval": 0.1153584381917101
+        "tstat": 1.531559621264703,
+        "pval": 0.1257285900864531
       },
       {
         "bandwidth": 3,
-        "tstat": 1.5438618458388453,
-        "pval": 0.1227192540200388
+        "tstat": 1.5044423040027917,
+        "pval": 0.1325648077721684
       },
       {
         "bandwidth": 4,
-        "tstat": 1.5509374799275386,
-        "pval": 0.1210141239332374
+        "tstat": 1.511965344711456,
+        "pval": 0.13064002385396578
       },
       {
         "bandwidth": 5,
-        "tstat": 1.527342926951019,
-        "pval": 0.1267731606145075
+        "tstat": 1.4859039413914956,
+        "pval": 0.1374016434697798
       },
       {
         "bandwidth": 6,
-        "tstat": 1.5269538290582771,
-        "pval": 0.12686989134250282
+        "tstat": 1.4833413189634188,
+        "pval": 0.13808083337683197
       },
       {
         "bandwidth": 7,
-        "tstat": 1.5263256999450654,
-        "pval": 0.12702616711012382
+        "tstat": 1.4794776397861071,
+        "pval": 0.13910974140016874
       },
       {
         "bandwidth": 8,
-        "tstat": 1.5373570539212735,
-        "pval": 0.12430333217475842
+        "tstat": 1.487324817189767,
+        "pval": 0.13702617106167891
       },
       {
         "bandwidth": 9,
-        "tstat": 1.5500795347281497,
-        "pval": 0.12121988349678192
+        "tstat": 1.49745969788747,
+        "pval": 0.13437091395811396
       },
       {
         "bandwidth": 10,
-        "tstat": 1.552661281554639,
-        "pval": 0.12060153403133778
+        "tstat": 1.4967710890277426,
+        "pval": 0.13455005428096123
       },
       {
         "bandwidth": 11,
-        "tstat": 1.557504958435762,
-        "pval": 0.11944810046964971
+        "tstat": 1.500902244790585,
+        "pval": 0.13347810725575981
       },
       {
         "bandwidth": 12,
-        "tstat": 1.5525511681721351,
-        "pval": 0.12062785656368824
+        "tstat": 1.4953216472208164,
+        "pval": 0.13492772744069814
       },
       {
         "bandwidth": 13,
-        "tstat": 1.539926160177689,
-        "pval": 0.12367579476637203
+        "tstat": 1.4828083517867867,
+        "pval": 0.138222414058631
       },
       {
         "bandwidth": 14,
-        "tstat": 1.5347702064006252,
-        "pval": 0.12493771130078257
+        "tstat": 1.4778232877793198,
+        "pval": 0.13955210146639452
       },
       {
         "bandwidth": 15,
-        "tstat": 1.5316605013766955,
-        "pval": 0.12570365150094553
+        "tstat": 1.4744597960407195,
+        "pval": 0.14045481039995056
       },
       {
         "bandwidth": 16,
-        "tstat": 1.5372716693802175,
-        "pval": 0.1243242310435797
+        "tstat": 1.481007412621328,
+        "pval": 0.13870165475935203
       },
       {
         "bandwidth": 17,
-        "tstat": 1.5469624372175028,
-        "pval": 0.12196975701055113
+        "tstat": 1.4907900325931978,
+        "pval": 0.1361137939923054
       },
       {
         "bandwidth": 18,
-        "tstat": 1.5579357415374482,
-        "pval": 0.11934593746397137
+        "tstat": 1.5022158808599009,
+        "pval": 0.13313863566242135
       },
       {
         "bandwidth": 19,
-        "tstat": 1.5740120736498675,
-        "pval": 0.11558208287527005
+        "tstat": 1.518709491604375,
+        "pval": 0.12893302347137636
       },
       {
         "bandwidth": 20,
-        "tstat": 1.5931697694668707,
-        "pval": 0.11121944432503028
+        "tstat": 1.5385188379255141,
+        "pval": 0.12401927430600868
       },
       {
         "bandwidth": 21,
-        "tstat": 1.6128507728025743,
-        "pval": 0.10687411097015165
+        "tstat": 1.5586954199631406,
+        "pval": 0.11916597174574872
       },
       {
         "bandwidth": 22,
-        "tstat": 1.6316127087309493,
-        "pval": 0.10285807372230704
+        "tstat": 1.5774700939513548,
+        "pval": 0.11478484066030736
       },
       {
         "bandwidth": 23,
-        "tstat": 1.6450907979481648,
-        "pval": 0.10004788181689994
+        "tstat": 1.5908969115057274,
+        "pval": 0.11173015496781291
       },
       {
         "bandwidth": 24,
-        "tstat": 1.655527747226005,
-        "pval": 0.09791412748463402
+        "tstat": 1.6018164930640189,
+        "pval": 0.1092934977003448
       }
     ],
-    "abs_t_min": 1.5263256999450654,
-    "abs_t_max": 1.655527747226005,
+    "abs_t_min": 1.4744597960407195,
+    "abs_t_max": 1.6018164930640189,
     "any_abs_t_ge_1_96": false
+  },
+  "robustness_strict_month_gate": {
+    "what": "MAX_RV_MONTH_SHORTFALL forced from 1 to 0: a month survives only if some contract on that schedule matches its exchange calendar exactly, so every month in rv_months_short_of_the_exchange_calendar is dropped, including the ones the reported threshold tolerates",
+    "is_the_reported_specification": false,
+    "n_obs": 3210,
+    "n_months": 146,
+    "coef_fcm_x_highvol": 0.0003348190727998906,
+    "t_driscoll_kraay": 1.6868567118329876,
+    "p_driscoll_kraay": 0.09172895786723845,
+    "t_cluster_month": 1.686144233005589
   },
   "timeseries_regression": {
     "n_months": 149,
     "hac_lag": 6,
     "hac_lag_rule": "max(ceil(T^(1/3)), 4); fixed rule, not ACF-derived",
-    "resid_acf1": -0.03974375453153672,
+    "resid_acf1": -0.041592743880769514,
     "coef": {
-      "const": -0.000973389129159941,
-      "hhi_z": 0.00014926717709665304,
-      "highvol_frac": 0.0016103094270896422,
-      "hhi_x_volfrac": 0.00035324083832500376
+      "const": -0.0009948336401686421,
+      "hhi_z": 0.00015040541349742675,
+      "highvol_frac": 0.001665533043270748,
+      "hhi_x_volfrac": 0.00038754056143339356
     },
     "tstat": {
-      "const": -1.5428753677298588,
-      "hhi_z": 1.0246346790278056,
-      "highvol_frac": 1.202018193989316,
-      "hhi_x_volfrac": 0.3343931102085376
+      "const": -1.5522402983404684,
+      "hhi_z": 1.037781592815689,
+      "highvol_frac": 1.2179088823545023,
+      "hhi_x_volfrac": 0.3591289289934717
     },
     "pval": {
-      "const": 0.12286101840799675,
-      "hhi_z": 0.30553559496626614,
-      "highvol_frac": 0.22935647907953316,
-      "hhi_x_volfrac": 0.7380829377440837
+      "const": 0.12060473703508616,
+      "hhi_z": 0.2993717483571745,
+      "highvol_frac": 0.2232586004338416,
+      "hhi_x_volfrac": 0.7194986410027062
     }
   },
   "bootstrap_spec1": {
@@ -694,23 +934,23 @@
         "t"
       ],
       "shares_spec1_design_matrix": true,
-      "n_rows": 3276,
+      "n_rows": 3275,
       "n_months": 149,
-      "point": 0.0003097380535187968,
+      "point": 0.0003033902252641436,
       "point_estimator_identity_check": {
-        "panel_ols": 0.0003097380535187968,
-        "within_ols": 0.00030973805351879687,
-        "max_abs_diff": 5.421010862427522e-20
+        "panel_ols": 0.0003033902252641436,
+        "within_ols": 0.0003033902252641433,
+        "max_abs_diff": 3.2526065174565133e-19
       },
       "n_boot": 2000,
       "n_failed": 0,
       "ci95": [
-        -7.411637663284947e-05,
-        0.0007750350961575663
+        -9.024131071482741e-05,
+        0.0007781690680312734
       ],
-      "p_two_sided": 0.119,
-      "mean": 0.00031908883670988115,
-      "std": 0.0002149141589078478
+      "p_two_sided": 0.13,
+      "mean": 0.0003128078622832554,
+      "std": 0.00021690476179679318
     },
     "month_cluster_iid": {
       "kind": "month_cluster_iid",
@@ -727,40 +967,40 @@
         "t"
       ],
       "shares_spec1_design_matrix": true,
-      "n_rows": 3276,
+      "n_rows": 3275,
       "n_months": 149,
-      "point": 0.0003097380535187968,
+      "point": 0.0003033902252641436,
       "point_estimator_identity_check": {
-        "panel_ols": 0.0003097380535187968,
-        "within_ols": 0.00030973805351879687,
-        "max_abs_diff": 5.421010862427522e-20
+        "panel_ols": 0.0003033902252641436,
+        "within_ols": 0.0003033902252641433,
+        "max_abs_diff": 3.2526065174565133e-19
       },
       "n_boot": 2000,
       "n_failed": 0,
       "ci95": [
-        -7.250648195029006e-05,
-        0.0007082489301427156
+        -8.045152069243808e-05,
+        0.000712530067756645
       ],
-      "p_two_sided": 0.122,
-      "mean": 0.00031187507515175193,
-      "std": 0.00019948289320558462
+      "p_two_sided": 0.128,
+      "mean": 0.00030520013340200016,
+      "std": 0.0002014668374388693
     },
     "design_matrix_note": "Both bootstraps resample months of the SAME build_spec_frame() rows and refit the SAME SPEC1_RHS (time trend `t` included), so the CI is the CI of the reported spec1 coefficient."
   },
   "primary_interaction": {
     "term": "fcm_x_highvol",
     "spec": "spec1_fcm_highvol",
-    "coef": 0.0003097380535187968,
-    "t_driscoll_kraay": 1.5269538290582771,
-    "t_cluster_month": 1.56728122592097,
+    "coef": 0.0003033902252641436,
+    "t_driscoll_kraay": 1.4833413189634188,
+    "t_cluster_month": 1.5178208229730303,
     "stationary_block_bootstrap_ci95": [
-      -7.411637663284947e-05,
-      0.0007750350961575663
+      -9.024131071482741e-05,
+      0.0007781690680312734
     ],
-    "stationary_block_bootstrap_p_two_sided": 0.119,
+    "stationary_block_bootstrap_p_two_sided": 0.13,
     "month_cluster_iid_bootstrap_ci95": [
-      -7.250648195029006e-05,
-      0.0007082489301427156
+      -8.045152069243808e-05,
+      0.000712530067756645
     ],
     "bootstrap_matches_spec1_sample_and_rhs": true,
     "claim_type": "ex_post_association"
@@ -768,22 +1008,23 @@
   "secondary_findings": {
     "spec2_continuous_interaction_is_positive_and_significant": {
       "term": "fcm_x_rvz",
-      "coef": 0.0002874686719902463,
-      "t_driscoll_kraay": 2.5421165752659687,
-      "t_cluster_month": 2.557817956027383,
+      "coef": 0.0002884599655089276,
+      "t_driscoll_kraay": 2.544788465073753,
+      "t_cluster_month": 2.561818422719159,
       "reading": "opposite sign to the crowding-out hypothesis; it is why the NULL must not be stated as 'no association'"
     },
     "spec4_lagged_timing_hardened": {
       "term": "fcm_pre_x_highvol_lag",
-      "n_obs": 2749,
-      "coef": 6.674084807116854e-05,
-      "t_driscoll_kraay": 0.27203055438159834,
-      "t_cluster_month": 0.3362656428716998,
+      "n_obs": 2748,
+      "coef": 7.266153668258871e-05,
+      "t_driscoll_kraay": 0.295527188326882,
+      "t_cluster_month": 0.3650008745031815,
       "reading": "an association is NOT SUPPORTED under this timing arrangement. That is not the same as showing there is none, and it is not evidence of 'no predictability': the FCM leg's ex-ante status is conditional on the synthetic availability constant, never verified."
     }
   },
   "limitations": [
-    "FCM concentration is a single system-wide monthly series; its main effect is a common time factor. The panel has 3276 rows spanning 149 calendar months, and those months are NOT independent: the FCM z-score has ACF(1) 0.964, ACF(6) 0.817, ACF(12) 0.584. Effective temporal degrees of freedom are well below the calendar-month count and no test here quantifies how far below.",
+    "The RV cache is missing daily bars on days the listing exchange was open. 2018-12-05 is documented: CME's own notice keeps every non-equity, non-interest-rate Globex market on regular hours, and no commodity here has a bar for it. A shortfall of one day common to a whole schedule sits inside MAX_RV_MONTH_SHORTFALL, so such a month PASSES the completeness screen -- the screen is therefore demonstrably not a certificate of completeness, and the affected months are listed in sample.completeness.rule.rv_months_short_of_the_exchange_calendar. Monthly RV for those months is computed from fewer bars than the exchange traded; what dropping every one of them does to spec1 is reported, not asserted, in robustness_strict_month_gate.",
+    "FCM concentration is a single system-wide monthly series; its main effect is a common time factor. The panel has 3275 rows spanning 149 calendar months, and those months are NOT independent: the FCM z-score has ACF(1) 0.964, ACF(6) 0.817, ACF(12) 0.584. Effective temporal degrees of freedom are well below the calendar-month count and no test here quantifies how far below.",
     "FCM publication dates are SYNTHETIC (month_end + 45d), never checked against actual CFTC release dates; the lag grid in K1694_lag_sensitivity.json shows insensitivity to the assumed vintage but is not a verification of it.",
     "Within-month timing overlap: in spec1-3 the FCM report's assumed availability can fall inside the outcome month, and the outcome d_nonrep is the change in a whole-month average, so part of the outcome window predates the signal. Ex-post association only.",
     "Regime labels rv_z and highvol in spec1-3 use FULL-SAMPLE within-commodity moments, i.e. the labelling itself looks ahead. Acceptable for a retrospective association; spec4 uses point-in-time expanding moments instead.",
@@ -796,10 +1037,10 @@
   ],
   "code_trace": {
     "path": "experiments/K1694/K1694.py",
-    "sha256": "a58965545d4e8abfebd6950c62a5d12301b696dd5cbde34cba9ba30a1695fbd7",
-    "size_bytes": 86361
+    "sha256": "a173663534fac62526703e12da9a2fccc5cd48918b17fc21463c4a42ec194da6",
+    "size_bytes": 105134
   },
-  "runtime_seconds": 5.251,
+  "runtime_seconds": 6.362,
   "runtime_env": {
     "python": "3.12.10",
     "implementation": "CPython",

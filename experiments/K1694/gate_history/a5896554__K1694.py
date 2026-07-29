@@ -121,111 +121,31 @@ MAX_DCOT_TAIL_GAP_DAYS = 6  # 末份週報距月底；序列在此中斷時沒�
 # Day 與 Veterans Day 是**聯邦假日、期貨照常交易**，所以 expected 被低估。2020-10 日曆給 21、
 # 快取裡 22 個商品實際都是 22 天；共同截短 2 天後 expected − max(ndays) 只有 1，22/22 仍判
 # complete —— 「共同短少 ≥2 天必偵測」當場被推翻。方向偏 permissive 不能拿來當藉口：它推翻的
-# 正是這條規則自己寫出來的偵測宣稱。現在改用交易所行事曆（見 CALENDAR_SPECS）。
-# **這些數字不手寫**：進入 coverage 的月份由 coverage_report() 在執行時逐月列進
-# results.sample.completeness.rule.rv_months_observed_beyond_the_exchange_calendar。
+# 正是這條規則自己寫出來的偵測宣稱。現在改用 CME 期貨休市日曆（見 _cme_holidays）。
+# 實測（月層級 expected − max(ndays)，RV 快取全部 259 個月）：246 個月是 0；8 個月是 −1，因為
+# 部分合約在 CME 休市日仍印出縮短交易時段的日線（2005-11 / 2006-05 / 2006-09 / 2006-11 /
+# 2006-12 / 2007-01 / 2023-11 / 2025-07；其中前兩個早於 DCOT 起點，不進 coverage）；正的只有
+# 2016-10、2016-11（+1，該年 Columbus / Veterans Day 全商品無日線）與 2026-07（+12，被截斷）。
+# 兩次計畫外休市走**列舉式白名單**（CME_UNSCHEDULED_CLOSURES），不是把門檻放寬到舊樣本回來。
+# 因此門檻 1 抓得到「共同短少 ≥2 天」，抓不到「共同短少剛好 1 天」—— 那和一次計畫外休市在只有
+# 計數的快取裡無法區分；上述 −1 的月份盲區則是 2 天。**這些數字不手寫**：進入 coverage 的那些
+# 月份由 coverage_report() 在執行時逐月列進
+# results.sample.completeness.rule.rv_months_observed_beyond_the_cme_calendar。
 # 盲區還在，所以月份只能說「通過篩檢」不能說「認證完整」（見 rv_residual_blind_spot）。
 MIN_RV_DAYS = 15
 MAX_RV_SHORTFALL_VS_CALENDAR = 2   # per commodity: expected_trading_days - ndays
-MAX_RV_CROSS_SHORTFALL = 2         # per commodity: max(ndays, same schedule+month) - ndays
-MAX_RV_MONTH_SHORTFALL = 1         # per (schedule, month): expected - max(ndays)
+MAX_RV_CROSS_SHORTFALL = 2         # per commodity: max(ndays that month) - ndays
+MAX_RV_MONTH_SHORTFALL = 1         # per month:  expected_trading_days - max(ndays)
 
-# --- round 6：product / exchange scoped 行事曆 -------------------------------------
-# round 5 判 FAIL 的第一個 blocking defect：round 4 的 CME_UNSCHEDULED_CLOSURES 是一張
-# **通用**白名單，對所有 22 個商品一律扣掉 2012-10-29 / 2012-10-30 / 2018-12-05。那張表是從
-# 「快取少了幾天」反推的，而交易所公告直接反駁它：
-#   * CFTC 12-363（2012-10-29，CME/CBOT/NYMEX/COMEX 自己送件）逐條列完所有緊急措施，關的只有
-#     US equity futures/options 與利率複合體；並明寫 "Electronic trading remains available for
-#     ALL NYMEX and COMEX products on CME Globex"。CBOT 穀物、KCBT 小麥、CME 畜產沒被列。
-#   * ICE 新聞稿（2012-10-29）："All other ICE markets and clearing houses will remain open and
-#     follow regular market hours"，例外只有 Russell 股指與 ICE Clear Credit。
-#   * CME 新聞稿（2018-12-02）+ Chadv18-474：關的是 U.S. equity 與 interest rate 商品，
-#     "All other markets on CME Globex ... will remain open for regular trading hours on Dec. 5."
-# K1694 一個股指、一個利率商品都沒有 → **那三天對本實驗的每個商品都是交易日**，白名單是錯的。
-# 逐列出處見 experiments/K1694/calendar_sources.md；機器可讀版見 calendar_fixtures.json，
-# 測試讀 fixture 不讀本檔（round 5 的第二個 defect：舊測試拿實作自己的輸出當 oracle）。
-#
-# 兩個 schedule 的常規休市集合經核對後相同，但仍**分開宣告**：日數、月端點、cross-sectional
-# peer group 全部 per-schedule 計算，將來哪一邊出現有出處的休市只會作用在該交易所的商品上。
-PRODUCT_SCHEDULE = {
-    # CME Group 實體商品（NYMEX 能源 / COMEX 金屬 / CBOT+KCBT 穀物 / CME 畜產）
-    "WTI-PHYSICAL": "CME_GLOBEX_COMMODITY",
-    "NAT GAS NYME": "CME_GLOBEX_COMMODITY",
-    "NY HARBOR ULSD": "CME_GLOBEX_COMMODITY",
-    "GASOLINE RBOB": "CME_GLOBEX_COMMODITY",
-    "GOLD": "CME_GLOBEX_COMMODITY",
-    "SILVER": "CME_GLOBEX_COMMODITY",
-    "PLATINUM": "CME_GLOBEX_COMMODITY",
-    "PALLADIUM": "CME_GLOBEX_COMMODITY",
-    "COPPER- #1": "CME_GLOBEX_COMMODITY",
-    "CORN": "CME_GLOBEX_COMMODITY",
-    "SOYBEANS": "CME_GLOBEX_COMMODITY",
-    "SOYBEAN OIL": "CME_GLOBEX_COMMODITY",
-    "SOYBEAN MEAL": "CME_GLOBEX_COMMODITY",
-    "WHEAT-SRW": "CME_GLOBEX_COMMODITY",
-    "WHEAT-HRW": "CME_GLOBEX_COMMODITY",
-    "LIVE CATTLE": "CME_GLOBEX_COMMODITY",
-    "LEAN HOGS": "CME_GLOBEX_COMMODITY",
-    "FEEDER CATTLE": "CME_GLOBEX_COMMODITY",
-    # ICE Futures U.S. softs
-    "SUGAR NO. 11": "ICEUS_SOFTS",
-    "COFFEE C": "ICEUS_SOFTS",
-    "COCOA": "ICEUS_SOFTS",
-    "COTTON NO. 2": "ICEUS_SOFTS",
+# 計畫外休市：**列舉、有外部事件出處**，逐日從預期交易日曆扣掉。這裡放的是「交易所根本沒開」
+# 的日子，不是「資料看起來少了一天」—— 白名單只能由外部事件證成，不能由被檢查的快取推導，
+# 否則就是拿答案去配門檻。代價要照實講：白名單條目本身在只有計數的快取裡與一次共同截斷無法
+# 區分，這正是 rv_residual_blind_spot 說的同一個盲區（見 coverage_report）。
+CME_UNSCHEDULED_CLOSURES = {
+    "2012-10-29": "Hurricane Sandy: U.S. markets closed (day 1 of 2)",
+    "2012-10-30": "Hurricane Sandy: U.S. markets closed (day 2 of 2)",
+    "2018-12-05": "national day of mourning for George H. W. Bush",
 }
-
-# 計畫外休市：**每一筆都要有交易所出處**，逐日從該 schedule 的預期交易日曆扣掉。
-# 現在兩邊都是空的 —— 不是「還沒填」，是三個爭議日期經查證後**交易所都開著**。
-# 沒有出處就不准放進來：_validate_unscheduled_closures() 在 import 時就擋，
-# test_unscheduled_closures_must_carry_a_primary_source 再擋一次。
-UNSCHEDULED_CLOSURES: dict[str, dict[str, dict[str, str]]] = {
-    "CME_GLOBEX_COMMODITY": {},
-    "ICEUS_SOFTS": {},
-}
-
-CALENDAR_SPECS = {
-    "CME_GLOBEX_COMMODITY": {
-        "exchange": ("CME Group (NYMEX, COMEX, CBOT, KCBT, CME) -- physical-commodity "
-                     "futures on CME Globex; contains no U.S. equity-index and no "
-                     "U.S. interest-rate product, which are the two groups the three "
-                     "disputed-date notices actually closed"),
-        "closed_holidays": ["New Year's Day", "Martin Luther King Day",
-                            "Presidents' Day", "Good Friday", "Memorial Day",
-                            "Juneteenth (from 2022)", "Independence Day", "Labor Day",
-                            "Thanksgiving", "Christmas"],
-        "trades_on": ["Columbus Day", "Veterans Day"],
-        "sources": ["CME Globex 2010 Holiday Calendar (11 per-product-group schedules)",
-                    "CME Globex Columbus Day Holiday Schedule 2010",
-                    "CME Group Holiday Calendar landing page",
-                    "CME Clearing Juneteenth 2022 advisory"],
-    },
-    "ICEUS_SOFTS": {
-        "exchange": ("ICE Futures U.S. -- Sugar No. 11, Coffee 'C', Cocoa, Cotton No. 2. "
-                     "ICE's Canola and its currency/stock-index/metal/energy groups keep "
-                     "DIFFERENT calendars; only the softs column is used here"),
-        "closed_holidays": ["New Year's Day", "Martin Luther King Day",
-                            "Presidents' Day", "Good Friday", "Memorial Day",
-                            "Juneteenth (from 2022)", "Independence Day", "Labor Day",
-                            "Thanksgiving", "Christmas"],
-        "trades_on": ["Columbus Day", "Veterans Day"],
-        "sources": ["ICE Futures U.S. 2018 Holiday Calendar (notice 2017-07-06)",
-                    "ICE Futures U.S. 2019 Holiday Calendar (notice 2018-06-22)",
-                    "ICE Futures U.S. 2026 Trading Holiday Calendar (2025-06-09)"],
-    },
-}
-
-# 查不到出處的日期：照實列出來，並且**不**主張休市。
-# 「查不到 → 當它休市」就是這輪要修掉的毛病本身。
-UNVERIFIED_TRADING_STATUS = [
-    {"date": "2018-12-05", "schedule": "ICEUS_SOFTS",
-     "searched": "an ICE Futures U.S. exchange notice or ICE press release covering the "
-                 "2018 national day of mourning",
-     "outcome": "NOT FOUND -- ICE's own 2018 holiday calendar is dated 2017-07-06 and "
-                "predates the event",
-     "treatment": "no closure asserted; the date is carried as a normal trading day",
-     "materiality": "quantified at run time in sample.completeness."
-                    "unverified_status_insensitivity"},
-]
 
 # spec4 的 point-in-time regime label 需要的最短暖身期
 PIT_MIN_MONTHS = 24
@@ -261,14 +181,6 @@ COMMODITY_MAP = {
     "NY HARBOR ULSD": "HO=F",
     "GASOLINE RBOB": "RB=F",
 }
-
-# A commodity with no declared exchange is a commodity with no calendar. Fail at
-# import, not silently at NaN, so adding a ticker forces a row in calendar_sources.md.
-if set(COMMODITY_MAP) != set(PRODUCT_SCHEDULE):
-    raise ValueError(
-        "COMMODITY_MAP and PRODUCT_SCHEDULE disagree: "
-        f"no schedule for {sorted(set(COMMODITY_MAP) - set(PRODUCT_SCHEDULE))}, "
-        f"no ticker for {sorted(set(PRODUCT_SCHEDULE) - set(COMMODITY_MAP))}")
 
 
 def _get(url: str, timeout: int = 60) -> bytes:
@@ -578,21 +490,10 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
     cov = cov.merge(rvm[["commodity", "month", "rv", "ndays"] + endpoint_cols],
                     on=["commodity", "month"], how="left")
     cov = cov.rename(columns={"ndays": "rv_ndays"})
-    # Every anchor below is computed WITHIN a product schedule. A CBOT grain and an
-    # ICE softs contract are peers only insofar as they keep the same calendar; when
-    # they do not, comparing their day counts is what produced the round-5 defect.
-    cov["schedule"] = cov["commodity"].map(PRODUCT_SCHEDULE)
-    unmapped = sorted(cov.loc[cov["schedule"].isna(), "commodity"].unique())
-    if unmapped:
-        raise KeyError(f"no product schedule declared for {unmapped}; add it to "
-                       "PRODUCT_SCHEDULE and to calendar_sources.md")
-    exp = pd.Series(np.nan, index=cov.index, dtype=float)
-    for sched, idx in cov.groupby("schedule").groups.items():
-        exp.loc[idx] = cov.loc[idx, "month"].map(expected_trading_days(sched))
-    cov["rv_expected_trading_days"] = exp
+    cov["rv_expected_trading_days"] = cov["month"].map(_expected_trading_days())
     cov["rv_shortfall_vs_calendar"] = (cov["rv_expected_trading_days"]
                                        - cov["rv_ndays"])
-    best = cov.groupby(["schedule", "month"])["rv_ndays"].transform("max")
+    best = cov.groupby("month")["rv_ndays"].transform("max")
     cov["rv_cross_shortfall"] = best - cov["rv_ndays"]
     cov["rv_month_shortfall"] = cov["rv_expected_trading_days"] - best
     cov["rv_complete"] = (
@@ -611,14 +512,11 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
         # delete 30 June 2020 from all 22 commodities and keep every row complete.
         # Observing MORE than the calendar (an abbreviated holiday session on the 1st
         # or the last day) reads as a gap of 0, so extra data never fails the gate.
+        first_exp, last_exp = expected_month_endpoints()
         first = pd.to_datetime(cov["first_day"], errors="coerce")
         last = pd.to_datetime(cov["last_day"], errors="coerce")
-        exp_first = pd.Series(pd.NaT, index=cov.index, dtype="datetime64[ns]")
-        exp_last = pd.Series(pd.NaT, index=cov.index, dtype="datetime64[ns]")
-        for sched, idx in cov.groupby("schedule").groups.items():
-            f_exp, l_exp = expected_month_endpoints(sched)
-            exp_first.loc[idx] = cov.loc[idx, "month"].map(f_exp)
-            exp_last.loc[idx] = cov.loc[idx, "month"].map(l_exp)
+        exp_first = cov["month"].map(first_exp)
+        exp_last = cov["month"].map(last_exp)
         cov["rv_head_gap_days"] = _weekdays_between(exp_first, first)
         cov["rv_tail_gap_days"] = _weekdays_between(last, exp_last)
         cov["rv_complete"] &= (first.le(exp_first).fillna(False)
@@ -626,50 +524,22 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
     return cov
 
 
-def _validate_unscheduled_closures() -> None:
-    """An unscheduled closure without a primary source is the round-5 defect itself.
+@functools.lru_cache(maxsize=1)
+def _cme_trading_days() -> pd.DatetimeIndex:
+    """Weekdays on which CME futures are scheduled to trade, 2000-2035.
 
-    Round 4 built ``CME_UNSCHEDULED_CLOSURES`` by reading day counts out of the very
-    cache the rule was supposed to police, then labelled the result an exchange
-    calendar. Structure, not vigilance, has to stop that recurring: every entry must
-    carry ``source_id`` (an id resolvable in ``calendar_fixtures.json``) and a
-    ``quote`` from that source, and it must name a schedule that actually exists.
-    """
-    for schedule, entries in UNSCHEDULED_CLOSURES.items():
-        if schedule not in CALENDAR_SPECS:
-            raise ValueError(f"unscheduled closures for unknown schedule {schedule!r}")
-        for day, meta in entries.items():
-            pd.Timestamp(day)  # raises on a malformed date
-            missing = {"source_id", "quote"} - set(meta)
-            if missing:
-                raise ValueError(
-                    f"{schedule} {day}: unscheduled closure lacks {sorted(missing)}. "
-                    "A closure may only be justified by an exchange notice, never by "
-                    "the day counts in the cache being checked (Codex round 5).")
+    Codex round 4 blocked on the previous definition, "weekdays minus U.S. FEDERAL
+    holidays minus Good Friday". Columbus Day and Veterans Day are federal holidays
+    on which CME futures trade, so that set understated the true trading-day count.
+    The old docstring called the direction safe because it only made the rule more
+    permissive -- true, and beside the point: what it made false was the rule's own
+    detection claim. 2020-10 is the counterexample (see the note above
+    ``MIN_RV_DAYS``), and ``test_common_two_day_truncation_2020_10`` pins it.
 
-
-_validate_unscheduled_closures()
-
-
-@functools.lru_cache(maxsize=None)
-def trading_days(schedule: str) -> pd.DatetimeIndex:
-    """Weekdays on which ``schedule``'s products are scheduled to trade, 2000-2035.
-
-    Codex round 4 blocked on "weekdays minus U.S. FEDERAL holidays minus Good
-    Friday": Columbus Day and Veterans Day are federal holidays on which these
-    futures trade, so that set understated the count and refuted the rule's own
-    detection claim (2020-10; ``test_common_two_day_truncation_2020_10`` pins it).
-
-    Codex round 5 blocked on the repair: a UNIVERSAL unscheduled-closure whitelist
-    applied to every commodity, contradicted by the exchanges' own notices. The
-    calendar is now declared per product schedule, and the closure sets are empty
-    because the three disputed dates were, on primary-source evidence, trading days
-    for every product in this panel. See ``calendar_sources.md``.
-
-    The holiday set below is the days the venue is closed outright. Some contracts
-    still print a daily bar on an abbreviated session around a few of them, so this
-    count is a lower bound on what a given contract may show; the months where that
-    happens are enumerated at run time in :func:`coverage_report`.
+    The holidays below are the days CME Globex is closed outright. Some contracts
+    still print a daily bar on an abbreviated session around a few of them, so the
+    count this yields is a lower bound on what a given contract may show; the months
+    where that happens are enumerated at run time in :func:`coverage_report`.
     """
     from pandas.tseries.holiday import (AbstractHolidayCalendar, GoodFriday, Holiday,
                                         USLaborDay, USMartinLutherKingJr,
@@ -677,22 +547,17 @@ def trading_days(schedule: str) -> pd.DatetimeIndex:
                                         USThanksgivingDay, nearest_workday,
                                         sunday_to_monday)
 
-    if schedule not in CALENDAR_SPECS:
-        raise KeyError(f"no calendar declared for schedule {schedule!r}")
-
-    class _Calendar(AbstractHolidayCalendar):
-        # New Year on a Saturday is NOT rolled back to 31 Dec. Evidence grade for
-        # this one rule is EMPIRICAL-FROM-PANEL, not primary-source: no exchange
-        # notice was found stating it, and 2010-12 / 2021-12 show the extra day in
-        # every contract. calendar_sources.md says so in as many words rather than
-        # letting it pass as sourced. Christmas and Independence Day DO roll.
+    class _CMECalendar(AbstractHolidayCalendar):
+        # New Year on a Saturday is NOT rolled back to 31 Dec: futures trade that
+        # Friday (verified against 2010-12 and 2021-12, which both show the extra
+        # day in every contract). Christmas and Independence Day DO roll.
         rules = [
             Holiday("NewYearsDay", month=1, day=1, observance=sunday_to_monday),
             USMartinLutherKingJr,
             USPresidentsDay,
             GoodFriday,
             USMemorialDay,
-            # First observed in 2022 by both venues; 2021-06-18 traded normally.
+            # CME first closed for Juneteenth in 2022; 2021-06-18 traded normally.
             Holiday("Juneteenth", month=6, day=19, start_date="2022-06-19",
                     observance=nearest_workday),
             Holiday("IndependenceDay", month=7, day=4, observance=nearest_workday),
@@ -701,22 +566,22 @@ def trading_days(schedule: str) -> pd.DatetimeIndex:
             Holiday("Christmas", month=12, day=25, observance=nearest_workday),
         ]
 
-    hol = _Calendar().holidays(start="2000-01-01", end="2035-12-31")
+    hol = _CMECalendar().holidays(start="2000-01-01", end="2035-12-31")
     closed = pd.DatetimeIndex([h for h in hol if h.dayofweek < 5]).union(
-        pd.DatetimeIndex(sorted(UNSCHEDULED_CLOSURES.get(schedule, {}))))
+        pd.DatetimeIndex(sorted(CME_UNSCHEDULED_CLOSURES)))
     return pd.bdate_range("2000-01-01", "2035-12-31").difference(closed)
 
 
-@functools.lru_cache(maxsize=None)
-def expected_trading_days(schedule: str) -> dict:
-    """Scheduled trading days per calendar month, for one product schedule."""
-    days = trading_days(schedule)
+@functools.lru_cache(maxsize=1)
+def _expected_trading_days() -> dict:
+    """Scheduled CME futures trading days per calendar month."""
+    days = _cme_trading_days()
     return pd.Series(1, index=days.to_period("M")).groupby(level=0).size().to_dict()
 
 
-@functools.lru_cache(maxsize=None)
-def expected_month_endpoints(schedule: str) -> tuple[dict, dict]:
-    """First and last scheduled trading day of each month, for one schedule.
+@functools.lru_cache(maxsize=1)
+def expected_month_endpoints() -> tuple[dict, dict]:
+    """First and last scheduled CME trading day of each calendar month.
 
     These are the anchors the endpoint test compares against. A download that stops
     before the last scheduled trading day, or starts after the first, fails -- no
@@ -724,7 +589,7 @@ def expected_month_endpoints(schedule: str) -> tuple[dict, dict]:
     through (three weekday gaps were allowed at each end, so dropping 30 June from
     every commodity still passed).
     """
-    days = trading_days(schedule)
+    days = _cme_trading_days()
     g = pd.Series(days, index=days.to_period("M")).groupby(level=0)
     return g.min().to_dict(), g.max().to_dict()
 
@@ -769,36 +634,22 @@ def coverage_report(cov: pd.DataFrame) -> dict:
                 for _, r in out.iterrows()]
 
     endpoint_test = "first_day" in cov.columns and "last_day" in cov.columns
-    # Months where at least one contract prints a bar on a day its exchange calendar
-    # calls a holiday (abbreviated sessions around Thanksgiving, Labor Day, 4 July).
+    # Months where at least one contract prints a bar on a day the CME calendar calls
+    # a holiday (abbreviated sessions around Thanksgiving, Labor Day, 4 July ...).
     # There max(ndays) exceeds the calendar, so the common-truncation threshold is
     # that much looser. Enumerated at run time -- never hand-written -- because it is
     # the exact extent of the residual blind spot.
     have = cov.loc[cov["rv_ndays"].notna()]
-    per_month = have.groupby(["schedule", "month"]).agg(
+    per_month = have.groupby("month").agg(
         observed=("rv_ndays", "max"),
         expected=("rv_expected_trading_days", "max")).reset_index()
     over = per_month.loc[per_month["observed"] > per_month["expected"]]
-    beyond = [{"schedule": r["schedule"], "month": str(r["month"]),
-               "exchange_calendar_days": int(r["expected"]),
+    beyond = [{"month": str(r["month"]),
+               "cme_calendar_days": int(r["expected"]),
                "max_days_observed": int(r["observed"]),
                "common_truncation_days_needed_to_detect":
                    int(MAX_RV_MONTH_SHORTFALL + 1 + r["observed"] - r["expected"])}
               for _, r in over.iterrows()]
-    # The other direction, and the more important one after round 6: months where
-    # EVERY contract of a schedule is short of its own exchange's calendar. These are
-    # gaps in the DOWNLOAD, not closures -- the calendar now carries no unsourced
-    # exemption that could absorb them. Published rather than absorbed, because the
-    # ones inside MAX_RV_MONTH_SHORTFALL are exactly the residual blind spot, and
-    # 2018-12 is a case where primary sources say the exchange was open.
-    short = per_month.loc[per_month["observed"] < per_month["expected"]]
-    provider_gaps = [{"schedule": r["schedule"], "month": str(r["month"]),
-                      "exchange_calendar_days": int(r["expected"]),
-                      "max_days_observed": int(r["observed"]),
-                      "common_shortfall_days": int(r["expected"] - r["observed"]),
-                      "caught_by_the_rule":
-                          bool(r["expected"] - r["observed"] > MAX_RV_MONTH_SHORTFALL)}
-                     for _, r in short.iterrows()]
     return {
         "rule": {
             "dcot_month_complete": (
@@ -816,70 +667,29 @@ def coverage_report(cov: pd.DataFrame) -> dict:
             "rv_month_complete": (
                 f"trading days >= {MIN_RV_DAYS} AND expected_trading_days - trading "
                 f"days <= {MAX_RV_SHORTFALL_VS_CALENDAR} AND max(trading days across "
-                f"commodities on the SAME product schedule that month) - trading days "
-                f"<= {MAX_RV_CROSS_SHORTFALL} AND expected_trading_days - max(trading "
-                f"days on that schedule that month) <= {MAX_RV_MONTH_SHORTFALL}. Every "
-                f"anchor is computed within a product schedule, never across all 22 "
-                f"commodities (Codex round 5)."),
+                f"commodities that month) - trading days <= {MAX_RV_CROSS_SHORTFALL} "
+                f"AND expected_trading_days - max(trading days that month) <= "
+                f"{MAX_RV_MONTH_SHORTFALL}"),
             "rv_expected_trading_days_definition": (
-                "weekdays minus the holiday calendar OF THE EXCHANGE THAT LISTS THE "
-                "PRODUCT -- New Year (not rolled back to 31 Dec when 1 Jan is a "
-                "Saturday), MLK, Presidents' Day, Good Friday, Memorial Day, "
-                "Juneteenth from 2022, Independence Day, Labor Day, Thanksgiving, "
-                "Christmas -- minus that schedule's enumerated unscheduled closures. "
-                "Columbus Day and Veterans Day are federal holidays on which BOTH "
-                "venues TRADE and are deliberately not subtracted: subtracting them "
-                "understated the count and refuted this rule's own detection claim "
-                "(Codex round 4, 2020-10). Sources per ticker: calendar_sources.md; "
-                "machine-readable fixtures the tests check against, without consulting "
-                "this module: calendar_fixtures.json."),
-            "product_schedules": {
-                k: {"exchange": v["exchange"],
-                    "commodities": sorted(c for c, s in PRODUCT_SCHEDULE.items()
-                                          if s == k),
-                    "closed_holidays": v["closed_holidays"],
-                    "trades_on": v["trades_on"],
-                    "sources": v["sources"]}
-                for k, v in CALENDAR_SPECS.items()},
-            "rv_unscheduled_closures": {k: dict(v)
-                                        for k, v in UNSCHEDULED_CLOSURES.items()},
-            "rv_unscheduled_closures_note": (
-                "EMPTY, and empty is the finding, not an omission. Codex round 5 "
-                "blocked on a universal whitelist that removed 2012-10-29, 2012-10-30 "
-                "and 2018-12-05 for all 22 commodities. The exchanges' own notices say "
-                "the opposite for every product here: CFTC submission 12-363 lists the "
-                "Sandy emergency actions exhaustively (U.S. equity futures and the "
-                "interest-rate complex) and states electronic trading remained "
-                "available for ALL NYMEX and COMEX products on CME Globex; ICE's "
-                "2012-10-29 release keeps all ICE markets but Russell index futures "
-                "and ICE Clear Credit on regular hours; CME's 2018-12-02 release and "
-                "clearing advisory Chadv18-474 close U.S. equity and interest-rate "
-                "products only and state all other Globex markets keep regular hours "
-                "on Dec. 5. This panel holds no equity-index and no interest-rate "
-                "product. An entry may only be added with a source_id and a quote; "
-                "_validate_unscheduled_closures() refuses anything less."),
-            "rv_trading_status_not_verified": list(UNVERIFIED_TRADING_STATUS),
+                "weekdays minus the CME futures holiday calendar -- New Year (not "
+                "rolled back to 31 Dec when 1 Jan is a Saturday), MLK, Presidents' "
+                "Day, Good Friday, Memorial Day, Juneteenth from 2022, Independence "
+                "Day, Labor Day, Thanksgiving, Christmas -- minus the enumerated "
+                "unscheduled closures in rv_unscheduled_closures. Columbus Day and "
+                "Veterans Day are federal holidays on which CME futures TRADE and are "
+                "deliberately not subtracted: subtracting them understated the count "
+                "and refuted this rule's own detection claim (Codex round 4, 2020-10)."),
+            "rv_unscheduled_closures": dict(CME_UNSCHEDULED_CLOSURES),
             "rv_rule_detects": (
-                f"an independently truncated download (a commodity short of both its "
-                f"own exchange calendar and its same-schedule peers) AND a truncation "
-                f"common to every commodity of a schedule of "
-                f"{MAX_RV_MONTH_SHORTFALL + 1} or more days, which no cross-sectional "
-                f"check can see -- except in the {len(beyond)} schedule-months listed "
-                f"under rv_months_observed_beyond_the_exchange_calendar, where some "
-                f"contract prints an abbreviated holiday session, so the threshold "
-                f"there is the per-month figure given in that list"),
-            "rv_months_observed_beyond_the_exchange_calendar": beyond,
-            "rv_months_short_of_the_exchange_calendar": provider_gaps,
-            "rv_months_short_note": (
-                "Every commodity of the named schedule is short of that exchange's own "
-                "calendar in these months. With the unsourced whitelist gone nothing "
-                "absorbs them, so they are either genuine download gaps or a provider "
-                "artefact -- in both readings the data, not the exchange, is what is "
-                "missing. Those with caught_by_the_rule=false are inside "
-                "MAX_RV_MONTH_SHORTFALL and are the residual blind spot made concrete: "
-                "2018-12 is one of them, and for that month primary sources say the "
-                "exchange WAS open (see rv_unscheduled_closures_note), so a month can "
-                "pass this screen while provably missing a trading day."),
+                f"an independently truncated download (a commodity short of both the "
+                f"calendar and its peers) AND a truncation common to every commodity "
+                f"of {MAX_RV_MONTH_SHORTFALL + 1} or more days, which no "
+                f"cross-sectional check can see -- except in the "
+                f"{len(beyond)} months listed under "
+                f"rv_months_observed_beyond_the_cme_calendar, where some contract "
+                f"prints an abbreviated holiday session, so the threshold there is "
+                f"the per-month figure given in that list"),
+            "rv_months_observed_beyond_the_cme_calendar": beyond,
             "rv_endpoint_test": (
                 "applied: observed first_day <= the calendar's first scheduled "
                 "trading day of the month AND observed last_day >= its last, with no "
@@ -889,19 +699,17 @@ def coverage_report(cov: pd.DataFrame) -> dict:
                 "no first/last observation dates. build_vol() now records them, so "
                 "any regenerated cache upgrades this to a true endpoint test."),
             "rv_residual_blind_spot": (
-                "a truncation of exactly ONE day common to every commodity of a "
-                "schedule is inside MAX_RV_MONTH_SHORTFALL and is therefore not "
-                "flagged. After round 6 this is no longer a hypothetical: the "
-                "calendar carries no unsourced exemption, so the months listed in "
-                "rv_months_short_of_the_exchange_calendar with caught_by_the_rule="
-                "false are months this screen passes while the download is short of "
-                "the exchange's own calendar. 2018-12 is one of them and is the sharp "
-                "case -- CME's own notice says the market was open on 2018-12-05, yet "
-                "no commodity has a bar for it. This rule therefore does NOT prove "
-                "each download reached both ends of its month; it SCREENS the day "
-                "count for consistency with the listing exchange's calendar to within "
+                "a truncation of exactly ONE day common to every commodity is "
+                "indistinguishable, in a count-only cache, from an unscheduled "
+                "market closure -- and by the same token an entry in "
+                "rv_unscheduled_closures rests on the external event that dated it, "
+                "not on anything this cache can show. Two such closures are in "
+                "sample and are subtracted by name: 2012-10 (Hurricane Sandy) and "
+                "2018-12 (national day of mourning). This rule therefore does NOT "
+                "prove each download reached both ends of its month; it SCREENS the "
+                "day count for consistency with the CME futures calendar to within "
                 "one day, wider by the excess shown in "
-                "rv_months_observed_beyond_the_exchange_calendar. Months that pass are "
+                "rv_months_observed_beyond_the_cme_calendar. Months that pass are "
                 "screened, NOT certified complete: certifying them from a count-only "
                 "cache would need independent endpoint evidence, which this frozen "
                 "rv_monthly.csv does not carry."),
@@ -917,61 +725,6 @@ def coverage_report(cov: pd.DataFrame) -> dict:
         "rv_masked_partial_months": int(len(bad_rv)),
         "rv_masked_month_examples": sorted({str(m) for m in bad_rv["month"]})[:12],
     }
-
-
-def _clear_calendar_caches() -> None:
-    for fn in (trading_days, expected_trading_days, expected_month_endpoints):
-        fn.cache_clear()
-
-
-def unverified_status_insensitivity(dcot: pd.DataFrame, rv: pd.DataFrame) -> dict:
-    """How much would the run move if the unsourced date HAD been a closure?
-
-    ``UNVERIFIED_TRADING_STATUS`` records dates for which no exchange notice could be
-    found; the calendar carries them as trading days, because inventing a closure to
-    fill an evidentiary hole is the round-5 defect in miniature. That choice still has
-    to be shown to be immaterial rather than assumed to be, so each unverified date is
-    temporarily forced closed and the resulting ``rv_complete`` vector is compared
-    with the reported one.
-
-    ``rv_complete`` is the only channel through which the calendar reaches the panel:
-    ``build_panel`` uses it to mask ``rv`` and carries every other calendar column as
-    a diagnostic. An unchanged vector therefore means an unchanged estimation sample.
-    """
-    base = monthly_coverage(dcot, rv)
-    key = ["commodity", "month"]
-    base_flag = base.set_index(key)["rv_complete"]
-    out = []
-    for item in UNVERIFIED_TRADING_STATUS:
-        sched, day = item["schedule"], item["date"]
-        UNSCHEDULED_CLOSURES[sched][day] = {
-            "source_id": "COUNTERFACTUAL-NOT-A-SOURCE",
-            "quote": "sensitivity probe only; never part of the reported calendar",
-        }
-        _clear_calendar_caches()
-        try:
-            alt_flag = monthly_coverage(dcot, rv).set_index(key)["rv_complete"]
-        finally:
-            del UNSCHEDULED_CLOSURES[sched][day]
-            _clear_calendar_caches()
-        diff = base_flag.index[base_flag.ne(alt_flag.reindex(base_flag.index))]
-        out.append({
-            "date": day, "schedule": sched,
-            "counterfactual": "this date forced closed for that schedule",
-            "rv_complete_rows_reported": int(base_flag.sum()),
-            "rv_complete_rows_if_closed": int(alt_flag.sum()),
-            "commodity_months_that_would_flip": [
-                {"commodity": c, "month": str(m)} for c, m in diff],
-            "estimation_sample_would_change": bool(len(diff) > 0),
-        })
-    # The probe mutated a module global; prove it was put back.
-    restored = monthly_coverage(dcot, rv).set_index(key)["rv_complete"]
-    if not restored.equals(base_flag):
-        raise AssertionError("insensitivity probe leaked into the reported calendar")
-    return {"why": ("each date in rv_trading_status_not_verified is carried as OPEN "
-                    "because no exchange notice was found; forcing it closed changes "
-                    "the rows listed below and nothing else"),
-            "probes": out}
 
 
 def build_panel(fcm: pd.DataFrame, dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
@@ -1196,49 +949,6 @@ SPEC2_RHS = ["hhi_seg_z", "rv_z", "fcm_x_rvz", "nonrep_lag", "d_nonrep_lag", "dl
 SPEC3_RHS = ["conc4_z", "highvol", "conc4_x_highvol", "nonrep_lag", "d_nonrep_lag", "dlog_oi", "t"]
 SPEC4_RHS = ["hhi_seg_pit_z", "highvol_pit_lag", "fcm_pre_x_highvol_lag",
              "nonrep_lag2", "d_nonrep_lag2", "dlog_oi_lag2", "t"]
-
-
-def strict_month_gate_sensitivity(fcm: pd.DataFrame, dcot: pd.DataFrame,
-                                  rv: pd.DataFrame) -> dict:
-    """Does the disclosed one-day blind spot actually move the finding?
-
-    Round 6 removed an unsourced closure whitelist, and the consequence is a sharper
-    disclosure: 2018-12 passes the count screen while CME's own notice says the market
-    was open on a day for which no commodity has a bar. Disclosing that is necessary
-    but not sufficient -- the honest question is whether the estimate survives dropping
-    every such month.
-
-    So ``MAX_RV_MONTH_SHORTFALL`` is temporarily set to 0, which requires at least one
-    contract on a schedule to match its exchange calendar exactly, the panel is rebuilt
-    and spec1 re-estimated. This is a SENSITIVITY, not the reported specification: the
-    reported run keeps the threshold every round since 4 has used, so no number here
-    can be read as a threshold tuned to a result.
-    """
-    global MAX_RV_MONTH_SHORTFALL  # noqa: PLW0603 -- restored in the finally block
-    baseline = MAX_RV_MONTH_SHORTFALL
-    try:
-        MAX_RV_MONTH_SHORTFALL = 0
-        panel = build_panel(fcm, dcot, rv)
-        strict = panel_regression(build_spec_frame(panel),
-                                  build_lagged_frame(panel))["spec1_fcm_highvol"]
-    finally:
-        MAX_RV_MONTH_SHORTFALL = baseline
-    if MAX_RV_MONTH_SHORTFALL != baseline:
-        raise AssertionError("strict-gate probe leaked into the reported threshold")
-    return {
-        "what": ("MAX_RV_MONTH_SHORTFALL forced from "
-                 f"{baseline} to 0: a month survives only if some contract on that "
-                 "schedule matches its exchange calendar exactly, so every month in "
-                 "rv_months_short_of_the_exchange_calendar is dropped, including the "
-                 "ones the reported threshold tolerates"),
-        "is_the_reported_specification": False,
-        "n_obs": strict["n_obs"],
-        "n_months": strict["n_months"],
-        "coef_fcm_x_highvol": strict["driscoll_kraay"]["coef"]["fcm_x_highvol"],
-        "t_driscoll_kraay": strict["driscoll_kraay"]["tstat"]["fcm_x_highvol"],
-        "p_driscoll_kraay": strict["driscoll_kraay"]["pval"]["fcm_x_highvol"],
-        "t_cluster_month": strict["cluster_by_month"]["tstat"]["fcm_x_highvol"],
-    }
 
 
 def panel_regression(frame: pd.DataFrame,
@@ -1592,8 +1302,6 @@ def main():
     rv = build_vol()
     cov = monthly_coverage(dcot, rv)
     cov_report = coverage_report(cov)
-    cov_report["unverified_status_insensitivity"] = \
-        unverified_status_insensitivity(dcot, rv)
     panel = build_panel(fcm, dcot, rv)
     panel.to_csv(DATA / "panel.csv", index=False)
 
@@ -1612,10 +1320,6 @@ def main():
 
     desc = descriptives(panel, fcm)
     panel_res = panel_regression(frame, lagged_frame)
-    strict_gate = strict_month_gate_sensitivity(fcm, dcot, rv)
-    print(f"[ROBUSTNESS] strict month gate (shortfall<=0): n={strict_gate['n_obs']} "
-          f"coef={strict_gate['coef_fcm_x_highvol']:.3e} "
-          f"t_DK={strict_gate['t_driscoll_kraay']:.2f}")
     ts_res = timeseries_regression(frame)
     # Effective temporal d.o.f.: 149 calendar months is NOT 149 independent draws of
     # the FCM factor. Report the autocorrelation instead of asserting independence.
@@ -1715,16 +1419,11 @@ def main():
                 f"{MIN_DCOT_WEEKS} reports, no gap over {MAX_DCOT_GAP_DAYS} days "
                 "between consecutive reports including the entry gap from the "
                 "previous month, so a skipped week anywhere fails. Its RV month is "
-                "only SCREENED: the day count must match the listing exchange's own "
-                "trading calendar to within one day, which cannot rule out a one-day "
-                "truncation common to every commodity of that exchange. The screen is "
-                "demonstrably not a certificate -- round 6 removed an unsourced "
-                "closure whitelist, and 2018-12 now passes the screen while CME's own "
-                "notice says the market was open on a day for which no commodity has "
-                "a bar. No partial month such as 2026-07 survives either test, but "
-                "'complete months only' would overstate the RV side. See "
-                "sample.completeness.rule.rv_residual_blind_spot and "
-                "sample.completeness.rule.rv_months_short_of_the_exchange_calendar."),
+                "only SCREENED: the day count must match the CME futures calendar to "
+                "within one day, which cannot rule out a one-day truncation common to "
+                "every commodity. No partial month such as 2026-07 survives either "
+                "test, but 'complete months only' would overstate the RV side. See "
+                "sample.completeness.rule.rv_residual_blind_spot."),
             "lagged_frame_rows": int(len(lagged_frame)),
             "effective_temporal_dof": {
                 "calendar_months": int(panel_res["spec1_fcm_highvol"]["n_months"]),
@@ -1740,7 +1439,6 @@ def main():
         "descriptives": desc,
         "panel_regressions": panel_res,
         "dk_bandwidth_sensitivity_spec1": dk_sens,
-        "robustness_strict_month_gate": strict_gate,
         "timeseries_regression": ts_res,
         "bootstrap_spec1": {
             "headline": "stationary_block_by_month",
@@ -1786,17 +1484,6 @@ def main():
             },
         },
         "limitations": [
-            "The RV cache is missing daily bars on days the listing exchange was open. "
-            "2018-12-05 is documented: CME's own notice keeps every non-equity, "
-            "non-interest-rate Globex market on regular hours, and no commodity here has "
-            "a bar for it. A shortfall of one day common to a whole schedule sits inside "
-            "MAX_RV_MONTH_SHORTFALL, so such a month PASSES the completeness screen -- "
-            "the screen is therefore demonstrably not a certificate of completeness, and "
-            "the affected months are listed in "
-            "sample.completeness.rule.rv_months_short_of_the_exchange_calendar. Monthly RV "
-            "for those months is computed from fewer bars than the exchange traded; what "
-            "dropping every one of them does to spec1 is reported, not asserted, in "
-            "robustness_strict_month_gate.",
             "FCM concentration is a single system-wide monthly series; its main effect is a "
             f"common time factor. The panel has {panel_res['spec1_fcm_highvol']['n_obs']} "
             f"rows spanning {panel_res['spec1_fcm_highvol']['n_months']} calendar months, and "

@@ -50,6 +50,17 @@ def coverage() -> pd.DataFrame:
     return K1694.monthly_coverage(K1694.build_dcot(), K1694.build_vol())
 
 
+@pytest.fixture(scope="module")
+def calendar_fixtures() -> dict:
+    """Trading-status fixtures hand-transcribed from exchange notices.
+
+    This file is the ORACLE for every calendar test. It is never derived from
+    K1694.py -- that is precisely why it exists (Codex round 5, defect 2). Its URLs
+    and quotes are listed for a third party in calendar_sources.md.
+    """
+    return json.loads((HERE / "calendar_fixtures.json").read_text())
+
+
 # --- defect 1: bootstrap must estimate spec1, not a neighbouring specification ---
 
 def test_bootstrap_shares_spec1_design_matrix(results: dict) -> None:
@@ -311,22 +322,207 @@ def test_endpoint_truncation_2020_06() -> None:
         "a one-day endpoint truncation was accepted as a complete month")
 
 
-def test_endpoint_gate_accepts_an_untruncated_dated_cache() -> None:
-    """The endpoint gate must not simply reject everything: with the calendar's own
-    endpoints injected, the dated path certifies the same months the count path does."""
+# --- round 6: the calendar is checked against PRIMARY SOURCES, not against itself ---
+#
+# Codex round 5, defect 2: the only endpoint acceptance test injected
+# expected_month_endpoints() and then asked the same implementation to accept it. That
+# verifies internal consistency and cannot falsify a wrong calendar. Every test below
+# reads calendar_fixtures.json -- hand-transcribed from exchange notices, listed with
+# URLs in calendar_sources.md -- and never consults K1694.py for an expected value.
+
+def test_calendar_matches_primary_source_date_fixtures(calendar_fixtures: dict) -> None:
+    """Each dated exchange notice must agree with the calendar, day by day."""
+    assert calendar_fixtures["date_fixtures"], "the oracle must not be empty"
+    for fx in calendar_fixtures["date_fixtures"]:
+        assert fx["status"] in ("open", "closed")
+        src = calendar_fixtures["sources"][fx["source_id"]]
+        assert src["url"].startswith("http"), "a fixture must be checkable by a third party"
+        assert fx["quote"].strip(), "a fixture must quote the source it rests on"
+        days = K1694.trading_days(fx["schedule"])
+        is_trading = pd.Timestamp(fx["date"]) in days
+        assert is_trading is (fx["status"] == "open"), (
+            f"{fx['schedule']} {fx['date']}: the calendar says "
+            f"{'open' if is_trading else 'closed'} but {fx['source_id']} "
+            f"({src['url']}) says {fx['status']} -- {fx['quote'][:140]}")
+
+
+def test_the_disputed_dates_are_trading_days_for_every_schedule() -> None:
+    """Codex round 5, defect 1, as a falsification test.
+
+    Round 4 removed these three dates from every commodity's calendar on the strength
+    of a count-only cache. The exchanges say otherwise: CFTC submission 12-363 lists
+    the Sandy emergency actions exhaustively and leaves NYMEX/COMEX electronic trading
+    available for all products; ICE kept all markets but Russell index futures and ICE
+    Clear Credit on regular hours; CME closed only U.S. equity and interest-rate
+    products on 2018-12-05. K1694 holds neither product type. This test fails on the
+    round-5 code.
+    """
+    disputed = ["2012-10-29", "2012-10-30", "2018-12-05"]
+    for schedule in K1694.CALENDAR_SPECS:
+        days = K1694.trading_days(schedule)
+        for date in disputed:
+            assert pd.Timestamp(date) in days, (
+                f"{schedule} treats {date} as a closure; no exchange notice supports "
+                "that for any product in this panel (calendar_sources.md)")
+        assert not (set(disputed) & set(K1694.UNSCHEDULED_CLOSURES[schedule]))
+
+
+def test_unscheduled_closures_must_carry_a_primary_source() -> None:
+    """A closure justified by the cache being checked is the round-5 defect itself."""
+    for schedule, entries in K1694.UNSCHEDULED_CLOSURES.items():
+        assert schedule in K1694.CALENDAR_SPECS
+        for date, meta in entries.items():
+            assert {"source_id", "quote"} <= set(meta), f"{schedule} {date} unsourced"
+    K1694.UNSCHEDULED_CLOSURES["CME_GLOBEX_COMMODITY"]["2013-01-15"] = "looks short"
+    try:
+        with pytest.raises(ValueError, match="never by"):
+            K1694._validate_unscheduled_closures()
+    finally:
+        del K1694.UNSCHEDULED_CLOSURES["CME_GLOBEX_COMMODITY"]["2013-01-15"]
+    K1694._validate_unscheduled_closures()
+
+
+def test_calendar_matches_primary_source_month_fixtures(calendar_fixtures: dict) -> None:
+    """Month-level day counts and endpoints, derived by hand from the notices."""
+    assert calendar_fixtures["month_fixtures"]
+    for fx in calendar_fixtures["month_fixtures"]:
+        month, sched = pd.Period(fx["month"], "M"), fx["schedule"]
+        # the fixture's own arithmetic first: weekday count is calendar arithmetic,
+        # and expected = weekdays - the closures the sources name
+        weekdays = len(pd.bdate_range(month.start_time, month.end_time))
+        assert weekdays == fx["weekdays"], f"{fx['month']} weekday count is wrong"
+        assert weekdays - len(fx["closed_weekdays"]) == fx["expected_trading_days"]
+        assert K1694.expected_trading_days(sched)[month] == fx["expected_trading_days"], (
+            f"{sched} {fx['month']}: calendar disagrees with {fx['derivation']}")
+        first, last = K1694.expected_month_endpoints(sched)
+        assert first[month] == pd.Timestamp(fx["first_trading_day"])
+        assert last[month] == pd.Timestamp(fx["last_trading_day"])
+
+
+def test_endpoint_gate_accepts_a_primary_source_untruncated_cache(
+        calendar_fixtures: dict) -> None:
+    """The gate must accept endpoints taken from the EXCHANGE NOTICES and reject a
+    one-day truncation of them -- so it can be neither vacuously strict nor lax.
+
+    This replaces test_endpoint_gate_accepts_an_untruncated_dated_cache, which Codex
+    round 5 rejected as tautological (it fed expected_month_endpoints() back into the
+    implementation that produced it). The endpoints here come from
+    calendar_fixtures.json.
+    """
+    month = pd.Period("2020-10", "M")
+    want = {fx["schedule"]: fx for fx in calendar_fixtures["month_fixtures"]
+            if fx["month"] == "2020-10"}
+    assert set(want) == set(K1694.CALENDAR_SPECS), "need a fixture for both schedules"
+
     dcot = K1694.build_dcot()
-    rv = K1694.build_vol().copy()
-    first, last = K1694.expected_month_endpoints()
-    per = rv["month_end"].dt.to_period("M")
-    rv["first_day"] = per.map(first)
-    rv["last_day"] = per.map(last)
-    rv = rv.loc[rv["first_day"].notna() & rv["last_day"].notna()].copy()
-    cov = K1694.monthly_coverage(dcot, rv)
-    dated = cov.loc[cov["rv"].notna(), "rv_complete"]
-    count_only = K1694.monthly_coverage(dcot, K1694.build_vol())
-    count_only = count_only.loc[count_only["rv"].notna(), "rv_complete"]
-    assert dated.sum() == count_only.sum(), (
-        "injecting the calendar's own endpoints must not change which months pass")
+    base = K1694.build_vol()
+    per = base["month_end"].dt.to_period("M")
+    rv = base.copy()
+    # neutral filler for every other month, from plain weekday boundaries -- never
+    # from the module's calendar; only the fixture month is asserted on
+    rv["first_day"] = [pd.bdate_range(p.start_time, p.end_time)[0] for p in per]
+    rv["last_day"] = [pd.bdate_range(p.start_time, p.end_time)[-1] for p in per]
+    rows = per == month
+    assert rows.sum() == 22
+    for commodity in rv.loc[rows, "commodity"]:
+        fx = want[K1694.PRODUCT_SCHEDULE[commodity]]
+        sel = rows & (rv["commodity"] == commodity)
+        rv.loc[sel, "first_day"] = pd.Timestamp(fx["first_trading_day"])
+        rv.loc[sel, "last_day"] = pd.Timestamp(fx["last_trading_day"])
+
+    hit = K1694.monthly_coverage(dcot, rv)
+    hit = hit.loc[hit["month"] == month]
+    assert hit["rv_complete"].all(), (
+        "endpoints straight from the exchange notices were rejected: the gate is "
+        "vacuously strict")
+
+    cut = rv.copy()
+    cut.loc[rows, "last_day"] = cut.loc[rows, "last_day"] - pd.offsets.BDay(1)
+    cut.loc[rows, "ndays"] = cut.loc[rows, "ndays"] - 1
+    miss = K1694.monthly_coverage(dcot, cut)
+    miss = miss.loc[miss["month"] == month]
+    assert not miss["rv_complete"].any(), (
+        "the gate accepted a month ending one trading day before the exchange's own "
+        "last scheduled trading day")
+
+
+def test_the_tolerated_blind_spot_is_quantified_not_only_disclosed(
+        results: dict) -> None:
+    """Dropping every month short of its exchange calendar must be reported.
+
+    Disclosing that 2018-12 passes the screen while provably missing a trading day is
+    necessary but not sufficient; the artifact also has to say what happens when those
+    months go. It must be labelled a sensitivity, never the reported specification, and
+    the reported threshold must be the unchanged one.
+    """
+    rb = results["robustness_strict_month_gate"]
+    assert rb["is_the_reported_specification"] is False
+    assert rb["n_obs"] < results["sample"]["panel_rows_usable"], (
+        "a strict gate that drops nothing is not a sensitivity")
+    assert K1694.MAX_RV_MONTH_SHORTFALL == 1, (
+        "the reported threshold must be the one every round since 4 has used")
+    assert "MAX_RV_MONTH_SHORTFALL" in rb["what"] and " to 0" in rb["what"]
+    for k in ("coef_fcm_x_highvol", "t_driscoll_kraay", "p_driscoll_kraay"):
+        assert isinstance(rb[k], float)
+
+
+def test_every_commodity_has_a_sourced_schedule(calendar_fixtures: dict) -> None:
+    """No commodity may reach the calendar without a declared, sourced exchange."""
+    assert set(K1694.PRODUCT_SCHEDULE) == set(K1694.COMMODITY_MAP)
+    assert set(K1694.PRODUCT_SCHEDULE.values()) <= set(K1694.CALENDAR_SPECS)
+    src = (HERE / "calendar_sources.md").read_text()
+    for commodity, ticker in K1694.COMMODITY_MAP.items():
+        assert f"`{ticker}`" in src, f"{commodity} ({ticker}) has no row in the source table"
+        assert commodity in src
+    for schedule, spec in K1694.CALENDAR_SPECS.items():
+        assert schedule in src
+        assert spec["sources"], f"{schedule} declares no source"
+        assert schedule in calendar_fixtures["schedules"]
+
+
+def test_the_two_schedules_are_declared_separately_not_aliased() -> None:
+    """Identical holiday sets today must not become one shared calendar object.
+
+    The venues happen to agree, but that is a checked fact, not a licence to collapse
+    them: a sourced closure at one exchange must not silently apply to the other.
+    """
+    assert len(K1694.CALENDAR_SPECS) >= 2
+    idx = {s: K1694.trading_days(s) for s in K1694.CALENDAR_SPECS}
+    assert len({id(v) for v in idx.values()}) == len(idx), "schedules share one object"
+    K1694.UNSCHEDULED_CLOSURES["ICEUS_SOFTS"]["2020-10-05"] = {
+        "source_id": "TEST", "quote": "probe"}
+    K1694._clear_calendar_caches()
+    try:
+        probe = pd.Timestamp("2020-10-05")
+        assert probe not in K1694.trading_days("ICEUS_SOFTS")
+        assert probe in K1694.trading_days("CME_GLOBEX_COMMODITY"), (
+            "an ICE closure leaked into the CME calendar")
+    finally:
+        del K1694.UNSCHEDULED_CLOSURES["ICEUS_SOFTS"]["2020-10-05"]
+        K1694._clear_calendar_caches()
+
+
+def test_removing_the_whitelist_is_disclosed_with_its_consequence(results: dict) -> None:
+    """The screen now passes a month it can be PROVEN to be short in. Say so."""
+    rule = results["sample"]["completeness"]["rule"]
+    assert rule["rv_unscheduled_closures"] == {"CME_GLOBEX_COMMODITY": {},
+                                               "ICEUS_SOFTS": {}}
+    gaps = rule["rv_months_short_of_the_exchange_calendar"]
+    dec18 = [g for g in gaps if g["month"] == "2018-12"]
+    assert dec18, "2018-12 is short of the CME calendar and must be published"
+    assert all(not g["caught_by_the_rule"] for g in dec18), (
+        "a one-day common shortfall is inside MAX_RV_MONTH_SHORTFALL by construction")
+    assert "2018-12" in rule["rv_residual_blind_spot"]
+    assert "WAS open" in rule["rv_months_short_note"]
+    # the date with no source is carried as OPEN and its immateriality is measured
+    unverified = rule["rv_trading_status_not_verified"]
+    assert any(u["date"] == "2018-12-05" and u["schedule"] == "ICEUS_SOFTS"
+               for u in unverified)
+    probes = results["sample"]["completeness"]["unverified_status_insensitivity"]
+    assert probes["probes"] and all(
+        p["estimation_sample_would_change"] is False for p in probes["probes"]), (
+        "an unsourced date that DOES move the sample must be reported, not asserted "
+        "away")
 
 
 def test_rv_endpoint_test_is_declared_unavailable_when_the_cache_lacks_dates(
@@ -339,7 +535,9 @@ def test_rv_endpoint_test_is_declared_unavailable_when_the_cache_lacks_dates(
     else:
         assert rule["rv_endpoint_test"].startswith("UNAVAILABLE")
         assert "does NOT prove" in rule["rv_residual_blind_spot"]
-        assert "2012-10" in rule["rv_residual_blind_spot"]
+        # round 6: the blind spot is named by the month it is REALIZED in, not by the
+        # two months a whitelist used to exempt.
+        assert "2018-12" in rule["rv_residual_blind_spot"]
         # Codex round 4: months that pass a count-only screen are not certified.
         assert "NOT certified complete" in rule["rv_residual_blind_spot"]
     # The claim must not appear in the rule's POSITIVE descriptions; the blind-spot

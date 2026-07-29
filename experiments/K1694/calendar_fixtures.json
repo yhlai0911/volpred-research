@@ -1,0 +1,233 @@
+{
+  "schema": "K1694 primary-source trading-calendar fixtures, v1",
+  "purpose": "Independent oracle for the trading calendars in K1694.py. Every entry below is hand-transcribed from the primary source named in `source_id` and resolved in `sources`. NOTHING here may be derived from K1694.py -- that is the whole point: Codex round 5 blocked because the only endpoint test fed expected_month_endpoints() back into the implementation that produced it, so it could not falsify a wrong calendar. These fixtures can.",
+  "written_by": "K1694 round-6 repair, 2026-07-29",
+  "how_to_verify": "Open the URL in `sources`, find the quoted sentence, and check it against the `open` / `closed` value. The weekday arithmetic in month_fixtures (how many Mon-Fri dates a month contains) is plain calendar arithmetic and is NOT a claim about any exchange; the exchange claim is only which of those weekdays are closed.",
+
+  "sources": {
+    "CFTC-12-363": {
+      "title": "CME/CBOT/NYMEX/COMEX Submission No. 12-363 -- 40.6(a) Self Certification of Emergency Actions/Rules Due to Hurricane Sandy",
+      "publisher": "CME Group Inc., filed with the U.S. Commodity Futures Trading Commission",
+      "dated": "2012-10-29",
+      "url": "https://www.cftc.gov/sites/default/files/stellent/groups/public/%40rulesandproducts/documents/ifdocs/rul102912cmecbotnymexandcomex1.pdf",
+      "kind": "primary -- regulatory filing by the exchange itself"
+    },
+    "ICE-PR-2012-10-29": {
+      "title": "IntercontinentalExchange Announces Hurricane Sandy Market Update",
+      "publisher": "IntercontinentalExchange, Inc. (investor relations press release)",
+      "dated": "2012-10-29",
+      "url": "https://ir.theice.com/press/news-details/2012/IntercontinentalExchange-Announces-Hurricane-Sandy-Market-Update/default.aspx",
+      "kind": "primary -- exchange press release"
+    },
+    "CME-PR-2018-12-02": {
+      "title": "CME Group U.S. Equity, Interest Rate Markets to Close for National Day of Mourning",
+      "publisher": "CME Group Inc.",
+      "dated": "2018-12-02",
+      "url": "https://www.cmegroup.com/media-room/press-releases/2018/12/02/cme_group_u_s_equityinterestratemarketstoclosefornationaldayofmo.html",
+      "mirror": "https://web.archive.org/web/2019id_/https://www.cmegroup.com/media-room/press-releases/2018/12/02/cme_group_u_s_equityinterestratemarketstoclosefornationaldayofmo.html",
+      "kind": "primary -- exchange press release"
+    },
+    "CME-CHADV18-474": {
+      "title": "Clearing Advisory Chadv18-474: National Day of Mourning -- December 5, 2018",
+      "publisher": "CME Clearing",
+      "dated": "2018-12-03",
+      "url": "https://www.cmegroup.com/notices/clearing/2018/12/Chadv18-474.html",
+      "mirror": "https://web.archive.org/web/2019id_/https://www.cmegroup.com/notices/clearing/2018/12/Chadv18-474.html",
+      "kind": "primary -- exchange clearing advisory"
+    },
+    "CME-GLOBEX-2010-CAL": {
+      "title": "CME Globex 2010 Holiday Calendar (compiled: one schedule per holiday, per product group)",
+      "publisher": "CME Group Inc.",
+      "dated": "2010 (per-holiday sheets carry their own 'last updated' dates)",
+      "url": "http://www.cmegroup.com/tools-information/holiday-calendar/files/2010-globex-holiday-calendar.pdf",
+      "mirror": "https://web.archive.org/web/20100215061802id_/http://www.cmegroup.com/tools-information/holiday-calendar/files/2010-globex-holiday-calendar.pdf",
+      "kind": "primary -- exchange holiday calendar"
+    },
+    "CME-GLOBEX-2010-COLUMBUS": {
+      "title": "CME Globex Columbus Day Holiday Schedule (2010)",
+      "publisher": "CME Group Inc.",
+      "dated": "last updated 2010-06-09",
+      "url": "http://www.cmegroup.com/tools-information/holiday-calendar/files/2010-columbus-day.pdf",
+      "mirror": "https://web.archive.org/web/20100821133122id_/http://www.cmegroup.com/tools-information/holiday-calendar/files/2010-columbus-day.pdf",
+      "kind": "primary -- exchange holiday schedule"
+    },
+    "CME-JUNETEENTH-2022": {
+      "title": "CME Clearing memorandum: Juneteenth holiday 2022 (holiday processing schedule for Monday, June 20, 2022)",
+      "publisher": "CME Group Inc. / CME Clearing",
+      "dated": "2022",
+      "url": "https://www.cmegroup.com/tools-information/holiday-calendar/files/2022-juneteenth-advisory.pdf",
+      "kind": "primary -- exchange clearing advisory"
+    },
+    "CME-HOLIDAY-CAL-PAGE": {
+      "title": "CME Group Holiday Calendar (landing page): 'CME Group observes 11 U.S.-recognized holidays.'",
+      "publisher": "CME Group Inc.",
+      "dated": "retrieved via Wayback snapshot of the 2019/2020 page",
+      "url": "https://www.cmegroup.com/tools-information/holiday-calendar.html",
+      "mirror": "https://web.archive.org/web/2019id_/https://www.cmegroup.com/tools-information/holiday-calendar.html",
+      "kind": "primary -- exchange reference page"
+    },
+    "ICEUS-CAL-2018": {
+      "title": "ICE Futures U.S. 2018 Holiday Calendar (Exchange Notice)",
+      "publisher": "ICE Futures U.S., Inc.",
+      "dated": "2017-07-06",
+      "url": "https://www.ice.com/publicdocs/futures_us/exchange_notices/ExNot2018HolidayCal.pdf",
+      "kind": "primary -- exchange notice"
+    },
+    "ICEUS-CAL-2019": {
+      "title": "ICE Futures U.S. 2019 Holiday Calendar (Exchange Notice)",
+      "publisher": "ICE Futures U.S., Inc.",
+      "dated": "2018-06-22",
+      "url": "https://www.ice.com/publicdocs/futures_us/exchange_notices/ICE_Futures_US_2019_Holidays_20180622.pdf",
+      "kind": "primary -- exchange notice"
+    },
+    "ICEUS-CAL-2026": {
+      "title": "ICE Futures U.S. 2026 Trading Holiday Calendar",
+      "publisher": "ICE Futures U.S., Inc.",
+      "dated": "2025-06-09",
+      "url": "https://www.ice.com/publicdocs/futures/IFUS_Trading_Hours_Holiday_Calendar.pdf",
+      "kind": "primary -- exchange notice"
+    }
+  },
+
+  "schedules": {
+    "CME_GLOBEX_COMMODITY": {
+      "exchange": "CME Group (NYMEX, COMEX, CBOT, KCBT, CME) -- physical-commodity futures on CME Globex",
+      "scope_note": "Deliberately EXCLUDES the two CME product groups that were closed on the disputed dates: U.S. equity-index futures and the U.S. interest-rate complex. K1694 contains neither.",
+      "closed_holidays": ["New Year's Day", "Martin Luther King Day", "Presidents' Day", "Good Friday", "Memorial Day", "Juneteenth (from 2022)", "Independence Day", "Labor Day", "Thanksgiving", "Christmas"],
+      "open_on": ["Columbus Day", "Veterans Day"],
+      "holiday_set_sources": ["CME-GLOBEX-2010-CAL", "CME-GLOBEX-2010-COLUMBUS", "CME-HOLIDAY-CAL-PAGE", "CME-JUNETEENTH-2022"]
+    },
+    "ICEUS_SOFTS": {
+      "exchange": "ICE Futures U.S. -- Sugar No. 11, Coffee 'C', Cocoa, Cotton No. 2",
+      "scope_note": "ICE's Canola and its currency/stock-index/metal/energy groups keep DIFFERENT calendars (see the two-column ICE notices); K1694 uses only the softs column.",
+      "closed_holidays": ["New Year's Day", "Martin Luther King Day", "Presidents' Day", "Good Friday", "Memorial Day", "Juneteenth (from 2022)", "Independence Day", "Labor Day", "Thanksgiving", "Christmas"],
+      "open_on": ["Columbus Day", "Veterans Day"],
+      "holiday_set_sources": ["ICEUS-CAL-2018", "ICEUS-CAL-2019", "ICEUS-CAL-2026"]
+    }
+  },
+
+  "date_fixtures": [
+    {
+      "date": "2012-10-29", "schedule": "CME_GLOBEX_COMMODITY", "status": "open",
+      "source_id": "CFTC-12-363", "evidence": "explicit",
+      "quote": "NYMEX and COMEX closed their physical trading floors for trade dates October 29, 2012 and October 30, 2012. Electronic trading remains available for all NYMEX and COMEX products on CME Globex.",
+      "note": "The same filing enumerates every emergency action taken. The only market closures listed are U.S. equity futures/options (CME, CBOT) and the interest-rate complex (Treasury, Eurodollar, Fed Funds). CBOT grains, KCBT wheat and CME livestock appear nowhere in the filing, i.e. no emergency action was taken for them."
+    },
+    {
+      "date": "2012-10-30", "schedule": "CME_GLOBEX_COMMODITY", "status": "open",
+      "source_id": "CFTC-12-363", "evidence": "explicit",
+      "quote": "NYMEX and COMEX closed their physical trading floors for trade dates October 29, 2012 and October 30, 2012. Electronic trading remains available for all NYMEX and COMEX products on CME Globex."
+    },
+    {
+      "date": "2012-10-29", "schedule": "ICEUS_SOFTS", "status": "open",
+      "source_id": "ICE-PR-2012-10-29", "evidence": "explicit-by-exclusion",
+      "quote": "All other ICE markets and clearing houses will remain open and follow regular market hours, including ICE Clear Europe for CDS clearing.",
+      "note": "The release names exactly two exceptions -- ICE's Russell equity index futures/options (rescheduled) and ICE Clear Credit (closed October 30). Sugar, coffee, cocoa and cotton are not named individually; they fall under 'all other ICE markets'."
+    },
+    {
+      "date": "2012-10-30", "schedule": "ICEUS_SOFTS", "status": "open",
+      "source_id": "ICE-PR-2012-10-29", "evidence": "explicit-by-exclusion",
+      "quote": "All other ICE markets and clearing houses will remain open and follow regular market hours, including ICE Clear Europe for CDS clearing.",
+      "note": "The release is dated 29 October and speaks to both days: it names 30 October explicitly for each of its two exceptions."
+    },
+    {
+      "date": "2018-12-05", "schedule": "CME_GLOBEX_COMMODITY", "status": "open",
+      "source_id": "CME-PR-2018-12-02", "evidence": "explicit",
+      "quote": "All other markets on CME Globex, CME ClearPort and the trading floor will remain open for regular trading hours on Dec. 5.",
+      "corroborating_source_id": "CME-CHADV18-474",
+      "note": "The closure was scoped to 'its U.S.-based equity and interest rate futures and options products'."
+    },
+    {
+      "date": "2018-12-25", "schedule": "ICEUS_SOFTS", "status": "closed",
+      "source_id": "ICEUS-CAL-2018", "evidence": "explicit",
+      "quote": "Christmas | Tuesday December 25 | closed"
+    },
+    {
+      "date": "2018-03-30", "schedule": "ICEUS_SOFTS", "status": "closed",
+      "source_id": "ICEUS-CAL-2018", "evidence": "explicit",
+      "quote": "Good Friday | Friday March 30 | closed"
+    },
+    {
+      "date": "2018-10-08", "schedule": "ICEUS_SOFTS", "status": "open",
+      "source_id": "ICEUS-CAL-2018", "evidence": "explicit",
+      "quote": "Columbus Day | Monday October 8 | Open"
+    },
+    {
+      "date": "2019-10-14", "schedule": "ICEUS_SOFTS", "status": "open",
+      "source_id": "ICEUS-CAL-2019", "evidence": "explicit",
+      "quote": "Columbus Day /Thanksgiving Day (Canada) | Monday October 14 | open"
+    },
+    {
+      "date": "2019-11-11", "schedule": "ICEUS_SOFTS", "status": "open",
+      "source_id": "ICEUS-CAL-2019", "evidence": "explicit",
+      "quote": "Veterans Day /Remembrance Day (Canada) | Monday November 11 | open"
+    },
+    {
+      "date": "2026-06-19", "schedule": "ICEUS_SOFTS", "status": "closed",
+      "source_id": "ICEUS-CAL-2026", "evidence": "explicit",
+      "quote": "Juneteenth | Friday, June 19 | closed  (Cocoa, Coffee 'C', Cotton No 2, FCOJ, Sugar No. 11 column)"
+    },
+    {
+      "date": "2026-11-11", "schedule": "ICEUS_SOFTS", "status": "open",
+      "source_id": "ICEUS-CAL-2026", "evidence": "explicit",
+      "quote": "Veterans Day/ Remembrance Day (Canada) | Wednesday, Nov 11 | open  (softs column)"
+    },
+    {
+      "date": "2010-10-11", "schedule": "CME_GLOBEX_COMMODITY", "status": "open",
+      "source_id": "CME-GLOBEX-2010-COLUMBUS", "evidence": "explicit",
+      "quote": "Sunday, Oct 10: 1700 CT / 1800 ET - Regular CME Globex open for NYMEX, COMEX and DME products on CME Globex for trade date Monday, Oct 11 ... 1800 CT - Regular CME Globex open for CBOT, KCBT and MGEX Grains and CBOT Ethanol for trade date Monday, Oct 11",
+      "note": "Columbus Day 2010. The schedule gives a regular open and a regular close for trade date Oct 11 for every product group K1694 uses."
+    },
+    {
+      "date": "2010-11-11", "schedule": "CME_GLOBEX_COMMODITY", "status": "open",
+      "source_id": "CME-GLOBEX-2010-CAL", "evidence": "explicit",
+      "quote": "CME Globex Veterans Day Holiday Schedule -- Other CME Group Products, including KCBT and MGEX on CME Globex: Wednesday, Nov 10 ... Regular Open - Per each product schedule for trade date Thursday, Nov 11",
+      "note": "Veterans Day 2010."
+    },
+    {
+      "date": "2010-04-02", "schedule": "CME_GLOBEX_COMMODITY", "status": "closed",
+      "source_id": "CME-GLOBEX-2010-CAL", "evidence": "explicit",
+      "quote": "CME Globex Good Friday Holiday Schedule ... No CME Globex Trading on Good Friday",
+      "note": "Good Friday 2010."
+    },
+    {
+      "date": "2022-06-20", "schedule": "CME_GLOBEX_COMMODITY", "status": "closed",
+      "source_id": "CME-JUNETEENTH-2022", "evidence": "explicit",
+      "quote": "Juneteenth Holiday (6/19/2022) observed 6/20/2022 -- CME Clearing holiday processing schedule for Monday, June 20, 2022.",
+      "note": "2022 is the first year CME Group observed Juneteenth; 2021-06-18 was a normal trading day."
+    }
+  ],
+
+  "unverified_dates": [
+    {
+      "date": "2018-12-05", "schedule": "ICEUS_SOFTS",
+      "searched_for": "an ICE Futures U.S. exchange notice or ICE press release stating whether the softs traded on the 2018 national day of mourning",
+      "outcome": "NOT FOUND. ICE's own 2018 holiday calendar predates the event (notice dated 2017-07-06) and therefore cannot speak to it, and no ICE notice for that date surfaced.",
+      "treatment": "No closure is asserted for ICEUS_SOFTS on this date: an unsourced closure is exactly the defect this round is repairing. The calendar therefore treats 2018-12-05 as a normal trading day for the ICE softs too.",
+      "materiality": "None for the reported sample. See `insensitivity_check` in K1694_results.json -- the CORN row that leaves the sample is a CME_GLOBEX_COMMODITY row, and asserting an ICE closure on this date changes no row either way."
+    }
+  ],
+
+  "month_fixtures": [
+    {"month": "2012-10", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 23, "closed_weekdays": [], "expected_trading_days": 23, "first_trading_day": "2012-10-01", "last_trading_day": "2012-10-31",
+     "derivation": "October 2012 has 23 Mon-Fri dates. None of the ten sourced closed holidays falls in October (Columbus Day, Mon 2012-10-08, is a trading day). Hurricane Sandy closed no product K1694 uses -- CFTC-12-363."},
+    {"month": "2012-10", "schedule": "ICEUS_SOFTS", "weekdays": 23, "closed_weekdays": [], "expected_trading_days": 23, "first_trading_day": "2012-10-01", "last_trading_day": "2012-10-31",
+     "derivation": "Same arithmetic; ICE-PR-2012-10-29 keeps the softs open on 29 and 30 October."},
+    {"month": "2018-12", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 21, "closed_weekdays": ["2018-12-25"], "expected_trading_days": 20, "first_trading_day": "2018-12-03", "last_trading_day": "2018-12-31",
+     "derivation": "December 2018 has 21 Mon-Fri dates. Christmas (Tue 2018-12-25) is the only sourced closure. 2018-12-05 is a trading day -- CME-PR-2018-12-02."},
+    {"month": "2020-10", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 22, "closed_weekdays": [], "expected_trading_days": 22, "first_trading_day": "2020-10-01", "last_trading_day": "2020-10-30",
+     "derivation": "October 2020 has 22 Mon-Fri dates; Columbus Day (Mon 2020-10-12) trades."},
+    {"month": "2020-06", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 22, "closed_weekdays": [], "expected_trading_days": 22, "first_trading_day": "2020-06-01", "last_trading_day": "2020-06-30",
+     "derivation": "June 2020 has 22 Mon-Fri dates; Juneteenth was not yet observed by CME (first observed 2022)."},
+    {"month": "2021-06", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 22, "closed_weekdays": [], "expected_trading_days": 22, "first_trading_day": "2021-06-01", "last_trading_day": "2021-06-30",
+     "derivation": "June 2021 has 22 Mon-Fri dates. CME did not close for Juneteenth in 2021 -- CME-JUNETEENTH-2022 records 2022 as the first observance."},
+    {"month": "2022-06", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 22, "closed_weekdays": ["2022-06-20"], "expected_trading_days": 21, "first_trading_day": "2022-06-01", "last_trading_day": "2022-06-30",
+     "derivation": "June 2022 has 22 Mon-Fri dates; Juneteenth 6/19 fell on a Sunday and was observed Monday 6/20 -- CME-JUNETEENTH-2022."},
+    {"month": "2016-11", "schedule": "CME_GLOBEX_COMMODITY", "weekdays": 22, "closed_weekdays": ["2016-11-24"], "expected_trading_days": 21, "first_trading_day": "2016-11-01", "last_trading_day": "2016-11-30",
+     "derivation": "November 2016 has 22 Mon-Fri dates. Thanksgiving (Thu 2016-11-24) is closed; Veterans Day (Fri 2016-11-11) trades."},
+    {"month": "2018-12", "schedule": "ICEUS_SOFTS", "weekdays": 21, "closed_weekdays": ["2018-12-25"], "expected_trading_days": 20, "first_trading_day": "2018-12-03", "last_trading_day": "2018-12-31",
+     "derivation": "ICEUS-CAL-2018 lists Christmas as the only December closure. 2018-12-05 is carried as a trading day because no source says otherwise -- see unverified_dates."},
+    {"month": "2020-10", "schedule": "ICEUS_SOFTS", "weekdays": 22, "closed_weekdays": [], "expected_trading_days": 22, "first_trading_day": "2020-10-01", "last_trading_day": "2020-10-30",
+     "derivation": "October 2020 has 22 Mon-Fri dates and the ICE softs column carries no October holiday (Columbus Day, Mon 2020-10-12, is 'open' in ICEUS-CAL-2019 and ICEUS-CAL-2026)."}
+  ]
+}
