@@ -96,6 +96,9 @@ Schema (version 1)::
           "job_id": str, "cohort_id": str, "slot_id": int,
           "created_at": "<ISO>",
           "isolated": bool                       # WS-B: this fire ran with a workspace →
+          "closeout_generation_id": str,         # terminal commit idempotency identity
+          "closeout_base_head": str,             # bound before PHASE-Z may adopt HEAD
+          "closeout_started_at": "<ISO>",
           "fire_lifecycle": {                    # exact generation copied from worker
             "generation_id": str,
             "captured_at": "<ISO>",
@@ -112,6 +115,13 @@ Schema (version 1)::
           "rejection_reason": str
         }
       ],                                         # bounded hot cache; JSONL is durable history
+      "phase_z_receipts": [                      # terminal closeout receipts (bounded hot history)
+        {
+          "receipt_id": str, "cohort_id": str, "generation_id": str,
+          "reason": str, "committed": bool, "commit_sha": str | null,
+          "completed_at": "<ISO>", "job_ids": [str]
+        }
+      ],
       "completions": [                           # ring buffer (max 100 entries)
         {
           "fire_at": "<ISO>", "completed_at": "<ISO>",
@@ -383,6 +393,7 @@ def _empty_state() -> dict[str, Any]:
         "current_job": None,
         "phase_z_pending": [],
         "phase_z_rejections": [],
+        "phase_z_receipts": [],
         "completions": [],
         "auth_blocked": False,
         "auth_blocked_at": None,
@@ -470,6 +481,8 @@ def _normalise_state(data: dict[str, Any]) -> dict[str, Any]:
         data["phase_z_pending"] = []
     if not isinstance(data.get("phase_z_rejections"), list):
         data["phase_z_rejections"] = []
+    if not isinstance(data.get("phase_z_receipts"), list):
+        data["phase_z_receipts"] = []
     if not isinstance(data.get("cutover_quiesce"), dict):
         data["cutover_quiesce"] = None
     return data
@@ -1643,7 +1656,71 @@ def record_completion(
         }
 
 
-def finish_phase_z(*, cohort_id: str, path: Path = STATE_PATH) -> int:
+def begin_phase_z(
+    *,
+    cohort_ids: set[str],
+    generation_id: str,
+    base_head: str,
+    path: Path = STATE_PATH,
+) -> dict[str, str]:
+    """Bind one idempotent closeout attempt before PHASE-Z may mutate HEAD.
+
+    A restarted process reuses the original ``base_head`` and generation.  It
+    must never overwrite an in-flight identity with whichever HEAD happens to
+    exist after the crash.
+    """
+    wanted = {str(item) for item in cohort_ids}
+    generation_id = str(generation_id)
+    base_head = str(base_head)
+    with _locked_state(path) as (_fh, data):
+        matching = [
+            item
+            for item in data.get("phase_z_pending") or []
+            if str(item.get("cohort_id")) in wanted
+        ]
+        if not matching:
+            return {}
+        existing = {
+            (
+                str(item.get("closeout_generation_id") or ""),
+                str(item.get("closeout_base_head") or ""),
+                str(item.get("closeout_started_at") or ""),
+            )
+            for item in matching
+            if item.get("closeout_generation_id") is not None
+        }
+        if existing:
+            if len(existing) != 1:
+                raise RuntimeError("mixed PHASE-Z closeout attempt identities")
+            existing_generation, existing_head, existing_started = next(iter(existing))
+            if existing_generation != generation_id:
+                raise RuntimeError("PHASE-Z closeout generation changed across restart")
+            if any(item.get("closeout_generation_id") is None for item in matching):
+                raise RuntimeError("partial PHASE-Z closeout attempt identity")
+            return {
+                "generation_id": existing_generation,
+                "base_head": existing_head,
+                "started_at": existing_started,
+            }
+        started_at = _now()
+        for item in matching:
+            item["closeout_generation_id"] = generation_id
+            item["closeout_base_head"] = base_head
+            item["closeout_started_at"] = started_at
+        return {
+            "generation_id": generation_id,
+            "base_head": base_head,
+            "started_at": started_at,
+        }
+
+
+def finish_phase_z(
+    *,
+    cohort_id: str,
+    path: Path = STATE_PATH,
+    terminal_outcome: dict[str, Any] | None = None,
+    generation_id: str | None = None,
+) -> int:
     """Release every drained slot for one cohort after PHASE-Z finishes.
 
     Returns the number of pending slot records removed. The exact cohort CAS
@@ -1652,8 +1729,63 @@ def finish_phase_z(*, cohort_id: str, path: Path = STATE_PATH) -> int:
     """
     with _locked_state(path) as (_fh, data):
         pending = data.get("phase_z_pending") or []
-        kept = [item for item in pending if str(item.get("cohort_id")) != str(cohort_id)]
-        removed = len(pending) - len(kept)
+        removed_items = [
+            item
+            for item in pending
+            if str(item.get("cohort_id")) == str(cohort_id)
+        ]
+        kept = [
+            item
+            for item in pending
+            if str(item.get("cohort_id")) != str(cohort_id)
+        ]
+        removed = len(removed_items)
+        if removed and terminal_outcome is not None:
+            lifecycle_generations = {
+                str((item.get("fire_lifecycle") or {}).get("generation_id") or "")
+                for item in removed_items
+            }
+            expected_generation = str(generation_id or "")
+            if (
+                not expected_generation
+                or lifecycle_generations != {expected_generation}
+            ):
+                raise RuntimeError(
+                    "terminal PHASE-Z receipt generation does not match pending authority"
+                )
+            reason = str(terminal_outcome.get("reason") or "")
+            commit_sha = str(terminal_outcome.get("commit_sha") or "") or None
+            job_ids = sorted(str(item.get("job_id") or "") for item in removed_items)
+            receipt_material = json.dumps(
+                {
+                    "cohort_id": str(cohort_id),
+                    "generation_id": expected_generation,
+                    "reason": reason,
+                    "commit_sha": commit_sha,
+                    "job_ids": job_ids,
+                },
+                sort_keys=True,
+                ensure_ascii=False,
+            )
+            receipt = {
+                "receipt_id": hashlib.sha256(
+                    receipt_material.encode("utf-8")
+                ).hexdigest(),
+                "cohort_id": str(cohort_id),
+                "generation_id": expected_generation,
+                "reason": reason,
+                "committed": bool(terminal_outcome.get("committed")),
+                "commit_sha": commit_sha,
+                "completed_at": _now(),
+                "job_ids": job_ids,
+            }
+            receipts = data.get("phase_z_receipts") or []
+            if not any(
+                str(item.get("receipt_id")) == receipt["receipt_id"]
+                for item in receipts
+            ):
+                receipts.append(receipt)
+            data["phase_z_receipts"] = receipts[-COMPLETIONS_MAX:]
         data["phase_z_pending"] = kept
         return removed
 

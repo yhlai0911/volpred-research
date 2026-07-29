@@ -105,6 +105,7 @@ _PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_
 # every ~64s tick forever. Three attempts ≈ 3 min of transient tolerance, then
 # one give-up alert and the token is released.
 _PHASE_Z_MAX_DRAIN_ATTEMPTS = 3
+_PHASE_Z_GENERATION_TRAILER = "VolPred-Phase-Z-Generation"
 
 
 def _phase_z_claim_owners(pending: list[dict[str, Any]]) -> set[str]:
@@ -144,6 +145,94 @@ def _matching_fire_lifecycle(
     if any(paths != normalized[0] for paths in normalized[1:]):
         return None, "generation_baseline_mismatch"
     return normalized[0], next(iter(generation_ids))
+
+
+def _git_head(repo_root: Path) -> str:
+    """Return the current HEAD OID, or an empty string for non-git test seams."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        if (repo_root / ".git").exists():
+            raise RuntimeError(f"PHASE-Z HEAD probe unavailable: {exc}") from exc
+        return ""
+    if proc.returncode != 0 and (repo_root / ".git").exists():
+        raise RuntimeError(
+            "PHASE-Z HEAD probe failed: " + (proc.stderr or "")[-300:]
+        )
+    return (proc.stdout or "").strip() if proc.returncode == 0 else ""
+
+
+def _phase_z_terminal_commit(
+    *,
+    repo_root: Path,
+    pending: list[dict[str, Any]],
+    generation_id: str,
+) -> str | None:
+    """Recover a terminal PHASE-Z commit after process death.
+
+    ``begin_phase_z`` binds the pre-mutation HEAD into every pending token.
+    PHASE-Z writes the generation as a commit trailer.  A new process searches
+    only descendants of that exact HEAD, so an old receipt with the same text
+    cannot release a newer lifecycle.
+    """
+    attempts = {
+        (
+            str(item.get("closeout_generation_id") or ""),
+            str(item.get("closeout_base_head") or ""),
+        )
+        for item in pending
+        if item.get("closeout_generation_id") is not None
+    }
+    if not attempts:
+        return None
+    if len(attempts) != 1 or any(
+        item.get("closeout_generation_id") is None for item in pending
+    ):
+        raise RuntimeError("mixed PHASE-Z closeout attempt identities")
+    attempt_generation, base_head = next(iter(attempts))
+    if attempt_generation != str(generation_id):
+        raise RuntimeError("PHASE-Z closeout attempt does not match lifecycle generation")
+    if not base_head and (repo_root / ".git").exists():
+        raise RuntimeError("PHASE-Z closeout attempt has no verified base HEAD")
+    if not base_head:
+        return None
+    try:
+        proc = subprocess.run(
+            [
+                "git", "-C", str(repo_root), "log",
+                "--format=%H%x00%B%x00%x1e",
+                f"{base_head}..HEAD",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        raise RuntimeError(
+            f"PHASE-Z terminal receipt probe unavailable: {exc}"
+        ) from exc
+    if proc.returncode != 0:
+        raise RuntimeError(
+            "cannot inspect PHASE-Z terminal commit "
+            f"generation={generation_id} base={base_head}: "
+            + (proc.stderr or "")[-300:]
+        )
+    expected = f"{_PHASE_Z_GENERATION_TRAILER}: {generation_id}"
+    for raw_record in (proc.stdout or "").split("\x1e"):
+        record = raw_record.strip("\n\x00 ")
+        if not record or "\x00" not in record:
+            continue
+        commit_sha, body = record.split("\x00", 1)
+        if any(line.strip() == expected for line in body.splitlines()):
+            return commit_sha.strip()
+    return None
 
 
 def _reject_unmatched_generation(
@@ -196,6 +285,11 @@ def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
     restarts — a restart must not grant a stuck cohort three fresh retries
     per boot, which is just the livelock with extra steps.
     """
+    if (outcome or {}).get("head_committed"):
+        # HEAD already contains this generation.  Releasing after a retry cap
+        # would permanently skip index/claim/test closeout.  Keep retrying the
+        # idempotent downstream finisher until it emits a terminal receipt.
+        return False
     attempts = 0
     with state._locked_state(state_path) as (_fh, data):
         for item in data.get("phase_z_pending") or []:
@@ -1067,6 +1161,9 @@ async def _run_reserved_fire(
                     durable_baseline, generation = _matching_fire_lifecycle(
                         cohort_pending
                     )
+                    cohort_ids = {
+                        str(item.get("cohort_id")) for item in cohort_pending
+                    }
                     phase_z_kwargs = {
                         "repo_root": repo_root,
                         "isolated_cohort": isolated_cohort,
@@ -1079,6 +1176,31 @@ async def _run_reserved_fire(
                     }
                     if durable_baseline is not None:
                         phase_z_kwargs["pre_fire_dirty"] = durable_baseline
+                        state.begin_phase_z(
+                            cohort_ids=cohort_ids,
+                            generation_id=generation,
+                            base_head=_git_head(repo_root),
+                            path=state_path,
+                        )
+                        recovered_commit = _phase_z_terminal_commit(
+                            repo_root=repo_root,
+                            pending=state.read_state(state_path).get(
+                                "phase_z_pending"
+                            ) or [],
+                            generation_id=generation,
+                        )
+                        if recovered_commit:
+                            phase_z_outcome = await asyncio.to_thread(
+                                phase_z.recover_committed_closeout,
+                                repo_root=repo_root,
+                                commit_sha=recovered_commit,
+                                generation_id=generation,
+                                claim_owners=_phase_z_claim_owners(
+                                    cohort_pending
+                                ),
+                            )
+                        else:
+                            phase_z_kwargs["closeout_generation"] = generation
                     else:
                         phase_z_outcome = _reject_unmatched_generation(
                             pending=cohort_pending,
@@ -1093,7 +1215,12 @@ async def _run_reserved_fire(
                 except Exception as exc:  # noqa: BLE001
                     LOG.warning("phase_z safety-net failed (non-fatal): %s", exc)
                 if _phase_z_terminal(phase_z_outcome):
-                    cleared = state.finish_phase_z(cohort_id=cohort_id, path=state_path)
+                    cleared = state.finish_phase_z(
+                        cohort_id=cohort_id,
+                        path=state_path,
+                        terminal_outcome=phase_z_outcome,
+                        generation_id=generation,
+                    )
                     LOG.info("phase_z cohort released cohort=%s pending=%d", cohort_id, cleared)
                 elif _phase_z_drain_exhausted(cohort_id=cohort_id, outcome=phase_z_outcome,
                                               state_path=state_path):
@@ -1438,20 +1565,59 @@ async def _tick_once(
             recovery_isolated = all(
                 bool(item.get("isolated")) for item in pending_phase_z
             )
-            outcome = await asyncio.to_thread(
-                phase_z.run_phase_z, repo_root=repo_root,
-                isolated_cohort=recovery_isolated,
-                claim_owners=_phase_z_claim_owners(pending_phase_z),
-                pre_fire_dirty=durable_baseline,
-                fire_ids={
-                    str(item["job_id"])
-                    for item in pending_phase_z
-                    if item.get("job_id")
-                },
+            cohorts = {
+                str(item.get("cohort_id")) for item in pending_phase_z
+            }
+            state.begin_phase_z(
+                cohort_ids=cohorts,
+                generation_id=generation,
+                base_head=_git_head(repo_root),
+                path=state_path,
             )
+            pending_phase_z = (
+                state.read_state(state_path).get("phase_z_pending") or []
+            )
+            recovered_commit = _phase_z_terminal_commit(
+                repo_root=repo_root,
+                pending=pending_phase_z,
+                generation_id=generation,
+            )
+            if recovered_commit:
+                outcome = await asyncio.to_thread(
+                    phase_z.recover_committed_closeout,
+                    repo_root=repo_root,
+                    commit_sha=recovered_commit,
+                    generation_id=generation,
+                    claim_owners=_phase_z_claim_owners(pending_phase_z),
+                )
+            else:
+                outcome = await asyncio.to_thread(
+                    phase_z.run_phase_z, repo_root=repo_root,
+                    isolated_cohort=recovery_isolated,
+                    claim_owners=_phase_z_claim_owners(pending_phase_z),
+                    pre_fire_dirty=durable_baseline,
+                    closeout_generation=generation,
+                    fire_ids={
+                        str(item["job_id"])
+                        for item in pending_phase_z
+                        if item.get("job_id")
+                    },
+                )
             if _phase_z_terminal(outcome):
-                for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
-                    state.finish_phase_z(cohort_id=cohort, path=state_path)
+                for cohort in cohorts:
+                    state.finish_phase_z(
+                        cohort_id=cohort,
+                        path=state_path,
+                        terminal_outcome=outcome,
+                        generation_id=generation,
+                    )
+                if recovered_commit:
+                    return {
+                        "action": "phase_z_receipt_recovered",
+                        "phase_z": outcome,
+                        "generation_id": generation,
+                        "commit_sha": recovered_commit,
+                    }
             else:
                 # Same bounded retry as the fire-time drain: one run_phase_z per
                 # tick serves the whole backlog, so every pending cohort's counter

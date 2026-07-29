@@ -10558,6 +10558,219 @@ def test_phase_z_isolated_cohort_demotes_non_machine_owned(tmp_path: Path) -> No
     assert out["foreign_ownership"]["risk"] == ["docs/note.md"]
 
 
+def test_phase_z_commit_carries_durable_generation_trailer(tmp_path: Path) -> None:
+    _git_init_repo(tmp_path)
+    (tmp_path / "storage" / "ops").mkdir(parents=True)
+    (tmp_path / "storage" / "ops" / "some_state.json").write_text(
+        "{}\n", encoding="utf-8",
+    )
+
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path,
+        now_hhmm="16:07",
+        pre_fire_dirty=set(),
+        closeout_generation="generation-terminal-trailer",
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert out["committed"] is True
+    assert out["commit_sha"]
+    body = subprocess.run(
+        ["git", "-C", str(tmp_path), "log", "-1", "--format=%B"],
+        capture_output=True, text=True, check=True,
+    ).stdout
+    assert (
+        "VolPred-Phase-Z-Generation: generation-terminal-trailer" in body
+    )
+
+
+def test_phase_z_head_adoption_with_downstream_failure_is_not_terminal(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    _git_init_repo(tmp_path)
+    machine = tmp_path / "storage" / "ops" / "some_state.json"
+    machine.parent.mkdir(parents=True)
+    machine.write_text("{}\n", encoding="utf-8")
+    monkeypatch.setattr(
+        phase_z,
+        "_refresh_shared_index_cas",
+        lambda *_args, **_kwargs: {
+            "ok": False, "reason": "injected_refresh_failure",
+        },
+    )
+
+    out = phase_z.run_phase_z(
+        repo_root=tmp_path,
+        now_hhmm="16:07",
+        pre_fire_dirty=set(),
+        closeout_generation="generation-refresh-failed",
+        alert_fn=lambda **_kwargs: {},
+    )
+
+    assert out["committed"] is False
+    assert out["head_committed"] is True
+    assert out["reason"] == "committed_recovery_index_failed"
+    assert out["commit_sha"]
+    assert scheduler._phase_z_terminal(out) is False
+
+
+def test_committed_closeout_recovery_finishes_every_downstream_handoff(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    _git_init_repo(tmp_path)
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "scripts" / "recovered.py").write_text(
+        "VALUE = 1\n", encoding="utf-8",
+    )
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "scripts/recovered.py"],
+        capture_output=True, text=True, check=True,
+    )
+    subprocess.run(
+        [
+            "git", "-C", str(tmp_path), "commit",
+            "-m", "phase-z recovered commit",
+            "-m", (
+                "VolPred-Phase-Z-Generation: generation-downstream\n"
+                'VolPred-Phase-Z-Owned-Paths: ["scripts/recovered.py"]'
+            ),
+        ],
+        capture_output=True, text=True, check=True,
+    )
+    commit_sha = subprocess.run(
+        ["git", "-C", str(tmp_path), "rev-parse", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    events: list[str] = []
+    monkeypatch.setattr(
+        phase_z, "_refresh_shared_index_cas",
+        lambda *_args, **_kwargs: events.append("index") or {
+            "ok": True, "refreshed": ["scripts/recovered.py"], "preserved": [],
+        },
+    )
+    monkeypatch.setattr(
+        phase_z, "_consume_pre_fire_snapshot",
+        lambda *_args, **_kwargs: events.append("snapshot"),
+    )
+    monkeypatch.setattr(
+        phase_z, "backfill_ci_repair_commit",
+        lambda **_kwargs: events.append("task_commit") or ["task-a"],
+    )
+    monkeypatch.setattr(
+        phase_z, "pending_issue_task_ids_for_owners",
+        lambda **_kwargs: events.append("issue_lookup") or ["task-a"],
+    )
+    monkeypatch.setattr(
+        phase_z, "settle_completed_task_issues",
+        lambda **_kwargs: events.append("issue_settlement")
+        or [{"task_id": "task-a", "issue": 42}],
+    )
+    monkeypatch.setattr(
+        phase_z, "_post_commit_test_gate",
+        lambda *_args, **_kwargs: events.append("test_gate") or {
+            "passed": True, "reason": "green",
+        },
+    )
+
+    out = phase_z.recover_committed_closeout(
+        repo_root=tmp_path,
+        commit_sha=commit_sha,
+        generation_id="generation-downstream",
+        claim_owners={"codex-vscode"},
+    )
+
+    assert out["committed"] is True
+    assert events == [
+        "index",
+        "snapshot",
+        "task_commit",
+        "issue_lookup",
+        "issue_settlement",
+        "test_gate",
+    ]
+    assert out["ci_repair_tasks_backfilled"] == ["task-a"]
+    assert out["issue_tasks_closed"] == [{"task_id": "task-a", "issue": 42}]
+
+    monkeypatch.setattr(
+        phase_z, "settle_completed_task_issues", lambda **_kwargs: [],
+    )
+    incomplete = phase_z.recover_committed_closeout(
+        repo_root=tmp_path,
+        commit_sha=commit_sha,
+        generation_id="generation-downstream",
+        claim_owners={"codex-vscode"},
+    )
+    assert incomplete["committed"] is False
+    assert incomplete["head_committed"] is True
+    assert (
+        incomplete["reason"]
+        == "committed_recovery_issue_readback_incomplete"
+    )
+    assert incomplete["missing_task_ids"] == ["task-a"]
+
+
+def test_committed_machine_churn_recovery_never_settles_worker_claim(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    _git_init_repo(tmp_path)
+    machine = tmp_path / "storage" / "ops" / "state.json"
+    machine.parent.mkdir(parents=True)
+    machine.write_text("{}\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", "storage/ops/state.json"],
+        capture_output=True, text=True, check=True,
+    )
+    subprocess.run(
+        [
+            "git", "-C", str(tmp_path), "commit",
+            "-m", "phase-z machine churn",
+            "-m", (
+                "VolPred-Phase-Z-Generation: generation-machine\n"
+                "VolPred-Phase-Z-Owned-Paths: []"
+            ),
+        ],
+        capture_output=True, text=True, check=True,
+    )
+    commit_sha = subprocess.run(
+        ["git", "-C", str(tmp_path), "rev-parse", "HEAD"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    monkeypatch.setattr(
+        phase_z, "_refresh_shared_index_cas",
+        lambda *_args, **_kwargs: {"ok": True, "refreshed": [], "preserved": []},
+    )
+    monkeypatch.setattr(phase_z, "_consume_pre_fire_snapshot", lambda *_args, **_kwargs: None)
+    monkeypatch.setattr(
+        phase_z,
+        "backfill_ci_repair_commit",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("machine churn must not bind a worker claim")
+        ),
+    )
+    monkeypatch.setattr(
+        phase_z,
+        "settle_completed_task_issues",
+        lambda **_kwargs: (_ for _ in ()).throw(
+            AssertionError("machine churn must not close a worker issue")
+        ),
+    )
+    monkeypatch.setattr(
+        phase_z, "_post_commit_test_gate",
+        lambda *_args, **_kwargs: {"passed": None, "reason": "skipped_non_code"},
+    )
+
+    out = phase_z.recover_committed_closeout(
+        repo_root=tmp_path,
+        commit_sha=commit_sha,
+        generation_id="generation-machine",
+        claim_owners={"hourly-slot-1-job-a"},
+    )
+
+    assert out["committed"] is True
+    assert out["ci_repair_tasks_backfilled"] == []
+    assert out["issue_tasks_closed"] == []
+
+
 def test_phase_z_isolated_cohort_all_residue_is_terminal(tmp_path: Path) -> None:
     """All-residue outcome must land on a TERMINAL reason (nothing_owned) so
     the scheduler releases the drain token -- no livelock behind the demotion."""
@@ -10956,6 +11169,83 @@ def test_closeout_failure_restart_reuses_same_generation_until_terminal(
     assert second["action"] == "phase_z_recovered"
     assert observed == [{"already-dirty.txt"}, {"already-dirty.txt"}]
     assert state.read_state(state_path)["phase_z_pending"] == []
+
+
+def test_restart_after_terminal_commit_recovers_receipt_without_rerunning_closeout(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    """Issue #42: a crash after HEAD adoption but before token release must
+    recover the exact generation from git history, not execute PHASE-Z twice."""
+    _git_init_repo(tmp_path)
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{
+            "job_id": "job-a", "cohort_id": "cohort-a", "slot_id": 1,
+            "created_at": "2026-07-27T00:00:01+00:00", "isolated": False,
+            "fire_lifecycle": _fire_lifecycle(),
+        }]
+
+    closeout_calls: list[dict] = []
+
+    def commit_closeout(**kwargs):
+        closeout_calls.append(kwargs)
+        generation = kwargs["closeout_generation"]
+        subprocess.run(
+            [
+                "git", "-C", str(tmp_path), "commit", "--allow-empty",
+                "-m", "phase-z terminal canary",
+                "-m", (
+                    f"VolPred-Phase-Z-Generation: {generation}\n"
+                    "VolPred-Phase-Z-Owned-Paths: []"
+                ),
+            ],
+            capture_output=True, text=True, check=True,
+        )
+        commit_sha = subprocess.run(
+            ["git", "-C", str(tmp_path), "rev-parse", "HEAD"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+        return {
+            "committed": True,
+            "reason": "committed",
+            "commit_sha": commit_sha,
+        }
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", commit_closeout)
+    real_finish = state.finish_phase_z
+    finish_calls = {"count": 0}
+
+    def crash_once(**kwargs):
+        finish_calls["count"] += 1
+        if finish_calls["count"] == 1:
+            raise SystemExit("injected crash after terminal commit")
+        return real_finish(**kwargs)
+
+    monkeypatch.setattr(scheduler.state, "finish_phase_z", crash_once)
+    scheduler._PHASE_Z_LOCK = None
+    with pytest.raises(SystemExit, match="injected crash"):
+        asyncio.run(scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *",
+            prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+            dry_run=False, repo_root=tmp_path,
+        ))
+    assert len(closeout_calls) == 1
+    assert state.read_state(state_path)["phase_z_pending"]
+
+    scheduler._PHASE_Z_LOCK = None
+    recovered = asyncio.run(scheduler._tick_once(
+        state_path=state_path, cron_expr="7 * * * *",
+        prompt_path=tmp_path / "prompt.md", log_path=tmp_path / "worker.log",
+        dry_run=False, repo_root=tmp_path,
+    ))
+
+    assert recovered["action"] == "phase_z_receipt_recovered"
+    assert recovered["generation_id"] == "generation-a"
+    assert len(closeout_calls) == 1
+    snap = state.read_state(state_path)
+    assert snap["phase_z_pending"] == []
+    assert snap["phase_z_receipts"][-1]["generation_id"] == "generation-a"
+    assert snap["phase_z_receipts"][-1]["reason"] == "committed"
 
 
 def test_scheduler_recovery_drain_passes_isolated_cohort(tmp_path: Path, monkeypatch) -> None:

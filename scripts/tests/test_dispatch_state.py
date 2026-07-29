@@ -1716,6 +1716,44 @@ def _drive_every_writer(path: Path) -> None:
         cohort_ids={done.cohort_id}, reason="shape_gate_rejection", path=path,
     )
 
+    receipt_done = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/receipt.log", path=path,
+    )
+    st.attach_process(
+        job_id=receipt_done.job_id, expected_attempt=1,
+        pid=102, pgid=102, started_wall="wr", path=path,
+    )
+    st.attach_fire_lifecycle(
+        job_id=receipt_done.job_id,
+        lifecycle={
+            "generation_id": "generation-terminal-receipt",
+            "captured_at": "2026-07-27T00:00:30+00:00",
+            "pre_fire_dirty": [],
+        },
+        path=path,
+    )
+    st.record_completion(
+        job_id=receipt_done.job_id, expected_attempt=1, expected_pid=102,
+        exit_code=0, outcome="success", final_model="opus", path=path,
+    )
+    st.begin_phase_z(
+        cohort_ids={receipt_done.cohort_id},
+        generation_id="generation-terminal-receipt",
+        base_head="2" * 40,
+        path=path,
+    )
+    st.finish_phase_z(
+        cohort_id=receipt_done.cohort_id,
+        terminal_outcome={
+            "committed": True,
+            "reason": "committed",
+            "commit_sha": "3" * 40,
+        },
+        generation_id="generation-terminal-receipt",
+        path=path,
+    )
+
     pending = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                               log_path="/tmp/pending.log", path=path)
     st.attach_process(job_id=pending.job_id, expected_attempt=1,
@@ -1762,6 +1800,12 @@ def _drive_every_writer(path: Path) -> None:
     }, path=path)
     st.record_completion(job_id=pending.job_id, expected_attempt=1, expected_pid=101,
                          exit_code=0, outcome="success", final_model="opus", path=path)
+    st.begin_phase_z(
+        cohort_ids={pending.cohort_id},
+        generation_id="generation-live-shape",
+        base_head="4" * 40,
+        path=path,
+    )
     assert sibling.job_id == st.read_state(path)["current_job"]["job_id"]
 
     # Issue #42: exercise the complete public cutover-fence lifecycle, then
@@ -1842,7 +1886,8 @@ def _container_shapes(node, path="$"):
 # 保持扁平 —— 一旦有人往裡面塞巢狀 dict，就是一個沒人 gate 的新層。
 KNOWN_CONTAINERS = {
     "$", "$.current_job", "$.current_jobs[]", "$.phase_z_pending[]",
-    "$.phase_z_rejections[]", "$.completions[]", "$.alerts_dedup",
+    "$.phase_z_rejections[]", "$.phase_z_receipts[]", "$.completions[]",
+    "$.alerts_dedup",
     "$.cutover_quiesce",
     # #42 durable fire generation and rejected-token evidence.
     "$.current_job.fire_lifecycle", "$.current_jobs[].fire_lifecycle",
@@ -1888,6 +1933,17 @@ PRODUCER_CUSTODY_KEYS = {
     "trusted_unique_ids",
 }
 
+PHASE_Z_RECEIPT_KEYS = {
+    "receipt_id",
+    "cohort_id",
+    "generation_id",
+    "reason",
+    "committed",
+    "commit_sha",
+    "completed_at",
+    "job_ids",
+}
+
 
 def test_cutover_quiesce_shape_is_flat_and_documented(tmp_state):
     """Issue #42's durable cutover fence has one explicit, bounded schema."""
@@ -1922,6 +1978,21 @@ def test_fire_lifecycle_shape_is_flat_and_documented(tmp_state):
         assert all(
             not isinstance(value, dict)
             for value in lifecycle.values()
+        )
+
+
+def test_phase_z_terminal_receipt_shape_is_bounded(tmp_state):
+    """A restart receipt must not grow an undocumented lifecycle subtree."""
+    _drive_every_writer(tmp_state)
+    receipts = st.read_state(tmp_state)["phase_z_receipts"]
+    assert receipts, "writer drive did not leave a terminal PHASE-Z receipt"
+    for receipt in receipts:
+        assert set(receipt) == PHASE_Z_RECEIPT_KEYS
+        assert isinstance(receipt["job_ids"], list)
+        assert all(isinstance(item, str) for item in receipt["job_ids"])
+        assert all(
+            not isinstance(value, dict)
+            for value in receipt.values()
         )
 
 
