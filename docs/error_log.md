@@ -4529,7 +4529,12 @@ command key 加入 payload hash，route transition 不再被舊 record 擋住；
 並把 effect owner／generation／work id／evidence 寫入 incident candidate。所有新版
 alert email 標題統一加 `[新架構派發]`。
 
-**回歸與狀態**：alert、CI recovery、owned-email、Postgres effect affected suites
-共 **230 passed**。尚待完整 pytest、immutable supervisor reload 與一筆 production
-delivery/read-back，因此目前為 **`contained`**；完成五步 Gate 後才可提升為
-`root_cause_fixed_and_verified`。
+**回歸與狀態**：alert、incident lifecycle、CI recovery、owned-email、Postgres effect
+affected suites 共 **293 passed**，Spec／Standards 兩軸 review 均 PASS。production
+smoke `effect_owned_email_c737f1e75e5172720523bf6723459c35` 由
+`operations_core` generation 4 以 attempt 1 delivered，Gmail Sent evidence SHA
+`8e71849f3b2718b16d3228366dd3b700a1654923865c354711477278d8e1d470`；receipt 回讀
+`email=delivered`、`telegram=not_routed`，標題為
+`[新架構派發][VolPred Alert][INFO] 通知路由上線驗證`。本 incident slice 已完成五步
+Gate，狀態為 **`root_cause_fixed_and_verified`**；Issue #13 umbrella 的其他 acceptance
+仍各自驗收，不因本條自動關閉。
