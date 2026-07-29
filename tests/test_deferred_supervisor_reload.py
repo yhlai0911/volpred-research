@@ -157,6 +157,50 @@ def test_duplicate_request_coalesces_to_one_durable_identity(tmp_path: Path) -> 
     assert len(list((request_root / "receipts").glob("*.json"))) == 0
 
 
+def test_scheduler_admission_gate_observes_validated_active_request(
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    request_root = tmp_path / "reload-request"
+    source_root = _source(tmp_path)
+    _state(state_path)
+
+    deferred_reload.arm(
+        reason="admission-drain",
+        state_path=state_path,
+        root=request_root,
+        source_roots=(source_root,),
+        now=NOW,
+    )
+
+    assert deferred_reload.active_request_pending(root=request_root) is True
+    with deferred_reload.admission_gate(root=request_root) as admission_open:
+        assert admission_open is False
+
+
+def test_scheduler_admission_gate_fails_closed_on_malformed_request(
+    tmp_path: Path,
+) -> None:
+    request_root = tmp_path / "reload-request"
+    request_root.mkdir(mode=0o700)
+    active = request_root / "active.json"
+    active.write_text("{not-json", encoding="utf-8")
+    active.chmod(0o600)
+
+    with pytest.raises(
+        deferred_reload.DeferredReloadError,
+        match="active request is unreadable",
+    ):
+        deferred_reload.active_request_pending(root=request_root)
+
+    with pytest.raises(
+        deferred_reload.DeferredReloadError,
+        match="active request is unreadable",
+    ):
+        with deferred_reload.admission_gate(root=request_root):
+            pytest.fail("malformed reload state must not open admission")
+
+
 @pytest.mark.parametrize(
     ("jobs", "pending"),
     [

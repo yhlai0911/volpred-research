@@ -25,6 +25,7 @@ from scripts import task_pool_claim
 from scripts.dispatch_supervisor import (
     auth_lease_reaper,
     claim_release,
+    deferred_reload,
     health,
     isolation,
     phase_z,
@@ -40,7 +41,18 @@ from volpred.ops.legacy_retirement import LegacyRetirementInputError
 
 
 @pytest.fixture(autouse=True)
-def _provider_guard_stub(monkeypatch):
+def _provider_guard_stub(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    # Scheduler admission now reads the durable reload request.  Every test
+    # must use an isolated request root; consulting ~/.volpred here would make
+    # a real production deploy change hermetic scheduler expectations.
+    monkeypatch.setenv(
+        "VOLPRED_DEFERRED_RELOAD_ROOT",
+        str(tmp_path / "deferred-reload"),
+    )
+
     def authorize(**kwargs):
         environment = kwargs["environment"]
         forbidden = [
@@ -508,6 +520,224 @@ def test_scheduler_fire_runs_worker_when_due(tmp_path: Path, monkeypatch) -> Non
     assert scratch_probe.returncode != 0
     assert f"launcher_cwd={received[0]['workdir']}" in received[0]["prompt_text"]
     assert "inline task 可用絕對路徑編輯 canonical_root" in received[0]["prompt_text"]
+
+
+def test_scheduler_does_not_admit_next_fire_while_deferred_reload_is_active(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Issue #42 regression: a drain request must close the admission gate.
+
+    Production armed request 749b49b3 at 00:59 CST, but the stale process
+    admitted job 5738de9c at 01:17 CST after the previous cohort drained.  The
+    health loop can activate an immutable release only while both the worker
+    and PHASE-Z sets are empty, so admitting another fire here can starve the
+    reload forever.
+    """
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    before = state.read_state(state_path)
+    calls = {"worker": 0, "pre_fire": 0}
+
+    monkeypatch.setattr(
+        deferred_reload,
+        "active_request_pending",
+        lambda: True,
+        raising=False,
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "run_pre_fire_guard",
+        lambda **_kwargs: calls.__setitem__("pre_fire", calls["pre_fire"] + 1),
+    )
+    monkeypatch.setattr(
+        scheduler.worker,
+        "run_worker",
+        lambda **_kwargs: calls.__setitem__("worker", calls["worker"] + 1),
+    )
+
+    decision = asyncio.run(
+        scheduler._tick_once(
+            state_path=state_path,
+            cron_expr="7 * * * *",
+            prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log",
+            dry_run=False,
+            repo_root=tmp_path,
+        )
+    )
+
+    assert decision == {
+        "action": "skip",
+        "reason": "deferred_reload_pending",
+    }
+    assert calls == {"worker": 0, "pre_fire": 0}
+    after = state.read_state(state_path)
+    assert after["last_fire_at"] == before["last_fire_at"]
+    assert after["current_jobs"] == []
+
+
+def test_reload_winning_final_admission_race_preserves_pending_fire_request(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The reload may arm after the early check but before reservation."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    state.request_fire("owner-urgent-task", path=state_path)
+    last_fire_before = state.read_state(state_path)["last_fire_at"]
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+
+    monkeypatch.setattr(
+        deferred_reload,
+        "active_request_pending",
+        lambda: False,
+    )
+
+    @contextlib.contextmanager
+    def reload_wins_at_reservation():
+        yield False
+
+    monkeypatch.setattr(
+        deferred_reload,
+        "admission_gate",
+        reload_wins_at_reservation,
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": True,
+            "reason": "ok",
+            "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
+    )
+    worker_calls: list[dict] = []
+    monkeypatch.setattr(
+        scheduler.worker,
+        "run_worker",
+        lambda **kwargs: worker_calls.append(kwargs),
+    )
+
+    decision = asyncio.run(
+        scheduler._tick_once(
+            state_path=state_path,
+            cron_expr="7 * * * *",
+            prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log",
+            dry_run=False,
+            repo_root=tmp_path,
+        )
+    )
+
+    assert decision == {
+        "action": "skip",
+        "reason": "deferred_reload_pending",
+    }
+    snapshot = state.read_state(state_path)
+    assert snapshot["fire_requested_at"] is not None
+    assert snapshot["fire_request_reason"] == "owner-urgent-task"
+    assert snapshot["current_jobs"] == []
+    assert snapshot["last_fire_at"] == last_fire_before
+    assert worker_calls == []
+
+
+def test_atomic_reservation_failure_cannot_consume_pending_fire_request(
+    tmp_path: Path,
+) -> None:
+    """A sibling closeout may make PHASE-Z pending before reservation."""
+    state_path = _tmp_state(tmp_path)
+    state.request_fire("owner-urgent-task", path=state_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{
+            "job_id": "sibling",
+            "cohort_id": "cohort-sibling",
+            "slot_id": 1,
+            "fire_lifecycle": _fire_lifecycle(),
+        }]
+
+    with pytest.raises(RuntimeError, match="PHASE-Z drain is pending"):
+        state.reserve_fire(
+            schedule_id="hourly_dispatch",
+            attempt=1,
+            model="opus",
+            log_path="/tmp/worker.log",
+            consume_request=True,
+            expected_fire_request="owner-urgent-task",
+            path=state_path,
+        )
+
+    snapshot = state.read_state(state_path)
+    assert snapshot["fire_requested_at"] is not None
+    assert snapshot["fire_request_reason"] == "owner-urgent-task"
+    assert snapshot["current_jobs"] == []
+
+
+def test_request_cas_loss_never_bypasses_plain_cron_pregate(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A disappeared request turns the verdict back into COLLECT_DEMAND."""
+    state_path = _tmp_state(tmp_path)
+    _seed_due(state_path)
+    state.request_fire("owner-urgent-task", path=state_path)
+    last_fire_before = state.read_state(state_path)["last_fire_at"]
+    prompt_path = tmp_path / "prompt.md"
+    prompt_path.write_text("prompt-body", encoding="utf-8")
+    monkeypatch.setattr(
+        scheduler,
+        "load_pregate_config",
+        lambda **_kwargs: {"mode": "shadow", "window_hours": 3.0},
+    )
+    pregate_calls: list[dict] = []
+    monkeypatch.setattr(
+        scheduler,
+        "_run_pregate",
+        lambda **kwargs: pregate_calls.append(kwargs) or False,
+    )
+    monkeypatch.setattr(
+        scheduler.phase_z,
+        "run_pre_fire_guard",
+        lambda **_kwargs: {
+            "ran": True,
+            "reason": "ok",
+            "dirty_at_fire_start": 0,
+            "fire_lifecycle": _fire_lifecycle(),
+        },
+    )
+    reserve_calls = {"count": 0}
+
+    def request_disappears_before_reservation(**_kwargs):
+        reserve_calls["count"] += 1
+        assert state.consume_fire_request(state_path) == "owner-urgent-task"
+        raise state.FireRequestChanged(None)
+
+    monkeypatch.setattr(state, "reserve_fire", request_disappears_before_reservation)
+
+    decision = asyncio.run(
+        scheduler._tick_once(
+            state_path=state_path,
+            cron_expr="7 * * * *",
+            prompt_path=prompt_path,
+            log_path=tmp_path / "worker.log",
+            dry_run=False,
+            repo_root=tmp_path,
+        )
+    )
+
+    assert decision == {
+        "action": "skip",
+        "reason": "fire_request_changed",
+    }
+    assert reserve_calls["count"] == 1
+    assert pregate_calls == []
+    snapshot = state.read_state(state_path)
+    assert snapshot["current_jobs"] == []
+    assert snapshot["last_fire_at"] == last_fire_before
 
 
 def test_scheduler_scratch_failure_releases_reserved_slot(tmp_path: Path, monkeypatch) -> None:

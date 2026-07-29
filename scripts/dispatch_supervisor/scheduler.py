@@ -54,6 +54,7 @@ from . import (
     alerts,
     custody_receipt,
     decision,
+    deferred_reload,
     identity,
     isolation,
     phase_z,
@@ -1643,6 +1644,23 @@ async def _tick_once(
             "action": "phase_z_recovered", "phase_z": outcome,
             "pending_jobs": len(pending_phase_z),
         }
+    # Issue #42 deployment-drain gate.  The health loop can activate an
+    # immutable release only when both current_jobs and phase_z_pending are
+    # empty.  Without this admission stop, the scheduler can fill the just-
+    # drained slot before the next health tick and starve a durable reload
+    # request indefinitely (live request 749b49b3 -> job 5738de9c, 2026-07-30).
+    try:
+        if deferred_reload.active_request_pending():
+            return {
+                "action": "skip",
+                "reason": "deferred_reload_pending",
+            }
+    except deferred_reload.DeferredReloadError as exc:
+        LOG.error("deferred reload admission state unavailable: %s", exc)
+        return {
+            "action": "skip",
+            "reason": "deferred_reload_intent_unreadable",
+        }
     # ── WS-H4 step 2: collect inputs, let decision.decide() own the verdict ──
     # All reads happen here; decide() is pure. Dry-run and fire consume the
     # SAME Decision — they may only diverge at the write boundary below.
@@ -1700,19 +1718,6 @@ async def _tick_once(
             )
             return {"action": "skip", "reason": "bootstrap_last_fire_at"}
         return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
-    # Admission gates passed — consume any pending request atomically NOW
-    # (one request produces exactly one fire; consumed even when cron was due
-    # anyway so it cannot cause a SECOND fire right after this one).
-    consumed = state.consume_fire_request(state_path)
-    if consumed != dec_input.fire_request:
-        # Lost the atomic-consume race, or a request landed after the snapshot:
-        # re-decide with the value this tick actually owns.
-        dec_input = dataclasses.replace(dec_input, fire_request=consumed)
-        dec = decision.decide(dec_input)
-        if dec.action == decision.ACTION_SKIP:
-            return {"action": "skip", "reason": "not_due", "prev_fire": prev_fire.isoformat()}
-    if consumed is not None and not due:
-        LOG.info("fire request consumed (reason=%s) — firing off-cadence", consumed)
     # Git conflict guard (2026-07-10 rewire; see phase_z.run_pre_fire_guard).
     # Orphaned by the 7/4 cutover — its only caller was the now-unloaded
     # cron_hourly_dispatch.sh, while the concurrent-writer risk it backstops
@@ -1779,7 +1784,6 @@ async def _tick_once(
         LOG.error("decision pipeline returned unexpected action=%r reason=%r — skipping tick",
                   dec.action, dec.reason)
         return {"action": "skip", "reason": f"decision_error:{dec.action}"}
-    fire_reason = dec.fire_reason or "cron"
     if dry_run:
         LOG.info("DRY-RUN would fire (prev_scheduled=%s)", prev_fire.isoformat())
         # update last_fire_at so we don't re-log every tick — shadow run still tracks
@@ -1791,13 +1795,92 @@ async def _tick_once(
         LOG.error("empty prompt — refusing to fire")
         return {"action": "skip", "reason": "empty_prompt"}
     cohort_id = str(current_jobs[0].get("cohort_id")) if current_jobs else None
-    lease = state.reserve_fire(
-        schedule_id=SCHEDULE_ID, attempt=1, model=worker.OPUS_MODEL,
-        log_path=str(log_path), scheduled_for=prev_fire.isoformat(),
-        fire_reason=fire_reason, max_slots=capacity, cohort_id=cohort_id,
-        fire_key=(f"cron:{prev_fire.isoformat()}" if fire_reason.startswith("cron") else None),
-        path=state_path,
-    )
+    try:
+        with deferred_reload.admission_gate() as admission_open:
+            if not admission_open:
+                return {
+                    "action": "skip",
+                    "reason": "deferred_reload_pending",
+                }
+            final_input = dec_input
+            final_dec = dec
+            expected_request = dec_input.fire_request
+            for request_attempt in range(2):
+                fire_reason = final_dec.fire_reason or "cron"
+                try:
+                    lease = state.reserve_fire(
+                        schedule_id=SCHEDULE_ID,
+                        attempt=1,
+                        model=worker.OPUS_MODEL,
+                        log_path=str(log_path),
+                        scheduled_for=prev_fire.isoformat(),
+                        fire_reason=fire_reason,
+                        max_slots=capacity,
+                        cohort_id=cohort_id,
+                        fire_key=(
+                            f"cron:{prev_fire.isoformat()}"
+                            if fire_reason.startswith("cron")
+                            else None
+                        ),
+                        consume_request=True,
+                        expected_fire_request=expected_request,
+                        path=state_path,
+                    )
+                    break
+                except state.FireRequestChanged as exc:
+                    # Nothing was consumed or reserved. Re-decide once from
+                    # the exact demand observed under the state lock. If it
+                    # changes again, leave the newest demand durable for the
+                    # next tick instead of spinning or guessing.
+                    if request_attempt:
+                        return {
+                            "action": "skip",
+                            "reason": "fire_request_changed",
+                        }
+                    expected_request = exc.actual
+                    final_input = dataclasses.replace(
+                        dec_input,
+                        fire_request=expected_request,
+                    )
+                    final_dec = decision.decide(final_input)
+                    if final_dec.action == decision.ACTION_SKIP:
+                        return {
+                            "action": "skip",
+                            "reason": "not_due",
+                            "prev_fire": prev_fire.isoformat(),
+                        }
+                    if final_dec.action == decision.ACTION_COLLECT_DEMAND:
+                        # The original request bypassed pregate, but it no
+                        # longer exists. Do not run slow subprocess I/O while
+                        # holding both admission locks and do not fire an
+                        # ungated plain cron. Leave last_fire_at unchanged so
+                        # the next tick evaluates the full pregate path.
+                        return {
+                            "action": "skip",
+                            "reason": "fire_request_changed",
+                        }
+                    if final_dec.action != decision.ACTION_FIRE:
+                        LOG.error(
+                            "request CAS re-decision returned unexpected "
+                            "action=%r reason=%r",
+                            final_dec.action,
+                            final_dec.reason,
+                        )
+                        return {
+                            "action": "skip",
+                            "reason": f"decision_error:{final_dec.action}",
+                        }
+            if expected_request is not None and not due:
+                LOG.info(
+                    "fire request consumed (reason=%s) — firing off-cadence",
+                    expected_request,
+                )
+    except deferred_reload.DeferredReloadError as exc:
+        LOG.error("deferred reload admission gate unavailable: %s", exc)
+        return {
+            "action": "skip",
+            "reason": "deferred_reload_intent_unreadable",
+        }
     job_id = lease.job_id
     if fire_lifecycle is not None:
         state.attach_fire_lifecycle(

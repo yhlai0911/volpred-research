@@ -4582,3 +4582,38 @@ Dispatcher 保留完整 `agentable` 統計，但把 generic worker 菜單拆為
 現場仍因另一個 PHASE-Z incident 將 slot cap 降為 2 且當下 2/2 occupied，故須等自然
 空槽再取得「實際不 idle」的 terminal fire receipt。本條在該 receipt 前維持
 **`contained`**。
+
+---
+
+## 2026-07-30 — durable reload request 可被下一班 fire 永久餓死
+
+**證據化症狀**：immutable reload request `749b49b3…` 於 00:59 CST 已 durable
+寫入，目標 release commit `1a80230c3`；舊 supervisor 在先前 cohort 清空後，卻於
+01:17 CST 再 admission worker `5738de9c…`。因此 health loop 始終讀到
+`current_jobs != []`，無法進入 release activation；下一班又可在 health 的 30 秒 tick
+前搶先補回 slot，使「自然 drain 後上版」沒有必然收斂保證。
+
+**根因層級（deployment intent／scheduler admission concurrency contract）**：
+`deferred_reload.process()` 只在 health loop 端等待空槽，但 scheduler admission 不知道
+durable reload intent。即使加一次普通 `active.json` 檢查，request 仍可能在 check 與
+`state.reserve_fire()` 之間寫入，留下 TOCTOU。Reload root lock 原本只序列化
+arm/process，沒有涵蓋最後的 worker reservation。
+
+**底層修復與制度化**：scheduler 在完成既有 worker／PHASE-Z closeout 後、任何新
+派工副作用前，先以 validated `active_request_pending()` 關閉 admission；最後把
+fire-demand expected-value CAS／consume 與 `reserve_fire()` 收斂成同一個 state-lock
+transaction，再把整個 transaction 包入 arm/process 共用的 `admission_gate()`。因此
+只有兩種合法排序：reload intent 先 durable，則新 fire 不得 reserve 且 demand 原封
+不動；或 reservation 先完成，後來的 reload request 必讀到 in-flight job 並等待完整
+closeout。Sibling completion 在 admission 期間寫入 PHASE-Z 時，reservation 會在 consume
+前 fail closed，urgent demand 仍完整保留。Malformed／不安全 request 一律 fail closed；
+不 force kill worker。測試另將 reload root 自真實 `~/.volpred` 隔離，避免 production
+deploy 狀態污染 unit test。
+
+**回歸與狀態**：live race 的 tight test 修前進入 worker 路徑而 RED，修後不執行
+pre-fire／worker 且保留 `last_fire_at`；另有 deterministic race 鎖住
+early-check=false、final-gate=false 時 `fire_requested_at`／reason 不得遺失。
+Validated active request、malformed fail-closed、self-reload、wrapper、scheduler 與
+durable fire lifecycle 相鄰 suite 全綠。待目前 worker 自然完成、舊 request terminal、
+新 release（含本修正與通知 commit `9a15cede8`）完成 fresh-boot read-back前，本條維持
+**`contained`**。

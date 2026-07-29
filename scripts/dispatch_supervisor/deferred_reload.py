@@ -69,6 +69,44 @@ def default_root() -> Path:
     return Path.home() / ".volpred" / "run" / "dispatch-supervisor-reload"
 
 
+def active_request_pending(*, root: Path | None = None) -> bool:
+    """Return whether one validated immutable reload intent owns admission.
+
+    This is deliberately a read of the durable request, not an mtime/code-drift
+    guess.  A malformed or unsafe request raises ``DeferredReloadError`` so the
+    scheduler can fail closed instead of admitting work while deployment state
+    is ambiguous.
+    """
+    request_root = Path(root) if root is not None else default_root()
+    if not request_root.exists():
+        return False
+    with _locked_root(request_root):
+        request = _read_active(request_root / "active.json")
+        if request is None:
+            return False
+        _validate_request(request)
+        return True
+
+
+@contextmanager
+def admission_gate(*, root: Path | None = None) -> Iterator[bool]:
+    """Serialize the final worker reservation against reload intent creation.
+
+    The scheduler performs its early, side-effect-free check with
+    :func:`active_request_pending`, then uses this gate around
+    ``state.reserve_fire``.  Holding the same request-root lock as ``arm`` and
+    ``process`` closes the check/reserve race: either the reload request is
+    already durable and admission loses, or the worker reservation wins and a
+    later request observes that in-flight job and waits for its closeout.
+    """
+    request_root = Path(root) if root is not None else default_root()
+    with _locked_root(request_root):
+        request = _read_active(request_root / "active.json")
+        if request is not None:
+            _validate_request(request)
+        yield request is None
+
+
 def arm(
     *,
     reason: str,

@@ -988,6 +988,14 @@ class JobHandle:
     slot_id: int
 
 
+class FireRequestChanged(RuntimeError):
+    """The pending demand no longer matches the scheduler's decision input."""
+
+    def __init__(self, actual: str | None) -> None:
+        super().__init__(f"fire request changed during admission: {actual!r}")
+        self.actual = actual
+
+
 def reserve_fire(
     *,
     schedule_id: str,
@@ -999,6 +1007,8 @@ def reserve_fire(
     fire_key: str | None = None,
     max_slots: int = 2,
     cohort_id: str | None = None,
+    consume_request: bool = False,
+    expected_fire_request: str | None = None,
     path: Path = STATE_PATH,
 ) -> JobHandle:
     """Atomically claim the lowest free slot BEFORE spawning the child.
@@ -1060,6 +1070,14 @@ def reserve_fire(
             raise RuntimeError(
                 f"reserve_fire while current_jobs at max_slots={max_slots}: {jobs}"
             )
+        if consume_request:
+            actual_request = (
+                str(data.get("fire_request_reason") or "unspecified")
+                if data.get("fire_requested_at")
+                else None
+            )
+            if actual_request != expected_fire_request:
+                raise FireRequestChanged(actual_request)
         active_ids = {str(job.get("job_id")) for job in jobs}
         job_id = uuid.uuid4().hex
         while job_id in active_ids:  # defensive against a monkeypatched UUID source
@@ -1088,6 +1106,9 @@ def reserve_fire(
         }
         jobs.append(job)
         data["current_jobs"] = jobs
+        if consume_request:
+            data["fire_requested_at"] = None
+            data["fire_request_reason"] = None
         data["last_fire_at"] = started_at
         _sync_projection(data)
     _IMPLICIT_JOB_ID.set(job_id)
