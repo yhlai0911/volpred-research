@@ -20,12 +20,12 @@
     "3180"
   ],
   "env": {},
-  "status": "queued",
+  "status": "completed",
   "queue_priority": 5,
   "queued_at": "2026-07-29T00:02:36Z",
-  "started_at": null,
-  "completed_at": null,
-  "exit_code": null,
+  "started_at": "2026-07-29T00:15:19Z",
+  "completed_at": "2026-07-29T00:34:38Z",
+  "exit_code": 0,
   "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7.stdout",
   "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7.stderr",
   "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694/experiments/K1694/r4_repair_report.json",
@@ -51,5 +51,23 @@
   "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/brief_k1694_r4_rv_completeness_e98b43fc.md",
   "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7.md",
   "parent_timeout_job_id": "agent-brief_k1694_repair_e98b43fc-ea643c",
-  "split_stage": "rv-completeness-repair"
+  "split_stage": "rv-completeness-repair",
+  "claimed_by_pid": 77354,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:4a69d1e87e7e4da27dec2e77",
+    "scheduled_for": "2026-07-29T00:15:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Jul 29 08:15:18 2026",
+  "source_task_settlement": {
+    "state": "pending_collection",
+    "task_id": "assign_a88eed84",
+    "settled_at": "2026-07-29T00:34:38Z",
+    "error": null
+  },
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694/experiments/K1694"
+  }
 }

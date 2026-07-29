@@ -620,9 +620,6 @@
    "class": "machine_self",
    "clean_observations": [
     {
-     "at": "2026-07-28T14:41:46.728543+00:00"
-    },
-    {
      "at": "2026-07-28T15:46:03.801321+00:00"
     },
     {
@@ -654,6 +651,9 @@
     },
     {
      "at": "2026-07-29T00:08:03.954120+00:00"
+    },
+    {
+     "at": "2026-07-29T01:19:46.302587+00:00"
     }
    ],
    "clean_streak_started_at": "2026-07-28T09:24:21.846131+00:00",
@@ -1172,6 +1172,57 @@
     "last_reason": "remediation_cap_24h"
    }
   },
+  "inc_7842d390a71f": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "current_task_id": "ci-red-30409803097",
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-29T00:20:20.567860+00:00",
+   "escalation": null,
+   "fingerprint": "7842d390a71f69f783f431d034f51ac4656e4e4a754e6c23240032c0f2e098c5",
+   "fingerprint_parts": [
+    "ci-red-30409803097"
+   ],
+   "first_seen_at": "2026-07-29T00:20:20.567860+00:00",
+   "incident_id": "inc_7842d390a71f",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T00:20:20.567860+00:00",
+     "key": "30409803097:1",
+     "last_seen_at": "2026-07-29T00:20:20.567860+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T00:50:26.302662+00:00",
+     "key": "30411360764:1",
+     "last_seen_at": "2026-07-29T00:50:26.302662+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-29T00:48:58.7426534Z E AssertionError: 3 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1694', 'K1727', 'k1812']",
+   "last_seen_at": "2026-07-29T00:50:26.302662+00:00",
+   "notified_at": null,
+   "occurrence_count": 2,
+   "resolution": null,
+   "resolutions": [],
+   "state": "open",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T00:20:20.706482+00:00",
+     "task_id": "ci-red-30409803097"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_792a94b0ecf4": {
    "class": "machine_self",
    "clean_observations": [],
@@ -1316,7 +1367,7 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-29T00:09:05.293791+00:00"
+     "last_seen_at": "2026-07-29T01:19:39.839372+00:00"
     },
     {
      "cleared_at": null,
@@ -1330,7 +1381,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-29T00:09:04.151519+00:00"
+     "last_seen_at": "2026-07-29T01:19:29.310861+00:00"
     },
     {
      "cleared_at": null,
@@ -1363,9 +1414,9 @@
    ],
    "kind": "worker_orphaned",
    "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-29T00:09:05.293791+00:00",
+   "last_seen_at": "2026-07-29T01:19:39.839372+00:00",
    "notified_at": null,
-   "occurrence_count": 2823,
+   "occurrence_count": 2966,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2195,6 +2246,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T00:09:05.310896+00:00",
+ "updated_at": "2026-07-29T01:19:46.303369+00:00",
  "version": 1
 }

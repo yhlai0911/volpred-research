@@ -43289,7 +43289,7 @@
     "title": "K1623: write general-audience article (auto-discovered uncovered K)",
     "description": "K K1623 has verdict signal (score=4, reasons=['PASS/Harvey-significant', 'robust inference']) but no general article in feed.json.  Verdict preview: k1623 [CONDITIONAL_PASS]：識別 RV 表觀長記憶是真分數整合(ARFIMA, d∈(0,0.5))還是 level-shift 假象（Diebold-Inoue 2001），並測其 OOS 可交易性。資料：VIX/SPY/TW0050/QQQ/N225 daily Parkinson RV（VIX用(VIX/100)^2），樣本涵蓋2008-2026(依資產不同)。ELW估計 raw d̂ 全部顯著>0（0.50-0.72）；break-demean 後（Bai-Perron多斷點）仍顯著>0（BIC下界0.46-0.65），le",
     "priority": 3,
-    "status": "blocked",
+    "status": "pending",
     "task_type": "daily_article",
     "source": "auto_discovered",
     "audience_correction_rewrite": false,
@@ -43313,13 +43313,15 @@
         "to": "pending",
         "by": "main_thread",
         "note": "manual_release"
+      },
+      {
+        "at": "2026-07-29T00:13:45.782168+00:00",
+        "from": "blocked",
+        "to": "pending",
+        "reason": "blocked_until_expired (2026-07-29T00:00:00)"
       }
     ],
-    "last_released_at": "2026-07-22T02:35:07.026527+00:00",
-    "blocked_until": "2026-07-29T00:00:00",
-    "blocked_reason": "awaiting_codex_review",
-    "blocked_at": "2026-07-22T02:35:18+00:00",
-    "blocked_note": "K1623 敘事核心三條 claims 撤回中；rev3 於 07-22 10:06 Codex round-3 FAIL（3 blocking defects）。出口=k1623_rev4_remediation_after_codex_round3_fail 完成且 round-4 PASS 且 merge 進 main 後，以修正後弱版敘事重派（writer-k1623 已依研究誠實正確拒寫）。"
+    "last_released_at": "2026-07-22T02:35:07.026527+00:00"
   },
   {
     "id": "assign_0f1231b6",
@@ -55251,7 +55253,7 @@
     "id": "k1380_v4_white_rc_snooping_correction_20260729",
     "task_type": "experiment",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "agent",
     "dispatch_lane": "agent",
     "topology": "compute_queue",
@@ -55259,7 +55261,30 @@
     "created_by": "hourly-slot-1-e98b43fc304544638c7c2f3524ab6936",
     "parent_task_id": "k1380_stage_refactor_collect",
     "title": "K1380_v4 的 white_rc_test 名為 Reality Check 實為單 spec 檢定，未做 snooping 修正（Paper 9 C3 canonical 指標受影響）",
-    "description": "**來源**：2026-07-29 hourly slot-1（e98b43fc）在裁決 `k1380_stage_refactor_collect` 時，逐條檢查 stage-refactor report 的 `defects_found_beyond_the_known_reversed_qlike`（該單驗收項第 6 條）後，回讀 K1380_v4 原始碼發現。**不是報告自述，是讀 code 確認的。**\n\n## 問題\n\n`experiments/K1380_v4/k1380_v4_results.json` 的 `white_rc_test` **依構造沒有做任何 data-snooping 修正**，但 `interpretation` 寫「A4f significantly beats GJR **after RC correction** (p=0.000)」，且該值直接參與 `c3_verdict` 判定。這份 results 正是 D5（`docs/governance/2026-07/d5_k1380_file_adjudication.md` §6）指給 **Paper 9 C3** 當 canonical 指標的那份。\n\n**證據** — `experiments/K1380_v4/k1380_v4.py:771-782`：\n```python\nrc_stat_obs = float(t_obs[a4f_elig_idx])        # 只取 A4f 一支的 t\nbootstrap_rc_stats[b_idx] = max(0.0, t_b_a4f)   # bootstrap 也只重抽 A4f 自己\nrc_pval = (bootstrap_rc_stats >= rc_stat_obs).mean()\n```\n沒有跨候選集合取 max。White 的 Reality Check 定義上就是 max 型統計量；單一 spec 的 bootstrap t 檢定不是 RC。\n\n這與 stage-refactor report 對**舊** lineage 點名的 defect id=2（severity=**invalidating**，原文「A single-model bootstrap t-test is not a Reality Check」）是同一個缺陷 —— 新資訊是：**它在 v4 並沒有被修掉**。\n\n## 為什麼有份量\n\nv4 的 SPA 是正確的 max 型檢定（`k1380_v4.py:788` 明寫 `max_i over n_elig eligible specs`，n=15），而它 **p=0.2886、不拒絕 H0**。所以誠實的讀法是：**真正做了多重檢定修正的檢定沒有拒絕；「顯著」只出現在那個沒做修正、卻被標成 RC 的單一 spec 檢定上。**\n\n## 要做什麼（二選一，先做裁決再動手）\n\n**(a) 做成真正的 RC**：改成 Hansen 三重 recentering 的 max 型統計量 —— u（least-favourable，即 White RC）、c（consistent，報 primary）、l（lower bound），滿足 `p_l <= p_c <= p_u`；per-spec t 保留但明確標註 not snooping-adjusted，另加 Holm step-down。需重跑（heavy → `compute_queue`，禁塞進 hourly fire）。\n\n**(b) 誠實改標籤**：保留單 spec 檢定，但把欄位名、`interpretation`、`c3_verdict` 一起改成「A4f 個別 DM 檢定，未做 snooping 修正」，並移除其作為 RC 證據的角色。**注意 (b) 仍需改 code 後重跑產出 results，禁止手改 results JSON 收尾**（AGENTS.md「永遠修流程，不修資料」）。\n\n## 硬性約束\n\n- **在本單收斂前，不得以「通過 RC 多重檢定修正」的口徑寫進 Paper 9 C3。**\n- 修完要回頭檢查**已寫入的 knowledge 與任何引用該 RC 數字的產物**，若結論被推翻，依 AGENTS.md 第 13 條回溯更正並寫 `docs/error_log.md`。\n- knowledge 只能主線程寫（K1259），數字一律從 results JSON 程式化取得。\n- 前班狀態為 **`contained`**（只證據化症狀＋定位根因層級），**未修程式、未重跑、未動 Paper 9、未改 knowledge**。本單完成才可能標 `root_cause_fixed_and_verified`。\n\n## 相關\n\n- `k1380_stage_refactor_collect` 欄位 `adjudication_20260729_slot1`（完整裁決與證據；該單驗收項 1-5 已 superseded，第 6 項就是本發現，故刻意留 pending 未關）\n- D5 裁決：`docs/governance/2026-07/d5_k1380_file_adjudication.md`\n- v4 canonical：SPA stat=4.2047 / p=0.2886 / n=15 / reject=false；RC spec=A4f / t=4.1335 / p=0.000 / reject=true；timestamp 2026-07-05T09:58:26\n"
+    "description": "**來源**：2026-07-29 hourly slot-1（e98b43fc）在裁決 `k1380_stage_refactor_collect` 時，逐條檢查 stage-refactor report 的 `defects_found_beyond_the_known_reversed_qlike`（該單驗收項第 6 條）後，回讀 K1380_v4 原始碼發現。**不是報告自述，是讀 code 確認的。**\n\n## 問題\n\n`experiments/K1380_v4/k1380_v4_results.json` 的 `white_rc_test` **依構造沒有做任何 data-snooping 修正**，但 `interpretation` 寫「A4f significantly beats GJR **after RC correction** (p=0.000)」，且該值直接參與 `c3_verdict` 判定。這份 results 正是 D5（`docs/governance/2026-07/d5_k1380_file_adjudication.md` §6）指給 **Paper 9 C3** 當 canonical 指標的那份。\n\n**證據** — `experiments/K1380_v4/k1380_v4.py:771-782`：\n```python\nrc_stat_obs = float(t_obs[a4f_elig_idx])        # 只取 A4f 一支的 t\nbootstrap_rc_stats[b_idx] = max(0.0, t_b_a4f)   # bootstrap 也只重抽 A4f 自己\nrc_pval = (bootstrap_rc_stats >= rc_stat_obs).mean()\n```\n沒有跨候選集合取 max。White 的 Reality Check 定義上就是 max 型統計量；單一 spec 的 bootstrap t 檢定不是 RC。\n\n這與 stage-refactor report 對**舊** lineage 點名的 defect id=2（severity=**invalidating**，原文「A single-model bootstrap t-test is not a Reality Check」）是同一個缺陷 —— 新資訊是：**它在 v4 並沒有被修掉**。\n\n## 為什麼有份量\n\nv4 的 SPA 是正確的 max 型檢定（`k1380_v4.py:788` 明寫 `max_i over n_elig eligible specs`，n=15），而它 **p=0.2886、不拒絕 H0**。所以誠實的讀法是：**真正做了多重檢定修正的檢定沒有拒絕；「顯著」只出現在那個沒做修正、卻被標成 RC 的單一 spec 檢定上。**\n\n## 要做什麼（二選一，先做裁決再動手）\n\n**(a) 做成真正的 RC**：改成 Hansen 三重 recentering 的 max 型統計量 —— u（least-favourable，即 White RC）、c（consistent，報 primary）、l（lower bound），滿足 `p_l <= p_c <= p_u`；per-spec t 保留但明確標註 not snooping-adjusted，另加 Holm step-down。需重跑（heavy → `compute_queue`，禁塞進 hourly fire）。\n\n**(b) 誠實改標籤**：保留單 spec 檢定，但把欄位名、`interpretation`、`c3_verdict` 一起改成「A4f 個別 DM 檢定，未做 snooping 修正」，並移除其作為 RC 證據的角色。**注意 (b) 仍需改 code 後重跑產出 results，禁止手改 results JSON 收尾**（AGENTS.md「永遠修流程，不修資料」）。\n\n## 硬性約束\n\n- **在本單收斂前，不得以「通過 RC 多重檢定修正」的口徑寫進 Paper 9 C3。**\n- 修完要回頭檢查**已寫入的 knowledge 與任何引用該 RC 數字的產物**，若結論被推翻，依 AGENTS.md 第 13 條回溯更正並寫 `docs/error_log.md`。\n- knowledge 只能主線程寫（K1259），數字一律從 results JSON 程式化取得。\n- 前班狀態為 **`contained`**（只證據化症狀＋定位根因層級），**未修程式、未重跑、未動 Paper 9、未改 knowledge**。本單完成才可能標 `root_cause_fixed_and_verified`。\n\n## 相關\n\n- `k1380_stage_refactor_collect` 欄位 `adjudication_20260729_slot1`（完整裁決與證據；該單驗收項 1-5 已 superseded，第 6 項就是本發現，故刻意留 pending 未關）\n- D5 裁決：`docs/governance/2026-07/d5_k1380_file_adjudication.md`\n- v4 canonical：SPA stat=4.2047 / p=0.2886 / n=15 / reject=false；RC spec=A4f / t=4.1335 / p=0.000 / reject=true；timestamp 2026-07-05T09:58:26\n",
+    "status_history": [
+      {
+        "ts": "2026-07-29T00:16:23.059086+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-37c1e7e0b01544989bf84373b1492b8d"
+      },
+      {
+        "ts": "2026-07-29T00:16:41.274263+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-37c1e7e0b01544989bf84373b1492b8d"
+      },
+      {
+        "ts": "2026-07-29T00:26:18.376981+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "hourly-slot-1-37c1e7e0b01544989bf84373b1492b8d"
+      }
+    ],
+    "started_at": "2026-07-29T00:16:41.274248+00:00",
+    "completed_at": "2026-07-29T00:26:18.376959+00:00",
+    "result": "RC/SPA 兩欄位誤標修正完成並驗證。選項(a)：純重新分析（k1380_v4.py:693 已存 17x1881 QLIKE 矩陣，缺陷全在下游，不需重跑 GARCH）。新增 k1380_v4_rc_correction.py，內建 v4 四項數字逐位重現斷言(atol=1e-12, PASS)。新發現 hansen_spa_test 亦誤標=least-favourable SPA_u 非 SPA_c。關鍵證據：144/499 超標 bootstrap draws 的 max 全部由 A5/C2/C3 三支(t=-11.2/-21.1/-10.0)取得，無一由競爭力 spec 取得。修正後 SPA_c p<1/499（兩種 studentization 慣例皆然），Holm FWER0.10 下 11/15 拒絕。C3 verdict MIXED→POSITIVE(snooping-adjusted)，方向與先前記載相反。v4 原始 JSON 未改。已寫 README 修正節 + docs/error_log.md。三項收尾（A5/C2/C3 退化查證、knowledge 引用稽核、Codex 二審）開 followup assign_b8abe71a。"
   },
   {
     "id": "assign_0c1eca40",
@@ -55420,7 +55445,7 @@
     "parent_task_id": "k1694_codex_fail_repair_20260729",
     "created_by": "hourly-slot-1-99b060f8a48945b5aeba3736a6541724",
     "compute_job_id": "agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7",
-    "blocked_reason": "external_compute_job_active",
+    "blocked_reason": "external_compute_receipt_pending_collection",
     "status_history": [
       {
         "ts": "2026-07-29T00:02:36.295777+00:00",
@@ -55430,7 +55455,9 @@
         "note": "durable_external_execution_receipt"
       }
     ],
-    "result": "dispatched to compute job agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7; awaiting PHASE A collection"
+    "result": "dispatched to compute job agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-29T00:15:19Z",
+    "compute_finished_at": "2026-07-29T00:34:38Z"
   },
   {
     "id": "assign_6a2adc68",
@@ -55447,5 +55474,112 @@
     "blocked_reason": "external_compute_job_running",
     "blocked_at": "2026-07-29T00:02:52+00:00",
     "blocked_note": "Waits for [K1694 split 1/2] assign_a88eed84 / compute job agent-brief_k1694_r4_rv_completeness_e98b43fc-5095f7 to deliver experiments/K1694/r4_repair_report.json in worktree dispatch-slot-1-e98b43fc-k1694. Do not start before that artifact exists."
+  },
+  {
+    "id": "ci-red-30409803097",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "source": "auto_discovered",
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "dispatch_preempt": true,
+    "incident_id": "ci-red-30409803097",
+    "ci_incident_id": "ci-red-30409803097",
+    "ci_run_key": "30409803097:1",
+    "created_at": "2026-07-29T00:20:17.756739+00:00",
+    "title": "CI 紅燈修復（run 30409803097, attempt 1）— main Test Suite",
+    "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30409803097\nattempt: 1\nhead_sha: dd5a1acdd\n偵測摘要（仍須讀完整 failed log）：2026-07-29T00:17:05.4812140Z E AssertionError: assert [JSONDecodeEr... 1 (char 0)')] == []\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30409803097 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
+    "write_intent": "repo_patch",
+    "declared_output_paths": [
+      "frontend-v2-fix/tests/member-continuity-postgres-e2e.mjs",
+      "scripts/lazypack_layout_guard.py",
+      "scripts/tests/test_git_writer_lock.py",
+      "scripts/tests/test_knowledge_unrecorded_ratchet.py",
+      "scripts/tests/test_lazypack_layout_guard.py",
+      "scripts/tests/test_scheduled_writer_commit_policy.py",
+      "src/volpred/charts/article_charts.py",
+      "src/volpred/evaluation/statistical_tests.py",
+      "src/volpred/ops/rollback.py",
+      "tests/test_append_work_log.py",
+      "tests/test_cpi_t0_official_release_dates.py",
+      "tests/test_daily_update_tw_staleness.py",
+      "tests/test_evaluation_metrics.py",
+      "tests/test_mark_task_blocked.py",
+      "tests/test_postgres_member_continuity.py",
+      "tests/test_refresh_paper_snapshots_concurrent_append.py",
+      "tests/test_rollback.py",
+      "tests/test_shared_lock.py"
+    ],
+    "post_merge_actions": [],
+    "priority_capped_from": 1,
+    "status_history": [
+      {
+        "ts": "2026-07-29T00:21:22.259760+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-2-cf8e57a93ba74f2aa77e0e5f1704fd20",
+        "note": "supervisor_preassignment"
+      },
+      {
+        "ts": "2026-07-29T00:21:22.259762+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-2-cf8e57a93ba74f2aa77e0e5f1704fd20",
+        "note": "workspace_admission"
+      },
+      {
+        "ts": "2026-07-29T01:19:54.550745+00:00",
+        "from": "in_progress",
+        "to": "pending",
+        "by": "hourly-slot-2-cf8e57a93ba74f2aa77e0e5f1704fd20",
+        "note": "supervisor_settle_empty"
+      }
+    ],
+    "dispatch_settled_session_id": "dispatch-cf8e57a9-34a4d6ff",
+    "last_released_at": "2026-07-29T01:19:54.550732+00:00",
+    "last_release_reason": "workspace_empty"
+  },
+  {
+    "id": "assign_b8abe71a",
+    "title": "K1380_v4 RC 修正的三項收尾：A5/C2/C3 退化查證 + knowledge 引用稽核 + Codex 二審",
+    "description": "承接 k1380_v4_white_rc_snooping_correction_20260729（2026-07-29 hourly slot-1 37c1e7e0）。\n該單已把 RC/SPA 誤標修正完成並驗證（見 experiments/K1380_v4/k1380_v4_rc_correction_results.json、\nREADME 修正節、docs/error_log.md 2026-07-29 條目）。以下三項刻意未在該班收尾：\n\n1. **A5/C2/C3 數值退化查證**：三支 spec 的 QLIKE 損失比 benchmark 差 10-21 個標準差\n   （A5 t=-11.2 / C2 t=-21.1 / C3 t=-10.0），且 v4 least-favourable bootstrap 的整條上尾\n   （144/499 draws）全由它們取得。SPA_c 依統計理由捨棄它們，但若它們根本是數值退化/實作\n   壞掉，就不該出現在候選集合裡。需回讀 k1380_v4.py 這三支的設定與 one-step 遞迴，判定\n   是「真的很差」還是「壞掉」。結論會影響候選集合定義，但兩條路徑都不改變已驗證的 C3 反轉。\n\n2. **knowledge.json 引用稽核**：需找出所有引用舊 RC 數字（p=0.000「after RC correction」）\n   或舊 SPA 數字（p=0.2886「不拒絕」）的 knowledge 條目，依 AGENTS.md 第 13 條回溯更正。\n   上一班 grep 該檔逾時（檔案過大），未完成 —— 請用 build_knowledge_index.py 產生的索引或\n   分段 jq，不要整檔掃。\n\n3. **Codex 二審**：experiments/K1380_v4/k1380_v4_rc_correction.py 尚未經 Codex 審查\n   （fire 內禁止 spawn codex exec）。重點審：Hansen 三重 recentering 的方向是否正確\n   （g_i = d_bar_i * 1{...} 的保留/捨棄語意）、fixed-omega vs per-resample studentization\n   的選擇、Holm step-down 實作、以及重現斷言是否真的具備 falsify 能力。\n\n**硬性約束**：Paper 9 C3 在本單收斂前，不得以任何舊口徑（「RC 修正後顯著」或「SPA 不拒絕」）\n書寫。canonical 數字為 k1380_v4_rc_correction_results.json。\n",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "dispatch",
+    "created_at": "2026-07-29T00:26:06.760995+00:00",
+    "parent_task_id": "k1380_v4_white_rc_snooping_correction_20260729",
+    "created_by": "hourly-slot-1-37c1e7e0b01544989bf84373b1492b8d",
+    "priority_capped_from": 1
+  },
+  {
+    "id": "daily_digest_20260729",
+    "title": "[daily_digest] 寫一篇每日精選導讀專題策展並發佈",
+    "description": "寫一篇『每日精選導讀』專題策展長文並立即發佈。這是 editorial curation 不是逐篇摘要。規格：(1) **主題必須由『時事／近期重要宣告／近期熱門新聞／近期熱門標的』驅動，或框成回答一個具體投資議題**（例：『AI 資本支出爆增，科技股風險選擇權市場怎麼定價、該不該擔心？』『Fed 新主席放鷹，利率-波動率該怎麼讀？』『半導體修正，逢低還是走避？』）——**不是**挑一個純研究/方法論主題（如某模型複雜度天花板）當標的。時事/熱門標的/投資議題是骨幹，過去研究是用來論述、回答它的證據；(2) **從整個 archive（所有發過的文章、跨全部時間，不限本週）撈與該主題/議題相關的 5-8 篇**（grep/jq 掃 storage/reports/feed.json 的 title/tags），用這些過去研究**引導論述、建構對這個當下議題的回答/觀點**——**嚴禁只把這一兩週剛發的研究拿出來湊**（2026-07-01 boss 三次 + 2026-07-05 再糾正的核心錯誤：digest 不是本週研究 recap，是跨 archive 的主題專欄；此規則已進 `.claude/rules/publishing.md`「精選導讀策展硬規則」+ 機械 gate `publisher._audit_digest_archive_span`：來源文章發佈日期跨度 <14 天會被 publish 擋下）；排除 digest 自身與每日建議類日報；(3) 開場直接進當下的時事/標的情境（真實數據取自 archive 文章或 results.json，不可臆造），讓讀者一看就知道『這篇在回答我現在關心的什麼』；(4) **敘事弧 + 一個可帶走的具名方法（good 與 garbage 的唯一分野，2026-07-01 逐期 forensic 定論）**：(a) **命名一個讀者記得住、帶得走、能複用的心智模型或比喻**（範例：VIX=溫度計不是計時器／訊號三關檢驗法／尾部風控的煞車距離），**先想好這個名字，整篇圍繞它組織**，不是寫完再補一個比喻；(b) **把一份具名、可操作的清單或檢查法放到最顯眼處當骨幹**（不是塞在結尾當補充）——讀者當天就能套用。(c) **深度對齊金標竿**：每篇引用的來源文章都要用足它的具體數字與 nuance（個股數值、季度時序、比值、百分位等），不可把好幾篇濃縮成幾句；篇幅目標 ≥ 第一期（約 4000+ 字），寧可深不可空。(d) **內文每段引用都要 inline 標註來源**：邊論述邊用 markdown 連結標到那篇（像期 5：『在〈[文章標題](https://volpred.zeabur.app/v3/reports/<mile_id>)〉裡我們算過…』），不可只在文末列清單、讓讀者猜這段出自哪篇。敘事只是載體，『可用方法』才是重點；不是逐篇『這篇講 X、那篇講 Y』的並列摘要，也不是叫讀者自己去看原文。金標竿：mile_a1fd229a(期1)／mile_1597b341(期6)／mile_4901f7bc(期12)；反例（連貫但沒具名框架、洩氣）：期 4/5/8-11。(5) 文末才列本期精選連結（id + 一句話，連結 https://volpred.zeabur.app/v3/reports/<mile_id>）。輸出硬規則：reader-facing **必走 anti-ai-style**（寫前讀 prompt-templates、寫後跑 editor-sop 9-checklist）+ **圖表分工（2026-07-01 boss 糾正）：來源研究的證據圖表要 inline 放在內文對應論證段落旁當實證佐證（哪段講 X，X 的圖就在那）；文末『懶人包圖組』必須是另生的『框架/重點合成摘要 poster』（例：把本篇框架做成一張 summary card），不可拿內文證據圖充數塞進懶人包**；走 feed-publisher 正式入口發佈，**details.content_type 必設 'daily_digest'**（首頁 getDigestColumn 靠此辨識），**curated 來源文章 slug 須寫進 details.digest_articles 陣列**（前端側欄『本期精選』唯一資料源，每個 slug 須對應 archive 中真實存在的已發佈文章；陣列順序 = 顯示順序），tags 含 '精選導讀'，title 用專題式標題，**不可**以 '每日精選導讀｜' 起頭（前端區塊已顯示此標頭，重複會觸發 content-quality alert），也不可寫成『今日 N 篇摘要』；content 須為完整繁中 Markdown 單篇 essay 且至少含一張圖 ![alt](url)；立即 published（非 draft）。正文每個數字須可對應實驗 results.json 或數據源，K 編號與資料來源要標清楚。",
+    "task_type": "daily_digest",
+    "priority": 1,
+    "status": "pending",
+    "dispatch_lane": "agent",
+    "created_at": "2026-07-29T09:00:27.663327+08:00",
+    "source": "scheduled",
+    "tags": [
+      "daily_digest",
+      "reader_facing",
+      "精選導讀"
+    ]
+  },
+  {
+    "id": "alert_dispatch_supervisor_stale_code_20260729",
+    "title": "[alert] 派工程式有改動沒生效（daemon 未重載）",
+    "description": "由 alert `dispatch_supervisor_stale_code` 自動建立（level=warn）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n派工程式的程式碼被改過，但那個常駐程式還在跑舊版 —— 改動沒有生效。\n- daemon 開機時間: 2026-07-28T22:54:00.278035+00:00\n- 改了但沒生效的檔案: ['state.py', 'blocked_reasons.py', 'next_tasks.py']\n- 最久的一個已經放置: 63.0 分鐘\n- 門檻: warn>20.0分 / critical>120.0分\n\n## 影響\n常駐程式讀的是它啟動當下的程式碼。改了檔案不重載，等於沒改 —— 而且它看起來\n完全正常：心跳新鮮、任務照跑、零告警。2026-07-10 有三個修好的問題就這樣躺了\n三個多小時沒生效，沒有任何訊號。\n\n## 建議行動\n1. 確認沒有派工正在跑：uv run python -m scripts.dispatch_supervisor.cli status\n2. 重載：bash scripts/reload_dispatch_supervisor.sh --reason <為什麼>\n   （它會拒絕殺掉在飛的工作，也會避免這次重啟被誤報成崩潰）\n3. 若那些改動是刻意不上線的，把它們 revert 或說明，別讓磁碟與線上長期分岔。",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "created_at": "2026-07-29T01:01:22.114979+00:00",
+    "source": "alert_remediation_bridge",
+    "tags": [
+      "alert",
+      "dispatch_supervisor_stale_code"
+    ]
   }
 ]
