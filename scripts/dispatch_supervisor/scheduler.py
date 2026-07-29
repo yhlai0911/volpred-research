@@ -90,6 +90,8 @@ SHARED_LAUNCHD_COALITION_MODE = "shared_launchd_coalition"
 # Strong references keep launched fire tasks alive until their done callback
 # observes the result. Keys are immutable state job_ids, never reusable slots.
 _ACTIVE_FIRE_TASKS: dict[str, asyncio.Task] = {}
+_ACTIVE_PHASE_Z_RECOVERY_TASK: asyncio.Task | None = None
+_BACKGROUND_ALERT_TASKS: set[asyncio.Task] = set()
 _PHASE_Z_LOCK: asyncio.Lock | None = None
 _PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_commit",
                              # ownership_unknown = no fire-start baseline. The baseline is
@@ -911,6 +913,44 @@ def _reap_fire_task(job_id: str, task: asyncio.Task) -> None:
         )
 
 
+def _reap_phase_z_recovery_task(task: asyncio.Task) -> None:
+    """Observe a detached closeout and release the single-flight marker."""
+    global _ACTIVE_PHASE_Z_RECOVERY_TASK
+    if _ACTIVE_PHASE_Z_RECOVERY_TASK is task:
+        _ACTIVE_PHASE_Z_RECOVERY_TASK = None
+    if task.cancelled():
+        LOG.warning("background PHASE-Z recovery task cancelled")
+        return
+    exc = task.exception()
+    if exc is not None:
+        LOG.error("background PHASE-Z recovery task crashed: %s", exc, exc_info=exc)
+        alert_task = asyncio.create_task(
+            asyncio.to_thread(
+                alerts.send_loop_crash,
+                "phase_z_recovery_task",
+                "".join(
+                    traceback.format_exception(type(exc), exc, exc.__traceback__)
+                ),
+            ),
+            name="dispatch-phase-z-recovery-alert",
+        )
+        _BACKGROUND_ALERT_TASKS.add(alert_task)
+        alert_task.add_done_callback(_reap_background_alert_task)
+        return
+    LOG.info("background PHASE-Z recovery task completed outcome=%s", task.result())
+
+
+def _reap_background_alert_task(task: asyncio.Task) -> None:
+    """Keep slow alert delivery observed without blocking the trigger loop."""
+    _BACKGROUND_ALERT_TASKS.discard(task)
+    if task.cancelled():
+        LOG.warning("background dispatch alert task cancelled")
+        return
+    exc = task.exception()
+    if exc is not None:
+        LOG.error("background dispatch alert task crashed: %s", exc, exc_info=exc)
+
+
 async def _run_reserved_fire(
     *,
     job_id: str,
@@ -1433,8 +1473,10 @@ async def _tick_once(
     schedules_path: Path = SCHEDULES_PATH,
     background: bool = False,
     max_slots: int | None = None,
+    _closeout_only: bool = False,
 ) -> dict[str, Any]:
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
+    global _ACTIVE_PHASE_Z_RECOVERY_TASK
     state.heartbeat(path=state_path)
     pre_reconcile = state.read_state(state_path)
     active_jobs = list(pre_reconcile.get("current_jobs") or [])
@@ -1448,6 +1490,36 @@ async def _tick_once(
             "action": "skip",
             "reason": "producer_slot_in_flight",
             "active_jobs": len(active_jobs),
+        }
+    pending_at_entry = list(pre_reconcile.get("phase_z_pending") or [])
+    if background and pending_at_entry:
+        active_recovery = _ACTIVE_PHASE_Z_RECOVERY_TASK
+        if active_recovery is not None and not active_recovery.done():
+            return {
+                "action": "skip",
+                "reason": "phase_z_recovery_in_progress",
+                "phase_z_pending": len(pending_at_entry),
+            }
+        recovery = asyncio.create_task(
+            _tick_once(
+                state_path=state_path,
+                cron_expr=cron_expr,
+                prompt_path=prompt_path,
+                log_path=log_path,
+                dry_run=dry_run,
+                repo_root=repo_root,
+                schedules_path=schedules_path,
+                background=False,
+                max_slots=max_slots,
+                _closeout_only=True,
+            ),
+            name="dispatch-phase-z-recovery",
+        )
+        _ACTIVE_PHASE_Z_RECOVERY_TASK = recovery
+        recovery.add_done_callback(_reap_phase_z_recovery_task)
+        return {
+            "action": "phase_z_recovery_started",
+            "phase_z_pending": len(pending_at_entry),
         }
     try:
         custody_recovery = await asyncio.to_thread(
@@ -1643,6 +1715,11 @@ async def _tick_once(
         return {
             "action": "phase_z_recovered", "phase_z": outcome,
             "pending_jobs": len(pending_phase_z),
+        }
+    if _closeout_only:
+        return {
+            "action": "skip",
+            "reason": "phase_z_already_drained",
         }
     # Issue #42 deployment-drain gate.  The health loop can activate an
     # immutable release only when both current_jobs and phase_z_pending are

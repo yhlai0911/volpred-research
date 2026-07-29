@@ -5077,3 +5077,36 @@ formal retirement assessor已不再輸出physical blocker，只剩
 復活；archived wrapper仍由caller/behaviour transfer gates稽核。此bounded dispatcher
 slice為 **`root_cause_fixed_and_verified`**；全域Issue #46因五個formal legacy
 owners與14日clean gate仍是 **`contained`**。
+
+---
+
+## 2026-07-30 — PHASE-Z closeout 在 trigger decision lock 內阻塞每分鐘派工
+
+**證據化症狀**：Operations Core `agent_dispatch_tick` 在
+2026-07-29 22:50–22:54 UTC連續五班 `timeout after 30s`，22:49前每班只需
+0.4–0.7秒；同一scheduler daemon的Gmail、GitHub通知與CI watch仍exit 0。直接socket
+replay也在4.28秒小窗口內重現TimeoutError。當時state為`current_jobs=[]`但有一筆
+`phase_z_pending`，supervisor正執行orphan-half probe與quarantine checkpoint。
+
+**根因層級（executor trigger lifecycle）**：Unix socket server雖以
+`background=True`呼叫scheduler，但只有worker本體被detach；restart/orphan後的
+PHASE-Z recovery仍在`DispatchTriggerServer._decision_lock`內同步await。一次數分鐘
+closeout因此鎖住所有後續每分鐘requests，Operations Core把已交付到executor的合法
+背壓誤記成transport timeout。
+
+**底層修復與制度化**：background tick看到durable `phase_z_pending`時，現在只建立
+一個process-local single-flight recovery task並立即回
+`phase_z_recovery_started`；後續tick快速回
+`phase_z_recovery_in_progress`。真正recovery沿用原本的generation、git lock與terminal
+receipt契約；`_closeout_only`保證pending若被其他路徑先清掉，背景task只能no-op，
+不可越過closeout另開worker。done callback會清single-flight marker並把exception送入
+既有loop-crash incident；告警本身透過observed `asyncio.to_thread` task送出，慢速
+通知或通知失敗都不會再卡住executor event loop。
+
+**回歸與狀態**：deterministic regression先以0.3秒slow closeout重現同步等待與
+無background task，再轉綠：第一次ack <0.15秒、第二次只回in-progress、closeout
+exactly once、pending最後清空。trigger／PHASE-Z／restart closeout相鄰範圍
+**314 passed、1 skipped**，並另有exception-path regression證明0.3秒慢告警不阻塞
+下一次tick。此slice目前為 **`contained`**；需commit、immutable self-reload、
+production連續tick read-back及GitHub CI後才升級為
+**`root_cause_fixed_and_verified`**。

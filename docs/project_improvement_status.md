@@ -2896,6 +2896,19 @@ Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy 
   被 #9 與完整 writer inventory／single interface／crash injection／recognizer
   retirement 阻塞，維持 OPEN／`contained`。
 
+## 2026-07-30 — Operations Core trigger／PHASE-Z closeout 解耦
+
+- 🔴 live `agent_dispatch_tick`於22:50–22:54 UTC連續五班30秒timeout；其他Core jobs
+  正常，tight socket replay亦可重現。
+- ✅ 根因為trigger server的decision lock同步等待數分鐘PHASE-Z orphan/quarantine
+  closeout，不是Operations Core scheduler整體死亡。
+- ✅ background tick現在以single-flight task執行closeout，第一次立即ack started，
+  後續tick立即ack in-progress；closeout未終止前仍禁止新worker。
+- ✅ exception通知也移到observed thread task，慢速或失敗告警不阻塞event loop。
+- ✅ TDD先紅後綠；trigger／PHASE-Z／restart完整範圍 **314 passed、1 skipped**。
+- 🟡 程式slice目前 **`contained`**，待commit、immutable release、production
+  連續tick回讀與GitHub CI後升級。
+
 ## 2026-07-30 — Compute queue UTF-8 argv boundary
 
 - ✅ `assign_8b0b2c61` 已完成；commit `f3c504abd`。

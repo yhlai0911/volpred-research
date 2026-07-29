@@ -11229,6 +11229,136 @@ def test_restart_closeout_uses_matching_durable_generation(
     assert state.read_state(state_path)["phase_z_pending"] == []
 
 
+def test_background_tick_acks_while_phase_z_closeout_runs_once(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A slow closeout must not turn every Operations Core tick into timeout."""
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{
+            "job_id": "job-a", "cohort_id": "cohort-a", "slot_id": 1,
+            "created_at": "2026-07-27T00:00:01+00:00", "isolated": False,
+            "fire_lifecycle": _fire_lifecycle(),
+        }]
+    closeout_calls = 0
+
+    def slow_closeout(**_kwargs):
+        nonlocal closeout_calls
+        closeout_calls += 1
+        time.sleep(0.3)
+        return {"committed": False, "reason": "clean"}
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", slow_closeout)
+    monkeypatch.setattr(scheduler, "_PHASE_Z_LOCK", None)
+    monkeypatch.setattr(
+        scheduler, "_ACTIVE_PHASE_Z_RECOVERY_TASK", None, raising=False
+    )
+
+    async def scenario() -> tuple[dict, dict, float]:
+        started = time.monotonic()
+        first = await scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *",
+            prompt_path=tmp_path / "prompt.md",
+            log_path=tmp_path / "worker.log",
+            dry_run=False, repo_root=tmp_path, background=True,
+        )
+        elapsed = time.monotonic() - started
+        second = await scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *",
+            prompt_path=tmp_path / "prompt.md",
+            log_path=tmp_path / "worker.log",
+            dry_run=False, repo_root=tmp_path, background=True,
+        )
+        recovery = scheduler._ACTIVE_PHASE_Z_RECOVERY_TASK
+        assert recovery is not None
+        await recovery
+        return first, second, elapsed
+
+    first, second, elapsed = asyncio.run(scenario())
+
+    assert elapsed < 0.15
+    assert first["action"] == "phase_z_recovery_started"
+    assert second == {
+        "action": "skip",
+        "reason": "phase_z_recovery_in_progress",
+        "phase_z_pending": 1,
+    }
+    assert closeout_calls == 1
+    assert state.read_state(state_path)["phase_z_pending"] == []
+
+
+def test_background_closeout_exception_alert_does_not_block_next_tick(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    state_path = _tmp_state(tmp_path)
+    with state._locked_state(state_path) as (_fh, data):
+        data["phase_z_pending"] = [{
+            "job_id": "job-a", "cohort_id": "cohort-a", "slot_id": 1,
+            "created_at": "2026-07-27T00:00:01+00:00", "isolated": False,
+            "fire_lifecycle": _fire_lifecycle(),
+        }]
+    closeout_calls = 0
+
+    def flaky_closeout(**_kwargs):
+        nonlocal closeout_calls
+        closeout_calls += 1
+        if closeout_calls == 1:
+            raise RuntimeError("injected closeout crash")
+        return {"committed": False, "reason": "clean"}
+
+    alert_started = False
+
+    def slow_alert(*_args, **_kwargs):
+        nonlocal alert_started
+        alert_started = True
+        time.sleep(0.3)
+        return True
+
+    monkeypatch.setattr(scheduler.phase_z, "run_phase_z", flaky_closeout)
+    monkeypatch.setattr(scheduler.alerts, "send_loop_crash", slow_alert)
+    monkeypatch.setattr(scheduler, "_PHASE_Z_LOCK", None)
+    monkeypatch.setattr(scheduler, "_ACTIVE_PHASE_Z_RECOVERY_TASK", None)
+    monkeypatch.setattr(scheduler, "_BACKGROUND_ALERT_TASKS", set())
+
+    async def scenario() -> tuple[dict, float]:
+        first = await scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *",
+            prompt_path=tmp_path / "prompt.md",
+            log_path=tmp_path / "worker.log",
+            dry_run=False, repo_root=tmp_path, background=True,
+        )
+        assert first["action"] == "phase_z_recovery_started"
+        failed = scheduler._ACTIVE_PHASE_Z_RECOVERY_TASK
+        assert failed is not None
+        with pytest.raises(RuntimeError, match="injected closeout crash"):
+            await failed
+        await asyncio.sleep(0)
+
+        started = time.monotonic()
+        second = await scheduler._tick_once(
+            state_path=state_path, cron_expr="7 * * * *",
+            prompt_path=tmp_path / "prompt.md",
+            log_path=tmp_path / "worker.log",
+            dry_run=False, repo_root=tmp_path, background=True,
+        )
+        elapsed = time.monotonic() - started
+        recovered = scheduler._ACTIVE_PHASE_Z_RECOVERY_TASK
+        assert recovered is not None
+        await recovered
+        await asyncio.gather(*scheduler._BACKGROUND_ALERT_TASKS)
+        return second, elapsed
+
+    second, elapsed = asyncio.run(scenario())
+
+    assert elapsed < 0.15
+    assert second["action"] == "phase_z_recovery_started"
+    assert closeout_calls == 2
+    assert alert_started is True
+    assert state.read_state(state_path)["phase_z_pending"] == []
+
+
 def test_running_worker_restart_orphan_cleanup_preserves_generation_to_recovery(
     tmp_path: Path, monkeypatch,
 ) -> None:
