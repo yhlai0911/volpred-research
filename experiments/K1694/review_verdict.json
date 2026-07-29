@@ -1,59 +1,62 @@
 {
   "kid": "K1694",
-  "round": 5,
-  "verdict": "FAIL",
-  "reviewer": "Codex gpt-5.6-sol with independent Spec and Standards reviewers",
-  "reviewed_at": "2026-07-29T06:33:14Z",
-  "fixed_point": "aad5ce399",
-  "reviewed_commit": "94b81c295b7e9be0f459dce98629bdf9bf1deb0e",
-  "knowledge_promotion_allowed": false,
-  "merge_allowed": false,
-  "blocking_defects": [
-    {
-      "priority": "P1",
-      "id": "product_scoped_calendar_required",
-      "summary": "The universal unscheduled-closure whitelist is contradicted by primary exchange notices and changes the estimation sample.",
-      "detail": "CME_UNSCHEDULED_CLOSURES removes 2012-10-29, 2012-10-30 and 2018-12-05 for every commodity. CME stated that the Sandy closures covered U.S. equity-index futures (and part of the interest-rate complex), while all other futures remained open and NYMEX/COMEX electronic trading remained available. CME likewise stated that the 2018 mourning closure covered U.S. equity and interest-rate products while all other Globex markets remained open. K1694 spans energy, metals, agriculture, livestock and ICE softs. Removing the unsupported universal whitelist changes 2012-10 from 22/22 passing rows to 0/22 and changes the 2018-12 CORN row from passing to failing; the current 3276-row sample and rerun outputs are therefore not admissible.",
-      "required_fix": "Use product- and exchange-scoped official trading calendars with source-backed date fixtures, or remove the unsupported whitelist, explicitly downgrade the completeness claim, and rerun every derived artifact and sensitivity analysis."
+  "round": 6,
+  "verdict": "PASS",
+  "reviewer": "Codex gpt-5.6-sol, read-only sandbox",
+  "reviewed_at": "2026-07-30T00:40:00Z",
+  "fixed_point": "7e55cdf6e",
+  "reviewed_commit": "2724b3587",
+  "prompt": "storage/ops/codex_reviews/k1694_prompt_round6.md",
+  "raw_verdict": "storage/ops/codex_reviews/k1694_verdict_round6.md",
+  "knowledge_promotion_allowed": true,
+  "merge_allowed": true,
+  "blocking_defects": [],
+  "round5_defects_resolved": {
+    "product_scoped_calendar_required": {
+      "status": "RESOLVED",
+      "reviewer_finding": "Official notices support the disputed-date treatment: CFTC 12-363 enumerates the Sandy actions; ICE explicitly kept all other markets open; CME explicitly kept all non-equity/non-rate markets open in 2012 and 2018. The Sandy exclusion inference is sound and 2012-10 is outside the estimation sample. Schedule scoping is operational in expected days, month anchor, and peer maximum. Thresholds remain 15/2/2/1.",
+      "reviewer_independent_recomputation": "5252 -> 5229 complete rows; 2012-10 22/22 -> 0/22; 2018-12 22/22 -> 21/22 with only CORN failing; frame/lagged 3276/2749 -> 3275/2748"
     },
+    "calendar_truth_test_is_tautological": {
+      "status": "RESOLVED",
+      "reviewer_finding": "Calendar expectations come from calendar_fixtures.json, not K1694.py. The replacement endpoint test independently supplies fixture endpoints, accepts the complete cache, and rejects a one-day truncation through the actual zero-tolerance endpoint comparison.",
+      "reviewer_independent_recomputation": "The oracle reproduces exactly 9 contradictions against the preserved round-5 module in gate_history/ and 0 against current code."
+    }
+  },
+  "requirements_verified": {
+    "source_table_primary_only": "PASS -- 22 tickers to exchange to official URL in calendar_sources.md; reviewer opened the CFTC, ICE and CME documents",
+    "independent_fixture_tests": "PASS -- calendar_fixtures.json is the oracle; no calendar test takes an expected value from K1694.py",
+    "path_choice_declared": "PASS -- option (a), product/exchange-scoped calendars, with the completeness claim downgraded on top; both unscheduled-closure sets are empty on the evidence",
+    "full_rerun_no_hand_edits": "PASS -- K1694.py, lag_sensitivity.py and the figures regenerated; code/result/spec hashes consistent; seed 1694; lag visible in code",
+    "quantified_change": "PASS -- reviewer independently reproduced every headline delta",
+    "strict_month_gate_sensitivity": "PASS -- correctly labelled non-reported, restores the mutated global, 3210-row frame reproduced by the reviewer",
+    "unverified_status_insensitivity": "PASS -- 5229 -> 5229, zero flips, restores UNSCHEDULED_CLOSURES",
+    "conclusion_unchanged": "PASS -- NULL / NOT SUPPORTED intact",
+    "no_threshold_moved": "PASS -- MIN_RV_DAYS=15, MAX_RV_SHORTFALL_VS_CALENDAR=2, MAX_RV_CROSS_SHORTFALL=2, MAX_RV_MONTH_SHORTFALL=1 unchanged since round 4"
+  },
+  "reviewer_could_not_verify": [
     {
-      "priority": "P2",
-      "id": "calendar_truth_test_is_tautological",
-      "summary": "The endpoint acceptance test reuses the calendar owner as its expected value and cannot falsify a wrong calendar.",
-      "detail": "test_endpoint_gate_accepts_an_untruncated_dated_cache injects expected_month_endpoints() output and then asks the same implementation to accept it. The test verifies internal consistency, not whether each product was actually open.",
-      "required_fix": "Add independent primary-source fixtures for product/date/open status, including the three disputed dates and both CME and ICE products."
+      "item": "the pytest suite",
+      "reason": "the read-only sandbox has no writable temporary directory and the directly accessible environment lacks linearmodels",
+      "what_the_reviewer_did_instead": "static inspection confirmed all round-6 and regression gates are present; artifact identity and every non-regression recomputation were independently verified",
+      "executed_by_the_repair_agent_instead": "uv run --active python -m pytest experiments/K1694/test_K1694.py -q -> 50 passed"
     }
   ],
-  "requirements_verified": {
-    "round4_d2_endpoint_truncation": "PASS",
-    "round4_noncalendar_pass_list_regression": "PASS",
-    "null_scope_and_secondary_positive_result": "PASS",
-    "runtime_code_trace_and_reproduce_spec_identity": "PASS",
-    "tests": "42 passed with linearmodels",
-    "artifact_gate": "Only the intentionally deferred K1259 knowledge entry remains"
-  },
+  "accepted_limitations": [
+    "No source found for ICE Futures U.S. on 2018-12-05. Reviewer: 'Carrying the unsourced ICE date as open is acceptable because uncertainty is disclosed and both possible statuses give the identical sample.'",
+    "The New-Year-on-a-Saturday rule rests on the panel's own bar counts rather than an exchange notice, and is labelled EMPIRICAL-FROM-PANEL. Reviewer: accurately labelled.",
+    "The frozen rv_monthly.csv is count-only, so the reported months are SCREENED, never certified; the endpoint gate exists and is tested but is not exercised by the reported run. Reviewer: accurately labelled.",
+    "2018-12 passes the completeness screen while CME's own notice says the market was open on 2018-12-05, for which no commodity has a bar. Published at run time in rule.rv_months_short_of_the_exchange_calendar and quantified in robustness_strict_month_gate (n 3210, t_DK 1.69, still short of 1.96)."
+  ],
   "reviewed_sha256": {
-    "README.md": "f589f8d245d2973130f59b8076d917a1c3eade4408918110a07b60bdffc9867b",
-    "K1694.py": "a58965545d4e8abfebd6950c62a5d12301b696dd5cbde34cba9ba30a1695fbd7",
-    "K1694_results.json": "eba0f030abb59c4466371443c516625dd9bf2282f4e6f733e6cdc032c0e0cd78",
-    "test_K1694.py": "25a476808162f8f57356839b88095fb3dd85c480d9de2808688a934b25ff91c0",
-    "reproduce_spec.json": "bb19d4a63e9291ca293aa8ed31338aefcd85ef39d1f0507d99be8cdc22c68b9a"
+    "README.md": "6d54a151e63b265f6627253514c1b8f63ee3923d3a5c2c76453e2cbee34256d6",
+    "K1694.py": "a173663534fac62526703e12da9a2fccc5cd48918b17fc21463c4a42ec194da6",
+    "K1694_results.json": "5587e72ab3f256a1f88c862340ea55d3d78874cab04a1431f5aea826d66f03fb",
+    "test_K1694.py": "b619cba053a82ae24053b8a9216bc3858eada029a5116fd3157b54846b96dcc7",
+    "reproduce_spec.json": "2f2850218fc8c65def42286b10a095d7b0581f3926fc8dc8a3244828f0491b6d",
+    "calendar_sources.md": "70c44c6d4890f7d2ebd01d4629514c0344911be857cfd760773030261595011b",
+    "calendar_fixtures.json": "50288feccaad9768b3f0b2c0a07b60ebf1a7623e7092dd7b413bc77d915bd97c",
+    "r6_repair_report.json": "fbf85bde756bb8e88f0b8bca0effdf15de3c9fe9161113d7a29a0977cec39a3a"
   },
-  "primary_sources": [
-    {
-      "title": "CME Group Sandy closure notice, 2012-10-28",
-      "url": "https://www.cmegroup.com/media-room/press-releases/2012/10/28/media_alert_cme_grouptocloseusequityindexfuturesandoptionsonfutu.html",
-      "finding": "Only U.S. equity-index futures were closed; all other CME Group futures remained open."
-    },
-    {
-      "title": "CME/CBOT/NYMEX/COMEX CFTC submission 12-363",
-      "url": "https://www.cftc.gov/sites/default/files/stellent/groups/public/%40rulesandproducts/documents/ifdocs/rul102912cmecbotnymexandcomex1.pdf",
-      "finding": "NYMEX/COMEX physical floors closed, but electronic trading remained available for all products on CME Globex."
-    },
-    {
-      "title": "CME Group national day of mourning notice, 2018-12-02",
-      "url": "https://www.cmegroup.com/media-room/press-releases/2018/12/02/cme_group_u_s_equityinterestratemarketstoclosefornationaldayofmo.html",
-      "finding": "Only U.S. equity and interest-rate products closed; all other Globex markets kept regular hours."
-    }
-  ]
+  "next_step": "Main thread only: write the knowledge.json entry, taking every number programmatically from experiments/K1694/K1694_results.json (K1259 -- agents must not write knowledge.json, and no number may be retyped from this file or from the README). Then merge via scripts/merge_worktree.sh."
 }

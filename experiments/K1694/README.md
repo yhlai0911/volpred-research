@@ -1,6 +1,6 @@
 # K1694 — FCM 清算集中度與商品小型交易人的高波動排擠
 
-## 狀態：round 6 審查中（重跑於 2026-07-30）
+## 狀態：round 6 **PASS**（Codex，2026-07-30；reviewed_commit `2724b3587`）
 
 - **round 1 → FAIL**（`storage/ops/codex_reviews/k1694_verdict.md`）：8 項缺陷
 - **round 2 → FAIL**（`k1694_verdict_round2.md`）：4 項要求
@@ -8,10 +8,10 @@
 - **round 4 → FAIL**（`k1694_verdict_round4.md`）：2 項 RV 完整性反例
 - **round 5 → FAIL**（`review_verdict.json`）：2 項缺陷 —— 通用休市白名單無出處、
   端點測試自己當自己的 oracle
-- round 5 的 2 項缺陷已修完並全面重跑，等 round 6 裁決
+- **round 6 → PASS**（`review_verdict.json`）：兩項缺陷皆 RESOLVED，無新增 blocking defect
 
-**在 `review_verdict.json` 出現 PASS 之前**：不得寫進 `storage/memory/knowledge.json`、不得據此
-寫文章或論文段落。下面的數字是重跑後的真實輸出，但**認證未完成**。
+`review_verdict.json` 已 PASS，`knowledge_promotion_allowed: true`。knowledge 條目仍**只能由
+主線程**寫（K1259），且每個數字必須從 `K1694_results.json` 程式化取得，不得從本 README 轉抄。
 
 ## 結論：NULL —— 意思是「未獲支持」，不是「不存在」
 
@@ -264,8 +264,8 @@ frozen cache 的 provenance 穩定性**、把宣稱降到程式證得到的強�
 
 1. ~~跑通 `K1694.py`~~ ✅
 2. ~~Codex round 1–5~~ ✅ → 五次皆 FAIL；~~逐輪依裁決修復並全面重跑~~ ✅
-3. Codex round 6 裁決 → `review_verdict.json`
-4. PASS 後才由**主線程**寫 knowledge entry（agent 不得寫 `knowledge.json`）
+3. ~~Codex round 6 裁決~~ ✅ → **PASS**
+4. 由**主線程**寫 knowledge entry（agent 不得寫 `knowledge.json`），再 `scripts/merge_worktree.sh` 合併
 5. 真正核對 CFTC FCM 月報的實際上線日期（離線做不到；沒有它，spec4 的 ex-ante 身分永遠是條件式的）
 6. 量化有效時間自由度（目前只揭露 ACF，沒有給出等效樣本數）
 7. **ICE Futures U.S. 在 2018-12-05 的交易狀態**：查不到官方出處，目前當作有開；
