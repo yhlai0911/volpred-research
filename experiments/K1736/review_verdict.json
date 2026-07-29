@@ -1,0 +1,33 @@
+{
+  "kid": "K1736",
+  "verdict": "PASS",
+  "reviewer": "hourly-slot-1-5738de9c5aa5470db484b65b881147f0 (main thread, numeric reconciliation) + independent hostile code-audit agent (opus/high)",
+  "reviewed_at": "2026-07-30T01:40:00+08:00",
+  "reviewed_commit": "0974370d99a0ec674ddd2a88604189420e41b52e",
+  "review_artifact": "experiments/K1736/review_round2_collection.md",
+  "blocking_defects": [],
+  "non_blocking_defects_found_and_fixed_this_session": [
+    "ISSUE-1 (fabrication): analytic_note_iid_only_slope.corr_with_skew_level was hardcoded 1.0, never computed, and sign-wrong (skew_level IS zeta30 at L265, and the iid multiplier sqrt(30/93)-1 = -0.432038 is negative, so the true value is -1.0). Fixed by constructing the series and measuring it (n=8356) rather than correcting the constant. The |corr|=1 degeneracy conclusion it supports is unchanged.",
+    "ISSUE-2 (verification theatre): lookahead audit check 3 reduced to `i - 1 > i` and could never fire, so it passed unconditionally with zero power to detect an OOS lookahead. Replaced with a session-calendar measurement independent of the row arithmetic it audits (n_origins_probed=666, min_gap_sessions=1, still passing).",
+    "ISSUE-3 (dead code / docstring overclaim): removed a no-op guard at L455-456 and corrected a docstring that claimed check 2 verified target observability when it only verifies the t-1 regressor identity."
+  ],
+  "verification_performed": {
+    "verdict_block_counters_independently_recomputed": "10/10 match, recomputed from raw univariate_cells / multivariate_incremental / out_of_sample rather than read back",
+    "hac_lag_ge_horizon": "64/64",
+    "t_equals_beta_over_se": "64/64 within 0.02",
+    "holm_monotonicity_vs_raw_p": "64/64",
+    "hodrick_scope_restriction_enforced": "32/32 fwd_ret cells carry a Hodrick SE; 32/32 fwd_mdd path-functional cells correctly carry null",
+    "bit_exact_reproduction_on_frozen_data": true,
+    "experiment_gates_run": "PASS (4 integrity gates)",
+    "lookahead_audit": "5/5 checks pass, one of which was rewritten this session to actually have power",
+    "post_fix_diff_scope": "9 substantive field diffs, all inside the two fixed blocks; all 64 univariate cells, 32 multivariate rows, 35 OOS cells and the entire verdict_block byte-identical"
+  },
+  "verdict_rationale": "NULL_DEGENERATE is not a bug artifact. The null is genuine but doubly bounded, and must be cited as such: (a) the three risk-neutral slopes are 0.86-0.89 R2-explained by the SKEW level because CBOE publishes ^SKEW only at 30 days, so zeta(T) is model-extrapolated -- the results file proves analytically that a pure iid sqrt-scaling slope has correlation exactly -1 with the level; (b) the only non-degenerate slope (ts_realized, corr 0.0965) has effective sample size 31.5-64 at H=126/252. This is a power-limited NULL capped by data availability, NOT a precise estimate of zero predictive power for skew term structure.",
+  "reviewed_sha256": {
+    "K1736.py": "2be05aad1479895d047c943d3edd286c228664142b2352989cbad76d137a9562",
+    "K1736_results.json": "5dd8330133561f72d697d098153565850fa4269a1b8f415989d556d10dc4cb44",
+    "README.md": "5886143f75e3b1aadec1ef3fdb0a98d9b1e1f25c4547cf63ea77e54dbdb79359",
+    "figures/K1736_degeneracy_and_tstats.png": "48790c78209f1e841b382f46a6c3b4663c5828043220f686b99f5c6f6bee93cb",
+    "figures/K1736_slope_level_and_targets.png": "5092c54bfe09206e9199da0963cc863103a80b0b7e67e656a32dd0d939a22808"
+  }
+}
