@@ -961,13 +961,19 @@
      "first_seen_at": "2026-07-29T22:20:23.344314+00:00",
      "key": "30494529174:1",
      "last_seen_at": "2026-07-29T22:20:23.344314+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T23:20:36.191031+00:00",
+     "key": "30498120557:1",
+     "last_seen_at": "2026-07-29T23:20:36.191031+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T22:17:32.9313535Z E AssertionError: raw termination bypasses: ['scripts/ci_install_system_test_dependencies.py:89', 'scripts/ci_install_system_test_dependencies.py:102']",
-   "last_seen_at": "2026-07-29T22:20:23.344314+00:00",
+   "last_breach_detail": "2026-07-29T23:18:24.7681300Z E AssertionError: raw termination bypasses: ['scripts/ci_install_system_test_dependencies.py:89', 'scripts/ci_install_system_test_dependencies.py:102']",
+   "last_seen_at": "2026-07-29T23:20:36.191031+00:00",
    "notified_at": null,
-   "occurrence_count": 1,
+   "occurrence_count": 2,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1686,13 +1692,27 @@
      "first_seen_at": "2026-07-29T22:50:23.656983+00:00",
      "key": "dispatch-slot-1-268e30c9",
      "last_seen_at": "2026-07-29T22:50:23.656983+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "89a2af7e101a291895771fa46071d2d98e98ddbc",
+      "branch": "worktree-dispatch-slot-1-6d97230e",
+      "checkpoint_commit": "a5912edd9ec3b3e74ef76d19b5dfd17cb10b4c89",
+      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
+      "reason": "worker_kill_failed_orphan_drained",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-6d97230e"
+     },
+     "first_seen_at": "2026-07-29T23:25:38.092723+00:00",
+     "key": "dispatch-slot-1-6d97230e",
+     "last_seen_at": "2026-07-29T23:25:38.092723+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-268e30c9 unmergeable (worker_kill_failed_orphan_drained)",
-   "last_seen_at": "2026-07-29T22:50:23.656983+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-6d97230e unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-29T23:25:38.092723+00:00",
    "notified_at": null,
-   "occurrence_count": 5111,
+   "occurrence_count": 5112,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2589,6 +2609,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T22:50:35.263026+00:00",
+ "updated_at": "2026-07-29T23:25:49.107315+00:00",
  "version": 1
 }
