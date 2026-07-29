@@ -1,5 +1,5 @@
 {
-  "last_k_id": 1812,
+  "last_k_id": 1814,
   "reservations": [
     {
       "claimed_at": "2026-06-24T08:08:00.019383+00:00",
@@ -992,22 +992,28 @@
       "topic_hash": "e015a88689eb2483"
     },
     {
+      "amend_note": "Registry was untrue: this number was reserved 2026-07-18T00:00:01Z by research_backlog_auto for the overnight/intraday VRP calendar-effect topic (research_program.md line 596), but ~13h later a P1 dispatch (commit 221c7abb7, 2026-07-18 13:11 CST) allocated K1730 to GEVReg-MIDAS-SSVS arm A without reserving. Commits 9060414f9 / 126164416 / 62bcfe5b7 and the k1730 quarantine manifests now consume the number. Original topic renumbered to K1813; K1730 stays with the GEVReg arm A artifacts (that work is Codex-certified across 12 rounds and renumbering it would be far more disruptive). Consequence being recorded: pool task id K1730 is permanently undispatchable via compute_queue enqueue-agent, because _find_task_dispatch_collision greps commit messages for the literal task id and hits the unmerged branch wt/dispatch-slot-1-bd00f90a-k1731.",
+      "amended_at": "2026-07-29T18:13:36.306784+00:00",
+      "amended_by": "hourly-slot-1-6fa24ccc550146918b39e3b39e4ad902",
       "claimed_at": "2026-07-18T00:00:01.459169+00:00",
       "claimed_by": "research_backlog_auto",
       "k_id": "K1730",
       "number": 1730,
       "source_max": 1729,
-      "status": "reserved",
+      "status": "renumbered",
       "topic": "隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）",
       "topic_hash": "3c7139386715f5a1"
     },
     {
+      "amend_note": "Same squat as K1730. Reserved 2026-07-18T00:00:01Z by research_backlog_auto for the DL-vs-HAR mid/long-horizon boundary test (research_program.md line 598); commit cdf14744d (2026-07-18 16:03 CST) allocated K1731 to GEVReg-MIDAS-SSVS arm B without reserving. Branch wt/dispatch-slot-1-bd00f90a-k1731 now holds 31 unmerged commits and a full experiments/k1731/ tree whose README reads 'K1731 - GEVReg-MIDAS-SSVS arm B: tail-interval forecasts of SPY returns' - a different experiment from the reserved topic. Original topic renumbered to K1814; K1731 stays with the GEVReg arm B artifacts. Note that main carries neither experiments/k1730/ nor experiments/k1731/, so nothing on main disambiguates the two meanings - only this registry row does.",
+      "amended_at": "2026-07-29T18:13:43.751003+00:00",
+      "amended_by": "hourly-slot-1-6fa24ccc550146918b39e3b39e4ad902",
       "claimed_at": "2026-07-18T00:00:01.649089+00:00",
       "claimed_by": "research_backlog_auto",
       "k_id": "K1731",
       "number": 1731,
       "source_max": 1730,
-      "status": "reserved",
+      "status": "renumbered",
       "topic": "深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）",
       "topic_hash": "4346c2ef0c936853"
     },
@@ -1826,8 +1832,28 @@
       "status": "reserved",
       "topic": "BAB beta anomaly conditioned on prior realized volatility (JFE 2025)",
       "topic_hash": "7818b2a416f020d6"
+    },
+    {
+      "claimed_at": "2026-07-29T18:13:20.298389+00:00",
+      "claimed_by": "hourly-slot-1-6fa24ccc550146918b39e3b39e4ad902",
+      "k_id": "K1813",
+      "number": 1813,
+      "source_max": 1812,
+      "status": "reserved",
+      "topic": "隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）[renumbered from K1730: id squatted by GEVReg-MIDAS-SSVS arm A on 2026-07-18]",
+      "topic_hash": "28a9d3c5500206f1"
+    },
+    {
+      "claimed_at": "2026-07-29T18:13:27.182150+00:00",
+      "claimed_by": "hourly-slot-1-6fa24ccc550146918b39e3b39e4ad902",
+      "k_id": "K1814",
+      "number": 1814,
+      "source_max": 1813,
+      "status": "reserved",
+      "topic": "深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）[renumbered from K1731: id squatted by GEVReg-MIDAS-SSVS arm B on 2026-07-18]",
+      "topic_hash": "6df9c7091e45ec01"
     }
   ],
   "schema_version": 1,
-  "updated_at": "2026-07-27T12:17:06.461660+00:00"
+  "updated_at": "2026-07-29T18:13:43.751003+00:00"
 }
