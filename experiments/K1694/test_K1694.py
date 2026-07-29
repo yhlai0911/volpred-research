@@ -148,7 +148,12 @@ def test_partial_months_are_excluded_by_rule(results: dict, panel: pd.DataFrame)
     assert "2026-07" in dropped, "the partial DCOT month is still in the panel"
     assert str(panel["month"].max()) not in dropped
     assert results["sample"]["panel_span"][1] == "2026-06"
-    assert results["sample"]["panel_span_is_complete_months_only"] is True
+    # Codex round 4: the count-only RV cache cannot certify complete months, so the
+    # claim is withdrawn. The disclosure that replaces it must say what IS certified.
+    assert results["sample"]["panel_span_is_complete_months_only"] is False
+    basis = results["sample"]["panel_span_completeness_basis"]
+    assert "CERTIFIED" in basis and "SCREENED" in basis
+    assert "rv_residual_blind_spot" in basis
 
 
 def test_completeness_rule_holds_on_every_retained_row(panel: pd.DataFrame) -> None:
@@ -235,17 +240,108 @@ def test_completeness_rule_catches_a_truncation_common_to_every_commodity() -> N
         "a truncation common to every commodity was accepted as a complete month")
 
 
+def test_common_two_day_truncation_2020_10() -> None:
+    """Codex round-4 counterexample 1, verbatim.
+
+    2020-10 has 22 weekdays and one federal holiday CME futures trade through,
+    Columbus Day. The retired calendar subtracted it, so ``expected`` read 21 while
+    every commodity in the cache actually has 22 days. Truncating all 22 commodities
+    by two days then left ``expected - max(ndays) = 1``, inside the month-level
+    threshold, and 22/22 rows were still certified -- refuting the claim that a
+    common truncation of two days is detected. The calendar no longer subtracts
+    Columbus Day, so the same truncation now reads 2 and every row is flagged.
+    """
+    dcot = K1694.build_dcot()
+    rv = K1694.build_vol().copy()
+    month = pd.Period("2020-10", "M")
+    rows = rv["month_end"].dt.to_period("M") == month
+    assert rows.sum() == 22, "the counterexample needs the full 22-commodity month"
+    base = K1694.monthly_coverage(dcot, rv)
+    in_month = base["month"] == month
+    assert base.loc[in_month, "rv_complete"].all(), "untouched month must start complete"
+    assert (base.loc[in_month, "rv_ndays"] == 22).all()
+    assert base.loc[in_month, "rv_expected_trading_days"].eq(22).all(), (
+        "Columbus Day is a trading day for CME futures; expected must count it")
+
+    rv.loc[rows, "ndays"] = rv.loc[rows, "ndays"] - 2  # everyone loses two days
+    cov = K1694.monthly_coverage(dcot, rv)
+    hit = cov.loc[cov["month"] == month]
+    assert hit["rv_cross_shortfall"].max() == 0, "cross-sectional check is blind here"
+    assert (hit["rv_month_shortfall"] == 2).all()
+    assert not hit["rv_complete"].any(), (
+        "a two-day truncation common to every commodity was accepted as complete")
+
+
+def test_endpoint_truncation_2020_06() -> None:
+    """Codex round-4 counterexample 2, verbatim.
+
+    The date-bearing path allowed up to three weekday gaps at each end of the month,
+    so dropping 2020-06-30 from every commodity left ``rv_tail_gap_days = 1`` and
+    22/22 rows complete -- the same one-day endpoint blind spot the disclosure said
+    existed only in the count-only cache. The gate now requires the observed first /
+    last day to reach the calendar's first / last trading day exactly.
+    """
+    dcot = K1694.build_dcot()
+    rv = K1694.build_vol().copy()
+    assert {"first_day", "last_day"} - set(rv.columns) == {"first_day", "last_day"}, (
+        "the frozen cache is count-only; this test injects the dates itself")
+    # Injected from the plain weekday boundaries, not from the module's calendar, so
+    # this test reproduces Codex's counterexample on the pre-fix code as well.
+    per = rv["month_end"].dt.to_period("M")
+    rv["first_day"] = [pd.bdate_range(p.start_time, p.end_time)[0] for p in per]
+    rv["last_day"] = [pd.bdate_range(p.start_time, p.end_time)[-1] for p in per]
+
+    month = pd.Period("2020-06", "M")
+    rows = rv["month_end"].dt.to_period("M") == month
+    assert rows.sum() == 22
+    base = K1694.monthly_coverage(dcot, rv)
+    in_month = base["month"] == month
+    assert base.loc[in_month, "rv_complete"].all(), "untouched month must start complete"
+    assert (base.loc[in_month, "last_day"] == pd.Timestamp("2020-06-30")).all()
+
+    # every commodity loses the last trading day, and only that day
+    rv.loc[rows, "last_day"] = pd.Timestamp("2020-06-29")
+    rv.loc[rows, "ndays"] = rv.loc[rows, "ndays"] - 1
+    cov = K1694.monthly_coverage(dcot, rv)
+    hit = cov.loc[cov["month"] == month]
+    assert (hit["rv_tail_gap_days"] == 1).all(), "the retired rule allowed <= 3 here"
+    assert (hit["rv_month_shortfall"] == 1).all(), (
+        "the count test alone cannot see this: it is inside the one-day tolerance")
+    assert not hit["rv_complete"].any(), (
+        "a one-day endpoint truncation was accepted as a complete month")
+
+
+def test_endpoint_gate_accepts_an_untruncated_dated_cache() -> None:
+    """The endpoint gate must not simply reject everything: with the calendar's own
+    endpoints injected, the dated path certifies the same months the count path does."""
+    dcot = K1694.build_dcot()
+    rv = K1694.build_vol().copy()
+    first, last = K1694.expected_month_endpoints()
+    per = rv["month_end"].dt.to_period("M")
+    rv["first_day"] = per.map(first)
+    rv["last_day"] = per.map(last)
+    rv = rv.loc[rv["first_day"].notna() & rv["last_day"].notna()].copy()
+    cov = K1694.monthly_coverage(dcot, rv)
+    dated = cov.loc[cov["rv"].notna(), "rv_complete"]
+    count_only = K1694.monthly_coverage(dcot, K1694.build_vol())
+    count_only = count_only.loc[count_only["rv"].notna(), "rv_complete"]
+    assert dated.sum() == count_only.sum(), (
+        "injecting the calendar's own endpoints must not change which months pass")
+
+
 def test_rv_endpoint_test_is_declared_unavailable_when_the_cache_lacks_dates(
         results: dict) -> None:
     """The frozen cache stores counts only. Say so; do not claim an endpoint test."""
     rule = results["sample"]["completeness"]["rule"]
     rv_cache_has_dates = {"first_day", "last_day"} <= set(K1694.build_vol().columns)
     if rv_cache_has_dates:
-        assert rule["rv_endpoint_test"] == "applied"
+        assert rule["rv_endpoint_test"].startswith("applied")
     else:
         assert rule["rv_endpoint_test"].startswith("UNAVAILABLE")
         assert "does NOT prove" in rule["rv_residual_blind_spot"]
         assert "2012-10" in rule["rv_residual_blind_spot"]
+        # Codex round 4: months that pass a count-only screen are not certified.
+        assert "NOT certified complete" in rule["rv_residual_blind_spot"]
     # The claim must not appear in the rule's POSITIVE descriptions; the blind-spot
     # field exists precisely to deny it, so it is excluded from the scan.
     positive = json.dumps({k: v for k, v in rule.items()

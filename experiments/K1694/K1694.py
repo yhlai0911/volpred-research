@@ -63,6 +63,7 @@ spec1-3 的波動 regime 與結果同期，且 regime label（`rv_z`/`highvol`�
 """
 from __future__ import annotations
 
+import functools
 import io
 import json
 import re
@@ -112,20 +113,39 @@ MAX_DCOT_GAP_DAYS = 9       # 相鄰週報間隔（含跨月界那一段）；�
 MAX_DCOT_TAIL_GAP_DAYS = 6  # 末份週報距月底；序列在此中斷時沒有「下一份」可比，故仍需這條
 
 # RV 端：ndays 是**計數**，計數證明不了下載跑到月底。能從只存計數的快取做到的最強檢查，是
-# 拿它跟**假日調整後的預期交易日數**比（美國聯邦假日 + Good Friday，CME 的休市日集合）。
+# 拿它跟**期貨交易日曆的預期交易日數**比。
 #   - 個別商品短少 -> 它自己的下載被截斷（另外再跟同月其他商品比一次）。
 #   - **整月所有商品一起短少** -> 月層級的 anchor 才抓得到；這正是 Codex round 3 指出
 #     cross-sectional max 會失效的情形。
-# 實測（月層級 expected - max(ndays)）：209 個月是 0、47 個月是負的（CME 在 Columbus Day /
-# Veterans Day 照常交易，所以實際交易日多於聯邦日曆），只有 3 個月是正的：2012-10（+1，
-# Sandy 颶風休市）、2018-12（+1，老布希國殤日休市）、2026-07（+12，被截斷）。
-# 因此門檻 1 抓得到「共同短少 ≥2 天」，抓不到「共同短少剛好 1 天」—— 那和一次計畫外休市
-# 在只有計數的快取裡無法區分。**這個盲區照實揭露，不用規則假裝它不存在**（見
-# results.sample.completeness.rule.rv_residual_blind_spot）。
+# round 4 反例：舊版把 expected 定義成「weekdays − 美國聯邦假日 − Good Friday」，但 Columbus
+# Day 與 Veterans Day 是**聯邦假日、期貨照常交易**，所以 expected 被低估。2020-10 日曆給 21、
+# 快取裡 22 個商品實際都是 22 天；共同截短 2 天後 expected − max(ndays) 只有 1，22/22 仍判
+# complete —— 「共同短少 ≥2 天必偵測」當場被推翻。方向偏 permissive 不能拿來當藉口：它推翻的
+# 正是這條規則自己寫出來的偵測宣稱。現在改用 CME 期貨休市日曆（見 _cme_holidays）。
+# 實測（月層級 expected − max(ndays)，RV 快取全部 259 個月）：246 個月是 0；8 個月是 −1，因為
+# 部分合約在 CME 休市日仍印出縮短交易時段的日線（2005-11 / 2006-05 / 2006-09 / 2006-11 /
+# 2006-12 / 2007-01 / 2023-11 / 2025-07；其中前兩個早於 DCOT 起點，不進 coverage）；正的只有
+# 2016-10、2016-11（+1，該年 Columbus / Veterans Day 全商品無日線）與 2026-07（+12，被截斷）。
+# 兩次計畫外休市走**列舉式白名單**（CME_UNSCHEDULED_CLOSURES），不是把門檻放寬到舊樣本回來。
+# 因此門檻 1 抓得到「共同短少 ≥2 天」，抓不到「共同短少剛好 1 天」—— 那和一次計畫外休市在只有
+# 計數的快取裡無法區分；上述 −1 的月份盲區則是 2 天。**這些數字不手寫**：進入 coverage 的那些
+# 月份由 coverage_report() 在執行時逐月列進
+# results.sample.completeness.rule.rv_months_observed_beyond_the_cme_calendar。
+# 盲區還在，所以月份只能說「通過篩檢」不能說「認證完整」（見 rv_residual_blind_spot）。
 MIN_RV_DAYS = 15
 MAX_RV_SHORTFALL_VS_CALENDAR = 2   # per commodity: expected_trading_days - ndays
 MAX_RV_CROSS_SHORTFALL = 2         # per commodity: max(ndays that month) - ndays
 MAX_RV_MONTH_SHORTFALL = 1         # per month:  expected_trading_days - max(ndays)
+
+# 計畫外休市：**列舉、有外部事件出處**，逐日從預期交易日曆扣掉。這裡放的是「交易所根本沒開」
+# 的日子，不是「資料看起來少了一天」—— 白名單只能由外部事件證成，不能由被檢查的快取推導，
+# 否則就是拿答案去配門檻。代價要照實講：白名單條目本身在只有計數的快取裡與一次共同截斷無法
+# 區分，這正是 rv_residual_blind_spot 說的同一個盲區（見 coverage_report）。
+CME_UNSCHEDULED_CLOSURES = {
+    "2012-10-29": "Hurricane Sandy: U.S. markets closed (day 1 of 2)",
+    "2012-10-30": "Hurricane Sandy: U.S. markets closed (day 2 of 2)",
+    "2018-12-05": "national day of mourning for George H. W. Bush",
+}
 
 # spec4 的 point-in-time regime label 需要的最短暖身期
 PIT_MIN_MONTHS = 24
@@ -424,10 +444,14 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
         therefore never certifiable. Incomplete months are dropped outright: they
         can be neither an outcome nor the lag of one.
     ``rv_complete``
-        the month's day COUNT is consistent with a holiday-adjusted trading
-        calendar, per commodity and for the month as a whole. This is a count
-        test, not an endpoint test -- see ``rv_endpoint_test`` below and the
-        blind spot recorded in :func:`coverage_report`. Incomplete months keep
+        the month's day COUNT is consistent with the CME futures trading calendar,
+        per commodity and for the month as a whole, AND -- only if the cache carries
+        observation dates -- the observed first/last day reaches the calendar's
+        first/last scheduled trading day. The frozen count-only cache exercises the
+        count test alone, which SCREENS a month rather than certifying it: a
+        one-day truncation common to every commodity is inside the tolerance. See
+        ``rv_residual_blind_spot`` in :func:`coverage_report`; do not read
+        ``rv_complete`` as "this month is provably whole". Incomplete months keep
         their DCOT row (so the difference chain is not broken) but their ``rv`` is
         masked to NaN, because a partial month cannot label a volatility regime.
     """
@@ -481,37 +505,93 @@ def monthly_coverage(dcot: pd.DataFrame, rv: pd.DataFrame) -> pd.DataFrame:
         # A cache that carries the actual first/last observation dates upgrades the
         # count test to a real endpoint test. The frozen cache used for the reported
         # run does not; see coverage_report()["rule"]["rv_endpoint_test"].
+        #
+        # The gap is measured against the CALENDAR's first/last scheduled trading
+        # day and must be ZERO. The retired rule measured against the month boundary
+        # and allowed three weekday gaps at each end, which is why Codex round 4 could
+        # delete 30 June 2020 from all 22 commodities and keep every row complete.
+        # Observing MORE than the calendar (an abbreviated holiday session on the 1st
+        # or the last day) reads as a gap of 0, so extra data never fails the gate.
+        first_exp, last_exp = expected_month_endpoints()
         first = pd.to_datetime(cov["first_day"], errors="coerce")
         last = pd.to_datetime(cov["last_day"], errors="coerce")
-        cov["rv_head_gap_days"] = _weekdays_between(cov["month_start"], first)
-        cov["rv_tail_gap_days"] = _weekdays_between(last, cov["month_end"])
-        cov["rv_complete"] &= (cov["rv_head_gap_days"].le(3).fillna(False)
-                               & cov["rv_tail_gap_days"].le(3).fillna(False))
+        exp_first = cov["month"].map(first_exp)
+        exp_last = cov["month"].map(last_exp)
+        cov["rv_head_gap_days"] = _weekdays_between(exp_first, first)
+        cov["rv_tail_gap_days"] = _weekdays_between(last, exp_last)
+        cov["rv_complete"] &= (first.le(exp_first).fillna(False)
+                               & last.ge(exp_last).fillna(False))
     return cov
 
 
-def _expected_trading_days() -> dict:
-    """Weekdays minus U.S. federal holidays and Good Friday, per calendar month.
+@functools.lru_cache(maxsize=1)
+def _cme_trading_days() -> pd.DatetimeIndex:
+    """Weekdays on which CME futures are scheduled to trade, 2000-2035.
 
-    The set CME observes; Columbus Day and Veterans Day are federal holidays on
-    which futures do trade, so this UNDERSTATES the true trading-day count by up to
-    two days a year. That direction is safe here: the rule flags months that are
-    SHORT of it, so understating it can only make the rule more permissive, never
-    make it drop a legitimate month.
+    Codex round 4 blocked on the previous definition, "weekdays minus U.S. FEDERAL
+    holidays minus Good Friday". Columbus Day and Veterans Day are federal holidays
+    on which CME futures trade, so that set understated the true trading-day count.
+    The old docstring called the direction safe because it only made the rule more
+    permissive -- true, and beside the point: what it made false was the rule's own
+    detection claim. 2020-10 is the counterexample (see the note above
+    ``MIN_RV_DAYS``), and ``test_common_two_day_truncation_2020_10`` pins it.
+
+    The holidays below are the days CME Globex is closed outright. Some contracts
+    still print a daily bar on an abbreviated session around a few of them, so the
+    count this yields is a lower bound on what a given contract may show; the months
+    where that happens are enumerated at run time in :func:`coverage_report`.
     """
-    from pandas.tseries.holiday import (AbstractHolidayCalendar, GoodFriday,
-                                        USFederalHolidayCalendar)
+    from pandas.tseries.holiday import (AbstractHolidayCalendar, GoodFriday, Holiday,
+                                        USLaborDay, USMartinLutherKingJr,
+                                        USMemorialDay, USPresidentsDay,
+                                        USThanksgivingDay, nearest_workday,
+                                        sunday_to_monday)
 
     class _CMECalendar(AbstractHolidayCalendar):
-        rules = [*USFederalHolidayCalendar.rules, GoodFriday]
+        # New Year on a Saturday is NOT rolled back to 31 Dec: futures trade that
+        # Friday (verified against 2010-12 and 2021-12, which both show the extra
+        # day in every contract). Christmas and Independence Day DO roll.
+        rules = [
+            Holiday("NewYearsDay", month=1, day=1, observance=sunday_to_monday),
+            USMartinLutherKingJr,
+            USPresidentsDay,
+            GoodFriday,
+            USMemorialDay,
+            # CME first closed for Juneteenth in 2022; 2021-06-18 traded normally.
+            Holiday("Juneteenth", month=6, day=19, start_date="2022-06-19",
+                    observance=nearest_workday),
+            Holiday("IndependenceDay", month=7, day=4, observance=nearest_workday),
+            USLaborDay,
+            USThanksgivingDay,
+            Holiday("Christmas", month=12, day=25, observance=nearest_workday),
+        ]
 
-    hol = _CMECalendar().holidays(start="1990-01-01", end="2035-12-31")
-    hol = pd.DatetimeIndex([h for h in hol if h.dayofweek < 5])
-    out = {}
-    for m in pd.period_range("2000-01", "2035-12", freq="M"):
-        ms, me = m.to_timestamp(how="start"), m.to_timestamp(how="end")
-        out[m] = len(pd.bdate_range(ms, me)) - int(((hol >= ms) & (hol <= me)).sum())
-    return out
+    hol = _CMECalendar().holidays(start="2000-01-01", end="2035-12-31")
+    closed = pd.DatetimeIndex([h for h in hol if h.dayofweek < 5]).union(
+        pd.DatetimeIndex(sorted(CME_UNSCHEDULED_CLOSURES)))
+    return pd.bdate_range("2000-01-01", "2035-12-31").difference(closed)
+
+
+@functools.lru_cache(maxsize=1)
+def _expected_trading_days() -> dict:
+    """Scheduled CME futures trading days per calendar month."""
+    days = _cme_trading_days()
+    return pd.Series(1, index=days.to_period("M")).groupby(level=0).size().to_dict()
+
+
+@functools.lru_cache(maxsize=1)
+def expected_month_endpoints() -> tuple[dict, dict]:
+    """First and last scheduled CME trading day of each calendar month.
+
+    These are the anchors the endpoint test compares against. A download that stops
+    before the last scheduled trading day, or starts after the first, fails -- no
+    tolerance, because a tolerance is exactly what let Codex's 2020-06 counterexample
+    through (three weekday gaps were allowed at each end, so dropping 30 June from
+    every commodity still passed).
+    """
+    days = _cme_trading_days()
+    g = pd.Series(days, index=days.to_period("M")).groupby(level=0)
+    return g.min().to_dict(), g.max().to_dict()
 
 
 def _weekdays_between(a: pd.Series, b: pd.Series) -> pd.Series:
@@ -554,6 +634,22 @@ def coverage_report(cov: pd.DataFrame) -> dict:
                 for _, r in out.iterrows()]
 
     endpoint_test = "first_day" in cov.columns and "last_day" in cov.columns
+    # Months where at least one contract prints a bar on a day the CME calendar calls
+    # a holiday (abbreviated sessions around Thanksgiving, Labor Day, 4 July ...).
+    # There max(ndays) exceeds the calendar, so the common-truncation threshold is
+    # that much looser. Enumerated at run time -- never hand-written -- because it is
+    # the exact extent of the residual blind spot.
+    have = cov.loc[cov["rv_ndays"].notna()]
+    per_month = have.groupby("month").agg(
+        observed=("rv_ndays", "max"),
+        expected=("rv_expected_trading_days", "max")).reset_index()
+    over = per_month.loc[per_month["observed"] > per_month["expected"]]
+    beyond = [{"month": str(r["month"]),
+               "cme_calendar_days": int(r["expected"]),
+               "max_days_observed": int(r["observed"]),
+               "common_truncation_days_needed_to_detect":
+                   int(MAX_RV_MONTH_SHORTFALL + 1 + r["observed"] - r["expected"])}
+              for _, r in over.iterrows()]
     return {
         "rule": {
             "dcot_month_complete": (
@@ -575,26 +671,48 @@ def coverage_report(cov: pd.DataFrame) -> dict:
                 f"AND expected_trading_days - max(trading days that month) <= "
                 f"{MAX_RV_MONTH_SHORTFALL}"),
             "rv_expected_trading_days_definition": (
-                "weekdays minus U.S. federal holidays and Good Friday; understates "
-                "the true count on Columbus Day / Veterans Day, which only makes the "
-                "rule more permissive"),
+                "weekdays minus the CME futures holiday calendar -- New Year (not "
+                "rolled back to 31 Dec when 1 Jan is a Saturday), MLK, Presidents' "
+                "Day, Good Friday, Memorial Day, Juneteenth from 2022, Independence "
+                "Day, Labor Day, Thanksgiving, Christmas -- minus the enumerated "
+                "unscheduled closures in rv_unscheduled_closures. Columbus Day and "
+                "Veterans Day are federal holidays on which CME futures TRADE and are "
+                "deliberately not subtracted: subtracting them understated the count "
+                "and refuted this rule's own detection claim (Codex round 4, 2020-10)."),
+            "rv_unscheduled_closures": dict(CME_UNSCHEDULED_CLOSURES),
             "rv_rule_detects": (
-                "an independently truncated download (a commodity short of both the "
-                "calendar and its peers) AND a truncation common to every commodity "
-                "of 2 or more days, which no cross-sectional check can see"),
-            "rv_endpoint_test": ("applied" if endpoint_test else
-                                 "UNAVAILABLE for this cache: rv_monthly.csv stores "
-                                 "day counts only, no first/last observation dates. "
-                                 "build_vol() now records them, so any regenerated "
-                                 "cache upgrades this to a true endpoint test."),
+                f"an independently truncated download (a commodity short of both the "
+                f"calendar and its peers) AND a truncation common to every commodity "
+                f"of {MAX_RV_MONTH_SHORTFALL + 1} or more days, which no "
+                f"cross-sectional check can see -- except in the "
+                f"{len(beyond)} months listed under "
+                f"rv_months_observed_beyond_the_cme_calendar, where some contract "
+                f"prints an abbreviated holiday session, so the threshold there is "
+                f"the per-month figure given in that list"),
+            "rv_months_observed_beyond_the_cme_calendar": beyond,
+            "rv_endpoint_test": (
+                "applied: observed first_day <= the calendar's first scheduled "
+                "trading day of the month AND observed last_day >= its last, with no "
+                "tolerance, so a truncation at either end fails whatever the day "
+                "count says" if endpoint_test else
+                "UNAVAILABLE for this cache: rv_monthly.csv stores day counts only, "
+                "no first/last observation dates. build_vol() now records them, so "
+                "any regenerated cache upgrades this to a true endpoint test."),
             "rv_residual_blind_spot": (
                 "a truncation of exactly ONE day common to every commodity is "
                 "indistinguishable, in a count-only cache, from an unscheduled "
-                "market closure. Two such closures are in sample and are correctly "
-                "kept: 2012-10 (Hurricane Sandy) and 2018-12 (national day of "
-                "mourning). This rule therefore does NOT prove each download reached "
-                "both ends of its month; it proves the day count is consistent with "
-                "a holiday-adjusted calendar to within one day."),
+                "market closure -- and by the same token an entry in "
+                "rv_unscheduled_closures rests on the external event that dated it, "
+                "not on anything this cache can show. Two such closures are in "
+                "sample and are subtracted by name: 2012-10 (Hurricane Sandy) and "
+                "2018-12 (national day of mourning). This rule therefore does NOT "
+                "prove each download reached both ends of its month; it SCREENS the "
+                "day count for consistency with the CME futures calendar to within "
+                "one day, wider by the excess shown in "
+                "rv_months_observed_beyond_the_cme_calendar. Months that pass are "
+                "screened, NOT certified complete: certifying them from a count-only "
+                "cache would need independent endpoint evidence, which this frozen "
+                "rv_monthly.csv does not carry."),
             "date_hardcoded": False,
             "effect_of_dcot_incomplete": "row dropped from the panel entirely",
             "effect_of_rv_incomplete": "rv masked to NaN; DCOT row retained",
@@ -1291,7 +1409,21 @@ def main():
             "panel_rows_usable": int(len(frame)),
             "panel_commodities": int(frame["commodity"].nunique()),
             "panel_span": [str(frame["month"].min()), str(frame["month"].max())],
-            "panel_span_is_complete_months_only": True,
+            # Codex round 4: this said `true`, and the count-only RV cache cannot
+            # support it. DCOT continuity IS certified; RV completeness is screened
+            # to within one day. Withdrawn rather than kept as a strong-sounding
+            # sentence the code does not enforce.
+            "panel_span_is_complete_months_only": False,
+            "panel_span_completeness_basis": (
+                "every retained row's DCOT month is CERTIFIED continuous -- at least "
+                f"{MIN_DCOT_WEEKS} reports, no gap over {MAX_DCOT_GAP_DAYS} days "
+                "between consecutive reports including the entry gap from the "
+                "previous month, so a skipped week anywhere fails. Its RV month is "
+                "only SCREENED: the day count must match the CME futures calendar to "
+                "within one day, which cannot rule out a one-day truncation common to "
+                "every commodity. No partial month such as 2026-07 survives either "
+                "test, but 'complete months only' would overstate the RV side. See "
+                "sample.completeness.rule.rv_residual_blind_spot."),
             "lagged_frame_rows": int(len(lagged_frame)),
             "effective_temporal_dof": {
                 "calendar_months": int(panel_res["spec1_fcm_highvol"]["n_months"]),
