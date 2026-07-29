@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "title": "懶人包：五個波動模型同場考試，最新的那個考最後一名",
+  "evidence": {
+    "results": {
+      "path": "experiments/k775/k775_har_pd_results.json",
+      "sha256": "053e897aecd03500572ca09e98824f5d15ce83f2fab1595103e89cb25d61a9a9",
+      "label": "SPY 日收盤波動率模型比較實驗結果（滾動重新校準、樣本外逐日評分、統一預測目標）"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "明天會晃多大，五個模型同場考",
+      "alt": "問題面板：五個預測隔天股價波動幅度的模型，跑同一份美股大盤指數股票型基金的日收盤資料、同一套評分規則。每個模型每天只能用當天以前的資料作答，參數隨時間定期重新校準，因此記分的每一天都是模型沒見過的日子。面板列出樣本外評分天數與資料期間兩個數字。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "考法：每天現場作答",
+          "body": [
+            "模型每天只用當天以前的資料猜隔天波動，隔天揭曉就記一次分，分數越低代表越準。",
+            "參數不是算一次就放著，訓練資料隨時間往後長、定期重新校準，所以記分的日子模型都沒見過。",
+            "評分規則對低估特別嚴格：把明天說得比實際平靜，扣分比說得比實際激烈更重。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "被記分的樣本外交易日數",
+          "value": {
+            "source": "results",
+            "path": "/n_oos",
+            "format": {
+              "kind": "integer"
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "資料期間",
+          "value": {
+            "source": "results",
+            "path": "/data_period",
+            "format": {
+              "kind": "text"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_new_features",
+      "info": "method",
+      "style": "professional",
+      "title": "新版本多加了四個描述走勢的欄位",
+      "alt": "方法面板：最新那個版本的作法，是拿既有的日內波動迴歸模型當底本，再多餵四個描述市場最近走過什麼路的欄位，包含短期均線相對長期均線的方向、兩條均線的乖離幅度、過去一個月的累積報酬，以及過去一個月的最大回落。面板並列底本的分數、加上四個欄位之後的分數，以及兩者的退步幅度，並註明這個差距在統計上分不出勝負。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "加的是「最近走過什麼路」",
+          "body": [
+            "底本是那個把短、中、長期波動疊起來的迴歸模型；新版本在它上面多餵四個欄位。",
+            "四個欄位分別是短期均線相對長期均線的方向、兩條均線的乖離幅度、過去一個月的累積報酬、過去一個月的最大回落。",
+            "想法很直觀：剛從高點摔下來的市場，跟慢慢往上爬的市場，就算當下波動一樣，隔天也不該一樣。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "只有底本的平均誤差分數",
+          "value": {
+            "source": "results",
+            "path": "/metrics/har_abs/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "底本加上四個新欄位之後",
+          "value": {
+            "source": "results",
+            "path": "/metrics/har_pd/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "加了之後反而退步",
+          "value": {
+            "source": "results",
+            "path": "/har_pd_vs_har_abs/improvement_pct",
+            "format": {
+              "kind": "percent",
+              "scale": 1,
+              "digits": 2,
+              "absolute": true
+            }
+          },
+          "note": "這個差距沒有跨過我們設的門檻，跟雜訊分不開，只能說沒幫上忙"
+        }
+      ]
+    },
+    {
+      "name": "panel_ranking",
+      "info": "results",
+      "style": "professional",
+      "title": "真正拉開距離的是模型家族",
+      "alt": "結果面板：全期成績單上分數最低（最準）的兩名，都是把下跌和上漲分開處理的舊模型；底本加了四個新欄位的版本反而全期墊底。面板同時列出把樣本按當期波動高低切成兩半之後，波動大的那一半裡新版本的分數，顯示它的墊底幾乎全部來自激動的市況；平靜的那一半它反而小勝底本。贏過底本的那兩個舊模型，統計強度遠超門檻。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "全期第一名：分開處理跌與漲的舊模型",
+          "value": {
+            "source": "results",
+            "path": "/metrics/amem/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全期第二名：同樣分開處理跌與漲",
+          "value": {
+            "source": "results",
+            "path": "/metrics/gjr/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "全期最後一名：底本加四個新欄位",
+          "value": {
+            "source": "results",
+            "path": "/metrics/har_pd/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "波動大的那一半：新版本更吃力",
+          "value": {
+            "source": "results",
+            "path": "/subperiod_analysis/high_vol/har_pd/qlike",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          },
+          "note": "同一段裡沒加欄位的底本更準"
+        },
+        {
+          "kind": "text",
+          "heading": "家族之間的差距，遠大於加不加欄位",
+          "body": [
+            "前兩名贏過底本的幅度，統計強度遠遠超過門檻，大到幾乎不可能是運氣。",
+            "同一份資料裡，換掉模型家族帶來的改善，是加那四個欄位那件事的好幾倍，而且方向相反。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "切成兩半，冠亞軍沒換人",
+          "body": [
+            "按當期波動高低把樣本切成一半一半，前兩名在兩邊都是前兩名，排名不是某一段市況撐出來的。",
+            "新版本在平靜的那一半反而小勝底本；它的墊底幾乎全部來自波動大的那一半——偏偏那正是最需要模型撐住的時候。"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "先確認模型有沒有把跌和漲分開",
+      "alt": "帶走一句面板：翻全樣本估出來的參數可以看到，冠軍模型分配給「漲跌一視同仁」那一項的權重被估成零，反應全部集中在下跌那一項；亞軍模型也一樣偏心，下跌額外加的係數遠大於上漲的係數。兩個贏家的共同點是把跌和漲當成兩件事，而新加的四個欄位補的是最近走勢的形狀，剛好不是模型缺的那一塊。面板也提醒這是單一標的、單一資料頻率、單一評分規則的結果。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "metric",
+          "label": "冠軍模型：漲跌一視同仁那一項的權重",
+          "value": {
+            "source": "results",
+            "path": "/full_sample_params/amem/alpha",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "冠軍模型：只在下跌日啟動的那一項",
+          "value": {
+            "source": "results",
+            "path": "/full_sample_params/amem/gamma",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "亞軍模型：上漲的反應係數",
+          "value": {
+            "source": "results",
+            "path": "/full_sample_params/gjr/alpha",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "亞軍模型：下跌額外再加的係數",
+          "value": {
+            "source": "results",
+            "path": "/full_sample_params/gjr/gamma",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "text",
+          "heading": "補錯地方了",
+          "body": [
+            "兩個贏家都把跌和漲當成兩件事；底本那一家用報酬的絕對值，漲一分跟跌一分算同一件事。",
+            "新加的四個欄位補的是最近走勢的形狀，剛好不是模型缺的那一塊。拿到「在既有模型上加欄位」的作法，先確認底本是不是這份資料上最好的選擇。"
+          ]
+        },
+        {
+          "kind": "text",
+          "heading": "別把結論拉得太遠",
+          "body": [
+            "這是單一標的、單一資料頻率、單一評分規則的結果，換市場、換頻率、換評分方式，名次有可能重排。",
+            "而且家族之間的差距是穩定但不誇張的高下之分，不是舊模型碾壓新模型。"
+          ]
+        }
+      ]
+    }
+  ]
+}
