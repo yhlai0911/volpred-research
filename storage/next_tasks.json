@@ -35961,7 +35961,7 @@
     "title": "K1730: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-2",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 596). Original: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1730.py with signal.shift(1) + seed=42, (c) K1730_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "failed",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36003,19 +36003,42 @@
         "to": "pending",
         "by": "hourly-slot-1-5738de9c5aa5470db484b65b881147f0",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-29T19:12:26.978382+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-8af0700e2e824061adab655d58d04357"
+      },
+      {
+        "ts": "2026-07-29T19:12:27.270289+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-8af0700e2e824061adab655d58d04357"
+      },
+      {
+        "ts": "2026-07-29T19:17:13.929752+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-8af0700e2e824061adab655d58d04357"
       }
     ],
     "dispatch_blocker": "enqueue-agent 被 _find_task_dispatch_collision 擋下：stale worktree dispatch-slot-1-bd00f90a-k1731（dispatch report 已標 stale, 無進度 7.5h）的 quarantine commit（\"NN stuck foreign path(s)\"）掃進 k1730-named 路徑，git log --grep=K1730 命中未 merge 分支 → 機械拒派（正確，不可繞過）。解法先決條件：reclaim/清理該 stale worktree（reclaim_stale_worktrees.py）——但該 worktree 另含今日(07-27 12:38) k1731 近期產物，reclaim 需謹慎不可 force。brief 已備妥 storage/ops/agent_briefs/agent-brief_k1730.md 供解阻後直接 enqueue。",
     "last_released_at": "2026-07-29T17:44:26.249851+00:00",
     "successor_k_id": "K1813",
-    "dispatch_blocker_root_cause": "2026-07-30 02:1x CST slot-1 6fa24ccc 補上根因（原 dispatch_blocker 只描述症狀）：這不是 stale worktree 需要 reclaim 的問題，而是 K-id 佔用。research_backlog_auto 2026-07-18T00:00:01Z 已保留 K1730 給本主題（隔夜 VRP 星期效應），同日 13:11 commit 221c7abb7 的 P1 dispatch 未經 kid_reserve 就把 K1730 指派給 GEVReg-MIDAS-SSVS arm A。因此 git log --grep=K1730 命中的 quarantine commit（訊息本文列了 experiments/k1730/* 路徑清單）與 9060414f9/126164416/62bcfe5b7 都屬於另一個實驗。已於 k_id_registry 用 reassign --status renumbered 記錄，原主題改配 K1813。與 K1731 同一成因、同一解阻路徑（main_thread 裁決/merge wt/dispatch-slot-1-bd00f90a-k1731）。"
+    "dispatch_blocker_root_cause": "2026-07-30 02:1x CST slot-1 6fa24ccc 補上根因（原 dispatch_blocker 只描述症狀）：這不是 stale worktree 需要 reclaim 的問題，而是 K-id 佔用。research_backlog_auto 2026-07-18T00:00:01Z 已保留 K1730 給本主題（隔夜 VRP 星期效應），同日 13:11 commit 221c7abb7 的 P1 dispatch 未經 kid_reserve 就把 K1730 指派給 GEVReg-MIDAS-SSVS arm A。因此 git log --grep=K1730 命中的 quarantine commit（訊息本文列了 experiments/k1730/* 路徑清單）與 9060414f9/126164416/62bcfe5b7 都屬於另一個實驗。已於 k_id_registry 用 reassign --status renumbered 記錄，原主題改配 K1813。與 K1731 同一成因、同一解阻路徑（main_thread 裁決/merge wt/dispatch-slot-1-bd00f90a-k1731）。",
+    "started_at": "2026-07-29T19:12:27.270277+00:00",
+    "superseded_by": "K1813",
+    "renumber_receipt": "2026-07-30 03:3x CST slot-1 8af0700e: id permanently undispatchable (literal-grep collision on unmerged wt/dispatch-slot-1-bd00f90a-k1731). Topic re-materialized as pool task K1813 and dispatched as compute job agent-brief_k1813-5f38bb (worktree dispatch-slot-1-8af0700e-k1813). Do not re-open this id.",
+    "completed_at": "2026-07-29T19:17:13.929720+00:00",
+    "result": "SUPERSEDED, not executed under this id. K1730 is permanently undispatchable: compute_queue _find_task_dispatch_collision greps commit messages for the literal task id and hits unmerged branch wt/dispatch-slot-1-bd00f90a-k1731 (GEVReg-MIDAS-SSVS arms, which squatted the K-id on 2026-07-18 without kid_reserve). Gate behaviour is correct and was not bypassed. Remedy this fire: k_id_registry already had the topic re-reserved as K1813; materialized K1813 as a pending pool task via append_task_record, created registered worktree dispatch-slot-1-8af0700e-k1813, and enqueued the research agent (job agent-brief_k1813-5f38bb, opus/xhigh, timeout 5400s, artifact experiments/k1813/K1813_results.json). Collision gate passed under K1813, proving the renumber is the working unblock path. The overnight-VRP research itself runs under K1813 and will be collected by a future PHASE A followup."
   },
   {
     "id": "K1731",
     "title": "K1731: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE +",
     "priority": 3,
     "description": "Auto-generated from research_program.md unchecked item (line 598). Original: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1731.py with signal.shift(1) + seed=42, (c) K1731_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.",
-    "status": "pending",
+    "status": "failed",
     "task_type": "experiment",
     "dispatch_lane": "agent",
     "source": "research_backlog_auto",
@@ -36044,11 +36067,34 @@
         "to": "pending",
         "by": "hourly-slot-1-6fa24ccc550146918b39e3b39e4ad902",
         "note": "manual_release"
+      },
+      {
+        "ts": "2026-07-29T19:15:05.099253+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "hourly-slot-1-8af0700e2e824061adab655d58d04357"
+      },
+      {
+        "ts": "2026-07-29T19:15:05.408448+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "hourly-slot-1-8af0700e2e824061adab655d58d04357"
+      },
+      {
+        "ts": "2026-07-29T19:17:14.272202+00:00",
+        "from": "in_progress",
+        "to": "failed",
+        "by": "hourly-slot-1-8af0700e2e824061adab655d58d04357"
       }
     ],
     "successor_k_id": "K1814",
     "dispatch_blocker": "UNDISPATCHABLE UNDER THIS ID (root cause found 2026-07-30 02:1x CST, slot-1 6fa24ccc). enqueue-agent 的 _find_task_dispatch_collision 以 literal task id 掃 commit message；wt/dispatch-slot-1-bd00f90a-k1731 有 31 個未 merge commit 訊息含 \"K1731\" → 機械拒派（gate 行為正確，不可繞過）。但這不是「同一任務被重複派」：該 branch 的 experiments/k1731/README.md 標題是 \"K1731 — GEVReg-MIDAS-SSVS arm B: tail-interval forecasts of SPY returns\"，與本 task（DL vs HAR 中長 horizon 邊界檢定）是完全不同的實驗。成因＝K-id 佔用：research_backlog_auto 於 2026-07-18T00:00:01Z 已在 k_id_registry 保留 K1731 給本主題，同日 16:03 commit cdf14744d 未經 kid_reserve 就把 K1731 指派給 GEVReg arm B。已於 registry 用 kid_reserve reassign --status renumbered 記錄，原主題改配 K1814。解阻唯一路徑：由 main_thread lane 裁決 / merge 該 worktree（gate 對已 merge 進 HEAD 的 commit 視為 historical harmless，collision 自動消失）——見 inc_776caf84f125_e1 / inc_792a94b0ecf4_e1。hourly worker 無法自行解阻（claim 回 main_thread_lane）。",
-    "last_released_at": "2026-07-29T18:14:43.190181+00:00"
+    "last_released_at": "2026-07-29T18:14:43.190181+00:00",
+    "started_at": "2026-07-29T19:15:05.408433+00:00",
+    "superseded_by": "K1814",
+    "renumber_receipt": "2026-07-30 03:3x CST slot-1 8af0700e: id permanently undispatchable (literal-grep collision on unmerged wt/dispatch-slot-1-bd00f90a-k1731). Topic re-materialized as pool task K1814 and dispatched as compute job agent-brief_k1814-a3ea90 (worktree dispatch-slot-1-8af0700e-k1814). Do not re-open this id.",
+    "completed_at": "2026-07-29T19:17:14.272174+00:00",
+    "result": "SUPERSEDED, not executed under this id. Same root cause as K1730: literal-id collision against the 31 unmerged commits on wt/dispatch-slot-1-bd00f90a-k1731, whose experiments/k1731/ tree is a different experiment (GEVReg-MIDAS-SSVS arm B). Gate not bypassed. Remedy this fire: materialized the reserved successor K1814 as a pending pool task, created registered worktree dispatch-slot-1-8af0700e-k1814, and enqueued the research agent (job agent-brief_k1814-a3ea90, opus/xhigh, timeout 5400s, artifact experiments/k1814/K1814_results.json). Brief adds a data-feasibility gate up front (yfinance 5-min history is ~60 days, insufficient for a 22-day horizon OOS) requiring the agent to measure actual coverage and either justify the 5-min route or switch to a clearly labelled realized-range proxy. The DL-vs-HAR research runs under K1814."
   },
   {
     "id": "K1732",
@@ -44710,116 +44756,15 @@
   },
   {
     "id": "assign_7750fcd9",
-    "title": "PHASE-Z 卡住檔案 incident（3c0b76a1bcd65274）— 未關則 scheduler 降載",
-    "description": "## 發生什麼\n3 個未提交檔案不是任何一班 fire 產出的，最長已連續 77 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 4 次觀察到這組）\n- storage/drafts/k1253_general_draft.md — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 77 班\n- tests/test_check_matt_skills_installation.py — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260726T173704933918Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173805118048Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T173905257186Z:<路徑>`\n- `git show refs/volpred/quarantine/20260726T182937793148Z:<路徑>`",
-    "task_type": "platform_ops",
-    "priority": 2,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "PHASE-Z 卡住檔案 incident（3c0b76a1bcd65274）— 未關則 scheduler 降載",
+    "priority": 2,
     "source": "phase_z",
     "created_at": "2026-07-26T17:37:07.912107+00:00",
-    "payload": {
-      "incident_kind": "phase_z_foreign_stuck",
-      "fingerprint": "3c0b76a1bcd65274",
-      "paths": [
-        "storage/drafts/k1253_general_draft.md",
-        "storage/logs/trending_primary_source_verification.jsonl",
-        "tests/test_check_matt_skills_installation.py"
-      ],
-      "streaks": {
-        "storage/drafts/k1253_general_draft.md": 6,
-        "storage/logs/trending_primary_source_verification.jsonl": 77,
-        "tests/test_check_matt_skills_installation.py": 10
-      },
-      "quarantine_refs": [
-        "refs/volpred/quarantine/20260726T173704933918Z",
-        "refs/volpred/quarantine/20260726T173805118048Z",
-        "refs/volpred/quarantine/20260726T173905257186Z",
-        "refs/volpred/quarantine/20260726T182937793148Z"
-      ],
-      "fires": 4,
-      "first_seen_at": "2026-07-26T17:37:07.900931+00:00",
-      "last_seen_at": "2026-07-26T18:29:40.644386+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-26T17:38:05.198668+00:00",
-      "deferred": [
-        "storage/logs/trending_primary_source_verification.jsonl: 已保存，且 19.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "tests/test_check_matt_skills_installation.py: 已保存，且 5.4 小時內還在改 — 活躍碼，不算無主殘留"
-      ]
-    },
-    "priority_capped_from": 1,
-    "updated_at": "2026-07-26T18:29:40.644386+00:00",
-    "claimed_by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce",
-    "claimed_at": "2026-07-26T18:42:06.986615+00:00",
-    "claim_session_id": "1e803ee95600",
-    "status_history": [
-      {
-        "ts": "2026-07-26T18:42:06.986623+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
-      },
-      {
-        "ts": "2026-07-26T18:42:07.234989+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
-      }
-    ],
-    "started_at": "2026-07-26T18:42:07.234969+00:00",
     "completed_at": "2026-07-26T18:42:53.518125+00:00",
-    "result": "關閉條件機械滿足：3 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
-    "close_evidence": {
-      "closeable": true,
-      "derates": false,
-      "paths": {
-        "storage/drafts/k1253_general_draft.md": {
-          "quarantined": false,
-          "live_workspace": "/Users/yhlai0911/volpred-research/.codex/worktrees/operations-core-scheduler-cutover",
-          "still_dirty_in_main": false,
-          "covered": true,
-          "live_authoring": false,
-          "idle_s": null,
-          "liveness": "dead",
-          "referenced_by": null,
-          "test_file": null,
-          "liveness_evidence": []
-        },
-        "storage/logs/trending_primary_source_verification.jsonl": {
-          "quarantined": true,
-          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-204d556b",
-          "still_dirty_in_main": false,
-          "covered": true,
-          "live_authoring": false,
-          "idle_s": null,
-          "liveness": "dead",
-          "referenced_by": null,
-          "test_file": null,
-          "liveness_evidence": []
-        },
-        "tests/test_check_matt_skills_installation.py": {
-          "quarantined": true,
-          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-204d556b",
-          "still_dirty_in_main": false,
-          "covered": true,
-          "live_authoring": false,
-          "idle_s": null,
-          "liveness": "live",
-          "referenced_by": null,
-          "test_file": "tests/test_check_matt_skills_installation.py",
-          "liveness_evidence": [
-            "本身是測試檔（tests/ 下的 test_*.py）"
-          ]
-        }
-      },
-      "blockers": [],
-      "deferred": [],
-      "checked": [
-        "storage/drafts/k1253_general_draft.md",
-        "storage/logs/trending_primary_source_verification.jsonl",
-        "tests/test_check_matt_skills_installation.py"
-      ],
-      "grace_s": 86400.0
-    }
+    "tombstone": true,
+    "archived_at": "2026-07-29T19:07:47.877732+00:00"
   },
   {
     "id": "release_deadlock_repair_20260726_18",
@@ -44840,81 +44785,27 @@
   },
   {
     "id": "alert_release_pool_deadlock_20260726",
-    "title": "[alert] Release pool deadlocked — 3 drafts, 0 eligible (due now)",
-    "description": "由 alert `release_pool_deadlock` 自動建立（level=critical）。\n這是系統自己要做的事，不是老闆的待辦。做完後下一輪巡檢會自動解除警報。\n\n執行任何會改變發布或外部狀態的修復前，必須先用原 detector 重新驗證警報仍在 breached。若已自然解除，只記錄 fresh no-op 後完成，不得照舊快照執行。\n\n## 觸發條件\n釋出已到期（due_now），草稿池有 3 篇，但通過所有 gate 的只有 **0 篇**。\n下一次 release fire 會 exit 0 而且什麼都不發 —— 這是可以在它發生前就斷定的。\n- draft: 3\n- eligible_before_dedup: 3\n- dedup_flagged: 0\n- narrative_cluster_filtered: 0\n- content_gate_blocked: 3\n- eligible_after_all_gates: 0\n- 被 narrative_cluster gate 擋住的 cluster: (none)\n  - `mile_be7666e2` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_be7666e2) — waiting on the */15 compute worker, no action needed\n  - `mile_496e7dce` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_496e7dce) — waiting on the */15 compute worker, no action needed\n  - `mile_35d8941b` (general, 已連續被擋 1 次): missing 懶人包圖組 section (render queued, job lazypack-mile_35d8941b) — waiting on the */15 compute worker, no action needed\n\n## 系統已自動執行\n- 已自動建 **P1 補池任務** `release_deadlock_repair_20260726_18`，指定只補仍可放行的 cluster：vix, spy, forecast_method。\n- 老闆不需要跑任何指令；下一班 hourly dispatch 會消化這個補池任務。\n\n## 影響\n池裡有貨卻一篇都放不出去 = 讀者端靜默空窗（Mission 第 1 條內容、第 5 條流量）。\n此條件的存在理由就是「沒有訊號」本身：fire 成功與發出文章從來不是同一件事，\nexit 0 的零產出在過去只能等 6.5 小時後由下游 WARN 間接發現。",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
-    "created_at": "2026-07-26T18:01:02.560552+00:00",
+    "task_type": "platform_ops",
+    "title": "[alert] Release pool deadlocked — 3 drafts, 0 eligible (due now)",
+    "priority": 1,
     "source": "alert_remediation_bridge",
-    "tags": [
-      "alert",
-      "release_pool_deadlock"
-    ],
-    "status_history": [
-      {
-        "ts": "2026-07-26T18:15:48.585502+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-fa8046638b2e465f884c444edf8d1de4"
-      },
-      {
-        "ts": "2026-07-26T18:15:48.823318+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-fa8046638b2e465f884c444edf8d1de4"
-      },
-      {
-        "ts": "2026-07-26T18:26:51.968593+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-fa8046638b2e465f884c444edf8d1de4"
-      }
-    ],
-    "started_at": "2026-07-26T18:15:48.823305+00:00",
+    "created_at": "2026-07-26T18:01:02.560552+00:00",
     "completed_at": "2026-07-26T18:26:51.968565+00:00",
-    "result": "ROOT CAUSE: com.volpred.compute-worker LaunchAgent 未 bootstrap 於 launchd → */15 drain 從不執行 → 3 lazypack render job 卡 queued → 3 drafts content_gate_blocked → deadlock。FIX: launchctl bootstrap+kickstart，worker 恢復，3 job queued→running→completed，eligible 0→3。VERIFIED: release-pool-by-settings released=1 mile_be7666e2 published+supabase_synced+verified_live；check_alerts breaches=0。durable 守護記入 assign_f13a5d5f (main-thread)。"
+    "tombstone": true,
+    "archived_at": "2026-07-29T19:07:47.877732+00:00"
   },
   {
     "id": "issue40_production_workspace_acceptance_20260727",
-    "title": "[Issue #40 acceptance] production workspace → gate → merge receipt canary",
-    "description": "Issue #40 production acceptance canary. This is a bounded platform_ops repo-patch task. Inside the supervisor-provided workspace, create docs/ops/issue40_production_workspace_acceptance.md with the task id, current UTC timestamp, and a short statement that the file is the tracked canary for task→workspace→gate→merge read-back. Do not modify storage JSON or external systems. Commit only that declared doc path with an ASCII message containing the task id. Complete normally so the supervisor finalizer can gate and integrate the exact branch.",
-    "task_type": "platform_ops",
-    "priority": 1,
     "status": "succeeded",
+    "task_type": "platform_ops",
+    "title": "[Issue #40 acceptance] production workspace → gate → merge receipt canary",
+    "priority": 1,
     "source": "user_issue40_acceptance",
-    "issue_ref": "#40",
-    "tags": [
-      "platform_ops",
-      "issue40",
-      "production-acceptance"
-    ],
     "created_at": "2026-07-26T18:32:16.080979+00:00",
-    "status_history": [
-      {
-        "ts": "2026-07-26T18:33:08.069003+00:00",
-        "from": "pending",
-        "to": "claimed",
-        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
-      },
-      {
-        "ts": "2026-07-26T18:33:11.387229+00:00",
-        "from": "claimed",
-        "to": "in_progress",
-        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
-      },
-      {
-        "ts": "2026-07-26T18:33:40.957352+00:00",
-        "from": "in_progress",
-        "to": "succeeded",
-        "by": "hourly-slot-1-204d556bf80943e0abdc28847b1513ce"
-      }
-    ],
-    "started_at": "2026-07-26T18:33:11.387212+00:00",
     "completed_at": "2026-07-26T18:33:40.957325+00:00",
-    "result": "Issue #40 acceptance canary: created docs/ops/issue40_production_workspace_acceptance.md in workspace worktree-dispatch-slot-1-204d556b, committed 07938d55d (ASCII msg, task id). Clean tree, only declared path. Supervisor finalizer to gate+merge.",
-    "issue_closed_at": "2026-07-26T18:51:34.265762+00:00",
-    "issue_closed_commit": "dad84187eb893ca330c951d5adf95e0815150f85"
+    "tombstone": true,
+    "archived_at": "2026-07-29T19:07:47.877732+00:00"
   },
   {
     "id": "issue42_persistent_fire_lifecycle_20260727",
@@ -51242,7 +51133,7 @@
     "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 15 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 15 班\n- src/volpred/ops/next_tasks.py — 15 班\n- storage/drafts/assets/k1710_overnight_edge.png — 11 班\n- storage/logs/trending_primary_source_verification.jsonl — 6 班\n- storage/memory/knowledge.json — 13 班\n- storage/reports/INDEX.md — 4 班\n- storage/reports/index.json — 4 班\n- storage/strategy_metrics.json — 4 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T020733505311Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T030758815603Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T02:07:40.376334+00:00",
     "payload": {
@@ -51282,7 +51173,126 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T03:08:05.879047+00:00"
+    "updated_at": "2026-07-28T03:08:05.879047+00:00",
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：8 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/assets/k1710_overnight_edge.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1710_overnight_edge.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "release_deadlock_repair_20260728_03",
@@ -51795,7 +51805,7 @@
     "description": "## 發生什麼\n25 個未提交檔案不是任何一班 fire 產出的，最長已連續 19 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 19 班\n- src/volpred/ops/next_tasks.py — 19 班\n- storage/drafts/K1357_general_draft.md — 4 班\n- storage/drafts/K1419_general_draft.md — 4 班\n- storage/drafts/assets/K1357_spread_asymmetry.png — 4 班\n- storage/drafts/assets/ai_capex_skew_20260728.json — 4 班\n- storage/drafts/assets/ai_capex_skew_20260728.png — 4 班\n- storage/drafts/assets/ai_capex_term_20260728.png — 4 班\n- storage/drafts/assets/k1419_0050tw_pinball.png — 4 班\n- storage/drafts/assets/k1492_cross_asset_qlike.png — 3 班\n- storage/drafts/assets/k1492_peg_vs_flow.png — 3 班\n- storage/drafts/assets/lazypack_ai_capex_20260728/panel_method.png — 4 班\n- storage/drafts/assets/lazypack_ai_capex_20260728/panel_question.png — 4 班\n- storage/drafts/assets/lazypack_ai_capex_20260728/panel_result.png — 4 班\n- storage/drafts/assets/lazypack_ai_capex_20260728/panel_takeaway.png — 4 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_answer.png — 4 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png — 4 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_model.png — 4 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_today.png — 4 班\n- storage/lazypack_jobs/mile_eaacd072/runs/lazypack-mile_eaacd072/plan.json — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 10 班\n- storage/memory/knowledge.json — 17 班\n- storage/reports/INDEX.md — 8 班\n- storage/reports/index.json — 8 班\n- storage/strategy_metrics.json — 8 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T054019118615Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T05:40:29.860296+00:00",
     "payload": {
@@ -51867,7 +51877,347 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：25 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/K1357_general_draft.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/K1419_general_draft.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/K1357_spread_asymmetry.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/ai_capex_skew_20260728.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/ai_capex_skew_20260728.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/ai_capex_term_20260728.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1419_0050tw_pinball.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1492_cross_asset_qlike.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1492_peg_vs_flow.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_method.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_question.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_result.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_takeaway.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/lazypack_jobs/mile_eaacd072/runs/lazypack-mile_eaacd072/plan.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/K1357_general_draft.md",
+        "storage/drafts/K1419_general_draft.md",
+        "storage/drafts/assets/K1357_spread_asymmetry.png",
+        "storage/drafts/assets/ai_capex_skew_20260728.json",
+        "storage/drafts/assets/ai_capex_skew_20260728.png",
+        "storage/drafts/assets/ai_capex_term_20260728.png",
+        "storage/drafts/assets/k1419_0050tw_pinball.png",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png",
+        "storage/drafts/assets/k1492_peg_vs_flow.png",
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_method.png",
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_question.png",
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_result.png",
+        "storage/drafts/assets/lazypack_ai_capex_20260728/panel_takeaway.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png",
+        "storage/lazypack_jobs/mile_eaacd072/runs/lazypack-mile_eaacd072/plan.json",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_bfd18c51",
@@ -51875,7 +52225,7 @@
     "description": "## 發生什麼\n17 個未提交檔案不是任何一班 fire 產出的，最長已連續 21 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 21 班\n- src/volpred/ops/next_tasks.py — 21 班\n- storage/drafts/K1357_general_draft.md — 6 班\n- storage/drafts/K1419_general_draft.md — 6 班\n- storage/drafts/assets/K1357_spread_asymmetry.png — 6 班\n- storage/drafts/assets/k1419_0050tw_pinball.png — 6 班\n- storage/drafts/assets/k1492_cross_asset_qlike.png — 5 班\n- storage/drafts/assets/k1492_peg_vs_flow.png — 5 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_answer.png — 6 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png — 6 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_model.png — 6 班\n- storage/drafts/assets/lazypack_digest_20260728/panel_today.png — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 12 班\n- storage/memory/knowledge.json — 19 班\n- storage/reports/INDEX.md — 10 班\n- storage/reports/index.json — 10 班\n- storage/strategy_metrics.json — 10 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T060219670980Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T065000644513Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T06:02:30.324069+00:00",
     "payload": {
@@ -51933,7 +52283,243 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T06:50:16.377112+00:00"
+    "updated_at": "2026-07-28T06:50:16.377112+00:00",
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：17 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/K1357_general_draft.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/K1419_general_draft.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/K1357_spread_asymmetry.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1419_0050tw_pinball.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1492_cross_asset_qlike.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1492_peg_vs_flow.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/K1357_general_draft.md",
+        "storage/drafts/K1419_general_draft.md",
+        "storage/drafts/assets/K1357_spread_asymmetry.png",
+        "storage/drafts/assets/k1419_0050tw_pinball.png",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png",
+        "storage/drafts/assets/k1492_peg_vs_flow.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_answer.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_checklist.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_model.png",
+        "storage/drafts/assets/lazypack_digest_20260728/panel_today.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_7217b886",
@@ -52035,7 +52621,7 @@
     "description": "## 發生什麼\n9 個未提交檔案不是任何一班 fire 產出的，最長已連續 22 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 22 班\n- src/volpred/ops/next_tasks.py — 22 班\n- storage/drafts/assets/k1492_cross_asset_qlike.png — 6 班\n- storage/drafts/assets/k1492_peg_vs_flow.png — 6 班\n- storage/logs/trending_primary_source_verification.jsonl — 13 班\n- storage/memory/knowledge.json — 20 班\n- storage/reports/INDEX.md — 11 班\n- storage/reports/index.json — 11 班\n- storage/strategy_metrics.json — 11 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T073915856298Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T07:39:30.930729+00:00",
     "payload": {
@@ -52075,7 +52661,139 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：9 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/assets/k1492_cross_asset_qlike.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1492_peg_vs_flow.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1492_cross_asset_qlike.png",
+        "storage/drafts/assets/k1492_peg_vs_flow.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_86dbf680",
@@ -52351,7 +53069,7 @@
     "description": "## 發生什麼\n9 個未提交檔案不是任何一班 fire 產出的，最長已連續 23 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 23 班\n- src/volpred/ops/next_tasks.py — 23 班\n- storage/drafts/assets/k1493_risk_reward.png — 3 班\n- storage/drafts/assets/k1493_svxy_path.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 14 班\n- storage/memory/knowledge.json — 21 班\n- storage/reports/INDEX.md — 12 班\n- storage/reports/index.json — 12 班\n- storage/strategy_metrics.json — 12 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T084612876204Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T08:46:30.845696+00:00",
     "payload": {
@@ -52391,7 +53109,139 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：9 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/assets/k1493_risk_reward.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1493_svxy_path.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1493_risk_reward.png",
+        "storage/drafts/assets/k1493_svxy_path.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_1c16f316",
@@ -52506,7 +53356,7 @@
     "description": "## 發生什麼\n14 個未提交檔案不是任何一班 fire 產出的，最長已連續 25 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 25 班\n- experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json — 3 班\n- src/volpred/ops/next_tasks.py — 25 班\n- storage/drafts/assets/gen_k1366_general_figs.py — 4 班\n- storage/drafts/assets/k1366_general_asset_vol_lifts.png — 4 班\n- storage/drafts/assets/k1366_general_correlation_response.png — 4 班\n- storage/drafts/assets/k1366_general_variance_response.png — 4 班\n- storage/drafts/assets/k1406_general_dip_cost.png — 4 班\n- storage/drafts/assets/k1406_general_winrate_two_yardsticks.png — 4 班\n- storage/logs/trending_primary_source_verification.jsonl — 16 班\n- storage/memory/knowledge.json — 23 班\n- storage/reports/INDEX.md — 14 班\n- storage/reports/index.json — 14 班\n- storage/strategy_metrics.json — 14 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T092500426365Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T09:25:26.628484+00:00",
     "payload": {
@@ -52556,7 +53406,204 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：14 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/assets/gen_k1366_general_figs.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1366_general_correlation_response.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1366_general_variance_response.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1406_general_dip_cost.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "experiments/snapaudit_unmeasured_20260728/quantify_unmeasured_exposure_results.json",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/gen_k1366_general_figs.py",
+        "storage/drafts/assets/k1366_general_asset_vol_lifts.png",
+        "storage/drafts/assets/k1366_general_correlation_response.png",
+        "storage/drafts/assets/k1366_general_variance_response.png",
+        "storage/drafts/assets/k1406_general_dip_cost.png",
+        "storage/drafts/assets/k1406_general_winrate_two_yardsticks.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "K1658_article_general",
@@ -52709,7 +53756,7 @@
     "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 26 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 26 班\n- scripts/tests/test_audit_compute_queue_bindings.py — 3 班\n- src/volpred/ops/next_tasks.py — 26 班\n- storage/logs/trending_primary_source_verification.jsonl — 17 班\n- storage/memory/knowledge.json — 24 班\n- storage/reports/INDEX.md — 15 班\n- storage/reports/index.json — 15 班\n- storage/strategy_metrics.json — 15 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T103251851847Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T10:33:17.566738+00:00",
     "payload": {
@@ -52747,7 +53794,128 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：8 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/tests/test_audit_compute_queue_bindings.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_audit_compute_queue_bindings.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "scripts/tests/test_audit_compute_queue_bindings.py",
+        "src/volpred/ops/next_tasks.py",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_c40f7ee0",
@@ -52755,7 +53923,7 @@
     "description": "## 發生什麼\n9 個未提交檔案不是任何一班 fire 產出的，最長已連續 27 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 27 班\n- src/volpred/ops/next_tasks.py — 27 班\n- storage/drafts/assets/k1536_general_event_windows.png — 3 班\n- storage/drafts/assets/k1536_general_unconditional_gap.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 18 班\n- storage/memory/knowledge.json — 25 班\n- storage/reports/INDEX.md — 16 班\n- storage/reports/index.json — 16 班\n- storage/strategy_metrics.json — 16 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T112254422329Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T11:23:24.725967+00:00",
     "payload": {
@@ -52795,7 +53963,139 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：9 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/assets/k1536_general_event_windows.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1536_general_unconditional_gap.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/assets/k1536_general_event_windows.png",
+        "storage/drafts/assets/k1536_general_unconditional_gap.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_0f532134",
@@ -52803,7 +54103,7 @@
     "description": "## 發生什麼\n12 個未提交檔案不是任何一班 fire 產出的，最長已連續 28 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- docs/error_log.md — 28 班\n- src/volpred/ops/next_tasks.py — 28 班\n- storage/drafts/K1658_general_draft.md — 3 班\n- storage/drafts/assets/k1589_general_before_after.png — 3 班\n- storage/drafts/assets/k1589_general_dose_response.png — 3 班\n- storage/drafts/assets/k1658_general_figs.py — 3 班\n- storage/drafts/assets/k1658_general_raw_vs_holm.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 19 班\n- storage/memory/knowledge.json — 26 班\n- storage/reports/INDEX.md — 17 班\n- storage/reports/index.json — 17 班\n- storage/strategy_metrics.json — 17 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T124648470647Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T12:47:26.091819+00:00",
     "payload": {
@@ -52876,6 +54176,177 @@
       "claim_expires_at": "2026-07-28T19:41:59.614977+00:00",
       "claim_session_id": "47e783da6dd0",
       "started_at": "2026-07-28T17:41:59.906483+00:00"
+    },
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：12 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/drafts/K1658_general_draft.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1589_general_before_after.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1589_general_dose_response.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1658_general_figs.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/drafts/assets/k1658_general_raw_vs_holm.png": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "src/volpred/ops/next_tasks.py",
+        "storage/drafts/K1658_general_draft.md",
+        "storage/drafts/assets/k1589_general_before_after.png",
+        "storage/drafts/assets/k1589_general_dose_response.png",
+        "storage/drafts/assets/k1658_general_figs.py",
+        "storage/drafts/assets/k1658_general_raw_vs_holm.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
     }
   },
   {
@@ -53921,7 +55392,7 @@
     "description": "## 發生什麼\n8 個未提交檔案不是任何一班 fire 產出的，最長已連續 35 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- docs/error_log.md — 35 班\n- scripts/tests/test_git_writer_lock.py — 4 班\n- src/volpred/ops/next_tasks.py — 35 班\n- storage/logs/trending_primary_source_verification.jsonl — 26 班\n- storage/memory/knowledge.json — 33 班\n- storage/reports/INDEX.md — 24 班\n- storage/reports/index.json — 24 班\n- storage/strategy_metrics.json — 24 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T170122631379Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T172557846534Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T17:02:13.268980+00:00",
     "payload": {
@@ -53961,7 +55432,128 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T17:26:38.290787+00:00"
+    "updated_at": "2026-07-28T17:26:38.290787+00:00",
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：8 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "docs/error_log.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "scripts/tests/test_git_writer_lock.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_git_writer_lock.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "src/volpred/ops/next_tasks.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": "scripts/audit_canonical_writers.py",
+          "test_file": null,
+          "liveness_evidence": [
+            "被已提交的 scripts/audit_canonical_writers.py 引用"
+          ]
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "docs/error_log.md",
+        "scripts/tests/test_git_writer_lock.py",
+        "src/volpred/ops/next_tasks.py",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "K781_article_general_v5",
@@ -54154,7 +55746,7 @@
     "description": "## 發生什麼\n6 個未提交檔案不是任何一班 fire 產出的，最長已連續 34 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- scripts/tests/test_git_writer_lock.py — 5 班\n- storage/logs/trending_primary_source_verification.jsonl — 27 班\n- storage/memory/knowledge.json — 34 班\n- storage/reports/INDEX.md — 25 班\n- storage/reports/index.json — 25 班\n- storage/strategy_metrics.json — 25 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T182342307603Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T18:24:18.040104+00:00",
     "payload": {
@@ -54188,7 +55780,100 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：6 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "scripts/tests/test_git_writer_lock.py": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "live",
+          "referenced_by": null,
+          "test_file": "scripts/tests/test_git_writer_lock.py",
+          "liveness_evidence": [
+            "本身是測試檔（tests/ 下的 test_*.py）"
+          ]
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "scripts/tests/test_git_writer_lock.py",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "assign_8da52efd",
@@ -54496,7 +56181,7 @@
     "description": "## 發生什麼\n11 個未提交檔案不是任何一班 fire 產出的，最長已連續 36 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/K1694/K1694_lag_sensitivity.json — 3 班\n- experiments/K1694/K1694_results.json — 3 班\n- experiments/K1694/data/panel.csv — 3 班\n- experiments/K1694/figures/fig1_fcm_hhi_timeseries.png — 3 班\n- experiments/K1694/figures/fig2_regime_2x2.png — 3 班\n- experiments/K1694/figures/fig3_interaction_coef.png — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 29 班\n- storage/memory/knowledge.json — 36 班\n- storage/reports/INDEX.md — 27 班\n- storage/reports/index.json — 27 班\n- storage/strategy_metrics.json — 27 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T202004995963Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T20:20:48.765293+00:00",
     "payload": {
@@ -54540,7 +56225,163 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：11 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "experiments/K1694/K1694_lag_sensitivity.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/K1694/K1694_results.json": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/K1694/data/panel.csv": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/K1694/figures/fig1_fcm_hhi_timeseries.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/K1694/figures/fig2_regime_2x2.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "experiments/K1694/figures/fig3_interaction_coef.png": {
+          "quarantined": true,
+          "live_workspace": null,
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "experiments/K1694/K1694_lag_sensitivity.json",
+        "experiments/K1694/K1694_results.json",
+        "experiments/K1694/data/panel.csv",
+        "experiments/K1694/figures/fig1_fcm_hhi_timeseries.png",
+        "experiments/K1694/figures/fig2_regime_2x2.png",
+        "experiments/K1694/figures/fig3_interaction_coef.png",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "issue27_natural_growth_registry_20260729",
@@ -54633,7 +56474,7 @@
     "description": "## 發生什麼\n6 個未提交檔案不是任何一班 fire 產出的，最長已連續 37 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- experiments/K1694/README.md — 3 班\n- storage/logs/trending_primary_source_verification.jsonl — 30 班\n- storage/memory/knowledge.json — 37 班\n- storage/reports/INDEX.md — 28 班\n- storage/reports/index.json — 28 班\n- storage/strategy_metrics.json — 28 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T210758708224Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T21:08:48.506986+00:00",
     "payload": {
@@ -54667,7 +56508,98 @@
         "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
-    "priority_capped_from": 1
+    "priority_capped_from": 1,
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：6 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "experiments/K1694/README.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "experiments/K1694/README.md",
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "K1705_article_general",
@@ -54758,7 +56690,7 @@
     "description": "## 發生什麼\n5 個未提交檔案不是任何一班 fire 產出的，最長已連續 39 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 2 次觀察到這組）\n- storage/logs/trending_primary_source_verification.jsonl — 32 班\n- storage/memory/knowledge.json — 39 班\n- storage/reports/INDEX.md — 30 班\n- storage/reports/index.json — 30 班\n- storage/strategy_metrics.json — 30 班\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260728T223939382286Z:<路徑>`\n- `git show refs/volpred/quarantine/20260728T233951459196Z:<路徑>`",
     "task_type": "platform_ops",
     "priority": 2,
-    "status": "pending",
+    "status": "succeeded",
     "source": "phase_z",
     "created_at": "2026-07-28T22:40:28.095399+00:00",
     "payload": {
@@ -54792,7 +56724,104 @@
       ]
     },
     "priority_capped_from": 1,
-    "updated_at": "2026-07-28T23:40:43.198796+00:00"
+    "updated_at": "2026-07-28T23:40:43.198796+00:00",
+    "claimed_by": "codex-vscode",
+    "claimed_at": "2026-07-29T19:06:04.828644+00:00",
+    "claim_expires_at": "2026-07-29T21:06:04.828644+00:00",
+    "claim_session_id": "b8ba134c6760",
+    "status_history": [
+      {
+        "ts": "2026-07-29T19:06:04.828659+00:00",
+        "from": "pending",
+        "to": "claimed",
+        "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T19:06:05.160841+00:00",
+        "from": "claimed",
+        "to": "in_progress",
+        "by": "codex-vscode"
+      }
+    ],
+    "started_at": "2026-07-29T19:06:05.160823+00:00",
+    "completed_at": "2026-07-29T19:09:44.437820+00:00",
+    "result": "關閉條件機械滿足：5 個路徑全部有覆蓋（quarantine ref 或 live workspace），且無未收拾的殘留。",
+    "close_evidence": {
+      "closeable": true,
+      "derates": false,
+      "paths": {
+        "storage/logs/trending_primary_source_verification.jsonl": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-1e5922b4-k1733",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/memory/knowledge.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/INDEX.md": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/reports/index.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        },
+        "storage/strategy_metrics.json": {
+          "quarantined": true,
+          "live_workspace": "/Users/yhlai0911/volpred-research/.claude/worktrees/agent-a148e8a94105f7935",
+          "still_dirty_in_main": false,
+          "covered": true,
+          "live_authoring": false,
+          "idle_s": null,
+          "liveness": "dead",
+          "referenced_by": null,
+          "test_file": null,
+          "liveness_evidence": []
+        }
+      },
+      "blockers": [],
+      "deferred": [],
+      "checked": [
+        "storage/logs/trending_primary_source_verification.jsonl",
+        "storage/memory/knowledge.json",
+        "storage/reports/INDEX.md",
+        "storage/reports/index.json",
+        "storage/strategy_metrics.json"
+      ],
+      "grace_s": 86400.0
+    }
   },
   {
     "id": "issue46_compute_worker_owner_cutover_20260729",
@@ -58767,33 +60796,32 @@
       "fires": 1,
       "first_seen_at": "2026-07-29T11:27:53.606071+00:00",
       "last_seen_at": "2026-07-29T11:27:53.606071+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-29T14:17:58.681453+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-29T19:09:44.437820+00:00",
       "deferred": [
-        ".claude/rules/experiments.md: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1585_general_charts.py: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1680_general_charts.py: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1705_general_charts.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1585_general_effect_forest.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1585_general_oos_cost.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1680_general_multiplicity.png: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1680_general_per_firm.png: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1705_general_sign_audit.png: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1705_general_timing_flip.png: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k781_general_ranking.png: 已保存，且 19.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+        ".claude/rules/experiments.md: 已保存，且 11.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1585_general_charts.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1680_general_charts.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1705_general_charts.py: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_effect_forest.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_oos_cost.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_multiplicity.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_per_firm.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_sign_audit.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_timing_flip.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_ranking.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -59450,37 +61478,36 @@
       "fires": 1,
       "first_seen_at": "2026-07-29T16:50:12.551917+00:00",
       "last_seen_at": "2026-07-29T16:50:12.551917+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-29T17:16:06.368579+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-29T19:09:44.437820+00:00",
       "deferred": [
-        ".claude/rules/experiments.md: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1585_general_charts.py: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1680_general_charts.py: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1705_general_charts.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1585_general_effect_forest.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1585_general_oos_cost.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1680_general_multiplicity.png: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1680_general_per_firm.png: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1698_general_rebuild_audit.png: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1698_general_strength_flip.png: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1698_general_two_targets.png: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1705_general_sign_audit.png: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1705_general_timing_flip.png: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k781_general_ranking.png: 已保存，且 19.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k775_general_plan.json: 已保存，且 2.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+        ".claude/rules/experiments.md: 已保存，且 11.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1585_general_charts.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1680_general_charts.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1705_general_charts.py: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_effect_forest.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_oos_cost.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_multiplicity.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_per_firm.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_rebuild_audit.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_strength_flip.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_two_targets.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_sign_audit.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_timing_flip.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_ranking.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k775_general_plan.json: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -60145,46 +62172,40 @@
       "fires": 1,
       "first_seen_at": "2026-07-29T18:03:16.973315+00:00",
       "last_seen_at": "2026-07-29T18:03:16.973315+00:00",
-      "derates": true,
-      "derates_updated_at": "2026-07-29T18:17:16.884701+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-29T19:09:44.437820+00:00",
       "deferred": [
-        ".claude/rules/experiments.md: 已保存，且 10.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "experiments/k1630/README.md: 已保存，且 1.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1585_general_charts.py: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1680_general_charts.py: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "scripts/gen_k1705_general_charts.py: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1585_general_effect_forest.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1585_general_oos_cost.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1609_general_gate_forest.png: 已保存，且 1.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1609_general_two_rulers.png: 已保存，且 1.2 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1680_general_multiplicity.png: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1680_general_per_firm.png: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1698_general_rebuild_audit.png: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1698_general_strength_flip.png: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1698_general_two_targets.png: 已保存，且 8.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1705_general_sign_audit.png: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k1705_general_timing_flip.png: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k781_general_ranking.png: 已保存，且 19.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.0 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/K1448_general_draft.md: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1448_general_corr_by_regime.png: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1448_general_ten_tests.png: 已保存，且 1.6 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1630_general_effect_ci.png: 已保存，且 1.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/drafts/assets/k1630_general_winter_summer.png: 已保存，且 1.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 16.3 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1448_general_plan.json: 已保存，且 1.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 8.7 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 8.8 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/lazypack_plans/k775_general_plan.json: 已保存，且 2.5 小時內還在改 — 活躍碼，不算無主殘留",
-        "storage/memory/knowledge.json: 已保存，且 0.7 小時內還在改 — 活躍碼，不算無主殘留"
+        ".claude/rules/experiments.md: 已保存，且 11.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1630/README.md: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1585_general_charts.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1680_general_charts.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1705_general_charts.py: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_effect_forest.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_oos_cost.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1609_general_gate_forest.png: 已保存，且 2.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1609_general_two_rulers.png: 已保存，且 2.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_multiplicity.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_per_firm.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_rebuild_audit.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_strength_flip.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_two_targets.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_sign_audit.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_timing_flip.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_ranking.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1448_general_plan.json: 已保存，且 2.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k775_general_plan.json: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留"
       ]
     },
     "priority_capped_from": 1
@@ -60286,7 +62307,200 @@
       ],
       "fires": 1,
       "first_seen_at": "2026-07-29T18:18:47.153292+00:00",
-      "last_seen_at": "2026-07-29T18:18:47.153292+00:00"
+      "last_seen_at": "2026-07-29T18:18:47.153292+00:00",
+      "derates": false,
+      "derates_updated_at": "2026-07-29T19:09:44.437820+00:00",
+      "deferred": [
+        ".claude/rules/experiments.md: 已保存，且 11.5 小時內還在改 — 活躍碼，不算無主殘留",
+        "experiments/k1630/README.md: 已保存，且 2.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1585_general_charts.py: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1680_general_charts.py: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "scripts/gen_k1705_general_charts.py: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_effect_forest.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1585_general_oos_cost.png: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1609_general_gate_forest.png: 已保存，且 2.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1609_general_two_rulers.png: 已保存，且 2.0 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_ruler_flip.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1623_general_survivor_funnel.png: 已保存，且 9.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_multiplicity.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1680_general_per_firm.png: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_rebuild_audit.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_strength_flip.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1698_general_two_targets.png: 已保存，且 8.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_sign_audit.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k1705_general_timing_flip.png: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_ranking.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/assets/k781_general_subperiod_regime.png: 已保存，且 19.9 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py: 已保存，且 17.2 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1448_general_plan.json: 已保存，且 2.4 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1585_general_plan.json: 已保存，且 9.7 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1623_general_plan.json: 已保存，且 9.8 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1680_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k1705_general_plan.json: 已保存，且 9.6 小時內還在改 — 活躍碼，不算無主殘留",
+        "storage/lazypack_plans/k775_general_plan.json: 已保存，且 3.4 小時內還在改 — 活躍碼，不算無主殘留"
+      ]
+    },
+    "priority_capped_from": 1
+  },
+  {
+    "id": "K1450_article_general",
+    "title": "K1450: write general-audience article (auto-discovered uncovered K)",
+    "description": "K K1450 has verdict signal (score=3, reasons=['PASS/Harvey-significant']) but no general article in feed.json.  Verdict preview: K1450 CONDITIONAL_PASS：檢驗VNQ在升息/降息regime（^TNX 63日落後變化訊號）下的未來21日已實現波動與相關性差異，2005-01-01至2026-06-09（有效樣本2005-04-06至2026-05-07，n=5,301，regime almost balanced：rate_down 2,651/rate_up 2,650）。HAC(21) OLS檢定：VNQ forward RV rate_down 23.85% vs rate_up 19.76%（p=0.0599，未過多重檢定）；SPY forward RV Canonical evidence: experiments/k1450/k1450_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose. General-audience delivery contract: keep exact figures, sample/as-of/window, data source, and statistical strength, but translate the evidence into plain reader language. Do not put K-ids or bare academic terms (for example QLIKE, Diebold-Mariano/DM test, Harvey, bootstrap, p-value, t-stat, or MLE) in the reader-visible title or body. Preserve experiment provenance in frontmatter/details.experiment_refs and evidence_source_paths instead. Before completing the task, run the canonical publisher audience inference against the final title/body/tags; success requires inferred audience=general.",
+    "priority": 4,
+    "status": "pending",
+    "task_type": "daily_article",
+    "source": "auto_discovered",
+    "audience_correction_rewrite": false,
+    "k_id": "K1450",
+    "evidence_source_paths": [
+      "experiments/k1450/k1450_results.json"
+    ],
+    "evidence_source_kind": "experiment_results",
+    "data_source_note": "Canonical evidence: experiments/k1450/k1450_results.json. Read figures programmatically from these sources; do not copy numeric claims from README or task prose.",
+    "tags": [
+      "auto-discovered",
+      "audience-general"
+    ],
+    "topic_cluster": null,
+    "created_at": "2026-07-29T19:09:13+00:00"
+  },
+  {
+    "id": "K1813",
+    "title": "K1813: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）",
+    "description": "Auto-generated from research_program.md unchecked item (line 596). Original: 隔夜/日內波動率溢酬 clustering 與星期效應擇時 — yfinance ETF 隔夜段 vol，檢定 day-of-week × overnight VRP 可交易性（含成本）（來源：AEF/Harbourfront 2025-26 VRP calendar effect）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1813.py with signal.shift(1) + seed=42, (c) K1813_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.\n\nRenumbered from K1730 on 2026-07-30 (k_id_registry status=renumbered). K1730 was reserved for this topic by research_backlog_auto at 2026-07-18T00:00:01Z but was squatted the same day by the GEVReg-MIDAS-SSVS arm A dispatch, which committed under the id without calling kid_reserve. Those commits live on the unmerged branch wt/dispatch-slot-1-bd00f90a-k1731, so enqueue-agent's literal-grep collision gate rejects any dispatch under K1730 forever. This id carries the original topic; do NOT reuse K1730.",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "awaiting_agent_job",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "renumbered_from": "K1730",
+    "created_at": "2026-07-29T19:13:00.012588+00:00",
+    "compute_job_id": "agent-brief_k1813-5f38bb",
+    "blocked_reason": "external_compute_job_running",
+    "status_history": [
+      {
+        "ts": "2026-07-29T19:14:57.704921+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1813-5f38bb",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "result": "dispatched to compute job agent-brief_k1813-5f38bb; awaiting PHASE A collection",
+    "compute_started_at": "2026-07-29T19:15:27Z"
+  },
+  {
+    "id": "K1814",
+    "title": "K1814: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）",
+    "description": "Auto-generated from research_program.md unchecked item (line 598). Original: 深度學習 vs HAR 的「中長 horizon 才贏」邊界檢定 — yfinance 美股指 5-min RV，誠實對比 HAR-RV vs LSTM/簡化 Transformer 在 1/5/22 日 horizon 的 QLIKE + DM 檢定，定位 DL 增量真正出現的 horizon（來源：JFEC/IJF 2025 ML-vs-HAR）\n\nRequired experiment workflow per .claude/rules/experiments.md: (a) README.md with motivation + method + lookahead policy + success criteria, (b) K1814.py with signal.shift(1) + seed=42, (c) K1814_results.json with byte-traceable outputs. Codex review primary path (fallback to subagent or audit if quota blocked). Knowledge entry only after CONDITIONAL_PASS minimum.\n\nRenumbered from K1731 on 2026-07-30 (k_id_registry status=renumbered). K1731 was reserved for this topic by research_backlog_auto at 2026-07-18T00:00:01Z but was squatted the same day by the GEVReg-MIDAS-SSVS arm B dispatch, which committed under the id without calling kid_reserve. Those commits live on the unmerged branch wt/dispatch-slot-1-bd00f90a-k1731, so enqueue-agent's literal-grep collision gate rejects any dispatch under K1731 forever. This id carries the original topic; do NOT reuse K1731.",
+    "task_type": "experiment",
+    "priority": 3,
+    "status": "awaiting_agent_job",
+    "dispatch_lane": "agent",
+    "source": "research_backlog_auto",
+    "renumbered_from": "K1731",
+    "created_at": "2026-07-29T19:13:00.174056+00:00",
+    "compute_job_id": "agent-brief_k1814-a3ea90",
+    "blocked_reason": "external_compute_job_active",
+    "status_history": [
+      {
+        "ts": "2026-07-29T19:16:49.223703+00:00",
+        "from": "pending",
+        "to": "awaiting_agent_job",
+        "by": "compute-job:agent-brief_k1814-a3ea90",
+        "note": "durable_external_execution_receipt"
+      }
+    ],
+    "result": "dispatched to compute job agent-brief_k1814-a3ea90; awaiting PHASE A collection"
+  },
+  {
+    "id": "assign_cf82928c",
+    "title": "PHASE-Z 卡住檔案 incident（e72eebd41371417d）— 未關則 scheduler 降載",
+    "description": "## 發生什麼\n31 個未提交檔案不是任何一班 fire 產出的，最長已連續 20 班還在工作區。連續多班沒清，代表沒有人會回來收；工作區越髒，每一班「誰擁有這個檔案」的判斷就越不可靠。\n\n## 為什麼是一張任務而不是一封信\n這張單未關就會**壓低 scheduler 的 slot cap**（`scripts/dispatch_slot_budget.py`）。也就是說，不處理它的代價是每班能派的工變少 —— 這是它和以前那封 CRITICAL 的唯一差別。\n\n## 關閉條件（機械可驗，不是自我宣告）\n`uv run python -m volpred.ops.foreign_incident --check` 全綠才可關：\n每個路徑都要有 live workspace 或 quarantine ref 覆蓋，且不得還髒在 main checkout。\n\n## 卡住的檔案（連續班數；本班第 1 次觀察到這組）\n- .claude/rules/experiments.md — 20 班\n- experiments/k1630/README.md — 6 班\n- scripts/gen_k1585_general_charts.py — 14 班\n- scripts/gen_k1680_general_charts.py — 14 班\n- scripts/gen_k1705_general_charts.py — 14 班\n- storage/assets/k1585_general_effect_forest.png — 14 班\n- storage/assets/k1585_general_oos_cost.png — 14 班\n- storage/assets/k1609_general_gate_forest.png — 5 班\n- storage/assets/k1609_general_two_rulers.png — 5 班\n- storage/assets/k1623_general_ruler_flip.png — 14 班\n- storage/assets/k1623_general_survivor_funnel.png — 14 班\n- storage/assets/k1680_general_multiplicity.png — 14 班\n- storage/assets/k1680_general_per_firm.png — 14 班\n- storage/assets/k1698_general_rebuild_audit.png — 13 班\n- storage/assets/k1698_general_strength_flip.png — 13 班\n- storage/assets/k1698_general_two_targets.png — 13 班\n- storage/assets/k1705_general_sign_audit.png — 14 班\n- storage/assets/k1705_general_timing_flip.png — 14 班\n- storage/assets/k781_general_ranking.png — 19 班\n- storage/assets/k781_general_subperiod_regime.png — 19 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_correction.png — 16 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_model.png — 16 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png — 16 班\n- storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png — 16 班\n- storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py — 16 班\n- storage/lazypack_plans/k1448_general_plan.json — 6 班\n- storage/lazypack_plans/k1585_general_plan.json — 14 班\n- storage/lazypack_plans/k1623_general_plan.json — 14 班\n- storage/lazypack_plans/k1680_general_plan.json — 14 班\n- storage/lazypack_plans/k1705_general_plan.json — 14 班\n- …\n\n## 已保存（可取回）\nbytes 已 checkpoint 進不可變 ref（保存，不是收養，也進不了 main）：\n- `git show refs/volpred/quarantine/20260729T192036201708Z:<路徑>`",
+    "task_type": "platform_ops",
+    "priority": 2,
+    "status": "pending",
+    "source": "phase_z",
+    "created_at": "2026-07-29T19:20:59.045005+00:00",
+    "payload": {
+      "incident_kind": "phase_z_foreign_stuck",
+      "fingerprint": "e72eebd41371417d",
+      "paths": [
+        ".claude/rules/experiments.md",
+        "experiments/k1630/README.md",
+        "scripts/gen_k1585_general_charts.py",
+        "scripts/gen_k1680_general_charts.py",
+        "scripts/gen_k1705_general_charts.py",
+        "storage/assets/k1585_general_effect_forest.png",
+        "storage/assets/k1585_general_oos_cost.png",
+        "storage/assets/k1609_general_gate_forest.png",
+        "storage/assets/k1609_general_two_rulers.png",
+        "storage/assets/k1623_general_ruler_flip.png",
+        "storage/assets/k1623_general_survivor_funnel.png",
+        "storage/assets/k1680_general_multiplicity.png",
+        "storage/assets/k1680_general_per_firm.png",
+        "storage/assets/k1698_general_rebuild_audit.png",
+        "storage/assets/k1698_general_strength_flip.png",
+        "storage/assets/k1698_general_two_targets.png",
+        "storage/assets/k1705_general_sign_audit.png",
+        "storage/assets/k1705_general_timing_flip.png",
+        "storage/assets/k781_general_ranking.png",
+        "storage/assets/k781_general_subperiod_regime.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png",
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png",
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py",
+        "storage/lazypack_plans/k1448_general_plan.json",
+        "storage/lazypack_plans/k1585_general_plan.json",
+        "storage/lazypack_plans/k1623_general_plan.json",
+        "storage/lazypack_plans/k1680_general_plan.json",
+        "storage/lazypack_plans/k1705_general_plan.json",
+        "storage/lazypack_plans/k775_general_plan.json"
+      ],
+      "streaks": {
+        ".claude/rules/experiments.md": 20,
+        "experiments/k1630/README.md": 6,
+        "scripts/gen_k1585_general_charts.py": 14,
+        "scripts/gen_k1680_general_charts.py": 14,
+        "scripts/gen_k1705_general_charts.py": 14,
+        "storage/assets/k1585_general_effect_forest.png": 14,
+        "storage/assets/k1585_general_oos_cost.png": 14,
+        "storage/assets/k1609_general_gate_forest.png": 5,
+        "storage/assets/k1609_general_two_rulers.png": 5,
+        "storage/assets/k1623_general_ruler_flip.png": 14,
+        "storage/assets/k1623_general_survivor_funnel.png": 14,
+        "storage/assets/k1680_general_multiplicity.png": 14,
+        "storage/assets/k1680_general_per_firm.png": 14,
+        "storage/assets/k1698_general_rebuild_audit.png": 13,
+        "storage/assets/k1698_general_strength_flip.png": 13,
+        "storage/assets/k1698_general_two_targets.png": 13,
+        "storage/assets/k1705_general_sign_audit.png": 14,
+        "storage/assets/k1705_general_timing_flip.png": 14,
+        "storage/assets/k781_general_ranking.png": 19,
+        "storage/assets/k781_general_subperiod_regime.png": 19,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_correction.png": 16,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_model.png": 16,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_shopping_list.png": 16,
+        "storage/lazypack_jobs/daily_digest_20260729/panel_takeaway.png": 16,
+        "storage/lazypack_jobs/daily_digest_20260729/render_lazypack.py": 16,
+        "storage/lazypack_plans/k1448_general_plan.json": 6,
+        "storage/lazypack_plans/k1585_general_plan.json": 14,
+        "storage/lazypack_plans/k1623_general_plan.json": 14,
+        "storage/lazypack_plans/k1680_general_plan.json": 14,
+        "storage/lazypack_plans/k1705_general_plan.json": 14,
+        "storage/lazypack_plans/k775_general_plan.json": 8
+      },
+      "quarantine_refs": [
+        "refs/volpred/quarantine/20260729T192036201708Z"
+      ],
+      "fires": 1,
+      "first_seen_at": "2026-07-29T19:20:59.027794+00:00",
+      "last_seen_at": "2026-07-29T19:20:59.027794+00:00"
     },
     "priority_capped_from": 1
   }

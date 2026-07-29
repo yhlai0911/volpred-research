@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1814-a3ea90",
+  "title": "K1814 DL vs HAR mid/long-horizon boundary test (QLIKE + DM)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1814-a3ea90.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814/experiments/k1814/K1814_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1814-a3ea90.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T19:16:49Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1814-a3ea90.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1814-a3ea90.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814/experiments/k1814/K1814_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1814-a3ea90.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1814",
+  "claude_followup": {
+    "brief": "K1814 收件：(1) 先驗資料可行性 gate — README 是否明列 yfinance 實測起訖/筆數，且宣稱的資料口徑（5-min RV vs realized-range proxy）與程式實際使用一致；(2) 驗 experiments/k1814/K1814_results.json 與 README 數字逐項一致（每 horizon 的 QLIKE、DM 統計量、FDR 後 p 值、多 seed sd）；(3) 檢 lookahead — scaler/超參數是否只在 train window 決定，rolling refit 是否真的 refit；(4) 檢 HAR baseline 有沒有被弱化（h=1 若 DL 勝出要特別查）；(5) 檢 review_verdict.json 是否達 CONDITIONAL_PASS 以上；(6) 跑 scripts/check_experiment_artifacts.py check --path experiments/k1814；(7) 主線程寫 knowledge.json（K1259：agent 禁寫）；(8) bash scripts/merge_worktree.sh dispatch-slot-1-8af0700e-k1814 整合。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1814",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T19:16:49Z",
+    "linked_at": "2026-07-29T19:16:49Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1814.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1814-a3ea90.md"
+}

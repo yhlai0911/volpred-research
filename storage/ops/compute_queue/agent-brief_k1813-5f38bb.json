@@ -1,0 +1,61 @@
+{
+  "id": "agent-brief_k1813-5f38bb",
+  "title": "K1813 overnight/intraday VRP clustering + day-of-week timing tradability",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1813-5f38bb.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1813",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1813/experiments/k1813/K1813_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1813-5f38bb.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T19:14:57Z",
+  "started_at": "2026-07-29T19:15:27Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1813-5f38bb.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1813-5f38bb.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1813/experiments/k1813/K1813_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1813-5f38bb.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-8af0700e-k1813",
+  "claude_followup": {
+    "brief": "K1813 收件：(1) 驗 experiments/k1813/K1813_results.json 與 README 數字逐項一致（含 H1/H2/H3 檢定統計量、p 值、FDR 後結論、含成本 Sharpe）；(2) 檢 lookahead — 程式碼要有明確 signal.shift(1)，禁止 same-day 訊號乘 same-day 報酬；(3) 檢 review_verdict.json 是否達 CONDITIONAL_PASS 以上（未達則不得寫 knowledge）；(4) 跑 scripts/check_experiment_artifacts.py check --path experiments/k1813 確認 reproduce_spec 由 run-time 產生；(5) 主線程寫 knowledge.json（K1259：agent 禁寫）；(6) bash scripts/merge_worktree.sh dispatch-slot-1-8af0700e-k1813 整合。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1813",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T19:14:57Z",
+    "linked_at": "2026-07-29T19:14:57Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1813.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1813-5f38bb.md",
+  "claimed_by_pid": 21975,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:566034f643f2b9baad112c27",
+    "scheduled_for": "2026-07-29T19:15:00Z"
+  },
+  "claimed_by_pid_start_wall": "Thu Jul 30 03:15:26 2026"
+}
