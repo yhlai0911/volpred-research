@@ -45,7 +45,13 @@ BLOCKED_REASONS: frozenset[str] = frozenset(
 )
 
 WORK_SHADOW_CUTOVER_GATE = "work_shadow_cutover_ready_v1"
-UNBLOCK_GATES: frozenset[str] = frozenset({WORK_SHADOW_CUTOVER_GATE})
+INCIDENT_SUSTAINED_CLEAN_GATE = "incident_sustained_clean_v1"
+UNBLOCK_GATES: frozenset[str] = frozenset(
+    {
+        WORK_SHADOW_CUTOVER_GATE,
+        INCIDENT_SUSTAINED_CLEAN_GATE,
+    }
+)
 
 
 def is_valid(reason: str | None) -> bool:

@@ -86,10 +86,12 @@ Schema (version 1)::
       "phase_z_rejections": [                    # fail-closed evidence, never silently dropped
         {
           # original phase_z_pending fields, plus:
+          "rejection_id": str,                   # deterministic audit identity
+          "audit_ref": "phase_z_rejections.jsonl#<rejection_id>",
           "rejected_at": "<ISO>",
           "rejection_reason": str
         }
-      ],
+      ],                                         # bounded hot cache; JSONL is durable history
       "completions": [                           # ring buffer (max 100 entries)
         {
           "fire_at": "<ISO>", "completed_at": "<ISO>",
@@ -203,6 +205,117 @@ def _lock_path(state_path: Path) -> Path:
     to the data file underneath it.
     """
     return state_path.with_name(state_path.name + ".lock")
+
+
+def _phase_z_rejection_audit_path(state_path: Path) -> Path:
+    return state_path.with_name("phase_z_rejections.jsonl")
+
+
+def _phase_z_rejection_id(entry: dict[str, Any]) -> str:
+    identity = {
+        key: value
+        for key, value in entry.items()
+        if key not in {"rejected_at", "rejection_id", "audit_ref"}
+    }
+    canonical = json.dumps(
+        identity,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def _prepare_phase_z_rejection_entry(
+    entry: dict[str, Any],
+    *,
+    state_path: Path,
+) -> dict[str, Any]:
+    """Return one rejection with its stable durable-audit identity."""
+    prepared = dict(entry)
+    prepared["rejection_id"] = _phase_z_rejection_id(prepared)
+    prepared["audit_ref"] = (
+        f"{_phase_z_rejection_audit_path(state_path).name}"
+        f"#{prepared['rejection_id']}"
+    )
+    return prepared
+
+
+def _append_phase_z_rejection_audit(
+    entries: list[dict[str, Any]],
+    *,
+    state_path: Path,
+) -> None:
+    """Persist rejection evidence before the bounded state cache can evict it.
+
+    ``reject_phase_z`` already holds the dispatch-state lock.  The append-only
+    ledger has its own stable-inode flock so audit readers need not acquire the
+    whole scheduler mutex.  A deterministic id makes replay after a crash
+    between append and state replacement idempotent.
+    """
+    if not entries:
+        return
+    audit_path = _phase_z_rejection_audit_path(state_path)
+    audit_path.parent.mkdir(parents=True, exist_ok=True)
+    guard_canonical_write(audit_path)
+    with audit_path.open("a+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            raw = fh.read()
+            existing_ids: set[str] = set()
+            for line_number, line in enumerate(raw.splitlines(), start=1):
+                if not line.strip():
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: blank record"
+                    )
+                try:
+                    prior = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: {exc}"
+                    ) from exc
+                if not isinstance(prior, dict):
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: record is not an object"
+                    )
+                rejection_id = prior.get("rejection_id")
+                if not isinstance(rejection_id, str) or not rejection_id:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: rejection_id missing"
+                    )
+                if _phase_z_rejection_id(prior) != rejection_id:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: rejection_id mismatch"
+                    )
+                expected_ref = f"{audit_path.name}#{rejection_id}"
+                if prior.get("audit_ref") != expected_ref:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: audit_ref mismatch"
+                    )
+                existing_ids.add(rejection_id)
+            fh.seek(0, os.SEEK_END)
+            if raw and not raw.endswith("\n"):
+                # A complete final JSON object with only its delimiter missing
+                # is safe to frame in place.  A torn object failed above before
+                # either the audit or dispatch-state authority was mutated.
+                fh.write("\n")
+            for entry in entries:
+                if entry["rejection_id"] in existing_ids:
+                    continue
+                fh.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+                existing_ids.add(entry["rejection_id"])
+            fh.flush()
+            os.fsync(fh.fileno())
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
 
 SCHEMA_VERSION = 1
 # Adding an OPTIONAL key to `_empty_state()` must NOT bump SCHEMA_VERSION:
@@ -553,6 +666,12 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
     identity checks that this module deliberately does not depend on).
     """
     with _locked_state(path) as (_fh, data):
+        legacy_rejections = [
+            _prepare_phase_z_rejection_entry(entry, state_path=path)
+            for entry in data.get("phase_z_rejections") or []
+        ]
+        _append_phase_z_rejection_audit(legacy_rejections, state_path=path)
+        data["phase_z_rejections"] = legacy_rejections[-COMPLETIONS_MAX:]
         data["supervisor_started_at"] = _now()
         data["supervisor_pid"] = os.getpid()
         data["last_heartbeat_at"] = _now()
@@ -1277,13 +1396,26 @@ def reject_phase_z(
             if str(item.get("cohort_id")) not in wanted:
                 kept.append(item)
                 continue
-            rejected.append({
+            entry = {
                 **item,
                 "rejected_at": _now(),
                 "rejection_reason": str(reason),
-            })
+            }
+            rejected.append(
+                _prepare_phase_z_rejection_entry(entry, state_path=path)
+            )
+        _append_phase_z_rejection_audit(rejected, state_path=path)
         ledger = data.get("phase_z_rejections") or []
-        ledger.extend(rejected)
+        cached_ids = {
+            str(entry.get("rejection_id"))
+            for entry in ledger
+            if entry.get("rejection_id")
+        }
+        ledger.extend(
+            entry
+            for entry in rejected
+            if entry["rejection_id"] not in cached_ids
+        )
         data["phase_z_pending"] = kept
         data["phase_z_rejections"] = ledger[-COMPLETIONS_MAX:]
         return rejected

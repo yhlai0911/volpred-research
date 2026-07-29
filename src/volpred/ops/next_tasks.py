@@ -54,7 +54,11 @@ from typing import IO, Any
 
 from volpred.canonical_write import guard_canonical_write
 
-from .blocked_reasons import BLOCKED_REASONS, UNBLOCK_GATES
+from .blocked_reasons import (
+    BLOCKED_REASONS,
+    INCIDENT_SUSTAINED_CLEAN_GATE,
+    UNBLOCK_GATES,
+)
 from .blocked_reasons import is_valid as is_valid_blocked_reason
 from .diagnostics import warn
 
@@ -437,6 +441,13 @@ def validate_unblock_gates(tasks: list[Any]) -> None:
             != "awaiting_event_window"
             or not isinstance(task.get("blocked_until"), str)
             or not str(task["blocked_until"]).strip()
+            or (
+                gate == INCIDENT_SUSTAINED_CLEAN_GATE
+                and (
+                    not isinstance(task.get("unblock_incident_id"), str)
+                    or not str(task["unblock_incident_id"]).strip()
+                )
+            )
         ):
             raise InvalidUnblockGate(
                 f"task {task.get('id')!r} has invalid unblock_gate lifecycle "

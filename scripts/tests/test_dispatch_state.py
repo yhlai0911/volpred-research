@@ -460,6 +460,278 @@ def test_phase_z_pending_holds_slot_until_exact_cohort_finish(tmp_state: Path) -
     )
 
 
+def test_phase_z_rejection_hot_ring_archives_every_receipt_before_eviction(
+    tmp_state: Path,
+) -> None:
+    """The 101st rejection must not erase the first generation receipt."""
+    cap = st.COMPLETIONS_MAX
+    for index in range(cap + 1):
+        with st._locked_state(tmp_state) as (_fh, data):
+            data["phase_z_pending"] = [
+                {
+                    "job_id": f"job-{index}",
+                    "cohort_id": f"cohort-{index}",
+                    "slot_id": 1,
+                    "created_at": "2026-07-29T00:00:00+00:00",
+                    "isolated": False,
+                    "fire_lifecycle": {
+                        "generation_id": f"generation-{index}",
+                        "captured_at": "2026-07-29T00:00:00+00:00",
+                        "pre_fire_dirty": [f"pre-existing-{index}.txt"],
+                    },
+                }
+            ]
+        rejected = st.reject_phase_z(
+            cohort_ids={f"cohort-{index}"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+        assert len(rejected) == 1
+
+    hot = st.read_state(tmp_state)["phase_z_rejections"]
+    assert len(hot) == cap
+    assert hot[0]["job_id"] == "job-1"
+
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    archived = [
+        json.loads(line)
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(archived) == cap + 1
+    assert archived[0]["job_id"] == "job-0"
+    assert archived[0]["fire_lifecycle"]["generation_id"] == "generation-0"
+    assert archived[-1]["job_id"] == f"job-{cap}"
+
+
+def test_phase_z_rejection_replay_is_idempotent_in_audit_and_hot_cache(
+    tmp_state: Path,
+) -> None:
+    pending = {
+        "job_id": "job-replay",
+        "cohort_id": "cohort-replay",
+        "slot_id": 1,
+        "created_at": "2026-07-29T00:00:00+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-replay",
+            "captured_at": "2026-07-29T00:00:00+00:00",
+            "pre_fire_dirty": ["already-dirty.txt"],
+        },
+    }
+    for _attempt in range(2):
+        with st._locked_state(tmp_state) as (_fh, data):
+            data["phase_z_pending"] = [pending]
+        st.reject_phase_z(
+            cohort_ids={"cohort-replay"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    hot = st.read_state(tmp_state)["phase_z_rejections"]
+    archived = [
+        json.loads(line)
+        for line in tmp_state.with_name(
+            "phase_z_rejections.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(hot) == 1
+    assert len(archived) == 1
+    assert hot[0]["rejection_id"] == archived[0]["rejection_id"]
+
+
+def test_phase_z_rejection_audit_failure_keeps_pending_authority(
+    tmp_state: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_pending"] = [
+            {
+                "job_id": "job-audit-fail",
+                "cohort_id": "cohort-audit-fail",
+                "slot_id": 1,
+                "created_at": "2026-07-29T00:00:00+00:00",
+                "isolated": False,
+                "fire_lifecycle": {
+                    "generation_id": "generation-audit-fail",
+                    "captured_at": "2026-07-29T00:00:00+00:00",
+                    "pre_fire_dirty": [],
+                },
+            }
+        ]
+    monkeypatch.setattr(
+        st,
+        "_append_phase_z_rejection_audit",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    with pytest.raises(OSError, match="disk full"):
+        st.reject_phase_z(
+            cohort_ids={"cohort-audit-fail"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    snap = st.read_state(tmp_state)
+    assert [item["job_id"] for item in snap["phase_z_pending"]] == [
+        "job-audit-fail"
+    ]
+    assert snap["phase_z_rejections"] == []
+
+
+def test_phase_z_rejection_torn_audit_tail_keeps_pending_authority(
+    tmp_state: Path,
+) -> None:
+    pending = {
+        "job_id": "job-torn-ledger",
+        "cohort_id": "cohort-torn-ledger",
+        "slot_id": 1,
+        "created_at": "2026-07-29T00:00:00+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-torn-ledger",
+            "captured_at": "2026-07-29T00:00:00+00:00",
+            "pre_fire_dirty": [],
+        },
+    }
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_pending"] = [pending]
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    audit_path.write_text('{"torn":', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="malformed phase-z rejection audit"):
+        st.reject_phase_z(
+            cohort_ids={"cohort-torn-ledger"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    snap = st.read_state(tmp_state)
+    assert snap["phase_z_pending"] == [pending]
+    assert snap["phase_z_rejections"] == []
+    assert audit_path.read_text(encoding="utf-8") == '{"torn":'
+
+
+def test_phase_z_rejection_repairs_complete_tail_missing_only_newline(
+    tmp_state: Path,
+) -> None:
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    for index in range(2):
+        with st._locked_state(tmp_state) as (_fh, data):
+            data["phase_z_pending"] = [
+                {
+                    "job_id": f"job-framing-{index}",
+                    "cohort_id": f"cohort-framing-{index}",
+                    "slot_id": 1,
+                    "created_at": "2026-07-29T00:00:00+00:00",
+                    "isolated": False,
+                    "fire_lifecycle": {
+                        "generation_id": f"generation-framing-{index}",
+                        "captured_at": "2026-07-29T00:00:00+00:00",
+                        "pre_fire_dirty": [],
+                    },
+                }
+            ]
+        if index == 1:
+            audit_path.write_text(
+                audit_path.read_text(encoding="utf-8").rstrip("\n"),
+                encoding="utf-8",
+            )
+        st.reject_phase_z(
+            cohort_ids={f"cohort-framing-{index}"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    archived = [
+        json.loads(line)
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [entry["job_id"] for entry in archived] == [
+        "job-framing-0",
+        "job-framing-1",
+    ]
+
+
+def test_phase_z_rejection_forged_existing_identity_keeps_pending_authority(
+    tmp_state: Path,
+) -> None:
+    pending = {
+        "job_id": "job-authentic",
+        "cohort_id": "cohort-authentic",
+        "slot_id": 1,
+        "created_at": "2026-07-29T00:00:00+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-authentic",
+            "captured_at": "2026-07-29T00:00:00+00:00",
+            "pre_fire_dirty": [],
+        },
+    }
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_pending"] = [pending]
+    authentic_id = st._phase_z_rejection_id(
+        {
+            **pending,
+            "rejection_reason": "generation_mismatch",
+        }
+    )
+    forged = {
+        "rejection_id": authentic_id,
+        "job_id": "forged-payload",
+    }
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    original = json.dumps(forged, sort_keys=True) + "\n"
+    audit_path.write_text(original, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="rejection_id mismatch"):
+        st.reject_phase_z(
+            cohort_ids={"cohort-authentic"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    snap = st.read_state(tmp_state)
+    assert snap["phase_z_pending"] == [pending]
+    assert snap["phase_z_rejections"] == []
+    assert audit_path.read_text(encoding="utf-8") == original
+
+
+def test_mark_supervisor_started_backfills_legacy_phase_z_rejection_audit(
+    tmp_state: Path,
+) -> None:
+    """A deploy must preserve hot-cache evidence created before the ledger."""
+    legacy = {
+        "job_id": "job-before-ledger",
+        "cohort_id": "cohort-before-ledger",
+        "slot_id": 2,
+        "created_at": "2026-07-26T18:30:45+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-before-ledger",
+            "captured_at": "2026-07-26T18:23:00+00:00",
+            "pre_fire_dirty": ["another-session.txt"],
+        },
+        "rejected_at": "2026-07-26T18:30:45+00:00",
+        "rejection_reason": "missing_generation",
+    }
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_rejections"] = [legacy]
+
+    st.mark_supervisor_started(tmp_state)
+
+    snap = st.read_state(tmp_state)
+    migrated = snap["phase_z_rejections"][0]
+    assert migrated["rejection_id"]
+    assert migrated["audit_ref"].endswith(f"#{migrated['rejection_id']}")
+
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    archived = [
+        json.loads(line)
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert archived == [migrated]
+
+
 def test_attach_process_fills_identity(tmp_state: Path) -> None:
     st.reserve_fire(
         schedule_id="hourly_dispatch", attempt=1, model="opus",

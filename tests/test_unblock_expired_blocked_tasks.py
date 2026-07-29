@@ -304,6 +304,106 @@ def test_expired_named_gate_unblocks_only_after_live_probe_is_ready(
     )
 
 
+def _write_incident_gate_state(
+    root: Path,
+    *,
+    incident_id: str,
+    state: str,
+    clean_streak_started_at: str | None = None,
+) -> None:
+    incident_path = root / "storage" / "ops" / "incidents.json"
+    incident_path.parent.mkdir(parents=True, exist_ok=True)
+    incident_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "incidents": {
+                    incident_id: {
+                        "incident_id": incident_id,
+                        "state": state,
+                        "clean_streak_started_at": clean_streak_started_at,
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def test_expired_incident_gate_stays_blocked_until_incident_is_resolved(
+    tmp_path, monkeypatch
+) -> None:
+    """A 24h timestamp is not proof that the detector stayed clean."""
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "issue42_closeout",
+                    "task_type": "platform_ops",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_event_window",
+                    "blocked_until": "2000-01-01T00:00:00+00:00",
+                    "unblock_gate": "incident_sustained_clean_v1",
+                    "unblock_incident_id": "inc_42",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    _write_incident_gate_state(
+        tmp_path,
+        incident_id="inc_42",
+        state="open",
+        clean_streak_started_at="2999-01-01T00:00:00+00:00",
+    )
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "_REPO_ROOT", tmp_path)
+
+    assert unblock_expired_blocked_tasks.main(apply=True) == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "blocked"
+    assert saved[0]["unblock_gate"] == "incident_sustained_clean_v1"
+    assert saved[0]["blocked_until"] == "2999-01-02T00:00:00+00:00"
+
+
+def test_expired_incident_gate_unblocks_after_canonical_incident_resolution(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "issue42_closeout",
+                    "task_type": "platform_ops",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_event_window",
+                    "blocked_until": "2000-01-01T00:00:00+00:00",
+                    "unblock_gate": "incident_sustained_clean_v1",
+                    "unblock_incident_id": "inc_42",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    _write_incident_gate_state(
+        tmp_path,
+        incident_id="inc_42",
+        state="resolved",
+    )
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "PATH", next_tasks)
+    monkeypatch.setattr(unblock_expired_blocked_tasks, "_REPO_ROOT", tmp_path)
+
+    assert unblock_expired_blocked_tasks.main(apply=True) == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))
+    assert saved[0]["status"] == "pending"
+    assert "unblock_gate" not in saved[0]
+    assert "unblock_incident_id" not in saved[0]
+
+
 def test_unexpired_named_gate_is_not_probed(
     tmp_path, monkeypatch
 ) -> None:

@@ -225,6 +225,68 @@ def test_event_window_block_sets_allowlisted_live_gate(
     assert saved[0]["unblock_gate"] == "work_shadow_cutover_ready_v1"
 
 
+def test_incident_gate_records_required_canonical_incident_identity(
+    tmp_path, monkeypatch
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    next_tasks.write_text(
+        json.dumps([{"id": "issue42", "status": "pending"}]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mark_task_blocked.py",
+            "--id",
+            "issue42",
+            "--reason",
+            "awaiting_event_window",
+            "--until",
+            "2026-07-29T09:24:21+00:00",
+            "--unblock-gate",
+            "incident_sustained_clean_v1",
+            "--unblock-incident-id",
+            "inc_537a3ff3304f",
+        ],
+    )
+
+    assert mark_task_blocked.main() == 0
+
+    saved = json.loads(next_tasks.read_text(encoding="utf-8"))[0]
+    assert saved["unblock_gate"] == "incident_sustained_clean_v1"
+    assert saved["unblock_incident_id"] == "inc_537a3ff3304f"
+
+
+def test_incident_gate_rejects_missing_incident_identity(
+    tmp_path, monkeypatch, capsys
+) -> None:
+    next_tasks = tmp_path / "next_tasks.json"
+    original = [{"id": "issue42", "status": "pending"}]
+    next_tasks.write_text(json.dumps(original), encoding="utf-8")
+    monkeypatch.setattr(mark_task_blocked, "NEXT_TASKS", next_tasks)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "mark_task_blocked.py",
+            "--id",
+            "issue42",
+            "--reason",
+            "awaiting_event_window",
+            "--until",
+            "2026-07-29T09:24:21+00:00",
+            "--unblock-gate",
+            "incident_sustained_clean_v1",
+        ],
+    )
+
+    assert mark_task_blocked.main() == 2
+    assert json.loads(next_tasks.read_text(encoding="utf-8")) == original
+    assert "requires --unblock-incident-id" in capsys.readouterr().err
+
+
 def test_live_gate_rejects_non_event_window_reason(
     tmp_path, monkeypatch, capsys
 ) -> None:
@@ -468,7 +530,11 @@ def test_deprecated_reason_terminalizes_instead_of_blocking(tmp_path, monkeypatc
             [
                 {
                     "id": "duplicate_article",
-                    "status": "pending",
+                    "status": "blocked",
+                    "blocked_reason": "awaiting_event_window",
+                    "blocked_until": "2026-07-30T00:00:00+00:00",
+                    "unblock_gate": "incident_sustained_clean_v1",
+                    "unblock_incident_id": "inc_obsolete",
                 }
             ],
             ensure_ascii=False,
@@ -500,6 +566,8 @@ def test_deprecated_reason_terminalizes_instead_of_blocking(tmp_path, monkeypatc
     assert saved[0]["blocked_reason"] == "deprecated"
     assert saved[0]["blocked_note"] == "Already covered by a published article"
     assert "blocked_until" not in saved[0]
+    assert "unblock_gate" not in saved[0]
+    assert "unblock_incident_id" not in saved[0]
     assert saved[0]["terminalized_reason"] == "deprecated"
 
 
