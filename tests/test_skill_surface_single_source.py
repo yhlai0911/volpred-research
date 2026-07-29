@@ -50,25 +50,30 @@ RETIRED_SURFACES = (
 
 STALE_RENDER_HEADER = "AUTO-GENERATED FROM agent-specs/"
 
+CANONICAL_AGENT_DIRS = (
+    "agents",
+    "commands",
+    "hooks",
+    "rules",
+    "skills",
+)
+
 
 def _iter_agent_surface_files() -> list[Path]:
-    """Every `.md` in THIS checkout's `.claude/` surface.
+    """Every `.md` in THIS checkout's active `.claude/` surface.
 
-    Paths are filtered on their position RELATIVE to the repo root, not on the
-    absolute path. The absolute path of a worktree checkout is itself
-    `<main>/.claude/worktrees/<branch>/...`, so filtering on absolute `.parts`
-    would drop every single file whenever the suite runs inside a worktree —
-    i.e. the check would quietly scan nothing and pass. A gate that scans zero
-    files must never look like a gate that passed.
+    Enumerate active roots directly instead of recursively walking `.claude/`
+    and filtering afterward. Post-filtering still traverses local-only
+    `.claude/worktrees/`, `.claude/backups/`, and `.claude/projects/`, so the
+    test reads paths absent from a clean CI checkout and trips the CI-parity
+    ratchet even when every assertion passes.
     """
     root = REPO_ROOT / ".claude"
-    files = [
-        p
-        for p in root.rglob("*.md")
-        # other agents' checkouts under .claude/worktrees/ are not our surface
-        if "worktrees" not in p.relative_to(root).parts
-        and "__pycache__" not in p.relative_to(root).parts
-    ]
+    files = list(root.glob("*.md"))
+    for dirname in CANONICAL_AGENT_DIRS:
+        active_root = root / dirname
+        if active_root.is_dir():
+            files.extend(active_root.rglob("*.md"))
     assert files, f"scanned zero files under {root} — the check is not actually running"
     return files
 
