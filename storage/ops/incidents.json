@@ -426,13 +426,19 @@
      "first_seen_at": "2026-07-29T08:45:35.470724+00:00",
      "key": "30435469828:1",
      "last_seen_at": "2026-07-29T08:45:35.470724+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T09:20:16.419035+00:00",
+     "key": "30437836269:1",
+     "last_seen_at": "2026-07-29T09:20:16.419035+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T08:42:41.3741776Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
-   "last_seen_at": "2026-07-29T08:45:35.470724+00:00",
+   "last_breach_detail": "2026-07-29T09:17:41.9389456Z E AssertionError: Enforcement Layer Map is out of sync with disk — update .claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md in the same commit as ",
+   "last_seen_at": "2026-07-29T09:20:16.419035+00:00",
    "notified_at": null,
-   "occurrence_count": 2,
+   "occurrence_count": 3,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -669,45 +675,8 @@
   },
   "inc_537a3ff3304f": {
    "class": "machine_self",
-   "clean_observations": [
-    {
-     "at": "2026-07-28T17:00:46.615210+00:00"
-    },
-    {
-     "at": "2026-07-28T17:25:38.681120+00:00"
-    },
-    {
-     "at": "2026-07-28T18:23:42.002507+00:00"
-    },
-    {
-     "at": "2026-07-28T19:17:14.039274+00:00"
-    },
-    {
-     "at": "2026-07-28T20:20:04.514722+00:00"
-    },
-    {
-     "at": "2026-07-28T21:07:20.009549+00:00"
-    },
-    {
-     "at": "2026-07-28T22:39:38.926084+00:00"
-    },
-    {
-     "at": "2026-07-28T23:39:51.185004+00:00"
-    },
-    {
-     "at": "2026-07-29T00:08:03.954120+00:00"
-    },
-    {
-     "at": "2026-07-29T01:19:46.302587+00:00"
-    },
-    {
-     "at": "2026-07-29T02:06:32.080933+00:00"
-    },
-    {
-     "at": "2026-07-29T08:53:19.591680+00:00"
-    }
-   ],
-   "clean_streak_started_at": "2026-07-28T09:24:21.846131+00:00",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
    "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
@@ -724,9 +693,19 @@
    "notification_id": "effect_owned_email_d3508f72aaa989427c20868a341f7623",
    "notified_at": "2026-07-26T15:57:03.341326+00:00",
    "occurrence_count": 4,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-29T09:41:04.873699+00:00",
+    "by": "detector",
+    "criterion": "clean_streak_k3_24h"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-29T09:41:04.873699+00:00",
+     "by": "detector",
+     "criterion": "clean_streak_k3_24h"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [],
    "task_mode": "none",
@@ -1507,7 +1486,7 @@
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-29T08:53:35.698638+00:00"
+     "last_seen_at": "2026-07-29T09:41:17.743728+00:00"
     },
     {
      "cleared_at": null,
@@ -1549,7 +1528,7 @@
      },
      "first_seen_at": "2026-07-29T02:02:19.114849+00:00",
      "key": "dispatch-slot-1-cfeeb2f6",
-     "last_seen_at": "2026-07-29T08:53:37.480693+00:00"
+     "last_seen_at": "2026-07-29T09:41:19.458693+00:00"
     },
     {
      "cleared_at": null,
@@ -1563,14 +1542,14 @@
      },
      "first_seen_at": "2026-07-29T08:53:18.944581+00:00",
      "key": "dispatch-slot-1-d3c39bb1",
-     "last_seen_at": "2026-07-29T08:53:18.944581+00:00"
+     "last_seen_at": "2026-07-29T09:41:20.732231+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-cfeeb2f6 unmergeable (worker_unknown_external)",
-   "last_seen_at": "2026-07-29T08:53:37.480693+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-d3c39bb1 unmergeable (undeclared_output_path)",
+   "last_seen_at": "2026-07-29T09:41:20.732231+00:00",
    "notified_at": null,
-   "occurrence_count": 4315,
+   "occurrence_count": 4459,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2400,6 +2379,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T08:53:37.503091+00:00",
+ "updated_at": "2026-07-29T09:41:20.757010+00:00",
  "version": 1
 }
