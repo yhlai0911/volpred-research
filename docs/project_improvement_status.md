@@ -2844,6 +2844,18 @@ Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
 - ℹ️ 00:14 immutable release 因 monitored notification source 尚未 commit 而拒絕，
   是正確 fail-closed：沒有載入 mutable bytes、沒有中止 worker、fresh generation
   仍成功建立；兩檔已於 `96018b340`／`13061f9dc`正式落地。
+- 🔁 原結案後的 production regression 重新開啟本 issue：request `749b49b3…`
+  durable 後，舊 scheduler 仍於 01:17 與 01:49 各 admission 一班，證明
+  health-loop-only drain 沒有封住 scheduler TOCTOU。`983a8eaf5`新增共用 reload-root
+  admission lock、active-intent fail-closed 與 fire-demand CAS；相鄰最終
+  **336 passed、1 skipped**，Matt Spec／Standards雙 PASS。
+- ✅ 兩班舊 worker 都自然 `exit=0`，沒有 signal kill；token-owned quiesce 阻止第三班。
+  immutable release `451f9bf61cc0…` 於 02:04:40 fresh boot，包含
+  `983a8eaf5` 與通知路由 `9a15cede8`，planned-restart 通知正確抑制。
+- ✅ 控制性 request `9b5db49d2642…` 存在時，真實 Operations Core socket tick回傳
+  `skip/deferred_reload_pending`，`current_jobs=0`、`last_fire_at`不變；其後
+  completion receipt回讀相同 release SHA／新 generation，最終
+  `auth_blocked=false`、quiesce已解除。這項 regression 的五步 Gate 已重新通過。
 
 Issue #42狀態為 **`root_cause_fixed_and_verified`**。這只結案 T38；不代表
 Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy owner與#46

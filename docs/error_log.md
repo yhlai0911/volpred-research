@@ -4610,10 +4610,26 @@ closeout。Sibling completion 在 admission 期間寫入 PHASE-Z 時，reservati
 不 force kill worker。測試另將 reload root 自真實 `~/.volpred` 隔離，避免 production
 deploy 狀態污染 unit test。
 
-**回歸與狀態**：live race 的 tight test 修前進入 worker 路徑而 RED，修後不執行
+**回歸與 live read-back**：live race 的 tight test 修前進入 worker 路徑而 RED，修後不執行
 pre-fire／worker 且保留 `last_fire_at`；另有 deterministic race 鎖住
 early-check=false、final-gate=false 時 `fire_requested_at`／reason 不得遺失。
 Validated active request、malformed fail-closed、self-reload、wrapper、scheduler 與
-durable fire lifecycle 相鄰 suite 全綠。待目前 worker 自然完成、舊 request terminal、
-新 release（含本修正與通知 commit `9a15cede8`）完成 fresh-boot read-back前，本條維持
-**`contained`**。
+durable fire lifecycle 相鄰 suite最終 **336 passed、1 skipped**，Matt Spec／Standards
+雙 PASS。修正 commit=`983a8eaf5`。
+
+Production 沒有 force kill：舊 worker `5738de9c…` 與競態期間再被舊 release 收進來的
+`11ba9644…` 都自然 `exit=0`，PHASE-Z 完整收尾。切換期間以 token-owned
+`cutover_quiesce` 向舊 release 相容地設 `auth_blocked=true`，所以第二個 worker
+完成後沒有第三個 stale admission。最新 immutable release commit
+`451f9bf61cc0…` 於 02:04:40 CST fresh boot，確認同時包含 `983a8eaf5` 與通知路由
+`9a15cede8`；planned-reload restart 通知被正確抑制。
+
+最後另建立控制性 durable request `9b5db49d2642…`，隨即由真實 Unix-socket trigger
+送入 Operations Core tick；live decision 精確回傳
+`{"action":"skip","reason":"deferred_reload_pending"}`，`current_jobs` 保持 0、
+`last_fire_at` 未改、沒有 pre-fire 或 worker。該 request 隨後以相同 release
+fresh boot，terminal receipt
+`~/.volpred/run/dispatch-supervisor-reload/receipts/9b5db49d2642792e7cf8a20588a443f62b4814081f28ac128a7ca07ddb002f6c.json`
+回讀 `state=completed`、observed source SHA 與 supervisor generation 相符；最終
+`auth_blocked=false`、`cutover_quiesce=null`、`current_jobs=[]`。本 incident 五步
+Gate 已完成，狀態升為 **`root_cause_fixed_and_verified`**。
