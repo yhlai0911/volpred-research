@@ -1,0 +1,167 @@
+{
+  "stage": "product-and-exchange-scoped-trading-calendars",
+  "round": 6,
+  "responds_to": "experiments/K1694/review_verdict.json (round 5, FAIL, reviewed_commit 94b81c295b7e9be0f459dce98629bdf9bf1deb0e)",
+  "path_chosen": {
+    "option": "(a) product- and exchange-scoped calendars",
+    "but_read_this_first": "Choosing (a) did NOT rescue the numbers, and it must not be read that way. The scoped calendars are what MADE the round-4 whitelist indefensible: once each ticker is mapped to the exchange that lists it and that exchange's own notices are read, all three disputed dates are trading days for all 22 products. The unscheduled-closure sets are therefore EMPTY, which reproduces exactly the numeric effect of option (b) -- 3276 rows -> 3275, 2012-10 from 22/22 to 0/22, 2018-12 CORN out -- and the completeness claim is downgraded on top of that. What (a) buys over (b) is structure, not sample: a future SOURCED closure at one venue will not touch the other.",
+    "why_not_pure_b": "Deleting the whitelist without scoping would have left the same single calendar applied to two exchanges, i.e. the next reviewer would have had to take on faith that ICE and CME agree. They do agree, but that is now a checked fact with URLs rather than an assumption."
+  },
+
+  "d1_product_scoped_calendar_required": {
+    "verdict_on_the_defect": "accepted in full; the round-4 whitelist was wrong, not merely unproven",
+    "primary_sources_read": [
+      {
+        "id": "CFTC-12-363",
+        "url": "https://www.cftc.gov/sites/default/files/stellent/groups/public/%40rulesandproducts/documents/ifdocs/rul102912cmecbotnymexandcomex1.pdf",
+        "quote": "NYMEX and COMEX closed their physical trading floors for trade dates October 29, 2012 and October 30, 2012. Electronic trading remains available for all NYMEX and COMEX products on CME Globex.",
+        "also": "The filing enumerates every emergency action taken. Only U.S. equity futures/options (CME, CBOT) and the interest-rate complex (Treasury, Eurodollar, Fed Funds) were closed. CBOT grains, KCBT wheat and CME livestock appear nowhere in it."
+      },
+      {
+        "id": "ICE-PR-2012-10-29",
+        "url": "https://ir.theice.com/press/news-details/2012/IntercontinentalExchange-Announces-Hurricane-Sandy-Market-Update/default.aspx",
+        "quote": "All other ICE markets and clearing houses will remain open and follow regular market hours, including ICE Clear Europe for CDS clearing.",
+        "also": "Exactly two exceptions are named: ICE's Russell equity index futures/options (rescheduled) and ICE Clear Credit (closed 30 October)."
+      },
+      {
+        "id": "CME-PR-2018-12-02 / CME-CHADV18-474",
+        "url": "https://www.cmegroup.com/media-room/press-releases/2018/12/02/cme_group_u_s_equityinterestratemarketstoclosefornationaldayofmo.html",
+        "quote": "All other markets on CME Globex, CME ClearPort and the trading floor will remain open for regular trading hours on Dec. 5.",
+        "also": "cmegroup.com returns 403 to non-browser user agents; both documents were read through the Wayback id_ mirrors recorded in calendar_fixtures.json."
+      },
+      {
+        "id": "CME-GLOBEX-2010-CAL / CME-GLOBEX-2010-COLUMBUS",
+        "url": "http://www.cmegroup.com/tools-information/holiday-calendar/files/2010-globex-holiday-calendar.pdf",
+        "quote": "CME Globex Columbus Day Holiday Schedule -- Sunday, Oct 10: 1700 CT / 1800 ET Regular CME Globex open for NYMEX, COMEX and DME products ... 1800 CT Regular CME Globex open for CBOT, KCBT and MGEX Grains ... Monday, Oct 11: Per each product schedule -- Regular CME Globex close",
+        "also": "The compiled 2010 calendar has one section per holiday: New Year's, MLK, President's, Good Friday ('No CME Globex Trading on Good Friday'), Memorial, Fourth of July, Labor Day, Columbus Day, Veterans Day, Thanksgiving, Christmas. Columbus and Veterans carry regular open/close for every product group K1694 uses."
+      },
+      {
+        "id": "ICEUS-CAL-2018 / ICEUS-CAL-2019 / ICEUS-CAL-2026",
+        "url": "https://www.ice.com/publicdocs/futures_us/exchange_notices/ExNot2018HolidayCal.pdf",
+        "quote": "Columbus Day | Monday October 8 | Open  (Sugar, Cocoa, Coffee, Cotton, FCOJ, Grain and Oilseed column)",
+        "also": "The 2019 notice adds 'Veterans Day ... open' and the 2026 notice adds 'Juneteenth ... closed' for the same softs column. The softs closed-set matches the CME commodity closed-set exactly."
+      }
+    ],
+    "code_change": "CME_UNSCHEDULED_CLOSURES deleted. New PRODUCT_SCHEDULE maps all 22 DCOT names to CME_GLOBEX_COMMODITY (18) or ICEUS_SOFTS (4); CALENDAR_SPECS declares each venue's closed-holiday set and its sources; UNSCHEDULED_CLOSURES is per-schedule and both entries are {}. _cme_trading_days/_expected_trading_days/expected_month_endpoints became trading_days(schedule)/expected_trading_days(schedule)/expected_month_endpoints(schedule). monthly_coverage() now computes rv_expected_trading_days per (schedule, month) and takes BOTH the cross-sectional peer maximum and the month-level anchor within schedule, never across all 22 commodities. _validate_unscheduled_closures() runs at import and refuses any closure lacking source_id + quote. A COMMODITY_MAP/PRODUCT_SCHEDULE set-equality check raises at import so a new ticker cannot reach the calendar without a row in calendar_sources.md.",
+    "no_threshold_moved": "MIN_RV_DAYS=15, MAX_RV_SHORTFALL_VS_CALENDAR=2, MAX_RV_CROSS_SHORTFALL=2, MAX_RV_MONTH_SHORTFALL=1 -- unchanged since round 4."
+  },
+
+  "d2_calendar_truth_test_is_tautological": {
+    "verdict_on_the_defect": "accepted; the test could not falsify a wrong calendar",
+    "removed": "test_endpoint_gate_accepts_an_untruncated_dated_cache -- it injected expected_month_endpoints() and asked the same implementation to accept it",
+    "replaced_by": "calendar_fixtures.json, an oracle hand-transcribed from the exchange notices, plus tests that read ONLY that file for expected values",
+    "tests_added": [
+      "test_calendar_matches_primary_source_date_fixtures -- 16 dated open/closed fixtures across both schedules; each carries a resolvable URL and a quote",
+      "test_the_disputed_dates_are_trading_days_for_every_schedule -- the round-5 defect as a direct falsification",
+      "test_calendar_matches_primary_source_month_fixtures -- 10 month fixtures with hand-derived day counts and endpoints; the fixture's own weekday arithmetic is re-checked inside the test",
+      "test_endpoint_gate_accepts_a_primary_source_untruncated_cache -- injects the NOTICES' endpoints (accept) and then truncates by one trading day (must reject), so the gate is neither vacuously strict nor vacuously lax",
+      "test_unscheduled_closures_must_carry_a_primary_source -- inserts an unsourced closure and requires _validate_unscheduled_closures() to raise",
+      "test_the_two_schedules_are_declared_separately_not_aliased -- injects a closure into ICEUS_SOFTS and requires it NOT to appear in the CME calendar",
+      "test_every_commodity_has_a_sourced_schedule -- every ticker must have a row in calendar_sources.md",
+      "test_removing_the_whitelist_is_disclosed_with_its_consequence",
+      "test_the_tolerated_blind_spot_is_quantified_not_only_disclosed"
+    ],
+    "oracle_falsifies_the_previous_code": {
+      "how": "gate_history/a5896554__K1694.py (the round-5 bytes, preserved by scripts/preserve_gate_blob.py BEFORE any edit) was loaded with importlib, pointed at the same frozen data/ cache, and evaluated against calendar_fixtures.json",
+      "contradictions": 9,
+      "detail": [
+        "CME_GLOBEX_COMMODITY 2012-10-29 calendar=closed vs CFTC-12-363 open",
+        "CME_GLOBEX_COMMODITY 2012-10-30 calendar=closed vs CFTC-12-363 open",
+        "ICEUS_SOFTS 2012-10-29 calendar=closed vs ICE-PR-2012-10-29 open",
+        "ICEUS_SOFTS 2012-10-30 calendar=closed vs ICE-PR-2012-10-29 open",
+        "CME_GLOBEX_COMMODITY 2018-12-05 calendar=closed vs CME-PR-2018-12-02 open",
+        "CME_GLOBEX_COMMODITY 2012-10 calendar=21 days vs sources 23",
+        "ICEUS_SOFTS 2012-10 calendar=21 days vs sources 23",
+        "CME_GLOBEX_COMMODITY 2018-12 calendar=19 days vs sources 20",
+        "ICEUS_SOFTS 2018-12 calendar=19 days vs sources 20"
+      ],
+      "same_oracle_on_round_6": "0 contradictions (all calendar tests pass)"
+    }
+  },
+
+  "quantified_change": {
+    "estimation_sample_rows": {"round5": 3276, "round6": 3275, "delta": -1,
+      "which_row": "CORN 2018-12 -- 17 observed days against a 20-day CME calendar is a shortfall of 3, over MAX_RV_SHORTFALL_VS_CALENDAR=2"},
+    "lagged_spec_rows": {"round5": 2749, "round6": 2748},
+    "coverage_rv_complete_rows": {"round5": 5252, "round6": 5229, "delta": -23,
+      "how_round5_was_obtained": "recomputed from gate_history/a5896554__K1694.py against the same frozen data/ cache, not copied from the round-5 artifact"},
+    "rv_masked_partial_months": {"round5": 22, "round6": 45},
+    "month_2012_10": {"round5": "22/22 pass", "round6": "0/22 pass",
+      "why": "23 scheduled trading days, 21 observed for every commodity -- a 2-day common shortfall, over MAX_RV_MONTH_SHORTFALL=1",
+      "effect_on_estimation_sample": "none; the estimation sample starts 2014-02 because the FCM series starts 2013-12"},
+    "month_2018_12": {"round5": "22/22 pass", "round6": "21/22 pass",
+      "why": "20 scheduled trading days, 19 observed for 21 commodities (a 1-day common shortfall, inside the tolerance) and 17 for CORN (fails)"},
+    "headline_estimates": {
+      "spec1_coef": {"round5": 3.0974e-4, "round6": 3.0339e-4},
+      "spec1_t_DK": {"round5": 1.53, "round6": 1.48},
+      "spec1_p_DK": {"round5": 0.127, "round6": 0.138},
+      "spec1_stationary_block_boot95": {"round5": [-7.4116e-5, 7.7504e-4], "round6": [-9.0241e-5, 7.7817e-4]},
+      "spec2_coef": {"round5": 2.8747e-4, "round6": 2.8846e-4},
+      "spec2_t_DK": {"round5": 2.54, "round6": 2.54},
+      "spec3_coef": {"round5": -1.9088e-4, "round6": -1.8474e-4},
+      "spec4_coef": {"round5": 6.6741e-5, "round6": 7.2662e-5},
+      "spec4_t_DK": {"round5": 0.27, "round6": 0.30},
+      "dk_bandwidth_grid_abs_t": {"round5": [1.53, 1.66], "round6": [1.47, 1.60]},
+      "lag_grid_t_DK": {"round5": [1.25, 1.53], "round6": [1.16, 1.48]},
+      "regime_2x2_bp": {"round5": [-1.89, -4.89, -3.06, 2.76], "round6": [-1.84, -4.96, -3.06, 2.83]}
+    },
+    "attribution": {
+      "whitelist_removal": "accounts for 100% of the numbers above",
+      "per_schedule_scoping": "changed no row in this run, because the two venues' regular holiday sets are identical (checked, not assumed) and neither carries an unscheduled closure. It is structural, and test_the_two_schedules_are_declared_separately_not_aliased pins the isolation with an injected probe."
+    },
+    "conclusion_changed": false,
+    "conclusion_detail": "VERDICT stays NULL: the negative, binary high-vol crowding-out interaction is NOT SUPPORTED. spec1 remains positive (wrong sign for the hypothesis) and insignificant; the stationary block bootstrap CI still spans zero (p 0.119 -> 0.130); spec2 (continuous rv_z) remains positive and significant and is still named in verdict_scope; spec4 remains near zero. Six rounds, five FAILs, none of them because the conclusion was wrong."
+  },
+
+  "new_disclosure_forced_by_the_repair": {
+    "what": "With no unsourced exemption left to absorb them, a month can pass the completeness screen while being PROVABLY short of a trading day.",
+    "the_case": "2018-12. CME's own notice keeps every non-equity, non-interest-rate Globex market on regular hours on 2018-12-05, and no commodity in the cache has a bar for it. The 1-day common shortfall is inside MAX_RV_MONTH_SHORTFALL=1, so 21 of 22 rows pass.",
+    "published_as": "sample.completeness.rule.rv_months_short_of_the_exchange_calendar -- enumerated at run time, per schedule-month, with a caught_by_the_rule flag. 13 schedule-months this run: 2012-10 (2 days, caught) and 2026-07 (12 days, caught); 11 at exactly 1 day, not caught.",
+    "and_quantified": "robustness_strict_month_gate re-estimates spec1 with MAX_RV_MONTH_SHORTFALL forced to 0, which drops every one of those months: n 3275 -> 3210, coef 3.034e-04 -> 3.348e-04, t_DK 1.48 -> 1.69. Same sign, still short of 1.96. This is labelled is_the_reported_specification=false; the reported threshold was not changed."
+  },
+
+  "unresolved": [
+    {
+      "item": "ICE Futures U.S. trading status on 2018-12-05",
+      "state": "NOT FOUND. ICE's own 2018 holiday calendar is dated 2017-07-06 and predates the event; no ICE exchange notice or press release for that date surfaced.",
+      "treatment": "No closure asserted -- inventing one to fill an evidentiary hole is the round-5 defect in miniature. The date is carried as a trading day for the ICE softs and listed in rule.rv_trading_status_not_verified.",
+      "materiality": "Measured, not assumed: unverified_status_insensitivity forces the date closed at run time and recomputes. rv_complete 5229 -> 5229, zero commodity-months flip, so the estimation sample is identical either way. The probe restores the global and re-reads the reported vector to prove it did."
+    },
+    {
+      "item": "The 'New Year on a Saturday is not rolled back to 31 Dec' rule",
+      "state": "Evidence grade is EMPIRICAL-FROM-PANEL, not primary-source: no exchange notice stating it was found; 2010-12 and 2021-12 show the extra day in every contract.",
+      "treatment": "Labelled as such in calendar_sources.md and deliberately NOT backed by calendar_fixtures.json. Unchanged from round 4 and unrelated to either blocking defect."
+    },
+    {
+      "item": "The frozen rv_monthly.csv is still count-only",
+      "state": "The exact-endpoint gate exists in code and is now exercised by a primary-source test, but the reported run's cache carries no first/last dates, so the reported months are SCREENED, never certified.",
+      "treatment": "Disclosed in rule.rv_endpoint_test and panel_span_completeness_basis. Regenerating the cache from yfinance was deliberately not done: it trades the frozen input's provenance stability for a stronger check, and that decision belongs to whoever owns the cache, not to this repair."
+    },
+    {
+      "item": "Sandy status for CBOT grains and CME livestock",
+      "state": "Established by exhaustive enumeration rather than a positive sentence: CFTC 12-363 lists every emergency action and does not mention them. NYMEX/COMEX get an explicit positive statement; ICE gets an explicit 'all other ICE markets' statement; CME's 2018 notice gets an explicit 'all other markets' statement.",
+      "treatment": "Each fixture carries evidence: 'explicit' or 'explicit-by-exclusion' so a reviewer can see which is which. Nothing in the estimation sample turns on it -- 2012-10 predates the sample."
+    },
+    {
+      "item": "knowledge.json",
+      "state": "Untouched, deliberately (K1259 and the brief both forbid an agent writing it). The strict artifact check's single remaining finding is exactly this entry, and it may not be written before a PASS."
+    }
+  ],
+
+  "provenance": {
+    "entrypoint_sha256_prefix": "a173663534fa",
+    "identity": "on-disk K1694.py sha == results.code_trace.sha256 == reproduce_spec.entrypoint.sha256; results bytes sha == reproduce_spec.canonical_result_identity.sha256; all emitted by finalize_experiment() in the same run",
+    "pre_change_bytes_preserved": "experiments/K1694/gate_history/a5896554__K1694.py, written by scripts/preserve_gate_blob.py BEFORE the first edit, so the round-5 calendar can be diffed and re-run rather than reconstructed",
+    "seed": 1694,
+    "lag_discipline": "untouched by this repair; the lag is visible in build_panel() as g[...].shift(1)/.shift(2).where(adj) and the t-2 controls for spec4",
+    "reran": [
+      "experiments/K1694/K1694.py end to end (no hand edits to any output file)",
+      "experiments/K1694/lag_sensitivity.py (K1694_lag_sensitivity.json regenerated)",
+      "figures fig1/fig2/fig3 regenerated by the same run"
+    ],
+    "tests": "50 passed",
+    "artifact_gate": "uv run --active python scripts/check_experiment_artifacts.py check --path experiments/K1694 -> exit 1 with exactly one finding, the K1259-deferred knowledge entry. reproduce_spec parse, file existence and entrypoint-drift all pass."
+  },
+
+  "self_assessment": "The two blocking defects are resolved against evidence a third party can open: 22 ticker rows with exchange URLs, 16 dated fixtures and 10 month fixtures transcribed from those notices, and a demonstration that the same oracle produces 9 contradictions against the preserved round-5 bytes and none against round 6. The honest weak points are named above rather than smoothed over -- one date with no source found (measured to be immaterial), one calendar rule whose evidence is the panel rather than a notice, and a Sandy inference for grains and livestock that rests on an exhaustive enumeration rather than a positive sentence. The uncomfortable finding is the one I did not have to publish and did: removing the whitelist means the screen now demonstrably passes a month that is short a trading day, so I published the affected months, said in the limitations that the screen is not a certificate, and re-estimated with the tolerance set to zero rather than leaving the reader to wonder. Nothing merged, knowledge.json untouched, no threshold moved, and the conclusion is the same NULL it has been for six rounds."
+}

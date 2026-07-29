@@ -1,0 +1,155 @@
+{
+  "kid": "K1694",
+  "round": 7,
+  "verdict": "PASS",
+  "reviewer": "Claude opus-5 / xhigh, worktree dispatch-slot-1-e98b43fc-k1694 (read-write, tests executable)",
+  "reviewed_at": "2026-07-29T17:15:18Z",
+  "reviewed_at_note": "Real UTC. Round 6 recorded '2026-07-30T00:40:00Z', which was Taipei local time carrying a Z suffix (UTC+8); that field was off by +8h and is not carried forward.",
+  "reviewed_commit": "8ba4a50d4",
+  "review_artifact": "experiments/K1694/review_verdict.json",
+  "supersedes": {
+    "round": 6,
+    "reviewer": "Codex gpt-5.6-sol, read-only sandbox",
+    "reviewed_commit": "2724b3587",
+    "prompt": "storage/ops/codex_reviews/k1694_prompt_round6.md",
+    "raw_verdict": "storage/ops/codex_reviews/k1694_verdict_round6.md",
+    "fixed_point": "7e55cdf6e",
+    "why_a_further_round_was_needed": "Round 6 returned PASS with zero blocking defects and that scientific verdict stands unchanged. But its reviewed_sha256 pinned only 3 of the 8 claim-surface files (K1694.py, K1694_results.json, test_K1694.py), so scripts/experiment_gates.py correctly refused to certify the merge. This round is a verdict-COMPLETENESS round: it re-verifies and pins the whole claim surface. The science was not re-litigated, the estimator was not re-run, and no threshold was touched."
+  },
+  "knowledge_promotion_allowed": true,
+  "merge_allowed": true,
+  "blocking_defects": [],
+  "scope_of_this_round": {
+    "carried_forward_unchanged": "The round-6 scientific verdict (NULL / NOT SUPPORTED), both round-5 defect resolutions, every requirement in requirements_verified, and every accepted limitation. All reproduced verbatim below so that superseding the round-6 file loses nothing from the record.",
+    "newly_verified_here": [
+      "README.md",
+      "figures/fig1_fcm_hhi_timeseries.png",
+      "figures/fig2_regime_2x2.png",
+      "figures/fig3_interaction_coef.png",
+      "lag_sensitivity.py",
+      "gate_history/a5896554__K1694.py"
+    ],
+    "claim_surface_size": "9 files at this commit (8 at the round-6 commit, plus the restored fig1 -- see artifact_loss_found_and_repaired)."
+  },
+  "artifact_loss_found_and_repaired": {
+    "severity": "would have been a blocking defect if left unrepaired; repaired within this round from reviewed bytes, so the verdict is PASS",
+    "what": "experiments/K1694/figures/fig1_fcm_hhi_timeseries.png was present at the round-6 reviewed commit 2724b3587 and absent from both the working tree and the git index at 019b4e4f0.",
+    "how_it_happened": "Commit 019b4e4f0, whose message reads 'integrate main into round-6 branch, restoring the Codex-PASS artifacts', deleted fig1 (Bin 107974 -> 0 bytes). That commit's own verification note lists only K1694.py and K1694_results.json byte-identity plus a pytest run, so the figure deletion went unnoticed.",
+    "why_no_gate_caught_it": "This is exactly the hole this round closes. Round 6 never pinned any figure, so review-certification had no hash to compare and the loss produced no gate failure. A reader-facing figure could be silently dropped between review and merge.",
+    "why_it_mattered": "fig1 is reader-facing, is indexed in the README artifact table (line 252), and is declared as a run output in reproduce_spec.json. With it missing, the repo no longer satisfied its own reproduce spec.",
+    "repair": "Restored verbatim from 2724b3587 via `git checkout 2724b3587 -- experiments/K1694/figures/fig1_fcm_hhi_timeseries.png`. Nothing was re-run and no estimate changed.",
+    "why_the_restored_bytes_are_the_reviewed_bytes": "fig2 and fig3 on disk are byte-identical (sha256) to their blobs at 2724b3587, which establishes that the tracked figure set at that commit is the output of the same reported run; fig1 was taken from that same tree. Restored sha256 30436a7dc921180216606130efcfa468bd4da5e8660a91c59a14d355dfd4440f.",
+    "recommendation_for_the_main_thread": "scripts/merge_worktree.sh (or whatever performed 019b4e4f0) verified only two files by hash. Now that the verdict pins the full claim surface, the merge step should diff the post-integration tree against reviewed_sha256 in full rather than spot-checking two paths."
+  },
+  "newly_pinned_path_findings": {
+    "README.md": {
+      "verdict": "PASS",
+      "numbers_match_the_results_json": "Every headline number checked programmatically against K1694_results.json: spec1 +3.034e-04 / t_DK 1.48 / t_cl 1.52 / p 0.138; spec2 +2.885e-04 / 2.54 / 2.56 / p 0.011; spec3 -1.847e-04 / -0.72 / -0.71; spec4 +7.266e-05 / 0.30 / 0.37, n 2748. Stationary-block CI [-9.02e-05, 7.78e-04] p 0.130 and IID month-cluster CI [-8.05e-05, 7.13e-04] p 0.128 match. DK bandwidth |t| in [1.47, 1.60], none >= 1.96. Aggregate hhi_x_volfrac t 0.36 p 0.719, HAC lag 6, resid acf1 -0.042, 149 months. Lag grid t_DK in [1.16, 1.48], none >= 1.96. Strict-month-gate n 3210 (-65 from 3275), coef +3.348e-04, t_DK 1.69. ACF(1/3/6/12) 0.964/0.918/0.817/0.584. Counts 13 short and 8 observed-beyond schedule-months match sample.completeness.rule.",
+      "descriptive_2x2_independently_reproduced": "README's cell means -1.84 / -4.96 / -3.06 / +2.83 bp were recomputed from the frozen data/panel.csv with the same grouping make_figures() uses, and reproduce to the stated 2 decimals.",
+      "does_not_overstate_the_null": "PASS. The README states the primary point estimate is POSITIVE where the crowding-out hypothesis predicts negative, and not significant; it states spec2 is positive AND significant in the direction OPPOSITE to crowding-out; it words every null as '未獲支持 / NOT SUPPORTED' rather than as absence or disproof; and it labels spec4 as 'not supported under this timing arrangement', not as evidence of no predictability.",
+      "bookkeeping_diff_2724b3587_to_1a4f43d90": "Verified as claimed: 12 lines, all bookkeeping. Status line 'round 6 審查中' -> 'round 6 PASS'; the pending-round bullet replaced by the PASS bullet; the pre-PASS embargo paragraph replaced by the K1259 knowledge-writing rule; two TODO items struck through. No number, no claim and no limitation changed. In particular the ICE 2018-12-05 open question survives verbatim in the TODO list.",
+      "this_round_edited_the_readme": "Disclosed, and hashed after the edit: I updated the status line to round 7 and added a round-7 history bullet recording the artifact loss. Bookkeeping only -- no number, claim or limitation touched. The pinned hash 3c95e3d9... is the post-edit byte state, so this verdict binds the README a reader will actually see."
+    },
+    "figures/fig1_fcm_hhi_timeseries.png": {
+      "verdict": "PASS",
+      "what_it_depicts": "FCM HHI (left axis) and top-4 CR4 share (right axis) monthly, ~2014 to mid-2026. Purely descriptive; it asserts no hypothesis test.",
+      "consistent_with_the_results_json": "Plotted HHI ranges ~0.0625 to ~0.0904 against descriptives hhi_seg_min 0.06246 / hhi_seg_max 0.09043; CR4 axis centres on ~46% against cr4_seg_mean 0.4608; the span covers the 150 FCM months."
+    },
+    "figures/fig2_regime_2x2.png": {
+      "verdict": "PASS -- does not read as crowding-out confirmed",
+      "what_it_depicts": "Mean monthly change in the non-reportable (small-trader) OI share across the 2x2 of FCM-HHI regime and volatility regime.",
+      "reader_facing_check": "The High-HHI x High-vol cell -- the exact cell where the crowding-out hypothesis predicts the LARGEST NEGATIVE value -- is the only POSITIVE bar (+2.83 bp) while the other three are negative (-1.84 / -4.96 / -3.06). The figure therefore points AGAINST crowding-out and is consistent with spec1's positive-but-insignificant coefficient and spec2's significant positive coefficient. A reader cannot take it as confirming the hypothesis.",
+      "numbers_independently_reproduced": "Recomputed from the frozen data/panel.csv: -1.84 / -4.96 / -3.06 / +2.83 bp, matching the rendered bars and the README text.",
+      "generation_is_not_hand_typed": "make_figures() computes the cells by groupby on the panel; no literal is typed into the figure.",
+      "noted_not_blocking": "The cells are raw conditional means with no fixed effects, controls, or error bars, and are taken from the panel rather than the 3275-row estimation frame. This cannot inflate the result in the hypothesis's direction -- the discrepancy runs against crowding-out -- and the title is framed as a 'check', so it is descriptive support, not a claim."
+    },
+    "figures/fig3_interaction_coef.png": {
+      "verdict": "PASS -- depicts the NULL and the opposite-signed spec2 correctly",
+      "what_it_depicts": "Forest plot of the interaction coefficient with 95% CIs for spec1-4 plus the spec1 stationary block bootstrap.",
+      "reader_facing_check": "Every crowding-out interval crosses zero (spec1 DK, spec1 bootstrap, spec3, spec4). The ONLY interval excluding zero is FCM HHI x rv_z, and it lies wholly on the POSITIVE side -- i.e. the figure shows the significant effect running opposite to crowding-out, which is what the results JSON says. The title is a question, not an assertion.",
+      "numbers_traced_to_source": "Coefficients and t-stats are read from panel_res[spec]['driscoll_kraay'] with CI = coef +/- 1.96*|coef/t|; the bootstrap row uses boot['point'] and boot['ci95'], which equal primary_interaction's [-9.02e-05, 7.78e-04]. Nothing transcribed."
+    },
+    "lag_sensitivity.py": {
+      "verdict": "PASS",
+      "lag_convention_agents_md_rule_11": "PASS. The script does not build its own panel: it calls K1694.build_panel / K1694.build_spec_frame / K1694.panel_regression, so the lag structure is the baseline's by construction. The only thing it varies is the assumed FCM publication lag (avail_date = month_end + lag) over 30/45/60/75/90 days.",
+      "baseline_uses_the_same_lag": "PASS. K1694_lag_sensitivity.json records baseline_lag_days = K1694.FCM_LAG_DAYS = 45, and the 45-day grid row (n 3275, coef 3.0339e-04, t_DK 1.48, t_cl 1.52) reproduces the headline spec1 row exactly -- an internal consistency check that the grid and the baseline are the same estimator.",
+      "underlying_lag_in_K1694_py": "Verified directly: pd.merge_asof(..., direction='backward') on avail_date for spec1-3 (availability may fall inside the outcome month -- honestly labelled ex-post association, not predictive), and direction='backward' on month_start for spec4. Lagged regressors use .shift(1) / .shift(2) each guarded by an explicit month-adjacency mask (adj, adj2), so a gap in the panel cannot silently masquerade as a one- or two-month lag. This is stricter than a bare shift.",
+      "direction_of_the_test_is_the_honest_one": "The docstring reasons correctly that lookahead appears only if the ASSUMED lag is shorter than the ACTUAL one, so it tests longer assumed lags. No grid point reaches |t| >= 1.96; the NULL is invariant across 30-90 days."
+    },
+    "gate_history/a5896554__K1694.py": {
+      "verdict": "PASS",
+      "is_genuinely_the_old_frozen_copy": "PASS. Its sha256 a58965545d4e... matches gate_history/manifest.json, matches the a5896554 filename prefix, and matches the hash pinned here -- three-way self-consistent. Content confirms it is pre-change: it defines the flat, universal CME_UNSCHEDULED_CLOSURES whitelist that round 6 removed, whereas the live module defines the schedule-keyed UNSCHEDULED_CLOSURES with per-entry source_id + quote. The manifest records preserved_at 2026-07-29T15:57:52Z with the round-6 reason.",
+      "not_imported_by_the_live_run": "PASS. Neither K1694.py nor lag_sensitivity.py references gate_history in any form; the blob is inert evidence, loaded by nothing on the reported path.",
+      "note_on_the_9_contradictions": "The '9 contradictions against the preserved round-5 module' recorded in round 6 and in README lines 120-123 is a round-6 repair-time comparison (documented in r6_repair_report.json); it is not re-executed by the pytest suite, which contains no reference to gate_history. That is a documentation-provenance observation, not a defect: the round-5 defect-2 fix that the suite DOES enforce is the fixture-based oracle, which I verified directly."
+    }
+  },
+  "round5_defects_resolved": {
+    "product_scoped_calendar_required": {
+      "status": "RESOLVED",
+      "reviewer_finding": "Official notices support the disputed-date treatment: CFTC 12-363 enumerates the Sandy actions; ICE explicitly kept all other markets open; CME explicitly kept all non-equity/non-rate markets open in 2012 and 2018. The Sandy exclusion inference is sound and 2012-10 is outside the estimation sample. Schedule scoping is operational in expected days, month anchor, and peer maximum. Thresholds remain 15/2/2/1.",
+      "reviewer_independent_recomputation": "5252 -> 5229 complete rows; 2012-10 22/22 -> 0/22; 2018-12 22/22 -> 21/22 with only CORN failing; frame/lagged 3276/2749 -> 3275/2748",
+      "round7_recheck": "Structure re-confirmed at the byte level: the live module defines UNSCHEDULED_CLOSURES as dict[schedule][date] -> {source_id, quote} with _validate_unscheduled_closures() rejecting unsourced entries at import, and the only remaining mentions of the old CME_UNSCHEDULED_CLOSURES name in K1694.py are two comments documenting the round-5 defect, not live code."
+    },
+    "calendar_truth_test_is_tautological": {
+      "status": "RESOLVED",
+      "reviewer_finding": "Calendar expectations come from calendar_fixtures.json, not K1694.py. The replacement endpoint test independently supplies fixture endpoints, accepts the complete cache, and rejects a one-day truncation through the actual zero-tolerance endpoint comparison.",
+      "reviewer_independent_recomputation": "The oracle reproduces exactly 9 contradictions against the preserved round-5 module in gate_history/ and 0 against current code.",
+      "round7_recheck": "Confirmed non-tautological by direct inspection of test_K1694.py. expected_month_endpoints() appears in the suite only on the ASSERTED side (line 397), checked against hand-derived calendar_fixtures.json values; the endpoint acceptance test (test_endpoint_gate_accepts_a_primary_source_untruncated_cache) injects endpoints FROM the fixtures, never from the module. The round-5 tautological test is gone."
+    }
+  },
+  "requirements_verified": {
+    "source_table_primary_only": "PASS -- 22 tickers to exchange to official URL in calendar_sources.md; reviewer opened the CFTC, ICE and CME documents",
+    "independent_fixture_tests": "PASS -- calendar_fixtures.json is the oracle; no calendar test takes an expected value from K1694.py",
+    "path_choice_declared": "PASS -- option (a), product/exchange-scoped calendars, with the completeness claim downgraded on top; both unscheduled-closure sets are empty on the evidence",
+    "full_rerun_no_hand_edits": "PASS -- K1694.py, lag_sensitivity.py and the figures regenerated; code/result/spec hashes consistent; seed 1694; lag visible in code",
+    "quantified_change": "PASS -- reviewer independently reproduced every headline delta",
+    "strict_month_gate_sensitivity": "PASS -- correctly labelled non-reported, restores the mutated global, 3210-row frame reproduced by the reviewer",
+    "unverified_status_insensitivity": "PASS -- 5229 -> 5229, zero flips, restores UNSCHEDULED_CLOSURES",
+    "conclusion_unchanged": "PASS -- NULL / NOT SUPPORTED intact",
+    "no_threshold_moved": "PASS -- MIN_RV_DAYS=15, MAX_RV_SHORTFALL_VS_CALENDAR=2, MAX_RV_CROSS_SHORTFALL=2, MAX_RV_MONTH_SHORTFALL=1 unchanged since round 4",
+    "_round7_note": "The nine entries above are round 6's, carried forward verbatim. Round 7 re-confirmed conclusion_unchanged, no_threshold_moved and the lag half of full_rerun_no_hand_edits directly; the seed is declared as numpy 1694 in both K1694_results.json and reproduce_spec.json (AGENTS.md rule 12)."
+  },
+  "reviewer_could_not_verify": [
+    {
+      "item": "the pytest suite",
+      "reason": "the round-6 read-only sandbox had no writable temporary directory and the directly accessible environment lacked linearmodels",
+      "what_the_reviewer_did_instead": "static inspection confirmed all round-6 and regression gates are present; artifact identity and every non-regression recomputation were independently verified",
+      "status_at_round_7": "CLOSED. Executed in this worktree by the round-7 reviewer: `uv run --active python -m pytest experiments/K1694/test_K1694.py -q` -> 50 passed in 9.40s, at the certified bytes. Independently, the main thread ran it twice (before and after the main integration), also 50 passed."
+    },
+    {
+      "item": "round 7 residual",
+      "reason": "nothing in this round was left unverified for lack of tooling",
+      "status_at_round_7": "none"
+    }
+  ],
+  "accepted_limitations": [
+    "No source found for ICE Futures U.S. on 2018-12-05. Reviewer: 'Carrying the unsourced ICE date as open is acceptable because uncertainty is disclosed and both possible statuses give the identical sample.'",
+    "The New-Year-on-a-Saturday rule rests on the panel's own bar counts rather than an exchange notice, and is labelled EMPIRICAL-FROM-PANEL. Reviewer: accurately labelled.",
+    "The frozen rv_monthly.csv is count-only, so the reported months are SCREENED, never certified; the endpoint gate exists and is tested but is not exercised by the reported run. Reviewer: accurately labelled.",
+    "2018-12 passes the completeness screen while CME's own notice says the market was open on 2018-12-05, for which no commodity has a bar. Published at run time in rule.rv_months_short_of_the_exchange_calendar and quantified in robustness_strict_month_gate (n 3210, t_DK 1.69, still short of 1.96).",
+    "ROUND 7 ADDITION -- the FCM publication lag is synthetic (avail_date = month_end + 45d), never a verified CFTC release date, so spec4's ex-ante status stays CONDITIONAL. Disclosed in data_provenance.fcm_publication_lag_is_synthetic, bounded by the 30-90 day sensitivity in K1694_lag_sensitivity.json (no grid point significant), and correctly refused as a predictive claim in the README. Accepted, and it remains the experiment's binding open item."
+  ],
+  "reviewed_sha256": {
+    "K1694.py": "a173663534fac62526703e12da9a2fccc5cd48918b17fc21463c4a42ec194da6",
+    "K1694_results.json": "5587e72ab3f256a1f88c862340ea55d3d78874cab04a1431f5aea826d66f03fb",
+    "README.md": "3c95e3d971702e511d13d5156fd4f661b268321a0c38c1d05e9f46978f23761a",
+    "figures/fig1_fcm_hhi_timeseries.png": "30436a7dc921180216606130efcfa468bd4da5e8660a91c59a14d355dfd4440f",
+    "figures/fig2_regime_2x2.png": "a6d491fd9f5514ae0b523e156a761d385268eb8aff3b1a4f152c3265d4ea15b7",
+    "figures/fig3_interaction_coef.png": "543db8ccaaa3d07e9ffe1b2d0875bd85c17fa7b0fe819c878043f2bbd33cb0dd",
+    "gate_history/a5896554__K1694.py": "a58965545d4e8abfebd6950c62a5d12301b696dd5cbde34cba9ba30a1695fbd7",
+    "lag_sensitivity.py": "29346e17ffc33bc8de3280ccd97ab750b42a9a4d9f3384a9c0626c1d617b697b",
+    "test_K1694.py": "b619cba053a82ae24053b8a9216bc3858eada029a5116fd3157b54846b96dcc7"
+  },
+  "reviewed_sha256_carried_forward_from_round6": {
+    "_why_separate": "scripts/experiment_gates.py requires reviewed_sha256 to be EXACTLY the claim surface (*.py, README.md, *_results.json, reader-facing figures). Round 6 also pinned four files that are outside that surface; listing them in reviewed_sha256 makes the gate report them as 'reviewed file is gone from the experiment'. They are preserved here so nothing is lost from the record, and all four were re-hashed at this commit and are UNCHANGED from round 6.",
+    "reproduce_spec.json": "2f2850218fc8c65def42286b10a095d7b0581f3926fc8dc8a3244828f0491b6d",
+    "calendar_sources.md": "70c44c6d4890f7d2ebd01d4629514c0344911be857cfd760773030261595011b",
+    "calendar_fixtures.json": "50288feccaad9768b3f0b2c0a07b60ebf1a7623e7092dd7b413bc77d915bd97c",
+    "r6_repair_report.json": "fbf85bde756bb8e88f0b8bca0effdf15de3c9fe9161113d7a29a0977cec39a3a"
+  },
+  "observations_for_the_main_thread_not_blocking": [
+    "K1694_lag_sensitivity.json is a frozen result record but does not match the *_results.json suffix, so it falls outside the claim surface and is not hash-pinned by any verdict. Its headline claim (no lag in 30-90d reaches |t| 1.96) is reader-facing via README. Consider widening the claim-surface predicate in scripts/experiment_claim_surface.py, or renaming the file, so it cannot drift unnoticed. Not fixed here: it would change a shared module outside experiments/K1694.",
+    "The merge step that produced 019b4e4f0 verified only two files by hash and so silently dropped a reviewed figure. With the full claim surface now pinned, that step should compare the whole reviewed_sha256 map post-integration."
+  ],
+  "next_step": "Main thread only: the knowledge.json entry (item e32f1aa8) is already written and K1259-compliant; every number in it must come programmatically from experiments/K1694/K1694_results.json, never retyped from this file or the README. Then merge via scripts/merge_worktree.sh, which should now verify the full reviewed_sha256 map rather than a two-file spot check."
+}

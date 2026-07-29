@@ -1,0 +1,59 @@
+{
+  "experiment_id": "K1694",
+  "check": "fcm_publication_lag_sensitivity",
+  "baseline_lag_days": 45,
+  "grid": [
+    {
+      "assumed_lag_days": 30,
+      "n_obs": 3297,
+      "n_months": 150,
+      "coef_fcm_x_highvol": 0.00023095283509239073,
+      "t_driscoll_kraay": 1.2203950054502026,
+      "p_driscoll_kraay": 0.22240322193689255,
+      "t_cluster_month": 1.1598455687800167,
+      "rsq_within": 0.22506184492661074
+    },
+    {
+      "assumed_lag_days": 45,
+      "n_obs": 3275,
+      "n_months": 149,
+      "coef_fcm_x_highvol": 0.0003033902252641436,
+      "t_driscoll_kraay": 1.4833413189634188,
+      "p_driscoll_kraay": 0.13808083337683197,
+      "t_cluster_month": 1.5178208229730303,
+      "rsq_within": 0.22680607325533786
+    },
+    {
+      "assumed_lag_days": 60,
+      "n_obs": 3253,
+      "n_months": 148,
+      "coef_fcm_x_highvol": 0.000252393174533863,
+      "t_driscoll_kraay": 1.2283777092207757,
+      "p_driscoll_kraay": 0.21939487403487945,
+      "t_cluster_month": 1.2486540515244193,
+      "rsq_within": 0.22661946241918784
+    },
+    {
+      "assumed_lag_days": 75,
+      "n_obs": 3253,
+      "n_months": 148,
+      "coef_fcm_x_highvol": 0.0002369782874951832,
+      "t_driscoll_kraay": 1.156958315015156,
+      "p_driscoll_kraay": 0.24737510539524687,
+      "t_cluster_month": 1.1803937424018582,
+      "rsq_within": 0.2265938457207174
+    },
+    {
+      "assumed_lag_days": 90,
+      "n_obs": 3253,
+      "n_months": 148,
+      "coef_fcm_x_highvol": 0.0002754202215896664,
+      "t_driscoll_kraay": 1.370464537095303,
+      "p_driscoll_kraay": 0.17063734864653357,
+      "t_cluster_month": 1.356747784100132,
+      "rsq_within": 0.2268563611993175
+    }
+  ],
+  "any_lag_significant_at_5pct": false,
+  "conclusion": "NULL verdict is invariant to the assumed FCM publication lag across 30-90 days; no grid point reaches |t|>1.96."
+}

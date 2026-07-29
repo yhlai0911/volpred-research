@@ -1,0 +1,106 @@
+{
+  "stage": "rv-completeness-repair",
+  "parent_job_id": "agent-brief_k1694_repair_e98b43fc-ea643c",
+  "d1": {
+    "path": "A",
+    "primary_path": "A",
+    "claim_wording_also_weakened": true,
+    "reason": "Path A was reachable and is strictly better, so the code was fixed rather than the claim merely withdrawn: the panel's own data shows CME futures DO trade Columbus Day and Veterans Day (2020-10 has 22 bars for all 22 commodities against 22 weekdays), so a correct calendar is a fact about the data, not a judgement call. With the corrected calendar the 2020-10 counterexample is resolved with NO threshold change (MAX_RV_MONTH_SHORTFALL stays 1) and only ONE row changes in the whole panel. But Path A alone does not make the certification claim true, so the fourth falsified claim was withdrawn as well (partial Path B): a count-only cache still cannot see a one-day truncation common to every commodity, so `panel_span_is_complete_months_only` went true -> false and README's '3275 列皆為完整月份' was replaced by a screened-vs-certified distinction. Codex round 4: '若仍要認證完整月份，count-only frozen cache 需要獨立 endpoint 證據' -- that evidence does not exist in the frozen rv_monthly.csv, so the certification wording had to go regardless of how good the calendar is.",
+    "code_change": "K1694.py: `_expected_trading_days()` (weekdays - USFederalHolidayCalendar - GoodFriday) replaced by `_cme_trading_days()` -> `_expected_trading_days()`. The CME futures holiday set is New Year (observance=sunday_to_monday, i.e. NOT rolled back to 31 Dec when 1 Jan is a Saturday -- verified against 2010-12 and 2021-12, where every contract shows the extra day), MLK, Presidents' Day, Good Friday, Memorial Day, Juneteenth from 2022-06-19 (CME traded 2021-06-18), Independence Day, Labor Day, Thanksgiving, Christmas. Columbus Day and Veterans Day are NOT subtracted. New module constant CME_UNSCHEDULED_CLOSURES enumerates the two sourced unscheduled closures and subtracts them day by day: 2012-10-29 and 2012-10-30 (Hurricane Sandy) and 2018-12-05 (national day of mourning for George H. W. Bush). No threshold was loosened: MIN_RV_DAYS=15, MAX_RV_SHORTFALL_VS_CALENDAR=2, MAX_RV_CROSS_SHORTFALL=2, MAX_RV_MONTH_SHORTFALL=1 are all unchanged; the corrected calendar makes the rule STRICTER (expected is now >= the old expected in every month). coverage_report() additionally enumerates, at run time, the months where max(ndays) exceeds the CME calendar because some contract prints an abbreviated holiday session -- that is exactly where the blind spot is 2 days rather than 1, and it is now published per month instead of being asserted away.",
+    "counterexample_2020_10": {
+      "pre_fix_expected_trading_days": 21,
+      "observed_ndays_all_commodities": 22,
+      "pre_fix_rv_complete_rows": 22,
+      "post_fix_expected_trading_days": 22,
+      "post_fix_rv_complete_rows": 0,
+      "post_fix_rv_month_shortfall": 2,
+      "cross_sectional_shortfall_both_ways": 0,
+      "note": "cross-sectional shortfall is 0 pre- and post-fix; the month-level calendar anchor is what catches it, which is why the anchor had to be correct."
+    }
+  },
+  "d2": {
+    "path": "A",
+    "reason": "The date-bearing path claimed to be a 'true endpoint test' while allowing three weekday gaps at each end, so it carried the very one-day blind spot it said existed only in the count-only cache. Withdrawing the claim (Path B) would have left a tolerance with no justification behind it; the tolerance existed only because there was no calendar to measure against. Once D1 supplied a correct calendar, an exact endpoint gate became available at no cost. The gate is written as an inequality against the calendar's endpoints rather than as strict equality, because the panel spans CME/CBOT/COMEX/NYMEX/ICE contracts whose holiday sessions differ: observing MORE than the calendar must not fail, observing LESS must always fail.",
+    "code_change": "K1694.py monthly_coverage(): the endpoint branch no longer measures gaps from the month boundary with a `.le(3)` tolerance. New `expected_month_endpoints()` returns the first and last scheduled CME trading day of each month (same calendar and whitelist as D1). rv_head_gap_days is now weekdays between the calendar's first trading day and the observed first_day; rv_tail_gap_days is weekdays between the observed last_day and the calendar's last trading day. The gate is `first_day <= expected_first AND last_day >= expected_last`, with zero tolerance; a contract that observes an abbreviated session outside the calendar reads a gap of 0 and passes. Missing endpoint dates still fail closed (.fillna(False)). The frozen count-only cache does not exercise this branch, which is stated in rule.rv_endpoint_test rather than glossed over.",
+    "counterexample_2020_06": {
+      "injected": "first_day/last_day derived from plain weekday boundaries for every month, then 2020-06-30 dropped from all 22 commodities (last_day -> 2020-06-29, ndays -1)",
+      "pre_fix_rv_tail_gap_days": 1,
+      "pre_fix_rv_month_shortfall": 1,
+      "pre_fix_rv_complete_rows": 22,
+      "post_fix_rv_complete_rows": 0,
+      "note": "rv_month_shortfall is 1 post-fix too -- inside the count tolerance. The endpoint gate, not the count test, is what rejects it, which is the point of the defect."
+    }
+  },
+  "readme_nits_fixed": [
+    "fcm_avail_inside_outcome_month_rows",
+    "round2_history_tense"
+  ],
+  "readme_nit_detail": {
+    "fcm_avail_inside_outcome_month_rows": "README line ~127 referenced the deleted key; now cites data_provenance.fcm_avail_inside_outcome_month_rows_in_estimation_sample and reads 3276/3276.",
+    "round2_history_tense": "The round-2 table row D described the retired head-gap-from-month-start rule and the retired RV thresholds (<=5 business days, <=3 vs peers) in the present tense. It is now explicitly marked as a historical record with the current thresholds named alongside. The round-3 table row II likewise now records that its own fix was overturned in round 4, and the trailing paragraph that restated the old 'exactly one day' blind spot was replaced by a pointer to the new round-4 section.",
+    "also_fixed": "README lines 99-101 still quoted the retired head-gap distribution ('head gap 實測最大 7 天') and RV business-day gaps; replaced with the current DCOT gap distribution (6/7/8 days observed, threshold 9) and the current CME-calendar month-level distribution (246/259 months at 0)."
+  },
+  "tests": {
+    "added": [
+      "test_common_two_day_truncation_2020_10",
+      "test_endpoint_truncation_2020_06",
+      "test_endpoint_gate_accepts_an_untruncated_dated_cache"
+    ],
+    "added_note": "The third test is not required by the brief. It exists because an endpoint gate that rejects everything would also pass the two counterexample tests: it asserts that injecting the calendar's own endpoints certifies exactly the same number of months as the count-only path, so the gate cannot be 'fixed' by making it vacuously strict.",
+    "modified": [
+      "test_partial_months_are_excluded_by_rule -- now pins panel_span_is_complete_months_only is False and requires the replacement disclosure to name both CERTIFIED and SCREENED",
+      "test_rv_endpoint_test_is_declared_unavailable_when_the_cache_lacks_dates -- now also requires 'NOT certified complete' in the blind-spot string"
+    ],
+    "fail_on_pre_fix_code": true,
+    "fail_on_pre_fix_evidence": "Both tests were written before the fix and run against the unmodified K1694.py: 2 failed, on the substantive assertions (not on a missing helper) -- test_common_two_day_truncation_2020_10 failed asserting rv_expected_trading_days == 22, test_endpoint_truncation_2020_06 failed asserting not rv_complete.any(). Re-confirmed after the fix by stashing only experiments/K1694/K1694.py and re-running the two tests: 2 failed, 40 deselected. With the fix restored: 42 passed. test_endpoint_truncation_2020_06 deliberately injects endpoints from plain weekday boundaries rather than from the module's calendar, so that it is runnable against the pre-fix code at all.",
+    "suite_passed": true,
+    "n_tests": 42
+  },
+  "rerun": {
+    "script_sha256": "a58965545d4e8abfebd6950c62a5d12301b696dd5cbde34cba9ba30a1695fbd7",
+    "results_sha256": "eba0f030abb59c4466371443c516625dd9bf2282f4e6f733e6cdc032c0e0cd78",
+    "provenance_consistency": "on-disk K1694.py sha == results.code_trace.sha256 == reproduce_spec.entrypoint.sha256 == a58965545d4e...; results bytes sha == reproduce_spec.canonical_result_identity.sha256 == eba0f030abb5...; all emitted by finalize_experiment() at run time. The suite caught an intermediate violation when a comment was edited after a run, and K1694.py was re-run rather than the checksum refreshed.",
+    "n_rows_before": 3275,
+    "n_rows_after": 3276,
+    "sample_change_explanation": "Net +1 row, and the direction must not be mistaken for a loosened gate. The calendar change alone is strictly STRICTER (expected trading days are now >= the old value in every month, since Columbus Day and Veterans Day are no longer subtracted). Exactly one (commodity, month) row flips, in 2018-12: the national day of mourning on 2018-12-05 is now subtracted by name from the whitelist, so a commodity that read 3 days short of the calendar reads 2 and clears MAX_RV_SHORTFALL_VS_CALENDAR. No threshold was changed to produce this. Full flip audit over the 5643-row RV cache: 5617 rv_complete before, 5618 after, one row differing.",
+    "downstream_reran": [
+      "experiments/K1694/K1694.py (end to end, no hand edits to K1694_results.json)",
+      "experiments/K1694/lag_sensitivity.py (K1694_lag_sensitivity.json regenerated; the lag-45 row now reads n=3276)",
+      "figures fig2_regime_2x2.png and fig3_interaction_coef.png regenerated by the same run"
+    ],
+    "headline_numbers_after": {
+      "spec1_fcm_x_highvol_coef": 0.0003097380535187968,
+      "spec1_t_DK": 1.527,
+      "spec1_t_cluster": 1.567,
+      "spec1_stationary_block_boot95": [-7.411637663284947e-05, 0.0007750350961575663],
+      "spec2_fcm_x_rvz_coef": 0.0002874686719902463,
+      "spec2_t_DK": 2.542,
+      "spec4_coef": 6.674084807116854e-05,
+      "spec4_t_DK": 0.27,
+      "spec4_n_obs": 2749
+    },
+    "artifact_check_strict": "fail",
+    "artifact_check_detail": "Command: `uv run --active python scripts/check_experiment_artifacts.py check --path experiments/K1694` (the script exposes `check` / `sweep` subcommands with `--path`; there is no `--experiment` or `--strict` flag). Exit 1 with exactly ONE finding: 'no entry in storage/memory/knowledge.json mentions k1694'. The reproduce_spec parse, the file-existence check and the entrypoint-drift check all pass. That single finding is out of scope for this stage by two independent rules: K1259 forbids agents from writing knowledge.json, and this brief repeats the prohibition. It is also correct that no entry exists yet -- Codex has not certified K1694, and the round-4 verdict says the finding may not be written to knowledge.json until it does. Nothing else in the strict check fails."
+  },
+  "claims_now_supported": [
+    "sample.completeness.rule.rv_expected_trading_days_definition: 'weekdays minus the CME futures holiday calendar -- New Year (not rolled back to 31 Dec when 1 Jan is a Saturday), MLK, Presidents' Day, Good Friday, Memorial Day, Juneteenth from 2022, Independence Day, Labor Day, Thanksgiving, Christmas -- minus the enumerated unscheduled closures in rv_unscheduled_closures. Columbus Day and Veterans Day are federal holidays on which CME futures TRADE and are deliberately not subtracted: subtracting them understated the count and refuted this rule's own detection claim (Codex round 4, 2020-10).'",
+    "sample.completeness.rule.rv_rule_detects: 'an independently truncated download (a commodity short of both the calendar and its peers) AND a truncation common to every commodity of 2 or more days, which no cross-sectional check can see -- except in the 6 months listed under rv_months_observed_beyond_the_cme_calendar, where some contract prints an abbreviated holiday session, so the threshold there is the per-month figure given in that list'",
+    "sample.completeness.rule.rv_months_observed_beyond_the_cme_calendar: enumerated at run time, 6 entries this run -- 2006-09, 2006-11, 2006-12, 2007-01, 2023-11, 2025-07, each with cme_calendar_days, max_days_observed and common_truncation_days_needed_to_detect = 3.",
+    "sample.completeness.rule.rv_endpoint_test (dated cache): 'applied: observed first_day <= the calendar's first scheduled trading day of the month AND observed last_day >= its last, with no tolerance, so a truncation at either end fails whatever the day count says'",
+    "sample.completeness.rule.rv_endpoint_test (this frozen cache): 'UNAVAILABLE for this cache: rv_monthly.csv stores day counts only, no first/last observation dates. build_vol() now records them, so any regenerated cache upgrades this to a true endpoint test.'",
+    "sample.completeness.rule.rv_residual_blind_spot: 'a truncation of exactly ONE day common to every commodity is indistinguishable, in a count-only cache, from an unscheduled market closure -- and by the same token an entry in rv_unscheduled_closures rests on the external event that dated it, not on anything this cache can show. Two such closures are in sample and are subtracted by name: 2012-10 (Hurricane Sandy) and 2018-12 (national day of mourning). This rule therefore does NOT prove each download reached both ends of its month; it SCREENS the day count for consistency with the CME futures calendar to within one day, wider by the excess shown in rv_months_observed_beyond_the_cme_calendar. Months that pass are screened, NOT certified complete: certifying them from a count-only cache would need independent endpoint evidence, which this frozen rv_monthly.csv does not carry.'",
+    "sample.panel_span_is_complete_months_only: false (was true)",
+    "sample.panel_span_completeness_basis: 'every retained row's DCOT month is CERTIFIED continuous -- at least 4 reports, no gap over 9 days between consecutive reports including the entry gap from the previous month, so a skipped week anywhere fails. Its RV month is only SCREENED: the day count must match the CME futures calendar to within one day, which cannot rule out a one-day truncation common to every commodity. No partial month such as 2026-07 survives either test, but 'complete months only' would overstate the RV side. See sample.completeness.rule.rv_residual_blind_spot.'",
+    "README: '樣本：3276 列 / 22 商品 / 2014-02..2026-06（149 個日曆月）。每一列的 DCOT 月份都經過連續性認證（漏任何一週都擋得下來）；RV 月份則只是通過篩檢——日數與 CME 期貨交易日曆相符到 1 天以內，不是逐月端點認證（round 4 修正，見下方專節）。' (replacing '皆為完整月份')"
+  ],
+  "residual_limitations": [
+    "The reported run STILL rests on a count-only cache. A truncation of exactly one day common to all 22 commodities is invisible, and in the 6 months enumerated in rv_months_observed_beyond_the_cme_calendar it takes 3 days. The panel is therefore SCREENED, never certified complete. The exact-endpoint gate exists in code and is covered by tests, but the frozen rv_monthly.csv does not exercise it -- regenerating the cache from yfinance was deliberately not done, because provenance stability of the frozen input is worth more than upgrading the check, and the disclosure now says so instead of implying otherwise.",
+    "CME_UNSCHEDULED_CLOSURES is justified by external dated events (Hurricane Sandy 2012-10-29/30; national day of mourning 2018-12-05), not by anything this cache can prove. A whitelist entry is, by construction, indistinguishable from a common truncation in a count-only cache -- the same blind spot in another guise. This is stated inside rv_residual_blind_spot rather than left for a reviewer to notice.",
+    "No single fixed calendar predicts the daily-bar count of this panel exactly, and the code does not pretend one does. The panel spans CME/CBOT/COMEX/NYMEX/ICE contracts with differing abbreviated holiday sessions, and the provider's behaviour is not even stable over time: the 2016 Columbus Day and Veterans Day have no bar for any commodity, while the 2020 Columbus Day has one for all 22. Both directions of deviation are published per month rather than absorbed by a threshold.",
+    "The endpoint gate treats a missing first_day/last_day as failure. On a partially-dated cache that would mask months for want of metadata rather than for want of data. No such cache exists today; if one appears, that behaviour is a deliberate fail-closed choice and should be re-examined, not silently inherited.",
+    "Everything Codex passed in round 4 was left untouched and is therefore only as verified as it was then: estimator, provenance, NULL scope, DCOT entry-gap continuity, MAX_DCOT_GAP_DAYS separation, NOT SUPPORTED wording, bootstrap / shared sample / stationary bootstrap / t-2 adjacency / PIT regime timing."
+  ],
+  "conclusion_changed": false,
+  "conclusion_detail": "VERDICT remains NULL: the negative, binary high-vol crowding-out interaction is NOT SUPPORTED. spec1 stays positive (wrong sign for the hypothesis) and insignificant: coef 3.103e-04 -> 3.097e-04, t_DK 1.53 -> 1.53, stationary-block bootstrap 95% CI still spans zero. spec2 (continuous rv_z) stays positive and significant, 2.880e-04 -> 2.875e-04, t_DK 2.55 -> 2.54, and is still named in verdict_scope so the NULL is not read wider than it is. spec4 stays near zero (t 0.28 -> 0.27). The FCM publication-lag grid still reaches no |t| >= 1.96 across 30-90 days. What moved is the disclosure, not the finding -- which is the same pattern as rounds 1-3: five rounds, four FAILs, and not one of them because the conclusion was wrong.",
+  "self_assessment": "Both blocking defects are resolved in code, both counterexamples were reproduced on the pre-fix code (22/22 rows complete in each, exactly as Codex reported) and both now yield 0/22, and both regression tests demonstrably fail without the fix. The honest weak point is D1's status: the calendar is now correct as far as this panel's data can show, but 'correct' is not 'exact' -- no fixed calendar reproduces a multi-exchange panel's bar counts to the day, so I did not claim one does. Instead the rule's detection threshold is stated with its per-month exceptions enumerated at run time, and the certification claim that could not survive a count-only cache was withdrawn rather than defended. I expect the residual one-day blind spot to be the thing round 5 probes; it is disclosed in three places (rule.rv_residual_blind_spot, sample.panel_span_completeness_basis, README round-4 section) and pinned by tests, and closing it genuinely requires regenerating rv_monthly.csv with endpoint dates -- a trade against provenance stability that belongs to whoever owns that decision, not to this repair. Not done here and deliberately so: knowledge.json is untouched (K1259), the cache was not regenerated, nothing was merged, and the strict artifact check's single remaining finding is the knowledge entry this stage is forbidden to write."
+}
