@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "K1736",
   "source_task_link": {
     "state": "linked",
@@ -59,13 +59,15 @@
   },
   "claimed_by_pid_start_wall": "Wed Jul 29 23:45:32 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "K1736",
-    "settled_at": "2026-07-29T17:08:57Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-07-29T17:20:17Z"
   },
   "experiment_gate": {
     "status": "passed",
     "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e9403ded-k1736/experiments/K1736"
-  }
+  },
+  "followup_dispatched_at": "2026-07-29T17:20:17Z",
+  "followup_next_task_id": "K1736_collect_20260730"
 }
