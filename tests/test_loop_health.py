@@ -333,17 +333,27 @@ def test_known_self_healing_still_detected_with_root_cause_suffix(tmp_path):
     assert r["status"] == "ok"
 
 
-def _dispatch_completion(days_ago: float, outcome: str, exit_code: int = 1) -> dict:
+def _dispatch_completion(
+    days_ago: float,
+    outcome: str,
+    exit_code: int = 1,
+    *,
+    job_id: str | None = None,
+    attempts: int = 1,
+) -> dict:
     ts = _iso(days_ago)
-    return {
+    completion = {
         "fire_at": ts,
         "completed_at": ts,
         "exit_code": exit_code,
         "duration_s": 5.0,
-        "attempts": 1,
+        "attempts": attempts,
         "final_model": "claude-opus-5",
         "outcome": outcome,
     }
+    if job_id is not None:
+        completion["job_id"] = job_id
+    return completion
 
 
 def test_error_recurrence_counts_dispatch_supervisor_completions(tmp_path):
@@ -370,6 +380,94 @@ def test_error_recurrence_dispatch_supervisor_success_marks_recovered(tmp_path):
     top = r["top_recurring"][0]
     assert top["signature"] == "dispatch_supervisor:failure:exit1"
     assert top["recovered"] is True
+    assert r["status"] == "ok"
+
+
+def test_error_recurrence_uses_terminal_outcome_for_retried_dispatch_job(tmp_path):
+    storage = _storage(tmp_path)
+    completions = [
+        _dispatch_completion(
+            2 / 24,
+            "failure",
+            1,
+            job_id="retry-then-success",
+            attempts=1,
+        ),
+        _dispatch_completion(
+            1 / 24,
+            "success",
+            0,
+            job_id="retry-then-success",
+            attempts=2,
+        ),
+    ]
+    _write(storage / "ops" / "dispatch_state.json", {"completions": completions})
+
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+
+    assert not any(
+        item["signature"] == "dispatch_supervisor:failure:exit1"
+        for item in r["top_recurring"]
+    )
+    assert r["status"] == "ok"
+
+
+def test_error_recurrence_counts_retried_terminal_failure_once(tmp_path):
+    storage = _storage(tmp_path)
+    completions = [
+        _dispatch_completion(
+            2 / 24,
+            "failure",
+            1,
+            job_id="retry-still-fails",
+            attempts=1,
+        ),
+        _dispatch_completion(
+            1 / 24,
+            "failure",
+            1,
+            job_id="retry-still-fails",
+            attempts=2,
+        ),
+    ]
+    _write(storage / "ops" / "dispatch_state.json", {"completions": completions})
+
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+
+    top = r["top_recurring"][0]
+    assert top["signature"] == "dispatch_supervisor:failure:exit1"
+    assert top["count"] == 1
+
+
+def test_error_recurrence_ignores_retry_job_still_owned_by_supervisor(tmp_path):
+    storage = _storage(tmp_path)
+    completion = _dispatch_completion(
+        1 / 24,
+        "failure",
+        1,
+        job_id="retry-in-progress",
+        attempts=1,
+    )
+    _write(
+        storage / "ops" / "dispatch_state.json",
+        {
+            "completions": [completion],
+            "current_jobs": [
+                {
+                    "job_id": "retry-in-progress",
+                    "attempt": 2,
+                    "status": "retry_wait",
+                }
+            ],
+        },
+    )
+
+    r = lh.compute_error_recurrence(str(storage), now=NOW)
+
+    assert not any(
+        item["signature"] == "dispatch_supervisor:failure:exit1"
+        for item in r["top_recurring"]
+    )
     assert r["status"] == "ok"
 
 

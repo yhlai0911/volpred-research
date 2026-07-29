@@ -2977,3 +2977,16 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
 - ✅ deterministic RED→GREEN；K-coverage 13 tests、dedup／generator 相鄰範圍合計
   **182 passed**。
 - ⏳ 狀態 **`contained`**：待正式 commit／push 與 GitHub CI read-back 後升級。
+
+## 2026-07-30 — dispatch retry 終態 observer containment
+
+- ✅ live evidence 證明 `9189c746…` 是同一 job 的 attempt 1 failure、attempt 2
+  success；supervisor heartbeat 與後續工作均健康。
+- ✅ loop-health 不再把 attempt receipts 當成多個最終 job：相同 `job_id` 先依
+  append order 收斂，仍在 `current_jobs`／`current_job` 的 retry 不提前視為終態。
+- ✅ retry 最終成功不列 failure；retry 最終仍失敗只計一次；無 `job_id` 的舊 receipt
+  維持相容。
+- ✅ deterministic RED→GREEN；loop-health **27 passed**，live read-back 已移除
+  `dispatch_supervisor:failure:exit1`，且未吞掉其他獨立 recurrence。
+- ✅ Matt Standards／Spec 雙軸複審 PASS。
+- ⏳ 狀態 **`contained`**：待正式 commit／push 與 GitHub CI read-back 後升級。

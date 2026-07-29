@@ -4918,3 +4918,32 @@ fail-open，但不再給綠色 clearance。
 此切片目前為 **`contained`**：程式、回歸與 live source read-back 已完成；待正式
 commit 進 origin 並取得新 GitHub CI 全綠 receipt 後，才升級為
 **`root_cause_fixed_and_verified`**。
+
+---
+
+## 2026-07-30 — loop-health 把同一 dispatch job 的 retry failure 當成最終故障
+
+**證據化症狀**：`loop-health` 持續列出
+`dispatch_supervisor:failure:exit1`（count 10、`recovered=false`），但 canonical
+`dispatch_state.json` 顯示最新一筆相關工作 `9189c746…` 先在 attempt 1 exit 1，
+之後同一 `job_id` 的 attempt 2 已於 16 分鐘後 success／exit 0；supervisor log 與
+目前 heartbeat 也都證明工作已成功且 daemon 健康。
+
+**根因層級（observer lifecycle contract）**：dispatch completion ring 保存的是
+attempt-level receipts；loop-health 卻逐筆聚合 failure signature，只用「任意較晚成功
+且 failure 已過 6 小時」判 recovered。它沒有先依 `job_id` 還原一次 dispatch job 的
+終態，因此正常 retry ladder 會被誤判成另一個尚未復原的 production failure。
+
+**底層修復與制度化**：structured-state scanner 現先依 canonical append order 將相同
+`job_id` 收斂成最後一筆，且會排除仍在 `current_jobs`／legacy `current_job` projection
+中由 supervisor 持有的工作，再做 recurrence 分類。最終成功的 retry 不計 failure；
+最終仍失敗的 retry 只計一個 failed job；retry_wait／running 尚無 terminal outcome，
+不提早定罪。沒有 `job_id` 的 legacy receipt 無法可靠關聯，維持逐筆相容處理。
+
+**回歸與 read-back**：deterministic RED 先重現同 job failure→success 仍出現在
+`top_recurring`，複審再以 RED 鎖定 failure receipt＋同 job retry_wait 的中間狀態；
+修正後 loop-health tests **27 passed**。live command 已不再列出
+`dispatch_supervisor:failure:exit1`，證明同一 receipt pair 由 active recurrence
+移除；其他獨立 signature 仍照實保留。Matt Standards／Spec 複審均 PASS。此切片目前
+為 **`contained`**：待正式 commit 進 origin 與 GitHub CI 回讀後，才升級為
+**`root_cause_fixed_and_verified`**。

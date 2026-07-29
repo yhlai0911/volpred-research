@@ -607,14 +607,49 @@ def _is_dispatch_success(entry: dict[str, Any]) -> bool:
     return outcome == "success" and exit_code == 0
 
 
+def _terminal_dispatch_completions(
+    completions: list[Any],
+    *,
+    current_jobs: list[Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Collapse attempt receipts to one terminal outcome per dispatch job.
+
+    The supervisor appends a completion entry before retaining a slot for a
+    retry, then appends another entry for the same ``job_id`` after that retry.
+    The ring is append ordered, so the last entry for a job is its current
+    terminal outcome once the supervisor no longer owns that job. Jobs still
+    present in ``current_jobs`` are retrying or running and do not have a
+    terminal outcome yet. Legacy entries without a job id cannot be correlated
+    and remain independent observations.
+    """
+    active_job_ids = {
+        str(job.get("job_id") or "").strip()
+        for job in (current_jobs or [])
+        if isinstance(job, dict) and str(job.get("job_id") or "").strip()
+    }
+    by_job_id: dict[str, dict[str, Any]] = {}
+    uncorrelated: list[dict[str, Any]] = []
+    for rec in completions:
+        if not isinstance(rec, dict):
+            continue
+        job_id = str(rec.get("job_id") or "").strip()
+        if not job_id:
+            uncorrelated.append(rec)
+            continue
+        if job_id in active_job_ids:
+            continue
+        by_job_id[job_id] = rec
+    return [*uncorrelated, *by_job_id.values()]
+
+
 def _scan_dispatch_supervisor_completion_signatures(
     storage_dir: str, cutoff: datetime, now: datetime
 ) -> dict[str, dict[str, Any]]:
-    """Count non-success dispatch supervisor completions from structured state.
+    """Count terminal non-success dispatch jobs from structured state.
 
     `dispatch_state.json` is the canonical structured source for the launchd-era
-    hourly dispatcher. It records attempt-level completion outcomes even though
-    they no longer appear in `storage/logs/cron/*.log`.
+    hourly dispatcher. It records attempt-level completion outcomes, so receipts
+    sharing a ``job_id`` must be collapsed before recurrence classification.
     """
     sigs: dict[str, dict[str, Any]] = {}
     state_path = project_path(storage_dir) / "ops" / "dispatch_state.json"
@@ -629,11 +664,19 @@ def _scan_dispatch_supervisor_completion_signatures(
     if not isinstance(completions, list):
         return sigs
 
+    current_jobs = raw.get("current_jobs")
+    if not isinstance(current_jobs, list):
+        current_jobs = []
+    current_job = raw.get("current_job")
+    if isinstance(current_job, dict):
+        current_jobs = [*current_jobs, current_job]
+
     latest_success_ts: datetime | None = None
     failure_sigs: list[str] = []
-    for rec in completions:
-        if not isinstance(rec, dict):
-            continue
+    for rec in _terminal_dispatch_completions(
+        completions,
+        current_jobs=current_jobs,
+    ):
         ts = _parse_iso(rec.get("completed_at")) or _parse_iso(rec.get("fire_at"))
         if _is_dispatch_success(rec):
             if ts is not None and (latest_success_ts is None or ts > latest_success_ts):
