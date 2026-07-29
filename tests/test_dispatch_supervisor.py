@@ -5973,17 +5973,14 @@ def test_scheduler_spawns_isolated_worker_from_workspace_cwd(
 
 
 def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_paths(
-    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
         pytest.skip("production isolation substrate is macOS sandbox-exec")
-    test_temp_root = Path.home() / ".volpred" / "test-tmp"
-    test_temp_root.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setattr(tempfile, "tempdir", str(test_temp_root))
-    with tempfile.TemporaryDirectory(
-        prefix="volpred-isolation-", dir=Path.home(),
-    ) as root_raw:
-        root = Path(root_raw)
+    # pytest owns cleanup of this fixture.  A nested TemporaryDirectory made
+    # shutil emit dir_fd-relative audit paths that CIParity correctly cannot
+    # resolve without the missing dir_fd context.
+    with contextlib.nullcontext(tmp_path) as root:
         repo = root / "repo"
         repo.mkdir()
         _git_init_repo(repo)
@@ -6086,9 +6083,7 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
             ],
             capture_output=True, text=True, check=False,
         )
-        log_dir = Path.home() / ".volpred" / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_path = log_dir / "sandbox-inherited-fd-test.log"
+        log_path = root / "sandbox-inherited-fd-test.log"
         log_file = log_path.open("w", encoding="utf-8")
         try:
             inherited_log_fd = subprocess.run(
@@ -6134,146 +6129,76 @@ def test_workspace_os_sandbox_denies_canonical_repo_bytes_but_allows_contract_pa
 
 
 def test_workspace_os_sandbox_allows_worker_to_terminate_its_own_child(
-    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     """Producer isolation must not turn normal child cleanup into orphan work."""
     if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
         pytest.skip("production isolation substrate is macOS sandbox-exec")
-    test_temp_root = Path.home() / ".volpred" / "test-tmp"
-    test_temp_root.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setattr(tempfile, "tempdir", str(test_temp_root))
-    with tempfile.TemporaryDirectory(
-        prefix="volpred-isolation-signal-", dir=Path.home(),
-    ) as root_raw:
-        root = Path(root_raw)
-        repo = root / "repo"
-        repo.mkdir()
-        _git_init_repo(repo)
-        ws = _ws_allocate(repo, job_id="2" * 32, slot="slot-1")
-        assert ws is not None
-        prepared = isolation.prepare(
-            canonical_root=repo,
-            workspace=Path(ws["path"]),
-            job_id="sandbox-child-signal-test",
-            profile_root=root / "profiles",
-        )
-        probe = (
-            "import subprocess, sys; "
-            "child = subprocess.Popen("
-            "[sys.executable, '-c', 'import time; time.sleep(2)'], "
-            "stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); "
-            "child.terminate(); "
-            "raise SystemExit(child.wait(timeout=5) not in (-15, 143))"
-        )
-        result = subprocess.run(
-            [
-                str(isolation.SANDBOX_EXEC),
-                "-f",
-                prepared.profile_path,
-                sys.executable,
-                "-c",
-                probe,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=10,
-            check=False,
-        )
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo, job_id="2" * 32, slot="slot-1")
+    assert ws is not None
+    prepared = isolation.prepare(
+        canonical_root=repo,
+        workspace=Path(ws["path"]),
+        job_id="sandbox-child-signal-test",
+        profile_root=tmp_path / "profiles",
+    )
+    probe = (
+        "import subprocess, sys; "
+        "child = subprocess.Popen("
+        "[sys.executable, '-c', 'import time; time.sleep(2)'], "
+        "stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); "
+        "child.terminate(); "
+        "raise SystemExit(child.wait(timeout=5) not in (-15, 143))"
+    )
+    result = subprocess.run(
+        [
+            str(isolation.SANDBOX_EXEC),
+            "-f",
+            prepared.profile_path,
+            sys.executable,
+            "-c",
+            probe,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
 
-        assert result.returncode == 0, result.stderr
+    assert result.returncode == 0, result.stderr
 
 
 def test_workspace_os_sandbox_cannot_signal_unrelated_host_process(
-    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     """Child cleanup capability must not extend to sibling host processes."""
     if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
         pytest.skip("production isolation substrate is macOS sandbox-exec")
-    test_temp_root = Path.home() / ".volpred" / "test-tmp"
-    test_temp_root.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setattr(tempfile, "tempdir", str(test_temp_root))
     outside = subprocess.Popen(
         [sys.executable, "-c", "import time; time.sleep(60)"],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
     try:
-        with tempfile.TemporaryDirectory(
-            prefix="volpred-isolation-signal-boundary-", dir=Path.home(),
-        ) as root_raw:
-            root = Path(root_raw)
-            repo = root / "repo"
-            repo.mkdir()
-            _git_init_repo(repo)
-            ws = _ws_allocate(repo, job_id="3" * 32, slot="slot-1")
-            assert ws is not None
-            prepared = isolation.prepare(
-                canonical_root=repo,
-                workspace=Path(ws["path"]),
-                job_id="sandbox-signal-boundary-test",
-                profile_root=root / "profiles",
-            )
-            probe = (
-                "import os, signal, sys; "
-                "\ntry: os.kill(int(sys.argv[1]), signal.SIGTERM)"
-                "\nexcept PermissionError: raise SystemExit(0)"
-                "\nraise SystemExit(1)"
-            )
-            result = subprocess.run(
-                [
-                    str(isolation.SANDBOX_EXEC),
-                    "-f",
-                    prepared.profile_path,
-                    sys.executable,
-                    "-c",
-                    probe,
-                    str(outside.pid),
-                ],
-                capture_output=True,
-                text=True,
-                timeout=10,
-                check=False,
-            )
-            assert result.returncode == 0, result.stderr
-            assert outside.poll() is None
-    finally:
-        outside.terminate()
-        outside.wait(timeout=5)
-
-
-def test_workspace_os_sandbox_can_terminate_multiprocessing_pool(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Regression: Pool cleanup previously leaked children after sandbox EPERM."""
-    if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
-        pytest.skip("production isolation substrate is macOS sandbox-exec")
-    test_temp_root = Path.home() / ".volpred" / "test-tmp"
-    test_temp_root.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setattr(tempfile, "tempdir", str(test_temp_root))
-    with tempfile.TemporaryDirectory(
-        prefix="volpred-isolation-pool-signal-", dir=Path.home(),
-    ) as root_raw:
-        root = Path(root_raw)
-        repo = root / "repo"
+        repo = tmp_path / "repo"
         repo.mkdir()
         _git_init_repo(repo)
-        ws = _ws_allocate(repo, job_id="4" * 32, slot="slot-1")
+        ws = _ws_allocate(repo, job_id="3" * 32, slot="slot-1")
         assert ws is not None
         prepared = isolation.prepare(
             canonical_root=repo,
             workspace=Path(ws["path"]),
-            job_id="sandbox-pool-signal-test",
-            profile_root=root / "profiles",
+            job_id="sandbox-signal-boundary-test",
+            profile_root=tmp_path / "profiles",
         )
         probe = (
-            "import multiprocessing as mp, time; "
-            "pool = mp.get_context('fork').Pool(2); "
-            "workers = tuple(pool._pool); "
-            "pool.map_async(time.sleep, [2, 2]); "
-            "time.sleep(0.1); "
-            "pool.terminate(); pool.join(); "
-            "raise SystemExit(any("
-            "proc.exitcode not in (-15, -9) for proc in workers))"
+            "import os, signal, sys; "
+            "\ntry: os.kill(int(sys.argv[1]), signal.SIGTERM)"
+            "\nexcept PermissionError: raise SystemExit(0)"
+            "\nraise SystemExit(1)"
         )
         result = subprocess.run(
             [
@@ -6283,14 +6208,63 @@ def test_workspace_os_sandbox_can_terminate_multiprocessing_pool(
                 sys.executable,
                 "-c",
                 probe,
+                str(outside.pid),
             ],
             capture_output=True,
             text=True,
             timeout=10,
             check=False,
         )
-
         assert result.returncode == 0, result.stderr
+        assert outside.poll() is None
+    finally:
+        outside.terminate()
+        outside.wait(timeout=5)
+
+
+def test_workspace_os_sandbox_can_terminate_multiprocessing_pool(
+    tmp_path: Path,
+) -> None:
+    """Regression: Pool cleanup previously leaked children after sandbox EPERM."""
+    if sys.platform != "darwin" or not isolation.SANDBOX_EXEC.is_file():
+        pytest.skip("production isolation substrate is macOS sandbox-exec")
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git_init_repo(repo)
+    ws = _ws_allocate(repo, job_id="4" * 32, slot="slot-1")
+    assert ws is not None
+    prepared = isolation.prepare(
+        canonical_root=repo,
+        workspace=Path(ws["path"]),
+        job_id="sandbox-pool-signal-test",
+        profile_root=tmp_path / "profiles",
+    )
+    probe = (
+        "import multiprocessing as mp, time; "
+        "pool = mp.get_context('fork').Pool(2); "
+        "workers = tuple(pool._pool); "
+        "pool.map_async(time.sleep, [2, 2]); "
+        "time.sleep(0.1); "
+        "pool.terminate(); pool.join(); "
+        "raise SystemExit(any("
+        "proc.exitcode not in (-15, -9) for proc in workers))"
+    )
+    result = subprocess.run(
+        [
+            str(isolation.SANDBOX_EXEC),
+            "-f",
+            prepared.profile_path,
+            sys.executable,
+            "-c",
+            probe,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=10,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def test_isolated_environment_scopes_subscription_auth_to_provider(
