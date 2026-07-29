@@ -197,9 +197,11 @@ def test_build_report_exposes_disambiguated_pending_summary(monkeypatch, tmp_pat
     # tests here so the sweep cannot touch the real one.
     monkeypatch.setattr(dispatch, "NEXT_TASKS", tmp_path / "next_tasks.json")
     monkeypatch.setattr(dispatch, "count_active_slots", lambda: {"worktrees": [], "active_agents": [], "occupied": 0})
+    monkeypatch.setattr(dispatch._slot_budget, "budget", lambda: {"cap": 4})
     monkeypatch.setattr(dispatch, "load_pending_tasks", lambda: tasks)
     monkeypatch.setattr(dispatch, "load_recent_task_type_counts", lambda limit=10: Counter())
     monkeypatch.setattr(dispatch, "_maybe_refill", lambda *args, **kwargs: None)
+    monkeypatch.setattr(dispatch, "_maybe_refill_draft_pool", lambda **kwargs: None)
 
     report = dispatch.build_report(auto_refill=False)
 
@@ -208,10 +210,20 @@ def test_build_report_exposes_disambiguated_pending_summary(monkeypatch, tmp_pat
     assert report["pending_blocked"] == 0
     assert report["pending_summary"] == {
         "agentable": 2,
+        "worker_claimable": 1,
+        "supervisor_only": 1,
         "main_thread": 1,
         "blocked": 0,
-        "label": "agentable 2 / main_thread 1 / blocked 0",
+        "label": (
+            "agentable 2 (worker 1 / supervisor 1) / "
+            "main_thread 1 / blocked 0"
+        ),
     }
+    assert report["pending_worker_claimable"] == 1
+    assert report["pending_supervisor_only"] == 1
+    assert [
+        item["id"] for item in report["supervisor_preassignment"]["tasks"]
+    ] == ["platform-1"]
 
 
 def test_maybe_refill_uses_live_agentable_count_not_raw_added(monkeypatch):

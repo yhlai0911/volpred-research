@@ -40,7 +40,10 @@ def _task(task_id: str, *, priority=1, age_hours: float = 0.5, **extra) -> dict:
     task: dict = {
         "id": task_id,
         "priority": priority,
-        "task_type": "platform_ops",
+        # Lane-order tests exercise the generic hourly menu. Mutating
+        # platform_ops/governance tasks use the separate supervisor
+        # preassignment lane and are covered in test_dispatch_starvation.py.
+        "task_type": "experiment",
         "dispatch_lane": "agent",
         "status": "pending",
         "source": "auto_discovered",

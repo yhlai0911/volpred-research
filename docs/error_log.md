@@ -4538,3 +4538,37 @@ smoke `effect_owned_email_c737f1e75e5172720523bf6723459c35` 由
 `[新架構派發][VolPred Alert][INFO] 通知路由上線驗證`。本 incident slice 已完成五步
 Gate，狀態為 **`root_cause_fixed_and_verified`**；Issue #13 umbrella 的其他 acceptance
 仍各自驗收，不因本條自動關閉。
+
+---
+
+## 2026-07-30 — Starvation lockout 把 generic hourly worker 鎖在不可 claim 的 mutating tasks
+
+**證據化症狀**：hourly fire 三次看到 `STARVATION LOCKOUT` 只列
+`platform_ops`／`governance`，隨後同一 fire 呼叫 claim 必定得到
+`supervisor_preassignment_required`。最後一個可 claim 的 experiment 被前班收走後，
+106 筆 pending 中仍有工作，generic slot 卻只能 idle；而修復此問題的 task 自身也是
+`platform_ops`，故 hourly fire 亦無法認領。
+
+**根因層級（selection／admission composition contract）**：
+`continue_task_dispatch.build_report()` 把 schema 上 agentable 的 mutating task 直接放進
+generic worker 菜單，但 `task_pool_claim.cmd_claim()` 已要求這兩類工作必須在 spawn 前
+由 supervisor 綁 execution contract。兩個局部正確的 policy 各自保存 task-type
+清單，沒有共用「需 supervisor preassignment」判定；starvation lockout 又只看前者的
+候選集，因此會把所有真正可 claim 的工作排除在外。
+
+**底層修復與制度化**：`task_pool_selection.requires_supervisor_preassignment()` 成為
+唯一 predicate，由 direct claim gate、supervisor preassign 與 dispatcher 同時使用。
+Dispatcher 保留完整 `agentable` 統計，但把 generic worker 菜單拆為
+`worker_claimable` 與 `supervisor_only`；starvation 只鎖前者。報表另輸出
+`supervisor_preassignment.required_count/tasks/hourly_claimable=false`，文字輸出明示
+`SUPERVISOR-ONLY`，所以缺 execution contract 的 mutating backlog 仍可觀測，卻不再
+令 generic slot 空轉或誘使 worker 繞過 claim gate。
+
+**回歸與 live read-back**：最小 compose test 先 RED（菜單只含
+`starved_platform_ops`），修後同一情境改列 fresh experiment，兩個 mutating task
+完整留在 supervisor bucket。Dispatcher／lane／dry-run／claim／preassign 相鄰範圍
+**146 passed**。Production queue 的 read-only dry-run 回讀
+`agentable=98`、`worker=23`、`supervisor=75`，並逐項列出 supervisor-only tasks；
+現場仍因另一個 PHASE-Z incident 將 slot cap 降為 2 且當下 2/2 occupied，故須等自然
+空槽再取得「實際不 idle」的 terminal fire receipt。本條在該 receipt 前維持
+**`contained`**。

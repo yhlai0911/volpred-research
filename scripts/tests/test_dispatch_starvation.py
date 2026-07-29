@@ -125,10 +125,10 @@ def test_lockout_collapses_the_candidate_menu(
     assert report["dispatch_candidates"][0]["starved"] is True
 
 
-def test_ci_incident_preempts_starvation_but_ordinary_fresh_work_stays_excluded(
+def test_ci_incident_is_reserved_for_supervisor_while_starvation_stays_claimable(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """A generic request_fire must actually offer its fresh CI P1 to the worker."""
+    """CI repair remains visible but never reaches the generic claim menu."""
     import continue_task_dispatch as ctd
 
     starving = _task("starving_p1", 1, 17.0)
@@ -158,15 +158,16 @@ def test_ci_incident_preempts_starvation_but_ordinary_fresh_work_stays_excluded(
     report = ctd.build_report(auto_refill=False, now=NOW)
 
     assert report["starvation"]["locked"] is True
-    assert report["starvation"]["incident_preempt_count"] == 1
+    assert report["starvation"]["incident_preempt_count"] == 0
     assert [item["id"] for item in report["dispatch_candidates"]] == [
-        "ci-red-123",
-        "starving_p1",
+        "starving_p1"
     ]
-    assert report["dispatch_candidates"][0]["dispatch_preempt"] is True
+    assert [
+        item["id"] for item in report["supervisor_preassignment"]["tasks"]
+    ] == ["ci-red-123", "fresh_p1"]
 
 
-def test_ci_incident_preempts_normal_rotation_when_only_one_slot_is_free(
+def test_ci_incident_is_not_offered_to_generic_worker_when_one_slot_is_free(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import continue_task_dispatch as ctd
@@ -202,7 +203,10 @@ def test_ci_incident_preempts_normal_rotation_when_only_one_slot_is_free(
     report = ctd.build_report(auto_refill=False, now=NOW)
 
     assert report["starvation"]["locked"] is False
-    assert [item["id"] for item in report["dispatch_candidates"]] == ["zzz-ci-red"]
+    assert report["dispatch_candidates"] == []
+    assert [
+        item["id"] for item in report["supervisor_preassignment"]["tasks"]
+    ] == ["aaa-ordinary-p1", "zzz-ci-red"]
 
 
 def _dispatch_env(monkeypatch, tmp_path, tasks, cap: int) -> None:
@@ -269,10 +273,10 @@ def test_tail_floor_never_takes_the_only_free_slot(
     assert report["starvation"]["tail_floor_task_ids"] == []
 
 
-def test_tail_floor_does_not_displace_an_incident_preempt(
+def test_tail_floor_does_not_hide_a_supervisor_reserved_incident(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """The reserved seat comes out of ordinary starved work, never the preempt lane."""
+    """Worker lane changes cannot make supervisor-owned CI work disappear."""
     import continue_task_dispatch as ctd
 
     _dispatch_env(
@@ -295,9 +299,11 @@ def test_tail_floor_does_not_displace_an_incident_preempt(
     report = ctd.build_report(auto_refill=False, now=NOW)
 
     ids = [c["id"] for c in report["dispatch_candidates"]]
-    assert ids[0] == "ci_red"
-    assert ids[1] == "dreaming_p3"
-    assert report["starvation"]["tail_floor_task_ids"] == ["dreaming_p3"]
+    assert ids == ["starving_p1", "dreaming_p3"]
+    assert report["starvation"]["tail_floor_task_ids"] == []
+    assert [
+        item["id"] for item in report["supervisor_preassignment"]["tasks"]
+    ] == ["ci_red"]
 
 
 def test_no_floor_when_the_tail_band_is_already_represented(
@@ -318,3 +324,48 @@ def test_no_floor_when_the_tail_band_is_already_represented(
 
     assert [c["id"] for c in report["dispatch_candidates"]] == ["p1_a", "dreaming_p3"]
     assert report["starvation"]["tail_floor_task_ids"] == []
+
+
+def test_supervisor_only_starved_tasks_do_not_lock_out_claimable_hourly_work(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The starvation menu and hourly claim gate must agree on claimability."""
+    import continue_task_dispatch as ctd
+
+    platform_ops = _task(
+        "starved_platform_ops",
+        2,
+        STARVATION_HOURS[2] + 10,
+        task_type="platform_ops",
+    )
+    governance = _task(
+        "starved_governance",
+        2,
+        STARVATION_HOURS[2] + 5,
+        task_type="governance",
+    )
+    experiment = _task(
+        "fresh_experiment",
+        2,
+        0.5,
+        task_type="experiment",
+    )
+    _dispatch_env(
+        monkeypatch,
+        tmp_path,
+        [platform_ops, governance, experiment],
+        cap=1,
+    )
+
+    report = ctd.build_report(auto_refill=False, now=NOW)
+
+    assert [c["id"] for c in report["dispatch_candidates"]] == [
+        "fresh_experiment"
+    ]
+    assert report["starvation"]["locked"] is False
+    assert report["supervisor_preassignment"]["required_count"] == 2
+    assert [
+        task["id"]
+        for task in report["supervisor_preassignment"]["tasks"]
+    ] == ["starved_governance", "starved_platform_ops"]
+    assert report["supervisor_preassignment"]["hourly_claimable"] is False

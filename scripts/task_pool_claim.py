@@ -72,11 +72,12 @@ from volpred.ops.issue_tracker_sync import (  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 from volpred.ops import dreaming_revalidate  # noqa: E402
 from volpred.ops.task_pool_selection import (  # noqa: E402
-    CODEX_ELIGIBLE_TASK_TYPES,
+    CODEX_ELIGIBLE_TASK_TYPES,  # noqa: F401 - compatibility re-export
     evaluate_task_claim,
     is_codex_eligible_task as _is_codex_eligible_task,
     is_pending_list_candidate,
     normalized_task_type as _normalized_task_type,
+    requires_supervisor_preassignment,
     resolve_task_identity,
     task_identity,
     task_rank_key,
@@ -88,7 +89,6 @@ FB_DRAFTS_DIR = ROOT / "storage" / "drafts"
 
 DEFAULT_STALE_HOURS = 2  # Canonical handoff stale sweep contract
 TERMINAL_STATUSES = {"succeeded", "failed", "blocked"}
-DISPATCH_MUTATING_TASK_TYPES = frozenset({"platform_ops", "governance"})
 FB_DUAL_PUBLISH_TASK_TYPES = {"trending_repost", "event_article"}
 _MILE_ID_RE = re.compile(r"\bmile_[A-Za-z0-9_-]+\b")
 _PUBLISH_EVIDENCE_RE = re.compile(
@@ -604,11 +604,8 @@ def cmd_claim(args: argparse.Namespace) -> dict[str, Any]:
             }
         normalized_type = _normalized_task_type(task)
         normalized_owner = str(args.owner or "").strip().lower()
-        raw_lane = str(task.get("dispatch_lane") or "").strip().lower()
         if (
-            normalized_type in DISPATCH_MUTATING_TASK_TYPES
-            and raw_lane not in {"main", "main_thread", "manual", "interactive"}
-            and (task.get("status") or "").lower() != "pending_main_thread"
+            requires_supervisor_preassignment(task)
             and (
                 normalized_owner.startswith("hourly-")
                 or normalized_owner.startswith("codex-failover-")
@@ -721,7 +718,7 @@ def _dispatch_execution_contract(
     task: dict[str, Any],
 ) -> tuple[dict[str, Any] | None, str | None]:
     """Validate the fail-closed contract required before mutating dispatch."""
-    if _normalized_task_type(task) not in DISPATCH_MUTATING_TASK_TYPES:
+    if not requires_supervisor_preassignment(task):
         return None, "not_mutating_dispatch_type"
     if str(task.get("write_intent") or "") != "repo_patch":
         return None, "write_intent_missing_or_not_repo_patch"
@@ -779,7 +776,7 @@ def cmd_dispatch_preassign(args: argparse.Namespace) -> dict[str, Any]:
         for task in sorted(tasks, key=task_rank_key):
             if (task.get("status") or "").lower() != "pending":
                 continue
-            if _normalized_task_type(task) not in DISPATCH_MUTATING_TASK_TYPES:
+            if not requires_supervisor_preassignment(task):
                 continue
             if task.get("unblock_gate") is not None:
                 blockers.append(

@@ -32,6 +32,7 @@ CODEX_ELIGIBLE_TASK_TYPES = frozenset(
         "daily_digest",
     }
 )
+DISPATCH_MUTATING_TASK_TYPES = frozenset({"platform_ops", "governance"})
 _ACTIVE_STATUSES = frozenset({"claimed", "in_progress"})
 _CLAIMABLE_STATUSES = frozenset(
     {"pending", "pending_main_thread", "claimed", "blocked", ""}
@@ -123,6 +124,22 @@ def normalized_task_type(task: Mapping[str, Any]) -> str:
         .lower()
         .replace("-", "_")
         .replace(" ", "_")
+    )
+
+
+def requires_supervisor_preassignment(task: Mapping[str, Any]) -> bool:
+    """Whether an hourly/failover worker needs supervisor-bound execution.
+
+    This predicate is shared by the dispatcher menu and the claim mutation
+    gate.  Keeping the two decisions together prevents a starvation lockout
+    from offering a generic worker only tasks that its claim CLI must reject.
+    Main-thread lanes are excluded because they have a different owner rather
+    than a missing supervisor preassignment.
+    """
+
+    return (
+        normalized_task_type(task) in DISPATCH_MUTATING_TASK_TYPES
+        and not is_main_thread_reserved(dict(task))
     )
 
 
@@ -398,6 +415,7 @@ def select_task_for_claim(
 
 __all__ = [
     "CODEX_ELIGIBLE_TASK_TYPES",
+    "DISPATCH_MUTATING_TASK_TYPES",
     "LegacyClaimDecision",
     "LegacyClaimSelection",
     "TaskIdentityResolution",
@@ -406,6 +424,7 @@ __all__ = [
     "is_codex_owner",
     "is_pending_list_candidate",
     "normalized_task_type",
+    "requires_supervisor_preassignment",
     "resolve_task_identity",
     "select_task_for_claim",
     "task_identity",

@@ -12,6 +12,7 @@ import pytest
 from volpred.ops.next_tasks import InvalidUnblockGate
 from volpred.ops.task_pool_selection import (
     evaluate_task_claim,
+    requires_supervisor_preassignment,
     select_task_for_claim,
 )
 
@@ -2487,6 +2488,27 @@ def test_hourly_worker_cannot_claim_mutating_task_without_preassignment(
     assert out["ok"] is False
     assert out["reason"] == "supervisor_preassignment_required"
     assert json.loads(next_tasks.read_text())[0]["status"] == "pending"
+
+
+@pytest.mark.parametrize("task_type", ["platform_ops", "governance"])
+def test_mutating_claim_gate_and_dispatch_menu_share_preassignment_predicate(
+    task_type: str,
+) -> None:
+    assert requires_supervisor_preassignment({
+        "task_type": task_type,
+        "status": "pending",
+        "dispatch_lane": "agent",
+    })
+    assert not requires_supervisor_preassignment({
+        "task_type": task_type,
+        "status": "pending",
+        "dispatch_lane": "main_thread",
+    })
+    assert not requires_supervisor_preassignment({
+        "task_type": "experiment",
+        "status": "pending",
+        "dispatch_lane": "agent",
+    })
 
 
 def test_dispatch_preassign_binds_exact_contract_and_settles_by_session(

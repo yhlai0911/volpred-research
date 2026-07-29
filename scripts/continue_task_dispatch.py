@@ -131,8 +131,8 @@ from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "src"))
 from volpred.canonical_write import guard_canonical_write  # noqa: E402
 from volpred.ops import task_urgency as _task_urgency  # noqa: E402  (2026-07-21 R1: lane rank 的唯一判定 owner)
-from volpred.ops.blocked_reasons import BLOCKED_REASONS  # noqa: E402
 from volpred.ops.diagnostics import warn as _diag_warn  # noqa: E402
+from volpred.ops.task_pool_selection import requires_supervisor_preassignment  # noqa: E402
 from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 SELF_OPTIONAL_PATTERN = re.compile(
@@ -1148,6 +1148,22 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
     slot_cap = slot_budget["cap"]
     free_slots = max(0, slot_cap - slots["occupied"])
 
+    # Mutating platform/governance work is admitted before worker spawn by the
+    # supervisor and cannot be claimed from a generic hourly prompt.  It must
+    # remain visible, but it must not enter that prompt's candidate menu.  The
+    # claim CLI imports this same predicate, so starvation and claim admission
+    # cannot disagree about who is eligible.
+    supervisor_only = [
+        task
+        for task in cats["agentable"]
+        if requires_supervisor_preassignment(task)
+    ]
+    worker_claimable = [
+        task
+        for task in cats["agentable"]
+        if not requires_supervisor_preassignment(task)
+    ]
+
     # 2026-07-21 dispatch-lanes R1: lane rank is the OUTERMOST ordering key.
     # `task_urgency.classify()` has been the single urgency owner since
     # 2026-07-18, but this dispatcher never consulted it — ordering was
@@ -1164,7 +1180,7 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
     urgent_lane: list[dict] = []
     time_critical_lane: list[dict] = []
     scheduled_pool: list[dict] = []
-    for task in cats["agentable"]:
+    for task in worker_claimable:
         lane = _task_urgency.classify(task)
         lane_by_id[task.get("id")] = lane
         if lane == _task_urgency.LANE_URGENT:
@@ -1215,10 +1231,13 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
 
     pending_summary = {
         "agentable": len(cats["agentable"]),
+        "worker_claimable": len(worker_claimable),
+        "supervisor_only": len(supervisor_only),
         "main_thread": len(cats["main_thread"]),
         "blocked": len(cats["blocked"]),
         "label": (
-            f"agentable {len(cats['agentable'])} / "
+            f"agentable {len(cats['agentable'])} "
+            f"(worker {len(worker_claimable)} / supervisor {len(supervisor_only)}) / "
             f"main_thread {len(cats['main_thread'])} / "
             f"blocked {len(cats['blocked'])}"
         ),
@@ -1233,6 +1252,8 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
         "free_slots": free_slots,
         "pending_total": len(pending),
         "pending_agentable": len(cats["agentable"]),
+        "pending_worker_claimable": len(worker_claimable),
+        "pending_supervisor_only": len(supervisor_only),
         "pending_main_thread": len(cats["main_thread"]),
         "pending_blocked": len(cats["blocked"]),
         "pending_summary": pending_summary,
@@ -1242,6 +1263,26 @@ def build_report(*, auto_refill: bool = True, now: datetime | None = None,
             "urgent_pending": len(urgent_lane),
             "time_critical_pending": len(time_critical_lane),
             "lane_head_task_ids": [t.get("id") for t in lane_head],
+        },
+        "supervisor_preassignment": {
+            "required_count": len(supervisor_only),
+            "hourly_claimable": False,
+            "directive": (
+                "這些 mutating tasks 只能由 supervisor 在 worker spawn 前"
+                "綁定 execution contract；generic hourly worker 不得 claim。"
+            ),
+            "tasks": [
+                {
+                    "id": task.get("id"),
+                    "priority": task.get("priority"),
+                    "task_type": task.get("task_type"),
+                    "age_hours": (
+                        lambda age: round(age, 1) if age is not None else None
+                    )(task_age_hours(task, now=now)),
+                    "title": (task.get("title") or "")[:120],
+                }
+                for task in supervisor_only[:10]
+            ],
         },
         "starvation": {
             "locked": bool(starved),
@@ -1374,6 +1415,24 @@ def print_report(report: dict) -> None:
         f"blocked={report.get('pending_blocked', 0)}"
     )
 
+    supervisor = report.get("supervisor_preassignment") or {}
+    if supervisor.get("required_count"):
+        print(
+            "[dispatch] SUPERVISOR-ONLY "
+            f"({supervisor['required_count']}): "
+            f"{supervisor['directive']}"
+        )
+        for task in supervisor.get("tasks") or []:
+            age = (
+                "unknown"
+                if task.get("age_hours") is None
+                else f"{task['age_hours']}h"
+            )
+            print(
+                f"  ↳ P{task['priority']} {task['id']} "
+                f"[{task['task_type']}] :: aged {age}"
+            )
+
     starvation = report.get("starvation") or {}
     if starvation.get("locked"):
         print(f"[dispatch] {starvation['directive']}")
@@ -1391,8 +1450,10 @@ def print_report(report: dict) -> None:
             seat = " ⟵ 保底席（最低 starved 優先序，本班必挑）" if c["id"] in tail_floor else ""
             print(f"  - P{c['priority']} [{c['topology']}] {c['id']} :: {c['title']}{seat}")
     else:
-        print("[dispatch] NO agent dispatch candidates "
-              "(slot full or all pending are main-thread-only)")
+        print(
+            "[dispatch] NO agent dispatch candidates "
+            "(slot full or no worker-claimable candidates)"
+        )
 
     if report["main_thread_queue_top5"]:
         print("[dispatch] main-thread queue (top 5):")
