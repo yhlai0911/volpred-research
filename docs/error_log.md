@@ -4825,3 +4825,30 @@ JSON schedule parse 與 diff check通過。此 root class 在 production schema 
 read-back 與自然 due batch acknowledgement 完成前維持 **`contained`**，不得提前稱
 `root_cause_fixed_and_verified`；24 小時頻率／資訊性 sustained audit 亦為上位
 notification policy 的獨立驗收條件。
+
+---
+
+## 2026-07-30 — handoff 將歷史 worktree 目錄誤報為 active slot
+
+**證據化症狀**：每小時 handoff 顯示 `slot 占用 13 / 4`，同時 Operations Core
+agent dispatch 的 canonical live admission 只觀察到在途 producer，沒有 13 個
+active workers。13 個名稱全是 `.claude/worktrees/` 現存目錄；其中多數已長期無進度。
+
+**根因層級（observer ownership split）**：`dispatch_slot_budget.py` 早已用
+HEAD／dirty mtime 與 4 小時 TTL 區分 live/stale，且同時擁有動態 cap 2／4／6；
+`generate_handoff.py` 卻另以「目錄存在」重算 occupancy，並硬編 cap 4。handoff 因此
+復活已淘汰的 artifact=lease 推理，與真實 scheduler admission 分岔。
+
+**底層修復與制度化**：handoff 改為直接投影 canonical `budget()` 的 cap、
+occupancy、live identities 與 stale count，不再重算 TTL 或目錄數。agent metadata
+也由同一次 canonical classification snapshot 回傳，消除 classifier 後二次讀檔的
+TOCTOU。invalid JSON root、status type、UTF-8、queue row／priority 均會留下 warning
+並釋放假 slot，不會讓 observer crash；stale artifacts 仍顯示數量但明確不占 slot。
+
+**回歸與 read-back**：RED 證明舊 observer 把一個 live＋一個 stale 目錄顯示成
+2/4；dynamic 2／4／6 cap、stale exclusion、metadata snapshot、四類 corrupt agent
+receipt、malformed queue 與 PHASE-Z incident reader 共 **85 passed**，Ruff E9/F/I、
+py_compile、diff check通過；Matt Standards／Spec 複審 PASS。live canonical build
+由錯誤 13/4 收斂為 3/4，另顯示 11 個 stale artifacts 不占 slot。此 observer
+root class 五步 Gate 完成，狀態為 **`root_cause_fixed_and_verified`**；不代表
+Issue #44 的 Producer Isolation／recognizer retirement umbrella 已結案。

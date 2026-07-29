@@ -8,7 +8,6 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -25,6 +24,7 @@ def _write_fixture_files(tmp_path: Path, tasks: list[dict]) -> None:
     (tmp_path / "ops" / "agents").mkdir(parents=True)
     (tmp_path / "worktrees").mkdir()
     (tmp_path / "next_tasks.json").write_text(json.dumps(tasks, ensure_ascii=False), encoding="utf-8")
+    (tmp_path / "ops" / "dispatch_state.json").write_text("{}", encoding="utf-8")
     (tmp_path / "dashboard_latest.json").write_text("{}", encoding="utf-8")
     (tmp_path / "work_log.json").write_text("[]", encoding="utf-8")
     (tmp_path / "gmail_inbox_state.json").write_text("{}", encoding="utf-8")
@@ -38,6 +38,7 @@ def _patch_paths(monkeypatch, module, tmp_path: Path) -> None:
     monkeypatch.setattr(module, "GMAIL_STATE", tmp_path / "gmail_inbox_state.json")
     monkeypatch.setattr(module, "WORKTREES", tmp_path / "worktrees")
     monkeypatch.setattr(module, "AGENTS_DIR", tmp_path / "ops" / "agents")
+    monkeypatch.setattr(module, "DISPATCH_STATE", tmp_path / "ops" / "dispatch_state.json")
     monkeypatch.setattr(module, "_now_local", lambda: "2026-06-22 06:50:00")
 
 
@@ -407,9 +408,90 @@ def test_handoff_warns_on_invalid_agent_receipt(tmp_path, monkeypatch, capsys) -
 
     assert "slot 占用**：0 / 4" in handoff
     captured = capsys.readouterr()
-    assert "[generate_handoff] WARN JSON read failed; skipping agent receipt" in captured.err
+    assert "[slot-budget] WARN agent record 讀不到 bad-agent.json" in captured.err
     assert "bad-agent.json" in captured.err
     assert "JSONDecodeError" in captured.err
+
+
+@pytest.mark.parametrize("cap", [2, 4, 6])
+def test_handoff_uses_canonical_slot_budget_instead_of_counting_directories(
+    tmp_path,
+    monkeypatch,
+    cap,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    (tmp_path / "worktrees" / "live-work").mkdir()
+    (tmp_path / "worktrees" / "stale-artifact").mkdir()
+    _patch_paths(monkeypatch, module, tmp_path)
+    monkeypatch.setattr(
+        module,
+        "_canonical_slot_budget",
+        lambda: {
+            "cap": cap,
+            "occupied": 1,
+            "occupancy": {
+                "worktrees": ["live-work"],
+                "active_agents": [],
+                "agent_detail": [],
+                "stale": [
+                    {
+                        "name": "stale-artifact",
+                        "live": False,
+                        "idle_hours": 48.0,
+                    }
+                ],
+            },
+        },
+        raising=False,
+    )
+
+    handoff = module.build()
+
+    assert f"slot 占用**：1 / {cap}" in handoff
+    assert "`live-work`" in handoff
+    assert "stale artifacts（不占 slot）: 1" in handoff
+    assert "`stale-artifact`" not in handoff
+
+
+def test_handoff_renders_canonical_agent_metadata_without_rereading_receipt(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    module = _load_generate_handoff()
+    _write_fixture_files(tmp_path, [])
+    _patch_paths(monkeypatch, module, tmp_path)
+    monkeypatch.setattr(
+        module,
+        "_canonical_slot_budget",
+        lambda: {
+            "cap": 4,
+            "occupied": 1,
+            "occupancy": {
+                "worktrees": [],
+                "active_agents": ["agent-1"],
+                "agent_detail": [
+                    {
+                        "name": "agent-1",
+                        "status": "running",
+                        "task_type": "experiment",
+                        "started_at": "2026-07-30T04:00:00+00:00",
+                        "idle_hours": 0.1,
+                        "live": True,
+                    }
+                ],
+                "stale": [],
+            },
+        },
+    )
+
+    # No agents/agent-1.json exists. Rendering succeeds because the canonical
+    # classifier returns one immutable metadata snapshot instead of handing
+    # the path to a second TOCTOU read.
+    handoff = module.build()
+
+    assert "slot 占用**：1 / 4" in handoff
+    assert "`agent-1` status=running type=experiment" in handoff
 
 
 def test_handoff_surfaces_invalid_completed_at_warning(tmp_path, monkeypatch) -> None:

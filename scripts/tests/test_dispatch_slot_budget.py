@@ -183,6 +183,39 @@ def test_unreadable_agent_record_warns_and_holds_no_slot(tmp_path, monkeypatch, 
     )
 
 
+@pytest.mark.parametrize(
+    ("payload", "warning"),
+    [
+        (b"[]", "root \u4e0d\u662f object"),
+        (b'"text"', "root \u4e0d\u662f object"),
+        (b'{"status":[]}', "status \u4e0d\u662f string"),
+        (b'{"status":"\xff"}', "UnicodeDecodeError"),
+    ],
+)
+def test_invalid_agent_schema_warns_and_holds_no_slot(
+    tmp_path,
+    monkeypatch,
+    capsys,
+    payload,
+    warning,
+):
+    agents = tmp_path / "agents"
+    agents.mkdir()
+    (agents / "bad-agent.json").write_bytes(payload)
+    monkeypatch.setattr(sb, "WORKTREES_DIR", tmp_path / "no-worktrees")
+    monkeypatch.setattr(sb, "AGENTS_DIR", agents)
+
+    occ = sb.occupancy()
+
+    assert occ["occupied"] == 0
+    assert occ["active_agents"] == []
+    assert occ["agent_detail"] == []
+    err = capsys.readouterr().err
+    assert "[slot-budget] WARN" in err
+    assert "bad-agent.json" in err
+    assert warning in err
+
+
 def test_dispatcher_keeps_no_occupancy_paths_of_its_own():
     """The dispatcher must not re-declare the paths occupancy is measured from.
 

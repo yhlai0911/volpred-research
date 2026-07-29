@@ -34,6 +34,7 @@ DASHBOARD = ROOT / "storage" / "ops" / "dashboard_latest.json"
 WORK_LOG = ROOT / "storage" / "work_log.json"
 WORKTREES = ROOT / ".claude" / "worktrees"
 AGENTS_DIR = ROOT / "storage" / "ops" / "agents"
+DISPATCH_STATE = ROOT / "storage" / "ops" / "dispatch_state.json"
 GMAIL_STATE = ROOT / "storage" / "ops" / "gmail_inbox_state.json"
 
 TAIPEI = ZoneInfo("Asia/Taipei")
@@ -41,7 +42,8 @@ TAIPEI = ZoneInfo("Asia/Taipei")
 SCRIPTS_DIR = str(ROOT / "scripts")
 if SCRIPTS_DIR not in sys.path:
     sys.path.insert(0, SCRIPTS_DIR)
-from task_pool_claim import _is_codex_eligible_task  # noqa: E402
+import dispatch_slot_budget as _slot_budget
+from task_pool_claim import _is_codex_eligible_task
 
 
 def _now_local() -> str:
@@ -302,30 +304,38 @@ def _direct_mode_receipt_drift(
     }
 
 
-def _active_agents() -> dict[str, Any]:
-    worktrees: list[str] = []
-    if WORKTREES.exists():
-        for p in WORKTREES.iterdir():
-            if p.is_dir() and not p.name.startswith("."):
-                worktrees.append(p.name)
+def _canonical_slot_budget() -> dict[str, Any]:
+    """Read the one slot cap/occupancy owner with handoff-injected paths."""
+    return _slot_budget.budget(
+        tasks_path=NEXT_TASKS,
+        state_path=DISPATCH_STATE,
+        worktrees_dir=WORKTREES,
+        agents_dir=AGENTS_DIR,
+    )
 
-    agents: list[dict[str, Any]] = []
-    if AGENTS_DIR.exists():
-        for f in sorted(AGENTS_DIR.glob("*.json")):
-            try:
-                data = json.loads(f.read_text(encoding="utf-8"))
-            except (json.JSONDecodeError, OSError) as exc:
-                _warn_json_read_failed(f, exc, action="skipping agent receipt")
-                continue
-            status = (data.get("status") or "").lower()
-            if status in {"running", "active", "in_progress", "claimed"}:
-                agents.append({
-                    "id": f.stem,
-                    "status": status,
-                    "task_type": data.get("task_type"),
-                    "started_at": data.get("started_at") or data.get("claimed_at"),
-                })
-    return {"worktrees": worktrees, "agents": agents, "occupied": len(worktrees) + len(agents)}
+
+def _active_agents() -> dict[str, Any]:
+    slot_budget = _canonical_slot_budget()
+    occupancy = slot_budget["occupancy"]
+    worktrees = list(occupancy["worktrees"])
+    live_agent_names = set(occupancy["active_agents"])
+    agents = [
+        {
+            "id": item["name"],
+            "status": item["status"],
+            "task_type": item.get("task_type"),
+            "started_at": item.get("started_at"),
+        }
+        for item in occupancy["agent_detail"]
+        if item["live"] and item["name"] in live_agent_names
+    ]
+    return {
+        "worktrees": worktrees,
+        "agents": agents,
+        "occupied": slot_budget["occupied"],
+        "cap": slot_budget["cap"],
+        "stale_count": len(occupancy["stale"]),
+    }
 
 
 def _dashboard_signals(dashboard: dict[str, Any]) -> list[str]:
@@ -684,7 +694,7 @@ def build() -> str:
     # 5. 進行中 agent
     lines.append("## 5. 進行中 agent / worktree")
     lines.append("")
-    lines.append(f"- **slot 占用**：{agents['occupied']} / 4")
+    lines.append(f"- **slot 占用**：{agents['occupied']} / {agents['cap']}")
     if agents["worktrees"]:
         lines.append("- worktrees:")
         for w in agents["worktrees"]:
@@ -693,6 +703,10 @@ def build() -> str:
         lines.append("- agents:")
         for a in agents["agents"]:
             lines.append(f"  - `{a['id']}` status={a['status']} type={a['task_type']} started={a['started_at']}")
+    if agents["stale_count"]:
+        lines.append(
+            f"- stale artifacts（不占 slot）: {agents['stale_count']}"
+        )
     if not agents["worktrees"] and not agents["agents"]:
         lines.append("- (slot 全空)")
     lines.append("")

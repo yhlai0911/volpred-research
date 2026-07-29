@@ -93,14 +93,33 @@ _MAX_DIRTY_FILES_STATTED = 200
 def _pending_by_priority(tasks_path: Path) -> Counter:
     try:
         tasks = json.loads(tasks_path.read_text())
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, json.JSONDecodeError, UnicodeError) as exc:
         warn("slot-budget", f"讀不到任務池 {tasks_path} ({exc}) — 退回 baseline cap")
         return Counter()
     if isinstance(tasks, dict):
         tasks = tasks.get("tasks", [])
-    return Counter(
-        int(t.get("priority", 4)) for t in tasks if t.get("status") == "pending"
-    )
+    if not isinstance(tasks, list):
+        warn("slot-budget", f"任務池 {tasks_path} root 不是 list — 退回 baseline cap")
+        return Counter()
+    pending = Counter()
+    for index, task in enumerate(tasks):
+        if not isinstance(task, dict):
+            warn(
+                "slot-budget",
+                f"任務池 {tasks_path} row {index} 不是 object — 退回 baseline cap",
+            )
+            return Counter()
+        if task.get("status") != "pending":
+            continue
+        try:
+            pending[int(task.get("priority", 4))] += 1
+        except (TypeError, ValueError):
+            warn(
+                "slot-budget",
+                f"任務池 {tasks_path} row {index} priority 無效 — 退回 baseline cap",
+            )
+            return Counter()
+    return pending
 
 
 def _auth_blocked(state_path: Path) -> bool:
@@ -186,10 +205,28 @@ def agent_slots(now: float | None = None, agents_dir: Path | None = None) -> lis
     for f in sorted(agents_dir.glob("*.json")):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            warn("slot-budget", f"agent record 讀不到 {f.name} ({exc}) — 不計入佔用")
+        except (OSError, json.JSONDecodeError, UnicodeError) as exc:
+            warn(
+                "slot-budget",
+                f"agent record 讀不到 {f.name} "
+                f"({type(exc).__name__}: {exc}) — 不計入佔用",
+            )
             continue
-        if (data.get("status") or "").lower() not in ACTIVE_AGENT_STATUSES:
+        if not isinstance(data, dict):
+            warn(
+                "slot-budget",
+                f"agent record {f.name} root 不是 object — 不計入佔用",
+            )
+            continue
+        status_raw = data.get("status")
+        if not isinstance(status_raw, str):
+            warn(
+                "slot-budget",
+                f"agent record {f.name} status 不是 string — 不計入佔用",
+            )
+            continue
+        status = status_raw.lower()
+        if status not in ACTIVE_AGENT_STATUSES:
             continue
         try:
             idle_hours = (now - f.stat().st_mtime) / 3600.0
@@ -198,16 +235,24 @@ def agent_slots(now: float | None = None, agents_dir: Path | None = None) -> lis
             continue
         slots.append({
             "name": f.stem,
+            "status": status,
+            "task_type": data.get("task_type"),
+            "started_at": data.get("started_at") or data.get("claimed_at"),
             "idle_hours": round(idle_hours, 1),
             "live": idle_hours < STALE_HOURS,
         })
     return slots
 
 
-def occupancy(now: float | None = None) -> dict:
+def occupancy(
+    now: float | None = None,
+    *,
+    worktrees_dir: Path | None = None,
+    agents_dir: Path | None = None,
+) -> dict:
     """How many slots are actually held. Single owner — do not re-derive."""
-    wts = worktree_slots(now=now)
-    agents = agent_slots(now=now)
+    wts = worktree_slots(now=now, worktrees_dir=worktrees_dir)
+    agents = agent_slots(now=now, agents_dir=agents_dir)
     live_wt = [w["name"] for w in wts if w["live"]]
     live_agents = [a["name"] for a in agents if a["live"]]
     stale = [w for w in wts if not w["live"]] + [a for a in agents if not a["live"]]
@@ -220,6 +265,7 @@ def occupancy(now: float | None = None) -> dict:
         "occupied": len(live_wt) + len(live_agents),
         "stale": stale,
         "worktree_detail": wts,
+        "agent_detail": agents,
     }
 
 
@@ -246,7 +292,14 @@ def _open_incident_signal(tasks_path: Path) -> dict | None:
     return incidents[0]
 
 
-def budget(tasks_path: Path = TASKS_PATH, state_path: Path = STATE_PATH) -> dict:
+def budget(
+    tasks_path: Path = TASKS_PATH,
+    state_path: Path = STATE_PATH,
+    *,
+    now: float | None = None,
+    worktrees_dir: Path | None = None,
+    agents_dir: Path | None = None,
+) -> dict:
     pending = _pending_by_priority(tasks_path)
     blocked = _auth_blocked(state_path)
     incident = _open_incident_signal(tasks_path)
@@ -268,7 +321,11 @@ def budget(tasks_path: Path = TASKS_PATH, state_path: Path = STATE_PATH) -> dict
     else:
         cap, reason = BASE_CAP, f"baseline（P1 backlog={p1}）"
 
-    occ = occupancy()
+    occ = occupancy(
+        now=now,
+        worktrees_dir=worktrees_dir,
+        agents_dir=agents_dir,
+    )
     return {
         "cap": cap,
         "reason": reason,

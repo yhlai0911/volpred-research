@@ -125,7 +125,7 @@ def open_incidents(tasks_path: str | Path) -> list[dict]:
     path = Path(tasks_path)
     try:
         raw = path.read_text(encoding="utf-8").strip()
-    except OSError as exc:
+    except (OSError, UnicodeError) as exc:
         warn("foreign_incident", f"讀不到任務池 {path} ({exc}) — 當作沒有未關 incident")
         return []
     try:

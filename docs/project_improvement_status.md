@@ -2928,3 +2928,18 @@ Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OP
   suites **25 passed**，Ruff、py_compile、schedule parse、diff check均通過。
 - ⏳ 待 production schema v3 migration、自然 due batch receipt 與 24 小時頻率觀察；
   因此目前為 **`contained`**，Issue #13 保持 OPEN，尚未宣稱整體通知政策完成。
+
+## 2026-07-30 — T37 handoff slot observer ownership bounded closure（Issue #44）
+
+- ✅ 定位 `13/4` 為 observer 誤報：handoff 自行數所有 worktree directories，
+  繞過 canonical progress TTL 與 dynamic cap。
+- ✅ handoff 現直接投影 `dispatch_slot_budget` 的 cap 2／4／6、live occupancy、
+  agent metadata snapshot 與 stale count；stale artifact 可見但不占 slot。
+- ✅ agent receipt invalid JSON schema／status type／UTF-8 只會 warning＋skip；
+  metadata 不再二次讀檔，移除 TOCTOU。
+- ✅ affected suites **85 passed**；Ruff E9/F/I、py_compile、diff check與 Matt
+  Standards／Spec review PASS。
+- ✅ live build 由 `13/4` 修正為 `3/4`，另列 11 個 stale artifacts 不占 slot。
+
+此 observer root class 為 **`root_cause_fixed_and_verified`**；Issue #44 umbrella
+仍須 Producer Isolation／PHASE-Z recognizer retirement acceptance，維持 OPEN。
