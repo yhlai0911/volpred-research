@@ -4794,3 +4794,34 @@ production reconcile 不關閉任何 WIP，五張 incident 仍為 pending，但�
 回到 baseline 4、`open_incident=null`、free 2。此 bounded lifecycle root class
 五步 Gate 已完成，狀態為 **`root_cause_fixed_and_verified`**；Issue #44 的完整
 Producer Isolation／recognizer retirement acceptance 仍維持 OPEN／`contained`。
+
+---
+
+## 2026-07-30 — GitHub 留言逐則 Email＋Telegram 鏡像造成雙通道通知暴增
+
+**證據化症狀**：`github_comment_notifications` 每五分鐘輪詢一次，舊 v2 contract
+對每則 Issue／PR 留言各送一封 Email 與一則 Telegram；production 觀察到同一 Issue
+在 85 分鐘內形成 4 Email＋4 Telegram。這些訊息是同一來源的重複鏡像，不是需要即時
+打斷 owner 的 incident。
+
+**根因層級（notification routing／durable state contract）**：ingress cadence、
+owner visibility 與 escalation channel 被綁成同一件事。comment id 雖有 durable
+receipt，但缺少 thread-level aggregation window；Telegram 也沒有單一責任邊界。
+直接降低 poll 頻率會延遲 ingestion，單純關 Telegram 則會讓 v2 partial-delivery
+狀態在 schema migration 時有漏信或重送風險。
+
+**底層修復與制度化**：state schema v3 將每則完整 comment 先持久化到 Issue／PR
+專屬 batch，再前進 source cursor；每個 batch 使用固定 15 分鐘 window，新留言不延長
+舊 window，逾期才被觀察的留言另開下一窗。incremental owner visibility 改為一封
+Email 摘要，Telegram 僅由互動／progress pipeline 使用。Email 仍使用
+`in_flight → delivery_unknown` fail-closed receipt，`pending`／`failed` 可重試；
+v2 delivered／partial／indeterminate 狀態均有顯式 migration，避免部署時重播或遺失。
+canonical `runtime_schedules.json` 同步記錄 cadence 與 channel ownership。
+
+**回歸驗證**：固定窗邊界、同 thread 合併、跨 thread 分離、Email retry、crash
+unknown、cursor repair、v2 delivered／pending／failed／in-flight／unknown migration、
+CLI exit semantics 與 scheduler contract 共 **25 passed**；Ruff、py_compile、
+JSON schedule parse 與 diff check通過。此 root class 在 production schema v3
+read-back 與自然 due batch acknowledgement 完成前維持 **`contained`**，不得提前稱
+`root_cause_fixed_and_verified`；24 小時頻率／資訊性 sustained audit 亦為上位
+notification policy 的獨立驗收條件。

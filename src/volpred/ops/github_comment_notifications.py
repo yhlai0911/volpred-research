@@ -1,9 +1,10 @@
-"""Durable GitHub comment ingress with per-channel delivery receipts.
+"""Durable GitHub comment ingress with per-issue delivery receipts.
 
 GitHub is the source of truth for issue and pull-request comments.  Mailbox
 labels, Trash state, and browser sessions are deliberately outside this
-contract: a comment is considered owner-visible only after both the canonical
-email route and the manager Telegram route have durable receipts here.
+contract. Incremental comments are durably buffered by Issue/PR for fifteen
+minutes, then delivered as one email digest. Telegram remains owned by the
+interactive/progress pipeline instead of mirroring every GitHub comment.
 """
 
 from __future__ import annotations
@@ -20,11 +21,13 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
+LEGACY_SCHEMA_VERSION = 2
 DEFAULT_LOOKBACK_DAYS = 7
 DEFAULT_REPO = "yhlai0911/volpred-research"
 COMMENT_SOURCES = ("issue_comment", "pull_review_comment")
 TELEGRAM_MAX_MESSAGE_CHARS = 4096
+COMMENT_BATCH_WINDOW = timedelta(minutes=15)
 DEFAULT_STATE_PATH = (
     Path.home()
     / ".volpred"
@@ -173,11 +176,13 @@ def reconcile_github_comments(
     now: datetime | None = None,
     lookback_days: int = DEFAULT_LOOKBACK_DAYS,
 ) -> dict[str, Any]:
-    """Deliver pending GitHub comments without crossing a failed comment.
+    """Durably ingest GitHub comments and reconcile their owner notification.
 
     The first successful run emits one bounded backfill digest.  Later runs
-    process comments oldest-first and advance the cursor only after both
-    channel receipts are durable.
+    stage each complete comment into a per-thread batch before advancing its
+    source cursor. A batch is owner-visible only after its email receipt is
+    durable; an indeterminate external attempt remains blocked rather than
+    being replayed.
     """
     observed_at = _aware(now or datetime.now(UTC))
     if lookback_days < 1:
@@ -187,7 +192,9 @@ def reconcile_github_comments(
     lock_path = state_path.with_suffix(f"{state_path.suffix}.lock")
     with lock_path.open("a+", encoding="utf-8") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
-        state = _load_state(state_path)
+        state, migrated = _load_state(state_path)
+        if migrated:
+            _save_state(state_path, state)
         if state.get("backfill_completed_at") is None:
             return _reconcile_backfill(
                 state=state,
@@ -203,12 +210,13 @@ def reconcile_github_comments(
             fetch_comments(_cursor_since(state)),
             cursors=state.get("cursors"),
         )
-        if not comments:
+        if not comments and not state.get("pending_batches"):
             return {
                 "schema_version": SCHEMA_VERSION,
                 "mode": "incremental",
                 "comment_count": 0,
                 "delivery_status": "idle",
+                "pending_batch_count": 0,
                 "cursor": _latest_cursor(state),
                 "cursors": state.get("cursors"),
                 "receipt_count": _receipt_count(state),
@@ -376,78 +384,197 @@ def _reconcile_incremental(
     deliver_email: DeliverNotification,
     deliver_telegram: DeliverNotification,
 ) -> dict[str, Any]:
-    deliveries = state.setdefault("deliveries", {})
-    examined = 0
-    latest_channels: dict[str, Any] = {}
-    for comment in comments:
-        examined += 1
-        delivery = deliveries.get(comment.delivery_key)
-        if not isinstance(delivery, dict):
-            notification = _comment_notification(comment)
-            delivery = {
-                "comment": asdict(comment),
-                "notification": asdict(notification),
-                "email": {"status": "pending"},
-                "telegram": {"status": "pending"},
-            }
-            deliveries[comment.delivery_key] = delivery
-            _save_state(state_path, state)
-        else:
-            notification = Notification(**delivery["notification"])
+    """Stage comments durably, then deliver due per-issue email batches.
 
+    ``deliver_telegram`` remains in the public signature for the one-time
+    backfill path and caller compatibility. Incremental batches deliberately do
+    not call it: Telegram's single owner is the interactive/progress pipeline.
+    """
+    del deliver_telegram
+    deliveries = state.setdefault("deliveries", {})
+    batches = state.setdefault("pending_batches", {})
+    if not isinstance(batches, dict):
+        raise TypeError("pending_batches must be an object")
+
+    staged = 0
+    for comment in comments:
+        delivery = deliveries.get(comment.delivery_key)
+        if isinstance(delivery, dict):
+            # A crash after the durable stage but before cursor persistence is
+            # harmless: replay sees the comment identity here and only repairs
+            # the cursor. It never appends the comment twice.
+            _advance_source_cursor(state, comment)
+            continue
+        batch = _open_subject_batch(batches, comment, now=now)
+        if batch is None:
+            batch_id = (
+                f"{comment.subject_kind}:{comment.number}:"
+                f"{comment.delivery_key}"
+            )
+            batch = {
+                "batch_id": batch_id,
+                "subject_kind": comment.subject_kind,
+                "number": comment.number,
+                "opened_at": now.isoformat(),
+                "due_at": (now + COMMENT_BATCH_WINDOW).isoformat(),
+                "comments": [],
+                "email": {"status": "pending"},
+            }
+            batches[batch_id] = batch
+        batch["comments"].append(asdict(comment))
+        deliveries[comment.delivery_key] = {
+            "comment": asdict(comment),
+            "status": "buffered",
+            "batch_id": batch["batch_id"],
+        }
+        _advance_source_cursor(state, comment)
+        staged += 1
+    if comments:
+        _save_state(state_path, state)
+
+    delivered_batches = 0
+    blocked_batch: str | None = None
+    latest_channels: dict[str, Any] = {}
+    for batch_id, batch in sorted(
+        batches.items(),
+        key=lambda item: (str(item[1].get("due_at") or ""), item[0]),
+    ):
+        due_at = _aware(datetime.fromisoformat(str(batch.get("due_at") or "")))
+        if due_at > now:
+            continue
+        notification_data = batch.get("notification")
+        if isinstance(notification_data, dict):
+            notification = Notification(**notification_data)
+        else:
+            notification = _batch_notification(batch)
+            batch["notification"] = asdict(notification)
+            _save_state(state_path, state)
         _attempt_channel(
             state=state,
             state_path=state_path,
-            delivery=delivery,
+            delivery=batch,
             channel="email",
             notification=notification,
             sender=deliver_email,
             now=now,
         )
-        _attempt_channel(
-            state=state,
-            state_path=state_path,
-            delivery=delivery,
-            channel="telegram",
-            notification=notification,
-            sender=deliver_telegram,
-            now=now,
-        )
-        latest_channels = {
-            channel: dict(delivery[channel])
-            for channel in ("email", "telegram")
-        }
-        if not _channels_delivered(delivery):
-            delivery_status = _delivery_status(delivery)
-            return {
-                "schema_version": SCHEMA_VERSION,
-                "mode": "incremental",
-                "comment_count": examined,
-                "delivery_status": delivery_status,
-                **(
-                    {"blocked_reason": "delivery_unknown"}
-                    if delivery_status == "blocked"
-                    else {}
-                ),
-                "blocked_comment": comment.delivery_key,
-                "cursor": _latest_cursor(state),
-                "cursors": state.get("cursors"),
-                "receipt_count": _receipt_count(state),
-                "channels": latest_channels,
-            }
-        _advance_source_cursor(state, comment)
+        latest_channels = {"email": dict(batch["email"])}
+        email_status = batch["email"].get("status")
+        if email_status == "delivery_unknown":
+            blocked_batch = batch_id
+            continue
+        if email_status != "delivered":
+            continue
+
+        receipt_key = f"{notification.idempotency_key}:email"
+        state.setdefault("receipts", {})[receipt_key] = dict(batch["email"])
+        for item in batch.get("comments", []):
+            comment = GitHubComment(**item)
+            delivery = deliveries[comment.delivery_key]
+            delivery.update(
+                status="delivered",
+                delivered_via=notification.idempotency_key,
+                receipt_keys={"email": receipt_key},
+            )
+        del batches[batch_id]
+        delivered_batches += 1
         _save_state(state_path, state)
+
+    pending_count = len(batches)
+    if blocked_batch is not None:
+        delivery_status = "blocked"
+    elif any(
+        isinstance(batch, dict)
+        and isinstance(batch.get("email"), dict)
+        and batch["email"].get("status") == "failed"
+        for batch in batches.values()
+    ):
+        delivery_status = "pending"
+    elif pending_count:
+        delivery_status = "buffered"
+    elif delivered_batches:
+        delivery_status = "delivered"
+    else:
+        delivery_status = "idle"
 
     return {
         "schema_version": SCHEMA_VERSION,
         "mode": "incremental",
-        "comment_count": examined,
-        "delivery_status": "delivered",
+        "comment_count": staged,
+        "delivery_status": delivery_status,
+        "pending_batch_count": pending_count,
+        "delivered_batch_count": delivered_batches,
+        **(
+            {
+                "blocked_reason": "delivery_unknown",
+                "blocked_batch": blocked_batch,
+            }
+            if blocked_batch is not None
+            else {}
+        ),
         "cursor": _latest_cursor(state),
         "cursors": state.get("cursors"),
         "receipt_count": _receipt_count(state),
         "channels": latest_channels,
     }
+
+
+def _open_subject_batch(
+    batches: dict[str, Any],
+    comment: GitHubComment,
+    *,
+    now: datetime,
+) -> dict[str, Any] | None:
+    """Return the unfrozen batch for one Issue/PR, if one exists."""
+    for batch in batches.values():
+        if not isinstance(batch, dict) or isinstance(batch.get("notification"), dict):
+            continue
+        due_at = _aware(datetime.fromisoformat(str(batch.get("due_at") or "")))
+        if due_at <= now:
+            continue
+        if (
+            batch.get("subject_kind") == comment.subject_kind
+            and batch.get("number") == comment.number
+        ):
+            return batch
+    return None
+
+
+def _batch_notification(batch: dict[str, Any]) -> Notification:
+    comments = [
+        GitHubComment(**item)
+        for item in batch.get("comments", [])
+        if isinstance(item, dict)
+    ]
+    if not comments:
+        raise ValueError("GitHub comment batch cannot be empty")
+    comments = _sort_comments(comments)
+    subject = "PR" if batch.get("subject_kind") == "pull_request" else "Issue"
+    number = int(batch["number"])
+    lines = [
+        "同一討論串 15 分鐘內的留言已合併；GitHub 是完整內容的 canonical source。",
+        "",
+    ]
+    for comment in comments:
+        lines.extend(
+            [
+                f"- `{comment.delivery_key}`｜{comment.created_at}｜{comment.author}",
+                f"  - {_summary(comment.body)}",
+                f"  - {comment.url}",
+            ]
+        )
+    first = comments[0]
+    return Notification(
+        idempotency_key=(
+            f"github-comments:batch:{first.subject_kind}:{number}:"
+            f"{first.delivery_key}"
+        ),
+        title=(
+            f"[新架構派發][GitHub #{number}] {subject} 留言摘要"
+            f"（{len(comments)} 則）"
+        ),
+        body="\n".join(lines),
+    )
 
 
 def _channels_delivered(delivery: dict[str, Any]) -> bool:
@@ -778,20 +905,114 @@ def _telegram_payload(notification: Notification) -> str:
     return text
 
 
-def _load_state(path: Path) -> dict[str, Any]:
+def _migrate_v2_state(payload: dict[str, Any]) -> dict[str, Any]:
+    """Upgrade v2 per-comment channel state without losing partial delivery.
+
+    Email is the v3 owner-visibility channel. A delivered v2 email becomes a
+    terminal historical receipt (Telegram history is preserved when present).
+    Pending/failed email work becomes a due batch; in-flight/unknown remains
+    indeterminate in that batch so replay cannot duplicate an external send.
+    """
+    deliveries = payload.get("deliveries")
+    receipts = payload.get("receipts")
+    if not isinstance(deliveries, dict) or not isinstance(receipts, dict):
+        raise TypeError("GitHub comment notification v2 state is malformed")
+    batches: dict[str, Any] = {}
+    for delivery_key, delivery in list(deliveries.items()):
+        if not isinstance(delivery, dict):
+            raise TypeError("GitHub comment notification v2 delivery is malformed")
+        # Backfill rows already carry one aggregate durable receipt.
+        if delivery.get("status") == "delivered" and delivery.get("delivered_via"):
+            continue
+        comment_data = delivery.get("comment")
+        if not isinstance(comment_data, dict):
+            raise TypeError("GitHub comment notification v2 comment is malformed")
+        comment = GitHubComment(**comment_data)
+        if comment.delivery_key != delivery_key:
+            raise ValueError("GitHub comment notification v2 identity mismatch")
+        email = delivery.get("email")
+        if not isinstance(email, dict):
+            raise TypeError("GitHub comment notification v2 email state is malformed")
+        email_status = email.get("status")
+        notification_data = delivery.get("notification")
+        if isinstance(notification_data, dict):
+            notification = Notification(**notification_data)
+        else:
+            notification = _comment_notification(comment)
+
+        if email_status == "delivered":
+            receipt_keys: dict[str, str] = {}
+            for channel in ("email", "telegram"):
+                channel_state = delivery.get(channel)
+                if (
+                    isinstance(channel_state, dict)
+                    and channel_state.get("status") == "delivered"
+                ):
+                    receipt_key = f"{notification.idempotency_key}:{channel}"
+                    receipts.setdefault(receipt_key, dict(channel_state))
+                    receipt_keys[channel] = receipt_key
+            delivery.update(
+                status="delivered",
+                delivered_via=notification.idempotency_key,
+                receipt_keys=receipt_keys,
+            )
+            _advance_source_cursor(payload, comment)
+            continue
+        if email_status not in {
+            "pending", "failed", "in_flight", "delivery_unknown",
+        }:
+            raise ValueError(
+                "GitHub comment notification v2 email status is invalid"
+            )
+        batch_id = (
+            f"{comment.subject_kind}:{comment.number}:{comment.delivery_key}"
+        )
+        batches[batch_id] = {
+            "batch_id": batch_id,
+            "subject_kind": comment.subject_kind,
+            "number": comment.number,
+            "opened_at": comment.created_at,
+            # It has already waited in v2. Make it immediately eligible while
+            # preserving its exact old delivery disposition below.
+            "due_at": comment.created_at,
+            "comments": [asdict(comment)],
+            "email": dict(email),
+        }
+        deliveries[delivery_key] = {
+            "comment": asdict(comment),
+            "status": "buffered",
+            "batch_id": batch_id,
+            "migrated_from_schema": LEGACY_SCHEMA_VERSION,
+        }
+        _advance_source_cursor(payload, comment)
+    payload["schema_version"] = SCHEMA_VERSION
+    payload["pending_batches"] = batches
+    return payload
+
+
+def _load_state(path: Path) -> tuple[dict[str, Any], bool]:
     if not path.exists():
         return {
             "schema_version": SCHEMA_VERSION,
             "backfill_completed_at": None,
             "cursors": {},
             "pending_backfill": None,
+            "pending_batches": {},
             "deliveries": {},
             "receipts": {},
-        }
+        }, False
     payload = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
+    if not isinstance(payload, dict):
+        raise TypeError("GitHub comment notification state schema is invalid")
+    version = payload.get("schema_version")
+    if version == LEGACY_SCHEMA_VERSION:
+        return _migrate_v2_state(payload), True
+    if version != SCHEMA_VERSION:
         raise ValueError("GitHub comment notification state schema is invalid")
-    return payload
+    if not isinstance(payload.get("pending_batches", {}), dict):
+        raise TypeError("GitHub comment notification pending_batches is invalid")
+    payload.setdefault("pending_batches", {})
+    return payload, False
 
 
 def _save_state(path: Path, state: dict[str, Any]) -> None:

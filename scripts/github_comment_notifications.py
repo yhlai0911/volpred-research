@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reconcile GitHub comments into durable Email/Telegram notifications."""
+"""Reconcile GitHub comments into durable per-issue email batches."""
 
 from __future__ import annotations
 
@@ -24,8 +24,8 @@ from volpred.ops.github_comment_notifications import (
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "Deliver GitHub comment notifications through the Operations Core "
-            "Email and Telegram routes."
+            "Buffer GitHub comments by Issue/PR and deliver Operations Core "
+            "email batches."
         )
     )
     parser.add_argument("--repo", default=DEFAULT_REPO)
@@ -44,7 +44,9 @@ def main(argv: list[str] | None = None) -> int:
         lookback_days=args.lookback_days,
     )
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
-    return 0 if result.get("delivery_status") in {"delivered", "idle"} else 1
+    return 0 if result.get("delivery_status") in {
+        "delivered", "buffered", "idle",
+    } else 1
 
 
 if __name__ == "__main__":

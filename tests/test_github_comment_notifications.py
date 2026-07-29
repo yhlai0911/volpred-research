@@ -3,11 +3,13 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
+from scripts import github_comment_notifications as cli
 from volpred.ops.github_comment_notifications import (
     TELEGRAM_MAX_MESSAGE_CHARS,
     GitHubComment,
@@ -37,6 +39,9 @@ def _comment(
         url=f"https://github.com/yhlai0911/volpred-research/issues/{number}"
         f"#issuecomment-{comment_id}",
         body=f"comment {comment_id}\nsecond line",
+        subject_kind=(
+            "pull_request" if kind == "pull_review_comment" else "issue"
+        ),
     )
 
 
@@ -95,7 +100,7 @@ def test_initial_reconcile_delivers_one_digest_then_replay_is_quiet(
     }
 
 
-def test_incremental_partial_delivery_retries_only_missing_channel(
+def test_incremental_email_batch_retries_without_telegram_mirror(
     tmp_path: Path,
 ) -> None:
     state_path = tmp_path / "state.json"
@@ -113,43 +118,371 @@ def test_incremental_partial_delivery_retries_only_missing_channel(
     def deliver_email(_notification: Notification) -> dict[str, object]:
         nonlocal email_calls
         email_calls += 1
+        if email_calls == 1:
+            return {"sent": False, "reason": "temporary email failure"}
         return {"sent": True, "receipt_id": "email-12"}
 
     def deliver_telegram(_notification: Notification) -> dict[str, object]:
         nonlocal telegram_calls
         telegram_calls += 1
-        if telegram_calls == 1:
-            return {"sent": False, "reason": "temporary Telegram failure"}
         return {"sent": True, "message_ids": [7012]}
 
-    first = reconcile_github_comments(
+    buffered = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
         deliver_email=deliver_email,
         deliver_telegram=deliver_telegram,
         state_path=state_path,
         now=datetime(2026, 7, 29, 4, 2, tzinfo=UTC),
     )
-    second = reconcile_github_comments(
+    first_attempt = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
         deliver_email=deliver_email,
         deliver_telegram=deliver_telegram,
         state_path=state_path,
-        now=datetime(2026, 7, 29, 4, 3, tzinfo=UTC),
+        now=datetime(2026, 7, 29, 4, 17, tzinfo=UTC),
     )
-    third = reconcile_github_comments(
+    second_attempt = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
         deliver_email=deliver_email,
         deliver_telegram=deliver_telegram,
         state_path=state_path,
-        now=datetime(2026, 7, 29, 4, 4, tzinfo=UTC),
+        now=datetime(2026, 7, 29, 4, 18, tzinfo=UTC),
     )
 
-    assert first["delivery_status"] == "pending"
-    assert second["delivery_status"] == "delivered"
-    assert second["cursor"]["comment_id"] == 12
-    assert third["comment_count"] == 0
-    assert email_calls == 1
-    assert telegram_calls == 2
+    assert buffered["delivery_status"] == "buffered"
+    assert buffered["cursor"]["comment_id"] == 12
+    assert first_attempt["delivery_status"] == "pending"
+    assert second_attempt["delivery_status"] == "delivered"
+    assert second_attempt["pending_batch_count"] == 0
+    assert email_calls == 2
+    assert telegram_calls == 0
+
+
+def test_incremental_comments_batch_per_issue_for_fifteen_minutes_email_only(
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "state.json"
+    email: list[Notification] = []
+    telegram: list[Notification] = []
+    reconcile_github_comments(
+        fetch_comments=lambda _since: [],
+        deliver_email=lambda _notification: {"sent": True},
+        deliver_telegram=lambda _notification: {"sent": True},
+        state_path=state_path,
+        now=NOW,
+    )
+    first_comment = _comment(
+        60,
+        created_at="2026-07-29T04:01:00+00:00",
+    )
+    second_comment = _comment(
+        61,
+        created_at="2026-07-29T04:06:00+00:00",
+    )
+
+    buffered = reconcile_github_comments(
+        fetch_comments=lambda _since: [first_comment],
+        deliver_email=lambda notification: (
+            email.append(notification) or {"sent": True, "receipt_id": "email-batch"}
+        ),
+        deliver_telegram=lambda notification: (
+            telegram.append(notification) or {"sent": True, "message_ids": [7060]}
+        ),
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 2, tzinfo=UTC),
+    )
+    coalesced = reconcile_github_comments(
+        fetch_comments=lambda _since: [first_comment, second_comment],
+        deliver_email=lambda notification: (
+            email.append(notification) or {"sent": True, "receipt_id": "email-batch"}
+        ),
+        deliver_telegram=lambda notification: (
+            telegram.append(notification) or {"sent": True, "message_ids": [7060]}
+        ),
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 7, tzinfo=UTC),
+    )
+    delivered = reconcile_github_comments(
+        fetch_comments=lambda _since: [first_comment, second_comment],
+        deliver_email=lambda notification: (
+            email.append(notification) or {"sent": True, "receipt_id": "email-batch"}
+        ),
+        deliver_telegram=lambda notification: (
+            telegram.append(notification) or {"sent": True, "message_ids": [7060]}
+        ),
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 17, tzinfo=UTC),
+    )
+
+    assert buffered["delivery_status"] == "buffered"
+    assert buffered["pending_batch_count"] == 1
+    assert buffered["cursors"]["issue_comment"]["comment_id"] == 60
+    assert coalesced["delivery_status"] == "buffered"
+    assert coalesced["pending_batch_count"] == 1
+    assert coalesced["cursors"]["issue_comment"]["comment_id"] == 61
+    assert delivered["delivery_status"] == "delivered"
+    assert delivered["pending_batch_count"] == 0
+    assert len(email) == 1
+    assert telegram == []
+    assert email[0].title == "[新架構派發][GitHub #42] Issue 留言摘要（2 則）"
+    assert "issue_comment:60" in email[0].body
+    assert "issue_comment:61" in email[0].body
+
+
+def test_comment_observed_after_due_time_starts_the_next_fixed_window(
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "state.json"
+    email: list[Notification] = []
+    reconcile_github_comments(
+        fetch_comments=lambda _since: [],
+        deliver_email=lambda _notification: {"sent": True},
+        deliver_telegram=lambda _notification: {"sent": True},
+        state_path=state_path,
+        now=NOW,
+    )
+    first = _comment(70, created_at="2026-07-29T04:01:00+00:00")
+    after_due = _comment(71, created_at="2026-07-29T04:19:00+00:00")
+    sender = lambda notification: (
+        email.append(notification)
+        or {"sent": True, "receipt_id": f"email-{len(email)}"}
+    )
+
+    reconcile_github_comments(
+        fetch_comments=lambda _since: [first],
+        deliver_email=sender,
+        deliver_telegram=lambda _notification: {"sent": True},
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 2, tzinfo=UTC),
+    )
+    split = reconcile_github_comments(
+        fetch_comments=lambda _since: [first, after_due],
+        deliver_email=sender,
+        deliver_telegram=lambda _notification: {"sent": True},
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 20, tzinfo=UTC),
+    )
+    final = reconcile_github_comments(
+        fetch_comments=lambda _since: [first, after_due],
+        deliver_email=sender,
+        deliver_telegram=lambda _notification: {"sent": True},
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 35, tzinfo=UTC),
+    )
+
+    assert split["delivered_batch_count"] == 1
+    assert split["pending_batch_count"] == 1
+    assert split["delivery_status"] == "buffered"
+    assert len(email) == 2
+    assert "issue_comment:70" in email[0].body
+    assert "issue_comment:71" not in email[0].body
+    assert "issue_comment:71" in email[1].body
+    assert "issue_comment:70" not in email[1].body
+    assert final["delivery_status"] == "delivered"
+    assert final["pending_batch_count"] == 0
+
+
+def test_schema_v2_state_migrates_in_place_without_replaying_deliveries(
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "state.json"
+    comment = _comment(
+        10,
+        created_at="2026-07-29T04:01:00+00:00",
+    )
+    legacy_notification = Notification(
+        idempotency_key="github-comment:issue_comment:10",
+        title="legacy",
+        body="legacy",
+    )
+    state_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "backfill_completed_at": NOW.isoformat(),
+                "cursors": {
+                    source: {
+                        "created_at": NOW.isoformat(),
+                        "source": source,
+                        "comment_id": 0,
+                    }
+                    for source in ("issue_comment", "pull_review_comment")
+                },
+                "pending_backfill": None,
+                "deliveries": {
+                    "issue_comment:10": {
+                        "comment": asdict(comment),
+                        "notification": asdict(legacy_notification),
+                        "email": {
+                            "status": "delivered",
+                            "receipt": {"sent": True, "receipt_id": "email-10"},
+                        },
+                        "telegram": {
+                            "status": "delivered",
+                            "receipt": {"sent": True, "message_ids": [10]},
+                        },
+                    }
+                },
+                "receipts": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    sent: list[Notification] = []
+
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: [comment],
+        deliver_email=lambda notification: (
+            sent.append(notification) or {"sent": True}
+        ),
+        deliver_telegram=lambda notification: (
+            sent.append(notification) or {"sent": True}
+        ),
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 2, tzinfo=UTC),
+    )
+
+    migrated = json.loads(state_path.read_text(encoding="utf-8"))
+    assert result["delivery_status"] == "idle"
+    assert migrated["schema_version"] == 3
+    assert migrated["pending_batches"] == {}
+    assert migrated["deliveries"]["issue_comment:10"]["status"] == "delivered"
+    assert migrated["cursors"]["issue_comment"]["comment_id"] == 10
+    assert set(migrated["deliveries"]["issue_comment:10"]["receipt_keys"]) == {
+        "email",
+        "telegram",
+    }
+    assert sent == []
+
+
+@pytest.mark.parametrize("legacy_status", ["pending", "failed"])
+def test_schema_v2_retryable_email_migrates_to_due_batch(
+    tmp_path: Path,
+    legacy_status: str,
+) -> None:
+    state_path = tmp_path / "state.json"
+    comment = _comment(20, created_at="2026-07-29T04:01:00+00:00")
+    legacy_notification = Notification(
+        idempotency_key="github-comment:issue_comment:20",
+        title="legacy",
+        body="legacy",
+    )
+    state_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "backfill_completed_at": NOW.isoformat(),
+                "cursors": {
+                    source: {
+                        "created_at": NOW.isoformat(),
+                        "source": source,
+                        "comment_id": 0,
+                    }
+                    for source in ("issue_comment", "pull_review_comment")
+                },
+                "pending_backfill": None,
+                "deliveries": {
+                    comment.delivery_key: {
+                        "comment": asdict(comment),
+                        "notification": asdict(legacy_notification),
+                        "email": {"status": legacy_status},
+                        "telegram": {"status": "pending"},
+                    }
+                },
+                "receipts": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    email: list[Notification] = []
+    telegram: list[Notification] = []
+
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: [comment],
+        deliver_email=lambda notification: (
+            email.append(notification)
+            or {"sent": True, "receipt_id": "migrated-email-20"}
+        ),
+        deliver_telegram=lambda notification: (
+            telegram.append(notification) or {"sent": True}
+        ),
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 2, tzinfo=UTC),
+    )
+
+    migrated = json.loads(state_path.read_text(encoding="utf-8"))
+    assert result["delivery_status"] == "delivered"
+    assert result["pending_batch_count"] == 0
+    assert migrated["schema_version"] == 3
+    assert migrated["cursors"]["issue_comment"]["comment_id"] == 20
+    assert migrated["deliveries"][comment.delivery_key]["status"] == "delivered"
+    assert len(email) == 1
+    assert email[0].title == "[新架構派發][GitHub #42] Issue 留言摘要（1 則）"
+    assert telegram == []
+
+
+@pytest.mark.parametrize("legacy_status", ["in_flight", "delivery_unknown"])
+def test_schema_v2_indeterminate_email_migrates_without_replaying(
+    tmp_path: Path,
+    legacy_status: str,
+) -> None:
+    state_path = tmp_path / "state.json"
+    comment = _comment(21, created_at="2026-07-29T04:01:00+00:00")
+    legacy_notification = Notification(
+        idempotency_key="github-comment:issue_comment:21",
+        title="legacy",
+        body="legacy",
+    )
+    state_path.write_text(
+        json.dumps(
+            {
+                "schema_version": 2,
+                "backfill_completed_at": NOW.isoformat(),
+                "cursors": {
+                    source: {
+                        "created_at": NOW.isoformat(),
+                        "source": source,
+                        "comment_id": 0,
+                    }
+                    for source in ("issue_comment", "pull_review_comment")
+                },
+                "pending_backfill": None,
+                "deliveries": {
+                    comment.delivery_key: {
+                        "comment": asdict(comment),
+                        "notification": asdict(legacy_notification),
+                        "email": {"status": legacy_status},
+                        "telegram": {"status": "pending"},
+                    }
+                },
+                "receipts": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+    sent: list[Notification] = []
+
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: [comment],
+        deliver_email=lambda notification: (
+            sent.append(notification) or {"sent": True}
+        ),
+        deliver_telegram=lambda notification: (
+            sent.append(notification) or {"sent": True}
+        ),
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 2, tzinfo=UTC),
+    )
+
+    migrated = json.loads(state_path.read_text(encoding="utf-8"))
+    batch = next(iter(migrated["pending_batches"].values()))
+    assert result["delivery_status"] == "blocked"
+    assert result["blocked_reason"] == "delivery_unknown"
+    assert migrated["schema_version"] == 3
+    assert migrated["cursors"]["issue_comment"]["comment_id"] == 21
+    assert migrated["deliveries"][comment.delivery_key]["status"] == "buffered"
+    assert batch["email"]["status"] == "delivery_unknown"
+    assert sent == []
 
 
 def test_fetcher_combines_paginated_issue_and_pr_review_comments() -> None:
@@ -204,6 +537,18 @@ def test_direct_cli_entrypoint_is_runnable_outside_repo(tmp_path: Path) -> None:
     assert "GitHub comment" in completed.stdout
 
 
+def test_cli_treats_durably_buffered_comments_as_success(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        cli,
+        "run_github_comment_notifications",
+        lambda **_kwargs: {"delivery_status": "buffered"},
+    )
+
+    assert cli.main([]) == 0
+
+
 def test_operations_core_schedule_owns_github_comment_notifications() -> None:
     root = Path(__file__).resolve().parents[1]
     config = json.loads(
@@ -228,7 +573,7 @@ def test_operations_core_schedule_owns_github_comment_notifications() -> None:
     assert 'cron_emit_exit "github_comment_notifications"' in wrapper
 
 
-def test_indeterminate_telegram_attempt_blocks_without_duplicate_replay(
+def test_indeterminate_batch_email_blocks_without_duplicate_replay(
     tmp_path: Path,
 ) -> None:
     state_path = tmp_path / "state.json"
@@ -240,34 +585,41 @@ def test_indeterminate_telegram_attempt_blocks_without_duplicate_replay(
         now=NOW,
     )
     comment = _comment(30, created_at="2026-07-29T04:10:00+00:00")
-    telegram_calls = 0
+    email_calls = 0
 
     def interrupted(_notification: Notification) -> dict[str, object]:
-        nonlocal telegram_calls
-        telegram_calls += 1
+        nonlocal email_calls
+        email_calls += 1
         raise KeyboardInterrupt
 
+    reconcile_github_comments(
+        fetch_comments=lambda _since: [comment],
+        deliver_email=interrupted,
+        deliver_telegram=lambda _notification: {"sent": True},
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 11, tzinfo=UTC),
+    )
     with pytest.raises(KeyboardInterrupt):
         reconcile_github_comments(
             fetch_comments=lambda _since: [comment],
-            deliver_email=lambda _notification: {"sent": True},
-            deliver_telegram=interrupted,
+            deliver_email=interrupted,
+            deliver_telegram=lambda _notification: {"sent": True},
             state_path=state_path,
-            now=datetime(2026, 7, 29, 4, 11, tzinfo=UTC),
+            now=datetime(2026, 7, 29, 4, 26, tzinfo=UTC),
         )
 
     replay = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
-        deliver_email=lambda _notification: {"sent": True},
-        deliver_telegram=interrupted,
+        deliver_email=interrupted,
+        deliver_telegram=lambda _notification: {"sent": True},
         state_path=state_path,
-        now=datetime(2026, 7, 29, 4, 12, tzinfo=UTC),
+        now=datetime(2026, 7, 29, 4, 27, tzinfo=UTC),
     )
 
     assert replay["delivery_status"] == "blocked"
     assert replay["blocked_reason"] == "delivery_unknown"
-    assert replay["channels"]["telegram"]["status"] == "delivery_unknown"
-    assert telegram_calls == 1
+    assert replay["channels"]["email"]["status"] == "delivery_unknown"
+    assert email_calls == 1
 
 
 def test_same_second_comment_from_other_source_is_not_skipped(
@@ -319,22 +671,22 @@ def test_same_second_comment_from_other_source_is_not_skipped(
         deliver_email=sender,
         deliver_telegram=sender,
         state_path=state_path,
-        now=datetime(2026, 7, 29, 4, 4, tzinfo=UTC),
+        now=datetime(2026, 7, 29, 4, 20, tzinfo=UTC),
     )
 
-    assert first["delivery_status"] == "delivered"
-    assert second["delivery_status"] == "delivered"
+    assert first["delivery_status"] == "buffered"
+    assert second["delivery_status"] == "buffered"
     assert second["cursors"]["issue_comment"]["comment_id"] == 200
-    assert third["comment_count"] == 0
+    assert second["cursors"]["pull_review_comment"]["comment_id"] == 300
+    assert third["delivery_status"] == "delivered"
+    assert third["pending_batch_count"] == 0
     assert delivered == [
-        "github-comment:pull_review_comment:300",
-        "github-comment:pull_review_comment:300",
-        "github-comment:issue_comment:200",
-        "github-comment:issue_comment:200",
+        "github-comments:batch:pull_request:9:pull_review_comment:300",
+        "github-comments:batch:issue:52:issue_comment:200",
     ]
 
 
-def test_partial_telegram_chunk_does_not_advance_cursor(
+def test_partial_email_receipt_retries_without_duplicate_batch(
     tmp_path: Path,
 ) -> None:
     state_path = tmp_path / "state.json"
@@ -352,41 +704,49 @@ def test_partial_telegram_chunk_does_not_advance_cursor(
     def email_sender(_notification: Notification) -> dict[str, object]:
         nonlocal email_calls
         email_calls += 1
+        if email_calls == 1:
+            return {
+                "sent": True,
+                "reason": "provider accepted but receipt was incomplete",
+                "receipt_id": "email-40-partial",
+            }
         return {"sent": True, "receipt_id": "email-40"}
 
     def telegram_sender(_notification: Notification) -> dict[str, object]:
         nonlocal telegram_calls
         telegram_calls += 1
-        if telegram_calls == 1:
-            return {
-                "sent": True,
-                "reason": "second chunk failed",
-                "message_ids": [7040],
-            }
-        return {"sent": True, "message_ids": [7041, 7042]}
+        return {"sent": True, "message_ids": [7040]}
 
-    first = reconcile_github_comments(
+    buffered = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
         deliver_email=email_sender,
         deliver_telegram=telegram_sender,
         state_path=state_path,
         now=datetime(2026, 7, 29, 4, 11, tzinfo=UTC),
     )
+    first = reconcile_github_comments(
+        fetch_comments=lambda _since: [comment],
+        deliver_email=email_sender,
+        deliver_telegram=telegram_sender,
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 26, tzinfo=UTC),
+    )
     second = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
         deliver_email=email_sender,
         deliver_telegram=telegram_sender,
         state_path=state_path,
-        now=datetime(2026, 7, 29, 4, 12, tzinfo=UTC),
+        now=datetime(2026, 7, 29, 4, 27, tzinfo=UTC),
     )
 
+    assert buffered["delivery_status"] == "buffered"
+    assert buffered["cursors"]["issue_comment"]["comment_id"] == 40
     assert first["delivery_status"] == "pending"
-    assert first["channels"]["telegram"]["status"] == "failed"
-    assert first["cursors"]["issue_comment"]["comment_id"] == 0
+    assert first["channels"]["email"]["status"] == "failed"
     assert second["delivery_status"] == "delivered"
     assert second["cursors"]["issue_comment"]["comment_id"] == 40
-    assert email_calls == 1
-    assert telegram_calls == 2
+    assert email_calls == 2
+    assert telegram_calls == 0
 
 
 def test_large_backfill_is_bounded_to_one_telegram_message(
@@ -461,13 +821,22 @@ def test_mailbox_trash_state_cannot_suppress_github_ingress(
     mailbox_state.write_text('{"github_notifications":"trashed"}', encoding="utf-8")
     comment = _comment(50, created_at="2026-07-29T04:20:00+00:00")
 
-    result = reconcile_github_comments(
+    buffered = reconcile_github_comments(
         fetch_comments=lambda _since: [comment],
         deliver_email=lambda _notification: {"sent": True, "receipt_id": "email-50"},
         deliver_telegram=lambda _notification: {"sent": True, "message_ids": [7050]},
         state_path=state_path,
         now=datetime(2026, 7, 29, 4, 21, tzinfo=UTC),
     )
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: [comment],
+        deliver_email=lambda _notification: {"sent": True, "receipt_id": "email-50"},
+        deliver_telegram=lambda _notification: {"sent": True, "message_ids": [7050]},
+        state_path=state_path,
+        now=datetime(2026, 7, 29, 4, 36, tzinfo=UTC),
+    )
 
+    assert buffered["delivery_status"] == "buffered"
+    assert buffered["cursors"]["issue_comment"]["comment_id"] == 50
     assert result["delivery_status"] == "delivered"
     assert result["cursors"]["issue_comment"]["comment_id"] == 50

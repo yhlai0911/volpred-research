@@ -357,14 +357,14 @@
       },
       {
         "id": "github_comment_notifications",
-        "label": "GitHub issue/PR comments → owner Email + Telegram receipts",
+        "label": "GitHub issue/PR comments → 15-minute per-thread email batches",
         "cron": "*/5 * * * *",
         "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_github_comment_notifications.sh",
         "log_path": "storage/logs/cron/github_comment_notifications.log",
         "host_crontab_managed": false,
         "piggy_back_skip": true,
         "piggy_back_skip_reason": "Operations Core owns the five-minute ingress; no host cron or hourly piggy-back duplicate caller.",
-        "description": "每 5 分鐘由 Operations Core 讀 GitHub issue conversation + PR review comments，以 GitHub comment id 作 durable identity，逐 comment 留 Email/Telegram channel receipt；partial failure 只重試缺失通道，cursor 不越過未完成 comment。首次啟用將近 7 日留言合併成一封摘要，避免歷史通知爆量。狀態位於 ~/.volpred/run，不污染 Git working tree。",
+        "description": "每 5 分鐘由 Operations Core 讀 GitHub issue conversation + PR review comments，以 GitHub comment id 作 durable identity；同一 Issue/PR 固定 15 分鐘窗合併成一封 Email，窗口不因新留言延長，Telegram 保留給互動／progress owner。comment 完整寫入 durable batch 後才前進 cursor；外送以 in-flight／unknown receipt 防重複，失敗只重試該 Email batch。首次啟用仍將近 7 日留言合併成一封摘要。狀態位於 ~/.volpred/run，不污染 Git working tree。",
         "matchers": [
           "scripts/github_comment_notifications.py",
           "cron_github_comment_notifications.sh",

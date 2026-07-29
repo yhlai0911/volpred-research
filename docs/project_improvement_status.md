@@ -2912,3 +2912,19 @@ Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy 
 
 此 bounded slice 為 **`root_cause_fixed_and_verified`**；Issue #44 umbrella 的完整
 Producer Isolation／PHASE-Z recognizer retirement仍未全部驗收，維持 OPEN／`contained`。
+
+## 2026-07-30 — T13 GitHub 留言通知 batching bounded slice（Issue #13）
+
+- ✅ production audit 定位逐 comment 雙通道 burst：同一 Issue 85 分鐘內
+  4 Email＋4 Telegram；ingress 每五分鐘本身不是問題，缺少聚合與 channel ownership
+  才是根因。
+- ✅ schema v3 先 durable stage 完整 comment、再推進 per-source cursor；每個 Issue／PR
+  使用固定 15 分鐘窗，新留言不延長既有窗，逾期留言進下一窗。
+- ✅ incremental 改為 Email-only 摘要；Telegram 保留給互動／progress owner。Email
+  外送保持 in-flight／unknown 防重送與 failed retry。
+- ✅ v2 delivered、pending、failed、in-flight、delivery_unknown 均有 migration；
+  exact comment identity、receipt 與 cursor 不遺失。
+- ✅ canonical `runtime_schedules.json` 已同步 channel／cadence contract；affected
+  suites **25 passed**，Ruff、py_compile、schedule parse、diff check均通過。
+- ⏳ 待 production schema v3 migration、自然 due batch receipt 與 24 小時頻率觀察；
+  因此目前為 **`contained`**，Issue #13 保持 OPEN，尚未宣稱整體通知政策完成。
