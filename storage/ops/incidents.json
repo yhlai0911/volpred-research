@@ -474,13 +474,19 @@
      "first_seen_at": "2026-07-29T14:40:41.637233+00:00",
      "key": "30460382691:1",
      "last_seen_at": "2026-07-29T14:40:41.637233+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T15:00:25.526311+00:00",
+     "key": "30462072539:1",
+     "last_seen_at": "2026-07-29T15:00:25.526311+00:00"
     }
    ],
    "kind": "ci_red",
-   "last_breach_detail": "2026-07-29T14:37:46.6697768Z E AssertionError: assert 'skip' == 'dry_run_fire'",
-   "last_seen_at": "2026-07-29T14:40:41.637233+00:00",
+   "last_breach_detail": "2026-07-29T14:57:58.0749949Z E AssertionError: assert 'skip' == 'dry_run_fire'",
+   "last_seen_at": "2026-07-29T15:00:25.526311+00:00",
    "notified_at": null,
-   "occurrence_count": 10,
+   "occurrence_count": 11,
    "resolution": null,
    "resolutions": [],
    "state": "open",
@@ -1597,13 +1603,27 @@
      "first_seen_at": "2026-07-29T08:53:18.944581+00:00",
      "key": "dispatch-slot-1-d3c39bb1",
      "last_seen_at": "2026-07-29T13:58:39.956577+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "877e4a699bf778b701bbe46bce5dff895c999aa4",
+      "branch": "worktree-dispatch-slot-1-ef1e108b",
+      "checkpoint_commit": "ee8005da78d79fcaaf3c36ffd806f2a88a63c019",
+      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
+      "reason": "worker_kill_failed_orphan_drained",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ef1e108b"
+     },
+     "first_seen_at": "2026-07-29T14:57:09.054864+00:00",
+     "key": "dispatch-slot-1-ef1e108b",
+     "last_seen_at": "2026-07-29T14:57:09.054864+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-1-d3c39bb1 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-29T13:58:39.956577+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-ef1e108b unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-29T14:57:09.054864+00:00",
    "notified_at": null,
-   "occurrence_count": 5109,
+   "occurrence_count": 5110,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -2433,6 +2453,6 @@
    }
   }
  },
- "updated_at": "2026-07-29T14:55:21.703725+00:00",
+ "updated_at": "2026-07-29T15:18:05.094881+00:00",
  "version": 1
 }

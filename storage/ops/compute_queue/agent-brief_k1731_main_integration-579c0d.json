@@ -39,7 +39,7 @@
     "task_type": "experiment",
     "priority": 3
   },
-  "followup_dispatched": false,
+  "followup_dispatched": true,
   "source_task_id": "k1731_f1_bootstrap_merge_deadlock",
   "source_task_link": {
     "state": "linked",
@@ -59,13 +59,15 @@
   },
   "claimed_by_pid_start_wall": "Wed Jul 29 19:30:43 2026",
   "source_task_settlement": {
-    "state": "pending_collection",
     "task_id": "k1731_f1_bootstrap_merge_deadlock",
-    "settled_at": "2026-07-29T11:59:34Z",
-    "error": null
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-07-29T15:07:26Z"
   },
   "experiment_gate": {
     "status": "passed",
     "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731"
-  }
+  },
+  "followup_dispatched_at": "2026-07-29T15:07:26Z",
+  "followup_next_task_id": "k1730_k1731_review_certification_codex_20260729"
 }
