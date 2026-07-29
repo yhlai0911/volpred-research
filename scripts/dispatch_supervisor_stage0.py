@@ -19,15 +19,19 @@ import subprocess
 import sys
 import tempfile
 import time
+import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 ROOT_ENV = "VOLPRED_DEFERRED_RELOAD_ROOT"
 POINTER_NAME = "current_release.json"
 BOOTSTRAPS_DIR_NAME = "bootstraps"
+RELEASES_DIR_NAME = "releases"
 BOOT_ATTEMPTS_DIR_NAME = "boot_attempts"
 ROLLBACK_RECEIPTS_DIR_NAME = "rollback_receipts"
+TERMINATION_MEMBER = "src/volpred/ops/termination.py"
 
 
 def _run_root() -> Path:
@@ -199,14 +203,100 @@ def _read_pointer(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _terminate_child(child: subprocess.Popen[bytes]) -> None:
+def _load_stable_termination_owner(
+    *,
+    run_root: Path,
+    candidate_pointer: dict[str, Any],
+) -> ModuleType:
+    """Load the termination owner from the verified last-known-good release."""
+    stable = candidate_pointer.get("previous_release")
+    if not isinstance(stable, dict):
+        raise TypeError("candidate has no stable termination owner")
+    release_sha = stable.get("release_sha256")
+    release_commit = stable.get("release_commit")
+    if not _is_sha256(release_sha) or not isinstance(release_commit, str):
+        raise RuntimeError("stable termination owner identity is invalid")
+    archive = Path(str(stable.get("release_archive") or ""))
+    expected_parent = (run_root / RELEASES_DIR_NAME).resolve()
+    if archive.parent.resolve() != expected_parent:
+        raise RuntimeError("stable termination owner escaped the release root")
+    if archive.name != f"{release_sha}.zip":
+        raise RuntimeError("stable termination owner is not content-addressed")
+    _private_regular(archive)
+    if _sha256(archive) != release_sha:
+        raise RuntimeError("stable termination owner release digest mismatch")
+
+    try:
+        with zipfile.ZipFile(archive) as release:
+            names = release.namelist()
+            if len(names) != len(set(names)):
+                raise RuntimeError("stable release has duplicate members")
+            manifest = json.loads(release.read("VOLPRED_RELEASE.json"))
+            if (
+                not isinstance(manifest, dict)
+                or manifest.get("schema_version") != 1
+                or manifest.get("release_commit") != release_commit
+                or manifest.get("entries") != sorted(
+                    name for name in names if name != "VOLPRED_RELEASE.json"
+                )
+                or TERMINATION_MEMBER not in names
+            ):
+                raise RuntimeError("stable termination owner manifest is invalid")
+            source = release.read(TERMINATION_MEMBER)
+    except (OSError, KeyError, zipfile.BadZipFile) as exc:
+        raise RuntimeError(
+            f"stable termination owner is unavailable: {exc}"
+        ) from exc
+
+    module_name = f"_volpred_stage0_termination_{release_sha}"
+    existing = sys.modules.get(module_name)
+    if isinstance(existing, ModuleType):
+        return existing
+    owner = ModuleType(module_name)
+    owner.__file__ = f"{archive}!/{TERMINATION_MEMBER}"
+    sys.modules[module_name] = owner
+    try:
+        exec(  # noqa: S102 - source belongs to a digest-verified stable release
+            compile(source, owner.__file__, "exec"),
+            owner.__dict__,
+        )
+    except BaseException:
+        sys.modules.pop(module_name, None)
+        raise
+    if not callable(getattr(owner, "arm", None)) or not callable(
+        getattr(owner, "send_pid", None)
+    ):
+        sys.modules.pop(module_name, None)
+        raise TypeError("stable release has no termination owner interface")
+    return owner
+
+
+def _terminate_child(
+    child: subprocess.Popen[bytes],
+    *,
+    run_root: Path,
+    candidate_pointer: dict[str, Any],
+) -> None:
     if child.poll() is not None:
         return
-    child.terminate()
+    owner = _load_stable_termination_owner(
+        run_root=run_root,
+        candidate_pointer=candidate_pointer,
+    )
+    ledger = run_root / "termination_intents.jsonl"
+    intent = owner.arm(
+        target_kind="pid",
+        target_id=child.pid,
+        reason="candidate_startup_timeout",
+        actor="dispatch-supervisor-stage0",
+        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+        ledger_path=ledger,
+    )
+    owner.send_pid(intent, signal.SIGTERM, ledger_path=ledger)
     try:
         child.wait(timeout=5)
     except subprocess.TimeoutExpired:
-        child.kill()
+        owner.send_pid(intent, signal.SIGKILL, ledger_path=ledger)
         child.wait(timeout=5)
 
 
@@ -242,7 +332,11 @@ def _supervise_candidate(
             ):
                 return child.wait(), None
             time.sleep(0.1)
-        _terminate_child(child)
+        _terminate_child(
+            child,
+            run_root=run_root,
+            candidate_pointer=pointer,
+        )
         attempts_path = (
             run_root
             / BOOT_ATTEMPTS_DIR_NAME

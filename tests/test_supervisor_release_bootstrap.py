@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import signal
 import subprocess
 import sys
 import zipfile
@@ -100,6 +101,9 @@ def _release(tmp_path: Path) -> tuple[Path, Path, dict[str, str]]:
         "scripts/task_pool_claim.py": "PINNED_TASK_POOL_VALUE = 73\n",
         "src/volpred/__init__.py": "",
         "src/volpred/ops/__init__.py": "RELEASE_VALUE = 42\n",
+        "src/volpred/ops/termination.py": (
+            ROOT / "src" / "volpred" / "ops" / "termination.py"
+        ).read_text(encoding="utf-8"),
     }
     commit = "b" * 40
     with zipfile.ZipFile(provisional, "w") as archive:
@@ -364,7 +368,8 @@ def test_stage0_times_out_hung_candidate_and_boots_last_known_good(
         "scripts/__init__.py": "",
         "scripts/dispatch_supervisor/__init__.py": "",
         "scripts/dispatch_supervisor/supervisor.py": (
-            "import time\n"
+            "import signal, time\n"
+            "signal.signal(signal.SIGTERM, signal.SIG_IGN)\n"
             "time.sleep(30)\n"
         ),
     }
@@ -420,7 +425,7 @@ def test_stage0_times_out_hung_candidate_and_boots_last_known_good(
         cwd=tmp_path / "canonical",
         capture_output=True,
         text=True,
-        timeout=5,
+        timeout=10,
         check=False,
         env={
             **os.environ,
@@ -443,6 +448,46 @@ def test_stage0_times_out_hung_candidate_and_boots_last_known_good(
     )
     assert receipt["state"] == "rolled_back_failed_boot"
     assert receipt["reason"] == "startup_timeout"
+    termination_events = [
+        json.loads(line)
+        for line in (
+            run_root / "termination_intents.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert [event["event"] for event in termination_events] == [
+        "intent_armed",
+        "signal_attempted",
+        "signal_result",
+        "signal_attempted",
+        "signal_result",
+    ]
+    assert termination_events[0]["reason"] == "candidate_startup_timeout"
+    assert termination_events[0]["actor"] == "dispatch-supervisor-stage0"
+    assert termination_events[0]["signal_sequence"] == [
+        signal.SIGTERM,
+        signal.SIGKILL,
+    ]
+    assert termination_events[1]["signum"] == signal.SIGTERM
+    assert termination_events[2]["status"] in {"sent", "gone"}
+    assert termination_events[3]["signum"] == signal.SIGKILL
+    assert termination_events[4]["status"] in {"sent", "gone"}
+    exact_generation = {
+        key: termination_events[0][key]
+        for key in (
+            "intent_id",
+            "target_kind",
+            "target_id",
+            "target_identity",
+        )
+    }
+    assert exact_generation["target_kind"] == "pid"
+    assert all(
+        {
+            key: event[key]
+            for key in exact_generation
+        } == exact_generation
+        for event in termination_events[1:]
+    )
     assert output.exists()
 
 
