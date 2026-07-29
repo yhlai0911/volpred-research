@@ -1,0 +1,61 @@
+{
+  "id": "agent-brief_k1694_r7-60eaae",
+  "title": "K1694 round-7: certify the full claim surface (science already PASSed)",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1694_r7-60eaae.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694/experiments/K1694/review_verdict.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1694_r7-60eaae.json",
+    "--timeout",
+    "3480"
+  ],
+  "env": {},
+  "status": "running",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T17:00:38Z",
+  "started_at": "2026-07-29T17:08:58Z",
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1694_r7-60eaae.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1694_r7-60eaae.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694/experiments/K1694/review_verdict.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1694_r7-60eaae.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-e98b43fc-k1694",
+  "claude_followup": {
+    "brief": "Verify round-7 certification: (1) review_verdict.json round==7 and reviewed_sha256 covers all 8 claim-surface paths with hashes matching disk; (2) reviewed_at is a real UTC offset, not Taipei-time-with-Z; (3) round5_defects_resolved / requirements_verified / accepted_limitations carried forward from round 6, not dropped; (4) run scripts/merge_worktree.sh dispatch-slot-1-e98b43fc-k1694 — certification must pass. If PASS: merge, then confirm knowledge item e32f1aa8 still matches the merged results.json (it was written 2026-07-30 from the same bytes; no rewrite needed unless numbers moved). If FAIL: keep the worktree, record the defects, do NOT hand-edit the verdict.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "k1694_cert_round7_20260730",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T17:00:38Z",
+    "linked_at": "2026-07-29T17:00:39Z",
+    "error": null
+  },
+  "timeout_seconds": 3600,
+  "brief_source": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/brief_k1694_r7.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1694_r7-60eaae.md",
+  "claimed_by_pid": 33466,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:e3fa48c3fbf1b3295cf34ca6",
+    "scheduled_for": "2026-07-29T15:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Jul 29 23:45:32 2026"
+}

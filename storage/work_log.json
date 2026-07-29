@@ -31242,5 +31242,25 @@
     ],
     "verification": "check_arc_dedup --k-id k1448 --audience general exit0；feed.json K1448 零命中；anti_ai_gate.py exit0（主線程獨立複跑）；存活兩格係數 +0.20896/+0.20199、p=1.913e-06/1.909e-06 直接自 k1448_results.json 讀出核對；n_obs_joint_prices=4133 相符。",
     "notes": "CONDITIONAL_PASS：10 個主檢定 Bonferroni(alpha=0.005) 下僅 2 格存活，且兩格高度重疊（SPY-IEF 與 SPY-TLT corr 幾乎同一件事）。agent 主動揭露 BH 校正下會變 5 格存活，文中保留此揭露以免選擇性報告。lazypack plan 只綁 results.json 可驗數字。"
+  },
+  {
+    "timestamp": "2026-07-30T01:01:38+08:00",
+    "task_type": "experiment",
+    "task_id": "assign_3cf55dd4",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-6187150abebc46e6be0f6e7ba69a5fdc",
+    "owner": "hourly-slot-1-6187150abebc46e6be0f6e7ba69a5fdc",
+    "commit": null,
+    "summary": "PHASE A 收件 K1694 round-6（compute job agent-brief_k1694_r6-6431c0, exit 0）。Codex 判 PASS、0 blocking defect，但收件不採信摘要，主線程逐項回驗：\n\n- **sha256**：8 個 reviewed 檔中 7 個與 `reviewed_sha256` byte-identical；README 不符是因為 commit `1a4f43d90`（記錄 PASS 那一筆）在 reviewer 於 `2724b3587` 取雜湊之後改了狀態行 —— 差異 12 行純屬記帳，非竄改。\n- **pytest**：round-6 reviewer 因唯讀沙箱缺 linearmodels 跑不了測試（自己在 `reviewer_could_not_verify` 揭露）。主線程補跑 `pytest experiments/K1694/test_K1694.py -q` → **50 passed**，主線整合後再跑一次仍 50 passed。\n- **round-5 defect 2 真的修掉**：`expected_month_endpoints()` 在 `test_K1694.py` 只出現在被斷言的一側（L397，對照 `calendar_fixtures.json`）；端點接受測試（L402）灌入的是 fixture 端點，不是模組自己的輸出。\n- **primary source**：`calendar_sources.md` 全部 URL 落在 cmegroup / ice / ir.theice / cftc.gov 或這些網域的 archive 快照，無二手整理。\n- **樣本量化**：估計樣本 3276 → 3275、lagged frame 2749 → 2748；2012-10 因 exchange_calendar_days=23 / max_days_observed=21 被規則擋下。結論 NULL 未動，spec2 連續型交互項 coef 2.8846e-04 / t_DK 2.54 顯著為正（與排擠方向相反）。\n\n**產出**：knowledge item `e32f1aa8`（主線程程式化寫入，K1259；所有數字由 `K1694_results.json` 讀出，無一從 README 或 agent 摘要轉抄）。\n\n**合併兩道關卡**：\n1. `STALE-BASE ABORT` — worktree base 落後 main 73 commits 且雙方都動 `experiments/K1694/`。原因是 main `685c291cc` 已把當時未審的 K1694 產物回滾（#46），只留 do-not-cite 的腳本與原始資料。round-6 現在正是那次回滾在等的「已審版本」，故明確把 main 併入 branch（`019b4e4f0`），8 個衝突路徑一律取 branch 側，並在 commit message 交代理由 —— 不用 `-X ours` 靜默裁決。併後 `K1694.py` / `K1694_results.json` 雜湊仍與裁決一致。\n2. `review-certification ABORT` — **未解，且這個擋是對的**：`reviewed_sha256` 只釘住 8 個 claim-surface 檔中的 3 個，README / 兩張圖 / `lag_sensitivity.py` / `gate_history` 副本都沒釘。裁決檔嚴禁手改補雜湊（K1709 教訓），故開 round-7 認證覆審：task `k1694_cert_round7_20260730` + job `agent-brief_k1694_r7-60eaae`（opus/xhigh, attempt=0）。\n\n**分類注意**：round 6 沒有失敗，這不是 3-strike、也不是 effort escalation；`escalation_attempts` 維持 1。缺的是裁決覆蓋率，不是科學結論。另發現一個結構性缺陷：**記錄 PASS 這個動作本身會改 README，從而讓裁決自己的 README 雜湊失效** —— 已寫進 round-7 task description 供制度面處理。\n\nworktree `dispatch-slot-1-e98b43fc-k1694` 保留未合併，等 round-7 裁決。"
+  },
+  {
+    "timestamp": "2026-07-30T01:12:35+08:00",
+    "task_type": "daily_article",
+    "task_id": "K1609_article_general",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-6187150abebc46e6be0f6e7ba69a5fdc",
+    "owner": "hourly-slot-1-6187150abebc46e6be0f6e7ba69a5fdc",
+    "commit": null,
+    "summary": "K1609 general-audience 草稿完成：`storage/drafts/K1609_general_draft.md`（未發佈，交 release cron）。\n\n**選題脈絡**：本班 PHASE B 的可選面極窄 —— platform_ops（81 筆 pending）全被 `supervisor_preassignment_required` 機械擋下；starvation lockout 點名的 22 筆 K17xx experiment 因 `free_slots=0`（slot cap 由 `dispatch_slot_budget.py` de-rate 到 2，理由是 PHASE-Z 卡住檔案 incident `assign_b48f6bac` 未關）無法開新 worktree；唯一的 paper_body 明確 blocked on 外部資料（CBOE put-call / Google Trends / intraday VIX）。故取 K1609_article_general。\n\n**查重（兩層都做）**：`check_arc_dedup.py --k-id K1609 --audience general` → exit 0 / verdict clean / k_coverage []；另依 2026-07-11 教訓，主線程不外包給單一 gate，自行 grep `feed.json` 與 `storage/drafts/` 確認無 K1609 覆蓋。\n\n**派工**：model_router(daily_article) → opus / medium / subagent，故走 Agent tool 同步跑（非 queue —— medium effort 不需要 CLI effort 升級）。brief 含 3 canonical paths、evidence-package 先於 prose、禁碰 feed.json / knowledge.json。\n\n**主線程獨立驗證（不採信 agent 摘要）**：\n- 重跑 `anti_ai_gate.py` → **exit 0**（PASS，warn=1/3，僅 3.2 段落長度且該 3 段是表格/frontmatter/footer）。\n- 逐格核對六個 primary cell 與 `K1609_results.json`：黃金 log_fwd5 +0.016545/t 1.4025/p 0.1608、白銀 +0.014690/1.1013/0.2708、黃金 downside +0.000385/0.3579/0.7204、白銀 +0.007399/1.4177/0.1563（year-bootstrap p_sign 0.0956）、黃金 real-yield −0.015693/−2.0524/0.0401（HAC CI −0.03068~−0.000706，bootstrap CI 跨 0）、白銀 −0.012231/−1.63/0.102 —— 草稿四捨五入後全數相符。\n- 樣本 2,061 / 1,038 / 1,023、n=1,021 / 1,004、2006-01-06~2026-05-29、seed 42、strong_cells=[]、兩次 CME 抓取 8.069s / 8.067s 皆 0 bytes：全部相符。\n- 衍生算式自行重算：門檻 |t|>=3 → 黃金 real-yield 需 3×se=0.022941（草稿寫 −0.0229 ✓），差 1.4619 倍（寫 1.46 ✓）；最弱一格黃金 downside 只有門檻的 11.9%（寫 12% ✓）。\n- 圖表開圖目視：`k1609_general_gate_forest.png` 中文字形正常無豆腐字，六格 t 值與 JSON 一致，門檻 ±3 參考線正確。\n\n**agent 主動揭露、我已覆核**：三個 ffill 污染數字（每金屬 8 個非交易起算日、14/1038 五日窗、56/1038 廿一日窗）不在 `K1609_results.json` 內，來源是 knowledge item `190a42a0` 記錄的 Codex 覆核；agent 標明出處而非假裝來自 results，處置正確。\n\n**產出**：草稿 + `storage/assets/k1609_general_{gate_forest,two_rulers}.png` + 可重跑的 `scripts/gen_k1609_general_charts.py`（讀 results.json，非硬編數字）。尚未產 lazypack plan —— 由 `publish_draft.py` 於發佈時 async enqueue，不屬本任務範圍。"
   }
 ]
