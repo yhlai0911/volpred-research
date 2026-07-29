@@ -28,11 +28,13 @@ from .content import (
 )
 from .alerts import (
     ALERT_RECIPIENT,
+    AlertDeliveryClass,
     build_alert_condition_report,
     check_alert_conditions,
     resolve_internal_remediable_alert,
     route_internal_remediable_alert,
     send_alert,
+    send_routed_alert,
 )
 from .health import health_snapshot
 from .experiments import (
@@ -140,6 +142,7 @@ from .summaries import (
 
 __all__ = [
     "ALERT_RECIPIENT",
+    "AlertDeliveryClass",
     "activate_strategy",
     "admin_override_claim",
     "adopt_experiment_files",
@@ -152,6 +155,7 @@ __all__ = [
     "check_alert_conditions",
     "resolve_internal_remediable_alert",
     "route_internal_remediable_alert",
+    "send_routed_alert",
     "archive_question",
     "claim_question_for_research",
     "find_duplicate_question",

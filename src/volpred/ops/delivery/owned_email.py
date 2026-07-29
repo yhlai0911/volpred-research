@@ -58,6 +58,10 @@ class NotificationOwnershipLost(RuntimeError):
     """The caller no longer owns the notification family generation."""
 
 
+class OwnedEmailCommandConflict(RuntimeError):
+    """The same idempotency key was reused for a different immutable command."""
+
+
 @dataclass(frozen=True)
 class NotificationOwner:
     schema_version: str
@@ -525,7 +529,7 @@ def dispatch_email_by_current_owner(
     store = SupabaseOwnedEmailStore.from_environment()
     existing = store.read_request(normalized.idempotency_key)
     if existing is not None and existing.command != normalized:
-        raise RuntimeError(
+        raise OwnedEmailCommandConflict(
             "owned email idempotency key conflicts with durable command"
         )
     owner = store.read_owner()
@@ -655,7 +659,7 @@ def dispatch_email_by_current_owner(
             fenced_existing is not None
             and fenced_existing.command != normalized
         ):
-            raise RuntimeError(
+            raise OwnedEmailCommandConflict(
                 "owned email idempotency key conflicts with durable command"
             )
         fenced_owner = store.read_owner()

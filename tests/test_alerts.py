@@ -6,9 +6,12 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from click.testing import CliRunner
 
 import volpred.ops.alerts as alerts_module
+from volpred.cli import cli
 from volpred.ops.alerts import (
+    AlertDeliveryClass,
     _format_telegram_alert_text,
     _parse_content_quality_state,
     _parse_draft_pool_state,
@@ -19,10 +22,12 @@ from volpred.ops.alerts import (
     build_alert_condition_report,
     check_alert_conditions,
     send_alert,
+    send_routed_alert,
 )
 from volpred.ops.boss_facing import boss_facing_alert, plainify_boss_text
 from volpred.ops.authority import PrimaryLease
 from volpred.ops.delivery import AcknowledgedEffect, EffectView
+from volpred.ops.delivery.owned_email import OwnedEmailCommandConflict
 
 
 def _write_text(path: Path, content: str) -> None:
@@ -582,7 +587,7 @@ def test_dispatch_alert_email_routes_operations_core_owner_through_transaction(
     }
     assert result == {
         "notification_id": "effect-owned-email-test",
-        "subject": "[VolPred Alert][WARN] ownership smoke",
+        "subject": "[新架構派發][VolPred Alert][WARN] ownership smoke",
         "sent": True,
         "configured": True,
         "send_error": None,
@@ -972,7 +977,39 @@ def test_send_alert_records_incident_candidate_even_when_transport_fails(
     assert records[0]["occurrence"] == 1
 
 
-def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body(
+def test_send_alert_contains_owned_email_idempotency_conflict_as_delivery_failure(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+
+    def conflicting_dispatch(**kwargs):
+        raise OwnedEmailCommandConflict(
+            "owned email idempotency key conflicts with durable command"
+        )
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts._dispatch_alert_email",
+        conflicting_dispatch,
+    )
+
+    result = send_alert(
+        "warn",
+        "CI red detection",
+        "repair admitted",
+        storage_dir=str(storage_dir),
+    )
+
+    assert result["sent"] is False
+    assert result["send_error_code"] == "owned_email_command_conflict"
+    assert result["channels"] == {"email": "failed", "telegram": "not_routed"}
+    stream = storage_dir / "ops" / "incident_candidates.jsonl"
+    records = [json.loads(line) for line in stream.read_text().splitlines()]
+    assert records[-1]["event"] == "send_failed"
+    assert records[-1]["evidence"]["send_error_code"] == "owned_email_command_conflict"
+    assert records[-1]["evidence"]["effect_status"] == "command_conflict"
+
+
+def test_routed_alert_keeps_telegram_owned_by_progress_report(
     tmp_path: Path, monkeypatch
 ):
     storage_dir = tmp_path / "storage"
@@ -1018,33 +1055,225 @@ def test_send_alert_telegram_mirror_formats_markdown_without_mutating_email_body
     monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
     monkeypatch.setattr("volpred.ops.telegram.send_telegram", fake_send_telegram)
 
-    result = send_alert(
+    result = send_routed_alert(
         "info",
         "tg mirror format",
         body,
         recipient="yihao.lai@gmail.com",
         storage_dir=str(storage_dir),
         force_send=True,
+        delivery_class=AlertDeliveryClass.HUMAN_ACTION,
     )
 
     assert email_bodies == [body]
-    assert result["telegram"] == {"sent": True, "message_ids": [123]}
-    assert len(telegram_calls) == 1
-    tg_text = str(telegram_calls[0]["text"])
-    assert telegram_calls[0]["disable_notification"] is True
-    assert tg_text.startswith("ℹ️ [INFO] tg mirror format")
-    # INFO = 純資訊/完成通知 → 不套「營運風險/行動清單」危機 prefix（2026-07-08 incident）
-    assert "白話結論" not in tg_text
-    assert "系統偵測到需要處理的營運風險" not in tg_text
-    # 真正的 body 內容仍完整流過（白話化翻譯 + 表格保留）
-    assert "觸發條件" in tg_text
-    assert "📌 Hourly-22 發送警報 smoke" in tg_text
-    assert "🚦 觸發條件" in tg_text
-    assert "• queue mirror check" in tg_text
-    assert "• 項目: 結果" in tg_text
-    assert "• emoji: ok" in tg_text
-    assert "## " not in tg_text
-    assert "|---" not in tg_text
+    assert telegram_calls == []
+    assert result["telegram"] is None
+    assert result["channels"] == {"email": "delivered", "telegram": "not_routed"}
+
+
+def test_send_alert_routes_recovery_to_email_without_telegram(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    email_calls: list[str] = []
+    telegram_calls: list[str] = []
+
+    def fake_dispatch(
+        *,
+        level: str,
+        title: str,
+        body: str,
+        recipient: str,
+        storage_dir: str,
+        delivery_key: str,
+    ):
+        email_calls.append(title)
+        return {
+            "notification_id": "notif-recovery",
+            "subject": f"[VolPred Alert][{level.upper()}] {title}",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    def fake_send_telegram(text: str, *, storage_dir: str, disable_notification: bool):
+        telegram_calls.append(text)
+        return {"sent": True}
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+    monkeypatch.setattr("volpred.ops.telegram.send_telegram", fake_send_telegram)
+
+    result = send_routed_alert(
+        "info",
+        "CI 已修復並驗證",
+        "verified green",
+        storage_dir=str(storage_dir),
+        delivery_class=AlertDeliveryClass.RECOVERY,
+    )
+    duplicate = send_routed_alert(
+        "info",
+        "CI 已修復並驗證",
+        "verified green",
+        storage_dir=str(storage_dir),
+        delivery_class=AlertDeliveryClass.RECOVERY,
+    )
+
+    assert email_calls == ["CI 已修復並驗證"]
+    assert telegram_calls == []
+    assert result["delivery_class"] == "recovery"
+    assert result["channels"] == {"email": "delivered", "telegram": "not_routed"}
+    assert duplicate["delivery_class"] == "recovery"
+    assert duplicate["channels"] == {"email": "deduped", "telegram": "not_routed"}
+
+
+def test_send_alert_defaults_noncritical_alerts_to_email_record_only(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    telegram_calls: list[str] = []
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts._dispatch_alert_email",
+        lambda **kwargs: {
+            "notification_id": "notif-record",
+            "subject": "subject",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        },
+    )
+
+    def fake_send_telegram(text: str, *, storage_dir: str, disable_notification: bool):
+        telegram_calls.append(text)
+        return {"sent": True}
+
+    monkeypatch.setattr("volpred.ops.telegram.send_telegram", fake_send_telegram)
+
+    result = send_alert(
+        "warn",
+        "CI 紅燈已由自動修復接手",
+        "repair task admitted",
+        storage_dir=str(storage_dir),
+    )
+
+    assert telegram_calls == []
+    assert result["delivery_class"] == "record"
+    assert result["channels"] == {"email": "delivered", "telegram": "not_routed"}
+
+
+def test_send_alert_does_not_dedup_human_action_behind_prior_record(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    email_calls: list[str] = []
+    delivery_keys: list[str] = []
+
+    def fake_dispatch(**kwargs):
+        email_calls.append(str(kwargs["title"]))
+        delivery_keys.append(str(kwargs["delivery_key"]))
+        return {
+            "notification_id": f"notif-{len(email_calls)}",
+            "subject": "subject",
+            "sent": True,
+            "configured": True,
+            "send_error": None,
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts._dispatch_alert_email", fake_dispatch)
+    send_alert(
+        "warn",
+        "需要介入",
+        "repair is still running",
+        storage_dir=str(storage_dir),
+    )
+    escalated = send_routed_alert(
+        "warn",
+        "需要介入",
+        "automatic repair exhausted",
+        storage_dir=str(storage_dir),
+        delivery_class=AlertDeliveryClass.HUMAN_ACTION,
+    )
+
+    assert email_calls == ["需要介入", "需要介入"]
+    assert len(set(delivery_keys)) == 2
+    assert escalated["skipped"] is False
+    assert escalated["channels"] == {
+        "email": "delivered",
+        "telegram": "not_routed",
+    }
+
+
+def test_send_alert_records_self_healing_event_without_external_transport(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    email_calls: list[str] = []
+    telegram_calls: list[str] = []
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts._dispatch_alert_email",
+        lambda **kwargs: email_calls.append(str(kwargs["title"])),
+    )
+    monkeypatch.setattr(
+        "volpred.ops.telegram.send_telegram",
+        lambda text, **kwargs: telegram_calls.append(text),
+    )
+
+    result = send_routed_alert(
+        "warn",
+        "草稿池偏低，已自動補池",
+        "dispatcher refill is active",
+        storage_dir=str(storage_dir),
+        delivery_class=AlertDeliveryClass.SELF_HEALING,
+    )
+
+    assert email_calls == []
+    assert telegram_calls == []
+    assert result["sent"] is False
+    assert result["skipped"] is True
+    assert result["skip_reason"] == "delivery_policy_self_healing"
+    assert result["channels"] == {"email": "not_routed", "telegram": "not_routed"}
+
+    stream = storage_dir / "ops" / "incident_candidates.jsonl"
+    records = [json.loads(line) for line in stream.read_text().splitlines()]
+    assert records[-1]["event"] == "policy_suppressed"
+    assert records[-1]["title"] == "草稿池偏低，已自動補池"
+
+
+def test_send_alert_cli_routes_needs_reply_as_human_action(tmp_path: Path, monkeypatch):
+    observed: list[dict[str, object]] = []
+
+    def fake_send_alert(level: str, title: str, body: str, **kwargs):
+        observed.append(
+            {"level": level, "title": title, "body": body, **kwargs}
+        )
+        return {
+            "sent": True,
+            "skipped": False,
+            "notification_id": "notif-owner-action",
+        }
+
+    monkeypatch.setattr("volpred.ops.send_routed_alert", fake_send_alert)
+
+    result = CliRunner().invoke(
+        cli,
+        [
+            "ops",
+            "send-alert",
+            "--level",
+            "warn",
+            "--title",
+            "需要選擇",
+            "--body",
+            "請選 A 或 B",
+            "--needs-reply",
+            "--storage-dir",
+            str(tmp_path / "storage"),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert observed[0]["delivery_class"] == AlertDeliveryClass.HUMAN_ACTION
 
 
 def test_boss_facing_alert_plainifies_jargon_and_keeps_commands():
@@ -1494,20 +1723,37 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     paper_root = tmp_path / "paper"
     _write_text(paper_root / "demo" / "body.tex", "\\documentclass{article}")
 
-    sent_titles: list[str] = []
+    routed_titles: list[str] = []
 
-    def fake_send_alert(level: str, title: str, body: str, recipient: str = "", **kwargs):
-        sent_titles.append(title)
+    def fake_routed_alert(level: str, title: str, body: str, recipient: str = "", **kwargs):
+        routed_titles.append(title)
         return {
             "level": level,
             "title": title,
             "recipient": recipient,
-            "sent": True,
-            "skipped": False,
-            "notification_id": f"notif-{len(sent_titles)}",
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "delivery_policy_self_healing",
+            "notification_id": None,
         }
 
-    monkeypatch.setattr("volpred.ops.alerts.send_alert", fake_send_alert)
+    def fake_internal_route(**kwargs):
+        routed_titles.append(str(kwargs["title"]))
+        return {
+            "level": kwargs["level"],
+            "title": kwargs["title"],
+            "sent": False,
+            "skipped": True,
+            "skip_reason": "internal_auto_remediation",
+            "notification_id": None,
+            "remediation": {"disposition": "internal_task"},
+        }
+
+    monkeypatch.setattr("volpred.ops.alerts.send_routed_alert", fake_routed_alert)
+    monkeypatch.setattr(
+        "volpred.ops.alerts.route_internal_remediable_alert",
+        fake_internal_route,
+    )
 
     # STRUCTURAL ISOLATION (2026-07-18, ci-red-29622117580). Every stub above was
     # added *after* a CI red, one condition at a time: dispatch_binary_health,
@@ -1553,13 +1799,59 @@ def test_check_alert_conditions_sends_each_breached_condition_once(tmp_path: Pat
     breached_ids = [c["id"] for c in result["conditions"] if c.get("breached")]
     assert breached_ids == ["release_pool_gap", "draft_pool_low", "host_cron_fail"]
     assert result["breach_count"] == 3
-    assert result["sent_count"] == 3
-    # each breached condition sends exactly once (unique titles), in condition order
-    assert len(sent_titles) == 3 and len(set(sent_titles)) == 3
-    assert sent_titles[0].startswith("Release pool cron gap")
-    assert sent_titles[1] == "Draft pool below threshold (<4)"
-    assert sent_titles[2] == "Host cron failure detected"
+    assert result["sent_count"] == 0
+    assert result["skipped_count"] == 3
+    # Every breach enters exactly one repair route; none interrupts the owner.
+    assert len(routed_titles) == 3 and len(set(routed_titles)) == 3
+    assert routed_titles[0].startswith("Release pool cron gap")
+    assert routed_titles[1] == "Draft pool below threshold (<4)"
+    assert routed_titles[2] == "Host cron failure detected"
     assert duplicate_slot_calls == [str(storage_dir)]
+
+
+def test_check_alert_conditions_marks_registered_self_heal_as_noninterrupting(
+    tmp_path: Path, monkeypatch
+):
+    storage_dir = tmp_path / "storage"
+    _write_json(storage_dir / "next_tasks.json", [])
+    monkeypatch.setattr(
+        "volpred.ops.alerts.build_alert_condition_report",
+        lambda **kwargs: {
+            "generated_at": "2026-07-29T16:00:00+00:00",
+            "recipient": "yihao.lai@gmail.com",
+            "conditions": [
+                {
+                    "id": "draft_pool_low",
+                    "breached": True,
+                    "level": "warn",
+                    "title": "Draft pool below threshold (<4)",
+                    "body": "refill is already owned by dispatcher",
+                }
+            ],
+            "breach_count": 1,
+        },
+    )
+
+    monkeypatch.setattr(
+        "volpred.ops.alerts.send_routed_alert",
+        lambda *args, **kwargs: pytest.fail(
+            "a registered self-healing breach must not notify before escalation"
+        ),
+    )
+
+    result = check_alert_conditions(storage_dir=str(storage_dir))
+
+    assert result["sent_count"] == 0
+    assert result["skipped_count"] == 1
+    assert result["alerts"][0]["skip_reason"] == "internal_auto_remediation"
+    assert json.loads((storage_dir / "next_tasks.json").read_text()) == []
+    incidents = json.loads(
+        (storage_dir / "ops" / "incidents.json").read_text(encoding="utf-8")
+    )["incidents"]
+    row = next(iter(incidents.values()))
+    assert row["kind"] == "draft_pool_low"
+    assert row["task_mode"] == "none"
+    assert row["occurrence_count"] == 1
 
 
 def test_series_registry_stores_no_status_copy():
@@ -2228,7 +2520,7 @@ def test_held_push_backlog_records_incident_notifies_once_and_mints_no_task(
     deliveries: list[str] = []
     monkeypatch.setattr(
         alerts_module,
-        "send_alert",
+        "send_routed_alert",
         lambda level, title, body, **kwargs: deliveries.append(title)
         or {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"},
     )

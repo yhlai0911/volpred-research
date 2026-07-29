@@ -179,7 +179,7 @@ def test_internal_alert_router_failure_is_not_silently_suppressed(pool, monkeypa
         deliveries.append({"level": level, "title": title, "body": body, **kwargs})
         return {"sent": True, "skipped": False, "notification_id": "router-failure"}
 
-    monkeypatch.setattr(alerts, "send_alert", fake_send)
+    monkeypatch.setattr(alerts, "send_routed_alert", fake_send)
 
     result = alerts.route_internal_remediable_alert(
         alert_key="silent_fallback_new",
@@ -318,6 +318,51 @@ def test_internal_breach_records_incident_without_minting_tasks(pool) -> None:
     assert rows[0]["task_mode"] == incident.TASK_MODE_NONE
 
 
+def test_registered_self_heal_observes_then_escalates_without_duplicate_repair_task(
+    pool,
+) -> None:
+    """An existing actuator gets three observations, not a second repair loop."""
+
+    from volpred.ops import incident
+
+    condition = {
+        "id": "draft_pool_low",
+        "breached": True,
+        "level": "warn",
+        "title": "Draft pool below threshold",
+        "body": "dispatcher refill owner is active",
+    }
+    first = ar.remediate_internal_alert(
+        condition,
+        alert_key="draft_pool_low",
+        storage_dir=str(pool),
+        now=NOW,
+    )
+    second = ar.remediate_internal_alert(
+        condition,
+        alert_key="draft_pool_low",
+        storage_dir=str(pool),
+        now=NOW + timedelta(hours=1),
+    )
+    third = ar.remediate_internal_alert(
+        condition,
+        alert_key="draft_pool_low",
+        storage_dir=str(pool),
+        now=NOW + timedelta(hours=2),
+    )
+
+    assert first["reason"] == "incident_recorded"
+    assert second["reason"] == "incident_recorded"
+    assert third["escalate"] is True
+    assert third["reason"] == "incident_escalation_due"
+    assert _tasks(pool) == []
+    [row] = incident.list_incidents(_store(pool))
+    assert row["class"] == incident.CLASS_ORDINARY
+    assert row["task_mode"] == incident.TASK_MODE_NONE
+    assert row["occurrence_count"] == 3
+    assert row["state"] == incident.STATE_ESCALATED
+
+
 def test_internal_fingerprints_become_instances_not_new_incidents(pool) -> None:
     """plan §3.3 inversion: fingerprint 決定 incident；file:line 實例只進陣列。
 
@@ -382,7 +427,7 @@ def test_wrapper_sends_first_notification_then_stays_silent(pool, monkeypatch) -
         deliveries.append({"level": level, "title": title, "body": body})
         return {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"}
 
-    monkeypatch.setattr(alerts, "send_alert", fake_send)
+    monkeypatch.setattr(alerts, "send_routed_alert", fake_send)
 
     first = alerts.route_internal_remediable_alert(
         alert_key="silent_fallback_new", level="warn", title="held",
@@ -413,7 +458,7 @@ def test_wrapper_escalation_opens_one_root_cause_task_and_one_mail(pool, monkeyp
         deliveries.append({"level": level, "title": title})
         return {"sent": True, "skipped": False, "notification_id": f"n{len(deliveries)}"}
 
-    monkeypatch.setattr(alerts, "send_alert", fake_send)
+    monkeypatch.setattr(alerts, "send_routed_alert", fake_send)
 
     def fire(now):
         return alerts.route_internal_remediable_alert(
@@ -450,5 +495,3 @@ def test_wrapper_escalation_opens_one_root_cause_task_and_one_mail(pool, monkeyp
     row = incident.list_incidents(_store(pool))[0]
     assert row["state"] == incident.STATE_ESCALATED
     assert row["occurrence_count"] == 12
-
-

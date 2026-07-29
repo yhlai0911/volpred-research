@@ -3110,7 +3110,13 @@ def ops_send_alert(
 ) -> None:
     """Send a general-purpose ops alert email (HTML auto-rendered from markdown body)."""
     from pathlib import Path as _Path
-    from volpred.ops import ALERT_RECIPIENT, route_internal_remediable_alert, send_alert
+    from volpred.ops import (
+        ALERT_RECIPIENT,
+        AlertDeliveryClass,
+        route_internal_remediable_alert,
+        send_alert,
+        send_routed_alert,
+    )
 
     if body_md_file:
         body = _Path(body_md_file).read_text(encoding="utf-8")
@@ -3150,13 +3156,20 @@ def ops_send_alert(
             suppress_owner_transport=suppress_owner_transport,
         )
     else:
-        result = send_alert(
+        sender = send_routed_alert if needs_reply else send_alert
+        delivery_kwargs = (
+            {"delivery_class": AlertDeliveryClass.HUMAN_ACTION}
+            if needs_reply
+            else {}
+        )
+        result = sender(
             level,
             title,
             body,
             recipient=ALERT_RECIPIENT,
             storage_dir=storage_dir,
             force_send=force_send,
+            **delivery_kwargs,
         )
     if result.get("skipped"):
         if result.get("skip_reason") == "internal_auto_remediation":

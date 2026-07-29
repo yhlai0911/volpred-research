@@ -4503,3 +4503,33 @@ chain。Task-pool 非零退出同時保留 bounded stderr，避免同類事故�
 private identity 為空，supervisor／PHASE-Z／workspace／release／task-pool affected
 suite 共 **460 passed**。在 immutable live reload、新 worker completion receipt、
 連續 scheduler tick 與通知／pregate read-back 完成前，本條仍為 **`contained`**。
+
+---
+
+## 2026-07-30 — Alert 全量鏡像 Telegram，且 durable email conflict 被誤報成 host cron failure
+
+**證據化症狀**：`send_alert()` 曾把每一封 INFO／復原／self-heal 告警都直接鏡像
+Telegram，與 `progress_report.py` 的即時進度 owner 重疊；同時相同
+`level+title+date` 的 owned-email command 若 body 或路由用途改變，會命中 durable
+idempotency conflict。例外向外冒泡後，包住 `check_alerts` 的 cron wrapper 只看到非零
+退出，下一輪把 notification transport failure 報成 `host_cron_fail`，使用者收到錯誤
+根因與重複通知。
+
+**根因層級**：通道 policy 用 severity／「每封都鏡像」取代 remediation disposition；
+Telegram 有兩個外送 owner；email effect key 沒綁 payload identity；typed command
+conflict 沒有在 transport boundary 轉成可觀測 receipt，incident candidate 也缺
+effect evidence。
+
+**底層修復與制度化**：維持 `send_alert()` 公開 signature 與既有
+`sha256(level + "\\0" + title)` 24h 去重契約，另以 typed `AlertDeliveryClass` 做內部
+路由。Telegram 回到 `progress_report.py` 單一 owner；owner decision／recovery／record
+走 email，自動建單與 self-heal 只進 incident lifecycle，持續失敗才升級。Owned-email
+command key 加入 payload hash，route transition 不再被舊 record 擋住；typed
+`OwnedEmailCommandConflict` 轉成 `send_error_code=owned_email_command_conflict`，
+並把 effect owner／generation／work id／evidence 寫入 incident candidate。所有新版
+alert email 標題統一加 `[新架構派發]`。
+
+**回歸與狀態**：alert、CI recovery、owned-email、Postgres effect affected suites
+共 **230 passed**。尚待完整 pytest、immutable supervisor reload 與一筆 production
+delivery/read-back，因此目前為 **`contained`**；完成五步 Gate 後才可提升為
+`root_cause_fixed_and_verified`。
