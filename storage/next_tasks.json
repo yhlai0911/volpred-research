@@ -59780,7 +59780,7 @@
     "task_type": "platform_ops",
     "priority": 2,
     "source": "auto_discovered",
-    "status": "in_progress",
+    "status": "succeeded",
     "dispatch_lane": "agent",
     "dispatch_preempt": true,
     "incident_id": "ci-red-30473391569",
@@ -59791,30 +59791,15 @@
     "description": "GitHub Actions Test Suite 於 main 完成 failure-like 班次。\nRun: https://github.com/yhlai0911/volpred-research/actions/runs/30473391569\nattempt: 1\nhead_sha: 1a80230c3\n偵測摘要（仍須讀完整 failed log）：2026-07-29T17:16:43.3226052Z > raise ValueError(\n\n行動（當班修到綠，不許只報告）：\n1. `gh run view 30473391569 --attempt 1 --log-failed | tail -300` 讀失敗測試與根因\n2. 本地重現 → 修根因；同類站點做 class sweep（per feedback_declare_complete_requires_class_sweep），禁 surface patch\n3. 卡住即改派 `codex exec`（gpt-5.6-sol ultra）做獨立診斷/第二實作，不等下一班（老闆指示：強模型直接嘗試）\n4. 不自行 commit/push；result 必須帶機器可讀的 `root_cause=<一行>; repair_commit=pending_post_commit`。PHASE-Z（或 Codex exact-path commit helper）在 commit 落地後以本 fire ownership token 回填真實 SHA，禁止猜測或填舊 HEAD\n5. fixer 不得自行寄 email/Telegram；CI watcher 是唯一通知 owner，會等 GitHub 綠燈後收口\n成功標準：修復與本地驗證完成；commit/push 由平台 owner 收尾，最終 GitHub success 由 CI watcher 獨立驗證。",
     "write_intent": "repo_patch",
     "declared_output_paths": [
-      "scripts/lazypack_layout_guard.py",
-      "scripts/tests/test_git_writer_lock.py",
-      "scripts/tests/test_lazypack_layout_guard.py",
-      "src/volpred/charts/article_charts.py",
-      "src/volpred/evaluation/statistical_tests.py",
-      "src/volpred/ops/alerts.py",
-      "src/volpred/ops/delivery/owned_email.py",
-      "src/volpred/ops/rollback.py",
-      "tests/test_append_work_log.py",
-      "tests/test_cpi_t0_official_release_dates.py",
-      "tests/test_daily_update_tw_staleness.py",
-      "tests/test_evaluation_metrics.py",
-      "tests/test_phase_z_test_gate.py",
-      "tests/test_refresh_paper_snapshots_concurrent_append.py",
-      "tests/test_rollback.py",
-      "tests/test_shared_lock.py",
-      "tests/test_x.py"
+      "docs/error_log.md",
+      "scripts/dispatch_supervisor/scheduler.py",
+      "scripts/dispatch_supervisor/state.py",
+      "storage/memory/knowledge.json",
+      "tests/test_dispatch_decision.py",
+      "tests/test_dispatch_supervisor.py"
     ],
     "post_merge_actions": [],
     "priority_capped_from": 1,
-    "claimed_by": "codex-vscode",
-    "claimed_at": "2026-07-29T17:40:26.502913+00:00",
-    "claim_expires_at": "2026-07-29T19:40:26.502913+00:00",
-    "claim_session_id": "fa4c6911914f",
     "status_history": [
       {
         "ts": "2026-07-29T17:40:26.502931+00:00",
@@ -59827,9 +59812,18 @@
         "from": "claimed",
         "to": "in_progress",
         "by": "codex-vscode"
+      },
+      {
+        "ts": "2026-07-29T18:34:49.948568+00:00",
+        "from": "in_progress",
+        "to": "succeeded",
+        "by": "codex-vscode"
       }
     ],
-    "started_at": "2026-07-29T17:40:26.847594+00:00"
+    "started_at": "2026-07-29T17:40:26.847594+00:00",
+    "scope_note": "Descendant CI run 30477972221 exposed Issue #42 dry-run/CAS regression plus committed experiment knowledge ratchet; output contract expanded to exact repair surfaces.",
+    "completed_at": "2026-07-29T18:34:49.948539+00:00",
+    "result": "root_cause=Issue #42 moved request consumption into real reservation but left a stale dry-run test; admission CAS also used mutable reason as identity, allowing same-reason ABA. repair_commit=b676122e0; knowledge_commit=2b62f889e; verification=341 passed, 1 skipped; Matt Spec PASS; Matt Standards PASS; GitHub success pending CI watcher read-back."
   },
   {
     "id": "K1694_collect_r7_20260730",
