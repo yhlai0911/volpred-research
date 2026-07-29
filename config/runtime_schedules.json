@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-29T07:05:00+08:00",
+    "updated_at": "2026-07-29T11:55:00+08:00",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。 【2026-07-27 shadow 觀察結論（scripts/crosscheck_pregate_outcomes.py --invoker supervisor --since 2026-07-20，即 capacity+novelty rewire 上線後）】新 gate 於 162 班中僅 would_skip 2 班（1.2% skip 率），且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2＝100% 誤判，反例：2026-07-21T07:08 / 08:08 UTC）。雙重不合格：skip 率過低不足以省 token；skip 時全為誤判，遠超 flip 門檻 strict_mismatch_rate≤0.10。判定：維持 shadow，不翻 enforce；live A/B（60min vs 15min）因 enforce 未上線暫緩。後續：gate 需補訊號提高 skip precision/recall 後再評，估算值（15min≈1.84x）尚未由 live A/B 實測取代。"
   },
   "schedule_materialization": {
@@ -115,6 +115,13 @@
         "max_attempts": 1,
         "lease_seconds": 240,
         "timeout_seconds": 180
+      },
+      "github_comment_notifications": {
+        "catch_up": "skip",
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "lease_seconds": 120,
+        "timeout_seconds": 90
       },
       "gmail_poll": {
         "catch_up": "skip",
@@ -346,6 +353,22 @@
           "scripts/check_alerts.py --ci-only",
           "cron_ci_watch.sh",
           "ci-watch"
+        ]
+      },
+      {
+        "id": "github_comment_notifications",
+        "label": "GitHub issue/PR comments → owner Email + Telegram receipts",
+        "cron": "*/5 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_github_comment_notifications.sh",
+        "log_path": "storage/logs/cron/github_comment_notifications.log",
+        "host_crontab_managed": false,
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "Operations Core owns the five-minute ingress; no host cron or hourly piggy-back duplicate caller.",
+        "description": "每 5 分鐘由 Operations Core 讀 GitHub issue conversation + PR review comments，以 GitHub comment id 作 durable identity，逐 comment 留 Email/Telegram channel receipt；partial failure 只重試缺失通道，cursor 不越過未完成 comment。首次啟用將近 7 日留言合併成一封摘要，避免歷史通知爆量。狀態位於 ~/.volpred/run，不污染 Git working tree。",
+        "matchers": [
+          "scripts/github_comment_notifications.py",
+          "cron_github_comment_notifications.sh",
+          "github-comment-notifications"
         ]
       },
       {
