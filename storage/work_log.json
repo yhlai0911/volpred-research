@@ -31322,5 +31322,25 @@
     "owner": "hourly-slot-1-8af0700e2e824061adab655d58d04357",
     "commit": null,
     "summary": "K1731 與 K1730 同根因、同一次處置，完整敘述見同班 K1730 條目（同一 actor / 同一 fire）。\n\n本條只記 K1731 這一側的事實：\n- 標 **failed（superseded，非 succeeded）** — DL-vs-HAR 實驗從未在 K1731 這個 id 下跑過。\n- 阻塞成因：`wt/dispatch-slot-1-bd00f90a-k1731` 的 31 個未 merge commit 訊息含字面 `K1731`，觸發 `compute_queue._find_task_dispatch_collision`；但該 branch 的 `experiments/k1731/` 是 GEVReg-MIDAS-SSVS arm B，與本主題無關。gate 未被繞過。\n- 處置：以 registry 已保留的 successor **K1814** materialize 新 pool task，建 registered worktree `dispatch-slot-1-8af0700e-k1814`，enqueue 研究 agent `agent-brief_k1814-a3ea90`（opus/xhigh，timeout 5400s，artifact `experiments/k1814/K1814_results.json`），collision gate 通過。\n- brief 額外加了資料可行性 gate（yfinance 5-min 僅約 60 天，撐不起 22 日 horizon OOS），要求 agent 先實測再選路線，且禁止口徑混用。"
+  },
+  {
+    "timestamp": "2026-07-30T04:24:39+08:00",
+    "task_type": "platform_ops",
+    "task_id": "K1813_triage_20260730",
+    "outcome": "completed",
+    "actor": "hourly-slot-1-9189c746ecdf4a4d828139d75fc52eb5",
+    "owner": "hourly-slot-1-9189c746ecdf4a4d828139d75fc52eb5",
+    "commit": null,
+    "summary": "PHASE A followup 收件 triage：K1813 agent job 判定為 **transient-500 失敗但產物完整**，SALVAGEABLE，禁止 fresh-worktree re-enqueue。\n\n證據（讀 live source，非憑印象）：\n- `agent-brief_k1813-5f38bb` exit_code=1，但 stdout 唯一錯誤是 `API Error: 500 Internal server error`（server-side, transient），發生於 finished_at=2026-07-29T20:02:23Z。\n- 產物落地時間 03:52-03:53 CST，**早於**該 500 —— 即 agent 已完成實驗，是在收尾階段被 server error 打斷。\n- job_metadata：`result_artifact_exists=true`、`artifact_ok=True`、`timed_out=false`、`result_artifact_near_misses=[]`。\n- worktree `dispatch-slot-1-8af0700e-k1813/experiments/k1813/` 三件套齊全：k1813.py (57747B) / K1813_results.json (376182B) / README.md (26996B) + reproduce_spec.json + figures/ (4 png) + data/ (6 csv)。\n- `check_experiment_artifacts.py check --path experiments/k1813` → 只缺 knowledge.json 條目，reproduce_spec 半邊已過。\n- 結果實質健全：`lookahead_diagnostics` 對 5 資產各做 noise-corruption 因果探針（violations=[]、walkforward_signal_is_causal=true）；verdicts H1 PARTIAL / H2 PARTIAL / H3 REJECT，且 H3 明確指出 5bp 成本下的「勝出」是 turnover artifact 而非 day-of-week 效應 —— 誠實 NULL，符合研究誠實原則。\n\n處置：\n- 建 collection task `assign_71636a7a`（platform_ops P2），description 內完整寫入上述 triage 證據與 5 步收尾（驗數字 / lookahead 複核 / Codex 審 / 主線程寫 knowledge / merge worktree）。\n- `compute_queue.py mark-followup-dispatched --id agent-brief_k1813-5f38bb --next-task-id assign_71636a7a` 已執行，防重派。\n- **本 slot 無法自行執行該 collection**：`platform_ops` 被 task CLI 以 `supervisor_preassignment_required` 機械拒絕（mutating dispatch work 須由 supervisor 綁 execution contract）。未繞過，留給 supervisor-preassigned worker。\n\n狀態：contained（triage 與交棒完成、證據落檔）；K1813 本身的 root_cause_fixed_and_verified 由 assign_71636a7a 收尾。"
+  },
+  {
+    "timestamp": "2026-07-30T04:24:39+08:00",
+    "task_type": "experiment",
+    "task_id": "K1733",
+    "outcome": "dispatched",
+    "actor": "hourly-slot-1-9189c746ecdf4a4d828139d75fc52eb5",
+    "owner": "hourly-slot-1-9189c746ecdf4a4d828139d75fc52eb5",
+    "commit": null,
+    "summary": "K1733（AI 基建資金鏈波動傳導）重新派工成功 —— 解掉 284.3h 餓死。本班經 STARVATION LOCKOUT 只能從 K1733/K1734 挑（diversity rotation 暫停），選最舊的 K1733。\n\n根因（為何餓死 284h，非「這次才失敗」）：\n- 先前兩次 enqueue `agent-agent-brief_k1733-bf0e58`（2026-07-27T15:34:23Z）與 `-c3ccb0`（16:30:05Z）都 exit_code=-2、`completed_at == started_at`（0 秒即死），stderr 唯一訊息是 `[EXCEPTION] task is owned by running compute job: K1720`。\n- 即 collision gate 正確擋下，但當下沒人讀那兩行 stderr，兩個 job 都 `followup_dispatched=true` 就被結算掉，task 退回 pending 後持續老化到 284.3h。\n- 本班回讀 9 個 k1720 job record 確認：全部 terminal（completed/failed），**沒有任何 K1720 job 在跑** → 阻塞條件已消失，可重派。實測 enqueue 確實通過 gate（非猜測）。\n\n處置：\n- 建 registered linked worktree `.claude/worktrees/dispatch-slot-1-9189c746-k1733`（branch `k1733-slot1-9189c746`），經 `git_writer_lock.py run` 建立，名稱含本班 worktree_prefix。\n- brief 寫成 /tmp/brief_k1733.md 後 enqueue：`agent-brief_k1733-b39c59`（claude-opus-5 / xhigh，timeout 5280s，artifact `experiments/k1733/K1733_results.json`），`linked source task: K1733 -> awaiting_agent_job`。\n- 未在 fire 內 spawn agent（3000s cap 內塞不進 xhigh 研究工作；走 compute worker 是唯一合法路徑）。\n\nbrief 的關鍵研究價值 —— 事前把知識庫已付過學費的坑寫進紅線：\n- K1733 的核心假設本質是**方向性**的（電力/credit vol → Nasdaq RV），而 K628b（2026-07-13 CORRECTED：SPY 淨傳出 +43.7pp 是 Cholesky 排序產物，KPPS GFEVD 重估為 +14.6pp）與 K865b（Diebold-Yilmaz 的 SPY-hub 方向性結論是排序假象，總溢出本身為真）正是在同一個地方翻車。\n- 因此 brief 硬性要求：方向性宣稱只能來自 order-invariant **KPPS GFEVD**，且必須額外報 ordering robustness（>=100 次隨機重排，報 net-directional 分佈與符號穩定率），符號不穩即降級 NULL；並要求明確區分「總溢出真實」vs「方向性可疑」兩種結論強度。\n- 另加 K907（spillover TCI 與 VIX r=0.001）避免誤把 TCI 當 VIX 代理或錯誤宣稱新指標。\n- nested 預測比較指定 **Clark-West**（非 DM）；lookahead 除 `signal.shift(1)` 外另要求複製 K1813 已驗證有效的 noise-corruption 因果探針；seed=42；reproduce_spec 必須 run-time 由 `finalize_experiment()` 產生（K1708 教訓）。\n- followup brief 內把「若用 Cholesky FEVD 支撐方向性結論則判 FAIL」寫成收件時的硬檢查項。\n\n狀態：本 fire 職責到 enqueue 為止（已完成）；task status 由 enqueue 自動置 `awaiting_agent_job`，無 in_progress 殘留；實驗結果由後續 fire 於 PHASE A 收件。"
   }
 ]

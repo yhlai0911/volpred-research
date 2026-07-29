@@ -1,0 +1,53 @@
+{
+  "id": "agent-brief_k1733-b39c59",
+  "title": "agent: brief_k1733",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1733-b39c59.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9189c746-k1733",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9189c746-k1733/experiments/k1733/K1733_results.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1733-b39c59.json",
+    "--timeout",
+    "5160"
+  ],
+  "env": {},
+  "status": "queued",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T20:22:32Z",
+  "started_at": null,
+  "completed_at": null,
+  "exit_code": null,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1733-b39c59.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1733-b39c59.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9189c746-k1733/experiments/k1733/K1733_results.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1733-b39c59.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-9189c746-k1733",
+  "claude_followup": {
+    "brief": "K1733 收件：(1) 驗 experiments/k1733/K1733_results.json 與 README 數字逐項一致（H1-H4 檢定統計量、p 值、FDR 後結論、ordering_robustness 符號穩定率、含成本結果）；(2) 檢 lookahead — K1733.py 要有明確 signal.shift(1)，且 lookahead_diagnostics 的 noise-corruption 探針 violations 必須為空；(3) 關鍵紅線複核：方向性宣稱必須來自 order-invariant KPPS GFEVD 且 ordering robustness 符號穩定率 >=90%，若用 Cholesky FEVD 支撐方向性結論則判 FAIL（K628b/K865b 教訓）；(4) nested 預測比較必須用 Clark-West 而非 DM；(5) 跑 scripts/check_experiment_artifacts.py check --path experiments/k1733 確認 reproduce_spec 由 run-time 產生；(6) Codex 代碼審查後才可信結果；(7) 主線程寫 knowledge.json（K1259：agent 禁寫，數字程式化從 results.json 取）；(8) bash scripts/merge_worktree.sh dispatch-slot-1-9189c746-k1733 整合。",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": false,
+  "source_task_id": "K1733",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T20:22:32Z",
+    "linked_at": "2026-07-29T20:22:32Z",
+    "error": null
+  },
+  "timeout_seconds": 5280,
+  "brief_source": "/tmp/brief_k1733.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1733-b39c59.md"
+}
