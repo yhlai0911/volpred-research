@@ -24,6 +24,7 @@ SCHEMA_VERSION = 2
 DEFAULT_LOOKBACK_DAYS = 7
 DEFAULT_REPO = "yhlai0911/volpred-research"
 COMMENT_SOURCES = ("issue_comment", "pull_review_comment")
+TELEGRAM_MAX_MESSAGE_CHARS = 4096
 DEFAULT_STATE_PATH = (
     Path.home()
     / ".volpred"
@@ -488,20 +489,41 @@ def _backfill_notification(
         f"範圍：{since.isoformat()} ～ {now.isoformat()}",
         "",
     ]
-    for comment in comments:
+    telegram_prefix = f"ℹ️ {title}\n\n"
+    for index, comment in enumerate(comments):
         summary = _summary(comment.body)
         subject = "PR" if comment.subject_kind == "pull_request" else "Issue"
-        lines.append(
+        line = (
             f"- {comment.created_at} [{subject} #{comment.number}]({comment.url}) "
             f"{comment.author}: {summary}"
         )
+        remaining_after = len(comments) - index - 1
+        omission_line = (
+            f"- 另有 {remaining_after} 則已納入 durable receipt；"
+            "完整內容請見 GitHub Issues/PR。"
+        )
+        candidate_lines = [*lines, line]
+        if remaining_after:
+            candidate_lines.append(omission_line)
+        if len(telegram_prefix + "\n".join(candidate_lines)) <= (
+            TELEGRAM_MAX_MESSAGE_CHARS
+        ):
+            lines.append(line)
+            continue
+        omitted = len(comments) - index
+        lines.append(
+            f"- 另有 {omitted} 則已納入 durable receipt；完整內容請見 GitHub Issues/PR。"
+        )
+        break
     if not comments:
         lines.append("- 此期間沒有留言。")
-    return Notification(
+    notification = Notification(
         idempotency_key=f"github-comments:backfill:{since.date().isoformat()}",
         title=title,
         body="\n".join(lines),
     )
+    _telegram_payload(notification)
+    return notification
 
 
 def _comment_notification(comment: GitHubComment) -> Notification:
@@ -741,10 +763,19 @@ def _deliver_telegram(
     from volpred.ops.telegram import send_telegram
 
     return send_telegram(
-        f"ℹ️ {notification.title}\n\n{notification.body}",
+        _telegram_payload(notification),
         storage_dir=storage_dir,
         disable_notification=True,
     )
+
+
+def _telegram_payload(notification: Notification) -> str:
+    text = f"ℹ️ {notification.title}\n\n{notification.body}"
+    if len(text) > TELEGRAM_MAX_MESSAGE_CHARS:
+        raise ValueError(
+            "GitHub notification exceeds the single-message Telegram contract"
+        )
+    return text
 
 
 def _load_state(path: Path) -> dict[str, Any]:

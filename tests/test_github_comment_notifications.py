@@ -9,11 +9,14 @@ from pathlib import Path
 import pytest
 
 from volpred.ops.github_comment_notifications import (
+    TELEGRAM_MAX_MESSAGE_CHARS,
     GitHubComment,
     Notification,
+    _telegram_payload,
     fetch_github_comments,
     reconcile_github_comments,
 )
+from volpred.ops.telegram import _chunks
 
 NOW = datetime(2026, 7, 29, 4, 0, tzinfo=UTC)
 
@@ -384,6 +387,39 @@ def test_partial_telegram_chunk_does_not_advance_cursor(
     assert second["cursors"]["issue_comment"]["comment_id"] == 40
     assert email_calls == 1
     assert telegram_calls == 2
+
+
+def test_large_backfill_is_bounded_to_one_telegram_message(
+    tmp_path: Path,
+) -> None:
+    comments = [
+        _comment(
+            10_000 + index,
+            created_at=f"2026-07-28T02:{index % 60:02d}:00+00:00",
+            number=20 + (index % 30),
+        )
+        for index in range(150)
+    ]
+    telegram: list[Notification] = []
+
+    result = reconcile_github_comments(
+        fetch_comments=lambda _since: comments,
+        deliver_email=lambda _notification: {"sent": True, "receipt_id": "email"},
+        deliver_telegram=lambda notification: (
+            telegram.append(notification)
+            or {"sent": True, "message_ids": [9001]}
+        ),
+        state_path=tmp_path / "state.json",
+        now=NOW,
+    )
+
+    payload = _telegram_payload(telegram[0])
+    assert len(payload) <= TELEGRAM_MAX_MESSAGE_CHARS
+    assert len(_chunks(payload)) == 1
+    assert "另有" in payload
+    assert result["comment_count"] == 150
+    state = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    assert len(state["deliveries"]) == 150
 
 
 def test_fetch_failure_is_observable() -> None:
