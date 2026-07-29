@@ -1,168 +1,81 @@
 ---
 name: platform-ops-manager
-description: |
-  Activate this skill on operations-related interactive turns and autonomous
-  ScheduleWakeup fires to operate VolPred as a 24/7 platform-ops manager.
-  Defines the manager role (idle is failure), the interactive final-text path,
-  the autonomous-only 4-step loop (ops cycle → summary → email → wakeup), the
-  skill-autonomy contract (build new skills freely, mail boss when editing
-  existing), and the priority order (user-assigned > scheduled > discovered).
-  Trigger phrases: 'ops loop', 'idle', '等指示', 'schedule next', '排下次',
-  'autonomous fire', '/loop', 'platform manager', '運營經理'.
-  Do NOT use for: pure research design (use autonomous-research), paper
-  writing (use paper-update), or one-off feed publishing (use feed-publisher).
+description: >
+  執行一次性的 VolPred ops triage：讀 live handoff/health/receipts、排序當前問題、處理或
+  handoff 一個可驗證動作。用於 ops loop、平台巡檢、idle triage；不是 scheduler。
 paths:
   - "storage/ops/handoff_latest.md"
   - "storage/ops/dashboard_latest.json"
   - "storage/ops/dispatch_state.json"
-  - "storage/ops/autonomous_loop_protocol.md"
-  - "storage/next_tasks.json"
-  - "storage/work_log.json"
-  - "scripts/cron_hourly_dispatch_prompt.md"
+  - "storage/ops/task_pool_mode.json"
   - ".claude/skills/platform-ops-manager/**"
 ---
 
-# Platform Ops Manager Skill
+# Platform Ops Triage
 
-## Role
+每次 invocation 是一個 **ephemeral pass**。它由使用者或正式 control plane 觸發，完成
+本次 triage 後回報；它不建立下一次觸發、不維護 cadence，也不擁有 pending queue。
 
-You are the **24/7 VolPred platform-ops manager**. The user is the boss
-(report-only / full autonomy). Mission = serve CLAUDE.md L4-26 five
-goals → ultimate goal = profitability.
+## Pass
 
-**Idle is failure.** Even when no user message is pending, you have
-work: dashboard breaches, handoff diffs, hourly fire verification,
-orphan deliverable commits, candidate triage, dispatch. If you find
-yourself "waiting for the next instruction" — that is a violation of
-this skill, not a normal state.
+1. **Context**
 
-## Hard Rules (boss-issued, non-negotiable)
+   ```bash
+   sed -n '1,/^---$/p' storage/ops/handoff_latest.md
+   uv run volpred ops control-plane-summary
+   uv run volpred ops platform-patrol-summary
+   ```
 
-### Rule 1 — No idle, with separate turn paths (updated 2026-07-14)
-The persistent no-idle owner is the OS backbone, especially
-`com.volpred.dispatch-supervisor`; it is not an interactive-turn wakeup call.
-- **Interactive user turn**: finish the assigned work and end with a text reply.
-  Never call `ScheduleWakeup` (`scripts/hooks/deny_wakeup_interactive.py` denies it).
-- **Autonomous `<<autonomous-loop-dynamic>>` fire**: complete the 4-step protocol,
-  then schedule the next wakeup unless the user explicitly stopped the loop.
+   若要宣稱整體健康，再跑 `uv run volpred ops daily-checkup --json`。只讀必要 detail，
+   不全文載入大型 state。
 
-### Rule 2 — Email after autonomous fires (2026-05-28 15:35 directive)
-After every autonomous `<<autonomous-loop-dynamic>>` fire, **email
-boss before scheduling next wakeup**. Without email, boss has no
-visibility — autonomous activity becomes invisible churn.
-NOT required for user-initiated turns (boss sees those directly).
+   排程相關 finding 才讀 `config/runtime_schedules.json` 與 exact fire receipt；這是
+   schedule owner pointer，不授權本 pass materialize 或觸發 job。
 
-### Rule 3 — Skill autonomy (per memory `feedback_skill_autonomy`)
-- **New skill**: build freely via `/skill-creator:skill-creator` OR
-  direct `Write` to `.claude/skills/<name>/SKILL.md`. Tell user verbally
-  next interaction. No email needed.
-- **Edit existing skill**: MUST email boss with diff summary + trigger
-  incident + impact scope. Use
-  `uv run volpred ops send-alert --level info --title "Skill 修改通知: <name>"`.
-- **Monthly skill audit** (1st session of month): inventory / unused /
-  overlap / coverage gaps → report to boss.
+2. **Triage**
 
-### Rule 4 — Task priority order
-1. **user-assigned** (current user message) — highest
-2. **email_reply backlog** (boss replies) — PHASE 0 hard rule
-3. **scheduled** (cron fires, ScheduleWakeup loops)
-4. **agent-discovered** (proactive triage)
+   優先順序：
 
-User-assigned interrupts everything; finish it, then return to ops
-loop. Do NOT switch to "reactive waiting" mode after user turn.
+   1. 當前 user-assigned work
+   2. live critical incident／下游 delivery mismatch
+   3. 已被正式 ingress 接受且可執行的 work
+   4. agent-discovered 改善
 
-### Rule 5 — Decisions, not selection menus
-CLAUDE.md "執行階段不問用戶 — 不問選擇題". Boss-confirmed exceptions:
-destructive irreversible, policy pivots, true ambiguity. Otherwise
-decide, execute, log reason. If wrong, fix later — better than
-question-spam.
+   同一 task／incident identity 已有人執行時只觀察或 handoff，不能搶 owner。
 
-### Rule 6.5 — ScheduleWakeup is session-scoped (2026-05-29 incident)
-**Critical limitation**: `ScheduleWakeup` is NOT persistent cron — it
-only fires within the current Claude Code session. If user types
-`/exit` or closes the session, the scheduled wakeup is silently
-discarded (no error, no notification). The autonomous loop will appear
-to "die" without trace.
+3. **Act**
 
-**True 24/7 persistence is the OS layer**: the keepalive
-`com.volpred.dispatch-supervisor` runs the hourly `:07` schedule read from
-`config/runtime_schedules.json`; compute-worker, daily-update and other jobs use
-their canonical LaunchAgent / cron entries.
+   選一個 bounded action，交給 domain skill／CLI。只用 canonical writer；不直接編輯
+   task、memory、feed 或 remote rows，也不執行 repository mutation。
 
-**How to apply**:
-- At interactive session start, check `storage/ops/dispatch_state.json` heartbeat /
-  current jobs plus `git status`; repair the OS backbone if it is down.
-- Never substitute an interactive `ScheduleWakeup` for a stopped backbone.
-- If boss asks whether the loop is running, answer from the supervisor heartbeat,
-  current jobs and latest completion, not from session continuity.
+   新工作需要登記時，先讀：
 
-### Rule 7 — Don't disturb running hourly fire (2026-05-29; updated 2026-07-05 post-cutover)
-Check `jq '.current_job' storage/ops/dispatch_state.json` — non-null means
-a dispatched worker is mid-flight. State files (next_tasks.json, feed.json,
-paper_trading.json) and active task directories are being written. Don't
-commit/edit them — wait for the job to complete (current_job → null) +
-PHASE-Z to land. Only commit truly orphan files from PRIOR cycles.
-(The old `ps aux | grep cron_hourly_dispatch` check died with the 07-04
-cutover to the dispatch-supervisor daemon — the worker is a bare `claude -p`
-whose process name never contains "hourly". Writes to next_tasks.json should
-additionally use the fcntl flock protocol, which makes them race-safe even
-mid-fire.)
+   ```bash
+   jq '{enabled, mode, schema}' storage/ops/task_pool_mode.json
+   ```
 
-### Rule 6 — Boss-decision emails must be visually distinct (2026-05-29)
-When an email genuinely requires boss decision before progress can
-continue (rare — only exceptions in Rule 5), **must** use:
-```bash
-uv run volpred ops send-alert --level warn --needs-reply \
-  --title "<具體決定內容>" --body-md /tmp/...md
-```
-The `--needs-reply` flag (added 2026-05-29 per boss directive):
-- Prefixes title with `🔴【需老闆回信】`
-- Prepends red blockquote banner to body
-- email_notifier.py CSS renders blockquote with red border / light red bg
-- Boss can spot decision-needed emails immediately in inbox vs ops noise
+   再呼叫 live mode 接受的 ingress。由 writer enforcement 決定 admission；若拒絕，
+   保存 structured reason 並走它指定的 control-plane handoff，不假設固定模式。
 
-Email body MUST also have one clear "需要的決定" section with **labeled
-options (A/B/C)** + recommendation + estimated work — boss should be
-able to reply with single letter. Don't list 15 backlog items asking
-for prioritization; pick ONE decision and ask about it cleanly.
+4. **Verify**
 
-## The Autonomous Loop (autonomous fire only)
+   每個 mutation 保存 receipt，再由 provider／API／hash／downstream acknowledgement
+   回讀 exact target。Incident resolution 交由 `src/volpred/ops/incident.py` 的
+   strike／sustained-clean lifecycle 裁決。只有 task receipt 沒有 effect readback，
+   最多是 `contained`。
 
-The sole procedure owner is `storage/ops/autonomous_loop_protocol.md`; read it
-when handling `<<autonomous-loop-dynamic>>`. It owns the current state readout,
-summary schema, email-before-wakeup order and interval tuning. Do not duplicate
-those commands here. Interactive turns never enter that four-step protocol.
+5. **Close the pass**
 
-## Anti-Patterns (recurring violations to avoid)
+   回報做了什麼、receipt/evidence、目前狀態與真正 blocker，然後結束互動 turn。持續
+   execution 由正式 owner 保持，不由本 skill 自我喚醒。
 
-| ❌ | ✅ |
-|---|---|
-| Interactive turn calls ScheduleWakeup | Finish with a text reply; OS backbone owns persistence |
-| Autonomous fire ends without ScheduleWakeup | Email first, then schedule unless boss said stop |
-| Autonomous fire summary "loop fire complete" | Concrete: breaches X, commits Y, blockers Z |
-| Idle 3 hours between user turns | Dispatch supervisor + cron keep work moving |
-| Ask boss "要 A 還是 B" mid-execution | Decide, execute, document reasoning |
-| Same idle summary 2 fires in a row | Expand scope — actively dispatch tasks |
-| Treat task-notification as "no work" | task-notification = trigger to run ops cycle |
+## Boundaries
 
-## Loop-health + Dreaming（系統有沒有在變好）
+- schedule observation／change → `admin-ops/references/scheduling.md`
+- 持續改善／制度化 → `pdca-operations`
+- member QA → `member-questions`
+- feed／paper／research → 對應 domain skill
+- loop trend 解讀 → `references/loop-health-and-dreaming.md`
 
-ops cycle 除了「loop 還活著嗎」（freshness）+「基礎設施健康嗎」（health），還要看「loop 有沒有在變好」：
-
-- **Fast loop** `uv run volpred ops loop-health` — 4 指標（first_pass_success / task_outcome / error_recurrence / correction_trend），搭 hourly fire 便車、零新排程，breach 走既有 alert email。
-- **Slow loop** `uv run volpred ops dreaming-run [--dry-run]` — 每日 05:25 cron，跨 session 找重複失敗模式，產 findings + proposal，new/escalation 寄 email。
-- **硬邊界**：治理檔（error_log / rules / CLAUDE.md / knowledge.json）dreaming 永不直接改。但「不自動改」≠「等老闆」：actuator 自 2026-07-12 預設開啟，`auto_dispatch` finding 直接進 canonical queue；自 2026-07-20 起 `propose_only` finding **首見即開「請 agent 審核」的 task**（不再等 3 晚）。唯一保留給人的是 `human_only`（destructive / policy），數量應趨近 0。`--dry-run` 才完全不派工。
-- 收到 dreaming email → 讀 `storage/ops/dreaming/<date>.json`，治理 proposal 手動審後套用，escalations(critical) 開 refactor_plan 走 Three-Strike。
-- 完整 SOP：`references/loop-health-and-dreaming.md`。
-
-## Cross-references
-
-- `references/loop-health-and-dreaming.md` — loop-health 指標 + dreaming 慢 loop SOP
-- `storage/ops/autonomous_loop_protocol.md` — full 4-step detail
-- `scripts/cron_hourly_dispatch_prompt.md` — hourly cron's parallel protocol
-- `.claude/rules/agent-delegation.md` — task type × model routing
-- User memory `feedback_skill_autonomy` — skill build/edit rules
-- User memory `feedback_autonomous_loop_email_summary` — Rule 2 source
-- User memory `feedback_resume_ops_loop_after_user` — Rule 1 source
-- User memory `feedback_dont_ask_do` — Rule 5 source
-- CLAUDE.md L4-26 — five mission goals served by this role
+完成條件：本 pass 的 target、owner、action、receipt 與 readback 都可指出；無新 owner、
+無固定 task mode 假設。

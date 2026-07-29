@@ -182,6 +182,7 @@
         "member-questions"
       ],
       "paper": [
+        "paper-submission-pipeline",
         "paper-update",
         "finance-paper-quality"
       ],
@@ -195,17 +196,20 @@
         "agent-result-verification"
       ],
       "ops": [
-        "memory-health",
-        "admin-ops"
+        "platform-ops-manager",
+        "admin-ops",
+        "memory-health"
       ],
-      "strategy": []
+      "strategy": [
+        "strategy-lifecycle"
+      ]
     },
     "by_context": {
       "external_data_fetch": [
         "external-data-sources"
       ],
       "taiwan_macro": [
-        "taiwan-macro-data"
+        "external-data-sources"
       ],
       "experiment_numbers_produced": [
         "agent-result-verification"
@@ -217,7 +221,8 @@
         "paper-stage-classifier"
       ],
       "methodology_peer_review": [
-        "academic-finance-reviewer"
+        "finance-paper-quality",
+        "latex-academic-reviewer"
       ]
     }
   },

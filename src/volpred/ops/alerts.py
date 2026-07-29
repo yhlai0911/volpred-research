@@ -1,4 +1,4 @@
-"""Ops alert registry + email/Telegram transport with a 24h dedup ledger.
+"""Ops alert registry + email transport with a 24h dedup ledger.
 
 Alert dedup has exactly TWO stores with an explicit division of labor
 (2026-07-20 ops-master D4 — do not merge them, do not add a third):
@@ -15,7 +15,10 @@ Alert dedup has exactly TWO stores with an explicit division of labor
   flood gate still land here (it calls `send-alert --force` because burst
   semantics differ from standing-condition semantics).
 
-Enforcement Layer Map (loop-health-and-dreaming.md) carries the same split.
+Telegram progress/interaction has one separate owner (`scripts/progress_report.py`);
+this module must not mirror alerts into that channel. Enforcement Layer Map
+(`docs/governance/enforcement_layer_map.md`) carries the machine inventory;
+channel policy remains owned by Operations Core contracts.
 """
 
 from __future__ import annotations
@@ -28,6 +31,7 @@ import re
 import shutil
 import subprocess
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 from pathlib import Path
 from typing import Any, Iterable
 from zoneinfo import ZoneInfo
@@ -62,6 +66,16 @@ from .health import (
 )
 ALERT_RECIPIENT = "yihao.lai@gmail.com"
 ALERT_LEVELS = ("info", "warn", "critical")
+
+
+class AlertDeliveryClass(str, Enum):
+    HUMAN_ACTION = "human_action"
+    RECORD = "record"
+    RECOVERY = "recovery"
+    SELF_HEALING = "self_healing"
+    BREADCRUMB = "breadcrumb"
+
+
 ALERT_DEDUP_WINDOW = timedelta(hours=24)
 # D4 retention: dedup ledger entries with no activity for this long are pruned
 # at every save — the ledger is a rolling throttle window, not an archive
@@ -388,6 +402,7 @@ def _record_incident_candidate(
     occurrence: int,
     event: str,
     now: datetime,
+    evidence: dict[str, Any] | None = None,
 ) -> None:
     """Append an error_log FILING CANDIDATE for this alert occurrence (WS-F3).
 
@@ -413,6 +428,8 @@ def _record_incident_candidate(
         "occurrence": occurrence,
         "event": event,  # sent | dedup_skip | send_failed
     }
+    if evidence:
+        record["evidence"] = evidence
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
         with path.open("a", encoding="utf-8") as fh:
@@ -551,7 +568,12 @@ def _dispatch_alert_email(
     delivery_key: str,
 ) -> dict[str, Any]:
     display_title, display_body = boss_facing_alert(title, body, level)
-    subject = f"[VolPred Alert][{level.upper()}] {display_title}"
+    architecture_marker = "[新架構派發]"
+    if display_title.startswith(architecture_marker):
+        display_title = display_title[len(architecture_marker):].lstrip()
+    subject = (
+        f"{architecture_marker}[VolPred Alert][{level.upper()}] {display_title}"
+    )
     text_body = "\n".join(
         [
             f"Alert level: {level}",
@@ -615,7 +637,7 @@ def _dispatch_alert_email(
     )
 
 
-def send_alert(
+def send_routed_alert(
     level: str,
     title: str,
     body: str,
@@ -623,10 +645,12 @@ def send_alert(
     *,
     storage_dir: str = "storage",
     force_send: bool = False,
+    delivery_class: AlertDeliveryClass = AlertDeliveryClass.RECORD,
 ) -> dict[str, Any]:
     normalized_level = level.strip().lower()
     normalized_title = title.strip()
     normalized_recipient = recipient.strip() or ALERT_RECIPIENT
+    normalized_delivery_class = AlertDeliveryClass(delivery_class)
     if normalized_level not in ALERT_LEVELS:
         raise ValueError(f"Unsupported alert level: {level}")
     if not normalized_title:
@@ -647,10 +671,58 @@ def send_alert(
     )
     incident_first_seen = str(existing.get("first_sent_at") or now.isoformat())
 
+    if normalized_delivery_class in {
+        AlertDeliveryClass.SELF_HEALING,
+        AlertDeliveryClass.BREADCRUMB,
+    }:
+        existing.update(
+            {
+                "level": normalized_level,
+                "title": normalized_title,
+                "recipient": normalized_recipient,
+                "delivery_class": normalized_delivery_class.value,
+                "first_sent_at": existing.get("first_sent_at") or now.isoformat(),
+                "last_skipped_at": now.isoformat(),
+                "skip_count": int(existing.get("skip_count", 0) or 0) + 1,
+                "send_count": int(existing.get("send_count", 0) or 0),
+            }
+        )
+        dedup_state["alerts"][dedup_key] = existing
+        _save_alert_dedup(storage_dir, dedup_state)
+        _record_incident_candidate(
+            storage_dir,
+            dedupe_key=dedup_key,
+            level=normalized_level,
+            title=normalized_title,
+            first_seen=incident_first_seen,
+            occurrence=incident_occurrence,
+            event="policy_suppressed",
+            now=now,
+        )
+        return {
+            "level": normalized_level,
+            "title": normalized_title,
+            "recipient": normalized_recipient,
+            "delivery_class": normalized_delivery_class.value,
+            "channels": {"email": "not_routed", "telegram": "not_routed"},
+            "alert_key": dedup_key,
+            "sent": False,
+            "skipped": True,
+            "skip_reason": f"delivery_policy_{normalized_delivery_class.value}",
+            "notification_id": None,
+            "telegram": None,
+            "dedup_path": str(_alert_dedup_path(storage_dir)),
+            "timestamp": now.isoformat(),
+        }
+
     if (
         not force_send
         and last_sent_at is not None
         and now - last_sent_at < ALERT_DEDUP_WINDOW
+        and existing.get("delivery_class") in {
+            None,
+            normalized_delivery_class.value,
+        }
     ):
         existing["last_skipped_at"] = now.isoformat()
         existing["skip_count"] = int(existing.get("skip_count", 0) or 0) + 1
@@ -670,6 +742,11 @@ def send_alert(
             "level": normalized_level,
             "title": normalized_title,
             "recipient": normalized_recipient,
+            "delivery_class": normalized_delivery_class.value,
+            "channels": {
+                "email": "deduped",
+                "telegram": "not_routed",
+            },
             "alert_key": dedup_key,
             "sent": False,
             "skipped": True,
@@ -679,43 +756,64 @@ def send_alert(
             "last_sent_at": existing.get("last_sent_at"),
         }
 
+    payload_sha = hashlib.sha256(
+        json.dumps(
+            {
+                "level": normalized_level,
+                "title": normalized_title,
+                "body": body,
+                "recipient": normalized_recipient,
+                "delivery_class": normalized_delivery_class.value,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()[:24]
     delivery_key = (
-        f"ops-alert:{dedup_key}:force:{now.isoformat()}"
+        f"ops-alert:{dedup_key}:force:{now.isoformat()}:{payload_sha}"
         if force_send
-        else f"ops-alert:{dedup_key}:{now.date().isoformat()}"
+        else f"ops-alert:{dedup_key}:{now.date().isoformat()}:{payload_sha}"
     )
-    delivery = _dispatch_alert_email(
-        level=normalized_level,
-        title=normalized_title,
-        body=body,
-        recipient=normalized_recipient,
-        storage_dir=storage_dir,
-        delivery_key=delivery_key,
-    )
-    # 2026-07-02 (boss): mirror every alert to Telegram when the transport is
-    # configured (bot token + captured chat_id). Fail-open: a TG hiccup must
-    # never break the email path — email stays canonical, TG is the mirror.
-    telegram_result: dict[str, Any] | None = None
+    from volpred.ops.delivery.owned_email import OwnedEmailCommandConflict
+
     try:
-        from volpred.ops.telegram import send_telegram
-        tg_text = _format_telegram_alert_text(
+        delivery = _dispatch_alert_email(
             level=normalized_level,
             title=normalized_title,
             body=body,
+            recipient=normalized_recipient,
+            storage_dir=storage_dir,
+            delivery_key=delivery_key,
         )
-        # info 級靜音送達（不響鈴），warn/critical 才推播出聲 — 防 routine tick 騷擾
-        telegram_result = send_telegram(
-            tg_text, storage_dir=storage_dir,
-            disable_notification=(normalized_level == "info"),
-        )
-    except Exception as _tg_exc:  # noqa: BLE001 — mirror only, never fatal
-        warn("telegram_mirror", "alert mirror failed", err=str(_tg_exc)[:200])
-        telegram_result = {"sent": False, "reason": str(_tg_exc)[:200]}
-
+    except OwnedEmailCommandConflict as exc:
+        # A payload conflict is a notification-transport incident, not proof that
+        # the check_alerts schedule or host failed. Contain it in the delivery
+        # receipt so the alert pass can finish and the incident stream can file it.
+        delivery = {
+            "notification_id": None,
+            "subject": None,
+            "sent": False,
+            "configured": True,
+            "send_error": str(exc),
+            "send_error_code": "owned_email_command_conflict",
+            "delivery_owner": "operations_core",
+            "owner_generation": None,
+            "work_id": None,
+            "effect_status": "command_conflict",
+            "attempt_count": 0,
+            "evidence_ref": None,
+            "evidence_sha256": None,
+        }
     result = {
         "level": normalized_level,
         "title": normalized_title,
         "recipient": normalized_recipient,
+        "delivery_class": normalized_delivery_class.value,
+        "channels": {
+            "email": "delivered" if delivery["sent"] else "failed",
+            "telegram": "not_routed",
+        },
         "alert_key": dedup_key,
         "sent": delivery["sent"],
         "skipped": False,
@@ -723,6 +821,7 @@ def send_alert(
         "subject": delivery["subject"],
         "configured": delivery["configured"],
         "send_error": delivery.get("send_error"),
+        "send_error_code": delivery.get("send_error_code"),
         "delivery_owner": delivery.get("delivery_owner"),
         "owner_generation": delivery.get("owner_generation"),
         "work_id": delivery.get("work_id"),
@@ -730,7 +829,7 @@ def send_alert(
         "attempt_count": delivery.get("attempt_count"),
         "evidence_ref": delivery.get("evidence_ref"),
         "evidence_sha256": delivery.get("evidence_sha256"),
-        "telegram": telegram_result,
+        "telegram": None,
         "dedup_path": str(_alert_dedup_path(storage_dir)),
         "timestamp": now.isoformat(),
     }
@@ -739,6 +838,7 @@ def send_alert(
             "level": normalized_level,
             "title": normalized_title,
             "recipient": normalized_recipient,
+            "delivery_class": normalized_delivery_class.value,
             "first_sent_at": existing.get("first_sent_at") or now.isoformat(),
             "last_sent_at": now.isoformat(),
             "last_notification_id": delivery["notification_id"],
@@ -758,8 +858,51 @@ def send_alert(
         occurrence=incident_occurrence,
         event="sent" if delivery["sent"] else "send_failed",
         now=now,
+        evidence={
+            key: delivery.get(key)
+            for key in (
+                "send_error_code",
+                "effect_status",
+                "delivery_owner",
+                "owner_generation",
+                "work_id",
+                "evidence_ref",
+                "evidence_sha256",
+            )
+            if delivery.get(key) is not None
+        },
     )
     return result
+
+
+def send_alert(
+    level: str,
+    title: str,
+    body: str,
+    recipient: str = ALERT_RECIPIENT,
+    *,
+    storage_dir: str = "storage",
+    force_send: bool = False,
+) -> dict[str, Any]:
+    """Send the stable public alert contract through the email-owned record lane."""
+
+    return send_routed_alert(
+        level,
+        title,
+        body,
+        recipient=recipient,
+        storage_dir=storage_dir,
+        force_send=force_send,
+        delivery_class=AlertDeliveryClass.RECORD,
+    )
+
+
+def _registered_internal_alert_keys() -> frozenset[str]:
+    """Return one runtime registry for incident-routed self-healing conditions."""
+
+    from .alert_remediation import SELF_REMEDIATING
+
+    return INTERNAL_REMEDIABLE_ALERT_KEYS | frozenset(SELF_REMEDIATING)
 
 
 def route_internal_remediable_alert(
@@ -789,7 +932,7 @@ def route_internal_remediable_alert(
     """
 
     normalized_key = str(alert_key or "").strip().lower()
-    if normalized_key not in INTERNAL_REMEDIABLE_ALERT_KEYS:
+    if normalized_key not in _registered_internal_alert_keys():
         raise ValueError(f"Unsupported internal-remediable alert_key: {alert_key}")
     normalized_level = str(level or "warn").strip().lower()
     if normalized_level not in ALERT_LEVELS:
@@ -825,7 +968,7 @@ def route_internal_remediable_alert(
             alert_key=normalized_key,
             reason=remediation_reason,
         )
-        delivery = send_alert(
+        delivery = send_routed_alert(
             "critical",
             f"內部自動修復路由失敗（{normalized_key}）",
             "\n".join(
@@ -841,6 +984,7 @@ def route_internal_remediable_alert(
             ),
             recipient=recipient,
             storage_dir=storage_dir,
+            delivery_class=AlertDeliveryClass.HUMAN_ACTION,
         )
         return {
             **delivery,
@@ -869,12 +1013,13 @@ def route_internal_remediable_alert(
                 str(body),
             ]
         )
-        delivery = send_alert(
+        delivery = send_routed_alert(
             normalized_level,
             str(title),
             notify_body,
             recipient=recipient,
             storage_dir=storage_dir,
+            delivery_class=AlertDeliveryClass.HUMAN_ACTION,
         )
         owner_reached = bool(
             delivery.get("sent")
@@ -925,8 +1070,13 @@ def route_internal_remediable_alert(
         incident_id,
         queue_path=incident.store_path_for(storage_dir).parents[1] / "next_tasks.json",
         now=now,
-        notify=lambda level_, title_, body_: send_alert(
-            level_, title_, body_, recipient=recipient, storage_dir=storage_dir
+        notify=lambda level_, title_, body_: send_routed_alert(
+            level_,
+            title_,
+            body_,
+            recipient=recipient,
+            storage_dir=storage_dir,
+            delivery_class=AlertDeliveryClass.HUMAN_ACTION,
         ),
         send_mail=not suppress_owner_transport,
     )
@@ -956,7 +1106,7 @@ def resolve_internal_remediable_alert(
     """Reset one internal alert episode after its condition is observably clear."""
 
     normalized_key = str(alert_key or "").strip().lower()
-    if normalized_key not in INTERNAL_REMEDIABLE_ALERT_KEYS:
+    if normalized_key not in _registered_internal_alert_keys():
         raise ValueError(f"Unsupported internal-remediable alert_key: {alert_key}")
     from .alert_remediation import resolve_internal_alert
 
@@ -973,7 +1123,14 @@ def _internal_condition_alert_key(condition: dict[str, Any]) -> str | None:
     details = condition.get("details")
     candidate = details.get("internal_alert_key") if isinstance(details, dict) else None
     normalized = str(candidate or "").strip().lower()
-    return normalized if normalized in INTERNAL_REMEDIABLE_ALERT_KEYS else None
+    registered = _registered_internal_alert_keys()
+    if normalized in registered:
+        return normalized
+    alert_id = str(condition.get("id") or "").strip().lower()
+    if alert_id == "push_backlog" and isinstance(details, dict):
+        if details.get("ahead_count") == 0 or details.get("cause") == "recovered":
+            return "git_push_backup_hold"
+    return alert_id if alert_id in registered else None
 
 
 def _parse_release_pool_state(storage_dir: str, now: datetime) -> dict[str, Any]:
@@ -5059,12 +5216,8 @@ def _parse_series_registry_state(storage_dir: str) -> dict[str, Any]:
     Warn-only — series branding is a content-quality issue, not an outage.
     """
     try:
-        import importlib.util
-        repo_root = Path(__file__).resolve().parents[3]
-        spec = importlib.util.spec_from_file_location(
-            "_series_registry_audit", str(repo_root / "scripts" / "series_registry.py"))
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
+        from scripts import series_registry as mod
+
         # Read the feed through `storage_dir`, not the module's hardcoded production
         # path. `mod._load_feed()` ignored the argument this condition is given, so
         # an isolated fixture still audited the real feed and the breach count moved
@@ -5308,20 +5461,26 @@ def check_alert_conditions(
         warn("alerts", "alert remediation bridge failed", err=str(exc))
         report["remediation"] = []
 
+    dispositions_by_alert_id = {
+        str(item.get("alert_id") or ""): str(item.get("disposition") or "")
+        for item in report.get("remediation", [])
+        if item.get("alert_id")
+    }
+
     for condition in report.get("conditions", []):
-        if str(condition.get("id")) != "push_backlog" or condition.get("breached"):
+        if condition.get("breached"):
             continue
-        details = condition.get("details") if isinstance(condition.get("details"), dict) else {}
-        if details.get("ahead_count") == 0 or details.get("cause") == "recovered":
+        internal_key = _internal_condition_alert_key(condition)
+        if internal_key:
             resolution = resolve_internal_remediable_alert(
-                alert_key="git_push_backup_hold",
+                alert_key=internal_key,
                 storage_dir=storage_dir,
                 now=report_observed_at,
             )
             report["remediation"].append(
                 {
                     "disposition": "internal_resolution",
-                    "alert_id": "push_backlog",
+                    "alert_id": str(condition.get("id") or ""),
                     **resolution,
                 }
             )
@@ -5344,15 +5503,42 @@ def check_alert_conditions(
             report["remediation"].append(routed["remediation"])
             alerts.append(routed)
             continue
-        alerts.append(
-            send_alert(
-                str(condition["level"]),
-                str(condition["title"]),
-                str(condition["body"]),
-                recipient=recipient,
-                storage_dir=storage_dir,
+        disposition = dispositions_by_alert_id.get(str(condition.get("id") or ""))
+        if disposition == "owner_decision":
+            alerts.append(
+                send_routed_alert(
+                    str(condition["level"]),
+                    str(condition["title"]),
+                    str(condition["body"]),
+                    recipient=recipient,
+                    storage_dir=storage_dir,
+                    delivery_class=AlertDeliveryClass.HUMAN_ACTION,
+                )
             )
-        )
+        elif disposition in {"task", "self_remediating"}:
+            # The platform already owns a repair action. Record the occurrence
+            # without interrupting the owner; failed repairs escalate through
+            # the persistent incident lifecycle above.
+            alerts.append(
+                send_routed_alert(
+                    str(condition["level"]),
+                    str(condition["title"]),
+                    str(condition["body"]),
+                    recipient=recipient,
+                    storage_dir=storage_dir,
+                    delivery_class=AlertDeliveryClass.SELF_HEALING,
+                )
+            )
+        else:
+            alerts.append(
+                send_alert(
+                    str(condition["level"]),
+                    str(condition["title"]),
+                    str(condition["body"]),
+                    recipient=recipient,
+                    storage_dir=storage_dir,
+                )
+            )
 
     report["alerts"] = alerts
     report["sent_count"] = sum(1 for item in alerts if item.get("sent"))

@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "canonical_path": "config/skill_registry.json",
+  "role_vocabulary": [
+    "orchestrator",
+    "leaf",
+    "cross-cutting",
+    "compatibility"
+  ],
+  "contract_tokens": {
+    "dispatch": "config/supervisor_rules.json",
+    "experiment": "scripts/check_experiment_artifacts.py",
+    "facebook": "scripts/fb_realchrome_post.py",
+    "git_writer": "scripts/git_writer_lock.py",
+    "host": "config/host_migration_manifest.json",
+    "incident": "src/volpred/ops/incident.py",
+    "memory": "src/volpred/memory/system.py",
+    "paper": "scripts/paper_pipeline_check.py",
+    "publishing": "scripts/publish_draft.py",
+    "reproducibility": "scripts/reproduce_check.py",
+    "schedules": "config/runtime_schedules.json",
+    "strategy": "docs/strategy-registry.md",
+    "targets": "config/project_targets.json",
+    "task_pool": "storage/ops/task_pool_mode.json",
+    "worktree_merge": "scripts/merge_worktree.sh"
+  },
+  "supervisor_dispatch": {
+    "by_task_family": {
+      "research": ["autonomous-research"],
+      "content": ["feed-publisher", "publication-candidates"],
+      "member": ["member-questions"],
+      "paper": [
+        "paper-submission-pipeline",
+        "paper-update",
+        "finance-paper-quality"
+      ],
+      "review": [
+        "paper-review-cycle",
+        "latex-academic-reviewer",
+        "citation-verifier",
+        "agent-result-verification"
+      ],
+      "code": ["agent-result-verification"],
+      "ops": ["platform-ops-manager", "admin-ops", "memory-health"],
+      "strategy": ["strategy-lifecycle"]
+    },
+    "by_context": {
+      "external_data_fetch": ["external-data-sources"],
+      "taiwan_macro": ["external-data-sources"],
+      "experiment_numbers_produced": ["agent-result-verification"],
+      "worktree_merge": ["worktree-merge-verification"],
+      "paper_stage_decision": ["paper-stage-classifier"],
+      "methodology_peer_review": [
+        "finance-paper-quality",
+        "latex-academic-reviewer"
+      ]
+    },
+    "seed_sources_priority": {
+      "member_qa_ranking": "member-questions",
+      "publication_candidates": "publication-candidates"
+    }
+  },
+  "workflow_usage": {
+    "ops-triage": "後台 surface、平台操作與 ops 導航",
+    "agent-result-check": "agent／worktree 結果回傳後驗證",
+    "research-design": "文獻、實驗、回測與研究續跑",
+    "citation-check": "DOI、書目與 claim-level 引用驗證",
+    "deploy-frontend": "active frontend 安全部署與 live readback",
+    "data-source-lookup": "外部資料源選擇與欄位陷阱",
+    "feed-publish": "撰寫或發布 reader-facing feed 文章",
+    "paper-quality": "claim-evidence 與財金論文品質",
+    "host-migration": "使用者明確要求換機／standby／promotion",
+    "incident-response": "bug、alert、failed workflow 與結案",
+    "latex-review": "read-only LaTeX 學術審查",
+    "member-qa": "會員問題評分、claim 與答覆生命週期",
+    "memory-health": "記憶索引與內容健康稽核",
+    "paper-review-round": "發起、收集與歸檔一輪 paper review",
+    "paper-submission": "唯一 paper state 與 submission orchestration",
+    "paper-update": "主線程修稿、編譯與平台同步",
+    "platform-ops": "一次性 platform triage／repair loop",
+    "skill-governance": "新增、修改、合併、退役或稽核 skill",
+    "publication-scan": "研究／事件文章候選掃描",
+    "reconcile-projections": "local canonical 對 remote/live drift",
+    "reproducibility-audit": "experiment inventory、isolated rerun、identity drift",
+    "schedule-operations": "Operations Core schedule、owner、liveness",
+    "strategy-lifecycle": "策略評估、registry、啟停與 rollout",
+    "task-pool": "task create／claim／start／release／complete",
+    "trending-repost": "熱門主題的 VolPred 原創分析",
+    "web-ui-review": "active frontend UI/UX gate"
+  },
+  "skills": {
+    "admin-ops": {
+      "role": "orchestrator",
+      "domain": "ops",
+      "routes": ["workflow:ops-triage"],
+      "contracts": ["targets", "schedules", "task_pool"]
+    },
+    "agent-result-verification": {
+      "role": "cross-cutting",
+      "domain": "research",
+      "routes": ["workflow:agent-result-check"],
+      "contracts": ["experiment", "reproducibility", "memory"]
+    },
+    "anti-ai-style": {
+      "role": "cross-cutting",
+      "domain": "publishing",
+      "routes": ["support:feed-publisher", "support:trending-repost"],
+      "contracts": []
+    },
+    "autonomous-research": {
+      "role": "orchestrator",
+      "domain": "research",
+      "routes": ["workflow:research-design"],
+      "contracts": ["experiment", "reproducibility", "task_pool", "worktree_merge"]
+    },
+    "citation-verifier": {
+      "role": "cross-cutting",
+      "domain": "paper",
+      "routes": ["workflow:citation-check"],
+      "contracts": []
+    },
+    "data-collection-ops": {
+      "role": "leaf",
+      "domain": "ops",
+      "routes": ["support:platform-ops-manager"],
+      "contracts": ["schedules"]
+    },
+    "deploy-frontend": {
+      "role": "leaf",
+      "domain": "frontend",
+      "routes": ["workflow:deploy-frontend"],
+      "contracts": ["targets"]
+    },
+    "external-data-sources": {
+      "role": "leaf",
+      "domain": "research",
+      "routes": ["workflow:data-source-lookup"],
+      "contracts": []
+    },
+    "fb-publishing": {
+      "role": "leaf",
+      "domain": "publishing",
+      "routes": ["support:trending-repost", "support:feed-publisher"],
+      "contracts": ["facebook"]
+    },
+    "feed-publisher": {
+      "role": "orchestrator",
+      "domain": "publishing",
+      "routes": ["workflow:feed-publish"],
+      "contracts": ["publishing", "schedules", "task_pool"]
+    },
+    "finance-paper-quality": {
+      "role": "cross-cutting",
+      "domain": "paper",
+      "routes": ["workflow:paper-quality"],
+      "contracts": []
+    },
+    "host-migration": {
+      "role": "leaf",
+      "domain": "ops",
+      "routes": ["workflow:host-migration"],
+      "contracts": ["host"]
+    },
+    "incident-response": {
+      "role": "cross-cutting",
+      "domain": "ops",
+      "routes": ["workflow:incident-response"],
+      "contracts": ["incident"]
+    },
+    "journal-review": {
+      "role": "leaf",
+      "domain": "paper",
+      "routes": ["support:paper-submission-pipeline"],
+      "contracts": ["paper"]
+    },
+    "latex-academic-reviewer": {
+      "role": "leaf",
+      "domain": "paper",
+      "routes": ["workflow:latex-review"],
+      "contracts": ["paper"]
+    },
+    "lazypack-infographic": {
+      "role": "cross-cutting",
+      "domain": "publishing",
+      "routes": ["support:feed-publisher"],
+      "contracts": ["publishing", "schedules"]
+    },
+    "member-questions": {
+      "role": "leaf",
+      "domain": "member",
+      "routes": ["workflow:member-qa"],
+      "contracts": ["task_pool"]
+    },
+    "memory-health": {
+      "role": "leaf",
+      "domain": "memory",
+      "routes": ["workflow:memory-health"],
+      "contracts": ["memory"]
+    },
+    "paper-review-cycle": {
+      "role": "leaf",
+      "domain": "paper",
+      "routes": ["workflow:paper-review-round"],
+      "contracts": ["paper", "reproducibility"]
+    },
+    "paper-stage-classifier": {
+      "role": "compatibility",
+      "domain": "paper",
+      "routes": ["support:paper-submission-pipeline"],
+      "contracts": ["paper"]
+    },
+    "paper-submission-pipeline": {
+      "role": "orchestrator",
+      "domain": "paper",
+      "routes": ["workflow:paper-submission"],
+      "contracts": ["paper", "targets"]
+    },
+    "paper-update": {
+      "role": "leaf",
+      "domain": "paper",
+      "routes": ["workflow:paper-update"],
+      "contracts": ["paper", "targets", "git_writer"]
+    },
+    "pdca-operations": {
+      "role": "leaf",
+      "domain": "ops",
+      "routes": ["support:platform-ops-manager"],
+      "contracts": ["incident"]
+    },
+    "platform-ops-manager": {
+      "role": "orchestrator",
+      "domain": "ops",
+      "routes": ["workflow:platform-ops"],
+      "contracts": ["schedules", "task_pool", "incident"]
+    },
+    "project-skill-governance": {
+      "role": "orchestrator",
+      "domain": "governance",
+      "routes": ["workflow:skill-governance"],
+      "contracts": ["dispatch", "targets", "schedules", "task_pool"]
+    },
+    "promote-knowledge": {
+      "role": "leaf",
+      "domain": "memory",
+      "routes": ["support:autonomous-research"],
+      "contracts": ["experiment", "memory"]
+    },
+    "publication-candidates": {
+      "role": "leaf",
+      "domain": "publishing",
+      "routes": ["workflow:publication-scan"],
+      "contracts": ["publishing", "schedules", "task_pool"]
+    },
+    "reconcile-projections": {
+      "role": "leaf",
+      "domain": "ops",
+      "routes": ["workflow:reconcile-projections"],
+      "contracts": ["targets", "schedules"]
+    },
+    "reproducibility-audit": {
+      "role": "cross-cutting",
+      "domain": "research",
+      "routes": ["workflow:reproducibility-audit"],
+      "contracts": ["reproducibility"]
+    },
+    "research-topic-discovery": {
+      "role": "leaf",
+      "domain": "research",
+      "routes": ["support:autonomous-research"],
+      "contracts": ["task_pool"]
+    },
+    "schedule-operations": {
+      "role": "leaf",
+      "domain": "ops",
+      "routes": ["workflow:schedule-operations"],
+      "contracts": ["schedules"]
+    },
+    "strategy-lifecycle": {
+      "role": "leaf",
+      "domain": "strategy",
+      "routes": ["workflow:strategy-lifecycle"],
+      "contracts": ["strategy"]
+    },
+    "task-pool-operator": {
+      "role": "cross-cutting",
+      "domain": "ops",
+      "routes": ["workflow:task-pool"],
+      "contracts": ["task_pool"]
+    },
+    "trending-repost": {
+      "role": "leaf",
+      "domain": "publishing",
+      "routes": ["workflow:trending-repost"],
+      "contracts": ["publishing", "facebook"]
+    },
+    "web-ui-ux-review": {
+      "role": "leaf",
+      "domain": "frontend",
+      "routes": ["workflow:web-ui-review"],
+      "contracts": ["targets"]
+    },
+    "worktree-merge-verification": {
+      "role": "compatibility",
+      "domain": "research",
+      "routes": ["support:agent-result-verification"],
+      "contracts": ["experiment", "worktree_merge", "git_writer"]
+    }
+  }
+}

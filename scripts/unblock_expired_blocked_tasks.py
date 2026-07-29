@@ -44,6 +44,7 @@ if str(_REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "src"))
 from volpred.canonical_write import guard_canonical_write
 from volpred.ops.blocked_reasons import (
+    INCIDENT_SUSTAINED_CLEAN_GATE,
     WORK_SHADOW_CUTOVER_GATE,
 )
 from volpred.ops.diagnostics import warn
@@ -62,6 +63,7 @@ BLOCKED_FIELDS = (
     "blocked_until",
     "blocked_note",
     "unblock_gate",
+    "unblock_incident_id",
 )
 # 3 天：唯一讀 recent-terminal 全文的 reader 是 generate_handoff 的
 # recently_completed（24h 窗口，只用 completed_at/title）；其餘 reader 全部
@@ -98,6 +100,46 @@ def _probe_unblock_gate(
     """Evaluate one allowlisted durable gate without executing task content."""
 
     gate = task.get("unblock_gate")
+    if gate == INCIDENT_SUSTAINED_CLEAN_GATE:
+        incident_id = str(task.get("unblock_incident_id") or "").strip()
+        if not incident_id:
+            return False, "incident_id_missing", None
+        incident_path = _REPO_ROOT / "storage" / "ops" / "incidents.json"
+        try:
+            payload = json.loads(incident_path.read_text(encoding="utf-8"))
+            incidents = payload.get("incidents")
+            if not isinstance(incidents, dict):
+                return False, "incident_store_shape_invalid", None
+            row = incidents.get(incident_id)
+            if not isinstance(row, dict):
+                return False, f"incident_not_found:{incident_id}", None
+        except (OSError, json.JSONDecodeError) as exc:
+            return False, f"incident_store_unavailable:{exc}", None
+
+        state = str(row.get("state") or "").strip().lower()
+        if state == "resolved":
+            return True, f"incident_resolved:{incident_id}", None
+
+        next_eligible_at = None
+        started_at = parse_iso_warn(
+            row.get("clean_streak_started_at"),
+            tag="unblock",
+            field_name="clean_streak_started_at",
+            fallback=None,
+            task_id=str(task.get("id") or ""),
+        )
+        if started_at is not None:
+            from volpred.ops.incident import RESOLVE_MIN_CLEAN_SPAN
+
+            next_eligible_at = (
+                started_at + RESOLVE_MIN_CLEAN_SPAN
+            ).isoformat()
+        return (
+            False,
+            f"incident_not_resolved:{incident_id}:state={state or 'unknown'}",
+            next_eligible_at,
+        )
+
     if gate != WORK_SHADOW_CUTOVER_GATE:
         return False, f"unknown_unblock_gate:{gate!r}", None
     from volpred.ops.task_pool_mode import (

@@ -163,6 +163,10 @@ def sandbox_profile(
         '(import "system.sb")',
         "(deny default)",
         "(allow process*)",
+        # Producers may use subprocess/multiprocessing internally.  Let the
+        # sandboxed parent reap only processes it created; unrelated host
+        # processes remain outside this capability boundary.
+        "(allow signal (target children))",
         # The model-provider transport needs outbound TLS. Inbound listeners
         # are not required and remain denied. Remote side effects are also
         # fenced by the synthetic HOME plus credential-env scrub in

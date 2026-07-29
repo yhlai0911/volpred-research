@@ -11,7 +11,7 @@
 2. **規則已機械化的 class**：信任 gate（CI / hook / ratchet / audit 會擋），你只需知道它存在、別繞過它。
 3. **查某條歷史 incident 全文**：看該 class「代表 incident」行末的 archive 檔（`Q1`=`2026-Q1.md`，`Q2`=`2026-Q2.md`，`Q3`=`2026-Q3.md`），用日期在該檔內 `grep '^## <日期>'`。
 4. **踩了新坑做完根因修正**：在對應 class 加一行代表 incident（日期 + 一句 + `Qn`），把全文 entry 追加進當季 archive；季度結束把當季 entry 併入 archive。
-5. **anti-stacking**：一個 concern 只有一個 enforcement owner；修復要收編進既有 gate，不要每次疊一層新機制（見 §H 與 `loop-health-and-dreaming.md` Layer Map）。
+5. **anti-stacking**：一個 concern 只有一個 enforcement owner；修復要收編進既有 gate，不要每次疊一層新機制（見 §H 與 `docs/governance/enforcement_layer_map.md`）。
 
 ## Class 目錄（TOC）
 
@@ -4322,3 +4322,219 @@ continuity suite **8 passed**。Production兩檔也連續重跑成功，catalog�
 owner／ACL／空search_path全符，service-role transaction E2E通過後rollback。此類
 managed owner-transfer與migration重跑失敗為
 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-29 — macOS `flock` 不會替同程序的第二個 FD 自動重入
+
+**證據化症狀**：`lazypack_async_render.py enqueue` 先取得
+`compute_queue._receipt_lock()`，再呼叫同一模組的 canonical `enqueue()`；後者以第二個
+FD 對同一 `.receipts.lock` 再做 `LOCK_EX`。macOS 會讓它等待自己而不是重入。Live
+PID 13404 因此卡在第二次 `flock`，同時阻塞已於 07:28:04 完成的 K1694 worker
+settlement；process sampling與`lsof`都顯示兩條執行緒停在同一把 receipt lock。
+
+**根因層級（跨程序 transaction contract）**：既有 `threading.RLock` 只保護 Python
+執行緒，巢狀 context仍會另開 kernel FD；程式把 process-local reentrancy與
+cross-process exclusion誤當成一個原語已同時提供。
+
+**底層修復與制度化**：receipt lock仍由 process-wide `RLock`序列化各執行緒、由
+`flock`排除其他程序；另以 thread-local depth讓同一執行緒的巢狀 transaction重用
+外層kernel lease，不再開第二個FD。最外層的所有例外路徑都會清depth並unlock。
+Regression以daemon thread實際巢狀取得兩次；舊碼在1秒後仍死鎖（RED），修正後立即
+完成，完整compute／owner／scheduler相鄰範圍 **144 passed**，Matt Spec／Standards
+雙PASS。
+
+**Live read-back**：以正式termination intent
+`435b6b8daa3f4a56aa7c38af2fc4eeb8`只終止已證實自鎖的exact PID 13404；lock由kernel
+釋放後，K1694立即寫出terminal failed receipt與source-task settlement，舊worker自然
+退出。原K781 lazypack enqueue隨後在新contract下收斂為唯一queued receipt
+`lazypack-mile_35863986`，重播只回`already queued`且沒有第二份job。此
+same-process nested-flock自鎖類根因為 **`root_cause_fixed_and_verified`**。
+
+### 2026-07-29 — `cron_jobs` 逃出 Operations Core inventory 會製造假「legacy=0」
+
+**證據化症狀**：正式owner report宣稱全部`system_crontab` jobs已由Operations Core
+持有、legacy LaunchAgent為0，但live仍有`com.volpred.compute-worker`每15分鐘觸發。
+根因不是cutover後復活，而是compute clock只存在另一個top-level `cron_jobs` registry；
+loader與owner audit根本沒有枚舉它。
+
+**底層修復**：compute cadence、wrapper、parallelism與activation全部移入canonical
+`system_crontab`；舊row只保留`status=retired`的rollback receipt，任何active
+`cron_jobs` row都讓owner plan fail closed。Owner census另對所有loaded
+`com.volpred.*`做canonical set difference，Telegram、dispatch與host dashboard三個
+KeepAlive control daemons則顯式納入registry。Wrapper在業務動作前執行owner gate；
+Core只做60秒內detached dispatch，長job timeout與terminal receipt仍由compute executor
+擁有。
+
+**因果退役gate**：physical bootout前不只要求scheduler成功；還必須找到activation後
+的natural Core fire，並讓指定downstream compute smoke以
+`schedule_dispatch.fire_key`回指同一份success receipt。任何一邊缺失、失敗或key不同，
+`reconcile_schedule_owners --apply`都會在live mutation前拒絕。
+
+**回歸與live read-back**：compute／owner／scheduler相鄰範圍 **144 passed**，
+Matt Spec／Standards雙PASS。07:45 natural fire
+`operations-core-v1:volpred-compute-worker:133ccb319bd393968dde017b`
+attempt 1／exit 0；priority-0 smoke同秒completed／exit 0，回讀55/55 Core、legacy 0且
+fire key exact match。Gate放行後只bootout `com.volpred.compute-worker`；
+`launchctl print`回113/not found，targeted audit
+`conflicts=[]`、`dormant_legacy_surfaces=[]`，同時detached Core executor仍持續跑K781，
+證明工作未被誤停。此漏網clock類根因為
+**`root_cause_fixed_and_verified`**；Issue #46其他capability與14-day sustained-clean
+仍保持OPEN／contained。
+
+---
+
+## 2026-07-29 — K1380_v4 的 RC/SPA 兩個欄位都標錯，且方向相反（Paper 9 C3 canonical 指標）
+
+**類型**：統計方法誤標 → 對外結論失真（AGENTS.md 第 13 條回溯更正）
+
+**發現路徑**：2026-07-29 hourly slot-1（37c1e7e0）承接
+`k1380_v4_white_rc_snooping_correction_20260729`。前一班（e98b43fc）在裁決
+`k1380_stage_refactor_collect` 時讀 code 發現 `white_rc_test` 非 RC，狀態停在
+`contained`（只證據化、未修）。本班完成修復與驗證。
+
+**錯誤內容**：`experiments/K1380_v4/k1380_v4_results.json` 兩個檢定欄位都名實不符 ——
+
+1. `white_rc_test`（p=0.000，宣稱「after RC correction」）實為**單一 spec 的 bootstrap
+   DM t 檢定，零窺探修正**。`k1380_v4.py:771-782` 的 `max(0.0, t_b_a4f)` 是對純量取
+   max，而 White 的 Reality Check 定義上是跨候選集合的 max 型統計量。→ **高估顯著性**。
+2. `hansen_spa_test`（p=0.2886，不拒絕）實為 **least-favourable 的 SPA_u**
+   （每個 spec 用自己的 d-bar 置中 = studentized White RC），不是 Hansen (2005) 建議
+   回報的 consistent SPA_c。→ **低估顯著性**。
+
+第 2 項是本班新發現：先前把它當成「有做多重檢定修正所以可信」的對照組，因此得出
+「真正修正過的檢定沒有拒絕」。該讀法建立在一個同樣有缺陷的數字上。
+
+**根因**：兩處都是「按統計方法的名字命名欄位，但實作的是另一個統計量」，且沒有任何
+斷言把實作綁回定義（max 型統計量必須跨 spec 取 max；SPA 必須報 c 變體）。
+
+**修復**：`experiments/K1380_v4/k1380_v4_rc_correction.py` 純重新分析 —— `k1380_v4.py:693`
+在檢定前已存下完整 17×n_oos QLIKE 矩陣，缺陷全在其下游，**不需重跑 GARCH**。腳本以
+**逐位重現 v4 四項數字**（atol=1e-12）為前置斷言，重現失敗即中止；再計算 Hansen 三重
+recentering（u/c/l，斷言 p_l ≤ p_c ≤ p_u）、古典非 studentized White RC、以及 Holm
+step-down。v4 原始 JSON 未被修改。
+
+**驗證與新結論**：499 次 bootstrap 中 144 次超過觀測統計量，其 max **全部**由
+A5(t=-11.2)/C2(t=-21.1)/C3(t=-10.0) 三支遠差於 benchmark 的 spec 取得（77/48/19），
+無一次由具競爭力的 spec 取得 —— v4 的「不顯著」量到的是這三支的退化程度。修正後
+SPA_c p < 1/499（fixed-omega 與 per-resample 兩種 studentization 慣例下皆然），
+Holm 在 FWER 0.10 下 15 支中 11 支拒絕。**聯合窺探修正後的檢定拒絕 H0** ——
+與先前記載的方向相反。
+
+**影響面**：Paper 9 C3 在本單收斂前不得以任何一個舊口徑書寫。C3 verdict 由
+`C3 MIXED` 更新為 `C3 POSITIVE (snooping-adjusted)`，canonical 數字改指
+`k1380_v4_rc_correction_results.json`。
+
+**遺留（未關）**：A5/C2/C3 的極端損失可能是數值退化本身。SPA_c 依統計理由捨棄它們，
+但若它們是壞的就不該是候選。已開 followup 追查 + Codex 二審修正腳本。
+
+---
+
+## 2026-07-29 — Issue #46：orphan reaper 把「無主」誤當成「可進 main」，並以非原子 Git 交易收件
+
+**證據化症狀**：K1694 在正式 Codex review 為 FAIL 後，`experiments/` orphan sweep
+仍可把結果、spec 與衍生檔收進 main；同時 reaper 的舊交易會直接操作共用 index，
+以一般 commit 前進 HEAD，失敗清理由 path-scoped reset 收尾。這使「作者 session 已結束」
+被錯當成研究 admission，且 pre-commit hook 或不合作的外部 writer 若在交易途中前進
+HEAD，reaper 沒有一個不覆蓋他人 commit 的 compare-and-swap 出口。
+
+**根因層級**：
+
+1. `experiments/` 的 ownership 與 research admission 共用同一個 `default=adopt` 判斷；
+   reaper 沒有要求完整 experiment directory、artifact gate、byte-bound review、
+   methodology gate 與 K-id registry 同時成立。
+2. admission 讀 working tree 的 knowledge、exclusion、baseline 與 registry；未提交的外部
+   工作可能替同一批候選提供「已通過」證據，政策與產物不在同一個 Git snapshot。
+3. Git writer lock 只序列化合作 writer，舊 commit 路徑仍缺少 exact parent/scope/blob
+   read-back 與 ref CAS；失敗後的補償式 reset 不能安全處理不合作 writer。
+4. active frontend 是私有 `yhlai0911/volpred-v2`，但 target config 只記本機目錄。
+   clean clone／GitHub Actions 因而拿不到前端，讓 route parity 與型別 gate 在「本機有殘留
+   checkout、CI 沒有」兩種拓撲間漂移。
+
+**底層修復與制度化**：`config/orphan_namespaces.json` 將 experiment 的 atomic unit
+提升為第一層 directory，整個單位必須一起通過 `experiment_ready_for_main`；checker
+只從同一個 committed HEAD 讀 knowledge、exclusion、baseline、K-id registry 與 namespace
+policy，再把 admission 綁到每個待 stage blob 的 SHA。未知 gate、dirty policy、HEAD
+漂移、刪除／改名中的不完整目錄一律 fail closed。Commit path 要求全域 index 起始乾淨，
+執行正式 hooks 後重驗 exact staged scope/blob，以 `write-tree` 與 detached
+`commit-tree` 建立候選，再驗 parent、tree scope、blob，最後只做一次
+`update-ref HEAD <new> <expected>` CAS；外部 HEAD 若先前進，外部 commit 保留且 reaper
+不做 ref rollback。
+
+active frontend 的 canonical target 同步補上 private repository 與 immutable revision；
+GitHub Actions 以 read-only deploy key checkout 該 revision，不再依賴 root repo 內的
+偶然巢狀 checkout。K1694 未通過 review 的衍生 artifacts 已回滾，只保留原始碼與原始
+cache；正式產品／交易日曆的 follow-up 已進任務池，不阻擋平台復機。已合併且通過 review
+的 K1727、K1812 knowledge 則單獨同步，避免 artifact CI 因另一個 session 的未合併研究
+而整體停擺。
+
+**狀態**：本機 affected-suite 與 private frontend gate 已通過；本條在 GitHub CI、
+Operations Core deploy 與 live read-back 完成前維持 **`contained`**，不得宣稱
+`root_cause_fixed_and_verified`。
+
+---
+
+## 2026-07-29 — immutable supervisor 身分不可繼承到 canonical／provider child
+
+**證據化症狀**：immutable release cutover 後，dispatch supervisor 每分鐘的 admission
+settlement 都回 `task_pool_cli_failed rc=1`，沒有新 worker。以 live daemon 的
+`VOLPRED_SUPERVISOR_RELEASE_*`、`VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256` 與
+`VOLPRED_CANONICAL_REPO_ROOT` 重播 canonical
+`scripts/task_pool_claim.py dispatch-pending`，可 100% 重現
+`ModuleNotFoundError: No module named 'scripts'`；移除 release marker 後則正常進到
+`supervisor_capability_required`。Queue validator 同期為 0/3569 invalid，child PPID
+也精確指向 supervisor，故不是壞資料或 parent-proof 誤拒。
+
+**根因層級（process identity／import provenance contract）**：release marker 是
+daemon 本身的 process-scoped identity，bootstrap 卻讓所有 subprocess 原樣繼承。
+Canonical child 並未由 pinned loader 啟動，但 `volpred.ops` 看到 marker 後改走 pinned
+語意，造成 import path 與 writer capability 判斷錯置。原 `_task_pool_command` 又把空
+stdout 解成 `{}` 並丟棄 stderr，live 只剩 generic failure，掩蓋真正 traceback。
+
+**底層修復與制度化**：新增 dependency-free
+`dispatch_supervisor.child_env.external_child_environment()`；在套用 overrides 後統一
+移除所有 `VOLPRED_SUPERVISOR_*`、`VOLPRED_DEFERRED_RELOAD_*` 與
+`VOLPRED_CANONICAL_REPO_ROOT`，但保留 PATH、HOME、OAuth、actor、task owner、
+provider receipt 與 Git writer lease。Task-pool、pregate、send-alert、Claude、
+Codex preflight／reachability／worker、PHASE-Z pre-fire／clone pytest／trusted hook、
+workspace merge 全部走同一邊界；stage0→bootstrap 是唯一刻意保留 pinned identity 的
+chain。Task-pool 非零退出同時保留 bounded stderr，避免同類事故再被 generic rc
+靜默化。
+
+**回歸與狀態**：各邊界先有可重現 RED，再修成 GREEN；bootstrap→grandchild E2E 也斷言
+private identity 為空，supervisor／PHASE-Z／workspace／release／task-pool affected
+suite 共 **460 passed**。在 immutable live reload、新 worker completion receipt、
+連續 scheduler tick 與通知／pregate read-back 完成前，本條仍為 **`contained`**。
+
+---
+
+## 2026-07-30 — Alert 全量鏡像 Telegram，且 durable email conflict 被誤報成 host cron failure
+
+**證據化症狀**：`send_alert()` 曾把每一封 INFO／復原／self-heal 告警都直接鏡像
+Telegram，與 `progress_report.py` 的即時進度 owner 重疊；同時相同
+`level+title+date` 的 owned-email command 若 body 或路由用途改變，會命中 durable
+idempotency conflict。例外向外冒泡後，包住 `check_alerts` 的 cron wrapper 只看到非零
+退出，下一輪把 notification transport failure 報成 `host_cron_fail`，使用者收到錯誤
+根因與重複通知。
+
+**根因層級**：通道 policy 用 severity／「每封都鏡像」取代 remediation disposition；
+Telegram 有兩個外送 owner；email effect key 沒綁 payload identity；typed command
+conflict 沒有在 transport boundary 轉成可觀測 receipt，incident candidate 也缺
+effect evidence。
+
+**底層修復與制度化**：維持 `send_alert()` 公開 signature 與既有
+`sha256(level + "\\0" + title)` 24h 去重契約，另以 typed `AlertDeliveryClass` 做內部
+路由。Telegram 回到 `progress_report.py` 單一 owner；owner decision／recovery／record
+走 email，自動建單與 self-heal 只進 incident lifecycle，持續失敗才升級。Owned-email
+command key 加入 payload hash，route transition 不再被舊 record 擋住；typed
+`OwnedEmailCommandConflict` 轉成 `send_error_code=owned_email_command_conflict`，
+並把 effect owner／generation／work id／evidence 寫入 incident candidate。所有新版
+alert email 標題統一加 `[新架構派發]`。
+
+**回歸與狀態**：alert、incident lifecycle、CI recovery、owned-email、Postgres effect
+affected suites 共 **293 passed**，Spec／Standards 兩軸 review 均 PASS。production
+smoke `effect_owned_email_c737f1e75e5172720523bf6723459c35` 由
+`operations_core` generation 4 以 attempt 1 delivered，Gmail Sent evidence SHA
+`8e71849f3b2718b16d3228366dd3b700a1654923865c354711477278d8e1d470`；receipt 回讀
+`email=delivered`、`telegram=not_routed`，標題為
+`[新架構派發][VolPred Alert][INFO] 通知路由上線驗證`。本 incident slice 已完成五步
+Gate，狀態為 **`root_cause_fixed_and_verified`**；Issue #13 umbrella 的其他 acceptance
+仍各自驗收，不因本條自動關閉。

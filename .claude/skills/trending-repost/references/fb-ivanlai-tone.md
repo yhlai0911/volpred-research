@@ -1,157 +1,60 @@
-# Ivan Lai Facebook 貼文 — 風格與機制規則
+# Ivan Lai Facebook 文案規格
 
-每篇 trending_repost（以及未來其他 reader-facing FB 發文）的 FB 貼文寫法。
-原則：FB 是社群動態，不是 newsletter 副本。
+本檔只擁有**文案風格**。瀏覽器、查重、圖片上傳、第一則留言送出、狀態與 readback 全由 `fb-publishing` 的 real-Chrome workflow 擁有。
 
----
+## 文案輸入
 
-## 文案結構規則（重寫，不複製 VolPred 內文）
+從已驗證的 VolPred thesis 重新寫一篇 200–400 字 FB-native 短文：
 
-1. **FB 文案必須是改寫版**
-   - ❌ 不可把 VolPred 原文整段或大段 copy-paste 到 FB
-   - ❌ 不可把 title + first paragraph 直接 reuse
-   - ✓ 從 VolPred 文章抓 1 個 hook + 1 個關鍵數字 / 場景，重新組成 FB 短文
-   - ✓ FB 文案字數 200-400 字（中文）— 比 VolPred 內文短得多
+- 抓一個個人觀察或 tension 作開頭
+- 保留一至兩個最重要、可追溯的數字
+- 短句、短段、段落間留白
+- 留一個清楚 take 或問題，不把網站完整論證搬過來
+- 至少附一張與內文相符、沒有重複資訊的圖
 
-2. **主貼文不要放連結**
-   - ❌ 主貼文 body 內**不貼** volpred.zeabur.app/... 連結
-   - 原因：FB 演算法對外連結 reach 大幅打折
-   - 主貼文純文字（中文） + 視需要 1 張圖（VolPred 文章的核心圖表，獨立上傳 FB）
+不得複製 VolPred title、首段或整段正文，也不得寫成 newsletter 摘要、SEO snippet 或密集條列。
 
-3. **VolPred 連結放在第一則留言**
-   - 主貼文發出後，**自己**立刻在貼文下方 reply 1 則留言
-   - 留言內容：「完整版分析 + 圖表在這裡 → https://volpred.zeabur.app/v3/reports/<mile_id>」
-   - **URL hard rule**：只能用 `/v3/reports/<mile_id>`，**絕對不可**用 `/article/<mile_id>`（404）。發文前 `curl -I` 驗 HTTP 200。
-   - 留言可以簡單，但連結要完整正確
+## Ivan Lai voice
 
----
+- 第一人稱觀察先行，不以「根據資料顯示」開場
+- 每段最多三句，讓讀者有呼吸空間
+- 語氣可有判斷，但數字與因果強度不得超過證據
+- 不用制式財經 recap 把所有統計量塞進主貼文
+- 結尾避免「綜上所述」「總結而言」與硬 CTA
 
-## Ivan Lai 舊文口吻（必模仿）
+額外禁用：
 
-每篇 FB 文案要符合 Ivan Lai 在 FB 上的個人帳號慣有口吻：
+- 「值得關注／值得深思／不容忽視」
+- 「在 AI 時代／在新常態下」
+- 「投資人應該／建議讀者」
+- 強行「不是 X，而是 Y」的假哲理
 
-### 結構原則
+完整語言 gate 見 `anti-ai-style`。
 
-1. **先個人觀察或判斷**
-   - 開頭不是「今天市場…」「根據資料…」（這是新聞稿腔）
-   - 開頭是「我覺得…」「看到 XXX 時，我會想…」「這幾天有件事卡在我腦袋裡…」（第一人稱觀察 / 思考起點）
+## Draft contract
 
-2. **句子短、段落短**
-   - 每句 ≤ 25 字（中文）
-   - 每段 ≤ 3 句
-   - 段落間用空行分隔，視覺呼吸感
+```markdown
+# mile_id: <mile_id>
 
-3. **保留留白**
-   - 不寫成密集論證
-   - 結尾不下標準新聞稿結論（「綜上所述…」「總結而言…」全禁）
-   - 留 1-2 個讀者自己連結的空間（拋問題、留懸念）
+## 主貼文
+<不含連結的 FB-native 正文>
 
-4. **不把論證一次講滿**
-   - VolPred 完整論證留在原文（連結看了才有）
-   - FB 只給：1 個觀察 + 1 個關鍵數字 + 1 個個人 take
-   - 想知道完整推導 → 點留言連結
+## 第一則留言
+<由 config/project_targets.json 的 site.default_remote_url 衍生並驗證的文章 URL>
 
-5. **不要寫成制式財經摘要**
-   - 禁「Q1 EPS 1.85 美元（YoY +12%）」這種純財經 brief 寫法
-   - 改成「Meta 帳上多了一張 1000 億的單。我想的是這錢誰付」（口語 + 個人 take）
+## 圖片
+<image path or URL, one per line>
+```
 
-### 禁用 / 慎用詞彙（FB 比 VolPred 內文更嚴）
+content producer 只需交付這份 draft。不得自行操作瀏覽器或直接寫 FB/feed status。
 
-除了 `.claude/skills/anti-ai-style/references/8-landmines.md` 的 8 大地雷外，FB 額外禁：
+## Handoff checklist
 
-- 「綜上所述」/「總結而言」/「總的來說」（新聞稿腔）
-- 「值得關注」/「值得深思」/「不容忽視」（套話）
-- 「在 AI 時代」/「在後疫情時代」/「在新常態下」（大詞包裝）
-- 「根據資料顯示」/「研究表明」（FB 沒人這樣講話）
-- 「投資人應該…」/「建議讀者…」（FB 不是顧問報告）
+- [ ] 主貼文與網站正文不是逐段複製
+- [ ] 主文沒有 VolPred URL
+- [ ] 第一則留言 URL 由 active runtime target 解析且 HTTP 200
+- [ ] 圖片至少一張，無視覺重複
+- [ ] `anti_ai_gate.py` exit 0
+- [ ] draft 已保存到 `storage/drafts/fb_<mile_id>.md`
 
-### 好範例 vs 壞範例
-
-❌ 壞範例（制式財經摘要）：
-> Meta Q1 2026 財報出爐，EPS 1.85 美元，YoY +12%，CapEx 240 億美元。在 AI 時代，巨頭資本支出競賽白熱化，值得投資人深思。
-
-✓ 好範例（Ivan Lai 口吻）：
-> Meta 這季財報我看到一個數字，腦袋停了一下。
->
-> CapEx 240 億美元一季。
->
-> 過去 Meta 一年才花這個數字。現在一季就燒掉。
->
-> 不是說燒得對不對，而是當這成為新常態，毛利模型要重寫了。
-
-（短句、空行、第一人稱、留白給讀者自己連結）
-
----
-
-## 操作備註
-
-### 0. 發文前必查：FB 是否已被手動發過（2026-06-19 用戶硬性要求，FB dual-publish 恢復同時生效）
-
-**老闆可能臨時心血來潮自己先在 Ivan Lai FB 發了同主題** → 自動再發會造成重複貼文、傷個人帳號觀感。所以每次 trending_repost / event_article 要 dual-publish 到 FB 前，**第一步（先於寫文案、先於輸入）必做**：
-
-1. Claude in Chrome 開 Ivan Lai 個人 FB 動態（瀏覽器自選 MAC STUDIO Chrome，deviceId 見 memory `reference_fb_chrome_browser_autoselect`，不問用戶）。
-2. 掃最近 **~7–14 天**貼文，比對本篇主題/角度是否已出現（看主論點、關鍵數字、主圖、是否帶 volpred.zeabur.app 連結）。
-3. 判定與動作：
-   - **已發過**（老闆手動貼了同主題）→ **跳過 FB 主貼文**，只做 feed 發佈；`mark_fb_post_status.py --status skipped_already_posted` + 把既有貼文 URL 記到 `details.fb_existing_post_url`；**不重發、不在既有貼文下硬補東西**。
-   - **沒發過** → 照下面正常 dual-publish 流程。
-   - **不確定**（相近但不完全同主題）→ 偏保守跳過 FB，標 `fb_post_status: skipped_uncertain_dup`，回報裡點出讓老闆定奪（寧可漏發不要重發）。
-4. feed 端不受影響：無論 FB 跳過與否，feed 文章照常發。FB 跳過不算任務失敗。
-
-### 中文文案輸入方式
-
-claude-in-chrome 在 FB 貼文輸入中文時：
-
-1. **不要逐字輸入**（type one character at a time）
-   - 原因：FB 編輯器對中文 IME 處理不穩；逐字輸入容易：
-     - 字打到一半 input 失焦
-     - 中文輸入法狀態被切回英文
-     - 看似輸入完成但實際只 partial 進去
-2. **優先用整段貼上**
-   - 用 `mcp__claude-in-chrome__form_input` 一次塞完整段文字
-   - 或先 copy 到 clipboard 再 paste（如 form_input 不穩）
-3. **貼上後先檢查內容**
-   - Screenshot 確認文字完整、中文無亂碼、換行正確
-   - 確認**沒有意外把 VolPred 連結貼進主貼文**
-4. **檢查通過才送出**
-   - 點「發佈」前再次確認 — FB 一旦 publish 不能 silent edit（edit 會有「已編輯」標記，影響觀感）
-
-### 留言（first comment）操作
-
-5. 主貼文 publish 後，立刻在自己貼文下方 reply 一則 comment
-6. Comment 內容：簡短引導 + VolPred 完整連結
-7. Comment 也用整段貼上不要逐字輸入
-8. Comment publish 後 screenshot 留 audit trail，更新 `storage/reports/trending_repost_log.json`：
-   ```json
-   "fb_post_status": "success",
-   "fb_post_url": "https://www.facebook.com/...",
-   "fb_comment_url": "https://volpred.zeabur.app/v3/reports/<mile_id>",
-   "fb_post_timestamp": "2026-05-16T...+08:00"
-   ```
-9. **必同步 patch `storage/reports/feed.json` 對應 entry `details`**（2026-05-25 K1401 教訓；HARD RULE）：
-   ```bash
-   jq --arg id "<mile_id>" --arg url "<fb_post_url>" --arg ts "<fb_post_timestamp>" \
-     'map(if .id == $id then .details = ((.details // {}) + {
-        fb_post_status: "success",
-        fb_post_url: $url,
-        fb_comment_url: ("https://volpred.zeabur.app/v3/reports/" + $id),
-        fb_post_timestamp: $ts
-      }) else . end)' \
-     storage/reports/feed.json > /tmp/feed_patched.json && mv /tmp/feed_patched.json storage/reports/feed.json
-   uv run python scripts/supabase_sync.py sync-article --id <mile_id>
-   ```
-   **Why**：只記 trending_repost_log.json 不寫回 feed.json，audit 看不到 FB URL → 反覆掃成「未發」重 post。mile_daaff779 (K1401 GDP) 03:33 catch-up success 但 details 為空，11:44 又 fail entry — 即此 root cause。
-
-### 失敗 fallback
-
-- claude-in-chrome session 沒登入 Ivan Lai FB → log `fb_post_status: failed`，原因 `not_logged_in`，下次重試前提示用戶登入
-- 主貼文發出但 comment 連結沒貼成功 → log `fb_post_status: partial_no_comment_link`，下次手動補
-- 中文 input 出現亂碼 → 立刻 cancel publish，screenshot 留證，log `fb_post_status: failed`，原因 `chinese_input_corruption`，3 retry 後 escalate 給用戶
-
----
-
-## 為什麼這麼嚴
-
-- **Mission Goal 5（曝光流量拉高）+ Goal 1（文章寫好）** 同時依賴 FB 發文品質
-- FB 是 VolPred 主要曝光入口之一；發得像新聞稿 / 像 AI → reach 與互動雙降
-- Ivan Lai 個人帳號的觀感（個人聲量 / 信任度）是長期商業價值的 anchor — 一篇看起來像「AI 代寫」會傷信任 brand
-- FB 主貼文無連結 + 留言連結 是經 reach test 的最高 ROI 寫法（FB 演算法對純文字 + 圖比帶連結 reach 高 2-5×）
+通過後交 `fb-publishing`。文案完成只代表 handoff-ready，不代表 FB delivery 成功。

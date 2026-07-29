@@ -21,7 +21,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.dispatch_supervisor import decision, scheduler, state as st
+from scripts.dispatch_supervisor import custody_receipt, decision, scheduler, state as st
 
 CRON = "7 * * * *"
 
@@ -129,6 +129,10 @@ def test_decision_module_source_has_no_io_clock_or_randomness() -> None:
 def consistency_env(tmp_path: Path, monkeypatch):
     """Frozen fixture: pinned due-ness, stubbed pregate, mocked worker/phase_z,
     a decide() spy, and a resettable injected state file."""
+    custody_receipt.initialize_producer_custody_ledger(
+        tmp_path,
+        migration_confirmed_quiescent=True,
+    )
     state_path = tmp_path / "dispatch_state.json"
     with st._locked_state(state_path) as (_fh, data):
         data["last_fire_at"] = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
@@ -295,5 +299,5 @@ def test_request_survives_full_pool_skip(consistency_env, monkeypatch) -> None:
 
     result = env.tick(dry_run=False, schedules_path=schedules_path)
 
-    assert result["reason"] == "slots_full"
+    assert result["reason"] == "producer_slot_in_flight"
     assert st.read_state(state_path)["fire_request_reason"] == "boss-email"  # survived

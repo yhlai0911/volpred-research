@@ -1,129 +1,130 @@
 ---
 name: fb-publishing
 description: >
-  發佈 VolPred 文章到 Ivan Lai 個人 FB（與 feed 雙發佈）的完整 SOP。涵蓋
-  發前查重（好幾個管道會轉發 → 必查是否已發過）、主貼文必附圖（結果圖 + 懶人包）、
-  CDP-attach 持久 profile Chrome 機制、繼續→發佈兩段式、第一則留言補連結。
-  Trigger: 'FB 發文', '發 FB', 'Ivan Lai FB', 'dual publish', 'trending FB',
-  '轉發到 FB', 'fb_realchrome_post'. 語氣/文案規範另見 anti-ai-style +
-  trending-repost/references/fb-ivanlai-tone.md（本 skill 不重複，只指路）。
+  Use to deliver a prepared VolPred Facebook-native draft to Ivan Lai's
+  personal Facebook through the sole supported real-Chrome worker, including
+  idempotency, images, first-comment link, status writing, and readback. It
+  does not write the feed article or choose the topic.
 ---
 
-# FB 個人帳號（Ivan Lai）發佈 SOP
+# Facebook Publishing
 
-**唯一機制**：`scripts/fb_realchrome_post.py` — CDP-attach 到**專用持久 profile 的真 GUI Chrome**
-（`~/.volpred/fb_chrome_profile`，port 9222）驅動貼文。**不用 Graph API（個人帳號無 headless 發文權）、
-不用粉專、不用 headless 假瀏覽器**（老闆硬性約束）。機制演進 + 一次性登入設定見 `docs/fb_realchrome_setup.md`。
-
-## ⛔ 硬規則（違反 = 發文失敗）
-
-1. **發前必查重（好幾個管道會轉發同文到 Ivan FB）** — 這是**第一步、先於任何動作**。查 Ivan Lai 時間軸
-   有沒有已發過同主題（老闆可能手動發過、其他管道可能已轉發）。**已發過 → 跳過 FB 主貼文、只做 feed**，
-   `mark_fb_post_status.py --status success`（或 skipped），**不重發、不硬補**。查法：worker 有 canonical
-   `fb_post_status` idempotency guard（success → skip，除非 `--force`）；但 canonical 只擋「本 pipeline 發過的」，
-   **老闆手動/他管道發的要親自看時間軸**（`fb_realchrome_post.py --check` 開 FB 頁 + grep 主題關鍵詞）。
-2. **主貼文一定要附圖（結果圖 + 懶人包圖）** — 純文字貼文違反規則（2026-07-07 老闆糾正）。draft 的
-   `## 圖片` 區塊列圖 URL（結果圖 e.g. `*_rv_divergence` + 懶人包 e.g. `*_concept/results-*`）；worker 會
-   下載 + `set_input_files` 上傳 + 驗證縮圖數>0，**0 張則 ABORT 不發**。
-   - **結果圖 vs 懶人包 內容查重（2026-07-07 老闆 Telegram「圖片為什麼會重複」）**：懶人包的 results/近期 panel
-     常已完整涵蓋結果圖的同一組數字（如 mile_d12825bb：結果圖兩根 bar = 懶人包 panel1 全期 + panel3 近90日，
-     4 張 md5 不同但視覺上讀者會覺得「同一張圖貼兩次」）。**附圖前先看一眼**：若結果圖的圖表已被某張懶人包 panel
-     以更完整形式呈現 → **拿掉獨立結果圖，只貼懶人包**；或改挑一張懶人包沒畫到的結果圖。不要為湊「結果圖+懶人包」硬塞重複內容。
-3. **主貼文不放連結；連結進第一則留言**（引流；主文放連結會被 FB 降觸及 + 生錯誤預覽卡）。
-4. **全形 emoji / 中文用剪貼簿**：中文用 `pbcopy`+`Cmd+V`（`type` 會亂碼）；worker 已內建「貼上前一刻
-   pbcopy + pbpaste 驗證 + composer 回讀驗證」防剪貼簿被搶（2026-07-07 差點貼成別的 URL 的教訓）。
-5. **語氣**：Ivan Lai 第一人稱、無「朋友問我」開場、無列表體 — 見 `anti-ai-style` +
-   `trending-repost/references/fb-ivanlai-tone.md`（唯一語氣來源，本檔不重複）。
-
-## Draft 格式（`storage/drafts/fb_mile_<id>.md`）
-
-```
-# mile_id: mile_XXXX
-## 主貼文（純文字，不含連結）
-<Ivan Lai 語氣正文…>
-## 第一則留言（貼連結）
-https://volpred.zeabur.app/v3/reports/mile_XXXX
-## 圖片（結果圖 + 懶人包，依序）
-https://.../<結果圖>.png
-https://.../<懶人包 concept>.png
-https://.../<懶人包 results-*>.png
-```
-
-## Handoff 持久化（awaiting_interactive_session 硬規則，2026-07-07）
-
-背景排程無 Chrome → 完稿要交給互動 session 發時，**完稿必須先落在 canonical 位置
-`storage/drafts/fb_mile_<id>.md`**，否則稿與狀態 decouple → 稿遺失（error_log 2026-07-07）。
-
-`mark_fb_post_status.py` 是 enforcement owner：設 `awaiting_interactive_session` 時
-**強制**有 canonical 稿，否則拒絕（exit 1）。標 handoff 一律帶 `--draft-file`：
+`fb-publishing` 是 **FB delivery 的唯一 owner**。唯一可操作瀏覽器的機制是：
 
 ```bash
-uv run python scripts/mark_fb_post_status.py --mile-id mile_<id> \
-  --status awaiting_interactive_session --draft-file /tmp/fb_<id>.md
-#   → 同步把完稿寫進 storage/drafts/fb_mile_<id>.md（含主貼文+留言連結）
+uv run python scripts/fb_realchrome_post.py --help
 ```
 
-`audit_fb_pipeline.py` 加了 backstop invariant：awaiting 但缺 canonical 稿 → warn。
+不得改用其他 browser automation、headless browser、Graph API、MCP 或人工拼接 DOM 步驟。真 Chrome profile、attach 與一次性登入設定只看 `docs/fb_realchrome_setup.md`，不在 skill 重複 runtime 細節。
 
-## 雙發佈完成契約（2026-07-23）
+## Ownership boundary
 
-`trending_repost` / `event_article` 發佈到 feed 的同一班，必須先把 FB-native
-完稿寫到 `storage/drafts/fb_mile_<id>.md`，才可把來源 task 標 `succeeded`。
-Chrome 當下不可用只影響是否送上 FB，不影響「稿必須已存在」；不得用
-`fb_repost_*` follow-up 取代完稿。`task_pool_claim.py complete` 會從發佈結果中的
-`mile_<id>` 回讀 canonical 稿，缺檔就 fail-closed 保留原 task 為 `in_progress`。
+- 內容 producer：完成 FB-native 文案、圖片清單與留言連結。
+- `feed-publisher`：建立／更新 VolPred 文章並回傳真實 `mile_id`。
+- **本 skill**：real-Chrome preflight、dry-run、送出、第一則留言、canonical status 與 readback。
+- `mark_fb_post_status.py`：唯一 FB state writer。禁止直接改 feed 或 trending log。
 
-`audit_fb_pipeline.py` 是第二道 backstop：所有非 terminal FB 狀態（不只
-`awaiting_interactive_session`）缺稿都會立即告警，不等 48h TTL。
+## 1. 輸入契約
 
-## 執行流程（風控 gate，逐步不可跳）
+Canonical draft：
+
+```text
+storage/drafts/fb_<mile_id>.md
+```
+
+必含：
+
+- `mile_id`
+- 主貼文：FB-native 短文，正文不放外部連結
+- 第一則留言：由 `config/project_targets.json` 的 `site.default_remote_url` 衍生，且 publish 前 HTTP 200
+- 圖片：至少一張；內容重複的結果圖與懶人包圖要先去重
+
+文案規則見 [fb-ivanlai-tone.md](../trending-repost/references/fb-ivanlai-tone.md)，並先通過：
 
 ```bash
-# 1) 查 attach + 登入（自癒：port 沒開會自動起 dedicated Chrome）
-uv run python scripts/fb_realchrome_post.py --check       # 期望 [PASS] 已登入
-
-# 2) dry-run：填文 + 附圖，停在送出前，人工看 /tmp/fb_realchrome/post_with_images_*.png
-uv run python scripts/fb_realchrome_post.py --post storage/drafts/fb_mile_<id>.md --dry-run
-
-# 3) 真發（idempotency guard 自動查 fb_post_status；已發過會 [SKIP]）
-uv run python scripts/fb_realchrome_post.py --post storage/drafts/fb_mile_<id>.md
-#   --force 只在確認要覆蓋（例如刪掉舊版重發）時用
+uv run python scripts/anti_ai_gate.py --file storage/drafts/fb_<mile_id>.md
 ```
 
-**⚠️ 撤掉重發不要先 --dry-run 再 --force（2026-07-07 T2 教訓）**：`--dry-run` 會把附圖留在 composer
-草稿裡，緊接的 `--force` `set_input_files` 是「**新增**」不是「取代」→ 舊圖 + 新圖疊加（實測 2 舊 + 3 新
-= 5 張，重現老闆「圖片重複」）。已加防護：附圖前自動清既存照片 + `縮圖數 != 附圖數` 直接 ABORT 不發。
-撤掉重發時**直接 `--force` 一次到位**，看 log `已附 N 張圖（縮圖偵測 N）` 兩數必須相等。
-
-### 撤掉舊貼文（重發前刪除）— `--delete-matching`
-
-老闆要求「撤掉重發」時，先刪舊貼文再 `--post --force`。刪除是對外破壞性動作，走兩段式風控：
+背景 producer 若只能 handoff，使用 formal writer：
 
 ```bash
-# 段 1：定位 + 截圖目標貼文（不刪）。幾何定位：捲到含 ANCHOR 的正文 → 取其正上方
-#        aria-label「對<名字>的這則貼文採取的動作」⋯ 鈕（非「最小容器」heuristic，會誤配）。
-uv run python scripts/fb_realchrome_post.py --delete-matching "<貼文正文前幾字>"
-#   → 人工看 /tmp/fb_realchrome/delete_target_*.png 確認是「該篇」（勿誤刪置頂/他篇）
-
-# 段 2：確認後真刪（⋯ → 移到垃圾桶 → 確認鈕「移動」）
-uv run python scripts/fb_realchrome_post.py --delete-matching "<貼文正文前幾字>" --confirm-delete
+uv run python scripts/mark_fb_post_status.py \
+  --mile-id <mile_id> \
+  --status awaiting_interactive_session \
+  --draft-file <completed-fb-draft.md>
 ```
-ANCHOR 用主貼文開頭純文字（避免用被 FB 截斷/「查看更多」的尾段）。FB 虛擬捲動會 unmount
-捲太遠的貼文 → 定位用「漸進小捲 + scrollIntoView 保持 mounted」，不要一次捲過頭。
 
-發文兩段式（worker 已處理）：composer → **繼續** → 貼文設定 → **發佈** → 自動補第一則留言連結 →
-`mark_fb_post_status.py --status success`。
+writer 會持久化 canonical draft；缺稿會 fail closed。
 
-## 誠實邊界
+## 2. Preflight 與查重
 
-- CDP-attach 若觸 FB 自動化風控/鎖帳 → **誠實回報物理上限，不硬繞**。
-- AI **不能替老闆輸入 FB 密碼**（硬規則）；dedicated Chrome 的一次性 FB 登入只能老闆做。
-- 刪除既有貼文（重發用）是對外破壞性動作 → 先確認是「該篇」再刪（screenshot 驗證，勿誤刪置頂/他篇）。
+```bash
+uv run python scripts/fb_realchrome_post.py --check
+```
 
-## 相關檔（不重複維護，只指路）
+只有 attach、登入與專用 profile 全通過才繼續。發布前：
 
-- 機制 + 一次性設定：`docs/fb_realchrome_setup.md`
-- Ivan Lai 語氣：`.claude/skills/trending-repost/references/fb-ivanlai-tone.md` + `anti-ai-style`
-- 粉專（另一條線，個人優先）：`.claude/skills/trending-repost/references/fb-page-operations.md`
-- 狀態機/查重欄位：`scripts/mark_fb_post_status.py`、`storage/reports/feed.json` 的 `fb_post_status`
-- 懶人包生圖：`.claude/skills/lazypack-infographic/`
+- 先讓 worker 的 idempotency guard 檢查 canonical FB state。
+- 用同一 real-Chrome surface 確認 timeline 沒有老闆手動或其他管道先發的同主題。
+- 不確定是否重複時停止並回報，不用 `--force` 猜測。
+
+## 3. 兩段式 delivery
+
+```bash
+# 停在送出前，檢查正文、圖片縮圖與留言
+uv run python scripts/fb_realchrome_post.py \
+  --post storage/drafts/fb_<mile_id>.md \
+  --dry-run
+
+# 確認後只送一次
+uv run python scripts/fb_realchrome_post.py \
+  --post storage/drafts/fb_<mile_id>.md
+```
+
+worker 必須一次完成主貼文與第一則留言；不得用 FB 原生排程把兩者拆開，也不得 retry-loop。中文輸入、剪貼簿驗證、圖片上傳與 permalink capture 都交給 worker 實作。
+
+`--force` 只在已確認刪除或撤回舊版、且用戶明確要求重發時使用。
+
+## 4. Destructive correction
+
+刪除貼文是外部破壞性動作，只在用戶明確要求時走 worker 的兩段式：
+
+```bash
+uv run python scripts/fb_realchrome_post.py --delete-matching "<anchor>"
+# 檢視 worker 產生的目標截圖
+uv run python scripts/fb_realchrome_post.py \
+  --delete-matching "<anchor>" \
+  --confirm-delete
+```
+
+未先確認截圖，不得執行 `--confirm-delete`。
+
+## 5. Completion readback
+
+delivery 結束後執行：
+
+```bash
+uv run python scripts/audit_fb_pipeline.py
+
+jq --arg id "<mile_id>" \
+  '.[] | select(.id == $id) | {
+    id,
+    fb_post_status: .details.fb_post_status,
+    fb_post_url: .details.fb_post_url,
+    fb_posted_at: .details.fb_posted_at
+  }' storage/reports/feed.json
+```
+
+完成條件：
+
+- canonical status 是 terminal success，或 worker 明確 idempotent skip
+- permalink 已捕捉且對應本篇
+- timeline 可見主貼文與正確圖片
+- 第一則留言的 VolPred URL 可開啟
+- `audit_fb_pipeline.py` 不再把本篇列為 pending、missing draft 或 stale
+
+Chrome 暫不可用時只能回報 `awaiting_interactive_session`；這代表 handoff 已保存，不代表 delivery 完成。FB delivery 失敗不回滾已正確發布的 feed article，但要保留正式狀態與 retry owner。
+
+## 歷史與其他 surface
+
+[fb-page-operations.md](../trending-repost/references/fb-page-operations.md) 只保留歷史背景，不是 active runbook。現行 delivery 一律以本 skill、`fb_realchrome_post.py --help` 與 canonical status writer 為準。

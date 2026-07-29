@@ -153,6 +153,7 @@ SOURCE_TASK_CREATION_GRACE = timedelta(minutes=5)
 # canonical task file while a sibling thread is truncating and rewriting it.
 _SOURCE_TASK_QUEUE_THREAD_LOCK = threading.RLock()
 _RECEIPT_THREAD_LOCK = threading.RLock()
+_RECEIPT_LOCK_LOCAL = threading.local()
 
 
 @dataclass(frozen=True)
@@ -332,18 +333,33 @@ def _write_job_file(path: Path, payload: dict[str, Any]) -> None:
 
 @contextmanager
 def _receipt_lock():
-    """Serialize receipt read/merge/write operations across threads/processes."""
+    """Serialize receipt writes and allow same-thread composite transactions.
+
+    ``flock`` is not reentrant when the same process opens a second file
+    descriptor on macOS. Composite producers such as lazypack intentionally
+    hold this transaction while calling the canonical queue writer, so a
+    same-thread nested acquisition must reuse the outer kernel lease.
+    """
     QUEUE_DIR.mkdir(parents=True, exist_ok=True)
     lock_path = QUEUE_DIR / ".receipts.lock"
-    with _RECEIPT_THREAD_LOCK, lock_path.open(
-        "a+",
-        encoding="utf-8",
-    ) as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        try:
-            yield
-        finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    with _RECEIPT_THREAD_LOCK:
+        depth = int(getattr(_RECEIPT_LOCK_LOCAL, "depth", 0))
+        if depth:
+            _RECEIPT_LOCK_LOCAL.depth = depth + 1
+            try:
+                yield
+            finally:
+                _RECEIPT_LOCK_LOCAL.depth = depth
+            return
+
+        with lock_path.open("a+", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            _RECEIPT_LOCK_LOCAL.depth = 1
+            try:
+                yield
+            finally:
+                _RECEIPT_LOCK_LOCAL.depth = 0
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
 def _normalize_output_path(raw: str | Path) -> str:
@@ -2645,6 +2661,13 @@ def _claim_job(job_path: Path, *, context: str) -> dict[str, Any] | None:
         job["status"] = "running"
         job["started_at"] = utc_now()
         job["claimed_by_pid"] = os.getpid()
+        if os.environ.get("VOLPRED_SCHEDULE_OWNER") == "operations_core":
+            job["schedule_dispatch"] = {
+                "owner": "operations_core",
+                "job_id": os.environ.get("VOLPRED_SCHEDULE_JOB_ID"),
+                "fire_key": os.environ.get("VOLPRED_SCHEDULE_FIRE_KEY"),
+                "scheduled_for": os.environ.get("VOLPRED_SCHEDULED_FOR"),
+            }
         # D6b: pid-reuse-safe fingerprint (same lstart scheme as the dispatch
         # supervisor's procutil). The probe happens before the receipt critical
         # section: it may execute `ps`, and no external subprocess belongs
@@ -3054,12 +3077,14 @@ def _resolve_max_parallel(cli_value: int | None) -> int:
     """Effective drain-loop parallelism bound.
 
     Precedence: explicit CLI flag > `max_parallel` on the volpred-compute-worker
-    entry in config/runtime_schedules.json > DRAIN_MAX_PARALLEL_DEFAULT. The
-    config file wins over a code constant because it is the repo's canonical
-    schedule spec (CLAUDE.md: 排程 → config/runtime_schedules.json): ops can
-    retune the bound in the same place the job's cadence lives, without a code
-    change. Every fallback is loud, and run-loop prints the effective bound at
-    startup, so the value in force is always observable in the worker log.
+    Operations Core item in config/runtime_schedules.json >
+    DRAIN_MAX_PARALLEL_DEFAULT. Retired ``cron_jobs`` rows are audit history,
+    never an active policy source. The config file wins over a code constant
+    because it is the repo's canonical schedule spec (CLAUDE.md: 排程 →
+    config/runtime_schedules.json): ops can retune the bound in the same place
+    the job's cadence lives, without a code change. Every fallback is loud, and
+    run-loop prints the effective bound at startup, so the value in force is
+    always observable in the worker log.
     """
     if cli_value is not None:
         if cli_value < 1:
@@ -3069,7 +3094,14 @@ def _resolve_max_parallel(cli_value: int | None) -> int:
     entries: list[Any] = []
     try:
         data = json.loads(config_path.read_text(encoding="utf-8"))
-        raw_entries = data.get("cron_jobs") if isinstance(data, dict) else None
+        system_crontab = (
+            data.get("system_crontab") if isinstance(data, dict) else None
+        )
+        raw_entries = (
+            system_crontab.get("items")
+            if isinstance(system_crontab, dict)
+            else None
+        )
         entries = raw_entries if isinstance(raw_entries, list) else []
     except (OSError, json.JSONDecodeError) as exc:
         warn(

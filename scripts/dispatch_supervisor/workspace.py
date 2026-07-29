@@ -42,22 +42,28 @@ receipt with real measured durations — never fabricated numbers.
 """
 from __future__ import annotations
 
+import errno
 import fcntl
 import json
 import logging
 import os
 import re
+import selectors
+import signal
 import shutil
+import stat
 import subprocess
+import tempfile
 import time
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any, Callable
 
 from volpred.canonical_write import canonical_writes_disabled
-from volpred.ops import legacy_retirement_events
+from volpred.ops import legacy_retirement_events, termination
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
@@ -66,7 +72,8 @@ from volpred.ops.git_writer_lock import (
 from volpred.ops.next_tasks import append_task_record
 from volpred.ops.remediation_throttle import INCIDENT_ADJUDICATION_SOURCE
 
-from . import phase_z
+from . import phase_z, procutil
+from .child_env import external_child_environment
 
 LOG = logging.getLogger(__name__)
 
@@ -93,10 +100,86 @@ _ISOLATION_MODES = ("off", "pilot", "enforce")
 # exhaustion, auth/quota, superseded, orphan sweep) produced bytes nobody
 # verified end-of-turn — those go to remediation, never silently to main.
 _MERGEABLE_OUTCOMES = {"success", "codex_failover_recovered"}
+_LEGACY_WORKSPACE_DRAIN_EVENT = "legacy_workspace_producer_drain"
+_PRODUCER_LIVENESS_UNVERIFIED_OUTCOMES = {
+    "kill_failed_orphan",
+    "timeout_unverified",
+    "orphan_unverified_not_killed",
+    "orphan_unverified_no_pid",
+}
+_PRODUCER_NEVER_SPAWNED_OUTCOMES = {
+    "provider_policy_denied",
+    "spawn_not_started",
+}
 
 _JOB8_RE = re.compile(
     r"^dispatch-slot-\d+-([0-9a-f]{8})(?:-[a-z0-9][a-z0-9._-]*)?$"
 )
+
+# Quarantine widens the task output contract so a failed producer cannot retain
+# a live checkout forever, but it must never widen the repository's credential
+# boundary.  These are intentionally high-confidence signatures: a false
+# positive retains the recoverable checkout for adjudication; a false negative
+# would persist a credential in Git history.
+_SECRET_SIGNATURES: tuple[tuple[str, re.Pattern[bytes]], ...] = (
+    (
+        "private_key",
+        re.compile(
+            rb"-----BEGIN (?:OPENSSH |RSA |EC |DSA )?PRIVATE KEY-----"
+        ),
+    ),
+    (
+        "github_token",
+        re.compile(rb"\bgh[pousr]_[A-Za-z0-9_]{20,}\b"),
+    ),
+    (
+        "openai_token",
+        re.compile(rb"\bsk-(?:proj-)?[A-Za-z0-9_-]{20,}\b"),
+    ),
+    (
+        "aws_access_key",
+        re.compile(rb"\bAKIA[0-9A-Z]{16}\b"),
+    ),
+    (
+        "google_api_key",
+        re.compile(rb"\bAIza[0-9A-Za-z_-]{30,}\b"),
+    ),
+    (
+        "slack_token",
+        re.compile(rb"\bxox[baprs]-[A-Za-z0-9-]{20,}\b"),
+    ),
+    (
+        "jwt",
+        re.compile(
+            rb"\beyJ[A-Za-z0-9_-]{12,}\.[A-Za-z0-9_-]{12,}"
+            rb"\.[A-Za-z0-9_-]{12,}\b"
+        ),
+    ),
+)
+_GENERIC_SECRET_ASSIGNMENT = re.compile(
+    rb"(?i)\b("
+    rb"access[_-]?token|refresh[_-]?token|api[_-]?key|client[_-]?secret|"
+    rb"password|passwd"
+    rb")\b\s*[:=]\s*[\"']?"
+    rb"([A-Za-z0-9_./+=:@-]{16,})"
+)
+_PLACEHOLDER_SECRET_MARKERS = (
+    b"example",
+    b"placeholder",
+    b"changeme",
+    b"redacted",
+    b"dummy",
+    b"fake",
+    b"test-token",
+    b"test_secret",
+    b"metered-secret",
+)
+_REF_LOCK_OWNER_KIND = "volpred-dispatch-release-ref-lock-v1"
+_SECRET_SCAN_CHUNK_BYTES = 1024 * 1024
+_SECRET_SCAN_OVERLAP_BYTES = 64 * 1024
+_SNAPSHOT_FALLBACK_BUDGET_BYTES = 64 * 1024 * 1024
+_CHECKPOINT_SCAN_LOGICAL_BYTES = 64 * 1024 * 1024
+_CHECKPOINT_SCAN_TIMEOUT_S = 60.0
 
 
 # ── config ───────────────────────────────────────────────────────────────────
@@ -197,6 +280,1033 @@ def _git(repo: Path, *args: str, runner=subprocess.run,
     )
 
 
+def _git_bytes(
+    repo: Path,
+    *args: str,
+    runner=subprocess.run,
+    timeout_s: float = _GIT_TIMEOUT_S,
+    input_bytes: bytes | None = None,
+) -> subprocess.CompletedProcess:
+    """Binary Git plumbing for immutable blob read/write operations."""
+    return runner(
+        ["git", "-C", str(repo), *args],
+        capture_output=True,
+        text=False,
+        timeout=timeout_s,
+        check=False,
+        input=input_bytes,
+    )
+
+
+def _process_tail(value: str | bytes | None, limit: int = 300) -> str:
+    if isinstance(value, bytes):
+        value = value.decode("utf-8", errors="replace")
+    return (value or "")[-limit:]
+
+
+def _git_diff_paths(
+    repo: Path,
+    revision: str,
+    *,
+    runner=subprocess.run,
+    timeout_s: float = 60,
+) -> tuple[subprocess.CompletedProcess, list[str]]:
+    """Read Git pathnames losslessly; line-delimited porcelain is never safe."""
+    proc = _git_bytes(
+        repo,
+        "diff",
+        "--name-only",
+        "-z",
+        revision,
+        runner=runner,
+        timeout_s=timeout_s,
+    )
+    raw = proc.stdout or b""
+    if isinstance(raw, str):
+        paths = [path for path in raw.split("\0") if path]
+    else:
+        paths = [
+            os.fsdecode(path)
+            for path in raw.split(b"\0")
+            if path
+        ]
+    return proc, paths
+
+
+@contextmanager
+def _branch_ref_lock(
+    repo_root: Path,
+    branch: str,
+    *,
+    runner=subprocess.run,
+):
+    """Hold Git's native `<ref>.lock` across the destructive remove window.
+
+    The repository writer lock coordinates VolPred writers.  The ref lock also
+    fences an otherwise-uncoordinated `git commit` in the linked checkout:
+    Git can create its candidate object, but cannot advance the checked-out
+    branch while the release CAS is in progress.  The complete owner identity
+    is hard-linked into place atomically, so a crash cannot leave an anonymous
+    permanent lock: a later pass reclaims only this module's lock and only when
+    its PID/start-time identity is confirmed dead or reused.
+    """
+    branch_path = Path(branch)
+    if branch_path.is_absolute() or ".." in branch_path.parts:
+        raise OSError("unsafe branch ref")
+    common = _git(
+        repo_root,
+        "rev-parse",
+        "--git-common-dir",
+        runner=runner,
+        timeout_s=30,
+    )
+    if common.returncode != 0 or not (common.stdout or "").strip():
+        raise OSError("git common dir unavailable")
+    common_dir = Path((common.stdout or "").strip())
+    if not common_dir.is_absolute():
+        common_dir = (repo_root / common_dir).resolve()
+    ref_path = common_dir / "refs" / "heads" / branch_path
+    lock_path = ref_path.with_name(f"{ref_path.name}.lock")
+    lock_path.parent.mkdir(parents=True, exist_ok=True)
+    started_wall = procutil.get_process_start_wall(os.getpid())
+    if started_wall is procutil.PROBE_FAILED or not started_wall:
+        raise OSError("release ref lock owner identity unavailable")
+    owner = {
+        "kind": _REF_LOCK_OWNER_KIND,
+        "pid": os.getpid(),
+        "pid_started_wall": started_wall,
+        "token": uuid.uuid4().hex,
+    }
+    owner_bytes = (
+        json.dumps(owner, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode("utf-8")
+    intent_path = lock_path.with_name(
+        f".{lock_path.name}.volpred-{owner['token']}.tmp"
+    )
+    intent_fd = os.open(
+        intent_path,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0),
+        0o600,
+    )
+    try:
+        intent_handle = os.fdopen(intent_fd, "wb", closefd=True)
+        intent_fd = -1
+        with intent_handle as handle:
+            handle.write(owner_bytes)
+            handle.flush()
+            os.fsync(handle.fileno())
+
+        for attempt in range(2):
+            try:
+                # Unlike O_CREAT followed by write, hard-linking exposes either
+                # the complete owner record or no lock at all.
+                os.link(intent_path, lock_path)
+                break
+            except FileExistsError:
+                if attempt or not _reclaim_stale_release_ref_lock(lock_path):
+                    raise
+        yield
+    finally:
+        if intent_fd >= 0:
+            os.close(intent_fd)
+        try:
+            intent_path.unlink()
+        except FileNotFoundError:
+            pass  # silent-ok: best-effort cleanup lost an unlink race
+        try:
+            if lock_path.read_bytes() == owner_bytes:
+                lock_path.unlink()
+        except FileNotFoundError:
+            pass  # silent-ok: best-effort cleanup lost an unlink race
+
+
+def _reclaim_stale_release_ref_lock(lock_path: Path) -> bool:
+    """Reclaim only a dead VolPred-owned lock; unknown Git locks stay fenced."""
+    try:
+        raw = lock_path.read_bytes()
+        owner = json.loads(raw.decode("utf-8"))
+    except (
+        FileNotFoundError,
+        OSError,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+    ) as exc:
+        LOG.warning(
+            "release ref lock is not reclaimable path=%s reason=%s",
+            lock_path,
+            type(exc).__name__,
+        )
+        return False
+    if not isinstance(owner, dict) or owner.get("kind") != _REF_LOCK_OWNER_KIND:
+        return False
+    try:
+        pid = int(owner.get("pid"))
+    except (TypeError, ValueError) as exc:
+        LOG.warning(
+            "release ref lock owner PID is malformed path=%s reason=%s",
+            lock_path,
+            type(exc).__name__,
+        )
+        return False
+    expected_start = str(owner.get("pid_started_wall") or "")
+    identity = procutil.check_identity(pid, expected_start)
+    if identity not in {procutil.IDENTITY_DEAD, procutil.IDENTITY_MISMATCH}:
+        return False
+    try:
+        # Content readback is the lock's CAS token.  Never unlink a path that
+        # another process replaced between the identity probe and cleanup.
+        if lock_path.read_bytes() != raw:
+            return False
+        lock_path.unlink()
+        return True
+    except (FileNotFoundError, OSError) as exc:
+        LOG.warning(
+            "release ref lock reclaim lost CAS path=%s reason=%s",
+            lock_path,
+            type(exc).__name__,
+        )
+        return False
+
+
+def _runtime_credential_values() -> list[bytes]:
+    values: list[bytes] = []
+    for key, value in os.environ.items():
+        upper = key.upper()
+        if not any(
+            marker in upper
+            for marker in (
+                "TOKEN",
+                "SECRET",
+                "API_KEY",
+                "PASSWORD",
+                "CREDENTIAL",
+                "COOKIE",
+            )
+        ):
+            continue
+        encoded = os.fsencode(value)
+        if len(encoded) < 12 or any(
+            marker in encoded.lower()
+            for marker in _PLACEHOLDER_SECRET_MARKERS
+        ):
+            continue
+        values.append(encoded)
+    return values
+
+
+def _secret_candidate_rules(data: bytes) -> list[str]:
+    """Return high-confidence rule ids without ever exposing matched values."""
+    rules = [
+        rule
+        for rule, signature in _SECRET_SIGNATURES
+        if signature.search(data)
+    ]
+    for match in _GENERIC_SECRET_ASSIGNMENT.finditer(data):
+        candidate = match.group(2).lower()
+        if any(marker in candidate for marker in _PLACEHOLDER_SECRET_MARKERS):
+            continue
+        rules.append("secret_assignment")
+        break
+    for encoded in _runtime_credential_values():
+        if encoded in data:
+            rules.append("runtime_credential")
+            break
+    return sorted(set(rules))
+
+
+def _kmp_failure(pattern: bytes) -> list[int]:
+    failure = [0] * len(pattern)
+    matched = 0
+    for index in range(1, len(pattern)):
+        while matched and pattern[matched] != pattern[index]:
+            matched = failure[matched - 1]
+        if pattern[matched] == pattern[index]:
+            matched += 1
+            failure[index] = matched
+    return failure
+
+
+class _StreamingSecretScanner:
+    """Fixed-window regex scan plus exact cross-chunk credential matching."""
+
+    def __init__(self) -> None:
+        self.rules: set[str] = set()
+        self.tail = b""
+        self.patterns = _runtime_credential_values()
+        self.failures = [_kmp_failure(pattern) for pattern in self.patterns]
+        self.states = [0] * len(self.patterns)
+        self.matched_patterns: set[int] = set()
+        self.jwt_stage = 0
+        self.jwt_segment_length = 0
+        self.jwt_matched = False
+        self.jwt_previous_byte: int | None = None
+        self.jwt_segment_last_byte: int | None = None
+
+    @staticmethod
+    def _jwt_word_byte(byte: int | None) -> bool:
+        return byte is not None and (
+            ord("A") <= byte <= ord("Z")
+            or ord("a") <= byte <= ord("z")
+            or ord("0") <= byte <= ord("9")
+            or byte == ord("_")
+        )
+
+    def _reset_jwt(self, byte: int, previous_byte: int | None) -> None:
+        self.jwt_stage = (
+            1
+            if byte == ord("e") and not self._jwt_word_byte(previous_byte)
+            else 0
+        )
+        self.jwt_segment_length = 0
+        self.jwt_segment_last_byte = None
+
+    def _feed_jwt(self, chunk: bytes) -> None:
+        if self.jwt_matched:
+            return
+        alphabet = (
+            b"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            b"abcdefghijklmnopqrstuvwxyz"
+            b"0123456789_-"
+        )
+        for byte in chunk:
+            previous_byte = self.jwt_previous_byte
+            if self.jwt_stage == 0:
+                self._reset_jwt(byte, previous_byte)
+            elif self.jwt_stage == 1:
+                if byte == ord("y"):
+                    self.jwt_stage = 2
+                else:
+                    self._reset_jwt(byte, previous_byte)
+            elif self.jwt_stage == 2:
+                if byte == ord("J"):
+                    self.jwt_stage = 3
+                    self.jwt_segment_length = 0
+                    self.jwt_segment_last_byte = None
+                else:
+                    self._reset_jwt(byte, previous_byte)
+            elif self.jwt_stage in {3, 4, 5}:
+                if byte in alphabet:
+                    if (
+                        self.jwt_stage == 5
+                        and self.jwt_segment_length >= 12
+                        and self._jwt_word_byte(self.jwt_segment_last_byte)
+                        and not self._jwt_word_byte(byte)
+                    ):
+                        # The regex may end before an allowed ``-`` byte:
+                        # ``\b`` succeeds between the prior word byte and the
+                        # non-word hyphen even though the character class could
+                        # otherwise consume it.
+                        self.rules.add("jwt")
+                        self.jwt_matched = True
+                        return
+                    self.jwt_segment_length += 1
+                    self.jwt_segment_last_byte = byte
+                elif (
+                    byte == ord(".")
+                    and self.jwt_stage in {3, 4}
+                    and self.jwt_segment_length >= 12
+                ):
+                    self.jwt_stage += 1
+                    self.jwt_segment_length = 0
+                    self.jwt_segment_last_byte = None
+                else:
+                    if (
+                        self.jwt_stage == 5
+                        and self.jwt_segment_length >= 12
+                        and self._jwt_word_byte(self.jwt_segment_last_byte)
+                        != self._jwt_word_byte(byte)
+                    ):
+                        self.rules.add("jwt")
+                        self.jwt_matched = True
+                        return
+                    self._reset_jwt(byte, previous_byte)
+            self.jwt_previous_byte = byte
+
+    def finish(self) -> None:
+        if (
+            not self.jwt_matched
+            and self.jwt_stage == 5
+            and self.jwt_segment_length >= 12
+            and self._jwt_word_byte(self.jwt_segment_last_byte)
+        ):
+            self.rules.add("jwt")
+            self.jwt_matched = True
+
+    def feed(self, chunk: bytes) -> None:
+        window = self.tail + chunk
+        self.rules.update(_secret_candidate_rules(window))
+        self.tail = window[-_SECRET_SCAN_OVERLAP_BYTES:]
+        self._feed_jwt(chunk)
+        for pattern_index, pattern in enumerate(self.patterns):
+            if pattern_index in self.matched_patterns:
+                continue
+            state = self.states[pattern_index]
+            failure = self.failures[pattern_index]
+            for byte in chunk:
+                while state and pattern[state] != byte:
+                    state = failure[state - 1]
+                if pattern[state] == byte:
+                    state += 1
+                    if state == len(pattern):
+                        self.rules.add("runtime_credential")
+                        self.matched_patterns.add(pattern_index)
+                        state = failure[state - 1]
+                        break
+            self.states[pattern_index] = state
+
+
+class _ScanDeadlineExceeded(RuntimeError):
+    pass
+
+
+def _scan_secret_stream(
+    handle,
+    *,
+    deadline: float | None = None,
+) -> list[str]:
+    """Bounded scanner whose memory does not grow with artifact size."""
+    scanner = _StreamingSecretScanner()
+    while True:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise _ScanDeadlineExceeded
+        chunk = handle.read(_SECRET_SCAN_CHUNK_BYTES)
+        if not chunk:
+            break
+        scanner.feed(chunk)
+    scanner.finish()
+    return sorted(scanner.rules)
+
+
+def _scan_secret_pipe(
+    pipe,
+    *,
+    deadline: float,
+) -> list[str]:
+    """Deadline-aware pipe scanner; a child that never closes is killable."""
+    scanner = _StreamingSecretScanner()
+    selector = selectors.DefaultSelector()
+    selector.register(pipe, selectors.EVENT_READ)
+    try:
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise _ScanDeadlineExceeded
+            events = selector.select(remaining)
+            if not events:
+                raise _ScanDeadlineExceeded
+            chunk = os.read(pipe.fileno(), _SECRET_SCAN_CHUNK_BYTES)
+            if not chunk:
+                break
+            scanner.feed(chunk)
+    finally:
+        selector.close()
+    scanner.finish()
+    return sorted(scanner.rules)
+
+
+def _clone_file_snapshot(
+    source_fd: int,
+    snapshot_path: Path,
+    *,
+    fallback_budget: int,
+    deadline: float,
+) -> tuple[str, int]:
+    """Copy only from the pinned source FD, preserving sparse extents.
+
+    A pathname-based clone has a replace-and-restore ABA window: the producer
+    can swap the path after ``open`` while the clone command independently
+    resolves a different inode.  The checkpoint boundary is small (64 MiB
+    logical), so bounded ``pread``/``pwrite`` is preferable to that ambiguity.
+    """
+    source_stat = os.fstat(source_fd)
+    size = source_stat.st_size
+    allocated_bytes = source_stat.st_blocks * 512
+    if allocated_bytes > fallback_budget:
+        return "checkpoint_snapshot_clone_unavailable", 0
+    target_fd = os.open(
+        snapshot_path,
+        os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_CLOEXEC", 0),
+        stat.S_IMODE(source_stat.st_mode) or 0o600,
+    )
+    try:
+        os.ftruncate(target_fd, size)
+        offset = 0
+        copied_bytes = 0
+        sparse_supported = hasattr(os, "SEEK_DATA") and hasattr(os, "SEEK_HOLE")
+        while offset < size and sparse_supported:
+            if time.monotonic() >= deadline:
+                return "checkpoint_scan_deadline", 0
+            try:
+                data_offset = os.lseek(source_fd, offset, os.SEEK_DATA)
+            except OSError as exc:
+                if exc.errno == errno.ENXIO:
+                    break
+                if exc.errno in {errno.EINVAL, getattr(errno, "ENOTSUP", -1)}:
+                    sparse_supported = False
+                    break
+                raise
+            if data_offset >= size:
+                break
+            hole_offset = min(
+                os.lseek(source_fd, data_offset, os.SEEK_HOLE),
+                size,
+            )
+            cursor = data_offset
+            while cursor < hole_offset:
+                if time.monotonic() >= deadline:
+                    return "checkpoint_scan_deadline", 0
+                chunk = os.pread(
+                    source_fd,
+                    min(_SECRET_SCAN_CHUNK_BYTES, hole_offset - cursor),
+                    cursor,
+                )
+                if not chunk:
+                    raise OSError("sparse snapshot source shortened")
+                if copied_bytes + len(chunk) > fallback_budget:
+                    return "checkpoint_snapshot_clone_unavailable", 0
+                written = 0
+                while written < len(chunk):
+                    wrote = os.pwrite(
+                        target_fd,
+                        chunk[written:],
+                        cursor + written,
+                    )
+                    if wrote <= 0:
+                        raise OSError("sparse snapshot write made no progress")
+                    written += wrote
+                copied_bytes += len(chunk)
+                cursor += len(chunk)
+            offset = hole_offset
+        if not sparse_supported:
+            if size > fallback_budget:
+                return "checkpoint_snapshot_clone_unavailable", 0
+            os.ftruncate(target_fd, 0)
+            cursor = 0
+            while cursor < size:
+                if time.monotonic() >= deadline:
+                    return "checkpoint_scan_deadline", 0
+                chunk = os.pread(
+                    source_fd,
+                    min(_SECRET_SCAN_CHUNK_BYTES, size - cursor),
+                    cursor,
+                )
+                if not chunk:
+                    raise OSError("snapshot source shortened")
+                written = 0
+                while written < len(chunk):
+                    wrote = os.pwrite(
+                        target_fd,
+                        chunk[written:],
+                        cursor + written,
+                    )
+                    if wrote <= 0:
+                        raise OSError("snapshot write made no progress")
+                    written += wrote
+                cursor += len(chunk)
+        os.fsync(target_fd)
+    finally:
+        os.close(target_fd)
+    return "", allocated_bytes
+
+
+def _snapshot_workspace_paths(
+    worktree: Path,
+    paths: list[str],
+    snapshot_root: Path,
+    *,
+    deadline: float,
+) -> tuple[
+    dict[str, tuple[str, Path | None]],
+    dict[str, list[str]],
+    str,
+    dict[str, Any],
+]:
+    """Read one immutable staging snapshot and scan it before Git object writes.
+
+    Values are ``(git_mode, fsynced_snapshot_path)``; ``path=None`` means an
+    exact deletion.  Files are copied and scanned in fixed-size chunks, then
+    hashed by Git from that same immutable snapshot.  Regular files are opened
+    with ``O_NOFOLLOW`` and their stat identity is checked before/after the copy
+    so a concurrent in-place writer cannot be mistaken for a quiescent result.
+    """
+    snapshots: dict[str, tuple[str, Path | None]] = {}
+    findings: dict[str, list[str]] = {}
+    root = worktree.resolve()
+    fallback_budget = _SNAPSHOT_FALLBACK_BUDGET_BYTES
+    logical_bytes = 0
+    sized_paths: list[str] = []
+    snapshot_root.mkdir(parents=True, exist_ok=True)
+    for index, rel in enumerate(paths):
+        if time.monotonic() >= deadline:
+            return (
+                {},
+                {},
+                "checkpoint_scan_deadline",
+                {"logical_bytes": logical_bytes, "paths": sized_paths},
+            )
+        candidate = Path(rel)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            return {}, {}, "unsafe_workspace_path", {}
+        path = worktree / candidate
+        try:
+            metadata = os.lstat(path)
+        except FileNotFoundError:
+            LOG.warning("checkpoint path disappeared before snapshot: %s", rel)
+            snapshots[rel] = ("", None)
+            continue
+        except OSError:
+            return {}, {}, "checkpoint_snapshot_failed", {}
+
+        snapshot_path = snapshot_root / f"{index:06d}-{uuid.uuid4().hex}.blob"
+        try:
+            if stat.S_ISLNK(metadata.st_mode):
+                data = os.fsencode(os.readlink(path))
+                mode = "120000"
+                with snapshot_path.open("wb") as target:
+                    target.write(data)
+                    target.flush()
+                    os.fsync(target.fileno())
+                rules = _secret_candidate_rules(data)
+            elif stat.S_ISREG(metadata.st_mode):
+                flags = os.O_RDONLY
+                flags |= getattr(os, "O_CLOEXEC", 0)
+                flags |= getattr(os, "O_NOFOLLOW", 0)
+                fd = os.open(path, flags)
+                try:
+                    before = os.fstat(fd)
+                    logical_bytes += before.st_size
+                    sized_paths.append(rel)
+                    if logical_bytes > _CHECKPOINT_SCAN_LOGICAL_BYTES:
+                        return (
+                            {},
+                            {},
+                            "oversized_artifact_quarantine_required",
+                            {
+                                "logical_bytes": logical_bytes,
+                                "logical_limit_bytes":
+                                    _CHECKPOINT_SCAN_LOGICAL_BYTES,
+                                "paths": sorted(sized_paths),
+                            },
+                        )
+                    clone_error, fallback_used = _clone_file_snapshot(
+                        fd,
+                        snapshot_path,
+                        fallback_budget=fallback_budget,
+                        deadline=deadline,
+                    )
+                    if clone_error:
+                        return (
+                            {},
+                            {},
+                            clone_error,
+                            {
+                                "logical_bytes": logical_bytes,
+                                "paths": sorted(sized_paths),
+                            },
+                        )
+                    fallback_budget -= fallback_used
+                    after = os.fstat(fd)
+                finally:
+                    os.close(fd)
+                identity_before = (
+                    before.st_dev,
+                    before.st_ino,
+                    before.st_size,
+                    before.st_mtime_ns,
+                    before.st_ctime_ns,
+                )
+                identity_after = (
+                    after.st_dev,
+                    after.st_ino,
+                    after.st_size,
+                    after.st_mtime_ns,
+                    after.st_ctime_ns,
+                )
+                if identity_before != identity_after:
+                    return {}, {}, "checkpoint_snapshot_changed", {}
+                try:
+                    path_after = os.lstat(path)
+                except OSError:
+                    return {}, {}, "checkpoint_snapshot_changed", {}
+                if (
+                    path_after.st_dev != before.st_dev
+                    or path_after.st_ino != before.st_ino
+                    or path_after.st_size != before.st_size
+                    or path_after.st_mtime_ns != before.st_mtime_ns
+                    or path_after.st_ctime_ns != before.st_ctime_ns
+                ):
+                    return {}, {}, "checkpoint_snapshot_changed", {}
+                mode = "100755" if before.st_mode & stat.S_IXUSR else "100644"
+                try:
+                    with snapshot_path.open("rb") as snapshot:
+                        rules = _scan_secret_stream(
+                            snapshot,
+                            deadline=deadline,
+                        )
+                except _ScanDeadlineExceeded:
+                    return (
+                        {},
+                        {},
+                        "checkpoint_scan_deadline",
+                        {
+                            "logical_bytes": logical_bytes,
+                            "paths": sorted(sized_paths),
+                        },
+                    )
+            else:
+                return {}, {}, "unsupported_workspace_entry", {}
+        except (FileNotFoundError, OSError):
+            return {}, {}, "checkpoint_snapshot_changed", {}
+
+        # A path resolving outside the checkout may only be a symlink (whose
+        # link text was captured above); regular files must remain rooted here.
+        if mode != "120000":
+            try:
+                path.resolve().relative_to(root)
+            except (OSError, ValueError):
+                return {}, {}, "unsafe_workspace_path", {}
+        snapshots[rel] = (mode, snapshot_path)
+        if rules:
+            findings[rel] = rules
+    return (
+        snapshots,
+        findings,
+        "",
+        {"logical_bytes": logical_bytes, "paths": sorted(sized_paths)},
+    )
+
+
+def _stage_dirty_checkpoint(
+    worktree: Path,
+    paths: list[str],
+    *,
+    runner=subprocess.run,
+) -> dict[str, Any]:
+    """Secret-gate and stage exact fsynced snapshots with bounded memory."""
+    deadline = time.monotonic() + _CHECKPOINT_SCAN_TIMEOUT_S
+    logical_bytes = 0
+    sized_paths: list[str] = []
+    for rel in paths:
+        if time.monotonic() >= deadline:
+            return {
+                "ok": False,
+                "reason": "checkpoint_scan_deadline",
+                "paths": paths,
+                "logical_bytes": logical_bytes,
+            }
+        try:
+            metadata = os.lstat(worktree / rel)
+        except FileNotFoundError:
+            LOG.warning("checkpoint path disappeared before staging: %s", rel)
+            continue
+        except OSError:
+            return {
+                "ok": False,
+                "reason": "checkpoint_snapshot_failed",
+                "paths": [rel],
+            }
+        if stat.S_ISREG(metadata.st_mode):
+            logical_bytes += metadata.st_size
+            sized_paths.append(rel)
+    if logical_bytes > _CHECKPOINT_SCAN_LOGICAL_BYTES:
+        return {
+            "ok": False,
+            "reason": "oversized_artifact_quarantine_required",
+            "paths": sorted(sized_paths),
+            "logical_bytes": logical_bytes,
+            "logical_limit_bytes": _CHECKPOINT_SCAN_LOGICAL_BYTES,
+        }
+    with tempfile.TemporaryDirectory(
+        prefix="volpred-dispatch-checkpoint-",
+    ) as temp_dir:
+        snapshots, findings, error, snapshot_detail = _snapshot_workspace_paths(
+            worktree,
+            paths,
+            Path(temp_dir),
+            deadline=deadline,
+        )
+        if error:
+            return {
+                "ok": False,
+                "reason": error,
+                "paths": paths,
+                **snapshot_detail,
+            }
+        if findings:
+            return {
+                "ok": False,
+                "reason": "secret_candidate_detected",
+                "paths": sorted(findings),
+                "secret_rules": findings,
+            }
+        for rel in paths:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                return {
+                    "ok": False,
+                    "reason": "checkpoint_scan_deadline",
+                    "paths": paths,
+                    "logical_bytes": logical_bytes,
+                }
+            mode, snapshot_path = snapshots[rel]
+            if snapshot_path is None:
+                staged = _git(
+                    worktree,
+                    "update-index",
+                    "--force-remove",
+                    "--",
+                    rel,
+                    runner=runner,
+                    timeout_s=60,
+                )
+            else:
+                try:
+                    blob = _git(
+                        worktree,
+                        "hash-object",
+                        "-w",
+                        "--no-filters",
+                        "--",
+                        str(snapshot_path),
+                        runner=runner,
+                        timeout_s=max(1.0, remaining),
+                    )
+                except subprocess.TimeoutExpired:
+                    return {
+                        "ok": False,
+                        "reason": "checkpoint_scan_deadline",
+                        "paths": [rel],
+                        "logical_bytes": logical_bytes,
+                    }
+                if blob.returncode != 0:
+                    return {
+                        "ok": False,
+                        "reason": "checkpoint_hash_failed",
+                        "paths": [rel],
+                        "rc": blob.returncode,
+                        "output_tail": _process_tail(blob.stderr),
+                    }
+                blob_sha = (blob.stdout or "").strip()
+                staged = _git(
+                    worktree,
+                    "update-index",
+                    "--add",
+                    "--cacheinfo",
+                    f"{mode},{blob_sha},{rel}",
+                    runner=runner,
+                    timeout_s=60,
+                )
+            if staged.returncode != 0:
+                return {
+                    "ok": False,
+                    "reason": "checkpoint_index_failed",
+                    "paths": [rel],
+                    "rc": staged.returncode,
+                    "output_tail": _process_tail(staged.stderr),
+                }
+    return {"ok": True}
+
+
+def _terminate_checkpoint_blob_reader(
+    blob: subprocess.Popen,
+    *,
+    repo_root: Path,
+    reason: str,
+) -> bool:
+    """Drain a session-isolated git blob reader through durable kill intent."""
+    for stream in (blob.stdout, blob.stderr):
+        if stream is not None:
+            try:
+                stream.close()
+            except OSError:
+                pass  # silent-ok: best-effort subprocess stream cleanup
+    ledger_path = (
+        Path(repo_root) / "storage" / "ops" / "termination_intents.jsonl"
+    )
+    intent = termination.arm(
+        target_kind="pgid",
+        target_id=int(blob.pid),
+        reason=reason,
+        actor="dispatch-supervisor.workspace",
+        signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+        ledger_path=ledger_path,
+    )
+    drained = procutil.kill_tree(
+        int(blob.pid),
+        intent=intent,
+        ledger_path=ledger_path,
+        grace_s=0.5,
+    )
+    try:
+        blob.wait(timeout=5)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        LOG.warning(
+            "checkpoint blob reader did not confirm exit pid=%s reason=%s",
+            blob.pid,
+            type(exc).__name__,
+        )
+        return False
+    return drained
+
+
+def _scan_branch_secret_candidates(
+    repo_root: Path,
+    revision: str,
+    paths: list[str],
+    *,
+    runner=subprocess.run,
+) -> dict[str, Any]:
+    """Scan immutable Git blobs directly from a bounded stdout pipe."""
+    deadline = time.monotonic() + _CHECKPOINT_SCAN_TIMEOUT_S
+    logical_bytes = 0
+    blob_paths: list[str] = []
+    for rel in paths:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return {
+                "ok": False,
+                "reason": "checkpoint_scan_deadline",
+                "paths": paths,
+                "logical_bytes": logical_bytes,
+            }
+        try:
+            size = _git(
+                repo_root,
+                "cat-file",
+                "-s",
+                f"{revision}:{rel}",
+                runner=runner,
+                timeout_s=min(30.0, remaining),
+            )
+        except subprocess.TimeoutExpired:
+            return {
+                "ok": False,
+                "reason": "checkpoint_scan_deadline",
+                "paths": paths,
+                "logical_bytes": logical_bytes,
+            }
+        if size.returncode != 0:
+            exists = _git(
+                repo_root,
+                "cat-file",
+                "-e",
+                f"{revision}:{rel}",
+                runner=runner,
+                timeout_s=30,
+            )
+            if exists.returncode != 0:
+                continue
+            return {"ok": False, "reason": "checkpoint_blob_readback_failed"}
+        try:
+            logical_bytes += int((size.stdout or "").strip())
+        except ValueError:
+            return {"ok": False, "reason": "checkpoint_blob_readback_failed"}
+        blob_paths.append(rel)
+    if logical_bytes > _CHECKPOINT_SCAN_LOGICAL_BYTES:
+        return {
+            "ok": False,
+            "reason": "oversized_artifact_quarantine_required",
+            "paths": sorted(blob_paths),
+            "logical_bytes": logical_bytes,
+            "logical_limit_bytes": _CHECKPOINT_SCAN_LOGICAL_BYTES,
+        }
+
+    findings: dict[str, list[str]] = {}
+    for rel in paths:
+        if time.monotonic() >= deadline:
+            return {
+                "ok": False,
+                "reason": "checkpoint_scan_deadline",
+                "paths": paths,
+                "logical_bytes": logical_bytes,
+            }
+        try:
+            blob = subprocess.Popen(
+                [
+                    "git",
+                    "-C",
+                    str(repo_root),
+                    "cat-file",
+                    "blob",
+                    f"{revision}:{rel}",
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                start_new_session=True,
+            )
+        except OSError:
+            return {"ok": False, "reason": "checkpoint_blob_readback_failed"}
+        assert blob.stdout is not None
+        try:
+            rules = _scan_secret_pipe(blob.stdout, deadline=deadline)
+            blob.stdout.close()
+            remaining = max(0.001, deadline - time.monotonic())
+            returncode = blob.wait(timeout=remaining)
+        except _ScanDeadlineExceeded:
+            drained = _terminate_checkpoint_blob_reader(
+                blob,
+                repo_root=repo_root,
+                reason="checkpoint_secret_scan_deadline",
+            )
+            return {
+                "ok": False,
+                "reason": (
+                    "checkpoint_scan_deadline"
+                    if drained
+                    else "checkpoint_blob_reader_orphan"
+                ),
+                "paths": paths,
+                "logical_bytes": logical_bytes,
+            }
+        except (OSError, subprocess.TimeoutExpired):
+            drained = _terminate_checkpoint_blob_reader(
+                blob,
+                repo_root=repo_root,
+                reason="checkpoint_blob_readback_failed",
+            )
+            return {
+                "ok": False,
+                "reason": (
+                    "checkpoint_blob_readback_failed"
+                    if drained
+                    else "checkpoint_blob_reader_orphan"
+                ),
+            }
+        finally:
+            if blob.stderr is not None:
+                blob.stderr.close()
+        if returncode == 0:
+            if rules:
+                findings[rel] = rules
+            continue
+        # A deletion has no blob.  Distinguish it from an unreadable object.
+        exists = _git(
+            repo_root,
+            "cat-file",
+            "-e",
+            f"{revision}:{rel}",
+            runner=runner,
+            timeout_s=30,
+        )
+        if exists.returncode != 0:
+            continue
+        return {"ok": False, "reason": "checkpoint_blob_readback_failed"}
+    return {
+        "ok": True,
+        "findings": findings,
+        "logical_bytes": logical_bytes,
+    }
+
+
+def _task_binding_missing(workspace: dict[str, Any]) -> bool:
+    """A declaration alone is not an execution ownership binding."""
+    return (
+        not str(workspace.get("task_id") or "").strip()
+        or not str(workspace.get("claim_session_id") or "").strip()
+        or workspace.get("write_intent") != "repo_patch"
+    )
+
+
 def _append_receipt(repo_root: Path, payload: dict[str, Any]) -> bool:
     """Durably append one workspace event; return whether fsync succeeded."""
     dest = Path(repo_root) / RECEIPTS_RELPATH
@@ -220,6 +1330,379 @@ def _append_receipt(repo_root: Path, payload: dict[str, Any]) -> bool:
         return False
 
 
+def bind_producer_custody(
+    repo_root: Path,
+    *,
+    workspace: dict[str, Any],
+    job_id: str,
+    producer_custody: dict[str, Any],
+    attempt: int = 1,
+) -> bool:
+    """Persist the kernel custody boundary independently of dispatch state.
+
+    This fsync receipt is written after custody capture and before Popen.  The
+    orphan sweeper can therefore recover the original coalition id even if the
+    supervisor state file is lost entirely; without this receipt it must keep a
+    legacy workspace quarantined rather than guess that no detached producer
+    survives in an older coalition.
+    """
+    workspace_name = str(workspace.get("name") or "").strip()
+    normalized_job_id = str(job_id or "").strip()
+    if (
+        not workspace_name
+        or not normalized_job_id
+        or not isinstance(producer_custody, dict)
+        or not producer_custody
+    ):
+        return False
+    return _append_receipt(
+        Path(repo_root),
+        {
+            "event": "producer_custody_bound",
+            "workspace": workspace_name,
+            "job_id": normalized_job_id,
+            "attempt": int(attempt),
+            "producer_custody": dict(producer_custody),
+        },
+    )
+
+
+def read_bound_producer_custody(
+    repo_root: Path,
+    *,
+    workspace_name: str,
+    job_id_prefix: str,
+) -> dict[str, Any] | None:
+    """Strictly read the latest custody binding for a state-less workspace.
+
+    Any malformed/partial line or I/O failure means unverified.  Unlike generic
+    observability readers this must never skip corruption and fall back to an
+    older coalition generation.
+    """
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        with source.open("r", encoding="utf-8") as fh:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_SH)
+            try:
+                lines = fh.read().splitlines()
+            finally:
+                fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+    except FileNotFoundError:
+        LOG.warning("producer custody receipt store is absent: %s", source)
+        return None
+    except OSError as exc:
+        LOG.warning("producer custody receipt read failed (%s): %s", source, exc)
+        return None
+    latest: dict[str, Any] | None = None
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            LOG.warning("producer custody receipt corrupt (%s): %s", source, exc)
+            return None
+        if not isinstance(event, dict):
+            return None
+        if (
+            event.get("event") != "producer_custody_bound"
+            or str(event.get("workspace") or "") != workspace_name
+            or not str(event.get("job_id") or "").startswith(job_id_prefix)
+        ):
+            continue
+        custody = event.get("producer_custody")
+        attempt = event.get("attempt")
+        if (
+            not isinstance(custody, dict)
+            or not custody
+            or isinstance(attempt, bool)
+            or not isinstance(attempt, int)
+            or attempt <= 0
+        ):
+            return None
+        latest = dict(custody)
+    return latest
+
+
+def _allocation_generation(event: dict[str, Any]) -> dict[str, str] | None:
+    """Normalize one exact allocator generation or fail closed."""
+    if event.get("event") != "allocated":
+        return None
+    workspace_name = str(event.get("workspace") or "").strip()
+    job_id = str(event.get("job_id") or "").strip()
+    receipt_id = str(event.get("receipt_id") or "").strip()
+    allocated_at = str(event.get("at") or "").strip()
+    branch = str(event.get("branch") or "").strip()
+    base_sha = str(event.get("base_sha") or "").strip()
+    match = _JOB8_RE.fullmatch(workspace_name)
+    try:
+        allocated_time = datetime.fromisoformat(allocated_at)
+    except ValueError as exc:
+        LOG.warning(
+            "workspace allocation timestamp is invalid receipt_id=%s: %s",
+            receipt_id,
+            exc,
+        )
+        return None
+    if (
+        match is None
+        or len(job_id) < 8
+        or match.group(1) != job_id[:8]
+        or re.fullmatch(r"[0-9a-f]{32}", receipt_id) is None
+        or allocated_time.tzinfo is None
+        or allocated_time.utcoffset() is None
+        or branch != f"worktree-{workspace_name}"
+        or re.fullmatch(r"[0-9a-f]{40}", base_sha) is None
+    ):
+        return None
+    return {
+        "workspace": workspace_name,
+        "job_id": job_id,
+        "allocation_receipt_id": receipt_id,
+        "allocated_at": allocated_at,
+        "branch": branch,
+        "base_sha": base_sha,
+    }
+
+
+def active_allocated_workspace_generations(
+    repo_root: Path,
+) -> list[dict[str, str]]:
+    """Return exact live allocator generations, not reusable short names."""
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        lines = source.read_text(encoding="utf-8").splitlines()
+    except FileNotFoundError:
+        lines = []
+    except OSError as exc:
+        raise RuntimeError(
+            f"workspace allocation receipts unavailable: {source}"
+        ) from exc
+    active: dict[str, dict[str, str]] = {}
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                f"workspace allocation receipts corrupt: {source}"
+            ) from exc
+        if not isinstance(event, dict):
+            raise TypeError(
+                f"workspace allocation receipt is not an object: {source}"
+            )
+        name = str(event.get("workspace") or event.get("name") or "")
+        if event.get("event") == "allocated":
+            generation = _allocation_generation(event)
+            if generation is None:
+                raise RuntimeError(
+                    f"workspace allocation generation is invalid: {name}"
+                )
+            active[name] = generation
+        elif event.get("event") in {"allocation_aborted", "released"} or (
+            event.get("event") == "finalized"
+            and event.get("disposition") in {"empty_removed", "merged"}
+        ):
+            active.pop(name, None)
+    registered = {
+        path.name for path in _registered_dispatch_worktrees(Path(repo_root))
+    }
+    missing = registered - active.keys()
+    if missing:
+        raise RuntimeError(
+            "registered allocator workspace has no exact allocation generation: "
+            + ", ".join(sorted(missing))
+        )
+    return [active[name] for name in sorted(registered)]
+
+
+def record_legacy_workspace_producer_drain(
+    repo_root: Path,
+    *,
+    workspace_generations: list[dict[str, str]],
+    cutover_request_id: str,
+    cutover_completed_at: str,
+    complete_coalition_drained: bool,
+    release_commit: str = "",
+) -> bool:
+    """Bind a verified cutover drain to exact pre-custody generations."""
+    if complete_coalition_drained is not True:
+        raise ValueError(
+            "legacy workspace migration requires complete coalition drain"
+        )
+    request_id = str(cutover_request_id or "").strip()
+    completed_at = str(cutover_completed_at or "").strip()
+    release = str(release_commit or "").strip()
+    try:
+        completed_time = datetime.fromisoformat(completed_at)
+    except ValueError as exc:
+        raise ValueError(
+            "legacy workspace cutover timestamp is invalid"
+        ) from exc
+    if (
+        not request_id
+        or completed_time.tzinfo is None
+        or completed_time.utcoffset() is None
+        or re.fullmatch(r"[0-9a-f]{40}", release) is None
+        or not workspace_generations
+    ):
+        raise ValueError("legacy workspace migration identity is invalid")
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        events = [
+            json.loads(line)
+            for line in source.read_text(encoding="utf-8").splitlines()
+        ]
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "legacy workspace allocation receipts are unavailable"
+        ) from exc
+    actual = {
+        normalized["allocation_receipt_id"]: normalized
+        for event in events
+        if isinstance(event, dict)
+        and (normalized := _allocation_generation(event)) is not None
+    }
+    normalized_generations: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for generation in workspace_generations:
+        if not isinstance(generation, dict):
+            raise TypeError("legacy workspace generation is invalid")
+        candidate = {
+            key: str(generation.get(key) or "").strip()
+            for key in (
+                "workspace",
+                "job_id",
+                "allocation_receipt_id",
+                "allocated_at",
+                "branch",
+                "base_sha",
+            )
+        }
+        receipt_id = candidate["allocation_receipt_id"]
+        if (
+            not receipt_id
+            or receipt_id in seen
+            or actual.get(receipt_id) != candidate
+            or datetime.fromisoformat(candidate["allocated_at"]) > completed_time
+        ):
+            raise ValueError(
+                "legacy workspace generation is not covered by cutover"
+            )
+        seen.add(receipt_id)
+        normalized_generations.append(candidate)
+    return _append_receipt(
+        Path(repo_root),
+        {
+            "event": _LEGACY_WORKSPACE_DRAIN_EVENT,
+            "cutover_request_id": request_id,
+            "cutover_completed_at": completed_at,
+            "workspace_generations": sorted(
+                normalized_generations,
+                key=lambda item: item["allocation_receipt_id"],
+            ),
+            "complete_coalition_drained": True,
+            "proof": "complete_legacy_supervisor_coalition_drained",
+            "release_commit": release,
+        },
+    )
+
+
+def legacy_workspace_producer_drain_confirmed(
+    repo_root: Path,
+    *,
+    workspace_name: str,
+    job_id: str,
+) -> bool:
+    """Read generation-bound migration proof; malformed history fails closed."""
+    name = str(workspace_name or "").strip()
+    normalized_job_id = str(job_id or "").strip()
+    match = _JOB8_RE.fullmatch(name)
+    if (
+        match is None
+        or len(normalized_job_id) < 8
+        or match.group(1) != normalized_job_id[:8]
+    ):
+        return False
+    source = Path(repo_root) / RECEIPTS_RELPATH
+    try:
+        with source.open("r", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+            try:
+                lines = handle.read().splitlines()
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    except FileNotFoundError:
+        LOG.warning("legacy workspace drain receipt store is absent: %s", source)
+        return False
+    except OSError as exc:
+        LOG.warning(
+            "legacy workspace drain receipt read failed (%s): %s",
+            source,
+            exc,
+        )
+        return False
+    allocations: dict[tuple[str, str], dict[str, str]] = {}
+    migrations: list[dict[str, Any]] = []
+    for line in lines:
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            LOG.warning(
+                "legacy workspace drain receipt corrupt (%s): %s",
+                source,
+                exc,
+            )
+            return False
+        if not isinstance(event, dict):
+            return False
+        generation = _allocation_generation(event)
+        if generation is not None:
+            allocations[(generation["workspace"], generation["job_id"])] = (
+                generation
+            )
+        if event.get("event") == _LEGACY_WORKSPACE_DRAIN_EVENT:
+            migrations.append(event)
+    target = allocations.get((name, normalized_job_id))
+    if target is None:
+        return False
+    for event in migrations:
+        generations = event.get("workspace_generations")
+        completed_at = str(event.get("cutover_completed_at") or "")
+        release = str(event.get("release_commit") or "")
+        try:
+            completed_time = datetime.fromisoformat(completed_at)
+        except ValueError as exc:
+            LOG.warning(
+                "legacy workspace cutover timestamp is invalid request_id=%s: %s",
+                event.get("cutover_request_id"),
+                exc,
+            )
+            return False
+        if (
+            event.get("complete_coalition_drained") is not True
+            or event.get("proof")
+            != "complete_legacy_supervisor_coalition_drained"
+            or not str(event.get("cutover_request_id") or "").strip()
+            or completed_time.tzinfo is None
+            or completed_time.utcoffset() is None
+            or re.fullmatch(r"[0-9a-f]{40}", release) is None
+            or not isinstance(generations, list)
+        ):
+            return False
+        for candidate in generations:
+            if not isinstance(candidate, dict):
+                return False
+            normalized = {
+                key: str(candidate.get(key) or "").strip()
+                for key in target
+            }
+            if (
+                normalized == target
+                and datetime.fromisoformat(target["allocated_at"])
+                <= completed_time
+            ):
+                return True
+    return False
+
+
 def _settlement_key(payload: dict[str, Any]) -> tuple[str, str]:
     return (
         str(payload.get("task_id") or ""),
@@ -233,6 +1716,7 @@ def ensure_task_settlement_pending(
     workspace: dict[str, Any],
     job_id: str,
     worker_outcome: str,
+    producer_custody: dict[str, Any] | None = None,
 ) -> bool:
     """Durably bind task settlement before any terminal workspace mutation."""
     key = _settlement_key(workspace)
@@ -270,6 +1754,11 @@ def ensure_task_settlement_pending(
             "task_id": key[0],
             "claim_session_id": key[1],
             "workspace": dict(workspace),
+            "producer_custody": (
+                dict(producer_custody)
+                if isinstance(producer_custody, dict)
+                else None
+            ),
         },
     )
 
@@ -367,26 +1856,59 @@ def record_allocation_deferred(
 def _latest_terminal_receipt(
     repo_root: Path,
     workspace_name: str,
+    *,
+    job_id: str = "",
 ) -> dict[str, Any] | None:
-    """Return the last durable finalization for one workspace, if any."""
+    """Return the terminal receipt for the exact allocation generation."""
     source = Path(repo_root) / RECEIPTS_RELPATH
     try:
-        lines = source.read_text(encoding="utf-8").splitlines()
+        with source.open("r", encoding="utf-8") as handle:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_SH)
+            try:
+                lines = handle.read().splitlines()
+            finally:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
     except FileNotFoundError:  # silent-ok: no prior receipt means this is the first finalization
         return None
     except OSError as exc:
         LOG.warning("workspace terminal receipt read failed (%s): %s", source, exc)
         return None
-    for line in reversed(lines):
+    events: list[dict[str, Any]] = []
+    for line in lines:
         try:
             event = json.loads(line)
         except json.JSONDecodeError as exc:
             LOG.warning("workspace terminal receipt line unreadable (%s): %s", source, exc)
-            continue
+            return None
+        if not isinstance(event, dict):
+            LOG.warning("workspace terminal receipt is not an object: %s", source)
+            return None
+        events.append(event)
+    normalized_job_id = str(job_id or "").strip()
+    generation_start = 0
+    if normalized_job_id:
+        generation_start = -1
+        for index, event in enumerate(events):
+            if (
+                event.get("event") == "allocated"
+                and event.get("workspace") == workspace_name
+            ):
+                generation_start = (
+                    index
+                    if str(event.get("job_id") or "") == normalized_job_id
+                    else -1
+                )
+        if generation_start < 0:
+            return None
+    for event in reversed(events[generation_start:]):
         if (
-            isinstance(event, dict)
-            and event.get("event") in {"finalized", "released"}
+            event.get("event") in {"finalized", "released"}
             and event.get("workspace") == workspace_name
+            and (
+                not normalized_job_id
+                or not str(event.get("job_id") or "")
+                or str(event.get("job_id") or "") == normalized_job_id
+            )
             and (
                 event.get("event") == "released"
                 or event.get("disposition")
@@ -754,14 +2276,18 @@ def _workspace_changed_paths(repo_root: Path, workspace: dict[str, Any],
     """Union of committed (merge-base..branch) and uncommitted workspace paths."""
     wt = Path(workspace["path"])
     changed: set[str] = set()
-    diff = _git(repo_root, "diff", "--name-only", f"main...{workspace['branch']}",
-                runner=runner, timeout_s=60)
+    diff, committed_paths = _git_diff_paths(
+        repo_root,
+        f"main...{workspace['branch']}",
+        runner=runner,
+        timeout_s=60,
+    )
     if diff.returncode == 0:
-        changed.update(p for p in (diff.stdout or "").splitlines() if p)
+        changed.update(committed_paths)
     else:
         raise RuntimeError(
             "branch_diff_failed:"
-            f"{diff.returncode}:{(diff.stderr or '')[-200:]}"
+            f"{diff.returncode}:{_process_tail(diff.stderr, 200)}"
         )
     status = _git(wt, "status", "--porcelain", "-z", "--untracked-files=all",
                   runner=runner, timeout_s=60)
@@ -951,7 +2477,7 @@ def _run_merge_script(*, repo_root: Path, workspace: dict[str, Any],
                 ["/bin/bash", str(script), workspace["name"]],
                 capture_output=True, text=True, timeout=_MERGE_TIMEOUT_S,
                 cwd=str(repo_root), check=False,  # K1618: never from inside the worktree
-                env=lease.child_env(),
+                env=external_child_environment(lease.child_env()),
                 pass_fds=lease.child_pass_fds(),
             )
     except GitWriterLockError as exc:
@@ -1287,16 +2813,20 @@ def _checkpoint_workspace(
             "error": str(exc)[:300],
         }
     contract = _output_contract_violations(workspace, all_changed)
-    if contract["denied"] or contract["undeclared"] or not contract["declared"]:
+    if contract["denied"]:
         return {
             **result,
-            "reason": (
-                "canonical_path_denied"
-                if contract["denied"]
-                else "undeclared_output_path"
-            ),
-            "paths": contract["denied"] or contract["undeclared"],
+            "reason": "canonical_path_denied",
+            "paths": contract["denied"],
         }
+    # This is a quarantine boundary, not the integration boundary.  The merge
+    # gate and producer commit remain strict about declared output paths, but a
+    # failed producer's undeclared bytes are precisely the evidence remediation
+    # must preserve.  Refusing to checkpoint them leaves the live checkout
+    # registered forever and eventually exhausts ``max_total``.  Pre-contract
+    # workspaces likewise have no declaration to validate; a clean branch HEAD
+    # is already the durable artifact and may be receipted as-is.  Canonical-only
+    # paths stay denied above and can never enter a quarantine commit.
     try:
         with git_writer_lock(
             repo_root,
@@ -1321,21 +2851,62 @@ def _checkpoint_workspace(
             dirty_paths = sorted(
                 set(phase_z._porcelain_paths(status.stdout or ""))
             )
+            branch_diff, branch_changed = _git_diff_paths(
+                repo_root,
+                f"main...{branch}",
+                runner=runner,
+                timeout_s=60,
+            )
+            if branch_diff.returncode != 0:
+                return {
+                    **result,
+                    "reason": "branch_diff_failed",
+                    "rc": branch_diff.returncode,
+                    "output_tail": _process_tail(branch_diff.stderr),
+                }
+            locked_changed = sorted(
+                set(dirty_paths)
+                | set(branch_changed)
+            )
+            locked_contract = _output_contract_violations(
+                workspace, locked_changed,
+            )
+            if locked_contract["denied"]:
+                return {
+                    **result,
+                    "reason": "canonical_path_denied",
+                    "paths": locked_contract["denied"],
+                }
+            branch_changed = sorted(branch_changed)
+            branch_scan = _scan_branch_secret_candidates(
+                repo_root,
+                branch,
+                branch_changed,
+                runner=runner,
+            )
+            if not branch_scan.get("ok"):
+                return {
+                    **result,
+                    **branch_scan,
+                }
+            branch_secrets = branch_scan.get("findings") or {}
+            if branch_secrets:
+                return {
+                    **result,
+                    "reason": "secret_candidate_detected",
+                    "paths": sorted(branch_secrets),
+                    "secret_rules": branch_secrets,
+                }
             if dirty_paths:
-                add = _git(
+                staged_snapshot = _stage_dirty_checkpoint(
                     wt,
-                    "add",
-                    "--",
-                    *dirty_paths,
+                    dirty_paths,
                     runner=runner,
-                    timeout_s=60,
                 )
-                if add.returncode != 0:
+                if not staged_snapshot.get("ok"):
                     return {
                         **result,
-                        "reason": "checkpoint_add_failed",
-                        "rc": add.returncode,
-                        "output_tail": (add.stderr or "")[-300:],
+                        **staged_snapshot,
                     }
                 commit = _git(
                     wt,
@@ -1371,6 +2942,70 @@ def _checkpoint_workspace(
                     "rc": head.returncode,
                 }
             checkpoint_sha = (head.stdout or "").strip()
+            checkpoint_diff, checkpoint_changed = _git_diff_paths(
+                repo_root,
+                f"main...{checkpoint_sha}",
+                runner=runner,
+                timeout_s=60,
+            )
+            if checkpoint_diff.returncode != 0:
+                return {
+                    **result,
+                    "commit": checkpoint_sha,
+                    "reason": "checkpoint_diff_failed",
+                    "rc": checkpoint_diff.returncode,
+                    "output_tail": _process_tail(checkpoint_diff.stderr),
+                }
+            checkpoint_changed = sorted(checkpoint_changed)
+            checkpoint_contract = _output_contract_violations(
+                workspace, checkpoint_changed,
+            )
+            if checkpoint_contract["denied"]:
+                return {
+                    **result,
+                    "commit": checkpoint_sha,
+                    "reason": "canonical_path_denied",
+                    "paths": checkpoint_contract["denied"],
+                }
+            quarantined_undeclared = (
+                list(checkpoint_changed)
+                if not checkpoint_contract["declared"]
+                else list(checkpoint_contract["undeclared"])
+            )
+            binding_missing = _task_binding_missing(workspace)
+            readback_status = _git(
+                wt,
+                "status",
+                "--porcelain",
+                "-z",
+                "--untracked-files=all",
+                runner=runner,
+                timeout_s=60,
+            )
+            if readback_status.returncode != 0:
+                return {
+                    **result,
+                    "commit": checkpoint_sha,
+                    "reason": "checkpoint_status_readback_failed",
+                    "rc": readback_status.returncode,
+                }
+            late_dirty = sorted(
+                set(phase_z._porcelain_paths(readback_status.stdout or ""))
+            )
+            if late_dirty:
+                late_contract = _output_contract_violations(
+                    workspace, late_dirty,
+                )
+                return {
+                    **result,
+                    "commit": checkpoint_sha,
+                    "reason": (
+                        "canonical_path_denied"
+                        if late_contract["denied"]
+                        else "checkpoint_not_quiescent"
+                    ),
+                    "paths": late_contract["denied"] or late_dirty,
+                }
     except GitWriterLockError as exc:
         return {**result, "reason": "writer_lock_busy", "error": str(exc)[:300]}
     except (OSError, subprocess.TimeoutExpired) as exc:
@@ -1389,6 +3024,9 @@ def _checkpoint_workspace(
             "branch": branch,
             "checkpoint_commit": checkpoint_sha,
             "reason": reason,
+            "task_binding_missing": binding_missing,
+            "checkpoint_changed_paths": checkpoint_changed,
+            "quarantined_undeclared_paths": quarantined_undeclared,
             "cleanup": "pending",
         },
     ):
@@ -1404,6 +3042,9 @@ def _checkpoint_workspace(
         "commit": checkpoint_sha,
         "released": False,
         "reason": "checkpointed",
+        "task_binding_missing": binding_missing,
+        "checkpoint_changed_paths": checkpoint_changed,
+        "quarantined_undeclared_paths": quarantined_undeclared,
     }
 
 
@@ -1460,18 +3101,97 @@ def _release_checkpointed_workspace(
             actor=f"dispatch-workspace-release:{name}",
             timeout_s=60,
         ):
-            remove = _git(
-                repo_root,
-                "worktree",
-                "remove",
-                str(wt),
-                runner=runner,
-                timeout_s=60,
-            )
+            with _branch_ref_lock(repo_root, branch, runner=runner):
+                branch_head = _git(
+                    repo_root,
+                    "rev-parse",
+                    branch,
+                    runner=runner,
+                    timeout_s=30,
+                )
+                workspace_head = _git(
+                    wt,
+                    "rev-parse",
+                    "HEAD",
+                    runner=runner,
+                    timeout_s=30,
+                )
+                if (
+                    branch_head.returncode != 0
+                    or workspace_head.returncode != 0
+                ):
+                    return {
+                        **checkpoint,
+                        "released": False,
+                        "reason": "checkpoint_head_readback_failed",
+                    }
+                actual_branch_head = (branch_head.stdout or "").strip()
+                actual_workspace_head = (workspace_head.stdout or "").strip()
+                if (
+                    actual_branch_head != checkpoint_sha
+                    or actual_workspace_head != checkpoint_sha
+                ):
+                    return {
+                        **checkpoint,
+                        "released": False,
+                        "reason": "checkpoint_branch_advanced",
+                        "expected_head": checkpoint_sha,
+                        "branch_head": actual_branch_head,
+                        "workspace_head": actual_workspace_head,
+                    }
+                status = _git(
+                    wt,
+                    "status",
+                    "--porcelain",
+                    "-z",
+                    "--untracked-files=all",
+                    runner=runner,
+                    timeout_s=60,
+                )
+                if status.returncode != 0:
+                    return {
+                        **checkpoint,
+                        "released": False,
+                        "reason": "checkpoint_status_readback_failed",
+                        "rc": status.returncode,
+                    }
+                release_dirty = sorted(
+                    set(phase_z._porcelain_paths(status.stdout or ""))
+                )
+                if release_dirty:
+                    release_contract = _output_contract_violations(
+                        workspace,
+                        release_dirty,
+                    )
+                    return {
+                        **checkpoint,
+                        "released": False,
+                        "reason": (
+                            "canonical_path_denied"
+                            if release_contract["denied"]
+                            else "checkpoint_not_quiescent"
+                        ),
+                        "paths": release_contract["denied"] or release_dirty,
+                    }
+                remove = _git(
+                    repo_root,
+                    "worktree",
+                    "remove",
+                    str(wt),
+                    runner=runner,
+                    timeout_s=60,
+                )
+                post_release_head = _git(
+                    repo_root,
+                    "rev-parse",
+                    branch,
+                    runner=runner,
+                    timeout_s=30,
+                )
     except GitWriterLockError as exc:
         return {**checkpoint, "released": False, "reason": "writer_lock_busy",
                 "error": str(exc)[:300]}
-    except (OSError, subprocess.TimeoutExpired) as exc:
+    except (OSError, subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
         return {**checkpoint, "released": False, "reason": "release_error",
                 "error": str(exc)[:300]}
     if remove.returncode != 0:
@@ -1481,6 +3201,32 @@ def _release_checkpointed_workspace(
             "reason": "checkpoint_remove_failed",
             "rc": remove.returncode,
             "output_tail": (remove.stderr or "")[-300:],
+        }
+    actual_post_release_head = (
+        (post_release_head.stdout or "").strip()
+        if post_release_head.returncode == 0
+        else ""
+    )
+    if actual_post_release_head != checkpoint_sha:
+        _append_receipt(
+            repo_root,
+            {
+                "event": "release_race_detected",
+                "workspace": name,
+                "branch": branch,
+                "checkpoint_commit": checkpoint_sha,
+                "branch_head": actual_post_release_head,
+                "disposition": "remediation_opened",
+                "reason": "post_release_branch_advanced",
+                "cleanup": "removed",
+            },
+        )
+        return {
+            **checkpoint,
+            "released": False,
+            "reason": "post_release_branch_advanced",
+            "expected_head": checkpoint_sha,
+            "branch_head": actual_post_release_head,
         }
     released = _append_receipt(
         repo_root,
@@ -2172,6 +3918,8 @@ def finalize_workspace(
     workspace: dict[str, Any],
     worker_outcome: str,
     job_id: str = "",
+    producer_custody: dict[str, Any] | None = None,
+    producer_drain_confirmed: bool = False,
     queue_path: Path | None = None,
     runner=subprocess.run,
     gate_fn: Callable[..., dict[str, Any]] | None = None,
@@ -2188,18 +3936,85 @@ def finalize_workspace(
         LOG.warning("workspace finalize refused: test process on canonical checkout")
         return {"disposition": "canonical_guard", "workspace": workspace.get("name")}
     workspace_name = str(workspace.get("name") or "")
+    prior = _latest_terminal_receipt(
+        repo_root,
+        workspace_name,
+        job_id=job_id,
+    )
+    if prior is not None:
+        return {**prior, "replayed": True}
+    cohort_members = (
+        []
+        if producer_drain_confirmed
+        or worker_outcome in _PRODUCER_NEVER_SPAWNED_OUTCOMES
+        else procutil.producer_cohort_members_checked(
+            0,
+            job_id=job_id,
+            custody=producer_custody,
+        )
+        if job_id
+        else []
+    )
+    # These outcomes explicitly mean a producer may still be writing.  Do not
+    # even open task settlement yet: health keeps the state slot quarantined
+    # and, after a positively empty PGID probe, records a new ``*_drained``
+    # completion whose reconciliation pass may safely finalize this checkout.
+    if (
+        (
+            worker_outcome in _PRODUCER_LIVENESS_UNVERIFIED_OUTCOMES
+            and not producer_drain_confirmed
+        )
+        or cohort_members is None
+        or cohort_members
+    ):
+        outcome = {
+            "disposition": "producer_active",
+            "workspace": workspace_name,
+            "branch": workspace.get("branch", ""),
+            "reason": "producer_liveness_unverified",
+            "worker_outcome": worker_outcome,
+            "cohort_status": (
+                "unverified"
+                if cohort_members is None
+                else "active"
+                if cohort_members
+                else "outcome_unverified"
+            ),
+            "cohort_member_count": (
+                None if cohort_members is None else len(cohort_members)
+            ),
+            "checkpoint": {
+                "ok": False,
+                "released": False,
+                "reason": "producer_liveness_unverified",
+            },
+        }
+        _append_receipt(
+            repo_root,
+            {
+                "event": "finalize_attempt",
+                "job_id": job_id,
+                **outcome,
+            },
+        )
+        return outcome
     if not ensure_task_settlement_pending(
         repo_root,
         workspace=workspace,
         job_id=job_id,
         worker_outcome=worker_outcome,
+        producer_custody=producer_custody,
     ):
         return {
             "disposition": "receipt_failed",
             "workspace": workspace_name,
             "reason": "task_settlement_pending_not_durable",
         }
-    prior = _latest_terminal_receipt(repo_root, workspace_name)
+    prior = _latest_terminal_receipt(
+        repo_root,
+        workspace_name,
+        job_id=job_id,
+    )
     if prior is not None:
         return {**prior, "replayed": True}
     reconciled = _reconcile_terminal_intent(
@@ -2211,6 +4026,35 @@ def finalize_workspace(
     if reconciled is not None:
         return reconciled
     if not Path(str(workspace.get("path") or "")).exists():
+        release_race = _latest_workspace_event(
+            repo_root,
+            event_name="release_race_detected",
+            workspace_name=workspace_name,
+        )
+        if release_race is not None:
+            # Absence after a failed release CAS is not proof of successful
+            # cleanup.  In particular, never synthesize a `released` receipt
+            # from the older remediation binding while the branch names a
+            # different commit.
+            return {
+                "workspace": workspace_name,
+                "branch": release_race.get(
+                    "branch",
+                    workspace.get("branch", ""),
+                ),
+                "disposition": "reconcile_pending",
+                "reason": "post_release_branch_advanced",
+                "checkpoint": {
+                    "ok": False,
+                    "branch": release_race.get(
+                        "branch",
+                        workspace.get("branch", ""),
+                    ),
+                    "commit": release_race.get("checkpoint_commit", ""),
+                    "released": False,
+                    "reason": "release_race_detected",
+                },
+            }
         # Crash window: removal succeeded but the final `released` fsync did
         # not. The durable remediation binding proves both recovery identities
         # existed before cleanup, so reconstruct the terminal receipt.
@@ -2220,17 +4064,25 @@ def finalize_workspace(
             workspace_name=workspace_name,
         )
         if binding is not None:
+            expected_checkpoint = str(
+                binding.get("checkpoint_commit") or ""
+            )
+            bound_branch = str(
+                binding.get("branch")
+                or workspace.get("branch")
+                or ""
+            )
             recovered = {
                 "event": "released",
                 "workspace": workspace_name,
-                "branch": binding.get("branch", workspace.get("branch", "")),
-                "checkpoint_commit": binding.get("checkpoint_commit", ""),
+                "branch": bound_branch,
+                "checkpoint_commit": expected_checkpoint,
                 "disposition": "remediation_opened",
                 "reason": binding.get("reason", "recovered_release"),
                 "checkpoint": {
                     "ok": True,
-                    "branch": binding.get("branch", workspace.get("branch", "")),
-                    "commit": binding.get("checkpoint_commit", ""),
+                    "branch": bound_branch,
+                    "commit": expected_checkpoint,
                     "released": True,
                     "reason": "checkpointed",
                 },
@@ -2240,12 +4092,91 @@ def finalize_workspace(
                 },
                 "cleanup": "recovered_absent",
             }
-            if _append_receipt(repo_root, recovered):
+            try:
+                with git_writer_lock(
+                    repo_root,
+                    actor=f"dispatch-workspace-recover-release:{workspace_name}",
+                    timeout_s=60,
+                ), _branch_ref_lock(
+                    repo_root,
+                    bound_branch,
+                    runner=runner,
+                ):
+                    branch_head = _git(
+                        repo_root,
+                        "rev-parse",
+                        bound_branch,
+                        runner=runner,
+                        timeout_s=30,
+                    )
+                    actual_branch_head = (
+                        (branch_head.stdout or "").strip()
+                        if branch_head.returncode == 0
+                        else ""
+                    )
+                    if (
+                        not expected_checkpoint
+                        or actual_branch_head != expected_checkpoint
+                    ):
+                        _append_receipt(
+                            repo_root,
+                            {
+                                "event": "release_race_detected",
+                                "workspace": workspace_name,
+                                "branch": bound_branch,
+                                "checkpoint_commit": expected_checkpoint,
+                                "branch_head": actual_branch_head,
+                                "disposition": "remediation_opened",
+                                "reason": "absent_recovery_branch_advanced",
+                                "cleanup": "already_absent",
+                            },
+                        )
+                        return {
+                            "workspace": workspace_name,
+                            "branch": bound_branch,
+                            "disposition": "reconcile_pending",
+                            "reason": "post_release_branch_advanced",
+                            "checkpoint": {
+                                "ok": False,
+                                "branch": bound_branch,
+                                "commit": expected_checkpoint,
+                                "released": False,
+                                "reason": "release_race_detected",
+                            },
+                        }
+                    if not _append_receipt(repo_root, recovered):
+                        return {
+                            "workspace": workspace_name,
+                            "branch": bound_branch,
+                            "disposition": "reconcile_pending",
+                            "reason": "release_receipt_failed",
+                            "checkpoint": {
+                                **recovered["checkpoint"],
+                                "released": False,
+                                "reason": "release_receipt_failed",
+                            },
+                        }
+            except GitWriterLockError as exc:
                 return {
-                    key: value
-                    for key, value in recovered.items()
-                    if key != "event"
-                } | {"replayed": True}
+                    "workspace": workspace_name,
+                    "branch": bound_branch,
+                    "disposition": "reconcile_pending",
+                    "reason": "writer_lock_busy",
+                    "error": str(exc)[:300],
+                }
+            except (OSError, subprocess.TimeoutExpired) as exc:
+                return {
+                    "workspace": workspace_name,
+                    "branch": bound_branch,
+                    "disposition": "reconcile_pending",
+                    "reason": "release_recovery_error",
+                    "error": str(exc)[:300],
+                }
+            return {
+                key: value
+                for key, value in recovered.items()
+                if key != "event"
+            } | {"replayed": True}
     outcome: dict[str, Any] = {"disposition": "error", "workspace": workspace.get("name")}
     try:
         outcome = _finalize_inner(
@@ -2700,6 +4631,10 @@ def sweep_orphan_workspaces(
         return []
     active8 = {str(j)[:8] for j in protected_job_ids}
     results: list[dict[str, Any]] = []
+    generations = {
+        item["workspace"]: item
+        for item in active_allocated_workspace_generations(repo_root)
+    }
     for wt_path in _registered_dispatch_worktrees(repo_root, runner=runner):
         match = _JOB8_RE.match(wt_path.name)
         job8 = match.group(1) if match else None
@@ -2734,9 +4669,24 @@ def sweep_orphan_workspaces(
         )
         workspace = {"name": wt_path.name, "path": str(wt_path), "branch": branch,
                      "base_sha": ""}
+        sweep_custody = read_bound_producer_custody(
+            repo_root,
+            workspace_name=wt_path.name,
+            job_id_prefix=job8,
+        )
+        full_job_id = str(
+            (generations.get(wt_path.name) or {}).get("job_id") or job8
+        )
+        migration_drain = legacy_workspace_producer_drain_confirmed(
+            repo_root,
+            workspace_name=wt_path.name,
+            job_id=full_job_id,
+        )
         results.append(finalize_workspace(
             repo_root=repo_root, workspace=workspace, worker_outcome="orphaned",
-            job_id=job8 or "", queue_path=queue_path, runner=runner,
+            job_id=full_job_id, producer_custody=sweep_custody,
+            producer_drain_confirmed=migration_drain,
+            queue_path=queue_path, runner=runner,
         ))
     return results
 

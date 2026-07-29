@@ -62,6 +62,10 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
     _neutralize_state(monkeypatch)
     monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")  # daemon default
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_ID", "release")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_FUTURE_MARKER", "future")
+    monkeypatch.setenv("VOLPRED_DEFERRED_RELOAD_ROOT", "/tmp/reload")
+    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/repo")
     monkeypatch.setattr(
         worker,
         "authorize_provider_spawn",
@@ -114,9 +118,16 @@ def test_run_one_attempt_env_is_os_environ_extension(tmp_path: Path, monkeypatch
             "VOLPRED_ACTOR", "VOLPRED_DISPATCH_SLOT",
             "VOLPRED_DISPATCH_JOB_ID", "VOLPRED_TASK_CLAIM_OWNER",
             "VOLPRED_PROVIDER_ID", "VOLPRED_PROVIDER_REGISTRY_SHA256",
-        ):
+        ) or key.startswith(
+            ("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_")
+        ) or key == "VOLPRED_CANONICAL_REPO_ROOT":
             continue
         assert env.get(key) == value
+    assert not any(
+        key.startswith(("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_"))
+        for key in env
+    )
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in env
 
 
 def test_task_claim_owner_is_unique_across_same_hour_slots_and_stable_on_retry() -> None:
@@ -179,6 +190,38 @@ def test_spawn_env_reaches_child_process(tmp_path: Path) -> None:
     )
     assert proc.wait(timeout=30) == 0
     assert log_path.read_text(encoding="utf-8") == "dispatch-worker:test:0000"
+
+
+def test_spawn_never_forwards_supervisor_private_identity(tmp_path: Path) -> None:
+    """The final Popen boundary is fail-closed even for a direct caller."""
+    import sys
+
+    log_path = tmp_path / "child-private.log"
+    child_env = {
+        **os.environ,
+        "VOLPRED_ACTOR": "dispatch-worker:test:0000",
+        "VOLPRED_SUPERVISOR_RELEASE_ID": "release",
+        "VOLPRED_DEFERRED_RELOAD_ROOT": "/tmp/reload",
+        "VOLPRED_CANONICAL_REPO_ROOT": "/repo",
+    }
+    proc = worker._spawn(
+        argv=[
+            sys.executable,
+            "-c",
+            (
+                "import os,sys; "
+                "sys.stdout.write('|'.join(sorted(k for k in os.environ "
+                "if k.startswith(('VOLPRED_SUPERVISOR_', "
+                "'VOLPRED_DEFERRED_RELOAD_')) or "
+                "k == 'VOLPRED_CANONICAL_REPO_ROOT')))"
+            ),
+        ],
+        log_path=log_path,
+        env=child_env,
+    )
+
+    assert proc.wait(timeout=30) == 0
+    assert log_path.read_text(encoding="utf-8") == ""
 
 
 # ── writer_log: env-driven actor, unchanged fallback ─────────────────────────

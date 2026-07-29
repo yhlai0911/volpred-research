@@ -18,6 +18,11 @@ from collections.abc import Callable
 from typing import Any, Mapping, Protocol
 
 
+EXPERIMENT_ATTRIBUTION_FIELDS = frozenset(
+    {"experiment_id", "variant_id"}
+)
+
+
 @dataclass(frozen=True)
 class AnalyticsEventDefinition:
     purpose: str
@@ -33,7 +38,9 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
     "content_impression": AnalyticsEventDefinition(
         purpose="measure first-party content reach",
         required_fields=frozenset({"content_id", "surface"}),
-        optional_fields=frozenset({"referrer_class"}),
+        optional_fields=(
+            frozenset({"referrer_class"}) | EXPERIMENT_ATTRIBUTION_FIELDS
+        ),
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
@@ -41,6 +48,8 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
             "content_id": "opaque_identifier",
             "surface": "enum:home|article|search|feed|email",
             "referrer_class": "enum:direct|internal|search|social|email|other",
+            "experiment_id": "opaque_identifier",
+            "variant_id": "opaque_identifier",
         },
     ),
     "content_click": AnalyticsEventDefinition(
@@ -59,7 +68,9 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
     "read_depth": AnalyticsEventDefinition(
         purpose="measure aggregate content reading depth",
         required_fields=frozenset({"content_id", "depth_bucket"}),
-        optional_fields=frozenset({"surface"}),
+        optional_fields=(
+            frozenset({"surface"}) | EXPERIMENT_ATTRIBUTION_FIELDS
+        ),
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
@@ -67,12 +78,16 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
             "content_id": "opaque_identifier",
             "depth_bucket": "enum:25|50|75|100",
             "surface": "enum:home|article|search|feed|email",
+            "experiment_id": "opaque_identifier",
+            "variant_id": "opaque_identifier",
         },
     ),
     "qualified_action": AnalyticsEventDefinition(
         purpose="measure aggregate completion of a declared product action",
         required_fields=frozenset({"content_id", "action"}),
-        optional_fields=frozenset({"surface"}),
+        optional_fields=(
+            frozenset({"surface"}) | EXPERIMENT_ATTRIBUTION_FIELDS
+        ),
         raw_retention_days=30,
         identity_contract="anonymous_or_authenticated",
         dedupe_contract="idempotency_key",
@@ -80,6 +95,8 @@ ANALYTICS_EVENT_DICTIONARY: Mapping[str, AnalyticsEventDefinition] = {
             "content_id": "opaque_identifier",
             "action": "enum:subscribe|share|save|open_paper|open_experiment",
             "surface": "enum:home|article|search|feed|email",
+            "experiment_id": "opaque_identifier",
+            "variant_id": "opaque_identifier",
         },
     ),
     "return_visit": AnalyticsEventDefinition(
@@ -842,6 +859,24 @@ class AnalyticsPrivacyTracer:
             raise ValueError(
                 "missing required analytics fields: " + ", ".join(missing)
             )
+        has_experiment_id = "experiment_id" in observed_fields
+        has_variant_id = "variant_id" in observed_fields
+        if has_experiment_id != has_variant_id:
+            raise ValueError(
+                "analytics experiment_id and variant_id must be paired"
+            )
+        if has_experiment_id:
+            if event.properties.get("surface") != "article":
+                raise ValueError(
+                    "analytics experiment surface must be article"
+                )
+            if (
+                event.kind == "qualified_action"
+                and event.properties.get("action") != "share"
+            ):
+                raise ValueError(
+                    "analytics experiment qualified action must be share"
+                )
         if frozenset(definition.field_contracts) != allowed_fields:
             raise RuntimeError(
                 f"analytics field contracts drifted for {event.kind}"

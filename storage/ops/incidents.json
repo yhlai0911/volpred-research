@@ -399,6 +399,121 @@
     "last_at": null
    }
   },
+  "inc_2f1ab59a7f47": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-29T08:20:33.297125+00:00",
+   "escalation": null,
+   "fingerprint": "2f1ab59a7f47ce603661d90fd7c17c6e3ed6bfdb9efcc850b065c4f2e8a30b25",
+   "fingerprint_parts": [
+    "ci-red-30433823744"
+   ],
+   "first_seen_at": "2026-07-29T08:20:33.297125+00:00",
+   "incident_id": "inc_2f1ab59a7f47",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T08:20:33.297125+00:00",
+     "key": "30433823744:1",
+     "last_seen_at": "2026-07-29T08:20:33.297125+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T08:45:35.470724+00:00",
+     "key": "30435469828:1",
+     "last_seen_at": "2026-07-29T08:45:35.470724+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T09:20:16.419035+00:00",
+     "key": "30437836269:1",
+     "last_seen_at": "2026-07-29T09:20:16.419035+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T10:25:29.977070+00:00",
+     "key": "30442304988:1",
+     "last_seen_at": "2026-07-29T10:25:29.977070+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T11:00:47.980433+00:00",
+     "key": "30444605576:1",
+     "last_seen_at": "2026-07-29T11:00:47.980433+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T11:25:36.466250+00:00",
+     "key": "30446217613:1",
+     "last_seen_at": "2026-07-29T11:25:36.466250+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T11:50:27.795636+00:00",
+     "key": "30447854654:1",
+     "last_seen_at": "2026-07-29T11:50:27.795636+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T13:40:18.795404+00:00",
+     "key": "30455565263:1",
+     "last_seen_at": "2026-07-29T13:40:18.795404+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T14:20:20.971487+00:00",
+     "key": "30458744004:1",
+     "last_seen_at": "2026-07-29T14:20:20.971487+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T14:40:41.637233+00:00",
+     "key": "30460382691:1",
+     "last_seen_at": "2026-07-29T14:40:41.637233+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T15:00:25.526311+00:00",
+     "key": "30462072539:1",
+     "last_seen_at": "2026-07-29T15:00:25.526311+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-29T14:57:58.0749949Z E AssertionError: assert 'skip' == 'dry_run_fire'",
+   "last_seen_at": "2026-07-29T15:00:25.526311+00:00",
+   "notified_at": null,
+   "occurrence_count": 11,
+   "resolution": {
+    "at": "2026-07-29T15:25:27.586119+00:00",
+    "by": "ci-red-30433823744",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-29T15:25:27.586119+00:00",
+     "by": "ci-red-30433823744",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T08:20:33.477350+00:00",
+     "task_id": "ci-red-30433823744"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
+   }
+  },
   "inc_407e6c77f250": {
    "class": "machine_self",
    "clean_observations": [],
@@ -618,45 +733,8 @@
   },
   "inc_537a3ff3304f": {
    "class": "machine_self",
-   "clean_observations": [
-    {
-     "at": "2026-07-28T12:46:29.307705+00:00"
-    },
-    {
-     "at": "2026-07-28T13:31:15.237137+00:00"
-    },
-    {
-     "at": "2026-07-28T14:05:14.111970+00:00"
-    },
-    {
-     "at": "2026-07-28T14:41:46.728543+00:00"
-    },
-    {
-     "at": "2026-07-28T15:46:03.801321+00:00"
-    },
-    {
-     "at": "2026-07-28T16:16:27.983669+00:00"
-    },
-    {
-     "at": "2026-07-28T17:00:46.615210+00:00"
-    },
-    {
-     "at": "2026-07-28T17:25:38.681120+00:00"
-    },
-    {
-     "at": "2026-07-28T18:23:42.002507+00:00"
-    },
-    {
-     "at": "2026-07-28T19:17:14.039274+00:00"
-    },
-    {
-     "at": "2026-07-28T20:20:04.514722+00:00"
-    },
-    {
-     "at": "2026-07-28T21:07:20.009549+00:00"
-    }
-   ],
-   "clean_streak_started_at": "2026-07-28T09:24:21.846131+00:00",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
    "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
@@ -673,9 +751,19 @@
    "notification_id": "effect_owned_email_d3508f72aaa989427c20868a341f7623",
    "notified_at": "2026-07-26T15:57:03.341326+00:00",
    "occurrence_count": 4,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-29T09:41:04.873699+00:00",
+    "by": "detector",
+    "criterion": "clean_streak_k3_24h"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-29T09:41:04.873699+00:00",
+     "by": "detector",
+     "criterion": "clean_streak_k3_24h"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [],
    "task_mode": "none",
@@ -855,6 +943,7 @@
   "inc_776caf84f125": {
    "class": "machine_self",
    "clean_observations": [],
+   "clean_streak_started_at": null,
    "current_task_id": "inc_776caf84f125_e1",
    "episode_count": 1,
    "episode_failures": [],
@@ -960,72 +1049,72 @@
      "detail": {
       "branch": "wt/dispatch-slot-1-20b291d5-snapdup",
       "dirty": true,
-      "idle_hours": 170.3,
+      "idle_hours": 194.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-20b291d5-snapdup",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-375ba0e3-k1380",
       "dirty": true,
-      "idle_hours": 170.4,
+      "idle_hours": 194.4,
       "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-375ba0e3-k1380",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-bd00f90a-k1731",
       "dirty": false,
-      "idle_hours": 20.9,
-      "unmerged_commits": 24
+      "idle_hours": 4.5,
+      "unmerged_commits": 31
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-bd00f90a-k1731",
-     "last_seen_at": "2026-07-28T04:26:05.004572+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-f5a22a5f-k1095v2",
       "dirty": false,
-      "idle_hours": 164.2,
+      "idle_hours": 188.2,
       "unmerged_commits": 3
      },
      "first_seen_at": "2026-07-22T00:26:54.543032+00:00",
      "key": "dispatch-slot-1-f5a22a5f-k1095v2",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "worktree-agent-a148e8a94105f7935",
       "dirty": true,
-      "idle_hours": 157.6,
+      "idle_hours": 181.6,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "agent-a148e8a94105f7935",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-2-8dda242d-k1708",
       "dirty": false,
-      "idle_hours": 22.9,
+      "idle_hours": 46.9,
       "unmerged_commits": 6
      },
      "first_seen_at": "2026-07-22T11:00:30.825875+00:00",
      "key": "dispatch-slot-1-457427c2-k1708",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": "2026-07-28T10:25:56.532041+00:00",
@@ -1040,19 +1129,19 @@
      "last_seen_at": "2026-07-28T04:26:05.004572+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-29T16:26:16.869845+00:00",
      "detail": {
       "branch": "worktree-dispatch-slot-1-a4fe4570",
       "dirty": false,
-      "idle_hours": 44.9,
+      "idle_hours": 62.9,
       "unmerged_commits": 2
      },
      "first_seen_at": "2026-07-27T04:25:30.568624+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T10:26:10.723470+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-28T22:14:28.969341+00:00",
      "detail": {
       "branch": "worktree-k1715-204d556b",
       "dirty": true,
@@ -1068,91 +1157,103 @@
      "detail": {
       "branch": "wt/dispatch-slot-2-7087efc0-signfc",
       "dirty": true,
-      "idle_hours": 33.3,
+      "idle_hours": 57.3,
       "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-27T16:25:51.225239+00:00",
      "key": "dispatch-slot-2-7087efc0-signfc",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "wt/dispatch-slot-1-1e5922b4-k1734",
-      "dirty": true,
-      "idle_hours": 17.8,
-      "unmerged_commits": 2
+      "dirty": false,
+      "idle_hours": 25.6,
+      "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-1-1e5922b4-k1734",
-     "last_seen_at": "2026-07-28T10:25:56.532041+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-28T22:25:46.637755+00:00",
      "detail": {
       "branch": "wt/dispatch-slot-2-dc4437b8-k1812",
-      "dirty": true,
-      "idle_hours": 20.5,
-      "unmerged_commits": 0
+      "dirty": false,
+      "idle_hours": 7.0,
+      "unmerged_commits": 1
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-2-dc4437b8-k1812",
-     "last_seen_at": "2026-07-28T10:25:56.532041+00:00"
+     "last_seen_at": "2026-07-28T22:14:28.969341+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "dispatch-slot-3-87c7269d-k1720",
-      "dirty": true,
-      "idle_hours": 17.7,
-      "unmerged_commits": 0
+      "dirty": false,
+      "idle_hours": 25.3,
+      "unmerged_commits": 4
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-3-87c7269d-k1720",
-     "last_seen_at": "2026-07-28T10:25:56.532041+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "branch": "dispatch-slot-3-87c7269d-k1721",
       "dirty": true,
-      "idle_hours": 24.5,
+      "idle_hours": 48.5,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-27T22:25:51.036366+00:00",
      "key": "dispatch-slot-3-87c7269d-k1721",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T16:26:16.869845+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-29T04:25:53.479182+00:00",
      "detail": {
-      "branch": "wt/dispatch-slot-4-6ba995a0-k1727",
-      "dirty": false,
-      "idle_hours": 12.1,
-      "unmerged_commits": 4
+      "branch": null,
+      "dirty": true,
+      "idle_hours": 18.1,
+      "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-28T10:25:56.532041+00:00",
      "key": "dispatch-slot-4-6ba995a0-k1727",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-28T22:25:46.637755+00:00"
     },
     {
-     "cleared_at": null,
+     "cleared_at": "2026-07-29T10:26:10.723470+00:00",
      "detail": {
       "branch": "worktree-dispatch-slot-2-58249487",
       "dirty": true,
-      "idle_hours": 8.4,
+      "idle_hours": 20.4,
       "unmerged_commits": 0
      },
      "first_seen_at": "2026-07-28T16:25:53.129809+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T16:25:53.129809+00:00"
+     "last_seen_at": "2026-07-29T04:25:53.479182+00:00"
+    },
+    {
+     "cleared_at": "2026-07-29T16:26:16.869845+00:00",
+     "detail": {
+      "branch": "worktree-dispatch-slot-1-cfeeb2f6",
+      "dirty": true,
+      "idle_hours": 8.6,
+      "unmerged_commits": 0
+     },
+     "first_seen_at": "2026-07-29T10:26:10.723470+00:00",
+     "key": "dispatch-slot-1-cfeeb2f6",
+     "last_seen_at": "2026-07-29T10:26:10.723470+00:00"
     }
    ],
    "kind": "worktree_unmerged",
-   "last_breach_detail": "held worktree dispatch-slot-4-6ba995a0-k1727",
-   "last_seen_at": "2026-07-28T16:25:53.129809+00:00",
+   "last_breach_detail": "held worktree dispatch-slot-3-87c7269d-k1721",
+   "last_seen_at": "2026-07-29T16:26:16.869845+00:00",
    "notified_at": null,
-   "occurrence_count": 210,
+   "occurrence_count": 271,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1169,6 +1270,132 @@
     "count": 4,
     "last_at": "2026-07-22T00:26:54.543032+00:00",
     "last_reason": "remediation_cap_24h"
+   }
+  },
+  "inc_7842d390a71f": {
+   "class": "ordinary",
+   "clean_observations": [],
+   "clean_streak_started_at": null,
+   "current_task_id": null,
+   "episode_count": 1,
+   "episode_failures": [],
+   "episode_opened_at": "2026-07-29T00:20:20.567860+00:00",
+   "escalation": null,
+   "fingerprint": "7842d390a71f69f783f431d034f51ac4656e4e4a754e6c23240032c0f2e098c5",
+   "fingerprint_parts": [
+    "ci-red-30409803097"
+   ],
+   "first_seen_at": "2026-07-29T00:20:20.567860+00:00",
+   "incident_id": "inc_7842d390a71f",
+   "instances": [
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T00:20:20.567860+00:00",
+     "key": "30409803097:1",
+     "last_seen_at": "2026-07-29T00:20:20.567860+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T00:50:26.302662+00:00",
+     "key": "30411360764:1",
+     "last_seen_at": "2026-07-29T00:50:26.302662+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T01:50:14.444910+00:00",
+     "key": "30414278776:1",
+     "last_seen_at": "2026-07-29T01:50:14.444910+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T02:25:21.019589+00:00",
+     "key": "30415888720:1",
+     "last_seen_at": "2026-07-29T02:25:21.019589+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T02:45:40.942863+00:00",
+     "key": "30416792123:1",
+     "last_seen_at": "2026-07-29T02:45:40.942863+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T03:25:16.721454+00:00",
+     "key": "30418623573:1",
+     "last_seen_at": "2026-07-29T03:25:16.721454+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T04:10:34.670601+00:00",
+     "key": "30420634055:1",
+     "last_seen_at": "2026-07-29T04:10:34.670601+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T04:35:43.583411+00:00",
+     "key": "30421794548:1",
+     "last_seen_at": "2026-07-29T04:35:43.583411+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T04:55:19.678615+00:00",
+     "key": "30422707211:1",
+     "last_seen_at": "2026-07-29T04:55:19.678615+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T06:15:23.973294+00:00",
+     "key": "30426509734:1",
+     "last_seen_at": "2026-07-29T06:15:23.973294+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T06:35:41.228613+00:00",
+     "key": "30427591102:1",
+     "last_seen_at": "2026-07-29T06:35:41.228613+00:00"
+    },
+    {
+     "cleared_at": null,
+     "first_seen_at": "2026-07-29T07:00:46.514325+00:00",
+     "key": "30428956638:1",
+     "last_seen_at": "2026-07-29T07:00:46.514325+00:00"
+    }
+   ],
+   "kind": "ci_red",
+   "last_breach_detail": "2026-07-29T06:57:20.4102520Z E AssertionError: 2 finished experiment(s) have archived results but no knowledge.json entry, so dedup and topic selection cannot see them: ['K1727', 'k1812']",
+   "last_seen_at": "2026-07-29T07:00:46.514325+00:00",
+   "notified_at": null,
+   "occurrence_count": 12,
+   "resolution": {
+    "at": "2026-07-29T07:20:47.399211+00:00",
+    "by": "ci-red-30409803097",
+    "criterion": "ci_verified_green"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-29T07:20:47.399211+00:00",
+     "by": "ci-red-30409803097",
+     "criterion": "ci_verified_green"
+    }
+   ],
+   "state": "resolved",
+   "suppressed_until": null,
+   "task_history": [
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T00:20:20.706482+00:00",
+     "task_id": "ci-red-30409803097"
+    },
+    {
+     "episode": 1,
+     "opened_at": "2026-07-29T06:15:24.168342+00:00",
+     "task_id": "ci-red-30426509734"
+    }
+   ],
+   "task_mode": "external",
+   "throttled": {
+    "count": 0,
+    "last_at": null
    }
   },
   "inc_792a94b0ecf4": {
@@ -1315,21 +1542,21 @@
      },
      "first_seen_at": "2026-07-28T08:45:56.262176+00:00",
      "key": "dispatch-slot-2-58249487",
-     "last_seen_at": "2026-07-28T21:08:11.113465+00:00"
+     "last_seen_at": "2026-07-29T08:29:31.226191+00:00"
     },
     {
      "cleared_at": null,
      "detail": {
       "base_sha": "",
       "branch": "worktree-dispatch-slot-1-a4fe4570",
-      "checkpoint_commit": "",
+      "checkpoint_commit": "7b2b309b455de574023571e1c6a2243700755c30",
       "detail_tail": "fire ended with outcome=orphaned; dirty=False unique_commits=2",
       "reason": "worker_orphaned",
       "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-a4fe4570"
      },
      "first_seen_at": "2026-07-28T08:46:20.840798+00:00",
      "key": "dispatch-slot-1-a4fe4570",
-     "last_seen_at": "2026-07-28T21:08:10.088766+00:00"
+     "last_seen_at": "2026-07-29T13:58:17.996597+00:00"
     },
     {
      "cleared_at": null,
@@ -1358,13 +1585,55 @@
      "first_seen_at": "2026-07-28T14:05:06.679719+00:00",
      "key": "dispatch-slot-1-24c9dbdc",
      "last_seen_at": "2026-07-28T14:05:06.679719+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "0ac4cbdbb454a4a027e202fa00c8e3a5a9353b0e",
+      "branch": "worktree-dispatch-slot-1-cfeeb2f6",
+      "checkpoint_commit": "1e8eef63f55e97184dee77bf6d5c0d486dc6adfe",
+      "detail_tail": "fire ended with outcome=unknown_external; dirty=True unique_commits=0",
+      "reason": "worker_unknown_external",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-cfeeb2f6"
+     },
+     "first_seen_at": "2026-07-29T02:02:19.114849+00:00",
+     "key": "dispatch-slot-1-cfeeb2f6",
+     "last_seen_at": "2026-07-29T13:58:28.558256+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "916dd806594f565c4bf8fcd6e8d055a8d239dccf",
+      "branch": "worktree-dispatch-slot-1-d3c39bb1",
+      "checkpoint_commit": "5645aecee8de2c145fe42b52c0fb51cb53c5eacc",
+      "detail_tail": "['.claude/skills/platform-ops-manager/references/loop-health-and-dreaming.md', 'scripts/audit_enforcement_map.py', 'scripts/check_skill_architecture.py', 'tests/test_skill_architecture.py']",
+      "reason": "undeclared_output_path",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-d3c39bb1"
+     },
+     "first_seen_at": "2026-07-29T08:53:18.944581+00:00",
+     "key": "dispatch-slot-1-d3c39bb1",
+     "last_seen_at": "2026-07-29T13:58:39.956577+00:00"
+    },
+    {
+     "cleared_at": null,
+     "detail": {
+      "base_sha": "877e4a699bf778b701bbe46bce5dff895c999aa4",
+      "branch": "worktree-dispatch-slot-1-ef1e108b",
+      "checkpoint_commit": "ee8005da78d79fcaaf3c36ffd806f2a88a63c019",
+      "detail_tail": "fire ended with outcome=kill_failed_orphan_drained; dirty=True unique_commits=0",
+      "reason": "worker_kill_failed_orphan_drained",
+      "worktree": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-ef1e108b"
+     },
+     "first_seen_at": "2026-07-29T14:57:09.054864+00:00",
+     "key": "dispatch-slot-1-ef1e108b",
+     "last_seen_at": "2026-07-29T14:57:09.054864+00:00"
     }
    ],
    "kind": "worker_orphaned",
-   "last_breach_detail": "WS-B workspace dispatch-slot-2-58249487 unmergeable (undeclared_output_path)",
-   "last_seen_at": "2026-07-28T21:08:11.113465+00:00",
+   "last_breach_detail": "WS-B workspace dispatch-slot-1-ef1e108b unmergeable (worker_kill_failed_orphan_drained)",
+   "last_seen_at": "2026-07-29T14:57:09.054864+00:00",
    "notified_at": null,
-   "occurrence_count": 2474,
+   "occurrence_count": 5110,
    "resolution": null,
    "resolutions": [],
    "state": "mitigating",
@@ -1650,14 +1919,8 @@
   },
   "inc_c67bec28dd29": {
    "class": "machine_self",
-   "clean_observations": [
-    {
-     "at": "2026-07-27T12:22:38.836371+00:00"
-    },
-    {
-     "at": "2026-07-27T14:35:03.508048+00:00"
-    }
-   ],
+   "clean_observations": [],
+   "clean_streak_started_at": null,
    "current_task_id": null,
    "episode_count": 1,
    "episode_failures": [],
@@ -1885,9 +2148,19 @@
    "notification_id": "2a07caa0",
    "notified_at": "2026-07-21T14:10:28.040441+00:00",
    "occurrence_count": 59,
-   "resolution": null,
-   "resolutions": [],
-   "state": "open",
+   "resolution": {
+    "at": "2026-07-28T22:40:38.230375+00:00",
+    "by": "detector",
+    "criterion": "clean_streak_k3_24h"
+   },
+   "resolutions": [
+    {
+     "at": "2026-07-28T22:40:38.230375+00:00",
+     "by": "detector",
+     "criterion": "clean_streak_k3_24h"
+    }
+   ],
+   "state": "resolved",
    "suppressed_until": null,
    "task_history": [],
    "task_mode": "none",
@@ -2190,6 +2463,6 @@
    }
   }
  },
- "updated_at": "2026-07-28T21:08:11.130287+00:00",
+ "updated_at": "2026-07-29T16:48:38.017199+00:00",
  "version": 1
 }

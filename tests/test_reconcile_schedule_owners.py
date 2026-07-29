@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -62,6 +63,113 @@ def test_active_plan_decommissions_legacy_launchagent() -> None:
     ]
 
 
+def test_owner_plan_rejects_active_legacy_cron_job_outside_core_inventory() -> None:
+    """A second schedule registry must not escape the unique-owner audit."""
+    runtime = config(mode="active")
+    runtime["cron_jobs"] = [
+        {
+            "id": "volpred-compute-worker",
+            "schedule": "*/15 * * * *",
+            "command": "/tmp/cron_compute_worker.sh",
+        }
+    ]
+
+    with pytest.raises(
+        RuntimeError,
+        match=(
+            "active cron_jobs entry is outside Operations Core inventory: "
+            "volpred-compute-worker"
+        ),
+    ):
+        build_owner_plan(runtime)
+
+
+def test_owner_plan_allows_retired_legacy_cron_job_receipt() -> None:
+    """Retired rows remain as rollback history without retaining execution rights."""
+    runtime = config(mode="active")
+    runtime["cron_jobs"] = [
+        {
+            "id": "volpred-compute-worker",
+            "schedule": "*/15 * * * *",
+            "command": "/tmp/cron_compute_worker.sh",
+            "status": "retired",
+        }
+    ]
+
+    plan = build_owner_plan(runtime)
+
+    assert plan["operations_core_job_ids"] == ["host_job", "launch_job"]
+
+
+def test_retirement_gate_requires_matching_core_and_downstream_receipts(
+    tmp_path: Path,
+) -> None:
+    runtime = config(mode="active")
+    runtime["system_crontab"]["items"][1]["legacy_retirement_gate"] = {
+        "type": "schedule_and_compute_receipt",
+        "schedule_receipts_path": "storage/ops/schedule_receipts.json",
+        "proof_receipt_path": (
+            "storage/ops/compute_queue/issue46-compute-smoke.json"
+        ),
+    }
+    schedule_path = tmp_path / "storage/ops/schedule_receipts.json"
+    compute_path = (
+        tmp_path / "storage/ops/compute_queue/issue46-compute-smoke.json"
+    )
+    schedule_path.parent.mkdir(parents=True)
+    compute_path.parent.mkdir(parents=True)
+    fire_key = "g1:launch_job:proof"
+    schedule_path.write_text(
+        json.dumps(
+            {
+                "fires": {
+                    fire_key: {
+                        "job_id": "launch_job",
+                        "fire_key": fire_key,
+                        "scheduled_for": "2026-07-26T10:15:00Z",
+                        "state": "succeeded",
+                        "exit_code": 0,
+                    }
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    compute_path.write_text(
+        json.dumps(
+            {
+                "id": "issue46-compute-smoke",
+                "status": "completed",
+                "exit_code": 0,
+                "schedule_dispatch": {
+                    "owner": "operations_core",
+                    "job_id": "launch_job",
+                    "fire_key": "wrong-fire",
+                    "scheduled_for": "2026-07-26T10:15:00Z",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="downstream proof does not match"):
+        owners._assert_legacy_retirement_gate(
+            runtime,
+            "launch_job",
+            repo_root=tmp_path,
+        )
+
+    proof = json.loads(compute_path.read_text(encoding="utf-8"))
+    proof["schedule_dispatch"]["fire_key"] = fire_key
+    compute_path.write_text(json.dumps(proof), encoding="utf-8")
+
+    owners._assert_legacy_retirement_gate(
+        runtime,
+        "launch_job",
+        repo_root=tmp_path,
+    )
+
+
 def test_audit_reports_host_and_launchagent_conflicts() -> None:
     plan = build_owner_plan(config(mode="active"))
     audit = audit_owner_plan(
@@ -94,6 +202,29 @@ def test_audit_green_requires_core_clock() -> None:
     assert missing["ok"] is False
     assert green["ok"] is True
     assert green["status"] == "owner_surfaces_verified"
+
+
+def test_audit_rejects_unregistered_loaded_volpred_launchagent() -> None:
+    """A loaded VolPred label must exist in the canonical owner inventory."""
+    plan = build_owner_plan(config())
+
+    audit = audit_owner_plan(
+        plan,
+        crontab_text="",
+        loaded_labels={
+            "com.volpred.operations-core-scheduler",
+            "com.volpred.rogue-clock",
+        },
+    )
+
+    assert audit["ok"] is False
+    assert audit["conflicts"] == [
+        {
+            "job_id": "",
+            "surface": "com.volpred.rogue-clock",
+            "reason": "loaded VolPred LaunchAgent is absent from canonical inventory",
+        }
+    ]
 
 
 def test_audit_green_requires_every_active_control_plane_daemon() -> None:

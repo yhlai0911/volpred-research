@@ -12,6 +12,7 @@
   "held_escalation_shifts": 6,
   "defaults": {
     "default": "adopt",
+    "atomic_unit": "file",
     "status_filter": "all",
     "respect_inflight": true,
     "content_gates": [],
@@ -57,6 +58,8 @@
       "path": "experiments",
       "owner_source": "experiment_run",
       "default": "adopt",
+      "atomic_unit": "first_child_directory",
+      "content_gates": ["experiment_ready_for_main"],
       "max_files": 40,
       "commit_subject": "chore(experiment-reap): collect orphaned experiment artifacts ({count} files)",
       "commit_body": "Auto-collected by reap_orphan_deliverables: experiment scripts, result JSON and caches left uncommitted after the producing session ended. Root-cause: the author session that wrote them never came back, and PHASE-Z only commits what its own fire produced - so the files had no owner and re-alerted every fire."

@@ -19,6 +19,7 @@ fixture 的目的，不是禮貌。
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import os
@@ -76,6 +77,9 @@ def _install_registry(mod, root: Path, payload: dict) -> None:
     path = root / "config" / "orphan_namespaces.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    _git(root, "add", "config/orphan_namespaces.json")
+    committed = _git(root, "commit", "-q", "-m", "registry fixture")
+    assert committed.returncode == 0, committed.stderr
     mod.load_registry(refresh=True)
 
 
@@ -358,8 +362,13 @@ def test_c_shipped_registry_declares_the_three_managed_directories():
     assert raw["defaults"]["default"] == "adopt", "全域預設必須是收編，不是白名單"
     assert by_id["drafts"]["path"] == "storage/drafts"
     assert by_id["experiments"]["path"] == "experiments"
-    # experiments/ 沒有任何專屬程式碼 —— 它只是套用了全域預設。
-    assert by_id["experiments"].get("content_gates", []) == []
+    assert by_id["experiments"]["atomic_unit"] == "first_child_directory"
+    # experiments/ 仍走泛型 namespace engine，但收編前必須委派既有的
+    # review-certification + artifact-completeness owners；否則 reaper 會像
+    # K1694 一樣把 Codex FAIL、無 knowledge 的結果直接 commit 進 main。
+    assert by_id["experiments"]["content_gates"] == [
+        "experiment_ready_for_main"
+    ]
     # paper/ 是唯一的 hold-by-default：那裡的 dirty 檔可能是真的內容變動。
     assert by_id["paper"]["default"] == "hold"
     assert by_id["paper"]["content_gates"] == [
@@ -376,3 +385,667 @@ def test_c_registry_has_no_per_directory_recognizer_functions():
         assert banned not in code, f"per-directory recognizer 回來了: {banned}"
     assert "def scan_namespace(" in code
     assert "def collect_namespace(" in code
+
+
+def test_experiment_file_limit_never_splits_one_directory(env):
+    """A 41-file experiment crosses max_files=40 as one atomic unit."""
+    mod, _root = env
+    namespace = {
+        "path": "experiments",
+        "atomic_unit": "first_child_directory",
+    }
+    entries = [
+        {"path": f"experiments/K2000/artifact_{index:02d}.json"}
+        for index in range(41)
+    ] + [{"path": "experiments/K2001/result.json"}]
+
+    batch = mod._namespace_batch(namespace, entries, 40)
+
+    assert len(batch) == 41
+    assert {
+        str(Path(row["path"]).parent)
+        for row in batch
+    } == {"experiments/K2000"}
+
+
+def test_uncertified_experiment_outputs_are_held_not_auto_committed(env):
+    """K1694 regression: orphan adoption may not bypass experiment admission.
+
+    The producer can leave perfectly ordinary result files in ``experiments/``;
+    their location proves ownership, not scientific admissibility.  A missing
+    byte-bound PASS review and missing knowledge/spec must therefore hold the
+    whole experiment for its normal review/merge owner.
+    """
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(root / "storage" / "memory" / "knowledge.json", "[]")
+    exp = root / "experiments" / "K1694"
+    _write(exp / "K1694.py", "print('invalid pending review')\n", mtime=OLD)
+    _write(exp / "README.md", "# REVIEW_FAILED\n", mtime=OLD)
+    _write(
+        exp / "K1694_results.json",
+        json.dumps({"experiment_id": "K1694", "verdict": "NULL"}),
+        mtime=OLD,
+    )
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert {entry["path"] for entry in scan["held"]} == {
+        "experiments/K1694/K1694.py",
+        "experiments/K1694/K1694_results.json",
+        "experiments/K1694/README.md",
+    }
+    assert all(
+        entry["kind"] == "experiment_admission"
+        and "review-certification" in entry["reason"]
+        and "knowledge" in entry["reason"]
+        for entry in scan["held"]
+    )
+
+
+def _reviewed_k1694(root: Path) -> Path:
+    exp = root / "experiments" / "K1694"
+    claim_files = {
+        "K1694.py": "print('reviewed')\n",
+        "README.md": "# reviewed\n",
+        "K1694_results.json": json.dumps(
+            {"experiment_id": "K1694", "verdict": "NULL"}
+        ),
+    }
+    for name, payload in claim_files.items():
+        _write(exp / name, payload, mtime=OLD)
+    _write(exp / "reproduce_spec.json", json.dumps({
+        "schema_version": "volpred.reproduce_spec.v1",
+        "entrypoint": {"path": "K1694.py", "args": []},
+        "canonical_result": "K1694_results.json",
+        "inputs": [],
+        "timeout_seconds": 900,
+        "network": "deny",
+        "randomness": {"status": "not_applicable"},
+        "comparison": {
+            "rtol": 1e-9,
+            "atol": 1e-12,
+            "ignore_pointers": [],
+            "ignore_reasons": {},
+        },
+    }), mtime=OLD)
+    reviewed = {
+        name: hashlib.sha256((exp / name).read_bytes()).hexdigest()
+        for name in claim_files
+    }
+    _write(exp / "review_verdict.json", json.dumps({
+        "kid": "K1694",
+        "verdict": "PASS",
+        "reviewer": "test",
+        "reviewed_at": "2026-07-29T00:00:00+00:00",
+        "reviewed_commit": "fixture",
+        "review_artifact": "fixture",
+        "blocking_defects": [],
+        "reviewed_sha256": reviewed,
+    }), mtime=OLD)
+    return exp
+
+
+def _commit_k1694_evidence(root: Path, *, tracked_input: bool = False) -> Path:
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    paths = [
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    ]
+    tracked = root / "experiments" / "K1694" / "tracked_input.csv"
+    if tracked_input:
+        _write(tracked, "x\n")
+        paths.append("experiments/K1694/tracked_input.csv")
+    _git(root, "add", *paths)
+    committed = _git(root, "commit", "-q", "-m", "admission evidence")
+    assert committed.returncode == 0, committed.stderr
+    return tracked
+
+
+def test_atomic_experiment_with_tracked_deletion_is_entirely_held(env):
+    """A deleted sibling blocks even when current claim-surface bytes PASS."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "atomic_unit": "first_child_directory",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    tracked = _commit_k1694_evidence(root, tracked_input=True)
+    tracked.unlink()
+    _reviewed_k1694(root)
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert len(scan["held"]) == 1
+    held = scan["held"][0]
+    assert held["path"] == "experiments/K1694"
+    assert held["kind"] == held["reason"] == "pending_rename"
+    assert "experiments/K1694/tracked_input.csv" in held["members"]
+    assert "experiments/K1694/K1694_results.json" in held["members"]
+
+
+def test_atomic_experiment_with_41_ready_and_one_recent_member_commits_nothing(
+    env,
+):
+    """max_files cannot hide a held/grace member outside the collectable slice."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "atomic_unit": "first_child_directory",
+            "content_gates": ["experiment_ready_for_main"],
+            "max_files": 40,
+        }],
+    })
+    _commit_k1694_evidence(root)
+    exp = _reviewed_k1694(root)
+    for index in range(41):
+        _write(exp / f"input_{index:02d}.bin", "ready", mtime=OLD)
+    _write(exp / "input_recent.bin", "still writing")
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert len(scan["held"]) == 1
+    held = scan["held"][0]
+    assert held["path"] == "experiments/K1694"
+    assert held["reason"] == "atomic_unit_incomplete"
+    assert "experiments/K1694/input_recent.bin" in held["members"]
+    assert len([p for p in held["members"] if p.endswith(".bin")]) == 42
+
+
+def test_dirty_only_knowledge_cannot_authorize_experiment_collection(env):
+    """The reaper commits only experiment paths, so evidence must come from HEAD."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    knowledge = root / "storage" / "memory" / "knowledge.json"
+    _write(knowledge, "[]")
+    _git(root, "add", "storage/memory/knowledge.json")
+    _git(root, "commit", "-q", "-m", "empty knowledge")
+    # The working tree claims K1694 is recorded, but collect_namespace would
+    # leave this dirty byte behind while committing only experiments/K1694/*.
+    _write(knowledge, json.dumps([{"content": "K1694 dirty-only"}]))
+    exp = _reviewed_k1694(root)
+    (exp / "reproduce_spec.json").unlink()
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert scan["held"]
+    assert all("knowledge.json" in row["reason"] for row in scan["held"])
+
+
+def test_dirty_only_artifact_exclusion_cannot_authorize_collection(env):
+    """A working-tree-only exclusion is evidence outside the commit boundary."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    exclusion = root / "config" / "experiment_artifact_exclusions.json"
+    _write(exclusion, json.dumps({"exclusions": []}))
+    baseline = root / "storage" / "ops" / "mdd_scale_artifact_baseline.json"
+    _write(baseline, "{}")
+    _git(root, "add", "storage/memory/knowledge.json", str(exclusion), str(baseline))
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    _write(exclusion, json.dumps({
+        "exclusions": [{
+            "experiment": "K1694",
+            "reason": "dirty-only bypass",
+        }],
+    }))
+    exp = _reviewed_k1694(root)
+    (exp / "reproduce_spec.json").unlink()
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert scan["held"]
+    assert all(
+        "missing reproduce_spec.json" in row["reason"]
+        for row in scan["held"]
+    )
+
+
+def test_evidence_mutation_between_snapshot_and_checker_cannot_authorize(
+    env, monkeypatch
+):
+    """Delegated checkers receive the immutable HEAD snapshot, not a later read."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    exclusion = root / "config" / "experiment_artifact_exclusions.json"
+    _write(exclusion, json.dumps({"exclusions": []}))
+    _git(root, "add", "storage/memory/knowledge.json", str(exclusion))
+    _git(root, "commit", "-q", "-m", "immutable admission evidence")
+    exp = _reviewed_k1694(root)
+    (exp / "reproduce_spec.json").unlink()
+
+    import check_experiment_artifacts as artifacts
+
+    original = artifacts.audit_experiment
+
+    def mutate_then_audit(*args, **kwargs):
+        _write(exclusion, json.dumps({
+            "exclusions": [{
+                "experiment": "K1694",
+                "reason": "TOCTOU dirty-only bypass",
+            }],
+        }))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(artifacts, "audit_experiment", mutate_then_audit)
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert scan["held"]
+    assert all("missing reproduce_spec.json" in row["reason"] for row in scan["held"])
+
+
+def test_dirty_registry_cannot_remove_an_admission_gate(env):
+    """A working-tree registry edit is policy outside the commit boundary."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "config" / "orphan_namespaces.json",
+        json.dumps({
+            "namespaces": [{
+                "id": "experiments",
+                "path": "experiments",
+                "content_gates": [],
+            }],
+        }),
+    )
+    _write(
+        root / "experiments" / "K1694" / "K1694_results.json",
+        "{}",
+        mtime=OLD,
+    )
+
+    scan = mod.scan_namespace("experiments")
+
+    assert scan["collectable"] == []
+    assert scan["held"] == [{
+        "path": "experiments/K1694/K1694_results.json",
+        "kind": "namespace_configuration",
+        "reason": "registry_worktree_differs_head",
+    }]
+
+
+def test_reviewed_experiment_mutated_after_scan_is_not_committed(env):
+    """The writer lease revalidates admission and the exact staged blob."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    _git(
+        root,
+        "add",
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    )
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    exp = _reviewed_k1694(root)
+    scan = mod.scan_namespace("experiments")
+    assert scan["collectable"], scan
+
+    # This byte was never reviewed. The old implementation would still stage
+    # and commit it using the earlier scan decision.
+    _write(exp / "K1694.py", "print('mutated after review')\n", mtime=OLD)
+
+    out = mod.collect_namespace("experiments", scan["collectable"])
+
+    assert out == [{
+        "namespace": "experiments",
+        "paths": [row["path"] for row in scan["collectable"]],
+        "committed": False,
+        "err": "admission_snapshot_changed",
+        "mismatches": [row["path"] for row in scan["collectable"]],
+    }]
+    assert _git(
+        root, "status", "--porcelain", "--", "experiments/K1694"
+    ).stdout
+
+
+def test_foreign_staged_path_blocks_the_whole_tree_commit(env):
+    """A detached commit may not inherit any staged path outside its namespace."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    _git(
+        root,
+        "add",
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    )
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    _reviewed_k1694(root)
+    scan = mod.scan_namespace("experiments")
+    foreign = root / "foreign-owner.txt"
+    _write(foreign, "not the reaper's change\n")
+    _git(root, "add", "foreign-owner.txt")
+
+    out = mod.collect_namespace("experiments", scan["collectable"])
+
+    assert out == [{
+        "namespace": "experiments",
+        "paths": [row["path"] for row in scan["collectable"]],
+        "committed": False,
+        "err": "pre_staged_collision",
+        "collisions": ["foreign-owner.txt"],
+    }]
+    assert _git(
+        root, "diff", "--cached", "--name-only"
+    ).stdout.splitlines() == ["foreign-owner.txt"]
+
+
+def test_worktree_mutation_after_staged_check_cannot_replace_verified_blob(env):
+    """The final commit consumes an isolated index, never pathspec worktree bytes."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    _git(
+        root,
+        "add",
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    )
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    exp = _reviewed_k1694(root)
+    reviewed_bytes = (exp / "K1694.py").read_text(encoding="utf-8")
+    scan = mod.scan_namespace("experiments")
+    assert scan["collectable"], scan
+
+    hook = root / ".git" / "hooks" / "pre-commit"
+    _write(
+        hook,
+        "#!/bin/sh\n"
+        "printf \"%s\\\\n\" \"print('mutated inside pre-commit')\" "
+        "> experiments/K1694/K1694.py\n",
+    )
+    hook.chmod(0o755)
+
+    out = mod.collect_namespace("experiments", scan["collectable"])
+
+    assert out[0]["committed"] is True, out
+    committed = _git(
+        root, "show", "HEAD:experiments/K1694/K1694.py"
+    ).stdout
+    assert committed == reviewed_bytes
+    assert (exp / "K1694.py").read_text(encoding="utf-8") == (
+        "print('mutated inside pre-commit')\n"
+    )
+    # The later bytes are preserved as an ordinary dirty edit for the next
+    # admission cycle; they were neither lost nor smuggled into this commit.
+    assert "experiments/K1694/K1694.py" in _git(
+        root, "status", "--porcelain"
+    ).stdout
+
+
+def test_head_advance_during_hook_is_preserved_and_reaper_fails_closed(env):
+    """A foreign HEAD advance must win; reaper may never roll it back."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    _git(
+        root,
+        "add",
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    )
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    _reviewed_k1694(root)
+    scan = mod.scan_namespace("experiments")
+    original_head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    external_receipt = root / "external-head.txt"
+
+    hook = root / ".git" / "hooks" / "pre-commit"
+    _write(
+        hook,
+        "#!/bin/sh\n"
+        "original=$(git rev-parse HEAD)\n"
+        "tree=$(git rev-parse \"$original^{tree}\")\n"
+        "external=$(printf 'external writer\\n' | "
+        "git commit-tree \"$tree\" -p \"$original\")\n"
+        "git update-ref HEAD \"$external\" \"$original\"\n"
+        f"printf '%s\\n' \"$external\" > {external_receipt}\n",
+    )
+    hook.chmod(0o755)
+
+    out = mod.collect_namespace("experiments", scan["collectable"])
+
+    external_head = external_receipt.read_text(encoding="utf-8").strip()
+    assert external_head != original_head
+    assert _git(root, "rev-parse", "HEAD").stdout.strip() == external_head
+    assert out[0]["committed"] is False
+    assert "experiments/" in _git(
+        root, "status", "--porcelain"
+    ).stdout
+
+
+def test_foreign_staged_during_hook_survives_reaper_failure(env):
+    """Failure cleanup may never replace the checkout's shared index."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    _git(
+        root,
+        "add",
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    )
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    _reviewed_k1694(root)
+    scan = mod.scan_namespace("experiments")
+    original_head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    _write(root / "foreign-owner.txt", "staged by external writer\n")
+
+    hook = root / ".git" / "hooks" / "pre-commit"
+    _write(
+        hook,
+        "#!/bin/sh\n"
+        "env -u GIT_INDEX_FILE git add foreign-owner.txt\n"
+        "exit 1\n",
+    )
+    hook.chmod(0o755)
+
+    out = mod.collect_namespace("experiments", scan["collectable"])
+
+    assert out[0]["committed"] is False
+    assert _git(root, "rev-parse", "HEAD").stdout.strip() == original_head
+    assert _git(
+        root, "diff", "--cached", "--name-only"
+    ).stdout.splitlines() == ["foreign-owner.txt"]
+    assert _git(
+        root, "show", ":foreign-owner.txt"
+    ).stdout == "staged by external writer\n"
+
+
+def test_head_advance_after_commit_is_not_rolled_back(env):
+    """A post-commit ref race must fail its CAS without deleting either commit."""
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "experiments",
+            "path": "experiments",
+            "content_gates": ["experiment_ready_for_main"],
+        }],
+    })
+    _write(
+        root / "storage" / "memory" / "knowledge.json",
+        json.dumps([{"content": "K1694 recorded"}]),
+    )
+    _write(
+        root / "config" / "experiment_artifact_exclusions.json",
+        json.dumps({"exclusions": []}),
+    )
+    _git(
+        root,
+        "add",
+        "storage/memory/knowledge.json",
+        "config/experiment_artifact_exclusions.json",
+    )
+    _git(root, "commit", "-q", "-m", "admission evidence")
+    _reviewed_k1694(root)
+    scan = mod.scan_namespace("experiments")
+    original_head = _git(root, "rev-parse", "HEAD").stdout.strip()
+    race_receipt = root / "post-commit-race.txt"
+    hook = root / ".git" / "hooks" / "post-commit"
+    _write(
+        hook,
+        "#!/bin/sh\n"
+        "reaper=$(git rev-parse HEAD)\n"
+        "tree=$(git rev-parse \"$reaper^{tree}\")\n"
+        "external=$(printf 'external writer\\n' | "
+        "git commit-tree \"$tree\" -p \"$reaper\")\n"
+        "git update-ref HEAD \"$external\" \"$reaper\"\n"
+        f"printf '%s %s\\n' \"$reaper\" \"$external\" > {race_receipt}\n",
+    )
+    hook.chmod(0o755)
+
+    out = mod.collect_namespace("experiments", scan["collectable"])
+
+    reaper_head, external_head = race_receipt.read_text(
+        encoding="utf-8"
+    ).split()
+    assert reaper_head != original_head
+    assert external_head != reaper_head
+    assert _git(root, "rev-parse", "HEAD").stdout.strip() == external_head
+    assert _git(
+        root, "cat-file", "-e", f"{reaper_head}^{{commit}}"
+    ).returncode == 0
+    assert _git(root, "rev-parse", f"{external_head}^").stdout.strip() == reaper_head
+    assert out[0]["committed"] is True
+
+
+def test_unknown_content_gate_fails_closed(env):
+    mod, root = env
+    _install_registry(mod, root, {
+        "namespaces": [{
+            "id": "widgets",
+            "path": "storage/widgets",
+            "content_gates": ["typo_gate"],
+        }],
+    })
+    _write(root / "storage" / "widgets" / "output.json", "{}", mtime=OLD)
+
+    scan = mod.scan_namespace("widgets")
+
+    assert scan["collectable"] == []
+    assert scan["held"] == [{
+        "path": "storage/widgets/output.json",
+        "kind": "namespace_configuration",
+        "reason": "unknown_content_gate:typo_gate",
+    }]

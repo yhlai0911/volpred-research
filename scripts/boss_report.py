@@ -19,8 +19,9 @@ Structure (per user 2026-05-19 directive — user is boss, receives reports only
 
 Channel contract (WS-H2): work_summary_6h is RETIRED — its content lives here
 in the 20:10 daily-close edition. Do not add a second periodic boss email; the
-outbound-channel matrix in .claude/skills/platform-ops-manager/references/
-loop-health-and-dreaming.md is the owner of that rule.
+outbound-channel contract in Operations Core governance is the owner of that
+rule. Machine enforcement inventory lives in
+docs/governance/enforcement_layer_map.md.
 
 Delivery follows the durable ``email.ops_alert`` owner. Operations Core uses
 WorkItem + EffectRequest/outbox + Primary Authority + exact Sent read-back;

@@ -13,7 +13,7 @@
 | 機制 | 節奏 | 做什麼 |
 |---|---|---|
 | **dispatch-supervisor**（daemon） | 每 ≤60 秒評估 | 唯一派工引擎：挑任務、開 agent、看管執行、收屍。派工裁決集中在單一純函數（2026-07-20 H4），dry-run 預覽與真實派工**保證同一套判斷** |
-| **compute-worker** | **連續運轉**（2026-07-20 D6） | 重算力工作（回測/GARCH/bootstrap）不耗 token — 佇列有工就連續消化到空、最多 3 個平行；15 分 tick 只是「掛了自動重啟」的保險 |
+| **compute-worker** | **Operations Core 每 15 分喚醒，單次連續排空** | 重算力工作（回測/GARCH/bootstrap）不耗 token — 佇列有工就連續消化到空、最多 3 個平行；queue flock 防止重疊 drain。`cron_compute_worker.sh` 只是 executor wrapper，不是時鐘；舊 `com.volpred.compute-worker` LaunchAgent 已退役 |
 | **check-alerts** | 每小時整點 | 唯一可靠的鬧鐘：先跑到期排程（piggyback），再檢查告警條件 |
 | **dreaming + loop-health** | 每日 05:25 / 每小時 | 慢迴圈找反覆出事的模式、快迴圈量測「系統有沒有在變好」。2026-07-20 F3F5 補上兩個盲點：**每個 alert 自動留立案候選**（同類事故第二次出現時系統「記得」它是老問題，不再靠人記）；**觀察期帳本**（任何 shadow／待退役狀態逾期未決策自動升 breach，不再無限掛著） |
 
@@ -92,6 +92,21 @@ platform_ops 類的排程 agent 現在**每班配一個機械指派的隔離工�
 | **Email** | 週期摘要、需要你決策的事（🔴 標題 + mailto 快速回覆）、告警、skill 修改通知 | `volpred ops send-alert` + 排程報告 |
 
 **分工原則**：Telegram = 「現在正在發生什麼」；Email = 「定期總結 + 需要你出手的」。
+`volpred ops send-alert` **不得直接鏡像 Telegram**：Telegram 的唯一外送 owner
+仍是 `scripts/progress_report.py`，避免同一事件被 alert 層與進度層各送一次。Alert
+依 remediation disposition 路由：
+
+- `owner_decision`：立即寄 email（標題含 `[新架構派發]`；需要回覆時另有
+  `🔴【需老闆回信】`）。
+- `recovery`：只寄一封驗證完成 email，不發 Telegram。
+- 平台已建修復 task／正在 self-heal：只記入 dedup + incident lifecycle，不立即外送；
+  連續修復失敗達 escalation gate 才寄 email。
+- 一般 record／週期摘要：email；24 小時相同 level+title 去重。
+
+Owned-email durable command 的 idempotency key 同時綁定 payload hash；同 title 從
+record 升級成 owner decision 時可安全成為新 command。若 command conflict，警報
+runner 只記成 `owned_email_command_conflict` transport incident（含 effect evidence），
+不得再誤分類為 `host_cron_fail`。
 **收信量收斂（2026-07-20 H2 已落地）**：定期信從最多 7 班/日收斂為 **4 班/日** — boss_report 08:10／14:10／20:10 三班（晚班含完整日結，原 work_summary 已併入退役）+ token 報告 08:00 一班（原三班合一）。通道職責矩陣已入 enforcement 總表。
 Boss Report 的內容以 master spec §7 與當前 task-pool mode 為準，不再引用 5 月的 cycle 暫存檔；寄信則先讀 `email.ops_alert` durable owner。正常 `operations_core` 路徑會留下 WorkItem／EffectRequest／outbox／Gmail Sent 回讀證據，只有資料庫明確切回 `legacy` 才可使用 direct SMTP rollback；owner 讀取失敗一律不寄。
 同一個排程 fire 會先驗證 canonical generation／cron slot／digest，再跨主機讀回既有

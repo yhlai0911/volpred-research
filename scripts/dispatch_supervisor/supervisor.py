@@ -36,16 +36,19 @@ import asyncio
 import logging
 import os
 import resource
+import signal
 import stat
 import sys
 import traceback
 from pathlib import Path
 
 from volpred.ops.execution.registry import load_provider_registry
+from volpred.ops import termination
 
 from . import (
     __version__,
     alerts,
+    custody_receipt,
     health,
     isolation,
     procutil,
@@ -224,49 +227,196 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
             state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
         return
     if orphan.get("pid") is None:
-        # Codex review fix #2 (2026-07-04): supervisor crashed between
-        # reserve_fire() (writes the pid=None placeholder) and worker.py's
-        # attach_process() call, which now runs immediately after Popen()
-        # returns (narrowed to just that syscall — see worker.py). We cannot
-        # identify or kill a child we were never told the pid of; the best
-        # we can do is stop this slot from being wedged forever and make the
-        # gap loudly visible instead of silently swallowing it.
-        logging.warning(
-            "restart: abandoned pid=None reservation (schedule_id=%s attempt=%s) — "
-            "clearing stuck slot; if Popen had already succeeded before the crash, "
-            "that child is now untracked and will only be found by max-age/health checks "
-            "once/if it (re)acquires a pid we happen to observe",
-            orphan.get("schedule_id"), orphan.get("attempt"),
+        # `producer_spawn_state` makes the formerly ambiguous Popen crash window
+        # explicit.  not_started is positive proof no provider existed; once a
+        # kernel custody baseline was bound, that saved coalition can discover
+        # and terminate a child even though its PID never reached state.
+        spawn_state = str(orphan.get("producer_spawn_state") or "")
+        custody = (
+            orphan.get("producer_custody")
+            if isinstance(orphan.get("producer_custody"), dict)
+            else None
         )
-        if orphan.get("workspace") is not None:
-            # Once a workspace is bound, pid=None is not proof that no producer
-            # exists: the old supervisor may have crashed in Popen's tiny
-            # return→attach window. Keep both the slot and workspace protected
-            # until an operator can prove the process group is absent.
+        killed = False
+        if spawn_state == "not_started":
+            exit_code, outcome = -1, "spawn_not_started"
+        elif custody is not None:
+            survivors = procutil.producer_cohort_members_checked(
+                0,
+                job_id=job_id,
+                custody=custody,
+            )
+            if survivors is None:
+                outcome = "orphan_unverified_no_pid"
+                state.mark_job_phase(
+                    job_id=job_id,
+                    phase=outcome,
+                    expected_attempt=int(orphan.get("attempt", 1)),
+                    path=state_path,
+                )
+                alerts.send_orphan_restart_alert(
+                    job=orphan,
+                    killed=False,
+                    outcome=outcome,
+                    state_path=state_path,
+                )
+                return
+            if survivors:
+                ledger_path = termination.ledger_for_state(state_path)
+                intent = termination.arm(
+                    target_kind="pid",
+                    target_id=int(survivors[0]),
+                    target_identity=(
+                        "producer-custody:"
+                        f"{custody.get('resource_coalition_id', 'unknown')}"
+                    ),
+                    reason="supervisor_restart_orphan_no_pid",
+                    actor="dispatch-supervisor.supervisor",
+                    signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+                    job_id=job_id,
+                    attempt=int(orphan.get("attempt", 1)),
+                    ledger_path=ledger_path,
+                )
+                killed = procutil.kill_producer_cohort(
+                    custody,
+                    intent=intent,
+                    ledger_path=ledger_path,
+                )
+                if not killed:
+                    outcome = "orphan_unverified_no_pid"
+                    state.mark_job_phase(
+                        job_id=job_id,
+                        phase=outcome,
+                        expected_attempt=int(orphan.get("attempt", 1)),
+                        path=state_path,
+                    )
+                    alerts.send_orphan_restart_alert(
+                        job={**orphan, "survivors": survivors},
+                        killed=False,
+                        outcome=outcome,
+                        state_path=state_path,
+                    )
+                    return
+                exit_code, outcome = -9, "killed_supervisor_restart"
+            else:
+                exit_code, outcome = -1, "orphan_gone_or_reused"
+        else:
+            # Legacy/malformed state has neither positive no-spawn proof nor a
+            # kernel custody boundary. Never reinterpret absence as safety.
+            outcome = "orphan_unverified_no_pid"
             state.mark_job_phase(
                 job_id=job_id,
-                phase="orphan_unverified_no_pid",
+                phase=outcome,
                 expected_attempt=int(orphan.get("attempt", 1)),
                 path=state_path,
             )
             alerts.send_orphan_restart_alert(
                 job=orphan,
                 killed=False,
-                outcome="orphan_unverified_no_pid",
+                outcome=outcome,
                 state_path=state_path,
             )
             return
         state.append_completion_entry(
-            orphan, exit_code=-1, outcome="reservation_abandoned_no_pid",
+            orphan, exit_code=exit_code, outcome=outcome,
             final_model=str(orphan.get("model", "?")), path=state_path,
             mark_cleanup_recorded=True,
         )
         alerts.send_orphan_restart_alert(
-            job=orphan, killed=False, outcome="reservation_abandoned_no_pid", state_path=state_path,
+            job=orphan, killed=killed, outcome=outcome, state_path=state_path,
         )
-        state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
+        if _finalize_restart_workspace(orphan, outcome=outcome):
+            state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
         return
     pid = int(orphan["pid"])
+    custody = (
+        orphan.get("producer_custody")
+        if isinstance(orphan.get("producer_custody"), dict)
+        else None
+    )
+    if custody is not None:
+        # Kernel custody is stronger than the legacy ps wall-clock
+        # fingerprint: every target is rechecked by process unique ID
+        # immediately before signal, including setsid/reparent descendants.
+        survivors = procutil.producer_cohort_members_checked(
+            int(orphan.get("pgid") or pid),
+            job_id=job_id,
+            custody=custody,
+        )
+        if survivors is None:
+            outcome = "orphan_unverified_not_killed"
+            state.mark_job_phase(
+                job_id=job_id,
+                phase=outcome,
+                expected_attempt=int(orphan.get("attempt", 1)),
+                expected_pid=pid,
+                path=state_path,
+            )
+            alerts.send_orphan_restart_alert(
+                job=orphan,
+                killed=False,
+                outcome=outcome,
+                state_path=state_path,
+            )
+            return
+        killed = False
+        if survivors:
+            ledger_path = termination.ledger_for_state(state_path)
+            intent = termination.arm(
+                target_kind="pid",
+                target_id=int(survivors[0]),
+                target_identity=(
+                    "producer-custody:"
+                    f"{custody.get('resource_coalition_id', 'unknown')}"
+                ),
+                reason="supervisor_restart_orphan",
+                actor="dispatch-supervisor.supervisor",
+                signal_sequence=[signal.SIGTERM, signal.SIGKILL],
+                job_id=job_id,
+                attempt=int(orphan.get("attempt", 1)),
+                ledger_path=ledger_path,
+            )
+            killed = procutil.kill_producer_cohort(
+                custody,
+                intent=intent,
+                ledger_path=ledger_path,
+            )
+            if not killed:
+                outcome = "kill_failed_orphan"
+                state.mark_job_phase(
+                    job_id=job_id,
+                    phase=outcome,
+                    expected_attempt=int(orphan.get("attempt", 1)),
+                    expected_pid=pid,
+                    path=state_path,
+                )
+                alerts.send_orphan_restart_alert(
+                    job={**orphan, "survivors": survivors},
+                    killed=False,
+                    outcome=outcome,
+                    state_path=state_path,
+                )
+                return
+            exit_code, outcome = -9, "killed_supervisor_restart"
+        else:
+            exit_code, outcome = -1, "orphan_gone_or_reused"
+        state.append_completion_entry(
+            orphan,
+            exit_code=exit_code,
+            outcome=outcome,
+            final_model=str(orphan.get("model", "?")),
+            path=state_path,
+            mark_cleanup_recorded=True,
+        )
+        alerts.send_orphan_restart_alert(
+            job=orphan,
+            killed=killed,
+            outcome=outcome,
+            state_path=state_path,
+        )
+        if _finalize_restart_workspace(orphan, outcome=outcome):
+            state.finalize_restart_orphan_cleanup(state_path, job_id=job_id)
+        return
     started_wall = orphan.get("started_wall")
     identity = procutil.check_identity(pid, started_wall)
     if identity == procutil.IDENTITY_MATCH:
@@ -275,10 +425,15 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
             "restart: orphan job pid=%d pgid=%d still alive (identity-verified) — killing", pid, pgid,
         )
         killed = worker._kill_pgid(
-            pgid,
+            pgid, leader_pid=pid,
             reason="supervisor_restart_orphan",
             job_id=job_id,
             attempt=int(orphan.get("attempt", 1)),
+            custody=(
+                orphan.get("producer_custody")
+                if isinstance(orphan.get("producer_custody"), dict)
+                else None
+            ),
             state_path=state_path,
         )
         if not killed:
@@ -313,7 +468,15 @@ def _handle_one_restart_orphan(orphan: dict, *, state_path) -> None:
         return
     else:
         pgid = int(orphan.get("pgid") or pid)
-        survivors = procutil.pgid_members_checked(pgid)
+        survivors = procutil.producer_cohort_members_checked(
+            pgid,
+            job_id=job_id,
+            custody=(
+                orphan.get("producer_custody")
+                if isinstance(orphan.get("producer_custody"), dict)
+                else None
+            ),
+        )
         if survivors is None or survivors:
             # The leader can be dead while a descendant/subagent in its process
             # group keeps writing. A failed probe is also not evidence of
@@ -350,11 +513,24 @@ def _finalize_restart_workspace(orphan: dict, *, outcome: str) -> bool:
     workspace = orphan.get("workspace")
     if not isinstance(workspace, dict):
         return True
+    job_id = str(orphan.get("job_id") or "")
     final = workspace_mod.finalize_workspace(
         repo_root=ROOT,
         workspace=workspace,
-        worker_outcome="orphaned",
-        job_id=str(orphan.get("job_id") or ""),
+        worker_outcome=outcome,
+        job_id=job_id,
+        producer_custody=(
+            orphan.get("producer_custody")
+            if isinstance(orphan.get("producer_custody"), dict)
+            else None
+        ),
+        producer_drain_confirmed=(
+            workspace_mod.legacy_workspace_producer_drain_confirmed(
+                ROOT,
+                workspace_name=str(workspace.get("name") or ""),
+                job_id=job_id,
+            )
+        ),
     )
     disposition = str(final.get("disposition") or "")
     settlement_disposition = scheduler._settlement_disposition(final)
@@ -421,6 +597,48 @@ async def _run_once_async(*, dry_run: bool) -> int:
     return 0
 
 
+def _initialize_runtime(*, state_path: Path) -> None:
+    """Recover every producer-affecting startup gate before serving traffic."""
+    prev_started = state.read_state(state_path).get("supervisor_started_at")
+    state.mark_supervisor_started(state_path)
+    custody_recovery = custody_receipt.reconcile_pending_producer_custodies(
+        ROOT,
+    )
+    if not custody_recovery.get("ok"):
+        raise isolation.IsolationUnavailable(
+            "global producer custody startup recovery failed closed: "
+            f"{custody_recovery}"
+        )
+    if custody_recovery.get("released"):
+        logging.warning(
+            "global producer custody startup recovered=%s",
+            custody_recovery["released"],
+        )
+    _handle_restart_orphan()
+    # Auth-reaper recovery can Popen a helper. In shared-coalition custody mode
+    # it must run only after boot orphan reconciliation has positively drained
+    # (or retained) the prior producer. Starting it first contaminates the saved
+    # coalition and can make the real provider indistinguishable from control
+    # maintenance.
+    if state.read_state(state_path).get("current_jobs"):
+        logging.info(
+            "provider auth startup recovery deferred until producer slot drains"
+        )
+    else:
+        recovery = isolation.recover_provider_auth_reapers()
+        if recovery["invalid"]:
+            raise isolation.IsolationUnavailable(
+                f"provider auth startup recovery failed closed: {recovery}"
+            )
+        if any(recovery.values()):
+            logging.info("provider auth reaper recovery=%s", recovery)
+    planned_reason = state.consume_planned_restart_marker()
+    alerts.send_supervisor_restart(
+        prev_started=prev_started,
+        planned_reason=planned_reason,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
     if args.version:
@@ -431,13 +649,6 @@ def main(argv: list[str] | None = None) -> int:
     # Startup half of the zero-paid guard. Worker attempts reload the same
     # canonical bytes immediately before each provider Popen.
     load_provider_registry()
-    recovery = isolation.recover_provider_auth_reapers()
-    if recovery["invalid"]:
-        raise isolation.IsolationUnavailable(
-            f"provider auth startup recovery failed closed: {recovery}"
-        )
-    if any(recovery.values()):
-        logging.info("provider auth reaper recovery=%s", recovery)
     # NOTE: resolve `state.STATE_PATH` here and pass it down explicitly — the
     # same definition-time default-binding trap `_handle_restart_orphan()`
     # documents. These two calls used to rely on `mark_supervisor_started`'s own
@@ -448,14 +659,20 @@ def main(argv: list[str] | None = None) -> int:
     # (caught 2026-07-10, when the new `supervisor_pid` field made a dead pytest
     # pid show up as the running daemon's).
     state_path = state.STATE_PATH
-    prev_started = state.read_state(state_path).get("supervisor_started_at")
-    state.mark_supervisor_started(state_path)
-    _handle_restart_orphan()
-    # Deploy-aware restart alert (2026-07-10): a fresh marker means this boot is
-    # a deliberate `kickstart -k` reload (supervisor code change) → suppress the
-    # INFO alert. No marker → genuine/unexpected KeepAlive respawn → alert.
-    planned_reason = state.consume_planned_restart_marker()
-    alerts.send_supervisor_restart(prev_started=prev_started, planned_reason=planned_reason)
+    try:
+        _initialize_runtime(state_path=state_path)
+    except Exception as exc:  # noqa: BLE001 - startup must remain fail closed
+        # The old placement only covered exceptions raised by asyncio.gather.
+        # Missing/corrupt custody evidence instead crashed under KeepAlive with
+        # no owner-visible signal. Alert before re-raising; no producer can be
+        # admitted because trigger/scheduler loops have not started.
+        logging.exception("supervisor startup crash: %s", exc)
+        alerts.send_loop_crash(
+            "supervisor_startup",
+            traceback.format_exc(),
+            state_path=state_path,
+        )
+        raise
     try:
         if args.once:
             return asyncio.run(_run_once_async(dry_run=args.dry_run))

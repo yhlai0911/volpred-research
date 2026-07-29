@@ -1,63 +1,78 @@
 ---
 name: web-ui-ux-review
-description: 前端 UI/UX 專業審查與優化 SOP — 任何 frontend-v2-fix 視覺/互動改動的設計 gate。觸發時機：(1) boss 抱怨 UI/UX (2) 新頁面/新區塊上線前 (3) 每次 deploy 前的視覺 spot check (4) 設計統一/重構任務
+description: >
+  審查或驗證 active frontend 的 UI/UX、資訊正確性、route parity 與 production render。
+  用於前端改動、視覺抱怨或 deploy 前後 gate；target 必須從 config 動態解析。
 ---
 
-# Web UI/UX 審查與優化 SOP
+# Web UI/UX Review
 
-> 2026-06-11 建立。背景：boss 連續抓到「同類型不同風格」「收合方式不一樣」「會員提問 badge 不見了」「footer 被蓋掉」「badge 不精確」— 工程向修補缺乏設計視角的系統性檢查。本 skill 是每次前端改動的設計 gate。
+## 1. Resolve target
 
-## 核心原則（依優先序）
+每次開始都重新解析，不從 skill 或歷史 commit 複製 frontend／service identity：
 
-1. **正確性先於美觀**：顯示錯的資訊（收盤顯示開盤、stale 數據）是可信度硬傷，優先於任何視覺
-2. **一致性是專業感的來源**：同類型元件必同風格 — 用 `src/lib/design-tokens.ts`，禁止手寫平行樣式
-3. **內容可見性**：做了的功能要讓讀者找得到（入口、排序、tab）— 「存在但看不到」= 不存在
-4. **白話優先**：一般讀者看得懂（已建立 pattern：plainSignalSummary / plainInvestmentTakeaway）
-5. **法律紅線**：任何文案不可暗示個人化投資建議（「建議」字眼慎用；免責聲明常駐 footer）
+```bash
+FRONTEND_KEY="$(jq -er '.active_frontend' config/project_targets.json)"
+FRONTEND_PATH="$(jq -er --arg key "$FRONTEND_KEY" '.frontends[$key].path' config/project_targets.json)"
+ACTIVE_SERVICE="$(jq -er '.deploy.active_service' config/project_targets.json)"
+LIVE_URL="$(jq -er '.site.default_remote_url' config/project_targets.json)"
+test -d "$FRONTEND_PATH"
+test -n "$ACTIVE_SERVICE"
+```
 
-## 改動前 checklist（設計 gate）
+先讀 `.claude/rules/frontend-and-deploy.md` 與 active tree 的 local instructions。Admin 是
+observer；畫面值必須回到 canonical API／data source。
 
-### A. 一致性掃描（boss 最在乎）
-- [ ] 同類型元件（卡片/badge/標題/收合/按鈕/空態）是否已有既有 pattern？**先 grep 再造** — `grep -rn "details open\|collapsed\|badgeBase" src/`
-- [ ] 新樣式是否引用 `design-tokens.ts`？需要新 token 就加進去，不要 inline 手寫
-- [ ] 收合元件統一規格：點整個 header 觸發 + 右側 chevron-down svg（h-5 w-5 text-gray-500，展開時 rotate-180）
-- [ ] Badge 統一規格：`badgeBase`（rounded-full px-2 py-0.5 text-[10px] font-semibold）+ 色彩語意表（藍=方向/分類、紫=校準/每日、綠=狀態 good、紅=事件/警示/遲發、黃=會員/策略、灰=中性）
-- [ ] 字級 scale：[10px]=徽章、[11px]=輔助、xs=說明、sm=正文、base/lg=標題 — 不可越級
+## 2. Inspect before editing
 
-### B. 資訊正確性
-- [ ] 任何「狀態」顯示（開盤/收盤、active/delisted、最新時間）— 語意是 day-level 還是 live？渲染是否匹配？
-- [ ] 時間顯示一律台北時區標示；相對時間（N 分鐘前）必加 `suppressHydrationWarning`
-- [ ] 數據 timestamp 是否 stale 可見（讓讀者知道資料多新）
+- 用 `rg` 找同類 card、badge、collapse、empty/loading/error states 與 design tokens，
+  重用現有 pattern。
+- 若 active tree 同時有 base route 與 alternate presentation route，列出兩邊 exact
+  files；同一資訊必讀同一 API／canonical source。
+- 對每個狀態欄位確認語意（live、day-level、交易日、timezone、staleness）。
+- 檢查入口與排序，確保新內容可被讀者找到；自動載入必有界，footer 可達。
+- SSR render path 不得依賴不穩定時間／隨機值；map lookup 要有可理解 fallback。
+- 法規／風險文字、mobile keyboard navigation、focus、contrast 與 reduced motion 都納入
+  acceptance。
 
-### C. 內容可見性
-- [ ] 新內容類型有沒有入口（tab / nav / footer link）？
-- [ ] 排序（diversify/cluster）會不會把整類內容排到不可見？少量類型（如 member_qa 9 篇）需要專屬 tab
-- [ ] infinite scroll 必須有界（auto 前 3 頁，之後手動「載入更多」）— footer 必須可達
+## 3. Verify source
 
-### D. Hydration / 技術品質
-- [ ] `Date.now()` / `new Date()` / `Math.random()` 出現在 render path → SSR/client mismatch → #418；用 suppressHydrationWarning 或 client-only
-- [ ] 任何 STATUS/CONFIG map 查表必有 fallback（未知 key 不可 crash 整頁 — /paper major_revision 事故）
-- [ ] 空態、載入態、錯誤態三態都有設計（不可白屏/裸 spinner 無限轉）
+從 active frontend 的 `package.json` 讀可用 scripts，執行與變更相稱的 lint、typecheck、
+tests、build。不要假設 package manager 或 script 名稱。
 
-### E. 部署後驗證（必做，不可只看 build 過）
-- [ ] Chrome 實際開頁截圖（桌面寬度）— 看 grid 排版、留白、視覺層級
-- [ ] `read_console_messages` pattern="418|error" 查 console
-- [ ] 改動目標的具體驗證（JS elementFromPoint / innerText 抓實際渲染值，不靠假設）
-- [ ] grid 改動必看寬螢幕（auto-fit + justify-center 在 1568px 寬造成偏右事故 2026-06-11）
+用 in-app Browser／Chrome 對目標 route 做至少 mobile、desktop、wide viewport：
 
-## 已踩坑記錄（每次審查先讀）
+- screenshot 與 layout hierarchy
+- keyboard/focus 與主要 interaction
+- empty/loading/error/unknown-state
+- console error／hydration warning
+- DOM 或文字 readback 對照 API expected value
+- base/alternate route parity（若存在）
 
-| 日期 | 坑 | 教訓 |
-|---|---|---|
-| 06-11 | 台股收盤後 6 小時仍顯示「● 開盤」 | API is_open 是 day-level，前端當 live 渲染 — 狀態語意要對齊 |
-| 06-11 | 競技場 details ▶ vs 策略面板 useState chevron 兩種收合 | 同類交互必先 grep 既有 pattern |
-| 06-11 | member_qa badge「不見了」 | 其實是 9 篇全被 cluster 排序排到 100 名外 + 無 tab 入口 — 可見性問題伪裝成樣式問題 |
-| 06-11 | auto-fit+justify-center 寬螢幕偏右 | grid 改動必驗寬螢幕截圖 |
-| 06-11 | excerpt 裸露 markdown 符號 | 顯示層 sanitize（stripMarkdown）；上游 content_type 已強制落地 |
-| 06-11 | footer 被 infinite scroll 蓋掉 | 無限自動載入必設界 |
-| 06-10 | /paper STATUS_CONFIG 未知 status 全頁 crash | 查表必 fallback |
+source gate 完成後，把 exact changed paths、測試輸出與 screenshots handoff 給該 frontend
+的 canonical repository writer／integrator；本 skill 不自建版本控制流程。
 
-## 與其他 skill / 規則的關係
-- 部署：`.claude/rules/frontend-and-deploy.md`（巢狀 repo + deploy-zeabur-safe.sh）
-- 文案風格：`anti-ai-style`（reader-facing 文字）
-- Badge 分類底層：publisher `content_type` 強制落地（src/volpred/publisher/publisher.py）
+## 4. Safe deploy handoff
+
+只有任務已授權 production deploy 且 source gate 通過時，才交給 active frontend wrapper：
+
+```bash
+test -x "$FRONTEND_PATH/scripts/deploy-zeabur-safe.sh"
+(cd "$FRONTEND_PATH" && ./scripts/deploy-zeabur-safe.sh)
+```
+
+wrapper 必須自行解析 provider target、回傳 deployment identity、等待 terminal running
+status，並驗 production APIs。缺任何條件就停止，不改走 provider shortcut。
+
+## 5. Production readback
+
+部署後重新讀 `config/project_targets.json`，確認 target 沒在部署期間漂移，再保存：
+
+1. source identity 與 resolved frontend/service names；
+2. deployment receipt 與 terminal provider status；
+3. wrapper API acknowledgement；
+4. `$LIVE_URL` 上本次 route 的 screenshot、DOM/文字值、interaction 與 console；
+5. alternate route parity（若 active tree 有該 route）。
+
+只有 build 綠或 upload 成功時回報 `contained`。source tests、deployment receipt 與 live
+feature readback 全過，才可回報 `root_cause_fixed_and_verified`。

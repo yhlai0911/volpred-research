@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "title": "K1705 懶人包：問題出在哪個減哪個",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1705/k1705_results.json",
+      "sha256": "b69a9e92e23971390343450e5188514401671b0833595201a8dd059907d972e1",
+      "label": "experiment K1705 results (correction of the archived K1100c copula-superiority claim: sign convention audit plus marginal-first re-evaluation)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "存檔裡躺著一個很有底氣的結論",
+      "alt": "舊研究宣稱專門捕捉極端連動的模型明顯勝過標準模型，檢定強度高到少有人回頭複查，而且兩組資產指向同一方向。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "好用到沒人回頭問",
+          "body": [
+            "它支持一個很受歡迎的說法：市場崩起來的時候資產是手牽手一起跳的，標準模型抓不到那個瞬間。",
+            "美股配公債如此，美股配黃金也如此，兩組資料指向同一個方向。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "舊結論宣稱的檢定強度（美股配公債）",
+          "value": {
+            "source": "results",
+            "path": "/parent_claim_audit/pairs/SPY-TLT/reported_dm_t",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "資料涵蓋的交易日數",
+          "value": {
+            "source": "results",
+            "path": "/data/rows",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "正號的意思，跟說明寫的相反",
+      "alt": "存檔程式碼定義的誤差差距是尾端模型減標準模型，因此正號代表尾端模型誤差較大也就是較差；兩組資產的存檔數字都是正的，文字說明卻讀成尾端模型較好。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "先寫哪一個，決定正號代表誰",
+          "body": [
+            "差距是正是負本身沒有意義，有意義的是算式先放哪個模型。",
+            "程式碼先放尾端模型再減標準模型，所以正號代表尾端模型比較差；說明卻把同樣的正號讀成比較好。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "存檔誤差差距：美股配公債",
+          "value": {
+            "source": "results",
+            "path": "/parent_claim_audit/pairs/SPY-TLT/reported_mean_loss_diff_joe_minus_dcc",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "存檔誤差差距：美股配黃金",
+          "value": {
+            "source": "results",
+            "path": "/parent_claim_audit/pairs/SPY-GLD/reported_mean_loss_diff_joe_minus_dcc",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "重做之後，方向不穩到不能當結論",
+      "alt": "以相同前處理重做的樣本外評分中，前處理檢查未全數通過因此正式判定停在該關；即使續看連動分數，把其中一邊延後一天方向就翻面，且都未跨過事先設定的門檻。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "撤回舊結論，不等於證明反面",
+          "body": [
+            "前處理該有的統計性質沒有全部成立，在歪掉的尺度上比兩把尺，比得再仔細還是歪的。",
+            "一個會因為怎麼對齊日期就翻面的方向，不能拿來當結論。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "兩邊同一天收盤時的檢定強度",
+          "value": {
+            "source": "results",
+            "path": "/synchronous_close/0/dependence_scores/canonical_dm_dcc_minus_joe/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "其中一邊延後一天後的檢定強度",
+          "value": {
+            "source": "results",
+            "path": "/asynchronous_sensitivity/0/dependence_scores/canonical_dm_dcc_minus_joe/t_stat",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "每組資產的樣本外評分天數",
+          "value": {
+            "source": "results",
+            "path": "/synchronous_close/0/n_scored",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

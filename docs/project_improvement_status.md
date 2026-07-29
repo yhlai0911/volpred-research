@@ -2801,3 +2801,50 @@ inventory 也已明列零-provider delete reconciliation。Production function d
   candidate commit，未收active checkout的package／PDF／question-test WIP。
 
 Issue #23五步Gate全過，狀態為 **`root_cause_fixed_and_verified`**。
+
+## 2026-07-29 — T40 compute-worker clock 漏網修復（Issue #46）
+
+- 🔄 Owner audit 發現 `volpred-compute-worker` 仍只存在舊 `cron_jobs` registry，並由
+  `com.volpred.compute-worker` LaunchAgent 每 15 分直接喚醒；因此先前
+  `system_crontab` 54/54、legacy owner 0 的結論沒有涵蓋這條正式 executor clock。
+- ✅ Reconciler 現對任何非 `retired` 的 `cron_jobs` row fail closed，避免第二個
+  schedule registry 再逃出唯一 owner audit。
+- ✅ Compute worker cadence／`max_parallel` 已移入 canonical
+  `system_crontab[id=volpred-compute-worker]`；runtime resolver不再從 retired row
+  讀 active policy。
+- ✅ 07:45 natural fire
+  `operations-core-v1:volpred-compute-worker:133ccb319bd393968dde017b`
+  attempt 1／exit 0；priority-0 smoke同秒完成，receipt內的owner／job／fire key與
+  scheduler exact match，validator回讀55/55 Core、legacy 0。
+- ✅ Receipt-gated reconcile隨後bootout exact
+  `com.volpred.compute-worker`；`launchctl print`回113/not found，targeted owner audit
+  `conflicts=[]`、`dormant_legacy_surfaces=[]`。Detached Core executor與其K781
+  lazypack child在bootout後仍持續運行，證明退役的是clock而非工作。
+- ✅ 交接期間另抓到nested receipt-lock自鎖；底層改為same-thread reentrant且保留
+  cross-thread/process排他，144 tests與Matt雙review PASS。此compute clock漏網與
+  nested-lock slice為 **`root_cause_fixed_and_verified`**；Issue #46 umbrella仍需
+  其他capability與14-day clean，不在本slice冒稱關閉。
+
+## 2026-07-30 — T38 Supervisor Fire Lifecycle 最終結案（Issue #42）
+
+- ✅ 將同一個 committed regression overlay 到精確 pre-fix parent `dad84187e`：
+  `test_defers_while_durable_closeout_is_pending` 實際 RED，舊碼在仍有 durable
+  `phase_z_pending` generation 時錯回 `reload`；目前 HEAD 同一 test GREEN。
+- ✅ restart／generation／closeout／self-reload 聚焦範圍 **92 passed**；覆蓋
+  pre-fire、worker running、worker complete、closeout failure、terminal commit後
+  recovery，以及無 matching generation 時拒絕 closeout。
+- ✅ Production generation receipt
+  `371e54f705a729ea9b8421960acfb7e2d88e5bbf7a0a870e3dfdf5e33ed20239`
+  對應 commit `5e63b6b57f9c5f2e1ad3dbc426509d8a089999fe`；`phase_z_pending=[]`，
+  downstream commit可回讀。
+- ✅ `inc_537a3ff3304f`由 detector 依 `clean_streak_k3_24h` 自動 resolved，
+  非人工改狀態；planned reload後沒有新 baseline-missing episode。
+- ✅ Matt Standards review PASS；Matt Spec review原本只缺歷史 RED receipt，
+  補上可重播 pre-fix RED→HEAD GREEN 後六項 acceptance 均有證據。
+- ℹ️ 00:14 immutable release 因 monitored notification source 尚未 commit 而拒絕，
+  是正確 fail-closed：沒有載入 mutable bytes、沒有中止 worker、fresh generation
+  仍成功建立；兩檔已於 `96018b340`／`13061f9dc`正式落地。
+
+Issue #42狀態為 **`root_cause_fixed_and_verified`**。這只結案 T38；不代表
+Operations Core 全域替換完成，#9七日 queue gate、五個 formal legacy owner與#46
+十四日 sustained-clean 仍各自 fail closed。

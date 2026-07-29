@@ -66,7 +66,7 @@
     }
   },
   "rules": [
-    "Respect skill frontmatter model default first; override via Agent tool `model` param only when skill has none or the task clearly escalates.",
+    "Project skills must not pin `model` or `effort` in frontmatter. Resolve both at dispatch time from this file and scripts/model_router.py; an explicit owner request may override the selected route for that invocation without changing the skill.",
     "ALL subagents use opus (owner directive 2026-07-05). Only `effort` varies by difficulty across the 5-tier scale low<medium<high<xhigh<max (max = ceiling; matches `claude --effort`) — never route a subagent to sonnet/haiku by default. effort is applied via the `--effort` flag on the spawned `claude -p` (was inert before 2026-07-05).",
     "Procedural side-tasks (browser automation, scans, large search) still get FORKED to a subagent (context: fork) rather than run inline on the main loop — but that subagent is now opus/low, not sonnet. 2026-07-01 gap: FB posting ran inline on the main loop.",
     "Do NOT route to a model whose available=false. As of 2026-07-14 no roster alias is available=false — every alias in `dispatchable_now` will answer. 'Not on the default rotation' (sonnet / haiku / fable) is a POLICY, not unavailability: it means do not auto-route there, NOT that the model is dead. Do not write policy into the availability fields."

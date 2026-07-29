@@ -218,6 +218,10 @@ storage/ops/work_shadow_observations/
 # Runtime-only durable process-signal receipts; append-only audit, never Git input.
 storage/ops/termination_intents.jsonl
 storage/ops/termination_intents.jsonl.lock
+# Host-local kernel custody generations; initialized only by a quiescent
+# supervisor cutover and never part of PHASE-Z/agent-authored Git output.
+storage/ops/producer_custody_receipts.jsonl
+storage/ops/producer_custody_receipts.jsonl.lock
 
 # Editor swap/temp droppings（2026-07-20：JetBrains/AFP 型 `.!<pid>!<name>` 曾在工作區卡 13 班，
 # 每班都被 PHASE-Z 重數一次成「無主檔案」）

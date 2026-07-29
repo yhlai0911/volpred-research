@@ -344,6 +344,24 @@
       "phase_z_probe_paths": ["storage/next_tasks.json", "storage/ops/telegram_state.json"],
       "reason": "Poller writes queue rows and telegram state only."
     },
+    "github_comment_notifications": {
+      "entrypoint": "scripts/cron_github_comment_notifications.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "Operations Core writes source-safe cursors and per-channel delivery receipts under ignored ~/.volpred runtime state, then sends Email/Telegram notifications; it never writes Git-tracked repository state."
+    },
+    "growth_experiment_lifecycle": {
+      "entrypoint": "scripts/cron_growth_experiment_lifecycle.sh",
+      "policy": "no_repo_tracked_output",
+      "tracked_outputs": [],
+      "reason": "The Operations Core lifecycle reconciler reads its committed template and advances the receipt-backed Supabase RPC state only; repository output is limited to ignored logs."
+    },
+    "work-dashboard": {
+      "entrypoint": "scripts/work_dashboard_server.py",
+      "policy": "delegated_delivery_contract",
+      "tracked_outputs": ["storage/next_tasks.json"],
+      "reason": "The host-only dashboard daemon reads repository state; interactive task mutations are delegated to the canonical mark_task_blocked.py queue writer, which owns locking and PHASE-Z attribution for storage/next_tasks.json."
+    },
     "handoff_regen": {
       "entrypoint": "scripts/generate_handoff.py",
       "policy": "phase_z_machine_state",
@@ -500,7 +518,12 @@
     "com.volpred.check-alerts": {"job_id": "check_alerts", "status": "active"},
     "com.volpred.collect-tw-data": {"job_id": "collect_tw_data", "status": "active"},
     "com.volpred.collect-us-data": {"job_id": "collect_us_data", "status": "active"},
-    "com.volpred.compute-worker": {"job_id": "volpred-compute-worker", "status": "active"},
+    "com.volpred.compute-worker": {
+      "job_id": "volpred-compute-worker",
+      "status": "retired",
+      "retired_at": "2026-07-28T23:45:00Z",
+      "reason": "Issue #46 transfers the only clock to Operations Core; the queue executor and its exact output-path delivery contract remain active."
+    },
     "com.volpred.daily-checkup": {"job_id": "daily_checkup", "status": "active"},
     "com.volpred.daily-update": {"job_id": "daily_update", "status": "active"},
     "com.volpred.daily-update-intraday": {"job_id": "daily_update_intraday", "status": "active"},
@@ -521,6 +544,7 @@
       "reason": "Retired 2026-07-20 (WS-H2): work_summary_6h merged into boss_report --daily-close (20:10). No runtime job remains; the host plist stays registered here until the main thread runs launchctl bootout gui/$UID/com.volpred.work-summary and removes ~/Library/LaunchAgents/com.volpred.work-summary.plist plus ~/.volpred/bin/cron_work_summary.sh."
     },
     "com.volpred.work-dashboard": {
+      "job_id": "work-dashboard",
       "status": "host_only_exception",
       "reason": "Host-only UI daemon is not periodic; its only repository mutation is a human POST delegated to mark_task_blocked.py for PHASE-Z-owned storage/next_tasks.json."
     }

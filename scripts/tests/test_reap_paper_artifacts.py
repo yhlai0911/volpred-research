@@ -37,6 +37,12 @@ def fake_repo(tmp_path: Path, monkeypatch) -> Path:
     # that happens to have a global gitconfig.
     _git(tmp_path, "config", "user.email", "reaper-test@example.invalid")
     _git(tmp_path, "config", "user.name", "Reaper Test")
+    registry = tmp_path / "config" / "orphan_namespaces.json"
+    registry.parent.mkdir(parents=True)
+    registry.write_text(
+        (REPO / "config" / "orphan_namespaces.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
     d = tmp_path / "paper" / "demo"
     (d / "experiments").mkdir(parents=True)
     (d / "main.tex").write_text("\\documentclass{article}")
@@ -46,7 +52,9 @@ def fake_repo(tmp_path: Path, monkeypatch) -> Path:
     _git(tmp_path, "add", "-A")
     _git(tmp_path, "commit", "-qm", "base")
     monkeypatch.setattr(reap, "ROOT", tmp_path)
+    monkeypatch.setattr(reap, "REGISTRY_PATH", registry)
     monkeypatch.setattr(reap, "GRACE_SECONDS", 0)
+    reap.load_registry(refresh=True)
     return tmp_path
 
 

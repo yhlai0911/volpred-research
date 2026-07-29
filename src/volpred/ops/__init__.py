@@ -1,13 +1,17 @@
 # Ensure project root is on sys.path so that top-level `scripts.*` imports
 # in submodules (content, jobs, questions, etc.) resolve correctly.
 # This MUST run before any submodule import.
+import os as _os
 import sys as _sys
 from pathlib import Path as _Path
 
 _PROJECT_ROOT = str(_Path(__file__).resolve().parents[3])
-if _PROJECT_ROOT not in _sys.path:
+if (
+    not _os.environ.get("VOLPRED_SUPERVISOR_RELEASE_ID")
+    and _PROJECT_ROOT not in _sys.path
+):
     _sys.path.insert(0, _PROJECT_ROOT)
-del _sys, _Path, _PROJECT_ROOT
+del _sys, _os, _Path, _PROJECT_ROOT
 
 from .content import (
     build_platform_cycle_summary,
@@ -24,11 +28,13 @@ from .content import (
 )
 from .alerts import (
     ALERT_RECIPIENT,
+    AlertDeliveryClass,
     build_alert_condition_report,
     check_alert_conditions,
     resolve_internal_remediable_alert,
     route_internal_remediable_alert,
     send_alert,
+    send_routed_alert,
 )
 from .health import health_snapshot
 from .experiments import (
@@ -136,6 +142,7 @@ from .summaries import (
 
 __all__ = [
     "ALERT_RECIPIENT",
+    "AlertDeliveryClass",
     "activate_strategy",
     "admin_override_claim",
     "adopt_experiment_files",
@@ -148,6 +155,7 @@ __all__ = [
     "check_alert_conditions",
     "resolve_internal_remediable_alert",
     "route_internal_remediable_alert",
+    "send_routed_alert",
     "archive_question",
     "claim_question_for_research",
     "find_duplicate_question",

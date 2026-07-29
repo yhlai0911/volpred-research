@@ -54,7 +54,10 @@ from typing import IO, Any
 
 from volpred.canonical_write import guard_canonical_write
 
-from .blocked_reasons import BLOCKED_REASONS, UNBLOCK_GATES
+from .blocked_reasons import (
+    BLOCKED_REASONS,
+    INCIDENT_SUSTAINED_CLEAN_GATE,
+)
 from .blocked_reasons import is_valid as is_valid_blocked_reason
 from .diagnostics import warn
 
@@ -422,7 +425,14 @@ class InvalidUnblockGate(ValueError):
 
 
 def validate_unblock_gates(tasks: list[Any]) -> None:
-    """Reject any lifecycle shape that could bypass a named live gate."""
+    """Reject lifecycle shapes that could make a named gate dispatchable.
+
+    Unknown string gates are intentionally preserved when their task remains
+    blocked behind an event window.  This is the rollback/rolling-deploy
+    contract: an older reader need not understand a newer gate to keep it
+    fail-closed.  The expiry sweeper likewise refuses to execute unknown gates.
+    Producer CLIs still allowlist gates they are permitted to create.
+    """
 
     for task in tasks:
         if not isinstance(task, dict):
@@ -431,12 +441,20 @@ def validate_unblock_gates(tasks: list[Any]) -> None:
         if gate is None:
             continue
         if (
-            gate not in UNBLOCK_GATES
+            not isinstance(gate, str)
+            or not gate.strip()
             or str(task.get("status") or "").strip().lower() != "blocked"
             or str(task.get("blocked_reason") or "").strip().lower()
             != "awaiting_event_window"
             or not isinstance(task.get("blocked_until"), str)
             or not str(task["blocked_until"]).strip()
+            or (
+                gate == INCIDENT_SUSTAINED_CLEAN_GATE
+                and (
+                    not isinstance(task.get("unblock_incident_id"), str)
+                    or not str(task["unblock_incident_id"]).strip()
+                )
+            )
         ):
             raise InvalidUnblockGate(
                 f"task {task.get('id')!r} has invalid unblock_gate lifecycle "

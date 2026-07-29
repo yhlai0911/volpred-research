@@ -2543,8 +2543,15 @@ def _notify_ci_incident(
 
     accepted = bool(notice.get("delivery_accepted"))
     if not accepted:
+        from volpred.ops.alerts import AlertDeliveryClass  # noqa: WPS433
+
         if sender is None:
-            from volpred.ops.alerts import send_alert as sender  # noqa: WPS433
+            from volpred.ops.alerts import send_routed_alert as sender  # noqa: WPS433
+        delivery_class = (
+            AlertDeliveryClass.RECOVERY
+            if kind == "recovery"
+            else AlertDeliveryClass.HUMAN_ACTION
+        )
         notice["attempts"] = int(notice.get("attempts") or 0) + 1
         notice["last_attempt_at"] = now_iso
         try:
@@ -2553,6 +2560,7 @@ def _notify_ci_incident(
                 title,
                 body,
                 storage_dir=str(PROJECT_ROOT / "storage"),
+                delivery_class=delivery_class,
             )
             accepted = _ci_delivery_accepted(result)
             notice["last_delivery"] = {

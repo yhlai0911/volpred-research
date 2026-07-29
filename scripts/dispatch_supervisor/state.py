@@ -6,6 +6,16 @@ Schema (version 1)::
       "version": 1,
       "supervisor_started_at": "<ISO>",          # supervisor process boot time
       "supervisor_pid": int | null,              # os.getpid() of the live daemon
+      "supervisor_release_id": str | null,        # immutable release request loaded at boot
+      "supervisor_release_sha256": str | null,    # verified release archive digest
+      "supervisor_release_commit": str | null,    # Git commit materialized into the release
+      "supervisor_bootstrap_sha256": str | null,  # installed immutable bootstrap digest
+      "cutover_quiesce": null | {                 # durable new-fire fence for launchd migration
+        "token": str, "reason": str, "requested_at": str, "expires_at": str,
+        "previous_auth_blocked": bool,
+        "previous_auth_blocked_at": str | null,
+        "legacy_fence_at": str
+      },
       "last_heartbeat_at": "<ISO>",              # liveness heartbeat (health_loop, every 30s)
       "last_fire_at": "<ISO|null>",              # last time a worker was actually spawned
       "current_jobs": [                          # canonical in-flight workers (one per slot)
@@ -26,6 +36,11 @@ Schema (version 1)::
           "scheduled_for": "<ISO|null>",
           "fire_reason": "cron|requested:*|cron+requested:*",
           "fire_key": str | null,                 # atomic cron-slot dedup identity
+          "producer_custody": null | {             # macOS kernel resource-coalition authority
+            "version": 2, "host_uuid": str, "boot_session_uuid": str,
+            "resource_coalition_id": int, "trusted_unique_ids": [int]
+          },
+          "producer_spawn_state": "not_started|custody_bound|spawn_committed|attached",
           "fire_lifecycle": {                     # durable PHASE-Z authority
             "generation_id": str,                 # one immutable cohort generation
             "captured_at": "<ISO>",
@@ -65,6 +80,11 @@ Schema (version 1)::
         "scheduled_for": "<ISO|null>",            # cron slot this fire services (naive local ISO)
         "fire_reason": "cron|requested:*|cron+requested:*",
         "fire_key": str | null,
+        "producer_custody": null | {
+          "version": 2, "host_uuid": str, "boot_session_uuid": str,
+          "resource_coalition_id": int, "trusted_unique_ids": [int]
+        },
+        "producer_spawn_state": "not_started|custody_bound|spawn_committed|attached",
         "workspace": {"name": str, "path": str, "branch": str, "base_sha": str,
                       "lanes": [str], "created_at": "<ISO>", "setup_s": float},
         "restart_cleanup_pending": true,          # only present while a restart-orphan investigation is in flight
@@ -76,6 +96,9 @@ Schema (version 1)::
           "job_id": str, "cohort_id": str, "slot_id": int,
           "created_at": "<ISO>",
           "isolated": bool                       # WS-B: this fire ran with a workspace →
+          "closeout_generation_id": str,         # terminal commit idempotency identity
+          "closeout_base_head": str,             # bound before PHASE-Z may adopt HEAD
+          "closeout_started_at": "<ISO>",
           "fire_lifecycle": {                    # exact generation copied from worker
             "generation_id": str,
             "captured_at": "<ISO>",
@@ -86,8 +109,17 @@ Schema (version 1)::
       "phase_z_rejections": [                    # fail-closed evidence, never silently dropped
         {
           # original phase_z_pending fields, plus:
+          "rejection_id": str,                   # deterministic audit identity
+          "audit_ref": "phase_z_rejections.jsonl#<rejection_id>",
           "rejected_at": "<ISO>",
           "rejection_reason": str
+        }
+      ],                                         # bounded hot cache; JSONL is durable history
+      "phase_z_receipts": [                      # terminal closeout receipts (bounded hot history)
+        {
+          "receipt_id": str, "cohort_id": str, "generation_id": str,
+          "reason": str, "committed": bool, "commit_sha": str | null,
+          "completed_at": "<ISO>", "job_ids": [str]
         }
       ],
       "completions": [                           # ring buffer (max 100 entries)
@@ -102,6 +134,11 @@ Schema (version 1)::
           "pid": int, "pgid": int, "started_wall": str,
           # 只在 WS-B 隔離 fire 出現：ownership 由 worktree 隔離產生的 receipt。
           "workspace": {"name": str, "path": str, "branch": str, "base_sha": str},
+          # 只在 custody 已於 Popen 前持久化的 fire 出現；供 crash/restart audit。
+          "producer_custody": {
+            "version": 2, "host_uuid": str, "boot_session_uuid": str,
+            "resource_coalition_id": int, "trusted_unique_ids": [int]
+          },
           "outcome": "success" | "failure" | "killed_timeout" | "kill_failed_orphan" |
                      "silent_death" |
                      "timeout_unverified" | "killed_supervisor_restart" |
@@ -173,7 +210,7 @@ import tempfile
 import uuid
 from contextlib import contextmanager
 from contextvars import ContextVar
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
@@ -204,6 +241,117 @@ def _lock_path(state_path: Path) -> Path:
     """
     return state_path.with_name(state_path.name + ".lock")
 
+
+def _phase_z_rejection_audit_path(state_path: Path) -> Path:
+    return state_path.with_name("phase_z_rejections.jsonl")
+
+
+def _phase_z_rejection_id(entry: dict[str, Any]) -> str:
+    identity = {
+        key: value
+        for key, value in entry.items()
+        if key not in {"rejected_at", "rejection_id", "audit_ref"}
+    }
+    canonical = json.dumps(
+        identity,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def _prepare_phase_z_rejection_entry(
+    entry: dict[str, Any],
+    *,
+    state_path: Path,
+) -> dict[str, Any]:
+    """Return one rejection with its stable durable-audit identity."""
+    prepared = dict(entry)
+    prepared["rejection_id"] = _phase_z_rejection_id(prepared)
+    prepared["audit_ref"] = (
+        f"{_phase_z_rejection_audit_path(state_path).name}"
+        f"#{prepared['rejection_id']}"
+    )
+    return prepared
+
+
+def _append_phase_z_rejection_audit(
+    entries: list[dict[str, Any]],
+    *,
+    state_path: Path,
+) -> None:
+    """Persist rejection evidence before the bounded state cache can evict it.
+
+    ``reject_phase_z`` already holds the dispatch-state lock.  The append-only
+    ledger has its own stable-inode flock so audit readers need not acquire the
+    whole scheduler mutex.  A deterministic id makes replay after a crash
+    between append and state replacement idempotent.
+    """
+    if not entries:
+        return
+    audit_path = _phase_z_rejection_audit_path(state_path)
+    audit_path.parent.mkdir(parents=True, exist_ok=True)
+    guard_canonical_write(audit_path)
+    with audit_path.open("a+", encoding="utf-8") as fh:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX)
+        try:
+            fh.seek(0)
+            raw = fh.read()
+            existing_ids: set[str] = set()
+            for line_number, line in enumerate(raw.splitlines(), start=1):
+                if not line.strip():
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: blank record"
+                    )
+                try:
+                    prior = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: {exc}"
+                    ) from exc
+                if not isinstance(prior, dict):
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: record is not an object"
+                    )
+                rejection_id = prior.get("rejection_id")
+                if not isinstance(rejection_id, str) or not rejection_id:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: rejection_id missing"
+                    )
+                if _phase_z_rejection_id(prior) != rejection_id:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: rejection_id mismatch"
+                    )
+                expected_ref = f"{audit_path.name}#{rejection_id}"
+                if prior.get("audit_ref") != expected_ref:
+                    raise ValueError(
+                        "malformed phase-z rejection audit "
+                        f"at line {line_number}: audit_ref mismatch"
+                    )
+                existing_ids.add(rejection_id)
+            fh.seek(0, os.SEEK_END)
+            if raw and not raw.endswith("\n"):
+                # A complete final JSON object with only its delimiter missing
+                # is safe to frame in place.  A torn object failed above before
+                # either the audit or dispatch-state authority was mutated.
+                fh.write("\n")
+            for entry in entries:
+                if entry["rejection_id"] in existing_ids:
+                    continue
+                fh.write(json.dumps(entry, ensure_ascii=False, sort_keys=True) + "\n")
+                existing_ids.add(entry["rejection_id"])
+            fh.flush()
+            os.fsync(fh.fileno())
+        finally:
+            fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
 SCHEMA_VERSION = 1
 # Adding an OPTIONAL key to `_empty_state()` must NOT bump SCHEMA_VERSION:
 # `_locked_state()` / `read_state()` reset the file to empty whenever the
@@ -232,6 +380,11 @@ def _empty_state() -> dict[str, Any]:
         "version": SCHEMA_VERSION,
         "supervisor_started_at": None,
         "supervisor_pid": None,
+        "supervisor_release_id": None,
+        "supervisor_release_sha256": None,
+        "supervisor_release_commit": None,
+        "supervisor_bootstrap_sha256": None,
+        "cutover_quiesce": None,
         "last_heartbeat_at": None,
         "last_fire_at": None,
         "current_jobs": [],
@@ -240,6 +393,7 @@ def _empty_state() -> dict[str, Any]:
         "current_job": None,
         "phase_z_pending": [],
         "phase_z_rejections": [],
+        "phase_z_receipts": [],
         "completions": [],
         "auth_blocked": False,
         "auth_blocked_at": None,
@@ -327,6 +481,10 @@ def _normalise_state(data: dict[str, Any]) -> dict[str, Any]:
         data["phase_z_pending"] = []
     if not isinstance(data.get("phase_z_rejections"), list):
         data["phase_z_rejections"] = []
+    if not isinstance(data.get("phase_z_receipts"), list):
+        data["phase_z_receipts"] = []
+    if not isinstance(data.get("cutover_quiesce"), dict):
+        data["cutover_quiesce"] = None
     return data
 
 
@@ -553,8 +711,26 @@ def mark_supervisor_started(path: Path = STATE_PATH) -> None:
     identity checks that this module deliberately does not depend on).
     """
     with _locked_state(path) as (_fh, data):
+        legacy_rejections = [
+            _prepare_phase_z_rejection_entry(entry, state_path=path)
+            for entry in data.get("phase_z_rejections") or []
+        ]
+        _append_phase_z_rejection_audit(legacy_rejections, state_path=path)
+        data["phase_z_rejections"] = legacy_rejections[-COMPLETIONS_MAX:]
         data["supervisor_started_at"] = _now()
         data["supervisor_pid"] = os.getpid()
+        data["supervisor_release_id"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_RELEASE_ID"
+        )
+        data["supervisor_release_sha256"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_RELEASE_SHA256"
+        )
+        data["supervisor_release_commit"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_RELEASE_COMMIT"
+        )
+        data["supervisor_bootstrap_sha256"] = os.environ.get(
+            "VOLPRED_SUPERVISOR_BOOTSTRAP_SHA256"
+        )
         data["last_heartbeat_at"] = _now()
 
 
@@ -629,6 +805,8 @@ def _phase_z_pending_record(job: dict[str, Any]) -> dict[str, Any]:
     }
     if job.get("fire_lifecycle") is not None:
         pending["fire_lifecycle"] = dict(job["fire_lifecycle"])
+    if job.get("producer_custody") is not None:
+        pending["producer_custody"] = dict(job["producer_custody"])
     return pending
 
 
@@ -688,6 +866,8 @@ def append_completion_entry(
             entry["started_wall"] = job.get("started_wall")
         if job.get("workspace") is not None:
             entry["workspace"] = job.get("workspace")
+        if job.get("producer_custody") is not None:
+            entry["producer_custody"] = dict(job["producer_custody"])
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -842,6 +1022,12 @@ def reserve_fire(
         raise ValueError(f"max_slots must be >= 1, got {max_slots}")
 
     with _locked_state(path) as (_fh, data):
+        quiesce = _active_cutover_quiesce(data)
+        if quiesce is not None:
+            raise RuntimeError(
+                "reserve_fire blocked by supervisor cutover quiesce "
+                f"token={quiesce['token']}"
+            )
         jobs = data.get("current_jobs") or []
         pending = data.get("phase_z_pending") or []
         if pending:
@@ -888,6 +1074,8 @@ def reserve_fire(
             "pid": None,
             "pgid": None,
             "started_wall": None,
+            "producer_custody": None,
+            "producer_spawn_state": "not_started",
             "schedule_id": schedule_id,
             "started_at": started_at,
             "attempt_started_at": started_at,
@@ -904,6 +1092,135 @@ def reserve_fire(
         _sync_projection(data)
     _IMPLICIT_JOB_ID.set(job_id)
     return JobHandle(job_id=job_id, cohort_id=cohort, slot_id=slot_id)
+
+
+def begin_cutover_quiesce(
+    *,
+    reason: str,
+    ttl_s: int = 600,
+    path: Path = STATE_PATH,
+) -> dict[str, Any]:
+    """Atomically fence new fire reservations for a bounded launchd cutover."""
+    ttl_s = max(30, min(int(ttl_s), 3600))
+    with _locked_state(path) as (_fh, data):
+        existing = _active_cutover_quiesce(data)
+        if existing is not None:
+            raise RuntimeError(
+                "another supervisor cutover quiesce is active "
+                f"token={existing['token']}"
+            )
+        now = datetime.now(timezone.utc)
+        legacy_fence_at = now.isoformat()
+        quiesce = {
+            "token": uuid.uuid4().hex,
+            "reason": str(reason)[:200],
+            "requested_at": now.isoformat(),
+            "expires_at": (now + timedelta(seconds=ttl_s)).isoformat(),
+            "previous_auth_blocked": bool(data.get("auth_blocked")),
+            "previous_auth_blocked_at": data.get("auth_blocked_at"),
+            "legacy_fence_at": legacy_fence_at,
+        }
+        data["cutover_quiesce"] = quiesce
+        # Backward-compatible fence: a pre-cutover daemon does not have the
+        # cutover_quiesce-aware reserve_fire in memory, but every old scheduler
+        # decision and worker spawn already fail closed on auth_blocked.
+        data["auth_blocked"] = True
+        data["auth_blocked_at"] = legacy_fence_at
+        _sync_projection(data)
+        return {
+            **quiesce,
+            "active_count": len(data.get("current_jobs") or [])
+            + len(data.get("phase_z_pending") or []),
+            "supervisor_started_at": data.get("supervisor_started_at"),
+        }
+
+
+def cutover_quiesce_snapshot(
+    *,
+    token: str,
+    path: Path = STATE_PATH,
+) -> dict[str, Any]:
+    """CAS-read the drain state while proving this cutover still owns the fence."""
+    with _locked_state(path) as (_fh, data):
+        quiesce = _active_cutover_quiesce(data)
+        if quiesce is None or quiesce.get("token") != token:
+            raise RuntimeError("supervisor cutover quiesce ownership was lost")
+        return {
+            **quiesce,
+            "active_count": len(data.get("current_jobs") or [])
+            + len(data.get("phase_z_pending") or []),
+            "supervisor_started_at": data.get("supervisor_started_at"),
+        }
+
+
+def end_cutover_quiesce(
+    *,
+    token: str,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Release only the caller's exact cutover fence."""
+    with _locked_state(path) as (_fh, data):
+        quiesce = data.get("cutover_quiesce")
+        if not isinstance(quiesce, dict) or quiesce.get("token") != token:
+            return False
+        _clear_cutover_quiesce(data, quiesce)
+        _sync_projection(data)
+        return True
+
+
+def renew_cutover_quiesce(
+    *,
+    token: str,
+    ttl_s: int,
+    path: Path = STATE_PATH,
+) -> str:
+    """Extend the caller-owned fence before another bounded cutover phase."""
+    ttl_s = max(30, min(int(ttl_s), 3600))
+    with _locked_state(path) as (_fh, data):
+        quiesce = _active_cutover_quiesce(data)
+        if quiesce is None or quiesce.get("token") != token:
+            raise RuntimeError("supervisor cutover quiesce ownership was lost")
+        expires_at = (
+            datetime.now(timezone.utc) + timedelta(seconds=ttl_s)
+        ).isoformat()
+        quiesce["expires_at"] = expires_at
+        data["cutover_quiesce"] = quiesce
+        _sync_projection(data)
+        return expires_at
+
+
+def _active_cutover_quiesce(data: dict[str, Any]) -> dict[str, Any] | None:
+    raw = data.get("cutover_quiesce")
+    if not isinstance(raw, dict):
+        data["cutover_quiesce"] = None
+        return None
+    expires_at = raw.get("expires_at")
+    try:
+        expires = datetime.fromisoformat(str(expires_at))
+    except ValueError:
+        LOG.warning(
+            "cutover_quiesce has invalid expires_at=%r; clearing fence",
+            expires_at,
+        )
+        _clear_cutover_quiesce(data, raw)
+        return None
+    if expires.tzinfo is None:
+        _clear_cutover_quiesce(data, raw)
+        return None
+    if expires <= datetime.now(timezone.utc):
+        _clear_cutover_quiesce(data, raw)
+        return None
+    return raw
+
+
+def _clear_cutover_quiesce(
+    data: dict[str, Any],
+    quiesce: dict[str, Any],
+) -> None:
+    if data.get("auth_blocked_at") == quiesce.get("legacy_fence_at"):
+        data["auth_blocked"] = bool(quiesce.get("previous_auth_blocked"))
+        data["auth_blocked_at"] = quiesce.get("previous_auth_blocked_at")
+    data["cutover_quiesce"] = None
 
 
 def begin_attempt(
@@ -927,6 +1244,10 @@ def begin_attempt(
             "pid": None,
             "pgid": None,
             "started_wall": None,
+            # Custody is attempt-scoped.  A retry takes a fresh kernel baseline
+            # immediately before its own provider spawn.
+            "producer_custody": None,
+            "producer_spawn_state": "not_started",
             "attempt_started_at": attempt_started_at,
             "attempt": int(attempt),
             "model": model,
@@ -1007,6 +1328,7 @@ def attach_process(
         job["pgid"] = pgid
         job["started_wall"] = started_wall
         job["phase"] = "running"
+        job["producer_spawn_state"] = "attached"
         _sync_projection(data)
 
 
@@ -1028,6 +1350,95 @@ def attach_workspace(
             return False
         _index, job = found
         job["workspace"] = dict(workspace)
+        _sync_projection(data)
+        return True
+
+
+def attach_producer_custody(
+    *,
+    job_id: str,
+    custody: dict[str, Any],
+    expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Durably bind the pre-spawn kernel custody baseline to one attempt.
+
+    This transition must happen after provider authorization and immediately
+    before ``Popen``.  It closes the former crash window where a provider could
+    be spawned but neither its PID nor a durable way to discover detached
+    descendants existed.  A bound baseline is immutable for that attempt.
+    """
+    if not isinstance(custody, dict) or not custody:
+        raise ValueError("producer custody must be a non-empty mapping")
+    normalized = dict(custody)
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            LOG.warning("attach_producer_custody: job %s not found", job_id)
+            return False
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            raise RuntimeError(
+                f"attach_producer_custody after process attach: job_id={job_id}"
+            )
+        existing = job.get("producer_custody")
+        if existing is not None and existing != normalized:
+            raise RuntimeError(
+                f"producer custody already bound to another baseline: job_id={job_id}"
+            )
+        job["producer_custody"] = normalized
+        job["producer_spawn_state"] = "custody_bound"
+        _sync_projection(data)
+        return True
+
+
+def mark_producer_spawn_committed(
+    *,
+    job_id: str,
+    expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Persist the last pre-Popen state transition.
+
+    ``spawn_committed`` means a crash may have occurred inside Popen and pid=None
+    is no longer evidence that no child exists.  Only an observed Popen failure
+    may move it back to ``not_started``.
+    """
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            return False
+        job["producer_spawn_state"] = "spawn_committed"
+        _sync_projection(data)
+        return True
+
+
+def mark_producer_spawn_aborted(
+    *,
+    job_id: str,
+    expected_attempt: int | None = None,
+    path: Path = STATE_PATH,
+) -> bool:
+    """Record a Popen syscall that raised before returning a child handle."""
+    with _locked_state(path) as (_fh, data):
+        found = _find_job(data, job_id)
+        if found is None:
+            return False
+        _index, job = found
+        if expected_attempt is not None and int(job.get("attempt", 0)) != int(expected_attempt):
+            return False
+        if job.get("pid") is not None:
+            return False
+        if job.get("producer_spawn_state") != "spawn_committed":
+            return False
+        job["producer_spawn_state"] = "not_started"
         _sync_projection(data)
         return True
 
@@ -1203,6 +1614,8 @@ def record_completion(
             # WS-B ownership receipt: the completion ring is where an auditor
             # reverse-maps a merged branch to the fire that produced it.
             entry["workspace"] = job.get("workspace")
+        if job.get("producer_custody") is not None:
+            entry["producer_custody"] = dict(job["producer_custody"])
         completions = data.get("completions") or []
         completions.append(entry)
         if len(completions) > COMPLETIONS_MAX:
@@ -1243,7 +1656,71 @@ def record_completion(
         }
 
 
-def finish_phase_z(*, cohort_id: str, path: Path = STATE_PATH) -> int:
+def begin_phase_z(
+    *,
+    cohort_ids: set[str],
+    generation_id: str,
+    base_head: str,
+    path: Path = STATE_PATH,
+) -> dict[str, str]:
+    """Bind one idempotent closeout attempt before PHASE-Z may mutate HEAD.
+
+    A restarted process reuses the original ``base_head`` and generation.  It
+    must never overwrite an in-flight identity with whichever HEAD happens to
+    exist after the crash.
+    """
+    wanted = {str(item) for item in cohort_ids}
+    generation_id = str(generation_id)
+    base_head = str(base_head)
+    with _locked_state(path) as (_fh, data):
+        matching = [
+            item
+            for item in data.get("phase_z_pending") or []
+            if str(item.get("cohort_id")) in wanted
+        ]
+        if not matching:
+            return {}
+        existing = {
+            (
+                str(item.get("closeout_generation_id") or ""),
+                str(item.get("closeout_base_head") or ""),
+                str(item.get("closeout_started_at") or ""),
+            )
+            for item in matching
+            if item.get("closeout_generation_id") is not None
+        }
+        if existing:
+            if len(existing) != 1:
+                raise RuntimeError("mixed PHASE-Z closeout attempt identities")
+            existing_generation, existing_head, existing_started = next(iter(existing))
+            if existing_generation != generation_id:
+                raise RuntimeError("PHASE-Z closeout generation changed across restart")
+            if any(item.get("closeout_generation_id") is None for item in matching):
+                raise RuntimeError("partial PHASE-Z closeout attempt identity")
+            return {
+                "generation_id": existing_generation,
+                "base_head": existing_head,
+                "started_at": existing_started,
+            }
+        started_at = _now()
+        for item in matching:
+            item["closeout_generation_id"] = generation_id
+            item["closeout_base_head"] = base_head
+            item["closeout_started_at"] = started_at
+        return {
+            "generation_id": generation_id,
+            "base_head": base_head,
+            "started_at": started_at,
+        }
+
+
+def finish_phase_z(
+    *,
+    cohort_id: str,
+    path: Path = STATE_PATH,
+    terminal_outcome: dict[str, Any] | None = None,
+    generation_id: str | None = None,
+) -> int:
     """Release every drained slot for one cohort after PHASE-Z finishes.
 
     Returns the number of pending slot records removed. The exact cohort CAS
@@ -1252,8 +1729,63 @@ def finish_phase_z(*, cohort_id: str, path: Path = STATE_PATH) -> int:
     """
     with _locked_state(path) as (_fh, data):
         pending = data.get("phase_z_pending") or []
-        kept = [item for item in pending if str(item.get("cohort_id")) != str(cohort_id)]
-        removed = len(pending) - len(kept)
+        removed_items = [
+            item
+            for item in pending
+            if str(item.get("cohort_id")) == str(cohort_id)
+        ]
+        kept = [
+            item
+            for item in pending
+            if str(item.get("cohort_id")) != str(cohort_id)
+        ]
+        removed = len(removed_items)
+        if removed and terminal_outcome is not None:
+            lifecycle_generations = {
+                str((item.get("fire_lifecycle") or {}).get("generation_id") or "")
+                for item in removed_items
+            }
+            expected_generation = str(generation_id or "")
+            if (
+                not expected_generation
+                or lifecycle_generations != {expected_generation}
+            ):
+                raise RuntimeError(
+                    "terminal PHASE-Z receipt generation does not match pending authority"
+                )
+            reason = str(terminal_outcome.get("reason") or "")
+            commit_sha = str(terminal_outcome.get("commit_sha") or "") or None
+            job_ids = sorted(str(item.get("job_id") or "") for item in removed_items)
+            receipt_material = json.dumps(
+                {
+                    "cohort_id": str(cohort_id),
+                    "generation_id": expected_generation,
+                    "reason": reason,
+                    "commit_sha": commit_sha,
+                    "job_ids": job_ids,
+                },
+                sort_keys=True,
+                ensure_ascii=False,
+            )
+            receipt = {
+                "receipt_id": hashlib.sha256(
+                    receipt_material.encode("utf-8")
+                ).hexdigest(),
+                "cohort_id": str(cohort_id),
+                "generation_id": expected_generation,
+                "reason": reason,
+                "committed": bool(terminal_outcome.get("committed")),
+                "commit_sha": commit_sha,
+                "completed_at": _now(),
+                "job_ids": job_ids,
+            }
+            receipts = data.get("phase_z_receipts") or []
+            if not any(
+                str(item.get("receipt_id")) == receipt["receipt_id"]
+                for item in receipts
+            ):
+                receipts.append(receipt)
+            data["phase_z_receipts"] = receipts[-COMPLETIONS_MAX:]
         data["phase_z_pending"] = kept
         return removed
 
@@ -1277,13 +1809,26 @@ def reject_phase_z(
             if str(item.get("cohort_id")) not in wanted:
                 kept.append(item)
                 continue
-            rejected.append({
+            entry = {
                 **item,
                 "rejected_at": _now(),
                 "rejection_reason": str(reason),
-            })
+            }
+            rejected.append(
+                _prepare_phase_z_rejection_entry(entry, state_path=path)
+            )
+        _append_phase_z_rejection_audit(rejected, state_path=path)
         ledger = data.get("phase_z_rejections") or []
-        ledger.extend(rejected)
+        cached_ids = {
+            str(entry.get("rejection_id"))
+            for entry in ledger
+            if entry.get("rejection_id")
+        }
+        ledger.extend(
+            entry
+            for entry in rejected
+            if entry["rejection_id"] not in cached_ids
+        )
         data["phase_z_pending"] = kept
         data["phase_z_rejections"] = ledger[-COMPLETIONS_MAX:]
         return rejected
@@ -1441,6 +1986,7 @@ class CurrentJob:
     slot_id: int = 1
     phase: str = "running"
     started_wall: str | None = None
+    producer_custody: dict[str, Any] | None = None
     age_seconds: float = 0.0
 
 
@@ -1480,6 +2026,11 @@ def get_current_jobs(path: Path = STATE_PATH) -> list[CurrentJob]:
             log_path=str(job.get("log_path", "")),
             phase=str(job.get("phase", "running")),
             started_wall=job.get("started_wall"),
+            producer_custody=(
+                dict(job["producer_custody"])
+                if isinstance(job.get("producer_custody"), dict)
+                else None
+            ),
             age_seconds=age,
         ))
     return result

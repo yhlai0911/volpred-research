@@ -1,139 +1,65 @@
 ---
 name: paper-stage-classifier
 description: >
-  論文 stage 分類（5 階段 early/draft/review/ready/submitted）+
-  continuous review loop 觸發頻率。決定資源分配。Trigger phrases:
-  'paper stage', '論文 stage', 'ready_for_submission', 'submitted'. Do not use
-  for實際跑審查（use paper-review-cycle）或修訂操作（use paper-update）。
-model: opus
-effort: low
+  Compatibility projection for the canonical 11-stage paper-submission
+  pipeline. Use only when an older caller asks for a coarse paper status or
+  "paper stage." It does not define gates, run reviews, or transition papers.
 user-invocable: true
 ---
 
-# Paper Stage Classifier
+# Paper Stage Classifier — Compatibility Alias
 
-## 5 Stage 分類
+This skill is a retired state-machine surface. The only authoritative stage
+model and orchestrator is `paper-submission-pipeline`.
 
-| Stage | 判定條件 | 動作 |
-|-------|---------|------|
-| **early** | < 20p, 主結構未完，1 個 contribution | 補實驗 + 寫初稿，**不審查**（reviewer 看不出價值）|
-| **draft** | 20-30p, 結構完但內容粗 | Codex/Gemini 第一輪審查 + 修正。先寫滿再審 |
-| **review** | 30+p, 內容齊但未經正式 review | 跑 SOP step 1 雙審查（latex-academic-reviewer + citation-verifier）→ step 2 修正 |
-| **ready_for_submission** | latex-reviewer ≥ 4★ + citation-verifier 0 MAJOR + ≤3 MED | **進入 continuous review loop**（見下段）|
-| **submitted** | 已投稿 journal | 監控 reviewer 回應，準備 R&R |
+## Read
 
-## Scope Boundary
+Read the current tracker through the existing read model:
 
-Use this skill only for：
-
-- paper stage 判定
-- ready / submitted 的條件界定
-- continuous review loop 何時啟動
-
-Do **not** use this skill for：
-
-- 實際跑 review → `paper-review-cycle`
-- 實際修稿與平台同步 → `paper-update`
-
-## Stage 判定 SOP（**只負責分類**，修訂操作 SOP 在 `paper-update` skill）
-
-每次 `paper-update` 後立即：
-1. 跑 `paper-list` 看 pages, citations
-2. 對照上表判斷 stage
-3. 用 `volpred ops paper-upsert --paper-id <id> --stage <stage>` 寫入 DB（若有 --stage 欄位；無則寫 details JSON）
-4. 同步更新 `next_tasks.json` 的對應任務 description
-5. **⚠️ Frontend dependency check**（2026-04-27 P6 incident 教訓）：
-   - 若新 stage value 在 supabase 為新 enum（例如首次升 `ready_for_submission`），**必須** check `frontend-v2-fix/src/app/paper/page.tsx` + `src/app/v3/paper/page.tsx` 的 `Paper.status` type union 是否包含
-   - 若沒包含 → frontend client-side crash（`STATUS_CONFIG[status] = undefined`），**整頁 https://volpred.zeabur.app/paper 掛掉**
-   - 必跑：grep `frontend-v2-fix/src/app/**/paper*.tsx` 確認 5 stages (working / ready_for_submission / submitted / accepted / published) 全 covered
-   - frontend-v2-fix 是獨立 git repo（main repo gitignored），改完 cd 進去 commit + 跑 `bash scripts/deploy-zeabur-safe.sh` deploy
-
-補充：
-- 這裡同步 `next_tasks.json` 的目的，只是維持 paper working list / human-readable plan。
-- v11 之後，正式 orchestration 狀態仍以 `storage/ops/` control plane 與 `config/runtime_schedules.json` / `event_jobs` 為準；`next_tasks.json` 不是 canonical scheduler queue。
-
-修訂操作步驟（從 review report 到平台同步）→ 見 `paper-update` skill。本 skill 只負責 stage 判定 + continuous review loop 觸發頻率。
-
-## Ready-for-Submission 持續審查迴圈
-
-論文一旦進入 ready，**不視為「完成」**，必須持續優化：
-
-```
-[ready v_n] → /latex-academic-reviewer + /citation-verifier 並行
-           → 兩 reports 寫入 paper/<id>/review_history/v<n>/（archived，不覆蓋）
-           → 主線程修正 → body_v(n+1).tex + diff_v(n)_v(n+1).tex
-           → xelatex main_v(n+1).tex × 2
-           → uv run volpred ops paper-update --paper-id <id>
-           → git commit "v(n+1) review-driven revisions + archived v(n) reports"
-           → 回到 [ready v_(n+1)]，下一輪
+```bash
+uv run python scripts/paper_pipeline_check.py
 ```
 
-### Review report 歸檔規則
+Do not infer stage from page count, review age, website status, or a previous
+report. Do not write the tracker.
 
-歸檔規則的**唯一 owner = `paper-review-cycle`**（見其 §「Review Report Archive 規則（MUST）」+「為什麼 review report 必須 archive」+「Agent prompt 必含的歸檔指令」）：`review_history/v<n>/` 目錄結構、每跑一輪建新版本目錄、舊 reports 不可覆蓋、每輪 README 內容（觸發時間/原因/reviewer、HIGH/MED/MINOR 摘要、主線程動作、v(n)→v(n+1) diff）、agent prompt 寫死 output path、Markdown-not-LaTeX、inline `$...$`、`"§4.3, eq.(7)"` 文字引用、`appendix_v<n>.tex` 罕見場景、git-track 不進 `.gitignore`、以及為什麼要 archive 的 rationale。本 skill 不重複；跑審查時依 paper-review-cycle 歸檔。
+## Coarse projection
 
-### 啟動頻率
+For legacy UI/reporting only, project the canonical stage as follows:
 
-| 觸發條件 | 行動 |
-|---------|------|
-| 第一次進入 ready | 跑全套 SOP step 1-6（雙審查 + v2 修正 + 同步） |
-| 有新研究證據可加 | 立即觸發一輪 review-fix |
-| 每月最低 1 輪 | 即使無新證據，catch reviewer-style 問題 |
-| 用戶要求 review | 立即觸發 |
+| Canonical pipeline stage | Coarse public status |
+|---|---|
+| `draft`, `revision`, `compliance_scrub`, `multi_round_review` | `working` |
+| `review_converged`, `arxiv_ready` | `ready_for_submission` |
+| `arxiv_posted`, `journal_submitted`, `under_journal_review` | `submitted` |
+| `accepted` | `accepted` |
+| `rejected` | `working` |
 
-### 停止迴圈條件（→ 升 submitted）
+This mapping is lossy and never feeds back into the canonical stage.
 
-**全部三條同時滿足**才能 mark `submitted`：
-1. latex-reviewer 給 ★★★★★ 且 0 HIGH-priority recommendations
-2. citation-verifier 0 MAJOR + 0 MED + ≤3 minor
-3. 用戶確認 final（避免 agent 自行判定提交）
+When a public-status projection genuinely needs persistence, first verify the
+installed interface:
 
-### Continuous review 在 next_tasks 的維持
-
-這一段是 **legacy paper working list** 規範，用於人類與主線程快速追蹤；不是 shared scheduler 的 canonical task schema。
-
-每篇 ready 論文在 `next_tasks.json` 必須有：
-```json
-{
-  "id": "<paper-id>_continuous_review",
-  "title": "<paper-id> 持續審查迴圈 (current v<n>)",
-  "priority": 2,
-  "description": "上次 review: YYYY-MM-DD v<n>。下次計畫: YYYY-MM-DD v<n+1>。已知 outstanding fixes: ...",
-  "status": "pending"
-}
+```bash
+uv run volpred ops paper-upsert --help
 ```
 
-每次跑完一輪後**更新此任務**（不刪除），記錄上次/下次日期。
+Then use only its supported metadata field:
 
-## 9 篇論文當前 stage 評估（2026-04-13）
-
-| Paper ID | Stage | 證據 / 待辦 |
-|----------|-------|------------|
-| leverage-direction | **review** | citation 0 MAJOR ✅，**latex-reviewer 3★/5★ + 7 HIGH issues**（內部矛盾、缺 ES backtest、Proposition 1 N=6 脆弱）。需 v3 修正 7 HIGH 後再 review，預計修完可達 ★★★★ ready。詳 `paper/leverage-direction/review_history/v2/README.md` |
-| vix-sufficiency | **review→expansion** | integration_plan_v2 ready，整合今日 6 實驗 +9.2p → 48p，主線程執行中 |
-| volatility-absorption | **review** | 39p, 36 cites, JFE target，需 SOP step 1 雙審查 |
-| taiwan-vt | **review** | Gemini 找到 3 weaknesses (TX tax/linear scaling/TSMC endogeneity)，待修 |
-| garch-x-vix | **review** | 36p, 25 cites (Paper 9)，CLAUDE.md 標 main thread |
-| vt-trend-following | **draft** | 33p, 19 cites, mid-stage |
-| vt-insurance-cost | **early** | 14p, 17 cites, < 20p |
-| vt-crowding-abm | **early** | 15p, 13 cites, < 20p |
-| prg-periodic-garch | **early** | 14p, 19 cites, < 20p |
-
-**Ready/Expansion phase 2 篇**（leverage-direction, vix-sufficiency）優先進入 continuous review loop。
-**Review phase 3 篇**（volatility-absorption, taiwan-vt, garch-x-vix）依序排 SOP step 1。
-
-## DB Schema 整合（待實作）
-
-理想 schema 增加 `stage` column：
-```sql
-ALTER TABLE papers ADD COLUMN IF NOT EXISTS stage TEXT 
-  CHECK (stage IN ('early', 'draft', 'review', 'ready_for_submission', 'submitted'));
+```bash
+uv run volpred ops paper-upsert --paper-id <id> --status <coarse-status>
+uv run volpred ops paper-list
 ```
 
-CLI 增加 `--stage` 參數於 `paper-upsert`。
+This command updates a public metadata projection; it is **not** a pipeline
+transition. Treat the write as failed unless the read-back shows the requested
+paper and status.
 
-短期 fallback：用 `tags` field 加 `stage:<value>` tag 編碼。
+## Transition requests
 
-## 對應 CLAUDE.md 條目
-
-CLAUDE.md「論文更新標準程序」段已提此 SOP 大綱（行 ~221）。本 skill 提供完整實作細節 + ready-for-submission continuous loop 規範。CLAUDE.md 不重複內容，只 reference 此 skill。
+Forward every transition request to `paper-submission-pipeline`. A transition
+may run only through an already-existing canonical writer/CLI verified by
+`--help`. If none exists, return `BLOCKED` and create a
+governance/implementation task through the currently canonical task-creation
+surface. Never mutate tracker/database records by hand, invent a flag, or
+repurpose the coarse `status` field as the 11-stage state.

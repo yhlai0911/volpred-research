@@ -20,8 +20,7 @@
     <string>/opt/homebrew/bin/uv</string>
     <string>run</string>
     <string>python</string>
-    <string>-m</string>
-    <string>scripts.dispatch_supervisor.supervisor</string>
+    <string>/Users/yhlai0911/.volpred/bin/dispatch-supervisor-stage0.py</string>
   </array>
 
   <key>WorkingDirectory</key>
@@ -35,6 +34,11 @@
     <string>/Users/yhlai0911</string>
     <key>VOLPRED_WRITER_ISOLATION_REQUIRED</key>
     <string>1</string>
+    <!-- Shared launchd coalition cannot yet couple Codex reachability
+         descendants to provider-auth lease drain. Keep failover mechanically
+         off until per-fire custody passes regression + live read-back. -->
+    <key>VOLPRED_CODEX_FAILOVER</key>
+    <string>0</string>
   </dict>
 
   <key>RunAtLoad</key>

@@ -2,7 +2,7 @@
   "metadata": {
     "canonical_path": "config/runtime_schedules.json",
     "timezone": "Asia/Taipei",
-    "updated_at": "2026-07-28T15:47:00+08:00",
+    "updated_at": "2026-07-29T11:55:00+08:00",
     "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; continue_task heartbeat 設為 */30 * * * *（嚴格 30 分鐘等距，對齊 Claude Code Max $200/月 plan 1-hour prompt cache TTL，已於 2026-04-26 經 Anthropic support article 驗證）。The formal clock is the cron-driven shared scheduler, while idle_policy only governs slot-aware continuation/selection. 派工 cadence（2026-07-20, telegram-1198）：15 分鐘一班的成本完全取決於 pregate。demand-only gate 下是實打實 4x（池永遠有 P1/P2 → 7 天 164 fire would_skip=0）。加上 novelty gate 後，實測近 7 天 1077 次 agentable P1/P2 集合變動，15min 僅 46.0% 的 bin 有變動 → 相對現況 hourly 約 1.84x（30min 1.35x、60min 0.87x；scripts/analyze_dispatch_cadence.py 可重跑）。capacity veto 會再往下壓。cadence 尚未改動，待 shadow 觀察窗與 live A/B 後決定。 【2026-07-27 shadow 觀察結論（scripts/crosscheck_pregate_outcomes.py --invoker supervisor --since 2026-07-20，即 capacity+novelty rewire 上線後）】新 gate 於 162 班中僅 would_skip 2 班（1.2% skip 率），且該 2 班經 work_log 交叉核對皆有實質產出（strict_mismatch=2/2＝100% 誤判，反例：2026-07-21T07:08 / 08:08 UTC）。雙重不合格：skip 率過低不足以省 token；skip 時全為誤判，遠超 flip 門檻 strict_mismatch_rate≤0.10。判定：維持 shadow，不翻 enforce；live A/B（60min vs 15min）因 enforce 未上線暫緩。後續：gate 需補訊號提高 skip precision/recall 後再評，估算值（15min≈1.84x）尚未由 live A/B 實測取代。"
   },
   "schedule_materialization": {
@@ -45,6 +45,12 @@
       },
       "agent_dispatch_tick": {
         "activated_at": "2026-07-26T11:42:00Z"
+      },
+      "growth_experiment_lifecycle": {
+        "activated_at": "2026-07-28T22:45:00Z"
+      },
+      "volpred-compute-worker": {
+        "activated_at": "2026-07-28T23:45:00Z"
       }
     },
     "job_defaults": {
@@ -75,6 +81,19 @@
         "lease_seconds": 45,
         "timeout_seconds": 30
       },
+      "growth_experiment_lifecycle": {
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "lease_seconds": 180,
+        "timeout_seconds": 120
+      },
+      "volpred-compute-worker": {
+        "catch_up": "skip",
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "lease_seconds": 120,
+        "timeout_seconds": 60
+      },
       "boss_report_4h": {
         "catch_up": "skip",
         "max_attempts": 1
@@ -96,6 +115,13 @@
         "max_attempts": 1,
         "lease_seconds": 240,
         "timeout_seconds": 180
+      },
+      "github_comment_notifications": {
+        "catch_up": "skip",
+        "max_attempts": 3,
+        "retry_delay_seconds": 60,
+        "lease_seconds": 120,
+        "timeout_seconds": 90
       },
       "gmail_poll": {
         "catch_up": "skip",
@@ -327,6 +353,22 @@
           "scripts/check_alerts.py --ci-only",
           "cron_ci_watch.sh",
           "ci-watch"
+        ]
+      },
+      {
+        "id": "github_comment_notifications",
+        "label": "GitHub issue/PR comments → owner Email + Telegram receipts",
+        "cron": "*/5 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_github_comment_notifications.sh",
+        "log_path": "storage/logs/cron/github_comment_notifications.log",
+        "host_crontab_managed": false,
+        "piggy_back_skip": true,
+        "piggy_back_skip_reason": "Operations Core owns the five-minute ingress; no host cron or hourly piggy-back duplicate caller.",
+        "description": "每 5 分鐘由 Operations Core 讀 GitHub issue conversation + PR review comments，以 GitHub comment id 作 durable identity，逐 comment 留 Email/Telegram channel receipt；partial failure 只重試缺失通道，cursor 不越過未完成 comment。首次啟用將近 7 日留言合併成一封摘要，避免歷史通知爆量。狀態位於 ~/.volpred/run，不污染 Git working tree。",
+        "matchers": [
+          "scripts/github_comment_notifications.py",
+          "cron_github_comment_notifications.sh",
+          "github-comment-notifications"
         ]
       },
       {
@@ -706,6 +748,46 @@
           "cron_agent_dispatch_tick.sh",
           "scripts.dispatch_supervisor.trigger",
           "dispatch-trigger.sock"
+        ]
+      },
+      {
+        "id": "volpred-compute-worker",
+        "label": "Operations Core compute queue drain/restart insurance",
+        "cron": "*/15 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_compute_worker.sh",
+        "log_path": "storage/logs/cron/compute_worker.log",
+        "description": "Issue #46 canonical compute executor trigger. Operations Core is the only clock and dispatches a detached work-conserving compute queue drain every 15 minutes as restart insurance; the wrapper itself returns within the 60-second scheduler timeout. The queue-wide flock preserves one drain loop, while each queued job keeps its own timeout, provider guard, immutable receipt, schedule fire identity and output contract. The legacy com.volpred.compute-worker LaunchAgent is retired after a natural Operations Core receipt and queue execution read-back.",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "mechanism": "launchd",
+        "launchagent_label": "com.volpred.compute-worker",
+        "max_parallel": 3,
+        "staleness_expected_minutes": 30,
+        "legacy_retirement_gate": {
+          "type": "schedule_and_compute_receipt",
+          "schedule_receipts_path": "storage/ops/schedule_receipts.json",
+          "proof_receipt_path": "storage/ops/compute_queue/issue46-operations-core-compute-smoke.json"
+        },
+        "matchers": [
+          "cron_compute_worker.sh",
+          "compute_queue.py run-loop",
+          "compute_worker.log"
+        ]
+      },
+      {
+        "id": "growth_experiment_lifecycle",
+        "label": "Receipt-backed natural-growth experiment lifecycle",
+        "cron": "*/5 * * * *",
+        "wrapper_script": "/Users/yhlai0911/.volpred/bin/cron_growth_experiment_lifecycle.sh",
+        "log_path": "storage/logs/cron/growth_experiment_lifecycle.log",
+        "description": "Issue #27 canonical lifecycle owner. Every five minutes Operations Core reads the durable experiment registry and idempotently advances the committed article-share CTA experiment through activate, exposure stop, attribution maturation, and frozen closeout. Stable command receipts make retries and restart catch-up safe; the job never rewrites research facts, buys traffic, or requires Claude/Codex Desktop to stay open.",
+        "host_crontab_managed": false,
+        "piggy_back_enabled": false,
+        "staleness_expected_minutes": 15,
+        "matchers": [
+          "cron_growth_experiment_lifecycle.sh",
+          "growth-experiment reconcile-template",
+          "growth_experiment_lifecycle.log"
         ]
       },
       {
@@ -1735,7 +1817,10 @@
       "canonical_script": "scripts/cron_compute_worker.sh",
       "tcc_bypass_copy": "~/.volpred/bin/cron_compute_worker.sh",
       "installed_at": "2026-05-12T06:41:51Z",
-      "updated_at": "2026-07-20T05:10:00Z"
+      "updated_at": "2026-07-20T05:10:00Z",
+      "status": "retired",
+      "retired_at": "2026-07-28T23:45:00Z",
+      "reason": "Issue #46 moves the clock into Operations Core; this row remains only as a rollback/audit receipt and is rejected as an active policy source."
     }
   ],
   "daemons": [
@@ -1747,21 +1832,51 @@
       "entrypoint": "uv run python -m scripts.dispatch_supervisor.supervisor",
       "state_file": "storage/ops/dispatch_state.json",
       "log": "~/.volpred/logs/dispatch_supervisor.log",
-      "max_slots": 4,
-      "max_slots_rationale": "2026-07-19 老闆『加快清任務池』(assign_794c4bc2)：2→4。2 個 slot 長期滿載，requested fire（email/telegram/急件）撞 slots_full 被延到下一 tick。放大的是「同時幾條主線程」，不是 agent 數 —— agent 並行度的唯一 owner 仍是 scripts/dispatch_slot_budget.py（全 repo worktree occupancy，4/surge 6），不隨 max_slots 倍增。上限依據：10 CPU core（主線程 IO-bound）、64GB RAM、weekly quota 剩 67.7%、磁碟 85GB free（91% used，worktree 是這裡的真限制而非 slot 數）。守門：scheduler.load_max_slots 於連 2 次 outcome=quota_blocked 時自動 clamp 回 2，成功一次即自愈。",
+      "producer_custody": {
+        "mode": "shared_launchd_coalition",
+        "rationale": "2026-07-29 production safety cutover：supervisor 以 launchd resource coalition + per-fire process unique-id baseline 追蹤 setsid／leader-exit 後仍存活的 producer。shared coalition 無法安全區分同時起跑的多個 fire，因此 scheduler 必須機械限流為單一 slot；恢復多 slot 前須先切到 per-fire isolated coalition 並完成 live drain read-back。"
+      },
+      "codex_failover": {
+        "mode": "disabled_until_per_fire_custody",
+        "environment": "VOLPRED_CODEX_FAILOVER=0",
+        "rationale": "2026-07-29 safe-launch gate：Codex reachability/preflight 與 provider-auth reaper 仍以 subprocess/PGID 管理，無法證明 setsid descendant 與 credential lease 同時 drained；shared launchd coalition 期間機械停用 failover。Claude subscription 主執行不受影響；只有 per-fire custody + lease drain regression/live proof 全綠後才可恢復。"
+      },
+      "max_slots": 1,
+      "max_slots_rationale": "2026-07-29 shared_launchd_coalition custody safety mode：單一 shared coalition 的 per-fire baseline 在並行 fire 下會互相看見新成員，故 production 必須 max_slots=1；scheduler.load_max_slots 即使讀到漂移值或無效值也 fail-safe clamp 1。2026-07-19 的 4-slot throughput 設定暫停，待 per-fire isolated coalition 通過 regression + live drain proof 後才可恢復。",
       "fires": "Receives model-free ticks only from Operations Core job agent_dispatch_tick; each tick evaluates the hourly volpred-hourly-dispatch policy plus state.fire_requested_at",
       "writer_isolation": {
         "mode": "enforce",
         "lanes": [
           "platform_ops"
         ],
-        "max_active": 2,
+        "max_active": 1,
         "max_total": 3,
         "disk_floor_gib": 20,
-        "rationale": "Issue #43 enforce cutover：每班 mutating-capable fire 由 supervisor 在 agent spawn 前機械配發 registered worktree，worker cwd 與 macOS sandbox 綁定該 workspace；allocation/cap/disk/lock 任一失敗只會釋放 slot 並保留 fire request 重派，禁止 shared-main fallback。candidate head + main base 進 durable gate receipt；main 前進必 rebase + re-gate，integrator 以雙 SHA fence 落地。canonical storage 只容許既有帶鎖 CLI；workspace 內 storage/** 變更在 merge gate fail closed。max_active=2 允許雙 slot 不相交工作並行，max_total=3 保留一個 checkpoint/remediation 緩衝；超限只重派。"
+        "rationale": "Issue #43 enforce cutover：每班 mutating-capable fire 由 supervisor 在 agent spawn 前機械配發 registered worktree，worker cwd 與 macOS sandbox 綁定該 workspace；allocation/cap/disk/lock 任一失敗只會釋放 slot 並保留 fire request 重派，禁止 shared-main fallback。candidate head + main base 進 durable gate receipt；main 前進必 rebase + re-gate，integrator 以雙 SHA fence 落地。canonical storage 只容許既有帶鎖 CLI；workspace 內 storage/** 變更在 merge gate fail closed。max_active=1 與 shared_launchd_coalition 的單 slot custody gate 一致；max_total=3 保留 checkpoint/remediation 緩衝，超限只重派。"
       },
       "since": "2026-07-04T16:36:00+08:00",
-      "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, max_slots worker pool, retry/failover ladder and cohort-drained PHASE-Z safety commit. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
+      "description": "Long-lived dispatch executor after the Operations Core cutover. It has no schedule clock: a local Unix-socket trigger server accepts Operations Core ticks, while the process retains the independent health monitor, single-slot shared-coalition worker, retry ladder and cohort-drained PHASE-Z safety commit. Codex failover is fail-closed disabled until per-fire custody also owns provider-auth lease drain. Schedule-trigger receipts and model-delivery outcomes remain separate. Failure alerting owner = its own alerts.py (completion_failure/quota/hang/auth) — host_cron_fail deliberately does NOT cover model outcomes."
+    },
+    {
+      "id": "telegram_poll",
+      "type": "launchd_keepalive_daemon",
+      "label": "com.volpred.telegram-poll",
+      "plist": "ops/launchd/com.volpred.telegram-poll.plist",
+      "entrypoint": "~/.volpred/bin/cron_telegram_poll.sh",
+      "state_file": "storage/ops/telegram_state.json",
+      "log": "~/.volpred/logs/telegram_poll_launchd.log",
+      "since": "2026-07-02T00:00:00+08:00",
+      "description": "Canonical always-on Telegram ingress daemon. It has no periodic schedule clock and remains an explicit control-plane dependency during Operations Core schedule retirement."
+    },
+    {
+      "id": "work-dashboard",
+      "type": "launchd_keepalive_daemon",
+      "label": "com.volpred.work-dashboard",
+      "plist": "ops/launchd/com.volpred.work-dashboard.plist",
+      "entrypoint": "uv run python scripts/work_dashboard_server.py",
+      "log": "~/.volpred/logs/work_dashboard.log",
+      "since": "2026-07-02T00:00:00+08:00",
+      "description": "Canonical host-only interactive dashboard daemon. It has no periodic schedule clock; repository writes are delegated to the canonical task writer."
     }
   ]
 }

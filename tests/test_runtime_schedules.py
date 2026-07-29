@@ -36,8 +36,14 @@ def test_dispatch_writer_isolation_is_fail_closed_in_config_and_launchd():
     )
     isolation = daemon["writer_isolation"]
     assert isolation["mode"] == "enforce"
-    assert isolation["max_active"] == 2
+    assert isolation["max_active"] == 1
     assert isolation["max_total"] >= isolation["max_active"]
+    assert daemon["max_slots"] == 1
+    assert daemon["producer_custody"]["mode"] == "shared_launchd_coalition"
+    assert (
+        daemon["codex_failover"]["mode"]
+        == "disabled_until_per_fire_custody"
+    )
 
     with (
         ROOT / "ops" / "launchd" / "com.volpred.dispatch-supervisor.plist"
@@ -47,3 +53,4 @@ def test_dispatch_writer_isolation_is_fail_closed_in_config_and_launchd():
         plist["EnvironmentVariables"]["VOLPRED_WRITER_ISOLATION_REQUIRED"]
         == "1"
     )
+    assert plist["EnvironmentVariables"]["VOLPRED_CODEX_FAILOVER"] == "0"

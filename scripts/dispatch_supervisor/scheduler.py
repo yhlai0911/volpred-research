@@ -52,14 +52,17 @@ from volpred.ops.timestamps import parse_iso_warn  # noqa: E402
 
 from . import (
     alerts,
+    custody_receipt,
     decision,
     identity,
     isolation,
     phase_z,
+    procutil,
     state,
     worker,
-    workspace as workspace_mod,
 )
+from . import workspace as workspace_mod
+from .child_env import external_child_environment
 from .report_contract import inject_external_report_contract
 
 LOG = logging.getLogger(__name__)
@@ -79,7 +82,9 @@ DAEMON_ID = "volpred-dispatch-supervisor"
 # Also the floor the pool de-rates to during a quota outage: the capacity that
 # ran for months without exhausting the window is the safe thing to fall back to.
 DEFAULT_MAX_SLOTS = 2
+FAIL_CLOSED_MAX_SLOTS = 1
 QUOTA_DERATE_STREAK = 2
+SHARED_LAUNCHD_COALITION_MODE = "shared_launchd_coalition"
 
 # Strong references keep launched fire tasks alive until their done callback
 # observes the result. Keys are immutable state job_ids, never reusable slots.
@@ -100,6 +105,7 @@ _PHASE_Z_TERMINAL_REASONS = {"committed", "clean", "nothing_owned", "nothing_to_
 # every ~64s tick forever. Three attempts ≈ 3 min of transient tolerance, then
 # one give-up alert and the token is released.
 _PHASE_Z_MAX_DRAIN_ATTEMPTS = 3
+_PHASE_Z_GENERATION_TRAILER = "VolPred-Phase-Z-Generation"
 
 
 def _phase_z_claim_owners(pending: list[dict[str, Any]]) -> set[str]:
@@ -139,6 +145,94 @@ def _matching_fire_lifecycle(
     if any(paths != normalized[0] for paths in normalized[1:]):
         return None, "generation_baseline_mismatch"
     return normalized[0], next(iter(generation_ids))
+
+
+def _git_head(repo_root: Path) -> str:
+    """Return the current HEAD OID, or an empty string for non-git test seams."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "--verify", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        if (repo_root / ".git").exists():
+            raise RuntimeError(f"PHASE-Z HEAD probe unavailable: {exc}") from exc
+        return ""
+    if proc.returncode != 0 and (repo_root / ".git").exists():
+        raise RuntimeError(
+            "PHASE-Z HEAD probe failed: " + (proc.stderr or "")[-300:]
+        )
+    return (proc.stdout or "").strip() if proc.returncode == 0 else ""
+
+
+def _phase_z_terminal_commit(
+    *,
+    repo_root: Path,
+    pending: list[dict[str, Any]],
+    generation_id: str,
+) -> str | None:
+    """Recover a terminal PHASE-Z commit after process death.
+
+    ``begin_phase_z`` binds the pre-mutation HEAD into every pending token.
+    PHASE-Z writes the generation as a commit trailer.  A new process searches
+    only descendants of that exact HEAD, so an old receipt with the same text
+    cannot release a newer lifecycle.
+    """
+    attempts = {
+        (
+            str(item.get("closeout_generation_id") or ""),
+            str(item.get("closeout_base_head") or ""),
+        )
+        for item in pending
+        if item.get("closeout_generation_id") is not None
+    }
+    if not attempts:
+        return None
+    if len(attempts) != 1 or any(
+        item.get("closeout_generation_id") is None for item in pending
+    ):
+        raise RuntimeError("mixed PHASE-Z closeout attempt identities")
+    attempt_generation, base_head = next(iter(attempts))
+    if attempt_generation != str(generation_id):
+        raise RuntimeError("PHASE-Z closeout attempt does not match lifecycle generation")
+    if not base_head and (repo_root / ".git").exists():
+        raise RuntimeError("PHASE-Z closeout attempt has no verified base HEAD")
+    if not base_head:
+        return None
+    try:
+        proc = subprocess.run(
+            [
+                "git", "-C", str(repo_root), "log",
+                "--format=%H%x00%B%x00%x1e",
+                f"{base_head}..HEAD",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (subprocess.TimeoutExpired, OSError) as exc:
+        raise RuntimeError(
+            f"PHASE-Z terminal receipt probe unavailable: {exc}"
+        ) from exc
+    if proc.returncode != 0:
+        raise RuntimeError(
+            "cannot inspect PHASE-Z terminal commit "
+            f"generation={generation_id} base={base_head}: "
+            + (proc.stderr or "")[-300:]
+        )
+    expected = f"{_PHASE_Z_GENERATION_TRAILER}: {generation_id}"
+    for raw_record in (proc.stdout or "").split("\x1e"):
+        record = raw_record.strip("\n\x00 ")
+        if not record or "\x00" not in record:
+            continue
+        commit_sha, body = record.split("\x00", 1)
+        if any(line.strip() == expected for line in body.splitlines()):
+            return commit_sha.strip()
+    return None
 
 
 def _reject_unmatched_generation(
@@ -191,6 +285,11 @@ def _phase_z_drain_exhausted(*, cohort_id: str, outcome: dict[str, Any] | None,
     restarts — a restart must not grant a stuck cohort three fresh retries
     per boot, which is just the livelock with extra steps.
     """
+    if (outcome or {}).get("head_committed"):
+        # HEAD already contains this generation.  Releasing after a retry cap
+        # would permanently skip index/claim/test closeout.  Keep retrying the
+        # idempotent downstream finisher until it emits a terminal receipt.
+        return False
     attempts = 0
     with state._locked_state(state_path) as (_fh, data):
         for item in data.get("phase_z_pending") or []:
@@ -308,37 +407,89 @@ def load_max_slots(
     """Hot-load the daemon pool capacity from runtime_schedules.json.
 
     The owner is ``daemons[id=volpred-dispatch-supervisor].max_slots``. Missing
-    or invalid values fall back to two; bool is rejected even though it is an
-    ``int`` subclass.  A config reduction never kills existing workers — it
+    or invalid/ambiguous values fail closed to one; bool is rejected even
+    though it is an ``int`` subclass. A config reduction never kills existing workers — it
     only blocks new admission until occupancy falls below the new limit.
 
-    The configured value is a ceiling, not a promise: while a quota streak is
-    active the pool is clamped back to ``DEFAULT_MAX_SLOTS``. Keeping that here
-    rather than in the caller preserves the single-owner rule — everyone who
-    asks "how many slots exist" gets the same answer, de-rate included.
+    The configured value is a ceiling, not a promise.  Shared launchd-coalition
+    producer custody cannot safely distinguish concurrently-started fires, so
+    that mode always returns one even if either capacity field drifts.  While a
+    quota streak is active other custody modes are clamped back to
+    ``DEFAULT_MAX_SLOTS``. Keeping these guards here rather than in the caller
+    preserves the single-owner rule — everyone who asks "how many slots exist"
+    gets the same answer.
     """
     try:
         data = json.loads(schedules_path.read_text(encoding="utf-8"))
     except (FileNotFoundError, json.JSONDecodeError) as exc:
-        LOG.warning("load_max_slots fallback=%d: %s", DEFAULT_MAX_SLOTS, exc)
-        return DEFAULT_MAX_SLOTS
+        LOG.warning(
+            "load_max_slots fail-closed=%d: %s",
+            FAIL_CLOSED_MAX_SLOTS,
+            exc,
+        )
+        return FAIL_CLOSED_MAX_SLOTS
     for item in data.get("daemons") or []:
         if not isinstance(item, dict) or item.get("id") != daemon_id:
             continue
         value = item.get("max_slots", DEFAULT_MAX_SLOTS)
-        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-            LOG.warning("max_slots %r invalid — using %d", value, DEFAULT_MAX_SLOTS)
-            return DEFAULT_MAX_SLOTS
-        if value > DEFAULT_MAX_SLOTS and quota_derate_active(state_path):
+        custody = item.get("producer_custody")
+        custody_mode = custody.get("mode") if isinstance(custody, dict) else None
+        writer_cfg = item.get("writer_isolation")
+        writer_max_active = (
+            writer_cfg.get("max_active")
+            if isinstance(writer_cfg, dict)
+            else None
+        )
+        if (
+            value != 1
+            or writer_max_active != 1
+            or custody_mode != SHARED_LAUNCHD_COALITION_MODE
+        ):
             LOG.warning(
-                "max_slots %d de-rated to %d: last %d completions were quota_blocked "
-                "(self-clears on the next successful fire)",
-                value, DEFAULT_MAX_SLOTS, QUOTA_DERATE_STREAK,
+                "per-fire producer coalition isolation is not implemented; "
+                "admission remains single-slot shared custody "
+                "(configured mode/slots/writers=%r/%r/%r)",
+                custody_mode,
+                value,
+                writer_max_active,
             )
-            return DEFAULT_MAX_SLOTS
-        return value
-    LOG.warning("daemon %s missing max_slots — using %d", daemon_id, DEFAULT_MAX_SLOTS)
-    return DEFAULT_MAX_SLOTS
+        return FAIL_CLOSED_MAX_SLOTS
+    LOG.warning(
+        "daemon %s missing max_slots — fail-closed to %d",
+        daemon_id,
+        FAIL_CLOSED_MAX_SLOTS,
+    )
+    return FAIL_CLOSED_MAX_SLOTS
+
+
+def load_producer_custody_mode(
+    *,
+    schedules_path: Path = SCHEDULES_PATH,
+    daemon_id: str = DAEMON_ID,
+) -> str:
+    """Read custody mode; ambiguity retains the strict shared-coalition gate."""
+    try:
+        data = json.loads(schedules_path.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError) as exc:
+        LOG.warning(
+            "producer custody mode unavailable — fail-closed shared: %s",
+            exc,
+        )
+        return SHARED_LAUNCHD_COALITION_MODE
+    for item in data.get("daemons") or []:
+        if not isinstance(item, dict) or item.get("id") != daemon_id:
+            continue
+        custody = item.get("producer_custody")
+        mode = custody.get("mode") if isinstance(custody, dict) else None
+        if mode == SHARED_LAUNCHD_COALITION_MODE:
+            return SHARED_LAUNCHD_COALITION_MODE
+        LOG.warning(
+            "producer custody mode %r is not implemented — fail-closed shared",
+            mode,
+        )
+        return SHARED_LAUNCHD_COALITION_MODE
+    LOG.warning("producer custody daemon row missing — fail-closed shared")
+    return SHARED_LAUNCHD_COALITION_MODE
 
 
 def _slot_log_path(base: Path, *, slot_id: str, job_id: str) -> Path:
@@ -465,6 +616,7 @@ def _task_pool_command(
     proc = subprocess.run(
         [sys.executable, str(repo_root / "scripts" / "task_pool_claim.py"), *args],
         cwd=repo_root,
+        env=external_child_environment(),
         capture_output=True,
         text=True,
         timeout=30,
@@ -479,12 +631,20 @@ def _task_pool_command(
             "rc": proc.returncode,
             "detail": (proc.stderr or proc.stdout or "")[-500:],
         }
-    if proc.returncode != 0 and payload.get("ok") is not False:
+    if proc.returncode != 0:
+        existing_detail = payload.get("detail")
+        detail = (
+            proc.stderr
+            or (existing_detail if isinstance(existing_detail, str) else "")
+            or proc.stdout
+            or ""
+        )[-1000:]
         payload = {
             **payload,
             "ok": False,
             "reason": payload.get("reason") or "task_pool_cli_failed",
             "rc": proc.returncode,
+            **({"detail": detail} if detail else {}),
         }
     return payload
 
@@ -568,6 +728,11 @@ def reconcile_task_settlements(
             workspace=workspace,
             job_id=str(completion.get("job_id") or ""),
             worker_outcome=str(completion.get("outcome") or "failure"),
+            producer_custody=(
+                completion.get("producer_custody")
+                if isinstance(completion.get("producer_custody"), dict)
+                else None
+            ),
         ):
             receipt_error = True
     if receipt_error:
@@ -593,6 +758,18 @@ def reconcile_task_settlements(
             workspace=workspace,
             worker_outcome=str(pending.get("worker_outcome") or "failure"),
             job_id=str(pending.get("job_id") or ""),
+            producer_custody=(
+                pending.get("producer_custody")
+                if isinstance(pending.get("producer_custody"), dict)
+                else None
+            ),
+            producer_drain_confirmed=(
+                workspace_mod.legacy_workspace_producer_drain_confirmed(
+                    repo_root,
+                    workspace_name=str(workspace.get("name") or ""),
+                    job_id=pending_job_id,
+                )
+            ),
         )
         disposition = _settlement_disposition(final)
         if disposition is None:
@@ -774,9 +951,20 @@ async def _run_reserved_fire(
              if str(job.get("job_id")) == job_id),
             None,
         )
-        if own is not None and own.get("pid") is None and own.get("phase") not in {
-            "kill_failed_orphan", "timeout_unverified", "orphan_unverified_not_killed",
-        }:
+        if (
+            own is not None
+            and own.get("pid") is None
+            and own.get("phase") not in {
+                "kill_failed_orphan",
+                "timeout_unverified",
+                "orphan_unverified_not_killed",
+            }
+            and result.outcome not in {
+                "kill_failed_orphan",
+                "timeout_unverified",
+                "orphan_unverified_not_killed",
+            }
+        ):
             state.record_completion(
                 job_id=job_id, expected_attempt=int(own.get("attempt", result.attempts)),
                 expected_pid=own.get("pid"), exit_code=result.exit_code,
@@ -792,11 +980,49 @@ async def _run_reserved_fire(
             None,
         )
         if own is not None and own.get("pid") is None:
-            state.record_completion(
-                job_id=job_id, expected_attempt=int(own.get("attempt", 1)),
-                exit_code=-1, outcome="failure", final_model=str(own.get("model") or "unknown"),
-                path=state_path,
+            producer_custody = (
+                own.get("producer_custody")
+                if isinstance(own.get("producer_custody"), dict)
+                else None
             )
+            members = (
+                procutil.producer_cohort_members_checked(
+                    0,
+                    job_id=job_id,
+                    custody=producer_custody,
+                )
+                if producer_custody is not None
+                else []
+                if own.get("producer_spawn_state") == "not_started"
+                else None
+            )
+            if members == []:
+                state.record_completion(
+                    job_id=job_id,
+                    expected_attempt=int(own.get("attempt", 1)),
+                    exit_code=-1,
+                    outcome=(
+                        "failure"
+                        if producer_custody is not None
+                        else "spawn_not_started"
+                    ),
+                    final_model=str(own.get("model") or "unknown"),
+                    path=state_path,
+                )
+            else:
+                state.mark_job_phase(
+                    job_id=job_id,
+                    phase="orphan_unverified_no_pid",
+                    expected_attempt=int(own.get("attempt", 1)),
+                    path=state_path,
+                )
+                LOG.error(
+                    "worker failed before pid attach and custody is %s; "
+                    "retaining slot job_id=%s members=%s",
+                    "unverified" if members is None else "active",
+                    job_id,
+                    members,
+                )
     finally:
         # Close the producer-side state machine before any workspace/PHASE-Z
         # consumer reads it. fire_receipt normally seals successful output;
@@ -825,11 +1051,38 @@ async def _run_reserved_fire(
         # crash here must not skip the cohort drain below.
         if fire_workspace is not None:
             try:
-                worker_outcome = result.outcome if result is not None else "failure"
+                custody_snapshot = state.read_state(state_path)
+                custody_sources = [
+                    *(custody_snapshot.get("current_jobs") or []),
+                    *reversed(custody_snapshot.get("completions") or []),
+                ]
+                terminal_record = next(
+                    (
+                        item
+                        for item in custody_sources
+                        if str(item.get("job_id") or "") == job_id
+                    ),
+                    {},
+                )
+                worker_outcome = (
+                    result.outcome
+                    if result is not None
+                    else str(
+                        terminal_record.get("outcome")
+                        or terminal_record.get("phase")
+                        or "failure"
+                    )
+                )
+                producer_custody = (
+                    terminal_record.get("producer_custody")
+                    if isinstance(terminal_record.get("producer_custody"), dict)
+                    else None
+                )
                 workspace_outcome = await asyncio.to_thread(
                     workspace_mod.finalize_workspace,
                     repo_root=repo_root, workspace=fire_workspace,
                     worker_outcome=worker_outcome, job_id=job_id,
+                    producer_custody=producer_custody,
                 )
                 LOG.info("workspace finalize job_id=%s disposition=%s",
                          job_id, (workspace_outcome or {}).get("disposition"))
@@ -908,6 +1161,9 @@ async def _run_reserved_fire(
                     durable_baseline, generation = _matching_fire_lifecycle(
                         cohort_pending
                     )
+                    cohort_ids = {
+                        str(item.get("cohort_id")) for item in cohort_pending
+                    }
                     phase_z_kwargs = {
                         "repo_root": repo_root,
                         "isolated_cohort": isolated_cohort,
@@ -920,6 +1176,31 @@ async def _run_reserved_fire(
                     }
                     if durable_baseline is not None:
                         phase_z_kwargs["pre_fire_dirty"] = durable_baseline
+                        state.begin_phase_z(
+                            cohort_ids=cohort_ids,
+                            generation_id=generation,
+                            base_head=_git_head(repo_root),
+                            path=state_path,
+                        )
+                        recovered_commit = _phase_z_terminal_commit(
+                            repo_root=repo_root,
+                            pending=state.read_state(state_path).get(
+                                "phase_z_pending"
+                            ) or [],
+                            generation_id=generation,
+                        )
+                        if recovered_commit:
+                            phase_z_outcome = await asyncio.to_thread(
+                                phase_z.recover_committed_closeout,
+                                repo_root=repo_root,
+                                commit_sha=recovered_commit,
+                                generation_id=generation,
+                                claim_owners=_phase_z_claim_owners(
+                                    cohort_pending
+                                ),
+                            )
+                        else:
+                            phase_z_kwargs["closeout_generation"] = generation
                     else:
                         phase_z_outcome = _reject_unmatched_generation(
                             pending=cohort_pending,
@@ -934,7 +1215,12 @@ async def _run_reserved_fire(
                 except Exception as exc:  # noqa: BLE001
                     LOG.warning("phase_z safety-net failed (non-fatal): %s", exc)
                 if _phase_z_terminal(phase_z_outcome):
-                    cleared = state.finish_phase_z(cohort_id=cohort_id, path=state_path)
+                    cleared = state.finish_phase_z(
+                        cohort_id=cohort_id,
+                        path=state_path,
+                        terminal_outcome=phase_z_outcome,
+                        generation_id=generation,
+                    )
                     LOG.info("phase_z cohort released cohort=%s pending=%d", cohort_id, cleared)
                 elif _phase_z_drain_exhausted(cohort_id=cohort_id, outcome=phase_z_outcome,
                                               state_path=state_path):
@@ -1021,6 +1307,7 @@ def _run_pregate(*, mode: str, window_hours: float) -> bool:
         proc = subprocess.run(
             cmd, capture_output=True, text=True,
             timeout=PREGATE_TIMEOUT_S, cwd=str(ROOT), check=False,
+            env=external_child_environment(),
         )
     except subprocess.TimeoutExpired:
         LOG.warning("pregate timeout after %ss — fail-open PROCEED", PREGATE_TIMEOUT_S)
@@ -1149,6 +1436,44 @@ async def _tick_once(
     """One tick. Returns a small dict describing the decision (for tests + audit log)."""
     state.heartbeat(path=state_path)
     pre_reconcile = state.read_state(state_path)
+    active_jobs = list(pre_reconcile.get("current_jobs") or [])
+    if active_jobs:
+        # Shared-coalition safety mode: any scheduler subprocess started while a
+        # producer reservation is crossing capture/Popen, or while its producer
+        # is live, would inherit the same coalition and become indistinguishable
+        # from producer output. Do no reconciliation, git, task-pool, or
+        # admission work until the sole slot drains.
+        return {
+            "action": "skip",
+            "reason": "producer_slot_in_flight",
+            "active_jobs": len(active_jobs),
+        }
+    try:
+        custody_recovery = await asyncio.to_thread(
+            custody_receipt.reconcile_pending_producer_custodies,
+            repo_root,
+        )
+    except custody_receipt.CustodyReceiptError as exc:
+        LOG.error("producer custody admission gate unavailable: %s", exc)
+        return {
+            "action": "skip",
+            "reason": "producer_custody_ledger_unavailable",
+        }
+    if not custody_recovery.get("ok"):
+        LOG.error(
+            "producer custody admission gate unresolved: %s",
+            custody_recovery,
+        )
+        return {
+            "action": "skip",
+            "reason": "producer_custody_recovery_unresolved",
+            "unresolved": len(custody_recovery.get("unresolved") or []),
+        }
+    if custody_recovery.get("released"):
+        LOG.warning(
+            "producer custody admission recovered=%s",
+            custody_recovery["released"],
+        )
     if (Path(repo_root) / ".git").exists():
         protected_workspace_jobs = (
             [
@@ -1240,20 +1565,59 @@ async def _tick_once(
             recovery_isolated = all(
                 bool(item.get("isolated")) for item in pending_phase_z
             )
-            outcome = await asyncio.to_thread(
-                phase_z.run_phase_z, repo_root=repo_root,
-                isolated_cohort=recovery_isolated,
-                claim_owners=_phase_z_claim_owners(pending_phase_z),
-                pre_fire_dirty=durable_baseline,
-                fire_ids={
-                    str(item["job_id"])
-                    for item in pending_phase_z
-                    if item.get("job_id")
-                },
+            cohorts = {
+                str(item.get("cohort_id")) for item in pending_phase_z
+            }
+            state.begin_phase_z(
+                cohort_ids=cohorts,
+                generation_id=generation,
+                base_head=_git_head(repo_root),
+                path=state_path,
             )
+            pending_phase_z = (
+                state.read_state(state_path).get("phase_z_pending") or []
+            )
+            recovered_commit = _phase_z_terminal_commit(
+                repo_root=repo_root,
+                pending=pending_phase_z,
+                generation_id=generation,
+            )
+            if recovered_commit:
+                outcome = await asyncio.to_thread(
+                    phase_z.recover_committed_closeout,
+                    repo_root=repo_root,
+                    commit_sha=recovered_commit,
+                    generation_id=generation,
+                    claim_owners=_phase_z_claim_owners(pending_phase_z),
+                )
+            else:
+                outcome = await asyncio.to_thread(
+                    phase_z.run_phase_z, repo_root=repo_root,
+                    isolated_cohort=recovery_isolated,
+                    claim_owners=_phase_z_claim_owners(pending_phase_z),
+                    pre_fire_dirty=durable_baseline,
+                    closeout_generation=generation,
+                    fire_ids={
+                        str(item["job_id"])
+                        for item in pending_phase_z
+                        if item.get("job_id")
+                    },
+                )
             if _phase_z_terminal(outcome):
-                for cohort in {str(item.get("cohort_id")) for item in pending_phase_z}:
-                    state.finish_phase_z(cohort_id=cohort, path=state_path)
+                for cohort in cohorts:
+                    state.finish_phase_z(
+                        cohort_id=cohort,
+                        path=state_path,
+                        terminal_outcome=outcome,
+                        generation_id=generation,
+                    )
+                if recovered_commit:
+                    return {
+                        "action": "phase_z_receipt_recovered",
+                        "phase_z": outcome,
+                        "generation_id": generation,
+                        "commit_sha": recovered_commit,
+                    }
             else:
                 # Same bounded retry as the fire-time drain: one run_phase_z per
                 # tick serves the whole backlog, so every pending cohort's counter

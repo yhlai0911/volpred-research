@@ -22,6 +22,8 @@ _READ_ONLY_RPCS = frozenset(
         "volpred_read_owned_email_request",
         "volpred_read_primary_authority_owner",
         "volpred_read_provider_owner",
+        "read_volpred_growth_experiment",
+        "read_volpred_growth_command_receipt",
         "volpred_read_publisher_article_delete_approval",
         "volpred_read_publisher_article_delete_candidate",
         "volpred_read_publisher_article_delete_owner",

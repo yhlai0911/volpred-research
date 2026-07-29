@@ -84,11 +84,35 @@ def _direct_legacy_label(item: Mapping[str, Any]) -> str | None:
     return None
 
 
+def _assert_no_active_legacy_cron_jobs(config: Mapping[str, Any]) -> None:
+    """Fail closed when the retired pre-Core registry still grants a clock."""
+    cron_jobs = config.get("cron_jobs") or []
+    if not isinstance(cron_jobs, list):
+        raise RuntimeError("invalid cron_jobs registry: expected a list")
+    for index, item in enumerate(cron_jobs):
+        if not isinstance(item, Mapping):
+            raise RuntimeError(
+                f"invalid cron_jobs registry row {index}: expected an object"
+            )
+        if str(item.get("status") or "").strip().lower() == "retired":
+            continue
+        job_id = str(item.get("id") or "").strip()
+        if not job_id:
+            raise RuntimeError(
+                f"active cron_jobs entry at row {index} has no job id"
+            )
+        raise RuntimeError(
+            "active cron_jobs entry is outside Operations Core inventory: "
+            f"{job_id}"
+        )
+
+
 def build_owner_plan(
     config: Mapping[str, Any],
     *,
     job_id: str | None = None,
 ) -> dict[str, Any]:
+    _assert_no_active_legacy_cron_jobs(config)
     policy = load_schedule_policy(config)
     jobs = load_schedule_jobs(config)
     items = _items_by_id(config)
@@ -228,6 +252,29 @@ def audit_owner_plan(
                     "reason": "required control-plane daemon not loaded",
                 }
             )
+    canonical_labels = {
+        core_label,
+        *map(str, plan.get("legacy_labels_to_bootout") or []),
+        *map(str, plan.get("legacy_launchagent_labels") or []),
+        *(
+            str(daemon["label"])
+            for daemon in plan.get("required_daemons") or []
+        ),
+    }
+    for label in sorted(
+        value
+        for value in loaded_labels
+        if value.startswith("com.volpred.") and value not in canonical_labels
+    ):
+        conflicts.append(
+            {
+                "job_id": "",
+                "surface": label,
+                "reason": (
+                    "loaded VolPred LaunchAgent is absent from canonical inventory"
+                ),
+            }
+        )
     return {
         **dict(plan),
         "ok": not conflicts,
@@ -256,6 +303,114 @@ def _legacy_gate_covered_job_ids(config: Mapping[str, Any]) -> set[str]:
         ):
             covered.add(job_id)
     return covered
+
+
+def _resolve_repo_path(raw: object, *, repo_root: Path) -> Path:
+    if not isinstance(raw, str) or not raw.strip():
+        raise RuntimeError(f"retirement gate path must be a non-empty string: {raw!r}")
+    relative = Path(raw)
+    if relative.is_absolute() or ".." in relative.parts:
+        raise RuntimeError(f"retirement gate path must be repo-relative: {raw}")
+    root = repo_root.resolve()
+    resolved = (root / relative).resolve()
+    if not resolved.is_relative_to(root):
+        raise RuntimeError(f"retirement gate path escapes repository: {raw}")
+    return resolved
+
+
+def _parse_utc(value: object, *, field: str) -> datetime:
+    if not isinstance(value, str) or not value:
+        raise RuntimeError(f"retirement gate has invalid {field}: {value!r}")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise RuntimeError(
+            f"retirement gate has invalid {field}: {value!r}"
+        ) from exc
+    if parsed.tzinfo is None:
+        raise RuntimeError(f"retirement gate {field} must include a timezone")
+    return parsed.astimezone(UTC)
+
+
+def _assert_legacy_retirement_gate(
+    config: Mapping[str, Any],
+    job_id: str,
+    *,
+    repo_root: Path = ROOT,
+) -> None:
+    """Require a causal Core fire + downstream receipt before physical bootout."""
+    item = _items_by_id(config)[job_id]
+    gate = item.get("legacy_retirement_gate")
+    if gate is None:
+        return
+    if not isinstance(gate, Mapping):
+        raise RuntimeError(f"{job_id}: legacy_retirement_gate must be an object")
+    gate_type = gate.get("type")
+    if gate_type != "schedule_and_compute_receipt":
+        raise RuntimeError(
+            f"{job_id}: unsupported legacy retirement gate type {gate_type!r}"
+        )
+
+    schedule_path = _resolve_repo_path(
+        gate.get("schedule_receipts_path"),
+        repo_root=repo_root,
+    )
+    proof_path = _resolve_repo_path(
+        gate.get("proof_receipt_path"),
+        repo_root=repo_root,
+    )
+    try:
+        schedule_payload = json.loads(schedule_path.read_text(encoding="utf-8"))
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            f"{job_id}: legacy retirement evidence unavailable: "
+            f"{type(exc).__name__}: {exc}"
+        ) from exc
+    if not isinstance(schedule_payload, Mapping) or not isinstance(proof, Mapping):
+        raise RuntimeError(f"{job_id}: legacy retirement evidence must be objects")
+
+    activation = load_schedule_policy(config).activation_for(job_id)
+    if activation is None:
+        raise RuntimeError(f"{job_id}: Operations Core activation is missing")
+    successful_fire_keys: set[str] = set()
+    fires = schedule_payload.get("fires")
+    if isinstance(fires, Mapping):
+        for key, value in fires.items():
+            if not isinstance(value, Mapping):
+                continue
+            if value.get("job_id") != job_id:
+                continue
+            if value.get("state") != "succeeded" or value.get("exit_code") != 0:
+                continue
+            scheduled_for = _parse_utc(
+                value.get("scheduled_for"),
+                field=f"{job_id}.scheduled_for",
+            )
+            if scheduled_for < activation.astimezone(UTC):
+                continue
+            fire_key = str(value.get("fire_key") or key)
+            if fire_key:
+                successful_fire_keys.add(fire_key)
+    if not successful_fire_keys:
+        raise RuntimeError(
+            f"{job_id}: no successful Operations Core fire exists after activation"
+        )
+
+    dispatch = proof.get("schedule_dispatch")
+    proof_ok = (
+        proof.get("status") == "completed"
+        and proof.get("exit_code") == 0
+        and isinstance(dispatch, Mapping)
+        and dispatch.get("owner") == "operations_core"
+        and dispatch.get("job_id") == job_id
+        and dispatch.get("fire_key") in successful_fire_keys
+    )
+    if not proof_ok:
+        raise RuntimeError(
+            f"{job_id}: downstream proof does not match a successful "
+            "Operations Core fire"
+        )
 
 
 def _run_host_reconcile(
@@ -493,6 +648,12 @@ def apply_owner_plan(
     job_id: str | None,
     restart_core: bool = False,
 ) -> None:
+    label_jobs = plan.get("legacy_label_jobs") or {}
+    for label in plan["legacy_labels_to_bootout"]:
+        gated_job_id = str(label_jobs.get(label) or "")
+        if gated_job_id:
+            _assert_legacy_retirement_gate(config, gated_job_id)
+
     gated_job_ids = _legacy_gate_covered_job_ids(config)
     if plan["core_daemon_required"]:
         _install_core_plist(restart=restart_core)

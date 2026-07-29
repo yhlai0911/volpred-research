@@ -1,5 +1,54 @@
 # `.claude/` Skill Registry
 
+## Current architecture projection
+
+`config/skill_registry.json` 是 skill metadata、角色、route、workflow usage、
+supervisor dispatch expectation 與 architecture contract 的機械唯一來源；下表是人類
+可讀 projection。Skill 的程序本體仍只存在
+`.claude/skills/<name>/SKILL.md`。下方 2026-07-14 surface 稽核保留作歷史背景，不可用來
+推導目前 skill inventory 或 runtime mode。
+
+<!-- skill-registry:start -->
+| Skill | Role | Domain | Route |
+|---|---|---|---|
+| `admin-ops` | orchestrator | ops | `ops-triage` |
+| `agent-result-verification` | cross-cutting | research | `agent-result-check` |
+| `anti-ai-style` | cross-cutting | publishing | support |
+| `autonomous-research` | orchestrator | research | `research-design` |
+| `citation-verifier` | cross-cutting | paper | `citation-check` |
+| `data-collection-ops` | leaf | ops | support |
+| `deploy-frontend` | leaf | frontend | `deploy-frontend` |
+| `external-data-sources` | leaf | research | `data-source-lookup` |
+| `fb-publishing` | leaf | publishing | support |
+| `feed-publisher` | orchestrator | publishing | `feed-publish` |
+| `finance-paper-quality` | cross-cutting | paper | `paper-quality` |
+| `host-migration` | leaf | ops | `host-migration` |
+| `incident-response` | cross-cutting | ops | `incident-response` |
+| `journal-review` | leaf | paper | support |
+| `latex-academic-reviewer` | leaf | paper | `latex-review` |
+| `lazypack-infographic` | cross-cutting | publishing | support |
+| `member-questions` | leaf | member | `member-qa` |
+| `memory-health` | leaf | memory | `memory-health` |
+| `paper-review-cycle` | leaf | paper | `paper-review-round` |
+| `paper-stage-classifier` | compatibility | paper | support |
+| `paper-submission-pipeline` | orchestrator | paper | `paper-submission` |
+| `paper-update` | leaf | paper | `paper-update` |
+| `pdca-operations` | leaf | ops | support |
+| `platform-ops-manager` | orchestrator | ops | `platform-ops` |
+| `project-skill-governance` | orchestrator | governance | `skill-governance` |
+| `promote-knowledge` | leaf | memory | support |
+| `publication-candidates` | leaf | publishing | `publication-scan` |
+| `reconcile-projections` | leaf | ops | `reconcile-projections` |
+| `reproducibility-audit` | cross-cutting | research | `reproducibility-audit` |
+| `research-topic-discovery` | leaf | research | support |
+| `schedule-operations` | leaf | ops | `schedule-operations` |
+| `strategy-lifecycle` | leaf | strategy | `strategy-lifecycle` |
+| `task-pool-operator` | cross-cutting | ops | `task-pool` |
+| `trending-repost` | leaf | publishing | `trending-repost` |
+| `web-ui-ux-review` | leaf | frontend | `web-ui-review` |
+| `worktree-merge-verification` | compatibility | research | support |
+<!-- skill-registry:end -->
+
 ## Canonical source（2026-07-14 定案，唯一）
 
 **`.claude/` 是唯一的 agent surface。沒有 render step，所以沒有 drift 可言。**

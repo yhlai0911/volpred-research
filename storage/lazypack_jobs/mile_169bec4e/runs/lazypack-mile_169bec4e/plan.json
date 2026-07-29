@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "title": "K1585 懶人包：專家吵得越兇，市場越危險？",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1585/k1585_results.json",
+      "sha256": "3fd18111731caa9cd03a667bb497eae598986a654092553414b5b44576256f9e",
+      "label": "experiment K1585 results (SPF forecaster disagreement as an incremental predictor of forward SPY realized variance and tail risk, on top of VIX)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "前景不明朗，市場就會比較抖嗎",
+      "alt": "專業預測者對經濟看法分歧越大，通常被解讀為前景不明朗，直覺上市場應該更不安分。費城聯準銀行的專業預測者調查提供了現成的分歧指標，可以直接拿來驗證這個推論。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "一個幾乎不用驗證的直覺",
+          "body": [
+            "當經濟學家對明年的看法差一大截，代表局勢不清楚；局勢不清楚，市場理應比較不安分。",
+            "分歧這件事剛好有人量了六十年，所以這個推論可以直接拿資料打一次。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "專家調查累積的季數",
+          "value": {
+            "source": "results",
+            "path": "/data/spf_quarterly_rows",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "對應的股市交易日數",
+          "value": {
+            "source": "results",
+            "path": "/data/daily_rows_raw",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "方向是反的，而且誤差範圍跨過零",
+      "alt": "在市場已經緊張的日子裡，專家意見一致那組後續波動反而較高，與直覺相反。但這個差距的九成五誤差範圍跨過零，代表這批資料分不出兩組是否真有差別。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "單邊看有故事，攤開誤差就沒了",
+          "body": [
+            "專家一致時，後續一個月的波動反而比較大，跟直覺整個相反。",
+            "但把移動區塊拔靴法算出的誤差範圍攤開，它跨過零；一致時比較抖和兩組其實沒差，這批資料分不開。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "單邊看起來的機率",
+          "value": {
+            "source": "results",
+            "path": "/agreed_vs_disagreed_tests/fwd_rv21/p_one_sided_agreed_greater",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "專家一致組的天數",
+          "value": {
+            "source": "results",
+            "path": "/agreed_vs_disagreed_tests/fwd_rv21/n_agreed",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "專家分歧組的天數",
+          "value": {
+            "source": "results",
+            "path": "/agreed_vs_disagreed_tests/fwd_rv21/n_disagreed",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "加進模型之後，預測反而變差",
+      "alt": "把專家分歧加進只用波動率指數的基準模型，在樣本外預測上兩個時間尺度的準確度都下降，未達開跑前預先寫定的支持門檻，因此結論為不支持。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "門檻是開跑前就寫死的",
+          "body": [
+            "多給模型一個變數，它總能在舊資料裡找到一點東西可以配合；拿到沒看過的資料上就消失了，這次還倒扣。",
+            "要說有用必須樣本外顯著變準，標準寫在程式裡而不是跑完再挑，實際結果離門檻很遠。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "預測未來一週：準確度變化（百分比）",
+          "value": {
+            "source": "results",
+            "path": "/oos_forecast/h5/qlike_improvement_pct_augmented_vs_baseline",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "預測未來一個月：準確度變化（百分比）",
+          "value": {
+            "source": "results",
+            "path": "/oos_forecast/h21/qlike_improvement_pct_augmented_vs_baseline",
+            "format": {
+              "kind": "number",
+              "digits": 2
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "樣本外預測點數",
+          "value": {
+            "source": "results",
+            "path": "/oos_forecast/h21/n_oos",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

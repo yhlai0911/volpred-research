@@ -1,5 +1,14 @@
 # 系統架構
 
+> **Live resolution order（2026-07-29）**
+> 本檔保留大量具日期的 migration／rehearsal 物證；它們是歷史快照，不是 runtime
+> state owner。當文字與機器狀態不同時，一律以
+> `storage/ops/task_pool_mode.json`、`config/runtime_schedules.json`、
+> `config/project_targets.json` 與對應 terminal receipt 為準。Operations Core 是唯一
+> business clock；session cron、host VolPred crontab、per-job LaunchAgent 與
+> `run_due_jobs.py` piggy-back 路徑均屬 retired／rollback compatibility。不得從下方
+> 日期較早的 `direct_execution`、v12 或 piggy-back 敘述推導當前 owner。
+
 > **已核可的目標架構（2026-07-23）**
 > 見 `docs/platform_optimization_program_2026_07.md` 與 `docs/adr/` 下四份 accepted ADR。
 > 本檔以下仍描述 live/current architecture；只有某項能力完成 shadow、cutover、read-back
@@ -728,10 +737,10 @@
 > 這是 `email.ops_alert` effect-family 的 runtime 流程，不代表 Work Coordinator
 > queue owner 已切換。
 
-> ⚠️ **當前真實架構修正（2026-05-29，本檔下方 v12 描述部分已 superseded）**
+> ⚠️ **歷史架構快照（2026-05-29；已由下方 2026-07-26 Operations Core 描述取代）**
 > 願景見 `VISION.md`；重新擘劃藍圖見 `docs/master_plan.md`（含完整現況/目標/7-phase 路線圖）。
 > **實際控制面 = 5 層並存**（非單純 v12 單線程）：
-> 1. **LaunchAgent**（macOS 原生，最可靠）— hourly-dispatch / compute-worker / check-alerts / daily-update / gmail-poll / collect / release / work-summary / handoff-regen 等 12 個
+> 1. **LaunchAgent**（當時）— hourly-dispatch / compute-worker / check-alerts / daily-update / gmail-poll / collect / release / work-summary / handoff-regen 等 12 個
 > 2. **piggy-back universal scheduler** — `check_alerts (0 * * * *)` → `scripts/run_due_jobs.py` 讀 `runtime_schedules.json` 評估 due 並執行（macOS host cron 只可靠 fire `0` 分 pattern，故非 0 分 job 走此路）。`piggy_back_skip:true` 明確禁止 piggy-back；`host_crontab_managed:false` 只禁止 host crontab leg，若同時有 `piggy_back_enabled:true` 仍由 piggy-back 執行（例如 `work_shadow_observe`、`git_push_backup`）。LaunchAgent 專責 job 必須以 skip／未 opt-in 防雙 fire。
 > 3. **codex_loop.sh daemon**（VSCode terminal，常駐）— Codex 每小時 tick，讀 `AGENTS.md`（Codex 版指令檔，**勿歸檔**）claim task
 > 4. **task pool** — `next_tasks.json`（pending queue，目前實際多靠 hourly-dispatch 自生）+ `storage/ops/tasks/`（audit receipts）
@@ -843,7 +852,9 @@ receipt 只證明排程已交付，模型成功／quota_blocked／auth_blocked �
 
 - **Operations Core scheduler**：每 30 秒重讀 `config/runtime_schedules.json`，以
   generation／immutable fire key／lease／retry／catch-up／receipt 執行全部
-  `system_crontab` jobs；不呼叫模型的 job 不依賴 Claude／Codex 額度。
+  `system_crontab` jobs；不呼叫模型的 job 不依賴 Claude／Codex 額度。重算力
+  `volpred-compute-worker` 也只由此時鐘每 15 分鐘喚醒；queue-wide flock 與 job receipt
+  仍由 compute executor 擁有，沒有第二個 LaunchAgent clock。
 - **dispatch executor pool**：`volpred-dispatch-supervisor.max_slots` 控制並行 logical
   fires。它沒有自己的 schedule loop，只接受 Operations Core 每分鐘 tick，並保留
   health monitor、模型 failover、stable `job_id`／`slot_id` 與 PHASE-Z。
@@ -950,7 +961,7 @@ RPO=0。完整操作與舊 bootstrap 的 rollback 邊界見 `docs/host-migration
 `config/runtime_schedules.json.schedule_materialization.mode=active` 是目前正式時鐘。
 單一 LaunchAgent `com.volpred.operations-core-scheduler` 讀取同一份 canonical spec，
 以 `generation + job_id + scheduled UTC` 建 immutable fire identity，並以 fenced lease、
-retry、timeout、terminal receipt 與 catch-up policy 執行 51 個 `system_crontab` jobs。
+retry、timeout、terminal receipt 與 catch-up policy 執行 55 個 `system_crontab` jobs。
 
 `ci_watch` 是其中的獨立 5 分鐘工作，呼叫 `scripts/check_alerts.py --ci-only`。
 它與每小時 `check_alerts` 分離：CI 紅燈的入池、派工、GitHub 綠燈驗證與 incident
@@ -961,6 +972,11 @@ retry、timeout、terminal receipt 與 catch-up policy 執行 51 個 `system_cro
 - 主機 crontab 的 VolPred entries 已收斂為 0；它不再是 business schedule owner。
 - 舊 per-job LaunchAgents 已 bootout；wrapper 邊界另有 fail-closed owner gate，避免 stale
   plist／手動 shell 誤觸造成雙跑。
+- `cron_jobs` 只允許 `status=retired` 的 rollback/audit rows；owner reconciler遇到任何
+  active row會 fail closed。`com.volpred.compute-worker` 的 clock 已由
+  `system_crontab[id=volpred-compute-worker]` 接管，shell wrapper只是 executor boundary，
+  不再擁有排程。實體LaunchAgent只有在natural Core receipt與下游compute receipt共用
+  exact fire key後才能bootout；無因果proof時reconciler會在任何live mutation前拒絕。
 - `run_due_jobs.py` 只保留 rollback compatibility；Operations Core owner 下所有 job
   均會被拒絕，不再是 universal piggy-back scheduler。
 - `session_crons.items=[]` 且 status=`retired`；不得再建立 Claude Code `CronCreate`。
@@ -975,6 +991,34 @@ Agent work queue 與 business clock 是不同責任。2026-07-23 起 legacy
 `storage/next_tasks.json` admission 處於 `direct_execution`，新工作唯一登記面暫為
 GitHub Issues；Work Coordinator 的 queue ownership 仍須依 Issue #9 完成七日
 owner-matched evidence，不能因 scheduler 已上線就冒充 queue cutover 完成。
+
+> 上段是 2026-07-23 cutover snapshot，不是永久 mode 宣告。2026-07-26 production
+> authorization 後 queue 曾恢復；任何 worker 與 skill 一律以
+> `storage/ops/task_pool_mode.json` 的 live fields 判斷，禁止從本段推導目前 mode。
+
+### Project skill architecture contract（2026-07-29）
+
+Project skill 的程序本體只存在 `.claude/skills/<name>/SKILL.md`；角色、domain、route、
+workflow usage、supervisor dispatch expectation 與 architecture contract metadata 的唯一來源是
+`config/skill_registry.json`，
+`docs/skill-registry.md` 與 `docs/workflow-index.md` 是人類可讀 projection。
+
+Skill 不得保存 runtime snapshot。每次執行必重新讀：
+
+- `storage/ops/task_pool_mode.json`：當下 admission／queue mode；
+- `config/runtime_schedules.json`：Operations Core schedule owner 與 active fields；
+- `config/project_targets.json`：frontend、deploy、paper、Mirror／live target；
+- `config/supervisor_rules.json`：task-family／context 的 live skill dispatch；
+- `config/models.json` + `scripts/model_router.py`：model／effort runtime routing；
+- 對應 canonical writer／gateway／state machine：task、feed、memory、paper、strategy、
+  Git、worktree 與 experiment artifact contract。
+
+`scripts/check_skill_architecture.py` 對全部 skill fail closed 驗證 inventory、registry
+projection、workflow route、supervisor dispatch、dynamic routing metadata、canonical
+contract pointer 與 retired／繞過路徑；由
+`tests/test_skill_architecture.py` 納入 CI。`scripts/check_skills_complete.sh` 聚合結構與
+architecture report。新增或修改 skill 必須同一 change 更新 registry／workflow projection，
+並依 `AGENTS.md` 寄出 owner 通知。
 
 ## 程式碼架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）

@@ -1,15 +1,11 @@
 {
-  "date": "2026-07-28",
+  "date": "2026-07-29",
   "scanned": true,
-  "scanned_at": "2026-07-27T22:00:29+00:00",
-  "trending_added": 1,
+  "scanned_at": "2026-07-28T22:00:29+00:00",
+  "trending_added": 0,
   "event_added": 0,
   "member_qa_added": 0,
   "errors": [],
-  "trending_skipped": {
-    "reason": null,
-    "hint": null
-  },
   "event_skipped": [
     {
       "id": "nfp-2026-06-05-t7",
@@ -77,13 +73,15 @@
     },
     {
       "id": "fomc-2026-07-29-t2",
-      "reason": "already_materialized",
-      "next_task_id": "event_article_fomc_2026-07-29_tminus2",
-      "queue_updated": false
+      "reason": "expired"
     },
     {
       "id": "fomc-2026-07-29-t0",
-      "reason": "pending"
+      "reason": "reaction_already_covered",
+      "covered_by": {
+        "id": "mile_cdade7c8",
+        "match": "title_keyword"
+      }
     },
     {
       "id": "nfp-2026-08-07-t7",

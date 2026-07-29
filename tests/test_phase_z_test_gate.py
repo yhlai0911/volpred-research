@@ -7,8 +7,11 @@ These tests inject a FAKE test-runner (never a real pytest — that would recurs
 """
 from __future__ import annotations
 
+import os
 import subprocess
 from pathlib import Path
+
+import pytest
 
 from scripts.dispatch_supervisor import phase_z
 
@@ -78,6 +81,49 @@ def _gate_alerts(calls: list[dict]) -> list[dict]:
     orthogonal warn when a commit lands without an agent-supplied reason; that
     one is not this gate's concern and must not be counted here."""
     return [c for c in calls if "紅燈" in c.get("title", "")]
+
+
+def test_clone_pytest_does_not_leak_supervisor_private_environment(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    clone = tmp_path / "clone"
+    target = clone / "tests" / "test_example.py"
+    target.parent.mkdir(parents=True)
+    target.write_text("def test_example():\n    assert True\n", encoding="utf-8")
+    original_path = os.environ.get("PATH", "")
+    marker_path = f"/volpred-pytest-path:{original_path}"
+    monkeypatch.setenv("PATH", marker_path)
+    monkeypatch.setenv("VOLPRED_ACTOR", "phase-z-test-gate")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_ARCHIVE", "/private/release.zip")
+    monkeypatch.setenv("VOLPRED_DEFERRED_RELOAD_ROOT", "/private/reload")
+    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/private/canonical")
+    calls: list[dict] = []
+
+    def runner(argv, **kwargs):
+        calls.append(kwargs)
+        return _FakeCompleted(0, stdout="1 passed in 0.01s\n")
+
+    outcome = phase_z._run_clone_pytest(
+        clone,
+        targets=["tests/test_example.py"],
+        k_expr=None,
+        test_runner=runner,
+    )
+
+    assert outcome["returncode"] == 0
+    assert len(calls) == 1
+    child_env = calls[0]["env"]
+    assert child_env["PATH"] == marker_path
+    assert child_env["VOLPRED_ACTOR"] == "phase-z-test-gate"
+    assert child_env["VOLPRED_NO_CANONICAL_WRITE"] == "1"
+    assert child_env["PYTHONPATH"].split(os.pathsep) == [
+        str(clone),
+        str(clone / "src"),
+    ]
+    assert "VOLPRED_SUPERVISOR_RELEASE_ARCHIVE" not in child_env
+    assert "VOLPRED_DEFERRED_RELOAD_ROOT" not in child_env
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in child_env
 
 
 def test_junit_failure_identity_is_machine_readable(tmp_path: Path) -> None:

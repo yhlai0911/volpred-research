@@ -1,0 +1,73 @@
+{
+  "id": "agent-brief_k1731_main_integration-579c0d",
+  "title": "K1731 worktree-main integration: clear stale-base so F1 shards can run",
+  "script_path": "scripts/run_agent_job.py",
+  "interpreter": "uv run python",
+  "args": [
+    "--brief-file",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1731_main_integration-579c0d.md",
+    "--model",
+    "claude-opus-5",
+    "--effort",
+    "xhigh",
+    "--cwd",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+    "--result-artifact",
+    "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_main_integration_report.json",
+    "--job-metadata",
+    "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1731_main_integration-579c0d.json",
+    "--timeout",
+    "5280"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 5,
+  "queued_at": "2026-07-29T11:15:19Z",
+  "started_at": "2026-07-29T11:30:44Z",
+  "completed_at": "2026-07-29T11:59:36Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1731_main_integration-579c0d.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/agent-brief_k1731_main_integration-579c0d.stderr",
+  "result_artifact": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731/k1731_main_integration_report.json",
+  "output_paths": [],
+  "output_paths_updated_at": null,
+  "job_metadata": "/Users/yhlai0911/volpred-research/storage/ops/agent_jobs/agent-brief_k1731_main_integration-579c0d.json",
+  "kind": "agent",
+  "cwd": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731",
+  "claude_followup": {
+    "brief": "Collect: (1) read experiments/k1731/k1731_main_integration_report.json and check each of the 5 conflict resolutions and test outputs; confirm the rev11/rev12 freeze-integrity gate and ratchet in experiment_gates.py survived AND that main-side changes over 1233 commits were not swallowed; (2) re-run pytest scripts/tests/test_experiment_gates.py and test_nested_dm_misuse_ratchet.py yourself - do not trust the report self-assessment; (3) run bash scripts/merge_worktree.sh --dry-run dispatch-slot-1-bd00f90a-k1731 to confirm STALE-BASE ABORT is gone; (4) only if all pass, run the real merge_worktree.sh; (5) after merge run uv run python scripts/compute_queue.py requeue --id k1731-f1-boot-c0-parametric and --id k1731-f1-boot-c0-block to put the two F1 shards (22h/11h) back to run - README 11.6 names requeue as the intended recovery path; (6) if integration failed or any gate was weakened, do NOT merge - record and escalate.",
+    "task_type": "experiment",
+    "priority": 3
+  },
+  "followup_dispatched": true,
+  "source_task_id": "k1731_f1_bootstrap_merge_deadlock",
+  "source_task_link": {
+    "state": "linked",
+    "attempted_at": "2026-07-29T11:15:19Z",
+    "linked_at": "2026-07-29T11:15:20Z",
+    "error": null
+  },
+  "timeout_seconds": 5400,
+  "brief_source": "/tmp/brief_k1731_main_integration.md",
+  "brief_snapshot": "/Users/yhlai0911/volpred-research/storage/ops/agent_briefs/agent-brief_k1731_main_integration-579c0d.md",
+  "claimed_by_pid": 57750,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:234dc0a6881f7480350e2b02",
+    "scheduled_for": "2026-07-29T11:30:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Jul 29 19:30:43 2026",
+  "source_task_settlement": {
+    "task_id": "k1731_f1_bootstrap_merge_deadlock",
+    "reason": "terminal_receipt_collected",
+    "state": "settled",
+    "settled_at": "2026-07-29T15:07:26Z"
+  },
+  "experiment_gate": {
+    "status": "passed",
+    "scope": "/Users/yhlai0911/volpred-research/.claude/worktrees/dispatch-slot-1-bd00f90a-k1731/experiments/k1731"
+  },
+  "followup_dispatched_at": "2026-07-29T15:07:26Z",
+  "followup_next_task_id": "k1730_k1731_review_certification_codex_20260729"
+}

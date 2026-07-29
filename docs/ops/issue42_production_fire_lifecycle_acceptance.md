@@ -81,3 +81,45 @@ post-reload daemon for job `06c75e969f6c4a1abea609e27ab54524`, generation
   generation `78987568…` and the same 16-path baseline.
 - PHASE-Z correctly deferred after the canary merged because two cohort siblings
   were still running.  No baseline-missing fallback was used for this fire.
+
+## Replayed RED → GREEN evidence (2026-07-30)
+
+The original implementation and regression test landed in one commit, so the
+initial history did not preserve an independently runnable RED receipt.  The
+same committed test was therefore replayed against the exact pre-fix parent,
+without changing production state:
+
+- Pre-fix implementation: `dad84187eb893ca330c951d5adf95e0815150f85`
+  (`de63029c0^`).
+- Test overlay: the `tests/test_selfreload.py` diff from
+  `dad84187e..de63029c0`; test node
+  `test_defers_while_durable_closeout_is_pending`.
+- RED command:
+  `PYTHONPATH=<pre-fix-worktree> <repo>/.venv/bin/python -m pytest -q tests/test_selfreload.py::test_defers_while_durable_closeout_is_pending`
+- RED result: exit 1.  The pre-fix process returned `reload` while the durable
+  `phase_z_pending` generation was not closed; the assertion required
+  `deferred_in_flight`.
+- GREEN command on current HEAD:
+  `uv run pytest -q tests/test_selfreload.py::test_defers_while_durable_closeout_is_pending`
+- GREEN result: `1 passed`.
+
+The broader final acceptance regression selected the durable-generation,
+restart-boundary, unmatched-generation, closeout-retry, and self-reload seams:
+`92 passed`.
+
+The canonical production incident `inc_537a3ff3304f` was not manually closed.
+The detector resolved it at `2026-07-29T09:41:04.873699+00:00` under
+`clean_streak_k3_24h`; no later baseline-missing episode exists.  A subsequent
+fire generated receipt
+`371e54f705a729ea9b8421960acfb7e2d88e5bbf7a0a870e3dfdf5e33ed20239`
+and committed generation-owned state as
+`5e63b6b57f9c5f2e1ad3dbc426509d8a089999fe`.
+
+At `2026-07-30 00:14 CST` self-reload also refused to build an immutable release
+while two monitored notification modules were still uncommitted.  This is the
+intended fail-closed path: no mutable bytes were loaded, the worker kept running,
+and a fresh durable generation was captured.  Those modules later landed in
+commits `96018b340` and `13061f9dc`.
+
+All six Issue #42 acceptance criteria now have test and live read-back evidence.
+The Issue #42 umbrella status is `root_cause_fixed_and_verified`.

@@ -24,3 +24,26 @@ def test_send_warns_when_temp_cleanup_fails(monkeypatch, caplog) -> None:
     assert rc == 0
     assert "alert temp file cleanup failed" in caplog.text
     assert "unlink denied" in caplog.text
+
+
+def test_send_alert_scrubs_supervisor_private_environment(monkeypatch) -> None:
+    captured: dict[str, str] = {}
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_RELEASE_ID", "release")
+    monkeypatch.setenv("VOLPRED_SUPERVISOR_FUTURE_MARKER", "future")
+    monkeypatch.setenv("VOLPRED_DEFERRED_RELOAD_ROOT", "/tmp/reload")
+    monkeypatch.setenv("VOLPRED_CANONICAL_REPO_ROOT", "/repo")
+    monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")
+
+    def run(*_args, **kwargs):
+        captured.update(kwargs["env"])
+        return SimpleNamespace(returncode=0, stderr="")
+
+    monkeypatch.setattr(alerts.subprocess, "run", run)
+
+    assert alerts._send("info", "environment boundary", "body") == 0
+    assert captured["VOLPRED_ACTOR"] == "dispatch-supervisor"
+    assert not any(
+        key.startswith(("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_"))
+        for key in captured
+    )
+    assert "VOLPRED_CANONICAL_REPO_ROOT" not in captured

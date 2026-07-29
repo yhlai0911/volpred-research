@@ -1,0 +1,169 @@
+{
+  "schema_version": 1,
+  "title": "K1623 懶人包：換一把尺量，冠軍就換人",
+  "evidence": {
+    "results": {
+      "path": "experiments/k1623/k1623_rev2_results.json",
+      "sha256": "eab6d7df8371e2bd0772cda48d8996e64112a04f12d27dc0ff5a5b80e836b6e2",
+      "label": "experiment K1623 rev2 results (loss-function dependence of ARFIMA-vs-HAR ranking; HAC DM tests with multiple-comparison correction)"
+    }
+  },
+  "panels": [
+    {
+      "name": "panel_question",
+      "info": "concept",
+      "style": "professional",
+      "title": "波動的長記憶，是真的還是接縫造成的錯覺",
+      "alt": "波動率的自相關衰減得異常慢，有兩種解釋：真的存在長程記憶結構，或者只是水位偶爾整段跳動、把幾段接起來量所產生的假象。本研究在五個市場的樣本外期間上檢驗。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "同一條慢尾巴，兩種讀法",
+          "body": [
+            "今天劇烈震盪，效應會拖上好幾個月才淡出，畫成圖是一條衰減異常慢的尾巴。",
+            "第二種讀法比較掃興：市場沒什麼記憶，只是正常水位偶爾整段跳一次，把幾段水位不同的平靜期接起來量，看起來就像有長記憶。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "每個市場的樣本外測試天數",
+          "value": {
+            "source": "results",
+            "path": "/per_asset/VIX/n_oos",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "總共跑了幾組模型對比",
+          "value": {
+            "source": "results",
+            "path": "/summary/n_dm_comparisons_total",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_result",
+      "info": "results",
+      "style": "professional",
+      "title": "同一批預測，換一把尺量，五個市場有三個換冠軍",
+      "alt": "完全相同的預測結果，用在意相對誤差的尺量，樸素模型在多數市場較優；改用在意絕對誤差的尺量，長記憶模型在多數市場較優。排名在部分市場直接對調，台股旗艦 ETF 的翻轉幅度最大。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "沒有重跑，只換了評分方式",
+          "body": [
+            "同一份程式、同一批模型、同一段測試期，換一把尺重量一次。",
+            "在意「差幾成」時樸素模型較優，在意「差多少」時長記憶模型較優，而且誤差低了一到一成六。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "五個市場裡冠軍對調的個數",
+          "value": {
+            "source": "results",
+            "path": "/summary/n_sign_reversals_arfima",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股旗艦 ETF：比例式評分下的誤差比",
+          "value": {
+            "source": "results",
+            "path": "/loss_function_sign_reversal/2/qlike_ratio_arfima_over_har",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "台股旗艦 ETF：平方式評分下的誤差比",
+          "value": {
+            "source": "results",
+            "path": "/loss_function_sign_reversal/2/mse_ratio_arfima_over_har",
+            "format": {
+              "kind": "number",
+              "digits": 3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "panel_takeaway",
+      "info": "takeaway",
+      "style": "professional",
+      "title": "扣掉運氣之後，兩邊其實分不出高下",
+      "alt": "跑了數十組比較，總會有幾組看起來像回事。針對真正想回答的長記憶模型對樸素模型那組，只有極少數單看像有勝負，扣掉多重比較的運氣後一組都不剩。",
+      "sources": [
+        "results"
+      ],
+      "blocks": [
+        {
+          "kind": "text",
+          "heading": "只報一把尺，方向隨你挑",
+          "body": [
+            "跑得夠多，總會有幾組看起來像回事，這跟丟銅板總會出現連續正面是同一件事。",
+            "當一個結論會因為換一把尺就翻面，那個結論量到的是尺，不是市場。"
+          ]
+        },
+        {
+          "kind": "metric",
+          "label": "焦點對比：單看像有勝負的組數",
+          "value": {
+            "source": "results",
+            "path": "/summary/focal_arfima_breakhar_nominal_sig_05",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "焦點對比：扣掉運氣後存活的組數",
+          "value": {
+            "source": "results",
+            "path": "/summary/focal_arfima_breakhar_bh_sig_05",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        },
+        {
+          "kind": "metric",
+          "label": "平方式評分：扣掉運氣後存活的組數",
+          "value": {
+            "source": "results",
+            "path": "/summary/bh_sig_05_within_loss/MSE",
+            "format": {
+              "kind": "number",
+              "digits": 0
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

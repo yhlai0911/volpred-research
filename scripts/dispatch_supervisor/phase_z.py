@@ -74,23 +74,25 @@ from volpred.ops.foreign_incident import (
     reconcile_incidents,
     upsert_incident,
 )
-from volpred.ops.machine_churn import (
-    MachineChurnClassification,
-    MachineChurnIdentity,
-    classify_machine_churn,
-    machine_churn_identity_matches,
-)
-from volpred.ops.issue_tracker_sync import (
-    pending_issue_task_ids_for_owners,
-    settle_completed_task_issues,
-)
-from volpred.ops.next_tasks import backfill_ci_repair_commit
 from volpred.ops.git_writer_lock import (
     GitWriterLockError,
     git_writer_lock,
     git_writer_subprocess_kwargs,
     require_canonical_main_checkout,
 )
+from volpred.ops.issue_tracker_sync import (
+    pending_issue_task_ids_for_owners,
+    settle_completed_task_issues,
+)
+from volpred.ops.machine_churn import (
+    MachineChurnClassification,
+    MachineChurnIdentity,
+    classify_machine_churn,
+    machine_churn_identity_matches,
+)
+from volpred.ops.next_tasks import backfill_ci_repair_commit
+
+from .child_env import external_child_environment
 
 LOG = logging.getLogger(__name__)
 
@@ -1511,6 +1513,7 @@ def run_pre_fire_guard(
             text=True,
             timeout=_GUARD_TIMEOUT_S,
             cwd=str(repo_root),
+            env=external_child_environment(),
             check=False,
         )
     except subprocess.TimeoutExpired:
@@ -2155,15 +2158,18 @@ def _run_clone_pytest(
     ]
     if k_expr:
         argv += ["-k", k_expr]
-    env = os.environ.copy()
-    env.update({
-        "VOLPRED_NO_EMAIL": "1",
-        "VOLPRED_NO_REMOTE_WRITE": "1",
-        "VOLPRED_NO_REMOTE_READ": "1",
-        "VOLPRED_NO_CANONICAL_WRITE": "1",
-        "VOLPRED_CI_PARITY": "0",
-        "PYTHONPATH": os.pathsep.join([str(clone_root), str(clone_root / "src")]),
-    })
+    env = external_child_environment(
+        overrides={
+            "VOLPRED_NO_EMAIL": "1",
+            "VOLPRED_NO_REMOTE_WRITE": "1",
+            "VOLPRED_NO_REMOTE_READ": "1",
+            "VOLPRED_NO_CANONICAL_WRITE": "1",
+            "VOLPRED_CI_PARITY": "0",
+            "PYTHONPATH": os.pathsep.join(
+                [str(clone_root), str(clone_root / "src")]
+            ),
+        }
+    )
     try:
         proc = test_runner(
             argv,
@@ -2977,6 +2983,215 @@ def _partition_foreign_ownership(repo_root: Path, paths: list[str]) -> dict:
     }
 
 
+def recover_committed_closeout(
+    *,
+    repo_root: Path,
+    commit_sha: str,
+    generation_id: str,
+    claim_owners: set[str] | list[str] | tuple[str, ...] | None = None,
+    now_hhmm: str | None = None,
+    runner=subprocess.run,
+    test_runner=None,
+    internal_alert_fn=None,
+) -> dict:
+    """Finish post-adoption work for a generation commit after a crash.
+
+    Finding the generation trailer proves only that HEAD adoption happened.
+    It does *not* prove the shared index refresh, task/issue receipts, or
+    post-commit test gate ran.  This replay-safe finisher reruns those steps and
+    returns terminal only after every required downstream handoff completes.
+    """
+    repo_root = Path(repo_root)
+    hhmm = now_hhmm or datetime.now().strftime("%H:%M")
+    internal_alert_fn = internal_alert_fn or _default_internal_alert
+    shown = _git(
+        repo_root,
+        "show",
+        "-s",
+        "--format=%B",
+        commit_sha,
+        timeout_s=_SHORT_TIMEOUT_S,
+        runner=runner,
+    )
+    expected_trailer = f"VolPred-Phase-Z-Generation: {generation_id}"
+    commit_body = shown.stdout or ""
+    if (
+        shown.returncode != 0
+        or not any(
+            line.strip() == expected_trailer
+            for line in commit_body.splitlines()
+        )
+    ):
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_identity_mismatch",
+            "commit_sha": commit_sha,
+        }
+    owned_prefix = "VolPred-Phase-Z-Owned-Paths: "
+    owned_lines = [
+        line.strip()[len(owned_prefix):]
+        for line in commit_body.splitlines()
+        if line.strip().startswith(owned_prefix)
+    ]
+    try:
+        owned_paths = json.loads(owned_lines[-1]) if len(owned_lines) == 1 else None
+    except json.JSONDecodeError:
+        owned_paths = None
+    if (
+        not isinstance(owned_paths, list)
+        or any(not isinstance(path, str) for path in owned_paths)
+    ):
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_owned_scope_missing",
+            "commit_sha": commit_sha,
+        }
+    parent = _git(
+        repo_root,
+        "rev-parse",
+        "--verify",
+        f"{commit_sha}^",
+        timeout_s=_SHORT_TIMEOUT_S,
+        runner=runner,
+    )
+    changed = _git(
+        repo_root,
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        commit_sha,
+        timeout_s=_SHORT_TIMEOUT_S,
+        runner=runner,
+    )
+    if parent.returncode != 0 or changed.returncode != 0:
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_git_probe_failed",
+            "commit_sha": commit_sha,
+        }
+    base_sha = (parent.stdout or "").strip()
+    candidate_paths = [
+        line.strip()
+        for line in (changed.stdout or "").splitlines()
+        if line.strip()
+    ]
+    if not set(owned_paths) <= set(candidate_paths):
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_owned_scope_mismatch",
+            "commit_sha": commit_sha,
+        }
+    try:
+        with git_writer_lock(
+            repo_root,
+            actor=f"dispatch-phase-z-recovery:{hhmm}",
+            timeout_s=_COMMIT_TIMEOUT_S,
+        ):
+            require_canonical_main_checkout(repo_root)
+            refresh = _refresh_shared_index_cas(
+                repo_root,
+                base_sha=base_sha,
+                committed_sha=commit_sha,
+                candidate_paths=candidate_paths,
+                runner=runner,
+            )
+    except Exception as exc:  # noqa: BLE001
+        LOG.warning("phase_z: committed closeout index recovery failed: %s", exc)
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_index_failed",
+            "commit_sha": commit_sha,
+            "detail": str(exc)[:300],
+        }
+    if not refresh.get("ok"):
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_index_failed",
+            "commit_sha": commit_sha,
+            "index_refresh": refresh,
+        }
+
+    _consume_pre_fire_snapshot(repo_root, runner)
+    normalized_owners = {
+        str(owner)
+        for owner in (claim_owners or [])
+        if str(owner).strip()
+    }
+    ci_repair_tasks_backfilled: list[str] = []
+    issue_tasks_closed: list[dict[str, Any]] = []
+    try:
+        if normalized_owners and owned_paths:
+            ci_repair_tasks_backfilled = backfill_ci_repair_commit(
+                path=repo_root / "storage" / "next_tasks.json",
+                claim_owners=normalized_owners,
+                commit_sha=commit_sha,
+            )
+            linked_task_ids = pending_issue_task_ids_for_owners(
+                path=repo_root / "storage" / "next_tasks.json",
+                claim_owners=normalized_owners,
+            )
+            issue_tasks_closed = settle_completed_task_issues(
+                path=repo_root / "storage" / "next_tasks.json",
+                claim_owners=normalized_owners,
+                commit_sha=commit_sha,
+                commit_parent_sha=base_sha,
+                completed_task_ids=linked_task_ids,
+                repo_root=repo_root,
+            )
+            acknowledged_task_ids = {
+                str(item.get("task_id") or "")
+                for item in issue_tasks_closed
+                if isinstance(item, dict)
+            }
+            if acknowledged_task_ids != set(linked_task_ids):
+                return {
+                    "committed": False,
+                    "head_committed": True,
+                    "reason": "committed_recovery_issue_readback_incomplete",
+                    "commit_sha": commit_sha,
+                    "index_refresh": refresh,
+                    "missing_task_ids": sorted(
+                        set(linked_task_ids) - acknowledged_task_ids
+                    ),
+                }
+    except Exception as exc:  # noqa: BLE001
+        LOG.warning("phase_z: committed closeout receipt recovery failed: %s", exc)
+        return {
+            "committed": False,
+            "head_committed": True,
+            "reason": "committed_recovery_receipt_failed",
+            "commit_sha": commit_sha,
+            "index_refresh": refresh,
+            "detail": str(exc)[:300],
+        }
+
+    tests = _post_commit_test_gate(
+        repo_root,
+        commit_sha=commit_sha,
+        hhmm=hhmm,
+        runner=runner,
+        test_runner=test_runner or subprocess.run,
+        internal_alert_fn=internal_alert_fn,
+    )
+    return {
+        "committed": True,
+        "reason": "committed",
+        "commit_sha": commit_sha,
+        "receipt_recovered": True,
+        "index_refresh": refresh,
+        "tests": tests,
+        "ci_repair_tasks_backfilled": ci_repair_tasks_backfilled,
+        "issue_tasks_closed": issue_tasks_closed,
+    }
+
+
 def run_phase_z(
     *,
     repo_root: Path,
@@ -2993,6 +3208,7 @@ def run_phase_z(
     gate_review_fn=None,
     claim_owners: set[str] | list[str] | tuple[str, ...] | None = None,
     fire_ids: set[str] | list[str] | tuple[str, ...] | None = None,
+    closeout_generation: str | None = None,
     _recovery_capability: object | None = None,
     _closeout_authorization: dict[str, dict[str, object]] | None = None,
 ) -> dict:
@@ -3725,15 +3941,17 @@ def run_phase_z(
             )
             if git_dir_probe.returncode != 0:
                 return {"committed": False, "reason": "candidate_gate_error", "rolled_back": True}
-            hook_env = candidate_env.copy()
-            hook_env.update({
-                "GIT_DIR": (git_dir_probe.stdout or "").strip(),
-                "GIT_WORK_TREE": str(candidate_root),
-                "VOLPRED_NO_EMAIL": "1",
-                "VOLPRED_NO_REMOTE_WRITE": "1",
-                "VOLPRED_NO_REMOTE_READ": "1",
-                "VOLPRED_NO_CANONICAL_WRITE": "1",
-            })
+            hook_env = external_child_environment(
+                candidate_env,
+                overrides={
+                    "GIT_DIR": (git_dir_probe.stdout or "").strip(),
+                    "GIT_WORK_TREE": str(candidate_root),
+                    "VOLPRED_NO_EMAIL": "1",
+                    "VOLPRED_NO_REMOTE_WRITE": "1",
+                    "VOLPRED_NO_REMOTE_READ": "1",
+                    "VOLPRED_NO_CANONICAL_WRITE": "1",
+                },
+            )
             if trusted_auditor.is_file():
                 hook_env["VOLPRED_TRUSTED_TEST_IMPORT_AUDITOR"] = str(trusted_auditor)
             hook_observed_at = datetime.now(timezone.utc)
@@ -3827,6 +4045,20 @@ def run_phase_z(
                 f"{len(churn)} daemon-written machine-churn path(s) this module owns.\n"
                 f"Left alone (dirty before the fire, another writer's): {len(foreign)} path(s)."
             )
+            if closeout_generation:
+                body_lines.append("")
+                body_lines.append(
+                    "VolPred-Phase-Z-Generation: "
+                    f"{str(closeout_generation).strip()}"
+                )
+                body_lines.append(
+                    "VolPred-Phase-Z-Owned-Paths: "
+                    + json.dumps(
+                        sorted(owned),
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    )
+                )
             if adopted_halves:
                 # The audit trail for reversing this file's default answer lives
                 # in the commit itself, not only in a log line that rotates away.
@@ -3915,6 +4147,16 @@ def run_phase_z(
                 body=("commit 本身完整，working bytes 未遺失；共享 index CAS 未完成。"
                       "請先確認沒有其他 git writer，再人工 refresh。\n\n" + detail),
             )
+            return {
+                "committed": False,
+                "head_committed": True,
+                "reason": "committed_recovery_index_failed",
+                "commit_sha": committed_sha,
+                "index_refresh": refresh,
+                "owned": owned,
+                "foreign": foreign,
+                "churn": churn,
+            }
         elif refresh.get("preserved"):
             LOG.info(
                 "phase_z: preserved concurrent staged entries for %s",
@@ -3937,6 +4179,14 @@ def run_phase_z(
                 )
             except Exception as exc:  # noqa: BLE001 — commit already landed; receipt repair is retryable
                 LOG.warning("phase_z: CI repair commit receipt backfill failed: %s", exc)
+                return {
+                    "committed": False,
+                    "head_committed": True,
+                    "reason": "committed_recovery_receipt_failed",
+                    "commit_sha": committed_sha,
+                    "index_refresh": refresh,
+                    "detail": str(exc)[:300],
+                }
             try:
                 linked_task_ids = pending_issue_task_ids_for_owners(
                     path=repo_root / "storage" / "next_tasks.json",
@@ -3950,11 +4200,37 @@ def run_phase_z(
                     completed_task_ids=linked_task_ids,
                     repo_root=repo_root,
                 )
+                acknowledged_task_ids = {
+                    str(item.get("task_id") or "")
+                    for item in issue_tasks_closed
+                    if isinstance(item, dict)
+                }
+                if acknowledged_task_ids != set(linked_task_ids):
+                    return {
+                        "committed": False,
+                        "head_committed": True,
+                        "reason": (
+                            "committed_recovery_issue_readback_incomplete"
+                        ),
+                        "commit_sha": committed_sha,
+                        "index_refresh": refresh,
+                        "missing_task_ids": sorted(
+                            set(linked_task_ids) - acknowledged_task_ids
+                        ),
+                    }
             except Exception as exc:  # noqa: BLE001 — commit already landed; GitHub sync is retryable
                 LOG.warning(
                     "phase_z: linked issue post-commit settlement failed: %s",
                     exc,
                 )
+                return {
+                    "committed": False,
+                    "head_committed": True,
+                    "reason": "committed_recovery_receipt_failed",
+                    "commit_sha": committed_sha,
+                    "index_refresh": refresh,
+                    "detail": str(exc)[:300],
+                }
         tests = _post_commit_test_gate(
             repo_root, commit_sha=committed_sha, hhmm=hhmm, runner=runner,
             test_runner=test_runner or subprocess.run,
@@ -3997,6 +4273,7 @@ def run_phase_z(
                 ]),
             )
         return {"committed": True, "reason": "committed", "untracked": untracked,
+                "commit_sha": committed_sha,
                 "owned": owned, "foreign": foreign, "churn": churn,
                 "commit_head": out[-500:], "tests": tests, "index_refresh": refresh,
                 "orphan_halves": orphan_halves, "quarantine": quarantine,

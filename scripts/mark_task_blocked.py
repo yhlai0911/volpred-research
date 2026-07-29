@@ -50,12 +50,13 @@ ROOT = Path(__file__).resolve().parents[1]
 NEXT_TASKS = ROOT / "storage" / "next_tasks.json"
 
 sys.path.insert(0, str(ROOT / "src"))
+from volpred.canonical_write import guard_canonical_write
 from volpred.ops.blocked_reasons import BLOCKED_REASONS as VALID_REASONS
 from volpred.ops.blocked_reasons import (
+    INCIDENT_SUSTAINED_CLEAN_GATE,
     UNBLOCK_GATES as VALID_UNBLOCK_GATES,
 )
 from volpred.ops.blocked_reasons import is_valid as _valid_blocked_reason
-from volpred.canonical_write import guard_canonical_write
 from volpred.ops.diagnostics import warn as _diag_warn
 
 # 2026-07-18: the 14-day default window used to be this module's own constant.
@@ -177,6 +178,7 @@ def _mutate_tasks(args: argparse.Namespace, tasks: list) -> int:
             "blocked_until",
             "blocked_note",
             "unblock_gate",
+            "unblock_incident_id",
             "terminalized_at",
             "terminalized_reason",
         ):
@@ -225,11 +227,16 @@ def _mutate_tasks(args: argparse.Namespace, tasks: list) -> int:
         matched["terminalized_reason"] = reason
         matched.pop("blocked_until", None)
         matched.pop("unblock_gate", None)
+        matched.pop("unblock_incident_id", None)
     else:
         matched["status"] = "blocked"
         matched["blocked_until"] = args.until or _default_blocked_until()
         if existing_gate is None and args.unblock_gate:
             matched["unblock_gate"] = args.unblock_gate
+        if args.unblock_gate == INCIDENT_SUSTAINED_CLEAN_GATE:
+            matched["unblock_incident_id"] = args.unblock_incident_id
+        elif matched.get("unblock_gate") != INCIDENT_SUSTAINED_CLEAN_GATE:
+            matched.pop("unblock_incident_id", None)
     matched["blocked_reason"] = args.reason
     matched["blocked_at"] = datetime.now(timezone.utc).isoformat(
         timespec="seconds"
@@ -272,6 +279,13 @@ def main() -> int:
         help="Named live condition that must pass after --until before re-pending",
     )
     parser.add_argument(
+        "--unblock-incident-id",
+        help=(
+            "Canonical incident id required by "
+            f"--unblock-gate {INCIDENT_SUSTAINED_CLEAN_GATE}"
+        ),
+    )
+    parser.add_argument(
         "--unblock",
         action="store_true",
         help="remove block fields instead of setting them",
@@ -284,6 +298,26 @@ def main() -> int:
     if args.unblock_gate and args.reason != "awaiting_event_window":
         print(
             "error: --unblock-gate requires --reason awaiting_event_window",
+            file=sys.stderr,
+        )
+        return 2
+    if (
+        args.unblock_gate == INCIDENT_SUSTAINED_CLEAN_GATE
+        and not str(args.unblock_incident_id or "").strip()
+    ):
+        print(
+            f"error: --unblock-gate {INCIDENT_SUSTAINED_CLEAN_GATE} "
+            "requires --unblock-incident-id",
+            file=sys.stderr,
+        )
+        return 2
+    if (
+        args.unblock_incident_id
+        and args.unblock_gate != INCIDENT_SUSTAINED_CLEAN_GATE
+    ):
+        print(
+            "error: --unblock-incident-id is only valid with "
+            f"--unblock-gate {INCIDENT_SUSTAINED_CLEAN_GATE}",
             file=sys.stderr,
         )
         return 2

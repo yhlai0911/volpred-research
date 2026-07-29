@@ -24,7 +24,7 @@ import logging
 import os
 import subprocess
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -458,6 +458,278 @@ def test_phase_z_pending_holds_slot_until_exact_cohort_finish(tmp_state: Path) -
         schedule_id="hourly_dispatch", attempt=1, model="opus",
         log_path="/tmp/b.log", max_slots=1, path=tmp_state,
     )
+
+
+def test_phase_z_rejection_hot_ring_archives_every_receipt_before_eviction(
+    tmp_state: Path,
+) -> None:
+    """The 101st rejection must not erase the first generation receipt."""
+    cap = st.COMPLETIONS_MAX
+    for index in range(cap + 1):
+        with st._locked_state(tmp_state) as (_fh, data):
+            data["phase_z_pending"] = [
+                {
+                    "job_id": f"job-{index}",
+                    "cohort_id": f"cohort-{index}",
+                    "slot_id": 1,
+                    "created_at": "2026-07-29T00:00:00+00:00",
+                    "isolated": False,
+                    "fire_lifecycle": {
+                        "generation_id": f"generation-{index}",
+                        "captured_at": "2026-07-29T00:00:00+00:00",
+                        "pre_fire_dirty": [f"pre-existing-{index}.txt"],
+                    },
+                }
+            ]
+        rejected = st.reject_phase_z(
+            cohort_ids={f"cohort-{index}"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+        assert len(rejected) == 1
+
+    hot = st.read_state(tmp_state)["phase_z_rejections"]
+    assert len(hot) == cap
+    assert hot[0]["job_id"] == "job-1"
+
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    archived = [
+        json.loads(line)
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(archived) == cap + 1
+    assert archived[0]["job_id"] == "job-0"
+    assert archived[0]["fire_lifecycle"]["generation_id"] == "generation-0"
+    assert archived[-1]["job_id"] == f"job-{cap}"
+
+
+def test_phase_z_rejection_replay_is_idempotent_in_audit_and_hot_cache(
+    tmp_state: Path,
+) -> None:
+    pending = {
+        "job_id": "job-replay",
+        "cohort_id": "cohort-replay",
+        "slot_id": 1,
+        "created_at": "2026-07-29T00:00:00+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-replay",
+            "captured_at": "2026-07-29T00:00:00+00:00",
+            "pre_fire_dirty": ["already-dirty.txt"],
+        },
+    }
+    for _attempt in range(2):
+        with st._locked_state(tmp_state) as (_fh, data):
+            data["phase_z_pending"] = [pending]
+        st.reject_phase_z(
+            cohort_ids={"cohort-replay"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    hot = st.read_state(tmp_state)["phase_z_rejections"]
+    archived = [
+        json.loads(line)
+        for line in tmp_state.with_name(
+            "phase_z_rejections.jsonl"
+        ).read_text(encoding="utf-8").splitlines()
+    ]
+    assert len(hot) == 1
+    assert len(archived) == 1
+    assert hot[0]["rejection_id"] == archived[0]["rejection_id"]
+
+
+def test_phase_z_rejection_audit_failure_keeps_pending_authority(
+    tmp_state: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_pending"] = [
+            {
+                "job_id": "job-audit-fail",
+                "cohort_id": "cohort-audit-fail",
+                "slot_id": 1,
+                "created_at": "2026-07-29T00:00:00+00:00",
+                "isolated": False,
+                "fire_lifecycle": {
+                    "generation_id": "generation-audit-fail",
+                    "captured_at": "2026-07-29T00:00:00+00:00",
+                    "pre_fire_dirty": [],
+                },
+            }
+        ]
+    monkeypatch.setattr(
+        st,
+        "_append_phase_z_rejection_audit",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("disk full")),
+    )
+
+    with pytest.raises(OSError, match="disk full"):
+        st.reject_phase_z(
+            cohort_ids={"cohort-audit-fail"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    snap = st.read_state(tmp_state)
+    assert [item["job_id"] for item in snap["phase_z_pending"]] == [
+        "job-audit-fail"
+    ]
+    assert snap["phase_z_rejections"] == []
+
+
+def test_phase_z_rejection_torn_audit_tail_keeps_pending_authority(
+    tmp_state: Path,
+) -> None:
+    pending = {
+        "job_id": "job-torn-ledger",
+        "cohort_id": "cohort-torn-ledger",
+        "slot_id": 1,
+        "created_at": "2026-07-29T00:00:00+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-torn-ledger",
+            "captured_at": "2026-07-29T00:00:00+00:00",
+            "pre_fire_dirty": [],
+        },
+    }
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_pending"] = [pending]
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    audit_path.write_text('{"torn":', encoding="utf-8")
+
+    with pytest.raises(ValueError, match="malformed phase-z rejection audit"):
+        st.reject_phase_z(
+            cohort_ids={"cohort-torn-ledger"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    snap = st.read_state(tmp_state)
+    assert snap["phase_z_pending"] == [pending]
+    assert snap["phase_z_rejections"] == []
+    assert audit_path.read_text(encoding="utf-8") == '{"torn":'
+
+
+def test_phase_z_rejection_repairs_complete_tail_missing_only_newline(
+    tmp_state: Path,
+) -> None:
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    for index in range(2):
+        with st._locked_state(tmp_state) as (_fh, data):
+            data["phase_z_pending"] = [
+                {
+                    "job_id": f"job-framing-{index}",
+                    "cohort_id": f"cohort-framing-{index}",
+                    "slot_id": 1,
+                    "created_at": "2026-07-29T00:00:00+00:00",
+                    "isolated": False,
+                    "fire_lifecycle": {
+                        "generation_id": f"generation-framing-{index}",
+                        "captured_at": "2026-07-29T00:00:00+00:00",
+                        "pre_fire_dirty": [],
+                    },
+                }
+            ]
+        if index == 1:
+            audit_path.write_text(
+                audit_path.read_text(encoding="utf-8").rstrip("\n"),
+                encoding="utf-8",
+            )
+        st.reject_phase_z(
+            cohort_ids={f"cohort-framing-{index}"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    archived = [
+        json.loads(line)
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert [entry["job_id"] for entry in archived] == [
+        "job-framing-0",
+        "job-framing-1",
+    ]
+
+
+def test_phase_z_rejection_forged_existing_identity_keeps_pending_authority(
+    tmp_state: Path,
+) -> None:
+    pending = {
+        "job_id": "job-authentic",
+        "cohort_id": "cohort-authentic",
+        "slot_id": 1,
+        "created_at": "2026-07-29T00:00:00+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-authentic",
+            "captured_at": "2026-07-29T00:00:00+00:00",
+            "pre_fire_dirty": [],
+        },
+    }
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_pending"] = [pending]
+    authentic_id = st._phase_z_rejection_id(
+        {
+            **pending,
+            "rejection_reason": "generation_mismatch",
+        }
+    )
+    forged = {
+        "rejection_id": authentic_id,
+        "job_id": "forged-payload",
+    }
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    original = json.dumps(forged, sort_keys=True) + "\n"
+    audit_path.write_text(original, encoding="utf-8")
+
+    with pytest.raises(ValueError, match="rejection_id mismatch"):
+        st.reject_phase_z(
+            cohort_ids={"cohort-authentic"},
+            reason="generation_mismatch",
+            path=tmp_state,
+        )
+
+    snap = st.read_state(tmp_state)
+    assert snap["phase_z_pending"] == [pending]
+    assert snap["phase_z_rejections"] == []
+    assert audit_path.read_text(encoding="utf-8") == original
+
+
+def test_mark_supervisor_started_backfills_legacy_phase_z_rejection_audit(
+    tmp_state: Path,
+) -> None:
+    """A deploy must preserve hot-cache evidence created before the ledger."""
+    legacy = {
+        "job_id": "job-before-ledger",
+        "cohort_id": "cohort-before-ledger",
+        "slot_id": 2,
+        "created_at": "2026-07-26T18:30:45+00:00",
+        "isolated": False,
+        "fire_lifecycle": {
+            "generation_id": "generation-before-ledger",
+            "captured_at": "2026-07-26T18:23:00+00:00",
+            "pre_fire_dirty": ["another-session.txt"],
+        },
+        "rejected_at": "2026-07-26T18:30:45+00:00",
+        "rejection_reason": "missing_generation",
+    }
+    with st._locked_state(tmp_state) as (_fh, data):
+        data["phase_z_rejections"] = [legacy]
+
+    st.mark_supervisor_started(tmp_state)
+
+    snap = st.read_state(tmp_state)
+    migrated = snap["phase_z_rejections"][0]
+    assert migrated["rejection_id"]
+    assert migrated["audit_ref"].endswith(f"#{migrated['rejection_id']}")
+
+    audit_path = tmp_state.with_name("phase_z_rejections.jsonl")
+    archived = [
+        json.loads(line)
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert archived == [migrated]
 
 
 def test_attach_process_fills_identity(tmp_state: Path) -> None:
@@ -1358,6 +1630,24 @@ def _drive_every_writer(path: Path) -> None:
 
     orphan_handle = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                                     log_path="/tmp/x.log", path=path)
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    assert st.attach_producer_custody(
+        job_id=orphan_handle.job_id,
+        custody=custody,
+        expected_attempt=1,
+        path=path,
+    )
+    assert st.mark_producer_spawn_committed(
+        job_id=orphan_handle.job_id,
+        expected_attempt=1,
+        path=path,
+    )
     st.attach_process(job_id=orphan_handle.job_id, expected_attempt=1,
                       pid=4242, pgid=4242, started_wall="w1", path=path)
     st.update_started_wall(job_id=orphan_handle.job_id, expected_attempt=1,
@@ -1382,6 +1672,25 @@ def _drive_every_writer(path: Path) -> None:
                       phase="phase_z", path=path)
     st.release_reservation(path=path, job_id=retry_handle.job_id, expected_attempt=2)
 
+    aborted = st.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/aborted.log",
+        path=path,
+    )
+    assert st.mark_producer_spawn_committed(
+        job_id=aborted.job_id,
+        expected_attempt=1,
+        path=path,
+    )
+    assert st.mark_producer_spawn_aborted(
+        job_id=aborted.job_id,
+        expected_attempt=1,
+        path=path,
+    )
+    st.release_reservation(path=path, job_id=aborted.job_id, expected_attempt=1)
+
     done = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
                            log_path="/tmp/done.log", path=path)
     st.attach_process(job_id=done.job_id, expected_attempt=1,
@@ -1405,6 +1714,44 @@ def _drive_every_writer(path: Path) -> None:
     assert token is not None
     st.reject_phase_z(
         cohort_ids={done.cohort_id}, reason="shape_gate_rejection", path=path,
+    )
+
+    receipt_done = st.reserve_fire(
+        schedule_id="hourly_dispatch", attempt=1, model="opus",
+        log_path="/tmp/receipt.log", path=path,
+    )
+    st.attach_process(
+        job_id=receipt_done.job_id, expected_attempt=1,
+        pid=102, pgid=102, started_wall="wr", path=path,
+    )
+    st.attach_fire_lifecycle(
+        job_id=receipt_done.job_id,
+        lifecycle={
+            "generation_id": "generation-terminal-receipt",
+            "captured_at": "2026-07-27T00:00:30+00:00",
+            "pre_fire_dirty": [],
+        },
+        path=path,
+    )
+    st.record_completion(
+        job_id=receipt_done.job_id, expected_attempt=1, expected_pid=102,
+        exit_code=0, outcome="success", final_model="opus", path=path,
+    )
+    st.begin_phase_z(
+        cohort_ids={receipt_done.cohort_id},
+        generation_id="generation-terminal-receipt",
+        base_head="2" * 40,
+        path=path,
+    )
+    st.finish_phase_z(
+        cohort_id=receipt_done.cohort_id,
+        terminal_outcome={
+            "committed": True,
+            "reason": "committed",
+            "commit_sha": "3" * 40,
+        },
+        generation_id="generation-terminal-receipt",
+        path=path,
     )
 
     pending = st.reserve_fire(schedule_id="hourly_dispatch", attempt=1, model="opus",
@@ -1453,7 +1800,26 @@ def _drive_every_writer(path: Path) -> None:
     }, path=path)
     st.record_completion(job_id=pending.job_id, expected_attempt=1, expected_pid=101,
                          exit_code=0, outcome="success", final_model="opus", path=path)
+    st.begin_phase_z(
+        cohort_ids={pending.cohort_id},
+        generation_id="generation-live-shape",
+        base_head="4" * 40,
+        path=path,
+    )
     assert sibling.job_id == st.read_state(path)["current_job"]["job_id"]
+
+    # Issue #42: exercise the complete public cutover-fence lifecycle, then
+    # leave a second fence active so the state-shape gate below observes the
+    # durable container rather than proving only that the functions were called.
+    quiesce = st.begin_cutover_quiesce(
+        reason="state-shape-cutover", ttl_s=60, path=path,
+    )
+    st.cutover_quiesce_snapshot(token=quiesce["token"], path=path)
+    st.renew_cutover_quiesce(token=quiesce["token"], ttl_s=120, path=path)
+    assert st.end_cutover_quiesce(token=quiesce["token"], path=path)
+    st.begin_cutover_quiesce(
+        reason="state-shape-active-cutover", ttl_s=60, path=path,
+    )
 
 
 def _public_writers_of_state_module() -> set[str]:
@@ -1520,7 +1886,9 @@ def _container_shapes(node, path="$"):
 # 保持扁平 —— 一旦有人往裡面塞巢狀 dict，就是一個沒人 gate 的新層。
 KNOWN_CONTAINERS = {
     "$", "$.current_job", "$.current_jobs[]", "$.phase_z_pending[]",
-    "$.phase_z_rejections[]", "$.completions[]", "$.alerts_dedup",
+    "$.phase_z_rejections[]", "$.phase_z_receipts[]", "$.completions[]",
+    "$.alerts_dedup",
+    "$.cutover_quiesce",
     # #42 durable fire generation and rejected-token evidence.
     "$.current_job.fire_lifecycle", "$.current_jobs[].fire_lifecycle",
     "$.phase_z_pending[].fire_lifecycle",
@@ -1529,6 +1897,8 @@ KNOWN_CONTAINERS = {
     # shape gate = test_workspace_receipt_shape_is_flat_and_documented。
     "$.current_job.workspace", "$.current_jobs[].workspace",
     "$.completions[].workspace",
+    # The exhaustive writer drive leaves custody in its terminal receipt.
+    "$.completions[].producer_custody",
 }
 
 # WS-B workspace receipt 的欄位契約（state.py docstring schema 同步列出）。
@@ -1549,6 +1919,42 @@ WORKSPACE_LIST_KEYS = {
 FIRE_LIFECYCLE_KEYS = {
     "generation_id", "captured_at", "pre_fire_dirty",
 }
+
+CUTOVER_QUIESCE_KEYS = {
+    "token", "reason", "requested_at", "expires_at",
+    "previous_auth_blocked", "previous_auth_blocked_at", "legacy_fence_at",
+}
+
+PRODUCER_CUSTODY_KEYS = {
+    "version",
+    "host_uuid",
+    "boot_session_uuid",
+    "resource_coalition_id",
+    "trusted_unique_ids",
+}
+
+PHASE_Z_RECEIPT_KEYS = {
+    "receipt_id",
+    "cohort_id",
+    "generation_id",
+    "reason",
+    "committed",
+    "commit_sha",
+    "completed_at",
+    "job_ids",
+}
+
+
+def test_cutover_quiesce_shape_is_flat_and_documented(tmp_state):
+    """Issue #42's durable cutover fence has one explicit, bounded schema."""
+    _drive_every_writer(tmp_state)
+    quiesce = st.read_state(tmp_state)["cutover_quiesce"]
+    assert isinstance(quiesce, dict), "驅動沒留下 active cutover fence（假綠燈風險）"
+    assert set(quiesce) == CUTOVER_QUIESCE_KEYS
+    assert all(
+        not isinstance(value, (dict, list))
+        for value in quiesce.values()
+    )
 
 
 def test_fire_lifecycle_shape_is_flat_and_documented(tmp_state):
@@ -1575,6 +1981,21 @@ def test_fire_lifecycle_shape_is_flat_and_documented(tmp_state):
         )
 
 
+def test_phase_z_terminal_receipt_shape_is_bounded(tmp_state):
+    """A restart receipt must not grow an undocumented lifecycle subtree."""
+    _drive_every_writer(tmp_state)
+    receipts = st.read_state(tmp_state)["phase_z_receipts"]
+    assert receipts, "writer drive did not leave a terminal PHASE-Z receipt"
+    for receipt in receipts:
+        assert set(receipt) == PHASE_Z_RECEIPT_KEYS
+        assert isinstance(receipt["job_ids"], list)
+        assert all(isinstance(item, str) for item in receipt["job_ids"])
+        assert all(
+            not isinstance(value, dict)
+            for value in receipt.values()
+        )
+
+
 def test_workspace_receipt_shape_is_flat_and_documented(tmp_state):
     """WS-B workspace 容器的 shape gate：欄位 ⊆ 契約集合，值必須是純量
     （lanes 是字串 list）—— 不准再長出下一層無人 gate 的巢狀 dict。"""
@@ -1598,6 +2019,28 @@ def test_workspace_receipt_shape_is_flat_and_documented(tmp_state):
                 assert not isinstance(value, (dict, list)), (
                     f"workspace[{key!r}] 是 {type(value).__name__} —— receipt 必須扁平"
                 )
+
+
+def test_producer_custody_shape_is_bounded_and_documented(tmp_state):
+    """Terminal custody receipts retain only the kernel identity contract."""
+    _drive_every_writer(tmp_state)
+    receipts = [
+        entry["producer_custody"]
+        for entry in st.read_state(tmp_state)["completions"]
+        if "producer_custody" in entry
+    ]
+    assert receipts, "驅動沒長出任何 producer custody（假綠燈風險）"
+    for receipt in receipts:
+        assert set(receipt) == PRODUCER_CUSTODY_KEYS
+        assert isinstance(receipt["trusted_unique_ids"], list)
+        assert all(
+            isinstance(item, int) and not isinstance(item, bool) and item > 0
+            for item in receipt["trusted_unique_ids"]
+        )
+        assert all(
+            not isinstance(value, dict)
+            for value in receipt.values()
+        )
 
 
 def test_no_undocumented_nested_container(tmp_state):

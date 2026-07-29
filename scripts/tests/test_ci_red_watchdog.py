@@ -15,6 +15,7 @@ for extra in (PROJECT_ROOT / "scripts", PROJECT_ROOT / "src"):
         sys.path.insert(0, str(extra))
 
 import check_alerts  # noqa: E402
+from volpred.ops.alerts import AlertDeliveryClass  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
@@ -108,7 +109,12 @@ def _harness(
     send_results = list(send_results or [])
 
     def sender(level, title, body, **kwargs):
-        record = {"level": level, "title": title, "body": body}
+        record = {
+            "level": level,
+            "title": title,
+            "body": body,
+            "delivery_class": kwargs.get("delivery_class"),
+        }
         # The msg-822 detection heads-up is warn-level and its own stream; it must
         # not consume the terminal (recovery/escalation) ``send_results`` queue nor
         # pollute the ``sent`` list existing assertions read.
@@ -259,6 +265,7 @@ def test_red_then_green_sends_exactly_one_verified_notice(tmp_path):
     assert summary["notification_delivered"] is True
     assert len(sent) == 1
     assert sent[0]["level"] == "info"
+    assert sent[0]["delivery_class"] == AlertDeliveryClass.RECOVERY
     assert "已修復並驗證" in sent[0]["title"]
     assert CAUSE in sent[0]["body"]
     assert str(GREEN["databaseId"]) in sent[0]["body"]

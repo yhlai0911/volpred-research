@@ -86,3 +86,42 @@ K1380_v4 resolves C3 by providing valid SPA + RC test results under corrected pe
 
 - K1380 (original, 3× failed), K988 (GARCH-X horse race baseline)
 - Triggered: `3-strike trigger 2026-05-22` per CLAUDE.md Three-Strike Rule
+
+---
+
+## ⚠️ 2026-07-29 資料窺探修正（RC/SPA 重新分析）
+
+`k1380_v4_results.json` 的 `white_rc_test` 與 `hansen_spa_test` **兩個欄位都被錯誤標示**，
+且方向相反。修正產物：`k1380_v4_rc_correction.py` → `k1380_v4_rc_correction_results.json`。
+v4 原始 results JSON **未被修改**（永遠修流程，不修資料）。
+
+| 欄位 | v4 宣稱 | 實際是什麼 |
+|---|---|---|
+| `white_rc_test` p=0.000 | 「A4f significantly beats GJR **after RC correction**」 | **單一 spec 的 bootstrap DM t 檢定，完全沒做窺探修正**（`k1380_v4.py:771-782`：`max(0.0, t_b_a4f)` 是對純量取 max，不是跨候選集合取 max）→ **高估** |
+| `hansen_spa_test` p=0.2886 | 「Hansen SPA，不拒絕 H0」 | 每個 spec 都用自己的 d-bar 重新置中 = **least-favourable 的 SPA_u**（studentized White RC），不是 Hansen 建議回報的 consistent SPA_c → **低估** |
+
+**為什麼不需要重跑 GARCH**：`k1380_v4.py:693` 在任何檢定之前就存下完整 17×n_oos QLIKE
+矩陣，缺陷完全在該產物的下游，屬純重新分析。修正腳本內建 4 項 v4 數字的**逐位重現**
+（atol=1e-12）作為前置斷言，重現失敗即中止 — 沒有這道檢查，後面的修正數字無從取信。
+
+**關鍵證據（least-favourable 尾部歸因）**：499 次 bootstrap 中有 144 次超過觀測統計量，
+而這 144 次的 max **全部**由 A5(t=-11.2) / C2(t=-21.1) / C3(t=-10.0) 三支
+「比 benchmark 差 10-21 個標準差」的 spec 取得（77/48/19），**沒有任何一次**由具競爭力的
+spec 取得。v4 的「不顯著」量到的是這三支的退化程度，不是候選集合的競爭力 —— 這正是
+Hansen SPA_c 要移除的保守性。
+
+**修正後結論**：SPA_c p < 1/499（fixed-omega 與 v4 的 per-resample studentization
+**兩種慣例下皆然**，故非 studentization 選擇的產物）；Holm step-down 在 FWER 0.10 下
+15 支中 11 支拒絕，A4f adj p < 1/499。**聯合窺探修正後的檢定拒絕 H0**。
+
+⚠️ 這**推翻**了先前「真正做了多重檢定修正的檢定沒有拒絕」的讀法 —— 因為當時被當成
+「有做修正」的那個 SPA 數字本身也是錯的。
+
+**遺留待查**：A5/C2/C3 的極端 QLIKE 損失本身可能是數值退化。SPA_c 依統計理由捨棄它們；
+但若它們根本是壞的，就不該出現在候選集合裡。兩條路徑導向同一修正結論，但成因仍需查明。
+
+## Output（更新）
+
+- `k1380_v4_results.json` — v4 原始（RC/SPA 欄位已被上表取代，保留供稽核）
+- `k1380_v4_losses_all.npy` — (17, n_oos) QLIKE 損失矩陣
+- `k1380_v4_rc_correction_results.json` — **窺探修正後的 canonical RC/SPA 數字**

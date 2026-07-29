@@ -1,0 +1,63 @@
+{
+  "id": "lazypack-mile_c53932a1",
+  "title": "lazypack render mile_c53932a1",
+  "script_path": "scripts/lazypack_async_render.py",
+  "interpreter": "uv run python",
+  "args": [
+    "run",
+    "--job-id",
+    "lazypack-mile_c53932a1",
+    "--article-id",
+    "mile_c53932a1",
+    "--plan",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/plan.json",
+    "--out-dir",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels",
+    "--storage-dir",
+    "storage",
+    "--title",
+    "mile_c53932a1 懶人包",
+    "--experiment",
+    "K775"
+  ],
+  "env": {},
+  "status": "completed",
+  "queue_priority": 1,
+  "queued_at": "2026-07-29T15:47:38Z",
+  "started_at": "2026-07-29T16:36:19Z",
+  "completed_at": "2026-07-29T16:41:02Z",
+  "exit_code": 0,
+  "stdout_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_c53932a1.stdout",
+  "stderr_file": "/Users/yhlai0911/volpred-research/storage/logs/compute/lazypack-mile_c53932a1.stderr",
+  "result_artifact": "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels",
+  "output_paths": [
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/plan.json",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels/panel_question.png",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels/panel_new_features.png",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels/panel_ranking.png",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels/panel_takeaway.png",
+    "storage/lazypack_jobs/mile_c53932a1/runs/lazypack-mile_c53932a1/panels/render_lazypack.py"
+  ],
+  "output_paths_updated_at": "2026-07-29T16:40:54Z",
+  "job_metadata": null,
+  "kind": "compute",
+  "cwd": null,
+  "claude_followup": null,
+  "followup_dispatched": false,
+  "source_task_id": null,
+  "source_task_link": null,
+  "timeout_seconds": 1800,
+  "brief_source": null,
+  "brief_snapshot": null,
+  "claimed_by_pid": 33466,
+  "schedule_dispatch": {
+    "owner": "operations_core",
+    "job_id": "volpred-compute-worker",
+    "fire_key": "operations-core-v1:volpred-compute-worker:e3fa48c3fbf1b3295cf34ca6",
+    "scheduled_for": "2026-07-29T15:45:00Z"
+  },
+  "claimed_by_pid_start_wall": "Wed Jul 29 23:45:32 2026",
+  "experiment_gate": {
+    "status": "out_of_scope"
+  }
+}

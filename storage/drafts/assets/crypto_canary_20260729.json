@@ -1,0 +1,106 @@
+{
+  "as_of": "2026-07-29",
+  "note": "每日精選導讀 2026-07-29『金絲雀，還是住隔壁的鄰居？』證據包。每個欄位皆逐字取自已發佈的來源文章，未做任何重算。",
+  "market_snapshot": {
+    "source_article": "mile_e9623067",
+    "close_date": "2026-07-28",
+    "spy_close_usd": 740.86,
+    "spy_change_pct": 0.24,
+    "vix": 18.21,
+    "gld_close_usd": 369.37,
+    "gld_change_pct": -1.41,
+    "model_annualized_vol_pct": 12.8
+  },
+  "lead_lag": {
+    "source_article": "mile_ea920f7f",
+    "sample_start": "2018-01-02",
+    "sample_end": "2026-04-16",
+    "trading_days": 2083,
+    "significance_btc_to_spy": 0.282,
+    "significance_spy_to_btc": 0.160,
+    "significance_eth_to_spy": 0.225,
+    "significance_spy_to_eth": 0.094,
+    "threshold": 0.05,
+    "joint_btc_to_spy": 0.440,
+    "joint_eth_to_spy": 0.621,
+    "joint_combined_to_spy": 0.511,
+    "avg_dcc_btc_spy": 0.361,
+    "avg_dcc_eth_spy": 0.376
+  },
+  "prior_claim": {
+    "source_article": "mile_7d99dfd0",
+    "published_at": "2026-03-31",
+    "trading_days": 2803,
+    "significance_btc_vol_to_vix": 0.00025,
+    "significance_vix_to_btc_vol": 0.013,
+    "retracted_by": "mile_ea920f7f"
+  },
+  "neighbour_evidence": {
+    "source_article": "mile_a93c8580",
+    "trading_days": 2812,
+    "corr_vix_below_15": 0.068,
+    "corr_vix_15_25": 0.265,
+    "corr_vix_25_35": 0.449,
+    "corr_vix_above_35": 0.409,
+    "f_btc_down_to_vix": 18.96,
+    "f_btc_up_to_vix": 1.74,
+    "crisis_amplification_x": 8.5
+  },
+  "hedge_illusion": {
+    "source_article": "mile_218c5587",
+    "trading_days": 2011,
+    "corr_vix_above_25": 0.47,
+    "gold_corr_low": 0.03,
+    "gold_corr_high": 0.08,
+    "skew_5050": -0.35,
+    "skew_plus_10pct_btc": -0.82,
+    "skew_plus_20pct_btc": -1.00
+  },
+  "texture": {
+    "source_article": "mile_dd8a1fb8",
+    "observations": 2263,
+    "roughness_spy": 0.014,
+    "roughness_btc": 0.014,
+    "roughness_corr_spy_btc": -0.13,
+    "error_own_signal": 1.4773,
+    "error_baseline": 1.4785,
+    "error_cross_asset": 1.4852
+  },
+  "stablecoin": {
+    "source_article": "mile_eaacd072",
+    "flow_improvement": -0.0000025,
+    "flow_coincidence_prob_pct": 98.3,
+    "depeg_p95_pct": 0.45,
+    "depeg_mean_pct": 0.12,
+    "depeg_improvement": 0.00521,
+    "depeg_plus_flow_improvement": 0.00535,
+    "eth_coincidence_prob_pct": 46.3,
+    "assets_tested": 4,
+    "assets_passed": 1
+  },
+  "funding_rate": {
+    "source_article": "mile_3c83e665",
+    "bars_5min": 689225,
+    "realized_vol_days": 2393,
+    "funding_settlements": 7180,
+    "positive_share_pct": 85.7,
+    "oos_days": 932,
+    "lookahead_rows_checked": 250,
+    "lookahead_violations": 0,
+    "error_baseline": 0.28571,
+    "error_plus_direction": 0.28363,
+    "error_plus_magnitude": 0.28314,
+    "significance_direction": 0.080,
+    "significance_magnitude": 0.041
+  },
+  "reverse_direction": {
+    "source_article": "mile_e565b810",
+    "oos_days": 3023,
+    "strict_threshold": 3,
+    "strength_always_on": 1.13,
+    "strength_off_when_vix_25": 0.82,
+    "strength_on_when_corr_high": 1.19,
+    "strength_continuous": -0.92,
+    "panic_days": 463
+  }
+}

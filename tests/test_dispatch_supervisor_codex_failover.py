@@ -12,7 +12,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from scripts.dispatch_supervisor import codex_failover, worker
+from scripts.dispatch_supervisor import (
+    codex_failover,
+    custody_receipt,
+    state,
+    worker,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -164,6 +169,46 @@ def test_exec_success_marks_recovered(monkeypatch) -> None:
     assert work_envs[0]["VOLPRED_PROVIDER_ID"] == "codex-cli"
     assert work_envs[0]["VOLPRED_PROVIDER_MODEL_ID"] == codex_failover.CODEX_MODEL
     assert len(work_envs[0]["VOLPRED_PROVIDER_REGISTRY_SHA256"]) == 64
+
+
+def test_all_codex_boundaries_scrub_supervisor_private_environment(
+    monkeypatch,
+) -> None:
+    environments: list[dict[str, str]] = []
+    for key in (
+        "VOLPRED_SUPERVISOR_RELEASE_ID",
+        "VOLPRED_SUPERVISOR_FUTURE_MARKER",
+        "VOLPRED_DEFERRED_RELOAD_ROOT",
+        "VOLPRED_CANONICAL_REPO_ROOT",
+    ):
+        monkeypatch.setenv(key, f"private-{key.lower()}")
+    monkeypatch.setenv("VOLPRED_ACTOR", "dispatch-supervisor")
+
+    inner = _fake_codex(
+        probe=_PROBE_OK,
+        work=SimpleNamespace(returncode=0, stdout="done", stderr=""),
+    )
+
+    def run(argv, **kwargs):
+        environments.append(dict(kwargs["env"]))
+        return inner(argv, **kwargs)
+
+    monkeypatch.setattr(codex_failover, "resolve_codex_bin", lambda: "/bin/codex")
+    monkeypatch.setattr(codex_failover.subprocess, "run", run)
+
+    result = codex_failover.run_codex_failover(reason="quota", enabled=True)
+
+    assert result.recovered is True
+    assert len(environments) == 3
+    for environment in environments:
+        assert environment["VOLPRED_ACTOR"] == "dispatch-supervisor"
+        assert not any(
+            key.startswith(
+                ("VOLPRED_SUPERVISOR_", "VOLPRED_DEFERRED_RELOAD_")
+            )
+            for key in environment
+        )
+        assert "VOLPRED_CANONICAL_REPO_ROOT" not in environment
 
 
 def test_registry_denial_prevents_any_codex_subprocess(monkeypatch) -> None:
@@ -1059,6 +1104,111 @@ def test_failover_exception_never_escapes_worker(monkeypatch, tmp_path, _quiet_s
         state_path=tmp_path / "s.json", sleep_fn=lambda _s: None,
     )
     assert result.outcome == "quota_blocked"
+
+
+def test_failover_descendant_survivor_keeps_global_custody_and_slot_quarantined(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    state_path = tmp_path / "dispatch_state.json"
+    custody = {
+        "version": 2,
+        "host_uuid": "92515cc4-ec37-5659-923e-c700da4843a4",
+        "boot_session_uuid": "05699489-50d5-4a6d-b11b-7aa4550f48ca",
+        "resource_coalition_id": 73,
+        "trusted_unique_ids": [1001],
+    }
+    lease = state.reserve_fire(
+        schedule_id="hourly_dispatch",
+        attempt=1,
+        model="opus",
+        log_path="/tmp/worker.log",
+        path=state_path,
+    )
+    assert state.attach_producer_custody(
+        job_id=lease.job_id,
+        custody=custody,
+        expected_attempt=1,
+        path=state_path,
+    )
+    assert state.mark_producer_spawn_committed(
+        job_id=lease.job_id,
+        expected_attempt=1,
+        path=state_path,
+    )
+    state.attach_process(
+        job_id=lease.job_id,
+        expected_attempt=1,
+        pid=123,
+        pgid=123,
+        started_wall="start",
+        path=state_path,
+    )
+    assert state.mark_job_phase(
+        job_id=lease.job_id,
+        expected_phase="running",
+        expected_attempt=1,
+        expected_pid=123,
+        phase="codex_failover",
+        detach_process=True,
+        path=state_path,
+    )
+    custody_receipt.initialize_producer_custody_ledger(
+        tmp_path,
+        migration_confirmed_quiescent=True,
+    )
+    custody_receipt.bind_producer_custody(
+        tmp_path,
+        job_id=lease.job_id,
+        attempt=1,
+        custody=custody,
+    )
+    monkeypatch.setattr(
+        worker.codex_failover,
+        "run_codex_failover",
+        lambda **_kwargs: codex_failover.FailoverResult(
+            attempted=False,
+            recovered=False,
+            exit_code=codex_failover.RC_DISABLED,
+            detail="disabled",
+        ),
+    )
+    monkeypatch.setattr(
+        worker.alerts,
+        "send_codex_failover_alert",
+        lambda **_kwargs: True,
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "producer_cohort_members_checked",
+        lambda _pgid, *, job_id, custody=None: [777],
+    )
+    monkeypatch.setattr(
+        worker.procutil,
+        "kill_producer_cohort",
+        lambda *_args, **_kwargs: False,
+    )
+
+    result = worker._attempt_codex_failover(
+        reason="quota",
+        attempt=1,
+        total_duration=5.0,
+        fallback_exit=1,
+        model="opus",
+        log_tail="quota",
+        state_path=state_path,
+        job_id=lease.job_id,
+        slot_id="slot-1",
+        isolated_workspace={"isolation_canonical_root": str(tmp_path)},
+    )
+
+    assert result is not None
+    assert result.outcome == "kill_failed_orphan"
+    current = state.read_state(state_path)["current_job"]
+    assert current["phase"] == "kill_failed_orphan"
+    assert current["pid"] == 777
+    assert state.read_state(state_path)["completions"] == []
+    assert len(custody_receipt.read_pending_producer_custodies(tmp_path)) == 1
 
 
 def test_success_path_never_calls_failover(monkeypatch, tmp_path, _quiet_state_and_alerts):

@@ -84,6 +84,13 @@ KIND_POLICY: dict[str, tuple[str, str]] = {
     "worker_orphaned": (CLASS_MACHINE_SELF, TASK_MODE_ADJUDICATION),
     "worktree_unmerged": (CLASS_MACHINE_SELF, TASK_MODE_ADJUDICATION),
     "ci_red": (CLASS_ORDINARY, TASK_MODE_EXTERNAL),
+    # These conditions already have a concrete self-healing owner.  Re-enqueuing
+    # the same repair would double-book it, so persistent occurrences are only
+    # observed here.  Three consecutive breached observations escalate to one
+    # root-cause task; no ordinary repair task is created.
+    "publishing_freshness": (CLASS_ORDINARY, TASK_MODE_NONE),
+    "lazypack_render_stuck": (CLASS_ORDINARY, TASK_MODE_NONE),
+    "draft_pool_low": (CLASS_ORDINARY, TASK_MODE_NONE),
 }
 DEFAULT_POLICY: tuple[str, str] = (CLASS_ORDINARY, TASK_MODE_AUTO_REPAIR)
 
@@ -513,6 +520,15 @@ def _dispose_current_episode(
 
     if task_mode == TASK_MODE_NONE:
         row["state"] = STATE_OPEN
+        if str(row.get("class")) == CLASS_ORDINARY:
+            if int(row.get("occurrence_count") or 0) >= _threshold(row):
+                row["state"] = STATE_ESCALATED
+                row.setdefault("escalation", None)
+                return {
+                    "action": "escalate",
+                    "suggested_root_cause_task_id": suggested_root_cause_task_id(row),
+                }
+            return {"action": "none"}
         if not row.get("notified_at"):
             return {"action": "notify"}
         return {"action": "none"}
