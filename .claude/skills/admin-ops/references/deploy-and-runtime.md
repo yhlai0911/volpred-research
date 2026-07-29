@@ -1,125 +1,42 @@
 # Deploy And Runtime
 
-這份文件是 `admin-ops` 的 runtime / deploy 入口。
+只有程式、build-time environment 或 service configuration 變更才進部署 branch。內容、
+策略、問題與論文 metadata 優先走各自 ops sync。
 
-在以下情況先讀它：
-
-- Zeabur redeploy
-- worker / job / health 巡檢
-- session 啟動後要建 cron / monitor
-- 想判斷這次改動需不需要 redeploy
-- 想快速確認服務 ID、project ID、runtime ownership
-
-## 先判斷是不是平台層
-
-這份文件只處理：
-
-- deploy
-- runtime health
-- session automation
-- 平台層 verification
-
-如果是：
-
-- 研究實驗設計
-- 論文內容修訂
-- feed 文章內容寫作
-
-先切回對應 skill，不要直接從 deploy 入口處理。
-
-## 開工前先查
-
-1. `docs/error_log.md`
-2. `references/architecture.md`
-3. `references/session-cron-workflows.md`
-4. `scripts/session_startup.md`
-
-如果是 OAuth / proxy 問題，再看 `docs/zeabur-oauth-gotcha.md`
-
-## 系統地圖
-
-- 前端線上版：看 `config/project_targets.json` 的 `active_frontend`（目前 `frontend-v2-fix/`）
-- 主要服務：看 `config/project_targets.json` 的 `active_service`（目前 `volpred-v3`）
-- 平台資料源頭：`storage/`
-- 平台寫入口：`uv run volpred ops ...`
-- DB / Auth：Supabase
-- 記憶鏡像：Mirror API
-- 前端 / deploy / mirror target 的 source-of-truth：`config/project_targets.json`
-
-完整事實以 `references/architecture.md` 與 `docs/architecture.md` 為準。
-
-## 什麼情況不用 redeploy
-
-以下情況預設 **不需要 redeploy**：
-
-- 文章內容更新
-- feed / question / paper metadata 更新
-- PDF 上傳
-- paper trading / metrics 重算
-- 一般 `ops` CLI 同步
-
-這些通常只需要：
-
-- `uv run volpred ops ...`
-- 或 `daily_update.py` / `recalc_metrics.py` / `supabase_sync.py`
-
-## 什麼情況可能需要 redeploy
-
-通常要 redeploy 的是：
-
-- `frontend-v2-fix/` 前端邏輯或 UI 變更
-- runtime 環境變數變更
-- 服務層設定變更
-- 確認是部署產物而不是資料問題
-
-先問自己：
-
-1. 這是資料問題還是程式問題？
-2. 如果是資料問題，能不能走 ops surface 修正？
-3. 只有在程式或環境真的變了時才 redeploy
-
-## Zeabur 目前識別資訊
-
-**Source of truth = `config/project_targets.json` 的 `.deploy`**（含 `zeabur_project_id` / `zeabur_environment_id` / `services`）。換伺服器只改 config，**不要在文件硬編 ID**（2026-06-02 教訓：硬編 + script 硬編 env-id 導致換伺服器後 deploy 一直打到舊伺服器、build 後 REMOVED 從未上線）。取值 `jq '.deploy' config/project_targets.json`。
-
-現值（2026-06-02 換伺服器後）：
-- Project ID: `6a15c5a8f14c612a409a4d77`
-- Environment ID: `6a15c5a85dd63457627dd6c7`
-- `volpred-v3`（active）: `6a15c5a9938e05c2b6854116`
-- 舊伺服器（已遷移、勿用，保留於 config `.deploy._legacy_pre_20260602`）：Project `69b5b264800a475a1f82b073` / Env `69b5b2646853f6f4f5f6a16d` / volpred-v3 `69be521a1066986b9a1692be`
-
-## 常用命令
+## Resolve target at run time
 
 ```bash
-npx zeabur@latest auth status
-npx zeabur@latest service list --project-id <project_id from config> --json
-npx zeabur@latest service redeploy --id <service_id> -i=false -y
-cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh
-uv run volpred ops health
-uv run volpred ops jobs --status queued
-uv run volpred ops job-show <job_id>
-uv run volpred ops worker --poll-interval 10
+FRONTEND_KEY="$(jq -er '.active_frontend' config/project_targets.json)"
+FRONTEND_PATH="$(jq -er --arg key "$FRONTEND_KEY" '.frontends[$key].path' config/project_targets.json)"
+ACTIVE_SERVICE="$(jq -er '.deploy.active_service' config/project_targets.json)"
+LIVE_URL="$(jq -er '.site.default_remote_url' config/project_targets.json)"
+test -n "$ACTIVE_SERVICE"
+test -x "$FRONTEND_PATH/scripts/deploy-zeabur-safe.sh"
 ```
 
-## Session automation 規則
+不要把解析值貼回 skill、prompt 或 command。若 frontend key、frontend deploy service 與
+`.deploy.active_service` 不相容，先停止並修 `config/project_targets.json` 的 target
+transaction。
 
-- session cron / Monitor 都是 session-only
-- 每個新 session 都要重建
-- 固定 cadence 與 prompt 以 `scripts/session_startup.md` 為準
-- 若工作是 question rerank / content release / 平台巡檢，先讀 `session-cron-workflows.md`
+## Safe handoff
 
-## Deploy 後驗證
+部署只交給 active frontend 自帶的安全 wrapper：
 
-至少做以下檢查：
+```bash
+(cd "$FRONTEND_PATH" && ./scripts/deploy-zeabur-safe.sh)
+```
 
-1. `uv run volpred ops health`
-2. 需要時看 Zeabur service / deployment log
-3. 前端頁面或 `/admin/*` 是否反映預期變化
-4. 若是內容/策略/paper 相關變更，確認其實有沒有只需要 ops sync 而非 redeploy
+wrapper 應從 config 解析 provider target、等待新 deployment 進 terminal running state，
+並驗證 production APIs。任何 bypass 或 provider-level shortcut 都不是本 workflow。
 
-## 反模式
+## Verification
 
-- 遇到資料不同步就先 redeploy
-- 直接手改 DB / JSON 當成正常運營路徑
-- 把研究問題誤當成 deploy 問題
-- session 沒重建 cron / monitor 卻以為自動化還在
+至少保存：
+
+1. pre-deploy source identity 與 resolved frontend/service names；
+2. wrapper 回傳的 deployment identity 與 terminal status；
+3. wrapper 的 production API acknowledgement；
+4. `$LIVE_URL` 上本次改動 route 的真實 DOM／文字／console／screenshot readback。
+
+部署 output 只有 upload acknowledgement 時仍是 `contained`。只有 provider terminal
+receipt 與本次功能的 live readback 都符合才可宣稱完成。

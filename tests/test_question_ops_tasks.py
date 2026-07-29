@@ -49,6 +49,12 @@ def test_ensure_member_qa_task_creates_ranked_research_task(monkeypatch, tmp_pat
     assert next_tasks[0]["task_type"] == "member_qa"
     assert next_tasks[0]["question_id"] == "abc12345-0000-0000-0000-000000000000"
     assert next_tasks[0]["task_mode"] == "research"
+    description = next_tasks[0]["description"]
+    assert "question-claim abc12345-0000-0000-0000-000000000000" in description
+    assert "question-answer abc12345-0000-0000-0000-000000000000" in description
+    assert "question-finish" not in description
+    assert "--question-id" not in description
+    assert "--actor" not in description
 
 
 def test_ensure_member_qa_task_creates_evaluate_task_when_only_pending(monkeypatch, tmp_path: Path):
@@ -79,6 +85,29 @@ def test_ensure_member_qa_task_creates_evaluate_task_when_only_pending(monkeypat
     next_tasks = json.loads((tmp_path / "storage" / "next_tasks.json").read_text())
     assert next_tasks[0]["task_mode"] == "evaluate"
     assert "question-ranking-workflow" in next_tasks[0]["description"]
+    assert "question-finish" not in next_tasks[0]["description"]
+    assert "--question-id" not in next_tasks[0]["description"]
+
+
+def test_question_rerank_workflow_emits_only_current_cli_entrypoints(monkeypatch, tmp_path: Path):
+    _patch_project_path(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        questions,
+        "get_member_question_ranking_summary",
+        lambda source="user", limit=20: {
+            "health": {},
+            "answered_history": [],
+            "ranked_table": [],
+            "pending_questions": [],
+        },
+    )
+
+    workflow = questions.build_question_rerank_workflow(source="user", limit=5)
+
+    commands = "\n".join(workflow["next_commands"].values())
+    assert "uv run volpred ops question-ranking-summary" in commands
+    assert "uv run volpred ops question-rerank" in commands
+    assert "python -m volpred.cli" not in commands
 
 
 def test_ensure_member_qa_task_dedupes_existing_active_task(monkeypatch, tmp_path: Path):

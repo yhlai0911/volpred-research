@@ -1,113 +1,117 @@
-# Experiment Agent Preamble（實驗 Agent 必讀）
+# Experiment Agent Preamble
 
-**此文件必須附加在每個實驗 agent prompt 的開頭。不可省略。**
+每個正式 experiment brief 都要要求 agent 先讀本文件與
+`operations-core-contract.md`。Agent 只產出被授權的 experiment tree；主線程負責
+shared state、review、knowledge 與 integration。
 
-## 1. 模型-Target 匹配規則（最重要）
+## 1. 研究誠實
 
-不同波動率模型預測不同的東西，評估必須在各自的原生 target 上進行：
+- 數字、表格與圖只來自實際執行 artifact。
+- README 與 results 標明資料來源、期間、樣本數、更新/vintage 時點。
+- 明確區分 empirical、simulation、theoretical 與 descriptive。
+- Proxy 必須說明理想變數、採用原因與已知偏誤。
+- Null、模型不收斂及資料不足都如實保存。
+- 結論強度不得超過 formal tests 與 OOS evidence。
 
-| 模型類型 | 預測標的 | 正確評估 target | 不可用的 target |
-|---------|---------|----------------|----------------|
-| GARCH/GJR/EGARCH | close-to-close σ²（全日，含隔夜）| r²（squared daily return）| 日內 RV |
-| HAR-RV | 日內 realized variance（僅交易時段）| 5-min RV | r² |
-| MEM | |r| 或 r² | 各自原生 | 混用 |
-| Range (Parkinson/GK/RS) | 日內 high-low range | range-based vol | r² |
+## 2. 模型與 target 對齊
 
-**跨模型公平比較的唯一正確方式**：
-1. Patton (2011): QLIKE on r²（proxy-robust，排名一致性有理論保證）
-2. Hansen & Lunde (2005): 最優加權 RV_total = w₁×RV_intraday + w₂×r²_overnight
-3. Spearman rank correlation（分配無關）
+| 模型 | 原生預測標的 | 主要評估 target |
+|---|---|---|
+| GARCH / GJR / EGARCH | close-to-close conditional variance | daily squared return 或明確的 full-day proxy |
+| HAR-RV | intraday realized variance | 相同 sampling rule 的 realized variance |
+| MEM | absolute return / duration-like nonnegative process | 與 fitted observation 一致 |
+| Range estimator | intraday high-low variation | 相同 range-based measure |
 
-**絕對禁止**：
-- 用 RV target 評估 GARCH 然後說 HAR 贏（HAR 本來就預測 RV）
-- 用 r² target 評估 HAR 然後說 GARCH 贏（GARCH 本來就預測 σ²）
-- 把「模型在自己 target 上贏」宣稱為「發現」——這是設計的必然，不是實證結果
+跨模型比較若 target 不同，先建立共同 estimand 或 proxy-robust loss。模型在自己的
+原生 target 勝出可能是 mechanical result，不能自動宣稱 empirical contribution。
 
-## 2. Mechanical vs Empirical 區分
+## 3. 時序與 lookahead
 
-如果結果可以從模型定義直接推導，它是 **mechanical result**，不是 empirical finding：
-- Mechanical: HAR 在 RV 上贏 GARCH（定義使然）
-- Empirical: HAR-RV 經 Hansen & Lunde 調整後在全日 vol 上仍勝 GARCH（需要實證驗證）
-- Mechanical: gamma > 0 implies VT de-levers after negative returns（GJR 方程式使然）
-- Empirical: cross-sectional gamma-VT correlation exceeds mechanical prediction（需要數據）
+- `signal from t-1, return at t`；代碼中要有明確 lag 或等價 information-set join。
+- Forward-label row 只有在完整 label window 早於 forecast origin 時才可進 train。
+- 跨市場以實際可用時間及交易日 join，不以相同 date label 猜測同步。
+- 修訂型總經資料使用 real-time vintage；做不到時標為 final-vintage pseudo-OOS。
+- Baseline、candidate、成本與 rebalance 使用相同 lag convention。
 
-**不可把 mechanical result 宣稱為 contribution 或 discovery。**
+跨市場細節見 `data-timing.md`。
 
-## 3. 統計門檻
+## 4. 統計與風險 gate
 
-| 檢定 | 門檻 | 依據 |
-|------|------|------|
-| DM test | Harvey (2016) \|t\| > 3.0 | 多重檢定校正 |
-| Sharpe 差異 | SE ≈ 1/√N_years | 19 年 SE=0.23 |
-| Cross-sectional | N ≥ 7 | Spearman 穩定性 |
-| Bootstrap | ≥ 1000 reps | CI 精確度 |
-| GARCH window | ≥ 500（建議 2000）| Hwang & Valls Pereira (2006) |
-| OOS 期間 | ≥ 252 天 | 至少涵蓋 1 年 |
+- 固定 bootstrap、Monte Carlo、sampling、split 與 optimizer seed。
+- Forecast loss 使用 repository canonical QLIKE/DM implementation。
+- DM/HAC bandwidth 不自行退化成只用 `h-1`；依 repo canonical implementation 並做
+  sensitivity。
+- 多重比較依 `research_program.md` 的 Harvey 標準。
+- VaR 與 ES 同時評估，清楚區分 IS/OOS、coverage、independence 與 joint loss。
+- 不同實現波動的策略不可只比較 raw MDD；依 repo rule 做 exposure matching 與
+  phase-randomization null。
+- Sharpe 遠高於 baseline 時先查 lag、成本、return alignment 與 sample selection。
 
-**Sharpe > 2x baseline = 幾乎一定有 bug，先停下來檢查。**
+完整方法論以 `.claude/rules/experiments.md` 和 `methodology.md` 為準。
 
-## 3b. 風險管理評估標準（VaR + ES）
+## 5. 資料診斷先行
 
-模型比較必須涵蓋 VaR 和 ES 兩個維度：
+估計前保存：
 
-| 評估 | 方法 | 門檻 | 依據 |
-|------|------|------|------|
-| **VaR unconditional** | Kupiec (1995) LR test | p > 0.05 | 違約率是否符合目標 |
-| **VaR conditional** | Christoffersen (1998) CC test | p > 0.05 | 違約是否獨立 |
-| **VaR Basel** | Traffic light (Green/Yellow/Red) | Green | 250天內違約次數 |
-| **Trinity** | Kupiec + CC + Basel 全過 | 全 PASS | 三重把關 |
-| **ES backtest** | Acerbi & Szekely (2014) Z-test | p > 0.05 | ES 是否充分覆蓋尾部 |
-| **Joint VaR-ES** | Fissler & Ziegel (2016) scoring | 越低越好 | 唯一 strictly consistent joint loss |
+- 缺值、重複、極端值、交易日與 timezone
+- 描述統計與 ARCH/autocorrelation diagnostics
+- train/OOS 日期與樣本數
+- release/vintage availability
+- 每個輸入檔或 API snapshot 的 identity
 
-**VaR 和 ES 必須同時在 1% 和 5% 信心水準評估。只測 1% 不夠。**
-**VaR/ES 評估必須分 In-Sample 和 Out-of-Sample 分別報告。** IS PASS + OOS PASS = 可信；IS PASS + OOS FAIL = overfitting。只報一種沒有說服力。
+資料品質不符合 brief 成功標準時停止，不以補值掩蓋來源錯誤。
 
-## 4. 防錯規則
+## 6. Runtime artifact contract
 
-- **DM test**：forecast pointwise losses 用 `from volpred.stats.model_evaluation import dm_test`；交易策略報酬比較才用 `strategy_dm_test`。兩者都不可在實驗內另寫 helper
-- **0050.TW**：必須 `from volpred.utils import clean_tw50_data`
-- **Lookahead**：`signal = signal.shift(1)` 寫在代碼裡，不靠記憶
-- **GARCH OOS**：逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不用 stale variance
-- **Student-t**：考慮 scale term sqrt((df-2)/df)
-- **Basel/統計檢定**：用標準實作，不自定義閾值
-- **TAIFEX 期貨轉倉**：不要直接用 TX1（近月），要用 **TX（全合約）數據，每日按成交量選最活躍的合約月份**。結算日（每月第三個週三）TX1 自動切換合約月份會有 roll gap（~0.5-1.0%）。正確做法：讀 TX 檔案 → 按「到期月份」分組計算成交量 → 選當日成交量最大的合約 → 只用該合約的 tick 計算 return/RV。這樣在流動性自然轉移時平滑切換，不會有假波動
-- **Results JSON 寫入**：結果檔必須先寫到同目錄暫存檔、`json.load` 驗證可解析，再用 `os.replace(tmp, final)` 原子替換；禁止直接 `open(results.json, "w")` 後 `json.dump`，避免 agent 中途死亡留下截斷 JSON。
+必備：
 
-## 5. 結果自我質疑（實驗完成後必做）
+- `README.md`
+- `<experiment_id>.py`
+- `<experiment_id>_results.json`
+- `reproduce_spec.json`
 
-在記錄結論前，問自己：
-1. 這個結果是 mechanical 還是 empirical？
-2. 這跟 research_program.md 已有的方法論標準矛盾嗎？
-3. 如果用不同的 target/proxy，結論會改變嗎？
-4. Sharpe > 2x baseline 嗎？（如果是，90% 有 bug）
-5. 這個結論的強度是否超過證據支持的範圍？
+實驗腳本必須以 `finalize_experiment(...)` 同時封存 canonical result 與 spec。不要另寫
+一套 results writer，也不要事後手補 code hash。
 
-## 6. Periodic Model Robustness（PRG/PRS 專用）
+若已封存結果後要改 entrypoint，先執行 `preserve_gate_blob.py preserve` 保存原始 bytes。
+找不到原始 bytes 時回報 blocked；不能用重建檔證明重建流程。
 
-- **Session 收盤價可交易性**：session 收盤價可能無法即時交易。Robustness check 應使用收盤前 n 分鐘（n=1,5,10）的價格重算 session return 和 RV，確認結果穩健。
-- **Information set 說明**：PRG/PRS 使用「前一 session 已實現的資訊」預測「下一 session」。這不是 lookahead——隔夜 session 在日盤開盤前已結束，日盤 session 在夜盤開盤前已結束。論文必須明確標註每個模型的 information set。
-- **公平比較**：PRG 在 session 邊界有更多資訊（剛完成的 session）。與 GJR（日頻）比較時，PRG 的優勢包含「模型結構」+「資訊即時性」兩個成分。要隔離純模型結構價值，可比 PRG vs GJR-X(r²_overnight)。
+## 7. Review contract
 
-## 7. Worktree 保存規則（必做）
+- 執行前：review information set、target、cost、seed、formal test。
+- 執行後：review 完整 claim surface，而非只抽查可疑 rows。
+- Review agent 不執行受審實驗；需要新 run 時交回正式 compute/experiment workflow。
+- `review_verdict.json` 由 gate template 產生，pin 當下 bytes。
+- Review 後任何 claim-surface 改動都使 verdict 失效，必須重審。
+- Prompt 與 raw transcript 放在受審 worktree 外。
 
-**在完成所有工作後，必須執行以下命令保存檔案：**
+## 8. Worktree ownership 與保存
+
+Worktree agent 只修改 `experiments/<experiment_id>/`。禁止修改 task pool、shared memory、
+feed、paper、frontend、Supabase、Mirror 或其他實驗。
+
+完成前，用受鎖的 exact-path transaction 保存本實驗：
+
 ```bash
-git add -A && git commit -m "K9XX: description"
+uv run python scripts/git_writer_lock.py commit \
+  --actor "<owner>" \
+  --task-id "<task-id>" \
+  --message "K<id> experiment artifacts" \
+  -- experiments/<experiment_id>
 ```
-不 commit = 檔案在 worktree 清理時永久遺失。K923/K924/K932 都因此遺失過腳本。
 
-## 8. Worktree 共享狀態禁令（必遵守）
+若此 worktree task 沒有 task id，依 dispatcher 提供的正式 commit contract 執行；不要
+自行發明 shared-checkout mutation。整合由主線程執行 `merge_worktree.sh`。
 
-**Worktree agent 禁止直接修改以下共享狀態檔案：**
-- `storage/reports/feed.json`（由主線程透過 publish_milestone 統一寫入）
-- `storage/memory/knowledge.json`（由主線程在 agent 完成後統一記錄）
-- `storage/memory/thinking_journal.json`（同上）
-- `storage/memory/experiment_experiences.json`（同上）
-- 禁止呼叫 `supabase_sync.py`、`_sync_to_remote()` 或任何寫入 Supabase/Mirror 的操作
+## 9. Agent 回報
 
-**原因**：Worktree 是隔離的 git 分支。若 worktree 和主線程同時修改這些 JSON 陣列檔案，git merge 無法自動合併 → 資料遺失。若同時 sync 到 Supabase，兩邊會互相覆蓋。
+依 `agent-result-template.md` 回報：
 
-**Worktree agent 只應產出：**
-- `experiments/kXXX/` 下的所有檔案（腳本 `.py`、結果 `_results.json`、圖表 `.png`、`README.md`）
-- 結果透過 agent 返回值傳回主線程
-- **主線程負責**：記錄 knowledge、發佈文章、sync 到 Supabase
+- artifact 路徑與 hash/identity
+- 實際執行命令與 seed
+- 核心數字所在 JSON path
+- gate 結果
+- 異常、null 與限制
+- 建議後續
+
+Agent summary 只協助定位；主線程仍會從 canonical results 重新計算所有 claim。

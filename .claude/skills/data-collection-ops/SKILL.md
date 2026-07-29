@@ -1,63 +1,125 @@
 ---
 name: data-collection-ops
 description: >
-  資料收集 / 更新的常態運營流程 —— 所有資料 job 的排程、時效窗口、新鮮度判準、
-  靜默落後偵測、手動 recovery 指令。觸發時機：每日大體檢 data_freshness 維度有 finding、
-  「績效/資料卡在舊日期」、資料 job 疑似沒跑、要手動補資料、要新增資料源 job。
-  Trigger phrases: '資料沒更新', '績效卡在', '資料落後', 'daily_update', 'collect_us',
-  'collect_tw', 'twse_orderflow', '補資料', '資料新鮮度', 'data freshness', 'data recovery'.
-  Do NOT use for: 資料源代碼/欄位查詢（external-data-sources）、實驗用資料分析（autonomous-research）。
+  Diagnose and recover a VolPred data-collection freshness incident. Use when
+  a configured data job, dataset date, market-data snapshot, or downstream
+  metric is stale or missing.
 ---
 
-# 資料收集 Ops（常態資料更新流程 + recovery）
+# Data Collection Freshness Incident
 
-2026-06-30 incident：collect_us 3 天沒跑、twse_orderflow 12 天沒補、daily_update 因
-時間點抓到舊資料 → 線上績效卡在 6/26，全靠老闆發現。根因：無「資料 job 新鮮度」廣域監控
-+ 無 recovery SOP。本 skill 把這常態工作固化。
+本 skill 處理「資料為什麼沒有準時抵達」；資料欄位與 provider 選擇交給
+`external-data-sources`。
 
-**致命提醒**：盤中 / tick / order flow 類資料有**收集窗口**，錯過可能**永久無法補**。
-EOD（yfinance / FRED）多半可 backfill。判斷「是否時效性」決定急迫度。
+## Preflight
 
-## 資料 job 全表（排程 + 時效窗口 + recovery）
+先讀：
 
-| job | 排程(cron) | 抓什麼 | 時效性 | recovery 指令 |
-|---|---|---|---|---|
-| `daily_update` | `3 8 * * 1-6` + **新增 `5 15 * * 1-5`**（台股盤後，期貨需 14:30-15:00 才齊） | paper_trading + market_daily + 策略 metrics + sync | EOD 可補 | `uv run python scripts/daily_update.py` |
-| `collect_us` | `3 7 * * 2-6`（跳週一；週二抓週一 EOD） | 美股 EOD（SPY/QQQ/VIX/N225…）+ SPY 5min | EOD 可補 | `uv run python scripts/collect_us*.py`（或 wrapper） |
-| `collect_tw` | `0 15 * * 1-5`（台股盤後） | 台股 EOD | EOD 可補 | `uv run python scripts/collect_tw*.py` |
-| `collect_twse_orderflow` | **未排程（manual）→ 應加排程** | TWSE 委託流量 backfill | ⚠️ TWSE archive 有窗口，越久越可能漏 | `uv run python scripts/collect_twse_orderflow.py` |
-| `fred_backfill_guard` | 每日（週一更新 FRED） | FRED 總經 | 可 backfill | wrapper |
+- `.claude/skills/autonomous-research/references/operations-core-contract.md`
+- `config/runtime_schedules.json`
 
-注意：macOS host cron 只可靠 `0 * * * *`；其餘 cron pattern 走 **piggy-back `run_due_jobs`**（讀 `config/runtime_schedules.json` 的 `cron` 欄評估 due）。改排程 = 改 config 的 `cron` 欄即可（crontab entry 不 fire），見 `.claude/rules/control-plane.md`。
+每次 invocation 先執行：
 
-## 時間點陷阱（為何「今天卻顯示前幾天」）
+```bash
+uv run python scripts/task_pool_control.py status
+```
 
-`daily_update` 排 `08:03` 台北 —— **早於台股收盤 13:30、也早於美股當日數據**：
-- 週一 08:03 抓到的是上週五 EOD（週一台股/美股都還沒收）。
-- 所以週二早上前，最新只到上週五 → 看似「卡了好幾天」（再加週末）。
-- **修法（用戶 2026-06-30 指定）**：**增加**一個盤後更新點（台股 15:05，在 collect_tw 15:00 抓完之後、期貨資料已齊），保留原 08:03（美股盤前時效）。不是「改」是「加」。
+Task mode 只決定是否能建立 follow-up；資料 recovery 本身仍需依使用者交付範圍執行。
 
-## 每日大體檢的 data_freshness 維度
+## 1. 證據化症狀
 
-`scripts/daily_checkup.py` 已含 data_freshness：掃 `DATA_JOBS_EXPECTED_H` 每個 job 的 cron log mtime，超過預期 1.5× → warn、3× → critical，附 recovery 指令。**有 finding 直接跑 recovery，不只 alert。**
+先跑 compact summary：
 
-## Recovery SOP（發現資料落後時）
+```bash
+uv run volpred ops health
+```
 
-1. 跑 `scripts/daily_checkup.py` 看 data_freshness 哪些 job stale。
-2. 判時效性：order flow / 盤中 / tick → 最急（搶窗口）；EOD → 可從容 backfill。
-3. 直接跑對應 recovery 指令（背景跑重的，`nohup ... &` 或 run_in_background）。
-4. **Check**：跑完查資料檔最新日期 / 線上 API data_date 是否前進到最新交易日。
-5. 若 job 反覆不跑 → 查 cron config（piggy-back 有沒有讀到、wrapper 能不能 exec）+ 修流程不修資料。
+對疑似 job 設定 `JOB_ID` 後，動態讀 canonical spec：
 
-## 新增資料源 job 時
+```bash
+JOB_ID="<job-id>"
+jq --arg id "$JOB_ID" \
+  '.schedule_materialization,
+   (.system_crontab.items[] | select(.id == $id))' \
+  config/runtime_schedules.json
+```
 
-- 在 `config/runtime_schedules.json` 加 job（id/cron/wrapper_script），piggy-back 自動接。
-- wrapper 放 `~/.volpred/bin/`（TCC），canonical source 在 `scripts/`。
-- 同步把新 job 加進 `daily_checkup.py::DATA_JOBS_EXPECTED_H`（否則大體檢監控不到）。
-- 資料源代碼/欄位細節 → `external-data-sources` skill。
+再取得 `.schedule_materialization.receipt_path`，核對該 job 最新 scheduled fire、
+attempt、terminal status、generation 與 owner。不要從 skill 的歷史表格推算應跑時間。
 
-## 關聯
-- `.claude/rules/control-plane.md`（piggy-back scheduler / crontab 維運）
-- `.claude/skills/external-data-sources/SKILL.md`（資料源代碼）
-- `.claude/skills/pdca-operations/SKILL.md`（大體檢 + 發現即修）
-- `scripts/daily_checkup.py`
+同時回讀下游：
+
+- 最新 observation/data date
+- row count
+- output hash 或 mtime
+- 線上/API data date（若該 job有下游）
+
+Scheduler receipt 與資料 freshness 是兩份不同證據。
+
+## 2. 判定根因層級
+
+依證據分類：
+
+| 層級 | 判斷 |
+|---|---|
+| source availability | Provider 尚未發布、休市、修訂或 rate/auth failure |
+| collector logic | Parser/schema/date window/contract selection 錯誤 |
+| Operations Core | 沒有 matching fire、lease/retry/timeout/owner conflict |
+| wrapper/runtime | Canonical wrapper bytes、環境或權限錯誤 |
+| downstream handoff | Collector 成功但 storage、sync、API 沒收到正確 identity |
+| monitor/checker | 資料正確，但 freshness rule 或 expected calendar 錯誤 |
+
+根因不明時標 blocked，不把「手動跑成功」當根因。
+
+## 3. Recovery
+
+先判資料是否有不可回補窗口：
+
+- Tick、order flow、短 retention intraday：先保存 provider 可取得範圍與缺口 evidence。
+- EOD、FRED、官方歷史資料：使用 collector 支援的 bounded backfill。
+
+Recovery command 從 canonical job 的 wrapper/action 追到 repo implementation；不在 skill
+保存 wrapper 絕對路徑或複製 command。手動 recovery 是單次 operator action，不會取得
+排程 ownership。
+
+跑完後重做：
+
+1. output parse/read-back
+2. max data date與 row count
+3. downstream API/storage acknowledgement
+4. 重複執行的 idempotency 檢查
+
+只能完成上述 read-back 時才稱資料已 `contained`。
+
+## 4. Root-cause fix
+
+- Collector bug：修 canonical script與 regression fixture。
+- Schedule/spec bug：先改 `config/runtime_schedules.json`，再走 Operations Core owner
+  reconciliation，等待自然 fire receipt。
+- Wrapper drift：修 canonical source，部署正式 wrapper generation，核對 bytes。
+- Monitor bug：修 freshness/calendar checker，使同類落後無法靜默。
+
+不要新增第二個 clock、互動 session owner或 wrapper-side scheduler。
+
+## 5. 新增資料 job
+
+1. 資料 source contract 先由 `external-data-sources` 定義。
+2. Collector輸出寫到正式 canonical storage surface，並提供 idempotent bounded backfill。
+3. 在 `config/runtime_schedules.json` 增加 job spec。
+4. 接入 freshness checker、terminal receipt與下游 read-back。
+5. 走 Operations Core reconciliation及 natural-fire驗證。
+
+若需要 materialize後續 task，重新讀 task-pool mode；queued mode 才走 canonical producer，
+direct/restore/unreadable mode 不新增 legacy task identity。
+
+## Completion
+
+- [ ] Canonical spec與 task mode 都是本次 read-back
+- [ ] Scheduler receipt與下游 freshness分開驗證
+- [ ] Root cause定位到 source/collector/core/wrapper/handoff/checker
+- [ ] Recovery有 idempotent output read-back
+- [ ] 底層修正有 regression
+- [ ] 自然 Operations Core fire及下游 acknowledgement通過
+- [ ] 同類錯誤可被 monitor發現
+
+只有全部完成才可回報 `root_cause_fixed_and_verified`；否則使用 `contained` 或 blocked。

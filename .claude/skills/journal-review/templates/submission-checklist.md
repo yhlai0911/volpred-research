@@ -1,16 +1,17 @@
 # Generic Pre-Submission Checklist (floor — every journal extends)
 
-This is the MINIMUM gate for any submission. Each `references/<abbrev>.md` adds
-the journal's specific mechanical rules on top (abstract cap, highlights, fee,
-data policy, anonymization model). Run this FIRST, then the journal's own list.
+This is the MINIMUM gate for any submission. Each `references/<abbrev>.md` is a
+local checklist, not live authority. Run this first, then verify every material
+journal rule on an official page and record its URL and access timestamp.
 
 ## Compliance (hard — cross-ref `paper-workflow.md` / `publishing.md` rules)
 - [ ] **Authorship = Yi-Hao Lai (賴奕豪) ONLY.** No co-authors. No AI / agent
       listed as author (Elsevier/JFE/RFS forbid AI authorship).
-- [ ] **No "volpred" / "VolPred" / "AI" / "LLM" / "Claude" / "Codex" / agent /
-      model branding** anywhere — manuscript, title, abstract, metadata,
-      acknowledgements, filenames, figure captions, or code comments shipped in
-      the replication package. `grep -ri` the .tex + .bib + the package to prove it.
+- [ ] **No "volpred" / "VolPred" / "Claude" / "Codex" / agent/model branding**
+      anywhere — manuscript, title, abstract, metadata, acknowledgements,
+      filenames, figure captions, or shipped code comments. Required,
+      factually accurate AI-use disclosure is not branding and must not be
+      suppressed. Scan the full submission set and preserve the receipt.
 - [ ] If generative AI was genuinely used in preparation and the journal requires
       it (Elsevier/IJF/PBFJ), put a generative-AI-use declaration as a SEPARATE
       titled section before references — never satisfy it by branding the paper as
@@ -22,8 +23,8 @@ data policy, anonymization model). Run this FIRST, then the journal's own list.
       manuscript has NOT been presented at a seminar/conference and has NOT been
       peer-reviewed, so "I/we thank seminar participants / conference participants
       / (two) anonymous referees for helpful comments" is *fabrication*. Remove it.
-      Honest floor: "All errors are my own. Data and replication code are available
-      upon request." Add real thanks only after a real presentation/review.
+      Add real thanks only after a real presentation/review. Make a data/code
+      availability claim only when the package actually satisfies it.
 - [ ] **No internal experiment-registry IDs (K123 / K1234)** in any reader-facing
       text, table caption, footnote, or bibliography `\bibitem`. Reword to the
       paper's own "canonical replication" / Section / Table refs or "(replication
@@ -38,9 +39,13 @@ data policy, anonymization model). Run this FIRST, then the journal's own list.
       attribute work to the AI system — stay honest (do NOT falsify) and must NOT
       ship in the replication package.
 - [ ] **Automated gate (run last, must be CLEAN)**:
-      `python scripts/check_paper_compliance.py <paper-dir>` exits non-zero on any
-      VolPred / OpenAI / Codex / Claude / co-author (`\and`) / fabricated-ack /
-      K-id finding in the submission set. CI-style proof, not eyeballing.
+      `uv run python scripts/check_paper_compliance.py <paper-id> --json`
+      scans one paper using its installed positional interface. Preserve the
+      current candidate's findings and scanned-file closure.
+- [ ] If an official journal rule requires a truthful disclosure that the
+      current checker rejects, mark the compliance gate `BLOCKED` and create an
+      implementation/governance task. Never omit a required disclosure or
+      bypass the checker merely to obtain a clean receipt.
 
 ## Reproducibility (hard — cross-ref `experiments.md`)
 - [ ] Replication package regenerates EVERY table and figure from raw or
@@ -87,11 +92,13 @@ data policy, anonymization model). Run this FIRST, then the journal's own list.
       converged (no new structural/citation defects).
 
 ## Process
-- [ ] Submission fee budgeted + paid where required (JFE $850 · JBF $350 ·
-      PBFJ $220 · FRL $200 · JoE $75; RFS tiered; IJF/JoF/JPM/FAJ none) — confirm
-      scope fit BEFORE paying (non-refundable; forfeited on desk-reject).
-- [ ] Declarations completed (COI / funding / CRediT / generative-AI use) per the
-      journal's tool.
+- [ ] Current submission fee and refund terms verified on an official page,
+      with URL/access time recorded. Stop for the user before any payment.
+- [ ] COI, funding, CRediT, originality, and generative-AI declarations are
+      prepared from verified facts. Stop for the author before a legal
+      attestation or signature.
 - [ ] Cover letter prepared where required (`templates/cover-letter.md`).
-- [ ] Boss notified with target journal + fee + decision horizon + open risks
-      before the portal upload; actual submission is a boss decision.
+- [ ] Target, verified fee, expected decision horizon, and open risks recorded
+      in the submission receipt. Routine target/timing decisions use the
+      standing authorization; stop only at the non-delegable boundaries above
+      (or login/MFA).

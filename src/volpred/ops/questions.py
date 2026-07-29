@@ -1508,9 +1508,12 @@ def _build_member_qa_task_description(
     if mode == "research":
         workflow = (
             "執行流程：\n"
-            f"1. uv run volpred ops question-claim --question-id {question_id} --actor claude\n"
-            "2. 依 member_qa workflow 完成 research / write / question-answer / question-finish\n"
-            "3. 文章需 published（member_qa 不走 release pool）並加非投資建議 disclaimer\n"
+            f"1. uv run volpred ops question-claim {question_id}\n"
+            "2. 依 member-questions skill 完成 research、write 與正式發布\n"
+            f"3. uv run volpred ops question-answer {question_id} "
+            "--answer \"<會員答覆>\" --article-id <published article slug>\n"
+            "4. 回讀 question-ranking-summary 與公開文章；member_qa 不走 release pool，"
+            "並須含非投資建議 disclaimer\n"
         )
     else:
         workflow = (
@@ -1518,8 +1521,9 @@ def _build_member_qa_task_description(
             "1. uv run volpred ops question-ranking-workflow --source user --output-json /tmp/q_workflow.json\n"
             "2. 主線程逐題做 4 維度評分（研究可行性 / 讀者價值 / 研究相關性 / 預期影響力）\n"
             "3. uv run volpred ops question-rerank --evaluations-json /tmp/q_evals.json\n"
-            f"4. rerank 後如本題入榜，再 uv run volpred ops question-claim --question-id {question_id} --actor claude\n"
-            "5. 完成 research / write / question-answer / question-finish\n"
+            f"4. rerank 後如本題入榜，再 uv run volpred ops question-claim {question_id}\n"
+            "5. 依 member-questions skill 完成 research、write、正式發布與 question-answer\n"
+            "6. 回讀 question-ranking-summary 與公開文章\n"
         )
     return (
         f"Member question id: {question_id}\n"
@@ -1565,8 +1569,8 @@ def build_question_rerank_workflow(
         ],
         "evaluation_template": evaluation_template,
         "next_commands": {
-            "read_summary": f"uv run python -m volpred.cli ops question-ranking-summary --source {source} --limit {limit}",
-            "apply_rerank": "uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/evaluations.json",
+            "read_summary": f"uv run volpred ops question-ranking-summary --source {source} --limit {limit}",
+            "apply_rerank": "uv run volpred ops question-rerank --evaluations-json /path/to/evaluations.json",
         },
     }
     if write_latest:

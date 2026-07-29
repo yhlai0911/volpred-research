@@ -1,7 +1,11 @@
 # Journal Picker — Comparison Table
 
 Read this first to narrow to 1-2 candidates, then open `references/<abbrev>.md`.
-Confirm **scope fit before paying any submission fee** (most are non-refundable).
+This table is a cached routing aid, not current submission authority. Before a
+gate can pass, reverify scope, format, review model, fees, data/code policy,
+portal requirements, and decision-time claims on official pages; record URLs
+and access timestamps in the current journal-review report. Confirm **scope fit
+before paying any submission fee** (most are non-refundable).
 
 | Journal | Abbrev | Tier | Scope one-liner | Length limit | Abstract | Distinctive requirement | Typical first-decision |
 |---|---|---|---|---|---|---|---|

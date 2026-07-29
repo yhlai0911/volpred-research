@@ -1,79 +1,88 @@
-# Agent Brief Template
+# Experiment Agent Brief Template
 
-**每個 agent prompt 必須填寫此模板。不可省略任何段落。**
+主線程填完所有欄位後才派工。Experiment agent 同時必讀
+`experiment-preamble.md` 與 `operations-core-contract.md`。
 
-主線程負責填寫 WHY 和 CONTEXT，確保 agent 知道為什麼要做這件事。
-Agent 完成後，主線程根據動機和結果做解讀，不是照搬 agent 的結論。
+## Identity
 
----
+- Task id：
+- Owner token：
+- Reserved experiment id：
+- Worktree / agent identity：
+- 唯一 write scope：`experiments/<experiment_id>/`
 
-## 任務（WHAT）
+## WHAT
 
-[具體要做什麼——明確的實驗設計、模型、數據、評估指標]
+[可推翻的研究問題、模型、資料、baseline、主要 metric 與正式檢定]
 
-## 動機（WHY）
+## WHY
 
-[為什麼要做這個實驗？至少回答以下問題：]
-- 這個實驗要回答什麼問題？
-- 跟哪些先前實驗相關？（引用 K 編號和結論）
-- 如果結果是正面/負面，分別代表什麼？
-- 用戶的關切是什麼？（如果有）
+- 要支援哪個研究或決策問題：
+- Related K 與已知結論：
+- 本次增量：
+- 正面結果代表：
+- Null 結果代表：
+- 失敗/資料不足代表：
 
-## 此實驗特有的約束
+## Data contract
 
-[只列「這次實驗」需要特別注意的規則，不重複 preamble 的通用規則]
-[通用方法論（模型-target 匹配、統計門檻、防錯規則）已在 experiment-preamble.md 中，不需重複]
+- Source / series：
+- Retrieval/vintage：
+- Availability timestamp：
+- Period：
+- 預期樣本數：
+- Proxy 與偏誤：
+- Input identity 要如何寫入 reproduce spec：
 
-例：
-- 此實驗用 0050.TW → 必須 `clean_tw50_data`（preamble 沒有這條，是資產特有的）
-- 此實驗做期貨避險 → 注意 roll gap 處理（preamble 第 4 節有，但此處強調因為本實驗會碰到）
-- 此實驗的 baseline 是 K687 的 BH 50/50（Sharpe 0.545）→ 超過 1.09 就可疑
+## Method contract
 
-## 成功標準
+- Empirical / theoretical / simulation / descriptive：
+- Forecast origin 與 target horizon：
+- Train/OOS split：
+- Lag convention：
+- Transaction cost：
+- Seeds：
+- Formal tests / multiple-testing correction：
+- Relevant error-log rules：
 
-[怎樣算做完？怎樣算異常需回報？]
+## Artifact contract
 
-例：
-- 完成：產出 results.json + 至少 1 張圖表 + README.md
-- 異常：Sharpe > 2x baseline、parameter 在邊界上、HE < 0
-- 失敗：數據不足 (<252 日)、模型不收斂
+- `README.md`
+- `<experiment_id>.py`
+- `<experiment_id>_results.json`
+- `reproduce_spec.json`，由 runtime `finalize_experiment` 同步建立
+- 圖表、loss sidecar、diagnostics（如適用）
 
-## 相關知識
+Agent 不寫 shared memory、task pool、feed、paper、frontend 或 remote systems。
 
-[引用相關 K 編號和結論，讓 agent 建立在已有基礎上]
+## Acceptance
 
-例：
-- K849：HAR-RV 在 RV target 上勝 GJR（DM t=-11.14）——預期結果
-- K847：隔夜 gap 61% 可交易
-- K687：正確 lag 後沒有 VT 策略打敗 BH 50/50
+- 成功：
+- Null：
+- Blocked：
+- 必須停止的 anomaly：
+- Gate commands：
 
-## 審查型 brief 的範圍限制（READ ONLY）
+## Review-only override
 
-**只有當本 brief 是「審查實驗程式碼」而非「執行實驗」時才填寫此段——但那時必須逐字帶上：**
+若此 brief 是 review，而非 execution，逐字加入：
 
-> **READ ONLY —— 不得執行受審的實驗腳本。** 需要輸出佐證時引用既有 artifact；
-> 若審查結論取決於一個尚未存在的執行結果，回報「execution request」給主線程，
-> 由主線程走 compute queue 派工，不要自己跑。
+> READ ONLY. Do not execute the reviewed experiment. Reconstruct claims only from
+> existing artifacts. If a verdict needs a missing run, return an execution request
+> to the main thread. Do not modify the reviewed tree except for the gate-generated
+> review verdict explicitly authorized by the brief.
 
-理由（2026-07-21 K1623 arm C 事件）：`feature-dev:code-reviewer` subagent 被派去審 `k1623_rev3_armc_mc.py`，
-自行執行了該腳本。跑程式在一般 code review 是勤勉；但**實驗程式碼的執行是受控動作**，
-必須經 compute queue、post-run gate 與 provenance 三道，才有可引用的來源。
-該次數字未受污染（產物已隔離到 `/tmp/k1623_quarantine/`、標記 `preview_numbers_not_citable`、
-事後對帳與正式 queue run 完全一致），受損的是**審查獨立性**，不是數字。
+Review prompt/transcript 寫在受審 worktree 外。
 
-根因是 brief 只說了「審查這段程式碼」，從沒說「不要執行它」。所以修在模板——
-約束必須在**派工當下**抵達 agent，而不是再加一層散文提醒。
+## Required reading
 
-## 必讀文件
+- `.claude/skills/autonomous-research/references/experiment-preamble.md`
+- `.claude/skills/autonomous-research/references/operations-core-contract.md`
+- `.claude/rules/experiments.md`
+- `docs/error_log.md` 的指定條目
+- [本題其他 primary references]
 
-[列出 agent 必須讀取的檔案路徑]
+## Return format
 
-- `.claude/skills/autonomous-research/references/experiment-preamble.md`（通用方法論規則——模型-target 匹配、統計門檻、防錯規則。此模板的「特有約束」是補充，不是替代）
-- [其他相關的 skill 或參考文件路徑]
-
----
-
-**本模板與 experiment-preamble.md 的關係：**
-- **Preamble**（靜態）= agent 必須遵守的通用方法論規則（不隨實驗變化）
-- **Brief**（動態）= 這次實驗的具體任務 + 動機 + 特有約束（每次不同）
-- Agent prompt 的結構：`[preamble 全文] + [填好的 brief] + [結尾提醒用 result-template 格式回報]`
+使用 `agent-result-template.md`。所有 numeric claims 同時提供 canonical result JSON path；
+主線程會獨立重建，不會採信 summary。

@@ -1,93 +1,81 @@
 ---
 name: member-questions
 description: >
-  會員問題研究。每 6 小時由 cron 自動觸發。評估排名會員提問，
-  選最高分做研究，回答發佈為 feed 文章（proposer=會員名稱），
-  問答頁自動連結文章。每次只處理一個問題。
-  Trigger phrases: '會員問題研究', 'member questions', '提問排名', '評估會員問題',
-  'question ranking', 'question rerank'. Do not use for the core experiment itself
-  (use autonomous-research), article writing (use feed-publisher), or general
-  platform surfaces unrelated to member questions (use admin-ops).
-model: sonnet
-effort: low
+  評分、stable-rerank、atomic claim、發佈綁定與回讀會員問題。
+  用於會員提問排行或回答 lifecycle；研究交給 autonomous-research，文章交給 feed-publisher。
 context: fork
 user-invocable: true
 ---
 
-# 會員問題研究
+# 會員問題流轉
 
-這個 skill 是會員問題審查與流轉的唯一母本。它負責：
+本 skill 是 question lifecycle 的執行母本，不擁有觸發 cadence。每次只承接一題，所有
+mutation 走 `uv run volpred ops`，以 receipt + live readback 結案。
 
-- 評分 `pending_questions`
-- stable insertion rerank
-- atomic claim 防撞
-- candidate lifecycle
-- `question-answer` 綁定
-
-它不負責：
-
-- 真正的研究與新實驗：交給 `autonomous-research`
-- 文章內容寫作與圖表：交給 `feed-publisher`
-- 一般平台後台操作：交給 `admin-ops`
-
-## 核心原則
-- **每個回答 = 一篇完整資訊性文章**（1000-2000 字，委託研究報告等級）
-- **每次只處理一個**（排名最高且尚未被承接的問題）
-- **先研究再回答**（不能只複製現有 knowledge，要有新分析或數據驗證）
-- **proposer = 會員名稱**（不是 Claude）
-- **會員是付費的**——品質等同一般讀者文章（場景、表格、操作建議、風險說明）
-- **排名更新採 stable insertion**：待評分題目插入既有榜單，但原 ranked 榜單彼此相對順序不可變
-- **固定表格欄位**：排名 / 前次排名 / 主題 / 提出者 / 狀態
+若上游要求 materialize／dispatch member-QA work，先讀
+`storage/ops/task_pool_mode.json`，再走該 mode 接受的 canonical ingress；本 skill
+不直接建立 task，且 admission refusal 必保留 structured receipt。
 
 ## 流程
-1. 先讀目前榜單與待評分題目：
-   - `uv run volpred ops question-ranking-summary --limit 20`
-   - 或 `/api/admin/questions/summary`
-2. 對 `pending_questions` 逐題做 LLM 評分，產生：
-   - `score`
-   - `score_breakdown`
-3. 呼叫 `question-rerank`，把待評分題目插入既有榜單適當位置：
-   - 只插入新題目
-   - 舊榜相對順序不可變
-   - 更新 `current_rank` / `prev_rank` / `status`
-4. 從 ranked 榜單挑最高分且未承接題目
-5. **Atomic claim（跨 session 防撞必做）**：
-   - `uv run volpred ops question-claim <question_id>`
-   - 成功（exit 0）→ 繼續做研究
-   - 失敗（exit 2，claimed=False）→ 代表另一個 session 已經接走，挑下一題重試
-   - 機制：Supabase 條件式 PATCH `status=ranked → researching`，原子操作
-6. 若進研究候選池，遵循 lifecycle：
-   - `queued` → `claimed` → `completed` / `cancelled`
-7. 做研究（LanceDB 搜尋 + Agent 實驗 if needed）
-8. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --category member_qa --audience member_qa --proposer 會員名稱 --status published --tags "會員提問,..."`  
-   - **必須傳 `--category member_qa`、`--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
-   - **member_qa 是 reader-facing immediate flow**：不要先存 `draft` 等 release pool
-   - ⚠️ **發佈端查重 gate（2026-07-19 STRIKE 2）**：`details.question_id` 對應的問題若已有 published/scheduled 文章，publish 會直接 raise `MemberQaDuplicatePublishError` 並列出既有文章 id。這是唯一守在讀者可見面的閘門，上游 gate 全被繞過它仍成立。刻意續作（先發初步、後補深入）才加 `--supersedes <既有文章id[,...]>`，且必須列出**全部**既有答覆文章 id——它不是萬用旁路旗標。
-9. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
-   - `question-answer` 綁 published 文章後，問題應直接進 `answered`
-   - ⚠️ **不要手動 patch 問題狀態**——交給 `question-answer` / `question-finish` 正式流程
-   - 冪等：該問題若已綁過 published 文章，`question-answer` 回傳 `skipped=already_answered`（不再綁第二篇、`answered_at` 只記首答）。這是正常拒絕，不是失敗——除非確為刻意續作（`allow_reanswer=True`）。
-10. `question-answer` 綁定成功即為終態（回傳 `status=answered`）。**`question-finish` 這個 CLI 指令不存在**（2026-07-12 K1700 收尾時實測 `No such command`）——不要再呼叫它；候選池的清理走 `question-ops-maintain`。
-11. 回報：處理了哪個問題、發了什麼文章、問題狀態（`answered` / `completed`）
 
-## 測試 / Spam 清理
+1. **讀取**
 
-當 ranking 榜首被明顯的測試輸入（鍵盤亂按、重複字元 >70%、< 10 字、無語意）卡住時，先不做研究而是歸檔：
+   ```bash
+   uv run volpred ops question-ops-maintain --stub-if-no-work
+   uv run volpred ops question-ranking-summary --limit 20
+   ```
 
-```bash
-uv run volpred ops question-archive <question_id> --reason "<e.g. test_input_2026-04-20>"
-```
+   沒有 pending／ranked work 就停止；不要建立空任務。
 
-- `question-archive` 無條件 force `status='archived'`（跟 `question-claim` 不同，不要求 status='ranked' 前提）
-- Archived 不會進 `active_ranked` 也不會出現在 summary，但 row 保留供 audit
-- 判斷標準依 CLAUDE.md 研究誠實原則 — 不對無意義 input 寫 1000-2000 字研究文章（= 虛構）
-- 建議同時通知 user 有 spam 被歸檔
+2. **評分與 stable insertion**
 
-## 詳細實作
-見 [references/evaluation-guide.md](references/evaluation-guide.md)：
+   pending 存在時讀 `references/evaluation-guide.md`，產 evaluation array，再執行：
 
-- 評分標準與 `score_breakdown`
-- stable insertion 規則
-- candidate / question status lifecycle
-- `question-answer` 綁定規範
-- 常見錯誤與邊界案例
+   ```bash
+   uv run volpred ops question-rerank \
+     --evaluations-json /tmp/member-question-evaluations.json
+   uv run volpred ops question-ranking-summary --limit 20
+   ```
+
+   第二次 summary 必須證明每個 evaluation 被套用、舊 ranked 題彼此相對順序未變。
+
+3. **Atomic claim**
+
+   ```bash
+   uv run volpred ops question-claim <question_id>
+   ```
+
+   只有 exit 0 且 receipt `claimed=true` 才能開始。exit 2 代表 claim lost 或 duplicate
+   gate 拒絕；依 receipt 改選下一題。重複題預設連結既有回答；真正新角度才依
+   `question-claim --help` 提供可稽核理由。理由 receipt 缺失時停止。
+
+4. **研究與文章 handoff**
+
+   把已 claim 的原題、會員名稱、question id 與成功 claim receipt 交給
+   `autonomous-research`；可發佈結果再交給 `feed-publisher`。member QA 發佈必須使用
+   `audience=member_qa`、會員 proposer、exact question id，且直接 `published`。
+   發佈 command 的 live syntax 以 `uv run volpred ops publish-milestone --help` 為準。
+
+5. **先驗文章，再綁問題**
+
+   從 publish receipt 取得 article id，先以
+   `config/project_targets.json.site.default_remote_url` 的
+   `/api/publications/feed/<article_id>` 確認 reader 可見，再執行：
+
+   ```bash
+   uv run volpred ops question-answer <question_id> \
+     --answer "<可公開摘要>" --article-id <article_id>
+   ```
+
+6. **獨立回讀**
+
+   再跑 `question-ranking-summary`，確認 exact question 進 `answered`、
+   `linked_articles_count >= 1`，且 public article 的 question identity、audience 與
+   proposer 正確。CLI exit 0 或 UI toast 都不能代替這兩段 readback。
+
+完成條件：rerank（若需要）、claim、publish、answer receipts 全可追溯，question 與
+reader-facing article exact match。任一步只有止血或缺 readback，狀態是 `contained`。
+
+明顯 spam／測試輸入走
+`uv run volpred ops question-archive <question_id> --reason "<audit reason>"`，並以 summary
+確認已離開 active ranking；不要直接改狀態。

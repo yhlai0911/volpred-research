@@ -1,169 +1,97 @@
 ---
 name: paper-review-cycle
 description: >
-  跑論文審查迴圈：並行 latex-academic-reviewer + citation-verifier → 歸檔到
-  review_history/v(n)/ Markdown reports → 寫 round README。Stage 由
-  paper-stage-classifier 決定，修訂由 paper-update。Trigger phrases:
-  'review cycle', '跑論文審查', 'review_history', 'paper review round'. Do not
-  use for stage 判定（use paper-stage-classifier）或主線程修稿與同步（use
-  paper-update）。
-model: opus
-effort: medium
+  Orchestrate and archive a read-only review round for the current paper
+  candidate: reproducibility preflight, LaTeX review, citation verification,
+  and optional journal review. It does not revise the paper or own pipeline
+  state.
 user-invocable: true
 ---
 
-# Paper Review Cycle SOP
+# Paper Review Cycle
 
-**只負責「跑審查 + 歸檔」**。不分類（→ paper-stage-classifier）、不修訂（→ paper-update）。
+This skill runs reviewers and records evidence. Main-thread revision belongs to
+`paper-update`; the unique stage model and any transition belong to
+`paper-submission-pipeline`.
 
-## Scope Boundary
+Before use, read
+`../paper-update/references/reproduce-gate-rules.md`.
 
-Use this skill for：
+## 1. Identify the candidate
 
-- 併行啟動 review agents
-- 收集 review 結果
-- 寫 round README
-- 維護 `review_history/`
+- Resolve the paper entry point, included sources, bibliography, figures, and
+  compiled PDF.
+- Record SHA-256 for every reviewed input.
+- Read current pipeline state with:
 
-Do **not** use this skill for：
+  ```bash
+  uv run python scripts/paper_pipeline_check.py
+  ```
 
-- stage 判定 → `paper-stage-classifier`
-- 主線程修稿與同步 → `paper-update`
+This checker is a read model, not a transition writer.
 
-## 當下啟動條件
+## 2. Reproducibility preflight
 
-任一以下情況啟動一輪 review cycle：
-1. 論文進入 `review` 或 `ready_for_submission` stage（首次）
-2. v(n+1) 已完成修訂，需要新一輪審查
-3. **每月最低 1 次**（Ready 論文，catch reviewer-style 問題）
-4. 用戶要求
-
-## 標準執行（4 步）
-
-### Step 1: 並行啟動兩個 review agents
-
-**⚠️ 關鍵：審查 agent 通常派 Codex-based subagent（`codex:review` / `codex:codex-rescue`）。透過 codex-companion runtime，Codex 可讀 project root 任何檔（含 `.claude/skills/`）。prompt 必須明寫 skill path 否則 agent 瞎做不符合規範 → 主線程要重派燒 token。**
+Build a manifest from every experiment/result used by a headline claim, table,
+or figure. For each experiment, run the existing checker using its verified
+interface:
 
 ```bash
-# Agent 1 (citation-verifier, Codex-based)
-prompt: "先讀 .claude/skills/citation-verifier/SKILL.md 掌握規範。
-        接著對 paper/<id>/main_v<n>.tex 跑完整 citation verification：
-        APA format / DOI / author / quoted-content accuracy / cited-fact verification via web search。
-        輸出報告到 paper/<id>/review_history/v<n>/citation_check_report.md
-        Format: Markdown，含 severity (MAJOR/MED/MINOR) + suggested fix。"
-
-# Agent 2 (latex-academic-reviewer, Codex-based)
-prompt: "先讀 .claude/skills/latex-academic-reviewer/SKILL.md 和
-        .claude/skills/latex-academic-reviewer/references/review-criteria.md。
-        對 paper/<id>/main_v<n>.tex + body_v<n>.tex 做完整學術審查：
-        logic / argument / model / equation / symbol / citation / 結構。
-        輸出報告到 paper/<id>/review_history/v<n>/academic_review_report.md
-        Format: Markdown，含 severity + suggested fix + academic-score 1-5★。"
+uv run python scripts/reproduce_check.py run --experiment <K-id> --timeout <seconds>
 ```
 
-**並行**（非串行）以省時間。兩 agent 互不依賴。兩個報告都要**存進 paper 資料夾的 `review_history/v<n>/`**（不是放 `/tmp` 或散在 project root），這樣整包 paper 資料夾 self-contained，投稿時附上 replication package 可帶審查紀錄。
+Also verify source binding: manuscript number, result artifact, experiment,
+period, sample, code/spec identity, and figure/table source must agree. Abort
+the review with `BLOCKED` if a required experiment fails, is missing, or the
+candidate cites a different snapshot.
 
-### Step 2: 等兩 agents 回報
+## 3. Run independent reviews
 
-待兩個 review 都產出後再進入 step 3。一個完成另一個還沒，**不要**先動 v(n+1) 修正。
+Run these read-only reviewers in parallel on the **same hashes**:
 
-### Step 3: 寫 round summary README
+- `latex-academic-reviewer`
+- `citation-verifier`
 
-`paper/<id>/review_history/v<n>/README.md`：
+Run `journal-review` as well when a target journal/article type is selected or
+when testing a submission gate. Review agents must not edit `.tex`, compile a
+replacement PDF, or update metadata/state.
 
-```markdown
-# Review Round v<n> — <paper-id>
+## 4. Archive the round
 
-**Date**: YYYY-MM-DD
-**Triggered by**: <stage entry / user request / monthly cycle / new evidence>
-**Reviewers**:
-- citation-verifier (agent <id>)
-- latex-academic-reviewer (agent <id>)
+Create the next immutable directory under the paper's existing
+`review_history/v<n>/` convention and save:
 
-## Overall Assessment
-| Reviewer | Verdict | Rating |
-|----------|---------|--------|
-| Citation | <X MAJOR / Y minor / Z MED> | ✅/⚠️ |
-| Academic | <verdict + 預測 journal response> | <stars> |
+- LaTeX review report;
+- citation report;
+- journal report, when run;
+- reproducibility/source-binding manifest;
+- `README.md` round manifest.
 
-## Issues Summary
-### HIGH severity (N) — blocking submission
-1. ...
-### MEDIUM (M)
-1. ...
-### Minor
-- ...
+The round manifest records candidate hashes, reviewer/report hashes,
+timestamps, commands used, verdicts, unresolved findings, and the previous
+round. Never overwrite an older round.
 
-## Action Plan for v<n+1>
-**主線程必修**:
-1. ...
-**可 deferred 到 v<n+2>**:
-- ...
-**Prediction**: if all HIGH fixed → ?★/5
+## 5. Decide the round result
 
-## Files in this round
-- citation_check_report.md
-- academic_review_report.md
-- README.md (本檔)
+- `PASS`: reproducibility/source binding pass, LaTeX review has no
+  CRITICAL/MAJOR finding, citation review has no MAJOR finding or unresolved
+  central source, and any required journal review passes.
+- `FAIL`: the candidate is reviewable but has a blocking finding.
+- `BLOCKED`: required evidence, source, candidate identity, or official rule
+  cannot be verified.
 
-## Next round trigger
-After 主線程完成 v<n+1> 修正 → 新一輪 → 寫入 review_history/v<n+1>/
-```
+On `FAIL`, give the main thread an ordered revision list for `paper-update`.
+After any revision, all reports whose input hashes changed are stale and a new
+round is required.
 
-### Step 4: 更新 stage（呼叫 paper-stage-classifier 邏輯）
+On `PASS`, hand the immutable round evidence to
+`paper-submission-pipeline`. Do not advance state here.
 
-依 review 結果判定 paper 應停留在哪個 stage：
-- 若 latex ≥ 4★ + citation 0 MAJOR + ≤3 MED → 升 ready_for_submission
-- 否則 → 留 review，等 v(n+1) 修正
+## State-write rule
 
-→ `volpred ops paper-upsert --paper-id <id> --stage <stage>` (若 CLI 支援)
-→ `next_tasks.json` 對應任務 description 同步更新
-
-補充：
-- 這裡更新 `next_tasks.json`，只是在維持 legacy paper working list / human-readable follow-up。
-- v11 之後，正式 orchestration 狀態仍以 `storage/ops/` control plane 與 `config/runtime_schedules.json` / `event_jobs` 為準；`next_tasks.json` 不是 canonical scheduler queue。
-
-## Review Report Archive 規則（MUST）
-
-```
-paper/<id>/
-└── review_history/
-    ├── v1/
-    │   ├── citation_check_report.md
-    │   ├── academic_review_report.md
-    │   └── README.md
-    ├── v2/...
-    └── ...
-```
-
-- **每跑一輪建新版本目錄**
-- **舊 reports 不可覆蓋**——同 filename 在新版本目錄
-- **Format = Markdown**（review 是 working doc，不是 publication doc）
-- 公式用 inline `$...$`（KaTeX/GitHub 原生支援）
-- 引用論文 sec/eq 用文字 `"§4.3, eq.(7)"`，不用 `\ref{}`
-- **罕見場景**才用 `appendix_v<n>.tex`：reviewer 提出新數學推導
-- **Git track 全部 commit 進 repo**（review_history 不放 .gitignore）
-
-## 為什麼 review report 必須 archive
-
-1. 6 個月後 reviewer 問「為何這篇 paper 改了 5 次？」→ 翻 review_history 即知
-2. 提交 journal 時可附 prior review log 證明 rigor
-3. catch deferred fixes（v1 deferred 的問題 v2 必查）
-4. 學術誠實：審查痕跡完整，無 cherry-pick
-
-## Agent prompt 必含的歸檔指令
-
-當啟動 review agent 時，prompt 必寫死輸出 path：
-```
-"...output the report to paper/<id>/review_history/v<n>/{citation_check_report.md|academic_review_report.md} —
-do NOT write to paper/<id>/ top-level."
-```
-
-避免寫到 top-level 後手動 mv（本 session 已踩過坑）。
-
-## 與其他 skill 的關係
-
-- **stage 判定**（什麼時候該跑 cycle、cycle 後升 stage）→ `paper-stage-classifier`
-- **修訂操作**（v(n+1) tex 編輯 + 編譯 + 平台同步）→ `paper-update`
-- **review 內容方法論**（什麼是好 citation 審查、什麼是好 latex 審查）→ `citation-verifier` + `latex-academic-reviewer`
-- 本 skill 只負責 cycle 編排 + archive
+Never edit a tracker or database directly. A transition may be executed only
+through an already-existing canonical writer/CLI whose `--help` has been
+verified in the current checkout. If no such transition surface exists, the
+pipeline remains `BLOCKED` and the main thread must create a
+governance/implementation task through the currently canonical task-creation
+surface. Do not substitute a queue edit, metadata field, or invented command.

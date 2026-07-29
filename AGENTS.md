@@ -301,6 +301,12 @@ hash 不上那個值、`gate_history/` 又沒有原件，`check_experiment_artif
 - **新建 skill**：可自主用 `.claude/skills/<name>/SKILL.md` 建立，之後口頭通知 owner
 - **修改既有 skill**：**必寄 email** 給 owner（`send-alert --title "Skill 修改通知: <name>"`），
   含 diff 摘要 + 觸發 incident + 影響範圍。此規則原本只寫在 `CLAUDE.md`，Codex 讀不到而漏守。
+- **全量架構 gate**：skill 程序不得保存 queue mode、cron、service ID、model 或其他 runtime
+  snapshot；每次從 `storage/ops/task_pool_mode.json`、`config/runtime_schedules.json`、
+  `config/project_targets.json`、`config/supervisor_rules.json`、`config/models.json` 與
+  對應 canonical writer 解析。新增／修改／合併／退役必同步
+  `config/skill_registry.json`、supervisor dispatch 與 workflow projection，並跑
+  `python3 scripts/check_skill_architecture.py`；未全量通過不得宣稱 skill migration 完成。
 
 ### Matt Pocock flow
 

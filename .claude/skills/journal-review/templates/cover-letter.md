@@ -12,7 +12,10 @@ have specific rules — check `references/<abbrev>.md` before filling:
   original manuscript number + point-by-point response), optional for new.
 
 Keep it to one page. Plain, specific, no AI-style filler. Author = **Yi-Hao Lai
-(賴奕豪)** only. No "volpred" / "AI" / "LLM" / agent branding anywhere.
+(賴奕豪)** only. No internal system or agent branding. If the journal requires
+an AI-use declaration, provide a separate factual disclosure. Originality,
+conflict, authorship, and signature language below are author attestations:
+leave them visibly pending until Yi-Hao Lai confirms them.
 
 ---
 
@@ -41,11 +44,12 @@ result and its magnitude/robustness — sample period incl. a crisis/bear regime
 formal tests used (DM/HLN/MCS, VaR/ES backtesting), and that it survives
 robustness checks.]
 
-**[4 — Originality & integrity]** This manuscript is original, has not been
-published, and is not under consideration elsewhere. [If a working-paper/SSRN
-version exists and the journal permits it, note it here.] All authors have
-approved the submission and declare [no competing interests / the interests
-disclosed in the declarations].
+**[4 — Originality & integrity — AUTHOR CONFIRMATION REQUIRED]** [After author
+confirmation: This manuscript is original, has not been published, and is not
+under consideration elsewhere.] [If a working-paper/SSRN version exists and
+the journal permits it, note it here.] [After author confirmation: I approve
+the submission and declare no competing interests / the interests disclosed in
+the declarations.]
 
 **[5 — Data & code]** A complete replication package (data + code + README +
 data-availability statement) is provided / deposited at [repository], satisfying
@@ -61,5 +65,5 @@ Thank you for considering this submission.
 
 Sincerely,
 Yi-Hao Lai (賴奕豪)
-Associate Professor, Department of Finance, Da-Yeh University
-[email] · [ORCID]
+[verified current title and affiliation]
+[verified email] · [verified ORCID]

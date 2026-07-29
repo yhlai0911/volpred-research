@@ -1,138 +1,59 @@
-# Agent Orchestration
+# Research Agent Orchestration
 
-這份文件是 `autonomous-research` 的派工與 brief 規格。
+`autonomous-research` 使用本文件選 topology；正式 task type 與 concurrency 仍由
+`.claude/rules/task-routing.md` 決定。
 
-在以下情況讀它：
+## Owner boundary
 
-- 要決定用什麼模型 / agent 類型
-- 要寫 experiment / paper / feed agent prompt
-- 要分派 2-4 個 worktree agent
-- 要決定研究主題從哪裡來
+- Research design/execution：`autonomous-research`
+- Post-run claim verification：`agent-result-verification`
+- Worktree integration：`agent-result-verification` 的 worktree branch
+- Data source selection：`external-data-sources`
+- Data freshness incident：`data-collection-ops`
+- Shared memory health/write：`memory-health` 與 canonical writer
+- Publishing、paper、deployment：交給各自 owner
 
-## Owner 與邊界
+## Topology
 
-- **owner**：`autonomous-research`
-- **paper-specific workflow**：交給 `paper-*` skills
-- **feed 文章內容**：交給 `feed-publisher`
-- **平台節奏 / cron / deploy**：交給 `admin-ops`
+| 情況 | Topology |
+|---|---|
+| 單一 K、單一路徑 | 一個 worktree agent |
+| 多個互不依賴 K-id | 每個 K 一個 worktree，可在 slot 內平行 |
+| 只查 repository facts | read-only explorer |
+| 只查文獻 | read-only research agent，回傳 primary sources |
+| 需要 independent verdict | fresh-context reviewer，不修改被審 tree |
+| 需要 shared-state synthesis | 主線程 |
 
-本檔負責的是**研究主線如何派工與收斂**，不是平台操作手冊。
+Agent 之間有資料依賴時按 stage 排序，不為了填 slot 強行平行。
 
-## 研究主題來源優先序
+## Dispatch sequence
 
-不要只靠自己憑感覺選題。優先序如下：
+1. 重讀 task-pool mode。
+2. Reserve K-id。
+3. 寫自足 brief 與唯一 write scope。
+4. 派工並保留 task/agent/worktree identity。
+5. 等待完整返回；不把「agent 已啟動」當成果。
+6. 走 post-run verification、knowledge writer、merge、read-back。
 
-1. 使用者指定
-2. 正在推進的 open question / member question
-3. 已完成實驗衍生出的 follow-up
-4. Codex / Gemini 的具體建議
-5. 文獻缺口或 cross-market 驗證需求
+詳細命令與 timeout 行為見 `delegation-playbook.md`。
 
-若連續 3 個 null result，先換方向，再派 agent。
+## Review independence
 
-## 模型 / agent 選擇
+- Reviewer 只讀 frozen claim surface。
+- Commissioning prompt 與 raw transcript 放在 worktree 外。
+- Reviewer 不執行實驗；缺少 run 時回報 execution request。
+- Verdict 由 gate template 產生。
+- 修正任何 claim-surface artifact 後重新 review。
 
-高精確度工作一律優先最強模型：
+## Completion
 
-- 研究實驗
-- 統計檢定
-- 回測與風險評估
-- 論文寫作 / 論文審查
-- 程式修正
+Orchestration 完成必須能連回：
 
-可放寬的情況：
+- task/agent/worktree identity
+- reserved K-id
+- canonical result/spec identity
+- reviewer verdict
+- main-thread knowledge item
+- merge/read-back evidence
 
-- 單純 grep / 搜檔 / 探路 → read-only explorer 類型
-- 單純 feed 文章草稿 → 可用較輕模型，但仍需 `feed-publisher` 規範
-
-## 什麼時候要派 agent
-
-適合派 agent：
-
-- 多個獨立實驗可平行
-- 單一任務可明確切成 worktree
-- 需要第二意見或 adversarial review
-- 主線程可以同時做 synthesis / literature / verification
-
-不適合派 agent：
-
-- 下一步完全依賴那個 agent 的即時結果
-- 任務邊界不清楚
-- 會碰共享 JSON / Supabase / Mirror 寫入
-
-## Brief 最小欄位
-
-每個 agent prompt 至少要有：
-
-- `WHAT`：要做什麼
-- `WHY`：為什麼現在做
-- `FILES / DATA`：要讀哪些檔
-- `CONSTRAINTS`：不可犯的錯
-- `SUCCESS CRITERIA`：什麼算完成
-- `OUTPUT FORMAT`：回報格式
-
-不要只寫「幫我研究看看」。
-
-## 各類 agent 必備約束
-
-### Experiment agent
-
-- 必讀 `experiment-preamble.md`
-- 先查 `docs/error_log.md`
-- 引用相關 K 編號 / knowledge
-- 若是策略回測，必須顯式 lag
-
-### Feed agent
-
-- 必讀 `feed-publisher`
-- 自己讀實驗 JSON / 圖表需求
-- 不負責文章池 / 通知 / cadence
-
-### Paper review agent
-
-- 明確指定 `paper-stage-classifier` / `paper-review-cycle` / `paper-update`
-- 內容品質與 citation / LaTeX 分工不可混淆
-
-### Worktree agent
-
-- 必須 commit
-- 不得改共享狀態 JSON / Supabase / Mirror
-- 返回後主線程仍需：
-  - `agent-result-verification`
-  - `worktree-merge-verification`
-
-## 主線程責任
-
-派工後，主線程不能只等結果。
-
-主線程要做：
-
-- 文獻補查
-- 結果 synthesis
-- 數字驗證
-- merge 與落地檢查
-- knowledge / experience / research_program 回寫
-
-## 返回後的固定流程
-
-1. 看 agent 回報是否完整
-2. 用 `agent-result-verification` 驗數字
-3. 用 `worktree-merge-verification` 驗檔案與 merge
-4. 主線程做 synthesis
-5. 再決定是否發文、是否續做下一個實驗
-
-## 反模式
-
-- 派 agent 前沒有明確成功標準
-- agent 跑完就直接相信數字
-- worktree agent 直接碰共享 state
-- 把平台部署、排程、通知塞進研究 agent
-- 用 agent 補救其實應該由 hook / script 防呆的問題
-
-## 搭配文件
-
-- `agent-brief-template.md`
-- `agent-result-template.md`
-- `experiment-preamble.md`
-- `ai-collaboration.md`
-- `question-review-guide.md`
+任一段缺失時不 complete task。

@@ -1,5 +1,14 @@
 # 系統架構
 
+> **Live resolution order（2026-07-29）**
+> 本檔保留大量具日期的 migration／rehearsal 物證；它們是歷史快照，不是 runtime
+> state owner。當文字與機器狀態不同時，一律以
+> `storage/ops/task_pool_mode.json`、`config/runtime_schedules.json`、
+> `config/project_targets.json` 與對應 terminal receipt 為準。Operations Core 是唯一
+> business clock；session cron、host VolPred crontab、per-job LaunchAgent 與
+> `run_due_jobs.py` piggy-back 路徑均屬 retired／rollback compatibility。不得從下方
+> 日期較早的 `direct_execution`、v12 或 piggy-back 敘述推導當前 owner。
+
 > **已核可的目標架構（2026-07-23）**
 > 見 `docs/platform_optimization_program_2026_07.md` 與 `docs/adr/` 下四份 accepted ADR。
 > 本檔以下仍描述 live/current architecture；只有某項能力完成 shadow、cutover、read-back
@@ -982,6 +991,34 @@ Agent work queue 與 business clock 是不同責任。2026-07-23 起 legacy
 `storage/next_tasks.json` admission 處於 `direct_execution`，新工作唯一登記面暫為
 GitHub Issues；Work Coordinator 的 queue ownership 仍須依 Issue #9 完成七日
 owner-matched evidence，不能因 scheduler 已上線就冒充 queue cutover 完成。
+
+> 上段是 2026-07-23 cutover snapshot，不是永久 mode 宣告。2026-07-26 production
+> authorization 後 queue 曾恢復；任何 worker 與 skill 一律以
+> `storage/ops/task_pool_mode.json` 的 live fields 判斷，禁止從本段推導目前 mode。
+
+### Project skill architecture contract（2026-07-29）
+
+Project skill 的程序本體只存在 `.claude/skills/<name>/SKILL.md`；角色、domain、route、
+workflow usage、supervisor dispatch expectation 與 architecture contract metadata 的唯一來源是
+`config/skill_registry.json`，
+`docs/skill-registry.md` 與 `docs/workflow-index.md` 是人類可讀 projection。
+
+Skill 不得保存 runtime snapshot。每次執行必重新讀：
+
+- `storage/ops/task_pool_mode.json`：當下 admission／queue mode；
+- `config/runtime_schedules.json`：Operations Core schedule owner 與 active fields；
+- `config/project_targets.json`：frontend、deploy、paper、Mirror／live target；
+- `config/supervisor_rules.json`：task-family／context 的 live skill dispatch；
+- `config/models.json` + `scripts/model_router.py`：model／effort runtime routing；
+- 對應 canonical writer／gateway／state machine：task、feed、memory、paper、strategy、
+  Git、worktree 與 experiment artifact contract。
+
+`scripts/check_skill_architecture.py` 對全部 skill fail closed 驗證 inventory、registry
+projection、workflow route、supervisor dispatch、dynamic routing metadata、canonical
+contract pointer 與 retired／繞過路徑；由
+`tests/test_skill_architecture.py` 納入 CI。`scripts/check_skills_complete.sh` 聚合結構與
+architecture report。新增或修改 skill 必須同一 change 更新 registry／workflow projection，
+並依 `AGENTS.md` 寄出 owner 通知。
 
 ## 程式碼架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）

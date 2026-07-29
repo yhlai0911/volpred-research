@@ -1,6 +1,45 @@
 # Workflow Index
 
-這份文件是 **token-aware 的快速路由索引**。先在這裡判斷 workflow / 執行模式 / 預設 model，再按需讀對應 skill 全文，不要一開始就把多份長 SOP 一次載入。
+這份文件是 **token-aware 的快速路由索引**。先在這裡判斷 workflow 與 detail skill，
+再按需讀對應 skill 全文；model／effort 由 runtime router 決定，不要一開始就把多份長
+SOP 一次載入。
+
+## Current skill workflows
+
+下表由 `config/skill_registry.json` 投影，僅負責 workflow → skill 導航。Model／effort
+一律在執行時交給 `config/models.json` 與 `scripts/model_router.py`，不得從本表或 skill
+frontmatter 推導。Support／cross-cutting skill 由其 owner 載入，不另外製造平行 router。
+
+<!-- skill-workflows:start -->
+| Workflow ID | 使用時機 | Detail path |
+|---|---|---|
+| `ops-triage` | 後台 surface、平台操作與 ops 導航 | `.claude/skills/admin-ops/SKILL.md` |
+| `agent-result-check` | agent／worktree 結果回傳後驗證 | `.claude/skills/agent-result-verification/SKILL.md` |
+| `research-design` | 文獻、實驗、回測與研究續跑 | `.claude/skills/autonomous-research/SKILL.md` |
+| `citation-check` | DOI、書目與 claim-level 引用驗證 | `.claude/skills/citation-verifier/SKILL.md` |
+| `deploy-frontend` | active frontend 安全部署與 live readback | `.claude/skills/deploy-frontend/SKILL.md` |
+| `data-source-lookup` | 外部資料源選擇與欄位陷阱 | `.claude/skills/external-data-sources/SKILL.md` |
+| `feed-publish` | 撰寫或發布 reader-facing feed 文章 | `.claude/skills/feed-publisher/SKILL.md` |
+| `paper-quality` | claim-evidence 與財金論文品質 | `.claude/skills/finance-paper-quality/SKILL.md` |
+| `host-migration` | 使用者明確要求換機／standby／promotion | `.claude/skills/host-migration/SKILL.md` |
+| `incident-response` | bug、alert、failed workflow 與結案 | `.claude/skills/incident-response/SKILL.md` |
+| `latex-review` | read-only LaTeX 學術審查 | `.claude/skills/latex-academic-reviewer/SKILL.md` |
+| `member-qa` | 會員問題評分、claim 與答覆生命週期 | `.claude/skills/member-questions/SKILL.md` |
+| `memory-health` | 記憶索引與內容健康稽核 | `.claude/skills/memory-health/SKILL.md` |
+| `paper-review-round` | 發起、收集與歸檔一輪 paper review | `.claude/skills/paper-review-cycle/SKILL.md` |
+| `paper-submission` | 唯一 paper state 與 submission orchestration | `.claude/skills/paper-submission-pipeline/SKILL.md` |
+| `paper-update` | 主線程修稿、編譯與平台同步 | `.claude/skills/paper-update/SKILL.md` |
+| `platform-ops` | 一次性 platform triage／repair loop | `.claude/skills/platform-ops-manager/SKILL.md` |
+| `skill-governance` | 新增、修改、合併、退役或稽核 skill | `.claude/skills/project-skill-governance/SKILL.md` |
+| `publication-scan` | 研究／事件文章候選掃描 | `.claude/skills/publication-candidates/SKILL.md` |
+| `reconcile-projections` | local canonical 對 remote/live drift | `.claude/skills/reconcile-projections/SKILL.md` |
+| `reproducibility-audit` | experiment inventory、isolated rerun、identity drift | `.claude/skills/reproducibility-audit/SKILL.md` |
+| `schedule-operations` | Operations Core schedule、owner、liveness | `.claude/skills/schedule-operations/SKILL.md` |
+| `strategy-lifecycle` | 策略評估、registry、啟停與 rollout | `.claude/skills/strategy-lifecycle/SKILL.md` |
+| `task-pool` | task create／claim／start／release／complete | `.claude/skills/task-pool-operator/SKILL.md` |
+| `trending-repost` | 熱門主題的 VolPred 原創分析 | `.claude/skills/trending-repost/SKILL.md` |
+| `web-ui-review` | active frontend UI/UX gate | `.claude/skills/web-ui-ux-review/SKILL.md` |
+<!-- skill-workflows:end -->
 
 ## 使用順序
 
@@ -25,7 +64,7 @@ Canonical source：`config/token_policy.json`
 - `research`、`publish`、`deploy` 這類可能載入較長 skill / SOP 的 command，先做 boundary gate，再決定是否繼續。
 - 原則：先判斷「要不要在這個 session 繼續」，再決定「要讀哪份 skill」。
 
-## Workflow 路由
+## Historical workflow snapshot（superseded）
 
 > **Owner directive 2026-07-05**：下表「預設 model」欄全部為 `opus`（4.8）；所有 subagent 一律用 opus，只有 `effort` 依難度變化。**effort 是 5 檔**（對齊 `claude --effort`）：`low < medium < high < xhigh < max`（`max` 是天花板；owner 更正——原本錯把 high 當頂，研究類升 `xhigh`、失敗升 `max`）。effort 現在真的透過 `--effort` 套用（worker.py / telegram_responder.sh；2026-07-05 前 inert）。canonical 來源 = `config/models.json` + `scripts/model_router.py`。`sonnet` / `haiku` 退出預設 rotation（仍是合法 alias，不自動路由）。
 

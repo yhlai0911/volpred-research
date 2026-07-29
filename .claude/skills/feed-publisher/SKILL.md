@@ -1,634 +1,149 @@
 ---
 name: feed-publisher
 description: >
-  This skill should be used when publishing research findings as reader-facing articles
-  to the website feed. It ensures each article has complete Traditional Chinese Markdown
-  content (title, tables, interpretation, conclusion) rather than internal reasoning notes.
-  Trigger phrases: '發佈', '發文', 'publish', '/publish', 'post to feed', '發佈到網站'.
-  Trigger situations: after completing an experiment with noteworthy results, reaching a
-  research milestone, or when the user explicitly requests a feed publication.
-  This skill should NOT be used for: internal memory recording (use m.think/m.add_knowledge),
-  running experiments (use autonomous-research), or paper writing (use finance-paper-quality).
-model: sonnet
-effort: medium
+  Use when a prepared reader-facing Markdown draft must be created, updated,
+  or read back through VolPred's formal feed publisher. This is the only agent
+  workflow allowed to enter the feed gateway. Never edit feed JSON, article
+  projections, or live database rows directly. Topic selection, prose
+  drafting, release scheduling, and Facebook delivery belong to other skills.
 ---
 
-# Feed 研究文章發佈規範
+# Feed Publisher
 
-## Scope Boundary
+`feed-publisher` 是薄的**發布 orchestrator 與唯一 feed gateway**。內容 producer 交付草稿；本 skill 驗證並呼叫 canonical publisher，再用 local、projection 與 live surface 回讀。它不兼任寫手或排程器。
 
-Use this skill for **文章內容本身**：
+## Ownership boundary
 
-- audience / article type 選擇
-- 標題、結構、圖表與資料來源標注
-- 主題查重與事件文章內容時效
-
-Do **not** use this skill for：
-
-- 文章池釋出節奏、排程發布、補寄通知 → `admin-ops`
-- 實驗設計與研究判斷 → `autonomous-research`
-- 論文寫作或 paper metadata 更新 → `finance-paper-quality` / `admin-ops`
-
-## 核心原則
-
-**Feed = 給讀者看的完整文章，不是內部研究筆記。**
-
-每篇文章必須通過「讀者測試」：一個不認識你的人看完後，能學到什麼？
-
-## 文章 4 維度標準（發文前 + verify 時都要查）
-
-每篇文章（不論 audience）必須同時符合以下 4 個維度，才算達到 Mission 第 1（把文章寫好）+ 第 5（拉高流量）條的標準；只看「字數 + 圖表數量」等表面條件不夠。派 agent 前把這 4 維度寫進 brief 的 checklist；verify agent 結果時也用這個 checklist，不只看字數/圖表數。
-
-1. **深度**：解釋 mechanism（不只描述結果）；≥1 個 counter-intuitive insight 或方法論教訓；cross-reference ≥3 個相關 K；無廢話段落
-2. **可讀性**：punchy title（避免「K908: ...」式命名）；hook 式 intro；段落 ≤5 句；專有名詞首次定義；結尾一句話 take-away
-   - **系列前綴**：若該篇屬**已註冊系列**（如 `迷思實驗室｜` 🧪、`會員提問｜`），標題格式為 `系列名｜實際標題`（迷思實驗室**不掛集數、純前綴** `迷思實驗室｜<標題>`），**分隔符用全形 `｜` 不是半形 `|`**（半形保留給絕對值 `|t|` 與表格）。系列 canonical list + 兩種品牌化機制（A 標題前綴 / B 前端 masthead 如 daily_digest 不加前綴）見 `.claude/rules/publishing.md` §「系列/專題標題前綴慣例」。一次性文章不加前綴。
-3. **資訊性**：真實圖表 ≥2 張（matplotlib PNG，禁 ASCII）；具體數字（不寫「顯著改善」空話）；標明資料來源 + 統計方法（Harvey/Kupiec/DM 等）+ 樣本數與期間
-4. **參考性**：cross-link ≥3 個相關 K/paper/experiment；延伸閱讀段落；reproduce method 簡述（script + results.json 路徑）；文末標 K 編號 + 資料來源
-
-**適用範圍補充（2026-07-22）**：上面第 3–4 點的 reader-visible 統計方法、reproduce
-path 與 K 編號是 `audience=research` 契約。`audience=general` 仍要引用完全相同的 canonical
-數字與統計強度，但以白話呈現；K-id 與實驗路徑只放 frontmatter /
-`details.experiment_refs` 等 provenance metadata，不得出現在讀者可見標題或正文。這個界線
-與下方 general 禁 K 編號及 publisher `_infer_audience` gate 一致。
-
-同一 K 已有文章但不符 4 維度 → 可視為「不符合標準」重派（不算 3-layer dedup 的 duplicate）。既有文章定期回審（top-viewed 優先）不達標考慮重寫。反面教材：K908 mile_3eb8657c（達標範例，可作 reference template）；只給數字翻譯 + 兩張圖但無 mechanism 解釋、academic 標題、無 cross-link 的文章（缺深度/可讀性/參考性）。
-
-## thinking ≠ content
-
-| | thinking（內部） | content（發佈） |
-|---|---|---|
-| 目的 | 記錄推理過程 | 展示研究成果 |
-| 讀者 | 自己 | 外部訪客 |
-| 格式 | 自由筆記 | 結構化 Markdown |
-| 語氣 | 「我發現...」「可能是...」 | 「研究結果顯示...」 |
-| 長度 | 不限 | 500-3000 字 |
-
-## 選題來源（寫之前先查）
-
-**主題不是憑記憶挑——用 `publication-candidates` skill 系統化選。**
-**讀者偏好迴圈**：選題與圖文表配置先查 `storage/analytics/reader_preferences.json`（週一 06:45 更新）的合格結論；樣本不足 bucket 不得當依據。
-
-1. **研究驅動**：`uv run volpred ops publication-candidates-summary`
-2. **事件驅動**：WebSearch 近期 CPI/NFP/FOMC/TSMC/earnings season；`grep '財報公告日.txt'`；讀 `next_tasks.json` 事件任務
-
-補充：
-- `storage/next_tasks.json` 在 v11 之後只算 **legacy planning / working list**，可當事件線索，但不是正式 scheduler queue。
-- 正式事件來源仍是 `config/runtime_schedules.json` 的 `event_jobs`、`storage/ops/` control plane 與 `storage/ops/event_ledger/`。
-- 若 `next_tasks.json` 與 control plane / `event_jobs` 不一致，以後者為準。
-
-**事件驅動文章 populate playbook**（FOMC/CPI/NFP/Earnings template、T-series slot 配額表、ROI 優先序、populate workflow）：見 `references/event-article-templates.md`。
-
-詳見 `publication-candidates` skill。
-
-## 發文前必做：主題重複檢查（不可跳過）
-
-**在決定主題之後、撰寫內容之前，必須先確認主題是否已有類似文章。**
-
-### 檢查步驟（⚠️ 2026-04-14 強化：用**概念關鍵字**不是字面字串）
-1. **grep 概念關鍵字**（多組查，涵蓋同義詞）：
-   ```bash
-   # 例：寫「0050 夜盤」主題必須至少查：夜盤 | overnight | 跳空 | 隔夜 | gap | pre.*market
-   grep -iE "夜盤|overnight|跳空|隔夜|gap" storage/reports/feed.json | grep title | head -20
-   ```
-   **禁止**只用狹義字串（例「0050.*夜盤」）——會漏掉同主題不同代號的文章（如 TX 期貨夜盤、K847 台股隔夜）
-2. **LanceDB 語義搜尋**（必跑，比 grep 更精確）：
-   ```bash
-   uv run python scripts/build_knowledge_index.py search --query "主題一句話描述"
-   ```
-   若 top-3 結果 dist < 0.5（高相似）→ 有重複，不可寫
-3. **同 audience 檢查**：只比較相同受眾類型（general vs general，research vs research）
-4. **主題家族檢查**：若主題屬已知高頻家族（overnight/gap/50-50 SPY-GLD/VT 保險/VIX 充分性），**先列已有同家族文章 title 清單，逐一確認差異化角度**，再決定是否寫
-
-### 判斷標準
-- **完全重複**（>70% 標題相似）→ **禁止發佈**，除非要更正或更新
-- **部分重疊**（30-70% 相似）→ **必須找出新觀點**：
-  - 過去文章的結論是什麼？
-  - 這次有什麼不同的數據、角度、或結論？
-  - 新文章標題和內容必須明確與既有文章區隔
-  - 在文章中主動引用/連結舊文章：「我們在 [之前的分析] 中發現 X，但這次新數據顯示 Y」
-- **無重疊**（<30%）→ 正常發佈
-
-## 寫作前必讀實驗檔案（⚠️ 不可跳過）
-
-**寫每篇文章前，每個引用的 K 實驗都必須**：
-
-1. `cat experiments/k<id>/README.md` —— 計劃、問題、方法、預期、結論（若有獨立資料夾）
-2. `cat experiments/k<id>*.py` 或 `experiments/k<id>/k<id>.py` —— 實作細節、真實樣本、參數設定
-3. `python3 -c "import json; print(json.dumps(json.load(open('experiments/k<id>*_results.json')), ensure_ascii=False, indent=2)[:3000])"` —— 真實統計量、DM t / p / bootstrap CI / VaR 等
-4. `ls experiments/k<id>*.png` 或 `experiments/k<id>/*.png` —— **優先直接 embed 既有圖表**，不要重畫
-
-**為什麼**：
-- knowledge.json 摘要只有 200-300 字，可能漏關鍵細節（樣本數、OOS 期間、模型版本）
-- 文章數字必須 byte-for-byte 對應 results JSON，不可從記憶引用
-- 既有 PNG 是原始實驗設計的視覺化，重畫簡化反而丟失資訊
-- 若沒有既有 PNG 才用 `volpred.charts` 生成新圖
-
-**2026-04-14 教訓**：agent 只讀 knowledge.json 摘要就寫文章，漏掉實驗真實方法細節；重畫新 chart 失去原始 bootstrap/placebo 分布資訊。
-
-### 高頻重複主題警告
-以下主題已有多篇文章，新文章必須有**顯著不同的切入角度**：
-- 50/50 SPY/GLD 配置（10+ 篇）
-- VT 保險/保費（5+ 篇）
-- VIX 充分性（多篇）
-- **隔夜波動 / overnight gap / 跳空 / 夜盤（20+ 篇，含 K847 / K906 / K812v2 / K847 / K886 / I4 / I5 / N68 等）**
-- 美股對台股的 spillover / lead-lag（10+ 篇）
-- PRG / Periodic GARCH 勝出 GJR（多篇，含 K874 系列）
-
-## 延伸閱讀（自動附加）
-
-Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 audience 中相似度 >20% 的已發布文章（最多 3 篇）。這些連結也存在 `related_articles` metadata 中供前端使用。
-
-**不需要手動操作** — 只要 `_find_similar_articles` 找到相關文章，就會自動附加。
-
-## 三種發文類型
-
-### 1. 即時發現（milestone）— 500-1500 字（僅限時效性速報；一般文章走 publishing.md 下限 general 1500+/research 2000+）
-每個實驗完成後立即發佈。一個發現、一個結論、一個實務意義。
-
-### 2. 深度長文（article）— 2000-5000 字
-整合 5-10 個相關發現，提供完整的理論框架和實務指南。例如：
-- 「VaR 七方法大評比」（整合 Phase O 全部 VaR 實驗）
-- 「日頻 QLIKE 天花板」（整合 4 個自建模型的 null results）
-- 「12/VIX 完整操作手冊」（策略+風控+歷史驗證）
-適合在一個研究主題收斂後撰寫。不只是把 milestones 拼在一起——要有新的綜合觀點。
-
-### 3. 研究報告（research report）— 5000-10000 字
-跨 Phase 的總結性文件，包含完整數據表格、方法論比較、限制和未來方向。例如：
-- 「Phase O+P 完整報告：從 Skewed-t 到 QLIKE 天花板」
-- 「2026 Q1 Hormuz 危機即時追蹤報告」
-適合每個月或每個重大 Phase 結束後撰寫一次。
-
-## Related Skills
-
-- 研究產出來源 → `autonomous-research`
-- 文章池、節奏與通知 → `admin-ops`
-
-## 文章結構模板
-
-**骨架依 `audience` 分流**（見下方「文章類型寫作模板」）：
-
-- `audience=general` → **敘事式**（爆款標題、場景 hook、類比解釋、2-3 張表、**1500-3000 字**；publishing.md L98 下限 1500 為 publisher gate enforce）
-- `audience=research` → **學術報告式**（摘要/背景/方法/發現/實務/限制/結論、數字完整列、3000-8000 字）
-- `audience=daily` → 維持現狀（本節規則不適用）
-
-**所有文章通用（不論 audience）**：
-
-- 必含**真實圖表**（禁 ASCII、純文字表格替代）；優先 `upload_chart('experiments/k<id>/*.png')`，沒有再用 `volpred.charts` 生成新圖
-- 必含**數據來源標注**：`*本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。數據來源：yfinance / FRED / TAIFEX，期間：YYYY-YYYY，樣本：N 個觀測值。*`
-
-## 發佈流程
-
-### 方法 A：Agent 寫完整文章（推薦）
-
-**⚠️ Agent prompt 必須是 articulated brief，不是 topic list**。每個 prompt 必含下列 7 段（缺一不可）。
-
-**為什麼**：vague prompt → agent 自由發揮 → **過度推論造幻覺**（編造數字、誤解 K 之間關係、把 NULL 寫成 PASS 等）。詳細 prompt + 必讀檔案 + curation list = 把 agent 鎖在 ground-truth 內。
-
-**更新（2026-04-14）**：每個引用的 K 在 prompt 內**必須單獨指定** README + .py + results.json 路徑，不可只給 K 編號讓 agent 自己找。原因：agent 若只知道「K1145」可能讀不到實驗檔（路徑可能是 `experiments/k1145/` 也可能是 `experiments/k1145_xxx.py`），漏讀就會回去抓 knowledge.json 摘要寫文 → 深度不夠 + 幻覺。
-
-```
-為 volpred-research 平台寫一篇 [audience] 文章，主題：「<具體 angle 標題，不要泛泛>」
-
-## 1. 必讀先（按順序逐項執行 cat）
-- cat .claude/skills/feed-publisher/SKILL.md
-- python3 -c "import json; e=[k for k in json.load(open('storage/memory/knowledge.json')) if k.get('experiment_id') in ('K<a>','K<b>','K<c>')]; [print('---',k['experiment_id'],'---'); print(k['content']) for k in e]"
-- cat experiments/k<a>/README.md           # ⚠️ 用到的每個實驗都要讀 README + .py
-- cat experiments/k<a>/k<a>.py
-- python3 -c "import json; print(json.dumps(json.load(open('experiments/k<a>/k<a>_results.json')), ensure_ascii=False, indent=2)[:3000])"
-- cat experiments/k<b>/README.md
-- ... (對每個引用的 K 重複)
-
-## 2. 主題查重（必跑兩種）
-- grep -iE "concept_kw1|concept_kw2|concept_kw3" storage/reports/feed.json | grep title | head -10
-- uv run python scripts/build_knowledge_index.py search --query "<主題一句話>"
-若 top-3 dist < 0.5 或標題重疊 > 30% → 回報已存在，停止
-
-## 3. 文章核心（依 audience 不同）
-
-**若 audience=general**（敘事式，5-6 個 numbered points 明確 curation）：
-1. <最反常識 / aha 點，文章主幹>
-2. <對比點：之前以為什麼，這次發現什麼>
-3. <關鍵機制 / 為什麼會這樣（白話）>
-4. <主要支持數據：3-5 個 curated 數字，不全列；用白話解釋>
-5. <實務 / 投資意涵>
-6. <局限 / 下一步>
-
-**若 audience=research**（學術式，列完整研究要素）：
-1. <研究問題 / 假設>
-2. <方法、數據、期間、樣本、OOS 設定、統計門檻>
-3. <核心發現（可多個）：完整列統計量、p-value、CI；允許 Layer-1/2/3 逐層 walkthrough>
-4. <穩健性 / placebo / subperiod / 交替 spec>
-5. <實務意義 / 後續研究方向 / open questions>
-6. <限制（樣本、proxy、look-ahead 檢查）>
-
-## 4. 結構建議（依 audience）
-
-**若 audience=general**（敘事式）：
-- 標題：爆款型（「你以為...其實...」「為什麼...」）
-- 摘要：3-4 句含核心數字 + 1 個反直覺發現
-- 開頭：用場景 / 類比 / 反常識 hook，不從 method table 開頭
-- 主敘事：核心發現 → 為什麼 surprising → 機制（白話）→ 數據 → 實務
-- 表格 2-3 張上限；避免 Layer 逐層列
-
-**若 audience=research**（學術報告式，回歸 3/25 模板）：
-- 標題：具體描述發現（「K1145: 三市場 pooled panel — OFI 預測 RV 的 universality 檢定」）
-- 摘要：3-5 句，含數據期間、方法、主要統計量、實務意涵（不需要 hook）
-- 結構：摘要 → 研究背景 → 方法與數據 → 核心發現（可多節，每節對應 K）→ 實務意義 → 限制與穩健性 → 結論
-- 表格不限；統計量完整列（t-stat、p-value、CI、bootstrap 分布）
-- Layer-1/2/3 逐層 walkthrough **允許且鼓勵**（robustness 驗證所需）
-
-## 5. 圖表（必含真實圖表，禁 ASCII）
-- 優先 embed 既有 PNG：upload_chart('experiments/k<a>/k<a>_xxx.png')
-- 沒有再用 volpred.charts.generate_bar_chart / grouped_bar / line / heatmap
-
-## 6. 發佈
-
-**⚠️ CRITICAL: `audience` 必須顯式傳**，不可依賴 Publisher 從 `phase` auto-derive (會自動變 research)。
-
-```python
-from src.volpred.publisher.publisher import Publisher
-pub = Publisher()
-pub.publish_milestone(
-    title='<具體 hook 標題>',
-    description=content,
-    phase='research',
-    category='milestone',
-    audience='general',  # ⚠️ 必填 — 'general' 或 'research' 或 'member_qa'
-    tags=['K<a>','K<b>','<asset>','<method>','<theme>'],  # 3-8 個
-    proposer='Claude',
-    status='draft',  # ⚠️ 永遠 draft
-)
-```
-
-**2026-04-14 教訓**：7 篇本該 general 的文章因為沒傳 audience，被 Publisher auto-classify 成 research，draft pool 變 R=13/G=4 不符 R≥4/G≥8 目標。修正: 此 skill 強制 audience 必填。
-
-**⚠️ lazypack gate（boss 2026-06-30 硬性；2026-07-02 改 async 管線，error_log 15:15 #4）**：`audience='general'` 文章的 `## 懶人包圖組` 區塊（heading + ≥1 張圖）在 **reader-visible 邊界** enforce（單一來源 `publisher.lazypack_required_at()`）：
-
-- **plan 必須先寫成 strict data-bound v1**：root=`schema_version:1,title,evidence,panels`；每個 evidence alias=`{path,sha256,label}`；panel 必填 `{name,info,style,title,alt,sources,blocks}`；數字只能用 evidence binding。缺欄位或舊版 root list 直接 fail，禁止 silent LLM fallback。最小範例與完整規則見 `lazypack-infographic` skill；CLI 見 `scripts/lazypack_render.py --help` 與 renderer tests。
-- **status=draft（本 skill 預設）→ 不需先生圖，正文寫完 publish 後一行 enqueue**（`*/15` compute worker 走 codex-primary 渲染鏈，失敗自動 logged fallback 到 deterministic renderer；release_pool flip published 前 enforce，缺 section 不釋出）：
-```bash
-uv run python scripts/lazypack_async_render.py enqueue \
-  --article-id <mile_id> --plan <plan.json>
-# plan.json 由寫作 agent 寫內容與 evidence bindings；agent 不寫 renderer code
-# 檢查 job：uv run python scripts/compute_queue.py show lazypack-<mile_id>
-```
-- **status=published（event/trending 立即發佈）→ 發佈當下就要有 section**，同步先生完再 publish：
-```bash
-# PRIMARY：codex bespoke poster（boss 2026-07-15；codex 寫 data-bound 腳本、本地執行）
-uv run python scripts/gen_lazypack_codex.py \
-  --article-id <mile_id> --plan <plan.json> --out-dir <dir>
-# FALLBACK（codex 不可用 / 額度耗盡時順位自動生效，必留紀錄，禁 silent）：
-#   uv run python scripts/lazypack_render.py --plan <plan.json> --out-dir <dir>
-# 每張 PNG → upload_chart() 上傳 Supabase → append 文末「## 懶人包圖組」
-```
-渲染鏈三層順位（codex PRIMARY → deterministic FALLBACK → NotebookLM 最後備援，僅人工授權）與完整 SOP 走 `lazypack-infographic` skill（2-4 張 poster：概念/方法/結果，禁卡通風）。逃生門：CLI `--no-lazypack-gate` / API `audit_strict=False`，**僅限**真正非讀者向 / 批次遷移（會被 content_quality coverage 監看）。
-
-## 7. 紀律
-- 繁中、status=draft、不派 sub-agent、不修改 storage/memory/* 或 storage/reports/* 以外共享檔
-- 完成回報：title + id + draft 確認
-```
-
-**反模式（禁止給 agent 的 prompt 樣態）**：
-- ❌「寫一篇關於 K1150 的研究文章」← 太 vague
-- ❌「主題：A B C 三個，自由發揮」← 沒 curation
-- ❌「3000-6000 字，1 圖」← 沒結構引導
-
-## 平台層發佈決策
-
-### 核心規則：所有文章一律 `status=draft`，由文章池節奏釋出
-
-- **永遠用 `status=draft`**：不論 research 或 general，所有文章先進文章池
-- **禁止直接 `status=published`**：除非用戶明確說「立即發布這篇」
-- **Agent prompt 必須指定 `status="draft"`**：不可省略
-- 文章池每 **15 分鐘**自動釋出 1 篇（正式時鐘以 shared scheduler / canonical runtime schedule 為準；若本機仍留 session cron，只視為過渡期便利）
-- CLI 指令：`uv run volpred ops release-pool --include-drafts --limit 1 --storage-dir storage`
-
-### 文章類型寫作模板（寫作前必須選定類型）
-
-**一般讀者和研究文章的受眾完全不同，寫作方式必須有本質差異。**
-
-#### Audience 分類總表（六個 audience + 定義 + enforce 機制）
-
-**⚠️ `_infer_audience` 是 source of truth（2026-05-26 mile_d0d66405 incident）**
-
-Agent 提供的 audience 只是 **hint**。Publisher 的 `_infer_audience()` 會根據 title / content / tags 中的學術關鍵詞強制推斷，若與 caller 傳入的不同，以推斷結果為準（並印 WARN log）。
-
-**唯一豁免**：`content_type='member_qa'` → 保 `member_qa`；`content_type='event_article'` → 保 `event`。
-
-| audience | 中文標籤 | 定義 | 典型內容 | 是否推斷（`_infer_audience` 覆寫） |
-|----------|---------|------|---------|----------------------------------|
-| `general` | 一般讀者 | 散戶 / 業餘投資人；無統計背景 | 敘事式故事、白話投資建議、類比解釋 | 是：若含 ≥2 學術關鍵詞 → 自動升為 `research` |
-| `research` | 研究 | 有金融 / 統計背景；同行可復現 | K 編號、t-stat、QLIKE、DM test、Harvey、bootstrap | 是：有 K-id in title 或 ≥2 學術關鍵詞 → 確認為 `research` |
-| `methodology` | 方法論 | 純方法比較；不帶具體 K 結果 | GARCH 家族介紹、HAR-RV 推導、MCS 方法解釋 | 否（依 caller 判斷） |
-| `event` | 事件 | 時效性市場事件（FOMC/CPI/NFP/財報） | 即時觀察、情境劇本、當日建議 | 否（由 content_type=event_article 保留） |
-| `member_qa` | 會員提問 | 會員提問研究；問答頁連結 | 答覆指定會員問題 | 否（由 content_type=member_qa 保留） |
-| `daily` | 每日建議 | 每日市場配置、短版評論 | 每日倉位建議、VIX 看板 | 否（依 tag 推斷：`每日建議` / `daily-update`） |
-| `daily_digest` | 每日精選導讀 | 報紙專欄式專題策展（reader-facing general） | 把 archive 同主題多篇串成一條敘事 + 時事 hook | 否（`content_type='daily_digest'` 強制歸 general 並豁免學術關鍵詞 upcast） |
-
-#### 每日精選導讀 (content_type='daily_digest') — **專題策展型（editorial curation）**
-
-**這是 editorial curation，不是逐篇摘要。**（boss 2026-06-23 釐清）
-
-- **錯誤做法**（禁）：把「今天剛發的 3-5 篇」一篇一篇分析摘要 / recap。
-- **正確做法**：選定**一個專題**，從**過去累積的 archive** 撈**同主題多篇舊文**，結合**最近時事/市場狀態**，串成一篇**有觀點、有脈絡**的專題導讀長文。
-
-**5 步**：
-1. **選專題（theme）**：整篇圍繞單一 thesis（如「波動率模型複雜度天花板」「MOVE-VIX 跨資產分裂」「尾部風險 VaR 監管現實」「研究誠實 audit」），不橫跨多個無關主題。
-2. **撈 archive 同主題舊文 3-6 篇**：`grep -i "關鍵詞" storage/reports/feed.json` / `jq` 掃 title·tags。硬規則：發佈日期**橫跨 >1 週**、**至少 3 篇來自當天以外**；不可只挑今天/昨天湊數；排除 digest 自身與每日建議類日報。
-3. **掛時事 hook 開場**：當前 VIX 水位 / 近期 FOMC·NFP·CPI / MOVE-VIX 分裂等，**數據取自真實 archive 或 results.json，不可臆造**。
-4. **串敘事弧**：演進 / 對照 / 反差（告訴讀者「這主題我們做過什麼、結論如何演進、彼此如何呼應」），不是並列摘要。
-5. **文末列本期精選連結**：id + 一句話，連結 `https://volpred.zeabur.app/v3/reports/<mile_id>`。
-
-**前端 render 約束（硬性，缺一不可）**：
-- `details.content_type='daily_digest'`（首頁 `getDigestColumn` / `listDigestSlugsAsc` 偵測唯一依據；漏設則整篇不被視為 digest、期數算錯）。
-- `title` 用專題式標題（非「今日 N 篇摘要」），且**不可**以 `每日精選導讀｜` 起頭；前端區塊已顯示「每日精選導讀」，重複前綴會觸發 content-quality alert。
-- `content` = 完整繁中 Markdown **單篇 essay**（詳情頁 `/digest/[slug]` 直接 render），**至少含一張圖** `![alt](url)`（首頁主圖靠正則抓第一張）。
-- `details.digest_articles` = **curated 來源文章 slug 陣列**（前端側欄「本期精選」唯一資料源；slug 須對應 archive 中真實存在的已發佈文章，查不到 title 會靜默消失；陣列順序 = 顯示順序）。
-- `status='published'` 立即發（非 draft）；`tags` 含 `精選導讀`；`excerpt` 填編按導言。
-- audience 固定 general → **必走 anti-ai-style 9-checklist + 文末懶人包圖組**（`lazypack-infographic`）。
-
-**注意**：勿與 `uv run volpred ops send-daily-digest` 混淆 — 那是給老闆的 EMAIL ops 通知（逐篇 recap 當天文章），與讀者向專欄完全無關，不可改成發文。
-
-**合格 checklist（四項皆 yes）**：(a) 單一專題標題 + thesis；(b) 成員橫跨 >1 週且 ≥3 篇非當天；(c) 含時事 hook；(d) 敘事串接非逐篇 recap。
-
-**學術關鍵詞清單**（`_infer_audience` 推斷用，≥2 命中 → `research`）：
-
-`K\d+`（K-id）、`p-value`、`t-stat`、`QLIKE`、`Sharpe`、`Bonferroni`、`bootstrap`、`MLE`、`cointegration`、`GARCH-X`、`Harvey`、`Diebold-Mariano`、`DM test`、`HAR-RV`、`GJR-GARCH`、`EGARCH`、`GARCH`、`MCS`、`VaR`
-
-#### Audience 分流決策表（寫第一個字之前必看）
-
-| 情境 | audience | 骨架風格 | 表格上限 | 字數 |
-|------|----------|---------|---------|-----|
-| 散戶 / 業餘投資人可讀；從主題切入；融貫 3-5 K | `general` | 敘事式（場景 hook → 白話解釋 → 實務建議） | 2-3 張 | 1500-3000 |
-| 同行學者 / 有統計背景讀者；單一 K 深度或系列 K 聚合 | `research` | **學術報告式**（摘要/背景/方法/發現/實務/限制/結論） | 不限（但避免為表格而表格） | 3000-8000 |
-| 每日市場建議、配置、短版評論 | `daily` | 維持現狀，**本節規則不適用** | — | — |
-
-**分流原則**：
-- 同一素材兩種寫法都可行時，以「主要讀者」判斷 — 想用生活比喻教散戶 → `general`；想讓同行驗證或復現 → `research`
-- **不要為了「好讀」把 research 素材硬寫成 general**（t-stat、Harvey 門檻、DM test 這些在 research 必須保留）
-- **不要為了「學術感」把 general 強加 research 模板**（爆款標題、生活場景開頭是 general 的本分）
-- 若 audience 判錯，產出的文章會「結構與讀者錯位」——這是最近「文章架構統一化、為故事而故事」的主因
-
-#### 一般讀者 (audience=general) — **融會貫通型**
-**受眾**：非專業投資人、對金融有興趣但無統計背景的人
-**目的**：讓讀者「看完就知道該怎麼做」
-
-**⚠️ 寫作模式 = 多實驗融合**：
-- **不可**只用單一 K 實驗寫 general 文——內容太薄
-- **必須**從讀者關心的主題切入（風險管理、成本、心態、策略選擇等）
-- **必須**融合 3-5 個相關 K 實驗的發現，串成一個連貫洞見
-- 結構：問題場景 → 多實驗證據 → 跨實驗歸納 → 實務建議 → 跨市場 / 跨時間對比（可選）
-- 目的是**站在讀者角度講故事**，不是「發表實驗結果」
-
-| 元素 | 規範 |
-|------|------|
-| 標題 | 爆款型：有懸念、驚喜、具體場景（「你以為...其實...」「為什麼...」） |
-| 開頭 | 用生活場景或問題帶入（「想像你有 100 萬...」），不用學術摘要 |
-| 核心概念 | 用類比解釋（VIX = 恐懼溫度計、VT = 自動煞車、MDD = 最深的坑） |
-| 數據 | 只引用 1-2 個關鍵數字，用白話解釋（「20 年來最差的一個月也只虧了 4.7%」） |
-| 結構 | 問題 → 一句話答案 → 為什麼 → 具體例子 → 行動建議 → CTA |
-| 長度 | 1500-3000 字 |
-| 語氣 | 像朋友聊天，不是教授講課 |
-
-**禁止**：
-- ❌ 「裸」統計術語寫法：t=2.24、p<0.05、DM test、Harvey threshold（**按下方對照表白話包裝，不是刪除** — 統計證據鏈要留在文章裡）
-- ❌ K 編號（改用「我們的研究發現」）
-- ❌ 多個表格堆砌統計結果（**最多 2-3 張**對比表；超過就視為 research 素材寫錯 audience）
-- ❌ 論文引用格式（改用「學術研究顯示」）
-- ❌ 超過 2 個 takeaway（一篇一個核心重點）
-
-**統計表達白話包裝對照表（翻譯向 gate，2026-07-02 error_log 15:15 root cause #1）**：
-
-general 禁的是**裸術語寫法，不是統計資訊本身**。2026-05/06 的教訓：agent 為過 gate 整段不寫統計 → 結果表、檢定結論、robustness 全消失，general 文章 median 腰斬 -49%。正確做法是**白話包裝、保留數值**（讀者與 audit 都能覆核證據強度）。`scripts/publish_draft.py::sanitize_general` 會在 CLI publish 路徑自動翻譯下列 pattern；agent 寫作時直接寫右欄即可：
-
-| 裸術語（禁） | 白話包裝（寫這個） |
+| 階段 | 唯一責任 |
 |---|---|
-| `t = 3.5` | 統計檢定高度顯著（強度很強，統計值 3.5） |
-| `t = 2.24` | 統計檢定顯著（強度中上，統計值 2.24） |
-| `t = 1.7` | 統計檢定接近顯著（強度偏弱，統計值 1.7） |
-| `t = 0.8` | 未達統計顯著（統計值 0.8） |
-| `p = 0.003` | 高度顯著（顯著性 0.003） |
-| `p = 0.03` | 達顯著水準（顯著性 0.03） |
-| `p = 0.30` | 未達顯著水準（顯著性 0.30）— **不可寫成「達顯著」** |
-| `p < 0.05` | 達顯著水準（顯著性低於 0.05） |
-| `p > 0.10` | 未達顯著水準（顯著性高於 0.10） |
-| `95% CI [1.2, 3.4]` | 合理範圍約 1.2 到 3.4（95% 信心水準） |
-| `DM test 顯著` | 兩個模型的預測差異經比較檢定顯著 |
-| `Harvey threshold` | 通過嚴格統計檢驗門檻 |
-| `\|t\| ≥ 3` / `t-stat` | 統計強度（數值照列） |
+| 選題 | `publication-candidates` |
+| 正文與證據 | 對應內容 producer；公共文字共跑 `anti-ai-style` |
+| 懶人包 plan | `lazypack-infographic` |
+| Feed create／update／status transition | **本 skill，僅經正式 CLI** |
+| 文章池 cadence | Operations Core + canonical release settings |
+| FB 文案 | 內容 producer |
+| FB delivery | `fb-publishing` |
 
-分級門檻：\|t\| 1.645 / 1.96 / 3.0 ≈ 雙尾 10% / 5% / Harvey (2016) 嚴格門檻；p 0.10 / 0.05 / 0.01 同義。**白話結論強度不可超過數字支撐**（研究誠實原則）。學術引用格式（如 Patton (2011)）不受此表影響 — sanitizer 有 citation 豁免。
+任何 agent 或 worktree 都只能產出 draft、圖與 plan；**不得 append、patch、重排或覆寫 `storage/reports/feed.json`，也不得直接寫 Supabase `articles`**。更正既有文章也必須走 update gateway。
 
-#### 研究發現 (audience=research) — **學術報告式**（2026-04-18 回歸 3/25 模板）
-**受眾**：有金融/統計背景的讀者、學術研究者
-**目的**：完整記錄有統計顯著性或方法論價值的發現，讓同行能復現、檢驗、延伸。
+## 1. 接受 handoff
 
-**2026-04-18 變更原因**：4/14 曾把 research 改為敘事式（「一篇一個 aha / curate 3-5 數字 / 反常識開頭 / 禁止 Layer 逐層列」），但此風格副作用是**最近 research 文章過度統一化、結構同構、統計量缺失**。研究文章的讀者要的是**可驗證、可復現、可延伸**，不是「爆款敘事」；敘事式保留給 `general`。
+最低輸入契約：
 
-**骨架（按此順序，不相關章節可省略，但不可倒置）**：
+- reader-facing Markdown draft 路徑
+- `audience`、`task_type`、預期 `status`
+- evidence／experiment 路徑與資料期間
+- 圖片或可重現圖表來源
+- general 文章的 strict data-bound lazypack plan
+- source task id；若同一任務要求 FB，另有 canonical FB-native draft
 
-```markdown
-## 摘要
-3-5 句：發現什麼、數據期間、方法、主要統計量、實務意涵。不需要「反常識 hook」。
+缺資料就退回 producer，不在發布階段即興補研究結論或重寫文章。
 
-## 研究背景
-為什麼要做這個分析？既有文獻或自己的舊結論是什麼？本研究的差異化在哪？
-
-## 方法與數據
-| 項目 | 設定 |
-|------|------|
-| 資產 | SPY / 0050.TW / ... |
-| 期間 | YYYY-YYYY |
-| 樣本 | N 個觀測值 |
-| 方法 | GJR-GARCH / HAR-RV / OFI / ... |
-| OOS 設定 | rolling / expanding / block-bootstrap |
-| 統計門檻 | Harvey 3.0 / DM-HLN / MCS / placebo z-score |
-
-## 核心發現
-
-### 發現一：[具體標題]
-統計量 + 解讀。可含表格、圖、p-value、CI。**完整列數據，不 curate**。
-
-### 發現二：...
-（多實驗聚合時可多節；每節對應一個 K 或一個面向）
-
-## 實務意義
-投資人、其他研究者、後續實驗可以怎麼用？
-
-## 限制與穩健性
-樣本限制、proxy 假設、look-ahead 檢查、OOS / placebo / subperiod；Harvey / DM / bootstrap 細節。
-
-## 結論
-重申核心發現 + 下一步研究方向 / open questions。
-```
-
-**核心寫作原則**：
-
-1. **不強制故事 hook**（可有可無，但**不是必要**；摘要是合法的開頭）
-2. **不強制「三個 Takeaway」結論模板**（research 用「結論 + 下一步」即可）
-3. **數字可完整列**：research 讀者要看所有統計量，**不需要 curate 3-5**；p-value、CI、bootstrap 細節都列出來
-4. **允許 Layer-1/2/3 逐層 walkthrough**（對 robustness 驗證非常重要，不是流水帳）
-5. **K 編號明確標記**：每個引用的 K 都要標（含實驗路徑、results JSON 路徑）
-6. **不要強行找「paradigm / framework / rule」**：如果結果只是 `H0 無法拒絕` 或 `PASS under X condition only`，就照實寫 — null result 也是結果
-
-**觸發時機**：跟著實驗走——當實驗（或一組系列實驗）產生顯著發現、methodology 教訓、或值得記錄的 null result 時寫。不是從候選清單挑。
-
-**兩種合法形式**：
-1. **單一 K 深度報告**：重大發現可獨立成篇（例：K1145 pooled panel PASS、K1140 block-bootstrap 方法論警示）
-2. **系列實驗聚合**：同主題 / 同研究目的 / 同標的的多實驗共圖寫成研究文（例：K1145+K1147+K1150 三市場 universality；K1136+K1129+K1134 alt-model NULL 跨資產）
-
-**寫作來源（必讀，不可從 knowledge 摘要寫）**：
-- `experiments/k<id>/README.md` —— 計劃、問題描述、動機、方法、預期、結論
-- `experiments/k<id>*.py` 腳本**內部註解** —— 實作細節、設計意圖、樣本處理邏輯
-- `experiments/k<id>_results.json` —— 真實統計量（byte-for-byte 對應，不可引自記憶）
-- `experiments/k<id>*.png` —— **直接 embed 既有圖表**，不要重畫
-- 系列實驗相關 K 的對應檔案（如寫 K1145 要一併讀 K1109/K1113/K1140 等背景 K）
-
-### general vs research 二分總結
-
-| 維度 | General（一般讀者） | Research（研究發現） |
-|------|----------|----------|
-| 觸發 | **主動挑讀者感興趣主題**（`publication-candidates` 軌道 A+B） | **跟著實驗進行**，有顯著發現就寫 |
-| 素材 | 融貫 3-5 個相關 K 實驗 | 單 K 深度 或 系列實驗聚合 |
-| 文風 | 生活類比、禁 K 編號、1500-3000 字 | K 編號 + t-stat + 完整方法、3000-8000 字 |
-| 主要來源 | knowledge.json 摘要 + 概念層 | README.md + 腳本註解 + results JSON + 既有 PNG |
-| 寫作節奏 | 寫手動籌劃，每天 4 篇配額 | 實驗完成即寫，無固定配額 |
-
-| 元素 | 規範 |
-|------|------|
-| 標題 | K編號 + 發現描述（「K304: VIX 因果性檢定 — Toda-Yamamoto 確認」）；聚合型可列多 K |
-| 署名 | `[提出: XXX, 執行: Claude]` |
-| 數據來源 | 明確標示（yfinance, FRED, CBOE 等）、資料期間、樣本數量 |
-| 方法 | 統計方法完整描述、OOS 設定 |
-| 結果 | 表格呈現（Sharpe、MDD、t-stat、p-value、DM test） |
-| 結論 | 區分「統計顯著」vs「經濟顯著」 |
-| 局限 | 樣本大小、proxy 假設、look-ahead 風險 |
-| 引用 | 相關實驗 K 編號 |
-
-### General 文章產出規範
-
-- **每日 4 篇** general 文章（audience=general）
-- **主題不要重疊**：每篇必須有獨立的核心 insight，不能是同一發現的不同角度改寫
-- **言之有物**：必須基於具體研究數據，不能空泛
-- 用 LanceDB 搜尋確認該主題尚未被寫過 general 文章
-- 每完成 3-5 篇 research 文章後寫 1 篇 general
-
-### 例外（可立即發布）
-
-- 用戶明確要求「立即發布」
-- 即時市場危機更新（如 Hormuz 事件）
-
-- 若涉及文章池、排程發布、節奏釋出、下架、內容工作台操作，請交由 `admin-ops` skill 與平台層 API / CLI 完成
-- 若是論文 PDF/metadata 更新，這不屬於 feed 發文本身；請轉交 `admin-ops` 的 `paper-*` surface
-
-### 方法 B：record_and_publish.py（快速但品質較低）
-
-只適合簡短的里程碑通知或 legacy 快速同步，不適合完整文章。
+## 2. 每次都解析 live state
 
 ```bash
-uv run python scripts/record_and_publish.py \
-  --title "標題" \
-  --thinking "內部推理（存 thinking_journal）" \
-  --knowledge "知識摘要（存 knowledge.json）" \
-  --phase "Phase_N"
+uv run python scripts/task_pool_control.py status
+uv run volpred ops platform-cycle-summary
+jq '{active_frontend, deploy: .deploy.active_service, site: .site.default_remote_url}' \
+  config/project_targets.json
 ```
 
-**注意**：此工具的 content 來自 --thinking 參數，品質不夠好。如果要發完整文章，用方法 A。
+- task lifecycle 的 canonical owner 是 `storage/ops/task_pool_mode.json`；以
+  `task_pool_control.py status` 對同一份 state 的 receipt 為準，不得硬編
+  queued/direct mode。
+- draft release mode、interval 與 next release 依 `platform-cycle-summary`、`storage/.release_settings.json` 及 `config/runtime_schedules.json`；不得在 skill 保存分鐘數或 cron。
+- public base URL、active frontend 與 deploy service 只讀 `config/project_targets.json`。
+- task mode 決定工作如何被擁有，**不自動決定文章 status**。文章 status 必須來自 source task／用戶指令與 publisher 當下 gate。
 
-### 方法 C：平台層釋出（文章池 / 節奏發布）
+## 3. 發布前 gate
+
+先讀 `.claude/rules/publishing.md` 的當前 reader-visible 契約，再執行：
 
 ```bash
-uv run volpred ops publish-milestone ...
-uv run volpred ops release-pool-by-settings --storage-dir storage
+uv run python scripts/anti_ai_gate.py --file <draft.md> --no-fb-mode
+
+uv run python scripts/publish_draft.py <draft.md> \
+  --audience <audience> \
+  --status <draft|scheduled|published> \
+  --dry-run
 ```
 
-需要查看現況或管理釋出節奏時，優先參考：
-- `.claude/skills/admin-ops/references/platform-api-manual.md`
-- `.claude/skills/admin-ops/references/surfaces.md`
+dry-run 或 anti-AI gate 非 0 就停止。不要用 bypass flag 掩蓋缺圖、重複、lazypack 或證據錯誤；豁免只能來自有記錄且可審核的真實例外。
 
-## 發布後通知
+事件文章的內容差異化可按 [event-article-templates.md](references/event-article-templates.md)，但事件排程仍由 formal event workflow 擁有。
 
-- 文章真正進入 `published` 後，平台層可自動建立管理通知
-- 管理通知預設是短版：
-  - 標題
-  - 摘要
-  - 文章連結
-- `draft` / `scheduled` 階段不應寄送通知
-- 若需要補送或重寄，交由 `admin-ops`：
+## 4. 唯一 mutation path
+
+### 新文章
 
 ```bash
-uv run volpred ops send-article-notification <pub_id>
-uv run volpred ops send-daily-digest --target-date YYYY-MM-DD
+uv run python scripts/publish_draft.py <draft.md> \
+  --phase <phase> \
+  --audience <audience> \
+  --status <draft|scheduled|published> \
+  --tags '<comma-separated-tags>' \
+  --lazypack-plan <plan.json>
 ```
 
-- 若 `sent=false`，代表通知已建立，但 SMTP 尚未配置或尚未真正送出
+- `--lazypack-plan` 只在契約要求時傳；helper 會替 draft/scheduled 文章建立正式 compute receipt。
+- 不自己呼叫 `Publisher()` heredoc，不直接改 canonical JSON。
 
-## 關鍵字 Tags
+### 更正／更新
 
-每篇文章必須包含 `tags` 欄位（JSON array），用於搜尋和分類：
-
-```json
-"tags": ["VaR", "Cornish-Fisher", "SPY", "QQQ", "GLD", "TLT", "EEM", "風險管理"]
+```bash
+uv run python scripts/publish_draft.py <revised.md> \
+  --update <mile_id> \
+  --update-action <stable-action> \
+  --update-summary "<what changed and why>" \
+  --sync-supabase
 ```
 
-Tag 規則：
-- 涉及的**資產代碼**（SPY, QQQ, 0050.TW...）
-- **方法/模型**（GARCH, CF-VaR, EVT, MIDAS...）
-- **主題分類**（波動率預測, 風險管理, 投資策略, 避險, 危機分析...）
-- **研究階段**（Phase_O, Phase_N...）
-- 3-8 個 tags 為宜
+更新要保存 audit trail。若是 retraction、unpublish 或 destructive correction，改走對應 `volpred ops` command 與 incident/correction contract，不用 JSON workaround。
 
-## 品質檢查清單
+## 5. Projection 與 reader readback
 
-發佈前必須確認：
-- [ ] 有 Markdown 結構（標題、段落、表格）
-- [ ] 繁體中文
-- [ ] 有數據解讀，不只是數字
-- [ ] 回答「為什麼這個結果重要？」
-- [ ] 回答「投資人可以怎麼用？」
-- [ ] content 欄位非空且 > 300 字
-- [ ] 寫入 `storage/reports/feed.json`（**Contentlayer 唯一 canonical source**；`storage/feed.json` + `mile_*.json` 單檔**皆已廢除**，不要寫也不要讀）
-- [ ] **圖片 URL 必須是 Supabase Storage**（`https://...supabase.co/storage/...`），不可用 `/tmp/` 本地路徑
-- [ ] 寫完後執行 `uv run volpred ops feed-sync --apply`（將 feed.json 變動推到 Supabase projection）
-- [ ] Badge：category=milestone, status=published
-- [ ] **tags 欄位**：包含資產代碼 + 方法 + 主題分類
+從 publisher output 擷取真實 `mile_id`，接著：
 
-## ⚠️ Agent Worktree 寫文章注意事項
+```bash
+# targeted local readback；只讀，不寫
+jq --arg id "<mile_id>" \
+  '.[] | select(.id == $id) | {id,title,status,audience,updated_at,details}' \
+  storage/reports/feed.json
 
-Agent 在 worktree 中寫文章時（Contentlayer 模式，2026-04-18 起）：
-1. **只寫 `storage/reports/feed.json`**（append to items array），content 欄位必須完整
-2. **不要寫 `storage/reports/{id}.json` 單檔** — 單檔模式已廢除，寫了會變 orphan（被 feed-sync --apply 清除）
-3. worktree merge 回主分支後，主線程跑 `uv run volpred ops feed-sync --apply` 把 feed 變動推到 Supabase
+# projection convergence
+uv run volpred ops feed-sync --dry-run
+```
 
-**2026-03-29 教訓**：27 篇文章因寫到 `storage/feed.json`（而非 `reports/feed.json`）導致 7 小時不發文。
-**2026-04-18 教訓**：廢除 3-source 架構（feed + mile_*.json + Supabase），改 Contentlayer 模式。publisher.py / release_pool 已移除單檔寫入；sync_article 已移除從單檔 fallback 讀 content — agent 再寫單檔是無效操作（會被下一輪 feed-sync 清掉）。
+若 dry-run 顯示本次文章有 drift，才走正式 reconcile：
 
-## 不該發佈的內容
+```bash
+uv run volpred ops feed-sync --apply
+uv run volpred ops feed-sync --dry-run
+```
 
-- Bug fix、格式修正、系統維護
-- 純數字列表沒有解讀
-- 內部推理過程（放 thinking journal）
-- 重複的進度更新
-- 空白或只有標題的文章
+`--apply` 必須得到 acknowledged success，第二次 dry-run 必須 clean；命令 exit 0 但 effect 未 acknowledged 不能算完成。
 
-## 資料同步
+對 `published` 文章，再由 `config/project_targets.json` 解析 public base URL，讀取對應 report route，確認 HTTP 200、標題與關鍵更正已出現。draft／scheduled 不要求提前出現在 public reader surface。
 
-發佈後必須同步（Contentlayer 模式，單向 feed → Supabase）：
-1. **`storage/reports/feed.json` 是唯一 canonical 源**（`storage/feed.json` + `reports/mile_*.json` 單檔皆已廢除；單檔只保存在 `storage/reports/_archive_mile_files/` 作 audit 參考，不再被任何 code 讀寫）
-2. 執行 `uv run volpred ops feed-sync --apply`（將 feed.json 變動推到 Supabase projection；含 timestamp-normalized 差異偵測、idempotent upsert）
-3. System crontab `3 */2` 的 `release-pool-by-settings` 自動釋出 feed.json 的 draft → published，並連動推到 Supabase
-4. `frontend-v2-fix` 從 Supabase 直讀（`articles` 表 RLS 封死反向寫，service_role 才能寫入），所以 Supabase 對齊 = 前端即時看到
-5. 依部署流程同步到線上站
+general draft 若排了 lazypack，依 `lazypack-infographic` 讀 compute receipt；沒有 terminal receipt 與文章 section，不得宣稱 reader-visible gate 完成。
 
-## 作者標注
+## 6. Task completion
 
-每篇 Feed 文章和知識記錄必須標注發起者：
+只有以下條件全過才回報發布完成：
 
-| 標注格式 | 含義 |
-|---|---|
-| `[提出: Gemini, 執行: Claude]` | Gemini 建議方向，Claude 實驗驗證 |
-| `[提出: Codex, 執行: Claude]` | Codex 建議改進，Claude 執行 |
-| `[提出: Claude]` | Claude 自主發起 |
-| `[提出: 用戶, 執行: Claude]` | 用戶要求的分析 |
+- publisher 回傳穩定 `mile_id`
+- targeted local readback 的 title/status/audience 正確
+- Supabase projection acknowledged 且無本次 drift
+- published 文章 live readback 正確；或 draft/scheduled 的 queue/compute receipts 已明確記錄
+- 若 source task 含 FB 雙發，canonical FB draft 已 handoff 給 `fb-publishing`；是否可結束整張 source task，依其 acceptance contract 判定
 
-在文章的摘要或首段註明即可。
+回報精確列出：`mile_id`、status、gateway command、projection readback、live URL或待完成 receipt。不要以「指令沒報錯」代替下游確認。
+
+## Progressive disclosure
+
+- 內容硬規則：`.claude/rules/publishing.md`
+- 自然語氣：`anti-ai-style`
+- 選題與 pre-write dedup：`publication-candidates`
+- 懶人包：`lazypack-infographic`
+- FB delivery：`fb-publishing`
+- CLI/schema 的最新參數：`uv run python scripts/publish_draft.py --help`、`uv run volpred ops feed-sync --help`

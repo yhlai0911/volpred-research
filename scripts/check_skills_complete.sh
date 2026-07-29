@@ -2,7 +2,7 @@
 # Skill completeness audit for .claude/skills/.
 #
 # 解 finding #16（2026-04-27 .claude/skills/member-questions/SKILL.md 遺失 incident）。
-# 用 weekly cron 跑（建議掛在 host crontab Wed 03:00），出 missing/dead-reference 列表。
+# 由 Operations Core 所屬的維護流程呼叫，輸出結構、registry、route 與 architecture drift。
 #
 # Usage:
 #   bash scripts/check_skills_complete.sh           # 印 report 到 stdout
@@ -142,6 +142,12 @@ for skill_dir in "$SKILLS_DIR"/*/; do
     done < <(find "$skill_dir" -type f -name '*.md' | sort)
 done
 
+architecture_status=0
+set +e
+architecture_json=$(python3 "$ROOT/scripts/check_skill_architecture.py" --json)
+architecture_status=$?
+set -e
+
 if [ "$JSON_MODE" = "1" ]; then
     # Compose minimal JSON
     printf '{\n'
@@ -176,7 +182,8 @@ if [ "$JSON_MODE" = "1" ]; then
         [ "$i" -gt 0 ] && printf ', '
         printf '"%s"' "${workflow_drift[$i]}"
     done
-    printf ']\n'
+    printf '],\n'
+    printf '  "architecture": %s\n' "$architecture_json"
     printf '}\n'
 else
     echo "=== Skill Audit @ $(date -u +%FT%TZ) ==="
@@ -225,10 +232,20 @@ else
     else
         echo "✅ no legacy workflow patterns detected"
     fi
+
+    if [ "$architecture_status" -ne 0 ]; then
+        architecture_issue_count=$(printf '%s' "$architecture_json" | jq '.issues | length')
+        echo "🔴 architecture contract drift (${architecture_issue_count}):"
+        printf '%s' "$architecture_json" \
+            | jq -r '.issues[] | "  - \(.code): \(.skill // \"project\") :: \(.path // \"unknown\")\((if .line == null then \"\" else \":\" + (.line|tostring) end)) :: \(.detail)"'
+        echo ""
+    else
+        echo "✅ skill registry, routes, contracts, and architecture deny rules pass"
+    fi
 fi
 
 # Exit 1 if any issue found
-if [ ${#missing_skill_md[@]} -gt 0 ] || [ ${#dead_references[@]} -gt 0 ] || [ ${#workflow_drift[@]} -gt 0 ]; then
+if [ ${#missing_skill_md[@]} -gt 0 ] || [ ${#dead_references[@]} -gt 0 ] || [ ${#workflow_drift[@]} -gt 0 ] || [ "$architecture_status" -ne 0 ]; then
     exit 1
 fi
 

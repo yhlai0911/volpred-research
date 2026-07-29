@@ -1,66 +1,111 @@
 ---
 name: research-topic-discovery
 description: >
-  從頂尖學術期刊系統性挖掘研究主題，持續擴展 VolPred 研究方向（取代手寫 = treadmill）。
-  涵蓋四大期刊群（財金 / 實務 / 經濟頂刊 / 計量經濟）的「為什麼看 + 要找哪類主題」+
-  挖掘流程 + 排程。觸發時機：研究 backlog 變薄（refill fallback < 3）、週一/四 cadence、
-  「該研究什麼」「持續擴展研究主題」「技術精進」「找新方向」的決策。
-  Trigger phrases: '研究主題', '找方向', '期刊', 'journal', '經濟期刊', '研究方向',
-  '擴展研究', '技術精進', 'topic discovery', '挖題', 'backlog 薄'.
-  Do NOT use for: 單一實驗執行（autonomous-research）、寫文章（feed-publisher）。
+  Discover and rank new VolPred research directions from current primary
+  academic literature. Use when the research backlog needs new, non-duplicate
+  experimentable questions.
 ---
 
-# 研究主題挖掘（持續擴展 VolPred 研究方向）
+# Research Topic Discovery
 
-2026-06-30 用戶教訓：**沒做成 skill → 不會主動發現可用；沒排程 → 不會去執行**。loose
-memory + agent_prompt 一定被遺忘（曾「忘記」經濟頂刊那條）。常態研究擴展必須 skill
-（discoverable）+ schedule（auto-exec）+ 結論落檔（research_program.md，不留對話串）。
+本 skill 產生有來源、可跑、可區分的研究 proposals；不直接執行實驗，也不自己取得
+排程或 task-pool ownership。
 
-**為什麼挖期刊**：研究方向 backlog 被高速消化（1400+ K）。手寫方向 = treadmill 自我重複；
-從真實期刊熱門主題挖 = 真實趨勢紮根 + 高品質 + 持續精進建模技術。
+## Preflight
 
-## 四大期刊群：看什麼 + 為什麼 + 找哪類主題
+先讀：
 
-| 群 | 期刊 | 為什麼看 | 要找哪類主題 |
-|---|---|---|---|
-| **財金學術** | JBF / JFE / RFS / JoE / Review of Finance / JFQA / JEmpFin / JFM | 主流波動率/資產定價/風險前沿 | 直接的 vol/VaR/因子/microstructure/ETF flow 題 |
-| **實務** | JPM / FAJ / CFA / J.Fixed Income / J.Futures Markets | 可落地、機構在用的策略 | VT/再平衡/避險/配置/策略 + 實務 regime |
-| **經濟頂刊** | QJE / AER / JPE / Econometrica / ReStud / AEJ:Applied&Macro / JEP | 愛收「**乾淨識別(RD/DiD/natural experiment) + 新奇角度 + 跨領域資料**」 | **外生衝擊 / 新奇變數**：氣候·天災·政策不連續·地緣·注意力·人口·媒體·博弈/樂透文化 → **轉成波動率/風險溢酬/regime 切換**，當 VolPred 的**事件窗 / 解釋變數 / regime 訊號**。⚠️ VolPred **不做純經濟學因果**，是把外生衝擊當市場訊號（例：biodiversity transition-risk → 商品波動 K1536） |
-| **計量經濟** | JFEC / JBES / REStat / JAE / Econometric Theory / Quantitative Economics | 波動率/預測的**前沿方法** | 新 realized measures、HARQ/含測量誤差 HAR、rough vol、forecast combination + 評估(DM/MCS/Giacomini-White)、jump/co-jump/regime 檢測、高頻計量、ML×計量有正式 inference → **升級 VolPred vol-forecast/risk 建模**（技術精進） |
+- `.claude/skills/autonomous-research/references/operations-core-contract.md`
+- `storage/ops/task_pool_mode.json`（透過下列 status command 每次重新 read-back）
+- `scripts/agent_prompts/journal_topic_scan.md`
 
-## 挖掘流程
+```bash
+uv run python scripts/task_pool_control.py status
+```
 
-**輕量（backlog < 3 或週度）**：派 1 個 general-purpose agent（WebSearch, background）跑
-`scripts/agent_prompts/journal_topic_scan.md` → review 輸出 → 貼進 `research_program.md`
-「期刊主題挖掘 batch」section → 跑 `scripts/refill_task_pool.py --apply` 補池。
+同一 session 的早期 mode 不可重用。
 
-**深度（ultracode / 要全面擴展）**：用 workflow `econ-journal-topic-mining`（4 個並行 mining
-agent 分別掃財金/經濟/計量/跨領域 + baseline dedup + synthesis），產 8-12 個帶 VolPred 角度 +
-資料可行性的方向。script 已存：`workflows/scripts/econ-journal-topic-mining-*.js`。
+## 1. 決定 discovery scope
 
-**每次都要**：(1) econ_finding（學界在紅什麼）(2) volpred_angle（轉 vol/風險/策略 + 具體 proxy）
-(3) data_feasibility（免費資料 yfinance/FRED/TAIFEX/TWSE/NOAA/官網/arXiv 能不能跑）。
-dedup against 既有 arcs（同邏輯換外殼算重複）。不捏造論文。
+先從 `research_program.md`、近期 verified/null experiments 與 knowledge index整理：
 
-**市場多樣性軸（2026-07-15 用戶指示）**：每 batch 至少 2 條非美股市場方向 — 台股產業 /
-日股與其產業 / 印度（^NSEI + ^INDIAVIX 可用）/ 東南亞（^STI/^JKSE/^KLSE/^SET.BK）。
-掃期刊時同步留意 JIMF / EMR / Pacific-Basin Finance Journal 等亞太/新興市場線。
-可用 ticker 清單與 proxy 對照見 `research_program.md` 面向 ASIA。
+- 現有 research arcs
+- 已反覆 null 的方法
+- 尚未解決的大問題
+- 市場、資料與方法的 coverage gaps
 
-## 排程（auto-exec — 沒排程就不會執行）
+用 bounded search，不整檔載入大型 memory。建立 semantic dedup baseline；同一機制只換
+ticker或包裝，不算新方向。
 
-- `config/runtime_schedules.json::journal_topic_scan`（週一/四 cadence）→ piggy-back/session
-  自動派工。**驗證它真的有 fire**：查 `research_program.md` 最近 batch 日期；若 > 2 週沒新
-  batch = 排程沒執行，查 cron。
-- 大體檢 `mission_progress` 維度監控 backlog 薄 → 觸發挖掘。
+## 2. 搜尋 primary literature
 
-## 結論落檔（不留對話串）
+至少覆蓋與問題相關的三類來源：
 
-挖到的方向 → **一律寫進 `research_program.md`「期刊主題挖掘 batch（日期 + 群）」section**；
-重大方法升級 → 寫 memory/knowledge。對話串裡的結論不算數。
+- Finance / asset pricing / market microstructure
+- Forecasting / econometrics / statistics
+- Applied or market-specific literature
 
-## 關聯
-- `scripts/agent_prompts/journal_topic_scan.md`（agent prompt，本 skill 的執行載體）
-- memory `feedback_journal_topic_discovery`
-- `.claude/skills/pdca-operations/SKILL.md`（M2 research scan）、`autonomous-research`（接著執行實驗）
-- `research_program.md`（落檔目標）
+每個候選保留可核實的 title、authors、year、journal/repository與 DOI/official URL。
+搜尋摘要只能做 discovery；最終方法 claim回到 paper或official abstract。不能捏造 citation。
+
+## 3. 轉成 VolPred proposal
+
+每個方向必須有：
+
+| Field | Requirement |
+|---|---|
+| `academic_finding` | 文獻真正研究了什麼 |
+| `volpred_question` | 可推翻的 forecasting/risk/strategy 問題 |
+| `differentiation` | 與現有 K/arcs 的實質差異 |
+| `data_contract` | 免費/可取得 source、period、availability、proxy bias |
+| `method` | baseline、target、OOS、formal test |
+| `failure_value` | null/failed 仍能學到什麼 |
+| `sources` | 至少三個 primary references |
+
+一個 batch 目標 8–12 個 proposals，至少兩個非美股市場方向；市場多樣性不能犧牲資料
+可用性或方法正當性。
+
+## 4. Rank and verify
+
+依下列維度排序：
+
+- novelty relative to current K
+- decision/research value
+- data availability與timing safety
+- identification/inference quality
+- bounded runtime與artifact feasibility
+
+Top proposals再次查 knowledge/experiments/task identities，移除重複或已在執行者。
+
+## 5. Handoff and task mode
+
+輸出先交給主線程 review。只有主線程接受後才：
+
+- 更新 `research_program.md` 的 discovery batch
+- queued execution：經 canonical research producer/refill writer materialize tasks
+- direct execution：保留 proposal或在已授權時建立 GitHub Issue；不新增 legacy task id
+- restore/unreadable：fail closed
+
+每次 materialize 前都重新讀 `storage/ops/task_pool_mode.json`；不是 batch 開頭讀一次後
+整批沿用。
+
+## Schedule read-back
+
+若這次是在診斷「為何 discovery 沒自然執行」：
+
+1. 從 `config/runtime_schedules.json` 查目前承接 research backlog/discovery 的 job。
+2. 從 `.schedule_materialization.receipt_path` 回讀 Operations Core terminal receipt。
+3. 回讀最新 accepted discovery batch或 task receipt。
+
+本 skill 不保存 cadence，也不建立另一個clock。
+
+## Completion
+
+- [ ] 8–12 個可推翻 proposals
+- [ ] 每個至少三個primary sources且可核實
+- [ ] 與既有K/arcs/task做semantic dedup
+- [ ] data availability、timing與proxy bias明確
+- [ ] 至少兩個非美股方向
+- [ ] ranking與排除理由可重建
+- [ ] 主線程acceptance有read-back
+- [ ] Task materialization符合當次mode並有canonical receipt

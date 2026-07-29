@@ -52,6 +52,12 @@
 - **新建 skill**: 自主用 `/skill-creator:skill-creator` 或直接 Write `.claude/skills/<name>/SKILL.md`，下次互動口頭通知
 - **修改既有 skill**: **必寄 email** 給老闆（`send-alert --title "Skill 修改通知: <name>"`），含 diff 摘要 + 觸發 incident + 影響範圍
 - 每月 1st session 產出 skill 審查報告
+- **全量架構 gate**：skill 程序不得保存 queue mode、cron、service ID、model 或其他 runtime
+  snapshot；每次從 `storage/ops/task_pool_mode.json`、`config/runtime_schedules.json`、
+  `config/project_targets.json`、`config/supervisor_rules.json`、`config/models.json` 與
+  對應 canonical writer 解析。新增／修改／合併／退役必同步
+  `config/skill_registry.json`、supervisor dispatch 與 workflow projection，並跑
+  `python3 scripts/check_skill_architecture.py`；未全量通過不得宣稱 skill migration 完成。
 
 **完整 SOP + anti-patterns**：`.claude/skills/platform-ops-manager/SKILL.md`（觸及 ops 相關 paths 時 auto-load）。
 

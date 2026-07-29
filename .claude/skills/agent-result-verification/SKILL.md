@@ -1,94 +1,127 @@
 ---
 name: agent-result-verification
 description: >
-  Agent（worktree 或 background）返回實驗結果後的驗證 checklist。
-  防止 agent 回報不準確的數字（K1016 教訓：agent 聲稱 QLIKE 改善 +13.7%
-  但 JSON 顯示惡化）。Trigger: 每次 agent 返回實驗結果後自動執行。
-  Do not use for research design, article writing, or generic platform ops.
-model: sonnet
-effort: low
+  Verify a completed experiment agent's artifacts and claims before knowledge
+  recording or worktree integration. Use when an experiment agent returns
+  results, statistics, a verdict, or a completed experiment worktree.
 user-invocable: false
 ---
 
-# Agent Result Verification Checklist
+# Post-Experiment Intake
 
-## Scope Boundary
+這是 experiment agent 返回後的唯一 intake owner。它驗證 artifact、claims、review、
+knowledge provenance 及 worktree delivery；不設計新研究、不發文。
 
-Use this skill only after agent 回報統計或比較結果時，用來：
+## Preflight
 
-- 以 results JSON 為準驗證數字
-- 檢查號誌方向與合理性
-- 阻止錯誤數字流入 knowledge / 文章
+先讀：
 
-Do **not** use this skill for：
+- `.claude/skills/autonomous-research/references/operations-core-contract.md`
+- `.claude/rules/experiments.md`
+- `references/claim-verification.md`
+- Worktree 返回時再讀 `references/worktree-intake.md`
 
-- 研究設計與模型選擇 → `autonomous-research`
-- worktree merge / reflog 恢復 → `worktree-merge-verification`
+每次 invocation 都先回讀：
 
-## 觸發時機
-每次 agent 返回包含統計數字的實驗結果後，**在記錄 knowledge 之前**必須執行。
-
-## Checklist（按順序）
-
-### 1. 讀取 results JSON（不信 agent summary）
-```python
-import json
-experiment_id = "k123"  # or k123b
-with open(f'experiments/{experiment_id}/{experiment_id}_results.json') as f:
-    r = json.load(f)
+```bash
+uv run python scripts/task_pool_control.py status
 ```
 
-### 2. 核對關鍵數字
-逐一比對以下數字是否與 agent summary 一致：
+Mode 不影響 evidence verification；但任何 task complete、follow-up 或 refill 都必須依本次
+mode 分支。
 
-| 指標 | Agent 說 | JSON 實際值 | 一致？ |
-|------|---------|------------|--------|
-| QLIKE (model A) | | | |
-| QLIKE (model B) | | | |
-| DM t-stat | | | |
-| QLIKE improvement % | | | |
-| VaR pass/fail | | | |
+## Intake sequence
 
-**如果任何數字不一致 → 以 JSON 為準，不用 agent 的數字。**
+### 1. Freeze identity
 
-### 3. 合理性檢查
-- [ ] Sharpe > 2x baseline? → 90% 有 bug，暫停
-- [ ] DM t-stat 的正負號是否合理？（負 = 新模型更好）
-- [ ] QLIKE improvement 方向是否與 DM 一致？
-- [ ] VaR violation rate 是否在合理範圍？（2.5% target → 1-4% 正常）
-- [ ] 模型有收斂嗎？（convergence flag, persistence < 1）
+記下：
 
-### 4. 數字不一致的常見原因
+- task、agent、worktree、reserved K-id
+- agent 宣告的 artifact paths
+- canonical result、spec、entrypoint 與 review verdict identity
+- agent summary 原文
 
-| 現象 | 常見原因 |
-|------|---------|
-| Agent 說改善但 JSON 顯示惡化 | Agent 混淆了 model A 和 model B 的數字 |
-| DM t-stat 正負號反了 | Agent 弄反了比較方向（A vs B 還是 B vs A）|
-| QLIKE % 不匹配 | Agent 用了不同的 baseline（round-off 或 wrong model）|
-| 兩個模型結果完全相同 | 代碼 bug：兩個模型共享了同一組參數或 fear input |
+Artifact identity 尚未固定時不開始 knowledge/publishing handoff。
 
-### 5. 通過驗證後才可以
-- 記錄 knowledge（數字從 JSON 抄，不從 agent summary 抄）
-- 撰寫文章
-- 更新 research_program.md
+### 2. Verify artifact set
 
-### 6. Publishable-finding gate（2026-04-18 新增，防 session 整天不發 milestone）
-每次 agent 回報 **必做** 這個判定：
+至少確認：
 
-- ✅ Confidence ≥ 0.85（knowledge.json 標 confidence）
-- ✅ Harvey-significant 或 decisive verdict（PASS / NULL confirmed / artifact discovered / narrative pivot gate met）
-- ✅ 結果對讀者/實務有 takeaway（非純 internal audit）
+- README、entrypoint、canonical result、`reproduce_spec.json`
+- Results 可解析且由 spec 指定
+- `results.code_trace` 與 spec entrypoint 指向同一次 bytes
+- seeds、inputs、period、sample count、started/finished time 可重建
+- 已 pin entrypoint 若漂移，存在原始 `gate_history` evidence
 
-**三項全中**：立即 `TaskCreate` 一個 `publish_milestone_article` P3 task，指向該 K experiment；不 queue 到下 session 才處理。
+先用 `scripts/reproduce_check.py inventory` 檢查 repository 對這個 experiment 的
+reproduce contract 判讀；不要另寫一個 spec parser 當第二個 owner。
 
-**排除**：純 markdown draft / edit guide / session consolidation / reproduction-package audit — 這些是 internal artifacts，不面向外部讀者。
+缺 runtime spec 或 code trace 時，不能事後人工補成「已驗證」。
 
-2026-04-17 教訓：~80 K experiments 含 K1216c ROOT_CAUSE / K1203 UNIVERSAL_NULL / K1133b BTC decomposition / K1235b Paper 9 defensibility 等 decisive findings 全沒發 milestone 文章，根因就是 agent-result-verification skill 沒這個 publish gate。
+### 3. Rebuild every claim
 
-## 歷史事件
+依 `references/claim-verification.md`，從 canonical result 程式化重建 agent summary 的
+所有 numeric、direction、significance、uniqueness 與 verdict claims。固定指標表只能當
+提示，不能取代 full-population audit。
 
-| 日期 | 實驗 | 問題 | 影響 |
-|------|------|------|------|
-| 2026-04-10 | K1016 | Agent 聲稱 QLIKE +13.7% (DM=+5.46)，JSON 顯示惡化 (1.616→1.831) | Knowledge 記錄錯誤數字，需要修正 |
-| 2026-04-10 | K1016 | M4/M5 結果完全相同 | 代碼 bug：兩個模型共用 input |
-| 2026-03-29 | 8/93 實驗 | 10% 的實驗被推翻 | 全部因跳過「Codex 先審代碼」|
+任何不一致：
+
+- 保存 agent claim 與 artifact actual value
+- 以 artifact 為證據修正敘述
+- 若差異影響 verdict，回到 code/review，不能直接改 README 收尾
+
+### 4. Run methodology and review gates
+
+```bash
+uv run python scripts/experiment_gates.py run \
+  --path experiments/<experiment_id>
+```
+
+`review_verdict.json` 必須由 gate template 建立並 pin 現有 claim surface。Review 後修改
+任何 claim-surface bytes，都要重審。完整 artifact checker 同時檢查 main-thread
+knowledge half，因此在下一步 canonical writer read-back 後執行。
+
+### 5. Main-thread knowledge write
+
+只有 artifact 與 reviewer verdict 都有效時：
+
+1. 從 canonical result 程式化組成 knowledge record。
+2. 加入 experiment id/path、verdict、evidence 與 reviewer provenance。
+3. 經 `src/volpred/memory/system.py` 的 canonical memory writer/K1259 寫入。
+4. 回讀 item id。
+5. 執行 `scripts/validate_knowledge_provenance.py`。
+6. 再跑 `scripts/check_experiment_artifacts.py check`，確認 knowledge half gate 通過。
+
+Agent 或 worktree 不得寫 shared memory。
+
+### 6. Integrate worktree
+
+只有 worktree 返回才執行。依 `references/worktree-intake.md`：
+
+- pre-merge 在 worktree tree 跑 artifact gate
+- 整合只走 `bash scripts/merge_worktree.sh <worktree-name>`
+- 失敗時保留 worktree與完整輸出
+- merge 後在 main 回讀 artifact hash及 gate
+
+不自行改 branch、拼接 commit 或刪 worktree。
+
+### 7. Close or hand off
+
+Task complete 前必須有：
+
+- artifact identity
+- rebuilt-claim report
+- methodology/review verdict
+- knowledge item read-back
+- worktree merge/read-back（如適用）
+
+若要新增 follow-up，重新執行 task-pool status，再依 mode 選 canonical producer。
+Publication/paper 只收到 verified artifact handoff，不在本 skill 執行。
+
+## Completion status
+
+- `verified`：artifact identity、所有 claims、review、knowledge及必要 merge 都回讀成功。
+- `blocked`：缺原始 bytes、spec、review 或無法重建 claim。
+- `contained`：只保存 worktree、修正 summary 或暫停傳播，底層問題尚未修復。
+
+不得把「JSON 可以讀」或「merge command exit 0」單獨當成 verified。
